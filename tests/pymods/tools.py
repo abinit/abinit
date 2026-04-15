@@ -20,8 +20,14 @@ __all__ = [
 
 def patch(fromfile, tofile):
     """
-    Use the unix tools diff and patch to patch tofile.
-    Returns 0 if success
+    Use the Unix tools `diff` and `patch` to patch `tofile`.
+
+    Args:
+        fromfile: Path to the source file (patch source).
+        tofile: Path to the file to be patched.
+
+    Returns:
+        int: The return code of the patch command (0 if success).
     """
     with tempfile.NamedTemporaryFile(delete=True, suffix=".patch") as f:
         tmp = f.name
@@ -57,7 +63,13 @@ def patch(fromfile, tofile):
 
 
 def unzip(gz_fname, dest=None):
-    """Decompress a gz file."""
+    """
+    Decompress a .gz file.
+
+    Args:
+        gz_fname: Path to the .gz file.
+        dest: Optional destination path. Defaults to `gz_fname` without the .gz extension.
+    """
     import gzip
 
     if not gz_fname.endswith(".gz"):
@@ -78,14 +90,30 @@ def unzip(gz_fname, dest=None):
 
 
 def touch(fname, times=None):
-    """Emulate unix touch."""
+    """
+    Emulate the Unix `touch` command.
+
+    Args:
+        fname: Path to the file to touch.
+        times: Optional tuple of (atime, mtime).
+    """
     import os
     with open(fname, "a"):
         os.utime(fname, times)
 
 
 def tail_file(fname, n, aslist=False):
-    """Emulate unix tail. Assumes a unix-like system."""
+    """
+    Emulate the Unix `tail` command. Assumes a Unix-like system.
+
+    Args:
+        fname: Path to the file.
+        n: Number of lines to return.
+        aslist: If True, returns a list of strings instead of a single string.
+
+    Returns:
+        str or list: The last `n` lines of the file.
+    """
     args = ["tail", "-n " + str(n), fname]
 
     if sys.version_info >= (3, 0):
@@ -105,9 +133,13 @@ def tail_file(fname, n, aslist=False):
 
 def which(program):
     """
-    Python version of the unix tool which locate a program file in the user's path
-    Return:
-        None if program cannot be found.
+    Locate an executable in the user's PATH.
+
+    Args:
+        program: Name of the program or absolute path.
+
+    Returns:
+        str: Absolute path to the executable, or None if not found.
     """
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
@@ -126,7 +158,19 @@ def which(program):
 
 
 def tonumber(s):
-    """Convert string to number, raise ValueError if s cannot be converted."""
+    """
+    Convert a string to a number.
+
+    Args:
+        s: The string to convert.
+
+    Returns:
+        float: The converted number.
+
+    Raises:
+        ValueError: If the string cannot be converted to a float.
+        RuntimeError: If an unexpected error occurs during conversion.
+    """
     # Duck test. Much more readable than the ugly strfltrem routine in fldiff.pl
     try:
         stnum = s.upper().replace("D","E")  # D-01 is not recognized by python: Replace it with E.
@@ -139,7 +183,15 @@ def tonumber(s):
 
 
 def nums_and_text(line):
-    """Split line into (numbers, text)."""
+    """
+    Split a line into a list of numbers and a combined text string.
+
+    Args:
+        line: The line to split.
+
+    Returns:
+        tuple: (list of floats, string of non-numeric tokens).
+    """
     tokens = line.split()
     text = ""
     numbers = []
@@ -157,12 +209,11 @@ class RShellError(Exception):
 
 class RestrictedShell:
     """
-    This object executes a restricted set of shell commands.
-    It's main goal is to provide a restricted access to the
-    computing environment as we want to avoid executing
-    arbitrary code passed through the TEST_INFO sections.
+    Executes a restricted set of shell commands.
 
-    At present, it supports rm, cp, mv and touch
+    This object provides a restricted access to the computing environment
+    to avoid executing arbitrary code passed through the TEST_INFO sections.
+    It currently supports: cp, mv, and touch.
     """
     _key2command = {
         # key (function,   nargs)
@@ -175,7 +226,14 @@ class RestrictedShell:
     Error = RShellError
 
     def __init__(self, inp_dir, workdir, psps_dir):
-        """Helper function executing simple commands passed via a string."""
+        """
+        Initialize the restricted shell with directory context.
+
+        Args:
+            inp_dir: Directory for input files.
+            workdir: Working directory for the test.
+            psps_dir: Directory for pseudopotential files.
+        """
         self.exceptions = []
 
         self.prefix2dir = {
@@ -189,8 +247,16 @@ class RestrictedShell:
 
     def execute(self, string):
         """
-        Don't raise exceptions since python threads get stuck.
-        Exceptions are stored in self.exceptions
+        Execute a basic command string.
+
+        Exceptions are not raised (to avoid blocking threads) but are stored
+        in `self.exceptions`.
+
+        Args:
+            string: Command string (e.g., "w_touch filename" or "i_cp src w_dest").
+
+        Returns:
+            The result of the command execution, or None if failed.
         """
         #print("executing %s" % string)
         _key2command = RestrictedShell._key2command
@@ -259,7 +325,13 @@ class RestrictedShell:
 
 def stream_has_colours(stream):
     """
-    True if stream supports colours. Python cookbook, #475186
+    Check if a stream supports ANSI colors.
+
+    Args:
+        stream: The stream to check.
+
+    Returns:
+        bool: True if colors are supported.
     """
     if not hasattr(stream, "isatty"):
         return False
@@ -276,6 +348,9 @@ def stream_has_colours(stream):
 
 
 class StringColorizer:
+    """
+    Helper object to colorize strings using ANSI escape sequences.
+    """
     colours = {
         "default": "",
         "blue":  "\x1b[01;34m",
@@ -299,6 +374,15 @@ class StringColorizer:
 
 
 def prompt(question):
+    """
+    Replacement for `input` / `raw_input` to support both Python 2 and 3.
+
+    Args:
+        question: The prompt string.
+
+    Returns:
+        str: The user input.
+    """
     if sys.version_info >= (3, 0):
         my_input = input
     else:
@@ -319,7 +403,7 @@ def user_wants_to_exit():
 
 
 class Editor:
-    """Python interface to text editors."""
+    """Python interface to system text editors."""
     def __init__(self, editor=None):
         if editor is None:
             self.editor = os.getenv("EDITOR", "vi")
@@ -414,7 +498,16 @@ class Patcher:
                 raise self.Error("%s: trying to patch  %s %s:\n%s" % (self.patcher, fromfile, tofile, str(exc)))
 
     def patch_files(self, fromfiles, tofiles):
-        """Patch a list of files."""
+        """
+        Patch a list of files.
+
+        Args:
+            fromfiles: List of source paths.
+            tofiles: List of destination paths.
+
+        Returns:
+            int: The exit status of the overall operation.
+        """
         assert len(fromfiles) == len(tofiles)
         exit_status = 0
 

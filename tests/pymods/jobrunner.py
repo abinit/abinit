@@ -51,7 +51,16 @@ def is_string(s):
 
 
 def mpicfg_parser(fname, defaults=None):
-    """Parse the configuration file with MPI options."""
+    """
+    Parse a configuration file (INI format) for MPI options.
+
+    Args:
+        fname: Path to the configuration file.
+        defaults: Default values for the parser.
+
+    Returns:
+        dict: A dictionary containing the parsed MPI options.
+    """
     logger.debug("Parsing [MPI] section in file : " + str(fname))
 
     parser = SafeConfigParser(defaults)
@@ -87,8 +96,7 @@ def mpicfg_parser(fname, defaults=None):
 # used to store info about the exception in JobRunner exceptions (see run method)
 
 class JobRunnerError:
-#class JobRunnerError(Exception):
-    """Exceptions raised by `Jobrunner`."""
+    """Exception-like object to store information about job execution failures."""
 
     def __init__(self, return_code, cmd, run_etime, prev_errmsg=None):
         """
@@ -128,12 +136,27 @@ class JobRunnerError:
 
 
 class JobRunner:
-    """Base Class used to manage the execution of jobs in an MPI environment."""
+    """
+    Manages the execution of jobs in an MPI or sequential environment.
+
+    This class provides a unified interface for running binaries with support for
+    MPI (via mpirun, srun, or poe), OpenMP, and diagnostic tools like Valgrind or perf.
+    """
     #Error = JobRunnerError
 
     @classmethod
     def fromdict(cls, kwargs, ompenv=None, timebomb=None):
-        """Initialize the object from a dictionary"""
+        """
+        Create a JobRunner instance from a dictionary of options.
+
+        Args:
+            kwargs: Dictionary containing runner options.
+            ompenv: Optional OMPEnvironment instance.
+            timebomb: Optional TimeBomb instance for enforcing timeouts.
+
+        Returns:
+            JobRunner: A new instance configured with the provided options.
+        """
         d = dict(ompenv=ompenv, timebomb=timebomb)
         d.update(kwargs)
 
@@ -141,7 +164,16 @@ class JobRunner:
 
     @classmethod
     def fromfile(cls, fname, timebomb=None):
-        """Initialize the object from a INI configuration file."""
+        """
+        Create a JobRunner instance from an INI configuration file.
+
+        Args:
+            fname: Path to the configuration file.
+            timebomb: Optional TimeBomb instance.
+
+        Returns:
+            JobRunner: A new instance configured from the file.
+        """
         d = mpicfg_parser(fname)
         d["ompenv"] = OMPEnvironment.from_file(fname, allow_empty=True)
         d["timebomb"] = timebomb
@@ -150,13 +182,30 @@ class JobRunner:
 
     @classmethod
     def sequential(cls, ompenv=None, timebomb=None):
-        """Build a simple `JobRunner` for sequential runs."""
+        """
+        Create a JobRunner for sequential (non-MPI) execution.
+
+        Args:
+            ompenv: Optional OMPEnvironment.
+            timebomb: Optional TimeBomb.
+
+        Returns:
+            JobRunner: A sequential runner instance.
+        """
         return cls(dict(ompenv=ompenv, timebomb=timebomb))
 
     @classmethod
     def srun(cls, ompenv=None, timebomb=None, mpi_args=""):
         """
-        Build a `JobRunner` based on srun (assumes some default values).
+        Create a JobRunner configured for Slurm's `srun`.
+
+        Args:
+            ompenv: Optional OMPEnvironment.
+            timebomb: Optional TimeBomb.
+            mpi_args: Extra arguments for the mpirun command.
+
+        Returns:
+            JobRunner: A runner instance configured for Slurm.
         """
         d = dict(ompenv=ompenv, timebomb=timebomb, mpi_args=mpi_args)
         d["mpirun_np"] = "srun -n"
@@ -165,7 +214,16 @@ class JobRunner:
     @classmethod
     def generic_mpi(cls, ompenv=None, use_mpiexec=False, mpi_args="", timebomb=None):
         """
-        Build a `JobRunner` for MPI jobs (assumes some default values).
+        Create a JobRunner for generic MPI execution (mpirun or mpiexec).
+
+        Args:
+            ompenv: Optional OMPEnvironment.
+            use_mpiexec: If True, use `mpiexec` instead of `mpirun`.
+            mpi_args: Extra arguments for the MPI launcher.
+            timebomb: Optional TimeBomb.
+
+        Returns:
+            JobRunner: A generic MPI runner instance.
         """
         # It should work, provided that the shell environment is properly defined.
         d = dict(ompenv=ompenv, timebomb=timebomb, mpi_args=mpi_args)
@@ -283,16 +341,19 @@ class JobRunner:
 
     def run(self, mpi_nprocs, bin_path, stdin_fname, stdout_fname, stderr_fname, bin_argstr="", cwd=None):
         """
-        Args:
-            mpi_nprocs: Number of MPI nodes.
-            bin_path: Path of the executable.
-            stdin_fname: Input file
-            stdout_fname: Output file
-            stderr_fname: Error file
-            bin_argstr: String with command line options passed to `bin_path`.
-            cwd: cd to cwd before launching the job.
+        Execute the job.
 
-        Set self.retcode
+        Args:
+            mpi_nprocs: Number of MPI processes to launch.
+            bin_path: Path to the executable.
+            stdin_fname: Optional path to the input file.
+            stdout_fname: Optional path to the output file.
+            stderr_fname: Optional path to the error file.
+            bin_argstr: Extra command-line arguments for the binary.
+            cwd: Optional working directory for the execution.
+
+        Returns:
+            float: Elapsed time of the execution (in seconds).
         """
         env = os.environ.copy()
         if self.has_ompenv: env.update(self.ompenv)
@@ -375,15 +436,9 @@ class JobRunner:
 
 class BaseValgrindParser:
     """
-    Base class for parsers used to analyze the output of Valgrind
-    Concrete classes must implement the methods:
+    Abstract base class for Valgrind output parsers.
 
-        parse(filename) to parse the content of filename
-
-
-    error_report
-        string that evaluates to True if errors are found.
-        ...
+    Subclasses must implement the `parse(filename)` method.
     """
     # I really miss python 2.6 abc and context managers but must be compatible with py 2.4
     def parse(self, filename):
@@ -395,6 +450,7 @@ class BaseValgrindParser:
 
 
 class MemcheckParser(BaseValgrindParser):
+    """Parser for Valgrind Memcheck tool output."""
     #==3851== HEAP SUMMARY:
     #==3851==     in use at exit: 25,149 bytes in 13 blocks
     #==3851==   total heap usage: 841 allocs, 828 frees, 579,777,815 bytes allocated
@@ -457,6 +513,7 @@ class MemcheckParser(BaseValgrindParser):
 
 
 class TimeBomb:
+    """Enforces execution timeouts on subprocesses."""
 
     def __init__(self, timeout, delay=.05, exec_path=None):
         self.timeout = int(timeout)
@@ -515,8 +572,9 @@ class TimeBomb:
 
 class OMPEnvironment(dict):
     """
-    OpenMP variables.
-    see https://computing.llnl.gov/tutorials/openMP/#EnvironmentVariables
+    Dictionary-like object storing OpenMP environment variables.
+
+    Supports validation of OpenMP-standard keys and initialization from INI files.
     """
     _keys = [
        "OMP_SCHEDULE",

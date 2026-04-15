@@ -95,7 +95,13 @@ def ison():
 
 def stream_has_colours(stream):
     """
-    True if stream supports colours. Python cookbook, #475186
+    Check if a stream supports ANSI color sequences.
+
+    Args:
+        stream: A file-like object (e.g., sys.stdout).
+
+    Returns:
+        bool: True if colors are supported and the stream is a TTY.
     """
     if not hasattr(stream, "isatty"):
         return False
@@ -111,20 +117,17 @@ def stream_has_colours(stream):
 
 
 def colored(text, color=None, on_color=None, attrs=None):
-    """Colorize text.
+    """
+    Colorize text using ANSI escape sequences.
 
-    Available text colors:
-        red, green, yellow, blue, magenta, cyan, white.
+    Args:
+        text: The string to colorize.
+        color: Primary color name (e.g., "red", "green").
+        on_color: Background color name (e.g., "on_red").
+        attrs: List of attributes (e.g., ["bold", "underline"]).
 
-    Available text highlights:
-        on_red, on_green, on_yellow, on_blue, on_magenta, on_cyan, on_white.
-
-    Available attributes:
-        bold, dark, underline, blink, reverse, concealed.
-
-    Example:
-        colored('Hello, World!', 'red', 'on_grey', ['blue', 'blink'])
-        colored('Hello, World!', 'green')
+    Returns:
+        str: The colorized string ready for terminal output.
     """
     if __ISON and os.getenv("ANSI_COLORS_DISABLED") is None:
         fmt_str = "\033[%dm%s"
@@ -143,9 +146,15 @@ def colored(text, color=None, on_color=None, attrs=None):
 
 
 def cprint(text, color=None, on_color=None, attrs=None, **kwargs):
-    """Print colorize text.
+    """
+    Print colorized text to a stream.
 
-    It accepts arguments of print function.
+    Args:
+        text: The string to print.
+        color: Primary color name.
+        on_color: Background color name.
+        attrs: List of attributes.
+        **kwargs: Standard arguments passed to the `print` function.
     """
     try:
         print((colored(text, color, on_color, attrs)), **kwargs)

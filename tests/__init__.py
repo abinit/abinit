@@ -21,8 +21,10 @@ __all__ = [
 
 class AbinitEnvironment:
     """
-    Container with information on the abinit source tree.
-    Provide helper functions to construct the absolute path of directories.
+    Environmental context and path manager for the ABINIT source tree.
+
+    Provides information about the system (hostname, username) and helper
+    methods to construct absolute paths relative to the ABINIT root directory.
     """
 
     def __init__(self):
@@ -50,20 +52,28 @@ class AbinitEnvironment:
 
     def apath_of(self, *p):
         """
-        Return the absolute path of p where p is one or more pathname components
-        relative to the top level directory of the package.
+        Compute the absolute path of a subpath relative to the ABINIT root.
+
+        Args:
+            *p: One or more path components.
+
+        Returns:
+            str: The joined absolute path.
         """
         return os.path.join(self.home_dir, *p)
 
     def isbuild(self):
-        """True if we have built the code in the top level directory."""
+        """bool: True if the code has been built in the current directory."""
         configh_path = os.path.join(self.home_dir, "config.h")
         abinit_path = os.path.join(self.home_dir, "src", "98_main", "abinit")
         return os.path.isfile(configh_path) and os.path.isfile(abinit_path)
 
     def touch_srcfiles(self, patterns):
         """
-        Touch all Abinit source files containing the specified list of `patterns`.
+        Touch (update timestamp) all source files containing any of the patterns.
+
+        Args:
+            patterns: List of string patterns to search for in source files.
         """
         def touch(fname):
             """
@@ -94,6 +104,12 @@ class AbinitEnvironment:
                             break
 
     def start_watching_sources(self):
+        """
+        Initialize a snapshot of the source files' statistics for modification tracking.
+
+        Returns:
+            dict: Mapping of file paths to their `os.stat` results.
+        """
         def is_source(fname):
             # NB: `.finc` include files are ignored on purpose because
             # make is not tracking them. one should change the Fortran file
@@ -112,7 +128,12 @@ class AbinitEnvironment:
         return self.srcpath_stat
 
     def changed_sources(self):
-        """Return list of files that have been modified."""
+        """
+        Detect and return a list of source files modified since the last check.
+
+        Returns:
+            list: Paths of modified files.
+        """
         changed = []
         for path, old_stat in self.srcpath_stat.items():
             now_stat = os.stat(path)
@@ -176,6 +197,17 @@ _tsuite_dirs = tuple([os.path.join(abenv.tests_dir, dir_name) for dir_name in _t
 
 
 def load_mod(filepath):
+    """
+    Dynamically load a Python module from a file path.
+
+    Supports both older `imp` and modern `importlib` mechanisms.
+
+    Args:
+        filepath: Absolute path to the .py file.
+
+    Returns:
+        ModuleType: The loaded module.
+    """
     try:
         import imp
         return imp.load_source(filepath, filepath)
@@ -185,7 +217,13 @@ def load_mod(filepath):
 
 
 class Suite:
-    """Information on one test suite"""
+    """
+    Representation of an ABINIT test suite.
+
+    A suite corresponds to a directory containing an `__init__.py` file and
+    an `Input/` subdirectory. It manages keywords, required CPP variables,
+    and subsuite logic.
+    """
 
     def __init__(self, suite_path):
 
@@ -248,10 +286,19 @@ class Suite:
                 self.subsuites[sub_name] = inp_paths
 
     def has_subsuite(self, subsuite_name):
+        """bool: True if the suite contains a subsuite with the given name."""
         return subsuite_name in self.subsuites
 
     def inputs_of_subsuite(self, subsuite_name):
-        """Return the absolute path of the input files in the subsuite."""
+        """
+        Return the absolute paths of the input files in a subsuite.
+
+        Args:
+            subsuite_name: Name of the subsuite.
+
+        Returns:
+            list: List of absolute paths to .abi files.
+        """
         return self.subsuites[subsuite_name]
 
     def __str__(self):
@@ -259,14 +306,25 @@ class Suite:
 
 
 class AbinitTestsDatabase(dict):
-    """Database of tests indexed by the name of the abinit suite"""
+    """
+    Database of test instances, indexed by suite name.
+
+    Inherits from `dict`. Each value is typically a list of test objects
+    (AbinitTestInfo or similar). Providing facilities to query and iterate
+    over the entire test collection.
+    """
 
     def __init__(self, suites):
         dict.__init__(self)
         self._suites = suites
 
     def iter_tests(self):
-        """Iterate over all the tests."""
+        """
+        Ordered iterator over all tests in the database.
+
+        Yields:
+            AbinitTest: The next test object.
+        """
         for suite in self.values():
             for test in suite:
                 yield test
@@ -296,7 +354,16 @@ class AbinitTestsDatabase(dict):
         return [t for t in self.iter_tests() if t.has_variables(ivars)]
 
     def add_test_suite(self, suite_name, test_suite):
-        """Add test_suite to the database using the key suite_name."""
+        """
+        Add an executed or selected test suite to the database.
+
+        Args:
+            suite_name: Key used to index the suite.
+            test_suite: The test suite object to add.
+
+        Raises:
+            ValueError: If the suite name is invalid or already exists.
+        """
         if suite_name not in self.suite_names:
             raise ValueError("%s is not a valid suite name" % suite_name)
 
@@ -307,10 +374,16 @@ class AbinitTestsDatabase(dict):
 
     def init_result_table(self):
         """
-        Initialize a nested dictionary indexed by [suite_name][test.id].
-        The dictionary contains ALL the tests present in the database
-        and is used in testbot.py to store the results of the tests executed
-        by the buildbot slave. Values are initialized with {}.
+        Initialize a nested dictionary used to store test results.
+
+        Structure: `res_table[suite_name][test_id] = {}`.
+        Ensures all possible tests have an entry for Buildbot output aggregation.
+
+        Returns:
+            dict: The initialized nested results table.
+
+        Raises:
+            ValueError: If duplicate test IDs are found within the same suite.
         """
         res_table = {}
         for suite_name in self.suite_names:
@@ -331,10 +404,15 @@ class AbinitTestsDatabase(dict):
 
     def get_test_suite(self, suite_name, subsuite_name=None, slice_obj=None):
         """
-        Return a list of tests belonging to the suite suite_name.
-        If subsuite_name is not None, only the tests in suite_name/subsuite_name are returned.
-        slice_obj is a slice object that can be used to specify the initial and final number of the test.
-        if slice_obj is None, all the tests in suite_name/subsuite_name are returned.
+        Retrieve a selection of tests from a suite.
+
+        Args:
+            suite_name: Name of the suite to query.
+            subsuite_name: Optional subsuite filter.
+            slice_obj: Optional slice to select a range of tests.
+
+        Returns:
+            AbinitTestSuite: An object containing the requested tests.
         """
         test_suite = self[suite_name]
 
@@ -360,8 +438,10 @@ class AbinitTestsDatabase(dict):
 
     def find_unknown_wrong_keywords(self):
         """
-        Check whether TEST_INFO keywords have been documented.
-        Returns set with the unknown keywords.
+        Identify keywords in `TEST_INFO` sections that are undocumented or malformed.
+
+        Returns:
+            tuple: (unknown_keywords: set, malformed_keywords: set)
         """
         unknowns, wrong = set(), set()
         for suite_name, suite in self.items():
@@ -376,11 +456,10 @@ class AbinitTestsDatabase(dict):
 
     def find_stale_or_lost_inputs(self):
         """
-        Check whether all reference files located in the Refs directories
-        are tested namely that if they appear in the files_to_test field.
+        Verify that all input files in `Input/` directories are referenced by tests.
 
         Returns:
-            String with the errors, empty string if OK.
+            str: Error report with unreferenced or double-referenced input files.
         """
         # Build the list of files that are tested.
         err = StringIO()
@@ -428,11 +507,10 @@ class AbinitTestsDatabase(dict):
 
     def find_stale_or_lost_refs(self):
         """
-        Check whether all reference files located in the Refs directories
-        are tested namely that if they compare in the files_to_test field.
+        Verify that all reference files in `Refs/` directories are tracked by at least one test.
 
         Returns:
-            String with the errors, empty string if OK
+            str: Error report with unreferenced reference files.
         """
         # Build the list of files that are tested.
         err = StringIO()
@@ -530,7 +608,10 @@ def path2str(path):
 
 class AbinitTests:
     """
-    Object describing the collection of automatic tests
+    High-level manager for the entire collection of ABINIT automatic tests.
+
+    This class handles basic suite discovery, indexing, and high-level
+    database construction and selection tasks.
     """
 
     def __init__(self):
@@ -548,24 +629,48 @@ class AbinitTests:
                 print("Found suite and subsuite with the same name: %s" % suite_name)
 
     def walk_suites(self):
-        """Return list of (suite_name, suite_paths)"""
+        """
+        Iterator over all registered suites.
+
+        Yields:
+            tuple: (suite_name, suite_path)
+        """
         return zip(self.suite_names, self.suite_paths)
 
     def __str__(self):
         return "\n".join([str(k) + " : " + str(v) for (k, v) in self.__dict__.items()])
 
     def get_suite(self, suite_name):
-        return self._suites[suite_name]
+        """
+        Get the `Suite` object for a given name.
 
+        Args:
+            suite_name: Name of the suite to retrieve.
+
+        Returns:
+            Suite: The suite object.
+        """
+        return self._suites[suite_name]
     @property
     def suites(self):
         return self._suites.values()
 
     def multi_parallel_suites(self):
+        """list[Suite]: List of all suites containing multi-parallel tests."""
         return [s for s in self.suites if s.is_multi_parallel]
-
     def suite_of_subsuite(self, subsuite_name):
-        """Return the suite corresponding to the given subsuite."""
+        """
+        Find the parent suite containing a specific subsuite.
+
+        Args:
+            subsuite_name: Name of the subsuite to search for.
+
+        Returns:
+            Suite: The parent suite object.
+
+        Raises:
+            ValueError: If the subsuite name is not registered.
+        """
         for suite in self.suites:
             if suite.has_subsuite(subsuite_name):
                 return suite
@@ -613,8 +718,13 @@ class AbinitTests:
 
     def build_database(self, with_disabled=False):
         """
-        Return an instance of AbinitTestsDatabase containing all the ABINIT automatic tests.
-        with_disabled specifies whether disabled tests should be included in the database.
+        Build a comprehensive tests database from the filesystem.
+
+        Args:
+            with_disabled: If True, include tests marked as disabled in the database.
+
+        Returns:
+            AbinitTestsDatabase: The fully populated database instance.
         """
         database = AbinitTestsDatabase(self._suites)
 
@@ -636,14 +746,15 @@ class AbinitTests:
 
     def get_database(self, regenerate=False, with_pickle=False):
         """
-        Return an instance of AbinitTestsDatabase initialized from an external pickle file.
+        Retrieve the tests database, optionally loading from a pickle cache.
 
         Args:
-            regenerate:
-                True to force the regeneration of the database
-                and the writing of a new pickle file.
-            with_pickle:
-                Save the generated database in pickle format.
+            regenerate: If True, force recalculation of the database instead of
+                loading from cache.
+            with_pickle: If True, save the database to a pickle file after generation.
+
+        Returns:
+            AbinitTestsDatabase: The tests database instance.
         """
         if regenerate or not os.path.exists(database_path):
             cprint("Regenerating database...", "yellow")
@@ -749,12 +860,19 @@ class AbinitTests:
     def select_tests(self, suite_args, regenerate=False, keys=None,
                      authors=None, ivars=None, with_pickle=True, flat_list=False):
         """
-        Main entry point for client code. Return an instance of AbinitTestSuite
+        Construct a test suite based on selection arguments and filters.
 
         Args:
-            with_pickle: Save the generated database in pickle format.
-            flat_list: True if a flat list of tests should be returned instead
-                of a list that can contain ChainOfTests objects.
+            suite_args: Arguments specifying suites and slices (e.g., "v1[1:10]").
+            regenerate: If True, regenerate the tests database.
+            keys: List of keywords to filter by.
+            authors: List of authors to filter by.
+            ivars: List of input variables to filter by.
+            with_pickle: If True, use the pickle cache for the database.
+            flat_list: If True, return a flat list of tests instead of chained ones.
+
+        Returns:
+            AbinitTestSuite: The suite of selected tests.
         """
         tests_todo = self._suite_args_parser(suite_args)
 

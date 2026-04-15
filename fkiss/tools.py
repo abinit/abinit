@@ -12,10 +12,10 @@ from .termcolor import cprint
 # Helper functions (coming from AbiPy)
 class lazy_property:
     """
-    lazy_property descriptor
+    Descriptor for implementing lazy-evaluated properties.
 
-    Used as a decorator to create lazy attributes.
-    Lazy attributes are evaluated on first use.
+    The decorated method is evaluated only once on first access, after which
+    the result is cached on the instance.
     """
 
     def __init__(self, func):
@@ -64,7 +64,13 @@ class lazy_property:
 
 
 class Editor:
-    """Python interface to text editors."""
+    """
+    Python interface to system text editors.
+
+    Args:
+        editor: The name of the editor executable (e.g., "vi", "emacs").
+            If None, defaults to the $EDITOR environment variable.
+    """
     def __init__(self, editor=None):
         if editor is None:
             self.editor = os.getenv("EDITOR", "vi")
@@ -72,6 +78,16 @@ class Editor:
             self.editor = str(editor)
 
     def edit_file(self, fname, lineno=None):
+        """
+        Open a file in the editor, optionally jumping to a specific line.
+
+        Args:
+            fname: Path to the file to edit.
+            lineno: Optional line number to jump to.
+
+        Returns:
+            int: The exit status of the editor process.
+        """
         from subprocess import call
         if lineno is None:
             retcode = call([self.editor, fname])
@@ -80,14 +96,22 @@ class Editor:
             retcode = call([self.editor, fname, "+%s" % str(lineno)])
 
         if retcode != 0:
+            import warnings
             warnings.warn("Error while trying to edit file: %s" % fname)
 
         return retcode
 
     def edit_files(self, fnames, ask_for_exit=True):
         """
-        Edit a list of files, if assk_for_exit is True, we ask
-        whether the user wants to exit from the cycle at each iteration.
+        Iteratively edit a list of files.
+
+        Args:
+            fnames: List of file paths to edit.
+            ask_for_exit: If True, prompt the user after each file to see
+                if they want to stop the cycle.
+
+        Returns:
+            int: The exit status of the last editor invocation.
         """
         exit_status = 0
         for idx, fname in enumerate(fnames):
@@ -120,16 +144,12 @@ def prompt(question):
 
 def pprint_table(table, out=sys.stdout, rstrip=False):
     """
-    Prints out a table of data, padded for alignment
-    Each row must have the same number of columns.
+    Print a 2D table of data with aligned columns.
 
     Args:
-        out:
-            Output stream (file-like object)
-        table:
-            The table to print. A list of lists.
-        rstrip:
-            if true, trailing withespaces are removed from the entries.
+        table: A list of lists (rows and columns).
+        out: File-like object to write the table to.
+        rstrip: If True, remove trailing whitespace from each entry.
     """
     def max_width_col(table, col_idx):
         """Get the maximum width of the given column index"""
@@ -156,18 +176,19 @@ def pprint_table(table, out=sys.stdout, rstrip=False):
 
 def print_dataframe(frame, title=None, precision=6, sortby=None, file=sys.stdout, display=None):
     """
-    Print entire pandas DataFrame.
+    Print a pandas DataFrame in a formatted table.
 
     Args:
-        frame: pandas DataFrame.
-        title: Optional string to print as initial title.
-        precision: Floating point output precision (number of significant digits).
-            This is only a suggestion [default: 6] [currently: 6]
-        sortby: string name or list of names which refer to the axis items to be sorted (dataframe is not changed)
-        file: a file-like object (stream); defaults to the current sys.stdout.
-            If file == "string", a temporary stream is created and a string is returned.
-        display: Use ipython rich display protocol by invoking _repr_`display_ and returning the result.
-            Use e.g. display="html" to get HTML table.
+        frame: The pandas DataFrame to print.
+        title: Optional title string to print above the table.
+        precision: Floating point output precision.
+        sortby: Name or list of names to sort the DataFrame by.
+        file: File-like object to write to (defaults to sys.stdout).
+            If "string", returns the formatted table as a string.
+        display: Optional rich display format (e.g., "html") for Jupyter.
+
+    Returns:
+        str or None: The formatted string if file="string", else None.
     """
     return_string = file == "string"
     if return_string:
@@ -197,7 +218,8 @@ def print_dataframe(frame, title=None, precision=6, sortby=None, file=sys.stdout
 #@six.add_metaclass(abc.ABCMeta)
 class NotebookWriter: #metaclass=abc.ABCMeta):
     """
-    Mixin class for objects that are able to generate jupyter_ notebooks.
+    Mixin class for objects capable of generating Jupyter notebooks.
+
     Subclasses must provide a concrete implementation of `write_notebook`.
     """
     def make_and_open_notebook(self, nbpath=None, foreground=False):  # pragma: no cover

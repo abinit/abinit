@@ -57,7 +57,12 @@ TESTBOT_JSON = pj(ROOT, "testbot.json")
 
 
 def lazy__str__(func):
-    """Lazy decorator for __str__ methods"""
+    """
+    Decorator that provides a default __str__ implementation based on object attributes.
+
+    Returns:
+        Callable: The wrapped function.
+    """
     def oncall(*args, **kwargs):
         self = args[0]
         return "\n".join(str(k) + " : " + str(v) for (k, v) in self.__dict__.items())
@@ -65,6 +70,18 @@ def lazy__str__(func):
 
 
 def _yesno2bool(string):
+    """
+    Convert "yes"/"no" strings to boolean.
+
+    Args:
+        string: String to convert.
+
+    Returns:
+        bool: True if "yes", False if "no".
+
+    Raises:
+        ValueError: If the string cannot be interpreted.
+    """
     string = string.lower().strip().replace('"', "").replace("'", "")
     if string == "yes":
         return True
@@ -72,24 +89,30 @@ def _yesno2bool(string):
         return False
     raise ValueError("Cannot interpret string: %s" % string)
 
-
 def _str2list(string):
+    """
+    Parse a comma-separated string into a list of trimmed strings.
+
+    Args:
+        string: The string or list/tuple to process.
+
+    Returns:
+        list: A list of trimmed strings.
+    """
     if isinstance(string, (list, tuple)):
         return string
 
-    #try:
     return [s.strip() for s in string.split(",") if s]
-    #except Exception as exc:
-    #    print(f"{type(string)=}, {string=}")
-    #    raise
-
 
 #from pydantic.dataclasses import dataclass as pydantic_dataclass
 #@pydantic_dataclass(kw_only=True)
 @dataclass(kw_only=True)
 class TestBotContext:
     """
-    Configuration for TestBot builder
+    Configuration context for a TestBot builder.
+
+    This class encapsulates all settings required to run tests for a specific
+    Buildbot worker, including MPI/OpenMP configuration, timeouts, and suite selection.
     """
 
     slavename: str
@@ -160,7 +183,19 @@ class TestBotContext:
 
     @classmethod
     def from_builders(cls, all_builders: list[dict], builder_name: str):
-        """Build an instance from yaml file and builder name."""
+        """
+        Factory method to create a context from a list of builder configurations.
+
+        Args:
+            all_builders: List of builder dictionaries (e.g., from YAML/JSON).
+            builder_name: Name of the builder to extract.
+
+        Returns:
+            TestBotContext: An initialized context for the specified builder.
+
+        Raises:
+            ValueError: If the builder name is not found.
+        """
         for builder in all_builders:
             if builder["name"] == builder_name: break
         else:
@@ -205,6 +240,15 @@ class TestBotContext:
 
 
 def get_mpi_prefix_from_env() -> str | None:
+    """
+    Try to detect the MPI installation directory from environment variables.
+
+    Checks MPI_HOME and MPIHOME. This is used for compatibility with certain
+    Buildbot worker configurations.
+
+    Returns:
+        str | None: The detected MPI path, or None if not found.
+    """
     # This is what JMB does in buildbot_worker/testbot.py
     # The problem is that this has precedence over mpi_prefix. Should ask why!!
     try:
@@ -220,7 +264,18 @@ def get_mpi_prefix_from_env() -> str | None:
 
 
 def read_builders(fmt: str) -> list[dict]:
-    """Read builders from file."""
+    """
+    Read builder configurations from a file (YAML or JSON).
+
+    Args:
+        fmt: Format of the input file ("yaml" or "json").
+
+    Returns:
+        list[dict]: A list of dictionaries, each representing a builder.
+
+    Raises:
+        ValueError: If the format is invalid.
+    """
     if fmt == "yaml":
       from ruamel import yaml
       with open(TESTBOT_YAML) as f:
@@ -236,7 +291,10 @@ def read_builders(fmt: str) -> list[dict]:
 
 def validate() -> int:
     """
-    Validate configuration files.
+    Validate the consistency of configuration files (YAML and testfarm.conf).
+
+    Returns:
+        int: Number of validation errors found.
     """
     # Read testfarm configuration file with builders.
     build_examples = abenv.apath_of(pj("config", "specs", "testfarm.conf"))
@@ -292,7 +350,10 @@ def validate() -> int:
 
 def convert():
     """
-    Convert yaml file to json.
+    Convert the TestBot builder configuration from YAML to JSON.
+
+    Returns:
+        int: 0 on success.
     """
     all_builders = read_builders("yaml")
 
@@ -304,13 +365,13 @@ def convert():
 
 class TestBot:
     """
-    This object drives the execution of the ABINIT automatic tests:
+    Driver for ABINIT automatic tests on Buildbot workers.
 
-      1) Read setup options from the file testbot.cfg uploaded by the master on the builder.
-      2) Initialize the job_runner and other objects used to run the tests.
-      3) run the tests (see run method), and return the number of tests that failed.
-
-    Step 1-2 are performed in the creation method.
+    The execution flow consists of:
+    1. Loading configuration from `testbot.cfg` (legacy) or `testbot.yaml`/`testbot.json`.
+    2. Initializing `JobRunner` instances for sequential and parallel execution.
+    3. Selecting and running test suites based on selected keywords and tags.
+    4. Aggregating results into a summary report.
     """
     _attrbs = {
       # name           --> (default, parser, info)
@@ -343,7 +404,7 @@ class TestBot:
     @classmethod
     def print_options(cls):
         """
-        Print the different options supported in testbot.cfg with a brief description and the default value.
+        Print the available configuration options with descriptions and defaults.
         """
         for opt_name, t in cls._attrbs.items():
             default, parser, info = t
@@ -353,6 +414,16 @@ class TestBot:
         print("# NB If default is None, the option must be specified.")
 
     def __init__(self, testbot_cfg=None, builder_name=None):
+        """
+        Initialize the TestBot instance.
+
+        Args:
+            testbot_cfg: Optional path to the legacy INI configuration file.
+            builder_name: Optional name for extraction from YAML/JSON config.
+
+        Raises:
+            ValueError: If mandatory options are missing or invalid.
+        """
 
         attrs2read = [
             "slavename",
@@ -539,19 +610,28 @@ class TestBot:
 
     @property
     def has_mpi(self):
-        """True if we have the MPI runner"""
+        """bool: True if an MPI runner is configured."""
         return bool(self.mpirun_np) or bool(self.poe)
 
     @property
     def has_openmp(self):
-        """True if the tests must be executed with OpenMP threads."""
+        """bool: True if tests should be executed with OpenMP."""
         return self.omp_num_threads > 0
 
     def run_tests_with_np(self, mpi_nprocs, suite_args=None, runmode="static"):
         """
-        Run the tests specified by suite_args, using mpi_nprocs MPI processors.
+        Run a subset of tests using a specified number of MPI processes.
 
-        Returns: (nfailed, npassed, nexecuted)
+        Calculates the appropriate number of parallel Python processes based on
+        available CPUs and OpenMP configuration.
+
+        Args:
+            mpi_nprocs: Number of MPI processes per test.
+            suite_args: Arguments for test suite selection.
+            runmode: Execution mode ("static" or "parallel").
+
+        Returns:
+            tuple: (nfailed, npassed, nexecuted)
         """
         # Compute number of python processes, note that self.omp_num_threads might be zero.
         py_nprocs = self.max_cpus // (mpi_nprocs * max(self.omp_num_threads, 1))
@@ -626,8 +706,15 @@ class TestBot:
 
     def run(self):
         """
-        Run all the automatic tests depending on the environment and the options specified in the testbot.cfg configuration file.
-        Return the number of failing tests (+ no. passed tests if this is the reference builder).
+        Execute the full test suite based on the current configuration.
+
+        This method handles:
+        - Running sequential and/or parallel tests.
+        - Executing multi-parallel suites with varying CPU counts.
+        - Generating the final summary table and JSON report.
+
+        Returns:
+            int: Number of failed tests (or total passed + failed for reference builders).
         """
         # TODO
         #import multiprocessing
@@ -712,7 +799,13 @@ class TestBot:
 
 def analyze(fname):
     """
-    This piece of code has been extracted from analysis9
+    Analyze and display the performance figures of the tests.
+
+    Parses the summary JSON file and prints a table with execution times
+    (CPU and Wall) per test suite.
+
+    Args:
+        fname: Path to the JSON summary file.
     """
     #fname = "testbot_summary.json"
     with open(fname) as data_file:
@@ -771,7 +864,12 @@ def analyze(fname):
 
 
 class TestBotSummary:
-    """Stores the final results of the tests performed by TestBot."""
+    """
+    Aggregates and formats the final results of a TestBot run.
+
+    This class maintains a result table for all test suites and provides methods
+    to merge new results and export them to various formats (HTML, JSON).
+    """
 
     _possible_status = ["failed", "passed", "succeeded", "skipped"]
 
@@ -789,12 +887,12 @@ class TestBotSummary:
 
     def to_table(self):
         """
-        Return a table (list of lists whose elements are strings).
-        The table has the format:
-            - [ suite_name1, suite_name2, ... ]
-            - [ stats1,      stats2,      ... ]
+        Convert the current summary into a table format for display.
 
-        where stats is given by "nfail/npass/nsucces"
+        The table contains suite names and their corresponding pass/fail/skip stats.
+
+        Returns:
+            list[list[str]]: A list of rows, where each row is a list of strings.
         """
         def stats2string(stats):
             """Helper function that returns (nfail/npass/nsucc/nskipped)"""
@@ -810,6 +908,16 @@ class TestBotSummary:
         return table
 
     def merge_results(self, test_suite, run_info):
+        """
+        Merge results from a completed test suite into the global summary.
+
+        Updates the status of each test (e.g., marking as failed if any run failed)
+        and accumulates execution times.
+
+        Args:
+            test_suite: The executed test suite object.
+            run_info: Dictionary containing execution metadata (currently unused).
+        """
         # assert test_suite._executed
         self.run_info = run_info
 
@@ -879,8 +987,13 @@ class TestBotSummary:
 
     def json_dump(self, fname):
         """
-        Save self.res_table, self.failed, self.passed in json format.
-        The file will be transferred from the buildbot builder to the buildbot master.
+        Export the current summary to a JSON file.
+
+        The exported data includes a list of failed tests, passed tests, and
+        the detailed result table for all suites.
+
+        Args:
+            fname: Path to the output JSON file.
         """
         # list of strings with the name of the tests that (failed|passed)
         d = {}

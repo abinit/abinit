@@ -54,8 +54,15 @@ import re
 
 class HasRegex:
     """
-    Mixin class providing regular expressions used to analyze Fortran code.
-    Many regexs use `^` so we assume source lines have been already stripped.
+    Mixin class providing regular expressions for lexical analysis of Fortran code.
+
+    This class serves as a central registry for regex patterns used to identify
+    key Fortran constructs such as procedure boundaries, type declarations,
+    and control statements.
+
+    Note:
+        Many regex patterns assume that the source lines have already been stripped
+        of leading/trailing whitespace.
     """
     USE_MPI_EXPLICIT = re.compile(r"use\s+mpi\s*", re.IGNORECASE)
 
@@ -80,12 +87,18 @@ class HasRegex:
     # PROGRAM [name] && END [PROGRAM [name]]
     # NB: we enforce PROGRAM and NAME
     RE_PROG_START = re.compile(r"^program\s+(?P<name>\w+)", re.IGNORECASE)
+    """Pattern to match the beginning of a Fortran program."""
+
     RE_PROG_END = re.compile(r"^end\s+program\s+(?P<name>\w+)", re.IGNORECASE)
+    """Pattern to match the end of a Fortran program."""
 
     # MODULE <name> && END [MODULE [name]]
     # NB: we enforce MODULE and NAME in END
     RE_MOD_START= re.compile(r"^module\s+(?P<name>\w+)", re.IGNORECASE)
+    """Pattern to match the beginning of a Fortran module."""
+
     RE_MOD_END = re.compile(r"^end\s+module\s+(?P<name>\w+)", re.IGNORECASE)
+    """Pattern to match the end of a Fortran module."""
 
     #[ MODULE ] PROCEDURE <procedure-name-list>
     #re.compile(r"(module\s*|)procedure\s(?P<namelist>\w+)", re.I)
@@ -94,7 +107,10 @@ class HasRegex:
     # END [SUBROUTINE [name]]
     # NB: we enforce name and name
     RE_SUB_START = re.compile(r"(?P<prefix>(recursive|pure|elemental|\s)*)subroutine\s*(?P<name>\w+)", re.IGNORECASE)
+    """Pattern to match the beginning of a Fortran subroutine."""
+
     RE_SUB_END = re.compile(r"^end\s+subroutine\s+(?P<name>\w+)", re.IGNORECASE)
+    """Pattern to match the end of a Fortran subroutine."""
     RE_SUB_ARGS = re.compile(r"\((?P<args>.*?)\)")
 
     # [<prefix>] FUNCTION <name> ([<dummy-arg-list>]) [<suffix>]
@@ -116,6 +132,7 @@ re.IGNORECASE | re.VERBOSE)
 
     # Enforce function and name
     RE_FUNC_END = re.compile(r"^end\s+function\s*(?P<name>\w+)", re.IGNORECASE)
+    """Pattern to match the end of a Fortran function."""
     #result_re = re.compile(r'result\s*\((.*?)\)', re.I)
 
     # INTERFACE [generic-spec]
@@ -138,7 +155,10 @@ re.IGNORECASE | re.VERBOSE)
     # NB: Enforcing name in END
     #RE_TYPE_START = re.compile(r'^type(?:\s+|\s*(,.*)?::\s*)(?P<name>\w+)', re.I)
     RE_TYPE_START = re.compile(r"^type(?P<attribs>(?:\s+|\s*(,.*)?::\s*))(?P<name>\w+)", re.IGNORECASE)
+    """Pattern to match the beginning of a Fortran derived type declaration."""
+
     RE_TYPE_END = re.compile(r"^end\s+type\s+(?P<name>\w+)", re.IGNORECASE)
+    """Pattern to match the end of a Fortran derived type declaration."""
 
     RE_PUB_OR_PRIVATE = re.compile(r"^(?P<name>public|private)\s*(\!+\s*\w*|\Z)", re.IGNORECASE)
 
