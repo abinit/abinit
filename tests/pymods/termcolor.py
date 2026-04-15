@@ -1,6 +1,5 @@
-
 """
-Copyright (C) 2008-2011 Volvox Development Team
+Copyright (C) 2008-2011 Volvox Development Team.
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -32,49 +31,49 @@ __all__ = ["colored", "cprint"]
 VERSION = (1, 1, 0)
 
 ATTRIBUTES = dict(
-    list(zip([
-        "bold",
-        "dark",
-        "",
-        "underline",
-        "blink",
-        "",
-        "reverse",
-        "concealed"
-    ],
-        list(range(1, 9))
-    ))
+    list(
+        zip(
+            ["bold", "dark", "", "underline", "blink", "", "reverse", "concealed"],
+            list(range(1, 9)),
+        )
+    )
 )
 del ATTRIBUTES[""]
 
 HIGHLIGHTS = dict(
-    list(zip([
-        "on_grey",
-        "on_red",
-        "on_green",
-        "on_yellow",
-        "on_blue",
-        "on_magenta",
-        "on_cyan",
-        "on_white"
-    ],
-        list(range(40, 48))
-    ))
+    list(
+        zip(
+            [
+                "on_grey",
+                "on_red",
+                "on_green",
+                "on_yellow",
+                "on_blue",
+                "on_magenta",
+                "on_cyan",
+                "on_white",
+            ],
+            list(range(40, 48)),
+        )
+    )
 )
 
 COLORS = dict(
-    list(zip([
-        "grey",
-        "red",
-        "green",
-        "yellow",
-        "blue",
-        "magenta",
-        "cyan",
-        "white",
-    ],
-        list(range(30, 38))
-    ))
+    list(
+        zip(
+            [
+                "grey",
+                "red",
+                "green",
+                "yellow",
+                "blue",
+                "magenta",
+                "cyan",
+                "white",
+            ],
+            list(range(30, 38)),
+        )
+    )
 )
 
 RESET = "\033[0m"
@@ -120,6 +119,7 @@ def stream_has_colours(stream):
         return False  # auto color only on TTYs
     try:
         import curses
+
         curses.setupterm()
         return curses.tigetnum("colors") > 2
     except:
@@ -202,7 +202,8 @@ def colored_map(text, cmap):
         colored_key("foo bar", {"bar": "green"})
         colored_key("foo bar", {"bar": {"color": "green", "on_color": "on_red"}})
     """
-    if not __ISON: return text
+    if not __ISON:
+        return text
     for key, v in cmap.items():
         if isinstance(v, dict):
             text = text.replace(key, colored(key, **v))
@@ -248,11 +249,13 @@ def get_terminal_size():
         pass
 
     env = os.environ
+
     def ioctl_GWINSZ(fd):
         try:
             import fcntl
             import struct
             import termios
+
             rc = struct.unpack("hh", fcntl.ioctl(fd, termios.TIOCGWINSZ, "1234"))
             return rc
         except:
@@ -272,6 +275,7 @@ def get_terminal_size():
         rc = (env.get("LINES", 25), env.get("COLUMNS", 80))
 
     return int(rc[0]), int(rc[1])
+
 
 if __name__ == "__main__":
     # enable(False)
@@ -305,15 +309,12 @@ if __name__ == "__main__":
     cprint("Blink yellow color", "yellow", attrs=["blink"])
     cprint("Reversed blue color", "blue", attrs=["reverse"])
     cprint("Concealed Magenta color", "magenta", attrs=["concealed"])
-    cprint("Bold underline reverse cyan color", "cyan",
-           attrs=["bold", "underline", "reverse"])
-    cprint("Dark blink concealed white color", "white",
-           attrs=["dark", "blink", "concealed"])
+    cprint("Bold underline reverse cyan color", "cyan", attrs=["bold", "underline", "reverse"])
+    cprint("Dark blink concealed white color", "white", attrs=["dark", "blink", "concealed"])
     print("-" * 78)
 
     print("Test mixing:")
-    cprint("Underline red on grey color", "red", "on_grey",
-           ["underline"])
+    cprint("Underline red on grey color", "red", "on_grey", ["underline"])
     cprint("Reversed green on red color", "green", "on_red", ["reverse"])
 
     # Test cprint_keys
