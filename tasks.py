@@ -215,11 +215,10 @@ def runemall(ctx, make=True, jobs="auto", touch=False, clean=False, keywords=Non
 
 
 @task
-def makemake(ctx, without_chmod=True):
+def makemake(ctx):
     """Invoke makemake"""
     with cd(ABINIT_ROOTDIR):
-        opt = "--without-chmod" if without_chmod else ""
-        ctx.run(f"./config/scripts/makemake {opt}", pty=True)
+        ctx.run(f"./config/scripts/makemake", pty=True)
 
 
 @task

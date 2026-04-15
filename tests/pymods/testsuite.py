@@ -48,8 +48,10 @@ _MY_NAME = os.path.basename(__file__)[:-3] + "-" + __version__
 # Helper functions and tools
 def my_getlogin():
     """
-    Returns the user logged in to the controlling terminal of the process.
-    Based on: https://stackoverflow.com/questions/4399617/python-os-getlogin-problem
+    Get the username of the user logged into the controlling terminal.
+
+    Returns:
+        str: The username, or a fallback string if it cannot be detected.
     """
     username = "No_username"
     if hasattr(os, "getlogin"):
@@ -69,8 +71,10 @@ def my_getlogin():
 @makeunique
 def genid():
     """
-    Produce a random sequence 12 bytes represented as 16 ascii characters.
-    The decorator ensure that output is different at each call.
+    Generate a unique random ID (12 bytes, base64 encoded).
+
+    Returns:
+        str: A unique 16-character ASCII string.
     """
     return b64encode(os.urandom(12)).decode("ascii")
 
@@ -89,7 +93,15 @@ _status2htmlcolor = {
 
 
 def status2html(status):
-    """Convert test status in a colored HTML string."""
+    """
+    Convert a test status string into a colorized HTML string.
+
+    Args:
+        status: The test status (e.g., "succeeded", "failed").
+
+    Returns:
+        str: HTML string with font color tags.
+    """
     return _status2htmlcolor[status](status)
 
 
@@ -112,7 +124,16 @@ def args2htmltr(*args):
 
 
 def html_link(string, href=None):
-    """Create a HTML link from a string. Use href as link of href is not None."""
+    """
+    Create an HTML hyperlink.
+
+    Args:
+        string: The text to display for the link.
+        href: Optional URL. If None, `string` is used as the URL.
+
+    Returns:
+        str: The HTML <a> tag.
+    """
     if href is not None:
         return "<a href='%s'>%s</a>" % (href, string)
     return "<a href='%s'>%s</a>" % (string, string)
@@ -157,12 +178,14 @@ def lazy_readlines(fname):
 
 def rm_rf(top, exclude_paths=None):
     """
-    Recursively remove all files and directories contained in directory top.
+    Recursively remove all files and directories within `top`.
 
     Args:
-        exclude_paths: list with the absolute paths that should be preserved
+        top: The directory to clean.
+        exclude_paths: Optional list of absolute paths to preserve.
 
-    Returns the list of files and the directories that have been removed.
+    Returns:
+        list: Paths of files and directories that were removed.
     """
     exc_paths = []
     if exclude_paths is not None:
@@ -189,15 +212,13 @@ def rm_rf(top, exclude_paths=None):
 
 def find_abortfile(workdir):
     """
-    Return the absolute path of the MPIABORTFILE file produced by Abinit
-    Empty string if file is not present.
+    Find the absolute path of the MPI abort file produced by ABINIT.
 
     Args:
-        workdir: Working directory of the test.
+        workdir: The working directory to search in.
 
-    .. Note::
-
-        __LIBPAW_MPIABORFILE__ is produced if abinit uses libpaw and execution aborts inside libpaw.
+    Returns:
+        str: Absolute path to the abort file, or an empty string if not found.
     """
     for s in ("__ABI_MPIABORTFILE__", "__LIBPAW_MPIABORFILE__"):
         path = os.path.join(workdir, s)
@@ -208,17 +229,13 @@ def find_abortfile(workdir):
 
 def read_yaml_errmsg(path):
     """
-    Extract the YAML error message from file `path`.
-    Returns string with message, empty string if message is not found.
+    Extract a YAML-formatted error message from a file.
 
-    The Yaml error message is in the form:
+    Args:
+        path: Path to the file containing the error message.
 
-    --- !ERROR
-    src_file: m_io_screening.F90
-    src_line: 648
-    message: |
-        Unsupported value of iomode
-    ...
+    Returns:
+        str: The extracted YAML error message, or an empty string if not found.
     """
     errlines, inerr = [], 0
 
@@ -237,9 +254,13 @@ def read_yaml_errmsg(path):
 
 def extract_errinfo_from_files(workdir):
     """
-    Extract information from the files produced by the code when we run tests in debug mode.
+    Extract error information from debug files (.flun, .mocc) in a directory.
 
-    Return: String with the content of the files. Empty string if no debug file is found.
+    Args:
+        workdir: The directory to search for debug files.
+
+    Returns:
+        str: Combined content of the debug files, or an empty string if none found.
     """
     registered_exts = {".flun", ".mocc"}
     errinfo = []
@@ -258,7 +279,10 @@ def extract_errinfo_from_files(workdir):
 
 class FileToTest:
     """
-    This object contains information on the output file that will be analyzed by fldiff
+    Metadata and comparison logic for a single output file.
+
+    This object stores tolerances and options used by `fldiff` to validate
+    test results against reference files.
     """
     #  atr_name,   default, conversion function. None designes mandatory attributes.
     _attrbs = [
@@ -309,8 +333,20 @@ class FileToTest:
     def compare(self, fldiff_path, ref_dir, workdir, yaml_test, timebomb=None,
                 outf=sys.stdout, simplified_yaml_test=False, forced_tolerance="default"):
         """
-        Use fldiff_path to compare the reference file located in ref_dir with
-        the output file located in workdir. Results are written to stream outf.
+        Compare the output file in `workdir` with the reference in `ref_dir`.
+
+        Args:
+            fldiff_path: Path to the fldiff tool.
+            ref_dir: Directory containing reference files.
+            workdir: Directory containing output files.
+            yaml_test: YAML test configuration.
+            timebomb: Optional TimeBomb instance.
+            outf: Output stream for diff details.
+            simplified_yaml_test: If True, only compare the YAML sections.
+            forced_tolerance: Override standard tolerances (e.g., "high", "medium").
+
+        Returns:
+            tuple: (isok: bool, status: str, message: str)
         """
         ref_fname = os.path.abspath(os.path.join(ref_dir, self.name))
         # FIXME Hack due to the stdout-out ambiguity
@@ -566,7 +602,12 @@ def line_starts_with_section_or_option(string):
 
 
 def doc_testcnf_format(fh=sys.stdout):
-    """Automatic documentation of the TEST_INFO sections and related options."""
+    """
+    Generate automatic documentation for the TEST_INFO sections and options.
+
+    Args:
+        fh: File-like object to write the documentation to.
+    """
     def written(string):
         fh.write(string + "\n")
 
@@ -637,7 +678,7 @@ class AbinitTestInfoParserError(Exception):
 
 
 class AbinitTestInfoParser:
-    """This object parses the TEST_INFO section that describes the test."""
+    """Parser for the TEST_INFO section embedded in ABINIT input files."""
     Error = AbinitTestInfoParserError
 
     def __init__(self, inp_fname, defaults=None):

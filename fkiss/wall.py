@@ -163,12 +163,15 @@ this includes scalars and derived types.""",
 
 class Message:
     """
-    .. attributes:
+    Representation of a diagnostic message (warning/error) from a compiler.
 
-        filepath:
-        lineno:
-        colno:
-        text:
+    Attributes:
+        filepath: Path to the source file that triggered the message.
+        kind: The category or flag of the warning (e.g., "-Wconversion").
+        text: The full raw text of the message.
+        lineno: Line number in the source file.
+        colno: Column number in the source file.
+        info: Descriptive information about this specific warning kind.
     """
     def __init__(self, filepath, kind, text, lineno, colno, info):
         self.filepath = filepath if filepath is not None else "Unknown"
@@ -195,27 +198,10 @@ class Message:
 
 class GFortranWarning(Message):
     """
-    ../../../src/98_main/mrgscr.F90:1852:25:
+    Parser and container for GFortran-style warning messages.
 
-        omega_new = CMPLX(-one,-one)
-                         1
-    Warning: Conversion from REAL(8) to default-kind COMPLEX(4) at (1) ... [-Wconversion]
-
-    ../../../src/53_ffts/m_fft.F90:1606:47: Warning: Possible change of ... at (1) [-Wconversion]
-
-    ../../../src/01_linalg_ext/m_linalg_interfaces.F90:84:14:
-
-    character*1 :: TRANS
-              1
-    Warning: Obsolescent feature: Old-style character length at (1)
-
-    ../../../src/28_numeric_noabirule/interfaces_28_numeric_noabirule.F90:705:8:
-
-    real*8, intent(inout) :: a(mesh)
-    1
-    Warning: GNU Extension: Nonstandard type declaration REAL*8 at (1)
-
-    ../../../src/95_drive/eph.F90:320:54: Warning: Possible change of value in ... at (1) [-Wconversion]
+    Args:
+        lines: List of strings comprising the full GFortran warning output block.
     """
     def __init__(self, lines):
         text = "\n".join(lines) #.encode("utf8")
@@ -259,6 +245,18 @@ class WarningsParser:
 
     @classmethod
     def from_compiler(cls, compiler):
+        """
+        Factory method to create a parser instance based on the compiler name.
+
+        Args:
+            compiler: Name of the compiler (e.g., "gfortran", "ifort").
+
+        Returns:
+            WarningsParser: An instance of the appropriate subclass.
+
+        Raises:
+            ValueError: If no parser is found for the given compiler.
+        """
         for c in cls.__subclasses__():
             if c.compiler == compiler: return c()
         raise ValueError("No Parser associated to compiler `%s`" % compiler)
@@ -268,6 +266,15 @@ class WarningsParser:
         """Parse the file. Returns self."""
 
     def parse_file(self, filename):
+        """
+        Read and parse a file containing compiler warnings.
+
+        Args:
+            filename: Path to the file to parse.
+
+        Returns:
+            WarningsParser: The instance itself (self).
+        """
         self.filepath = os.path.abspath(filename)
         with open(filename, encoding="utf8") as fh:
             return self.parse_lines(fh.readlines(), filepath=self.filepath)

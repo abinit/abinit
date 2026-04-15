@@ -25,9 +25,15 @@ def _df(df):
 
 class ProjectViewer(param.Parameterized):
     """
-    A Dashboard to browse the source code, visualize connections among directories,
-    files and procedures inside the Abinit project.
-    Panel can can be executed either inside a jupyter notebook or as a standalone bokeh app.
+    Dashboard for interactive visualization of the ABINIT project structure.
+
+    Utilizes Holoviz Panel to create a web-based interface for browsing
+    directories, files, procedures, and datatypes with integrated dependency
+    graphs via Graphviz.
+
+    Args:
+        proj: An `AbinitProject` instance to visualize.
+        **params: Additional parameters passed to the `Parameterized` constructor.
     """
 
     engine = pn.widgets.Select(value="dot",
@@ -39,6 +45,7 @@ class ProjectViewer(param.Parameterized):
         self._layout()
 
     def _layout(self):
+        """Initialize the dashboard layout and widgets."""
         self.dir2files = self.proj.groupby_dirname()
         self.dirname2path = {os.path.basename(p): p for p in self.dir2files}
         self.dir_select = pn.widgets.Select(name="Directory", options=list(self.dirname2path.keys()))
@@ -88,6 +95,9 @@ class ProjectViewer(param.Parameterized):
 
     @param.depends("dir_select.value")
     def view_dirname(self):
+        """
+        Update the directory-level view, including stats and dependency graph.
+        """
         dirpath = self.dirname2path[self.dir_select.value]
         # Update widgets.
         self.file_select.options = [f.name for f in self.dir2files[dirpath]]
@@ -99,6 +109,9 @@ class ProjectViewer(param.Parameterized):
 
     @param.depends("file_select.value")
     def view_fort_file(self):
+        """
+        Update the file-level view, including stats and file dependency graph.
+        """
         dirpath = self.dirname2path[self.dir_select.value]
         fort_file = self._find_fort_file(dirpath)
 

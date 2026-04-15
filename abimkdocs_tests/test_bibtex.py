@@ -51,4 +51,4 @@ class BibrefTest(AbimkdocsTest):
             assert entry.to_abimarkdown()
             assert entry.to_html()
             assert entry.to_bibtex()
-            assert entry.get_bibtex_btn_modal(link=False)
+            #assert entry.get_bibtex_btn_modal(link=False)

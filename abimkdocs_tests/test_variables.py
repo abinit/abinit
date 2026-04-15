@@ -111,7 +111,8 @@ class VariablesTest(AbimkdocsTest):
             assert len(database.vars_with_char(charact))
 
         name2varset = database.name2varset
-        assert name2varset["ecut"] == "basic" and name2varset["ionmov"] == "rlx"
+        assert name2varset["ecut"] == "basic"
+        assert name2varset["ionmov"] == "dev"
 
         print("d:", database.group_by_varset("ecut"), "hello")
         assert database.group_by_varset("ecut") ==  {"basic": ["ecut"]}

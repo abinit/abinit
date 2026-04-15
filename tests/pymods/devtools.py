@@ -8,11 +8,10 @@ from functools import wraps
 
 def number_of_cpus():
     """
-    Number of virtual or physical CPUs on this system, i.e.
-    user/real as output by time(1) when called with an optimally scaling userspace-only program
-    Return -1 if ncpus cannot be detected
-    taken from:
-    http://stackoverflow.com/questions/1006289/how-to-find-out-the-number-of-cpus-in-python
+    Detect the number of physical or virtual CPUs on the system.
+
+    Returns:
+        int: Number of CPUs detected, or -1 if detection fails.
     """
     import os
     import re
@@ -97,10 +96,10 @@ def number_of_cpus():
 
 def number_of_gpus():
     """
-    Get the number of GPU from NVIDIA "nvidia-smi" or AMD "roc-smi".
+    Detect the number of GPUs using vendor-specific tools (`nvidia-smi` or `roc-smi`).
 
-    Return:
-        Integer containing number of GPUs, 0 if none is available.
+    Returns:
+        int: Number of GPUs detected, or 0 if none are available.
     """
     # Look for NVIDIA GPU first, then AMD GPU...
     nvidia_cmd = ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"]
@@ -138,16 +137,21 @@ class FileLockException(Exception):
 
 
 class FileLock:
-    """A file locking mechanism that has context-manager support so
-    you can use it in a with statement. This should be relatively cross
-    compatible as it doesn't rely on msvcrt or fcntl for the locking.
-    Taken from http://www.evanfosmark.com/2009/01/cross-platform-file-locking-support-in-python/
+    """
+    A cross-platform file locking mechanism with context manager support.
+
+    Wait times and delays can be configured to handle lock contention.
     """
     Error = FileLockException
 
     def __init__(self, file_name, timeout=10, delay=.05):
-        """Prepare the file locker. Specify the file to lock and optionally
-        the maximum timeout and the delay between each attempt to lock.
+        """
+        Initialize the file lock.
+
+        Args:
+            file_name: Name of the file to lock.
+            timeout: Maximum time (in seconds) to wait for the lock.
+            delay: Delay (in seconds) between successive lock attempts.
         """
         self.file_name = file_name
         self.lockfile = os.path.abspath(file_name) + ".lock"
@@ -163,7 +167,17 @@ class FileLock:
 
     @classmethod
     def FakeLock(cls, file_name, timeout=10, delay=.05):
-        """Returns a fake lock file."""
+        """
+        Create a lock object that does nothing (monkey-patched acquire/release).
+
+        Args:
+            file_name: Path to the target file.
+            timeout: Timeout for the lock attempt.
+            delay: Interval between attempts.
+
+        Returns:
+            FileLock: A fake lock instance.
+        """
         fake = cls(file_name, timeout=timeout, delay=delay)
 
         def nop():
@@ -174,10 +188,14 @@ class FileLock:
         return fake
 
     def acquire(self):
-        """Acquire the lock, if possible. If the lock is in use, it check again
-        every `wait` seconds. It does this until it either gets the lock or
-        exceeds `timeout` number of seconds, in which case it throws
-        an exception.
+        """
+        Acquire the lock.
+
+        Retries every `delay` seconds until the lock is acquired or `timeout`
+        is reached.
+
+        Raises:
+            FileLockException: If the lock cannot be acquired within the timeout.
         """
         start_time = time.time()
         while True:
@@ -194,9 +212,10 @@ class FileLock:
         self.is_locked = True
 
     def release(self):
-        """Get rid of the lock by deleting the lockfile.
-        When working in a `with` statement, this gets automatically
-        called at the end.
+        """
+        Release the lock by deleting the lock file.
+
+        This is called automatically when using the context manager.
         """
         if self.is_locked:
             os.close(self.fd)
@@ -225,8 +244,9 @@ class FileLock:
 
 class NoErrorFileLock(FileLock):
     """
-    A file locker that never raise a FileLockErrorin call of __enter__ but
-    return a boolean to tell whether the lock.
+    A file locker that suppresses `FileLockException` during context entry.
+
+    Returns True if the lock was acquired, False otherwise.
     """
 
     def __enter__(self):
@@ -240,7 +260,10 @@ class NoErrorFileLock(FileLock):
 
 def makeunique(gen):
     """
-    Gen have to be random enough not to produce too often the same thing
+    Decorator that ensures a generator produces unique outputs by caching them.
+
+    Args:
+        gen: The generator function to wrap.
     """
     cache = set()
 
