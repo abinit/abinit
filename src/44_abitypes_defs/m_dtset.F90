@@ -175,6 +175,7 @@ type, public :: dataset_type
  integer :: dmft_triqs_read_ctqmcdata
  integer :: dmft_triqs_time_invariance
  integer :: dmft_triqs_use_norm_as_weight
+ integer :: dmft_full_chipsi
  integer :: dmft_wanorthnorm
  integer :: dmft_x2my2d
  integer :: dmft_yukawa_param
@@ -1650,6 +1651,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_triqs_time_invariance = dtin%dmft_triqs_time_invariance
  dtout%dmft_triqs_tol_block = dtin%dmft_triqs_tol_block
  dtout%dmft_triqs_use_norm_as_weight = dtin%dmft_triqs_use_norm_as_weight
+ dtout%dmft_full_chipsi   = dtin%dmft_full_chipsi
  dtout%dmft_wanorthnorm   = dtin%dmft_wanorthnorm
  dtout%dmft_wanrad        = dtin%dmft_wanrad
  dtout%dmft_x2my2d        = dtin%dmft_x2my2d
@@ -3731,7 +3733,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_triqs_move_shift dmft_triqs_n_cycles dmft_triqs_n_iw dmft_triqs_n_l dmft_triqs_n_tau dmft_triqs_n_warmup_cycles_init'
  list_vars=trim(list_vars)//' dmft_triqs_n_warmup_cycles_restart dmft_triqs_nsubdivisions dmft_triqs_off_diag dmft_triqs_pauli_prob'
  list_vars=trim(list_vars)//' dmft_triqs_prt_entropy dmft_triqs_random_seed_a dmft_triqs_random_seed_b dmft_triqs_read_ctqmcdata dmft_triqs_shift_mu'
- list_vars=trim(list_vars)//' dmft_triqs_time_invariance dmft_triqs_tol_block dmft_triqs_use_norm_as_weight'
+ list_vars=trim(list_vars)//' dmft_triqs_time_invariance dmft_triqs_tol_block dmft_triqs_use_norm_as_weight dmft_full_chipsi'
  list_vars=trim(list_vars)//' dmft_wanorthnorm dmft_wanrad dmft_x2my2d dmft_yukawa_epsilon dmft_yukawa_lambda dmft_yukawa_param'
  list_vars=trim(list_vars)//' dmftbandf dmftbandi dmftcheck dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'

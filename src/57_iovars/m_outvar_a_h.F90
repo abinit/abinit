@@ -817,6 +817,9 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%dmft_triqs_tol_block
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_tol_b','DPR',0)
 
+ intarr(1,:)=dtsets(:)%dmft_full_chipsi                                                              
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_full_chipsi','INT',0)
+
  intarr(1,:)=dtsets(:)%dmft_wanorthnorm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_wanorthnorm','INT',0)
 

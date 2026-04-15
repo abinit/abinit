@@ -737,6 +737,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,6,(/1,2,5,6,7,8/),iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_full_chipsi',dt%dmft_full_chipsi,2,(/0,1/),iout)
+       cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_wanorthnorm',dt%dmft_wanorthnorm,2,(/2,3/),iout)
        if(dt%getwfk==0.and.dt%irdwfk==0.and.dt%irdden==0.and.dt%getden==0.and.dt%ucrpa==0) then
          write(msg,'(3a,i3,a,i3,a,i3,a,i3,a)' )&
@@ -806,10 +808,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          end if
        end do
 
-       if (dt%dmft_prtwan==1) then
-         cond_string(1)='dmft_prtwan' ; cond_values(1)=dt%dmft_prtwan
-         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,2,(/6,7/),iout)
-       end if
+       !if (dt%dmft_prtwan==1) then
+       !  cond_string(1)='dmft_prtwan' ; cond_values(1)=dt%dmft_prtwan
+       !  call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,2,(/6,7/),iout)
+       !end if
 
        if (dt%dmft_solv>=5.and.dt%dmft_solv/=6.and.dt%dmft_solv/=7) then
          cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
