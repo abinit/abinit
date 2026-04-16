@@ -2,6 +2,12 @@
 """
 Command line interface to difflib.py providing diffs in four formats:
 
+This module is used to visualize differences between files in various formats
+(ndiff, context, unified, html). It includes ABINIT-specific heuristics to
+determine 'junk' content (like timestamps or fluctuating small values) that
+should not trigger a diff failure.
+
+Available formats:
 * ndiff:    lists every line and highlights interline changes.
 * context:  highlights clusters of changes in a before/after format.
 * unified:  highlights clusters of changes in an inline format.

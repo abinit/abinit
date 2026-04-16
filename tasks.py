@@ -12,16 +12,17 @@ General usage:
         invoke abichecks
 """
 from __future__ import annotations
+
 import os
 import platform
 import subprocess
 import sys
 import webbrowser
+from collections.abc import Iterable
 from contextlib import contextmanager
 from glob import glob
 from pathlib import Path
 from shutil import which
-from typing import Any, Iterable, Optional, Union
 
 try:
     from invoke import Context, task
@@ -163,7 +164,7 @@ def list_from_string(string, type=int) -> list[str]:
 
 
 @task
-def make(ctx: Context, jobs: Union[str, int] = "auto", touch: bool = False, clean: bool = False, binary: str = "") -> None:
+def make(ctx: Context, jobs: str | int = "auto", touch: bool = False, clean: bool = False, binary: str = "") -> None:
     """
     Recompile the Abinit source code.
 
@@ -230,7 +231,7 @@ def clean(ctx: Context) -> None:
 
 
 @task
-def runemall(ctx: Context, make: bool = True, jobs: Union[str, int] = "auto", touch: bool = False, clean: bool = False, keywords: Optional[str] = None) -> None:
+def runemall(ctx: Context, make: bool = True, jobs: str | int = "auto", touch: bool = False, clean: bool = False, keywords: str | None = None) -> None:
     """
     Run all sequential and parallel tests.
 
@@ -280,7 +281,7 @@ def makemake(ctx: Context) -> None:
 
 
 @task
-def makedeep(ctx: Context, jobs: Union[str, int] = "auto") -> None:
+def makedeep(ctx: Context, jobs: str | int = "auto") -> None:
     """
     Perform a complete rebuild cycle: makemake, clean, and build.
 
@@ -328,7 +329,7 @@ def abichecks(ctx: Context) -> int:
 
 
 @task
-def robodoc(ctx: Context) -> Optional[bool]:
+def robodoc(ctx: Context) -> bool | None:
     """
     Build the Robodoc documentation and open the index in the browser.
 
@@ -845,7 +846,7 @@ $ git merge --abort
 
 
 @task
-def watchdog(ctx: Context, jobs: Union[str, int] = "auto", sleep_time: int = 5) -> None:
+def watchdog(ctx: Context, jobs: str | int = "auto", sleep_time: int = 5) -> None:
     """
     Monitor the source directory for changes and trigger recompilation automatically.
 
@@ -1089,7 +1090,7 @@ def git_info(ctx: Context, top_n: int = 20) -> None:
 
 
 @task
-def large_files(ctx: Context, top_dir: Optional[Union[str, Path]] = None, size_threshold_mb: int = 5) -> None:
+def large_files(ctx: Context, top_dir: str | Path | None = None, size_threshold_mb: int = 5) -> None:
     """
     Find and list files larger than `size_threshold_mb` megabytes under `top_dir`.
 
@@ -1156,7 +1157,7 @@ def system(ctx: Context) -> None:
 
 
 @task
-def pid(ctx: Context, pid: Union[int, str]) -> None:
+def pid(ctx: Context, pid: int | str) -> None:
     """
     Display detailed information for a specific process ID (PID).
 
@@ -1277,7 +1278,7 @@ def get_cache_info_windows() -> dict[str, str]:
     return caches
 
 
-def _extract_errors(logfile: Union[str, Path], context_lines: int = 5) -> list[str]:
+def _extract_errors(logfile: str | Path, context_lines: int = 5) -> list[str]:
     """
     Parse a log file to extract error messages with surrounding context.
 
@@ -1321,7 +1322,7 @@ def _extract_errors(logfile: Union[str, Path], context_lines: int = 5) -> list[s
     return errors
 
 
-def find_filename(filename: str, start_dir: Optional[Path] = None) -> Path:
+def find_filename(filename: str, start_dir: Path | None = None) -> Path:
     """
     Search for a file by walking upwards from a starting directory.
 

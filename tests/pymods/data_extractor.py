@@ -2,6 +2,10 @@
 Implement the steps to extract data from an Abinit output file.
 Extract lines associated with their "meta character" (that makes sense in
 fldiff), and valid YAML documents associated with their iteration context.
+
+This module provides the DataExtractor class, which processes ABINIT output files
+to identify significant lines (marked with meta-characters for fldiff) and
+extract structured YAML documents associated with their iteration context.
 """
 import re
 
@@ -17,7 +21,17 @@ doc_end_re = re.compile(r"\.\.\.\n?$")
 
 
 class DataExtractor:
-    """Setup extraction of formatted documents and significant lines."""
+    """
+    Setup extraction of formatted documents and significant lines.
+
+    The DataExtractor scans lines and identifies whether they belong to a YAML
+    document or if they are "significant" lines that should be compared using
+    the fldiff algorithm. It tracks the state of ABINIT iterators to provide
+    context for extracted YAML documents.
+
+    Attributes:
+        IGNORE_LINES_STARTING_WITH (list[str]): List of prefixes for lines that should be ignored entirely.
+    """
 
     IGNORE_LINES_STARTING_WITH = [
         "MPI startup(): Warning: I_MPI_PMI_LIBRARY",

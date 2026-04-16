@@ -1,4 +1,23 @@
 """
+Comparison tool for ABINIT output files with arithmetic floating-point support.
+
+This module provides the fldiff algorithm, which compares two text files line by line.
+It is specifically designed for scientific output where small numerical fluctuations
+are expected. It identifies floating-point numbers and compares them against a
+configurable tolerance, while performing character-based comparison for the rest
+of the content.
+
+The logic is driven by 'meta-characters' at the start of each line, which dictate
+how that specific line should be handled (e.g., ignored, compared as text,
+compared as numbers with specific tolerances, etc.).
+
+Key Features:
+- Intelligent floating-point detection and comparison.
+- Absolute and relative error thresholds.
+- Meta-character based line control.
+- Support for YAML-based structured data comparison.
+
+Original detailed description:
 Compare 2 output files from ABINIT line by line with arithmetic
 comparison of floating point substrings
 
@@ -438,12 +457,17 @@ class Result:
 
 class Differ:
     """
-    Differ class for legacy fldiff and YAML-based comparisons.
+    High-level interface for comparing ABINIT files using fldiff and YAML tests.
+
+    The Differ class orchestrates the extraction of significant lines and YAML
+    documents from two files and performs the respective comparisons. It handles
+    configuration options like tolerances and whether to enable specific modes.
 
     Attributes:
-        use_fl (bool): Whether to use legacy fldiff.
-        use_yaml (bool): Whether to use YAML-based comparison.
-        yaml_conf (DriverTestConf): YAML configuration object.
+        use_fl (bool): If True, perform legacy fldiff line-based comparison.
+        use_yaml (bool): If True, perform YAML-based document comparison.
+        yaml_conf (DriverTestConf): Configuration for the YAML tester.
+        options (dict): Dictionary of all configuration parameters.
     """
 
     def __init__(self, yaml_test=None, **options):

@@ -1,3 +1,7 @@
+"""
+General-purpose developer tools and utilities for the ABINIT test suite.
+Includes system CPU/GPU detection, cross-platform file locking, and function decorators.
+"""
 import errno
 import os
 import shutil
@@ -140,8 +144,11 @@ class FileLock:
     """
     A cross-platform file locking mechanism with context manager support.
 
+    This class implements a simple advisory lock by creating a '.lock' file.
+    It supports use as a context manager for easy acquisition and release.
     Wait times and delays can be configured to handle lock contention.
     """
+    # Create an alias for compatibility
     Error = FileLockException
 
     def __init__(self, file_name, timeout=10, delay=.05):
@@ -280,8 +287,14 @@ def makeunique(gen):
     """
     Decorator that ensures a generator produces unique outputs by caching them.
 
+    This is useful for generators that might produce duplicate items (e.g., random
+    name generators) when unique values are required.
+
     Args:
-        gen: The generator function to wrap.
+        gen (callable): The generator function to wrap.
+
+    Returns:
+        callable: A wrapped generator that filters out duplicate values.
     """
     cache = set()
 

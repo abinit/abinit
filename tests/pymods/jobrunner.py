@@ -1,3 +1,11 @@
+"""
+Job execution and management tools for ABINIT tests.
+
+This module provides a unified interface for running ABINIT binaries in various
+environments, including sequential, MPI (OpenMPI, MPICH, srun, poe), and OpenMP.
+It also includes facilities for enforcing timeouts, profiling with Valgrind or
+perf, and managing environment variables.
+"""
 import os
 import sys
 import time
@@ -150,6 +158,9 @@ class JobRunner:
 
     This class provides a unified interface for running binaries with support for
     MPI (via mpirun, srun, or poe), OpenMP, and diagnostic tools like Valgrind or perf.
+
+    It abstracts the complexities of different MPI launchers and environment
+    configurations, providing resource management and timeout enforcement.
     """
     #Error = JobRunnerError
 
