@@ -532,68 +532,79 @@ endif()
 #
 # NetCDF / MPI
 #
-if (MPI_FOUND)
 
-  if (ABINIT_NETCDF_FOUND)
+if (ABINIT_NETCDF_FOUND)
+  message(STATUS "Check NetCDF Fortran support...")
 
-    # check NetCDF C / MPI
-    # message(STATUS "Check netcdf/c/mpi support...")
-    # try_compile(HAVE_NETCDF_C_MPI_BOOL ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_netcdf_c_mpi.c
-    #   LINK_LIBRARIES MPI::MPI_C PkgConfig::ABINIT_NETCDF)
-    # #PkgConfig::ABINIT_NETCDF_MPI)
-    # if (HAVE_NETCDF_C_MPI_BOOL)
-    #   message(STATUS "NetCDF C/MPI support checked ok")
-    #   set(HAVE_NETCDF_MPI 1)
-    # else()
-    #   message(STATUS "NetCDF C/MPI not supported")
-    # endif()
+  if (NOT DEFINED HAVE_NETCDF_FORTRAN_BOOL)
 
-    message(STATUS "Check netcdf/fortran support...")
-    if (NOT DEFINED HAVE_NETCDF_FORTRAN_BOOL)
-      try_compile(HAVE_NETCDF_FORTRAN_BOOL
-        ${CMAKE_BINARY_DIR}/try_compile_netcdf
-        ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_netcdf_fortran.F90
-        LINK_LIBRARIES HDF5::HDF5 PkgConfig::ABINIT_NETCDF_FORTRAN PkgConfig::ABINIT_NETCDF MPI::MPI_Fortran)
-    endif()
-    if (HAVE_NETCDF_FORTRAN_BOOL)
-      message(STATUS "NetCDF Fortran support checked ok")
-      set(HAVE_NETCDF 1)
-      set(HAVE_NETCDF_FORTRAN 1)
-    else()
-      message(STATUS "NetCDF Fortran not supported")
-    endif()
+    # --- Merge include dirs ---
+    set(_all_inc "")
+    foreach (_inc IN LISTS _ncf_inc _nc_inc _hdf5_inc _hdf5_hl_inc)
+      if (_inc AND NOT _inc MATCHES "-NOTFOUND$")
+        list(APPEND _all_inc "${_inc}")
+      endif()
+    endforeach()
+    list(REMOVE_DUPLICATES _all_inc)
+    list(JOIN _all_inc "$<SEMICOLON>" _all_inc_joined)
 
-    # check NetCDF fortran / MPI
-    message(STATUS "Check netcdf/fortran/mpi support...")
+    # --- Merge link libraries ---
+    set(_all_libs "")
+    foreach (_lib IN LISTS _ncf_libs _nc_libs _hdf5_hl_libs _hdf5_libs _hdf5_hl_libs)
+      if (_lib AND NOT _lib MATCHES "-NOTFOUND$")
+        list(APPEND _all_libs "${_lib}")
+      endif()
+    endforeach()
+
+    # --- Try to compile ---
+    try_compile(HAVE_NETCDF_FORTRAN_BOOL
+      "${CMAKE_BINARY_DIR}/try_compile_netcdf"
+      "${CMAKE_SOURCE_DIR}/cmake/try_compile/have_netcdf_fortran.F90"
+      CMAKE_FLAGS
+        "-DINCLUDE_DIRECTORIES=${_all_inc_joined}"
+      LINK_LIBRARIES
+        ${_all_libs}
+      )
+
+  endif()
+
+  if (HAVE_NETCDF_FORTRAN_BOOL)
+    message(STATUS "NetCDF Fortran support checked ok")
+    set(HAVE_NETCDF 1)
+    set(HAVE_NETCDF_FORTRAN 1)
+  else()
+    message(SEND_ERROR "NetCDF Fortran not supported")
+  endif()
+
+  if (MPI_FOUND)
+    message(STATUS "Check NetCDF fortran MPI support...")
+
     if (NOT DEFINED HAVE_NETCDF_FORTRAN_MPI_BOOL)
-      # try_run(
-      #   HAVE_NETCDF_FORTRAN_MPI_BOOL_RUN
-      #   HAVE_NETCDF_FORTRAN_MPI_BOOL_COMPILE
-      #   ${CMAKE_BINARY_DIR}/try_compile
-      #   ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_netcdf_fortran_mpi.F90
-      #   LINK_LIBRARIES MPI::MPI_Fortran PkgConfig::ABINIT_NETCDF_FORTRAN
-      #   RUN_OUTPUT_VARIABLE HAVE_NETCDF_FORTRAN_MPI_RUN_RES)
-      try_compile(
-        HAVE_NETCDF_FORTRAN_MPI_BOOL
-        ${CMAKE_BINARY_DIR}/try_compile_netcdf_mpi
-        ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_netcdf_fortran_mpi.F90
-        LINK_LIBRARIES MPI::MPI_Fortran PkgConfig::ABINIT_NETCDF_FORTRAN)
+      # --- Try to compile ---
+      try_compile(HAVE_NETCDF_FORTRAN_MPI_BOOL
+        "${CMAKE_BINARY_DIR}/try_compile_netcdf_mpi"
+        "${CMAKE_SOURCE_DIR}/cmake/try_compile/have_netcdf_fortran_mpi.F90"
+        CMAKE_FLAGS
+          "-DINCLUDE_DIRECTORIES=${_all_inc_joined}"
+        LINK_LIBRARIES
+          ${_all_libs}
+          MPI::MPI_Fortran
+        )
     endif()
 
     if (HAVE_NETCDF_FORTRAN_BOOL AND HAVE_NETCDF_FORTRAN_MPI_BOOL)
-      message(STATUS "NetCDF fortran/MPI support checked ok")
+      message(STATUS "NetCDF fortran MPI support checked ok")
       set(HAVE_NETCDF_FORTRAN_MPI 1)
-
       # TO DO : evaluate if we should also set HAVE_NETCDF_MPI here, because actually
       # only HAVE_NETCDF_MPI is used e.g m_nctk.F90
       set(HAVE_NETCDF_MPI 1)
     else()
-      message(STATUS "NetCDF fortran/MPI not supported")
+      message(STATUS "NetCDF fortran MPI not supported")
     endif()
 
-  endif()
+  endif()  # MPI found
+endif()    # NETCDF found
 
-endif()
 
 # TODO PK : evaluate if this really need to be checked, almost all MPI implementation
 # have support for MPI2
