@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 """
-This script runs the given abinit input file with different number of processors 
+This script runs the given abinit input file with different number of processors
 and compare the results
 """
-from __future__ import print_function, division
 
-import sys
+import argparse
 import os
-import argparse 
-import warnings
+import sys
 import tempfile
-
+import warnings
 from collections import namedtuple
 
 
@@ -47,13 +45,13 @@ def make_html_diff(fromfile, tofile):
 
 def find_nextout(root="."):
     """
-    Returns the path the next output file. Assumes Abinit conventions + gmatteo's convention 
+    Returns the path the next output file. Assumes Abinit conventions + gmatteo's convention
     for the extension i.e. run.abo, run.aboA ...
     This function is the most complicated of the entire module!
     """
     from string import ascii_letters
     root = os.path.abspath(root)
-                                                                                                               
+
     # Find all files with extensions `.abo?`
     chars, found = [], False
     for f in os.listdir(root):
@@ -65,24 +63,23 @@ def find_nextout(root="."):
     if not found:
         # First run
         fname = "run.abo"
+    elif not chars:
+        fname = "run.aboA"
     else:
-        if not chars: 
-            fname = "run.aboA"
-        else:
-            last_ch = sorted(chars)[-1]
-            if last_ch == "Z": raise RunTimeError("Got Z as last character, clean your directory!")
-            print("last",last_ch)
-            i = ascii_letters.index(last_ch)
-            next_ch =  ascii_letters[i+1]
-            fname = "run.abo" + next_ch
-                                                                                                               
+        last_ch = sorted(chars)[-1]
+        if last_ch == "Z": raise RunTimeError("Got Z as last character, clean your directory!")
+        print("last",last_ch)
+        i = ascii_letters.index(last_ch)
+        next_ch =  ascii_letters[i+1]
+        fname = "run.abo" + next_ch
+
     return os.path.join(root, fname)
 
 def main():
     def str_examples():
         examples = (
           "\n"
-          "Usage example:\n\n" 
+          "Usage example:\n\n"
           "paradev.py 1 2 3    ==> Run mpirun -n# abinit < files > log 2> err for n in [1,2,3] and compare the output files\n"
         )
         return examples
@@ -90,7 +87,7 @@ def main():
     def show_examples_and_exit(err_msg=None, error_code=1):
         """Display the usage of the script."""
         sys.stderr.write(str_examples())
-        if err_msg: 
+        if err_msg:
             sys.stderr.write("Fatal Error\n" + err_msg + "\n")
         sys.exit(error_code)
 
@@ -103,7 +100,7 @@ def main():
 
     parser.add_argument("-f", "--file-type", type=str, default="out", help="File to compared (out from main output or log for log file)")
 
-    #parser.add_argument("-s", "--strict", type=bool, default=True, action="store_if_true, 
+    #parser.add_argument("-s", "--strict", type=bool, default=True, action="store_if_true,
     #                    help="Exit immediately if the subprocess returns nonzero exit status")
 
     parser.add_argument("nprocs", nargs="*", help="List of MPI nodes to be tested")
@@ -114,7 +111,7 @@ def main():
     except Exception:
         show_examples_and_exit(error_code=1)
 
-    if options.nprocs: 
+    if options.nprocs:
         options.nprocs = map(int, options.nprocs)
     else:
         options.nprocs = [1,2]
@@ -136,10 +133,10 @@ def main():
 
         retcode = os.system(cmd)
 
-        if retcode: 
+        if retcode:
             print("Return code: %d" % retcode)
-            with open(run.log, "r") as fh: print(fh.read())
-            with open(run.err, "r") as fh: print(fh.read())
+            with open(run.log) as fh: print(fh.read())
+            with open(run.err) as fh: print(fh.read())
             #if options.strict
             #    return retcode
             #else
@@ -149,8 +146,8 @@ def main():
 
     # This function will select the file we want to analyze.
     gat = {
-        "log": lambda x: getattr(x, "log"),
-        "out": lambda x: getattr(x, "out"),
+        "log": lambda x: x.log,
+        "out": lambda x: x.out,
     }[options.file_type]
 
     run0, html_files = run_list[0], []

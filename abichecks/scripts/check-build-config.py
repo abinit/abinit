@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"check build configuration"
+"""check build configuration"""
 #
 # Copyright (C) 2010-2026 ABINIT Group (Yann Pouillon)
 #
@@ -8,19 +8,18 @@
 # distribution.
 #
 # FIXME: detect duplicate definitions
-from __future__ import unicode_literals, division, print_function, absolute_import
 
 from abirules_tools import find_abinit_toplevel_directory
 
 try:
-    from ConfigParser import ConfigParser,NoOptionError
+    from ConfigParser import ConfigParser, NoOptionError
 except ImportError:
-    from configparser import ConfigParser, NoOptionError
-from time import gmtime,strftime
+    from configparser import ConfigParser
 
 import os
 import re
 import sys
+
 
 class MyConfigParser(ConfigParser):
 
@@ -69,7 +68,7 @@ def main():
   env_config = list()
   for env in cnf_env.sections():
     if ( (cnf_env.get(env,"reset") == "no") and \
-       (not cnf_env.get(env,"status") in ["dropped", "removed"]) ):
+       (cnf_env.get(env,"status") not in ["dropped", "removed"]) ):
       if not is_ignored(env):
           env_config.append(env)
 
@@ -106,9 +105,8 @@ def main():
         opt_config.append(opt)
     elif tmp_sta == "hidden":
       opt_ignore.append(opt)
-    else:
-      if not is_ignored(opt):
-        opt_config.append(opt)
+    elif not is_ignored(opt):
+      opt_config.append(opt)
   opt_config += ["with_%s" % item for item in cnf_dep.sections() \
     if cnf_dep.get(item, "detector") in ["arch", "steredeg"]]
   opt_config += ["with_%s_flavor" % item for item in cnf_dep.sections() \
@@ -121,7 +119,7 @@ def main():
   opt_template = list()
 
   ac_fname = os.path.join(home_dir, "doc/build/config-template.ac9")
-  with open(ac_fname, "rt") as fh:
+  with open(ac_fname) as fh:
       for line in fh:
         if re_env.match(line):
           tmp_env = re.sub("=.*","",line[1:-1])
@@ -140,7 +138,7 @@ def main():
   # Check whether non-trivial option values are found in template
   ac_fname = os.path.join(home_dir,"doc/build/config-template.ac9")
 
-  with open(ac_fname, "rt") as fh:
+  with open(ac_fname) as fh:
     tpl_data = fh.read()
 
   opt_values = dict()
