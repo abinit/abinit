@@ -1,3 +1,11 @@
+"""
+The main engine for orchestrating ABINIT test suites and build environments.
+
+This module provides the core logic for discovering tests, parsing TEST_INFO
+metadata from input files, managing parallel and sequential executions,
+comparing results against references, and generating reports in text, HTML,
+and YAML formats.
+"""
 
 import logging
 import os
@@ -1242,6 +1250,12 @@ class NagBacktrace(FortranBacktrace):
 class BuildEnvironment:
     """
     Store information on the ABINIT build environment.
+
+    The BuildEnvironment stores information about the compiler, libraries (NetCDF,
+    MPI), and capabilities (OpenMP, CUDA) of the specific ABINIT binary being tested.
+
+    This information is crucial for determining if a test is compatible with the
+    current build (e.g., checking if a test requiring NetCDF can be executed).
     """
 
     def __init__(self, build_dir, cygwin_instdir=None):
@@ -3981,10 +3995,12 @@ class ChainOfTests:
 class AbinitTestSuite:
     """
     List of BaseTest instances. Provide methods to:
+    1) Select a subset of tests according to keywords, authors, or numbers.
+    2) Run tests in parallel with python multiple processes.
+    3) Analyze the final results and generate reports in various formats.
 
-    1) select subset of tests according to keywords, authors, numbers
-    2) run tests in parallel with python processes
-    3) analyze the final results
+    This class serves as the main orchestrator for the entire ABINIT testing process,
+    managing configuration, job execution via JobRunner, and result collection.
     """
 
     def __init__(self, abenv, inp_files=None, test_list=None, keywords=None, need_cpp_vars=None):

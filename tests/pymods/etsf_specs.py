@@ -37,10 +37,14 @@ def all_subclasses(cls):
 
 class EtsfObject:
     """
-    Base class for NetCDF Dimensions, Variables, Attributes.
+    Base class for ETSF-specified NetCDF objects (Dimensions, Variables, Attributes).
 
-    Subclasses implement a `validate` method that receives a NC dataset
-    and returns a list of errors (strings).
+    This class serves as a foundation for implementing specific validation rules
+    associated with different types of NetCDF entities defined in the ETSF-IO
+    specification.
+
+    Subclasses must implement a `validate` method that takes a NetCDF dataset instance
+    as input and returns a list of strings describing any validation failures.
     """
     def __str__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.name)
@@ -133,13 +137,17 @@ class EtsfVariable(EtsfObject):
     """
     A variable with a name, a type, and a list of dimensions.
 
+    This class provides a representation of a NetCDF Variable as defined in the
+    ETSF-IO specifications. It handles expected names, data types, and
+    dimensions, and can specify allowed values and required attributes.
+
     Attributes:
-        all_variables (list): List of all created instances.
-        name (str): Variable name.
-        xtype (str): NetCDF data type.
-        dimensions (list): List of EtsfDimension objects.
-        allowed (list, optional): List of allowed values.
-        reqattrs (list, optional): List of required EtsfAttribute objects.
+        all_variables (list[EtsfVariable]): Registry of all EtsfVariable instances created.
+        name (str): The name of the variable.
+        xtype (str): The expected NetCDF data type (e.g., 'double', 'char').
+        dimensions (list[EtsfDimension]): List of dimension objects defining the variable's shape.
+        allowed (list, optional): A collection of values the variable is allowed to take.
+        reqattrs (list[EtsfAttribute], optional): Attributes that the variable must possess.
     """
     # Stores all the instances we are gonna create.
     all_variables = []
@@ -416,9 +424,13 @@ exchange_correlation_potential = VariableWithUnits("exchange_correlation_potenti
 
 
 class EtsfGroup:
-    """"
-    This object is essentially a container of variables
+    """
+    This object is essentially a container of variables.
     A Group can contain other subgroups.
+
+    It represents a logical container for ETSF variables, dimensions, and attributes,
+    satisfying specific parts of the ETSF core specification (e.g., Crystallographic
+    data, K-points, etc.).
     """
     attributes = []
     dimensions = []
