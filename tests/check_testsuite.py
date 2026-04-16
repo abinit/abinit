@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 """Script for checking the ABINIT automatic tests."""
 
-import sys
 import os
-
-from pprint import pprint
+import sys
 from optparse import OptionParser
-from io import StringIO
+from pprint import pprint
 
 pack_dir, tail = os.path.split(os.path.abspath(__file__))
 pack_dir, tail = os.path.split(pack_dir)
@@ -14,6 +12,7 @@ sys.path.insert(0, pack_dir)
 
 import tests
 from tests import abitests
+
 abenv = tests.abenv
 
 from tests.pymods.termcolor import cprint
@@ -23,6 +22,15 @@ __author__ = "Matteo Giantomassi"
 
 
 def check_authors(suite):
+    """
+    Check if test authors follow the project's naming conventions.
+
+    Args:
+        suite (list): The test suite to analyze.
+
+    Returns:
+        set: A set of unique author second names found in the suite.
+    """
     def first_second_name(string):
         idx = string.rfind(".")
         if idx == -1:
@@ -73,7 +81,7 @@ def get_allowed_cpp_vars():
     for root, dirs, files in os.walk(os.path.join(abidir, "src/39_libpaw")):
         for src in files:
             if not re_hdrfile.search(src): continue
-            with open(os.path.join(root, src), "rt") as fh:
+            with open(os.path.join(root, src)) as fh:
                 for line in fh:
                     if not re_cppdef.search(line): continue
                     tmp_def = re.sub("^[# ]*define[ ]*([0-9A-Z_]*).*","\\1", line).strip()
@@ -84,13 +92,13 @@ def get_allowed_cpp_vars():
     for root, dirs, files in os.walk(os.path.join(abidir, "config/m4")):
         for src in files:
             if not re_m4file.search(src): continue
-            with open(os.path.join(root, src), "rt") as fh:
+            with open(os.path.join(root, src)) as fh:
                 for line in fh:
                     if not re_acdef.search(line): continue
                     tmp_def = re.sub(".*AC_DEFINE\\([\\[]?([^\\],]*).*","\\1",line).strip()
                     cpp_buildsys.add(tmp_def)
 
-    with open(os.path.join(abidir, "configure.ac"), "rt") as fh:
+    with open(os.path.join(abidir, "configure.ac")) as fh:
         for line in fh:
             if not re_acdef.search(line): continue
             tmp_def = re.sub(".*AC_DEFINE\\([\\[]?([^\\],]*).*","\\1",line).strip()
@@ -100,6 +108,13 @@ def get_allowed_cpp_vars():
 
 
 def main():
+    """
+    Main entry point for check_testsuite.py.
+    Performs various sanity checks on the ABINIT test suite.
+
+    Returns:
+        int: Total number of errors/failures detected.
+    """
     usage = "usage: %prog [suite_name] [options] [-h|--help] for help)"
     version = "%prog "+ str(__version__)
     parser = OptionParser(usage=usage, version=version)
@@ -182,7 +197,7 @@ def main():
     for suite_name, suite in full_database.items():
         for test in suite:
             # Remove ! from string e.g. !HAVE_MPI
-            tvars = set(v[1:] if v.startswith("!") else v for v in test.need_cpp_vars)
+            tvars = set(v.removeprefix("!") for v in test.need_cpp_vars)
             diff = tvars.difference(allowed_cpp_vars)
             if diff:
                 print("in test: ", test)

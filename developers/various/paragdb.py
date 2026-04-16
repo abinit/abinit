@@ -3,19 +3,18 @@
 This script automates the steps needed to debug a MPI executable with the GNU debugger
 Note that GNU gdb is not a parallel debugger hence this crude approach may not work properly.
 """
-from __future__ import print_function, division
 
-import sys
+import argparse
 import os
-import argparse 
+import sys
 import tempfile
+from subprocess import Popen
 
-from subprocess import Popen, PIPE
 
 def str_examples():
     examples = (
       "\n"
-      "Usage example:\n\n" 
+      "Usage example:\n\n"
          "pmdbg.py -n 2 abinit files_file  ==> (Try) to run Abinit in parallel under the control of gdb\n"
          "                                      Use 2 MPI processes, read input from files_file "
     )
@@ -24,21 +23,21 @@ def str_examples():
 def show_examples_and_exit(err_msg=None, error_code=1):
     """Display the usage of the script."""
     sys.stderr.write(str_examples())
-    if err_msg: 
+    if err_msg:
         sys.stderr.write("Fatal Error\n" + err_msg + "\n")
     sys.exit(error_code)
 
 
 def main():
-    """mpirun -n# xterm gdb binary -command=file"""
+    """Mpirun -n# xterm gdb binary -command=file"""
     parser = argparse.ArgumentParser(epilog=str_examples(),formatter_class=argparse.RawDescriptionHelpFormatter)
 
     #parser.add_argument('-v', '--verbose', default=0, action='count', # -vv --> verbose=2
     #                     help='verbose, can be supplied multiple times to increase verbosity')
 
-    parser.add_argument('-n', default=1, type=int, help='Number of MPI processes')
+    parser.add_argument("-n", default=1, type=int, help="Number of MPI processes")
 
-    parser.add_argument("args", nargs="+", help='executable stdin_file')
+    parser.add_argument("args", nargs="+", help="executable stdin_file")
 
     # Parse the command line.
     try:
@@ -62,7 +61,7 @@ def main():
 
     try:
         os.remove(dbg_fname)
-    except IOError:
+    except OSError:
         pass
 
     return retcode
