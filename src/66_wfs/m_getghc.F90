@@ -1112,7 +1112,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #endif
          else
            ABI_MALLOC(gvnlc, (2,npw_k2*my_nspinor*ndat))
-#if defined HAVE_GPU && defined HAVE_YAKL
+#if defined HAVE_OPENMP_OFFLOAD
            !$OMP TARGET ENTER DATA MAP(to:gvnlc) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
          end if
@@ -1129,13 +1129,13 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        if (fock_get_getghc_call(fock)==1) then
          if (gs_ham%usepaw==0) cwaveprj_idat => cwaveprj
          if (fock%use_ACE==0) then
-#if defined HAVE_GPU && defined HAVE_YAKL
+#if defined HAVE_OPENMP_OFFLOAD
            !$OMP TARGET UPDATE FROM(cwavef,gvnlxc_) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
            call timab(360,1,tsec)
            call fock_getghc(cwavef,cwaveprj,gvnlxc_,gs_ham,mpi_enreg,ndat)
            call timab(360,2,tsec)
-#if defined HAVE_GPU && defined HAVE_YAKL
+#if defined HAVE_OPENMP_OFFLOAD
            !$OMP TARGET UPDATE TO(cwavef,gvnlxc_) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
          else
