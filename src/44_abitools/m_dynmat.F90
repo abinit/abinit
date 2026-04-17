@@ -1527,23 +1527,6 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
 
  eta_=zero; if(present(eta)) eta_=eta
 
-!Exchange of perturbations
-! write(ab_out,*)"HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
-!  do ipert1=1,mpert !See notes
-!     do idir1=1,3
-!      do ipert2=1,mpert !See notes
-!         do idir2=1,3
-!         if ((blkflg(idir2,ipert2,idir1,ipert1)==blkflg(idir1,ipert1,idir2,ipert2)) .and. blkflg(idir1,ipert1,idir2,ipert2)>0) then
-!         if ((d2(1,idir2,ipert2,idir1,ipert1)-d2(1,idir1,ipert1,idir2,ipert2)>tol16) .and. blkflg(idir1,ipert1,idir2,ipert2)>0) then
-! write(ab_out,*)idir1,ipert1, idir2,ipert2,d2(1,idir2,ipert2,idir1,ipert1),d2(1,idir1,ipert1,idir2,ipert2)
-! endif
-! endif
-! enddo
-! enddo
-! enddo
-! enddo
-! write(ab_out,*)"HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
-
 !Consider two cases : either time-reversal symmetry
 !conserves the wavevector, or not
  if(timrev==0.and.abs(eta_)<tol8)then
