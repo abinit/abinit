@@ -35,7 +35,7 @@ module m_dfptlw_loop
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_io_tools,    only : file_exists,iomode_from_fname,get_unit
- use m_kg,          only : getcut,getph,getmpw,kpgio
+ use m_kg,          only : getmpw,kpgio
  use m_inwffil,     only : inwffil
  use m_fft,         only : fourdp
  use m_ioarr,       only : read_rhor
@@ -148,7 +148,7 @@ contains
 subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil,dtset,&
 & ffnl,gmet,gprimd,gsqcut,&
 & hdr,just_timdisp,kg,kxc,mband,mgfft,mkmem,mk1mem,&
-& mpert,mpi_enreg,mpw,natom,nattyp,ngfftf,nfftf,nkpt,nkxc,nspinor,nsppol,&
+& mpert,mpi_enreg,mpw,natom,nattyp,ncorespl,ngfftf,nfftf,nkpt,nkxc,nspinor,nsppol,&
 & npwarr,nylmgr,occ,&
 & pawfgr,pawtab,ph1d,&
 & psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,useylmgr,xred,ylm,ylmgr)
@@ -177,7 +177,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol),gmet(3,3)
  real(dp),intent(in) :: ffnl(mkmem,mpw,dimffnl,psps%lmnmax,psps%ntypat)
  real(dp),intent(in) :: gprimd(3,3),kxc(nfftf,nkxc)
-! real(dp),intent(in) :: ncorespl(psps%mqgrid_vl,2,psps%ntypat)
+ real(dp),intent(in) :: ncorespl(psps%mqgrid_vl,2,psps%ntypat)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*natom)
  real(dp),intent(in) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden),rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: xred(3,natom)
@@ -194,7 +194,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
  integer :: ia1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idir_dkdk 
  integer :: idq,ierr,ii,ikpt,ireadwf,istr,itypat,mcg1,me,mpsang
  integer :: mpw1, mpw1_mq
- integer :: n1,n2,n3,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc
+ integer :: n1,n2,n3,ndir,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc
  integer :: optgeom,opthartdqdq,optorth,pawread
  integer :: pert1case,pert2case,pert3case,timrev,usexcnhat 
  integer :: pert1case_mq,pert2case_mq
@@ -515,6 +515,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
              else if (i2pert > natom+11 .and. i2pert <= 2*natom+11) then
                pert2case = i2dir + i2pert*3
              end if 
+
              call appdig(pert2case,dtfil%fnamewff1,fiwf2i)
 
              if (finite_q) then
@@ -623,20 +624,22 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
              !Allocate the second-gradient array
              ABI_MALLOC(vpsp1_i1pertdqdq,(2*nfftf,dtset%nspden,n2dq))
 
-!             !Calculate first-order pseudocore charge (still, only for quadrupoles)
-!             if (i1pert==natom+2.and.i2pert<=natom.and.psps%n1xccc/=0.and.nkxc == 7) then
-!               if (psps%nc_xccc_gspace==1) then
-!                 ndir=1
-!                 call dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,i2dir,i2pert,&
-!                 & mgfft,psps%mqgrid_vl,dtset%natom,ndir,nfftf,ngfftf,psps%ntypat,&
-!                 & ph1d,psps%qgrid_vl,dtset%qptn,dtset%typat,ucvol,psps%usepaw,xred,psps,pawtab,&
-!                 & atmrhor1=xccc3d2,optn_in=n3xccc/nfftf,optn2_in=1)
-!               else if (psps%nc_xccc_gspace==0) then
-!                 call dfpt_mkcore(cplex,i2dir,i2pert,dtset%natom,psps%ntypat,n1,psps%n1xccc,&
-!                 & n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d2,xred)
-!               end if
-!             end if
-!
+             !Calculate first-order pseudocore charge (still, only for quadrupoles)
+             if (.not.just_timdisp) then
+               if (i1pert==natom+2.and.i2pert<=natom.and.psps%n1xccc/=0.and.nkxc == 7) then
+                 if (psps%nc_xccc_gspace==1) then
+                   ndir=1
+                   call dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,i2dir,i2pert,&
+                   & mgfft,psps%mqgrid_vl,dtset%natom,ndir,nfftf,ngfftf,psps%ntypat,&
+                   & ph1d,psps%qgrid_vl,dtset%qptn,dtset%typat,ucvol,psps%usepaw,xred,psps,pawtab,&
+                   & atmrhor1=xccc3d2,optn_in=n3xccc/nfftf,optn2_in=1)
+                 else if (psps%nc_xccc_gspace==0) then
+                   call dfpt_mkcore(cplex,i2dir,i2pert,dtset%natom,psps%ntypat,n1,psps%n1xccc,&
+                   & n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d2,xred)
+                 end if
+               end if
+             end if
+
              do i3pert = 1, mpert
                do i3dir = 1, 3
 
@@ -722,8 +725,23 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                            vpsp1_i2pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
                          end if
                        end if
+                       
+                       if (i1pert==natom+2.and.i2pert<=natom.and.psps%n1xccc/=0) then
+                         !Get the q-gradient of the pseudocore density
+                         call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i2dir,i2pert,mpi_enreg, &
+                         & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
+                         & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,ncorespl,xccc3d2dq,optnc=1)
+  
+                         !Get the q-gradient of the first-order XC potential due to the pseudocore charge
+                         call dfpt_mkvxcccdq(cplex,i3dir,dtset%ixc,gprimd,kxc,mpi_enreg,nfftf,dtset%ngfft,&
+                       & nkxc,nspden,dtset%qptn,rprimd,vxccc1_i2pertdq,xccc3d2,xccc3d2dq)
+  
+                         !Add this contribution to the gradient of the local PSP
+                         vpsp1_i2pertdq= vpsp1_i2pertdq + vxccc1_i2pertdq
+                       end if
                      end if !samepert
   
+
                      !Prepare ddk wf file
                      pert3case = i3dir + natom*3
                      call appdig(pert3case,dtfil%fnamewffddk,fiwfddk)
@@ -743,9 +761,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                      write(message,'(2a)')'-dfptlw_loop : read the ddk wavefunctions from file: ',trim(fiwfddk)
                      call wrtout(std_out,message,'COLL')
                      !call wrtout(ab_out,message,'COLL')
-  !                  Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
+                     !Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
                      call ddk_f%open_read(fiwfddk,1,dtset%iomode,dtfil%unddk,mpi_enreg%comm_cell)
-  
+
                      !Prepare d2_dkdk wf file
                      !For i1pert
                      if (i1pert==natom+2) then
@@ -795,8 +813,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                        end if
                        write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk wavefunctions from file: ',trim(fiwfdkdk)
                        call wrtout(std_out,message,'COLL')
-
-
                        call d2_dkdk_f2%open_read(fiwfdkdk,1,dtset%iomode,dtfil%unddk+2,mpi_enreg%comm_cell)
                      end if
   

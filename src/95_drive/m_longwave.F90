@@ -100,11 +100,6 @@ contains
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
 !!
-!! NOTES
-!!
-!! PARENTS
-!!      m_driver
-!!
 !! SOURCE
 
 subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
@@ -131,7 +126,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !Local variables-------------------------------
  !scalars
  integer,parameter :: cplex1=1,formeig=0,response=1
- integer :: ask_accurate,bantot,coredens_method,dimffnl,dimffnl_i
+ integer :: ask_accurate,bantot,dimffnl,dimffnl_i
  integer :: gscase,iatom,ierr,indx,ireadwf0,iscf_eff,itypat
  integer :: ider,idir0,idir
  integer :: i1dir,i1pert,i2dir,ii,i2pert,i3dir,i3pert
@@ -142,11 +137,10 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,timrev,tim_mkrho
  integer :: usexcnhat,useylmgr
  real(dp) :: bigexc,bigsxc,boxcut,ecore,ecutdg_eff,ecut_eff,etot
- real(dp) :: enxc
  real(dp) :: fermie,fermih,gsqcut,gsqcut_eff,gsqcutc_eff,residm
  real(dp) :: ucvol,vxcavg
  logical :: non_magnetic_xc,just_timdisp
-! logical :: has_strain,non_magnetic_xc
+! logical :: has_strain
  character(len=500) :: msg
  type(ebands_t) :: bstruct
  type(ddb_hdr_type) :: ddb_hdr
@@ -214,22 +208,16 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    ABI_BUG(msg)
  end if
 
-!!Not usable with core electron density corrections
-! if (.not.just_timdisp.and.psps%n1xccc/=0) then
-!   msg='This routine cannot be used for n1xccc/=0 in case of spatial dispersion'
-!   ABI_BUG(msg)
-! end if
+!Not usable with core electron density corrections and flexo
+ if (.not.just_timdisp.and.psps%n1xccc/=0.and.dtset%lw_flexo/=0) then
+   msg='This routine cannot be used to calculate flexoelectric properties with n1xccc/=0'
+   ABI_BUG(msg)
+ end if
 
 !Only usable for insulators
  if(0>dtset%occopt .and. dtset%occopt>2)then
    msg='This routine cannot be used with metallic occupations'
  end if
-!Not usable with core electron density corrections and flexo
- if (psps%n1xccc/=0.and.dtset%lw_flexo/=0) then
-   msg='This routine cannot be used to calculate flexoelectric properties with n1xccc/=0'
-   ABI_BUG(msg)
- end if
-
 
 !Define some data
  ntypat=psps%ntypat
@@ -589,39 +577,36 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !driver are under way.
  n3xccc=0;if (psps%n1xccc/=0) n3xccc=nfftf
  ABI_MALLOC(xccc3d,(n3xccc))
- coredens_method=2
  if (.not.just_timdisp) then
-   if (coredens_method==2.and.psps%n1xccc/=0) then
-     option=1
-     ABI_MALLOC(ncorespl,(psps%mqgrid_vl,2,ntypat))
+   ABI_MALLOC(ncorespl,(psps%mqgrid_vl,2,ntypat))
+   if (psps%n1xccc/=0) then
      ABI_MALLOC(dummy_dyfrx2,(3,3,natom)) ! dummy
-   if (psps%nc_xccc_gspace==1) then
-     ABI_MALLOC(dummy_vpsp,(nfftf))
-     optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optv=0;optn=n3xccc/nfftf;optn2=1
-     call atm2fft(atindx1,xccc3d,dummy_vpsp,dummy_dyfrx2,dum_dyfrv,dum_eltfrxc,dum_gauss,gmet,gprimd,&
-  &   dum_grn,dum_grv,gsqcut,mgfftf,psps%mqgrid_vl,natom,nattyp,nfftf,ngfftf,&
-  &   ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,&
-  &   dtset%qprtrb,dtset%rcut,dum_rhog,rprimd,dummy6,other_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
+     if (psps%nc_xccc_gspace==1) then
+       ABI_MALLOC(dummy_vpsp,(nfftf))
+       optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optv=0;optn=n3xccc/nfftf;optn2=1
+       call atm2fft(atindx1,xccc3d,dummy_vpsp,dummy_dyfrx2,dum_dyfrv,dum_eltfrxc,dum_gauss,gmet,gprimd,&
+    &   dum_grn,dum_grv,gsqcut,mgfftf,psps%mqgrid_vl,natom,nattyp,nfftf,ngfftf,&
+    &   ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,&
+    &   dtset%qprtrb,dtset%rcut,dum_rhog,rprimd,dummy6,other_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
 
-     ABI_FREE(dummy_vpsp)
-   end if
-   if (psps%nc_xccc_gspace==0) then
-     option=1
-     ABI_MALLOC(vxc,(0,0)) ! dummy
-     ABI_MALLOC(grxc,(3,natom))
-     call mkcore(dummy6,dummy_dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
-  &   ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
-  &   psps%xcccrc,psps%xccc1d,xccc3d,xred)
-     ABI_FREE(vxc) ! dummy
-     ABI_FREE(grxc) ! dummy
-   end if
-   ABI_FREE(dummy_dyfrx2) ! dummy
+       ABI_FREE(dummy_vpsp)
+     end if
+     if (psps%nc_xccc_gspace==0) then
+       option=1
+       ABI_MALLOC(vxc,(0,0)) ! dummy
+       ABI_MALLOC(grxc,(3,natom))
+       call mkcore(dummy6,dummy_dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
+    &   ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
+    &   psps%xcccrc,psps%xccc1d,xccc3d,xred)
+       ABI_FREE(vxc) ! dummy
+       ABI_FREE(grxc) ! dummy
+     end if
+     ABI_FREE(dummy_dyfrx2) ! dummy
 
-   !Write the spl interpolation of the pseudo core density for all atom types
-   do itypat= 1, ntypat
-     ncorespl(:,:,itypat)= psps%nctab(itypat)%tcorespl(:,:)
-   end do
-
+     !Write the spl interpolation of the pseudo core density for all atom types
+     do itypat= 1, ntypat
+       ncorespl(:,:,itypat)= psps%nctab(itypat)%tcorespl(:,:)
+     end do
    end if
  end if
 
@@ -638,7 +623,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_MALLOC(nhatgr,(0,0,0))
  non_magnetic_xc=.false.
 
- enxc=zero; usexcnhat=0
+ usexcnhat=0
  bigexc=zero
  bigsxc=zero
  
@@ -731,7 +716,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  call dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil,dtset,&
 & ffnl,gmet,gprimd,gsqcut,&
 & hdr,just_timdisp,kg,kxc,dtset%mband,dtset%mgfft,&
-& dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,&
+& dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ncorespl,ngfftf,nfftf,&
 & dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,nylmgr,occ,&
 & pawfgr,pawtab,ph1d,&
 & psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,useylmgr,xred,ylm,ylmgr)
@@ -874,20 +859,7 @@ end subroutine longwave
 !!
 !! SIDE EFFECTS
 !!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 
 subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,natom,timdisp,ucvol)
 
