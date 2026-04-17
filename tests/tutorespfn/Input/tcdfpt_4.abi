@@ -20,8 +20,7 @@ tcdfpt_2o_DS6_DDB
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = M. Royo
-#%% keywords = DFPT
+#%% keywords = CDFPT
 #%% description =  Input file for mrgddb of 2nd derivatives of ETOT at different frequencies
-#%% topics = DFPT
 #%%<END TEST_INFO>
 

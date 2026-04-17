@@ -313,8 +313,6 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
        call wrtout(std_out,message,'PERS')
      end if
 
-! TODO: if n+magnetization basis is used for the density, need to rotate rhoaug1 to that now, before packing into rhor1
-
 !  Transfer density on augmented fft grid to normal fft grid in real space
 !  Take also into account the spin, to place it correctly in rhor1.
 !  Note the use of cplex
@@ -373,14 +371,13 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
          ABI_MALLOC(wfraug_down,(2,n4,n5,n6))
          ABI_MALLOC(wfraug1_up,(2,n4,n5,n6))
          ABI_MALLOC(wfraug1_down,(2,n4,n5,n6))
-         ABI_MALLOC(cwave0_up,(2,mpw))
-         ABI_MALLOC(cwave0_down,(2,mpw))
-         ABI_MALLOC(cwave1_up,(2,mpw1))
-         ABI_MALLOC(cwave1_down,(2,mpw1))
+         ABI_MALLOC(cwave0_up,(2,npw_k))
+         ABI_MALLOC(cwave0_down,(2,npw_k))
+         ABI_MALLOC(cwave1_up,(2,npw1_k))
+         ABI_MALLOC(cwave1_down,(2,npw1_k))
 
 ! EB FR build spinorial wavefunctions
 ! Obtain Fourier transform in fft box and accumulate the density
-! EB FR How do we manage the following lines for non-collinear????
 ! zero order up and down spins
          ptr1 = 1 + (iband_me-1)*npw_k*nspinor + icg
          call cg_zcopy(npw_k, cg(1,ptr1), cwave0_up)
@@ -392,37 +389,22 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
          ptr2 = 1 + npw1_k + (iband_me-1)*npw1_k*nspinor + icg1
          call cg_zcopy(npw1_k, cg1(1,ptr2), cwave1_down)
 
-! TODO: here ispinor should be ispinorp to get full matrix and nspden 4
-!        ptr = 1 + (ispinor-1)*npw1_k + (iband_me-1)*npw1_k*nspinor + icg1
-!        call cg_zcopy(npw1_k, cg1(1,ptr), cwavef1)
-
-! EB FR lines to be managed (?????)
-
-! zero order
-!        cwave0_up => cwavef(:,1:npw_k)
-!        cwave0_down => cwavef(:,1+npw_k:2*npw_k)
-! first order
-!        cwave1_up => cwavef1(:,1:npw_k)
-!        cwave1_down => cwavef1(:,1+npw_k:2*npw_k)
-
-!    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997) ?? [[cite:Gonze1997]])
-         weight=two*occ_rbz(iband+bdtot_index)*wtk_rbz(ikpt)/ucvol
 !density components
 !GS wfk Fourrier Tranform
-! EB FR in the fourwf calls rhoaug(:,:,:,2) is a dummy argument
          call fourwf(1,rhoaug(:,:,:,2),cwave0_up,dummy,wfraug_up,gbound,gbound,istwf_k,kg_k,kg_k,&
 &         mgfft,mpi_enreg,1,ngfft,npw_k,1,n4,n5,n6,&
 &         0,tim_fourwf7,weight,weight)
          call fourwf(1,rhoaug(:,:,:,2),cwave0_down,dummy,wfraug_down,gbound,gbound,istwf_k,kg_k,kg_k,&
 &         mgfft,mpi_enreg,1,ngfft,npw_k,1,n4,n5,n6,&
 &         0,tim_fourwf7,weight,weight)
- !1st order wfk Fourrier Transform
-         call fourwf(1,rhoaug1(:,:,:,2),cwave1_up,dummy,wfraug1_up,gbound,gbound,istwf_k,kg_k,kg_k,&
-&         mgfft,mpi_enreg,1,ngfft,npw_k,1,n4,n5,n6,&
-&         0,tim_fourwf7,weight,weight)
-         call fourwf(1,rhoaug1(:,:,:,2),cwave1_down,dummy,wfraug1_down,gbound,gbound,istwf_k,kg_k,kg_k,&
-&         mgfft,mpi_enreg,1,ngfft,npw_k,1,n4,n5,n6,&
-&         0,tim_fourwf7,weight,weight)
+!1st order wfk Fourrier Transform
+         call fourwf(cplex,rhoaug(:,:,:,1),cwave1_up,dummy,wfraug1_up,gbound1,gbound1,istwf_k,kg1_k,kg1_k,&
+&         mgfft,mpi_enreg,1,ngfft,npw1_k,1,n4,n5,n6,0,tim_fourwf7,weight,weight)
+         call fourwf(cplex,rhoaug(:,:,:,1),cwave1_down,dummy,wfraug1_down,gbound1,gbound1,istwf_k,kg1_k,kg1_k,&
+&         mgfft,mpi_enreg,1,ngfft,npw1_k,1,n4,n5,n6,0,tim_fourwf7,weight,weight)
+
+!    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997) ?? [[cite:Gonze1997]])
+         weight=two*occ_rbz(iband+bdtot_index)*wtk_rbz(ikpt)/ucvol
 
 !    Accumulate 1st-order density (x component)
          if (cplex==2) then
@@ -434,19 +416,25 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
                  re0_down=wfraug_down(1,i1,i2,i3)  ; im0_down=wfraug_down(2,i1,i2,i3)
                  re1_down=wfraug1_down(1,i1,i2,i3) ; im1_down=wfraug1_down(2,i1,i2,i3)
                  rhoaug1(2*i1-1,i2,i3,1)=rhoaug1(2*i1-1,i2,i3,1)+weight*(re0_up*re1_up+im0_up*im1_up) !n_upup
-                 rhoaug1(2*i1  ,i2,i3,1)=zero ! imag part of n_upup at k
+                 rhoaug1(2*i1  ,i2,i3,1)=rhoaug1(2*i1  ,i2,i3,1)+weight*(re0_up*im1_up-im0_up*re1_up)
                  rhoaug1(2*i1-1,i2,i3,4)=rhoaug1(2*i1-1,i2,i3,4)+weight*(re0_down*re1_down+im0_down*im1_down) ! n_dndn
-                 rhoaug1(2*i1  ,i2,i3,4)=zero ! imag part of n_dndn at k
-                 rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,2)+weight*(re1_up*re0_down+re0_up*re1_down &
-&                 +im0_up*im1_down+im0_down*im1_up) ! mx; the factor two is inside weight
-                 rhoaug1(2*i1  ,i2,i3,2)=zero ! imag part of mx
-                 rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,3)+weight*(re1_up*im0_down-im1_up*re0_down &
-&                 +re0_up*im1_down-im0_up*re1_down) ! my; the factor two is inside weight
-                 rhoaug1(2*i1  ,i2,i3,3)=zero ! imag part of my at k
+                 rhoaug1(2*i1  ,i2,i3,4)=rhoaug1(2*i1  ,i2,i3,4)+weight*(re0_down*im1_down-im0_down*re1_down)
+
+                 rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,2)+weight*(re1_up*re0_down+im1_up*im0_down)& !Re[m1x]
+&                +weight*(re1_down*re0_up+im1_down*im0_up)
+                 rhoaug1(2*i1  ,i2,i3,2)=rhoaug1(2*i1  ,i2,i3,2)+weight*(-re1_up*im0_down+im1_up*re0_down)& !Im[m1x]
+&                +weight*(-re1_down*im0_up+im1_down*re0_up)
+
+                 rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,3)+weight*(+re1_up*im0_down-im1_up*re0_down)& !Re[m1y]
+&                +weight*(-re1_down*im0_up+im1_down*re0_up)
+                 rhoaug1(2*i1  ,i2,i3,3)=rhoaug1(2*i1  ,i2,i3,3)+weight*(+re1_up*re0_down+im1_up*im0_down)& !Im[m1y]
+&                +weight*(-re1_down*re0_up-im1_down*im0_up)
                end do
              end do
            end do
          else
+           re0_up=zero;im0_up=zero;re1_up=zero;im1_up=zero;re0_down=zero;im0_down=zero
+           re1_down=zero;im1_down=zero
            do i3=1,n3
              do i2=1,n2
                do i1=1,n1
@@ -490,9 +478,6 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
        icg1=icg1+npw1_k*mband_mem*nspinor
        ikg1=ikg1+npw1_k
 
-     ikg=ikg+npw_k
-     ikg1=ikg1+npw1_k
-
    end do ! End loop on ikpt
 
 
@@ -501,12 +486,13 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
      call wrtout(std_out,message,'PERS')
    end if
 
-! TODO: if n+magnetization basis is used for the density, need to rotate rhoaug1 to that now, before packing into rhor1
-
 !  Transfer density on augmented fft grid to normal fft grid in real space
 !  Take also into account the spin, to place it correctly in rhor1.
-!  Note the use of cplex
-   call fftpac(1,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,ngfft,rhor1,rhoaug1,1)
+   call fftpac(1,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,ngfft,rhor1,rhoaug1(:,:,:,1),1)
+   do ispden=2,4
+     call fftpac(ispden,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,ngfft,rhor1,rhoaug1(:,:,:,ispden),1)
+   end do
+   
  end if ! nspden /= 4
 
 !if (xmpi_paral==1) then
@@ -531,6 +517,12 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  call xmpi_sum(rhor1,spaceworld,ierr)
  call timab(71,2,tsec)
  call timab(48,2,tsec)
+
+ !This rotation is managed by symrhg
+ if (nspden==4) then
+  rhor1(:,2) = rhor1(:,2) + (rhor1(:,1) + rhor1(:,4))
+  rhor1(:,3) = rhor1(:,3) + (rhor1(:,1) + rhor1(:,4))
+ end if
 
  call symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfft,ngfft,nspden,nsppol,nsym,phnons,&
              rhog1,rhor1,rprimd,symafm,symrel,tnons)
