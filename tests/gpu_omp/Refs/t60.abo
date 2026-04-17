@@ -1,8 +1,8 @@
 
 .Version 10.7.0.3 of ABINIT, released Dec 2025.
-.(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer) 
+.(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,12 +16,12 @@
 
 .Starting date : Thu 22 Jan 2026.
 - ( at 00h28 )
-  
+
 - input  file    -> /home/gmatteo/git_repos/gmatteo_gwr/_build_eos_nvhpc_23.9_elpa/tests/Test_suite/gpu_omp_t53/t53.abi
 - output file    -> t53.abo
 - root for input  files -> t53i
 - root for output files -> t53o
- 
+
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -37,7 +37,7 @@ P This job should need less than                      44.315 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      9.430 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -151,15 +151,15 @@ P           mkmem           8
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl       14.00000
- 
+
 ================================================================================
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   1.
- 
+
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -173,17 +173,17 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 1, }
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.0838809  5.0838809  G(1)= -0.0983501  0.0983501  0.0983501
  R(2)=  5.0838809  0.0000000  5.0838809  G(2)=  0.0983501 -0.0983501  0.0983501
  R(3)=  5.0838809  5.0838809  0.0000000  G(3)=  0.0983501  0.0983501 -0.0983501
  Unit cell volume ucvol=  2.6279439E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  45  45  45
          ecut(hartree)=     40.000   => boxcut(ratio)=   2.14955
- 
+
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/gmatteo/git_repos/gmatteo_gwr/tests/Pspdir/Si-GGA.psp8
 - pspatm: opening atomic psp file    /home/gmatteo/git_repos/gmatteo_gwr/tests/Pspdir/Si-GGA.psp8
@@ -199,12 +199,12 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 1, }
              1    2.714235    0.601251
              2  -10.098774   -0.937313
  pspatm: atomic psp has been read  and splines computed
- 
+
    1.49645492E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
- 
+
 _setup2: Arith. and geom. avg. npw (full set) are    3174.016    3173.978
- 
+
 ================================================================================
 
 --- !BeginCycle
@@ -212,7 +212,7 @@ iteration_state: {dtset: 1, }
 solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 114, }
 tolerances: {toldfe: 1.00E-08, }
 ...
- 
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -8.4532926632248    -8.453E+00 4.334E-03 2.783E+01
  ETOT  2  -8.4555723912352    -2.280E-03 1.325E-04 4.387E-01
@@ -220,15 +220,15 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT  4  -8.4556011772511    -1.848E-07 3.416E-05 1.849E-04
  ETOT  5  -8.4556011823242    -5.073E-09 7.328E-07 2.551E-06
  ETOT  6  -8.4556011823706    -4.631E-11 2.044E-07 2.148E-08
- 
- At SCF step    6, etot is converged : 
+
+ At SCF step    6, etot is converged :
   for the second time, diff in etot=  4.631E-11 < toldfe=  1.000E-08
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.87303503E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.87303503E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -1.87303503E-04  sigma(2 1)=  0.00000000E+00
- 
+
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
@@ -264,9 +264,9 @@ force_length_stats: {min:   2.20168731E-27, max:   2.20168731E-27, mean:   2.201
     1        2.00000          1.79426590
     2        2.00000          1.80710878
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   14.248E-10; max=  20.444E-08
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
@@ -274,16 +274,16 @@ force_length_stats: {min:   2.20168731E-27, max:   2.20168731E-27, mean:   2.201
  rms dE/dt=  1.3624E-26; max dE/dt=  2.5849E-26; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.34513694961481     1.34513694961481     1.34513694961481
- 
+
  cartesian forces (hartree/bohr) at end:
     1      0.00000000000000    -0.00000000000000     0.00000000000000
     2     -0.00000000000000     0.00000000000000    -0.00000000000000
  frms,max,avg= 1.2711448E-27 2.1185746E-27   0.000E+00  0.000E+00  0.000E+00 h/b
- 
+
  cartesian forces (eV/Angstrom) at end:
     1      0.00000000000000    -0.00000000000000     0.00000000000000
     2     -0.00000000000000     0.00000000000000    -0.00000000000000
@@ -298,7 +298,7 @@ force_length_stats: {min:   2.20168731E-27, max:   2.20168731E-27, mean:   2.201
    0.45400    0.45400    0.46687    0.58639    0.58639    0.58639    0.74311    1.02808
    1.02808    1.02808    1.06741    1.06741    1.13758    1.13758    1.13758    1.26406
  prteigrs : prtvol=0 or 1, do not print more k-points.
- 
+
 
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
@@ -315,20 +315,20 @@ total_energy_eV     : -2.30088629715459E+02
 band_energy         : -1.47176752811815E-01
 ...
 
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.87303503E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.87303503E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -1.87303503E-04  sigma(2 1)=  0.00000000E+00
- 
+
 -Cartesian components of stress tensor (GPa)         [Pressure=  5.5107E+00 GPa]
 - sigma(1 1)= -5.51065933E+00  sigma(3 2)=  0.00000000E+00
 - sigma(2 2)= -5.51065933E+00  sigma(3 1)=  0.00000000E+00
 - sigma(3 3)= -5.51065933E+00  sigma(2 1)=  0.00000000E+00
- 
+
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      2.80855000E+01
@@ -437,7 +437,7 @@ P           mkmem           8
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl       14.00000
- 
+
 ================================================================================
 
 
@@ -485,7 +485,7 @@ P           mkmem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -502,12 +502,12 @@ P           mkmem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -525,15 +525,15 @@ P           mkmem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - Proc.   0 individual time (sec): cpu=          5.4  wall=          5.4
- 
+
 ================================================================================
- 
+
  Calculation completed.
 .Delivered   1 WARNINGs and   3 COMMENTs to log file.
 +Overall time at end (sec) : cpu=          5.4  wall=          5.4

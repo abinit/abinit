@@ -54,6 +54,7 @@ module m_hamiltonian
  use m_fock,              only : fock_common_type, fock_BZ_type, fock_ACE_type, fock_type
  use m_mkffnl,            only : mkffnl_objs
  use m_initylmg,          only : initylmg_k
+ use m_ompgpu_fourwf,     only : free_ompgpu_fourwf
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -160,6 +161,9 @@ module m_hamiltonian
   integer :: nfft = -1
    ! number of FFT grid points same as dtset%nfft
 
+  integer :: nfft_blocks = 1
+  ! number of blocks fourwf computation is divided into
+
   integer :: npw_k = -1
    ! number of plane waves at k
    ! In case of band-FFT parallelism, npw_k is the number of plane waves
@@ -198,7 +202,7 @@ module m_hamiltonian
   ! Governs the choice of the GPU implementation:
   !        = 0 ==> do not use GPU
   !        > 0 ==> see defs_basis.F90 to have the list of possible GPU implementations
-  
+
   integer :: usecprj = -1
    ! usecprj= 1 if cprj projected WF are stored in memory
    !        = 0 if they are to be computed on the fly
@@ -696,6 +700,10 @@ subroutine gsham_free(Ham)
    ABI_FREE(Ham%ph1d)
  end if
 
+ if(Ham%gpu_option==ABI_GPU_OPENMP) then
+   call free_ompgpu_fourwf()
+ end if
+
 ! Structured datatype pointers
  if (associated(Ham%fockcommon)) nullify(Ham%fockcommon)
  if (associated(Ham%fockACE_k)) nullify(Ham%fockACE_k)
@@ -769,13 +777,14 @@ end subroutine gsham_free
 subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
                      xred,nfft,mgfft,ngfft,rprimd,nloalg,&
                      ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&   ! optional
-                     electronpositron,fock,nucdipmom,gpu_option,spinaxis,use_gbt,zora) ! optional
+                     electronpositron,fock,nucdipmom,gpu_option,spinaxis,&    ! optional
+                     use_gbt,zora,nfft_blocks)    ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(gs_hamiltonian_type),intent(inout),target :: ham
  integer,intent(in) :: nfft,natom,nspinor,nsppol,nspden,mgfft
- integer,optional,intent(in) :: comm_atom,usecprj,gpu_option,use_gbt,zora
+ integer,optional,intent(in) :: comm_atom,usecprj,gpu_option,use_gbt,zora,nfft_blocks
  type(electronpositron_type),optional,pointer :: electronpositron
  type(fock_type),optional,pointer :: fock
  type(pseudopotential_type),intent(in) :: psps
@@ -810,6 +819,10 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
  my_zora=0; if (present(zora)) my_zora=zora
 
+ ham%nfft_blocks=1;
+ if (present(nfft_blocks) .and. l_gpu_option==ABI_GPU_OPENMP) then
+   ham%nfft_blocks=nfft_blocks
+ end if
  ham%use_gbt = 0; if (present(use_gbt)) ham%use_gbt = use_gbt
  ham%spinaxis = zero; if (present(spinaxis)) ham%spinaxis = spinaxis
 
@@ -1437,6 +1450,7 @@ subroutine gsham_copy(gs_hamk_in, gs_hamk_out)
  gs_hamk_out%mpssoang = gs_hamk_in%mpssoang
  gs_hamk_out%natom = gs_hamk_in%natom
  gs_hamk_out%nfft = gs_hamk_in%nfft
+ gs_hamk_out%nfft_blocks = gs_hamk_in%nfft_blocks
  gs_hamk_out%npw_k = gs_hamk_in%npw_k
  gs_hamk_out%npw_kp = gs_hamk_in%npw_kp
  gs_hamk_out%npw_fft_k = gs_hamk_in%npw_fft_k
