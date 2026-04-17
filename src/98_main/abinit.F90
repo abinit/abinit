@@ -179,6 +179,9 @@ program abinit
  character(len=10) :: strtime
  character(len=13) :: warn_fmt
  integer :: gpu_devices(12)
+#ifdef HAVE_GPU
+ integer :: lib_vers(2)
+#endif
 !******************************************************************
 
 !0) Change communicator for I/O (mandatory!)
@@ -368,6 +371,15 @@ program abinit
  end do
 #ifdef HAVE_GPU
  call setdevice_cuda(gpu_devices,gpu_option)
+ lib_vers(1) = gpu_get_lib_version_major()
+ lib_vers(2) = gpu_get_lib_version_minor()
+#ifdef HAVE_GPU_CUDA
+ write(std_out,'(a,i1,a,i1)') ' Using CUDA version: ',lib_vers(1),'.',lib_vers(2)
+#endif
+#ifdef HAVE_GPU_HIP
+ write(std_out,'(a,i1,a,i1)') ' Using ROCm/HIP version: ',lib_vers(1),'.',lib_vers(2)
+#endif
+
 #else
  if (gpu_option/=ABI_GPU_DISABLED) then
    write(msg,'(a)')ch10,'Use of GPU is requested but ABINIT was not built with GPU support.'

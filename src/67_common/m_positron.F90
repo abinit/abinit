@@ -2503,7 +2503,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
        else
          call prep_fourwf(denpot_dum,blocksize,cwaveg_pos,cwaveaug_pos,&
 &         iblock_pos,istwf_k_pos,dtset%mgfft,mpi_enreg,nband_k_pos,&
-&         bandpp,ngfft,npw_k_pos,n4,n5,n6,occ_k_pos,option,Crystal%ucvol,wtk_k_pos,&
+&         bandpp,ngfft,npw_k_pos,n4,n5,n6,occ_k_pos,option,Crystal%ucvol,wtk_k_pos,1,&
 &         bandfft_kpt_tab=bandfft_kpt_pos,gpu_option=dtset%gpu_option)
        end if
 
@@ -2731,7 +2731,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
                      else
                        call prep_fourwf(denpot_dum,blocksize,cwaveg,cwaveaug,&
 &                       iblock,istwf_k,dtset%mgfft,mpi_enreg,nband_k,&
-&                       bandpp,ngfft,npw_k,n4,n5,n6,occ_k,option,Crystal%ucvol,wtk_k,&
+&                       bandpp,ngfft,npw_k,n4,n5,n6,occ_k,option,Crystal%ucvol,wtk_k,1,&
 &                       bandfft_kpt_tab=bandfft_kpt_el,gpu_option=dtset%gpu_option)
                      end if
 

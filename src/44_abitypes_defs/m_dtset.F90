@@ -279,10 +279,11 @@ type, public :: dataset_type
  integer :: gethaydock = 0
  integer :: goprecon
 
+ integer :: gpu_nfft_blocks = 0
  integer :: gpu_kokkos_nthrd
  integer :: gpu_linalg_limit
  integer :: gpu_nl_distrib = 0
- integer :: gpu_nl_splitsize = 1
+ integer :: gpu_nl_splitsize = 0
  integer :: gpu_option
  integer :: gpu_thread_limit
 
@@ -1833,6 +1834,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%get1wf             = dtin%get1wf
  dtout%goprecon           = dtin%goprecon
 
+ dtout%gpu_nfft_blocks  = dtin%gpu_nfft_blocks
  dtout%gpu_kokkos_nthrd   = dtin%gpu_kokkos_nthrd
  dtout%gpu_linalg_limit   = dtin%gpu_linalg_limit
  dtout%gpu_nl_distrib     = dtin%gpu_nl_distrib
@@ -3800,7 +3802,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_kokkos_nthrd gpu_linalg_limit gpu_nl_distrib gpu_thread_limit'
- list_vars=trim(list_vars)//' gpu_nl_splitsize gpu_option'
+ list_vars=trim(list_vars)//' gpu_nfft_blocks gpu_nl_splitsize gpu_option'
  list_vars=trim(list_vars)//' gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
  list_vars=trim(list_vars)//' gstore_brange gstore_erange gstore_kfilter gstore_gname'
  list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk gstore_iv1p_comm gstore_use_lgk gstore_use_lgq'
