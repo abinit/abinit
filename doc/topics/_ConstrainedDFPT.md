@@ -147,7 +147,7 @@ Because the frequency dependence of the second-order internal energies \( U_{\la
 The current implementation is restricted to:
 
 - Magnetic insulating systems (metals are not supported)
-- Local exchange–correlation functionals
+- Local exchange-correlation functionals
 - Norm-conserving pseudopotentials
 - Atomic displacements, electric fields, Zeeman fields (uniform and local), and scalar potential perturbations
 
