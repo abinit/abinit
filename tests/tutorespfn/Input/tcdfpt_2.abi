@@ -5,7 +5,7 @@
   jdtset   3 4 5 6
 
 ## PARALELIZATION OPTIONS
-paral_rf   1
+#  paral_rf   1
 #  nppert   2
 
 ## GENERAL LINEAR RESPONSE PARAMETERS
@@ -30,24 +30,24 @@ paral_rf   1
 
 ### 3) LINEAR RESPONSE TO PHONONS, ELECTRIC AND ZEEMAN FIELD (hw=0)
   rfphon3   1
- rfatpol3   1 6
+ rfatpol3   1 1
   rfelfd3   3             
   rfmagn3   1
-   rfdir3   1 1 1         
+   rfdir3   1 0 0         
   getddk3   2            
 
 ### 4) LINEAR RESPONSE TO LOCAL ZEEMAN FIELDS (hw=0)
   rfmagn4   2       # Activates linear response to local Zeeman fields
- rfatpol4   1 2     # Atoms on the spheres of which the Zeeman fields are applied
-   rfdir4   1 1 0   # Directions of the Zeeman fields
+ rfatpol4   1 1     # Atoms on the spheres of which the Zeeman fields are applied
+   rfdir4   1 0 0   # Directions of the Zeeman fields
   getddk4   2            
 
 ### 5) LINEAR RESPONSE TO PHONONS, ELECTRIC AND ZEEMAN FIELD (finite hw)
   rfphon5   1
- rfatpol5   1 6
+ rfatpol5   1 1
   rfelfd5   3             
   rfmagn5   1
-   rfdir5   1 1 1         
+   rfdir5   1 0 0         
   getddk5   2            
  rfomega5   0.0006  # Frequency of the perturbations
  tim1rev5   0       # Broken Krammer's degeneracy 
@@ -55,8 +55,8 @@ paral_rf   1
 
 ### 6) LINEAR RESPONSE TO LOCAL ZEEMAN FIELDS (finite hw)
   rfmagn6   2       # Activates linear response to local Zeeman fields
- rfatpol6   1 2     # Atoms on the spheres of which the Zeeman fields are applied
-   rfdir6   1 1 0   # Directions of the Zeeman fields
+ rfatpol6   1 1     # Atoms on the spheres of which the Zeeman fields are applied
+   rfdir6   1 0 0   # Directions of the Zeeman fields
   getddk6   2            
  rfomega6   0.0006  # Frequency of the perturbations
  tim1rev6   0       # Broken Krammer's degeneracy 
@@ -112,6 +112,7 @@ nnsclo -4
 nspden   4   
 nspinor  2   
 asr 0
+chneut 0
 
 #Pseudos
 pp_dirpath "$ABI_PSPDIR"
@@ -129,7 +130,7 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%% files_to_test =
 #%%   tcdfpt_2.abo, tolnlines=  10, tolabs=  4.192e-06, tolrel=  4.000e-07, fld_options=-medium
 #%% [shell]  
-#%% post_commands= ww_mv tcdfpt_2o_DS4_1WF55 tcdfpt_2o_DS3_1WF55; ww_mv tcdfpt_2o_DS4_1WF56 tcdfpt_2o_DS3_1WF56; ww_mv tcdfpt_2o_DS4_1WF58 tcdfpt_2o_DS3_1WF58; ww_mv tcdfpt_2o_DS4_1WF59 tcdfpt_2o_DS3_1WF59
+#%% post_commands= ww_mv tcdfpt_2o_DS4_1WF55 tcdfpt_2o_DS3_1WF55
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [extra_info]

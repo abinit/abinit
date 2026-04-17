@@ -69,10 +69,6 @@ nnsclo -4
 
 nspden   4   
 nspinor  2   
-asr 0
-
-# Parallelization 
-#autoparal 1
 
 #Pseudos
 pp_dirpath "$ABI_PSPDIR"

@@ -10,6 +10,8 @@
    mpdir 1 1 0
    mpopt 2  !(1 Frozen-spin, 2 Relaxed-spin)
    timdisp 1 
+   asr 0
+   chneut 0
 
 !Frequency interpolation
    freqflag 1
@@ -24,9 +26,10 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% input_ddb = tcdfpt_10.ddb.out
+#%% input_ddb = tcdfpt_10.ddb.in
 #%% test_chain =  tcdfpt_8.abi, tcdfpt_9.abi, tcdfpt_10.abi, tcdfpt_11.abi
 #%% [files]
+#%% extra_inputs = tcdfpt_10.ddb.in
 #%% files_to_test =
 #%%   tcdfpt_11.abo, tolnlines=  0, tolabs=  0.000e0, tolrel=  0.000e-0, fld_options = -easy
 #%% [paral_info]
