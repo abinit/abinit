@@ -1,11 +1,11 @@
-# coding: utf-8
 """Tests abiref.bib file."""
-from __future__ import division, print_function, unicode_literals, absolute_import
 
-from .tools import patch_syspath, AbimkdocsTest
+from .tools import AbimkdocsTest, patch_syspath
+
 patch_syspath()
 
 import os
+
 from abimkdocs.website import Website
 
 

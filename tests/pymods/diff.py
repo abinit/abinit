@@ -2,60 +2,88 @@
 """
 Command line interface to difflib.py providing diffs in four formats:
 
+This module is used to visualize differences between files in various formats
+(ndiff, context, unified, html). It includes ABINIT-specific heuristics to
+determine 'junk' content (like timestamps or fluctuating small values) that
+should not trigger a diff failure.
+
+Available formats:
 * ndiff:    lists every line and highlights interline changes.
 * context:  highlights clusters of changes in a before/after format.
 * unified:  highlights clusters of changes in an inline format.
 * html:     generates side by side comparison with change highlights.
 """
 
-import sys
-import os
-import time
-import difflib
 import argparse
+import difflib
+import os
+import sys
+import time
 
 
 def abinit_line_junk(line):
+    """
+    Heuristic to determine if a line is 'junk' in Abinit output.
+
+    Args:
+        line (str): The line to analyze.
+
+    Returns:
+        bool: True if the line starts with '-' or '+' or is whitespace.
+    """
     return (
-        line.startswith('-')
-        or line.startswith('+')
+        line.startswith("-")
+        or line.startswith("+")
         or line.isspace()
     )
 
 
 def abinit_char_junk(c):
+    """
+    Heuristic to determine if a character is 'junk'.
+
+    Args:
+        c (str): The character to analyze.
+
+    Returns:
+        bool: True if the character is whitespace or a digit.
+    """
     return c.isspace() or c.isdigit()
 
 
 def main():
+    """
+    Main entry point for the command-line diff utility.
+    Parses arguments and performs the selected diff operation.
+    """
     # Configure the option parser
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-c', action='store_true', default=False,
-                        help='Produce a context format diff (default)')
+    parser.add_argument("-c", action="store_true", default=False,
+                        help="Produce a context format diff (default)")
 
-    parser.add_argument('-u', action='store_true', default=False,
-                        help='Produce a unified format diff')
+    parser.add_argument("-u", action="store_true", default=False,
+                        help="Produce a unified format diff")
 
-    hlp = 'Produce HTML side by side diff (can use -c and -l in conjunction)'
-    parser.add_argument('-m', action='store_true', default=False, help=hlp)
+    hlp = "Produce HTML side by side diff (can use -c and -l in conjunction)"
+    parser.add_argument("-m", action="store_true", default=False, help=hlp)
 
-    hlp = 'Produce HTML table of side by side diff (can use -c and -l in conjunction)'
-    parser.add_argument('-t', action='store_true', default=False, help=hlp)
+    hlp = "Produce HTML table of side by side diff (can use -c and -l in conjunction)"
+    parser.add_argument("-t", action="store_true", default=False, help=hlp)
 
-    parser.add_argument('-n', action='store_true', default=False,
-                        help='Produce a ndiff format diff')
-    parser.add_argument('-l', '--lines', type=int, default=3,
-                        help='Set number of context lines (default 3)')
+    parser.add_argument("-n", action="store_true", default=False,
+                        help="Produce a ndiff format diff")
+    parser.add_argument("-l", "--lines", type=int, default=3,
+                        help="Set number of context lines (default 3)")
 
-    parser.add_argument('-f', '--file', type=str, default='',
-                        help='Write diff to file FILE. stdout is used if not specified', metavar='FILE')
+    parser.add_argument("-f", "--file", type=str, default="",
+                        help="Write diff to file FILE. stdout is used if not specified", metavar="FILE")
 
-    parser.add_argument('-j', '--abinit-junk', action='store_true', default=False,
-                        help='Use Abinit output specific heuristic instead of builtin heuristic to synchronise lines.')
+    parser.add_argument("-j", "--abinit-junk", action="store_true", default=False,
+                        help="Use Abinit output specific heuristic instead of builtin heuristic to synchronise lines.")
 
-    parser.add_argument('fromfile', help='Reference file')
-    parser.add_argument('tofile', help='Compared file')
+    parser.add_argument("fromfile", help="Reference file")
+    parser.add_argument("tofile", help="Compared file")
 
     options = parser.parse_args()
 
@@ -65,8 +93,8 @@ def main():
     # we're passing these as arguments to the diff function
     fromdate = time.ctime(os.stat(fromfile).st_mtime)
     todate = time.ctime(os.stat(tofile).st_mtime)
-    fromlines = open(fromfile, "rt").readlines()
-    tolines = open(tofile, "rt").readlines()
+    fromlines = open(fromfile).readlines()
+    tolines = open(tofile).readlines()
 
     if options.abinit_junk:
         line_junk = abinit_line_junk
@@ -106,5 +134,5 @@ def main():
     sys.exit(0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
