@@ -69,10 +69,6 @@ nnsclo -4
 
 nspden   4   
 nspinor  2   
-asr 0
-
-# Parallelization 
-#autoparal 1
 
 #Pseudos
 pp_dirpath "$ABI_PSPDIR"
@@ -95,9 +91,8 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%% max_nprocs = 12
 #%% [extra_info]
 #%% authors = M. Royo
-#%% keywords = DFPT
+#%% keywords = CDFPT
 #%% description = Noncolinear ground state and ddk response functions for MnF2
-#%% topics = DFPT
 #%%<END TEST_INFO>
 
 

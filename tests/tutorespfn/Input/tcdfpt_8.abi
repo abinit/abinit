@@ -16,7 +16,7 @@
    getwfk1  0
 
 ## PARALELIZATION OPTIONS
-paral_rf   1
+#  paral_rf   1
 #  nppert   2
 
 ## GENERAL LINEAR RESPONSE PARAMETERS
@@ -41,15 +41,15 @@ paral_rf   1
 
 ### 2) LINEAR RESPONSE TO PHONONS AND ZEEMAN FIELD (hw=0)
   rfphon2   1
- rfatpol2   1 6
+ rfatpol2   1 1
   rfelfd2   0
   rfmagn2   1
-   rfdir2   1 1 1
+   rfdir2   1 0 0
 
 ### 3) LINEAR RESPONSE TO LOCAL ZEEMAN FIELDS (hw=0)
   rfmagn3   2       # Activates linear response to local Zeeman fields
- rfatpol3   1 2     # Atoms on the spheres of which the Zeeman fields are applied
-   rfdir3   1 1 0   # Directions of the Zeeman fields
+ rfatpol3   1 1     # Atoms on the spheres of which the Zeeman fields are applied
+   rfdir3   1 0 0   # Directions of the Zeeman fields
 
 ### GENERAL PARAMETERS
 
@@ -99,10 +99,8 @@ nnsclo -4
 
 nspden   4   
 nspinor  2   
-
-# Parallelization 
-#autoparal 1
 asr 0
+chneut 0
 
 #Pseudos
 pp_dirpath "$ABI_PSPDIR"
@@ -120,14 +118,13 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%% files_to_test =
 #%%   tcdfpt_8.abo, tolnlines=  5, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-medium
 #%% [shell]  
-#%% post_commands= ww_mv tcdfpt_8o_DS1_WFK tcdfpt_9o_DS1_WFK; ww_mv tcdfpt_8o_DS3_1WF55 tcdfpt_8o_DS2_1WF55; ww_mv tcdfpt_8o_DS3_1WF56 tcdfpt_8o_DS2_1WF56; ww_mv tcdfpt_8o_DS3_1WF58 tcdfpt_8o_DS2_1WF58; ww_mv tcdfpt_8o_DS3_1WF59 tcdfpt_8o_DS2_1WF59; ww_mv tcdfpt_8o_DS3_1WF124 tcdfpt_8o_DS2_1WF124; ww_mv tcdfpt_8o_DS3_1WF125 tcdfpt_8o_DS2_1WF125; ww_mv tcdfpt_8o_DS3_1WF127 tcdfpt_8o_DS2_1WF127; ww_mv tcdfpt_8o_DS3_1WF128 tcdfpt_8o_DS2_1WF128 
+#%% post_commands= ww_mv tcdfpt_8o_DS1_WFK tcdfpt_9o_DS1_WFK; ww_mv tcdfpt_8o_DS3_1WF55 tcdfpt_8o_DS2_1WF55; ww_mv tcdfpt_8o_DS3_1WF124 tcdfpt_8o_DS2_1WF124
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [extra_info]
 #%% authors = M. Royo
-#%% keywords = DFPT
+#%% keywords = CDFPT
 #%% description = Noncolinear ground state and response functions for MnF2 at finite q
-#%% topics = DFPT
 #%%<END TEST_INFO>
 
 
