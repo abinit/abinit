@@ -28,17 +28,17 @@ subsuites = [
 
 #: List of input files
 inp_files = [
-#"tcdfpt_1.abi", 
-#"tcdfpt_2.abi",
-#"tcdfpt_3.abi",
-#"tcdfpt_4.abi",
-#"tcdfpt_5.abi",
-#"tcdfpt_6.abi",
-#"tcdfpt_7.abi",
-#"tcdfpt_8.abi",
-#"tcdfpt_9.abi",
-#"tcdfpt_10.abi",
-#"tcdfpt_11.abi",
+"tcdfpt_1.abi", 
+"tcdfpt_2.abi",
+"tcdfpt_3.abi",
+"tcdfpt_4.abi",
+"tcdfpt_5.abi",
+"tcdfpt_6.abi",
+"tcdfpt_7.abi",
+"tcdfpt_8.abi",
+"tcdfpt_9.abi",
+"tcdfpt_10.abi",
+"tcdfpt_11.abi",
 #
 "teph_tdep_legacy_1.abi",
 "teph_tdep_legacy_2.abi",

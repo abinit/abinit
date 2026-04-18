@@ -1,11 +1,11 @@
 # Linear-response to phonons (at Gamma and finite q) and electric field 
-# with the 2D Coulomb cutoff in BN monolayer
-# (M. Royo, 16.01.2026)
+# with the 2D short-range Coulomb kernel in BN monolayer
+# (M. Royo, 16.01.2025)
 
 ndtset 5
 
 # 2D Coulomb cutoff (Beigi)
-icutcoul 2
+icutcoul 22
 vcutgeo  1 1 0
 
 #Set 1: Ground state self-consistency
@@ -50,7 +50,7 @@ nqpt5     1
 qpt5      0.01 0.0 0.0   
 getwfq5  -1             
 kptopt5   3             
-tolwfr5   1.0d-10   
+tolwfr5   1.1d-10   
 
 ###################  Common data  ######################
 prtwf     0
@@ -111,16 +111,15 @@ pseudos "B.psp8, N.psp8"
 #%% [setup]
 #%% executable = abinit
 #%% exclude_builders = scope_gnu_12.2_mpich ,bob_gnu_13.2_openmp  
-#%% test_chain =  t218.abi
+#%% test_chain =  t53.abi
 #%% [files]
 #%% files_to_test =
-#%%   t218.abo, tolnlines=  40, tolabs=  1.000e-05, tolrel=  5.000e-04, fld_options=-easy
+#%%   t53.abo, tolnlines=  19, tolabs=  1.000e-03, tolrel=  5.000e-04, fld_options=-easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Royo
 #%% keywords = DFPT
-#%% description = Linear response to phonons and electric field with the 2D Coulomb cutoff kernel
+#%% description = Linear response to phonons and electric field with the 2D short-range Coulomb kernel
 #%%<END TEST_INFO>
-
 

@@ -75,7 +75,6 @@ module m_dfpt_loopert
  use m_paw_sphharm,only : setsym_ylm
  use m_rf2,        only : rf2_getidirs
  use m_iogkk,      only : outgkk
- use m_inwffil,    only : inwffil
  use m_spacepar,   only : rotate_rho, setsym
  use m_initylmg,   only : initylmg
  use m_dfpt_scfcv, only : dfpt_scfcv
@@ -1605,8 +1604,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ABI_MALLOC(resid_mq,(dtset%mband*nkpt_rbz*dtset%nsppol))
      !initialize cg1_mq:
      call timab(144,1,tsec)
-     if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. (dtset%get1wf > 0 .or. dtset%ird1wf > 0)) then
-       call wfk_read_my_kptbands(fiwf1i, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2, &
+     if ((file_exists(nctk_ncify(fiwf1i_mq)) .or. file_exists(fiwf1i_mq)) .and. (dtset%get1wf > 0 .or. dtset%ird1wf > 0)) then
+       call wfk_read_my_kptbands(fiwf1i_mq, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2, &
           formeig, istwfk_rbz, kmq_rbz, mcg1mq, dtset%mband, mband_mem_rbz, mk1mem_rbz, mpw1_mq,&
           dtset%natom, nkpt_rbz, npwar1_mq, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
           cg1_mq, eigen=eigen1_mq, ask_accurate_=0)
@@ -1884,36 +1883,49 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ! rhor1 not being forced to 0.0
      if(iscf_mod>0) then
 !      cplex=2 gets the complex density, =1 only real part
-       if (psps%usepaw==1) then
-!        Be careful: in PAW, rho does not include the 1st-order compensation density (to be added in dfpt_scfcv.F90) !
-         ABI_MALLOC(rho1wfg,(2,dtset%nfft))
-         ABI_MALLOC(rho1wfr,(dtset%nfft,nspden))
-         call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
-           kg,kg1,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
-           dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
-           occ_rbz,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
-         call transgrid(cplex,mpi_enreg,nspden,+1,1,1,dtset%paral_kgb,pawfgr,rho1wfg,rhog1,rho1wfr,rhor1)
-         ABI_FREE(rho1wfg)
-         ABI_FREE(rho1wfr)
-       else
-         call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
-           kg,kg1,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
-           dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
-           occ_rbz,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
+       if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
+         call appdig(pertcase,dtfil%fildens1in,fiden1i)
+         call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor1, &
+         hdr_den, pawrhoij1, spaceComm, check_hdr=hdr)
+         etotal = hdr_den%etot; call hdr_den%free()
 
-         if (.not.kramers_deg) then
-           rhor1_pq(:,:)=rhor1(:,:)
-           rhog1_pq(:,:)=rhog1(:,:)
-           call dfpt_mkrho(cg,cg1_mq,cplex,gprimd,irrzon1,istwfk_rbz,&
-             kg,kg1_mq,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1_mq,nband_rbz,&
-             dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1_mq,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
-             occ_rbz,phnons1,rhog1_mq,rhor1_mq,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
+!        Compute up+down rho1(G) by fft
+         ABI_MALLOC(work,(cplex*nfftf))
+         work(:)=rhor1(:,1)
+         call fourdp(cplex,rhog1,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
+         ABI_FREE(work)
+       else if (dtset%get1wf /= 0 .or. dtset%ird1wf /= 0 ) then
+          if (psps%usepaw==1) then
+!          Be careful: in PAW, rho does not include the 1st-order compensation density (to be added in dfpt_scfcv.F90) !
+           ABI_MALLOC(rho1wfg,(2,dtset%nfft))
+           ABI_MALLOC(rho1wfr,(dtset%nfft,nspden))
+           call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
+             kg,kg1,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
+             dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
+             occ_rbz,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
+           call transgrid(cplex,mpi_enreg,nspden,+1,1,1,dtset%paral_kgb,pawfgr,rho1wfg,rhog1,rho1wfr,rhor1)
+           ABI_FREE(rho1wfg)
+           ABI_FREE(rho1wfr)
+         else
+           call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
+             kg,kg1,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
+             dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
+             occ_rbz,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
 
-           do ifft=1,nfftf
-             rhor1(2*ifft-1,:) = half*(rhor1_pq(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
-             rhor1(2*ifft  ,:) = half*(rhor1_pq(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
-           end do
-           call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
+           if (.not.kramers_deg) then
+             rhor1_pq(:,:)=rhor1(:,:)
+             rhog1_pq(:,:)=rhog1(:,:)
+             call dfpt_mkrho(cg,cg1_mq,cplex,gprimd,irrzon1,istwfk_rbz,&
+               kg,kg1_mq,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1_mq,nband_rbz,&
+               dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1_mq,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
+               occ_rbz,phnons1,rhog1_mq,rhor1_mq,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
+
+             do ifft=1,nfftf
+               rhor1(2*ifft-1,:) = half*(rhor1_pq(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
+               rhor1(2*ifft  ,:) = half*(rhor1_pq(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
+             end do
+             call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
+           end if
          end if
        end if
 
@@ -2949,7 +2961,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
  call wrtout(iout,msg)
  call wrtout(std_out,msg)
 
- if (emagpen1>tol8) then
+ if (abs(emagpen1)>tol8) then
    write(msg,'(a,es17.8)') &
 &   '     Magnetic penalty contribution=', emagpen1   
    call wrtout(iout,msg)
@@ -2981,7 +2993,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
    else if(ipert>natom+11.and.ipert<=2*natom+11)then
      erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1+elmag1
    end if
-   if (emagpen1>tol8) erelax=erelax+emagpen1
+   if (abs(emagpen1)>tol8) erelax=erelax+emagpen1
    enl1_effective=enl1
    if (ipert==natom+1.or.ipert==natom+2) then
      if (1.0_dp+enl1/10.0_dp==1.0_dp) enl1_effective=zero

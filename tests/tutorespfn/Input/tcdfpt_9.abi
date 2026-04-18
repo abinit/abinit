@@ -19,32 +19,32 @@ optdriver  10
 ### 4) ADIABATIC DYNAMICS WITH MACROSCOPIC ZEEMAN
   
   d3e_pert1_magn4  1
-d3e_pert1_magdir4  1 1 1
-   d3e_pert1_dir4  1 1 1
+d3e_pert1_magdir4  1 0 0
+   d3e_pert1_dir4  1 0 0
   d3e_pert1_phon4  1
- d3e_pert1_atpol4  1 6
+ d3e_pert1_atpol4  1 1
 
   d3e_pert2_magn4  1
-d3e_pert2_magdir4  1 1 1
-   d3e_pert2_dir4  1 1 1
+d3e_pert2_magdir4  1 0 0
+   d3e_pert2_dir4  1 0 0
   d3e_pert2_phon4  1
- d3e_pert2_atpol4  1 6
+ d3e_pert2_atpol4  1 1
 
 ### 5) ADIABATIC DYNAMICS WITH LOCAL ZEEMAN
   
   d3e_pert1_magn5  2
- d3e_pert1_magat5  1 2
-d3e_pert1_magdir5  1 1 0
-   d3e_pert1_dir5  1 1 1
+ d3e_pert1_magat5  1 1
+d3e_pert1_magdir5  1 0 0
+   d3e_pert1_dir5  1 0 0
   d3e_pert1_phon5  1
- d3e_pert1_atpol5  1 6
+ d3e_pert1_atpol5  1 1
 
   d3e_pert2_magn5  2
- d3e_pert2_magat5  1 2
-d3e_pert2_magdir5  1 1 0
-   d3e_pert2_dir5  1 1 1
+ d3e_pert2_magat5  1 1
+d3e_pert2_magdir5  1 0 0
+   d3e_pert2_dir5  1 0 0
   d3e_pert2_phon5  1
- d3e_pert2_atpol5  1 6
+ d3e_pert2_atpol5  1 1
 
 ### MORE GENERAL PARAMETERS
 
@@ -85,7 +85,6 @@ nsym 1
 
 nspden   4   
 nspinor  2   
-asr 0
 
 #Pseudos
 pp_dirpath "$ABI_PSPDIR"
@@ -107,9 +106,8 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%% max_nprocs = 12
 #%% [extra_info]
 #%% authors = M. Royo
-#%% keywords = DFPT
+#%% keywords = CDFPT
 #%% description = Berry curvatures calculation for adiabatic dynamics of MnF2
-#%% topics = DFPT
 #%%<END TEST_INFO>
 
 
