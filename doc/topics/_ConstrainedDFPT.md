@@ -32,7 +32,7 @@ restores the expected magnetic symmetries of the crystal [[cite:Bonini2023]].
 Magnetic materials can also host spin-wave excitations (magnons), which typically overlap in energy with phonons 
 and introduce additional complications in the linear-response regime. On the one hand, magnons and phonons can interact,
 mutually influencing each other's spectra, and therefore must be treated simultaneously. This problem was addressed in 
-[[cite:Ren2025]] by working with a set of Hessians and Berry curvatures defined in an extended parameter space of 
+[[cite:Ren2024]] by working with a set of Hessians and Berry curvatures defined in an extended parameter space of 
 atomic displacements, local spin cantings, and their mutual interactions. The resulting generalized equations of motion 
 provide the eigenfrequencies and eigenvectors of the coupled magnon–phonon system.
 
