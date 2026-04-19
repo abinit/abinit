@@ -19858,7 +19858,7 @@ Variable(
     mnemonics="Response Function with respect to MAGNetic B-field perturbation",
     added_in_version="before_v9",
     text=r"""
-This variable enables response-function calculations with respect to external Zeeman magnetic fields. At present, orbital magnetism is not included, and the perturbing potential has purely Zeeman form. For further details, see Refs. [[cite:Ricci2019]] and [[cite:Royo2025]].
+This variable enables response-function calculations with respect to external Zeeman magnetic fields. At present, orbital magnetism is not included, and the perturbing potential has purely Zeeman form. For further details, see Refs. [[cite:Ricci2019]] and [[cite:Royo2026]].
 
   * 0 --> no magnetic-field perturbation
   * 1 --> uniform magnetic-field perturbation (possibly at finite q) applied along the Cartesian directions specified by [[rfdir]]
@@ -19869,7 +19869,7 @@ This variable enables response-function calculations with respect to external Ze
 Note for constrained DFPT calculations:
 A set of local magnetic-field response calculations, combined with a geometrically equivalent magnetic penalty 
 (defined by the variables [[magpen]], [[mpatpol]], and [[mpdir]]), enables the computation of the so-called 
-local spin susceptibility within the constrained-B functional introduced in Ref. [[cite:Royo2025]]. This quantity 
+local spin susceptibility within the constrained-B functional introduced in Ref. [[cite:Royo2026]]. This quantity 
 is stored in the DDB file and subsequently used by anaddb to transform the second- and third-order energy derivatives 
 computed with the magnetic penalty--i.e., within the constrained-B functional--into the corresponding physically 
 relevant magnetic functionals.
