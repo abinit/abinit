@@ -1890,15 +1890,11 @@ subroutine ebands_read_qpdata(qp_ebands, ks_ebands, filepath, comm)
 
      ! Make sure energies are sorted.
      ! FIXME: The sorting section should be removed as we loose the correspondence
-     ! hetween the band indices for energies and the ones in the e-ph matrix elements.
-     ! We should write a new method to compute the chemical potential in which energies
-     ! are sorted on-the-fly.
-#if 0
-     ABI_MALLOC(iperm, (nband_k))
-     iperm = [(ii, ii=1, nband_k)]
-     call sort_dp(nband_k, qp_ebands%eig(:, ikpt, spin), iperm, tol6)
-     ABI_FREE(iperm)
-#endif
+     ! between the band indices for energies and the ones in the e-ph matrix elements.
+     !ABI_MALLOC(iperm, (nband_k))
+     !iperm = [(ii, ii=1, nband_k)]
+     !call sort_dp(nband_k, qp_ebands%eig(:, ikpt, spin), iperm, tol6)
+     !ABI_FREE(iperm)
 
      ABI_FREE(re_enes)
      ABI_FREE(im_enes)
