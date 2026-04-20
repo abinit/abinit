@@ -422,6 +422,7 @@ contains
  ABI_FREE(fmzeff_tr)
  ABI_FREE(lm_epsilon)
  ABI_FREE(dum_phongreen)
+ ABI_FREE(invhmat)
 
  end subroutine ddb_magpen
 !!***
@@ -574,6 +575,10 @@ contains
 
  if (fs2rs_==1) then
    magsus=work1
+   ABI_SFREE(ipiv)
+   ABI_SFREE(work1)
+   ABI_SFREE(work2)
+   ABI_SFREE(work)
    return
  end if
 

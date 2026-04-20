@@ -1,6 +1,6 @@
 
-.Version 10.7.2.9 of ABINIT. v10.7.1 released Mar 2026.
-.(MPI version, prepared for a x86_64_linux_intel2024.2 computer) 
+.Version 10.5.8.1 of ABINIT. v10.7.1 released Mar 2026.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,14 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 17 Apr 2026.
-- ( at 11h53 )
+.Starting date : Mon 20 Apr 2026.
+- ( at 12h12 )
   
-- input  file    -> /mnt/lustre/scratch/nlsas/home/csic/eem/mrv/Programs/abinit/tmp-build-samare-branch/Test_suite/tutorespfn_tcdfpt_1-tcdfpt_2-tcdfpt_3-tcdfpt_4-tcdfpt_5-tcdfpt_6-tcdfpt_7/tcdfpt_3.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/tutorespfn_tcdfpt_1-tcdfpt_2-tcdfpt_3-tcdfpt_4-tcdfpt_5-tcdfpt_6-tcdfpt_7/tcdfpt_3.abi
 - output file    -> tcdfpt_3.abo
 - root for input  files -> tcdfpt_3i
 - root for output files -> tcdfpt_2o
- 
+
  DATASET    7 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  7.
@@ -37,7 +37,7 @@ P This job should need less than                       6.127 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.025 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
 ================================================================================
- 
+
  DATASET    8 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  8.
@@ -53,7 +53,7 @@ P This job should need less than                       6.127 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.025 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
 ================================================================================
- 
+
  DATASET    9 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  9.
@@ -69,7 +69,7 @@ P This job should need less than                       6.127 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.025 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
 ================================================================================
- 
+
  DATASET   10 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 10.
@@ -85,7 +85,7 @@ P This job should need less than                       6.127 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.025 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -94,7 +94,7 @@ _ WF disk file :      1.025 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
 -   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file
--  max_nthreads =    1
+-  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      9.2100000000E+00  9.2100000000E+00  6.2560000000E+00 Bohr
@@ -222,21 +222,21 @@ P           mkmem          12
                        3.0372381769E-01  3.0372381769E-01  0.0000000000E+00
                        8.0372381769E-01  1.9627618231E-01  5.0000000000E-01
             znucl       25.00000    9.00000
- 
+
 ================================================================================
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   7.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   8.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   9.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=  10.
- 
+
 ================================================================================
 == DATASET  7 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
- 
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 7, }
@@ -247,9 +247,9 @@ meta: {optdriver: 10, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
- 
+
  mkfilename : get1wf/=0, take file _1WF from output of DATASET   3.
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  9.2100000  0.0000000  0.0000000  G(1)=  0.1085776  0.0000000  0.0000000
  R(2)=  0.0000000  9.2100000  0.0000000  G(2)=  0.0000000  0.1085776  0.0000000
@@ -257,13 +257,13 @@ meta: {optdriver: 10, }
  Unit cell volume ucvol=  5.3065957E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
  setup1 : take into account q-point for computing boxcut.
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  10
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05011
- 
+
  The list of irreducible elements of the spatial-dispersion third-order energy derivatives is: 
  (in reduced coordinates except for strain and hspinfield perturbations) 
- 
+
             i1dir   i1pert  i2dir   i2pert  i3dir  i3pert
      1)       1       1       1       1       1      15
      2)       1       1       1       8       1      15
@@ -271,13 +271,13 @@ meta: {optdriver: 10, }
      4)       1       1       1      11       1      15
      5)       1       8       1      11       1      15
      6)       1      11       1      11       1      15
- 
- 
- 
- 
+
+
+
+
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /mnt/lustre/scratch/nlsas/home/csic/eem/mrv/Programs/abinit/tests/Pspdir/Mn_LDA_FR_7e.psp8
-- pspatm: opening atomic psp file    /mnt/lustre/scratch/nlsas/home/csic/eem/mrv/Programs/abinit/tests/Pspdir/Mn_LDA_FR_7e.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Mn_LDA_FR_7e.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Mn_LDA_FR_7e.psp8
 - Mn    ONCVPSP-4.0.1  r_core=   3.51846   2.80304   2.20653
 - 25.00000   7.00000    260121                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -293,9 +293,9 @@ meta: {optdriver: 10, }
   spin-orbit 1    0.180363   -0.051207    0.019378
   spin-orbit 2   -0.012806    0.009932    0.001874   -0.000335
  pspatm: atomic psp has been read  and splines computed
- 
-- pspini: atom type   2  psp file is /mnt/lustre/scratch/nlsas/home/csic/eem/mrv/Programs/abinit/tests/Pspdir/F_LDA_FR.psp8
-- pspatm: opening atomic psp file    /mnt/lustre/scratch/nlsas/home/csic/eem/mrv/Programs/abinit/tests/Pspdir/F_LDA_FR.psp8
+
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/F_LDA_FR.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/F_LDA_FR.psp8
 - F     ONCVPSP-4.0.1  r_core=   1.30176   1.45845   1.60495
 -  9.00000   7.00000    250506                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -311,39 +311,39 @@ meta: {optdriver: 10, }
   spin-orbit 1    0.008005    0.002900   -0.000089
   spin-orbit 2   -0.008605    0.000211
  pspatm: atomic psp has been read  and splines computed
- 
+
    2.50951992E+03                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
- 
- 
+
+
 ================================================================================
  ==> Compute spatial-dispersion 3rd-order energy derivatives <== 
- 
+
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF1
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF1
- 
+
 TIMDISP :  perts :  1.1 /  1.1 / 15.1
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF22
- 
+
 TIMDISP :  perts :  1.1 /  8.1 / 15.1
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF31
- 
+
 TIMDISP :  perts :  1.1 / 11.1 / 15.1
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF22
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF22
- 
+
 TIMDISP :  perts :  8.1 /  8.1 / 15.1
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF31
- 
+
 TIMDISP :  perts :  8.1 / 11.1 / 15.1
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF31
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF31
- 
+
 TIMDISP :  perts : 11.1 / 11.1 / 15.1
- 
- 
+
+
  -- Spatial-dispersion 3rd-order derivatives completed -- 
- 
+
  Frequency derivative of second-order energies, in cartesian coordinates
      j1       j2                    matrix elementi
   dir pert dir pert           real part       imaginary part
@@ -356,11 +356,11 @@ TIMDISP :  perts : 11.1 / 11.1 / 15.1
    1   11   1    1         0.0000000000        -0.0000000003
    1   11   1    8         0.0000000000        -0.0000000181
    1   11   1   11         0.0000000000         0.0000000000
- 
+
 ================================================================================
 == DATASET  8 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
- 
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 8, }
@@ -371,9 +371,9 @@ meta: {optdriver: 10, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
- 
+
  mkfilename : get1wf/=0, take file _1WF from output of DATASET   3.
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  9.2100000  0.0000000  0.0000000  G(1)=  0.1085776  0.0000000  0.0000000
  R(2)=  0.0000000  9.2100000  0.0000000  G(2)=  0.0000000  0.1085776  0.0000000
@@ -381,13 +381,13 @@ meta: {optdriver: 10, }
  Unit cell volume ucvol=  5.3065957E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
  setup1 : take into account q-point for computing boxcut.
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  10
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05011
- 
+
  The list of irreducible elements of the spatial-dispersion third-order energy derivatives is: 
  (in reduced coordinates except for strain and hspinfield perturbations) 
- 
+
             i1dir   i1pert  i2dir   i2pert  i3dir  i3pert
      1)       1       1       1       1       1      15
      2)       1       1       1       8       1      15
@@ -395,40 +395,40 @@ meta: {optdriver: 10, }
      4)       1       1       1      18       1      15
      5)       1       8       1      18       1      15
      6)       1      18       1      18       1      15
- 
- 
- 
+
+
+
 --------------------------------------------------------------------------------
- 
- 
+
+
 ================================================================================
  ==> Compute spatial-dispersion 3rd-order energy derivatives <== 
- 
+
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF1
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF1
- 
+
 TIMDISP :  perts :  1.1 /  1.1 / 15.1
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF22
- 
+
 TIMDISP :  perts :  1.1 /  8.1 / 15.1
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF55
- 
+
 TIMDISP :  perts :  1.1 / 18.1 / 15.1
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF22
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF22
- 
+
 TIMDISP :  perts :  8.1 /  8.1 / 15.1
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF55
- 
+
 TIMDISP :  perts :  8.1 / 18.1 / 15.1
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF55
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF55
- 
+
 TIMDISP :  perts : 18.1 / 18.1 / 15.1
- 
- 
+
+
  -- Spatial-dispersion 3rd-order derivatives completed -- 
- 
+
  Frequency derivative of second-order energies, in cartesian coordinates
      j1       j2                    matrix elementi
   dir pert dir pert           real part       imaginary part
@@ -437,15 +437,15 @@ TIMDISP :  perts : 18.1 / 18.1 / 15.1
    1    1   1   18         0.0000000000         0.0000000007
    1    8   1    1         0.0000000000         0.0000002264
    1    8   1    8         0.0000000000         0.0000000000
-   1    8   1   18         0.0000000000         0.0000000287
+   1    8   1   18         0.0000000000         0.0000000286
    1   18   1    1         0.0000000000        -0.0000000007
-   1   18   1    8         0.0000000000        -0.0000000287
+   1   18   1    8         0.0000000000        -0.0000000286
    1   18   1   18         0.0000000000         0.0000000000
- 
+
 ================================================================================
 == DATASET  9 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
- 
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 9, }
@@ -456,9 +456,9 @@ meta: {optdriver: 10, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
- 
+
  mkfilename : get1wf/=0, take file _1WF from output of DATASET   3.
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  9.2100000  0.0000000  0.0000000  G(1)=  0.1085776  0.0000000  0.0000000
  R(2)=  0.0000000  9.2100000  0.0000000  G(2)=  0.0000000  0.1085776  0.0000000
@@ -466,42 +466,42 @@ meta: {optdriver: 10, }
  Unit cell volume ucvol=  5.3065957E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
  setup1 : take into account q-point for computing boxcut.
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  10
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05011
- 
+
  The list of irreducible elements of the spatial-dispersion third-order energy derivatives is: 
  (in reduced coordinates except for strain and hspinfield perturbations) 
- 
+
             i1dir   i1pert  i2dir   i2pert  i3dir  i3pert
      1)       1      11       1      18       1      15
- 
- 
- 
+
+
+
 --------------------------------------------------------------------------------
- 
- 
+
+
 ================================================================================
  ==> Compute spatial-dispersion 3rd-order energy derivatives <== 
- 
+
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF31
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF55
- 
+
 TIMDISP :  perts : 11.1 / 18.1 / 15.1
- 
- 
+
+
  -- Spatial-dispersion 3rd-order derivatives completed -- 
- 
+
  Frequency derivative of second-order energies, in cartesian coordinates
      j1       j2                    matrix elementi
   dir pert dir pert           real part       imaginary part
    1   11   1   18         0.0000000000         0.0000000058
    1   18   1   11         0.0000000000        -0.0000000058
- 
+
 ================================================================================
 == DATASET 10 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
- 
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 10, }
@@ -512,9 +512,9 @@ meta: {optdriver: 10, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
- 
+
  mkfilename : get1wf/=0, take file _1WF from output of DATASET   3.
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  9.2100000  0.0000000  0.0000000  G(1)=  0.1085776  0.0000000  0.0000000
  R(2)=  0.0000000  9.2100000  0.0000000  G(2)=  0.0000000  0.1085776  0.0000000
@@ -522,38 +522,38 @@ meta: {optdriver: 10, }
  Unit cell volume ucvol=  5.3065957E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
  setup1 : take into account q-point for computing boxcut.
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  10
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05011
- 
+
  The list of irreducible elements of the spatial-dispersion third-order energy derivatives is: 
  (in reduced coordinates except for strain and hspinfield perturbations) 
- 
+
             i1dir   i1pert  i2dir   i2pert  i3dir  i3pert
      1)       1      18       1      11       1      15
- 
- 
- 
+
+
+
 --------------------------------------------------------------------------------
- 
- 
+
+
 ================================================================================
  ==> Compute spatial-dispersion 3rd-order energy derivatives <== 
- 
+
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF55
 -inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF31
- 
+
 TIMDISP :  perts : 18.1 / 11.1 / 15.1
- 
- 
+
+
  -- Spatial-dispersion 3rd-order derivatives completed -- 
- 
+
  Frequency derivative of second-order energies, in cartesian coordinates
      j1       j2                    matrix elementi
   dir pert dir pert           real part       imaginary part
    1   11   1   18         0.0000000000         0.0000000058
    1   18   1   11         0.0000000000        -0.0000000058
- 
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -719,9 +719,9 @@ P           mkmem          12
                        3.0372381769E-01  3.0372381769E-01  0.0000000000E+00
                        8.0372381769E-01  1.9627618231E-01  5.0000000000E-01
             znucl       25.00000    9.00000
- 
+
 ================================================================================
- 
+
  The spacegroup number, the magnetic point group, and/or the number of symmetries
  have changed between the initial recognition based on the input file
  and a postprocessing based on the final acell, rprim, and xred.
@@ -812,10 +812,10 @@ P           mkmem          12
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.5
- 
+- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.2
+
 ================================================================================
- 
+
  Calculation completed.
 .Delivered  24 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.4  wall=          1.5
++Overall time at end (sec) : cpu=          1.2  wall=          1.2

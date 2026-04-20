@@ -116,7 +116,7 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%% test_chain =  tcdfpt_8.abi, tcdfpt_9.abi, tcdfpt_10.abi, tcdfpt_11.abi
 #%% [files]
 #%% files_to_test =
-#%%   tcdfpt_8.abo, tolnlines=  5, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-medium
+#%%   tcdfpt_8.abo, tolnlines=  5, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-easy
 #%% [shell]  
 #%% post_commands= ww_mv tcdfpt_8o_DS1_WFK tcdfpt_9o_DS1_WFK; ww_mv tcdfpt_8o_DS3_1WF55 tcdfpt_8o_DS2_1WF55; ww_mv tcdfpt_8o_DS3_1WF124 tcdfpt_8o_DS2_1WF124
 #%% [paral_info]

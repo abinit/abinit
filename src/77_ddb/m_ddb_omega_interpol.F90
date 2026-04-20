@@ -1287,6 +1287,9 @@ contains
  ABI_FREE(dummysus)
  ABI_FREE(dummysus1)
  ABI_FREE(dummysus2)
+ ABI_FREE(dummymom_tr)
+ ABI_FREE(dummymom)
+ ABI_FREE(omegacalc)
  ABI_FREE(magsus)
  ABI_FREE(lm_magsus)
  ABI_FREE(invmagsus)
@@ -1299,6 +1302,7 @@ contains
  ABI_FREE(lm_epsilon_nm)
  ABI_FREE(ci_mchi)
  ABI_FREE(lm_mchi)
+ ABI_FREE(lm_mchi_nm)
  ABI_FREE(ci_alpha)
  ABI_FREE(ci_alpha_hc)
  ABI_FREE(lm_alpha)
@@ -1493,6 +1497,7 @@ subroutine phonon_green(amu,displ,eigvec,eta,blkval,&
  ABI_REMALLOC(work,(lwork))
  call zgetri( pdim, work1, pdim, ipiv, work, lwork, info )
  ABI_CHECK(info == 0, sjoin('zgetri returned:', itoa(info)))
+ ABI_FREE(work)
 
  phongreen=-work1
 
@@ -1513,6 +1518,7 @@ subroutine phonon_green(amu,displ,eigvec,eta,blkval,&
    mode_phonspec(irow)= -one/pi * aimag(two*cmplx(omega,eta,kind=dpc)*mass_phongreen(irow,irow))
  end do
  phonspec= sum(mode_phonspec(:))
+ ABI_FREE(mass_phongreen)
 
 !Diagonalize the Dynamical matrix
  ABI_MALLOC(matrx,(2,(3*natom*(3*natom+1))/2))
@@ -1531,6 +1537,7 @@ subroutine phonon_green(amu,displ,eigvec,eta,blkval,&
  ABI_CHECK(ier == 0, sjoin('zhpev returned:', itoa(ier)))
 
  ABI_FREE(matrx)
+ ABI_FREE(dynmat)
  ABI_FREE(zhpev1)
  ABI_FREE(zhpev2)
 
@@ -1558,8 +1565,8 @@ subroutine phonon_green(amu,displ,eigvec,eta,blkval,&
  ABI_FREE(ifc_w2mass)
  ABI_FREE(ipiv)
  ABI_FREE(work1)
- ABI_FREE(mass_phongreen)
  ABI_FREE(invmassfac)
+ ABI_FREE(eigval)
 ! ABI_FREE(delta_asrw0)
 
  DBG_EXIT("COLL")
