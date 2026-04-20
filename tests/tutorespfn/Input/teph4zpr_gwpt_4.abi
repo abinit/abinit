@@ -1,11 +1,12 @@
 # NSCF computation of WFK files with empty states
  ecut 35.0
 
- nband  110 nbdbuf -10 # A negative value means 10% of nband
+ nband  110
+ nbdbuf -10 # A negative value means 10% of nband
 
  nstep 150
  iscf -2          # NSCF run
- tolwfr 1e-14     # 1e-18 is the recommended value
+ tolwfr 1e-14     # 1e-18 is the recommended value. This is just to speedup the test.
 
  getden_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 

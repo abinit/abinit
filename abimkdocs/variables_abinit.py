@@ -8160,6 +8160,24 @@ semiconductors and insulators.
 ),
 
 Variable(
+    abivarname="gwpt_wmode",
+    varset="eph",
+    vartype="integer",
+    topics=["ElPhonInt_expert"],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="GWPT omega MODE",
+    added_in_version="10.7.1",
+    text=r"""
+This variable controls the treatment of the frequency-dependence in the GWPT matrix elements.
+
+1 -> Use the original treatment as in [[cite:Li2019]] in which the convolution is evaluated
+     at $\ee_\nk$ and $\ee_\mkq$ and the average is taken.
+2 -> Evaluate the convolution at $\ee_\nk$.
+""",
+),
+
+Variable(
     abivarname="gwgmcorr",
     varset="gw",
     vartype="integer",

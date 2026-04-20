@@ -1,5 +1,4 @@
 # GW computation at Gamma for MgO.
-
  ecut 35.0
 
  ngkpt 4 4 4

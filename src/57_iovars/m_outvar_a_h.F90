@@ -1548,6 +1548,9 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%gwgamma
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwgamma','INT',0)
 
+ intarr(1,:)=dtsets(:)%gwpt_wmode
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwpt_wmode','INT',0)
+
  intarr(1,:)=dtsets(:)%gwmem
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwmem','INT',0)
 

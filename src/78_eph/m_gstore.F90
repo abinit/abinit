@@ -1079,11 +1079,13 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
      "gstore_with_vk", "gstore_qptopt", "gstore_completed", &
-     "gstore_use_lgk", "gstore_use_lgq", "gstore_has_ifcs", "ifc_eta"  &
+     "gstore_use_lgk", "gstore_use_lgq", "gstore_has_ifcs", "gwpt_wmode"  &
    ])
    NCF_CHECK(ncerr)
-   !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "fermi_energy", "smearing_width"])
-   !NCF_CHECK(ncerr)
+   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
+     "ifc_eta" &
+   ])
+   NCF_CHECK(ncerr)
 
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("gstore_qibz", "dp", "three, gstore_nqibz"), &
@@ -1155,6 +1157,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_use_lgk"), dtset%gstore_use_lgk))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_use_lgq"), dtset%gstore_use_lgq))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_has_ifcs"), gstore_has_ifcs))
+   NCF_CHECK(nf90_put_var(ncid, vid("gwpt_wmode"), dtset%gwpt_wmode))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_completed"), 0))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kzone"), trim(gstore%kzone)))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qzone"), trim(gstore%qzone)))
