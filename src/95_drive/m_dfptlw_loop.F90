@@ -932,7 +932,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
 
              if (finite_q) then
                call hdr1_pq%free()
+               call hdr2_pq%free()
                if (.not.kramers_deg) then
+                 call hdr1_mq%free()
                  call hdr2_mq%free()
                end if
              end if
@@ -980,7 +982,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
   ABI_FREE(vxc1dqdq)
  end if
 
+ call ebands_kq%free()
  if (.not.kramers_deg) then
+   call ebands_kmq%free()
    ABI_FREE(cg1_mq)
    ABI_FREE(cg2_mq)
    ABI_FREE(eigen1_mq)
