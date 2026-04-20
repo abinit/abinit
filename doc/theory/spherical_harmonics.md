@@ -110,8 +110,8 @@ RSH are the most adequate basis functions for calculations in which atomic
 symmetry is important since they can be directly related to the irreducible
 representations of the subgroups of $D_3$ [[cite:Blanco1997]].
 Moreover, being real, they have half the memory requirement of complex spherical harmonics. 
-This is clearly an advantage if high angular momenta are needed or several RHS values have to be stored in memory.
-A possible definition for RHS is [[cite:Blanco1997]]:
+This is clearly an advantage if high angular momenta are needed or several RSH values have to be stored in memory.
+A possible definition for RSH is [[cite:Blanco1997]]:
 
 \begin{equation}\label{eq:Definition_real_harmonics}
  \rYlm \df 
@@ -191,7 +191,7 @@ The effect of a proper or improper rotation on a RSH can be deduced from:
 \end{equation}
 
 That is, spherical harmonics of given $l$ are transformed into a linear combination
-of RHS of same $l$ where the coefficients are given by:
+of RSH of same $l$ where the coefficients are given by:
 
 \begin{equation}
 D^l_{\alpha m}(\mcR) \df \la\rY^l_\alpha|\hat\mcR|\rYlm\ra.
