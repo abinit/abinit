@@ -3328,20 +3328,21 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
 
      bxc0=-sqrt((half*(vxc0(ipt,1)-vxc0(ipt,2)))**2+vxc0(ipt,3)**2+vxc0(ipt,4)**2)
      if(cplex==1) then
-       rhor1(ipt,1)=zero       ! rho_up+rho_dwn    => charge density
-       rhor1(ipt,2)=m1_norm*mdir(1)-half*m0_norm/bxc0*(fdir(1)-f_dot_m*mdir(1))   ! m1x
-       rhor1(ipt,3)=m1_norm*mdir(2)-half*m0_norm/bxc0*(fdir(2)-f_dot_m*mdir(2))   ! m1y
-       rhor1(ipt,4)=m1_norm*mdir(3)-half*m0_norm/bxc0*(fdir(3)-f_dot_m*mdir(3))   ! m1z
+     ! TODO:    
+     !  rhor1(ipt,1)=zero       ! rho_up+rho_dwn    => charge density
+     !  rhor1(ipt,2)=m1_norm*mdir(1)-half*m0_norm/bxc0*(fdir(1)-f_dot_m*mdir(1))   ! m1x
+     !  rhor1(ipt,3)=m1_norm*mdir(2)-half*m0_norm/bxc0*(fdir(2)-f_dot_m*mdir(2))   ! m1y
+     !  rhor1(ipt,4)=m1_norm*mdir(3)-half*m0_norm/bxc0*(fdir(3)-f_dot_m*mdir(3))   ! m1z
        rhor1(ipt,:)=zero
      else
-       rhor1(2*ipt-1,1)=zero       ! Re rho_up+rho_dwn
-       rhor1(2*ipt-1,2)=m1_norm*mdir(1)-half*m0_norm/bxc0*(fdir(1)-f_dot_m*mdir(1))   ! m1x
-       rhor1(2*ipt-1,3)=m1_norm*mdir(2)-half*m0_norm/bxc0*(fdir(2)-f_dot_m*mdir(2))   ! m1x
-       rhor1(2*ipt-1,4)=m1_norm*mdir(3)-half*m0_norm/bxc0*(fdir(3)-f_dot_m*mdir(3))   ! m1x
-       rhor1(2*ipt  ,1)=zero       ! Im rho_up+rho_dwn
-       rhor1(2*ipt  ,2)=zero
-       rhor1(2*ipt  ,3)=zero
-       rhor1(2*ipt  ,4)=zero
+     !  rhor1(2*ipt-1,1)=zero       ! Re rho_up+rho_dwn
+     !  rhor1(2*ipt-1,2)=m1_norm*mdir(1)-half*m0_norm/bxc0*(fdir(1)-f_dot_m*mdir(1))   ! m1x
+     !  rhor1(2*ipt-1,3)=m1_norm*mdir(2)-half*m0_norm/bxc0*(fdir(2)-f_dot_m*mdir(2))   ! m1x
+     !  rhor1(2*ipt-1,4)=m1_norm*mdir(3)-half*m0_norm/bxc0*(fdir(3)-f_dot_m*mdir(3))   ! m1x
+     !  rhor1(2*ipt  ,1)=zero       ! Im rho_up+rho_dwn
+     !  rhor1(2*ipt  ,2)=zero
+     !  rhor1(2*ipt  ,3)=zero
+     !  rhor1(2*ipt  ,4)=zero
 
        rhor1(2*ipt-1,1)=zero; rhor1(2*ipt,1)=zero
        rhor1(2*ipt-1,2)=zero; rhor1(2*ipt,2)=zero
