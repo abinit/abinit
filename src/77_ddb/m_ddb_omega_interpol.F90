@@ -1220,6 +1220,7 @@ contains
    end do
  end do
 
+ close(phon_unit)
 !Born effective charges
  zeff_filename=trim(outfilename_radix)//"_ZEFF"
  if (open_file(zeff_filename, msg, newunit=zeff_unit) /= 0) then
