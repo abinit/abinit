@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  1 Apr 2026.
-- ( at 14h17 )
+.Starting date : Mon 20 Apr 2026.
+- ( at 10h00 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v9_t218/t218.abi
-- output file    -> t218.abo
-- root for input  files -> t218i
-- root for output files -> t218o
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v10_t52/t52.abi
+- output file    -> t52.abo
+- root for input  files -> t52i
+- root for output files -> t52o
 
  DATASET    1 : space group P-6 m 2 (#187); Bravais hP (primitive hexag.)
 ================================================================================
@@ -587,7 +587,7 @@ force_length_stats: {min:   4.13789619E-28, max:   4.13789619E-28, mean:   4.137
  frms,max,avg= 1.2284812E-26 1.7699317E-26   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  4.689500000000  4.689500000000 40.000000000000 bohr
               =  2.481576528846  2.481576528846 21.167088421760 angstroms
- prteigrs : about to open file t218o_DS1_EIG
+ prteigrs : about to open file t52o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.19694   Average Vxc (hartree)=  -0.09421
  Eigenvalues (hartree) for nkpt=   7  k points:
  kpt#   1, nband=  4, wtk=  0.02778, kpt=  0.0000  0.0000  0.5000 (reduced coord)
@@ -706,7 +706,7 @@ tolerances: {tolwfr: 1.00E-18, }
  Mean square residual over all n,k,spin=   46.155E-20; max=  95.111E-20
  dfpt_looppert : ek2=    3.8297054743E+01
           f-sum rule ratio=    9.8867667043E-01
- prteigrs : about to open file t218t_1WF1_EIG
+ prteigrs : about to open file t52t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  20  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  4, wtk=  0.02778, kpt=  0.0000  0.0000  0.5000 (reduced coord)
@@ -768,7 +768,7 @@ tolerances: {tolwfr: 1.00E-18, }
  Mean square residual over all n,k,spin=   48.324E-20; max=  95.111E-20
  dfpt_looppert : ek2=    3.8297054744E+01
           f-sum rule ratio=    9.8867667048E-01
- prteigrs : about to open file t218t_1WF1_EIG
+ prteigrs : about to open file t52t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  20  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  4, wtk=  0.02778, kpt=  0.0000  0.0000  0.5000 (reduced coord)
@@ -828,7 +828,7 @@ tolerances: {tolwfr: 1.00E-18, }
  Mean square residual over all n,k,spin=   55.548E-20; max=  99.902E-20
  dfpt_looppert : ek2=    3.9478417604E-01
           f-sum rule ratio=    9.6176298028E-01
- prteigrs : about to open file t218t_1WF1_EIG
+ prteigrs : about to open file t52t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  20  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  4, wtk=  0.02778, kpt=  0.0000  0.0000  0.5000 (reduced coord)
@@ -962,9 +962,9 @@ tolerances: {tolwfr: 1.00E-10, }
  ETOT  7   13.226874701327     -2.787E-10 9.985E-11 5.963E-10
 
  At SCF step    7   max residual=  9.98E-11 < tolwfr=  1.00E-10 =>converged.
--open ddk wf file :t218o_DS2_1WF7
--open ddk wf file :t218o_DS2_1WF8
--open ddk wf file :t218o_DS2_1WF9
+-open ddk wf file :t52o_DS2_1WF7
+-open ddk wf file :t52o_DS2_1WF8
+-open ddk wf file :t52o_DS2_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1028,9 +1028,9 @@ tolerances: {tolwfr: 1.00E-10, }
  ETOT 14   56.494982993997     -4.481E-09 9.511E-11 3.297E-05
 
  At SCF step   14   max residual=  9.51E-11 < tolwfr=  1.00E-10 =>converged.
--open ddk wf file :t218o_DS2_1WF7
--open ddk wf file :t218o_DS2_1WF8
--open ddk wf file :t218o_DS2_1WF9
+-open ddk wf file :t52o_DS2_1WF7
+-open ddk wf file :t52o_DS2_1WF8
+-open ddk wf file :t52o_DS2_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1087,9 +1087,9 @@ tolerances: {tolwfr: 1.00E-10, }
  ETOT  8   9.7158268056772     -6.935E-12 9.758E-11 4.562E-11
 
  At SCF step    8   max residual=  9.76E-11 < tolwfr=  1.00E-10 =>converged.
--open ddk wf file :t218o_DS2_1WF7
--open ddk wf file :t218o_DS2_1WF8
--open ddk wf file :t218o_DS2_1WF9
+-open ddk wf file :t52o_DS2_1WF7
+-open ddk wf file :t52o_DS2_1WF8
+-open ddk wf file :t52o_DS2_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1155,9 +1155,9 @@ tolerances: {tolwfr: 1.00E-10, }
  ETOT 16   943.88537783538      3.638E-12 9.157E-11 4.513E-06
 
  At SCF step   16   max residual=  9.16E-11 < tolwfr=  1.00E-10 =>converged.
--open ddk wf file :t218o_DS2_1WF7
--open ddk wf file :t218o_DS2_1WF8
--open ddk wf file :t218o_DS2_1WF9
+-open ddk wf file :t52o_DS2_1WF7
+-open ddk wf file :t52o_DS2_1WF8
+-open ddk wf file :t52o_DS2_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1196,7 +1196,7 @@ tolerances: {tolwfr: 1.00E-10, }
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-- dfpt_looppert: read the DDK wavefunctions from file: t218o_DS2_1WF7
+- dfpt_looppert: read the DDK wavefunctions from file: t52o_DS2_1WF7
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -1215,9 +1215,9 @@ tolerances: {tolwfr: 1.00E-10, }
  ETOT  8  -142.09005988220      0.000E+00 9.877E-11 1.390E-06
 
  At SCF step    8   max residual=  9.88E-11 < tolwfr=  1.00E-10 =>converged.
--open ddk wf file :t218o_DS2_1WF7
--open ddk wf file :t218o_DS2_1WF8
--open ddk wf file :t218o_DS2_1WF9
+-open ddk wf file :t52o_DS2_1WF7
+-open ddk wf file :t52o_DS2_1WF8
+-open ddk wf file :t52o_DS2_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1249,7 +1249,7 @@ tolerances: {tolwfr: 1.00E-10, }
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-- dfpt_looppert: read the DDK wavefunctions from file: t218o_DS2_1WF9
+- dfpt_looppert: read the DDK wavefunctions from file: t52o_DS2_1WF9
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -1269,9 +1269,9 @@ tolerances: {tolwfr: 1.00E-10, }
  ETOT  9 -0.16095314636093     -4.293E-07 9.926E-11 9.432E-03
 
  At SCF step    9   max residual=  9.93E-11 < tolwfr=  1.00E-10 =>converged.
--open ddk wf file :t218o_DS2_1WF7
--open ddk wf file :t218o_DS2_1WF8
--open ddk wf file :t218o_DS2_1WF9
+-open ddk wf file :t52o_DS2_1WF7
+-open ddk wf file :t52o_DS2_1WF8
+-open ddk wf file :t52o_DS2_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1584,10 +1584,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.13255
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t218o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t52o_DS1_WFK
 
 ================================================================================
- prteigrs : about to open file t218o_DS4_EIG
+ prteigrs : about to open file t52o_DS4_EIG
  Non-SCF case, kpt    1 (  0.01000  0.00000  0.50000), residuals and eigenvalues=
   6.49E-19  4.16E-19  1.88E-19  3.28E-19
  -1.0382E+00 -4.4557E-01 -2.3737E-01 -2.3400E-01
@@ -1637,7 +1637,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      1.24078826442304     0.71636943846830     0.00000000000000
  length scales=  4.689500000000  4.689500000000 40.000000000000 bohr
               =  2.481576528846  2.481576528846 21.167088421760 angstroms
- prteigrs : about to open file t218o_DS4_EIG
+ prteigrs : about to open file t52o_DS4_EIG
  Eigenvalues (hartree) for nkpt=  36  k points:
  kpt#   1, nband=  4, wtk=  0.02778, kpt=  0.0100  0.0000  0.5000 (reduced coord)
   -1.03816   -0.44557   -0.23737   -0.23400
@@ -2569,10 +2569,10 @@ P          mk1mem5         36
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- Proc.   0 individual time (sec): cpu=         20.7  wall=         20.7
+- Proc.   0 individual time (sec): cpu=         20.9  wall=         20.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  35 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         20.7  wall=         20.7
++Overall time at end (sec) : cpu=         20.9  wall=         20.9

@@ -1,5 +1,5 @@
 
-.Version 10.5.8.1 of ABINIT, released Dec 2025.
+.Version 10.5.8.1 of ABINIT. v10.7.1 released Mar 2026.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2026 ABINIT group . 
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Feb 2026.
-- ( at 23h33 )
+.Starting date : Mon 20 Apr 2026.
+- ( at 10h00 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v9_t220/t220.abi
-- output file    -> t220.abo
-- root for input  files -> t220i
-- root for output files -> t220o
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v10_t54/t54.abi
+- output file    -> t54.abo
+- root for input  files -> t54i
+- root for output files -> t54o
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -484,7 +484,7 @@ force_length_stats: {min:   1.43440033E-08, max:   1.00304660E+00, mean:   6.686
  frms,max,avg= 2.4314445E+01 3.6471670E+01   3.864E-09  1.511E-08 -5.051E-10 e/A
  length scales=  9.210000000000  9.210000000000  6.256000000000 bohr
               =  4.873722109110  4.873722109110  3.310532629163 angstroms
- prteigrs : about to open file t220o_DS1_EIG
+ prteigrs : about to open file t54o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.43609   Average Vxc (hartree)=  -0.47688
  Eigenvalues (hartree) for nkpt=  12  k points:
  kpt#   1, nband= 42, wtk=  0.08333, kpt=  0.2500  0.2500  0.1667 (reduced coord)
@@ -551,7 +551,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
 ================================================================================
- prteigrs : about to open file t220o_DS2_EIG
+ prteigrs : about to open file t54o_DS2_EIG
  Non-SCF case, kpt    1 (  0.26000  0.25000  0.16667), residuals and eigenvalues=
   1.76E-13  5.32E-13  2.07E-13  1.55E-13  1.97E-13  2.97E-13  2.87E-13  1.47E-13
   9.64E-13  1.90E-13  4.22E-13  4.72E-13  4.98E-13  6.87E-13  9.15E-13  2.99E-13
@@ -636,7 +636,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     6      3.91712653989424     0.95659556921600     1.65526631458163
  length scales=  9.210000000000  9.210000000000  6.256000000000 bohr
               =  4.873722109110  4.873722109110  3.310532629163 angstroms
- prteigrs : about to open file t220o_DS2_EIG
+ prteigrs : about to open file t54o_DS2_EIG
  Eigenvalues (hartree) for nkpt=  12  k points:
  kpt#   1, nband= 42, wtk=  0.08333, kpt=  0.2600  0.2500  0.1667 (reduced coord)
   -1.54215   -1.54215   -1.53837   -1.53837   -1.52829   -1.52829   -1.51296   -1.51296
@@ -676,7 +676,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
 ================================================================================
- prteigrs : about to open file t220o_DS3_EIG
+ prteigrs : about to open file t54o_DS3_EIG
  Non-SCF case, kpt    1 (  0.24000  0.25000  0.16667), residuals and eigenvalues=
   1.80E-13  9.92E-13  2.13E-13  1.12E-13  1.37E-13  1.62E-13  6.39E-13  7.84E-13
   4.00E-13  4.53E-13  9.88E-13  7.03E-13  2.69E-13  2.45E-13  8.55E-13  5.51E-13
@@ -761,7 +761,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     6      3.91712653989424     0.95659556921600     1.65526631458163
  length scales=  9.210000000000  9.210000000000  6.256000000000 bohr
               =  4.873722109110  4.873722109110  3.310532629163 angstroms
- prteigrs : about to open file t220o_DS3_EIG
+ prteigrs : about to open file t54o_DS3_EIG
  Eigenvalues (hartree) for nkpt=  12  k points:
  kpt#   1, nband= 42, wtk=  0.08333, kpt=  0.2400  0.2500  0.1667 (reduced coord)
   -1.54246   -1.54246   -1.54112   -1.54112   -1.53085   -1.53085   -1.51802   -1.51802
@@ -1313,10 +1313,10 @@ P          mk1mem          12
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- Proc.   0 individual time (sec): cpu=         99.1  wall=         99.1
+- Proc.   0 individual time (sec): cpu=         99.5  wall=         99.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  31 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         99.1  wall=         99.1
++Overall time at end (sec) : cpu=         99.5  wall=         99.6
