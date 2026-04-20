@@ -13,6 +13,7 @@
 #gwpt_np_wpqbks 1 1 8 1 1 1
 optdriver 7              # Enter EPH driver.
 eph_task 17              # GWPT computation.
+gwpt_wmode 2
 
 # Additional filter in k-space: only k-points corresponding to the band edges are considered
 gstore_kfilter "qprange"
@@ -27,7 +28,7 @@ boxcutmin 1.1
 tolwfr 1e-8       # Tolerance for Sternheimer solver.
 nstep 150
 
-gwcomp 2          # Activate COH static remainder technique.
+#gwcomp 2          # Activate COH static remainder technique.
 
 # TODO: elph2_imagden Should have a default value
 elph2_imagden 0.1 eV

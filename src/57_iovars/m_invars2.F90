@@ -1050,6 +1050,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwgamma',tread,'INT')
  if(tread==1) dtset%gwgamma=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwpt_wmode',tread,'INT')
+ if(tread==1) dtset%gwpt_wmode=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdefmas',tread,'INT')
  if(tread==1) dtset%irdefmas=intarr(1)
 
