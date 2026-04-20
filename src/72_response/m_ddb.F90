@@ -2002,6 +2002,7 @@ subroutine ddb_read_block_txt(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
    else
      ddb%omega(1,iblok)=0.d0
    end if
+   ddb%omega(2:3,iblok)=0.d0
 
    ! Read every element
    do ii=1,nelmts
