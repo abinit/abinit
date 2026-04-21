@@ -67,20 +67,20 @@ module m_fock_getghc
 contains
 !!***
 
-subroutine select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,nfftf,&
+subroutine select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,nfftf,ngfft,&
     n4,n5,n6,natom,nspinor,lmn2_size,usepaw,cprj,ieigen,need_ghc,optfor,optstr)
 
 !Arguments ------------------------------------
 ! Scalars
- integer,intent(in)     :: nband_k,ndat,npw,cplex_fock,nfftf,n4,n5,n6
+ integer,intent(in)     :: nband_k,ndat,npw,cplex_fock,nfftf,n4,n5,n6,ngfft(18)
  integer,intent(in)     :: natom,nspinor,lmn2_size,usepaw,ieigen
  logical,intent(in)     :: optfor,optstr,need_ghc
  integer,intent(out)    :: ndat_occ
  type(pawcprj_type),intent(in) :: cprj(natom,nspinor*ndat)
 
 !Local variables-------------------------------
- integer :: i,ider,nprojs
- integer(kind=c_size_t) :: sum_mem,free_mem
+ integer :: i,ider,nprojs,t_fft(3)
+ integer(kind=c_size_t) :: sum_mem,free_mem,fourdp_smem
 
 ! *************************************************************************
 
@@ -91,6 +91,10 @@ subroutine select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,nfftf,&
      nprojs = nprojs + cprj(i, 1)%nlmn
    end do
  end if
+
+ t_fft(1) = ngfft(3);
+ t_fft(2) = ngfft(2);
+ t_fft(3) = ngfft(1);
 
 #ifdef HAVE_GPU
  call gpu_get_max_mem(free_mem)
@@ -118,7 +122,11 @@ subroutine select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,nfftf,&
    ! vlocpsi_r
    sum_mem = sum_mem + INT(cplex_fock,c_size_t)*nfftf*ndat
    ! work (ompgpu_fourwf internal array)
-   sum_mem = sum_mem + INT(2,c_size_t)*n4*n5*n6*ndat
+   sum_mem = sum_mem + INT(2,c_size_t)*n4*n5*n6*ndat*ndat_occ
+#ifdef HAVE_GPU
+   call gpu_fft_get_estimate_work_size(3, c_loc(t_fft), FFT_Z2Z, ndat*ndat_occ, fourdp_smem);
+#endif
+   sum_mem = sum_mem + fourdp_smem
 
    ! rhor_munu
    sum_mem = sum_mem + INT(cplex_fock,c_size_t)*nfftf*ndat_occ*ndat
@@ -435,7 +443,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      lmn2_size=0
      if(fockcommon%usepaw==1) lmn2_size=fockcommon%pawtab(1)%lmn2_size
      call select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,&
-&        nfftf,n4f,n5f,n6f,natom,nspinor,lmn2_size,&
+&        nfftf,ngfftf,n4f,n5f,n6f,natom,nspinor,lmn2_size,&
 &        fockcommon%usepaw,cwaveprj,fockcommon%ieigen,need_ghc,fockcommon%optfor,fockcommon%optstr)
    else
      ndat_occ=min(nband_k,4)
