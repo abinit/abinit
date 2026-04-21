@@ -1915,7 +1915,7 @@ subroutine ddb_read_block_txt(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 !scalars
  integer,intent(in) :: mband,mpert,msize,nkpt,nunit
  integer,intent(in) :: iblok
- integer,intent(in),optional :: ddb_version 
+ integer,intent(in) :: ddb_version 
  !logical, intent(in), optional :: eig2d
  class(ddb_type),intent(inout) :: ddb
 !arrays
@@ -5688,7 +5688,7 @@ subroutine ddb_read_d2E_nc(ddb, ncid, iblok, iblok_d2E, ddb_version)
  integer :: ncerr
  integer, parameter :: cvrsio9_new=20240201
 !arrays
- real(dp) :: qpt(3),omega
+ real(dp) :: qpt(3)
  integer,allocatable :: flg_d2E(:,:,:,:)
  real(dp),allocatable :: matrix_d2E(:,:,:,:,:)
 ! ************************************************************************
