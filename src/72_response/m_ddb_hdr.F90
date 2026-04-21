@@ -106,8 +106,8 @@ MODULE m_ddb_hdr
  !integer,public,parameter :: DDB_VERSION=20230401 ! TODO: check if we should update this with new G matrix stuff
  ! DDB Version number for text format.
 
- !integer,public,parameter :: DDB_VERSION_NC=20240201 ! TODO:  
- integer,public,parameter :: DDB_VERSION_NC=20230219 ! TODO: check if we should update this with new G matrix stuff
+ integer,public,parameter :: DDB_VERSION_NC=20240201 ! TODO:  
+ !integer,public,parameter :: DDB_VERSION_NC=20230219 ! TODO: check if we should update this with new G matrix stuff
  ! DDB NetCDF version number.
 
  type,public :: ddb_hdr_type
