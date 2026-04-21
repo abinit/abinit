@@ -4555,7 +4555,7 @@ class AbinitTestSuite:
                 "status2html": status2html,
             }
 
-            fname = os.path.join(self.workdir, "suite_report.html")
+            fname = os.path.join(self.workdir, "index.html")
             fh = open(fname, "w")
 
             header = """
