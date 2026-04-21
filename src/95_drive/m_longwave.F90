@@ -869,7 +869,7 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,na
  real(dp),intent(in) :: ucvol
 !arrays
  integer,intent(in) :: blkflg_car(3,mpert,3,mpert,3,mpert)
- real(dp),intent(out) :: d3etot_car(2,3,mpert,3,mpert,3,mpert)
+ real(dp),intent(in) :: d3etot_car(2,3,mpert,3,mpert,3,mpert)
 
 !Local variables-------------------------------
 !scalar

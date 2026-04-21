@@ -1409,6 +1409,11 @@ subroutine ddb_hdr_open_write_nc(ddb_hdr, filename, with_psps, with_dfpt_vars)
    &])
  NCF_CHECK(ncerr)
 
+ ncerr = nctk_def_arrays(ncid_d2E, [&
+   nctkarr_t('frequency', "dp", 'number_of_d2E_blocks') &
+   &])
+ NCF_CHECK(ncerr)
+
  ! Info on blocks and matrix values
  ncerr = nctk_def_arrays(ncid_d2E, [&
    nctkarr_t('matrix_values', "dp",&
@@ -1448,6 +1453,12 @@ NCF_CHECK(nf90_put_var(ncid_d2E, nctk_idname(ncid_d2E, 'd2E_block_types'), blkty
 
  ncerr = nctk_def_arrays(ncid_d3E, [&
    nctkarr_t('qpoints_normalization', "dp",&
+             'three_dim, number_of_d3E_blocks') &
+   &])
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(ncid_d3E, [&
+   nctkarr_t('frequencies', "dp",&
              'three_dim, number_of_d3E_blocks') &
    &])
  NCF_CHECK(ncerr)
