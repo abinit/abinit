@@ -659,7 +659,7 @@ contains
        end do
        call wrtout([ab_out,std_out], '   ')
   
-       call wrtout([ab_out,std_out], ' Inverse of H matrix (I-\alpha \barchi)^{-1} ')
+       call wrtout([ab_out,std_out], ' Inverse of H matrix (I-alpha barchi)^{-1} ')
        call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
        do irow=1, ndim
          do icol=1, ndim

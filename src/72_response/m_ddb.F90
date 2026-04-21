@@ -2934,7 +2934,7 @@ subroutine ddb_read_nc(ddb, filename, ddb_hdr, crystal, comm, prtvol, raw)
 !scalars
  integer,parameter :: master=0
  integer :: prtvol_, raw_
- integer :: ncid
+ integer :: ncid, ddb_version
  integer :: iblok,iblok_d0E,iblok_d1E,iblok_d2E,iblok_d3E,iblok_d2eig
 
 !arrays
@@ -2975,6 +2975,7 @@ subroutine ddb_read_nc(ddb, filename, ddb_hdr, crystal, comm, prtvol, raw)
    ddb%acell(:) = one
    ddb%rprim(:,:) = ddb_hdr%crystal%rprimd(:,:)
    ddb%gprim(:,:) = ddb_hdr%crystal%gprimd(:,:)
+   ddb_version = ddb_hdr%ddb_version
 
    ! ---------------
    ! Read all blocks
@@ -2997,11 +2998,11 @@ subroutine ddb_read_nc(ddb, filename, ddb_hdr, crystal, comm, prtvol, raw)
 
      else if (is_type_d2E(ddb%typ(iblok))) then
        iblok_d2E = iblok_d2E + 1
-       call ddb%read_d2E_nc(ncid, iblok, iblok_d2E)
+       call ddb%read_d2E_nc(ncid, iblok, iblok_d2E, ddb_version)
 
      else if (is_type_d3E(ddb%typ(iblok))) then
        iblok_d3E = iblok_d3E + 1
-       call ddb%read_d3E_nc(ncid, iblok, iblok_d3E)
+       call ddb%read_d3E_nc(ncid, iblok, iblok_d3E, ddb_version)
 
      else if (is_type_d2eig(ddb%typ(iblok))) then
        iblok_d2eig = iblok_d2eig + 1
@@ -5360,6 +5361,7 @@ subroutine ddb_write_nc(ddb, ddb_hdr, filename, comm, with_psps)
  integer,allocatable :: flg_d2E(:,:,:,:)
  integer,allocatable :: flg_d3E(:,:,:,:,:,:)
  real(dp) :: qpt(3), qpts(3,3), nrms(3)
+ real(dp) :: omega, omegas(3)
  real(dp),allocatable :: matrix_d1E(:,:,:)
  real(dp),allocatable :: matrix_d2E(:,:,:,:,:)
  real(dp),allocatable :: matrix_d3E(:,:,:,:,:,:,:)
@@ -5458,6 +5460,13 @@ subroutine ddb_write_nc(ddb, ddb_hdr, filename, comm, with_psps)
                             start=[iblok_d2E])
      NCF_CHECK(ncerr)
 
+     omega = ddb%omega(1,iblok)
+     ncerr = nf90_put_var(ncid_d2E, nctk_idname(ncid_d2E,&
+                            'frequency'),&
+                            omega,&
+                            start=[iblok_d2E])
+     NCF_CHECK(ncerr)
+
      call ddb%get_d2matr(iblok, matrix_d2E, flg_d2E)
 
      ncerr = nf90_put_var(ncid_d2E, nctk_idname(ncid_d2E,&
@@ -5497,6 +5506,16 @@ subroutine ddb_write_nc(ddb, ddb_hdr, filename, comm, with_psps)
      ncerr = nf90_put_var(ncid_d3E, nctk_idname(ncid_d3E,&
                             'qpoints_normalization'),&
                             nrms,&
+                            start=[1,iblok_d3E])
+     NCF_CHECK(ncerr)
+
+     omegas(1) = ddb%omega(1,iblok)
+     omegas(2) = ddb%omega(2,iblok)
+     omegas(3) = ddb%omega(3,iblok)
+
+     ncerr = nf90_put_var(ncid_d3E, nctk_idname(ncid_d3E,&
+                            'frequencies'),&
+                            omegas,&
                             start=[1,iblok_d3E])
      NCF_CHECK(ncerr)
 
@@ -5655,19 +5674,21 @@ end subroutine ddb_read_d1E_nc
 !!
 !! SOURCE
 
-subroutine ddb_read_d2E_nc(ddb, ncid, iblok, iblok_d2E)
+subroutine ddb_read_d2E_nc(ddb, ncid, iblok, iblok_d2E, ddb_version)
 
 !Arguments -------------------------------
 !scalars
  class(ddb_type),intent(inout) :: ddb
  integer,intent(in) :: ncid,iblok,iblok_d2E
+ integer,intent(in) :: ddb_version 
 
 !Local variables -------------------------
 !scalars
  integer :: ncid_d2E
  integer :: ncerr
+ integer, parameter :: cvrsio9_new=20240201
 !arrays
- real(dp) :: qpt(3)
+ real(dp) :: qpt(3),omega
  integer,allocatable :: flg_d2E(:,:,:,:)
  real(dp),allocatable :: matrix_d2E(:,:,:,:,:)
 ! ************************************************************************
@@ -5683,6 +5704,14 @@ subroutine ddb_read_d2E_nc(ddb, ncid, iblok, iblok_d2E)
  ddb%qpt(1:3,iblok) = qpt(:)
  ncerr = nf90_get_var(ncid_d2E, nctk_idname(ncid_d2E, 'qpoints_normalization'), ddb%nrm(1,iblok), start=[iblok_d2E])
  NCF_CHECK(ncerr)
+   ! Read the perturbation frequency
+ if (ddb_version>=cvrsio9_new) then
+   ncerr = nf90_get_var(ncid_d2E, nctk_idname(ncid_d2E, 'frequency'), ddb%omega(1,iblok), start=[iblok_d2E])
+   NCF_CHECK(ncerr)
+ else
+   ddb%omega(1,iblok)=0.d0
+ end if
+ ddb%omega(2:3,iblok)=0.d0
 
  ncerr = nf90_get_var(ncid_d2E, nctk_idname(ncid_d2E, 'matrix_values'), matrix_d2E, start=[1,1,1,1,1,iblok_d2E])
  NCF_CHECK(ncerr)
@@ -5717,20 +5746,22 @@ end subroutine ddb_read_d2E_nc
 !!
 !! SOURCE
 
-subroutine ddb_read_d3E_nc(ddb, ncid, iblok, iblok_d3E)
+subroutine ddb_read_d3E_nc(ddb, ncid, iblok, iblok_d3E, ddb_version)
 
 !Arguments -------------------------------
 !scalars
  class(ddb_type),intent(inout) :: ddb
  integer,intent(in) :: ncid,iblok,iblok_d3E
+ integer,intent(in) :: ddb_version 
 
 !Local variables -------------------------
 !scalars
  integer :: blktyp
  integer :: ncid_d3E
  integer :: ncerr
+ integer, parameter :: cvrsio9_new=20240201
 !arrays
- real(dp) :: qpt(3), nrm(3)
+ real(dp) :: qpt(3), nrm(3), omega(3)
  real(dp),allocatable :: matrix_d3E(:,:,:,:,:,:,:)
  integer,allocatable :: flg_d3E(:,:,:,:,:,:)
 ! ************************************************************************
@@ -5756,6 +5787,13 @@ subroutine ddb_read_d3E_nc(ddb, ncid, iblok, iblok_d3E)
  ncerr = nf90_get_var(ncid_d3E, nctk_idname(ncid_d3E, 'qpoints_normalization'), nrm, start=[1,iblok_d3E],count=[3,1])
  NCF_CHECK(ncerr)
  ddb%nrm(:,iblok) = nrm(:)
+ if (ddb_version>=cvrsio9_new) then
+   ncerr = nf90_get_var(ncid_d3E, nctk_idname(ncid_d3E, 'frequencies'),qpt,start=[1,iblok_d3E])
+   NCF_CHECK(ncerr)
+   ddb%omega(1:3,iblok)=omega(:)
+ else
+   ddb%omega(:,iblok)=0.d0
+ end if
 
  NCF_CHECK(nf90_get_var(ncid_d3E, nctk_idname(ncid_d3E, 'matrix_values'), matrix_d3E, start=[1,1,1,1,1,1,1,iblok_d3E]))
  NCF_CHECK(nf90_get_var(ncid_d3E, nctk_idname(ncid_d3E, 'matrix_mask'), flg_d3E, start=[1,1,1,1,1,1,iblok_d3E]))

@@ -149,7 +149,7 @@
    2     y     2     x      -1.629987008E-02   3.301000326E-17
    2     y     2     y       5.160210192E-01  -6.764569272E-18
 
- Inverse of H matrix (I-\alpha \barchi)^{-1}
+ Inverse of H matrix (I-alpha barchi)^{-1}
   atom1  dir  atom2  dir        Real              Imag
    1     x     1     x       1.018006688E+00  -1.784118708E-21
    1     x     1     y       5.969696089E-04  -4.278941491E-18
