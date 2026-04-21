@@ -791,7 +791,7 @@ def main():
 
     print()
     print("Execution completed.")
-    print("Results in HTML format are available in %s" % (os.path.join(workdir, "suite_report.html")))
+    print("Results in HTML format are available in %s" % (os.path.join(workdir, "index.html")))
 
     try:
         return results.nfailed
