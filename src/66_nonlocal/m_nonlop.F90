@@ -378,6 +378,9 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  type(pawcprj_type),pointer :: cprjin_(:,:)
  integer :: b0,b1,b2,b3,b4,e0,e1,e2,e3,e4
  integer :: proj_shift,ia,nlmn
+ integer :: shift,shift_forces,shift_stress
+ integer :: nnlout_forces,nnlout_stress
+ real(dp), allocatable :: enlout_forces(:),enlout_stress(:)
 
 ! **********************************************************************
 
@@ -783,16 +786,55 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
    if(hamk%gpu_option==ABI_GPU_DISABLED .or. hamk%gpu_option==ABI_GPU_OPENMP) then
 
-     call gemm_nonlop(hamk%atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,&
-         dimffnlin,dimffnlout,enl_ptr,enl_ndat_ptr,enlout,ffnlin,ffnlout,hamk%gmet,hamk%gprimd,&
-         idir,hamk%indlmn,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,&
-         hamk%lmnmax,hamk%matblk,hamk%mgfft,mpi_enreg,&
-         hamk%natom,hamk%nattyp,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
-         nnlout,npwin,npwout,my_nspinor,hamk%nspinor,hamk%ntypat,only_SO_,paw_opt,&
-         ph3din,ph3dout,signs,hamk%sij,svectout,&
-         tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,proj_shift,select_k_,&
-         iatom_only_,hamk%typat,hamk%usepaw,&
-         vectproj=vectproj,gpu_option=hamk%gpu_option)
+     ! If forces and stresses are both asked, compute them separately if set to (choice=={2,3})
+     if(choice==23 .and. signs==1 .and. gemm_nonlop_split_choice23) then
+       nnlout_forces = 3*hamk%natom
+       nnlout_stress = 6
+       ABI_MALLOC(enlout_forces,(nnlout_forces*ndat))
+       ABI_MALLOC(enlout_stress,(nnlout_stress*ndat))
+       call gemm_nonlop(hamk%atindx1,     2,cpopt,cprjin,dimenl1,dimenl2,dimekbq,&
+           dimffnlin,dimffnlout,enl_ptr,enl_ndat_ptr,enlout_forces,ffnlin,ffnlout,&
+           hamk%gmet,hamk%gprimd,&
+           idir,hamk%indlmn,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,&
+           hamk%lmnmax,hamk%matblk,hamk%mgfft,mpi_enreg,&
+           hamk%natom,hamk%nattyp,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
+           nnlout_forces,npwin,npwout,my_nspinor,hamk%nspinor,hamk%ntypat,only_SO_,paw_opt,&
+           ph3din,ph3dout,signs,hamk%sij,svectout,&
+           tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,proj_shift,select_k_,&
+           iatom_only_,hamk%typat,hamk%usepaw,&
+           vectproj=vectproj,gpu_option=hamk%gpu_option)
+       call gemm_nonlop(hamk%atindx1,     3,cpopt,cprjin,dimenl1,dimenl2,dimekbq,&
+           dimffnlin,dimffnlout,enl_ptr,enl_ndat_ptr,enlout_stress,ffnlin,ffnlout,&
+           hamk%gmet,hamk%gprimd,&
+           idir,hamk%indlmn,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,&
+           hamk%lmnmax,hamk%matblk,hamk%mgfft,mpi_enreg,&
+           hamk%natom,hamk%nattyp,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
+           nnlout_stress,npwin,npwout,my_nspinor,hamk%nspinor,hamk%ntypat,only_SO_,paw_opt,&
+           ph3din,ph3dout,signs,hamk%sij,svectout,&
+           tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,proj_shift,select_k_,&
+           iatom_only_,hamk%typat,hamk%usepaw,&
+           vectproj=vectproj,gpu_option=hamk%gpu_option)
+       do idat=1,ndat
+         shift=(idat-1)*nnlout
+         shift_forces=(idat-1)*nnlout_forces
+         shift_stress=(idat-1)*nnlout_stress
+         enlout(shift+1:shift+6)=enlout_stress(shift_stress+1:shift_stress+6)
+         enlout(shift+7:shift+7+3*hamk%natom)=enlout_forces(shift_forces+1:shift_forces+3*hamk%natom)
+       end do
+       ABI_FREE(enlout_forces)
+       ABI_FREE(enlout_stress)
+     else
+       call gemm_nonlop(hamk%atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,&
+           dimffnlin,dimffnlout,enl_ptr,enl_ndat_ptr,enlout,ffnlin,ffnlout,hamk%gmet,hamk%gprimd,&
+           idir,hamk%indlmn,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,&
+           hamk%lmnmax,hamk%matblk,hamk%mgfft,mpi_enreg,&
+           hamk%natom,hamk%nattyp,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
+           nnlout,npwin,npwout,my_nspinor,hamk%nspinor,hamk%ntypat,only_SO_,paw_opt,&
+           ph3din,ph3dout,signs,hamk%sij,svectout,&
+           tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,proj_shift,select_k_,&
+           iatom_only_,hamk%typat,hamk%usepaw,&
+           vectproj=vectproj,gpu_option=hamk%gpu_option)
+     end if
 
    else if (hamk%gpu_option==ABI_GPU_LEGACY .or. hamk%gpu_option==ABI_GPU_KOKKOS) then
 

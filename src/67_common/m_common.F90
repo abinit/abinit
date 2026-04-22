@@ -67,6 +67,7 @@ module m_common
  use m_lobpcg2,            only : lobpcg_memInfo
  use m_invovl,             only : invovl_ompgpu_static_mem,invovl_ompgpu_work_mem
  use m_gemm_nonlop,        only : gemm_nonlop_ompgpu_static_mem,gemm_nonlop_ompgpu_work_mem
+ use m_gemm_nonlop_projectors, only : gemm_nonlop_split_choice23
  use m_getghc,      only : getghc_ompgpu_work_mem
  use, intrinsic :: iso_c_binding, only : c_size_t
 
@@ -2283,26 +2284,29 @@ end function crystal_from_file
 !!  blocksize        :  if higher than 0, only print memory estimation and exit
 !!
 !! OUTPUT
+!!  nfft_blocks      :  Number of blocks fourwf computation will be divided into
 !!  blocksize        :  Size of MPI tasks blocks to be used in GEMM nonlop
 !!  nblocks          :  Number of MPI blocks to be used in GEMM nonlop
 !!
 !! SOURCE
 subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspden,paral_kgb,&
 &                                           npband,optfor,optstr,wfoptalg,gpu_option,use_distrib,&
-&                                           blocksize,nblocks,warn_on_fail)
+&                                           blocksize,nblocks,nfft_blocks,warn_on_fail)
 
    integer,intent(in)     :: ikpt,ndat,nband,nspinor,nspden,paral_kgb,npband,optfor,optstr,wfoptalg,gpu_option
    logical,intent(in)     :: use_distrib
    logical,intent(in),optional  :: warn_on_fail
    type(gs_hamiltonian_type),intent(in) :: gs_hamk
-   integer,intent(inout)  :: blocksize
+   integer,intent(inout)  :: blocksize,nfft_blocks
    integer,intent(out)    :: nblocks
 
    integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem,gs_ham_smem,updrho_wmem,prep_nonlop_wmem
-   integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem
-   integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices,npw,npw_fft,signs
-   logical  :: print_and_exit,l_warn_on_fail
+   integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem,fourwf_smem,fourwf_wmem,fourwf_mem,hegvd_mem
+   integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices,npw,npw_fft,signs,nprojs,itypat
+   integer, target :: t_fft(3)
+   logical  :: print_and_exit,l_warn_on_fail,fixed_blocksize,fixed_fourwf_blocks
    integer(kind=c_size_t) :: chebfiMem(2),lobpcgMem(2)
+   character(len=500) :: message
 
 ! *********************************************************************
 
@@ -2326,7 +2330,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
 
    if(gpu_option /= ABI_GPU_OPENMP) then
      ! No distribution is attempted outside of OpenMP GPU. User is already warned in chkinp
-     blocksize=1; nblocks=0;
+     blocksize=1; nblocks=0; nfft_blocks=1
      return
    end if
 
@@ -2349,9 +2353,55 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    signs=2
    !wfoptalg==-1 means we're in forstr
    if(wfoptalg==-1) signs=1
+   t_fft(1) = gs_hamk%ngfft(3);
+   t_fft(2) = gs_hamk%ngfft(2);
+   t_fft(3) = gs_hamk%ngfft(1);
+   nprojs=0
+   do itypat=1,gs_hamk%ntypat
+     nprojs = nprojs + count(gs_hamk%indlmn(3,:,itypat)>0)*gs_hamk%nattyp(itypat)
+   end do
 
-   nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, 1, ndgxdt, use_distrib)
-   getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat_try)
+   nonlop_smem=0; invovl_smem=0; getghc_wmem=0; invovl_wmem=0; nonlop_wmem=0; gs_ham_smem=0
+   updrho_wmem=0; prep_nonlop_wmem=0; sum_mem=0; sum_bandpp_mem=0; sum_other_mem=0;
+   localMem=0; fourwf_smem=0; fourwf_wmem=0; fourwf_mem=0; hegvd_mem=0
+   chebfiMem(:)=0; lobpcgMem(:)=0
+
+   !HEGVD work memory estimate.
+   ! Since *_bufferSize routines from (cu/hip)SOLVER require buffer
+   ! to be provided, I measeured the work size given by those routines
+   ! on many big cases and guess an approximate value.
+   ! hipSolver is eager than cuSolver, hence the extra multiplier
+
+   if(wfoptalg==111 .or. wfoptalg==11) then
+     hegvd_mem = int(dp, c_size_t) * nband * nband * 3
+   else if(wfoptalg==114 .or. wfoptalg==14) then
+     hegvd_mem = int(dp, c_size_t) * (ndat*3) * (ndat*3) * 3
+   end if
+#ifdef HAVE_GPU_CUDA
+   if(space == SPACE_C) hegvd_mem = hegvd_mem * 2
+#endif
+#ifdef HAVE_GPU_HIP
+   if(space == SPACE_C) hegvd_mem = hegvd_mem * 3
+   ! ROCm 7 memory usage was measured to be more or less
+   ! on par with CUDA but ROCm 6 was indeed ~9 times higher.
+   ! For now, we can't drop ROCm 6 so we keep this workaround.
+   if(gpu_get_lib_version_major() < 7) then
+     hegvd_mem = hegvd_mem * 9
+   end if
+#endif
+
+   if(wfoptalg>=0) then
+#ifdef HAVE_GPU
+     call gpu_fft_get_estimate_work_size(3, c_loc(t_fft), FFT_Z2Z, ndat, fourwf_smem);
+#endif
+   end if
+
+   nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, max(1,blocksize), ndgxdt, use_distrib)
+   getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat, max(nfft_blocks,1))
+   fourwf_wmem  = int(2, c_size_t) * dp * gs_hamk%n4 * gs_hamk%n5 * gs_hamk%n6 &
+   &             * (ndat/max(nfft_blocks,1) + modulo(ndat,max(nfft_blocks,1)))
+   fourwf_mem  = fourwf_wmem+fourwf_smem
+
    nonlop_wmem = gemm_nonlop_ompgpu_work_mem(gs_hamk%istwf_k, ndat, ndgxdt, npw_fft,&
    &               gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, gs_hamk%lmnmax, signs, wfoptalg)
    gs_ham_smem = int(2,c_size_t)*npw_fft*size(gs_hamk%ffnl_k,dim=3)*size(gs_hamk%ffnl_k,dim=4) + int(3,c_size_t)*npw_fft
@@ -2370,48 +2420,141 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    if(wfoptalg==111 .or. wfoptalg==112) then
      chebfiMem = chebfi_memInfo(nband,icplx*npw*nspinor,space,paral_kgb,icplx*npw*nspinor,blockdim)
      invovl_smem = invovl_ompgpu_static_mem(gs_hamk)
-     invovl_wmem = invovl_ompgpu_work_mem(gs_hamk, ndat_try)
+     invovl_wmem = invovl_ompgpu_work_mem(gs_hamk, ndat)
    end if
    if(wfoptalg==114) then
      lobpcgMem = lobpcg_memInfo(nband,icplx*npw*nspinor,space,paral_kgb,blockdim)
    end if
    localMem  = (int(2,c_size_t)*npw*nspinor*nband+3*nband)*kind(1.d0) ! cg, eig, occ, resid in chebfiwf/lobpcgwf
 
+   ! Check if arrays outside of GEMM nonlop projectors and ompgpu_fourwf fit in GPU memory
+   sum_other_mem    = gs_ham_smem
+
+   if(wfoptalg>=0) then
+     sum_other_mem    = sum_other_mem+updrho_wmem+prep_nonlop_wmem
+   else
+     sum_other_mem    = sum_other_mem+nonlop_wmem+prep_nonlop_wmem
+   end if
+
+   if(wfoptalg==111) then
+     sum_other_mem    = sum_other_mem  + invovl_wmem+invovl_smem+chebfiMem(1)+chebfiMem(2)+localMem
+   end if
+
+   if(wfoptalg==114) then
+     sum_other_mem    = sum_other_mem  + lobpcgMem(1)+lobpcgMem(2)+localMem
+   end if
+
    print_and_exit=.false.
+   fixed_blocksize=.false.
+   fixed_fourwf_blocks=.false.
    nblocks=0
-   if(blocksize > 1) then
+   if(blocksize > 0 .and. nfft_blocks > 0) then
      nblocks=max(1,nprocs/blocksize)
      print_and_exit=.true.
    else
-     blocksize=1
-     write(std_out,*) "Setting GEMM nonlop block number...", new_line('A')
+     if(blocksize > 0) then
+       nblocks=max(1,nprocs/blocksize)
+       fixed_blocksize=.true.
+     else
+       blocksize=1
+       write(std_out,*) "Setting GEMM nonlop block number...", new_line('A')
+     end if
+
+     if(nfft_blocks > 0) then
+       fixed_fourwf_blocks=.true.
+     else
+       nfft_blocks=1
+       write(std_out,*) "Setting FFT blocks number...", new_line('A')
+     end if
    end if
 
-   max_slices=max(100,nprocs*2); if(use_distrib) max_slices=nprocs
-   ! How the number of blocks is decided:
-   ! We try to divide bandpp with dividers from 1 to max_slices (#MPI tasks if in distributed mode, magical value otherwise)
-   ! If we fail, that means test case is too fat for given hardware, and that's it
-   do i=1,nprocs
+   max_slices=max(100,nprocs*2); if(sum_other_mem > free_mem) max_slices=1
+   ! How we try to optimize GPU memory consumption:
+   ! We work on two variables :
+   !    - blocksize : for slicing GEMM nonlop projectors arrays
+   !    - nfft_blocks : for slicing ompgpu_fourwf work buffer
+   ! At each iteration, we check which routine from GEMM nonlop or ompgpu_fourwf
+   ! have the higher memory requirement and increase related variable.
+   !
+   ! We arbitraly give at least 100 tries to improve GPU memory consumption before eventually
+   ! ruling out that use case is too big to run with available GPU memory and abort.
+   !
+   ! User may hard set slicing for both fourwf and GEMM nonlop, in which case the code will
+   ! warn the user about possible GPU memory overpassing instead of aborting.
+   !
+   ! However, if arrays from other parts of the code already have higher memory requirements,
+   ! we fail anyway and advise the user to increase nblock_lobpcg or run on more nodes.
+   do i=1,max_slices
 
-     ! Gemm nonlop static memory requirement is higher, split here
-     if(i>1 .and. .not. print_and_exit) blocksize = blocksize + 1
-     if(modulo(nprocs,blocksize)/=0 .and. use_distrib) cycle
-     !FIXME : Skipping uneven blocksize <=5 if using MPI distrib, as the amount of GPU per node is even usually
-     !For example, with 3 nodes of 4 GPU, we don't want to have a blocksize of 3 as
-     !it would generate 4 comms-block, with 2 inter-node comms.
-     !While using a blocksize of 4 would generate 3 comms, one for each node, leading to less MPI comms
-     if(i>1 .and. modulo(blocksize,2)/=0 .and. use_distrib .and. .not. print_and_exit) cycle
-     if(i>1) nblocks=nprocs/blocksize
+     ! First iteration or user provided parameters to split fourwf and GEMM nonlop
+     ! Just measure
+     if(i==1 .or. print_and_exit) then
+       if(wfoptalg>=0) then
+#ifdef HAVE_GPU
+         call gpu_fft_get_estimate_work_size(3, c_loc(t_fft), FFT_Z2Z, ndat/nfft_blocks, fourwf_smem);
+#endif
+         getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat, nfft_blocks)
+         fourwf_wmem  = int(2, c_size_t) * dp * gs_hamk%n4 * gs_hamk%n5 * gs_hamk%n6 &
+         &             * (ndat/nfft_blocks + modulo(ndat,nfft_blocks))
+         fourwf_mem  = fourwf_wmem + fourwf_smem
+       end if
+       nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft,gs_hamk%indlmn,gs_hamk%nattyp,&
+       &             gs_hamk%ntypat,blocksize,ndgxdt,use_distrib)
+     else
+       ! Raise fourwf slicing if :
+       ! - GEMM nonlop block has been set by user
+       ! or
+       ! - fourwf memory requirements are higher
+       ! - fourwf slicing wasn't set by user
+       ! - fourwf is still sliceable
+       !
+       ! Raise GEMM nonlop blocks otherwise
+       if(fixed_blocksize .or. &
+       &    (wfoptalg >= 0 &
+       &     .and. nonlop_smem < fourwf_mem  &
+       &     .and. fourwf_mem >= getghc_wmem &
+       &     .and. .not. fixed_fourwf_blocks &
+       &     .and. nfft_blocks < ndat &
+       &     .and. ndat_try > 1)) then
+         ! Fourwf work memory requirement is higher, split here
+         if(nfft_blocks == ndat) cycle ! Can't split more than ndat
 
-     nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,blocksize, ndgxdt, use_distrib)
+         if(i>1 .and. .not. print_and_exit) then
+           do while(ndat_try <= (ndat/nfft_blocks + modulo(ndat,nfft_blocks)))
+             nfft_blocks=nfft_blocks+1
+           end do
+           ndat_try = (ndat/nfft_blocks + modulo(ndat,nfft_blocks))
+         end if
+#ifdef HAVE_GPU
+         call gpu_fft_get_estimate_work_size(3, c_loc(t_fft), FFT_Z2Z, ndat/nfft_blocks, fourwf_smem);
+#endif
+         getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat, nfft_blocks)
+         fourwf_wmem  = int(2, c_size_t) * dp * gs_hamk%n4 * gs_hamk%n5 * gs_hamk%n6 &
+         &             * (ndat/nfft_blocks + modulo(ndat,nfft_blocks))
+         fourwf_mem  = fourwf_wmem + fourwf_smem
+       else
+         ! Gemm nonlop static memory requirement is higher, split here
+         if(i>1 .and. .not. print_and_exit) blocksize = blocksize + 1
+         if(modulo(nprocs,blocksize)/=0 .and. use_distrib) cycle
+         if(nprocs < blocksize .and. use_distrib) cycle
+         !FIXME : Skipping uneven blocksize <=5 if using MPI distrib, as the amount of GPU per node is even usually
+         !For example, with 3 nodes of 4 GPU, we don't want to have a blocksize of 3 as
+         !it would generate 4 comms-block, with 2 inter-node comms.
+         !While using a blocksize of 4 would generate 3 comms, one for each node, leading to less MPI comms
+         if(i>1 .and. modulo(blocksize,2)/=0 .and. use_distrib .and. .not. print_and_exit) cycle
+         if(i>1) nblocks=nprocs/blocksize
+
+         nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft,gs_hamk%indlmn,gs_hamk%nattyp,&
+         &             gs_hamk%ntypat,blocksize,ndgxdt,use_distrib)
+       end if
+     end if
 
      ! Bandpp~ndat sized buffer memory requirements are higher, split there
      sum_mem          = nonlop_smem + gs_ham_smem
      sum_bandpp_mem   = getghc_wmem
-     sum_other_mem    = nonlop_smem + gs_ham_smem
 
      if(wfoptalg>=0) then
-       sum_mem          = sum_mem+getghc_wmem+updrho_wmem+prep_nonlop_wmem
+       sum_mem          = sum_mem+getghc_wmem+updrho_wmem+prep_nonlop_wmem+fourwf_smem+hegvd_mem
      else
        sum_mem          = sum_mem+nonlop_wmem+prep_nonlop_wmem
      end if
@@ -2419,86 +2562,169 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
      if(wfoptalg==111 .or. wfoptalg==112) then
        sum_mem          = sum_mem        + invovl_smem+invovl_wmem+chebfiMem(1)+chebfiMem(2)+localMem
        sum_bandpp_mem   = sum_bandpp_mem + invovl_wmem
-       sum_other_mem    = sum_other_mem  + invovl_smem+chebfiMem(1)+chebfiMem(2)+localMem
      end if
 
      if(wfoptalg==114) then
        sum_mem          = sum_mem        + lobpcgMem(1)+lobpcgMem(2)+localMem
-       sum_other_mem    = sum_other_mem  + lobpcgMem(1)+lobpcgMem(2)+localMem
      end if
 
      if(sum_mem < free_mem .or. print_and_exit) exit
 
    end do
-   if(blocksize==1) then
-     write(std_out,'(A,A,I3,A)') "GPU memory consumption estimate without ",&
-     &                        "distribution in GEMM nonlop for K-point ",ikpt,":"
-   else if(use_distrib) then
-     write(std_out,'(A,I3,A,I3,A,I3,A)') "GPU memory consumption estimate using ",&
-     &                        nblocks, " blocks of ", blocksize,&
-     &                        " MPI tasks in GEMM nonlop for K-point ",ikpt,":"
-   else
-     write(std_out,'(A,I3,A,I3,A)') "GPU memory consumption estimate using ",&
-       &                        blocksize, " slices in GEMM nonlop for K-point ",ikpt,":"
-   end if
-   write(std_out,'(A,F10.3,1x,A)') " Available memory                        : ", real(free_mem)/(1024*1024), "MiB"
-   write(std_out,*) "Memory requirements per MPI task (OpenMP GPU)"
-   write(std_out,*) "---------------------------------------------------------"
-   write(std_out,*) "GEMM nonlop projectors, gouverned by blocking"
-   write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop_ompgpu (projectors)       : ",  real(nonlop_smem,dp)/(1024*1024), "MiB"
 
+   ! Corner case : not enough GPU memory in forstrnps for forces and stress computation.
+   ! By default, forces and stress are computed in one gemm_nonlop call using choice==23
+   ! This translates to have various arrays sized by ndgxdt == 9 (6 for stress, 3 for forces)
+   ! To try circumventing the lack of GPU memory in that case, we may compute stress and forces
+   ! separately so arrays will be sized after ndgxdt=6 at most instead.
+   if(sum_mem > free_mem .and. optfor > 0 .and. optstr > 0 .and. wfoptalg < 0) then
+     ndgxdt = 6 ! number of derivatives for stress
+     nonlop_wmem = gemm_nonlop_ompgpu_work_mem(gs_hamk%istwf_k, ndat, ndgxdt, npw_fft,&
+     &               gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, gs_hamk%lmnmax, signs, wfoptalg)
+     blocksize=1
+     ! Same loop as above, simplified to forstrnps use case
+     do i=1,nprocs
+       ! Gemm nonlop static memory requirement is higher, split here
+       if(i>1 .and. .not. print_and_exit) blocksize = blocksize + 1
+       if(modulo(nprocs,blocksize)/=0 .and. use_distrib) cycle
+       !FIXME : Skipping uneven blocksize <=5 if using MPI distrib, as the amount of GPU per node is even usually
+       !For example, with 3 nodes of 4 GPU, we don't want to have a blocksize of 3 as
+       !it would generate 4 comms-block, with 2 inter-node comms.
+       !While using a blocksize of 4 would generate 3 comms, one for each node, leading to less MPI comms
+       if(i>1 .and. modulo(blocksize,2)/=0 .and. use_distrib .and. .not. print_and_exit) cycle
+       if(i>1) nblocks=nprocs/blocksize
 
-   write(std_out,*) "Static buffers, computed once and permanently on card"
-   ! CHEBFI2 or SLICE
-   if(wfoptalg==111 .or. wfoptalg==112) then
-     write(std_out,'(A,F10.3,1x,A)') "   invovl_ompgpu (mkinvovl)              : ",  real(invovl_smem,dp)/(1024*1024), "MiB"
-     write(std_out,'(A,F10.3,1x,A)') "   chebfi2                               : ",    real(chebfiMem(1))/(1024*1024), "MiB"
-   end if
+       nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,&
+       &                                           blocksize,ndgxdt, use_distrib)
+       sum_mem     = nonlop_smem + gs_ham_smem + nonlop_wmem + prep_nonlop_wmem
 
-   ! LOBPCG2
-   if(wfoptalg==114) then
-     write(std_out,'(A,F10.3,1x,A)') "   lobpcg2                               : ",    real(lobpcgMem(1))/(1024*1024), "MiB"
-   end if
-
-   write(std_out,'(A,F10.3,1x,A)') "   hamiltonian arrays                    : ",      real(gs_ham_smem)/(1024*1024), "MiB"
-
-   write(std_out,*) "Work buffers (sized after bandpp or nblock_lobpcg)"
-
-   ! getghc (any diago algorithm)
-   if(wfoptalg>=0) then
-     write(std_out,'(A,F10.3,1x,A)') "   getghc (inc. fourwf+gemm_nonlop)      : ",  real(getghc_wmem,dp)/(1024*1024), "MiB"
-     write(std_out,'(A,F10.3,1x,A)') "   mkrho~vtowfk_extra             )      : ",  real(updrho_wmem,dp)/(1024*1024), "MiB"
-   else
-     write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop                           : ",  real(nonlop_wmem,dp)/(1024*1024), "MiB"
-   end if
-   if(paral_kgb==1) then
-     write(std_out,'(A,F10.3,1x,A)') "   prep_nonlop                           : ",  real(prep_nonlop_wmem,dp)/(1024*1024), "MiB"
+       if(sum_mem < free_mem) then
+         gemm_nonlop_split_choice23 = .true.
+         exit
+       end if
+     end do
    end if
 
-   ! CHEBFI2 or SLICE
-   if(wfoptalg==111 .or. wfoptalg==112) then
-     write(std_out,'(A,F10.3,1x,A)') "   invovl                                : ",  real(invovl_wmem,dp)/(1024*1024), "MiB"
-     write(std_out,'(A,F10.3,1x,A)') "   chebfi2 (RR buffers)                  : ",    real(chebfiMem(2))/(1024*1024), "MiB"
-     write(std_out,'(A,F10.3,1x,A)') "   chebfiwf (cg,resid,eig)               : ",        real(localMem)/(1024*1024), "MiB"
-   end if
-
-   ! LOBPCG2
-   if(wfoptalg==114) then
-     write(std_out,'(A,F10.3,1x,A)') "   lobpcg2 (RR buffers)                  : ",    real(lobpcgMem(2))/(1024*1024), "MiB"
-     write(std_out,'(A,F10.3,1x,A)') "   lobpcgwf (cg,resid,eig)               : ",        real(localMem)/(1024*1024), "MiB"
-   end if
-
-   write(std_out,*) "---------------------------------------------------------"
-   write(std_out,'(A,F10.3,1x,A)') "Sum                                      : ", real(sum_mem)/(1024*1024), "MiB"
-   write(std_out,'(A)') new_line('A')
-   flush(std_out)
-   if(sum_mem > free_mem) then
-     if(l_warn_on_fail) then
-       ABI_WARNING("It seems the test case you're trying to run is too big to run with given GPU resources !")
+   ! Quickfix : sometimes, we may run out of GPU memory when computing forces/stresses because of fragmentation.
+   ! We try to reduce the risk by forcing even more blocking:
+   if((wfoptalg < 0 .and. (optfor > 0 .or. optstr > 0)) .and. sum_mem > 0.95*free_mem) then
+     if(blocksize > 5) then
+       if(.not. gemm_nonlop_split_choice23) then
+         gemm_nonlop_split_choice23 = .true.
+         ndgxdt=6
+       else
+         blocksize=blocksize*1.5
+         blocksize=min(nprojs,blocksize)
+       end if
      else
-       ABI_ERROR("It seems the test case you're trying to run is too big to run with given GPU resources !")
+       blocksize=blocksize*1.5
+     end if
+
+     nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,&
+     &                                           blocksize,ndgxdt,use_distrib)
+     sum_mem     = nonlop_smem + gs_ham_smem + nonlop_wmem + prep_nonlop_wmem
+   end if
+
+   write(std_out,'(A,I3,A)') "GPU memory consumption estimate per MPI task for K-point ",ikpt,":"
+   if(blocksize>1) then
+     if(use_distrib) then
+       write(std_out,'(A,I3,A,I3,A)') "MPI distribution of GEMM nonlop projectors using ",&
+       &                        nblocks, " blocks of ", blocksize, " MPI tasks."
+     else
+       write(std_out,'(A,I3,A)') "Local slicing of GEMM nonlop projectors using ",&
+         &                        blocksize, " blocks."
      end if
    end if
+   if(nfft_blocks>1 .and. wfoptalg>=0) then
+     write(std_out,'(A,I3,A)') "Local slicing of FFT work array using ",&
+       &                        nfft_blocks, " blocks."
+   end if
+   write(std_out,'(A,F10.3,1x,A)') " Considered available memory             : ", real(free_mem)/(1024*1024), "MiB"
+   write(std_out,'(A)')
+   write(std_out,'(A)') "|                 Buffers gouverned by blocking/slicing                |"
+   write(std_out,'(A)') "|:--------------------------|---------:|-------------:|---------------:|"
+   write(std_out,'(A,I4,A,F10.2,1x,A)') "|  gemm_nonlop_projectors   | ", blocksize, " blk |  npw,*natom* | ",  real(nonlop_smem,dp)/(1024*1024), "MiB |"
+   if(wfoptalg>=0) then
+     write(std_out,'(A,I4,A,F10.2,1x,A)') "|  fourwf (fofr work array) | ", nfft_blocks, " blk | npw,*bandpp* | ",  real(fourwf_wmem,dp)/(1024*1024), "MiB |"
+     write(std_out,'(A,F10.2,1x,A)') "|  xFFT~internal buffers    |       NA |           NA | ",  real(fourwf_smem,dp)/(1024*1024), "MiB |"
+   end if
+
+   if(sum_other_mem > free_mem) then
+     write(std_out,'(A)')
+     write(std_out,'(A)') "/!\ No slicing attempted as other arrays are too big to fit"
+     write(std_out,'(A)')
+   end if
+
+   write(std_out,'(A)')
+   write(std_out,'(A)') "|   Static buffers, computed once and permanently on card    |"
+   write(std_out,'(A)') "|:-------------------------|--------------:|----------------:|"
+   ! CHEBFI2 or SLICE
+   if(wfoptalg==111 .or. wfoptalg==112) then
+     write(std_out,'(A,F10.2,1x,A)') "|  invovl (mkinvovl)       |        natom  |  ",  real(invovl_smem,dp)/(1024*1024), "MiB |"
+     write(std_out,'(A,F10.2,1x,A)') "|  chebfi2                 |          npw  |  ",    real(chebfiMem(1))/(1024*1024), "MiB |"
+   end if
+
+   ! LOBPCG2
+   if(wfoptalg==114) then
+     write(std_out,'(A,F10.2,1x,A)') "|  lobpcg2                 |          npw  |  ",    real(lobpcgMem(1))/(1024*1024), "MiB |"
+   end if
+
+   write(std_out,'(A,F10.2,1x,A)') "|  hamiltonian arrays      |          npw  |  ",      real(gs_ham_smem)/(1024*1024), "MiB |"
+
+   write(std_out,'(A)')
+   write(std_out,'(A)') "|  Work buffers (mostly sized after bandpp or nblock_lobpcg) |"
+   write(std_out,'(A)') "|:-------------------------|--------------:|----------------:|"
+   ! getghc (any diago algorithm)
+   if(wfoptalg>=0) then
+     if(getghc_wmem /= fourwf_wmem) then
+       write(std_out,'(A,F10.2,1x,A)') "|  gemm_nonlop             |     bandpp  |  ",  real(getghc_wmem,dp)/(1024*1024), "MiB |"
+     end if
+     write(std_out,'(A,F10.2,1x,A)') "|  mkrho~vtowfk_extra      |   npw,bandpp  |  ",  real(updrho_wmem,dp)/(1024*1024), "MiB |"
+     write(std_out,'(A,F10.2,1x,A)') "|  hegvd                   |       bandpp  |  ",  real(hegvd_mem,dp)/(1024*1024), "MiB |"
+   else
+     write(std_out,'(A,F10.2,1x,A)') "|  gemm_nonlop             | natom,bandpp  |  ",  real(nonlop_wmem,dp)/(1024*1024), "MiB |"
+   end if
+   if(paral_kgb==1) then
+     write(std_out,'(A,F10.2,1x,A)') "|  prep_nonlop             |   npw,bandpp  |  ",  real(prep_nonlop_wmem,dp)/(1024*1024), "MiB |"
+   end if
+
+   ! CHEBFI2 or SLICE
+   if(wfoptalg==111 .or. wfoptalg==112) then
+     write(std_out,'(A,F10.2,1x,A)') "|  invovl                  | natom,bandpp  |  ",  real(invovl_wmem,dp)/(1024*1024), "MiB |"
+     write(std_out,'(A,F10.2,1x,A)') "|  chebfi2 (RR buffers)    |        nband  |  ",    real(chebfiMem(2))/(1024*1024), "MiB |"
+     write(std_out,'(A,F10.2,1x,A)') "|  chebfiwf (cg,resid,eig) |    npw,nband  |  ",        real(localMem)/(1024*1024), "MiB |"
+   end if
+
+   ! LOBPCG2
+   if(wfoptalg==114) then
+     write(std_out,'(A,F10.2,1x,A)') "|  lobpcg2 (RR buffers)    |       bandpp  |  ",    real(lobpcgMem(2))/(1024*1024), "MiB |"
+     write(std_out,'(A,F10.2,1x,A)') "|  lobpcgwf (cg,resid,eig) |    npw,nband  |  ",        real(localMem)/(1024*1024), "MiB |"
+   end if
+
+   write(std_out,'(A)')
+   if(sum_other_mem > free_mem) then
+     write(std_out,'(A,F10.2,1x,A)') "Sum                                      : ", real(sum_other_mem)/(1024*1024), "MiB"
+   else
+     write(std_out,'(A,F10.2,1x,A)') "Sum                                      : ", real(sum_mem)/(1024*1024), "MiB"
+   end if
+   write(std_out,'(A)')
+   flush(std_out)
+   if(rank==0) then
+     if(sum_other_mem > free_mem) then
+       write(message,'(3a)') &
+         &   '  Your case is too big to fit in GPU memory regardless of possible array optimizations in fourwf and GEMM nonlop.',ch10,&
+         &   '  Action : run on more nodes and/or increase nblock_lobpcg if using LOBPCG.'
+       ABI_ERROR(message)
+     end if
+     if(sum_mem > free_mem) then
+       if(l_warn_on_fail) then
+         ABI_WARNING("It seems the test case you're trying to run is too big to run with given GPU resources !")
+       else
+         ABI_ERROR("It seems the test case you're trying to run is too big to run with given GPU resources !")
+       end if
+     end if
+   end if
+   !call xmpi_barrier(xmpi_world)
 
  end subroutine get_gemm_nonlop_ompgpu_blocksize
 !!***

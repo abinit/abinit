@@ -7,15 +7,14 @@
 # 2024 : Port to python3.6
 
 #from __future__ import division, print_function
+#from numpy import complex, float
+import multiprocessing
+import os
+from functools import partial
+
+import netCDF4 as nc
 import numpy as N
 from numpy import zeros
-#from numpy import complex, float
-import itertools as Iter
-from functools import partial
-import multiprocessing
-import netCDF4 as nc
-import sys
-import os
 
 # Variables
 tol6 = 1E-6
@@ -45,40 +44,40 @@ class system:
   filefullpath = None
   def __init__(self,directory=None,filename=None):
     if filename == None:return
-    if directory == None:directory='.'
+    if directory == None:directory="."
     self.filename = filename
-    self.filefullpath = '%s/%s' %(directory,filename)
-    if self.filefullpath[-4:] == '_DDB':
+    self.filefullpath = "%s/%s" %(directory,filename)
+    if self.filefullpath[-4:] == "_DDB":
       self.DDB_file_open(self.filefullpath)
-    if self.filefullpath[-10:] == '_EIGR2D.nc' or self.filefullpath[-10:] == '_EIGI2D.nc':
+    if self.filefullpath[-10:] == "_EIGR2D.nc" or self.filefullpath[-10:] == "_EIGI2D.nc":
       self.EIG2Dnc_file_open(self.filefullpath)
-    if self.filefullpath[-7:] == '_EIG.nc':
+    if self.filefullpath[-7:] == "_EIG.nc":
       self.EIG_file_open(self.filefullpath)
-    if self.filefullpath[-4:] == '_EIG':
-      raise Exception('Please provide a netCDF _EIG.nc file!\n\
-         This is mandatory for good accuracy.' )
-    if self.filefullpath[-7:] == '_GKK.nc':
+    if self.filefullpath[-4:] == "_EIG":
+      raise Exception("Please provide a netCDF _EIG.nc file!\n\
+         This is mandatory for good accuracy." )
+    if self.filefullpath[-7:] == "_GKK.nc":
       self.GKKnc_file_open(self.filefullpath)
-    if self.filefullpath[-6:] == '_EP.nc':
+    if self.filefullpath[-6:] == "_EP.nc":
       self.EP_file_open(self.filefullpath)
 
 # Read _EP.nc file
   def EP_file_open(self,filefullpath):
     if not (os.path.isfile(filefullpath)):
       raise Exception('The file "%s" does not exists!' %filefullpath)
-    root = nc.Dataset(filefullpath,'r')
-    self.natom = len(root.dimensions['number_of_atoms'])
-    self.nkpt = len(root.dimensions['number_of_kpoints'])
-    self.nband = len(root.dimensions['max_number_of_states'])
-    self.ntemp = len(root.dimensions['number_of_temperature'])
-    self.nsppol = len(root.dimensions['number_of_spins'])
-    self.nbQ = len(root.dimensions['number_of_qpoints'])
-    self.temp = root.variables['temperature'][:]
-    self.occ = root.variables['occupations'][:,:,:] # number_of_spins, number_of_kpoints, max_number_of_states
-    self.kpt = root.variables['reduced_coordinates_of_kpoints'][:,:]
-    self.eigenvalues = root.variables['eigenvalues'][:,:,:] #number_of_spins, number_of_kpoints, max_number_of_states
-    self.rprimd = root.variables['primitive_vectors'][:,:]
-    self.zpm = root.variables['zero_point_motion'][:,:,:,:,:] # nsppol, number_of_temperature,
+    root = nc.Dataset(filefullpath,"r")
+    self.natom = len(root.dimensions["number_of_atoms"])
+    self.nkpt = len(root.dimensions["number_of_kpoints"])
+    self.nband = len(root.dimensions["max_number_of_states"])
+    self.ntemp = len(root.dimensions["number_of_temperature"])
+    self.nsppol = len(root.dimensions["number_of_spins"])
+    self.nbQ = len(root.dimensions["number_of_qpoints"])
+    self.temp = root.variables["temperature"][:]
+    self.occ = root.variables["occupations"][:,:,:] # number_of_spins, number_of_kpoints, max_number_of_states
+    self.kpt = root.variables["reduced_coordinates_of_kpoints"][:,:]
+    self.eigenvalues = root.variables["eigenvalues"][:,:,:] #number_of_spins, number_of_kpoints, max_number_of_states
+    self.rprimd = root.variables["primitive_vectors"][:,:]
+    self.zpm = root.variables["zero_point_motion"][:,:,:,:,:] # nsppol, number_of_temperature,
                                                    # number_of_kpoints, max_number_of_states, cplex
     root.close()
 
@@ -86,10 +85,10 @@ class system:
   def EIG_file_open(self,filefullpath):
     if not (os.path.isfile(filefullpath)):
       raise Exception('The file "%s" does not exists!' %filefullpath)
-    root = nc.Dataset(filefullpath,'r')
-    self.EIG = root.variables['Eigenvalues'][:,:,:] # nsppol,nkpt,nband
-    self.Kptns = root.variables['Kptns'][:,:]
-    NBandK = root.variables['NBandK'][:]
+    root = nc.Dataset(filefullpath,"r")
+    self.EIG = root.variables["Eigenvalues"][:,:,:] # nsppol,nkpt,nband
+    self.Kptns = root.variables["Kptns"][:,:]
+    NBandK = root.variables["NBandK"][:]
     self.nband =  int(NBandK[0,0])
     root.close()
 
@@ -97,47 +96,47 @@ class system:
   def GKKnc_file_open(self,filefullpath):
     if not (os.path.isfile(filefullpath)):
       raise Exception('The file "%s" does not exists!' %filefullpath)
-    root = nc.Dataset(filefullpath,'r')
-    self.natom = len(root.dimensions['number_of_atoms'])
-    self.nkpt = len(root.dimensions['number_of_kpoints'])
-    self.nband = len(root.dimensions['max_number_of_states'])
-    self.nsppol = len(root.dimensions['number_of_spins'])
-    self.occ = root.variables['occupations'][:,:,:] # number_of_spins, number_of_kpoints, max_number_of_states
-    GKKtmp = root.variables['second_derivative_eigenenergies_actif'][:,:,:,:,:] #max_number_of_states,number_of_atoms,
+    root = nc.Dataset(filefullpath,"r")
+    self.natom = len(root.dimensions["number_of_atoms"])
+    self.nkpt = len(root.dimensions["number_of_kpoints"])
+    self.nband = len(root.dimensions["max_number_of_states"])
+    self.nsppol = len(root.dimensions["number_of_spins"])
+    self.occ = root.variables["occupations"][:,:,:] # number_of_spins, number_of_kpoints, max_number_of_states
+    GKKtmp = root.variables["second_derivative_eigenenergies_actif"][:,:,:,:,:] #max_number_of_states,number_of_atoms,
                                        # number_of_cartesian_directions, number_of_kpoints, product_mband_nsppol*2
-    GKKtmp2 = N.einsum('ijkno->nokji', GKKtmp)
+    GKKtmp2 = N.einsum("ijkno->nokji", GKKtmp)
     #GKKtmp2(nkpt,nband*nsppol*2,3,natom,nband)
     GKKtmp3 = GKKtmp2[:, ::2, ...]  # Slice the even numbers
     GKKtmp4 = GKKtmp2[:, 1::2, ...] # Slice the odd numbers
     self.GKK = 1j*GKKtmp4
     self.GKK += GKKtmp3
     self.GKK_bis = N.reshape(self.GKK,(self.nkpt,self.nsppol,self.nband,3,self.natom,self.nband))
-    self.eigenvalues = root.variables['eigenvalues'][:,:,:] #number_of_spins, number_of_kpoints, max_number_of_states
-    self.kpt = root.variables['reduced_coordinates_of_kpoints'][:,:]
-    self.iqpt = root.variables['current_q_point'][:]
-    self.wtq = root.variables['current_q_point_weight'][:]
-    self.rprimd = root.variables['primitive_vectors'][:,:]
+    self.eigenvalues = root.variables["eigenvalues"][:,:,:] #number_of_spins, number_of_kpoints, max_number_of_states
+    self.kpt = root.variables["reduced_coordinates_of_kpoints"][:,:]
+    self.iqpt = root.variables["current_q_point"][:]
+    self.wtq = root.variables["current_q_point_weight"][:]
+    self.rprimd = root.variables["primitive_vectors"][:,:]
     root.close()
 
 # Open the EIG2D.nc file and read it
   def EIG2Dnc_file_open(self,filefullpath):
     if not (os.path.isfile(filefullpath)):
       raise Exception('The file "%s" does not exists!' %filefullpath)
-    root = nc.Dataset(filefullpath,'r')
-    self.natom = len(root.dimensions['number_of_atoms'])
-    self.nkpt = len(root.dimensions['number_of_kpoints'])
-    self.nband = len(root.dimensions['maximum_number_of_bands'])
-    self.nsppol = len(root.dimensions['number_of_spins'])
-    self.occ = root.variables['occupations'][:,:,:] # number_of_spins, number_of_kpoints, max_number_of_states
-    group = root.groups['d2eig']
-    EIG2Dtmp = group.variables['matrix_values'][:,:,:,:,:,:,:,:,:]#number_of_d2eig_blocks, number_of_spins, number_of_kpoints, maximum_number_of_bands, number_of_perturbations, number_of_cartesian_directions, number_of_perturbations, number_of_cartesian_directions, cplex
+    root = nc.Dataset(filefullpath,"r")
+    self.natom = len(root.dimensions["number_of_atoms"])
+    self.nkpt = len(root.dimensions["number_of_kpoints"])
+    self.nband = len(root.dimensions["maximum_number_of_bands"])
+    self.nsppol = len(root.dimensions["number_of_spins"])
+    self.occ = root.variables["occupations"][:,:,:] # number_of_spins, number_of_kpoints, max_number_of_states
+    group = root.groups["d2eig"]
+    EIG2Dtmp = group.variables["matrix_values"][:,:,:,:,:,:,:,:,:]#number_of_d2eig_blocks, number_of_spins, number_of_kpoints, maximum_number_of_bands, number_of_perturbations, number_of_cartesian_directions, number_of_perturbations, number_of_cartesian_directions, cplex
     #EIG2Dtmp = root.variables['second_derivative_eigenenergies'][:,:,:,:,:,:,:] #number_of_atoms,
                                        # number_of_cartesian_directions, number_of_atoms, number_of_cartesian_directions,
                                        # number_of_kpoints, product_mband_nsppol, cplex
     # SP: we assume only 1 q-points (no merge) per file and only 1 spin channel
     EIG2Dtmp2 = EIG2Dtmp[0,0,:,:,:,:,:,:,:] # (nkpt, mband, npert, 3, npert, 3, 2)
     # From (nkpt, mband, npert, 3, npert, 3, 2) --> (nkpt,mband*nsppol,3,natom,3,natom,2)
-    EIG2Dtmp3 = N.einsum('ijklmno->ijlknmo', EIG2Dtmp2)
+    EIG2Dtmp3 = N.einsum("ijklmno->ijlknmo", EIG2Dtmp2)
 
     self.EIG2D = 1j*EIG2Dtmp3[...,1]
     self.EIG2D += EIG2Dtmp3[...,0]
@@ -145,8 +144,8 @@ class system:
     self.EIG2D_bis = N.reshape(self.EIG2D,(self.nkpt,self.nsppol,self.nband,3,self.natom,3,self.natom))
     #EIG2D_bis(nkpt,nband,nsppol,3,natom,3,natom)
     #self.eigenvalues = root.variables['eigenvalues'][:,:,:] #number_of_spins, number_of_kpoints, max_number_of_states
-    self.kpt = root.variables['reduced_coordinates_of_kpoints'][:,:]
-    self.iqpt = root.groups['d2eig'].variables['reduced_coordinates_of_qpoints'][:]
+    self.kpt = root.variables["reduced_coordinates_of_kpoints"][:,:]
+    self.iqpt = root.groups["d2eig"].variables["reduced_coordinates_of_qpoints"][:]
     #self.iqpt = root.variables['current_q_point'][:]
     #self.wtq = root.variables['current_q_point_weight'][:]
     #self.rprimd = root.variables['primitive_vectors'][:,:]
@@ -156,34 +155,34 @@ class system:
   def DDB_file_open(self,filefullpath):
     if not (os.path.isfile(filefullpath)):
       raise Exception('The file "%s" does not exists!' %filefullpath)
-    with open(filefullpath,'r') as DDB:
+    with open(filefullpath) as DDB:
       Flag = 0
       Flag2 = False
       Flag3 = False
       ikpt = 0
       typatdone = 0
       for line in DDB:
-        if line.find('natom') > -1:
+        if line.find("natom") > -1:
           self.natom = int(line.split()[1])
-        if line.find('nkpt') > -1:
+        if line.find("nkpt") > -1:
           self.nkpt = int(line.split()[1])
           self.kpt  = zeros((self.nkpt,3))
-        if line.find('ntypat') > -1:
+        if line.find("ntypat") > -1:
           self.ntypat = int(line.split()[1])
-        if line.find('nband') > -1:
+        if line.find("nband") > -1:
           self.nband = int(line.split()[1])
-        if line.find('acell') > -1:
-          line = line.replace('D','E')
+        if line.find("acell") > -1:
+          line = line.replace("D","E")
           tmp = line.split()
           self.acell = [float(tmp[1]),float(tmp[2]),float(tmp[3])]
         if Flag2:
-          line = line.replace('D','E')
+          line = line.replace("D","E")
           for ii in N.arange(3,self.ntypat):
             self.amu[ii] = float(line.split()[ii-3])
             Flag2 = False
-        if line.find('amu') > -1:
-          line = line.replace('D','E')
-          self.amu = zeros((self.ntypat))
+        if line.find("amu") > -1:
+          line = line.replace("D","E")
+          self.amu = zeros(self.ntypat)
           if self.ntypat > 3:
             for ii in N.arange(3):
               self.amu[ii] = float(line.split()[ii+1])
@@ -191,35 +190,35 @@ class system:
           else:
             for ii in N.arange(self.ntypat):
               self.amu[ii] = float(line.split()[ii+1])
-        if line.find(' kpt ') > -1:
-          line = line.replace('D','E')
+        if line.find(" kpt ") > -1:
+          line = line.replace("D","E")
           tmp = line.split()
           self.kpt[0,0:3] = [float(tmp[1]),float(tmp[2]),float(tmp[3])]
           ikpt = 1
           continue
         if ikpt < self.nkpt and ikpt > 0:
-          line = line.replace('D','E')
+          line = line.replace("D","E")
           tmp = line.split()
           self.kpt[ikpt,0:3] = [float(tmp[0]),float(tmp[1]),float(tmp[2])]
           ikpt += 1
           continue
         if Flag == 2:
-          line = line.replace('D','E')
+          line = line.replace("D","E")
           tmp = line.split()
           self.rprim[2,0:3] = [float(tmp[0]),float(tmp[1]),float(tmp[2])]
           Flag = 0
         if Flag == 1:
-          line = line.replace('D','E')
+          line = line.replace("D","E")
           tmp = line.split()
           self.rprim[1,0:3] = [float(tmp[0]),float(tmp[1]),float(tmp[2])]
           Flag = 2
-        if line.find('rprim') > -1:
-          line = line.replace('D','E')
+        if line.find("rprim") > -1:
+          line = line.replace("D","E")
           tmp = line.split()
           self.rprim[0,0:3] = [float(tmp[1]),float(tmp[2]),float(tmp[3])]
           Flag = 1
         if Flag3:
-          line = line.replace('D','E')
+          line = line.replace("D","E")
           if (self.natom-typatdone)*1.0/12 < 1.001:
             for ii in N.arange(self.natom-typatdone):
               self.typat[typatdone+ii] = float(line.split()[ii])
@@ -228,8 +227,8 @@ class system:
             for ii in N.arange(12):
               self.typat[typatdone+ii] = float(line.split()[ii])
             typatdone += 12
-        if line.find(' typat') > -1:
-          self.typat = zeros((self.natom))
+        if line.find(" typat") > -1:
+          self.typat = zeros(self.natom)
           if self.natom > 12:
             for ii in N.arange(12):
               self.typat[ii] = float(line.split()[ii+1])
@@ -240,13 +239,13 @@ class system:
               self.typat[ii] = float(line.split()[ii+1])
         # Read the actual d2E/dRdR matrix
         if Flag == 3:
-          line = line.replace('D','E')
+          line = line.replace("D","E")
           tmp = line.split()
           self.IFC[int(tmp[0])-1,int(tmp[1])-1,int(tmp[2])-1,int(tmp[3])-1] = \
             complex(float(tmp[4]),float(tmp[5]))
         # Read the current Q-point
-        if line.find('qpt') > -1:
-          line = line.replace('D','E')
+        if line.find("qpt") > -1:
+          line = line.replace("D","E")
           tmp = line.split()
           self.iqpt = [float(tmp[1]),float(tmp[2]),float(tmp[3])]
           Flag = 3
@@ -419,7 +418,7 @@ def get_bose(natom,omega,temp_info):
     if omega[imode].real > tol6:
       tt = 0
       for T in temp_info:
-        if T < tol6:
+        if tol6 > T:
           bose[imode,tt] = 0.0
         else:
           bose[imode,tt] = 1.0/(N.exp(omega[imode].real/(kb_HaK*T))-1)
@@ -455,19 +454,19 @@ def dynamic_zpm_temp(arguments,ddw_save,ddw_save2,type,temp_info,smearing,eig0,d
 
   if type == 1 or type == 2:
     nbqpt,wtq,eigq_files,DDB_files,EIGR2D_files,GKK_files = arguments
-    GKKterm = system(directory='.',filename=GKK_files)
+    GKKterm = system(directory=".",filename=GKK_files)
     GKK = GKKterm.GKK_bis
   elif type == 3:
     nbqpt,wtq,eigq_files,DDB_files,EIGR2D_files = arguments
 
-  DDB = system(directory='.',filename=DDB_files)
-  EIGR2D = system(directory='.',filename=EIGR2D_files)
+  DDB = system(directory=".",filename=DDB_files)
+  EIGR2D = system(directory=".",filename=EIGR2D_files)
   ntemp = len(temp_info)
   if type == 1 or type == 2:
     total_corr = zeros((4+2*len(energy),ntemp,EIGR2D.nsppol,EIGR2D.nkpt,EIGR2D.nband),dtype=complex)
   elif type == 3:
     total_corr = zeros((4+len(energy),ntemp,EIGR2D.nsppol,EIGR2D.nkpt,EIGR2D.nband),dtype=complex)
-  eigq = system(directory='.',filename=eigq_files)
+  eigq = system(directory=".",filename=eigq_files)
 
 # If the calculation is on a Homogenous q-point mesh
 # retreve the weight of the q-point
@@ -478,12 +477,12 @@ def dynamic_zpm_temp(arguments,ddw_save,ddw_save2,type,temp_info,smearing,eig0,d
 # Current Q-point calculated
   print("Q-point: ",nbqpt," with wtq =",wtq," and reduced coord.",EIGR2D.iqpt)
   current = multiprocessing.current_process()
-  file_name = str('PYLOG_')+str(current.pid)
+  file_name = "PYLOG_"+str(current.pid)
   if os.path.isfile(file_name) :
-    with open(file_name,'a') as F:
+    with open(file_name,"a") as F:
       F.write("Q-point: "+str(nbqpt)+" with wtq ="+str(wtq)+" and reduced coord."+str(EIGR2D.iqpt)+"\n")
   else:
-    with open(file_name,'w') as F:
+    with open(file_name,"w") as F:
       F.write("Q-point: "+str(nbqpt)+" with wtq ="+str(wtq)+" and reduced coord."+str(EIGR2D.iqpt)+"\n")
 
 
@@ -506,13 +505,13 @@ def dynamic_zpm_temp(arguments,ddw_save,ddw_save2,type,temp_info,smearing,eig0,d
   # displ_red(mode,atom1,atom2,dir1,dir2)
 
 # Einstein sum make the vector matrix multiplication ont the correct indices
-  fan_corrQ = N.einsum('iojklmn,plnkm->pijo',EIGR2D.EIG2D_bis,displ_red_FAN2)
-  ddw_corrQ = N.einsum('iojklmn,plnkm->pijo',ddw_save,displ_red_DDW2)
+  fan_corrQ = N.einsum("iojklmn,plnkm->pijo",EIGR2D.EIG2D_bis,displ_red_FAN2)
+  ddw_corrQ = N.einsum("iojklmn,plnkm->pijo",ddw_save,displ_red_DDW2)
   # fan_corrQ(mode,kpt,band,spin)
 
   # Sum over the modes with bose + reshape to (itemp,ispin,ikpt,iband)
-  fan_corr = N.einsum('ijkl,im->mljk',fan_corrQ,2*bose+1.0)
-  ddw_corr = N.einsum('ijkl,im->mljk',ddw_corrQ,2*bose+1.0)
+  fan_corr = N.einsum("ijkl,im->mljk",fan_corrQ,2*bose+1.0)
+  ddw_corr = N.einsum("ijkl,im->mljk",ddw_corrQ,2*bose+1.0)
 
   omegatmp = omega[:].real # imode
   if type == 3:
@@ -522,64 +521,64 @@ def dynamic_zpm_temp(arguments,ddw_save,ddw_save2,type,temp_info,smearing,eig0,d
 
 #   Now compute active space
     # sum over atom1,dir1
-    temp = N.einsum('iqjklm,nlokp->ijmnpoq',GKK,displ_red_FAN2)
-    fan_addQ = N.einsum('ijklmnq,iqjmnk->ijklq',temp,N.conjugate(GKK))
+    temp = N.einsum("iqjklm,nlokp->ijmnpoq",GKK,displ_red_FAN2)
+    fan_addQ = N.einsum("ijklmnq,iqjmnk->ijklq",temp,N.conjugate(GKK))
     # fan_addQ(nkpt,nband,nband,imode,ispin)
-    temp = N.einsum('iqjklm,nlokp->ijmnpoq',ddw_save2,displ_red_DDW2)
-    ddw_addQ = N.einsum('ijklmnq,iqjmnk->ijklq',temp,N.conjugate(ddw_save2))
+    temp = N.einsum("iqjklm,nlokp->ijmnpoq",ddw_save2,displ_red_DDW2)
+    ddw_addQ = N.einsum("ijklmnq,iqjmnk->ijklq",temp,N.conjugate(ddw_save2))
     # fan_addQ(nkpt,nband,nband,imode,ispin)
 
     occtmp = EIGR2D.nsppol*EIGR2D.occ[:,:,:]/2 # jband # should be 1 !
-    delta_E_ddw = N.einsum('lij,k->lijk',eig0[:,:,:].real,N.ones(EIGR2D.nband)) - \
-              N.einsum('lij,k->likj',eig0[:,:,:].real,N.ones(EIGR2D.nband)) - \
-              N.einsum('i,ljk->ljik',N.ones((EIGR2D.nband)),(2*occtmp-1))*smearing*1j # spin,ikpt,iband,jband
+    delta_E_ddw = N.einsum("lij,k->lijk",eig0[:,:,:].real,N.ones(EIGR2D.nband)) - \
+              N.einsum("lij,k->likj",eig0[:,:,:].real,N.ones(EIGR2D.nband)) - \
+              N.einsum("i,ljk->ljik",N.ones(EIGR2D.nband),(2*occtmp-1))*smearing*1j # spin,ikpt,iband,jband
 
-    ddw_tmp = N.einsum('ijkln,lm->mijkn',ddw_addQ,2*bose+1.0) # itemp,ikpt,iband,jband,ispin
-    ddw_add = N.einsum('ijklm,mjkl->imjk',ddw_tmp,1.0/delta_E_ddw) # temp,spin,ikpt,iband
-    delta_E = N.einsum('lij,k->lijk',eig0[:,:,:].real,N.ones(EIGR2D.nband)) - \
-              N.einsum('lij,k->likj',eigq.EIG[:,:,:].real,N.ones(EIGR2D.nband)) # spin,ikpt,iband,jband
-    delta_E_sm = N.einsum('i,ljk->ljik',N.ones((EIGR2D.nband)),(2*occtmp-1))*smearing*1j # spin,ikpt,iband,jband
-    num1 = N.einsum('ij,mkl->mkijl',bose,N.ones((EIGR2D.nsppol,EIGR2D.nkpt,EIGR2D.nband))) +1.0 \
-          - N.einsum('ij,mkl->mkijl',N.ones((3*EIGR2D.natom,ntemp)),occtmp) # spin,k,mod,temp,band # bef was (imode,tmp,band)
-    deno1 = N.einsum('mijk,l->mijkl',delta_E,N.ones(3*EIGR2D.natom),dtype=complex)
+    ddw_tmp = N.einsum("ijkln,lm->mijkn",ddw_addQ,2*bose+1.0) # itemp,ikpt,iband,jband,ispin
+    ddw_add = N.einsum("ijklm,mjkl->imjk",ddw_tmp,1.0/delta_E_ddw) # temp,spin,ikpt,iband
+    delta_E = N.einsum("lij,k->lijk",eig0[:,:,:].real,N.ones(EIGR2D.nband)) - \
+              N.einsum("lij,k->likj",eigq.EIG[:,:,:].real,N.ones(EIGR2D.nband)) # spin,ikpt,iband,jband
+    delta_E_sm = N.einsum("i,ljk->ljik",N.ones(EIGR2D.nband),(2*occtmp-1))*smearing*1j # spin,ikpt,iband,jband
+    num1 = N.einsum("ij,mkl->mkijl",bose,N.ones((EIGR2D.nsppol,EIGR2D.nkpt,EIGR2D.nband))) +1.0 \
+          - N.einsum("ij,mkl->mkijl",N.ones((3*EIGR2D.natom,ntemp)),occtmp) # spin,k,mod,temp,band # bef was (imode,tmp,band)
+    deno1 = N.einsum("mijk,l->mijkl",delta_E,N.ones(3*EIGR2D.natom),dtype=complex)
 
     if type==1: # dynamic
-      deno1 -= N.einsum('mijk,l->mijkl',N.ones((EIGR2D.nsppol,EIGR2D.nkpt,EIGR2D.nband,EIGR2D.nband)),omegatmp) #spin,ikpt,iband,jband,imode
+      deno1 -= N.einsum("mijk,l->mijkl",N.ones((EIGR2D.nsppol,EIGR2D.nkpt,EIGR2D.nband,EIGR2D.nband)),omegatmp) #spin,ikpt,iband,jband,imode
 
     imag_part1 = N.pi*gaussian(deno1,0.0,gaussian_smearing)
     #imag_part1 = N.pi*fermidirac(deno1,0.0,gaussian_smearing)
     #imag_part1 = N.pi*lorentzian(deno1,0.0,gaussian_smearing)
     #imag_part1 = gaussian_smearing/(deno1*deno1 + gaussian_smearing*gaussian_smearing)
-    deno1 += N.einsum('mijk,l->mijkl',delta_E_sm,N.ones(3*EIGR2D.natom),dtype=complex)
+    deno1 += N.einsum("mijk,l->mijkl",delta_E_sm,N.ones(3*EIGR2D.natom),dtype=complex)
 
-    div1 = N.einsum('ijklm,ijnmk->iklmjn',num1,1.0/deno1) # (spin,k,mod,temp,jband)/(spin,ikpt,iband,jband,mode) => (ispin,imod,tmp,jband,ikpt,iband)
+    div1 = N.einsum("ijklm,ijnmk->iklmjn",num1,1.0/deno1) # (spin,k,mod,temp,jband)/(spin,ikpt,iband,jband,mode) => (ispin,imod,tmp,jband,ikpt,iband)
 
-    num2 = N.einsum('ij,mkl->mkijl',bose,N.ones((EIGR2D.nsppol,EIGR2D.nkpt,EIGR2D.nband))) \
-          + N.einsum('ij,mkl->mkijl',N.ones((3*EIGR2D.natom,ntemp)),occtmp) #imode,tmp,jband
-    deno2 = N.einsum('mijk,l->mijkl',delta_E,N.ones((3*EIGR2D.natom),dtype=complex))
+    num2 = N.einsum("ij,mkl->mkijl",bose,N.ones((EIGR2D.nsppol,EIGR2D.nkpt,EIGR2D.nband))) \
+          + N.einsum("ij,mkl->mkijl",N.ones((3*EIGR2D.natom,ntemp)),occtmp) #imode,tmp,jband
+    deno2 = N.einsum("mijk,l->mijkl",delta_E,N.ones((3*EIGR2D.natom),dtype=complex))
 
     if type==1: # dynamic
-      deno2 += N.einsum('mijk,l->mijkl',N.ones((EIGR2D.nsppol,EIGR2D.nkpt,EIGR2D.nband,EIGR2D.nband)),omegatmp) #spin,ikpt,iband,jband,imode
+      deno2 += N.einsum("mijk,l->mijkl",N.ones((EIGR2D.nsppol,EIGR2D.nkpt,EIGR2D.nband,EIGR2D.nband)),omegatmp) #spin,ikpt,iband,jband,imode
 
     imag_part2 = N.pi*gaussian(deno2,0.0,gaussian_smearing)
     #imag_part2 = N.pi*fermidirac(deno2,0.0,gaussian_smearing)
     #imag_part2 = N.pi*lorentzian(deno2,0.0,gaussian_smearing)
     #imag_part2 = gaussian_smearing/(deno2*deno2 + gaussian_smearing*gaussian_smearing)
-    deno2 -= N.einsum('mijk,l->mijkl',delta_E_sm,N.ones(3*EIGR2D.natom),dtype=complex)
+    deno2 -= N.einsum("mijk,l->mijkl",delta_E_sm,N.ones(3*EIGR2D.natom),dtype=complex)
 
-    div2 = N.einsum('ijklm,ijnmk->iklmjn',num2,1.0/deno2) # (spin,k,mod,temp,jband)/(spin,ikpt,iband,jband,mode) => (ispin,imod,tmp,jband,ikpt,iband)
+    div2 = N.einsum("ijklm,ijnmk->iklmjn",num2,1.0/deno2) # (spin,k,mod,temp,jband)/(spin,ikpt,iband,jband,mode) => (ispin,imod,tmp,jband,ikpt,iband)
 
-    fan_add = N.einsum('ijklq,qlmkij->mqij',fan_addQ,div1+div2) # (k,iband,jband,imod,ispin) * (spin,imod,tmp,jband,ikpt,iband) => (temp,ispin,ikpt,iband)
+    fan_add = N.einsum("ijklq,qlmkij->mqij",fan_addQ,div1+div2) # (k,iband,jband,imod,ispin) * (spin,imod,tmp,jband,ikpt,iband) => (temp,ispin,ikpt,iband)
 
 
-    imag_div1 = N.einsum('ijklm,ijnmk->iklmjn',num1,imag_part1) # (spin,k,mod,temp,jband)/(spin,ikpt,iband,jband,mode) => (ispin,imod,tmp,jband,ikpt,iband)
-    imag_div2 = N.einsum('ijklm,ijnmk->iklmjn',num2,imag_part2) # (spin,k,mod,temp,jband)/(spin,ikpt,iband,jband,mode) => (ispin,imod,tmp,jband,ikpt,iband)
-    imag_fan_add = N.einsum('ijklq,qlmkij->mqij',fan_addQ,imag_div1+imag_div2) # (k,iband,jband,imod,ispin) * (spin,imod,tmp,jband,ikpt,iband) => (temp,ispin,ikpt,iband)
+    imag_div1 = N.einsum("ijklm,ijnmk->iklmjn",num1,imag_part1) # (spin,k,mod,temp,jband)/(spin,ikpt,iband,jband,mode) => (ispin,imod,tmp,jband,ikpt,iband)
+    imag_div2 = N.einsum("ijklm,ijnmk->iklmjn",num2,imag_part2) # (spin,k,mod,temp,jband)/(spin,ikpt,iband,jband,mode) => (ispin,imod,tmp,jband,ikpt,iband)
+    imag_fan_add = N.einsum("ijklq,qlmkij->mqij",fan_addQ,imag_div1+imag_div2) # (k,iband,jband,imod,ispin) * (spin,imod,tmp,jband,ikpt,iband) => (temp,ispin,ikpt,iband)
 
     print("Now compute generalized g2F Eliashberg electron-phonon spectral function ...")
 
-    fan_tmp = N.einsum('ijklm->mijl',fan_addQ) # (ispin,ikpt, iband, imode)
-    ddw_tmp = N.einsum('ijklm->mijl',ddw_addQ) # (ispin,ikpt, iband, imode)
+    fan_tmp = N.einsum("ijklm->mijl",fan_addQ) # (ispin,ikpt, iband, imode)
+    ddw_tmp = N.einsum("ijklm->mijl",ddw_addQ) # (ispin,ikpt, iband, imode)
     g_kk = fan_tmp - ddw_tmp
 
     # Eliashberg function
@@ -623,7 +622,7 @@ def compute_wtq(arguments,type):
   elif type == 3:
     nbqpt,wtq,eigq_files,DDB_files,EIGR2D_files = arguments
 
-  EIGR2D = system(directory='.',filename=EIGR2D_files)
+  EIGR2D = system(directory=".",filename=EIGR2D_files)
 # If the calculation is on a Homogenous q-point mesh
 # retreve the weight of the q-point
   if (wtq == 0):

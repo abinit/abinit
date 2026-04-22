@@ -254,6 +254,10 @@ MODULE m_paw_dmft
   integer :: dmft_triqs_therm_restart
   ! TRIQS CTQMC: Number of thermalization steps when we restart from a previous configuration.
 
+  integer :: dmft_full_chipsi
+  ! =0 do not use
+  ! =1 build Wannier functions
+
   integer :: dmft_wanorthnorm
   ! =2 orthonormalization of Wannier functions for each k-point
   ! =3 orthonormalization over the sum over k-points
@@ -1069,6 +1073,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_magnfield       = dtset%dmft_magnfield
  paw_dmft%dmft_magnfield_b     = dtset%dmft_magnfield_b
  paw_dmft%dmft_dc              = dmft_dc
+ paw_dmft%dmft_full_chipsi     = dtset%dmft_full_chipsi
  paw_dmft%dmft_wanorthnorm     = dtset%dmft_wanorthnorm
  paw_dmft%prtvol               = dtset%prtvol
  paw_dmft%prtdos               = dtset%prtdos
@@ -1368,7 +1373,12 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 
  ! Now build radial grid by extending the PAW mesh up to max(rmax,size(proj))
  ! The mesh inside the PAW sphere is still exactly the same.
- use_full_chipsi = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
+ !use_full_chipsi = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
+ if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then
+   use_full_chipsi = .true.
+ else
+   use_full_chipsi = (paw_dmft%dmft_full_chipsi /= 0)  
+ endif   
  paw_dmft%int_meshsz => pawrad(:)%int_meshsz
 
  if (use_full_chipsi) then
@@ -1407,7 +1417,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
      ABI_ERROR(message)
    end if
    if (mesh_size > pawrad(itypat)%int_meshsz .and. (.not. use_full_chipsi)) then
-     message = "You need to activate use_full_chipsi if you use an orbital that extends outside the PAW sphere"
+     message = "You need to activate dmft_full_chipsi if you use an orbital that extends outside the PAW sphere"
      ABI_ERROR(message)
    end if
    call pawrad_init(paw_dmft%radgrid(itypat),mesh_size,mesh_type,rstep,lstep)

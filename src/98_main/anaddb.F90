@@ -266,7 +266,7 @@ program anaddb
 
 ! Phonon density of states and thermodynamical properties calculation
  if (dtset%ifcflag == 1 .and. any(dtset%thmflag==[1, 2])) then
-   call driver%harmonic_thermo(dtset, crystal, Ifc, ddb, comm)
+   call driver%harmonic_thermo(dtset, crystal, Ifc, comm)
  end if
 
 ! Phonon band structure

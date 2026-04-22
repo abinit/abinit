@@ -1,4 +1,3 @@
-from __future__ import print_function, division, unicode_literals, absolute_import
 
 from markdown import Extension
 from markdown.treeprocessors import Treeprocessor
@@ -21,13 +20,12 @@ class AbinitTreeprocessor(Treeprocessor):
         Iterates through the full document tree looking for specific
         tags and then makes them relative based on the site navigation
         """
-
         for element in root.iter():
 
-            if element.tag == 'a':
-                key = 'href'
-            elif element.tag == 'img':
-                key = 'src'
+            if element.tag == "a":
+                key = "href"
+            elif element.tag == "img":
+                key = "src"
             else:
                 continue
 
