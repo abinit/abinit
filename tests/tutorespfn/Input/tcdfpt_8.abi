@@ -5,7 +5,7 @@
    ndtset 3
 
 ### 1) GROUND STATE
-   tolvrs1  1.0d-12   
+   tolvrs1  1.0d-10   
    spinat1  0.0 0.0  5.0     #Magnetism
             0.0 0.0 -5.0
             0.0 0.0  0.0
@@ -20,7 +20,7 @@
 #  nppert   2
 
 ## GENERAL LINEAR RESPONSE PARAMETERS
-  tolvrs   1.0d-3
+  tolvrs   1.0d-2
     nqpt   1
      qpt   5.00000000E-01  5.00000000E-01  0.00000000E+00
   getwfk   1
