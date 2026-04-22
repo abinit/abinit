@@ -1191,7 +1191,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                      omegame0i2_ac = omegame0i_ac*omegame0i_ac
                      do iiw=1,epsm1%nomega_i_conv
                         sigctmp(io,iab) = sigctmp(io,iab) + &
-                        piinv * conv_rhotw_epsm1_rhotw(jb,kb,iiw,iab) * &
+                        piinv * ((wtqp+wtqm)*DBLE(conv_rhotw_epsm1_rhotw(jb,kb,iiw,iab)) + (wtqp-wtqm)*j_gw*AIMAG(conv_rhotw_epsm1_rhotw(jb,kb,iiw,iab))) * &
                         omegame0i_ac / (omegame0i2_ac + conv_omegap2(iiw)) * conv_gl_wts(iiw) / conv_gl_knots(iiw)**2
                      end do
                   else
@@ -1200,7 +1200,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                         omegame0i2_ac = omegame0i_ac*omegame0i_ac
                         do iiw=1,epsm1%nomega_i
                            sigctmp(io,iab) = sigctmp(io,iab) + &
-                           piinv * rhotw_epsm1_rhotw(jb,kb,iiw,iab) * &
+                           piinv * ((wtqp+wtqm)*DBLE(rhotw_epsm1_rhotw(jb,kb,iiw,iab)) + (wtqp-wtqm)*j_gw*AIMAG(rhotw_epsm1_rhotw(jb,kb,iiw,iab))) * &
                            omegame0i_ac / (omegame0i2_ac + omegap2(iiw)) * gl_wts(iiw) / gl_knots(iiw)**2
                         end do
                      case ("minimax")
@@ -1208,8 +1208,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                         ! Here the -1 factor disappears because we have performed an EIGEN decomposition of -(epsm1-1).
                          do iiw=1,epsm1%nomega_i
                            sigctmp(io,iab) = sigctmp(io,iab) + &
-                             (piinv / two) * rhotw_epsm1_rhotw(jb,kb,iiw,iab) * ( &
-                                (one / (omegame0i_ac + omegap_cplx(iiw))) + (one / (omegame0i_ac - omegap_cplx(iiw)))) * &
+                             (piinv / two) * ((wtqp+wtqm)*DBLE(rhotw_epsm1_rhotw(jb,kb,iiw,iab)) + (wtqp-wtqm)*j_gw*AIMAG(rhotw_epsm1_rhotw(jb,kb,iiw,iab))) * &
+                                ((one / (omegame0i_ac + omegap_cplx(iiw))) + (one / (omegame0i_ac - omegap_cplx(iiw)))) * &
                                 epsm1%hscr%omega_wgs(epsm1%nomega_r+iiw)
                          end do
                      case default
@@ -1276,11 +1276,17 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            do iab=1,Sigp%nsig_ab
              is_idx=spin; if (nspinor==2) is_idx=iab
 
-             sigcme_tmp(:,jb,kb,is_idx)=sigcme_tmp(:,jb,kb,is_idx) + &
-               (wtqp+wtqm)*DBLE(sigctmp(:,iab)) + (wtqp-wtqm)*j_gw*AIMAG(sigctmp(:,iab))
-
-             sigc(1,:,jb,kb,is_idx)=sigc(1,:,jb,kb,is_idx) + wtqp*      sigctmp(:,iab)
-             sigc(2,:,jb,kb,is_idx)=sigc(2,:,jb,kb,is_idx) + wtqm*CONJG(sigctmp(:,iab))
+             select case (mod10)
+              case (SIG_GW_AC)
+                sigcme_tmp(:,jb,kb,is_idx)=sigcme_tmp(:,jb,kb,is_idx) + sigctmp(:,iab)
+                sigc(1,:,jb,kb,is_idx)=sigc(1,:,jb,kb,is_idx) + sigctmp(:,iab)
+                sigc(2,:,jb,kb,is_idx)=sigc(2,:,jb,kb,is_idx) + czero
+              case default
+                sigcme_tmp(:,jb,kb,is_idx)=sigcme_tmp(:,jb,kb,is_idx) + &
+                  (wtqp+wtqm)*DBLE(sigctmp(:,iab)) + (wtqp-wtqm)*j_gw*AIMAG(sigctmp(:,iab))
+                sigc(1,:,jb,kb,is_idx)=sigc(1,:,jb,kb,is_idx) + wtqp*      sigctmp(:,iab)
+                sigc(2,:,jb,kb,is_idx)=sigc(2,:,jb,kb,is_idx) + wtqm*CONJG(sigctmp(:,iab))
+             end select
              ! TODO this should be the contribution coming from the anti-hermitian part.
            end do
          end do ! irow used to calculate matrix elements of $\Sigma$
