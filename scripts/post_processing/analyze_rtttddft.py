@@ -10,9 +10,10 @@ exciting code
 F. Brieuc
 """
 
-import sys
-import numpy as np
 import argparse
+import sys
+
+import numpy as np
 from scipy.fftpack import fft, fftfreq
 
 # -------------------- Units --------------------------
@@ -72,24 +73,24 @@ def fourier_direct(time,signal,wcut,nfft):
 
 # Read command line arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('-c', '--current', help='Name of the TDCURRENT file', required=True)
-parser.add_argument('-e', '--efield',  help='Name of the TDEFIELD file\
+parser.add_argument("-c", "--current", help="Name of the TDCURRENT file", required=True)
+parser.add_argument("-e", "--efield",  help="Name of the TDEFIELD file\
                                              or dirac if you used an impulse electric field (Dirac pulse)\
-                                             see also the ezero parameter in that case', required=False)
-parser.add_argument('-ez', '--ezero',  help='Amplitude of the electric field - Only used if -e dirac', required=False,
+                                             see also the ezero parameter in that case", required=False)
+parser.add_argument("-ez", "--ezero",  help="Amplitude of the electric field - Only used if -e dirac", required=False,
                                        type=float, default=1.0)
-parser.add_argument('-d', '--dir',     help='Direction (x, y or z) of electric field to consider (divide by E_dir)', required=False,
-                                       type=str, default='x')
-parser.add_argument('-wc', '--wcut',   help='Cutoff angular frequency exponential window [exp(-wcut*t)] (in Ha)', required=False,
+parser.add_argument("-d", "--dir",     help="Direction (x, y or z) of electric field to consider (divide by E_dir)", required=False,
+                                       type=str, default="x")
+parser.add_argument("-wc", "--wcut",   help="Cutoff angular frequency exponential window [exp(-wcut*t)] (in Ha)", required=False,
                                        type=float, default=0.04)
-parser.add_argument('-ts', '--tshift', help='Remove the first tshift time of current density', required=False,
+parser.add_argument("-ts", "--tshift", help="Remove the first tshift time of current density", required=False,
                                        type=float, default=0.0)
-parser.add_argument('-s', '--stride',  help='Stride time step (Default: 1)', required=False, type=int, default=1)
-parser.add_argument('-p', '--padding', help='If p>1 then zero-padding is used.\n\
-The signal is considered to be of length p*ntime (Default: 1)',
+parser.add_argument("-s", "--stride",  help="Stride time step (Default: 1)", required=False, type=int, default=1)
+parser.add_argument("-p", "--padding", help="If p>1 then zero-padding is used.\n\
+The signal is considered to be of length p*ntime (Default: 1)",
                                        required=False, type=int, default=1)
-parser.add_argument('-v', '--verbose',  help='More output mostly for testing', required=False,
-                                        action='store_true', default=False)
+parser.add_argument("-v", "--verbose",  help="More output mostly for testing", required=False,
+                                        action="store_true", default=False)
 args = parser.parse_args()
 
 # Check input parameters
@@ -113,11 +114,11 @@ if args.tshift < 0:
 else:
     tshift=int(args.tshift)
 
-if args.dir == 'x':
+if args.dir == "x":
     dir=0
-elif args.dir == 'y':
+elif args.dir == "y":
     dir=1
-elif args.dir == 'z':
+elif args.dir == "z":
     dir=2
 else:
     sys.exit("Wrong value of dir! Should be x, y or z!")
@@ -134,9 +135,9 @@ calc_conducti = True
 dirac_pulse = False
 if args.efield is None:
     calc_conducti = False
-    print("")
+    print()
     print("Conductivity and dielectric function will not be computed since the electric field was not provided.")
-elif args.efield.strip().lower() == 'dirac':
+elif args.efield.strip().lower() == "dirac":
     dirac_pulse = True
     if args.ezero is None:
         sys.exit("You should give the amplitude of the electric field -ez <E_0> if you use a Dirac pulse.")
@@ -168,9 +169,9 @@ time = np.arange(0,n)*dt
 nfft = n*padding
 
 # Print summary
-print("")
+print()
 print("Removing timesteps before tshift and applying time striding if required.")
-print("")
+print()
 print("# Time-dependent current")
 print("Original number of steps n0 =", n0)
 print("Actual number of steps used n =", n)
@@ -179,7 +180,7 @@ print("Actual timestep used dt =", dt, "au", "=", dt*au2as, "as")
 print("Original length of trajectory tmax0 =",n0*dt0, "au", "=", n0*dt0*au2fs, "fs")
 print("Actual length of trajectory tmax =",n*dt, "au", "=", n*dt*au2fs, "fs")
 
-print("")
+print()
 print("# Fourier transform")
 print("Number of frequency point used for FFT nfft =", nfft)
 print("Minimum angular frequency wmin = dw = ", 2*np.pi/(nfft*dt), "au", "=", 2*np.pi*au2ev/(nfft*dt), "eV")

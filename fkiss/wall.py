@@ -1,18 +1,16 @@
 #!/usr/bin/env python
-# coding: utf-8
 """
 Parser for warning messages emitted by Fortran compilers.
 """
-from __future__ import print_function, division, unicode_literals
 
-import sys
-import os
-import io
-import re
 import abc
+import os
+import re
+import sys
+from collections import Counter
 
-from collections import Counter, OrderedDict
-from tools import pprint_table, lazy_property
+from tools import lazy_property, pprint_table
+
 #from termcolor import cprint
 
 # From https://gcc.gnu.org/onlinedocs/gfortran/Error-and-Warning-Options.html#Error-and-Warning-Options
@@ -158,21 +156,22 @@ this includes scalars and derived types.""",
 "-Wunused-variable": "FIXME",
 "-Wunused-function":  "FIXME",
 
-#
 "GnuExtension": "FIXME",
 "Obsolescent": "Obsolescent Feature",
-#
 "Miscellaneous": "Miscellaneous Warnings",   # Used to classify warnings that are not documented
 }
 
 class Message:
     """
-    .. attributes:
+    Representation of a diagnostic message (warning/error) from a compiler.
 
-        filepath:
-        lineno:
-        colno:
-        text:
+    Attributes:
+        filepath: Path to the source file that triggered the message.
+        kind: The category or flag of the warning (e.g., "-Wconversion").
+        text: The full raw text of the message.
+        lineno: Line number in the source file.
+        colno: Column number in the source file.
+        info: Descriptive information about this specific warning kind.
     """
     def __init__(self, filepath, kind, text, lineno, colno, info):
         self.filepath = filepath if filepath is not None else "Unknown"
@@ -199,27 +198,10 @@ class Message:
 
 class GFortranWarning(Message):
     """
-../../../src/98_main/mrgscr.F90:1852:25:
+    Parser and container for GFortran-style warning messages.
 
-        omega_new = CMPLX(-one,-one)
-                         1
-Warning: Conversion from REAL(8) to default-kind COMPLEX(4) at (1) ... [-Wconversion]
-
-../../../src/53_ffts/m_fft.F90:1606:47: Warning: Possible change of ... at (1) [-Wconversion]
-
-../../../src/01_linalg_ext/m_linalg_interfaces.F90:84:14:
-
-    character*1 :: TRANS
-              1
-Warning: Obsolescent feature: Old-style character length at (1)
-
-../../../src/28_numeric_noabirule/interfaces_28_numeric_noabirule.F90:705:8:
-
-real*8, intent(inout) :: a(mesh)
-1
-Warning: GNU Extension: Nonstandard type declaration REAL*8 at (1)
-
-../../../src/95_drive/eph.F90:320:54: Warning: Possible change of value in ... at (1) [-Wconversion]
+    Args:
+        lines: List of strings comprising the full GFortran warning output block.
     """
     def __init__(self, lines):
         text = "\n".join(lines) #.encode("utf8")
@@ -263,6 +245,18 @@ class WarningsParser:
 
     @classmethod
     def from_compiler(cls, compiler):
+        """
+        Factory method to create a parser instance based on the compiler name.
+
+        Args:
+            compiler: Name of the compiler (e.g., "gfortran", "ifort").
+
+        Returns:
+            WarningsParser: An instance of the appropriate subclass.
+
+        Raises:
+            ValueError: If no parser is found for the given compiler.
+        """
         for c in cls.__subclasses__():
             if c.compiler == compiler: return c()
         raise ValueError("No Parser associated to compiler `%s`" % compiler)
@@ -272,8 +266,17 @@ class WarningsParser:
         """Parse the file. Returns self."""
 
     def parse_file(self, filename):
+        """
+        Read and parse a file containing compiler warnings.
+
+        Args:
+            filename: Path to the file to parse.
+
+        Returns:
+            WarningsParser: The instance itself (self).
+        """
         self.filepath = os.path.abspath(filename)
-        with io.open(filename, "rt", encoding="utf8") as fh:
+        with open(filename, encoding="utf8") as fh:
             return self.parse_lines(fh.readlines(), filepath=self.filepath)
 
     @property
@@ -321,11 +324,12 @@ class WarningsParser:
     #    return od
 
     def fix(self):
-        from tools import Editor, user_wants_to_exit
         import json
+
+        from tools import Editor, user_wants_to_exit
         fixed = set()
         if os.path.exists("fixed.json"):
-            with open("fixed.json", "rt") as fh:
+            with open("fixed.json") as fh:
                 fixed = set(json.load(fh)["fixed"])
 
         editor = Editor()
@@ -340,7 +344,7 @@ class WarningsParser:
             fixed.add(repr(warn))
             if user_wants_to_exit(): break
 
-        with open("fixed.json", "wt") as fh:
+        with open("fixed.json", "w") as fh:
             json.dump(list(fixed), fh)
 
 
@@ -435,13 +439,13 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter)
 
-    parser.add_argument('-v', '--verbose', default=0, action='count', # -vv --> verbose=2
-        help='verbose, can be supplied multiple times to increase verbosity.')
+    parser.add_argument("-v", "--verbose", default=0, action="count", # -vv --> verbose=2
+        help="verbose, can be supplied multiple times to increase verbosity.")
 
     parser.add_argument("filepath", type=str, help="File to parse.")
     parser.add_argument("-c", "--compiler", type=str, default="gfortran",
         help="Fortran Compiler. Allowed values in ['gfortran', 'ifort'], Default: gfortran")
-    parser.add_argument("-f", "--fix", action='store_true', default=False, help="Fix warnings in $EDITOR")
+    parser.add_argument("-f", "--fix", action="store_true", default=False, help="Fix warnings in $EDITOR")
 
     options = parser.parse_args()
 

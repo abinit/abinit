@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Abinit Post Process Application
@@ -7,10 +6,9 @@ author: Martin Alexandre
 last edited: May 2013
 """
 
-import commands
 
 class ReadGraph:
-    
+
     # This class can read graph in a file
     # This is useful to add graphics
 
@@ -19,7 +17,7 @@ class ReadGraph:
 #-----------------------------#
 
   def __init__(self, pnamefile):
-    self.input_file = str(pnamefile) 
+    self.input_file = str(pnamefile)
     self.number_column = 0
     file = open(self.input_file)
 
@@ -43,12 +41,11 @@ class ReadGraph:
             y.append(float(temp[idx2]))
           except:
             pass
-      
+
       if len(x)==len(y):
         return [x,y]
-      else:
-        return [0,0]
-  
+      return [0,0]
+
   def getFile(self):
       file = open(self.input_file)
       return file.read()
@@ -61,4 +58,4 @@ class ReadGraph:
           if nb != self.number_column :
               self.number_column = nb
       file.close()
-      return self.number_column 
+      return self.number_column

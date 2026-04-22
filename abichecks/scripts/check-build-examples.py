@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"check test farm build examples"
+"""check test farm build examples"""
 #
 # Copyright (C) 2010-2026 ABINIT Group (Yann Pouillon)
 #
@@ -8,7 +8,6 @@
 # distribution.
 #
 # FIXME: detect duplicate definitions
-from __future__ import unicode_literals, division, print_function, absolute_import
 
 from abirules_tools import find_abinit_toplevel_directory
 
@@ -16,11 +15,11 @@ try:
     from ConfigParser import ConfigParser
 except ImportError:
     from configparser import ConfigParser
-from time import gmtime,strftime
 
 import os
 import re
 import sys
+
 
 class MyConfigParser(ConfigParser):
 
@@ -49,8 +48,7 @@ def key_is_ok(mode,key):
 
   if ( key in cnf_ignore[mode] ):
     return False
-  else:
-    return True
+  return True
 
 def main():
   home_dir = find_abinit_toplevel_directory()
@@ -83,9 +81,8 @@ def main():
       opt_removed.append(tmp_sta.split()[1])
       if not is_ignored(opt):
         opt_config.append(opt)
-    else:
-      if not is_ignored(opt):
-        opt_config.append(opt)
+    elif not is_ignored(opt):
+      opt_config.append(opt)
   opt_config.sort()
   opt_removed.sort()
 
@@ -128,7 +125,7 @@ def main():
     if ( re.match("bb_",acf) ):
       acf_section = re.sub(r"\.ac","",acf)
       if ( cnf_bex.has_section(acf_section) ):
-        with open(os.path.join(home_dir, "doc/build/config-examples/"+acf), "r") as fh:
+        with open(os.path.join(home_dir, "doc/build/config-examples/"+acf)) as fh:
           acf_data = fh.readlines()
 
         acf_dict = dict()
@@ -138,14 +135,14 @@ def main():
           if ( len(line) > 0 ):
             idx = line.find("=")
             key = line[:idx]
-            val = re.sub("\"","",line[idx+1:])
+            val = re.sub('"',"",line[idx+1:])
             acf_dict[key] = val
         bex_data[acf_section] = acf_dict
       else:
         dbex_files.append(acf_section)
 
   dbex_sections = [bot for bot in cnf_bex.sections() \
-    if ( re.match("bb_",bot) and bot not in bex_data.keys() )]
+    if ( re.match("bb_",bot) and bot not in bex_data )]
 
   dbex_keys = dict()
   dbex_vals = dict()

@@ -3,11 +3,11 @@
 This script generates the ROBODOC headers located in the Abinit directories (e.g src/70_gw/_70_gw_)
 Usage: mkrobodoc_dirs.py abinit/src/
 """
-from __future__ import print_function
 
-import sys
-import os
 import fnmatch
+import os
+import sys
+
 
 def is_string(s):
     """True if s behaves like a string (duck typing test)."""
@@ -37,8 +37,7 @@ def list_strings(arg):
     """
     if is_string(arg):
         return [arg]
-    else:
-        return arg
+    return arg
 
 
 class WildCard:
@@ -147,7 +146,7 @@ def mkrobodoc_files(top):
             continue
 
         robo_dfile = os.path.abspath(os.path.join(dirpath, robo_dfile))
-        with open(robo_dfile, "r") as f:
+        with open(robo_dfile) as f:
             robotext = []
             for line in f:
                 robotext.append(line.strip())

@@ -7,1852 +7,372 @@
 
 module m_tdep_utils
 
-  use defs_basis
-  use m_errors
-  use m_abicore
-  use m_xmpi
-  use m_wffile
-  use m_numeric_tools,    only : uniformrandom
-  use m_tdep_latt,        only : Lattice_type, tdep_make_inbox
-  use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
-  use m_tdep_sym,         only : Symetries_type, tdep_SearchS_1at
-  use m_io_tools
+ use defs_basis
+ use m_errors
+ use m_abicore
+ use m_xmpi
+ use m_io_tools
+ use m_tdep_dataset,     only : atdep_dataset_type, MPI_enreg_type
+ use m_tdep_latt,        only : Lattice_type
+ use m_tdep_sym,         only : Symmetries_type
+ use m_tdep_shell,       only : Shell_type
+ use m_tdep_model,       only : tdep_Model_type
+ use m_tdep_phi3,        only : tdep_build_phi3_333
+ use m_tdep_phi4,        only : tdep_build_phi4_3333
 
-  implicit none
+ implicit none
 
-  type Coeff_Moore_type
-    integer :: ntotcoeff
-    integer :: ntotconst
-    integer :: ncoeff1st
-    integer :: ncoeff2nd
-    integer :: ncoeff3rd
-    integer :: ncoeff4th
-    integer :: nconst_1st
-    integer :: nconst_2nd
-    integer :: nconst_3rd
-    integer :: nconst_4th
-    integer :: nconst_rot2nd
-    integer :: nconst_huang
-    integer :: nconst_dynmat
-    integer :: nconst_rot3rd
-    integer :: nconst_asr3rd
-    integer :: nconst_rot4th
-    integer :: nconst_asr4th
-    double precision, allocatable :: fcoeff(:,:)
-    double precision, allocatable :: const(:,:)
-  end type Coeff_Moore_type
-
-  type S_product
-    double precision, allocatable :: SS  (:,:,:)
-    double precision, allocatable :: SSS (:,:,:,:)
-    double precision, allocatable :: SSSS(:,:,:,:,:)
-  end type S_product
-
-  type Asr_Rot
-    double precision, allocatable :: ABG (:,:,:)
-    double precision, allocatable :: ABGD(:,:,:,:)
-    double precision, allocatable :: ABGDE(:,:,:,:,:)
-  end type Asr_Rot
-
-  type,public :: Constraints_type
-    type(S_product),allocatable :: Sprod(:,:)
-    type(Asr_Rot),allocatable :: AsrRot3(:,:,:)
-    type(Asr_Rot),allocatable :: AsrRot4(:,:,:,:)
-  end type Constraints_type
-
-
- public :: tdep_calc_MoorePenrose
- public :: tdep_MatchIdeal2Average
- public :: tdep_calc_model
- public :: tdep_calc_nbcoeff
- public :: tdep_write_xred_average
+ public :: tdep_check_constraints
+ public :: tdep_print_Aknowledgments
 
 contains
 
-!=====================================================================================================
- subroutine tdep_calc_MoorePenrose(CoeffMoore,Forces,simult,Invar,IFC_coeff,MPIdata)
-
-  type(Input_type),intent(in) :: Invar
-  type(Coeff_Moore_type), intent(in) :: CoeffMoore
-  double precision, intent(in)  :: Forces(3*Invar%natom*Invar%my_nstep)
-  double precision, intent(out)  :: IFC_coeff(CoeffMoore%ntotcoeff,1)
-  type(MPI_enreg_type), intent(in) :: MPIdata
-  integer, intent(in) :: simult
-
-  integer :: INFO,ntotcoeff,ntotconst
-  integer :: natnstep,nconcoef,ierr,ncoeff_prev,nconst_prev,iconst,icoeff
-  integer, allocatable :: IPIV(:)
-  double precision, allocatable :: WORK(:)
-  double precision, allocatable :: ffcoeff_tmp(:,:),fforces_tmp(:),b_const(:)
-  double precision, allocatable :: A_tot(:,:),A_inv(:,:),b_tot(:),x_tot(:)
-
-  write(Invar%stdout,*) '################### And compute the pseudo-inverse ##########################'
-  write(Invar%stdout,*) '#############################################################################'
-  natnstep=3*Invar%natom*Invar%my_nstep
-
-  if (simult.eq.0) then
-!   Simultaneously (Invar%together=1)
-    ncoeff_prev=0
-    nconst_prev=0
-    ntotcoeff=CoeffMoore%ntotcoeff
-    ntotconst=CoeffMoore%ntotconst
-  else if (simult.eq.1) then
-!   Successively (Invar%together=0 and Invar%order=2)
-    ncoeff_prev=0
-    nconst_prev=0
-    ntotcoeff=CoeffMoore%ncoeff1st +CoeffMoore%ncoeff2nd
-    ntotconst=CoeffMoore%nconst_1st+CoeffMoore%nconst_2nd
-  else if (simult.eq.2) then
-!   Successively (Invar%together=0 and Invar%order=3)
-    ncoeff_prev=CoeffMoore%ncoeff1st +CoeffMoore%ncoeff2nd
-    nconst_prev=CoeffMoore%nconst_1st+CoeffMoore%nconst_2nd
-    ntotcoeff=CoeffMoore%ncoeff3rd
-    ntotconst=CoeffMoore%nconst_3rd
-  else if (simult.eq.3) then
-!   Successively (Invar%together=0 and Invar%order=4)
-    ncoeff_prev=CoeffMoore%ncoeff1st +CoeffMoore%ncoeff2nd +CoeffMoore%ncoeff3rd
-    nconst_prev=CoeffMoore%nconst_1st+CoeffMoore%nconst_2nd+CoeffMoore%nconst_3rd
-    ntotcoeff=CoeffMoore%ncoeff4th
-    ntotconst=CoeffMoore%nconst_4th
-  end if
-  nconcoef=ntotcoeff+ntotconst
-!  write(Invar%stdout,*) 'ncoeff_prev=',ncoeff_prev
-!  write(Invar%stdout,*) 'nconst_prev=',nconst_prev
-!  write(Invar%stdout,*) 'ntotconst=',ntotconst
-!  write(Invar%stdout,*) 'ntotcoeff=',ntotcoeff
-!  write(Invar%stdout,*) 'nconcoef=',nconcoef
-  if ((ntotconst.gt.0).and.(simult.ge.2)) then
-    ABI_MALLOC(b_const,(ntotconst)) ; b_const(:)=0.d0
-    do iconst=1,ntotconst
-      do icoeff=1,ncoeff_prev
-        b_const(iconst)=b_const(iconst)+&
-&         CoeffMoore%const(nconst_prev+iconst,icoeff)*IFC_coeff(icoeff,1)
-      end do
-    end do
-  end if
-
-  ABI_MALLOC(ffcoeff_tmp,(ntotcoeff,ntotcoeff)) ; ffcoeff_tmp(:,:)=0.d0
-  ABI_MALLOC(fforces_tmp,(ntotcoeff)) ; fforces_tmp(:)=0.d0
-  ABI_MALLOC(A_tot,(nconcoef,nconcoef)) ; A_tot(:,:)=0.d0
-  ABI_MALLOC(A_inv,(nconcoef,nconcoef)) ; A_inv(:,:)=0.d0
-  ABI_MALLOC(b_tot,(nconcoef)) ; b_tot(:)=0.d0
-  ABI_MALLOC(x_tot,(nconcoef)) ; x_tot(:)=0.d0
-  call DGEMM('T','N',ntotcoeff,ntotcoeff,natnstep,2.d0,&
-&            CoeffMoore%fcoeff(:,ncoeff_prev+1:ncoeff_prev+ntotcoeff),natnstep,&
-&            CoeffMoore%fcoeff(:,ncoeff_prev+1:ncoeff_prev+ntotcoeff),natnstep,&
-&            0.d0,ffcoeff_tmp,ntotcoeff)
-! NOTE, we have to solve F_ij = -\sum_j \Phi_ij u_j, so we add a minus sign
-  call DGEMV('T',natnstep,ntotcoeff,-2.d0,&
-&            CoeffMoore%fcoeff(:,ncoeff_prev+1:ncoeff_prev+ntotcoeff),natnstep,&
-&            Forces,1,0.d0,fforces_tmp,1)
-  call xmpi_sum(ffcoeff_tmp,MPIdata%comm_step,ierr)
-  call xmpi_sum(fforces_tmp,MPIdata%comm_step,ierr)
-
-  A_tot(1:ntotcoeff,1:ntotcoeff)=ffcoeff_tmp(1:ntotcoeff,1:ntotcoeff)
-  ABI_FREE(ffcoeff_tmp)
-  if (ntotconst.gt.0) then
-    A_tot(ntotcoeff+1:nconcoef,1:ntotcoeff)=&
-&                     CoeffMoore%const(nconst_prev+1:nconst_prev+ntotconst,ncoeff_prev+1:ncoeff_prev+ntotcoeff)
-    A_tot(1:ntotcoeff,ntotcoeff+1:nconcoef)=&
-&                     transpose(CoeffMoore%const(nconst_prev+1:nconst_prev+ntotconst,ncoeff_prev+1:ncoeff_prev+ntotcoeff))
-!FB    ABI_FREE(CoeffMoore%const)
-  end if
-  b_tot(1:ntotcoeff)=fforces_tmp(:)
-  if ((ntotconst.gt.0).and.(simult.ge.2)) then
-    b_tot(ntotcoeff+1:nconcoef)=-b_const(1:ntotconst)
-    ABI_FREE(b_const)
-  end if
-  ABI_FREE(fforces_tmp)
-
-  ABI_MALLOC(WORK, (5 * nconcoef)); WORK(:) = 0.d0
-  ABI_MALLOC(IPIV, (nconcoef)); IPIV(:) = 0
-  A_inv(:,:) = A_tot(:,:)
-  !BEGIN DEBUG
-  !write(Invar%stdout,*) ' '
-  !write(Invar%stdout,*) ' The matrix A_inv is (before DGETRF):'
-  !do icoeff=1,nconcoef
-  !  write(Invar%stdout,*) (A_inv(icoeff,iconst), iconst=1, nconcoef)
-  !end do
-  !END DEBUG
-
-  ! Check for small pivot elements
-  do icoeff=1,nconcoef
-    if (abs(A_inv(icoeff, icoeff)) < tol12) then
-      write(Invar%stdlog,*) ' WARNING: Small pivot value at index ', icoeff, ' : ', A_inv(icoeff, icoeff)
-!      A_inv(icoeff, icoeff) = tol14 ! Regularization to avoid numerical issues
-      A_inv(icoeff, icoeff) = max(EPSILON(1.0_dp) * maxval(abs(A_inv)), tol12)
-    end if
-  end do
-
-  ! Perform LU factorization
-  call DGETRF(nconcoef, nconcoef, A_inv, nconcoef, IPIV, INFO)
-  if (INFO.ne.0) then
-    write(Invar%stdout,*) 'ERROR: Singular matrix detected in DGETRF. INFO=', INFO
-    stop
-  end if
-
-  ! Check for small pivot elements
-  do icoeff=1,nconcoef
-    if (abs(A_inv(icoeff, icoeff)) < tol12) then
-      write(Invar%stdlog,*) ' WARNING: Small pivot value at index ', icoeff, ' : ', A_inv(icoeff, icoeff)
-!      A_inv(icoeff, icoeff) = tol14 ! Regularization to avoid numerical issues
-      A_inv(icoeff, icoeff) = max(EPSILON(1.0_dp) * maxval(abs(A_inv)), tol12)
-    end if
-  end do
-
-  ! Compute matrix inverse using LU decomposition
-  call DGETRI(nconcoef, A_inv, nconcoef, IPIV, WORK, 5 * nconcoef, INFO)
-  if (INFO.ne.0) then
-    write(Invar%stdout,*) 'ERROR: Matrix inversion failed in DGETRI. INFO=', INFO
-    stop
-  end if
-  ! BEGIN DEBUG
-  !write(Invar%stdout,*) ' '
-  !write(Invar%stdout,*) ' The inverse matrix is (after DGETRI):'
-  !do icoeff=1,nconcoef
-  !  write(Invar%stdout,*) (A_inv(icoeff,iconst), iconst=1, nconcoef)
-  !end do
-  ! END DEBUG
-
-  ABI_FREE(WORK)
-  ABI_FREE(IPIV)
-
-  call DGEMV('N',nconcoef,nconcoef,1.d0,A_inv,nconcoef,b_tot,1,0.d0,x_tot,1)
-  write(Invar%stdout,*) ' The problem is solved'
-  write(Invar%stdout,*) ' '
-  !BEGIN DEBUG
-  !write(Invar%stdout,*) ' The solutions are:'
-  !do icoeff=1,nconcoef
-  !  write(Invar%stdout,'(1x,i4,1x,f15.10)') icoeff,x_tot(icoeff)
-  !end do
-  !write(Invar%stdout,'(a,1x,f15.10)')'  condition number=',maxval(x_tot(:))/minval(x_tot(:))
-  !END DEBUG
-
-  IFC_coeff(ncoeff_prev+1:ncoeff_prev+ntotcoeff,1)=x_tot(1:ntotcoeff)
-  ABI_FREE(A_tot)
-  ABI_FREE(A_inv)
-  ABI_FREE(b_tot)
-  ABI_FREE(x_tot)
-
- end subroutine tdep_calc_MoorePenrose
-
 !====================================================================================================
 
-!!****f* ABINIT/m_tdep_utils/tdep_MatchIdeal2Average
-!! NAME
-!!  tdep_MatchIdeal2Average
-!!
-!! FUNCTION
-!! Find the mapping between the atoms in the ideal (equilibrium) supercell,
-!! and the atoms of the input moledular dynamics using their average positions.
-!! Then compute the atom displacements with respect to the equilibrium positions
-!! at each time step of the MD.
-!!
-!! INPUTS
-!!  Invar = Input object containing the input variables, positions, and forces.
-!!  Lattice = Lattice object describing the ideal structure.
-!!  Sym = Symetries object describing all the symmetry operations of the crystal.
-!!  MPIdata = Info on MPI parallelism.
-!!
-!! OUTPUT
-!!  distance = Distance between the ideal positions of the atoms in the supercell,
-!!             (norm, and cartesian components).
-!!  Forces_MD = Cartesian forces on the atoms at each time steps, as a flat array.
-!!  ucart = Cartesian displacements of the atoms with respect to their equilibrium
-!!          positions at each time step.
-!!  Rlatt_cart = Cartesian coordinate of the lattice vectors of the unitcell
-!!               within the supercell, for each atom.
-!!               This array seems to have an extra dimension, for algorithmic simplicity.
-!!  Rlatt4dos = like Rlatt_cart, but scaled by acell_unitcell.
-!!              These are used when reading an IFC file, to compare with the R vectors
-!!              that are stored in the file.
-!!
-!! SIDE EFFECTS
-!! Some of the reduced positions of the atoms Invar%xred are shifted by a supercell
-!! lattice vector in order to re-center the crystal.
-!!
-!! NOTES
-!!
-!! SOURCE
+ subroutine tdep_check_constraints(Model,distance,Invar,Sym,Shell3at,Shell4at)
 
- subroutine tdep_MatchIdeal2Average(distance,Forces_MD,Invar,Lattice,MPIdata,&
-&                                   Rlatt_cart,Rlatt4dos,Sym,ucart)
+  type(tdep_Model_type),intent(in) :: Model
+  type(atdep_dataset_type),intent(in) :: Invar
+  double precision, intent(in) :: distance(Invar%natom,Invar%natom,4)
+  type(Symmetries_type),intent(in) :: Sym
+  type(Shell_type), intent(in) :: Shell3at
+  type(Shell_type), intent(in) :: Shell4at
 
-  type(Input_type),intent(inout) :: Invar
-  type(Lattice_type),intent(in) :: Lattice
-  type(Symetries_type),intent(inout) :: Sym
-  type(MPI_enreg_type),intent(in) :: MPIdata
-  double precision, intent(out)  :: distance(Invar%natom,Invar%natom,4)
-  double precision, intent(out)  :: Forces_MD(3*Invar%natom*Invar%my_nstep)
-  double precision, intent(out)  :: Rlatt_cart(3,Invar%natom_unitcell,Invar%natom)
-  double precision, intent(out)  :: Rlatt4dos (3,Invar%natom_unitcell,Invar%natom)
-  double precision, intent(out)  :: ucart(3,Invar%natom,Invar%my_nstep)
+  integer :: ii,jj,kk,ll,iatom,jatom,katom,latom,isym,itrans
+  integer :: alpha,beta,gama,lambda
+  integer :: ishell,iatshell
+  double precision :: norm1
+  double precision :: Kroenecker(3,3),Phi3_333(3,3,3),Phi4_3333(3,3,3,3)
+  double precision, allocatable :: asr3(:,:,:,:,:),rot3(:,:,:,:,:)
+  double precision, allocatable :: asr4(:,:,:,:,:,:)
+  integer :: ierr
+  logical :: order2,order3,order4
 
-  integer :: ii,jj,kk,max_ijk,iatcell,jatcell,iatom,jatom,eatom,fatom,istep
-  integer :: iatom_ref,ierr
-  integer :: ndir_match,natom_match
-  double precision :: tmp(3),tmp1(3),tmp2(3),Rlatt(3),xred_tmp(3),rprimd_md_tmp(3,3),distance_tmp(3)
-  double precision, allocatable :: dist_unitcell(:,:,:),xcart_average(:,:)
-  double precision, allocatable :: fcart_tmp(:,:,:),ucart_tmp(:,:,:)
-  double precision, allocatable  :: xred_average(:,:)
-  double precision, allocatable  :: xred_center(:,:)
-  double precision, allocatable  :: Rlatt_red (:,:,:)
-  double precision, allocatable  :: xred_ideal(:,:)
-! double precision, allocatable  :: distance_average(:,:,:)
-  integer, allocatable  :: FromIdeal2Average(:)
-  double precision, allocatable  :: xcart(:,:,:)
-  double precision, allocatable  :: xcart_ideal(:,:)
-  logical :: ok,must_shift,discard_R
-  character(len=500) :: msg
+  ierr = 0;
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Compute the acoustic sum rule and the !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!! invariance under an arbitrary rotation of the system !!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  Kroenecker(:,:)=zero
+  Kroenecker(1,1)=1 ; Kroenecker(2,2)=1 ; Kroenecker(3,3)=1
 
-  write(Invar%stdout,*)' '
-  write(Invar%stdout,*) '#############################################################################'
-  write(Invar%stdout,*) '###### Find the matching between ideal and average positions  ###############'
-  write(Invar%stdout,*) '#############################################################################'
+  order2 = .false.
+  order3 = .false.
+  order4 = .false.
+  if (Invar%order.ge.2) order2=.true.
+  if (Invar%order.ge.3) order3=.true.
+!FB4th  if (Invar%order.ge.4) order4=.true.
+  if (Invar%order.ge.4) order4=.false.
 
-!==========================================================================================
-!======== 1/ Determine ideal positions and distances ======================================
-!==========================================================================================
-  write(Invar%stdout,*)' Determine ideal positions and distances...'
-! Define the bigbox with ideal positions
-  ABI_MALLOC(Rlatt_red ,(3,Invar%natom_unitcell,Invar%natom)); Rlatt_red (:,:,:)=0.d0
-  ABI_MALLOC(xred_ideal,(3,Invar%natom))                     ; xred_ideal(:,:)=0.d0
-  max_ijk=20
-  iatom=1
-  do ii=-max_ijk,max_ijk
-    do jj=-max_ijk,max_ijk
-      do kk=-max_ijk,max_ijk
+  if (order2) then
+!   FIRST ORDER
+!   Acoustic sum rule (first order)'
+    do alpha=1,3
+      norm1=zero
+      do iatom=1,Invar%natom_unitcell
+        norm1=norm1+Model%Phi1((iatom-1)*3+alpha)
+      enddo
+      if (abs(norm1).gt.tol8) then
+        write(std_out,'(a,1(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR1) : alpha,Sum =',alpha,norm1
+        if (abs(norm1).gt.tol6) then
+          ABI_WARNING('The acoustic sum rule is not fulfilled (order 1)')
+        end if
+      end if
+    enddo
+!   Invariance under an arbitrary rotation (first order)'
+    do alpha=1,3
+      do beta=1,3
+        norm1=zero
+        do iatom=1,Invar%natom_unitcell
+          norm1=norm1+Model%Phi1(3*(iatom-1)+alpha)*distance(1,iatom,beta +1)-&
+&                     Model%Phi1(3*(iatom-1)+beta )*distance(1,iatom,alpha+1)
+        end do !iatom
+        if (abs(norm1).gt.tol8) then
+          write(std_out,'(a,2(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ROT1) : alpha,beta,Sum=',alpha,beta,norm1
+          if (abs(norm1).gt.tol6) then
+            ABI_WARNING('The invariance under arbitrary rotation is not fulfilled (order 1)')
+          end if 
+        end if 
+      end do !beta
+    end do !alpha
 
-        Rlatt(1)=real(ii-1)
-        Rlatt(2)=real(jj-1)
-        Rlatt(3)=real(kk-1)
-
-        discard_R = .false.
-        do iatcell=1,Invar%natom_unitcell
-
-          if (discard_R) cycle
-
-!         Compute the reduced positions
-          tmp(:) = Rlatt(:) + Invar%xred_unitcell(:,iatcell)
-          call DGEMV('T',3,3,1.d0,Lattice%multiplicitym1(:,:),3,tmp(:),1,0.d0,xred_tmp(:),1)
-
-!         If the first atom of the pattern is in the [0;1[ range then keep all the
-!         atoms of the pattern (even if the others are outside the box). Else,
-!         none are taken.
-          if (iatcell==1) then
-            if (minval(xred_tmp(:)).lt.0.d0.or.maxval(xred_tmp(:)).ge.(1.d0-tol12)) then
-              discard_R = .true.
-              cycle
+!   SECOND ORDER
+!   Acoustic sum rule (second order)
+    do iatom=1,Invar%natom
+      do alpha=1,3
+        do beta=1,3
+          norm1=zero
+          do jatom=1,Invar%natom
+            norm1=norm1+Model%Phi2%SR((iatom-1)*3+alpha,3*(jatom-1)+beta)
+          enddo
+          if (abs(norm1).gt.tol8) then
+            write(std_out,'(a,3(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR2) : iatom,alpha,beta,Sum =',iatom,alpha,beta,norm1
+            if (abs(norm1).gt.tol6) then
+              ABI_WARNING('The acoustic sum rule is not fulfilled (order 2)')
             end if
           end if
-
-          !GA: Why natom+1 ?
-          if (iatom.gt.(Invar%natom+1)) then
-            ABI_ERROR('The number of atoms found in the bigbox exceeds natom' )
-          end if
-
-          xred_ideal(:,iatom) = xred_tmp(:)
-          call DGEMV('T',3,3,1.d0,Lattice%multiplicitym1(:,:),3,Rlatt(:),1,0.d0,Rlatt_red(:,1,iatom),1)
-          iatom = iatom + 1
-        end do
-      end do
-    end do
-  end do
-
-  if (iatom.lt.Invar%natom+1) then
-    ABI_ERROR('The number of atoms found in the big box is smaller than natom')
-  end if
-
-! Compute the distances between ideal positions in the SUPERcell
-  do eatom=1,Invar%natom
-    do fatom=1,Invar%natom
-      tmp(:)=xred_ideal(:,fatom)-xred_ideal(:,eatom)
-      call tdep_make_inbox(tmp,1,1d-4)
-      rprimd_md_tmp(:,:)=Lattice%rprimd_md(:,:)
-      distance_tmp(:)=distance(eatom,fatom,2:4)
-      call DGEMV('T',3,3,1.d0,rprimd_md_tmp,3,tmp,1,0.d0,distance_tmp,1)
-      distance(eatom,fatom,2:4)=distance_tmp(:)
-      do ii=1,3
-!       Remove the rounding errors before writing (for non regression testing purposes)
-        if (abs(distance(eatom,fatom,ii+1)).lt.tol8) distance(eatom,fatom,ii+1)=zero
-        distance(eatom,fatom,1)=distance(eatom,fatom,1)+(distance(eatom,fatom,ii+1))**2
-      end do
-      distance(eatom,fatom,1)=distance(eatom,fatom,1)**0.5
-      distance(eatom,fatom,1)=tol12 * dint(distance(eatom,fatom,1) / tol12)
-    end do
-  end do
-
-! Compute the distances between ideal positions in the UNITcell
-  ABI_MALLOC(dist_unitcell,(Invar%natom_unitcell,Invar%natom_unitcell,3)); dist_unitcell(:,:,:)=zero
-  do iatcell=1,Invar%natom_unitcell
-    do jatcell=1,Invar%natom_unitcell
-      tmp(:) = xred_ideal(:,jatcell)-xred_ideal(:,iatcell)
-      call tdep_make_inbox(tmp,1,tol8)
-      dist_unitcell(iatcell,jatcell,:) = tmp(:)
-    end do
-  end do
-
-!==========================================================================================
-!======== 2/ Find the matching between the ideal and average ==============================
-!========   (from the MD simulations) positions. ==========================================
-!==========================================================================================
-!  NOTE: - xred_center is used to find the matching with the ideal positions
-!        - xred_average is used to compute the displacements (from MD trajectories)
-!        The difference between those two is that xred_center will be shifted to bring
-!        one of the average positions at the origin, for an easier comparison with
-!        xred_ideal. Some shifts by a supercell lattice vector will be computed
-!        from the difference between xred_center and xred_ideal, and those shifts
-!        will be applied to xred_average and xred at all steps.
-
-  write(Invar%stdout,*)' Compute average positions...'
-  ABI_MALLOC(xred_average,(3,Invar%natom))             ; xred_average(:,:)=0.d0
-  ABI_MALLOC(xred_center,(3,Invar%natom))              ; xred_center(:,:)=0.d0
-! Average positions from MD (on nstep steps)
-  do istep=1,Invar%my_nstep
-    do iatom=1,Invar%natom
-      xred_average(:,iatom)=xred_average(:,iatom)+Invar%xred(:,iatom,istep)
-    end do
-  end do
-  call xmpi_sum(xred_average,MPIdata%comm_step,ierr)
-  xred_average(:,:) = xred_average(:,:) / real(Invar%nstep_tot)
-
-! Search the basis of atoms in the supercell
-! in order to find iatom_ref
-  write(Invar%stdout,*)' Search the unitcell basis of atoms in the MD trajectory...'
-  ok=.false.
-  xred_center(:,:) = xred_average(:,:)
-  iatcell=1
-  do iatom=1,Invar%natom
-    if (Invar%typat(iatom).ne.Invar%typat_unitcell(iatcell)) cycle
-    natom_match = 0
-    do jatom=1,Invar%natom
-
-      tmp(:)=xred_center(:,jatom)-xred_center(:,iatom)
-      call tdep_make_inbox(tmp,1,Invar%tolinbox)
-
-      do jatcell=1,Invar%natom_unitcell
-        if (Invar%typat(jatom).ne.Invar%typat_unitcell(jatcell)) cycle
-        ndir_match = 0
-        do ii=1,3
-          if (abs(tmp(ii)-dist_unitcell(iatcell,jatcell,ii)).le.Invar%tolmotif) then
-            ndir_match=ndir_match+1
-          end if
-        end do
-        if (ndir_match==3) then
-          natom_match = natom_match + 1
-          exit
-        end if
-      end do
-    end do
-    if (natom_match.eq.Invar%natom_unitcell) then
-      iatom_ref = iatom
-      ok=.true.
-      exit
-    else if (natom_match.gt.Invar%natom_unitcell) then
-      write(msg,'(5a)') 'Too many atoms match the unit cell.',ch10,&
-                        'Perhaps the value of tolmotif is too large,',ch10,&
-                        'or the value of tolinbox is too small.'
-      ABI_ERROR(msg)
-    endif
-  end do
-  if (.not.ok) then
-    call tdep_write_xred_average(Invar,MPIdata,Lattice,xred_ideal,xred_center)
-    write(msg,'(3a)') 'The basis of atoms written in input.in file does not appear in the MD trajectory.',ch10,&
-                      'Perhaps, you can adjust the tolerance (tolmotif).'
-    ABI_ERROR(msg)
-  end if
-  ABI_FREE(dist_unitcell)
-
-  write(Invar%stdout,*)' Compare ideal and average positions using PBC...'
-! Modification of xred and Rlatt tabs
-! for averaged quantities: xred_center, xred_average, xred
-! 1/ The "iatom_ref" atom is put in (0.0;0.0;0.0)
-  tmp(:) = xred_center(:,iatom_ref)
-  do jatom=1,Invar%natom
-    xred_center(:,jatom) = xred_center(:,jatom) - tmp(:)
-  end do
-! 2/ All the atoms are put in the range [-0.5;0.5[ (use of PBC)
-  do jatom=1,Invar%natom
-    tmp(:)=xred_center(:,jatom)
-    call tdep_make_inbox(tmp,1,Invar%tolinbox,xred_center(:,jatom))
-    call tdep_make_inbox(tmp,1,Invar%tolinbox,xred_average(:,jatom))
-    do istep=1,Invar%my_nstep
-      call tdep_make_inbox(tmp,1,Invar%tolinbox,Invar%xred(:,jatom,istep))
-    end do
-  end do
-! Modification of xred and Rlatt tabs
-! for ideal quantities: Rlatt_red et xred_ideal
-!   1/ The atom 1 is put in (0.0;0.0;0.0)
-  tmp1(:)=xred_ideal(:,1)
-  tmp2(:)=Rlatt_red(:,1,1)
-  do jatom=1,Invar%natom
-    xred_ideal(:,jatom)=  xred_ideal(:,jatom)  -tmp1(:)
-    Rlatt_red (:,1,jatom)=Rlatt_red (:,1,jatom)-tmp2(:)
-  end do
-! 2/ All the atoms are put in the range [-0.5;0.5[ (use of PBC)
-  do jatom=1,Invar%natom
-    tmp(:)=xred_ideal(:,jatom)
-    call tdep_make_inbox(tmp,1,tol8,xred_ideal(:,jatom))
-    call tdep_make_inbox(tmp,1,tol8,Rlatt_red(:,1,jatom))
-!FB      call tdep_make_inbox(Rlatt_red(:,1,jatom),1,tol8)
-  end do
-
-! When the multiplicity equals 1 along one direction, there is some trouble
-! To clean!!!!!!!
-  do ii=1,3
-    if ((Invar%multiplicity(ii,ii).eq.1).and.(Invar%multiplicity(ii,mod(ii  ,3)+1).eq.0)&
-&                                 .and.(Invar%multiplicity(ii,mod(ii+1,3)+1).eq.0)) then
-      Rlatt_red(ii,1,:)=0.d0
-      write(Invar%stdout,*) 'WARNING: multiplicity=1 for ii=',ii
-    end if
-  end do
-
-! Define Rlatt for all the atoms in the basis (Rlatt_red varies as a function of iatcell)
-  if (Invar%natom_unitcell.gt.1) then
-    do iatcell=2,Invar%natom_unitcell
-      Rlatt_red(:,iatcell,:)=Rlatt_red(:,1,:)
-    end do
-  end if
-  do iatom=1,Invar%natom
-    do iatcell=1,Invar%natom_unitcell
-      tmp(:)=xred_ideal(:,iatom)-xred_ideal(:,iatcell)
-      call tdep_make_inbox(tmp,1,tol8,Rlatt_red(:,iatcell,iatom))
-    end do
-  end do
-  if (Invar%debug) then
-    do iatcell=1,Invar%natom_unitcell
-      write(Invar%stdout,*) 'For iatcell=',iatcell
-      do jatom=1,Invar%natom
-        write(Invar%stdout,'(a,i4,a,3(f16.10,1x))') 'For jatom=',jatom,', Rlatt=',Rlatt_red(1:3,iatcell,jatom)
-      end do
-    end do
-  end if
-
-! Matching between Ideal and Average positions: xred_ideal and xred_center
-! Then, write them in the xred_average.xyz file.
-  write(Invar%stdout,*)' Write the xred_average.xyz file with ideal and average positions...'
-  ABI_MALLOC(FromIdeal2Average,(Invar%natom))             ; FromIdeal2Average(:)=0
-  do iatom=1,Invar%natom
-    ok =.false.
-    do jatom=1,Invar%natom
-      if (Invar%typat(iatom).ne.Invar%typat_unitcell(mod(jatom-1,Invar%natom_unitcell)+1)) cycle
-      must_shift=.false.
-      ndir_match=0
-      do ii=1,3
-        if (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)).le.Invar%tolmatch) then
-          ndir_match=ndir_match+1
-        else if ((abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)-1.d0).le.Invar%tolmatch) &
-&            .or.(abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)+1.d0).le.Invar%tolmatch)) then
-          ndir_match=ndir_match+1
-          must_shift=.true.
-        endif
-      end do
-      if (ndir_match==3.and..not.must_shift) then
-        FromIdeal2Average(jatom)=iatom
-        ok=.true.
-        exit
-      else if (ndir_match==3.and.must_shift) then
-        do ii=1,3
-          if (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)-1.d0).le.Invar%tolmatch) then
-            xred_center(ii,iatom)=xred_center(ii,iatom)-1d0
-            xred_average(ii,iatom)=xred_average(ii,iatom)-1d0
-            do istep=1,Invar%my_nstep
-              Invar%xred(ii,iatom,istep)=Invar%xred(ii,iatom,istep)-1d0
-            end do
-            FromIdeal2Average(jatom)=iatom
-          else if (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)+1.d0).le.Invar%tolmatch) then
-            xred_center(ii,iatom)=xred_center(ii,iatom)+1d0
-            xred_average(ii,iatom)=xred_average(ii,iatom)+1d0
-            do istep=1,Invar%my_nstep
-              Invar%xred(ii,iatom,istep)=Invar%xred(ii,iatom,istep)+1d0
-            end do
-            FromIdeal2Average(jatom)=iatom
-          end if
-        end do
-        ok=.true.
-        exit
-      end if
-    end do
-    if (.not.ok) then
-      write(Invar%stdlog,*) 'Problem to find the average position for iatom=',iatom
-      write(Invar%stdlog,*) '  Reasons:'
-      write(Invar%stdlog,*) '    1/ One atom jump to another equilibrium position'
-      write(Invar%stdlog,*) '    2/ The system is no more solid'
-      write(Invar%stdlog,*) '    3/ Perhaps, you can adjust the tolerance (tolmatch)'
-      write(Invar%stdlog,*) '  xred_center=',(xred_center(ii,iatom),ii=1,3)
-      do eatom=1,Invar%natom
-        write(Invar%stdlog,'(a,1x,3(f10.6,1x))') 'I',xred_ideal (:,eatom)
-        write(Invar%stdlog,'(a,1x,3(f10.6,1x))') 'C',xred_center(:,eatom)
-      end do
-      ABI_ERROR('Problem to find the average position')
-    end if
-  end do
-
-! WARNING: VERY IMPORTANT: The positions are displayed/sorted
-! (and used in the following) according to ideal positions xred_ideal.
-  call tdep_write_xred_average(Invar,MPIdata,Lattice,xred_ideal,xred_center,FromIdeal2Average)
-  !if (MPIdata%iam_master) then
-  !  open(unit=31,file=trim(Invar%output_prefix)//'_xred_average.xyz')
-  !  write(31,'(i4)') Invar%natom*2
-  !  write(31,'(i4)') 1
-! !  --> In reduced coordinates
-  !  do iatom=1,Invar%natom
-  !    write(31,'(a,1x,3(f10.6,1x))') 'Ired',xred_ideal (:,iatom)
-  !    write(31,'(a,1x,3(f10.6,1x))') 'Cred',xred_center(:,FromIdeal2Average(iatom))
-  !  end do
-! !  --> In cartesian coordinates
-  !  do iatom=1,Invar%natom
-  !    tmp(:)=zero
-  !    call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,xred_ideal (:,iatom),1,0.d0,tmp(:),1)
-  !    write(31,'(a,1x,3(f10.6,1x))') 'Icart',tmp(:)
-  !    tmp(:)=zero
-  !    call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,xred_center(:,FromIdeal2Average(iatom)),1,0.d0,tmp(:),1)
-  !    write(31,'(a,1x,3(f10.6,1x))') 'Ccart',tmp(:)
-  !  end do
-  !  close(31)
-  !end if
-  ABI_FREE(xred_center)
-
-!FB! Average distances between atoms --> distance_average
-!FB  ABI_MALLOC(distance_average,(Invar%natom,Invar%natom,4))      ; distance_average(:,:,:)=0.d0
-!FB  do eatom=1,Invar%natom
-!FB    do fatom=1,Invar%natom
-!FB      tmp(:)=xred_center(:,FromIdeal2Average(fatom))-xred_center(:,FromIdeal2Average(eatom))
-!FB      call tdep_make_inbox(tmp,1,1d-3)
-!FB      call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,tmp(:),1,0.d0,distance_average(eatom,fatom,2:4),1)
-!FB      do ii=1,3
-!FB!       Remove the rounding errors before writing (for non regression testing purposes)
-!FB        if (abs(distance_average(eatom,fatom,ii+1)).lt.tol8) distance_average(eatom,fatom,ii+1)=zero
-!FB        distance_average(eatom,fatom,1)=distance_average(eatom,fatom,1)+(distance_average(eatom,fatom,ii+1))**2
-!FB      end do
-!FB      distance_average(eatom,fatom,1)=distance_average(eatom,fatom,1)**0.5
-!FB    end do
-!FB  end do
-!FB  ABI_FREE(xred_center)
-!FB  ABI_FREE(distance_average)
-
-!====================================================================================
-!====================== END OF REDUCED COORDINATES ==================================
-!====================================================================================
-! a/ Get cartesian coordinates from reduced ones
-! b/ Compute ucart and fcart tabs
-! c/ The atoms are sorted according the IDEAL arrangement
-!    The correspondance function is contained in: FromIdeal2Average
-!    WARNING : Consequently the arrangement of the xcart* tabs is not modified.
-  write(Invar%stdout,*)' Compute cartesian coordinates and forces...'
-  ABI_MALLOC(xcart        ,(3,Invar%natom,Invar%my_nstep)); xcart(:,:,:)=0.d0
-  ABI_MALLOC(xcart_ideal  ,(3,Invar%natom))               ; xcart_ideal(:,:)=0.d0
-  ABI_MALLOC(xcart_average,(3,Invar%natom))               ; xcart_average(:,:)=0.d0
-  ABI_MALLOC(ucart_tmp    ,(3,Invar%natom,Invar%my_nstep)); ucart_tmp(:,:,:)=0.d0
-  do iatom=1,Invar%natom
-    call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,xred_ideal  (:,iatom),1,0.d0,xcart_ideal  (:,iatom),1)
-    call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,xred_average(:,iatom),1,0.d0,xcart_average(:,iatom),1)
-    do iatcell=1,Invar%natom_unitcell
-      call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,Rlatt_red(:,iatcell,iatom),1,0.d0,Rlatt_cart(:,iatcell,iatom),1)
-    end do
-  end do
-  do istep=1,Invar%my_nstep
-    do iatom=1,Invar%natom
-      jatom = FromIdeal2Average(iatom)
-      call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,Invar%xred(:,jatom,istep),&
-&                1,0.d0,xcart(:,jatom,istep),1)
-      if (Invar%use_ideal_positions.eq.0) then
-        ucart_tmp(:,iatom,istep) = xcart(:,jatom,istep) - xcart_average(:,jatom)
-      else
-        ucart_tmp(:,iatom,istep) = xcart(:,jatom,istep) - xcart_ideal(:,iatom)
-      end if
-    end do
-  end do
-  ABI_FREE(xred_average)
-  ABI_FREE(xcart)
-  ABI_FREE(xcart_ideal)
-  ABI_FREE(xcart_average)
-
-! Rearrangement of the fcart tabs in column --> Forces_MD
-  ABI_MALLOC(fcart_tmp,(3,Invar%natom,Invar%my_nstep)); fcart_tmp(:,:,:)=0.d0
-  do istep=1,Invar%my_nstep
-    do iatom=1,Invar%natom
-      fcart_tmp(:,iatom,istep)=Invar%fcart(:,FromIdeal2Average(iatom),istep)
-    end do
-  end do
-  do istep=1,Invar%my_nstep
-    do jatom=1,Invar%natom
-      do ii=1,3
-        Forces_MD(ii+3*(jatom-1)+3*Invar%natom*(istep-1))=fcart_tmp(ii,jatom,istep)
-        ucart(ii,jatom,istep)=ucart_tmp(ii,jatom,istep)
+        enddo
       enddo
     enddo
-  enddo
-  ABI_FREE(FromIdeal2Average)
-  ABI_FREE(ucart_tmp)
-  ABI_FREE(fcart_tmp)
-
-! Define Rlatt4dos, fulfilling the definition of mkphdos (ABINIT routine)
-  do ii=1,3
-    rprimd_md_tmp(ii,:)=Lattice%rprimd_md(ii,:)/Lattice%acell_unitcell(ii)
-  end do
-  do iatom=1,Invar%natom
-    do iatcell=1,Invar%natom_unitcell
-      call DGEMV('T',3,3,1.d0,rprimd_md_tmp,3,Rlatt_red(:,iatcell,iatom),1,0.d0,Rlatt4dos(:,iatcell,iatom),1)
-    end do
-  end do
-
-! Find the symetry operation between 2 atoms
-  call tdep_SearchS_1at(Invar,MPIdata,Sym,xred_ideal)
-  ABI_MALLOC(Invar%xred_ideal,(3,Invar%natom)) ; Invar%xred_ideal(:,:)=0.d0
-  Invar%xred_ideal(:,:)=xred_ideal(:,:)
-  ABI_FREE(xred_ideal)
-  ABI_FREE(Rlatt_red)
-
-! BEGIN DEBUG
-!  write(Invar%stdout,*)'------------------------------------------'
-!  write(Invar%stdout,*)'iatom istep ucart'
-!  do jatom=1,Invar%natom
-!    do istep=1,Invar%my_nstep
-!      write(Invar%stdout,'(2(i5,1x),3(f14.6,1x))') jatom, istep, ucart(:,jatom,istep)
-!    end do
-!  end do
-!  write(Invar%stdout,*)'------------------------------------------'
-! END DEBUG
-
-
- end subroutine tdep_MatchIdeal2Average
-
-!====================================================================================================
- subroutine tdep_write_xred_average(Invar,MPIdata,Lattice,&
-                                    xred_ideal,xred_center,&
-                                    FromIdeal2Average)
-  type(Input_type), intent(in) :: Invar
-  type(MPI_enreg_type),intent(in) :: MPIdata
-  type(Lattice_type),intent(in) :: Lattice
-  double precision,intent(in) :: xred_ideal(3,Invar%natom)
-  double precision,intent(in) :: xred_center(3,Invar%natom)
-  integer,intent(in),optional :: FromIdeal2Average(Invar%natom)
-
-  integer :: unt
-  !integer :: natom,natom_unitcell
-  integer :: iatom,jatom,ii,jj
-  !logical :: with_xcart
-  integer,allocatable :: ideal2average(:)
-  double precision :: rprimd(3,3)
-  double precision :: xred_C(3),xred_I(3),xcart_C(3),xcart_I(3)
-
-  if (MPIdata%iam_master) then
-
-    rprimd(:,:) = Lattice%rprimd_md(:,:)
-
-    ABI_MALLOC(ideal2average,(Invar%natom))
-    ideal2average(:)=0
-    if (present(FromIdeal2Average)) then
-      ideal2average(:) = FromIdeal2Average(:)
-    else
-      do iatom=1,Invar%natom
-        ideal2average(iatom) = iatom
-      end do
-    end if
-
-    unt=31
-    open(unit=unt,file=trim(Invar%output_prefix)//'_xred_average.xyz')
-    write(unt,'(a,i4)') '# natom = ',Invar%natom
-    write(unt,'(a,i4)') '# natom_unitcell = ',Invar%natom_unitcell
-    write(unt,'(a,9(f4.1,1x))') '# multiplicity = ',((Lattice%multiplicity(ii,jj),jj=1,3),ii=1,3 )
-    write(unt,'(a)') '#'
-
-    write(unt,'(a1,1x,a8,2x,a6,2x,2(a5,30x))') '#', 'position', 'iatom', 'xred ', 'xcart'
-    write(unt,'(a)')''
-
-    xred_I = zero
-    xred_C = zero
+!   Invariance under an arbitrary rotation (first and second order)'
     do iatom=1,Invar%natom
-      jatom = ideal2average(iatom)
-      xred_I = xred_ideal (:,iatom)
-      xred_C = xred_center(:,jatom)
-
-      xcart_I(:)=zero
-      xcart_C(:)=zero
-      call DGEMV('T',3,3,1.d0,rprimd(:,:),3,xred_I,1,0.d0,xcart_I,1)
-      call DGEMV('T',3,3,1.d0,rprimd(:,:),3,xred_C,1,0.d0,xcart_C,1)
-
-      write(unt,'(2x,a6,4x,i6,2x,3(f10.6,1x),2x,3(f10.6,1x))')'Ideal ',iatom,xred_I,xcart_I
-      write(unt,'(2x,a6,4x,i6,2x,3(f10.6,1x),2x,3(f10.6,1x))')'Center',jatom,xred_C,xcart_C
-      write(unt,'(a)')''
-
-    end do
-
-    close(unt)
-    ABI_FREE(ideal2average)
-  end if
-
- end subroutine tdep_write_xred_average
-!====================================================================================================
- subroutine tdep_calc_model(Forces_MD,Forces_TDEP,Invar,MPIdata,Phi1Ui,Phi2UiUj,&
-&                           Phi3UiUjUk,Phi4UiUjUkUl,U0)
-
-  type(Input_type),intent(in) :: Invar
-  type(MPI_enreg_type), intent(in) :: MPIdata
-  double precision, intent(in)  :: Forces_MD(3*Invar%natom*Invar%my_nstep)
-  double precision, intent(in)  :: Forces_TDEP(3*Invar%natom*Invar%my_nstep)
-  double precision, intent(out) :: U0
-  double precision, intent(in)  :: Phi1Ui(Invar%my_nstep)
-  double precision, intent(in)  :: Phi2UiUj(Invar%my_nstep)
-  double precision, intent(in)  :: Phi3UiUjUk(Invar%my_nstep)
-  double precision, intent(in)  :: Phi4UiUjUkUl(Invar%my_nstep)
-
-  integer :: ii,istep,iatom
-  double precision :: Delta_F2,Delta_U,Delta_U2
-  double precision :: sigma,U_1,U_2,U_3,U_4,UMD
-  double precision, allocatable :: tmp(:),Phi_tot(:)
-  double precision, allocatable :: U_MD(:),U_TDEP(:),weights_tot(:)
-  integer :: ierr
-
-  write(Invar%stdout,*)' '
-  write(Invar%stdout,*) '#############################################################################'
-  write(Invar%stdout,*) '######################### Energies, errors,...  #############################'
-  write(Invar%stdout,*) '#############################################################################'
-
-! Compute U0, U_TDEP, Delta_U and write them in the data.out file
-  write(Invar%stdout,'(a)') ' Thermodynamic quantities and convergence parameters of THE MODEL,'
-  write(Invar%stdout,'(a)') '      as a function of the step number (energies in eV/atom and forces in Ha/bohr) :'
-  if (Invar%order.eq.4) then
-    write(Invar%stdout,'(a)') ' <U_TDEP> = U_0 + U_1 + U_2 + U_3 + U_4'
-    write(Invar%stdout,'(2a)') '       with U_0 = < U_MD - sum_i Phi1 ui - 1/2 sum_ij Phi2 ui uj ',&
-&                             '- 1/6 sum_ijk Phi3 ui uj uk - 1/24 sum_ijkl Phi4 ui uj uk ul >'
-    write(Invar%stdout,'(a)') '        and U_1 = <      sum_i    Phi1 ui >'
-    write(Invar%stdout,'(a)') '        and U_2 = < 1/2  sum_ij   Phi2 ui uj >'
-    write(Invar%stdout,'(a)') '        and U_3 = < 1/6  sum_ijk  Phi3 ui uj uk >'
-    write(Invar%stdout,'(a)') '        and U_4 = < 1/24 sum_ijkl Phi4 ui uj uk ul >'
-  else if (Invar%order.eq.3) then
-    write(Invar%stdout,'(a)') ' <U_TDEP> = U_0 + U_1 + U_2 + U_3'
-    write(Invar%stdout,'(a)') '       with U_0 = < U_MD - sum_i Phi1 ui - 1/2 sum_ij Phi2 ui uj - 1/6 sum_ijk Phi3 ui uj uk >'
-    write(Invar%stdout,'(a)') '        and U_1 = <      sum_i    Phi1 ui >'
-    write(Invar%stdout,'(a)') '        and U_2 = < 1/2  sum_ij   Phi2 ui uj >'
-    write(Invar%stdout,'(a)') '        and U_3 = < 1/6  sum_ijk  Phi3 ui uj uk >'
-  else
-    write(Invar%stdout,'(a)') ' <U_TDEP> = U_0 + U_1 + U_2'
-    write(Invar%stdout,'(a)') '       with U_0 = < U_MD - sum_i Phi1 ui - 1/2 sum_ij Phi2 ui uj >'
-    write(Invar%stdout,'(a)') '        and U_1 = <      sum_i    Phi1 ui >'
-    write(Invar%stdout,'(a)') '        and U_2 = < 1/2  sum_ij   Phi2 ui uj >'
-  end if
-  write(Invar%stdout,'(a)') '  Delta_U =   < U_MD - U_TDEP > '
-  write(Invar%stdout,'(a)') '  Delta_U2= (< (U_MD - U_TDEP)^2 >)**0.5 '
-  write(Invar%stdout,'(a)') '  Delta_F2= (< (F_MD - F_TDEP)^2 >)**0.5 '
-  write(Invar%stdout,'(a)') '  Sigma   = (< (F_MD - F_TDEP)^2 >/<F_MD**2>)**0.5 '
-  if (Invar%order.eq.4) then
-    write(Invar%stdout,'(2a)') '     <U_MD>            U_0              U_1              U_2  ',&
-&     '            U_3              U_4            Delta_U          Delta_U2          Delta_F2          Sigma'
-  else if (Invar%order.eq.3) then
-    write(Invar%stdout,'(2a)') '     <U_MD>            U_0              U_1              U_2  ',&
-&     '            U_3            Delta_U          Delta_U2          Delta_F2          Sigma'
-  else
-    write(Invar%stdout,'(2a)') '     <U_MD>            U_0              U_1              U_2  ',&
-&     '          Delta_U          Delta_U2          Delta_F2          Sigma'
-  end if
-
-! Compute eucledian distance for forces
-  ABI_MALLOC(tmp,(11))                  ; tmp(:)   =0.d0
-  do istep=1,Invar%my_nstep
+      do alpha=1,3
+        do beta=1,3
+          do gama=1,3
+            norm1=zero
+            do jatom=1,Invar%natom
+              norm1=norm1+Model%Phi2%SR(3*(iatom-1)+alpha,3*(jatom-1)+beta)*distance(iatom,jatom,gama+1)-&
+&                         Model%Phi2%SR(3*(iatom-1)+alpha,3*(jatom-1)+gama)*distance(iatom,jatom,beta+1)              
+            end do !jatom
+            norm1=norm1+Model%Phi1(3*(iatom-1)+beta)*Kroenecker(alpha,gama)&
+&                      -Model%Phi1(3*(iatom-1)+gama)*Kroenecker(alpha,beta)
+            if (abs(norm1).gt.tol8) then
+              write(std_out,'(a,4(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ROT2) : iatom,alpha,beta,gama,Sum =',&
+&                                                        iatom,alpha,beta,gama,norm1
+              if (abs(norm1).gt.tol4) then
+                ABI_WARNING('The invariance under arbitrary rotation is not fulfilled (order 2)')
+              end if 
+            end if 
+          end do !gama
+        end do !beta
+      end do !alpha
+    end do !iatom  
+  end if !order=1,2  
+  
+  if (order3) then
+!   THIRD ORDER
+    ABI_MALLOC(rot3,(Invar%natom,3,3,3,3)) ; rot3(:,:,:,:,:)=0.d0
+    ABI_MALLOC(asr3,(2,Invar%natom,3,3,3)) ; asr3(:,:,:,:,:)=0.d0
     do iatom=1,Invar%natom
-      do ii=1,3
-        tmp(4)=tmp(4)+(Forces_MD(ii+3*(iatom-1)+3*Invar%natom*(istep-1))&
-&               -Forces_TDEP(ii+3*(iatom-1)+3*Invar%natom*(istep-1)))**2*Invar%weights(istep)
-        tmp(5)=tmp(5)+Forces_MD(ii+3*(iatom-1)+3*Invar%natom*(istep-1))**2*Invar%weights(istep)
-      end do
-    end do
-  end do
-! Compute energies
-  ABI_MALLOC(U_TDEP,     (Invar%nstep_tot)) ; U_TDEP(:)=0.d0
-  ABI_MALLOC(U_MD,       (Invar%nstep_tot)) ; U_MD(:)  =0.d0
-  ABI_MALLOC(weights_tot,(Invar%nstep_tot)) ; weights_tot(:)=0.d0
-  ABI_MALLOC(Phi_tot,    (MPIdata%my_nstep)); Phi_tot(:)=0.d0
-  do istep=1,Invar%my_nstep
-    tmp(7) =tmp(7) +Invar%etot(istep)*Invar%weights(istep)
-    tmp(10)=tmp(10)+Phi1Ui(istep)*Invar%weights(istep)
-    tmp(6) =tmp(6) +Phi2UiUj(istep)*Invar%weights(istep)
-    tmp(8) =tmp(8) +Phi3UiUjUk(istep)*Invar%weights(istep)
-    tmp(11)=tmp(11)+Phi4UiUjUkUl(istep)*Invar%weights(istep)
-  end do
-  call xmpi_sum(tmp,MPIdata%comm_step,ierr)
-  tmp(1) = tmp(7)-tmp(10)-tmp(6)-tmp(8)-tmp(11)
-  Phi_tot(:)=tmp(1)+Phi1Ui(:)+Phi2UiUj(:)+Phi3UiUjUk(:)+Phi4UiUjUkUl(:)
-  call xmpi_gatherv(Phi_tot,Invar%my_nstep,U_TDEP,MPIdata%nstep_all,MPIdata%shft_step,&
-&                   MPIdata%master,MPIdata%comm_step,ierr)
-  call xmpi_gatherv(Invar%etot,Invar%my_nstep,U_MD,MPIdata%nstep_all,MPIdata%shft_step,&
-&                   MPIdata%master,MPIdata%comm_step,ierr)
-  call xmpi_gatherv(Invar%weights,Invar%my_nstep,weights_tot,MPIdata%nstep_all,MPIdata%shft_step,&
-&                   MPIdata%master,MPIdata%comm_step,ierr)
-  do istep=1,Invar%nstep_tot
-    tmp(2) =tmp(2) + (U_MD(istep)-U_TDEP(istep)) * weights_tot(istep)
-    tmp(9) =tmp(9) + (U_MD(istep)-U_TDEP(istep))**2 * weights_tot(istep)
-  end do
-  U0       =tmp(1) /real(Invar%natom)
-  UMD      =tmp(7) /real(Invar%natom)
-  U_1      =tmp(10)/real(Invar%natom)
-  U_2      =tmp(6) /real(Invar%natom)
-  U_3      =tmp(8) /real(Invar%natom)
-  U_4      =tmp(11)/real(Invar%natom)
-  Delta_U  =tmp(2) /real(Invar%natom)
-  Delta_U2 =tmp(9) /real(Invar%natom)
-  Delta_F2 =tmp(4) /real(Invar%natom*3)
-  if (tmp(5).eq.0.d0) then
-    sigma    =0.d0
-  else
-    sigma    =dsqrt(tmp(4)/tmp(5))
-  end if
-  if (Invar%order.eq.4) then
-    write(Invar%stdout,'(10(f12.5,5x))') UMD*Ha_eV,U0*Ha_eV,U_1*Ha_eV,U_2*Ha_eV,U_3*Ha_eV,U_4*Ha_eV,&
-&     Delta_U*Ha_eV,Delta_U2**0.5*Ha_eV,Delta_F2**0.5,sigma
-  else if (Invar%order.eq.3) then
-    write(Invar%stdout,'(9(f12.5,5x))') UMD*Ha_eV,U0*Ha_eV,U_1*Ha_eV,U_2*Ha_eV,U_3*Ha_eV,&
-&     Delta_U*Ha_eV,Delta_U2**0.5*Ha_eV,Delta_F2**0.5,sigma
-  else
-    write(Invar%stdout,'(8(f12.5,5x))') UMD*Ha_eV,U0*Ha_eV,U_1*Ha_eV,U_2*Ha_eV,&
-&     Delta_U*Ha_eV,Delta_U2**0.5*Ha_eV,Delta_F2**0.5,sigma
-  endif
-  ABI_FREE(tmp)
-  write(Invar%stdout,'(a,1x,f12.5)') ' NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=',&
-&   3.d0/2.d0*kb_HaK*Ha_eV*Invar%temperature
-
-! Write : i) (U_TDEP vs U_MD) in etotMDvsTDEP.dat
-!        ii) (Forces_TDEP vs Forces_MD) in fcartMDvsTDEP.dat
-  write(Invar%stdout,'(a)') ' '
-  write(Invar%stdout,'(a)') ' See the etotMDvsTDEP.dat & fcartMDvsTDEP.dat files'
-  if (MPIdata%iam_master) then
-    open(unit=32,file=trim(Invar%output_prefix)//'_etotMDvsTDEP.dat')
-    open(unit=33,file=trim(Invar%output_prefix)//'_fcartMDvsTDEP.dat')
-    write(32,'(a)') '#   Istep      U_MD(Ha)         U_TDEP(Ha)'
-    write(33,'(a)') '# Forces_MD(Ha/bohr) Forces_TDEP(Ha/bohr)'
-    do istep=1,Invar%nstep_tot
-      write(32,'(i6,1x,2(f17.6,1x))') istep,U_MD(istep),U_TDEP(istep)
-    end do
-    do istep=1,Invar%my_nstep
-      do iatom=1,Invar%natom
-        do ii=1,3
-          write(33,'(2(f17.10,1x))') Forces_MD  (ii+3*(iatom-1)+3*Invar%natom*(istep-1)),&
-&                                    Forces_TDEP(ii+3*(iatom-1)+3*Invar%natom*(istep-1))
-        end do
-      end do
-    end do
-    close(32)
-    close(33)
-  end if
-  ABI_FREE(U_MD)
-  ABI_FREE(U_TDEP)
-  ABI_FREE(Phi_tot)
-  ABI_FREE(weights_tot)
-
- end subroutine tdep_calc_model
-
-!====================================================================================================
-subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPIdata,&
-&                            ncoeff,norder,nshell,order,proj,Sym)
-
-  integer,intent(in) :: iatcell,ishell,jatom,katom,latom,nshell,order,norder
-  integer,intent(inout) :: ncoeff
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
-  type(MPI_enreg_type), intent(in) :: MPIdata
-  double precision,intent(in) :: distance(Invar%natom,Invar%natom,4)
-  double precision,intent(out) :: proj(norder,norder,nshell)
-
-  integer :: ii,jj,kk,ll,isym,LWORK,INFO,const_tot,itemp,nconst_perm,nconst_loc
-  integer :: ncount,icoeff,jatcell,katcell,latcell,mu,nu,xi,zeta
-  integer :: inv,watom,xatom,yatom,zatom,isyminv,nsyminv,facorder,iseed
-  integer, allocatable :: iconst(:)
-  double precision :: prod_scal,drandom
-  double precision :: eigvec(3,3)
-  double precision :: vect_trial(3),vect_trial1(3),vect_trial2(3),vect_trial3(3)
-  double precision :: vect_trial4(3),vect_trial5(3),vect_trial6(3)
-  double precision :: WR(3),WI(3),VL(3,3),VR(3,3)
-  double precision, allocatable :: WORK(:)
-  double complex :: eigenvectors(3,3),eigenvalues(3)
-  double complex :: pp(3,3),ppp(3,3,3),pppp(3,3,3,3),lambda
-  double complex, allocatable :: tab_vec(:,:),temp(:,:),alphaij(:,:,:),constraints(:,:,:)
-  logical :: ok
-  logical, allocatable :: unchanged(:)
-  character(len=500) :: message
-
-  if (iatcell==1.and.order==1) return
-  if (jatom==iatcell.and.order==2) return
-!FB  if (katom==iatcell.and.jatom==iatcell.and.order==3) return
-
-  if (order==1) then
-    facorder=1
-  else if (order==2) then
-    facorder=2
-  else if (order==3) then
-    facorder=6
-  else if (order==4) then
-    facorder=24
-  end if
-
-! If we want to remove the constraints coming from the symetries
-!FB  if (order==3) then
-!FB    do ii=1,norder
-!FB      proj(ii,ii,ishell)=1.d0
-!FB    end do
-!FB    ncoeff=norder
-!FB    return
-!FB  end if
-
-  nconst_loc=0
-  const_tot=0
-  nsyminv=Sym%nsym*facorder
-  ABI_MALLOC(alphaij,(nsyminv,norder,norder)); alphaij(:,:,:)=czero
-  ABI_MALLOC(iconst,(nsyminv))               ; iconst(:)=0
-  ABI_MALLOC(unchanged,(nsyminv))            ; unchanged(:)=.false.
-
-! ================================================================================================
-! ================ Big loop over symmetries and invariance (nsym*facorder) =======================
-! ================================================================================================
-  if (MPIdata%iam_master) write(16,'(a)') ' '
-  if (MPIdata%iam_master) write(16,'(a,i4)') 'For shell number=',ishell
-  do isyminv=1,nsyminv
-    isym=(isyminv-1)/facorder+1
-    inv=isyminv-(isym-1)*facorder
-    if (isym==1) cycle
-
-!   For the 1st order: Search if the atom is let invariant
-    if (order==1) then
-      if (Sym%indsym(4,isym,iatcell)==iatcell) then
-        if (MPIdata%iam_master) then
-          write(16,'(a,1x,i3)')'===========The atom is kept invariant for isym=',isym
-        end if
-      else
-        cycle
-      end if
-    end if
-
-!   For the 2nd order: Search if the bond is kept invariant or reversed
-    if (order==2) then
-      vect_trial(:)=zero
-      if (inv==1) then ; watom=iatcell ; xatom=jatom   ; endif !\Phi_ij
-      if (inv==2) then ; watom=jatom   ; xatom=iatcell ; endif !\Phi_ji
-      do ii=1,3
-        do jj=1,3
-          vect_trial(ii)=vect_trial(ii)+Sym%S_ref(ii,jj,isym,1)*distance(watom,xatom,jj+1)
-        end do
-      end do
-      jatcell=mod(jatom-1,Invar%natom_unitcell)+1
-      if ((sum(abs(vect_trial(:)-distance(iatcell,jatom,2:4))).lt.tol8).and.&
-&         (Sym%indsym(4,isym,watom)==iatcell).and.&
-&         (Sym%indsym(4,isym,xatom)==jatcell)) then
-        if (MPIdata%iam_master) then
-          if (inv==1) write(16,'(a,1x,i3)')'===========The bond is kept invariant for isym=',isym
-          if (inv==2) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j) --> (j,i) for isym=',isym
-        end if
-      else
-        cycle
-      end if
-    end if
-
-!   For the 3rd order : 6 permutations at all
-    if (order==3) then
-      vect_trial1(:)=zero
-      vect_trial2(:)=zero
-      vect_trial3(:)=zero
-      if (inv==1) then ; watom=iatcell ; xatom=jatom   ; yatom=katom   ; endif !\Phi3_ijk
-      if (inv==2) then ; watom=iatcell ; xatom=katom   ; yatom=jatom   ; endif !\Phi3_ikj
-      if (inv==3) then ; watom=jatom   ; xatom=iatcell ; yatom=katom   ; endif !\Phi3_jik
-      if (inv==4) then ; watom=jatom   ; xatom=katom   ; yatom=iatcell ; endif !\Phi3_jki
-      if (inv==5) then ; watom=katom   ; xatom=iatcell ; yatom=jatom   ; endif !\Phi3_kij
-      if (inv==6) then ; watom=katom   ; xatom=jatom   ; yatom=iatcell ; endif !\Phi3_kji
-      do ii=1,3
-        do jj=1,3
-          vect_trial1(ii)=vect_trial1(ii)+Sym%S_ref(ii,jj,isym,1)*distance(watom,xatom,jj+1)
-          vect_trial2(ii)=vect_trial2(ii)+Sym%S_ref(ii,jj,isym,1)*distance(xatom,yatom,jj+1)
-          vect_trial3(ii)=vect_trial3(ii)+Sym%S_ref(ii,jj,isym,1)*distance(yatom,watom,jj+1)
-        end do
-      end do
-      jatcell=mod(jatom-1,Invar%natom_unitcell)+1
-      katcell=mod(katom-1,Invar%natom_unitcell)+1
-      if ((sum(abs(vect_trial1(:)-distance(iatcell,jatom  ,2:4))).lt.tol8).and.&
-&         (sum(abs(vect_trial2(:)-distance(jatom  ,katom  ,2:4))).lt.tol8).and.&
-&         (sum(abs(vect_trial3(:)-distance(katom  ,iatcell,2:4))).lt.tol8).and.&
-&         (Sym%indsym(4,isym,watom)==iatcell).and.&
-&         (Sym%indsym(4,isym,xatom)==jatcell).and.&
-&         (Sym%indsym(4,isym,yatom)==katcell)) then
-        if (MPIdata%iam_master) then
-          if (inv==1) write(16,'(a,1x,i3)')'===========The bond is kept invariant for isym=',isym
-          if (inv==2) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k) --> (i,k,j) for isym=',isym
-          if (inv==3) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k) --> (j,i,k) for isym=',isym
-          if (inv==4) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k) --> (j,k,i) for isym=',isym
-          if (inv==5) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k) --> (k,i,j) for isym=',isym
-          if (inv==6) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k) --> (k,j,i) for isym=',isym
-        end if
-      else
-        cycle
-      end if
-    end if
-
-!   For the 4th order : 24 permutations at all
-    if (order==4) then
-      vect_trial1(:)=zero
-      vect_trial2(:)=zero
-      vect_trial3(:)=zero
-      vect_trial4(:)=zero
-      vect_trial5(:)=zero
-      vect_trial6(:)=zero
-      if (inv==1) then ; watom=iatcell ; xatom=jatom   ; yatom=katom   ; zatom=latom   ; endif !\Phi4_ijkl
-      if (inv==2) then ; watom=iatcell ; xatom=katom   ; yatom=jatom   ; zatom=latom   ; endif !\Phi4_ikjl
-      if (inv==3) then ; watom=jatom   ; xatom=iatcell ; yatom=katom   ; zatom=latom   ; endif !\Phi4_jikl
-      if (inv==4) then ; watom=jatom   ; xatom=katom   ; yatom=iatcell ; zatom=latom   ; endif !\Phi4_jkil
-      if (inv==5) then ; watom=katom   ; xatom=iatcell ; yatom=jatom   ; zatom=latom   ; endif !\Phi4_kijl
-      if (inv==6) then ; watom=katom   ; xatom=jatom   ; yatom=iatcell ; zatom=latom   ; endif !\Phi4_kjil
-
-      if (inv==7 ) then ; watom=iatcell ; xatom=jatom   ; yatom=latom   ; zatom=katom   ; endif !\Phi4_ijlk
-      if (inv==8 ) then ; watom=iatcell ; xatom=katom   ; yatom=latom   ; zatom=jatom   ; endif !\Phi4_iklj
-      if (inv==9 ) then ; watom=jatom   ; xatom=iatcell ; yatom=latom   ; zatom=katom   ; endif !\Phi4_jilk
-      if (inv==10) then ; watom=jatom   ; xatom=katom   ; yatom=latom   ; zatom=iatcell ; endif !\Phi4_jkli
-      if (inv==11) then ; watom=katom   ; xatom=iatcell ; yatom=latom   ; zatom=jatom   ; endif !\Phi4_kilj
-      if (inv==12) then ; watom=katom   ; xatom=jatom   ; yatom=latom   ; zatom=iatcell ; endif !\Phi4_kjli
-
-      if (inv==13) then ; watom=iatcell ; xatom=latom   ; yatom=jatom   ; zatom=katom   ; endif !\Phi4_iljk
-      if (inv==14) then ; watom=iatcell ; xatom=latom   ; yatom=katom   ; zatom=jatom   ; endif !\Phi4_ilkj
-      if (inv==15) then ; watom=jatom   ; xatom=latom   ; yatom=iatcell ; zatom=katom   ; endif !\Phi4_jlik
-      if (inv==16) then ; watom=jatom   ; xatom=latom   ; yatom=katom   ; zatom=iatcell ; endif !\Phi4_jlki
-      if (inv==17) then ; watom=katom   ; xatom=latom   ; yatom=iatcell ; zatom=jatom   ; endif !\Phi4_klij
-      if (inv==18) then ; watom=katom   ; xatom=latom   ; yatom=jatom   ; zatom=iatcell ; endif !\Phi4_klji
-
-      if (inv==19) then ; watom=latom   ; xatom=iatcell ; yatom=jatom   ; zatom=katom   ; endif !\Phi4_lijk
-      if (inv==20) then ; watom=latom   ; xatom=iatcell ; yatom=katom   ; zatom=jatom   ; endif !\Phi4_likj
-      if (inv==21) then ; watom=latom   ; xatom=jatom   ; yatom=iatcell ; zatom=katom   ; endif !\Phi4_ljik
-      if (inv==22) then ; watom=latom   ; xatom=jatom   ; yatom=katom   ; zatom=iatcell ; endif !\Phi4_ljki
-      if (inv==23) then ; watom=latom   ; xatom=katom   ; yatom=iatcell ; zatom=jatom   ; endif !\Phi4_lkij
-      if (inv==24) then ; watom=latom   ; xatom=katom   ; yatom=jatom   ; zatom=iatcell ; endif !\Phi4_lkji
-
-      do ii=1,3
-        do jj=1,3
-          vect_trial1(ii)=vect_trial1(ii)+Sym%S_ref(ii,jj,isym,1)*distance(watom,xatom,jj+1)
-          vect_trial2(ii)=vect_trial2(ii)+Sym%S_ref(ii,jj,isym,1)*distance(watom,yatom,jj+1)
-          vect_trial3(ii)=vect_trial3(ii)+Sym%S_ref(ii,jj,isym,1)*distance(watom,zatom,jj+1)
-          vect_trial4(ii)=vect_trial4(ii)+Sym%S_ref(ii,jj,isym,1)*distance(xatom,yatom,jj+1)
-          vect_trial5(ii)=vect_trial5(ii)+Sym%S_ref(ii,jj,isym,1)*distance(xatom,zatom,jj+1)
-          vect_trial6(ii)=vect_trial6(ii)+Sym%S_ref(ii,jj,isym,1)*distance(yatom,zatom,jj+1)
-        end do
-      end do
-      jatcell=mod(jatom-1,Invar%natom_unitcell)+1
-      katcell=mod(katom-1,Invar%natom_unitcell)+1
-      latcell=mod(latom-1,Invar%natom_unitcell)+1
-      if ((sum(abs(vect_trial1(:)-distance(iatcell,jatom,2:4))).lt.tol8).and.&
-&         (sum(abs(vect_trial2(:)-distance(iatcell,katom,2:4))).lt.tol8).and.&
-&         (sum(abs(vect_trial3(:)-distance(iatcell,latom,2:4))).lt.tol8).and.&
-&         (sum(abs(vect_trial4(:)-distance(jatom  ,katom,2:4))).lt.tol8).and.&
-&         (sum(abs(vect_trial5(:)-distance(jatom  ,latom,2:4))).lt.tol8).and.&
-&         (sum(abs(vect_trial6(:)-distance(katom  ,latom,2:4))).lt.tol8).and.&
-&         (Sym%indsym(4,isym,watom)==iatcell).and.&
-&         (Sym%indsym(4,isym,xatom)==jatcell).and.&
-&         (Sym%indsym(4,isym,yatom)==katcell).and.&
-&         (Sym%indsym(4,isym,zatom)==latcell)) then
-        if (MPIdata%iam_master) then
-          if (inv==1 ) write(16,'(a,1x,i3)')'===========The bond is kept invariant for isym=',isym
-          if (inv==2 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (i,k,j,l) for isym=',isym !\Phi4_ikjl
-          if (inv==3 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,i,k,l) for isym=',isym !\Phi4_jikl
-          if (inv==4 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,k,i,l) for isym=',isym !\Phi4_jkil
-          if (inv==5 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,i,j,l) for isym=',isym !\Phi4_kijl
-          if (inv==6 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,j,i,l) for isym=',isym !\Phi4_kjil
-
-          if (inv==7 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (i,j,l,k) for isym=',isym !\Phi4_ijlk
-          if (inv==8 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (i,k,l,j) for isym=',isym !\Phi4_iklj
-          if (inv==9 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,i,l,k) for isym=',isym !\Phi4_jilk
-          if (inv==10) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,k,l,i) for isym=',isym !\Phi4_jkli
-          if (inv==11) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,i,l,j) for isym=',isym !\Phi4_kilj
-          if (inv==12) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,j,l,i) for isym=',isym !\Phi4_kjli
-
-          if (inv==13) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (i,l,j,k) for isym=',isym !\Phi4_iljk
-          if (inv==14) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (i,l,k,j) for isym=',isym !\Phi4_ilkj
-          if (inv==15) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,l,i,k) for isym=',isym !\Phi4_jlik
-          if (inv==16) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,l,k,i) for isym=',isym !\Phi4_jlki
-          if (inv==17) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,l,i,j) for isym=',isym !\Phi4_klij
-          if (inv==18) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,l,j,i) for isym=',isym !\Phi4_klji
-
-          if (inv==19) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,i,j,k) for isym=',isym !\Phi4_lijk
-          if (inv==20) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,i,k,j) for isym=',isym !\Phi4_likj
-          if (inv==21) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,j,i,k) for isym=',isym !\Phi4_ljik
-          if (inv==22) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,j,k,i) for isym=',isym !\Phi4_ljki
-          if (inv==23) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,k,i,j) for isym=',isym !\Phi4_lkij
-          if (inv==24) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,k,j,i) for isym=',isym !\Phi4_lkji
-        end if
-      else
-        cycle
-      end if
-    end if
-
-!   Write the S_ref matrix
-!FB    write(16,'(3(f16.12,1x))') Sym%S_ref(1,1,isym,1),Sym%S_ref(1,2,isym,1),Sym%S_ref(1,3,isym,1)
-!FB    write(16,'(3(f16.12,1x))') Sym%S_ref(2,1,isym,1),Sym%S_ref(2,2,isym,1),Sym%S_ref(2,3,isym,1)
-!FB    write(16,'(3(f16.12,1x))') Sym%S_ref(3,1,isym,1),Sym%S_ref(3,2,isym,1),Sym%S_ref(3,3,isym,1)
-
-!   Diagonalize the S_ref matrix
-    do ii=1,3
-      do jj=1,3
-        eigvec(ii,jj)=Sym%S_ref(jj,ii,isym,1)
-      end do
-    end do
-    LWORK=4*3
-    ABI_MALLOC(WORK,(LWORK)); WORK(:)=zero
-!   This one is real and could be non-symmetric
-    call dgeev( 'N', 'V', 3, eigvec, 3, WR, WI, VL, 3, VR, 3, WORK, LWORK, INFO)
-    ABI_FREE(WORK)
-
-!   Build the real and imaginary parts of the eigenvectors and eigenvalues
-    jj=0
-    do ii=1,3
-      eigenvalues(ii)=dcmplx(WR(ii),-WI(ii))
-      if (WI(ii).ne.zero.and.jj==0) then
-        do kk=1,3
-          eigenvectors(kk,ii)=dcmplx(VR(kk,ii),VR(kk,ii+1))
-        end do
-        jj=jj+1
-      else if (WI(ii).ne.zero.and.jj==1) then
-        do kk=1,3
-          eigenvectors(kk,ii)=dcmplx(VR(kk,ii-1),-VR(kk,ii))
-        end do
-        jj=jj+1
-      else
-        do kk=1,3
-          eigenvectors(kk,ii)=dcmplx(VR(kk,ii),zero)
-        end do
-      end if
-    end do
-
-!   Write the eigenvalues and eigenvectors
-    ok=.true.
-    do ii=1,3
-      if ((aimag(eigenvalues(1)).ne.0).or.(aimag(eigenvalues(2)).ne.0).or.(aimag(eigenvalues(3)).ne.0)) then
-        ok=.false.
-      end if
-    end do
-    if (.not.ok.and.MPIdata%iam_master) write(16,'(a)') '            WARNING: THERE IS COMPLEX EIGENVALUES'
-
-!   If the transformation matrix keeps the bond invariant:
-!       Phi_{\alpha\beta}=\sum_{\mu\nu} S_{\alpha\mu}.S_{\beta\nu}.Phi_{\mu\nu}
-!       If lambda and p are the eigenvectors and eigenvalues of the S matrix, then:
-!       \sum_{\alpha\beta} p_{\alpha}^l.p_{\beta}^k Phi_{\alpha\beta}
-!     = \sum_{\mu\nu,\alpha\beta} p_{\alpha}^l.p_{\beta}^k.S_{\alpha\mu}.S_{\beta\nu}.Phi_{\mu\nu}
-!     = lambda^{*l}.lambda^{*k} \sum_{\mu\nu} p_{\mu}^l.p_{\nu}^k.Phi_{\mu\nu}
-!   So, if lambda^{*l}.lambda^{*k} = -1, we must have:
-!      \sum_{\alpha\beta} p_{\alpha}^l.p_{\beta}^k.Phi_{\alpha\beta}= 0
-!
-!   In the case of the reversed bond, one obtains the following constraint:
-!      \sum_{\alpha\beta} (lambda^{*l}.lambda^{*k}.p_{\alpha}^l.p_{\beta}^k-p_{\beta}^l.p_{\alpha}^k).Phi_{\alpha\beta}= 0
-!   which applies whether lambda^{*l}.lambda^{*k} = \pm 1
-!
-!   We obtain n vectors with norder coefficients (defined in the R^norder space).
-!   The space of the independent solutions are in the R^(norder-n) space, orthogonal
-!   to the space spanned by the starting n vectors.
-    if (order==1) then
-      do ii=1,3
-        lambda=eigenvalues(ii)
-        if ((abs(real(lambda)-1.d0).lt.1.d-6).and.(abs(aimag(lambda)).lt.1.d-6)) cycle
-        unchanged(isyminv)=.true.
-        iconst(isyminv)=iconst(isyminv)+1
-!FB        const_tot=const_tot+1
-!FB        write(16,*)'  The eigenvalue',ii
-!FB        write(16,*)'  is equal to ',lambda
-        do mu=1,3
-          alphaij(isyminv,mu,iconst(isyminv))=eigenvectors(mu,ii)
-        end do
-!FB        write(16,*)'  Real & imaginary parts of the eigenvectors product:'
-!FB        write(16,'(3(f16.12,1x))')  real(alphaij(isyminv,:,iconst(isyminv)))
-!FB        write(16,'(3(f16.12,1x))') aimag(alphaij(isyminv,:,iconst(isyminv)))
-      end do !ii
-    else if (order==2) then
-      do ii=1,3
-        do jj=1,3
-          lambda=eigenvalues(ii)*eigenvalues(jj)
-          if (((abs(real(lambda)-1.d0).lt.1.d-6).and.(abs(aimag(lambda)).lt.1.d-6).and.(inv==1)).or.&
-&             ((abs(real(lambda)-1.d0).lt.1.d-6).and.(abs(aimag(lambda)).lt.1.d-6).and.(inv==2).and.(ii==jj))) cycle
-          unchanged(isyminv)=.true.
-          iconst(isyminv)=iconst(isyminv)+1
-!FB          const_tot=const_tot+1
-!FB          write(16,*)'  The product of eigenvalues',ii,jj
-!FB          write(16,*)'  is equal to ',lambda
-          do mu=1,3
-            do nu=1,3
-              pp(mu,nu)=eigenvectors(mu,ii)*eigenvectors(nu,jj)
+      rot3(:,:,:,:,:)=0.d0
+      asr3(:,:,:,:,:)=0.d0
+      do jatom=1,Invar%natom
+        if (distance(iatom,jatom,1).gt.Invar%rcut3) cycle
+!       Compute the rotational invariance (third order)
+        do alpha=1,3
+          do beta=1,3
+            do gama=1,3
+              do lambda=1,3
+                rot3(jatom,alpha,beta,gama,lambda)=rot3(jatom,alpha,beta,gama,lambda)+&
+&                    Model%Phi2%SR(3*(iatom-1)+gama  ,3*(jatom-1)+beta  )*Kroenecker(alpha,lambda)+&
+&                    Model%Phi2%SR(3*(iatom-1)+alpha ,3*(jatom-1)+gama  )*Kroenecker(beta,lambda)-&
+&                    Model%Phi2%SR(3*(iatom-1)+lambda,3*(jatom-1)+beta  )*Kroenecker(alpha,gama)-&
+&                    Model%Phi2%SR(3*(iatom-1)+alpha ,3*(jatom-1)+lambda)*Kroenecker(beta,gama)
+              end do !lambda
+            end do !gama
+          end do !beta
+        end do !alpha
+      end do !jatom
+      do ishell=1,Shell3at%nshell
+!       Build the 3x3x3 IFC of an atom in this shell
+        if (Shell3at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
+        do iatshell=1,Shell3at%neighbours(iatom,ishell)%n_interactions
+          jatom=Shell3at%neighbours(iatom,ishell)%atomj_in_shell(iatshell)
+          katom=Shell3at%neighbours(iatom,ishell)%atomk_in_shell(iatshell)
+          isym =Shell3at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
+          itrans=Shell3at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
+          call tdep_build_phi3_333(isym,Model%Phi3(:,:,:,ishell),Phi3_333,Sym,itrans) 
+!         Compute the first ASR : sum_k Phi3_ijk=0 
+!              --> Phi3_iji+sum_{k.ne.i} Phi3_ijk=0
+!              --> if i.eq.j Phi3_iii+sum_{k.ne.i} Phi3_iik
+          asr3(1,jatom,:,:,:)=asr3(1,jatom,:,:,:)+Phi3_333(:,:,:)
+!         Compute the second ASR : sum_j Phi3_ijk=0 
+          asr3(2,katom,:,:,:)=asr3(2,katom,:,:,:)+Phi3_333(:,:,:)
+!         Compute the rotational invariance (third order)
+          do alpha=1,3
+            do beta=1,3
+              do gama=1,3
+                do lambda=1,3
+                  rot3(jatom,alpha,beta,gama,lambda)=rot3(jatom,alpha,beta,gama,lambda)+&
+&                      Phi3_333(alpha,beta,gama  )*distance(iatom,katom,lambda+1)-&
+&                      Phi3_333(alpha,beta,lambda)*distance(iatom,katom,gama  +1)
+                end do
+              end do
             end do
           end do
-          do mu=1,3
-            do nu=1,3
-              if (inv==1) then
-                alphaij(isyminv,(mu-1)*3+nu,iconst(isyminv))=pp(mu,nu)
-              else if (inv==2) then
-                alphaij(isyminv,(mu-1)*3+nu,iconst(isyminv))=lambda*pp(mu,nu)-pp(nu,mu)
-              else
-                ABI_BUG('This symetry is neither Keptinvariant nor Reversed')
-              end if
-            end do
-          end do
-!FB          write(16,*)'  Real & imaginary parts of the eigenvectors product:'
-!FB          write(16,'(9(f16.12,1x))')  real(alphaij(isyminv,:,iconst(isyminv)))
-!FB          write(16,'(9(f16.12,1x))') aimag(alphaij(isyminv,:,iconst(isyminv)))
-        end do !jj
-      end do !ii
-    else if (order==3) then
+        end do !iatshell
+      end do !ishell
+!     Check the acoustic sum rules (third order)
       do ii=1,3
         do jj=1,3
           do kk=1,3
-            lambda=eigenvalues(ii)*eigenvalues(jj)*eigenvalues(kk)
-            if (((abs(real(lambda)-1.d0).lt.1.d-6).and.(abs(aimag(lambda)).lt.1.d-6).and.(inv==1)).or.&
-&               ((abs(real(lambda)-1.d0).lt.1.d-6).and.(abs(aimag(lambda)).lt.1.d-6).and.(inv==2).and.(jj==kk)).or.&
-&               ((abs(real(lambda)-1.d0).lt.1.d-6).and.(abs(aimag(lambda)).lt.1.d-6).and.(inv==3).and.(ii==jj)).or.&
-&               ((abs(real(lambda)-1.d0).lt.1.d-6).and.(abs(aimag(lambda)).lt.1.d-6).and.(inv==4).and.(ii==jj).and.(jj==kk)).or.&
-&               ((abs(real(lambda)-1.d0).lt.1.d-6).and.(abs(aimag(lambda)).lt.1.d-6).and.(inv==5).and.(ii==jj).and.(jj==kk)).or.&
-&               ((abs(real(lambda)-1.d0).lt.1.d-6).and.(abs(aimag(lambda)).lt.1.d-6).and.(inv==6).and.(ii==kk))) cycle
-            unchanged(isyminv)=.true.
-            iconst(isyminv)=iconst(isyminv)+1
-!FB            const_tot=const_tot+1
-!FB            write(16,*)'  The product of eigenvalues',ii,jj
-!FB            write(16,*)'  is equal to ',lambda
-            do mu=1,3
-              do nu=1,3
-                do xi=1,3
-                  ppp(mu,nu,xi)=eigenvectors(mu,ii)*eigenvectors(nu,jj)*eigenvectors(xi,kk)
-                end do !xi
-              end do !nu
-            end do !mu
-            do mu=1,3
-              do nu=1,3
-                do xi=1,3
-                  if (inv==1) then
-                    alphaij(isyminv,(mu-1)*9+(nu-1)*3+xi,iconst(isyminv))=ppp(mu,nu,xi)
-                  else if (inv==2) then
-                    alphaij(isyminv,(mu-1)*9+(nu-1)*3+xi,iconst(isyminv))=lambda*ppp(mu,nu,xi)-ppp(mu,xi,nu)
-                  else if (inv==3) then
-                    alphaij(isyminv,(mu-1)*9+(nu-1)*3+xi,iconst(isyminv))=lambda*ppp(mu,nu,xi)-ppp(nu,mu,xi)
-                  else if (inv==4) then
-                    alphaij(isyminv,(mu-1)*9+(nu-1)*3+xi,iconst(isyminv))=lambda*ppp(mu,nu,xi)-ppp(nu,xi,mu)
-                  else if (inv==5) then
-                    alphaij(isyminv,(mu-1)*9+(nu-1)*3+xi,iconst(isyminv))=lambda*ppp(mu,nu,xi)-ppp(xi,mu,nu)
-                  else if (inv==6) then
-                    alphaij(isyminv,(mu-1)*9+(nu-1)*3+xi,iconst(isyminv))=lambda*ppp(mu,nu,xi)-ppp(xi,nu,mu)
-                  else
-                    ABI_BUG('This symetry is neither Keptinvariant nor Reversed')
-                  end if
-                end do !xi
-              end do !nu
-            end do !mu
-!FB            write(16,*)'  Real & imaginary parts of the eigenvectors product:'
-!FB            write(16,'(27(f16.12,1x))')  real(alphaij(isyminv,:,iconst(isyminv)))
-!FB            write(16,'(27(f16.12,1x))') aimag(alphaij(isyminv,:,iconst(isyminv)))
+!           Check the first acoustic sum rule
+            do jatom=1,Invar%natom
+              if (abs(asr3(1,jatom,ii,jj,kk)).gt.tol8) then
+                write(std_out,'(a,1x,5(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR3) --->',&
+&                                                             ii,jj,kk,iatom,jatom,asr3(1,jatom,ii,jj,kk)
+                if (abs(asr3(1,jatom,ii,jj,kk)).gt.tol6)&
+&                  ABI_WARNING('The acoustic sum rule is not fulfilled (order 3, 3rd dim)')
+              end if
+            end do !jatom
+!           Check the second acoustic sum rule
+            do katom=1,Invar%natom
+              if (abs(asr3(2,katom,ii,jj,kk)).gt.tol8) then
+                write(std_out,'(a,1x,5(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR3) --->',&
+&                                                             ii,jj,kk,iatom,katom,asr3(2,katom,ii,jj,kk)
+                if (abs(asr3(2,katom,ii,jj,kk)).gt.tol6)&                
+&                  ABI_WARNING('The acoustic sum rule is not fulfilled (order 3, 2nd dim)')
+              end if
+            end do !jatom
           end do !kk
         end do !jj
       end do !ii
-    else if (order==4) then
+!     Check the rotational invariance (third order)
+      do jatom=1,Invar%natom
+        do alpha=1,3
+          do beta=1,3
+            do gama=1,3
+              do lambda=1,3
+                if (abs(rot3(jatom,alpha,beta,gama,lambda)).gt.tol8) then
+                  write(std_out,'(a,6(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ROT3) ---> iatom,jatom,alpha,beta,gama,lambda,norm =',&
+&                                iatom,jatom,alpha,beta,gama,lambda,rot3(jatom,alpha,beta,gama,lambda)
+                  if (abs(rot3(jatom,alpha,beta,gama,lambda)).gt.tol6)& 
+&                     ABI_WARNING('The invariance under arbitrary rotation is not fulfilled (order 3)')
+                end if
+              end do !lambda
+            end do !gama
+          end do !beta
+        end do !alpha
+      end do !jatom
+    end do !iatom
+    ABI_FREE(asr3)
+    ABI_FREE(rot3)
+  end if !order=3
+
+! FOURTH ORDER
+  if (order4) then
+!FB    ABI_MALLOC(rot3,(Invar%natom,3,3,3,3)) ; rot3(:,:,:,:,:)=0.d0
+    ABI_MALLOC(asr4,(Invar%natom,Invar%natom,3,3,3,3)) ; asr4(:,:,:,:,:,:)=0.d0
+    do iatom=1,Invar%natom
+      asr4(:,:,:,:,:,:)=0.d0
+!FB      rot3(:,:,:,:,:)=0.d0
+!FB      do jatom=1,Invar%natom
+!FB        if (distance(iatom,jatom,1).gt.Invar%rcut3) cycle
+!FB!       Compute the rotational invariance (third order)
+!FB        do alpha=1,3
+!FB          do beta=1,3
+!FB            do gama=1,3
+!FB              do lambda=1,3
+!FB                rot3(jatom,alpha,beta,gama,lambda)=rot3(jatom,alpha,beta,gama,lambda)+&
+!FB&                    Model%Phi2%SR(3*(iatom-1)+gama  ,3*(jatom-1)+beta  )*Kroenecker(alpha,lambda)+&
+!FB&                    Model%Phi2%SR(3*(iatom-1)+alpha ,3*(jatom-1)+gama  )*Kroenecker(beta,lambda)-&
+!FB&                    Model%Phi2%SR(3*(iatom-1)+lambda,3*(jatom-1)+beta  )*Kroenecker(alpha,gama)-&
+!FB&                    Model%Phi2%SR(3*(iatom-1)+alpha ,3*(jatom-1)+lambda)*Kroenecker(beta,gama)
+!FB              end do !lambda  
+!FB            end do !gama
+!FB          end do !beta
+!FB        end do !alpha
+!FB      end do !jatom
+      do ishell=1,Shell4at%nshell
+!       Build the 3x3x3x3 IFC of an atom in this shell    
+        if (Shell4at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
+        do iatshell=1,Shell4at%neighbours(iatom,ishell)%n_interactions
+          jatom=Shell4at%neighbours(iatom,ishell)%atomj_in_shell(iatshell)
+          katom=Shell4at%neighbours(iatom,ishell)%atomk_in_shell(iatshell)
+          latom=Shell4at%neighbours(iatom,ishell)%atoml_in_shell(iatshell)
+          isym =Shell4at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
+          itrans=Shell4at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
+          call tdep_build_phi4_3333(isym,Model%Phi4(:,:,:,:,ishell),Phi4_3333,Sym,itrans) 
+!         Compute the first ASR : sum_l Phi3_ijkl=0 
+          asr4(jatom,katom,:,:,:,:)=asr4(jatom,katom,:,:,:,:)+Phi4_3333(:,:,:,:)
+!FB!         Compute the rotational invariance (third order)
+!FB          do alpha=1,3
+!FB            do beta=1,3
+!FB              do gama=1,3
+!FB                do lambda=1,3
+!FB                  rot3(jatom,alpha,beta,gama,lambda)=rot3(jatom,alpha,beta,gama,lambda)+&
+!FB&                      Phi3_333(alpha,beta,gama  )*distance(iatom,katom,lambda+1)-&
+!FB&                      Phi3_333(alpha,beta,lambda)*distance(iatom,katom,gama  +1)
+!FB                end do  
+!FB              end do  
+!FB            end do  
+!FB          end do  
+        end do !iatshell
+      end do !ishell  
+!     Check the acoustic sum rules (fourth order)
       do ii=1,3
         do jj=1,3
           do kk=1,3
             do ll=1,3
-              lambda=eigenvalues(ii)*eigenvalues(jj)*eigenvalues(kk)*eigenvalues(ll)
-              if ((abs(real(lambda)-1.d0).lt.1.d-6).and.(abs(aimag(lambda)).lt.1.d-6)) then
-                if ((inv==1 )                                       .or.& !\Phi4_ijkl
-&                 ((inv==2 ).and.(jj==kk))                          .or.& !\Phi4_ikjl
-&                 ((inv==3 ).and.(ii==jj))                          .or.& !\Phi4_jikl
-&                 ((inv==4 ).and.(ii==jj).and.(jj==kk))             .or.& !\Phi4_jkil
-&                 ((inv==5 ).and.(ii==jj).and.(jj==kk))             .or.& !\Phi4_kijl
-&                 ((inv==6 ).and.(ii==kk))                          .or.& !\Phi4_kjil
-
-&                 ((inv==7 ).and.(kk==ll))                          .or.& !\Phi4_ijlk
-&                 ((inv==8 ).and.(jj==kk).and.(kk==ll))             .or.& !\Phi4_iklj
-&                 ((inv==9 ).and.(ii==jj).and.(kk==ll))             .or.& !\Phi4_jilk
-&                 ((inv==10).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Phi4_jkli
-&                 ((inv==11).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Phi4_kilj
-&                 ((inv==12).and.(ii==kk).and.(kk==ll))             .or.& !\Phi4_kjli
-
-&                 ((inv==13).and.(jj==kk).and.(kk==ll))             .or.& !\Phi4_iljk
-&                 ((inv==14).and.(jj==ll))                          .or.& !\Phi4_ilkj
-&                 ((inv==15).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Phi4_jlik
-&                 ((inv==16).and.(ii==jj).and.(jj==ll))             .or.& !\Phi4_jlki
-&                 ((inv==17).and.(ii==kk).and.(jj==ll))             .or.& !\Phi4_klij
-&                 ((inv==18).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Phi4_klji
-
-&                 ((inv==19).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Phi4_lijk
-&                 ((inv==20).and.(ii==jj).and.(jj==ll))             .or.& !\Phi4_likj
-&                 ((inv==21).and.(ii==kk).and.(kk==ll))             .or.& !\Phi4_ljik
-&                 ((inv==22).and.(ii==ll))                          .or.& !\Phi4_ljki
-&                 ((inv==23).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Phi4_lkij
-&                 ((inv==24).and.(ii==ll).and.(jj==kk))) cycle            !\Phi4_lkji
-              end if
-              unchanged(isyminv)=.true.
-              iconst(isyminv)=iconst(isyminv)+1
-!FB              const_tot=const_tot+1
-!FB              write(16,*)'  The product of eigenvalues',ii,jj
-!FB              write(16,*)'  is equal to ',lambda
-              do mu=1,3
-                do nu=1,3
-                  do xi=1,3
-                    do zeta=1,3
-                      pppp(mu,nu,xi,zeta)=eigenvectors(mu,ii)*eigenvectors(nu,jj)*eigenvectors(xi,kk)*eigenvectors(zeta,ll)
-                    end do !zeta
-                  end do !xi
-                end do !nu
-              end do !mu
-              do mu=1,3
-                do nu=1,3
-                  do xi=1,3
-                    do zeta=1,3
-                      itemp=(mu-1)*27+(nu-1)*9+(xi-1)*3+zeta
-                      if (inv==1)       then ; alphaij(isyminv,itemp,iconst(isyminv))=pppp(mu,nu,xi,zeta)
-                      else if (inv==2 ) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(mu,xi,nu,zeta)
-                      else if (inv==3 ) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(nu,mu,xi,zeta)
-                      else if (inv==4 ) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(nu,xi,mu,zeta)
-                      else if (inv==5 ) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(xi,mu,nu,zeta)
-                      else if (inv==6 ) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(xi,nu,mu,zeta)
-
-                      else if (inv==7 ) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(mu,nu,zeta,xi)
-                      else if (inv==8 ) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(mu,xi,zeta,nu)
-                      else if (inv==9 ) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(nu,mu,zeta,xi)
-                      else if (inv==10) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(nu,xi,zeta,mu)
-                      else if (inv==11) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(xi,mu,zeta,nu)
-                      else if (inv==12) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(xi,nu,zeta,mu)
-
-                      else if (inv==13) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(mu,zeta,nu,xi)
-                      else if (inv==14) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(mu,zeta,xi,nu)
-                      else if (inv==15) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(nu,zeta,mu,xi)
-                      else if (inv==16) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(nu,zeta,xi,mu)
-                      else if (inv==17) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(xi,zeta,mu,nu)
-                      else if (inv==18) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(xi,zeta,nu,mu)
-
-                      else if (inv==19) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(zeta,mu,nu,xi)
-                      else if (inv==20) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(zeta,mu,xi,nu)
-                      else if (inv==21) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(zeta,nu,mu,xi)
-                      else if (inv==22) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(zeta,nu,xi,mu)
-                      else if (inv==23) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(zeta,xi,mu,nu)
-                      else if (inv==24) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(zeta,xi,nu,mu)
-                      else ; ABI_BUG('This symetry is neither Keptinvariant nor Reversed')
-                      end if
-                    end do !zeta
-                  end do !xi
-                end do !nu
-              end do !mu
-!FB              write(16,*)'  Real & imaginary parts of the eigenvectors product:'
-!FB              write(16,'(81(f16.12,1x))')  real(alphaij(isyminv,:,iconst(isyminv)))
-!FB              write(16,'(81(f16.12,1x))') aimag(alphaij(isyminv,:,iconst(isyminv)))
+              do jatom=1,Invar%natom
+                do katom=1,Invar%natom
+                  if (abs(asr4(jatom,katom,ii,jj,kk,ll)).gt.tol8) then
+                    write(std_out,'(a,1x,7(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR4) --->',&
+&                      ii,jj,kk,ll,iatom,jatom,katom,asr4(jatom,katom,ii,jj,kk,ll)
+                    if (abs(asr4(jatom,katom,ii,jj,kk,ll)).gt.tol6)&
+&                      ABI_WARNING('The acoustic sum rule is not fulfilled (order 4)')
+                  end if
+                end do !katom  
+              end do !jatom  
             end do !ll
           end do !kk
         end do !jj
-      end do !ii
-    else
-      ABI_BUG('Only the first, second, third and fourth order are allowed')
-    end if
+      end do !ii  
+!FB!     Check the rotational invariance (third order)
+!FB      do jatom=1,Invar%natom
+!FB        do alpha=1,3
+!FB          do beta=1,3
+!FB            do gama=1,3
+!FB              do lambda=1,3
+!FB                if (abs(rot3(jatom,alpha,beta,gama,lambda)).gt.tol8) then
+!FB                  write(std_out,'(a,6(i3,1x),1(e17.10,1x))') &
+!FB                        &'>>>>> WARNING (ROT3) ---> iatom,jatom,alpha,beta,gama,lambda,norm =',&
+!FB&                                iatom,jatom,alpha,beta,gama,lambda,rot3(jatom,alpha,beta,gama,lambda)
+!FB                  if (abs(rot3(jatom,alpha,beta,gama,lambda)).gt.tol6)& 
+!FB&                     ABI_WARNING('The invariance under arbitrary rotation is not fulfilled (order 3)')
+!FB                end if  
+!FB              end do !lambda 
+!FB            end do !gama 
+!FB          end do !beta 
+!FB        end do !alpha 
+!FB      end do !jatom
+    end do !iatom  
+    ABI_FREE(asr4)
+!FB    ABI_FREE(rot3)
+  end if !order=4
 
+ end subroutine tdep_check_constraints
 
-!FB=================================================================
-!FB======== TO CLEAN ===============================================
-!FB=================================================================
-  nconst_loc=const_tot+iconst(isyminv)
-  ii=0
-  ABI_MALLOC(tab_vec,(norder,nconst_loc)); tab_vec(:,:)=czero
-  do itemp=1,isyminv
-    if (unchanged(itemp)) then
-      do jj=1,iconst(itemp)
-        ii=ii+1
-        tab_vec(:,ii)=alphaij(itemp,:,jj)
-      end do
-    end if
-  end do
+!=====================================================================================================
 
-  do kk=2,nconst_loc
-    do jj=1,kk-1
-      prod_scal=sum( real(tab_vec(:,jj))* real(tab_vec(:,jj))+aimag(tab_vec(:,jj))*aimag(tab_vec(:,jj)))
-      if (abs(prod_scal).gt.tol8) then
-        tab_vec(:,kk)=tab_vec(:,kk)-sum(tab_vec(:,kk)*conjg(tab_vec(:,jj)))/dcmplx(prod_scal,zero)*tab_vec(:,jj)
-        do ii=1,norder
-          if (abs( real(tab_vec(ii,kk))).lt.1.d-8) tab_vec(ii,kk)=dcmplx(zero,aimag(tab_vec(ii,kk)))
-          if (abs(aimag(tab_vec(ii,kk))).lt.1.d-8) tab_vec(ii,kk)=dcmplx( real(tab_vec(ii,kk)),zero)
-        end do
-      end if
-    end do
-  end do
+ subroutine tdep_print_Aknowledgments(unt)
 
-! On stocke les vecteurs non-nuls
-  ABI_MALLOC(temp   ,(norder,nconst_loc)); temp(:,:)   =czero
-  ii=0
-  do kk=1,nconst_loc
-    prod_scal=sum( real(tab_vec(:,kk))* real(tab_vec(:,kk))+aimag(tab_vec(:,kk))*aimag(tab_vec(:,kk)))
-    if (abs(prod_scal).gt.tol8) then
-      ii=ii+1
-      temp(:,ii)=tab_vec(:,kk)/dsqrt(prod_scal)
-    end if
-  end do
-  ABI_FREE(tab_vec)
-  iconst(isyminv)=ii-const_tot
-  const_tot=const_tot+iconst(isyminv)
+  integer, intent(in) :: unt
 
-  ii=0
-  alphaij(:,:,:)=czero
-  do itemp=1,isyminv
-    if (unchanged(itemp)) then
-      do jj=1,iconst(itemp)
-        ii=ii+1
-        alphaij(itemp,:,jj)=temp(:,ii)
-      end do
-    end if
-  end do
-  ABI_FREE(temp)
-!FB=================================================================
-!FB======== TO CLEAN ===============================================
-!FB=================================================================
+  write(unt,*) ' '
+  write(unt,'(a)') ' #############################################################################'
+  write(unt,'(a)') ' ######################### CALCULATION COMPLETED #############################'
+  write(unt,'(a)') ' #############################################################################'
+  write(unt,'(a)') ' Suggested references for the acknowledgment of ABINIT usage.'
+  write(unt,'(a)') ' '
+  write(unt,'(a)') ' The users of ABINIT have little formal obligations with respect to the ABINIT group'
+  write(unt,'(a)') ' (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).'
+  write(unt,'(a)') ' However, it is common practice in the scientific literature,'
+  write(unt,'(a)') ' to acknowledge the efforts of people that have made the research possible.'
+  write(unt,'(a)') ' In this spirit, please find below suggested citations of work written by ABINIT developers,'
+  write(unt,'(a)') ' corresponding to implementations inside of ABINIT that you have used in the present run.'
+  write(unt,'(a)') ' Note also that it will be of great value to readers of publications presenting these results,'
+  write(unt,'(a)') ' to read papers enabling them to understand the theoretical formalism and details'
+  write(unt,'(a)') ' of the ABINIT implementation.'
+  write(unt,'(a)') ' For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.'
+  write(unt,'(a)') ' '
+  write(unt,'(a)') ' [1] a-TDEP: Temperature Dependent Effective Potential for Abinit '
+  write(unt,'(a)') ' -- Lattice dynamic properties including anharmonicity'
+  write(unt,'(a)') ' F. Bottin, J. Bieder and J. Bouchet, Comput. Phys. Comm. 254, 107301 (2020).' ! [[cite:Bottin2020]]
+  write(unt,'(a)') ' Strong suggestion to cite this paper in your publications.'
+  write(unt,'(a)') ' '
+  write(unt,'(a)') ' [2] Thermal evolution of vibrational properties of alpha-U'
+  write(unt,'(a)') ' J. Bouchet and F. Bottin, Phys. Rev. B 92, 174108 (2015).' ! [[cite:Bouchet2015]]
+  write(unt,'(a)') ' Strong suggestion to cite this paper in your publications.'
+  write(unt,'(a)') ' '
+  write(unt,'(a)') ' [3] Lattice dynamics of anharmonic solids from first principles'
+  write(unt,'(a)') ' O. Hellman, I.A. Abrikosov and S.I. Simak, Phys. Rev. B 84, 180301(R) (2011).' ! [[cite:Hellman2011]]
+  write(unt,'(a)') ' '
+  write(unt,'(a)') ' [4] Temperature dependent effective potential method for accurate free energy calculations of solids'
+  write(unt,'(a)') ' O. Hellman, P. Steneteg, I.A. Abrikosov and S.I. Simak, Phys. Rev. B 87, 104111 (2013).' ! [[cite:Hellman2013]]
 
+ end subroutine tdep_print_Aknowledgments
 
-
-
-
-
-!   WARNING: There are some minimum and maximum of constraints
-    if (order==1.and.(iconst(isyminv).eq.3)) then
-      ncoeff=0
-      proj(:,:,ishell)=zero
-      ABI_FREE(unchanged)
-      ABI_FREE(alphaij)
-      ABI_FREE(iconst)
-      return
-    else if (order==1.and.(iconst(isyminv).gt.3)) then
-      ABI_BUG(' First order : There are more than 3 constraints')
-    end if
-    if (order==2.and.(iconst(isyminv).gt.8)) then
-      ABI_BUG(' Second order : There are more than 8 constraints')
-    end if
-    if (order==3.and.(iconst(isyminv).gt.27)) then
-      ABI_BUG(' Third order : There are more than 27 constraints')
-    end if
-    if (order==4.and.(iconst(isyminv).gt.81)) then
-      ABI_BUG(' Fourth order : There are more than 81 constraints')
-    end if
-  end do !isyminv
-! ================================================================================================
-! =========== End big loop over symetries and facorder ===========================================
-! ================================================================================================
-  nconst_perm=0
-! The (iik, iji, ijj and iii) third order IFCs are symmetric with respect to some permutations.
-! Some constraints have to be added :
-  if (order.eq.3) then
-    if ((iatcell.eq.jatom).or.(iatcell.eq.katom).or.(jatom.eq.katom)) then
-      nconst_perm=5
-      if (MPIdata%iam_master) write(16,'(a)')'=========== The IFCs are symmetric'
-      const_tot=const_tot+nconst_perm*norder
-      ABI_MALLOC(constraints,(nconst_perm,norder,norder)) ; constraints(:,:,:)=czero
-      ii=0
-      do mu=1,3
-        do nu=1,3
-          do xi=1,3
-            ii=ii+1
-            if (iatcell.eq.jatom) then
-              if (mu.eq.nu) cycle
-              constraints(1,(mu-1)*9+(nu-1)*3+xi,ii)= cone
-              constraints(1,(nu-1)*9+(mu-1)*3+xi,ii)=-cone
-            end if
-            if (iatcell.eq.katom) then
-              if (mu.eq.xi) cycle
-              constraints(2,(mu-1)*9+(nu-1)*3+xi,ii)= cone
-              constraints(2,(xi-1)*9+(nu-1)*3+mu,ii)=-cone
-            end if
-            if (jatom.eq.katom) then
-              if (nu.eq.xi) cycle
-              constraints(3,(mu-1)*9+(nu-1)*3+xi,ii)= cone
-              constraints(3,(mu-1)*9+(xi-1)*3+nu,ii)=-cone
-            end if
-            if ((iatcell.eq.jatom).and.(jatom.eq.katom)) then
-              if ((nu.eq.xi).and.(nu.eq.mu)) cycle
-              constraints(4,(mu-1)*9+(nu-1)*3+xi,ii)= cone
-              constraints(4,(xi-1)*9+(mu-1)*3+nu,ii)=-cone
-            end if
-            if ((iatcell.eq.jatom).and.(jatom.eq.katom)) then
-              if ((nu.eq.xi).and.(nu.eq.mu)) cycle
-              constraints(5,(mu-1)*9+(nu-1)*3+xi,ii)= cone
-              constraints(5,(nu-1)*9+(xi-1)*3+mu,ii)=-cone
-            end if
-          end do
-        end do
-      end do
-    end if
-  end if
-
-! The (iikl, ijil, ijki, ijjl, ijkj, ijkk, iiil, iiki, ijii, ijjj, iiii)
-! fourth order IFCs are symmetric with respect to some permutations.
-! Some constraints have to be added :
-  if (order.eq.4) then
-    if ((iatcell.eq.jatom).or.(iatcell.eq.katom).or.(iatcell.eq.latom)&
-&                         .or.(jatom.eq.katom).or.(jatom.eq.latom).or.(katom.eq.latom)) then
-      nconst_perm=17
-      if (MPIdata%iam_master) write(16,'(a)')'=========== The IFCs are symmetric'
-      const_tot=const_tot+nconst_perm*norder
-      ABI_MALLOC(constraints,(nconst_perm,norder,norder)) ; constraints(:,:,:)=czero
-      ii=0
-      do mu=1,3
-        do nu=1,3
-          do xi=1,3
-            do zeta=1,3
-              ii=ii+1
-              if (iatcell.eq.jatom) then
-                if (mu.eq.nu) cycle
-                constraints(1,(mu-1)*27+(nu-1)*9+(xi-1)*3+zeta,ii)= cone
-                constraints(1,(nu-1)*27+(mu-1)*9+(xi-1)*3+zeta,ii)=-cone
-              end if
-              if (iatcell.eq.katom) then
-                if (mu.eq.xi) cycle
-                constraints(2,(mu-1)*27+(nu-1)*9+(xi-1)*3+zeta,ii)= cone
-                constraints(2,(xi-1)*27+(nu-1)*9+(mu-1)*3+zeta,ii)=-cone
-              end if
-              if (iatcell.eq.latom) then
-                if (mu.eq.zeta) cycle
-                constraints(3,(mu  -1)*27+(nu-1)*9+(xi-1)*3+zeta,ii)= cone
-                constraints(3,(zeta-1)*27+(nu-1)*9+(xi-1)*3+mu  ,ii)=-cone
-              end if
-              if (jatom.eq.katom) then
-                if (nu.eq.xi) cycle
-                constraints(4,(mu-1)*27+(nu-1)*9+(xi-1)*3+zeta,ii)= cone
-                constraints(4,(mu-1)*27+(xi-1)*9+(nu-1)*3+zeta,ii)=-cone
-              end if
-              if (jatom.eq.latom) then
-                if (nu.eq.zeta) cycle
-                constraints(5,(mu-1)*27+(nu  -1)*9+(xi-1)*3+zeta,ii)= cone
-                constraints(5,(mu-1)*27+(zeta-1)*9+(xi-1)*3+nu  ,ii)=-cone
-              end if
-              if (katom.eq.latom) then
-                if (xi.eq.zeta) cycle
-                constraints(6,(mu-1)*27+(nu-1)*9+(xi  -1)*3+zeta,ii)= cone
-                constraints(6,(mu-1)*27+(nu-1)*9+(zeta-1)*3+xi  ,ii)=-cone
-              end if
-
-              if ((iatcell.eq.jatom).and.(jatom.eq.katom)) then
-                if ((mu.eq.nu).and.(nu.eq.xi)) cycle
-                constraints(7,(mu-1)*27+(nu-1)*9+(xi-1)*3+zeta,ii)= cone
-                constraints(7,(xi-1)*27+(mu-1)*9+(nu-1)*3+zeta,ii)=-cone
-              end if
-              if ((iatcell.eq.jatom).and.(jatom.eq.katom)) then
-                if ((mu.eq.nu).and.(nu.eq.xi)) cycle
-                constraints(8,(mu-1)*27+(nu-1)*9+(xi-1)*3+zeta,ii)= cone
-                constraints(8,(nu-1)*27+(xi-1)*9+(mu-1)*3+zeta,ii)=-cone
-              end if
-
-              if ((iatcell.eq.jatom).and.(jatom.eq.latom)) then
-                if ((mu.eq.nu).and.(nu.eq.zeta)) cycle
-                constraints(9,(mu-1)*27+(nu  -1)*9+(xi-1)*3+zeta,ii)= cone
-                constraints(9,(nu-1)*27+(zeta-1)*9+(xi-1)*3+mu  ,ii)=-cone
-              end if
-              if ((iatcell.eq.jatom).and.(jatom.eq.latom)) then
-                if ((mu.eq.nu).and.(nu.eq.zeta)) cycle
-                constraints(10,(mu  -1)*27+(nu-1)*9+(xi-1)*3+zeta,ii)= cone
-                constraints(10,(zeta-1)*27+(mu-1)*9+(xi-1)*3+nu  ,ii)=-cone
-              end if
-
-              if ((iatcell.eq.katom).and.(katom.eq.latom)) then
-                if ((mu.eq.xi).and.(xi.eq.zeta)) cycle
-                constraints(11,(mu-1)*27+(nu-1)*9+(xi  -1)*3+zeta,ii)= cone
-                constraints(11,(xi-1)*27+(nu-1)*9+(zeta-1)*3+mu  ,ii)=-cone
-              end if
-              if ((iatcell.eq.katom).and.(katom.eq.latom)) then
-                if ((mu.eq.xi).and.(xi.eq.zeta)) cycle
-                constraints(12,(mu  -1)*27+(nu-1)*9+(xi-1)*3+zeta,ii)= cone
-                constraints(12,(zeta-1)*27+(nu-1)*9+(mu-1)*3+xi  ,ii)=-cone
-              end if
-
-              if ((jatom.eq.katom).and.(katom.eq.latom)) then
-                if ((nu.eq.xi).and.(xi.eq.zeta)) cycle
-                constraints(13,(mu-1)*27+(nu-1)*9+(xi  -1)*3+zeta,ii)= cone
-                constraints(13,(mu-1)*27+(xi-1)*9+(zeta-1)*3+nu  ,ii)=-cone
-              end if
-              if ((jatom.eq.katom).and.(katom.eq.latom)) then
-                if ((nu.eq.xi).and.(xi.eq.zeta)) cycle
-                constraints(14,(mu-1)*27+(nu  -1)*9+(xi-1)*3+zeta,ii)= cone
-                constraints(14,(mu-1)*27+(zeta-1)*9+(nu-1)*3+xi  ,ii)=-cone
-              end if
-
-              if ((iatcell.eq.jatom).and.(jatom.eq.katom).and.(katom.eq.latom)) then
-                if ((mu.eq.nu).and.(nu.eq.xi).and.(xi.eq.zeta)) cycle
-                constraints(15,(mu-1)*27+(nu-1)*9+(xi  -1)*3+zeta,ii)= cone
-                constraints(15,(nu-1)*27+(xi-1)*9+(zeta-1)*3+mu  ,ii)=-cone
-              end if
-              if ((iatcell.eq.jatom).and.(jatom.eq.katom).and.(katom.eq.latom)) then
-                if ((mu.eq.nu).and.(nu.eq.xi).and.(xi.eq.zeta)) cycle
-                constraints(16,(mu-1)*27+(nu  -1)*9+(xi-1)*3+zeta,ii)= cone
-                constraints(16,(xi-1)*27+(zeta-1)*9+(mu-1)*3+nu  ,ii)=-cone
-              end if
-              if ((iatcell.eq.jatom).and.(jatom.eq.katom).and.(katom.eq.latom)) then
-                if ((mu.eq.nu).and.(nu.eq.xi).and.(xi.eq.zeta)) cycle
-                constraints(17,(mu  -1)*27+(nu-1)*9+(xi-1)*3+zeta,ii)= cone
-                constraints(17,(zeta-1)*27+(mu-1)*9+(nu-1)*3+xi  ,ii)=-cone
-              end if
-            end do
-          end do
-        end do
-      end do
-    end if
-  end if
-
-! In the case where the matrix has norder**2 inequivalent and non-zero elements
-  if (const_tot==0) then
-    write(message,'(a,1x,i3,1x,a)') 'For shell number=',ishell,'there is no symetry operation reducing the number of coefficients'
-    ABI_WARNING(message)
-    proj(:,:,ishell)=0.d0
-    do ii=1,norder
-      proj(ii,ii,ishell)=1.d0
-    end do
-    ncoeff=norder
-    ABI_FREE(unchanged)
-    ABI_FREE(alphaij)
-    ABI_FREE(iconst)
-    return
-  end if
-
-! When some constraints have been found
-  ncount=const_tot
-  if (MPIdata%iam_master) then
-    write(16,'(a,1x,i7,1x,a)') 'There is a total of ',ncount,' non-independant constraints for this shell'
-  end if
-  ii=0
-  ABI_MALLOC(tab_vec,(norder,ncount)); tab_vec(:,:)=czero
-  ABI_MALLOC(temp   ,(norder,ncount)); temp(:,:)   =czero
-  do isyminv=1,nsyminv
-    if (unchanged(isyminv)) then
-      do jj=1,iconst(isyminv)
-        ii=ii+1
-        tab_vec(:,ii)=alphaij(isyminv,:,jj)
-      end do
-    end if
-  end do
-  ABI_FREE(unchanged)
-  ABI_FREE(alphaij)
-  ABI_FREE(iconst)
-! Add the constraints coming from the symmetry of the IFCs (at the 3rd order)
-  if (nconst_perm.gt.0) then
-    do jj=1,norder
-      do kk=1,nconst_perm
-        ii=ii+1
-        tab_vec(:,ii)=constraints(kk,:,jj)
-      end do
-    end do
-    ABI_FREE(constraints)
-  end if
-  if (ii.ne.ncount) then
-    write(message,'(i7,1x,a,1x,i7)') ii,' non equal to ',ncount
-    ABI_BUG(message)
-  end if
-  do ii=1,norder
-    do jj=1,ncount
-      if (abs( real(tab_vec(ii,jj))).lt.1.d-8) tab_vec(ii,jj)=dcmplx(zero,aimag(tab_vec(ii,jj)))
-      if (abs(aimag(tab_vec(ii,jj))).lt.1.d-8) tab_vec(ii,jj)=dcmplx( real(tab_vec(ii,jj)),zero)
-    end do
-  end do
-
-! On stocke les vecteurs non-nuls
-  ii=0
-  do kk=1,ncount
-    prod_scal=sum( real(tab_vec(:,kk))* real(tab_vec(:,kk))+aimag(tab_vec(:,kk))*aimag(tab_vec(:,kk)))
-    if (abs(prod_scal).gt.tol8) then
-      ii=ii+1
-      temp(:,ii)=tab_vec(:,kk)/dsqrt(prod_scal)
-    end if
-  end do
-  ncount=ii
-  ABI_FREE(tab_vec)
-  ABI_MALLOC(tab_vec,(norder,ncount)); tab_vec(:,1:ncount)=temp(:,1:ncount)
-  ABI_FREE(temp)
-  ABI_MALLOC(temp   ,(norder,ncount)); temp(:,:)   =czero
-
-! L'ensemble des vecteurs reduisants l'espace de R^norder a R^n ne forment pas une base
-! independante. Il faut donc trouver les vecteurs independants.
-! --> Orthogonalisation de Gram-Schmidt
-  do kk=2,ncount
-    do jj=1,kk-1
-      prod_scal=sum( real(tab_vec(:,jj))* real(tab_vec(:,jj))+aimag(tab_vec(:,jj))*aimag(tab_vec(:,jj)))
-      if (abs(prod_scal).gt.tol8) then
-        tab_vec(:,kk)=tab_vec(:,kk)-sum(tab_vec(:,kk)*conjg(tab_vec(:,jj)))/dcmplx(prod_scal,zero)*tab_vec(:,jj)
-        do ii=1,norder
-          if (abs( real(tab_vec(ii,kk))).lt.1.d-8) tab_vec(ii,kk)=dcmplx(zero,aimag(tab_vec(ii,kk)))
-          if (abs(aimag(tab_vec(ii,kk))).lt.1.d-8) tab_vec(ii,kk)=dcmplx( real(tab_vec(ii,kk)),zero)
-        end do
-!FB      else
-!FB        write(Invar%stdout,*)'One prod_scal equals zero'
-      end if
-    end do
-  end do
-
-! On stocke les vecteurs non-nuls
-  ii=0
-  do kk=1,ncount
-    prod_scal=sum( real(tab_vec(:,kk))* real(tab_vec(:,kk))+aimag(tab_vec(:,kk))*aimag(tab_vec(:,kk)))
-    if (abs(prod_scal).gt.tol8) then
-      ii=ii+1
-      temp(:,ii)=tab_vec(:,kk)/dsqrt(prod_scal)
-    end if
-  end do
-  ncount=ii
-  ABI_FREE(tab_vec)
-
-! On ecrit les vecteurs non-nuls
-!FB  write(16,*) ' '
-!FB  write(16,*) '  ========The final set of vectors is:'
-!FB  do kk=1,ncount
-!FB    write(16,'(81(f16.12,1x))')  real(temp(:,kk))
-!FB    write(16,'(81(f16.12,1x))') aimag(temp(:,kk))
-!FB  end do
-  if (MPIdata%iam_master) then
-    write(16,'(a,1x,i7,1x,a)') '  ======= Finally, there are ',ncount,' independent vectors'
-  end if
-  if (ncount.gt.8.and.order==2) then
-    ABI_ERROR(' Order 2 : There are too many independent vectors')
-  end if
-  if (ncount.gt.27.and.order==3) then
-    ABI_ERROR(' Order 3 : There are too many independent vectors')
-  end if
-  if (ncount.gt.81.and.order==4) then
-    ABI_ERROR(' Order 4 : There are too many independent vectors')
-  end if
-
-! On cherche les (norder-ncount) vecteurs orthogonaux aux vecteurs non-nuls
-! --> Orthogonalisation de Gram-Schmidt
-  ABI_MALLOC(tab_vec,(norder,norder)); tab_vec(:,:)=czero
-  iseed=-5
-  do kk=1,norder
-    if (kk.le.ncount) then
-      tab_vec(:,kk)=temp(:,kk)
-    else
-      do jj=1,norder
-        drandom=uniformrandom(iseed)
-        tab_vec(jj,kk)=dcmplx(drandom,zero)
-      end do
-      do jj=1,kk-1
-        prod_scal=sum( real(tab_vec(:,jj))* real(tab_vec(:,jj))+aimag(tab_vec(:,jj))*aimag(tab_vec(:,jj)))
-        if (abs(prod_scal).gt.tol8) then
-          tab_vec(:,kk)=tab_vec(:,kk)-sum(tab_vec(:,kk)*conjg(tab_vec(:,jj)))/prod_scal*tab_vec(:,jj)
-          do ii=1,norder
-            if (abs( real(tab_vec(ii,kk))).lt.1.d-8) tab_vec(ii,kk)=dcmplx(zero,aimag(tab_vec(ii,kk)))
-            if (abs(aimag(tab_vec(ii,kk))).lt.1.d-8) tab_vec(ii,kk)=dcmplx( real(tab_vec(ii,kk)),zero)
-          end do
-        end if
-        prod_scal=sum( real(tab_vec(:,kk))* real(tab_vec(:,kk))+aimag(tab_vec(:,kk))*aimag(tab_vec(:,kk)))
-        tab_vec(:,kk)=tab_vec(:,kk)/dsqrt(prod_scal)
-      end do
-    end if
-  end do
-  ABI_FREE(temp)
-
-! On ecrit les vecteurs non-nuls
-!FB  write(16,*) ' '
-!FB  write(16,*) '  ========The orthogonal set of vectors is:'
-  do kk=ncount+1,norder
-!FB    write(16,'(81(f16.12,1x))')  real(tab_vec(:,kk))
-!FB    write(16,'(81(f16.12,1x))') aimag(tab_vec(:,kk))
-    if ((abs(aimag(tab_vec(1,kk))).gt.1.d-6).or.&
-&       (abs(aimag(tab_vec(1,kk))).gt.1.d-6).or.&
-&       (abs(aimag(tab_vec(1,kk))).gt.1.d-6)) then
-      ABI_ERROR('the constraint has an imaginary part')
-    end if
-  end do
-  ncoeff=norder-ncount
-  if (MPIdata%iam_master) then
-    write(16,'(a,1x,i7,1x,a)') '  ======= Finally, there are ',ncoeff,' coefficients'
-  end if
-
-! On copie tab_vec dans proj
-  do icoeff=1,ncoeff
-    proj(:,icoeff,ishell)=tab_vec(:,ncount+icoeff)
-  end do
-  ABI_FREE(tab_vec)
-
-end subroutine tdep_calc_nbcoeff
 !=====================================================================================================
 
 end module m_tdep_utils
