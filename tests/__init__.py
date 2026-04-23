@@ -1,3 +1,13 @@
+from __future__ import annotations
+
+"""
+The ABINIT test suite package.
+
+This package provides classes and utilities for managing the ABINIT automatic
+test suite, including environment discovery, test selection, and database
+management.
+"""
+
 import logging
 import os
 import pickle
@@ -7,6 +17,7 @@ import sys
 from io import StringIO
 from pprint import pprint
 from socket import gethostname
+from typing import Any, Iterator, Iterable, Callable
 
 from tests.pymods.devtools import FileLock
 from tests.pymods.termcolor import cprint
@@ -56,7 +67,7 @@ class AbinitEnvironment:
         """
         return "\n".join([str(k) + " : " + str(v) for (k, v) in self.__dict__.items()])
 
-    def apath_of(self, *p):
+    def apath_of(self, *p: str) -> str:
         """
         Compute the absolute path of a subpath relative to the ABINIT root.
 
@@ -68,20 +79,20 @@ class AbinitEnvironment:
         """
         return os.path.join(self.home_dir, *p)
 
-    def isbuild(self):
+    def isbuild(self) -> bool:
         """bool: True if the code has been built in the current directory."""
         configh_path = os.path.join(self.home_dir, "config.h")
         abinit_path = os.path.join(self.home_dir, "src", "98_main", "abinit")
         return os.path.isfile(configh_path) and os.path.isfile(abinit_path)
 
-    def touch_srcfiles(self, patterns):
+    def touch_srcfiles(self, patterns: list[str]) -> None:
         """
         Touch (update timestamp) all source files containing any of the patterns.
 
         Args:
             patterns: List of string patterns to search for in source files.
         """
-        def touch(fname):
+        def touch(fname: str) -> None:
             """
             Python touch
             See also http://stackoverflow.com/questions/1158076/implement-touch-using-python
@@ -109,14 +120,14 @@ class AbinitEnvironment:
                             touch(path)
                             break
 
-    def start_watching_sources(self):
+    def start_watching_sources(self) -> dict[str, os.stat_result]:
         """
         Initialize a snapshot of the source files' statistics for modification tracking.
 
         Returns:
             dict: Mapping of file paths to their `os.stat` results.
         """
-        def is_source(fname):
+        def is_source(fname: str) -> bool:
             # NB: `.finc` include files are ignored on purpose because
             # make is not tracking them. one should change the Fortran file
             # that includes .finc to force recompilation.
@@ -133,7 +144,7 @@ class AbinitEnvironment:
 
         return self.srcpath_stat
 
-    def changed_sources(self):
+    def changed_sources(self) -> list[str]:
         """
         Detect and return a list of source files modified since the last check.
 
@@ -202,7 +213,7 @@ _tsuite_dirs.sort()
 _tsuite_dirs = tuple([os.path.join(abenv.tests_dir, dir_name) for dir_name in _tsuite_dirs])
 
 
-def load_mod(filepath):
+def load_mod(filepath: str) -> Any:
     """
     Dynamically load a Python module from a file path.
 
@@ -231,7 +242,7 @@ class Suite:
     and subsuite logic.
     """
 
-    def __init__(self, suite_path):
+    def __init__(self, suite_path: str):
 
         suite_path = os.path.abspath(suite_path)
 
@@ -291,11 +302,11 @@ class Suite:
                 inp_paths = [p for p in paths if not p.endswith("-")]
                 self.subsuites[sub_name] = inp_paths
 
-    def has_subsuite(self, subsuite_name):
+    def has_subsuite(self, subsuite_name: str) -> bool:
         """bool: True if the suite contains a subsuite with the given name."""
         return subsuite_name in self.subsuites
 
-    def inputs_of_subsuite(self, subsuite_name):
+    def inputs_of_subsuite(self, subsuite_name: str) -> list[str]:
         """
         Return the absolute paths of the input files in a subsuite.
 
@@ -320,11 +331,11 @@ class AbinitTestsDatabase(dict):
     over the entire test collection.
     """
 
-    def __init__(self, suites):
+    def __init__(self, suites: dict[str, Suite]):
         dict.__init__(self)
         self._suites = suites
 
-    def iter_tests(self):
+    def iter_tests(self) -> Iterator[Any]:
         """
         Ordered iterator over all tests in the database.
 
@@ -336,12 +347,12 @@ class AbinitTestsDatabase(dict):
                 yield test
 
     @property
-    def suite_names(self):
+    def suite_names(self) -> list[str]:
         """List of suite names"""
         return [suite.name for suite in self._suites.values()]
 
     @property
-    def authors_snames(self):
+    def authors_snames(self) -> set[str]:
         """List of authors' second names extracted from the tests"""
         all_snames = []
         for test in self.iter_tests():
@@ -349,17 +360,28 @@ class AbinitTestsDatabase(dict):
 
         return set(all_snames)
 
-    def test_chains(self):
-        """Return a list with all the chained tests."""
+    def test_chains(self) -> list[ChainOfTests]:
+        """
+        Return a list with all the chained tests.
+
+        Returns:
+            list[ChainOfTests]: List of tests that are part of a chain.
+        """
         return [t for t in self.iter_tests() if isinstance(t, ChainOfTests)]
 
-    def tests_with_variables(self, ivars):
+    def tests_with_variables(self, ivars: Iterable[str]) -> list[Any]:
         """
-        Return a list with all the tests that contain the input variables ivars
+        Return a list with all the tests that contain the input variables ivars.
+
+        Args:
+            ivars: List of input variable names to search for.
+
+        Returns:
+            list: List of test objects containing those variables.
         """
         return [t for t in self.iter_tests() if t.has_variables(ivars)]
 
-    def add_test_suite(self, suite_name, test_suite):
+    def add_test_suite(self, suite_name: str, test_suite: AbinitTestSuite) -> None:
         """
         Add an executed or selected test suite to the database.
 
@@ -378,7 +400,7 @@ class AbinitTestsDatabase(dict):
 
         self[suite_name] = test_suite
 
-    def init_result_table(self):
+    def init_result_table(self) -> dict[str, dict[str, dict]]:
         """
         Initialize a nested dictionary used to store test results.
 
@@ -408,7 +430,7 @@ class AbinitTestsDatabase(dict):
 
         return res_table
 
-    def get_test_suite(self, suite_name, subsuite_name=None, slice_obj=None):
+    def get_test_suite(self, suite_name: str, subsuite_name: str | None = None, slice_obj: slice | None = None) -> AbinitTestSuite:
         """
         Retrieve a selection of tests from a suite.
 
@@ -442,7 +464,7 @@ class AbinitTestsDatabase(dict):
         logger.debug("will slice test_suite with slice_obj= %s " % slice_obj)
         return test_suite[slice_obj]
 
-    def find_unknown_wrong_keywords(self):
+    def find_unknown_wrong_keywords(self) -> tuple[set[str], set[str]]:
         """
         Identify keywords in `TEST_INFO` sections that are undocumented or malformed.
 
@@ -460,7 +482,7 @@ class AbinitTestsDatabase(dict):
 
         return unknowns, wrong
 
-    def find_stale_or_lost_inputs(self):
+    def find_stale_or_lost_inputs(self) -> str:
         """
         Verify that all input files in `Input/` directories are referenced by tests.
 
@@ -511,7 +533,7 @@ class AbinitTestsDatabase(dict):
 
         return err.getvalue()
 
-    def find_stale_or_lost_refs(self):
+    def find_stale_or_lost_refs(self) -> str:
         """
         Verify that all reference files in `Refs/` directories are tracked by at least one test.
 
@@ -556,11 +578,11 @@ class AbinitTestsDatabase(dict):
 
         return err.getvalue()
 
-    def check_testinfo_options(self):
+    def check_testinfo_options(self) -> str:
         """
         Test the presence of important options in the TEST_INFO section of each test.
         """
-        def check_options_in_test(test):
+        def check_options_in_test(test: Any) -> dict[str, str]:
             recommended_opts = [
                 "keywords",
                 "description",
@@ -597,14 +619,14 @@ class AbinitTestsDatabase(dict):
         return "\n".join(lines)
 
 
-def exclude_path(p):
+def exclude_path(p: str) -> bool:
     p = os.path.basename(p)
     if p.startswith(".") or p.endswith("~"):
         return True
     return False
 
 
-def path2str(path):
+def path2str(path: str) -> str:
     head, fname = os.path.split(path)
     head, x = os.path.split(head)
     _, dirname = os.path.split(head)
@@ -634,7 +656,7 @@ class AbinitTests:
             if suite_name in all_subsuite_names:
                 print("Found suite and subsuite with the same name: %s" % suite_name)
 
-    def walk_suites(self):
+    def walk_suites(self) -> Iterator[tuple[str, str]]:
         """
         Iterator over all registered suites.
 
@@ -646,7 +668,7 @@ class AbinitTests:
     def __str__(self):
         return "\n".join([str(k) + " : " + str(v) for (k, v) in self.__dict__.items()])
 
-    def get_suite(self, suite_name):
+    def get_suite(self, suite_name: str) -> Suite:
         """
         Get the `Suite` object for a given name.
 
@@ -658,13 +680,18 @@ class AbinitTests:
         """
         return self._suites[suite_name]
     @property
-    def suites(self):
+    def suites(self) -> Iterable[Suite]:
         return self._suites.values()
 
-    def multi_parallel_suites(self):
-        """list[Suite]: List of all suites containing multi-parallel tests."""
+    def multi_parallel_suites(self) -> list[Suite]:
+        """
+        List of all suites containing multi-parallel tests.
+
+        Returns:
+            list[Suite]: List of suites where `is_multi_parallel` is True.
+        """
         return [s for s in self.suites if s.is_multi_parallel]
-    def suite_of_subsuite(self, subsuite_name):
+    def suite_of_subsuite(self, subsuite_name: str) -> Suite:
         """
         Find the parent suite containing a specific subsuite.
 
@@ -684,7 +711,7 @@ class AbinitTests:
         raise ValueError("subsuite %s not found" % subsuite_name)
 
     @property
-    def all_subsuite_names(self):
+    def all_subsuite_names(self) -> list[str]:
         """List with the names of all the registered subsuites."""
         all_subnames = []
         for suite in self.suites:
@@ -696,10 +723,10 @@ class AbinitTests:
 
         return all_subnames
 
-    def keywords_of_suite(self, suite_name):
+    def keywords_of_suite(self, suite_name: str) -> set[str]:
         return self._suites[suite_name].keywords
 
-    def cpp_vars_of_suite(self, suite_name):
+    def cpp_vars_of_suite(self, suite_name: str) -> set[str]:
         return self._suites[suite_name].need_cpp_vars
 
     #def get_all_need_cppvars(self):
@@ -717,7 +744,7 @@ class AbinitTests:
 
     #    return all_need_cppvars
 
-    def inputs_of_suite(self, suite_name, active=True):
+    def inputs_of_suite(self, suite_name: str, active: bool = True) -> list[str]:
         """
         Get the list of input files for a specific suite.
 
@@ -732,7 +759,7 @@ class AbinitTests:
             return self._suites[suite_name].inp_paths
         return self._suites[suite_name].disabled_inp_paths
 
-    def build_database(self, with_disabled=False):
+    def build_database(self, with_disabled: bool = False) -> AbinitTestsDatabase:
         """
         Build a comprehensive tests database from the filesystem.
 
@@ -760,7 +787,7 @@ class AbinitTests:
 
         return database
 
-    def get_database(self, regenerate=False, with_pickle=False):
+    def get_database(self, regenerate: bool = False, with_pickle: bool = False) -> AbinitTestsDatabase:
         """
         Retrieve the tests database, optionally loading from a pickle cache.
 
@@ -793,7 +820,7 @@ class AbinitTests:
 
         return database
 
-    def _suite_args_parser(self, args=None):
+    def _suite_args_parser(self, args: list[str] | None = None) -> dict[tuple[str, str | None], list[slice]]:
         """
         Parse script arguments. Return a mapping suite_name --> [slice objects]
         Three forms are possible
@@ -802,7 +829,7 @@ class AbinitTests:
         2) v4- v5-                       Exclude suites
         """
         # Mapping (suite_name, subsuite_name) --> slice_obj
-        def all_tests():
+        def all_tests() -> dict[tuple[str, str | None], list[slice]]:
             tuples = [(name, None) for name in self.suite_names]
             return dict.fromkeys(tuples, [slice(None), ])
 
@@ -871,8 +898,8 @@ class AbinitTests:
 
         return d
 
-    def select_tests(self, suite_args, regenerate=False, keys=None,
-                     authors=None, ivars=None, with_pickle=True, flat_list=False):
+    def select_tests(self, suite_args: list[str] | None, regenerate: bool = False, keys: list[str] | None = None,
+                     authors: list[str] | None = None, ivars: list[str] | None = None, with_pickle: bool = True, flat_list: bool = False) -> AbinitTestSuite | list[Any]:
         """
         Construct a test suite based on selection arguments and filters.
 
@@ -966,7 +993,7 @@ class AbinitTests:
                 flat.append(t)
         return flat
 
-    def generate_html_listoftests(self):
+    def generate_html_listoftests(self) -> None:
         """Generate the ListOfTests files"""
         database = self.get_database(regenerate=True)
 
@@ -983,7 +1010,7 @@ class AbinitTests:
             with open(fname, "w") as fh:
                 fh.write(suite.make_listoftests(width=100, html=False))
 
-    def show_info(self, verbose=0):
+    def show_info(self, verbose: int = 0) -> None:
         """
         Print info on the test suite.
         """
