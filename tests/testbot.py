@@ -13,6 +13,8 @@ import platform
 import shutil
 import sys
 import tempfile
+from collections.abc import Callable, Iterator, Iterable
+from typing import Any
 from dataclasses import dataclass, field
 from os.path import abspath as absp
 from os.path import basename
@@ -55,7 +57,7 @@ TESTBOT_YAML = pj(ROOT, "testbot.yaml")
 TESTBOT_JSON = pj(ROOT, "testbot.json")
 
 
-def lazy__str__(func):
+def lazy__str__(func: Callable) -> Callable:
     """
     Decorator that provides a default __str__ implementation based on object attributes.
 
@@ -71,7 +73,7 @@ def lazy__str__(func):
     return oncall
 
 
-def _yesno2bool(string):
+def _yesno2bool(string: str) -> bool:
     """
     Convert "yes"/"no" strings to boolean.
 
@@ -91,7 +93,7 @@ def _yesno2bool(string):
         return False
     raise ValueError("Cannot interpret string: %s" % string)
 
-def _str2list(string):
+def _str2list(string: str | list[str] | tuple[str, ...]) -> list[str]:
     """
     Parse a comma-separated string into a list of trimmed strings.
 
@@ -184,7 +186,7 @@ class TestBotContext:
     """Force usage of mpirun_np prefix"""
 
     @classmethod
-    def from_builders(cls, all_builders: list[dict], builder_name: str):
+    def from_builders(cls, all_builders: list[dict[str, Any]], builder_name: str) -> TestBotContext:
         """
         Factory method to create a context from a list of builder configurations.
 
@@ -206,7 +208,7 @@ class TestBotContext:
         kwargs = {k: builder[k] for k in [field.name for field in dataclasses.fields(cls)] if k in builder}
         return cls(**kwargs)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
         Enforce required fields and basic consistency.
         """
@@ -265,7 +267,7 @@ def get_mpi_prefix_from_env() -> str | None:
     return None
 
 
-def read_builders(fmt: str) -> list[dict]:
+def read_builders(fmt: str) -> list[dict[str, Any]]:
     """
     Read builder configurations from a file (YAML or JSON).
 
@@ -350,7 +352,7 @@ def validate() -> int:
     return retcode
 
 
-def convert():
+def convert() -> int:
     """
     Convert the TestBot builder configuration from YAML to JSON.
 
@@ -404,7 +406,7 @@ class TestBot:
     }
 
     @classmethod
-    def print_options(cls):
+    def print_options(cls) -> None:
         """
         Print the available configuration options with descriptions and defaults.
         """
@@ -415,7 +417,7 @@ class TestBot:
 
         print("# NB If default is None, the option must be specified.")
 
-    def __init__(self, testbot_cfg=None, builder_name=None):
+    def __init__(self, testbot_cfg: str | None = None, builder_name: str | None = None) -> None:
         """
         Initialize the TestBot instance.
 
@@ -598,7 +600,7 @@ class TestBot:
         self.summary = TestBotSummary(res_table)
         #print(self.summary)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation."""
         lines = []
         app = lines.append
@@ -610,16 +612,16 @@ class TestBot:
         return "\n".join(lines)
 
     @property
-    def has_mpi(self):
+    def has_mpi(self) -> bool:
         """bool: True if an MPI runner is configured."""
         return bool(self.mpirun_np) or bool(self.poe)
 
     @property
-    def has_openmp(self):
+    def has_openmp(self) -> bool:
         """bool: True if tests should be executed with OpenMP."""
         return self.omp_num_threads > 0
 
-    def run_tests_with_np(self, mpi_nprocs, suite_args=None, runmode="static"):
+    def run_tests_with_np(self, mpi_nprocs: int, suite_args: list[str] | str | None = None, runmode: str = "static") -> tuple[int, int, int]:
         """
         Run a subset of tests using a specified number of MPI processes.
 
@@ -705,7 +707,7 @@ class TestBot:
 
         return results.nfailed, results.npassed, results.nexecuted
 
-    def run(self):
+    def run(self) -> int:
         """
         Execute the full test suite based on the current configuration.
 
@@ -798,7 +800,7 @@ class TestBot:
         return nfailed
 
 
-def analyze(fname):
+def analyze(fname: str) -> None:
     """
     Analyze and display the performance figures of the tests.
 
@@ -874,22 +876,22 @@ class TestBotSummary:
 
     _possible_status = ["failed", "passed", "succeeded", "skipped"]
 
-    def __init__(self, res_table):
+    def __init__(self, res_table: dict[str, dict[str, Any]]) -> None:
         self.res_table = res_table
         self.failed = []
         self.passed = []
 
     @lazy__str__
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Default string representation.
         """
 
-    def _min_status(self, items):
+    def _min_status(self, items: list[str]) -> str:
         indices = [self._possible_status.index(item) for item in items]
         return self._possible_status[min(indices)]
 
-    def to_table(self):
+    def to_table(self) -> list[list[str]]:
         """
         Convert the current summary into a table format for display.
 
@@ -911,7 +913,7 @@ class TestBotSummary:
 
         return table
 
-    def merge_results(self, test_suite, run_info):
+    def merge_results(self, test_suite: Any, run_info: dict[str, Any]) -> None:
         """
         Merge results from a completed test suite into the global summary.
 
@@ -950,16 +952,16 @@ class TestBotSummary:
         for test in test_suite.passed_tests():
             self.passed.append(test.full_id)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         """Iterate over the suite names in alphabetical order."""
         for suite_name in self.suite_names():
             yield suite_name
 
-    def suite_names(self):
+    def suite_names(self) -> list[str]:
         """List of suite names in alphabetical order."""
         return sorted(list(self.res_table.keys()))
 
-    def status_of_suite(self, suite_name):
+    def status_of_suite(self, suite_name: str) -> tuple[str, dict[str, int]]:
         """
         Args:
             suite_name: string with the name of the suite.
@@ -989,7 +991,7 @@ class TestBotSummary:
 
         return suite_status, stats
 
-    def json_dump(self, fname):
+    def json_dump(self, fname: str) -> None:
         """
         Export the current summary to a JSON file.
 
@@ -1036,7 +1038,7 @@ Usage example:
     return s
 
 
-def get_parser(with_epilog=False):
+def get_parser(with_epilog: bool = False) -> argparse.ArgumentParser:
     """
     Build and return the command-line parser.
 
@@ -1075,7 +1077,7 @@ def get_parser(with_epilog=False):
     return parser
 
 
-def new_main():
+def new_main() -> int:
     """
     Main entry point for TestBot using the modern sub-command interface.
 
@@ -1108,7 +1110,7 @@ def new_main():
     raise ValueError(f"Invalid command: {options.command}")
 
 
-def old_main():
+def old_main() -> int:
     """
     Main entry point for TestBot using the legacy command-line interface.
 

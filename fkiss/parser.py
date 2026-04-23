@@ -50,7 +50,11 @@ def fort2html(s: str, full: bool = True) -> str:
 class Node:
     def __repr__(self):
         if self.ancestor is not None:
-            return "<%s: %s.%s>" % (self.__class__.__name__, self.ancestor.name, self.name)
+            return "<%s: %s.%s>" % (
+                self.__class__.__name__,
+                self.ancestor.name,
+                self.name,
+            )
         return "<%s: %s>" % (self.__class__.__name__, self.name)
 
     def __str__(self):
@@ -91,9 +95,10 @@ class FortranVariable(Node):
         initial_value: str | None = None,
         doc: str | None = None,
     ):
-
         self.name, self.ancestor = name.strip(), ancestor
-        self.attribs = () if attribs is None else tuple(filter(None, (a.strip() for a in attribs)))
+        self.attribs = (
+            () if attribs is None else tuple(filter(None, (a.strip() for a in attribs)))
+        )
         self.ftype, self.shape = ftype, shape
         # TODO: dimension
         # print(self.attribs)
@@ -106,11 +111,15 @@ class FortranVariable(Node):
 
         if ftype == "character":
             if kind is not None:
-                raise ValueError("ftype: %s, kind: %s, strlen: %s" % (ftype, kind, strlen))
+                raise ValueError(
+                    "ftype: %s, kind: %s, strlen: %s" % (ftype, kind, strlen)
+                )
             self.strlen = strlen
         else:
             if strlen is not None:
-                raise ValueError("ftype: %s, kind: %s, strlen: %s" % (ftype, kind, strlen))
+                raise ValueError(
+                    "ftype: %s, kind: %s, strlen: %s" % (ftype, kind, strlen)
+                )
             self.kind = kind
 
     def to_string(self, verbose: int = 0) -> str:
@@ -133,7 +142,11 @@ class FortranVariable(Node):
         for i, a in enumerate(self.attribs):
             if a.startswith("intent"):
                 return (
-                    self.attribs[i].replace("intent", "").replace("(", "").replace(")", "").strip()
+                    self.attribs[i]
+                    .replace("intent", "")
+                    .replace("(", "")
+                    .replace(")", "")
+                    .strip()
                 )
         return None
 
@@ -155,7 +168,14 @@ class Datatype(Node, HasRegex):
         variables: Ordered dictionary mapping variable names to `FortranVariable` objects.
     """
 
-    def __init__(self, name: str, ancestor: Node, preamble: Iterable[str] | None, attribs: Iterable[str] | None, lines: list[str]):
+    def __init__(
+        self,
+        name: str,
+        ancestor: Node,
+        preamble: Iterable[str] | None,
+        attribs: Iterable[str] | None,
+        lines: list[str],
+    ):
         self.name, self.ancestor = name, ancestor
         self.attribs = attribs
         self.preamble = "\n".join(preamble) if preamble else ""
@@ -319,8 +339,7 @@ class Interface(Node):
         self._analyzed = False
 
     def to_string(self, verbose: int = 0) -> str:
-        s = "\n".join(self.lines)
-        return s
+        return "\n".join(self.lines)
 
     def analyze(self, verbose: int = 0) -> None:
         if self._analyzed:
@@ -342,7 +361,14 @@ class Procedure(Node):
     """
 
     def __init__(
-        self, name: str, ancestor: Node | None, preamble: Iterable[str] | None, line: str = "", prefix: str | None = None, arg_names: Iterable[str] | None = None, path: str = "<UnknownFile>"
+        self,
+        name: str,
+        ancestor: Node | None,
+        preamble: Iterable[str] | None,
+        line: str = "",
+        prefix: str | None = None,
+        arg_names: Iterable[str] | None = None,
+        path: str = "<UnknownFile>",
     ):
         self.name = name.strip()
         self.ancestor = ancestor
@@ -373,7 +399,9 @@ class Procedure(Node):
         # self.has_implicit_none = False
 
     def _repr_html_(self):
-        prototype = self.line.replace("(", "(\n\t").replace(",", ",\n\t").replace(")", "\n)")
+        prototype = (
+            self.line.replace("(", "(\n\t").replace(",", ",\n\t").replace(")", "\n)")
+        )
         # prototype = proto.replace(" ", "")
         return fort2html(prototype + 2 * "\n" + self.preamble)
 
@@ -471,7 +499,9 @@ class Procedure(Node):
             return [self] + [p for p in self.contains if p.is_public]
         if self.is_subroutine or self.is_function:
             return [self] if self.is_public else []
-        raise TypeError("Don't know how to find public entities of type: %s" % type(self))
+        raise TypeError(
+            "Don't know how to find public entities of type: %s" % type(self)
+        )
 
     def stree(self, level: int = 0) -> str:
         lines = [level * "\t" + repr(self)]
@@ -495,7 +525,10 @@ class Procedure(Node):
         app("Directory: %s" % os.path.basename(self.dirname))
 
         if self.ancestor is not None:
-            app("ANCESTOR:\n\t%s (%s)" % (self.ancestor.name, self.ancestor.__class__.__name__))
+            app(
+                "ANCESTOR:\n\t%s (%s)"
+                % (self.ancestor.name, self.ancestor.__class__.__name__)
+            )
         if self.uses:
             app("USES:\n%s\n" % w.fill(", ".join(self.uses)))
             diff = sorted(set(self.local_uses) - set(self.uses))
@@ -509,7 +542,9 @@ class Procedure(Node):
         if self.types:
             app("DATATYPES:\n%s\n" % w.fill(", ".join(d.name for d in self.types)))
         if self.interfaces:
-            app("INTERFACES:\n%s\n" % w.fill(", ".join(i.name for i in self.interfaces)))
+            app(
+                "INTERFACES:\n%s\n" % w.fill(", ".join(i.name for i in self.interfaces))
+            )
 
         app("PARENTS:\n%s\n" % w.fill(", ".join(sorted(p.name for p in self.parents))))
         # if verbose:
@@ -608,7 +643,13 @@ class Module(Procedure):
 
     proc_type = "module"
 
-    def __init__(self, name: str, ancestor: Node | None, preamble: Iterable[str] | None, path: str | None = None):
+    def __init__(
+        self,
+        name: str,
+        ancestor: Node | None,
+        preamble: Iterable[str] | None,
+        path: str | None = None,
+    ):
         super().__init__(name, ancestor, preamble, path=path)
         self.default_visibility = True
         # self.variables = OrderedDict()
@@ -652,7 +693,12 @@ class FortranKissParser(HasRegex):
         strict: If True, raise an exception on parsing warnings.
     """
 
-    def __init__(self, macros: dict[str, str] | None = None, verbose: int = 0, strict: bool = False):
+    def __init__(
+        self,
+        macros: dict[str, str] | None = None,
+        verbose: int = 0,
+        strict: bool = False,
+    ):
         self.verbose = verbose
         self.strict = strict
         self.macros = {} if macros is None else macros
@@ -674,10 +720,13 @@ class FortranKissParser(HasRegex):
                 lines = []
                 for line in fh:
                     l = line.strip().replace("'", "").replace('"', "")
-                    if l.startswith("#include") and (l.endswith(".finc") or l.endswith(".F90")):
+                    if l.startswith("#include") and (
+                        l.endswith(".finc") or l.endswith(".F90")
+                    ):
                         basename = l.split()[-1]
                         with open(
-                            os.path.join(os.path.dirname(path), basename), encoding="utf8"
+                            os.path.join(os.path.dirname(path), basename),
+                            encoding="utf8",
                         ) as incfh:
                             lines.extend(il for il in incfh)
                     else:
@@ -849,7 +898,9 @@ class FortranKissParser(HasRegex):
             # Handle `end module`
             m = self.RE_MOD_END.match(line)
             if m:
-                self.close_stack_entry(line, end_proc_type="module", end_name=m.group("name"))
+                self.close_stack_entry(
+                    line, end_proc_type="module", end_name=m.group("name")
+                )
                 continue
 
             # print("Ignored line:", line)
@@ -867,7 +918,8 @@ class FortranKissParser(HasRegex):
             p, status = self.stack.pop(0)
             if status != "closed":
                 self.warn(
-                    "Unclosed %s with status %s, ancestor: %s" % (repr(p), status, repr(p.ancestor))
+                    "Unclosed %s with status %s, ancestor: %s"
+                    % (repr(p), status, repr(p.ancestor))
                 )
 
             # Sort entries here.
@@ -1048,7 +1100,9 @@ class FortranKissParser(HasRegex):
             # or here if the module does not have *contains*
             m = self.RE_MOD_END.match(line)
             if m:
-                self.close_stack_entry(line, end_proc_type="module", end_name=m.group("name"))
+                self.close_stack_entry(
+                    line, end_proc_type="module", end_name=m.group("name")
+                )
                 return True
 
         raise ValueError("Cannot find `contains` in %s" % self.path)
@@ -1071,7 +1125,9 @@ class FortranKissParser(HasRegex):
                     print("end interface", line)
                 # Add interface to the last item on the stack.
                 # NB Don't enforce name `end interface [name]`
-                self.stack[-1][0].interfaces.append(Interface(name, self.ancestor, buflines))
+                self.stack[-1][0].interfaces.append(
+                    Interface(name, self.ancestor, buflines)
+                )
                 return True
         raise ValueError("Cannot find `end interface %s` in %s" % (name, self.path))
 
@@ -1085,7 +1141,11 @@ class FortranKissParser(HasRegex):
             print("begin datatype", name, "in line:", line)
         # Extract attributes and put them in a tuple.
         attribs = m.group("attribs").lower().replace(":", "")
-        attribs = tuple(filter(None, (s.strip() for s in attribs.split(",")))) if attribs else ()
+        attribs = (
+            tuple(filter(None, (s.strip() for s in attribs.split(","))))
+            if attribs
+            else ()
+        )
 
         while self.lines:
             line = self.lines.popleft()
@@ -1216,9 +1276,13 @@ class FortranKissParser(HasRegex):
                 end_proc_type = m.group("proc_type")
                 # Warn if `end [proc_type [name]]`
                 if end_proc_type != proc_type:
-                    self.warn("Cannot find `end %s %s` in %s" % (proc_type, name, self.path))
+                    self.warn(
+                        "Cannot find `end %s %s` in %s" % (proc_type, name, self.path)
+                    )
                 if end_name != name:
-                    self.warn("Cannot find `end %s %s` in %s" % (proc_type, name, self.path))
+                    self.warn(
+                        "Cannot find `end %s %s` in %s" % (proc_type, name, self.path)
+                    )
 
                 self.close_stack_entry(line, end_proc_type, end_name)
                 break
@@ -1269,7 +1333,9 @@ class FortranKissParser(HasRegex):
         # TODO: Recheck this part (open, end, accumulate?)
         self.num_f90lines, self.num_doclines, self.num_omp_statements = 0, 0, 0
 
-    def close_stack_entry(self, line: str, end_proc_type: str | None, end_name: str | None) -> None:
+    def close_stack_entry(
+        self, line: str, end_proc_type: str | None, end_name: str | None
+    ) -> None:
         if end_name:
             # Close the last entry in the stack with name == end_name.
             for item in reversed(self.stack):
@@ -1280,11 +1346,19 @@ class FortranKissParser(HasRegex):
             else:
                 raise RuntimeError(
                     "Cannot find end_name `%s` in stack:\n%s\npath: %s\nLast line:%s"
-                    % (end_name, pformat([s[0].name for s in self.stack]), self.path, line)
+                    % (
+                        end_name,
+                        pformat([s[0].name for s in self.stack]),
+                        self.path,
+                        line,
+                    )
                 )
         # Close the last entry in the stack with end_proc_type.
         elif end_proc_type is not None:
-            self.warn("Found `end %s` without name in %s:%s" % (end_proc_type, self.path, line))
+            self.warn(
+                "Found `end %s` without name in %s:%s"
+                % (end_proc_type, self.path, line)
+            )
             for item in reversed(self.stack):
                 if item[0].proc_type == end_proc_type:
                     node = item[0]
@@ -1293,12 +1367,17 @@ class FortranKissParser(HasRegex):
             else:
                 raise RuntimeError(
                     "Cannot find end_proc_type `%s` in stack:\n%s\nLast line:%s"
-                    % (end_proc_type, pformat([s[0].proc_type for s in self.stack]), line)
+                    % (
+                        end_proc_type,
+                        pformat([s[0].proc_type for s in self.stack]),
+                        line,
+                    )
                 )
         else:
             # This is the best I can do without any info.
             self.warn(
-                "Found plain `end` without procedure_type and name in %s:%s" % (self.path, line)
+                "Found plain `end` without procedure_type and name in %s:%s"
+                % (self.path, line)
             )
             self.stack[-1][1] = "closed"
             node = self.stack[-1][0]
@@ -1354,7 +1433,9 @@ class FortranKissParser(HasRegex):
                 ftype, kind, strlen = m.group("ftype"), m.group("kind"), None
         if not m:
             # raise ValueError("Cannot find Fortran type in line: %s. file: %s" % (line, self.path))
-            self.warn("Cannot find Fortran type in line: %s. file: %s" % (line, self.path))
+            self.warn(
+                "Cannot find Fortran type in line: %s. file: %s" % (line, self.path)
+            )
             return []
 
         # TODO: a(1,2), b, c(3, 4)
@@ -1450,13 +1531,7 @@ class FortranKissParser(HasRegex):
 
 
 class RobodocHeader(OrderedDict):
-    # See config/robodoc/robodoc-html.rc
-
-    # ALL_KEYS = [
-    #    "NAME", "COPYRIGHT", "FUNCTION",
-    #    "INPUTS", "OUTPUT", "OUTPUTS", "SIDE EFFECTS",
-    #    "NOTES", "TODO", "PARENTS", "CHILDREN", "SOURCE",
-    # ]
+    """See config/robodoc/robodoc-html.rc"""
 
     ALL_KEYS = [
         "SOURCE",
@@ -1515,7 +1590,9 @@ class RobodocHeader(OrderedDict):
     #    d "Directories" robo_directories
 
     # Detect robodoc header (!****)
-    RE_HEADER_START = re.compile(r"^!!\*{4}(?P<ptype>[a-z])\*\s+(?P<name>.+?)$", re.MULTILINE)
+    RE_HEADER_START = re.compile(
+        r"^!!\*{4}(?P<ptype>[a-z])\*\s+(?P<name>.+?)$", re.MULTILINE
+    )
 
     @classmethod
     def from_string(cls, s: str) -> RobodocHeader:
@@ -1546,7 +1623,8 @@ class RobodocHeader(OrderedDict):
             if k in cls.ALL_KEYS:
                 if new[k]:
                     raise ValueError(
-                        "Key %s already present in robodoc header.\n%s" % (k, "\n".join(lines))
+                        "Key %s already present in robodoc header.\n%s"
+                        % (k, "\n".join(lines))
                     )
                 new[k] = []
                 active_key = k
