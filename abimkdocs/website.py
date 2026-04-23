@@ -7,6 +7,8 @@ For the different between Absolute, Relative, and Root-relative URLs see:
     <http://ifyoucodeittheywill.com/2009/03/absolute-relative-and-root-relative-urls/>
 """
 
+from __future__ import annotations
+
 import datetime
 import os
 import re
@@ -14,6 +16,7 @@ import shutil
 import sys
 import time
 import uuid
+from typing import Any, Iterator, Iterable, Callable, TypeVar, IO
 
 #from markdown.util import etree
 import xml.etree.ElementTree as etree
@@ -33,7 +36,7 @@ from doc.tests.pymods.termcolor import cprint
 from .variables import ABI_RELEVANCES, ABI_TOPICS, lazy_property
 
 
-def my_unicode(s):
+def my_unicode(s: Any) -> str:
     """
     Convert a string or object to a unicode string.
 
@@ -46,7 +49,7 @@ def my_unicode(s):
     return unicode(s) if sys.version_info[0] <= 2 else str(s)
 
 
-def escape(text, tag=None, cls=None):
+def escape(text: str, tag: str | None = None, cls: str | None = None) -> str:
     """
     Escape HTML entities in the given text and optionally enclose it in an HTML tag.
 
@@ -65,7 +68,7 @@ def escape(text, tag=None, cls=None):
     return text
 
 
-def gen_id(n=1, pre="uuid-"):
+def gen_id(n: int = 1, pre: str = "uuid-") -> str | list[str]:
     """
     Generate universally unique identifiers (UUIDs).
 
@@ -89,7 +92,7 @@ def gen_id(n=1, pre="uuid-"):
     raise ValueError("n must be > 0 but got %s" % str(n))
 
 
-def splitall(path):
+def splitall(path: str) -> list[str]:
     """
     Split a file path into all its component parts.
 
@@ -113,7 +116,8 @@ def splitall(path):
     return allparts
 
 
-def sort_and_groupby(items, key, reverse=False):
+T = TypeVar("T")
+def sort_and_groupby(items: Iterable[T], key: Callable[[T], Any], reverse: bool = False) -> Iterator[tuple[Any, Iterator[T]]]:
     """
     Sort a list and group its elements based on a key function.
 
@@ -134,7 +138,7 @@ class MyEntry(Entry):
     See https://bitbucket.org/pybtex-devs/pybtex/
     """
     @lazy_property
-    def authors(self):
+    def authors(self) -> str:
         """
         String containing the list of authors formatted for display.
         Returns an empty string if authors are not provided.
@@ -146,7 +150,7 @@ class MyEntry(Entry):
         except KeyError:
             return ""
 
-    def to_abimarkdown(self, bibtex_ui="button"):
+    def to_abimarkdown(self, bibtex_ui: str | None = "button") -> str:
         """
         Format the bibliographic entry as a markdown string with ABINIT extensions.
 
@@ -221,7 +225,7 @@ class MyEntry(Entry):
 """
         return s
 
-    def to_html(self):
+    def to_html(self) -> str:
         """
         Convert the entry to an HTML string.
 
@@ -230,7 +234,7 @@ class MyEntry(Entry):
         """
         return markdown.markdown(self.to_abimarkdown())
 
-    def to_bibtex(self):
+    def to_bibtex(self) -> str:
         """
         Convert the entry to a BibTeX formatted string.
 
@@ -272,7 +276,7 @@ class Website:
     #WIKILINK_RE = r'(?![~`])\[\[([^\[]+)\]\]'
 
     @classmethod
-    def build(cls, root, deploy, verbose):
+    def build(cls, root: str, deploy: bool, verbose: int) -> Website:
         """
         Build the Website singleton from the given root directory.
 
@@ -294,7 +298,7 @@ class Website:
         return _WEBSITE
 
     @classmethod
-    def get(cls):
+    def get(cls) -> Website:
         """
         Get the Website singleton instance.
 
@@ -309,7 +313,7 @@ class Website:
             raise RuntimeError("website must be constructed by calling `Website.build`")
         return _WEBSITE
 
-    def __init__(self, root, deploy, verbose=0):
+    def __init__(self, root: str, deploy: bool, verbose: int = 0):
         """
         Initialize the Website instance.
 
@@ -445,7 +449,7 @@ Change the input yaml files or the python code
 -->
 """
 
-    def walk_filepath(self):
+    def walk_filepath(self) -> Iterator[tuple[str, str]]:
         """
         Iterate over the files stored in the documentation directory.
 
@@ -464,13 +468,13 @@ Change the input yaml files or the python code
                 #if f == "README.md": continue
                 yield f, os.path.join(root, f)
 
-    def warn(self, msg):
+    def warn(self, msg: str) -> None:
         """Print warning message to terminal and save it for future reference."""
         msg = "WARNING: %s" % msg
         self.warnings.append(msg)
         cprint(msg, color="yellow")
 
-    def convert_markdown(self, source):
+    def convert_markdown(self, source: str) -> str:
         """
         Convert a markdown string to a serialized HTML string.
 
@@ -483,7 +487,7 @@ Change the input yaml files or the python code
         self.markdown.reset()
         return my_unicode(self.markdown.convert(source))
 
-    def new_mdfile(self, dirname, mdname, meta=None, with_comment=True, hide_navigation=False, hide_toc=False):
+    def new_mdfile(self, dirname: str, mdname: str, meta: dict | None = None, with_comment: bool = True, hide_navigation: bool = False, hide_toc: bool = False) -> IO[str]:
         """
         Create a new markdown file and register it in the build system.
 
@@ -532,7 +536,7 @@ Change the input yaml files or the python code
 
         return mdf
 
-    def generate_mdindex(self, dirname):
+    def generate_mdindex(self, dirname: str) -> None:
         """
         Generate the index.md file from the meta data section given in
         the md files stored in directory `dirname`.
@@ -555,7 +559,7 @@ Change the input yaml files or the python code
         #with self.new_mdfile(dirname, "index.md") as mdf:
         #    mdf.write("\n".join(index_md))
 
-    def copy_install_files(self):
+    def copy_install_files(self) -> None:
         """
         Copy INSTALL_*.md files from ~abinit to ~abinit/doc and *git ignore* them.
         Files must be included in mkdocs.yml in the `Installation` section.
@@ -568,7 +572,7 @@ Change the input yaml files or the python code
                 shutil.copy(src, dest)
                 self.ignored_paths.append(dest)
 
-    def generate_page_with_ac_examples(self):
+    def generate_page_with_ac_examples(self) -> None:
         """Generate markdown pages with all ac examples found in config-examples."""
         dirpath = os.path.join(self.root, "build", "config-examples")
         md_lines = []
@@ -609,7 +613,7 @@ and [builder matrix](https://github.com/abinit/abinit_web/blob/main/docs/builder
         with self.new_mdfile("developers", "autoconf_examples.md") as mdf:
             mdf.write("\n".join(md_lines))
 
-    def generate_markdown_files(self):
+    def generate_markdown_files(self) -> None:
         """
         Main orchestration method to generate all dynamic markdown files for the site.
         Includes variables, tutorial tests, bibliography, and statistics.
@@ -877,7 +881,7 @@ The full bibtex file is available [here](../abiref.bib).
 
         cprint("Markdown files generation completed in %.2f [s]" % (time.time() - start), "green")
 
-    def analyze_pages(self):
+    def analyze_pages(self) -> None:
         """
         Analyze all markdown pages, find wiklinks in pages required to generate backlinks in docs.
         """
@@ -904,7 +908,7 @@ The full bibtex file is available [here](../abiref.bib).
         self.find_unreferenced_mds()
         cprint("Completed in %.2f [s]" % (time.time() - start), "green")
 
-    def find_unreferenced_mds(self):
+    def find_unreferenced_mds(self) -> None:
         """
         Extract all md pages listed in mkdocs.yml and compare them with the md files
         in docs directory. Issue a warning if the two sets are not equal.
@@ -945,14 +949,14 @@ The full bibtex file is available [here](../abiref.bib).
         if diff:
             self.warn("Found markdown files in mkdocsyml not present in directories:\n%s" % "\n".join(diff))
 
-    def slugify(self, value):
+    def slugify(self, value: str) -> str:
         """
         Slugify a string, to make it URL friendly. Use same convention as TOC extensions of python markdown.
         """
         from markdown.extensions.toc import slugify
         return slugify(value, separator="-")
 
-    def preprocess_mdlines(self, lines):
+    def preprocess_mdlines(self, lines: list[str]) -> list[str]:
         """
         Preprocess the markdown lines before parsing.
 
@@ -967,7 +971,7 @@ The full bibtex file is available [here](../abiref.bib).
         lines = self._preprocess_macros(lines)
         return lines
 
-    def _preprocess_macros(self, lines):
+    def _preprocess_macros(self, lines: list[str]) -> list[str]:
         """
         Handle macro substitutions in markdown lines (e.g., [TUTORIAL_README]).
 
@@ -1042,7 +1046,7 @@ The full bibtex file is available [here](../abiref.bib).
         return new_lines
 
 
-    def _preprocess_aliases(self, lines):
+    def _preprocess_aliases(self, lines: list[str]) -> list[str]:
         """
         Handle aliases of the form |token|.
 
@@ -1069,7 +1073,7 @@ The full bibtex file is available [here](../abiref.bib).
         #alias_syntax = re.compile(r"(?!`+)\|(?P<key>\w+)\|")
         return [re.sub(alias_syntax, repl, line) for line in lines]
 
-    def _preprocess_include(self, lines):
+    def _preprocess_include(self, lines: list[str]) -> list[str]:
         """
         Handle custom ABINIT inclusion syntax: {% action ... %}.
 
@@ -1108,7 +1112,7 @@ The full bibtex file is available [here](../abiref.bib).
         return new_lines
 
     @staticmethod
-    def parse_wikilink_token(token):
+    def parse_wikilink_token(token: str) -> tuple[str | None, str | None, str | None, str | None]:
         """
         Parse a wikilink token of the form `namespace:name#fragment|text`.
 
@@ -1146,7 +1150,7 @@ The full bibtex file is available [here](../abiref.bib).
 
         return namespace, name, fragment, text
 
-    def get_wikilink(self, token, page_rpath):
+    def get_wikilink(self, token: str, page_rpath: str) -> etree.Element | str:
         """
         Resolve a wikilink token and return an HTML anchor element.
 
@@ -1459,7 +1463,7 @@ The full bibtex file is available [here](../abiref.bib).
         if target: a.set("target", target)
         return a
 
-    def build_varsearch_html(self, page_rpath):
+    def build_varsearch_html(self, page_rpath: str) -> str:
         """
         Build the HTML for the interactive variable search page.
 
@@ -1519,7 +1523,7 @@ Enter `@anaddb` in the search bar to show only the variables of `anaddb`.
 {html_vars}
 </ul>"""
 
-    def dialogs_from_filenames(self, paths):
+    def dialogs_from_filenames(self, paths: list[str]) -> str:
         """Build customized jquery dialog to show the content of a list of filepaths."""
         buttons, dialogs = [], []
         for path in paths:
@@ -1530,7 +1534,7 @@ Enter `@anaddb` in the search bar to show only the variables of `anaddb`.
         button_group = '<div class="text-center"><div class="btn-group-vertical">\n%s\n</div></div>' % "\n".join(buttons)
         return button_group + "\n".join(dialogs)
 
-    def dialog_from_filename(self, path, title=None, ret_btn_dialog=False):
+    def dialog_from_filename(self, path: str, title: str | None = None, ret_btn_dialog: bool = False) -> str | tuple[str, str]:
         """
         Create a jQuery UI dialog to display the content of a file.
 
@@ -1580,7 +1584,7 @@ class Page:
         topics: Set of topic names associated with this page.
     """
 
-    def __init__(self, path, website):
+    def __init__(self, path: str, website: Website):
         self.path = os.path.abspath(path)
         self.website = website
         self.citations = set()
@@ -1603,7 +1607,7 @@ class Page:
         return ("/" + self.relpath).replace(".md", "")
 
 
-def add_popover(element, content=None, title=None, html=False):
+def add_popover(element: etree.Element, content: str | None = None, title: str | None = None, html: bool = False) -> None:
     """
     Attach a Tippy.js popover to an etree Element.
 
@@ -1623,7 +1627,7 @@ def add_popover(element, content=None, title=None, html=False):
         element.set("data-tippy-content", tos(content))
 
 
-def a2s(element, cls=None):
+def a2s(element: etree.Element, cls: str | None = None) -> str:
     """Convert element tree element into HTML string."""
     cls = element.get("class") if cls is None else cls
     return '<a href="%s" class="%s">%s</a>' % (element.get("href"), cls, element.text)
@@ -1632,7 +1636,7 @@ def a2s(element, cls=None):
 class MarkdownPage(Page):
     """Representation of a page generated from a markdown file."""
 
-    def __init__(self, path, website):
+    def __init__(self, path: str, website: Website):
         super().__init__(path, website)
         self.meta = {}
         with open(self.path, encoding="utf-8") as fh:
@@ -1662,7 +1666,7 @@ class MarkdownPage(Page):
 
 class HtmlPage(Page):
     """Representation of a page generated from an HTML file."""
-    def __init__(self, path, website):
+    def __init__(self, path: str, website: Website):
         super().__init__(path, website)
 
 
@@ -1671,11 +1675,11 @@ class AbinitStats:
     Parser for ABINIT source code statistics (lines of code, number of files, etc.).
     Exports data to JSON format for visualization.
     """
-    def __init__(self, path):
+    def __init__(self, path: str):
         self.path = os.path.abspath(path)
         self.parse()
 
-    def parse(self):
+    def parse(self) -> None:
         """
         Parse the content of the statistics file.
         """
@@ -1701,7 +1705,7 @@ class AbinitStats:
                         if k not in ("versions", "dates"): v = float(v)
                         self.data[k].append(v)
 
-    def update(self):
+    def update(self) -> None:
         """
         Recompute statistics by scanning the source directory.
         Calculates number of F90 files, lines of code, and number of tests.
@@ -1717,7 +1721,7 @@ class AbinitStats:
         num_tests = int(check_output(["ls %s/tests/*/Input/t*abi | wc" % src_dir], shell=True))
         self.parse()
 
-    def json_dump(self, path):
+    def json_dump(self, path: str) -> None:
         """
         Export the collected statistics to a JSON file.
 
@@ -1736,10 +1740,10 @@ class HTMLValidator:
     Attributes:
         verbose: Verbosity level for validation reports.
     """
-    def __init__(self, verbose):
+    def __init__(self, verbose: int | bool):
         self.verbose = bool(verbose)
 
-    def validate_website(self, dirpath):
+    def validate_website(self, dirpath: str) -> int:
         """
         Validate all HTML files within a directory and its subdirectories.
 
@@ -1758,7 +1762,7 @@ class HTMLValidator:
 
         return retcode
 
-    def validate_htmlpage(self, path):
+    def validate_htmlpage(self, path: str) -> int:
         """
         Validate a single HTML file.
 
