@@ -161,7 +161,7 @@ def main():
                 tmp_values.remove("no")
             if "yes" in tmp_values:
                 tmp_values.remove("yes")
-        except:
+        except Exception:
             tmp_values = list()
 
         for val in tmp_values:
