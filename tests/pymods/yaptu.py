@@ -3,7 +3,7 @@ from __future__ import annotations
 """Yet Another Python Templating Utility, Version 1.2. Taken from http://code.activestate.com/recipes/52305/"""
 
 import sys
-from typing import Any, Callable, IO
+from typing import Any
 
 from .six import exec_
 

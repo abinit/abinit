@@ -7518,7 +7518,7 @@ Variable(
     abivarname="gpu_nfft_blocks",
     varset="paral",
     vartype="integer",
-    topics=['parallelism_expert'],
+    topics=["parallelism_expert"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="GPU: Number of Fast Fourier Transform Blocks",

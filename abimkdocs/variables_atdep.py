@@ -628,7 +628,7 @@ Variable(
     abivarname="symbec@atdep",
     varset="atdep",
     vartype="integer",
-    topics=['aTDEP_expert'],
+    topics=["aTDEP_expert"],
     dimensions="scalar",
     defaultval="0",
     mnemonics="SYMmetrize Born Effective Charges",

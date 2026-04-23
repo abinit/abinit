@@ -28,7 +28,7 @@ ANSII Color formatting for output in terminal.
 from __future__ import annotations
 
 import os
-from typing import Any, IO
+from typing import IO, Any
 
 __all__ = ["colored", "cprint"]
 

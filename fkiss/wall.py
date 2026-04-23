@@ -10,7 +10,6 @@ import os
 import re
 import sys
 from collections import Counter
-from typing import Any, Iterator, Iterable, Callable, TypeVar, IO
 
 from tools import lazy_property, pprint_table
 

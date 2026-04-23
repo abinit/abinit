@@ -10,7 +10,6 @@ to identify significant lines (marked with meta-characters for fldiff) and
 extract structured YAML documents associated with their iteration context.
 """
 import re
-from typing import Any
 
 from .yaml_tools import Document
 from .yaml_tools import is_available as has_yaml

@@ -10,7 +10,6 @@ import shutil
 import subprocess
 import time
 from functools import wraps
-from typing import Any, Callable
 
 
 def number_of_cpus() -> int:
@@ -176,7 +175,7 @@ class FileLock:
             raise ValueError(err_msg)
 
     @classmethod
-    def FakeLock(cls, file_name: str, timeout: int | float = 10, delay: int | float = .05) -> FileLock:
+    def FakeLock(cls, file_name: str, timeout: float = 10, delay: float = .05) -> FileLock:
         """
         Create a lock object that does nothing (monkey-patched acquire/release).
 
