@@ -1,9 +1,18 @@
 #!/usr/bin/env python
-"""This script executes the ABINIT suite of automatic tests."""
+"""
+This script executes the ABINIT suite of automatic tests.
+
+It provides a comprehensive command-line interface to build, execute, debug,
+and profile ABINIT tests. It supports sequential and parallel (MPI/OpenMP) runs,
+test filtering based on keywords or authors, automatic recompilation, and
+integration with debugging tools (gdb, valgrind). Results are summarized
+in both console and HTML formats.
+"""
 from __future__ import absolute_import, division, print_function  #, unicode_literals
 
 import os
 import sys
+from typing import Any
 
 # Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
 os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Pspdir"))
@@ -70,7 +79,8 @@ ALL_BINARIES = [
     "lruj",
 ]
 
-def str_examples():
+def str_examples() -> str:
+    """Return a string containing usage examples for the runtests.py script."""
     return """
 Usage example (assuming the script is executed within a build tree):
 
@@ -105,7 +115,7 @@ Debugging mode:
 """
 
 
-def show_examples_and_exit(err_msg=None, error_code=1):
+def show_examples_and_exit(err_msg: str | None = None, error_code: int = 1) -> None:
     """
     Display the usage examples and exit the script.
 
@@ -119,9 +129,11 @@ def show_examples_and_exit(err_msg=None, error_code=1):
     sys.exit(error_code)
 
 
-def vararg_callback(option, opt_str, value, parser):
+def vararg_callback(option: Any, opt_str: str, value: Any, parser: Any) -> None:
     """
-    Callback for an option with variable arguments.
+    Custom callback for the OptionParser to handle arguments that accept a variable
+    number of space-separated strings or values (e.g., `-k kw1 kw2`).
+    It reads arguments until it encounters another option starting with `-`.
 
     Args:
         option: The option instance.
@@ -150,9 +162,11 @@ def vararg_callback(option, opt_str, value, parser):
     setattr(parser.values, option.dest, value)
 
 
-def make_abinit(num_threads, touch_patterns=None, target=""):
+def make_abinit(num_threads: int, touch_patterns: str | None = None, target: str = "") -> int:
     """
-    Find the top-level directory of the build tree and issue `make -j num_threads`.
+    Finds the root of the ABINIT build tree and attempts to build the specified `target`
+    (or the whole project) using parallel make. Allows touching specific files before
+    compilation to trigger partial recompilation.
 
     Args:
         num_threads (int): Number of threads for parallel make.
@@ -178,9 +192,11 @@ def make_abinit(num_threads, touch_patterns=None, target=""):
     return retcode
 
 
-def parse_stats(stats):
+def parse_stats(stats: str | list[str]) -> list[str]:
     """
-    Parse a status string (e.g., 'failed+passed', 'all', 'not_succeeded').
+    Parses a user-provided status string into a list of normalized status keywords.
+    Supports combination syntax (e.g. `failed+passed`), keywords like `all`,
+    and negation like `not_succeeded`.
 
     Args:
         stats (str): The status specification string.
@@ -213,9 +229,11 @@ def parse_stats(stats):
     return stats
 
 
-def reload_test_suite(status_list):
+def reload_test_suite(status_list: list[str]) -> Any:
     """
-    Reload a test suite from the pickle file of a previous run.
+    Restores a previously executed `AbinitTestSuite` from a local `.prev_run.pickle` file.
+    Filters the loaded suite to return only those tests whose final status matches the
+    provided `status_list`. Useful for re-running or inspecting failed tests.
 
     Args:
         status_list (list): List of status strings to filter tests.
@@ -232,10 +250,13 @@ def reload_test_suite(status_list):
     return AbinitTestSuite(test_suite.abenv, test_list=test_list)
 
 
-def main():
+def main() -> int:
     """
-    Main entry point for runtests.py.
-    Parses command-line options and executes the test suite.
+    Main execution routine for the ABINIT automatic test runner.
+    Parses command-line arguments using `OptionParser`, establishes the MPI/OpenMP
+    execution environment, selects the appropriate test cases, compiles the codebase
+    if requested, executes the tests in sequence or parallel, and generates summary
+    reports including HTML and terminal output.
     """
     usage = "usage: %prog [suite_args] [options]. Use [-h|--help] for help."
     version = "%prog " + str(__version__)
