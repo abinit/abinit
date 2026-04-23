@@ -2,7 +2,16 @@
 Pyinvoke file for automating build and configuration tasks within the Abinit repository.
 
 This file can be executed from any location within the Abinit directory structure,
-including build directories.
+including build directories. It requires the `invoke` package.
+
+Task Categories:
+    * Build & Clean: `make`, `makemake`, `makedeep`, `clean`
+    * Testing: `runemall`, `abichecks`
+    * Git & Release: `pull`, `push`, `pull_trunk`, `branchoff`, `official_release`, `git_info`, `submodules`
+    * Debugging: `gdb`, `lldb`, `config_log`
+    * Execution: `abinit`, `anaddb`, `mpi_check`, `omp_check`
+    * Utilities: `links`, `ctags`, `fgrep`, `cgrep`, `tgrep`, `watchdog`, `diff2`, `diff3`
+    * System Info: `system`, `pid`, `env`
 
 General usage:
     To list available commands:
@@ -805,6 +814,7 @@ def branchoff(ctx: Context, start_point: str) -> None:
         remote = "trunk"
 
     def run(cmd):
+        """Execute a shell command via context."""
         cprint(f"Executing: `{cmd}`", color="green")
         ctx.run(cmd)
 
@@ -829,6 +839,7 @@ def dryrun_merge(ctx: Context, start_point: str) -> None:
     """
 
     def run(cmd):
+        """Execute a shell command via context."""
         cprint(f"Executing: `{cmd}`", color="green")
         ctx.run(cmd)
 
@@ -872,12 +883,15 @@ def watchdog(ctx: Context, jobs: str | int = "auto", sleep_time: int = 5) -> Non
                                                 ignore_directories=False, case_sensitive=True)
 
     def on_created(event):
+        """Handle file creation events."""
         print(f"hey, {event.src_path} has been created!")
 
     def on_deleted(event):
+        """Handle file deletion events."""
         print(f"what the f**k! Someone deleted {event.src_path}!")
 
     def on_modified(event):
+        """Trigger parallel make when a watched file is modified."""
         print(f"hey buddy, {event.src_path} has been modified")
         cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
         cprint("Executing: %s" % cmd, color="yellow")
@@ -892,6 +906,7 @@ def watchdog(ctx: Context, jobs: str | int = "auto", sleep_time: int = 5) -> Non
                 cprint("Keep on watching for changes hoping you get it right ...", color="red")
 
     def on_moved(event):
+        """Handle file rename or move events."""
         print(f"ok ok ok, someone moved {event.src_path} to {event.dest_path}")
 
     event_handler.on_created = on_created
@@ -966,6 +981,7 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
 
     _run_kwargs = dict(pty=True, echo=True)
     def _run(command: str):
+        """Helper to run commands with predefined kwargs."""
         return ctx.run(command, **_run_kwargs)
 
     current_branch = get_current_branch()
