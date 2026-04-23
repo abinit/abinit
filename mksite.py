@@ -1,9 +1,17 @@
 #!/usr/bin/env python
+"""
+This script serves as a wrapper around MkDocs to build the ABINIT documentation website.
 
+It automates the process of extracting the current ABINIT version, generating
+the configuration file (`mkdocs.yml`) from a template (`mkdocs.yml.in`), and
+dynamically building the Markdown source files via the `Website` class. It also
+provides built-in HTML validation and execution profiling capabilities.
+"""
 import os
 import subprocess
 import sys
 import warnings
+from typing import Any, Callable
 
 import mkdocs
 import mkdocs.__main__
@@ -11,11 +19,17 @@ import mkdocs.__main__
 if sys.version_info < (3, 6):
     warnings.warn("Python >= 3.6 is STRONGLY recommended when building the Abinit documentation\n" * 20)
 
-def is_git_repo(path):
+def is_git_repo(path: str) -> bool:
     """
     Utility to check if current dir is the root of a git clone.
     How ? just checking .git fold exist.
     Do not require to have git installed
+
+    Args:
+        path (str): The directory path to check.
+
+    Returns:
+        bool: True if the path contains a `.git` directory, False otherwise.
     """
     # Check whether "path/.git" exists and is a directory
     git_dir = os.path.join(path, ".git")
@@ -32,7 +46,21 @@ sys.path.insert(0, os.path.join(pack_dir, "doc"))
 from abimkdocs.website import HTMLValidator, Website
 
 
-def get_abinit_version():
+def get_abinit_version() -> str:
+    """
+    Determine the current ABINIT version.
+
+    The function looks for version strings in the following files in order:
+    `.version`, `.current_version`, and `.tarball-version`. If none are found
+    and the current directory is a git repository, it falls back to invoking
+    the `./config/scripts/git-version-gen` script.
+
+    Returns:
+        str: The detected ABINIT version in lowercase.
+
+    Raises:
+        RuntimeError: If the version cannot be determined.
+    """
     abinit_version = "unknown"
     if os.path.exists(".version"):
         with open(".version") as f:
@@ -63,7 +91,13 @@ def get_abinit_version():
     return abinit_version
 
 
-def generate_mkdocs_yml():
+def generate_mkdocs_yml() -> None:
+    """
+    Generate the `mkdocs.yml` file used by MkDocs.
+
+    Reads the template file `mkdocs.yml.in`, substitutes the `ABINIT_VERSION`
+    placeholder with the actual detected version, and writes the output to `mkdocs.yml`.
+    """
     abinit_version = get_abinit_version()
 
     # Read yml template and replace abinit version
@@ -77,7 +111,7 @@ def generate_mkdocs_yml():
         mkdocs_yml.write(yml_data)
 
 
-def prof_main(main):
+def prof_main(main: Callable[..., int]) -> Callable[..., int]:
     """
     Decorator for profiling main programs.
 
@@ -106,7 +140,7 @@ def prof_main(main):
     """
     from functools import wraps
     @wraps(main)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> int:
         import sys
         do_prof, do_tracemalloc, do_traceopen = 3 * [False]
         if len(sys.argv) > 1:
@@ -171,7 +205,22 @@ def prof_main(main):
 
 
 @prof_main
-def main():
+def main() -> int:
+    """
+    Main entry point for the ABINIT documentation builder.
+
+    Parses command-line arguments to determine the mode of operation. Supports:
+    - HTML validation mode (`validate`).
+    - Standard MkDocs commands (`build`, `serve`, `gh-deploy`), preceded by the
+      dynamic generation of markdown files.
+    - Dry-run mode for testing.
+
+    Generates the `mkdocs.yml` file, initializes the `Website` object, and delegates
+    the actual HTML build process to the `mkdocs.__main__.cli()` function.
+
+    Returns:
+        int: Return code indicating success (0) or failure.
+    """
     verbose = 1 if "-v" in sys.argv or "--verbose" in sys.argv else 0
     strict = "-s" in sys.argv or "--strict" in sys.argv
 
