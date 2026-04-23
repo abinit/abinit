@@ -3,9 +3,10 @@ from __future__ import annotations
 import os
 import re
 from collections import OrderedDict, deque
+from collections.abc import Iterable
 from pprint import pformat
 from textwrap import TextWrapper
-from typing import Any, Iterator, Iterable, Callable, TypeVar, IO, Deque
+from typing import Any
 
 from .regex import HasRegex
 from .termcolor import cprint
@@ -693,7 +694,7 @@ class FortranKissParser(HasRegex):
 
             return self.parse_string(string, path=path)
 
-    def preproc_string(self, string: str, path: str) -> Deque[str]:
+    def preproc_string(self, string: str, path: str) -> deque[str]:
         # Preprocess string to facilitate further analysis.
         # Use approach similar to the one used in Ford:
         #
@@ -978,7 +979,7 @@ class FortranKissParser(HasRegex):
         # Find use statements and the corresponding module
         if not line.startswith("use "):
             return False
-        smod = line.split()[1].split(",")[0].lower()
+        smod = line.split()[1].split(",", maxsplit=1)[0].lower()
         # Remove comment at the end of the line if present.
         i = smod.find("!")
         if i != -1:

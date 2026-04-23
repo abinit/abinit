@@ -3,7 +3,8 @@ from __future__ import annotations
 import fnmatch
 import os
 import sys
-from typing import Any, Iterable
+from typing import Any
+
 
 def is_string(s: Any) -> bool:
     """True if s behaves like a string (duck typing test)."""

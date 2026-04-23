@@ -62,9 +62,6 @@ the '%',and '.' first-column special signs.
 """
 
 import re
-import sys
-from typing import Any, IO
-
 from math import floor
 from threading import Thread
 

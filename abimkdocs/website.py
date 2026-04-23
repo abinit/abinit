@@ -16,13 +16,14 @@ import shutil
 import sys
 import time
 import uuid
-from typing import Any, Iterator, Iterable, Callable, TypeVar, IO
 
 #from markdown.util import etree
 import xml.etree.ElementTree as etree
 from collections import OrderedDict, defaultdict
+from collections.abc import Callable, Iterable, Iterator
 from itertools import groupby
 from pprint import pprint
+from typing import IO, Any, TypeVar
 
 import markdown
 import yaml

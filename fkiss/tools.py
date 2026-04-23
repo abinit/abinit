@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import abc
 import os
+import pickle
 import sys
 import tempfile
-import pickle
-from typing import Any, Iterator, Iterable, Callable, TypeVar, IO
+from collections.abc import Callable, Iterator
+from typing import IO, Any
 
 from .termcolor import cprint
 

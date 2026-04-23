@@ -14,10 +14,11 @@ import pickle
 import platform
 import re
 import sys
+from collections.abc import Callable, Iterable, Iterator
 from io import StringIO
 from pprint import pprint
 from socket import gethostname
-from typing import Any, Iterator, Iterable, Callable
+from typing import Any
 
 from tests.pymods.devtools import FileLock
 from tests.pymods.termcolor import cprint

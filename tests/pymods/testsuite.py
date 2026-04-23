@@ -30,7 +30,6 @@ from queue import Empty as EmptyQueueError
 from socket import gethostname
 from subprocess import PIPE, Popen
 from threading import Thread
-from typing import Any, Callable, IO, Iterable, Iterator
 
 from .abo_file_analysis import AboFileAnalysis
 from .devtools import NoErrorFileLock, makeunique
@@ -547,7 +546,7 @@ class FileToTest:
             except Exception as e:
                 warnings.warn(f"[{self.name}] Something went wrong with this test:\n"
                                f"{type(e).__name__}: {e!s}\n")
-                raise e
+                #raise e
 
                 isok, status = False, "failed"
                 msg = f"Internal error:\n{type(e).__name__}: {e!s}"

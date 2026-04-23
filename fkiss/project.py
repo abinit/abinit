@@ -7,9 +7,10 @@ import pickle
 import sys
 import time
 from collections import OrderedDict, defaultdict
+from collections.abc import Iterator
 from pprint import pformat, pprint
 from textwrap import TextWrapper
-from typing import Any, Iterator, Iterable, Callable, TypeVar, IO
+from typing import Any
 
 from .parser import FortranKissParser
 from .termcolor import cprint
@@ -153,13 +154,13 @@ class FortranFile:
         self.all_usedby_mods = []
         #self.num_f90lines, self.num_doclines = 0, 0
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Use path to compare for equality and compute hash value."""
         if other is None: return False
         if not isinstance(other, self.__class__): return False
         return self.path == other.path
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
     def __hash__(self) -> int:
