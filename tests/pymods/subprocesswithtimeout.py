@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import errno
 import os
 import signal
@@ -15,7 +17,7 @@ class SubProcessWithTimeout:
     """
     Error = TimeoutError
 
-    def __init__(self, timeout, delay=.05):
+    def __init__(self, timeout: int | float, delay: float = .05):
         """
         Initialize the SubProcessWithTimeout object.
 

@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 """Yet Another Python Templating Utility, Version 1.2. Taken from http://code.activestate.com/recipes/52305/"""
 
 import sys
+from typing import Any, Callable, IO
 
 from .six import exec_
 
@@ -8,12 +11,12 @@ from .six import exec_
 # utility stuff to avoid tests in the mainline code
 class _nevermatch:
     """Polymorphic with a regex that never matches"""
-    def match(self, line):
+    def match(self, line: str) -> Any | None:
         return None
 
 _never = _nevermatch()     # one reusable instance of it suffices
 
-def identity(string, why):
+def identity(string: str, why: str) -> str:
     """A do-nothing-special-to-the-input, just-return-it function"""
     return string
 
