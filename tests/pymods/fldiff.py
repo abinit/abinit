@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Comparison tool for ABINIT output files with arithmetic floating-point support.
 
@@ -60,6 +62,9 @@ the '%',and '.' first-column special signs.
 """
 
 import re
+import sys
+from typing import Any, IO
+
 from math import floor
 from threading import Thread
 
@@ -75,7 +80,7 @@ if has_yaml:
 # As a consequence, integers will be compared as strings
 float_re = re.compile(r"([+-]?[0-9]*\.[0-9]+(?:[eEdDfF][+-]?[0-9]+)?)")
 
-def norm_spaces(s):
+def norm_spaces(s: str) -> str:
     r"""
     Normalize all blanks ( \n\r\t).
 
@@ -89,7 +94,7 @@ def norm_spaces(s):
     return " ".join(s.split())
 
 
-def relative_truncate(f, n):
+def relative_truncate(f: float, n: int) -> float:
     """
     Relative truncate function for numerical comparison.
 
@@ -387,7 +392,7 @@ class Result:
         file.write(self.get_summary() + "\n")
         return None
 
-    def passed_within_tols(self, tolnlines, tolabs, tolrel):
+    def passed_within_tols(self, tolnlines: int, tolabs: float, tolrel: float) -> tuple[bool, str, str]:
         """
         Check the result of the diff against the given tolerances.
 
@@ -444,7 +449,7 @@ class Result:
         isok = status in ("succeeded", "passed")
         return isok, status, msg
 
-    def has_line_count_error(self):
+    def has_line_count_error(self) -> bool:
         """
         Check if there was a line count discrepancy between files.
 

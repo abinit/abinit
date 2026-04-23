@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Implement the steps to extract data from an Abinit output file.
 Extract lines associated with their "meta character" (that makes sense in
@@ -8,6 +10,7 @@ to identify significant lines (marked with meta-characters for fldiff) and
 extract structured YAML documents associated with their iteration context.
 """
 import re
+from typing import Any
 
 from .yaml_tools import Document
 from .yaml_tools import is_available as has_yaml
@@ -38,7 +41,7 @@ class DataExtractor:
         "MPI startup(): PMI server not found.",
     ]
 
-    def __init__(self, use_yaml, ignore=True, ignoreP=True, xml_mode=False):
+    def __init__(self, use_yaml: bool, ignore: bool = True, ignoreP: bool = True, xml_mode: bool = False):
         """
         Initialize the DataExtractor.
 
@@ -58,7 +61,7 @@ class DataExtractor:
         self.corrupted_docs = []
         self.abinit_messages = []
 
-    def _get_metachar(self, line):
+    def _get_metachar(self, line: str) -> str:
         """
         Return a meta character which gives the behaviour of the line.
 
@@ -90,7 +93,7 @@ class DataExtractor:
                     c = "+"
         return c
 
-    def ignore_line(self, line):
+    def ignore_line(self, line: str) -> bool:
         """
         Check if the line should be ignored.
 
@@ -103,7 +106,7 @@ class DataExtractor:
         if (any(line.startswith(l) for l in self.IGNORE_LINES_STARTING_WITH)): return True
         return False
 
-    def extract(self, src_lines):
+    def extract(self, src_lines: list[str]) -> tuple[list[tuple[int, str, str]], dict[str, Document], list[tuple[int, str]]]:
         """
         Extract formatted documents and significant lines from src_lines.
 

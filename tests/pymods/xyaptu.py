@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """XYAPTU: Lightweight XML/HTML Document Template Engine for Python. Taken from http://code.activestate.com/recipes/162292/"""
 
 __version__ = "1.0.0"

@@ -2,15 +2,18 @@
 General-purpose developer tools and utilities for the ABINIT test suite.
 Includes system CPU/GPU detection, cross-platform file locking, and function decorators.
 """
+from __future__ import annotations
+
 import errno
 import os
 import shutil
 import subprocess
 import time
 from functools import wraps
+from typing import Any, Callable
 
 
-def number_of_cpus():
+def number_of_cpus() -> int:
     """
     Detect the number of physical or virtual CPUs on the system.
 
@@ -98,7 +101,7 @@ def number_of_cpus():
     return -1
     #raise Exception('Cannot determine number of CPUs on this system')
 
-def number_of_gpus():
+def number_of_gpus() -> int:
     """
     Detect the number of GPUs using vendor-specific tools (`nvidia-smi` or `roc-smi`).
 
@@ -173,7 +176,7 @@ class FileLock:
             raise ValueError(err_msg)
 
     @classmethod
-    def FakeLock(cls, file_name, timeout=10, delay=.05):
+    def FakeLock(cls, file_name: str, timeout: int | float = 10, delay: int | float = .05) -> FileLock:
         """
         Create a lock object that does nothing (monkey-patched acquire/release).
 
