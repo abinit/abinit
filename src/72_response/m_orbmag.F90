@@ -596,27 +596,27 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      ! ZTG23 Eq. 36 term 2 and Eq. 46 term 1
      call orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,ph1d,pawtab,trnrm)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,ph1d,pawtab,trnrm,suppress_ormesh=.FALSE.)
 
      ! ZTG23 Eq. 36 terms 3 and 4 and Eq. 46 term 2
      call orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh,ph1d,pawtab,trnrm)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh,ph1d,pawtab,trnrm,suppress_ormesh=.FALSE.)
 
      ! ZTG23 Eq. 36 term 1
      call orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,ph1d,trnrm)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,ph1d,trnrm,suppress_ormesh=.FALSE.)
 
      ! ZTG23 text after Eq. 42
      nl1_option = 1 ! LR
      call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_hamk,ikpt,isppol,&
        & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab,&
-       & ph1d,trnrm)
+       & ph1d,trnrm,suppress_ormesh=.FALSE.)
 
      ! ZTG23 Eq. 43
      nl1_option = 2 ! A0.An
      call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_hamk,ikpt,isppol,&
        & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab,&
-       & ph1d,trnrm)
+       & ph1d,trnrm,suppress_ormesh=.FALSE.)
 
      ! accumulate terms
      do nn = 1, nband_k
@@ -950,7 +950,7 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,gdir,nn,npwsp
+  integer :: adir,bdir,dnlbra,dnlket,gdir,nn,npwsp
   complex(dp) :: prefac_m,tt
   logical :: my_suppress_ormesh
   !arrays
@@ -966,6 +966,7 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
  npwsp = npw_k*dtset%nspinor
  prefac_m = cone
  bdir=0;gdir=0
+ dnlbra=0; dnlket=0
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
  !ABI_MALLOC(cwavef,(2,npwsp))
  call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
@@ -979,13 +980,13 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
 
      select case (nl1_option)
      case(1)
-       call nonlocal_me(adir,atindx,bdir,cwavef,cwaveprj,0,0,&
+       call nonlocal_me(adir,atindx,bdir,cwavef,cwaveprj,dnlbra,dnlket,&
          & dterm,dtset,eig_k(nn),fermie,gdir,gs_hamk,cwavef,mpi_enreg,tt,npw_k,&
          & orbmag_mesh,inlr,ph1d,prefac_m,pawtab,trnrm(nn),&
          & suppress_ormesh=my_suppress_ormesh)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inlr) = real(tt)
      case(2)
-       call nonlocal_me(adir,atindx,bdir,cwavef,cwaveprj,0,0,&
+       call nonlocal_me(adir,atindx,bdir,cwavef,cwaveprj,dnlbra,dnlket,&
          & dterm,dtset,eig_k(nn),fermie,gdir,gs_hamk,cwavef,mpi_enreg,tt,npw_k,&
          & orbmag_mesh,inbm,ph1d,prefac_m,pawtab,trnrm(nn),&
          & suppress_ormesh=my_suppress_ormesh)
@@ -2048,6 +2049,7 @@ subroutine nonlocal_me(adir,atindx,bdir,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
     ABI_CHECK(ASSOCIATED(ket),"nonlocal_me: input ket needed for ormesh is not associated")
     ABI_CHECK(ASSOCIATED(bra),"nonlocal_me: input bra needed for ormesh is not associated")
     ABI_CHECK(dtset%nspinor.EQ.1,"nonlocal_me: orbmag_rmesh not coded for spinors yet")
+    t_atom=0
     do iat = 1, dtset%natom
       if ( ANY(ABS(dtset%nucdipmom(1:3,iat))>tol8) ) then
         t_atom = atindx(iat)
@@ -2975,7 +2977,8 @@ subroutine orbmag_rmesh(omag,adir,bra,dtset,gs_hamk,ket,local_term,mpi_enreg,&
       & n4,n5,n6,fourwf_option,tim_fourwf,weight_r,weight_i)
     cpw = czero
     do ig = 1, npw_k
-      cpw = cpw + phgr(ig)*CONJG(CMPLX(bra(1,ig),bra(2,ig)))
+      !cpw = cpw + phgr(ig)*CONJG(CMPLX(bra(1,ig),bra(2,ig)))
+      cpw = cpw + CONJG(CMPLX(bra(1,ig),bra(2,ig)))
     end do
     cpw = cpw*scalar_factor
     fofr(1,:,:,:) = fofr(1,:,:,:)*REAL(cpw) - fofr(2,:,:,:)*AIMAG(cpw)
