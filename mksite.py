@@ -182,7 +182,7 @@ def prof_main(main: Callable[..., int]) -> Callable[..., int]:
 
             n = min(len(top_stats), 20)
             print("[Top %d]" % n)
-            for stat in top_stats[:20]:
+            for stat in top_stats[:n]:
                 print(stat)
 
         elif do_traceopen:

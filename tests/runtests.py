@@ -50,11 +50,7 @@ from tests.pymods import termcolor
 from tests.pymods.devtools import number_of_cpus, number_of_gpus
 from tests.pymods.jobrunner import JobRunner, OMPEnvironment, TimeBomb
 from tests.pymods.termcolor import cprint, get_terminal_size
-from tests.pymods.testsuite import (
-    AbinitTestSuite,
-    BuildEnvironment,
-    find_top_build_tree,
-)
+from tests.pymods.testsuite import AbinitTestSuite, BuildEnvironment, find_top_build_tree
 from tests.pymods.tools import ascii_abinit, which
 
 __version__ = "0.7.0"
@@ -1157,7 +1153,7 @@ def main() -> int:
     print("Execution completed.")
     print(
         "Results in HTML format are available in %s"
-        % (os.path.join(workdir, "index.html"))
+        % (os.path.join(workdir, "suite_report.html"))
     )
 
     try:

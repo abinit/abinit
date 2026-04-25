@@ -10,7 +10,6 @@ import os
 import sys
 import time
 
-# The ConfigParser module has been renamed to configparser in Python 3
 from configparser import NoOptionError
 from subprocess import Popen
 
@@ -123,8 +122,6 @@ class JobRunnerError:
             run_etime: Elapsed-time
             prev_errmsg: Previous error message.
         """
-        # This is needed for pickle
-        #super(JobRunnerError, self).__init__("jobrunner error")
         self.return_code = return_code
         self.cmd = cmd
         self.run_etime = run_etime
@@ -137,20 +134,6 @@ class JobRunnerError:
 
         return string
 
-    #def __getstate__(self):
-    #    """
-    #    Return state is pickled as the contents for the instance.
-    #    """
-    #    print("in getstate")
-    #    return {k: getattr(self, k) for k in ("return_code", "cmd", "run_etime", "prev_errmsg")}
-
-    #def __setstate__(self, state):
-    #    print("in setstate")
-    #    self.return_code = state["return_code"]
-    #    self.cmd = state["cmd"]
-    #    self.run_etime = state["run_etime"]
-    #    self.prev_errmsg = state["prev_errmsg"]
-
 
 class JobRunner:
     """
@@ -162,7 +145,6 @@ class JobRunner:
     It abstracts the complexities of different MPI launchers and environment
     configurations, providing resource management and timeout enforcement.
     """
-    #Error = JobRunnerError
 
     @classmethod
     def fromdict(cls, kwargs, ompenv=None, timebomb=None):
@@ -286,8 +268,6 @@ class JobRunner:
         Returns:
             str: The configuration summary.
         """
-        #return "\n".join([str(k) + " : " + str(v) for (k, v) in self.__dict__.items()] )
-
         string = ""
         for key in CFG_KEYWORDS:
             attr = getattr(self, str(key), None)
@@ -340,7 +320,6 @@ class JobRunner:
             ValueError: If Valgrind is not enabled for this runner.
         """
         if not self.has_valgrind: raise ValueError("Runner does not use valgrind!")
-        # TODO build specialized parsers for the different tools (XML?)
         return MemcheckParser()
 
     def set_debugger(self, debugger):
@@ -669,7 +648,7 @@ class TimeBomb:
 
             return p, ret_code
 
-        except:
+        except Exception:
             raise
 
 
