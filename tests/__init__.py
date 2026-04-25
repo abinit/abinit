@@ -32,7 +32,7 @@ __all__ = []
 
 # Dictionary mapping test keywords to string with human-readable description.
 _json_path = os.path.join(os.path.dirname(__file__), "known_keywords.json")
-with open(_json_path, "r", encoding="utf-8") as _fh:
+with open(_json_path, encoding="utf-8") as _fh:
     KNOWN_KEYWORDS = json.load(_fh)
 
 

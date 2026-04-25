@@ -13,13 +13,13 @@ import platform
 import shutil
 import sys
 import tempfile
-from collections.abc import Callable, Iterator, Iterable
-from typing import Any
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 from os.path import abspath as absp
 from os.path import basename
 from os.path import join as pj
 from socket import gethostname
+from typing import Any
 from warnings import warn
 
 logger = logging.getLogger(__name__)
