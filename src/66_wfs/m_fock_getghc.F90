@@ -95,7 +95,7 @@ subroutine select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,nfftf,&
 
 #ifdef HAVE_GPU
  call gpu_get_max_mem(free_mem)
- free_mem = 0.95 * free_mem ! Cutting 5% out to be safe
+ free_mem = 0.85 * free_mem ! Cutting 15% out to be safe
 #endif
 
  do i=1,nband_k
@@ -150,6 +150,7 @@ subroutine select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,nfftf,&
        sum_mem = sum_mem + INT(2,c_size_t)*nprojs*npw*6
      end if
      ! grnhat_12
+     ider=ider*2 ! Overestimate this buffer to ensure it fits as we don't manage OpenMP pool of GPU memory
      sum_mem = sum_mem + INT(2,c_size_t)*nfftf*nspinor**2*3*natom*(ider/3)*ndat_occ*ndat
      ! gvnlxc
      sum_mem = sum_mem + INT(2,c_size_t)*npw*nspinor*ndat_occ
@@ -185,7 +186,7 @@ subroutine select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,nfftf,&
  end if
 !#ifdef DEBUG_VERBOSE
  write(std_out,*) "-----------DEBUG fock_getghc%select_ndat_occ_for_gpu : "
- write(std_out,'(A,F10.3,1x,A)') "Free GPU memory                : ", real(free_mem,dp)/(1024*1024), "MiB"
+ write(std_out,'(A,F10.3,1x,A)') "Considered free GPU memory     : ", real(free_mem,dp)/(1024*1024), "MiB"
  write(std_out,'(A,I4)')         "selected ndat_occ              : ", ndat_occ
  write(std_out,'(A,F10.3,1x,A)') "Forecasted consumed GPU memory : ", real(sum_mem,dp)/(1024*1024), "MiB"
  write(std_out,*) "-----------END DEBUG fock_getghc%select_ndat_occ_for_gpu : "
