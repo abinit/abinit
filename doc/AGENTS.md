@@ -78,5 +78,6 @@ Rules:
    - Do not change logic unless explicitly required.
    - If behavior must change, explain why.
 
+**Comments for Agents**: Instructions or context directed specifically to the AI assistant should be prefixed with `# AGENT:` (e.g., `# AGENT: refactor this loop`).
 
 By adhering to these rules, you will ensure that the documentation remains consistent, correctly processed by the custom Abinit MkDocs pipeline, and seamlessly integrated with the rest of the project.

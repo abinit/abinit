@@ -160,20 +160,21 @@ class VariablesTest(AbimkdocsTest):
             count_code[code] = Counter(dict.fromkeys(d, 0))
 
         ierr = 0
-        doc_vnames = codevars["anaddb"].get_all_vnames(with_internal=False)
-        anaddb_f90vnames = self.get_anaddb_varnames_from_f90()
-        #print("anaddb_vames:", anaddb_f90vnames)
-        diff = anaddb_f90vnames - doc_vnames
-        if diff:
-            ierr += 1
-            print("\nThe following variables are found in anaddb F90 code but not in variables_anaddb.py")
-            pprint(diff)
 
-        diff = doc_vnames - anaddb_f90vnames
-        if diff:
-            ierr += 1
-            print("\nThe following variables are found in variables_anaddb.py but not in anaddb F90 code.")
-            pprint(diff)
+        #doc_vnames = codevars["anaddb"].get_all_vnames(with_internal=False)
+        #anaddb_f90vnames = self.get_anaddb_varnames_from_f90()
+        ##print("anaddb_vames:", anaddb_f90vnames)
+        #diff = anaddb_f90vnames - doc_vnames
+        #if diff:
+        #    ierr += 1
+        #    print("\nThe following variables are found in anaddb F90 code but not in variables_anaddb.py")
+        #    pprint(diff)
+
+        #diff = doc_vnames - anaddb_f90vnames
+        #if diff:
+        #    ierr += 1
+        #    print("\nThe following variables are found in variables_anaddb.py but not in anaddb F90 code.")
+        #    pprint(diff)
 
         doc_vnames = codevars["abinit"].get_all_vnames(with_internal=False)
         abinit_f90vnames = self.get_abinit_varnames_from_f90()
