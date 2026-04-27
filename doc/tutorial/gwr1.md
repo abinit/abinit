@@ -10,8 +10,8 @@ This tutorial aims at showing how to calculate self-energy corrections to the
 DFT Kohn-Sham (KS) eigenvalues in the one-shot GW approximation using the GWR code
 
 The user should be already familiar with the four basic tutorials of ABINIT,
-see the [tutorial home page](/tutorial),
-and is strongly encouraged to read the [introduction to the GWR code](/tutorial/gwr_intro)
+see the [tutorial home page](../tutorial),
+and is strongly encouraged to read the [introduction to the GWR code](../tutorial/gwr_intro)
 before running these examples.
 
 This tutorial should take about 1.5 hours.
@@ -183,9 +183,9 @@ to distribute the KS Hamiltonian matrix.
 
     We strongly recommend using the ELPA library for diagonalization,
     as it is much more efficient and requires significantly less memory than the ScaLAPACK drivers.
-    See the [GWR_intro](/tutorial/gwr_intro) for more details on how to link the ELPA library.
+    See the [GWR_intro](../tutorial/gwr_intro) for more details on how to link the ELPA library.
 
-Here, we ask for 400 bands. Let's recall that in the [previous GW tutorial](/tutorial/gw1)
+Here, we ask for 400 bands. Let's recall that in the [previous GW tutorial](../tutorial/gw1)
 [[nband]] = 100 was considered converged within 30 meV,
 but with GWR we can afford more bands since [[nband]] enters into play only during the initial construction
 of the Green's function
@@ -720,7 +720,7 @@ You should obtain the following plots:
 On the basis of this convergence study, we decide to use [[nband]] = 250 and [[ecuteps]] = 10.
 
 <!--
-In the [first GW tutorial](/tutorial/gw1), we have already performed convergence studies,
+In the [first GW tutorial](../tutorial/gw1), we have already performed convergence studies,
 and [[nband]] = 100 was found to give results converged within 30 mev, which is fair to compare with experimental accuracy.
 Also ecuteps = 6.0 can be considered converged within 10 meV.
 We will not repeat these convergence studies here, we just use these values for our calculation so that
@@ -913,7 +913,7 @@ mv tgwr_4o_* log conv_kmesh
 
 In this last part of the tutorial, we discuss how to interpolate the QP corrections
 along an arbitrary $\kk$-path using the star-function method discussed in
-[this section](/tutorial/eph_intro/#star-function-interpolation-of-the-ks-eigenvalues) of the EPH introduction.
+[this section](../tutorial/eph_intro/#star-function-interpolation-of-the-ks-eigenvalues) of the EPH introduction.
 This method is less precise than e.g. the Wannier interpolation, and might be problematic in the presence
 of band-crossings, but it has the big advantage of being much easier to use and with minimal user intervention.
 

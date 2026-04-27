@@ -18,8 +18,8 @@ that are computed on the basis of the density-functional perturbation theory
 Such computations are realized when one of the input variables [[rfphon]],
 [[rfelfd]] or [[rfstrs]] are non-zero, which activates [[optdriver]]=1.
 You are supposed to be well-familiarized with such calculations before starting
-the present tutorial. See the [respfn help file](/guide/respfn), the input variables described in [[varset:dfpt]] and
-the tutorial [Response-Function 1](/tutorial/rf1) and subsequent tutorials.
+the present tutorial. See the [respfn help file](../guide/respfn), the input variables described in [[varset:dfpt]] and
+the tutorial [Response-Function 1](../tutorial/rf1) and subsequent tutorials.
 
 You will learn about the basic implementation of parallelism for DFPT
 calculations, then will execute a very simple, quick calculation for one
@@ -34,7 +34,7 @@ the tutorial, a 16-computing-core machine is recommended, in order to perform
 the scalability measurements.
 
 You are supposed to know already some basics of parallelism in ABINIT,
-explained in the tutorial [A first introduction to ABINIT in parallel](/tutorial/basepar).
+explained in the tutorial [A first introduction to ABINIT in parallel](../tutorial/basepar).
 
 This tutorial should take less than two hours to be done if a powerful parallel
 computer is available.
@@ -55,7 +55,7 @@ The step 2 and step 3 are the time-consuming DFPT steps, to which the present
 tutorial is dedicated, and for which the implementation of the parallelism
 will be explained. They generate different files, and in particular, one (or several) DDB file(s).
 As explained in related tutorials (see e.g.
-[Response-Function 1](/tutorial/rf1)), several perturbations are usually treated in
+[Response-Function 1](../tutorial/rf1)), several perturbations are usually treated in
 one dataset (hence the "Do for each perturbation"-loop in step 2 of this
 Schema). For example, in one dataset, although one considers only one phonon
 wavevector, all the primitive atomic displacements for this wavevector (as
@@ -128,10 +128,10 @@ For this ground-state calculation, symmetries can be used to reduce
 drastically the number of k points: there are 60 k points in the irreducible
 Brillouin zone (this cannot be deduced from the examination of the input file, though).
 In order to treat properly the phonon calculation, the number of bands is larger than the
-default value, that would have given [[nband]]=3. Indeed, several of the unoccupied bands 
+default value, that would have given [[nband]]=3. Indeed, several of the unoccupied bands
 plays a role in the response calculations in the case of metallic occupations.
-For example, the acoustic sum rule might be largely violated when too few unoccopied 
-bands are treated. 
+For example, the acoustic sum rule might be largely violated when too few unoccopied
+bands are treated.
 
 This calculation is very fast, actually.
 You can launch it:
@@ -229,7 +229,7 @@ Let us explain the timing section. It is present a bit before the end of the out
 
     - For major independent code sections, cpu and wall times (sec),
     - as well as % of the total time and number of calls
-    
+
     -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
     - cpu_time =         115.3, wall_time =         115.6
     -
@@ -261,14 +261,14 @@ factor of four between these two groups, reflecting that the load balance is goo
 Let us examine the second group of data in more detail. It corresponds to a
 decomposition of the most time-consuming parts of the code. Note that the
 subtotal is 85.7 percent, thus the statistics is not very accurate, as it should be close to 100%.
-Actually, as of ABINIT v9, there is must be a bug in the timing decomposition, since, 
+Actually, as of ABINIT v9, there is must be a bug in the timing decomposition, since,
 e.g. there is a negative time announced for the "others" subroutines.
 
 Anyhow, several of the most time-consuming parts are directly related to application of the Hamiltonian to wavefunctions,
-namely, fourwf%(pot) (application of the local potential, which implies two Fourier transforms), nonlop(apply) 
+namely, fourwf%(pot) (application of the local potential, which implies two Fourier transforms), nonlop(apply)
 (application of the non-local part of the Hamiltonian), nonlop(forces) (computation of the non-local part of the
 interatomic forces), fourwf%(G->r) (fourier transform needed to build the first-order density). Also, quite noticeable
-is dfpt_vtorho:MPI , synchronisation of the MPI parallelism. 
+is dfpt_vtorho:MPI , synchronisation of the MPI parallelism.
 
 A study of the speed-up brought by the k-point parallelism for this simple test case
 gives the following behaviour, between 1 and 40 cores:
@@ -276,10 +276,10 @@ gives the following behaviour, between 1 and 40 cores:
 <div id="plotly_plot" style="width:90%;height:450px;"></div>
 <script>
 $(function() {
-    Plotly.newPlot(document.getElementById('plotly_plot'), 
+    Plotly.newPlot(document.getElementById('plotly_plot'),
         [{ x: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], y: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], name: 'Ideal'},
-         { x: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], y: [1, 1.92, 3.75, 5.50, 7.17, 9.34, 11.1, 14.4, 17.8, 19.7], name: 'Observed' }], 
-        { title: "Parallel speed-up", 
+         { x: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], y: [1, 1.92, 3.75, 5.50, 7.17, 9.34, 11.1, 14.4, 17.8, 19.7], name: 'Observed' }],
+        { title: "Parallel speed-up",
           xaxis: {title:'Number of cores'} }
     );
 });
@@ -291,8 +291,8 @@ for a speed-up of 19.7 ..
 
 ## 3 Computation of one perturbation for a slab of 29 atoms of barium titanate
 
-**3.1.** This test, with 29 atoms, is slower, but highlights other aspects 
-of the DFPT parallelism than the Al FCC case. 
+**3.1.** This test, with 29 atoms, is slower, but highlights other aspects
+of the DFPT parallelism than the Al FCC case.
 It consists in the computation of one perturbation at [[qpt]] 0.0 0.25
 0.0 for a 29 atom slab of barium titanate, artificially terminated by a double
 TiO<sub>2</sub> layer on each face, with a reasonable k-point sampling of the Brillouin zone.
@@ -337,9 +337,9 @@ The preparatory step takes about 3 minutes, and the DFPT step takes about
 
 {% dialog tests/tutoparal/Input/tdfpt_03.abi tests/tutoparal/Input/tdfpt_04.abi %}
 
-You can run now these test cases. For tdfpt_03, with [[autoparal]]=1, 
+You can run now these test cases. For tdfpt_03, with [[autoparal]]=1,
 you will be able to run on different numbers of processors compatible with [[nkpt]]=4,
-[[nband]]=120 and [[ngfft]]=[30 30 192], detected by ABINIT. Alternatively, you might decide to explicitly 
+[[nband]]=120 and [[ngfft]]=[30 30 192], detected by ABINIT. Alternatively, you might decide to explicitly
 define [[np_spkpt]], [[npband]] and [[npfft]].
 At variance, for tdfpt_04, no adaptation of the input file is
 needed to be able to run on an arbitrary number of processors.
@@ -415,7 +415,7 @@ saturate well below this value, as there are some non-parallelized sections of t
 
 In the above-mentioned list, the kpoint+band parallelism cannot be exploited
 (or is badly exploited) in several sections of the code : "dfpt_vtorho:MPI",
-about 12 percents of the total time of the run on 24 processors, "pspini", about 1.4 percent. 
+about 12 percents of the total time of the run on 24 processors, "pspini", about 1.4 percent.
 This amounts to about 1/8 of the total.
 However, the scalability of the band parallelisation is rather poor, and effective saturation
 in this case already happens at 16 processor.
@@ -427,13 +427,13 @@ gives the following behaviour, between 1 and 40 cores:
 <div id="plotly_plot2" style="width:90%;height:450px;"></div>
 <script>
 $(function() {
-    Plotly.newPlot(document.getElementById('plotly_plot2'), 
+    Plotly.newPlot(document.getElementById('plotly_plot2'),
         [{ x: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], y: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], name: 'Ideal'},
          { x: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], y: [1, 1.97, 3.93, 3.86, 7.67, 7.53, 14.77, 16.44, 15.47, 14.37], name: 'Observed' }],
-        { title: "Parallel speed-up", 
+        { title: "Parallel speed-up",
           xaxis: {title:'Number of cores'} }
     );
-}); 
+});
 </script>
 
 The additional band parallelism is very efficient when running with 16 cores, bringing 14.77 speed-up,
@@ -443,7 +443,7 @@ is disappointing beyond 16 cores, or even for a number of processors which is no
 Such a behaviour might be different on your machine.
 
 **3.2.** A better parallelism can be seen if the number of k-points is brought
-back to a converged value (8x8x1). Again, 
+back to a converged value (8x8x1). Again,
 Try this if you have more than 100 processors at hand.
 
 Set in your input files *tdfpt_03.abi* and *tdfpt_04.abo* :
@@ -496,12 +496,12 @@ $(function() {
 </script>
 
 Thus, it is very important that you gain some understanding of the scaling of your typical runs
-for your particular computer, and that you know the parameters (especially [[nkpt]]) of your calculations. 
+for your particular computer, and that you know the parameters (especially [[nkpt]]) of your calculations.
 Up to 4 or 8 cores, the ABINIT scaling will usually be very good, if
 k-point parallelism is possible. In the range between 10 and 100 cores, the speed-up might still be good,
 but this will depend on details.
 
-This last example is the end of the present tutorial. 
+This last example is the end of the present tutorial.
 The basics of the current implementation of the parallelism for the DFPT part of ABINIT have been explained,
 then you have explored two test cases: one for a small cell
 materials, with lots of k points, and another one, medium-size, in which the k

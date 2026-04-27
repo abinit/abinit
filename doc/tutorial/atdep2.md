@@ -14,13 +14,13 @@ In practice, this means to obtain the $3^{rd}$ and 4$^{th}$ order effective IFC.
 
 You will learn:
 
-1. how to launch aTDEP just after an ABINIT simulation, 
-2. the meaning and effects of the main input variables, and 
+1. how to launch aTDEP just after an ABINIT simulation,
+2. the meaning and effects of the main input variables, and
 3. how to exploit the data provided in the output files.
 
-You are supposed to have performed the [1$^{st}$ aTDEP tutorial](/tutorial/atdep1) and strongly encouraged to read the following documents:
+You are supposed to have performed the [1$^{st}$ aTDEP tutorial](../tutorial/atdep1) and strongly encouraged to read the following documents:
 
-* User guide: [[pdf:aTDEP_Guide| aTDEP guide]]  
+* User guide: [[pdf:aTDEP_Guide| aTDEP guide]]
 * Theory: [[pdf:aTDEP_Paper|aTDEP paper]] corresponding to the article [[cite:Bottin2020]]
 
 This tutorial should take about 1.5 hour.
@@ -31,7 +31,7 @@ This tutorial should take about 1.5 hour.
 
 In the previous tutorial, we have considered that the potential energy of a crystal can be rewritten using a Taylor expansion around the equilibrium. If this expansion is truncated at the 4$^{th}$ order, we obtain:
 $$
-U=   U_0 + 
+U=   U_0 +
 \sum_{p\ge 1}^4 \frac{1}{p\ !} \sum_{\substack{\alpha_1...\alpha_p \\ i_1...i_p}}\overset{(p)}{\Theta}\vphantom{\Theta}_{i_1...i_p}^{\alpha_1...\alpha_p}\prod_{k=1}^p
  u_{i_k}^{\alpha_k}
 $$

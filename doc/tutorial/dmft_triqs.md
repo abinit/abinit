@@ -13,10 +13,10 @@ while ABINIT drives the calculation and connects to TRIQS/CT-HYB
 as an external library.
 
 Before starting, you should already know how to do a basic DFT calculation with ABINIT
-(see [basic1](/tutorial/base1), [basic2](/tutorial/base2), [basic3](/tutorial/base3),
-and [basic4](/tutorial/base4)). It also helps if you are familiar with PAW
-(see [PAW1](/tutorial/paw1) and [PAW2](/tutorial/paw2)) and [DFT+U](/tutorial/dftu).
-There is also a tutorial on the ABINIT's internal DMFT solvers (see [DMFT](/tutorial/dmft)), but
+(see [basic1](../tutorial/base1), [basic2](../tutorial/base2), [basic3](../tutorial/base3),
+and [basic4](../tutorial/base4)). It also helps if you are familiar with PAW
+(see [PAW1](../tutorial/paw1) and [PAW2](../tutorial/paw2)) and [DFT+U](../tutorial/dftu).
+There is also a tutorial on the ABINIT's internal DMFT solvers (see [DMFT](../tutorial/dmft)), but
 the two DMFT tutorials are independent.
 
 We also recommend that you are comfortable with TRIQS/CT-HYB, and we will assume you already
@@ -438,7 +438,7 @@ Once these ratios are fixed, the two remaining Slater integrals $F^0$ and $F^2$ 
 These parameters have clear physical meanings — $U$ sets the overall interaction strength, while $J$ controls the tendency of electrons to align their spins.
 You can set them for each atom type using [[upawu]] and [[jpawu]].
 
-There are several ways to compute these parameters directly within ABINIT — for example, using [cRPA](/tutorial/ucalc_crpa) or [linear response](/tutorial/lruj) - but those
+There are several ways to compute these parameters directly within ABINIT — for example, using [cRPA](../tutorial/ucalc_crpa) or [linear response](../tutorial/lruj) - but those
 are beyond the scope of this tutorial. Here, we will simply treat $U$ and $J$ as input parameters.
 
 Keep in mind that these are matrix elements of the screened potential, meaning their values depend on the shape of the local orbitals.
@@ -492,7 +492,7 @@ For TRIQS/CT-HYB, there are two relevant options:
       more efficient.
   * [[dmft_solv]]$=7$: Uses the full rotationally invariant Slater Hamiltonian, giving the most accurate treatment of interactions.
 
-If instead you want to use ABINIT’s internal DMFT implementation with its built-in solvers, check out the dedicated [DMFT tutorial](/tutorial/dmft).
+If instead you want to use ABINIT’s internal DMFT implementation with its built-in solvers, check out the dedicated [DMFT tutorial](../tutorial/dmft).
 
 ### 5.9 Matsubara Mesh
 

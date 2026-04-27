@@ -20,7 +20,7 @@ elements, phonon frequencies and phonon eigenvectors from a standard ABINIT
 phonon calculation, which we will briefly review.
 
 Note that this tutorial covers a legacy version of the electron-phonon calculation.
-A new, more efficient workflow is presented in Tutorial [Introduction to the new EPH workflow](/tutorial/eph_intro).
+A new, more efficient workflow is presented in Tutorial [Introduction to the new EPH workflow](../tutorial/eph_intro).
 The old workflow is still useful because it is compatible with spinors (spin orbit coupling), PAW, and
 therefore also DFT+U, but it will be deprecated at some time in the future.
 
@@ -38,11 +38,11 @@ This tutorial should take about 1 hour.
 *Before beginning, you might consider making a different subdirectory to work
 in. Why not create Work_eph in \$ABI_TESTS/tutorespfn/Input?*
 
-It is presumed that the user has already followed the Tutorials [RF1](/tutorial/rf1) and [RF2](/tutorial/rf2),
+It is presumed that the user has already followed the Tutorials [RF1](../tutorial/rf1) and [RF2](../tutorial/rf2),
 and understands the calculation of ground state and response (phonon using density-functional
 perturbation theory (DFPT)) properties with ABINIT.
 
-Copy the file *teph_legacy_1.abi* to your working directory. It contains in particular file names and root names 
+Copy the file *teph_legacy_1.abi* to your working directory. It contains in particular file names and root names
 for the first run (GS+perturbations).
 
 ```sh
@@ -101,7 +101,7 @@ precise determination of the Fermi surface of the metal. This implies a very
 dense k-point mesh, and the convergence of the grid must be checked. In our
 case, for Al, we will use a (non-shifted) 6x6x6 k-point grid, but a converged
 calculation needs more than 16x16x16 points. This will be re-considered in
-section 5. The q-point grid will be 2x2x2, and is selected by the [[ngqpt]], 
+section 5. The q-point grid will be 2x2x2, and is selected by the [[ngqpt]],
 qshift, nqshift, and [[qptopt]] variables. It must be a sub-grid of the full
 k-point grid, and must contain the Γ point. For the phonon and GKK datasets,
 the q-point is selected by the variable [[iqpt]]: this guarantees that there are
@@ -111,7 +111,7 @@ wedge. One way to check this is to set iqpt to a very large value: the error mes
 gives you the size of the irreducible set.
 
 The value of [[acell]] is fixed to a rounded value from experiment.
-It, too, should be converged to get physical results (see [Tutorial 3](/tutorial/base3)).
+It, too, should be converged to get physical results (see [Tutorial 3](../tutorial/base3)).
 
 Note that the value of 1.0E-14 for [[tolwfr]] is tight, and should be even
 lower (down to 1.0E-20 or even 1.0E-22) for precise results. This is because the wavefunctions
@@ -135,7 +135,7 @@ directions of the fcc unit cell. This is done for three different phonons,
 Gamma, (1/2,0,0), and X=(1/2,1/2,0), which generate the 2x2x2 q-point grid
 (take care with the reduced coordinates of the reciprocal space points! They
 are not along cartesian directions, but along the reciprocal space lattice
-vectors.). The whole calculation follows the same lines as [Tutorial RF1](/tutorial/rf1).
+vectors.). The whole calculation follows the same lines as [Tutorial RF1](../tutorial/rf1).
 As an example, DATASET 3 calculates the perturbed
 wavefunctions at k+q, for k in the ground state k-point mesh, and q=(1/2,0,0).
 Then, DATASET 3 calculates
@@ -143,7 +143,7 @@ Then, DATASET 3 calculates
      2DTE 6.9410188336E-01 Ha
 
 for the second-order energy variation for movement of the (unique) atom along
-the first reduced direction for q=(1/2,0,0). The main differences with [Tutorial RF1](/tutorial/rf1)
+the first reduced direction for q=(1/2,0,0). The main differences with [Tutorial RF1](../tutorial/rf1)
 are that Given we are dealing with a metal, no
 perturbation wrt electric fields is considered ; However, if you want to do
 transport calculations, you need the ddk calculation anyway, to get the
@@ -153,7 +153,7 @@ minimal number of 2DTE for different mixed second derivatives of the total
 energy. In our case we use the first derivatives, and they must all be calculated explicitly.
 
 You are now the proud owner of 9 first-order matrix element files (suffixed
-\_GKKx, and corresponding copies in netcdf format \_GKKx.nc), 
+\_GKKx, and corresponding copies in netcdf format \_GKKx.nc),
 corresponding to the three directional perturbations of the atom at
 each of the three q-points. The \_GKK files contain the matrix elements of the
 electron-phonon interaction, which we will extract and use in the following.
@@ -232,7 +232,7 @@ ANADDB to carry out the calculation of the electron-phonon quantities.
 
 ANADDB has file path variables, just like ABINIT, which tells it where to find the input,
 ddb, and gkk files, and what to name the output, thermodynamical output, and
-electron phonon output files. 
+electron phonon output files.
 
 The new variables are at the head of the file:
 
@@ -257,7 +257,7 @@ The new variables are at the head of the file:
 [[anaddb:elphflag]] is a flag to turn on the calculation of the electron-
 phonon quantities. The first quantities which will be calculated are the
 phonon linewidths along a path in reciprocal space (exactly like the band
-structure in [the tutorial 3](/tutorial/base3). The path is specified by the
+structure in [the tutorial 3](../tutorial/base3). The path is specified by the
 variable [[anaddb:qpath]] giving the apexes of the path in reciprocal space,
 which are usually special points of high symmetry. The number of points is
 given by [[anaddb:nqpath]]. Note that qpath can be used in normal phonon band
@@ -301,7 +301,7 @@ K. The coupling strength is severely underestimated (experiment gives 0.44),
 and the logarithmic average frequency is a bit too high (converged value of 270 K in [[cite:Savrasov1996|Savrasov]]).
 The resulting critical temperature from McMillan's formula is unphysical, and you
 should always regard it critically: if $\lambda$ is close to or lower than the chosen value of
-$\mu^{\star}$, $T_c$ will diverge. 
+$\mu^{\star}$, $T_c$ will diverge.
 Aluminum is a good case in which things can be improved easily,
 because its Fermi surface is large and isotropic and the coupling is weak.
 
@@ -353,7 +353,7 @@ the Fermi surface. This is the "true" velocity the charge will move at, once
 you have displaced the Fermi sphere a little bit in k space (see, e.g.
 [[cite:Ashcroft1976|Ashcroft and Mermin]]). The velocity can be related simply to a
 commutator of the position, which is also used for dielectric response, using
-a DDK calculation (see [the first DFPT tutorial (DFPT1)](/tutorial/rf1).
+a DDK calculation (see [the first DFPT tutorial (DFPT1)](../tutorial/rf1).
 The phonon calculation at Gamma need not include the electric field (this is a metal after all, so the effect on the
 phonons should be negligible), but we need an additional dataset to calculate
 the 3 DDK files along the 3 primitive directions of the unit cell. To be more
@@ -365,7 +365,7 @@ basically the first part of the normal DDK files for E field perturbation,
 without the wave function coefficients).
 
 The ANADDB input must specify where the ddk files are, so ANADDB can
-calculate the Fermi velocities. The variable ddk_filepath points to a 
+calculate the Fermi velocities. The variable ddk_filepath points to a
 small file listing the 3 DDK files to be used, whose contents in our case are:
 
     teph_legacy_1_DS5_GKK4
@@ -411,5 +411,5 @@ components, for the resistivity tensor (2 1 = y x or the current response
 along y when you apply an electric field along x). In many systems the tensor
 should be diagonal by symmetry, and the value of off-diagonal terms gives an
 estimate of the symmetrization error (tiny). Similarly the difference in the diagonal terms
-is due to numerical convergence: here is is a few per-mil, visible in the figure 
+is due to numerical convergence: here is is a few per-mil, visible in the figure
 between green and red lines (yy and xx components).

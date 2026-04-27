@@ -16,7 +16,7 @@ This tutorial should take about 90 minutes and requires you have several CPU
 cores (up to 64 if possible).
 
 You are supposed to know already some basics of parallelism in ABINIT,
-explained in the tutorial [A first introduction to ABINIT in parallel](/tutorial/basepar).  
+explained in the tutorial [A first introduction to ABINIT in parallel](../tutorial/basepar).
 
 The tutorial will be more profitable if you have already performed calculations
 using the wavelet formalism (see the [[topic:Wavelets|topic page on wavelets]]
@@ -27,7 +27,7 @@ and the [[usewvl]] keyword).
        To do this, download the [bigdft fallback](https://www.abinit.org/fallbacks) and use
        the `--with-bigdft`, `BIGDFT_LIBS`, `BIGDFT_FCFLAGS`, etc. flags during the
        `configure` step.
- 
+
 [TUTORIAL_README]
 
 ## 1 Wavelets variables and parallelism
@@ -88,7 +88,7 @@ The speed-up is the ratio between the time with one processor and the
 time of a run with N processors.
 
 Assuming that the directories are called {01, 03, 07, 21}, one can grep the
-over-all time of a run and plot it with the [gnuplot](http://www.gnuplot.info) graphical tool.  
+over-all time of a run and plot it with the [gnuplot](http://www.gnuplot.info) graphical tool.
 Just issue:
 
     gnuplot
@@ -98,7 +98,7 @@ and, in `gnuplot` command line, type:
     plot "< grep 'individual time' */*.abo | tr '/' ' '" u 1:(ttt/$11) w lp t "Boron cluster", x t "Ideal speed-up"
 
 where `ttt` represents the time on one processor (replace `ttt` by this time in the
-command line above).  
+command line above).
 
 ![Speedup for the Boron14 cluster](paral_gswvl_assets/speedup-B14.png){width=50%}
 
@@ -201,7 +201,7 @@ efficiency of the wavelet mode more accurately:
 
 With the percentages of the `wvl_timings.yaml` file, one can see that, for this
 example, the time is mostly spent in communications, the precondionner,
-the computation of the density and the application of the local part of the Hamiltonian.  
+the computation of the density and the application of the local part of the Hamiltonian.
 Let's categorise the time information:
 
   * The communication time (all entries of class `Communications`).
@@ -233,7 +233,7 @@ distributes the scalar arrays like density and potentials by z-planes in real
 space. So some parts of the code may become more efficient when used with a
 bigger number of processors, like the Poisson Solver part for instance.
 
-Run the boron example with {2, 4, 14, 15} processors and plot the speed-up.  
+Run the boron example with {2, 4, 14, 15} processors and plot the speed-up.
 
 One can also look at the standard output to the **load balancing of orbitals**
 and the **load balancing of the Poisson Solver** (with 15 processors):
@@ -270,7 +270,7 @@ As expected, one can see that:
 
 * The load balancing of the scalar arrays distribution is not so good since
   the last processor will have a reduced array.
-  
+
 It is thus useless to run this job at 15 processors;
 14 will give the same run time (since the load balancing will be better).
 

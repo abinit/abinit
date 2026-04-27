@@ -2,7 +2,7 @@
 
 Something going wrong ? Better to realize this than to think everything is OK ...
 
-In this page, the user will find tips to fix several problems with ABINIT.   
+In this page, the user will find tips to fix several problems with ABINIT.
 
 Many other tips might be found on the [[https://discourse.abinit.org|forum]], or by looking in the extensive [abimkdocs documentation on the Web](../new_user)
 
@@ -16,13 +16,13 @@ This problem might come from the unpacking of the tar.gz. It was reported that u
 
     configure script won't accept hostnames containing a hyphen
 
-Also apparently an error due to incorrect unpacking of the tar.gz . 
+Also apparently an error due to incorrect unpacking of the tar.gz .
 
 
-### ABINIT does not run 
+### ABINIT does not run
 
 (to be filled ...)
-### ABINIT stops without finishing its tasks 
+### ABINIT stops without finishing its tasks
 
 Make sure you **get and read the error messages**. They are usually written at the end of the log file, and look like:
 
@@ -36,7 +36,7 @@ message:   (here follows the error message)
 
 If you do not see such error message at the end of the log file, the error message might be found alternatively in an "error" file, depending on the command that you used to launch ABINIT.
 Also, if you are running in batch, the behaviour might be different, and error messages might end up in another file than the log file.
-If you run in parallel, the error messages might have been written in still another, separate file, entitled 
+If you run in parallel, the error messages might have been written in still another, separate file, entitled
 <code>
 __ABI_MPIABORTFILE__
 </code>
@@ -47,19 +47,19 @@ Sometimes, the error message is prepared by another message giving preliminary i
 
 If you think to have obtained all information that ABINIT was supposed to give you, try to identify whether ABINIT stops because of geometry optimization problem or SCF problem. In the first case, your input geometry is perhaps crazy. Anyhow, see the next items in this troubleshooting page.
 
-By the way, there might also be memory problems ... See the [tuning speed and memory topic](/topics/TuningSpeedMem).
+By the way, there might also be memory problems ... See the [tuning speed and memory topic](../topics/TuningSpeedMem).
 
 
-### Incorrect initial geometry 
+### Incorrect initial geometry
 
 Many mistakes done by beginners are related to incorrect starting geometry.
 
 Here is a check list :
 
-  * Check that the **units** are correct for your cell parameters and atomic positions. __ABINIT uses atomic unit by default__, but can use several other units if specified by the user, see the [ABINIT user's guide](/guide/abinit/#parameters).
+  * Check that the **units** are correct for your cell parameters and atomic positions. __ABINIT uses atomic unit by default__, but can use several other units if specified by the user, see the [ABINIT user's guide](../guide/abinit/#parameters).
   * Check that the [[typat]] atom types are correct with respect to [[xred]] or [[xcart]]
   * Check that the **number of atoms** [[natom]] is coherent with your list of coordinates, [[xred]] or [[xcart]]. __ABINIT reads only the coordinates of [[natom]] nuclei, and **ignore others**__.
-  * Relax first the atomic positions **at fixed primitive vectors** before optimizing the cell. Explicitly, use a first datadet with [[optcell]] = 0, then a second dataset with non-zero [[optcell]], in which you tell ABINIT to read optimized atomic positions using [[getxred]] or [[getxcart]]. In this second dataset, do not forget to use[[dilatmx]] bigger than 1 if you expect the volume of the cell to increase during the optimization. Possibly after the atomic position relaxation, make a run with [[https:/chkdilatmx]]=0, then a third run with [[dilatmx]]=1. See the additional suggestions in the documentation of [[optcell]] . 
+  * Relax first the atomic positions **at fixed primitive vectors** before optimizing the cell. Explicitly, use a first datadet with [[optcell]] = 0, then a second dataset with non-zero [[optcell]], in which you tell ABINIT to read optimized atomic positions using [[getxred]] or [[getxcart]]. In this second dataset, do not forget to use[[dilatmx]] bigger than 1 if you expect the volume of the cell to increase during the optimization. Possibly after the atomic position relaxation, make a run with [[https:/chkdilatmx]]=0, then a third run with [[dilatmx]]=1. See the additional suggestions in the documentation of [[optcell]] .
   * ABINIT can read VASP POSCAR external files containing unit cell parameters and atomic positions. See the input variable [[structure]]. This might help in setting the geometry correctly.
   * Try to visualize your primitive cell. There are numerous possibilities, using Abipy, VESTA, XCrysDen (to be documented).
 
@@ -85,7 +85,7 @@ If this still does not work, but your residm did not look bad after all before a
 Then, try to use iscf 2. This is a very slow but inconditionally convergent algorithm provided diemix is small enough. At some stage of convergence, you might restart with the obtained _DEN a better algorithm, as non-linear effects should have been eliminated at some stage.
 
 
-### Geometry optimization does not converge 
+### Geometry optimization does not converge
 
 (to be filled)
 
