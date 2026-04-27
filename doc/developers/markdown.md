@@ -334,11 +334,12 @@ As usual, it is much easier to explain the different cases by examples:
 
 | Markdown | Result | Link Type |
 | :-- | :-- | :--
-| `[MBPT document](/theory/mbt)` | [MBPT document](/theory/mbt) | root-relative URL (**recommended**)
+| `[MBPT document](../theory/mbt)` | [MBPT document](../theory/mbt) | relative URL (**recommended**)
+| `[MBPT document](/theory/mbt)` | [MBPT document](/theory/mbt) | root-relative URL
 | `[MBPT document](../theory/mbt.md)` | [MBPT document](../theory/mbt.md) | mkdocs preprocessed relative URL
-| `[About topics](/developers/abimkdocs#topics)` | [About topics](/developers/abimkdocs#topics)  | root-relative + HTML fragment  (**recommended**)
+| `[About topics](../abimkdocs#topics)` | [About topics](../abimkdocs#topics)  | relative + HTML fragment (**recommended**)
+| `[About topics](/developers/abimkdocs#topics)` | [About topics](/developers/abimkdocs#topics)  | root-relative + HTML fragment
 | `[About topics](abimkdocs.md#topics)` | [About topics](abimkdocs.md#topics)  | mkdocs preprocessed relative URL + HTML fragment
-| `[About topics](../abimkdocs#topics)` | [About topics](../abimkdocs#topics)  | relative URL (no mkdocs preprocessing) + HTML fragment (**don't use it**)
 
 !!! important
 
@@ -348,16 +349,10 @@ As usual, it is much easier to explain the different cases by examples:
 
 
 At this point you may ask why do we have all these different approaches and which one should I use when writing the documentation?
-To make a long story short, **we strongly suggest to use root-relative URLs**.
-The reason is that root-relative URLs look like "absolute paths" so one can easily use regular expressions
-to update the links everywhere if md pages are moved around.
-The mkdocs syntax is shorter if you are referring to another md page in the same directory but since the ABINIT
-website does not have so many nested levels, root-relative URLs are not necessarily much longer than the mkdocs syntax.
+To make a long story short, **we strongly suggest to use relative URLs**.
+The reason is that relative URLs avoid link breakage across different hosting environments. While root-relative URLs look like "absolute paths", they can break if the documentation is not deployed at the root of a domain. Using relative URLs ensures that the links remain robust regardless of the deployment path.
 
-The mkdocs syntax has the advantage that mkdocs can immediately check whether the internal URL is correct while building
-the web site but, as a matter of fact, we perform a similar check by running linkchecker with our buildbot infrastructure.
-This means that if you use root-relative URLs in the docs, mkdocs won't be able to detect broken links while
-you are working interactively but the error will be automatically detected by our test farm.
+Furthermore, using standard relative URLs correctly maps to the built directories when `use_directory_urls` is enabled. While MkDocs provides its own `.md` preprocessing syntax, adopting plain relative URLs is simpler and is the current recommended practice in Abinit.
 
 There are however cases in which we would like to have an even **simpler syntax** to automatically generate
 links within our documentation, in particular links to:
