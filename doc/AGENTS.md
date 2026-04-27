@@ -51,4 +51,32 @@ Agents must modify the template file with the underscore, not the auto-generated
 - **Figures**: Place images in a dedicated `assets` directory named after the markdown file (e.g., `doc/tutorial/bse_assets/` for `doc/tutorial/bse.md`).
 - **Videos & PDFs**: Use `[[pdf:filename]]` to link to internal PDFs.
 
+### 8. Unit Tests for Documentation Machinery
+- The low-level Python machinery used to build the website (including wikilink resolution, variable parsing, and HTML generation) is covered by a suite of unit tests.
+- These tests are located in the `abimkdocs_tests/` directory at the project root.
+- Agents should run these tests using `pytest` after modifying any code in `abimkdocs/` to ensure no regressions are introduced:
+  ```bash
+  pytest abimkdocs_tests
+  ```
+
+### 9. Modifying an existing Python module.
+
+Rules:
+1. Follow existing conventions:
+   - Match naming, formatting, typing, and structure already present.
+   - Do not introduce new patterns unless explicitly requested.
+
+2. Avoid large refactoring:
+   - Keep changes minimal and localized.
+   - Do not rename functions, move files, or restructure code unless instructed.
+
+3. When in doubt:
+   - Stop and ask for clarification before making changes.
+   - Do not guess intent.
+
+4. Preserve behavior:
+   - Do not change logic unless explicitly required.
+   - If behavior must change, explain why.
+
+
 By adhering to these rules, you will ensure that the documentation remains consistent, correctly processed by the custom Abinit MkDocs pipeline, and seamlessly integrated with the rest of the project.
