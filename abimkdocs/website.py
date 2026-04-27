@@ -1038,7 +1038,7 @@ The full bibtex file is available [here](../abiref.bib).
         [[gwr_task]] = "HDIAGO"
 
     and, when available, enabling the ELPA library for optimal performance
-    For additional information, please consult the [gwr_intro](/tutorial/gwr_intro) page
+    For additional information, please consult the [[tutorial:gwr_intro|gwr_intro]] page
 
 """
         new_lines = []
@@ -1474,9 +1474,9 @@ The full bibtex file is available [here](../abiref.bib).
 
                     # MkDocs requires proper internal relative links (including .md extension)
                     if is_dir and url != ".":
-                        url += "/"
+                        url += "/index.md"
                     elif is_dir and url == ".":
-                        url = "./"
+                        url = "./index.md"
                     elif not has_ext and url != ".":
                         url += ".md"
 

@@ -10,7 +10,7 @@ This tutorial aims at showing how to calculate self-energy corrections to the
 DFT Kohn-Sham (KS) eigenvalues in the one-shot GW approximation using the GWR code
 
 The user should be already familiar with the four basic tutorials of ABINIT,
-see the [tutorial home page](../tutorial.md),
+see the [tutorial home page](index.md),
 and is strongly encouraged to read the [introduction to the GWR code](../tutorial/gwr_intro.md)
 before running these examples.
 
@@ -913,7 +913,7 @@ mv tgwr_4o_* log conv_kmesh
 
 In this last part of the tutorial, we discuss how to interpolate the QP corrections
 along an arbitrary $\kk$-path using the star-function method discussed in
-[this section](../tutorial/eph_intro/#star-function-interpolation-of-the-ks-eigenvalues) of the EPH introduction.
+[this section](eph_intro.md#star-function-interpolation-of-the-ks-eigenvalues) of the EPH introduction.
 This method is less precise than e.g. the Wannier interpolation, and might be problematic in the presence
 of band-crossings, but it has the big advantage of being much easier to use and with minimal user intervention.
 

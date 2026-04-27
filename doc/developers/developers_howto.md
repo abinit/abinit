@@ -257,7 +257,7 @@ For the treatment of dimensions see **invars0**, **invars1m**
 
 ## How to add a new test in the test suite
 
-Please see the [testsuite documentation](../developers/testsuite_howto/#how-to-add-a-new-test-in-the-test-suite).
+Please see the [testsuite documentation](testsuite_howto.md#how-to-add-a-new-test-in-the-test-suite).
 
 ## Code Coverage
 

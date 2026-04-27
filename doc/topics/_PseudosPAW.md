@@ -34,7 +34,7 @@ is rather accurate, but requires often large
 [[ecut]]. The old Troullier-Martins type tables
 are deprecated, because not accurate enough, and also not
 including spin-orbit coupling. The different formats for norm-conserving
-pseudopotentials are described in the Pseudos page of the [developers section](../developers/psp8_info/)
+pseudopotentials are described in the Pseudos page of the [developers section](../developers/psp8_info.md)
 A much more flexible and powerful file format (PSML) has been recently proposed in [[cite:Garcia2018]].
 The format is supported by Abinit via the psml library that must be activated by user during
 the configuration of the package.

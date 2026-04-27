@@ -180,7 +180,7 @@ increase it during the last steps of the convergence study.
 As discussed in [[cite:Baroni1986]], the treatment of the long-wavelenght limit $\qq \rightarrow 0$
 in the polarizability, requires the inclusion of the commutator of the non-local part of the Hamiltonian
 with the position operator.
-See also [this section](../theory/bse/#5-matrix-elements-of-the-dipole-operator) of the Bethe-Salpeter notes.
+See also [this section](../theory/bse.md#5-matrix-elements-of-the-dipole-operator) of the Bethe-Salpeter notes.
 By default the commutator of the non-local part is always included.
 The input variable [[inclvkb]] can be used to deactivate it, if needed.
 

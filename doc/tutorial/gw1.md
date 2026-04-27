@@ -22,7 +22,7 @@ It is suggested to acknowledge the efforts of developers of
 the GW part of ABINIT, by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 
 The user should be familiarized with the four basic tutorials of ABINIT,
-see the [tutorial home page](../tutorial.md).
+see the [tutorial home page](index.md).
 After this first tutorial on GW, you should read the [second GW tutorial](../tutorial/gw2.md).
 
 This tutorial should take about 2 hours.
