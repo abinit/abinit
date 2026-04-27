@@ -830,6 +830,7 @@ corresponding section in the [ABINIT_build tutorial](../tutorial/abinit_build.md
 
 <!-- part of the discussion can be moved to the eph_intro as SKW will be used also in phgamma -->
 
+<a id="how-to-compute-only-the-k-points-close-to-the-band-edges"></a>
 ## How to compute the WFK only for k-points close to the band edges
 
 As we have already seen in the previous sections, a relatively small number of $\kk$-points

@@ -337,7 +337,7 @@ As usual, it is much easier to explain the different cases by examples:
 | `[MBPT document](../theory/mbt.md)` | [MBPT document](../theory/mbt.md) | relative URL (**recommended**)
 | `[MBPT document](../theory/mbt.md)` | [MBPT document](../theory/mbt.md) | root-relative URL
 | `[MBPT document](../theory/mbt.md)` | [MBPT document](../theory/mbt.md) | mkdocs preprocessed relative URL
-| `[About topics](../abimkdocs.md#topics)` | [About topics](../abimkdocs.md#topics)  | relative + HTML fragment (**recommended**)
+| `[About topics](abimkdocs.md#topics)` | [About topics](abimkdocs.md#topics)  | relative + HTML fragment (**recommended**)
 | `[About topics](../developers/abimkdocs.md#topics)` | [About topics](../developers/abimkdocs.md#topics)  | root-relative + HTML fragment
 | `[About topics](abimkdocs.md#topics)` | [About topics](abimkdocs.md#topics)  | mkdocs preprocessed relative URL + HTML fragment
 

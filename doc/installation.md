@@ -553,7 +553,7 @@ More explicitly, you need minimally (version numbers can be upgraded)
  * [GNU M4 1.4](ftp://ftp.gnu.org/gnu/m4/m4-1.4.4.tar.gz)
 
 If you do not have these tools, please consult your local computer guru, and/or the page
-[an overview of ABINIT development](../developers/overview_development.md).
+[an overview of ABINIT development](developers/overview_development.md).
 
 If you want to develop on a regular basis, please have a Git(lab) access
 created for you by contacting Jean-Michel Beuken, as described in these pages.

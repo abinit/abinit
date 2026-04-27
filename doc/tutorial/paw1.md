@@ -424,6 +424,7 @@ This indicates that [[ecut]] 14 or lower is not sufficient to reach the toleranc
 One should stick to [[ecut]] 16 and [[pawecutdg]] 18 (or may be 16 if memory problems might be present).
 
 
+<a id="dos"></a>
 ## 5. Plotting PAW contributions to the Density of States (DOS)
 
 We now use the input file *tpaw1_4.abi* file.
