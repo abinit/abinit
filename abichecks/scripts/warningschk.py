@@ -66,7 +66,9 @@ def main(warno, home_dir=""):
 
   makelog = os.path.join(home_dir, "make.log")
   if not os.path.exists(makelog):
-      raise RuntimeError("Cannot find `make.log` file in `%s`.\nUse `make -O multi -j8 > make.log 2>&1`" % home_dir)
+      makelog = os.path.join(home_dir, "make.stderr")
+      if not os.path.exists(makelog):
+          raise RuntimeError("Cannot find `make.log` or `make.stderr` file in `%s`.\nUse `make -O multi -j8 > make.log 2>&1`" % home_dir)
   # make.log contains utf-8 characters
   #import io
   #logfile = io.open(makelog, "r", encoding="utf-8")
