@@ -344,7 +344,7 @@ with a band-gap of about 0.585 eV (this is quantitatively quite wrong: the exper
 The minimum of the conduction band is slightly displaced with respect to X, see kpt # 21 (this is correct).
 This underestimation of the band gap is well-known (the famous DFT band-gap problem).
 In order to obtain correct band gaps, you need to go beyond the Kohn-Sham Density Functional
-Theory: use the GW approximation. This is described in [the first GW tutorial](../tutorial/gw1).
+Theory: use the GW approximation. This is described in [the first GW tutorial](../tutorial/gw1.md).
 
 For experimental data and band structure representation, see the book by M.L. Cohen and J.R. Chelikowski [[cite:Cohen1988]].
 

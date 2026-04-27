@@ -4,7 +4,7 @@ Something going wrong ? Better to realize this than to think everything is OK ..
 
 In this page, the user will find tips to fix several problems with ABINIT.
 
-Many other tips might be found on the [[https://discourse.abinit.org|forum]], or by looking in the extensive [abimkdocs documentation on the Web](../new_user)
+Many other tips might be found on the [[https://discourse.abinit.org|forum]], or by looking in the extensive [abimkdocs documentation on the Web](../new_user.md)
 
 
 ### Configure problems
@@ -47,7 +47,7 @@ Sometimes, the error message is prepared by another message giving preliminary i
 
 If you think to have obtained all information that ABINIT was supposed to give you, try to identify whether ABINIT stops because of geometry optimization problem or SCF problem. In the first case, your input geometry is perhaps crazy. Anyhow, see the next items in this troubleshooting page.
 
-By the way, there might also be memory problems ... See the [tuning speed and memory topic](../topics/TuningSpeedMem).
+By the way, there might also be memory problems ... See the [tuning speed and memory topic](../topics/TuningSpeedMem.md).
 
 
 ### Incorrect initial geometry

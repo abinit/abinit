@@ -239,7 +239,7 @@ In this case, use the HTML embed element:
 <embed src="../howto_chebfi.pdf" type="application/pdf" width="100%" height="480px">`
 ```
 
-See the automatically generated [pdf gallery](../theory/documents) for examples.
+See the automatically generated [pdf gallery](../theory/documents.md) for examples.
 
 
 ### Videos
@@ -259,7 +259,7 @@ The video below gives an overwiew of the command line options of `runtests.py`
 [![asciicast](https://asciinema.org/a/40324.png)](https://asciinema.org/a/40324)
 
 More advanced features such as video galleries require a bit of HTML/CSS/JS code in the Markdown page.
-See for example the [Abinit video gallery](../topics/external_resources#abinit-videos)
+See for example the [Abinit video gallery](../topics/external_resources.md#abinit-videos)
 built with [lightGallery](http://sachinchoolur.github.io/lightGallery/).
 
 
@@ -334,11 +334,11 @@ As usual, it is much easier to explain the different cases by examples:
 
 | Markdown | Result | Link Type |
 | :-- | :-- | :--
-| `[MBPT document](../theory/mbt)` | [MBPT document](../theory/mbt) | relative URL (**recommended**)
-| `[MBPT document](../theory/mbt)` | [MBPT document](../theory/mbt) | root-relative URL
+| `[MBPT document](../theory/mbt.md)` | [MBPT document](../theory/mbt.md) | relative URL (**recommended**)
+| `[MBPT document](../theory/mbt.md)` | [MBPT document](../theory/mbt.md) | root-relative URL
 | `[MBPT document](../theory/mbt.md)` | [MBPT document](../theory/mbt.md) | mkdocs preprocessed relative URL
-| `[About topics](../abimkdocs#topics)` | [About topics](../abimkdocs#topics)  | relative + HTML fragment (**recommended**)
-| `[About topics](../developers/abimkdocs#topics)` | [About topics](../developers/abimkdocs#topics)  | root-relative + HTML fragment
+| `[About topics](../abimkdocs.md#topics)` | [About topics](../abimkdocs.md#topics)  | relative + HTML fragment (**recommended**)
+| `[About topics](../developers/abimkdocs.md#topics)` | [About topics](../developers/abimkdocs.md#topics)  | root-relative + HTML fragment
 | `[About topics](abimkdocs.md#topics)` | [About topics](abimkdocs.md#topics)  | mkdocs preprocessed relative URL + HTML fragment
 
 !!! important
@@ -499,7 +499,7 @@ To refer to a particular git commit inside a Markdown document use:
     Solved in [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]]
 
 that produces: [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]].
-This extension is useful to generate nice changelogs and [release notes](../about/release-notes).
+This extension is useful to generate nice changelogs and [release notes](../about/release-notes.md).
 
 <!--
 It's also possible to mention a particular github issue with the syntax:

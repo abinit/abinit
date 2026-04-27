@@ -20,7 +20,7 @@ to a non-trivial insulating phase under isotropic pressure. At 5GPa, the materia
 a non-trivial topological insulator.
 
 You already should know about the interface between ABINIT and Wannier90
-(see the tutorial [Wannier90](../tutorial/wannier90)).
+(see the tutorial [Wannier90](../tutorial/wannier90.md)).
 This tutorial should take about 1 hour. It is important to note that the examples in this tutorial
 are not converged, they are just examples to show how to use the code.
 
@@ -141,7 +141,7 @@ If this is the case, the electronic bands in the non-trivial phase would display
 Around the $A$ point, one can notice some band dispersions characteristic of band inversion.
 In order to check whether or not there is inversion of character between bands which are gapped due to spin-orbit coupling,
 we plot the fatbands.
-One can use the fatbands plotting feature of abipy as used in the [Wannier90](../tutorial/wannier90) tutorial,
+One can use the fatbands plotting feature of abipy as used in the [Wannier90](../tutorial/wannier90.md) tutorial,
 but instead here we will use a more advanced script which plots the difference in character between
 the p orbitals of bismuth and of those of both the tellurium and iodine.
 This procedure makes more clear the band inversion and the script is the following:

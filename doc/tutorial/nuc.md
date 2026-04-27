@@ -42,7 +42,7 @@ $$ V({\mathbf r})=\int \frac{n({\mathbf r'})}{ |\mathbf{r}-\mathbf{r'}| } d{\mat
 and the electric field gradient is
 $$ V_{ij} = -\frac{\partial^2}{\partial x_i\partial x_j}V({\mathbf r}). $$
 The gradient is computed at each nuclear site, for each source of charge arising
-from the PAW decomposition (see [the tutorial PAW1](../tutorial/paw1) ).
+from the PAW decomposition (see [the tutorial PAW1](../tutorial/paw1.md) ).
 This is done in the code as follows [[cite:Profeta2003]],[[cite:Zwanziger2008]]:
 
   * Valence space described by planewaves: expression for gradient is Fourier-transformed at each nuclear site.
@@ -231,7 +231,7 @@ the structure is hence that of a cross product, which yields the circulation ind
 In the full PAW treatment implemented in Abinit there are a number of other related terms as well. Note
 in this expression the appearance of the derivatives of the wavefunctions; these are obtained from the DDK
 perturbation in Abinit, as was examined in
-[tutorial DFPT1](../tutorial/rf1) ).
+[tutorial DFPT1](../tutorial/rf1.md) ).
 
 Carrying out the calculation in Abinit is a two-step process: first, the ground state wavefunctions must be calculated
 in the presence of a nuclear magnetic dipole moment, on the atom of interest in the direction of interest; then these

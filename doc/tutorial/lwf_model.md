@@ -16,7 +16,7 @@ authors: xuhe
 
 This lesson aims at showing how to build a LWF model and run a LWF dynamics calculation.
 
-**Before beginning, we recommend the reading of the theory on Lattice Wannier functions in the literature [[cite:Rabe1995]]. The construction of LWF from the phonon band structure is covered in another [tutorial](../tutorial/lattice_wannier). **
+**Before beginning, we recommend the reading of the theory on Lattice Wannier functions in the literature [[cite:Rabe1995]]. The construction of LWF from the phonon band structure is covered in another [tutorial](../tutorial/lattice_wannier.md). **
 
 
 With this lesson, you will learn to:
@@ -32,7 +32,7 @@ With this lesson, you will learn to:
 
 ### How to build LWF models.
 The LWF model consists of second order (harmonic) and higher order (anharmonic) interaction between the LWF's.
-The first step of building the LWF model is to construct the LWF and the harmonic Hamiltonian from the phonon band structure, which is covered in this [tutorial](../tutorial/lattice_wannier). The tools for getting the anharmonic interaction are not ready for usage in the version 9.8. They will be released in the future.
+The first step of building the LWF model is to construct the LWF and the harmonic Hamiltonian from the phonon band structure, which is covered in this [tutorial](../tutorial/lattice_wannier.md). The tools for getting the anharmonic interaction are not ready for usage in the version 9.8. They will be released in the future.
 
 
 ### How to use MULTIBINIT to run LWF dynamics
