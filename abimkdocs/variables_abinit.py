@@ -5969,7 +5969,7 @@ Variable(
     abivarname="field_red",
     varset="ffield",
     vartype="real",
-    topics=[],
+    topics=["Berry_basic"],
     dimensions=[3],
     defaultval=MultipleValue(number=3, value=0.0),
     mnemonics="FIELD in REDuced coordinates",
@@ -8682,6 +8682,23 @@ Note that Tesla are admitted, despite the fact that this is not the proper unit 
 Actually, if you specify "Tesla", ABINIT will set $\mu_0H$ in Tesla, so that H will be in Amperes/metre.
 
 REPLACES the obsolete zeemanfield input variable.
+""",
+),
+
+Variable(
+    abivarname="hspinfield_cart",
+    varset="ffield",
+    vartype="real",
+    topics=["MagField_basic"],
+    dimensions=[3],
+    defaultval=0,
+    mnemonics="H-magnetic SPIN FIELD in CARTesian coordinates",
+    characteristics=["[[MAGNETIC_FIELD]]"],
+    added_in_version="10.6.0",
+    text=r"""
+Give the value of the magnetic field, $H$, acting on the spin/spinorial wavefunctions in **Cartesian** coordinates.
+Unlike [[hspinfield]], this variable is always interpreted in the Cartesian reference frame, regardless of the value of [[spinaxis]].
+When [[spinaxis]] differs from its default value, it is recommended to specify the magnetic field in Cartesian coordinates using [[hspinfield_cart]].
 """,
 ),
 
@@ -20528,6 +20545,22 @@ then recommended to put [[nsym]] = 1.
 ),
 
 Variable(
+    abivarname="spinat_cart",
+    varset="gstate",
+    vartype="real",
+    topics=["spinpolarisation_basic", "crystal_useful", "MagMom_useful", "ConstrainedDFT_useful"],
+    dimensions=ValueWithConditions({"[[natrd]]<[[natom]]": "[3, [[natrd]] ]", "defaultval": "[3, [[natom]] ]"}),
+    defaultval=0.0,
+    mnemonics="SPIN for AToms in CARTesian coordinates",
+    added_in_version="10.2.2",
+    text=r"""
+Gives the **initial** electronic spin-magnetization for each atom in **Cartesian** coordinates, in unit of $\hbar/2$.
+Unlike [[spinat]], this variable is always interpreted in the Cartesian reference frame, regardless of the value of [[spinaxis]].
+When [[spinaxis]] differs from its default value, it is recommended to specify magnetic vectors in Cartesian coordinates using [[spinat_cart]].
+""",
+),
+
+Variable(
     abivarname="spinmagntarget",
     varset="ffield",
     vartype="real",
@@ -26035,7 +26068,7 @@ instead of the GWPT ones, for comparison purposes.
 Variable(
     abivarname="gstore_brange",
     varset="eph",
-    vartype="int",
+    vartype="integer",
     topics=["ElPhonInt_basic"],
     dimensions=[2, "[[nsppol]]"],
     defaultval=0,
@@ -26094,7 +26127,7 @@ See also [[getabiwan]].
 Variable(
     abivarname="getabiwan",
     varset="eph",
-    vartype="int",
+    vartype="integer",
     topics=["ElPhonInt_basic"],
     dimensions="scalar",
     defaultval="None",
@@ -26124,7 +26157,7 @@ See also [[getgwan]].
 Variable(
     abivarname="getgwan",
     varset="eph",
-    vartype="int",
+    vartype="integer",
     topics=["ElPhonInt_basic"],
     dimensions="scalar",
     defaultval="None",
@@ -26554,7 +26587,7 @@ visualisation software like VESTA or Xcrysden.
 Variable(
     abivarname="getvpq",
     varset="eph",
-    vartype="int",
+    vartype="integer",
     topics=["Polaron_basic"],
     dimensions="scalar",
     defaultval=None,
@@ -26830,7 +26863,7 @@ Variable(
     varset="eph",
     vartype="real",
     topics=["Polaron_basic"],
-    dimensions="(2)",
+    dimensions=[2],
     defaultval=[0, 1],
     mnemonics="Variational Polaron eQuations: Gaussian PaRameters -- electronic ENERGY",
     requires='[[eph_task]] == 13 and [[vpq_aseed]] == "gau_energy"',
@@ -26848,7 +26881,7 @@ Variable(
     varset="eph",
     vartype="real",
     topics=["Polaron_basic"],
-    dimensions="(3)",
+    dimensions=[3],
     defaultval=[0, 0, 0],
     mnemonics="Variational Polaron eQuations: TRanslation VECtor",
     requires="[[eph_task]] == -13",
@@ -26865,7 +26898,7 @@ Variable(
     varset="eph",
     vartype="real",
     topics=["Polaron_basic"],
-    dimensions="(3)",
+    dimensions=[3],
     defaultval=[1, 1, 1],
     mnemonics="Variational Polaron eQuations: Gaussian PaRameters -- localization LENGTH",
     requires='[[eph_task]] == 13 and [[vpq_aseed]] == "gau_length"',
@@ -27023,7 +27056,7 @@ kptbounds
 Variable(
     abivarname="eph_path_brange",
     varset="eph",
-    vartype="int",
+    vartype="integer",
     topics=["ElPhonInt_useful"],
     dimensions=[2],
     defaultval=[0, 0],
