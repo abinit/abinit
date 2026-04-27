@@ -60,6 +60,7 @@ Further details about the EPH implementation are available in [[cite:Brunin2020b
     runtests.py -k GWR -n NUM -j PYTASKS
     ```
 
+<a id="typical_workflow_for_zpr"></a>
 ## EPH workflow
 
 A typical EPH workflow with arrows denoting dependencies between the different steps

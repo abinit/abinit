@@ -318,7 +318,7 @@ defines the number of ω′ points in the linear mesh used for the spectral
 function i.e. the number of ω′ in the
 [[theory:mbt#hilbert_transform|equation]] for the spectral function.
 
-As discussed in the [[theory:mbt#hilbert_transform|GW notes] for the spectral function.
+As discussed in the [[theory:mbt#hilbert_transform|GW notes]] for the spectral function.
 Hilbert transform method is much more memory demanding that the Adler-Wiser
 approach, mainly because of the large value of [[nomegasf]] that is usually
 needed to converge the results. Fortunately, the particular distribution of

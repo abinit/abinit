@@ -14,6 +14,7 @@ Some additional specialized documentation is not available on the Web, but insid
 advanced users only.
 
 <a id="intro"></a>
+<a id="intro1"></a>
 ## 1 How to run the code
 
 The main executable file is called abinit. Supposing that the input file is
@@ -209,6 +210,7 @@ produced by Abinit or text files with a reduced set of ABINIT variables.
 
 
 <a id="files-file"></a>
+<a id="32_file_names_in_abinit"></a>
 ### 3.2 File names in ABINIT
 
 File names in ABINIT are either given automatically by ABINIT, or build from
@@ -500,6 +502,7 @@ both cases, the stop is not immediate. It can take a significant fraction
 
 
 
+<a id="multidataset"></a>
 <a id="multidatasets"></a>
 ### 3.4 The multi-dataset mode
 
@@ -627,6 +630,7 @@ In both cases, there are six datasets, with increasing values of [[ecut]].
 
 
 <a id="loop"></a>
+<a id="35-defining-a-double-loop-dataset"></a>
 ### 3.6 Defining a double loop dataset
 
 To define a double loop dataset, one has first to define the upper limit of
@@ -743,6 +747,7 @@ that you should read now (quickly, do not pursue with the description of each fo
 
 
 
+<a id="5"></a>
 ## 5 The different output files
 
 Explanation of the output from the code
