@@ -18,7 +18,7 @@ working in the terminal), the installation/compilation steps are:
      possibly some recommended libraries (MPI) and other optional libraries such as Wannier90.
      The libraries can be installed with the help of the "fallback" procedure, see below for more info on this step.
      Alternatively, you may want to install everything from source using the procedure detailed in
-     the [ABINIT_build tutorial](/tutorial/abinit_build).
+     the [ABINIT_build tutorial](./tutorial/abinit_build).
   2. Get the [latest version of the ABINIT package](https://github.com/abinit/abinit/releases/latest) (abinit-x.y.z.tar.gz)
      from the abinit web site.
      More information are available [here](#how-to-get-a-version-of-abinit).
@@ -29,7 +29,7 @@ working in the terminal), the installation/compilation steps are:
      See below for more information, as well as [this section](#how-to-write-the-hostnameac9-file).
   4. Issue `./configure` (or, even better, first create a *tmp* directory for the build
      then `cd tmp` and finally run `../configure` within the build directory).
-     For further details, consult [the ABINIT_build tutorial](/tutorial/abinit_build/).
+     For further details, consult [the ABINIT_build tutorial](./tutorial/abinit_build/).
   5. Issue `make` (or `make -jN` for compiling with N processors, e.g. `make -j4`
      to use four processors). This step might take dozen of minutes depending on the compilation options.
      More information are available [here](#how-to-compile-the-executables).
@@ -38,10 +38,10 @@ working in the terminal), the installation/compilation steps are:
 
 Note that the details of step 1 and 3 might vary significantly depending on the operating system.
 Further details are provided by
-[the ABINIT_build tutorial](/tutorial/abinit_build) that covers the scenario in which you want to build everything from source
+[the ABINIT_build tutorial](./tutorial/abinit_build) that covers the scenario in which you want to build everything from source
 and install libraries in your $HOME directory.
 There are also other pages focusing on
-[macOS](/INSTALL_MacOS), [CentOS](/INSTALL_CentOS) and [Ubuntu](/INSTALL_Ubuntu)
+[macOS](./INSTALL_MacOS), [CentOS](./INSTALL_CentOS) and [Ubuntu](./INSTALL_Ubuntu)
 that discuss how to bypass the compilation of the external libraries
 using homebrew or MacPorts (for macOS), dnf (for CentOS) or apt (for Ubuntu).
 
@@ -49,7 +49,7 @@ Examples of configuration files to compile Abinit on clusters are available
 in the |abiconfig| package on github
 (specifically the [directory for ABINITv9](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters)),
 while the configuration files
-used for our buildbot testfarm are available in the [autoconf_examples section](/developers/autoconf_examples/).
+used for our buildbot testfarm are available in the [autoconf_examples section](./developers/autoconf_examples/).
 The current documentation for the fallback procedure is available
 [here](https://github.com/abinit/abinit-fallbacks).
 
@@ -187,7 +187,7 @@ There is a template for such "hostname".ac9 file, located in ~abinit/doc/config.
 Its name is *config-template.ac9*.
 Examples of such files, that are used for testing the package on our testfarm,
 can be found in ~abinit/doc/build/config-examples,
-or equivalently in the [autoconf_examples section](/developers/autoconf_examples/).
+or equivalently in the [autoconf_examples section](./developers/autoconf_examples/).
 Additional examples of configuration files for clusters are provided by the *abiconfig* project
 and are available [here](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters).
 
@@ -224,8 +224,8 @@ When the hostname.ac9 file is ready, you can come back to the configure/make seq
 
 ## How to build ABINIT with CMake ?
 
-As an alternative to the autotools, you can use [CMake](https://cmake.org/) to build ABINIT. 
-You just need to follow step 1 and 2 from the [overview](#overview) above. 
+As an alternative to the autotools, you can use [CMake](https://cmake.org/) to build ABINIT.
+You just need to follow step 1 and 2 from the [overview](#overview) above.
 No need to write an _ac9 file__, `CMake` should be able to figure out where all required software dependencies are installed on your build host.
 
 Here are the steps for building abinit, where all options take default values:
@@ -339,9 +339,9 @@ appropriate library to be installed in order to work properly.
 
 For further information on these internal tests, see the ~abinit/tests/built-in/README file.
 
-You might now read the [new user's guide](/guide/new_user), in
+You might now read the [new user's guide](./guide/new_user), in
 order to learn how to use the code, and then follow the four basic
-tutorials, see the [entry page for the tutorials](/tutorial/).
+tutorials, see the [entry page for the tutorials](./tutorial/).
 This is useful if you consider that the installation has been successful. Or
 you might continue to read the present Web page, and try to perform the speed
 tests, as well as the other tests.
@@ -534,7 +534,7 @@ fldiff.report and report files are produced automatically.
 
 ## For developers
 
-Note the documentation available in the pages labelled [Developers](/developers/git_and_gitlab/),
+Note the documentation available in the pages labelled [Developers](./developers/git_and_gitlab/),
 as well as the [developer's corner of the ABINIT web site](https://www.abinit.org/corner.html).
 The following sections are complements for the installation from gitlab, and the generation of the
 ABINIT distribution.
@@ -552,7 +552,7 @@ More explicitly, you need minimally (version numbers can be upgraded)
  * [GNU Libtool 2.2.4](ftp://ftp.gnu.org/gnu/libtool/libtool-2.2.4.tar.gz)
  * [GNU M4 1.4](ftp://ftp.gnu.org/gnu/m4/m4-1.4.4.tar.gz)
 
-If you do not have these tools, please consult your local computer guru, and/or the page 
+If you do not have these tools, please consult your local computer guru, and/or the page
 [an overview of ABINIT development](../developers/overview_development).
 
 If you want to develop on a regular basis, please have a Git(lab) access

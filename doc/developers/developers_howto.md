@@ -73,7 +73,7 @@ As usual, use:
     ../../tests/runtests.py --help
 
 to list the available options.
-A more detailed discussion is given in [this page](/developers/testsuite_howto).
+A more detailed discussion is given in [this page](../developers/testsuite_howto).
 
 [![asciicast](https://asciinema.org/a/40324.png)](https://asciinema.org/a/40324)
 
@@ -143,8 +143,8 @@ error, with the commands:
 !!! tip
 
     For debugging MPI jobs, serial debuggers attached to individual processes are useful.
-    Run an MPI job (4 processes in this example) that opens separate instances of `xterm` terminal windows 
-    for individual processes and then loads the ABINIT executable in the GNU debugger on each one of them, using 
+    Run an MPI job (4 processes in this example) that opens separate instances of `xterm` terminal windows
+    for individual processes and then loads the ABINIT executable in the GNU debugger on each one of them, using
     the command:
 
         mpirun -n 4 xterm -e gdb path_to_abinit_executable
@@ -154,7 +154,7 @@ error, with the commands:
 
         (gdb) run path_to_input_abi
 
-    Within each process, gdb can be used as in the serial case. 
+    Within each process, gdb can be used as in the serial case.
 
 For a more complete introduction to *gdb*, we suggest this youtube tutorial:
 
@@ -199,7 +199,7 @@ In particular:
 
 * Create the F90 module and `git add` it
 * Register the F90 file in the `abinit.src` file (avoid duplicated names in the public API, **abisrc.py** will complain about that)
-* Register the F90 file in the `CMakeLists.txt` file as well 
+* Register the F90 file in the `CMakeLists.txt` file as well
 * Rerun `makemake` in the source directory
 * Rerun `configure` and `make` in the build directory (possibly `make clean && make`)
 
@@ -234,7 +234,7 @@ To add a new variables follow the below steps:
   Use the routines *chkint_eq*, *chkint_ne*, *chkint_ge*, *chkint_le*, *chkdpr*.
 
 - Add the documentation of the new variable to `~abinit/abimkdocs/variables_CODE.py`
-  following the instructions given in [this section](/developers/abimkdocs#how-to-addmodify-an-input-variable).
+  following the instructions given in [this section](../developers/abimkdocs#how-to-addmodify-an-input-variable).
 
 Finally,
 
@@ -257,7 +257,7 @@ For the treatment of dimensions see **invars0**, **invars1m**
 
 ## How to add a new test in the test suite
 
-Please see the [testsuite documentation](/developers/testsuite_howto/#how-to-add-a-new-test-in-the-test-suite).
+Please see the [testsuite documentation](../developers/testsuite_howto/#how-to-add-a-new-test-in-the-test-suite).
 
 ## Code Coverage
 

@@ -22,8 +22,8 @@ It is suggested to acknowledge the efforts of developers of
 the GW part of ABINIT, by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 
 The user should be familiarized with the four basic tutorials of ABINIT,
-see the [tutorial home page](/tutorial).
-After this first tutorial on GW, you should read the [second GW tutorial](/tutorial/gw2).
+see the [tutorial home page](../tutorial).
+After this first tutorial on GW, you should read the [second GW tutorial](../tutorial/gw2).
 
 This tutorial should take about 2 hours.
 
@@ -34,7 +34,7 @@ This tutorial should take about 2 hours.
 *Before beginning, you might consider to work in a different subdirectory as
 for the other tutorials. Why not Work_gw1?*
 
-At the end of [tutorial 3](/tutorial/base3), we computed the KS band
+At the end of [tutorial 3](../tutorial/base3), we computed the KS band
 structure of silicon. In this approximation, the band dispersion as well as
 the band widths are reasonable but the band gaps are qualitatively wrong.
 Now we will compute the band gaps much more accurately, using the so-called
@@ -989,7 +989,7 @@ A python example showing how to construct an energy-dependent scissor operator w
 
 ## 8 Advanced features of GW calculations
 
-The user might switch to the [second GW tutorial](/tutorial/gw2) before
+The user might switch to the [second GW tutorial](../tutorial/gw2) before
 coming back to the present section.
 
 ### Calculations without using the Plasmon-Pole model

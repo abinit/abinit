@@ -13,7 +13,7 @@ In the following, we will refer to this traditional approach as the **convention
 ## Why a new GW code?
 
 In the standard GW code, one uses the Lehmann representation of the Green's function in the real-frequency domain
-to compute the irreducible polarizability, as explained in the [MBPT notes](/theory/mbt).
+to compute the irreducible polarizability, as explained in the [MBPT notes](../theory/mbt).
 Then the self-energy matrix elements in the KS representation are computed via an expensive convolution
 in the frequency domain [[cite:Golze2019]] — by default using the plasmon-pole approximation [[cite:Giantomassi2011]],
 which significantly accelerates calculations but introduces approximations and prevents direct access
@@ -180,7 +180,7 @@ increase it during the last steps of the convergence study.
 As discussed in [[cite:Baroni1986]], the treatment of the long-wavelenght limit $\qq \rightarrow 0$
 in the polarizability, requires the inclusion of the commutator of the non-local part of the Hamiltonian
 with the position operator.
-See also [this section](/theory/bse/#5-matrix-elements-of-the-dipole-operator) of the Bethe-Salpeter notes.
+See also [this section](../theory/bse/#5-matrix-elements-of-the-dipole-operator) of the Bethe-Salpeter notes.
 By default the commutator of the non-local part is always included.
 The input variable [[inclvkb]] can be used to deactivate it, if needed.
 

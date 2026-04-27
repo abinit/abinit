@@ -12,7 +12,7 @@ You will learn what is a DFT+U calculation and what are the main input
 variables controlling this type of calculation.
 
 It is supposed that you already know how to do PAW calculations using ABINIT.
-Please follow the two tutorials on PAW in ABINIT ([PAW1](/tutorial/paw1), [PAW2](/tutorial/paw2)), if this is not the case.
+Please follow the two tutorials on PAW in ABINIT ([PAW1](../tutorial/paw1), [PAW2](../tutorial/paw2)), if this is not the case.
 
 This tutorial should take about 1 hour to complete.
 
@@ -86,8 +86,8 @@ and [[nspden]], that define this antiferromagnetic ordering along the <111>
 direction (of a conventional cubic cell).
 
 If you take a look at the output file (tdftu_1.out), you can see the
-integrated total density in the PAW spheres (see the [PAW1](/tutorial/paw1)
-and [PAW2](/tutorial/paw2) tutorials on PAW formalism). This value roughly
+integrated total density in the PAW spheres (see the [PAW1](../tutorial/paw1)
+and [PAW2](../tutorial/paw2) tutorials on PAW formalism). This value roughly
 estimates the magnetic moment of NiO:
 
      Integrated electronic and magnetization densities in atomic spheres:
@@ -98,7 +98,7 @@ estimates the magnetic moment of NiO:
      2 Ni   1.81432     7.187993     8.564385     15.752379    -1.376392
      3  O   1.41465     2.260909     2.260909      4.521817     0.000000
      4  O   1.41465     2.260909     2.260909      4.521817     0.000000
-     
+
 
 The atoms in the output file, are listed as in the [[typat]] variable (the
 first two are nickel atoms and the last two are oxygen atoms). The results
@@ -316,7 +316,7 @@ these results are not well converged. By contrast, the magnetization,
       4  O   1.41465     2.288685     2.288685      4.577371    -0.000000
 
 
-is very similar to the DFT+U FLL. 
+is very similar to the DFT+U FLL.
 For other systems, the difference can be more important. FLL is designed
 to work well for systems in which occupations of orbitals are 0 or 1 for each
 spin. The AMF should be used when orbital occupations are near the average occupancies.
@@ -324,4 +324,4 @@ spin. The AMF should be used when orbital occupations are near the average occup
 ## 5 Projected density of states in DFT+U
 
 Using [[prtdos]] 3, you can now compute the projected d and f density of states.
-For more information about projected density of states, for more details see the [PAW1](/tutorial/paw1) tutorial.
+For more information about projected density of states, for more details see the [PAW1](../tutorial/paw1) tutorial.

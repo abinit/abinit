@@ -19,8 +19,8 @@ where it it shown that BiTeI is a trivial insulator at 0GPa but undergoes a tran
 to a non-trivial insulating phase under isotropic pressure. At 5GPa, the material is
 a non-trivial topological insulator.
 
-You already should know about the interface between ABINIT and Wannier90 
-(see the tutorial [Wannier90](/tutorial/wannier90)).
+You already should know about the interface between ABINIT and Wannier90
+(see the tutorial [Wannier90](../tutorial/wannier90)).
 This tutorial should take about 1 hour. It is important to note that the examples in this tutorial
 are not converged, they are just examples to show how to use the code.
 
@@ -28,13 +28,13 @@ are not converged, they are just examples to show how to use the code.
 
 ## 1. Summary of Z2Pack in ABINIT
 
-Z2Pack is a code that enables the calculation of topological invariants from model 
+Z2Pack is a code that enables the calculation of topological invariants from model
 Hamiltonians, as well as from first-principles calculations.
 It is highly recommended to read the following papers to understand its basics:
 [[cite:Gresch2017]] and [[cite:Gresch2018]].
 
 Z2Pack starts from a one-particle Hamiltonian $H(\textbf{k})$  which describes the electronic states in a crystalline material.
-Its eigenvectors are so-called *Bloch states* $| \psi_{n,\textbf{k}} \rangle$. 
+Its eigenvectors are so-called *Bloch states* $| \psi_{n,\textbf{k}} \rangle$.
 They are superpositions of plane waves with wave vector $\textbf{k}$.
 Bloch states can be written as $| \psi_{n, \textbf{k}} \rangle = e^{i\textbf{k} \cdot \textbf{r}} | u_{n, \textbf{k}} \rangle$
 where $|u_{n, \textbf{k}} \rangle$ is cell-periodic.
@@ -42,7 +42,7 @@ Taking into account the shape of the Bloch states leads to a topological classif
 
 The topological classification of materials is based on a topological invariant called the Chern number.
 For a closed, orientable two-dimensional surface $S$ in reciprocal space, the Chern number invariant $C$
-can be defined in terms of the cell-periodic states in a set $B$ of bands as 
+can be defined in terms of the cell-periodic states in a set $B$ of bands as
 $C = \frac{i}{2\pi} \sum_{n\in B}  \int_S \nabla_{\textbf{k}} \wedge \langle u_{n, \textbf{k}} | \nabla_{\textbf{k}} | u_{n, \textbf{k}} \rangle \cdot d\textbf{S}$.
 
 There are various ways to calculate the Chern number that are easier numerically.
@@ -64,12 +64,12 @@ This procedure of segmenting the surface is illustrated in [[cite:Gresch2018]] F
 
 The equivalence between hybrid Wannier charge centers and the Berry phase gives rise to a physical interpretation of the Chern number as a charge pumping process, where each cycle of $k_x$ moves the charge by $C$ unit cells.
 
-For time-reversal invariant systems, the total Chern number is zero as 
+For time-reversal invariant systems, the total Chern number is zero as
 the Chern numbers of Kramers partners cancel each other.
 We will rather compute the Z2 invariant, which can only take values of 0 or 1.
 Z2Pack can handle this calculation in the following way.
 By fixing one reciprocal space coordinate at a time-reversal invariant value
-(i.e. $k_i=0$ or $k_i=0.5$ in reduced coordinates), we can define a surface in 
+(i.e. $k_i=0$ or $k_i=0.5$ in reduced coordinates), we can define a surface in
 reciprocal space which contains its own time-reversal image.
 Using the hybrid Wannier charge centers computed on this surface, we can
 then define a surface invariant $\Delta\in\{0,1\}$, which can be intuitively
@@ -78,9 +78,9 @@ More details about how Z2Pack handles this calculation will be provided later.
 
 To compute the surface invariant $\Delta$, Z2pack needs 2 inputs: a description
 of the system and the surface on which the invariant should be calculated.
-In the interface with ABINIT, Z2Pack will start from a computed ground state and 
+In the interface with ABINIT, Z2Pack will start from a computed ground state and
 perform the Wannierization on lines in the Brillouin zone.
-At the end, it can sum mod 2 the surface invariants obtained on the two 
+At the end, it can sum mod 2 the surface invariants obtained on the two
 time-reversal invariant surfaces to evaluate the Z2 invariant.
 
 Before we actually compute the Z2 invariant, we will take a look at another indication of non-trivial topology: band inversion.
@@ -121,7 +121,7 @@ Run it using:
 
 You should get a less resolved version of the following figure:
 
-![](z2pack_assets/tz2_2_bandstructure.png) 
+![](z2pack_assets/tz2_2_bandstructure.png)
 
 The path of this band structure is first along a high-symmetry path in the $k_z=0$ plane
 $(M-\Gamma-K)$.
@@ -141,7 +141,7 @@ If this is the case, the electronic bands in the non-trivial phase would display
 Around the $A$ point, one can notice some band dispersions characteristic of band inversion.
 In order to check whether or not there is inversion of character between bands which are gapped due to spin-orbit coupling,
 we plot the fatbands.
-One can use the fatbands plotting feature of abipy as used in the [Wannier90](/tutorial/wannier90) tutorial,
+One can use the fatbands plotting feature of abipy as used in the [Wannier90](../tutorial/wannier90) tutorial,
 but instead here we will use a more advanced script which plots the difference in character between
 the p orbitals of bismuth and of those of both the tellurium and iodine.
 This procedure makes more clear the band inversion and the script is the following:
@@ -166,13 +166,13 @@ You need first to install Z2Pack, if not yet available on your computer.
 Please, see [Z2Pack home](https://z2pack.greschd.ch/en/latest/index.html), or directly
 the [Installation and setup information](https://z2pack.greschd.ch/en/latest/tutorial/installation.html).
 
-Then, to run the example presented in this section, you need to download four big files from GitHub, 
+Then, to run the example presented in this section, you need to download four big files from GitHub,
 <https://github.com/abinit/abinit_assets/tree/main/tests/tutoplugs/Input/results_tz2_3> ,
 and store them in the directory results_tz2_3, such that
 
     ls results_tz2_3
-    BiTeI_0.msgpack  BiTeI_1.msgpack  BiTeI_2.msgpack  BiTeI_3.msgpack 
- 
+    BiTeI_0.msgpack  BiTeI_1.msgpack  BiTeI_2.msgpack  BiTeI_3.msgpack
+
 You will now launch the script for ABINIT with Z2Pack:
 
     cp -r ../input_tz2_3/ .
@@ -237,7 +237,7 @@ besides $k_z=0.5$ with $P=5$ GPa, indicating that the 0 Gpa phase is trivial and
 ## 4. Conclusion
 
 We have seen that in material with strong spin-orbit coupling, band crossing at the Fermi level can lead to band inversion seen in the orbital character of the bands. The gap thus created can be topologically non-trivial.
-To know whether or not a material is a topological insulator in the sense of the Z2 invariant, 
+To know whether or not a material is a topological insulator in the sense of the Z2 invariant,
 we can look at the displacement of the Wannier charge centers instead of integrating the whole Berry curvature.
 This leads to the calculation performed by Z2Pack.
 

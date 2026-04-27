@@ -738,7 +738,7 @@ For different other reasons, it might nevertheless be useful to be able to
 grasp some information from the file. For norm-conserving pseudopotentials
 different format are possible (labelled 1 to 8 presently). The associated
 internal variable is called pspcod. Information on the header of these
-pseudopotential files can be found [here](/developers/pseudos_nc_header)
+pseudopotential files can be found [here](../developers/pseudos_nc_header)
 that you should read now (quickly, do not pursue with the description of each format, though).
 
 

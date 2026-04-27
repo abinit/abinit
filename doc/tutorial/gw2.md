@@ -30,7 +30,7 @@ Also, it is suggested to acknowledge the efforts of developers of the GW part of
 by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 
 The user should be familiarized with the four basic tutorials of ABINIT, see the
-[tutorial index](/tutorial/) as well as the [first GW tutorial](/tutorial/gw1).
+[tutorial index](../tutorial/) as well as the [first GW tutorial](../tutorial/gw1).
 
 Visualisation tools are NOT covered in this tutorial.
 Powerful visualisation procedures have been developed in the Abipy context,
@@ -47,7 +47,7 @@ reading of [[cite:Bruneval2006]] and [[cite:Lebegue2003]].
 *Before beginning, you might consider to work in a different subdirectory as
 for the other tutorials. Why not Work_gw2?*
 
-In [basic tutorial 4](/tutorial/base4), we have computed different properties of
+In [basic tutorial 4](../tutorial/base4), we have computed different properties of
 Aluminum within DFT(LDA). Unlike for silicon, in this approximation, there is
 no outstanding problem in the computed band structure. Nevertheless, as you
 will see, the agreement of the band structure with experiment can be improved

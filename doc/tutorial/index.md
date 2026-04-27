@@ -1292,7 +1292,7 @@ Powerful visualisation procedures have been developed in the Abipy context,
 relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
 and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
-Before following the tutorials, you should have read the [new user's guide](/guide/new_user),
+Before following the tutorials, you should have read the [new user's guide](../guide/new_user),
 as well as the pages
 1045-1058 of [[cite:Payne1992|Rev. Mod. Phys. 64, 1045 (1992)]].
 If you have more time, you should browse through the Chaps. 1 to 13, and appendices L and M of the book
