@@ -8,7 +8,7 @@ Most of the documentation is written in [Markdown](https://en.wikipedia.org/wiki
 a lightweight markup language with plain text
 [formatting syntax](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet).
 The documentation includes the User Guide, the Abinit tutorial, the topics, the release notes
-as well as the pages with the [input variables](../variables/) and the [bibliographic references](../theory/bibliography.md)
+as well as the pages with the [input variables](../variables/index.md) and the [bibliographic references](../theory/bibliography.md)
 that are generated *automatically* in python from the information reported in
 `~abinit/mkdocs/variables_abinit.py` (and similar files in the same directory for other main executables) and the bibtex
 entries given in the `~abinit/doc/abiref.bib` file.

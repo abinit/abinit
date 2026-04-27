@@ -4,7 +4,7 @@ Something going wrong ? Better to realize this than to think everything is OK ..
 
 In this page, the user will find tips to fix several problems with ABINIT.
 
-Many other tips might be found on the [[https://discourse.abinit.org|forum]], or by looking in the extensive [abimkdocs documentation on the Web](../new_user.md)
+Many other tips might be found on the [[https://discourse.abinit.org|forum]], or by looking in the extensive [abimkdocs documentation on the Web](../guide/new_user.md)
 
 
 ### Configure problems
@@ -56,7 +56,7 @@ Many mistakes done by beginners are related to incorrect starting geometry.
 
 Here is a check list :
 
-  * Check that the **units** are correct for your cell parameters and atomic positions. __ABINIT uses atomic unit by default__, but can use several other units if specified by the user, see the [ABINIT user's guide](../guide/abinit/#parameters).
+  * Check that the **units** are correct for your cell parameters and atomic positions. __ABINIT uses atomic unit by default__, but can use several other units if specified by the user, see the [ABINIT user's guide](../guide/abinit.md#parameters).
   * Check that the [[typat]] atom types are correct with respect to [[xred]] or [[xcart]]
   * Check that the **number of atoms** [[natom]] is coherent with your list of coordinates, [[xred]] or [[xcart]]. __ABINIT reads only the coordinates of [[natom]] nuclei, and **ignore others**__.
   * Relax first the atomic positions **at fixed primitive vectors** before optimizing the cell. Explicitly, use a first datadet with [[optcell]] = 0, then a second dataset with non-zero [[optcell]], in which you tell ABINIT to read optimized atomic positions using [[getxred]] or [[getxcart]]. In this second dataset, do not forget to use[[dilatmx]] bigger than 1 if you expect the volume of the cell to increase during the optimization. Possibly after the atomic position relaxation, make a run with [[https:/chkdilatmx]]=0, then a third run with [[dilatmx]]=1. See the additional suggestions in the documentation of [[optcell]] .

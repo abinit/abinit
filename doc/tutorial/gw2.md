@@ -30,7 +30,7 @@ Also, it is suggested to acknowledge the efforts of developers of the GW part of
 by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 
 The user should be familiarized with the four basic tutorials of ABINIT, see the
-[tutorial index](../tutorial/) as well as the [first GW tutorial](../tutorial/gw1.md).
+[tutorial index](index.md) as well as the [first GW tutorial](../tutorial/gw1.md).
 
 Visualisation tools are NOT covered in this tutorial.
 Powerful visualisation procedures have been developed in the Abipy context,

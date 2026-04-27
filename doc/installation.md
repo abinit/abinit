@@ -29,7 +29,7 @@ working in the terminal), the installation/compilation steps are:
      See below for more information, as well as [this section](#how-to-write-the-hostnameac9-file).
   4. Issue `./configure` (or, even better, first create a *tmp* directory for the build
      then `cd tmp` and finally run `../configure` within the build directory).
-     For further details, consult [the ABINIT_build tutorial](./tutorial/abinit_build/).
+     For further details, consult [the ABINIT_build tutorial](tutorial/abinit_build.md).
   5. Issue `make` (or `make -jN` for compiling with N processors, e.g. `make -j4`
      to use four processors). This step might take dozen of minutes depending on the compilation options.
      More information are available [here](#how-to-compile-the-executables).
@@ -49,7 +49,7 @@ Examples of configuration files to compile Abinit on clusters are available
 in the |abiconfig| package on github
 (specifically the [directory for ABINITv9](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters)),
 while the configuration files
-used for our buildbot testfarm are available in the [autoconf_examples section](./developers/autoconf_examples/).
+used for our buildbot testfarm are available in the [autoconf_examples section](developers/autoconf_examples.md).
 The current documentation for the fallback procedure is available
 [here](https://github.com/abinit/abinit-fallbacks).
 
@@ -187,7 +187,7 @@ There is a template for such "hostname".ac9 file, located in ~abinit/doc/config.
 Its name is *config-template.ac9*.
 Examples of such files, that are used for testing the package on our testfarm,
 can be found in ~abinit/doc/build/config-examples,
-or equivalently in the [autoconf_examples section](./developers/autoconf_examples/).
+or equivalently in the [autoconf_examples section](developers/autoconf_examples.md).
 Additional examples of configuration files for clusters are provided by the *abiconfig* project
 and are available [here](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters).
 
@@ -341,7 +341,7 @@ For further information on these internal tests, see the ~abinit/tests/built-in/
 
 You might now read the [new user's guide](./guide/new_user.md), in
 order to learn how to use the code, and then follow the four basic
-tutorials, see the [entry page for the tutorials](./tutorial/).
+tutorials, see the [entry page for the tutorials](tutorial/index.md).
 This is useful if you consider that the installation has been successful. Or
 you might continue to read the present Web page, and try to perform the speed
 tests, as well as the other tests.
@@ -534,7 +534,7 @@ fldiff.report and report files are produced automatically.
 
 ## For developers
 
-Note the documentation available in the pages labelled [Developers](./developers/git_and_gitlab/),
+Note the documentation available in the pages labelled [Developers](developers/git_and_gitlab.md),
 as well as the [developer's corner of the ABINIT web site](https://www.abinit.org/corner.html).
 The following sections are complements for the installation from gitlab, and the generation of the
 ABINIT distribution.

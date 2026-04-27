@@ -25,7 +25,7 @@ trf2_4.abi, trf2_5.abi, and trf2_6.abi, with the accompanying modifications in t
 Also, due to the change of default values for [[rfdir]] and [[rfatpol]] in ABINITv9.8 with respect to the prior versions of ABINIT,
 the example input files from this tutorial will not work with such version of ABINIT or even older ones).
 Please, use ABINITv9.8 or more recent versions of ABINIT, or adjust the values of [[rfdir]] and [[rfatpol]].
-See point A.3 of the [v9.8 release notes](../about/release-notes/#98).
+See point A.3 of the [v9.8 release notes](../about/release-notes.md#98).
 
 [TUTORIAL_README]
 
@@ -117,7 +117,7 @@ In order to do interatomic force constant (IFC) calculations, and to
 compute associated phonon band structure and thermodynamical
 properties, you should first have some theoretical background.  Let us
 assume that you have read the literature relative to the [first
-tutorial on DFPT](/tutorial/rf1).  You might find additional material,
+tutorial on DFPT](rf1.md).  You might find additional material,
 related to the present section, in [[cite:Gonze1997a]] -especially
 section IX-, [[cite:Lee1995]] and [[cite:Baroni2001]].  If you haven't
 read parts of these references, we strongly advise you to take the time
@@ -351,7 +351,7 @@ Now, you should issue:
 It will last only a few seconds. The variables [[anaddb:nqpath]],
 [[anaddb:qpath]], and [[anaddb:ndivsm]] have analogous counterparts in
 electronic band structure calculations, see the [3rd basic
-tutorial](/tutorial/base3).
+tutorial](base3.md).
 
 The file *trf2_5.abo* contains the list of eigenvalues, for all the needed
 q-wavevectors. You can open it, and have a look at the different sections of
