@@ -19622,7 +19622,7 @@ elements of the dynamical matrix, use different values of [[rfatpol]] and/or
 [[rfdir]]. The name 'iatpol' is used for the part of the internal variable
 ipert when it runs from 1 to [[natom]]. The internal variable ipert can also
 assume values larger than [[natom]], denoting perturbations of electric field
-or stress type (see [the DFPT help file](/guide/respfn)).
+or stress type (see [the DFPT help file](../guide/respfn.md)).
 
 As a side technical information, the value [[rfatpol]](1)=-1 is admitted, and transformed
 immediately to [[rfatpol]](1)=1, while [[rfatpol]](2)=-1 is transformed to  [[rfatpol]](2)=[[natom]],
@@ -23406,11 +23406,11 @@ The different possibilities are:
   * [[wfoptalg]] = 114: A modern and highly efficient version of [[wfoptalg]] = 14 (**Locally Optimal Block Preconditioned Conjugate Gradient**), particularly suited for parallel computations. It performs well with a small number of blocks and can utilize OpenMP if ABINIT is compiled with a multithreaded linear algebra library.
 > Note: When using more than one thread, [[npfft]] cannot be used.
 
-  * [[wfoptalg]] = 1: A spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. It is suitable when the LOBPCG algorithm no longer scales efficiently. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].
+  * [[wfoptalg]] = 1: A spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. It is suitable when the LOBPCG algorithm no longer scales efficiently. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](../theory/howto_chebfi.pdf) and [[cite:Levitt2015]].
 > Recommendation: use [[wfoptalg]] = 111, which is the modern and improved version of this algorithm.
 > See **notes** in the "[[wfoptalg]] = 111" section.
 
-* [[wfoptalg]] = 111: A **modern and highly efficient version** of [[wfoptalg]] = 1, a spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].
+* [[wfoptalg]] = 111: A **modern and highly efficient version** of [[wfoptalg]] = 1, a spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](../theory/howto_chebfi.pdf) and [[cite:Levitt2015]].
 
 * [[wfoptalg]] = 112: A **highly** experimental version of Spectrum Slicing algorithm. A spectral filtering
 algorithm by spectral slices based on lowpass and bandpass Chebyshev polynomials. The polynomial degree is tuned
