@@ -688,7 +688,7 @@ class Variable:
             str: HTML anchor tag with relative URL.
         """
         token = "%s:%s" % (self.executable, self.name)
-        a = website.get_wikilink(token, page_rpath)
+        a = website.get_wikilink(token, page_rpath, is_html=True)
         cls = a.get("class") if cls is None else cls
         return '<a href="%s" class="%s">%s</a>' % (
             a.get("href"),

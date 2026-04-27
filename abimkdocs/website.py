@@ -1157,7 +1157,7 @@ The full bibtex file is available [here](../abiref.bib).
 
         return namespace, name, fragment, text
 
-    def get_wikilink(self, token: str, page_rpath: str) -> etree.Element | str:
+    def get_wikilink(self, token: str, page_rpath: str, is_html: bool = False) -> etree.Element | str:
         """
         Resolve a wikilink token and return an HTML anchor element.
 
@@ -1473,12 +1473,18 @@ The full bibtex file is available [here](../abiref.bib).
                     url = os.path.relpath(url, page_dir)
 
                     # MkDocs requires proper internal relative links (including .md extension)
-                    if is_dir and url != ".":
-                        url += "/index.md"
-                    elif is_dir and url == ".":
-                        url = "./index.md"
-                    elif not has_ext and url != ".":
-                        url += ".md"
+                    # unless we are generating raw HTML that won't be processed by MkDocs.
+                    if not is_html:
+                        if is_dir and url != ".":
+                            url += "/index.md"
+                        elif is_dir and url == ".":
+                            url = "./index.md"
+                        elif not has_ext and url != ".":
+                            url += ".md"
+                    else:
+                        # For HTML, ensure directory-style URLs if no extension is present
+                        if not has_ext and url != "." and not url.endswith("/"):
+                            url += "/"
 
             if end: url = "%s#%s" % (url, end)
             #print("url", url)
