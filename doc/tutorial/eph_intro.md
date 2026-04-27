@@ -72,7 +72,7 @@ Each DFPT run produces a (partial) DDB file with a portion of the full dynamical
 as well as POT files with the first-order derivative of the KS potential (referred to as the DFPT potential below).
 The partial POT files are merged with the **mrgdv** utility to produce a
 single **DVDB file** (Derivatives of V($\rr$) DataBase).
-As usual, the partial DDB files are merged with **mrgddb** (see [the second tutorial on DFPT](../tutorial/rf2)).
+As usual, the partial DDB files are merged with **mrgddb** (see [the second tutorial on DFPT](../tutorial/rf2.md)).
 
 The EPH driver (blue box) receives in input the total DDB and the DVDB as well as a GS WFK file that is usually
 produced with a different $\kk$-mesh (in some cases, even with a different number of bands
@@ -140,12 +140,12 @@ In this introduction, we focus on the parts that are common to the different sub
 
 The use of the different sub-drivers is discussed in more detail in the specialized lessons:
 
-* [Phonon-limited mobilities](../tutorial/eph4mob)
-* [ZPR and T-dependent band structures](../tutorial/eph4zpr)
-* [Self-trapped polarons & Variational Polaron Equations ](../tutorial/eph4vpq)
+* [Phonon-limited mobilities](../tutorial/eph4mob.md)
+* [ZPR and T-dependent band structures](../tutorial/eph4zpr.md)
+* [Self-trapped polarons & Variational Polaron Equations ](../tutorial/eph4vpq.md)
 
 <!--
-* [Isotropic superconductivity in metals](tutorial/eph4isotc)
+* [Isotropic superconductivity in metals](tutorial/eph4isotc.md)
 -->
 
 ## Phonon bands and DOS with EPH
@@ -627,7 +627,7 @@ Small deviations between SKW and ab-initio bands can always be accounted for by 
 of [[sigma_erange]] used for generating the KERANGE.nc file.
 
 Examples of input files to compute WFK files with the KERANGE are given in the last section of
-the [mobility tutorial](../tutorial/eph4mob#how-to-compute-only-the-k-points-close-to-the-band-edges).
+the [mobility tutorial](../tutorial/eph4mob.md#how-to-compute-only-the-k-points-close-to-the-band-edges).
 
 <!--
 TODO: Recheck the code, perhaps I can use the ab-initio band edge if its greater/smaller than the SKW one.

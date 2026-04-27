@@ -13,7 +13,7 @@ In the following, we will refer to this traditional approach as the **convention
 ## Why a new GW code?
 
 In the standard GW code, one uses the Lehmann representation of the Green's function in the real-frequency domain
-to compute the irreducible polarizability, as explained in the [MBPT notes](../theory/mbt).
+to compute the irreducible polarizability, as explained in the [MBPT notes](../theory/mbt.md).
 Then the self-energy matrix elements in the KS representation are computed via an expensive convolution
 in the frequency domain [[cite:Golze2019]] — by default using the plasmon-pole approximation [[cite:Giantomassi2011]],
 which significantly accelerates calculations but introduces approximations and prevents direct access

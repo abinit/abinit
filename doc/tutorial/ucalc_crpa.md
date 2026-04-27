@@ -11,15 +11,15 @@ Abinit using cRPA. This method is well adapted in particular to determine _U_
 and _J_ as they can be used in DFT+DMFT. The implementation is described in [[cite:Amadon2014]].
 
 Note that there is another methodology to compute _U_ and _J_, see the
-[Linear response U(J)](../tutorial/lruj) tutorial.
+[Linear response U(J)](../tutorial/lruj.md) tutorial.
 
 It might be useful that you already know how to do PAW calculations using
 ABINIT but it is not mandatory (you can follow the two tutorials on PAW in
-ABINIT ([PAW1](../tutorial/paw1), [PAW2](../tutorial/paw2))).
-The DFT+_U_ tutorial in ABINIT ([DFT+U](../tutorial/dftu)) might be useful to know some
+ABINIT ([PAW1](../tutorial/paw1.md), [PAW2](../tutorial/paw2.md))).
+The DFT+_U_ tutorial in ABINIT ([DFT+U](../tutorial/dftu.md)) might be useful to know some
 basic variables related to correlated orbitals.
 
-The first GW tutorial in ABINIT ([GW](../tutorial/gw1)) is useful to learn how
+The first GW tutorial in ABINIT ([GW](../tutorial/gw1.md)) is useful to learn how
 to compute the screening, and how to converge the relevant parameters
 (energy cutoffs and number of bands for the polarizability).
 
@@ -227,7 +227,7 @@ important physical parameters relevant to this dataset.
 
   * Diagonalization of Kohn-Sham Hamiltonian: As in the case of DFT+DMFT or _GW_ calculation, a cRPA calculation requires that the LDA is perfectly converged and the Kohn Sham eigenstates are precisely determined, including the empty states. Indeed these empty states are necessary both to build Wannier functions and to compute the polarizability. For this reason we choose a very low value of [[tolwfr]] in the input file tucalc_crpa_1.abi.
 
-  * Wannier functions: Once the calculation is converged, we compute Wannier functions, triggered using the [[plowan_compute]] keyword. In addition to the KS bands (defined using [[plowan_bandi]] and [[plowan_bandf]]), we use the ([PLO-Wannier](../topics/Wannier)) keywords to define on which atom and on which orbital the Wannier functions are calculated.
+  * Wannier functions: Once the calculation is converged, we compute Wannier functions, triggered using the [[plowan_compute]] keyword. In addition to the KS bands (defined using [[plowan_bandi]] and [[plowan_bandf]]), we use the ([PLO-Wannier](../topics/Wannier.md)) keywords to define on which atom and on which orbital the Wannier functions are calculated.
 	For this tutorial we will only look at cases with only one orbital for the Wannier functions and thus the cRPA, but note
 	that the implementation allow to use multiple orbitals. We emphasize that with respect to the discussion on models on section 3.1, [[plowan_bandi]] and [[plowan_bandf]] are used to define the so called A bands. We will see in dataset 2 how B bands are defined. In our case, as we are in the _d-d_ model, we choose only the _d_ -like bands as a starting point and [[plowan_bandi]] and [[plowan_bandf]] are thus equal to the first and last _d_ -like bands, namely 21 and 25.
 

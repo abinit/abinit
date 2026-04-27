@@ -18,7 +18,7 @@ working in the terminal), the installation/compilation steps are:
      possibly some recommended libraries (MPI) and other optional libraries such as Wannier90.
      The libraries can be installed with the help of the "fallback" procedure, see below for more info on this step.
      Alternatively, you may want to install everything from source using the procedure detailed in
-     the [ABINIT_build tutorial](./tutorial/abinit_build).
+     the [ABINIT_build tutorial](./tutorial/abinit_build.md).
   2. Get the [latest version of the ABINIT package](https://github.com/abinit/abinit/releases/latest) (abinit-x.y.z.tar.gz)
      from the abinit web site.
      More information are available [here](#how-to-get-a-version-of-abinit).
@@ -38,10 +38,10 @@ working in the terminal), the installation/compilation steps are:
 
 Note that the details of step 1 and 3 might vary significantly depending on the operating system.
 Further details are provided by
-[the ABINIT_build tutorial](./tutorial/abinit_build) that covers the scenario in which you want to build everything from source
+[the ABINIT_build tutorial](./tutorial/abinit_build.md) that covers the scenario in which you want to build everything from source
 and install libraries in your $HOME directory.
 There are also other pages focusing on
-[macOS](./INSTALL_MacOS), [CentOS](./INSTALL_CentOS) and [Ubuntu](./INSTALL_Ubuntu)
+[macOS](./INSTALL_MacOS.md), [CentOS](./INSTALL_CentOS.md) and [Ubuntu](./INSTALL_Ubuntu.md)
 that discuss how to bypass the compilation of the external libraries
 using homebrew or MacPorts (for macOS), dnf (for CentOS) or apt (for Ubuntu).
 
@@ -339,7 +339,7 @@ appropriate library to be installed in order to work properly.
 
 For further information on these internal tests, see the ~abinit/tests/built-in/README file.
 
-You might now read the [new user's guide](./guide/new_user), in
+You might now read the [new user's guide](./guide/new_user.md), in
 order to learn how to use the code, and then follow the four basic
 tutorials, see the [entry page for the tutorials](./tutorial/).
 This is useful if you consider that the installation has been successful. Or
@@ -553,7 +553,7 @@ More explicitly, you need minimally (version numbers can be upgraded)
  * [GNU M4 1.4](ftp://ftp.gnu.org/gnu/m4/m4-1.4.4.tar.gz)
 
 If you do not have these tools, please consult your local computer guru, and/or the page
-[an overview of ABINIT development](../developers/overview_development).
+[an overview of ABINIT development](../developers/overview_development.md).
 
 If you want to develop on a regular basis, please have a Git(lab) access
 created for you by contacting Jean-Michel Beuken, as described in these pages.

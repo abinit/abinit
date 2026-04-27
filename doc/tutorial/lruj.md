@@ -13,7 +13,7 @@ these parameters may then be applied via the DFT+U(+J)-like Hubbard functionals 
 address self-interaction and static correlation errors.
 
 Note that there is another methodology to compute U and J; see the
-[cRPA U(J)](../tutorial/ucalc_crpa) tutorial.
+[cRPA U(J)](../tutorial/ucalc_crpa.md) tutorial.
 
 This tutorial is a condensed version of that published in [[cite:MacEnulty2024]], a more
 comprehensive user guide on the lrUJ utility and its predessecor, the UJdet utility. If
@@ -22,8 +22,8 @@ you find this information useful for your own scientific investigations, please 
 
 In this tutorial, you will learn how to run perturbative calculations in Abinit and
 generate input data to successfully execute the lruj post-processing utility.
-We strongly encourage you to read the [PAW1](../tutorial/paw1), [PAW2](../tutorial/paw2)
-and [DFT+U](../tutorial/dftu) tutorials to familiarize yourself with the manifestation of
+We strongly encourage you to read the [PAW1](../tutorial/paw1.md), [PAW2](../tutorial/paw2.md)
+and [DFT+U](../tutorial/dftu.md) tutorials to familiarize yourself with the manifestation of
 PAW atomic datasets within Abinit. Also consider checking out the following video
 introducing the PAW formalism in an Abinit context.
 

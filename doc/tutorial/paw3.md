@@ -72,12 +72,12 @@ it here. We will now discuss the prerequisites for this tutorial.
 ## 2. Prerequisites, code components and scripts
 
 It is assumed that you are already familiar with the contents and procedures
-in tutorials [PAW1](../tutorial/paw1) and [PAW2](../tutorial/paw2), and so
+in tutorials [PAW1](../tutorial/paw1.md) and [PAW2](../tutorial/paw2.md), and so
 have some familiarity with input files for  `ATOMPAW` , and the issues in creating
 PAW datasets. To exactly reproduce the results in this tutorial, you will
 need:
 
-  * The `ATOMPAW` code for generating PAW datasets (see tutorial [PAW2](../tutorial/paw2), section **2.**).
+  * The `ATOMPAW` code for generating PAW datasets (see tutorial [PAW2](../tutorial/paw2.md), section **2.**).
 
 ```sh
 	   cd atompaw-4.x.y.z
@@ -765,7 +765,7 @@ better, so let us see if we can make it so.
 
 Now that you know the target values, is up to you to experiment and see if you
 can improve this dataset. The techniques are well documented in tutorial
-[PAW2](../tutorial/paw2). Here's a brief summary of main points to be concerned about:
+[PAW2](../tutorial/paw2.md). Here's a brief summary of main points to be concerned about:
 
   * Use the keyword series `custom rrkj ...`, or `custom polynom ...`, or `custom polynom2 ...`,
     if you want to have maximum control over the convergence properties of the projectors.
@@ -1259,4 +1259,4 @@ calculations, here is a list of a few:
 
   * A particularly sensitive thing is the quality of the expansion of the pseudised plane-wave part in terms of the on-site basis.
      This can be checked by using the density of states (DOS), as described in the
-     [first PAW tutorial](../tutorial/paw1).
+     [first PAW tutorial](../tutorial/paw1.md).

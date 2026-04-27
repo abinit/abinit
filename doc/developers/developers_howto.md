@@ -73,7 +73,7 @@ As usual, use:
     ../../tests/runtests.py --help
 
 to list the available options.
-A more detailed discussion is given in [this page](../developers/testsuite_howto).
+A more detailed discussion is given in [this page](../developers/testsuite_howto.md).
 
 [![asciicast](https://asciinema.org/a/40324.png)](https://asciinema.org/a/40324)
 
@@ -234,7 +234,7 @@ To add a new variables follow the below steps:
   Use the routines *chkint_eq*, *chkint_ne*, *chkint_ge*, *chkint_le*, *chkdpr*.
 
 - Add the documentation of the new variable to `~abinit/abimkdocs/variables_CODE.py`
-  following the instructions given in [this section](../developers/abimkdocs#how-to-addmodify-an-input-variable).
+  following the instructions given in [this section](../developers/abimkdocs.md#how-to-addmodify-an-input-variable).
 
 Finally,
 

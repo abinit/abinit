@@ -22,7 +22,7 @@ The Abinit documentation is built using [MkDocs](https://www.mkdocs.org/) with t
 - **Important**: When writing variable descriptions in these python files, always use Python raw strings (`r"""..."""`) to prevent escape sequence errors when using LaTeX (e.g., `\alpha`).
 
 ### 3. Links and Cross-Referencing
-- **Root-Relative URLs**: Use relative URLs for internal markdown links (e.g., `[MBPT document](../theory/mbt)`) instead of root-relative paths, as this is the recommended practice to avoid link breakage.
+- **Root-Relative URLs**: Use relative URLs for internal markdown links (e.g., `[MBPT document](../theory/mbt.md)`) instead of root-relative paths, as this is the recommended practice to avoid link breakage.
 - **Wikilinks**: Abinit uses a custom wikilink extension. Use this syntax extensively:
   - Variables: `[[ecut]]` for Abinit variables or `[[dipdip@anaddb]]` if dipdip is an anaddb variable
   - Citations: `[[cite:Amadon2008]]`

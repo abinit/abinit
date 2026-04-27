@@ -39,7 +39,7 @@ As the DFPT equations at higher order always start from input wavefunctions
 obtained at lower order, we begin by generating the ground state wavefunctions
 and DDK wavefunctions for our system, AlAs. The ground state wavefunctions are needed
 for the phonon and electric field perturbations, and the electric field perturbation
-needs the DDK wavefunctions as well, as explained in the [first tutorial on DFPT](../tutorial/rf1).
+needs the DDK wavefunctions as well, as explained in the [first tutorial on DFPT](../tutorial/rf1.md).
 
 Copy file *trf2_1.abi* from  \$ABI_TESTS/tutorespfn/Input* to *Work_rf2*:
 
@@ -176,7 +176,7 @@ step automatically through the generated q points, as is done in our
 file with [[ndtset]] 8 and [[iqpt]]: 1 [[iqpt]]+ 1. This raises the
 question, though, of how one would know in advance that there will be
 8 q points in the current set. For this one can use
-[abitk](../guide/abitk), a convenient tool built along with ABINIT and
+[abitk](../guide/abitk.md), a convenient tool built along with ABINIT and
 used to examine output files in `netcdf` format. Run it on our
 original ground state file as:
 

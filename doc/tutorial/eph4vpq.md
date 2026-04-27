@@ -14,10 +14,10 @@ small hole and large electron polarons in LiF as examples.
 We also showcase the capabilities of |AbiPy| to post-process the results and perform typical
 convergence studies.
 
-It is assumed the user has already completed the two tutorials [RF1](../tutorial/rf1) and [RF2](../tutorial/rf2),
+It is assumed the user has already completed the two tutorials [RF1](../tutorial/rf1.md) and [RF2](../tutorial/rf2.md),
 and that they are familiar with the calculation of ground state (GS) and response properties
 in particular phonons, Born effective charges and the high-frequency dielectric tensor.
-The user should have read the [introduction tutorial for the EPH code](../tutorial/eph_intro)
+The user should have read the [introduction tutorial for the EPH code](../tutorial/eph_intro.md)
 before running these examples.
 
 This lesson should take about 2 hours.
@@ -35,7 +35,7 @@ In the present formalism, we treat only **electron** and **hole polarons**, whic
 
 Depending on the strength of the electron-phonon coupling, one can distinguish different regimes.
 In the weak-coupling limit, a charge carrier is coherent with phonon oscillations, dragging the associated phonon cloud.
-This primarily leads to the band renormalization, and the physics can be captured by the [ZPR calculations](../tutorial/eph4zpr).
+This primarily leads to the band renormalization, and the physics can be captured by the [ZPR calculations](../tutorial/eph4zpr.md).
 In the limit of strong-coupling, the picture is different: a carrier is trapped in the potential well, created by lattice deformation
 -- a phenomena called self-trapping or autolocalization.
 This leads to the occurrence of a localized polaronic state inside the bandgap, and may switch the transport regime from a band-like to hopping transport.
@@ -230,7 +230,7 @@ one needs to obtain the required input parameters,
 describing the electronic and phonon subspaces, and the electron-phonon coupling.
 
 A typical workflow for self-trapped polaron calculations involves the following steps
-(see the [introductory e-ph tutorial](../tutorial/eph_intro)):
+(see the [introductory e-ph tutorial](../tutorial/eph_intro.md)):
 
 1. **GS calculation** to obtain the WFK and the DEN file.
    The $\kk$-mesh should be dense enough to converge both electronic and vibrational properties.
@@ -257,7 +257,7 @@ A typical workflow for self-trapped polaron calculations involves the following 
 !!! warning
 
     GSTORE computation requires ABINIT to be configured with support for parallel I/O for HDF5 and NetCDF libraries.
-    See, for example, the corresponding section in the installation [tutorial](../tutorial/abinit_build)
+    See, for example, the corresponding section in the installation [tutorial](../tutorial/abinit_build.md)
 
     To verify, whether the installed libraries and ABINIT support the parallel I/O, try issuing
 
@@ -673,7 +673,7 @@ correspond to the one used for the input WFK file.
 [[ddb_ngqpt]] is set to 3x3x3 as this is the $\qq$-mesh used in the DFPT part to generate the DDB and DVDB files,
 but the integration in $\qq$-space is performed with the [[eph_ngqpt_fine]] mesh.
 As [[eph_ngqpt_fine]] differs from [[ddb_ngqpt]], the code will automatically activate
-the interpolation of the DFPT potentials as discussed in the [introduction to the EPH code](../tutorial/eph_intro).
+the interpolation of the DFPT potentials as discussed in the [introduction to the EPH code](../tutorial/eph_intro.md).
 
 Polaron calculations require complex electron-phonon matrix elements.
 As we will deal with small hole polaron, and the VBM in LiF is triply-degenerate, we select the last three occupied bands
@@ -1472,7 +1472,7 @@ are confined within an energy window near the band edge.
 
     One can also use energy filtering at the step of computing the WFK files
     to achieve extra-dense meshes.
-    See the corresponding section of the [mobility tutorial](../tutorial/eph4mob).
+    See the corresponding section of the [mobility tutorial](../tutorial/eph4mob.md).
 
 
 Once the **GSTORE** file has been computed, we can launch the variational optimization

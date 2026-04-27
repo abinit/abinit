@@ -10,8 +10,8 @@ This tutorial aims at showing how to calculate self-energy corrections to the
 DFT Kohn-Sham (KS) eigenvalues in the one-shot GW approximation using the GWR code
 
 The user should be already familiar with the four basic tutorials of ABINIT,
-see the [tutorial home page](../tutorial),
-and is strongly encouraged to read the [introduction to the GWR code](../tutorial/gwr_intro)
+see the [tutorial home page](../tutorial.md),
+and is strongly encouraged to read the [introduction to the GWR code](../tutorial/gwr_intro.md)
 before running these examples.
 
 This tutorial should take about 1.5 hours.
@@ -183,9 +183,9 @@ to distribute the KS Hamiltonian matrix.
 
     We strongly recommend using the ELPA library for diagonalization,
     as it is much more efficient and requires significantly less memory than the ScaLAPACK drivers.
-    See the [GWR_intro](../tutorial/gwr_intro) for more details on how to link the ELPA library.
+    See the [GWR_intro](../tutorial/gwr_intro.md) for more details on how to link the ELPA library.
 
-Here, we ask for 400 bands. Let's recall that in the [previous GW tutorial](../tutorial/gw1)
+Here, we ask for 400 bands. Let's recall that in the [previous GW tutorial](../tutorial/gw1.md)
 [[nband]] = 100 was considered converged within 30 meV,
 but with GWR we can afford more bands since [[nband]] enters into play only during the initial construction
 of the Green's function
@@ -250,7 +250,7 @@ and other variables whose name starts with `gwr_` that are specific to the GWR c
 We use [[optdriver]] 6 to enter the GWR code while [[gwr_task]] activates a one-shot GW calculation.
 To reduce the wall-time, we use a minimax mesh with [[gwr_ntau]] = 6 points, the minimum number of points that can be used.
 Most likely, six points are not sufficient, but the convergence study for [[gwr_ntau]] is postponed to the next sections.
-[[getden_filepath]] specifies the density file used to compute $v_{xc}[n](\rr)$,
+[[getden_filepath]] specifies the density file used to compute $v_{xc}[n](\rr.md)$,
 while [[getwfk_filepath]] specifies the WFK file with empty states used to build the Green's function.
 
 !!! important
@@ -720,7 +720,7 @@ You should obtain the following plots:
 On the basis of this convergence study, we decide to use [[nband]] = 250 and [[ecuteps]] = 10.
 
 <!--
-In the [first GW tutorial](../tutorial/gw1), we have already performed convergence studies,
+In the [first GW tutorial](../tutorial/gw1.md), we have already performed convergence studies,
 and [[nband]] = 100 was found to give results converged within 30 mev, which is fair to compare with experimental accuracy.
 Also ecuteps = 6.0 can be considered converged within 10 meV.
 We will not repeat these convergence studies here, we just use these values for our calculation so that
