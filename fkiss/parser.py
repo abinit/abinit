@@ -1,17 +1,19 @@
-""" """
+from __future__ import annotations
 
 import os
 import re
 from collections import OrderedDict, deque
+from collections.abc import Iterable
 from pprint import pformat
 from textwrap import TextWrapper
+from typing import Any
 
 from .regex import HasRegex
 from .termcolor import cprint
 from .tools import lazy_property
 
 
-def terminal_highlight(s, bg="dark"):
+def terminal_highlight(s: str, bg: str = "dark") -> str:
     try:
         from pygments import highlight
     except ImportError:
@@ -23,7 +25,7 @@ def terminal_highlight(s, bg="dark"):
     return highlight(s, FortranLexer(), TerminalFormatter(bg=bg))
 
 
-def fort2html(s, full=True):
+def fort2html(s: str, full: bool = True) -> str:
     """
     Convert a string of Fortran code to an HTML representation using pygments.
 
@@ -48,7 +50,11 @@ def fort2html(s, full=True):
 class Node:
     def __repr__(self):
         if self.ancestor is not None:
-            return "<%s: %s.%s>" % (self.__class__.__name__, self.ancestor.name, self.name)
+            return "<%s: %s.%s>" % (
+                self.__class__.__name__,
+                self.ancestor.name,
+                self.name,
+            )
         return "<%s: %s>" % (self.__class__.__name__, self.name)
 
     def __str__(self):
@@ -56,7 +62,7 @@ class Node:
         return self.to_string()
 
     @lazy_property
-    def is_procedure(self):
+    def is_procedure(self) -> bool:
         """Subroutine/function/module/program."""
         return isinstance(self, Procedure)
 
@@ -79,19 +85,20 @@ class FortranVariable(Node):
 
     def __init__(
         self,
-        name,
-        ancestor,
-        ftype,
-        shape,
-        kind=None,
-        strlen=None,
-        attribs=None,
-        initial_value=None,
-        doc=None,
+        name: str,
+        ancestor: Node,
+        ftype: str,
+        shape: str | None,
+        kind: str | None = None,
+        strlen: str | None = None,
+        attribs: Iterable[str] | None = None,
+        initial_value: str | None = None,
+        doc: str | None = None,
     ):
-
         self.name, self.ancestor = name.strip(), ancestor
-        self.attribs = () if attribs is None else tuple(filter(None, (a.strip() for a in attribs)))
+        self.attribs = (
+            () if attribs is None else tuple(filter(None, (a.strip() for a in attribs)))
+        )
         self.ftype, self.shape = ftype, shape
         # TODO: dimension
         # print(self.attribs)
@@ -104,39 +111,47 @@ class FortranVariable(Node):
 
         if ftype == "character":
             if kind is not None:
-                raise ValueError("ftype: %s, kind: %s, strlen: %s" % (ftype, kind, strlen))
+                raise ValueError(
+                    "ftype: %s, kind: %s, strlen: %s" % (ftype, kind, strlen)
+                )
             self.strlen = strlen
         else:
             if strlen is not None:
-                raise ValueError("ftype: %s, kind: %s, strlen: %s" % (ftype, kind, strlen))
+                raise ValueError(
+                    "ftype: %s, kind: %s, strlen: %s" % (ftype, kind, strlen)
+                )
             self.kind = kind
 
-    def to_string(self, verbose=0):
+    def to_string(self, verbose: int = 0) -> str:
         return "foo"
 
     @lazy_property
-    def is_scalar(self):
+    def is_scalar(self) -> bool:
         return not bool(self.shape)
 
     @lazy_property
-    def is_array(self):
+    def is_array(self) -> bool:
         return bool(self.shape)
 
     @lazy_property
-    def is_allocatable(self):
+    def is_allocatable(self) -> bool:
         return "allocatable" in self.attribs
 
     @lazy_property
-    def intent(self):
+    def intent(self) -> str | None:
         for i, a in enumerate(self.attribs):
             if a.startswith("intent"):
                 return (
-                    self.attribs[i].replace("intent", "").replace("(", "").replace(")", "").strip()
+                    self.attribs[i]
+                    .replace("intent", "")
+                    .replace("(", "")
+                    .replace(")", "")
+                    .strip()
                 )
         return None
 
     @lazy_property
-    def is_pointer(self):
+    def is_pointer(self) -> bool:
         return "pointer" in self.attribs
 
     # @lazy_property
@@ -153,7 +168,14 @@ class Datatype(Node, HasRegex):
         variables: Ordered dictionary mapping variable names to `FortranVariable` objects.
     """
 
-    def __init__(self, name, ancestor, preamble, attribs, lines):
+    def __init__(
+        self,
+        name: str,
+        ancestor: Node,
+        preamble: Iterable[str] | None,
+        attribs: Iterable[str] | None,
+        lines: list[str],
+    ):
         self.name, self.ancestor = name, ancestor
         self.attribs = attribs
         self.preamble = "\n".join(preamble) if preamble else ""
@@ -164,15 +186,15 @@ class Datatype(Node, HasRegex):
         """Rich HTML representation for Jupyter notebooks."""
         return fort2html(self.preamble + "\n".join(self.lines))
 
-    def to_string(self, verbose=0):
+    def to_string(self, verbose: int = 0) -> str:
         """Return a string with the source code of the datatype."""
         return "\n".join(self.lines)
 
-    def check_abirules(self, verbose=0):
+    def check_abirules(self, verbose: int = 0) -> int:
         """Check for ABINIT coding rules (place holder)."""
         return 0
 
-    def analyze(self, verbose=0):
+    def analyze(self, verbose: int = 0) -> None:
         """
         Analyze the type declaration to extract its components (variables, etc.).
 
@@ -311,16 +333,15 @@ class Datatype(Node, HasRegex):
 
 
 class Interface(Node):
-    def __init__(self, name, ancestor, lines):
+    def __init__(self, name: str, ancestor: Node, lines: list[str]):
         self.name, self.ancestor = name, ancestor
         self.lines = lines
         self._analyzed = False
 
-    def to_string(self, verbose=0):
-        s = "\n".join(self.lines)
-        return s
+    def to_string(self, verbose: int = 0) -> str:
+        return "\n".join(self.lines)
 
-    def analyze(self, verbose=0):
+    def analyze(self, verbose: int = 0) -> None:
         if self._analyzed:
             return
         self._analyzed = True
@@ -340,7 +361,14 @@ class Procedure(Node):
     """
 
     def __init__(
-        self, name, ancestor, preamble, line="", prefix=None, arg_names=None, path="<UnknownFile>"
+        self,
+        name: str,
+        ancestor: Node | None,
+        preamble: Iterable[str] | None,
+        line: str = "",
+        prefix: str | None = None,
+        arg_names: Iterable[str] | None = None,
+        path: str = "<UnknownFile>",
     ):
         self.name = name.strip()
         self.ancestor = ancestor
@@ -371,7 +399,9 @@ class Procedure(Node):
         # self.has_implicit_none = False
 
     def _repr_html_(self):
-        prototype = self.line.replace("(", "(\n\t").replace(",", ",\n\t").replace(")", "\n)")
+        prototype = (
+            self.line.replace("(", "(\n\t").replace(",", ",\n\t").replace(")", "\n)")
+        )
         # prototype = proto.replace(" ", "")
         return fort2html(prototype + 2 * "\n" + self.preamble)
 
@@ -469,9 +499,11 @@ class Procedure(Node):
             return [self] + [p for p in self.contains if p.is_public]
         if self.is_subroutine or self.is_function:
             return [self] if self.is_public else []
-        raise TypeError("Don't know how to find public entities of type: %s" % type(self))
+        raise TypeError(
+            "Don't know how to find public entities of type: %s" % type(self)
+        )
 
-    def stree(self, level=0):
+    def stree(self, level: int = 0) -> str:
         lines = [level * "\t" + repr(self)]
         app = lines.append
         level += 1
@@ -480,7 +512,7 @@ class Procedure(Node):
 
         return "\n".join(lines)
 
-    def to_string(self, verbose=0, width=90):
+    def to_string(self, verbose: int = 0, width: int = 90) -> str:
         """
         String representation with verbosity level `verbose`.
         Text is wrapped at `width` columns.
@@ -493,7 +525,10 @@ class Procedure(Node):
         app("Directory: %s" % os.path.basename(self.dirname))
 
         if self.ancestor is not None:
-            app("ANCESTOR:\n\t%s (%s)" % (self.ancestor.name, self.ancestor.__class__.__name__))
+            app(
+                "ANCESTOR:\n\t%s (%s)"
+                % (self.ancestor.name, self.ancestor.__class__.__name__)
+            )
         if self.uses:
             app("USES:\n%s\n" % w.fill(", ".join(self.uses)))
             diff = sorted(set(self.local_uses) - set(self.uses))
@@ -507,7 +542,9 @@ class Procedure(Node):
         if self.types:
             app("DATATYPES:\n%s\n" % w.fill(", ".join(d.name for d in self.types)))
         if self.interfaces:
-            app("INTERFACES:\n%s\n" % w.fill(", ".join(i.name for i in self.interfaces)))
+            app(
+                "INTERFACES:\n%s\n" % w.fill(", ".join(i.name for i in self.interfaces))
+            )
 
         app("PARENTS:\n%s\n" % w.fill(", ".join(sorted(p.name for p in self.parents))))
         # if verbose:
@@ -561,7 +598,7 @@ class Program(Procedure):
 
     proc_type = "program"
 
-    def check_abirules(self, verbose=0):
+    def check_abirules(self, verbose: int = 0) -> int:
         retcode = 0
         return retcode
 
@@ -571,7 +608,7 @@ class Function(Procedure):
 
     proc_type = "function"
 
-    def check_abirules(self, verbose=0):
+    def check_abirules(self, verbose: int = 0) -> int:
         retcode = 0
         return retcode
 
@@ -581,7 +618,7 @@ class Subroutine(Procedure):
 
     proc_type = "subroutine"
 
-    def check_abirules(self, verbose=0):
+    def check_abirules(self, verbose: int = 0) -> int:
         # FIXME: These tests have to be deactivated as many headers are not valid
         retcode = 0
 
@@ -606,7 +643,13 @@ class Module(Procedure):
 
     proc_type = "module"
 
-    def __init__(self, name, ancestor, preamble, path=None):
+    def __init__(
+        self,
+        name: str,
+        ancestor: Node | None,
+        preamble: Iterable[str] | None,
+        path: str | None = None,
+    ):
         super().__init__(name, ancestor, preamble, path=path)
         self.default_visibility = True
         # self.variables = OrderedDict()
@@ -614,16 +657,15 @@ class Module(Procedure):
         # self.private_procedure_names = []
         # self.usedby_mods = []
 
-    def to_string(self, verbose=0, width=90):
+    def to_string(self, verbose: int = 0, width: int = 90) -> str:
         lines = []
         app = lines.append
         app(super().to_string(verbose=verbose, width=width))
         # w = TextWrapper(initial_indent="\t", subsequent_indent="\t", width=width)
         return "\n".join(lines)
 
-    def check_abirules(self, verbose=0):
+    def check_abirules(self, verbose: int = 0) -> int:
         retcode = 0
-
         # FIXME: These tests have to be deactivated as many headers are not valid
         # if not self.preamble:
         #    cprint("Empty preamble in %s" % repr(self), "red")
@@ -651,12 +693,17 @@ class FortranKissParser(HasRegex):
         strict: If True, raise an exception on parsing warnings.
     """
 
-    def __init__(self, macros=None, verbose=0, strict=False):
+    def __init__(
+        self,
+        macros: dict[str, str] | None = None,
+        verbose: int = 0,
+        strict: bool = False,
+    ):
         self.verbose = verbose
         self.strict = strict
         self.macros = {} if macros is None else macros
 
-    def parse_file(self, path, include_files=False):
+    def parse_file(self, path: str, include_files: bool = False) -> FortranKissParser:
         """
         Parse a Fortran source file from the given path.
 
@@ -673,10 +720,13 @@ class FortranKissParser(HasRegex):
                 lines = []
                 for line in fh:
                     l = line.strip().replace("'", "").replace('"', "")
-                    if l.startswith("#include") and (l.endswith(".finc") or l.endswith(".F90")):
+                    if l.startswith("#include") and (
+                        l.endswith(".finc") or l.endswith(".F90")
+                    ):
                         basename = l.split()[-1]
                         with open(
-                            os.path.join(os.path.dirname(path), basename), encoding="utf8"
+                            os.path.join(os.path.dirname(path), basename),
+                            encoding="utf8",
                         ) as incfh:
                             lines.extend(il for il in incfh)
                     else:
@@ -693,7 +743,7 @@ class FortranKissParser(HasRegex):
 
             return self.parse_string(string, path=path)
 
-    def preproc_string(self, string, path):
+    def preproc_string(self, string: str, path: str) -> deque[str]:
         # Preprocess string to facilitate further analysis.
         # Use approach similar to the one used in Ford:
         #
@@ -795,7 +845,7 @@ class FortranKissParser(HasRegex):
 
         return deque(new_lines)
 
-    def parse_string(self, string, path=None):
+    def parse_string(self, string: str, path: str | None = None) -> FortranKissParser:
         """
         Parse a string of Fortran code.
 
@@ -848,7 +898,9 @@ class FortranKissParser(HasRegex):
             # Handle `end module`
             m = self.RE_MOD_END.match(line)
             if m:
-                self.close_stack_entry(line, end_proc_type="module", end_name=m.group("name"))
+                self.close_stack_entry(
+                    line, end_proc_type="module", end_name=m.group("name")
+                )
                 continue
 
             # print("Ignored line:", line)
@@ -866,7 +918,8 @@ class FortranKissParser(HasRegex):
             p, status = self.stack.pop(0)
             if status != "closed":
                 self.warn(
-                    "Unclosed %s with status %s, ancestor: %s" % (repr(p), status, repr(p.ancestor))
+                    "Unclosed %s with status %s, ancestor: %s"
+                    % (repr(p), status, repr(p.ancestor))
                 )
 
             # Sort entries here.
@@ -891,20 +944,20 @@ class FortranKissParser(HasRegex):
         return self
 
     @staticmethod
-    def trim_comment(line):
+    def trim_comment(line: str) -> str:
         i = line.find("!")
         if i != -1:
             line = line[:i]
         return line.strip()
 
-    def warn(self, msg):
+    def warn(self, msg: str) -> None:
         cprint(msg, color="yellow")
         if not self.strict:
             self.warnings.append(msg)
         else:
             raise RuntimeError(msg)
 
-    def handle_contains(self, line):
+    def handle_contains(self, line: str) -> bool:
         m = self.RE_CONTAINS.match(line)
         if not m:
             return False
@@ -914,7 +967,7 @@ class FortranKissParser(HasRegex):
             print("Setting ancestor to:", repr(self.ancestor))
         return True
 
-    def handle_cpp_line(self, line):
+    def handle_cpp_line(self, line: str) -> bool:
         # Handle include statement (CPP or Fortran version).
         m = self.RE_INCLUDE.match(line)
         if m:
@@ -927,7 +980,7 @@ class FortranKissParser(HasRegex):
 
         return True if line[0] == "#" else False
 
-    def handle_comment(self, line):
+    def handle_comment(self, line: str) -> bool:
         # Count number of comments and code line
         # Inlined comments are not counted (also because I don't like them)
         m = self.RE_F90COMMENT.match(line)
@@ -974,11 +1027,11 @@ class FortranKissParser(HasRegex):
 
         return True
 
-    def handle_use_statement(self, line):
+    def handle_use_statement(self, line: str) -> bool:
         # Find use statements and the corresponding module
         if not line.startswith("use "):
             return False
-        smod = line.split()[1].split(",")[0].lower()
+        smod = line.split()[1].split(",", maxsplit=1)[0].lower()
         # Remove comment at the end of the line if present.
         i = smod.find("!")
         if i != -1:
@@ -989,7 +1042,7 @@ class FortranKissParser(HasRegex):
         self.all_uses.append(smod)
         return True
 
-    def handle_call(self, line):
+    def handle_call(self, line: str) -> bool:
         # At this level subname is a string that will be replaced by a Procedure object afterwards
         # TODO: should handle `call obj%foo()` syntax.
         m = self.RE_SUBCALL.match(line)
@@ -1002,7 +1055,7 @@ class FortranKissParser(HasRegex):
         self.stack[-1][0].children.append(subname)
         return True
 
-    def consume_module_header(self, line):
+    def consume_module_header(self, line: str) -> bool:
         m = self.RE_MOD_START.match(line)
         if not m:
             return False
@@ -1047,12 +1100,14 @@ class FortranKissParser(HasRegex):
             # or here if the module does not have *contains*
             m = self.RE_MOD_END.match(line)
             if m:
-                self.close_stack_entry(line, end_proc_type="module", end_name=m.group("name"))
+                self.close_stack_entry(
+                    line, end_proc_type="module", end_name=m.group("name")
+                )
                 return True
 
         raise ValueError("Cannot find `contains` in %s" % self.path)
 
-    def consume_interface(self, line):
+    def consume_interface(self, line: str) -> bool:
         m = self.RE_INTERFACE_START.match(line)
         if not m:
             return False
@@ -1070,11 +1125,13 @@ class FortranKissParser(HasRegex):
                     print("end interface", line)
                 # Add interface to the last item on the stack.
                 # NB Don't enforce name `end interface [name]`
-                self.stack[-1][0].interfaces.append(Interface(name, self.ancestor, buflines))
+                self.stack[-1][0].interfaces.append(
+                    Interface(name, self.ancestor, buflines)
+                )
                 return True
         raise ValueError("Cannot find `end interface %s` in %s" % (name, self.path))
 
-    def consume_datatype(self, line):
+    def consume_datatype(self, line: str) -> bool:
         m = self.RE_TYPE_START.match(line)
         if not m:
             return False
@@ -1084,7 +1141,11 @@ class FortranKissParser(HasRegex):
             print("begin datatype", name, "in line:", line)
         # Extract attributes and put them in a tuple.
         attribs = m.group("attribs").lower().replace(":", "")
-        attribs = tuple(filter(None, (s.strip() for s in attribs.split(",")))) if attribs else ()
+        attribs = (
+            tuple(filter(None, (s.strip() for s in attribs.split(","))))
+            if attribs
+            else ()
+        )
 
         while self.lines:
             line = self.lines.popleft()
@@ -1110,7 +1171,7 @@ class FortranKissParser(HasRegex):
                 return True
         raise ValueError("Cannot find `end type %s` in %s" % (name, self.path))
 
-    def handle_procedure(self, line):
+    def handle_procedure(self, line: str) -> bool:
         if not self.RE_SEARCH_PROC.search(line):
             return False
         # Find if (subroutine|function|program) and select regex for end tag.
@@ -1215,9 +1276,13 @@ class FortranKissParser(HasRegex):
                 end_proc_type = m.group("proc_type")
                 # Warn if `end [proc_type [name]]`
                 if end_proc_type != proc_type:
-                    self.warn("Cannot find `end %s %s` in %s" % (proc_type, name, self.path))
+                    self.warn(
+                        "Cannot find `end %s %s` in %s" % (proc_type, name, self.path)
+                    )
                 if end_name != name:
-                    self.warn("Cannot find `end %s %s` in %s" % (proc_type, name, self.path))
+                    self.warn(
+                        "Cannot find `end %s %s` in %s" % (proc_type, name, self.path)
+                    )
 
                 self.close_stack_entry(line, end_proc_type, end_name)
                 break
@@ -1228,7 +1293,7 @@ class FortranKissParser(HasRegex):
 
         return True
 
-    def handle_args(self, line):
+    def handle_args(self, line: str) -> bool:
         m = self.RE_INTENT.search(line)
         if not m:
             return False
@@ -1261,14 +1326,16 @@ class FortranKissParser(HasRegex):
 
         return True
 
-    def add_node_to_stack(self, node):
+    def add_node_to_stack(self, node: Procedure) -> None:
         self.ancestor = node
         self.stack.append([node, "open"])
         self.preamble = None
         # TODO: Recheck this part (open, end, accumulate?)
         self.num_f90lines, self.num_doclines, self.num_omp_statements = 0, 0, 0
 
-    def close_stack_entry(self, line, end_proc_type, end_name):
+    def close_stack_entry(
+        self, line: str, end_proc_type: str | None, end_name: str | None
+    ) -> None:
         if end_name:
             # Close the last entry in the stack with name == end_name.
             for item in reversed(self.stack):
@@ -1279,11 +1346,19 @@ class FortranKissParser(HasRegex):
             else:
                 raise RuntimeError(
                     "Cannot find end_name `%s` in stack:\n%s\npath: %s\nLast line:%s"
-                    % (end_name, pformat([s[0].name for s in self.stack]), self.path, line)
+                    % (
+                        end_name,
+                        pformat([s[0].name for s in self.stack]),
+                        self.path,
+                        line,
+                    )
                 )
         # Close the last entry in the stack with end_proc_type.
         elif end_proc_type is not None:
-            self.warn("Found `end %s` without name in %s:%s" % (end_proc_type, self.path, line))
+            self.warn(
+                "Found `end %s` without name in %s:%s"
+                % (end_proc_type, self.path, line)
+            )
             for item in reversed(self.stack):
                 if item[0].proc_type == end_proc_type:
                     node = item[0]
@@ -1292,12 +1367,17 @@ class FortranKissParser(HasRegex):
             else:
                 raise RuntimeError(
                     "Cannot find end_proc_type `%s` in stack:\n%s\nLast line:%s"
-                    % (end_proc_type, pformat([s[0].proc_type for s in self.stack]), line)
+                    % (
+                        end_proc_type,
+                        pformat([s[0].proc_type for s in self.stack]),
+                        line,
+                    )
                 )
         else:
             # This is the best I can do without any info.
             self.warn(
-                "Found plain `end` without procedure_type and name in %s:%s" % (self.path, line)
+                "Found plain `end` without procedure_type and name in %s:%s"
+                % (self.path, line)
             )
             self.stack[-1][1] = "closed"
             node = self.stack[-1][0]
@@ -1319,7 +1399,7 @@ class FortranKissParser(HasRegex):
 
         self.preamble = []
 
-    def parse_variables(self, line):
+    def parse_variables(self, line: str) -> list[FortranVariable]:
         # Remove inlined comment from line (if any)
         icomm, doc = line.find("!"), ""
         if icomm != -1:
@@ -1353,7 +1433,9 @@ class FortranKissParser(HasRegex):
                 ftype, kind, strlen = m.group("ftype"), m.group("kind"), None
         if not m:
             # raise ValueError("Cannot find Fortran type in line: %s. file: %s" % (line, self.path))
-            self.warn("Cannot find Fortran type in line: %s. file: %s" % (line, self.path))
+            self.warn(
+                "Cannot find Fortran type in line: %s. file: %s" % (line, self.path)
+            )
             return []
 
         # TODO: a(1,2), b, c(3, 4)
@@ -1411,7 +1493,7 @@ class FortranKissParser(HasRegex):
         return fvars
 
     @staticmethod
-    def quote_split(sep, string, strip=False):
+    def quote_split(sep: str, string: str, strip: bool = False) -> list[str]:
         """
         Splits the strings into pieces divided by sep, when sep in not inside quotes.
         Copied from https://github.com/Fortran-FOSS-Programmers/ford/blob/master/ford/utils.py
@@ -1449,13 +1531,7 @@ class FortranKissParser(HasRegex):
 
 
 class RobodocHeader(OrderedDict):
-    # See config/robodoc/robodoc-html.rc
-
-    # ALL_KEYS = [
-    #    "NAME", "COPYRIGHT", "FUNCTION",
-    #    "INPUTS", "OUTPUT", "OUTPUTS", "SIDE EFFECTS",
-    #    "NOTES", "TODO", "PARENTS", "CHILDREN", "SOURCE",
-    # ]
+    """See config/robodoc/robodoc-html.rc"""
 
     ALL_KEYS = [
         "SOURCE",
@@ -1514,14 +1590,16 @@ class RobodocHeader(OrderedDict):
     #    d "Directories" robo_directories
 
     # Detect robodoc header (!****)
-    RE_HEADER_START = re.compile(r"^!!\*{4}(?P<ptype>[a-z])\*\s+(?P<name>.+?)$", re.MULTILINE)
+    RE_HEADER_START = re.compile(
+        r"^!!\*{4}(?P<ptype>[a-z])\*\s+(?P<name>.+?)$", re.MULTILINE
+    )
 
     @classmethod
-    def from_string(cls, s):
+    def from_string(cls, s: str) -> RobodocHeader:
         return cls.from_lines(s.splitlines())
 
     @classmethod
-    def from_lines(cls, lines):
+    def from_lines(cls, lines: list[str]) -> RobodocHeader:
         # m = cls.RE_HEADER_START.search(s)
         m = cls.RE_HEADER_START.match(lines[0])
         if not m:
@@ -1545,7 +1623,8 @@ class RobodocHeader(OrderedDict):
             if k in cls.ALL_KEYS:
                 if new[k]:
                     raise ValueError(
-                        "Key %s already present in robodoc header.\n%s" % (k, "\n".join(lines))
+                        "Key %s already present in robodoc header.\n%s"
+                        % (k, "\n".join(lines))
                     )
                 new[k] = []
                 active_key = k
@@ -1561,7 +1640,7 @@ class RobodocHeader(OrderedDict):
 
         return new
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         for k in self.ALL_KEYS:
             self[k] = []
@@ -1569,7 +1648,7 @@ class RobodocHeader(OrderedDict):
     def __str__(self):
         return self.to_string(self)
 
-    def to_string(self, verbose=0):
+    def to_string(self, verbose: int = 0) -> str:
         lines = []
         app = lines.append
         for key, value in self.items():

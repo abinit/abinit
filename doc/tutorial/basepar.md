@@ -52,8 +52,8 @@ advise you to get familiar with your own parallel environment. It might be
 relatively simple for a SMP machine, but more difficult for very powerful
 machines. You will need at least to have MPI (see next section) installed on
 your machine. Take some time to determine how you can launch a job in parallel
-with MPI, what are the resources available and the limitations as well. 
-Perhaps you will have to use a batch system 
+with MPI, what are the resources available and the limitations as well.
+Perhaps you will have to use a batch system
 (typically the `qsub` or `sbatch` command and an associated shell script).
 Do not hesitate to
 discuss with your system administrator if you feel that something is not clear to you.
@@ -115,7 +115,7 @@ algebra library is provided)
 
 Scalapack is the parallel version of the popular LAPACK library (for linear
 algebra). It can play some role in the parallelism of several parts of ABINIT,
-especially the LOBPCG algorithm in ground state calculations, 
+especially the LOBPCG algorithm in ground state calculations,
 and the parallelism for the Bethe-Salpether equation. ScaLAPACK being itself based on MPI, we will not discuss
 its use in ABINIT in this tutorial.
 
@@ -135,7 +135,7 @@ transfer (so called *latency*).
 Broadly speaking, one can categorize computers following the speed of
 communications. In the fast communication machines, the latency is very low
 and the transfer time, once initialized, is very low too. For the parallelised
-part of ABINIT, SMP machines and machines with fast interconnect 
+part of ABINIT, SMP machines and machines with fast interconnect
 will usually not be limited by their network characteristics, but
 by the existence of residual sequential parts. The tutorials that have been
 developed for ABINIT have been based on fast communication machines.
@@ -149,19 +149,19 @@ knowledge of it, and perhaps consider using multithreading.
 ## What parts of ABINIT are parallel?
 
 Parallelizing a code is a very delicate and complicated task, thus do not
-expect that things will systematically go faster just because you are using 
+expect that things will systematically go faster just because you are using
 more processors. Please keep also in mind that in some situations,
 parallelization is simply impossible. At the present time, the parts of ABINIT
 that have been parallelized, and for which a tutorial is available, include:
 
-* [parallelism over bands and plane waves](/tutorial/paral_bandpw),
-* [ground state with wavelets](/tutorial/paral_gswvl),
-* [molecular dynamics](/tutorial/paral_moldyn),
-* [parallelism on "images"](/tutorial/paral_images),
-* [density-functional perturbation theory (DFPT)](/tutorial/paral_dfpt),
-* [Many-Body Perturbation Theory](/tutorial/paral_mbt).
+* [parallelism over bands and plane waves](../tutorial/paral_bandpw.md),
+* [ground state with wavelets](../tutorial/paral_gswvl.md),
+* [molecular dynamics](../tutorial/paral_moldyn.md),
+* [parallelism on "images"](../tutorial/paral_images.md),
+* [density-functional perturbation theory (DFPT)](../tutorial/paral_dfpt.md),
+* [Many-Body Perturbation Theory](../tutorial/paral_mbt.md).
 
-Note that the tutorial on [parallelism over bands and plane waves](/tutorial/paral_bandpw) presents a complete overview of the
+Note that the tutorial on [parallelism over bands and plane waves](../tutorial/paral_bandpw.md) presents a complete overview of the
 parallelism for the ground state, including up to four levels of parallelisation and, as such, is rather complex.
 Of course, it is also quite powerful, and allows to use several hundreds of processors.
 
@@ -231,7 +231,7 @@ Actually, *tbasepar_1.abi* corresponds to the investigation of a *FCC* crystal o
 lead, which requires a large number of k-points if one wants to get an
 accurate description of the ground state. Examine this file. Note that the
 cut-off is realistic, as well as the grid of k-points (giving 182 k points in
-the irreducible Brillouin zone). 
+the irreducible Brillouin zone).
 Once done, your output files for the sequential run, launched while starting to read this section, have likely been produced.
 Examine the timing in the output file (the last line gives the `Overall time`, `cpu` and `wall`), and keep note of it.
 
@@ -272,7 +272,7 @@ mpirun -np 2 -machinefile cluster ../../src/main/abinit tbasepar_1.abi >& tbasep
 ```
 
 Now, examine the corresponding output file. If you have kept the output from
-the sequential job, you can make a diff between the two files. 
+the sequential job, you can make a diff between the two files.
 
 {% dialog tests/tutorial/Refs/tbasepar_1.abo %}
 
@@ -316,7 +316,7 @@ _Speedup with k point parallelization_
 
 The red curve materializes the speedup achieved, while the green one is the
 $y = x$ line. The shape of the red curve will vary depending on your hardware
-configuration. 
+configuration.
 
 One last remark: the number of k-points need not be a multiple of the number
 of processors. As an example, you might try to run the above case with 16
@@ -347,7 +347,7 @@ If needed, modify the input file, to provide a local temporary disk space.
 Run this test case, in sequential, then in parallel.
 
 While the jobs are running, read the input. Then look closely
-at the output and log files in the sequential and parallel cases. They are quite similar. 
+at the output and log files in the sequential and parallel cases. They are quite similar.
 Actually, apart the mention of two processors and the speedup, there is no other
 manifestation of the parallelism.
 

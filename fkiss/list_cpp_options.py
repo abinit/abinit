@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import annotations
 
 import os
 import re
@@ -9,7 +9,7 @@ cppline = re.compile("^#")
 cppkeys = ("define .*", "include.*", "ifdef", "ifndef", "elif", "^if ", "else", "endif", "defined", "undef",
            "!", "&&", r"\|\|", r"\(", r"\)")
 
-def list_cpp_options(top):
+def list_cpp_options(top: str) -> int:
   cppopts = dict()
   for root,dirs,files in os.walk(top):
     for src in files:
