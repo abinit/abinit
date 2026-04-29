@@ -2977,8 +2977,7 @@ subroutine orbmag_rmesh(omag,adir,bra,dtset,gs_hamk,ket,local_term,mpi_enreg,&
       & n4,n5,n6,fourwf_option,tim_fourwf,weight_r,weight_i)
     cpw = czero
     do ig = 1, npw_k
-      !cpw = cpw + phgr(ig)*CONJG(CMPLX(bra(1,ig),bra(2,ig)))
-      cpw = cpw + CONJG(CMPLX(bra(1,ig),bra(2,ig)))
+      cpw = cpw + phgr(ig)*CONJG(CMPLX(bra(1,ig),bra(2,ig)))
     end do
     cpw = cpw*scalar_factor
     fofr(1,:,:,:) = fofr(1,:,:,:)*REAL(cpw) - fofr(2,:,:,:)*AIMAG(cpw)
