@@ -1,7 +1,6 @@
-# coding: utf-8
-from __future__ import print_function, division, absolute_import, unicode_literals
 
 import os
+
 
 def find_abinit_src_directory(start_path=None, ntrials=10):
     top = find_abinit_toplevel_directory(start_path=start_path, ntrials=ntrials)
@@ -42,8 +41,7 @@ def find_abinit_toplevel_directory(start_path=None, ntrials=10):
 
         if found:
             return abs_path
-        else:
-            abs_path, tail = os.path.split(abs_path)
-            trial += 1
+        abs_path, tail = os.path.split(abs_path)
+        trial += 1
 
     raise RuntimeError("Cannot find the ABINIT top level directory after %s trials" % ntrials)

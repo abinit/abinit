@@ -3825,6 +3825,7 @@ end subroutine ifclo9
 !! OUTPUT
 !! wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
 !!  The vector r(atom2)-r(atom1)+rpt should be inside the moving box
+!! r_inscribed_sphere= The radius of the sphere inscribed inside the big box.
 !! ngqpt(6)= can be modified
 !!
 !! SOURCE

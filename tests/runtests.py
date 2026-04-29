@@ -1,21 +1,20 @@
 #!/usr/bin/env python
 """This script executes the ABINIT suite of automatic tests."""
-from __future__ import print_function, division, absolute_import #, unicode_literals
+from __future__ import absolute_import, division, print_function  #, unicode_literals
 
-import sys
 import os
+import sys
+
 # Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
 os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Pspdir"))
 #print("ABI_PSPDIR:", os.environ["ABI_PSPDIR"])
+import logging
+import pickle
 import platform
 import time
-import pickle
-
-from warnings import warn
 from optparse import OptionParser
 from socket import gethostname
 
-import logging
 logger = logging.getLogger(__name__)
 
 # We don't install with setup.py hence we have to add the directory [...]/abinit/tests to $PYTHONPATH
@@ -30,15 +29,16 @@ sys.path.insert(0,pack_dir)
 
 # TODO change name!
 import tests
+
 abenv = tests.abenv
 abitests = tests.abitests
 
-from tests.pymods.devtools import number_of_cpus, number_of_gpus
-from tests.pymods.tools import which, ascii_abinit, prompt
 from tests.pymods import termcolor
-from tests.pymods.termcolor import get_terminal_size, cprint
-from tests.pymods.testsuite import find_top_build_tree, AbinitTestSuite, BuildEnvironment
+from tests.pymods.devtools import number_of_cpus, number_of_gpus
 from tests.pymods.jobrunner import JobRunner, OMPEnvironment, TimeBomb
+from tests.pymods.termcolor import cprint, get_terminal_size
+from tests.pymods.testsuite import AbinitTestSuite, BuildEnvironment, find_top_build_tree
+from tests.pymods.tools import ascii_abinit, which
 
 __version__ = "0.7.0"
 __author__ = "Matteo Giantomassi"
@@ -106,7 +106,13 @@ Debugging mode:
 
 
 def show_examples_and_exit(err_msg=None, error_code=1):
-    """Display the usage of the script."""
+    """
+    Display the usage examples and exit the script.
+
+    Args:
+        err_msg (str, optional): An error message to display before exiting.
+        error_code (int, optional): The exit code to return.
+    """
     sys.stderr.write(str_examples())
     if err_msg:
         sys.stderr.write("Fatal Error\n" + err_msg + "\n")
@@ -114,7 +120,15 @@ def show_examples_and_exit(err_msg=None, error_code=1):
 
 
 def vararg_callback(option, opt_str, value, parser):
-    """Callback for an option with variable arguments"""
+    """
+    Callback for an option with variable arguments.
+
+    Args:
+        option: The option instance.
+        opt_str (str): The option string.
+        value: The option value (unused, should be None).
+        parser: The option parser instance.
+    """
     assert value is None
     value = []
 
@@ -139,7 +153,14 @@ def vararg_callback(option, opt_str, value, parser):
 def make_abinit(num_threads, touch_patterns=None, target=""):
     """
     Find the top-level directory of the build tree and issue `make -j num_threads`.
-    Return: Exit status of the subprocess.
+
+    Args:
+        num_threads (int): Number of threads for parallel make.
+        touch_patterns (str, optional): Comma-separated patterns of files to touch.
+        target (str, optional): The make target (e.g., 'abinit').
+
+    Returns:
+        int: Exit status of the make process.
     """
     top = find_top_build_tree(".", with_abinit=False)
 
@@ -158,6 +179,18 @@ def make_abinit(num_threads, touch_patterns=None, target=""):
 
 
 def parse_stats(stats):
+    """
+    Parse a status string (e.g., 'failed+passed', 'all', 'not_succeeded').
+
+    Args:
+        stats (str): The status specification string.
+
+    Returns:
+        list: A list of valid status strings.
+
+    Raises:
+        ValueError: If an invalid status is encountered.
+    """
     # TODO Use BaseTest class attribute
     _possible_status = ["failed", "passed", "succeeded", "skipped", "disabled",]
 
@@ -181,6 +214,15 @@ def parse_stats(stats):
 
 
 def reload_test_suite(status_list):
+    """
+    Reload a test suite from the pickle file of a previous run.
+
+    Args:
+        status_list (list): List of status strings to filter tests.
+
+    Returns:
+        AbinitTestSuite: A new test suite containing the filtered tests.
+    """
     cprint("Reading previous tests from pickle file", "yellow")
     with open(".prev_run.pickle", "rb") as fh:
         test_suite = pickle.load(fh)
@@ -191,6 +233,10 @@ def reload_test_suite(status_list):
 
 
 def main():
+    """
+    Main entry point for runtests.py.
+    Parses command-line options and executes the test suite.
+    """
     usage = "usage: %prog [suite_args] [options]. Use [-h|--help] for help."
     version = "%prog " + str(__version__)
 
@@ -202,8 +248,8 @@ def main():
     parser = MyOptionParser(usage=usage, version=version)
 
     #parser.add_argument('-v', '--version', action='version', version="%(prog)s version " + __version__)
-    parser.add_option('--no-colors', default=False, action="store_true", help='Disable ASCII colors')
-    parser.add_option('--no-logo', default=False, action="store_true", help='Disable Abinit logo')
+    parser.add_option("--no-colors", default=False, action="store_true", help="Disable ASCII colors")
+    parser.add_option("--no-logo", default=False, action="store_true", help="Disable Abinit logo")
 
     parser.add_option("-c", "--cfg_file", dest="cfg_fname", type="string",
                       help="Read options from configuration FILE.", metavar="FILE")
@@ -275,7 +321,7 @@ def main():
                       help="Will only perform a simplified diff when comparing .abo files (based only on YAML sections)")
 
     parser.add_option("-T", "--forced-tolerance", dest="forced_tolerance", type="string", default="default",
-                      help="[string] Force the use of fldiff comparison tool with the specified tolerance. "+
+                      help="[string] Force the use of fldiff comparison tool with the specified tolerance. "
                            "Possible values are: default (from test config), high (1.e-10), medium (1.e-8), easy (1.e-5), ridiculous (1.e-2).")
 
     parser.add_option("--abimem-level", type=int, default=0, help="Run executable with abimem-level option.")
@@ -307,7 +353,7 @@ def main():
                       help="Directory where the test suite results will be produced.")
 
     parser.add_option("-o", "--omp_num-threads", dest="omp_nthreads", type="int", default=0,
-                      help="Number of OMP threads to use (set the value of the env variable OMP_NUM_THREADS.\n" +
+                      help="Number of OMP threads to use (set the value of the env variable OMP_NUM_THREADS.\n"
                            "Not compatible with -c. Use the cfg file to specify the OpenMP runtime variables.\n")
 
     parser.add_option("-p", "--patch", dest="patch", type="str", default="",
@@ -337,7 +383,7 @@ def main():
                             "Status can be concatenated by '+' e.g. failed+passed"))
 
     parser.add_option("-v", "--verbose", dest="verbose", action="count", default=0, # -vv --> verbose=2
-                      help='Verbose, can be supplied multiple times to increase verbosity')
+                      help="Verbose, can be supplied multiple times to increase verbosity")
 
     parser.add_option("-V", "--valgrind_cmdline", type="str", default="",
                       help=("Run test(s) under the control of valgrind."
@@ -345,21 +391,21 @@ def main():
                            "runtests.py -V 'memcheck -v' to pass options to valgrind"))
 
     parser.add_option("--Vmem", action="store_true",
-                      help="Shortcut to run test(s) under the control of valgrind memcheck:\n"+
+                      help="Shortcut to run test(s) under the control of valgrind memcheck:\n"
                            "Use --leak-check=full --show-reachable=yes --track-origins=yes")
 
     parser.add_option("--pedantic", action="store_true", help="Mark test(s) as failed if stderr is not empty.")
 
     parser.add_option("--erase-files", dest="erase_files", type="int", default=2,
-                      help=("0 => Keep all files produced by the test\n" +
-                            "1 => Remove files but only if the test passed or succeeded.\n"+
-                            "2 => Remove files even if the test failed.\n" +
+                      help=("0 => Keep all files produced by the test\n"
+                            "1 => Remove files but only if the test passed or succeeded.\n"
+                            "2 => Remove files even if the test failed.\n"
                             "default=2\n") )
 
     parser.add_option("--make-html-diff", dest="make_html_diff", type="int", default=0,
-                      help=("0 => Do not produce diff files in HTML format\n" +
-                            "1 => Produce HTML diff but only if the test failed\n" +
-                            "2 => Produce HTML diff independently of the final status of the test.\n" +
+                      help=("0 => Do not produce diff files in HTML format\n"
+                            "1 => Produce HTML diff but only if the test failed\n"
+                            "2 => Produce HTML diff independently of the final status of the test.\n"
                             "default=0\n") )
 
     parser.add_option("--sub-timeout", dest="sub_timeout", type="int", default=30,
@@ -368,7 +414,7 @@ def main():
     parser.add_option("--with-pickle", type="int",  default=1,
                       help="Save test database in pickle format (default: True).")
 
-    parser.add_option('--loglevel', default="ERROR", type="str",
+    parser.add_option("--loglevel", default="ERROR", type="str",
                       help="set the loglevel. Possible values: CRITICAL, ERROR (default), WARNING, INFO, DEBUG")
 
     # Parse command line.
@@ -387,7 +433,7 @@ def main():
     import logging
     numeric_level = getattr(logging, options.loglevel.upper(), None)
     if not isinstance(numeric_level, int):
-        raise ValueError('Invalid log level: %s' % options.loglevel)
+        raise ValueError("Invalid log level: %s" % options.loglevel)
     logging.basicConfig(level=numeric_level)
 
     if options.no_colors:
@@ -407,7 +453,7 @@ def main():
 
     cprint("Running on %s -- system %s -- ncpus %s -- ngpus %s -- Python %s -- %s" % (
           gethostname(), system, ncpus_detected, ngpus_detected, platform.python_version(), _my_name),
-          color='green', attrs=['underline'])
+          color="green", attrs=["underline"])
 
     # Compile the code before running the tests.
     if options.make:
@@ -553,7 +599,7 @@ def main():
             print(">>> Tests excluded on builder:", builder)
             for test in tests:
                 print(test, "\n")
-            print("")
+            print()
 
         sys.exit(0)
 
@@ -676,43 +722,41 @@ def main():
             if not test_list:
                 cprint("All tests ok. Exiting looponfail", "green")
                 break
-            else:
-                cprint("%d test(s) are still failing" % len(test_list), "red")
-                changed = abenv.changed_sources()
-                if not changed:
-                    sleep_time = 10
-                    cprint("No change in source files detected. Will sleep for %s seconds..." % sleep_time, "yellow")
-                    time.sleep(sleep_time)
-                    continue
-                else:
-                    print("Invoking `make` because the following files have been changed:")
-                    for i, path in enumerate(changed):
-                        print("[%d] %s" % (i, os.path.relpath(path)))
-                    rc = make_abinit(ncpus_detected, target=options.target)
-                    if rc != 0:
-                        cprint("make_abinit returned %s, tests are postponed" % rc, "red")
-                        continue
+            cprint("%d test(s) are still failing" % len(test_list), "red")
+            changed = abenv.changed_sources()
+            if not changed:
+                sleep_time = 10
+                cprint("No change in source files detected. Will sleep for %s seconds..." % sleep_time, "yellow")
+                time.sleep(sleep_time)
+                continue
+            print("Invoking `make` because the following files have been changed:")
+            for i, path in enumerate(changed):
+                print("[%d] %s" % (i, os.path.relpath(path)))
+            rc = make_abinit(ncpus_detected, target=options.target)
+            if rc != 0:
+                cprint("make_abinit returned %s, tests are postponed" % rc, "red")
+                continue
 
-                    test_suite = AbinitTestSuite(test_suite.abenv, test_list=test_list)
-                    results = test_suite.run_tests(build_env, workdir, runner,
-                                                   mpi_nprocs=mpi_nprocs,
-                                                   omp_nthreads=omp_nthreads,
-                                                   max_cpus=ncpus_detected,
-                                                   max_gpus=ngpus_detected,
-                                                   py_nprocs=py_nprocs,
-                                                   runmode=runmode,
-                                                   verbose=options.verbose,
-                                                   erase_files=options.erase_files,
-                                                   make_html_diff=options.make_html_diff,
-                                                   sub_timeout=options.sub_timeout,
-                                                   pedantic=options.pedantic,
-                                                   abimem_check=options.abimem,
-                                                   etsf_check=options.etsf,
-                                                   abimem_level=options.abimem_level,
-                                                   useylm=options.useylm,
-                                                   gpu_option=options.gpu_option,
-                                                   )
-                    if results is None: return 99
+            test_suite = AbinitTestSuite(test_suite.abenv, test_list=test_list)
+            results = test_suite.run_tests(build_env, workdir, runner,
+                                           mpi_nprocs=mpi_nprocs,
+                                           omp_nthreads=omp_nthreads,
+                                           max_cpus=ncpus_detected,
+                                           max_gpus=ngpus_detected,
+                                           py_nprocs=py_nprocs,
+                                           runmode=runmode,
+                                           verbose=options.verbose,
+                                           erase_files=options.erase_files,
+                                           make_html_diff=options.make_html_diff,
+                                           sub_timeout=options.sub_timeout,
+                                           pedantic=options.pedantic,
+                                           abimem_check=options.abimem,
+                                           etsf_check=options.etsf,
+                                           abimem_level=options.abimem_level,
+                                           useylm=options.useylm,
+                                           gpu_option=options.gpu_option,
+                                           )
+            if results is None: return 99
 
         if count == max_iterations:
             cprint("Reached max_iterations", "red")
@@ -745,7 +789,7 @@ def main():
     with open(".prev_run.pickle", "wb") as fh:
         pickle.dump(test_suite, fh)
 
-    print("")
+    print()
     print("Execution completed.")
     print("Results in HTML format are available in %s" % (os.path.join(workdir, "suite_report.html")))
 
@@ -773,7 +817,8 @@ if __name__ == "__main__":
         sys.exit(main())
     else:
         print("Entering profiling mode...")
-        import pstats, cProfile
+        import cProfile
+        import pstats
         import tempfile
         #prof_file = kwargs.get("prof_file", None)
         prof_file = None

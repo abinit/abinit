@@ -66,6 +66,8 @@ module m_alloc_hamilt_gpu
 
  type(gemm_nonlop_gpu_data_type), save, public, target :: gemm_nonlop_gpu_data
 
+ integer, save, public :: hamilt_gpu_nfft_blocks
+
 contains
 !!***
 
@@ -144,7 +146,7 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
      call alloc_gpu_fourwf_managed(dtset%ngfft,dtset%bandpp,npw_max_loc,npw_max_loc)
 #endif
    else if (gpu_option == ABI_GPU_OPENMP) then
-     call alloc_ompgpu_fourwf(dtset%ngfft,dtset%bandpp)
+     !call alloc_ompgpu_fourwf(dtset%ngfft,dtset%bandpp)
    end if
 
  end if

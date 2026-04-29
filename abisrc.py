@@ -1,21 +1,18 @@
 #!/usr/bin/env python
-# coding: utf-8
 """
 This script analyzes the Abinit source tree and generates the dependency graph
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
 
-import sys
-import os
 import argparse
+import os
 import platform
-
+import sys
 from socket import gethostname
-from fkiss import termcolor
-from fkiss.tools import print_dataframe
-from fkiss.project import FortranFile, AbinitProject
-from fkiss.termcolor import cprint
 
+from fkiss import termcolor
+from fkiss.project import AbinitProject, FortranFile
+from fkiss.termcolor import cprint
+from fkiss.tools import print_dataframe
 
 __version__ = "0.2.0"
 _my_name = os.path.basename(__file__) + "-" + __version__
@@ -80,21 +77,20 @@ or
 
 def get_parser():
     """Build and return parser object."""
-
     # Parent parser for common options.
     copts_parser = argparse.ArgumentParser(add_help=False)
-    copts_parser.add_argument('-v', '--verbose', default=0, action='count', # -vv --> verbose=2
-        help='verbose, can be supplied multiple times to increase verbosity.')
-    copts_parser.add_argument('-r', '--regenerate', default=False, action="store_true",
-        help='Parse files, generate new pickle file.')
+    copts_parser.add_argument("-v", "--verbose", default=0, action="count", # -vv --> verbose=2
+        help="verbose, can be supplied multiple times to increase verbosity.")
+    copts_parser.add_argument("-r", "--regenerate", default=False, action="store_true",
+        help="Parse files, generate new pickle file.")
     #copts_parser.add_argument('--loglevel', default="ERROR", type=str,
     #    help="Set the loglevel. Possible values: CRITICAL, ERROR (default), WARNING, INFO, DEBUG.")
-    copts_parser.add_argument('--no-colors', default=False, action="store_true", help='Disable ASCII colors')
-    copts_parser.add_argument('-j', "--jobs", type=int, default=4,  help="Number of python processes to use.")
+    copts_parser.add_argument("--no-colors", default=False, action="store_true", help="Disable ASCII colors")
+    copts_parser.add_argument("-j", "--jobs", type=int, default=4,  help="Number of python processes to use.")
 
     # Parent parser for commands that operating on pandas dataframes
     pandas_parser = argparse.ArgumentParser(add_help=False)
-    pandas_parser.add_argument("-c", '--clipboard', default=False, action="store_true",
+    pandas_parser.add_argument("-c", "--clipboard", default=False, action="store_true",
             help="Copy dataframe to the system clipboard. This can be pasted into Excel, for example")
 
     # Build the main parser.
@@ -102,28 +98,28 @@ def get_parser():
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
 
     # Create the parsers for the sub-commands
-    subparsers = parser.add_subparsers(dest='command', help='sub-command help.', description="Valid subcommands")
+    subparsers = parser.add_subparsers(dest="command", help="sub-command help.", description="Valid subcommands")
 
     # Subparser for parse.
-    p_parse = subparsers.add_parser('parse', parents=[copts_parser], help="Parse file.")
+    p_parse = subparsers.add_parser("parse", parents=[copts_parser], help="Parse file.")
     p_parse.add_argument("what", type=str, help="File to parse.")
 
     # Subparser for makemake.
-    p_makemake = subparsers.add_parser('makemake', parents=[copts_parser],
+    p_makemake = subparsers.add_parser("makemake", parents=[copts_parser],
         help="Generate configuration files required by the build system.")
 
     # Subparser for touch.
-    p_touch = subparsers.add_parser('touch', parents=[copts_parser],
+    p_touch = subparsers.add_parser("touch", parents=[copts_parser],
         help="Change timestamp of all files that.")
     #p_touch.add_argument("what_list", nargs="*", default=None, help="List of files or empty for auto.")
 
     # Subparser for print.
-    p_print = subparsers.add_parser('print', parents=[copts_parser],
+    p_print = subparsers.add_parser("print", parents=[copts_parser],
         help="Show children of module/procedure.")
     p_print.add_argument("what", nargs="?", default=None, help="File or procedure name")
 
     # Subparser for interface.
-    p_interfaces = subparsers.add_parser('interface', parents=[copts_parser], help="Print interface.")
+    p_interfaces = subparsers.add_parser("interface", parents=[copts_parser], help="Print interface.")
     p_interfaces.add_argument("what", nargs="?", default=None, help="Name of the interface.")
 
     # Subparser for pedit.
@@ -139,7 +135,7 @@ def get_parser():
 
     # notebook option
     p_notebook = subparsers.add_parser("notebook", parents=[copts_parser], help="Analyze project in jupyter notebook")
-    p_notebook.add_argument('--foreground', action='store_true', default=False,
+    p_notebook.add_argument("--foreground", action="store_true", default=False,
         help="Run jupyter notebook in the foreground.")
 
     # panel option
@@ -152,7 +148,7 @@ def get_parser():
     p_stats.add_argument("what", nargs="?", default=None, help="File, directory or empty for project.")
 
     # Subparser for graph.
-    p_graph = subparsers.add_parser('graph', parents=[copts_parser],
+    p_graph = subparsers.add_parser("graph", parents=[copts_parser],
         help="Draw dependency graph flow with graphviz package. See https://graphviz.readthedocs.io/.")
     p_graph.add_argument("-e", "--engine", type=str, default="automatic",
         help=("graphviz engine: ['dot', 'neato', 'twopi', 'circo', 'fdp', 'sfdp', 'patchwork', 'osage']. "
@@ -163,21 +159,21 @@ def get_parser():
     p_graph.add_argument("what", nargs="?", default=None, help="File of directory to visualize.")
 
     # Subparser for validate.
-    p_validate = subparsers.add_parser('validate', parents=[copts_parser], help="Validate source tree.")
+    p_validate = subparsers.add_parser("validate", parents=[copts_parser], help="Validate source tree.")
 
-    p_abirules = subparsers.add_parser('abirules', parents=[copts_parser], help="Check abirules (still under development).")
+    p_abirules = subparsers.add_parser("abirules", parents=[copts_parser], help="Check abirules (still under development).")
     p_abirules.add_argument("what", nargs="?", default=None, help="File, directory or empty for project.")
 
-    p_orphans = subparsers.add_parser('orphans', parents=[copts_parser], help="Print orphans.")
-    p_ipython = subparsers.add_parser('ipython', parents=[copts_parser], help="Open project in ipython terminal.")
+    p_orphans = subparsers.add_parser("orphans", parents=[copts_parser], help="Print orphans.")
+    p_ipython = subparsers.add_parser("ipython", parents=[copts_parser], help="Open project in ipython terminal.")
 
-    p_dtype = subparsers.add_parser('dtype', parents=[copts_parser], help="Generate code for datatype.")
+    p_dtype = subparsers.add_parser("dtype", parents=[copts_parser], help="Generate code for datatype.")
     p_dtype.add_argument("what", nargs="+", default=None,
             help="Name of datatype followed by the kind of routine that should be generated.")
 
-    p_master = subparsers.add_parser('master', parents=[copts_parser], help="How to become a great programmer.")
+    p_master = subparsers.add_parser("master", parents=[copts_parser], help="How to become a great programmer.")
     #p_robodoc = subparsers.add_parser('robodoc', parents=[copts_parser], help="Generate robodoc files.")
-    p_cpp = subparsers.add_parser('cpp', parents=[copts_parser], help="List CPP options.")
+    p_cpp = subparsers.add_parser("cpp", parents=[copts_parser], help="List CPP options.")
 
     return parser
 
@@ -197,7 +193,7 @@ def main():
     # Parse command line.
     try:
         options = parser.parse_args()
-    except Exception as exc:
+    except Exception:
         show_examples_and_exit(error_code=1)
 
     if not options.command:
@@ -218,7 +214,7 @@ def main():
 
     cprint("Running on %s -- system %s -- ncpus %s -- Python %s -- %s" % (
           gethostname(), system, ncpus_detected, platform.python_version(), _my_name),
-          color='green', attrs=['underline'])
+          color="green", attrs=["underline"])
 
     #if options.command == "robodoc":
     #    from fkiss.mkrobodoc_dirs import mkrobodoc_files
@@ -241,7 +237,7 @@ def main():
             #        dtype.analyze()
         return 0
 
-    elif options.command == "touch":
+    if options.command == "touch":
         # Load old project and touch files that have been changed.
         old_proj = AbinitProject.pickle_load()
         ntouch = old_proj.touch_alldeps(verbose=options.verbose)
@@ -313,7 +309,7 @@ def main():
             raise NotImplementedError("graph action requires argument!")
             #graph = proj.get_graphviz(engine=options.engine)
 
-        elif os.path.isdir(options.what):
+        if os.path.isdir(options.what):
             graph = proj.get_graphviz_dir(options.what, engine=options.engine)
 
         elif os.path.isfile(options.what):
@@ -385,7 +381,7 @@ def main():
             try:
                 dtype.analyze(verbose=0)
                 print(dtype)
-            except Exception as exc:
+            except Exception:
                 import traceback
                 cprint(traceback.format_exc(), "red")
 
@@ -401,13 +397,13 @@ def main():
         if not options.what:
             return proj.check_abirules(verbose=options.verbose)
 
-        elif os.path.isdir(options.what):
+        if os.path.isdir(options.what):
             retcode = 0
             for fort_file in proj.fort_files_indir(options.what):
                 retcode += fort_file.check_abirules(verbose=options.verbose)
             return retcode
 
-        elif os.path.isfile(options.what):
+        if os.path.isfile(options.what):
             fort_file = proj.fort_files[os.path.basename(options.what)]
             return fort_file.check_abirules(verbose=options.verbose)
 
@@ -431,7 +427,8 @@ if __name__ == "__main__":
     if not do_prof:
         sys.exit(main())
     else:
-        import pstats, cProfile
+        import cProfile
+        import pstats
         cProfile.runctx("main()", globals(), locals(), "Profile.prof")
         s = pstats.Stats("Profile.prof")
         s.strip_dirs().sort_stats("time").print_stats()

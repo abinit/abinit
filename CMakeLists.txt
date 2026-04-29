@@ -615,89 +615,131 @@ if (ABINIT_ENABLE_PARALLEL_HDF5)
   set(HDF5_PREFER_PARALLEL TRUE)
 endif()
 
+# 1- Try with FIND_PACKAGE
 find_package(HDF5 COMPONENTS C HL)
-if(HDF5_FOUND)
-  message(STATUS "HDF5 found via find_package")
+if (HDF5_FOUND)
   add_library(abinit_hdf5 INTERFACE)
-  if(TARGET HDF5::HL)
+
+  set(_hdf5_hl_inc  "")
+  set(_hdf5_hl_libs "")
+  if (TARGET HDF5::HL)
     target_link_libraries(abinit_hdf5 INTERFACE HDF5::HL)
-  elseif(TARGET hdf5::hdf5_hl)
+    set(_hdf5_hl_libs "${HDF5_HL_LIBRARIES}")
+    #HDF5_IS_PARALLEL automatically set
+  elseif (TARGET hdf5::hdf5_hl)
     target_link_libraries(abinit_hdf5 INTERFACE hdf5::hdf5_hl)
+    get_target_property(_hdf5_hl_libs hdf5::hdf5_hl INTERFACE_LINK_LIBRARIES)
+    if (NOT _hdf5_hl_libs OR _hdf5_hl_libs MATCHES "-NOTFOUND$")
+      get_target_property(_hdf5_hl_libs hdf5::hdf5_hl IMPORTED_LOCATION)
+    endif()
+    if (NOT _hdf5_hl_libs OR _hdf5_hl_libs MATCHES "-NOTFOUND$")
+      set(_hdf5_hl_libs "${HDF5_HL_LIBRARIES}")
+    endif()
+    get_target_property(_hdf5_is_parallel HDF5::HDF5 HDF5_IS_PARALLEL)
+    if (_hdf5_is_parallel)
+      set(HDF5_IS_PARALLEL TRUE)
+    endif()
   endif()
-  target_link_libraries(abinit_hdf5 INTERFACE HDF5::HDF5)
+
+  if (TARGET HDF5::HDF5)
+    target_link_libraries(abinit_hdf5 INTERFACE HDF5::HDF5)
+    get_target_property(_hdf5_inc HDF5::HDF5 INTERFACE_INCLUDE_DIRECTORIES)
+    if (NOT _hdf5_inc OR _hdf5_inc MATCHES "-NOTFOUND$")
+      set(_hdf5_inc "${HDF5_INCLUDE_DIRS}")
+    endif()
+    get_target_property(_hdf5_libs HDF5::HDF5 INTERFACE_LINK_LIBRARIES)
+    if  (NOT _hdf5_libs OR _hdf5_libs MATCHES "-NOTFOUND$")
+      get_target_property(_hdf5_libs HDF5::HDF5 IMPORTED_LOCATION)
+    endif()
+    if (NOT _hdf5_libs OR _hdf5_libs MATCHES "-NOTFOUND$")
+      set(_hdf5_libs "${HDF5_LIBRARIES}")
+    endif()
+  endif()
+
   #Add again hdf5_hl because some compilers want it before, and some after
-  if(TARGET HDF5::HL)
+  if (TARGET HDF5::HL)
     target_link_libraries(abinit_hdf5 INTERFACE HDF5::HL)
-  elseif(TARGET hdf5::hdf5_hl)
+  elseif (TARGET hdf5::hdf5_hl)
     target_link_libraries(abinit_hdf5 INTERFACE hdf5::hdf5_hl)
   endif()
+
   add_library(abinit::hdf5 ALIAS abinit_hdf5)
   set(ABINIT_HDF5_FOUND TRUE)
+  message(STATUS "HDF5 found via find_package")
+
+# 2- Try with PKGCONFIG
 else()
   pkg_check_modules(ABINIT_HDF5 QUIET IMPORTED_TARGET hdf5)
-  if(NOT ABINIT_HDF5_FOUND)
-    # Second try for Cray parallel version
+  if (NOT ABINIT_HDF5_FOUND OR ABINIT_HDF5_FOUND MATCHES "-NOTFOUND$") # 2nd try for Cray
     pkg_check_modules(ABINIT_HDF5 QUIET IMPORTED_TARGET hdf5_parallel)
   endif()
-  if(ABINIT_HDF5_FOUND)
+  if (ABINIT_HDF5_FOUND)
     add_library(abinit::hdf5 ALIAS PkgConfig::ABINIT_HDF5)
+    get_target_property(_hdf5_inc  PkgConfig::ABINIT_HDF5 INTERFACE_INCLUDE_DIRECTORIES)
+    get_target_property(_hdf5_libs PkgConfig::ABINIT_HDF5 INTERFACE_LINK_LIBRARIES)
+    set(_hdf5_hl_inc  "")
+    set(_hdf5_hl_libs "")
+    pkg_check_modules(_HDF5_PARALLEL_CHECK QUIET hdf5_parallel)
+    if (_HDF5_PARALLEL_CHECK_FOUND)
+      set(HDF5_IS_PARALLEL TRUE)
+    endif()
     message(STATUS "HDF5 found via pkg-config")
   endif()
 endif()
 
-if(ABINIT_HDF5_FOUND)
+if (ABINIT_HDF5_FOUND)
   set(HAVE_HDF5 1)
-  if(HDF5_IS_PARALLEL)
+  if (HDF5_IS_PARALLEL)
     set(HAVE_HDF5_MPI 1)
   endif()
 else()
   message(SEND_ERROR "HDF5 NOT FOUND")
 endif()
 
-
 #
 # NetCDF_C / NetCDF_Fortran
 #
 pkg_check_modules(ABINIT_NETCDF QUIET IMPORTED_TARGET netcdf)
-# Extra check for Cray env...
-if(NOT ABINIT_NETCDF_FOUND)
+if (NOT ABINIT_NETCDF_FOUND OR ABINIT_NETCDF_FOUND MATCHES "-NOTFOUND$") # 2nd try for Cray
   pkg_check_modules(ABINIT_NETCDF QUIET IMPORTED_TARGET netcdf_parallel)
 endif()
-if(ABINIT_NETCDF_FOUND)
-  message(STATUS "netcdf found via pkg-config")
+if (ABINIT_NETCDF_FOUND)
   add_library(abinit::netcdf ALIAS PkgConfig::ABINIT_NETCDF)
+  get_target_property(_nc_inc  PkgConfig::ABINIT_NETCDF INTERFACE_INCLUDE_DIRECTORIES)
+  get_target_property(_nc_libs PkgConfig::ABINIT_NETCDF INTERFACE_LINK_LIBRARIES)
+  message(STATUS "netcdf found via pkg-config")
 else()
   message(SEND_ERROR "netcdf NOT FOUND")
 endif()
 
 pkg_check_modules(ABINIT_NETCDF_FORTRAN QUIET IMPORTED_TARGET GLOBAL netcdf-fortran)
-#Extra check for Cray env...
-if(NOT ABINIT_NETCDF_FORTRAN_FOUND)
+if (NOT ABINIT_NETCDF_FORTRAN_FOUND OR ABINIT_NETCDF_FORTRAN_FOUND MATCHES "-NOTFOUND$") # 2nd try for Cray
   pkg_check_modules(ABINIT_NETCDF_FORTRAN QUIET IMPORTED_TARGET GLOBAL netcdf-fortran_parallel)
 endif()
-if(ABINIT_NETCDF_FORTRAN_FOUND)
-  message(STATUS "netcdf-fortran found via pkg-config : ${ABINIT_NETCDF_FORTRAN_PREFIX}")
-
+if (ABINIT_NETCDF_FORTRAN_FOUND)
   # kind of fix to make sure path PREFIX/include (where netcdf.mod is located)
   # is append in include dirs used in abinit::netcdf-fortran
   pkg_get_variable(ABINIT_NETCDF_FORTRAN_PREFIX netcdf-fortran prefix)
-  if("${ABINIT_NETCDF_FORTRAN_PREFIX}" STREQUAL "")
+  if ("${ABINIT_NETCDF_FORTRAN_PREFIX}" STREQUAL "")
     # Cray flavor of netcdf
     pkg_get_variable(ABINIT_NETCDF_FORTRAN_PREFIX netcdf-fortran_parallel netcdf_prefix)
   endif()
-  get_target_property(ABINIT_NETCDF_FORTRAN_INC_TMP PkgConfig::ABINIT_NETCDF_FORTRAN INTERFACE_INCLUDE_DIRECTORIES)
+  get_target_property(ABINIT_NETCDF_FORTRAN_INC_TMP PkgConfig::ABINIT_NETCDF_FORTRAN
+                      INTERFACE_INCLUDE_DIRECTORIES)
   list(APPEND ABINIT_NETCDF_FORTRAN_INC_TMP "${ABINIT_NETCDF_FORTRAN_PREFIX}/include")
-  set_target_properties(PkgConfig::ABINIT_NETCDF_FORTRAN PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${ABINIT_NETCDF_FORTRAN_INC_TMP}")
-
+  set_target_properties(PkgConfig::ABINIT_NETCDF_FORTRAN PROPERTIES
+                        INTERFACE_INCLUDE_DIRECTORIES "${ABINIT_NETCDF_FORTRAN_INC_TMP}")
   add_library(abinit::netcdf-fortran ALIAS PkgConfig::ABINIT_NETCDF_FORTRAN)
-
+  get_target_property(_ncf_inc  PkgConfig::ABINIT_NETCDF_FORTRAN INTERFACE_INCLUDE_DIRECTORIES)
+  get_target_property(_ncf_libs PkgConfig::ABINIT_NETCDF_FORTRAN INTERFACE_LINK_LIBRARIES)
+  message(STATUS "netcdf-fortran found via pkg-config : ${ABINIT_NETCDF_FORTRAN_PREFIX}")
 else()
   message(SEND_ERROR "netcdf-fortran NOT FOUND")
 endif()
 
 if (MPI_FOUND)
   pkg_check_modules(ABINIT_NETCDF_MPI QUIET IMPORTED_TARGET netcdf-mpi)
-  if(ABINIT_NETCDF_MPI_FOUND)
+  if (ABINIT_NETCDF_MPI_FOUND)
     message(STATUS "netcdf-mpi found via pkg-config")
     add_library(abinit::netcdf-mpi ALIAS PkgConfig::ABINIT_NETCDF_MPI)
     #set(HAVE_NETCDF_MPI 1) => see generate_config.h

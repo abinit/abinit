@@ -130,6 +130,10 @@ module m_gemm_nonlop_projectors
  ! Public variable indicating whether we should gemm_nonlop operated in a distributed manner. Set to false by default
  ! but might be enabled by memory constraints or forced by user through parameters.
 
+ logical, save, public :: gemm_nonlop_split_choice23 = .false.
+ ! Public variable indicating whether choice 23 computation should be splitted. Set to false by default
+ ! but might be enabled by memory constraints or forced by user through parameters.
+
  integer, save :: gemm_nonlop_nblocks = 1
  ! How many blocks of MPI tasks should the projs arrays be ditributed.
 

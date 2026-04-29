@@ -1371,6 +1371,9 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
    do ii=1,12; intarr(ii,:)=dtsets(:)%gpu_devices(ii); end do
    call prttagm(dprarr,intarr,iout,jdtset_,1,marr,12,narrm,ncid,ndtset_alloc,'gpu_devices','INT',0,firstchar=firstchar_gpu)
 
+   intarr(1,:)=dtsets(:)%gpu_nfft_blocks
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_nfft_blocks','INT',0,firstchar=firstchar_gpu)
+
    intarr(1,:)=dtsets(:)%gpu_linalg_limit
    call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_linalg_limit','INT',0)
 
