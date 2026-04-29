@@ -1,4 +1,4 @@
-"""\
+"""
 This is the explore_test shell. This tool lets you inspect and explore YAML
 files defining Abinit tests. It also provides documentation about the
 constraints and parameters available in the test config files.
