@@ -83,5 +83,7 @@ inp_files = [
 "t55.abi", # checks nkpath and einterp
 "t56.abi", # checks ionmov 2
 "t57.abi", # checks accuracy, rprim and tsmear
+"t58.abi", # checks nkpath, einterp and istwfk > 2
+"t59.abi", # checks tolwfr_diago
 "t60.abi", # RMM-DIIS with NC pseudos
 ]
