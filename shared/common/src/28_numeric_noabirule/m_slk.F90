@@ -1525,7 +1525,7 @@ end function basemat_is_gpu_mapped
 subroutine basemat_gpu_map(mat, gpu_action)
 
 !Arguments ------------------------------------
- class(basemat_t),target,intent(in) :: mat
+ class(basemat_t),target,intent(inout) :: mat
  character(len=*), intent(in) :: gpu_action
 
 !Local variables-------------------------------

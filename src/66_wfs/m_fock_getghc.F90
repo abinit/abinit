@@ -79,7 +79,8 @@ subroutine select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,nfftf,ng
  type(pawcprj_type),intent(in) :: cprj(natom,nspinor*ndat)
 
 !Local variables-------------------------------
- integer :: i,ider,nprojs,t_fft(3)
+ integer :: i,ider,nprojs
+ integer,target :: t_fft(3)
  integer(kind=c_size_t) :: sum_mem,free_mem,fourdp_smem
 
 ! *************************************************************************
