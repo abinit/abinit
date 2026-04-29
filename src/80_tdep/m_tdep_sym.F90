@@ -14,13 +14,12 @@ module m_tdep_sym
  use m_matrix,           only : mati3inv
  use m_symtk,            only : symatm
  use m_symfind,          only : symfind, symanal, symlatt
+ use m_tdep_dataset,     only : atdep_dataset_type, MPI_enreg_type
  use m_tdep_latt,        only : Lattice_type, tdep_make_inbox
- use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
 
  implicit none
 
- ! GA: TODO change the spelling --> Symmetries_type
- type,public :: Symetries_type
+ type,public :: Symmetries_type
 
    integer :: msym
    integer :: nptsym
@@ -36,7 +35,7 @@ module m_tdep_sym
    double precision, allocatable :: tnons(:,:)
    double precision, allocatable :: xred_zero(:,:)
 
- end type Symetries_type
+ end type Symmetries_type
 
  public :: tdep_make_sym
  public :: tdep_SearchS_1at
@@ -51,8 +50,8 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_make_sym(Invar,Lattice,MPIdata,Sym)
 
-  type(Symetries_type),intent(out) :: Sym
-  type(Input_type),intent(inout) :: Invar
+  type(Symmetries_type),intent(out) :: Sym
+  type(atdep_dataset_type),intent(inout) :: Invar
   type(Lattice_type),intent(in) :: Lattice
   type(MPI_enreg_type), intent(in) :: MPIdata
 
@@ -69,6 +68,7 @@ contains
 
 ! Compute all the symetries coming from the bravais lattice
 ! The routine used is symlatt (from Abinit code)
+! GA: FIXME msym needs to be an input variable
   Sym%msym=1000 !msym needs to be very large due to non-primitive cell calculations
   ABI_MALLOC(Sym%ptsymrel,(3,3,Sym%msym)) ; Sym%ptsymrel(:,:,:)=0
   call symlatt(Invar%bravais,std_out,Sym%msym,Sym%nptsym,Sym%ptsymrel,Lattice%rprimdt,tol8)
@@ -199,8 +199,8 @@ contains
 
  subroutine tdep_SearchS_1at(Invar,MPIdata,Sym,xred_ideal)
 
-  type(Input_type), intent(in) :: Invar
-  type(Symetries_type), intent(inout) :: Sym
+  type(atdep_dataset_type), intent(in) :: Invar
+  type(Symmetries_type), intent(inout) :: Sym
   type(MPI_enreg_type), intent(in) :: MPIdata
   double precision, intent(in) :: xred_ideal(3,Invar%natom)
 
@@ -328,8 +328,8 @@ contains
  subroutine tdep_SearchS_2at(Invar,iatom,jatom,eatom,fatom,Isym2at,Sym,xred_ideal)
 
   integer, intent(in) :: iatom,jatom,eatom,fatom
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
+  type(atdep_dataset_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
   integer, intent(inout) :: Isym2at(Invar%natom,Invar%natom,2)
   double precision, intent(in) :: xred_ideal(3,Invar%natom)
 
@@ -400,8 +400,8 @@ contains
  subroutine tdep_SearchS_3at(Invar,iatom,jatom,katom,eatom,fatom,gatom,Isym3at,Sym,xred_ideal)
 
   integer, intent(in) :: iatom,jatom,katom,eatom,fatom,gatom
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
+  type(atdep_dataset_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
   integer, intent(inout) :: Isym3at(2)
   double precision, intent(in) :: xred_ideal(3,Invar%natom)
 
@@ -506,8 +506,8 @@ contains
  subroutine tdep_SearchS_4at(Invar,iatom,jatom,katom,latom,eatom,fatom,gatom,hatom,Isym4at,Sym,xred_ideal)
 
   integer, intent(in) :: iatom,jatom,katom,latom,eatom,fatom,gatom,hatom
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
+  type(atdep_dataset_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
   integer, intent(inout) :: Isym4at(2)
   double precision, intent(in) :: xred_ideal(3,Invar%natom)
 
@@ -647,8 +647,8 @@ contains
  subroutine tdep_calc_indsym2(Invar,iatom,jatom,indsym2,isym,Sym,xred_ideal)
 
   integer, intent(in) :: iatom,jatom
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
+  type(atdep_dataset_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
   integer, intent(out) :: indsym2(8)
   double precision, intent(in) :: xred_ideal(3,Invar%natom)
 
@@ -701,7 +701,7 @@ contains
 
  subroutine tdep_destroy_sym(Sym)
 
-  type(Symetries_type),intent(inout) :: Sym
+  type(Symmetries_type),intent(inout) :: Sym
 
   ABI_FREE(Sym%ptsymrel)
   ABI_FREE(Sym%S_ref)

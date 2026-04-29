@@ -12,21 +12,15 @@ module m_tdep_phi2
   use m_abicore
   use m_xmpi
   use m_io_tools
-  use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
+  use m_tdep_dataset,     only : atdep_dataset_type, MPI_enreg_type
   use m_tdep_shell,       only : Shell_type
-  use m_tdep_sym,         only : Symetries_type
+  use m_tdep_sym,         only : Symmetries_type
   use m_tdep_qpt,         only : Qpoints_type
-  use m_tdep_utils,       only : Coeff_Moore_type
+  use m_tdep_sampling,    only : tdep_Sampling_type
+  use m_tdep_solver,      only : tdep_Solver_type
+  use m_tdep_model,       only : tdep_Model_type
 
   implicit none
-
-  type Phi2_type
-
-    double precision, allocatable :: SR(:,:)
-    double precision, allocatable :: LR(:,:)
-    double precision, allocatable :: Tot(:,:)
-
-  end type Phi2_type
 
   type Eigen_type
 
@@ -37,17 +31,13 @@ module m_tdep_phi2
   end type Eigen_type
 
   public :: tdep_calc_ftot2
-  public :: tdep_calc_phi1fcoeff
   public :: tdep_calc_phi1
   public :: tdep_write_phi1
-  public :: tdep_calc_phi2fcoeff
   public :: tdep_calc_phi2
   public :: tdep_write_phi2
   public :: tdep_build_phi2_33
   public :: tdep_calc_dij
   public :: tdep_write_dij
-  public :: tdep_init_phi2
-  public :: tdep_destroy_phi2
   public :: tdep_init_eigen2nd
   public :: tdep_destroy_eigen2nd
   public :: tdep_write_yaml
@@ -55,23 +45,20 @@ module m_tdep_phi2
 contains
 
 !====================================================================================================
- subroutine tdep_calc_ftot2(Forces_TDEP,Invar,Phi1,Phi1Ui,Phi2,Phi2UiUj,ucart)
+ subroutine tdep_calc_ftot2(Model,Invar,Phi2,ucart)
 
-  type(Input_type),intent(in) :: Invar
+  type(tdep_Model_type),intent(inout) :: Model
+  type(atdep_dataset_type),intent(in) :: Invar
   double precision, intent(in)  :: Phi2(3*Invar%natom,3*Invar%natom)
   double precision, intent(in)  :: ucart(3,Invar%natom,Invar%my_nstep)
-  double precision, intent(in)  :: Phi1(3*Invar%natom)
-  double precision, intent(out) :: Phi1Ui(Invar%my_nstep)
-  double precision, intent(out) :: Phi2UiUj(Invar%my_nstep)
-  double precision, intent(inout) :: Forces_TDEP(3*Invar%natom*Invar%my_nstep)
 
   integer :: jj,istep,jatom
   double precision, allocatable :: ucart_blas(:)
   double precision, allocatable :: ftot2(:)
 
 ! Compute Forces of the model TDEP
-  ABI_MALLOC(ucart_blas,(3*Invar%natom)); ucart_blas(:)=0.d0
-  ABI_MALLOC(ftot2     ,(3*Invar%natom)); ftot2     (:)=0.d0
+  ABI_CALLOC(ucart_blas,(3*Invar%natom))
+  ABI_CALLOC(ftot2     ,(3*Invar%natom))
   do istep=1,Invar%my_nstep
     ucart_blas(:)=0.d0
     ftot2     (:)=0.d0
@@ -80,154 +67,32 @@ contains
         ucart_blas(3*(jatom-1)+jj)=ucart(jj,jatom,istep)
       end do
     end do
-    Phi1Ui(istep)=sum(Phi1(:)*ucart_blas(:))
+    Model%Phi1Ui(istep)=sum(Model%Phi1(:)*ucart_blas(:))
     call DGEMM('N','N',3*Invar%natom,1,3*Invar%natom,1.d0,Phi2,3*Invar%natom,ucart_blas,3*Invar%natom,0.d0,ftot2(:),3*Invar%natom)
-    call DGEMM('T','N',1,1,3*Invar%natom,1./2.d0,ftot2,3*Invar%natom,ucart_blas,3*Invar%natom,0.d0,Phi2UiUj(istep),3*Invar%natom)
-    Forces_TDEP(3*Invar%natom*(istep-1)+1:3*Invar%natom*istep)=-Phi1(:)-ftot2(:)
+    call DGEMM('T','N',1,1,3*Invar%natom,1./2.d0,ftot2,3*Invar%natom,ucart_blas,3*Invar%natom,0.d0,Model%Phi2UiUj(istep),3*Invar%natom)
+    Model%Forces(3*Invar%natom*(istep-1)+1:3*Invar%natom*istep)=-Model%Phi1(:)-ftot2(:)
   end do !istep
   ABI_FREE(ucart_blas)
   ABI_FREE(ftot2)
 
  end subroutine tdep_calc_ftot2
 
-!====================================================================================================
-subroutine tdep_calc_phi1fcoeff(CoeffMoore,Invar,proj,Shell1at,Sym)
-
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
-  type(Shell_type),intent(in) :: Shell1at
-  type(Coeff_Moore_type), intent(inout) :: CoeffMoore
-  double precision, intent(in) :: proj(3,3,Shell1at%nshell)
-
-  integer :: ishell,ncoeff,ncoeff_prev,istep,iatom,iatshell,iat_mod
-  integer :: icoeff,isym,mu,iatref
-  double precision :: terme
-
-  write(Invar%stdout,*) ' '
-  write(Invar%stdout,*) '#############################################################################'
-  write(Invar%stdout,*) '############## Fill the matrices used in the pseudo-inverse #################'
-  write(Invar%stdout,*) '#############################################################################'
-
-  write(Invar%stdout,*) ' Compute the coefficients (at the 1st order) used in the Moore-Penrose...'
-  do ishell=1,Shell1at%nshell
-    if (Shell1at%neighbours(1,ishell)%n_interactions.eq.0) cycle
-    do iatshell=1,Shell1at%neighbours(1,ishell)%n_interactions
-      iatom=Shell1at%neighbours(1,ishell)%atomj_in_shell(iatshell)
-      iat_mod=mod(iatom+Invar%natom_unitcell-1,Invar%natom_unitcell)+1
-      if (iat_mod==1) cycle
-      iatref=Shell1at%iatref(ishell)
-      isym=Shell1at%neighbours(1,ishell)%sym_in_shell(iatshell)
-      ncoeff     =Shell1at%ncoeff(ishell)
-      ncoeff_prev=Shell1at%ncoeff_prev(ishell)
-      do mu=1,3
-        do icoeff=1,ncoeff
-          terme=sum(Sym%S_ref(mu,:,isym,1)*proj(:,icoeff,ishell))
-          do istep=1,Invar%my_nstep
-            CoeffMoore%fcoeff(mu+3*(iatom-1)+3*Invar%natom*(istep-1),icoeff+ncoeff_prev)= &
-&           CoeffMoore%fcoeff(mu+3*(iatom-1)+3*Invar%natom*(istep-1),icoeff+ncoeff_prev)+terme
-!           Add all the other contributions, when iat_mod==1 (due to ASR)
-            CoeffMoore%fcoeff(mu+3*(iatom-iat_mod+1)+3*Invar%natom*(istep-1),icoeff+ncoeff_prev)= &
-&           CoeffMoore%fcoeff(mu+3*(iatom-iat_mod+1)+3*Invar%natom*(istep-1),icoeff+ncoeff_prev)-terme
-          end do !istep
-        end do
-      end do
-    end do !iatshell
-  end do !ishell
-  write(Invar%stdout,*) ' ------- achieved'
-
-end subroutine tdep_calc_phi1fcoeff
-
-!====================================================================================================
-subroutine tdep_calc_phi2fcoeff(CoeffMoore,Invar,proj,Shell2at,Sym,ucart)
-
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
-  type(Shell_type),intent(in) :: Shell2at
-  type(Coeff_Moore_type), intent(inout) :: CoeffMoore
-  double precision, intent(in) :: ucart(3,Invar%natom,Invar%my_nstep)
-  double precision, intent(in) :: proj(9,9,Shell2at%nshell)
-
-  integer :: ishell,ncoeff,ncoeff_prev,istep,iatom,jatom,iatshell
-  integer :: icoeff,isym
-  integer :: mu,nu,alpha,beta,itrans
-  double precision :: terme,temp
-  double precision :: udiff(3),SSu(3,9)
-  double precision, allocatable :: SS_ref(:,:,:,:,:)
-
-! For each couple of atoms, transform the Phi2 (3x3) ifc matrix using the symetry operation (S)
-! Note: iatom=1 is excluded in order to take into account the atomic sum rule (see below)
-  ABI_MALLOC(SS_ref,(3,9,3,Sym%nsym,2)); SS_ref(:,:,:,:,:)=zero
-  do isym=1,Sym%nsym
-    do mu=1,3
-      do alpha=1,3
-        do nu=1,3
-          do beta=1,3
-            temp=Sym%S_ref(mu,alpha,isym,1)*Sym%S_ref(nu,beta,isym,1)
-            SS_ref(mu,beta+(alpha-1)*3,nu,isym,1)=temp
-            SS_ref(mu,alpha+(beta-1)*3,nu,isym,2)=temp
-          end do
-        end do
-      end do
-    end do
-  end do
-
-  write(Invar%stdout,*) ' Compute the coefficients (at the 2nd order) used in the Moore-Penrose...'
-  do ishell=1,Shell2at%nshell
-    do iatom=1,Invar%natom
-      if (Shell2at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
-      do iatshell=1,Shell2at%neighbours(iatom,ishell)%n_interactions
-        jatom=Shell2at%neighbours(iatom,ishell)%atomj_in_shell(iatshell)
-        if (iatom==jatom) cycle
-        isym=Shell2at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
-        itrans=Shell2at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
-        ncoeff     =Shell2at%ncoeff(ishell)
-        ncoeff_prev=Shell2at%ncoeff_prev(ishell)+CoeffMoore%ncoeff1st
-
-        do istep=1,Invar%my_nstep
-!         In order to impose the acoustic sum rule we use (u(j)-u(i))==u_j^\nu
-          udiff(1)=(ucart(1,jatom,istep)-ucart(1,iatom,istep))*Invar%weights(istep)
-          udiff(2)=(ucart(2,jatom,istep)-ucart(2,iatom,istep))*Invar%weights(istep)
-          udiff(3)=(ucart(3,jatom,istep)-ucart(3,iatom,istep))*Invar%weights(istep)
-
-!         F_i^\mu(t)=\sum_{\alpha\beta,j,\nu}S^{\mu\alpha}.S^{\nu\beta}.\Phi_{ij}^{\alpha\beta}.u_j^\nu(t)
-          SSu(:,:)=zero
-          do nu=1,3
-            SSu(:,:)=SSu(:,:)+SS_ref(:,:,nu,isym,itrans)*udiff(nu)
-          end do
-          do mu=1,3
-            do icoeff=1,ncoeff
-              terme=sum(SSu(mu,:)*proj(:,icoeff,ishell))
-!FB              write(Invar%stdlog,*) 'indices=', mu+3*(iatom-1)+3*Invar%natom*(istep-1),icoeff+ncoeff_prev
-              CoeffMoore%fcoeff(mu+3*(iatom-1)+3*Invar%natom*(istep-1),icoeff+ncoeff_prev)= &
-&             CoeffMoore%fcoeff(mu+3*(iatom-1)+3*Invar%natom*(istep-1),icoeff+ncoeff_prev)+terme
-            end do
-          end do
-
-        end do !istep
-      end do !iatshell
-    end do !iatom
-  end do !ishell
-  write(Invar%stdout,*) ' ------- achieved'
-  ABI_FREE(SS_ref)
-
-end subroutine tdep_calc_phi2fcoeff
-
 !=====================================================================================================
-subroutine tdep_calc_phi1(Invar,ntotcoeff,proj,Phi1_coeff,Phi1,Shell1at,Sym)
+subroutine tdep_calc_phi1(Solver,Shell1at,Sym,Phi1)
 
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
+  type(tdep_Solver_type),intent(in) :: Solver
   type(Shell_type),intent(in) :: Shell1at
-  integer,intent(in) :: ntotcoeff
-  double precision,intent(in) :: proj(3,3,Shell1at%nshell)
-  double precision,intent(in) :: Phi1_coeff(ntotcoeff,1)
-  double precision,intent(out) :: Phi1(3*Invar%natom)
+  type(Symmetries_type),intent(in) :: Sym
+  double precision,intent(out) :: Phi1(3*Solver%natom)
 
   integer :: ishell,isym,iatom,ncoeff,ncoeff_prev
   integer :: nshell,ii,iatshell,iat_mod
+  double precision,allocatable :: Phi1_coeff(:)
   double precision,allocatable :: Phi1_3(:),Phi1_ref(:,:)
 
   nshell=Shell1at%nshell
+  ABI_MALLOC(Phi1_coeff,(Solver%ncoeff1st))
+  Phi1_coeff(:) = Solver%theta(1:Solver%ncoeff1st)
   ABI_MALLOC(Phi1_ref,(3,nshell)); Phi1_ref(:,:)=zero
   ABI_MALLOC(Phi1_3,(3)) ; Phi1_3(:)=0.d0
   do ishell=1,nshell
@@ -235,7 +100,7 @@ subroutine tdep_calc_phi1(Invar,ntotcoeff,proj,Phi1_coeff,Phi1,Shell1at,Sym)
     ncoeff     =Shell1at%ncoeff(ishell)
     ncoeff_prev=Shell1at%ncoeff_prev(ishell)
     do ii=1,3
-      Phi1_ref(ii,ishell)=sum(proj(ii,1:ncoeff,ishell)*Phi1_coeff(ncoeff_prev+1:ncoeff_prev+ncoeff,1))
+      Phi1_ref(ii,ishell)=sum(Shell1at%proj(ii,1:ncoeff,ishell)*Phi1_coeff(ncoeff_prev+1:ncoeff_prev+ncoeff))
     end do
 !   Build the vector-IFC of an atom in this shell
     if (Shell1at%neighbours(1,ishell)%n_interactions.eq.0) cycle
@@ -250,17 +115,18 @@ subroutine tdep_calc_phi1(Invar,ntotcoeff,proj,Phi1_coeff,Phi1,Shell1at,Sym)
   end do !ishell
 ! Acoustic sum rule
   do ii=1,3
-    do iatom=1,Invar%natom
-      iat_mod=mod(iatom+Invar%natom_unitcell-1,Invar%natom_unitcell)+1
+    do iatom=1,Solver%natom
+      iat_mod=mod(iatom+Solver%natom_unitcell-1,Solver%natom_unitcell)+1
       if (iat_mod==1) cycle
       Phi1((iatom-iat_mod+1)*3+ii)=Phi1((iatom-iat_mod+1)*3+ii)-Phi1((iatom-1)*3+ii)
     end do
   end do
+  ABI_FREE(Phi1_coeff)
   ABI_FREE(Phi1_3)
   ABI_FREE(Phi1_ref)
 
 ! Remove the rounding errors before writing (for non regression testing purposes)
-  do ii=1,3*Invar%natom
+  do ii=1,3*Solver%natom
     if (abs(Phi1(ii)).lt.tol8) Phi1(ii)=zero
   end do
 
@@ -269,7 +135,7 @@ end subroutine tdep_calc_phi1
 !=====================================================================================================
 subroutine tdep_write_phi1(Invar,Phi1)
 
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   double precision,intent(in) :: Phi1(3*Invar%natom)
 
   integer :: iatcell,ii
@@ -290,20 +156,21 @@ subroutine tdep_write_phi1(Invar,Phi1)
 end subroutine tdep_write_phi1
 
 !=====================================================================================================
-subroutine tdep_calc_phi2(Invar,ntotcoeff,proj,Phi2_coeff,Phi2,Shell2at,Sym)
+subroutine tdep_calc_phi2(Solver,Shell2at,Sym,Phi2)
 
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
+  type(tdep_Solver_type),intent(in) :: Solver
   type(Shell_type),intent(in) :: Shell2at
-  integer,intent(in) :: ntotcoeff
-  double precision,intent(in) :: Phi2_coeff(ntotcoeff,1),proj(9,9,Shell2at%nshell)
-  double precision,intent(out) :: Phi2(3*Invar%natom,3*Invar%natom)
+  type(Symmetries_type),intent(in) :: Sym
+  double precision,intent(out) :: Phi2(3*Solver%natom,3*Solver%natom)
 
   integer :: ishell,isym,eatom,fatom,ncoeff,ncoeff_prev
   integer :: nshell,ii,jj,kk,kappa,iatshell,itrans
   double precision,allocatable :: Phi2_33(:,:),Phi2_ref(:,:,:)
+  double precision,allocatable :: Phi2_coeff(:)
 
   nshell=Shell2at%nshell
+  ABI_MALLOC(Phi2_coeff,(Solver%ncoeff2nd))
+  Phi2_coeff(:) = Solver%theta(Solver%ncoeff1st+1:Solver%ncoeff1st+Solver%ncoeff2nd)
   ABI_MALLOC(Phi2_ref,(3,3,nshell)); Phi2_ref(:,:,:)=zero
   ABI_MALLOC(Phi2_33,(3,3)) ; Phi2_33(:,:)=0.d0
   do ishell=1,nshell
@@ -314,10 +181,10 @@ subroutine tdep_calc_phi2(Invar,ntotcoeff,proj,Phi2_coeff,Phi2,Shell2at,Sym)
     do ii=1,3
       do jj=1,3
         kappa=kappa+1
-        Phi2_ref(ii,jj,ishell)=sum(proj(kappa,1:ncoeff,ishell)*Phi2_coeff(ncoeff_prev+1:ncoeff_prev+ncoeff,1))
+        Phi2_ref(ii,jj,ishell)=sum(Shell2at%proj(kappa,1:ncoeff,ishell)*Phi2_coeff(ncoeff_prev+1:ncoeff_prev+ncoeff))
       end do
     end do
-    do eatom=1,Invar%natom
+    do eatom=1,Solver%natom
 !     Build the 3x3 IFC of an atom in this shell
       if (Shell2at%neighbours(eatom,ishell)%n_interactions.eq.0) cycle
       do iatshell=1,Shell2at%neighbours(eatom,ishell)%n_interactions
@@ -337,10 +204,10 @@ subroutine tdep_calc_phi2(Invar,ntotcoeff,proj,Phi2_coeff,Phi2,Shell2at,Sym)
     end do !eatom
   end do !ishell
 ! Acoustic sum rule
-  do eatom=1,Invar%natom
+  do eatom=1,Solver%natom
     do jj=1,3
       do kk=1,3
-        do fatom=1,Invar%natom
+        do fatom=1,Solver%natom
           if (fatom==eatom) cycle
           Phi2((eatom-1)*3+jj,(eatom-1)*3+kk)=Phi2((eatom-1)*3+jj,3*(eatom-1)+kk)&
 &                                               -Phi2((eatom-1)*3+jj,3*(fatom-1)+kk)
@@ -348,12 +215,13 @@ subroutine tdep_calc_phi2(Invar,ntotcoeff,proj,Phi2_coeff,Phi2,Shell2at,Sym)
       enddo
     enddo
   enddo
+  ABI_FREE(Phi2_coeff)
   ABI_FREE(Phi2_33)
   ABI_FREE(Phi2_ref)
 
 ! Remove the rounding errors before writing (for non regression testing purposes)
-  do ii=1,3*Invar%natom
-    do jj=1,3*Invar%natom
+  do ii=1,3*Solver%natom
+    do jj=1,3*Solver%natom
       if (abs(Phi2(ii,jj)).lt.tol8) Phi2(ii,jj)=zero
     end do
   end do
@@ -363,7 +231,7 @@ end subroutine tdep_calc_phi2
 !=====================================================================================================
 subroutine tdep_write_phi2(distance,Invar,MPIdata,Phi2,Shell2at)
 
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Shell_type),intent(in) :: Shell2at
   type(MPI_enreg_type), intent(in) :: MPIdata
   double precision,intent(in) :: distance(Invar%natom,Invar%natom,4)
@@ -465,7 +333,7 @@ end subroutine tdep_write_phi2
 !=====================================================================================================
 subroutine tdep_calc_dij(dij,eigenV,iqpt,Invar,omega,Phi2,qpt_cart,Rlatt_cart)
 
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   integer,intent(in) :: iqpt
   double precision,intent(in) :: Phi2(3*Invar%natom,3*Invar%natom)
   double precision,intent(in) :: Rlatt_cart(3,Invar%natom_unitcell,Invar%natom)
@@ -566,7 +434,7 @@ end subroutine tdep_calc_dij
 !FB subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,qpt_cart)
 subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,qpt)
 
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   integer,intent(in) :: iqpt
 !FB  double precision,intent(in) :: qpt_cart(3)
   double precision,intent(in) :: qpt(3)
@@ -669,8 +537,8 @@ end subroutine tdep_write_dij
 !=====================================================================================================
 subroutine tdep_build_phi2_33(isym,Phi2_ref,Phi2_33,Sym,itrans)
 
-  type(Symetries_type),intent(in) :: Sym
-! type(Input_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
+! type(atdep_dataset_type),intent(in) :: Invar
   double precision, intent(in) :: Phi2_ref(3,3)
   double precision, intent(out) :: Phi2_33(3,3)
   integer,intent(in) :: isym,itrans
@@ -719,35 +587,6 @@ subroutine tdep_destroy_eigen2nd(Eigen2nd)
   ABI_FREE(Eigen2nd%dynmat)
 
 end subroutine tdep_destroy_eigen2nd
-
-!=====================================================================================================
-subroutine tdep_init_phi2(Phi2,loto,natom)
-
-  logical, intent(in) :: loto
-  integer, intent(in) :: natom
-  type(Phi2_type),intent(out) :: Phi2
-
-  ABI_MALLOC(Phi2%SR ,(3*natom,3*natom)); Phi2%SR (:,:)=zero
-  if (loto) then
-    ABI_MALLOC(Phi2%Tot,(3*natom,3*natom)); Phi2%Tot(:,:)=zero
-    ABI_MALLOC(Phi2%LR ,(3*natom,3*natom)); Phi2%LR (:,:)=zero
-  end if
-
-end subroutine tdep_init_phi2
-
-!=====================================================================================================
-subroutine tdep_destroy_phi2(Phi2,loto)
-
-  logical, intent(in) :: loto
-  type(Phi2_type),intent(inout) :: Phi2
-
-  ABI_FREE(Phi2%SR)
-  if (loto) then
-    ABI_FREE(Phi2%Tot)
-    ABI_FREE(Phi2%LR)
-  end if
-
-end subroutine tdep_destroy_phi2
 
 !=====================================================================================================
 subroutine tdep_write_yaml(Eigen2nd,Qpt,Prefix)

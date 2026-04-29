@@ -1,19 +1,20 @@
 """XYAPTU: Lightweight XML/HTML Document Template Engine for Python. Taken from http://code.activestate.com/recipes/162292/"""
 
-__version__ = '1.0.0'
+__version__ = "1.0.0"
 __author__= [
-  'Alex Martelli (aleax@aleax.it)',
-  'Mario Ruggier (mario@ruggier.org)'
+  "Alex Martelli (aleax@aleax.it)",
+  "Mario Ruggier (mario@ruggier.org)"
 ]
-__copyright__ = '(c) Python Style Copyright. All Rights Reserved. No Warranty.'
-__dependencies__ = ['YAPTU 1.2, http://aspn.activestate.com/ASPN/Python/Cookbook/Recipe/52305']
+__copyright__ = "(c) Python Style Copyright. All Rights Reserved. No Warranty."
+__dependencies__ = ["YAPTU 1.2, http://aspn.activestate.com/ASPN/Python/Cookbook/Recipe/52305"]
 __history__= {
-  '1.0.0' : '2002/11/13: First Released Version',
+  "1.0.0" : "2002/11/13: First Released Version",
 }
 
 ####################################################
 
-import sys, re, string
+import re
+import sys
 
 try:
     from cStringIO import StringIO
@@ -23,19 +24,36 @@ except ImportError:
 
 from .yaptu import copier
 
+
 class xcopier(copier):
-    ' xcopier class, inherits from yaptu.copier '
+    """
+    xcopier class for xyaptu.
+
+    Inherits from yaptu.copier and provides translation from XML/HTML
+    template tags to YAPTU format.
+    """
 
     def __init__(self, dns, rExpr=None, rOpen=None, rClose=None, rClause=None,
                  ouf=sys.stdout, dbg=0, dbgOuf=sys.stdout):
-        ' set default regular expressions required by yaptu.copier '
+        """
+        Initialize the xcopier.
 
+        Args:
+            dns (dict): Dictionary namespace for substitutions.
+            rExpr (regex, optional): Regex for expressions.
+            rOpen (regex, optional): Regex for opening blocks.
+            rClose (regex, optional): Regex for closing blocks.
+            rClause (regex, optional): Regex for clauses.
+            ouf (file, optional): Output stream.
+            dbg (int, optional): Debug mode (0 or 1).
+            dbgOuf (file, optional): Debug output stream.
+        """
         # Default regexps for yaptu delimiters (what xyaptu tags are first converted to)
         # These must be in sync with what is output in self._x2y_translate
-        _reExpression = re.compile('_:@([^:@]+)@:_')
-        _reOpen       = re.compile(r'\++yaptu ')
-        _reClose      = re.compile('--yaptu')
-        _reClause     = re.compile('==yaptu ')
+        _reExpression = re.compile("_:@([^:@]+)@:_")
+        _reOpen       = re.compile(r"\++yaptu ")
+        _reClose      = re.compile("--yaptu")
+        _reClause     = re.compile("==yaptu ")
 
         rExpr         = rExpr  or _reExpression
         rOpen         = rOpen  or _reOpen
@@ -54,11 +72,15 @@ class xcopier(copier):
 
 
     def xcopy(self, input=None):
-        '''
-        Converts the value of the input stream (or contents of input filename)
-        from xyaptu format to yaptu format, and invokes yaptu.copy
-        '''
+        """
+        Convert xyaptu format to yaptu format and invoke copying.
 
+        Args:
+            input (str or file, optional): Input stream or filename.
+
+        Raises:
+            ValueError: If input file cannot be opened.
+        """
         # Read the input
         inf = input
         try:
@@ -80,8 +102,15 @@ class xcopier(copier):
         yinf.close()
 
     def _x2y_translate(self, xStr):
-        ' Converts xyaptu markup in input string to yaptu delimiters '
+        """
+        Convert xyaptu markup in input string to yaptu delimiters.
 
+        Args:
+            xStr (str): Input string with xyaptu markup.
+
+        Returns:
+            str: Translated string in YAPTU format.
+        """
         # Define regexps to match xml elements on.
         # The variations (all except for py-expr, py-close) we look for are:
         # <py-elem code="{python code}" /> |
@@ -89,53 +118,53 @@ class xcopier(copier):
         # <py-elem>{python code}</py-elem>
 
         # ${py-expr} | $py-expr | <py-expr code="pvkey" />
-        reExpr = re.compile(r'''
+        reExpr = re.compile(r"""
           \$\{([^}]+)\} |  # ${py-expr}
           \$([_\w]+) | # $py-expr
           <py-expr\s+code\s*=\s*"([^"]*)"\s*/> |
           <py-expr\s+code\s*=\s*"([^"]*)"\s*>[^<]*</py-expr> |
           <py-expr\s*>([^<]*)</py-expr\s*>
-        ''', re.VERBOSE)
+        """, re.VERBOSE)
 
         # <py-line code="pvkeys=pageVars.keys()"/>
-        reLine = re.compile(r'''
+        reLine = re.compile(r"""
           <py-line\s+code\s*=\s*"([^"]*)"\s*/> |
           <py-line\s+code\s*=\s*"([^"]*)"\s*>[^<]*</py-line> |
           <py-line\s*>([^<]*)</py-line\s*>
-        ''', re.VERBOSE)
+        """, re.VERBOSE)
 
         # <py-open code="for k in pageVars.keys():" />
-        reOpen = re.compile(r'''
+        reOpen = re.compile(r"""
           <py-open\s+code\s*=\s*"([^"]*)"\s*/> |
           <py-open\s+code\s*=\s*"([^"]*)"\s*>[^<]*</py-open\s*> |
           <py-open\s*>([^<]*)</py-open\s*>
-        ''', re.VERBOSE)
+        """, re.VERBOSE)
 
         # <py-clause code="else:" />
-        reClause = re.compile(r'''
+        reClause = re.compile(r"""
           <py-clause\s+code\s*=\s*"([^"]*)"\s*/> |
           <py-clause\s+code\s*=\s*"([^"]*)"\s*>[^<]*</py-clause\s*> |
           <py-clause\s*>([^<]*)</py-clause\s*>
-        ''', re.VERBOSE)
+        """, re.VERBOSE)
 
         # <py-close />
-        reClose = re.compile(r'''
+        reClose = re.compile(r"""
           <py-close\s*/> |
           <py-close\s*>.*</py-close\s*>
-        ''', re.VERBOSE)
+        """, re.VERBOSE)
 
         # Call-back functions for re substitutions
         # These must be in sync with what is expected in self.__init__
         def rexpr(match,self=self):
-            return '_:@%s@:_' % match.group(match.lastindex)
+            return "_:@%s@:_" % match.group(match.lastindex)
         def rline(match,self=self):
-            return '\n++yaptu %s #\n--yaptu \n' % match.group(match.lastindex)
+            return "\n++yaptu %s #\n--yaptu \n" % match.group(match.lastindex)
         def ropen(match,self=self):
-            return '\n++yaptu %s \n' % match.group(match.lastindex)
+            return "\n++yaptu %s \n" % match.group(match.lastindex)
         def rclause(match,self=self):
-            return '\n==yaptu %s \n' % match.group(match.lastindex)
+            return "\n==yaptu %s \n" % match.group(match.lastindex)
         def rclose(match,self=self):
-            return '\n--yaptu \n'
+            return "\n--yaptu \n"
 
         # Substitutions
         xStr = reExpr.sub(rexpr, xStr)
@@ -146,36 +175,70 @@ class xcopier(copier):
 
         # When in debug mode, keep a copy of intermediate template format
         if self.dbg:
-            _sep = '====================\n'
-            self.dbgOuf.write('%sIntermediate YAPTU format:\n%s\n%s' % (_sep, xStr, _sep))
+            _sep = "====================\n"
+            self.dbgOuf.write("%sIntermediate YAPTU format:\n%s\n%s" % (_sep, xStr, _sep))
 
         return xStr
 
     # Handle expressions that do not evaluate
     def _handleBadExps(self, s):
-        ' Handle expressions that do not evaluate '
+        """
+        Handle expressions that do not evaluate.
+
+        Args:
+            s (str): The expression string.
+
+        Returns:
+            str: Error placeholder string.
+        """
         if self.dbg:
-            self.dbgOuf.write('!!! ERROR: failed to evaluate expression: %s \n' % s)
-        return '***! %s !***' % s
+            self.dbgOuf.write("!!! ERROR: failed to evaluate expression: %s \n" % s)
+        return "***! %s !***" % s
 
     # Preprocess code
     def _preProcess(self, s, why):
-        ' Preprocess embedded python statements and expressions '
+        """
+        Preprocess embedded python statements and expressions.
+
+        Args:
+            s (str): The code string.
+            why (str): "exec" or "eval".
+
+        Returns:
+            str: Decoded code string.
+        """
         return self._xmlDecode(s)
     def _preProcessDbg(self, s, why):
-        ' Preprocess embedded python statements and expressions '
-        self.dbgOuf.write('!!! DBG: %s %s \n' % (s, why))
+        """
+        Preprocess embedded python statements and expressions with debug logging.
+
+        Args:
+            s (str): The code string.
+            why (str): "exec" or "eval".
+
+        Returns:
+            str: Decoded code string.
+        """
+        self.dbgOuf.write("!!! DBG: %s %s \n" % (s, why))
         return self._xmlDecode(s)
 
     # Decode utility for XML/HTML special characters
     _xmlCodes = [
-      ['"', '&quot;'],
-      ['>', '&gt;'],
-      ['<', '&lt;'],
-      ['&', '&amp;'],
+      ['"', "&quot;"],
+      [">", "&gt;"],
+      ["<", "&lt;"],
+      ["&", "&amp;"],
     ]
     def _xmlDecode(self, s):
-        ' Returns the ASCII decoded version of the given HTML string. '
+        """
+        Return the ASCII decoded version of the given HTML string.
+
+        Args:
+            s (str): HTML string to decode.
+
+        Returns:
+            str: Decoded string.
+        """
         codes = self._xmlCodes
         for code in codes:
             #s = string.replace(s, code[1], code[0])
@@ -185,29 +248,29 @@ class xcopier(copier):
 
 ####################################################
 
-if __name__=='__main__':
+if __name__=="__main__":
 
     ##################################################
     # Document Name Space (a dictionary, normally prepared by runtime application,
     # and that serves as the substitution namespace for instantiating a doc template).
     #
     DNS = {
-      'pageTitle' : 'Event Log (xyaptu test page)',
-      'baseUrl' : 'http://xproject.sourceforge.net/',
-      'sid' : 'a1b2c3xyz',
-      'session' : 1,
-      'userName' : 'mario',
-      'startTime' : '12:31:42',
-      'AllComputerCaptions' : 'No',
-      'ComputerCaption' : 'mymachine01',
-      'LogSeverity' : ['Info', 'Warning', 'Error' ],
-      'LogFileType' : 'Application',
-      'logTimeStamp' : 'Event Log Dump written on 25 May 2001 at 13:55',
-      'logHeadings' : ['Type', 'Date', 'Time', 'Source', 'Category', 'Computer', 'Message'] ,
-      'logEntries' : [
-        ['Info', '14/05/2001', '15:26', 'MsiInstaller', '0', 'PC01', 'winzip80 install ok...'],
-        ['Warning', '16/05/2001', '02:43', 'EventSystem', '4', 'PC02', 'COM+ failed...'],
-        ['Error', '22/05/2001', '11:35', 'rasctrs', '0', 'PC03', '...', ' ** EXTRA ** ' ],
+      "pageTitle" : "Event Log (xyaptu test page)",
+      "baseUrl" : "http://xproject.sourceforge.net/",
+      "sid" : "a1b2c3xyz",
+      "session" : 1,
+      "userName" : "mario",
+      "startTime" : "12:31:42",
+      "AllComputerCaptions" : "No",
+      "ComputerCaption" : "mymachine01",
+      "LogSeverity" : ["Info", "Warning", "Error" ],
+      "LogFileType" : "Application",
+      "logTimeStamp" : "Event Log Dump written on 25 May 2001 at 13:55",
+      "logHeadings" : ["Type", "Date", "Time", "Source", "Category", "Computer", "Message"] ,
+      "logEntries" : [
+        ["Info", "14/05/2001", "15:26", "MsiInstaller", "0", "PC01", "winzip80 install ok..."],
+        ["Warning", "16/05/2001", "02:43", "EventSystem", "4", "PC02", "COM+ failed..."],
+        ["Error", "22/05/2001", "11:35", "rasctrs", "0", "PC03", "...", " ** EXTRA ** " ],
       ]
     }
 
@@ -215,15 +278,15 @@ if __name__=='__main__':
     def my_current_time():
         import time
         return str(time.clock())
-    DNS['my_current_time'] = my_current_time
+    DNS["my_current_time"] = my_current_time
 
-    '''
+    """
     # To use functions defined in an external library
     import externalFunctionsLib
     dict['fcn'] = externalFunctionsLib
     # which will therefore permit to call functions with:
     ${fcn.somefun()}
-    '''
+    """
 
     ##################################################
     # Sample page template that uses the xyaptu tags and pcdata expressions.
@@ -231,7 +294,7 @@ if __name__=='__main__':
     #  - source code indentation here is irrelevant for xyaptu
     #  - xyaptu tags may span more than one source line
     #
-    templateString = '''<html>
+    templateString = """<html>
    <head>
     <title>$pageTitle</title>
    </head>
@@ -288,7 +351,7 @@ if __name__=='__main__':
     <hr>
    </body>
   </html>
-    '''
+    """
 
     ##################################################
     # Set a filelike object to templateString
@@ -303,22 +366,22 @@ if __name__=='__main__':
     ##################################################
     # Test DBG 1
     # Set dbg ON (writing dbg statements on output stream)
-    '''
+    """
     xcp = xcopier(DNS, dbg=1)
     xcp.xcopy(templateStream)
-    '''
+    """
 
     ##################################################
     # Test DBG 2
     # Write dbg statements to a separate dbg stream
-    '''
+    """
     dbgStream = StringIO()
     dbgStream.write('DBG info: \n')
     xcp = xcopier(DNS, dbg=1, dbgOuf=dbgStream)
     xcp.xcopy(templateStream)
     print dbgStream.getvalue()
     dbgStream.close()
-    '''
+    """
 
 ####################################################
 

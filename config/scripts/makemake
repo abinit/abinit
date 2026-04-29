@@ -201,8 +201,8 @@ from optparse import OptionParser
 my_help = "Usage: %prog [options] vdW-DF_file"
 parser = OptionParser(usage=my_help, version="%prog for Abinit 9")
 
-parser.add_option("--without-chmod", action="store_false",
-  dest="run_chmod", default=True,
+parser.add_option("--with-chmod", action="store_true",
+  dest="run_chmod", default=False,
   help="Skip chmod operations")
 parser.add_option("-a", "--without-autotools", action="store_false",
   dest="run_autotools", default=True,

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 """Search for inlined CPP macros in ABINIT src files"""
-from __future__ import unicode_literals, division, print_function, absolute_import
 
 __author__  = "M. Giantomassi"
 
@@ -90,7 +89,7 @@ def main():
             for src in files:
                 if not is_srcfile(dirpath, src): continue
                 fpath = os.path.join(dirpath,src)
-                with open(fpath, "rt") as fh:
+                with open(fpath) as fh:
                     for lno, line in enumerate(fh):
                         retcode = wrong_string(line)
                         if retcode:
