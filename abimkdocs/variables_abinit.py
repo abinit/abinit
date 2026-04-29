@@ -8681,9 +8681,38 @@ As usual, the default is atomic units.
 Note that Tesla are admitted, despite the fact that this is not the proper unit for a $H$ field.
 Actually, if you specify "Tesla", ABINIT will set $\mu_0H$ in Tesla, so that H will be in Amperes/metre.
 
+The three components are expressed in the spin-axis basis defined by [[spinaxis]].
+For the default value [[spinaxis]] = (0 0 1), this basis coincides with the Cartesian reference frame, so that [[hspinfield]] is equivalent to [[hspinfield_cart]].
+
+When [[spinaxis]] is not aligned with the Cartesian z axis, it is recommended to use
+[[hspinfield_cart]] instead of [[hspinfield]], in order to specify the magnetic field directly in Cartesian coordinates.
+
 REPLACES the obsolete zeemanfield input variable.
 """,
 ),
+
+Variable(
+    abivarname="hspinfield_cart",
+    varset="ffield",
+    vartype="real",
+    topics=["MagField_basic"],
+    dimensions=[3],
+    defaultval=0,
+    mnemonics="H-magnetic SPIN FIELD in CARTesian coordinates",
+    characteristics=["[[MAGNETIC_FIELD]]"],
+    added_in_version="10.7.0",
+    text=r"""
+Give the value of the magnetic field, $H$, acting on the spin/spinorial wavefunctions (so, not on the orbital part), in Cartesian coordinates.
+As usual, the default is atomic units.
+
+Note that Tesla are admitted, despite the fact that this is not the proper unit for a $H$ field.
+Actually, if you specify "Tesla", ABINIT will set $\mu_0H$ in Tesla, so that H will be in Amperes/metre.
+
+This variable is the Cartesian-coordinate counterpart of [[hspinfield]] and uses the same units.
+It should be used when [[spinaxis]] is not aligned with the Cartesian z axis.
+""",
+),
+
 
 Variable(
     abivarname="hyb_mixing",
@@ -20495,9 +20524,16 @@ Variable(
     mnemonics="SPIN for AToms",
     added_in_version="before_v9",
     text=r"""
-Gives the **initial** electronic spin-magnetization for each atom in Cartesian coordinates, in unit of $\hbar/2$,
+Gives the **initial** electronic spin-magnetization for each atom, in unit of $\hbar/2$,
 as well as, in case of fixed magnetization calculations (see [[constraint_kind]] and [[magconon]]),
 the **target value** of the magnetization.
+
+The three components are expressed in the spin-axis basis defined by [[spinaxis]].
+For the default value [[spinaxis]] = (0 0 1), this basis coincides with the Cartesian reference frame,
+so that [[spinat]] is equivalent to [[spinat_cart]].
+
+When [[spinaxis]] is not aligned with the Cartesian z axis, it is recommended to use [[spinat_cart]]
+instead of [[spinat]], in order to specify the magnetic vectors directly in Cartesian coordinates.
 
 Note that if [[nspden]] = 2, the z-component must be given for each atom, in triplets (0 0 z-component).
 For example, the electron of an hydrogen atom can be spin up (0 0 1.0) or spin down (0 0 -1.0).
@@ -20524,6 +20560,29 @@ then recommended to put [[nsym]] = 1.
 * If the symmetries are specified, and the irreducible set of atoms is specified, the anti-ferromagnetic characteristics of the symmetry operations [[symafm]] will be used to generate [[spinat]] for all the non-irreducible atoms.
 
 * In the case of PAW+U calculations using the [[dmatpawu]] initial occupation matrix, and if [[nspden]] = 4, [[spinat]] is also used to determine the direction of the integrated magnetization matrix.
+""",
+),
+
+Variable(
+    abivarname="spinat_cart",
+    varset="gstate",
+    vartype="real",
+    topics=["spinpolarisation_basic", "crystal_useful", "MagMom_useful", "ConstrainedDFT_useful"],
+    dimensions=ValueWithConditions({"[[natrd]]<[[natom]]": "[3, [[natrd]] ]", "defaultval": "[3, [[natom]] ]"}),
+    defaultval=0.0,
+    mnemonics="SPIN for AToms in CARTesian coordinates",
+    added_in_version="10.7.0",
+    text=r"""
+Gives the **initial** electronic spin magnetization for each atom in Cartesian coordinates, in unit of $\hbar/2$,
+as well as, in case of fixed magnetization calculations (see [[constraint_kind]] and [[magconon]]),
+the **target value** of the magnetization.
+
+This variable is the Cartesian-coordinate counterpart of [[spinat]].
+It is recommended when [[spinaxis]] is not aligned with the Cartesian z axis, in order to specify
+the magnetic moments directly in Cartesian coordinates.
+
+Note that if [[nspden]] = 2, only the component along [[spinaxis]] is used: the Cartesian magnetic
+moments specified by [[spinat_cart]] are therefore projected onto this axis.
 """,
 ),
 
