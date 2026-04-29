@@ -8338,7 +8338,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  real(dp),contiguous, pointer :: ks_eig(:,:,:), qp_eig(:,:,:), qp_occ(:,:,:), cg2_ptr(:,:) ! cg1_ptr(:,:),
  real(dp),allocatable :: work(:,:,:,:), cg1_ibz(:,:) !, cg2_bz(:,:)
  complex(gwp),allocatable :: vc_sqrt_qbz(:), ur_bdgw(:,:)
- complex(dp),allocatable :: rhotwg(:), rhotwgp(:), rhotwg_ki(:,:), ur_ksum(:), ur_prod(:), eig0r(:)
+ complex(dp),allocatable :: rhotwg(:), rhotwgp(:), rhotwg_ki(:,:), ur_ksum(:), ur_prod(:), eig0r(:), ugb_kcalcibz(:)
  complex(dp),target,allocatable :: ug_ksum(:)
  complex(dp),allocatable  :: sigxme_tmp(:,:,:), sigx(:,:,:,:)
  type(sigijtab_t),allocatable :: Sigxij_tab(:,:), Sigcij_tab(:,:)
@@ -8530,6 +8530,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
      end if
 
      ABI_MALLOC(ug_ksum, (npw_k * nspinor))
+     ABI_MALLOC(ugb_kcalcibz, (npw_k * nspinor))
      ABI_MALLOC(cg1_ibz, (2, desc_ki%npw * nspinor))
      !ABI_MALLOC(cg2_bz, (2, npw_k * nspinor))
 
@@ -8618,13 +8619,12 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
                !cg_jb  => wave_jb%ug
                !ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
                !!! FIXME TSAI: Need double check
-               associate (ugb_kcalcibz => gwr%ugb(ikcalc_ibz, spin)%buffer_cplx(:,il_b))
-                 ABI_CHECK(size(ug_ksum) == size(ugb_kcalcibz), "Size mismatch in Sigma_x")
-                 ctmp = xdotc(npw_k, ug_ksum(1:), 1, ugb_kcalcibz(1:), 1)
-                 rhotwg_ki(1, jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp) * real(ctmp)
-                 ctmp = xdotc(npw_k, ug_ksum(npw_k+1:), 1, ugb_kcalcibz(npw_k+1:), 1)
-                 rhotwg_ki(npwx+1, jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp) * real(ctmp)
-               end associate
+               ugb_kcalcibz = gwr%ugb(ikcalc_ibz, spin)%buffer_cplx(:,il_b)
+               ABI_CHECK(size(ug_ksum) == size(ugb_kcalcibz), "Size mismatch in Sigma_x")
+               ctmp = xdotc(npw_k, ug_ksum(1:), 1, ugb_kcalcibz(1:), 1)
+               rhotwg_ki(1, jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp) * real(ctmp)
+               ctmp = xdotc(npw_k, ug_ksum(npw_k+1:), 1, ugb_kcalcibz(npw_k+1:), 1)
+               rhotwg_ki(npwx+1, jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp) * real(ctmp)
              end if
              !!!rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
              !!! PAW is missing
@@ -8678,6 +8678,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
      ABI_FREE(gbound_x)
      ABI_FREE(kg_k)
      ABI_FREE(ug_ksum)
+     ABI_FREE(ugb_kcalcibz)
      ABI_FREE(cg1_ibz)
      !ABI_FREE(cg2_bz)
      ABI_FREE(gbound_ksum)
