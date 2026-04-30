@@ -94,7 +94,7 @@ subroutine select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,nfftf,&
 
 #ifdef HAVE_GPU
  call gpu_get_max_mem(free_mem)
- free_mem = 0.95 * free_mem ! Cutting 5% out to be safe
+ free_mem = 0.85 * free_mem ! Cutting 15% out to be safe
 #endif
 
  do i=1,nband_k
@@ -149,13 +149,14 @@ subroutine select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,nfftf,&
        sum_mem = sum_mem + INT(2,c_size_t)*nprojs*npw*6
      end if
      ! grnhat_12
+     ider=ider*2 ! Overestimate this buffer to ensure it fits as we don't manage OpenMP pool of GPU memory
      sum_mem = sum_mem + INT(2,c_size_t)*nfftf*nspinor**2*3*natom*(ider/3)*ndat_occ*ndat
      ! gvnlxc
      sum_mem = sum_mem + INT(2,c_size_t)*npw*nspinor*ndat_occ
      ! rho12
      sum_mem = sum_mem + INT(2,c_size_t)*nfftf*nspinor**2*ndat_occ*ndat
 
-     ! rho12 (paw_psipsi internal work array)
+     ! nhat12_atm/nhat12_work (paw_psipsi internal work array)
      sum_mem = sum_mem + INT(2,c_size_t)*nfftf*nspinor**2*ndat_occ*ndat*natom
      ! cprj1 (paw_psipsi internal work array)
      sum_mem = sum_mem + INT(2,c_size_t)*nprojs*nspinor*ndat
@@ -184,7 +185,7 @@ subroutine select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,nfftf,&
  end if
 !#ifdef DEBUG_VERBOSE
  write(std_out,*) "-----------DEBUG fock_getghc%select_ndat_occ_for_gpu : "
- write(std_out,'(A,F10.3,1x,A)') "Free GPU memory                : ", real(free_mem,dp)/(1024*1024), "MiB"
+ write(std_out,'(A,F10.3,1x,A)') "Considered free GPU memory     : ", real(free_mem,dp)/(1024*1024), "MiB"
  write(std_out,'(A,I4)')         "selected ndat_occ              : ", ndat_occ
  write(std_out,'(A,F10.3,1x,A)') "Forecasted consumed GPU memory : ", real(sum_mem,dp)/(1024*1024), "MiB"
  write(std_out,*) "-----------END DEBUG fock_getghc%select_ndat_occ_for_gpu : "
@@ -255,6 +256,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  real(dp), allocatable :: rho12(:,:,:,:,:),rhog_munu(:,:,:,:),rhor_munu(:,:,:,:),vlocpsi_r(:,:),strdat(:,:,:,:)
  real(dp), allocatable :: vfock(:,:,:),psilocal(:,:,:),enlout_dum(:),vectin_dum(:,:),vqg(:),forout(:,:),strout(:,:),for1(:,:,:,:)
  real(dp), allocatable,target ::cwavef_r(:,:,:,:),vdotr(:,:,:,:),vdoti(:),vfockstr(:,:,:)
+ real(dp), allocatable,target :: nhat12_work(:,:,:,:,:,:)
  real(dp), ABI_CONTIGUOUS  pointer :: cwaveocc_r(:,:,:,:,:)
  type(pawcprj_type),pointer :: cwaveocc_prj(:,:)
 
@@ -493,17 +495,15 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 #endif
      end if
      ABI_MALLOC(grnhat_12,(2,nfftf,nspinor**2,3,natom*(ider/3),ndat_occ,ndat))
-#ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET ENTER DATA MAP(alloc:grnhat_12) IF(gpu_option==ABI_GPU_OPENMP .and. ider==3)
-#endif
      ABI_MALLOC(gvnlxc,(2,npw*nspinor*ndat_occ))
-#ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET ENTER DATA MAP(alloc:gvnlxc) IF(gpu_option==ABI_GPU_OPENMP)
-#endif
      ABI_MALLOC(grnhat12,(2,nfftf,nspinor**2,3*nhat12_grdim,ndat_occ,ndat))
      ABI_MALLOC(rho12,(2,nfftf,nspinor**2,ndat_occ,ndat))
+     ABI_MALLOC(nhat12_work, (2,nfftf,nspinor**2,ndat_occ,ndat,maxval(gs_ham%nattyp)))
 #ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET ENTER DATA MAP(alloc:grnhat_12) IF(gpu_option==ABI_GPU_OPENMP .and. ider==3)
+     !$OMP TARGET ENTER DATA MAP(alloc:gvnlxc) IF(gpu_option==ABI_GPU_OPENMP)
      !$OMP TARGET ENTER DATA MAP(alloc:rho12) IF(gpu_option==ABI_GPU_OPENMP)
+     !$OMP TARGET ENTER DATA MAP(alloc:nhat12_work) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    end if
 
@@ -664,7 +664,8 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 &       nhat12_grdim,nspinor,fockcommon%ntypat,ndat,ndat_occ,fockbz%pawang,fockcommon%pawfgrtab,grnhat12,&
 &       rho12,&
 &       fockcommon%pawtab,gprimd=gs_ham%gprimd,grnhat_12=grnhat_12,qphon=qvec_j,&
-&       xred=gs_ham%xred,atindx=gs_ham%atindx,gpu_option=gpu_option,nattyp=gs_ham%nattyp)
+&       xred=gs_ham%xred,atindx=gs_ham%atindx,gpu_option=gpu_option,nattyp=gs_ham%nattyp,&
+&       nhat12_work=nhat12_work)
 
        if(gpu_option==ABI_GPU_DISABLED) then
          !$OMP PARALLEL DO COLLAPSE(2) &
@@ -1240,11 +1241,13 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      end if
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET EXIT DATA MAP(delete:grnhat_12) IF(gpu_option==ABI_GPU_OPENMP .and. ider==3)
+     !$OMP TARGET EXIT DATA MAP(delete:rho12,gvnlxc,nhat12_work) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
      ABI_FREE(grnhat_12)
      ABI_FREE(gvnlxc)
      ABI_FREE(grnhat12)
      ABI_FREE(rho12)
+     ABI_FREE(nhat12_work)
    end if
 
    call timab(1528,2,tsec)

@@ -1,4 +1,12 @@
 #!/usr/bin/env python
+"""
+Check config.h inclusion.
+
+This script scans all Fortran source files (`.F` and `.F90`) in the ABINIT
+source directories to ensure that they properly include `config.h` using
+the standard `#if defined HAVE_CONFIG_H` macro. It reports missing or
+multiple inclusions.
+"""
 
 import os
 import re
@@ -13,7 +21,13 @@ re_srcfile = re.compile(r"\.(F|F90)$")
 re_config  = re.compile("#if defined HAVE_CONFIG_H\n#include .config\\.h.\n#endif\n",re.MULTILINE)
 
 
-def main():
+def main() -> int:
+  """
+  Main logic for validating `config.h` inclusions.
+
+  Returns:
+      Number of files missing the `config.h` inclusion (0 if OK).
+  """
   for top in find_src_dirs():
       assert os.path.exists(top)
       retval = 0

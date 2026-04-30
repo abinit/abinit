@@ -135,11 +135,11 @@ Finally, the expression for the total nonlocal operator in reciprocal space is:
 \end{equation}
 
 For developers, more information about the pseudopotential formats that can be used with ABINIT can be found in several documents with formats numbered between 1 and 8 (7 missing):
-formats [1](/developers/psp1_info),
-formats [2 and 3](/developers/psp3_info),
-formats [4 and 5](/developers/psp45_info),
-formats [6](/developers/psp6_info),
-formats [8](/developers/psp8_info).
+formats [1](../developers/psp1_info.md),
+formats [2 and 3](../developers/psp3_info.md),
+formats [4 and 5](../developers/psp45_info.md),
+formats [6](../developers/psp6_info.md),
+formats [8](../developers/psp8_info.md).
 
 !!! note
 

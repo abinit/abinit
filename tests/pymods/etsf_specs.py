@@ -4,9 +4,12 @@ This module provides functions and objects to validate netcdf files written in t
 For a quick reference to the etsf specs see: http://esl.cecam.org/mediawiki/index.php/ETSF_File_Format_Specifications
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import re
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +24,7 @@ except ImportError as exc:
     raise ImportError(errmsg)
 
 
-def all_subclasses(cls):
+def all_subclasses(cls: type[Any]) -> list[type[Any]]:
     """
     Given a class `cls`, return all its subclasses recursively.
 
@@ -774,7 +777,7 @@ class PotentialGroup(DenPotGroup):
     pass
 
 
-def validate_vars(path):
+def validate_vars(path: str) -> list[str]:
     """
     Validate the ETSF variables declared in file `path`.
 

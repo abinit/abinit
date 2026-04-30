@@ -2,7 +2,16 @@
 Pyinvoke file for automating build and configuration tasks within the Abinit repository.
 
 This file can be executed from any location within the Abinit directory structure,
-including build directories.
+including build directories. It requires the `invoke` package.
+
+Task Categories:
+    * Build & Clean: `make`, `makemake`, `makedeep`, `clean`
+    * Testing: `runemall`, `abichecks`
+    * Git & Release: `pull`, `push`, `pull_trunk`, `branchoff`, `official_release`, `git_info`, `submodules`
+    * Debugging: `gdb`, `lldb`, `config_log`
+    * Execution: `abinit`, `anaddb`, `mpi_check`, `omp_check`
+    * Utilities: `links`, `ctags`, `fgrep`, `cgrep`, `tgrep`, `watchdog`, `diff2`, `diff3`
+    * System Info: `system`, `pid`, `env`
 
 General usage:
     To list available commands:
@@ -11,6 +20,7 @@ General usage:
     To run specific tasks (e.g., abichecks):
         invoke abichecks
 """
+
 from __future__ import annotations
 
 import os
@@ -27,7 +37,9 @@ from shutil import which
 try:
     from invoke import Context, task
 except ImportError:
-    raise ImportError("Cannot import invoke package. Use `pip install invoke` (or `pip install fabric` which includes invoke)")
+    raise ImportError(
+        "Cannot import invoke package. Use `pip install invoke` (or `pip install fabric` which includes invoke)"
+    )
 
 
 from tests.pymods.devtools import number_of_cpus
@@ -38,28 +50,28 @@ ABINIT_ROOTDIR = os.path.dirname(__file__)
 ABINIT_SRCDIR = os.path.join(ABINIT_ROOTDIR, "src")
 
 ALL_BINARIES = [
-"abinit",
-"abitk",
-"aim",
-"anaddb",
-"band2eps",
-"conducti",
-"cut3d",
-"dummy_tests",
-"fftprof",
-"fold2Bloch",
-"ioprof",
-"lapackprof",
-"macroave",
-"mrgddb",
-"mrgdv",
-"mrggkk",
-"mrgscr",
-"multibinit",
-"optic",
-"atdep",
-"testtransposer",
-"lruj",
+    "abinit",
+    "abitk",
+    "aim",
+    "anaddb",
+    "band2eps",
+    "conducti",
+    "cut3d",
+    "dummy_tests",
+    "fftprof",
+    "fold2Bloch",
+    "ioprof",
+    "lapackprof",
+    "macroave",
+    "mrgddb",
+    "mrgdv",
+    "mrggkk",
+    "mrgscr",
+    "multibinit",
+    "optic",
+    "atdep",
+    "testtransposer",
+    "lruj",
 ]
 
 
@@ -76,9 +88,12 @@ def which_vim() -> str:
     Raises:
         RuntimeError: If no Vim executable is found.
     """
-    if which("mvim") is not None: return "mvim"
-    if which("nvim") is not None: return "nvim"
-    if which("vim") is not None: return "vim"
+    if which("mvim") is not None:
+        return "mvim"
+    if which("nvim") is not None:
+        return "nvim"
+    if which("vim") is not None:
+        return "vim"
     raise RuntimeError("Cannot find vim in $PATH!")
 
 
@@ -93,7 +108,8 @@ def which_differ() -> str:
         RuntimeError: If no differ executable is found.
     """
     differ = "vimdiff"
-    if which("mvimdiff") is not None: differ = "mvimdiff"
+    if which("mvimdiff") is not None:
+        differ = "mvimdiff"
 
     if which(differ) is None:
         raise RuntimeError(f"Cannot find {differ=} in $PATH!")
@@ -164,7 +180,13 @@ def list_from_string(string, type=int) -> list[str]:
 
 
 @task
-def make(ctx: Context, jobs: str | int = "auto", touch: bool = False, clean: bool = False, binary: str = "") -> None:
+def make(
+    ctx: Context,
+    jobs: str | int = "auto",
+    touch: bool = False,
+    clean: bool = False,
+    binary: str = "",
+) -> None:
     """
     Recompile the Abinit source code.
 
@@ -196,7 +218,7 @@ def make(ctx: Context, jobs: str | int = "auto", touch: bool = False, clean: boo
             ctx.run("cd src && make clean && cd ..", pty=True)
             ctx.run("cd shared && make clean && cd ..", pty=True)
 
-        #cmd = f"make -j{jobs} {binary} | tee make.log 2> make.stderr"
+        # cmd = f"make -j{jobs} {binary} | tee make.log 2> make.stderr"
         cmd = f"make -j{jobs} {binary}"
         cprint(f"Executing: {cmd}", color="yellow")
         result = ctx.run(cmd, pty=True)
@@ -205,13 +227,14 @@ def make(ctx: Context, jobs: str | int = "auto", touch: bool = False, clean: boo
             sys.exit(1)
 
         # TODO Check for errors in make.stderr
-        #cprint("Exit code: %s" % retcode, "green" if retcode == 0 else "red")
+        # cprint("Exit code: %s" % retcode, "green" if retcode == 0 else "red")
 
-        #if SYSTEM == "Darwin":
+        # if SYSTEM == "Darwin":
         #    for binary in ALL_BINARIES:
         #        cmd = f"codesign -v --force --deep src/98_main/{binary}"
         #        cprint("Executing: %s" % cmd, "yellow")
         #        ctx.run(cmd, pty=True)
+
 
 @task
 def clean(ctx: Context) -> None:
@@ -231,7 +254,14 @@ def clean(ctx: Context) -> None:
 
 
 @task
-def runemall(ctx: Context, make: bool = True, jobs: str | int = "auto", touch: bool = False, clean: bool = False, keywords: str | None = None) -> None:
+def runemall(
+    ctx: Context,
+    make: bool = True,
+    jobs: str | int = "auto",
+    touch: bool = False,
+    clean: bool = False,
+    keywords: str | None = None,
+) -> None:
     """
     Run all sequential and parallel tests.
 
@@ -262,7 +292,8 @@ def runemall(ctx: Context, make: bool = True, jobs: str | int = "auto", touch: b
         # Now run the parallel tests.
         for n in [2, 4, 10]:
             j = jobs // n
-            if j == 0: continue
+            if j == 0:
+                continue
             cmd = "./runtests.py paral mpiio -j%d -n%d %s" % (j, n, kws)
             cprint(f"Executing: {cmd}", color="yellow")
             ctx.run(cmd, pty=True)
@@ -305,20 +336,28 @@ def abichecks(ctx: Context) -> int:
         ctx: Invoke context.
     """
     import time
+
     retcode = 0
     with cd(ABINIT_ROOTDIR):
         script_dir = os.path.join("abichecks", "scripts")
-        exclude = ["check-libpaw.py", "warningschk.py", "abirules_tools.py", "__init__.py"]
+        exclude = [
+            "check-libpaw.py",
+            "warningschk.py",
+            "abirules_tools.py",
+            "__init__.py",
+        ]
         for py_script in [f for f in os.listdir(script_dir) if f.endswith(".py")]:
-            if py_script in exclude: continue
+            if py_script in exclude:
+                continue
             py_script = os.path.join(script_dir, py_script)
             print("Running", py_script, "... ")
             start = time.time()
             result = ctx.run(py_script, warn=True, pty=True)
-            #print(result.ok)
+            # print(result.ok)
             msg, color = ("[OK]", "green") if result.ok else ("[FAILED]", "red")
             cprint("%s (%.2f s)" % (msg, time.time() - start), color=color)
-            if not result.ok: retcode += 1
+            if not result.ok:
+                retcode += 1
 
     if retcode != 0:
         cprint("%d FAILED TESTS" % retcode, color="red")
@@ -342,7 +381,9 @@ def robodoc(ctx: Context) -> bool | None:
         if result.ok:
             cprint("ROBODOC BUILD OK", color="green")
             # https://stackoverflow.com/questions/44447469/cannot-open-an-html-file-from-python-in-a-web-browser-notepad-opens-instead
-            html_path = os.path.join(ABINIT_ROOTDIR, "./tmp-robodoc/www/robodoc/masterindex.html")
+            html_path = os.path.join(
+                ABINIT_ROOTDIR, "./tmp-robodoc/www/robodoc/masterindex.html"
+            )
             print("Trying to open %s in browser ..." % html_path)
             return webbrowser.open_new_tab(html_path)
         cprint("ROBODOC BUILD FAILED", color="red")
@@ -374,7 +415,8 @@ def links(ctx: Context) -> None:
     top = find_top_build_tree(".", with_abinit=True)
     main98 = os.path.join(top, "src", "98_main")
     for dest in ALL_BINARIES:
-        if os.path.islink(os.path.join(os.getcwd(), dest)): continue
+        if os.path.islink(os.path.join(os.getcwd(), dest)):
+            continue
         source = os.path.join(main98, dest)
         if os.path.isfile(source):
             os.symlink(source, dest)
@@ -395,6 +437,7 @@ def ctags(ctx: Context) -> None:
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
+
 @task
 def fgrep(ctx: Context, pattern: str) -> None:
     """
@@ -410,7 +453,10 @@ def fgrep(ctx: Context, pattern: str) -> None:
     #    -i - case-insensitive search
     #    --include=\*.${file_extension} - search files that match the extension(s) or file pattern only
     with cd(ABINIT_ROOTDIR):
-        cmd  = 'grep -r -i --color --include "*[.F90,.f90,.finc,.c,.cu,.cpp,.h]" "%s" src shared' % pattern
+        cmd = (
+            'grep -r -i --color --include "*[.F90,.f90,.finc,.c,.cu,.cpp,.h]" "%s" src shared'
+            % pattern
+        )
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
@@ -425,7 +471,7 @@ def cgrep(ctx: Context, pattern: str) -> None:
         pattern (str): The pattern to search for.
     """
     with cd(ABINIT_ROOTDIR):
-        cmd  = 'grep -r -i --color --include "*.c" "%s" src shared' % pattern
+        cmd = 'grep -r -i --color --include "*.c" "%s" src shared' % pattern
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
@@ -440,7 +486,7 @@ def tgrep(ctx: Context, pattern: str) -> None:
         pattern (str): The pattern to search for.
     """
     with cd(ABINIT_ROOTDIR):
-        cmd  = 'grep -r -i --color "%s" tests/*/Input/*' % pattern
+        cmd = 'grep -r -i --color "%s" tests/*/Input/*' % pattern
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
@@ -471,7 +517,9 @@ def env(ctx: Context) -> None:
     Args:
         ctx: Invoke context.
     """
-    cprint("\nExecute the following lines in the shell to set the env:\n", color="green")
+    cprint(
+        "\nExecute the following lines in the shell to set the env:\n", color="green"
+    )
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main")
     print(f"export ABI_PSPDIR={ABINIT_ROOTDIR}/tests/Pspdir")
@@ -489,7 +537,8 @@ def diff2(ctx: Context, filename: str = "run.abo") -> None:
     """
     vimdiff = which_differ()
     files = sorted([f for f in os.listdir(".") if f.startswith(filename)])
-    if not files: return
+    if not files:
+        return
     cmd = f"{vimdiff} {filename} {files[-1]}"
     cprint(f"Executing {cmd}", color="green")
     ctx.run(cmd, pty=True)
@@ -507,7 +556,8 @@ def diff3(ctx: Context, filename: str = "run.abo") -> None:
     differ = which_differ()
 
     files = sorted([f for f in os.listdir(".") if f.startswith(filename)])
-    if not files: return
+    if not files:
+        return
 
     if len(files) > 2:
         cmd = "%s %s %s %s" % (differ, filename, files[-2], files[-1])
@@ -551,7 +601,9 @@ def remote_add(ctx: Context, remote: str) -> None:
 
 
 @task
-def gdb(ctx: Context, input_name: str, exec_name: str = "abinit", run_make: bool = False) -> None:
+def gdb(
+    ctx: Context, input_name: str, exec_name: str = "abinit", run_make: bool = False
+) -> None:
     """
     Launch the GDB debugger for a specific executable and input file.
 
@@ -561,7 +613,8 @@ def gdb(ctx: Context, input_name: str, exec_name: str = "abinit", run_make: bool
         exec_name (str, optional): Name of the executable. Defaults to "abinit".
         run_make (bool, optional): If True, build before debugging. Defaults to False.
     """
-    if run_make: make(ctx)
+    if run_make:
+        make(ctx)
 
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main", exec_name)
@@ -569,13 +622,15 @@ def gdb(ctx: Context, input_name: str, exec_name: str = "abinit", run_make: bool
     cmd = f"gdb {binpath} --one-line 'settings set target.run-args {input_name}'"
     cprint(f"Executing gdb command: {cmd}", color="green")
     # mpirun -np 2 xterm -e gdb fftprof --command=dbg_file
-    #cprint("Type run to start lldb debugger", color="green")
-    #cprint("Then use `bt` to get the backtrace\n\n", color="green")
+    # cprint("Type run to start lldb debugger", color="green")
+    # cprint("Then use `bt` to get the backtrace\n\n", color="green")
     ctx.run(cmd, pty=True)
 
 
 @task
-def lldb(ctx: Context, input_name: str, exec_name: str = "abinit", run_make: bool = False) -> None:
+def lldb(
+    ctx: Context, input_name: str, exec_name: str = "abinit", run_make: bool = False
+) -> None:
     """
     Launch the LLDB debugger for a specific executable and input file.
 
@@ -585,7 +640,8 @@ def lldb(ctx: Context, input_name: str, exec_name: str = "abinit", run_make: boo
         exec_name (str, optional): Name of the executable. Defaults to "abinit".
         run_make (bool, optional): If True, build before debugging. Defaults to False.
     """
-    if run_make: make(ctx)
+    if run_make:
+        make(ctx)
 
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main", exec_name)
@@ -598,7 +654,13 @@ def lldb(ctx: Context, input_name: str, exec_name: str = "abinit", run_make: boo
 
 
 @task
-def mpi_check(ctx: Context, np_list: str = "1, 2", abinit_input_file: str = "run.abi", mpi_runner: str = "mpiexec", run_make: bool = False) -> None:
+def mpi_check(
+    ctx: Context,
+    np_list: str = "1, 2",
+    abinit_input_file: str = "run.abi",
+    mpi_runner: str = "mpiexec",
+    run_make: bool = False,
+) -> None:
     """
     Run an ABINIT input file with various MPI process counts and compare results.
 
@@ -609,9 +671,12 @@ def mpi_check(ctx: Context, np_list: str = "1, 2", abinit_input_file: str = "run
         mpi_runner (str, optional): Command used to launch MPI. Defaults to "mpiexec".
         run_make (bool, optional): If True, build before running. Defaults to False.
     """
-    if run_make: make(ctx)
+    if run_make:
+        make(ctx)
 
-    cprint(f"Will run {abinit_input_file=} with MPI nprocs in {np_list=}", color="yellow")
+    cprint(
+        f"Will run {abinit_input_file=} with MPI nprocs in {np_list=}", color="yellow"
+    )
 
     differ = which_differ()
     np_list = list_from_string(np_list)
@@ -619,7 +684,7 @@ def mpi_check(ctx: Context, np_list: str = "1, 2", abinit_input_file: str = "run
     for np in np_list:
         change_output_file(abinit_input_file, f"run_mpi{np}.abo")
         cmd = f"{mpi_runner} -n {np} abinit {abinit_input_file} | tee run_mpi{np}.log"
-        cprint(f"About to execute {cmd=}", color="yellow" )
+        cprint(f"About to execute {cmd=}", color="yellow")
         ctx.run(cmd)
 
     np_ref = np_list[0]
@@ -633,7 +698,14 @@ def mpi_check(ctx: Context, np_list: str = "1, 2", abinit_input_file: str = "run
 
 
 @task
-def omp_check(ctx: Context, omp_threads: str = "1, 2", np: int = 1, abinit_input_file: str = "run.abi", mpi_runner: str = "mpiexec", run_make: bool = False) -> None:
+def omp_check(
+    ctx: Context,
+    omp_threads: str = "1, 2",
+    np: int = 1,
+    abinit_input_file: str = "run.abi",
+    mpi_runner: str = "mpiexec",
+    run_make: bool = False,
+) -> None:
     """
     Run an ABINIT input file with various OpenMP thread counts and compare results.
 
@@ -645,25 +717,29 @@ def omp_check(ctx: Context, omp_threads: str = "1, 2", np: int = 1, abinit_input
         mpi_runner (str, optional): Command used to launch MPI. Defaults to "mpiexec".
         run_make (bool, optional): If True, build before running. Defaults to False.
     """
-    if run_make: make(ctx)
+    if run_make:
+        make(ctx)
 
     differ = which_differ()
     omp_threads = list_from_string(omp_threads)
 
-    cprint("Will run {abinit_input_file=} with OMP threads={omp_threads=} and MPI nprocs={np}", color="yellow")
+    cprint(
+        "Will run {abinit_input_file=} with OMP threads={omp_threads=} and MPI nprocs={np}",
+        color="yellow",
+    )
     for nth in omp_threads:
         change_output_file(abinit_input_file, f"run_omp{nth}_mpi{np}.abo")
         cmd = f"{mpi_runner} -n {np} abinit -o {nth} {abinit_input_file} | tee run_omp{nth}_mpi{np}.log"
-        cprint(f"About to execute {cmd=}", color="yellow" )
+        cprint(f"About to execute {cmd=}", color="yellow")
         ctx.run(cmd)
 
     omp_ref = omp_threads[0]
     for nth in omp_threads[1:]:
         cmd = f"{differ} run_omp{omp_ref}.abo run_omp{nth}_mpi{np}.abo"
-        cprint(f"About to execute {cmd=}", color="yellow" )
+        cprint(f"About to execute {cmd=}", color="yellow")
         ctx.run(cmd, pty=True)
         cmd = f"{differ} run_omp{omp_ref}.log run_omp{nth}_mpi{np}.log"
-        cprint(f"About to execute {cmd=}", color="yellow" )
+        cprint(f"About to execute {cmd=}", color="yellow")
         ctx.run(cmd, pty=True)
 
 
@@ -711,7 +787,7 @@ def anaddb(ctx: Context, input_name: str, run_make: bool = False) -> None:
     _run(ctx, input_name, exec_name="anaddb", run_make=run_make)
 
 
-def _run(ctx, input_name, exec_name, run_make):
+def _run(ctx: Context, input_name: str, exec_name: str, run_make: bool):
     """
     Internal helper to execute an Abinit binary with an input file.
 
@@ -721,7 +797,8 @@ def _run(ctx, input_name, exec_name, run_make):
         exec_name (str): Name of the executable.
         run_make (bool): If True, build before running.
     """
-    if run_make: make(ctx)
+    if run_make:
+        make(ctx)
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main", exec_name)
     cprint(f"Using binpath: {binpath}", color="green")
@@ -746,6 +823,7 @@ def pull_trunk(ctx: Context) -> None:
     ctx.run("git push")
     ctx.run("git push --tags")
     ctx.run("git stash apply")
+
 
 @task
 def pull(ctx: Context) -> None:
@@ -788,6 +866,7 @@ def submodules(ctx: Context) -> None:
         ctx.run("git submodule update --remote --init", pty=True)
         ctx.run("git submodule update --recursive --remote", pty=True)
 
+
 @task
 def branchoff(ctx: Context, start_point: str) -> None:
     """
@@ -804,7 +883,8 @@ def branchoff(ctx: Context, start_point: str) -> None:
     except:
         remote = "trunk"
 
-    def run(cmd):
+    def run(cmd: str):
+        """Execute a shell command via context."""
         cprint(f"Executing: `{cmd}`", color="green")
         ctx.run(cmd)
 
@@ -829,6 +909,7 @@ def dryrun_merge(ctx: Context, start_point: str) -> None:
     """
 
     def run(cmd):
+        """Execute a shell command via context."""
         cprint(f"Executing: `{cmd}`", color="green")
         ctx.run(cmd)
 
@@ -855,10 +936,15 @@ def watchdog(ctx: Context, jobs: str | int = "auto", sleep_time: int = 5) -> Non
         jobs (str or int, optional): Parallel threads for make. Defaults to "auto".
         sleep_time (int, optional): Sleep time in seconds between checks. Defaults to 5.
     """
-    cprint("Starting watchdog service to watch F90 files and execute `make` when changes are detected", color="green")
+    cprint(
+        "Starting watchdog service to watch F90 files and execute `make` when changes are detected",
+        color="green",
+    )
     cprint("Enter <CTRL + C> in the terminal to kill the service.", color="green")
 
-    cprint(f"Start watching F90 files with sleep_time {sleep_time} s ....", color="green")
+    cprint(
+        f"Start watching F90 files with sleep_time {sleep_time} s ....", color="green"
+    )
     top = find_top_build_tree(".", with_abinit=True)
     jobs = max(1, number_of_cpus() // 2) if jobs == "auto" else int(jobs)
 
@@ -868,16 +954,24 @@ def watchdog(ctx: Context, jobs: str | int = "auto", sleep_time: int = 5) -> Non
 
     from watchdog.events import PatternMatchingEventHandler
     from watchdog.observers import Observer
-    event_handler = PatternMatchingEventHandler(patterns="*.F90", ignore_patterns="",
-                                                ignore_directories=False, case_sensitive=True)
+
+    event_handler = PatternMatchingEventHandler(
+        patterns="*.F90",
+        ignore_patterns="",
+        ignore_directories=False,
+        case_sensitive=True,
+    )
 
     def on_created(event):
+        """Handle file creation events."""
         print(f"hey, {event.src_path} has been created!")
 
     def on_deleted(event):
+        """Handle file deletion events."""
         print(f"what the f**k! Someone deleted {event.src_path}!")
 
     def on_modified(event):
+        """Trigger parallel make when a watched file is modified."""
         print(f"hey buddy, {event.src_path} has been modified")
         cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
         cprint("Executing: %s" % cmd, color="yellow")
@@ -889,9 +983,13 @@ def watchdog(ctx: Context, jobs: str | int = "auto", sleep_time: int = 5) -> Non
                     cprint("Watching for changes ...", color="green")
             except Exception:
                 cprint("Make returned non-zero exit status", color="red")
-                cprint("Keep on watching for changes hoping you get it right ...", color="red")
+                cprint(
+                    "Keep on watching for changes hoping you get it right ...",
+                    color="red",
+                )
 
     def on_moved(event):
+        """Handle file rename or move events."""
         print(f"ok ok ok, someone moved {event.src_path} to {event.dest_path}")
 
     event_handler.on_created = on_created
@@ -923,7 +1021,11 @@ def get_current_branch() -> str:
         RuntimeError: If not in a git repository or git command fails.
     """
     try:
-        return subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).strip().decode("utf-8")
+        return (
+            subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
+            .strip()
+            .decode("utf-8")
+        )
     except subprocess.CalledProcessError:
         raise RuntimeError("Not inside a git repository or an error occurred")
 
@@ -965,7 +1067,9 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
     github_url = f"git@github.com:{github_user}/{github_repo}.git"
 
     _run_kwargs = dict(pty=True, echo=True)
+
     def _run(command: str):
+        """Helper to run commands with predefined kwargs."""
         return ctx.run(command, **_run_kwargs)
 
     current_branch = get_current_branch()
@@ -1011,7 +1115,9 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
             _run("git push origin master")
 
         # Step 2: Push to GitHub
-        _run(f"git remote add abinit {github_url} || echo 'Remote already exists but this is not critical'")
+        _run(
+            f"git remote add abinit {github_url} || echo 'Remote already exists but this is not critical'"
+        )
         if not dry_run:
             _run("git push -u abinit master --tags")
 
@@ -1042,7 +1148,7 @@ def git_info(ctx: Context, top_n: int = 20) -> None:
             ["git", "rev-list", "--objects", "--all"],
             stdout=subprocess.PIPE,
             text=True,
-            check=True
+            check=True,
         )
         objects = []
         for line in result.stdout.splitlines():
@@ -1055,11 +1161,15 @@ def git_info(ctx: Context, top_n: int = 20) -> None:
         """Return a dict of {hash: (size_in_bytes, path)} for blobs."""
         input_text = "\n".join(hashes)
         result = subprocess.run(
-            ["git", "cat-file", "--batch-check=%(objectname) %(objecttype) %(objectsize)"],
+            [
+                "git",
+                "cat-file",
+                "--batch-check=%(objectname) %(objecttype) %(objectsize)",
+            ],
             input=input_text,
             stdout=subprocess.PIPE,
             text=True,
-            check=True
+            check=True,
         )
 
         sizes = {}
@@ -1078,8 +1188,12 @@ def git_info(ctx: Context, top_n: int = 20) -> None:
     sizes = get_blob_sizes(hashes)
 
     sorted_blobs = sorted(
-        ((size, paths[_hash], _hash) for _hash, size in sizes.items() if _hash in paths),
-        reverse=True
+        (
+            (size, paths[_hash], _hash)
+            for _hash, size in sizes.items()
+            if _hash in paths
+        ),
+        reverse=True,
     )
 
     print(f"\nTop {top_n} largest files ever committed:")
@@ -1090,7 +1204,9 @@ def git_info(ctx: Context, top_n: int = 20) -> None:
 
 
 @task
-def large_files(ctx: Context, top_dir: str | Path | None = None, size_threshold_mb: int = 5) -> None:
+def large_files(
+    ctx: Context, top_dir: str | Path | None = None, size_threshold_mb: int = 5
+) -> None:
     """
     Find and list files larger than `size_threshold_mb` megabytes under `top_dir`.
 
@@ -1142,6 +1258,7 @@ def system(ctx: Context) -> None:
 
     import psutil
     from tabulate import tabulate
+
     info = []
     info.append(["OS", f"{platform.system()} {platform.release()}"])
     info.append(["Kernel", platform.version()])
@@ -1149,7 +1266,9 @@ def system(ctx: Context) -> None:
     info.append(["Processor", platform.processor()])
     info.append(["CPU Cores (Physical)", psutil.cpu_count(logical=False)])
     info.append(["CPU Cores (Logical)", psutil.cpu_count()])
-    info.append(["Memory (Total)", f"{psutil.virtual_memory().total / (1024 ** 3):.2f} GB"])
+    info.append(
+        ["Memory (Total)", f"{psutil.virtual_memory().total / (1024 ** 3):.2f} GB"]
+    )
     for level, size in get_cache_info().items():
         info.append([level, size])
 
@@ -1167,6 +1286,7 @@ def pid(ctx: Context, pid: int | str) -> None:
     """
     import psutil
     from tabulate import tabulate
+
     pid = int(pid)
     try:
         p = psutil.Process(pid)
@@ -1246,7 +1366,7 @@ def get_cache_info_mac() -> dict[str, str]:
         "hw.l1dcachesize": "L1d",
         "hw.l1icachesize": "L1i",
         "hw.l2cachesize": "L2",
-        "hw.l3cachesize": "L3"
+        "hw.l3cachesize": "L3",
     }
     for key, label in keys.items():
         try:
@@ -1266,13 +1386,16 @@ def get_cache_info_windows() -> dict[str, str]:
     """
     caches = {}
     try:
-        out = subprocess.check_output(["wmic", "cpu", "get", "L2CacheSize,L3CacheSize"],
-                                       stderr=subprocess.DEVNULL).decode()
+        out = subprocess.check_output(
+            ["wmic", "cpu", "get", "L2CacheSize,L3CacheSize"], stderr=subprocess.DEVNULL
+        ).decode()
         lines = out.strip().split("\n")
         if len(lines) >= 2:
             _, l2, l3 = lines[1].split()
-            if l2: caches["L2"] = f"{l2} KB"
-            if l3: caches["L3"] = f"{l3} KB"
+            if l2:
+                caches["L2"] = f"{l2} KB"
+            if l3:
+                caches["L3"] = f"{l3} KB"
     except Exception:
         pass
     return caches
@@ -1297,22 +1420,24 @@ def _extract_errors(logfile: str | Path, context_lines: int = 5) -> list[str]:
 
     # Common patterns indicating critical problems
     ERROR_PATTERNS = [
-        r"error",                # generic errors
-        r"fail",                 # tests failing
-        r"cannot\s+find",        # missing library or header
-        r"no\s+such\s+file",     # missing file
-        r"not\s+found",          # program not found
-        r"undefined\s+reference" # linking errors
+        r"error",  # generic errors
+        r"fail",  # tests failing
+        r"cannot\s+find",  # missing library or header
+        r"no\s+such\s+file",  # missing file
+        r"not\s+found",  # program not found
+        r"undefined\s+reference",  # linking errors
     ]
 
     import re
+
     regex = re.compile("|".join(ERROR_PATTERNS), re.IGNORECASE)
     n = len(lines)
     errors = []
     for i, line in enumerate(lines):
         if regex.search(line):
             # Ignore maches such as `sd_yakl_options='optional fail'
-            if line.startswith("sd_") and "fail" in line: continue
+            if line.startswith("sd_") and "fail" in line:
+                continue
             # Capture context
             start = max(0, i - context_lines)
             end = min(n, i + context_lines + 1)
