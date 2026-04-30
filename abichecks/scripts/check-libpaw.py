@@ -1,4 +1,12 @@
 #!/usr/bin/env python
+"""
+Check LibPAW bindings.
+
+This script automates the creation of the libpaw-bindings tarball by
+running the configuration and make process. It then extracts and builds
+the tarball in a temporary directory to verify its integrity, and cleans
+up the temporary files afterward.
+"""
 
 import glob
 import os
@@ -13,7 +21,16 @@ except AttributeError:
 from shutil import rmtree
 
 
-def main(home_dir=""):
+def main(home_dir: str = "") -> int:
+  """
+  Main logic for testing the libpaw tarball creation and build process.
+
+  Args:
+      home_dir: The base directory for libpaw bindings (default: "").
+
+  Returns:
+      0 if the tarball was created and compiled successfully, 1 otherwise.
+  """
   # create tarball
   sys.stdout.write("Creating tarball...\n")
 

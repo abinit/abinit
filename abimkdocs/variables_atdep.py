@@ -17,7 +17,7 @@ Variable(
     varset="atdep",
     vartype="integer",
     topics=["aTDEP_expert"],
-    dimensions="3",
+    dimensions=[3],
     defaultval="0",
     mnemonics="ALLOY treatment",
     added_in_version="9.5.1",
@@ -103,7 +103,7 @@ center=3        C-face centered
 Variable(
     abivarname="bzlength@atdep",
     varset="atdep",
-    vartype="integer+real",
+    vartype="real",
     topics=["aTDEP_expert"],
     dimensions="'[[atdep:bzlength]](1)'+1",
     defaultval="0",
@@ -119,7 +119,7 @@ Variable(
     varset="atdep",
     vartype="integer",
     topics=["aTDEP_expert"],
-    dimensions="1",
+    dimensions=[1],
     defaultval="0",
     mnemonics="Brillouin Zone PATH",
     added_in_version="before_v9",
@@ -131,7 +131,7 @@ OPTIONAL: Defines the number of special points used in the path in the Brillouin
 Variable(
     abivarname="special_qpt@atdep",
     varset="atdep",
-    vartype="letter",
+    vartype="string",
     topics=["aTDEP_expert"],
     dimensions="'[[atdep:bzpath]](1)'",
     defaultval="0",
@@ -309,9 +309,9 @@ Defines the number of atom types. See the ABINIT variable [[ntypat]] for more de
 Variable(
     abivarname="order@atdep",
     varset="atdep",
-    vartype="integer+real",
+    vartype="real",
     topics=["aTDEP_expert"],
-    dimensions="2",
+    dimensions=[2],
     defaultval="2",
     mnemonics="ORDER for the IFC",
     added_in_version="before_v9",
@@ -531,7 +531,7 @@ Defines the reduced coordinates of atoms in the UNITCELL.
 Variable(
     abivarname="znucl@atdep",
     varset="atdep",
-    vartype="float",
+    vartype="real",
     topics=["aTDEP_basic"],
     dimensions=["[[atdep:natom]]"],
     defaultval="[[atdep:natom]]*0",
@@ -624,5 +624,24 @@ which tells atdep to construct output file names like "run_DDB".
 """
 ),
 
+Variable(
+    abivarname="symbec@atdep",
+    varset="atdep",
+    vartype="integer",
+    topics=["aTDEP_expert"],
+    dimensions="scalar",
+    defaultval="0",
+    mnemonics="SYMmetrize Born Effective Charges",
+    added_in_version="10.7",
+    text="""
+OPTIONAL: Symmetrize the Born Effective Charges after reading them.
+
+- No symmetrization : [[atdep:symbec]] = 0
+- Spatial average : [[atdep:symbec]] = 1
+    Zero-out the non-diagonal part of the 3x3 BEC tensor of each atom,
+    and average the diagonal components, so that the BEC are spherically
+    symmetric.
+""",
+),
 
 ]

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import annotations
 
 import os
 import re
@@ -2558,7 +2558,7 @@ scalapack_routines = [
 
 re_f90 = re.compile(r"\.[Ff]90")
 
-def main(top):
+def main(top: str) -> None:
   sub_calls = list()
 
   # Extract subroutine calls

@@ -54,6 +54,7 @@ module m_ddb
  public :: rdddb9           ! This routine reads the derivative database entirely,
  public :: nlopt            ! Output of all quantities related to third-order derivatives of the energy.
  public :: chkin9
+ public :: gamma9
  public :: carttransf       ! Transform a second-derivative matrix (EIG2D) from reduced
                             ! coordinates to cartesian coordinates.
  public :: lwcart           ! Transform a 3rd order derivative tensor (long-wave) from reduced (actually
@@ -2345,7 +2346,7 @@ subroutine ddb_from_file(ddb, filename, ddb_hdr, crystal, comm, prtvol, raw)
  integer,intent(in) :: comm
  integer,optional,intent(in) :: prtvol, raw
  character(len=*),intent(in) :: filename
- type(crystal_t),intent(out) :: Crystal
+ type(crystal_t),intent(out) :: crystal
  type(ddb_hdr_type),intent(out) :: ddb_hdr
 !array
 
@@ -2653,9 +2654,15 @@ subroutine ddb_read_nc(ddb, filename, ddb_hdr, crystal, comm, prtvol, raw)
    ! Copy arrays from header
    ddb%typ(:) = ddb_hdr%typ(:)
    ddb%amu(:) = ddb_hdr%crystal%amu(:)
+
+   ! GA: Note that these quantities are stored twice in the nc file.
+   !     We could also use those quantities in ddb_hdr.
    ddb%acell(:) = one
    ddb%rprim(:,:) = ddb_hdr%crystal%rprimd(:,:)
    ddb%gprim(:,:) = ddb_hdr%crystal%gprimd(:,:)
+   !ddb%acell(:) = ddb_hdr%acell
+   !ddb%rprim(:,:) = ddb_hdr%rprim(:,:)
+   !ddb%gprim(:,:) = ddb_hdr%gprim(:,:)
 
    ! ---------------
    ! Read all blocks
@@ -4420,6 +4427,8 @@ subroutine asrq0_apply(asrq0, natom, mpert, msize, xcart, d2cart)
  real(dp),intent(in) :: xcart(3,natom)
  real(dp),intent(inout) :: d2cart(2,msize)
 ! ************************************************************************
+
+ ! TODO: Remove msize, since it can be inferred from mpert.
 
  if (asrq0%asr /= 0 .and. asrq0%iblok == 0) then
    ABI_WARNING("asr != 0 but DDB file does not contain q=Gamma. D(q) cannot be corrected")

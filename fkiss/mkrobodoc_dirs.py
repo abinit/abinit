@@ -1,15 +1,12 @@
-#!/usr/bin/env python
-"""
-This script generates the ROBODOC headers located in the Abinit directories (e.g src/70_gw/_70_gw_)
-Usage: mkrobodoc_dirs.py abinit/src/
-"""
+from __future__ import annotations
 
 import fnmatch
 import os
 import sys
+from typing import Any
 
 
-def is_string(s):
+def is_string(s: Any) -> bool:
     """True if s behaves like a string (duck typing test)."""
     try:
         dummy = s + " "
@@ -19,7 +16,7 @@ def is_string(s):
         return False
 
 
-def list_strings(arg):
+def list_strings(arg: str | list[str]) -> list[str]:
     """
     Always return a list of strings, given a string or list of strings as
     input.
@@ -54,7 +51,7 @@ class WildCard:
     >>> w.filter("foo.nc")
     ['foo.nc']
     """
-    def __init__(self, wildcard, sep="|"):
+    def __init__(self, wildcard: str, sep: str = "|"):
         """
         Args:
             wildcard:
@@ -70,7 +67,7 @@ class WildCard:
     def __str__(self):
         return "<%s, patterns = %s>" % (self.__class__.__name__, self.pats)
 
-    def filter(self, names):
+    def filter(self, names: str | list[str]) -> list[str]:
         """
         Returns a list with the names matching the pattern.
         """
@@ -84,7 +81,7 @@ class WildCard:
 
         return fnames
 
-    def match(self, name):
+    def match(self, name: str) -> bool:
         """
         Returns True if name matches one of the patterns.
         """
@@ -95,7 +92,7 @@ class WildCard:
         return False
 
 
-def robodoc_dheader(dirname):
+def robodoc_dheader(dirname: str) -> str:
     """Return a string with the ROBODOC header for the specified directory."""
     dirname = os.path.basename(dirname)
 
@@ -118,7 +115,7 @@ def robodoc_dheader(dirname):
 """ % locals()
 
 
-def mkrobodoc_files(top):
+def mkrobodoc_files(top: str) -> int:
     """
     Generate the ROBODOC files in all the ABINIT directories
     located within the top level directory top.
@@ -195,7 +192,7 @@ def mkrobodoc_files(top):
     return len(wrong_dirpaths)
 
 
-def main():
+def main() -> int:
     try:
         top = os.path.abspath(sys.argv[1])
     except:

@@ -13,10 +13,10 @@ Then we discuss how to run isotropic $T_c$-calculations and how to perform typic
 for MgB$_2$, a well-known phonon-mediated superconductor with $T_c$ = 39 K.
 For a more complete theoretical introduction, see [[cite:Giustino2017]] and references therein.
 
-It is assumed the user has already completed the two tutorials [RF1](/tutorial/rf1) and [RF2](/tutorial/rf2),
+It is assumed the user has already completed the two tutorials [RF1](../tutorial/rf1.md) and [RF2](../tutorial/rf2.md),
 and that he/she is familiar with the calculation of ground state and vibrational properties **in metals**.
-The user should have read the [fourth lesson on Al](/tutorial/base4) as well
-as the [introduction page for the EPH code](/tutorial/eph_intro) before running these examples.
+The user should have read the [fourth lesson on Al](../tutorial/base4.md) as well
+as the [introduction page for the EPH code](../tutorial/eph_intro.md) before running these examples.
 
 This lesson should take about 1.5 hour.
 
@@ -33,7 +33,7 @@ $$
 
 where only contributions up to the second order in the e-ph vertex $g$ have been included.
 The sum over the electron wavevector $\kk$ is performed over the first BZ, $\eta$ is a positive real infinitesimal
-and $\gkkp$ are the e-ph matrix element discussed in the [EPH introduction](eph_intro).
+and $\gkkp$ are the e-ph matrix element discussed in the [EPH introduction](eph_intro.md).
 The self-energy depends on the temperature via the Fermi-Dirac distribution function $f(\ee, T)$
 and the factor two accounts for spin degeneracy (henceforth we assume a non-magnetic system
 with scalar wavefunctions i.e. [[nsppol]] == 1 and [[nspinor]] == 1
@@ -994,7 +994,7 @@ to prepare our convergence studies.
 The NSCF computation of the WFK becomes quite CPU-consuming and memory-demanding if dense $\kk$-meshes are needed.
 Fortunately, we can optimize this part since the computation of $\gamma_\qnu$
 requires the knowledge of Bloch states inside a relatively small energy window around $\ee_F$.
-Similarly to what is done in the [eph4mob tutorial](eph4mob), we can therefore take advantage of
+Similarly to what is done in the [eph4mob tutorial](eph4mob.md), we can therefore take advantage of
 the star-function SKW interpolation to find the $\kk$ wavevectors whose energy is inside
 the [[sigma_erange]] energy window **around the Fermi level**.
 The choice of an optimal window is discussed afterwards.
