@@ -3415,7 +3415,13 @@ if (dtset%usekden==1) then
    else
       dtset%prtgden = 0
    end if
-   if (INDEX(dtset%write_files,'geo') .gt. 0) then
+   if (INDEX(dtset%write_files,'geo_1') .gt. 0) then
+      dtset%prtgeo = 1
+   else if (INDEX(dtset%write_files,'geo_2') .gt. 0) then
+      dtset%prtgeo = 2
+   else if (INDEX(dtset%write_files,'geo_3') .gt. 0) then
+      dtset%prtgeo = 3
+   else if (INDEX(dtset%write_files,'geo') .gt. 0) then
       dtset%prtgeo = 1
    else
       dtset%prtgeo = 0
