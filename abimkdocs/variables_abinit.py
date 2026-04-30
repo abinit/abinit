@@ -23478,6 +23478,9 @@ It can be used as a simple string flagging the desired outputs as follows:
  * "fsurf"     --> Activates the printing of the Fermi surface file. Refer to [[prtfsurf]] for further documentation.
  * "gden"      --> Activates the printing of the gradient of the electronic density file. Refer to [[prtgden]] for further documentation.
  * "geo"       --> Activates the printing of the geometry analysis. Refer to [[prtgeo]] for further documentation.
+ * "geo_1      --> Activates the printing of the geometry analysis under option 1 of the [[prtgeo]] variable.
+ * "geo_2      --> Activates the printing of the geometry analysis under option 2 of the [[prtgeo]] variable.
+ * "geo_3      --> Activates the printing of the geometry analysis under option 3 of the [[prtgeo]] variable.
  * "gkk"       --> Activates the printing of the GKK matrix file. Refer to [[prtgkk]] for further documentation.
  * "gsr"       --> Activates the printing of the GSR file. Refer to [[prtgsr]] for further documentation.
  * "hist"      --> Activates the printing of the HIST file. Refer to [[prthist]] for further documentation.
