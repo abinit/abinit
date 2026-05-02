@@ -4861,38 +4861,9 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
            ! FIXME: Implement both_g case.
 
            do my_ik=1,gqk%my_nk
-
-             associate (gkq0_atm => my_gq0nm_atm(:,:,:,my_ik))
-             ! Loop over bands in |m,k+q>
-             do im_kq=1,gqk%nb_kq
-               ! Loop over the n index in |n,k>.
-               do in_k=1,gqk%nb_k
-                 ! Compute DW term following XG paper. Check prefactor.
-                 gdw2 = zero
-                 do ip2=1,natom3
-                   do ip1=1,natom3
-                     cfact = ( &
-                       + real(gkq0_atm(in_k, im_kq, ip1)) * real(gkq0_atm(in_k, im_kq, ip2)) &
-                       + aimag(gkq0_atm(in_k, im_kq, ip1)) * aimag(gkq0_atm(in_k, im_kq, ip2)) &
-                       + real(gkq0_atm(in_k, im_kq, ip2)) * real(gkq0_atm(in_k, im_kq, ip1)) &
-                       + aimag(gkq0_atm(in_k, im_kq, ip2)) * aimag(gkq0_atm(in_k, im_kq, ip1)) &
-                     )
-                     gdw2 = gdw2 + real(tpp_red(ip1,ip2) * cfact)
-                   end do
-                 end do
-
-                 if (wqnu < EPHTK_WTOL) then
-                   gdw2 = zero
-                 else
-                   gdw2 = gdw2 / (four * two * wqnu)
-                 end if
-                 !print *, "gdw2", gdw2
-                 gqk%my_gdw2(my_ip, im_kq, my_iq, in_k, my_ik) = gdw2
-               end do ! in_k
-             end do ! im_kq
-             end associate
-
+             call calc_and_store_gdw2(gqk, my_ik, my_iq, my_ip, wqnu, tpp_red, my_gq0nm_atm(:,:,:,my_ik))
            end do ! my_ik
+
          end do ! my_ip
        end if
 
@@ -5017,6 +4988,51 @@ end function spin_vid
 
 end subroutine gstore_from_ncpath
 !!***
+
+subroutine calc_and_store_gdw2(gqk, my_ik, my_iq, my_ip, wqnu, tpp_red, gkq0_atm)
+
+ type(gqk_t), intent(inout) :: gqk
+ integer,intent(in) :: my_ik, my_iq, my_ip
+ real(dp),intent(in) :: wqnu
+ complex(dp),intent(in) :: tpp_red(gqk%natom3, gqk%natom3)
+ complex(dp),intent(in) :: gkq0_atm(gqk%nb_k, gqk%nb_kq, gqk%natom3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: im_kq, in_k, ip2, ip1
+ real(dp) :: gdw2
+ complex(dp) :: cfact
+! *************************************************************************
+
+ ! Loop over bands in |m,k+q>
+ do im_kq=1,gqk%nb_kq
+   ! Loop over the n index in |n,k>.
+   do in_k=1,gqk%nb_k
+     ! Compute DW term following XG paper. Check prefactor.
+     gdw2 = zero
+     do ip2=1,gqk%natom3
+       do ip1=1,gqk%natom3
+         cfact = ( &
+           + real(gkq0_atm(in_k, im_kq, ip1)) * real(gkq0_atm(in_k, im_kq, ip2)) &
+           + aimag(gkq0_atm(in_k, im_kq, ip1)) * aimag(gkq0_atm(in_k, im_kq, ip2)) &
+           + real(gkq0_atm(in_k, im_kq, ip2)) * real(gkq0_atm(in_k, im_kq, ip1)) &
+           + aimag(gkq0_atm(in_k, im_kq, ip2)) * aimag(gkq0_atm(in_k, im_kq, ip1)) &
+         )
+         gdw2 = gdw2 + real(tpp_red(ip1,ip2) * cfact)
+       end do
+     end do
+
+     if (wqnu < EPHTK_WTOL) then
+       gdw2 = zero
+     else
+       gdw2 = gdw2 / (four * two * wqnu)
+     end if
+     !print *, "gdw2", gdw2
+     gqk%my_gdw2(my_ip, im_kq, my_iq, in_k, my_ik) = gdw2
+   end do ! in_k
+ end do ! im_kq
+
+end subroutine calc_and_store_gdw2
 
 !----------------------------------------------------------------------
 

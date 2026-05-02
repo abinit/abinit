@@ -250,9 +250,8 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
 
 !Local variables-------------------------------
  integer,parameter :: master = 0, cplex1 = 1, pawread0 = 0, ndat1 = 1, istwfk_1 = 1
- integer,parameter :: LOG_MODQ = 100, LOG_MODK = 1
- integer,parameter :: g2_mode_AA = 0, g2_mode_KS_GWPT = 1
- integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk, ntemp, cplex, my_npert, use_lgk, iw, g2_mode
+ integer,parameter :: LOG_MODQ = 100, LOG_MODK = 1, g2mode_AA = 1, g2mode_KS_GWPT = 2
+ integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk, ntemp, cplex, my_npert, use_lgk, iw
  integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, gap_err, my_rank, ip1, ip2, nu, ipc, idir, ipert
  integer :: it, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol, nspden, nspinor, nkpt !,ik_bz
  integer :: isym_k,isym_kq,trev_k,trev_kq, with_cplex
@@ -305,22 +304,19 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
  nsppol = dtset%nsppol; nspden = dtset%nspden; nspinor = dtset%nspinor
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
- call wrtout(units, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
+ call wrtout(std_out, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
+ !call wrtout(units, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
 
  ! Decide if self-energies should be computed with |g|^2 or g^KS g^GWPT.
- g2_mode = g2_mode_AA
- with_cplex = 1
- if (dtset%useria == 123) g2_mode = g2_mode_KS_GWPT
-
- select case (g2_mode)
- case (g2_mode_AA)
+ select case (dtset%gwpt_g2mode)
+ case (g2mode_AA)
    with_cplex = 1
-   call wrtout(units, " Using self-energy expression with |g|^2")
- case (g2_mode_KS_GWPT)
+   !call wrtout(units, " Using self-energy expression with |g|^2")
+ case (g2mode_KS_GWPT)
    with_cplex = 2
-   call wrtout(units, " Using self-energy expression with g^KS g^GWPT")
+   !call wrtout(units, " Using self-energy expression with g^KS g^GWPT")
  case default
-   ABI_ERROR(sjoin("Invalid g2_mode:", itoa(g2_mode)))
+   ABI_ERROR(sjoin("Invalid dtset%gwpt_g2mode:", itoa(dtset%gwpt_g2mode)))
  end select
 
  ! Init gstore and MPI grid from file and dtset.
@@ -931,10 +927,10 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
              end if
 
              ! Note the weight_q included in gkq2
-             if (g2_mode == g2_mode_AA) then
+             if (dtset%gwpt_g2mode == g2mode_AA) then
                gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
 
-             else if (g2_mode == g2_mode_KS_GWPT) then
+             else if (dtset%gwpt_g2mode == g2mode_KS_GWPT) then
                gkq2 = weight_q * real((conjg((gqk%my_g_ks(my_ip, im_kq, my_iq, in_k, my_ik)) * &
                                               gqk%my_g   (my_ip, im_kq, my_iq, in_k, my_ik))))
              end if
@@ -992,9 +988,9 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
                end do
              end if ! nwr > 0
 
-             !if (g2_mode == g2_mode_AA) then
+             !if (dtset%gwpt_g2mode == g2mode_AA) then
              gdw2 = gqk%my_gdw2(my_ip, im_kq, my_iq, in_k, my_ik)
-             !else if (g2_mode == g2_mode_KS_GWPT) then
+             !else if (dtset%gwpt_g2mode == g2mode_KS_GWPT) then
 
              ! Accumulate DW for each T, add it to Sigma(e0) and Sigma(w) as well
              ! - (2 n_{q\nu} + 1) * gdw2 / (e_nk - e_mk)
