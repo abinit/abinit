@@ -4487,6 +4487,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
  ABI_MALLOC(gstore%glob_nk_spin, (gstore%nsppol))
  ABI_MALLOC(gstore%glob_nq_spin, (gstore%nsppol))
 
+ ! If use_both_g is true, we allocate and read both the KS and the GWPT matrix elements.
  read_ks = gstore%gtype == "GWPT"
  use_both_g = gstore%gtype == "GWPT"
 
@@ -4797,32 +4798,32 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
          do ib_m=1,nb_kq
            do ib_n=1,nb_k
              my_gq0nm_atm(ib_n,ib_m,:,my_ik) = gwork_q(1,ib_m,ib_n,:,ik_glob) + j_dpc * gwork_q(2,ib_m,ib_n,:,ik_glob)
-            if (gqk%use_both_g) then
+             if (gqk%use_both_g) then
                ks_my_gq0nm_atm(ib_n,ib_m,:,my_ik) = ks_gwork_q(1,ib_m,ib_n,:,ik_glob) + j_dpc * ks_gwork_q(2,ib_m,ib_n,:,ik_glob)
-            end if
+             end if
            end do
          end do
        end do
      end if ! with_g2dw
 
      if (has_iv1p_comm) then
-      ! Read matrix elements of commutator [iv, p].
-      ABI_MALLOC(gqk%my_iv1p_comm, (nb_k, nb_k, 3, gqk%my_npert, gqk%my_nk))
-      ABI_MALLOC(iv1p_comm, (2, nb_k, nb_k, 3, natom3))
-      ! nctkarr_t("iv1p_comm", "dp", "two, nb_k, nb_k, three, natom3, glob_nk")
+       ! Read matrix elements of commutator [iv, p].
+       ABI_MALLOC(gqk%my_iv1p_comm, (nb_k, nb_k, 3, gqk%my_npert, gqk%my_nk))
+       ABI_MALLOC(iv1p_comm, (2, nb_k, nb_k, 3, natom3))
+       ! nctkarr_t("iv1p_comm", "dp", "two, nb_k, nb_k, three, natom3, glob_nk")
 
-      do my_ik=1,gqk%my_nk
-        ik_glob = my_ik + gqk%my_kstart - 1
-        ncerr = nf90_get_var(spin_ncid, spin_vid("iv1p_comm"), iv1p_comm, start=[1,1,1,1,1, ik_glob])
-        NCF_CHECK(ncerr)
+       do my_ik=1,gqk%my_nk
+         ik_glob = my_ik + gqk%my_kstart - 1
+         ncerr = nf90_get_var(spin_ncid, spin_vid("iv1p_comm"), iv1p_comm, start=[1,1,1,1,1, ik_glob])
+         NCF_CHECK(ncerr)
 
-        ! Save my perturbations for this k-point.
-        do my_ip=1,gqk%my_npert
-          ipert = gqk%my_pertcases(my_ip)
-          gqk%my_iv1p_comm(:,:,:,my_ip, my_ik) = r2c(iv1p_comm(:,:,:,:,ipert))
-        end do
-      end do
-      ABI_FREE(iv1p_comm)
+         ! Save my perturbations for this k-point.
+         do my_ip=1,gqk%my_npert
+           ipert = gqk%my_pertcases(my_ip)
+           gqk%my_iv1p_comm(:,:,:,my_ip, my_ik) = r2c(iv1p_comm(:,:,:,:,ipert))
+         end do
+       end do
+       ABI_FREE(iv1p_comm)
      end if
 
      if (from_atm_to_nu) then
@@ -4860,35 +4861,37 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
            ! FIXME: Implement both_g case.
 
            do my_ik=1,gqk%my_nk
+
              associate (gkq0_atm => my_gq0nm_atm(:,:,:,my_ik))
              ! Loop over bands in |m,k+q>
              do im_kq=1,gqk%nb_kq
-             ! Loop over the n index in |n,k>.
-             do in_k=1,gqk%nb_k
-             ! Compute DW term following XG paper. Check prefactor.
-             gdw2 = zero
-             do ip2=1,natom3
-               do ip1=1,natom3
-                 cfact = ( &
-                   + real(gkq0_atm(in_k, im_kq, ip1)) * real(gkq0_atm(in_k, im_kq, ip2)) &
-                   + aimag(gkq0_atm(in_k, im_kq, ip1)) * aimag(gkq0_atm(in_k, im_kq, ip2)) &
-                   + real(gkq0_atm(in_k, im_kq, ip2)) * real(gkq0_atm(in_k, im_kq, ip1)) &
-                   + aimag(gkq0_atm(in_k, im_kq, ip2)) * aimag(gkq0_atm(in_k, im_kq, ip1)) &
-                 )
-                 gdw2 = gdw2 + real(tpp_red(ip1,ip2) * cfact)
-               end do
-             end do
+               ! Loop over the n index in |n,k>.
+               do in_k=1,gqk%nb_k
+                 ! Compute DW term following XG paper. Check prefactor.
+                 gdw2 = zero
+                 do ip2=1,natom3
+                   do ip1=1,natom3
+                     cfact = ( &
+                       + real(gkq0_atm(in_k, im_kq, ip1)) * real(gkq0_atm(in_k, im_kq, ip2)) &
+                       + aimag(gkq0_atm(in_k, im_kq, ip1)) * aimag(gkq0_atm(in_k, im_kq, ip2)) &
+                       + real(gkq0_atm(in_k, im_kq, ip2)) * real(gkq0_atm(in_k, im_kq, ip1)) &
+                       + aimag(gkq0_atm(in_k, im_kq, ip2)) * aimag(gkq0_atm(in_k, im_kq, ip1)) &
+                     )
+                     gdw2 = gdw2 + real(tpp_red(ip1,ip2) * cfact)
+                   end do
+                 end do
 
-             if (wqnu < EPHTK_WTOL) then
-               gdw2 = zero
-             else
-               gdw2 = gdw2 / (four * two * wqnu)
-             end if
-             !print *, "gdw2", gdw2
-             gqk%my_gdw2(my_ip, im_kq, my_iq, in_k, my_ik) = gdw2
-             end do ! in_k
+                 if (wqnu < EPHTK_WTOL) then
+                   gdw2 = zero
+                 else
+                   gdw2 = gdw2 / (four * two * wqnu)
+                 end if
+                 !print *, "gdw2", gdw2
+                 gqk%my_gdw2(my_ip, im_kq, my_iq, in_k, my_ik) = gdw2
+               end do ! in_k
              end do ! im_kq
              end associate
+
            end do ! my_ik
          end do ! my_ip
        end if

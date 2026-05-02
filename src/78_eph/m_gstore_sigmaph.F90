@@ -249,12 +249,13 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
 !Local variables-------------------------------
- integer,parameter :: master = 0, with_cplex1 = 1, cplex1 = 1, pawread0 = 0, ndat1 = 1, istwfk_1 = 1
+ integer,parameter :: master = 0, cplex1 = 1, pawread0 = 0, ndat1 = 1, istwfk_1 = 1
  integer,parameter :: LOG_MODQ = 100, LOG_MODK = 1
- integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk, ntemp, cplex, my_npert, use_lgk, iw
+ integer,parameter :: g2_mode_AA = 0, g2_mode_KS_GWPT = 1
+ integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk, ntemp, cplex, my_npert, use_lgk, iw, g2_mode
  integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, gap_err, my_rank, ip1, ip2, nu, ipc, idir, ipert
  integer :: it, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol, nspden, nspinor, nkpt !,ik_bz
- integer :: isym_k,isym_kq,trev_k,trev_kq
+ integer :: isym_k,isym_kq,trev_k,trev_kq, with_cplex
  integer :: istwf_k, istwf_kq, npw_k, npw_kq, nkpg_kq, nfft, nfftf, mgfft, mgfftf, nkpg
  integer :: usecprj, mpw, ibsum_kq, band_me, u1_band, ncid, ncerr
  real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2, rfact, gdw2_stern !, rtmp !,nqnu,gkq2,gkq2_pf,
@@ -303,12 +304,28 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
  natom = cryst%natom; natom3 = 3 * cryst%natom; nkpt = ebands%nkpt
  nsppol = dtset%nsppol; nspden = dtset%nspden; nspinor = dtset%nspinor
 
- call wrtout(std_out, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
+ call wrtout(units, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
+
+ ! Decide if self-energies should be computed with |g|^2 or g^KS g^GWPT.
+ g2_mode = g2_mode_AA
+ with_cplex = 1
+ if (dtset%useria == 123) g2_mode = g2_mode_KS_GWPT
+
+ select case (g2_mode)
+ case (g2_mode_AA)
+   with_cplex = 1
+   call wrtout(units, " Using self-energy expression with |g|^2")
+ case (g2_mode_KS_GWPT)
+   with_cplex = 2
+   call wrtout(units, " Using self-energy expression with g^KS g^GWPT")
+ case default
+   ABI_ERROR(sjoin("Invalid g2_mode:", itoa(g2_mode)))
+ end select
 
  ! Init gstore and MPI grid from file and dtset.
  ! The Fan-Migdal SE requires |g(k,q)|^2 as well as g2DW in the phonon representation.
- call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, dtfil, cryst, ebands, ifc, &
+ call gstore%from_ncpath(dtfil%filgstorein, with_cplex, dtset, dtfil, cryst, ebands, ifc, &
                          "phonon", dtset%gstore_gname, .True., comm)
  ! Consistency check.
  ierr = 0
@@ -914,7 +931,14 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
              end if
 
              ! Note the weight_q included in gkq2
-             gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
+             if (g2_mode == g2_mode_AA) then
+               gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
+
+             else if (g2_mode == g2_mode_KS_GWPT) then
+               gkq2 = weight_q * real((conjg((gqk%my_g_ks(my_ip, im_kq, my_iq, in_k, my_ik)) * &
+                                              gqk%my_g   (my_ip, im_kq, my_iq, in_k, my_ik))))
+             end if
+
              cfact_t = cfact_t * gkq2
 
              ! Compute contribution to Fan-Migdal for M > nb_kq
@@ -968,7 +992,9 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
                end do
              end if ! nwr > 0
 
+             !if (g2_mode == g2_mode_AA) then
              gdw2 = gqk%my_gdw2(my_ip, im_kq, my_iq, in_k, my_ik)
+             !else if (g2_mode == g2_mode_KS_GWPT) then
 
              ! Accumulate DW for each T, add it to Sigma(e0) and Sigma(w) as well
              ! - (2 n_{q\nu} + 1) * gdw2 / (e_nk - e_mk)
