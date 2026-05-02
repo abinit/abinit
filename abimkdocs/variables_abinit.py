@@ -8178,6 +8178,27 @@ This variable controls the treatment of the frequency-dependence in the GWPT mat
 ),
 
 Variable(
+    abivarname="gwpt_g2mode",
+    varset="eph",
+    vartype="integer",
+    topics=["ElPhonInt_expert"],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="GWPT G MODE",
+    added_in_version="10.7.1",
+    text=r"""
+This variable controls the treatment of the electron-phonon matrix elements
+in the computation of the e-ph self-energy whene we have a GSTORE file
+with the GWPT and the KS matrix elements.
+
+1 -> Use |g|^2.
+
+2 -> g^KS g^GWPT.
+""",
+),
+
+
+Variable(
     abivarname="gwgmcorr",
     varset="gw",
     vartype="integer",
