@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 20 Apr 2026.
-- ( at 09h55 )
+.Starting date : Mon  4 May 2026.
+- ( at 01h04 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/tutorespfn_tcdfpt_8-tcdfpt_9-tcdfpt_10-tcdfpt_11/tcdfpt_9.abi
 - output file    -> tcdfpt_9.abo
@@ -31,11 +31,11 @@
     nsppol =       1      nsym =       1    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =          42        mffmem =           1         mkmem =          12
-       mpw =         137          nfft =        2560          nkpt =          12
+       mpw =         133          nfft =        2560          nkpt =          12
 ================================================================================
-P This job should need less than                       6.192 Mbytes of memory.
+P This job should need less than                       6.127 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      1.056 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
+_ WF disk file :      1.025 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
 ================================================================================
 
  DATASET    5 : space group P1 (#  1); Bravais aP (primitive triclinic)
@@ -47,11 +47,11 @@ _ WF disk file :      1.056 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
     nsppol =       1      nsym =       1    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =          42        mffmem =           1         mkmem =          12
-       mpw =         137          nfft =        2560          nkpt =          12
+       mpw =         133          nfft =        2560          nkpt =          12
 ================================================================================
-P This job should need less than                       6.192 Mbytes of memory.
+P This job should need less than                       6.127 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      1.056 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
+_ WF disk file :      1.025 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -87,22 +87,20 @@ _ WF disk file :      1.056 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
 -          fftalg         512
            getwfk           1
            get1wf           2
-           istwfk        1    0    0    0    0    0    0    0    0    0
-                         0    0
               ixc       -1012
            jdtset        4    5
-              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       5.00000000E-01  0.00000000E+00  0.00000000E+00
-                       0.00000000E+00  5.00000000E-01  0.00000000E+00
-                       5.00000000E-01  5.00000000E-01  0.00000000E+00
-                       0.00000000E+00  0.00000000E+00  3.33333333E-01
-                       5.00000000E-01  0.00000000E+00  3.33333333E-01
-                       0.00000000E+00  5.00000000E-01  3.33333333E-01
-                       5.00000000E-01  5.00000000E-01  3.33333333E-01
-                       0.00000000E+00  0.00000000E+00 -3.33333333E-01
-                       5.00000000E-01  0.00000000E+00 -3.33333333E-01
-                       0.00000000E+00  5.00000000E-01 -3.33333333E-01
-                       5.00000000E-01  5.00000000E-01 -3.33333333E-01
+              kpt      2.50000000E-01  2.50000000E-01  1.66666667E-01
+                      -2.50000000E-01  2.50000000E-01  1.66666667E-01
+                       2.50000000E-01 -2.50000000E-01  1.66666667E-01
+                      -2.50000000E-01 -2.50000000E-01  1.66666667E-01
+                       2.50000000E-01  2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01  2.50000000E-01  5.00000000E-01
+                       2.50000000E-01 -2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01 -2.50000000E-01  5.00000000E-01
+                       2.50000000E-01  2.50000000E-01 -1.66666667E-01
+                      -2.50000000E-01  2.50000000E-01 -1.66666667E-01
+                       2.50000000E-01 -2.50000000E-01 -1.66666667E-01
+                      -2.50000000E-01 -2.50000000E-01 -1.66666667E-01
            kptopt           3
          kptrlatt        2    0    0      0    2    0      0    0    3
           kptrlen      1.84200000E+01
@@ -126,6 +124,7 @@ P           mkmem          12
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
         optdriver          10
               qpt      5.00000000E-01  5.00000000E-01  0.00000000E+00
+           shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup           1
           timdisp           1
           tim1rev           0
@@ -165,7 +164,7 @@ P           mkmem          12
 
 --- !DatasetInfo
 iteration_state: {dtset: 4, }
-dimensions: {natom: 6, nkpt: 12, mband: 42, nsppol: 1, nspinor: 2, nspden: 4, mpw: 137, }
+dimensions: {natom: 6, nkpt: 12, mband: 42, nsppol: 1, nspinor: 2, nspden: 4, mpw: 133, }
 cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
 electrons: {nelect:   4.20000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 10, }
@@ -264,10 +263,10 @@ TIMDISP :  perts : 11.1 / 11.1 / 15.1
  Frequency derivative of second-order energies, in cartesian coordinates
      j1       j2                    matrix elementi
   dir pert dir pert           real part       imaginary part
-   1    1   1    1         0.0000000000         0.0000000000
-   1    1   1   11         0.0032683631        -0.0000042597
-   1   11   1    1         0.0032683631         0.0000042597
-   1   11   1   11         0.0000257641         0.0000000000
+   1    1   1    1        -0.0000000000         0.0000000000
+   1    1   1   11         0.0000000030        -0.0000000002
+   1   11   1    1         0.0000000030         0.0000000002
+   1   11   1   11        -0.0000000693         0.0000000000
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -276,7 +275,7 @@ TIMDISP :  perts : 11.1 / 11.1 / 15.1
 
 --- !DatasetInfo
 iteration_state: {dtset: 5, }
-dimensions: {natom: 6, nkpt: 12, mband: 42, nsppol: 1, nspinor: 2, nspden: 4, mpw: 137, }
+dimensions: {natom: 6, nkpt: 12, mband: 42, nsppol: 1, nspinor: 2, nspden: 4, mpw: 133, }
 cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
 electrons: {nelect:   4.20000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 10, }
@@ -336,10 +335,10 @@ TIMDISP :  perts : 18.1 / 18.1 / 15.1
  Frequency derivative of second-order energies, in cartesian coordinates
      j1       j2                    matrix elementi
   dir pert dir pert           real part       imaginary part
-   1    1   1    1         0.0000000000         0.0000000000
-   1    1   1   18         0.0000000000         0.0000010787
-   1   18   1    1         0.0000000000        -0.0000010787
-   1   18   1   18         0.0000000000         0.0000000000
+   1    1   1    1        -0.0000000000         0.0000000000
+   1    1   1   18        -0.0000000000         0.0000000002
+   1   18   1    1        -0.0000000000        -0.0000000002
+   1   18   1   18        -0.0000000000         0.0000000000
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -381,22 +380,20 @@ TIMDISP :  perts : 18.1 / 18.1 / 15.1
 -          fftalg         512
            getwfk           1
            get1wf           2
-           istwfk        1    0    0    0    0    0    0    0    0    0
-                         0    0
               ixc       -1012
            jdtset        4    5
-              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       5.00000000E-01  0.00000000E+00  0.00000000E+00
-                       0.00000000E+00  5.00000000E-01  0.00000000E+00
-                       5.00000000E-01  5.00000000E-01  0.00000000E+00
-                       0.00000000E+00  0.00000000E+00  3.33333333E-01
-                       5.00000000E-01  0.00000000E+00  3.33333333E-01
-                       0.00000000E+00  5.00000000E-01  3.33333333E-01
-                       5.00000000E-01  5.00000000E-01  3.33333333E-01
-                       0.00000000E+00  0.00000000E+00 -3.33333333E-01
-                       5.00000000E-01  0.00000000E+00 -3.33333333E-01
-                       0.00000000E+00  5.00000000E-01 -3.33333333E-01
-                       5.00000000E-01  5.00000000E-01 -3.33333333E-01
+              kpt      2.50000000E-01  2.50000000E-01  1.66666667E-01
+                      -2.50000000E-01  2.50000000E-01  1.66666667E-01
+                       2.50000000E-01 -2.50000000E-01  1.66666667E-01
+                      -2.50000000E-01 -2.50000000E-01  1.66666667E-01
+                       2.50000000E-01  2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01  2.50000000E-01  5.00000000E-01
+                       2.50000000E-01 -2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01 -2.50000000E-01  5.00000000E-01
+                       2.50000000E-01  2.50000000E-01 -1.66666667E-01
+                      -2.50000000E-01  2.50000000E-01 -1.66666667E-01
+                       2.50000000E-01 -2.50000000E-01 -1.66666667E-01
+                      -2.50000000E-01 -2.50000000E-01 -1.66666667E-01
            kptopt           3
          kptrlatt        2    0    0      0    2    0      0    0    3
           kptrlen      1.84200000E+01
@@ -420,6 +417,7 @@ P           mkmem          12
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
         optdriver          10
               qpt      5.00000000E-01  5.00000000E-01  0.00000000E+00
+           shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup           1
            strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -547,5 +545,5 @@ P           mkmem          12
 ================================================================================
 
  Calculation completed.
-.Delivered  22 WARNINGs and   7 COMMENTs to log file.
+.Delivered  22 WARNINGs and   9 COMMENTs to log file.
 +Overall time at end (sec) : cpu=          0.8  wall=          0.8
