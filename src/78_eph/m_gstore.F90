@@ -4482,14 +4482,6 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
  ABI_MALLOC(gstore%glob_nk_spin, (gstore%nsppol))
  ABI_MALLOC(gstore%glob_nq_spin, (gstore%nsppol))
 
-
-
-
-
-
-
-
-
  ! =====================================================
  ! Master node reads basic objects and gstore dimensions
  ! =====================================================
@@ -4934,6 +4926,8 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
                if (read_ks .and. gqk%has_both_g) then
                  gqk%my_g2_ks(my_ip, :, my_iq, :, my_ik) = ks_slice_bb(1,:,:) ** 2 + ks_slice_bb(2,:,:) ** 2
                end if
+             else if (with_cplex == 0) then
+                continue
              else
                ABI_ERROR("Conversion from g2 on file to g_complex in memory is not possible!")
              end if
@@ -5087,9 +5081,13 @@ subroutine gstore_check_restart(filepath, dtset, nqbz, done_qbz_spin, restart, c
 
  my_rank = xmpi_comm_rank(comm); units = [std_out, ab_out]
 
+ !print *, "eph_restart:", dtset%eph_restart
+
  restart = 0; nqbz = 0
  if (my_rank == master .and. dtset%eph_restart == 1) then
     if (file_exists(filepath)) then
+      call wrtout(units, sjoin("- Found pre-existent GSTORE file:", trim(filepath)))
+      call wrtout(units, " Testing if all e-ph terms have been computed...")
       ! Use gstore_completed to understand if the previous GSTORE run completed else we need to restart.
       NCF_CHECK(nctk_open_read(root_ncid, filepath, xmpi_comm_self))
       NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_completed"), gstore_completed))
@@ -5111,13 +5109,14 @@ subroutine gstore_check_restart(filepath, dtset, nqbz, done_qbz_spin, restart, c
         restart = 0; done_qbz_spin = 0
         msg = sjoin("- WARNING: Found GSTORE.nc file with all entries already computed.", ch10, &
                     "- Will overwrite:", trim(filepath), ch10, "Keeping backup copy in:", strcat(filepath, ".bkp"))
-        ABI_WARNING(msg)
-        ! Keep backup copy
+        call wrtout(units, msg)
         ABI_CHECK(clib_rename(trim(filepath), strcat(filepath, ".bkp")) == 0, "Failed to rename GSTORE file.")
       else
         restart = 1
         call wrtout(units, "- Restarting from a previous GSTORE.nc file")
       end if
+    else
+      call wrtout(units, sjoin("- Cannot find pre-existent GSTORE file:", trim(filepath)))
     end if
  end if
 
@@ -5128,6 +5127,7 @@ subroutine gstore_check_restart(filepath, dtset, nqbz, done_qbz_spin, restart, c
    ABI_MALLOC(done_qbz_spin, (nqbz, dtset%nsppol))
  end if
  if (nqbz /= 0) call xmpi_bcast(done_qbz_spin, master, comm, ierr)
+ !stop
 
 contains
 integer function root_vid(var_name)

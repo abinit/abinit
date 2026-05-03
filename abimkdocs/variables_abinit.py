@@ -24781,7 +24781,7 @@ Variable(
     varset="eph",
     topics=["ElPhonInt_basic"],
     vartype="integer",
-    defaultval=0,
+    defaultval=1,
     dimensions="scalar",
     mnemonics="EPH RESTART.",
     added_in_version="9.0.0",
