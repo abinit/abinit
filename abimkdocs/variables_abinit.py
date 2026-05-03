@@ -5531,7 +5531,7 @@ The choice is among:
 * 11 --> Compute e-ph matrix elements on homogeneous k- and q-meshes.
          Save results in GSTORE.nc file (requires netcdf library with MPI-IO support).
          The k-mesh must be equal to the one associated to the input WFK file, the q-mesh is specified
-         by [[eph_ngqpt_fine]] (NB: the q-mesh must be a sub-mesh of the k-mesh or equal).
+         by [[eph_ngqpt_fine]] and must be a sub-mesh of the k-mesh or equal.
 * 12 --> Migdal-Eliashberg equations (isotropic case).
 * -12 --> Migdal-Eliashberg equations (anisotropic case). UNDER DEVELOPMENT.
 * 13 --> Variational polaron equations. Requires GSTORE file specified via [[getgstore_filepath]]
@@ -8169,10 +8169,11 @@ Variable(
     mnemonics="GWPT omega MODE",
     added_in_version="10.7.1",
     text=r"""
-This variable controls the treatment of the frequency-dependence in the GWPT matrix elements.
+This variable controls the treatment of the frequency-dependence in the computation
+of the GWPT e-ph matrix elements.
 
-1 -> Use the original treatment as in [[cite:Li2019]] in which the convolution is evaluated
-     at $\ee_\nk$ and $\ee_\mkq$ and the average is taken.
+1 -> Use the original treatment as in [[cite:Li2019]] in which the frequency convolution is evaluated
+     both at $\ee_\nk$ and $\ee_\mkq$ and the average is taken.
 2 -> Evaluate the convolution at $\ee_\nk$.
 """,
 ),
@@ -8187,13 +8188,13 @@ Variable(
     mnemonics="GWPT G MODE",
     added_in_version="10.7.1",
     text=r"""
-This variable controls the treatment of the electron-phonon matrix elements
-in the computation of the e-ph self-energy whene we have a GSTORE file
-with the GWPT and the KS matrix elements.
+This variable controls the treatment of the e-ph matrix elements
+in the computation of the e-ph self-energy when one starts from a GSTORE.nc file
+containing both the GWPT and the KS matrix elements.
 
 1 -> Use |g|^2.
 
-2 -> g^KS g^GWPT.
+2 -> Use g^*_KS g_GWPT.
 """,
 ),
 
