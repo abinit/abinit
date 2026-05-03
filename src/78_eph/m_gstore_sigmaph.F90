@@ -304,17 +304,16 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
  nsppol = dtset%nsppol; nspden = dtset%nspden; nspinor = dtset%nspinor
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
- call wrtout(std_out, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
- !call wrtout(units, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
+ call wrtout(units, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
 
  ! Decide if self-energies should be computed with |g|^2 or g^KS g^GWPT.
  select case (dtset%gwpt_g2mode)
  case (g2mode_AA)
    with_cplex = 1
-   !call wrtout(units, " Using self-energy expression with |g|^2")
+   call wrtout(units, " Using e-ph self-energy expression with |g|^2")
  case (g2mode_KS_GWPT)
    with_cplex = 2
-   !call wrtout(units, " Using self-energy expression with g^KS g^GWPT")
+   call wrtout(units, " Using e-ph self-energy expression with g^*_KS g_GWPT")
  case default
    ABI_ERROR(sjoin("Invalid dtset%gwpt_g2mode:", itoa(dtset%gwpt_g2mode)))
  end select
@@ -344,8 +343,12 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
 
  use_lgk = dtset%gstore_use_lgk
  if (gstore%has_used_lgk /= 0) use_lgk = gstore%has_used_lgk
- if (use_lgk == 0) call wrtout(units, " Little group operations of the k-point won't be used to symmetry reduce the integral in q-space.")
- if (use_lgk /= 0) call wrtout(units, " Little group operations of the k-point will be used to symmetry reduce the integral in q-space.")
+ if (use_lgk == 0) then
+   call wrtout(units, " Little group operations of the k-point won't be used to symmetry reduce the integral in q-space.")
+ end if
+ if (use_lgk /= 0) then
+   call wrtout(units, " Little group operations of the k-point will be used to symmetry reduce the integral in q-space.")
+ end if
 
  ! FFT meshes from input file, not necessarily equal to the ones found in the external files.
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
@@ -434,11 +437,6 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
 
    ! Initialize bks_mask
    call gstore%fill_bks_mask(dtset%mband, nkpt, nsppol, bks_mask)
-
-   !if (dtset%userie == 124) then
-   !  ! Debugging section have all states on each MPI rank.
-   !  bks_mask = .True.; call wrtout(std_out, " Storing all bands for debugging purposes.")
-   !end if
 
    ! mpw is the maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
    ! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
@@ -931,9 +929,10 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
                gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
 
              else if (dtset%gwpt_g2mode == g2mode_KS_GWPT) then
-               gkq2 = weight_q * real((conjg((gqk%my_g_ks(my_ip, im_kq, my_iq, in_k, my_ik)) * &
-                                              gqk%my_g   (my_ip, im_kq, my_iq, in_k, my_ik))))
+               gkq2 = weight_q * real(conjg(gqk%my_g_ks(my_ip, im_kq, my_iq, in_k, my_ik)) * &
+                                            gqk%my_g   (my_ip, im_kq, my_iq, in_k, my_ik))
              end if
+             !print *, "gkq2: ", gkq2
 
              cfact_t = cfact_t * gkq2
 
@@ -988,9 +987,7 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
                end do
              end if ! nwr > 0
 
-             !if (dtset%gwpt_g2mode == g2mode_AA) then
              gdw2 = gqk%my_gdw2(my_ip, im_kq, my_iq, in_k, my_ik)
-             !else if (dtset%gwpt_g2mode == g2mode_KS_GWPT) then
 
              ! Accumulate DW for each T, add it to Sigma(e0) and Sigma(w) as well
              ! - (2 n_{q\nu} + 1) * gdw2 / (e_nk - e_mk)
@@ -1293,6 +1290,7 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
    write(ab_out,"(a)")" "
    write(ab_out,"(a)")" "
    write(ab_out,"(2a)")" Using g(k,q) of type: ", trim(this_gtype)
+   !write(ab_out,"(2a)")" Treatment of gg: ", dtset%gwpt_g2mode
    write(ab_out,"(a)")" "
    write(ab_out,"(a)")" "
  end if
@@ -1592,7 +1590,6 @@ subroutine sep_free(sigma)
  ABI_SFREE(sigma%dw_stern_vals)
  ABI_SFREE(sigma%vals_wr)
  ABI_SFREE(sigma%wrmesh_b)
-
  ABI_SFREE(sigma%phmesh)
  ABI_SFREE(sigma%gfw_vals)
  ABI_SFREE(sigma%a2f_emesh)
