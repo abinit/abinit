@@ -219,7 +219,7 @@ type, public :: dataset_type
  integer :: eph_frohl_ntheta = 0
  integer :: eph_phrange(2) = 0
  integer :: eph_prtscratew = 0
- integer :: eph_restart = 0
+ integer :: eph_restart = 1
  integer :: eph_stern = 0
  integer :: eph_task = 1
  integer :: eph_transport = 0
