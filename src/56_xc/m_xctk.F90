@@ -162,10 +162,10 @@ subroutine xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rho
 
  if(ishift==1 .or. ngrad==2)then
 
-   ABI_MALLOC(work,(cplex*nfft))
-   ABI_MALLOC(wkcmpx,(2,nfft))
-   if(ngrad==2)then
-     ABI_MALLOC(workgr,(2,nfft))
+    ABI_MALLOC(wkcmpx,(2,nfft))
+    if(ngrad==2)then
+      ABI_MALLOC(work,(cplex*nfft))
+      ABI_MALLOC(workgr,(2,nfft))
      if (need_laplacian) lrhonow(:,:)=zero
      if (need_laplacian.or.need_derivative2) then
        ABI_MALLOC(workgr2,(2,nfft))
@@ -194,14 +194,25 @@ subroutine xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rho
    do ispden=1,nspden
 
 !    Obtain rho(G) in wkcmpx from input rho(r)
-!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,nfft,rhor,work)
-     do ifft=1,cplex*nfft
-       work(ifft)=rhor(ifft,ispden)
-     end do
+      if(ngrad==1)then
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,ispden,nfft,rhonow,rhor)
+        do ifft=1,cplex*nfft
+          rhonow(ifft,ispden,1)=rhor(ifft,ispden)
+        end do
+      else
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,ispden,nfft,rhor,work)
+        do ifft=1,cplex*nfft
+          work(ifft)=rhor(ifft,ispden)
+        end do
+      end if
 
-     call timab(82,1,tsec)
-     call fourdp(cplex,wkcmpx,work,-1,mpi_enreg,nfft,1,ngfft,0)
-     call timab(82,2,tsec)
+      call timab(82,1,tsec)
+      if(ngrad==1)then
+        call fourdp(cplex,wkcmpx,rhonow(:,ispden,1),-1,mpi_enreg,nfft,1,ngfft,0)
+      else
+        call fourdp(cplex,wkcmpx,work,-1,mpi_enreg,nfft,1,ngfft,0)
+      end if
+      call timab(82,2,tsec)
 
 !    If shift is required, multiply now rho(G) by phase, then generate rho(r+delta)
      if(ishift==1)then
@@ -231,15 +242,21 @@ subroutine xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rho
              end do
            end if
          end do
-       end do
-       call timab(82,1,tsec)
-       call fourdp(cplex,wkcmpx,work,1,mpi_enreg,nfft,1,ngfft,0)
-       call timab(82,2,tsec)
+        end do
+        call timab(82,1,tsec)
+        if(ngrad==1)then
+          call fourdp(cplex,wkcmpx,rhonow(:,ispden,1),1,mpi_enreg,nfft,1,ngfft,0)
+        else
+          call fourdp(cplex,wkcmpx,work,1,mpi_enreg,nfft,1,ngfft,0)
+        end if
+        call timab(82,2,tsec)
+        if(ngrad==2)then
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(ispden,nfft,rhonow,work)
-       do ifft=1,cplex*nfft
-         rhonow(ifft,ispden,1)=work(ifft)
-       end do
-     end if
+          do ifft=1,cplex*nfft
+            rhonow(ifft,ispden,1)=work(ifft)
+          end do
+        end if
+      end if
 
 !    If gradient of the density is required, take care of the three components now
 !    Note : this operation is applied on the eventually shifted rho(G)
@@ -351,7 +368,9 @@ subroutine xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rho
    end do  ! End loop on spins
 
 !  Release memory
-   ABI_FREE(work)
+    if (allocated(work))  then
+      ABI_FREE(work)
+    end if
    ABI_FREE(wkcmpx)
    if (allocated(workgr))  then
      ABI_FREE(workgr)

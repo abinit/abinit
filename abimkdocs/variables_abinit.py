@@ -14322,6 +14322,30 @@ during electronic SC iterations).
 ),
 
 Variable(
+    abivarname="pulayhiststore",
+    varset="dev",
+    vartype="integer",
+    topics=["SCFAlgorithms_expert"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PULAY HISTory STORAGE mode",
+    characteristics=["[[DEVELOP]]"],
+    requires="[[iscf]] in [7,17]",
+    added_in_version="v10.5",
+    text=r"""
+Selects the storage mode used for Pulay mixing history.
+
+Possible values are:
+
+  * 0: use the current full double-precision Pulay history storage. This is the default and stable mode.
+  * 1: store Pulay FFT-grid trial and preconditioned-residual history in single precision while keeping current vectors, dot products, coefficient solves, and returned trial vectors in double precision.
+  * 2: reserved for residual/update/delta-oriented reduced-memory storage.
+
+The non-zero modes are experimental development options and should be used only after validating convergence for the target system. The default value preserves the historical Pulay storage behavior.
+""",
+),
+
+Variable(
     abivarname="npvel",
     varset="gw",
     vartype="integer",

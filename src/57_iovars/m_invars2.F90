@@ -2291,6 +2291,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npulayit',tread,'INT')
  if(tread==1) dtset%npulayit=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pulayhiststore',tread,'INT')
+ if(tread==1) dtset%pulayhiststore=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'diismemory',tread,'INT')
  if(tread==1) dtset%diismemory=intarr(1)
 

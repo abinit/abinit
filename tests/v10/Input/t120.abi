@@ -1,0 +1,60 @@
+# Silicon PAW test for reduced-precision Pulay FFT-grid history.
+# Based on v5/t11, reduced to a standalone ground-state test.
+
+ndtset 1
+
+ecut 5
+pawecutdg 5
+
+iscf 17
+pulayhiststore 1
+tolvrs 1.0d-12
+nstep 50
+
+kptopt 1
+ngkpt 2 2 2
+nshiftk 4
+shiftk
+3*1/2
+1/2 0 0
+0 1/2 0
+0 0 1/2
+
+prtwf 0
+prtden 0
+prteig 0
+
+acell 3*5.43 angstrom
+rprim
+0 1/2 1/2
+1/2 0 1/2
+1/2 1/2 0
+
+occopt 1
+nband 4
+
+znucl 14
+ntypat 1
+typat 2*1
+natom 2
+xred 3*0 3*1/4
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "si_ps.736.lda"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t120.abo, tolnlines = 6, tolabs = 2.0e-8, tolrel = 2.0e-8, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = H. Xu
+#%% keywords = PAW, Pulay
+#%% description =
+#%%   Silicon PAW ground-state calculation derived from v5/t11.
+#%%   Exercises pulayhiststore=1, the opt-in reduced-precision Pulay FFT-grid history mode.
+#%% topics = PAW
+#%%<END TEST_INFO>

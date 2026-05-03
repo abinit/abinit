@@ -647,10 +647,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    end if
    if (iscf10_mod == 5 .or. iscf10_mod == 6) then
      call abi_mixing_new(mix, iscf10_mod, denpot, cplex, &
-&     nfftf, dtset%nspden, npawmix, errid, msg, dtset%npulayit)
+&     nfftf, dtset%nspden, npawmix, errid, msg, dtset%npulayit, &
+&     pulayhist_storage=dtset%pulayhiststore)
    else
      call abi_mixing_new(mix, iscf10_mod, denpot, max(cplex, ispmix), &
-&     nfftmix, dtset%nspden, npawmix, errid, msg, dtset%npulayit)
+&     nfftmix, dtset%nspden, npawmix, errid, msg, dtset%npulayit, &
+&     pulayhist_storage=dtset%pulayhiststore)
    end if
    if (errid /= AB7_NO_ERROR) then
      ABI_ERROR(msg)

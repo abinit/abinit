@@ -50,6 +50,10 @@ module m_abi_mixing
  integer, parameter, public :: ABI_MIXING_REAL_SPACE     = 1
  integer, parameter, public :: ABI_MIXING_FOURRIER_SPACE = 2
 
+ integer, parameter, public :: ABI_MIXING_PULAY_STORAGE_FULL = 0
+ integer, parameter, public :: ABI_MIXING_PULAY_STORAGE_REDUCED = 1
+ integer, parameter, public :: ABI_MIXING_PULAY_STORAGE_RESIDUAL = 2
+
 
  type, public :: abi_mixing_object
     integer :: iscf,useextfpmd,use_rcpaw
@@ -59,9 +63,11 @@ module m_abi_mixing
     integer :: mffmem
     character(len = fnlen) :: diskCache
     integer :: n_index, n_fftgr, n_pulayit, n_pawmix,n_rcpawmix
+    integer :: pulayhist_storage
 
     integer, dimension(:), pointer :: i_rhor, i_vtrial, i_vresid, i_vrespc
     real(dp), dimension(:,:,:), pointer :: f_fftgr, f_atm
+    real(sp), dimension(:,:,:), pointer :: f_fftgr_sp
     real(dp), dimension(:,:), pointer :: f_paw
 
     real(dp),dimension(:),pointer :: f_extfpmd
@@ -110,6 +116,7 @@ subroutine init_(mix)
  mix%n_index   = 0
  mix%n_fftgr   = 0
  mix%n_pulayit = 7
+ mix%pulayhist_storage = ABI_MIXING_PULAY_STORAGE_FULL
  mix%n_pawmix  = 0
  mix%n_atom    = 0
  mix%space     = 0
@@ -145,6 +152,7 @@ subroutine nullify_(mix)
  nullify(mix%i_vresid)
  nullify(mix%i_vrespc)
  nullify(mix%f_fftgr)
+ nullify(mix%f_fftgr_sp)
  nullify(mix%f_atm)
  nullify(mix%f_paw)
  nullify(mix%f_extfpmd)
@@ -168,7 +176,7 @@ end subroutine nullify_
 !! SOURCE
 
 subroutine abi_mixing_new(mix, iscf, kind, space, nfft, nspden, &
-&  npawmix, errid, errmess, npulayit, useprec)
+&  npawmix, errid, errmess, npulayit, useprec, pulayhist_storage)
 
 !Arguments ------------------------------------
 !scalars
@@ -177,6 +185,7 @@ subroutine abi_mixing_new(mix, iscf, kind, space, nfft, nspden, &
  integer, intent(out) :: errid
  character(len = 500), intent(out) :: errmess
  integer, intent(in), optional :: npulayit
+ integer, intent(in), optional :: pulayhist_storage
  logical, intent(in), optional :: useprec
 
 !Local variables-------------------------------
@@ -226,6 +235,14 @@ subroutine abi_mixing_new(mix, iscf, kind, space, nfft, nspden, &
 
  ! Optional arguments.
  if (present(useprec)) mix%useprec = useprec
+ if (present(pulayhist_storage)) mix%pulayhist_storage = pulayhist_storage
+ if (mix%pulayhist_storage /= ABI_MIXING_PULAY_STORAGE_FULL .and. &
+&     mix%pulayhist_storage /= ABI_MIXING_PULAY_STORAGE_REDUCED .and. &
+&     mix%pulayhist_storage /= ABI_MIXING_PULAY_STORAGE_RESIDUAL) then
+    errid = AB7_ERROR_MIXING_ARG
+    write(errmess, "(A,I0,A)") "Unknown Pulay history storage mode (", mix%pulayhist_storage, ")."
+    return
+ end if
 
  ! Set-up internal dimensions.
  !These arrays are needed only in the self-consistent case
@@ -471,8 +488,14 @@ subroutine abi_mixing_copy_current_step(mix, arr_resid, errid, errmess, &
  errid = AB7_NO_ERROR
 
  if (mix%n_fftgr>0) then
-   if (mix%i_vresid(1)>0) mix%f_fftgr(:,:,mix%i_vresid(1)) = arr_resid(:,:)
-   if (present(arr_respc).and.mix%i_vrespc(1)>0) mix%f_fftgr(:,:,mix%i_vrespc(1)) = arr_respc(:,:)
+   if (mix%iscf == ABI_MIXING_PULAY .and. &
+&       mix%pulayhist_storage == ABI_MIXING_PULAY_STORAGE_REDUCED) then
+     if (mix%i_vresid(1)>0) mix%f_fftgr(:,:,2) = arr_resid(:,:)
+     if (present(arr_respc).and.mix%i_vrespc(1)>0) mix%f_fftgr(:,:,1) = arr_respc(:,:)
+   else
+     if (mix%i_vresid(1)>0) mix%f_fftgr(:,:,mix%i_vresid(1)) = arr_resid(:,:)
+     if (present(arr_respc).and.mix%i_vrespc(1)>0) mix%f_fftgr(:,:,mix%i_vrespc(1)) = arr_respc(:,:)
+   end if
  end if
  if (mix%n_pawmix>0) then
    if (present(arr_paw_resid).and.mix%i_vresid(1)>0) mix%f_paw(:, mix%i_vresid(1)) = arr_paw_resid(:)
@@ -529,11 +552,21 @@ subroutine abi_mixing_eval_allocate(mix, istep)
  istep_ = 1
  if (present(istep)) istep_ = istep
 
+ if (mix%mffmem == 0 .and. mix%iscf == ABI_MIXING_PULAY .and. &
+&    mix%pulayhist_storage == ABI_MIXING_PULAY_STORAGE_REDUCED) then
+   ABI_ERROR("pulayhiststore 1 is not compatible with the Pulay disk-cache path")
+ end if
+
  ! Allocate work array.
  if (.not. associated(mix%f_fftgr)) then
    !allocate(mix%f_fftgr(mix%space * mix%nfft,mix%nspden,mix%n_fftgr), stat = i_stat)
    !call memocc_abi(i_stat, mix%f_fftgr, 'mix%f_fftgr', subname)
-   ABI_MALLOC(mix%f_fftgr,(mix%space * mix%nfft,mix%nspden,mix%n_fftgr))
+   if (mix%iscf == ABI_MIXING_PULAY .and. &
+&       mix%pulayhist_storage == ABI_MIXING_PULAY_STORAGE_REDUCED) then
+     ABI_MALLOC(mix%f_fftgr,(mix%space * mix%nfft,mix%nspden,2))
+   else
+     ABI_MALLOC(mix%f_fftgr,(mix%space * mix%nfft,mix%nspden,mix%n_fftgr))
+   end if
    mix%f_fftgr(:,:,:)=zero
    if (mix%mffmem == 0 .and. istep_ > 1 .and. mix%n_fftgr>0) then
      call timab(83,1,tsec)
@@ -545,6 +578,12 @@ subroutine abi_mixing_eval_allocate(mix, istep)
      if (mix%n_pawmix == 0) close(unit=temp_unit)
      call timab(83,2,tsec)
    end if
+ end if
+ if (mix%iscf == ABI_MIXING_PULAY .and. &
+&     mix%pulayhist_storage == ABI_MIXING_PULAY_STORAGE_REDUCED .and. &
+&     (.not. associated(mix%f_fftgr_sp))) then
+   ABI_MALLOC(mix%f_fftgr_sp,(mix%space * mix%nfft,mix%nspden,mix%n_fftgr))
+   mix%f_fftgr_sp(:,:,:)=zero_sp
  end if
  ! Allocate PAW work array.
  if (.not. associated(mix%f_paw)) then
@@ -630,6 +669,7 @@ subroutine abi_mixing_eval_allocate(mix, istep)
     ! VALGRIND complains not all of f_fftgr_disk is initialized
     if (mix%n_fftgr > 0) then
       write(temp_unit) mix%f_fftgr
+      if (associated(mix%f_fftgr_sp)) write(temp_unit) mix%f_fftgr_sp
     end if
     if (mix%n_pawmix > 0 .and. mix%n_fftgr > 0) then
       write(temp_unit) mix%f_paw
@@ -639,6 +679,10 @@ subroutine abi_mixing_eval_allocate(mix, istep)
     if (associated(mix%f_fftgr)) then
       ABI_FREE(mix%f_fftgr)
       nullify(mix%f_fftgr)
+    end if
+    if (associated(mix%f_fftgr_sp)) then
+      ABI_FREE(mix%f_fftgr_sp)
+      nullify(mix%f_fftgr_sp)
     end if
     if (associated(mix%f_paw)) then
        ABI_FREE(mix%f_paw)
@@ -766,7 +810,26 @@ end subroutine abi_mixing_eval_deallocate
       & mix%iscf == ABI_MIXING_ANDERSON .or. &
       & mix%iscf == ABI_MIXING_ANDERSON_2 .or. &
       & mix%iscf == ABI_MIXING_PULAY) then
-    if (present(comm_atom)) then
+    if (mix%iscf == ABI_MIXING_PULAY .and. &
+&       mix%pulayhist_storage == ABI_MIXING_PULAY_STORAGE_REDUCED) then
+      if (present(comm_atom)) then
+        call scfopt_pulay_sp(mix%space, mix%f_fftgr(:,:,1), mix%f_fftgr_sp, &
+&          mix%f_paw, istep, mix%i_vrespc, mix%i_vtrial, mpi_comm, &
+&          mpi_summarize, mix%nfft, mix%n_pawmix, mix%nspden, mix%n_fftgr, &
+&          mix%n_index, mix%kind, pawoptmix_, usepaw, pawarr_, resnrm_, &
+&          arr, errid, errmess, mix%useextfpmd, mix%f_extfpmd, &
+&          nelect_extfpmd_, mix%use_rcpaw, mix%n_rcpawmix, mix%f_rcpaw, &
+&          rcpawarr_, comm_atom=comm_atom)
+      else
+        call scfopt_pulay_sp(mix%space, mix%f_fftgr(:,:,1), mix%f_fftgr_sp, &
+&          mix%f_paw, istep, mix%i_vrespc, mix%i_vtrial, mpi_comm, &
+&          mpi_summarize, mix%nfft, mix%n_pawmix, mix%nspden, mix%n_fftgr, &
+&          mix%n_index, mix%kind, pawoptmix_, usepaw, pawarr_, resnrm_, &
+&          arr, errid, errmess, mix%useextfpmd, mix%f_extfpmd, &
+&          nelect_extfpmd_, mix%use_rcpaw, mix%n_rcpawmix, mix%f_rcpaw, &
+&          rcpawarr_)
+      end if
+    else if (present(comm_atom)) then
       call scfopt(mix%space, mix%f_fftgr,mix%f_paw,mix%iscf,istep,&
          & mix%i_vrespc,mix%i_vtrial, &
          & mpi_comm,mpi_summarize,mix%nfft,mix%n_pawmix,mix%nspden, &
@@ -858,6 +921,7 @@ subroutine abi_mixing_deallocate(mix)
  ABI_SFREE_PTR(mix%i_vresid)
  ABI_SFREE_PTR(mix%i_vrespc)
  ABI_SFREE_PTR(mix%f_fftgr)
+ ABI_SFREE_PTR(mix%f_fftgr_sp)
  ABI_SFREE_PTR(mix%f_paw)
  ABI_SFREE_PTR(mix%f_atm)
  ABI_SFREE_PTR(mix%f_extfpmd)
@@ -2342,6 +2406,398 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
  end if
 
 end subroutine scfopt
+!!***
+
+!!****f* ABINIT/scfopt_pulay_sp
+!! NAME
+!! scfopt_pulay_sp
+!!
+!! FUNCTION
+!!  Compute the Pulay update with single-precision storage for historical
+!!  FFT-grid trial and preconditioned-residual vectors. Current vectors,
+!!  dot products, coefficient solves, and the returned trial vector remain
+!!  double precision.
+!!
+!! SOURCE
+
+subroutine scfopt_pulay_sp(cplex,current_respc,f_fftgr_sp,f_paw,istep,i_vrespc,i_vtrial,&
+& mpicomm,mpi_summarize,nfft,npawmix,nspden,n_fftgr,&
+& n_index,opt_denpot,pawoptmix,usepaw,vpaw,vresid,vtrial,errid,errmess, &
+& useextfpmd,f_extfpmd,nelect_extfpmd,&
+& use_rcpaw,nrcpawmix,f_rcpaw,rcpaw_occ,&
+& comm_atom) ! optional
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,istep,n_fftgr,n_index,nfft,useextfpmd,use_rcpaw,nrcpawmix
+ integer,intent(in) :: npawmix,nspden,opt_denpot,pawoptmix,usepaw,mpicomm
+ integer, intent(in),optional :: comm_atom
+ integer,intent(out) :: errid
+ character(len = 500), intent(out) :: errmess
+ logical, intent(in) :: mpi_summarize
+ real(dp), intent(out) :: vresid
+ real(dp),intent(inout) :: nelect_extfpmd
+ real(dp),intent(inout) :: rcpaw_occ(nrcpawmix*use_rcpaw)
+!arrays
+ integer,intent(inout) :: i_vrespc(n_index),i_vtrial(n_index)
+ real(dp),intent(in) :: current_respc(cplex*nfft,nspden)
+ real(sp),intent(inout) :: f_fftgr_sp(cplex*nfft,nspden,n_fftgr)
+ real(dp),intent(inout) :: f_paw(npawmix,n_fftgr*usepaw),vpaw(npawmix*usepaw)
+ real(dp),intent(inout) :: vtrial(cplex*nfft,nspden)
+ real(dp),intent(inout) :: f_extfpmd(useextfpmd*n_fftgr)
+ real(dp),intent(inout) :: f_rcpaw(use_rcpaw*nrcpawmix,use_rcpaw*n_fftgr)
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: npulaymax=50
+ integer :: ierr,ifft,ii,index,isp,jj,comm_atom_,niter,npulay,tmp
+ integer :: i_vstore, trial_slot, respc_slot
+ real(dp) :: current,det
+ character(len=500) :: message
+!arrays
+ integer,allocatable :: ipiv(:)
+ real(dp),save :: amat(npulaymax+1,npulaymax+1)
+ real(dp) :: resid_new(1)
+ real(dp),allocatable :: alpha(:),amatinv(:,:),amat_paw(:),rwork(:)
+
+! *************************************************************************
+
+ errid = AB7_NO_ERROR
+ comm_atom_=xmpi_comm_self; if(present(comm_atom)) comm_atom_=comm_atom
+
+ if (modulo(n_fftgr, 2) == 0 ) then
+   npulay=(n_fftgr-2)/2
+ else
+   npulay=(n_fftgr-1)/2
+ end if
+ i_vstore=i_vtrial(npulay)
+ niter=min(istep,npulay+1)
+
+ call dotprodm_pulay_dp(cplex,1,resid_new,current_respc,current_respc, &
+&  mpicomm,mpi_summarize,nfft,nspden,opt_denpot)
+ if (usepaw==1.and.pawoptmix==1) then
+   do index=1,npawmix
+     resid_new(1)=resid_new(1)+f_paw(index,i_vrespc(1))**2
+   end do
+   call xmpi_sum(resid_new(1),comm_atom_,ierr)
+ end if
+ vresid = resid_new(1)
+
+ if (istep==1) then
+   amat(:,:)=zero
+   amat(1,1)=resid_new(1)
+ end if
+
+ write(message,'(2a,i2,a)') ch10,' Pulay reduced-precision update with ',niter-1,' previous iterations:'
+ call wrtout(std_out,message,'COLL')
+
+ if (npulay>npulaymax) then
+   errid = AB7_ERROR_MIXING_CONVERGENCE
+   write(errmess, '(4a)' ) ch10,&
+&   ' scfopt_pulay_sp: ERROR - ',ch10,&
+&   '  Too many iterations required for Pulay algorithm (<50) !'
+   return
+ end if
+
+! Compute "A" matrix in double precision. Historical FFT-grid vectors are
+! converted from single precision element by element during the dot product.
+ if (istep>npulay+1) then
+   do jj=1,niter-1
+     do ii=1,niter-1
+       amat(ii,jj)=amat(ii+1,jj+1)
+     end do
+   end do
+ end if
+ if (usepaw==1.and.pawoptmix==1) then
+   ABI_MALLOC(amat_paw,(niter))
+   amat_paw(:)=zero
+   do ii=1,niter
+     respc_slot=i_vrespc(1+niter-ii)
+     do index=1,npawmix
+       amat_paw(ii)=amat_paw(ii)+f_paw(index,i_vrespc(1))*f_paw(index,respc_slot)
+     end do
+   end do
+   call xmpi_sum(amat_paw,comm_atom_,ierr)
+ end if
+ do ii=1,niter
+   if (ii==niter) then
+     call dotprodm_pulay_dp(cplex,1,amat(ii,niter),current_respc,current_respc, &
+&      mpicomm,mpi_summarize,nfft,nspden,opt_denpot)
+   else
+     call dotprodm_pulay_sp(cplex,1,amat(ii,niter),current_respc, &
+&      f_fftgr_sp(:,:,i_vrespc(1+niter-ii)),mpicomm,mpi_summarize,nfft,nspden,opt_denpot)
+   end if
+   if (usepaw==1.and.pawoptmix==1) amat(ii,niter)=amat(ii,niter)+amat_paw(ii)
+   if (ii<niter) amat(niter,ii)=amat(ii,niter)
+ end do
+ if (usepaw==1.and.pawoptmix==1)then
+   ABI_FREE(amat_paw)
+ end if
+
+! Invert "A" matrix and compute Pulay alpha factors in double precision.
+ ABI_MALLOC(amatinv,(niter,niter))
+ amatinv(1:niter,1:niter)=amat(1:niter,1:niter)
+ ABI_MALLOC(ipiv,(niter))
+ ABI_MALLOC(rwork,(niter))
+ call dgetrf(niter,niter,amatinv,niter,ipiv,ierr)
+ call dgetri(niter,amatinv,niter,ipiv,rwork,niter,ierr)
+ ABI_FREE(ipiv)
+ ABI_FREE(rwork)
+
+ ABI_MALLOC(alpha,(niter))
+ alpha=zero
+ det=zero
+ do ii=1,niter
+   do jj=1,niter
+     alpha(ii)=alpha(ii)+amatinv(jj,ii)
+     det=det+amatinv(jj,ii)
+   end do
+ end do
+ alpha(:)=alpha(:)/det
+ ABI_FREE(amatinv)
+ write(message,'(a,5(1x,g10.3))')' mixing of old trial potential: alpha(m:m-4)=',(alpha(ii),ii=niter,max(1,niter-4),-1)
+ call wrtout(std_out,message,'COLL')
+
+! Save latest trial/preconditioned-residual vectors in single precision and
+! compute the next trial vector in double precision.
+ do isp=1,nspden
+   do ifft=1,cplex*nfft
+     current=vtrial(ifft,isp)
+     vtrial(ifft,isp)=alpha(niter)*(current+current_respc(ifft,isp))
+     do ii=niter-1,1,-1
+       trial_slot=i_vtrial(niter-ii)
+       respc_slot=i_vrespc(1+niter-ii)
+       vtrial(ifft,isp)=vtrial(ifft,isp)+alpha(ii) * &
+&       (real(f_fftgr_sp(ifft,isp,trial_slot),dp)+real(f_fftgr_sp(ifft,isp,respc_slot),dp))
+     end do
+     f_fftgr_sp(ifft,isp,i_vstore)=real(current,sp)
+     f_fftgr_sp(ifft,isp,i_vrespc(1))=real(current_respc(ifft,isp),sp)
+   end do
+ end do
+
+! PAW and scalar auxiliary histories remain in double precision for this first
+! reduced-precision implementation; the FFT-grid history is the dominant target.
+ do index=1,npawmix
+   current=vpaw(index)
+   vpaw(index)=alpha(niter)*(current+f_paw(index,i_vrespc(1)))
+   do ii=niter-1,1,-1
+     vpaw(index)=vpaw(index)+alpha(ii) &
+&    *(f_paw(index,i_vtrial(niter-ii))+f_paw(index,i_vrespc(1+niter-ii)))
+   end do
+   f_paw(index,i_vstore)=current
+ end do
+
+ if(useextfpmd==1) then
+   current=nelect_extfpmd
+   nelect_extfpmd=alpha(niter)*(current+f_extfpmd(i_vrespc(1)))
+   do ii=niter-1,1,-1
+     nelect_extfpmd=nelect_extfpmd+alpha(ii)&
+&     *(f_extfpmd(i_vtrial(niter-ii))+f_extfpmd(i_vrespc(1+niter-ii)))
+   enddo
+   f_extfpmd(i_vstore)=current
+ endif
+
+ do index=1,nrcpawmix
+   current=rcpaw_occ(index)
+   rcpaw_occ(index)=alpha(niter)*(current+f_rcpaw(index,i_vrespc(1)))
+   do ii=niter-1,1,-1
+     rcpaw_occ(index)=rcpaw_occ(index)+alpha(ii) &
+&    *(f_rcpaw(index,i_vtrial(niter-ii))+f_rcpaw(index,i_vrespc(1+niter-ii)))
+   end do
+   f_rcpaw(index,i_vstore)=current
+ end do
+
+ ABI_FREE(alpha)
+
+ tmp=i_vtrial(npulay)
+ do ii=npulay,2,-1
+   i_vtrial(ii)=i_vtrial(ii-1)
+ end do
+ i_vtrial(1)=tmp
+ tmp=i_vrespc(1+npulay)
+ do ii=1+npulay,2,-1
+   i_vrespc(ii)=i_vrespc(ii-1)
+ end do
+ i_vrespc(1)=tmp
+
+end subroutine scfopt_pulay_sp
+!!***
+
+subroutine dotprodm_pulay_dp(cplex,cpldot,dot,potarr1,potarr2,mpicomm,mpi_summarize,nfft,nspden,opt_storage)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: cpldot,cplex,nfft,nspden,opt_storage,mpicomm
+ logical, intent(in) :: mpi_summarize
+ real(dp),intent(in) :: potarr1(cplex*nfft,nspden)
+ real(dp),intent(in) :: potarr2(cplex*nfft,nspden)
+ real(dp),intent(out) :: dot(cpldot)
+
+!Local variables-------------------------------
+ integer :: ierr,ifft,ispden
+ real(dp) :: ai,ar
+! *************************************************************************
+
+ DBG_CHECK(ANY(cplex==(/1,2/)),"Wrong cplex")
+ DBG_CHECK(ANY(cpldot==(/1,2/)),"Wrong cpldot")
+ DBG_CHECK(ANY(nspden==(/1,2,4/)),"Wrong nspden")
+
+ if(cplex==1 .or. cpldot==1)then
+   ar=zero
+   do ispden=1,min(nspden,2)
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,ispden,nfft,potarr1,potarr2) REDUCTION(+:ar)
+     do ifft=1,cplex*nfft
+       ar=ar + potarr1(ifft,ispden)*potarr2(ifft,ispden)
+     end do
+   end do
+   dot(1)=ar
+   if (nspden==4) then
+     ar=zero
+     do ispden=3,4
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,ispden,nfft,potarr1,potarr2) REDUCTION(+:ar)
+       do ifft=1,cplex*nfft
+         ar=ar + potarr1(ifft,ispden)*potarr2(ifft,ispden)
+       end do
+     end do
+     if (opt_storage==0) then
+       if (cplex==1) then
+         dot(1)=dot(1)+two*ar
+       else
+         dot(1)=dot(1)+ar
+       end if
+     else
+       dot(1)=half*(dot(1)+ar)
+     end if
+   end if
+ else
+   ar=zero ; ai=zero
+   do ispden=1,min(nspden,2)
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(ispden,nfft,potarr1,potarr2) REDUCTION(+:ar,ai)
+     do ifft=1,nfft
+       ar=ar + potarr1(2*ifft-1,ispden)*potarr2(2*ifft-1,ispden) &
+&            + potarr1(2*ifft  ,ispden)*potarr2(2*ifft  ,ispden)
+       ai=ai + potarr1(2*ifft-1,ispden)*potarr2(2*ifft  ,ispden) &
+&            - potarr1(2*ifft  ,ispden)*potarr2(2*ifft-1,ispden)
+     end do
+   end do
+   dot(1)=ar ; dot(2)=ai
+   if (nspden==4) then
+     ar=zero
+     do ispden=3,4
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(ispden,nfft,potarr1,potarr2) REDUCTION(+:ar,ai)
+       do ifft=1,nfft
+         ar=ar + potarr1(2*ifft-1,ispden)*potarr2(2*ifft-1,ispden) &
+&              + potarr1(2*ifft  ,ispden)*potarr2(2*ifft  ,ispden)
+         ai=ai + potarr1(2*ifft-1,ispden)*potarr2(2*ifft  ,ispden) &
+&              - potarr1(2*ifft  ,ispden)*potarr2(2*ifft-1,ispden)
+       end do
+     end do
+     if (opt_storage==0) then
+       dot(1)=dot(1)+ar
+       dot(2)=dot(2)+ai
+     else
+       dot(1)=half*(dot(1)+ar)
+       dot(2)=half*(dot(2)+ai)
+     end if
+   end if
+ end if
+
+ if (mpi_summarize) call xmpi_sum(dot,mpicomm,ierr)
+ if(cpldot==2 .and. cplex==1)dot(2)=zero
+
+end subroutine dotprodm_pulay_dp
+!!***
+
+!!****f* ABINIT/dotprodm_pulay_sp
+!! NAME
+!! dotprodm_pulay_sp
+!!
+!! FUNCTION
+!!  Double-precision dot product between a double-precision current vector
+!!  and a single-precision historical vector.
+!!
+!! SOURCE
+
+subroutine dotprodm_pulay_sp(cplex,cpldot,dot,potarr1,potarr2,mpicomm,mpi_summarize,nfft,nspden,opt_storage)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: cpldot,cplex,nfft,nspden,opt_storage,mpicomm
+ logical, intent(in) :: mpi_summarize
+ real(dp),intent(in) :: potarr1(cplex*nfft,nspden)
+ real(sp),intent(in) :: potarr2(cplex*nfft,nspden)
+ real(dp),intent(out) :: dot(cpldot)
+
+!Local variables-------------------------------
+ integer :: ierr,ifft,ispden
+ real(dp) :: ai,ar
+! *************************************************************************
+
+ DBG_CHECK(ANY(cplex==(/1,2/)),"Wrong cplex")
+ DBG_CHECK(ANY(cpldot==(/1,2/)),"Wrong cpldot")
+ DBG_CHECK(ANY(nspden==(/1,2,4/)),"Wrong nspden")
+
+ if(cplex==1 .or. cpldot==1)then
+   ar=zero
+   do ispden=1,min(nspden,2)
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,ispden,nfft,potarr1,potarr2) REDUCTION(+:ar)
+     do ifft=1,cplex*nfft
+       ar=ar + potarr1(ifft,ispden)*real(potarr2(ifft,ispden),dp)
+     end do
+   end do
+   dot(1)=ar
+   if (nspden==4) then
+     ar=zero
+     do ispden=3,4
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,ispden,nfft,potarr1,potarr2) REDUCTION(+:ar)
+       do ifft=1,cplex*nfft
+         ar=ar + potarr1(ifft,ispden)*real(potarr2(ifft,ispden),dp)
+       end do
+     end do
+     if (opt_storage==0) then
+       if (cplex==1) then
+         dot(1)=dot(1)+two*ar
+       else
+         dot(1)=dot(1)+ar
+       end if
+     else
+       dot(1)=half*(dot(1)+ar)
+     end if
+   end if
+ else
+   ar=zero ; ai=zero
+   do ispden=1,min(nspden,2)
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(ispden,nfft,potarr1,potarr2) REDUCTION(+:ar,ai)
+     do ifft=1,nfft
+       ar=ar + potarr1(2*ifft-1,ispden)*real(potarr2(2*ifft-1,ispden),dp) &
+&            + potarr1(2*ifft  ,ispden)*real(potarr2(2*ifft  ,ispden),dp)
+       ai=ai + potarr1(2*ifft-1,ispden)*real(potarr2(2*ifft  ,ispden),dp) &
+&            - potarr1(2*ifft  ,ispden)*real(potarr2(2*ifft-1,ispden),dp)
+     end do
+   end do
+   dot(1)=ar ; dot(2)=ai
+   if (nspden==4) then
+     ar=zero
+     do ispden=3,4
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(ispden,nfft,potarr1,potarr2) REDUCTION(+:ar,ai)
+       do ifft=1,nfft
+         ar=ar + potarr1(2*ifft-1,ispden)*real(potarr2(2*ifft-1,ispden),dp) &
+&              + potarr1(2*ifft  ,ispden)*real(potarr2(2*ifft  ,ispden),dp)
+         ai=ai + potarr1(2*ifft-1,ispden)*real(potarr2(2*ifft  ,ispden),dp) &
+&              - potarr1(2*ifft  ,ispden)*real(potarr2(2*ifft-1,ispden),dp)
+       end do
+     end do
+     if (opt_storage==0) then
+       dot(1)=dot(1)+ar
+       dot(2)=dot(2)+ai
+     else
+       dot(1)=half*(dot(1)+ar)
+       dot(2)=half*(dot(2)+ai)
+     end if
+   end if
+ end if
+
+ if (mpi_summarize) call xmpi_sum(dot,mpicomm,ierr)
+ if(cpldot==2 .and. cplex==1)dot(2)=zero
+
+end subroutine dotprodm_pulay_sp
 !!***
 
 !!****f* ABINIT/findminscf

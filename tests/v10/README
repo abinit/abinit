@@ -17,6 +17,8 @@ Please, see the README file in the tests directory (above this one) to get help.
 
 * Tests 104-107 concern mobility calculations using Cumulant and DM spectral functions using Kubo-Greenwood
 
+* Test 120 concerns reduced-precision Pulay history with PAW
+
 * Tests 121-140 concern hybrid functionals
 
 * Tests 150-160 concern spectrum slicing diagonalization algorithm

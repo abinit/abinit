@@ -574,6 +574,7 @@ type, public :: dataset_type
  integer :: plowan_natom
  integer :: plowan_nt
  integer :: plowan_realspace
+ integer :: pulayhiststore = 0
  integer :: posdoppler
  integer :: positron
  integer :: posnstep
@@ -2116,6 +2117,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%plowan_natom       = dtin%plowan_natom
  dtout%plowan_nt          = dtin%plowan_nt
  dtout%plowan_realspace   = dtin%plowan_realspace
+ dtout%pulayhiststore     = dtin%pulayhiststore
  dtout%posdoppler         = dtin%posdoppler
  dtout%positron           = dtin%positron
  dtout%posnstep           = dtin%posnstep
@@ -3885,7 +3887,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' ph_intmeth ph_ndivsm ph_ngqpt ph_nqpath ph_nqshift ph_qpath'
  list_vars=trim(list_vars)//' ph_qshift ph_smear ph_wstep pitransform'
  list_vars=trim(list_vars)//' plowan_bandi plowan_bandf plowan_compute plowan_iatom plowan_it plowan_lcalc'
- list_vars=trim(list_vars)//' plowan_natom plowan_nbl plowan_nt plowan_projcalc plowan_realspace'
+ list_vars=trim(list_vars)//' plowan_natom plowan_nbl plowan_nt plowan_projcalc plowan_realspace pulayhiststore'
  list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff'
  list_vars=trim(list_vars)//' ppmfrq ppmodel pp_dirpath'
  list_vars=trim(list_vars)//' prepalw prepanl prepgkk'

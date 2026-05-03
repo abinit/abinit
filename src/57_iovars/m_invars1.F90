@@ -2769,6 +2769,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%plowan_natom=0
    dtsets(idtset)%plowan_nt=0
    dtsets(idtset)%plowan_realspace=0
+   dtsets(idtset)%pulayhiststore=0
    dtsets(idtset)%pol(:)=zero
    dtsets(idtset)%polcen(:)=zero
    dtsets(idtset)%posdoppler=0

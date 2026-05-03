@@ -406,6 +406,9 @@ contains
  intarr(1,:)=dtsets(:)%plowan_realspace
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'plowan_realspace','INT',0)
 
+ intarr(1,:)=dtsets(:)%pulayhiststore
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'pulayhiststore','INT',0)
+
 
 !plowan_it
  narr=100
