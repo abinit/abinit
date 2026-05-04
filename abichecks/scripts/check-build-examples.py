@@ -1,5 +1,12 @@
 #!/usr/bin/env python
-"""check test farm build examples"""
+"""
+Check test farm build examples.
+
+This script parses the 'config/specs/environment.conf' and 'options.conf'
+to validate the configurations defined in 'config/specs/testfarm.conf'. It checks
+whether the build examples use undefined, ignored, or removed configuration keys,
+and reports any mismatches against the generated files in 'doc/build/config-examples'.
+"""
 #
 # Copyright (C) 2010-2026 ABINIT Group (Yann Pouillon)
 #
@@ -18,7 +25,9 @@ except ImportError:
 
 import os
 import re
+import re
 import sys
+from typing import Dict, List, Tuple
 
 
 class MyConfigParser(ConfigParser):
@@ -29,7 +38,8 @@ class MyConfigParser(ConfigParser):
 env_ignore = list()
 opt_ignore = ["fcflags_opt_*","status"]
 
-def is_ignored(keyword):
+def is_ignored(keyword: str) -> bool:
+  """Check if the given keyword is matched by any ignore pattern."""
   for opt in env_ignore + opt_ignore:
     if ( "*" in opt ):
       if ( re.match(opt,keyword) ):
@@ -38,10 +48,11 @@ def is_ignored(keyword):
         return True
   return False
 
-def key_is_ok(mode,key):
+def key_is_ok(mode: str, key: str) -> bool:
+  """Determine if a configuration key is valid for a given build mode."""
 
   # Init keys to ignore
-  cnf_ignore = dict()
+  cnf_ignore = dict() # type: Dict[str, Tuple[str, ...]]
   cnf_ignore["mpi"] = ("status","CC","CXX","FC")
   cnf_ignore["raw"] = ("status")
   cnf_ignore["serial"] = ("status","with_mpi_prefix")
@@ -50,7 +61,13 @@ def key_is_ok(mode,key):
     return False
   return True
 
-def main():
+def main() -> int:
+  """
+  Main logic for validating the test farm build examples.
+
+  Returns:
+      Number of errors found during validation (0 if OK).
+  """
   home_dir = find_abinit_toplevel_directory()
   # Init
   re_env = re.compile("^[A-Z][0-9A-Z_]*")

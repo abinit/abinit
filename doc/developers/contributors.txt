@@ -1,7 +1,7 @@
 
 Contributors
 
-The ABINIT package : list of contributors.
+The ABINIT package: list of contributors.
 
 Copyright (C) 2000-2026 ABINIT group (XG)
 This file is distributed under the terms of the

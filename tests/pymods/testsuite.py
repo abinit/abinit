@@ -7,6 +7,8 @@ comparing results against references, and generating reports in text, HTML,
 and YAML formats.
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import pickle
@@ -791,7 +793,7 @@ class AbinitTestInfo:
         return test_id
 
     @property
-    def ismulti_parallel(self):
+    def ismulti_parallel(self) -> bool:
         """True is this is a multi-parallel test."""
         return self._ismulti_paral
 
@@ -4159,16 +4161,16 @@ class AbinitTestSuite:
         with open(self.cpkl_fname, "wb") as fh:
             pickle.dump(self, fh, protocol=protocol)
 
-    def _tests_with_status(self, status):
+    def _tests_with_status(self, status: str) -> list[BaseTest | ChainOfTests]:
         assert status in BaseTest._possible_status
         # assert self._executed
         return [test for test in self if test.status == status]
 
-    def succeeded_tests(self): return self._tests_with_status("succeeded")
-    def passed_tests(self):    return self._tests_with_status("passed")
-    def failed_tests(self):    return self._tests_with_status("failed")
-    def skipped_tests(self):   return self._tests_with_status("skipped")
-    def disabled_tests(self):  return self._tests_with_status("disabled")
+    def succeeded_tests(self) -> list[BaseTest | ChainOfTests]: return self._tests_with_status("succeeded")
+    def passed_tests(self) -> list[BaseTest | ChainOfTests]:    return self._tests_with_status("passed")
+    def failed_tests(self) -> list[BaseTest | ChainOfTests]:    return self._tests_with_status("failed")
+    def skipped_tests(self) -> list[BaseTest | ChainOfTests]:   return self._tests_with_status("skipped")
+    def disabled_tests(self) -> list[BaseTest | ChainOfTests]:  return self._tests_with_status("disabled")
 
     @property
     def targz_fname(self):
@@ -4767,7 +4769,7 @@ class Results:
     @lazy__str__
     def __str__(self): pass
 
-    def tests_with_status(self, status):
+    def tests_with_status(self, status: str) -> list[BaseTest | ChainOfTests]:
         """
         Return a list of tests with the given status.
 
@@ -4787,17 +4789,17 @@ class Results:
         }[status]
 
     @property
-    def nfailed(self):
+    def nfailed(self) -> int:
         """Number of failed tests."""
         return len(self.failed_tests)
 
     @property
-    def npassed(self):
+    def npassed(self) -> int:
         """Number of passed tests."""
         return len(self.passed_tests)
 
     @property
-    def nexecuted(self):
+    def nexecuted(self) -> int:
         """
         Number of tests executed.
 

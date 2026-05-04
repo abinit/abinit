@@ -1,5 +1,11 @@
 #!/usr/bin/env python
-"""check build refs"""
+"""
+Check build references.
+
+This script compares the generated build configuration examples in
+'doc/build/config-examples' against the reference files stored in
+'abichecks/buildsys/Refs'. It checks for differences and missing files.
+"""
 #
 # Copyright (C) 2011-2026 ABINIT Group (Yann Pouillon)
 #
@@ -10,11 +16,12 @@
 
 import os
 import sys
+from typing import Tuple, List
 
 from abirules_tools import find_abinit_toplevel_directory
 
 
-def getstatusoutput(cmd):
+def getstatusoutput(cmd: str) -> Tuple[int, str]:
     """
     Return (status, output) of executing cmd in a shell.
 
@@ -38,12 +45,18 @@ def getstatusoutput(cmd):
     return status, data
 
 
-def main():
+def main() -> int:
+  """
+  Main logic for validating build reference files.
+
+  Returns:
+      Number of mismatches or missing files found (0 if OK).
+  """
   home_dir = find_abinit_toplevel_directory()
   # Init
   nerr = 0
-  bex_diffs = list()
-  bex_missing = list()
+  bex_diffs = list() # type: List[str]
+  bex_missing = list() # type: List[str]
 
   bex_dir = os.path.join(home_dir,"doc/build/config-examples")
   ref_dir = os.path.join(home_dir,"abichecks/buildsys/Refs")
