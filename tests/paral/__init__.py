@@ -114,6 +114,7 @@ inp_files = [
 "t116.abi", # DMFT dmft_solv=8 and multiple atoms
 "t117.abi", # DMFT dmft_solv=8 and multiple atoms in different order
 "t118.abi", # DMFT dmftctqmc_basis = 4 + ctqmc_localprop soc
+"t119.abi", # DMFT dmft_solv=10 and dmft_hybri_limit=1
 "t120.abi", # Test meta-GGA + PAW + paral_kgb + cprj_in_memory + istwfk
 "t121.abi", #DMFT magnfield=1, with 4 chains per MPI (demonstrate dmftctqmc_chains)
 "t150.abi",  # Test sequential slice execution in spectrum slicing diagonalization with 4 MPI

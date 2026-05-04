@@ -1,11 +1,10 @@
 #!/usr/bin/env python
-from __future__ import print_function
 
 import os
 import re
 import sys
 
-re_f90 = re.compile("\.[Ff]90$")
+re_f90 = re.compile(r"\.[Ff]90$")
 re_ign = re.compile(r"_(ext|noabirule)")
 re_int = re.compile("interfaces_")
 
@@ -33,9 +32,9 @@ def main(source_tree):
   glo["mis"] = 0
 
   print( "Status of RoboDOC headers in %s" % (source_tree))
-  print( "")
-  print( "")
-  print( "")
+  print()
+  print()
+  print()
 
   for root,dirs,files in os.walk(source_tree):
     acc["mod"] = 0
@@ -76,7 +75,7 @@ def main(source_tree):
       cnt["mis"] = 0
 
       chk_fun = False
-      with open(src, "r") as fh:
+      with open(src) as fh:
         inp = fh.readlines()
 
       for line in inp:
@@ -93,8 +92,7 @@ def main(source_tree):
               chk_fun = True
 
       cnt["mis"] = (cnt["mod"]+cnt["sub"]-cnt["fun"]) + (cnt["fun"]-cnt["dsc"])
-      if ( cnt["mis"] < 0 ):
-        cnt["mis"] = 0
+      cnt["mis"] = max(cnt["mis"], 0)
 
       print ("%-48s %4d %4d %4d %4d %4d %4d" % \
         (src,cnt["mod"],cnt["sub"],cnt["hdr"],cnt["fun"],cnt["dsc"],cnt["mis"]))
@@ -113,9 +111,9 @@ def main(source_tree):
       print ("------------------------------------------------ ---- ---- ---- ---- ---- ----")
       print ("Total in %-39s %4d %4d %4d %4d %4d %4d" % \
         (root,acc["mod"],acc["sub"],acc["hdr"],acc["fun"],acc["dsc"],acc["mis"]))
-      print ("")
-      print ("")
-      print ("")
+      print()
+      print()
+      print()
 
     for blk in cnt:
       glo[blk] += acc[blk]
@@ -126,16 +124,16 @@ def main(source_tree):
   print ("%-48s %4d %4d %4d %4d %4d %4d" % \
     ("*",glo["mod"],glo["sub"],glo["hdr"],glo["fun"],glo["dsc"],glo["mis"]))
   print ("================================================ ==== ==== ==== ==== ==== ====")
-  print ("")
+  print()
   print ("Mods: number of Fortran modules or programs")
   print ("Subs: number of subroutines or functions")
   print ("Hdrs: number of RoboDOC headers")
   print ("Funs: number of RoboDOC 'FUNCTION' keywords")
   print ("Dscs: number of actually described functions")
   print ("Miss: number of missing descriptions")
-  print ("")
-  print ("")
-  print ("")
+  print()
+  print()
+  print()
 
   print ("Directory                  % done")
   print ("------------------------ --------")
@@ -147,31 +145,31 @@ def main(source_tree):
     pct = int(float(my_sum-glo["mis"])*100.0/float(my_sum))
     print ("------------------------ --------")
     print ("%-24s %8d" % ("*",pct))
-  print ("")
-  print ("")
-  print ("")
+  print()
+  print()
+  print()
 
   print ("The following directories have been ignored:")
-  print ("")
+  print()
   for d in ign:
     print ("  * %s/" % (d))
-  print ("")
-  print ("")
-  print ("")
+  print()
+  print()
+  print()
 
   print ("The following files are not modules, but contain a collection of routines:" )
-  print ("")
+  print()
   for src in sbm:
     print ("  * %s" % (src))
-  print ("")
-  print ("")
-  print ("")
+  print()
+  print()
+  print()
 
 if __name__ == "__main__":
 
-  if len(sys.argv) == 1: 
+  if len(sys.argv) == 1:
     source_tree = "src"
   else:
-    source_tree = sys.argv[1] 
+    source_tree = sys.argv[1]
 
   main(source_tree)

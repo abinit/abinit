@@ -2427,6 +2427,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_triqs_time_invariance=1
    dtsets(idtset)%dmft_triqs_tol_block=tol12
    dtsets(idtset)%dmft_triqs_use_norm_as_weight=1
+   dtsets(idtset)%dmft_full_chipsi=0
    dtsets(idtset)%dmft_wanorthnorm=3
    dtsets(idtset)%dmft_wanrad=-1.0_dp
    dtsets(idtset)%dmft_x2my2d=0
@@ -2509,10 +2510,11 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%goprecon =0
    dtsets(idtset)%goprecprm(:)=0
    dtsets(idtset)%gpu_devices=(/-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1/)
+   dtsets(idtset)%gpu_nfft_blocks=0
    dtsets(idtset)%gpu_kokkos_nthrd=xomp_get_max_threads()
    dtsets(idtset)%gpu_linalg_limit=2000000
    dtsets(idtset)%gpu_nl_distrib=0
-   dtsets(idtset)%gpu_nl_splitsize=1
+   dtsets(idtset)%gpu_nl_splitsize=0
    dtsets(idtset)%gpu_thread_limit=0
    if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) then
      dtsets(idtset)%gpu_thread_limit=min(4,xomp_get_max_threads())

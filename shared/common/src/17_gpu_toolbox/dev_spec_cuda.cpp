@@ -112,6 +112,22 @@ void get_gpu_uuid_(int* device, char* uuid)
    return;
 }
 
+// Gives the major version number of CUDA library ---------
+extern "C"
+int gpu_get_lib_version_major_cpp()
+{
+  int version = CUDA_VERSION;
+  return version / 1000;
+}
+
+// Gives the minor version number of CUDA library ---------
+extern "C"
+int gpu_get_lib_version_minor_cpp()
+{
+  int version = CUDA_VERSION;
+  return (version % 1000) / 10;
+}
+
 // Set new value for #MPI tasks being assigned per GPU ---------
 extern "C"
 void gpu_set_nprocs_per_gpu_(int* nprocs_per_gpu)

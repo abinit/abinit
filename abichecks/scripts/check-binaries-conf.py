@@ -1,5 +1,11 @@
 #!/usr/bin/env python
-"Check binaries configuration"
+"""
+Check binaries configuration.
+
+This script parses the 'config/specs/binaries.conf' file and validates
+the order of dependencies and libraries defined for each executable.
+Dependencies and libraries are expected to follow a predefined ordering schema.
+"""
 #
 # Copyright (C) 2012-2026 ABINIT Group (Yann Pouillon)
 #
@@ -7,22 +13,24 @@
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
-from __future__ import unicode_literals, division, print_function, absolute_import
 
 from abirules_tools import find_abinit_toplevel_directory
 
 try:
-    from ConfigParser import ConfigParser,NoOptionError
+    from ConfigParser import ConfigParser, NoOptionError
 except ImportError:
-    from configparser import ConfigParser, NoOptionError
+    from configparser import ConfigParser
 
 import os
 import re
 import sys
+from typing import Any, Dict, List
+
 
 class MyConfigParser(ConfigParser):
 
-  def optionxform(self,option):
+  def optionxform(self, option: str) -> str:
+    """Override optionxform to preserve the case of options."""
     return str(option)
 
 # ---------------------------------------------------------------------------- #
@@ -48,9 +56,15 @@ dep_levels = {
   "triqs":3,
   "wannier90":9,
   "xmlf90":3,
-}
+} # type: Dict[str, int]
 
-def main():
+def main() -> int:
+  """
+  Main logic for validating the binaries configuration.
+
+  Returns:
+      Number of errors found during validation (0 if OK).
+  """
   home_dir = find_abinit_toplevel_directory()
 
   # Init
@@ -60,8 +74,8 @@ def main():
   cnf_bin.read(cnf_fname)
   bin_list = cnf_bin.sections()
   bin_list.sort()
-  dep_order = {}
-  lib_order = {}
+  dep_order = {} # type: Dict[str, List[str]]
+  lib_order = {} # type: Dict[str, List[str]]
   re_num = re.compile("[0-9][0-9]_")
 
   # Check order of dependencies and libraries

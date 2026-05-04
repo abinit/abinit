@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# coding: utf-8
 """
 This script replaces strings in the source files. See replace_string function.
 """
-import sys
 import os
+import sys
 
 TOPDIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -24,7 +23,7 @@ def source_paths_from_abinit_src(top=None):
         abinit_src = os.path.join(root, "abinit.src")
         mod = imp.load_source(abinit_src, abinit_src)
         if hasattr(mod, "sources"):
-            source_paths.extend((os.path.join(root, s) for s in mod.sources if s not in black_list))
+            source_paths.extend(os.path.join(root, s) for s in mod.sources if s not in black_list)
 
     return source_paths
 
@@ -118,11 +117,11 @@ def main():
     for top in top_list:
         for path in all_source_files(top=top, types=("fortran", "h", "c")):
             #print("Replacing strings in:", path)
-            with open(path, "rt") as fh:
+            with open(path) as fh:
                 old_s = fh.read()
                 s = replace_string(old_s)
             if s != old_s:
-                with open(path, "wt") as fh:
+                with open(path, "w") as fh:
                     fh.write(s)
 
     return 0
