@@ -1,4 +1,4 @@
-# Silicon PAW test for reduced-precision Pulay FFT-grid history.
+# Silicon PAW test for delta-encoded Pulay FFT-grid history.
 # Based on v5/t11, reduced to a standalone ground-state test.
 
 ndtset 1
@@ -55,6 +55,6 @@ pseudos "si_ps.736.lda"
 #%% keywords = PAW, Pulay
 #%% description =
 #%%   Silicon PAW ground-state calculation derived from v5/t11.
-#%%   Exercises pulayhiststore=1, the opt-in reduced-precision Pulay FFT-grid history mode.
+#%%   Exercises pulayhiststore=1, the opt-in delta-encoded Pulay FFT-grid history mode.
 #%% topics = PAW
 #%%<END TEST_INFO>

@@ -2230,7 +2230,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  pulayhiststore
    call chkint_eq(0,0,cond_string,cond_values,ierr,'pulayhiststore', &
-&    dt%pulayhiststore,3,(/0,1,2/),iout)
+&    dt%pulayhiststore,2,(/0,1/),iout)
 
 !  mixalch_orig
 !  For each type of atom, the sum of the psp components must be one.

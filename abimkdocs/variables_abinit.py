@@ -14338,10 +14338,9 @@ Selects the storage mode used for Pulay mixing history.
 Possible values are:
 
   * 0: use the current full double-precision Pulay history storage. This is the default and stable mode.
-  * 1: store Pulay FFT-grid trial and preconditioned-residual history in single precision while keeping current vectors, dot products, coefficient solves, and returned trial vectors in double precision.
-  * 2: reserved for residual/update/delta-oriented reduced-memory storage.
+  * 1: use experimental delta encoding: keep compact single-precision residual history, keep the newest previous trial vector in single precision, and store older trial vectors as quantized int16 deltas from newer trial history.
 
-The non-zero modes are experimental development options and should be used only after validating convergence for the target system. The default value preserves the historical Pulay storage behavior.
+Mode `1` is an experimental development option and should be used only after validating convergence for the target system. It is not compatible with the Pulay disk-cache path selected by [[mffmem]] = 0. The default value preserves the historical Pulay storage behavior.
 """,
 ),
 

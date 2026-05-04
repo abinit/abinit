@@ -33,7 +33,6 @@ module m_atm2fft
  use m_time,        only : timab
  use defs_datatypes,only : pseudopotential_type
  use m_distribfft,  only : distribfft_type
- use m_gtermcutoff, only : termcutoff
  use m_pawtab,      only : pawtab_type
  use m_fft,         only : zerosym, fourdp
  use m_mpinfo,      only : set_mpi_enreg_fft, unset_mpi_enreg_fft, initmpi_seq
@@ -218,7 +217,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: im=2,re=1,icutcoul=3
+ integer,parameter :: im=2,re=1
  integer :: i1,i2,i3,ia,ia1,ia2,id1,id2,id3,ierr,ig1,ig1_,ig2,ig2_,ig3,ig3_,ii,is1,is2
  integer :: itypat,jj,js,ka,kb,kd,kg,me_fft,my_comm_fft,ndir,n1,n2,n3,nproc_fft,paral_kgb_fft
  integer :: shift1,shift2,shift3
@@ -245,11 +244,12 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  real(dp) :: dgm(3,3,6),d2gm(3,3,6,6),gcart(3),tsec(2)
  real(dp),allocatable :: dyfrn_indx(:,:,:),dyfrv_indx(:,:,:),grn_indx(:,:)
  real(dp),allocatable :: grv_indx(:,:),phim_igia(:),phre_igia(:),workn(:,:)
- real(dp),allocatable :: gcutoff(:)
  real(dp),allocatable :: workv(:,:)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+ ABI_UNUSED(rcut)
+ ABI_UNUSED(rprimd)
 !Check optional arguments
  if (present(comm_fft)) then
    if ((.not.present(paral_kgb)).or.(.not.present(me_g0))) then
@@ -358,10 +358,6 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  ABI_MALLOC(phre_igia,(natom))
  ABI_MALLOC(phim_igia,(natom))
 
- !Initialize Gcut-off array from m_termcutoff
- !ABI_MALLOC(gcutoff,(nfft))
- call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,1,rcut,rprimd,vcutgeo)
-
  ia1=1
  do itypat=1,ntypat
 !  ia1,ia2 sets range of loop over atoms:
@@ -455,7 +451,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                else
                  v_at=(aa*vspl(jj,1,itypat)+bb*vspl(jj+1,1,itypat)+&
 &                 cc*vspl(jj,2,itypat)+dd*vspl(jj+1,2,itypat)) &
-&                 /gsquar * gcutoff(ii)
+&                 /gsquar
                end if
              end if
              if (optn==1) then
@@ -731,8 +727,6 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
  ABI_FREE(phre_igia)
  ABI_FREE(phim_igia)
- ABI_FREE(gcutoff)
-
 !Get local potential or density back to real space
  if(optatm==1)then
 !  Allow for the addition of a perturbing potential
