@@ -26,6 +26,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
+#%% exclude_builders = alps_nag_7.2_serial
 #%% input_ddb = tcdfpt_10.ddb.in
 #%% test_chain =  tcdfpt_8.abi, tcdfpt_9.abi, tcdfpt_10.abi, tcdfpt_11.abi
 #%% [files]

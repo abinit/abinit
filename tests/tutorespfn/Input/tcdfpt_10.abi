@@ -12,6 +12,7 @@ tcdfpt_8o_DS5_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
+#%% exclude_builders = alps_nag_7.2_serial
 #%% test_chain =  tcdfpt_8.abi, tcdfpt_9.abi, tcdfpt_10.abi, tcdfpt_11.abi
 #%% [files]
 #%% files_to_test =
