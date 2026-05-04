@@ -2069,8 +2069,7 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
  integer,parameter :: npulaymax=50
  integer :: i_vstore,ierr,ifft,ii,index,isp,jj,comm_atom_,niter,npulay,tmp
  real(dp),save :: prod_resid_old,resid_old,resid_old2
- real(dp) :: aa1,aa2,alpha_sum,bb,cc1,cc2,current,det,lambda,lambda2,resid_best
- logical :: pulay_fallback
+ real(dp) :: aa1,aa2,bb,cc1,cc2,current,det,lambda,lambda2,resid_best
  character(len=500) :: message
 !arrays
  integer,allocatable :: ipiv(:)
@@ -2355,49 +2354,26 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
      ABI_FREE(amat_paw)
    end if
 
-!  Invert "A" matrix and compute "alpha" factors. Fall back to a one-step
-!  Pulay update for this call if the Gram matrix or coefficients are unstable.
+!  Invert "A" matrix and compute "alpha" factors.
     ABI_MALLOC(alpha,(niter))
-    pulay_fallback=.false.
-    if (niter==1) then
-      alpha(1)=one
-    else
-      ABI_MALLOC(amatinv,(niter,niter))
-      amatinv(1:niter,1:niter)=amat(1:niter,1:niter)
-      ABI_MALLOC(ipiv,(niter))
-      ABI_MALLOC(rwork,(niter))
-      call dgetrf(niter,niter,amatinv,niter,ipiv,ierr)
-      if (ierr==0) call dgetri(niter,amatinv,niter,ipiv,rwork,niter,ierr)
-      ABI_FREE(ipiv)
-      ABI_FREE(rwork)
-      if (ierr/=0) then
-        pulay_fallback=.true.
-      else
-        alpha=zero
-        det=zero
-        do ii=1,niter
-          do jj=1,niter
-            alpha(ii)=alpha(ii)+amatinv(jj,ii)
-            det=det+amatinv(jj,ii)
-          end do
-        end do
-        if (det/=det .or. abs(det)<tiny(one)) then
-          pulay_fallback=.true.
-        else
-          alpha(:)=alpha(:)/det
-          alpha_sum=sum(abs(alpha(:)))
-          if (alpha_sum/=alpha_sum .or. alpha_sum>50.0_dp) pulay_fallback=.true.
-        end if
-      end if
-      ABI_FREE(amatinv)
-    end if
-    if (pulay_fallback) then
-      call wrtout(std_out,' Pulay update fell back for this step: unstable residual Gram matrix or coefficients.','COLL')
-      ABI_FREE(alpha)
-      niter=1
-      ABI_MALLOC(alpha,(niter))
-      alpha(1)=one
-    end if
+    ABI_MALLOC(amatinv,(niter,niter))
+    amatinv(1:niter,1:niter)=amat(1:niter,1:niter)
+    ABI_MALLOC(ipiv,(niter))
+    ABI_MALLOC(rwork,(niter))
+    call dgetrf(niter,niter,amatinv,niter,ipiv,ierr)
+    call dgetri(niter,amatinv,niter,ipiv,rwork,niter,ierr)
+    ABI_FREE(ipiv)
+    ABI_FREE(rwork)
+    det=zero
+    alpha(:)=zero
+    do ii=1,niter
+      do jj=1,niter
+        alpha(ii)=alpha(ii)+amatinv(jj,ii)
+        det=det+amatinv(jj,ii)
+      end do
+    end do
+    alpha(:)=alpha(:)/det
+    ABI_FREE(amatinv)
    write(message,'(a,5(1x,g10.3))')' mixing of old trial potential: alpha(m:m-4)=',(alpha(ii),ii=niter,max(1,niter-4),-1)
    call wrtout(std_out,message,'COLL')
 
@@ -2639,7 +2615,6 @@ subroutine scfopt_pulay_delta_sp(cplex,f_fftgr,f_respc_sp,f_trial_sp,f_trial_del
    ABI_FREE(amatinv)
  end if
  if (pulay_fallback) then
-   call wrtout(std_out,' Pulay delta-encoded update fell back for this step: unstable residual Gram matrix or coefficients.','COLL')
    ABI_FREE(alpha)
    niter=1
    ABI_MALLOC(alpha,(niter))
