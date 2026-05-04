@@ -97,6 +97,7 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = alps_nag_7.2_serial
 #%% test_chain =  tcdfpt_8.abi, tcdfpt_9.abi, tcdfpt_10.abi, tcdfpt_11.abi
 #%% [files]
 #%% files_to_test =
