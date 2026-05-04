@@ -6084,7 +6084,7 @@ Variable(
     abivarname="field_red",
     varset="ffield",
     vartype="real",
-    topics=[],
+    topics=["Berry_basic"],
     dimensions=[3],
     defaultval=MultipleValue(number=3, value=0.0),
     mnemonics="FIELD in REDuced coordinates",
@@ -8796,7 +8796,37 @@ As usual, the default is atomic units.
 Note that Tesla are admitted, despite the fact that this is not the proper unit for a $H$ field.
 Actually, if you specify "Tesla", ABINIT will set $\mu_0H$ in Tesla, so that H will be in Amperes/metre.
 
+The three components are expressed in the spin-axis basis defined by [[spinaxis]].
+For the default value [[spinaxis]] = (0 0 1), this basis coincides with the Cartesian reference frame, so that [[hspinfield]] is equivalent to [[hspinfield_cart]].
+
+When [[spinaxis]] is not aligned with the Cartesian z axis, it is recommended to use
+[[hspinfield_cart]] instead of [[hspinfield]], in order to specify the magnetic field directly in Cartesian coordinates.
+
 REPLACES the obsolete zeemanfield input variable.
+""",
+),
+
+Variable(
+    abivarname="hspinfield_cart",
+    varset="ffield",
+    vartype="real",
+    topics=["MagField_basic"],
+    dimensions=[3],
+    defaultval=0,
+    mnemonics="H-magnetic SPIN FIELD in CARTesian coordinates",
+    characteristics=["[[MAGNETIC_FIELD]]"],
+    added_in_version="10.6.0",
+    text=r"""
+Give the value of the magnetic field, $H$, acting on the spin/spinorial wavefunctions in **Cartesian** coordinates.
+This variable is the Cartesian-coordinate counterpart of [[hspinfield]] and uses the same units.
+As usual, the default is atomic units.
+
+Unlike [[hspinfield]], this variable is always interpreted in the Cartesian reference frame, regardless of the value of [[spinaxis]].
+When [[spinaxis]] differs from its default value, it is recommended to specify the magnetic field in Cartesian coordinates using [[hspinfield_cart]].
+
+Note that Tesla are admitted, despite the fact that this is not the proper unit for a $H$ field.
+Actually, if you specify "Tesla", ABINIT will set $\mu_0H$ in Tesla, so that H will be in Amperes/metre.
+
 """,
 ),
 
@@ -19804,7 +19834,7 @@ elements of the dynamical matrix, use different values of [[rfatpol]] and/or
 [[rfdir]]. The name 'iatpol' is used for the part of the internal variable
 ipert when it runs from 1 to [[natom]]. The internal variable ipert can also
 assume values larger than [[natom]], denoting perturbations of electric field
-or stress type (see [the DFPT help file](/guide/respfn)).
+or stress type (see [the DFPT help file](../guide/respfn.md)).
 
 As a side technical information, the value [[rfatpol]](1)=-1 is admitted, and transformed
 immediately to [[rfatpol]](1)=1, while [[rfatpol]](2)=-1 is transformed to  [[rfatpol]](2)=[[natom]],
@@ -20708,9 +20738,16 @@ Variable(
     mnemonics="SPIN for AToms",
     added_in_version="before_v9",
     text=r"""
-Gives the **initial** electronic spin-magnetization for each atom in Cartesian coordinates, in unit of $\hbar/2$,
+Gives the **initial** electronic spin-magnetization for each atom, in unit of $\hbar/2$,
 as well as, in case of fixed magnetization calculations (see [[constraint_kind]] and [[magconon]]),
 the **target value** of the magnetization.
+
+The three components are expressed in the spin-axis basis defined by [[spinaxis]].
+For the default value [[spinaxis]] = (0 0 1), this basis coincides with the Cartesian reference frame,
+so that [[spinat]] is equivalent to [[spinat_cart]].
+
+When [[spinaxis]] is not aligned with the Cartesian z axis, it is recommended to use [[spinat_cart]]
+instead of [[spinat]], in order to specify the magnetic vectors directly in Cartesian coordinates.
 
 Note that if [[nspden]] = 2, the z-component must be given for each atom, in triplets (0 0 z-component).
 For example, the electron of an hydrogen atom can be spin up (0 0 1.0) or spin down (0 0 -1.0).
@@ -20737,6 +20774,30 @@ then recommended to put [[nsym]] = 1.
 * If the symmetries are specified, and the irreducible set of atoms is specified, the anti-ferromagnetic characteristics of the symmetry operations [[symafm]] will be used to generate [[spinat]] for all the non-irreducible atoms.
 
 * In the case of PAW+U calculations using the [[dmatpawu]] initial occupation matrix, and if [[nspden]] = 4, [[spinat]] is also used to determine the direction of the integrated magnetization matrix.
+""",
+),
+
+Variable(
+    abivarname="spinat_cart",
+    varset="gstate",
+    vartype="real",
+    topics=["spinpolarisation_basic", "crystal_useful", "MagMom_useful", "ConstrainedDFT_useful"],
+    dimensions=ValueWithConditions({"[[natrd]]<[[natom]]": "[3, [[natrd]] ]", "defaultval": "[3, [[natom]] ]"}),
+    defaultval=0.0,
+    mnemonics="SPIN for AToms in CARTesian coordinates",
+    added_in_version="10.7.0",
+    text=r"""
+Gives the **initial** electronic spin-magnetization for each atom in **Cartesian** coordinates, in unit of $\hbar/2$,.
+as well as, in case of fixed magnetization calculations (see [[constraint_kind]] and [[magconon]]),
+the **target value** of the magnetization.
+
+This variable is the Cartesian-coordinate counterpart of [[spinat]].
+Unlike [[spinat]], this variable is always interpreted in the Cartesian reference frame, regardless of the value of [[spinaxis]].
+It is recommended when [[spinaxis]] is not aligned with the Cartesian z axis, in order to specify
+the magnetic moments directly in Cartesian coordinates.
+
+Note that if [[nspden]] = 2, only the component along [[spinaxis]] is used: the Cartesian magnetic
+moments specified by [[spinat_cart]] are therefore projected onto this axis.
 """,
 ),
 
@@ -23646,11 +23707,11 @@ The different possibilities are:
   * [[wfoptalg]] = 114: A modern and highly efficient version of [[wfoptalg]] = 14 (**Locally Optimal Block Preconditioned Conjugate Gradient**), particularly suited for parallel computations. It performs well with a small number of blocks and can utilize OpenMP if ABINIT is compiled with a multithreaded linear algebra library.
 > Note: When using more than one thread, [[npfft]] cannot be used.
 
-  * [[wfoptalg]] = 1: A spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. It is suitable when the LOBPCG algorithm no longer scales efficiently. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].
+  * [[wfoptalg]] = 1: A spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. It is suitable when the LOBPCG algorithm no longer scales efficiently. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](../theory/howto_chebfi.pdf) and [[cite:Levitt2015]].
 > Recommendation: use [[wfoptalg]] = 111, which is the modern and improved version of this algorithm.
 > See **notes** in the "[[wfoptalg]] = 111" section.
 
-* [[wfoptalg]] = 111: A **modern and highly efficient version** of [[wfoptalg]] = 1, a spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].
+* [[wfoptalg]] = 111: A **modern and highly efficient version** of [[wfoptalg]] = 1, a spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](../theory/howto_chebfi.pdf) and [[cite:Levitt2015]].
 
 * [[wfoptalg]] = 112: A **highly** experimental version of Spectrum Slicing algorithm. A spectral filtering
 algorithm by spectral slices based on lowpass and bandpass Chebyshev polynomials. The polynomial degree is tuned
@@ -26275,7 +26336,7 @@ instead of the GWPT ones, for comparison purposes.
 Variable(
     abivarname="gstore_brange",
     varset="eph",
-    vartype="int",
+    vartype="integer",
     topics=["ElPhonInt_basic"],
     dimensions=[2, "[[nsppol]]"],
     defaultval=0,
@@ -26334,7 +26395,7 @@ See also [[getabiwan]].
 Variable(
     abivarname="getabiwan",
     varset="eph",
-    vartype="int",
+    vartype="integer",
     topics=["ElPhonInt_basic"],
     dimensions="scalar",
     defaultval="None",
@@ -26364,7 +26425,7 @@ See also [[getgwan]].
 Variable(
     abivarname="getgwan",
     varset="eph",
-    vartype="int",
+    vartype="integer",
     topics=["ElPhonInt_basic"],
     dimensions="scalar",
     defaultval="None",
@@ -26794,7 +26855,7 @@ visualisation software like VESTA or Xcrysden.
 Variable(
     abivarname="getvpq",
     varset="eph",
-    vartype="int",
+    vartype="integer",
     topics=["Polaron_basic"],
     dimensions="scalar",
     defaultval=None,
@@ -27070,7 +27131,7 @@ Variable(
     varset="eph",
     vartype="real",
     topics=["Polaron_basic"],
-    dimensions="(2)",
+    dimensions=[2],
     defaultval=[0, 1],
     mnemonics="Variational Polaron eQuations: Gaussian PaRameters -- electronic ENERGY",
     requires='[[eph_task]] == 13 and [[vpq_aseed]] == "gau_energy"',
@@ -27088,7 +27149,7 @@ Variable(
     varset="eph",
     vartype="real",
     topics=["Polaron_basic"],
-    dimensions="(3)",
+    dimensions=[3],
     defaultval=[0, 0, 0],
     mnemonics="Variational Polaron eQuations: TRanslation VECtor",
     requires="[[eph_task]] == -13",
@@ -27105,7 +27166,7 @@ Variable(
     varset="eph",
     vartype="real",
     topics=["Polaron_basic"],
-    dimensions="(3)",
+    dimensions=[3],
     defaultval=[1, 1, 1],
     mnemonics="Variational Polaron eQuations: Gaussian PaRameters -- localization LENGTH",
     requires='[[eph_task]] == 13 and [[vpq_aseed]] == "gau_length"',
@@ -27263,7 +27324,7 @@ kptbounds
 Variable(
     abivarname="eph_path_brange",
     varset="eph",
-    vartype="int",
+    vartype="integer",
     topics=["ElPhonInt_useful"],
     dimensions=[2],
     defaultval=[0, 0],

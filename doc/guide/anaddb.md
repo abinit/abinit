@@ -2,26 +2,26 @@
 authors: XG, DCA
 ---
 
-# The anaddb utility  
+# The anaddb utility
 
 This file explains the use and i/o parameters needed for the "Analysis of Derivative DataBase" code.
 
 This code is able to compute interatomic force constants, but also, more
 generally, many different physical properties from databases containing
-derivatives of the total energy (Derivative DataBases - DDB).  
+derivatives of the total energy (Derivative DataBases - DDB).
 The user is not supposed to know how the Derivative DataBase (DBB) has been
-generated. He/she should simply know what material is described by the DDB he/she wants to use.  
+generated. He/she should simply know what material is described by the DDB he/she wants to use.
 
 If he/she is interested in the generation of DDB, and wants to know more about
 this topic, he/she will read different help files of the ABINIT package,
 related to the [[help:abinit|main ABINIT executable]], to the
 [[help:respfn|DFPT features of ABINIT]], and to the [[help:mrgddb|DDB merge tool]].
 
-It will be easier to discover the present file with the help of the [tutorials](/tutorial),
-especially the tutorials on [DFPT1](/tutorial/rf1) and [DFPT2](/tutorial/rf2).  
+It will be easier to discover the present file with the help of the [tutorials](../tutorial/index.md),
+especially the tutorials on [DFPT1](../tutorial/rf1.md) and [DFPT2](../tutorial/rf2.md).
 
 ## 1 Introduction
-  
+
 In short, a Derivative DataBase contains a list of derivatives of the total
 energy with respect to three kind of perturbations: phonons, electric field
 and stresses. The present code analyses the DDB, and directly gives properties
@@ -34,24 +34,24 @@ the main input file, the main output file, the name of the DDB, and some other
 file names optionally used for selected capabilities of the code.
 
 The files file (called for example ab.files) could look like:
-    
-      anaddb.in  
-      anaddb.out  
-      ddb  
-      band_eps  
-      gkk  
-      anaddb.ep  
-      ddk  
-     
-In this example:  
 
-  * the main input file is called "anaddb.in",   
-  * the main output will be put into the file called "anaddb.out",   
-  * the input DDB file is called "ddb",   
-  * information to draw phonon band structures will go to band_eps  
-  * the input GKK file is called "gkk" (used only for electron-phonon interactions)  
-  * the base filename for electron-phonon output "anaddb.ep" (used only for electron-phonon interactions)  
-  * the file name for ddk reference files: these are the GKK files generated in k-point derivative runs, 
+      anaddb.in
+      anaddb.out
+      ddb
+      band_eps
+      gkk
+      anaddb.ep
+      ddk
+
+In this example:
+
+  * the main input file is called "anaddb.in",
+  * the main output will be put into the file called "anaddb.out",
+  * the input DDB file is called "ddb",
+  * information to draw phonon band structures will go to band_eps
+  * the input GKK file is called "gkk" (used only for electron-phonon interactions)
+  * the base filename for electron-phonon output "anaddb.ep" (used only for electron-phonon interactions)
+  * the file name for ddk reference files: these are the GKK files generated in k-point derivative runs,
     using the [[prtgkk]] abinit input variable (used only for electron-phonon transport calculations)
 
 Other examples are given in the ~abinit/test/v2 directory. The latter three
@@ -63,7 +63,7 @@ called anaddb.files, and that the executable is placed in your working
 directory, anaddb is run interactively (in Unix) with the command:
 
     anaddb < anaddb.files >& log
-  
+
 or, in the background, with the command
 
     anaddb < anaddb.files >& log &
@@ -84,18 +84,18 @@ abinit input files: the file is parsed, keywords are identified, comments are
 also identified. However, the multidataset mode is not available.
 
 ## 2 Input variables
-  
+
 This ANADDB utility is able to perform many different tasks, each governed by
 a selected set of input variables, with also some input variables common to
-many of the different tasks. The 'flag' variables activates the different tasks 
+many of the different tasks. The 'flag' variables activates the different tasks
 e.g. [[dieflag@anaddb]], [[thmflag@anaddb]], [[elphflag@anaddb]]
 
 The list of input variables for the anaddb input file are presented in the
 [[varset:anaddb]] variable set. In order to discover them, it is easier to use
-the different tutorials: start with the [second DFPT tutorial](/tutorial/rf2), then follow 
+the different tutorials: start with the [second DFPT tutorial](../tutorial/rf2.md), then follow
 the [tutorial on elasticity and
-piezoelectricity](/tutorial/elastic), 
-and the [tutorial on non-linear properties](/tutorial/nlo).
+piezoelectricity](../tutorial/elastic.md),
+and the [tutorial on non-linear properties](../tutorial/nlo.md).
 If you are interested in electron-phonon interaction, use the [new tutorial on electron-phonon
-interaction](/tutorial/eph_intro), while 
-the [legacy tutorial on electron-phonon interaction](/tutorial/eph_legacy) is still available.
+interaction](../tutorial/eph_intro.md), while
+the [legacy tutorial on electron-phonon interaction](../tutorial/eph_legacy.md) is still available.

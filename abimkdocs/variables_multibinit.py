@@ -820,7 +820,7 @@ Indices of the banned coefficients during the fit process of the model
 Variable(
     abivarname="fit_weight_T@multibinit",
     varset="multibinit",
-    vartype="float",
+    vartype="real",
     topics=["FitProcess_expert"],
     dimensions="scalar",
     defaultval=-0.1,

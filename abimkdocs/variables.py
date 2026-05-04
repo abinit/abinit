@@ -689,7 +689,7 @@ class Variable:
             str: HTML anchor tag with relative URL.
         """
         token = "%s:%s" % (self.executable, self.name)
-        a = website.get_wikilink(token, page_rpath)
+        a = website.get_wikilink(token, page_rpath, is_html=True)
         cls = a.get("class") if cls is None else cls
         return '<a href="%s" class="%s">%s</a>' % (
             a.get("href"),
@@ -833,10 +833,12 @@ class Variable:
         if self.abivarname is None:
             eapp("Variable `%s` has no name" % svar)
 
+        allowed_vartypes = {"integer", "real", "string", "integer or string"}
+
         if self.vartype is None:
             eapp("Variable `%s` has no vartype" % svar)
-        elif self.vartype not in ("integer", "real", "string"):
-            eapp("%s must have vartype in ['integer', 'real', 'string'].")
+        elif self.vartype not in allowed_vartypes:
+            eapp(f"{svar} must be in {allowed_vartypes} while it is {self.vartype}")
 
         if self.topics is None:
             eapp("%s does not have at least one topic and the associated relevance" % svar)
@@ -867,11 +869,11 @@ class Variable:
             eapp(
                 "%s does not have a dimension. If it is a *scalar*, it must be declared so." % svar
             )
-        elif self.dimensions != "scalar":
-            if not isinstance(self.dimensions, (list, ValueWithConditions)):
-                eapp(
-                    "The dimensions field of %s is not a list neither a valuewithconditions" % svar
-                )
+        #elif self.dimensions != "scalar":
+        #    if not isinstance(self.dimensions, (list, ValueWithConditions)):
+        #        eapp(
+        #            "The dimensions field of %s is not a list neither a valuewithconditions" % svar
+        #        )
 
         if self.varset is None:
             eapp("`%s` does not have a varset" % svar)
@@ -879,8 +881,8 @@ class Variable:
         #    if not isinstance(self.varset, str) or self.varset not in ref_varset:
         #        print('The field varset of %s should be one of the valid varsets' % str(self))
 
-        if len(self.name) > 25:
-            eapp("Length of `%s` is longer than 25 characters." % self.name)
+        #if len(self.name) > 25:
+        #    eapp("Length of `%s` is longer than 25 characters." % self.name)
 
         if errors:
             raise ValueError("\n".join(errors))
