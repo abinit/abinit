@@ -2354,8 +2354,7 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
      ABI_FREE(amat_paw)
    end if
 
-!  Invert "A" matrix and compute "alpha" factors.
-    ABI_MALLOC(alpha,(niter))
+!  Invert "A" matrix
     ABI_MALLOC(amatinv,(niter,niter))
     amatinv(1:niter,1:niter)=amat(1:niter,1:niter)
     ABI_MALLOC(ipiv,(niter))
@@ -2364,6 +2363,9 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
     call dgetri(niter,amatinv,niter,ipiv,rwork,niter,ierr)
     ABI_FREE(ipiv)
     ABI_FREE(rwork)
+
+!  Compute "alpha" factors
+    ABI_MALLOC(alpha,(niter))
     det=zero
     alpha(:)=zero
     do ii=1,niter
