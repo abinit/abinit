@@ -1377,7 +1377,7 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,qphon
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gmet(3,3),gprimd(3,3),potg0(4),rmet(3,3)
- real(dp),allocatable :: gq(:,:),work1(:,:)
+ real(dp),allocatable :: gq(:,:),work1(:,:),work2(:)
 
 ! *************************************************************************
 
@@ -1436,6 +1436,9 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,qphon
    length2=(two_pi*dielng)**2
    diemac_inv=1.0_dp/diemac
    ABI_MALLOC(work1,(2,nfft))
+   if (optreal==1) then
+     ABI_MALLOC(work2,(cplex*nfft))
+   end if
 
 !  In order to speed the routine, precompute the components of g
    mg=maxval(ngfft)
@@ -1455,10 +1458,10 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,qphon
 
      diemix_eff=diemix;if (ispden>1) diemix_eff=diemixmag
 
-!    Do fft from real space to G space (work1)
+!    Do fft from real space (work2) to G space (work1)
      if (optreal==1) then
-       vrespc(:,ispden)=vresid(:,ispden)
-       call fourdp(cplex,work1,vrespc(:,ispden),-1,mpi_enreg,nfft,1,ngfft,0)
+       work2(:)=vresid(:,ispden)
+       call fourdp(cplex,work1,work2,-1,mpi_enreg,nfft,1,ngfft,0)
      else
 !      work1(:,:)=reshape(vresid(:,ispden),(/2,nfft/))
 !      Reshape function does not work with big arrays for some compilers
@@ -1520,7 +1523,8 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,qphon
 
 !    Fourier transform
      if (optreal==1) then
-       call fourdp(cplex,work1,vrespc(:,ispden),1,mpi_enreg,nfft,1,ngfft,0)
+       call fourdp(cplex,work1,work2,1,mpi_enreg,nfft,1,ngfft,0)
+       vrespc(:,ispden)=work2(:)
      else
 !      vrespc(:,ispden)=reshape(work1(:,:),(/nfft*2/))
 !      Reshape function does not work with big arrays for some compilers
@@ -1535,6 +1539,9 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,qphon
 
    ABI_FREE(gq)
    ABI_FREE(work1)
+   if (optreal==1) then
+     ABI_FREE(work2)
+   end if
 
 !  End condition diemac/=1.0
  end if
