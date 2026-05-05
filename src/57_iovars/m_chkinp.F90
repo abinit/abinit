@@ -2228,10 +2228,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  mffmem
    call chkint_eq(0,0,cond_string,cond_values,ierr,'mffmem',dt%mffmem,2,(/0,1/),iout)
 
-!  pulayhiststore
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'pulayhiststore', &
-&    dt%pulayhiststore,2,(/0,1/),iout)
-
 !  mixalch_orig
 !  For each type of atom, the sum of the psp components must be one.
    do iimage=1,dt%nimage
@@ -3797,6 +3793,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='prtwf' ; cond_values(1)=dt%prtwf
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtwf_full',dt%prtwf_full,1,(/0/),iout)
    end if
+
+!  pulayhiststore
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'pulayhiststore', &
+&    dt%pulayhiststore,2,(/0,1/),iout)
 
 !  random_atpos
    call chkint_eq(0,0,cond_string,cond_values,ierr,'random_atpos',dt%random_atpos,5,(/0,1,2,3,4/),iout)

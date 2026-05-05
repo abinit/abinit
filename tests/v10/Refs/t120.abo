@@ -73,10 +73,10 @@ P           mkmem           2
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000
         pawecutdg      5.00000000E+00 Hartree
-   pulayhiststore           1
            prtden           0
            prteig           0
             prtwf           0
+   pulayhiststore           1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -422,10 +422,10 @@ P           mkmem           2
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000
         pawecutdg      5.00000000E+00 Hartree
-   pulayhiststore           1
            prtden           0
            prteig           0
             prtwf           0
+   pulayhiststore           1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
