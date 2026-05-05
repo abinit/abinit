@@ -2561,9 +2561,11 @@ subroutine scfopt_pulay_delta_sp(cplex,f_fftgr,f_respc_sp,f_trial_sp,f_trial_del
         respc_comp=i_vrespc(1+niter-ii)/2
       else
         respc_comp=npulay+1
-      end if
-     if (respc_comp<1 .or. respc_comp>npulay+1) then
-       if (usepaw==1.and.pawoptmix==1) ABI_FREE(amat_paw)
+     end if
+    if (respc_comp<1 .or. respc_comp>npulay+1) then
+       if (usepaw==1.and.pawoptmix==1) then
+         ABI_FREE(amat_paw)
+       end if
        errid = AB7_ERROR_MIXING_ARG
        write(errmess, '(4a)' ) ch10,&
 &      ' scfopt_pulay_delta_sp: ERROR - ',ch10,&

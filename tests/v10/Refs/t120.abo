@@ -600,8 +600,3 @@ P           mkmem           2
  Calculation completed.
 .Delivered  19 WARNINGs and   2 COMMENTs to log file.
 +Overall time at end (sec) : cpu=          0.4  wall=          0.4
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 78 allocations and 78 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 13279 allocations and 13279 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0
