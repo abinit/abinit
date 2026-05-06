@@ -4861,7 +4861,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
                call calc_and_store_gdw2(gqk, my_ik, my_iq, my_ip, wqnu, tpp_red, &
                                         my_gq0nm_atm(:,:,:,my_ik), my_gq0nm_atm(:,:,:,my_ik))
              else
-               print *, "Computing g2dw with both g^KS g_GWPT"
+               !print *, "Computing g2dw with both g^KS g_GWPT"
                call calc_and_store_gdw2(gqk, my_ik, my_iq, my_ip, wqnu, tpp_red, &
                                         ks_my_gq0nm_atm(:,:,:,my_ik), my_gq0nm_atm(:,:,:,my_ik))
              end if
