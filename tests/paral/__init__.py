@@ -116,4 +116,5 @@ inp_files = [
 "t118.abi", # DMFT dmftctqmc_basis = 4 + ctqmc_localprop soc
 "t120.abi", # Test meta-GGA + PAW + paral_kgb + cprj_in_memory + istwfk
 "t121.abi", #DMFT magnfield=1, with 4 chains per MPI (demonstrate dmftctqmc_chains)
+"t122.abi", # meta-GGA with npband>1
 ]

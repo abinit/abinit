@@ -38,6 +38,7 @@ module m_forstr
  use m_ompgpu_utils
  use m_xg
  use m_xg_nonlop
+ use m_xgTransposer
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -673,13 +674,15 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  integer :: nnlout,npw_k,paw_opt,signs,spaceComm
  integer :: tim_nonlop,tim_nonlop_prep,usecprj_local,use_ACE_old
  integer :: blocksize,iblock,iblocksize,ibs,nblockbd,nblk_gemm_nonlop
- integer :: space,me_g0,ncols_cprj
+ integer :: space,me_g0,ncols_cprj,me_g0_fft
  real(dp) :: ar,ar2,renorm_factor,dfsm,ecutsm_inv,fact_kin,fsm,htpisq
  real(dp) :: kin,kin_kphq,xx
  type(gs_hamiltonian_type) :: gs_hamk
  logical :: compute_gbound,usefock_loc
  character(len=500) :: msg
  type(fock_common_type),pointer :: fockcommon
+ type(xgBlock_t) :: xgx0_tr
+ type(xgTransposer_t) :: xgTransposer
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: kpoint(3),kphq(3),nonlop_dum(1,1),rmet(3,3),tsec(2)
@@ -705,6 +708,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  type(xg_t) :: cprj_xgx0,cprj_work
  real(dp),allocatable :: enlout_2d(:,:),enlout_2d_stress(:,:)
  real(dp),allocatable :: cwavef_spin(:,:),enlout_spin(:)
+ real(dp),pointer :: cwavef_tr(:,:)
 
 !*************************************************************************
 
@@ -1207,9 +1211,17 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
            end if ! GBT
          else if (usexg/=1) then ! paral_kgb = 1
            ! here we MUST pass option gpu_option=ABI_GPU_DISABLED, as cwavef here is a host memory buffer
+          if((stress_needed==1).and.(usevxctau==1).and.mpi_enreg%nproc_band>1) then
+            ABI_MALLOC(cwavef_tr,(2,my_bandfft_kpt%ndatarecv*my_nspinor*mpi_enreg%bandpp))
+            call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,blocksize,&
+&           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef,&
+&           already_transposed=.False.,gpu_option=ABI_GPU_DISABLED,cwavef_tr=cwavef_tr)
+          else
            call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,blocksize,&
 &           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef,&
 &           already_transposed=.False.,gpu_option=ABI_GPU_DISABLED)
+            if((stress_needed==1).and.(usevxctau==1)) cwavef_tr=>cwavef
+          endif
          else ! usexg==1
            if ( istwf_k > 1 ) then ! Real only
              space = SPACE_CR
@@ -1217,14 +1229,31 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              space = SPACE_C
            end if
            me_g0 = -1
+           me_g0_fft = -1
            if (space==SPACE_CR) then
              me_g0 = 0
+             me_g0_fft = 0
              if (istwf_k == 2) then
                if (mpi_enreg%me_g0 == 1) me_g0 = 1
+               if (mpi_enreg%me_g0_fft == 1) me_g0_fft = 1
              end if
            end if
+
            call xgBlock_map(xgx0,cwavef,space,npw_k*my_nspinor,blocksize,comm=mpi_enreg%comm_band,me_g0=me_g0,&
  &         gpu_option=gpu_option)
+
+          if ((stress_needed==1).and.(usevxctau==1)) then 
+             if(mpi_enreg%nproc_band>1) then
+               call xgTransposer_constructor(xgTransposer,xgx0,xgx0_tr,my_nspinor,&
+                   STATE_LINALG,TRANS_ALL2ALL,mpi_enreg%comm_spinorfft,mpi_enreg%comm_band,0,0,me_g0_fft)
+               call xgTransposer_transpose(xgTransposer,STATE_COLSROWS)
+               call xgBlock_reverseMap(xgx0_tr,cwavef_tr,rows=1,cols=my_nspinor*mpi_enreg%bandpp*my_bandfft_kpt%ndatarecv) !,rows=1,cols=spacedim*blockdim)
+             else
+               cwavef_tr=>cwavef  
+             endif      
+          endif
+
+
            call xgBlock_map_1d(xgeigen,lambda,SPACE_R,blocksize)
 
            if (psps%usepaw==1.and.usecprj_local==1) then
@@ -1374,10 +1403,19 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
 !        Accumulate stress tensor in case meta-GGA using v_tau
          if ((stress_needed==1).and.(usevxctau==1)) then
-           call stress_mGGA(mggastr,cwavef,effmass_free,gs_hamk%gbound_k,gs_hamk%gprimd,istwf_k, &
-&               kg_k,kpoint,mgfft,mpi_enreg,my_nspinor,blocksize,ngfft,npw_k,gs_hamk%nvloc, &
-&               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occblock,gs_hamk%ucvol,vxctaulocal, &
+           call stress_mGGA(mggastr,cwavef_tr,effmass_free,my_bandfft_kpt%gbound,gs_hamk%gprimd,istwf_k, &
+&               my_bandfft_kpt%kg_k_gather,kpoint,mgfft,mpi_enreg,my_nspinor,mpi_enreg%bandpp,ngfft,my_bandfft_kpt%ndatarecv,gs_hamk%nvloc, &
+&               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occblock(1+mpi_enreg%me_band*mpi_enreg%bandpp:1+(mpi_enreg%me_band+1)*mpi_enreg%bandpp),gs_hamk%ucvol,vxctaulocal, &
 &               wtk(ikpt),gpu_option=gpu_option)
+           if(mpi_enreg%nproc_band>1) then
+             if(usexg==1) then
+               call xgTransposer_free(xgTransposer)
+             else
+               ABI_FREE(cwavef_tr)
+             endif
+           else
+             nullify(cwavef_tr)
+           endif
          end if
 
 !        Accumulate stress tensor and forces for the Fock part
