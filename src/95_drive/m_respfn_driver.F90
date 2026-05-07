@@ -234,7 +234,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwrpaw
  integer :: rfddk,rfelfd,rfphon,rfstrs,rf2_dkdk,rf2_dkde,rfmagn
- integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw,usevxctau,usevxctau_paw
+ integer :: spaceworld,sumg0,sumg0_save,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw,usevxctau,usevxctau_paw
  integer :: usexcnhat,use_sym,vloc_method,zero_by_symm
  logical :: has_full_piezo,has_allddk,is_dfpt=.true.,non_magnetic_xc
  logical :: paral_atom,qeq0,use_nhat_gga,call_pawinit
@@ -329,6 +329,12 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  rfphon=dtset%rfphon ; rfstrs=dtset%rfstrs
  rf2_dkdk=dtset%rf2_dkdk ; rf2_dkde=dtset%rf2_dkde
 
+!Scalar potential has no idir.
+ if (rfmagn==3) then
+   rfdir(:)= 0
+   rfdir(1)= 1
+ end if 
+
  pawbec=0  ; if(psps%usepaw==1.and.(rfphon==1.or.(rfelfd==1.or.rfelfd==3))) pawbec=1
  pawpiezo=0; if(psps%usepaw==1.and.(rfstrs/=0.or.(rfelfd==1.or.rfelfd==3))) pawpiezo=1
 !AM 10152015 -- WARNING --- the full calculation of the piezoelectric tensor
@@ -366,6 +372,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 ! with MPERT_MAX=8, but we use a smaller value here.
  mpert=natom+7
  if (rf2_dkdk>0.or.rf2_dkde>0) mpert=natom+11
+ if (dtset%rfmagn==2.or.dtset%prt1mag/=0) mpert=2*dtset%natom+11
 
 !Initialize the list of perturbations rfpert
  ABI_MALLOC(rfpert,(mpert))
@@ -383,7 +390,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if(rfstrs==1.or.rfstrs==3)rfpert(natom+3)=1
  if(rfstrs==2.or.rfstrs==3)rfpert(natom+4)=1
 
- if(rfmagn==1)rfpert(natom+5)=1
+ if(rfmagn==1) rfpert(natom+5)=1
+ if(rfmagn==2) rfpert(natom+11+dtset%rfatpol(1):natom+11+dtset%rfatpol(2))=1
+ if(rfmagn==3) rfpert(natom+6)=1
 
  qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 
@@ -539,6 +548,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  else
    call littlegroup_q(dtset%nsym,dtset%qptn,symq,symrec,dtset%symafm,timrev,prtvol=dtset%prtvol)
  end if
+
+!Deactivate time-reversal symmetry for finite-omega calculations
+ if (abs(dtset%rfomega)>tol10.or.dtset%tim1rev==0) timrev=0
 
 !Generate an index table of atoms, in order for them to be used
 !type after type.
@@ -1013,6 +1025,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  dyfr_nondiag=0;if (psps%usepaw==1.and.rfphon==1) dyfr_nondiag=1
  dyfr_cplex=1;if (psps%usepaw==1.and.rfphon==1.and.(.not.qeq0)) dyfr_cplex=2
+ if (abs(dtset%rfomega)>tol10.or.dtset%tim1rev==0) dyfr_cplex=2
  ABI_MALLOC(dyew,(2,3,natom,3,natom))
  ABI_MALLOC(dyewq0,(3,3,natom))
  ABI_MALLOC(dyfrlo,(3,3,natom))
@@ -1085,7 +1098,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !  Compute Ewald (q=0) contribution
    sumg0=0;qphon(:)=zero
-   call dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
+   call dfpt_ewald(dyew,gmet,gsqcut,dtset%icutcoul,my_natom,natom,ngfftf,dtset%nkpt,qphon,dtset%rcut,rmet,&
+&   rprimd,sumg0,dtset%typat,ucvol,dtset%vcutgeo,xred,psps%ziontypat,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    option=1
    call q0dy3_calc(natom,dyewq0,dyew,option)
@@ -1180,6 +1194,7 @@ ABI_NVTX_END_RANGE()
 
  if(dtset%prtvol==-level) call wrtout(std_out,' respfn: frozen wavef. and Ewald(q=0) part of 2DTE done.')
 
+
  call timab(136,2,tsec)
  call pstat_proc%print(_PSTAT_ARGS_)
 
@@ -1228,13 +1243,13 @@ ABI_NVTX_END_RANGE()
  end if
 
 !Determine the symmetrical perturbations
- ABI_MALLOC(pertsy,(3,natom+6))
- call irreducible_set_pert(indsym,natom+6,natom,dtset%nsym,pertsy,rfdir,rfpert,symq,symrec,dtset%symrel)
+ ABI_MALLOC(pertsy,(3,mpert))
+ call irreducible_set_pert(indsym,mpert,natom,dtset%nsym,pertsy,rfdir,rfpert,symq,symrec,dtset%symrel)
 
  write(msg,'(a)') ' The list of irreducible perturbations for this q vector is:'
  call wrtout([std_out, ab_out] ,msg)
  ii=1
- do ipert=1,natom+6  ! GA: Why natom+6 instead of natom+MPERT_MAX ?
+ do ipert=1,mpert
    do idir=1,3
      if(rfpert(ipert)==1.and.rfdir(idir)==1)then
        if( pertsy(idir,ipert)==1 )then
@@ -1374,8 +1389,12 @@ ABI_NVTX_END_RANGE()
 
 !Contribution to the dynamical matrix from ion-ion energy
  if(rfphon==1)then
-   call dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat, &
+   sumg0_save= sumg0
+   if (dtset%icutcoul==55) sumg0= 0
+   call dfpt_ewald(dyew,gmet,gsqcut,dtset%icutcoul,my_natom,natom,ngfftf,dtset%nkpt,qphon,dtset%rcut,rmet,&
+&   rprimd,sumg0,dtset%typat,ucvol,dtset%vcutgeo,xred,psps%ziontypat, &
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+   sumg0= sumg0_save
    call q0dy3_apply(natom,dyewq0,dyew)
  end if
 
@@ -1390,7 +1409,7 @@ ABI_NVTX_END_RANGE()
      call dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,dtset%ixc,kxc,mgfftf,mpert,mpi_enreg,&
 &     psps%mqgrid_vl,natom,nfftf,ngfftf,nkxc,non_magnetic_xc,dtset%nspden,&
 &     ntypat,psps%n1xccc,psps,pawtab,ph1df,psps%qgrid_vl,qphon,&
-&     rfdir,rfpert,rprimd,timrev,dtset%typat,ucvol,psps%usepaw,psps%xcccrc,psps%xccc1d,xred,rhor=rhor,vxc=vxc)
+&     rfdir,rfpert,rprimd,timrev,dtset%typat,ucvol,psps%usepaw,psps%xcccrc,psps%xccc1d,xred,rhor=rhor,vxc=vxc,ixcrot=dtset%ixcrot)
    else
      call dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,dtset%ixc,kxc,mgfftf,mpert,mpi_enreg,&
 &     psps%mqgrid_vl,natom,nfftf,ngfftf,nkxc,non_magnetic_xc,dtset%nspden,&
@@ -1575,12 +1594,14 @@ ABI_NVTX_END_RANGE()
 
 !  Complete the d2nfr matrix by symmetrization of the existing elements
    !write(std_out,*)"blkflg before d2sym3: ", blkflg
-   call d2sym3(blkflg,d2nfr,indsym,mpert,natom,dtset%nsym,qphon,symq,symrec,dtset%symrel,timrev,zero_by_symm)
+   call d2sym3(blkflg,d2nfr,indsym,mpert,natom,dtset%nsym,qphon,symq,symrec,&
+ & dtset%symrel,timrev,zero_by_symm,eta=dtset%rfeta)
    !write(std_out,*)"blkflg after d2sym3: ", blkflg
 
    if(rfphon==1.and.psps%n1xccc/=0)then
 !    Complete the dyfrx1 matrix by symmetrization of the existing elements
-     call d2sym3(blkflgfrx1,dyfrx1,indsym,natom,natom,dtset%nsym,qphon,symq,symrec,dtset%symrel,timrev,zero_by_symm)
+     call d2sym3(blkflgfrx1,dyfrx1,indsym,natom,natom,dtset%nsym,qphon,symq,&
+ & symrec,dtset%symrel,timrev,zero_by_symm,eta=dtset%rfeta)
    end if
 
 !  Note that d2sym3 usually complete the 2nd-order matrix
@@ -1610,7 +1631,7 @@ ABI_NVTX_END_RANGE()
 &   eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 &   has_full_piezo,has_allddk,ab_out,dtset%mband,mpert,natom,ntypat,&
 &   outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,dtset%prtvol,qzero,&
-&   dtset%typat,rfdir,rfpert,rfphon,rfstrs,psps%usepaw,usevdw,psps%ziontypat)
+&   dtset%typat,rfdir,rfmagn,rfpert,rfphon,rfstrs,psps%usepaw,usevdw,psps%ziontypat)
 
 
    ! Initialize ddb header object
@@ -1620,7 +1641,8 @@ ABI_NVTX_END_RANGE()
    ! Initialize ddb object
    call ddb%init(dtset, nblok=1, mpert=mpert, with_d2E=.true.)
 
-   ! Set the values for the 2nd order derivatives
+! Set the values for the 2nd order derivatives
+   call ddb%set_omega(iblok=1, omega=dtset%rfomega)
    call ddb%set_qpt(iblok=1, qpt=qphon(1:3))
    call ddb%set_d2matr(1, d2matr, blkflg)
 
@@ -2186,6 +2208,7 @@ end subroutine wrtloctens
 !!  prtvol=print volume
 !!  qzero=1 if zero phonon wavevector
 !!  rfdir(3)=defines the directions for the perturbations
+!!  rfmagn= if 1 (2), there are response to uniform (local) spin fields
 !!  rfpert(mpert)=defines the perturbations
 !!  rfphon=if 1, there are phonon perturbations
 !!  rfstrs=if 1,2,3 there are strain perturbations
@@ -2209,13 +2232,13 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
 & eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 & has_full_piezo,has_allddk,iout,mband,mpert,natom,ntypat,&
 & outd2,pawbec,pawpiezo,piezofrnl,prtbbb,prtvol,qzero,typat,rfdir,&
-& rfpert,rfphon,rfstrs,usepaw,usevdw,zion)
+& rfmagn,rfpert,rfphon,rfstrs,usepaw,usevdw,zion)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: berryopt,dyfr_cplex,dyfr_nondiag,iout,mband,mpert
  integer,intent(in) :: natom,ntypat,outd2,pawbec,pawpiezo,prtbbb,prtvol,qzero
- integer, intent(in) :: rfphon,rfstrs,usepaw,usevdw
+ integer, intent(in) :: rfmagn,rfphon,rfstrs,usepaw,usevdw
 !arrays
  integer,intent(in) :: blkflg(3,mpert,3,mpert),carflg(3,mpert,3,mpert)
  integer,intent(in) :: ddkfil(3),rfdir(3),rfpert(mpert),typat(natom)
@@ -3373,6 +3396,101 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
    end if
  end if
 
+!Now the spin field quantities
+ if (rfmagn==1) then
+   write(iout,*)' '
+   write(iout,*)' Magnetic susceptibility, in cartesian coordinates'
+   write(iout,*)' (from uniform spin field response)'
+   write(iout,*)'    j1       j2             matrix element'
+   write(iout,*)' dir pert dir pert     real part    imaginary part'
+   ipert1=natom+5
+   ipert2=natom+5
+   nline=1
+   do idir1=1,3
+     if (nline/=0) write(iout,*)' '
+     nline=0
+     do idir2=1,3
+       if (carflg(idir1,ipert1,idir2,ipert2)==1) then
+         nline=nline+1
+         write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
+ &       d2cart(1,idir1,ipert1,idir2,ipert2),&
+ &       d2cart(2,idir1,ipert1,idir2,ipert2)
+       end if
+     end do
+   end do
+ end if
+
+ if (rfmagn==2) then
+   write(iout,*)' '
+   write(iout,*)' Local magnetic susceptibility, in cartesian coordinates'
+   write(iout,*)' (from local spin field response)'
+   write(iout,*)'    j1       j2             matrix element'
+   write(iout,*)' dir pert dir pert     real part    imaginary part'
+   nline=1
+   do ipert1= natom+12,2*natom+11
+     do idir1=1,3
+       if(nline/=0)write(iout,*)' '
+       nline=0
+       do ipert2= natom+12,2*natom+11
+         do idir2=1,3
+           if(carflg(idir1,ipert1,idir2,ipert2)==1)then
+             nline=nline+1
+             write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
+&             d2cart(1,idir1,ipert1,idir2,ipert2),&
+&             d2cart(2,idir1,ipert1,idir2,ipert2)
+           end if
+         end do
+       end do
+     end do
+   end do
+ end if
+
+ if (rfmagn==1.and.rfpert(natom+2)==1) then
+   write(iout,*)' '
+   write(iout,*)' Magnetoelectric tensor, in cartesian coordinates'
+   write(iout,*)' (from magnetization induced by electric field)'
+   write(iout,*)'    j1       j2             matrix element'
+   write(iout,*)' dir pert dir pert     real part    imaginary part'
+   ipert1=natom+5
+   ipert2=natom+2
+   nline=1
+   do idir1=1,3
+     if (nline/=0) write(iout,*)' '
+     nline=0
+     do idir2=1,3
+       if (carflg(idir1,ipert1,idir2,ipert2)==1) then
+         nline=nline+1
+         write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
+ &       d2cart(1,idir1,ipert1,idir2,ipert2),&
+ &       d2cart(2,idir1,ipert1,idir2,ipert2)
+       end if
+     end do
+   end do
+
+   write(iout,*)' '
+   write(iout,*)' Magnetoelectric tensor, in cartesian coordinates'
+   write(iout,*)' (from polarization induced by Zeeman field)'
+   write(iout,*)'    j1       j2             matrix element'
+   write(iout,*)' dir pert dir pert     real part    imaginary part'
+   ipert1=natom+2
+   ipert2=natom+5
+   nline=1
+   do idir1=1,3
+     if (nline/=0) write(iout,*)' '
+     nline=0
+     do idir2=1,3
+       if (carflg(idir1,ipert1,idir2,ipert2)==1) then
+         nline=nline+1
+         write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
+ &       d2cart(1,idir1,ipert1,idir2,ipert2),&
+ &       d2cart(2,idir1,ipert1,idir2,ipert2)
+       end if
+     end do
+   end do
+
+ end if
+
+
 end subroutine dfpt_dyout
 !!***
 
@@ -4158,7 +4276,7 @@ end subroutine dfpt_dyfro
 
 subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,mpi_enreg,mqgrid,&
 &          natom,nfft,ngfft,nkxc,nmxc,nspden,ntypat,n1xccc,psps,pawtab,&
-&          ph1d,qgrid,qphon,rfdir,rfpert,rprimd,timrev,typat,ucvol,usepaw,xcccrc,xccc1d,xred,rhor,vxc)
+&          ph1d,qgrid,qphon,rfdir,rfpert,rprimd,timrev,typat,ucvol,usepaw,xcccrc,xccc1d,xred,rhor,vxc,ixcrot)
 
  use m_cgtools,       only : dotprod_vn
  use m_atm2fft,       only : dfpt_atm2fft
@@ -4168,6 +4286,7 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
 !scalars
  integer,intent(in) :: ixc,mgfft,mpert,mqgrid,n1xccc,natom,nfft,nkxc,nspden,ntypat
  integer,intent(in) :: timrev,usepaw
+ integer,optional,intent(in) :: ixcrot
  logical,intent(in) :: nmxc
  real(dp),intent(in) :: gsqcut,ucvol
  type(pseudopotential_type),intent(in) :: psps
@@ -4242,10 +4361,10 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
      ABI_MALLOC(rhor1,(cplex*nfft,nspden))
      rhor1=zero
 !FR SPr EB Non-collinear magnetism
-     if (nspden==4.and.present(rhor).and.present(vxc)) then
+     if (nspden==4.and.present(rhor).and.present(vxc).and.present(ixcrot)) then
        optnc=1
        call dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,dum_nhat,0,nkxc,&
-&       nmxc,nspden,n3xccc,optnc,option,qphon,rhor,rhor1,rprimd,0,vxc,vxc10,xcccwk1)
+&       nmxc,nspden,n3xccc,optnc,option,qphon,rhor,rhor1,rprimd,0,vxc,vxc10,xcccwk1,ixcrot=ixcrot)
      else
        call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&
 &       nmxc,nspden,n3xccc,option,qphon,rhor1,rprimd,0,vxc10,xcccwk1)

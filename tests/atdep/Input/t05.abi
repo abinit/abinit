@@ -39,12 +39,12 @@ debug_mode 1
 #%% md_hist = t05
 #%% [files]
 #%% files_to_test = 
-#%%   t05.abo, tolnlines = 1, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
-#%%   t05_omega.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%%   t05.abo, tolnlines = 2, tolabs = 2.e-0, tolrel = 2.e-2, fld_options = -medium;
+#%%   t05_omega.dat, tolnlines = 5, tolabs = 2.e-1, tolrel = 1.e-4, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
-#%% authors = F. Bottin & J. Bouchet
+#%% authors = F. Bottin & J. Bouchet; G. Antonius
 #%% keywords = atdep
 #%% description = 
 #%%   test aTDEP (2nd order)

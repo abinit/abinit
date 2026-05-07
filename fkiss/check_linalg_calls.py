@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-from __future__ import print_function
+from __future__ import annotations
 
 import os
 import re
@@ -2559,14 +2558,14 @@ scalapack_routines = [
 
 re_f90 = re.compile(r"\.[Ff]90")
 
-def main(top):
+def main(top: str) -> None:
   sub_calls = list()
 
   # Extract subroutine calls
   for (root, dirs, files) in os.walk(top):
     for src in files:
       if ( re_f90.search(src) ):
-        with open(os.path.join(root,src), "r") as fh:
+        with open(os.path.join(root,src)) as fh:
             src_data = fh.readlines()
         for line in src_data:
           line = line.split()
@@ -2609,38 +2608,38 @@ def main(top):
 
   # Display results
   print( "Linear algebra statistics for Abinit")
-  print( "")
+  print()
   print( "BLAS use: %.1f%%" % (100.0*len(blas_count)/len(blas_routines)))
-  print( "")
+  print()
   print( "BLAS routine            Count")
   print( "--------------------    -----")
   for csub in blas_count:
     print("%-20s    %5i" % (csub,blas_count[csub]))
-  print("")
+  print()
 
   print ("LAPACK use: %.1f%%" % (100.0*len(lapack_count)/len(lapack_routines)))
-  print ("")
+  print()
   print ("LAPACK routine          Count")
   print ("--------------------    -----")
   for csub in lapack_count:
     print ("%-20s    %5i" % (csub,lapack_count[csub]))
-  print ("")
+  print()
 
   print ("BLACS use: %.1f%%" % (100.0*len(blacs_count)/len(blacs_routines)))
-  print ("")
+  print()
   print ("BLACS routine           Count")
   print ("--------------------    -----")
   for csub in blacs_count:
     print ("%-20s    %5i" % (csub,blacs_count[csub]))
-  print ("")
+  print()
 
   print ("ScaLAPACK use: %.1f%%" % (100.0*len(scalapack_count)/len(scalapack_routines)))
-  print ("")
+  print()
   print ("ScaLAPACK routine       Count")
   print ("--------------------    -----")
   for csub in scalapack_count:
     print ("%-20s    %5i" % (csub,scalapack_count[csub]))
-  print ("")
+  print()
 
 if __name__ == "__main__":
 

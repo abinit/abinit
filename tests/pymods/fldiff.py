@@ -1,4 +1,25 @@
+from __future__ import annotations
+
 """
+Comparison tool for ABINIT output files with arithmetic floating-point support.
+
+This module provides the fldiff algorithm, which compares two text files line by line.
+It is specifically designed for scientific output where small numerical fluctuations
+are expected. It identifies floating-point numbers and compares them against a
+configurable tolerance, while performing character-based comparison for the rest
+of the content.
+
+The logic is driven by 'meta-characters' at the start of each line, which dictate
+how that specific line should be handled (e.g., ignored, compared as text,
+compared as numbers with specific tolerances, etc.).
+
+Key Features:
+- Intelligent floating-point detection and comparison.
+- Absolute and relative error thresholds.
+- Meta-character based line control.
+- Support for YAML-based structured data comparison.
+
+Original detailed description:
 Compare 2 output files from ABINIT line by line with arithmetic
 comparison of floating point substrings
 
@@ -49,44 +70,58 @@ from .yaml_tools import is_available as has_yaml
 
 if has_yaml:
     from .yaml_tools.driver_test_conf import DriverTestConf as YDriverConf
-    from .yaml_tools.tester import Tester as YTester, Failure as YFailure
+    from .yaml_tools.tester import Failure as YFailure
+    from .yaml_tools.tester import Tester as YTester
 
 # Match floats. Minimal float is .0 for historical reasons.
 # As a consequence, integers will be compared as strings
-float_re = re.compile(r'([+-]?[0-9]*\.[0-9]+(?:[eEdDfF][+-]?[0-9]+)?)')
+float_re = re.compile(r"([+-]?[0-9]*\.[0-9]+(?:[eEdDfF][+-]?[0-9]+)?)")
 
-def norm_spaces(s):
-    r"""Normalize all blanks ( \\n\\r\\t)."""
-    # the join/split technique remove all blanks and put one space between non-blanks words
-    return ' '.join(s.split())
+def norm_spaces(s: str) -> str:
+    r"""
+    Normalize all blanks ( \n\r\t).
 
+    Args:
+        s (str): The string to normalize.
 
-def relative_truncate(f, n):
+    Returns:
+        str: The normalized string.
     """
-    >>> rel_truncate(1.8367387367, 2)
-    1.83
-    >>> rel_truncate(1.8367387367e-5, 5)
-    1.83673e-05
-    >>> rel_truncate(1.8367387367e+7, 4)
-    18367000.0
+    # the join/split technique remove all blanks and put one space between non-blanks words
+    return " ".join(s.split())
+
+
+def relative_truncate(f: float, n: int) -> float:
+    """
+    Relative truncate function for numerical comparison.
+
+    Args:
+        f (float): The number to truncate.
+        n (int): Number of digits.
+
+    Returns:
+        float: The truncated number.
+
+    Example:
+        >>> rel_truncate(1.8367387367, 2)
+        1.83
     """
     ten_n = 10.0**n
     if f == 0.0:
         return 0.0
-    elif abs(f) >= 1:
+    if abs(f) >= 1:
         ten_p = 10.0
         while abs(f) > ten_p:
             ten_p *= 10.0
         fact = 10 * ten_n / ten_p
         return floor(f * fact) / fact
-    else:
-        ten_p = 0.1
-        p = -1
-        while abs(f) < ten_p:
-            ten_p *= 0.1
-            p -= 1
-        fact = ten_n / ten_p
-        return floor(f * fact) / fact
+    ten_p = 0.1
+    p = -1
+    while abs(f) < ten_p:
+        ten_p *= 0.1
+        p -= 1
+    fact = ten_n / ten_p
+    return floor(f * fact) / fact
 
 
 class NotDriverConf:
@@ -95,33 +130,60 @@ class NotDriverConf:
 
     def extra_info(self):
         if self.has_yaml:
-            return ('# YAML support is available, but is disabled for this test.',)
-        else:
-            return ('# YAML support is not available, YAML based tests will be ignored.',)
+            return ("# YAML support is available, but is disabled for this test.",)
+        return ("# YAML support is not available, YAML based tests will be ignored.",)
 
 
 class LineDifference:
-    """Base class representing a difference."""
+    """
+    Base class representing a difference between two lines.
+
+    Attributes:
+        lines (tuple): Line numbers (p1+1, p2+1).
+        content (tuple): Lines content (l1, l2).
+    """
 
     def __init__(self, p1, p2, l1, l2):
         self.lines = (p1 + 1, p2 + 1)
-        if l1 == '' or l1[-1] not in '\n\r':
-            l1 += '\n'
+        if l1 == "" or l1[-1] not in "\n\r":
+            l1 += "\n"
         self.content = (l1, l2)
 
     def __eq__(self, other):
-        """Implement the == test."""
+        """
+        Check equality of two differences.
+
+        Args:
+            other (LineDifference): The other difference to compare.
+
+        Returns:
+            bool: True if they are equal.
+        """
         return self.lines == other.lines and self.content == other.content
 
     def __ne__(self, other):
+        """
+        Check inequality of two differences.
+
+        Args:
+            other (LineDifference): The other difference to compare.
+
+        Returns:
+            bool: True if they are not equal.
+        """
         return not (self == other)
 
     def __repr__(self):
-        """Default representation of difference inspired by gnu diff tool."""
+        """
+        Return a string representation of the difference.
+
+        Returns:
+            str: Description of the difference.
+        """
         return (
-            '{}\n'.format(*self.lines)
-            + '< ' + self.content[0]
-            + '> ' + self.content[1]
+            "{}\n".format(*self.lines)
+            + "< " + self.content[0]
+            + "> " + self.content[1]
         )
 
 
@@ -134,28 +196,28 @@ class LineCountDifference(LineDifference):
             more: the name of the file with more lines
             less: the name of the file with less lines
         """
-        LineDifference.__init__(self, 0, 0, '', '')
+        LineDifference.__init__(self, 0, 0, "", "")
         self.more = more
         self.less = less
         self.line_count = line_count
 
     def __repr__(self):
         if self.line_count != (0, 0):
-            return ('{} has more significant lines than {} ({} > {}).\n'
+            return ("{} has more significant lines than {} ({} > {}).\n"
                     .format(self.more, self.less, *self.line_count))
 
-        return '{} has more significant lines than {}.\n'.format(self.more, self.less)
+        return f"{self.more} has more significant lines than {self.less}.\n"
 
 
 class MetaCharDifference(LineDifference):
     """Represent a difference between two lines with different meta characters."""
     def __init__(self, p1, p2, m1, m2):
-        LineDifference.__init__(self, p1, p2, '', '')
+        LineDifference.__init__(self, p1, p2, "", "")
         self.metas = (m1, m2)
 
     def __repr__(self):
-        return ('At line {} (in file 1), line {} (in file 2), different'
-                ' leading characters: `{}` and `{}`.\n').format(*(self.lines + self.metas))
+        return ("At line {} (in file 1), line {} (in file 2), different"
+                " leading characters: `{}` and `{}`.\n").format(*(self.lines + self.metas))
 
 
 class FloatDifference(LineDifference):
@@ -178,11 +240,27 @@ class ForcedDifference(LineDifference):
 
 
 class Result:
-    """Analyse and summarize the set of differences found by a diff."""
+    """
+    Analyze and summarize the set of differences found by a diff.
+
+    Attributes:
+        fl_diff (list): List of fldiff differences.
+        yaml_diff (list): List of YAML differences.
+        success (bool): True if no significant differences.
+        max_abs_err (float): Maximum absolute error found.
+        max_rel_err (float): Maximum relative error found.
+    """
 
     def __init__(self, fl_diff, yaml_diff, extra_info=[], label=None, verbose=False):
         """
-        differences is expected to be a list of Difference instances
+        Initialize the Result object.
+
+        Args:
+            fl_diff (list): List of legacy fldiff differences.
+            yaml_diff (list): List of YAML-based differences.
+            extra_info (list, optional): List of strings with extra information.
+            label (str, optional): Label for the summary.
+            verbose (bool, optional): If True, enable verbose output.
         """
         self.fl_diff = fl_diff
         self.yaml_diff = yaml_diff
@@ -202,34 +280,30 @@ class Result:
 
     def _analyse(self):
         """
-        Analyse a difference list and extract summary information and
-        details.  Summary information is
+        Analyze a difference list and extract summary information and details.
 
-        - self.max_abs_err: maximum absolute difference
-        - self.max_rel_err: maximum relative difference
-        - self.max_abs_ln: line number where the maximum absolute
-          difference is reached for the first time
-        - self.max_rel_ln: line number where the maximum relative
-          difference is reached for the first time
-        - self.ndiff_lines: number of lines flagged as different (excluding
-          "silent" differences: line starting with '.' '+' and depending of Diff options ',' and 'P')
+        Computes maximum absolute and relative errors, their line numbers,
+        and the total number of flagged different lines.
+
+        Returns:
+            list: A list of string fragments for the detailed report.
         """
         details = []
         error_lines = set()
 
         if self.yaml_diff:
-            details.append('# Start YAML based comparison report\n')
+            details.append("# Start YAML based comparison report\n")
 
         for diff in self.yaml_diff:
             if diff.is_fail():
                 self.success = False
                 self.yaml_error = True
-                details.append(repr(diff) + '\n\n')
+                details.append(repr(diff) + "\n\n")
             elif self.verbose:
-                details.append(repr(diff) + '\n\n')
+                details.append(repr(diff) + "\n\n")
 
         if self.fl_diff:
-            details.append('# Start legacy fldiff comparison report\n')
+            details.append("# Start legacy fldiff comparison report\n")
 
         for diff in self.fl_diff:
             if isinstance(diff, LineCountDifference) \
@@ -259,7 +333,7 @@ class Result:
                     self.success = False
 
             else:  # any other Difference
-                assert isinstance(diff, LineDifference), 'Unknown type of Difference.'
+                assert isinstance(diff, LineDifference), "Unknown type of Difference."
                 if diff.lines[0] not in error_lines:
                     self.ndiff_lines += 1
                 self.success = False
@@ -274,95 +348,129 @@ class Result:
         return details
 
     def get_summary(self):
-        """Return a textual summary of the diff."""
+        """
+        Return a textual summary of the diff.
+
+        Returns:
+            str: A summary string containing max errors and line counts.
+        """
         if self.yaml_error:
-            summary = 'yaml_test errors.'
+            summary = "yaml_test errors."
         elif self.fatal_error:
-            summary = 'fldiff fatal error.'
+            summary = "fldiff fatal error."
         elif self.success:
-            summary = 'no significant difference has been found.'
+            summary = "no significant difference has been found."
         else:
-            summary = ('different lines={}, max abs_diff={:.3e} (l.{}),'
-                       ' max rel_diff={:.3e} (l.{}).').format(
-                self.ndiff_lines,
-                self.max_abs_err,
-                self.max_abs_ln,
-                self.max_rel_err,
-                self.max_rel_ln
-            )
+            summary = (f"different lines={self.ndiff_lines}, max abs_diff={self.max_abs_err:.3e} (l.{self.max_abs_ln}),"
+                       f" max rel_diff={self.max_rel_err:.3e} (l.{self.max_rel_ln}).")
         if self.label is not None:
-            summary = 'Summary ' + self.label + ': ' + summary
+            summary = "Summary " + self.label + ": " + summary
         else:
-            summary = 'Summary: ' + summary
+            summary = "Summary: " + summary
 
         return summary
 
     def dump_details(self, file=None):
         """
-        Either return a string describing all detected differences
-        or write it into the given file (expected to be a writable stream).
+        Produce a detailed report of all detected differences.
+
+        Args:
+            file (file-like, optional): If provided, the report is written to
+                this stream. Otherwise, it is returned as a string.
+
+        Returns:
+            str or None: The report string if file is None, else None.
         """
         if file is None:
-            return ('\n'.join(self.extra_info) + '\n' + ''.join(self.details)
+            return ("\n".join(self.extra_info) + "\n" + "".join(self.details)
                     + self.get_summary())
-        else:
-            file.write('\n'.join(self.extra_info) + '\n')
-            file.writelines(self.details)
-            file.write(self.get_summary() + '\n')
-            return None
+        file.write("\n".join(self.extra_info) + "\n")
+        file.writelines(self.details)
+        file.write(self.get_summary() + "\n")
+        return None
 
-    def passed_within_tols(self, tolnlines, tolabs, tolrel):
+    def passed_within_tols(self, tolnlines: int, tolabs: float, tolrel: float) -> tuple[bool, str, str]:
         """
         Check the result of the diff against the given tolerances.
+
+        Args:
+            tolnlines (int): Max number of erroneous lines allowed.
+            tolabs (float): Max absolute error allowed.
+            tolrel (float): Max relative error allowed.
+
+        Returns:
+            tuple: (is_ok, status, message) where:
+                is_ok (bool): True if tolerances are respected.
+                status (str): "succeeded", "passed", or "failed".
+                message (str): Description of the result.
         """
         if self.yaml_error:
-            status = 'failed'
+            status = "failed"
             for diff in self.yaml_diff:
                 if diff.is_fail():
                     first_fail = diff
                     break
-            msg = 'yaml_test errors. First is:\n{}\n'.format(first_fail)
+            msg = f"yaml_test errors. First is:\n{first_fail}\n"
         elif self.fatal_error:
-            status = 'failed'
-            msg = 'fldiff fatal error:\n' + self.details
+            status = "failed"
+            msg = "fldiff fatal error:\n" + self.details
         elif self.success:
-            status = 'succeeded'
-            msg = 'succeeded'
+            status = "succeeded"
+            msg = "succeeded"
         else:
             # truncate to prevent fldiff from printing 1.000 < 1.000
             # compatibility fix, this may be removed later
             abs_error = relative_truncate(self.max_abs_err, 3)
             rel_error = relative_truncate(self.max_rel_err, 3)
             ndiff_lines = self.ndiff_lines
-            status = 'failed'
+            status = "failed"
             fact = 1.0
 
             locs = locals()
             if ndiff_lines > tolnlines:
-                msg = 'failed: erroneous lines {ndiff_lines} > {tolnlines}'
+                msg = "failed: erroneous lines {ndiff_lines} > {tolnlines}"
             elif abs_error > tolabs * fact and rel_error < tolrel:
-                msg = 'failed: abs error {abs_error:.4} > {tolabs}'
+                msg = "failed: abs error {abs_error:.4} > {tolabs}"
             elif rel_error > tolrel * fact and abs_error < tolabs:
-                msg = 'failed: rel error {rel_error:.4} > {tolrel}'
+                msg = "failed: rel error {rel_error:.4} > {tolrel}"
             elif abs_error > tolabs * fact and rel_error > tolrel * fact:
-                msg = ('failed: abs error {abs_error:.4} > {tolabs},'
-                       ' rel error {rel_error:.4} > {tolrel}')
+                msg = ("failed: abs error {abs_error:.4} > {tolabs},"
+                       " rel error {rel_error:.4} > {tolrel}")
             else:
-                status = 'passed'
-                msg = ('passed: abs error {abs_error:.4} < {tolabs},'
-                       ' rel error {rel_error:.4} < {tolrel}')
+                status = "passed"
+                msg = ("passed: abs error {abs_error:.4} < {tolabs},"
+                       " rel error {rel_error:.4} < {tolrel}")
 
             msg = msg.format(**locs)
 
-        isok = status in ('succeeded', 'passed')
+        isok = status in ("succeeded", "passed")
         return isok, status, msg
 
-    def has_line_count_error(self):
+    def has_line_count_error(self) -> bool:
+        """
+        Check if there was a line count discrepancy between files.
+
+        Returns:
+            bool: True if a LineCountDifference was found.
+        """
         return any(isinstance(diff, LineCountDifference)
                    for diff in self.fl_diff)
 
 
 class Differ:
+    """
+    High-level interface for comparing ABINIT files using fldiff and YAML tests.
+
+    The Differ class orchestrates the extraction of significant lines and YAML
+    documents from two files and performs the respective comparisons. It handles
+    configuration options like tolerances and whether to enable specific modes.
+
+    Attributes:
+        use_fl (bool): If True, perform legacy fldiff line-based comparison.
+        use_yaml (bool): If True, perform YAML-based document comparison.
+        yaml_conf (DriverTestConf): Configuration for the YAML tester.
+        options (dict): Dictionary of all configuration parameters.
+    """
 
     def __init__(self, yaml_test=None, **options):
         """
@@ -383,55 +491,74 @@ class Differ:
         self.xml_mode = False  # this is the first dirty fix.
 
         self.options = {
-            'ignore': True,
-            'ignoreP': True,
-            'tolerance_abs': 1.01e-10,
-            'tolerance_rel': 1.01e-10,
-            'label': None,
-            'use_fl': True,
-            'use_yaml': False,
-            'verbose': False,
-            'debug': False
+            "ignore": True,
+            "ignoreP": True,
+            "tolerance_abs": 1.01e-10,
+            "tolerance_rel": 1.01e-10,
+            "label": None,
+            "use_fl": True,
+            "use_yaml": False,
+            "verbose": False,
+            "debug": False
         }
 
         self.options.update(options)
 
-        if 'tolerance' in options:
-            self.options['tolerance_abs'] = options['tolerance']
-            self.options['tolerance_rel'] = options['tolerance']
+        if "tolerance" in options:
+            self.options["tolerance_abs"] = options["tolerance"]
+            self.options["tolerance_rel"] = options["tolerance"]
 
-        self.use_fl = self.options['use_fl']
-        self.use_yaml = has_yaml and self.options['use_yaml']
+        self.use_fl = self.options["use_fl"]
+        self.use_yaml = has_yaml and self.options["use_yaml"]
 
         if self.use_yaml:
-            if yaml_test and 'file' in yaml_test and yaml_test['file']:
-                self.yaml_conf = YDriverConf.from_file(yaml_test['file'])
-            elif yaml_test and 'yaml' in yaml_test and yaml_test['yaml']:
-                self.yaml_conf = YDriverConf(yaml_test['yaml'])
+            if yaml_test and "file" in yaml_test and yaml_test["file"]:
+                self.yaml_conf = YDriverConf.from_file(yaml_test["file"])
+            elif yaml_test and "yaml" in yaml_test and yaml_test["yaml"]:
+                self.yaml_conf = YDriverConf(yaml_test["yaml"])
             else:
                 self.yaml_conf = YDriverConf()
-            self.yaml_conf.debug = self.options['debug']
+            self.yaml_conf.debug = self.options["debug"]
         else:
             self.yaml_conf = NotDriverConf(has_yaml)
 
     def diff(self, file1, file2):
         """
-        Compute the diff of file 1 (reference) and file 2 (out)
-        and return a Result instance.
+        Compute the diff between two files.
+
+        Combines legacy fldiff and YAML-based comparison if enabled.
+
+        Args:
+            file1 (str): Path to the reference file.
+            file2 (str): Path to the output file.
+
+        Returns:
+            Result: The analysis of found differences.
         """
-        if file1.endswith('.xml'):
+        if file1.endswith(".xml"):
             self.xml_mode = True
 
-        with open(file1, 'rt') as f1, open(file2, 'rt') as f2:
+        with open(file1) as f1, open(file2) as f2:
             line_diff, doc_diff = self._diff_lines(f1, f2)
 
         return Result(line_diff, doc_diff,
                       extra_info=self.yaml_conf.extra_info(),
-                      label=self.options['label'],
-                      verbose=self.options['verbose'])
+                      label=self.options["label"],
+                      verbose=self.options["verbose"])
 
     def _diff_lines(self, src1, src2):
+        """
+        Perform a line-by-line comparison of two sources.
 
+        Utilizes multiple threads for parallel extraction.
+
+        Args:
+            src1 (iterable): Lines from the reference source.
+            src2 (iterable): Lines from the output source.
+
+        Returns:
+            tuple: (line_differences, doc_differences)
+        """
         lines = [None, None]
         documents = [None, None]
         corrupted = [None, None]
@@ -439,8 +566,8 @@ class Differ:
         def extractor(src, i):
             # Remark: self.options['use_yam'] -> explicit request for YAML
             #         self.use_yaml -> explicit request AND availability of YAML
-            dext = DataExtractor(self.options['use_yaml'], xml_mode=self.xml_mode,
-                                 ignore=self.options['ignore'], ignoreP=self.options['ignoreP'])
+            dext = DataExtractor(self.options["use_yaml"], xml_mode=self.xml_mode,
+                                 ignore=self.options["ignore"], ignoreP=self.options["ignoreP"])
 
             lines[i], documents[i], _ = dext.extract(src)
             corrupted[i] = dext.corrupted_docs
@@ -464,15 +591,15 @@ class Differ:
         elif corrupted[0]:
             doc_differences = [YFailure(
                 self.yaml_conf,
-                'Reference has corrupted YAML documents at line(s) {}.'
-                .format(', '.join(str(d.start + 1) for d in corrupted[0]))
+                "Reference has corrupted YAML documents at line(s) {}."
+                .format(", ".join(str(d.start + 1) for d in corrupted[0]))
             )]
 
         elif corrupted[1]:
             doc_differences = [YFailure(
                 self.yaml_conf,
-                'Tested file has corrupted YAML documents at line(s) {}.'
-                .format(', '.join(str(d.start + 1) for d in corrupted[1]))
+                "Tested file has corrupted YAML documents at line(s) {}."
+                .format(", ".join(str(d.start + 1) for d in corrupted[1]))
             )]
 
         else:
@@ -481,112 +608,124 @@ class Differ:
         return lines_differences, doc_differences
 
     def _test_doc(self, docs1, docs2):
-        """Compare docs2 to docs1 and apply tests on docs2."""
+        """
+        Compare two sets of YAML documents.
+
+        Args:
+            docs1 (dict): Reference documents.
+            docs2 (dict): Output documents.
+
+        Returns:
+            list: List of YAML failure objects.
+        """
         return YTester(docs1, docs2, self.yaml_conf).run()
 
     def _fldiff(self, lines1, lines2):
         """
-        Compute the effective comparison between two set of lines.
-        LineCountDifference and MetaCharDifference are both fatal so
-        they are returned alone if encountered.
+        Compute the effective comparison between two sets of lines.
+
+        Args:
+            lines1 (list): Significant lines from first file.
+            lines2 (list): Significant lines from second file.
+
+        Returns:
+            list: List of LineDifference subclasses.
         """
         differences = []
         if len(lines1) > len(lines2):
-            return [LineCountDifference('file 1', 'file 2', (len(lines1), len(lines2)))]
+            return [LineCountDifference("file 1", "file 2", (len(lines1), len(lines2)))]
 
-        elif len(lines1) < len(lines2):
-            return [LineCountDifference('file 2', 'file 1', (len(lines2), len(lines1)))]
+        if len(lines1) < len(lines2):
+            return [LineCountDifference("file 2", "file 1", (len(lines2), len(lines1)))]
 
-        else:
-            for (i1, meta1, line1), (i2, meta2, line2) in zip(lines1, lines2):
-                if meta1 != meta2:
-                    if meta1 != '_' and meta2 != '_':
-                        return [MetaCharDifference(i1, i2, meta1, meta2)]
+        for (i1, meta1, line1), (i2, meta2, line2) in zip(lines1, lines2):
+            if meta1 != meta2:
+                if meta1 != "_" and meta2 != "_":
+                    return [MetaCharDifference(i1, i2, meta1, meta2)]
+            elif meta1 == "_":
+                # ignore these lines
+                pass
+
+            elif meta1 == "+":
+                # these lines are arbitrarily different
+                differences.append(ForcedDifference(
+                    i1, i2, line1, line2
+                ))
+
+            elif meta1 in {":", "."}:
+                # do a character comparison
+                if norm_spaces(line1) != norm_spaces(line2):
+                    differences.append(TextDifference(
+                        i1, i2, line1, line2, silent=(meta1 == ".")
+                    ))
+
+            else:
+                # compare numerical values
+                splitted1 = float_re.split(line1)
+                splitted2 = float_re.split(line2)
+
+                # not the same number of floats on the line
+                if len(splitted1) != len(splitted2):
+                    differences.append(TextDifference(i1, i2, line1, line2))
                 else:
-                    if meta1 == '_':
-                        # ignore these lines
-                        pass
+                    if meta1 == "%":
+                        # force tolerance
+                        tol = 1.01e-2
+                        tolrel = tol
+                    else:
+                        tol = self.options["tolerance_abs"]
+                        tolrel = self.options["tolerance_rel"]
 
-                    elif meta1 == '+':
-                        # these lines are arbitrarily different
-                        differences.append(ForcedDifference(
-                            i1, i2, line1, line2
-                        ))
+                    def to_float(f):
+                        return float(f.lower().replace("d", "e").replace("f", "e"))
 
-                    elif meta1 in {':', '.'}:
-                        # do a character comparison
-                        if norm_spaces(line1) != norm_spaces(line2):
+                    def pairs(seq1, seq2):
+                        i = 0
+                        n = len(seq1)
+                        while i + 1 < n:
+                            yield (seq1[i], seq1[i + 1],
+                                   seq2[i], seq2[i + 1])
+                            i += 2
+
+                        if i < n:
+                            yield (seq1[i], None, seq2[i], None)
+
+                    # si -> plain text separators
+                    # fi -> floats
+                    flag_compare = 1
+                    for s1, f1, s2, f2 in pairs(splitted1, splitted2):
+
+                        if norm_spaces(s1) != norm_spaces(s2):
                             differences.append(TextDifference(
-                                i1, i2, line1, line2, silent=(meta1 == '.')
+                                i1, i2, line1, line2
                             ))
 
-                    else:
-                        # compare numerical values
-                        splitted1 = float_re.split(line1)
-                        splitted2 = float_re.split(line2)
+                        if f1 is not None:
+                            # reached the end
+                            f1 = to_float(f1)
+                            f2 = to_float(f2)
 
-                        # not the same number of floats on the line
-                        if len(splitted1) != len(splitted2):
-                            differences.append(TextDifference(i1, i2, line1, line2))
-                        else:
-                            if meta1 == '%':
-                                # force tolerance
-                                tol = 1.01e-2
-                                tolrel = tol
+                            if meta1 == ";":
+                                # compare absolute values
+                                f1, f2 = abs(f1), abs(f2)
+
+                            abs_sum = abs(f1) + abs(f2)
+                            diff = abs(f1 - f2)
+                            if abs_sum == 0.0:
+                                diffrel = 0.0
                             else:
-                                tol = self.options['tolerance_abs']
-                                tolrel = self.options['tolerance_rel']
+                                diffrel = diff / abs_sum
 
-                            def to_float(f):
-                                return float(f.lower().replace('d', 'e').replace('f', 'e'))
+                            if diff > tol and diffrel > tolrel and flag_compare==1:
+                                differences.append(
+                                    FloatDifference(
+                                        i1, i2, line1, line2,
+                                        diff, diffrel
+                                    )
+                                )
 
-                            def pairs(seq1, seq2):
-                                i = 0
-                                n = len(seq1)
-                                while i + 1 < n:
-                                    yield (seq1[i], seq1[i + 1],
-                                           seq2[i], seq2[i + 1])
-                                    i += 2
-
-                                if i < n:
-                                    yield (seq1[i], None, seq2[i], None)
-
-                            # si -> plain text separators
-                            # fi -> floats
-                            flag_compare = 1
-                            for s1, f1, s2, f2 in pairs(splitted1, splitted2):
-
-                                if norm_spaces(s1) != norm_spaces(s2):
-                                    differences.append(TextDifference(
-                                        i1, i2, line1, line2
-                                    ))
-
-                                if f1 is not None:
-                                    # reached the end
-                                    f1 = to_float(f1)
-                                    f2 = to_float(f2)
-
-                                    if meta1 == ';':
-                                        # compare absolute values
-                                        f1, f2 = abs(f1), abs(f2)
-
-                                    abs_sum = abs(f1) + abs(f2)
-                                    diff = abs(f1 - f2)
-                                    if abs_sum == 0.0:
-                                        diffrel = 0.0
-                                    else:
-                                        diffrel = diff / abs_sum
-
-                                    if diff > tol and diffrel > tolrel and flag_compare==1:
-                                        differences.append(
-                                            FloatDifference(
-                                                i1, i2, line1, line2,
-                                                diff, diffrel
-                                            )
-                                        )
-
-                                    if meta1 == ')':
-                                        # turn off further numerical comparison
-                                        flag_compare = 0
+                            if meta1 == ")":
+                                # turn off further numerical comparison
+                                flag_compare = 0
 
         return differences

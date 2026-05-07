@@ -814,14 +814,13 @@ end subroutine anaddb_driver_thermal_supercell
 !!
 !! SOURCE
 
-subroutine anaddb_driver_harmonic_thermo(driver, dtset, crystal, ifc, ddb, comm)
+subroutine anaddb_driver_harmonic_thermo(driver, dtset, crystal, ifc, comm)
 
 !Arguments -------------------------------
  class(anaddb_driver_type), intent(in):: driver
  type(anaddb_dataset_type), intent(in):: dtset
  type(crystal_t), intent(in):: crystal
  type(ifc_type), intent(in):: ifc
- type(ddb_type), intent(in):: ddb
  integer, intent(in):: comm
 
 !Local variables -------------------------------
@@ -840,12 +839,12 @@ subroutine anaddb_driver_harmonic_thermo(driver, dtset, crystal, ifc, ddb, comm)
  call wrtout(units, msg)
 
  if (dtset%thmflag == 1) then
-   call harmonic_thermo(Ifc, crystal, ddb%amu, dtset, ab_out, dtset%prefix_outdata, comm)
+   call harmonic_thermo(Ifc, crystal, ifc%amu, dtset, ab_out, dtset%prefix_outdata, comm)
 
  else if (dtset%thmflag == 2) then
    write(msg, '(a, (80a), a, a, a, a)' ) ch10, ('=',ii = 1, 80), ch10, ch10, ' Entering thm9 routine with thmflag = 2 ',ch10
    call wrtout(units, msg)
-   call harmonic_thermo(Ifc, crystal, ddb%amu, dtset, ab_out, dtset%prefix_outdata, comm, thmflag=dtset%thmflag)
+   call harmonic_thermo(Ifc, crystal, ifc%amu, dtset, ab_out, dtset%prefix_outdata, comm, thmflag=dtset%thmflag)
  end if
 
 end subroutine anaddb_driver_harmonic_thermo
@@ -904,9 +903,9 @@ subroutine anaddb_driver_dielectric_q0(driver, dtset, crystal, ifc, ddb, asrq0, 
  if (dtset%ifcflag == 1) then
    ! Get d2cart using the interatomic forces and the
    ! long-range coulomb interaction through Ewald summation
-   call gtdyn9(ddb%acell, Ifc%atmfrc, driver%epsinf, Ifc%dipdip, &
-     Ifc%dyewq0, driver%d2cart, crystal%gmet, ddb%gprim, dtset%mpert, crystal%natom, &
-     Ifc%nrpt, qphnrm(1), qphon, crystal%rmet, ddb%rprim, Ifc%rpt, &
+   call gtdyn9(Ifc%acell, Ifc%atmfrc, driver%epsinf, Ifc%dipdip, &
+     Ifc%dyewq0, driver%d2cart, crystal%gmet, Ifc%gprim, dtset%mpert, crystal%natom, &
+     Ifc%nrpt, qphnrm(1), qphon, crystal%rmet, Ifc%rprim, Ifc%rpt, &
      Ifc%trans, crystal%ucvol, Ifc%wghatm, crystal%xred, driver%zeff, driver%qdrp_cart, &
      Ifc%ewald_option, eta, xmpi_comm_self, &
      dipquad=Ifc%dipquad, quadquad=Ifc%quadquad)
@@ -1085,8 +1084,6 @@ subroutine anaddb_driver_dielectric_nonana(driver, dtset, crystal, ddb, ana_ncid
    ! Initialisation of the phonon wavevector
    qphon(:,1)=dtset%qph2l(:,iphl2)
    qphnrm(1)=dtset%qnrml2(iphl2)
-
-   !TODO: Quadrupole interactions need to be incorporated here (MR)
 
    ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
    ! for the second list of wv (can include non-analyticities if q /= 0)

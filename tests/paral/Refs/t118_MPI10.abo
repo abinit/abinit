@@ -102,6 +102,8 @@ _ WF disk file :      9.066 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
     dmftqmc_therm2      10000
         dmft_solv1          5
         dmft_solv2          8
+ dmft_wanorthnorm1          3
+ dmft_wanorthnorm2          2
              ecut      2.40000000E+01 Hartree
 -          fftalg         112
            getwfk          -1
@@ -1043,10 +1045,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1113.844    1113.838
  DFT+DMFT Method is used
  ******************************************
 
-
- ******************************************
- DFT+DMFT Method is used
- ******************************************
+ DMFT uses the Continuous Time Quantum Monte Carlo solver of ABINIT
 
  Non Magnetic DFT, with Non-Magnetic FLL (Full Localized Limit) double counting
 
@@ -1707,6 +1706,8 @@ total_energy_dc_eV  : -1.07409567822254E+03
     dmftqmc_therm2      10000
         dmft_solv1          5
         dmft_solv2          8
+ dmft_wanorthnorm1          3
+ dmft_wanorthnorm2          2
              ecut      2.40000000E+01 Hartree
            etotal1    -3.9510626347E+01
            etotal2    -3.9472288126E+01

@@ -29,7 +29,7 @@ MODULE m_dens
  use m_splines
 
  use defs_abitypes,   only : MPI_type
- use m_fft,           only : fourdp
+ use m_fft,           only : fourdp,fftpac
  use m_time,          only : timab
  use m_numeric_tools, only : wrap2_zero_one, geteuler
  use m_io_tools,      only : open_file
@@ -51,6 +51,8 @@ MODULE m_dens
  public :: mag_penalty_e           ! Compute the energy corresponding to constrained magnetic moments.
  public :: calcdenmagsph           ! Compute integral of total density  and magnetization inside spheres around atoms.
  public :: prtdenmagsph            ! Print integral of total density and magnetization inside spheres around atoms.
+ public :: magmom_to_d2           ! Integrates the magnetic moments (total & local ones) into the ddb array. 
+ public :: fatsph_recip            ! Compute atom centered spheres in reciprocal space
  public :: calmaxdifmag            ! Compute the maximum magnetization and the maximum change in magnetization between two steps.
 !!***
 
@@ -852,7 +854,6 @@ end subroutine constrained_dft_free
 
  call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,&
                     xred,1,cplex1,qgbt,use_gbt,intgden=intgden,gr_intgden=gr_intgden,rhomag=rhomag,strs_intgden=strs_intgden)
-
  call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat,c_dft%znucl,c_dft%spinaxis)
 
 !DEBUG
@@ -1496,6 +1497,8 @@ end subroutine mag_penalty_e
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nspden=number of spin-density components
 !!  ntypat=number of atom types
+!!  ratopt= if 1 the atomic spheres are defined in real space
+!!           if 2 the atomic spheres are dfined in reciprocal space and then Fourier transformed
 !!  option = if not larger than 10, then a density is input , if larger than 10 then a potential residual is input.
 !!  ratsm=smearing width for ratsph
 !!  ratsph(ntypat)=radius of spheres around atoms
@@ -1505,6 +1508,7 @@ end subroutine mag_penalty_e
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  typat(natom)=type of each atom
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
+!!  [qphon(3)]= perturbation wave vector.
 !!
 !! OUTPUT
 !!  dentot(nspden)=integrated density (magnetization...) over full u.c. vol. Optional argument
@@ -1516,12 +1520,14 @@ end subroutine mag_penalty_e
 !!    In collinear case component 1 is total density and 2 is _magnetization_ up-down
 !!    In non collinear case component 1 is total density, and 2:4 are the magnetization vector
 !!  strs_intgden(6,nspden,natom)=stress contribution due to constrained integrated density (magnetization...), due to each atom. Optional arg
+!!  fatsph(nfft,natom)= functions defining the atomic spheres of integration in real space
+!!  taumr(nfft,natom,3)= array describing r-xred(iatom) at any point of the FFT grid
 !!  Rest is printing
 !!
 !! SOURCE
 
 subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
-&    option,cplex,qgbt,use_gbt,dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden)
+&           option,cplex,qgbt,use_gbt,dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden,fatsph,qphon,taumr)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1542,13 +1548,18 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  real(dp),intent(out),optional  :: intgf2(natom,natom)
  real(dp),intent(out),optional  :: rhomag(2,nspden)
  real(dp),intent(out),optional  :: strs_intgden(6,nspden,natom)
-
+ real(dp),intent(out),optional  :: fatsph(nfft,natom)   
+ real(dp),intent(in),optional   :: qphon(3)
+ real(dp),intent(out),optional  :: taumr(nfft,natom,3)   
 !Local variables ------------------------------
+
 !scalars
  integer,parameter :: ndir=3,ishift=5
  integer :: i1,i2,i3,iatom,ierr,ifft_local,ii,isp,ispden,ix,iy,iz,izloc,jatom,n1,n1a,n1b,n2,ifft,ifft_local_cplex
- integer :: neighbor_overlap,n2a,n2b,n3,n3a,n3b,nfftot
+ integer :: neighbor_overlap,n2a,n2b,n3,n3a,n3b,nfftot,n4,n5,n6
+! integer :: n1c, n2c, n3c
  integer :: jfft
+ real(dp) :: arg,phr1d_im,phr1d_re
  real(dp),parameter :: delta=0.99_dp
  real(dp) :: difx,dify,difz,r2,r2atsph,rr1,rr2,rr3,rx,ry,rz,qr,mx,my,mz,rhor_local(nspden)
  real(dp) :: dfsm,fact,fsm,ratsm2,ucvol
@@ -1557,7 +1568,9 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  integer :: overlap_ij(natom,natom)
  real(dp) :: gmet(3,3),gprimd(3,3),gr_intg(3,4)
- real(dp) :: intg(cplex,4),rhomag_(2,nspden)
+ real(dp) :: intg(cplex,4),qphon_(3),rhomag_(2,nspden)
+! real(dp) :: intg_im(4),intg_re(4)
+ real(dp) :: fatsph_(nfft,natom),taumr_(nfft,natom,3)
  real(dp) :: strs(3,3),strs_cartred(3,3),strs_intg(6,4),tsec(2)
  real(dp) :: dist_ij(natom,natom),intgden_(cplex,nspden,natom)!,intgden_im_(nspden,natom)
  real(dp) :: my_xred(3, natom), rmet(3,3),xshift(3, natom)
@@ -1568,11 +1581,19 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  !MG NOTE: the computation of intg is clearly wrong when cplex = 2 (DFPT)
 
  n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
+ n4=ngfft(4);n5=ngfft(5);n6=ngfft(6)
  nfftot=n1*n2*n3
- intgden_=zero
+ 
+ !Manage optinal arguments
  if(present(intgden)) intgden=zero
  if(present(gr_intgden)) gr_intgden=zero
  if(present(strs_intgden)) strs_intgden=zero
+ qphon_=zero
+ if(present(qphon))then
+   qphon_=qphon
+ endif
+ fatsph_=zero
+ taumr_=zero
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -1661,7 +1682,6 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
          dify=dble(i2)/dble(n2)-my_xred(2,iatom)
          do i1=n1a,n1b
            ix=mod(i1+ishift*n1,n1)
-
            difx=dble(i1)/dble(n1)-my_xred(1,iatom)
 !DEBUG
 !          if(present(gr_intgden).and. option<10 .and. ratsm2>tol12)then
@@ -1681,7 +1701,6 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
            rz=difx*rprimd(3,1)+dify*rprimd(3,2)+difz*rprimd(3,3)
            r2=rx**2+ry**2+rz**2
 
-
 !          Identify the fft indexes of the rectangular grid around the atom
            if(r2 > r2atsph) then
              cycle
@@ -1690,6 +1709,15 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
            call radsmear(dfsm,fsm,r2,r2atsph,ratsm2)
 
            ifft_local=1+ix+n1*(iy+n2*izloc)
+           fatsph_(ifft_local,iatom)=fsm
+
+!          Compute the finite-q real-space phase
+           taumr_(ifft_local,iatom,1)=difx
+           taumr_(ifft_local,iatom,2)=dify
+           taumr_(ifft_local,iatom,3)=difz
+           arg=two_pi*dot_product(qphon_,taumr_(ifft_local,iatom,:))
+           phr1d_re=dcos(arg)
+           phr1d_im=dsin(arg)
            ifft_local_cplex=1+cplex*(ifft_local-1)
 
            if(present(intgf2))then
@@ -1713,7 +1741,17 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
              rhor_local(1:nspden) = rhor(ifft_local,1:nspden)
            end if
 !          Integral of density or potential residual
-           intg(1:cplex,1:nspden)=intg(1:cplex,1:nspden)+fsm*rhor(ifft_local_cplex:ifft_local_cplex+cplex-1,1:nspden)
+           if (cplex==1) then
+             intg(1,1:nspden)=intg(1,1:nspden)+fsm*rhor(ifft_local,1:nspden)
+           else if (cplex==2) then
+             if (sum(qphon_(:)**2)<tol8) then 
+               intg(1,1:nspden)=intg(1,1:nspden)+fsm*rhor(2*ifft_local-1,1:nspden)
+               intg(2,1:nspden)=intg(2,1:nspden)+fsm*rhor(2*ifft_local  ,1:nspden)
+             else 
+               intg(1,1:nspden)=intg(1,1:nspden)+phr1d_re*fsm*rhor(2*ifft_local-1,1:nspden)-phr1d_im*fsm*rhor(2*ifft_local  ,1:nspden)
+               intg(2,1:nspden)=intg(2,1:nspden)+phr1d_re*fsm*rhor(2*ifft_local  ,1:nspden)+phr1d_im*fsm*rhor(2*ifft_local-1,1:nspden)
+             end if
+           end if
            if((present(gr_intgden).or.present(strs_intgden)).and. option<10 .and. ratsm2>tol12)then
              do ispden=1,nspden
                fact=dfsm*rhor(ifft_local_cplex,ispden)
@@ -1736,6 +1774,18 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
        end do
      end if
    end do
+
+
+!DEBUG
+!   n1c=(n1b+n1a)/2
+!   n2c=(n2b+n2a)/2
+!   do i3= n3a-5,n3b+5
+!     n1c=mod(n1c+ishift*n1,n1)
+!     n2c=mod(n2c+ishift*n2,n2)
+!     iz=mod(i3+ishift*n3,n3)
+!   end do 
+!ENDDEBUG
+    
 
    if(present(intgf2) .and. neighbor_overlap==0)then
      intgf2(iatom,iatom)=intgf2(iatom,iatom)*ucvol/dble(nfftot)
@@ -1817,9 +1867,6 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
      endif
    else
      intgden_(1:cplex,1:nspden,iatom)=intg(1:cplex,1:nspden)
-     !if (cplex==2) then
-     !  intgden_im_(1:nspden,iatom)=intg(2,1:nspden)
-     !endif
      if(present(gr_intgden).and. option<10 .and. ratsm2>tol12)then
        gr_intgden(:,1:nspden,iatom)=gr_intg(:,1:nspden)
      endif
@@ -1829,6 +1876,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
    endif
 
  end do ! iatom
+
 !-------------------------------------------
 !
 ! In case intgf2 must be computed, while the atoms overlap, a double loop over atoms is needed
@@ -1897,6 +1945,14 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
      call xmpi_sum(strs_intgden,mpi_enreg%comm_fft,ierr)
      call timab(48,2,tsec)
    end if
+ end if
+
+!TODO: Adapt to fft parallelization
+ if(present(fatsph)) then
+   fatsph=fatsph_
+ end if
+ if(present(taumr)) then
+   taumr=taumr_
  end if
 
 !EB  - Compute magnetization of the whole cell
@@ -2023,6 +2079,9 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
    sum_mag_x=zero
    sum_mag_y=zero
    sum_mag_z=zero
+   sum_mag_x_im=zero
+   sum_mag_y_im=zero
+   sum_mag_z_im=zero
    sum_rho_up=zero
    sum_rho_dn=zero
    sum_rho_tot=zero
@@ -2853,6 +2912,235 @@ subroutine calmaxdifmag(cplex,intgden,intgden0,natom,nspden,maxmag,difmag)
      if (difmag < tol8) difmag=0
    endif
 end subroutine calmaxdifmag
+!!***
+
+!!****f* m_dens/fatsph_recip
+!! NAME
+!! fatsph_recip
+!!
+!! FUNCTION
+!!  Compute the atomic spheres functions in reciprocal space as a product of 
+!!  a Bessel function times a Gaussian smearing for the boundary. The functions 
+!!  are subsequently Fourier transformed to real space. 
+!!
+!! INPUTS
+!!  mpi_enreg=information about MPI parallelization
+!!  natom=number of atoms in cell.
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  ntypat=number of atom types
+!!  ratsm=smearing width for ratsph
+!!  ratsph(ntypat)=radius of spheres around atoms
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  typat(natom)=type of each atom
+!!  xred(3,natom)=reduced dimensionless atomic coordinates
+!!
+!! OUTPUT
+!!  fatsph(nfft,natom)= functions defining the atomic spheres of integration in real space
+!!  fatsphi3(n1,n2,n3,natom)= Same functions with triple indexing
+!!
+!! SOURCE
+
+subroutine fatsph_recip(fatsph,fatsph3i,gmet,mpi_enreg,natom,nfft,ngfft,ntypat,&
+& ratsm,ratsph,typat,ucvol,xred) 
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)        :: natom,nfft,ntypat
+ real(dp),intent(in)       :: ratsm,ucvol
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in)  :: ngfft(18),typat(natom)
+ real(dp),intent(in) :: gmet(3,3),ratsph(ntypat)
+ real(dp),intent(in) :: xred(3,natom)
+ real(dp),intent(out):: fatsph(nfft,natom)
+ real(dp),intent(out):: fatsph3i(ngfft(1),ngfft(2),ngfft(3),natom)   
+
+!Local variables ------------------------------
+!scalars
+ integer :: iatom
+ integer :: i1,i2,i3,id1,id2,id3,ig1,ig2,ig3,ii,ii1,n1,n2,n3,n4,n5,n6
+ real(dp) :: arg1,arg2,fac1,fac2,fac3,gq1,gq2,gq3,gcube
+ real(dp) :: gsquar,gmag,gmagrad,rad,sfr,sfi,widthsq
+!arrays
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ real(dp) :: gq(3)
+ real(dp) :: work1(2,nfft),work2(nfft,1),work3(ngfft(1),ngfft(2),ngfft(3),1)
+
+!******************************************************************
+
+!Geometric parameters
+ n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
+ n4=ngfft(4);n5=ngfft(5);n6=ngfft(6)
+ id1=n1/2+2
+ id2=n2/2+2
+ id3=n3/2+2
+ widthsq=ratsm**2
+
+!Get the distrib associated with this fft_grid
+ call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+ do iatom=1, natom
+
+   ii=0
+   work1(:,:)=zero
+   !G=0 term
+   rad=ratsph(typat(iatom))
+   work1(1,1)=four_pi*rad**3/(three*ucvol)
+   do i3=1,n3
+     ig3=i3-(i3/id3)*n3-1
+     gq3=dble(ig3)
+     gq(3)=gq3
+     do i2=1,n2
+       if (fftn2_distrib(i2)==mpi_enreg%me_fft) then
+         ig2=i2-(i2/id2)*n2-1
+         gq2=dble(ig2)
+         gq(2)=gq2
+
+!        Note the lower limit of the next loop
+         ii1=1
+         if(i3==1 .and. i2==1 .and. ig2==0 .and. ig3==0)then
+           ii1=2
+           ii=ii+1
+         end if
+         do i1=ii1,n1
+           ig1=i1-(i1/id1)*n1-1
+           gq1=dble(ig1)
+           gq(1)=gq1
+           ii=ii+1
+
+           gsquar=gsq_vl3(gq1,gq2,gq3)
+           gmag=sqrt(gsquar)
+           gcube=gmag*gsquar
+           gmagrad=two_pi*gmag*rad
+           arg1=-gsquar*pi**2*widthsq
+           arg2=two_pi*dot_product(xred(:,iatom),gq)
+  
+           fac1=two/(two_pi**2*gcube*ucvol)
+           fac2=sin(gmagrad)-gmagrad*cos(gmagrad)
+           fac3=exp(arg1)
+           sfr=cos(arg2)
+           sfi=-sin(arg2)
+
+           work1(1,ii)=fac1*fac2*fac3*sfr
+           work1(2,ii)=fac1*fac2*fac3*sfi
+
+         end do
+       end if
+     end do
+   end do
+
+!  Transform to real space
+   call fourdp(1,work1,work2,1,mpi_enreg,nfft,1,ngfft,0)
+   fatsph(:,iatom)=work2(:,1)
+ 
+   call fftpac(1,mpi_enreg,1,n1,n2,n3,n1,n2,n3,ngfft,work2,work3,2)
+   fatsph3i(:,:,:,iatom)=work3(:,:,:,1)
+
+ end do !iatom
+
+ contains
+
+ function gsq_vl3(g1,g2,g3)
+
+ real(dp) :: gsq_vl3
+ real(dp),intent(in) :: g1,g2,g3 ! Note that they are real, unlike in other similar function definitions
+!Define G^2 based on G space metric gmet.
+   gsq_vl3=g1*g1*gmet(1,1)+g2*g2*gmet(2,2)+&
+&   g3*g3*gmet(3,3)+2.0_dp*g1*g2*gmet(1,2)+&
+&   2.0_dp*g2*g3*gmet(2,3)+2.0_dp*g3*g1*gmet(3,1)
+ end function gsq_vl3
+
+end subroutine fatsph_recip
+!!***
+
+!!****f* m_dens/magmom_to_d2
+!! NAME
+!! magmom_to_d2
+!!
+!! FUNCTION
+!! Incorporates the magnetic moments in the ddb files as second
+!! order energy derivatives with respect to (ipert,idir) and a 
+!! Zeeman field. Both total, i.e., response to a uniform Zeeman 
+!! field (ipert=natom+5) and local (ipert=natom+11+1:2*natom+11)
+!! magnetic moments are considered. The Zeeman field directions
+!! are passed in Cartesian format.
+!! It also incorporates the second-order energy derivatives involving
+!! a scalar-potential perturbation from the charge-induced by 
+!! another (ipert,idir). TODO: Check the consistency of signs in this case.
+!!
+!! INPUTS
+!!  blkflg(3,mpert,3,mpert)=flags for each element of the 2DTE (=1 if computed)
+!!  idir=direction of the perturbation
+!!  intgden(cplex,nspden, natom)=integrated rhor or potential residual, for each atom in a sphere of radius ratsph.
+!!    Representation differs according to nspden :
+!!      if nspden=1, total density
+!!      if nspden=2, spin up, then spin down
+!!      if nspden=4, total density, then mag_x, mag_y, mag_z
+!!  ipert=type of perturbation
+!!  mpert=maximum number of perturbations
+!!  natom=number of atoms in cell.
+!!  nspden=number of spin-density components
+!!  rhomag(2,nspden)=integral of charge or magnetization over the whole cell (also taking into account a possible imaginary part for DFPT).
+!!
+!! OUTPUT
+!!  d2lo(2,3,mpert,3,mpert)= Local contributions to the second-order energy functional.
+!!
+!! SOURCE
+
+subroutine magmom_to_d2(blkflg,cplex,d2lo,idir,intgden,ipert,mpert,natom,nspden,rhomag)
+
+!Arguments ---------------------------------------------
+!scalars
+integer,intent(in)        :: cplex,idir,ipert,mpert,natom,nspden
+!arrays
+integer,intent(inout) :: blkflg(3,mpert,3,mpert)
+real(dp),intent(in) :: intgden(cplex,nspden,natom)
+real(dp),intent(in) :: rhomag(2,nspden)
+real(dp),intent(inout) :: d2lo(2,3,mpert,3,mpert)
+!Local variables ------------------------------
+!scalars
+integer :: iatom
+
+! *************************************************************************
+
+ ! We store in DDB the second-order energy derivatives, hence the negative 
+ ! sign applied to the induced magnetic moments. 
+
+ ! Incorporate total charge and magnetic moments
+ if (nspden==2) then
+   blkflg(1,natom+6,idir,ipert)= 1
+   d2lo(1,1,natom+6,idir,ipert)= -rhomag(1,1)
+   if (cplex==2) d2lo(2,1,natom+6,idir,ipert)= rhomag(2,1)
+   blkflg(3,natom+5,idir,ipert)= 1
+   d2lo(1,3,natom+5,idir,ipert)= -half*rhomag(1,2)
+   if (cplex==2) d2lo(2,3,natom+5,idir,ipert)= -half*rhomag(2,2)
+ else if (nspden==4) then
+   blkflg(1,natom+6,idir,ipert)=1
+   d2lo(1,1,natom+6,idir,ipert)= -rhomag(1,1)
+   if (cplex==2) d2lo(2,1,natom+6,idir,ipert)= rhomag(2,1)
+   blkflg(1:3,natom+5,idir,ipert)=1
+   d2lo(1,1:3,natom+5,idir,ipert)= -half*rhomag(1,2:4)
+   if (cplex==2) d2lo(2,1:3,natom+5,idir,ipert)= -half*rhomag(2,2:4)
+ end if
+
+ ! Incorporate local magnetic moments
+ if (nspden==2) then
+   do iatom= 1, natom
+     blkflg(3,natom+11+iatom,idir,ipert)= 1
+     d2lo(1,3,natom+11+iatom,idir,ipert)= -half*intgden(1,2,iatom)
+     if (cplex==2) d2lo(2,3,natom+11+iatom,idir,ipert)= -half*intgden(2,2,iatom)
+   end do
+ else if (nspden==4) then
+   do iatom= 1, natom
+     blkflg(1:3,natom+11+iatom,idir,ipert)= 1
+     d2lo(1,1:3,natom+11+iatom,idir,ipert)= -half*intgden(1,2:4,iatom)
+     if (cplex==2) d2lo(2,1:3,natom+11+iatom,idir,ipert)= -half*intgden(2,2:4,iatom)
+   end do
+ end if
+
+end subroutine magmom_to_d2
 !!***
 
 end module m_dens

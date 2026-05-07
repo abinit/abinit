@@ -41,6 +41,50 @@ static cufftType select_cufft_type(const int fftType_int)
 
 /*=========================================================================*/
 /* NAME
+ *  gpu_fft_estimate_work_size_cpp
+ *
+ * FUNCTION
+ *  Estimate GPU memory size required for cuFFT internal work area, for
+ *  given FFT plan parameters.
+ *
+ * INPUTS
+ *   rank      Dimensionality of the transform (1, 2, or 3).
+ *   n         Array of size rank, describing the size of each dimension,
+ *             n[0] being the size of the outermost and n[rank-1] innermost
+ *             (contiguous) dimension of a transform.
+ *   type      The transform data type
+ *             (e.g., FFT_R2C for single precision real to complex)
+ *   batch     Batch size for this transform
+ * OUTPUT
+ *   work_size Estimated size of internal work area
+ */
+/*=========================================================================*/
+
+extern "C"
+void gpu_fft_get_estimate_work_size_cpp(int *rank, int **n, int *fft_type, int *batch, size_t *work_size){
+
+  assert(CUFFT_Z2Z==0x69 && "cuFFT_Type enum value mismatch !(CUDA update?)");
+  assert(CUFFT_FORWARD==-1 && "cuFFT direction enum value mismatch (CUDA update?)");
+  assert(CUFFT_INVERSE== 1 && "cuFFT direction enum value mismatch (CUDA update?)");
+
+  cufftType type = select_cufft_type(*fft_type);
+  CUDA_API_CHECK(cufftEstimateMany(
+      *rank,
+      *n,
+      NULL,
+      1,
+      1,
+      NULL,
+      1,
+      1,
+      type,
+      *batch,
+      work_size));
+}
+
+
+/*=========================================================================*/
+/* NAME
  *  gpu_fft_plan_many_cpp
  *
  * FUNCTION

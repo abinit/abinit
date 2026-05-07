@@ -29,6 +29,7 @@ module m_vtorho
  use defs_wvltypes
  use m_abicore
  use m_xmpi
+ use m_xomp
  use m_abi_mixing
  use m_errors
  use m_wffile
@@ -92,6 +93,7 @@ module m_vtorho
  use m_inwffil,            only : cg_from_atoms
  use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm, &
                                       gemm_nonlop_block_size, gemm_nonlop_is_distributed
+ use m_alloc_hamilt_gpu,   only : hamilt_gpu_nfft_blocks
 
  use m_abstract_wf,        only : abstract_wf, init_mywfc
  use m_mlwfovlp,           only : mlwfovlp
@@ -401,10 +403,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #if defined HAVE_GPU_CUDA
  integer(c_int64_t)   :: ph3d_size
 #endif
+ integer :: nthreads,nmpi,mpicomm
 
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd,step_cond
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
- logical :: do_last_ortho,wvlbigdft=.false.,do_invS,calc_ffnl_ph3d
+ logical :: do_last_ortho,wvlbigdft=.false.,do_invS,calc_ffnl_ph3d,gpu_mem_estimated
  integer :: dmft_dftocc
  real(dp) :: nelect,min_eigv
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
@@ -420,6 +423,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: dphasek(:,:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:), ffnl_kphq(:,:,:,:)
  real(dp),allocatable :: grnlnk(:,:), grnl_k(:,:), xcart(:,:)
+ real(dp),allocatable :: nvresid_tmp(:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(c_double), ABI_CONTIGUOUS pointer :: kinpw(:) => null()
@@ -492,6 +496,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
  paral_atom=(my_natom/=natom)
  compch_fft=-1.d5
+ gpu_mem_estimated=.false.; if(istep>1) gpu_mem_estimated=.true.
 
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.dtset%usekden/=0.and.usevxctau/=0)
@@ -641,7 +646,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
   dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
   paw_ij=paw_ij,ph1d=ph1d,usecprj=usecprj_local,electronpositron=electronpositron,fock=fock,&
   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-  nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option,spinaxis=dtset%spinaxis,use_gbt=dtset%use_gbt)
+  nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option,spinaxis=dtset%spinaxis,&
+  use_gbt=dtset%use_gbt,nfft_blocks=hamilt_gpu_nfft_blocks)
 
  if (dtset%cprj_in_memory==1) then
    call xg_nonlop_update_weight(xg_nonlop,ucvol) ! ucvol could have changed in mover
@@ -1080,16 +1086,18 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        end if
 
-       if(gemm_nonlop_use_gemm .and. istep <= 1 .and. isppol < 2 .and. dtset%gpu_option==ABI_GPU_OPENMP) then
+       if(gemm_nonlop_use_gemm .and. istep <= 1 .and. dtset%gpu_option==ABI_GPU_OPENMP .and. .not. gpu_mem_estimated) then
          gemm_nonlop_block_size = dtset%gpu_nl_splitsize
          call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
          &                        dtset%nspinor,dtset%nspden,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
          &                        0,0,dtset%wfoptalg,gs_hamk%gpu_option,(dtset%gpu_nl_distrib/=0),&
-         &                        gemm_nonlop_block_size,nblk_gemm_nonlop)
+         &                        gemm_nonlop_block_size,nblk_gemm_nonlop,hamilt_gpu_nfft_blocks)
+         gs_hamk%nfft_blocks = hamilt_gpu_nfft_blocks
          gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
+         gpu_mem_estimated=.true.
        end if
 
-       ! Build inverse of overlap matrix for chebfi
+        ! Build inverse of overlap matrix for chebfi or slice
        if(associated(rcpaw)) then
          step_cond=istep<=1.or.(rcpaw%istep>=rcpaw%updatepaw(1)+1.and.rcpaw%istep<=rcpaw%updatepaw(2)+1.and.&
               (dtset%wfoptalg==111.or.dtset%wfoptalg == 1))
@@ -1098,7 +1106,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        endif
 
        if (dtset%cprj_in_memory==0) then
-         if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. step_cond) then
+         if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111 .or. dtset%wfoptalg == 112) &
+&           .and. step_cond) then
             call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
          end if
        end if
@@ -1135,7 +1144,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
        if (dtset%cprj_in_memory==1) then
-         do_invS=xg_nonlop%paw.and.dtset%wfoptalg==111
+         do_invS=xg_nonlop%paw.and.(dtset%wfoptalg==111.or.dtset%wfoptalg==112)
          call xg_nonlop_make_k(xg_nonlop,my_ikpt,istwf_k,mpi_enreg%me_g0,mpi_enreg%me_g0_fft,npw_k,ffnl,ph3d,kpg_k,&
            & step_cond,compute_invS_approx=do_invS,compute_gram=do_invS)
        end if
@@ -1942,10 +1951,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      if (psps%usepaw==0) then
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-       rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd)
+       rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd,nfft_blocks=gs_hamk%nfft_blocks)
      else
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,nfft_blocks=gs_hamk%nfft_blocks)
      end if
 
      ABI_NVTX_END_RANGE()
@@ -2125,10 +2134,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    if(dtset%usekden==1 .and. (iscf > 0 .or. iscf==-3 ) )then
      if (psps%usepaw==0) then
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-         taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+         taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1,nfft_blocks=gs_hamk%nfft_blocks)
      else
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-        tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+        tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1,nfft_blocks=gs_hamk%nfft_blocks)
      end if
    end if
 
@@ -2303,10 +2312,47 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
      if (optres==1) then
        nvresid=rhor-nvresid
+       ! /!\ ---- DO NOT CHANGE THESE LINES WITHOUT CORE DEVELOPERS PERMISSION ---- /!\
+       ! LB-03/2026:
+       ! A noise can accumulate in nvresid after each SCF cycle,
+       ! resulting in different densities/potentials for different MPI processes.
+       ! This has been observed using threads, but could happen in other contexts.
+       ! This slowly worsens the SCF cycle, leading to wrong results after many iterations.
+       ! So here we compute the mean of nvresid over all MPI processes to reduce the noise.
+       ! This error is difficult to test as it is observed in long runs only, so BE VERY CAREFUL.
+       mpicomm = mpi_enreg%comm_kptband
+       nmpi = xmpi_comm_size(mpicomm)
+       nthreads = xomp_get_num_threads(open_parallel=.true.)
+       if (nmpi>1.and.nthreads>1) then
+         ABI_MALLOC(nvresid_tmp,(nfftf,dtset%nspden))
+         nvresid_tmp(:,:) = nvresid(:,:) / nmpi
+         call xmpi_sum(nvresid_tmp,mpicomm,ierr)
+         if (ierr/=0) then
+           ABI_ERROR("Error in mpi sum (nvresid)")
+         end if
+         nvresid(:,:) = nvresid_tmp(:,:)
+         ABI_FREE(nvresid_tmp)
+       end if
+       ! /!\--------------------/!\
+       !
        call sqnorm_v(1,nfftf,nres2,dtset%nspden,optres,nvresid,mpi_comm_sphgrid=mpi_comm_sphgrid)
        if (dtset%usekden==1) then
-         if (optres==1) tauresid=taur-tauresid
-       endif
+         if (optres==1) then
+           tauresid=taur-tauresid
+           ! /!\ ---- DO NOT CHANGE THESE LINES WITHOUT CORE DEVELOPERS PERMISSION ---- /!\
+           if (nmpi>1.and.nthreads>1) then
+             ABI_MALLOC(nvresid_tmp,(nfftf,dtset%nspden))
+             nvresid_tmp(:,:) = tauresid(:,:) / nmpi
+             call xmpi_sum(nvresid_tmp,mpicomm,ierr)
+             if (ierr/=0) then
+               ABI_ERROR("Error in mpi sum (tauresid)")
+             end if
+             tauresid(:,:) = nvresid_tmp(:,:)
+             ABI_FREE(nvresid_tmp)
+           end if
+           ! /!\--------------------/!\
+         end if
+       end if
      end if
    end if
 

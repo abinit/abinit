@@ -14,16 +14,18 @@ module m_tdep_phi4
   use m_linalg_interfaces
   use m_io_tools
   use m_crystal,          only : crystal_t
-  use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
+  use m_tdep_dataset,     only : atdep_dataset_type, MPI_enreg_type
   use m_tdep_latt,        only : Lattice_type
   use m_tdep_shell,       only : Shell_type
-  use m_tdep_sym,         only : Symetries_type
-  use m_tdep_utils,       only : Coeff_Moore_type, Constraints_type
+  use m_tdep_sym,         only : Symmetries_type
+  use m_tdep_sampling,    only : tdep_Sampling_type
+  use m_tdep_solver,      only : tdep_Solver_type
+  use m_tdep_model,       only : tdep_Model_type
+  use m_tdep_constraints, only : Constraints_type
 
   implicit none
 
   public :: tdep_calc_ftot4
-  public :: tdep_calc_phi4fcoeff
   public :: tdep_calc_phi4ref
   public :: tdep_write_phi4
   public :: tdep_build_phi4_3333
@@ -31,15 +33,14 @@ module m_tdep_phi4
 contains
 
 !====================================================================================================
- subroutine tdep_calc_ftot4(Forces_TDEP,Invar,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym)
 
-  type(Input_type),intent(in) :: Invar
+ subroutine tdep_calc_ftot4(Model,Invar,Shell4at,ucart,Sym)
+
+  type(tdep_Model_type),intent(inout) :: Model
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Shell_type),intent(in) :: Shell4at
-  type(Symetries_type),intent(in) :: Sym
+  type(Symmetries_type),intent(in) :: Sym
   double precision, intent(in)  :: ucart(3,Invar%natom,Invar%my_nstep)
-  double precision, intent(in)  :: Phi4_ref(3,3,3,3,Shell4at%nshell)
-  double precision, intent(out) :: Phi4UiUjUkUl(Invar%my_nstep)
-  double precision, intent(inout) :: Forces_TDEP(3*Invar%natom*Invar%my_nstep)
 
   integer :: iatom,jatom,katom,latom,isym,itrans,ishell,iatshell
   integer :: ii,jj,kk,ll,istep
@@ -59,7 +60,7 @@ contains
         latom=Shell4at%neighbours(iatom,ishell)%atoml_in_shell(iatshell)
         isym =Shell4at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
         itrans=Shell4at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
-        call tdep_build_phi4_3333(isym,Phi4_ref(:,:,:,:,ishell),Phi4_3333,Sym,itrans)
+        call tdep_build_phi4_3333(isym,Model%Phi4(:,:,:,:,ishell),Phi4_3333,Sym,itrans)
 !       Calculation of the force components (third order)
         do istep=1,Invar%my_nstep
           do ii=1,3
@@ -88,169 +89,28 @@ contains
       end do
     end do
     call DGEMM('T','N',1,1,3*Invar%natom,1./4.d0,ftot4(:,istep),3*Invar%natom,ucart_blas,&
-&              3*Invar%natom,0.d0,Phi4UiUjUkUl(istep),3*Invar%natom)
-    Forces_TDEP(3*Invar%natom*(istep-1)+1:3*Invar%natom*istep)=&
-&   Forces_TDEP(3*Invar%natom*(istep-1)+1:3*Invar%natom*istep)-ftot4(:,istep)
+&              3*Invar%natom,0.d0,Model%Phi4UiUjUkUl(istep),3*Invar%natom)
+    Model%Forces(3*Invar%natom*(istep-1)+1:3*Invar%natom*istep)=&
+&   Model%Forces(3*Invar%natom*(istep-1)+1:3*Invar%natom*istep)-ftot4(:,istep)
   end do
   ABI_FREE(ucart_blas)
   ABI_FREE(ftot4)
 
  end subroutine tdep_calc_ftot4
 
-!====================================================================================================
-subroutine tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj,Shell4at,Sym,ucart)
-
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
-  type(Shell_type),intent(in) :: Shell4at
-  type(Coeff_Moore_type), intent(inout) :: CoeffMoore
-  double precision, intent(in) :: ucart(3,Invar%natom,Invar%my_nstep)
-  double precision, intent(in) :: proj(81,81,Shell4at%nshell)
-
-  integer :: ishell,ncoeff,ncoeff_prev,istep,iatom,jatom,katom,latom
-  integer :: icoeff,isym,iatshell,itrans,counter
-  integer :: mu,nu,xi,zeta,alpha,beta,gama,delta,iindex_l,iindex_h
-  integer :: ncoeff_prev_l,ncoeff_prev_h
-  double precision :: temp,SSSS_tmp(81),proj_tmp(81)
-  double precision, allocatable :: SSSS_proj(:,:,:,:,:)
-  type(Constraints_type) :: Const
-
-  ABI_MALLOC(Const%Sprod,(Sym%nsym,24))
-  do isym=1,Sym%nsym
-    do itrans=1,24
-      ABI_MALLOC(Const%Sprod(isym,itrans)%SSSS,(3,81,3,3,3)); Const%Sprod(isym,itrans)%SSSS(:,:,:,:,:)=zero
-    end do
-  end do
-
-! For each couple of atoms, transform the Phi4 (3x3x3) ifc matrix using the symetry operation (S)
-! Note: iatom=1 is excluded in order to take into account the atomic sum rule (see below)
-  do isym=1,Sym%nsym
-    do mu=1,3
-      do alpha=1,3
-        do nu=1,3
-          do beta=1,3
-            do xi=1,3
-              do gama=1,3
-                do zeta=1,3
-                  do delta=1,3
-#if defined FC_NVHPC
-                    if (itrans == -1) write(std_out, *)"NVHPC freezes here that is fixed by this print statement."
-#endif
-
-                    counter=delta+(gama-1)*3+(beta-1)*9+(alpha-1)*27
-                    temp=Sym%S_ref(mu,alpha,isym,1)*Sym%S_ref(nu  ,beta ,isym,1)*&
-&                        Sym%S_ref(xi,gama ,isym,1)*Sym%S_ref(zeta,delta,isym,1)
-                    Const%Sprod(isym,1 )%SSSS(mu,counter,nu,xi,zeta)=temp !\Phi4_efgh
-                    Const%Sprod(isym,2 )%SSSS(mu,counter,xi,nu,zeta)=temp !\Phi4_egfh
-                    Const%Sprod(isym,3 )%SSSS(nu,counter,mu,xi,zeta)=temp !\Phi4_fegh
-                    Const%Sprod(isym,4 )%SSSS(nu,counter,xi,mu,zeta)=temp !\Phi4_fgeh
-                    Const%Sprod(isym,5 )%SSSS(xi,counter,mu,nu,zeta)=temp !\Phi4_gefh
-                    Const%Sprod(isym,6 )%SSSS(xi,counter,nu,mu,zeta)=temp !\Phi4_gfeh
-
-                    Const%Sprod(isym,7 )%SSSS(mu,counter,nu,zeta,xi)=temp !\Phi4_efhg
-                    Const%Sprod(isym,8 )%SSSS(mu,counter,xi,zeta,nu)=temp !\Phi4_eghf
-                    Const%Sprod(isym,9 )%SSSS(nu,counter,mu,zeta,xi)=temp !\Phi4_fehg
-                    Const%Sprod(isym,10)%SSSS(nu,counter,xi,zeta,mu)=temp !\Phi4_fghe
-                    Const%Sprod(isym,11)%SSSS(xi,counter,mu,zeta,nu)=temp !\Phi4_gehf
-                    Const%Sprod(isym,12)%SSSS(xi,counter,nu,zeta,mu)=temp !\Phi4_gfhe
-
-                    Const%Sprod(isym,13)%SSSS(mu,counter,zeta,nu,xi)=temp !\Phi4_ehfg
-                    Const%Sprod(isym,14)%SSSS(mu,counter,zeta,xi,nu)=temp !\Phi4_ehgf
-                    Const%Sprod(isym,15)%SSSS(nu,counter,zeta,mu,xi)=temp !\Phi4_fheg
-                    Const%Sprod(isym,16)%SSSS(nu,counter,zeta,xi,mu)=temp !\Phi4_fhge
-                    Const%Sprod(isym,17)%SSSS(xi,counter,zeta,mu,nu)=temp !\Phi4_ghef
-                    Const%Sprod(isym,18)%SSSS(xi,counter,zeta,nu,mu)=temp !\Phi4_ghfe
-
-                    Const%Sprod(isym,19)%SSSS(zeta,counter,mu,nu,xi)=temp !\Phi4_hefg
-                    Const%Sprod(isym,20)%SSSS(zeta,counter,mu,xi,nu)=temp !\Phi4_hegf
-                    Const%Sprod(isym,21)%SSSS(zeta,counter,nu,mu,xi)=temp !\Phi4_hfeg
-                    Const%Sprod(isym,22)%SSSS(zeta,counter,nu,xi,mu)=temp !\Phi4_hfge
-                    Const%Sprod(isym,23)%SSSS(zeta,counter,xi,mu,nu)=temp !\Phi4_hgef
-                    Const%Sprod(isym,24)%SSSS(zeta,counter,xi,nu,mu)=temp !\Phi4_hgfe
-
-                  end do
-                end do
-              end do
-            end do
-          end do
-        end do
-      end do
-    end do
-  end do
-
-  write(Invar%stdout,*) ' Compute the coefficients (at the 4th order) used in the Moore-Penrose...'
-  do ishell=1,Shell4at%nshell
-    do iatom=1,Invar%natom
-      if (Shell4at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
-      do iatshell=1,Shell4at%neighbours(iatom,ishell)%n_interactions
-        jatom=Shell4at%neighbours(iatom,ishell)%atomj_in_shell(iatshell)
-        katom=Shell4at%neighbours(iatom,ishell)%atomk_in_shell(iatshell)
-        latom=Shell4at%neighbours(iatom,ishell)%atoml_in_shell(iatshell)
-        isym =Shell4at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
-        itrans=Shell4at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
-        ncoeff     =Shell4at%ncoeff(ishell)
-        ncoeff_prev=Shell4at%ncoeff_prev(ishell)+CoeffMoore%ncoeff3rd+CoeffMoore%ncoeff2nd+CoeffMoore%ncoeff1st
-        ncoeff_prev_l=ncoeff_prev+1
-        ncoeff_prev_h=ncoeff_prev+ncoeff
-#if defined FC_NVHPC
-        if (itrans == -1) write(std_out, *)"NVHPC freezes here that is fixed by this print statement."
-#endif
-        ABI_MALLOC(SSSS_proj,(3,3,3,3,ncoeff)) ; SSSS_proj(:,:,:,:,:)=zero
-        do mu=1,3
-          do nu=1,3
-            do xi=1,3
-              do zeta=1,3
-                SSSS_tmp(:)=Const%Sprod(isym,itrans)%SSSS(mu,:,nu,xi,zeta)
-                do icoeff=1,ncoeff
-                  proj_tmp(:)=proj(:,icoeff,ishell)
-!                 SSSS_proj(mu,nu,xi,zeta,icoeff)=DDOT(81,Const%Sprod(isym,itrans)%SSSS(mu,:,nu,xi,zeta),1,proj(:,icoeff,ishell),1)
-                  SSSS_proj(mu,nu,xi,zeta,icoeff)=DDOT(81,SSSS_tmp,1,proj_tmp,1)
-                end do
-              end do
-            end do
-          end do
-        end do
-        do istep=1,Invar%my_nstep
-          iindex_l=3*(iatom-1)+3*Invar%natom*(istep-1)+1
-          iindex_h=3*(iatom-1)+3*Invar%natom*(istep-1)+3
-!         F_i^{\mu}(t)=\sum_{\alpha\beta\gamma\delta,jkl,\nu\xi\zeta} S^{\mu\alpha}.S^{\nu\beta}.S^{\xi\gamma}.S^{\zeta\delta}.
-!                      \Phi4_{ijkl}^{\alpha\beta\gamma\delta}.u_l^\zeta(t).u_k^\xi(t).u_j^\nu(t)
-          do nu=1,3
-            do xi=1,3
-              do zeta=1,3
-                CoeffMoore%fcoeff(iindex_l:iindex_h,ncoeff_prev_l:ncoeff_prev_h)= &
-&               CoeffMoore%fcoeff(iindex_l:iindex_h,ncoeff_prev_l:ncoeff_prev_h)+&
-&               SSSS_proj(1:3,nu,xi,zeta,1:ncoeff)*ucart(nu,jatom,istep)*ucart(xi,katom,istep)*ucart(zeta,latom,istep)/6.d0 *&
-&               Invar%weights(istep)
-              end do
-            end do
-          end do
-        end do !istep
-        ABI_FREE(SSSS_proj)
-      end do !iatshell
-    end do !iatom
-  end do !ishell
-  write(Invar%stdout,*) ' ------- achieved'
-  do isym=1,Sym%nsym
-    do itrans=1,24
-      ABI_FREE(Const%Sprod(isym,itrans)%SSSS)
-    end do
-  end do
-  ABI_FREE(Const%Sprod)
-
-end subroutine tdep_calc_phi4fcoeff
-
 !=====================================================================================================
-subroutine tdep_calc_phi4ref(ntotcoeff,proj,Phi4_coeff,Phi4_ref,Shell4at)
+subroutine tdep_calc_phi4ref(Solver,Shell4at,Phi4_ref)
 
+  type(tdep_Solver_type),intent(in) :: Solver
   type(Shell_type),intent(in) :: Shell4at
-  integer,intent(in) :: ntotcoeff
-  double precision, intent(in) :: proj(81,81,Shell4at%nshell)
-  double precision, intent(in) :: Phi4_coeff(ntotcoeff,1)
   double precision, intent(inout) :: Phi4_ref(3,3,3,3,Shell4at%nshell)
 
   integer :: ishell,ncoeff,ncoeff_prev
   integer :: ii,jj,kk,ll,kappa
+  double precision, allocatable :: Phi4_coeff(:)
+
+  ABI_CALLOC(Phi4_coeff, (Solver%ncoeff4th))
+  Phi4_coeff(:) = Solver%theta(Solver%ncoeff1st+Solver%ncoeff2nd+Solver%ncoeff3rd+1:Solver%ntotcoeff)
 
   do ishell=1,Shell4at%nshell
 !   Build the 3x3x3x3 IFC per shell
@@ -262,7 +122,7 @@ subroutine tdep_calc_phi4ref(ntotcoeff,proj,Phi4_coeff,Phi4_ref,Shell4at)
         do kk=1,3
           do ll=1,3
             kappa=kappa+1
-            Phi4_ref(ii,jj,kk,ll,ishell)=sum(proj(kappa,1:ncoeff,ishell)*Phi4_coeff(ncoeff_prev+1:ncoeff_prev+ncoeff,1))
+            Phi4_ref(ii,jj,kk,ll,ishell)=sum(Shell4at%proj(kappa,1:ncoeff,ishell)*Phi4_coeff(ncoeff_prev+1:ncoeff_prev+ncoeff))
           end do
         end do
       end do
@@ -279,13 +139,15 @@ subroutine tdep_calc_phi4ref(ntotcoeff,proj,Phi4_coeff,Phi4_ref,Shell4at)
     end do
   end do
 
+  ABI_FREE(Phi4_coeff)
+
 end subroutine tdep_calc_phi4ref
 
 !=====================================================================================================
 subroutine tdep_write_phi4(distance,Invar,Phi4_ref,Shell4at,Sym)
 
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
+  type(atdep_dataset_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
   type(Shell_type),intent(in) :: Shell4at
   double precision, intent(in) :: distance(Invar%natom,Invar%natom,4)
   double precision, intent(in) :: Phi4_ref(3,3,3,3,Shell4at%nshell)
@@ -365,7 +227,7 @@ end subroutine tdep_write_phi4
 !=====================================================================================================
 subroutine tdep_build_phi4_3333(isym,Phi4_ref,Phi4_3333,Sym,itrans)
 
-  type(Symetries_type),intent(in) :: Sym
+  type(Symmetries_type),intent(in) :: Sym
   double precision, intent(in) :: Phi4_ref(3,3,3,3)
   double precision, intent(out) :: Phi4_3333(3,3,3,3)
   integer,intent(in) :: isym,itrans

@@ -645,8 +645,20 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%rfatpol(2)=dtset%natom
  endif
 
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'mpatpol',tread,'INT')
+ if(tread==1) dtset%mpatpol(1:2)=intarr(1:2)
+ if(dtset%mpatpol(1)==-1)then
+   dtset%mpatpol(1)=1
+ endif
+ if(dtset%mpatpol(2)==-1)then
+   dtset%mpatpol(2)=dtset%natom
+ endif
+
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rfdir',tread,'INT')
  if(tread==1) dtset%rfdir(1:3)=intarr(1:3)
+
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'mpdir',tread,'INT')
+ if(tread==1) dtset%mpdir(1:3)=intarr(1:3)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfddk',tread,'INT')
  if(tread==1) dtset%rfddk=intarr(1)
@@ -896,20 +908,122 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'mdtemp',tread,'DPR')
  if(tread==1) dtset%mdtemp(1:2)=dprarr(1:2)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfomega',tread,'ENE')
+ if(tread==1) dtset%rfomega=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfeta',tread,'ENE')
+ if(tread==1) dtset%rfeta=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'magpen',tread,'ENE')
+ if(tread==1) dtset%magpen=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt1mag',tread,'INT')
+ if(tread==1) dtset%prt1mag=intarr(1)
+
+!LONG WAVE integer input variables
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert1_magat',tread,'INT')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf1magat',tread_alt,'INT')
+ if(tread==1.or.tread_alt==1) dtset%d3e_pert1_magat(1:2)=intarr(1:2)
+ if (tread_alt==1) tread_key=1
+ if(dtset%d3e_pert1_magat(1)==-1)then
+   dtset%d3e_pert1_magat(1)=1
+ endif
+ if(dtset%d3e_pert1_magat(2)==-1)then
+   dtset%d3e_pert1_magat(2)=dtset%natom
+ endif
+
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert2_magat',tread,'INT')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2magat',tread_alt,'INT')
+ if(tread==1.or.tread_alt==1) dtset%d3e_pert2_magat(1:2)=intarr(1:2)
+ if (tread_alt==1) tread_key=1
+ if(dtset%d3e_pert2_magat(1)==-1)then
+   dtset%d3e_pert2_magat(1)=1
+ endif
+ if(dtset%d3e_pert2_magat(2)==-1)then
+   dtset%d3e_pert2_magat(2)=dtset%natom
+ endif
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prepalw',tread,'INT')
  if(tread==1) dtset%prepalw=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lw_flexo',tread,'INT')
- if(tread==1) dtset%lw_flexo=intarr(1)
+ if(dtset%optdriver==RUNL_LONGWAVE) then
+   tread_key=0
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lw_qdrpl',tread,'INT')
- if(tread==1) dtset%lw_qdrpl=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'timdisp',tread,'INT')
+   if(tread==1) dtset%timdisp=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lw_natopt',tread,'INT')
- if(tread==1) dtset%lw_natopt=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert1_dir',tread,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert1_dir(1:3)=intarr(1:3)
+   if (tread_alt==1) tread_key=1
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ffnl_lw',tread,'INT')
- if(tread==1) dtset%ffnl_lw=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert1_elfd',tread,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert1_elfd=intarr(1)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert1_magdir',tread,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert1_magdir(1:3)=intarr(1:3)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert1_magn',tread,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert1_magn=intarr(1)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert1_phon',tread,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert1_phon=intarr(1)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert2_dir',tread,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_dir(1:3)=intarr(1:3)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert2_elfd',tread,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_elfd=intarr(1)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert2_magdir',tread,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_magdir(1:3)=intarr(1:3)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert2_magn',tread,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_magn=intarr(1)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert2_phon',tread,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_phon=intarr(1)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert2_strs',tread,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_strs=intarr(1)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert3_atpol',tread,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert3_atpol(1:2)=intarr(1:2)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert3_dir',tread,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert3_dir(1:3)=intarr(1:3)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert3_elfd',tread,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert3_elfd=intarr(1)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert3_phon',tread,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert3_phon=intarr(1)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lw_flexo',tread,'INT')
+   if(tread==1) dtset%lw_flexo=intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lw_qdrpl',tread,'INT')
+   if(tread==1) dtset%lw_qdrpl=intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lw_natopt',tread,'INT')
+   if(tread==1) dtset%lw_natopt=intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ffnl_lw',tread,'INT')
+   if(tread==1) dtset%ffnl_lw=intarr(1)
+ end if
 
  ! Recursion input variables
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tfkinfunc',tread,'INT')
@@ -1385,6 +1499,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getgam_eig2nkq',tread,'INT')
  if(tread==1) dtset%getgam_eig2nkq=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getwfmq',tread,'INT')
+ if(tread==1) dtset%getwfmq=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getwfmq_filepath',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%getwfmq_filepath = key_value
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getself',tread,'INT')
  if(tread==1) dtset%getself=intarr(1)
 
@@ -1733,6 +1853,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ionmov',tread,'INT')
  if(tread==1) dtset%ionmov=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'paral_slice',tread,'INT')
+ if(tread==1) dtset%paral_slice=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'intxc',tread,'INT')
  if(tread==1) dtset%intxc=intarr(1)
@@ -2096,6 +2219,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optcell',tread,'INT')
  if(tread==1) dtset%optcell=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdwfmq',tread,'INT')
+ if(tread==1) dtset%irdwfmq=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdwfq',tread,'INT')
  if(tread==1) dtset%irdwfq=intarr(1)
 
@@ -2158,6 +2284,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'magcon_lambda',tread,'DPR')
  if(tread==1) dtset%magcon_lambda=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ratopt',tread,'INT')
+ if(tread==1) dtset%ratopt=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ratsm',tread,'DPR')
  if(tread==1) dtset%ratsm=dprarr(1)
@@ -2543,6 +2672,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end if
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_fermi_step',tread,'ENE')
    if(tread==1) dtset%dmft_fermi_step=dprarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_hybri_limit',tread,'INT')
+   if(tread==1) dtset%dmft_hybri_limit=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_iter',tread,'INT')
    if(tread==1) dtset%dmft_iter=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_kspectralfunc',tread,'INT')
@@ -2582,10 +2713,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    do iatom=1,dtset%natom
      if(dtset%lpawu(dtset%typat(iatom))>0) natomcor=natomcor+1
    enddo
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_full_chipsi',tread,'INT')
+   if(tread==1) dtset%dmft_full_chipsi=intarr(1)
+
    if(natomcor>1.and.dtset%dmft_solv/=6.and.dtset%dmft_solv/=7) dtset%dmft_wanorthnorm=2
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_wanorthnorm',tread,'INT')
    if(tread==1) dtset%dmft_wanorthnorm=intarr(1)
-
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_wanrad',tread,'LEN')
    if(tread==1) dtset%dmft_wanrad=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_x2my2d',tread,'INT')
@@ -2634,7 +2767,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      if(tread==1) dtset%dmftqmc_seed=intarr(1)
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_therm',tread,'INT')
      if(tread==1) dtset%dmftqmc_therm=intarr(1)
-     if(dtset%dmft_solv>=5.and.dtset%dmft_solv<=9) then
+     if(dtset%dmft_solv>=5.and.dtset%dmft_solv<=10) then
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_check',tread,'INT')
        if(tread==1) dtset%dmftctqmc_check  =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_correl',tread,'INT')
@@ -2926,6 +3059,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if (tread_alt==1.and.tread/=1) dtset%nline = dtset%mdeg_filter
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nslice',tread,'INT')
+ if(tread==1) dtset%nslice=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nblock_lobpcg',tread,'INT')
  if(tread==1) dtset%nblock_lobpcg=intarr(1)
 
@@ -2937,6 +3073,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nstep',tread,'INT')
  if(tread==1) dtset%nstep=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nstep_mixed',tread,'INT')
+ if(tread==1) dtset%nstep_mixed=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntime',tread,'INT')
  if(tread==1) dtset%ntime=intarr(1)
@@ -4034,7 +4173,7 @@ if (dtset%usekden==1) then
  dtset%kptrlen=kptrlen
 
  dtset%kptns(:,1:nkpt)=dtset%kpt(:,1:nkpt)/dtset%kptnrm
- if(nqpt>=1 .and. dtset%optdriver/=RUNL_RESPFN)then
+ if(nqpt>=1 .and. dtset%optdriver/=RUNL_RESPFN.and.dtset%optdriver/=RUNL_LONGWAVE)then
    dtset%kptns(1,1:nkpt)=dtset%kptns(1,1:nkpt)+dtset%qptn(1)
    dtset%kptns(2,1:nkpt)=dtset%kptns(2,1:nkpt)+dtset%qptn(2)
    dtset%kptns(3,1:nkpt)=dtset%kptns(3,1:nkpt)+dtset%qptn(3)

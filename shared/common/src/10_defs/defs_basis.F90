@@ -339,6 +339,7 @@ module defs_basis
 !       In a.u., alpha is fixed and c is measured. Be carefull when used them. Here we defined c.
 
  real(dp), parameter :: mu_B_SI      = 9.2740100657D-24                   ! Bohr magneton in SI
+ real(dp), parameter :: mu_0_SI      = 1.25663706127d-6  ! Vacuum permeability in atomic units
  real(dp), parameter :: mu_B         = 0.5_dp                             ! Bohr magneton in atomic units
  real(dp), parameter :: BField_Tesla = mu_B_SI / (Ha_J * mu_B)            ! Tesla in a.u.
  real(dp), parameter :: dipole_moment_debye = 0.393430307_dp              ! Debye unit in a.u.
@@ -437,9 +438,9 @@ module defs_basis
   integer,parameter,public :: NLO_MBLKPW = 199
   integer,parameter,public :: NLO_MINCAT = 10
 
-! This is used to compute the maximum index of the perturbation as natom + MPERT_MAX
+! This is used to compute the maximum index of the perturbation as 2*natom + MPERT_MAX
 ! GA: But this is not actually the maximum perturbation, see m_dfpt_loopert
-  integer,parameter,public :: MPERT_MAX = 8
+  integer,parameter,public :: MPERT_MAX = 11
 
 ! Parameters for the GPU implementation(s)
  ! GPU implementation undetermined
