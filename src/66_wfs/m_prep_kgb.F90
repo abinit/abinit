@@ -638,7 +638,7 @@ end subroutine prep_getghc
 
 subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,&
                        blocksize,mpi_enreg,nnlout,paw_opt,signs,gsc, tim_nonlop,cwavef,gvnlc, &
-                       already_transposed,gpu_option,vectproj) ! optional
+                       already_transposed,gpu_option,vectproj,cwavef_tr) ! optional
 
 !Arguments ------------------------------------
  integer,         intent(in)            :: blocksize,choice,cpopt,idir,signs,nnlout,paw_opt
@@ -647,6 +647,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  real(dp),        intent(in)            :: lambdablock(blocksize)
  real(dp),        intent(out)  , target :: enlout_block(nnlout*blocksize),gvnlc(:,:),gsc(:,:)
  real(dp),        intent(inout), target :: cwavef(:,:)
+ real(dp),intent(inout), pointer,optional :: cwavef_tr(:,:)
  real(dp),ABI_CONTIGUOUS optional,intent(inout)        :: vectproj(:,:,:)
  type(gs_hamiltonian_type),intent(in)   :: hamk
  type(mpi_type),intent(in)              :: mpi_enreg
@@ -677,7 +678,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  integer(kind=C_SIZE_T) :: gvnlc_alltoall2_size
  integer(kind=C_SIZE_T) :: gsc_alltoall2_size
 #else
- real(dp), allocatable :: cwavef_alltoall2(:,:)
+ real(dp), pointer :: cwavef_alltoall2(:,:)
  real(dp), allocatable :: gvnlc_alltoall2(:,:)
  real(dp), allocatable :: gsc_alltoall2(:,:)
 #endif
@@ -783,7 +784,14 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    gvnlc_alltoall2_size = 2*ndatarecv*my_nspinor*bandpp*dp
 #endif
  else
-   ABI_MALLOC(cwavef_alltoall2, (2,ndatarecv*my_nspinor*bandpp))
+   if(present(cwavef_tr)) then
+     if(any(shape(cwavef_tr)/=(/2,ndatarecv*my_nspinor*bandpp/))) then
+       ABI_BUG('cwavef_tr does not have the correct shape')
+     endif
+     cwavef_alltoall2 => cwavef_tr
+   else
+     ABI_MALLOC(cwavef_alltoall2, (2,ndatarecv*my_nspinor*bandpp))
+   endif
    ABI_MALLOC(gsc_alltoall2,    (2,ndatarecv*my_nspinor*(paw_opt/3)*bandpp))
    ABI_MALLOC(gvnlc_alltoall2,  (2,ndatarecv*my_nspinor*bandpp))
  end if
@@ -1025,7 +1033,11 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    end if
 #endif
  else
-   ABI_FREE(cwavef_alltoall2)
+   if(present(cwavef_tr)) then
+     nullify(cwavef_alltoall2)
+   else
+     ABI_FREE(cwavef_alltoall2)
+   endif
    ABI_FREE(gvnlc_alltoall2)
    ABI_FREE(gsc_alltoall2)
  end if
