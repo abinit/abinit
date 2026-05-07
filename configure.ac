@@ -586,8 +586,12 @@ if test "${abi_fc_vendor}" = "cray"; then
 fi
 
 # With LLVM, a syntax error happens
+# An error also occurs with multiple definitions that is addressed by a linker flag
+# And a weird error occurs due to the inclusion of device-specific libs, that need to be removed
 if test "${abi_fc_vendor}" = "llvm"; then
   FCLIBS=`echo ${FCLIBS} | sed -e "s/-l \// \//"`
+  FCLIBS=`echo ${FCLIBS} -Wl,--allow-multiple-definition`
+  FCLIBS=`echo ${FCLIBS} | sed -e "s/-lompdevice -lclang_rt.builtins//"`
 fi
 
 # Remove -lsr-complexity-limit=<some-number> from FCLIBS, as it is
@@ -1134,8 +1138,12 @@ fi
 # AC_CONFIG_FILES([fallbacks/build-abinit-fallbacks.sh])
 #AC_CONFIG_COMMANDS([chmod +x fallbacks/build-abinit-fallbacks.sh])
 #AC_OUTPUT
-# Old formulation: AC_OUTPUT([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh],[chmod +x fallbacks/build-abinit-fallbacks.sh])
-AC_OUTPUT([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh],[chmod +x fallbacks/build-abinit-fallbacks.sh])
+# Old formulation: AC_CONFIG_FILES([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh])
+#AC_CONFIG_COMMANDS([default],[chmod +x fallbacks/build-abinit-fallbacks.sh],[])
+#AC_OUTPUT
+AC_CONFIG_FILES([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh])
+AC_CONFIG_COMMANDS([default],[chmod +x fallbacks/build-abinit-fallbacks.sh],[])
+AC_OUTPUT
 
 # Check that we have all required fallbacks
 ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])

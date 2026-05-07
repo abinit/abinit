@@ -13,6 +13,7 @@
 #include <string.h>
 #include <abi_gpu_header_common.h>
 #include <hip/hip_runtime_api.h>
+#include <rocm-core/rocm_version.h>
 #include "hip_api_error_check.h"
 
 static int version_2_cores(int major, int minor);
@@ -104,6 +105,20 @@ void get_gpu_uuid_(int* device, char* uuid)
    HIP_API_CHECK(hipGetDeviceProperties(&deviceProp, *device));
    strncpy(uuid, deviceProp.uuid.bytes, 16);
    return;
+}
+
+// Gives the major version number of HIP library ---------
+extern "C"
+int gpu_get_lib_version_major_cpp()
+{
+  return ROCM_VERSION_MAJOR;
+}
+
+// Gives the minor version number of HIP library ---------
+extern "C"
+int gpu_get_lib_version_minor_cpp()
+{
+  return ROCM_VERSION_MINOR;
 }
 
 // Set new value for #MPI tasks being assigned per GPU ---------

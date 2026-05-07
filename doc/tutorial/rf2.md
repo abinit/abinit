@@ -20,12 +20,12 @@ and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
 This tutorial should take about 1 hour.
 
-WARNING : This tutorial has been updated by removing the use of the ANADDB input variable [[brav]] in 
+WARNING : This tutorial has been updated by removing the use of the ANADDB input variable [[brav]] in
 trf2_4.abi, trf2_5.abi, and trf2_6.abi, with the accompanying modifications in the text of the tutorial.
-Also, due to the change of default values for [[rfdir]] and [[rfatpol]] in ABINITv9.8 with respect to the prior versions of ABINIT, 
-the example input files from this tutorial will not work with such version of ABINIT or even older ones). 
-Please, use ABINITv9.8 or more recent versions of ABINIT, or adjust the values of [[rfdir]] and [[rfatpol]]. 
-See point A.3 of the [v9.8 release notes](/about/release-notes/#98). 
+Also, due to the change of default values for [[rfdir]] and [[rfatpol]] in ABINITv9.8 with respect to the prior versions of ABINIT,
+the example input files from this tutorial will not work with such version of ABINIT or even older ones).
+Please, use ABINITv9.8 or more recent versions of ABINIT, or adjust the values of [[rfdir]] and [[rfatpol]].
+See point A.3 of the [v9.8 release notes](../about/release-notes.md#98).
 
 [TUTORIAL_README]
 
@@ -39,7 +39,7 @@ As the DFPT equations at higher order always start from input wavefunctions
 obtained at lower order, we begin by generating the ground state wavefunctions
 and DDK wavefunctions for our system, AlAs. The ground state wavefunctions are needed
 for the phonon and electric field perturbations, and the electric field perturbation
-needs the DDK wavefunctions as well, as explained in the [first tutorial on DFPT](/tutorial/rf1).
+needs the DDK wavefunctions as well, as explained in the [first tutorial on DFPT](../tutorial/rf1.md).
 
 Copy file *trf2_1.abi* from  \$ABI_TESTS/tutorespfn/Input* to *Work_rf2*:
 
@@ -84,7 +84,7 @@ Copy the file *trf2_2.abi* from  \$ABI_TESTS/tutorespfn/Input* into your working
 cp ../trf2_2.abi .
 ```
 Before you run it, you will have to name the input wavefunctions that you prepared in step 0
-appropriately, so ABINIT can find them. 
+appropriately, so ABINIT can find them.
 
 Examine the input file you are about to run:
 
@@ -117,7 +117,7 @@ In order to do interatomic force constant (IFC) calculations, and to
 compute associated phonon band structure and thermodynamical
 properties, you should first have some theoretical background.  Let us
 assume that you have read the literature relative to the [first
-tutorial on DFPT](/tutorial/rf1).  You might find additional material,
+tutorial on DFPT](rf1.md).  You might find additional material,
 related to the present section, in [[cite:Gonze1997a]] -especially
 section IX-, [[cite:Lee1995]] and [[cite:Baroni2001]].  If you haven't
 read parts of these references, we strongly advise you to take the time
@@ -176,7 +176,7 @@ step automatically through the generated q points, as is done in our
 file with [[ndtset]] 8 and [[iqpt]]: 1 [[iqpt]]+ 1. This raises the
 question, though, of how one would know in advance that there will be
 8 q points in the current set. For this one can use
-[abitk](/guide/abitk), a convenient tool built along with ABINIT and
+[abitk](../guide/abitk.md), a convenient tool built along with ABINIT and
 used to examine output files in `netcdf` format. Run it on our
 original ground state file as:
 
@@ -291,7 +291,7 @@ Now, you should issue:
 
     anaddb trf2_4.abi > trf2_4.abi.log
 
-It will last only a few seconds. 
+It will last only a few seconds.
 
 The file *trf2_4.abo* contains the list of interatomic force constants, as well as some analysis.
 
@@ -351,7 +351,7 @@ Now, you should issue:
 It will last only a few seconds. The variables [[anaddb:nqpath]],
 [[anaddb:qpath]], and [[anaddb:ndivsm]] have analogous counterparts in
 electronic band structure calculations, see the [3rd basic
-tutorial](/tutorial/base3).
+tutorial](base3.md).
 
 The file *trf2_5.abo* contains the list of eigenvalues, for all the needed
 q-wavevectors. You can open it, and have a look at the different sections of

@@ -48,6 +48,9 @@ inp_files = [
     "t44.abi" ,  # test all zora input values on orbmag calculation
     "t50.abi" ,  # test the projected SOC for GBT
     "t51.abi" ,  # test spin quantization axis
+    "t52.abi",  # test linear-response calculation with 2D Coulomb cutoff in BN monolayer
+    "t53.abi",  # test linear-response calculation with 2D short-range Coulomb kernel in BN monolayer
+    "t54.abi",  # test finite-q scalar potential linear-response calculation with PCM short-circuit conditions
     "t61.abi" ,  # test total energy due to electron-phonon interaction: step 1 DFT+DFPT
     "t62.abi" ,  # test total energy due to electron-phonon interaction: step 2 quadrupole
     "t63.abi" ,  # test total energy due to electron-phonon interaction: step 3 merge DDB
@@ -66,4 +69,5 @@ inp_files = [
     "t110.abi",  # Test for toldmag
     "t121.abi",  # Test for hybrid function using fock_icutcoul, fock_rcut
     "t122.abi",  # Test meta-GGA NC pseudopotential reading: compare PSML vs UPF for bulk Si
+    "t150.abi",  # Test sequential slice execution in spectrum slicing diagonalization with 1 MPI
 ]

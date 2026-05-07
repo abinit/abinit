@@ -534,13 +534,14 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
         DO iflavorbis=1, op%nflavors
           old_size = op%map(iflavor,iflavorbis)%tail
           !write(6,*) "size listDBLE",size(op%map(iflavor,iflavorbis)%listDBLE)
-        !sui!write(6,*) " measHybrid",old_size,iflavor,iflavorbis
+          !write(6,*) " measHybrid",old_size,iflavor,iflavorbis
           DO iC = 1, old_size
             if(op%map(iflavor,iflavorbis)%listINT(iC)==0) then
               !write(6,*) "listINT(iC)=",iC,op%map(iflavor,iflavorbis)%listINT(iC)
             endif
             !write(6,*) " measHybrid  iflavor,iflavorbis,iC listINT ",iflavor,iflavorbis,iC,op%map(iflavor,iflavorbis)%listINT(iC)
-               !write(6,*) " measHybrid  listDBLE ",iflavor,iflavorbis,iC,op%map(iflavor,iflavorbis)%listDBLE(iC),argument
+            !write(6,*) " measHybrid  listDBLE ",iflavor,iflavorbis,iC,op%map(iflavor,iflavorbis)%listDBLE(iC),argument
+            !write(6,*) "measHybrid ic iflavor1 iflavor2 oper",ic,iflavor,iflavorbis,op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold *  argument
             op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis) =                &
                            op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis) &
                          + op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold *  argument
@@ -698,8 +699,8 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
               ! --- define the new corresponding value of listINT(idx_old) from mat_tau (integers)
               ! --- idx_old has no meaning but listINT(idx_old) has.
               op%map(iflavor,iflavorbis)%listINT(idx_old)  = Mmatrix%mat_tau(iCdag_m,iC_m)
-             !write(6,*) " measHybrid  idx_old listINT ",idx_old,op%map(iflavor,iflavorbis)%listINT(idx_old)
-             !write(6,*) " measHybrid  iCdag_m, iC_m, mat_tau",iCdag_m,iC_m,Mmatrix%mat_tau(iCdag_m,iC_m)
+              !write(6,*) " measHybrid  idx_old listINT ",idx_old,op%map(iflavor,iflavorbis)%listINT(idx_old)
+              !write(6,*) " measHybrid  iCdag_m, iC_m, mat_tau",iCdag_m,iC_m,Mmatrix%mat_tau(iCdag_m,iC_m)
             !  if(iflavor==1.and.iflavorbis==2.and.op%map(iflavor,iflavorbis)%listINT(idx_old)==1) then
             !    !prt!if(prtopt==1) write(6,*) "---------------------------"
             !    !prt!if(prtopt==1) write(6,*) "GG12(0)", op%map(iflavor,iflavorbis)%listINT(idx_old),op%map(iflavor,iflavorbis)%listDBLE(idx_old),tcdag,tc,signe,signe2
@@ -1445,7 +1446,6 @@ include 'mpif.h'
   COMPLEX(KIND=8) :: iwtau
   COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: Gwtmp
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: omegatmp
-
 #if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
   INTEGER :: my_count
   COMPLEX(KIND=8), ALLOCATABLE , DIMENSION(:) :: Gwtmp_buf
@@ -1690,6 +1690,7 @@ include 'mpif.h'
       !write(6,*) "w",i,op%oper_w(i,iflavor1,iflavor1)
       enddo
   enddo
+
   FREE(Gwtmp)
   FREE(diagL)
   FREE(lastR)

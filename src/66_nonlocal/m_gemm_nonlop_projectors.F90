@@ -130,6 +130,10 @@ module m_gemm_nonlop_projectors
  ! Public variable indicating whether we should gemm_nonlop operated in a distributed manner. Set to false by default
  ! but might be enabled by memory constraints or forced by user through parameters.
 
+ logical, save, public :: gemm_nonlop_split_choice23 = .false.
+ ! Public variable indicating whether choice 23 computation should be splitted. Set to false by default
+ ! but might be enabled by memory constraints or forced by user through parameters.
+
  integer, save :: gemm_nonlop_nblocks = 1
  ! How many blocks of MPI tasks should the projs arrays be ditributed.
 
@@ -882,7 +886,7 @@ contains
         end if
 
         lmn_beg = max(1,ibeg-shift_do)
-        if(shift_do+nlmn > iend) nlmn = iend - shift_do - 1
+        if(shift_do+nlmn > iend - 1) nlmn = iend - shift_do - 1
       end if
 
       !! build atom_projs, from opernlb
@@ -1181,7 +1185,7 @@ contains
 
         lmn_beg = max(1,ibeg-shift_do)
         if(lmn_grad_beg==-1) lmn_grad_beg = (lmn_beg-1)*ngrads
-        if(shift_do+nlmn > iend) nlmn = iend - shift_do - 1
+        if(shift_do+nlmn > iend - 1) nlmn = iend - shift_do - 1
       end if
 
       !! build atom_dprojs, from opernlb
