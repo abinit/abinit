@@ -5526,8 +5526,9 @@ subroutine ddb_write_nc(ddb, ddb_hdr, filename, comm, with_psps)
      omegas(2) = ddb%omega(2,iblok)
      omegas(3) = ddb%omega(3,iblok)
 
+
      ncerr = nf90_put_var(ncid_d3E, nctk_idname(ncid_d3E,&
-                            'frequencies'),&
+                            'frequency'),&
                             omegas,&
                             start=[1,iblok_d3E])
      NCF_CHECK(ncerr)
@@ -5801,7 +5802,7 @@ subroutine ddb_read_d3E_nc(ddb, ncid, iblok, iblok_d3E, ddb_version)
  NCF_CHECK(ncerr)
  ddb%nrm(:,iblok) = nrm(:)
  if (ddb_version>=cvrsio9_new) then
-   ncerr = nf90_get_var(ncid_d3E, nctk_idname(ncid_d3E, 'frequencies'),qpt,start=[1,iblok_d3E])
+   ncerr = nf90_get_var(ncid_d3E, nctk_idname(ncid_d3E, 'frequency'),omega,start=[1,iblok_d3E],count=[3,1])
    NCF_CHECK(ncerr)
    ddb%omega(1:3,iblok)=omega(:)
  else
