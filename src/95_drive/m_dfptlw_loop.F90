@@ -35,6 +35,7 @@ module m_dfptlw_loop
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_io_tools,    only : file_exists,iomode_from_fname,get_unit
+ use m_kg,          only : getmpw,kpgio
  use m_inwffil,     only : inwffil
  use m_fft,         only : fourdp
  use m_ioarr,       only : read_rhor
@@ -59,7 +60,9 @@ module m_dfptlw_loop
  use m_mkcore,      only : dfpt_mkcore
  use m_mklocl,      only : dfpt_vlocal, vlocalstr,dfpt_vlocaldq,dfpt_vlocaldqdq,dfpt_vmetdqdq
  use m_dfptlw_pert, only : dfptlw_pert
+ use m_dfpttd_berrycurv, only : dfpttd_berrycurv
  use m_dynmat,      only : cart39
+  use m_ebands  ,      only : ebands_t
  use m_xmpi
 
  implicit none
@@ -84,6 +87,7 @@ contains
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol) = array for planewave coefficients of wavefunctions
+!!  codvsn=code version
 !!  d3e_pert1(mpert)=array with the i1pert cases to calculate
 !!  d3e_pert2(mpert)=array with the i2pert cases to calculate
 !!  dimffnl= third dimension of ffnl
@@ -94,6 +98,7 @@ contains
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space(bohr^-1)
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates
 !!  kxc(nfftf,nkxc)=exchange-correlation kernel
+!!  just_timdisp= it .true. this is a calculation of time-dispersion only
 !!  mband = maximum number of bands
 !!  mgfft = maximum single fft dimension
 !!  mkmem = Number of k points treated by this node.
@@ -140,10 +145,9 @@ contains
 !!
 !! SOURCE
 
-
-subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil,dtset,&
+subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil,dtset,&
 & ffnl,gmet,gprimd,gsqcut,&
-& hdr,kg,kxc,mband,mgfft,mkmem,mk1mem,&
+& hdr,just_timdisp,kg,kxc,mband,mgfft,mkmem,mk1mem,&
 & mpert,mpi_enreg,mpw,natom,nattyp,ncorespl,ngfftf,nfftf,nkpt,nkxc,nspinor,nsppol,&
 & npwarr,nylmgr,occ,&
 & pawfgr,pawtab,ph1d,&
@@ -154,6 +158,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 !scalars
  integer,intent(in) :: dimffnl,mband,mgfft,mk1mem,mkmem,mpert,mpw,natom,nfftf
  integer,intent(in) :: nkpt,nkxc,nspinor,nsppol,nylmgr,useylmgr
+ character(len=8),intent(in) :: codvsn
+ logical,intent(in) :: just_timdisp
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
@@ -183,25 +189,39 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
 !Local variables-------------------------------
 !scalars
- integer :: alpha,ask_accurate,beta,comm_cell,cplex,delta,dkdk_index,formeig,gamma
+ integer :: alpha,ask_accurate,bantot,beta,comm_cell,cplex
+ integer :: delta,dkdk_index,formeig,gamma
  integer :: ia1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idir_dkdk
- integer :: idq,ierr,ii,ireadwf,istr,itypat,mcg,me,mpsang
+ integer :: idq,ierr,ii,ikpt,ireadwf,istr,itypat,mcg1,me,mpsang
+ integer :: mpw1, mpw1_mq
  integer :: n1,n2,n3,ndir,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc
  integer :: optgeom,opthartdqdq,optorth,pawread
  integer :: pert1case,pert2case,pert3case,timrev,usexcnhat
+ integer :: pert1case_mq,pert2case_mq
  real(dp) :: delad,delag,delbd,delbg,ecut,ecut_eff
- logical :: samepert
+ logical :: finite_q,kramers_deg,samepert
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwfddk,fiwfdkdk
+ character(len=fnlen) :: fiwf1i_mq,fiwf2i_mq
  type(gs_hamiltonian_type) :: gs_hamkq
  type(wffile_type) :: wff1,wff2,wfft1,wfft2
  type(wfk_t) :: ddk_f,d2_dkdk_f,d2_dkdk_f2
  type(wvl_data) :: wvl
  type(hdr_type) :: hdr_den
+ type(ebands_t) :: ebands_kq,ebands_kmq
+ type(hdr_type) :: hdr1_pq,hdr1_mq
+ type(hdr_type) :: hdr2_pq,hdr2_mq
 !arrays
  integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+ integer,allocatable :: kg1(:,:),kg1_mq(:,:)
+ integer,allocatable :: npwar1(:),npwar1_mq(:),npwtot1(:),npwtot1_mq(:)
+ real(dp) :: d3etot_td(2),d3etot_td_mq(2)
  real(dp),allocatable :: cg1(:,:),cg2(:,:)
+ real(dp),allocatable :: cg1_mq(:,:),cg2_mq(:,:)
  real(dp),allocatable :: d3etot_t4(:,:),d3etot_t5(:,:),d3etot_tgeom(:,:),eigen1(:),eigen2(:)
+ real(dp),allocatable :: eigenq(:), doccde_tmp(:)
+ real(dp),allocatable :: eigen1_mq(:),eigen2_mq(:)
+ real(dp),allocatable :: kpq(:,:),kmq(:,:)
  real(dp),allocatable :: nhat1(:,:)
  real(dp),allocatable :: rho1g1(:,:),rho1r1(:,:)
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:)
@@ -225,8 +245,20 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  comm_cell=mpi_enreg%comm_cell
  me=mpi_enreg%me_kpt
 
+!Deactivate kramer's degeneracy for calculations that break TRS
+!(finite q in magnetic materials or finite omega)
+ kramers_deg=.true.
+ timrev = 1
+ if (dtset%tim1rev==0) then
+   kramers_deg=.false.
+   timrev = 0
+ end if
+
+!Special treatment for timdisp calculations at finite q
+ finite_q=.false.
+ if (sum(dtset%qptn(:)**2)>tol8) finite_q=.true.
+
 !Various initializations
- timrev = 1 ! as q=0
  cplex = 2 - timrev
  nspden = dtset%nspden
  ecut=dtset%ecut
@@ -235,11 +267,91 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  optorth=1;if (psps%usepaw==1) optorth=0
  opthartdqdq=1
 
+!Set up some quantities required to calculate the Berry
+!curvature at finite q
+ ABI_MALLOC(npwar1,(dtset%nkpt))
+ ABI_MALLOC(npwtot1,(dtset%nkpt))
+ ABI_MALLOC(kpq,(3,dtset%nkpt))
+ if (.not.kramers_deg) then
+   ABI_MALLOC(npwar1_mq,(dtset%nkpt))
+   ABI_MALLOC(npwtot1_mq,(dtset%nkpt))
+   ABI_MALLOC(kmq,(3,dtset%nkpt))
+ end if
+ if (finite_q.or..not.kramers_deg) then
 
- ABI_MALLOC(cg1,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
- ABI_MALLOC(cg2,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
+   !Initialize k+q (and k-q) array
+   do ikpt=1,dtset%nkpt
+     kpq(:,ikpt)=dtset%qptn(:)+dtset%kptns(:,ikpt)
+   end do
+   if (.not.kramers_deg) then
+     do ikpt=1,nkpt
+       kmq(:,ikpt)=-dtset%qptn(:)+dtset%kptns(:,ikpt)
+     end do
+   end if
+
+   !Compute maximum number of planewaves at k+q (and k-q)
+   call getmpw(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kpq,mpi_enreg,mpw1,dtset%nkpt)
+   if (.not.kramers_deg) then
+     call getmpw(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kmq,mpi_enreg,mpw1_mq,dtset%nkpt)
+     !number of plane waves at k+q and k-q should be in principle the same to reconstruct rhor1_pq (?)
+     mpw1=max(mpw1,mpw1_mq)
+     mpw1_mq=mpw1
+   else
+     mpw1_mq=0
+   end if
+
+   !Set up the basis sphere of planewaves at k+q (and k-q)
+   ABI_MALLOC(kg1,(3,mpw1*mk1mem))
+   call kpgio(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kg1,&
+   &   kpq,mk1mem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,mpw1,&
+   &   npwar1,npwtot1,dtset%nsppol)
+   if (.not.kramers_deg) then
+     ABI_MALLOC(kg1_mq,(3,mpw1_mq*mk1mem))
+     call kpgio(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kg1_mq,&
+   & kmq,mk1mem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,mpw1_mq,&
+   & npwar1_mq,npwtot1_mq,dtset%nsppol)
+   end if
+
+!  Initialize band structure datatype at k+q
+   bantot=sum(dtset%nband(1:dtset%nkpt*dtset%nsppol))
+   ABI_MALLOC(eigenq,(bantot))
+   ABI_MALLOC(doccde_tmp,(dtset%mband*dtset%nkpt*dtset%nsppol))
+   eigenq(:)=zero
+   call ebands_kq%init(bantot,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+&   doccde_tmp,eigenq,dtset%istwfk,kpq,dtset%nband,dtset%nkpt,npwar1,dtset%nsppol,&
+&   dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ,dtset%wtk,&
+&   dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+&   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+   if (.not.kramers_deg) then
+     eigenq(:)=zero
+     call ebands_kmq%init(bantot,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+&     doccde_tmp,eigenq,dtset%istwfk,kmq,dtset%nband,dtset%nkpt,npwar1_mq,dtset%nsppol,&
+&     dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ,dtset%wtk,&
+&     dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+&     dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+   end if
+   ABI_FREE(eigenq)
+   ABI_FREE(doccde_tmp)
+
+ else
+   ABI_MALLOC(kg1,(3,mpw*mk1mem))
+   kpq=dtset%kptns(:,1:dtset%nkpt)
+   mpw1=mpw
+   kg1=kg
+   npwar1=npwarr
+ end if
+ mcg1=mpw1*nspinor*mband*mk1mem*nsppol
+
+ ABI_MALLOC(cg1,(2,mcg1))
+ ABI_MALLOC(cg2,(2,mcg1))
  ABI_MALLOC(eigen1,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
  ABI_MALLOC(eigen2,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
+ if (.not.kramers_deg) then
+   ABI_MALLOC(cg1_mq,(2,mcg1))
+   ABI_MALLOC(cg2_mq,(2,mcg1))
+   ABI_MALLOC(eigen1_mq,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
+   ABI_MALLOC(eigen2_mq,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
+ end if
  ABI_MALLOC(rho1r1,(cplex*nfftf,dtset%nspden))
  ABI_MALLOC(rho2r1,(cplex*nfftf,dtset%nspden))
  ABI_MALLOC(rho1g1,(2,nfftf))
@@ -299,47 +411,87 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  ABI_MALLOC(nhat1,(cplex*dtset%nfft,nspden))
  nhat1=zero
 
- mcg=mpw*nspinor*mband*mkmem*nsppol
 
  pert1case = 0 ; pert2case = 0 ; pert3case = 0
+ pert1case_mq = 0 ; pert2case_mq = 0
 
  do i1pert = 1, mpert
    do i1dir = 1, 3
 
      if ((maxval(rfpert(i1dir,i1pert,:,:,:,:))==1)) then
 
-       pert1case = i1dir + (i1pert-1)*3
+       if (i1pert < natom + 10) then
+         pert1case = i1dir + (i1pert-1)*3
+       else if (i1pert > natom+11 .and. i1pert <= 2*natom+11) then
+         pert1case = i1dir + i1pert*3
+       end if
        call appdig(pert1case,dtfil%fnamewff1,fiwf1i)
 
+       if (finite_q) then
+         call hdr1_pq%init(ebands_kq,codvsn,dtset,pawtab,pert1case,psps,wvl%descr, &
+       & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
+       else
+         hdr1_pq=hdr
+       end if
+
        call inwffil(ask_accurate,cg1,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
-       & formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
-       & dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
-       & dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
+       & formeig,hdr1_pq,ireadwf,dtset%istwfk,kg1,kpq,dtset%localrdwf,&
+       & dtset%mband,mcg1,dtset%mk1mem,mpi_enreg,mpw1,&
+       & dtset%nband,dtset%ngfft,dtset%nkpt,npwar1,&
        & dtset%nsppol,dtset%nsym,&
        & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
        & dtfil%unkg1,wff1,wfft1,dtfil%unwff1,fiwf1i,wvl)
-
 
        if (ireadwf==1) then
          call WffClose (wff1,ierr)
        end if
 
-       call read_1eig(eigen1,formeig,mband,nkpt,nsppol,fiwf1i)
+       if (.not.kramers_deg) then
+         if (finite_q) then
+           pert1case_mq=pert1case+(2*dtset%natom+11)*3
+         else
+           pert1case_mq=pert1case
+         endif
+         call appdig(pert1case_mq,dtfil%fnamewff1,fiwf1i_mq)
 
-       rho1r1(:,:) = zero; rho1g1(:,:) = zero
-       if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
-         call appdig(pert1case,dtfil%fildens1in,fiden1i)
+         if (finite_q) then
+           call hdr1_mq%init(ebands_kmq,codvsn,dtset,pawtab,pert1case_mq,psps,wvl%descr, &
+         & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
+         else
+           hdr1_mq=hdr
+         end if
 
-         call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, psps%usepaw, mpi_enreg, rho1r1, &
-         hdr_den, pawrhoij_read, comm_cell, check_hdr=hdr)
-         call hdr_den%free()
+         call inwffil(ask_accurate,cg1_mq,dtset,dtset%ecut,ecut_eff,eigen1_mq,dtset%exchn2n3d,&
+         & formeig,hdr1_mq,ireadwf,dtset%istwfk,kg1_mq,kmq,dtset%localrdwf,&
+         & dtset%mband,mcg1,dtset%mk1mem,mpi_enreg,mpw1,&
+         & dtset%nband,dtset%ngfft,dtset%nkpt,npwar1_mq,&
+         & dtset%nsppol,dtset%nsym,&
+         & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
+         & dtfil%unkg1,wff1,wfft1,dtfil%unwff1,fiwf1i_mq,wvl)
+
+         if (ireadwf==1) then
+           call WffClose (wff1,ierr)
+         end if
        end if
 
-       !Perform FFT rhor1 to rhog1
-       ABI_MALLOC(work,(cplex*nfftf))
-       work(:)=rho1r1(:,1)
-       call fourdp(cplex,rho1g1,work,-1,mpi_enreg,dtset%nfft,1,dtset%ngfft,0)
-       ABI_FREE(work)
+       if (.not.just_timdisp) then
+         call read_1eig(eigen1,formeig,mband,nkpt,nsppol,fiwf1i)
+
+         rho1r1(:,:) = zero; rho1g1(:,:) = zero
+         if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
+           call appdig(pert1case,dtfil%fildens1in,fiden1i)
+
+           call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, psps%usepaw, mpi_enreg, rho1r1, &
+           hdr_den, pawrhoij_read, comm_cell, check_hdr=hdr)
+           call hdr_den%free()
+         end if
+
+         !Perform FFT rhor1 to rhog1
+         ABI_MALLOC(work,(cplex*nfftf))
+         work(:)=rho1r1(:,1)
+         call fourdp(cplex,rho1g1,work,-1,mpi_enreg,dtset%nfft,1,dtset%ngfft,0)
+         ABI_FREE(work)
+       end if
 
        !Allocate the first-order gradient local potential
        if (i1pert <= natom+3) then
@@ -358,13 +510,25 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
            if ((maxval(rfpert(i1dir,i1pert,i2dir,i2pert,:,:))==1)) then
 
-             pert2case = i2dir + (i2pert-1)*3
+             if (i2pert < natom + 10) then
+               pert2case = i2dir + (i2pert-1)*3
+             else if (i2pert > natom+11 .and. i2pert <= 2*natom+11) then
+               pert2case = i2dir + i2pert*3
+             end if
+
              call appdig(pert2case,dtfil%fnamewff1,fiwf2i)
 
+             if (finite_q) then
+               call hdr2_pq%init(ebands_kq,codvsn,dtset,pawtab,pert2case,psps,wvl%descr, &
+             & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
+             else
+               hdr2_pq=hdr
+             end if
+
              call inwffil(ask_accurate,cg2,dtset,dtset%ecut,ecut_eff,eigen2,dtset%exchn2n3d,&
-             & formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
-             & dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
-             & dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
+             & formeig,hdr2_pq,ireadwf,dtset%istwfk,kg1,kpq,dtset%localrdwf,&
+             & dtset%mband,mcg1,dtset%mk1mem,mpi_enreg,mpw1,&
+             & dtset%nband,dtset%ngfft,dtset%nkpt,npwar1,&
              & dtset%nsppol,dtset%nsym,&
              & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
              & dtfil%unkg1,wff2,wfft2,dtfil%unwff2,fiwf2i,wvl)
@@ -373,7 +537,33 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                call WffClose (wff2,ierr)
              end if
 
-             call read_1eig(eigen2,formeig,mband,nkpt,nsppol,fiwf2i)
+             if (.not.kramers_deg) then
+               if (finite_q) then
+                 pert2case_mq=pert2case+(2*dtset%natom+11)*3
+               else
+                 pert2case_mq=pert2case
+               end if
+               call appdig(pert2case_mq,dtfil%fnamewff1,fiwf2i_mq)
+
+               if (finite_q) then
+                 call hdr2_mq%init(ebands_kmq,codvsn,dtset,pawtab,pert2case_mq,psps,wvl%descr, &
+               & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
+               else
+                 hdr2_mq=hdr
+               end if
+
+               call inwffil(ask_accurate,cg2_mq,dtset,dtset%ecut,ecut_eff,eigen2_mq,dtset%exchn2n3d,&
+               & formeig,hdr2_mq,ireadwf,dtset%istwfk,kg1_mq,kmq,dtset%localrdwf,&
+               & dtset%mband,mcg1,dtset%mk1mem,mpi_enreg,mpw1,&
+               & dtset%nband,dtset%ngfft,dtset%nkpt,npwar1_mq,&
+               & dtset%nsppol,dtset%nsym,&
+               & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
+               & dtfil%unkg1,wff2,wfft2,dtfil%unwff2,fiwf2i_mq,wvl)
+
+               if (ireadwf==1) then
+                 call WffClose (wff2,ierr)
+               end if
+             end if
 
              if (i1pert==i2pert.and.i1dir==i2dir) then
                samepert=.true.
@@ -381,22 +571,26 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                samepert=.false.
              end if
 
-             rho2r1(:,:) = zero; rho2g1(:,:) = zero
-             if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
-               call appdig(pert2case,dtfil%fildens1in,fiden1i)
+             if (.not.just_timdisp) then
+               call read_1eig(eigen2,formeig,mband,nkpt,nsppol,fiwf2i)
 
-               call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, psps%usepaw, mpi_enreg, rho2r1, &
-               hdr_den, pawrhoij_read, comm_cell, check_hdr=hdr)
-               call hdr_den%free()
+               rho2r1(:,:) = zero; rho2g1(:,:) = zero
+               if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
+                 call appdig(pert2case,dtfil%fildens1in,fiden1i)
+
+                 call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, psps%usepaw, mpi_enreg, rho2r1, &
+                 hdr_den, pawrhoij_read, comm_cell, check_hdr=hdr)
+                 call hdr_den%free()
+               end if
+
+               if (.not.samepert) then
+                 !Perform FFT rhor1 to rhog1
+                 ABI_MALLOC(work,(cplex*nfftf))
+                 work(:)=rho2r1(:,1)
+                 call fourdp(cplex,rho2g1,work,-1,mpi_enreg,dtset%nfft,1,dtset%ngfft,0)
+                 ABI_FREE(work)
+               end if !samepert
              end if
-
-             if (.not.samepert) then
-               !Perform FFT rhor1 to rhog1
-               ABI_MALLOC(work,(cplex*nfftf))
-               work(:)=rho2r1(:,1)
-               call fourdp(cplex,rho2g1,work,-1,mpi_enreg,dtset%nfft,1,dtset%ngfft,0)
-               ABI_FREE(work)
-             end if !samepert
 
              !Allocate the first-order gradient local potential
              if (i2pert <= natom+3) then
@@ -415,30 +609,34 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
              !Calculate the first-order gradient local potential that enters the geometric term
              ABI_MALLOC(vpsp1_i1pertdq_geom,(2*nfftf,dtset%nspden,3))
-             if (i1pert <= natom .and. (i2pert == natom+3.or.i2pert == natom+4)) then
+             if (.not.just_timdisp) then
+               if (i1pert <= natom .and. (i2pert == natom+3.or.i2pert == natom+4)) then
 
-               !calculate the second of the two first-gradient directions
-               do ii=1,3
-                 call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
-                 & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
-                 & ph1d,ii,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdq_geom(:,1,ii))
-               end do
+                 !calculate the second of the two first-gradient directions
+                 do ii=1,3
+                   call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
+                   & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
+                   & ph1d,ii,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdq_geom(:,1,ii))
+                 end do
+               end if
              end if
 
              !Allocate the second-gradient array
              ABI_MALLOC(vpsp1_i1pertdqdq,(2*nfftf,dtset%nspden,n2dq))
 
              !Calculate first-order pseudocore charge (still, only for quadrupoles)
-             if (i1pert==natom+2.and.i2pert<=natom.and.psps%n1xccc/=0.and.nkxc == 7) then
-               if (psps%nc_xccc_gspace==1) then
-                 ndir=1
-                 call dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,i2dir,i2pert,&
-                 & mgfft,psps%mqgrid_vl,dtset%natom,ndir,nfftf,ngfftf,psps%ntypat,&
-                 & ph1d,psps%qgrid_vl,dtset%qptn,dtset%typat,ucvol,psps%usepaw,xred,psps,pawtab,&
-                 & atmrhor1=xccc3d2,optn_in=n3xccc/nfftf,optn2_in=1)
-               else if (psps%nc_xccc_gspace==0) then
-                 call dfpt_mkcore(cplex,i2dir,i2pert,dtset%natom,psps%ntypat,n1,psps%n1xccc,&
-                 & n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d2,xred)
+             if (.not.just_timdisp) then
+               if (i1pert==natom+2.and.i2pert<=natom.and.psps%n1xccc/=0.and.nkxc == 7) then
+                 if (psps%nc_xccc_gspace==1) then
+                   ndir=1
+                   call dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,i2dir,i2pert,&
+                   & mgfft,psps%mqgrid_vl,dtset%natom,ndir,nfftf,ngfftf,psps%ntypat,&
+                   & ph1d,psps%qgrid_vl,dtset%qptn,dtset%typat,ucvol,psps%usepaw,xred,psps,pawtab,&
+                   & atmrhor1=xccc3d2,optn_in=n3xccc/nfftf,optn2_in=1)
+                 else if (psps%nc_xccc_gspace==0) then
+                   call dfpt_mkcore(cplex,i2dir,i2pert,dtset%natom,psps%ntypat,n1,psps%n1xccc,&
+                   & n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d2,xred)
+                 end if
                end if
              end if
 
@@ -451,255 +649,295 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
                    !Calculate local potentials for first-order gradient Hamiltonians
                    !gradient of i1pert:
-                   if (i1pert<=natom) then
-                     !Get q-gradient of first-order local part of the pseudopotential
-                     call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
-                     & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
-                     & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdq(:,1,1))
+                   if (.not.just_timdisp) then
+                     if (i1pert<=natom) then
+                       !Get q-gradient of first-order local part of the pseudopotential
+                       call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
+                       & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
+                       & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdq(:,1,1))
 
-                     if (i2pert == natom+3.or.i2pert == natom+4) then
-                       gamma=i3dir
-                       do idq= 1, n2dq
-                          if (i2pert==natom+3) then
-                            istr=i2dir
-                          else
-                            istr=idq*3+i2dir
-                          endif
-                          delta=idx(2*istr)
-                          call dfpt_vlocaldqdq(atindx,2,gs_hamkq%gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
-                        & psps%mqgrid_vl,dtset%natom,&
-                        & nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
-                        & ph1d,gamma,delta,psps%qgrid_vl,&
-                        & dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdqdq(:,1,idq))
-                       end do
-                     end if
+                       if (i2pert == natom+3.or.i2pert == natom+4) then
+                         gamma=i3dir
+                         do idq= 1, n2dq
+                            if (i2pert==natom+3) then
+                              istr=i2dir
+                            else
+                              istr=idq*3+i2dir
+                            endif
+                            delta=idx(2*istr)
+                            call dfpt_vlocaldqdq(atindx,2,gs_hamkq%gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
+                          & psps%mqgrid_vl,dtset%natom,&
+                          & nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
+                          & ph1d,gamma,delta,psps%qgrid_vl,&
+                          & dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdqdq(:,1,idq))
+                         end do
+                       end if
 
-                   else if (i1pert==natom+3.or.i1pert==natom+4) then
-                     istr=i1dir; if (i1pert==natom+4) istr=3+i1dir
-                     !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
-                     !(and XC if GGA) contribution from ground state density
-                     call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i1pert,kxc,mpi_enreg, &
-                     & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
-                     & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
-                     & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
-                     vpsp1_i1pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
-                     if (i1pert==natom+4) then
-                       !Here we need to calculate both extradiagonal shear-strains
-                       !because the second gradient of the metric perturbation is
-                       !type-I, i.e., non symmetric with respect to the
-                       !permutation of the strain indexes.
-                       istr=6+i1dir
+                     else if (i1pert==natom+3.or.i1pert==natom+4) then
+                       istr=i1dir; if (i1pert==natom+4) istr=3+i1dir
+                       !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
+                       !(and XC if GGA) contribution from ground state density
                        call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i1pert,kxc,mpi_enreg, &
                        & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
                        & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
                        & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
-                       vpsp1_i1pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
-                     end if
-                   end if
-
-                   if (.not.samepert) then
-                     !gradient of i2pert:
-                     if (i2pert<=natom) then
-                       !Get q-gradient of first-order local part of the pseudopotential
-                       call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i2dir,i2pert,mpi_enreg, &
-                       & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
-                       & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i2pertdq(:,1,1))
-                     else if (i2pert==natom+3.or.i2pert==natom+4) then
-                       istr=i2dir; if (i2pert==natom+4) istr=3+i2dir
-                       !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
-                       !(and XC if GGA) contribution from ground state density
-                       call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i2pert,kxc,mpi_enreg, &
-                       & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
-                       & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
-                       & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
-                       vpsp1_i2pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
-                       if (i2pert==natom+4) then
+                       vpsp1_i1pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                       if (i1pert==natom+4) then
                          !Here we need to calculate both extradiagonal shear-strains
                          !because the second gradient of the metric perturbation is
                          !type-I, i.e., non symmetric with respect to the
                          !permutation of the strain indexes.
-                         istr=6+i2dir
-                         call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i2pert,kxc,mpi_enreg, &
-                         & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
-                         & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl, &
+                         istr=6+i1dir
+                         call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i1pert,kxc,mpi_enreg, &
+                         & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
+                         & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
                          & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
-                         vpsp1_i2pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                         vpsp1_i1pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
                        end if
                      end if
 
-                     if (i1pert==natom+2.and.i2pert<=natom.and.psps%n1xccc/=0) then
-                       !Get the q-gradient of the pseudocore density
-                       call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i2dir,i2pert,mpi_enreg, &
-                       & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
-                       & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,ncorespl,xccc3d2dq,optnc=1)
+                     if (.not.samepert) then
+                       !gradient of i2pert:
+                       if (i2pert<=natom) then
+                         !Get q-gradient of first-order local part of the pseudopotential
+                         call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i2dir,i2pert,mpi_enreg, &
+                         & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
+                         & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i2pertdq(:,1,1))
+                       else if (i2pert==natom+3.or.i2pert==natom+4) then
+                         istr=i2dir; if (i2pert==natom+4) istr=3+i2dir
+                         !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
+                         !(and XC if GGA) contribution from ground state density
+                         call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i2pert,kxc,mpi_enreg, &
+                         & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
+                         & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
+                         & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
+                         vpsp1_i2pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                         if (i2pert==natom+4) then
+                           !Here we need to calculate both extradiagonal shear-strains
+                           !because the second gradient of the metric perturbation is
+                           !type-I, i.e., non symmetric with respect to the
+                           !permutation of the strain indexes.
+                           istr=6+i2dir
+                           call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i2pert,kxc,mpi_enreg, &
+                           & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
+                           & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
+                           & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
+                           vpsp1_i2pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                         end if
+                       end if
 
-                       !Get the q-gradient of the first-order XC potential due to the pseudocore charge
-                       call dfpt_mkvxcccdq(cplex,i3dir,dtset%ixc,gprimd,kxc,mpi_enreg,nfftf,dtset%ngfft,&
-                     & nkxc,nspden,dtset%qptn,rprimd,vxccc1_i2pertdq,xccc3d2,xccc3d2dq)
+                       if (i1pert==natom+2.and.i2pert<=natom.and.psps%n1xccc/=0) then
+                         !Get the q-gradient of the pseudocore density
+                         call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i2dir,i2pert,mpi_enreg, &
+                         & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
+                         & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,ncorespl,xccc3d2dq,optnc=1)
 
-                       !Add this contribution to the gradient of the local PSP
-                       vpsp1_i2pertdq= vpsp1_i2pertdq + vxccc1_i2pertdq
-                     end if
-                   end if !samepert
+                         !Get the q-gradient of the first-order XC potential due to the pseudocore charge
+                         call dfpt_mkvxcccdq(cplex,i3dir,dtset%ixc,gprimd,kxc,mpi_enreg,nfftf,dtset%ngfft,&
+                       & nkxc,nspden,dtset%qptn,rprimd,vxccc1_i2pertdq,xccc3d2,xccc3d2dq)
 
-                   !Prepare ddk wf file
-                   pert3case = i3dir + natom*3
-                   call appdig(pert3case,dtfil%fnamewffddk,fiwfddk)
-                   ! Checking the existence of data file
-                   if (.not. file_exists(fiwfddk)) then
-                     ! Trick needed to run Abinit test suite in netcdf mode.
-                     if (file_exists(nctk_ncify(fiwfddk))) then
-                       write(message,"(3a)")"- File: ",trim(fiwfddk),&
-                       " does not exist but found netcdf file with similar name."
-                       call wrtout(std_out,message,'COLL')
-                       fiwfddk = nctk_ncify(fiwfddk)
-                     end if
+                         !Add this contribution to the gradient of the local PSP
+                         vpsp1_i2pertdq= vpsp1_i2pertdq + vxccc1_i2pertdq
+                       end if
+                     end if !samepert
+
+
+                     !Prepare ddk wf file
+                     pert3case = i3dir + natom*3
+                     call appdig(pert3case,dtfil%fnamewffddk,fiwfddk)
+                     ! Checking the existence of data file
                      if (.not. file_exists(fiwfddk)) then
-                       ABI_ERROR('Missing file: '//TRIM(fiwfddk))
-                     end if
-                   end if
-                   write(message,'(2a)')'-dfptlw_loop : read the ddk wavefunctions from file: ',trim(fiwfddk)
-                   call wrtout(std_out,message,'COLL')
-                   !call wrtout(ab_out,message,'COLL')
-!                  Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
-                   call ddk_f%open_read(fiwfddk,1,dtset%iomode,dtfil%unddk,mpi_enreg%comm_cell)
-
-                   !Prepare d2_dkdk wf file
-                   !For i1pert
-                   if (i1pert==natom+2) then
-                     call rf2_getidir(i1dir,i3dir,idir_dkdk)
-                     !if (idir_dkdk>6) idir_dkdk=idir_dkdk-3
-                     dkdk_index=idir_dkdk+(dtset%natom+6)*3
-                     call appdig(dkdk_index,dtfil%fnamewffdkdk,fiwfdkdk)
-                     !Check that d2_dkdk file exists and open it
-                     if (.not. file_exists(fiwfdkdk)) then
                        ! Trick needed to run Abinit test suite in netcdf mode.
-                       if (file_exists(nctk_ncify(fiwfdkdk))) then
-                         write(message,"(3a)")"- File: ",trim(fiwfdkdk),&
+                       if (file_exists(nctk_ncify(fiwfddk))) then
+                         write(message,"(3a)")"- File: ",trim(fiwfddk),&
                          " does not exist but found netcdf file with similar name."
                          call wrtout(std_out,message,'COLL')
-                         fiwfdkdk = nctk_ncify(fiwfdkdk)
+                         fiwfddk = nctk_ncify(fiwfddk)
                        end if
-                       if (.not. file_exists(fiwfdkdk)) then
-                         ABI_ERROR('Missing file: '//TRIM(fiwfdkdk))
+                       if (.not. file_exists(fiwfddk)) then
+                         ABI_ERROR('Missing file: '//TRIM(fiwfddk))
                        end if
                      end if
-                     write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk wavefunctions from file: ',trim(fiwfdkdk)
+                     write(message,'(2a)')'-dfptlw_loop : read the ddk wavefunctions from file: ',trim(fiwfddk)
                      call wrtout(std_out,message,'COLL')
                      !call wrtout(ab_out,message,'COLL')
-                     call d2_dkdk_f%open_read(fiwfdkdk,1,dtset%iomode,dtfil%unddk+1,mpi_enreg%comm_cell)
-                   end if
+                     !Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
+                     call ddk_f%open_read(fiwfddk,1,dtset%iomode,dtfil%unddk,mpi_enreg%comm_cell)
 
-                   !Prepare d2_dkdk wf file
-                   !For i2pert
-                   if (i2pert==natom+2.and..not.samepert) then
-                     call rf2_getidir(i2dir,i3dir,idir_dkdk)
-                     !if (idir_dkdk>6) idir_dkdk=idir_dkdk-3
-                     dkdk_index=idir_dkdk+(dtset%natom+6)*3
-                     call appdig(dkdk_index,dtfil%fnamewffdkdk,fiwfdkdk)
-                     !Check that d2_dkdk file exists and open it
-                     if (.not. file_exists(fiwfdkdk)) then
-                       ! Trick needed to run Abinit test suite in netcdf mode.
-                       if (file_exists(nctk_ncify(fiwfdkdk))) then
-                         write(message,"(3a)")"- File: ",trim(fiwfdkdk),&
-                         " does not exist but found netcdf file with similar name."
-                         call wrtout(std_out,message,'COLL')
-                         fiwfdkdk = nctk_ncify(fiwfdkdk)
-                       end if
+                     !Prepare d2_dkdk wf file
+                     !For i1pert
+                     if (i1pert==natom+2) then
+                       call rf2_getidir(i1dir,i3dir,idir_dkdk)
+                       !if (idir_dkdk>6) idir_dkdk=idir_dkdk-3
+                       dkdk_index=idir_dkdk+(dtset%natom+6)*3
+                       call appdig(dkdk_index,dtfil%fnamewffdkdk,fiwfdkdk)
+                       !Check that d2_dkdk file exists and open it
                        if (.not. file_exists(fiwfdkdk)) then
-                         ABI_ERROR('Missing file: '//TRIM(fiwfdkdk))
+                         ! Trick needed to run Abinit test suite in netcdf mode.
+                         if (file_exists(nctk_ncify(fiwfdkdk))) then
+                           write(message,"(3a)")"- File: ",trim(fiwfdkdk),&
+                           " does not exist but found netcdf file with similar name."
+                           call wrtout(std_out,message,'COLL')
+                           fiwfdkdk = nctk_ncify(fiwfdkdk)
+                         end if
+                         if (.not. file_exists(fiwfdkdk)) then
+                           ABI_ERROR('Missing file: '//TRIM(fiwfdkdk))
+                         end if
                        end if
+                       write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk wavefunctions from file: ',trim(fiwfdkdk)
+                       call wrtout(std_out,message,'COLL')
+                       !call wrtout(ab_out,message,'COLL')
+                       call d2_dkdk_f%open_read(fiwfdkdk,1,dtset%iomode,dtfil%unddk+1,mpi_enreg%comm_cell)
+
                      end if
-                     write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk wavefunctions from file: ',trim(fiwfdkdk)
-                     call wrtout(std_out,message,'COLL')
-                     call d2_dkdk_f2%open_read(fiwfdkdk,1,dtset%iomode,dtfil%unddk+2,mpi_enreg%comm_cell)
-                   end if
 
-                   !Perform the longwave DFPT part of the 3dte calculation
-                   call dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,dimffnl,dtset, &
-                   & eigen1,eigen2,ffnl,gmet,gs_hamkq,gsqcut,i1dir,&
-                   & i2dir,i3dir,i1pert,i2pert,i3pert,kg,kxc,mband,mkmem,mk1mem,mpert,mpi_enreg,&
-                   & mpsang,mpw,natom,n1dq,n2dq,nfftf,ngfftf,nkpt,nkxc,nspden,nspinor,nsppol,npwarr,nylmgr,occ,&
-                   & pawfgr,psps,rho1g1,rho1r1,rho2r1,rmet,rprimd,samepert,ucvol,useylmgr,&
-                   & vpsp1_i1pertdq,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,vpsp1_i2pertdq,&
-                   & ddk_f,d2_dkdk_f,d2_dkdk_f2,ylm,ylmgr)
+                     !Prepare d2_dkdk wf file
+                     !For i2pert
+                     if (i2pert==natom+2.and..not.samepert) then
+                       call rf2_getidir(i2dir,i3dir,idir_dkdk)
+                       !if (idir_dkdk>6) idir_dkdk=idir_dkdk-3
+                       dkdk_index=idir_dkdk+(dtset%natom+6)*3
+                       call appdig(dkdk_index,dtfil%fnamewffdkdk,fiwfdkdk)
+                       !Check that d2_dkdk file exists and open it
+                       if (.not. file_exists(fiwfdkdk)) then
+                         ! Trick needed to run Abinit test suite in netcdf mode.
+                         if (file_exists(nctk_ncify(fiwfdkdk))) then
+                           write(message,"(3a)")"- File: ",trim(fiwfdkdk),&
+                           " does not exist but found netcdf file with similar name."
+                           call wrtout(std_out,message,'COLL')
+                           fiwfdkdk = nctk_ncify(fiwfdkdk)
+                         end if
+                         if (.not. file_exists(fiwfdkdk)) then
+                           ABI_ERROR('Missing file: '//TRIM(fiwfdkdk))
+                         end if
+                       end if
+                       write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk wavefunctions from file: ',trim(fiwfdkdk)
+                       call wrtout(std_out,message,'COLL')
+                       call d2_dkdk_f2%open_read(fiwfdkdk,1,dtset%iomode,dtfil%unddk+2,mpi_enreg%comm_cell)
+                     end if
 
-                   !close ddk file
-                   call ddk_f%close()
+                     !Perform the longwave DFPT part of the 3dte calculation
+                     call dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,dimffnl,dtset, &
+                     & eigen1,eigen2,ffnl,gmet,gs_hamkq,gsqcut,i1dir,&
+                     & i2dir,i3dir,i1pert,i2pert,i3pert,kg,kxc,mband,mkmem,mk1mem,mpert,mpi_enreg,&
+                     & mpsang,mpw1,natom,n1dq,n2dq,nfftf,ngfftf,nkpt,nkxc,nspden,nspinor,nsppol,npwarr,nylmgr,occ,&
+                     & pawfgr,psps,rho1g1,rho1r1,rho2r1,rmet,rprimd,samepert,ucvol,useylmgr,&
+                     & vpsp1_i1pertdq,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,vpsp1_i2pertdq,&
+                     & ddk_f,d2_dkdk_f,d2_dkdk_f2,ylm,ylmgr)
 
-                   !close d2_dkdk file (i1pert)
-                   if (i1pert==natom+2) call d2_dkdk_f%close()
+                     !close ddk file
+                     call ddk_f%close()
 
-                   ! Close d2_dkdk file (i2pert)
-                   if (i2pert==natom+2.and..not.samepert) call d2_dkdk_f2%close()
+                     !close d2_dkdk file (i1pert)
+                     if (i1pert==natom+2) call d2_dkdk_f%close()
 
-                   !Save the type-I terms
-                   if (i2pert==natom+3.or.i2pert==natom+4) then
-                     gamma=i3dir
-                     do idq=1,n2dq
-                       if (i2pert==natom+3) then
-                         istr=i2dir
-                       else
-                         istr=idq*3+i2dir
-                       endif
-                       beta=idx(2*istr-1); delta=idx(2*istr)
-                       t4_typeI(:,i1dir,i1pert,beta,delta,gamma)=d3etot_t4(:,idq)
-                     end do
-                   else
-                     t4_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=d3etot_t4(:,1)
-                   end if
+                     ! Close d2_dkdk file (i2pert)
+                     if (i2pert==natom+2.and..not.samepert) call d2_dkdk_f2%close()
 
-                   if (i1pert==natom+3.or.i1pert==natom+4) then
-                     gamma=i3dir
-                     do idq=1,n1dq
-                       if (i1pert==natom+3) then
-                         istr=i1dir
-                       else
-                         istr=idq*3+i1dir
-                       endif
-                       beta=idx(2*istr-1); delta=idx(2*istr)
-                       t5_typeI(:,i2dir,i2pert,beta,delta,gamma)=d3etot_t5(:,idq)
-                     end do
-                   else
-                     t5_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=d3etot_t5(:,1)
-                   end if
-
-
-                   if (i1pert<=natom.and.(i2pert==natom+3.or.i2pert==natom+4)) then
-                     alpha=i1dir
-                     gamma=i3dir
-                     do idq=1,n2dq
-                       if (i2pert==natom+3) then
-                         istr=i2dir
-                       else
-                         istr=idq*3+i2dir
-                       endif
-                       beta=idx(2*istr-1); delta=idx(2*istr)
-                       tgeom_typeI(:,i1dir,i1pert,beta,delta,gamma)=d3etot_tgeom(:,idq)
-
-                       !Incorporate here the G=0 contribution of the geometric term
-                       ia1=0
-                       itypat=0
-                       do ii=1,dtset%ntypat
-                         ia1=ia1+nattyp(ii)
-                         if (atindx(i1pert)<=ia1.and.itypat==0) itypat=ii
+                     !Save the type-I terms
+                     if (i2pert==natom+3.or.i2pert==natom+4) then
+                       gamma=i3dir
+                       do idq=1,n2dq
+                         if (i2pert==natom+3) then
+                           istr=i2dir
+                         else
+                           istr=idq*3+i2dir
+                         endif
+                         beta=idx(2*istr-1); delta=idx(2*istr)
+                         t4_typeI(:,i1dir,i1pert,beta,delta,gamma)=d3etot_t4(:,idq)
                        end do
-                       delad=zero ; if (alpha==delta) delad=one
-                       delbd=zero ; if (beta==delta)  delbd=one
-                       delag=zero ; if (alpha==gamma) delag=one
-                       delbg=zero ; if (beta==gamma)  delbg=one
+                     else
+                       t4_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=d3etot_t4(:,1)
+                     end if
 
-                       tgeom_typeI(1,i1dir,i1pert,beta,delta,gamma)= &
-                     & tgeom_typeI(1,i1dir,i1pert,beta,delta,gamma) + &
-                     & pi*pi*rhog(1,1)*psps%vlspl(1,2,itypat)*(delag*delbd+delad*delbg)
-                     end do
-                   else
-                     tgeom_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=d3etot_tgeom(:,1)
+                     if (i1pert==natom+3.or.i1pert==natom+4) then
+                       gamma=i3dir
+                       do idq=1,n1dq
+                         if (i1pert==natom+3) then
+                           istr=i1dir
+                         else
+                           istr=idq*3+i1dir
+                         endif
+                         beta=idx(2*istr-1); delta=idx(2*istr)
+                         t5_typeI(:,i2dir,i2pert,beta,delta,gamma)=d3etot_t5(:,idq)
+                       end do
+                     else
+                       t5_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=d3etot_t5(:,1)
+                     end if
+
+
+                     if (i1pert<=natom.and.(i2pert==natom+3.or.i2pert==natom+4)) then
+                       alpha=i1dir
+                       gamma=i3dir
+                       do idq=1,n2dq
+                         if (i2pert==natom+3) then
+                           istr=i2dir
+                         else
+                           istr=idq*3+i2dir
+                         endif
+                         beta=idx(2*istr-1); delta=idx(2*istr)
+                         tgeom_typeI(:,i1dir,i1pert,beta,delta,gamma)=d3etot_tgeom(:,idq)
+
+                         !Incorporate here the G=0 contribution of the geometric term
+                         ia1=0
+                         itypat=0
+                         do ii=1,dtset%ntypat
+                           ia1=ia1+nattyp(ii)
+                           if (atindx(i1pert)<=ia1.and.itypat==0) itypat=ii
+                         end do
+                         delad=zero ; if (alpha==delta) delad=one
+                         delbd=zero ; if (beta==delta)  delbd=one
+                         delag=zero ; if (alpha==gamma) delag=one
+                         delbg=zero ; if (beta==gamma)  delbg=one
+
+                         tgeom_typeI(1,i1dir,i1pert,beta,delta,gamma)= &
+                       & tgeom_typeI(1,i1dir,i1pert,beta,delta,gamma) + &
+                       & pi*pi*rhog(1,1)*psps%vlspl(1,2,itypat)*(delag*delbd+delad*delbg)
+                       end do
+                     else
+                       tgeom_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=d3etot_tgeom(:,1)
+                     end if
+                   end if ! .not.just_timdisp
+
+                   if (i3pert==natom+9) then
+
+                      write(message,'(2a,3(a,i2,a,i1))') ch10,'TIMDISP : ',&
+                      ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir
+                      call wrtout(std_out,message,'COLL')
+                      call wrtout(ab_out,message,'COLL')
+                     !Perform the Berry curvature part of the time-disperion 3dte calculation
+                     call dfpttd_berrycurv(cg1,cg2,d3etot_td,dtset,&
+                     & mband,mk1mem,mpi_enreg,&
+                     & mpw1,nkpt,nspinor,nsppol,npwar1,occ)
+                     if (.not.kramers_deg) then
+                       call dfpttd_berrycurv(cg1_mq,cg2_mq,d3etot_td_mq,dtset,&
+                       & mband,mk1mem,mpi_enreg,&
+                       & mpw1,nkpt,nspinor,nsppol,npwar1_mq,occ)
+                     end if
+
+                     !Add the result to the big array
+                     if (kramers_deg) then
+                       d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=zero
+                       d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=-two*d3etot_td(2)
+                     else
+                       d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=-d3etot_td(1)+d3etot_td_mq(1)
+                       d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=-d3etot_td(2)-d3etot_td_mq(2)
+                     end if
+
                    end if
 
                  end if   ! rfpert
                end do    ! ir3dir
              end do     ! ir3pert
+
+             if (finite_q) then
+               call hdr1_pq%free()
+               call hdr2_pq%free()
+               if (.not.kramers_deg) then
+                 call hdr1_mq%free()
+                 call hdr2_mq%free()
+               end if
+             end if
 
              ABI_SFREE(vpsp1_i2pertdq)
              ABI_SFREE(xccc3d2dq)
@@ -722,7 +960,10 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
 !More memory cleaning
  call gs_hamkq%free()
-
+ ABI_FREE(kpq)
+ ABI_FREE(kg1)
+ ABI_FREE(npwar1)
+ ABI_FREE(npwtot1)
  ABI_FREE(cg1)
  ABI_FREE(cg2)
  ABI_FREE(eigen1)
@@ -741,6 +982,18 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
   ABI_FREE(vxc1dqdq)
  end if
 
+ call ebands_kq%free()
+ if (.not.kramers_deg) then
+   call ebands_kmq%free()
+   ABI_FREE(cg1_mq)
+   ABI_FREE(cg2_mq)
+   ABI_FREE(eigen1_mq)
+   ABI_FREE(eigen2_mq)
+   ABI_FREE(kg1_mq)
+   ABI_FREE(npwar1_mq)
+   ABI_FREE(npwtot1_mq)
+   ABI_FREE(kmq)
+ end if
 !Treatment of T4 and T5 terms that have a q-gradient of a rf Hamiltonian
 !they need to be converted to type-II for strain perturbation
  if (d3e_pert2(natom+3)==1.or.d3e_pert2(natom+4)==1) then

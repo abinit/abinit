@@ -120,7 +120,7 @@ subroutine outvar_i_n (dtsets,iout,&
  integer :: multi_atsph,multi_occopt
  integer :: natfix,natfixx,natfixy,natfixz,natnd,natom
  integer :: ndtset_kptopt,nimage,nqpt,nkpt_eff
- integer :: ntypalch,ntypat,size1,size2,tnkpt
+ integer :: ntypalch,ntypat,size1,size2,test_write,tnkpt
  real(dp) :: kpoint
  character(len=1) :: firstchar_gpu
 !arrays
@@ -449,6 +449,9 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%irdwfkfine
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdwfkfine','INT',0)
 
+ intarr(1,:)=dtsets(:)%irdwfmq
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdwfmq','INT',0)
+
  intarr(1,:)=dtsets(:)%irdwfq
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdwfq','INT',0)
 
@@ -768,6 +771,9 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%magconon
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'magconon','INT',0)
 
+ dprarr(1,:)=dtsets(:)%magpen
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'magpen','ENE',0)
+
  dprarr(1,:)=dtsets(:)%maxestep
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'maxestep','ENE',0)
 
@@ -857,6 +863,21 @@ subroutine outvar_i_n (dtsets,iout,&
    intarr(1,:)=dtsets(:)%mk1mem
    call prttagm(dprarr,intarr,iout,jdtset_,5,marr,1,narrm,ncid,ndtset_alloc,'mk1mem','INT',0)
  end if
+
+ test_write=0
+ do idtset=1,ndtset_alloc
+   if(dtsets(idtset)%mpatpol(1)/=1 .or. dtsets(idtset)%mpatpol(2)/=dtsets(idtset)%natom)test_write=1
+ enddo
+ if(test_write==1)then
+   intarr(1,:)=dtsets(:)%mpatpol(1)
+   intarr(2,:)=dtsets(:)%mpatpol(2)
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'mpatpol','INT',0)
+ endif
+
+ intarr(1,:)=dtsets(:)%mpdir(1)
+ intarr(2,:)=dtsets(:)%mpdir(2)
+ intarr(3,:)=dtsets(:)%mpdir(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'mpdir','INT',0)
 
  intarr(1,:)=dtsets(:)%mqgrid
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'mqgrid','INT',0)

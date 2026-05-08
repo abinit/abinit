@@ -194,6 +194,7 @@ contains
 !!  npw=number of planewaves in basis sphere at given k.
 !!  npw1=number of planewaves in basis sphere at k+Q
 !!  nspinor=number of spinorial components of the wavefunctions
+!!  omega= frequency of the perturbation
 !!  opt_gvnlx1=option controlling the use of gvnlx1 array:
 !!            0: used as an output
 !!            1: used as an input: - used only for ipert=natom+2
@@ -251,7 +252,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 & mcgq,mgscq,mpi_enreg,mpw1,natom,nband,nband_me,nbdbuf,nline_in,npw,npw1,nspinor,&
 & opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dfpt_sciss,tolrde,tolwfr,&
 & usedcwavef,wfoptalg,nlines_done, &
-  usetolrde) ! optional
+  eta,omega,usetolrde) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -263,6 +264,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  integer,intent(inout) :: nlines_done
  integer,optional,intent(in) :: usetolrde
  real(dp),intent(in) :: dfpt_sciss,tolrde,tolwfr
+ real(dp),optional,intent(in) :: eta,omega
  real(dp),intent(out) :: resid
  type(MPI_type),intent(in) :: mpi_enreg
  type(rf2_t), intent(in) :: rf2
@@ -293,7 +295,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  integer :: ipws,ispinor,istwf_k,jband,nline,optlocal,optnl,dc_shift_band,sij_opt
  integer :: test_is_ok,useoverlap,usepaw,usevnl,usetolrde__
  real(dp) :: d2edt2,d2te,d2teold,dedt,deltae,deold,dotgg
- real(dp) :: dotgp,doti,dotr,eshift,eshiftkq,gamma,optekin,prod1,prod2
+ real(dp) :: dotgp,doti,dotr,eta_,eshift,eshiftkq,gamma,omega_,optekin,prod1,prod2
  real(dp) :: theta,tol_restart,u1h0me0u1
  logical :: gen_eigenpb
  integer :: skipme, bands_skipped_now(nband)
@@ -361,6 +363,11 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
  ! Use scissor shift on 0-order eigenvalue
  eshift=eig0_k(u1_band)-dfpt_sciss
+
+ ! Remove omega for a finite-frequency calculation
+ omega_=zero ; if (present(omega)) omega_=omega
+ eta_=zero ; if (present(eta)) eta_=eta
+ eshift=eshift+omega_
 
  ! Additional initializations
  istwf_k=gs_hamkq%istwf_k
@@ -846,9 +853,9 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
  ! ghc also includes the eigenvalue shift
  if (gen_eigenpb) then
-   call cg_zaxpy(npw1*nspinor, [-eshift, zero], gsc,ghc)
+   call cg_zaxpy(npw1*nspinor, [-eshift, -eta_], gsc,ghc)
  else
-   call cg_zaxpy(npw1*nspinor, [-eshift, zero], cwavef,ghc)
+   call cg_zaxpy(npw1*nspinor, [-eshift, -eta_], cwavef,ghc)
  end if
 
  ! Initialize resid, in case of nline==0
@@ -1151,7 +1158,9 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    else
 !$OMP PARALLEL DO
      do ipw=1,npw1*nspinor
-       gh_direc(1:2,ipw)=gh_direc(1:2,ipw)-eshift*conjgr(1:2,ipw)
+!       gh_direc(1:2,ipw)=gh_direc(1:2,ipw)-eshift*conjgr(1:2,ipw)
+       gh_direc(1,ipw)=gh_direc(1,ipw)-eshift*conjgr(1,ipw)+eta_*conjgr(2,ipw)
+       gh_direc(2,ipw)=gh_direc(2,ipw)-eshift*conjgr(2,ipw)-eta_*conjgr(1,ipw)
      end do
    end if
 

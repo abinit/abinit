@@ -581,6 +581,9 @@ contains
  intarr(1,:)=dtsets(:)%prtlden
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtlden','INT',0)
 
+ intarr(1,:)=dtsets(:)%prt1mag
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prt1mag','INT',0)
+
  intarr(1,:)=dtsets(:)%prtnabla
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtnabla','INT',0)
 
@@ -751,6 +754,9 @@ contains
  intarr(1,:)=dtsets(:)%random_atpos
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'random_atpos','INT',0)
 
+ intarr(1,:)=dtsets(:)%ratopt
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ratopt','INT',0)
+
  dprarr(1,:)=dtsets(:)%ratsm
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ratsm','LEN',0)
 
@@ -874,11 +880,17 @@ contains
  intarr(1,:)=dtsets(:)%rfelfd
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfelfd','INT',0)
 
+ dprarr(1,:)=dtsets(:)%rfeta
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rfeta','ENE',0)
+
  intarr(1,:)=dtsets(:)%rfmagn
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfmagn','INT',0)
 
  intarr(1,:)=dtsets(:)%rfmeth
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfmeth','INT',0)
+
+ dprarr(1,:)=dtsets(:)%rfomega
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rfomega','ENE',0)
 
  intarr(1,:)=dtsets(:)%rfphon
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfphon','INT',0)
@@ -1152,6 +1164,9 @@ contains
 
  dprarr(1,:)=dtsets(:)%tfw_toldfe
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tfw_toldfe','ENE',0)
+
+ intarr(1,:)=dtsets(:)%timdisp
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'timdisp','INT',0)
 
  intarr(1,:)=dtsets(:)%tim1rev
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'tim1rev','INT',0)

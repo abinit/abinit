@@ -343,6 +343,9 @@ meta: {optdriver: 1, }
  ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
+    1)    idir= 1    ipert=  12
+    2)    idir= 2    ipert=  12
+    3)    idir= 3    ipert=  12
 
 ================================================================================
 
@@ -572,6 +575,9 @@ meta: {optdriver: 1, }
  ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
+    1)    idir= 1    ipert=  13
+    2)    idir= 2    ipert=  13
+    3)    idir= 3    ipert=  13
 
 ================================================================================
 
@@ -613,7 +619,7 @@ tolerances: {tolwfr: 1.00E-26, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   5.31067612E+04 eigvalue=  -8.04337242E+01  local=  -5.01341856E+04
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+    Hspinfield=   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.62098290E+04   enl1=   0.00000000E+00
@@ -654,7 +660,7 @@ tolerances: {tolwfr: 1.00E-26, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   5.31067613E+04 eigvalue=  -8.04337247E+01  local=  -5.01341856E+04
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+    Hspinfield=   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.62098290E+04   enl1=   0.00000000E+00
@@ -696,7 +702,7 @@ tolerances: {tolwfr: 1.00E-26, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   4.25142800E+04 eigvalue=  -2.39918163E+03  local=  -3.84976360E+04
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+    Hspinfield=   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   9.07579810E+03   enl1=   0.00000000E+00
@@ -738,7 +744,7 @@ tolerances: {tolwfr: 1.00E-26, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   4.25142800E+04 eigvalue=  -2.39918163E+03  local=  -3.84976360E+04
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+    Hspinfield=   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   9.07579810E+03   enl1=   0.00000000E+00
@@ -780,7 +786,7 @@ tolerances: {tolwfr: 1.00E-26, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   4.25142800E+04 eigvalue=  -2.39918163E+03  local=  -3.84976360E+04
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+    Hspinfield=   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   9.07579810E+03   enl1=   0.00000000E+00
@@ -822,7 +828,7 @@ tolerances: {tolwfr: 1.00E-26, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   4.25142800E+04 eigvalue=  -2.39918163E+03  local=  -3.84976360E+04
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+    Hspinfield=   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   9.07579810E+03   enl1=   0.00000000E+00
