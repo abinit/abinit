@@ -215,6 +215,7 @@ ABI_TOPICS = [
     "BandOcc",
     "BoundingProcess",
     "BSE",
+    "ConstrainedDFPT",
     "ConstrainedDFT",
     "ConstrainedPol",
     "Control",

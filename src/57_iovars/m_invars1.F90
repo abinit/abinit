@@ -2458,10 +2458,16 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%d3e_pert1_atpol(1:2)=-1
    dtsets(idtset)%d3e_pert1_dir(1:3)=1
    dtsets(idtset)%d3e_pert1_elfd=0
+   dtsets(idtset)%d3e_pert1_magat(1:2)=-1
+   dtsets(idtset)%d3e_pert1_magdir(1:3)=1
+   dtsets(idtset)%d3e_pert1_magn=0
    dtsets(idtset)%d3e_pert1_phon=0
    dtsets(idtset)%d3e_pert2_atpol(1:2)=-1
    dtsets(idtset)%d3e_pert2_dir(1:3)=1
    dtsets(idtset)%d3e_pert2_elfd=0
+   dtsets(idtset)%d3e_pert2_magat(1:2)=-1
+   dtsets(idtset)%d3e_pert2_magdir(1:3)=1
+   dtsets(idtset)%d3e_pert2_magn=0
    dtsets(idtset)%d3e_pert2_phon=0
    dtsets(idtset)%d3e_pert2_strs=0
    dtsets(idtset)%d3e_pert3_atpol(1:2)=-1
@@ -2626,6 +2632,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !  M
    dtsets(idtset)%magconon = 0
    dtsets(idtset)%magcon_lambda = 0.01_dp
+   dtsets(idtset)%magpen = zero
    dtsets(idtset)%mband = -1
    dtsets(idtset)%mdtemp(:)=300.0_dp
    dtsets(idtset)%mdeg_filter = 6
@@ -2636,6 +2643,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%mgfft = -1
    dtsets(idtset)%mgfftdg = -1
    dtsets(idtset)%mixesimgf(:)=zero
+   dtsets(idtset)%mpatpol(1:2)=-1
+   dtsets(idtset)%mpdir(1:3)=0
    dtsets(idtset)%moldyn = "none"
    dtsets(idtset)%mpw = -1
    dtsets(idtset)%mqgrid=0
@@ -2786,6 +2795,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%prtevk=0
    dtsets(idtset)%prtgsr=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtgsr=0
    dtsets(idtset)%prtkpt = -1
+   dtsets(idtset)%prt1mag = 0
    dtsets(idtset)%prtocc=0
    dtsets(idtset)%prtwf=1     ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtwf=0
    !if (dtsets%(idtset)%optdriver == RUNL_RESPFN and all(dtsets(:)%optdriver /= RUNL_NONLINEAR) dtsets(idtset)%prtwf = -1
@@ -2803,6 +2813,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%quadmom(:) = zero
 !  R
    dtsets(idtset)%random_atpos=0
+   dtsets(idtset)%ratopt=1
    dtsets(idtset)%ratsm=zero
    if (any(dtsets(idtset)%constraint_kind(1:dtsets(idtset)%ntypat)>0)) dtsets(idtset)%ratsm=0.05_dp
    dtsets(idtset)%ratsph_extra=two
@@ -2823,8 +2834,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%rfddk=0
    dtsets(idtset)%rfdir(1:3)=1
    dtsets(idtset)%rfelfd=0
+   dtsets(idtset)%rfeta=zero
    dtsets(idtset)%rfmagn=0
    dtsets(idtset)%rfmeth=1
+   dtsets(idtset)%rfomega=zero
    dtsets(idtset)%rfphon=0
    dtsets(idtset)%rfstrs=0
    dtsets(idtset)%rfstrs_ref=0
@@ -2866,6 +2879,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%td_ef_lambda=10000.0_dp
    dtsets(idtset)%td_ef_ezero=0.1_dp
    dtsets(idtset)%tfw_toldfe=0.000001_dp
+   dtsets(idtset)%timdisp=0
    dtsets(idtset)%tim1rev = 1
    dtsets(idtset)%tl_nprccg = 30
    dtsets(idtset)%tl_radius = zero

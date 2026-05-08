@@ -1,0 +1,43 @@
+! Postprocessing to switch between constrained/unconstrained magnetic functionals
+! and frequency interpolation with analytical Berry curvatures for antiferromagnetic MnF2
+! Finite q case.
+! (M. Royo, 22.01.2026)
+
+   prtvol 11
+!Magnetic penalty
+   magpen 0.0125
+   mpatpol 1 2
+   mpdir 1 1 0
+   mpopt 2  !(1 Frozen-spin, 2 Relaxed-spin)
+   timdisp 1
+   asr 0
+   chneut 0
+
+!Frequency interpolation
+   freqflag 1
+   nfreq  10
+   frmin  0.000
+   frmax  0.01
+   eta 0.000001
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% exclude_builders = alps_nag_7.2_serial
+#%% input_ddb = tcdfpt_10.ddb.in
+#%% test_chain =  tcdfpt_8.abi, tcdfpt_9.abi, tcdfpt_10.abi, tcdfpt_11.abi
+#%% [files]
+#%% extra_inputs = tcdfpt_10.ddb.in
+#%% files_to_test =
+#%%   tcdfpt_11.abo, tolnlines=  0, tolabs=  0.000e0, tolrel=  0.000e-0, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Royo
+#%% keywords = CDFPT
+#%% description = anaddb input file for switching between constrained magnetic functionals and frequency interpolation
+#%%<END TEST_INFO>
+

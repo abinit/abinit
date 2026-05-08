@@ -530,6 +530,7 @@ end subroutine mkunitpawspherepot
 !!  cplex= if 1, vhartr is REAL, if 2, vhartr is COMPLEX
 !!  gsqcut=cutoff value on G**2 for sphere inside fft box.
 !!         (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
+!!  icutcoul= type of Coulomb cutoff to apply
 !!  izero=if 1, unbalanced components of Vhartree(g) are set to zero
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
@@ -537,6 +538,7 @@ end subroutine mkunitpawspherepot
 !!  [qpt(3)=reduced coordinates for a wavevector to be combined with the G vectors (needed if cplex==2).]
 !!  rhog(2,nfft)=electron density in G space
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  vcutgeo(3)= array to describe the geometry of the Coulomb cutoff
 !!
 !! OUTPUT
 !!  vhartr(cplex*nfft)=Hartree potential in real space, either REAL or COMPLEX
@@ -564,6 +566,7 @@ subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
  integer :: i1,i2,i23,i2_local,i3,id1,id2,id3
  integer :: ig,ig1min,ig1,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
  integer :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05,me_fft,nproc_fft
+ integer :: nog0
  real(dp),parameter :: tolfix=1.000000001e0_dp
  real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,ucvol
  character(len=500) :: message
@@ -625,9 +628,11 @@ subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
    ABI_ERROR(message)
  end if
 
+ !PCM cut-off is implemented outside termcutoff
+ nog0=0; if (qeq0==1 .or. icutcoul==55) nog0=1
+
  !Initialize Gcut-off array from m_gtermcutoff
- !ABI_MALLOC(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3)))
- call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo,qpt=qpt_)
 
  ! In order to speed the routine, precompute the components of g+q
  ! Also check if the booked space was large enough...
@@ -664,7 +669,8 @@ subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
        i23=n1*(i2_local-1 +(n2/nproc_fft)*(i3-1))
        ! Do the test that eliminates the Gamma point outside of the inner loop
        ii1=1
-       if(i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0)then
+!       if(i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0)then
+       if(i23==0 .and. nog0==1  .and. ig2==0 .and. ig3==0)then
          ii1=2
          work1(re,1+i23)=zero
          work1(im,1+i23)=zero

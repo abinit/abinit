@@ -78,7 +78,7 @@ MODULE m_geometry
  public :: wedge_product      ! compute wedge product given wedge basis
  public :: d3lwsym
  public :: sylwtens             ! Determines the set of irreductible elements of the spatial-dispersion tensors
- public :: cart2spinaxis        ! Compute the rotation matrix from cartesian to spinaxis coordinate     
+ public :: cart2spinaxis        ! Compute the rotation matrix from cartesian to spinaxis coordinate
  public :: vcart2ylm          ! Convert Cartesian vector to spherical coordinates for Y_lm
 
  interface normv
@@ -3859,7 +3859,7 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
  integer :: i3dir,i3dir_,i3pert,i3pert_,idisy1,idisy2,idisy3,ipesy1,ipesy2
  integer :: ipesy3,isym
 ! integer :: istr,idisy2_a,idisy2_b
- logical :: is_strain
+ logical :: is_strain, is_timdisp
 ! real(dp) :: flag_dp
 !arrays
 ! integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
@@ -3876,6 +3876,7 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
    do i2pert_ = 1, mpert
      is_strain=.false.
      do i3pert_ = 1, mpert
+       is_timdisp=.false.
 
        do i1dir_ = 1, 3
          do i2dir_ = 1, 3
@@ -3942,6 +3943,9 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                  if (i3pert == natom + 8) then
                    ipesy3 = i3pert
                    sym3(:,:) = symrel(:,:,isym)
+                 else if (i3pert == natom + 9) then
+                   is_timdisp=.true.
+                   found = 0
                  else
                    found = 0
                  end if
@@ -3951,7 +3955,7 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 !                of the elements may be zero. In the latter case, they do not need
 !                to be computed.
 
-                 if (.not.is_strain) then
+                 if (.not.is_timdisp.and..not.is_strain) then
                    if ((flag /= -1).and.&
 &                   (ipesy1==i1pert).and.(ipesy2==i2pert).and.(ipesy3==i3pert)) then
                      flag = sym1(i1dir,i1dir)*sym2(i2dir,i2dir)*sym3(i3dir,i3dir)
@@ -4050,6 +4054,7 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 !Now, take into account the permutation of (i1pert,i1dir)
 !and (i2pert,i2dir)
 
+
  do i1pert = 1, mpert
    do i2pert = 1, mpert
      do i3pert = 1, mpert
@@ -4141,13 +4146,13 @@ end subroutine vcart2ylm
 !! cart2spinaxis
 !!
 !! FUNCTION
-!! Compute the rotation matrix R = Rz(alpha)*Ry(beta) and rotate a vector in 
+!! Compute the rotation matrix R = Rz(alpha)*Ry(beta) and rotate a vector in
 !! cartesian coordinate to spinaxis coordinates
 !!
 !! INPUTS
 !! alpha=Euler angle for rotation around z-axis
 !! beta=Euler angle for rotation around y-axis
-!! vin(3)=vector in the cartesian coordinate 
+!! vin(3)=vector in the cartesian coordinate
 !!
 !! OUTPUT
 !! R(3,3)=rotation matrix from cartesian to spinaxis coordinates
@@ -4183,6 +4188,6 @@ subroutine cart2spinaxis(alpha, beta, R, vin, vout)
 
 end subroutine cart2spinaxis
 !!***
- 
+
 end module  m_geometry
 !!***

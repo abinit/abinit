@@ -279,8 +279,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 ! Electric field perturbation or
 ! Strain perturbation
 !-------------------------------------------
+ if ((ipert<=natom+6.or.(ipert>natom+11.and.ipert<=2*natom+11)).and.ipert/=natom+1.and.optlocal>0) then !SPr deb
 
- if (ipert<=natom+5.and.ipert/=natom+1.and.optlocal>0) then
    ABI_NVTX_START_RANGE(NVTX_GETGH1_LOCPOT)
 
    ! Important: work (aka fofr) must be allocated with "ndat", but fourwf with option 2 never accesses it, so this allocation wastes memory.
@@ -1336,8 +1336,8 @@ subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipe
    if (ipert==natom+3) istr=idir
    if (ipert==natom+4) istr=idir+3
    ider=1;idir0=-istr
- !-- Magnetic field perturbation ( SPr, Zeeman )
- else if(ipert==natom+5)then
+ !-- Magnetic field perturbation ( SPr, Zeeman ) or scalar potential
+ else if(ipert==natom+5.or.ipert==natom+6.or.(ipert>natom+11.and.ipert<=2*natom+11))then
    ider=0;idir0=0
  end if
 
@@ -1798,7 +1798,7 @@ subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
 !=============================================================================
 
 !Phonon and metric (strain) perturbation
- if (ipert<=natom+5.and.ipert/=natom+1.and.ipert/=natom+2.and.optlocal>0) then
+ if (ipert<=natom+6.and.ipert/=natom+1.and.ipert/=natom+2.and.optlocal>0) then
 
    ABI_MALLOC(work,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 

@@ -1,0 +1,114 @@
+# Berry curvatures calculation in antiferromagnetic MnF2 (omega=0 and finite q).
+# (M. Royo, 22.01.2026)
+
+   ndtset 2
+   jdtset 4 5
+
+outdata_prefix = "tcdfpt_8o"
+
+## GENERAL PARAMETERS
+    nqpt   1
+     qpt   5.00000000E-01  5.00000000E-01  0.00000000E+00
+  getwfk   1
+  get1wf   2
+
+optdriver  10
+  timdisp  1
+  tim1rev  0
+
+### 4) ADIABATIC DYNAMICS WITH MACROSCOPIC ZEEMAN
+
+  d3e_pert1_magn4  1
+d3e_pert1_magdir4  1 0 0
+   d3e_pert1_dir4  1 0 0
+  d3e_pert1_phon4  1
+ d3e_pert1_atpol4  1 1
+
+  d3e_pert2_magn4  1
+d3e_pert2_magdir4  1 0 0
+   d3e_pert2_dir4  1 0 0
+  d3e_pert2_phon4  1
+ d3e_pert2_atpol4  1 1
+
+### 5) ADIABATIC DYNAMICS WITH LOCAL ZEEMAN
+
+  d3e_pert1_magn5  2
+ d3e_pert1_magat5  1 1
+d3e_pert1_magdir5  1 0 0
+   d3e_pert1_dir5  1 0 0
+  d3e_pert1_phon5  1
+ d3e_pert1_atpol5  1 1
+
+  d3e_pert2_magn5  2
+ d3e_pert2_magat5  1 1
+d3e_pert2_magdir5  1 0 0
+   d3e_pert2_dir5  1 0 0
+  d3e_pert2_phon5  1
+ d3e_pert2_atpol5  1 1
+
+### MORE GENERAL PARAMETERS
+
+#Definition of the atom types
+ntypat 2
+znucl 25 9
+
+#Definition of the atoms
+natom 6
+typat 2*1 4*2
+
+#Definition of the unit cell
+acell     9.2100000000E+00  9.2100000000E+00  6.2560000000E+00 Bohr
+rprim     1.0000 0.0000 0.0000
+          0.0000 1.0000 0.0000
+          0.0000 0.0000 1.0000
+xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+          5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+          6.9627618231E-01  6.9627618231E-01  0.0000000000E+00
+          1.9627618231E-01  8.0372381769E-01  5.0000000000E-01
+          3.0372381769E-01  3.0372381769E-01  0.0000000000E+00
+          8.0372381769E-01  1.9627618231E-01  5.0000000000E-01
+
+#Definition of the planewave basis set
+ecut   3.0         # Maximal kinetic energy cut-off, in Hartree
+nband  42
+
+#Definition of the k-point grid
+kptopt 3          # Option for the automatic generation of k points, taking
+                  # into account the symmetry
+ngkpt 2 2 3
+
+nshiftk 1
+shiftk 0.5 0.5 0.5
+
+#Symmetries deactivated for magnetic systems
+nsym 1
+
+nspden   4
+nspinor  2
+
+#Pseudos
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = alps_nag_7.2_serial
+#%% test_chain =  tcdfpt_8.abi, tcdfpt_9.abi, tcdfpt_10.abi, tcdfpt_11.abi
+#%% [files]
+#%% files_to_test =
+#%%   tcdfpt_9.abo, tolnlines=  5, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-easy
+#%% [shell]
+#%% [paral_info]
+#%% max_nprocs = 12
+#%% [extra_info]
+#%% authors = M. Royo
+#%% keywords = CDFPT
+#%% description = Berry curvatures calculation for adiabatic dynamics of MnF2
+#%%<END TEST_INFO>
+
+

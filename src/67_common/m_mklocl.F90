@@ -765,6 +765,7 @@ end subroutine mklocl_recipspace
 !!    are REAL, if 2, COMPLEX
 !!  gmet(3,3)=reciprocal space metric (Bohr**-2)
 !!  gsqcut=cutoff G**2 for included G s in fft box.
+!!  icutcoul= type of Coulomb cutoff to apply
 !!  idir=direction of atomic displacement (=1,2 or 3 : displacement of
 !!    atom ipert along the 1st, 2nd or 3rd axis).
 !!  ipert=number of the atom being displaced in the frozen-phonon
@@ -779,7 +780,9 @@ end subroutine mklocl_recipspace
 !!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phase information.
 !!  qgrid(mqgrid)=grid of q points from 0 to qmax.
 !!  qphon(3)=wavevector of the phonon
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  ucvol=unit cell volume (Bohr**3).
+!!  vcutgeo(3)= array to describe the geometry of the Coulomb cutoff
 !!  vlspl(mqgrid,2,ntypat)=spline fit of q^2 V(q) for each type of atom.
 !!  xred(3,natom)=reduced atomic coordinates
 !!
@@ -789,20 +792,22 @@ end subroutine mklocl_recipspace
 !!
 !! SOURCE
 
-subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
-& mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,ph1d,qgrid,qphon,ucvol,vlspl,vpsp1,xred)
+subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,icutcoul,idir,ipert,&
+& mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,nkpt,&
+& ntypat,n1,n2,n3,ph1d,qgrid,qphon,rcut,rprimd,ucvol,vcutgeo,vlspl,vpsp1,xred,&
+& zion) !Optional
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
- real(dp),intent(in) :: gsqcut,ucvol
+ integer,intent(in) :: cplex,icutcoul,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,nkpt,ntypat
+ real(dp),intent(in) :: gsqcut,rcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: atindx(natom),nattyp(ntypat),ngfft(18)
  real(dp),intent(in) :: gmet(3,3),ph1d(2,(2*n1+1+2*n2+1+2*n3+1)*natom)
- real(dp),intent(in) :: qgrid(mqgrid),qphon(3),vlspl(mqgrid,2,ntypat)
+ real(dp),intent(in) :: qgrid(mqgrid),qphon(3),rprimd(3,3),vcutgeo(3),vlspl(mqgrid,2,ntypat)
  real(dp),intent(in) :: xred(3,natom)
+ real(dp),intent(in),optional :: zion(ntypat)
  real(dp),intent(out) :: vpsp1(cplex*nfft)
 
 !Local variables -------------------------
@@ -810,7 +815,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
  integer :: i1,i2,i3,ia1,iatom,id1,id2,id3,ig1,ig2,ig3,ii,ii1,im=2
  integer :: itypat,jj,re=1
  real(dp),parameter :: tolfix=1.000000001_dp
- real(dp) :: aa,bb,cc,cutoff,dd,diff,dq,dq2div6,dqdiv6,dqm1,gmag,gq1
+ real(dp) :: aa,bb,cc,cutoff,dd,diff,dq,dq2div6,dqdiv6,dqm1,facg0,gmag,gq1
  real(dp) :: gq2,gq3,gsquar,phqim,phqre
  real(dp) :: qxred2pi,sfi,sfr,vion1,xnorm
  logical :: qeq0
@@ -818,12 +823,14 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
  integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gq(3)
+ real(dp),allocatable :: gcutoff(:)
  real(dp),allocatable :: work1(:,:)
 ! *********************************************************************
 
  iatom=ipert
 
- if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 .or. iatom==natom+5)then
+ if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 &
+& .or. iatom==natom+5 .or. iatom==natom+6 .or. iatom==natom+6 .or. (iatom>natom+11.and.iatom<=2*natom+11))then
 
 !  (In case of d/dk or an electric field, or magnetic (Zeeman) field->[natom+5] SPr deb )
    vpsp1(1:cplex*nfft)=zero
@@ -866,6 +873,9 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
    phqim=sin(qxred2pi)
    ii=0
 
+!  Initialize Gcut-off array from m_gtermcutoff
+   call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo,qpt=qphon)
+
    do i3=1,n3
      ig3=i3-(i3/id3)*n3-1
      gq3=dble(ig3)+qphon(3)
@@ -878,9 +888,13 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 
 !        Note the lower limit of the next loop
          ii1=1
+         facg0=zero
          if(i3==1 .and. i2==1 .and. qeq0 .and. ig2==0 .and. ig3==0)then
            ii1=2
            ii=ii+1
+         end if
+         if(i3==1 .and. i2==1 .and. (.not.qeq0) .and. icutcoul==55 .and. ig2==0 .and. ig3==0)then
+           facg0 = four_pi * zion(itypat) / (two_pi)**2
          end if
          do i1=ii1,n1
            ig1=i1-(i1/id1)*n1-1
@@ -906,8 +920,8 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
              cc = aa*(aa**2-1.0_dp)*dq2div6
              dd = bb*(bb**2-1.0_dp)*dq2div6
              vion1 = (aa*vlspl(jj,1,itypat)+bb*vlspl(jj+1,1,itypat) + &
-&             cc*vlspl(jj,2,itypat)+dd*vlspl(jj+1,2,itypat) ) &
-&             / gsquar
+&             cc*vlspl(jj,2,itypat)+dd*vlspl(jj+1,2,itypat) + facg0 ) &
+&             / gsquar*gcutoff(ii)
 
 !            Phase   G*xred  (complex conjugate) * -i *2pi*(g+q)*vion
              sfr=-phimag_vl3(ig1,ig2,ig3,iatom)*2.0_dp*pi*gq(idir)*vion1
@@ -916,6 +930,8 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
 !            Phase   q*xred  (complex conjugate)
              work1(re,ii)=sfr*phqre+sfi*phqim
              work1(im,ii)=-sfr*phqim+sfi*phqre
+
+             facg0=zero
            end if
 
          end do
@@ -930,6 +946,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
    vpsp1(1:cplex*nfft)=vpsp1(1:cplex*nfft)*xnorm
 
    ABI_FREE(work1)
+   ABI_FREE(gcutoff)
 
 !  End the condition of non-electric-field
  end if
@@ -1427,8 +1444,8 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
  iatom=ipert
 
  optnc_=0; if (present(optnc)) optnc_=optnc
-
- if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 .or. iatom==natom+5)then
+ if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 &
+& .or. iatom==natom+5 .or. iatom==natom+6 .or. (iatom>natom+11.and.iatom<=2*natom+11))then
 
 !  (In case of d/dk or an electric field, or magnetic (Zeeman) field->[natom+5] SPr deb )
    vpsp1dq(1:cplex*nfft)=zero
@@ -1690,7 +1707,8 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 
  iatom=ipert
 
- if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 .or. iatom==natom+5)then
+ if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 &
+& .or. iatom==natom+5 .or. iatom==natom+6 .or. (iatom>natom+11.and.iatom<=2*natom+11))then
 
 !  (In case of d/dk or an electric field, or magnetic (Zeeman) field->[natom+5] SPr deb )
    vpsp1dqdq(1:cplex*nfft)=zero
