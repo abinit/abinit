@@ -1458,7 +1458,7 @@ NCF_CHECK(nf90_put_var(ncid_d2E, nctk_idname(ncid_d2E, 'd2E_block_types'), blkty
  NCF_CHECK(ncerr)
 
  ncerr = nctk_def_arrays(ncid_d3E, [&
-   nctkarr_t('frequencies', "dp",&
+   nctkarr_t('frequency', "dp",&
              'three_dim, number_of_d3E_blocks') &
    &])
  NCF_CHECK(ncerr)
