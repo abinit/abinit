@@ -721,7 +721,8 @@ end subroutine ddb_malloc_d2eig
 !! FUNCTION
 !!  Set the q-point wavevector for a certain block.
 !!  In case of 3rd order derivatives, three q-points need to be specified
-!!  with the constrain q1 + q2 + q3 = 0.
+!!  with the constraint q1 + q2 + q3 = 0 (not checked).
+!!  The norm is set to one automatically.
 !!
 !! INPUTS
 !!  iblok=index of the block being set.
@@ -743,17 +744,17 @@ subroutine ddb_set_qpt(ddb, iblok, qpt, qpt2, qpt3)
  real(dp), intent(in),optional :: qpt2(3), qpt3(3)
 ! ************************************************************************
 
+ ddb%qpt(:,iblok)=zero
+ ddb%nrm(:,iblok)=one
+
  ddb%qpt(1:3,iblok) = qpt(1:3)
- ddb%nrm(1,iblok) = one
 
  if (present(qpt2)) then
    ddb%qpt(4:6,iblok) = qpt2(1:3)
-   ddb%nrm(2,iblok) = one
  end if
 
  if (present(qpt3)) then
    ddb%qpt(7:9,iblok) = qpt3(1:3)
-   ddb%nrm(3,iblok) = one
  end if
 
 end subroutine ddb_set_qpt
@@ -766,9 +767,9 @@ end subroutine ddb_set_qpt
 !! ddb_set_omega
 !!
 !! FUNCTION
-!!  Set the q-point wavevector for a certain block.
-!!  In case of 3rd order derivatives, three q-points need to be specified
-!!  with the constrain q1 + q2 + q3 = 0.
+!!  Set the frequencies for a certain block.
+!!  In case of 3rd order derivatives, three frequencies need to be specified
+!!  with the constraint omegaq1 + omega2 + omega3 = 0 (not checked).
 !!
 !! INPUTS
 !!  iblok=index of the block being set.
@@ -789,6 +790,9 @@ subroutine ddb_set_omega(ddb, iblok, omega, omega2, omega3)
  integer,intent(in) :: iblok
 
 ! ************************************************************************
+
+ ddb%omega(:,iblok)=zero
+
  ddb%omega(1,iblok) = omega
  if (present(omega2)) ddb%omega(2,iblok) = omega2
  if (present(omega3)) ddb%omega(3,iblok) = omega3
@@ -5522,8 +5526,9 @@ subroutine ddb_write_nc(ddb, ddb_hdr, filename, comm, with_psps)
      omegas(2) = ddb%omega(2,iblok)
      omegas(3) = ddb%omega(3,iblok)
 
+
      ncerr = nf90_put_var(ncid_d3E, nctk_idname(ncid_d3E,&
-                            'frequencies'),&
+                            'frequency'),&
                             omegas,&
                             start=[1,iblok_d3E])
      NCF_CHECK(ncerr)
@@ -5797,7 +5802,7 @@ subroutine ddb_read_d3E_nc(ddb, ncid, iblok, iblok_d3E, ddb_version)
  NCF_CHECK(ncerr)
  ddb%nrm(:,iblok) = nrm(:)
  if (ddb_version>=cvrsio9_new) then
-   ncerr = nf90_get_var(ncid_d3E, nctk_idname(ncid_d3E, 'frequencies'),qpt,start=[1,iblok_d3E])
+   ncerr = nf90_get_var(ncid_d3E, nctk_idname(ncid_d3E, 'frequency'),omega,start=[1,iblok_d3E],count=[3,1])
    NCF_CHECK(ncerr)
    ddb%omega(1:3,iblok)=omega(:)
  else
