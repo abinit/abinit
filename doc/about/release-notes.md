@@ -1,7 +1,7 @@
 ## v10.6
 
 Version 10.6, released on Feb 6, 2026.
-<!-- Release notes updated on Mar 11, 2026. -->
+<!-- Release notes updated on May 9, 2026. -->
 
 These release notes
 are relative to modifications/improvements of ABINIT v10.6 with respect to v10.4.
@@ -13,13 +13,14 @@ MR1276, 1277, 1278, 1280, 1288 will be included in v10.8 . Perhaps MR 1282 if no
 For release v10.6.3, also includes MR 1279 and 1281.
 MR 1284 and 1286 have been cherry-picked to 10.6.5 (perhaps also earlier ones, but I did not note ...)
 For release v10.6.5, also includes MR 1283, 1285, 1287, 1289 to 1292.
+For release v10.6.7, also includes MR 1294, 1297, 1299, 1300, 1301, 1303, 1306-1310, 1315, 1321, 1324.
 -->
 
-Many thanks to the contributors to the ABINIT project between April 2025 and March 2026 !
+Many thanks to the contributors to the ABINIT project between April 2025 and May 2026 !
 The list of contributors includes:
 
 B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, A. Blanchet, J. Boust, F. Brieuc, F. Bruneval,
-E. Castiel, F. Gendron, G. Geneste, M. Giantomassi, O. Gingras, X. Gonze, O. Mattelaer, G. Petretto,
+E. Castiel, F. Gendron, G. Geneste, M. Giantomassi, O. Gingras, X. Gonze, H. Lebrun, O. Mattelaer, G. Petretto,
 S. Ponce, S. Rostami, M. Royo, M. Sarraute, Le Shu, M. Torrent, Hsiaoyi Tsai, M. Verstraete, Xu He, A. Zabalo, J. Zwanziger.
 
 It is worthwhile to read carefully all the modifications that are mentioned in the present file,
@@ -254,7 +255,7 @@ By J.-M. Beuken (MR1213, 1267)
 * Fix CUDA 13 support (clockRate no longer in deviceProp)
 * Fix GPU memory leak in lobpcg2
 
-By M. Sarraute (MR1196, 1204, 1234, 1244, 1248, 1254, 1264)
+By M. Sarraute (MR1196, 1204, 1234, 1244, 1248, 1254, 1264, 1292, )
 
 **C.5** Replace complex(dpc) with complex(dp).  Remove gwpc and spc; use gwp and sp instead. By M. Giantomassi (MR1235)
 
@@ -453,6 +454,21 @@ By L. Baguet (MR1269)
 * Fix hist.nc file for PIMD calculations, writing correct temperature at correct time step. From M. Torrent and G. Geneste. (MR1268).
 * Small fix occuring with mGGA, big npw, threads and intel 19. L. Baguet (MR1272)
 * Do not check libxc fortran interface in configure as it is not used by the code. L. Baguet (MR1279).
+* FIx buffer overflow on GPU name + Avoid map of a zero-sized array. M. Sarraute (MR1292)
+* More compilation fixes for LLVM/GCC + 2 bug fixes. M. Sarraute (MR1294)
+* Fix fourwf timers in prep_fourwf + fix GEMM nonlop projectors slicing. M. Sarraute (MR1297)
+* Several fixes to improve compilation on up-to-date systems. M. Torrent (MR1299)
+* Correct error propagation in SCF loop and atomic dynamic when using threads. L. Baguet (MR1300)
+* Minimal fix for chkinput when eph_task == 2 (gkk). H. Lebrun (MR1301)
+* Fix cprj_in_memory nattyp=0. L. Baguet (MR1303)
+* Fix YAML output with CRAY + Fix GEMM nonlop projectors slicing for derivatives. M. Sarraute (MR1306)
+* Fix a typo in doc that prevented the variable xc_denpos from being displayed. M. Torrent (MR1307)
+* Fix Autotools compilation with LLVM and OpenMP offload. M. Sarraute (MR1308)
+* Changes to accomodate CMake and abinit-fallbacks-v10.6. M. Torrent and J.-M. Beuken (MR1309)
+* Fix integer overflow in xmpi_largetype_create. M. Sarraute (MR1310)
+* Some improvements of CMake BS to make the detection of hdf5/netcdf easier. M. Torrent (MR1315)
+* Fixes around fock_getghc with GPU. M. Sarraute (MR1321)
+* Correct nonlinear to write netcdf DDB format with iomode=3. L. Baguet (MR1324) 
 
 
 * * *
