@@ -908,11 +908,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ! Note that nw_nk depends on bstart_kq and bstop_kq so nw_nk depends on bands at _kq.
      nw_nk = 1 + (bstop_kq - bstart_kq + 1)
      nw_mkq = 1 + (bstop_k - bstart_k + 1)
-     call wrtout(units, " GWPT frequency convolution is evaluated at $\ee_\nk$ and $\ee_\mkq$ and the average is taken.")
+     call wrtout(units, " GWPT frequency convolution is evaluated at E_nk and E_mkq$ and the average is taken.")
    case (2)
      nw_nk = 1
      nw_mkq = (bstop_k - bstart_k + 1)
-     call wrtout(units, " GWPT frequency convolution is evaluated at $\ee_\nk$.")
+     call wrtout(units, " GWPT frequency convolution is evaluated at E_nk.")
    case default
      ABI_ERROR(sjoin("Invalid gwpt_wmode:", itoa(dtset%gwpt_wmode)))
    end select
