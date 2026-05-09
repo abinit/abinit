@@ -1379,8 +1379,8 @@ end function gstore_same_nbands
 !!  Notes on use cases:
 !!      For ZPR calculations, the current schemes are sufficient.
 !!      For tasks comparing g between GWPT and FD, the current schemes are not very convenient.
-!!      For instance, to compare g at k=q=Γ for the first 8 bands of diamond,
-!!      ideally we would restrict the calculation to nb_k = nb_kq = {1..8} and k=q=Γ. But currently
+!!      For instance, to compare g at k=q=Gamma for the first 8 bands of diamond,
+!!      ideally we would restrict the calculation to nb_k = nb_kq = {1..8} and k=q=Gamma. But currently
 !!
 !!  Using gstore_brange triggers unnecessary k-point calculations (ngkpt is usually a dense k-grid).
 !!
@@ -4439,11 +4439,10 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
  integer,parameter :: master = 0
  integer :: my_rank, ncid, spin, spin_ncid, nproc, ierr, fform, max_nb, ib, natom, natom3, ib_m, ib_n !, varid
  integer :: max_nq, max_nk, ncerr, my_is, my_iq, iq_glob, my_ik, ik_glob
- integer :: nb_k, nb_kq, nb_k_file, nb_kq_file, gstore_cplex, ip1, ip2
- integer :: my_ip, ipert, iq_ibz, iq_bz, isym_q, trev_q, tsign_q, ii, im_kq, in_k
+ integer :: nb_k, nb_kq, nb_k_file, nb_kq_file, gstore_cplex !, ip1, ip2
+ integer :: my_ip, ipert, iq_ibz, iq_bz, isym_q, trev_q, tsign_q, ii !, im_kq
  real(dp),parameter :: G_SMALL = tol8
- real(dp) :: cpu, wall, gflops, wqnu, gdw2
- complex(dp) :: cfact
+ real(dp) :: cpu, wall, gflops, wqnu
  logical :: isirr_q, from_atm_to_nu, has_iv1p_comm, read_ks, has_both_g
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: gstore_cryst
@@ -4647,9 +4646,9 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
  ! If has_both_g is true, we allocate and read both the KS and the GWPT matrix elements.
  read_ks = gstore%gtype == "gwpt"
  has_both_g = gstore%gtype == "gwpt"
- print *, "gstore%gtype:", trim(gstore%gtype)
- print *, "read_ks:", read_ks
- print *, "has_both_g:", has_both_g
+ !print *, "gstore%gtype:", trim(gstore%gtype)
+ !print *, "read_ks:", read_ks
+ !print *, "has_both_g:", has_both_g
 
  ! Distribute spins, create indirect mapping to spin index and init gstore%brange_k_spin
  call gstore%distribute_spins__(ebands%mband, brange_kq_spin, brange_k_spin, nproc_spin, comm_spin, comm)
