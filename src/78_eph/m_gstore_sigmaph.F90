@@ -263,7 +263,8 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
  logical :: q_is_gamma, intra_band, same_band, isirr_k, isirr_kq, stern_use_cache, print_time_kk, print_time_qq
  complex(dp) :: cfact !, sig_cplx
  character(len=5000) :: msg, qq_bz_string !, kk_string
- character(len=fnlen) :: path, gtype
+ character(len=fnlen) :: path
+ character(len=abi_slen) :: gtype
  type(gaps_t) :: gaps
  type(lgroup_t) :: lg_myk
  type(gstore_t) :: gstore
@@ -933,10 +934,10 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
              end if
 
              ! Note the weight_q included in gkq2
-             if (dtset%gwpt_g2mode == g2mode_AA) then
+             if (with_cplex == 1) then
                gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
 
-             else if (dtset%gwpt_g2mode == g2mode_KS_GWPT) then
+             else
                gkq2 = weight_q * real(conjg(gqk%my_g_ks(my_ip, im_kq, my_iq, in_k, my_ik)) * &
                                             gqk%my_g   (my_ip, im_kq, my_iq, in_k, my_ik))
              end if
