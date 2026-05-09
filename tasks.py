@@ -329,56 +329,65 @@ def bisect(ctx: Context, start: str, end: str, runtests_args: str) -> None:
     high = len(commits) - 1
     first_bad = end
 
-    try:
-        while low <= high:
-            mid = (low + high) // 2
-            current_commit = commits[mid]
+    with open("_bisection.txt", "w") as log:
+        log.write(f"Bisection started: start (good)={start}, end (bad)={end}\n")
+        log.write(f"Number of commits to check: {len(commits)}\n\n")
 
-            cprint(
-                f"\n--- Checking commit {mid+1}/{len(commits)}: {current_commit} ---",
-                color="cyan",
-            )
+        try:
+            while low <= high:
+                mid = (low + high) // 2
+                current_commit = commits[mid]
 
-            # 1. Checkout
-            ctx.run(f"git checkout {current_commit}", hide=True)
+                msg = f"\n--- Checking commit {mid+1}/{len(commits)}: {current_commit} ---"
+                cprint(msg, color="cyan")
+                log.write(msg + "\n")
 
-            # 2. Compile (required for runtests.py)
-            cprint("Compiling...", color="yellow")
-            make_res = ctx.run("invoke makedeep", warn=True)
-            if not make_res.ok:
-                cprint(
-                    f"Compilation failed for {current_commit}. Skipping this commit.",
-                    color="red",
-                )
-                # Move the range but this is a naive skip.
-                low = mid + 1
-                continue
+                # 1. Checkout
+                ctx.run(f"git checkout {current_commit}", hide=True)
 
-            # 3. Run tests
-            top = find_top_build_tree(".", with_abinit=True)
-            with cd(os.path.join(top, "tests")):
-                cmd = f"./runtests.py {runtests_args}"
-                cprint(f"Running tests: {cmd}", color="yellow")
-                test_res = ctx.run(cmd, warn=True)
-
-                if test_res.ok:
-                    cprint(f"Commit {current_commit} is GOOD", color="green")
+                # 2. Compile (required for runtests.py)
+                cprint("Compiling...", color="yellow")
+                make_res = ctx.run("invoke makedeep", warn=True)
+                if not make_res.ok:
+                    skip_msg = f"Compilation failed for {current_commit}. Skipping this commit."
+                    cprint(skip_msg, color="red")
+                    log.write(skip_msg + "\n")
                     low = mid + 1
-                else:
-                    cprint(f"Commit {current_commit} is BAD", color="red")
-                    first_bad = current_commit
-                    high = mid - 1
+                    continue
 
-        cprint(
-            f"\nResult: The bug was introduced in commit {first_bad}", color="magenta"
-        )
-        ctx.run(f"git show --summary {first_bad}")
+                # 3. Run tests
+                top = find_top_build_tree(".", with_abinit=True)
+                with cd(os.path.join(top, "tests")):
+                    cmd = f"./runtests.py {runtests_args}"
+                    cprint(f"Running tests: {cmd}", color="yellow")
+                    test_res = ctx.run(cmd, warn=True)
 
-    except Exception as e:
-        cprint(f"An error occurred during bisection: {e}", color="red")
+                    if test_res.ok:
+                        cprint(f"Commit {current_commit} is GOOD", color="green")
+                        log.write(f"{current_commit}: GOOD\n")
+                        low = mid + 1
+                    else:
+                        cprint(f"Commit {current_commit} is BAD", color="red")
+                        log.write(f"{current_commit}: BAD\n")
+                        first_bad = current_commit
+                        high = mid - 1
 
-    finally:
-        cprint("\nBisection finished.", color="yellow")
+            res_msg = f"\nResult: The bug was introduced in commit {first_bad}"
+            cprint(res_msg, color="magenta")
+            log.write(res_msg + "\n")
+
+            show_res = ctx.run(f"git show --summary {first_bad}", hide=True)
+            log.write("\nCommit Details:\n")
+            log.write(show_res.stdout)
+            ctx.run(f"git show --summary {first_bad}")
+
+        except Exception as e:
+            err_msg = f"An error occurred during bisection: {e}"
+            cprint(err_msg, color="red")
+            log.write(err_msg + "\n")
+
+        finally:
+            cprint("\nBisection finished.", color="yellow")
 
 
 @task

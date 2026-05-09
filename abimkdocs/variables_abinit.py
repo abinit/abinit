@@ -25028,7 +25028,8 @@ Variable(
     text=r"""
 This variable can be used to restart an EPH calculation.
 At present, this feature is supported only when computing the electron-phonon self-energy ([[eph_task]] = 4, -4)
-and solving the variational polaron equations ([[eph_task]] = 13).
+or when solving the variational polaron equations ([[eph_task]] = 13).
+or when computing the GSTORE.nc file ([[eph_task]] 11, 17),
 
 In the first case, the code will look for a **pre-existing** SIGEPH.nc file and will compute the remaining k-points.
 Note that the restart in done **in-place** that is the output SIGEPH.nc is used as input of the calculation so there is no
@@ -25036,6 +25037,11 @@ need to specify getsigeph or irdsigeph input variables.
 
 In the second case, the code will look for a **pre-existing** VPQ.nc file and continue the optimization
 process from the last iteration available in the netcdf file.
+In this case the default value of [[eph_restart]] is 0, so restart must be activated explictly in the input file
+
+In the third case, the code will look for a **pre-existing** GSTORE.nc file and continue the computation of the missing elements.
+This feature is activated by default.
+
 
 !!! note
 
