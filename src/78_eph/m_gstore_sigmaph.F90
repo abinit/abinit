@@ -66,7 +66,7 @@ module m_gstore_sigmaph
  use m_dtset,          only : dataset_type
  use m_dtfil,          only : datafiles_type
  use m_wfd,            only : wfd_t
- use m_gstore,         only : gstore_t, gqk_t
+ use m_gstore,         only : gstore_t, gqk_t, gstore_read_gtype
 
  implicit none
 
@@ -263,7 +263,7 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
  logical :: q_is_gamma, intra_band, same_band, isirr_k, isirr_kq, stern_use_cache, print_time_kk, print_time_qq
  complex(dp) :: cfact !, sig_cplx
  character(len=5000) :: msg, qq_bz_string !, kk_string
- character(len=fnlen) :: path
+ character(len=fnlen) :: path, gtype
  type(gaps_t) :: gaps
  type(lgroup_t) :: lg_myk
  type(gstore_t) :: gstore
@@ -306,17 +306,25 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call wrtout(units, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
 
- ! Decide if self-energies should be computed with |g|^2 or g^KS g^GWPT.
- select case (dtset%gwpt_g2mode)
- case (g2mode_AA)
+ call gstore_read_gtype(dtfil%filgstorein, gtype, comm)
+
+ with_cplex = 1
+ if (gtype == "gwpt") then
+   ! Decide if self-energies should be computed with |g|^2 or g^KS g^GWPT.
+   select case (dtset%gwpt_g2mode)
+   case (g2mode_AA)
+     with_cplex = 1
+     call wrtout(units, " Using e-ph self-energy expression with |g|^2")
+   case (g2mode_KS_GWPT)
+     with_cplex = 2
+     call wrtout(units, " Using e-ph self-energy expression with g^*_KS g_GWPT")
+   case default
+     ABI_ERROR(sjoin("Invalid dtset%gwpt_g2mode:", itoa(dtset%gwpt_g2mode)))
+   end select
+ else
    with_cplex = 1
    call wrtout(units, " Using e-ph self-energy expression with |g|^2")
- case (g2mode_KS_GWPT)
-   with_cplex = 2
-   call wrtout(units, " Using e-ph self-energy expression with g^*_KS g_GWPT")
- case default
-   ABI_ERROR(sjoin("Invalid dtset%gwpt_g2mode:", itoa(dtset%gwpt_g2mode)))
- end select
+ end if
 
  ! Init gstore and MPI grid from file and dtset.
  ! The Fan-Migdal SE requires |g(k,q)|^2 as well as g2DW in the phonon representation.

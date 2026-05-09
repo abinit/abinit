@@ -300,6 +300,88 @@ def runemall(
 
 
 @task
+def bisect(ctx: Context, start: str, end: str, runtests_args: str) -> None:
+    """
+    Perform a bisection search between two commits to find where a bug was introduced.
+
+    Args:
+        ctx: Invoke context.
+        start: The last known GOOD commit hash.
+        end: The first known BAD commit hash.
+        runtests_args: String containing arguments for `runtests.py`.
+    """
+    from tests.pymods.termcolor import cprint
+
+    cprint(f"Bisection started: start (good)={start}, end (bad)={end}", color="yellow")
+
+    # Get the list of commits between start and end.
+    # git rev-list end ^start gives commits from start to end.
+    res = ctx.run(f"git rev-list --reverse {end} ^{start}", hide=True)
+    commits = res.stdout.strip().split("\n")
+
+    if not commits:
+        cprint("No commits found between the specified points.", color="red")
+        return
+
+    cprint(f"Testing {len(commits)} commits...", color="yellow")
+
+    low = 0
+    high = len(commits) - 1
+    first_bad = end
+
+    try:
+        while low <= high:
+            mid = (low + high) // 2
+            current_commit = commits[mid]
+
+            cprint(
+                f"\n--- Checking commit {mid+1}/{len(commits)}: {current_commit} ---",
+                color="cyan",
+            )
+
+            # 1. Checkout
+            ctx.run(f"git checkout {current_commit}", hide=True)
+
+            # 2. Compile (required for runtests.py)
+            cprint("Compiling...", color="yellow")
+            make_res = ctx.run("invoke makedeep", warn=True)
+            if not make_res.ok:
+                cprint(
+                    f"Compilation failed for {current_commit}. Skipping this commit.",
+                    color="red",
+                )
+                # Move the range but this is a naive skip.
+                low = mid + 1
+                continue
+
+            # 3. Run tests
+            top = find_top_build_tree(".", with_abinit=True)
+            with cd(os.path.join(top, "tests")):
+                cmd = f"./runtests.py {runtests_args}"
+                cprint(f"Running tests: {cmd}", color="yellow")
+                test_res = ctx.run(cmd, warn=True)
+
+                if test_res.ok:
+                    cprint(f"Commit {current_commit} is GOOD", color="green")
+                    low = mid + 1
+                else:
+                    cprint(f"Commit {current_commit} is BAD", color="red")
+                    first_bad = current_commit
+                    high = mid - 1
+
+        cprint(
+            f"\nResult: The bug was introduced in commit {first_bad}", color="magenta"
+        )
+        ctx.run(f"git show --summary {first_bad}")
+
+    except Exception as e:
+        cprint(f"An error occurred during bisection: {e}", color="red")
+
+    finally:
+        cprint("\nBisection finished.", color="yellow")
+
+
+@task
 def makemake(ctx: Context) -> None:
     """
     Invoke the `makemake` script to rebuild the build system.
