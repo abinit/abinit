@@ -30,6 +30,8 @@ sources = [
  "m_ddb_flexo.F90",
  "m_ddb_internalstr.F90",
  "m_ddb_interpolate.F90",
+ "m_ddb_magpen.F90",
+ "m_ddb_omega_interpol.F90",
  "m_ddb_piezo.F90",
  "m_eliashberg_1d.F90",
  "m_elphon.F90",

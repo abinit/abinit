@@ -16,7 +16,7 @@ In this tutorial you will learn how to get the following physical properties (of
 
 In order to learn the use of the associated codes *mrgddb* and *anaddb*,
 to produce phonon band structures and the associated
-thermodynamical properties, please consult the [second tutorial on DFPT](/tutorial/rf2).
+thermodynamical properties, please consult the [second tutorial on DFPT](../tutorial/rf2.md).
 
 It is strongly recommended to discover this tutorial simultaneously with the DFPT (respfn) user guide.
 You might start by reading [[help:respfn#intro|sections 0 and the first paragraph of section 1]] of this user guide.
@@ -50,7 +50,7 @@ cp ../trf1_1.abi .
 Note that two pseudopotentials are mentioned in the input file: one
 for the Aluminum atom, and one for the Arsenic atom.
 The first listed in *trf1_1.abi* (for Al) will define the first type of atom of the input file
-(see input variables [[typat]] and [[ntypat]]) and the second (for As) will define the second type of atom. 
+(see input variables [[typat]] and [[ntypat]]) and the second (for As) will define the second type of atom.
 It might be the first time that you encounter this situation (more than one type of atoms) in the
 tutorials, at variance with the first four basic tutorials.
 !!! warning
@@ -122,7 +122,7 @@ atom along the first axis of the reduced coordinates.
 You can copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_2.abi* in *Work_rf1*.
 This is your input file. You should open it and briefly look at the two
 changes with respect to *trf1_1.abi*:
-the change of [[xred]], and the reading of the wavefunction file, using the [[irdwfk]] input variable. 
+the change of [[xred]], and the reading of the wavefunction file, using the [[irdwfk]] input variable.
 !!! warning
     You need to copy trf1_1o_WFK to trf1_2i_WFK so Abinit can find the wavefunction during the calculation.
 
@@ -135,11 +135,11 @@ increases a lot, and of course, the CPU time.
 From this run, it is possible to get the values of the total energy, and the
 value of the gradient of the total energy (dE) with respect to change of reduced coordinate (dt):
 
-	 rms dE/dt=  3.5517E-03; max dE/dt=  5.0080E-03; dE/dt below (all hartree)
-	    1       0.005007986445      0.002526333145      0.002526333145
-	    2      -0.005007927934     -0.002526305645     -0.002526305645
-            ...
-	total_energy        : -9.76586978750721E+00
+        rms dE/dt=  3.5517E-03; max dE/dt=  5.0080E-03; dE/dt below (all hartree)
+           1       0.005007986445      0.002526333145      0.002526333145
+           2      -0.005007927934     -0.002526305645     -0.002526305645
+           ...
+        total_energy        : -9.76586978750721E+00
 
 The change of reduced coordinate ([[xred]]) of the Al atom along the first axis was
 rather small (1/1000 = 0.001), and we can make an estimate of the second derivative of
@@ -167,8 +167,8 @@ simple higher-order estimation, as we will see later.
 The results of this calculation are as follows:
 
      rms dE/dt=  7.1249E-03; max dE/dt=  1.0016E-02; dE/dt below (all hartree)
-	1       0.010016404892      0.005097557910      0.005097557910
-    	2      -0.010016285027     -0.005097505086     -0.005097505086
+        1       0.010016404892      0.005097557910      0.005097557910
+        2      -0.010016285027     -0.005097505086     -0.005097505086
         ...
      total_energy        : -9.76586227537498E+00
 
@@ -209,7 +209,7 @@ into forces, and specified in cartesian coordinates, as can be seen in the
 output file for the small displacement:
 
      cartesian forces (hartree/bohr) at end:
-	1     -0.00001684430130    -0.00094404759278    -0.00094404759278
+        1     -0.00001684430130    -0.00094404759278    -0.00094404759278
     	2      0.00001684430130     0.00094404759278     0.00094404759278
 
 
@@ -475,11 +475,11 @@ Much later, the dielectric tensor is given:
        1    4   1    4         9.7501435881        -0.0000000000
        1    4   2    4         0.0000000000        -0.0000000000
        1    4   3    4         0.0000000000        -0.0000000000
-    
+
        2    4   1    4         0.0000000000        -0.0000000000
        2    4   2    4         9.7501435881        -0.0000000000
        2    4   3    4         0.0000000000        -0.0000000000
-    
+
        3    4   1    4         0.0000000000        -0.0000000000
        3    4   2    4         0.0000000000        -0.0000000000
        3    4   3    4         9.7501435881        -0.0000000000
@@ -517,7 +517,7 @@ Finally, the phonon frequencies are computed:
      Phonon frequencies in cm-1    :
     -  5.617914E-01  5.617914E-01  5.617917E-01  3.442606E+02  3.442606E+02
     -  3.442606E+02
-    
+
       Phonon at Gamma, with non-analyticity in the
       direction (cartesian coordinates)  1.00000  0.00000  0.00000
      Phonon energies in Hartree :
@@ -526,7 +526,7 @@ Finally, the phonon frequencies are computed:
      Phonon frequencies in cm-1    :
     -  5.617914E-01  5.617914E-01  8.875575E-01  3.442606E+02  3.442606E+02
     -  3.796470E+02
-    
+
       Phonon at Gamma, with non-analyticity in the
       direction (cartesian coordinates)  0.00000  1.00000  0.00000
      Phonon energies in Hartree :
@@ -535,7 +535,7 @@ Finally, the phonon frequencies are computed:
      Phonon frequencies in cm-1    :
     -  5.617914E-01  5.617917E-01  8.875573E-01  3.442606E+02  3.442606E+02
     -  3.796470E+02
-    
+
       Phonon at Gamma, with non-analyticity in the
       direction (cartesian coordinates)  0.00000  0.00000  1.00000
      Phonon energies in Hartree :
@@ -574,9 +574,9 @@ Still, the agreement of our calculation with the theoretical result is not very 
 better k point sampling (8x8x8), with [[ecut]] = 6 Hartree, reduces the value to 9.89.
 Changing pseudopotentials finally improves the agreement: with the
 much harder *al.psp8* and *as.psp8* pseudopotentials with adequate
-[[ecut]] = 20 Hartree and 8x8x8 Monkhorst-Pack sampling, we reach a value of 9.30. 
+[[ecut]] = 20 Hartree and 8x8x8 Monkhorst-Pack sampling, we reach a value of 9.30.
 Note that we need to change [[ixc]]=-1012 and consider [[nband]]=9, since there is 3 electrons for Al and 15 electrons for As moving in these pseudopotential.
-This information can be found by searching zion in the .abo of any file using the pseudopotentials. 
+This information can be found by searching zion in the .abo of any file using the pseudopotentials.
 This illustrates that the dielectric tensor is a much more sensitive quantity than the others.
 
 ## 6 DFPT calculation of phonon frequencies at non-zero q
@@ -620,6 +620,6 @@ close to their values at $\Gamma$ : 344.3 cm$^{-1}$ and 379.6 cm$^{-1}$.
 
 !!! note
     This ABINIT tutorial is now finished.
-    You are advised to go through the [second tutorial on DFPT](/tutorial/rf2) to
+    You are advised to go through the [second tutorial on DFPT](../tutorial/rf2.md) to
     make some post-processing analysis (phonon dispersions, thermodynamical properties, *etc*)
 

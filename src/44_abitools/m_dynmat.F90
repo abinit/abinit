@@ -704,6 +704,7 @@ subroutine cart29(blkflg,blkval,carflg,d2cart,&
  integer :: idir1,idir2,ii,ipert1,ipert2
 !arrays
  integer :: flg1(3),flg2(3)
+ integer :: mflg(3,mpert,3,mpert)
  real(dp) :: vec1(3),vec2(3)
 ! *********************************************************************
 
@@ -796,6 +797,73 @@ subroutine cart29(blkflg,blkval,carflg,d2cart,&
      end do
    end do
  end do
+
+!MRoyo: For magnetic Zeeman perturbations, apply a negative sign to get induced magnetic moments.
+!Macroscopic Zeeman
+ mflg= 0
+ ipert1=natom+5 
+ do idir1=1,3
+   do ipert2= 1, natom+6 !exclude local Zeemans, to be done below
+     do idir2=1,3
+       if (mflg(idir1,ipert1,idir2,ipert2)==0) then
+         do ii=1,2
+           d2cart(ii,idir1,ipert1,idir2,ipert2)=&
+&          -one*d2cart(ii,idir1,ipert1,idir2,ipert2)
+           mflg(idir1,ipert1,idir2,ipert2)=1
+         end do
+       end if
+       if (mflg(idir2,ipert2,idir1,ipert1)==0) then
+         do ii=1,2
+           d2cart(ii,idir2,ipert2,idir1,ipert1)=&
+&          -one*d2cart(ii,idir2,ipert2,idir1,ipert1)
+           mflg(idir2,ipert2,idir1,ipert1)=1
+         end do
+       end if
+     end do
+   end do
+ end do
+
+!Local Zeemans
+ if (mpert>natom+MPERT_MAX) then
+   do ipert1= natom+12,2*natom+11 
+     do idir1=1,3
+       do ipert2= 1, mpert
+         do idir2=1,3
+           if (mflg(idir1,ipert1,idir2,ipert2)==0) then
+             do ii=1,2
+               d2cart(ii,idir1,ipert1,idir2,ipert2)=&
+&              -one*d2cart(ii,idir1,ipert1,idir2,ipert2)
+               mflg(idir1,ipert1,idir2,ipert2)=1
+             end do
+           end if
+           if (mflg(idir2,ipert2,idir1,ipert1)==0) then
+             do ii=1,2
+               d2cart(ii,idir2,ipert2,idir1,ipert1)=&
+&              -one*d2cart(ii,idir2,ipert2,idir1,ipert1)
+               mflg(idir2,ipert2,idir1,ipert1)=1
+             end do
+           end if
+         end do
+       end do
+     end do
+   end do 
+ end if
+
+ !For magnetoelectric and magnetic susceptibility apply a 1/ucvol factor
+ ipert1= natom + 2
+ ipert2= natom + 5 
+ do idir1= 1, 3
+   do idir2= 1, 3
+     do ii=1,2
+       d2cart(ii,idir1,ipert1,idir2,ipert2)=&
+&      d2cart(ii,idir1,ipert1,idir2,ipert2)/ucvol
+       d2cart(ii,idir2,ipert2,idir1,ipert1)=&
+&      d2cart(ii,idir2,ipert2,idir1,ipert1)/ucvol
+       d2cart(ii,idir1,ipert2,idir2,ipert2)=&
+&      d2cart(ii,idir1,ipert2,idir2,ipert2)/ucvol
+     end do 
+   end do
+ end do 
 
 end subroutine cart29
 !!***
@@ -1410,7 +1478,7 @@ end subroutine chneu9
 !!
 !! SOURCE
 
-subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,zero_by_symm)
+subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,zero_by_symm,eta)
 
 !Arguments -------------------------------
 !scalars
@@ -1421,6 +1489,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  integer,intent(inout) :: blkflg(3,mpert,3,mpert)
  real(dp),intent(in) :: qpt(3)
  real(dp),intent(inout) :: d2(2,3,mpert,3,mpert)
+ real(dp),optional,intent(in) :: eta
 
 !Local variables -------------------------
 !scalars
@@ -1428,7 +1497,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  logical :: qzero
  integer :: exch12,found,idir1,idir2,idisy1,idisy2,ipert1,ipert2
  integer :: ipesy1,ipesy2,isgn,isym,ithree,itirev,nblkflg_is_one,noccur,nsym_used,quit,quit1
- real(dp) :: arg1,arg2,im,norm,re,sumi,sumr,xi,xr
+ real(dp) :: arg1,arg2,im,norm,eta_,re,sumi,sumr,xi,xr
 !arrays
  integer,pointer :: sym1_(:,:,:),sym2_(:,:,:)
  real(dp),allocatable :: d2tmp1(:,:,:),d2tmp2(:,:,:),d2work(:,:,:,:,:)
@@ -1456,21 +1525,21 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
    end do
  end if
 
-!Exchange of perturbations
+ eta_=zero; if(present(eta)) eta_=eta
 
 !Consider two cases : either time-reversal symmetry
 !conserves the wavevector, or not
- if(timrev==0)then
+ if(timrev==0.and.abs(eta_)<tol8)then
 
-!  do ipert1=1,mpert  See notes
-   do ipert1=1,min(natom+2,mpert)
+  do ipert1=1,mpert !See notes
+!   do ipert1=1,min(natom+2,mpert)
      do idir1=1,3
 
 !      Since the matrix is hermitian, the diagonal elements are real
        d2(2,idir1,ipert1,idir1,ipert1)=zero
 
-!      do ipert2=1,mpert See notes
-       do ipert2=1,min(natom+2,mpert)
+      do ipert2=1,mpert !See notes
+!       do ipert2=1,min(natom+2,mpert)
          do idir2=1,3
 
            ! FIXME use is_type functions
@@ -1507,11 +1576,11 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
 !  Here, case with time-reversal symmetry
  else
 
-!  do ipert1=1,mpert See notes
-   do ipert1=1,min(natom+2,mpert)
+  do ipert1=1,mpert !See notes
+!   do ipert1=1,min(natom+2,mpert)
      do idir1=1,3
-!      do ipert2=1,mpert See notes
-       do ipert2=1,min(natom+2,mpert)
+      do ipert2=1,mpert !See notes
+!       do ipert2=1,min(natom+2,mpert)
          do idir2=1,3
            d2(2,idir1,ipert1,idir2,ipert2)=zero
 
@@ -1546,8 +1615,8 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  do ithree=1,3
 
 !  Big loop on all elements
-!  do ipert1=1,mpert See notes
-   do ipert1=1,min(natom+2,mpert)
+  do ipert1=1,mpert !See notes
+!   do ipert1=1,min(natom+2,mpert)
 
 !    Select the symmetries according to pertubation 1
      if (ipert1<=natom)then
@@ -1557,8 +1626,8 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
      end if
 
      do idir1=1,3
-!      do ipert2=1,mpert See notes
-       do ipert2=1,min(natom+2,mpert)
+      do ipert2=1,mpert !See notes
+!       do ipert2=1,min(natom+2,mpert)
 
     !    Select the symmetries according to pertubation 2
          if (ipert2<=natom)then
@@ -1668,7 +1737,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
                      end do
                    end if
 
-!                  In case zero_by_symm==0, the computed materix element must be associated to at least one really computed matrix element
+!                  In case zero_by_symm==0, the computed matrix element must be associated to at least one really computed matrix element
                    if(zero_by_symm==0 .and. nblkflg_is_one==0)then
                      found=0
                    endif
@@ -1756,14 +1825,16 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
    ABI_MALLOC(d2tmp2,(2,3,3))
    ABI_MALLOC(d2work,(2,3,mpert,3,mpert))
    d2work(:,:,:,:,:)=d2(:,:,:,:,:)
-   do ipert1=1,min(natom+2,mpert)
+   do ipert1=1,mpert
+   !do ipert1=1,min(natom+2,mpert)
      if ((ipert1==natom+1.or.ipert1==natom+10.or.ipert1==natom+11).or.(ipert1==natom+2.and.(.not.qzero))) cycle
      if (ipert1<=natom)then
        sym1_ => symrec
      else
        sym1_ => symrel
      end if
-     do ipert2=1,min(natom+2,mpert)
+     do ipert2=1,mpert
+     !do ipert2=1,min(natom+2,mpert)
 !      if (any(blkflg(:,ipert1,:,ipert2)==0)) cycle
        if ((ipert2==natom+1.or.ipert2==natom+10.or.ipert2==natom+11).or.(ipert2==natom+2.and.(.not.qzero))) cycle
        if (ipert2<=natom)then
@@ -4614,6 +4685,7 @@ subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 end subroutine sytens
 !!***
 
+
 !----------------------------------------------------------------------
 
 !!****f* m_dynmat/axial9
@@ -5030,6 +5102,8 @@ end subroutine gtdyn9
 !! NOTES
 !!   1) One makes the dynamical matrix hermitian...
 !!   2) In case of q=Gamma, only the real part is used.
+!!      (MR: Modified since at finite omega imaginary components may arise 
+!!      also at Gamma in broken time-reversal symmetry crystals)
 !!
 !! SOURCE
 
@@ -5096,7 +5170,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    do i1=1,3*natom
      do i2=1,3*natom
        index=i1+3*natom*(i2-1)
-       displ(2*index)=zero
+       if (abs(displ(2*index)) < tol14) displ(2*index)=zero
      end do
    end do
  end if
@@ -5140,7 +5214,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
            i2=i2+1
            index=i1+3*natom*(i2-1)
            displ(2*index-1)=displ(2*index-1)+four_pi/ucvol*zeff(idir1,ipert1)*zeff(idir2,ipert2)/epsq
-           displ(2*index  )=zero
+           if (abs(displ(2*index)) < tol14) displ(2*index)=zero
          end do
        end do
      end do
@@ -5829,9 +5903,7 @@ subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
                ip= jdir + (jatom-1)*3 + (idir-1)*3*natom + (iatom-1)*9*natom
                ! Real and imaginary part of the interatomic forces
                gam_qpt(1,ip,iqpt) = gam_qpt(1,ip,iqpt) + re*gam_rpt(1,ip,irpt) - im*gam_rpt(2,ip,irpt)
-               !DEBUG
                gam_qpt(2,ip,iqpt) = gam_qpt(2,ip,iqpt) + im*gam_rpt(1,ip,irpt) + re*gam_rpt(2,ip,irpt)
-               !ENDDEBUG
              end do ! end jdir
            end do ! end idir
          end do

@@ -1,10 +1,12 @@
-"""Tools extracted by AbiPy."""
-# TODO: Rationalize modules, merged with pymods
+from __future__ import annotations
 
 import abc
 import os
+import pickle
 import sys
 import tempfile
+from collections.abc import Callable, Iterator
+from typing import IO, Any
 
 from .termcolor import cprint
 
@@ -18,12 +20,12 @@ class lazy_property:
     the result is cached on the instance.
     """
 
-    def __init__(self, func):
+    def __init__(self, func: Callable[[Any], Any]):
         self.__func = func
         from functools import wraps
         wraps(self.__func)(self)
 
-    def __get__(self, inst, inst_cls):
+    def __get__(self, inst: Any | None, inst_cls: type) -> Any:
         if inst is None:
             return self
 
@@ -40,7 +42,7 @@ class lazy_property:
         return value
 
     @classmethod
-    def invalidate(cls, inst, name):
+    def invalidate(cls, inst: Any, name: str) -> None:
         """Invalidate a lazy attribute.
 
         This obviously violates the lazy contract. A subclass of lazy
@@ -71,13 +73,13 @@ class Editor:
         editor: The name of the editor executable (e.g., "vi", "emacs").
             If None, defaults to the $EDITOR environment variable.
     """
-    def __init__(self, editor=None):
+    def __init__(self, editor: str | None = None):
         if editor is None:
             self.editor = os.getenv("EDITOR", "vi")
         else:
             self.editor = str(editor)
 
-    def edit_file(self, fname, lineno=None):
+    def edit_file(self, fname: str, lineno: int | None = None) -> int:
         """
         Open a file in the editor, optionally jumping to a specific line.
 
@@ -101,7 +103,7 @@ class Editor:
 
         return retcode
 
-    def edit_files(self, fnames, ask_for_exit=True):
+    def edit_files(self, fnames: list[str], ask_for_exit: bool = True) -> int:
         """
         Iteratively edit a list of files.
 
@@ -122,7 +124,7 @@ class Editor:
         return exit_status
 
 
-def user_wants_to_exit():
+def user_wants_to_exit() -> bool:
     """Interactive problem, return False if user entered `n` or `no`."""
     try:
         answer = prompt("Do you want to continue [Y/n]")
@@ -132,7 +134,7 @@ def user_wants_to_exit():
     return answer.lower().strip() in ["n", "no"]
 
 
-def prompt(question):
+def prompt(question: str) -> str:
     if sys.version_info >= (3, 0):
         my_input = input
     else:
@@ -142,7 +144,7 @@ def prompt(question):
     return my_input(question)
 
 
-def pprint_table(table, out=sys.stdout, rstrip=False):
+def pprint_table(table: list[list[str]], out: IO[str] = sys.stdout, rstrip: bool = False) -> None:
     """
     Print a 2D table of data with aligned columns.
 
@@ -151,7 +153,7 @@ def pprint_table(table, out=sys.stdout, rstrip=False):
         out: File-like object to write the table to.
         rstrip: If True, remove trailing whitespace from each entry.
     """
-    def max_width_col(table, col_idx):
+    def max_width_col(table: list[list[str]], col_idx: int) -> int:
         """Get the maximum width of the given column index"""
         return max([len(row[col_idx]) for row in table])
 
@@ -174,7 +176,7 @@ def pprint_table(table, out=sys.stdout, rstrip=False):
         out.write("\n")
 
 
-def print_dataframe(frame, title=None, precision=6, sortby=None, file=sys.stdout, display=None):
+def print_dataframe(frame: Any, title: str | None = None, precision: int = 6, sortby: str | list[str] | None = None, file: IO[str] | str = sys.stdout, display: str | None = None) -> str | None:
     """
     Print a pandas DataFrame in a formatted table.
 
@@ -222,7 +224,7 @@ class NotebookWriter: #metaclass=abc.ABCMeta):
 
     Subclasses must provide a concrete implementation of `write_notebook`.
     """
-    def make_and_open_notebook(self, nbpath=None, foreground=False):  # pragma: no cover
+    def make_and_open_notebook(self, nbpath: str | None = None, foreground: bool = False) -> int:  # pragma: no cover
         """
         Generate an jupyter_ notebook and open it in the browser.
 
@@ -260,13 +262,13 @@ class NotebookWriter: #metaclass=abc.ABCMeta):
         return 0
 
     @staticmethod
-    def get_nbformat_nbv():
+    def get_nbformat_nbv() -> tuple[Any, Any]:
         """Return nbformat module, notebook version module"""
         import nbformat
         nbv = nbformat.v4
         return nbformat, nbv
 
-    def get_nbformat_nbv_nb(self, title=None):
+    def get_nbformat_nbv_nb(self, title: str | None = None) -> tuple[Any, Any, Any]:
         """
         Return ``nbformat`` module, notebook version module
         and new notebook with title and import section
@@ -286,7 +288,7 @@ class NotebookWriter: #metaclass=abc.ABCMeta):
         return nbformat, nbv, nb
 
     @abc.abstractmethod
-    def write_notebook(self, nbpath=None):
+    def write_notebook(self, nbpath: str | None = None) -> str:
         """
         Write a jupyter notebook to nbpath. If nbpath is None, a temporary file is created.
         Return path to the notebook. A typical template:
@@ -309,7 +311,7 @@ class NotebookWriter: #metaclass=abc.ABCMeta):
         """
 
     @staticmethod
-    def _write_nb_nbpath(nb, nbpath):
+    def _write_nb_nbpath(nb: Any, nbpath: str | None) -> str:
         """
         This method must be called at the end of ``write_notebook``.
         nb is the jupyter notebook and nbpath the argument passed to ``write_notebook``.
@@ -326,7 +328,7 @@ class NotebookWriter: #metaclass=abc.ABCMeta):
             return nbpath
 
     @classmethod
-    def pickle_load(cls, filepath):
+    def pickle_load(cls, filepath: str) -> Any:
         """
         Loads the object from a pickle file.
         """
@@ -335,7 +337,7 @@ class NotebookWriter: #metaclass=abc.ABCMeta):
             #assert cls is new.__class__
             return new
 
-    def pickle_dump(self, filepath=None):
+    def pickle_dump(self, filepath: str | None = None) -> str:
         """
         Save the status of the object in pickle format.
         If filepath is None, a temporary file is created.
@@ -351,13 +353,13 @@ class NotebookWriter: #metaclass=abc.ABCMeta):
             return filepath
 
     @abc.abstractmethod
-    def yield_figs(self, **kwargs):  # pragma: no cover
+    def yield_figs(self, **kwargs: Any) -> Iterator[Any]:  # pragma: no cover
         """
         This function *generates* a predefined list of matplotlib figures with minimal input from the user.
         Used in abiview.py to get a quick look at the results.
         """
 
-    def expose(self, slide_mode=False, slide_timeout=None, **kwargs):
+    def expose(self, slide_mode: bool = False, slide_timeout: int | None = None, **kwargs: Any) -> None:
         """
         Shows a predefined list of matplotlib figures with minimal input from the user.
         """
@@ -366,7 +368,7 @@ class NotebookWriter: #metaclass=abc.ABCMeta):
             e(self.yield_figs(**kwargs))
 
 
-def which(cmd):
+def which(cmd: str) -> str | None:
     """
     Returns full path to a executable.
 

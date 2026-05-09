@@ -2366,7 +2366,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  call timab(1459,2,tsec)
  call timab(1460,1,tsec)
 
- !write(ab_out,*)"HHHHHHHHHHHH1"
 
 !SHOULD CLEAN THE ARGS OF THIS ROUTINE
  call afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
@@ -2383,7 +2382,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 & taur,tollist,usecprj,usevxctau,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
 & xccc3d,xcctau3d,xred,ylm,ylmgr,dtset%cellcharge(1)*SUM(vpotzero(:)),conv_retcode,xg_nonlop)
 
-! write(ab_out,*)"HHHHHHHHHHHH2"
 !Before leaving the present routine, save the current value of xred.
  xred_old(:,:)=xred(:,:)
 

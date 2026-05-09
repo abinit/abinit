@@ -2,14 +2,14 @@
 authors: DCA, XG, RC
 ---
 
-<!-- This file must be kept in sync with the doc/guide/new_user.md file. 
-Since they are not placed in the same directory, their hyperlinks might differ. 
+<!-- This file must be kept in sync with the doc/guide/new_user.md file.
+Since they are not placed in the same directory, their hyperlinks might differ.
 This problem problem should be solved, when time permits. -->
 
 # New user help file
 
 This page gives a beginner's introduction to the ABINIT resources,
-the package, and the main ABINIT applications. 
+the package, and the main ABINIT applications.
 
 ## Foreword
 
@@ -54,7 +54,7 @@ We suppose that you have downloaded the ABINIT package from the Web site,
 unpacked it and installed it. If not, you might nevertheless continue reading
 the present Web page, just to get an overview, but it might prove more
 fruitful to have first downloaded the ABINIT package and at least unpacked it,
-see the [installation notes](../installation).
+see the [installation notes](installation.md).
 
 !!! note
 
@@ -103,7 +103,7 @@ page of the ABINIT web site.
 There are official recommended pseudopotentials tables
 (the PAW JTH table, and the norm-conserving table from ONCVPSP), and also some older sets of pseudopotentials.
 Information on pseudopotential files can be found in the [[help:abinit#5|ABINIT help file]],
-the [[theory:pseudopotentials|Pseudopotential theory document]], 
+the [[theory:pseudopotentials|Pseudopotential theory document]],
 the [[developers:pseudos_nc_header|Description of the format for the norm-conserving pseudopotential header]],
 and in the [[topic:PseudosPAW|PseudosPAW]] topics.
 
@@ -354,7 +354,7 @@ the speed of ABINIT (e.g. PAW), and its parallelisation. These historical
 developments explain why the tests are gathered in directories "v1", "v2",
 "v3", etc. Every 4 to 8 months, we release a "production version" of ABINIT in
 which the second digit, an even number, is incremented, which usually goes
-with additional features. A [release notes document](about/release-notes) is issued, with the list of
+with additional features. A [release notes document](about/release-notes.md) is issued, with the list of
 additional capabilities, and other information with respect to modifications
 with the previous release. The odd second digits are used for internal
 management only, so-called "development versions" of ABINIT (for example

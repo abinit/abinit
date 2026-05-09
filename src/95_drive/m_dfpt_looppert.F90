@@ -75,7 +75,6 @@ module m_dfpt_loopert
  use m_paw_sphharm,only : setsym_ylm
  use m_rf2,        only : rf2_getidirs
  use m_iogkk,      only : outgkk
- use m_inwffil,    only : inwffil
  use m_spacepar,   only : rotate_rho, setsym
  use m_initylmg,   only : initylmg
  use m_dfpt_scfcv, only : dfpt_scfcv
@@ -225,7 +224,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type), intent(inout) :: psps
  integer, intent(in) :: atindx(dtset%natom),indsym(4,nsym,dtset%natom)
- integer, intent(in) :: nattyp(dtset%ntypat),pertsy(3,dtset%natom+6)
+ integer, intent(in) :: nattyp(dtset%ntypat),pertsy(3,mpert)
  integer, intent(in) :: rfpert(mpert),rf2_dirs_from_rfpert_nl(3,3),symq(4,2,nsym),symrec(3,3,nsym)
  integer, intent(out) :: ddkfil(3)
  integer, intent(inout) :: blkflg(3,mpert,3,mpert)
@@ -271,33 +270,33 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer :: ask_accurate,band_index,bantot,bantot_rbz,bdeigrf,bdtot1_index,nsppol,nspinor,band2tot_index
  integer :: bdtot_index,choice,cplex,cplex_rhoij,dim_eig2rf,formeig
  integer :: gscase,g0term,iband,iblok,icase,icase_eq,idir,idir0,idir1,idir2,idir_eq,idir_dkdk,ierr
- integer :: ii,ikpt,ikpt1,jband,initialized,iorder_cprj,ipert,ipert_cnt,ipert_eq,ipert_me,ireadwf0
+ integer :: ifft,ii,ikpt,ikpt1,jband,initialized,iorder_cprj,ipert,ipert_cnt,ipert_eq,ipert_me,ireadwf0
  integer :: iscf_mod,iscf_mod_save,isppol,istr,isym,mcg,mcgq,mcg1,mcprj,mcprjq,mband
  integer :: mband_mem_rbz
  integer :: mcgmq,mcg1mq,mpw1_mq !+/-q duplicates
  integer :: maxidir,me,mgfftf,mkmem_rbz,mk1mem_rbz,mkqmem_rbz,mpw,mpw1,my_nkpt_rbz
  integer :: n3xccc,nband_k,ncpgr,ndir,nkpt_eff,nkpt_max,nline_save,nmatel,npert_io,npert_me,nspden_rhoij
- integer :: nstep_save,nsym1,ntypat,nwffile,nylmgr,nylmgr1,old_comm_atom,openexit,option,optorth,optthm,pertcase
+ integer :: nstep_save,nsym1,ntypat,nwffile,nylmgr,nylmgr1,old_comm_atom,openexit,option,optorth,optthm,pertcase,pertcase_mq
  integer :: qphase_rhoij,rdwr,rdwrpaw,spaceComm,smdelta,timrev_pert,timrev_kpt,to_compute_this_pert
  integer :: useylmgr,useylmgr1,dfpt_scfcv_retcode,optn2
  integer :: ncerr,ncid
  real(dp) :: boxcut,dosdeltae,eberry,ecore,ecut_eff,ecutf,edocc,eei,eeig0,eew,efrhar,efrkin,efrloc
- real(dp) :: efrnl,efrx1,efrx2,ehart,ehart01,ehart1,eii,ek,ek0,ek1,ek2,eloc0
- real(dp) :: elpsp1,enl,enl0,enl1,end0,end1,entropy,enxc,eovl1,epaw1,evxctau0,evxctau1,evdw,exc1
- real(dp) :: fsum,gsqcut,maxocc,nelectkq
+ real(dp) :: efrnl,efrx1,efrx2,ehart,ehart01,ehart1,eii,ek,ek0,ek1,ek2,elmag1,eloc0
+ real(dp) :: elpsp1,emagpen1,enl,enl0,enl1,end0,end1,entropy,enxc,eovl1,epaw1,evxctau0,evxctau1,evdw,exc1
  real(dp) :: residm,tolwfr,tolwfr_save,toldfe_save,toldff_save,tolrff_save,tolvrs_save,toldmag_save
+ real(dp) :: fsum,gsqcut,maxocc,nelectkq
  real(dp) :: ucvol, eig1_r, eig1_i
  real(dp) :: residm_mq !+/-q duplicates
  logical,parameter :: paral_pert_inplace=.true.,remove_inv=.false.
  logical :: first_entry,found_eq_gkk,has_nd,t_exist,paral_atom,write_1wfk,init_rhor1,with_vxctau
  logical :: kramers_deg
- character(len=fnlen) :: fiden1i,fiwf1i,fiwf1o,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam
+ character(len=fnlen) :: fiden1i,fiwf1i,fiwf1i_mq,fiwf1o,fiwf1o_mq,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam, fnamewffmq_
  character(len=500) :: msg
  type(crystal_t) :: crystal, ddb_crystal
  type(dataset_type), pointer :: dtset_tmp
  type(ebands_t) :: ebands_k,ebands_kq,gkk_ebands, ebands_kmq !+/-q duplicates
  type(gkk_t)     :: gkk2d
- type(hdr_type) :: hdr,hdr_den,hdr_tmp
+ type(hdr_type) :: hdr,hdr_mq,hdr_den,hdr_tmp
  type(ddb_hdr_type) :: ddb_hdr
  type(pawang_type) :: pawang1
  type(wfk_t) :: ddk_f(4)
@@ -332,6 +331,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp),allocatable :: eigen_mq(:),gh1c_set_mq(:,:),docckde_mq(:),eigen1_mq(:)          !
  real(dp),allocatable :: vpsp1(:),work(:),wtk_folded(:),wtk_rbz(:),xccc3d1(:)
  real(dp),allocatable :: ylm(:,:),ylm1(:,:),ylmgr(:,:,:),ylmgr1(:,:,:),zeff(:,:,:)
+ real(dp),allocatable :: ylm1_mq(:,:),ylmgr1_mq(:,:,:)
  real(dp),allocatable :: phasecg(:,:),gauss(:,:)
  real(dp),allocatable :: gkk(:,:,:,:,:)
  logical :: has_cg1_3(3)
@@ -358,8 +358,16 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  dfpt_scfcv_retcode = -1
  nsppol = dtset%nsppol; nspinor = dtset%nspinor
 
+!Deactivate kramer's degeneracy for calculations that break TRS
  kramers_deg=.true.
  if (dtset%tim1rev==0) kramers_deg=.false.
+ 
+ if (.not.kramers_deg.and.dtset%npfft/=1) then
+   write(msg,'(a,a)')'   RF routines are not adapted to fft parallelization'//char(10)//&
+& '   when tim1rev=0. However, npfft is different from 1 in the present run.'
+   ABI_BUG(msg)
+   call wrtout(ab_out,msg,'COLL')
+ end if
 
  with_vxctau = (usevxctau > 0)
  evxctau0=zero; evxctau1=0
@@ -503,18 +511,24 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    rf2dir(9) = rf2_dir1(2)*rf2_dir2(1)
  end if
 
-!Determine existence of perturbations and of perturbation symmetries
-!Create array with perturbations which have to be calculated
- ABI_MALLOC(pert_tmp,(3,3*(dtset%natom+6)+18))
+!Determine existence of pertubations and of pertubation symmetries
+!Create array with pertubations which have to be calculated
+ ABI_MALLOC(pert_tmp,(3,3*(dtset%natom+6)+18+3*dtset%natom))
  ipert_cnt=0
  do ipert=1,mpert
-   if (ipert<dtset%natom+10) then
+   if (ipert<dtset%natom+10.or.ipert>dtset%natom+11) then
      maxidir = 3
      rfdir(1:3) = dtset%rfdir(:)
      rfdir(4:9) = 0
    else
      maxidir = 9
      rfdir(1:9) = rf2dir(:)
+   end if
+   !Scalar potential case
+   if (ipert==dtset%natom+6) then
+     maxidir = 1
+     rfdir(:) = 0
+     rfdir(1) = 1
    end if
    do idir=1,maxidir
      to_compute_this_pert = 0
@@ -558,6 +572,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        else if (idir>=7.and.idir<=9) then
          if (rfdir(idir) == 1 .or. rfdir(idir-3) == 1) to_compute_this_pert = 1
        end if
+     else if (ipert>dtset%natom+11 .and. ipert<=2*dtset%natom+11 .and. &
+&             rfpert(ipert)==1 .and. rfdir(idir) == 1) then
+       to_compute_this_pert = 1
      end if
      if (to_compute_this_pert /= 0) then
        ipert_cnt = ipert_cnt+1;
@@ -566,8 +583,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !      Store "pertcase" in pert_tmp(3,ipert_cnt)
        if (ipert<dtset%natom+10) then
          pert_tmp(3,ipert_cnt) = idir + (ipert-1)*3
-       else
+       else if (ipert==dtset%natom+10.or.ipert<=dtset%natom+11) then
          pert_tmp(3,ipert_cnt) = idir + (ipert-dtset%natom-10)*9 + (dtset%natom+6)*3
+       else if (ipert>dtset%natom+11 .and. ipert<=2*dtset%natom+11) then
+         pert_tmp(3,ipert_cnt) = idir + (ipert-dtset%natom-12)*3 + (dtset%natom+6)*3+18
        end if
      end if
    end do ! idir
@@ -736,6 +755,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    write(msg, '(a,80a,a,a,3f10.6)' ) ch10,('-',ii=1,80),ch10,&
     ' Perturbation wavevector (in red.coord.) ',dtset%qptn(:)
    call wrtout([std_out, ab_out],msg)
+   if (abs(dtset%rfomega) > tol10) then
+     write(msg, '(a,3f10.6)' ) &
+      ' Perturbation frequency (in hartree a.u.) ',dtset%rfomega
+     call wrtout([std_out, ab_out],msg)
+   end if
    if(ipert>=1 .and. ipert<=dtset%natom)then
      write(msg, '(a,i4,a,i4)' )' Perturbation : displacement of atom',ipert,'   along direction',idir
      call wrtout([std_out, ab_out], msg)
@@ -774,6 +798,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
         '  This corresponds to a calculation without local fields.'
        call wrtout([std_out, ab_out], msg)
      end if
+   else if(ipert==dtset%natom+5)then
+     write(msg, '(a,i4)' )' Perturbation : homogeneous spin magnetic field along direction',idir
+     call wrtout([std_out, ab_out], msg)
+   else if(ipert==dtset%natom+6)then
+     write(msg, '(a)' )' Perturbation : homogeneous scalar potential'
+     call wrtout([std_out, ab_out], msg)
    else if(ipert==dtset%natom+10.or.ipert==dtset%natom+11)then
      call rf2_getidirs(idir,idir1,idir2)
      if(ipert==dtset%natom+10)then
@@ -809,12 +839,27 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        cycle
      end if
      ABI_FREE(occ_pert)
-   else if(ipert>dtset%natom+11 .or. ipert<=0 )then
+   else if(ipert>dtset%natom+11.and.ipert<=2*dtset%natom+11)then
+     write(msg, '(a,i4,a,i4)' )' Perturbation : local spin magnetic field from atom', ipert-dtset%natom-11,&
+&    '  along direction', idir
+     call wrtout([std_out, ab_out], msg)
+   else if(ipert>2*dtset%natom+11 .or. ipert<=0 )then
      write(msg, '(a,i0,3a)' ) &
-      'ipert= ',ipert,' is outside the [1,dtset%natom+11] interval.',ch10,&
+      'ipert= ',ipert,' is outside the [1,2*natom+11] interval.',ch10,&
       'This perturbation is not (yet) allowed.'
      ABI_BUG(msg)
    end if
+
+   if (abs(dtset%magpen) > tol6) then
+     if (dtset%magpen<zero) then
+       write(msg, '(a,3f10.6)' ) ' Homogeneous spin magnetic penalty term is applied.'
+       call wrtout([std_out, ab_out],msg)
+     else 
+       write(msg, '(a,3f10.6)' ) ' Local spin magnetic penalty term from atomic spheres is applied.'
+       call wrtout([std_out, ab_out],msg)
+     end if
+   end if
+
 !  Initialize the diverse parts of energy :
    eew=zero ; evdw=zero ; efrloc=zero ; efrnl=zero ; efrx1=zero ; efrx2=zero
    efrhar=zero ; efrkin=zero
@@ -913,13 +958,15 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     1,symrc1,timrev_pert,dtset%wtk,wtk_folded, bz2ibz_smap, xmpi_comm_self)
    else
 !    For the time being, the time reversal symmetry is not used
-!    for ddk, elfd, mgfd perturbations.
+!    for ddk, elfd, mgfd, sclrpt perturbations.
      timrev_pert=timrev
      if(ipert==dtset%natom+1.or.ipert==dtset%natom+2.or.&
 &      ipert==dtset%natom+10.or.ipert==dtset%natom+11.or. &
 &      dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.  &
 &      dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17.or.  &
-&      ipert==dtset%natom+5.or.dtset%prtfull1wf==1) timrev_pert=0
+&      ipert==dtset%natom+5.or.ipert==dtset%natom+6.or. &
+&      (ipert>dtset%natom+11.and.ipert<=2*dtset%natom+11).or. &
+&      dtset%prtfull1wf==1) timrev_pert=0
      timrev_kpt = timrev_pert
 
      !MR: Modified to agree with longwave driver
@@ -928,7 +975,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        if (dtset%kptopt==3) timrev_pert=0
        timrev_kpt = timrev_pert
        !MR tmp: this has to be removed if perturbation-dependent spatial symmetries are
-       !implemented in the quadrupole and flexoelectrics routines
+       !implemented in the spatial-dispersion routines
        nsym1=1
 
        if (dtset%rfstrs/=0.and.dtset%rfstrs_ref==0) then
@@ -1191,7 +1238,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if (.not.kramers_deg) then
      call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kmq_rbz,mpi_enreg,mpw1_mq,nkpt_rbz)
      !number of plane waves at k+q and k-q should be in principle the same to reconstruct rhor1_pq (?)
-     !mpw1=max(mpw1,mpw1_tmp)
+     mpw1=max(mpw1,mpw1_mq)
+     mpw1_mq=mpw1
    else
      mpw1_mq=0
    end if
@@ -1236,7 +1284,19 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call initylmg(gprimd,kg1,kpq_rbz,mk1mem_rbz,mpi_enreg,psps%mpsang,mpw1,nband_rbz,nkpt_rbz,&
       npwar1,dtset%nsppol,option,rprimd,ylm1,ylmgr1)
    end if
-!  SPr: do the same for k-q if kramers_deg=.false.
+   if (.not.kramers_deg) then
+     ABI_MALLOC(ylm1_mq,(mpw1_mq*mk1mem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
+     ABI_MALLOC(ylmgr1_mq,(mpw1_mq*mk1mem_rbz,nylmgr1,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+     if (psps%useylm==1) then
+       if (abs(sum(dtset%qptn(1:3)**2)) < 1.d-14) then
+         ylm1_mq(:,:)=ylm1(:,:)
+         ylmgr1_mq(:,:,:)=ylmgr1(:,:,:)
+       else
+         call initylmg(gprimd,kg1_mq,kmq_rbz,mk1mem_rbz,mpi_enreg,psps%mpsang,mpw1_mq,nband_rbz,nkpt_rbz,&
+&        npwar1_mq,dtset%nsppol,option,rprimd,ylm1_mq,ylmgr1_mq)
+       end if
+     end if
+   end if
 
 !  Print a separator in output file
    write(msg, '(a,a)' )'--------------------------------------------------------------------------------',ch10
@@ -1266,7 +1326,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call hdr%init(ebands_kq,codvsn,dtset,pawtab,pertcase,psps,wvl%descr, &
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
    if (.not.kramers_deg) then
-     call hdr%init(ebands_kmq,codvsn,dtset,pawtab,pertcase,psps,wvl%descr, &
+     !MR: this is to not interfere with the second-order derivatives
+     !neither with the local spin perturbation
+     pertcase_mq=pertcase+(2*dtset%natom+11)*3
+     call hdr_mq%init(ebands_kmq,codvsn,dtset,pawtab,pertcase_mq,psps,wvl%descr, &
        comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
    end if
 
@@ -1311,16 +1374,22 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
            dtset%natom, nkpt_rbz, npwar1, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
            cgq, eigen=eigenq, occ=occ_disk)
      call timab(144,2,tsec)
+   end if
 
-     if (.not.kramers_deg) then
-       !SPr: later "make" a separate WFQ file for "-q"
+   if (.not.kramers_deg) then
+     if (dtfil%fnamewffq == dtfil%fnamewffk .and. sum(dtset%qptn(1:3)**2) < 1.d-14) then
+       call wrtout(std_out, " qpt is Gamma, psi_k-q initialized from psi_k in memory")
+       cg_mq = cg
+       eigen_mq = eigen0
+     else
        call timab(144,1,tsec)
-       call wfk_read_my_kptbands(dtfil%fnamewffq, distrb_flags, spacecomm,dtset%ecut*(dtset%dilatmx)**2, &
+       fnamewffmq_=dtfil%fnamewffq
+       if (dtset%getwfmq/=0) fnamewffmq_=dtfil%fnamewffmq
+        call wfk_read_my_kptbands(fnamewffmq_, distrb_flags, spacecomm,dtset%ecut*(dtset%dilatmx)**2, &
           formeig, istwfk_rbz, kmq_rbz, mcgmq, dtset%mband, mband_mem_rbz, mkqmem_rbz, mpw1_mq,&
           dtset%natom, nkpt_rbz, npwar1_mq, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
           cg_mq, eigen=eigen_mq, occ=occ_disk)
        call timab(144,2,tsec)
-
      end if
    end if
    ABI_FREE(occ_disk)
@@ -1432,6 +1501,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call wrtout([std_out, ab_out], msg)
    call appdig(pertcase,dtfil%fnamewff1,fiwf1i)
    call appdig(pertcase,dtfil%fnameabo_1wf,fiwf1o)
+   if (.not.kramers_deg) then
+     call appdig(pertcase_mq,dtfil%fnamewff1,fiwf1i_mq)
+     call appdig(pertcase_mq,dtfil%fnameabo_1wf,fiwf1o_mq)
+   end if
 
 !  Allocate 1st-order PAW occupancies (rhoij1)
    if (psps%usepaw==1) then
@@ -1531,8 +1604,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ABI_MALLOC(resid_mq,(dtset%mband*nkpt_rbz*dtset%nsppol))
      !initialize cg1_mq:
      call timab(144,1,tsec)
-     if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. (dtset%get1wf > 0 .or. dtset%ird1wf > 0)) then
-       call wfk_read_my_kptbands(fiwf1i, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2, &
+     if ((file_exists(nctk_ncify(fiwf1i_mq)) .or. file_exists(fiwf1i_mq)) .and. (dtset%get1wf > 0 .or. dtset%ird1wf > 0)) then
+       call wfk_read_my_kptbands(fiwf1i_mq, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2, &
           formeig, istwfk_rbz, kmq_rbz, mcg1mq, dtset%mband, mband_mem_rbz, mk1mem_rbz, mpw1_mq,&
           dtset%natom, nkpt_rbz, npwar1_mq, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
           cg1_mq, eigen=eigen1_mq, ask_accurate_=0)
@@ -1643,9 +1716,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,ntypat,ph1df,psps%qgrid_vl,&
          ucvol,psps%vlspl,vpsp1,g0term=g0term)
      else
-       call dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
-         nattyp,nfftf,ngfftf,ntypat,ngfftf(1),ngfftf(2),ngfftf(3),ph1df,psps%qgrid_vl,&
-         dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
+       call dfpt_vlocal(atindx,cplex,gmet,gsqcut,dtset%icutcoul,idir,ipert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
+        nattyp,nfftf,ngfftf,nkpt,ntypat,ngfftf(1),ngfftf(2),ngfftf(3),ph1df,psps%qgrid_vl,&
+        dtset%qptn,dtset%rcut,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1,xred,&
+        zion=dtset%ziontypat)
        !SPr: need vpsp1 for -q as well, but for magnetic field it's zero, to be done later
      end if
 
@@ -1665,6 +1739,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_MALLOC(rhor1,(cplex*nfftf,nspden))
    ABI_MALLOC(rhog1,(2,nfftf))
 
+!  MR:do we really need to define the partial rhos here? 
    if(.not.kramers_deg) then
      ! Case when first order spinors at both +q and -q are not related by symmetry (time and/or space inversion)
      ABI_MALLOC(rhor1_pq,(cplex*nfftf,nspden))
@@ -1752,7 +1827,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      rhor1(:,:)=zero ; rhog1(:,:)=zero
 !    PAW: rhoij have been set to zero in call to pawrhoij_alloc above
 
-     init_rhor1 = ((ipert>=1 .and. ipert<=dtset%natom).or.ipert==dtset%natom+5)
+     init_rhor1 = ((ipert>=1 .and. ipert<=dtset%natom).or.ipert==dtset%natom+5 &
+&    .or.ipert==dtset%natom+6.or.ipert==dtset%natom+7)
      ! This section is needed in order to maintain the old behavior and pass the automatic tests
      if (psps%usepaw == 0) then
        init_rhor1 = init_rhor1 .and. all(psps%nctab(:ntypat)%has_tvale)
@@ -1795,44 +1871,62 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        else
          ! Magnetic field perturbation
          call wrtout(std_out," Initializing rhor1 guess based on the ground state XC magnetic field")
-
+  
          call dfpt_init_mag1(ipert,idir,rhor1,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
-
-         if(.not.kramers_deg) then
-           rhor1_pq=rhor1
-           call dfpt_init_mag1(ipert,idir,rhor1_mq,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
-         end if
+  
        end if
 
        call fourdp(cplex,rhog1,rhor1,-1,mpi_enreg,nfftf,1,ngfftf,0)
-       if (.not.kramers_deg) then
-         !call fourdp(cplex,rhog1_pq,rhor1_pq,-1,mpi_enreg,nfftf,1,ngfftf,0)
-         rhog1_pq=rhog1
-         call fourdp(cplex,rhog1_mq,rhor1_mq,-1,mpi_enreg,nfftf,1,ngfftf,0)
-       end if
      end if
 
    else
      ! rhor1 not being forced to 0.0
      if(iscf_mod>0) then
 !      cplex=2 gets the complex density, =1 only real part
-       if (psps%usepaw==1) then
-!        Be careful: in PAW, rho does not include the 1st-order compensation density (to be added in dfpt_scfcv.F90) !
-         ABI_MALLOC(rho1wfg,(2,dtset%nfft))
-         ABI_MALLOC(rho1wfr,(dtset%nfft,nspden))
-         call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
-           kg,kg1,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
-           dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
-           occ_rbz,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
-         call transgrid(cplex,mpi_enreg,nspden,+1,1,1,dtset%paral_kgb,pawfgr,rho1wfg,rhog1,rho1wfr,rhor1)
-         ABI_FREE(rho1wfg)
-         ABI_FREE(rho1wfr)
-       else
-         !SPr: need to modify dfpt_mkrho to taken into account q,-q and set proper formulas when +q and -q spinors are related
-         call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
-           kg,kg1,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
-           dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
-           occ_rbz,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
+       if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
+         call appdig(pertcase,dtfil%fildens1in,fiden1i)
+         call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor1, &
+         hdr_den, pawrhoij1, spaceComm, check_hdr=hdr)
+         etotal = hdr_den%etot; call hdr_den%free()
+
+!        Compute up+down rho1(G) by fft
+         ABI_MALLOC(work,(cplex*nfftf))
+         work(:)=rhor1(:,1)
+         call fourdp(cplex,rhog1,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
+         ABI_FREE(work)
+       else if (dtset%get1wf /= 0 .or. dtset%ird1wf /= 0 ) then
+          if (psps%usepaw==1) then
+!          Be careful: in PAW, rho does not include the 1st-order compensation density (to be added in dfpt_scfcv.F90) !
+           ABI_MALLOC(rho1wfg,(2,dtset%nfft))
+           ABI_MALLOC(rho1wfr,(dtset%nfft,nspden))
+           call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
+             kg,kg1,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
+             dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
+             occ_rbz,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
+           call transgrid(cplex,mpi_enreg,nspden,+1,1,1,dtset%paral_kgb,pawfgr,rho1wfg,rhog1,rho1wfr,rhor1)
+           ABI_FREE(rho1wfg)
+           ABI_FREE(rho1wfr)
+         else
+           call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
+             kg,kg1,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
+             dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
+             occ_rbz,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
+
+           if (.not.kramers_deg) then
+             rhor1_pq(:,:)=rhor1(:,:)
+             rhog1_pq(:,:)=rhog1(:,:)
+             call dfpt_mkrho(cg,cg1_mq,cplex,gprimd,irrzon1,istwfk_rbz,&
+               kg,kg1_mq,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1_mq,nband_rbz,&
+               dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1_mq,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
+               occ_rbz,phnons1,rhog1_mq,rhor1_mq,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
+
+             do ifft=1,nfftf
+               rhor1(2*ifft-1,:) = half*(rhor1_pq(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
+               rhor1(2*ifft  ,:) = half*(rhor1_pq(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
+             end do
+             call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
+           end if
+         end if
        end if
 
      else if (.not. found_eq_gkk) then
@@ -1876,9 +1970,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        call dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,&
 &       dielt,dim_eig2rf,doccde_rbz,docckqde,dtfil,dtset_tmp,&
 &       d2bbb,d2lo,d2nl,d2ovl,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
-&       ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,eloc0,elpsp1,&
-&       end0,end1,enl0,enl1,eovl1,epaw1,etotal,evxctau0,evxctau1,evdw,exc1,&
-&       fermie,gh0c1_set,gh1c_set,hdr,idir,&
+&       ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,elmag1,eloc0,elpsp1,emagpen1,&
+&       end0,end1,enl0,enl1,eovl1,epaw1,etotal,evxctau0,evxctau1,evdw,exc1,fermie,gh0c1_set,gh1c_set,hdr,idir,&
 &       indkpt1,indsy1,initialized,ipert,irrzon1,istwfk_rbz,&
 &       kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mgfftf,mkmem_rbz,mkqmem_rbz,mk1mem_rbz,&
 &       mpert,mpi_enreg,mpw,mpw1,mpw1_mq,my_natom,&
@@ -1896,9 +1989,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        call dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,&
 &       dielt,dim_eig2rf,doccde_rbz,docckqde,dtfil,dtset_tmp,&
 &       d2bbb,d2lo,d2nl,d2ovl,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
-&       ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,eloc0,elpsp1,&
-&       end0,end1,enl0,enl1,eovl1,epaw1,etotal,evxctau0,evxctau1,evdw,exc1,&
-&       fermie,gh0c1_set,gh1c_set,hdr,idir,&
+&       ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,elmag1,eloc0,elpsp1,emagpen1,&
+&       end0,end1,enl0,enl1,eovl1,epaw1,etotal,evxctau0,evxctau1,evdw,exc1,fermie,gh0c1_set,gh1c_set,hdr_mq,idir,&
 &       indkpt1,indsy1,initialized,ipert,irrzon1,istwfk_rbz,&
 &       kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mgfftf,mkmem_rbz,mkqmem_rbz,mk1mem_rbz,&
 &       mpert,mpi_enreg,mpw,mpw1,mpw1_mq,my_natom,&
@@ -1915,7 +2007,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &       cg_mq=cg_mq,cg1_mq=cg1_mq,cg1_active_mq=cg1_active_mq,docckde_mq=docckde_mq,eigen_mq=eigen_mq,&
 &       eigen1_mq=eigen1_mq,gh0c1_set_mq=gh0c1_set_mq,gh1c_set_mq=gh1c_set_mq,&
 &       kg1_mq=kg1_mq,npwar1_mq=npwar1_mq,occk_mq=occk_mq,resid_mq=resid_mq,residm_mq=residm_mq,&
-&       rhog1_pq=rhog1_pq,rhog1_mq=rhog1_mq,rhor1_pq=rhor1_pq,rhor1_mq=rhor1_mq)
+&       rhog1_pq=rhog1_pq,rhog1_mq=rhog1_mq,rhor1_pq=rhor1_pq,rhor1_mq=rhor1_mq,&
+&       ylm1_mq=ylm1_mq,ylmgr1_mq=ylmgr1_mq)
      end if
 
 !    2nd-order eigenvalues stuff
@@ -2113,6 +2206,17 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call wfk_write_my_kptbands(fiwf1o, distrb_flags, spacecomm, formeig, hdr, dtset%iomode, &
 &          dtset%mband, mband_mem_rbz, mk1mem_rbz, dtset%mpw, nkpt_rbz, dtset%nspinor, dtset%nsppol, &
 &          cg1, kg1, eigen1)
+
+     if (.not.kramers_deg) then
+       call wfk_write_my_kptbands(fiwf1o_mq, distrb_flags, spacecomm, formeig, hdr_mq, dtset%iomode, &
+&            dtset%mband, mband_mem_rbz, mk1mem_rbz, dtset%mpw, nkpt_rbz, dtset%nspinor, dtset%nsppol, &
+&            cg1_mq, kg1_mq, eigen1_mq)
+     end if
+
+!     call outwf(cg1,dtset,psps,eigen1,fiwf1o,hdr,kg1,kpt_rbz,&
+!&     dtset%mband,mcg1,mk1mem_rbz,mpi_enreg,mpw1,dtset%natom,nband_rbz,&
+!&     nkpt_rbz,npwar1,dtset%nsppol,&
+!&     occ_rbz,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
    end if
 
    ! Output DDK file in netcdf format.
@@ -2173,8 +2277,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  Print the energies
    if (dtset%nline/=0 .or. dtset%nstep/=0)then
      call dfpt_prtene(dtset%berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
-          &     ehart01,ehart1,eii,ek0,ek1,eloc0,elpsp1,end0,end1,enl0,enl1,eovl1,epaw1,evxctau0,evxctau1,&
-          &     evdw,exc1,has_nd,with_vxctau,ab_out,ipert,dtset%natom,psps%usepaw,usevdw)
+&     ehart01,ehart1,eii,ek0,ek1,elmag1,eloc0,elpsp1,emagpen1,end0,end1,enl0,enl1,eovl1,epaw1,evxctau0,evxctau1,&
+&     evdw,exc1,has_nd,with_vxctau,ab_out,ipert,dtset%natom,psps%usepaw,usevdw)
    end if
 
    ! call orbmag if needed
@@ -2280,6 +2384,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ABI_FREE(rhor1_mq)
      ABI_FREE(rhog1_pq)
      ABI_FREE(rhog1_mq)
+     ABI_FREE(ylm1_mq)
+     ABI_FREE(ylmgr1_mq)
    end if
    if (psps%usepaw==1) then
      call pawang_free(pawang1)
@@ -2297,6 +2403,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ABI_FREE(mpi_enreg%my_kpttab)
    end if
    call hdr%free()
+   if (.not.kramers_deg) then
+     call hdr_mq%free()
+   end if
 
    ! Clean band structure datatypes (should use it more in the future !)
    call ebands_k%free()
@@ -2706,8 +2815,10 @@ end subroutine getcgqphase
 !! eii=pseudopotential core part of 2nd-order total energy
 !! ek0=0th-order kinetic energy part of 2nd-order total energy.
 !! ek1=1st-order kinetic energy part of 2nd-order total energy.
+!! elmag1=1st-order hspinfield part of 2nd-order total energy.
 !! eloc0=0th-order local (psp+vxc+Hartree) part of 2nd-order total energy
 !! elpsp1=1st-order local pseudopot. part of 2nd-order total energy.
+!! emagpen1=1st-order magnetic penalty part of 2nd-order total energy.
 !! end0=0th-order nuclear dipole part of 2nd-order total energy.
 !! end1=1st-order nuclear dipole part of 2nd-order total energy.
 !! enl0=0th-order nonlocal pseudopot. part of 2nd-order total energy.
@@ -2736,14 +2847,14 @@ end subroutine getcgqphase
 !! SOURCE
 
 subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
-     &  ehart01,ehart1,eii,ek0,ek1,eloc0,elpsp1,end0,end1,enl0,enl1,eovl1,epaw1,evxctau0,evxctau1,&
+&  ehart01,ehart1,eii,ek0,ek1,elmag1,eloc0,elpsp1,emagpen1,end0,end1,enl0,enl1,eovl1,epaw1,evxctau0,evxctau1,&
      & evdw,exc1,has_nd,with_vxctau,iout,ipert,natom,usepaw,usevdw)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: berryopt,iout,ipert,natom,usepaw,usevdw
  real(dp),intent(in) :: eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1
- real(dp),intent(in) :: efrx2,ehart01,ehart1,eii,ek0,ek1,eloc0,elpsp1,end0,end1,enl0,enl1
+ real(dp),intent(in) :: efrx2,ehart01,ehart1,eii,ek0,ek1,elmag1,eloc0,elpsp1,emagpen1,end0,end1,enl0,enl1
  real(dp),intent(in) :: eovl1,epaw1,evxctau0,evxctau1,evdw,exc1
  logical,intent(in) :: has_nd,with_vxctau
 
@@ -2767,12 +2878,15 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
  berry_activated=(berryopt== 4.or.berryopt== 6.or.berryopt== 7.or. &
 & berryopt==14.or.berryopt==16.or.berryopt==17)
  if (ipert==natom+1) nn=8
- if (ipert==natom+5) nn=8
+ if (ipert==natom+5.or.ipert==natom+6) nn=7
+ if (ipert==natom+7) nn=8
  if (ipert==natom+2) nn=7
  if (ipert>=1.and.ipert<=natom) nn=13
  if (ipert==natom+3.or.ipert==natom+4) nn=17
  if (ipert==natom+2.and.berry_activated) nn=nn+1
  if (ipert==natom+10.or.ipert==natom+11) nn=1 ! means nothing,
+ if (ipert>natom+11.and.ipert<=2*natom+11) nn=7
+ if (emagpen1>tol8) nn=nn+1
 ! because we do not compute derivatives of the energy in this case
  if (usepaw==1) nn=nn+1
  if (usevdw==1) nn=nn+1
@@ -2804,7 +2918,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
 & ' ',trim(numb),': 1st-order hamiltonian combined with 1st and 0th-order wfs'
  call wrtout(iout,msg)
  call wrtout(std_out,msg)
- if(ipert/=natom+1.and.ipert/=natom+2)then
+ if(ipert/=natom+1.and.ipert/=natom+2.and.ipert/=natom+5.and.ipert/=natom+6.and.ipert<natom+11)then
    write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,a)' ) &
 &   ' loc psp =',elpsp1,'  Hartree=',ehart1,'     xc=',exc1,ch10,&
 &   ' note that "loc psp" includes a xc core correction that could be resolved'
@@ -2826,6 +2940,10 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
  else if(ipert==natom+2) then
    write(msg, '(a,es17.8,a,es17.8,a,es17.8)' ) &
 &   '    dotwf=',enl1,  '  Hartree=',ehart1,'     xc=',exc1
+ else if(ipert==natom+5.or.ipert==natom+6.or.(ipert>natom+1.and.ipert<=2*natom+11)) then
+   write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,a)' ) &
+&   '    Hspinfield=',elmag1,'  Hartree=',ehart1,'     xc=',exc1,ch10,&
+&   ' note that "loc psp" includes a xc core correction that could be resolved'
  end if
  if(ipert==natom+3 .or. ipert==natom+4) then
    write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,a,es17.8)' ) &
@@ -2842,6 +2960,13 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
 & '    edocc=',edocc,'     enl0=',enl0,'   enl1=',enl1_effective
  call wrtout(iout,msg)
  call wrtout(std_out,msg)
+
+ if (abs(emagpen1)>tol8) then
+   write(msg,'(a,es17.8)') &
+&   '     Magnetic penalty contribution=', emagpen1   
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
+ end if 
 
  if (usepaw==1) then
    numb='10';if( ipert==natom+3.or.ipert==natom+4) numb='11'
@@ -2863,9 +2988,12 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
      erelax=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+epaw1+end0+end1+evxctau0+evxctau1
    else if(ipert==natom+3.or.ipert==natom+4)then
      erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1
-   else if(ipert==natom+5)then
-     erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1
+   else if(ipert==natom+5.or.ipert==natom+6)then
+     erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1+elmag1
+   else if(ipert>natom+11.and.ipert<=2*natom+11)then
+     erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1+elmag1
    end if
+   if (abs(emagpen1)>tol8) erelax=erelax+emagpen1
    enl1_effective=enl1
    if (ipert==natom+1.or.ipert==natom+2) then
      if (1.0_dp+enl1/10.0_dp==1.0_dp) enl1_effective=zero
@@ -3200,20 +3328,21 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
 
      bxc0=-sqrt((half*(vxc0(ipt,1)-vxc0(ipt,2)))**2+vxc0(ipt,3)**2+vxc0(ipt,4)**2)
      if(cplex==1) then
-       rhor1(ipt,1)=zero       ! rho_up+rho_dwn    => charge density
-       rhor1(ipt,2)=m1_norm*mdir(1)-half*m0_norm/bxc0*(fdir(1)-f_dot_m*mdir(1))   ! m1x
-       rhor1(ipt,3)=m1_norm*mdir(2)-half*m0_norm/bxc0*(fdir(2)-f_dot_m*mdir(2))   ! m1y
-       rhor1(ipt,4)=m1_norm*mdir(3)-half*m0_norm/bxc0*(fdir(3)-f_dot_m*mdir(3))   ! m1z
+     ! TODO:    
+     !  rhor1(ipt,1)=zero       ! rho_up+rho_dwn    => charge density
+     !  rhor1(ipt,2)=m1_norm*mdir(1)-half*m0_norm/bxc0*(fdir(1)-f_dot_m*mdir(1))   ! m1x
+     !  rhor1(ipt,3)=m1_norm*mdir(2)-half*m0_norm/bxc0*(fdir(2)-f_dot_m*mdir(2))   ! m1y
+     !  rhor1(ipt,4)=m1_norm*mdir(3)-half*m0_norm/bxc0*(fdir(3)-f_dot_m*mdir(3))   ! m1z
        rhor1(ipt,:)=zero
      else
-       rhor1(2*ipt-1,1)=zero       ! Re rho_up+rho_dwn
-       rhor1(2*ipt-1,2)=m1_norm*mdir(1)-half*m0_norm/bxc0*(fdir(1)-f_dot_m*mdir(1))   ! m1x
-       rhor1(2*ipt-1,3)=m1_norm*mdir(2)-half*m0_norm/bxc0*(fdir(2)-f_dot_m*mdir(2))   ! m1x
-       rhor1(2*ipt-1,4)=m1_norm*mdir(3)-half*m0_norm/bxc0*(fdir(3)-f_dot_m*mdir(3))   ! m1x
-       rhor1(2*ipt  ,1)=zero       ! Im rho_up+rho_dwn
-       rhor1(2*ipt  ,2)=zero
-       rhor1(2*ipt  ,3)=zero
-       rhor1(2*ipt  ,4)=zero
+     !  rhor1(2*ipt-1,1)=zero       ! Re rho_up+rho_dwn
+     !  rhor1(2*ipt-1,2)=m1_norm*mdir(1)-half*m0_norm/bxc0*(fdir(1)-f_dot_m*mdir(1))   ! m1x
+     !  rhor1(2*ipt-1,3)=m1_norm*mdir(2)-half*m0_norm/bxc0*(fdir(2)-f_dot_m*mdir(2))   ! m1x
+     !  rhor1(2*ipt-1,4)=m1_norm*mdir(3)-half*m0_norm/bxc0*(fdir(3)-f_dot_m*mdir(3))   ! m1x
+     !  rhor1(2*ipt  ,1)=zero       ! Im rho_up+rho_dwn
+     !  rhor1(2*ipt  ,2)=zero
+     !  rhor1(2*ipt  ,3)=zero
+     !  rhor1(2*ipt  ,4)=zero
 
        rhor1(2*ipt-1,1)=zero; rhor1(2*ipt,1)=zero
        rhor1(2*ipt-1,2)=zero; rhor1(2*ipt,2)=zero

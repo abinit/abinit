@@ -600,6 +600,16 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    cond_string(1)='natom' ; cond_values(1)=natom
    call chkint_le(1,1,cond_string,cond_values,ierr,'d3e_pert3_atpol(2)',dt%d3e_pert3_atpol(2),natom,iout)
 
+!  d3e_pert1_magat
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'d3e_pert1_magat(1)',dt%d3e_pert1_magat(1),1,iout)
+   cond_string(1)='natom' ; cond_values(1)=natom
+   call chkint_le(1,1,cond_string,cond_values,ierr,'d3e_pert1_magat(2)',dt%d3e_pert1_magat(2),natom,iout)
+
+!  d3e_pert2_magat
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'d3e_pert2_magat(1)',dt%d3e_pert2_magat(1),1,iout)
+   cond_string(1)='natom' ; cond_values(1)=natom
+   call chkint_le(1,1,cond_string,cond_values,ierr,'d3e_pert2_magat(2)',dt%d3e_pert2_magat(2),natom,iout)
+
 !  densfor_pred
    if(dt%iscf>0)then
      cond_string(1)='iscf';cond_values(1)=dt%iscf
@@ -1737,7 +1747,14 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 
    ! icutcoul
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,11,[0,1,2,3,4,5,6,7,14,15,16],iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,13,[0,1,2,3,4,5,6,7,14,15,16,22,55],iout)
+
+   if(optdriver/=RUNL_RESPFN.and.dt%icutcoul==55)then
+     write(msg, '(3a)' ) &
+     'The PCM short-circuit Coulomb cutoff is only available for linear-esponse calculations',ch10,&
+     'Action: set icutcoul /= 55 .'
+     ABI_ERROR_NOSTOP(msg, ierr)
+   end if
 
    ! ieig2rf
    if(optdriver==RUNL_RESPFN.and.usepaw==1)then
@@ -2147,6 +2164,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !     end if
 !   end if
 
+!  magpen
+   if(dt%magpen/=zero)then
+     cond_string(1)='magpen' ; cond_values(1)=dt%magpen
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'nspden',dt%nspden,1,(/4/),iout)
+   end if
+
 !  macro_uj
    if(dt%macro_uj/=0) then
      if (dt%ionmov/=0) then
@@ -2267,6 +2290,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
    end if
+
+!  mpatpol
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'mpatpol(1)',dt%mpatpol(1),1,iout)
+   cond_string(1)='natom' ; cond_values(1)=natom
+   call chkint_le(1,1,cond_string,cond_values,ierr,'mpatpol(2)',dt%mpatpol(2),natom,iout)
 
 !  natom
    if(dt%prtgeo>0)then
@@ -2957,7 +2985,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    ! Non-linear response not compatible with spinors
    if(nspinor/=1)then
      cond_string(1)='nspinor' ; cond_values(1)=nspinor
-     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,2,(/RUNL_NONLINEAR,RUNL_LONGWAVE/),iout)
+     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
    ! Non-linear response only for insulators
    if(dt%occopt/=1 .and. dt%occopt/=2)then
@@ -3061,8 +3089,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
+   !Longwave not compatible with spinors
+   if(nspinor/=1.and.dt%timdisp==0)then
+     cond_string(1)='nspinor' ; cond_values(1)=nspinor
+     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
+   end if
    !Longwave calculation only compatible with nonlinear core corrections for quadrupoles and NOA
-   if(dt%optdriver==RUNL_LONGWAVE.and.dt%lw_flexo/=0)then
+   if(dt%optdriver==RUNL_LONGWAVE.and.dt%timdisp==0.and.dt%lw_flexo/=0)then
      do ipsp=1,npsp
        !  Check that xccc is zero
        if (pspheads(ipsp)%xccc/=0) then
@@ -3089,8 +3122,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/0/),iout)
    endif
-   ! Longwave calculation not compatible with spin-dependent calculations
-   if(dt%nsppol/=1.or.dt%nspden/=1)then
+   !Longwave calculation not compatible with spin-dependent calculations
+   if((dt%nsppol/=1.or.dt%nspden/=1).and.dt%timdisp==0)then
      cond_string(1)='nsppol' ; cond_values(1)=dt%nsppol
      cond_string(2)='nspden' ; cond_values(2)=dt%nspden
      call chkint_ne(1,2,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
@@ -3706,6 +3739,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    !  call chkint(0,1,cond_string,cond_values,ierr,'prtlden',dt%prtlden,1,(/0/),0,0,iout)
    !end if
 
+!  prt1mag
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'prt1mag',dt%prt1mag,3,(/0,1,2/),iout)
+
 !  prtstm
    call chkint_le(0,0,cond_string,cond_values,ierr,'prtstm',dt%prtstm,1,iout)
    call chkint_ge(0,0,cond_string,cond_values,ierr,'prtstm',dt%prtstm,-dt%mband,iout)
@@ -3806,6 +3842,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  random_atpos
    call chkint_eq(0,0,cond_string,cond_values,ierr,'random_atpos',dt%random_atpos,5,(/0,1,2,3,4/),iout)
 
+!  ratopt
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'ratopt',dt%ratopt,2,(/1,2/),iout)
+
 !  ratsph
 !  If PAW and (prtdos==3 or dt%prtdensph==1), must be greater than PAW radius
    if(usepaw==1.and.(dt%prtdos==3.or.dt%prtdensph==1))then
@@ -3861,6 +3900,18 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  rfmeth
    call chkint_eq(0,0,cond_string,cond_values,ierr,'rfmeth',dt%rfmeth,6,(/-3,-2,-1,1,2,3/),iout)
+
+!  rfomega
+   if(dt%rfomega/=zero)then
+     cond_string(1)='rfomega' ; cond_values(1)=dt%rfomega
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'tim1rev',dt%tim1rev,1,(/0/),iout)
+   end if
+
+!  rfeta
+   if(dt%rfeta/=zero)then
+     cond_string(1)='rfeta' ; cond_values(1)=dt%rfeta
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'tim1rev',dt%tim1rev,1,(/0/),iout)
+   end if
 
 !  rprimd
 !  With optcell beyond 4, one has constraints on rprimd.
@@ -4105,6 +4156,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_eq(1,1,cond_string,cond_values,ierr,'useylm',dt%useylm,1,(/1/),iout)
      cond_string(1)='prtwf' ; cond_values(1)=dt%prtwf
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtwf',dt%prtwf,1,(/0/),iout)
+   end if
+
+!  timdisp
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'timdisp',dt%timdisp,2,(/0,1/),iout)
+   if(dt%timdisp/=0)then
+     cond_string(1)='timdisp' ; cond_values(1)=dt%timdisp
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
    end if
 
 !  tolmxde

@@ -2161,7 +2161,7 @@ Variable(
     abivarname="d3e_pert1_atpol",
     varset="dfpt",
     vartype="integer",
-    topics=["nonlinear_basic"],
+    topics=["nonlinear_basic", "ConstrainedDFPT_basic"],
     dimensions=[2],
     defaultval=[1, "[[natom]]" ],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: limits of ATomic POLarisations",
@@ -2179,7 +2179,7 @@ Variable(
     abivarname="d3e_pert1_dir",
     varset="dfpt",
     vartype="integer",
-    topics=["nonlinear_basic"],
+    topics=["nonlinear_basic", "ConstrainedDFPT_basic"],
     dimensions=[3],
     defaultval=[1, 1, 1],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: DIRections",
@@ -2198,7 +2198,7 @@ Variable(
     abivarname="d3e_pert1_elfd",
     varset="dfpt",
     vartype="integer",
-    topics=["nonlinear_basic"],
+    topics=["nonlinear_basic", "ConstrainedDFPT_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: ELectric FielD",
@@ -2212,11 +2212,69 @@ electric field perturbation itself. See [[rfelfd]] for additional details.
 """,
 ),
 
+
+Variable(
+    abivarname="d3e_pert1_magat",
+    varset="dfpt",
+    vartype="integer",
+    topics=["longwave_expert", "ConstrainedDFPT_expert"],
+    dimensions=[2],
+    defaultval=MultipleValue(number=1, value="[[natom]]"),
+    mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: limits of local MAGnetic fields on ATomic spheres",
+    requires="[[optdriver]] == 10 and [[timdisp]]==1 (time-dispersion calculation)",
+    characteristics=["[[DEVELOP]]"],
+    added_in_version="10.4",
+    text=r"""
+Controls the range of atoms for which local Zeeman fields will be considered in time-dispersion
+(Berry curvatures) computation, for the 1st perturbation.
+May take values from 1 to [[natom]], with **d3e_pert1_magat** (1)<=
+**d3e_pert1_magat** (2). 
+""",
+),
+
+
+Variable(
+    abivarname="d3e_pert1_magdir",
+    varset="dfpt",
+    vartype="integer",
+    topics=["longwave_expert", "ConstrainedDFPT_expert"],
+    dimensions=[3],
+    defaultval=[1, 1, 1],
+    mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: MAGnetic field DIRections",
+    requires="[[optdriver]] == 10 and [[timdisp]]==1 (time-dispersion calculation)",
+    characteristics=["[[DEVELOP]]"],
+    added_in_version="10.4",
+    text=r"""
+Gives the Cartesian directions to be considered in the time-dispersion (Berry curvatures) computation, 
+for the 1st perturbation.
+""",
+),
+
+Variable(
+    abivarname="d3e_pert1_magn",
+    varset="dfpt",
+    vartype="integer",
+    topics=["longwave_expert", "ConstrainedDFPT_expert"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: MAGNetic field",
+    requires="[[optdriver]] == 10 and [[timdisp]]==1 (time-dispersion calculation)",
+    characteristics=["[[DEVELOP]]"],
+    added_in_version="10.4",
+    text=r"""
+Turns on magnetic field perturbations in time-dispersion (Berry-curvatures) computation, as 1st
+perturbation. Can take two values:
+
+ * 1 --> Uniform Zeeman field perturbation along Cartesian directions set by [[d3e_pert1_magdir]]
+ * 2 --> Local Zeeman field perturbation to atoms and Cartesian directions set by [[d3e_pert1_magat]] and [[d3e_pert1_magdir]], respectively. 
+""",
+),
+
 Variable(
     abivarname="d3e_pert1_phon",
     varset="dfpt",
     vartype="integer",
-    topics=["nonlinear_basic"],
+    topics=["nonlinear_basic", "ConstrainedDFPT_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: PHONons",
@@ -2232,7 +2290,7 @@ Variable(
     abivarname="d3e_pert2_atpol",
     varset="dfpt",
     vartype="integer",
-    topics=["nonlinear_basic"],
+    topics=["nonlinear_basic", "ConstrainedDFPT_basic"],
     dimensions=[2],
     defaultval=[1, "[[natom]]" ],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 2: limits of ATomic POLarisations",
@@ -2250,7 +2308,7 @@ Variable(
     abivarname="d3e_pert2_dir",
     varset="dfpt",
     vartype="integer",
-    topics=["nonlinear_basic"],
+    topics=["nonlinear_basic", "ConstrainedDFPT_basic"],
     dimensions=[3],
     defaultval=[0, 0, 0],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 2: DIRections",
@@ -2284,10 +2342,67 @@ electric field perturbation itself. See [[rfelfd]] for additional details.
 ),
 
 Variable(
+    abivarname="d3e_pert2_magat",
+    varset="dfpt",
+    vartype="integer",
+    topics=["longwave_expert", "ConstrainedDFPT_expert"],
+    dimensions=[2],
+    defaultval=MultipleValue(number=1, value="[[natom]]"),
+    mnemonics="3rd Derivative of Energy, mixed PERTurbation 2: limits of local MAGnetic fields on ATomic spheres",
+    requires="[[optdriver]] == 10 and [[timdisp]]==1 (time-dispersion calculation)",
+    characteristics=["[[DEVELOP]]"],
+    added_in_version="10.4",
+    text=r"""
+Controls the range of atoms for which local Zeeman fields will be considered in time-dispersion
+(Berry curvatures) computation, for the 2nd perturbation.
+May take values from 1 to [[natom]], with **d3e_pert2_magat** (1)<=
+**d3e_pert2_magat** (2). 
+""",
+),
+
+
+Variable(
+    abivarname="d3e_pert2_magdir",
+    varset="dfpt",
+    vartype="integer",
+    topics=["longwave_expert", "ConstrainedDFPT_expert"],
+    dimensions=[3],
+    defaultval=[1, 1, 1],
+    mnemonics="3rd Derivative of Energy, mixed PERTurbation 2: MAGnetic field DIRections",
+    requires="[[optdriver]] == 10 and [[timdisp]]==1 (time-dispersion calculation)",
+    characteristics=["[[DEVELOP]]"],
+    added_in_version="10.4",
+    text=r"""
+Gives the Cartesian directions to be considered in the time-dispersion (Berry curvatures) computation, 
+for the 2nd perturbation.
+""",
+),
+
+Variable(
+    abivarname="d3e_pert2_magn",
+    varset="dfpt",
+    vartype="integer",
+    topics=["longwave_expert", "ConstrainedDFPT_expert"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="3rd Derivative of Energy, mixed PERTurbation 2: MAGNetic field",
+    requires="[[optdriver]] == 10 and [[timdisp]]==1 (time-dispersion calculation)",
+    characteristics=["[[DEVELOP]]"],
+    added_in_version="10.4",
+    text=r"""
+Turns on magnetic field perturbations in time-dispersion (Berry-curvatures) computation, as 2nd
+perturbation. Can take two values:
+
+ * 1 --> Uniform Zeeman field perturbation along Cartesian directions set by [[d3e_pert2_magdir]]
+ * 2 --> Local Zeeman field perturbation to atoms and Cartesian directions set by [[d3e_pert2_magat]] and [[d3e_pert2_magdir]], respectively. 
+""",
+),
+
+Variable(
     abivarname="d3e_pert2_phon",
     varset="dfpt",
     vartype="integer",
-    topics=["nonlinear_basic"],
+    topics=["nonlinear_basic", "ConstrainedDFPT_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 2: PHONons",
@@ -5969,7 +6084,7 @@ Variable(
     abivarname="field_red",
     varset="ffield",
     vartype="real",
-    topics=[],
+    topics=["Berry_basic"],
     dimensions=[3],
     defaultval=MultipleValue(number=3, value=0.0),
     mnemonics="FIELD in REDuced coordinates",
@@ -7534,7 +7649,7 @@ Variable(
     abivarname="gpu_nfft_blocks",
     varset="paral",
     vartype="integer",
-    topics=['parallelism_expert'],
+    topics=["parallelism_expert"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="GPU: Number of Fast Fourier Transform Blocks",
@@ -8697,7 +8812,37 @@ As usual, the default is atomic units.
 Note that Tesla are admitted, despite the fact that this is not the proper unit for a $H$ field.
 Actually, if you specify "Tesla", ABINIT will set $\mu_0H$ in Tesla, so that H will be in Amperes/metre.
 
+The three components are expressed in the spin-axis basis defined by [[spinaxis]].
+For the default value [[spinaxis]] = (0 0 1), this basis coincides with the Cartesian reference frame, so that [[hspinfield]] is equivalent to [[hspinfield_cart]].
+
+When [[spinaxis]] is not aligned with the Cartesian z axis, it is recommended to use
+[[hspinfield_cart]] instead of [[hspinfield]], in order to specify the magnetic field directly in Cartesian coordinates.
+
 REPLACES the obsolete zeemanfield input variable.
+""",
+),
+
+Variable(
+    abivarname="hspinfield_cart",
+    varset="ffield",
+    vartype="real",
+    topics=["MagField_basic"],
+    dimensions=[3],
+    defaultval=0,
+    mnemonics="H-magnetic SPIN FIELD in CARTesian coordinates",
+    characteristics=["[[MAGNETIC_FIELD]]"],
+    added_in_version="10.6.0",
+    text=r"""
+Give the value of the magnetic field, $H$, acting on the spin/spinorial wavefunctions in **Cartesian** coordinates.
+This variable is the Cartesian-coordinate counterpart of [[hspinfield]] and uses the same units.
+As usual, the default is atomic units.
+
+Unlike [[hspinfield]], this variable is always interpreted in the Cartesian reference frame, regardless of the value of [[spinaxis]].
+When [[spinaxis]] differs from its default value, it is recommended to specify the magnetic field in Cartesian coordinates using [[hspinfield_cart]].
+
+Note that Tesla are admitted, despite the fact that this is not the proper unit for a $H$ field.
+Actually, if you specify "Tesla", ABINIT will set $\mu_0H$ in Tesla, so that H will be in Amperes/metre.
+
 """,
 ),
 
@@ -8988,7 +9133,7 @@ to define the Hartree potential, and using Ewald correction.
 
 Variable(
     abivarname="icutcoul",
-    varset="gstate",
+    varset="gstate, dfpt",
     vartype="integer",
     topics=["Coulomb_basic"],
     dimensions="scalar",
@@ -9019,15 +9164,21 @@ on the methodology, thanks to [[rcut]].
   * 0 --> Sphere (molecules, but also 3D-crystals, see below). See [[rcut]].
   * 1 --> (W.I.P.) cylinder (nanowires, nanotubes). See [[vcutgeo]] and [[rcut]].
   * 2 --> Surface. See [[vcutgeo]] and [[rcut]].
+  * 22 --> Short-range 2D Coulomb interaction introduced in Ref. [[cite:Royo2021]].
   * 3 --> 3D crystal (Coulomb interaction without cut-off).
   * 4 --> ERF, long-range only Coulomb interaction.
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional). (W.I.P.)
+  * 55 --> Pick, Cohen and Martin (PCM) short-range 3D Coulomb interaction (see [[cite:Pick1970]]).
 
 Note that Spencer and Alavi showed that the
 spherical cutoff can efficiently be used also for 3D systems [[cite:Spencer2008]].
 In the latter case, use a negative value for the cutoff radius of the sphere ([[rcut]]<0),
 which is automatically calculated so that the volume enclosed in the sphere is
 equal to the volume of the solid.
+
+Starting from version 10.4, the use of Coulomb cutoffs has been extended to the linear-response 
+driver for all perturbations except strain. However, only the [[icutcoul]] = 2, 22, or 55 options 
+have been validated so far.
 """,
 ),
 
@@ -11798,6 +11949,30 @@ confusing.
 ),
 
 Variable(
+    abivarname="magpen",
+    varset="dfpt",
+    vartype="real",
+    topics=['DFPT_expert', 'ConstrainedDFPT_expert'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="MAGnetic PENalty DFPT parameter",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="10.4",
+    text=r"""
+This variable sets the amplitude of the penalty function applied to the first-order local magnetic moments in a constrained DFPT 
+calculation (see Ref. [[cite:Royo2019]]). Larger values of [[magpen]] shift the spin-wave excitations that hinder self-consistent 
+convergence to higher energies. However, the magnitude of this shift is limited by a material-dependent threshold associated with 
+the onset of cross-gap electronic excitations. Using values of [[magpen]] beyond this limit may be inefficient, as they can introduce 
+numerical instabilities. Typical values for insulators such as CrI$_3$ or Cr$_2$O$_3$ are on the order of 0.05. The factor-of-four 
+difference with respect to the values reported in Ref. [[cite:Royo2019]] arises from a different criterion used to define the magnetic moments.
+
+The size and boundary shape of the atomic spheres wherein the magnetic penalty is applied are specified by [[ratsph]] and [[ratsm]].
+The penalized ions and directions are specified by [[mpatpol]] and [[mpdir]], respectively. 
+""",
+),
+
+
+Variable(
     abivarname="max_ncpus",
     varset="paral",
     vartype="integer",
@@ -12280,6 +12455,43 @@ Choice of algorithm for the molecular dynamics simulation, and possibly changes 
     **Related variables:** time step [[dtion]]
 """,
 ),
+
+Variable(
+    abivarname="mpatpol",
+    varset="dfpt",
+    vartype="integer",
+    topics=['DFPT_expert', 'ConstrainedDFPT_expert'],
+    dimensions=[2],
+    defaultval=MultipleValue(number=1, value="[[natom]]"),
+    mnemonics="Magnetic Penalty: ATomic POLarisation",
+    characteristics=["[[DEVELOP]]"],
+    added_in_version="10.4",
+    text=r"""
+This variable specifies the range of atoms to which a magnetic penalty is applied on the 
+first-order local magnetic moments. It may take values between 1 to [[natom]], with [[mpatpol]](1)<=[[mpatpol]](2).
+In practice, the penalty is typically applied only to the magnetic ions.
+
+As a side technical information, the value [[mpatpol]](1)=-1 is admitted, and transformed
+immediately to [[mpatpol]](1)=1, while [[mpatpol]](2)=-1 is transformed to  [[mpatpol]](2)=[[natom]].
+""",
+),
+
+Variable(
+    abivarname="mpdir",
+    varset="dfpt",
+    vartype="integer",
+    topics=["DFPT_expert", "ConstrainedDFPT_expert"],
+    dimensions=[3],
+    defaultval=[1, 1, 1],
+    mnemonics="Magnetic Penalty: DIRections",
+    characteristics=["[[DEVELOP]]"],
+    added_in_version="10.4",
+    text=r"""
+Gives the Cartesian directions along which the first-order magnetic moments 
+are constrained during a linear-response calculatiuon when [[magpen]]/= 0.0. 
+""",
+),
+
 
 Variable(
     abivarname="mpw",
@@ -15492,7 +15704,7 @@ The choice is among:
   * 7 --> electron-phonon coupling (EPH), see also [[eph_task]] input variable.
   * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
   * 9 --> Real-time TDDDFT calculation (RTTDDFT), routine *rttddft_driver*
-  * 10 --> longwave response functions (LONGWAVE), routine *longwave*. See also [[lw_flexo]],  [[lw_qdrpl]] or [[lw_natopt]] input variables.
+  * 10 --> Spatial (LONGWAVE) and time (TIMDISP) dispersion, routine *longwave*. See also [[lw_flexo]],  [[lw_qdrpl]] , [[lw_natopt]] or [[timdisp]] input variables.
   * 66 --> GW using Lanczos-Sternheimer, see input variables whose name start with `gwls_*`.
   * 99 --> Bethe-Salpeter calculation (BSE), routine *bethe_salpeter*
 
@@ -19638,11 +19850,14 @@ elements of the dynamical matrix, use different values of [[rfatpol]] and/or
 [[rfdir]]. The name 'iatpol' is used for the part of the internal variable
 ipert when it runs from 1 to [[natom]]. The internal variable ipert can also
 assume values larger than [[natom]], denoting perturbations of electric field
-or stress type (see [the DFPT help file](/guide/respfn)).
+or stress type (see [the DFPT help file](../guide/respfn.md)).
 
 As a side technical information, the value [[rfatpol]](1)=-1 is admitted, and transformed
 immediately to [[rfatpol]](1)=1, while [[rfatpol]](2)=-1 is transformed to  [[rfatpol]](2)=[[natom]],
 while the default input values are actually [[rfatpol]]=-1 .
+
+Starting from version 10.4, [[rfatpol]] also defines the range of atoms for which the local 
+Zeeman-field response function is computed when [[rfmagn]] = 2.
 """,
 ),
 
@@ -19725,15 +19940,27 @@ Variable(
     abivarname="rfmagn",
     varset="dfpt",
     vartype="integer",
-    topics=["DFPT_basic"],
+    topics=["DFPT_basic", "ConstrainedDFPT_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Response Function with respect to MAGNetic B-field perturbation",
     added_in_version="before_v9",
     text=r"""
-[[rfmagn]] allows one to run response function calculations with respect to
-external magnetic field if set to 1. Currently, orbital magnetism is not taken into
-account and the perturbing potential has Zeeman form. For more details, see [[cite:Ricci2019]].
+This variable enables response-function calculations with respect to external Zeeman magnetic fields. At present, orbital magnetism is not included, and the perturbing potential has purely Zeeman form. For further details, see Refs. [[cite:Ricci2019]] and [[cite:Royo2026]].
+
+  * 0 --> no magnetic-field perturbation
+  * 1 --> uniform magnetic-field perturbation (possibly at finite q) applied along the Cartesian directions specified by [[rfdir]]
+  * 2 --> local magnetic-field perturbations (possibly at finite q) applied to the atoms specified by [[rfatpol]] and along the 
+          Cartesian directions specified by [[rfdir]]. The size and boundary shape of the atomic spheres wherein the field is applied 
+          are specified by [[ratsph]] and [[ratsm]].
+
+Note for constrained DFPT calculations:
+A set of local magnetic-field response calculations, combined with a geometrically equivalent magnetic penalty 
+(defined by the variables [[magpen]], [[mpatpol]], and [[mpdir]]), enables the computation of the so-called 
+local spin susceptibility within the constrained-B functional introduced in Ref. [[cite:Royo2026]]. This quantity 
+is stored in the DDB file and subsequently used by anaddb to transform the second- and third-order energy derivatives 
+computed with the magnetic penalty--i.e., within the constrained-B functional--into the corresponding physically 
+relevant magnetic functionals.
 """,
 ),
 
@@ -19757,6 +19984,22 @@ this use of symmetries, while it is denied when [[rfmeth]] is negative. There is
 as a symmetrization of the whole 2DTE is sometimes rendered possible when the additional knowledge of the zero matrix elements
 is available. Thus, the results obtained for positive and negative values of [[rfmeth]] might slightly differ for non-zero elements of the 2DTE,
 if they are computed in both cases.
+""",
+),
+
+Variable(
+    abivarname="rfomega",
+    varset="gw",
+    vartype="real",
+    topics=["DFPT_expert"],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="Response Function OMEGA",
+    characteristics=["[[DEVELOP]]"],
+    added_in_version="before_v9",
+    text=r"""
+This variable sets the frequency (in Hartree energy units) of the perturbation in dynamic linear-response calculations. 
+If [[rfomega]]/=0, [[tim1rev]] must be set to 0, since a time-dependent perturbation automatically breaks time-reversal symmetry. 
 """,
 ),
 
@@ -20511,9 +20754,16 @@ Variable(
     mnemonics="SPIN for AToms",
     added_in_version="before_v9",
     text=r"""
-Gives the **initial** electronic spin-magnetization for each atom in Cartesian coordinates, in unit of $\hbar/2$,
+Gives the **initial** electronic spin-magnetization for each atom, in unit of $\hbar/2$,
 as well as, in case of fixed magnetization calculations (see [[constraint_kind]] and [[magconon]]),
 the **target value** of the magnetization.
+
+The three components are expressed in the spin-axis basis defined by [[spinaxis]].
+For the default value [[spinaxis]] = (0 0 1), this basis coincides with the Cartesian reference frame,
+so that [[spinat]] is equivalent to [[spinat_cart]].
+
+When [[spinaxis]] is not aligned with the Cartesian z axis, it is recommended to use [[spinat_cart]]
+instead of [[spinat]], in order to specify the magnetic vectors directly in Cartesian coordinates.
 
 Note that if [[nspden]] = 2, the z-component must be given for each atom, in triplets (0 0 z-component).
 For example, the electron of an hydrogen atom can be spin up (0 0 1.0) or spin down (0 0 -1.0).
@@ -20540,6 +20790,30 @@ then recommended to put [[nsym]] = 1.
 * If the symmetries are specified, and the irreducible set of atoms is specified, the anti-ferromagnetic characteristics of the symmetry operations [[symafm]] will be used to generate [[spinat]] for all the non-irreducible atoms.
 
 * In the case of PAW+U calculations using the [[dmatpawu]] initial occupation matrix, and if [[nspden]] = 4, [[spinat]] is also used to determine the direction of the integrated magnetization matrix.
+""",
+),
+
+Variable(
+    abivarname="spinat_cart",
+    varset="gstate",
+    vartype="real",
+    topics=["spinpolarisation_basic", "crystal_useful", "MagMom_useful", "ConstrainedDFT_useful"],
+    dimensions=ValueWithConditions({"[[natrd]]<[[natom]]": "[3, [[natrd]] ]", "defaultval": "[3, [[natom]] ]"}),
+    defaultval=0.0,
+    mnemonics="SPIN for AToms in CARTesian coordinates",
+    added_in_version="10.7.0",
+    text=r"""
+Gives the **initial** electronic spin-magnetization for each atom in **Cartesian** coordinates, in unit of $\hbar/2$,.
+as well as, in case of fixed magnetization calculations (see [[constraint_kind]] and [[magconon]]),
+the **target value** of the magnetization.
+
+This variable is the Cartesian-coordinate counterpart of [[spinat]].
+Unlike [[spinat]], this variable is always interpreted in the Cartesian reference frame, regardless of the value of [[spinaxis]].
+It is recommended when [[spinaxis]] is not aligned with the Cartesian z axis, in order to specify
+the magnetic moments directly in Cartesian coordinates.
+
+Note that if [[nspden]] = 2, only the component along [[spinaxis]] is used: the Cartesian magnetic
+moments specified by [[spinat_cart]] are therefore projected onto this axis.
 """,
 ),
 
@@ -21091,23 +21365,24 @@ Can be specified in Ha (the default), Ry, eV or Kelvin, since it has the [[ENERG
 ),
 
 Variable(
-    abivarname="tim1rev",
+    abivarname="timdisp",
     varset="dfpt",
     vartype="integer",
-    topics=["DFPT_expert", "DFPT_internal"],
+    topics=["longwave_expert"],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="TIMe 1st order REVersal",
+    mnemonics="TIMe DISPersion",
+    requires="[[optdriver]] == 10",
     characteristics=["[[DEVELOP]]"],
-    added_in_version="before_v9",
+    added_in_version="10.4",
     text=r"""
-Allowed values are 0 or 1.
 
-If tim1rev is equal to 1, the Sternheimer equation is solved simultaneously at
-+q and -q perturbation wavevectors. The first order potential at -q is taken
-to be equal to the Hermitian conjugate of the first order potential at +q.
-The wavefunctions from both +q and -q are then combined to generate the first order density.
-Relevant in the case of magnetic field perturbation (but will be relevant also in case of non-zero frequency DFPT, when implemented).
+If [[optdriver]] is equal to 10, which activates a longwave run, setting [[timdisp]]=1 enables the 
+calculation of frequency-derivatives (Berry curvatures) of second-order energy derivatives
+specified by the variables: [[d3e_pert1_phon]], [[d3e_pert1_elfd]], 
+[[d3e_pert1_magn]], [[d3e_pert2_phon]], etc....
+
+This **requires** the precalculation of the corresponding first-order wavefunction files, 
 """,
 ),
 
@@ -21150,6 +21425,32 @@ timing of the different parts of the lobpcg routine. A different splitting of
 lobpcg than for [[timopt]] = -3 is provided (this takes time, and is discouraged
 for too small runs - the timing would take more time than the run !). The
 timer is timed. The sum of the independent parts is closer to 100% than for [[timopt]] = -3.
+""",
+),
+
+Variable(
+    abivarname="tim1rev",
+    varset="dfpt",
+    vartype="integer",
+    topics=["DFPT_expert", "DFPT_internal"],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="TIMe 1st order REVersal",
+    characteristics=["[[DEVELOP]]"],
+    added_in_version="before_v9",
+    text=r"""
+Allowed values are 0 or 1.
+
+If tim1rev is equal to 0, the Sternheimer equation is solved simultaneously at
++q and -q perturbation wavevectors. The first order potential at -q is taken
+to be equal to the Hermitian conjugate of the first order potential at +q.
+The wavefunctions from both +q and -q are then combined to generate the first order density.
+Relevant in the following cases: 
+
+ * Finite-q phonon response function calculation in a magnetic material.
+ * Magnetic field perturbation [[rfmagn]]=1 or 2. 
+ * Finite-frequency response function calculation (even in the q=0 limit).
+ * Berry curvature calculation at finte q or finite frequency.
 """,
 ),
 
@@ -23422,11 +23723,11 @@ The different possibilities are:
   * [[wfoptalg]] = 114: A modern and highly efficient version of [[wfoptalg]] = 14 (**Locally Optimal Block Preconditioned Conjugate Gradient**), particularly suited for parallel computations. It performs well with a small number of blocks and can utilize OpenMP if ABINIT is compiled with a multithreaded linear algebra library.
 > Note: When using more than one thread, [[npfft]] cannot be used.
 
-  * [[wfoptalg]] = 1: A spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. It is suitable when the LOBPCG algorithm no longer scales efficiently. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].
+  * [[wfoptalg]] = 1: A spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. It is suitable when the LOBPCG algorithm no longer scales efficiently. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](../theory/howto_chebfi.pdf) and [[cite:Levitt2015]].
 > Recommendation: use [[wfoptalg]] = 111, which is the modern and improved version of this algorithm.
 > See **notes** in the "[[wfoptalg]] = 111" section.
 
-* [[wfoptalg]] = 111: A **modern and highly efficient version** of [[wfoptalg]] = 1, a spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].
+* [[wfoptalg]] = 111: A **modern and highly efficient version** of [[wfoptalg]] = 1, a spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](../theory/howto_chebfi.pdf) and [[cite:Levitt2015]].
 
 * [[wfoptalg]] = 112: A **highly** experimental version of Spectrum Slicing algorithm. A spectral filtering
 algorithm by spectral slices based on lowpass and bandpass Chebyshev polynomials. The polynomial degree is tuned
@@ -26054,7 +26355,7 @@ instead of the GWPT ones, for comparison purposes.
 Variable(
     abivarname="gstore_brange",
     varset="eph",
-    vartype="int",
+    vartype="integer",
     topics=["ElPhonInt_basic"],
     dimensions=[2, "[[nsppol]]"],
     defaultval=0,
@@ -26113,7 +26414,7 @@ See also [[getabiwan]].
 Variable(
     abivarname="getabiwan",
     varset="eph",
-    vartype="int",
+    vartype="integer",
     topics=["ElPhonInt_basic"],
     dimensions="scalar",
     defaultval="None",
@@ -26143,7 +26444,7 @@ See also [[getgwan]].
 Variable(
     abivarname="getgwan",
     varset="eph",
-    vartype="int",
+    vartype="integer",
     topics=["ElPhonInt_basic"],
     dimensions="scalar",
     defaultval="None",
@@ -26573,7 +26874,7 @@ visualisation software like VESTA or Xcrysden.
 Variable(
     abivarname="getvpq",
     varset="eph",
-    vartype="int",
+    vartype="integer",
     topics=["Polaron_basic"],
     dimensions="scalar",
     defaultval=None,
@@ -26849,7 +27150,7 @@ Variable(
     varset="eph",
     vartype="real",
     topics=["Polaron_basic"],
-    dimensions="(2)",
+    dimensions=[2],
     defaultval=[0, 1],
     mnemonics="Variational Polaron eQuations: Gaussian PaRameters -- electronic ENERGY",
     requires='[[eph_task]] == 13 and [[vpq_aseed]] == "gau_energy"',
@@ -26867,7 +27168,7 @@ Variable(
     varset="eph",
     vartype="real",
     topics=["Polaron_basic"],
-    dimensions="(3)",
+    dimensions=[3],
     defaultval=[0, 0, 0],
     mnemonics="Variational Polaron eQuations: TRanslation VECtor",
     requires="[[eph_task]] == -13",
@@ -26884,7 +27185,7 @@ Variable(
     varset="eph",
     vartype="real",
     topics=["Polaron_basic"],
-    dimensions="(3)",
+    dimensions=[3],
     defaultval=[1, 1, 1],
     mnemonics="Variational Polaron eQuations: Gaussian PaRameters -- localization LENGTH",
     requires='[[eph_task]] == 13 and [[vpq_aseed]] == "gau_length"',
@@ -27042,7 +27343,7 @@ kptbounds
 Variable(
     abivarname="eph_path_brange",
     varset="eph",
-    vartype="int",
+    vartype="integer",
     topics=["ElPhonInt_useful"],
     dimensions=[2],
     defaultval=[0, 0],

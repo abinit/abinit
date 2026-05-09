@@ -8,10 +8,10 @@ This tutorial discusses how to compute phonon-limited carrier mobilities in semi
 the self-energy relaxation time approximation (SERTA) and the momentum relaxation time approximation (MRTA),
 taking the specific case of AlAs as an example.
 
-It is assumed the user has already completed the two tutorials [RF1](/tutorial/rf1) and [RF2](/tutorial/rf2),
+It is assumed the user has already completed the two tutorials [RF1](../tutorial/rf1.md) and [RF2](../tutorial/rf2.md),
 and that he/she is familiar with the calculation of ground state and response properties,
 in particular phonons, Born effective charges and dielectric tensor.
-The user should have read the [introduction tutorial for the EPH code](/tutorial/eph_intro)
+The user should have read the [introduction tutorial for the EPH code](../tutorial/eph_intro.md)
 before running these examples.
 
 This lesson should take about 1.5 hour.
@@ -91,7 +91,7 @@ that can be computed with DFPT.
     semiconductors**, conditions in which e-ph scattering is one of the most important contributions.
 
     Last but not least, we are assuming that carriers can be described by Bloch states with a well-defined excitation
-    energy (**band picture**). Polaronic effects such as those discussed in [this tutorial](/tutorial/eph4zpr)
+    energy (**band picture**). Polaronic effects such as those discussed in [this tutorial](../tutorial/eph4zpr.md)
     are not captured by the present approach.
 
 The generalized transport coefficients are defined by:
@@ -138,7 +138,7 @@ Similar expressions hold for holes.
 At zero total carrier concentration, the Fermi level $\ef$ is located inside the band gap so that $n_e = n_h$.
 
 A typical computation of mobilities requires different steps that are summarized
-in the [introduction page for the EPH code](/tutorial/eph_intro).
+in the [introduction page for the EPH code](../tutorial/eph_intro.md).
 Here we only describe the e-ph related part, i.e the blue-box in the workflow presented in the previous page.
 For this purpose, we use [[eph_task]] **-4** to compute **only the imaginary part of the SE at the KS energy**
 and explain other important aspects related to this kind of calculation.
@@ -407,8 +407,8 @@ In this case, using the same sampling for electrons and phonons may be enough to
   since these transitions are not compatible with energy and crystalline-momentum conservation.
   The use of the tetrahedron method is **automatically activated** when [[eph_task]] is set to -4.
   It is possible to change this behaviour by using [[eph_intmeth]] albeit not recommended
-  as the calculation will become significantly slower. If using the Gaussian method, one must 
-  converge the self-energy with respect to [[zcut]] (or [[eph_fsmear]] if [[eph_task]] is set to 1), 
+  as the calculation will become significantly slower. If using the Gaussian method, one must
+  converge the self-energy with respect to [[zcut]] (or [[eph_fsmear]] if [[eph_task]] is set to 1),
   By default, [[zcut]] is set to a very large value.
 
 * The [[sigma_erange]] variable defines the energy window, below the VBM and above the
@@ -423,7 +423,7 @@ A value of 0.2 eV represents a good starting point for further analysis.
 Hopefully, in the next version this parameter will be automatically computed by the code.
 -->
 
-* [[boxcutmin]] and [[mixprec]] are used to accelerate the computation, see [the introductory tutorial](/tutorial/eph_intro).
+* [[boxcutmin]] and [[mixprec]] are used to accelerate the computation, see [the introductory tutorial](../tutorial/eph_intro.md).
 
 We now examine the log file in detail.
 After the standard output of the input variables, the code reports the different parameters
@@ -820,7 +820,7 @@ If these tricks do not solve your problem, consider using OpenMP threads.
 The code is not highly-optimized for OpenMP but a couple of threads may be useful to avoid replicating memory at the MPI level.
 As a rule of thumb, 2-4 OpenMP threads should be OK provided you link with threaded FFT and BLAS libraries.
 To compile ABINIT with OpenMP support and link with a threaded library see the
-corresponding section in the [ABINIT_build tutorial](/tutorial/abinit_build).
+corresponding section in the [ABINIT_build tutorial](../tutorial/abinit_build.md).
 
 !!! warning
 
@@ -830,6 +830,7 @@ corresponding section in the [ABINIT_build tutorial](/tutorial/abinit_build).
 
 <!-- part of the discussion can be moved to the eph_intro as SKW will be used also in phgamma -->
 
+<a id="how-to-compute-only-the-k-points-close-to-the-band-edges"></a>
 ## How to compute the WFK only for k-points close to the band edges
 
 As we have already seen in the previous sections, a relatively small number of $\kk$-points
@@ -910,7 +911,7 @@ For further examples see [[test:v9_57]], and [[test:v9_61]].
 
 Note that the two tests **cannot be executed in multidataset mode with a single input file**.
 Also, keep in mind that the quality of the interpolation depends on the initial coarse $\kk$-mesh
-so we recommended to look at the interpolant, see discussion at the end of [the introductory tutorial](/tutorial/eph_intro).
+so we recommended to look at the interpolant, see discussion at the end of [the introductory tutorial](../tutorial/eph_intro.md).
 
 !!! important
 
