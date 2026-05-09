@@ -2973,11 +2973,20 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 
    dtsets(idtset)%bs_loband=0
 
+   !dtsets(idtset)%eph_restart = 0
+   !print *, dtsets(idtset)%optdriver
+   !print *, dtsets(idtset)%eph_task
    !if (dtsets(idtset)%optdriver == RUNL_EPH) then
-   !  dtsets(idtset)%mixprec = 1
-   !  dtsets(idtset)%boxcutmin = 1.1_dp
+   !  if (any(dtsets(idtset)%eph_task == [13, -13])) then
+   !    ! In VARPEQ, restart must be activated explicitly.
+   !    dtsets(idtset)%eph_restart = 0
+   !    stop "hello"
+   !  end if
+   !  !dtsets(idtset)%mixprec = 1
+   !  !dtsets(idtset)%boxcutmin = 1.1_dp
    !end if
  end do
+ !stop
 
  DBG_EXIT("COLL")
 
