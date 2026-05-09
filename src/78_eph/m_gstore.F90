@@ -653,7 +653,7 @@ contains
 end type gstore_t
 !!***
 
-public :: gstore_check_restart
+public :: gstore_check_restart, gstore_read_gtype
  ! Check whether restart is possible.
 
 contains
@@ -6564,6 +6564,56 @@ logical function gstore_nc_has_iv1p_comm(gstore, root_ncid) result (has_iv1p_com
  end do
 
 end function gstore_nc_has_iv1p_comm
+!!***
+
+!!****f* m_gstore/gstore_read_gtype
+!! NAME
+!! gstore_read_gtype
+!!
+!! FUNCTION
+!!  Read the value of "gstore_gtype" from the NetCDF file.
+!!  Only the master process reads the value and broadcasts it to all processes in comm.
+!!
+!! INPUTS
+!!  ncid: NetCDF file ID (open for reading).
+!!  comm: MPI communicator.
+!!
+!! OUTPUTS
+!!  gtype: The value of gstore_gtype read from the file.
+!!
+!! SOURCE
+
+subroutine gstore_read_gtype(path, gtype, comm)
+
+!Arguments ------------------------------------
+ character(len=*), intent(in) :: path
+ character(len=*), intent(out) :: gtype
+ integer, intent(in) :: comm
+
+!Local variables-------------------------------
+ integer, parameter :: master = 0
+ integer :: my_rank, nproc, ierr, varid, ncerr, ncid
+! *************************************************************************
+
+ my_rank = xmpi_comm_rank(comm)
+ nproc = xmpi_comm_size(comm)
+
+ if (my_rank == master) then
+   NCF_CHECK(nf90_open(path, nf90_nowrite, ncid))
+   gtype = "KS"
+   ncerr = nf90_inq_varid(ncid, "gstore_gtype", varid)
+   if (ncerr == nf90_noerr) then
+     NCF_CHECK(nf90_get_var(ncid, varid, gtype))
+     call replace_ch0(gtype)
+   end if
+   NCF_CHECK(nf90_close(ncid))
+ end if
+
+ if (nproc > 1) then
+   call xmpi_bcast(gtype, master, comm, ierr)
+ end if
+
+end subroutine gstore_read_gtype
 !!***
 
 end module m_gstore
