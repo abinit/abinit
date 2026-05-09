@@ -166,10 +166,10 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  real(dp),allocatable :: gh1c_sp(:,:),gh1c1(:,:),gh1c2(:,:),gh1c3(:,:),gh1c4(:,:)
  real(dp),allocatable :: gh1c_mGGA(:,:),gh1ndc(:,:),gvnl2(:,:)
  real(dp),target,allocatable :: nonlop_out(:,:),vlocal1_tmp(:,:,:)
-#define _DEV_USE_WORK
-#ifdef _DEV_USE_WORK
+!#define _DEV_USE_WORK
+!#ifdef _DEV_USE_WORK
  real(dp),target,allocatable :: work(:,:,:,:)
-#endif
+!#endif
  real(dp),contiguous, pointer :: gvnlx1_(:,:), dkinpw(:),kinpw1(:)
  type(pawcprj_type),allocatable,target :: cwaveprj_tmp(:,:)
  type(pawcprj_type),pointer :: cwaveprj_ptr(:,:)
@@ -290,16 +290,17 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    ndat__ = ndat
    !if (gs_hamkq%nvloc==1) ndat__ = ndat * gs_hamkq%nspinor ! TODO: Activate after testing
 
-#ifdef _DEV_USE_WORK
+!#ifdef _DEV_USE_WORK
    ABI_MALLOC(work,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6*ndat__))
 #ifdef HAVE_OPENMP_OFFLOAD
    if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(work,2*gs_hamkq%n4*gs_hamkq%n5*gs_hamkq%n6*ndat__)
 #endif
+!#endif
 
-#else
-   call gs_hamkq%alloc_fofr_work(ndat__)
-   associate (work => gs_hamkq%fofr_work)
-#endif
+!#else
+!   call gs_hamkq%alloc_fofr_work(ndat__)
+!   associate (work => gs_hamkq%fofr_work)
+!#endif
 
    if (gs_hamkq%nvloc==1) then
 
@@ -431,16 +432,16 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      end if
    end if ! nvloc
 
-#ifndef _DEV_USE_WORK
-   end associate
-#endif
+!#ifndef _DEV_USE_WORK
+!   end associate
+!#endif
 
-#ifdef _DEV_USE_WORK
+!#ifdef _DEV_USE_WORK
 #ifdef HAVE_OPENMP_OFFLOAD
    if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(work,2*gs_hamkq%n4*gs_hamkq%n5*gs_hamkq%n6*ndat__)
 #endif
    ABI_FREE(work)
-#endif
+!#endif
   ABI_NVTX_END_RANGE()
 
 !  k-point perturbation (or no local part, i.e. optlocal=0)
