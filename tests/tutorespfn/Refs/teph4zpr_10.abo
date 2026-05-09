@@ -889,6 +889,9 @@ meta: {optdriver: 7, eph_task: 24, }
 --------------------------------------------------------------------------------
 
 
+ Computing Fan-Migdal + DW self-energy from GSTORE.nc
+ Using e-ph self-energy expression with |g|^2
+
 - Reading e-ph matrix elements from: teph4zpr_10o_DS1_GSTORE.nc
  Asking for with_cplex: 1
  Asking for with_gmode: phonon

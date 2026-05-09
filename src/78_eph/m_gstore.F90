@@ -6587,7 +6587,7 @@ subroutine gstore_read_gtype(path, gtype, comm)
 
 !Arguments ------------------------------------
  character(len=*), intent(in) :: path
- character(len=*), intent(out) :: gtype
+ character(len=abi_slen), intent(out) :: gtype
  integer, intent(in) :: comm
 
 !Local variables-------------------------------
