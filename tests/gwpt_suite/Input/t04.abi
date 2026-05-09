@@ -10,6 +10,7 @@ gstore_kzone "ibz"
 gstore_qzone "bz"
 # Additional filter in k-space: only k-points corresponding to the band edges are considered
 gstore_kfilter "qprange"
+gwpt_wmode 1
 
 #gstore_use_lgk  0
 gstore_use_lgk 1   # IMPORTANT FOR PERFORMANCE
