@@ -902,16 +902,17 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_MALLOC(my_gbuf_ks, (gqk%cplex, nb_kq, nb_k, natom3, gqk%my_nk, qbuf_size))
 
    ! Allocate memory to deal with frequencies in Sigma(w).
-
    select case (dtset%gwpt_wmode)
    case (1)
      ! Prepare list of omegas: first e_nk then e_mkq for all m indices.
      ! Note that nw_nk depends on bstart_kq and bstop_kq so nw_nk depends on bands at _kq.
      nw_nk = 1 + (bstop_kq - bstart_kq + 1)
      nw_mkq = 1 + (bstop_k - bstart_k + 1)
+     call wrtout(units, " GWPT frequency convolution is evaluated at $\ee_\nk$ and $\ee_\mkq$ and the average is taken.")
    case (2)
      nw_nk = 1
      nw_mkq = (bstop_k - bstart_k + 1)
+     call wrtout(units, " GWPT frequency convolution is evaluated at $\ee_\nk$.")
    case default
      ABI_ERROR(sjoin("Invalid gwpt_wmode:", itoa(dtset%gwpt_wmode)))
    end select

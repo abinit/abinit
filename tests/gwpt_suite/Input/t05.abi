@@ -22,6 +22,7 @@ getpot_filepath "diamond_eph_gwpt/gso_POT.nc"
 getddb_filepath "diamond_eph_gwpt/out_DDB"
 getgstore_filepath "t04o_GSTORE.nc"
 
+gwpt_g2mode 1              # Use |g|^2
 gstore_gname "gvals"      # Use GWPT e-ph matrix elements from GSTORE (default)
 eph_stern 1               # Activate Sterheimer to compute contribution given by states above nband
 

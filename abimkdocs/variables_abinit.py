@@ -5659,7 +5659,7 @@ The choice is among:
               An array D(R) with the decay of the W(R,r) as a function of R is computed and saved to file
               In the second case (-15) the q-points are taken directly from the DVDB file.
 * 16, -16 --> test_phrotation TO BE DOCUMENTED.
-* 17 --> Compute e-ph matrix elements with the GWPT formalism  Produce GSTORE file.
+* 17 --> Compute e-ph matrix elements with the GWPT formalism  Produce GSTORE.nc file.
          Requires netcdf library with MPI-IO support.
 * 18 --> Compute e-ph matrix g(k,q) along a high-symmetry path. See [[eph_fix_wavevec]] and other related variables.
 * 19 --> Compute matrix elements of the screened interaction W between two Cooper pairs.
@@ -8280,16 +8280,16 @@ Variable(
     vartype="integer",
     topics=["ElPhonInt_expert"],
     dimensions="scalar",
-    defaultval=1,
+    defaultval=2,
     mnemonics="GWPT omega MODE",
     added_in_version="10.7.1",
     text=r"""
 This variable controls the treatment of the frequency-dependence in the computation
-of the GWPT e-ph matrix elements.
+of the GWPT e-ph matrix elements when [[eph_task]] == 17.
 
-1 -> Use the original treatment as in [[cite:Li2019]] in which the frequency convolution is evaluated
-     both at $\ee_\nk$ and $\ee_\mkq$ and the average is taken.
-2 -> Evaluate the convolution at $\ee_\nk$.
+1 -> Use the original treatment as in [[cite:Li2019]] in which the
+     frequency convolution is evaluated at $\ee_\nk$ and $\ee_\mkq$ and the average is taken.
+2 -> Evaluate the convolution at $\ee_\nk$. This is the **recommended** approach when computing the ZPR of the band gap.
 """,
 ),
 
@@ -8299,8 +8299,8 @@ Variable(
     vartype="integer",
     topics=["ElPhonInt_expert"],
     dimensions="scalar",
-    defaultval=1,
-    mnemonics="GWPT G MODE",
+    defaultval=2,
+    mnemonics="GWPT G-MODE",
     added_in_version="10.7.1",
     text=r"""
 This variable controls the treatment of the e-ph matrix elements
@@ -26824,7 +26824,7 @@ Variable(
     mnemonics="GWPT Number of Processors for Wavevector sum, Perturbations, Q-points, Bands, K-points, Spin.",
     added_in_version="10.1.4",
     text=r"""
-This variable defines the Cartesian grid of MPI processors used for GWPT calculations.
+This variable defines the Cartesian grid of MPI processors used for GWPT calculations ([[eph_task]] = 17)
 If not specified in the input, the code will generate this grid automatically using the total number of processors
 and the basic dimensions of the job computed at runtime.
 

@@ -60,6 +60,7 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
          eph_task          17
 -          fftalg         312
    gstore_use_lgk        1
+       gwpt_wmode           1
            istwfk        2    3    7
               ixc          11
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -235,6 +236,7 @@ meta: {optdriver: 7, eph_task: 17, }
    6.90155232E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+- Cannot find pre-existent GSTORE file: t04o_GSTORE.nc
 P qpt_comm can use shmem: yes
 P kpt_comm can use shmem: yes
 P bsum_comm can use shmem: yes
@@ -397,6 +399,7 @@ force_plsmf:   0.00000000E+00
 ...
 
  Only q-points in the IBZ_k will be computed.
+ GWPT frequency convolution is evaluated at $\ee_\nk$ and $\ee_\mkq$ and the average is taken.
 
  Sigma^x_nk and Sigma^c_nk(E0) in eV:
 Band     E0    <VxcDFT>   SigX SigC(E0)  for k-point:[ 0.0000E+00,  0.0000E+00,  0.0000E+00]
@@ -1054,6 +1057,7 @@ Band     E0    <VxcDFT>   SigX SigC(E0)  for k-point:[ 5.0000E-01,  5.0000E-01, 
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         512
    gstore_use_lgk        1
+       gwpt_wmode           1
               ixc          11
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      9.54735576E+00
