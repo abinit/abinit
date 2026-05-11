@@ -420,6 +420,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
    end if
    usexg = 0
    if (dtset%cprj_in_memory==1) usexg = 1
+   write(*,*) 'TEST 0',dtset%bandpp
    call forstrnps(cg,cprj,dtset%ecut,dtset%ecutsm,dtset%effmass_free,eigen,electronpositron,fock,grnl,&
 &   dtset%istwfk,kg,kinstr,nlstr,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,mggastr,dtset%mkmem,&
 &   mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,nfftf,dtset%ngfft,&
@@ -671,7 +672,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !scalars
  integer,parameter :: tim_rwwf=7
  integer :: bandpp,bdtot_index,choice,cpopt,dimffnl,dimffnl_str,iband,iband_cprj,iband_last,ibg,icg,ider,ider_str
- integer :: idir,idir_str,ierr,ii,ikg,ikpt,ilm,ipositron,ipw,ishift,isppol,istwf_k
+ integer :: idir,idir_str,ierr,ii,ikg,ikpt,ilm,ipositron,ipw,ishift,isppol,istwf_k,npw_k_
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: nnlout,npw_k,paw_opt,signs,spaceComm
  integer :: tim_nonlop,tim_nonlop_prep,usecprj_local,use_ACE_old
@@ -679,14 +680,15 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  integer :: space,me_g0,ncols_cprj,me_g0_fft
  real(dp) :: ar,ar2,renorm_factor,dfsm,ecutsm_inv,fact_kin,fsm,htpisq
  real(dp) :: kin,kin_kphq,xx
- type(gs_hamiltonian_type) :: gs_hamk
+ type(gs_hamiltonian_type),target :: gs_hamk
  logical :: compute_gbound,usefock_loc
  character(len=500) :: msg
  type(fock_common_type),pointer :: fockcommon
  type(xgBlock_t) :: xgx0_tr
  type(xgTransposer_t) :: xgTransposer
 !arrays
- integer,allocatable :: kg_k(:,:)
+ integer,allocatable,target :: kg_k(:,:)
+ integer,pointer :: gbound_k(:,:),kg_k_(:,:)
  real(dp) :: kpoint(3),kphq(3),nonlop_dum(1,1),rmet(3,3),tsec(2)
  real(dp) :: kgr(3),kgr_kphq(3),kgc(3),kgc_kphq(3)
 #if defined HAVE_GPU && defined HAVE_YAKL
@@ -1211,6 +1213,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              ABI_FREE(cwavef_spin)
              ABI_FREE(enlout_spin)
            end if ! GBT
+           if((stress_needed==1).and.(usevxctau==1)) then
+             cwavef_tr=>cwavef
+           endif
          else if (usexg/=1) then ! paral_kgb = 1
            ! here we MUST pass option gpu_option=ABI_GPU_DISABLED, as cwavef here is a host memory buffer
           if((stress_needed==1).and.(usevxctau==1).and.mpi_enreg%nproc_band>1) then
@@ -1405,11 +1410,20 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
 !        Accumulate stress tensor in case meta-GGA using v_tau
          if ((stress_needed==1).and.(usevxctau==1)) then
-           call stress_mGGA(mggastr,cwavef_tr,effmass_free,my_bandfft_kpt%gbound,gs_hamk%gprimd,istwf_k, &
-&               my_bandfft_kpt%kg_k_gather,kpoint,mgfft,mpi_enreg,my_nspinor,mpi_enreg%bandpp,ngfft,my_bandfft_kpt%ndatarecv,gs_hamk%nvloc, &
+           if(mpi_enreg%paral_kgb==1) then
+             gbound_k => my_bandfft_kpt%gbound
+             kg_k_ => my_bandfft_kpt%kg_k_gather
+             npw_k_=my_bandfft_kpt%ndatarecv
+           else
+             gbound_k => gs_hamk%gbound_k
+             kg_k_ => kg_k
+             npw_k_=npw_k
+           endif
+           call stress_mGGA(mggastr,cwavef_tr,effmass_free,gbound_k,gs_hamk%gprimd,istwf_k, &
+&               kg_k_,kpoint,mgfft,mpi_enreg,my_nspinor,mpi_enreg%bandpp,ngfft,npw_k_,gs_hamk%nvloc, &
 &               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occblock(1+mpi_enreg%me_band*mpi_enreg%bandpp:(mpi_enreg%me_band+1)*mpi_enreg%bandpp),gs_hamk%ucvol,vxctaulocal, &
 &               wtk(ikpt),gpu_option=gpu_option)
-           if(mpi_enreg%nproc_band>1) then
+           if(mpi_enreg%paral_kgb==1.and.mpi_enreg%nproc_band>1) then
              if(usexg==1) then
                call xgTransposer_free(xgTransposer)
              else
