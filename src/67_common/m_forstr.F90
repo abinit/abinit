@@ -1407,7 +1407,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          if ((stress_needed==1).and.(usevxctau==1)) then
            call stress_mGGA(mggastr,cwavef_tr,effmass_free,my_bandfft_kpt%gbound,gs_hamk%gprimd,istwf_k, &
 &               my_bandfft_kpt%kg_k_gather,kpoint,mgfft,mpi_enreg,my_nspinor,mpi_enreg%bandpp,ngfft,my_bandfft_kpt%ndatarecv,gs_hamk%nvloc, &
-&               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occblock(1+mpi_enreg%me_band*mpi_enreg%bandpp:1+(mpi_enreg%me_band+1)*mpi_enreg%bandpp),gs_hamk%ucvol,vxctaulocal, &
+&               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occblock(1+mpi_enreg%me_band*mpi_enreg%bandpp:(mpi_enreg%me_band+1)*mpi_enreg%bandpp),gs_hamk%ucvol,vxctaulocal, &
 &               wtk(ikpt),gpu_option=gpu_option)
            if(mpi_enreg%nproc_band>1) then
              if(usexg==1) then
