@@ -206,7 +206,8 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, comm)
       crystal%gmet,ddb%gprim,ddb%mpert,natom,Ifc%nrpt,qptnrm(1), &
       qpt, crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,crystal%ucvol, &
       Ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart,ifc%ewald_option,xmpi_comm_self, &
-      asrq0%asr,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
+      asrq0%asr,inp%dim_msr,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad,&
+      dielt_thick=inp%dielt_thick,dielt_env=inp%dielt_env)
 
    end if
 

@@ -156,6 +156,8 @@ module m_anaddb_dataset
 ! Real(dp)
   real(dp):: a2fsmear
   real(dp):: band_gap
+  real(dp):: dielt_env
+  real(dp):: dielt_thick(2)
   real(dp):: dosdeltae
   real(dp):: dossmear
   real(dp):: dostol
@@ -425,6 +427,21 @@ subroutine invars9(dtset, lenstr, natom, string)
    write(message, '(a, i0, 5a)' )&
    'dieflag is ',dtset%dieflag, ', but the only allowed values',ch10, &
    'are 0, 1, 2, 3 or 4.',ch10, 'Action: correct dieflag in your input file.'
+   ABI_ERROR(message)
+ end if
+
+ dtset%dielt_env = one
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'dielt_env',tread, 'DPR')
+ if(tread == 1) dtset%dielt_env = dprarr(1)
+
+ dtset%dielt_thick(:) = 0
+ call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'dielt_thick',tread, 'DPR')
+ if(tread == 1) dtset%dielt_thick(:) = dprarr(1:2)
+ print *, dtset%dielt_thick
+ if(dtset%dielt_thick(1) < zero)then
+   write(message, '(a, es14.4, 3a)' )&
+   'dielt_thick is ',dtset%dielt_thick(1), ', which is lower than 0 .',ch10, &
+   'Action: correct dielt_thick in your input file.'
    ABI_ERROR(message)
  end if
 
@@ -2474,7 +2491,7 @@ subroutine anaddb_chkvars(string)
 !C
  list_vars = trim(list_vars)//' chneut'
 !D
- list_vars = trim(list_vars)//' dieflag dim_msr dipdip dipquad dossum dosdeltae dossmear dostol dos_maxmode'
+ list_vars = trim(list_vars)//' dieflag dielt_env dielt_thick dim_msr dipdip dipquad dossum dosdeltae dossmear dostol dos_maxmode'
 !E
  list_vars = trim(list_vars)//' ep_scalprod eivec elaflag elphflag enunit'
  list_vars = trim(list_vars)//' ep_b_min ep_b_max ep_int_gkk ep_keepbands ep_nqpt ep_nspline ep_prt_yambo'

@@ -171,7 +171,7 @@ type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
 
    call new%ifc_vol(ivol)%init(new%cryst_vol(ivol), new%ddb_vol(ivol),&
      inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
-     qdrp_cart,inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
+     qdrp_cart,inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,inp%dim_msr,comm)
    ABI_FREE(zeff)
    ABI_FREE(qdrp_cart)
  end do

@@ -47,7 +47,7 @@ module m_anaddb_driver
  use m_ddb_piezo,      only : ddb_piezo
  use m_ddb_internalstr, only : ddb_internalstr
  use m_gruneisen,      only : gruns_anaddb
- use m_ddb_flexo,      only : ddb_flexo
+ use m_ddb_flexo,      only : ddb_flexo, ddb_phi1
  use m_lwf,            only : run_lattice_wannier
 
  implicit none
@@ -110,6 +110,12 @@ module m_anaddb_driver
    real(dp), allocatable:: qdrp_cart(:,:,:,:)
    ! qdrp_cart(3,3,3,natom)
 
+   real(dp), allocatable:: dcdq(:,:,:,:,:)
+   ! dcdq(3,natom,3,natom,3)
+
+   real(dp), allocatable:: dcdqdq(:,:,:,:,:)
+   ! dcdqdq(3,natom,3,3,3)
+
  contains
 
    procedure :: init => anaddb_driver_init
@@ -168,6 +174,9 @@ module m_anaddb_driver
 
    procedure :: lattice_wannier => anaddb_driver_lattice_wannier
    ! Construct the Lattice Wannier functions
+
+   procedure :: convertdim_dielt => anaddb_driver_convertdim_dielt
+   ! Extract low-dimmensional dielectric response from periodic calculations
 
  end type anaddb_driver_type
 
@@ -244,7 +253,10 @@ subroutine anaddb_driver_init(driver, dtset)
  ABI_MALLOC(driver%displ, (2*3*driver%natom*3*driver%natom))
  ABI_MALLOC(driver%phfrq, (3*driver%natom))
  ABI_MALLOC(driver%instrain, (3*driver%natom, 6))
-
+ ABI_MALLOC(driver%dcdq, (3, driver%natom, 3, driver%natom, 3))
+ ABI_MALLOC(driver%dcdqdq, (3, driver%natom, 3, 3, 3))
+ driver%dcdq = zero
+ driver%dcdqdq = zero
  ! Electric tensors
  ABI_MALLOC(driver%zeff, (3, 3, driver%natom))
  ABI_MALLOC(driver%qdrp_cart, (3, 3, 3, driver%natom))
@@ -289,6 +301,8 @@ subroutine anaddb_driver_free(driver)
  ABI_SFREE(driver%dchidt)
  ABI_SFREE(driver%instrain)
  ABI_SFREE(driver%fact_oscstr)
+ ABI_SFREE(driver%dcdq)
+ ABI_SFREE(driver%dcdqdq)
 
 end subroutine anaddb_driver_free
 !!***
@@ -628,7 +642,7 @@ end subroutine anaddb_driver_susceptibilities
 !!
 !! SOURCE
 
-subroutine anaddb_driver_interatomic_force_constants(driver, ifc, dtset, crystal, ddb, ana_ncid, asqr0, comm)
+subroutine anaddb_driver_interatomic_force_constants(driver, ifc, dtset, crystal, ddb, ana_ncid, asrq0, comm)
 
 !Arguments -------------------------------
  class(anaddb_driver_type), intent(inout):: driver
@@ -668,38 +682,39 @@ subroutine anaddb_driver_interatomic_force_constants(driver, ifc, dtset, crystal
    call Ifc_coarse%init(crystal, ddb, &
      dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, ngqpt_coarse, dtset%nqshft, dtset%q1shft, &
      driver%epsinf, driver%zeff, driver%qdrp_cart, &
-     dtset%nsphere, dtset%rifcsph, dtset%prtsrlr, dtset%enunit, comm, &
-     dipquad=dtset%dipquad, quadquad=dtset%quadquad)
+     dtset%nsphere, dtset%rifcsph, dtset%prtsrlr, dtset%enunit, dtset%dim_msr, comm, &
+     dipquad=dtset%dipquad, quadquad=dtset%quadquad, dielt_env=dtset%dielt_env,dielt_thick=dtset%dielt_thick)
 
    ! Now use the coarse q-mesh to fill the entries in dynmat(q)
    ! on the dense q-mesh that cannot be obtained from the DDB file.
    call ifc%init(crystal, ddb, &
     dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, &
     dtset%ngqpt(1:3), dtset%nqshft, dtset%q1shft, driver%epsinf, driver%zeff, driver%qdrp_cart, &
-    dtset%nsphere, dtset%rifcsph, dtset%prtsrlr, dtset%enunit, comm, &
-    Ifc_coarse=Ifc_coarse, dipquad=dtset%dipquad, quadquad=dtset%quadquad)
+    dtset%nsphere, dtset%rifcsph, dtset%prtsrlr, dtset%enunit, dtset%dim_msr, comm, &
+    Ifc_coarse=Ifc_coarse, dipquad=dtset%dipquad, quadquad=dtset%quadquad, &
+    dielt_env=dtset%dielt_env, dielt_thick=dtset%dielt_thick)
    call Ifc_coarse%free()
 
  else
    call ifc%init(crystal, ddb, &
      dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, &
      dtset%ngqpt(1:3), dtset%nqshft, dtset%q1shft, driver%epsinf, driver%zeff, driver%qdrp_cart, &
-     dtset%nsphere, dtset%rifcsph, dtset%prtsrlr, dtset%enunit, comm, &
-     dipquad=dtset%dipquad, quadquad=dtset%quadquad)
+     dtset%nsphere, dtset%rifcsph, dtset%prtsrlr, dtset%enunit, dtset%dim_msr, comm, &
+     dipquad=dtset%dipquad, quadquad=dtset%quadquad, dielt_env=dtset%dielt_env, dielt_thick=dtset%dielt_thick)
  end if
 
  call ifc%print(unit=std_out)
 
  ! If asr==6 (rotational invariance) we also need the estimation of the IFCs moments from real space.
- if (dtset%asr==6) then
-    call ifc%get_dcdq(crystal,asrq0%dcdq,comm)
+ if (dtset%asr==6 .and. dtset%flexoflag==0) then
+    write(msg, '(a, a)' )' Rotational invariance: will generate IFCs derivatives from IFCs moments',ch10
+    call ifc%get_dcdq(crystal,driver%dcdq,driver%dcdqdq,ifc%dyewq0, dtset%dipdip, comm)
     ! If phi1 is not available from DDB, compute rotational invariance based on dcdq
-    ! Not as accurate, especially for polar materials, but option should be available
-    if (dtset%flexoflag ==0) then
-       write(msg, '(a, a)' )' Rotational invariance: will generate IFCs derivatives from IFCs moments',ch10
-       call wrtout(units, msg)
-       asrq0 = asrq0%init(ddb,dtset%asr,dtset%rfmeth,crystal,dtset%dim_msr)
-    end if
+    ! For polar materials, we have to be extra cautious: indeed the typical electrostatics
+    ! model used to remove the non-analytical part is not invariant under rotation !
+    ! In 3D, the model leads to a divergent IFCs derivatives -> we cannot correct anything !
+    ! In 2D, the model leads to a finite torque and IFCs derivatives. We can add them back
+    ! during the imposition of rotational invariance...
  end if
 
  ! Compute speed of sound.
@@ -934,8 +949,9 @@ subroutine anaddb_driver_dielectric_q0(driver, dtset, crystal, ifc, ddb, asrq0, 
      Ifc%dyewq0, driver%d2cart, crystal%gmet, ddb%gprim, dtset%mpert, crystal%natom, &
      Ifc%nrpt, qphnrm(1), qphon, crystal%rmet, ddb%rprim, Ifc%rpt, &
      Ifc%trans, crystal%ucvol, Ifc%wghatm, crystal%xred, driver%zeff, driver%qdrp_cart, &
-     Ifc%ewald_option, xmpi_comm_self, &
-     dipquad=Ifc%dipquad, quadquad=Ifc%quadquad)
+     Ifc%ewald_option, xmpi_comm_self, Ifc%asr,dtset%dim_msr,&
+     dipquad=Ifc%dipquad, quadquad=Ifc%quadquad, dielt_thick=dtset%dielt_thick,&
+     dielt_env=dtset%dielt_env)
 
  else if (dtset%ifcflag == 0) then
    ! Look for the information in the DDB
@@ -1393,7 +1409,7 @@ end subroutine anaddb_driver_flexoelectric_tensor
 
 !!****f* m_anaddb_driver/anaddb_driver_get_dcdq
 !! NAME
-!! anaddb_driver_flexoelectric_get_dcdq
+!! anaddb_driver_get_dcdq
 !!
 !! FUNCTION
 !!
@@ -1403,21 +1419,20 @@ end subroutine anaddb_driver_flexoelectric_tensor
 !!
 !! SOURCE
 
-subroutine anaddb_driver_get_dcdq(driver, dtset, crystal, ddb, ddb_lw, ddb_hdr,asrq0)
+subroutine anaddb_driver_get_dcdq(driver, dtset, crystal, ddb, ddb_lw, ddb_hdr)
 
 !Arguments -------------------------------
- class(anaddb_driver_type), intent(in):: driver
+ class(anaddb_driver_type), intent(inout):: driver
+ type(crystal_t),intent(in):: crystal        
  type(anaddb_dataset_type), intent(in):: dtset
- type(crystal_t), intent(in):: crystal
  type(ddb_type), intent(in):: ddb, ddb_lw
  type(ddb_hdr_type), intent(in):: ddb_hdr
- type(asrq0_t), intent(in):: asrq0
 
 !Local variables -------------------------------
  integer:: ii
  integer:: units(2)
  character(len = 500):: msg
- real(dp):: dcdq(3,ddb%natom,3,ddb%natom,3)
+ !real(dp):: dcdq(3,ddb%natom,3,ddb%natom,3)
 
 ! ************************************************************************
 
@@ -1429,7 +1444,7 @@ subroutine anaddb_driver_get_dcdq(driver, dtset, crystal, ddb, ddb_lw, ddb_hdr,a
  call wrtout(units, msg)
 
  ! Compute and print the contributions to the flexoelectric tensor
- call ddb_phi1(ddb,ddb_lw,ddb_hdr%ddb_version, crystal, dtset%filename_ddb, asrq0%dcdq)
+ call ddb_phi1(ddb,ddb_lw,ddb_hdr%ddb_version, crystal, dtset%filename_ddb, driver%dcdq, driver%dcdqdq,ddb%natom)
 
 end subroutine anaddb_driver_get_dcdq
 
@@ -1477,6 +1492,99 @@ subroutine anaddb_driver_lattice_wannier(driver, dtset, crystal, ifc, comm)
 
 end subroutine anaddb_driver_lattice_wannier
 !!***
+
+!!***
+
+!!****f* m_anaddb_driver/anaddb_driver_convertdim_dielt
+!! NAME
+!! anaddb_driver_convertdim_dielt
+!!
+!! FUNCTION
+!! Supposing a reduced dimensionality of the problem, convert DDB dielectric tensor 
+!! to the low-dimensionality dielectric tensor of the isolated material. Indeed,
+!! first-principles calculations requires vacuum buffer(s) to isolate the low-dimensional
+!! materials, that spuriously contributes to the dielectric response of the whole slab
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine anaddb_driver_convertdim_dielt(driver, rprimd, dim_msr, dielt_thick)
+
+!Arguments -------------------------------
+ class(anaddb_driver_type), intent(inout):: driver
+ integer,intent(in):: dim_msr
+ real(dp) :: dielt_thick(2), rprimd(3,3)
+
+!Local variables -------------------------------
+ integer:: idir, jdir, kdir, bool_isolated(3)
+ real(dp) :: thick, epsinf_conv(3,3), acell(3)
+ character(len = 500):: msg
+
+! ************************************************************************
+ epsinf_conv=zero
+ thick = dielt_thick(1)-dielt_thick(2)
+ bool_isolated(:) = 0 
+ ! When periodic, additional variable spaces coming from dynamical matrices derivatives
+ if (dim_msr == 1) then ! 3D
+    bool_isolated = 0
+ elseif (dim_msr == 2) then ! 2D yz
+    bool_isolated(1) = 1
+ elseif (dim_msr == 3) then ! 2D xz
+    bool_isolated(2) = 1
+ elseif (dim_msr == 4) then ! 2D xy
+    bool_isolated(3) = 1
+ else
+    write(msg,'(3a,i0)') &
+   'For dipole-dipole in 2D, the argument dim_msr should',ch10,&
+   'be between 1 and 4. However, dim_msr = ',dim_msr
+   ABI_ERROR(msg)
+ end if
+ do idir = 1,3
+   do jdir =1,3
+     if (bool_isolated(idir)==1 .and. bool_isolated(jdir)==0 .and. driver%epsinf(idir,jdir)>tol2) then
+       write(msg,'(3a)')&
+       'Along a confined + periodic directions, the dielectric tensor should be 0.',ch10,&
+       'However, a component is found to be larger than 1e-6. Please check your DDB file'
+       ABI_ERROR(msg)
+     end if
+   end do
+ end do
+ do idir=1,3
+   acell(idir)= sqrt(dot_product(rprimd(idir,:),rprimd(idir,:)))
+ end do
+ write(msg,'(2a)') &
+ 'Conversion of the dielectric tensor for 2D materials to account for vacuum',ch10
+ call wrtout([std_out, ab_out],msg)
+ do kdir=1,3
+   if (bool_isolated(kdir)==1) then
+     do idir=1,3
+       do jdir=1,3
+         if (bool_isolated(idir)==0 .and. bool_isolated(jdir)==0) then
+           ! Capacitors in parallel for periodic directions between 2D and vacuum  
+           if (idir==jdir) then 
+             epsinf_conv(idir,jdir)=one-acell(kdir)/dielt_thick(1)*(one-driver%epsinf(idir,jdir))
+           else
+             epsinf_conv(idir,jdir)=acell(kdir)/dielt_thick(1)*driver%epsinf(idir,jdir)
+           end if
+         elseif (bool_isolated(idir)==1 .and. bool_isolated(jdir)==1) then
+           ! Capacitors in series for confined direction between 2D and vacuum
+           epsinf_conv(idir,jdir)= one/(one-acell(kdir)/thick*(one-one/driver%epsinf(idir,jdir))) 
+         end if
+       end do  
+     end do
+   end if
+ end do
+ write(msg,'(a,es16.8,a,es16.8,a,es16.8,a,es16.8,a,es16.8,a,es16.8,a,es16.8,a,es16.8,a,es16.8,a)')&
+ 'Converted dielectric tensor',epsinf_conv(1,1),' ',epsinf_conv(1,2), '  ', epsinf_conv(1,3),' '&
+                              ,epsinf_conv(2,1),' ',epsinf_conv(2,2), '  ', epsinf_conv(2,3),' '&
+                              ,epsinf_conv(3,1),' ',epsinf_conv(3,2), '  ', epsinf_conv(3,3), ch10
+ call wrtout([std_out, ab_out],msg)
+ driver%epsinf = epsinf_conv
+
+end subroutine anaddb_driver_convertdim_dielt
 
 end module m_anaddb_driver
 !!***

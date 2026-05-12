@@ -26,7 +26,7 @@ outdata_prefix = "t45o"
 
 !Phonon band structure output for band2eps - See note near end for
 ! dealing with gamma LO-TO splitting issue.
-eivec 2
+eivec 4
 nph1l 1
  qph1l 0.0 0.0 0.0 1
 

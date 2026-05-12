@@ -468,7 +468,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  call ifc%init(cryst, ddb, &
    dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, &
    dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
-   qdrp_cart, nsphere0, dtset%rifcsph, prtsrlr0, dtset%enunit, comm, &
+   qdrp_cart, nsphere0, dtset%rifcsph, prtsrlr0, dtset%enunit,1, comm, &
    dipquad=dtset%dipquad, quadquad=dtset%quadquad)
 
  ABI_FREE(ddb_qshifts)

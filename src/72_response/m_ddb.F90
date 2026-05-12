@@ -372,11 +372,7 @@ module m_ddb
 
    integer :: natom
     ! Number of atoms.
-
-   real(dp),allocatable :: dcdq(:,:,:,:,:)
-   ! dcdq,(3,3,natom,3,natom))
-   ! IFCs derivatives computed from real-space IFCs moments or long-wavelength driver
-
+   
    real(dp),allocatable :: d2asr(:,:,:,:,:)
    ! d2asr,(2,3,natom,3,natom))
    ! In case the interatomic forces are not calculated, the
@@ -384,7 +380,11 @@ module m_ddb
 
    real(dp),allocatable :: d2dqmsr(:,:,:,:,:)
    ! d2dqmsr,(3,natom,3,natom,3))
-   ! Corrections to the IFCs moment from translational + rotational invariance.
+   ! Corrections to the IFCs first derivatives from translational + rotational invariance.
+   
+   real(dp),allocatable :: d2dqdqmsr(:,:,:,:,:,:)
+   ! d2dqmsr,(3,natom,3,natom,3,3))
+   ! Corrections to the IFCs second derivatives from translational + rotational invariance.
 
    ! singular, uinvers and vtinvers are allocated and used only if asr in [3,4]
    ! i.e. Rotational invariance for 1D and 0D systems. dims=3*natom*(3*natom-1)/2
@@ -4093,7 +4093,8 @@ end function ddb_get_strten
 !!  Crystal<type(crystal_t)>=Crystal structure parameter
 !!  dim_msr=System dimensionality (0D, 1D, ...) used for rotational invariance
 !!  comm=MPI communicator.
-!!  d2dq=Moment of IFCs from LW DDB or Fourier transform
+!!  dcdq = derivative of interatomic force constants at the zone center
+!!  dcdqdq = second derivative of interatomic force constants at the zone center
 !!
 !! SIDE EFFECTS
 !!  ddb<type(ddb_type)>= Database with the derivates. The routine does not change it
@@ -4105,7 +4106,7 @@ end function ddb_get_strten
 !!
 !! SOURCE
 
-subroutine asrq0_init(asrq0, ddb,  asr, rftyp, crystal, dim_msr)
+subroutine asrq0_init(asrq0, ddb,  asr, rftyp, crystal, dim_msr, dcdq, dcdqdq)
 
 !Arguments -------------------------------
 !scalars
@@ -4113,6 +4114,8 @@ subroutine asrq0_init(asrq0, ddb,  asr, rftyp, crystal, dim_msr)
  class(ddb_type),intent(inout) :: ddb
  type(crystal_t),intent(in) :: crystal
  class(asrq0_t), intent(out) :: asrq0
+ real(dp), optional, intent(in) :: dcdq(3,crystal%natom,3,crystal%natom,3)
+ real(dp), optional, intent(in) :: dcdqdq(3,crystal%natom,3,3,3)
 !Local variables-------------------------------
 !scalars
  integer :: dims,iblok
@@ -4125,7 +4128,6 @@ subroutine asrq0_init(asrq0, ddb,  asr, rftyp, crystal, dim_msr)
 ! ************************************************************************
 
  asrq0%asr = asr; asrq0%natom = ddb%natom
-
  ! Find the Gamma block in the DDB (no need for E-field entries)
  qphon(:,1)=zero
  qphnrm(1)=zero
@@ -4137,8 +4139,10 @@ subroutine asrq0_init(asrq0, ddb,  asr, rftyp, crystal, dim_msr)
  ! this is to maintain the old behaviour in which the arrays where allocated and set to zero in anaddb.
  ABI_MALLOC(asrq0%d2asr, (2,3,ddb%natom,3,ddb%natom))
  ABI_MALLOC(asrq0%d2dqmsr, (3,ddb%natom,3,ddb%natom,3))
+ ABI_MALLOC(asrq0%d2dqdqmsr, (3,ddb%natom,3,ddb%natom,3,3))
  asrq0%d2asr = zero
  asrq0%d2dqmsr = zero
+ asrq0%d2dqdqmsr = zero
 
  if (asrq0%iblok == 0) return
  iblok = asrq0%iblok
@@ -4179,13 +4183,10 @@ subroutine asrq0_init(asrq0, ddb,  asr, rftyp, crystal, dim_msr)
 
    ABI_FREE(d2cart)
    ABI_FREE(d2asr_res)
- case (6) 
-   if (ALLOCATED(dcdq)) then 
-     call msria_calc(asr,crystal,asrq0%d2asr,ddb%val(:,:,iblok),&
-          asrq0%dcdq,asrq0%d2dqmsr,dim_msr,ddb%mpert,ddb%natom)
-   else
-       write(msg,'(a)')' IFCs derivatives not read from long-wavelength driver, will compute ASR+MSR later'
-       call wrtout(std_out,msg)      
+ case (6)
+   call msria_calc(asr,crystal,asrq0%d2asr,ddb%val(:,:,iblok),&
+   dcdq,dcdqdq,asrq0%d2dqmsr,asrq0%d2dqdqmsr,dim_msr,ddb%mpert,ddb%natom)
+   print *, maxval(asrq0%d2asr)
  case default
    ABI_ERROR(sjoin("Wrong value for asr:", itoa(asr)))
  end select
@@ -4447,7 +4448,7 @@ subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_c
  d2cart(:,1:ddb%msize) = ddb%val(:,:,iblok)
 
  ! Eventually impose the acoustic sum rule based on previously calculated d2asr
- call asrq0%apply(natom, ddb%mpert, ddb%msize, d2cart,qphon_padded,crystal)
+ call asrq0%apply(natom, ddb%mpert, ddb%msize, qphon_padded, crystal, d2cart)
 
  ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
  call dfpt_phfrq(ddb%amu,displ_cart,d2cart,eigval,eigvec,crystal%indsym,&
@@ -4497,15 +4498,11 @@ subroutine asrq0_apply(asrq0, natom, mpert, msize, qphon, crystal, d2cart)
 !Arguments -------------------------------
 !scalars
  class(asrq0_t),intent(inout) :: asrq0
- type(crystal_t),intent(in) :: crystal        
+ type(crystal_t),intent(in) :: crystal 
+ integer, intent(in) :: natom, mpert, msize 
 !arrays
  real(dp),intent(in) :: qphon(3,3)
  real(dp),intent(inout) :: d2cart(2,msize)
- !real(dp),intent(in),optional :: dcdq(3,natom,3,natom,3)
- !real(dp),intent(in),optional :: d2cdq(3,natom,3,natom,3,3)
- !real(dp),intent(in),optional :: phi1(3,natom,3,natom,3)
- !real(dp),intent(in),optional :: phi2(3,natom,3,3,3)
-
 
 ! ************************************************************************
 
@@ -4523,15 +4520,10 @@ subroutine asrq0_apply(asrq0, natom, mpert, msize, qphon, crystal, d2cart)
    ! Impose acoustic sum rule plus rotational symmetry for 0D and 1D systems
    call asrprs(asrq0%asr,2,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,d2cart,mpert,natom,crystal%xcart)
  case (6)
-   !if (present(phi1)) then
-   call msria_apply(asrq0%asr,asrq0%d2asr,asrq0%d2dqmsr,d2cart,mpert,natom,qphon,crystal,asrq0%dcdq)
-   !else
-   !   call msria_apply(asrq0%asr,asrq0%d2asr,asrq0%d2dqmsr,d2cart,mpert,natom,qphon,crystal,dcdq)
-   !end if
+   call msria_apply(asrq0%asr,asrq0%d2asr,asrq0%d2dqmsr,asrq0%d2dqdqmsr,d2cart,mpert,natom,qphon,crystal)
  case default
    ABI_ERROR(sjoin("Wrong value for asr:", itoa(asrq0%asr)))
  end select
-
 end subroutine asrq0_apply
 !!***
 

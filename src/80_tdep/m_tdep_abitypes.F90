@@ -157,7 +157,7 @@ contains
 !LOTO Keep the correct definition of the Lattice
 !LOTO  call ifc_init(Ifc,Crystal,DDB,1,asr,symdynmat,dipdip,&
   rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
-  prtsrlr,enunit,XMPI_WORLD, prtout=.false.)
+  prtsrlr,enunit,1,XMPI_WORLD, prtout=.false.)
 
   ABI_FREE(q1shft)
   ABI_FREE(qdrp_cart)

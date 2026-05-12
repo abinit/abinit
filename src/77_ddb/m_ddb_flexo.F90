@@ -1439,19 +1439,19 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,ddb_version,intstrn,lattflex
 !!
 !! SOURCE
 
-subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1)
+subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1,phi2,natom)
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ddb_version
+ integer,intent(in) :: ddb_version, natom
  class(ddb_type),intent(in) :: ddb,ddb_lw
  type(crystal_t),intent(in) :: crystal
  character(len=fnlen) :: filnamddb
 !arrays
- real(dp),intent(out) :: phi1(:,:,:,:,:)
- !real(dp),intent(out) :: phi2(3,ddb%natom,3,3,3)
+ real(dp), intent(out) :: phi1(3,natom,3,natom,3)
+ real(dp), intent(out) :: phi2(3,natom,3,3,3)
 
 !Local variables-------------------------------
  integer,parameter :: cvrsio8=20100401
@@ -1464,7 +1464,7 @@ subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1)
  integer,parameter :: alpha(6)=(/1,2,3,2,1,1/),beta(6)=(/1,2,3,3,3,2/)
  integer :: rfqvec(4)
  real(dp) :: qphnrm(3),qphon(3,3),fac
- real(dp) :: sqrbkt_t1(3,ddb%natom,3,3,3)
+ real(dp) :: sqrbkt_t1(3,natom,3,3,3)
  real(dp) :: d3cart(2,3,ddb%mpert,3,ddb%mpert,3,ddb%mpert)
  real(dp) :: phi2tmp(3,ddb%mpert,3,3,3)
 
@@ -1477,7 +1477,6 @@ subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1)
  rfphon(1)=1
  rfphon(2)=1
  rfqvec(3)=1
- ABI_MALLOC(phi1, (3,ddb%natom,3,ddb%natom,3))
 
  write(msg, '(2a)' ) ch10," Extract the Phi^(1) coeficients from 3DTE"
  call wrtout(std_out,msg,'COLL')
@@ -1501,18 +1500,19 @@ subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1)
    fac=one
  end if
 
-!Extraction of Phi^(1) tensor
+!Extraction of dC/dq and d2C/dqdq
  phi1(:,:,:,:,:) = fac*RESHAPE(d3cart(2,1:3,1:ddb%natom,1:3,1:ddb%natom,1:3,ddb%natom+8), &
                                & SHAPE=[3,ddb%natom,3,ddb%natom,3]) 
 
 !Define the factors to apply if DDB file has been created with the old version of
-!the longwave driver.
+!the longwave driver. Note that there is a factor -1 to go to the derivatives
  if (ddb_version <= cvrsio8) then
    fac=two
  else
    fac=-one
  end if
 
+ phi2 = zero
  do istrs=1,6
    strsd1=alpha(istrs)
    strsd2=beta(istrs)
@@ -1539,7 +1539,7 @@ do qvecd=1,3
  end do
 
 !Now correct the stress in the square bracketed tesnor tensor
-!! do qvecd=1,3
+! do qvecd=1,3
 !   do strsd2=1,3
 !     do strsd1=1,3
 !       do iatd=1,3
@@ -1552,19 +1552,19 @@ do qvecd=1,3
 ! end do
 
 !Now convert back to type-II in order to obtain the frozen ion Lagrange elastic tensor.
- !phi2(:,:,:,:,:)=zero
- !do iatd=1,3
- !  do qvecd=1,3
- !    do strsd1=1,3
- !      do strsd2=1,3
- !        do iat=1,ddb%natom
- !          phi2(iatd,iat,qvecd,strsd1,strsd2)=sqrbkt_t1(iatd,iat,strsd1,qvecd,strsd2) + &
- !        & sqrbkt_t1(iatd,iat,strsd2,strsd1,qvecd)-sqrbkt_t1(iatd,iat,qvecd,strsd2,strsd1)
- !        end do
- !      end do
- !    end do
- !  end do
- !end do
+ phi2(:,:,:,:,:)=zero
+ do iatd=1,3
+   do qvecd=1,3
+     do strsd1=1,3
+       do strsd2=1,3
+         do iat=1,ddb%natom
+           phi2(iatd,iat,qvecd,strsd1,strsd2)=sqrbkt_t1(iatd,iat,strsd1,qvecd,strsd2) + &
+         & sqrbkt_t1(iatd,iat,strsd2,strsd1,qvecd)-sqrbkt_t1(iatd,iat,qvecd,strsd2,strsd1)
+         end do
+       end do
+     end do
+   end do
+ end do
  DBG_EXIT("COLL")
  end subroutine ddb_phi1
  !!***

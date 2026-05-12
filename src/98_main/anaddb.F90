@@ -185,9 +185,13 @@ program anaddb
 
 ! Acoustic Sum Rule call 
  if (dtset%flexoflag == 1 .and. dtset%asr == 6) then
-    driver%get_dcdq(dtset, crystal, ddb, ddb_lw, ddb_hdr,asrq0)
+    call driver%get_dcdq(dtset, crystal, ddb, ddb_lw, ddb_hdr)
+    write(msg, '(a, a)' )' IFCs derivatives read',ch10
+   call wrtout(units, msg)
  end if
- call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal, dtset%dim_msr)
+ call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal, dtset%dim_msr, driver%dcdq, driver%dcdqdq)
+ write(msg, '(a, a)' )' ASR done',ch10
+ call wrtout(units, msg)
 
 ! Open netcdf output and write basic quantities
  call driver%open_write_nc(ana_ncid, dtset, crystal, comm)
@@ -197,6 +201,11 @@ program anaddb
 ! Compute dielectric tensor, Born effective charges, and quadrupoles.
  if (driver%do_electric_tensors) then
    call driver%electric_tensors(dtset, crystal, ddb, ddb_lw, ddb_hdr, ana_ncid, comm)
+ end if
+
+ ! If low-dimensional systems, convert dielectric tensors if present
+ if (dtset%dim_msr>1 .and. dtset%dipdip>0) then
+   call driver%convertdim_dielt(crystal%rprimd, dtset%dim_msr,dtset%dielt_thick)
  end if
 
 ! Structural response at fixed polarization
@@ -212,7 +221,12 @@ program anaddb
 
 ! Interatomic force constants
  if (driver%do_ifc) then
-   call driver%interatomic_force_constants(Ifc, dtset, crystal, ddb, ana_ncid, arsq0, comm)
+   call driver%interatomic_force_constants(Ifc, dtset, crystal, ddb, ana_ncid, asrq0, comm)
+   if (dtset%flexoflag /= 1 .and. dtset%asr == 6) then
+     write(msg, '(a, a)' )' IFCs derivatives computed from real-space moment',ch10
+     call wrtout(units, msg)
+     call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal, dtset%dim_msr, driver%dcdq, driver%dcdqdq)
+   end if
  end if
 
 ! Phonon density of states
