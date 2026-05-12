@@ -5,7 +5,6 @@
 # with the e-ph matrix elements computed on the fly.
 # Both approaches are expected to yield identical results.
 # Note nsym 1
-
  ndtset   2
 
  nsym 1

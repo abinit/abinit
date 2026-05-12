@@ -63,20 +63,32 @@ and hence shielding at the end of the DDK calculation.
 
 *basic:*
 
+- [[abinit:atndlist]]  ATom Nuclear Dipole moment LIST
+- [[abinit:iatnd]]  list of AToms with Nuclear Dipole moment
 - [[abinit:lambsig]]  LAMB shielding SIGma
+- [[abinit:natnd]]  Number of AToms with Nuclear Dipole moment
 - [[abinit:nucdipmom]]  NUClear DIPole MOMents
 - [[abinit:orbmag]]  ORBital MAGnetization
 
 
 ## Selected Input Files
 
+*gpu_omp:*
+
+- [[tests/gpu_omp/Input/t31.abi]]
+
 *tutorial:*
 
 - [[tests/tutorial/Input/tnuc_4.abi]]
+- [[tests/tutorial/Input/tnuc_5.abi]]
 
 *v10:*
 
 - [[tests/v10/Input/t40.abi]]
+- [[tests/v10/Input/t41.abi]]
+- [[tests/v10/Input/t42.abi]]
+- [[tests/v10/Input/t44.abi]]
+- [[tests/v10/Input/t84.abi]]
 
 *v7:*
 

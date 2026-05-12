@@ -5407,7 +5407,7 @@ Variable(
     mnemonics="Electron-PHonon: Allen-Heine-Cardona type",
     added_in_version="9.11.6",
     text=r"""
-Only relevant for [[optdriver]]=7 and [[eph_task]]=4.
+Only relevant for [[optdriver]] = 7 and [[eph_task]] = 4 or 24.
 If set to 0, use the adiabatic version of the Allen-Heine-Cardona equation to compute the
 zero-point renormalisation as well as temperature dependence.
 If set to 1 (default), use the non-adiabatic version of the Allen-Heine-Cardona equation to compute the
@@ -9157,7 +9157,7 @@ to define the Hartree potential, and using Ewald correction.
 
 Variable(
     abivarname="icutcoul",
-    varset="gstate, dfpt",
+    varset="gstate",
     vartype="integer",
     topics=["Coulomb_basic"],
     dimensions="scalar",

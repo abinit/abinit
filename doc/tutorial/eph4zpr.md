@@ -601,10 +601,11 @@ If all the independent entries are available, the code prints the following mess
     Also, note that it is not possible to change the value of [[nsym]] at the level of the EPH calculation
     as symmetries are automatically inherited from the previous GS/DFPT calculations.
 
-## Computing the WFK files with empty states
 
 At this point we have all the ingredients (**DDB** and **DVDB**) required to compute/interpolate
 the e-ph scattering potentials and we can finally start to generate the WFK files.
+
+## Computing the WFK files with empty states
 
 For our first NSCF calculation, we use a 4x4x4 $\Gamma$-centered $\kk$-mesh and 70 bands
 so that we can perform initial convergence studies for the number of empty states in the self-energy.
