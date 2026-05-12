@@ -49,7 +49,7 @@ gstore_qzone = "bz"
 
 These settings are OK if you need to compute electronic properties such as the electron self-energy
 $\Sigma_\nk$ required for the ZPR or electronic transport calculations.
-For the phonon self-energy $\Pi_\qnu$, on the other hand, on should override the default behaviour using
+For the phonon self-energy $\Pi_\qnu$, on the other hand, one should override the default behaviour using
 
 ```
 gstore_kzone = "bz"
@@ -60,7 +60,7 @@ gstore_qzone = "ibz"
 
     The combination [[gstore_kzone]] = "ibz" with [[gstore_qzone]] = "ibz" **is not allowed**.
     One usually restricts one wavevector to the IBZ while the other wavevector covers the full BZ.
-    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes (much slower).
+    Using the BZ for both $\kk$ and $\qq$ is usually done for testing purposes (much slower),
     and it is not recommended for production runs unless you know that the post-processing step
     of the GSTORE does not support symmetries.
 
@@ -70,7 +70,7 @@ mutually exclusive variables [[gstore_use_lgq]] and [[gstore_use_lgk]].
 In some cases, the integration over the BZ in the post-processing step can indeed be restricted
 by symmetry to the irreducible wedge defined by the little group of the "external" wavevector ($\kk$ or $\qq$).
 We use the notation IBZ_k to denote the irreducible wedge defined by the little group of $\kk$,
-and IBZ_q for the irrecudible wedge defined by the little group of $\qq$.
+and IBZ_q for the irreducible wedge defined by the little group of $\qq$.
 The following examples will help clarify this point.
 
 The electron self-energy $\Sigma_\nk$ is defined by an integration over $\qq$-points in the full BZ,
@@ -135,13 +135,23 @@ for the $\psi_\nk$ and $\psi_\mkq$ states entering the e-ph matrix elements.
 
 In ZPR calculations of the (fundamental) band gap, for instance, the $\kk$-points and the $n$ index can be restricted
 to the band edges that are automatically detected from the KS energies of the WFK file.
-The $m$ index, on the contrary, should cover a much large band range to account for empty states in the summation
+The $m$ index, on the contrary, should cover a much larger band range to account for empty states in the summation,
 while the $\qq$-points should cover the full BZ or an appropriate irreducible wedge as discussed below.
 
 Finally, the [[gstore_kfilter]] variable allows you to apply an additional level of filtering directly on the electronic states.
 As before, the most appropriate choice for this option depends strongly on the specific physical property you intend to compute.
-There are, indeed, several possibile values.
+There are, indeed, several possible values.
 Please refer to the documentation of [[gstore_kfilter]] for further details.
+
+Finally, the [[gstore_with_vk]] variable allows you to include electronic group velocities
+(and optionally off-diagonal velocity matrix elements) in the GSTORE file.
+This is particularly useful for transport calculations or when the velocity gauge must be consistent
+with the wavefunctions used for the e-ph matrix elements.
+Possible values are:
+
+- 0: Do not compute velocities (default).
+- 1: Compute only diagonal velocity matrix elements (group velocities).
+- 2: Compute both diagonal and off-diagonal velocity matrix elements.
 
 We conclude this guide by providing examples of recommended settings for different classes of physical properties.
 Note that not all gstore_ variables are explicitly included in these examples,
@@ -152,7 +162,7 @@ For computing the ZPR of the fundamental/direct band gap, use:
 ```
 gstore_kfilter "qprange"  # Compute g(k,q) only for |nk> at the band edges
 gstore_use_lgk 1          # Only q-points in the IBZ_k
-gstore_brange 1 12        # Range for the m index (last index cannot be greated than nband)
+gstore_brange 1 12        # Range for the m index (last index cannot be greater than nband)
 nband         12
 ```
 
@@ -199,17 +209,17 @@ containing both GWPT and KS e-ph matrix elements.
 [[eph_task]] 11 is parallelized over five different MPI levels.
 The user can specify manually the MPI grid using [[eph_np_pqbks]].
 In this case, the product of the MPI processors along the different dimensions must be equal to the
-total number of MPI processes allocated by the user, else the code will stop as idle processes are not supported.
+total number of MPI processes allocated by the user; otherwise, the code will stop as idle processes are not supported.
 If [[eph_np_pqbks]] is not specified in the input, the code will generate the MPI grid automatically
 using the total number of MPI processors and the basic dimensions of the job computed at runtime.
 
 If you decide to enforce your MPI grid with [[eph_np_pqbks]], take into account the following.
-The parallelization levels over collinear spins, $\kk$-points and $\qq-points$ are the most efficient ones
-but the the number of processors for $\kk$ or $\qq$ points should be adjusted according to the values
-of [[gstore_kzone]], [[gstore_qzone]].
-To reduce load imbalace, one should use less processors for the wavevector that is being restricted to the IBZ
+The parallelization levels over collinear spins, $\kk$-points and $\qq$-points are the most efficient ones,
+but the number of processors for $\kk$ or $\qq$ points should be adjusted according to the values
+of [[gstore_kzone]] and [[gstore_qzone]].
+To reduce load imbalance, one should use fewer processors for the wavevector that is being restricted to the IBZ.
 The parallelism over perturbations should be activated only when the previous three MPI levels start to saturate.
-Note that the parallelism over bands is not supported in GSTORE computation.
+Note that parallelism over bands is not supported in the current version of the GSTORE computation.
 
 In the case of GWPT calculations ([[eph_task]] == 17) the MPI grid is defined by [[gwpt_np_wpqbks]]
 
@@ -228,7 +238,7 @@ Also, be sure to compute the Born effective charges in polar materials,
 and the dynamical quadrupoles in order to
 properly describe the long-range part of the DFT scattering potentials and obtain a reliable Fourier interpolation.
 
-Further details on the interpolation of the DFPT scattering potentials are available the [eph_intro page](eph_intro.md).
+Further details on the interpolation of the DFPT scattering potentials are available on the [eph_intro page](eph_intro.md).
 
 ## Restarting a GSTORE computation
 
