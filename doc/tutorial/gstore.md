@@ -68,8 +68,8 @@ gstore_qzone = "ibz"
 An additional reduction of the number of wavevectors can be achieved with the two
 mutually exclusive variables [[gstore_use_lgq]] and [[gstore_use_lgk]].
 In some cases, the integration over the BZ in the post-processing step can indeed be restricted
-by symmetry to the irreducible wedge defined by the little group of the "external" wavevector ($\kk$ or $\qq$
-We use the notation IBZ_k to denote the the irreducible wedge defined by the little group of $\kk$
+by symmetry to the irreducible wedge defined by the little group of the "external" wavevector ($\kk$ or $\qq$).
+We use the notation IBZ_k to denote the irreducible wedge defined by the little group of $\kk$,
 and IBZ_q for the irrecudible wedge defined by the little group of $\qq$.
 The following examples will help clarify this point.
 
@@ -78,7 +78,7 @@ but one can use the symmetries of the little group of $\kk$ to restrict the inte
 Schematically:
 
 $$
-\Sigma_\nk = \int_{BZ} d\qq = \int_{IBZ_\kk} w^\kk(\qq) [...]
+\Sigma_\nk = \int_{BZ} d\qq [...] = \int_{IBZ_\kk} d\qq w^\kk(\qq) [...]
 $$
 
 In this case, one can use

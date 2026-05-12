@@ -26292,6 +26292,7 @@ When generating a GSTORE file, setting [[gstore_use_lgq]] to 1,
 instructs Abinit to restrict the computation of the g(k,q) to the
 $\kk$-points in the IBZ_q where IBZ_q is the irreducible zone
 defined by the little group of the $\qq$-point.
+
 This allows one to reduce the number of e-ph matrix elements, but keep in mind that
 the generated GSTORE can only be used to compute phonon properties such
 as the phonon self-energy $\Pi_\kk$.
@@ -26318,6 +26319,7 @@ Variable(
     text=r"""
 This input variable specifies whether the EPH code should compute the $g(\kk, \qq)$
 matrix elements with $\kk$ in the IBZ or in the BZ.
+Possible values are "ibz" or "bz".
 
 !!! important
 
@@ -26341,6 +26343,7 @@ Variable(
     text=r"""
 This input variable specifies whether the EPH code should compute the $g(\kk, \qq)$
 e-ph matrix elements for $\qq$ in the IBZ or in the BZ.
+Possible values are "ibz" or "bz".
 
 !!! important
 
@@ -26363,7 +26366,7 @@ Variable(
     added_in_version="9.6.2",
     text=r"""
 This input variable can be used to introduce a filter in the electronic wavevectors (k and k+q)
-when computing the e-ph matrix elements with [[eph_task]] == 11.
+when computing the e-ph matrix elements with [[eph_task]] in [11, 17].
 Possible values are:
 
 - "none" --> No filter is applied (default)
@@ -26395,24 +26398,8 @@ This variable has an effect only where reading a GSTORE file produced by
 the GWPT subdriver ([[eph_task]] 17) for post-processing purposes.
 In this case, indeed, the "gvals" netcdf variables stores the GWPT electron-matrix elements
 while "gvals_ks" contains the KS e-ph matrix elements.
-Use "gvals_ks" if you want to compute physical properties using KS matrix elements instead of the GWPT ones
+Use "gvals_ks" if you wish to compute physical properties using KS matrix elements instead of the GWPT ones
 for comparison purposes.
-
-This input variable specifies the name of the NetCDF variable from which
-the electron–phonon matrix elements will be read in the GSTORE.nc file.
-
-Valid options are:
-
-- "gvals" (default)
-- "gvals_ks"
-
-This variable is only relevant when reading a GSTORE.nc file produced by
-the GWPT subdriver ([[eph_task]] = 17) for post-processing.
-In such cases: "gvals" stores the GWPT-renormalized electron–phonon matrix elements while
-"gvals_ks" contains the Kohn–Sham (KS) electron–phonon matrix elements.
-
-Select "gvals_ks" if you wish to compute physical properties using the KS matrix elements
-instead of the GWPT ones, for comparison purposes.
 """,
 ),
 
