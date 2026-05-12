@@ -5,20 +5,21 @@ authors: MG
 # Zero-point renormalization of the band gap and temperature-dependent band gaps with GWPT
 
 This tutorial is similar to [eph4zpr](../tutorial/eph4zpr.md).
-Also in this lesson, we will compute the electron self-energy due to phonons, obtain the zero-point
+Also in this lesson, we compute the electron self-energy due to phonons, obtain the zero-point
 renormalization (ZPR) of the band gap and temperature-dependent band energies within the harmonic approximation.
 The main difference with respect to [eph4zpr](../tutorial/eph4zpr.md), is that, in this lesson,
 the e-ph matrix elements are computed within the GWPT formalism [[cite:Li2019]].
 
 It is assumed the user has already completed the two tutorials [RF1](../tutorial/rf1.md) and [RF2](../tutorial/rf2.md),
 and that they are familiar with the calculation of ground state (GS) and response properties
-in particular phonons, Born effective charges and the high-frequency dielectric tensor.
+in particular phonons, Born effective charges (BECS) and the high-frequency dielectric tensor.
 
 The user should have read the [introduction tutorial for the EPH code](../tutorial/eph_intro.md),
 the description of the [gstore-based approach](../tutorial/gstore.md),
 before running these examples.
 
-Also, you are kindly invidited to read the [first GW tutorial](../tutorial/gw1.md) if you are not familiar with GW.
+Also, you are kindly invited to read the [first GW tutorial](../tutorial/gw1.md) if you are not familiar
+with the GW implementation in Abinit.
 A brief description of the formalism and of the equations implemented in the
 code can be found in the [[theory:mbt|GW_notes]].
 
@@ -28,17 +29,40 @@ This lesson should take about 2.0 hours.
 
 In the GWPT method [[cite:Li2019]], the e-ph matrix elements are computed by replacing the
 first-order change of the KS Hamiltonian due to a phonon with the variation of the $GW$ self-energy.
-The final expression reads:
 
-Besides the summations over empty states $n'$, the equation requires the knownledge of the screened interaction $W$
+$$
+g_{m n \nu \mathbf{k}\mathbf{q}}^{GW}(\varepsilon) = g_{m n \nu \mathbf{k} \mathbf{q}}^{\mathrm{KS}} +
+\langle\psi_{m \mathbf{k}+\mathbf{q}} | \Delta_{\nu\mathbf{q}} \Sigma^{\mathrm{el}}(\varepsilon) | \psi_{n\mathbf{k}}\rangle
+ - \langle \psi_{m \mathbf{k} + \mathbf{q}} | \Delta_{\nu\mathbf{q}} V^{\mathrm{xc}}[\rho^\mathrm{v}] | \psi_{n\mathbf{k}} \rangle
+$$
+
+with
+
+\begin{align}\label{eq:sigma_g}
+ \langle   \psi_{m \mathbf{k} + \mathbf{q}}  | \partial_{\kappa\alpha\mathbf{q}} \Sigma^{\mathrm{el}}(\varepsilon ) | \psi_{n\mathbf{k}}\rangle =&
+  \frac{i}{2 \pi}\sum_{n'\mathbf{G G}^{\prime}} \int_\mathrm{BZ} \frac{\mathrm{d}\mathbf{p}}{\Omega}\langle\psi_{m \mathbf{k}+\mathbf{q}} | e^{i(\mathbf{p}+\mathbf{G}) \cdot \mathbf{r}} | \partial_{\kappa\alpha\mathbf{q}} \psi_{n^{\prime} \mathbf{k}-\mathbf{p}} \rangle \langle\psi_{n^{\prime} \mathbf{k}-\mathbf{p}} |e^{-i\left(\mathbf{p}+\mathbf{G}^{\prime}\right) \cdot \mathbf{r}^{\prime}}| \psi_{n \mathbf{k}}\rangle \widetilde{W}_{n'\mathbf{k-p,GG'}}(\varepsilon) \nonumber \\
+ &+ \langle\psi_{m \mathbf{k}+\mathbf{q}} | e^{i(\mathbf{p}+\mathbf{G}) \cdot \mathbf{r}} | \psi_{n^{\prime} \mathbf{k}+\mathbf{q}-\mathbf{p}}
+\rangle \langle\partial_{\kappa\alpha-\mathbf{q}} \psi_{n^{\prime} \mathbf{k}+\mathbf{q}-\mathbf{p}} | e^{-i (\mathbf{p}+\mathbf{G}^{\prime} ) \cdot \mathbf{r}^{\prime}} | \psi_{n \mathbf{k}}\rangle  \widetilde{W}_{n'\mathbf{k+q-p,GG'}}(\varepsilon)，
+\end{align}
+
+
+and  $\widetilde{W}$ is the frequency convolution of the screened Coulomb interaction that ensures the energy conservation of the plasmons:
+
+\begin{align}
+    \widetilde{W}_{n\mathbf{k-p,GG'}}(\varepsilon) \equiv & \int  \frac{\mathrm{d}\varepsilon' \, W_{\mathbf{p,GG'}}(\varepsilon')e^{i\eta\varepsilon'}}{\varepsilon-\varepsilon_{n\mathbf{k-p}}+ \varepsilon' +i\eta \sign(\varepsilon_{n\mathbf{k-p}}-\varepsilon^{\mathrm{F}})} \\
+W_{\mathbf{p,GG'}}(\varepsilon') =& \frac{1}{V} \int_V \mathrm{d} \mathbf{r} \mathrm{d} \mathbf{r}^{\prime} \, W(\mathbf{r}, \mathbf{r}'; \varepsilon')\nonumber \\
+    & \times  e^{-i(\mathbf{p}+\mathbf{G}) \cdot \mathbf{r}}  e^{i(\mathbf{p}+\mathbf{G}^{\prime}) \cdot \mathbf{r}^{\prime}},
+    \label{eq:screeningGG}
+\end{align}
+
+
+Besides the summations over empty states $n'$, the equation requires the knowledge of the screened interaction $W$
 as well as we the (full) first-order change of the KS states due to a phonon.
 Both terms can be computed by Abinit.
 The screened interaction is computed in terms of a sum of states with [[optdriver]] 3, and the results
 are stored in the SCR file.
 The first-order change of the KS states, on the contrary, are computed on the fly by solving a non-self-consistent (NSCF)
 Sternheimer equation as exlained in the sections below.
-
-## Typical workflow for ZPR with GWPT
 
 A typical workflow for ZPR-GWPT requires the same step as the ones
 [needed for KS-ZPR](../tutorial/eph_intro.md#typical_workflow_for_zpr)
@@ -49,7 +73,7 @@ plus additional computations for the screened interaction $W$.
 [TUTORIAL_README]
 
 Before beginning, you might consider to work in a different subdirectory as for the other tutorials.
-Why not create Work_eph4zpr in $ABI_TESTS/tutorespfn/Input?
+Why not create Work_eph4zpr_gwpt in $ABI_TESTS/tutorespfn/Input?
 
 ```sh
 cd $ABI_TESTS/tutorespfn/Input
@@ -58,11 +82,11 @@ cd Work_eph4zpr_gwpt
 ```
 
 In this tutorial, we prefer to focus on the use of the EPH code hence
-we will be using **pre-computed** DDB and DFPT POT files to bypass the DFPT part.
-We also provide a DEN.nc file to initialize the NSCF calculations
+we will be using **pre-computed** DDB and DFPT POT and DEN files to bypass the DFPT part.
+We also provide a GS DEN.nc file to initialize the NSCF calculations
 and a POT file with the GS KS potential required to solve the Sternheimer equation.
 
-If *git* is installed on your machine, one can easily fetch the entire repository (23 MB) with:
+If *git* is installed on your machine, one can easily fetch the entire repository with:
 
 ```sh
 git clone https://github.com/abinit/MgO_eph_zpr.git
@@ -94,13 +118,78 @@ mv MgO_eph_zpr-master MgO_eph_zpr_gwpt
     in which you will be executing the tutorial and must be named `MgO_eph_zpr_gwpt`.
 
 
-TODO: For the discussion on how to merge the DDB and DVDB files, I can use the link to the MgO ZPR lesson
+## Merging partial DDB, DFPT POT and DEN files
+
+The first steps are similar to the ones used in the [eph4zpr tutorial](../tutorial/eph4zpr.md)
+First of all, let's merge the partial DDB files with the command
+
+```sh
+mrgddb < teph4zpr_gwpt_1.abi
+```
+
+and the following input file:
+
+{% dialog tests/tutorespfn/Input/teph4zpr_gwpt_1.abi %}
+
+that lists the **relative paths** of the **partial DDB files** in the
+`MgO_eph_zpr` directory.
+
+Then we merge the DFPT potential with the *mrgdv* tool using the command.
+
+```sh
+mrgdv < teph4zpr_gwpt_2.abi
+```
+
+and the following input file:
+
+{% dialog tests/tutorespfn/Input/teph4zpr_gwpt_2.abi %}
+
+Note that for GWPT we also need to merge the files with the first-order change of the density.
+as we need to compute:
+
+$$
+\langle\psi_{m \mathbf{k}+\mathbf{q}} | \Delta_{\nu\mathbf{q}} \Sigma^{\mathrm{el}}(\varepsilon) | \psi_{n\mathbf{k}}\rangle
+ - \langle \psi_{m \mathbf{k} + \mathbf{q}} | \Delta_{\nu\mathbf{q}} V^{\mathrm{xc}}[\rho^\mathrm{v}] | \psi_{n\mathbf{k}} \rangle
+$$
+
+This is done by executing
+
+
+```sh
+mrgdv < teph4zpr_gwpt_3.abi
+```
+
+and the following input file:
+
+{% dialog tests/tutorespfn/Input/teph4zpr_gwpt_3.abi %}
+
 
 ## Computing the WFK files with empty states
 
+You may now run the NSCF calculation by issuing:
+
+```sh
+abinit teph4zpr_gwpt_4.abi > teph4zpr_4.log 2> err &
+```
+
+with the input file given by:
+
+{% dialog tests/tutorespfn/Input/teph4zpr_gwpt_4.abi %}
+
+Here, we use a 4x4x4 $\Gamma$-centered $\kk$-mesh and 110 bands.
+Note the use of [[getden_filepath]] to read the DEN.nc file instead of [[getden]] or [[irdden]].
+
+At this point, it is worth commenting about the use of [[nbdbuf]].
+As mentioned in the documentation, **the highest energy states require more iterations to convergence**.
+To avoid wasting precious computing time, we use a buffer that is ~10% of [[nband]].
+This trick significantly reduces the wall-time as the NSCF calculation completes
+only when the first [[nband]] - [[nbdbuf]] states are converged within [[tolwfr]].
+Obviously, one should not use the last [[nbdbuf]] states in the subsequent EPH calculation.
+
 [HDIAGO_README]
 
-## Computing the screened interaction W
+
+## Computing the screened interaction W and QP corrections with one-shot GW
 
 In this section, we use the WFK file generated in the previous section to compute the RPA polarizability and the
 screened interaction $W$.
@@ -111,23 +200,63 @@ the self-energy using [[ppmodel]].
 !!! Important
 
     Techniques beyond the PPM are presently not available in the GWPT code.
+    Also, only [[ppmodel]] 1 and 2 are presently supported.
 
-## Computing QP corrections with one-shot GW
+At this stage, one should perform convergence studies for [[nband]], [[ecuteps]], [[ecutsigx]],
+and [[ngkpt]] to ensure that the GW results are reasonably well converged.
+The converged parameters can then be reused in the subsequent GWPT calculation.
 
-At this point, one should stop here and perform convergence studies for [[nband]], [[ecuteps]], [[ecutsigx]] and [[ngkpt]]
-to make sure that our GW results are relative stable.
-Then these values can be used in our next GWPT computation.
+For the sake of conciseness, these convergence studies are omitted here, and reasonably
+converged values are assumed in what follows.
+
+
+To compute the SCR, execute e.g.:
+
+```sh
+abinit teph4zpr_gwpt_5.abi > teph4zpr_5.log 2> err &
+```
+
+with the input file given by:
+
+{% dialog tests/tutorespfn/Input/teph4zpr_gwpt_5.abi %}
+
+
+
+To compute the GW self-energy, execute e.g.:
+
+```sh
+abinit teph4zpr_gwpt_6.abi > teph4zpr_6.log 2> err &
+```
+
+with the input file given by:
+
+{% dialog tests/tutorespfn/Input/teph4zpr_gwpt_6.abi %}
+
 
 ## Computing e-ph matrix elements with GWPT
-
-To activate the computation of the GWPT matrix elements, we use the following two variables:
-
-[[optdriver]] 7  # Enter EPH driver.
-[[eph_task]] 17  # GWPT computation.
 
 GWPT computations require several external files in input.
 In what follows, we describe all the files step by step and discuss the connection with
 the parameters appearing in the equations.
+
+You may want to start immediately the computation by issuing:
+
+```sh
+mpirun -n 4 abinit teph4zpr_7.abi > teph4zpr_7.log 2> err &
+```
+
+with the following input file:
+
+{% dialog tests/tutorespfn/Input/teph4zpr_gwpt_7.abi %}
+
+To activate the computation of the GWPT matrix elements, we use the two variables:
+[[optdriver]] and [[eph_task]]
+
+```
+optdriver 7  # Enter EPH driver.
+eph_task 17  # GWPT computation.
+```
+
 
 The KS states are read from the WFK file via [[getwfk_filepath]].
 This file defines the list of $\kk$-points in the e-ph matrix elements.
@@ -139,13 +268,11 @@ The screening is read from the SCR file specified with [[getscr_filepath]].
 The cutoff energy in $W$ is given [[ecuteps]], while [[ecutsigx]] defines
 the cutoff-energy for the exchange part of the self-energy.
 Note that [[ecuteps]] **cannot be larger** than the value used in the screening calculation.
-The SCR file defines the $\pp$-mesh for the integration over transferred momennta in Eq.
+The SCR file defines the $\pp$-mesh for the integration over transferred momenta in Eq.
 This $\pp$-mesh must be identical to, or a submesh of, the $\kk$-mesh associated with the WFK file.
 No interpolation in $\pp$-space is possible at this level.
 
-Also, [[ppmodel]] defines the kind of plasmon-pole approximation.
-By default we use the Godby-Needs model
-At the time of writing, only ppmodel 1 and 2 are supported in the GWPT code.
+
 
 The DFPT KS potentials are read from [[getdvdb_filepath]], while the DFPT KS densities
 are taken from [[getdrhodb_filepath]].
@@ -157,6 +284,7 @@ and then use the Fourier interpolation of the DFPT potentials to reach a $\qq$-m
 
 Finally, the GWPT code needs to read the GS KS potential from the file specified with [[getpot_filepath]].
 This file is produced at the end of the GS SCF cycle by setting [[prtpot]] to 1 (note that the default if 0).
+
 The first order change of the KS wavefunctions due to an atomic perturbation is computed on-the-fly
 by solving the NSCF Sterheimer equation.
 There are two variables controlling the NSCF cycle:
@@ -167,24 +295,31 @@ There are two variables controlling the NSCF cycle:
     [[tolwfr]] has a big impact on the computational cost as more NSCF iterations of the
     Sternheimer equation are needed to reach small residuals.
 
-[[zcut]]
+The treatment of the frequency dependence in the GWPT matrix elements is governed by [[gwpt_wmode]].
+By default, the GWPT matrix elements are computed at the energy of the incoming state $$\ee_\nk$.
 
-TODO
-[[gwcomp]] 2
+Other variables worth mentioning here are:
+
+[[zcut]]
+[[elph2_imagden]]
+
+Also, [[ppmodel]] defines the kind of plasmon-pole approximation in the GWPT equation
+By default we use the Godby-Needs model
 
 ## Computing the ZPR with GWPT
 
 In this section, we can finally compute the ZPR of MgO at the GWPT level using the results produced previously.
-
-[[optdriver]] 7
-[[eph_task]] 24
-
-[[gstore_gname]] "gvals"      # Use GWPT e-ph matrix elements from GSTORE (default)
-[[eph_stern]] 1               # Activate Sterheimer to compute contribution given by states above nband
-
 It is important to understand that at this level of the calculations
 there are few parameters that can be changed as this run is essentially
 a post-processing of the e-ph matrix elements stored in the GSTORE file.
+
+```
+optdriver 7
+eph_task 24
+
+gstore_gname "gvals"      # Use GWPT e-ph matrix elements from GSTORE (default)
+eph_stern 1               # Activate Sterheimer to compute contribution given by states above nband
+```
 
 The temperature mesh is defined by [[tmesh]].
 The imaginary shift in the denomitator of the self-energy is given by [[zcut]].
@@ -194,3 +329,9 @@ The imaginary shift in the denomitator of the self-energy is given by [[zcut]].
     One can use [[gstore_gname]] to select the kind of e-ph matrix elements that should
     be read from the GSTORE.
     In order to compute the ZPR with KS matrix elements, use [[gstore_gname]] = "gvals_ks"
+
+
+Finally, let us mention that [[eph_ahc_type]] 0 can be used
+to use the adiabatic version of the Allen-Heine-Cardona equation to compute the ZPR.
+This is the version that should be used when comparing with finite-different GW calculations
+as fixed screeening.

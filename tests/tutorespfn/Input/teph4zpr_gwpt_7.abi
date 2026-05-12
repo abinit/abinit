@@ -1,34 +1,21 @@
 # Calculation of GWPT e-ph matrix elements
 # Preparatory run for ZPR computation.
 
- ecut 35.0
-
- ngkpt 4 4 4
- nshiftk 1
- shiftk 0 0 0
-
-##############################################
-####                 SECTION: GWPT
-##############################################
-#gwpt_np_wpqbks 1 1 8 1 1 1
 optdriver 7              # Enter EPH driver.
 eph_task 17              # GWPT computation.
+#gwpt_np_wpqbks 1 1 8 1 1 1
 gwpt_wmode 2
 
 # Additional filter in k-space: only k-points corresponding to the band edges are considered
 gstore_kfilter "qprange"
-#gstore_use_lgk  0
 gstore_use_lgk 1   # IMPORTANT FOR PERFORMANCE
                    # Since we want to compute ZPR_k, we can restrict the q-points to the IBZ_k
 
 ecuteps  2         # Cutoff energy for screening (cannot be larger than the one found in the SCR file)
-                   # SC TODO: on alps_gnu_14.2_cov, ecuteps here = ecuteps in the SCR file still results in an error
-ecutsigx 25         # Cutoff energy for exchange part.
+ecutsigx 25        # Cutoff energy for exchange part.
 boxcutmin 1.1
-tolwfr 1e-8       # Tolerance for Sternheimer solver.
+tolwfr 1e-8        # Tolerance for Sternheimer solver.
 nstep 150
-
-#gwcomp 2          # Activate COH static remainder technique.
 
 # TODO: elph2_imagden Should have a default value
 elph2_imagden 0.1 eV
@@ -50,12 +37,15 @@ getddb_filepath "teph4zpr_gwpt_1_DDB"
 getdvdb_filepath "teph4zpr_gwpt_2_DVDB"
 getdrhodb_filepath "teph4zpr_gwpt_3_DRHODB"
 
-prtphdos 0       # Disable computation of PHDOS to save some time
-
-#############################################
-###                 SECTION: Sigma_nk
-#############################################
 #zcut 0.01 eV
+ ecut 35.0
+
+ # K-mesh. Must be consistent with WFK file.
+ ngkpt 4 4 4
+ nshiftk 1
+ shiftk 0 0 0
+
+prtphdos 0       # Disable computation of PHDOS to save some time
 
 structure = "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 

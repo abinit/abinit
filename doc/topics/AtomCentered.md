@@ -26,7 +26,7 @@ The computed integrated charges or magnetizations are printed inside the main ou
 For the DOS, use the intput variable [[prtdos]] with value 3 or 4, possibly m-decomposed if [[prtdosm]] is activated.
 In the PAW case, use [[pawprtdos]].
 
-To perform an atom-by-atom orbital magnetization integration inside the PAW spheres, use the prt_lorbmag input variable.
+To perform an atom-by-atom orbital magnetization integration inside the PAW spheres, use the [[prt_lorbmag]] input variable.
 
 A band structure can even be represented using weights proportional to the
 orbital content (so-called "Fat Bands"), in case of PAW calculation, see
@@ -50,7 +50,7 @@ This topic is also strongly related to the two topics [[topic:ConstrainedDFT]] a
 
 - [[abinit:pawfatbnd]]  PAW: print band structure in the FAT-BaND representation
 - [[abinit:pawprtdos]]  PAW: PRinT partial DOS contributions
-- prt_lorbmag  PRinT L ORBital MAGnetic moment inside PAW spheres
+- [[abinit:prt_lorbmag]]  PRinT L ORBital MAGnetic moment inside PAW spheres
 - [[abinit:prtdos]]  PRinT the Density Of States
 - [[abinit:prtdosm]]  PRinT the Density Of States with M decomposition
 - [[abinit:ratsph_extra]]  Radii of the ATomic SPHere(s) in the EXTRA set

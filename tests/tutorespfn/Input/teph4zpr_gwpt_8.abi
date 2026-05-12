@@ -4,9 +4,6 @@ ngkpt 4 4 4
 nshiftk 1
 shiftk 0 0 0
 
-##############################################
-####                 SECTION: EPH
-##############################################
 #gwpt_np_wpqbks 1 1 8 1 1 1
 optdriver 7              # Enter EPH driver.
 eph_task 24              # GWPT computation.
