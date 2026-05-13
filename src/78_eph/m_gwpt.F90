@@ -902,6 +902,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_MALLOC(my_gbuf_ks, (gqk%cplex, nb_kq, nb_k, natom3, gqk%my_nk, qbuf_size))
 
    ! Allocate memory to deal with frequencies in Sigma(w).
+   ! TODO: Recheck gwpt_wmode 1 as the results for m=n and q = 0 do not agree with gwpt_wmode 2
    select case (dtset%gwpt_wmode)
    case (1)
      ! Prepare list of omegas: first e_nk then e_mkq for all m indices.
