@@ -682,7 +682,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg_kq,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom, sendcount
- integer :: comm_rpt, osc_npw, stern_comm
+ integer :: comm_rpt, osc_npw, stern_comm, ntheta
  integer :: nelem, cgq_request ! ffnl_k_request, ffnl_kq_request,
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val
@@ -701,6 +701,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(phstore_t) :: phstore
  type(u1_cache_t) :: u1c
  type(stern_t) :: stern
+ type(frohl_integrator_t) :: frohl
  character(len=5000) :: msg
  character(len=fnlen) :: sigeph_filepath
 !arrays
@@ -1186,9 +1187,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call pstat_proc%print(_PSTAT_ARGS_)
 
  !if (frohl_method /= )
- !call frohl_integrator_find_mesh(cryst, ifc, ntheta, comm)
- !call frohl%init(cryst, ifc, ntheta, comm)
- !call frohl%free()
+ call frohl_integrator_find_mesh(cryst, ifc, ntheta, comm)
+ call frohl%init(cryst, ifc, ntheta, comm)
+ call frohl%free()
+ stop
 
  ! Temperature resolved 4th order contribution to total energy
  ABI_CALLOC(E4, (sigma%ntemp))
@@ -5491,15 +5493,15 @@ subroutine frohl_integrator_init(new, cryst, ifc, ntheta, comm)
  integer,intent(in) :: ntheta, comm
 
 !Local variables ------------------------------
- integer :: iang
- !real(dp) :: inv_qepsq, simag, q0rad,  wqnu, qzd2
+ integer :: iang, my_rank, nprocs
 !************************************************************************
 
  ! Set angular mesh for numerical integration inside micro BZ around Gamma.
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  new%ntheta = ntheta
  new%nphi = 2 * new%ntheta
- !write(std_out,"(a)")" Activating computation of Frohlich self-energy:"
- !write(std_out,"(2(a,i0,1x))")" ntheta: ", new%ntheta, "nphi: ", new%nphi
+ write(std_out,"(a)")" Activating computation of Frohlich self-energy:"
+ write(std_out,"(2(a,i0,1x))")" ntheta: ", new%ntheta, "nphi: ", new%nphi
 
  ! Initialize angular mesh qvers_cart and angwgth
  ! NB: summing over f * angwgth gives the spherical average 1/(4pi) \int domega f(omega)
@@ -5536,30 +5538,35 @@ subroutine frohl_integrator_find_mesh(cryst, ifc, ntheta, comm)
  integer,intent(in) :: comm
 
 !Local variables ------------------------------
- integer :: iang, iatom, nu, natom3, iter
+ integer :: iang, iatom, nu, natom3, iter, my_rank, nprocs, ierr
+ integer, parameter :: max_iter = 20
  type(frohl_integrator_t) :: frohl
  real(dp) :: REL_TOL = 0.02_dp
- real(dp) :: inv_qepsq2, q0rad,  wqnu, inv_wqnu2, qzd2, new_value, old_value
+ real(dp) :: inv_qepsq2, wqnu, inv_wqnu2, qzd2, new_value, old_value
  logical :: converged
- complex(dp) :: cfact, cnum, sig_cplx, cfact2
+ complex(dp) :: cnum
  complex(dp) :: cp3(3)
 !************************************************************************
 
  ! Increment ntheta by 50 at each iteration.
  ! Stop when the value of the integral changes less than REL_TOL.
  natom3 = 3 * cryst%natom
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
+  if (my_rank == 0) then
+    call wrtout(std_out, " frohl_integrator_find_mesh: find angular mesh to converge spherical average of Frohlich divergence...")
+  end if
  converged = .False.; iter = 0
+ old_value = huge(old_value)
 
- ! TODO: Add additional check on iteration count to avoid infinite loop.
- outer_loop: do while (.not. converged)
+ outer_loop: do while (.not. converged .and. iter < max_iter)
    iter = iter + 1
-   ntheta = iter * 50
+   ntheta = iter * 1
    call frohl%init(cryst, ifc, ntheta, comm)
 
    new_value = zero
    do iang=1,frohl%angl_size
-     !if (mod(iang, nprocs) /= my_rank) cycle ! MPI parallelism
+     if (mod(iang, nprocs) /= my_rank) cycle ! MPI parallelism
      associate (qpt_cart => frohl%qvers_cart(:, iang), displ_cart => frohl%displ_cart(:,:,:,:,iang))
      inv_qepsq2 = (one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))) ** 2
 
@@ -5577,18 +5584,17 @@ subroutine frohl_integrator_find_mesh(cryst, ifc, ntheta, comm)
      end do
      end associate
    end do ! iang
+   call xmpi_sum(new_value, comm, ierr)
 
-   ! TODO: Add some printout.
-   if (iter == 1) then
-     old_value = new_value
-   else
-     converged = (abs(new_value - old_value) <=  (old_value * REL_TOL))
-     if (converged) then
-       exit outer_loop
-     else
-       old_value = new_value
-     end if
+   if (my_rank == 0) then
+     write(std_out, "(a,i0,a,i0,a,es16.8)") &
+       " frohl_integrator_find_mesh: iter: ", iter, " ntheta: ", ntheta, " value: ", new_value
    end if
+
+   if (iter > 1) then
+     converged = (abs(new_value - old_value) <= (old_value * REL_TOL))
+   end if
+   old_value = new_value
    call frohl%free()
  end do outer_loop
 
@@ -5654,7 +5660,7 @@ subroutine frohl_integrator_eval(new, cryst, ifc, nqbz, nwr, ntemp, nk_size, e_n
 
  ! Angular integration
  do iang=1,new%angl_size
-   !if (mod(iang, nprocs) /= my_rank) cycle ! MPI parallelism
+   if (mod(iang, nprocs) /= my_rank) cycle ! MPI parallelism
    qpt_cart = new%qvers_cart(:, iang)
    displ_cart = new%displ_cart(:,:,:,:,iang)
    inv_qepsq2 = (one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))) ** 2
@@ -5709,6 +5715,8 @@ subroutine frohl_integrator_eval(new, cryst, ifc, nqbz, nwr, ntemp, nk_size, e_n
      !z0_nk(ink, itemp) = z0_nk(ink, itemp) +
     end do ! itemp
  end do ! ink
+  call xmpi_sum(sig0_nk, comm, ierr)
+  call xmpi_sum(z0_nk, comm, ierr)
 
  ABI_FREE(displ_cart)
 
