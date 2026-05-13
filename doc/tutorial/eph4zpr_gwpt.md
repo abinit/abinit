@@ -15,8 +15,7 @@ and that they are familiar with the calculation of ground state (GS) and respons
 in particular phonons, Born effective charges (BECs) and the high-frequency dielectric tensor.
 
 The user should have read the [introduction tutorial for the EPH code](../tutorial/eph_intro.md),
-the description of the [gstore-based approach](../tutorial/gstore.md),
-before running these examples.
+and the description of the [gstore-based approach](../tutorial/gstore.md), before running these examples.
 
 Also, you are kindly invited to read the [first GW tutorial](../tutorial/gw1.md) if you are not familiar
 with the GW implementation in Abinit.
@@ -65,6 +64,12 @@ The screened interaction $W$ is computed in terms of a sum of states with [[optd
 are stored in the SCR file.
 The first-order derivative of the KS states, on the contrary, are computed on the fly by the GWPT subdriver
 by solving a non-self-consistent (NSCF) Sternheimer equation as explained in the sections below.
+
+Please note that ZPR computations at the GWPT level are still a field of active research,
+especially in polar materials where additional long-range (LR) terms of many-body carachter appear in the e-ph matrix
+elements.
+In this tutorial, we won't be able to converge the calculation so we mainly focus on explaining the different
+steps involved and the input parameters affecting the quality of the calculation and the predictive power.
 
 <!--
 A typical workflow for ZPR-GWPT requires the same step as the ones
@@ -131,12 +136,11 @@ First of all, let's merge the partial DDB files with the command
 mrgddb < teph4zpr_gwpt_1.abi
 ```
 
-and the following input file:
+with the following input file:
 
 {% dialog tests/tutorespfn/Input/teph4zpr_gwpt_1.abi %}
 
-that lists the **relative paths** of the **partial DDB files** in the
-`MgO_eph_zpr` directory.
+that lists the **relative paths** of the **partial DDB files** in the `MgO_eph_zpr` directory.
 
 Then we merge the DFPT potential with the *mrgdv* tool using the command.
 
@@ -144,7 +148,7 @@ Then we merge the DFPT potential with the *mrgdv* tool using the command.
 mrgdv < teph4zpr_gwpt_2.abi
 ```
 
-and the following input file:
+with the following input file:
 
 {% dialog tests/tutorespfn/Input/teph4zpr_gwpt_2.abi %}
 
@@ -160,12 +164,11 @@ $$
 
 This is done by executing
 
-
 ```sh
 mrgdv < teph4zpr_gwpt_3.abi
 ```
 
-and the following input file:
+with the following input file:
 
 {% dialog tests/tutorespfn/Input/teph4zpr_gwpt_3.abi %}
 
@@ -177,6 +180,10 @@ and the following input file:
 
 
 ## Computing the WFK files with empty states
+
+At this point, we need to generate a WFK file with empty bands by performing a NSCF KS calculation
+starting from a well-converged ground-state density.
+This WFK file will then be used to compute W, the GW self-energy, and the GWPT matrix elements.
 
 You may now run the NSCF calculation by issuing:
 

@@ -603,6 +603,7 @@ module m_sigmaph
     procedure :: init => frohl_integrator_init
     procedure :: free =>  frohl_integrator_free
     procedure :: eval => frohl_integrator_eval
+    procedure :: eval_isotropic_avg => frohl_integrator_eval_isotropic_avg
  end type frohl_integrator_t
 
 !----------------------------------------------------------------------
@@ -5492,10 +5493,9 @@ subroutine frohl_integrator_init(new, cryst, ifc, ntheta, comm)
 
  ! Set angular mesh for numerical integration inside micro BZ around Gamma.
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
- new%ntheta = ntheta
- new%nphi = 2 * new%ntheta
- write(std_out,"(a)")" Activating computation of Frohlich self-energy:"
- write(std_out,"(2(a,i0,1x))")" ntheta: ", new%ntheta, "nphi: ", new%nphi
+ new%ntheta = ntheta; new%nphi = 2 * new%ntheta
+ !write(std_out,"(a)")" Activating computation of Frohlich self-energy:"
+ !write(std_out,"(2(a,i0,1x))")" ntheta: ", new%ntheta, "nphi: ", new%nphi
 
  ! Initialize angular mesh qvers_cart and angwgth
  ! NB: summing over f * angwgth gives the spherical average 1/(4pi) \int domega f(omega)
@@ -5504,6 +5504,7 @@ subroutine frohl_integrator_init(new, cryst, ifc, ntheta, comm)
  !call lebedev%from_npts(npts, ierr)
  !ABI_CHECK(ierr = 0, "Error while initializing lebedev mesh.")
 
+ ! Precompute ph frequencies and displacement including NAC terms.
  ABI_MALLOC(new%phfrq, (cryst%natom * 3, new%angl_size))
  ABI_MALLOC(new%displ_cart, (2, 3, cryst%natom, cryst%natom * 3, new%angl_size))
 
@@ -5513,6 +5514,46 @@ subroutine frohl_integrator_init(new, cryst, ifc, ntheta, comm)
  end do
 
 end subroutine frohl_integrator_init
+!!***
+
+subroutine frohl_integrator_eval_isotropic_avg(self, cryst, ifc, comm, avg_value)
+  class(frohl_integrator_t),intent(in) :: self
+  type(crystal_t),intent(in) :: cryst
+  type(ifc_type),intent(in) :: ifc
+  integer,intent(in) :: comm
+  real(dp),intent(out) :: avg_value(cryst%natom * 3)
+
+!Local variables ------------------------------
+  integer :: iang, iatom, nu, natom3, my_rank, nprocs, ierr
+  real(dp) :: inv_qepsq2, wqnu, qzd2, inv_wqnu2
+  complex(dp) :: cnum, cp3(3)
+!************************************************************************
+
+  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+  natom3 = 3 * cryst%natom
+  avg_value = zero
+
+  do iang=1,self%angl_size
+    if (mod(iang, nprocs) /= my_rank) cycle ! MPI parallelism
+    associate (qpt_cart => self%qvers_cart(:, iang), displ_cart => self%displ_cart(:,:,:,:,iang))
+    inv_qepsq2 = (one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))) ** 2
+
+    ! NB: Acoustic modes are ignored here
+    do nu=4,natom3
+      wqnu = self%phfrq(nu, iang); inv_wqnu2 = one / wqnu ** 2
+      ! cnum = q.\sum_k Z_k.d(q,nu)
+      cp3 = czero
+      do iatom=1, cryst%natom
+        cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), cmplx(displ_cart(1,:,iatom, nu), displ_cart(2,:,iatom, nu), kind=dp))
+      end do
+      cnum = dot_product(qpt_cart, cp3); qzd2 = abs(cnum) ** 2
+      avg_value(nu) = avg_value(nu) + self%angwgth(iang) * qzd2 * inv_qepsq2 * inv_wqnu2
+    end do
+    end associate
+  end do ! iang
+  call xmpi_sum(avg_value, comm, ierr)
+
+end subroutine frohl_integrator_eval_isotropic_avg
 !!***
 
 !!****f* m_epthk/frohl_integrator_find_mesh
@@ -5532,62 +5573,40 @@ subroutine frohl_integrator_find_mesh(cryst, ifc, ntheta, comm)
  integer,intent(in) :: comm
 
 !Local variables ------------------------------
- integer :: iang, iatom, nu, natom3, iter, my_rank, nprocs, ierr
+ integer :: iter, my_rank, nprocs
  integer, parameter :: max_iter = 20
  type(frohl_integrator_t) :: frohl
  real(dp) :: REL_TOL = 0.02_dp
- real(dp) :: inv_qepsq2, wqnu, inv_wqnu2, qzd2, new_value, old_value
+ real(dp) :: new_value, old_value, avg_value_ph(3*cryst%natom)
  logical :: converged
- complex(dp) :: cnum
- complex(dp) :: cp3(3)
 !************************************************************************
 
  ! Increment ntheta by 50 at each iteration. Stop when the value of the integral changes less than REL_TOL.
- natom3 = 3 * cryst%natom
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
-  if (my_rank == 0) then
-    call wrtout(std_out, " frohl_integrator_find_mesh: find angular mesh to converge spherical average of Frohlich divergence...")
-  end if
- converged = .False.; iter = 0
- old_value = huge(old_value)
+ if (my_rank == 0) then
+   call wrtout(std_out, " frohl_integrator_find_mesh: find angular mesh to converge spherical average of Frohlich divergence...")
+ end if
+ converged = .False.; iter = 0; old_value = huge(old_value)
 
  outer_loop: do while (.not. converged .and. iter < max_iter)
    iter = iter + 1
-   ntheta = iter * 1
+   ntheta = iter * 2
    call frohl%init(cryst, ifc, ntheta, comm)
 
-   new_value = zero
-   do iang=1,frohl%angl_size
-     if (mod(iang, nprocs) /= my_rank) cycle ! MPI parallelism
-     associate (qpt_cart => frohl%qvers_cart(:, iang), displ_cart => frohl%displ_cart(:,:,:,:,iang))
-     inv_qepsq2 = (one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))) ** 2
+   call frohl%eval_isotropic_avg(cryst, ifc, comm, avg_value_ph)
+   new_value = sum(avg_value_ph)
 
-     ! NB: Acoustic modes are ignored here
-     do nu=4,natom3
-       wqnu = frohl%phfrq(nu, iang); inv_wqnu2 = one / wqnu ** 2
-       ! cnum = q.\sum_k Z_k.d(q,nu)
-       cp3 = czero
-       do iatom=1, cryst%natom
-         cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), cmplx(displ_cart(1,:,iatom, nu), displ_cart(2,:,iatom, nu), kind=dp))
-       end do
-       cnum = dot_product(qpt_cart, cp3); qzd2 = abs(cnum) ** 2
-       new_value = new_value + frohl%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq2 / wqnu ** 2
-     end do
-     end associate
-   end do ! iang
-   call xmpi_sum(new_value, comm, ierr)
+  if (my_rank == 0) then
+    write(std_out, "(a,i0,a,i0,a,i0,a,es16.8)") &
+      " frohl_integrator_find_mesh: iter: ", iter, " ntheta: ", ntheta, " angl_size: ", frohl%angl_size, " value: ", new_value
+  end if
 
-   if (my_rank == 0) then
-     write(std_out, "(a,i0,a,i0,a,i0,a,es16.8)") &
-       " frohl_integrator_find_mesh: iter: ", iter, " ntheta: ", ntheta, " angl_size: ", frohl%angl_size, " value: ", new_value
-   end if
-
-   if (iter > 1) then
-     converged = (abs(new_value - old_value) <= (old_value * REL_TOL))
-   end if
-   old_value = new_value
-   call frohl%free()
+  if (iter > 1) then
+    converged = (abs(new_value - old_value) <= (old_value * REL_TOL))
+  end if
+  old_value = new_value
+  call frohl%free()
  end do outer_loop
 
  call frohl%free()

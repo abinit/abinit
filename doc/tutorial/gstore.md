@@ -17,8 +17,7 @@ A notable example is the [VarPEq algorithm](./eph4vpq.md): here an external SCF 
 the code must evaluate terms that depend on a fixed set of e-ph matrix elements.
 
 To overcome this limitation, ABINIT now provides the capability to precompute the $\gkq$
-matrix elements using a dedicated EPH sub-driver that is activated using
-[[optdriver]] and [[eph_task]]:
+matrix elements using a dedicated EPH sub-driver that is activated using [[optdriver]] and [[eph_task]]:
 
 ```
 optdriver 7   # Enter EPH code.
@@ -67,6 +66,7 @@ gstore_qzone = "ibz"
 
 An additional reduction of the number of wavevectors can be achieved with the two
 mutually exclusive variables [[gstore_use_lgq]] and [[gstore_use_lgk]].
+
 In some cases, the integration over the BZ in the post-processing step can indeed be restricted
 by symmetry to the irreducible wedge defined by the little group of the "external" wavevector ($\kk$ or $\qq$).
 We use the notation IBZ_k to denote the irreducible wedge defined by the little group of $\kk$,
@@ -88,7 +88,6 @@ gstore_kzone "ibz"
 gstore_qzone "bz"
 gstore_use_lgk 1   # Default is 0
 ```
-
 
 For phonon properties, one should use
 
@@ -114,7 +113,7 @@ Clearly, this is **rarely** what you actually want: not all these transitions ar
 However, ABINIT cannot (yet) read your mind, so you must **explicitly specify** the band ranges in the input file.
 
 The most basic variable is [[gstore_brange]], which defines the range of **both** the $m$ and $n$ indices
-for each spin [[nsppol]] channel.
+for each **collinear** spin channel ([[nsppol]] = 2).
 
 [[gstore_brange]] gives you full control over the bands to include and should be included when you need
 all the e-ph matrix elements connecting all $\kk$ and $\kq$ states inside a band range as, for instance,
@@ -122,7 +121,7 @@ in polaron calculations.
 
 In the case of metals or transport properties in semiconductors, the relevant contributions to the physical properties come
 from transitions located within an energy window around the Fermi level (as in metals)
-or from windows starting at the band edges in semiconductors.
+or from energy windows starting at the band edges in semiconductors.
 In this case, it is much easier to filter bands automatically using an input energy range defined by [[gstore_erange]].
 
 !!! important
@@ -147,6 +146,7 @@ Finally, the [[gstore_with_vk]] variable allows you to include electronic group 
 (and optionally off-diagonal velocity matrix elements) in the GSTORE file.
 This is particularly useful for transport calculations or when the velocity gauge must be consistent
 with the wavefunctions used for the e-ph matrix elements.
+
 Possible values are:
 
 - 0: Do not compute velocities (default).
@@ -199,9 +199,9 @@ nband           12  # Last index cannot be greater than nband
 ```
 
 
-## MPI parallelism in gstore computation
+## Gstore computation and MPI parallelism
 
-There are two EPH subdrivers capable of generating a GSTORE.nc file.
+There are two EPH subdrivers capable of generating a GSTORE.nc file:
 [[eph_task]] = 11 computes the e-ph matrix elements at the KS level, whereas
 [[eph_task]] = 17 employs the more expensive GWPT formalism [[cite:Li2019]] and produces a GSTORE.nc file
 containing both GWPT and KS e-ph matrix elements.
@@ -237,7 +237,6 @@ Note, however, that the $\qq$-mesh must be identical to, or a submesh of, the $\
 Also, be sure to compute the Born effective charges in polar materials,
 and the dynamical quadrupoles in order to
 properly describe the long-range part of the DFT scattering potentials and obtain a reliable Fourier interpolation.
-
 Further details on the interpolation of the DFPT scattering potentials are available on the [eph_intro page](eph_intro.md).
 
 ## Restarting a GSTORE computation
@@ -269,7 +268,8 @@ to compute physical properties.
 
 
 Reading a GSTORE file is very easy, use [[getgstore_filepath]] and then select the appropriate
-value of [[eph_task]] to perform the post-processing step
+value of [[eph_task]] to perform the post-processing step.
+To compute the ZPR from GSTORE, use e.g.:
 
 ```
 optdriver 7         # Enter EPH code.
