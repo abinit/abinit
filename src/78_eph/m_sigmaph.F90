@@ -1293,12 +1293,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end if
      end if
 
-     ! Integrate delta functions inside miniBZ around Gamma.
-     ! TODO: Remove?
-     !if (sigma%frohl_model == 1 .and. sigma%imag_only) then
-     !  call eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, dtset%prtvol, sigma%pqb_comm%value)
-     !end if
-
      if (sigma%frohl_model == 1 .and. .not. sigma%imag_only) then
        call wrtout(std_out, " Computing spherical average to treat Frohlich divergence in Sigma^{FM}")
        ABI_MALLOC(f_tlist_b, (sigma%ntemp, nbcalc_ks))
@@ -5548,8 +5542,7 @@ subroutine frohl_integrator_find_mesh(cryst, ifc, ntheta, comm)
  complex(dp) :: cp3(3)
 !************************************************************************
 
- ! Increment ntheta by 50 at each iteration.
- ! Stop when the value of the integral changes less than REL_TOL.
+ ! Increment ntheta by 50 at each iteration. Stop when the value of the integral changes less than REL_TOL.
  natom3 = 3 * cryst%natom
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
@@ -5579,7 +5572,6 @@ subroutine frohl_integrator_find_mesh(cryst, ifc, ntheta, comm)
          cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), cmplx(displ_cart(1,:,iatom, nu), displ_cart(2,:,iatom, nu), kind=dp))
        end do
        cnum = dot_product(qpt_cart, cp3); qzd2 = abs(cnum) ** 2
-
        new_value = new_value + frohl%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq2 / wqnu ** 2
      end do
      end associate
@@ -5587,8 +5579,8 @@ subroutine frohl_integrator_find_mesh(cryst, ifc, ntheta, comm)
    call xmpi_sum(new_value, comm, ierr)
 
    if (my_rank == 0) then
-     write(std_out, "(a,i0,a,i0,a,es16.8)") &
-       " frohl_integrator_find_mesh: iter: ", iter, " ntheta: ", ntheta, " value: ", new_value
+     write(std_out, "(a,i0,a,i0,a,i0,a,es16.8)") &
+       " frohl_integrator_find_mesh: iter: ", iter, " ntheta: ", ntheta, " angl_size: ", frohl%angl_size, " value: ", new_value
    end if
 
    if (iter > 1) then
@@ -5637,8 +5629,8 @@ subroutine frohl_integrator_eval(new, cryst, ifc, nqbz, nwr, ntemp, nk_size, e_n
  real(dp) :: inv_qepsq2, simag, q0rad,  wqnu, inv_wqnu2, qzd2
  complex(dp) :: cfact, cnum, sig_cplx, cfact2
 !arrays
- real(dp) :: qpt_cart(3) !, phfrq(3*cryst%natom) ! zpr_frohl_sphcorr(3*cryst%natom),
- real(dp),allocatable :: displ_cart(:,:,:,:)
+ !real(dp) :: qpt_cart(3) !, phfrq(3*cryst%natom) ! zpr_frohl_sphcorr(3*cryst%natom),
+ !real(dp),allocatable :: displ_cart(:,:,:,:)
  complex(dp) :: cp3(3)
 !************************************************************************
 
@@ -5649,7 +5641,7 @@ subroutine frohl_integrator_eval(new, cryst, ifc, nqbz, nwr, ntemp, nk_size, e_n
  q0rad = two_pi * (three / (four_pi * cryst%ucvol * nqbz)) ** third
  !bz_vol = two_pi**3 / cryst%ucvol
 
- ABI_MALLOC(displ_cart, (2, 3, cryst%natom, natom3))
+ !ABI_MALLOC(displ_cart, (2, 3, cryst%natom, natom3))
 
  ! Prepare treatment of Frohlich divergence in the ZPR with spherical integration in the microzone around Gamma.
  ! Correction does not depend on (n,k) so we can precompute values at this level.
@@ -5661,8 +5653,7 @@ subroutine frohl_integrator_eval(new, cryst, ifc, nqbz, nwr, ntemp, nk_size, e_n
  ! Angular integration
  do iang=1,new%angl_size
    if (mod(iang, nprocs) /= my_rank) cycle ! MPI parallelism
-   qpt_cart = new%qvers_cart(:, iang)
-   displ_cart = new%displ_cart(:,:,:,:,iang)
+   associate (qpt_cart => new%qvers_cart(:, iang), displ_cart => new%displ_cart(:,:,:,:,iang))
    inv_qepsq2 = (one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))) ** 2
    !call ifc%fourq(cryst, qpt_cart, phfrq, displ_cart, nanaqdir="cart")
 
@@ -5707,6 +5698,7 @@ subroutine frohl_integrator_eval(new, cryst, ifc, nqbz, nwr, ntemp, nk_size, e_n
      end if
 
    end do
+   end associate
  end do ! iang
 
  do ink=1,nk_size
@@ -5718,10 +5710,7 @@ subroutine frohl_integrator_eval(new, cryst, ifc, nqbz, nwr, ntemp, nk_size, e_n
   call xmpi_sum(sig0_nk, comm, ierr)
   call xmpi_sum(z0_nk, comm, ierr)
 
- ABI_FREE(displ_cart)
-
  !call xmpi_sum(zpr_frohl_sphcorr, comm, ierr)
-
  !zpr_frohl_sphcorr = zpr_frohl_sphcorr * eight * pi / cryst%ucvol * (three / (four_pi * cryst%ucvol * nqbz)) ** third
  !zpr_frohl_sphcorr = zpr_frohl_sphcorr * four * q0rad  / cryst%ucvol
 
