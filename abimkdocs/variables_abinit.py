@@ -26264,8 +26264,7 @@ Variable(
     text=r"""
 When generating a GSTORE file, setting [[gstore_use_lgk]] to 1,
 instructs Abinit to restrict the computation of the g(k,q) to the
-$\qq$-points in the IBZ_k where IBZ_k is the irreducible zone
-defined by the little group of the $\kk$-point.
+$\qq$-points in the IBZ_k where IBZ_k is the irreducible zone defined by the little group of the $\kk$-point.
 This allows one to reduce the number of e-ph matrix elements, but keep in mind that
 the generated GSTORE can only be used to compute electronic properties such
 as the electron self-energy $\Sigma_\kk$.
@@ -26290,8 +26289,7 @@ Variable(
     text=r"""
 When generating a GSTORE file, setting [[gstore_use_lgq]] to 1,
 instructs Abinit to restrict the computation of the g(k,q) to the
-$\kk$-points in the IBZ_q where IBZ_q is the irreducible zone
-defined by the little group of the $\qq$-point.
+$\kk$-points in the IBZ_q where IBZ_q is the irreducible zone defined by the little group of the $\qq$-point.
 
 This allows one to reduce the number of e-ph matrix elements, but keep in mind that
 the generated GSTORE can only be used to compute phonon properties such
@@ -26394,6 +26392,7 @@ Variable(
 This input variable specifies the name of the netcdf variable from which the e-ph matrix elements
 will be **read** from the GSTORE.nc file.
 Possible values are: "gvals" (default) or "gvals_ks"
+
 This variable has an effect only where reading a GSTORE file produced by
 the GWPT subdriver ([[eph_task]] 17) for post-processing purposes.
 In this case, indeed, the "gvals" netcdf variables stores the GWPT electron-matrix elements
@@ -26421,7 +26420,7 @@ Note that the array depends on the value of [[nsppol]] thus one has to provide f
 two different spin channels when [[nsppol]] == 2.
 
 If not specified in input, ABINIT will use all the bands from 1 up to [[nband]]
-unless additional filters are activated, see [[gstore_kfilter]] and [[gstore_erange]].
+unless additional filters are activated, see also [[gstore_kfilter]] and [[gstore_erange]].
 """,
 ),
 
@@ -26438,12 +26437,13 @@ Variable(
     text=r"""
 This variable defines the path of the GSTORE.nc file with the e-ph matrix elements
 that should be used as input for further analysis.
-
-This variable can also be used when [[eph_task]] == 11 i.e. when we compute the GSTORE file.
-In this case, the code assumes we want to restart a GSTORE calculation and only the (k, q) entries
-that are missing in the nc file are computed.
-This option is very useful if the previous job has been killed due to timeout limit.
 """,
+
+# This variable can also be used when [[eph_task]] == 11 i.e. when we compute the GSTORE file.
+# In this case, the code assumes we want to restart a GSTORE calculation and only the (k, q) entries
+# that are missing in the nc file are computed.
+# This option is very useful if the previous job has been killed due to timeout limit.
+
 ),
 
 Variable(
@@ -26458,7 +26458,7 @@ Variable(
     text=r"""
 This variable defines the path of the QPDATA file with the quasi-particle energies.
 to be used to update the initial KS band structure.
-To generate a QPDATA file, one can use AbiPy to extract the results from the SIGRES.nc file
+To generate a QPDATA file, one can use AbiPy to extract the results from a SIGRES.nc file.
 """,
 ),
 
