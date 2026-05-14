@@ -15,6 +15,7 @@ freqspmax 2 eV
 nband 20
 
 eph_stern 1
+zcut 0.01 eV
 
 ddb_ngqpt 4 4 4
 
@@ -28,8 +29,6 @@ getdvdb_filepath "teph4zpr_gwpt_2_DVDB"
 getgstore_filepath "teph4zpr_gwpt_7o_GSTORE.nc"
 
 ecut 35.0
-
-#mixprec 1 boxcutmin 1.1   # Important to speedup the calculation and reduce memory.
 
 ##############################################
 ####                 SECTION: eph
