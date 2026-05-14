@@ -5482,7 +5482,7 @@ Variable(
     mnemonics="Electron-PHonon: FROHLIich Number of THETA points",
     added_in_version="9.8.0",
     text=r"""
-Only relevant for [[optdriver]] = 7 and [[eph_task]] = 4 i.e. computation of the e-ph self-energy.
+Relevant for the computation of the e-ph self-energy or the Variational Polaron Equations.
 This variable defines the angular mesh for the spherical integration of the Frohlich divergence
 in the microzone around the Gamma point to accelerate the convergence with the number of q-points.
 

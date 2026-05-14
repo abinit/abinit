@@ -1188,10 +1188,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call pstat_proc%print(_PSTAT_ARGS_)
 
  !if (sigma%frohl_model == 1 .and. .not. sigma%imag_only) then
-   call frohl_integrator_find_mesh(cryst, ifc, ntheta, comm)
-   call frohl%init(cryst, ifc, ntheta, comm)
-   call frohl%eval_isotropic_avg(cryst, ifc, comm, zpr_frohl_sphcorr)
-   call frohl%free()
+ !  call frohl_integrator_find_mesh(cryst, ifc, ntheta, comm)
+ !  call frohl%init(cryst, ifc, ntheta, comm)
+ !  call frohl%eval_isotropic_avg(cryst, ifc, comm, zpr_frohl_sphcorr)
+ !  call frohl%free()
  !end if
  !stop
 
@@ -3351,7 +3351,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ! TODO: Reintegrate at least frohl_model 1 for the full self-energy
  new%frohl_model = 0
  new%ntheta = abs(dtset%eph_frohl_ntheta)
- !print *, "ntheta:", new%ntheta; stop
  if (.not. new%imag_only .and. new%ntheta > 0) then
    new%frohl_model = 1
    !if (.not. dvdb%has_zeff) new%frohl_model = 0
@@ -3360,8 +3359,10 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  if (new%frohl_model /= 0) then
    ! Set angular mesh for numerical integration inside micro BZ around Gamma.
    new%nphi = 2 * new%ntheta
-   write(std_out,"(a)")" Activating computation of Frohlich self-energy:"
-   write(std_out,"(2(a,i0,1x))")" ntheta: ", new%ntheta, "nphi: ", new%nphi
+   if (my_rank == master) then
+     write(std_out,"(a)")" Activating computation the of Frohlich self-energy:"
+     write(std_out,"(2(a,i0,1x))")" ntheta: ", new%ntheta, "nphi: ", new%nphi
+   end if
 
    ! Initialize angular mesh qvers_cart and angwgth
    ! NB: summing over f * angwgth gives the spherical average 1/(4pi) \int domega f(omega)
@@ -5087,15 +5088,15 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt,"(a)")sjoin(" dipdip:", itoa(dtset%dipdip), "symdynmat:", itoa(dtset%symdynmat))
 
  if (.not. self%imag_only) then
- select case (self%frohl_model)
- case (0)
-   !write(unt,"(a)")" No special treatment for the integration of the Frohlich divergence in the microzone around Gamma"
- case (1)
-   write(unt,"(a)")" Integrating Frohlich model in small sphere around Gamma to accelerate qpt convergence"
-   write(unt,"(2(a,i0,1x))")" Spherical integration performed with: ntheta: ", self%ntheta, ", nphi: ", self%nphi
- case default
-   ABI_ERROR(sjoin("Invalid value of frohl_mode:", itoa(self%frohl_model)))
- end select
+   select case (self%frohl_model)
+   case (0)
+     !write(unt,"(a)")" No special treatment for the integration of the Frohlich divergence in the microzone around Gamma"
+   case (1)
+     write(unt,"(a)")" Integrating Frohlich model in small sphere around Gamma to accelerate qpt convergence"
+     write(unt,"(2(a,i0,1x))")" Spherical integration performed with: ntheta: ", self%ntheta, ", nphi: ", self%nphi
+   case default
+     ABI_ERROR(sjoin("Invalid value of frohl_mode:", itoa(self%frohl_model)))
+   end select
  end if
 
  write(unt,"(a, i0)")" Number of k-points for self-energy corrections: ", self%nkcalc
@@ -5630,8 +5631,8 @@ subroutine frohl_integrator_eval(self, cryst, ifc, nqbz, nwr, ntemp, nk_size, e_
 !scalars
  integer,parameter :: master = 0
  integer :: iang, nu, iatom, ierr, my_rank, nprocs, natom3, ink, itemp
- real(dp) :: inv_qepsq2, simag, q0rad,  wqnu, inv_wqnu2, qzd2
- complex(dp) :: cfact, cnum, sig_cplx, cfact2
+ real(dp) :: inv_qepsq2, q0rad,  wqnu, inv_wqnu2, qzd2
+ complex(dp) :: cnum
 !arrays
  complex(dp) :: cp3(3)
 !************************************************************************
@@ -5642,13 +5643,6 @@ subroutine frohl_integrator_eval(self, cryst, ifc, nqbz, nwr, ntemp, nk_size, e_
  ! Radius of sphere with volume equivalent to the micro zone.
  q0rad = two_pi * (three / (four_pi * cryst%ucvol * nqbz)) ** third
  !bz_vol = two_pi**3 / cryst%ucvol
-
- !ABI_MALLOC(displ_cart, (2, 3, cryst%natom, natom3))
-
- ! Prepare treatment of Frohlich divergence in the ZPR with spherical integration in the microzone around Gamma.
- ! Correction does not depend on (n,k) so we can precompute values at this level.
- !call wrtout(std_out, " Computing spherical average to treat Frohlich divergence ...")
- !zpr_frohl_sphcorr = zero
 
  sig0_nk = zero; z0_nk = zero
 
@@ -5709,12 +5703,9 @@ subroutine frohl_integrator_eval(self, cryst, ifc, nqbz, nwr, ntemp, nk_size, e_
      !z0_nk(ink, itemp) = z0_nk(ink, itemp) +
     end do ! itemp
  end do ! ink
-  call xmpi_sum(sig0_nk, comm, ierr)
-  call xmpi_sum(z0_nk, comm, ierr)
 
- !call xmpi_sum(zpr_frohl_sphcorr, comm, ierr)
- !zpr_frohl_sphcorr = zpr_frohl_sphcorr * eight * pi / cryst%ucvol * (three / (four_pi * cryst%ucvol * nqbz)) ** third
- !zpr_frohl_sphcorr = zpr_frohl_sphcorr * four * q0rad  / cryst%ucvol
+ call xmpi_sum(sig0_nk, comm, ierr)
+ call xmpi_sum(z0_nk, comm, ierr)
 
 end subroutine frohl_integrator_eval
 !!***
