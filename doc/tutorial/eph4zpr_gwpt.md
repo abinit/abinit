@@ -24,8 +24,8 @@ code can be found in the [[theory:mbt|GW_notes]].
 
 Note that in this tutorial, we will be using the conventional GW implementation in Fourier space and frequency-domain
 with quartic scaling with the number of atoms.
-A more efficient algorithm with cubic scaling is provided by the GWR code described in [this tutorial][./gwr1.md].
-Unfortunately, at the time of writing, the GWR code is not interfaced with GWPT.
+A more efficient algorithm with cubic scaling is provided by the GWR code described in the [GWR1 tutorial](../tutorial/gwr1.md).
+Unfortunately, at the time of writing, the GWR code is not yet interfaced with GWPT.
 
 This lesson should take about 2.0 hours.
 
@@ -63,18 +63,18 @@ W_{\mathbf{p,GG'}}(\varepsilon') =& \frac{1}{V} \int_V \mathrm{d} \mathbf{r} \ma
 Besides the summations over empty states $n'$, the equation requires the knowledge of the screened interaction $W$
 as well as the (full) first-order derivative of the KS states
 $\partial_{\kappa\alpha\mathbf{q}} \psi_{n^{\prime}}$
-induced by an atomic displacement of atom $\kappa$ along direction $\alpha$ modulated by the wavevector $\qq$.
+induced by an atomic displacement of atom $\kappa$ along direction $\alpha$ modulated by the wavevector $\mathbf{q}$.
 Both terms can be computed by Abinit.
 The screened interaction $W$ is computed in terms of a sum of states with [[optdriver]] 3, and the results
 are stored in the SCR file.
-The first-order derivative of the KS states, on the contrary, are computed on the fly by the GWPT subdriver
+The first-order derivative of the KS states, on the contrary, is computed on the fly by the GWPT subdriver
 by solving a non-self-consistent (NSCF) Sternheimer equation as explained in the sections below.
 
 Please note that ZPR computations at the GWPT level are still a field of active research,
 especially in polar materials where additional long-range (LR) terms of many-body nature appear in the e-ph matrix elements.
-In this tutorial, we won't be able to converge the calculation hence we mainly focus on explaining the different
+In this tutorial, we won't be able to converge the calculation; hence, we mainly focus on explaining the different
 steps involved and the input parameters affecting the quality of the calculation and the predictive power.
-Hopefully, additional techniques and algorithmic improvements will be made available in the forthcoming Abinit version
+Hopefully, additional techniques and algorithmic improvements will be made available in forthcoming Abinit versions
 in order to accelerate GWPT calculations without spoiling accuracy (stay tuned).
 
 <!--
@@ -135,9 +135,9 @@ mv MgO_eph_zpr-master MgO_eph_zpr_gwpt
 
 ## Merging partial DDB, DFPT POT and DEN files
 
-The first steps are similar to the ones used in the [eph4zpr tutorial](../tutorial/eph4zpr.md)
-First of all, we merge the partial DDB files containg the dynamical matrix
-evaluated for different $\qq$-points and atomic perturbations by executing
+The first steps are similar to the ones used in the [eph4zpr tutorial](../tutorial/eph4zpr.md).
+First, we merge the partial DDB files containing the dynamical matrix
+evaluated for different $\mathbf{q}$-points and atomic perturbations by executing:
 
 ```sh
 mrgddb < teph4zpr_gwpt_1.abi
@@ -188,9 +188,9 @@ with the following input file:
 
 ## Computing the WFK files with empty states
 
-At this point, we need to generate a WFK file with empty bands by performing a NSCF KS calculation
+At this point, we need to generate a WFK file with empty bands by performing an NSCF KS calculation
 starting from a well-converged ground-state density.
-This WFK file will then be used to compute W, the $G_0W_0$ self-energy, and the GWPT matrix elements.
+This WFK file will then be used to compute $W$, the $G_0W_0$ self-energy, and the GWPT matrix elements.
 
 Let us start the NSCF calculation immediately by issuing:
 
@@ -218,16 +218,16 @@ This trick significantly reduces the wall-time as the NSCF calculation completes
 only when the first [[nband]] - [[nbdbuf]] states are converged within [[tolwfr]].
 Obviously, one should not use the last [[nbdbuf]] states in the subsequent EPH calculation.
 
-Another point worth mentioning here is that the $\kk$-mesh used in this step, **strictly defines** the
-electronic wavevectorss $\kk$ that can be probed when computing the corrections to the QP energies,
+Another point worth mentioning here is that the $\kk$-mesh used in this step **strictly defines** the
+electronic wavevectors $\kk$ that can be probed when computing the corrections to the QP energies,
 both in the $GW$ part and in the $GWPT$ code.
-In other words, if your CBM (VBM) is located at $\kk_0$, the $\kk-mesh$ **must contain** $\kk_0$ as the present
-implementation is not yet able to exploit interpolation techniques such as Wannieration to densify the $\kk$-mesh.
-Before embarking on expensive GWPT, please make sure to undestand very-well the position of the KS band edges
-by computing the KS band-structure on an high-symmetry $\kk$-path.
+In other words, if your CBM (VBM) is located at $\kk_0$, the $\kk$-mesh **must contain** $\kk_0$, as the present
+implementation is not yet able to exploit interpolation techniques such as Wannierization to densify the $\kk$-mesh.
+Before embarking on expensive GWPT, please make sure to understand very well the position of the KS band edges
+by computing the KS band structure on a high-symmetry $\kk$-path.
 In the case of MgO, the scenario is optimal as we are dealing with a direct-gap semiconductor with $\kk_0 = \Gamma$.
-ZPR computations for the **fundamental band-gap** in indirect band-gap semiconductors such as diamond
-are significantly more challenging as it is not always possible to find a $\kk$ mesh that can capture
+ZPR computations for the **fundamental band gap** in indirect band-gap semiconductors such as diamond
+are significantly more challenging, as it is not always possible to find a $\kk$ mesh that can capture
 the position of both the CBM and the VBM at the same time.
 
 [HDIAGO_README]
@@ -238,8 +238,8 @@ the position of both the CBM and the VBM at the same time.
 In this section, we use the WFK file generated in the previous section to compute the RPA polarizability
 and the screened interaction $W$.
 Here we generate a screening file with only two frequencies: the static limit $\omega=0$
-and $\omega=i\omega_p$ with $\omega_p the Drude plasmon-frequency computed from the number of (valence) electrons.
-This is the **default behaviour** of the screening driver
+and $\omega=i\omega_p$, with $\omega_p$ being the Drude plasmon frequency computed from the number of (valence) electrons.
+This is the **default behavior** of the screening driver.
 
 The SCR file will then be used to construct the plasmon-pole model (PPM) when computing the self-energy.
 Note that integration techniques beyond the PPM are not supported in the GWPT code.
@@ -249,7 +249,7 @@ and [[ngkpt]] to ensure that the GW results are reasonably well converged.
 The converged parameters can then be reused in the subsequent GWPT calculation.
 
 For the sake of conciseness and performance reasons, these convergence studies are omitted here,
-and reasonably values are assumed in what follows.
+and reasonable values are assumed in what follows.
 
 !!! tip
 
@@ -258,8 +258,8 @@ and reasonably values are assumed in what follows.
     both the screening driver and the sigma driver are parallelized over bands.
     Clearly, one cannot use more MPI processes than [[nband]].
 
-    An additional level of parallelism over $\qq$-points in available in the screening part.
-    One can indeed split the computation of W over $\qq$-points using [[nqptdm]] and [[qptdm]]
+    An additional level of parallelism over $\qq$-points is available in the screening part.
+    One can indeed split the computation of $W$ over $\qq$-points using [[nqptdm]] and [[qptdm]]
     and then merge the partial results with the `mrgscr` tool.
 
 
@@ -303,7 +303,7 @@ mpirun -n 4 abinit teph4zpr_7.abi > teph4zpr_7.log 2> err &
     The code will do its best to efficiently distribute the workload for the given number of MPI processes.
     If finer control is needed, please consult the documentation of [[gwpt_np_wpqbks]].
 
-While the calculation is running, let's discuss the input file in more details:
+While the calculation is running, let's discuss the input file in more detail:
 
 {% dialog tests/tutorespfn/Input/teph4zpr_gwpt_7.abi %}
 
@@ -320,7 +320,7 @@ Since we need a GSTORE for the ZPR only for specific $\kk$-points, we use
 and [[gstore_use_lgk]] = 1 to restrict the $\qq$-points to the IBZ_k.
 These options are crucial to reduce the computational cost of the GWPT run.
 
-Note that GWPT require several external files in input.
+Note that GWPT requires several external files in input.
 The KS states are read from the WFK file via [[getwfk_filepath]].
 This file defines the list of $\kk$-points in the e-ph matrix elements.
 The value of [[ngkpt]], [[nshiftk]] and [[shiftk]] **must be consistent** with the ones used to generate the WFK file.
@@ -344,22 +344,22 @@ Clearly, [[ecuteps]] **cannot be larger** than the value used in the previous sc
 The SCR file defines the $\pp$-mesh for the integration over the transferred momenta in Eq.
 This $\pp$-mesh must be identical to, or a submesh of, the $\kk$-mesh associated with the WFK file.
 No interpolation in $\pp$-space is possible at present.
-In a typical scenario, one works with a fixed reasonably-dense $\pp$-mesh, e.g. 6x6x6, use a WFK file
-on a $\kk$-mesh that is a multiple of 6x6x6 and use the [[eph_ngqpt_fine]] to reach the same BZ sampling as the
+In a typical scenario, one works with a fixed reasonably-dense $\pp$-mesh, e.g. 6x6x6, uses a WFK file
+on a $\kk$-mesh that is a multiple of 6x6x6 and uses [[eph_ngqpt_fine]] to reach the same BZ sampling as the
 one used for electrons by using the interpolation of the DFPT scattering potentials.
 
 Finally, the GWPT code needs to read the GS KS potential from the file specified with [[getpot_filepath]].
 This file is used to build the GS Hamiltonian required by the Sternheimer solver.
-The GS POT is produced at the end of the GS SCF cycle by setting [[prtpot]] to 1 (note that the default if 0).
+The GS POT is produced at the end of the GS SCF cycle by setting [[prtpot]] to 1 (note that the default is 0).
 
-The first order derivative of the KS wavefunctions due to an atomic perturbation is computed on-the-fly
-by solving the NSCF Sternheimer equation for each $n'$ band, atomic displacement and quasi-momentun transfer.
+The first-order derivative of the KS wavefunctions due to an atomic perturbation is computed on-the-fly
+by solving the NSCF Sternheimer equation for each $n'$ band, atomic displacement, and quasi-momentum transfer.
 There are two variables controlling the NSCF cycle:
 [[nline]] defines the maximum number of iterations while [[tolwfr]] defines the stopping criterion.
 
 !!! important
 
-    [[tolwfr]] has a big impact on the computational cost as more NSCF iterations of the
+    [[tolwfr]] has a significant impact on the computational cost as more NSCF iterations of the
     Sternheimer equation are needed to reach small residuals.
 
 The treatment of the frequency dependence in the GWPT matrix elements is governed by [[gwpt_wmode]].
@@ -368,7 +368,7 @@ By default, the GWPT matrix elements are computed at the energy of the incoming 
 Other variables worth mentioning here are [[zcut]] and [[elph2_imagden]].
 
 Also, [[ppmodel]] defines the kind of plasmon-pole approximation in the GWPT equation.
-By default we use the Godby-Needs model
+By default, we use the Godby-Needs model.
 
 !!! Important
 
@@ -391,7 +391,7 @@ In other words, the quality of the ZPR obtained here mainly depends on the densi
 used in the previous section, the number of states ($n'$ index) and the different cutoff energies.
 In order to perform convergence studies, one should go back to the previous step, increase the relevant parameters
 and monitor how the ZPR is affected by these settings.
-This is left as excerise to the reader...
+This is left as an exercise to the reader...
 
 After this preamble, let us start the calculation by issuing:
 
@@ -415,12 +415,12 @@ The temperature mesh is defined by [[tmesh]].
 The imaginary shift in the denominator of the self-energy is given by [[zcut]].
 
 
-We use [[eph_stern]] 1 and [[getpot_filepath]] to activate the the Sternheimer approach
-to account for the contribution of the bands beyond the active-space defined by [[nband]].
+We use [[eph_stern]] 1 and [[getpot_filepath]] to activate the Sternheimer approach
+to account for the contribution of the bands beyond the active space defined by [[nband]].
 Note that the Sternheimer method is exact if one is interested
 in the on-the-mass-shell corrections at the KS level in the adiabatic approximation.
 In the case of GWPT calculations, one assumes that the GWPT matrix elements are
-very close the KS ones beyond [[nband]].
+very close to the KS ones beyond [[nband]].
 
 !!! tip
 
