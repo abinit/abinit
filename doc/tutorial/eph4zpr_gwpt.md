@@ -65,6 +65,7 @@ as well as the (full) first-order derivative of the KS states
 $\partial_{\kappa\alpha\mathbf{q}} \psi_{n^{\prime}}$
 induced by an atomic displacement of atom $\kappa$ along direction $\alpha$ modulated by the wavevector $\mathbf{q}$.
 Both terms can be computed by Abinit.
+
 The screened interaction $W$ is computed in terms of a sum of states with [[optdriver]] 3, and the results
 are stored in the SCR file.
 The first-order derivative of the KS states, on the contrary, is computed on the fly by the GWPT subdriver
@@ -76,12 +77,6 @@ In this tutorial, we won't be able to converge the calculation; hence, we mainly
 steps involved and the input parameters affecting the quality of the calculation and the predictive power.
 Hopefully, additional techniques and algorithmic improvements will be made available in forthcoming Abinit versions
 in order to accelerate GWPT calculations without spoiling accuracy (stay tuned).
-
-<!--
-A typical workflow for ZPR-GWPT requires the same step as the ones
-[needed for KS-ZPR](../tutorial/eph_intro.md#typical_workflow_for_zpr)
-plus additional computations for the screened interaction $W$.
--->
 
 ## Getting started
 
@@ -99,7 +94,7 @@ cd Work_eph4zpr_gwpt
 In this tutorial, we prefer to focus on the use of the GWPT subdriver of the EPH code hence
 we will be using **pre-computed** DDB and DFPT POT and DEN files to bypass the DFPT part.
 We also provide a GS DEN.nc file to initialize the NSCF calculations
-and a POT file with the GS KS potential required to solve the Sternheimer equation.
+and a GS POT file with the KS potential required to solve the NSCF Sternheimer equation.
 
 If *git* is installed on your machine, one can easily fetch the entire repository with:
 
@@ -189,7 +184,7 @@ with the following input file:
 ## Computing the WFK files with empty states
 
 At this point, we need to generate a WFK file with empty bands by performing an NSCF KS calculation
-starting from a well-converged ground-state density.
+starting from a well-converged GS  density.
 This WFK file will then be used to compute $W$, the $G_0W_0$ self-energy, and the GWPT matrix elements.
 
 Let us start the NSCF calculation immediately by issuing:
@@ -223,6 +218,7 @@ electronic wavevectors $\kk$ that can be probed when computing the corrections t
 both in the $GW$ part and in the $GWPT$ code.
 In other words, if your CBM (VBM) is located at $\kk_0$, the $\kk$-mesh **must contain** $\kk_0$, as the present
 implementation is not yet able to exploit interpolation techniques such as Wannierization to densify the $\kk$-mesh.
+
 Before embarking on expensive GWPT, please make sure to understand very well the position of the KS band edges
 by computing the KS band structure on a high-symmetry $\kk$-path.
 In the case of MgO, the scenario is optimal as we are dealing with a direct-gap semiconductor with $\kk_0 = \Gamma$.
@@ -235,21 +231,18 @@ the position of both the CBM and the VBM at the same time.
 
 ## Computing the screened interaction W and QP corrections with one-shot GW
 
-In this section, we use the WFK file generated in the previous section to compute the RPA polarizability
-and the screened interaction $W$.
-Here we generate a screening file with only two frequencies: the static limit $\omega=0$
-and $\omega=i\omega_p$, with $\omega_p$ being the Drude plasmon frequency computed from the number of (valence) electrons.
-This is the **default behavior** of the screening driver.
+In this section, we use the WFK file generated in the previous section to compute the RPA polarizability,
+the screened interaction $W$ and, finally, the QP corrections with one-shot GW.
 
-The SCR file will then be used to construct the plasmon-pole model (PPM) when computing the self-energy.
-Note that integration techniques beyond the PPM are not supported in the GWPT code.
+To compute the screening, execute e.g.:
 
-At this stage, one should perform convergence studies for [[nband]], [[ecuteps]], [[ecutsigx]],
-and [[ngkpt]] to ensure that the GW results are reasonably well converged.
-The converged parameters can then be reused in the subsequent GWPT calculation.
+```sh
+mpirun -n 4 abinit teph4zpr_gwpt_5.abi > teph4zpr_5.log 2> err &
+```
 
-For the sake of conciseness and performance reasons, these convergence studies are omitted here,
-and reasonable values are assumed in what follows.
+with the input file given by:
+
+{% dialog tests/tutorespfn/Input/teph4zpr_gwpt_5.abi %}
 
 !!! tip
 
@@ -263,16 +256,11 @@ and reasonable values are assumed in what follows.
     and then merge the partial results with the `mrgscr` tool.
 
 
-To compute the SCR, execute e.g.:
-
-```sh
-mpirun -n 4 abinit teph4zpr_gwpt_5.abi > teph4zpr_5.log 2> err &
-```
-
-with the input file given by:
-
-{% dialog tests/tutorespfn/Input/teph4zpr_gwpt_5.abi %}
-
+Here we generate a SCR file with only two frequencies: the static limit $\omega=0$
+and $\omega=i\omega_p$, with $\omega_p$ being the Drude plasmon frequency computed from the number of (valence) electrons.
+This is the **default behavior** of the screening driver (see also [[[ppmfrq]]).
+The SCR file will then be used to construct the plasmon-pole model (PPM) when computing the self-energy
+with [[optdriver]] 4 in the next step (see alsp [[ppmodel]])
 
 To compute the $G_0W_0$ self-energy, execute e.g.:
 
@@ -286,8 +274,58 @@ with the input file given by:
 
 Let's now have a look at the QP results reported in the output file:
 
-{% dialog tests/tutorespfn/Input/teph4zpr_gwpt_6.abi %}
+{% dialog tests/tutorespfn/Refs/teph4zpr_gwpt_6.abo %}
 
+The KS bands gaps are
+
+```
+ === KS Band Gaps ===
+  >>>> For spin  1
+   Minimum direct gap =   4.4790 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   4.4790 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.0000  0.0000  0.0000
+```
+
+and the QP corrections are summarized in this section:
+
+```
+ matrix elements of self-energy operator (all in [eV])
+
+ Perturbative Calculation
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    4.479
+QP_gap     :    6.528
+Delta_QP_KS:    2.049
+data: !SigmaeeData |
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        1 -68.031 -34.373 -58.114  13.281   0.273  -2.665 -37.227  -2.854 -70.885
+        2 -34.759 -32.313 -45.678   6.515   0.808  -0.238 -37.845  -5.533 -40.292
+        3 -34.759 -32.313 -45.678   6.515   0.808  -0.238 -37.845  -5.533 -40.292
+        4 -34.759 -32.313 -45.678   6.515   0.808  -0.238 -37.845  -5.533 -40.292
+        5 -12.564 -18.528 -30.572   9.400   0.667  -0.500 -20.290  -1.762 -14.326
+        6   4.490 -20.036 -25.441   4.181   0.803  -0.246 -21.019  -0.983   3.507
+        7   4.490 -20.036 -25.441   4.181   0.803  -0.246 -21.019  -0.983   3.507
+        8   4.490 -20.036 -25.441   4.181   0.803  -0.246 -21.019  -0.983   3.507
+        9   8.969 -13.280  -8.623  -3.404   0.851  -0.175 -12.214   1.066  10.035
+       10  20.266  -9.448  -3.582  -4.476   0.861  -0.162  -8.251   1.197  21.462
+       11  20.266  -9.448  -3.582  -4.476   0.861  -0.162  -8.251   1.197  21.462
+       12  20.266  -9.448  -3.582  -4.476   0.861  -0.162  -8.251   1.197  21.462
+...
+```
+
+For the meaning of the different columns, please consult the [GWR1 tutorial](../tutorial/gwr1.md).
+The experimental gap of MgO is 7.67 eV.
+A well converged G0W0 calculation should give 7.25 eV while our calculation gives 6.528.
+
+At this stage, one should perform convergence studies for [[nband]], [[ecuteps]], [[ecutsigx]],
+and [[ngkpt]] to ensure that the GW results are reasonably well converged.
+The converged parameters can then be reused in the subsequent GWPT calculation.
+
+For the sake of conciseness and performance reasons, these convergence studies are omitted here.
 
 ## Computing e-ph matrix elements with GWPT
 
@@ -299,7 +337,7 @@ mpirun -n 4 abinit teph4zpr_7.abi > teph4zpr_7.log 2> err &
 
 !!! tip
 
-    Feel free to use more MPI processes here as GWPT are very expensive.
+    Feel free to use more MPI processes here as GWPT are expensive.
     The code will do its best to efficiently distribute the workload for the given number of MPI processes.
     If finer control is needed, please consult the documentation of [[gwpt_np_wpqbks]].
 
@@ -355,7 +393,7 @@ The GS POT is produced at the end of the GS SCF cycle by setting [[prtpot]] to 1
 The first-order derivative of the KS wavefunctions due to an atomic perturbation is computed on-the-fly
 by solving the NSCF Sternheimer equation for each $n'$ band, atomic displacement, and quasi-momentum transfer.
 There are two variables controlling the NSCF cycle:
-[[nline]] defines the maximum number of iterations while [[tolwfr]] defines the stopping criterion.
+[[nline]] defines the maximum number of NSCF iterations while [[tolwfr]] defines the stopping criterion.
 
 !!! important
 
@@ -367,13 +405,11 @@ By default, the GWPT matrix elements are computed at the energy of the incoming 
 
 Other variables worth mentioning here are [[zcut]] and [[elph2_imagden]].
 
-Also, [[ppmodel]] defines the kind of plasmon-pole approximation in the GWPT equation.
-By default, we use the Godby-Needs model.
-
 !!! Important
 
     Techniques beyond the PPM are presently not available in the GWPT code.
     Also, only [[ppmodel]] 1 and 2 are presently supported.
+    By default, we use the Godby-Needs model.
 
 
 Now let's have a look at the output results:
@@ -386,9 +422,10 @@ Now let's have a look at the output results:
 In this section, we finally compute the ZPR of MgO at the GWPT level using the results produced previously.
 As you will see the calculation is much faster than the previous step
 as this run is essentially a post-processing of the data stored in the GSTORE file.
+
 The price to pay is that there are few parameters that can be changed as this level.
 In other words, the quality of the ZPR obtained here mainly depends on the density of the $\qq$- and $\pp$-meshes
-used in the previous section, the number of states ($n'$ index) and the different cutoff energies.
+used in the previous section, the number of empty states ($n'$ index) and the different cutoff energies.
 In order to perform convergence studies, one should go back to the previous step, increase the relevant parameters
 and monitor how the ZPR is affected by these settings.
 This is left as an exercise to the reader...
@@ -403,35 +440,38 @@ with the following input file:
 
 {% dialog tests/tutorespfn/Input/teph4zpr_gwpt_8.abi %}
 
-```
-optdriver 7
-eph_task 24
+Let us now discuss the most relevant input variables:
+To activate the computation of the e-ph self-energy from a GSTORE file we use
+[[optdriver]], [[eph_task]] and [[getgstore_filepath]]
 
-gstore_gname "gvals"      # Use GWPT e-ph matrix elements from GSTORE (default)
-eph_stern 1               # Activate Sternheimer to compute contribution given by states above nband
+```
+optdriver 7   # Enter EPH driver.
+eph_task 24   # ZPR from GSTORE.
+getgstore_filepath "teph4zpr_gwpt_7o_GSTORE.nc"
 ```
 
-The temperature mesh is defined by [[tmesh]].
+The temperature mesh in Kelvin is defined by [[tmesh]].
 The imaginary shift in the denominator of the self-energy is given by [[zcut]].
 
-
-We use [[eph_stern]] 1 and [[getpot_filepath]] to activate the Sternheimer approach
+We also use [[eph_stern]] 1 and [[getpot_filepath]] to activate the Sternheimer approach
 to account for the contribution of the bands beyond the active space defined by [[nband]].
-Note that the Sternheimer method is exact if one is interested
-in the on-the-mass-shell corrections at the KS level in the adiabatic approximation.
-In the case of GWPT calculations, one assumes that the GWPT matrix elements are
-very close to the KS ones beyond [[nband]].
 
-!!! tip
+TODO: One should check that nband is consistent with nb_kq
 
-    One can use [[gstore_gname]] to select the kind of e-ph matrix elements that should
-    be read from the GSTORE.
-    In order to compute the ZPR with KS matrix elements, use [[gstore_gname]] = "gvals_ks"
+!!! Important
 
+  The Sternheimer method is exact if one is interested
+  in the on-the-mass-shell corrections at the KS level in the adiabatic approximation.
+  In the case of GWPT calculations, one assumes that the GWPT matrix elements are
+  very close to the KS ones when $m$ > [[nband]].
 
 Now let's have a look at the final results reported in the main output file:
 
 {% dialog tests/tutorespfn/Refs/teph4zpr_gwpt_8.abo %}
+
+One can use [[gstore_gname]] to select the kind of e-ph matrix elements that should
+be read from the GSTORE.
+In order to compute the ZPR with KS matrix elements, use [[gstore_gname]] = "gvals_ks"
 
 !!! tip
 
