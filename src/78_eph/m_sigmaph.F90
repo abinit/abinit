@@ -1187,11 +1187,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  call pstat_proc%print(_PSTAT_ARGS_)
 
- !if (frohl_method /= )
- call frohl_integrator_find_mesh(cryst, ifc, ntheta, comm)
- call frohl%init(cryst, ifc, ntheta, comm)
- call frohl%free()
- stop
+ !if (sigma%frohl_model == 1 .and. .not. sigma%imag_only) then
+   call frohl_integrator_find_mesh(cryst, ifc, ntheta, comm)
+   call frohl%init(cryst, ifc, ntheta, comm)
+   call frohl%eval_isotropic_avg(cryst, ifc, comm, zpr_frohl_sphcorr)
+   call frohl%free()
+ !end if
+ !stop
 
  ! Temperature resolved 4th order contribution to total energy
  ABI_CALLOC(E4, (sigma%ntemp))
@@ -1204,9 +1206,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ! Check if this (kpoint, spin) was already calculated
    if (all(sigma%qp_done(ikcalc, :) == 1)) cycle
    call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
-
-   !call abimem_report("begin kcalc_loop", std_out)
-   !call wrtout(std_out, sjoin("xmpi_count_requests", itoa(xmpi_count_requests)))
 
    ! Find IBZ(k) for q-point integration.
    call cwtime(cpu_setk, wall_setk, gflops_setk, "start")
@@ -1357,7 +1356,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call xmpi_sum(zpr_frohl_sphcorr, sigma%kcalc_comm%value, ierr)
          zpr_frohl_sphcorr = zpr_frohl_sphcorr * eight * pi / cryst%ucvol * &
                              (three / (four_pi * cryst%ucvol * sigma%nqbz)) ** third
-         !zpr_frohl_sphcorr = zpr_frohl_sphcorr * four * q0rad  / cryst%ucvol
+         !zpr_frohl_sphcorr = zpr_frohl_sphcorr * q0rad  / (pi * cryst%ucvol)
          zpr_frohl_sphcorr_done = .True.
        end if
 
@@ -1375,22 +1374,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            write(ab_out, "(1x,f8.1,a,i0)")zpr_frohl_sphcorr(nu) * Ha_meV, " (meV) for ph-mode: ", nu
          end do
          write(ab_out, "(a)")ch10
-
-         !if (sigma%nwr > 0) then
-         !do ib_k=1,nbcalc_ks
-         !  band_ks = ib_k + bstart_ks - 1
-         !  write(ab_out, "(a, i0)")" Spherical correction to Sigma^{FM}(w=e_KS) for band: ", band_ks
-         !  do nu=1,natom3
-         !  do it=1,sigma%ntemp
-         !    iw = 1 + (sigma%nwr / 2) !; iw = 1
-         !    if (abs(fmw_frohl_sphcorr(iw,nu,it,ib_k)) < tol12) cycle
-         !    write(ab_out, "(2(f8.1),2(a,i0))") &
-         !      fmw_frohl_sphcorr(iw,nu,it,ib_k) * Ha_meV, " (meV) for ph-mode: ",nu, ", itemp: ", it
-         !  end do
-         !  end do
-         !end do
-         !write(ab_out, "(a)")ch10
-         !end if
        end if
      end if
 
@@ -2191,8 +2174,7 @@ end if
                        ! Treat Frohlich divergence with spherical integration around the Gamma point.
                        ! In principle one should rescale by the number of degenerate states but it's
                        ! easier to move all the weight to a single band
-                       sig_cplx = czero
-                       if (same_band) sig_cplx = zpr_frohl_sphcorr(nu) * (two * f_mkq - one)
+                       sig_cplx = czero; if (same_band) sig_cplx = zpr_frohl_sphcorr(nu) * (two * f_mkq - one)
                      end if
 
                      sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + sig_cplx
@@ -5500,6 +5482,9 @@ subroutine frohl_integrator_init(new, cryst, ifc, ntheta, comm)
  ! Initialize angular mesh qvers_cart and angwgth
  ! NB: summing over f * angwgth gives the spherical average 1/(4pi) \int domega f(omega)
  call ylm_angular_mesh(new%ntheta, new%nphi, new%angl_size, new%qvers_cart, new%angwgth)
+ write(std_out, *) sum(new%angwgth) * four_pi, "should be one"
+ write(std_out, *) sum(new%angwgth), "should be one"
+ stop
 
  !call lebedev%from_npts(npts, ierr)
  !ABI_CHECK(ierr = 0, "Error while initializing lebedev mesh.")
@@ -5597,16 +5582,16 @@ subroutine frohl_integrator_find_mesh(cryst, ifc, ntheta, comm)
    call frohl%eval_isotropic_avg(cryst, ifc, comm, avg_value_ph)
    new_value = sum(avg_value_ph)
 
-  if (my_rank == 0) then
-    write(std_out, "(a,i0,a,i0,a,i0,a,es16.8)") &
-      " frohl_integrator_find_mesh: iter: ", iter, " ntheta: ", ntheta, " angl_size: ", frohl%angl_size, " value: ", new_value
-  end if
+   if (my_rank == 0) then
+     write(std_out, "(a,i0,a,i0,a,i0,a,es16.8)") &
+       " frohl_integrator_find_mesh: iter: ", iter, " ntheta: ", ntheta, " angl_size: ", frohl%angl_size, " value: ", new_value
+   end if
 
-  if (iter > 1) then
-    converged = (abs(new_value - old_value) <= (old_value * REL_TOL))
-  end if
-  old_value = new_value
-  call frohl%free()
+   if (iter > 1) then
+     converged = (abs(new_value - old_value) <= (old_value * REL_TOL))
+   end if
+   old_value = new_value
+   call frohl%free()
  end do outer_loop
 
  call frohl%free()
@@ -5629,10 +5614,10 @@ end subroutine frohl_integrator_find_mesh
 !!
 !! SOURCE
 
-subroutine frohl_integrator_eval(new, cryst, ifc, nqbz, nwr, ntemp, nk_size, e_nk, f_nk, kTmesh, sig0_nk, z0_nk, comm)
+subroutine frohl_integrator_eval(self, cryst, ifc, nqbz, nwr, ntemp, nk_size, e_nk, f_nk, kTmesh, sig0_nk, z0_nk, comm)
 
 !Arguments ------------------------------------
- class(frohl_integrator_t),intent(out) :: new
+ class(frohl_integrator_t),intent(in) :: self
  type(crystal_t),intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
  integer,intent(in) :: nqbz, nwr, ntemp, nk_size
@@ -5648,8 +5633,6 @@ subroutine frohl_integrator_eval(new, cryst, ifc, nqbz, nwr, ntemp, nk_size, e_n
  real(dp) :: inv_qepsq2, simag, q0rad,  wqnu, inv_wqnu2, qzd2
  complex(dp) :: cfact, cnum, sig_cplx, cfact2
 !arrays
- !real(dp) :: qpt_cart(3) !, phfrq(3*cryst%natom) ! zpr_frohl_sphcorr(3*cryst%natom),
- !real(dp),allocatable :: displ_cart(:,:,:,:)
  complex(dp) :: cp3(3)
 !************************************************************************
 
@@ -5670,15 +5653,15 @@ subroutine frohl_integrator_eval(new, cryst, ifc, nqbz, nwr, ntemp, nk_size, e_n
  sig0_nk = zero; z0_nk = zero
 
  ! Angular integration
- do iang=1,new%angl_size
+ do iang=1,self%angl_size
    if (mod(iang, nprocs) /= my_rank) cycle ! MPI parallelism
-   associate (qpt_cart => new%qvers_cart(:, iang), displ_cart => new%displ_cart(:,:,:,:,iang))
+   associate (qpt_cart => self%qvers_cart(:, iang), displ_cart => self%displ_cart(:,:,:,:,iang))
    inv_qepsq2 = (one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))) ** 2
    !call ifc%fourq(cryst, qpt_cart, phfrq, displ_cart, nanaqdir="cart")
 
    ! NB: Acoustic modes are ignored here
    do nu=4,natom3
-     wqnu = new%phfrq(nu, iang) !; if (ephtk_skip_phmode(nu, wqnu, new%phmodes_skip, dtset%eph_phrange_w)) cycle
+     wqnu = self%phfrq(nu, iang) !; if (ephtk_skip_phmode(nu, wqnu, self%phmodes_skip, dtset%eph_phrange_w)) cycle
      inv_wqnu2 = one / wqnu ** 2
 
      ! cnum = q.\sum_k Z_k.d(q,nu)
@@ -5689,11 +5672,11 @@ subroutine frohl_integrator_eval(new, cryst, ifc, nqbz, nwr, ntemp, nk_size, e_n
      cnum = dot_product(qpt_cart, cp3); qzd2 = abs(cnum) ** 2
 
      ! Compute spherical average.
-     !zpr_frohl_sphcorr(nu) = zpr_frohl_sphcorr(nu) + new%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq2 / wqnu ** 2
+     !zpr_frohl_sphcorr(nu) = zpr_frohl_sphcorr(nu) + self%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq2 / wqnu ** 2
 
      do ink=1,nk_size
        do itemp=1,ntemp
-         sig0_nk(ink, itemp) = sig0_nk(ink, itemp) + new%angwgth(iang) * qzd2 * inv_qepsq2 * inv_wqnu2
+         sig0_nk(ink, itemp) = sig0_nk(ink, itemp) + self%angwgth(iang) * qzd2 * inv_qepsq2 * inv_wqnu2
          !z0_nk(ink, itemp) = z0_nk(ink, itemp) +
         end do ! itemp
      end do ! ink
@@ -5703,7 +5686,7 @@ subroutine frohl_integrator_eval(new, cryst, ifc, nqbz, nwr, ntemp, nk_size, e_n
 
      if (nwr > 0) then
      !  ! NB: summing over f * angwgth gives the spherical average 1/(4pi) \int domega f(omega)
-     !  weight = four_pi * new%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq2 / wqnu
+     !  weight = four_pi * self%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq2 / wqnu
      !  do ib_k=1,nbcalc_ks
      !    band_ks = ib_k + bstart_ks - 1; eig0nk = ebands%eig(band_ks, ik_ibz, spin)
      !    do it=1,sigma%ntemp
@@ -5744,16 +5727,16 @@ end subroutine frohl_integrator_eval
 !!
 !! SOURCE
 
-subroutine frohl_integrator_free(new)
+subroutine frohl_integrator_free(self)
 
 !Arguments ------------------------------------
- class(frohl_integrator_t),intent(inout) :: new
+ class(frohl_integrator_t),intent(inout) :: self
 !************************************************************************
 
- ABI_SFREE(new%qvers_cart)
- ABI_SFREE(new%angwgth)
- ABI_SFREE(new%phfrq)
- ABI_SFREE(new%displ_cart)
+ ABI_SFREE(self%qvers_cart)
+ ABI_SFREE(self%angwgth)
+ ABI_SFREE(self%phfrq)
+ ABI_SFREE(self%displ_cart)
 
 end subroutine frohl_integrator_free
 !!***
