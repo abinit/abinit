@@ -1,26 +1,26 @@
 # NSCF computation of WFK files with empty states.
- ecut 35.0
+ecut 35.0
 
- nband  110
- nbdbuf -10       # A negative value means 10% of nband.
+nband  110
+nbdbuf -10       # A negative value means 10% of nband.
 
- nstep 150        # Max number of NSCF iterations
- iscf -2          # NSCF run
- tolwfr 1e-14     # 1e-18 is the recommended value. This is just to speedup the test.
+nstep 150        # Max number of NSCF iterations
+iscf -2          # NSCF run
+tolwfr 1e-14     # 1e-18 is the recommended value. This is just to speedup the test.
 
- # Read density from this file.
- getden_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
+# Read density from this file.
+getden_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 
- # The k-mesh of the output WFK file.
- ngkpt 4 4 4
- nshiftk 1
- shiftk 0 0 0
+# The k-mesh of the output WFK file.
+ngkpt 4 4 4
+nshiftk 1
+shiftk 0 0 0
 
 # Read crystal structure from DEN.nc file
- structure "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
+structure "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "O.psp8, Mg-sp-gw.psp8"
+pp_dirpath "$ABI_PSPDIR"
+pseudos "O.psp8, Mg-sp-gw.psp8"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
