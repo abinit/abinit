@@ -491,7 +491,7 @@ force_plsmf:   0.00000000E+00
 ...
 
  Only q-points in the IBZ_k will be computed.
- GWPT frequency convolution is evaluated at $\ee_\nk$.
+ GWPT frequency convolution is evaluated at E_nk.
 
  Sigma^x_nk and Sigma^c_nk(E0) in eV:
 Band     E0    <VxcDFT>   SigX SigC(E0)  for k-point:[ 0.0000E+00,  0.0000E+00,  0.0000E+00]

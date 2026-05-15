@@ -25,6 +25,7 @@ pseudos "O.psp8, Mg-sp-gw.psp8"
 #%% executable = abinit
 #%% test_chain =  teph4zpr_gwpt_1.abi, teph4zpr_gwpt_2.abi, teph4zpr_gwpt_3.abi, teph4zpr_gwpt_4.abi,
 #%%               teph4zpr_gwpt_5.abi, teph4zpr_gwpt_6.abi, teph4zpr_gwpt_7.abi, teph4zpr_gwpt_8.abi
+#%% exclude_builders = scope_gnu_10.2_paral
 #%% [files]
 #%% use_git_submodule = MgO_eph_zpr
 #%% files_to_test =

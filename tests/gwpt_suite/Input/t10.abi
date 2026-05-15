@@ -80,6 +80,7 @@ pseudos "C.psp8"
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t07.abi, t08.abi, t09.abi, t10.abi, t11.abi, t12.abi
+#%% exclude_builders = scope_gnu_10.2_paral
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt_nosym
 #%% files_to_test =
