@@ -47,6 +47,7 @@ module m_gstate
  use m_dtfil
  use m_extfpmd
  use m_rcpaw
+ use m_alloc_hamilt_gpu
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -105,10 +106,6 @@ module m_gstate
  use m_nonlop_ylm,       only : nonlop_ylm_init_counters,nonlop_ylm_output_counters
  use m_fft,              only : fft_init_counters,fft_output_counters
  use m_pstat,            only : pstat_proc
-
-#if defined HAVE_GPU
- use m_alloc_hamilt_gpu
-#endif
 
 #if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
@@ -284,7 +281,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: cnt,spin,band,ikpt,usecg,usecprj,ylm_option
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie,fermih
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
- logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
+ logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk,inv_sij
  logical :: is_dfpt=.false.,wvlbigdft=.false.
  character(len=500) :: msg
  character(len=fnlen) :: dscrpt,filnam,wfkfull_path
@@ -445,6 +442,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    gemm_nonlop_use_gemm = .true.
    call init_gemm_nonlop(dtset%gpu_option)
  end if
+
+ ! Handle GPU FFT slicing
+ hamilt_gpu_nfft_blocks = dtset%gpu_nfft_blocks
 
 !Set up the Ylm for each k point
  if ( dtset%tfkinfunc /= 2) then
@@ -1057,7 +1057,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !###########################################################
 ! Initialisation of cprj
 
- ! xg_nonlop available only for cprj_in_memory=1 and (LOBPCG or Chebfi)
+ ! xg_nonlop available only for cprj_in_memory=1 and (LOBPCG or Chebfi or Slicing)
  ! cprj_in_memory=2 is used for Congugate Gradient
  if (dtset%cprj_in_memory==1) then
    if (dtset%useylm/=1) then
@@ -1068,7 +1068,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
                      mpi_enreg%me_band,mpi_enreg%comm_band,mpi_enreg%comm_atom,&
                      mpi_atmtab=mpi_enreg%my_atmtab)
    if (xg_nonlop%paw) then
-     call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=dtset%wfoptalg==111)
+     inv_sij=dtset%wfoptalg==111.or.dtset%wfoptalg==112 
+     call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=inv_sij)
    else
      call xg_nonlop_make_ekb(xg_nonlop,psps%ekb)
    end if

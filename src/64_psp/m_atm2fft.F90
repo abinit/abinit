@@ -1113,7 +1113,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
    optv  = 0
  end if
 
- if(ipert==natom+1.or.ipert==natom+2.or.ipert==natom+10.or.ipert==natom+11) then
+ if(ipert==natom+1.or.ipert==natom+2.or.ipert==natom+6.or.ipert==natom+10.or.ipert==natom+11) then
 
 !  (In case of d/dk or an electric/magnetic field)
    if (optn==1) then

@@ -7,16 +7,15 @@
 # ==                                                                  ==
 # ==  X.Gonze - July 19 2022 starting from     M. Torrent - June 2011 ==
 # ======================================================================
-from __future__ import print_function
 
 import os
 import re
 
 #Define keystring
-keystring='PARENTS'
+keystring="PARENTS"
 #keystring='CHILDREN'
 
-re_srcfile = re.compile("\.([Ff]|[Ff]90|h)$")
+re_srcfile = re.compile(r"\.([Ff]|[Ff]90|h)$")
 
 print( )
 
@@ -31,7 +30,7 @@ for (root, dirs, files) in os.walk("src"):
     if ( re_srcfile.search(src) ):
       file_total_count +=1
       filename=os.path.join(root,src)
-      with open(filename, "r") as fh: 
+      with open(filename) as fh:
         src_data = fh.readlines()
 
 #     1- look for '!!'+keystring in the file and identify whether it is a valid keystring section
@@ -50,11 +49,11 @@ for (root, dirs, files) in os.walk("src"):
 #         print ('File %s, found keystring statement' % (filename))
         if found_keystring:
 #         print (' found_keystring is True, looking for section')
-          if line.find("!!") == -1: 
+          if line.find("!!") == -1:
             found_keystring=False
 #           print ('File %s, did not find keystring section' % (filename))
 #         print(line.find("!!\n"))
-          if line.find("!!\n") != -1: 
+          if line.find("!!\n") != -1:
             found_keystring_section=True
 #           print ('File %s, found keystring section' % (filename))
             break
@@ -69,12 +68,12 @@ for (root, dirs, files) in os.walk("src"):
 #       Write message
 #       print ('File %s: found at least one keystring section\n' % (filename))
 #       Open a temporary file for writing
-        filenametmp=filename+'.tmp'
+        filenametmp=filename+".tmp"
 
         try:
-          filout=open(filenametmp,'w')
+          filout=open(filenametmp,"w")
         except:
-          print ('File %s, error: could not open tmp file !' % (filename))
+          print ("File %s, error: could not open tmp file !" % (filename))
           ErrorEncountered=True
 
         if not ErrorEncountered:
@@ -104,14 +103,14 @@ for (root, dirs, files) in os.walk("src"):
               end_keystring=False
 #             print (' found_keystring is True, looking for section')
 #             Abnormal end of keystring section : write stored lines
-              if line_wo_blks.find("!!") == -1:  
+              if line_wo_blks.find("!!") == -1:
                 end_keystring=True
                 found_keystring=False
                 write_newline=True
                 newline=newline+line
 #               print ('File %s, abnormal end of keystring section, will write stored newline' % (filename))
 #             Normal end of keystring section
-              if line_wo_blks.find("!!\n") != -1:  
+              if line_wo_blks.find("!!\n") != -1:
                 end_keystring=True
                 found_keystring=False
                 write_newline=False
@@ -121,14 +120,14 @@ for (root, dirs, files) in os.walk("src"):
                 write_newline=False
                 newline=newline+line
 #               print ('File %s, inside keystring section, do not write' % (filename))
-           
+
 #           Write the modified line
             if write_newline:
 #             print ('File %s, will write newline' % (filename))
               try:
                 filout.write(newline)
               except:
-                print ('File %s, error: could not write into tmp file !' % (filename))
+                print ("File %s, error: could not write into tmp file !" % (filename))
                 ErrorEncountered=True
                 break
 
@@ -138,15 +137,15 @@ for (root, dirs, files) in os.walk("src"):
 #         Replace current file by temporary file
           if not ErrorEncountered:
             try:
-              os.system('mv -f '+filenametmp+' '+filename)
+              os.system("mv -f "+filenametmp+" "+filename)
               file_write_wrong_count +=1
             except:
-              print ('File %s, error: could not move tmp file !' % (filename))
+              print ("File %s, error: could not move tmp file !" % (filename))
 
 #Print final message
 #-------------------
 if file_write_wrong_count==0:
-  print ('No file modified !')
+  print ("No file modified !")
 else:
-  print ('---------------------------------------------------')
-  print ('%d/%d file(s) modified !' %  (file_write_wrong_count,file_total_count))
+  print ("---------------------------------------------------")
+  print ("%d/%d file(s) modified !" %  (file_write_wrong_count,file_total_count))

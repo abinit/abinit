@@ -6,7 +6,7 @@ filename = "tdmft_triqs_3o_DS3_EIG"
 
 k_mesh = []
 
-with open(filename, "r") as f:
+with open(filename) as f:
     for line in f:
         if "kpt#" in line:
             line_split = line.split()
@@ -20,7 +20,7 @@ ikpt = 1
 data = []
 data_spectral = []
 
-with open(filename, "r") as f:
+with open(filename) as f:
     for line in f:
         line_split = line.split()
         if ("#" in line) or (len(line_split) == 0):

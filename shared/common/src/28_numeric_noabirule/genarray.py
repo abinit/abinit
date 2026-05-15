@@ -10,9 +10,9 @@ def dimension_shape_type_kind(ndim, type, kind):
         dimension = ("(" + ndim*":,")[:-1] + ")"
     else:
         dimension = ""
-                                                    
+
     shape = "(%d)" % ndim if ndim > 0 else ""
-                                                    
+
     if kind:
         type_kind = "%s(%s)" % (type, kind)
     else:
@@ -29,7 +29,7 @@ def ncwrite(type, kind, ndim):
     Args:
         type:
             Fortran intrinsic type (real, integer, complex, logical, character)
-        kind: 
+        kind:
             Kind of the type. if type is 'character' ...
         ndim:
             integer giving the number of dimensions.
@@ -38,7 +38,7 @@ def ncwrite(type, kind, ndim):
     function = "farr_" + type + "_" + kind + str(ndim)
 
     dimension, shape, type_kind = dimension_shape_type_kind(ndim, type, kind)
-    
+
     # Fortran type --> ETSF-IO flags.
     xtype = {
         ("integer", ""): "int",
@@ -54,11 +54,11 @@ def ncwrite(type, kind, ndim):
     # This trick can cause a sigfault for large arrays since
     # the compiler may store the result of c2r on the stack.
     convert_farray = "farray"; convert_fact = 1
-    if type == "complex": 
+    if type == "complex":
         convert_farray = "c2r(farray)"
         convert_fact = 2
 
-    # Template string 
+    # Template string
     template = """\
 subroutine %(function)s(farray, varname, ncid)
 
@@ -73,7 +73,7 @@ subroutine %(function)s(farray, varname, ncid)
 !scalars
 #ifdef HAVE_NETCDF
  integer :: dimval,ii,varid
- character(len=nctk_slen) :: dimname,shape_str   
+ character(len=nctk_slen) :: dimname,shape_str
 
 ! *********************************************************************
 
@@ -81,7 +81,7 @@ subroutine %(function)s(farray, varname, ncid)
 ! Use *private* names for dimensions to avoid possible name collisions.
 ! if varname is "foo", we use "__foo_dim1__", __foo_dim2__" for name of the dimensions
  NCF_CHECK(nctk_set_datamode(ncid))
- 
+
  shape_str = ""
  do ii=1,size(shape(farray))
    dimval = size(farray, dim=ii)
@@ -89,7 +89,7 @@ subroutine %(function)s(farray, varname, ncid)
    write(dimname,"(3a,i0,a)")"__",trim(varname),"_dim",ii,"__"
 
    NCF_CHECK(nctk_def_dims(ncid, nctkdim_t(dimname, dimval)))
-   shape_str = trim(shape_str) // ", " // dimname 
+   shape_str = trim(shape_str) // ", " // dimname
  end do
 
  ! Define the variable.
@@ -100,7 +100,7 @@ subroutine %(function)s(farray, varname, ncid)
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, varid, %(convert_farray)s))
 
-#else 
+#else
  MSG_ERROR("netcdf support is not activated.")
 #endif
 
@@ -122,7 +122,7 @@ def main():
     ]
 
     # The subroutines we are gonna create
-    subs = [ 
+    subs = [
         ncwrite,
     ]
 
