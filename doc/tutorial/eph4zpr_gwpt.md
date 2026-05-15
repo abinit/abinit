@@ -208,7 +208,7 @@ Note the use of [[getden_filepath]] to read the DEN.nc file instead of [[getden]
 
 At this point, it is worth commenting about the use of [[nbdbuf]].
 As mentioned in the documentation, **the highest energy states require more iterations to converge**.
-To avoid wasting precious computing time, we use a buffer that is ~10% of [[nband]].
+To avoid wasting precious computing time, we use a buffer that is 10% of [[nband]].
 This trick significantly reduces the wall-time as the NSCF calculation completes
 only when the first [[nband]] - [[nbdbuf]] states are converged within [[tolwfr]].
 Obviously, one should not use the last [[nbdbuf]] states in the subsequent EPH calculation.
