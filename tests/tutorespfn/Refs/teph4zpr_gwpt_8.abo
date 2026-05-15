@@ -56,8 +56,6 @@ _ WF disk file :      3.186 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
         eph_stern           1
          eph_task          24
 -          fftalg         512
-        freqspmax      7.34986444E-02 Hartree
-        freqspmin     -7.34986444E-02 Hartree
            istwfk        2    0    3    0    0    0    7    0
               ixc          11
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -73,7 +71,6 @@ _ WF disk file :      3.186 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 P           mkmem           8
             natom           2
             nband          20
-          nfreqsp         201
             ngfft          32      32      32
              nkpt           8
             nline         100
@@ -388,7 +385,6 @@ P Number of CPUs for parallelism over k-points: 1
  300.0     0.026     6.980     2.490     1.989
 
 
- Will compute Sigma(omega) using 201 points and step: 1.000000E-02 (eV)
  Reading GS KS potential for Sternheimer from: MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc
 ================================================================================
  Final results in eV.
@@ -470,15 +466,12 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    6.980
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         512
-        freqspmax      7.34986444E-02 Hartree
-        freqspmin     -7.34986444E-02 Hartree
               ixc          11
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      2.27305763E+01
 P           mkmem           8
             natom           2
             nband          20
-          nfreqsp         201
             ngfft          32      32      32
              nkpt           8
             nline         100
