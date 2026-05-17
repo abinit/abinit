@@ -494,7 +494,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      if (ipert1/=ipert) then
        if(dtset%usepaw==1) then
          if((ipert1<=dtset%natom.or.(ipert1==dtset%natom+2.and.has_ddk_file).or.&
-&            ((ipert>dtset%natom.and.ipert/=dtset%natom+5).and.(ipert1==dtset%natom+3.or.ipert1==dtset%natom+4)).or. &
+&            ((ipert>dtset%natom.and.ipert/=dtset%natom+5.and.ipert/=dtset%natom+6).and.(ipert1==dtset%natom+3.or.ipert1==dtset%natom+4)).or. &
 &            ((ipert1==dtset%natom+2).and.has_ddk_file))) then
            mpert1=mpert1+1;jpert1(mpert1)=ipert1
          end if
@@ -687,9 +687,10 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &             nattyp,nfftf,ngfftf,dtset%ntypat,ph1df,psps%qgrid_vl,ucvol,&
 &             psps%vlspl,vpsp1_idir1,g0term=g0term)
            else
-             call dfpt_vlocal(gs_hamkq%atindx,cplex,gmet,gsqcut,idir1,ipert1,mpi_enreg,psps%mqgrid_vl,&
-&             dtset%natom,nattyp,nfftf,ngfftf,dtset%ntypat,ngfftf(1),ngfftf(2),ngfftf(3),&
-&             ph1df,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_idir1,xred)
+             call dfpt_vlocal(gs_hamkq%atindx,cplex,gmet,gsqcut,dtset%icutcoul,idir1,ipert1,mpi_enreg,psps%mqgrid_vl,&
+&             dtset%natom,nattyp,nfftf,ngfftf,dtset%nkpt,dtset%ntypat,ngfftf(1),ngfftf(2),ngfftf(3),&
+&             ph1df,psps%qgrid_vl,dtset%qptn,dtset%rcut,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1_idir1,xred,&
+&             zion=dtset%ziontypat)
            end if
            if(psps%n1xccc/=0)then
              call dfpt_mkcore(cplex,idir1,ipert1,dtset%natom,dtset%ntypat,ngfftf(1),psps%n1xccc,&
@@ -1500,8 +1501,10 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 #ifdef HAVE_OPENMP_OFFLOAD
                      !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw) MAP(to:gvnlx1,gvnlx1_tmp)
                      do ipw=1,npw1_k*nspinor
-                       gvnlx1(:,(idat-1)*npw1_k*nspinor + ipw) = &
-                         gvnlx1_tmp(:,ipw) - (my_nproc_band-1)*gvnlx1(:,(idat-1)*npw1_k*nspinor + ipw)
+                       gvnlx1(1,(idat-1)*npw1_k*nspinor + ipw) = &
+                         gvnlx1_tmp(1,ipw) - (my_nproc_band-1)*gvnlx1(1,(idat-1)*npw1_k*nspinor + ipw)
+                       gvnlx1(2,(idat-1)*npw1_k*nspinor + ipw) = &
+                         gvnlx1_tmp(2,ipw) - (my_nproc_band-1)*gvnlx1(2,(idat-1)*npw1_k*nspinor + ipw)
                      end do
 #endif
                    end if
@@ -2624,6 +2627,12 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
                  gvnlx1(1,ipw)=gvnlx1(2,ipw)
                  gvnlx1(2,ipw)=-aa
                end do
+
+!              MRoyo 030925 :
+!              3) Case ipert1=natom+2 and ipert=natom+5 or ipert=natom+12:2*natom+11
+!              the computation of mixed derivatives wrt to Zeeman and electric fields needs $i \frac{d}{dk}.
+               if (ipert==dtset%natom+5.or.(ipert>=dtset%natom+12.and.ipert<=2*dtset%natom+11)) gvnlx1(:,:) = -gvnlx1(:,:)
+
              end if
 
 ! at this stage if iband is not mine I can cycle
@@ -2640,6 +2649,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !            the computation of the Born effective charge tensor uses
 !            the operator $-i \frac{d}{dk}.
              if (ipert==dtset%natom+2) gvnlx1(:,:) = -gvnlx1(:,:)
+
 
 !            <G|Vnl1|Cnk> is contained in gvnlx1
 !            construct the matrix element (<uj2|vj1|u0>)complex conjug and add it to the 2nd-order matrix

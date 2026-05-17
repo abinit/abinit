@@ -70,7 +70,7 @@ and mastered at different levels by different people (depending the kind of deve
 the Autotools (autoconf, automake, ...), buildbot, git, gitlab, CPP, Fortran90, HTML, markdown, MPI, Python.
 These, with the developer's Web pages of the ABINIT web site, constitute the ABINIT developer environment.
 For some of these languages/tools, the [Web site ABINIT developer's corner](https://www.abinit.org/corner.html) and
-the [ABINIT package developer documentation](https://docs.abinit.org/developers/git_and_gitlab)
+the [ABINIT package developer documentation](../developers/git_and_gitlab.md)
 provides documentation:
 external links (like the language reference, repository, tutorials), some internal links (additional tutorials), and the particulars of the use of such language/tools within ABINIT.
 

@@ -76,6 +76,8 @@ inp_files = [
 #Other
 "t51.abi", # test CHEBFI (istwfk==1, npband==1, paral_kgb==1) with gpu_thread_limit set to 64
 "t52.abi", # PAW, GS, CGWF,       (Fe,  nspinor==2, nspden==4, paral_kgb==1), with fixed_occ
-#
-"t53.abi", # RMM-DIIS with NC pseudos
+#GS with blocked FFT
+"t53.abi", # test CHEBFI (istwfk==1, npband==1, paral_kgb==1, gpu_nfft_blocks=3)
+"t54.abi", # test CHEBFI (istwfk==1, npband==1, paral_kgb==1, gpu_nfft_blocks=3, gpu_nl_splitsize=4)
+"t60.abi", # RMM-DIIS with NC pseudos
 ]

@@ -1,7 +1,7 @@
 ## v10.6
 
-Version 10.6, released on Feb 7, 2026.
-<!-- Release notes updated on Feb 6, 2026. -->
+Version 10.6, released on Feb 6, 2026.
+<!-- Release notes updated on Mar 11, 2026. -->
 
 These release notes
 are relative to modifications/improvements of ABINIT v10.6 with respect to v10.4.
@@ -9,12 +9,13 @@ are relative to modifications/improvements of ABINIT v10.6 with respect to v10.4
 MR1160, 1165, 1168, 1170, 1172, 1173, 1183, 1187, 1191, 1194, 1106,
 then 1200 to 1275, except those that had been closed, and also
 EXCEPT MR1219, 1225, that had already been included in v10.4.
-MR1276, 1277, 1278, 1280 will be included in v10.8 .
+MR1276, 1277, 1278, 1280, 1288 will be included in v10.8 . Perhaps MR 1282 if not a draft anymore.
 For release v10.6.3, also includes MR 1279 and 1281.
-MR 1284 and 1286 have been cherry-picked to 10.6.5 (perhaps also earlier onse, but I did not note ...)
+MR 1284 and 1286 have been cherry-picked to 10.6.5 (perhaps also earlier ones, but I did not note ...)
+For release v10.6.5, also includes MR 1283, 1285, 1287, 1289 to 1292.
 -->
 
-Many thanks to the contributors to the ABINIT project between April 2025 and February 2026 !
+Many thanks to the contributors to the ABINIT project between April 2025 and March 2026 !
 The list of contributors includes:
 
 B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, A. Blanchet, J. Boust, F. Brieuc, F. Bruneval,
@@ -1201,7 +1202,7 @@ By J.-M. Beuken (MR995) and M. Verstraete (MR1007)
 
 By M. Torrent (MR986, MR1032)
 
-**C.4** There is an embryo documentation for cmake build. Also, the need to modify CMakeLists.txt is not mentioned in doc/developers/developers_howto.md .
+**C.4** There is an embryo documentation for cmake build. Also, the need to modify CMakeLists.txt is not mentioned in [developers_howto](../developers/developers_howto.md).
 
 By P. Kestener (MR994), and a comment from Maxime Mignolet.
 
@@ -2270,7 +2271,7 @@ New tests of the band parallelism in DFPT: [[test:paral_65]] and [[test:paral_66
 By M. Giantomassi (commit 31e8aa66d8).
 
 **D.10** Improved developer documentation, section .
-[How to add a new test](https://docs.abinit.org/developers/developers_howto/#how-to-add-a-new-test-in-the-test-suite).
+[How to add a new test](../developers/developers_howto.md#how-to-add-a-new-test-in-the-test-suite).
 By X. Gonze (commit dabc1b905).
 
 **D.11** Fixed typo in CITATION.cff.
@@ -2298,6 +2299,7 @@ By X. Gonze (several commits)
 * * *
 
 
+<a id="98"></a>
 ## v9.8
 
 Version 9.8, released on December 23, 2022.
@@ -3132,7 +3134,7 @@ In particular:
 2. The build system of ABINITv9 does not build anymore the hard dependencies (Linalg, NetCDF4, HDF5, LibXC, ...),
    as this was not sustainable (see [B.6](#v9.2.B.6)) and nowadays most users install prerequisite libraries themselves.
    See also the specialized INSTALL notes for
-   [CentOS](/INSTALL_CentOS), [EasyBuild](/INSTALL_EasyBuild), [MacOS](/INSTALL_MacOS), and [Ubuntu](/INSTALL_Ubuntu).
+   [CentOS](../INSTALL_CentOS.md), [EasyBuild](../INSTALL_EasyBuild.md), [MacOS](../INSTALL_MacOS.md), and [Ubuntu](../INSTALL_Ubuntu.md).
 3. The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
    This means that some user-developed parsing tools might not work anymore,
    and should be adapted to the new ABINITv9 output file (see [B.9](#v9.2.B.9)).
@@ -3155,7 +3157,7 @@ A version of this paper that is not formatted for J. Chem. Phys.
 [is also available](https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf).
 The licence allows the authors to put it on the Web.
 
-Other specific publications are mentioned in the [Suggested acknowledgment page](/theory/acknowledgments).
+Other specific publications are mentioned in the [Suggested acknowledgment page](../theory/acknowledgments.md).
 
 <a name="v9.2.A.3"></a>
 **A.3**  The default values of the following ABINIT input variables have been changed:
@@ -3421,7 +3423,7 @@ the build system will try to find them in the "usual" directories, and inform th
 The build system also can make suggestions to the user, to complete its *.ac9 file.
 
 Specialized INSTALL notes are available to help the user for
-[CentOS](/INSTALL_CentOS), [EasyBuild](/INSTALL_EasyBuild), [MacOS](/INSTALL_MacOS), and [Ubuntu](/INSTALL_Ubuntu).
+[CentOS](../INSTALL_CentOS.md), [EasyBuild](../INSTALL_EasyBuild.md), [MacOS](../INSTALL_MacOS.md), and [Ubuntu](../INSTALL_Ubuntu.md).
 
 By Y. Pouillon and JM Beuken
 
@@ -3925,7 +3927,7 @@ A version of this paper that is not formatted for J. Chem. Phys.
 [is also available](https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf).
 The licence allows the authors to put it on the Web.
 
-Other specific publications are mentioned in the [Suggested acknowledgment page](/theory/acknowledgments).
+Other specific publications are mentioned in the [Suggested acknowledgment page](../theory/acknowledgments.md).
 
 <a name="v9.0.A.3"></a>
 **A.3**  The default values of the following ABINIT input variables have been changed:
@@ -4653,10 +4655,10 @@ C.1 All F90 ABINIT sources are now inside modules.
 C.2 Prepared the removal of the bindings subsystem.
     By Y. Pouillon and M. Torrent.
 
-C.2 New [Howto for developers](/developers/developers_howto) (variables, mkparents, robodoc, test_suite).
+C.2 New [Howto for developers](../developers/developers_howto.md) (variables, mkparents, robodoc, test_suite).
     By M. Giantomassi.
 
-C.3 New [Howto for the test suite](/developers/testsuite_howto).
+C.3 New [Howto for the test suite](../developers/testsuite_howto.md).
     By M. Giantomassi.
 
 * * *
@@ -4806,7 +4808,7 @@ B.1 The whole ABINIT documentation has been placed under the control of [mkdocs]
     The appearance is also new.
     The work on documentation is nearly complete, still not all bibliographical references of the doc have been entered in this
     central bibliographic database.
-    Entry point: see the new header of any ABINIT documentation file e.g. the [new user's guide](/guide/new_user).
+    Entry point: see the new header of any ABINIT documentation file e.g. the [new user's guide](../guide/new_user.md).
     By M. Giantomassi, with some help from X. Gonze.
 
 B.2 The DFPT has been extended to non-collinear systems ([[nspden]] = 4), with or without spin-orbit coupling,
@@ -5042,7 +5044,7 @@ B.1 The whole ABINIT documentation has been significantly improved by the introd
     - the list of related input variables (ordered according to their importance for the topics -compulsory, basic, useful or expert-);
     - possibly example input files;
     - list of references.
-    Entry point: see the new header of any ABINIT documentation file e.g. the [new user's guide](/guide/new_user)
+    Entry point: see the new header of any ABINIT documentation file e.g. the [new user's guide](../guide/new_user.md)
     By F. Jollet and X. Gonze (also tests/fixes by B. Amadon, M. Torrent).
 
 B.2 A central [[theory:bibliography]] database abiref.bib has been created, and linked to the

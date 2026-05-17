@@ -44,7 +44,7 @@ module m_getghc
  use m_fock_getghc, only : fock_getghc, fock_ACE_getghc
  use m_nonlop,      only : nonlop
  use m_gemm_nonlop_projectors, only : gemm_nonlop_use_gemm
- use m_fft,         only : fourwf
+ use m_fft,         only : fourwf,fourwf_optmem
  use m_ompgpu_fourwf,      only : ompgpu_fourwf_work_mem
  use m_gemm_nonlop,        only : gemm_nonlop_ompgpu_work_mem
 
@@ -94,10 +94,10 @@ contains
 !! OUTPUT
 !! req_mem=amount in bytes of required memory for getghc_ompgpu
 
-function getghc_ompgpu_work_mem(gs_ham, ndat) result(req_mem)
+function getghc_ompgpu_work_mem(gs_ham, ndat, nfft_blocks) result(req_mem)
 
  type(gs_hamiltonian_type),intent(in),target :: gs_ham
- integer, intent(in) :: ndat
+ integer, intent(in) :: ndat, nfft_blocks
  integer(kind=c_size_t) :: req_mem, ghc_mem, nonlop_mem
 
  ! getghc use a GPU work buffer only when using fourwf
@@ -105,7 +105,7 @@ function getghc_ompgpu_work_mem(gs_ham, ndat) result(req_mem)
  !   - the sum of getghc and fourwf work buffers memory requirements
  !   - the amount of memory required by gemm_nonlop_ompgpu work buffers
  ghc_mem = 0
- ghc_mem = int(2, c_size_t) * dp * gs_ham%n4 * gs_ham%n5 * gs_ham%n6 * ndat
+ ghc_mem = int(2, c_size_t) * dp * gs_ham%n4 * gs_ham%n5 * gs_ham%n6 * (ndat/nfft_blocks + modulo(ndat,nfft_blocks))
  !ghc_mem = ghc_mem + ompgpu_fourwf_work_mem(gs_ham%ngfft, ndat)
 
  nonlop_mem = gemm_nonlop_ompgpu_work_mem(gs_ham%istwf_k, ndat, 0, gs_ham%npw_fft_k,&
@@ -211,10 +211,11 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  integer :: ig,igspinor,istwf_k_,ii,iispinor,ikpt_this_proc,ipw,ispinor,my_nspinor
  integer :: n4,n5,n6,ndat_,nnlout,npw_fft,npw_k1,npw_k2,nspinortot,option_fft
  integer :: paw_opt,select_k_,shift1,shift2,signs,tim_nonlop
+ integer :: chunk,residuchunk,nfft_blocks
  logical(kind=c_bool) :: k1_eq_k2
  logical :: double_rfft_trick,have_to_reequilibrate,has_fock,local_gvnlxc
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,use_cwavef_r, filter_dilatmx_loc_
- real(dp) :: ghcim,ghcre,weight, kscale
+ real(dp) :: ghcim,ghcre,weight !, kscale
 #ifdef HAVE_OPENMP_OFFLOAD
  complex(dp), parameter :: cminusone  = (-1._dp,0._dp)
 #endif
@@ -379,7 +380,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  if(gs_ham%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
  transfer_ghc =  .not. xomp_target_is_present(c_loc(ghc))
- transfer_gsc =  .not. xomp_target_is_present(c_loc(gsc))
+ transfer_gsc =  .not. xomp_target_is_present(c_loc(gsc)) .and. sij_opt==1
  transfer_gvnlxc =  .not. xomp_target_is_present(c_loc(gvnlxc_))
  transfer_cwavef =  .not. xomp_target_is_present(c_loc(cwavef))
 
@@ -409,6 +410,13 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    if (gs_ham%use_gbt == 0) then
      ABI_CHECK(k1_eq_k2, 'vlocal (fourwf) cannot be computed with k/=k^prime!')
    end if
+
+   nfft_blocks = 1;
+   if(gs_ham%nfft_blocks > 1 .and. gs_ham%gpu_option/=ABI_GPU_DISABLED) then
+     nfft_blocks = gs_ham%nfft_blocks
+   end if
+   chunk = ndat/nfft_blocks ! Divide by 2 to construct chunk of even number of bands
+   residuchunk = ndat - nfft_blocks*chunk
 
    ! Eventually adjust load balancing for FFT (by changing FFT distrib)
    ! Not that have_to_reequilibrate can be true only if mpi_enreg%nproc_fft>1
@@ -484,8 +492,10 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    fftalg = gs_ham%ngfft(7)
    if (gs_ham%gpu_option==ABI_GPU_DISABLED.and.fftalg/=401) then
      ABI_MALLOC(work,(2,gs_ham%n4,gs_ham%n5,gs_ham%n6))
-   else
+   else if(nfft_blocks==1) then
      ABI_MALLOC(work,(2,gs_ham%n4,gs_ham%n5,gs_ham%n6*ndat))
+   else
+     ABI_MALLOC(work,(2,gs_ham%n4,gs_ham%n5,gs_ham%n6*(chunk+residuchunk)))
    end if
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(alloc:work) IF(gs_ham%gpu_option==ABI_GPU_OPENMP)
@@ -522,6 +532,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      end if
    else
      option_fft=3
+     nfft_blocks=1
      if (nspinortot==2) then
        ABI_MALLOC(cwavef1,(0,0))
        ABI_MALLOC(cwavef2,(0,0))
@@ -549,8 +560,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
           npw_fft,npw_fft,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
           weight,weight,gpu_option=gs_ham%gpu_option)
        else
-         call fourwf(1,gs_ham%vlocal,cwavef,ghc,work,gbound_k1,gbound_k2,&
-          istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat_,gs_ham%ngfft,&
+         call fourwf_optmem(1,gs_ham%vlocal,cwavef,ghc,work,gbound_k1,gbound_k2,&
+          istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat_,nfft_blocks,gs_ham%ngfft,&
           npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
           weight,weight,gpu_option=gs_ham%gpu_option)
        end if
@@ -577,8 +588,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET ENTER DATA MAP(alloc:ghc1) IF(gs_ham%gpu_option==ABI_GPU_OPENMP)
 #endif
-         call fourwf(1,gs_ham%vlocal,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
-          istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+         call fourwf_optmem(1,gs_ham%vlocal,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
+          istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,nfft_blocks,gs_ham%ngfft,&
           npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
           weight,weight,gpu_option=gs_ham%gpu_option)
          if(gs_ham%gpu_option==ABI_GPU_OPENMP) then
@@ -621,8 +632,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET ENTER DATA MAP(alloc:ghc2) IF(gs_ham%gpu_option==ABI_GPU_OPENMP)
 #endif
-         call fourwf(1,gs_ham%vlocal,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
-           istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+         call fourwf_optmem(1,gs_ham%vlocal,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
+           istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,nfft_blocks,gs_ham%ngfft,&
            npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
            gpu_option=gs_ham%gpu_option)
 
@@ -703,8 +714,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
            end do
          end do
        end if
-       call fourwf(1,vlocal_tmp,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
-         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+       call fourwf_optmem(1,vlocal_tmp,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
+         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,nfft_blocks,gs_ham%ngfft,&
          npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
          gpu_option=gs_ham%gpu_option)
      end if
@@ -738,8 +749,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          !$OMP TARGET UPDATE TO(work) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
        end if
-       call fourwf(1,vlocal_tmp,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
-         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+       call fourwf_optmem(1,vlocal_tmp,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
+         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,nfft_blocks,gs_ham%ngfft,&
          npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
          gpu_option=gs_ham%gpu_option)
      end if
@@ -774,8 +785,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
            end do
          end do
        end if
-       call fourwf(cplex,vlocal_tmp,cwavef1,ghc3,work,gbound_k1,gbound_k2,&
-         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+       call fourwf_optmem(cplex,vlocal_tmp,cwavef1,ghc3,work,gbound_k1,gbound_k2,&
+         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,nfft_blocks,gs_ham%ngfft,&
          npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
          gpu_option=gs_ham%gpu_option)
      end if
@@ -803,8 +814,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
            end do
          end do
        end if
-       call fourwf(cplex,vlocal_tmp,cwavef2,ghc4,work,gbound_k1,gbound_k2,&
-         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+       call fourwf_optmem(cplex,vlocal_tmp,cwavef2,ghc4,work,gbound_k1,gbound_k2,&
+         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,nfft_blocks,gs_ham%ngfft,&
          npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
          gpu_option=gs_ham%gpu_option)
      end if
@@ -1115,7 +1126,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #endif
          else
            ABI_MALLOC(gvnlc, (2,npw_k2*my_nspinor*ndat))
-#if defined HAVE_GPU && defined HAVE_YAKL
+#if defined HAVE_OPENMP_OFFLOAD
            !$OMP TARGET ENTER DATA MAP(to:gvnlc) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
          end if
@@ -1132,13 +1143,13 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        if (fock_get_getghc_call(fock)==1) then
          if (gs_ham%usepaw==0) cwaveprj_idat => cwaveprj
          if (fock%use_ACE==0) then
-#if defined HAVE_GPU && defined HAVE_YAKL
+#if defined HAVE_OPENMP_OFFLOAD
            !$OMP TARGET UPDATE FROM(cwavef,gvnlxc_) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
            call timab(360,1,tsec)
            call fock_getghc(cwavef,cwaveprj,gvnlxc_,gs_ham,mpi_enreg,ndat)
            call timab(360,2,tsec)
-#if defined HAVE_GPU && defined HAVE_YAKL
+#if defined HAVE_OPENMP_OFFLOAD
            !$OMP TARGET UPDATE TO(cwavef,gvnlxc_) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
          else
@@ -1203,49 +1214,81 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
            ! The version with COLLAPSE(3) is faster.
 
            ! !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,kinpw_k2,gvnlxc_,gsc,cwavef)
-           !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) PRIVATE(igspinor, kscale) MAP(to:ghc,kinpw_k2,gvnlxc_,gsc,cwavef)
+           ! !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) PRIVATE(igspinor, kscale) MAP(to:ghc,kinpw_k2,gvnlxc_,gsc,cwavef)
+           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,kinpw_k2,gvnlxc_,cwavef)
            do idat=1,ndat
              do ispinor=1,my_nspinor
                ! !$OMP PARALLEL DO PRIVATE(igspinor, kscale)
+               !$OMP PARALLEL DO PRIVATE(igspinor)
                do ig=1,npw_k2
                  igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
 
-                 ! New version with branch-free mask + manual loop unrolling.
-                 kscale = merge(one, zero, kinpw_k2(ig) < hugevalue)
+                 ! ! New version with branch-free mask + manual loop unrolling.
+                 ! kscale = merge(one, zero, kinpw_k2(ig) < hugevalue)
 
-                 ghc(1,igspinor) = kscale * (ghc(1,igspinor) + kinpw_k2(ig)*cwavef(1,igspinor) + gvnlxc_(1,igspinor))
-                 ghc(2,igspinor) = kscale * (ghc(2,igspinor) + kinpw_k2(ig)*cwavef(2,igspinor) + gvnlxc_(2,igspinor))
-                 if (sij_opt == 1) then
-                   gsc(1,igspinor) = kscale * gsc(1,igspinor)
-                   gsc(2,igspinor) = kscale * gsc(2,igspinor)
+                 ! ghc(1,igspinor) = kscale * (ghc(1,igspinor) + kinpw_k2(ig)*cwavef(1,igspinor) + gvnlxc_(1,igspinor))
+                 ! ghc(2,igspinor) = kscale * (ghc(2,igspinor) + kinpw_k2(ig)*cwavef(2,igspinor) + gvnlxc_(2,igspinor))
+                 ! if (sij_opt == 1) then
+                 !   gsc(1,igspinor) = kscale * gsc(1,igspinor)
+                 !   gsc(2,igspinor) = kscale * gsc(2,igspinor)
+                 ! end if
+                 if(kinpw_k2(ig)<huge(zero)*1.d-11)then
+                   ghc(1,igspinor) = ghc(1,igspinor) + kinpw_k2(ig)*cwavef(1,igspinor) + gvnlxc_(1,igspinor)
+                   ghc(2,igspinor) = ghc(2,igspinor) + kinpw_k2(ig)*cwavef(2,igspinor) + gvnlxc_(2,igspinor)
+                 else
+                   ghc(1,igspinor)=zero
+                   ghc(2,igspinor)=zero
                  end if
-
-                 ! Old version (slow)
-                 !if(kinpw_k2(ig)<hugevalue)then
-                 !  ghc(:,igspinor) = ghc(:,igspinor) + kinpw_k2(ig)*cwavef(:,igspinor) + gvnlxc_(:,igspinor)
-                 !else
-                 !  ghc(:,igspinor)=zero
-                 !  if (sij_opt==1) gsc(:,igspinor)=zero
-                 !end if
                end do ! ig
              end do ! ispinor
            end do ! idat
+           if(sij_opt==1) then
+             !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:gsc,kinpw_k2)
+             do idat=1,ndat
+               do ispinor=1,my_nspinor
+                 !$OMP PARALLEL DO PRIVATE(igspinor)
+                 do ig=1,npw_k2
+                   igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
+                   if(kinpw_k2(ig)>=huge(zero)*1.d-11)then
+                     gsc(1,igspinor) = zero
+                     gsc(2,igspinor) = zero
+                   end if
+                 end do ! ig
+               end do ! ispinor
+             end do ! idat
+           end if
          else
-           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,gvnlxc_,gsc,kinpw_k2)
+           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,gvnlxc_,kinpw_k2)
            do idat=1,ndat
              do ispinor=1,my_nspinor
                !$OMP PARALLEL DO PRIVATE(igspinor)
                do ig=1,npw_k2
                  igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
                  if(kinpw_k2(ig)<hugevalue)then
-                   ghc(:,igspinor)= ghc(:,igspinor) + gvnlxc_(:,igspinor)
+                   ghc(1,igspinor)= ghc(1,igspinor) + gvnlxc_(1,igspinor)
+                   ghc(2,igspinor)= ghc(2,igspinor) + gvnlxc_(2,igspinor)
                  else
-                   ghc(:,igspinor)=zero
-                   if (sij_opt==1) gsc(:,igspinor)=zero
+                   ghc(1,igspinor)=zero
+                   ghc(2,igspinor)=zero
                  end if
                end do ! ig
              end do ! ispinor
            end do ! idat
+           if(sij_opt==1) then
+             !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:gsc,kinpw_k2)
+             do idat=1,ndat
+               do ispinor=1,my_nspinor
+                 !$OMP PARALLEL DO PRIVATE(igspinor)
+                 do ig=1,npw_k2
+                   igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
+                   if(kinpw_k2(ig)>=huge(zero)*1.d-11)then
+                     gsc(1,igspinor)=zero
+                     gsc(2,igspinor)=zero
+                   end if
+                 end do ! ig
+               end do ! ispinor
+             end do ! idat
+           end if
          end if
 #endif
 

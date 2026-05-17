@@ -675,7 +675,7 @@ end subroutine pawmknhat
 !! SOURCE
 
 subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
-&          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,nattyp,pawtab, &
+&          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,nhat12_work,nattyp,pawtab, &
 &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft,gpu_option) ! optional arguments
 
 !Arguments ---------------------------------------------
@@ -693,6 +693,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  real(dp),intent(out) :: grnhat12(2,nfft,nspinor**2,3*nhat12_grdim,ndat2,ndat1)
  real(dp),optional,target,intent(out) :: grnhat_12(2,nfft,nspinor**2,3,natom*(ider/3),ndat2,ndat1)
  real(dp),target,intent(out) :: nhat12(2,nfft,nspinor**2,ndat2,ndat1)
+ real(dp),target, intent(in) ::nhat12_work(:,:,:,:,:,:)
  type(pawfgrtab_type),intent(inout),target :: pawfgrtab(my_natom)
  type(pawtab_type),intent(in),target :: pawtab(ntypat)
  type(pawcprj_type),intent(in) :: cprj1(natom,nspinor*ndat1),cprj2(natom,nspinor*ndat2)
@@ -715,7 +716,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  integer,pointer :: my_atmtab(:)
  real(dp) :: rdum(1),tsec(2),ro(2),ro_ql(2)
  real(dp),allocatable :: work(:,:), qijl(:,:),projs1(:,:,:),projs2(:,:,:),cpf(:,:,:,:,:),gnt_scal(:,:)
- real(dp),allocatable,target :: nhat12_atm(:,:,:,:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: nhat12_atm(:,:,:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: atom_expiqr(:,:,:),atom_gylm(:,:,:),atom_dltij(:),atom_gylmgr(:,:,:,:)
  integer,  ABI_CONTIGUOUS pointer :: atom_nfgd(:),atom_ifftsph(:,:),ang_gntselect(:,:),atom_indklmn(:,:)
 
@@ -844,10 +845,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    qijl=pawtab(itypat)%qijl
    nlmn = cprj1(iatm+1, 1)%nlmn
 
-   ABI_MALLOC(nhat12_atm, (2,nfft,nspinor**2,ndat2,ndat1,nattyp(itypat)))
-#ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(alloc:nhat12_atm) IF(gpu_option_==ABI_GPU_OPENMP)
-#endif
+   nhat12_atm => nhat12_work
 
    if (compute_nhat) then
      if(gpu_option_==ABI_GPU_DISABLED) then
@@ -912,7 +910,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  ABI_MALLOC(atom_nfgd,   (nfgd_max))
  ABI_MALLOC(atom_gylm,   (  nfgd_max,lm_size,nattyp(itypat)))
  ABI_MALLOC(atom_ifftsph,(nfgd_max,nattyp(itypat)))
- if(compute_phonon) then
+ if(compute_phonon.and.(.not.qeq0).and.pawfgrtab(iatom)%expiqr_allocated/=0) then
    ABI_MALLOC(atom_expiqr, (2,nfgd_max,nattyp(itypat)))
  end if
  if(compute_grad1) then
@@ -926,7 +924,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    atom_nfgd(ia) = pawfgrtab(iatom)%nfgd
    atom_gylm(1:nfgd,1:lm_size,ia)      = pawfgrtab(iatom)%gylm(1:nfgd,1:lm_size)
    atom_ifftsph(1:nfgd,ia)             = pawfgrtab(iatom)%ifftsph(1:nfgd)
-   if(compute_phonon) then
+   if(compute_phonon.and.(.not.qeq0).and.pawfgrtab(iatom)%expiqr_allocated/=0) then
      atom_expiqr(1:2,1:nfgd,ia)          = pawfgrtab(iatom)%expiqr(1:2,1:nfgd)
    end if
    if(compute_grad1) then
@@ -936,7 +934,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_indklmn,atom_nfgd,atom_ifftsph,atom_dltij,qijl,gnt_scal) IF(gpu_option_==ABI_GPU_OPENMP)
-   !$OMP TARGET ENTER DATA MAP(to:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_phonon)
+   !$OMP TARGET ENTER DATA MAP(to:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_phonon .and. (.not.qeq0))
    !$OMP TARGET ENTER DATA MAP(to:atom_gylmgr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_grad1)
 #endif
 
@@ -1306,7 +1304,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  iatm=iatm+nattyp(itypat)
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET EXIT DATA MAP(delete:atom_nfgd,atom_indklmn,atom_gylm,atom_ifftsph,atom_dltij,qijl,gnt_scal) IF(gpu_option_==ABI_GPU_OPENMP)
- !$OMP TARGET EXIT DATA MAP(delete:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_phonon)
+ !$OMP TARGET EXIT DATA MAP(delete:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_phonon .and. (.not.qeq0))
  !$OMP TARGET EXIT DATA MAP(delete:atom_gylmgr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_grad1)
 #endif
  ABI_FREE(atom_nfgd)
@@ -1314,16 +1312,16 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  if (compute_grad1) then
    ABI_FREE(atom_gylmgr)
  end if
- if (compute_phonon) then
+ if (compute_phonon.and.(.not.qeq0).and.pawfgrtab(iatom)%expiqr_allocated/=0) then
    ABI_FREE(atom_expiqr)
  end if
  ABI_FREE(atom_ifftsph)
  ABI_FREE(qijl)
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(delete:nhat12_atm,cpf) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:cpf) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif
  ABI_FREE(cpf)
- ABI_FREE(nhat12_atm)
+ nullify(nhat12_atm)
  end do ! itypat
 
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -1413,7 +1411,8 @@ end subroutine pawmknhat_psipsi_ndat
 
 subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
 &          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,pawtab, &
-&          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft,gpu_option,nattyp) ! optional arguments
+&          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,&
+&          distribfft,gpu_option,nattyp,nhat12_work) ! optional arguments
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1428,6 +1427,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
  integer,optional,intent(in) ::atindx(natom)
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),optional, intent(in) ::gprimd(3,3),qphon(3),xred(3,natom)
+ real(dp),optional,target, intent(in) ::nhat12_work(:,:,:,:,:,:)
  real(dp),intent(out) :: grnhat12(2,nfft,nspinor**2,3*nhat12_grdim,ndat2,ndat1)
  real(dp),optional,intent(out) :: grnhat_12(2,nfft,nspinor**2,3,natom*(ider/3),ndat2,ndat1)
  real(dp),intent(out) :: nhat12(2,nfft,nspinor**2,ndat2,ndat1)
@@ -1474,9 +1474,11 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
  gpu_option_=ABI_GPU_DISABLED; if (present(gpu_option)) gpu_option_=gpu_option
  if(gpu_option_==ABI_GPU_OPENMP) then
    ABI_CHECK(present(nattyp), "nattyp must be present when using GPU pawmknhat !")
+   ABI_CHECK(present(nhat12_work), "nhat12_work must be present when using GPU pawmknhat !")
    call pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
-   &          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,nattyp,pawtab, &
-   &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft,gpu_option)
+   &          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,nhat12_work,nattyp,pawtab, &
+   &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0, &
+   &          paral_kgb,distribfft,gpu_option)
    return
  end if
 

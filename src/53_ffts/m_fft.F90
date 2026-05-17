@@ -80,6 +80,9 @@ module m_fft
  public :: fourdp
  public :: fourwf
 
+! Alternate routine wrapping fourwf, for memory sensitive regions
+ public :: fourwf_optmem
+
  integer,public,save :: fourdp_counter = -1
  integer,public,save :: fourwf_counter = -1
  public :: fft_init_counters
@@ -2520,6 +2523,234 @@ integer function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft,
 
 end function fftu_mpi_utests
 !!***
+
+!!****f* ABINIT/fourwf_optmem
+!! NAME
+!! fourwf_optmem
+!!
+!! FUNCTION
+!! Wrapper on fourwf call, meant to be called on a fofr array smaller than ndat.
+!! Mainly used in sections where this array may explode in size, thus requiring
+!! fourwf computation to be done in many times to save on memory.
+!! For now, only GPU usecases are handled, where lack of memory is problematic
+!! even if CPU usecases can be handled by this routine.
+!! Arguments are identical to fourwf, except for extra 'nblocks', and the size of fofr array.
+!! For option={0,3} or gpu_option=ABI_GPU_DISABLED, regular fourwf is used and fofr is assumed sized by ndat
+!!
+!! Carry out composite Fourier transforms between real and reciprocal (G) space.
+!! Wavefunctions, contained in a sphere in reciprocal space,
+!! can be FFT to real space. They can also be FFT from real space
+!! to a sphere. Also, the density maybe accumulated, and a local
+!! potential can be applied.
+!!
+!! The different options are :
+!! - option=0 --> reciprocal to real space and output the result.
+!! - option=1 --> reciprocal to real space and accumulate the density.
+!! - option=2 --> reciprocal to real space, apply the local potential to the wavefunction
+!!                in real space and produce the result in reciprocal space.
+!! - option=3 --> real space to reciprocal space.
+!!                NOTE that in this case, fftalg=1x1 MUST be used. This may be changed in the future.
+!!
+!! The different sections of this routine corresponds to different
+!! algorithms, used independently of each others :
+!!(read first the description of the fftalg input variable in abinit_help)
+!! - fftalg=xx0 : use simple complex-to-complex routines, without zero padding
+!!     (rather simple, so can be used to understand how fourwf.f works);
+!! - fftalg=1x1 : use S Goedecker routines, with zero padding
+!!     (7/12 savings in execution time);
+!! - fftalg=1x2 : call even more sophisticated coding also based on S Goedecker routines
+!!
+!! This routine contains many parts that differ only
+!! by small details, in order to treat each case with the better speed.
+!! Also for better speed, it uses no F90 construct, except the allocate command
+!! and for zeroing arrays.
+!!
+!! INPUTS
+!! cplex= if 1 , denpot is real, if 2 , denpot is complex
+!!    (cplex=2 only allowed for option=2, and istwf_k=1)
+!!    not relevant if option=0 or option=3, so cplex=0 can be used to minimize memory
+!! fofgin(2,npwin)=holds input wavefunction in G vector basis sphere.
+!!                 (intent(in) but the routine sphere can modify it for another iflag)
+!! gboundin(2*mgfft+8,2)=sphere boundary info for reciprocal to real space
+!! gboundout(2*mgfft+8,2)=sphere boundary info for real to reciprocal space
+!! istwf_k=option parameter that describes the storage of wfs
+!! kg_kin(3,npwin)=reduced planewave coordinates, input
+!! kg_kout(3,npwout)=reduced planewave coordinates, output
+!! mgfft=maximum size of 1D FFTs
+!! mpi_enreg=information about MPI parallelization
+!! ndat=number of FFT to do in //
+!! nblocks=number of FFT to split computation into
+!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!! npwin=number of elements in fofgin array (for option 0, 1 and 2)
+!! npwout=number of elements in fofgout array (for option 2 and 3)
+!! n4,n5,n6=ngfft(4),ngfft(5),ngfft(6), dimensions of fofr.
+!! option= if 0: do direct FFT
+!!         if 1: do direct FFT, then sum the density
+!!         if 2: do direct FFT, multiply by the potential, then do reverse FFT
+!!         if 3: do reverse FFT only
+!! tim_fourwf=timing code of the calling routine (can be set to 0 if not attributed)
+!! weight_r=weight to be used for the accumulation of the density in real space
+!!         (needed only when option=1)
+!! weight_i=weight to be used for the accumulation of the density in real space
+!!         (needed only when option=1 and (fftalg=4 and fftalgc/=0))
+!! [weight_array_r]= -- optional -- same as weight_r when ndat>1
+!!                   weight_array_r(i)=weight_r to be used for band i
+!!                   at present only used for the GPU version
+!! [weight_array_i]= -- optional -- same as weight_i when ndat>1
+!!                   weight_array_i(i)=weight_i to be used for band i
+!!                   at present only used for the GPU version
+!! [fofginb(2,npwin)]=holds second input wavefunction in G vector basis sphere.
+!!                 (intent(in) but the routine sphere can modify it for another iflag)
+!!                 (for non diagonal occupation)
+!! [use_ndo] = use non diagonal occupations.
+!! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
+!!
+!! OUTPUT
+!!  (see side effects)
+!!
+!! SIDE EFFECTS
+!! Input/Output
+!! for option==0, fofgin(2,npwin*ndat)=holds input wavefunction in G sphere;
+!!                fofr(2,n4,n5,n6*ndat) contains the output Fourier Transform of fofgin;
+!!                no use of denpot, fofgout and npwout.
+!! for option==1, fofgin(2,npwin*ndat)=holds input wavefunction in G sphere;
+!!                denpot(cplex*n4,n5,n6) contains the input density at input,
+!!                and the updated density at output (accumulated);
+!!                no use of fofgout and npwout.
+!! for option==2, fofgin(2,npwin*ndat)=holds input wavefunction in G sphere;
+!!                denpot(cplex*n4,n5,n6) contains the input local potential;
+!!                fofgout(2,npwout*ndat) contains the output function;
+!! for option==3, fofr(2,n4,n5,n6*ndat) contains the input real space wavefunction;
+!!                fofgout(2,npwout*ndat) contains its output Fourier transform;
+!!                no use of fofgin and npwin.
+!!
+!! NOTES
+!!   DO NOT CHANGE THE API OF THIS FUNCTION.
+!!   If you need a specialized routine for the FFT of the wavefunctions, create
+!!   a wrapper that uses fourwf to accomplish your task. This routine, indeed,
+!!   has already too many parameters and each change in the API requires a careful
+!!   modification of the different wrappers used for specialized FFTs such as FFTW3 and MKL-DFTI
+!!
+!! SOURCE
+
+subroutine fourwf_optmem(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
+                  kg_kin,kg_kout,mgfft,mpi_enreg,ndat,nblocks,ngfft,npwin,npwout,n4,n5,n6,option,&
+                  tim_fourwf,weight_r,weight_i, &
+                  weight_array_r,weight_array_i,gpu_option,use_ndo,fofginb) ! Optional arguments
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,istwf_k,mgfft,n4,n5,n6,ndat,nblocks,npwin,npwout,option
+ integer,intent(in) :: tim_fourwf
+ integer,intent(in),optional :: gpu_option,use_ndo
+ real(dp),intent(in) :: weight_r,weight_i
+ real(dp),intent(in),optional,target :: weight_array_r(ndat),weight_array_i(ndat)
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: gboundin(2*mgfft+8,2),gboundout(2*mgfft+8,2)
+ integer,intent(in) :: kg_kin(3,npwin),kg_kout(3,npwout),ngfft(18)
+ real(dp),intent(inout) :: denpot(cplex*n4,n5,n6),fofgin(2,npwin*ndat)
+ real(dp),intent(inout),optional :: fofginb(:,:) ! (2,npwin*ndat)
+ real(dp),intent(inout) :: fofr(:,:,:,:) !(2,n4,n5,n6*(ndat/nblocks+ndat-(ndat/nblocks)*nblocks))
+ real(dp),intent(out) :: fofgout(2,npwout*ndat)
+
+ real(dp),pointer :: weight_ptr_r(:),weight_ptr_i(:)
+
+ integer :: ii,chunk,residuchunk,iblock,gpu_option_
+ integer :: firstelt,firstelt_out,firstband,lastelt,lastelt_out,lastband
+
+ gpu_option_=ABI_GPU_DISABLED; if(present(gpu_option)) gpu_option_=gpu_option
+
+ ABI_CHECK_IEQ(size(fofr,dim=1), 2,  'wrong size for fofr (dim 1)')
+ ABI_CHECK_IEQ(size(fofr,dim=2), n4, 'wrong size for fofr (dim 2)')
+ ABI_CHECK_IEQ(size(fofr,dim=3), n5, 'wrong size for fofr (dim 3)')
+
+ if(gpu_option_==ABI_GPU_DISABLED .or. option==0 .or. option==3) then
+   if(gpu_option/=ABI_GPU_DISABLED) then
+     ABI_CHECK_IEQ(size(fofr,dim=4), n6*ndat, 'wrong size for fofr (dim 4)')
+   end if
+
+   call fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
+   &    kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
+   &    tim_fourwf,weight_r,weight_i, &
+   &    weight_array_r=weight_array_r,weight_array_i=weight_array_i,&
+   &    gpu_option=gpu_option,use_ndo=use_ndo,fofginb=fofginb)
+
+ else
+   chunk = ndat/nblocks
+   residuchunk = ndat - nblocks*chunk
+
+   ABI_CHECK_IEQ(size(fofr,dim=4), n6*(chunk+residuchunk), 'wrong size for fofr (dim 4)')
+
+   if(option==1) then
+
+     if (present(weight_array_r)) then
+       weight_ptr_r => weight_array_r
+     else
+       ABI_MALLOC(weight_ptr_r,(ndat))
+       weight_ptr_r(:)=weight_r
+     end if
+     if (present(weight_array_i)) then
+       weight_ptr_i => weight_array_i
+     else
+       ABI_MALLOC(weight_ptr_i,(ndat))
+       weight_ptr_i(:)=weight_i
+     end if
+
+     do ii=1,nblocks
+       iblock=ii-1
+       if ( iblock < nblocks-residuchunk ) then
+         firstband = iblock*chunk+1
+         lastband = (iblock+1)*chunk
+       else
+         firstband = (nblocks-residuchunk)*chunk + ( iblock -(nblocks-residuchunk) )*(chunk+1) +1
+         lastband = firstband+chunk
+       end if
+       firstelt = (firstband-1)*npwin+1; lastelt = lastband*npwin
+       call fourwf(cplex,denpot,&
+       &      fofgin(:,firstelt:lastelt),&
+       &      fofgout,fofr,gboundin,gboundout,&
+       &      istwf_k,kg_kin,kg_kout,mgfft,mpi_enreg,lastband-firstband+1,&
+       &      ngfft,npwin,npwout,n4,n5,n6,option,tim_fourwf,weight_r,weight_i,&
+       &      weight_array_r=weight_ptr_r(firstband:lastband),&
+       &      weight_array_i=weight_ptr_i(firstband:lastband),&
+       &      gpu_option=gpu_option_,use_ndo=use_ndo,fofginb=fofginb)
+     end do
+
+     if (.not.present(weight_array_r)) then
+       ABI_FREE(weight_ptr_r)
+     end if
+     if (.not.present(weight_array_i)) then
+       ABI_FREE(weight_ptr_i)
+     end if
+
+   else if(option==2) then
+
+     do ii=1,nblocks
+       iblock=ii-1
+       if ( iblock < nblocks-residuchunk ) then
+         firstband = iblock*chunk+1
+         lastband = (iblock+1)*chunk
+       else
+         firstband = (nblocks-residuchunk)*chunk + ( iblock -(nblocks-residuchunk) )*(chunk+1) +1
+         lastband = firstband+chunk
+       end if
+       firstelt = (firstband-1)*npwin+1; lastelt = lastband*npwin
+       firstelt_out = (firstband-1)*npwout+1; lastelt_out = lastband*npwout
+       call fourwf(cplex,denpot,&
+       &      fofgin(:,firstelt:lastelt),&
+       &      fofgout(:,firstelt_out:lastelt_out),fofr,gboundin,gboundout,&
+       &      istwf_k,kg_kin,kg_kout,mgfft,mpi_enreg,lastband-firstband+1,&
+       &      ngfft,npwin,npwout,n4,n5,n6,option,tim_fourwf,weight_r,weight_i,&
+       &      gpu_option=gpu_option_,use_ndo=use_ndo,fofginb=fofginb)
+     end do
+
+   end if
+
+ end if
+
+
+end subroutine fourwf_optmem
 
 !!****f* ABINIT/fourwf
 !! NAME

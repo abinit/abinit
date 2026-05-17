@@ -102,10 +102,12 @@ MODULE m_ddb_hdr
  character(len=descrlen),public,parameter :: DESCR_ipert_10 = '2nd derivative wrt to k'
  character(len=descrlen),public,parameter :: DESCR_ipert_11 = '2nd derivative wrt to k and electric field'
 
- integer,public,parameter :: DDB_VERSION=20230401 ! TODO: check if we should update this with new G matrix stuff
+ integer,public,parameter :: DDB_VERSION=20240201 !
+ !integer,public,parameter :: DDB_VERSION=20230401 ! TODO: check if we should update this with new G matrix stuff
  ! DDB Version number for text format.
 
- integer,public,parameter :: DDB_VERSION_NC=20230219 ! TODO: check if we should update this with new G matrix stuff
+ integer,public,parameter :: DDB_VERSION_NC=20240201 ! TODO:
+ !integer,public,parameter :: DDB_VERSION_NC=20230219 ! TODO: check if we should update this with new G matrix stuff
  ! DDB NetCDF version number.
 
  type,public :: ddb_hdr_type
@@ -695,7 +697,7 @@ subroutine ddb_hdr_get_block_dims(ddb_hdr)
 ! ************************************************************************
 
  ! Compute mpert
- !ddb_hdr%mpert = ddb_hdr%natom+MPERT_MAX
+ !ddb_hdr%mpert = 2*ddb_hdr%natom+MPERT_MAX
  ! GA: mpert is stored in netcdf format but not in text format.
 
  ! Compute msize
@@ -1407,6 +1409,11 @@ subroutine ddb_hdr_open_write_nc(ddb_hdr, filename, with_psps, with_dfpt_vars)
    &])
  NCF_CHECK(ncerr)
 
+ ncerr = nctk_def_arrays(ncid_d2E, [&
+   nctkarr_t('frequency', "dp", 'number_of_d2E_blocks') &
+   &])
+ NCF_CHECK(ncerr)
+
  ! Info on blocks and matrix values
  ncerr = nctk_def_arrays(ncid_d2E, [&
    nctkarr_t('matrix_values', "dp",&
@@ -1446,6 +1453,12 @@ NCF_CHECK(nf90_put_var(ncid_d2E, nctk_idname(ncid_d2E, 'd2E_block_types'), blkty
 
  ncerr = nctk_def_arrays(ncid_d3E, [&
    nctkarr_t('qpoints_normalization', "dp",&
+             'three_dim, number_of_d3E_blocks') &
+   &])
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(ncid_d3E, [&
+   nctkarr_t('frequency', "dp",&
              'three_dim, number_of_d3E_blocks') &
    &])
  NCF_CHECK(ncerr)
@@ -1746,7 +1759,7 @@ subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, comm, &
  npsp = ddb_hdr%mtypat
 
  ! Set maximal value for mpert
- ddb_hdr%mpert = ddb_hdr%natom+MPERT_MAX
+ ddb_hdr%mpert = 2*ddb_hdr%natom+MPERT_MAX
 
  ! Compute the block dimensions
  call ddb_hdr%get_block_dims()
@@ -3484,6 +3497,7 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
 !scalars
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527 ! should I modify this ? I guess not
  integer,parameter :: cvrsio9=20230401,cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527 ! should I modify this ? I guess not
+ integer,parameter :: cvrsio9_new=20240201
  integer :: bantot,ddbvrs,iband,ii,ij,ikpt,iline,im,ndig,usepaw0
  logical :: ddbvrs_is_current_or_old,testn,testv
  character(len=500) :: message
@@ -3507,7 +3521,8 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
  read (unddb, '(20x,i10)' )ddbvrs
 
  !write(std_out,'(a,i10)')' ddbvrs=',ddbvrs
- if(ddbvrs/=cvrsio9 .and. ddbvrs/=vrsio8 .and. ddbvrs/=vrsio8_old .and. ddbvrs/=vrsio8_old_old)then
+ if(ddbvrs/=cvrsio9_new .and. ddbvrs/=cvrsio9 .and. ddbvrs/=vrsio8 &
+& .and. ddbvrs/=vrsio8_old .and. ddbvrs/=vrsio8_old_old)then
    write(message, '(a,i10,2a,4(a,i10),a)' )&
     'The input DDB version number=',ddbvrs,' does not agree',ch10,&
     'with the allowed code DDB version numbers,',cvrsio9,', ',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old,' .'
@@ -3515,7 +3530,7 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
  end if
 
 !Convert older version to 8 digit format
- if (ddbvrs /= cvrsio9) then
+ if (ddbvrs /= cvrsio9 .and. ddbvrs /= cvrsio9_new) then
    ndig= int(log10(real(ddbvrs))) + 1
    write(ddbvrs6,'(i0)') ddbvrs
    if (ddbvrs==vrsio8 .or.ddbvrs==vrsio8_old) then
@@ -4155,6 +4170,7 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,msym,natom,nblok,nkpt,&
 !Set routine version number here:
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
  integer,parameter :: cvrsio9=20230401,cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527
+ integer,parameter :: cvrsio9_new=20240201
  integer :: bantot,basis_size0,blktyp,ddbvrs,iband,iblok,iekb,ii,ikpt,iline,im,ios,iproj
  integer :: itypat,itypat0,jekb,lmn_size0,mproj,mpsang,nekb,ndig,nelmts
  integer :: occopt,pspso0,nsym
@@ -4181,7 +4197,7 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,msym,natom,nblok,nkpt,&
  read (unddb,*)
  read (unddb, '(20x,i10)' )ddbvrs
 
- if (all(ddbvrs/= [cvrsio9, vrsio8, vrsio8_old, vrsio8_old_old]) )then
+ if (all(ddbvrs/= [cvrsio9_new, cvrsio9, vrsio8, vrsio8_old, vrsio8_old_old]) )then
    write(message, '(a,i10,2a,4(a,i10))' )&
 &   'The input DDB version number=',ddbvrs,' does not agree',ch10,&
 &   'with the allowed code DDB version numbers,',cvrsio9,', ',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old
@@ -4189,7 +4205,7 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,msym,natom,nblok,nkpt,&
  end if
 
 !Convert older version to 8 digit format
- if (ddbvrs /= cvrsio9) then
+ if (ddbvrs /= cvrsio9 .and. ddbvrs /= cvrsio9_new) then
    ndig= int(log10(real(ddbvrs))) + 1
    write(ddbvrs6,'(i0)') ddbvrs
    if (ddbvrs==vrsio8 .or.ddbvrs==vrsio8_old) then
@@ -4531,7 +4547,6 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,msym,natom,nblok,nkpt,&
        read (unddb,*)
      end do
    end do
-
  else if(string==' No informat')then
 
    dimekb=0
@@ -4608,16 +4623,29 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,msym,natom,nblok,nkpt,&
      if (is_type_d2E(blktyp)) then
 !      Read the phonon wavevector
        read(unddb,*)
+!      Read the perturbation frequency
+       if (ddbvrs >= cvrsio9_new) then
+         read(unddb,*)
+       end if
+!     else if(blktyp==3.or.blktyp==33)then
      else if (is_type_d3E(blktyp)) then
 !      Read the perturbation wavevectors
        read(unddb,*)
        read(unddb,*)
        read(unddb,*)
+!      Read the perturbation frequency
+       if (ddbvrs >= cvrsio9_new) then
+         read(unddb,*)
+         read(unddb,*)
+         read(unddb,*)
+       end if
+!     else if(blktyp==5)then
      else if (is_type_d2eig(blktyp)) then
        read(unddb,*)
      end if
 
 !    Read every element
+     !if(blktyp==5)then
      if (is_type_d2eig(blktyp)) then
        do ikpt=1,nkpt
          read(unddb,*)

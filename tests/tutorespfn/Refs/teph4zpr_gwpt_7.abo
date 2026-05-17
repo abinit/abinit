@@ -60,7 +60,6 @@ _ WF disk file :      1.594 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
          eph_task          17
 -          fftalg         312
    gstore_use_lgk        1
-           gwcomp           2
            istwfk        2    0    3    0    0    0    7    0
               ixc          11
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -320,6 +319,7 @@ meta: {optdriver: 7, eph_task: 17, }
    2.46705647E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+- Cannot find pre-existent GSTORE file: teph4zpr_gwpt_7o_GSTORE.nc
 P qpt_comm can use shmem: yes
 P kpt_comm can use shmem: yes
 P bsum_comm can use shmem: yes
@@ -490,8 +490,8 @@ drude_plsmf:   1.24479186E+00
 force_plsmf:   0.00000000E+00
 ...
 
- Activating COH remainder technique
  Only q-points in the IBZ_k will be computed.
+ GWPT frequency convolution is evaluated at E_nk.
 
  Sigma^x_nk and Sigma^c_nk(E0) in eV:
 Band     E0    <VxcDFT>   SigX SigC(E0)  for k-point:[ 0.0000E+00,  0.0000E+00,  0.0000E+00]
@@ -515,96 +515,96 @@ Band     E0    <VxcDFT>   SigX SigC(E0)  for k-point:[ 0.0000E+00,  0.0000E+00, 
     iq    ik pcase  m_kq   n_k     |g^SE| in Ha    |g^KS| in Ha
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 4
     iq    ik pcase  m_kq   n_k            SE/KS          |g^SE|          |g^KS|
--    1     1     4     1     6     1.860746E+00    5.333480E-02    2.866312E-02
--    1     1     4     1     7     1.860746E+00    5.333480E-02    2.866312E-02
--    1     1     4     1     8     1.860746E+00    5.333480E-02    2.866312E-02
--    1     1     4     1     9     9.713318E+01    1.154888E-06    1.188973E-08
--    1     1     4     2     6     7.216137E+04    4.664410E-04    6.463860E-09
--    1     1     4     2     7     7.216137E+04    4.664410E-04    6.463860E-09
--    1     1     4     2     8     7.216137E+04    4.664410E-04    6.463860E-09
--    1     1     4     2     9     1.044173E+01    1.732698E-02    1.659397E-03
--    1     1     4     3     6     7.216137E+04    4.664410E-04    6.463860E-09
--    1     1     4     3     7     7.216137E+04    4.664410E-04    6.463860E-09
--    1     1     4     3     8     7.216137E+04    4.664410E-04    6.463860E-09
--    1     1     4     3     9     1.044173E+01    1.732698E-02    1.659397E-03
--    1     1     4     4     6     7.216137E+04    4.664410E-04    6.463860E-09
--    1     1     4     4     7     7.216137E+04    4.664410E-04    6.463860E-09
--    1     1     4     4     8     7.216137E+04    4.664410E-04    6.463860E-09
--    1     1     4     4     9     1.044173E+01    1.732698E-02    1.659397E-03
--    1     1     4     5     6     4.981063E-01    5.683265E-01    1.140974E+00
--    1     1     4     5     7     4.981063E-01    5.683265E-01    1.140974E+00
--    1     1     4     5     8     4.981063E-01    5.683265E-01    1.140974E+00
--    1     1     4     5     9     3.984236E+03    6.347025E-04    1.593035E-07
--    1     1     4     6     6     2.731140E+04    4.731878E-03    1.732565E-07
--    1     1     4     6     7     2.731140E+04    4.731878E-03    1.732565E-07
--    1     1     4     6     8     2.731140E+04    4.731878E-03    1.732565E-07
--    1     1     4     6     9     2.827119E+00    7.855700E-01    2.778694E-01
--    1     1     4     7     6     2.731140E+04    4.731878E-03    1.732565E-07
--    1     1     4     7     7     2.731140E+04    4.731878E-03    1.732565E-07
--    1     1     4     7     8     2.731140E+04    4.731878E-03    1.732565E-07
--    1     1     4     7     9     2.827119E+00    7.855700E-01    2.778694E-01
--    1     1     4     8     6     2.731140E+04    4.731878E-03    1.732565E-07
--    1     1     4     8     7     2.731140E+04    4.731878E-03    1.732565E-07
--    1     1     4     8     8     2.731140E+04    4.731878E-03    1.732565E-07
--    1     1     4     8     9     2.827119E+00    7.855700E-01    2.778694E-01
--    1     1     4     9     6     1.753910E+00    4.873579E-01    2.778694E-01
--    1     1     4     9     7     1.753910E+00    4.873579E-01    2.778694E-01
--    1     1     4     9     8     1.753910E+00    4.873579E-01    2.778694E-01
--    1     1     4     9     9     1.267581E+03    1.277359E-04    1.007714E-07
--    1     1     4    10     6     1.364428E+00    4.152857E-01    3.043663E-01
--    1     1     4    10     7     1.364428E+00    4.152857E-01    3.043663E-01
--    1     1     4    10     8     1.364428E+00    4.152857E-01    3.043663E-01
--    1     1     4    10     9     3.232951E+04    6.579860E-05    2.035249E-09
-- mean_g_ratio:    2.332474E+04
-- stdev_g_ratio:    2.867034E+04
-- min_g_ratio:    4.981063E-01
-- max_g_ratio:    7.216137E+04
+-    1     1     4     1     6     1.540081E+00    4.414354E-02    2.866312E-02
+-    1     1     4     1     7     1.540081E+00    4.414354E-02    2.866312E-02
+-    1     1     4     1     8     1.540081E+00    4.414354E-02    2.866312E-02
+-    1     1     4     1     9     2.818314E+03    3.350900E-05    1.188973E-08
+-    1     1     4     2     6     7.501857E+03    4.849098E-05    6.463864E-09
+-    1     1     4     2     7     7.501857E+03    4.849098E-05    6.463864E-09
+-    1     1     4     2     8     7.501857E+03    4.849098E-05    6.463864E-09
+-    1     1     4     2     9     5.002279E+00    8.300769E-03    1.659397E-03
+-    1     1     4     3     6     7.501857E+03    4.849098E-05    6.463864E-09
+-    1     1     4     3     7     7.501857E+03    4.849098E-05    6.463864E-09
+-    1     1     4     3     8     7.501857E+03    4.849098E-05    6.463864E-09
+-    1     1     4     3     9     5.002279E+00    8.300769E-03    1.659397E-03
+-    1     1     4     4     6     7.501857E+03    4.849098E-05    6.463864E-09
+-    1     1     4     4     7     7.501857E+03    4.849098E-05    6.463864E-09
+-    1     1     4     4     8     7.501857E+03    4.849098E-05    6.463864E-09
+-    1     1     4     4     9     5.002279E+00    8.300769E-03    1.659397E-03
+-    1     1     4     5     6     1.427491E+00    1.628730E+00    1.140974E+00
+-    1     1     4     5     7     1.427491E+00    1.628730E+00    1.140974E+00
+-    1     1     4     5     8     1.427491E+00    1.628730E+00    1.140974E+00
+-    1     1     4     5     9     7.199926E+03    1.146973E-03    1.593035E-07
+-    1     1     4     6     6     1.640553E+04    2.842367E-03    1.732566E-07
+-    1     1     4     6     7     1.640553E+04    2.842367E-03    1.732566E-07
+-    1     1     4     6     8     1.640553E+04    2.842367E-03    1.732566E-07
+-    1     1     4     6     9     1.945911E+00    5.407090E-01    2.778694E-01
+-    1     1     4     7     6     1.640553E+04    2.842367E-03    1.732566E-07
+-    1     1     4     7     7     1.640553E+04    2.842367E-03    1.732566E-07
+-    1     1     4     7     8     1.640553E+04    2.842367E-03    1.732566E-07
+-    1     1     4     7     9     1.945911E+00    5.407090E-01    2.778694E-01
+-    1     1     4     8     6     1.640553E+04    2.842367E-03    1.732566E-07
+-    1     1     4     8     7     1.640553E+04    2.842367E-03    1.732566E-07
+-    1     1     4     8     8     1.640553E+04    2.842367E-03    1.732566E-07
+-    1     1     4     8     9     1.945911E+00    5.407090E-01    2.778694E-01
+-    1     1     4     9     6     1.902995E+00    5.287840E-01    2.778694E-01
+-    1     1     4     9     7     1.902995E+00    5.287840E-01    2.778694E-01
+-    1     1     4     9     8     1.902995E+00    5.287840E-01    2.778694E-01
+-    1     1     4     9     9     8.928298E-01    8.997172E-08    1.007714E-07
+-    1     1     4    10     6     1.447744E+00    4.409752E-01    3.045947E-01
+-    1     1     4    10     7     1.447744E+00    4.409752E-01    3.045947E-01
+-    1     1     4    10     8     1.447744E+00    4.409752E-01    3.045947E-01
+-    1     1     4    10     9     5.778553E+04    1.178683E-04    2.039754E-09
+- mean_g_ratio:    7.075275E+03
+- stdev_g_ratio:    1.039873E+04
+- min_g_ratio:    8.928298E-01
+- max_g_ratio:    5.778553E+04
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 6
     iq    ik pcase  m_kq   n_k            SE/KS          |g^SE|          |g^KS|
--    1     1     6     1     6     1.972401E+00    5.654865E-02    2.866996E-02
--    1     1     6     1     7     1.972401E+00    5.654865E-02    2.866996E-02
--    1     1     6     1     8     1.972401E+00    5.654865E-02    2.866996E-02
--    1     1     6     1     9     1.405162E+02    3.394562E-06    2.415779E-08
--    1     1     6     2     6     4.025732E+04    4.952603E-04    1.230237E-08
--    1     1     6     2     7     4.025732E+04    4.952603E-04    1.230237E-08
--    1     1     6     2     8     4.025732E+04    4.952603E-04    1.230237E-08
--    1     1     6     2     9     8.059785E+00    1.324451E-02    1.643283E-03
--    1     1     6     3     6     4.025732E+04    4.952603E-04    1.230237E-08
--    1     1     6     3     7     4.025732E+04    4.952603E-04    1.230237E-08
--    1     1     6     3     8     4.025732E+04    4.952603E-04    1.230237E-08
--    1     1     6     3     9     8.059785E+00    1.324451E-02    1.643283E-03
--    1     1     6     4     6     4.025732E+04    4.952603E-04    1.230237E-08
--    1     1     6     4     7     4.025732E+04    4.952603E-04    1.230237E-08
--    1     1     6     4     8     4.025732E+04    4.952603E-04    1.230237E-08
--    1     1     6     4     9     8.059785E+00    1.324451E-02    1.643283E-03
--    1     1     6     5     6     4.707642E-01    5.371362E-01    1.140988E+00
--    1     1     6     5     7     4.707642E-01    5.371362E-01    1.140988E+00
--    1     1     6     5     8     4.707642E-01    5.371362E-01    1.140988E+00
--    1     1     6     5     9     5.971991E+03    1.902193E-03    3.185190E-07
--    1     1     6     6     6     9.597947E+03    3.275751E-03    3.412971E-07
--    1     1     6     6     7     9.597947E+03    3.275751E-03    3.412971E-07
--    1     1     6     6     8     9.597947E+03    3.275751E-03    3.412971E-07
--    1     1     6     6     9     2.879532E+00    8.000901E-01    2.778542E-01
--    1     1     6     7     6     9.597947E+03    3.275751E-03    3.412971E-07
--    1     1     6     7     7     9.597947E+03    3.275751E-03    3.412971E-07
--    1     1     6     7     8     9.597947E+03    3.275751E-03    3.412971E-07
--    1     1     6     7     9     2.879532E+00    8.000901E-01    2.778542E-01
--    1     1     6     8     6     9.597947E+03    3.275751E-03    3.412971E-07
--    1     1     6     8     7     9.597947E+03    3.275751E-03    3.412971E-07
--    1     1     6     8     8     9.597947E+03    3.275751E-03    3.412971E-07
--    1     1     6     8     9     2.879532E+00    8.000901E-01    2.778542E-01
--    1     1     6     9     6     1.736333E+00    4.824475E-01    2.778542E-01
--    1     1     6     9     7     1.736333E+00    4.824475E-01    2.778542E-01
--    1     1     6     9     8     1.736333E+00    4.824475E-01    2.778542E-01
--    1     1     6     9     9     1.984587E+03    3.834091E-04    1.931934E-07
--    1     1     6    10     6     1.342962E+00    1.482227E+00    1.103700E+00
--    1     1     6    10     7     1.342962E+00    1.482227E+00    1.103700E+00
--    1     1     6    10     8     1.342962E+00    1.482227E+00    1.103700E+00
--    1     1     6    10     9     2.168680E+05    9.062525E-04    4.178820E-09
-- mean_g_ratio:    1.684280E+04
-- stdev_g_ratio:    3.575581E+04
-- min_g_ratio:    4.707642E-01
-- max_g_ratio:    2.168680E+05
+-    1     1     6     1     6     1.533255E+00    4.395835E-02    2.866996E-02
+-    1     1     6     1     7     1.533255E+00    4.395835E-02    2.866996E-02
+-    1     1     6     1     8     1.533255E+00    4.395835E-02    2.866996E-02
+-    1     1     6     1     9     4.144546E+03    1.001231E-04    2.415779E-08
+-    1     1     6     2     6     8.089856E+03    9.952437E-05    1.230236E-08
+-    1     1     6     2     7     8.089856E+03    9.952437E-05    1.230236E-08
+-    1     1     6     2     8     8.089856E+03    9.952437E-05    1.230236E-08
+-    1     1     6     2     9     5.009024E+00    8.231247E-03    1.643283E-03
+-    1     1     6     3     6     8.089856E+03    9.952437E-05    1.230236E-08
+-    1     1     6     3     7     8.089856E+03    9.952437E-05    1.230236E-08
+-    1     1     6     3     8     8.089856E+03    9.952437E-05    1.230236E-08
+-    1     1     6     3     9     5.009024E+00    8.231247E-03    1.643283E-03
+-    1     1     6     4     6     8.089856E+03    9.952437E-05    1.230236E-08
+-    1     1     6     4     7     8.089856E+03    9.952437E-05    1.230236E-08
+-    1     1     6     4     8     8.089856E+03    9.952437E-05    1.230236E-08
+-    1     1     6     4     9     5.009024E+00    8.231247E-03    1.643283E-03
+-    1     1     6     5     6     1.429143E+00    1.630635E+00    1.140988E+00
+-    1     1     6     5     7     1.429143E+00    1.630635E+00    1.140988E+00
+-    1     1     6     5     8     1.429143E+00    1.630635E+00    1.140988E+00
+-    1     1     6     5     9     1.079029E+04    3.436912E-03    3.185190E-07
+-    1     1     6     6     6     5.186116E+03    1.770006E-03    3.412971E-07
+-    1     1     6     6     7     5.186116E+03    1.770006E-03    3.412971E-07
+-    1     1     6     6     8     5.186116E+03    1.770006E-03    3.412971E-07
+-    1     1     6     6     9     1.945006E+00    5.404280E-01    2.778542E-01
+-    1     1     6     7     6     5.186116E+03    1.770006E-03    3.412971E-07
+-    1     1     6     7     7     5.186116E+03    1.770006E-03    3.412971E-07
+-    1     1     6     7     8     5.186116E+03    1.770006E-03    3.412971E-07
+-    1     1     6     7     9     1.945006E+00    5.404280E-01    2.778542E-01
+-    1     1     6     8     6     5.186116E+03    1.770006E-03    3.412971E-07
+-    1     1     6     8     7     5.186116E+03    1.770006E-03    3.412971E-07
+-    1     1     6     8     8     5.186116E+03    1.770006E-03    3.412971E-07
+-    1     1     6     8     9     1.945006E+00    5.404280E-01    2.778542E-01
+-    1     1     6     9     6     1.902398E+00    5.285893E-01    2.778542E-01
+-    1     1     6     9     7     1.902398E+00    5.285893E-01    2.778542E-01
+-    1     1     6     9     8     1.902398E+00    5.285893E-01    2.778542E-01
+-    1     1     6     9     9     7.973418E-01    1.540412E-07    1.931934E-07
+-    1     1     6    10     6     1.446699E+00    1.596810E+00    1.103761E+00
+-    1     1     6    10     7     1.446699E+00    1.596810E+00    1.103761E+00
+-    1     1     6    10     8     1.446699E+00    1.596810E+00    1.103761E+00
+-    1     1     6    10     9     2.831588E+05    1.183233E-03    4.178689E-09
+- mean_g_ratio:    1.044045E+04
+- stdev_g_ratio:    4.381309E+04
+- min_g_ratio:    7.973418E-01
+- max_g_ratio:    2.831588E+05
  |g(k,q)| in Ha for iq: 64 ik: 1 pcase: 4
     iq    ik pcase  m_kq   n_k            SE/KS          |g^SE|          |g^KS|
 -   64     1     4     1     6    -1.000000E+00    0.000000E+00    0.000000E+00
@@ -708,7 +708,6 @@ Band     E0    <VxcDFT>   SigX SigC(E0)  for k-point:[ 0.0000E+00,  0.0000E+00, 
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
    gstore_use_lgk        1
-           gwcomp           2
               ixc          11
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      2.27305763E+01
@@ -786,12 +785,30 @@ P           mkmem           8
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Accurate GW self-energies in a plane-wave basis using only a few empty states:
-- towards large systems. F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008).
-- Comment: to be cited for non-vanishing gwcomp. Strong suggestion to cite this paper in your publications.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#bruneval2008
+- [1] Abinit 2025: New Capabilities for the Predictive Modeling of Solids and Nanomaterials.
+- J. Chem. Phys. 163, 164126 (2025).
+- M.J. Verstraete, J. Abreu, G. Allemand, B. Amadon, G. Antonius,
+- M. Azizi, L. Baguet, C. Barat, L. Bastogne, R. Bejaud, J.-M. Beuken,
+- J. Bieder, A. Blanchet, F. Bottin, J. Bouchet, J. Bouquiaux, E. Bousquet,
+- J. Boust, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval,
+- A. Castellano, E. Castiel, J.-B. Charraud, J. Clerouin, M. Cote, C. Duval,
+- A. Gallo, F. Gendron, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras,
+- F. Gomez-Ortiz, X. Gonze, F. Goudreault, A. Gruneis, R. Gupta, B. Guster,
+- D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
+- I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
+- Comment: the sixth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#verstraete2025
 -
-- [2] The Abinit project: Impact, environment and recent developments.
+- [2] Optimized norm-conserving Vanderbilt pseudopotentials.
+- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
+- Comment: Some pseudopotential generated using the ONCVPSP code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
+-
+- [3] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -804,29 +821,26 @@ P           mkmem           8
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [3] Optimized norm-conserving Vanderbilt pseudopotentials.
-- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
-- Comment: Some pseudopotential generated using the ONCVPSP code were used.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
--
-- [4] ABINIT: Overview, and focus on selected capabilities
-- J. Chem. Phys. 152, 124102 (2020).
-- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
-- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
-- G.Brunin, D.Caliste, M.Cote,
-- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
-- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
-- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
-- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
-- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- [4] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
-- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
+- is available at
+-  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
@@ -844,7 +858,8 @@ P           mkmem           8
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -

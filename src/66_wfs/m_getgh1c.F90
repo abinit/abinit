@@ -166,10 +166,10 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  real(dp),allocatable :: gh1c_sp(:,:),gh1c1(:,:),gh1c2(:,:),gh1c3(:,:),gh1c4(:,:)
  real(dp),allocatable :: gh1c_mGGA(:,:),gh1ndc(:,:),gvnl2(:,:)
  real(dp),target,allocatable :: nonlop_out(:,:),vlocal1_tmp(:,:,:)
-#define _DEV_USE_WORK
-#ifdef _DEV_USE_WORK
+!#define _DEV_USE_WORK
+!#ifdef _DEV_USE_WORK
  real(dp),target,allocatable :: work(:,:,:,:)
-#endif
+!#endif
  real(dp),contiguous, pointer :: gvnlx1_(:,:), dkinpw(:),kinpw1(:)
  type(pawcprj_type),allocatable,target :: cwaveprj_tmp(:,:)
  type(pawcprj_type),pointer :: cwaveprj_ptr(:,:)
@@ -279,8 +279,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 ! Electric field perturbation or
 ! Strain perturbation
 !-------------------------------------------
+ if ((ipert<=natom+6.or.(ipert>natom+11.and.ipert<=2*natom+11)).and.ipert/=natom+1.and.optlocal>0) then !SPr deb
 
- if (ipert<=natom+5.and.ipert/=natom+1.and.optlocal>0) then
    ABI_NVTX_START_RANGE(NVTX_GETGH1_LOCPOT)
 
    ! Important: work (aka fofr) must be allocated with "ndat", but fourwf with option 2 never accesses it, so this allocation wastes memory.
@@ -290,16 +290,17 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    ndat__ = ndat
    !if (gs_hamkq%nvloc==1) ndat__ = ndat * gs_hamkq%nspinor ! TODO: Activate after testing
 
-#ifdef _DEV_USE_WORK
+!#ifdef _DEV_USE_WORK
    ABI_MALLOC(work,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6*ndat__))
 #ifdef HAVE_OPENMP_OFFLOAD
    if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(work,2*gs_hamkq%n4*gs_hamkq%n5*gs_hamkq%n6*ndat__)
 #endif
+!#endif
 
-#else
-   call gs_hamkq%alloc_fofr_work(ndat__)
-   associate (work => gs_hamkq%fofr_work)
-#endif
+!#else
+!   call gs_hamkq%alloc_fofr_work(ndat__)
+!   associate (work => gs_hamkq%fofr_work)
+!#endif
 
    if (gs_hamkq%nvloc==1) then
 
@@ -431,16 +432,16 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      end if
    end if ! nvloc
 
-#ifndef _DEV_USE_WORK
-   end associate
-#endif
+!#ifndef _DEV_USE_WORK
+!   end associate
+!#endif
 
-#ifdef _DEV_USE_WORK
+!#ifdef _DEV_USE_WORK
 #ifdef HAVE_OPENMP_OFFLOAD
    if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(work,2*gs_hamkq%n4*gs_hamkq%n5*gs_hamkq%n6*ndat__)
 #endif
    ABI_FREE(work)
-#endif
+!#endif
   ABI_NVTX_END_RANGE()
 
 !  k-point perturbation (or no local part, i.e. optlocal=0)
@@ -1336,8 +1337,8 @@ subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipe
    if (ipert==natom+3) istr=idir
    if (ipert==natom+4) istr=idir+3
    ider=1;idir0=-istr
- !-- Magnetic field perturbation ( SPr, Zeeman )
- else if(ipert==natom+5)then
+ !-- Magnetic field perturbation ( SPr, Zeeman ) or scalar potential
+ else if(ipert==natom+5.or.ipert==natom+6.or.(ipert>natom+11.and.ipert<=2*natom+11))then
    ider=0;idir0=0
  end if
 
@@ -1639,7 +1640,8 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw) MAP(to:dcwavef,s1cwave0,dcwavef_tmp)
        do ipw=1,npw1*nspinor*ndat
-         dcwavef(1:2,ipw)= scal*(nproc_band*s1cwave0(1:2,ipw)-dcwavef_tmp(1:2,ipw))
+         dcwavef(1,ipw)= scal*(nproc_band*s1cwave0(1,ipw)-dcwavef_tmp(1,ipw))
+         dcwavef(2,ipw)= scal*(nproc_band*s1cwave0(2,ipw)-dcwavef_tmp(2,ipw))
        end do
 #endif
      end if
@@ -1797,7 +1799,7 @@ subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
 !=============================================================================
 
 !Phonon and metric (strain) perturbation
- if (ipert<=natom+5.and.ipert/=natom+1.and.ipert/=natom+2.and.optlocal>0) then
+ if (ipert<=natom+6.and.ipert/=natom+1.and.ipert/=natom+2.and.optlocal>0) then
 
    ABI_MALLOC(work,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 
@@ -2271,7 +2273,8 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
        do idat=1,ndat
          !$OMP PARALLEL DO PRIVATE(ipw)
          do ipw=1,npw_k
-           cwavein1(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k)
+           cwavein1(1,ipw+(idat-1)*npw_k)=cwavein(1,ipw+(idat-1)*my_nspinor*npw_k)
+           cwavein1(2,ipw+(idat-1)*npw_k)=cwavein(2,ipw+(idat-1)*my_nspinor*npw_k)
          end do
        end do
 #endif
@@ -2334,7 +2337,8 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
        do idat=1,ndat
          !$OMP PARALLEL DO PRIVATE(ipw)
          do ipw=1,npw_k
-           cwavein2(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k+shift)
+           cwavein2(1,ipw+(idat-1)*npw_k)=cwavein(1,ipw+(idat-1)*my_nspinor*npw_k+shift)
+           cwavein2(2,ipw+(idat-1)*npw_k)=cwavein(2,ipw+(idat-1)*my_nspinor*npw_k+shift)
          end do
        end do
 #endif

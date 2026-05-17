@@ -45,7 +45,7 @@ MODULE m_matlu
  use m_fstrings, only : int2char4
  use m_hide_lapack, only : xginv
  use m_io_tools, only : flush_unit
- use m_matrix, only : blockdiago_fordsyev
+ use m_matrix, only : blockdiago_fordsyev,blockdiago_forzheev
  use m_paw_dmft, only : paw_dmft_type
  use m_xmpi, only : xmpi_bcast,xmpi_sum
 
@@ -1862,7 +1862,7 @@ end subroutine add_matlu
 !!  checkstop= if true (default), print the matrix for spin down in the diagonalization basis of spin up
 !!             (useful when nsppol=2 and nsppol_imp=1)
 !!  optreal= diagonalize the real matrix if max(imag(matlu)) < 1e-6
-!!  test= if 8, use the block diagonalization algorithm (only when the real matrix is diagonalized)
+!!  test= if 8 or 10, use the block diagonalization algorithm (8 for real and 10 for complex)
 !!
 !! OUTPUT
 !!  matlu_diag(natom) :: diagonalized density matrix
@@ -1885,7 +1885,7 @@ end subroutine add_matlu
 !Local variables-------------------------------
  integer :: iatom,im1,im2,info,isppol,lpawu,lwork,lworkr
  integer :: nspinor,nsppol,nsppolimp,optreal,tndim
- logical :: blockdiag,checkstop_in,print_temp_mat2
+ logical :: blockdiag,blockdiagc,checkstop_in,print_temp_mat2
  character(len=4) :: tag
  character(len=500) :: message
  real(dp), allocatable :: eig(:),rwork(:),valuer(:,:),work(:)!,valuer2(:,:)
@@ -1896,6 +1896,7 @@ end subroutine add_matlu
 !************************************************************************
 
  blockdiag    = .false.
+ blockdiagc   = .false.
  checkstop_in = .true.
  nspinor      = matlu(1)%nspinor
  nsppol       = matlu(1)%nsppol
@@ -1904,7 +1905,8 @@ end subroutine add_matlu
 
  if (present(nsppol_imp)) nsppolimp = nsppol_imp
  if (present(checkstop)) checkstop_in = checkstop
- if (present(test)) blockdiag = (test == 8)
+ if (present(test)) blockdiag = (test == 8 )
+ if (present(test)) blockdiagc = ( test == 10)
  if (present(opt_real)) optreal = opt_real
 
  call zero_matlu(matlu_diag(:),natom)
@@ -2017,7 +2019,7 @@ end subroutine add_matlu
 !debug       temp_mat2(:,:)=gathermatlu(iatom)%value(:,:)
 !           write(std_out,*)"diag"
 
-     if (optreal == 1 .and. maxval(abs(aimag(matlu(iatom)%mat(:,:,isppol)))) < tol6) then
+     if (optreal == 1 .and. maxval(abs(aimag(matlu(iatom)%mat(:,:,isppol)))) < tol6 ) then
        write(message,'(a,2x,a,e9.3,a)') ch10,"Imaginary part of Local Hamiltonian is lower than ",&
          & tol6,": the real matrix is used"
        call wrtout(std_out,message,'COLL')
@@ -2045,7 +2047,7 @@ end subroutine add_matlu
 !             call wrtout(std_out,message,'COLL')
 !           end do
            !call dsyev('v','u',tndim,valuer,tndim,eig,work,lworkr,info)
-       if (blockdiag) then
+       if (blockdiag .or. blockdiagc) then
          call blockdiago_fordsyev(valuer(:,:),tndim,eig(:))
        else
          ABI_MALLOC(work,(lworkr))
@@ -2107,24 +2109,40 @@ end subroutine add_matlu
 !             call wrtout(std_out,message,'COLL')
 !           end do
      else
-       if (optreal == 1 .and. maxval(abs(aimag(matlu(iatom)%mat(:,:,isppol)))) > tol8) then
-         write(message,'(a)') " Local hamiltonian in correlated basis is complex"
-         ABI_COMMENT(message)
-       end if
-       ABI_MALLOC(zwork,(lwork))
-       ABI_MALLOC(rwork,(3*tndim-2))
-       call zheev('v','u',tndim,eigvectmatlu(iatom)%mat(:,:,isppol),tndim,eig(:),zwork(:),lwork,rwork(:),info)
-       ABI_FREE(zwork)
-       ABI_FREE(rwork)
-           !call blockdiago_forzheev(gathermatlu(iatom)%value,tndim,eig)
+
+       if (blockdiagc) then
+        write(message,'(a,a,a)') ch10, "   == The local Hamiltonian in Ylm basis is complex.&
+          & The complex matrix is used for the diagonalisation. Printing real and imaginary part of rotation matrix:  "
+        call wrtout(std_out,message,'COLL')
+
+        eigvectmatlu(iatom)%mat(:,:,isppol) = matlu(iatom)%mat(:,:,isppol)
+
+        call blockdiago_forzheev(eigvectmatlu(iatom)%mat(:,:,isppol),tndim,eig(:))
+
+        !ABI_MALLOC(zwork,(lwork))
+        !ABI_MALLOC(rwork,(3*tndim-2))
+        !call zheev('v','u',tndim,eigvectmatlu(iatom)%mat(:,:,isppol),tndim,eig(:),zwork(:),lwork,rwork(:),info)
+        !ABI_FREE(zwork)
+        !ABI_FREE(rwork)
+       else
+          if (optreal == 1 .and. maxval(abs(aimag(matlu(iatom)%mat(:,:,isppol)))) > tol8 ) then
+            write(message,'(a)') " Local hamiltonian in correlated basis is complex"
+            ABI_COMMENT(message)
+          end if
+         !eigvectmatlu(iatom)%mat(:,:,isppol) = matlu(iatom)%mat(:,:,isppol)
+         ABI_MALLOC(zwork,(lwork))
+         ABI_MALLOC(rwork,(3*tndim-2))
+         call zheev('v','u',tndim,eigvectmatlu(iatom)%mat(:,:,isppol),tndim,eig(:),zwork(:),lwork,rwork(:),info)
+         ABI_FREE(zwork)
+         ABI_FREE(rwork)
+       endif !blockdiag
      end if ! present(optreal)
      if (prtopt >= 3) then
-       write(message,'(a)') ch10
-       call wrtout(std_out,message,'COLL')
        write(message,'(3a,i1)') "       EIGENVECTORS for atom ",trim(adjustl(tag))," and isppol ",isppol
        call wrtout(std_out,message,'COLL')
        do im1=1,tndim
-         write(message,'(12(1x,18(1x,"(",f9.3,",",f9.3,")")))') (eigvectmatlu(iatom)%mat(im1,im2,isppol),im2=1,tndim)
+         !write(message,'(12(1x,18(1x,"(",f9.3,",",f9.3,")")))') (eigvectmatlu(iatom)%mat(im1,im2,isppol),im2=1,tndim)
+         write(message,'(12(1x,18(1x,f6.3,1x,f6.3)))') (eigvectmatlu(iatom)%mat(im1,im2,isppol),im2=1,tndim)
          call wrtout(std_out,message,'COLL')
        end do ! im1
           ! do im1=1,tndim

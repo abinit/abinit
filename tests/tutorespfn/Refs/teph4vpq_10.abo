@@ -53,6 +53,7 @@ _ WF disk file :      6.962 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
               amu      6.94100000E+00  1.89984032E+01
         ddb_ngqpt        3    3    3
              ecut      3.00000000E+01 Hartree
+      eph_restart           0
          eph_task         -13
 -          fftalg         512
            istwfk        2    0    0    0    0    0    0    0    0    0
@@ -363,6 +364,7 @@ meta: {optdriver: 7, eph_task: -13, }
               amu      6.94100000E+00  1.89984032E+01
         ddb_ngqpt        3    3    3
              ecut      3.00000000E+01 Hartree
+      eph_restart           0
          eph_task         -13
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00

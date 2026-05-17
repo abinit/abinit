@@ -211,9 +211,11 @@ meta: {optdriver: 7, eph_task: 24, }
    6.90155232E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+ Computing Fan-Migdal + DW self-energy from GSTORE.nc
+ Using e-ph self-energy expression with g^*_KS g_GWPT
 
 - Reading e-ph matrix elements from: t10o_GSTORE.nc
- Asking for with_cplex: 1
+ Asking for with_cplex: 2
  Asking for with_gmode: phonon
  Asking for gvals_name: gvals_ks
  Asking for g2dw: yes

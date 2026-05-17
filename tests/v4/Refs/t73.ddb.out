@@ -1,6 +1,6 @@
 
- **** DERIVATIVE DATABASE ****    
-+DDB, Version number  20230401
+ **** DERIVATIVE DATABASE ****
++DDB, Version number  20240201
 
  alas_gradients_DDB
 
@@ -110,7 +110,7 @@
             0.25000000000000D+00  0.25000000000000D+00  0.25000000000000D+00
      znucl  0.13000000000000D+02  0.33000000000000D+02
       zion  0.30000000000000D+01  0.50000000000000D+01
- 
+
   Description of the potentials (KB energies)
   vrsio8 (for pseudopotentials)=100401
   usepaw =  0
@@ -119,10 +119,10 @@
   iln lpsang iproj  ekb(:)
   Atom type=    2   pspso=  0   nekb=   0
   iln lpsang iproj  ekb(:)
- 
+
  **** Database of total energy derivatives ****
  Number of data blocks=    2
-  
+
  1st derivatives              - # elements :          15
      1     1  0.00000000000000D+00  0.00000000000000D+00
      2     1  0.00000000000000D+00  0.00000000000000D+00
@@ -139,6 +139,6 @@
      1     6  0.00000000000000D+00  0.00000000000000D+00
      2     6  0.00000000000000D+00  0.00000000000000D+00
      3     6  0.00000000000000D+00  0.00000000000000D+00
-  
+
  Total energy                 - # elements :           1
  -0.10094352445043D+02  0.00000000000000D+00

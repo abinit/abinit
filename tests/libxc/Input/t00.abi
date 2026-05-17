@@ -43,7 +43,7 @@ spinat  0.0 0.0 1.0
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
-#%% description = Bi atom with PAW, GGA PBE from LibXC
+#%% keywords =
+#%% description = Bi atom with GGA PBE from LibXC
 #%%   Very quick built-in test, to check that LibXC is installed.
 #%%<END TEST_INFO>

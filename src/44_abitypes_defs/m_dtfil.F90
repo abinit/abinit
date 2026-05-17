@@ -218,6 +218,10 @@ module m_dtfil
   character(len=fnlen) :: fnamewffk
    ! the name of the ground-state wavefunction file to be read (see driver.F90)
 
+  character(len=fnlen) :: fnamewffmq
+   ! the name of the k-q ground-state wavefunction file to be read (see driver.F90)
+   ! only useful in the response-function case
+
   character(len=fnlen) :: fnamewffq
    ! the name of the k+q ground-state wavefunction file to be read (see driver.F90)
    ! only useful in the response-function case
@@ -514,7 +518,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  character(len=15) :: stringfile
  character(len=500) :: msg
  character(len=fnlen) :: filsus,filctqmcdatain,filddbsin,fildens1in,fildensin,filpawdensin,filkdensin,filqps,filscr,filselfin,fil_efmas
- character(len=fnlen) :: fnamewff1,fnamewffddk,fnamewffdelfd,fnamewffdkdk,fnamewffdkde,fnamewffk,fnamewffq
+ character(len=fnlen) :: fnamewff1,fnamewffddk,fnamewffdelfd,fnamewffdkdk,fnamewffdkde,fnamewffk,fnamewffmq,fnamewffq
  character(len=fnlen) :: filbseig,filfft,filhaydock,fil_bsreso,fil_bscoup
  character(len=fnlen) :: filwfkfine
  character(len=fnlen) :: filnam_ds(5)
@@ -606,6 +610,13 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
                    getpath=dtset%getwfq_filepath)
    ! If fnamewffq is not initialized thanks to getwfq or irdwfq, use fnamewffk
    if(will_read==0) fnamewffq = fnamewffk
+
+   ! According to getwfmq and irdwfmq, build _WFQ file name, referred as fnamewffmq
+   stringfile='_WFQ' ; stringvar='wfq'
+   call mkfilename(filnam,fnamewffmq,dtset%getwfmq,idtset,dtset%irdwfmq,jdtset_,ndtset,stringfile,stringvar,will_read, &
+                   getpath=dtset%getwfmq_filepath)
+   ! If fnamewffmq is not initialized thanks to getwfmq or irdwfmq, use fnamewffk
+   if(will_read==0) fnamewffmq = fnamewffk
 
    ! According to get1wf and ird1wf, build _1WF file name, referred as fnamewff1
    stringfile='_1WF' ; stringvar='1wf'
@@ -849,6 +860,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabi_wfkfine = filwfkfine
  dtfil%filstat       =filstat
  dtfil%fnamewffk     =fnamewffk
+ dtfil%fnamewffmq     =fnamewffmq
  dtfil%fnamewffq     =fnamewffq
  dtfil%fnamewffddk   =fnamewffddk
  dtfil%fnamewffdelfd =fnamewffdelfd

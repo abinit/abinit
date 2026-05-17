@@ -54,6 +54,7 @@ _ WF disk file :      6.962 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
         ddb_ngqpt        3    3    3
              ecut      3.00000000E+01 Hartree
  eph_frohl_ntheta          32
+      eph_restart           0
          eph_task          13
 -          fftalg         512
            istwfk        2    0    0    0    0    0    0    0    0    0
@@ -477,6 +478,7 @@ P Number of CPUs for parallelism over k-points: 1
         ddb_ngqpt        3    3    3
              ecut      3.00000000E+01 Hartree
  eph_frohl_ntheta          32
+      eph_restart           0
          eph_task          13
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00

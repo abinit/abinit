@@ -1802,14 +1802,14 @@ subroutine ebands_read_qpdata(qp_ebands, ks_ebands, filepath, comm)
 
 !Local variables-------------------------------
  integer,parameter :: master = 0
- integer :: units(2), irec, unt, nkibz_file, nsppol_file, nspinor_file, ii
+ integer :: units(2), irec, unt, nkibz_file, nsppol_file, nspinor_file !, ii
  integer :: spin, b_start, b_stop, b_stop__, ikpt, nband_k, version, ierr
  real(dp),parameter :: ktol = tol6
  real(dp) :: kpt(3), spinmagntarget_, delta
  character(len=500) :: msg, err_msg
 !arrays
  integer :: ifound(ks_ebands%nkpt, ks_ebands%nsppol)
- integer, allocatable :: iperm(:)
+ !integer, allocatable :: iperm(:)
  real(dp),allocatable :: re_enes(:), im_enes(:)
 ! *************************************************************************
 
@@ -1889,10 +1889,12 @@ subroutine ebands_read_qpdata(qp_ebands, ks_ebands, filepath, comm)
      qp_ebands%eig(b_start:b_stop__, ikpt, spin) = re_enes(b_start:b_stop__)
 
      ! Make sure energies are sorted.
-     ABI_MALLOC(iperm, (nband_k))
-     iperm = [(ii, ii=1, nband_k)]
-     call sort_dp(nband_k, qp_ebands%eig(:, ikpt, spin), iperm, tol6)
-     ABI_FREE(iperm)
+     ! FIXME: The sorting section should be removed as we loose the correspondence
+     ! between the band indices for energies and the ones in the e-ph matrix elements.
+     !ABI_MALLOC(iperm, (nband_k))
+     !iperm = [(ii, ii=1, nband_k)]
+     !call sort_dp(nband_k, qp_ebands%eig(:, ikpt, spin), iperm, tol6)
+     !ABI_FREE(iperm)
 
      ABI_FREE(re_enes)
      ABI_FREE(im_enes)

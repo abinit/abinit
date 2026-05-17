@@ -161,6 +161,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, comm)
    ddb_new%typ = 85
  end if
  ddb_new%qpt = zero
+ ddb_new%omega = zero
  ddb_new%nrm = one
 
  ABI_MALLOC(d2cart,(2,3,mpert,3,mpert))
@@ -203,9 +204,9 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, comm)
 
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
-     call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart, &
-      crystal%gmet,ddb%gprim,ddb%mpert,natom,Ifc%nrpt,qptnrm(1), &
-      qpt, crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,crystal%ucvol, &
+     call gtdyn9(Ifc%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart, &
+      crystal%gmet,Ifc%gprim,Ifc%mpert,natom,Ifc%nrpt,qptnrm(1), &
+      qpt, crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,crystal%ucvol, &
       Ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart,ifc%ewald_option,eta, xmpi_comm_self, &
       dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
 

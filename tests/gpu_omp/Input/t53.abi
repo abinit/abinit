@@ -1,60 +1,56 @@
-# GS calculation with the LOBPCG + RMM-DIIS eigensolver, NC pseudos and GPUs.
-ndtset 1
+#Test chebfi with OpenMP GPU
 
-#gpu_option 0
-gpu_option 2
-#useylm 1
-#timopt -1
+ ndtset 1
+ wfoptalg 111  npband 1 npfft 1
+ gpu_option 2
+ gpu_nfft_blocks 3
 
-paral_kgb 1
+ np_spkpt 1
 
-# Dataset 1
-rmm_diis1 1       # Two CG steps followed by RMM-DIIS.
-nspinor1 1
-istwfk1 *1
+ ngfft 18 18 18
+ ngfftdg 36 36 36
 
-##################
-# COMMON VARIABLES
-##################
-ecut  40    # This to overconverge results and make the test more stable.
-diemac 12.0
+ occopt 1
+ kptopt 0
+ nkpt 1 tolvrs 1.0d-28
+ nsppol 2    spinmagntarget 0.0d0
+ ixc 1
 
-nband  24
-toldfe 1e-8
+ ecut 15. pawecutdg 50
+ diemac 12.0d0  enunit 2
+ nstep 16
+ acell 3*7.0
+ rprim 0.0 0.5 0.5
+       0.5 0.0 0.5
+       0.5 0.5 0.0
+ xred 0.0  0.0  0.0
+      0.22 0.22 0.22
+ chksymtnons 0
+ znucl 6
+ nband 12 occ 4*2 8*0
+ ntypat 1 typat 1 1  natom 2
+ istwfk *1
 
-ngkpt   4 4 4
-nshiftk 1
-shiftk  0.0 0.0 0.0
+ paral_kgb 1
+ iomode 0    # Only for testing purposes
+ fftalg 402
 
-pp_dirpath "$ABI_PSPDIR"
-pseudos "Si-GGA.psp8"
-
-# Definition of the unit cell
-acell 1.0 1.0 1.0
-rprim 0.0 5.083880873222 5.083880873222
-      5.083880873222 0.0 5.083880873222
-      5.083880873222 5.083880873222 0.0
-
-# Definition of the atom types
-ntypat 1
-znucl 14
-
-natom 2
-typat 1 1
-xred
-      0.0  0.0  0.0
-      1/4  1/4  1/4
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c_lda.paw"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test =
-#%%   t53.abo, tolnlines = 40, tolabs = 3e-04, tolrel = 1.5;
 #%% [paral_info]
+#%% nprocs_to_test = 1
 #%% max_nprocs = 1
+#%% [NCPU_1]
+#%% files_to_test = t53_MPI1.abo, tolnlines=   16,   tolabs=  5.0e-8,      tolrel= 2.0e-2
 #%% [extra_info]
-#%% authors = M. Giantomassi
-#%% keywords = NC, RMM-DIIS
-#%% description = GS calculation with LOBPGS + RMM-DIIS eigensolver, NC pseudos and GPU
+#%% keywords = PAW
+#%% authors = M. Sarraute
+#%% description =
+#%%    Chebyshev, local splitted fourwf, C-diamond, Bulk, 2 atoms, paral_kgb, mono-GPU, istwfk==1, with PAW.
+#%% topics = parallelism
 #%%<END TEST_INFO>

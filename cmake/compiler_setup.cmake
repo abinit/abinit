@@ -82,7 +82,8 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Clang")
 
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Flang")
 
-  # TODO
+  # Add exec-stack
+  add_link_options("$<$<AND:$<LINK_LANGUAGE:Fortran>>:-Wl,-z,execstack>")
 
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
 

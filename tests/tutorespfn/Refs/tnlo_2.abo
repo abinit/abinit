@@ -1,5 +1,5 @@
 
-.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.Version 10.5.8.9 of ABINIT. v10.7.1 released Mar 2026.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2026 ABINIT group .
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 20 Dec 2025.
-- ( at 17h04 )
+.Starting date : Thu 26 Mar 2026.
+- ( at 11h25 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorespfn_tnlo_2-tnlo_3-tnlo_4/tnlo_2.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/TestBot_MPI1/tutorespfn_tnlo_2-tnlo_3-tnlo_4/tnlo_2.abi
 - output file    -> tnlo_2.abo
 - root for input  files -> tnlo_2i
 - root for output files -> tnlo_2o
@@ -612,8 +612,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/P.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/P.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/P.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/P.psp8
 - P     ONCVPSP-3.3.0  r_core=   1.46089   1.55067   1.70594
 - 15.00000   5.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -627,8 +627,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -3.024864   -0.802189
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Al.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Al.psp8
 - Al    ONCVPSP-3.3.0  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2013,6 +2013,15 @@ tolerances: {tolvrs: 1.00E-12, }
    3    4   2    6        -1.6473303170         0.0000000000
    3    4   3    6         1.6473303255         0.0000000000
 
+   1    5   1    1        -0.0000000098         0.0000000000
+   1    5   2    1        -0.0000000127         0.0000000000
+   1    5   3    1        -0.0000000153         0.0000000000
+   1    5   1    2         0.0000000010         0.0000000000
+   1    5   2    2         0.0000000015         0.0000000000
+   1    5   3    2         0.0000000016         0.0000000000
+   1    5   1    4        -0.0000000007         0.0000000000
+   1    5   2    4        -0.0000000020         0.0000000000
+   1    5   3    4        -0.0000000045         0.0000000000
    1    5   1    5         1.4600842397         0.0000000000
    1    5   2    5         0.7952851048         0.0000000000
    1    5   3    5         0.7952851124         0.0000000000
@@ -2020,6 +2029,15 @@ tolerances: {tolvrs: 1.00E-12, }
    1    5   2    6         0.0000000086         0.0000000000
    1    5   3    6         0.0000000004         0.0000000000
 
+   2    5   1    1        -0.0000000392         0.0000000000
+   2    5   2    1        -0.0000000568         0.0000000000
+   2    5   3    1        -0.0000000392         0.0000000000
+   2    5   1    2         0.0000000060         0.0000000000
+   2    5   2    2         0.0000000085         0.0000000000
+   2    5   3    2         0.0000000055         0.0000000000
+   2    5   1    4        -0.0000000039         0.0000000000
+   2    5   2    4        -0.0000000180         0.0000000000
+   2    5   3    4        -0.0000000041         0.0000000000
    2    5   1    5         0.7952851110         0.0000000000
    2    5   2    5         1.4600842440         0.0000000000
    2    5   3    5         0.7952851137         0.0000000000
@@ -2027,6 +2045,15 @@ tolerances: {tolvrs: 1.00E-12, }
    2    5   2    6         0.0000000086         0.0000000000
    2    5   3    6         0.0000000004         0.0000000000
 
+   3    5   1    1        -0.0000000155         0.0000000000
+   3    5   2    1        -0.0000000127         0.0000000000
+   3    5   3    1        -0.0000000096         0.0000000000
+   3    5   1    2         0.0000000018         0.0000000000
+   3    5   2    2         0.0000000015         0.0000000000
+   3    5   3    2         0.0000000008         0.0000000000
+   3    5   1    4        -0.0000000046         0.0000000000
+   3    5   2    4        -0.0000000019         0.0000000000
+   3    5   3    4        -0.0000000006         0.0000000000
    3    5   1    5         0.7952851124         0.0000000000
    3    5   2    5         0.7952851076         0.0000000000
    3    5   3    5         1.4600842601         0.0000000000
@@ -2034,6 +2061,15 @@ tolerances: {tolvrs: 1.00E-12, }
    3    5   2    6         0.0000000086         0.0000000000
    3    5   3    6         0.0000000034         0.0000000000
 
+   1    6   1    1         0.0000000177         0.0000000000
+   1    6   2    1         1.0290817269         0.0000000000
+   1    6   3    1         1.0290817306         0.0000000000
+   1    6   1    2        -0.0000000018         0.0000000000
+   1    6   2    2        -1.0294864903         0.0000000000
+   1    6   3    2        -1.0294864916         0.0000000000
+   1    6   1    4         1.6473303255         0.0000000000
+   1    6   2    4        -1.6473303193         0.0000000000
+   1    6   3    4        -1.6473303170         0.0000000000
    1    6   1    5         0.0000000003         0.0000000000
    1    6   2    5         0.0000000008         0.0000000000
    1    6   3    5         0.0000000039         0.0000000000
@@ -2041,6 +2077,15 @@ tolerances: {tolvrs: 1.00E-12, }
    1    6   2    6        -0.0000000019         0.0000000000
    1    6   3    6         0.0000000011         0.0000000000
 
+   2    6   1    1         1.0290817246         0.0000000000
+   2    6   2    1        -0.0000000035         0.0000000000
+   2    6   3    1         1.0290817245         0.0000000000
+   2    6   1    2        -1.0294864925         0.0000000000
+   2    6   2    2         0.0000000016         0.0000000000
+   2    6   3    2        -1.0294864928         0.0000000000
+   2    6   1    4        -1.6473303167         0.0000000000
+   2    6   2    4         1.6473303160         0.0000000000
+   2    6   3    4        -1.6473303170         0.0000000000
    2    6   1    5        -0.0000000010         0.0000000000
    2    6   2    5        -0.0000000016         0.0000000000
    2    6   3    5        -0.0000000010         0.0000000000
@@ -2048,6 +2093,15 @@ tolerances: {tolvrs: 1.00E-12, }
    2    6   2    6         1.0569779455         0.0000000000
    2    6   3    6         0.0000000031         0.0000000000
 
+   3    6   1    1         1.0290817308         0.0000000000
+   3    6   2    1         1.0290817270         0.0000000000
+   3    6   3    1         0.0000000178         0.0000000000
+   3    6   1    2        -1.0294864917         0.0000000000
+   3    6   2    2        -1.0294864903         0.0000000000
+   3    6   3    2        -0.0000000019         0.0000000000
+   3    6   1    4        -1.6473303170         0.0000000000
+   3    6   2    4        -1.6473303193         0.0000000000
+   3    6   3    4         1.6473303255         0.0000000000
    3    6   1    5        -0.0000000050         0.0000000000
    3    6   2    5        -0.0000000081         0.0000000000
    3    6   3    5        -0.0000000028         0.0000000000
@@ -3296,7 +3350,41 @@ P          mk1mem5        432
 - Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#marques2012
 -
-- [4] The Abinit project: Impact, environment and recent developments.
+- [4] Abinit 2025: New Capabilities for the Predictive Modeling of Solids and Nanomaterials.
+- J. Chem. Phys. 163, 164126 (2025).
+- M.J. Verstraete, J. Abreu, G. Allemand, B. Amadon, G. Antonius,
+- M. Azizi, L. Baguet, C. Barat, L. Bastogne, R. Bejaud, J.-M. Beuken,
+- J. Bieder, A. Blanchet, F. Bottin, J. Bouchet, J. Bouquiaux, E. Bousquet,
+- J. Boust, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval,
+- A. Castellano, E. Castiel, J.-B. Charraud, J. Clerouin, M. Cote, C. Duval,
+- A. Gallo, F. Gendron, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras,
+- F. Gomez-Ortiz, X. Gonze, F. Goudreault, A. Gruneis, R. Gupta, B. Guster,
+- D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
+- I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
+- Comment: the sixth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#verstraete2025
+-
+- [5] Optimized norm-conserving Vanderbilt pseudopotentials.
+- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
+- Comment: Some pseudopotential generated using the ONCVPSP code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
+-
+- [6] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
+- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
+-
+- [7] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
+- interatomic force constants from density-functional perturbation theory,
+- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
+-
+- [8] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -3309,65 +3397,33 @@ P          mk1mem5        432
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [5] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
-- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
--
-- [6] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
-- interatomic force constants from density-functional perturbation theory,
-- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
--
-- [7] Optimized norm-conserving Vanderbilt pseudopotentials.
-- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
-- Comment: Some pseudopotential generated using the ONCVPSP code were used.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
--
-- [8] ABINIT: Overview, and focus on selected capabilities
-- J. Chem. Phys. 152, 124102 (2020).
-- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
-- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
-- G.Brunin, D.Caliste, M.Cote,
-- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
-- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
-- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
-- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
-- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- [9] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
-- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
+- is available at
+-  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [9] Recent developments in the ABINIT software package.
-- Computer Phys. Comm. 205, 106 (2016).
-- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
-- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
-- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
-- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
-- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
-- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
-- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
-- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
-- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
-- The licence allows the authors to put it on the Web.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
--
-- Proc.   0 individual time (sec): cpu=         61.4  wall=         61.5
+- Proc.   0 individual time (sec): cpu=         61.0  wall=         61.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  60 WARNINGs and  37 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         61.4  wall=         61.5
++Overall time at end (sec) : cpu=         61.0  wall=         61.1

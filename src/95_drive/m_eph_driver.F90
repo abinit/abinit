@@ -159,7 +159,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  character(len=fnlen) :: wfk0_path, wfq_path, ddb_filepath, dvdb_filepath, sigeph_filepath, path, drhodb_filepath, gstore_filepath, gstore_path
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst, cryst_ddb
- type(ebands_t) :: ks_ebands, ebands_kq, qp_ebands
+ type(ebands_t) :: ks_ebands, ks_ebands_kq, qp_ebands
  type(ddb_type) :: ddb, ddb_lw
  type(ddb_hdr_type) :: ddb_hdr
  type(dvdb_t) :: dvdb, drhodb
@@ -244,7 +244,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    wfq_path = wfk0_path
    use_wfq = .True.
    write(msg, "(4a)")&
-     "eph_task requires WFQ but none among (irdwfq, getwfq, getwfk_filepath) is specified in input.", ch10, &
+     "eph_task requires WFQ but none among (irdwfq, getwfq, getwfq_filepath) is specified in input.", ch10, &
      "Will read WFQ wavefunctions from WFK file:", trim(wfk0_path)
    ABI_COMMENT(msg)
  end if
@@ -364,11 +364,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  if (use_wfq) then
    ! Read WFQ and construct ebands on the shifted grid.
-   ebands_kq = wfk_read_ebands(wfq_path, comm, out_hdr=wfq_hdr)
+   ks_ebands_kq = wfk_read_ebands(wfq_path, comm, out_hdr=wfq_hdr)
    ! GKA TODO: Have to construct a header with the proper set of q-shifted k-points then compare against dtset.
    !call wfq_hdr%vs_dtset(dtset)
    call wfq_hdr%free()
-   call ephtk_update_ebands(dtset, ebands_kq, "Ground state energies (K+Q)")
+   call ephtk_update_ebands(dtset, ks_ebands_kq, "Ground state energies (K+Q)")
  end if
 
  call cwtime_report(" eph%init", cpu, wall, gflops)
@@ -678,13 +678,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (2, -2)
    ! Compute e-ph matrix elements (legacy version)
    ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
-   call eph_gkk(wfk0_path, wfq_path, dtfil, ngfftc, ngfftf, dtset, cryst, ks_ebands, ebands_kq, dvdb, ifc, &
+   call eph_gkk(wfk0_path, wfq_path, dtfil, ngfftc, ngfftf, dtset, cryst, ks_ebands, ks_ebands_kq, dvdb, ifc, &
                 pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (3)
    ! Compute phonon-electron self-energy.
    ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
-   call eph_phpi(wfk0_path, wfq_path, dtfil, ngfftc, ngfftf, dtset, cryst, ks_ebands, ebands_kq, dvdb, ifc, &
+   call eph_phpi(wfk0_path, wfq_path, dtfil, ngfftc, ngfftf, dtset, cryst, ks_ebands, ks_ebands_kq, dvdb, ifc, &
                  pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (4, -4)
@@ -717,15 +717,15 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (7)
    ! Compute phonon-limited RTA from SIGEPH.nc file.
-   call rta_driver(dtfil, ngfftc, dtset, ks_ebands, cryst, pawtab, psps, comm)
+   call rta_driver(dtfil, ngfftc, dtset, qp_ebands, cryst, pawtab, psps, comm)
 
  case (8)
    ! Solve IBTE from SIGEPH.nc file.
-   call ibte_driver(dtfil, ngfftc, dtset, ks_ebands, cryst, pawtab, psps, comm)
+   call ibte_driver(dtfil, ngfftc, dtset, qp_ebands, cryst, pawtab, psps, comm)
 
  case (9)
    ! Compute cumulant from SIGEPH.nc file.
-   call cumulant_driver(dtfil, dtset, ks_ebands, cryst, comm)
+   call cumulant_driver(dtfil, dtset, qp_ebands, cryst, comm)
 
  case (10)
    ! Estimate polaron effective mass in the triply-degenerate VB or CB cubic case
@@ -736,14 +736,14 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (dtfil%filgstorein /= ABI_NOFILE) then
      ! Init gstore from pre-existent file. gstore_gname and read_dw are not relevant here.
      call wrtout(units, sjoin(" Restarting GSTORE computation from:", dtfil%filgstorein))
-     call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, dtfil, cryst, ks_ebands, ifc, &
+     call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, dtfil, cryst, qp_ebands, ifc, &
                              "atom", dtset%gstore_gname, .False., comm)
    else
      gstore_path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-     call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, ks_ebands, ifc, comm)
+     call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, qp_ebands, ifc, comm)
    end if
 
-   call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ks_ebands, dvdb, &
+   call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, qp_ebands, dvdb, &
                        pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
    gstore_path = gstore%path
@@ -752,7 +752,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! Wannierize the e-ph matrix elements if the ABIWAN.nc file is provided.
    if (dtfil%filabiwanin /= ABI_NOFILE) then
      ! Init gstore from pre-existent file. gstore_gname and read_dw are not relevant here.
-     call gstore%from_ncpath(gstore_path, with_cplex2, dtset, dtfil, cryst, ks_ebands, ifc, &
+     call gstore%from_ncpath(gstore_path, with_cplex2, dtset, dtfil, cryst, qp_ebands, ifc, &
                             "atom", dtset%gstore_gname, .False., comm)
      call gstore%wannierize_and_write_gwan(dvdb, dtfil)
      call gstore%free()
@@ -783,7 +783,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (12, -12)
    ! Migdal-Eliashberg equations (isotropic or anisotropic case).
    ! Need|g(k,q)|^2 in the phonon representation but
-   call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, dtfil, cryst, ks_ebands, ifc, &
+   call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, dtfil, cryst, qp_ebands, ifc, &
                            "phonon", dtset%gstore_gname, .False., comm)
 
    if (dtset%eph_task == -12) call migdal_eliashberg_iso(gstore, dtset, dtfil)
@@ -793,19 +793,19 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (13)
    ! Variational polaron equations.
    call wrtout(units, sjoin(" Computing variational polaron equations from pre-existent GSTORE file:", gstore_filepath))
-   call gstore%from_ncpath(gstore_filepath, with_cplex2, dtset, dtfil, cryst, ks_ebands, ifc, &
+   call gstore%from_ncpath(gstore_filepath, with_cplex2, dtset, dtfil, cryst, qp_ebands, ifc, &
                            "phonon", dtset%gstore_gname, .False., comm)
    call varpeq_run(gstore, dtset, dtfil)
    call gstore%free()
 
  case (-13)
    ! Compute polaron wavefunctions and atomic displacements in the supercell and write results to files.
-   call varpeq_plot(wfk0_path, ngfftc, dtset, dtfil, cryst, ks_ebands, pawtab, psps, comm)
+   call varpeq_plot(wfk0_path, ngfftc, dtset, dtfil, cryst, qp_ebands, pawtab, psps, comm)
 
  case (14)
    ! Molecular Berry Curvature.
    call wrtout(units, sjoin(" Computing Berry curvature from pre-existent GSTORE file:", dtfil%filgstorein))
-   call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, dtfil, cryst, ks_ebands, ifc, &
+   call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, dtfil, cryst, qp_ebands, ifc, &
                            "atom", dtset%gstore_gname, .False., comm)
 
    call berry_curvature(gstore, dtset, dtfil)
@@ -827,7 +827,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      ABI_WARNING("eph_task in [16, -16] (test_phrotation) does not support nprocs > 1. Running in sequential.")
    end if
 
-   qptopt = ks_ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
+   qptopt = qp_ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
    call test_phrotation(ifc, cryst, qptopt, dtset%ph_ngqpt, comm)
 
    dvdb%comm = xmpi_comm_self
@@ -839,7 +839,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (17)
    ! Compute e-ph matrix elements with the GWPT formalism.
-   call gwpt_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ks_ebands, dvdb, drhodb, ifc, wfk0_hdr, &
+   call gwpt_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, qp_ebands, dvdb, drhodb, ifc, wfk0_hdr, &
                  pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (18)
@@ -848,7 +848,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (19)
    ! Compute matrix elements of W_kk'.
-   call wkk_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ks_ebands, wfk0_hdr, pawtab, psps, mpi_enreg, comm)
+   call wkk_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, qp_ebands, wfk0_hdr, pawtab, psps, mpi_enreg, comm)
 
  case default
    ABI_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
@@ -859,7 +859,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !=====================
  call cryst%free(); call dvdb%free(); call drhodb%free(); call ddb_hdr%free()
  call ddb%free(); call ifc%free(); call wfk0_hdr%free()
- call ks_ebands%free(); call ebands_kq%free()
+ call ks_ebands%free(); call ks_ebands_kq%free()
  call qp_ebands%free()
  call pawfgr_destroy(pawfgr); call destroy_mpi_enreg(mpi_enreg)
 

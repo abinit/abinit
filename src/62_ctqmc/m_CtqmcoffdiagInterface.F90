@@ -306,7 +306,7 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
     CALL Ctqmcoffdiag_sethybri_limit(op%Hybrid, hybri_limit)
 
      !call xmpi_barrier(op%Hybrid%MY_COMM)
-  CALL Ctqmcoffdiag_setG0wTab(op%Hybrid, G0omega,op%opt_fk)
+  CALL Ctqmcoffdiag_setG0wTab(op%Hybrid, G0omega,op%opt_fk,fname)
      !call xmpi_barrier(op%Hybrid%MY_COMM)
 
   IF ( PRESENT(matU) ) &

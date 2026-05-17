@@ -1,40 +1,28 @@
 # Calculation of GWPT e-ph matrix elements
 # Preparatory run for ZPR computation.
 
- ecut 35.0
-
- ngkpt 4 4 4
- nshiftk 1
- shiftk 0 0 0
-
-##############################################
-####                 SECTION: GWPT
-##############################################
-#gwpt_np_wpqbks 1 1 8 1 1 1
 optdriver 7              # Enter EPH driver.
 eph_task 17              # GWPT computation.
+#gwpt_wmode 2
+#gwpt_np_wpqbks 1 1 8 1 1 1
 
 # Additional filter in k-space: only k-points corresponding to the band edges are considered
 gstore_kfilter "qprange"
-#gstore_use_lgk  0
 gstore_use_lgk 1   # IMPORTANT FOR PERFORMANCE
                    # Since we want to compute ZPR_k, we can restrict the q-points to the IBZ_k
 
 ecuteps  2         # Cutoff energy for screening (cannot be larger than the one found in the SCR file)
-                   # SC TODO: on alps_gnu_14.2_cov, ecuteps here = ecuteps in the SCR file still results in an error
-ecutsigx 25         # Cutoff energy for exchange part.
+ecutsigx 25        # Cutoff energy for exchange part.
 boxcutmin 1.1
-tolwfr 1e-8       # Tolerance for Sternheimer solver.
-nstep 150
 
-gwcomp 2          # Activate COH static remainder technique.
+tolwfr 1e-8        # Tolerance for Sternheimer solver.
+nstep 150          # Max number of iterations in Sternheimer solver.
 
 # TODO: elph2_imagden Should have a default value
 elph2_imagden 0.1 eV
-#zcut 0.01 eV
 #gw_icutcoul 16      # Monte-carlo integration
 
-nband 10
+nband 10    # Number of bands in sum (n' index)
 
 getwfk_filepath "teph4zpr_gwpt_4o_WFK"    # 4x4x4 k-mesh
 getscr_filepath "teph4zpr_gwpt_5o_SCR"
@@ -49,12 +37,14 @@ getddb_filepath "teph4zpr_gwpt_1_DDB"
 getdvdb_filepath "teph4zpr_gwpt_2_DVDB"
 getdrhodb_filepath "teph4zpr_gwpt_3_DRHODB"
 
-prtphdos 0       # Disable computation of PHDOS to save some time
+ecut 35.0
 
-#############################################
-###                 SECTION: Sigma_nk
-#############################################
-#zcut 0.01 eV
+# K-mesh. Must be consistent with WFK file.
+ngkpt 4 4 4
+nshiftk 1
+shiftk 0 0 0
+
+prtphdos 0       # Disable computation of PHDOS to save some time
 
 structure = "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 
@@ -69,6 +59,7 @@ pseudos = "O.psp8, Mg-sp-gw.psp8"
 #%% executable = abinit
 #%% test_chain =  teph4zpr_gwpt_1.abi, teph4zpr_gwpt_2.abi, teph4zpr_gwpt_3.abi, teph4zpr_gwpt_4.abi,
 #%%               teph4zpr_gwpt_5.abi, teph4zpr_gwpt_6.abi, teph4zpr_gwpt_7.abi, teph4zpr_gwpt_8.abi
+#%% exclude_builders = scope_gnu_10.2_paral
 #%% [files]
 #%% use_git_submodule = MgO_eph_zpr
 #%% files_to_test =

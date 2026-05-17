@@ -16,7 +16,7 @@ In this tutorial you will learn how to get the following physical properties (of
 
 In order to learn the use of the associated codes *mrgddb* and *anaddb*,
 to produce phonon band structures and the associated
-thermodynamical properties, please consult the [second tutorial on DFPT](/tutorial/rf2).
+thermodynamical properties, please consult the [second tutorial on DFPT](../tutorial/rf2.md).
 
 It is strongly recommended to discover this tutorial simultaneously with the DFPT (respfn) user guide.
 You might start by reading [[help:respfn#intro|sections 0 and the first paragraph of section 1]] of this user guide.
@@ -135,11 +135,11 @@ increases a lot, and of course, the CPU time.
 From this run, it is possible to get the values of the total energy, and the
 value of the gradient of the total energy (dE) with respect to change of reduced coordinate (dt):
 
-	 rms dE/dt=  3.5517E-03; max dE/dt=  5.0080E-03; dE/dt below (all hartree)
-	    1       0.005007986445      0.002526333145      0.002526333145
-	    2      -0.005007927934     -0.002526305645     -0.002526305645
-            ...
-	total_energy        : -9.76586978750721E+00
+        rms dE/dt=  3.5517E-03; max dE/dt=  5.0080E-03; dE/dt below (all hartree)
+           1       0.005007986445      0.002526333145      0.002526333145
+           2      -0.005007927934     -0.002526305645     -0.002526305645
+           ...
+        total_energy        : -9.76586978750721E+00
 
 The change of reduced coordinate ([[xred]]) of the Al atom along the first axis was
 rather small (1/1000 = 0.001), and we can make an estimate of the second derivative of
@@ -167,8 +167,8 @@ simple higher-order estimation, as we will see later.
 The results of this calculation are as follows:
 
      rms dE/dt=  7.1249E-03; max dE/dt=  1.0016E-02; dE/dt below (all hartree)
-	1       0.010016404892      0.005097557910      0.005097557910
-    	2      -0.010016285027     -0.005097505086     -0.005097505086
+        1       0.010016404892      0.005097557910      0.005097557910
+        2      -0.010016285027     -0.005097505086     -0.005097505086
         ...
      total_energy        : -9.76586227537498E+00
 
@@ -209,7 +209,7 @@ into forces, and specified in cartesian coordinates, as can be seen in the
 output file for the small displacement:
 
      cartesian forces (hartree/bohr) at end:
-	1     -0.00001684430130    -0.00094404759278    -0.00094404759278
+        1     -0.00001684430130    -0.00094404759278    -0.00094404759278
     	2      0.00001684430130     0.00094404759278     0.00094404759278
 
 
@@ -620,6 +620,6 @@ close to their values at $\Gamma$ : 344.3 cm$^{-1}$ and 379.6 cm$^{-1}$.
 
 !!! note
     This ABINIT tutorial is now finished.
-    You are advised to go through the [second tutorial on DFPT](/tutorial/rf2) to
+    You are advised to go through the [second tutorial on DFPT](../tutorial/rf2.md) to
     make some post-processing analysis (phonon dispersions, thermodynamical properties, *etc*)
 

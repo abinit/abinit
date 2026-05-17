@@ -13,7 +13,7 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : 21 Dec 2025.
+.Starting date : 15 Apr 2026.
 
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
@@ -107,7 +107,6 @@
  tolinbox               0.03000
  tolmatch               0.05000
  USE IDEAL POSITIONS TO COMPUTE SPECTRUM
--Number of processors    1    1
 
  All quantities are computed from nstep_min=    1
                                to nstep_max=   20
@@ -282,7 +281,7 @@
  #############################################################################
  Read the IFC from ifc_in.dat
  ------- achieved
- Write in ifc_check.dat (and ifc_check.nc) the IFC read previously
+ Write the IFC in ifc_check.dat (and ifc_check.nc)
  ------- achieved
 
  #############################################################################

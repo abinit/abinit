@@ -1,27 +1,26 @@
-# NSCF computation of WFK files with empty states
- ecut 35.0
+# NSCF computation of WFK files with empty states.
+ecut 35.0
 
- nband  110 nbdbuf -10 # A negative value means 10% of nband
+nband  110
+nbdbuf -10       # A negative value means 10% of nband.
 
- nstep 150
- iscf -2          # NSCF run
- tolwfr 1e-14     # 1e-18 is the recommended value
+nstep 150        # Max number of NSCF iterations
+iscf -2          # NSCF run
+tolwfr 1e-14     # 1e-18 is the recommended value. This is just to speedup the test.
 
- getden_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
+# Read density from this file.
+getden_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 
- ngkpt 4 4 4
- nshiftk 1
- shiftk 0 0 0
-
-##############################################
-####                 SECTION: SCR
-##############################################
+# The k-mesh of the output WFK file.
+ngkpt 4 4 4
+nshiftk 1
+shiftk 0 0 0
 
 # Read crystal structure from DEN.nc file
- structure "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
+structure "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "O.psp8, Mg-sp-gw.psp8"
+pp_dirpath "$ABI_PSPDIR"
+pseudos "O.psp8, Mg-sp-gw.psp8"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -31,6 +30,7 @@
 #%% executable = abinit
 #%% test_chain =  teph4zpr_gwpt_1.abi, teph4zpr_gwpt_2.abi, teph4zpr_gwpt_3.abi, teph4zpr_gwpt_4.abi,
 #%%               teph4zpr_gwpt_5.abi, teph4zpr_gwpt_6.abi, teph4zpr_gwpt_7.abi, teph4zpr_gwpt_8.abi
+#%% exclude_builders = scope_gnu_10.2_paral
 #%% [files]
 #%% use_git_submodule = MgO_eph_zpr
 #%% files_to_test =
@@ -40,5 +40,5 @@
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH, GWPT
-#%% description = SCR computation for MgO
+#%% description = NSCF computation of WFK files with empty states
 #%%<END TEST_INFO>

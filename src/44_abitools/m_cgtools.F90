@@ -759,8 +759,8 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta, gpu_op
  character(len=1),intent(in) :: trans
  integer,optional,intent(in) :: gpu_option
 !arrays
- real(dp),intent(in) :: cgmat(2,nrows*ncols), vec(2,*)
- real(dp),intent(inout) :: matvec(2,*)
+ real(dp),intent(in), target :: cgmat(2,nrows*ncols), vec(2,*)
+ real(dp),intent(inout), target :: matvec(2,*)
 
 !Local variables-------------------------------
 !scalars
@@ -786,7 +786,11 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta, gpu_op
  else if(my_gpu_option==ABI_GPU_OPENMP) then
    my_calpha = DCMPLX(my_alpha(1), my_alpha(2))
    my_cbeta  = DCMPLX(my_beta(1), my_beta(2))
-   call abi_gpu_xgemm(2, trans, "N", mm, nn, kk, my_calpha, cgmat, lda, vec, ldb, my_cbeta, matvec, ldc)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET DATA USE_DEVICE_ADDR(cgmat,vec(1:2,1:nn*kk),matvec(1:2,1:mm*nn))
+   call abi_gpu_xgemm(2, trans, "N", mm, nn, kk, my_calpha, c_loc(cgmat), lda, c_loc(vec), ldb, my_cbeta, c_loc(matvec), ldc)
+   !$OMP END TARGET DATA
+#endif
  end if
 
 end subroutine cg_zgemv
@@ -1791,22 +1795,49 @@ subroutine dotprod_vn(cplex,dens,dotr,doti,nfft,nfftot,nspden,option,pot,ucvol, 
          pim12= pot(jfft  ,3)
          pre21= pot(jfft  ,4)
          pim21=-pot(jfft-1,4)
-         dotr=dotr + pre11 * dre11 &
-&         + pim11 * dim11 &
-&         + pre22 * dre22 &
-&         + pim22 * dim22 &
-&         + pre12 * dre12 &
-&         + pim12 * dim12 &
-&         + pre21 * dre21 &
-&         + pim21 * dim21
-         doti=doti + pre11 * dim11 &
-&         - pim11 * dre11 &
-&         + pre22 * dim22 &
-&         - pim22 * dre22 &
-&         + pre12 * dim12 &
-&         - pim12 * dre12 &
-&         + pre21 * dim21 &
-&         - pim21 * dre21
+         v0_re=half*(pre11+pre22)
+         v0_im=half*(pim11+pim22)
+         bx_re=half*(pre12+pre21)
+         bx_im=half*(pim12+pim21)
+         by_re=half*(-pim12+pim21)
+         by_im=half*(pre12-pre21)
+         bz_re=half*(pre11-pre22)
+         bz_im=half*(pim11-pim22)
+
+         dotr=dotr+v0_re * dens(jfft-1,1)&
+&         + v0_im * dens(jfft  ,1) &
+&         + bx_re * dens(jfft-1,2) &
+&         + bx_im * dens(jfft  ,2) &
+&         + by_re * dens(jfft-1,3) &
+&         + by_im * dens(jfft  ,3) &
+&         + bz_re * dens(jfft-1,4) &
+&         + bz_im * dens(jfft  ,4)
+
+         doti=doti+ v0_re * dens(jfft  ,1)&
+&         - v0_im * dens(jfft-1,1) &
+&         + bx_re * dens(jfft  ,2) &
+&         - bx_im * dens(jfft-1,2) &
+&         + by_re * dens(jfft  ,3) &
+&         - by_im * dens(jfft-1,3) &
+&         + bz_re * dens(jfft  ,4) &
+&         - bz_im * dens(jfft-1,4)
+
+!         dotr=dotr + pre11 * dre11 &
+!&         + pim11 * dim11 &
+!&         + pre22 * dre22 &
+!&         + pim22 * dim22 &
+!&         + pre12 * dre12 &
+!&         + pim12 * dim12 &
+!&         + pre21 * dre21 &
+!&         + pim21 * dim21
+!         doti=doti + pre11 * dim11 &
+!&         - pim11 * dre11 &
+!&         + pre22 * dim22 &
+!&         - pim22 * dre22 &
+!&         + pre12 * dim12 &
+!&         - pim12 * dre12 &
+!&         + pre21 * dim21 &
+!&         - pim21 * dre21
        end do
      end if ! option
    end if ! cplex

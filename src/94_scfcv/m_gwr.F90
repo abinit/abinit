@@ -5802,7 +5802,7 @@ subroutine gwr_build_sigmac(gwr)
  integer :: my_ikf, ipm, ik_bz, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp, iter_ncid
  integer :: isym_k, trev_k, g0_k(3), tsign_k !, b1gw, b2gw, ! npwsp, my_iqi, sc_ir, ig, my_iqf
  integer :: gt_request, wct_request
- integer :: band_val, ibv, ncerr, unt_it, unt_iw, unt_rw
+ integer :: band_val, ibv, unt_it, unt_iw, unt_rw ! ncerr,
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
  integer :: gt_scbox_win, wct_scbox_win, use_umklp, ideg, nstates, nb1, nb2, nspinor
  integer(c_size_t) :: bufsize
@@ -5814,7 +5814,7 @@ subroutine gwr_build_sigmac(gwr)
  real(gwp) :: wtqm, wtqp
  complex(dp) :: zz, zsc, sigc_e0__, dsigc_de0, z_e0, sig_xc, hhartree_bk, qp_ene, qp_ene_prev, alpha_c, sigc_zsc
  logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k, do_sigma_fit
- logical :: compute_this_kbz, print_time, define, sigc_is_herm, band_inversion
+ logical :: compute_this_kbz, print_time, sigc_is_herm, band_inversion ! define,
  character(len=500) :: msg, gpu_action
  type(gaps_t) :: new_gaps
  type(yamldoc_t) :: ydoc
@@ -6839,9 +6839,9 @@ subroutine print_sigma_header()
 
 end subroutine print_sigma_header
 
-subroutine ncwrite_sigmac(myncid, mydefine)
+subroutine ncwrite_sigmac(myncid)
  integer,intent(in) :: myncid
- logical,intent(in), optional :: mydefine
+ !logical,intent(in), optional :: mydefine
  integer :: myncerr
 
  ! Write Sigma_c to GWR.nc

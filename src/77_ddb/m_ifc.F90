@@ -345,7 +345,7 @@ end subroutine ifc_free
 !!
 !! SOURCE
 
-subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
+subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
                     rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
                     prtsrlr,enunit, & ! TODO: TO BE REMOVED
                     comm, &
@@ -353,7 +353,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
 !Arguments ------------------------------------
  class(ifc_type),intent(inout) :: Ifc
- integer,intent(in) :: asr,brav,dipdip,symdynmat,nqshft,rfmeth,nsphere,comm
+ integer,intent(in) :: asr,dipdip,symdynmat,nqshft,rfmeth,nsphere,comm
  real(dp),intent(in) :: rifcsph
  type(crystal_t),intent(in) :: Crystal
  type(ddb_type),intent(in) :: ddb
@@ -366,7 +366,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  real(dp),intent(in) :: dielt(3,3),zeff(3,3,Crystal%natom)
  real(dp),intent(in) :: qdrp_cart(3,3,3,Crystal%natom)
 !anaddb variables (TO BE REMOVED)
- integer,intent(in) :: prtsrlr,enunit
+ integer,intent(in) :: prtsrlr,enunit,brav
 
 !Local variables -------------------------
 !scalars
@@ -375,7 +375,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  integer :: nqbz,option,plus,sumg0,irpt,irpt_new, nprocs,my_rank,my_ierr,ierr
  logical :: prtout_
  real(dp),parameter :: qphnrm=one
- real(dp) :: xval,cpu,wall,gflops,rcut_min,r_inscribed_sphere,toldist
+ real(dp) :: cpu,wall,gflops,xval,rcut_min,r_inscribed_sphere,toldist
  character(len=500*4) :: msg
  type(ifc_type) :: ifc_tmp
 !arrays
@@ -391,6 +391,10 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  real(dp),allocatable :: wtq(:),wtq_folded(:),qbz(:,:)
 !******************************************************************
 
+ ! TODO
+ ! - Remove brav
+ ! - Separate into ifc_init and ifc_from_ddb
+
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  call cwtime(cpu, wall, gflops, "start")
 
@@ -398,8 +402,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  iout = ab_out
  prtout_ = .true.
  if (present(prtout)) prtout_ = prtout
-
- rprim = ddb%rprim; gprim = ddb%gprim
 
  nsym = Crystal%nsym
  natom = Crystal%natom
@@ -413,21 +415,58 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  Ifc%mpert = mpert
  Ifc%asr = asr
  Ifc%brav = brav
+
  Ifc%dipdip = abs(dipdip)
  Ifc%dipquad=0; if (present(dipquad)) Ifc%dipquad = dipquad
  Ifc%quadquad=0; if (present(quadquad)) Ifc%quadquad = quadquad
  Ifc%symdynmat = symdynmat
+ Ifc%ngqpt = ngqpt_in(1:3)
  Ifc%nqshft = nqshft
  call alloc_copy(q1shft(:,1:Ifc%nqshft),Ifc%qshft)
- Ifc%ngqpt = ngqpt_in(1:3)
+ Ifc%ewald_option = 0; if (dipdip < 0) Ifc%ewald_option = 1 !HM TODO: expose this in the init?
+
+
+ ! These two ways of defining rprim, gprim, acell should be equivalent.
+ ! Note that the crystal object does not know about acell.
  Ifc%rprim = ddb%rprim
  Ifc%gprim = ddb%gprim
  Ifc%acell = ddb%acell
- Ifc%ewald_option = 0; if (dipdip < 0) Ifc%ewald_option = 1 !HM TODO: expose this in the init?
+ !Ifc%rprim = crystal%rprimd
+ !Ifc%gprim = crystal%gprimd
+ !Ifc%acell = one
+ !
+ !! When brav/=1, we need specific values of rprim.
+ !if (abs(brav)/=1) then
+ !  if (brav==2) then
+ !    !  Face Centered Lattice
+ !    fac = half_sqrt2
+ !  else if (brav==3) then
+ !    !  Body Centered Cubic Lattice
+ !    fac = half_sqrt3
+ !  else if (brav==4) then
+ !    !  Hexagonal Lattice
+ !    fac = one
+ !  end if
+ !  Ifc%acell(1) = sqrt(rprimd(1,1)**2 + rprimd(2,1)**2 + rprimd(3,1)**2) / fac
+ !  Ifc%acell(2) = sqrt(rprimd(1,2)**2 + rprimd(2,2)**2 + rprimd(3,2)**2) / fac
+ !  Ifc%acell(3) = sqrt(rprimd(1,3)**2 + rprimd(2,3)**2 + rprimd(3,3)**2) / fac
+ !  do ii=1,3
+ !    Ifc%rprim(ii, 1) = rprimd(ii, 1) / Ifc%acell(1)
+ !    Ifc%rprim(ii, 2) = rprimd(ii, 2) / Ifc%acell(2)
+ !    Ifc%rprim(ii, 3) = rprimd(ii, 3) / Ifc%acell(3)
+ !    Ifc%gprim(ii, 1) = crystal%gprimd(ii, 1) * Ifc%acell(1)
+ !    Ifc%gprim(ii, 2) = crystal%gprimd(ii, 2) * Ifc%acell(2)
+ !    Ifc%gprim(ii, 3) = crystal%gprimd(ii, 3) * Ifc%acell(3)
+ !  end do
+ !
+ !end if
 
  ! Check if the rprim are coherent with the choice used in the interatomic forces generation
- call chkrp9(Ifc%brav,rprim)
+ call chkrp9(Ifc%brav,Ifc%rprim)
 
+ rprim = Ifc%rprim; gprim = Ifc%gprim
+
+ ! -------------------------------------------------------------------------- !
  ! Compute dyewq0, the correction to be applied to the Ewald, see Eq.(71) of PRB55, 10355 (1997).
  dyewq0 = zero
  if ((Ifc%dipdip==1.or.Ifc%dipquad==1.or.Ifc%quadquad==1).and. (Ifc%asr==1.or.Ifc%asr==2)) then
@@ -436,16 +475,19 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    qpt(:)=zero
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
    if (Ifc%dipquad==1.or.Ifc%quadquad==1) then
-     call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
+     call ewald9(Ifc%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                  Crystal%xred,zeff,qdrp_cart,ifc%eta, option=ifc%ewald_option,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
    else
-     call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
+     call ewald9(Ifc%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                  Crystal%xred,zeff,qdrp_cart,ifc%eta, option=ifc%ewald_option)
    end if
 
    call q0dy3_calc(natom,dyewq0,dyew,Ifc%asr)
    ABI_FREE(dyew)
  end if
+
+ ! -------------------------------------------------------------------------- !
+ ! Setup q-points
 
  ! Sample the Brillouin zone
  option=1
@@ -479,6 +521,9 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ABI_FREE(ibz2bz)
  ABI_FREE(wtq_folded)
  ABI_FREE(wtq)
+
+ ! -------------------------------------------------------------------------- !
+ ! Setup dynamical matrix and IFC matrix
 
  ABI_MALLOC(Ifc%dynmat,(2,3,natom,3,natom,nqbz))
 
@@ -548,11 +593,11 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      qpt(:)=qbz(:,iqpt)
      sumg0=0
      if (Ifc%dipquad==1.or.Ifc%quadquad==1) then
-       call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
+       call ewald9(Ifc%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                    Crystal%xred,zeff,qdrp_cart, ifc%eta, &
                    option=ifc%ewald_option,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
      else
-       call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
+       call ewald9(Ifc%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                    Crystal%xred,zeff,qdrp_cart, ifc%eta, &
                    option=ifc%ewald_option)
      end if
@@ -580,6 +625,9 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ! Multiply the dynamical matrix by a phase shift
  option=1
  call dymfz9(Ifc%dynmat,natom,nqbz,gprim,option,qbz,trans)
+
+ ! -------------------------------------------------------------------------- !
+ ! Compute interatomic forces in real space
 
  ! Create the Big Box of R vectors in real space and compute the number of points (cells) in real space
  call make_bigbox(Ifc%brav,ifc_tmp%cell,ngqpt,nqshft,rprim,ifc_tmp%nrpt,ifc_tmp%rpt)
@@ -631,7 +679,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    call wrtout(std_out, ' Apply cutoff on IFCs.')
    call wrtout(std_out, sjoin(" nsphere:", itoa(nsphere), ", rifcsph:", ftoa(rifcsph)))
    call wrtout(std_out, sjoin(" Radius of biggest sphere inscribed in the WS supercell: ", ftoa(r_inscribed_sphere)))
-   call corsifc9(ddb%acell,gprim,natom,ifc_tmp%nrpt,nsphere,rifcsph,rcan,rprim,ifc_tmp%rpt,rcut_min,ifc_tmp%wghatm)
+   call corsifc9(Ifc%acell,gprim,natom,ifc_tmp%nrpt,nsphere,rifcsph,rcan,rprim,ifc_tmp%rpt,rcut_min,ifc_tmp%wghatm)
    if (Ifc%asr > 0) then
      call wrtout(std_out, ' Enforcing ASR on cutoffed IFCs.')
      call asrif9(Ifc%asr,ifc_tmp%atmfrc,natom,ifc_tmp%nrpt,ifc_tmp%rpt,ifc_tmp%wghatm)
@@ -669,6 +717,10 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  !  write(std_out,*)ifc%rpt(:,irpt), (ifc%wghatm(ii,ii,irpt), ii=1,natom)
  !end do
 
+ call ifc_tmp%free()
+
+ ! -------------------------------------------------------------------------- !
+
  ! Copy other useful arrays.
  Ifc%dielt = dielt
  Ifc%nqbz = nqbz
@@ -679,9 +731,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  call alloc_copy(qbz(:,1:nqbz), Ifc%qbz)
  call alloc_copy(zeff, Ifc%zeff)
  call alloc_copy(qdrp_cart, Ifc%qdrp_cart)
- call alloc_copy(ddb%amu, Ifc%amu)
-
- call ifc_tmp%free()
+ call alloc_copy(crystal%amu, Ifc%amu)
 
  ! Compute min/max ph frequency with ab-initio q-mesh.
  ifc%omega_minmax(1) = huge(one); ifc%omega_minmax(2) = -huge(one)
@@ -710,7 +760,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      ! OmegaSRLR: Perform decomposition of dynamical matrix
      ! MG: FIXME I don't think the implementation is correct when q !=0
      if (prtsrlr==1) then
-       call omega_decomp(ddb%amu,natom,ntypat,Crystal%typat,dynmatfull,dynmat_sr,dynmat_lr,iqpt,nqbz,eigvec)
+       call omega_decomp(Ifc%amu,natom,ntypat,Crystal%typat,dynmatfull,dynmat_sr,dynmat_lr,iqpt,nqbz,eigvec)
      end if
 
      ! Write the phonon frequencies (this is for checking purposes).
@@ -1842,6 +1892,10 @@ subroutine ifc_write(Ifc,ifcana,atifcflg,ifcout,prt_ifc,ncid,prefix,&
        write(iout, '(a)' )
      end if
 
+     ! =========================================================================== !
+     ! Side effects happen here
+     ! The long-range part of the IFC (ewald_atmfrc) gets computed.
+
      ! BEGIN DEBUG
      !write(*,*) 'ifc_write (1) : Writing atmfrc'
      !write(*,*) 'atmfrc         : ', Ifc%atmfrc
@@ -1849,6 +1903,8 @@ subroutine ifc_write(Ifc,ifcana,atifcflg,ifcout,prt_ifc,ncid,prefix,&
      ! END DEBUG
      call ifc_getiaf(Ifc,ifcana,ifcout1,iout,ifc%zeff,ia,ra,list,dist,invdlt,&
                      detdlt,rsiaf,sriaf,vect,indngb,posngb)
+
+     ! =========================================================================== !
 
      if (prt_ifc == 1) then
        do ii=1,ifcout1
@@ -2000,6 +2056,9 @@ end subroutine ifc_write
 !! indngb(ifcout)=indices in the unit cell of the neighbouring atoms
 !! posngb(3,ifcout)=position of the neighbouring atoms in cartesian coordinates
 !! output file
+!!
+!! SIDE EFFECTS
+!! The long-range part of the IFC (ewald_atmfrc) gets computed.
 !!
 !! NOTES
 !! This routine should be executed by one processor only
@@ -2865,7 +2924,7 @@ subroutine ifc_to_ddb(ifc, ddb, crystal)
  real(dp) :: qj,qptnrm
 !arrays
  integer :: qptrlatt(3,3)
- integer,allocatable :: flg(:,:,:,:)
+ integer,allocatable :: flg(:,:,:,:), flg_gamma(:,:,:,:)
  real(dp) :: qpt(3), qshft(1,3)
  real(dp),allocatable :: qibz(:,:),qbz(:,:), wtq(:), d2cart(:,:,:,:,:),d2red(:,:,:,:,:)
 ! *********************************************************************
@@ -2882,7 +2941,8 @@ subroutine ifc_to_ddb(ifc, ddb, crystal)
   call alloc_copy(crystal%amu, ddb%amu)
 
   ! Block size
-  !mpert = ddb%natom + 3
+  ! GA: TODO need to compute mpert in a more transparent way.
+  !     Also, mpert should be consistent with ifc_init.
   mpert = ddb%natom + 6
   msize = 3*mpert*3*mpert
   ddb%mpert = mpert
@@ -2901,6 +2961,7 @@ subroutine ifc_to_ddb(ifc, ddb, crystal)
   ABI_MALLOC(ddb%flg,(msize,nqibz))  ; ddb%flg = one
   ABI_MALLOC(ddb%nrm,(3,nqibz))      ; ddb%nrm = zero ; ddb%nrm(1,:) = one
   ABI_MALLOC(ddb%qpt,(9,nqibz))      ; ddb%qpt = zero
+  ABI_MALLOC(ddb%omega,(3,nqibz))    ; ddb%omega = zero
   ABI_MALLOC(ddb%val,(2,msize,nqibz)); ddb%val = zero
   ABI_MALLOC(ddb%typ,(nqibz))
 
@@ -2926,15 +2987,40 @@ subroutine ifc_to_ddb(ifc, ddb, crystal)
 
   ! Set up the flags
   ABI_CALLOC(flg,(3,mpert,3,mpert))
+  ABI_CALLOC(flg_gamma,(3,mpert,3,mpert))
   do ipert1=1,ddb%natom
     do ipert2=1,ddb%natom
       do idir1=1,3
         do idir2=1,3
           flg(idir1,ipert1,idir2,ipert2) = one
+          flg_gamma(idir1,ipert1,idir2,ipert2) = one
         end do
       end do
     end do
   end do
+
+  ! Activate dielt and zeff flag if we have them
+  if (ifc%dipdip > 0) then
+
+    ! Dielectric tensor
+    ipert1 = ddb%natom + 2; ipert2 = ddb%natom + 2;
+    do idir1=1,3
+      do idir2=1,3
+        flg_gamma(idir1,ipert1,idir2,ipert2) = one
+      end do
+    end do
+
+    ! Born effective charges
+    ipert1 = ddb%natom + 2
+    do ipert2=1,ddb%natom
+      do idir1=1,3
+        do idir2=1,3
+          flg_gamma(idir1,ipert1,idir2,ipert2) = one
+          flg_gamma(idir1,ipert2,idir2,ipert1) = one
+        end do
+      end do
+    end do
+  end if
 
   do iqpt=1,DDB%nblok
 
@@ -2956,12 +3042,21 @@ subroutine ifc_to_ddb(ifc, ddb, crystal)
     call d2cart_to_red(d2cart,d2red,crystal%gprimd,crystal%rprimd,ddb%mpert, &
      crystal%natom,crystal%ntypat,crystal%typat,crystal%ucvol,crystal%zion)
 
-    call ddb%set_d2matr(iqpt, d2red, flg)
+    ! Check if this q-point is Gamma
+    call gamma9(jj, qpt, qptnrm, DDB_QTOL)
+
+    if (jj == 1) then
+      call ddb%set_d2matr(iqpt, d2red, flg_gamma)
+    else
+      call ddb%set_d2matr(iqpt, d2red, flg)
+    end if
+
   end do
 
   ABI_FREE(d2cart)
   ABI_FREE(d2red)
   ABI_FREE(flg)
+  ABI_FREE(flg_gamma)
 
 end subroutine ifc_to_ddb
 !!***

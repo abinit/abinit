@@ -1,8 +1,8 @@
 import numpy as np
-import triqs.utility.mpi as mpi
-from triqs.gf import *
-from som import Som, fill_refreq, reconstruct
 from plot_utils import *
+from som import Som, fill_refreq, reconstruct
+from triqs.gf import *
+from triqs.utility import mpi
 
 # Retrieve data from G(tau) file
 filename = "tdmft_triqs_2o_DS2_Gtau_diag_DLR_iatom0001.dat"
@@ -31,13 +31,13 @@ acc_params = {}
 energy_window = (-4.0, 4.0)
 
 # Support of the spectral function
-acc_params['energy_window'] = energy_window
+acc_params["energy_window"] = energy_window
 # Number of particular solutions to accumulate
-acc_params['l'] = 10
+acc_params["l"] = 10
 # Number of global updates
-acc_params['f'] = 100
+acc_params["f"] = 100
 # Number of local updates per global update
-acc_params['t'] = 50
+acc_params["t"] = 50
 
 cont = Som(g_tau, error_bars, kind="FermionGf", norms=norms)
 

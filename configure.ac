@@ -475,20 +475,6 @@ if test "${abi_fc_vendor}" == "cray"; then
   AC_MSG_NOTICE([disabling optimizations for src/70_gw/])
   fcflags_opt_70_gw="-O1"
 fi
-# FIXME: AMD LLVM fork for OpenMP GPU (aka AOMP) has a sensitive OpenMP GPU implementation, so we enable it where needed.
-# Checked with version 16.0.0 shipped with ROCm 5.6.0 (July 2023).
-if test "${abi_fc_vendor}" == "llvm" -a "${abi_gpu_flavor}" == "hip-double"; then
-  if test "${abi_openmp_offload_enable}" = "yes"; then
-    fcflags_opt_28_numeric_noabirule="${amd_openmp_flags}"
-    fcflags_opt_45_xgTools="${amd_openmp_flags}"
-    fcflags_opt_46_ghc_omp="${amd_openmp_flags}"
-    fcflags_opt_66_nonlocal="${amd_openmp_flags}"
-    fcflags_opt_66_wfs="${amd_openmp_flags}"
-    fcflags_opt_67_common="${amd_openmp_flags}"
-    fcflags_opt_79_seqpar_mpi="${amd_openmp_flags}"
-    fcflags_opt_98_main="${amd_openmp_flags}"
-  fi
-fi
 
 # Set per-directory Fortran optimizations
 # Note: must be done only once FCFLAGS_OPTIM is set
@@ -589,12 +575,23 @@ fi
 # Determine Fortran link flags (FCLIBS)
 # This is needed after FCFLAGS has been set as some compilers have extra
 # libraries linked due to optimizations levels or OpenMP
-# This step would be performed inside AC_FC_WRAPPERS but it fails due to a mischievous
+# This step would norally be performed inside AC_FC_WRAPPERS but...
+
+# With CRAY, it fails due to a mischievous
 # double-quote in FCLIBS when using Cray compiler, so we trim it out in that specific case.
 AC_FC_LIBRARY_LDFLAGS
 
 if test "${abi_fc_vendor}" = "cray"; then
   FCLIBS=`echo ${FCLIBS} | tr '"' ' '`
+fi
+
+# With LLVM, a syntax error happens
+# An error also occurs with multiple definitions that is addressed by a linker flag
+# And a weird error occurs due to the inclusion of device-specific libs, that need to be removed
+if test "${abi_fc_vendor}" = "llvm"; then
+  FCLIBS=`echo ${FCLIBS} | sed -e "s/-l \// \//"`
+  FCLIBS=`echo ${FCLIBS} -Wl,--allow-multiple-definition`
+  FCLIBS=`echo ${FCLIBS} | sed -e "s/-lompdevice -lclang_rt.builtins//"`
 fi
 
 # Remove -lsr-complexity-limit=<some-number> from FCLIBS, as it is
@@ -1141,8 +1138,12 @@ fi
 # AC_CONFIG_FILES([fallbacks/build-abinit-fallbacks.sh])
 #AC_CONFIG_COMMANDS([chmod +x fallbacks/build-abinit-fallbacks.sh])
 #AC_OUTPUT
-# Old formulation: AC_OUTPUT([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh],[chmod +x fallbacks/build-abinit-fallbacks.sh])
-AC_OUTPUT([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh],[chmod +x fallbacks/build-abinit-fallbacks.sh])
+# Old formulation: AC_CONFIG_FILES([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh])
+#AC_CONFIG_COMMANDS([default],[chmod +x fallbacks/build-abinit-fallbacks.sh],[])
+#AC_OUTPUT
+AC_CONFIG_FILES([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh])
+AC_CONFIG_COMMANDS([default],[chmod +x fallbacks/build-abinit-fallbacks.sh],[])
+AC_OUTPUT
 
 # Check that we have all required fallbacks
 ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])
