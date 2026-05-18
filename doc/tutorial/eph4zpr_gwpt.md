@@ -180,6 +180,17 @@ with the following input file:
     The first-order densities are not written by default when performing DFPT calculations.
     Remember to use [[prtden]] 1 during the DFPT calculation.
 
+!!! Tip
+
+    Mrgdv can also be invoked with the `merge` command and the syntax:
+
+        mrgdv merge out_DVDB POT1 POT2 ...
+
+    This is especially useful in cojunction with shell globbing.
+    For instance,
+
+        mrgdv merge teph4zpr_gwpt_3_DRHODB  MgO_eph_zpr/flow_zpr_mgo/w*/t*/outdata/out_DEN*.nc
+
 
 ## Computing the WFK files with empty states
 
@@ -354,11 +365,34 @@ eph_task 17  # GWPT computation.
 ```
 
 Since we need a GSTORE for the ZPR only for specific $\kk$-points, we use
-[[gstore_kfilter]] = "qprange" to select only the $\kk$-points associated with the band edges
-and [[gstore_use_lgk]] = 1 to restrict the $\qq$-points to the IBZ_k.
+[[gstore_kfilter]] = "qprange" to select only the $\kk$-points associated with the band edges.
+This is clearly seen in the output file
+
+{% dialog tests/tutorespfn/Refs/teph4zpr_gwpt_7.abo %}
+
+if you search for "k-points included in gstore:":
+
+```
+ k-points included in gstore:
+1 : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+```
+
+Note also that here we use [[gstore_use_lgk]] = 1 to restrict the $\qq$-points to the IBZ_k.
 These options are crucial to reduce the computational cost of the GWPT run.
 
-Note that GWPT requires several external files in input.
+GWPT requires several external files in input.
+To gain a first understanding of the situation, let us use
+
+```
+grep Reading teph4zpr_gwpt_7.abo
+
+- Reading GS states from WFK file: teph4zpr_gwpt_4o_WFK
+- Reading DDB from file: teph4zpr_gwpt_1_DDB
+- Reading DVDB from file: teph4zpr_gwpt_2_DVDB
+ Reading KS GS potential for Sternheimer from: MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
+```
+
 The KS states are read from the WFK file via [[getwfk_filepath]].
 This file defines the list of $\kk$-points in the e-ph matrix elements.
 The value of [[ngkpt]], [[nshiftk]] and [[shiftk]] **must be consistent** with the ones used to generate the WFK file.
@@ -412,9 +446,57 @@ Other variables worth mentioning here are [[zcut]] and [[elph2_imagden]].
     By default, we use the Godby-Needs model.
 
 
-Now let's have a look at the output results:
+Now let's use AbiPy to analyze the the GSTORE.nc file produced by the job:
+As usual, we can "print" basic info on the file by using the abiopen.py script:
 
-{% dialog tests/tutorespfn/Refs/teph4zpr_gwpt_7.abo %}
+```
+abiopen.py teph4zpr_gwpt_7o_GSTORE.nc -p
+```
+
+The last section of the printout gives:
+
+```
+============================= Gstore parameters =============================
+nsppol: 1
+gstore_completed: True
+kzone: ibz
+kfilter: qprange
+gtype: gwpt
+qzone: bz
+with_vk: 1
+kptopt: 1
+qptopt: 1
+use_lgk: 1
+use_lgq: 0
+For spin=0
+	brange_k: [5 9]
+	brange_kq: [ 0 10]
+	erange_spin: [0. 0.]
+	glob_spin_nq: 64
+```
+
+`brange_k` is the range of the $n$ index in the incoming state $\varepsilon_\nk$,
+while `brange_kq` gives the range of the $m$ index in the final state $\varepsilon_\mkq$,
+Note that here we are using python conventions so we start to count from zero, and the last value
+of the range is exluded.
+
+In our calculation, MgO has 16 valence electrons (see `nelect` in the main output file) so
+there are 8 occupied bands as [[nsppol]] = 1 and [[nspinor]] 1.
+Our GSTORE.nc thus contains $\gkq$ matrix elements
+
+Now let us explain how to visualize the data using the following AbiPy script:
+
+```
+#!/usr/bin/env python
+from abipy.eph.gstore import GstoreFile
+
+with GstoreFile.from_file("teph4zpr_gwpt_7o_GSTORE.nc") as g:
+    g.plot_gwpt_vs_ks_scatter()                                   # auto
+    g.plot_gwpt_vs_ks_scatter(ratio_min=0, ratio_max=3)           # clipped
+    g.plot_gwpt_vs_ks_scatter(fit_intercept=True, with_inset=False)
+```
+
+TODO: Discussion
 
 
 ## Computing the ZPR with GWPT e-ph matrix elements
@@ -428,7 +510,6 @@ In other words, the quality of the ZPR obtained here mainly depends on the densi
 used in the previous section, the number of empty states ($n'$ index) and the different cutoff energies.
 In order to perform convergence studies, one should go back to the previous step, increase the relevant parameters
 and monitor how the ZPR is affected by these settings.
-This is left as an exercise to the reader...
 
 After this preamble, let us start the calculation by issuing:
 
@@ -441,6 +522,7 @@ with the following input file:
 {% dialog tests/tutorespfn/Input/teph4zpr_gwpt_8.abi %}
 
 Let us now discuss the most relevant input variables:
+
 To activate the computation of the e-ph self-energy from a GSTORE file we use
 [[optdriver]], [[eph_task]] and [[getgstore_filepath]]
 
@@ -465,17 +547,133 @@ TODO: One should check that nband is consistent with nb_kq
   In the case of GWPT calculations, one assumes that the GWPT matrix elements are
   very close to the KS ones when $m$ > [[nband]].
 
-Now let's have a look at the final results reported in the main output file:
+Now let us have a look at the final results reported in the main output file:
 
 {% dialog tests/tutorespfn/Refs/teph4zpr_gwpt_8.abo %}
 
-One can use [[gstore_gname]] to select the kind of e-ph matrix elements that should
-be read from the GSTORE.
-In order to compute the ZPR with KS matrix elements, use [[gstore_gname]] = "gvals_ks"
+Thi section tells us that  computation we will use
+the real part of the $g^*_KS g_GWPT$ instead of $|g_GWPT|^2$
+when computing the diagonal matrix elements of the FM self-energy.
+The default behaviour can be changed via [[gwpt_gmode]].
+
+```
+ Computing Fan-Migdal + DW self-energy from GSTORE.nc
+ Using e-ph self-energy expression with g^*_KS g_GWPT
+
+- Reading e-ph matrix elements from: teph4zpr_gwpt_7o_GSTORE.nc
+ Asking for with_cplex: 2
+ Asking for with_gmode: phonon
+ Asking for gvals_name: gvals
+ Asking for g2dw: yes
+ Initializing gstore object from: teph4zpr_gwpt_7o_GSTORE.nc
+
+ Reading GWPT e-ph matrix elements
+```
+
+After this section, we have a summary of the GSTORE parameters:
+
+```
+ === Gstore parameters ===
+ kzone: ibz
+ kfilter: qprange
+ nkibz: 8
+ nkbz: 64
+ glob_nk_spin: [1]
+ qzone: bz
+ nqibz: 8
+ nqbz: 64
+ glob_nq_spin: [64]
+ kptopt: 1
+ qptopt: 1
+ has_used_lgk: 1
+ has_used_lgq: 0
+ with_vk: 1
+
+ gqk_cplex: 2
+ gqk_bstart_k: 6
+ gqk_bstart_kq: 1
+ gqk_bstop_k: 9
+ gqk_bstop_kq: 10
+ gqk_nb_k: 4
+ gqk_nb_kq: 10
+ gqk_my_npert: 6
+P gqk_my_nk: -1
+P gqk_my_nq: -1
+```
+
+As expected, we have only $\kk$-point in the e-ph matrix elements.
+
+Then we find a section describing how the workload and memory is distributed across the MPI grid:
+
+```
+  === MPI distribution ===
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of CPUs for parallelism over k-points: 1
+ k-points included in gstore:
+1 : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Little group operations of the k-point will be used to symmetry reduce the integral in q-space.
+```
+
+```
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Direct band gap semiconductor
+ Fundamental gap:     4.479 (eV)
+   VBM:     4.490 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.969 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         4.479 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   0.0     0.000     7.270     2.781     1.698
+ 100.0     0.009     7.173     2.684     1.795
+ 200.0     0.017     7.077     2.587     1.892
+ 300.0     0.026     6.980     2.490     1.989
+```
+
+The final results are summarized in this table:
+
+```
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
+
+
+ Using g(k,q) of type: GWPT
+
+
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.270
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   6   4.490    4.689    0.199    0.313   -0.006    0.637   -3.809    4.122    0.000    0.000
+   7   4.490    4.689    0.199    0.313   -0.006    0.637   -3.809    4.122    0.000    0.000
+   8   4.490    4.689    0.199    0.313   -0.006    0.637   -3.809    4.122    0.000    0.000
+   9   8.969    8.867   -0.102   -0.104   -0.000    0.979    0.035   -0.139    4.479    4.178
+
+ KS gap:    4.479 (assuming bval:8 ==> bcond:9)
+ QP gap:    4.178 (OTMS:    4.062)
+ QP_gap - KS_gap:   -0.301 (OTMS:   -0.417)
+```
 
 !!! tip
 
-  [[eph_ahc_type]] 0 can be used to use the adiabatic version of the Allen-Heine-Cardona equation.
-  This is the version that should be used when comparing GWPT ZPR with finite-difference $G_0 W_0$
-  calculations performed at fixed screening ignoring contributions beyond the rigid-ion approximation
-  commonly used to deal with the Debye-Waller term.
+    One can use [[gstore_gname]] to select the kind of e-ph matrix elements that should
+    be read from the GSTORE.
+    In order to compute the ZPR with KS matrix elements, use [[gstore_gname]] = "gvals_ks"
+
+Finally, let us mention that [[eph_ahc_type]] 0 can be used to use the adiabatic version of the Allen-Heine-Cardona equation.
+This is the version that should be used when comparing GWPT ZPR with finite-difference $G_0 W_0$
+calculations performed at fixed screening ignoring contributions beyond the rigid-ion approximation
+commonly used to deal with the Debye-Waller term.
+
+## Where to go next?
