@@ -24,7 +24,7 @@
 #include "abi_common.h"
 
 module m_spmat_spvec
-  use defs_basis  
+  use defs_basis
   use m_xmpi
   use m_errors
   use m_abicore

@@ -191,12 +191,12 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
 !scalars
  integer :: alpha,ask_accurate,bantot,beta,comm_cell,cplex
  integer :: delta,dkdk_index,formeig,gamma
- integer :: ia1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idir_dkdk 
+ integer :: ia1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idir_dkdk
  integer :: idq,ierr,ii,ikpt,ireadwf,istr,itypat,mcg1,me,mpsang
  integer :: mpw1, mpw1_mq
  integer :: n1,n2,n3,ndir,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc
  integer :: optgeom,opthartdqdq,optorth,pawread
- integer :: pert1case,pert2case,pert3case,timrev,usexcnhat 
+ integer :: pert1case,pert2case,pert3case,timrev,usexcnhat
  integer :: pert1case_mq,pert2case_mq
  real(dp) :: delad,delag,delbd,delbg,ecut,ecut_eff
  logical :: finite_q,kramers_deg,samepert
@@ -248,7 +248,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
 !Deactivate kramer's degeneracy for calculations that break TRS
 !(finite q in magnetic materials or finite omega)
  kramers_deg=.true.
- timrev = 1 
+ timrev = 1
  if (dtset%tim1rev==0) then
    kramers_deg=.false.
    timrev = 0
@@ -267,7 +267,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
  optorth=1;if (psps%usepaw==1) optorth=0
  opthartdqdq=1
 
-!Set up some quantities required to calculate the Berry 
+!Set up some quantities required to calculate the Berry
 !curvature at finite q
  ABI_MALLOC(npwar1,(dtset%nkpt))
  ABI_MALLOC(npwtot1,(dtset%nkpt))
@@ -285,7 +285,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
    end do
    if (.not.kramers_deg) then
      do ikpt=1,nkpt
-       kmq(:,ikpt)=-dtset%qptn(:)+dtset%kptns(:,ikpt) 
+       kmq(:,ikpt)=-dtset%qptn(:)+dtset%kptns(:,ikpt)
      end do
    end if
 
@@ -318,7 +318,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
    ABI_MALLOC(doccde_tmp,(dtset%mband*dtset%nkpt*dtset%nsppol))
    eigenq(:)=zero
    call ebands_kq%init(bantot,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
-&   doccde_tmp,eigenq,dtset%istwfk,kpq,dtset%nband,dtset%nkpt,npwar1,dtset%nsppol,& 
+&   doccde_tmp,eigenq,dtset%istwfk,kpq,dtset%nband,dtset%nkpt,npwar1,dtset%nsppol,&
 &   dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ,dtset%wtk,&
 &   dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 &   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
@@ -341,7 +341,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
    npwar1=npwarr
  end if
  mcg1=mpw1*nspinor*mband*mk1mem*nsppol
-  
+
  ABI_MALLOC(cg1,(2,mcg1))
  ABI_MALLOC(cg2,(2,mcg1))
  ABI_MALLOC(eigen1,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
@@ -413,7 +413,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
 
 
  pert1case = 0 ; pert2case = 0 ; pert3case = 0
- pert1case_mq = 0 ; pert2case_mq = 0 
+ pert1case_mq = 0 ; pert2case_mq = 0
 
  do i1pert = 1, mpert
    do i1dir = 1, 3
@@ -424,13 +424,13 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
          pert1case = i1dir + (i1pert-1)*3
        else if (i1pert > natom+11 .and. i1pert <= 2*natom+11) then
          pert1case = i1dir + i1pert*3
-       end if 
+       end if
        call appdig(pert1case,dtfil%fnamewff1,fiwf1i)
 
        if (finite_q) then
          call hdr1_pq%init(ebands_kq,codvsn,dtset,pawtab,pert1case,psps,wvl%descr, &
        & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
-       else 
+       else
          hdr1_pq=hdr
        end if
 
@@ -451,7 +451,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
            pert1case_mq=pert1case+(2*dtset%natom+11)*3
          else
            pert1case_mq=pert1case
-         endif 
+         endif
          call appdig(pert1case_mq,dtfil%fnamewff1,fiwf1i_mq)
 
          if (finite_q) then
@@ -468,24 +468,24 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
          & dtset%nsppol,dtset%nsym,&
          & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
          & dtfil%unkg1,wff1,wfft1,dtfil%unwff1,fiwf1i_mq,wvl)
-  
+
          if (ireadwf==1) then
            call WffClose (wff1,ierr)
          end if
-       end if 
+       end if
 
-       if (.not.just_timdisp) then 
+       if (.not.just_timdisp) then
          call read_1eig(eigen1,formeig,mband,nkpt,nsppol,fiwf1i)
-  
+
          rho1r1(:,:) = zero; rho1g1(:,:) = zero
          if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
            call appdig(pert1case,dtfil%fildens1in,fiden1i)
-  
+
            call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, psps%usepaw, mpi_enreg, rho1r1, &
            hdr_den, pawrhoij_read, comm_cell, check_hdr=hdr)
            call hdr_den%free()
          end if
-  
+
          !Perform FFT rhor1 to rhog1
          ABI_MALLOC(work,(cplex*nfftf))
          work(:)=rho1r1(:,1)
@@ -509,12 +509,12 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
          do i2dir = 1, 3
 
            if ((maxval(rfpert(i1dir,i1pert,i2dir,i2pert,:,:))==1)) then
-       
+
              if (i2pert < natom + 10) then
                pert2case = i2dir + (i2pert-1)*3
              else if (i2pert > natom+11 .and. i2pert <= 2*natom+11) then
                pert2case = i2dir + i2pert*3
-             end if 
+             end if
 
              call appdig(pert2case,dtfil%fnamewff1,fiwf2i)
 
@@ -523,8 +523,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
              & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
              else
                hdr2_pq=hdr
-             end if   
- 
+             end if
+
              call inwffil(ask_accurate,cg2,dtset,dtset%ecut,ecut_eff,eigen2,dtset%exchn2n3d,&
              & formeig,hdr2_pq,ireadwf,dtset%istwfk,kg1,kpq,dtset%localrdwf,&
              & dtset%mband,mcg1,dtset%mk1mem,mpi_enreg,mpw1,&
@@ -559,11 +559,11 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                & dtset%nsppol,dtset%nsym,&
                & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
                & dtfil%unkg1,wff2,wfft2,dtfil%unwff2,fiwf2i_mq,wvl)
- 
+
                if (ireadwf==1) then
                  call WffClose (wff2,ierr)
                end if
-             end if 
+             end if
 
              if (i1pert==i2pert.and.i1dir==i2dir) then
                samepert=.true.
@@ -571,25 +571,25 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                samepert=.false.
              end if
 
-             if (.not.just_timdisp) then 
+             if (.not.just_timdisp) then
                call read_1eig(eigen2,formeig,mband,nkpt,nsppol,fiwf2i)
-  
+
                rho2r1(:,:) = zero; rho2g1(:,:) = zero
                if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
                  call appdig(pert2case,dtfil%fildens1in,fiden1i)
-        
+
                  call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, psps%usepaw, mpi_enreg, rho2r1, &
                  hdr_den, pawrhoij_read, comm_cell, check_hdr=hdr)
                  call hdr_den%free()
                end if
-  
+
                if (.not.samepert) then
                  !Perform FFT rhor1 to rhog1
                  ABI_MALLOC(work,(cplex*nfftf))
                  work(:)=rho2r1(:,1)
                  call fourdp(cplex,rho2g1,work,-1,mpi_enreg,dtset%nfft,1,dtset%ngfft,0)
                  ABI_FREE(work)
-               end if !samepert  
+               end if !samepert
              end if
 
              !Allocate the first-order gradient local potential
@@ -611,14 +611,14 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
              ABI_MALLOC(vpsp1_i1pertdq_geom,(2*nfftf,dtset%nspden,3))
              if (.not.just_timdisp) then
                if (i1pert <= natom .and. (i2pert == natom+3.or.i2pert == natom+4)) then
-                 
+
                  !calculate the second of the two first-gradient directions
                  do ii=1,3
                    call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
                    & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
                    & ph1d,ii,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdq_geom(:,1,ii))
                  end do
-               end if 
+               end if
              end if
 
              !Allocate the second-gradient array
@@ -655,7 +655,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                        call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
                        & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
                        & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdq(:,1,1))
-  
+
                        if (i2pert == natom+3.or.i2pert == natom+4) then
                          gamma=i3dir
                          do idq= 1, n2dq
@@ -663,7 +663,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                               istr=i2dir
                             else
                               istr=idq*3+i2dir
-                            endif 
+                            endif
                             delta=idx(2*istr)
                             call dfpt_vlocaldqdq(atindx,2,gs_hamkq%gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
                           & psps%mqgrid_vl,dtset%natom,&
@@ -672,7 +672,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                           & dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdqdq(:,1,idq))
                          end do
                        end if
-  
+
                      else if (i1pert==natom+3.or.i1pert==natom+4) then
                        istr=i1dir; if (i1pert==natom+4) istr=3+i1dir
                        !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
@@ -686,7 +686,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                          !Here we need to calculate both extradiagonal shear-strains
                          !because the second gradient of the metric perturbation is
                          !type-I, i.e., non symmetric with respect to the
-                         !permutation of the strain indexes. 
+                         !permutation of the strain indexes.
                          istr=6+i1dir
                          call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i1pert,kxc,mpi_enreg, &
                          & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
@@ -695,7 +695,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                          vpsp1_i1pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
                        end if
                      end if
-  
+
                      if (.not.samepert) then
                        !gradient of i2pert:
                        if (i2pert<=natom) then
@@ -716,7 +716,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                            !Here we need to calculate both extradiagonal shear-strains
                            !because the second gradient of the metric perturbation is
                            !type-I, i.e., non symmetric with respect to the
-                           !permutation of the strain indexes. 
+                           !permutation of the strain indexes.
                            istr=6+i2dir
                            call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i2pert,kxc,mpi_enreg, &
                            & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
@@ -725,22 +725,22 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                            vpsp1_i2pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
                          end if
                        end if
-                       
+
                        if (i1pert==natom+2.and.i2pert<=natom.and.psps%n1xccc/=0) then
                          !Get the q-gradient of the pseudocore density
                          call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i2dir,i2pert,mpi_enreg, &
                          & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
                          & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,ncorespl,xccc3d2dq,optnc=1)
-  
+
                          !Get the q-gradient of the first-order XC potential due to the pseudocore charge
                          call dfpt_mkvxcccdq(cplex,i3dir,dtset%ixc,gprimd,kxc,mpi_enreg,nfftf,dtset%ngfft,&
                        & nkxc,nspden,dtset%qptn,rprimd,vxccc1_i2pertdq,xccc3d2,xccc3d2dq)
-  
+
                          !Add this contribution to the gradient of the local PSP
                          vpsp1_i2pertdq= vpsp1_i2pertdq + vxccc1_i2pertdq
                        end if
                      end if !samepert
-  
+
 
                      !Prepare ddk wf file
                      pert3case = i3dir + natom*3
@@ -773,9 +773,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                        call appdig(dkdk_index,dtfil%fnamewffdkdk,fiwfdkdk)
                        !Check that d2_dkdk file exists and open it
                        if (.not. file_exists(fiwfdkdk)) then
-                         ! Trick needed to run Abinit test suite in netcdf mode. 
-                         if (file_exists(nctk_ncify(fiwfdkdk))) then             
-                           write(message,"(3a)")"- File: ",trim(fiwfdkdk),& 
+                         ! Trick needed to run Abinit test suite in netcdf mode.
+                         if (file_exists(nctk_ncify(fiwfdkdk))) then
+                           write(message,"(3a)")"- File: ",trim(fiwfdkdk),&
                            " does not exist but found netcdf file with similar name."
                            call wrtout(std_out,message,'COLL')
                            fiwfdkdk = nctk_ncify(fiwfdkdk)
@@ -786,11 +786,11 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                        end if
                        write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk wavefunctions from file: ',trim(fiwfdkdk)
                        call wrtout(std_out,message,'COLL')
-                       !call wrtout(ab_out,message,'COLL') 
+                       !call wrtout(ab_out,message,'COLL')
                        call d2_dkdk_f%open_read(fiwfdkdk,1,dtset%iomode,dtfil%unddk+1,mpi_enreg%comm_cell)
-                     
+
                      end if
-  
+
                      !Prepare d2_dkdk wf file
                      !For i2pert
                      if (i2pert==natom+2.and..not.samepert) then
@@ -800,7 +800,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                        call appdig(dkdk_index,dtfil%fnamewffdkdk,fiwfdkdk)
                        !Check that d2_dkdk file exists and open it
                        if (.not. file_exists(fiwfdkdk)) then
-                         ! Trick needed to run Abinit test suite in netcdf mode. 
+                         ! Trick needed to run Abinit test suite in netcdf mode.
                          if (file_exists(nctk_ncify(fiwfdkdk))) then
                            write(message,"(3a)")"- File: ",trim(fiwfdkdk),&
                            " does not exist but found netcdf file with similar name."
@@ -815,7 +815,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                        call wrtout(std_out,message,'COLL')
                        call d2_dkdk_f2%open_read(fiwfdkdk,1,dtset%iomode,dtfil%unddk+2,mpi_enreg%comm_cell)
                      end if
-  
+
                      !Perform the longwave DFPT part of the 3dte calculation
                      call dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,dimffnl,dtset, &
                      & eigen1,eigen2,ffnl,gmet,gs_hamkq,gsqcut,i1dir,&
@@ -824,60 +824,60 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                      & pawfgr,psps,rho1g1,rho1r1,rho2r1,rmet,rprimd,samepert,ucvol,useylmgr,&
                      & vpsp1_i1pertdq,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,vpsp1_i2pertdq,&
                      & ddk_f,d2_dkdk_f,d2_dkdk_f2,ylm,ylmgr)
-  
+
                      !close ddk file
                      call ddk_f%close()
-  
+
                      !close d2_dkdk file (i1pert)
                      if (i1pert==natom+2) call d2_dkdk_f%close()
-  
+
                      ! Close d2_dkdk file (i2pert)
                      if (i2pert==natom+2.and..not.samepert) call d2_dkdk_f2%close()
-  
+
                      !Save the type-I terms
                      if (i2pert==natom+3.or.i2pert==natom+4) then
                        gamma=i3dir
                        do idq=1,n2dq
                          if (i2pert==natom+3) then
                            istr=i2dir
-                         else 
+                         else
                            istr=idq*3+i2dir
-                         endif 
+                         endif
                          beta=idx(2*istr-1); delta=idx(2*istr)
                          t4_typeI(:,i1dir,i1pert,beta,delta,gamma)=d3etot_t4(:,idq)
                        end do
-                     else 
+                     else
                        t4_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=d3etot_t4(:,1)
                      end if
-        
+
                      if (i1pert==natom+3.or.i1pert==natom+4) then
                        gamma=i3dir
                        do idq=1,n1dq
                          if (i1pert==natom+3) then
                            istr=i1dir
-                         else 
+                         else
                            istr=idq*3+i1dir
-                         endif 
+                         endif
                          beta=idx(2*istr-1); delta=idx(2*istr)
                          t5_typeI(:,i2dir,i2pert,beta,delta,gamma)=d3etot_t5(:,idq)
                        end do
-                     else 
+                     else
                        t5_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=d3etot_t5(:,1)
                      end if
-  
-  
+
+
                      if (i1pert<=natom.and.(i2pert==natom+3.or.i2pert==natom+4)) then
                        alpha=i1dir
                        gamma=i3dir
                        do idq=1,n2dq
                          if (i2pert==natom+3) then
                            istr=i2dir
-                         else 
+                         else
                            istr=idq*3+i2dir
-                         endif 
+                         endif
                          beta=idx(2*istr-1); delta=idx(2*istr)
                          tgeom_typeI(:,i1dir,i1pert,beta,delta,gamma)=d3etot_tgeom(:,idq)
-  
+
                          !Incorporate here the G=0 contribution of the geometric term
                          ia1=0
                          itypat=0
@@ -889,12 +889,12 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                          delbd=zero ; if (beta==delta)  delbd=one
                          delag=zero ; if (alpha==gamma) delag=one
                          delbg=zero ; if (beta==gamma)  delbg=one
-                         
+
                          tgeom_typeI(1,i1dir,i1pert,beta,delta,gamma)= &
                        & tgeom_typeI(1,i1dir,i1pert,beta,delta,gamma) + &
                        & pi*pi*rhog(1,1)*psps%vlspl(1,2,itypat)*(delag*delbd+delad*delbg)
                        end do
-                     else 
+                     else
                        tgeom_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=d3etot_tgeom(:,1)
                      end if
                    end if ! .not.just_timdisp
@@ -922,10 +922,10 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                      else
                        d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=-d3etot_td(1)+d3etot_td_mq(1)
                        d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=-d3etot_td(2)-d3etot_td_mq(2)
-                     end if   
+                     end if
 
-                   end if 
-  
+                   end if
+
                  end if   ! rfpert
                end do    ! ir3dir
              end do     ! ir3pert
@@ -938,7 +938,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                  call hdr2_mq%free()
                end if
              end if
-             
+
              ABI_SFREE(vpsp1_i2pertdq)
              ABI_SFREE(xccc3d2dq)
              ABI_SFREE(vxccc1_i2pertdq)

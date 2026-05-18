@@ -10,6 +10,7 @@ gstore_kzone "ibz"
 gstore_qzone "bz"
 # Additional filter in k-space: only k-points corresponding to the band edges are considered
 gstore_kfilter "qprange"
+gwpt_wmode 1
 
 #gstore_use_lgk  0
 gstore_use_lgk 1   # IMPORTANT FOR PERFORMANCE
@@ -32,10 +33,6 @@ nband 12          # Number of bands to build G with Lehmnann's representation.
 elph2_imagden 0.1 eV
 zcut 0.01 eV
 #gw_icutcoul 16      # Monte-carlo integration
-
-# Specify ppmodel used to evalue convolution between G and W.
-# MG: TODO: ppmodel 2 leads to a SIGFPE on eos_gnu_13.2_mpich
-#ppmodel 2
 
 # Read wavefunctions from this file
 getwfk_filepath "t03o_WFK"
@@ -78,6 +75,7 @@ pseudos "C.psp8"
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t01.abi, t02.abi, t03.abi, t04.abi, t05.abi, t06.abi
+#%% exclude_builders = scope_gnu_10.2_paral
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt
 #%% files_to_test =

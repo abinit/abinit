@@ -492,7 +492,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
    do ispden=2,4
      call fftpac(ispden,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,ngfft,rhor1,rhoaug1(:,:,:,ispden),1)
    end do
-   
+
  end if ! nspden /= 4
 
 !if (xmpi_paral==1) then
@@ -653,7 +653,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  n1=gs_hamkq%ngfft(1);n2=gs_hamkq%ngfft(2);n3=gs_hamkq%ngfft(3)
  if (option==2.or.option==3) eloc0_k=zero
  if (option==2.or.option==3) then
-!  XG20241028 This coding confuses the gnu 8.5 compiler, wrt the CONTIGUOUS character of the pointer. 
+!  XG20241028 This coding confuses the gnu 8.5 compiler, wrt the CONTIGUOUS character of the pointer.
 !  So, make a simple copy. This is not optimal, though...
 !  Original ---
 !  vlocal => gs_hamkq%vlocal

@@ -76,7 +76,7 @@ sub transpath {
 #	$path = path to be translated
 # output: this subroutine acts as a function and return the path
 # according to host conventions
-	
+
 	$path =~ tr/\057/\\/ if ($SLASH eq '\\');
 	return $path;
 	}

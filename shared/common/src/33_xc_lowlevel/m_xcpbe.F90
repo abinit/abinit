@@ -5352,7 +5352,7 @@ subroutine fex_kdt16(rho,grho,iflag,fx,v1x,v2x,einx,tsx,degauss)
 !
  s2x = s2*BAx
  ds2xdt = s2*dBAx
- ds2xdn = ds2dn*BAx & ! n*(d(s2x)/dn)=d(s2x)/d(s^2) * n*d(s^2)/dn 
+ ds2xdn = ds2dn*BAx & ! n*(d(s2x)/dn)=d(s2x)/d(s^2) * n*d(s^2)/dn
         + ds2xdt*dtdn !              +d(s2x)/dt * n*dt/dn
 !
 ! Energy
@@ -5370,11 +5370,11 @@ subroutine fex_kdt16(rho,grho,iflag,fx,v1x,v2x,einx,tsx,degauss)
 ! sx = -dfx/dt*1/T_F = -d(fxunif*Fx)/dt*1/T_F
 !    = -{ex0*(dAx/dt)*Fx+fxunif*dFx/d(s2x)*d(s2x)/dt}*1/T_F
  sx = -(ex0*dAx*FFx + fxunif*dFFxds2x*ds2xdt)/tF ! entropy per electron
- einx = fx + t*tF*sx                             ! internal energy per electron 
+ einx = fx + t*tF*sx                             ! internal energy per electron
  tsx = t*tF*sx                                   ! T*entropy per electron
 ! Potential=
 ! = d/dn(n*fxunif*Fx(s2x))=fxunif*Fx + n*(dfxunif/dn)*Fx + n*fxunif*(dFx/d2sx)*(ds2x/dn)
-! Pay attention: "*n" factor is included in dtdn, ds2dn, ds2dg, ds2xdn terms (see above). 
+! Pay attention: "*n" factor is included in dtdn, ds2dn, ds2dg, ds2xdn terms (see above).
  dfxunif = fxunif*third + ex0*dAx*dtdn !n*(dfxunif/dn)=fxunif*(1/3) + e_x^0*(dAx/dt)* n*(dt/dn)
  v1x = fx + dfxunif*FFx + fxunif*dFFxds2x*ds2xdn ! d/dn(n*fxunif*FFx(s2x) see above
  v2x = fxunif*dFFxds2x*ds2dg_agrho*BAx !d(n*fxunif*Fx(s2x))/d(gn)*1/(gn)=
@@ -5425,9 +5425,9 @@ subroutine enfact1_kdt16(iflag,s2x,Fx,dFxds2x)
 !arrays
  real(dp) :: Fxmax(4),mu(4),gamma(4)
 
-! ************************************************************************* 
+! *************************************************************************
 
-!            PBE         PBEsol                     PBEmol      Geldart                
+!            PBE         PBEsol                     PBEmol      Geldart
  data Fxmax /1.804_dp,   1.804_dp                 , 1.804_dp,   1.804_dp                 /
  data    mu /0.21951_dp, 0.12345679012345679012_dp, 0.27583_dp, 0.09876543209876543209_dp/
  data gamma /0.1_dp    , 0.05_dp                  , 0.1_dp,     0.05_dp                  /
@@ -5494,7 +5494,7 @@ subroutine enfact2_kdt16(iflag,s2x,Fx,dFxds2x)
 
 ! *************************************************************************
 
-!           PBE         PBEsol                     PBEmol      Geldart                
+!           PBE         PBEsol                     PBEmol      Geldart
  data kappa /0.804_dp,   0.804_dp                 , 0.804_dp,   0.804_dp                 /
  data    mu /0.21951_dp, 0.12345679012345679012_dp, 0.27583_dp, 0.09876543209876543209_dp/
  aa1 = mu(iflag)/kappa(iflag)
@@ -5512,7 +5512,7 @@ end subroutine enfact2_kdt16
 !!
 !! NOTES
 !!  finite-T PBE correlation (without LDA part)
-!!  it returns energy fc, einc and tsc densities, 
+!!  it returns energy fc, einc and tsc densities,
 !!  the LDA fex_ksdt and fec_ksdt return energies per electron.
 !!  iflag=1: PBE with Bc(rs,t) from Pade fit
 !!  iflag=2: PBEsol with Bc(rs,t) from Pade fit
@@ -5601,7 +5601,7 @@ subroutine fec_kdt16(rho,grho,iflag,fc,v1c,v2c,einc,tsc,degauss)
  af = be(iflag)/ga/(expe-1.d0) !A(fc_lda)
  dadf = expe*af**2/be(iflag) !dA(fc_lda)/d(fc_lda)
  y = af*qc*qc
- xy = (1.d0 + y) / (1.d0 + y + y * y) 
+ xy = (1.d0 + y) / (1.d0 + y + y * y)
  dxy = -y*(2._dp + y)/(1._dp + y + y*y)**2 !d(xy)/dy
  s1 = 1.d0 + be(iflag)/ga*qc*qc*xy
  ds1dqc = be(iflag)/ga*2._dp*qc*xy + be(iflag)/ga*qc*qc*dxy * 2._dp*af*qc !d(s1)/d(qc)
@@ -5612,7 +5612,7 @@ subroutine fec_kdt16(rho,grho,iflag,fc,v1c,v2c,einc,tsc,degauss)
 !v1c=d(n*H)/dn=H + n*(dH/ds1)*(ds1/dA)*(dA/d(fc_lda))*(d(fc_lda)/dn) + n*(dH/ds1)*(ds1/d(qc))*{(d(qc)/dn) + (d(qc)/dt)*(dt/dn)}
 !   = H + (dH/ds1)*(ds1/dA)*(dA/d(fc_lda))*(vc_lda - fc_lda) + (dH/ds1)*(ds1/d(qc))*{(n*d(qc)/dn) + (d(qc)/dt)*(n*dt/dn)}
 !
-! where we used the following: n*d(fc_lda)/dn = vc_lda - fc_lda 
+! where we used the following: n*d(fc_lda)/dn = vc_lda - fc_lda
 ! fc_lda is the energy per electron
 !
  v1c = h0 + (ga/s1)*ds1da*dadf*(vc_lda - fc_lda) + (ga/s1)*ds1dqc*(dqcdn + dqcdt*dtdn)

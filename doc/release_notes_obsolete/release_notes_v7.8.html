@@ -18,7 +18,7 @@ are relative to improvements of ABINITv7.8 with respect to v7.6.
 
 The list of contributors includes :
 F. Abreu, B. Amadon, T. Applencourt, J.-M. Beuken, J. Bieder, E. Bousquet, F. Bottin, J. Bouchet,
-F. Bruneval, D. Caliste, M. Delaveau, B. Dorado, C. Espejo, G. Geneste, M. Giantomassi, Y. Gillet, X. Gonze,  
+F. Bruneval, D. Caliste, M. Delaveau, B. Dorado, C. Espejo, G. Geneste, M. Giantomassi, Y. Gillet, X. Gonze,
 D. Hamann, F. Jollet, A. Levitt, I. Lukacevic, A. Martin, C. Martins, S. Ponce, Y. Pouillon, T. Rangel, G.-M. Rignanese,
 A. Romero, A. Shukri, M. Torrent, M. Van Setten, M. Verstraete, Bin Xu, V. Zecca, J. Zwanziger
 
@@ -48,9 +48,9 @@ A.1 As advertised in the recent announcements of ABINITv7.6, some developers are
     i.e. removing little used code, or rarely used capabilities, that were slowing down the
     developments by requiring too much maintenance.
     As a consequence, in ABINITv7.8, some backward compatibilities have been broken.
-    In particular, the input variable mkmem (and associated mkqmem, mk1mem, mffmem) have been removed. 
+    In particular, the input variable mkmem (and associated mkqmem, mk1mem, mffmem) have been removed.
     Calculations using out-of-core storing of wavefunctions are not possible anymore.
-    Instead, the user should rely on the parallelisation, with distributed memory. 
+    Instead, the user should rely on the parallelisation, with distributed memory.
     The computation of lattice wannier function has also been disabled, as well as the self-consistent
     phonon calculations (see C.7).
 
@@ -74,7 +74,7 @@ B.1 Computation of the U parameter (for LDA+U or DMFT), using the cRPA screened 
 B.2 The Path-Integral Molecular Dynamics in NVT ensemble is now available
     with two thermostats (Langevin and Nose-Hoover chains) and possible coordinate transformations (primitive, staging, normal modes).
     See the test v7#08 .
-    Adiabatic Path-Integral Molecular Dynamics is under development. New input variables : adpimd and adpimd_gamma. 
+    Adiabatic Path-Integral Molecular Dynamics is under development. New input variables : adpimd and adpimd_gamma.
     Work by G. Geneste and M. Torrent.
 
 B.3 Computation of the random stopping power, in the RPA and in the TD-LDA.
@@ -115,13 +115,13 @@ __________________________________________________________________
 
 C. Changes for the developers
 
-C.1 The test farm has undergone many modifications. 
-    New bots : 
+C.1 The test farm has undergone many modifications.
+    New bots :
     - tikal_gcc49 : gfort v4.9 is thus officially supported. This bot is used for full debugging.
-    - petrus_nag (NAG 5.3.1) : NAG compiler is officially supported. The debugging is quite aggressive. 
+    - petrus_nag (NAG 5.3.1) : NAG compiler is officially supported. The debugging is quite aggressive.
     - buda_intel14 (14.0.2) : quite aggressive optim : -O3 -xhost
     - bigmac_gcc48_sl : testing MacPorts, and Scalapack is also activated.
-    Rendering ABINIT NAG enabled was a significant debugging work for ABINIT ! 
+    Rendering ABINIT NAG enabled was a significant debugging work for ABINIT !
 
     Updated bots :
     - ktulu_gcc48 (ubuntu packages) : OS ubuntu 14.04 instead of ubuntu 10.04
@@ -137,20 +137,20 @@ C.1 The test farm has undergone many modifications.
 
     Work by JM Beuken, and MGiantomassi, with contributions from Vittorio Zecca for the NAG enabling.
 
-C.2 The modularization of the build system is progressing : bindings is autonomous ; 
+C.2 The modularization of the build system is progressing : bindings is autonomous ;
     creation of the "watch" subdirectory ; "Special" tests have been separated from usual non-regression tests.
     See https://wiki.abinit.org/doku.php?id=maintainers:buildsys:roadmap_v8
     Work by Y. Pouillon
 
-C.3 The modularization of the sources is progressing : many subroutines have been gathered in modules. 
-    About two dozen of new modules have been created : m_alloc.F90, m_anaddb_dataset.F90, 
-    m_array.F90, m_atmdata.F90, m_ddb.F90, 
+C.3 The modularization of the sources is progressing : many subroutines have been gathered in modules.
+    About two dozen of new modules have been created : m_alloc.F90, m_anaddb_dataset.F90,
+    m_array.F90, m_atmdata.F90, m_ddb.F90,
     m_dfpt_db.F90, m_doublegrid.F90, m_dynmat.F90, m_eig2d.F90, m_ewald.F90, m_fftcore.F90, m_fstrings.F90, m_ifc.F90, m_kxc.F90,
-    m_psps.F90, m_sg2002.F90, m_special_funcs.F90, m_xieee.F90, 
+    m_psps.F90, m_sg2002.F90, m_special_funcs.F90, m_xieee.F90,
     Work by Matteo Giantomassi (and others)
 
 C.4 The script mkrobodoc_dirs.py, to provide headers of directories for ROBODOC, has been written.
-    Work by Matteo Giantomassi 
+    Work by Matteo Giantomassi
 
 C.5 There is a new naming scheme for the procedures exported by m_xmpi (e.g. old: xsum_mpi, new: xmpi_sum)
     Work by Matteo Giantomassi.
@@ -181,7 +181,7 @@ D.2 The computation of oscillator matrix elements within the PAW formalism can n
     v7#68,69 for Shishkin Kresse .
     Work by M. Giantomassi.
 
-D.3 Temperature-dependence of the gap 
+D.3 Temperature-dependence of the gap
     Addition of current qpoint inside the EIGR2D.nc and adaptation of the temp dep python script to read nc files
     Output EIGR2D file (second order derivative wrt phononic displacement) in netcdf format following the ETSF-io specifications
     Work by S. Ponce
@@ -193,15 +193,15 @@ D.5 Point symmetrize all efg tensor contributions, update tests accordingly.
     Work by J. Zwanziger
 
 D.6 A new flavour of VdW_WF (vdw_xc=14) was added, which implements the recent vdW-QHO-WF method, a combination
-    of the MBD method of Tkatchenko with the localized Wannier functions approach. This method includes many body 
-    dispersion contributions to the van der Waals correction to the DFT energy.  
+    of the MBD method of Tkatchenko with the localized Wannier functions approach. This method includes many body
+    dispersion contributions to the van der Waals correction to the DFT energy.
     See test wannier90#14 .
     Work by C. Espejo and A. Romero
 
 D.7 Generalize prt1dm for spinors
      Work by M. Verstraete
 
-D.8 Improvements and debugging of the Dynamical Mean Field Theory (DMFT) with Continuous Time Quantum Monte Carlo solver 
+D.8 Improvements and debugging of the Dynamical Mean Field Theory (DMFT) with Continuous Time Quantum Monte Carlo solver
     is going on.
     Work by J. Bieder and B. Amadon
 
@@ -216,12 +216,12 @@ D.10 On-going efforts on the development of Hartree-Fock and hybrid functionals.
     Tests v7#65 and 66 for PBE0, and Tests paral#93 (HF in parallel) and 94 (PBE0 in parallel).
     From C. Martins (helped by M. Torrent and B. Amadon)
 
-D.11 Development of scripts for high-throughput GW calculations 
+D.11 Development of scripts for high-throughput GW calculations
      Work by M. Van Setten and G.-M. Rignanese
-    
+
 D.12 Work on Berry phase calculations with PAW, by J. Zwanziger (creation of the routine dsdr_k_paw.F90)
     Forces with electric field and PAW now working, more tests to come
-    
+
 D.13 Contribution from M Delaveau: improvement of parallelization over atoms for DFPT
 
 D.14 Debugging of PAW+DFPT+metals, and also for Born Effective charges.
@@ -241,13 +241,13 @@ D.17 PAW + Bigdft project
 D.18 Work is continuing on the JTH PAW dataset table.
      Soon the JTH 2.0 table will be released.
     Work by F. Jollet.
- 
+
 D.19 On-going work on PAW+DFPT : improving the stability, the parallelism has been fully tested and improved.
     See test mpiio#62
     Work by M. Torrent and B. Dorado.
 
 D.20 Continued efforts on the development of the abipy library
-    From M. Giantomassi 
+    From M. Giantomassi
 
 D.21 Implementation of the Chebishev algorithm, allowing to scale to 10000 procs (and beyond) with the band-FFT parallelism.
     Still, not yet completely ready for mass production (missing istwfk > 1, ecutsm, nspinor)
@@ -262,7 +262,7 @@ D.22 The Bethe-Salpeter Equation with spin-polarization is now available in the 
 
 D.22 Numerous miscellaneous additional bug fixes (to the sources, as well as to the build system,
      including patches for the fallbacks), and improvements of documentation by :
-     B. Amadon, J. Bieder, F. Bruneval, D. Caliste, M. Giantomassi, Y. Gillet, F. Jollet, 
+     B. Amadon, J. Bieder, F. Bruneval, D. Caliste, M. Giantomassi, Y. Gillet, F. Jollet,
      S. Ponce, Y. Pouillon, T. Rangel, M. Torrent, M. Verstraete, V. Zecca, J. Zwanziger
 
 </pre>

@@ -1503,7 +1503,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
  character(len=500) :: message
 ! arrays
  integer :: ngfft(18)
- integer, ABI_CONTIGUOUS pointer :: gbound_k(:,:),kg_k(:,:)
+ integer, contiguous, pointer :: gbound_k(:,:),kg_k(:,:)
  integer,allocatable :: dimlmn(:),indlmn(:,:,:),indsym_(:,:,:),typat_srt(:)
  real(dp) :: tsec(2),tsec2(2),dcp(3)
  real(dp),allocatable :: cgocc_tmp(:),cgocc(:,:),dummytab2(:,:),dummytab3(:,:,:),phase_jkpt(:,:)
@@ -2078,9 +2078,8 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
 !arrays
  real(dp) :: gcart(3),tsec(2),gmet(3,3),vqg(nfft)
  real(dp), allocatable :: v_gcart(:,:,:,:)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
-
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
 ! *************************************************************************
 
  call timab(568,1,tsec)

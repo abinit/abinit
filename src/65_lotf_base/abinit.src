@@ -23,7 +23,7 @@ sources = [
  "m_glue_lotf.F90",
  "m_pbc_lotf.F90",
  "m_tools_lotf.F90",
- "m_work_var_lotf.F90" 
+ "m_work_var_lotf.F90"
 ]
 
 

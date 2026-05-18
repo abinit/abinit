@@ -278,7 +278,7 @@ contains
 
     end if
 
-    ! Setup other filenames 
+    ! Setup other filenames
     if ( Invar%input_prefix == "" ) then
       hist_filename='HIST.nc'
       ddb_filename='DDB'

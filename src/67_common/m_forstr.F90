@@ -333,8 +333,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  real(dp) :: kinstr(6),mggastr(6),nlstr(6),tsec(2),strdum(6),gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp) :: dummy(0)
  real(dp),allocatable :: grnl(:),vlocal(:,:),vxc_hf(:,:),xcart(:,:),ylmbz(:,:),ylmgrbz(:,:,:)
- real(dp), ABI_CONTIGUOUS pointer :: resid(:,:)
-
+ real(dp), contiguous, pointer :: resid(:,:)
 ! *************************************************************************
 
  call timab(910,1,tsec)
@@ -691,7 +690,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  real(dp) :: kpoint(3),kphq(3),nonlop_dum(1,1),rmet(3,3),tsec(2)
  real(dp) :: kgr(3),kgr_kphq(3),kgc(3),kgc_kphq(3)
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(c_double), ABI_CONTIGUOUS pointer :: cwavef(:,:) => null()
+ real(c_double), contiguous, pointer :: cwavef(:,:) => null()
 #else
  real(dp),allocatable,target :: cwavef(:,:)
 #endif
@@ -712,7 +711,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  real(dp),allocatable :: enlout_2d(:,:),enlout_2d_stress(:,:)
  real(dp),allocatable :: cwavef_spin(:,:),enlout_spin(:)
  real(dp),pointer :: cwavef_tr(:,:)
-
 !*************************************************************************
 
  ABI_NVTX_START_RANGE(NVTX_FORSTRNPS)
@@ -1201,8 +1199,8 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              call cg_copy_spin(1,npw_k,my_nspinor,blocksize,cwavef,cwavef_spin)
              call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef_spin,cwavef_spin,select_k=K_H_K)
-            
-             gs_hamk%ispin_gbt = 2 
+
+             gs_hamk%ispin_gbt = 2
              call cg_copy_spin(2,npw_k,my_nspinor,blocksize,cwavef,cwavef_spin)
              call nonlop(choice,cpopt,cwaveprj,enlout_spin,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef_spin,cwavef_spin,select_k=KPRIME_H_KPRIME)
@@ -1725,7 +1723,6 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  real(dp) :: gmet(3,3),gprimd(3,3),qq(3),rmet(3,3)
  real(dp),allocatable :: dummy(:),kxc_cur(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: nresg(:,:),rhor0(:,:),vhres(:)
-
 ! *************************************************************************
 
 !Compatibility tests:

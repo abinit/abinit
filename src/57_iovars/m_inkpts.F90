@@ -504,7 +504,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pawspnorb',tread,'INT')
    if(tread/=0 .and. intarr(1)/=0)istwfk(1:nkpt)=1
-   
+
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'zora',tread,'INT')
    if( tread/=0 .and. intarr(1)/=0 .and. intarr(1)/=1)istwfk(1:nkpt)=1
 

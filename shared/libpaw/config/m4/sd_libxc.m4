@@ -78,7 +78,7 @@ AC_DEFUN([SD_LIBXC_INIT], [
   esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([libxc],
     [AS_HELP_STRING([--with-libxc],
       [Install prefix of the LibXC library (e.g. /usr/local).])],

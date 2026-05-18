@@ -6,9 +6,9 @@
 !!****m* ABINIT/m_BathOperatoroffdiagComplex
 !! NAME
 !!  m_BathOperatoroffdiagComplex
-!! 
-!! FUNCTION 
-!!  Manage all stuff related to the bath for the 
+!!
+!! FUNCTION
+!!  Manage all stuff related to the bath for the
 !!  simgle Anderson Impurity Model
 !!
 !! COPYRIGHT
@@ -77,11 +77,11 @@ TYPE BathOperatoroffdiagComplex
   ! Set to true if we can compute a new M (see updateDetXX) (ie in
   ! BathOperatoroffdiagComplex_getDetAdd)
 
-  LOGICAL :: MRemoveFlag = .FALSE. 
+  LOGICAL :: MRemoveFlag = .FALSE.
   ! Set to true if we can compute a new M (see updateDetXX) (ie in
   ! BathOperatoroffdiagComplex_getDetRemove)
 
-  LOGICAL :: antiShift   = .FALSE. 
+  LOGICAL :: antiShift   = .FALSE.
   ! shift when M is updated with antiseg
 
   LOGICAL :: doCheck     = .FALSE.
@@ -128,11 +128,11 @@ TYPE BathOperatoroffdiagComplex
   ! such that iflavor< iflavor
   ! It is thus the shift in the F matrix to have the first segment of the flavor
   ! iflavor
-  ! Fshift(nflavor+1) is the total nb of tails (=sumtails) 
+  ! Fshift(nflavor+1) is the total nb of tails (=sumtails)
 
   DOUBLE PRECISION                            :: beta
   ! Inverse of Temperature
-  ! 
+  !
 
   DOUBLE PRECISION                            :: dt
   ! dt=beta/samples
@@ -144,50 +144,50 @@ TYPE BathOperatoroffdiagComplex
   ! Hybridization function F(1:op%sizeHybrid+1,1:flavors,1:flavors)
 
   COMPLEX(KIND=8)                            :: S
-  ! Sherman Morrison notations 
+  ! Sherman Morrison notations
 
   COMPLEX(KIND=8)                            :: Stau
-  ! Sherman Morrison notations 
+  ! Sherman Morrison notations
 
   COMPLEX(KIND=8)                            :: Stilde
-  ! Sherman Morrison notations 
+  ! Sherman Morrison notations
 
-  TYPE(VectorComplex)                                :: R 
+  TYPE(VectorComplex)                                :: R
   ! Sherman Morrison notations R%vec(size).
   ! computed for each flavor (As matrices are made of Blocks for each
   ! flavor because the code is restricted to diagonal F matrices)
 
-  TYPE(VectorComplex)                                :: Q 
-  ! Sherman Morrison notations 
+  TYPE(VectorComplex)                                :: Q
+  ! Sherman Morrison notations
   ! computed for each flavor (As matrices are made of Blocks for each
   ! flavor because the code is restricted to diagonal F matrices)
 
   TYPE(Vector)                                :: Rtau
-  ! Sherman Morrison notations 
+  ! Sherman Morrison notations
   ! Rtau gives the time length for each elements of R
   ! computed for each flavor (As matrices are made of Blocks for each
   ! flavor because the code is restricted to diagonal F matrices)
 
   TYPE(Vector)                                :: Qtau
-  ! Sherman Morrison notations 
+  ! Sherman Morrison notations
   ! Qtau gives the time length for each elements of Q
   ! computed for each flavor (As matrices are made of Blocks for each
   ! flavor because the code is restricted to diagonal F matrices)
 
   TYPE(MatrixHybComplex)                             :: M  ! Flavors
   ! inverse of  Hybridization matrix  M%mat(global_size,global_size)
-  ! contains the value of the hybridization for all flavor and segments times, 
+  ! contains the value of the hybridization for all flavor and segments times,
   ! the times (mat_tau), and possibly the
   ! frequency
 
   TYPE(MatrixHybComplex)                             :: M_update  ! Flavors
   !  used in BathOperatoroffdiagComplex_getdetF and in BathOperatoroffdiagComplex_checkM
-  ! for checks 
+  ! for checks
 
 !#ifdef CTQMC_CHECK
   INTEGER                                     :: checkNumber
   DOUBLE PRECISION                            :: meanError
-!  TYPE(ListCdagC)                             :: ListCdagC 
+!  TYPE(ListCdagC)                             :: ListCdagC
 !#endif
 END TYPE BathOperatoroffdiagComplex
 !!***
@@ -245,7 +245,7 @@ SUBROUTINE BathOperatoroffdiagComplex_init(op, flavors, samples, beta, iTech,opt
   op%sizeHybrid   = samples + 1
   op%dt      = beta / DBLE(samples)
   op%inv_dt  = DBLE(samples) / beta
-  op%activeFlavor= 0 
+  op%activeFlavor= 0
   op%updatePosRow = 0
   op%updatePosCol = 0
   op%iTech        = iTech
@@ -273,7 +273,7 @@ SUBROUTINE BathOperatoroffdiagComplex_init(op, flavors, samples, beta, iTech,opt
   DT_MALLOC(op%Fshift,(1:op%flavors+1))
 #endif
   op%Fshift=0
-  
+
   CALL VectorComplex_init(op%R,100*op%flavors)
   CALL VectorComplex_init(op%Q,100*op%flavors)
   CALL Vector_init(op%Rtau,100*op%flavors)
@@ -283,7 +283,7 @@ SUBROUTINE BathOperatoroffdiagComplex_init(op, flavors, samples, beta, iTech,opt
   CALL MatrixHybComplex_init(op%M_update,op%iTech,size=Global_SIZE*op%flavors,Wmax=samples) !FIXME Should be consistent with ListCagC
   op%F       = cmplx(0.d0,0.d0,kind=8)
   op%set     = .TRUE.
-  
+
 END SUBROUTINE BathOperatoroffdiagComplex_init
 !!***
 
@@ -319,7 +319,7 @@ SUBROUTINE BathOperatoroffdiagComplex_reset(op)
   INTEGER                           :: iflavor
   op%MAddFlag     = .FALSE.
   op%MRemoveFlag  = .FALSE.
-  op%activeFlavor = 0 
+  op%activeFlavor = 0
   op%updatePosRow = 0
   op%updatePosCol = 0
 !#ifdef CTQMC_CHECK
@@ -378,7 +378,7 @@ SUBROUTINE BathOperatoroffdiagComplex_activateParticle(op,flavor)
 
   IF ( flavor .GT. op%flavors ) &
     CALL ERROR("BathOperatoroffdiagComplex_activateParticle : out of range      ")
-  IF ( op%set .EQV. .TRUE. ) THEN 
+  IF ( op%set .EQV. .TRUE. ) THEN
     op%activeFlavor =  flavor
     op%MAddFlag     = .FALSE.
     op%MRemoveFlag  = .FALSE.
@@ -409,7 +409,7 @@ END SUBROUTINE BathOperatoroffdiagComplex_activateParticle
 !!  particle=full list of CdagC for activeFlavor
 !!
 !! OUTPUT
-!!  BathOperatoroffdiagComplex_getDetAdd=the det 
+!!  BathOperatoroffdiagComplex_getDetAdd=the det
 !!
 !! SIDE EFFECTS
 !!
@@ -421,7 +421,7 @@ COMPLEX(KIND=8)  FUNCTION BathOperatoroffdiagComplex_getDetAdd(op,CdagC_1, posit
 !Arguments ------------------------------------
   TYPE(BathOperatoroffdiagComplex)      , INTENT(INOUT) :: op
   DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN   ) :: CdagC_1
-  INTEGER                 , INTENT(IN   ) :: position  
+  INTEGER                 , INTENT(IN   ) :: position
   TYPE(ListCdagC), INTENT(IN   ) :: particle(:)
 !Local variables-------------------------------
   INTEGER                                 :: it1
@@ -458,7 +458,7 @@ COMPLEX(KIND=8)  FUNCTION BathOperatoroffdiagComplex_getDetAdd(op,CdagC_1, posit
 
   IF ( size(particle)/=op%flavors ) &
     CALL ERROR("BathOperatoroffdiagComplex_getDetAdd : size of particle is erroneous ")
- 
+
  ! tail is now the complete size of the F matrix Fshift(nflavors+1)
   tail =  op%sumtails
   new_tail = tail+1
@@ -476,7 +476,7 @@ COMPLEX(KIND=8)  FUNCTION BathOperatoroffdiagComplex_getDetAdd(op,CdagC_1, posit
     tailbegin    = op%Fshift(op%activeflavor)+1
     tailend      = op%Fshift(op%activeflavor)+op%tails(op%activeflavor)
   endif
-  
+
   IF ( ((C .GT. Cdag) .AND. (position .EQ. -1)) &  ! Segment added at the end of the segment
        .OR. ((C .LT. Cdag) .AND. (tail .EQ. 0))) THEN ! empty orbital case: only adding a segment is possible
    ! If ones add a segment to an empty orbital or a segment at the end
@@ -491,9 +491,9 @@ COMPLEX(KIND=8)  FUNCTION BathOperatoroffdiagComplex_getDetAdd(op,CdagC_1, posit
     !write(6,*) "       BathOperatoroffdiagComplex_getDetAdd : op%updatePosRow",op%updatePosRow
     !write(6,*) "       BathOperatoroffdiagComplex_getDetAdd : op%updatePosCol",op%updatePosCol
     !write(6,*) "       BathOperatoroffdiagComplex_getDetAdd : C,Cdag",C,Cdag
-  
+
   IF ( C .LT. Cdag .AND. op%tails(op%activeFlavor) .GT. 0) THEN ! only if an antisegment is added
-  !  ratio = -ratio 
+  !  ratio = -ratio
     op%updatePosRow  = (op%updatePosRow + 1) !position in [1;tail]
   ! If the antisegment created is such that a segment with tcdagger> tc
   ! is suppressed
@@ -573,7 +573,7 @@ COMPLEX(KIND=8)  FUNCTION BathOperatoroffdiagComplex_getDetAdd(op,CdagC_1, posit
   endif
 
   ! Compute S
-  op%Stau = C - Cdagbeta 
+  op%Stau = C - Cdagbeta
   op%Rtau%vec(op%Fshift(op%activeFlavor)+op%updatePosRow) = op%Stau
     if(op%Rtau%vec(op%Fshift(op%activeFlavor)+op%updatePosRow)>beta) then
     !write(6,*) "Rtau sup beta", op%Stau,C,Cdagbeta
@@ -638,8 +638,8 @@ COMPLEX(KIND=8)  FUNCTION BathOperatoroffdiagComplex_getDetAdd(op,CdagC_1, posit
 !  op%ListCdagC = particle
 !!write(*,*) op%Stilde
 !!write(*,*) op%antishift
-!!write(*,*)    op%updatePosRow 
-!!write(*,*)    op%updatePosCol 
+!!write(*,*)    op%updatePosRow
+!!write(*,*)    op%updatePosCol
 !#endif
 
 END FUNCTION BathOperatoroffdiagComplex_getDetAdd
@@ -651,7 +651,7 @@ END FUNCTION BathOperatoroffdiagComplex_getDetAdd
 !!
 !! FUNCTION
 !!  Compute the determinant ratio when a (anti)segment
-!!  is trying to be removed 
+!!  is trying to be removed
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
@@ -664,7 +664,7 @@ END FUNCTION BathOperatoroffdiagComplex_getDetAdd
 !!  position=position of segment to be removed
 !!
 !! OUTPUT
-!!  BathOperatoroffdiagComplex_getDetRemove=the det 
+!!  BathOperatoroffdiagComplex_getDetRemove=the det
 !!
 !! SIDE EFFECTS
 !!
@@ -677,8 +677,8 @@ COMPLEX(KIND=8) FUNCTION BathOperatoroffdiagComplex_getDetRemove(op,position)
 !Arguments ------------------------------------
   TYPE(BathOperatoroffdiagComplex), INTENT(INOUT) :: op
 !Local arguments-------------------------------
-  INTEGER           , INTENT(IN   ) :: position  
-  INTEGER                           :: ABSposition  
+  INTEGER           , INTENT(IN   ) :: position
+  INTEGER                           :: ABSposition
   INTEGER                           :: tail !,it,it1
 
   IF ( op%activeFlavor .LE. 0 ) &
@@ -695,19 +695,19 @@ COMPLEX(KIND=8) FUNCTION BathOperatoroffdiagComplex_getDetRemove(op,position)
     op%updatePosRow = ABSposition
   ELSE
     op%updatePosRow = ABSposition+1
-    IF ( ABSposition .EQ. op%tails(op%activeFlavor) ) THEN 
+    IF ( ABSposition .EQ. op%tails(op%activeFlavor) ) THEN
       op%antiShift = .TRUE.
       op%updatePosRow = 1 !ABSposition - 1
-!      op%updatePosRow = ABSposition    
+!      op%updatePosRow = ABSposition
 !      IF ( op%updatePosCol .EQ. 0) op%updatePosCol = tail
     END IF
   ENDIF
   op%Stilde                 = op%M%mat(op%Fshift(op%activeFlavor)+&
-&                     op%updatePosRow,op%Fshift(op%activeFlavor)+op%updatePosCol) 
+&                     op%updatePosRow,op%Fshift(op%activeFlavor)+op%updatePosCol)
 !sui!write(6,*) "Fshift",op%Fshift(op%activeFlavor)
 !sui!write(6,*) "updatepos",op%updatePosRow,op%updatePosCol
-  
- 
+
+
   op%MRemoveFlag            = .TRUE.
        !write(6,*) "        getdetRemove",op%Stilde
   BathOperatoroffdiagComplex_getDetRemove = op%Stilde
@@ -732,7 +732,7 @@ END FUNCTION BathOperatoroffdiagComplex_getDetRemove
 !!
 !! FUNCTION
 !!  Compute the determinant of the F matrix
-!!  using the hybridization of flavor and the 
+!!  using the hybridization of flavor and the
 !!  segments of particle
 !!  used for Gloval moves only
 !!
@@ -748,7 +748,7 @@ END FUNCTION BathOperatoroffdiagComplex_getDetRemove
 !!  particles=segments to use
 !!
 !! OUTPUT
-!!  BathOperatoroffdiagComplex_getDetF=the det 
+!!  BathOperatoroffdiagComplex_getDetF=the det
 !!
 !! SIDE EFFECTS
 !!
@@ -795,7 +795,7 @@ COMPLEX(KIND=8) FUNCTION BathOperatoroffdiagComplex_getDetF(op,particle,option)
         iflavora=iflavordag
         iflavorb=iflavor
 #include "BathOperatoroffdiagComplex_hybrid"
-        op%M_update%mat(op%Fshift(iflavor)+iC,op%Fshift(iflavordag)+iCdag) = hybrid 
+        op%M_update%mat(op%Fshift(iflavor)+iC,op%Fshift(iflavordag)+iCdag) = hybrid
       END DO
       END DO
     END DO
@@ -807,8 +807,8 @@ COMPLEX(KIND=8) FUNCTION BathOperatoroffdiagComplex_getDetF(op,particle,option)
       tC   = particle(iflavor)%list(iC,C_)
       DO iflavordag=1,op%flavors
       DO iCdag = 1, tail
-    !sui!write(6,*) iCdag,Cdag_,size(particle(iflavordag)%list,1) 
-      !stop 
+    !sui!write(6,*) iCdag,Cdag_,size(particle(iflavordag)%list,1)
+      !stop
         tCdag  = particle(iflavordag)%list(iCdag,Cdag_)
         time = tC - tCdag
         signe = SIGN(1.d0,time)
@@ -855,7 +855,7 @@ END FUNCTION BathOperatoroffdiagComplex_getDetF
 !!
 !! SOURCE
 
-SUBROUTINE BathOperatoroffdiagComplex_setMAdd(op,particle) 
+SUBROUTINE BathOperatoroffdiagComplex_setMAdd(op,particle)
 
 !Arguments ------------------------------------
   TYPE(BathOperatoroffdiagComplex), INTENT(INOUT) :: op
@@ -987,7 +987,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setMAdd(op,particle)
         op%M%mat(row_move,col_move) =  &
         op%M%mat(row,col) + op%Q%vec(row)*op%R%vec(col) * Stilde
       !else
-      !  op%M%mat(row_move,col_move) = op%M%mat(row,col) 
+      !  op%M%mat(row_move,col_move) = op%M%mat(row,col)
       !endif
     END DO
   END DO
@@ -999,7 +999,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setMAdd(op,particle)
     !if(row>=tailb.and.row<=taile) then
       op%M%mat(row_move,PositionCol) = -op%Q%vec(row)*Stilde
     !else
-    !  op%M%mat(row_move,PositionCol) = op%M%mat(row,PositionCol) 
+    !  op%M%mat(row_move,PositionCol) = op%M%mat(row,PositionCol)
     !endif
 
     time = op%Rtau%vec(row) !  pourquoi Rtau et pas Qtau ici ?
@@ -1035,13 +1035,13 @@ SUBROUTINE BathOperatoroffdiagComplex_setMAdd(op,particle)
 !    endif
 
   ! Add new stuff for new col
-  DO col = 1, tail 
+  DO col = 1, tail
     col_move = col +  ( 1+SIGN(1,col-PositionCol) )/2
 ! ---   Stilde RN => Rtilde => M
     !if(col>=tailb.and.col<=taile) then
       op%M%mat(PositionRow,col_move) = -op%R%vec(col)*Stilde
     !else
-    !  op%M%mat(PositionRow,col_move) = op%M%mat(PositionRow,col) 
+    !  op%M%mat(PositionRow,col_move) = op%M%mat(PositionRow,col)
     !endif
     time = op%Qtau%vec(col)
     time = time + ( SIGN(1.d0,time) - 1.d0 )*mbeta_two
@@ -1061,7 +1061,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setMAdd(op,particle)
   time = op%Qtau%vec(new_tail)
   time = time + ( SIGN(1.d0,time) - 1.d0 )*mbeta_two
   op%M%mat_tau(PositionRow,new_tail) = INT ( (time*inv_dt) +1.5d0 )
-    !write(6,*) "     setMadd last time", op%Qtau%vec(new_tail),op%M%mat_tau(PositionRow,new_tail) 
+    !write(6,*) "     setMadd last time", op%Qtau%vec(new_tail),op%M%mat_tau(PositionRow,new_tail)
 !    if(op%M%mat_tau(PositionRow,new_tail)>301) then
 !      !write(6,*) ">301 d", time,inv_dt, op%M%mat_tau(PositionRow,new_tail)
 !    time = op%Qtau%vec(new_tail) !  pourquoi Rtau et pas Qtau ici ?
@@ -1095,7 +1095,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setMAdd(op,particle)
   !  IF ( col_move .EQ. positionCol ) THEN
   !    ! on calcule rajoute Q tilde
   !    !row_move = new_tail
-  !    row      = tail 
+  !    row      = tail
   !    DO row_move = new_tail, 1, -1
   !      ! calcul itau
   !      IF ( row_move .EQ. positionRow ) THEN
@@ -1104,7 +1104,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setMAdd(op,particle)
   !      ELSE
   !        op%M(aF)%mat(row_move,col_move) = -op%Q%vec(row)*Stilde
   !        !time = op%Rtau%vec(row_move)
-  !        row      = row      - 1 
+  !        row      = row      - 1
   !      END IF
   !      !time = time + ( SIGN(1.d0,time) - 1.d0 )*mbeta_two
   !      !op%M(aF)%mat_tau(row_move,col_move) = INT ( (time*inv_dt) +1.5d0 )
@@ -1113,7 +1113,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setMAdd(op,particle)
   !  ELSE
   !    ! on calcule Ptilde
   !    !row_move = new_tail
-  !    row      = tail 
+  !    row      = tail
   !    DO row_move = new_tail, 1, -1
   !      IF ( row_move .EQ. positionRow ) THEN
   !        op%M(aF)%mat(row_move,col_move) = -op%R%vec(col) * Stilde
@@ -1125,7 +1125,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setMAdd(op,particle)
   !        op%M(aF)%mat(row_move,col_move) = op%M(aF)%mat(row,col) + op%Q%vec(row)*op%R%vec(col)*Stilde
   !        ! copy itau
   !        !op%M(aF)%mat_tau(row_move,col_move) = op%M(aF)%mat_tau(row,col)
-  !        row      = row      - 1 
+  !        row      = row      - 1
   !      END IF
   !    END DO
   !    col      = col      - 1
@@ -1208,7 +1208,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setMAdd(op,particle)
     !write(6,*) "        setMAdd before antishift M%mat_tau",(op%M%mat_tau(it,it1),it1=1,op%sumtails)
   enddo
   if (new_tail>0.and.op%Fshift(aF+1)>op%Fshift(aF)) then
-    op%M%mat(op%Fshift(aF)+1:op%Fshift(aF+1) , 1:new_tail) = & 
+    op%M%mat(op%Fshift(aF)+1:op%Fshift(aF+1) , 1:new_tail) = &
         CSHIFT( op%M%mat(op%Fshift(aF)+1:op%Fshift(aF+1) , 1:new_tail) , SHIFT=-1 , DIM=1) ! Shift to the bottom
 
     op%M%mat(1:new_tail , op%Fshift(aF)+1:op%Fshift(aF+1)) = &
@@ -1265,7 +1265,7 @@ END SUBROUTINE BathOperatoroffdiagComplex_setMAdd
 !!
 !! SOURCE
 
-SUBROUTINE BathOperatoroffdiagComplex_setMRemove(op,particle) 
+SUBROUTINE BathOperatoroffdiagComplex_setMRemove(op,particle)
 
 !Arguments ------------------------------------
   TYPE(BathOperatoroffdiagComplex), INTENT(INOUT)  :: op
@@ -1351,7 +1351,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setMRemove(op,particle)
     !row = row_move + (1+SIGN(1,row_move-positionRow))/2
     op%R%vec(row_move) = op%M%mat(positionRow,col)
     op%Q%vec(row_move) = op%M%mat(row,positionCol)
-    row      = row + 1 
+    row      = row + 1
     col      = col + 1
   END DO
 !!    op%R%vec(1:positionCol-1) = op%M(aF)%mat(positionRow,1:positionCol-1)
@@ -1365,7 +1365,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setMRemove(op,particle)
 !CALL ListCdagC_print(op%ListCdagC)
 
   col      = 1
-  DO col_move = 1, new_tail 
+  DO col_move = 1, new_tail
     IF ( col_move .EQ. positionCol ) col = col + 1
     !col = col_move + (1+SIGN(1,col_move-positionCol))/2
     row      = 1
@@ -1378,12 +1378,12 @@ SUBROUTINE BathOperatoroffdiagComplex_setMRemove(op,particle)
         op%M%mat(row_move,col_move) = op%M%mat(row,col) &
                                         - op%Q%vec(row_move)*invStilde2
       !else
-      !  op%M%mat(row_move,col_move) = op%M%mat(row,col) 
+      !  op%M%mat(row_move,col_move) = op%M%mat(row,col)
       !endif
       op%M%mat_tau(row_move,col_move) = op%M%mat_tau(row,col)
       row      = row      + 1
     END DO
-    col      = col      + 1 
+    col      = col      + 1
   END DO
   CALL MatrixHybComplex_setSize(op%M,new_tail)
 
@@ -1511,10 +1511,10 @@ SUBROUTINE BathOperatoroffdiagComplex_swap(op, flavor1, flavor2)
 !     shift block flavorb at the place of flavora (column)
       if (op%Fshift(flavorb+1)>op%Fshift(flavora)) then
        do ii=1, op%tails(flavorb)
-        op%M%mat(op%Fshift(flavora)+1:op%Fshift(flavorb+1) , 1:op%sumtails) = & 
-          CSHIFT( op%M%mat(op%Fshift(flavora)+1:op%Fshift(flavorb+1) , 1:op%sumtails) , SHIFT=-1 , DIM=1) 
+        op%M%mat(op%Fshift(flavora)+1:op%Fshift(flavorb+1) , 1:op%sumtails) = &
+          CSHIFT( op%M%mat(op%Fshift(flavora)+1:op%Fshift(flavorb+1) , 1:op%sumtails) , SHIFT=-1 , DIM=1)
         op%M%mat_tau(op%Fshift(flavora)+1:op%Fshift(flavorb+1) , 1:op%sumtails) = &
-          CSHIFT( op%M%mat_tau(op%Fshift(flavora)+1:op%Fshift(flavorb+1) , 1:op%sumtails) , SHIFT=-1 , DIM=1) 
+          CSHIFT( op%M%mat_tau(op%Fshift(flavora)+1:op%Fshift(flavorb+1) , 1:op%sumtails) , SHIFT=-1 , DIM=1)
        enddo
       end if
 
@@ -1522,13 +1522,13 @@ SUBROUTINE BathOperatoroffdiagComplex_swap(op, flavor1, flavor2)
       if (op%Fshift(flavorb)>op%Fshift(flavora)) then
        do ii=1, op%tails(flavora)
         op%M%mat(op%Fshift(flavora)+op%tails(flavorb)+&
-&        1:op%Fshift(flavorb)+op%tails(flavorb) , 1:op%sumtails) = & 
+&        1:op%Fshift(flavorb)+op%tails(flavorb) , 1:op%sumtails) = &
           CSHIFT( op%M%mat( op%Fshift(flavora)+op%tails(flavorb)&
-&          +1:op%Fshift(flavorb)+op%tails(flavorb) , 1:op%sumtails) , SHIFT=1 , DIM=1) 
+&          +1:op%Fshift(flavorb)+op%tails(flavorb) , 1:op%sumtails) , SHIFT=1 , DIM=1)
         op%M%mat_tau(op%Fshift(flavora)+op%tails(flavorb)+1:op%Fshift(flavorb)+&
-&        op%tails(flavorb) , 1:op%sumtails) = & 
+&        op%tails(flavorb) , 1:op%sumtails) = &
           CSHIFT( op%M%mat_tau( op%Fshift(flavora)+op%tails(flavorb)+&
-&          1:op%Fshift(flavorb)+op%tails(flavorb) , 1:op%sumtails) , SHIFT=1 , DIM=1) 
+&          1:op%Fshift(flavorb)+op%tails(flavorb) , 1:op%sumtails) , SHIFT=1 , DIM=1)
        enddo
       end if
 
@@ -1536,9 +1536,9 @@ SUBROUTINE BathOperatoroffdiagComplex_swap(op, flavor1, flavor2)
       if (op%Fshift(flavorb+1)>op%Fshift(flavora)) then
        do ii=1, op%tails(flavorb)
         op%M%mat(1:op%sumtails , op%Fshift(flavora)+1:op%Fshift(flavorb+1)) = &
-          CSHIFT( op%M%mat(1:op%sumtails , op%Fshift(flavora)+1:op%Fshift(flavorb+1)) , SHIFT=-1 , DIM=2) 
+          CSHIFT( op%M%mat(1:op%sumtails , op%Fshift(flavora)+1:op%Fshift(flavorb+1)) , SHIFT=-1 , DIM=2)
         op%M%mat_tau(1:op%sumtails , op%Fshift(flavora)+1:op%Fshift(flavorb+1)) = &
-          CSHIFT( op%M%mat_tau(1:op%sumtails , op%Fshift(flavora)+1:op%Fshift(flavorb+1)) , SHIFT=-1 , DIM=2) 
+          CSHIFT( op%M%mat_tau(1:op%sumtails , op%Fshift(flavora)+1:op%Fshift(flavorb+1)) , SHIFT=-1 , DIM=2)
        enddo
       end if
 
@@ -1547,11 +1547,11 @@ SUBROUTINE BathOperatoroffdiagComplex_swap(op, flavor1, flavor2)
        do ii=1, op%tails(flavora)
         op%M%mat(1:op%sumtails , op%Fshift(flavora)+op%tails(flavorb)+1:op%Fshift(flavorb)+op%tails(flavorb)) = &
           CSHIFT( op%M%mat(1:op%sumtails ,op%Fshift(flavora)+op%tails(flavorb)&
-&          +1:op%Fshift(flavorb)+op%tails(flavorb)) , SHIFT=1 , DIM=2) 
+&          +1:op%Fshift(flavorb)+op%tails(flavorb)) , SHIFT=1 , DIM=2)
         op%M%mat_tau(1:op%sumtails ,op%Fshift(flavora)+op%tails(flavorb)+&
 &        1:op%Fshift(flavorb)+op%tails(flavorb) ) = &
           CSHIFT( op%M%mat_tau(1:op%sumtails ,op%Fshift(flavora)+&
-&          op%tails(flavorb)+1:op%Fshift(flavorb)+op%tails(flavorb) ) , SHIFT=1 , DIM=2) 
+&          op%tails(flavorb)+1:op%Fshift(flavorb)+op%tails(flavorb) ) , SHIFT=1 , DIM=2)
        enddo
       end if
     end if
@@ -1607,7 +1607,7 @@ SUBROUTINE BathOperatoroffdiagComplex_initF(op,ifstream)
   INTEGER           , INTENT(IN   ) :: ifstream
 !Local variables ----------------
   INTEGER                           :: iflavor1
-  INTEGER                           :: iflavor2                  
+  INTEGER                           :: iflavor2
   INTEGER                           :: sample
 
   IF ( op%set .EQV. .FALSE. ) &
@@ -1714,9 +1714,9 @@ SUBROUTINE BathOperatoroffdiagComplex_printF(op,ostream)
   INTEGER                           :: sample
   INTEGER                           :: ostream_val
 
-  IF ( PRESENT(ostream) ) THEN 
+  IF ( PRESENT(ostream) ) THEN
     ostream_val = ostream
-  ELSE  
+  ELSE
     ostream_val = 65
     OPEN(UNIT=ostream_val, FILE="F.dat")
   END IF
@@ -1876,13 +1876,13 @@ SUBROUTINE  BathOperatoroffdiagComplex_destroy(op)
 
   op%MAddFlag     = .FALSE.
   op%MRemoveFlag  = .FALSE.
-  op%flavors      = 0 
+  op%flavors      = 0
   op%beta         = 0.d0
   op%dt      = 0.d0
   op%inv_dt  = 0.d0
   op%samples      = 0
   op%sizeHybrid   = 0
-  op%activeFlavor = 0 
+  op%activeFlavor = 0
   op%updatePosRow = 0
   op%updatePosCol = 0
 
@@ -1919,7 +1919,7 @@ SUBROUTINE BathOperatoroffdiagComplex_doCheck(op,opt_check)
 !Arguments ------------------------------------
   TYPE(BathOperatoroffdiagComplex) , INTENT(INOUT) :: op
   INTEGER            , INTENT(IN   ) :: opt_check
-  
+
   IF ( opt_check .GE. 2 ) &
     op%doCheck = .TRUE.
 END SUBROUTINE BathOperatoroffdiagComplex_doCheck
@@ -2019,7 +2019,7 @@ SUBROUTINE BathOperatoroffdiagComplex_checkM(op,particle)
       op%M_update%mat(op%Fshift(iflavorb)+iC,op%Fshift(iflavora)+iCdag) = hybrid
 
       time = time + ( SIGN(1.d0,time) - 1.d0 )*mbeta_two
-      op%M_update%mat_tau(op%Fshift(iflavora)+iCdag,op%Fshift(iflavorb)+iC) = INT ( (time*op%inv_dt) +1.5d0 ) 
+      op%M_update%mat_tau(op%Fshift(iflavora)+iCdag,op%Fshift(iflavorb)+iC) = INT ( (time*op%inv_dt) +1.5d0 )
       !write(6,*) "         checkM mat_tau",INT ( (time*op%inv_dt) +1.5d0 )
       !write(6,*) "         checkM shifts",op%Fshift(iflavorb),iCdag,op%Fshift(iflavora),iC
     END DO ! iC
@@ -2047,9 +2047,9 @@ SUBROUTINE BathOperatoroffdiagComplex_checkM(op,particle)
   checkTau = .FALSE.
   DO iCdag = 1, tail
     Do iC =1, tail
-        errorrel= ABS((op%M_update%mat(iC, iCdag) - & 
+        errorrel= ABS((op%M_update%mat(iC, iCdag) - &
                   op%M%mat(iC,iCdag))/op%M_update%mat(iC,iCdag))
-        errorabs= ABS(op%M_update%mat(iC, iCdag) - & 
+        errorabs= ABS(op%M_update%mat(iC, iCdag) - &
                   op%M%mat(iC,iCdag))
         IF ( errorrel .gt. errormax .and. errorabs .gt. 0.001d0 ) errormax = errorrel
                  ! write(6,*) "     checkM ", errorrel,errorabs
@@ -2057,9 +2057,9 @@ SUBROUTINE BathOperatoroffdiagComplex_checkM(op,particle)
                 checkTau = .TRUE.
                 !write(6,*) "op%M_update%mat_tau(iC,iCdag), op%M%mat_tau(iC,iCdag)",op%M_update%mat_tau(iC,iCdag), op%M%mat_tau(iC,iCdag)
                 !call flush(6)
-         CALL ERROR("BathOperatoroffdiagComplex_checkM : "//a//"%                        ") 
+         CALL ERROR("BathOperatoroffdiagComplex_checkM : "//a//"%                        ")
         ENDIF
-  
+
     END DO
   END DO
 
@@ -2070,11 +2070,11 @@ SUBROUTINE BathOperatoroffdiagComplex_checkM(op,particle)
     CALL MatrixHybComplex_print(op%M,opt_print=1)
   END IF
   op%meanError = op%meanError + errormax
-  IF ( errormax .GT. 1.d0 ) THEN 
+  IF ( errormax .GT. 1.d0 ) THEN
     WRITE(a,'(I4)') INT(error1*100.d0)
     !write(6,'(I4)') INT(error1*100.d0)
 !    CALL MatrixHybComplex_Print(op%M)
-    CALL WARN("BathOperatoroffdiagComplex_checkM") 
+    CALL WARN("BathOperatoroffdiagComplex_checkM")
   END IF
 !  CALL MatrixHybComplex_destroy(checkMatrix)
 END SUBROUTINE BathOperatoroffdiagComplex_checkM
@@ -2085,7 +2085,7 @@ END SUBROUTINE BathOperatoroffdiagComplex_checkM
 !!  BathOperatoroffdiagComplex_recomputeM
 !!
 !! FUNCTION
-!!  compute from scratch the M matrix 
+!!  compute from scratch the M matrix
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2013-2025 ABINIT group (B. Amadon)
@@ -2177,7 +2177,7 @@ SUBROUTINE BathOperatoroffdiagComplex_recomputeM(op,particle,flav_i,flav_j)
           op%M_update%mat(op%Fshift(iflavorb_imp)+iC,op%Fshift(iflavora_imp)+iCdag) = hybrid
 
           time = time + ( SIGN(1.d0,time) - 1.d0 )*mbeta_two
-          op%M_update%mat_tau(op%Fshift(iflavora_imp)+iCdag,op%Fshift(iflavorb_imp)+iC) = INT ( (time*op%inv_dt) +1.5d0 ) 
+          op%M_update%mat_tau(op%Fshift(iflavora_imp)+iCdag,op%Fshift(iflavorb_imp)+iC) = INT ( (time*op%inv_dt) +1.5d0 )
           !write(6,*) "         checkM mat_tau",INT ( (time*op%inv_dt) +1.5d0 )
           !write(6,*) "         checkM shifts",op%Fshift(iflavorb),iCdag,op%Fshift(iflavora),iC
         END DO ! iC

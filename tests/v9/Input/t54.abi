@@ -31,6 +31,7 @@ getdvdb2    -1
 # EPH related parameters
 ############
 symsigma  1
+symsigma_de 1.0 meV
 
 optdriver  7
 nband      8

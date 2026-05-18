@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of MRGDDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  MRGDDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,18 +16,18 @@
 
 .Starting date : Sat 14 Sep 2024.
 - ( at 06h51 )
-  
-  Give name for output derivative database : 
+
+  Give name for output derivative database :
  t53o_DS20_DDB
   Give short description of the derivative database :
  C in diamond structure; Very rough 2x2x2 special point grid; low ecut.
   Give number of input ddbs
            3
-  Give name for derivative database number           1  : 
+  Give name for derivative database number           1  :
  t50o_DS3_DDB
-  Give name for derivative database number           2  : 
+  Give name for derivative database number           2  :
  t50o_DS4_DDB
-  Give name for derivative database number           3  : 
+  Give name for derivative database number           3  :
  t50o_DS5_DDB
 
   merge_ddb: Reading all headers.

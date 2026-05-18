@@ -8,7 +8,7 @@
    mpatpol 1 2
    mpdir 1 1 0
    mpopt 2  !(1 Frozen-spin, 2 Relaxed-spin)
-   timdisp 0 
+   timdisp 0
    asr 0
    chneut 0
 

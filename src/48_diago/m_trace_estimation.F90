@@ -5,7 +5,7 @@
 !! FUNCTION
 !! This module contains routines used to compute the stochastic Lanczos trace estimation.
 !! It also computes cummulative eigenvalue counts using differences of trace estimation
-!! on consecutive intervals. 
+!! on consecutive intervals.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2018-2026 ABINIT group (IML)
@@ -37,7 +37,7 @@ module m_trace_estimation
     use m_cgtools
     use m_xg
     use m_xgTransposer
-    
+
     use m_chebfi2
     use m_polynomial_filter
     use m_slice_task, only: matrixInfo_t
@@ -74,24 +74,24 @@ module m_trace_estimation
     ! Public methods
     !-------------------------------------------------
     public :: computeBLanczos           ! for lower bound estimation
-    public :: get_eigenvalue_count      ! count eigenvalues for lowpass intervals 
-    public :: computeTraceEstimation    ! compute moments etc 
+    public :: get_eigenvalue_count      ! count eigenvalues for lowpass intervals
+    public :: computeTraceEstimation    ! compute moments etc
     public :: smallestTridiagEigenpair  ! used in slice_cprj (experimental)
 
-    CONTAINS  
+    CONTAINS
 !=====================================================================
 !!***
 
 !!****f* m_trace_estimation/computeBLanczos
 !! NAME
 !! computeBLanczos
-!! 
+!!
 !! FUNCTION
 !! B-Lanczos three-term recurrence (using B-inner product).
 !! Performs k Lanczos iterations on a column vector.
 !!
 !! SOURCE
-  
+
   subroutine computeBLanczos(minfo, paw, getAX_BX, getBm1X, k, lambda_min, res_norm)
 
     implicit none
@@ -115,7 +115,7 @@ module m_trace_estimation
             type(xgBlock_t), intent(inout) :: Bm1X
         end subroutine getBm1X
     end interface
-    
+
     type(xg_t) :: W_vcol
     type(xg_t) :: W_dot
     type(xgBlock_t) :: q, v, Bv, Bm1v, qprev
@@ -136,7 +136,7 @@ module m_trace_estimation
   ! *********************************************************************
 
     call timab(tim_lanczos,1,tsec)
-    
+
     tot_spacedim = minfo%total_spacedim
     gpu_option = minfo%gpu_option
     space = minfo%space
@@ -148,7 +148,7 @@ module m_trace_estimation
     beta_prev = 0.0_dp
 
     ABI_MALLOC(v_min, (tot_spacedim))
-    
+
     write(std_out,*) 'Lanczos in rank=', rank; flush(std_out)
 
     ! workspace size (npw,5)
@@ -166,7 +166,7 @@ module m_trace_estimation
 
     ! q = random column vector
     call xgBlock_colwiseRandom(q, rank, 1)
-    !write(std_out,*) 'Random id=', xgBlock_getid(q) 
+    !write(std_out,*) 'Random id=', xgBlock_getid(q)
     !flush(std_out)
 
     ! Bv = B * q / norml_q
@@ -175,12 +175,12 @@ module m_trace_estimation
     call getAX_BX(q, v, Bv)
     call xgBlock_zero_im_g0(v) ! v stores Aq
     call xgBlock_zero_im_g0(Bv) ! Bv stores Bq
-    ABI_NVTX_END_RANGE() 
+    ABI_NVTX_END_RANGE()
     call timab(tim_getAX_BX,2,tsec)
 
     call xgBlock_colwiseDotProduct(q, Bv, dot_qTBv)
-    call xgBlock_reverseMap(dot_qTBv,dot_qTBv_layout,rows=1,cols=1)    
-    
+    call xgBlock_reverseMap(dot_qTBv,dot_qTBv_layout,rows=1,cols=1)
+
     norml_q = 1.d0 / sqrt(dot_qTBv_layout(1,1))
     call xgBlock_scale(q, norml_q, 1)
     call xgBlock_scale(v, norml_q, 1)
@@ -227,16 +227,16 @@ module m_trace_estimation
 
         ! Compute beta_j if j<k
         if (j < k) then
-            
+
             ! Bv = B * v
             call timab(tim_getAX_BX,1,tsec)
             ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
             call getAX_BX(v, Bm1v, Bv)
             call xgBlock_zero_im_g0(Bm1v) ! Bm1v dummy workspace
-            call xgBlock_zero_im_g0(Bv) ! Bv 
+            call xgBlock_zero_im_g0(Bv) ! Bv
             ABI_NVTX_END_RANGE()
             call timab(tim_getAX_BX,2,tsec)
- 
+
             call xgBlock_colwiseDotProduct(v, Bv, dot_vTBv)
             call xgBlock_reverseMap(dot_vTBv,dot_vTBv_layout,rows=1,cols=1)
             beta(j) = sqrt(dot_vTBv_layout(1,1))
@@ -258,7 +258,7 @@ module m_trace_estimation
     call xg_free(W_vcol)
     call xg_free(W_dot)
     ABI_FREE(v_min)
-    
+
     call timab(tim_lanczos,2,tsec)
 
   end subroutine computeBLanczos
@@ -269,14 +269,14 @@ module m_trace_estimation
 !!****f* m_trace_estimation/computeChebyshevMoments
 !! NAME
 !! computeChebyshevMoments
-!! 
+!!
 !! FUNCTION
 !! Compute Chebyshev moments up to maximal degree all centered in [A,B)
 !! Upper bound is computed as Rayleigh quotient
 !!
 !! OUTPUT
 !! M_n = <X, f_n(B^{-1}AX) X> for n=1,..,ndeg_filter_max
-!! 
+!!
 !! SOURCE
 
 subroutine computeChebyshevMoments(minfo, tolerance, ecut, paw, X0, getAX_BX, getBm1X, &
@@ -332,7 +332,7 @@ subroutine computeChebyshevMoments(minfo, tolerance, ecut, paw, X0, getAX_BX, ge
         me_g0 = minfo%me_g0_fft
     end if
     nband = cols(X0)
- 
+
     ! Moment workspace size (1, ndeg+1)
     call xg_init(Moments, space, 1, ndeg_filter+1, gpu_option=gpu_option) ! M_n=<X0,f_n(A)X0>
     call xg_init(X0_backup, space, tot_spacedim, nband, minfo%spacecom, me_g0=me_g0, gpu_option=gpu_option) ! X0
@@ -346,7 +346,7 @@ subroutine computeChebyshevMoments(minfo, tolerance, ecut, paw, X0, getAX_BX, ge
 
     ! Initialize Chebyshev recursion
     call xgBlock_copy(X0, X0_backup%self)
-    chebfi%xXColsRows = X0    
+    chebfi%xXColsRows = X0
 
     ! Compute A*Psi
     call timab(tim_getAX_BX,1,tsec)
@@ -358,17 +358,17 @@ subroutine computeChebyshevMoments(minfo, tolerance, ecut, paw, X0, getAX_BX, ge
     call timab(tim_getAX_BX,2,tsec)
 
     ! Initialize Chebyshev moment at k=1
-    call xgBlock_setBlock(Moments%self, Moment_ideg, 1, 1, fcol=1) 
+    call xgBlock_setBlock(Moments%self, Moment_ideg, 1, 1, fcol=1)
     call xgBlock_dot(X0_backup%self, chebfi%xXColsRows, Moment_ideg)
 
     ! Spectral interval to be amplified scaled to [-1,1)
     center = (lambda_plus + lambda_minus)/2.d0
-    radius = (lambda_plus - lambda_minus)/2.d0 
+    radius = (lambda_plus - lambda_minus)/2.d0
     one_over_r = 1.d0/radius
     two_over_r = 2.d0/radius
 
     do ideg = 0, ndeg_filter - 1
-     
+
         !chebfi%paw = .false.
         ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
         call chebfi_computeNextOrderChebfiPolynom(chebfi, ideg, center, one_over_r, two_over_r, getBm1X)
@@ -381,8 +381,8 @@ subroutine computeChebyshevMoments(minfo, tolerance, ecut, paw, X0, getAX_BX, ge
         call chebfi_swapInnerBuffers(chebfi, tot_spacedim, nband)
         call timab(tim_swap,2,tsec)
         ABI_NVTX_END_RANGE()
-        
-        !A * Psi    
+
+        !A * Psi
         call timab(tim_getAX_BX,1,tsec)
         ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
         call getAX_BX(chebfi%xXColsRows, chebfi%xAXColsRows, chebfi%xBXColsRows)
@@ -392,11 +392,11 @@ subroutine computeChebyshevMoments(minfo, tolerance, ecut, paw, X0, getAX_BX, ge
         call timab(tim_getAX_BX,2,tsec)
 
         ! M_ideg = < X0, f_ideg X0 >_B
-        call xgBlock_setBlock(Moments%self, Moment_ideg, 1, 1, fcol=ideg+2) 
+        call xgBlock_setBlock(Moments%self, Moment_ideg, 1, 1, fcol=ideg+2)
         call xgBlock_dot(X0_backup%self, chebfi%xXColsRows, Moment_ideg)
 
-    end do 
-    
+    end do
+
     call xgBlock_reverseMap(Moments%self, momvals, 1, ndeg_filter+1)
     cheby_moments(:,:) = momvals(:,:)
 
@@ -404,7 +404,7 @@ subroutine computeChebyshevMoments(minfo, tolerance, ecut, paw, X0, getAX_BX, ge
     call xg_free(Moments)
     call chebfi_free(chebfi)
     call xg_free(X0_backup)
-    
+
 end subroutine computeChebyshevMoments
 !!***
 
@@ -413,7 +413,7 @@ end subroutine computeChebyshevMoments
 !!****f* m_trace_estimation/computeTraceEstimation
 !! NAME
 !! computeTraceEstimation
-!! 
+!!
 !! FUNCTION
 !! Compute Girard-Hutchinson trace estimator
 !! ndeg_filter -> number of Chebyshev moments
@@ -461,9 +461,9 @@ subroutine computeTraceEstimation(minfo, ecut, paw, tolerance, getAX_BX, getBm1X
     type(xg_t) :: X_probe
     complex(dp), allocatable :: cheby_moments(:,:)
     real(dp) :: tsec(2)
-    
+
     ! *********************************************************************
-    
+
     call timab(tim_trace,1,tsec)
 
     tot_spacedim = minfo%total_spacedim
@@ -475,7 +475,7 @@ subroutine computeTraceEstimation(minfo, ecut, paw, tolerance, getAX_BX, getBm1X
     end if
 
     num_moments = ndeg_filter + 1
-    ABI_MALLOC(cheby_moments, (1, num_moments) ) 
+    ABI_MALLOC(cheby_moments, (1, num_moments) )
 
     ! total number of probes is m_probes * number of MPI processes
     call xg_init(X_probe, minfo%space, tot_spacedim, m_probe, minfo%spacecom, &
@@ -507,7 +507,7 @@ subroutine computeTraceEstimation(minfo, ecut, paw, tolerance, getAX_BX, getBm1X
     moments = real(cheby_moments(1,:))
     call xmpi_sum(moments, minfo%spacecom, ierr)
     moments(1:num_moments) = moments(1:num_moments)/m_probe_tot
-    
+
     !write(std_out,*) 'moments k=0=', real(cheby_moments(1,1))
     !write(std_out,*) 'moments k=1=', real(cheby_moments(1,2))
     !write(std_out,*) 'moments k=3=', real(cheby_moments(1,3))
@@ -516,9 +516,9 @@ subroutine computeTraceEstimation(minfo, ecut, paw, tolerance, getAX_BX, getBm1X
     ! Free memory
     ABI_FREE(cheby_moments)
     call xg_free(X_probe)
-    
+
     call timab(tim_trace,2,tsec)
-    
+
 end subroutine computeTraceEstimation
 !!***
 
@@ -527,7 +527,7 @@ end subroutine computeTraceEstimation
 !!****f* m_trace_estimation/get_eigenvalue_count
 !! NAME
 !! get_eigenvalue_count
-!! 
+!!
 !! SOURCE
 
 function get_eigenvalue_count(b, moments, work) result(mass)
@@ -552,7 +552,7 @@ function get_eigenvalue_count(b, moments, work) result(mass)
     !alpha = 20
     !Ngrid = 500
     !work = smooth_step_coeffs(b, ndeg_filter, alpha, Ngrid)
-    
+
     ! Steep Lanczos
     work = lanczos_step_coeffs(b, ndeg_filter)
 
@@ -566,7 +566,7 @@ end function get_eigenvalue_count
 !!****f* m_trace_estimation/smallestTridiagEigenpair
 !! NAME
 !! smallestTridiagEigenpair
-!! 
+!!
 !! FUNCTION
 !! Smallest eigenvalue of symmetric tridiagonal
 !!
@@ -584,7 +584,7 @@ end function get_eigenvalue_count
     real(dp), allocatable :: z(:,:), work(:)
     integer, allocatable :: iwork(:), ifail(:)
     integer :: info, m
-    
+
     ! *********************************************************************
 
     dloc = d

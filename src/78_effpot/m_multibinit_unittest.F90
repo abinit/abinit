@@ -13,7 +13,7 @@
 !! TODO: add this when F2003 doc style is determined.
 !!
 !! mb_test_main: run all unit test subroutines
-!! mb_test1: 
+!! mb_test1:
 !!
 !! COPYRIGHT
 !! Copyright (C) 2001-2026 ABINIT group (hexu)

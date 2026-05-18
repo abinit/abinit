@@ -114,7 +114,7 @@ module m_rmm_diis
    procedure :: exit_iter => rmm_diis_exit_iter         ! Return True if can exit the DIIS iteration.
    procedure :: print_block => rmm_diis_print_block     ! Print energies, residuals and diffs for a given block.
    ! TODO: Fix problem with last_iter and hist
-   procedure :: push_iter => rmm_diis_push_iter         ! Save results required the by DIIS algorithm
+   procedure :: push_iter => rmm_diis_push_iter         ! Save results required by the DIIS algorithm
 
  end type rmm_diis_t
 
@@ -196,9 +196,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  real(dp),allocatable :: lambda_bk(:), kres_bk(:,:), dots_bk(:,:), residv_bk(:,:)
  real(dp),allocatable :: umat(:,:,:), gwork(:,:), dots(:, :)
  real(dp),target,allocatable :: ghc(:,:), gvnlxc(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:), cg_bk(:,:), ghc_bk(:,:), gvnlxc_bk(:,:)
+ real(dp),contiguous, pointer :: gsc_bk(:,:), cg_bk(:,:), ghc_bk(:,:), gvnlxc_bk(:,:)
  type(pawcprj_type) :: cprj_dum(1,1)
-
 ! *************************************************************************
 
  ! Define useful vars.
@@ -237,7 +236,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
  ! Note:
  !
- ! * Accuracy_level is not allowed to increase during the SCF cycle
+ ! * Accuracy_level is not allowed to increase during the SCF cycle.
  !
  ! * Since we operate on blocks of bands, all the states in the block will receive the same treatment.
  !   This means that one can observe different convergence behaviour depending on bsize.
@@ -377,10 +376,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ABI_MALLOC(ghc_bk, (2, npwsp*bsize))
    ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
  end if
- !write(msg, "(a,f8.1,a)") &
- !  " Memory required: ", 2 * natom3**2 * (my_q2 - my_q1 + 1) * dp * b2Mb, " [Mb] <<< MEM"
+ !write(msg, "(a,f8.1,a)")" Memory required: ", 2 * natom3**2 * (my_q2 - my_q1 + 1) * dp * b2Mb, " [Mb] <<< MEM"
  !call wrtout(std_out, msg)
-
 
  ! We loop over nblocks, each block contains ndat states.
  !
@@ -455,14 +452,17 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
    ! Compute lambda
    dots_bk = zero
+   !$OMP PARALLEL DO PRIVATE(jj, kk)
    do idat=1,ndat
      jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
      call dotprod_g(dots_bk(1,idat), dots_bk(2,idat), istwf_k, npwsp, option1, &
                     diis%chain_resv(:,:,0,idat), residv_bk(:,jj), me_g0, xmpi_comm_self)
    end do
+
    call xmpi_sum(dots_bk, comm_bsf, ierr)
 
    ! Build |Psi_1> = |Phi_0> + lambda |K R_0>
+   !$OMP PARALLEL DO PRIVATE(jj, kk)
    do idat=1,ndat
      lambda_bk(idat) = -dots_bk(1,idat) / lambda_bk(idat)
      jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
@@ -561,7 +561,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (usepaw == 1) after_ortho = 2 ! FIXME ??
 
  if (after_ortho == 0) then
-   !if (prtvol == -level)
    call wrtout(std_out, " VERY-FAST: Won't recompute data after orthogonalization.")
 
  !else if (after_ortho == 1 .and. savemem == 0) then
@@ -601,7 +600,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    end if
 
  else
-   !if (prtvol == -level)
    if (after_ortho == 1) call wrtout(std_out, " SLOW: Recomputing enlx gvnlx by calling nonlop.")
    if (after_ortho == 2) call wrtout(std_out, " VERY-SLOW: Recomputing eigens and residues by calling getghc.")
 
@@ -920,7 +918,6 @@ subroutine getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, cg, ghc, gsc, mpi_enr
 !arrays
  real(dp) :: dots(2, ndat)
  type(pawcprj_type) :: cprj_dum(1,1)
-
 ! *************************************************************************
 
  !if (timeit) call cwtime(cpu, wall, gflops, "start")
@@ -985,7 +982,6 @@ type(rmm_diis_t) function rmm_diis_new(accuracy_level, usepaw, istwf_k, npwsp, m
 
 !Arguments ------------------------------------
  integer,intent(in) :: accuracy_level, usepaw, istwf_k, npwsp, max_niter, bsize, prtvol
-
 ! *************************************************************************
 
  diis%accuracy_level = accuracy_level
@@ -1026,7 +1022,6 @@ subroutine rmm_diis_free(diis)
 
 !Arguments ------------------------------------
  class(rmm_diis_t),intent(inout) :: diis
-
 ! *************************************************************************
 
  ABI_SFREE(diis%hist_ene)
@@ -1113,19 +1108,29 @@ subroutine rmm_diis_update_block(diis, iter, npwsp, ndat, cg_bk, residv_bk, comm
  !if (nprocs > 1) call xmpi_sum(wvec, comm, ierr)
 
  ! Take linear combination of chain_phi and chain_resv.
+!$omp parallel private(idat, alphas)
+  if (cplex /= 2) then
+    ABI_MALLOC(alphas, (1, 0:iter))
+  end if
+
+ !$omp do
  do idat=1,ndat
    if (cplex == 2) then
      call cg_zgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), wvec(:,:,idat), cg_bk(:,:,idat))
      call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), wvec(:,:,idat), residv_bk(:,:,idat))
    else
-     ! coefficients are real --> use DGEMV
-     ABI_MALLOC(alphas, (1, 0:iter))
+     ! coefficients are real --> use DGEMV.
      alphas(1,:) = wvec(1,:,idat)
      call dgemv("N", 2*npwsp, iter, one, diis%chain_phi(:,:,:,idat), 2*npwsp, alphas, 1, zero, cg_bk(:,:,idat), 1)
      call dgemv("N", 2*npwsp, iter, one, diis%chain_resv(:,:,:,idat), 2*npwsp, alphas, 1, zero, residv_bk(:,:,idat), 1)
-     ABI_FREE(alphas)
    end if
- end do
+ end do ! idat
+ !$omp end do
+
+ if (cplex /= 2) then
+   ABI_FREE(alphas)
+ end if
+!$omp end parallel
 
  ABI_FREE(wvec)
  !if (timeit) call cwtime_report(" update_block", cpu, wall, gflops)
@@ -1236,7 +1241,7 @@ end subroutine my_pack_matrix
 !!
 !! FUNCTION
 !!  This routine computes the <i|H|j> matrix elements and then performs the subspace rotation
-!!  of the orbitals (rayleigh-ritz procedure)
+!!  of the orbitals (Rayleigh-Ritz procedure)
 !!  The main difference with respect to other similar routines is that this implementation does not require
 !!  the <i|H|j> matrix elements as input so it can be used before starting the wavefunction optimation
 !!  as required e.g. by the RMM-DIIS method.
@@ -1268,13 +1273,12 @@ end subroutine my_pack_matrix
 subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor, savemem, enlx, eig, cg, gsc, ghc, gvnlxc)
 
 !Arguments ------------------------------------
- integer,intent(in) :: prtvol, nband, npw, my_nspinor, savemem
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+ integer,intent(in) :: prtvol, nband, npw, my_nspinor, savemem
  type(mpi_type),intent(in) :: mpi_enreg
  real(dp),target,intent(inout) :: cg(2,npw*my_nspinor*nband)
  real(dp),target,intent(inout) :: gsc(2,npw*my_nspinor*nband*gs_hamk%usepaw)
- !real(dp),target,intent(out) :: ghc(2,npw*my_nspinor*nband)
- !real(dp),target,intent(out) :: gvnlxc(2,npw*my_nspinor*nband)
+ !real(dp),target,intent(out) :: ghc(2,npw*my_nspinor*nband), gvnlxc(2,npw*my_nspinor*nband)
  real(dp),target,allocatable,intent(out) :: ghc(:,:), gvnlxc(:,:)
  real(dp),intent(out) :: eig(nband), enlx(nband)
 
@@ -1287,12 +1291,10 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
  real(dp) :: cpu, wall, gflops
 !arrays
  real(dp),target :: fake_gsc_bk(0,0)
- real(dp) :: subovl(use_subovl0)
+ real(dp) :: subovl(use_subovl0), dots(2, nband)
  real(dp),allocatable :: subham(:), h_ij(:,:,:), evec(:,:,:), evec_re(:,:), gwork(:,:)
- real(dp),ABI_CONTIGUOUS pointer :: ghc_bk(:,:), gvnlxc_bk(:,:), gsc_bk(:,:)
- real(dp) :: dots(2, nband)
+ real(dp),contiguous, pointer :: ghc_bk(:,:), gvnlxc_bk(:,:), gsc_bk(:,:)
  type(pawcprj_type) :: cprj_dum(1,1)
-
 ! *************************************************************************
 
  if (timeit) call cwtime(cpu, wall, gflops, "start")
@@ -1338,6 +1340,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
    igs = 1 + (iblock - 1) * npwsp * bsize; ige = min(iblock * npwsp * bsize, npwsp * nband)
    ndat = (ige - igs + 1) / npwsp
    ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
+
    if (usepaw == 1) gsc_bk => gsc(1:2,igs:ige)
    if (savemem == 0) then
      ghc_bk => ghc(:, igs:ige); gvnlxc_bk => gvnlxc(:, igs:ige)
@@ -1368,7 +1371,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
          do ib=1,nband
            ig0 = 1 + npwsp * (ib - 1)
 #if defined FC_NVHPC
-if (ig<0) write(100,*) ig,ig0,h_ij(1,ib,iband),cg(1,ig0),ghc_bk(1,ig)
+           if (ig<0) write(100,*) ig,ig0,h_ij(1,ib,iband),cg(1,ig0),ghc_bk(1,ig)
 #endif
            h_ij(1,ib,iband) = h_ij(1,ib,iband) - cg(1,ig0) * ghc_bk(1,ig)
          end do

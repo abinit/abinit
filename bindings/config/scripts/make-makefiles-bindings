@@ -165,7 +165,7 @@ for bnd in abinit_bindings:
   if ( bnd_srcs != None ):
     sources += sep+sep.join(bnd_srcs)
 
-  # Import and update template 
+  # Import and update template
   makefile = makefile_template(my_name,now,bnd)
   makefile = re.sub("@SOURCES@",sources,makefile)
   makefile = re.sub("@CLEANS@",cleans,makefile)

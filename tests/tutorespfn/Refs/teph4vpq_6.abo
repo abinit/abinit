@@ -2,7 +2,7 @@
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -54,6 +54,7 @@ _ WF disk file :      0.330 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
         ddb_ngqpt        3    3    3
              ecut      3.00000000E+01 Hartree
  eph_frohl_ntheta          32
+      eph_restart           0
          eph_task          13
 -          fftalg         512
            istwfk        2    0    0    0
@@ -550,6 +551,7 @@ P Number of CPUs for parallelism over k-points: 1
         ddb_ngqpt        3    3    3
              ecut      3.00000000E+01 Hartree
  eph_frohl_ntheta          32
+      eph_restart           0
          eph_task          13
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00

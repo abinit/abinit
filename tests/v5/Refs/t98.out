@@ -1,8 +1,8 @@
 
-.Version 9.7.4 of MRGGKK 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.7.4 of MRGGKK
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  MRGGKK comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,8 +16,8 @@
 
 .Starting date : Wed  4 May 2022.
 - ( at 01h24 )
-  
- Files file format: 
+
+ Files file format:
 
   Name of the output file
   Integer flag: 0 --> binary output,   1 --> ascii formatted output

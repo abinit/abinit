@@ -45,7 +45,7 @@ AC_DEFUN([ABI_LINALG_DETECT], [
 
 	# Test if BLAS library has buggy dot/norm interfaces
 	if test "${abi_zdot_bugfix_enable}" = "no" -o "${abi_zdot_bugfix_enable}" = "auto"; then
-	  abi_zdot_bugfix="${sd_linalg_has_buggy_zdot}"	
+	  abi_zdot_bugfix="${sd_linalg_has_buggy_zdot}"
 	  if test "${abi_zdot_bugfix}" = "yes" -a "${abi_zdot_bugfix_enable}" = "no"; then
 		AC_MSG_ERROR([--enable-zdot-bugfix option is deactivated but the BLAS library has buggy interfaces!])
 	  fi

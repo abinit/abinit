@@ -1,11 +1,11 @@
-# GS and linear-response to a finite-q scalar potential with PCM 
+# GS and linear-response to a finite-q scalar potential with PCM
 # electrical boundary conditions in noncolinear MnF2
 # (M. Royo, 23.01.2026)
 
    ndtset 4
 
 ### 1) GROUND STATE
-   tolvrs1  1.0d-10   
+   tolvrs1  1.0d-10
    spinat1  0.0 0.0  5.0     #Magnetism
             0.0 0.0 -5.0
             0.0 0.0  0.0
@@ -42,16 +42,16 @@ icutcoul4   55
    prtwf4   0
  tim1rev4   0
   ixcrot4   3
-                
+
 ### GENERAL PARAMETERS
 
 #Definition of the atom types
-ntypat 2          
+ntypat 2
 znucl 25 9
-                
+
 #Definition of the atoms
-natom 6           
-typat 2*1 4*2     
+natom 6
+typat 2*1 4*2
 
 #Definition of the unit cell
 acell     9.2100000000E+00  9.2100000000E+00  6.2560000000E+00 Bohr
@@ -63,34 +63,34 @@ xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
           6.9627618231E-01  6.9627618231E-01  0.0000000000E+00
           1.9627618231E-01  8.0372381769E-01  5.0000000000E-01
           3.0372381769E-01  3.0372381769E-01  0.0000000000E+00
-          8.0372381769E-01  1.9627618231E-01  5.0000000000E-01  
+          8.0372381769E-01  1.9627618231E-01  5.0000000000E-01
 
 #Definition of the planewave basis set
-ecut   3.5         
+ecut   3.5
 nband  42
 
 #Definition of the k-point grid
-kptopt 3          
-                  
-ngkpt 2 2 3      
+kptopt 3
 
-nshiftk 1         
+ngkpt 2 2 3
+
+nshiftk 1
 shiftk 0.5 0.5 0.5
 
 #Symmetries deactivated for magnetic systems
 nsym 1
 
 #Definition of the SCF procedure
-nstep 50        
-diemac  8.0    
+nstep 50
+diemac  8.0
 
 nline 8
 diemix1    0.6
 diemixmag1 0.4
 nnsclo -4
 
-nspden   4   
-nspinor  2   
+nspden   4
+nspinor  2
 asr 0
 
 #Pseudos
@@ -107,7 +107,7 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%% [files]
 #%% files_to_test =
 #%%   t54.abo, tolnlines=  22, tolabs=  1.000e-04, tolrel=  4.000e-6, fld_options=-medium
-#%% [shell]  
+#%% [shell]
 #%% max_nprocs = 12
 #%% [extra_info]
 #%% authors = M. Royo

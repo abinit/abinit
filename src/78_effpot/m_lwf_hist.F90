@@ -5,7 +5,7 @@
 !! FUNCTION
 !! This module contains definition the type lwf_hist_t
 !! and its related routines
-!! The observables are also calculated. 
+!! The observables are also calculated.
 !!
 !! Datatypes:
 !!

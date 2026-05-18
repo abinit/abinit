@@ -334,7 +334,7 @@ MODULE m_pawtab
 
   real(dp) :: ehnzc
    ! Hartree energy of core electrons + nucleus
-  
+
   real(dp) :: eps
   ! Epsilon parameter for Yukawa potential (only used for the exact double counting)
 

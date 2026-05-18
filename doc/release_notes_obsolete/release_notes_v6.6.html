@@ -17,12 +17,12 @@ September 2010 and February 2011. These release notes
 are relative to improvements of ABINITv6.6 with respect to v6.4.
 
 The list of contributors includes :
-D. Adams, B. Amadon, A. Berger, J.-M. Beuken, F. Bottin, 
+D. Adams, B. Amadon, A. Berger, J.-M. Beuken, F. Bottin,
 P. Boulanger, F. Bruneval, D. Caliste, M. Delaveau, C. Espejo, Don Fanucci,
 G.A. Franco, M. Giantomassi, X. Gonze, I. Hamada, N. Holzwarth, A. Jacques, F. Jollet, S. Le Roux,
-A. Lherbier, M. Mancini, T. Nishimatsu, M. Oliveira, S. Ponce, Y. Pouillon, 
+A. Lherbier, M. Mancini, T. Nishimatsu, M. Oliveira, S. Ponce, Y. Pouillon,
 P.-Y. Prodhomme, M. Rampp, T. Rangel,
-G.-M. Rignanese, AH Romero, M. Stankovski, M. Torrent, M. Verstraete, D. Waroquiers, 
+G.-M. Rignanese, AH Romero, M. Stankovski, M. Torrent, M. Verstraete, D. Waroquiers,
 Z. Zanolli, J. Zwanziger .
 
 It is worth to read carefully
@@ -77,9 +77,9 @@ B.  Most noticeable achievements
 
 B.1 The PAW atomic dataset generator ATOMPAW, from Natalie Holzwarth and coworkers,
     has been adapted as a plugin for ABINIT. The interface with ABINIT is tested
-    automatically, thanks to tests in tests/atompaw. 
+    automatically, thanks to tests in tests/atompaw.
     ATOMPAW compiles correctly on all the standard testing platforms of ABINIT,
-    so that it is considered as being part of the 
+    so that it is considered as being part of the
     standard reference configuration of the ABINIT package.
     The executable is generated in plugins/atompaw .
     Also, the ability to use libxc with atompaw is present, and the pseudopotentials that have
@@ -88,11 +88,11 @@ B.1 The PAW atomic dataset generator ATOMPAW, from Natalie Holzwarth and coworke
     Tests are tests/atompaw #01 and #02 (generation of the PAW dataset by PAW then use by ABINIT),
     and tests/libxc #10 (use of a PAW dataset for PBEsol).
     Plugin set-up and interfacing with ABINIT
-    done by Yann Pouillon, Jean-Michel Beuken, Marc Torrent, Joe Zwanziger and XG, in collaboration 
+    done by Yann Pouillon, Jean-Michel Beuken, Marc Torrent, Joe Zwanziger and XG, in collaboration
     with N. Holzwarth.
     ATOMPAW from Natalie Holzwarth and Alan Tackett.
 
-B.2 Two new tutorials are available : 
+B.2 Two new tutorials are available :
     - lesson_detu.html, for the determination of the U and J values from the method by Coccochioni and de Gironcoli
          (see the release_notes of v6.4, section B.4, for the announcement of the related input variables and automatic tests).
     - lesson_paw3.html, for the testing of Atomic dataset, compared to the ELK code.
@@ -105,14 +105,14 @@ B.3 The usage of MPIIO can be now considered in production for the FFT/Band para
     Initial MPIIO implementation by M. Boulet, F. Bottin and G. Zerah, improved by M. Delaveau and M. Torrent.
 
 B.4 The plasmon-pole models 2-3-4 can now be used in GW+PAW.
-    By M. Giantomassi 
+    By M. Giantomassi
 
 __________________________________________________________________
 
 C. Changes for the developers
 
-C.1 Max and littlebuda are two new slaves for the test farm : 
-    - max tests the parallelism up to 10 procs using Myrinet; 
+C.1 Max and littlebuda are two new slaves for the test farm :
+    - max tests the parallelism up to 10 procs using Myrinet;
     - littlebuda tests the compilation and links with GPU turned on. No tests activated yet, though.
     By J.-M. Beuken, Y. Pouillon, X. Gonze
 
@@ -126,7 +126,7 @@ D.  Other changes
 
 
 D.1 The two-phonon DOS sum and difference spectra can now be computed.
-    See test v2#15. 
+    See test v2#15.
     By A. Romero.
 
 D.2 Analysis of GW wavefunctions with cut3d now possible
@@ -185,7 +185,7 @@ D.14 The use of LDA+Dynamical Mean Field Theory is in progress.
      A new input variable "dmft_dc" has been introduced.
      By B. Amadon
 
-D.15 Work in progress for the implementation of the Path Integral Molecular Dynamics algorithm for the 
+D.15 Work in progress for the implementation of the Path Integral Molecular Dynamics algorithm for the
      ionic degrees of freedom, combined with DFT for the electronic degrees of freedom.
      Input variable pitransform
      Allowed by imgmov=9 (Langevin dynamics), imgmov=13 (chain of thermostats).
@@ -237,8 +237,8 @@ D.24 Work on SCPhonons going on.
 
 D.25 Numerous miscellaneous bug fixes (to the sources, as well as to the build system, including the plug-ins),
      and improvements of documentation by
-     B. Amadon, A. Berger, J.-M. Beuken, D. Caliste, Don Fanucci, 
-     G.A. Franco, M. Giantomassi, X. Gonze, I. Hamada, A. Jacques, F. Jollet, S. Le Roux, 
+     B. Amadon, A. Berger, J.-M. Beuken, D. Caliste, Don Fanucci,
+     G.A. Franco, M. Giantomassi, X. Gonze, I. Hamada, A. Jacques, F. Jollet, S. Le Roux,
      A. Lherbier, M. Mancini, T. Nishimatsu, S. Ponce, Y. Pouillon, P.-Y. Prodhomme, M. Rampp, T. Rangel,
      G.-M. Rignanese, M. Torrent, M. Stankovski, M. Verstraete, Z. Zanolli, J. Zwanziger .
 </pre>

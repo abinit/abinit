@@ -58,7 +58,7 @@ module m_krank
 
    integer,allocatable :: invrank(:)
 
-   real(dp),ABI_CONTIGUOUS pointer :: kpts(:,:)
+   real(dp),contiguous, pointer :: kpts(:,:)
     ! Reference to input k-points or copy of the array depending on kpts_owns_memory
 
     ! Internal tables used by krank_get_mapping

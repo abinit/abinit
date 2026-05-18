@@ -17,9 +17,9 @@ June 2013 and January 2014. These release notes
 are relative to improvements of ABINITv7.6 with respect to v7.4.
 
 The list of contributors includes :
-B. Amadon, G. Antonius, T. Applencourt, A. Berger, J.-M. Beuken, J. Bieder, F. Bottin, J. Bouchet, F. Bruneval, D. Caliste, 
+B. Amadon, G. Antonius, T. Applencourt, A. Berger, J.-M. Beuken, J. Bieder, F. Bottin, J. Bouchet, F. Bruneval, D. Caliste,
 M. Delaveau, B. Dorado, C. Espejo, A. Garcia, L. Genovese, M. Giantomassi, Y. Gillet, X. Gonze, N. Holzwarth,
-F. Jollet, G. Jomard, J. Junquera, A. Martin, C. Martins, Renato Miceli, 
+F. Jollet, G. Jomard, J. Junquera, A. Martin, C. Martins, Renato Miceli,
 Takeshi Nishimatsu, S. Ponce, Y. Pouillon, T. Rangel, M. Stengel, M. Torrent, M. Verstraete, J. Wiktor, B. Xu
 
 It is worth to read carefully
@@ -50,18 +50,18 @@ __________________________________________________________________
 B.  Most noticeable achievements
 
 B.1 A large set of PAW atomic data files, covering 71 elements (=all except lanthanides or Z>85, with nevertheless Rn and Lu),
-    with the GGA PBE functional, has been generated and tested. 
+    with the GGA PBE functional, has been generated and tested.
     See https://www.abinit.org/downloads/PAW2/JTH-TABLE/index.html .
     These atomic data files have been validated in ABINIT against all-electron calculations using the delta package, http://molmod.ugent.be/deltacodesdft.
-    A paper has been written, and is available on arXiv : http://arxiv.org/abs/1309.7274 . 
-    These files are written in the XML format (that can also be read by GPAW). 
+    A paper has been written, and is available on arXiv : http://arxiv.org/abs/1309.7274 .
+    These files are written in the XML format (that can also be read by GPAW).
     In the above-mentioned paper, this new JTH table is also compared with two other sets of PAW atomic pseudopotentials,
     from GPAW, and also from K.F. Garrity, J.W. Bennet, K.M. Rabe, D. Vanderbilt, arXiv:1305.5973v1
     See the Test v7#64 . Other tests using the PAW XML format : tests v7#60, 61, 63.
     Work by F. Jollet, M. Torrent and N. Holzwarth.
 
 B.2 The Dynamical Mean Field Theory (DMFT) with Continuous Time Quantum Monte Carlo solver is available and fully parallelised.
-    New input variables : dmft_t2g dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove dmftctqmc_grnns dmftctqmc_meas dmftctqmc_mrka 
+    New input variables : dmft_t2g dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove dmftctqmc_grnns dmftctqmc_meas dmftctqmc_mrka
      dmftctqmc_mov dmftctqmc_order dmftqmc_l dmftqmc_n dmft_seed dmftqmc_therm
     See also input variables usedmft and dmft_solv
     New tests v7#27, 28, 29 and paral #92.
@@ -69,7 +69,7 @@ B.2 The Dynamical Mean Field Theory (DMFT) with Continuous Time Quantum Monte Ca
 
 B.3 Introduction of the new input variable usepotzero, allowing to change the definition of the average of the
     local potential. The convention of PW-SCF can now be used (as well as the usual convention of ABINIT).
-    The cross validation of the results between the two codes can be made much stronger than previously, especially 
+    The cross validation of the results between the two codes can be made much stronger than previously, especially
     in the charged supercell case.
     A paper has been accepted in Phys. Rev. B :
     "Consistent treatment of charged systems within periodic boundary conditions:
@@ -100,12 +100,12 @@ C.2 PLASMA and ELPA are now detected automatically by the build system.
 C.3 The doc subsystem has been enabled.
     Work by Y. Pouillon
 
-C.4 There has been a deep cleaning of exception treatment. 
+C.4 There has been a deep cleaning of exception treatment.
     E.g. Now, the "PERS" mode is used for WARNINGs, COMMENTs and ERRORs, while leave_test is not used anymore,
     and abinit_comm_leave is not used anymore (now we **always** call MPI_ABORT is something goes wrong).
     Work by M. Giantomassi
-    
-C.5 The creation of sections of output written in YAML (see e.g. http://en.wikipedia.org/wiki/YAML ) has started 
+
+C.5 The creation of sections of output written in YAML (see e.g. http://en.wikipedia.org/wiki/YAML ) has started
     The build system supports YAML, and The YAML library has been integrated in the build system  (TRIO connector for YAML)
     Work by M. Giantomassi and Y. Pouillon
 
@@ -136,7 +136,7 @@ D.4 Work on the VdW-DF and VdW-WF function is going on :
     Corrections for the VdW-WF .
     Work by Y. Pouillon + C. Espejo
 
-D.5 PAW + Bigdft project 
+D.5 PAW + Bigdft project
     The ABINIT PAW library (libpaw) is in progress, see src/42_libpaw.
     It contains:
       - all the PAW object definitions and associated methods and functions,
@@ -157,7 +157,7 @@ D.7 On-going efforts for the computation of elastic tensor within PAW.
 
 D.8 On-going efforts on the development of Hartree-Fock.
     Hartree-Fock calculations are now coded within Norm-Conserving PSP formalism,
-    with the use of symetries and parallelism (not included in v7.6, though - developments to be merged in v7.7). 
+    with the use of symetries and parallelism (not included in v7.6, though - developments to be merged in v7.7).
     Still in the testing phase.
     PAW + Hartree-Fock under development
     From C. Martins (helped by M. Torrent and B. Amadon)
@@ -174,7 +174,7 @@ D.11 Work on the use of the PLASMA library.
 
 D.12 Continued efforts on the development of the abipy library
     Soon to be alpha tested (watch the anouncement on the forum).
-    From M. Giantomassi 
+    From M. Giantomassi
 
 D.13 Allow for the use of different ngfft in DFPT and GS.
      From M. Torrent
@@ -202,12 +202,12 @@ D.18 Post-process : Response function from Molecular Dynamics
 
 D.19 Output of phonon isosurface is working
      Should provide a test ?
-     By Bin Xu      
+     By Bin Xu
 
 D.20 Numerous miscellaneous additional bug fixes (to the sources, as well as to the build system,
      including patches for the fallbacks), and improvements of documentation by :
     B. Amadon, G. Antonius, J.-M. Beuken, J. Bieder, F. Bruneval, C. Espejo,
-    M. Giantomassi, Y. Gillet, X. Gonze, F. Jollet, Renato Miceli, 
+    M. Giantomassi, Y. Gillet, X. Gonze, F. Jollet, Renato Miceli,
     Takeshi Nishimatsu, Y. Pouillon, T. Rangel, M. Stengel, M. Torrent, M. Verstraete, B. Xu
 
 </pre>

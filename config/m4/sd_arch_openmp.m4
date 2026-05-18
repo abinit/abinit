@@ -428,7 +428,7 @@ AC_DEFUN([_SD_OPENMP_CHECK_CXX_API], [
                     # ------------------------------------ #
 
 #
-# Private macros for Fortran 
+# Private macros for Fortran
 #
 
 AC_DEFUN([_SD_OPENMP_CHECK_FC], [
@@ -466,10 +466,10 @@ AC_DEFUN([_SD_OPENMP_CHECK_FC_API], [
   AC_LANG_PUSH([Fortran])
   AC_RUN_IFELSE([AC_LANG_PROGRAM([],
     [[
-      use omp_lib 
+      use omp_lib
       integer :: i,n,m
       integer :: array(10)
-      n = 10 
+      n = 10
 !$OMP PARALLEL DO
       do i = 1, n
         array(i) = sqrt(real(i))

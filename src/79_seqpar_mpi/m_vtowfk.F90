@@ -234,8 +234,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp) :: dummy(2,1),nonlop_dum(1,1),nonlop_dum2(1,1),tsec(2)
  real(dp),allocatable :: cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(real64), ABI_CONTIGUOUS pointer :: cwavef(:,:)  => null()
- real(real64), ABI_CONTIGUOUS pointer :: wfraug(:,:,:,:)
+ real(real64), contiguous, pointer :: cwavef(:,:)  => null()
+ real(real64), contiguous, pointer :: wfraug(:,:,:,:)
 #else
  real(dp),allocatable,target :: cwavef(:,:)
  real(dp),allocatable :: wfraug(:,:,:,:)
@@ -531,7 +531,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &                              mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
                 ABI_NVTX_END_RANGE()
             end if
-         else            
+         else
              if (istep > nstep_mixed) then
                 write(std_out,'(a,i0)') 'entering slicewf_cprj'
                 ! ITEST
@@ -552,7 +552,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                     mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
             end if
          end if
-     
+
 !      =========================================================================
 !      ======== MINIMIZATION OF BANDS: CONJUGATE GRADIENT (Teter et al.) =======
 !      =========================================================================

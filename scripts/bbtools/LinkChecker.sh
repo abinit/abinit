@@ -36,10 +36,10 @@ sudo netstat -tapn | grep 8000
 echo -e "\n***  Starting linkchecker...\n"
 
 # BB logfiles={ "link-cleaned" : "linkchecker_ext_wo_false_errors.log" },
-# "linkchecker_ext.log" is too big  
+# "linkchecker_ext.log" is too big
 echo "cmd : linkchecker -v --no-status --check-extern -o xml --ignore-url=.*fonts.gstatic.com http://localhost:8000/ > ../linkchecker_ext.log"
 
-linkchecker -v --no-status --check-extern --timeout 15 -o xml --ignore-url=.*fonts.gstatic.com http://localhost:8000/ > ../linkchecker_ext.log 2> ../linkchecker_ext.err        
+linkchecker -v --no-status --check-extern --timeout 15 -o xml --ignore-url=.*fonts.gstatic.com http://localhost:8000/ > ../linkchecker_ext.log 2> ../linkchecker_ext.err
 
 echo -e "\n***  Stopping SimpleHTTPServer...\n"
 kill %1

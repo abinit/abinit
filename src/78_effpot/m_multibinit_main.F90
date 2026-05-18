@@ -36,7 +36,7 @@ module m_multibinit_main2
   use m_errors
   use m_build_info,         only: abinit_version, build_target
   use m_multibinit_manager, only: mb_manager_t
-  
+
   implicit none
 
   !!***

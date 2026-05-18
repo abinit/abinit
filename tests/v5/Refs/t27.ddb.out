@@ -1,5 +1,5 @@
 
- **** DERIVATIVE DATABASE ****    
+ **** DERIVATIVE DATABASE ****
 +DDB, Version number  20240201
 
  Si EIGR2D file for elphon calculation
@@ -86,7 +86,7 @@
             0.25000000000000D+00  0.25000000000000D+00  0.25000000000000D+00
      znucl  0.14000000000000D+02
       zion  0.40000000000000D+01
- 
+
   Description of the potentials (KB energies)
   vrsio8 (for pseudopotentials)=100401
   usepaw =  0
@@ -95,10 +95,10 @@
   iln lpsang iproj  ekb(:)
      1     0     1     3.2879487E+00  0.0000000E+00
      2     1     1     0.0000000E+00  1.8498858E+00
- 
+
  **** Database of total energy derivatives ****
  Number of data blocks=    2
-  
+
  2nd eigenvalue derivatives   - # elements :          36
  qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
  K-point: -2.50000000E-01  5.00000000E-01  0.00000000E+00
@@ -6053,7 +6053,7 @@
    1   2   3   2 -0.96862704789310D+00  0.64007276882121D-06
    2   2   3   2 -0.96862405500161D+00  0.28527132941610D-06
    3   2   3   2 -0.32665557396645D+01  0.26714741530043D-15
-  
+
  2nd eigenvalue derivatives   - # elements :          36
  qpt  5.00000000E-01  0.00000000E+00  0.00000000E+00   1.0
  K-point: -2.50000000E-01  5.00000000E-01  0.00000000E+00

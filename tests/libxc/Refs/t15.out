@@ -1,8 +1,8 @@
 
-.Version 6.8.1  of MRGSCR 
-.(MPI version, prepared for a x86_64_linux_gnu4.4 computer) 
+.Version 6.8.1  of MRGSCR
+.(MPI version, prepared for a x86_64_linux_gnu4.4 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  MRGSCR comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,11 +16,11 @@
 
 .Starting date : Thu 23 Jun 2011.
 - ( at 13h57 )
-  
->>>  Enter the number of files to merge: 
->>>  Enter the prefix for the final output file: 
->>>  Enter the name for the partial screening file no.   1 
->>>  Enter the name for the partial screening file no.   2 
+
+>>>  Enter the number of files to merge:
+>>>  Enter the prefix for the final output file:
+>>>  Enter the name for the partial screening file no.   1
+>>>  Enter the name for the partial screening file no.   2
  SCR file: epsilon^-1 , calculated using inclvkb = 2
  TESTPARTICLE RPA
  Identifier                       4
@@ -208,10 +208,10 @@
  Memory required for temporary matrix=              0.0 [Mb].
  reading q-slice corresponding to iq = 3 from file: t14o_DS10_SCR
 
- ==== Files have been merged successfully === 
+ ==== Files have been merged successfully ===
 
 
- Checking if the list of q-points is complete. 
+ Checking if the list of q-points is complete.
 
  symatm: atom number    1 is reached starting at atom
    1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2
@@ -227,7 +227,7 @@
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -239,10 +239,10 @@
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
 
- File t15o_SCR contains a complete list of q-points 
+ File t15o_SCR contains a complete list of q-points
 

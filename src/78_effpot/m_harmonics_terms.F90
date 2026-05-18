@@ -555,7 +555,7 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_u
   integer :: i1,i2,i3,ia,ib,icell,ierr,irpt,irpt_tmp,ii,jj,kk,ll
   integer :: mu,nu
   real(dp):: disp1,disp2,ifc,tmp_etot1,tmp_etot2
-!Variables for separation of short and dipdip ifc contribution 
+!Variables for separation of short and dipdip ifc contribution
  !real(dp):: short_ifc,ewald_ifc
  !real(dp):: tmp_ewald1,tmp_ewald2,tmp_short1,tmp_short2
   ! array
@@ -592,7 +592,7 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_u
             do mu=1,3
               disp1 = disp(mu,kk)
               ifc = atmfrc(mu,ia,nu,ib,irpt)
-              
+
 !              if(abs(ifc) > tol10)then
                 tmp_etot1  = disp2 * ifc
 !               accumule energy
@@ -663,14 +663,14 @@ subroutine harmonics_terms_evaluateElastic(elastic_constants,disp,energy,fcart,n
  strten = zero
 
 ! write(*,*) "----- STRAIN -----"
-! write(*,*) strain 
+! write(*,*) strain
 
 !1- Part due to elastic constants
  do alpha=1,6
    do beta=1,6
 !     write(*,*) "--- cij --- alpha: ", alpha, " beta: ", beta
      cij = ncell*elastic_constants(alpha,beta)
-!     write(*,*) cij 
+!     write(*,*) cij
      energy = energy + half*cij*strain(alpha)*strain(beta)
      strten(alpha) = strten(alpha) + cij*strain(beta)
    end do
@@ -693,8 +693,8 @@ subroutine harmonics_terms_evaluateElastic(elastic_constants,disp,energy,fcart,n
 !  Reset to 1 if the number of atoms is superior than in the initial cell
    if(ii==natom_uc+1) ii = 1
  end do
- 
-! write(*,*) "--- STRTEN at the end --- " 
+
+! write(*,*) "--- STRTEN at the end --- "
 ! write(*,*) strten(:)
 
 end subroutine  harmonics_terms_evaluateElastic

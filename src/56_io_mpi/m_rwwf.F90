@@ -763,7 +763,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
  character(len=500) :: msg
  integer :: ikpt_this_proc,ispinor,me_cart_3d
  integer,allocatable :: ind_cg_mpi_to_seq(:)
- real(dp),ABI_CONTIGUOUS pointer :: cg_ptr(:,:)
+ real(dp),contiguous, pointer :: cg_ptr(:,:)
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr
  character(len=nctk_slen) :: kdep
 #ifdef HAVE_MPI

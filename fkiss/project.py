@@ -90,6 +90,16 @@ def load_mod(filepath: str) -> Any:
         return SourceFileLoader(filepath, filepath).load_module()
 
 
+def remove_trailing_whitespace(filepath: str) -> None:
+    from pathlib import Path
+    path = Path(filepath)
+    lines = path.read_text().splitlines()
+
+    cleaned = [line.rstrip(" \t") for line in lines]
+
+    path.write_text("\n".join(cleaned))
+
+
 class FortranFile:
     """
     Representation of a single Fortran source file in the ABINIT project.
@@ -1099,6 +1109,10 @@ class AbinitProject(NotebookWriter):
             with open(binconf_path, "w") as fh:
                 fh.write(fobj.getvalue())
         fobj.close()
+
+        # Trailing whitespace can appear in config/specs/binaries.conf,
+        # causing unnecessary diffs or linting issues. Clean it here.
+        remove_trailing_whitespace(binconf_path)
 
         return 0
 

@@ -107,14 +107,13 @@ subroutine xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rho
  real(dp) :: work_im,work_re
  character(len=500) :: message
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: gcart1(:),gcart2(:),gcart3(:)
  real(dp),allocatable :: g2cart1(:),g2cart2(:),g2cart3(:)
  real(dp),allocatable :: ph1(:),ph2(:),ph3(:)
  real(dp),allocatable :: wkcmpx(:,:),work(:),workgr(:,:),workgr2(:,:)
-
 ! *************************************************************************
 
 !DEBUG
@@ -468,14 +467,13 @@ subroutine xcpot (cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,n
  real(dp) :: ph3i,ph3r,work_im,work_re
  character(len=500) :: message
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  logical :: with_vxc,with_vxctau
  real(dp) :: tsec(2)
  real(dp),allocatable :: gcart1(:),gcart2(:),gcart3(:),ph1(:),ph2(:),ph3(:)
  real(dp),allocatable :: wkcmpx(:,:),wkcmpxtau(:,:)
  real(dp),allocatable :: work(:),workgr(:,:),worklp(:,:),worktau(:,:)
-
 ! *************************************************************************
 
  if (ishift/=0 .and. ishift/=1) then
@@ -795,13 +793,12 @@ subroutine xcpotdq (agradn,cplex,gprimd,ishift,mpi_enreg, &
  real(dp) :: gc23_idir,gcart_idir
  character(len=500) :: message
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: gcart1(:),gcart2(:),gcart3(:)
  real(dp),allocatable :: wkcmpx(:,:)
  real(dp),allocatable :: work(:),workgr(:,:)
-
 ! *************************************************************************
 
  if (ishift/=0) then

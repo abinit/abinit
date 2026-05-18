@@ -82,7 +82,7 @@ module m_gwr_driver
  use m_vhxc_me,         only : calc_vhxc_me
  use m_gwr,             only : gwr_t
  use m_vcoul,           only : vcgen_t
- !use m_ephtk,          only : ephtk_update_ebands
+ use m_ephtk,           only : ephtk_update_ebands
  use m_pstat,           only : pstat_proc
 
  implicit none
@@ -892,7 +892,7 @@ end if
 
      ! Here we change the GS bands (Fermi level, scissors operator ...)
      ! All the modifications to ebands should be done here.
-     !call ephtk_update_ebands(dtset, ks_ebands, "Ground state energies")
+     !call ephtk_update_ebands(dtset, dtfil%filqpdatain, ks_ebands, "Ground state energies", comm)
    end if
    call pstat_proc%print(_PSTAT_ARGS_)
 

@@ -91,8 +91,8 @@ contains
           write(std_out,'(a,2(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ROT1) : alpha,beta,Sum=',alpha,beta,norm1
           if (abs(norm1).gt.tol6) then
             ABI_WARNING('The invariance under arbitrary rotation is not fulfilled (order 1)')
-          end if 
-        end if 
+          end if
+        end if
       end do !beta
     end do !alpha
 
@@ -122,7 +122,7 @@ contains
             norm1=zero
             do jatom=1,Invar%natom
               norm1=norm1+Model%Phi2%SR(3*(iatom-1)+alpha,3*(jatom-1)+beta)*distance(iatom,jatom,gama+1)-&
-&                         Model%Phi2%SR(3*(iatom-1)+alpha,3*(jatom-1)+gama)*distance(iatom,jatom,beta+1)              
+&                         Model%Phi2%SR(3*(iatom-1)+alpha,3*(jatom-1)+gama)*distance(iatom,jatom,beta+1)
             end do !jatom
             norm1=norm1+Model%Phi1(3*(iatom-1)+beta)*Kroenecker(alpha,gama)&
 &                      -Model%Phi1(3*(iatom-1)+gama)*Kroenecker(alpha,beta)
@@ -131,14 +131,14 @@ contains
 &                                                        iatom,alpha,beta,gama,norm1
               if (abs(norm1).gt.tol4) then
                 ABI_WARNING('The invariance under arbitrary rotation is not fulfilled (order 2)')
-              end if 
-            end if 
+              end if
+            end if
           end do !gama
         end do !beta
       end do !alpha
-    end do !iatom  
-  end if !order=1,2  
-  
+    end do !iatom
+  end if !order=1,2
+
   if (order3) then
 !   THIRD ORDER
     ABI_MALLOC(rot3,(Invar%natom,3,3,3,3)) ; rot3(:,:,:,:,:)=0.d0
@@ -171,12 +171,12 @@ contains
           katom=Shell3at%neighbours(iatom,ishell)%atomk_in_shell(iatshell)
           isym =Shell3at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
           itrans=Shell3at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
-          call tdep_build_phi3_333(isym,Model%Phi3(:,:,:,ishell),Phi3_333,Sym,itrans) 
-!         Compute the first ASR : sum_k Phi3_ijk=0 
+          call tdep_build_phi3_333(isym,Model%Phi3(:,:,:,ishell),Phi3_333,Sym,itrans)
+!         Compute the first ASR : sum_k Phi3_ijk=0
 !              --> Phi3_iji+sum_{k.ne.i} Phi3_ijk=0
 !              --> if i.eq.j Phi3_iii+sum_{k.ne.i} Phi3_iik
           asr3(1,jatom,:,:,:)=asr3(1,jatom,:,:,:)+Phi3_333(:,:,:)
-!         Compute the second ASR : sum_j Phi3_ijk=0 
+!         Compute the second ASR : sum_j Phi3_ijk=0
           asr3(2,katom,:,:,:)=asr3(2,katom,:,:,:)+Phi3_333(:,:,:)
 !         Compute the rotational invariance (third order)
           do alpha=1,3
@@ -210,7 +210,7 @@ contains
               if (abs(asr3(2,katom,ii,jj,kk)).gt.tol8) then
                 write(std_out,'(a,1x,5(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR3) --->',&
 &                                                             ii,jj,kk,iatom,katom,asr3(2,katom,ii,jj,kk)
-                if (abs(asr3(2,katom,ii,jj,kk)).gt.tol6)&                
+                if (abs(asr3(2,katom,ii,jj,kk)).gt.tol6)&
 &                  ABI_WARNING('The acoustic sum rule is not fulfilled (order 3, 2nd dim)')
               end if
             end do !jatom
@@ -226,7 +226,7 @@ contains
                 if (abs(rot3(jatom,alpha,beta,gama,lambda)).gt.tol8) then
                   write(std_out,'(a,6(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ROT3) ---> iatom,jatom,alpha,beta,gama,lambda,norm =',&
 &                                iatom,jatom,alpha,beta,gama,lambda,rot3(jatom,alpha,beta,gama,lambda)
-                  if (abs(rot3(jatom,alpha,beta,gama,lambda)).gt.tol6)& 
+                  if (abs(rot3(jatom,alpha,beta,gama,lambda)).gt.tol6)&
 &                     ABI_WARNING('The invariance under arbitrary rotation is not fulfilled (order 3)')
                 end if
               end do !lambda
@@ -258,13 +258,13 @@ contains
 !FB&                    Model%Phi2%SR(3*(iatom-1)+alpha ,3*(jatom-1)+gama  )*Kroenecker(beta,lambda)-&
 !FB&                    Model%Phi2%SR(3*(iatom-1)+lambda,3*(jatom-1)+beta  )*Kroenecker(alpha,gama)-&
 !FB&                    Model%Phi2%SR(3*(iatom-1)+alpha ,3*(jatom-1)+lambda)*Kroenecker(beta,gama)
-!FB              end do !lambda  
+!FB              end do !lambda
 !FB            end do !gama
 !FB          end do !beta
 !FB        end do !alpha
 !FB      end do !jatom
       do ishell=1,Shell4at%nshell
-!       Build the 3x3x3x3 IFC of an atom in this shell    
+!       Build the 3x3x3x3 IFC of an atom in this shell
         if (Shell4at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
         do iatshell=1,Shell4at%neighbours(iatom,ishell)%n_interactions
           jatom=Shell4at%neighbours(iatom,ishell)%atomj_in_shell(iatshell)
@@ -272,8 +272,8 @@ contains
           latom=Shell4at%neighbours(iatom,ishell)%atoml_in_shell(iatshell)
           isym =Shell4at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
           itrans=Shell4at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
-          call tdep_build_phi4_3333(isym,Model%Phi4(:,:,:,:,ishell),Phi4_3333,Sym,itrans) 
-!         Compute the first ASR : sum_l Phi3_ijkl=0 
+          call tdep_build_phi4_3333(isym,Model%Phi4(:,:,:,:,ishell),Phi4_3333,Sym,itrans)
+!         Compute the first ASR : sum_l Phi3_ijkl=0
           asr4(jatom,katom,:,:,:,:)=asr4(jatom,katom,:,:,:,:)+Phi4_3333(:,:,:,:)
 !FB!         Compute the rotational invariance (third order)
 !FB          do alpha=1,3
@@ -283,12 +283,12 @@ contains
 !FB                  rot3(jatom,alpha,beta,gama,lambda)=rot3(jatom,alpha,beta,gama,lambda)+&
 !FB&                      Phi3_333(alpha,beta,gama  )*distance(iatom,katom,lambda+1)-&
 !FB&                      Phi3_333(alpha,beta,lambda)*distance(iatom,katom,gama  +1)
-!FB                end do  
-!FB              end do  
-!FB            end do  
-!FB          end do  
+!FB                end do
+!FB              end do
+!FB            end do
+!FB          end do
         end do !iatshell
-      end do !ishell  
+      end do !ishell
 !     Check the acoustic sum rules (fourth order)
       do ii=1,3
         do jj=1,3
@@ -302,12 +302,12 @@ contains
                     if (abs(asr4(jatom,katom,ii,jj,kk,ll)).gt.tol6)&
 &                      ABI_WARNING('The acoustic sum rule is not fulfilled (order 4)')
                   end if
-                end do !katom  
-              end do !jatom  
+                end do !katom
+              end do !jatom
             end do !ll
           end do !kk
         end do !jj
-      end do !ii  
+      end do !ii
 !FB!     Check the rotational invariance (third order)
 !FB      do jatom=1,Invar%natom
 !FB        do alpha=1,3
@@ -318,15 +318,15 @@ contains
 !FB                  write(std_out,'(a,6(i3,1x),1(e17.10,1x))') &
 !FB                        &'>>>>> WARNING (ROT3) ---> iatom,jatom,alpha,beta,gama,lambda,norm =',&
 !FB&                                iatom,jatom,alpha,beta,gama,lambda,rot3(jatom,alpha,beta,gama,lambda)
-!FB                  if (abs(rot3(jatom,alpha,beta,gama,lambda)).gt.tol6)& 
+!FB                  if (abs(rot3(jatom,alpha,beta,gama,lambda)).gt.tol6)&
 !FB&                     ABI_WARNING('The invariance under arbitrary rotation is not fulfilled (order 3)')
-!FB                end if  
-!FB              end do !lambda 
-!FB            end do !gama 
-!FB          end do !beta 
-!FB        end do !alpha 
+!FB                end if
+!FB              end do !lambda
+!FB            end do !gama
+!FB          end do !beta
+!FB        end do !alpha
 !FB      end do !jatom
-    end do !iatom  
+    end do !iatom
     ABI_FREE(asr4)
 !FB    ABI_FREE(rot3)
   end if !order=4

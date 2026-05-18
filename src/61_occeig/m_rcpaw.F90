@@ -580,7 +580,7 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
 &       (dtset%rcpaw_vhtnzc/=2.or.dtset%rcpaw_frocc==1))then
         rcpaw%atm(itypat)%nc_conv=.true.
         write(message,'(a,i5,a)') 'RCPAW: core for typat ',itypat, ' converged'
-        call wrtout(ab_out,message) 
+        call wrtout(ab_out,message)
     endif
    endif
  enddo

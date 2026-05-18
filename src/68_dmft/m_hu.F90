@@ -370,21 +370,21 @@ subroutine init_hu(hu,paw_dmft,pawtab)
    ABI_FREE(xij)
 
   !imag part for debug
-  ! ij2 = 0                                                                                                
-  ! do i=1,tndim                                                                                           
-  !   if (i < tndim) then                                                                                  
-  !     ij1 = ij2 + 1                                                                                      
-  !     ij2 = ij2 + tndim - i                                                                              
-  !   end if                                                                                               
-  !   if (i == 1) write(message,'(i3,14f7.3)') i,xtemp,(aimag(hu(itypat)%uqmc(m)),m=ij1,ij2)                
-  !   if (i /= tndim .and. i /= 1) write(message,'(i3,14f7.3)') i, &                                       
-  !       & (aimag(hu(itypat)%uqmc(xij(i,m))),m=1,i-1),xtemp,(aimag(hu(itypat)%uqmc(m)),m=ij1,ij2)           
-  !   if (i == tndim) write(message,'(i3,14f7.3)') i,(aimag(hu(itypat)%uqmc(xij(i,m))),m=1,i-1),xtemp       
-  !   call wrtout(std_out,message,'COLL')                                                                  
-  ! end do ! i                                                                                             
-  ! write(message,'(5x,a)') "--------------------------------------------------------"                     
-  ! call wrtout(std_out,message,'COLL')                                                                    
-  ! ABI_FREE(xij)                                                                                          
+  ! ij2 = 0
+  ! do i=1,tndim
+  !   if (i < tndim) then
+  !     ij1 = ij2 + 1
+  !     ij2 = ij2 + tndim - i
+  !   end if
+  !   if (i == 1) write(message,'(i3,14f7.3)') i,xtemp,(aimag(hu(itypat)%uqmc(m)),m=ij1,ij2)
+  !   if (i /= tndim .and. i /= 1) write(message,'(i3,14f7.3)') i, &
+  !       & (aimag(hu(itypat)%uqmc(xij(i,m))),m=1,i-1),xtemp,(aimag(hu(itypat)%uqmc(m)),m=ij1,ij2)
+  !   if (i == tndim) write(message,'(i3,14f7.3)') i,(aimag(hu(itypat)%uqmc(xij(i,m))),m=1,i-1),xtemp
+  !   call wrtout(std_out,message,'COLL')
+  ! end do ! i
+  ! write(message,'(5x,a)') "--------------------------------------------------------"
+  ! call wrtout(std_out,message,'COLL')
+  ! ABI_FREE(xij)
 
 
  end do ! itypat
@@ -851,7 +851,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
            !    enddo
            !  enddo
            !enddo
-         if (.not. paw_dmft%dmft_solv .eq. 10) then         
+         if (.not. paw_dmft%dmft_solv .eq. 10) then
            call udens_inglis_hu(hu(itypat)%fk(:),lpawu)
          endif
          call rotate_hu(rot_mat(iatom)%mat(:,:,:),1,tndim,veeylm2(:,:,:,:),vee_rotated(iatom)%mat(:,:,:,:))
@@ -891,24 +891,24 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
          end do ! ms
        end do ! ms1
      end if ! rot_type /= 0 and jpawu /= zero
-     
+
      if (paw_dmft%dmft_solv .eq. 10) then
        call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),vee_rotated(iatom)%mat(:,:,:,:),"CTQMC",prtonly=2)
 
        !xsum=0
-       !xsum2=0                                                               
-       !do m1=1,ndim                                                        
-       !  do m2=1,ndim                                                      
-       !    xsum = xsum + aimag(vee_rotated(iatom)%mat(m1,m2,m1,m2))             
+       !xsum2=0
+       !do m1=1,ndim
+       !  do m2=1,ndim
+       !    xsum = xsum + aimag(vee_rotated(iatom)%mat(m1,m2,m1,m2))
        !    xsum2 = xsum2 + aimag(udens_atoms(iatom)%mat(m1,m2,1))
-       !  end do ! m2                                                       
-       !end do ! m1                                                         
-                                                                         
-       !write(*,*)"Sum of Imag part of Rotated Interaction Vee",xsum     
-       !write(message,'(5a)') "   == Sum of Imag part of Rotated Interaction Udens",xsum2                        
+       !  end do ! m2
+       !end do ! m1
+
+       !write(*,*)"Sum of Imag part of Rotated Interaction Vee",xsum
+       !write(message,'(5a)') "   == Sum of Imag part of Rotated Interaction Udens",xsum2
        !call wrtout(std_out,message,'COLL')
 
-     else 
+     else
        call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),vee_rotated(iatom)%mat(:,:,:,:),basis_vee,prtonly=1)
      endif
 
@@ -1583,49 +1583,49 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
  end if ! prtopt>=1
 
  if (prtopt .eq. 4 ) then
-  ! write(message,'(2x,a,3x,14f10.4)') "Real part of Um1m2=Vee(m1,m2,m1,m2)"                                 
-  ! call wrtout(std_out,message,'COLL')                                                         
-  ! write(message,'(2x,4x,14(2x,i8))') (m1,m1=1,ndim)                                           
-  ! call wrtout(std_out,message,'COLL')                                                         
-  ! do m1=1,ndim                                                                                
-  !   write(message,'(2x,i4,3x,14f10.4)') m1,(dble(vee(m1,m2,m1,m2)),m2=1,ndim)                 
-  !   call wrtout(std_out,message,'COLL')                                                       
-  ! end do ! m1                                                                                 
-  ! write(message,'(a)') ch10                                                                   
-  ! call wrtout(std_out,message,'COLL')                                                         
-                                                                                               
-   !write(message,'(2x,a,3x,14f10.4)') "Imag part of Um1m2=Vee(m1,m2,m1,m2)"                      
-   !call wrtout(std_out,message,'COLL')                                                         
-   !write(message,'(2x,4x,14(2x,i8))') (m1,m1=1,ndim)                                           
-   !call wrtout(std_out,message,'COLL')                                                         
-   !do m1=1,ndim                                                                                
-   !  write(message,'(2x,i4,3x,14f10.6)') m1,(aimag(vee(m1,m2,m1,m2)),m2=1,ndim)                
-   !  call wrtout(std_out,message,'COLL')                                                       
-   !end do ! m1                                                                                 
-   !write(message,'(a)') ch10                                                                   
-   !call wrtout(std_out,message,'COLL')                                                         
-                                                                                               
-  ! write(message,'(2x,a,3x,14f10.4)') "Real part of Jm1m2=Vee(m1,m2,m2,m1)"                                 
-  ! call wrtout(std_out,message,'COLL')                                                         
-  ! write(message,'(2x,4x,14(2x,i8))') (m1,m1=1,ndim)                                           
-  ! call wrtout(std_out,message,'COLL')                                                         
-  ! do m1=1,ndim                                                                                
-  !   write(message,'(2x,i4,3x,14f10.4)') m1,(dble(vee(m1,m2,m2,m1)),m2=1,ndim)                 
-  !   call wrtout(std_out,message,'COLL')                                                       
-  ! end do ! m1                                                                                 
-  ! write(message,'(a)') ch10                                                                   
-  ! call wrtout(std_out,message,'COLL')                                                         
-                                                                                               
-   !write(message,'(2x,a,3x,14f10.4)') "Imag part of Jm1m2=Vee(m1,m2,m2,m1)"                       
-   !call wrtout(std_out,message,'COLL')                                                         
-   !write(message,'(2x,4x,14(2x,i8))') (m1,m1=1,ndim)                                           
-   !call wrtout(std_out,message,'COLL')                                                         
-   !do m1=1,ndim                                                                                
-   !  write(message,'(2x,i4,3x,14f10.6)') m1,(aimag(vee(m1,m2,m2,m1)),m2=1,ndim)                
-   !  call wrtout(std_out,message,'COLL')                                                       
-   !end do ! m1                                                                                 
-   !write(message,'(a)') ch10                                                                   
-   !call wrtout(std_out,message,'COLL')                                                         
+  ! write(message,'(2x,a,3x,14f10.4)') "Real part of Um1m2=Vee(m1,m2,m1,m2)"
+  ! call wrtout(std_out,message,'COLL')
+  ! write(message,'(2x,4x,14(2x,i8))') (m1,m1=1,ndim)
+  ! call wrtout(std_out,message,'COLL')
+  ! do m1=1,ndim
+  !   write(message,'(2x,i4,3x,14f10.4)') m1,(dble(vee(m1,m2,m1,m2)),m2=1,ndim)
+  !   call wrtout(std_out,message,'COLL')
+  ! end do ! m1
+  ! write(message,'(a)') ch10
+  ! call wrtout(std_out,message,'COLL')
+
+   !write(message,'(2x,a,3x,14f10.4)') "Imag part of Um1m2=Vee(m1,m2,m1,m2)"
+   !call wrtout(std_out,message,'COLL')
+   !write(message,'(2x,4x,14(2x,i8))') (m1,m1=1,ndim)
+   !call wrtout(std_out,message,'COLL')
+   !do m1=1,ndim
+   !  write(message,'(2x,i4,3x,14f10.6)') m1,(aimag(vee(m1,m2,m1,m2)),m2=1,ndim)
+   !  call wrtout(std_out,message,'COLL')
+   !end do ! m1
+   !write(message,'(a)') ch10
+   !call wrtout(std_out,message,'COLL')
+
+  ! write(message,'(2x,a,3x,14f10.4)') "Real part of Jm1m2=Vee(m1,m2,m2,m1)"
+  ! call wrtout(std_out,message,'COLL')
+  ! write(message,'(2x,4x,14(2x,i8))') (m1,m1=1,ndim)
+  ! call wrtout(std_out,message,'COLL')
+  ! do m1=1,ndim
+  !   write(message,'(2x,i4,3x,14f10.4)') m1,(dble(vee(m1,m2,m2,m1)),m2=1,ndim)
+  !   call wrtout(std_out,message,'COLL')
+  ! end do ! m1
+  ! write(message,'(a)') ch10
+  ! call wrtout(std_out,message,'COLL')
+
+   !write(message,'(2x,a,3x,14f10.4)') "Imag part of Jm1m2=Vee(m1,m2,m2,m1)"
+   !call wrtout(std_out,message,'COLL')
+   !write(message,'(2x,4x,14(2x,i8))') (m1,m1=1,ndim)
+   !call wrtout(std_out,message,'COLL')
+   !do m1=1,ndim
+   !  write(message,'(2x,i4,3x,14f10.6)') m1,(aimag(vee(m1,m2,m2,m1)),m2=1,ndim)
+   !  call wrtout(std_out,message,'COLL')
+   !end do ! m1
+   !write(message,'(a)') ch10
+   !call wrtout(std_out,message,'COLL')
 
  endif !prtopt == 4
 end subroutine printvee_hu
@@ -1702,7 +1702,7 @@ subroutine vee2udensatom_hu(ndim,udens_atoms,veetemp,basis,prtonly)
  write(message,'(4a)') ch10,"   -------- Interactions in the ",trim(basis)," basis "
  call wrtout(std_out,message,'COLL')
  if (prtonly .eq. 2) then
-   write(message,'(14(i14))') (m,m=1,tndim) 
+   write(message,'(14(i14))') (m,m=1,tndim)
    call wrtout(std_out,message,'COLL')
    do ms=1,tndim
      write(message,'(i3,14(2x,28f7.3))') ms,((udens_atoms(ms,ms1)),ms1=1,tndim)
@@ -1712,8 +1712,8 @@ subroutine vee2udensatom_hu(ndim,udens_atoms,veetemp,basis,prtonly)
    write(message,'(1x,14(2x,i5))') (m,m=1,tndim)
    call wrtout(std_out,message,'COLL')
    do ms=1,tndim
-     write(message,'(i3,14f7.3)') ms,(dble(udens_atoms(ms,ms1)),ms1=1,tndim)               
-     call wrtout(std_out,message,'COLL')                                                   
+     write(message,'(i3,14f7.3)') ms,(dble(udens_atoms(ms,ms1)),ms1=1,tndim)
+     call wrtout(std_out,message,'COLL')
    enddo !ms
  endif
  write(message,'(3a)') "--------------------------------------------------------"

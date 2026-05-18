@@ -28,7 +28,7 @@
 #    * Irreps are numbered according to order returned by Bilbao server,
 #      which may not be canonical order.
 #    * If the symmetries are one day output to the anaddb files, only
-#      one input file will be needed (ie parse it for syms, instead of 
+#      one input file will be needed (ie parse it for syms, instead of
 #      "abifilename").
 #
 
@@ -70,11 +70,11 @@ def get_sym_elem(chardom):
 				#print tmp
 				sym_elem[isym].extend(map(string.atoi,tmp))
 			except AttributeError:
-				print "value error in get_sym_elem" 
+				print "value error in get_sym_elem"
 				raise
-				
+
 		isym = isym+1
-	
+
 #	print sym_elem
 	return sym_elem,sym_tnons
 
@@ -114,19 +114,19 @@ def get_irreps_chars(chardom,nsym):
 					#print char
 					character = character + char
 				except AttributeError:
-					print "value error in get_irreps_chars" 
+					print "value error in get_irreps_chars"
 					raise
-				
+
 				idim=idim+1
                         irrep_character[iirrep].append(int(character))
 		iirrep=iirrep+1
-	
+
 	print irrep_name,irrep_character
 	return irrep_name,irrep_character
 
 def get_abinit_syms(tokens):
 	"""Retrieve symmetry elements from abinit file tokenized previously"""
-	
+
 	ind_nsym = tokens.index('nsym')
 	nsym = int (tokens[ind_nsym+2])
 #	print "nsym = ", nsym
@@ -146,7 +146,7 @@ def get_abinit_syms(tokens):
 	except ValueError:
 		for itnons in range(nsym):
 			tnons.append((0.0,0.0,0.0))
-		
+
 #	print "symrel = ", symrel
 	return symrel
 
@@ -170,7 +170,7 @@ def get_abinit_group(tokens):
 	return groupnum
 #		if not re.compile('degenerate').match(tokens[ind1]):
 
-			
+
 def get_abinit_chars(tokens):
 	"""Retrieve characters and frequencies for modes from anaddb output file"""
 
@@ -229,7 +229,7 @@ def get_abinit_chars(tokens):
 				ind1=ind1+2
 			jmode = int(tokens[ind1])
 			degen = jmode-imode
-			
+
 			ind1=ind1+1
 			while not re.compile('[-]?[0-9]+\.[0-9]+').match(tokens[ind1]):
 				ind1=ind1+1
@@ -237,8 +237,8 @@ def get_abinit_chars(tokens):
 				charlist = int(float(tokens[ind1]))
 				abi_characters[imode].append(charlist)
 				ind1 = ind1+1
-			
-			
+
+
 # Duplicate characters for degenerate modes
 		for ii in range(degen-1):
 			abi_characters.append(abi_characters[imode])
@@ -247,7 +247,7 @@ def get_abinit_chars(tokens):
 	#print "abi_characters = ", abi_characters,abi_freq
 	return abi_characters,abi_freq
 
-	
+
 def get_sym_corresp(abinit_sym_elem,bilbao_sym_elem):
 	"""determine correspondence between Bilbao and abinit symmetry lists"""
 	abi_to_bilbao = []
@@ -282,7 +282,7 @@ def get_sym_corresp(abinit_sym_elem,bilbao_sym_elem):
 
 def get_bilbao_symbols(bilbao_sym_elem,bilbao_irreps_chars):
 	"""Deteremine irreps names from symmetry considerations"""
-	
+
 	iident = find_ident(bilbao_sym_elem)
 	iinv = -1
 	try:
@@ -328,7 +328,7 @@ def get_bilbao_symbols(bilbao_sym_elem,bilbao_irreps_chars):
 		else:
 			print "couldn't classify the irrep into A,B,E, or T"
 			raise ValueError
-		
+
 		geradeletter = ' '
 		if has_inv==1:
 			if bilbao_irreps_chars[iirrep][iinv] > 0:
@@ -336,7 +336,7 @@ def get_bilbao_symbols(bilbao_sym_elem,bilbao_irreps_chars):
 			elif bilbao_irreps_chars[iirrep][iinv] < 0:
 				geradeletter = 'u'
 			irrepnum = int((irrepnum+1.0)/2.0)
-			
+
 		print "%1c%1d%1c" % (irrepletter,irrepnum,geradeletter)
 		bilbao_symbols.append("%1c%1d%1c" % (irrepletter,irrepnum,geradeletter))
 
@@ -365,7 +365,7 @@ def find_princ_rotation(sym_elem,has_inv,iinv):
 	for isym in range(len(sym_elem)):
 		is_Sop = 0
 		#if has_inv==1:
-		#	if 
+		#	if
 		# suppose that order is at most 6 for elements of sym
 		tmpsym = [1,0,0,0,1,0,0,0,1]
 		for iorder in range(1,7):
@@ -400,7 +400,7 @@ def sym_elem_prod (s1,s2):
 
 def print_abi_irreps (abi_to_bilbao,abinit_chars,abinit_freq,irreps_names,irreps_chars):
 	"""Print out irreps for each abinit mode"""
-	
+
 	order = len(irreps_chars[0])
 #	print "abinit_chars = ", abinit_chars
 	for ichar in range(len(abinit_chars)):
@@ -417,7 +417,7 @@ def print_abi_irreps (abi_to_bilbao,abinit_chars,abinit_freq,irreps_names,irreps
                                 if (sum % order != 0):
                                         print '(Sum ', sum, ', order ', order, ')',
 		print
-	
+
 
 if __name__=='__main__':
 #	for ielem in range(len(elemabbrev)):
@@ -438,12 +438,12 @@ if __name__=='__main__':
 #
 	abitokens=tokenize_file(abifilename)
 	#print abitokens
-	
+
 	groupnum = get_abinit_group(abitokens)
 	print groupnum
-	
+
 	abinit_sym_elem = get_abinit_syms(abitokens)
-	
+
 #
 #  get characters of different modes from anaddb output file. Get the information
 #    only for the Gamma point.
@@ -452,9 +452,9 @@ if __name__=='__main__':
 	#print anaddbtokens
 
 	abinit_chars,abinit_freq = get_abinit_chars(anaddbtokens)
-	
+
 #
-#   open url and request xml input for characters and symops of 
+#   open url and request xml input for characters and symops of
 #     point group "groupnum"
 #
 	print "http://www.cryst.ehu.es"+\
@@ -465,17 +465,17 @@ if __name__=='__main__':
 	except IOError:
 		print "Error opening http://www.cryst.ehu.es"
 		raise
-	
+
 	bilbao_xml_lines = fhan.readlines()
 	XML = ''
 	for line in bilbao_xml_lines:
 		XML = XML + string.strip(line)
 #		print bilbao_xml_lines
-	
+
 
 #
 #   parse the XML input obtained from www.cryst.ehu.es Bilbao server
-#    use the minimalistic minidom. No dtd support in minidom, although 
+#    use the minimalistic minidom. No dtd support in minidom, although
 #    one exists on the server.
 #
 	chardom = xml.dom.minidom.parseString(XML)
@@ -510,5 +510,5 @@ if __name__=='__main__':
 #  print out abinit frequencies and irreps for each phonon mode.
 #
 	print_abi_irreps (abi_to_bilbao,abinit_chars,abinit_freq,bilbao_irreps_names,bilbao_irreps_chars)
-	
+
 

@@ -4,13 +4,13 @@
 !!
 !! FUNCTION
 !! This module contains the functions to calculate magnon band structure
-!! from information of primitive cell 
+!! from information of primitive cell
 !!
 !! Datatypes:
-!!  
+!!
 !!
 !! Subroutines:
-!! 
+!!
 !! TODO hexu: not yet implemented.
 !!
 !! COPYRIGHT

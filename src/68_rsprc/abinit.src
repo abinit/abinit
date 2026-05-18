@@ -18,7 +18,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
-  "mod_prc_memory.F90",   
+  "mod_prc_memory.F90",
   "m_newrho.F90",
   "m_newvtr.F90",
   "m_prcref.F90",

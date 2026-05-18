@@ -19,7 +19,7 @@ are relative to improvements of ABINITv6.4 with respect to v6.2.
 The list of contributors includes :
 D. Adams, B. Amadon, A. Berger, J.-M. Beuken, F. Bottin,
 P. Boulanger, F. Bruneval, C. Espejo, G.A. Franco, M. Giantomassi, X. Gonze, I. Hamada,
-F. Jollet, A. Lherbier, S. Miller, T. Nishimatsu, M. Oliveira, Y. Pouillon, AH. Romero, 
+F. Jollet, A. Lherbier, S. Miller, T. Nishimatsu, M. Oliveira, Y. Pouillon, AH. Romero,
 M. Torrent, M. Verstraete, D. Waroquiers, Z. Zanolli, J. Zwanziger
 
 It is worth to read carefully
@@ -61,7 +61,7 @@ A.3 Many different options have been added to the prtden variable. It contains t
 
 A.4 A numerical bug present in v6.4.1 has been fixed in v6.4.2 . It concerned GW-PAW calculations only,
     the computation of the head and wings of the susceptbility matrix at q=0.
-    Expect the changes in the QP energies to be around tens of meV. 
+    Expect the changes in the QP energies to be around tens of meV.
     Results for systems sampled at Gamma only were correct though.
 
 A.5 The default value for ecutwfn and ecutsigx is now set to ecut.
@@ -71,7 +71,7 @@ __________________________________________________________________
 B.  Most noticeable achievements
 
 B.1 The computation of the RPA energy in the GW part of ABINIT is now available.
-    Coded in the norm-conserving and PAW cases 
+    Coded in the norm-conserving and PAW cases
     Several techniques have been implemented : use of logarithmic formula, use of numerical integration over the interaction.
     It can be combined with the extrapolar trick and the range separated Coulomb interactions.
     Test v6#99. Input variable gwrpacorr .
@@ -97,10 +97,10 @@ B.3 Several advanced features of the GW part of ABINIT can now be used safely.
     Related input variables gw_nstep, gw_sctype, gw_sctype_name, gw_toldfeig.
     Work by M. Giantomassi
 
-B.4 The capability to compute the U or J values, within the DFT+U (LDA or GGA) approach (with PAW, also spin-polarized), 
-    according to the method of Coccocioni and De Gironcoli (2005), is available in production. 
-    Input variable : macro_uj, pawujat, pawujv, and pawujrad. 
-    Automatic tests : Tv5#38, 39, Tv6#41 
+B.4 The capability to compute the U or J values, within the DFT+U (LDA or GGA) approach (with PAW, also spin-polarized),
+    according to the method of Coccocioni and De Gironcoli (2005), is available in production.
+    Input variable : macro_uj, pawujat, pawujv, and pawujrad.
+    Automatic tests : Tv5#38, 39, Tv6#41
     Work by D. Adams and B. Amadon
 
 B.5 Print out VASP-style POSCAR and FORCES files, for use with PHON or frophon codes for frozen phonon calculations.
@@ -109,7 +109,7 @@ B.5 Print out VASP-style POSCAR and FORCES files, for use with PHON or frophon c
     Test v6#100.
     By M. Verstraete.
 
-B.6 The distribution of processors in the FFT/Band/k point parallelism can be found automatically. 
+B.6 The distribution of processors in the FFT/Band/k point parallelism can be found automatically.
     Input variable : paral_kgb .
     Work by F. Jollet
 
@@ -171,7 +171,7 @@ D.6 The use of LDA+Dynamical Mean Field Theory is in progress.
     (see D.7 of the 6.2 release notes)
     By B. Amadon
 
-D.7 Work in progress for the implementation of the Path Integral Molecular Dynamics algorithm for the 
+D.7 Work in progress for the implementation of the Path Integral Molecular Dynamics algorithm for the
     ionic degrees of freedom, combined with DFT for the electronic degrees of freedom.
     New input variable pitransform
     Allowed by imgmov=9 (Langevin dynamics), imgmov=13 (chain of thermostats).
@@ -186,7 +186,7 @@ D.8 On-going effort to provide vdW functionals for ABINIT.
      Also, a new directory to test vdwxc has been created. At present Tvdwxc#10 is working.
      Work by C. Espejo, Y. Pouillon, AH. Romero and X. Gonze.
 
-D.9 The Tran-Blaha meta-GGA is available 
+D.9 The Tran-Blaha meta-GGA is available
     See the automatic test Tlibxc#09
     By M. Oliveira, A. Lherbier and X. Gonze.
 
@@ -222,7 +222,7 @@ D.16 The tutorial GW1 has been updated and cleaned, to contain up-to-date inform
 
 D.17 Numerous miscellaneous bug fixes (to the sources, as well as to the build system, including the plug-ins),
      and improvements of documentation by
-     J.-M. Beuken, F. Bottin, M. Giantomassi, I. Hamada, Steven Miller, T. Nishimatsu, Y. Pouillon, Tim Robinson, M. Torrent, 
+     J.-M. Beuken, F. Bottin, M. Giantomassi, I. Hamada, Steven Miller, T. Nishimatsu, Y. Pouillon, Tim Robinson, M. Torrent,
      M. Verstraete, Z. Zanolli, J. Zwanziger
 
 </pre>

@@ -104,10 +104,10 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
  type(wave_t),pointer :: wave_v, wave_c
 !arrays
  integer,allocatable :: bbp_distrb(:,:)
- integer,ABI_CONTIGUOUS pointer :: kg_k(:,:)
+ integer,contiguous, pointer :: kg_k(:,:)
  real(dp) :: mat_dp(3,3),qrot(3),b1(3),b2(3),b3(3),kbz(3)
  complex(dp),allocatable :: ir_kibz(:,:,:,:,:)
- complex(gwp), ABI_CONTIGUOUS pointer :: ug_c(:),ug_v(:)
+ complex(gwp), contiguous, pointer :: ug_c(:),ug_v(:)
  complex(gwp) :: ihrc(3,Wfd%nspinor**2)
  logical :: bbp_mask(Wfd%mband,Wfd%mband)
  type(pawcprj_type),allocatable :: Cp_v(:,:),Cp_c(:,:)

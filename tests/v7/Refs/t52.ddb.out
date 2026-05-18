@@ -1,5 +1,5 @@
 
- **** DERIVATIVE DATABASE ****    
+ **** DERIVATIVE DATABASE ****
 +DDB, Version number  20240201
 
  C diamond DDB file
@@ -55,7 +55,7 @@
             0.25000000000000D+00  0.25000000000000D+00  0.25000000000000D+00
      znucl  0.60000000000000D+01
       zion  0.40000000000000D+01
- 
+
   Description of the potentials (KB energies)
   vrsio8 (for pseudopotentials)=100401
   usepaw =  0
@@ -63,10 +63,10 @@
   Atom type=    1   pspso=  0   nekb=   1
   iln lpsang iproj  ekb(:)
      1     0     1     4.9214663E+00
- 
+
  **** Database of total energy derivatives ****
  Number of data blocks=    3
-  
+
  2nd derivatives (non-stat.)  - # elements :          36
  qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
  frequency  0.00000000E+00
@@ -106,7 +106,7 @@
    1   2   3   2  0.68080551104396D+01  0.00000000000000D+00
    2   2   3   2  0.68080550058906D+01  0.00000000000000D+00
    3   2   3   2  0.13616105801778D+02  0.00000000000000D+00
-  
+
  2nd derivatives (non-stat.)  - # elements :          36
  qpt  5.00000000E-01  0.00000000E+00  0.00000000E+00   1.0
  frequency  0.00000000E+00
@@ -146,7 +146,7 @@
    1   2   3   2  0.52239526279602D+01 -0.25800893623568D-05
    2   2   3   2  0.52239493038640D+01 -0.29791423054505D-05
    3   2   3   2  0.10447894550408D+02  0.00000000000000D+00
-  
+
  2nd derivatives (non-stat.)  - # elements :          36
  qpt  5.00000000E-01  5.00000000E-01  0.00000000E+00   1.0
  frequency  0.00000000E+00

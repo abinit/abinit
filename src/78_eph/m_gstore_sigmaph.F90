@@ -66,7 +66,7 @@ module m_gstore_sigmaph
  use m_dtset,          only : dataset_type
  use m_dtfil,          only : datafiles_type
  use m_wfd,            only : wfd_t
- use m_gstore,         only : gstore_t, gqk_t
+ use m_gstore,         only : gstore_t, gqk_t, gstore_read_gtype
 
  implicit none
 
@@ -212,7 +212,8 @@ contains
 !! dtset<dataset_type>=All input variables for this dataset.
 !! dtfil<datafiles_type>=Variables related to files.
 !! cryst: Crystalline structure
-!! ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
+!! ks_ebands<ebands_t>=The KS band structure (energies, occupancies, k-weights...)
+!! qp_ebands<ebands_t>=The QP band structure (energies, occupancies, k-weights...)
 !! dvdb<dbdb_type>=Database with the DFPT SCF potentials.
 !! ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
 !! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
@@ -227,7 +228,7 @@ contains
 !!
 !! SOURCE
 
-subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, dvdb, ifc, &
+subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_ebands, qp_ebands, dvdb, ifc, &
                           pawfgr, pawtab, psps, mpi_enreg, comm)
 
 !Arguments ------------------------------------
@@ -236,7 +237,7 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
  type(crystal_t),intent(in) :: cryst
- type(ebands_t),intent(in) :: ebands
+ type(ebands_t),target,intent(in) :: ks_ebands, qp_ebands
  type(dvdb_t),intent(inout) :: dvdb
  type(ifc_type),target,intent(in) :: ifc
  type(pseudopotential_type),intent(in) :: psps
@@ -248,12 +249,12 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
 !Local variables-------------------------------
- integer,parameter :: master = 0, with_cplex1 = 1, cplex1 = 1, pawread0 = 0, ndat1 = 1, istwfk_1 = 1
- integer,parameter :: LOG_MODQ = 100, LOG_MODK = 1
+ integer,parameter :: master = 0, cplex1 = 1, pawread0 = 0, ndat1 = 1, istwfk_1 = 1
+ integer,parameter :: LOG_MODQ = 100, LOG_MODK = 1, g2mode_AA = 1, g2mode_KS_GWPT = 2
  integer :: n1, n2, n3, n4, n5, n6, nb_k, nb_kq, glob_nk, ntemp, cplex, my_npert, use_lgk, iw
  integer :: spin, my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, gap_err, my_rank, ip1, ip2, nu, ipc, idir, ipert
  integer :: it, ik_ibz, ikq_ibz, band_k, band_kq, timrev_k, ii, ikcalc, natom, natom3, nsppol, nspden, nspinor, nkpt !,ik_bz
- integer :: isym_k,isym_kq,trev_k,trev_kq
+ integer :: isym_k,isym_kq,trev_k,trev_kq, with_cplex
  integer :: istwf_k, istwf_kq, npw_k, npw_kq, nkpg_kq, nfft, nfftf, mgfft, mgfftf, nkpg
  integer :: usecprj, mpw, ibsum_kq, band_me, u1_band, ncid, ncerr
  real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2, rfact, gdw2_stern !, rtmp !,nqnu,gkq2,gkq2_pf,
@@ -263,6 +264,7 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
  complex(dp) :: cfact !, sig_cplx
  character(len=5000) :: msg, qq_bz_string !, kk_string
  character(len=fnlen) :: path
+ character(len=abi_slen) :: gtype
  type(gaps_t) :: gaps
  type(lgroup_t) :: lg_myk
  type(gstore_t) :: gstore
@@ -271,6 +273,7 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
  type(crystal_t) :: pot_cryst
  type(wfd_t) :: wfd
  !type(u1_cache_t) :: u1c
+ type(ebands_t),pointer :: ebands
  type(stern_t) :: stern
  type(gs_hamiltonian_type) :: gs_ham_kq
  type(rf_hamiltonian_type) :: rf_ham_kq
@@ -294,16 +297,39 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
 !----------------------------------------------------------------------
 
+ !ebands => ks_ebands
+ ebands => qp_ebands
+
  my_rank = xmpi_comm_rank(comm); units = [std_out, ab_out]
  natom = cryst%natom; natom3 = 3 * cryst%natom; nkpt = ebands%nkpt
  nsppol = dtset%nsppol; nspden = dtset%nspden; nspinor = dtset%nspinor
 
- call wrtout(std_out, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
+ call wrtout(units, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
+
+ call gstore_read_gtype(dtfil%filgstorein, gtype, comm)
+
+ with_cplex = 1
+ if (gtype == "gwpt") then
+   ! Decide if self-energies should be computed with |g|^2 or g^KS g^GWPT.
+   select case (dtset%gwpt_g2mode)
+   case (g2mode_AA)
+     with_cplex = 1
+     call wrtout(units, " Using e-ph self-energy expression with |g|^2")
+   case (g2mode_KS_GWPT)
+     with_cplex = 2
+     call wrtout(units, " Using e-ph self-energy expression with g^*_KS g_GWPT")
+   case default
+     ABI_ERROR(sjoin("Invalid dtset%gwpt_g2mode:", itoa(dtset%gwpt_g2mode)))
+   end select
+ else
+   with_cplex = 1
+   call wrtout(units, " Using e-ph self-energy expression with |g|^2")
+ end if
 
  ! Init gstore and MPI grid from file and dtset.
  ! The Fan-Migdal SE requires |g(k,q)|^2 as well as g2DW in the phonon representation.
- call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, dtfil, cryst, ebands, ifc, &
+ call gstore%from_ncpath(dtfil%filgstorein, with_cplex, dtset, dtfil, cryst, ebands, ifc, &
                          "phonon", dtset%gstore_gname, .True., comm)
  ! Consistency check.
  ierr = 0
@@ -326,8 +352,12 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
 
  use_lgk = dtset%gstore_use_lgk
  if (gstore%has_used_lgk /= 0) use_lgk = gstore%has_used_lgk
- if (use_lgk == 0) call wrtout(units, " Little group operations of the k-point won't be used to symmetry reduce the integral in q-space.")
- if (use_lgk /= 0) call wrtout(units, " Little group operations of the k-point will be used to symmetry reduce the integral in q-space.")
+ if (use_lgk == 0) then
+   call wrtout(units, " Little group operations of the k-point won't be used to symmetry reduce the integral in q-space.")
+ end if
+ if (use_lgk /= 0) then
+   call wrtout(units, " Little group operations of the k-point will be used to symmetry reduce the integral in q-space.")
+ end if
 
  ! FFT meshes from input file, not necessarily equal to the ones found in the external files.
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
@@ -416,11 +446,6 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
 
    ! Initialize bks_mask
    call gstore%fill_bks_mask(dtset%mband, nkpt, nsppol, bks_mask)
-
-   !if (dtset%userie == 124) then
-   !  ! Debugging section have all states on each MPI rank.
-   !  bks_mask = .True.; call wrtout(std_out, " Storing all bands for debugging purposes.")
-   !end if
 
    ! mpw is the maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
    ! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
@@ -616,6 +641,14 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
 
  call wrtout(std_out, " Begin computation of the self-energy matrix elements.")
 
+ if (dtset%userib /= 0) then
+   call wrtout(units, sjoin(" userib /= 0 => Include only one q-point in the integration. qpt", ktoa(dtset%qptn)))
+   ! Notes:
+   ! 1) Each q-point contribution is weighted by (multiplicity / nqbz), not by 1 / nqbz.
+   ! 2) When use_lgk is enabled, there is no guarantee that the q-point
+   !    specified in dtset%qptn belongs to the zone (IBZ_k). One shouls check the log file for messages
+ end if
+
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is), cryst => gstore%cryst)
@@ -650,6 +683,8 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
    ABI_CALLOC(stern_ppb, (2, natom3, natom3, nb_k))
 
    ! Loop over my k-points in |n,k>.
+   ABI_CHECK(gqk%my_nq /= 0, "gqm%my_nk cannot be zero here!")
+
    do my_ik=1,gqk%my_nk
      kk = gqk%my_kpts(:, my_ik)
      print_time_kk = my_rank == 0 .and. (my_ik <= LOG_MODK .or. mod(my_ik, LOG_MODK) == 0)
@@ -687,17 +722,31 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
      end if
 
      ! Sum over my q-points.
+     ABI_CHECK(gqk%my_nq /= 0, "gqm%my_nq cannot be zero here!")
+
      do my_iq=1,gqk%my_nq
        call gqk%myqpt(my_iq, gstore, weight_q, qpt); q_is_gamma = sum(qpt**2) < tol14
 
        ! weight_q is computed here. It depends whether we are summing over the full BZ or IBZ_k.
        ! IMPORTANT: We cannot cycle is my_iq == 1 as this is the iteration in which we broadcast stern_dw if eph_stern /= 0.
-       ! Also weight_q should be set to zero if q is not in IBZ_k when my_iq == 1.
+       ! Also weight_q should be set to zero if q is not in the IBZ_k when my_iq == 1.
        weight_q = one / gstore%nqbz
        if (use_lgk /= 0) then
          ii = lg_myk%findq_ibzk(qpt); if (ii == -1 .and. my_iq /= 1) cycle
+         weight_q = zero
          if (ii /= -1) weight_q = lg_myk%weights(ii)
        end if
+
+       ! Select contribution from a certaing q-point
+       ! Don't cycle as this will interfere with parallelism over q-points and DW
+       if (dtset%userib /= 0) then
+          if (any(abs(qpt - dtset%qptn) > tol14)) then
+            weight_q = zero
+          else
+            write(msg, *) "weight for qpt is", weight_q, " with multiplicity:", weight_q * gstore%nqbz
+            call wrtout(std_out, msg)
+          end if
+        end if
 
        !iq_bz = gqk%my_q2bz(my_iq); qq_is_gamma = sum(qq_bz**2) < tol14
        qq_bz_string = ktoa(qpt)
@@ -788,8 +837,9 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
              call wfd%copy_cg(band_k, ik_ibz, spin, kets_k(1, 1, in_k))
 
              !print *, "Stern for band_k", band_k, " with nb_kq:", gqk%nb_kq
+             ! NOTE: Here we are using the KS energies instead of the QP ones
              call stern%solve(u1_band, band_me, idir, ipert, qpt, gs_ham_kq, rf_ham_kq, &
-                              ebands%eig(:,ik_ibz,spin), ebands%eig(:,ikq_ibz,spin), &
+                              ks_ebands%eig(:,ik_ibz,spin), ks_ebands%eig(:,ikq_ibz,spin), &
                               kets_k(:,:,in_k), cwaveprj0, cg1s_kq(:,:,ipc,in_k), cwaveprj, msg, ierr)
              ABI_CHECK(ierr == 0, msg)
 
@@ -884,7 +934,15 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
              end if
 
              ! Note the weight_q included in gkq2
-             gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
+             if (with_cplex == 1) then
+               gkq2 = weight_q * gqk%my_g2(my_ip, im_kq, my_iq, in_k, my_ik)
+
+             else
+               gkq2 = weight_q * real(conjg(gqk%my_g_ks(my_ip, im_kq, my_iq, in_k, my_ik)) * &
+                                            gqk%my_g   (my_ip, im_kq, my_iq, in_k, my_ik))
+             end if
+             !print *, "gkq2: ", gkq2
+
              cfact_t = cfact_t * gkq2
 
              ! Compute contribution to Fan-Migdal for M > nb_kq
@@ -1135,7 +1193,7 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
 
  spin = gqk%spin
 
- ! Sum partial terms inside qgk%comm.
+ !call wrtout(std_out, "Summing partial sigma terms inside qgk%comm.", do_flush=.True.)
  call xmpi_sum(sigma%vals_e0ks, gqk%comm%value, ierr)
  call xmpi_sum(sigma%dvals_de0ks, gqk%comm%value, ierr)
  call xmpi_sum(sigma%fan_vals, gqk%comm%value, ierr)
@@ -1143,6 +1201,7 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
  call xmpi_sum(sigma%dw_vals, gqk%comm%value, ierr)
  call xmpi_sum(sigma%dw_stern_vals, gqk%comm%value, ierr)
  if (sigma%nwr > 0) call xmpi_sum(sigma%vals_wr, gqk%comm%value, ierr)
+ !call wrtout(std_out, "Sum completed.", do_flush=.True.)
 
  ! Only procs inside ncwrite_comm perform IO (ab_out and ncid)
  iwrite = gqk%comm%me == 0; if (.not. iwrite) return
@@ -1240,6 +1299,7 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
    write(ab_out,"(a)")" "
    write(ab_out,"(a)")" "
    write(ab_out,"(2a)")" Using g(k,q) of type: ", trim(this_gtype)
+   !write(ab_out,"(2a)")" Treatment of gg: ", dtset%gwpt_g2mode
    write(ab_out,"(a)")" "
    write(ab_out,"(a)")" "
  end if
@@ -1259,7 +1319,7 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
    if (dtset%symsigma == +1) then
      ! Average self-energy matrix elements in the degenerate subspace.
      bstart_k = gqk%bstart_k; bstop_k = gqk%bstop_k
-     call ebands%enclose_degbands(ik_ibz, spin, bstart_k, bstop_k, changed_k, TOL_EDIFF, degblock=degblock)
+     call ebands%enclose_degbands(ik_ibz, spin, bstart_k, bstop_k, changed_k, dtset%symsigma_de, degblock=degblock)
      bstart_k = gqk%bstart_k; bstop_k = gqk%bstop_k
      !if (changed_k) then
      !  ABI_WARNING("Changed")
@@ -1539,7 +1599,6 @@ subroutine sep_free(sigma)
  ABI_SFREE(sigma%dw_stern_vals)
  ABI_SFREE(sigma%vals_wr)
  ABI_SFREE(sigma%wrmesh_b)
-
  ABI_SFREE(sigma%phmesh)
  ABI_SFREE(sigma%gfw_vals)
  ABI_SFREE(sigma%a2f_emesh)

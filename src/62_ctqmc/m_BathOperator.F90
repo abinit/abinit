@@ -5,9 +5,9 @@
 !!****m* ABINIT/m_BathOperator
 !! NAME
 !!  m_BathOperator
-!! 
-!! FUNCTION 
-!!  Manage all stuff related to the bath for the 
+!!
+!! FUNCTION
+!!  Manage all stuff related to the bath for the
 !!  simgle Anderson Impurity Model
 !!
 !! COPYRIGHT
@@ -70,8 +70,8 @@ TYPE, PUBLIC :: BathOperator
   DOUBLE PRECISION _PRIVATE                   :: S
   DOUBLE PRECISION _PRIVATE                   :: Stau
   DOUBLE PRECISION _PRIVATE                   :: Stilde
-  TYPE(Vector)     _PRIVATE                   :: R 
-  TYPE(Vector)     _PRIVATE                   :: Q 
+  TYPE(Vector)     _PRIVATE                   :: R
+  TYPE(Vector)     _PRIVATE                   :: Q
   TYPE(Vector)     _PRIVATE                   :: Rtau
   TYPE(Vector)     _PRIVATE                   :: Qtau
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) _PRIVATE :: F ! sample,Flavors
@@ -150,7 +150,7 @@ SUBROUTINE BathOperator_init(this, flavors, samples, beta, iTech)
   this%sizeHybrid   = samples + 1
   this%dt      = beta / DBLE(samples)
   this%inv_dt  = DBLE(samples) / beta
-  this%activeFlavor= 0 
+  this%activeFlavor= 0
   this%updatePosRow = 0
   this%updatePosCol = 0
   this%iTech        = iTech
@@ -166,7 +166,7 @@ SUBROUTINE BathOperator_init(this, flavors, samples, beta, iTech)
   DT_MALLOC(this%M,(1:flavors))
   DT_FREEIF(this%M_update)
   DT_MALLOC(this%M_update,(1:flavors))
-  
+
   CALL Vector_init(this%R,100)
   CALL Vector_init(this%Q,100)
   CALL Vector_init(this%Rtau,100)
@@ -178,7 +178,7 @@ SUBROUTINE BathOperator_init(this, flavors, samples, beta, iTech)
   END DO
   this%F       = 0.d0
   this%set     = .TRUE.
-  
+
 END SUBROUTINE BathOperator_init
 !!***
 
@@ -214,7 +214,7 @@ SUBROUTINE BathOperator_reset(this)
   INTEGER                           :: it
   this%MAddFlag     = .FALSE.
   this%MRemoveFlag  = .FALSE.
-  this%activeFlavor = 0 
+  this%activeFlavor = 0
   this%updatePosRow = 0
   this%updatePosCol = 0
 !#ifdef CTQMC_CHECK
@@ -270,7 +270,7 @@ SUBROUTINE BathOperator_activateParticle(this,flavor)
 
   IF ( flavor .GT. this%flavors ) &
     CALL ERROR("BathOperator_activateParticle : out of range      ")
-  IF ( this%set .EQV. .TRUE. .AND. ALLOCATED(this%M) ) THEN 
+  IF ( this%set .EQV. .TRUE. .AND. ALLOCATED(this%M) ) THEN
     this%activeFlavor =  flavor
     this%MAddFlag     = .FALSE.
     this%MRemoveFlag  = .FALSE.
@@ -341,7 +341,7 @@ END FUNCTION BathOperator_hybrid
 !!  particle=full list of CdagC for activeFlavor
 !!
 !! OUTPUT
-!!  BathOperator_getDetAdd=the det 
+!!  BathOperator_getDetAdd=the det
 !!
 !! SIDE EFFECTS
 !!
@@ -353,8 +353,8 @@ DOUBLE PRECISION  FUNCTION BathOperator_getDetAdd(this,CdagC_1, position, partic
 !Arguments ------------------------------------
   TYPE(BathOperator)      , INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN   ) :: CdagC_1
-  INTEGER                 , INTENT(IN   ) :: position  
-  TYPE(ListCdagC), INTENT(IN   ) :: particle   
+  INTEGER                 , INTENT(IN   ) :: position
+  TYPE(ListCdagC), INTENT(IN   ) :: particle
 !Local variables-------------------------------
   INTEGER                                 :: it1
   INTEGER                                 :: it2
@@ -388,7 +388,7 @@ DOUBLE PRECISION  FUNCTION BathOperator_getDetAdd(this,CdagC_1, position, partic
   tail =  particle%tail
   new_tail = tail+1
 !  list => particle%list
-  
+
   IF ( ((C .GT. Cdag) .AND. (position .EQ. -1)) &
        .OR. ((C .LT. Cdag) .AND. (tail .EQ. 0))) THEN ! Possible only if it is a segment
     this%updatePosRow = tail + 1
@@ -397,11 +397,11 @@ DOUBLE PRECISION  FUNCTION BathOperator_getDetAdd(this,CdagC_1, position, partic
     this%updatePosRow  = ABS(position)
     this%updatePosCol  = ABS(position)
   END IF
-  
+
   ! If antisegment, the det ratio has to be by -1 ( sign of the signature of one
   ! permutation line in the this
   IF ( C .LT. Cdag .AND. tail .GT. 0) THEN ! if antiseg
-  !  ratio = -ratio 
+  !  ratio = -ratio
     this%updatePosRow  = (this%updatePosRow + 1) !position in [1;tail]
     IF ( CdagBeta .LT. particle%list(this%updatePosCol,Cdag_) ) this%antiShift = .TRUE.
   END IF
@@ -434,7 +434,7 @@ DOUBLE PRECISION  FUNCTION BathOperator_getDetAdd(this,CdagC_1, position, partic
 !    Q(it) = BathOperator_hybrid(this, Cibeta - Cdagbeta)
   END DO
   ! Compute S
-  this%Stau = C - Cdagbeta 
+  this%Stau = C - Cdagbeta
   this%Rtau%vec(this%updatePosRow) = this%Stau
   this%Qtau%vec(this%updatePosCol) = this%Rtau%vec(this%updatePosRow)
 
@@ -464,7 +464,7 @@ DOUBLE PRECISION  FUNCTION BathOperator_getDetAdd(this,CdagC_1, position, partic
   ! If antisegment, the det ratio has to be by -1 ( sign of the signature of one
   ! permutation line in the this)
   IF ( C .LT. Cdag .AND. tail .GT. 0) THEN ! if antiseg
-    ratio = -ratio 
+    ratio = -ratio
   ENDIF
 
   BathOperator_getDetAdd = ratio
@@ -473,8 +473,8 @@ DOUBLE PRECISION  FUNCTION BathOperator_getDetAdd(this,CdagC_1, position, partic
 !  this%ListCdagC = particle
 !!write(*,*) this%Stilde
 !!write(*,*) this%antishift
-!!write(*,*)    this%updatePosRow 
-!!write(*,*)    this%updatePosCol 
+!!write(*,*)    this%updatePosRow
+!!write(*,*)    this%updatePosCol
 !#endif
 
 END FUNCTION BathOperator_getDetAdd
@@ -486,7 +486,7 @@ END FUNCTION BathOperator_getDetAdd
 !!
 !! FUNCTION
 !!  Compute the determinant ratio when a (anti)segment
-!!  is trying to be removed 
+!!  is trying to be removed
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
@@ -499,7 +499,7 @@ END FUNCTION BathOperator_getDetAdd
 !!  position=position of segment to be removed
 !!
 !! OUTPUT
-!!  BathOperator_getDetRemove=the det 
+!!  BathOperator_getDetRemove=the det
 !!
 !! SIDE EFFECTS
 !!
@@ -512,8 +512,8 @@ DOUBLE PRECISION FUNCTION BathOperator_getDetRemove(this,position)
 !Arguments ------------------------------------
   TYPE(BathOperator), INTENT(INOUT) :: this
 !Local arguments-------------------------------
-  INTEGER           , INTENT(IN   ) :: position  
-  INTEGER                           :: ABSposition  
+  INTEGER           , INTENT(IN   ) :: position
+  INTEGER                           :: ABSposition
   INTEGER                           :: tail
 
   IF ( this%activeFlavor .LE. 0 ) &
@@ -530,14 +530,14 @@ DOUBLE PRECISION FUNCTION BathOperator_getDetRemove(this,position)
     this%updatePosRow = ABSposition
   ELSE
     this%updatePosRow = ABSposition+1
-    IF ( ABSposition .EQ. tail ) THEN 
+    IF ( ABSposition .EQ. tail ) THEN
       this%antiShift = .TRUE.
       this%updatePosRow = 1 !ABSposition - 1
-!      this%updatePosRow = ABSposition    
+!      this%updatePosRow = ABSposition
 !      IF ( this%updatePosCol .EQ. 0) this%updatePosCol = tail
     END IF
   ENDIF
-  this%Stilde                 = this%M(this%activeflavor)%mat(this%updatePosRow,this%updatePosCol) 
+  this%Stilde                 = this%M(this%activeflavor)%mat(this%updatePosRow,this%updatePosCol)
   this%MRemoveFlag            = .TRUE.
   BathOperator_getDetRemove = this%Stilde
 
@@ -559,7 +559,7 @@ END FUNCTION BathOperator_getDetRemove
 !!
 !! FUNCTION
 !!  Compute the determinant of the F this
-!!  using the hybridization of flavor and the 
+!!  using the hybridization of flavor and the
 !!  segments of particle
 !!
 !! COPYRIGHT
@@ -574,7 +574,7 @@ END FUNCTION BathOperator_getDetRemove
 !!  particles=segments to use
 !!
 !! OUTPUT
-!!  BathOperator_getDetF=the det 
+!!  BathOperator_getDetF=the det
 !!
 !! SIDE EFFECTS
 !!
@@ -616,7 +616,7 @@ DOUBLE PRECISION FUNCTION BathOperator_getDetF(this,flavor,particle)
         MODCYCLE(particle%list(iC,C_),beta,tC)
         time = tC - tCdag
 #include "BathOperator_hybrid"
-        this%M_update(flavor)%mat(iC,iCdag) = hybrid 
+        this%M_update(flavor)%mat(iC,iCdag) = hybrid
       END DO
     END DO
     ! mat_tau needs to be transpose of ordered time mat (way of measuring
@@ -664,7 +664,7 @@ END FUNCTION BathOperator_getDetF
 !!
 !! SOURCE
 
-SUBROUTINE BathOperator_setMAdd(this,particle) 
+SUBROUTINE BathOperator_setMAdd(this,particle)
 
 !Arguments ------------------------------------
   TYPE(BathOperator), INTENT(INOUT) :: this
@@ -759,7 +759,7 @@ SUBROUTINE BathOperator_setMAdd(this,particle)
   time = time + ( SIGN(1.d0,time) - 1.d0 )*mbeta_two
   this%M(aF)%mat_tau(new_tail,PositionCol) = INT ( (time*inv_dt) +1.5d0 )
   ! Add new stuff for new col
-  DO col = 1, tail 
+  DO col = 1, tail
     col_move = col +  ( 1+SIGN(1,col-PositionCol) )/2
     this%M(aF)%mat(PositionRow,col_move) = -this%R%vec(col)*Stilde
     time = this%Qtau%vec(col)
@@ -794,7 +794,7 @@ SUBROUTINE BathOperator_setMAdd(this,particle)
   !  IF ( col_move .EQ. positionCol ) THEN
   !    ! on calcule rajoute Q tilde
   !    !row_move = new_tail
-  !    row      = tail 
+  !    row      = tail
   !    DO row_move = new_tail, 1, -1
   !      ! calcul itau
   !      IF ( row_move .EQ. positionRow ) THEN
@@ -803,7 +803,7 @@ SUBROUTINE BathOperator_setMAdd(this,particle)
   !      ELSE
   !        this%M(aF)%mat(row_move,col_move) = -this%Q%vec(row)*Stilde
   !        !time = this%Rtau%vec(row_move)
-  !        row      = row      - 1 
+  !        row      = row      - 1
   !      END IF
   !      !time = time + ( SIGN(1.d0,time) - 1.d0 )*mbeta_two
   !      !this%M(aF)%mat_tau(row_move,col_move) = INT ( (time*inv_dt) +1.5d0 )
@@ -812,7 +812,7 @@ SUBROUTINE BathOperator_setMAdd(this,particle)
   !  ELSE
   !    ! on calcule Ptilde
   !    !row_move = new_tail
-  !    row      = tail 
+  !    row      = tail
   !    DO row_move = new_tail, 1, -1
   !      IF ( row_move .EQ. positionRow ) THEN
   !        this%M(aF)%mat(row_move,col_move) = -this%R%vec(col) * Stilde
@@ -824,7 +824,7 @@ SUBROUTINE BathOperator_setMAdd(this,particle)
   !        this%M(aF)%mat(row_move,col_move) = this%M(aF)%mat(row,col) + this%Q%vec(row)*this%R%vec(col)*Stilde
   !        ! copy itau
   !        !this%M(aF)%mat_tau(row_move,col_move) = this%M(aF)%mat_tau(row,col)
-  !        row      = row      - 1 
+  !        row      = row      - 1
   !      END IF
   !    END DO
   !    col      = col      - 1
@@ -929,7 +929,7 @@ END SUBROUTINE BathOperator_setMAdd
 !!
 !! SOURCE
 
-SUBROUTINE BathOperator_setMRemove(this,particle) 
+SUBROUTINE BathOperator_setMRemove(this,particle)
 
 !Arguments ------------------------------------
   TYPE(BathOperator), INTENT(INOUT)  :: this
@@ -999,7 +999,7 @@ SUBROUTINE BathOperator_setMRemove(this,particle)
     row = row_move + (1+SIGN(1,row_move-positionRow))/2
     this%R%vec(row_move) = this%M(aF)%mat(positionRow,col)
     this%Q%vec(row_move) = this%M(aF)%mat(row,positionCol)
-    !row      = row + 1 
+    !row      = row + 1
     !col      = col + 1
   END DO
 !!    this%R%vec(1:positionCol-1) = this%M(aF)%mat(positionRow,1:positionCol-1)
@@ -1013,7 +1013,7 @@ SUBROUTINE BathOperator_setMRemove(this,particle)
 !CALL ListCdagC_print(this%ListCdagC)
 
   !col      = 1
-  DO col_move = 1, new_tail 
+  DO col_move = 1, new_tail
     !IF ( col_move .EQ. positionCol ) col = col + 1
     col = col_move + (1+SIGN(1,col_move-positionCol))/2
     !row      = 1
@@ -1026,7 +1026,7 @@ SUBROUTINE BathOperator_setMRemove(this,particle)
       this%M(aF)%mat_tau(row_move,col_move) = this%M(aF)%mat_tau(row,col)
       !row      = row      + 1
     END DO
-    !col      = col      + 1 
+    !col      = col      + 1
   END DO
   CALL MatrixHyb_setSize(this%M(aF),new_tail)
 
@@ -1253,9 +1253,9 @@ SUBROUTINE BathOperator_printF(this,ostream)
   INTEGER                           :: sample
   INTEGER                           :: ostream_val
 
-  IF ( PRESENT(ostream) ) THEN 
+  IF ( PRESENT(ostream) ) THEN
     ostream_val = ostream
-  ELSE  
+  ELSE
     ostream_val = 65
     OPEN(UNIT=ostream_val, FILE="F.dat")
   END IF
@@ -1359,13 +1359,13 @@ SUBROUTINE  BathOperator_destroy(this)
 
   this%MAddFlag     = .FALSE.
   this%MRemoveFlag  = .FALSE.
-  this%flavors      = 0 
+  this%flavors      = 0
   this%beta         = 0.d0
   this%dt      = 0.d0
   this%inv_dt  = 0.d0
   this%samples      = 0
   this%sizeHybrid   = 0
-  this%activeFlavor = 0 
+  this%activeFlavor = 0
   this%updatePosRow = 0
   this%updatePosCol = 0
 
@@ -1402,7 +1402,7 @@ SUBROUTINE BathOperator_doCheck(this,opt_check)
 !Arguments ------------------------------------
   TYPE(BathOperator) , INTENT(INOUT) :: this
   INTEGER            , INTENT(IN   ) :: opt_check
-  
+
   IF ( opt_check .GE. 2 ) &
     this%doCheck = .TRUE.
 END SUBROUTINE BathOperator_doCheck
@@ -1482,7 +1482,7 @@ SUBROUTINE BathOperator_checkM(this,particle)
       this%M_update(aF)%mat(iC,iCdag) = hybrid
 
       time = time + ( SIGN(1.d0,time) - 1.d0 )*mbeta_two
-      this%M_update(aF)%mat_tau(iCdag,iC) = INT ( (time*this%inv_dt) +1.5d0 ) 
+      this%M_update(aF)%mat_tau(iCdag,iC) = INT ( (time*this%inv_dt) +1.5d0 )
     END DO
   END DO
 
@@ -1511,10 +1511,10 @@ SUBROUTINE BathOperator_checkM(this,particle)
     CALL MatrixHyb_print(this%M(aF),opt_print=1)
   END IF
   this%meanError = this%meanError + erreur
-  IF ( erreur .GT. 1.d0 ) THEN 
+  IF ( erreur .GT. 1.d0 ) THEN
     WRITE(a,'(I4)') INT(erreur*100.d0)
 !    CALL MatrixHyb_Print(this%M(aF)
-    CALL WARN("BathOperator_checkM : "//a//"%                        ") 
+    CALL WARN("BathOperator_checkM : "//a//"%                        ")
   END IF
 !  CALL MatrixHyb_destroy(checkMatrix)
 END SUBROUTINE BathOperator_checkM

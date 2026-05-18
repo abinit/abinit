@@ -67,7 +67,7 @@ AC_DEFUN([SD_LIBPAW_INIT], [
   esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([libpaw],
     [AS_HELP_STRING([--with-libpaw],
       [Install prefix of the LibPAW library (e.g. /usr/local).])],

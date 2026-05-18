@@ -224,7 +224,7 @@ module m_xg
   public :: xgBlock_copy ! IL-10/03/25: on GPU- Contains hidden one-way OMP calls (implicit H2D or D2H)
   public :: xgBlock_colwiseSwap
   public :: xgBlock_partialcopy
-  public :: xgBlock_permuteCols 
+  public :: xgBlock_permuteCols
   public :: xgBlock_hermitian_pd_cond ! computes condition number of Hermitian positive definite
   public :: xgBlock_spd_cond ! condition matrix for symmetric positive definite
   public :: xgBlock_pack
@@ -1626,13 +1626,13 @@ contains
 !!
 !! NAME
 !! xgBlock_permuteCols
-!! 
+!!
 !! FUNCTION
 !! Sequential in-place permute columns of xgBlock according to index permutation pcol.
 !! Performs the swap M(i,j) = M(i,perm(j)) for j=1,m using LAPACK.
 !! Checks memory location before applying LAPACK on CPU /!\
 !! Warning: implicit GPU transfer to place on CPU.
-!! 
+!!
   subroutine xgBlock_permuteCols(xgBlock, rows, cols, pcol)
 
     type(xgBlock_t), intent(inout) :: xgBlock
@@ -1676,10 +1676,10 @@ contains
   !!
   !! FUNCTION
   !! Condition number with 2-norm.
-  !! kappa2(A) 
+  !! kappa2(A)
   !!
-  !! Convention: 
-  !! for compatibility with xg_RayleighRitz_cprj, 
+  !! Convention:
+  !! for compatibility with xg_RayleighRitz_cprj,
   !! xgBlock stores the upper triangle of matrix
   !! uplo = 'u'
 
@@ -1689,7 +1689,7 @@ contains
       type(xgBlock_t), intent(in) :: xgBlock
       integer, intent(in) :: n
       real(dp), intent(inout) :: cond2
-     
+
       complex(dpc) :: vecC(n,n)
       real(dp) :: w(n)
       complex(dp) :: work(2*n)
@@ -1698,7 +1698,7 @@ contains
       external :: zheev
 
       ! IML debug
-      !write(901,*) 'space B', xgBlock%space 
+      !write(901,*) 'space B', xgBlock%space
 
       !# Validation
       ! Fill Hermitian SPD matrix (upper triangle only)
@@ -1744,7 +1744,7 @@ contains
       real(dp) :: rwork(8*n)
       integer :: info
       external :: dsyev
-     
+
       vecR(1:n,1:n) = xgBlock%vecR(1:n,1:n)
       call dsyev('N','U', n, vecR, n, w, rwork, 8*n, info)
       cond2 = abs(maxval(w) / minval(w))
@@ -2140,7 +2140,7 @@ contains
 
     if (timing_) call timab(tim_gemm_blas,2,tsec)
     ! END CALL GEMM
-    
+
     ! MPI SUM
     if ( present(comm) ) then
       if (timing_) call timab(tim_gemm_mpi,1,tsec)
@@ -3395,10 +3395,10 @@ contains
   !!
   !! NAME
   !! xgBlock_ymax
-  !! 
+  !!
   !! FUNCTION
   !! TODO IL-10/03/2025 Be careful, GPU version not tested
-  
+
   subroutine xgBlock_ymax(xgBlockA, da, shift, nblocks)
 
     type(xgBlock_t), intent(inout) :: xgBlockA
@@ -3434,7 +3434,7 @@ contains
     end if
 
     fact = 1 ; if (xgBlockA%space==SPACE_CR) fact = 2
-    
+
     if (xgBlockA%gpu_option==ABI_GPU_DISABLED) then
 
         if (space(da)==SPACE_R) then
@@ -3470,7 +3470,7 @@ contains
         else
             ABI_ERROR('Only SPACE_R or SPACE_C (for da) are implemented.')
         end if
-    
+
     else if (xgBlockA%gpu_option==ABI_GPU_OPENMP) then
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
@@ -5720,7 +5720,7 @@ contains
   !!
   !! NAME
   !! xgBlock_get_gpu_option
-  !! 
+  !!
   !! FUNCTION
   !! Getter routine for private variable of xgBlock type
 
@@ -5738,7 +5738,7 @@ contains
   !!
   !! NAME
   !! xgBlock_get_communicator
-  !! 
+  !!
   !! FUNCTION
   !! Getter routine for private variable of xgBlock type
 
@@ -6579,12 +6579,12 @@ contains
   !!***
 
   !!****f* m_xg/xgBlock_colwiseRandom
-  !! 
+  !!
   !! NAME
   !! xgBlock_colwiseRandom
 
   subroutine xgBlock_colwiseRandom(xgBlock, my_rank, jcol)
-    
+
     type(xgBlock_t), intent(inout) :: xgBlock
     integer, intent(in) :: my_rank ! mpi-parallel safe seed
     integer, intent(in) :: jcol
@@ -6600,15 +6600,15 @@ contains
     if (jcol > xgBlock%cols) then
         ABI_ERROR('given column is out of block')
     end if
-    
+
     tid = 0
     n = xgBlock%rows
     fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
-    
+
     if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
         call xgBlock_setBlock(xgBlock, xgBlock_part, n, 1, fcol=jcol)
         call xgBlock_copy_from_gpu(xgBlock_part)
-    end if 
+    end if
 
     ! Each thread each MPI process maintains its own seed
     select case(xgBlock%space)
@@ -6653,7 +6653,7 @@ contains
         norm2_vec = sum(conjg(vecC)*vecC)
         vecC = vecC / sqrt(real(norm2_vec, dp))
     end select
-    
+
     if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
         call xgBlock_copy_to_gpu(xgBlock_part)
     end if
@@ -6662,12 +6662,12 @@ contains
   !!***
 
   !!****f* m_xg/xgBlock_colwiseRandomGaussian
-  !! 
+  !!
   !! NAME
   !! xgBlock_colwiseRandomGaussian
 
   subroutine xgBlock_colwiseRandomGaussian(xgBlock, my_rank, jcol)
-    
+
     type(xgBlock_t), intent(inout) :: xgBlock
     integer, intent(in) :: my_rank ! mpi-parallel safe seed
     integer, intent(in) :: jcol
@@ -6682,14 +6682,14 @@ contains
     if (jcol > xgBlock%cols) then
         ABI_ERROR('given column is out of block')
     end if
-    
+
     tid = 0
     n = xgBlock%rows
-    
+
     if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
         call xgBlock_setBlock(xgBlock, xgBlock_part, n, 1, fcol=jcol)
         call xgBlock_copy_from_gpu(xgBlock_part)
-    end if 
+    end if
 
     ! Each thread each MPI process maintains its own seed
     select case(xgBlock%space)
@@ -6721,7 +6721,7 @@ contains
     case (SPACE_CR)
         ABI_ERROR('Not implemented for SPACE_CR')
     end select
-    
+
     if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
         call xgBlock_copy_to_gpu(xgBlock_part)
     end if
@@ -6730,15 +6730,15 @@ contains
   !!***
 
   !!****f* m_xg/xgBlock_colwiseRandomRademacher
-  !! 
+  !!
   !! NAME
   !! xgBlock_colwiseRandomRademacher
-  !! 
+  !!
   !! FUNCTION
   !! Every entry has |z_j| = 1 and E[z_j] = 0
 
   subroutine xgBlock_colwiseRandomRademacher(xgBlock, my_rank, jcol)
-    
+
     type(xgBlock_t), intent(inout) :: xgBlock
     integer, intent(in) :: my_rank ! mpi-parallel safe seed
     integer, intent(in) :: jcol
@@ -6755,17 +6755,17 @@ contains
     if (jcol > xgBlock%cols) then
         ABI_ERROR('given column is out of block')
     end if
-    
+
     tid = 0
     fact = 1
     fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
-    
+
     n = fact*xgBlock%rows
-    
+
     if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
         call xgBlock_setBlock(xgBlock, xgBlock_part, n, 1, fcol=jcol)
         call xgBlock_copy_from_gpu(xgBlock_part)
-    end if 
+    end if
 
     ! Each thread each MPI process maintains its own seed
     select case(xgBlock%space)
@@ -6817,7 +6817,7 @@ contains
             ABI_FREE(seed)
         !$omp end parallel
     end select
-    
+
     if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
         call xgBlock_copy_to_gpu(xgBlock_part)
     end if
@@ -6826,13 +6826,13 @@ contains
   !!***
 
   !!****f* m_xg/xgBlock_randomSketching
-  !! 
+  !!
   !! NAME
   !! xgBlock_randomSketching
-  !! 
+  !!
 
   subroutine xgBlock_randomSketching(X, X_sketch, k_sketch)
-   
+
     implicit none
 
     type(xgBlock_t), intent(in) :: X
@@ -6853,26 +6853,26 @@ contains
     ncols = X%cols
     nrows = X%rows
     gpu_option = X%gpu_option
-    spacecom = X%spacedim_comm 
+    spacecom = X%spacedim_comm
 
     if (k_sketch > ncols) then
         ABI_ERROR("sketching dimension cannot be more than initial one")
     end if
 
     ! Each MPI has the same sketch matrix
-    call xg_init(Omega, space, ncols, k_sketch, xmpi_comm_null, gpu_option=gpu_option) 
-    
+    call xg_init(Omega, space, ncols, k_sketch, xmpi_comm_null, gpu_option=gpu_option)
+
     rank = xmpi_comm_rank(spacecom)
 
     do k = 1, k_sketch
         ! seed depends on column index
         ! rank * offset + k, with offset > ncols to avoid overlap between columns across ranks
         call xgBlock_colwiseRandomGaussian(Omega%self, rank*(k_sketch+10)+k, k)
-        
+
         ! test
         ! q = random column vector
         !call xgBlock_setBlock(Omega%self, q, ncols, 1, fcol=k)
-        !write(std_out,*) 'Random id=', xgBlock_getid(q) 
+        !write(std_out,*) 'Random id=', xgBlock_getid(q)
         !flush(std_out)
     end do
 

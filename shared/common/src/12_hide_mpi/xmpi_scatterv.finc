@@ -215,7 +215,7 @@ subroutine xmpi_scatterv_dp2d(xval,sendcounts,displs,recvbuf,recvcount,root,comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
- integer :: cc,dd,sz1 
+ integer :: cc,dd,sz1
 
 ! *************************************************************************
 

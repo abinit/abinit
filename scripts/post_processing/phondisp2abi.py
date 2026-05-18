@@ -22,7 +22,7 @@
 #  forces in displaced configurations.
 #  See http://chianti.geol.ucl.ac.uk/~dario or
 #  D. Alfe, Computer Physics Communications 180,2622-2633 (2009)
-# 
+#
 #  NOTE: the symmetries in the present (1.28 8/2010) version of PHON
 #  are not functioning properly in some cases. It is your own
 #  responsibility to check it, and has nothing to do with ABINIT.
@@ -85,9 +85,9 @@ print "ndtset ", len(lines_disp)
 print "# supercell lattice vectors "
 print "acell 1 1 1 Angstr"
 print "rprim"
-print " %24.14f %24.14f %24.14f" % (rprimd[0][0], rprimd[1][0], rprimd[2][0]) 
-print " %24.14f %24.14f %24.14f" % (rprimd[0][1], rprimd[1][1], rprimd[2][1]) 
-print " %24.14f %24.14f %24.14f" % (rprimd[0][2], rprimd[1][2], rprimd[2][2]) 
+print " %24.14f %24.14f %24.14f" % (rprimd[0][0], rprimd[1][0], rprimd[2][0])
+print " %24.14f %24.14f %24.14f" % (rprimd[0][1], rprimd[1][1], rprimd[2][1])
+print " %24.14f %24.14f %24.14f" % (rprimd[0][2], rprimd[1][2], rprimd[2][2])
 
 
 idtset=1
@@ -100,7 +100,7 @@ for line in lines_disp:
 # add displacement to correct atom
 	xred = list(equilxred)
 	xred[iatom-1] = xred[iatom-1] + dispred
-	
+
 # output xred for this dataset
 	print "# add the following line, without the #, to the FORCES file for this dtset, when concatenating"
 	print "# %d %24.14f %24.14f %24.14f" % (iatom, dispred[0], dispred[1], dispred[2])
@@ -108,4 +108,4 @@ for line in lines_disp:
 	for xred_1at in xred:
 		print " %24.14f %24.14f %24.14f" % (xred_1at[0], xred_1at[1], xred_1at[2])
 # increment dataset counter
-	idtset=idtset+1	
+	idtset=idtset+1

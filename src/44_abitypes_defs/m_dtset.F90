@@ -221,7 +221,7 @@ type, public :: dataset_type
  integer :: eph_frohl_ntheta = 0
  integer :: eph_phrange(2) = 0
  integer :: eph_prtscratew = 0
- integer :: eph_restart = 0
+ integer :: eph_restart = 1
  integer :: eph_stern = 0
  integer :: eph_task = 1
  integer :: eph_transport = 0
@@ -291,6 +291,7 @@ type, public :: dataset_type
  integer :: gpu_thread_limit
 
  integer :: gstore_with_vk = 1
+ integer :: gstore_iv1p_comm = 0
  integer :: gstore_use_lgk = 0
  integer :: gstore_use_lgq = 0
  character(len=abi_slen) :: gstore_kzone = "ibz"
@@ -304,6 +305,8 @@ type, public :: dataset_type
  integer :: gwcalctyp = 0
  integer :: gwcomp = 0
  integer :: gwgamma = 0
+ integer :: gwpt_wmode = 2
+ integer :: gwpt_g2mode = 2
  ! GWLS
  integer :: gwls_stern_kmax             ! number of Lanczos steps taken by the gw_sternheimer routine
  integer :: gwls_npt_gauss_quad         ! number of points used in Gaussian quadrature in gw_sternheimer routine
@@ -976,6 +979,7 @@ type, public :: dataset_type
  real(dp) :: rhoqpmix
  real(dp) :: rifcsph = zero
  real(dp) :: rcut
+ real(dp) :: symsigma_de = one / Ha_meV
  real(dp) :: slabwsrad
  real(dp) :: slabzbeg
  real(dp) :: slabzend
@@ -1033,7 +1037,7 @@ type, public :: dataset_type
  real(dp) :: vdw_df_tolerance
  real(dp) :: vdw_df_zab
  real(dp) :: vis
- real(dp) :: vloc_rcut = 6.0_dp
+ real(dp) :: vloc_rcut = 6.0_dp !  10 Bohr in QE
  real(dp) :: wfmix
  real(dp) :: wtq
  real(dp) :: wvl_hgrid
@@ -1162,6 +1166,7 @@ type, public :: dataset_type
  character(len=fnlen) :: getsigeph_filepath = ABI_NOFILE
  character(len=fnlen) :: getvpq_filepath = ABI_NOFILE
  character(len=fnlen) :: getgstore_filepath = ABI_NOFILE
+ character(len=fnlen) :: getqpdata_filepath = ABI_NOFILE
  character(len=fnlen) :: getabiwan_filepath = ABI_NOFILE
  character(len=fnlen) :: getgwan_filepath = ABI_NOFILE
  character(len=fnlen) :: write_files = ABI_NOFILE
@@ -1828,6 +1833,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getpot_filepath    = dtin%getpot_filepath
  dtout%getsigeph_filepath = dtin%getsigeph_filepath
  dtout%getgstore_filepath = dtin%getgstore_filepath
+ dtout%getqpdata_filepath = dtin%getqpdata_filepath
  dtout%getabiwan_filepath = dtin%getabiwan_filepath
  dtout%getgwan_filepath   = dtin%getgwan_filepath
  dtout%getscr_filepath    = dtin%getscr_filepath
@@ -1860,6 +1866,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gpu_thread_limit   = dtin%gpu_thread_limit
 
  dtout%gstore_with_vk     = dtin%gstore_with_vk
+ dtout%gstore_iv1p_comm   = dtin%gstore_iv1p_comm
  dtout%gstore_use_lgk     = dtin%gstore_use_lgk
  dtout%gstore_use_lgq     = dtin%gstore_use_lgq
  dtout%gstore_kzone       = dtin%gstore_kzone
@@ -1876,6 +1883,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwmem              = dtin%gwmem
  dtout%gwpara             = dtin%gwpara
  dtout%gwgamma            = dtin%gwgamma
+ dtout%gwpt_wmode         = dtin%gwpt_wmode
+ dtout%gwpt_g2mode         = dtin%gwpt_g2mode
  dtout%gwrpacorr          = dtin%gwrpacorr
  dtout%gwgmcorr           = dtin%gwgmcorr
  dtout%gw1rdm             = dtin%gw1rdm
@@ -2456,6 +2465,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%rfomega            = dtin%rfomega
  dtout%dfpt_sciss         = dtin%dfpt_sciss
  dtout%mbpt_sciss         = dtin%mbpt_sciss
+ dtout%symsigma_de        = dtin%symsigma_de
  dtout%spinmagntarget     = dtin%spinmagntarget
  dtout%spbroad            = dtin%spbroad
  dtout%spnorbscl          = dtin%spnorbscl
@@ -3782,9 +3792,9 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?
  list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qdamp dvdb_rspace_cell'
  list_vars=trim(list_vars)//' dyn_chksym dyn_tolsym'
- list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_magat' 
+ list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_magat'
  list_vars=trim(list_vars)//' d3e_pert1_magdir d3e_pert1_magn d3e_pert1_phon'
- list_vars=trim(list_vars)//' d3e_pert2_atpol d3e_pert2_dir d3e_pert2_elfd d3e_pert2_magat' 
+ list_vars=trim(list_vars)//' d3e_pert2_atpol d3e_pert2_dir d3e_pert2_elfd d3e_pert2_magat'
  list_vars=trim(list_vars)//' d3e_pert2_magdir d3e_pert2_magn d3e_pert2_phon'
  list_vars=trim(list_vars)//' d3e_pert2_strs'
  list_vars=trim(list_vars)//' d3e_pert3_atpol d3e_pert3_dir d3e_pert3_elfd d3e_pert3_phon'
@@ -3829,7 +3839,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getddb getddb_filepath getden_filepath getddk'
  list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getkden getdvdb getdrhodb getdvdb_filepath getdrhodb_filepath'
  list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
- list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getsigeph_filepath getgstore_filepath'
+ list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getsigeph_filepath getgstore_filepath getqpdata_filepath'
  list_vars=trim(list_vars)//' getabiwan getabiwan_filepath getgwan getgwan_filepath'
  list_vars=trim(list_vars)//' getqps getscr getscr_filepath getself'
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
@@ -3838,9 +3848,9 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_kokkos_nthrd gpu_linalg_limit gpu_nl_distrib gpu_thread_limit'
  list_vars=trim(list_vars)//' gpu_nfft_blocks gpu_nl_splitsize gpu_option'
- list_vars=trim(list_vars)//' gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
+ list_vars=trim(list_vars)//' gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwpt_wmode gwpt_g2mode gwmem'
  list_vars=trim(list_vars)//' gstore_brange gstore_erange gstore_kfilter gstore_gname'
- list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk gstore_use_lgk gstore_use_lgq'
+ list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk gstore_iv1p_comm gstore_use_lgk gstore_use_lgq'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
  list_vars=trim(list_vars)//' gw_icutcoul gw_invalid_freq'
@@ -3990,7 +4000,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' spin_var_temperature spin_write_traj'
  list_vars=trim(list_vars)//' spinat spinaxis spinat_cart spinmagntarget spmeth'
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget'
- list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma symv1scf'
+ list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma symsigma_de symv1scf'
  list_vars=trim(list_vars)//' structure '
 !T
  list_vars=trim(list_vars)//' td_exp_order td_maxene td_mexcit td_scnmax td_prtstr td_restart td_propagator td_scthr'

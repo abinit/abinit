@@ -1,8 +1,8 @@
 
 .Version 10.5.8.9 of ABINIT. v10.7.1 released Mar 2026.
-.(MPI version, prepared for a x86_64_linux_gnu15.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu15.2 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Tue 31 Mar 2026.
 - ( at 19h10 )
-  
+
 - input  file    -> /home/hexu/projects/abinit_git/abinit_fixmaxforce/tests/v9/Input/t104.abi
 - output file    -> /home/hexu/projects/abinit_git/abinit_fixmaxforce/tests/v9/Input/t104.abo
 - root for input  files -> t104i
@@ -232,7 +232,7 @@ tolerances: {toldff: 1.00E-05, }
  ETOT 11  -177.32735447897    -2.700E-09 6.738E-04 1.374E-08 7.534E-06 3.246E-04
  ETOT 12  -177.32735447897    -2.046E-12 6.910E-04 7.432E-10 1.267E-06 3.256E-04
 
- At SCF step   12, forces are converged : 
+ At SCF step   12, forces are converged :
   for the second time, max diff in force=  1.267E-06 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -347,7 +347,7 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  6  -177.32735503872    -4.343E-11 4.753E-06 7.889E-08 8.447E-06 2.990E-04
  ETOT  7  -177.32735503875    -3.126E-11 1.929E-06 6.713E-09 9.268E-07 2.982E-04
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  9.268E-07 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -446,7 +446,7 @@ force_length_stats: {min:   4.89123519E-05, max:   4.30839677E-04, mean:   2.514
            Absolute (Ha)=-5.59781E-07
            Relative     =-3.15677E-09
 
- At Broyd/MD step   2, gradients are converged : 
+ At Broyd/MD step   2, gradients are converged :
   max grad (force/stress) = 4.9142E-04 < tolmxf= 5.0000E-04 ha/bohr (free atoms)
 
 ================================================================================
@@ -536,7 +536,7 @@ band_energy         : -1.41933802379949E+01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      7.3510346246E+00  7.3510346246E+00  7.3813696729E+00 Bohr
               amu      2.07200000E+02  4.78800000E+01  1.59994000E+01
@@ -642,7 +642,7 @@ P           mkmem           4
 - D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
 - I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
 - Comment: the sixth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
 - The licence allows the authors to put it on the Web.
@@ -665,7 +665,7 @@ P           mkmem           4
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
@@ -683,7 +683,7 @@ P           mkmem           4
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
 - is available at
 -  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
@@ -702,7 +702,7 @@ P           mkmem           4
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.

@@ -44,7 +44,7 @@ module m_common
  use m_yaml
  use m_invars2
  use m_dtset
- 
+
  use m_rcpaw,             only : rcpaw_type
  use m_fstrings,          only : indent, endswith, sjoin, itoa
  use m_electronpositron,  only : electronpositron_type
@@ -616,7 +616,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
        if(present(rcpaw)) then
          if (associated(rcpaw).and.residm < (tolwfr)**third) then
            if(rcpaw%updatepaw(1)==0.and.rcpaw%updatepaw(2)==0) then
-             rcpaw%updatepaw(:)=istep 
+             rcpaw%updatepaw(:)=istep
            endif
          endif
        endif
@@ -888,7 +888,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
    ! Additional stuff for rcpaw
    if(present(rcpaw)) then
      if(associated(rcpaw)) then
-       if(rcpaw%updatepaw(2)>0.and.rcpaw%frocc) rcpaw%updateocc=rcpaw%updatepaw(2) 
+       if(rcpaw%updatepaw(2)>0.and.rcpaw%frocc) rcpaw%updateocc=rcpaw%updatepaw(2)
        if(rcpaw%updatetnc==0)rcpaw%updatetnc=rcpaw%updatepaw(2)
        if(quit==1.and.(rcpaw%istep<rcpaw%updatepaw(2).or.rcpaw%updatepaw(2)==0))quit=0
      endif
@@ -896,7 +896,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
 
  case (3)
    ! If wavefunction convergence was not reached (for nstep>0) print a warning and return conv_retcode
-   
+
    conv_retcode = 0
    if(nstep>0) then
      if (.not. converged()) then
