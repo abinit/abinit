@@ -31,7 +31,7 @@ module m_multibinit_io_xml
   use m_errors
   implicit none
 
-!!*** 
+!!***
 
   interface
      !-------------------------------------------------------------------!

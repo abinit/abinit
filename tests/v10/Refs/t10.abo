@@ -1,8 +1,8 @@
 
 .Version 10.6.6.4 of ABINIT. v10.6.5 released Mar 2026.
-.(MPI version, prepared for a x86_64_linux_gnu12.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu12.3 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,17 +16,17 @@
 
 .Starting date : Thu  2 Apr 2026.
 - ( at 10h04 )
-  
+
 - input  file    -> t10.abi
 - output file    -> t10.abo
 - root for input  files -> t10i
 - root for output files -> t10o
 
-- inpspheads : Reading pseudopotential header in XML form from 
+- inpspheads : Reading pseudopotential header in XML form from
 -   /cea/home/l2/baguetl/WORK/pseudo/Psdj_paw_pbe_std/P.xml
-- inpspheads : Reading pseudopotential header in XML form from 
+- inpspheads : Reading pseudopotential header in XML form from
 -   /cea/home/l2/baguetl/WORK/pseudo/Psdj_paw_pbe_std/Al.xml
-- inpspheads : Reading pseudopotential header in XML form from 
+- inpspheads : Reading pseudopotential header in XML form from
 -   /cea/home/l2/baguetl/WORK/pseudo/Psdj_paw_pbe_std/Al.xml
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -1964,7 +1964,7 @@ P           mkmem           8
 - D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
 - I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
 - Comment: the sixth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
 - The licence allows the authors to put it on the Web.

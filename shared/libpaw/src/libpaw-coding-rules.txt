@@ -79,8 +79,8 @@ Use following macros to print messages:
 Use following macros to print messages and then stop:
   MSG_ERROR(msg)
   MSG_BUG(msg)
-  
-  
+
+
 --------------------------------------------------------------------------
 MPI wrappers
 --------------------------------------------------------------------------

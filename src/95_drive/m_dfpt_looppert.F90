@@ -361,7 +361,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !Deactivate kramer's degeneracy for calculations that break TRS
  kramers_deg=.true.
  if (dtset%tim1rev==0) kramers_deg=.false.
- 
+
  if (.not.kramers_deg.and.dtset%npfft/=1) then
    write(msg,'(a,a)')'   RF routines are not adapted to fft parallelization'//char(10)//&
 & '   when tim1rev=0. However, npfft is different from 1 in the present run.'
@@ -854,7 +854,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if (dtset%magpen<zero) then
        write(msg, '(a,3f10.6)' ) ' Homogeneous spin magnetic penalty term is applied.'
        call wrtout([std_out, ab_out],msg)
-     else 
+     else
        write(msg, '(a,3f10.6)' ) ' Local spin magnetic penalty term from atomic spheres is applied.'
        call wrtout([std_out, ab_out],msg)
      end if
@@ -1739,7 +1739,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_MALLOC(rhor1,(cplex*nfftf,nspden))
    ABI_MALLOC(rhog1,(2,nfftf))
 
-!  MR:do we really need to define the partial rhos here? 
+!  MR:do we really need to define the partial rhos here?
    if(.not.kramers_deg) then
      ! Case when first order spinors at both +q and -q are not related by symmetry (time and/or space inversion)
      ABI_MALLOC(rhor1_pq,(cplex*nfftf,nspden))
@@ -1871,9 +1871,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        else
          ! Magnetic field perturbation
          call wrtout(std_out," Initializing rhor1 guess based on the ground state XC magnetic field")
-  
+
          call dfpt_init_mag1(ipert,idir,rhor1,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
-  
+
        end if
 
        call fourdp(cplex,rhog1,rhor1,-1,mpi_enreg,nfftf,1,ngfftf,0)
@@ -2963,10 +2963,10 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
 
  if (abs(emagpen1)>tol8) then
    write(msg,'(a,es17.8)') &
-&   '     Magnetic penalty contribution=', emagpen1   
+&   '     Magnetic penalty contribution=', emagpen1
    call wrtout(iout,msg)
    call wrtout(std_out,msg)
- end if 
+ end if
 
  if (usepaw==1) then
    numb='10';if( ipert==natom+3.or.ipert==natom+4) numb='11'
@@ -3328,7 +3328,7 @@ subroutine dfpt_init_mag1(ipert,idir,rhor1,rhor0,cplex,nfft,nspden,vxc0,kxc0,nkx
 
      bxc0=-sqrt((half*(vxc0(ipt,1)-vxc0(ipt,2)))**2+vxc0(ipt,3)**2+vxc0(ipt,4)**2)
      if(cplex==1) then
-     ! TODO:    
+     ! TODO:
      !  rhor1(ipt,1)=zero       ! rho_up+rho_dwn    => charge density
      !  rhor1(ipt,2)=m1_norm*mdir(1)-half*m0_norm/bxc0*(fdir(1)-f_dot_m*mdir(1))   ! m1x
      !  rhor1(ipt,3)=m1_norm*mdir(2)-half*m0_norm/bxc0*(fdir(2)-f_dot_m*mdir(2))   ! m1y

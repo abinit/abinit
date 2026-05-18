@@ -385,6 +385,7 @@ end subroutine ephtk_gkknu_from_atm
 !!
 !! INPUTS
 !!  dtset<dataset_type>=All input variables for this dataset.
+!!  fileqpdatain: QPDATA file
 !!
 !! SOURCE
 
@@ -400,40 +401,39 @@ subroutine ephtk_update_ebands(dtset, ebands, header)
 !scalars
  real(dp),parameter :: nholes = zero
  character(len=500) :: msg
- integer :: unts(2)
+ integer :: units(2)
 ! *************************************************************************
 
- unts = [std_out, ab_out]
+ units = [std_out, ab_out]
+
+ if (abs(dtset%mbpt_sciss) > tol6) then
+   ! Apply the scissor operator
+   call wrtout(units, sjoin(" Applying scissors operator to the conduction states with value: ", &
+               ftoa(dtset%mbpt_sciss * Ha_eV, fmt="(f6.2)"), " (eV)"))
+   call ebands%apply_scissors(dtset%mbpt_sciss)
+ end if
 
  if (dtset%occopt /= ebands%occopt .or. abs(dtset%tsmear - ebands%tsmear) > tol12) then
- !if (.True.) then
    write(msg,"(2a,2(a,i0,a,f14.6,a))")&
    " Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.",ch10,&
    "   From WFK file: occopt = ",ebands%occopt,", tsmear = ",ebands%tsmear,ch10,&
    "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
-   call wrtout(unts, msg)
+   call wrtout(units, msg)
    call ebands%set_scheme(dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
-
-   if (abs(dtset%mbpt_sciss) > tol6) then
-     ! Apply the scissor operator
-     call wrtout(unts, sjoin(" Applying scissors operator to the conduction states with value: ", &
-                 ftoa(dtset%mbpt_sciss * Ha_eV, fmt="(f6.2)"), " (eV)"))
-     call ebands%apply_scissors(dtset%mbpt_sciss)
-   end if
  end if
 
  ! Default value of eph_fermie is zero hence no tolerance is used!
  if (dtset%eph_fermie /= zero) then
    ABI_CHECK(dtset%eph_extrael == zero, "eph_fermie and eph_extrael are mutually exclusive")
-   call wrtout(unts, sjoin(" Fermi level set by the user at:", ftoa(dtset%eph_fermie * Ha_eV, fmt="(f6.2)"), " (eV)"))
+   call wrtout(units, sjoin(" Fermi level set by the user at:", ftoa(dtset%eph_fermie * Ha_eV, fmt="(f6.2)"), " (eV)"))
    call ebands%set_fermie(dtset%eph_fermie, msg)
-   call wrtout(unts, msg)
+   call wrtout(units, msg)
 
  else if (abs(dtset%eph_extrael) > zero) then
-   call wrtout(unts, sjoin(" Adding eph_extrael:", ftoa(dtset%eph_extrael), "to input nelect:", ftoa(ebands%nelect)))
+   call wrtout(units, sjoin(" Adding eph_extrael:", ftoa(dtset%eph_extrael), "to input nelect:", ftoa(ebands%nelect)))
    call ebands%set_scheme(dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
    call ebands%set_extrael(dtset%eph_extrael, nholes, dtset%spinmagntarget, msg)
-   call wrtout(unts, msg)
+   call wrtout(units, msg)
  end if
 
  ! Recompute occupations. This is needed if WFK files have been produced in a NSCF run

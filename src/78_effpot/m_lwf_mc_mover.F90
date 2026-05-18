@@ -11,7 +11,7 @@
 !! * lwf_mc_t : MCMC. It defines how to move lwfs in one step,
 !! attempt function: whether to accept move
 !! accecpt/reject method which define what to do if move is
-!! accepted or rejected!! . 
+!! accepted or rejected!! .
 !!
 !! Subroutines:
 !! TODO: add this when F2003 doc style is determined.

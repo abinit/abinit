@@ -4854,11 +4854,11 @@ end subroutine zerosym
 !!
 !! SOURCE
 
-subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,tim_fourdp)
+subroutine fourdp_6d(cplex, matrix, isign, MPI_enreg, nfft, ngfft, tim_fourdp)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,isign,nfft,tim_fourdp
+ integer,intent(in) :: cplex, isign, nfft, tim_fourdp
  type(MPI_type),intent(in) :: MPI_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -4872,7 +4872,7 @@ subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,tim_fourdp)
  real(dp),allocatable :: fofg(:,:),fofr(:)
 ! *************************************************************************
 
-!TODO check normalization factor, it is better if we use the GW conventions.
+ ! TODO check normalization factor, it is better if we use the GW conventions.
  n1 = ngfft(1)
  n2 = ngfft(2)
  n3 = ngfft(3)
@@ -4899,9 +4899,11 @@ subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,tim_fourdp)
 
        call fourdp(cplex,fofg,fofr,isign,MPI_enreg,nfft,1,ngfft,tim_fourdp)
 
-       if (isign==1) then ! Save A(r1,G2)
+       if (isign==1) then
+         ! Save A(r1,G2)
          matrix(:,ifft)=CMPLX(fofr(1:nfft),fofr(nfft+1:2*nfft))
-       else if (isign==-1) then ! Save A(G1,r2)
+       else if (isign==-1) then
+         ! Save A(G1,r2)
          matrix(:,ifft)=CMPLX(fofg(1,:),fofg(2,:))
        end if
 

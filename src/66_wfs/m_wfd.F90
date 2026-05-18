@@ -457,6 +457,10 @@ module m_wfd
    procedure :: sym_ug_kg => wfd_sym_ug_kg
    ! Symmetrize a wave function in G-space
    ! Used in phgamma only, use wfd_rotate_cg for a more efficient version (see m_sigmaph for usage)
+   !  This routine is deprecated and should be replaced by sym_ug_kg_npw in order to call getgh1c with ndat > 1, i
+
+   procedure :: sym_ug_kg_npw => wfd_sym_ug_kg_npw
+   ! Symmetrize a wave function in G-space
 
    procedure :: paw_get_aeur => wfd_paw_get_aeur
    ! Compute the AE PAW wavefunction in real space.
@@ -3986,7 +3990,7 @@ end subroutine wfd_test_ortho
 !!                 is taken into account when constructing u_kbz.
 !!
 !! NOTES
-!!  This method is deprecated. See wfd_sym_ug_kg for symmetrization in G-space
+!!  This method is deprecated. See wfd_sym_ug_kg and wfd_sym_ug_kg_npw for symmetrization in G-space
 !!
 !! OUTPUT
 !!  ur_kbz(Wfd%nfft*Wfd%nspinor)=The symmetrized wavefunction in real space.
@@ -4268,32 +4272,38 @@ end subroutine wfd_rotate_cg
 !!  ecut: Cutoff energy for planewave basis set.
 !!  kk_bz: k-point in the BZ for output wavefunctions and G-vectors.
 !!  kk_ibz: Symmetrical image of kk_bz in the IBZ.
-!!  bstart: Initial band
+!!  bstart: Initial band index
 !!  nband: Number of bands to symmetrize.
 !!  spin: Spin index
-!!  mpw: Maximum number of planewaves used to dimension arrays.
+!!  mpw: MAXIMUM number of planewaves used to dimension arrays.
 !!  indkk: Symmetry map kk_bz -> kk_ibz as computed by listkk with the symrel convention.
 !!  cryst: Crystalline structure and symmetries
 !!  work_ngfft: Define the size of the workspace array work
 !!  work: Workspace array used to symmetrize wavefunctions
-!!  force_rotate:  optional, use cgtk_rotate for kpoint even if it is in the IBZ.
+!!  force_rotate: optional, use cgtk_rotate for kpoint even if it is in the IBZ.
 !!
 !! OUTPUT
-!!  istwf_kbz: Time-reversal flag associated to output wavefunctions
-!!  npw_kbz: Number of G-vectors in kk_bz G-sphere
+!!  istwf_kbz: Time-reversal flag associated to output wavefunctions.
+!!  npw_kbz: Number of G-vectors in kk_bz G-sphere.
 !!  kg_kbz: G-vectors in reduced coordinates.
-!!  cgs_kbz: Periodic part of wavefunctions at kk_bz
+!!  cgs_kbz: Periodic part of wavefunctions at kk_bz.
+!!
+!! NOTES
+!!  This routine is deprecated and should be replaced by sym_ug_kg_npw.
+!!  In order to call getgh1c with ndat > 1, indeed, one should return an array dimensioned
+!!  as (2, npw_kbz*wfd%nspinor, nband) instead of (2, mpw*wfd%nspinor, nband)
 !!
 !! SOURCE
 
-subroutine wfd_sym_ug_kg(self, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, indkk, cryst, &
-                         work_ngfft, work, istwf_kbz, npw_kbz, kg_kbz, cgs_kbz, force_rotate)
+subroutine wfd_sym_ug_kg(wfd, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, indkk, cryst, &
+                         work_ngfft, work, istwf_kbz, npw_kbz, kg_kbz, cgs_kbz, &
+                         force_rotate) ! optional
 
 !Arguments ------------------------------------
 !scalars
+ class(wfd_t),intent(in) :: wfd
  integer,intent(in) :: bstart, nband, spin, mpw
  type(crystal_t),intent(in) :: cryst
- class(wfd_t),intent(in) :: self
  integer,intent(out) :: istwf_kbz, npw_kbz
  real(dp),intent(in) :: ecut
 !arrays
@@ -4301,9 +4311,7 @@ subroutine wfd_sym_ug_kg(self, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, in
  integer,intent(in) :: indkk(6)
  integer,intent(out) :: kg_kbz(3, mpw)
  real(dp),intent(in) :: kk_bz(3), kk_ibz(3)
- ! TODO: these routines now should allocate wavefunctions as
- !real(dp),intent(out) :: cgs_kbz(2, npw_kq*self%nspinor, nband)
- real(dp),intent(out) :: cgs_kbz(2, mpw*self%nspinor, nband)
+ real(dp),intent(out) :: cgs_kbz(2, mpw*wfd%nspinor, nband)
  real(dp),intent(out) :: work(2, work_ngfft(4), work_ngfft(5), work_ngfft(6))
  logical ,optional, intent(in) :: force_rotate
 
@@ -4324,25 +4332,22 @@ subroutine wfd_sym_ug_kg(self, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, in
 
  rotate= .not. isirr_k
  if (present(force_rotate)) then
-   if (force_rotate) then
-     rotate=.True.
-   endif
+   if (force_rotate) rotate=.True.
  endif
 
  ! Get npw_kbz, kg_kbz and symmetrize wavefunctions from IBZ (if needed).
  ! Be careful with time-reversal symmetry.
  if (.not. rotate) then
    ! Copy u_k(G)
-   istwf_kbz = self%istwfk(ik_ibz); npw_kbz = self%npwarr(ik_ibz)
-   !ABI_MALLOC(kg_kbz, (3, npw_kbz))
-   !ABI_MALLOC(cgs_kbz, (2, npw_kbz*self%nspinor, nband))
-
+   istwf_kbz = wfd%istwfk(ik_ibz); npw_kbz = wfd%npwarr(ik_ibz)
    ABI_CHECK_ILEQ(npw_kbz, mpw, "npw_kbz > mpw!")
-   kg_kbz(:,1:npw_kbz) = self%kdata(ik_ibz)%kg_k
+   kg_kbz(:,1:npw_kbz) = wfd%kdata(ik_ibz)%kg_k
+
    do ib=1,nband
      band = ib + bstart - 1
-     call self%copy_cg(band, ik_ibz, spin, cgs_kbz(1,1,ib))
+     call wfd%copy_cg(band, ik_ibz, spin, cgs_kbz(1,1,ib))
    end do
+
  else
    ! Reconstruct u_k(G) from the IBZ image.
    istwf_kbz = 1
@@ -4350,23 +4355,137 @@ subroutine wfd_sym_ug_kg(self, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, in
    ABI_CHECK_ILEQ(npw_kbz, mpw, "npw_kbz > mpw!")
    kg_kbz(:,1:npw_kbz) = gtmp(:,:npw_kbz)
    ABI_FREE(gtmp)
-   !ABI_MALLOC(kg_kbz, (3, npw_kbz))
-   !ABI_MALLOC(cgs_kbz, (2, npw_kbz*self%nspinor, nband))
 
    ! Use cg_kirr as workspace array, results stored in cgs_kbz.
-   istwf_kirr = self%istwfk(ik_ibz); npw_kirr = self%npwarr(ik_ibz)
-   ABI_MALLOC(cg_kirr, (2, npw_kirr*self%nspinor))
+   istwf_kirr = wfd%istwfk(ik_ibz); npw_kirr = wfd%npwarr(ik_ibz)
+   ABI_MALLOC(cg_kirr, (2, npw_kirr*wfd%nspinor))
    do ib=1,nband
      band = ib + bstart - 1
-     call self%copy_cg(band, ik_ibz, spin, cg_kirr)
-     call cgtk_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, self%nspinor, ndat1, &
-                      npw_kirr, self%kdata(ik_ibz)%kg_k, &
+     call wfd%copy_cg(band, ik_ibz, spin, cg_kirr)
+     call cgtk_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, wfd%nspinor, ndat1, &
+                      npw_kirr, wfd%kdata(ik_ibz)%kg_k, &
                       npw_kbz, kg_kbz, istwf_kirr, istwf_kbz, cg_kirr, cgs_kbz(:,:,ib), work_ngfft, work)
    end do
    ABI_FREE(cg_kirr)
  end if
 
 end subroutine wfd_sym_ug_kg
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_wfd/wfd_sym_ug_kg_npw
+!! NAME
+!!  wfd_sym_ug_kg_npw
+!!
+!! FUNCTION
+!!  Use crystalline symmetries and time reversal to reconstruct wavefunctions at kk_bz from the IBZ image kk_ibz.
+!!  Return periodic part in G-space as well as list of G-vectors belonging to the G-sphere centered on kk_bz
+!!
+!! INPUTS
+!!  ecut: Cutoff energy for planewave basis set.
+!!  kk_bz: k-point in the BZ for output wavefunctions and G-vectors.
+!!  kk_ibz: Symmetrical image of kk_bz in the IBZ.
+!!  bstart: Initial band index
+!!  nband: Number of bands to symmetrize.
+!!  spin: Spin index
+!!  mpw: MAXIMUM number of planewaves used to dimension arrays.
+!!  indkk: Symmetry map kk_bz -> kk_ibz as computed by listkk with the symrel convention.
+!!  cryst: Crystalline structure and symmetries
+!!  work_ngfft: Define the size of the workspace array work
+!!  work: Workspace array used to symmetrize wavefunctions
+!!  force_rotate: optional, use cgtk_rotate for kpoint even if it is in the IBZ.
+!!
+!! OUTPUT
+!!  istwf_kbz: Time-reversal flag associated to output wavefunctions.
+!!  npw_kbz: Number of G-vectors in kk_bz G-sphere.
+!!  kg_kbz: G-vectors in reduced coordinates.
+!!  cgs_kbz: Periodic part of wavefunctions at kk_bz.
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine wfd_sym_ug_kg_npw(wfd, ecut, kk_bz, kk_ibz, bstart, nband, spin, indkk, cryst, &
+                             work_ngfft, work, istwf_kbz, npw_kbz, kg_kbz, cgs_kbz, &
+                             force_rotate) ! optional
+
+!Arguments ------------------------------------
+!scalars
+ class(wfd_t),intent(in) :: wfd
+ integer,intent(in) :: bstart, nband, spin
+ type(crystal_t),intent(in) :: cryst
+ integer,intent(out) :: istwf_kbz, npw_kbz
+ real(dp),intent(in) :: ecut
+!arrays
+ integer :: work_ngfft(18)
+ integer,intent(in) :: indkk(6)
+ integer,intent(out) :: kg_kbz(:,:) ! (3, mpw)
+ real(dp),intent(in) :: kk_bz(3), kk_ibz(3)
+ real(dp),allocatable,intent(out) :: cgs_kbz(:,:,:) ! (2, npw_kbz*wfd%nspinor, nband)
+ real(dp),intent(out) :: work(2, work_ngfft(4), work_ngfft(5), work_ngfft(6))
+ logical ,optional, intent(in) :: force_rotate
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: ndat1 = 1
+ integer :: ik_ibz, isym_k, trev_k, ib, band, istwf_kirr, npw_kirr, mpw
+ logical :: isirr_k, rotate
+!arrays
+ integer :: g0_k(3)
+ integer,allocatable :: gtmp(:,:)
+ real(dp),allocatable :: cg_kirr(:,:)
+!************************************************************************
+
+ mpw = size(kg_kbz, dim=2)
+
+ ! As reported by listkk via symrel
+ ik_ibz = indkk(1); isym_k = indkk(2); trev_k = indkk(6); g0_k = indkk(3:5)
+ isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+
+ rotate= .not. isirr_k
+ if (present(force_rotate)) then
+   if (force_rotate) rotate=.True.
+ endif
+
+ ! Get npw_kbz, kg_kbz and symmetrize wavefunctions from IBZ (if needed).
+ ! Be careful with time-reversal symmetry.
+ if (.not. rotate) then
+   ! Copy u_k(G)
+   istwf_kbz = wfd%istwfk(ik_ibz); npw_kbz = wfd%npwarr(ik_ibz)
+   ABI_CHECK_ILEQ(npw_kbz, mpw, "npw_kbz > mpw!")
+   kg_kbz(:,1:npw_kbz) = wfd%kdata(ik_ibz)%kg_k
+
+   ABI_MALLOC(cgs_kbz, (2, npw_kbz*wfd%nspinor, nband))
+   do ib=1,nband
+     band = ib + bstart - 1
+     call wfd%copy_cg(band, ik_ibz, spin, cgs_kbz(1,1,ib))
+   end do
+
+ else
+   ! Reconstruct u_k(G) from the IBZ image.
+   istwf_kbz = 1
+   call get_kg(kk_bz, istwf_kbz, ecut, cryst%gmet, npw_kbz, gtmp)
+   ABI_CHECK_ILEQ(npw_kbz, mpw, "npw_kbz > mpw!")
+   kg_kbz(:,1:npw_kbz) = gtmp(:,:npw_kbz)
+   ABI_FREE(gtmp)
+
+   ABI_MALLOC(cgs_kbz, (2, npw_kbz*wfd%nspinor, nband))
+
+   ! Use cg_kirr as workspace array, results stored in cgs_kbz.
+   istwf_kirr = wfd%istwfk(ik_ibz); npw_kirr = wfd%npwarr(ik_ibz)
+   ABI_MALLOC(cg_kirr, (2, npw_kirr*wfd%nspinor))
+   do ib=1,nband
+     band = ib + bstart - 1
+     call wfd%copy_cg(band, ik_ibz, spin, cg_kirr)
+     call cgtk_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, wfd%nspinor, ndat1, &
+                      npw_kirr, wfd%kdata(ik_ibz)%kg_k, &
+                      npw_kbz, kg_kbz, istwf_kirr, istwf_kbz, cg_kirr, cgs_kbz(:,:,ib), work_ngfft, work)
+   end do
+   ABI_FREE(cg_kirr)
+ end if
+
+end subroutine wfd_sym_ug_kg_npw
 !!***
 
 !----------------------------------------------------------------------
@@ -4849,6 +4968,11 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       ! TODO: Here I should treat the case in which istwfk in wfd differs from the one on disk.
       ABI_MALLOC(gf2wfd, (npw_disk))
       if (any(my_readmask(:,ik_ibz,spin))) then
+#if defined FC_NVHPC
+      !write(std_out, *)"NVHPC with netcdf gives crazy values for kg_k"
+      !write(std_out,*)  "wfd%kdata(ik_ibz)%kg_k(:,1)", wfd%kdata(ik_ibz)%kg_k(:,1)
+      !write(std_out,*)  "kg_k(:,1):", kg_k(:,1)
+#endif
         call kg_map(wfd%npwarr(ik_ibz), wfd%kdata(ik_ibz)%kg_k, npw_disk, kg_k, gf2wfd, nmiss)
       end if
       !if (nmiss/=0) then

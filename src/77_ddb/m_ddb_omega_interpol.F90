@@ -4,7 +4,7 @@
 !!  m_ddb_omega_interpol
 !!
 !! FUNCTION
-!! Interpolate the nonadiabatic second-order susceptibilities 
+!! Interpolate the nonadiabatic second-order susceptibilities
 !! onto a fine frequency grid and incorporate the lattice-mediated contributions.
 !!
 !! COPYRIGHT
@@ -28,7 +28,7 @@
 #include "abi_common.h"
 
 module m_ddb_omega_interpol
-    
+
  use defs_basis
  use m_abicore
  use m_profiling_abi
@@ -52,7 +52,7 @@ module m_ddb_omega_interpol
 
 ! *************************************************************************
 
-contains 
+contains
 !!***
 
 !!****f* m_ddb_omega_interpol/ddb_omega_interpol
@@ -60,18 +60,18 @@ contains
 !! ddb_omega_interpol
 !!
 !! FUNCTION
-!! Interpolate over frequency the secon-order derivatives calculated at 
-!! constrained magnetic moments, latter on convert them into susceptibilities 
+!! Interpolate over frequency the secon-order derivatives calculated at
+!! constrained magnetic moments, latter on convert them into susceptibilities
 !! calculated at fixed/relaxed ions/spins.
 !!
 !! INPUTS
 !! ddb (INOUT) = ddb block datastructure
-!! magpen = amplitude (in Ha) of the applied magnetic penalty 
+!! magpen = amplitude (in Ha) of the applied magnetic penalty
 !! mpatpol(2) = Atoms on which the magnetic penalty has been applied
-!! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened 
+!! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened
 !! mpert = maximum number of ipert
 !! mpopt = 1 calculate the frozen-magnetic second-order quantities
-!!         2 calculate the spin-relaxed second-order quantities 
+!!         2 calculate the spin-relaxed second-order quantities
 !! natom= number of atoms in unit cell
 !! ntypat= number of atom types
 !! ucvol= unit cell volume
@@ -81,7 +81,7 @@ contains
 !!
 !! SOURCE
 
- subroutine ddb_omega_interpol(amu,ddb,ddb_lw, & 
+ subroutine ddb_omega_interpol(amu,ddb,ddb_lw, &
 & eta,outfilename_radix,magpen,mpatpol,mpdir,mpert,mpopt,natom, &
 & nomega,ntypat,omegaflag,omegamax,omegamin,prtvol,typat,ucvol,xred)
 
@@ -100,7 +100,7 @@ contains
 !scalars
  integer :: alpha_unit,alpha_hc_unit,diel_unit,fs2rs,i,iblok,ifound
  integer :: ii,iishift,imode,iw,j,jw,ipert3,idir3
- integer :: mmag_unit,mmom_unit,nblok,ndim 
+ integer :: mmag_unit,mmom_unit,nblok,ndim
  integer :: nmat,nmdir,nwcalc,optgb,phon_unit,prtopt
  integer :: locmagsus_unit,zeff_unit,zfield_unit
  real(dp) :: mcell,omegastp,convfac
@@ -162,7 +162,7 @@ contains
  omegacalc(:)=ddb%omega(1,:)
 
 !Define the omega discretization
- omegastp=(omegamax-omegamin)/(nomega-1) 
+ omegastp=(omegamax-omegamin)/(nomega-1)
 
  prtopt=0
  if (magpen<zero) then
@@ -330,21 +330,21 @@ contains
        end if
      end do
 
-   !Polynomial with no dissipation 
+   !Polynomial with no dissipation
    else if (omegaflag==2) then
      do ii=1,ddb%msize
        if (all(ddb%flg(ii,:)==1)) then
          pc_in(:)= ddb%val_fs(1,ii,:)
-         call POLINT(omegacalc,pc_in,nwcalc,omega(iw),int_fsddb(1,ii,1),dint_fsddb(1,ii)) 
+         call POLINT(omegacalc,pc_in,nwcalc,omega(iw),int_fsddb(1,ii,1),dint_fsddb(1,ii))
          pc_in(:)= ddb%val_fs(2,ii,:)
-         call POLINT(omegacalc,pc_in,nwcalc,omega(iw),int_fsddb(2,ii,1),dint_fsddb(2,ii)) 
+         call POLINT(omegacalc,pc_in,nwcalc,omega(iw),int_fsddb(2,ii,1),dint_fsddb(2,ii))
        else if (count(ddb%flg(ii,:)==0)/=nwcalc) then
          write(msg,'(a,a,a)')&
          'ddb_omega_interpol detects differences between the DDB bloks for each frequency.',ch10,&
-       & ' The interpolation has been stopped.' 
+       & ' The interpolation has been stopped.'
          ABI_ERROR(msg)
        end if
-     end do 
+     end do
 
    !Taylor-expansion around w=0 with dissipation if eta/=0
    else if (omegaflag==3) then
@@ -356,14 +356,14 @@ contains
            cplxvar= cplxvar + cplx_weta**(jw-1)*cmplx(coeffs(1,jw,ii),coeffs(2,jw,ii),kind=dpc)
          end do
          int_fsddb(1,ii,1)=real(cplxvar)
-         int_fsddb(2,ii,1)=aimag(cplxvar) 
+         int_fsddb(2,ii,1)=aimag(cplxvar)
        else if (count(ddb%flg(ii,:)==0)/=nwcalc) then
          write(msg,'(a,a,a)')&
          'ddb_omega_interpol detects differences between the DDB bloks for each frequency.',ch10,&
-       & ' The interpolation has been stopped.' 
+       & ' The interpolation has been stopped.'
          ABI_ERROR(msg)
        end if
-     end do 
+     end do
    end if
 
    !Calculate the local spin susceptibilities
@@ -376,7 +376,7 @@ contains
  & magsus_iw,mmom_iw,mmom_tr_iw,mpatpol,mpdir,mpert,natom,&
  & ndim,nmdir,prtopt,prtvol,qphon,xred,zfield_iw,zfield_tr,&
  & fs2rs=fs2rs,blkval_fs=int_fsddb)
-  
+
    !Now calculate the non-magnetic second-order quantities
    call ddb%to_d2etot(int_fsddb,1,0,qeq0,qphon,qphnrm,ucvol,optgb,omega=omega(iw))
 
@@ -390,7 +390,7 @@ contains
    !Calculate the phonon propagator (Green's function) and spectral function
    !and the lattice-mediated contributions to the different susceptibilities.
    if (mpopt==1) then
-     call phonon_green(amu,displ,eigvec,eta,int_fsddb,& 
+     call phonon_green(amu,displ,eigvec,eta,int_fsddb,&
    & mode_phonspec,mpert,natom,ntypat,omega(iw),&
    & phfrq_iw,phongreen,phonspec(iw),typat)
 
@@ -403,12 +403,12 @@ contains
    & mpert,natom,ndim,ntypat,omega(iw),phfrq_iw,typat,ucvol,zfield_iw)
 
    else if (mpopt==2) then
-     call phonon_green(amu,displ,eigvec,eta,int_rsddb,& 
+     call phonon_green(amu,displ,eigvec,eta,int_rsddb,&
    & mode_phonspec,mpert,natom,ntypat,omega(iw),&
    & phfrq_iw,phongreen,phonspec(iw),typat)
 
      call ri_d2etot(int_rsddb,ci_alpha_iw,ci_alpha_hc_iw,ci_epsilon_iw,ci_localpha_iw,ci_locchi_iw,ci_mchi_iw,&
-   & lm_alpha_iw,lm_alpha_hc_iw,lm_epsilon_iw,lm_localpha_iw,lm_locchi_iw,lm_magsus_iw,lm_mchi_iw,& 
+   & lm_alpha_iw,lm_alpha_hc_iw,lm_epsilon_iw,lm_localpha_iw,lm_locchi_iw,lm_magsus_iw,lm_mchi_iw,&
    & mpert,mmom_iw,mmom_tr_iw,natom,ndim,phongreen,ucvol)
 
      call lm_normal_modes(amu,int_rsddb,displ,eta,lm_alpha_nm_iw,lm_epsilon_nm_iw,lm_mchi_nm_iw, &
@@ -539,7 +539,7 @@ contains
      write(msg,pfmt) omega(iw), ((real(zfield(i,(natom+1)*3+j,iw)),j=1,3),i=1,ndim)
      call wrtout(zfield_unit,msg,'COLL')
    end do
-  
+
    write(zfield_unit,*) ' '
    write(zfield_unit,*) '#  Imag part of clamped-ion local Zeeman fields induced by electric field (at. units)'
    write(msg,'(a,a)') ch10,&
@@ -619,7 +619,7 @@ contains
    &  omega(iw), ((real(ci_localpha(i,j,iw)),j=1,3),i=1,ndim)
       call wrtout(mmom_unit,msg,'COLL')
    end do
-  
+
    write(mmom_unit,*) ' '
    write(mmom_unit,*) '#  Imaginary part of the clamped-ion local magnetic moments induced by an electric field (at. units)'
    write(msg,'(a,a,a)') ch10,&
@@ -714,7 +714,7 @@ contains
    if (open_file(diel_filename, msg, newunit=diel_unit) /= 0) then
      ABI_ERROR(msg)
    end if
-  
+
    if (mpopt==1) then
      call wrtout([ab_out,std_out,diel_unit], '#  Fixed-spin dielectric tensor calculated and interpolated by ANADDB')
    else if (mpopt==2) then
@@ -723,15 +723,15 @@ contains
      write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
      ABI_ERROR(msg)
    end if
-   
+
    call wrtout([ab_out,std_out,diel_unit], ' ')
-   write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
-  
+   write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9
+
    call wrtout([ab_out,std_out,diel_unit], '#  Real part of clamped-ion dielectric tensor')
    write(msg,'(a,a)') ch10,&
   &           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
    call wrtout([ab_out,std_out,diel_unit],msg,'COLL')
-   do iw=1,min(nomega,3) 
+   do iw=1,min(nomega,3)
      write(msg,pfmt) &
    & omega(iw), ((real(ci_epsilon(i,j,iw)),j=1,3),i=1,3)
      call wrtout([ab_out,std_out],msg,'COLL')
@@ -742,13 +742,13 @@ contains
    & omega(iw), ((real(ci_epsilon(i,j,iw)),j=1,3),i=1,3)
      call wrtout(diel_unit,msg,'COLL')
    end do
-  
+
    call wrtout([ab_out,std_out,diel_unit], ' ')
    call wrtout([ab_out,std_out,diel_unit], '#  Imaginary part of clamped-ion dielectric tensor')
    write(msg,'(a,a)') ch10,&
   &           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
    call wrtout([ab_out,std_out,diel_unit],msg,'COLL')
-   do iw=1,min(nomega,3) 
+   do iw=1,min(nomega,3)
      write(msg,pfmt) &
    & omega(iw), ((aimag(ci_epsilon(i,j,iw)),j=1,3),i=1,3)
      call wrtout([ab_out,std_out],msg,'COLL')
@@ -759,13 +759,13 @@ contains
    &  omega(iw), ((aimag(ci_epsilon(i,j,iw)),j=1,3),i=1,3)
       call wrtout(diel_unit,msg,'COLL')
    end do
-  
+
    call wrtout([ab_out,std_out,diel_unit], ' ')
    call wrtout([ab_out,std_out,diel_unit], '#  Real part of relaxed-ion dielectric tensor ')
    write(msg,'(a,a)') ch10,&
   &           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
    call wrtout([ab_out,std_out,diel_unit],msg,'COLL')
-   do iw=1,min(nomega,3) 
+   do iw=1,min(nomega,3)
      write(msg,pfmt) &
    & omega(iw), ((real(lm_epsilon(i,j,iw)+ci_epsilon(i,j,iw)),j=1,3),i=1,3)
      call wrtout([ab_out,std_out],msg,'COLL')
@@ -776,13 +776,13 @@ contains
    & omega(iw), ((real(lm_epsilon(i,j,iw)+ci_epsilon(i,j,iw)),j=1,3),i=1,3)
      call wrtout(diel_unit,msg,'COLL')
    end do
-  
+
    call wrtout([ab_out,std_out,diel_unit], ' ')
    call wrtout([ab_out,std_out,diel_unit], '#  Imaginary part of relaxed-ion dielectric tensor')
    write(msg,'(a,a)') ch10,&
   &           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
    call wrtout([ab_out,std_out,diel_unit],msg,'COLL')
-   do iw=1,min(nomega,3) 
+   do iw=1,min(nomega,3)
      write(msg,pfmt) &
    & omega(iw), ((aimag(lm_epsilon(i,j,iw)+ci_epsilon(i,j,iw)),j=1,3),i=1,3)
      call wrtout([ab_out,std_out],msg,'COLL')
@@ -794,11 +794,11 @@ contains
       call wrtout(diel_unit,msg,'COLL')
    end do
    write(diel_unit,*) ' '
-  
+
    write(diel_unit,*) '#'
-   write(diel_unit,*) '# Phonon modes contribution to dielectric tensor' 
+   write(diel_unit,*) '# Phonon modes contribution to dielectric tensor'
    write(diel_unit,*) '#'
-  
+
    do imode= 1, 3*natom
      write(diel_unit,*) ' '
      write(diel_unit,*) '#  Real part of dielectric tensor due to phonon mode:', imode
@@ -820,7 +820,7 @@ contains
      &  omega(iw), ((aimag(lm_epsilon_nm(i,j,imode,iw)),j=1,3),i=1,3)
         call wrtout(diel_unit,msg,'COLL')
      end do
-   end do 
+   end do
 
    close(diel_unit)
  end if
@@ -831,7 +831,7 @@ contains
    if (open_file(alpha_filename, msg, newunit=alpha_unit) /= 0) then
      ABI_ERROR(msg)
    end if
-  
+
    call wrtout([ab_out,std_out], ' ')
    if (mpopt==1) then
      call wrtout([ab_out,std_out,alpha_unit], '#  Fixed-spin magnetoelectric tensor calculated and interpolated by ANADDB')
@@ -842,72 +842,72 @@ contains
      ABI_ERROR(msg)
    end if
    call wrtout([ab_out,std_out,alpha_unit],'#  (Magnetization induced by electric field: mu_0 dM_a/dE_b)')
-   
+
    call wrtout([ab_out,std_out,alpha_unit],' ')
-   write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
-  
+   write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9
+
    convfac= mu_0_SI *  e_Cb * BField_Tesla / Bohr_meter**2 * 1.d12
-  
+
     call wrtout([ab_out,std_out,alpha_unit],'#  Real part of clamped-ion magnetoelectric tensor (ps/m)')
    write(msg,'(a,a)') ch10,&
   &           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
    call wrtout([ab_out,std_out,alpha_unit],msg,'COLL')
-   do iw=1,min(nomega,3) 
+   do iw=1,min(nomega,3)
      write(msg,pfmt) &
    & omega(iw), ((real(ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
      call wrtout([ab_out,std_out],msg,'COLL')
-   end do 
+   end do
    call wrtout([ab_out,std_out],'...')
    do iw=1,nomega
      write(msg,pfmt) &
    & omega(iw), ((real(ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
      call wrtout(alpha_unit,msg,'COLL')
    end do
-  
+
    call wrtout([ab_out,std_out,alpha_unit], ' ')
    call wrtout([ab_out,std_out,alpha_unit], '#  Imaginary part of clamped-ion magnetoelectric tensor (ps/m)')
    write(msg,'(a,a)') ch10,&
   &           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
    call wrtout([ab_out,std_out,alpha_unit],msg,'COLL')
-   do iw=1,min(nomega,3) 
+   do iw=1,min(nomega,3)
      write(msg,pfmt) &
    & omega(iw), ((aimag(ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
      call wrtout([ab_out,std_out],msg,'COLL')
-   end do 
+   end do
    call wrtout([ab_out,std_out],'...')
    do iw=1,nomega
       write(msg,pfmt) &
    &  omega(iw), ((aimag(ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
       call wrtout(alpha_unit,msg,'COLL')
    end do
-  
+
    call wrtout([ab_out,std_out,alpha_unit],' ')
    call wrtout([ab_out,std_out,alpha_unit],'#  Real part of relaxed-ion magnetoelectric tensor (ps/m)')
    write(msg,'(a,a)') ch10,&
   &           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
    call wrtout([ab_out,std_out,alpha_unit],msg,'COLL')
-   do iw=1,min(nomega,3) 
+   do iw=1,min(nomega,3)
      write(msg,pfmt) &
    & omega(iw), ((real(lm_alpha(i,j,iw)+ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
      call wrtout([ab_out,std_out],msg,'COLL')
-   end do 
+   end do
    call wrtout([ab_out,std_out],'...')
    do iw=1,nomega
       write(msg,pfmt) &
    &  omega(iw), ((real(lm_alpha(i,j,iw)+ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
       call wrtout(alpha_unit,msg,'COLL')
    end do
-  
+
    call wrtout([ab_out,std_out,alpha_unit],' ')
    call wrtout([ab_out,std_out,alpha_unit],'#  Imaginary part of relaxed-ion magnetoelectric tensor (ps/m)')
    write(msg,'(a,a)') ch10,&
   &           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
    call wrtout([ab_out,std_out,alpha_unit],msg,'COLL')
-   do iw=1,min(nomega,3) 
+   do iw=1,min(nomega,3)
      write(msg,pfmt) &
    & omega(iw), ((aimag(lm_alpha(i,j,iw)+ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
      call wrtout([ab_out,std_out],msg,'COLL')
-   end do 
+   end do
    call wrtout([ab_out,std_out],'...')
    do iw=1,nomega
       write(msg,pfmt) &
@@ -915,11 +915,11 @@ contains
       call wrtout(alpha_unit,msg,'COLL')
    end do
    write(alpha_unit,*) ''
-  
+
    write(alpha_unit,*) '#'
-   write(alpha_unit,*) '# Phonon modes contribution to magnetoelectric tensor' 
+   write(alpha_unit,*) '# Phonon modes contribution to magnetoelectric tensor'
    write(alpha_unit,*) '#'
-  
+
    do imode= 1, 3*natom
      write(alpha_unit,*) ' '
      write(alpha_unit,*) '#  Real part of magnetoelectric tensor (ps/m) due to phonon mode:', imode
@@ -941,8 +941,8 @@ contains
      &  omega(iw), ((aimag(lm_alpha_nm(i,j,imode,iw))*convfac,j=1,3),i=1,3)
         call wrtout(alpha_unit,msg,'COLL')
      end do
-   end do 
-  
+   end do
+
    close(alpha_unit)
  end if
 
@@ -952,7 +952,7 @@ contains
    if (open_file(alpha_hc_filename, msg, newunit=alpha_hc_unit) /= 0) then
      ABI_ERROR(msg)
    end if
-  
+
    if (mpopt==1) then
      write(alpha_hc_unit,*) '#  Fixed-spin magnetoelectric tensor calculated and interpolated by ANADDB'
    else if (mpopt==2) then
@@ -962,12 +962,12 @@ contains
      ABI_ERROR(msg)
    end if
    write(alpha_hc_unit,*) '#  (Polarization induced by Zeeman field strength: dP_a/dH_b)'
-   
+
    write(alpha_hc_unit,*) '#'
-   write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
-  
+   write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9
+
    convfac= mu_0_SI *  e_Cb * BField_Tesla / Bohr_meter**2 * 1.d12
-  
+
    write(alpha_hc_unit,*) '#  Real part of clamped-ion magnetoelectric tensor (ps/m)'
    write(msg,'(a,a)') ch10,&
   &           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
@@ -977,7 +977,7 @@ contains
    &  omega(iw), ((real(ci_alpha_hc(i,j,iw))*convfac,j=1,3),i=1,3)
       call wrtout(diel_unit,msg,'COLL')
    end do
-  
+
    write(alpha_hc_unit,*) ' '
    write(alpha_hc_unit,*) '#  Imaginary part of clamped-ion magnetoelectric tensor (ps/m)'
    write(msg,'(a,a)') ch10,&
@@ -988,7 +988,7 @@ contains
    &  omega(iw), ((aimag(ci_alpha_hc(i,j,iw))*convfac,j=1,3),i=1,3)
       call wrtout(alpha_hc_unit,msg,'COLL')
    end do
-  
+
    write(alpha_hc_unit,*) ' '
    write(alpha_hc_unit,*) '#  Real part of relaxed-ion magnetoelectric tensor (ps/m)'
    write(msg,'(a,a)') ch10,&
@@ -999,7 +999,7 @@ contains
    &  omega(iw), ((real(lm_alpha_hc(i,j,iw)+ci_alpha_hc(i,j,iw))*convfac,j=1,3),i=1,3)
       call wrtout(alpha_hc_unit,msg,'COLL')
    end do
-  
+
    write(alpha_hc_unit,*) ' '
    write(alpha_hc_unit,*) '#  Imaginary part of relaxed-ion magnetoelectric tensor (ps/m)'
    write(msg,'(a,a)') ch10,&
@@ -1010,7 +1010,7 @@ contains
    &  omega(iw), ((aimag(lm_alpha_hc(i,j,iw)+ci_alpha_hc(i,j,iw))*convfac,j=1,3),i=1,3)
       call wrtout(alpha_hc_unit,msg,'COLL')
    end do
-  
+
    close(alpha_hc_unit)
  end if
 
@@ -1029,10 +1029,10 @@ contains
    write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
    ABI_ERROR(msg)
  end if
- 
- write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
 
- convfac= two * mu_0_SI * mu_B_SI * BField_Tesla / Bohr_meter**3 
+ write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9
+
+ convfac= two * mu_0_SI * mu_B_SI * BField_Tesla / Bohr_meter**3
 
  call wrtout([ab_out,std_out,mmag_unit],' ')
  call wrtout([ab_out,std_out,mmag_unit],'#  Real part of clamped-ion magnetic susceptibility (SI adim)')
@@ -1043,7 +1043,7 @@ contains
    write(msg,pfmt) &
  & omega(iw), ((real(ci_mchi(i,j,iw))*convfac,j=1,3),i=1,3)
    call wrtout([ab_out,std_out],msg,'COLL')
- end do 
+ end do
  call wrtout([ab_out,std_out],'...')
  do iw=1,nomega
    write(msg,pfmt) &
@@ -1060,7 +1060,7 @@ contains
    write(msg,pfmt) &
  & omega(iw), ((aimag(ci_mchi(i,j,iw))*convfac,j=1,3),i=1,3)
    call wrtout([ab_out,std_out],msg,'COLL')
- end do 
+ end do
  call wrtout([ab_out,std_out],'...')
  do iw=1,nomega
     write(msg,pfmt) &
@@ -1077,7 +1077,7 @@ contains
    write(msg,pfmt) &
  & omega(iw), ((real(ci_mchi(i,j,iw)+lm_mchi(i,j,iw))*convfac,j=1,3),i=1,3)
    call wrtout([ab_out,std_out],msg,'COLL')
- end do 
+ end do
  call wrtout([ab_out,std_out],'...')
  do iw=1,nomega
    write(msg,pfmt) &
@@ -1094,7 +1094,7 @@ contains
    write(msg,pfmt) &
  & omega(iw), ((aimag(ci_mchi(i,j,iw)+lm_mchi(i,j,iw))*convfac,j=1,3),i=1,3)
    call wrtout([ab_out,std_out],msg,'COLL')
- end do 
+ end do
  call wrtout([ab_out,std_out],'...')
  do iw=1,nomega
     write(msg,pfmt) &
@@ -1105,7 +1105,7 @@ contains
  write(mmag_unit,*) ''
 
  write(mmag_unit,*) '#'
- write(mmag_unit,*) '# Phonon modes contribution to magnetic susceptibility tensor' 
+ write(mmag_unit,*) '# Phonon modes contribution to magnetic susceptibility tensor'
  write(mmag_unit,*) '#'
 
  do imode= 1, 3*natom
@@ -1129,7 +1129,7 @@ contains
    &  omega(iw), ((aimag(lm_mchi_nm(i,j,imode,iw))*convfac,j=1,3),i=1,3)
       call wrtout(mmag_unit,msg,'COLL')
    end do
- end do 
+ end do
 
  close(mmag_unit)
 
@@ -1148,7 +1148,7 @@ contains
    write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
    ABI_ERROR(msg)
  end if
- 
+
  write(msg,'(a,a)') ch10, ' # At  hw               Phonon SF      '
  call wrtout(phon_unit,msg,'COLL')
  do iw=1,nomega
@@ -1182,7 +1182,7 @@ contains
     write(msg,pfmt) omega(iw), phfrq(:,iw)
     call wrtout(phon_unit,msg,'COLL')
  end do
- 
+
  close(phon_unit)
 
 !Phonon eigendisplacements
@@ -1231,8 +1231,8 @@ contains
    write(zeff_unit,*) '#'
    write(zeff_unit,*) '#  Electric and magnetic Born effective charges calculated and interpolated by ANADDB'
    write(zeff_unit,*) '#'
-  
-   write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' ) 3 
+
+   write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' ) 3
    do imode= 1, 3*natom
      write(zeff_unit,*) ' '
      write(zeff_unit,'(a,i3)') '#  Real part of electric Born charge (at. units) induced by phonon mode:', imode
@@ -1338,7 +1338,7 @@ contains
 !!  phonon_green
 !!
 !! FUNCTION
-!!  Computes the phonon Green's function and spectral function at 
+!!  Computes the phonon Green's function and spectral function at
 !!  a given value of frequency and imaginary damping
 !!
 !! COPYRIGHT
@@ -1359,7 +1359,7 @@ contains
 !!  phonspec= phonon spectral function at the input omega
 !!  phfrq= phonon frequencies calculated with the IFCs at the input omega
 !!  phfrq= phonon eigenvectors calculated with the IFCs at the input omega
-!!  
+!!
 !!
 !! SIDE EFFECTS
 !!
@@ -1378,7 +1378,7 @@ contains
 #include "abi_common.h"
 
 
-subroutine phonon_green(amu,displ,eigvec,eta,blkval,& 
+subroutine phonon_green(amu,displ,eigvec,eta,blkval,&
 & mode_phonspec,mpert,natom,ntypat,omega,&
 & phfrq,phongreen,phonspec,typat)
 
@@ -1390,7 +1390,7 @@ subroutine phonon_green(amu,displ,eigvec,eta,blkval,&
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in)  :: mpert,natom,ntypat 
+ integer, intent(in)  :: mpert,natom,ntypat
  real(dp), intent(in) :: eta,omega
  real(dp), intent(out) :: phonspec
 !arrays
@@ -1411,7 +1411,7 @@ subroutine phonon_green(amu,displ,eigvec,eta,blkval,&
  complex(dpc) :: cplx_eta
 !arrays
  integer, allocatable :: ipiv(:)
- real(dp) :: dum(2,0) 
+ real(dp) :: dum(2,0)
  real(dp), allocatable :: invmassfac(:,:)
  real(dp), allocatable :: matrx(:,:),zhpev1(:,:),zhpev2(:)
  real(dp), allocatable :: eigval(:)
@@ -1420,7 +1420,7 @@ subroutine phonon_green(amu,displ,eigvec,eta,blkval,&
  complex(dpc), allocatable :: dynmat(:,:),ifc_w2mass(:,:)
  complex(dpc),allocatable :: work(:),work1(:,:)
  complex(dpc),allocatable :: mass_phongreen(:,:)
-!character(len=500) :: msg                   
+!character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -1447,9 +1447,9 @@ subroutine phonon_green(amu,displ,eigvec,eta,blkval,&
 !better not applied.
 ! ABI_MALLOC_IFNOT(delta_asrw0,(3*natom,3))
 ! if (omega < tol14) then
-!   call asrw0(delta_asrw0,ifc,natom,0) 
-! else 
-!   call asrw0(delta_asrw0,ifc,natom,1) 
+!   call asrw0(delta_asrw0,ifc,natom,0)
+! else
+!   call asrw0(delta_asrw0,ifc,natom,1)
 ! end if
 
 !Build an array with the inverse mass factors
@@ -1475,7 +1475,7 @@ subroutine phonon_green(amu,displ,eigvec,eta,blkval,&
          ifc_w2mass(irow,icol)= ifc(irow,icol)
          if (irow==icol) then
            ifc_w2mass(irow,icol)= ifc_w2mass(irow,icol) - &
-         & amu(typat(iat1))*amu_emass*(omega+cplx_eta)**2 
+         & amu(typat(iat1))*amu_emass*(omega+cplx_eta)**2
          end if
        end do
      end do
@@ -1529,7 +1529,7 @@ subroutine phonon_green(amu,displ,eigvec,eta,blkval,&
      matrx(1,irow + (icol-1)*icol/2)=real(dynmat(irow,icol))
      matrx(2,irow + (icol-1)*icol/2)=aimag(dynmat(irow,icol))
    end do
- end do 
+ end do
 
  ABI_MALLOC(zhpev1,(2,2*3*natom-1))
  ABI_MALLOC(zhpev2,(3*3*natom-2))
@@ -1581,8 +1581,8 @@ end subroutine phonon_green
 !!
 !! FUNCTION
 !!  Calculates the lattice-mediated contributions of the different type of
-!!  susceptibilities by projecting the calculation on the contributions of 
-!!  the phonon modes. 
+!!  susceptibilities by projecting the calculation on the contributions of
+!!  the phonon modes.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2024 ABINIT group (FIXME: add author)
@@ -1633,7 +1633,7 @@ subroutine lm_normal_modes(amu,blkval,displ,eta,lm_alpha_nm,lm_epsilon_nm,lm_mch
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in)  :: mpert,natom,ndim,ntypat 
+ integer, intent(in)  :: mpert,natom,ndim,ntypat
  real(dp), intent(in) :: eta,mcell,omega,ucvol
 !arrays
  integer, intent(in)  :: typat(natom)
@@ -1662,7 +1662,7 @@ subroutine lm_normal_modes(amu,blkval,displ,eta,lm_alpha_nm,lm_epsilon_nm,lm_mch
  complex(dpc),allocatable :: c_blkval(:,:,:,:) !,norm(:)
  complex(dpc),allocatable :: zeff(:,:), zeff_tr(:,:), modezeff_tr(:,:)
  complex(dpc),allocatable :: meff(:,:), meff_tr(:,:), modemeff_tr(:,:)
-!character(len=500) :: msg                   
+!character(len=500) :: msg
 
 !TMP:
 ! complex(dpc) :: basein(2,2),baseout(2,2),hmat(2,2),rmat(2,2)
@@ -1674,7 +1674,7 @@ subroutine lm_normal_modes(amu,blkval,displ,eta,lm_alpha_nm,lm_epsilon_nm,lm_mch
 
  DBG_ENTER("COLL")
 
-!Rotate doubly degenerated modes 
+!Rotate doubly degenerated modes
  call alignph(amu,displ,blkval,mpert,natom,ntypat,phfrq,typat,silent=1)
 
 !Define the complex eigendisplacementes array
@@ -1691,7 +1691,7 @@ do imode=1,3*natom
 ! ABI_MALLOC(norm,(3*natom))
 ! do imode= 1, 3*natom
 !   norm(imode)= sqrt(dot_product(modedisp(:,imode),modedisp(:,imode)))
-! end do 
+! end do
 
 !Compute the mode-resolved macroscopic quantities
 !(Born and magnetic charges)
@@ -1815,7 +1815,7 @@ do imode=1,3*natom
  modemeff= modemeff*fac
  modemm= modemm*fac
  modezf= modezf*fac
- 
+
 
 ! ABI_FREE(norm)
  ABI_FREE(c_blkval)
@@ -1832,7 +1832,7 @@ end subroutine lm_normal_modes
 !!  ri_d2etot
 !!
 !! FUNCTION
-!!  Extracts the CI 2nd-order susceptibilities and calculates the corresponding 
+!!  Extracts the CI 2nd-order susceptibilities and calculates the corresponding
 !!  lattice-mediated contributions
 !!
 !! COPYRIGHT
@@ -1846,13 +1846,13 @@ end subroutine lm_normal_modes
 !!  magsus(ndim,ndim)= local magnetic susceptibility (RS) or its inverse (FS)
 !!  mpert= maximum number of perturbations
 !!  mcoup(ndim,natom+5)= magnetic Zeman fields (FS) or moments (RS)
-!!  mcoup_tr(natom+5,ndim)= hermitian conjugate of mmom 
+!!  mcoup_tr(natom+5,ndim)= hermitian conjugate of mmom
 !!  natom= number of atoms in the cell
 !!  ndim= dimension of the local magnetic degrees of freedom
 !!  phongreen(3*natom,3*natom)= Phonon Green's function
 !!
 !! OUTPUT
-!!  blkval_lm(2,3,mpert,3,mpert,1)= array with the lattice-mediated 
+!!  blkval_lm(2,3,mpert,3,mpert,1)= array with the lattice-mediated
 !!    second-order derivatives
 !!
 !! SIDE EFFECTS
@@ -1933,12 +1933,12 @@ end subroutine lm_normal_modes
  end do
  ipert2= natom + 2
  lm_epsilon= fac*matmul(coup(:,:),matmul(phongreen,coup_tr(:,:)))
- 
+
  do idir1= 1, 3
    do idir2= 1, 3
      ci_epsilon(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)
    end do
- end do 
+ end do
 
  !Magnetoelectric susceptibility
  !i) mu_0 dM/dE
@@ -1966,14 +1966,14 @@ end subroutine lm_normal_modes
  end do
 
  lm_alpha= fac*matmul(coup(:,:),matmul(phongreen,coup_tr(:,:)))
- 
+
  ipert1= natom + 5
  ipert2= natom + 2
  do idir1= 1, 3
    do idir2= 1, 3
      ci_alpha(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)
    end do
- end do 
+ end do
 
  !ii) dP/dH
  fac= -one/ucvol
@@ -2000,20 +2000,20 @@ end subroutine lm_normal_modes
  end do
 
  lm_alpha_hc= fac*matmul(coup(:,:),matmul(phongreen,coup_tr(:,:)))
- 
+
  ipert1= natom + 2
  ipert2= natom + 5
  do idir1= 1, 3
    do idir2= 1, 3
      ci_alpha_hc(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)
    end do
- end do 
+ end do
 
  !Local magnetoelectric susceptibilty
   ci_localpha(:,:)= mcoup(:,(natom+1)*3+1:(natom+2)*3)
-  lm_localpha(:,:)= -matmul(mcoup(:,1:natom*3),matmul(phongreen,coup_tr(:,:))) 
+  lm_localpha(:,:)= -matmul(mcoup(:,1:natom*3),matmul(phongreen,coup_tr(:,:)))
 
- !Magnetic susceptibility 
+ !Magnetic susceptibility
  fac= -one/ucvol
  ipert1= natom + 5
  do idir1= 1, 3
@@ -2028,18 +2028,18 @@ end subroutine lm_normal_modes
  end do
  ipert2= natom + 5
  lm_mchi= fac*matmul(coup(:,:),matmul(phongreen,coup_tr(:,:)))
- 
+
  do idir1= 1, 3
    do idir2= 1, 3
      ci_mchi(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)
    end do
- end do 
+ end do
 
  !Local magnetic moments induced by macroscopic Zeeman
  ci_locchi(:,:)= mcoup(:,(natom+4)*3+1:(natom+5)*3)
- lm_locchi(:,:)= -matmul(mcoup(:,1:natom*3),matmul(phongreen,coup_tr(:,:))) 
- 
- !Local magnetic susceptibility 
+ lm_locchi(:,:)= -matmul(mcoup(:,1:natom*3),matmul(phongreen,coup_tr(:,:)))
+
+ !Local magnetic susceptibility
  lm_magsus(:,:)= -matmul(mcoup(:,1:natom*3),matmul(phongreen,mcoup_tr(1:natom*3,:)))
 
  ABI_FREE(c_blkval)

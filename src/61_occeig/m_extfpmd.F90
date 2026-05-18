@@ -939,7 +939,7 @@ contains
         band_index=band_index+nband_k
       end do
     end do
-   open(file=fname,newunit=tmp_unt,status='unknown',form='formatted') 
+   open(file=fname,newunit=tmp_unt,status='unknown',form='formatted')
     do ii=1,minval(nband)-this%nbdbuf
       write(tmp_unt,*) ii,abs(err(ii))
     enddo

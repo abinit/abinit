@@ -5,10 +5,10 @@ authors: MR and MS
 
 <!--- This is the source file for this topic. Can be edited. -->
 
-This page describes how to perform noncollinear DFPT calculations in magnetic insulators 
-using the constrained magnetic moments formalism implemented in ABINIT. This approach, referred to 
-as **Constrained DFPT**, allows one to compute static and dynamic (finite-frequency) response functions 
---including interatomic force constants, dielectric tensors, Born effective charges, magnetic susceptibilities, 
+This page describes how to perform noncollinear DFPT calculations in magnetic insulators
+using the constrained magnetic moments formalism implemented in ABINIT. This approach, referred to
+as **Constrained DFPT**, allows one to compute static and dynamic (finite-frequency) response functions
+--including interatomic force constants, dielectric tensors, Born effective charges, magnetic susceptibilities,
 magnetic Born charges, and magnetoelectric tensors-- while enforcing parametric control over the local magnetic moments.
 
 The implementation follows the theoretical framework introduced in [[cite:Royo2026]].
@@ -22,30 +22,30 @@ It is intended for medium to advanced users familiar with noncollinear magnetism
 In systems where time-reversal (TR) symmetry is broken due to internal spin ordering,
 a standard static linear-response calculation yields unphysical response functions that are invariant under TR symmetry.
 
-In the context of phonons, this issue was first noticed by Mead and Truhlar [[cite:Mead1979]], who, by carefully 
-considering the phases of the nuclear and electronic wavefunctions within the Born–Oppenheimer 
-approximation, introduced a vector-potential term in the effective Hamiltonian of the nuclei. 
-This additional contribution enters the phonon equations of motion as a Berry curvature in the 
-parameter space of nuclear displacements. Physically, it represents a velocity-induced force and 
+In the context of phonons, this issue was first noticed by Mead and Truhlar [[cite:Mead1979]], who, by carefully
+considering the phases of the nuclear and electronic wavefunctions within the Born–Oppenheimer
+approximation, introduced a vector-potential term in the effective Hamiltonian of the nuclei.
+This additional contribution enters the phonon equations of motion as a Berry curvature in the
+parameter space of nuclear displacements. Physically, it represents a velocity-induced force and
 restores the expected magnetic symmetries of the crystal [[cite:Bonini2023]].
 
-Magnetic materials can also host spin-wave excitations (magnons), which typically overlap in energy with phonons 
+Magnetic materials can also host spin-wave excitations (magnons), which typically overlap in energy with phonons
 and introduce additional complications in the linear-response regime. On the one hand, magnons and phonons can interact,
-mutually influencing each other's spectra, and therefore must be treated simultaneously. This problem was addressed in 
-[[cite:Ren2024]] by working with a set of Hessians and Berry curvatures defined in an extended parameter space of 
-atomic displacements, local spin cantings, and their mutual interactions. The resulting generalized equations of motion 
+mutually influencing each other's spectra, and therefore must be treated simultaneously. This problem was addressed in
+[[cite:Ren2024]] by working with a set of Hessians and Berry curvatures defined in an extended parameter space of
+atomic displacements, local spin cantings, and their mutual interactions. The resulting generalized equations of motion
 provide the eigenfrequencies and eigenvectors of the coupled magnon–phonon system.
 
-On the other hand, acoustic magnons typically have very low frequencies at the center of the Brillouin zone. 
-This causes severe numerical instabilities in the self-consistent linear-response calculation whenever a perturbation 
+On the other hand, acoustic magnons typically have very low frequencies at the center of the Brillouin zone.
+This causes severe numerical instabilities in the self-consistent linear-response calculation whenever a perturbation
 couples to these magnon excitations.
 
-The constrained DFPT method implemented in ABINIT resolves these convergence issues by introducing a penalty functional 
-that stiffens the magnetic degrees of freedom during the linear-response calculation. The magnetic moments are constrained 
-to remain close to their ground-state configuration, thereby eliminating problematic low-energy resonances from the 
+The constrained DFPT method implemented in ABINIT resolves these convergence issues by introducing a penalty functional
+that stiffens the magnetic degrees of freedom during the linear-response calculation. The magnetic moments are constrained
+to remain close to their ground-state configuration, thereby eliminating problematic low-energy resonances from the
 self-consistent loop.
 
-The physically meaningful response functions, i.e. those without the constraints, are subsequently reconstructed in ANADDB 
+The physically meaningful response functions, i.e. those without the constraints, are subsequently reconstructed in ANADDB
 via exact linear-algebra relations derived from Legendre transformations.
 
 The Constrained DFPT implementation is still under active development. Users are strongly encouraged to contact the developers (Miquel Royo and Massimiliano Stengel) before using it for production calculations.
@@ -60,7 +60,7 @@ The theoretical formalism is described in detail in [[cite:Royo2026]]. Below we 
 
 The formalism is based on four different magnetic energy functionals:
 
-- Penalty-based internal energy \( \tilde{U}(B_l) \), with \( B_l \) the target magnetic moments  
+- Penalty-based internal energy \( \tilde{U}(B_l) \), with \( B_l \) the target magnetic moments
   (where \( l = (\kappa,\alpha) \) is a composite index running over magnetic sites and Cartesian directions).
 
 - Modified enthalpy \( \tilde{F}(H_l) \), with \( H_l \) the local Zeeman fields.
@@ -69,7 +69,7 @@ The formalism is based on four different magnetic energy functionals:
 
 - Magnetic enthalpy \( F(H_l) \).
 
-The two internal-energy functionals correspond to those introduced by Ma and Dudarev [[cite:Ma2015]] and by Gonze *et al.* [[cite:Gonze2022]], 
+The two internal-energy functionals correspond to those introduced by Ma and Dudarev [[cite:Ma2015]] and by Gonze *et al.* [[cite:Gonze2022]],
 and are discussed in [[topic:ConstrainedDFT]]. The corresponding enthalpies are obtained via Legendre transformations.
 
 In [[cite:Royo2026]] it was demonstrated that the general response functions (second derivatives of the total energy with respect to two arbitrary perturbations) calculated using these four functionals are related by simple linear-algebra relations. Therefore, all four functionals contain the same physical information. In practice, however, it is more convenient to perform the linear-response calculation using the internal energies, as they are free from the problematic low-energy magnon resonances.
@@ -86,7 +86,7 @@ Two different approaches are available to treat dynamical linear-response effect
 
 ### First-order adiabatic approximation
 
-The first approach is the **first-order adiabatic approximation (FOA)** described in [[cite:Royo2026]]. 
+The first approach is the **first-order adiabatic approximation (FOA)** described in [[cite:Royo2026]].
 It arises from an adiabatic expansion of the frequency dependence of the second-order internal energies:
 
 \[
@@ -106,7 +106,7 @@ The FOA truncates the expansion at first order in frequency. Consequently, it re
 - static Hessians \( \mathbf{U} \)
 - Berry curvatures \( \mathbf{G} \)
 
-The Hessians are obtained via static constrained DFPT calculations.  
+The Hessians are obtained via static constrained DFPT calculations.
 The Berry curvatures correspond to frequency derivatives of the second-order energies in the static limit \( \omega \to 0 \). In the most general case, their calculation reduces to
 
 \[
@@ -155,7 +155,7 @@ Some contributions are not yet included in the implementation (corresponding to 
 
 The current constrained DFPT implementation cannot yet be used on top of a constrained ground-state calculation corresponding to any of the flavors described in [[topic:ConstrainedDFT]]. In practice, the linear-response calculation must start from a ground state with a stable magnetic configuration.
 
-Finally, as mentioned above, ANADDB allows interpolation of the calculated response functions in frequency. However, combined interpolation in both frequency and momentum --needed, for instance, to obtain the Brillouin-zone dispersion of nonadiabatic coupled spin-phonon susceptibilities-- has not yet been implemented. Development in this direction is currently ongoing. 
+Finally, as mentioned above, ANADDB allows interpolation of the calculated response functions in frequency. However, combined interpolation in both frequency and momentum --needed, for instance, to obtain the Brillouin-zone dispersion of nonadiabatic coupled spin-phonon susceptibilities-- has not yet been implemented. Development in this direction is currently ongoing.
 
 
 ---

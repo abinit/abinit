@@ -1,5 +1,5 @@
 
- **** DERIVATIVE DATABASE ****    
+ **** DERIVATIVE DATABASE ****
 +DDB, Version number  20240201
 
  merged DDB file of strained Si
@@ -71,7 +71,7 @@
             0.24674118578000D+00  0.24674118578000D+00  0.24971966604000D+00
      znucl  0.14000000000000D+02
       zion  0.40000000000000D+01
- 
+
   Description of the potentials (KB energies)
   vrsio8 (for pseudopotentials)=100401
   usepaw =  0
@@ -80,10 +80,10 @@
   iln lpsang iproj  ekb(:)
      1     0     1     3.2879487E+00  0.0000000E+00
      2     1     1     0.0000000E+00  1.8498858E+00
- 
+
  **** Database of total energy derivatives ****
  Number of data blocks=    3
-  
+
  1st derivatives              - # elements :          12
      1     1 -0.15153108412210D-02  0.00000000000000D+00
      2     1 -0.15153108412210D-02  0.00000000000000D+00
@@ -97,10 +97,10 @@
      1     6  0.71466592192057D-04  0.00000000000000D+00
      2     6  0.71466592192057D-04  0.00000000000000D+00
      3     6  0.13590286620266D-03  0.00000000000000D+00
-  
+
  Total energy                 - # elements :           1
  -0.88455152253519D+01  0.00000000000000D+00
-  
+
  2nd derivatives (non-stat.)  - # elements :         144
  qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
  frequency  0.00000000E+00

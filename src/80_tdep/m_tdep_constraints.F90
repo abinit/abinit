@@ -10,27 +10,27 @@ module m_tdep_constraints
   use defs_basis
   use m_errors
   use m_xmpi
- 
+
   implicit none
- 
+
   type S_product
     double precision, allocatable :: SS  (:,:,:)
     double precision, allocatable :: SSS (:,:,:,:)
     double precision, allocatable :: SSSS(:,:,:,:,:)
   end type S_product
- 
+
   type Asr_Rot
     double precision, allocatable :: ABG (:,:,:)
     double precision, allocatable :: ABGD(:,:,:,:)
     double precision, allocatable :: ABGDE(:,:,:,:,:)
   end type Asr_Rot
- 
+
   type,public :: Constraints_type
     type(S_product),allocatable :: Sprod(:,:)
     type(Asr_Rot),allocatable :: AsrRot3(:,:,:)
     type(Asr_Rot),allocatable :: AsrRot4(:,:,:,:)
   end type Constraints_type
- 
+
   public :: tdep_calc_orthonorm
 
 contains
@@ -77,7 +77,7 @@ subroutine tdep_calc_orthonorm(dim1,dim2,nindep,vect)
   end do
   do kk=nindep+1,dim2
     vect(:,kk)=zero
-  end do  
+  end do
   nindep=ii
 
 end subroutine tdep_calc_orthonorm

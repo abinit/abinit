@@ -5,8 +5,8 @@
 !! FUNCTION
 !! This module contains a routine updating the whole wave functions at a given k-point,
 !! using the Spectrum Slicing method (2021 implementation using xG abstraction layer)
-!! for a given spin-polarization, from a fixed Hamiltonian but might also simply compute 
-!! eigenvectors and eigenvalues at this k point. it will also update the matrix elements 
+!! for a given spin-polarization, from a fixed Hamiltonian but might also simply compute
+!! eigenvectors and eigenvalues at this k point. it will also update the matrix elements
 !! of the Hamiltonian.
 !!
 !! COPYRIGHT
@@ -167,9 +167,9 @@ subroutine slicewf(cg,dtset,eig,enl_out,gs_hamk,mpi_enreg,&
  type(xgBlock_t) :: xgx0,xgeigen,xgresidu
  ! arrays
  real(dp) :: tsec(2)
- !integer(kind=c_size_t) :: sliceMem(2) 
+ !integer(kind=c_size_t) :: sliceMem(2)
  real(dp), allocatable :: l_gvnlxc(:,:)
- 
+
  ! Parameters for nonlop call in NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
  real(dp) :: gsc_dummy(1,1)
@@ -221,7 +221,7 @@ subroutine slicewf(cg,dtset,eig,enl_out,gs_hamk,mpi_enreg,&
      if (l_mpi_enreg%me_g0_fft == 1) me_g0_fft = 1
    end if
  end if
- 
+
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
@@ -432,7 +432,7 @@ subroutine getBm1X(X,Bm1X)
  real(dp), pointer :: gsm1hc_filter(:,:)
  type(pawcprj_type), allocatable :: cwaveprj_next(:,:) !dummy
 
-! ********************************************************************* 
+! *********************************************************************
 
  ! working bandpp will be equal to blockdim
  call xgBlock_getSize(X,spacedim,blockdim)
@@ -451,12 +451,12 @@ subroutine getBm1X(X,Bm1X)
     l_blockdim_evil = blockdim
  end if
 #endif
- 
+
  if(l_paw) then
 
    call xgBlock_reverseMap(X,ghc_filter,rows=1,cols=spacedim*blockdim)
    call xgBlock_reverseMap(Bm1X,gsm1hc_filter,rows=1,cols=spacedim*blockdim)
-   
+
    !cwaveprj_next is dummy
    if(gemm_nonlop_use_gemm) then
      ABI_MALLOC(cwaveprj_next, (1,1))
@@ -464,12 +464,12 @@ subroutine getBm1X(X,Bm1X)
      ABI_MALLOC(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim))
      call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj)
    end if
-    
+
    ABI_NVTX_START_RANGE(NVTX_INVOVL)
    call apply_invovl(l_gs_hamk, ghc_filter(:,:), gsm1hc_filter(:,:), cwaveprj_next(:,:), &
        spacedim/l_nspinor, blockdim, l_mpi_enreg, l_nspinor, l_block_sliced)
    ABI_NVTX_END_RANGE()
-   
+
    call pawcprj_free(cwaveprj_next)
    ABI_FREE(cwaveprj_next)
 

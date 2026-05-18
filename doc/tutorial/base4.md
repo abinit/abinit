@@ -140,7 +140,7 @@ In what follows, we will restrict ourselves to the grids with [[nkpt]] = 2, 10 a
 The theoretical convergence rate as a function of [[tsmear]] heading to 0, in the case of [[occopt]] = 4, is cubic.
 We rely on this value of [[occopt]] for this tutorial. Still, it might not be always robust,
 as this value might yield difficulties to find univocally the Fermi energy.
-A slightly worse convergence rate (quadratic) is obtained with [[occopt]] = 7, which is actually 
+A slightly worse convergence rate (quadratic) is obtained with [[occopt]] = 7, which is actually
 the recommended value for metallic systems.
 
 Such convergence rates are obtained in the hypothesis of infinitely dense k-point grid.

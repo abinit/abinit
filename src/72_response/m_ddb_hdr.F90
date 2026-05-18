@@ -102,11 +102,11 @@ MODULE m_ddb_hdr
  character(len=descrlen),public,parameter :: DESCR_ipert_10 = '2nd derivative wrt to k'
  character(len=descrlen),public,parameter :: DESCR_ipert_11 = '2nd derivative wrt to k and electric field'
 
- integer,public,parameter :: DDB_VERSION=20240201 ! 
+ integer,public,parameter :: DDB_VERSION=20240201 !
  !integer,public,parameter :: DDB_VERSION=20230401 ! TODO: check if we should update this with new G matrix stuff
  ! DDB Version number for text format.
 
- integer,public,parameter :: DDB_VERSION_NC=20240201 ! TODO:  
+ integer,public,parameter :: DDB_VERSION_NC=20240201 ! TODO:
  !integer,public,parameter :: DDB_VERSION_NC=20230219 ! TODO: check if we should update this with new G matrix stuff
  ! DDB NetCDF version number.
 
@@ -3521,7 +3521,7 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
  read (unddb, '(20x,i10)' )ddbvrs
 
  !write(std_out,'(a,i10)')' ddbvrs=',ddbvrs
- if(ddbvrs/=cvrsio9_new .and. ddbvrs/=cvrsio9 .and. ddbvrs/=vrsio8 & 
+ if(ddbvrs/=cvrsio9_new .and. ddbvrs/=cvrsio9 .and. ddbvrs/=vrsio8 &
 & .and. ddbvrs/=vrsio8_old .and. ddbvrs/=vrsio8_old_old)then
    write(message, '(a,i10,2a,4(a,i10),a)' )&
     'The input DDB version number=',ddbvrs,' does not agree',ch10,&

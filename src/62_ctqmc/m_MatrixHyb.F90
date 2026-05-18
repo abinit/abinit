@@ -5,8 +5,8 @@
 !!****m* ABINIT/m_MatrixHyb
 !! NAME
 !!  m_MatrixHyb
-!! 
-!! FUNCTION 
+!!
+!! FUNCTION
 !!  Module to deals with a matrix (mainly used for M matrix in m_BathOperatoroffdiag).
 !!  Perform varius operation on matrices.
 !!
@@ -129,7 +129,7 @@ SUBROUTINE MatrixHyb_init(this, iTech, size, Wmax)
   this%size = size_val
   FREEIF(this%mat)
   MALLOC(this%mat,(1:size_val,1:size_val))
-  this%tail  = 0 
+  this%tail  = 0
   this%mat   = 0.d0
   this%iTech = iTech
   SELECT CASE(this%iTech)
@@ -190,7 +190,7 @@ SUBROUTINE MatrixHyb_setSize(this,new_tail)
     CALL MatrixHyb_enlarge(this, MAX(Global_SIZE,new_tail-size))
   END IF
   this%tail = new_tail
-END SUBROUTINE MatrixHyb_setSize  
+END SUBROUTINE MatrixHyb_setSize
 !!***
 
 !!****f* ABINIT/m_MatrixHyb/MatrixHyb_enlarge
@@ -226,7 +226,7 @@ SUBROUTINE MatrixHyb_enlarge(this, size)
 !Local variables ------------------------------
   INTEGER                                   :: width
   INTEGER                                   :: tail
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: this_temp 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: this_temp
   INTEGER         , ALLOCATABLE, DIMENSION(:,:) :: this_temp_tau
   COMPLEX(KIND=8) , ALLOCATABLE, DIMENSION(:,:,:) :: this_temp_omega
   INTEGER                                   :: size_val
@@ -235,9 +235,9 @@ SUBROUTINE MatrixHyb_enlarge(this, size)
     FREEIF(this_temp)
     FREEIF(this_temp_tau)
     width = this%size
-    tail  = this%tail 
+    tail  = this%tail
     size_val = width
-    IF ( PRESENT(size) ) size_val = size 
+    IF ( PRESENT(size) ) size_val = size
 
 !   change size of mat
     MALLOC(this_temp,(1:tail,1:tail))
@@ -301,7 +301,7 @@ SUBROUTINE MatrixHyb_clear(this)
 
 !Arguments ------------------------------------
   TYPE(MatrixHyb), INTENT(INOUT) :: this
-  this%tail = 0 
+  this%tail = 0
 END SUBROUTINE MatrixHyb_clear
 !!***
 
@@ -341,7 +341,7 @@ SUBROUTINE MatrixHyb_assign(this, matrix)
   tail = matrix%tail
   CALL MatrixHyb_setSize(this, tail)
   this%mat(1:tail,1:tail) = matrix%mat(1:tail,1:tail)
-  IF ( this%iTech .NE. matrix%iTech ) & 
+  IF ( this%iTech .NE. matrix%iTech ) &
     CALL ERROR("MatrixHyb_assign : not compatible matrices")
   SELECT CASE(this%iTech)
   CASE (GREENHYB_TAU)
@@ -395,7 +395,7 @@ SUBROUTINE MatrixHyb_inverse(this,determinant)
   INTEGER :: sys
   INTEGER :: sys_vir
   INTEGER :: tail
-  INTEGER, DIMENSION(:), ALLOCATABLE :: pivot 
+  INTEGER, DIMENSION(:), ALLOCATABLE :: pivot
   DOUBLE PRECISION :: det
 
   tail = this%tail
@@ -426,7 +426,7 @@ SUBROUTINE MatrixHyb_inverse(this,determinant)
 !!        invMatrix%mat(ligne,sys_vir) = 0.d0 - reste
 !!      END IF
 !!    END DO
-!!    
+!!
 !!    DO ligne = tail, 1, -1
 !!      ligne_virtuelle=pivot(ligne)
 !!      reste = 0.d0
@@ -501,7 +501,7 @@ SUBROUTINE MatrixHyb_LU(this,pivot,determinant)
   DOUBLE PRECISION, OPTIONAL, INTENT(OUT) :: determinant
 !Local variables ------------------------------
   INTEGER :: ligne
-  INTEGER :: colonne 
+  INTEGER :: colonne
   INTEGER :: colonne_de_1_ligne
   INTEGER :: max_ind_lig
   INTEGER :: ligne_virtuelle
@@ -524,11 +524,11 @@ SUBROUTINE MatrixHyb_LU(this,pivot,determinant)
 
   MALLOC(mat_tmp,(1:tail,1:tail))
   mat_tmp(1:tail,1:tail) = this%mat(1:tail,1:tail)
-  DO colonne = 1, tail-1 
+  DO colonne = 1, tail-1
     max_col = ABS(mat_tmp(pivot_tmp(colonne),colonne))
     max_ind_lig = colonne
 
-    DO ligne = colonne+1, tail 
+    DO ligne = colonne+1, tail
       ligne_virtuelle = pivot_tmp(ligne)
       IF ( ABS( mat_tmp(ligne_virtuelle,colonne)).GT.max_col) then
         max_col = ABS(mat_tmp(ligne_virtuelle,colonne))
@@ -536,17 +536,17 @@ SUBROUTINE MatrixHyb_LU(this,pivot,determinant)
       ENDIF
     END DO
 
-    ligne              = pivot_tmp(colonne) 
+    ligne              = pivot_tmp(colonne)
     pivot_tmp(colonne)     = pivot_tmp(max_ind_lig)
     pivot_tmp(max_ind_lig) = ligne
     IF ( pivot_tmp(colonne) .NE. pivot_tmp(max_ind_lig) ) det = det * (-1.d0)
     inverse_pivot=1.d0 / mat_tmp(pivot_tmp(colonne),colonne)
     det = det * mat_tmp(pivot_tmp(colonne),colonne)
-    DO ligne = colonne+1, tail 
+    DO ligne = colonne+1, tail
       ligne_virtuelle = pivot_tmp(ligne)
       coef = mat_tmp(ligne_virtuelle,colonne)*inverse_pivot
       mat_tmp(ligne_virtuelle,colonne) = coef
-      DO colonne_de_1_ligne = colonne+1, tail 
+      DO colonne_de_1_ligne = colonne+1, tail
         mat_tmp(ligne_virtuelle,colonne_de_1_ligne)= mat_tmp(ligne_virtuelle,colonne_de_1_ligne)&
                                          -coef * mat_tmp(pivot_tmp(colonne) ,colonne_de_1_ligne)
       END DO
@@ -575,7 +575,7 @@ END SUBROUTINE MatrixHyb_LU
 !!  MatrixHyb_getDet
 !!
 !! FUNCTION
-!!  Just get the determinant 
+!!  Just get the determinant
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
@@ -663,7 +663,7 @@ SUBROUTINE MatrixHyb_print(this,ostream,opt_print)
       WRITE(ostream_val,string) "[",(/ (this%mat(it1,it2),it2=1,this%tail)  /)," ]"
     END DO
     WRITE(ostream_val,'(A)') "]"
-  END IF  
+  END IF
   IF ( opt_val .GE.1 ) THEN
     string ='(1x,A,1x,'//TRIM(ADJUSTL(size))//'(I4,1x),A)'
     WRITE(ostream_val,'(A)') "["

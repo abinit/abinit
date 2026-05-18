@@ -339,14 +339,14 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,i
        barev(ig) = gpq2(ig)
      end if
    end do
-   
+
 
  case('SPHERE') ! Spherical cutoff
 
    !
    ! Treatment of the divergence at q+g=zero
    !
-   ! rcut is not set (rcut<=0), use the default Spencer-Alavi definition: 
+   ! rcut is not set (rcut<=0), use the default Spencer-Alavi definition:
    if ( rcut < tol8 ) then
      rcut0= (three*nkpt_bz*ucvol/four_pi)**(one/three)
    else

@@ -1,5 +1,5 @@
 
- **** DERIVATIVE DATABASE ****    
+ **** DERIVATIVE DATABASE ****
 +DDB, Version number  20240201
 
  Total ddb for Al FCC system
@@ -428,7 +428,7 @@
       xred  0.00000000000000D+00  0.00000000000000D+00  0.00000000000000D+00
      znucl  0.13000000000000D+02
       zion  0.30000000000000D+01
- 
+
   Description of the potentials (KB energies)
   vrsio8 (for pseudopotentials)=100401
   usepaw =  0
@@ -447,10 +447,10 @@
                       -2.7704968E+00  0.0000000E+00
      6     2     2     0.0000000E+00  0.0000000E+00  0.0000000E+00  0.0000000E+00
                       -2.7704968E+00  0.0000000E+00
- 
+
  **** Database of total energy derivatives ****
  Number of data blocks=    3
-  
+
  2nd derivatives (non-stat.)  - # elements :      21
  qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
  frequency  0.00000000E+00
@@ -475,7 +475,7 @@
    3   1   2   3  0.00000000000000D+00  0.00000000000000D+00
    1   1   3   3  0.00000000000000D+00  0.00000000000000D+00
    2   1   3   3  0.00000000000000D+00  0.00000000000000D+00
-  
+
  2nd derivatives (non-stat.)  - # elements :       9
  qpt  5.00000000E-01  0.00000000E+00  0.00000000E+00   1.0
  frequency  0.00000000E+00
@@ -488,7 +488,7 @@
    1   1   3   1  0.34713804667920D+00  0.77166036829969D-13
    2   1   3   1  0.34713804667920D+00  0.77166036830004D-13
    3   1   3   1  0.69427609335837D+00  0.15433207366001D-12
-  
+
  2nd derivatives (non-stat.)  - # elements :       9
  qpt  5.00000000E-01  5.00000000E-01  0.00000000E+00   1.0
  frequency  0.00000000E+00

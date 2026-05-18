@@ -315,7 +315,7 @@ prtvol 4
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = manneback_gnu_14.2_hpc  
+#%% exclude_builders = manneback_gnu_14.2_hpc
 #%% [files]
 #%% [NCPU_10]
 #%% files_to_test =

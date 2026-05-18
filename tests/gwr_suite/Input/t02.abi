@@ -17,6 +17,9 @@ istwfk *1
 #kptopt 3
 #kptopt 2
 
+#useylm 1
+#useylm3 0
+#useylm4 0
 
 ####################
 # Dataset 1: SCF run

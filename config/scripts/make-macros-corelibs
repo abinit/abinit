@@ -15,7 +15,7 @@ except ImportError:
 from time import gmtime,strftime
 
 try:
-    from commands import getoutput 
+    from commands import getoutput
 except:
     from subprocess import getoutput
 import os

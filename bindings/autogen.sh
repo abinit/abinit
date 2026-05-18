@@ -43,11 +43,11 @@ autoconf
 #echo "[bndbuild]   Generating libtool scripts"
 #my_libtoolize="libtoolize"
 #${my_libtoolize} --version >/dev/null 2>&1
-#if test "${?}" != "0"; then 
+#if test "${?}" != "0"; then
 #  my_libtoolize="glibtoolize"
 #fi
 #${my_libtoolize} --version >/dev/null 2>&1
-#if test "${?}" != "0"; then 
+#if test "${?}" != "0"; then
 #  echo "[bndbuild]   Error: could not find a working version of libtoolize" >&2
 #  exit 1
 #fi

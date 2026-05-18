@@ -207,9 +207,9 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo,qpt
    call wrtout(std_out,msg)
  end if
  !!!
- !The Pick-Cohen-Martin cutoff is not a single factor on 1/G**2. 
+ !The Pick-Cohen-Martin cutoff is not a single factor on 1/G**2.
  !It is therefore externally applied, not in this routine.
- if (icutcoul==55) mode='CRYSTAL' 
+ if (icutcoul==55) mode='CRYSTAL'
 
   do i3=1,n3
    ! Precompute some products that do not depend on i2 and i1
@@ -510,7 +510,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo,qpt
      periodic_dir(:)=0
      do ii=1,3
        check=vcutgeo(ii)
-       if (ABS(check)>zero) then 
+       if (ABS(check)>zero) then
          periodic_dir(ii)=1
          !For Rozzi"s method
          if (check<zero) alpha(ii)=normv(check*rprimd(:,ii),rmet,'R')

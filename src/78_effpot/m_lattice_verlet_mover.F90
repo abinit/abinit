@@ -4,7 +4,7 @@
 !!
 !! FUNCTION
 !! This module contains the verlet  (NVE) lattice mover.
-!! 
+!!
 !!
 !!
 !! Datatypes:

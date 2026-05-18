@@ -67,7 +67,7 @@ AC_DEFUN([SD_PFFT_INIT], [
   esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([pfft],
     [AS_HELP_STRING([--with-pfft],
       [Install prefix of the PFFT library (e.g. /usr/local).])],

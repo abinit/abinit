@@ -1,5 +1,5 @@
 
- **** DERIVATIVE DATABASE ****    
+ **** DERIVATIVE DATABASE ****
 +DDB, Version number  20240201
 
  Li DDB file for elphon calculation
@@ -225,7 +225,7 @@
       xred  0.00000000000000D+00  0.00000000000000D+00  0.00000000000000D+00
      znucl  0.30000000000000D+01
       zion  0.10000000000000D+01
- 
+
   Description of the potentials (KB energies)
   vrsio8 (for pseudopotentials)=100401
   usepaw =  0
@@ -233,10 +233,10 @@
   Atom type=    1   pspso=  0   nekb=   1
   iln lpsang iproj  ekb(:)
      1     0     1     1.2427973E+00
- 
+
  **** Database of total energy derivatives ****
  Number of data blocks=    3
-  
+
  2nd derivatives (non-stat.)  - # elements :          21
  qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
  frequency  0.00000000E+00
@@ -261,7 +261,7 @@
    3   1   2   3  0.00000000000000D+00  0.00000000000000D+00
    1   1   3   3  0.00000000000000D+00  0.00000000000000D+00
    2   1   3   3  0.00000000000000D+00  0.00000000000000D+00
-  
+
  2nd derivatives (non-stat.)  - # elements :           9
  qpt  5.00000000E-01  0.00000000E+00  0.00000000E+00   1.0
  frequency  0.00000000E+00
@@ -274,7 +274,7 @@
    1   1   3   1  0.82547816741645D+00 -0.47009605758284D-15
    2   1   3   1  0.14409375090653D+00  0.94019211516567D-15
    3   1   3   1 -0.17950500857394D+01  0.00000000000000D+00
-  
+
  2nd derivatives (non-stat.)  - # elements :           9
  qpt  5.00000000E-01  5.00000000E-01  5.00000000E-01   1.0
  frequency  0.00000000E+00

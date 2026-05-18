@@ -813,7 +813,7 @@ be used with a small number [[anaddb:nph1l]] of q-points for interpolation.
         text=r"""
 Value of the largest frequency for the frequency-dependent dielectric tensor, in Hartree.
 
-Starting from version 10.4, this variable specifies the largest frequency used for the 
+Starting from version 10.4, this variable specifies the largest frequency used for the
 frequency interpolation of second-order quantities computed in a constrained DFPT ABINIT run.
 """,
     ),
@@ -830,7 +830,7 @@ frequency interpolation of second-order quantities computed in a constrained DFP
         text=r"""
 Value of the lowest frequency for the frequency-dependent dielectric tensor, in Hartree.
 
-Starting from version 10.4, this variable specifies the lowest frequency used for the 
+Starting from version 10.4, this variable specifies the lowest frequency used for the
 frequency interpolation of second-order quantities computed in a constrained DFPT ABINIT run.
 """,
     ),
@@ -1329,8 +1329,8 @@ In practice, the penalty is typically applied only to the magnetic ions.
         characteristics=["[[DEVELOP]]"],
         added_in_version="10.4",
         text=r"""
-Gives the Cartesian directions along which the first-order magnetic moments 
-have been constrained during a linear-response calculatiuon when [[magpen]]/= 0.0. 
+Gives the Cartesian directions along which the first-order magnetic moments
+have been constrained during a linear-response calculatiuon when [[magpen]]/= 0.0.
 """,
     ),
 

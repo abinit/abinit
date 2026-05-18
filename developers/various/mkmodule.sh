@@ -3,9 +3,9 @@
 # GNU General Public License, see ~abinit/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .
 # For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-# 
+#
 # The purpose of this script is to create a new module
-# ${module_name}.F90, from the embedded template, 
+# ${module_name}.F90, from the embedded template,
 # where "${module_name}" is the argument of the script.
 # Suppose that one is in a source directory, and that
 # Utility/template.F90 is accessible as ../Utilities/template.F90
@@ -53,7 +53,7 @@ cat > ${module_name}.F90 <<EOF
 #include "abi_common.h"
 
 module ${module_name}
-    
+
  use defs_basis
  use m_profiling_abi
  use m_errors
@@ -64,7 +64,7 @@ module ${module_name}
 
 ! *************************************************************************
 
-contains 
+contains
 !!***
 
 !!****f* ABINIT/${module_name}/${routine_name}
@@ -91,7 +91,7 @@ contains
 !! SOURCE
 
 subroutine ${routine_name}(argin,argout,option,sizein,sizeout)
-    
+
  use defs_basis
 
  implicit none
@@ -100,17 +100,17 @@ subroutine ${routine_name}(argin,argout,option,sizein,sizeout)
  integer , intent(in)  :: option,sizein,sizeout
  integer , intent(in)  :: argin(sizein)
  integer , intent(out) :: argout(sizeout)
- real(dp), intent(out) ::                        
+ real(dp), intent(out) ::
 
 !Local variables-------------------------------
- integer ::                                      
- real(dp) ::                                     
-!character(len=500) :: msg                   
- 
+ integer ::
+ real(dp) ::
+!character(len=500) :: msg
+
 ! *************************************************************************
 
  DBG_ENTER("COLL")
- 
+
 ! if (option/=1 .and. option/=2 ) then
 !  write(msg,'(3a,i0)')&
 !&  'The argument option should be 1 or 2,',ch10,&

@@ -1058,7 +1058,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !  check the exit criterion, then mix the 1st-order density
 !  ----------------------------------------------------------------------
 
-!  For tim1rev=0 we need to compute the SCF energies from the physically 
+!  For tim1rev=0 we need to compute the SCF energies from the physically
 !  meaningful first-order density
    if (.not.kramers_deg.and.(ipert<dtset%natom+10.or.(ipert>dtset%natom+11.and.ipert<=2*dtset%natom+11))) then
      optene=1
@@ -1070,7 +1070,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    end if
 
    if (iscf_mod>=10) then
-     optene = 0 
+     optene = 0
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
 &     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,elmag1,eloc0,elpsp1,emagpen1,&
 &     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,evxctau0,evxctau1,exc1,ipert,dtset%natom,optene)
@@ -4180,9 +4180,9 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
 !  Pack fe1fixed, fe1norm
    indx = 0
-   buffer1(indx+1)=fe1fixed 
+   buffer1(indx+1)=fe1fixed
    buffer1(indx+2)=fe1norm
-   indx=indx+2 
+   indx=indx+2
    if(indx<buffer_size)buffer1(indx+1:buffer_size)=zero
 
 !  Build sum of everything
@@ -4203,7 +4203,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    if (psps%usepaw==0) then
      call timab(48,1,tsec)
      buffer_size = cplex*nfftf
-     ! TODO: there should be a primitive for a 2d array here, but the compiler does not seem to find it. 
+     ! TODO: there should be a primitive for a 2d array here, but the compiler does not seem to find it.
      ! would simplify the call to xmpi_sum
      do isppol=1, nspden
        call xmpi_sum(rhorfermi(:,isppol),buffer_size,spaceworld,ierr)
@@ -4414,7 +4414,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  ABI_NVTX_START_RANGE(NVTX_DFPT_WFKFERMI)
 
 !Check arguments validity
- if (ipert>gs_hamkq%natom.and.ipert/=gs_hamkq%natom+3.and.ipert/=gs_hamkq%natom+4 & 
+ if (ipert>gs_hamkq%natom.and.ipert/=gs_hamkq%natom+3.and.ipert/=gs_hamkq%natom+4 &
 & .and.ipert/=gs_hamkq%natom+5.and.ipert/=gs_hamkq%natom+6 .and. &
 & (ipert>gs_hamkq%natom+11.and.ipert<=2*gs_hamkq%natom+11)) then !SPr rfmagn deb
    ABI_BUG('wrong ipert argument !')

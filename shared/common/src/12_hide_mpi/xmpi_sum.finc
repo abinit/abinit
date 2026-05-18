@@ -3215,9 +3215,7 @@ subroutine xmpi_sum_c7dc(xval,comm,ier)
      else
 #endif
        ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5,n6,n7),ier)
-       if (ier/=0) then
-         call xmpi_abort(comm=comm,msg='error allocating xsum in xmpi_sum_c7dc')
-       end if
+       if (ier/=0) call xmpi_abort(comm=comm,msg='error allocating xsum in xmpi_sum_c7dc')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval = xsum
        ABI_FREE(xsum)

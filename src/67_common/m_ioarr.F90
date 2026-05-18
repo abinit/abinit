@@ -164,11 +164,10 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  type(MPI_type) :: MPI_enreg_seq
 !arrays
  integer :: ngfft_in(18),ngfft_out(18)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
- real(dp), ABI_CONTIGUOUS pointer :: arr_file(:,:),my_density(:,:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
+ real(dp), contiguous, pointer :: arr_file(:,:),my_density(:,:)
  real(dp),allocatable :: rhor_file(:,:),rhog_in(:,:),rhor_out(:,:),rhog_out(:,:)
  type(pawrhoij_type),pointer:: pawrhoij__(:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -693,9 +692,8 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
  character(len=500) :: msg,errmsg
  type(abifile_t) :: abifile
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
  integer(XMPI_OFFSET_KIND) :: bsize_frecord(nspden)
-
 ! *************************************************************************
 
  abifile = abifile_from_varname(varname)
@@ -883,7 +881,6 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
  type(ebands_t) :: ebands
 !arrays
  real(dp),allocatable :: ene3d(:,:,:)
-
 ! *************************************************************************
 
  crystal = hdr%get_crystal()
@@ -990,11 +987,10 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
  character(len=fnlen) :: my_fname
  character(len=nctk_slen) :: varname
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),tsec(2)
  real(dp),allocatable :: rhor_file(:,:),rhor_tmp(:,:)
  type(pawrhoij_type),allocatable :: pawrhoij_file(:)
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)

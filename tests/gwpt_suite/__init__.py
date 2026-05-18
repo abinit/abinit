@@ -11,10 +11,18 @@ keywords = [
 
 #: List of input files
 inp_files = [
+# Diamond with symmetries
 "t01.abi",
 "t02.abi",
 "t03.abi",
 "t04.abi",
 "t05.abi",
 "t06.abi",
+# Diamond without symmetries
+"t07.abi",
+"t08.abi",
+"t09.abi",
+"t10.abi",
+"t11.abi",
+"t12.abi",
 ]

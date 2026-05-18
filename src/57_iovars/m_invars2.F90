@@ -1164,6 +1164,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwgamma',tread,'INT')
  if(tread==1) dtset%gwgamma=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwpt_wmode',tread,'INT')
+ if(tread==1) dtset%gwpt_wmode=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwpt_g2mode',tread,'INT')
+ if(tread==1) dtset%gwpt_g2mode=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdefmas',tread,'INT')
  if(tread==1) dtset%irdefmas=intarr(1)
 
@@ -1181,6 +1187,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symsigma',tread,'INT')
  if(tread==1) dtset%symsigma=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symsigma_de',tread,'ENE')
+ if(tread==1) dtset%symsigma_de=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fftgw',tread,'INT')
  if(tread==1) dtset%fftgw=intarr(1)
@@ -1493,6 +1502,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getgstore_filepath',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%getgstore_filepath = key_value
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getqpdata_filepath',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%getqpdata_filepath = key_value
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getcell',tread,'INT')
  if(tread==1) dtset%getcell=intarr(1)
 
@@ -1566,11 +1578,18 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_prtscratew',tread,'INT')
  if(tread==1) dtset%eph_prtscratew = intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_restart',tread,'INT')
- if(tread==1) dtset%eph_restart = intarr(1)
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_task',tread,'INT')
  if(tread==1) dtset%eph_task=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_restart',tread,'INT')
+ if(tread==1) then
+   dtset%eph_restart = intarr(1)
+ else
+   if (any(dtset%eph_task == [13, -13])) then
+     ! In VARPEQ, restart must be activated explicitly.
+     dtset%eph_restart = 0
+   end if
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_mustar',tread,'DPR')
  if(tread==1) dtset%eph_mustar=dprarr(1)
@@ -2431,6 +2450,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_with_vk', tread, 'INT')
  if (tread == 1) dtset%gstore_with_vk = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_iv1p_comm', tread, 'INT')
+ if (tread == 1) dtset%gstore_iv1p_comm = intarr(1)
 
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_use_lgk', tread, 'INT')
  if (tread == 1) dtset%gstore_use_lgk = intarr(1)

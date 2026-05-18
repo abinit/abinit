@@ -1,4 +1,4 @@
-# Ground-state, phonons and Zeeman fields response funcion calculations for 
+# Ground-state, phonons and Zeeman fields response funcion calculations for
 # at finite wave-vector antiferromagnetic MnF2
 # (M. Royo, 22.01.2026)
 
@@ -54,12 +54,12 @@
 ### GENERAL PARAMETERS
 
 #Definition of the atom types
-ntypat 2          
+ntypat 2
 znucl 25 9
-                
+
 #Definition of the atoms
-natom 6           
-typat 2*1 4*2     
+natom 6
+typat 2*1 4*2
 
 #Definition of the unit cell
 acell     9.2100000000E+00  9.2100000000E+00  6.2560000000E+00 Bohr
@@ -74,31 +74,31 @@ xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
           8.0372381769E-01  1.9627618231E-01  5.0000000000E-01
 
 #Definition of the planewave basis set
-ecut   3.0         
+ecut   3.0
 nband  42
 
 #Definition of the k-point grid
 kptopt 3
-                  
+
 ngkpt 2 2 3
 
-nshiftk 1         
+nshiftk 1
 shiftk 0.5 0.5 0.5
 
 #Symmetries deactivated for magnetic systems
 nsym 1
 
 #Definition of the SCF procedure
-nstep 50        
-diemac  8.0    
+nstep 50
+diemac  8.0
 
 nline 12
 diemix1    0.6
 diemixmag1 0.4
 nnsclo -4
 
-nspden   4   
-nspinor  2   
+nspden   4
+nspinor  2
 asr 0
 chneut 0
 
@@ -118,7 +118,7 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%% [files]
 #%% files_to_test =
 #%%   tcdfpt_8.abo, tolnlines=  5, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-easy
-#%% [shell]  
+#%% [shell]
 #%% post_commands= ww_mv tcdfpt_8o_DS1_WFK tcdfpt_9o_DS1_WFK; ww_mv tcdfpt_8o_DS3_1WF55 tcdfpt_8o_DS2_1WF55; ww_mv tcdfpt_8o_DS3_1WF124 tcdfpt_8o_DS2_1WF124
 #%% [paral_info]
 #%% max_nprocs = 12

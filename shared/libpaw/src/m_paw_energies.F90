@@ -73,8 +73,8 @@ MODULE m_paw_energies
 
 !public procedures
  public :: paw_energies_setzero  ! Set all energies in a paw_energies datastructure to zero
- public :: paw_energies_copy     ! Copy a paw_energies_type object into another 
- public :: paw_energies_to_array ! Transfer a paw_energies datastructure into/from a single array 
+ public :: paw_energies_copy     ! Copy a paw_energies_type object into another
+ public :: paw_energies_to_array ! Transfer a paw_energies datastructure into/from a single array
  public :: paw_energies_print    ! Printout of the object
 !!***
 
@@ -206,7 +206,7 @@ end subroutine paw_energies_copy
    msg='error on paw_energies_array size!'
    LIBPAW_BUG(msg)
  end if
- 
+
  if (option==1) then
    paw_energies_array(1)=paw_energies%epaw
    paw_energies_array(2)=paw_energies%epaw_dc

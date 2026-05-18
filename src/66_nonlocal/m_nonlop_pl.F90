@@ -137,7 +137,7 @@ contains
 !!  ucvol=unit cell volume (bohr^3)
 !!  vectin(2,nspinor*npwin)=input cmplx wavefunction coefficients <G|Cnk>
 !!  use_gbt= if 1, no spin-orbit coupling (scaler-Relativistic only);
-!!           if 2, include only the \sigma_z component of the spin-orbit coupling. 
+!!           if 2, include only the \sigma_z component of the spin-orbit coupling.
 !!
 !! OUTPUT
 !!  ==== if (signs==1) ====
@@ -304,7 +304,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
    if (use_gbt == 2) then
      soc_weight(1:2) = 0
      if (ispin_gbt == 2) soc_weight(3) = -1
-   end if 
+   end if
    call geteuler(spinaxis,alpha,beta)
    call metric_so(amet,soc_weight,gprimd,pauli,alpha,beta)
  end if
@@ -596,7 +596,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 
 ! BUG FIX START
 !        MS100725: First loop over spins, ilang, proj to take care of the ddk
-!        decompaction PRIOR to entering the main loop. This fixes a subtle bug 
+!        decompaction PRIOR to entering the main loop. This fixes a subtle bug
 !        in the calculation of the velocity operator with SOC
          do isp=1,nspinor
            ispin=isp;if (mpi_enreg%paral_spinor==1) ispin=ispinor_index
@@ -676,7 +676,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
                      call metcon(rank,gmet,temp,tmpfac)
                      gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)= &
 &                     wt(ilang,iproj)*tmpfac(:,1:((rank+1)*(rank+2))/2)
-                   else 
+                   else
 !                    ------ Spin-orbit ------
                      gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)=zero
 !                    Contraction over spins:
@@ -708,7 +708,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
                      jjk=1+((ilang-2)*(ilang-1)*ilang)/6
 ! BUG FIX START
 ! MS100725: Moved this chunk of code to a separate preliminary loop (see above),
-!           to fix the k-derivative of the SOC Hamiltonian 
+!           to fix the k-derivative of the SOC Hamiltonian
 !                     compact=-1
 !                     temp(:,1:(rank*(rank+1))/2)= &
 !&                     dgxdt(:,2,jjk:jjk-1+(rank*(rank+1))/2,ia,iproj,ispin)

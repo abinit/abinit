@@ -1,0 +1,70 @@
+t07_DVDB
+48
+diamond_eph_gwpt_nosym/dfpto_DS1_POT1.nc
+diamond_eph_gwpt_nosym/dfpto_DS1_POT2.nc
+diamond_eph_gwpt_nosym/dfpto_DS1_POT3.nc
+diamond_eph_gwpt_nosym/dfpto_DS1_POT4.nc
+diamond_eph_gwpt_nosym/dfpto_DS1_POT5.nc
+diamond_eph_gwpt_nosym/dfpto_DS1_POT6.nc
+diamond_eph_gwpt_nosym/dfpto_DS2_POT1.nc
+diamond_eph_gwpt_nosym/dfpto_DS2_POT2.nc
+diamond_eph_gwpt_nosym/dfpto_DS2_POT3.nc
+diamond_eph_gwpt_nosym/dfpto_DS2_POT4.nc
+diamond_eph_gwpt_nosym/dfpto_DS2_POT5.nc
+diamond_eph_gwpt_nosym/dfpto_DS2_POT6.nc
+diamond_eph_gwpt_nosym/dfpto_DS3_POT1.nc
+diamond_eph_gwpt_nosym/dfpto_DS3_POT2.nc
+diamond_eph_gwpt_nosym/dfpto_DS3_POT3.nc
+diamond_eph_gwpt_nosym/dfpto_DS3_POT4.nc
+diamond_eph_gwpt_nosym/dfpto_DS3_POT5.nc
+diamond_eph_gwpt_nosym/dfpto_DS3_POT6.nc
+diamond_eph_gwpt_nosym/dfpto_DS4_POT1.nc
+diamond_eph_gwpt_nosym/dfpto_DS4_POT2.nc
+diamond_eph_gwpt_nosym/dfpto_DS4_POT3.nc
+diamond_eph_gwpt_nosym/dfpto_DS4_POT4.nc
+diamond_eph_gwpt_nosym/dfpto_DS4_POT5.nc
+diamond_eph_gwpt_nosym/dfpto_DS4_POT6.nc
+diamond_eph_gwpt_nosym/dfpto_DS5_POT1.nc
+diamond_eph_gwpt_nosym/dfpto_DS5_POT2.nc
+diamond_eph_gwpt_nosym/dfpto_DS5_POT3.nc
+diamond_eph_gwpt_nosym/dfpto_DS5_POT4.nc
+diamond_eph_gwpt_nosym/dfpto_DS5_POT5.nc
+diamond_eph_gwpt_nosym/dfpto_DS5_POT6.nc
+diamond_eph_gwpt_nosym/dfpto_DS6_POT1.nc
+diamond_eph_gwpt_nosym/dfpto_DS6_POT2.nc
+diamond_eph_gwpt_nosym/dfpto_DS6_POT3.nc
+diamond_eph_gwpt_nosym/dfpto_DS6_POT4.nc
+diamond_eph_gwpt_nosym/dfpto_DS6_POT5.nc
+diamond_eph_gwpt_nosym/dfpto_DS6_POT6.nc
+diamond_eph_gwpt_nosym/dfpto_DS7_POT1.nc
+diamond_eph_gwpt_nosym/dfpto_DS7_POT2.nc
+diamond_eph_gwpt_nosym/dfpto_DS7_POT3.nc
+diamond_eph_gwpt_nosym/dfpto_DS7_POT4.nc
+diamond_eph_gwpt_nosym/dfpto_DS7_POT5.nc
+diamond_eph_gwpt_nosym/dfpto_DS7_POT6.nc
+diamond_eph_gwpt_nosym/dfpto_DS8_POT1.nc
+diamond_eph_gwpt_nosym/dfpto_DS8_POT2.nc
+diamond_eph_gwpt_nosym/dfpto_DS8_POT3.nc
+diamond_eph_gwpt_nosym/dfpto_DS8_POT4.nc
+diamond_eph_gwpt_nosym/dfpto_DS8_POT5.nc
+diamond_eph_gwpt_nosym/dfpto_DS8_POT6.nc
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgdv
+#%% test_chain = t07.abi, t08.abi, t09.abi, t10.abi, t11.abi, t12.abi
+#%% exclude_builders = scope_gnu_10.2_paral
+#%% [files]
+#%% use_git_submodule = diamond_eph_gwpt_nosym
+#%% files_to_test =
+#%%   t07.stdout, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH, GWPT
+#%% description = Merge precomputed DFPT POT files stored in diamond_eph_gwpt_nosym git submodule
+#%%<END TEST_INFO>

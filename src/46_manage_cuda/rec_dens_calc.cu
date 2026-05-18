@@ -71,9 +71,9 @@ cucmplx czero = {0.,0.};
 /* } */
 
 
-__host__ void 
+__host__ void
 density_calc(const cureal betafermie, //-in- product of beta and fermi energy
-	     const cureal mult,	      //-in- 2. divited inf_vol	
+	     const cureal mult,	      //-in- 2. divited inf_vol
 	     const cureal tolrec,     //-in- Tollerance of recursion
 	     const int irec,          //-in- current recursion term
 	     const int trotter,       //-in- trotter parameter
@@ -83,7 +83,7 @@ density_calc(const cureal betafermie, //-in- product of beta and fermi energy
 	     int* contrec,            //-out- number of converged points
 	     cureal* bn2,             //-inout- bn2 coeff
 	     cureal* an,              //-in- an coeff
-	     cureal* erreur,          //-inout- estimated error 
+	     cureal* erreur,          //-inout- estimated error
 	     cureal* prod_b2,         //-inout- contains the product of bn2's
 	     cucmplx* acc_rho,        //-inout- density
 	     cucmplx* ND,             //-inout- numerator of cont.fraction
@@ -116,27 +116,27 @@ density_calc(const cureal betafermie, //-in- product of beta and fermi energy
 	    cureal arg = M_PI*((cureal)it/2. + .5 )/rtrotter;
 	    cucmplx zj = {cos(arg) , sin(arg)};
 	    cucmplx prod1 = cuCmul(zj,cmu);
-	  
+
 	    NDold[ifo] = czero;
 	    NDold[ifo+1] = cone;
 
 	    NDnew[ifo] = cone;
 	    NDnew[ifo+1] = prod1;
-	    NDnew[ifo+1].x -= an[coord]; 
-	  
+	    NDnew[ifo+1].x -= an[coord];
+
 	    ND[ifo] = cone;
 	    ND[ifo+1] = NDnew[ifo+1];
 
 	    acc_rho[ipt] = cuCadd(acc_rho[ipt],cuCmul(prod1,cuCdiv(ND[ifo],ND[ifo+1])));
 	    prod1 = cuCmul(ND[ifo+1],NDold[ifo+1]);
 	    dd = sqrt(prod1.x*prod1.x+prod1.y*prod1.y);
-	    erreur[accoord+1] +=  2.*rtrotter/dd;	
-	  }	
+	    erreur[accoord+1] +=  2.*rtrotter/dd;
+	  }
 	cucmplx prod = { -2.*rtrotter,0.};
 	acc_rho[ipt] = cuCadd(cone, cuCdiv(acc_rho[ipt],prod));
       }
     }
-  else{  
+  else{
     for( int ipt = 0;ipt<loctranc;ipt++){
       int coord = ipt+irec*npt + delta_coor;
       int accoord = 2*ipt;
@@ -153,12 +153,12 @@ density_calc(const cureal betafermie, //-in- product of beta and fermi energy
 	    cureal arg = M_PI*((cureal)it/2. + .5 )/rtrotter;
 	    cucmplx zj = {cos(arg) , sin(arg)};
 	    cucmplx prod1 = cuCmul(zj,cmu);
-	  
+
 	    cucmplx an_c = {-an[coord],0.0};
 	    cucmplx bn_c = {-bn2[coord],0.0};
 	    NDnew[ifo] = cuCadd(cuCmul(cuCadd(prod1,an_c),ND[ifo]),cuCmul(NDold[ifo],bn_c));
 	    NDnew[ifo+1] = cuCadd(cuCmul(cuCadd(prod1,an_c),ND[ifo+1]),cuCmul(NDold[ifo+1],bn_c));
-	  
+
 	    NDold[ifo] = ND[ifo];
 	    NDold[ifo+1] = ND[ifo+1];
 	    ND[ifo] = NDnew[ifo];
@@ -172,11 +172,11 @@ density_calc(const cureal betafermie, //-in- product of beta and fermi energy
       }
       cucmplx prod = { -2.*rtrotter,0.};
       acc_rho[ipt] = cuCadd(cone, cuCdiv(acc_rho[ipt],prod));
-      
+
       if(irec>2) {
 	if(bn2[coord+npt]<CUDA_TOL ||
 	   mult*erreur[accoord+1] == POS_INF ||
-	   (mult*erreur[accoord+1] < tolrec && 
+	   (mult*erreur[accoord+1] < tolrec &&
 	    mult*erreur[accoord] < tolrec))
 	  {
 	    //bn2[coord+npt] = 0.;
@@ -189,7 +189,7 @@ density_calc(const cureal betafermie, //-in- product of beta and fermi energy
   }
 
   //printf("irec %d contrec %d dens %e err %e \n",irec,loccontrec,.5*mult*acc_rho[0].x,mult*erreur[1]);
-  *contrec = loccontrec;  
+  *contrec = loccontrec;
   return ;
 }
 

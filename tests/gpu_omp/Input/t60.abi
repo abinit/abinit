@@ -1,0 +1,61 @@
+# GS calculation with the LOBPCG + RMM-DIIS eigensolver, NC pseudos and GPUs.
+ndtset 1
+
+#gpu_option 0
+gpu_option 2
+#useylm 1
+#timopt -1
+
+paral_kgb 1
+
+# Dataset 1
+rmm_diis1 1       # Two CG steps followed by RMM-DIIS.
+nspinor1 1
+istwfk1 *1
+
+##################
+# COMMON VARIABLES
+##################
+ecut  40    # This to overconverge results and make the test more stable.
+diemac 12.0
+
+nband  24
+toldfe 1e-8
+
+ngkpt   4 4 4
+nshiftk 1
+shiftk  0.0 0.0 0.0
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Si-GGA.psp8"
+
+# Definition of the unit cell
+acell 1.0 1.0 1.0
+rprim 0.0 5.083880873222 5.083880873222
+      5.083880873222 0.0 5.083880873222
+      5.083880873222 5.083880873222 0.0
+
+# Definition of the atom types
+ntypat 1
+znucl 14
+
+natom 2
+typat 1 1
+xred
+      0.0  0.0  0.0
+      1/4  1/4  1/4
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t60.abo, tolnlines = 40, tolabs = 3e-04, tolrel = 1.5;
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, RMM-DIIS
+#%% description = GS calculation with LOBPGS + RMM-DIIS eigensolver, NC pseudos and GPU
+#%%<END TEST_INFO>

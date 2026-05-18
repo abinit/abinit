@@ -57,7 +57,7 @@ contains
 !! INPUTS
 !!  cplex: if 1, real space 1-order WF on FFT grid are REAL; if 2, COMPLEX
 !!  gsqcut=cutoff on (k+G)^2 (bohr^-2)
-!!  icutcoul= type of Coulomb cutoff to apply 
+!!  icutcoul= type of Coulomb cutoff to apply
 !!  idir=direction of atomic displacement (=1,2 or 3 : displacement of atom ipert along the 1st, 2nd or 3rd axis).
 !!  ipert=type of the perturbation
 !!  ixc= choice of exchange-correlation scheme
@@ -130,7 +130,7 @@ contains
  integer,intent(in) :: cplex,icutcoul,idir,ipert,ixc,n3xccc,natom,nfft,nhat1grdim,nkxc,nspden
  integer,intent(in) :: ntypat,optene,optres,usepaw,usexcnhat,ixcrot
  logical,intent(in) :: non_magnetic_xc
- integer,intent(in) :: use_gbt 
+ integer,intent(in) :: use_gbt
  real(dp),intent(in):: qgbt(3)
  real(dp),intent(in) :: gsqcut,magpen,ratsm,ucvol
  real(dp),intent(inout) :: ehart01,elpsp1,ehart1,exc1,elmag1,emagpen1
@@ -215,8 +215,8 @@ contains
 !Preconditioned DFPT
  if((ipert>natom+11.and.ipert<=2*natom+11).or.abs(magpen)>tol6) then
 
-  !Compute the first-order magnetic moments. 
-   prtopt=1 
+  !Compute the first-order magnetic moments.
+   prtopt=1
    ABI_MALLOC(intgden,(cplex,nspden,natom))
    ABI_MALLOC(rhomag,(2,nspden))
    ABI_MALLOC(fatsph,(nfft,natom))
@@ -433,8 +433,8 @@ contains
  if((ipert>natom+11.and.ipert<=2*natom+11).or.abs(magpen)>tol6) then
    ABI_FREE(intgden)
    ABI_FREE(rhomag)
-   ABI_FREE(fatsph) 
-   ABI_FREE(taumr) 
+   ABI_FREE(fatsph)
+   ABI_FREE(taumr)
  endif
 
  call timab(157,2,tsec)
@@ -640,7 +640,7 @@ end subroutine dfpt_v1hspinfield
 !!  The definition of components of the potential matrix differ depending on cplex:
 !!  For cplex=1, the potential is defined as (V_upup,V_dndn,Re[V_updn],Im[V_updn])
 !!  For cplex=2, the definition is (V_upup,V_dndn,V_updn,i.V_updn)
-!!  
+!!
 !!  If magpen < 0 the penalty field is defined from the cell-integrated magnetic moments along the directions given by mpdir
 !!  IF magpen > 0 the penalty field is defined from the atom spheres-integrated magnetic moments as given by mpatpol and mpdir
 !!
@@ -649,18 +649,18 @@ end subroutine dfpt_v1hspinfield
 subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
 & natom,nfft,nspden,qphon,rhomag,taumr,vmagpen1)
 
-!Arguments 
+!Arguments
 !scalars:
  integer,intent(in)   :: cplex,natom,nfft,nspden
  real(dp),intent(in)  :: magpen
- real(dp),intent(out) :: emagpen1 
+ real(dp),intent(out) :: emagpen1
 !arrays:
  integer,intent(in)    :: mpatpol(2),mpdir(3)
  real(dp),intent(in)   :: fatsph(nfft,natom)
  real(dp),intent(in)   :: intgden(cplex,nspden,natom)
  real(dp), intent(in)  :: qphon(3)
  real(dp),intent(in)   :: rhomag(2,nspden)
- real(dp), intent(in)   :: taumr(nfft,natom,3)   
+ real(dp), intent(in)   :: taumr(nfft,natom,3)
  real(dp),intent(out)  :: vmagpen1(cplex*nfft,nspden)
 
 !Local variables-------------------------------
@@ -685,8 +685,8 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
  if (magpen < zero) then
 
    rhomag_eff(:,1)=rhomag(:,1)
-   rhomag_eff(:,2:4)=half*rhomag(:,2:4) !Convert from mu_B to a.u. 
-   do i=1,3 
+   rhomag_eff(:,2:4)=half*rhomag(:,2:4) !Convert from mu_B to a.u.
+   do i=1,3
      if (mpdir(i)==0) rhomag_eff(:,1+i) = zero
    end do
 
@@ -697,7 +697,7 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
                         & + rhomag_eff(1,3)**2+rhomag_eff(2,3)**2 &
                         & + rhomag_eff(1,4)**2+rhomag_eff(2,4)**2 )
    end if
-   
+
    Bx(:)=-half*magpen*rhomag_eff(:,2)
    By(:)=-half*magpen*rhomag_eff(:,3)
    Bz(:)=-half*magpen*rhomag_eff(:,4)
@@ -732,7 +732,7 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
    intgden_eff(:,2:4,:)=half*intgden(:,2:4,:) !Convert from mu_B to a.u.
    do iatom=mpatpol(1),mpatpol(2)
 
-     do i=1,3 
+     do i=1,3
        if (mpdir(i)==0) intgden_eff(:,1+i,iatom) = zero
      end do
 
@@ -765,18 +765,18 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
        do ifft=1,nfft
          re=2*ifft-1
          im=2*ifft
-  
+
          Blocx_re=+half*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
          Blocy_re=+half*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
          Blocz_re=+half*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
          Blocx_im=+half*magpen*intgden_eff(2,2,iatom)*fatsph(ifft,iatom)
          Blocy_im=+half*magpen*intgden_eff(2,3,iatom)*fatsph(ifft,iatom)
          Blocz_im=+half*magpen*intgden_eff(2,4,iatom)*fatsph(ifft,iatom)
-      
+
          arg=two_pi*dot_product(qphon,-taumr(ifft,iatom,:))
          phr1d_re=dcos(arg)
          phr1d_im=dsin(arg)
-    
+
          Blocx(re)= Blocx(re)+phr1d_re*Blocx_re-phr1d_im*Blocx_im
          Blocx(im)= Blocx(im)+phr1d_im*Blocx_re+phr1d_re*Blocx_im
          Blocy(re)= Blocy(re)+phr1d_re*Blocy_re-phr1d_im*Blocy_im
@@ -821,7 +821,7 @@ end subroutine dfpt_v1magpen
 !!  Calculate 1st order potential due to a local Zeeman field inside an
 !!  atom centered sphere= -vec{\sigma}.\vec{b}*f_i(r), where
 !!  sigma is the vector of Pauli matrices, \vec{b}(r) is the unit
-!!  vector indicating the perturbing field direction and f_i(r) is the 
+!!  vector indicating the perturbing field direction and f_i(r) is the
 !!  real-space function defining the sphere around atom i.
 !!
 !! INPUTS
@@ -862,14 +862,14 @@ subroutine dfpt_v1hspinfield_atsph(cplex,fatsph,idir,ipert,natom,nfft,nspden,&
  real(dp), intent(in)   :: fatsph(nfft,natom)
  real(dp), intent(in)   :: qphon(3)
  real(dp), intent(inout):: v1hspinfield(cplex*nfft,nspden)
- real(dp), intent(in)   :: taumr(nfft,natom,3)   
+ real(dp), intent(in)   :: taumr(nfft,natom,3)
 
 !Local variables-------------------------------
 !scalars
  integer :: ifft,iatom,im,re
  real(dp) :: arg
  real(dp) :: phr1d_re,phr1d_im
- real(dp) :: Bloc_re, Bloc_im 
+ real(dp) :: Bloc_re, Bloc_im
  character(len=500) :: msg
 !arrays
  real(dp) :: Bloc(cplex*nfft)
@@ -891,10 +891,10 @@ subroutine dfpt_v1hspinfield_atsph(cplex,fatsph,idir,ipert,natom,nfft,nspden,&
    do ifft=1,nfft
      re=2*ifft-1
      im=2*ifft
-     if (sum(qphon(:)**2)<tol8) then 
+     if (sum(qphon(:)**2)<tol8) then
        Bloc(re)=-half*fatsph(ifft,iatom)
        Bloc(im)=zero
-     else 
+     else
        Bloc_re=-half*fatsph(ifft,iatom)
        Bloc_im=zero
        arg=two_pi*dot_product(qphon,-taumr(ifft,iatom,:))
@@ -932,7 +932,7 @@ subroutine dfpt_v1hspinfield_atsph(cplex,fatsph,idir,ipert,natom,nfft,nspden,&
          v1hspinfield(ifft,4)= 0.0d0
        end do
      end if
-   else 
+   else
      write(msg,*) 'Response to local Zeeman fields only implemented for nspden=4'
      ABI_BUG(msg)
    end if

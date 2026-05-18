@@ -14,7 +14,7 @@ pseudopotentials. So, convergence studies are very important !
 
 The format 2 for ABINIT pseudopotentials corresponds to the earlier
 paper S. Goedecker, M. Teter, and J. Hutter (GTH [[cite:Goedecker1996]]), Phys; Rev. B 54, 1703 (1996),
-that presents pseudopotentials without spin-orbit. 
+that presents pseudopotentials without spin-orbit.
 The "k**p" information mentioned in the format 3 is missing in the format 2.
 
 A few lines must be added to the data mentioned in that table,

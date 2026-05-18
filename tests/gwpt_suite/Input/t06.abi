@@ -1,8 +1,13 @@
-# ZPR computation for Diamond with KS e-ph matrix elements.
-# SImilar to t05.abi but here we read the KS matrix elements from the GSTORE.
+# ZPR calculation for diamond using KS electron–phonon (e-ph) matrix elements.
+# This example is similar to gwpt_suite/t05.abi, but here the KS matrix elements
+# are read from the GSTORE file (eph_task = 24) in dataset 1.
+# In dataset 2, eph_task = 4 is used to perform the same KS-level calculation,
+# with the e-ph matrix elements computed on the fly.
+# Both approaches are expected to yield identical results.
+
+ ndtset   2
 
  optdriver 7    # Enter EPH driver.
- eph_task 24    # ZPR computation from GSTORE file
 
  nband 12
  ecut 45.0
@@ -21,10 +26,26 @@
 
  # Read DDB file with dynamical matrix.
  getddb_filepath "diamond_eph_gwpt/out_DDB"
- getgstore_filepath "t04o_GSTORE.nc"
 
- gstore_gname "gvals_ks"  # Use KS e-ph matrix elements from GSTORE
+ # =============
+ # For dataset 1
+ # =============
+ eph_task1 24              # ZPR computation from GSTORE file
+ getgstore_filepath1 "t04o_GSTORE.nc"
+ gstore_gname1 "gvals_ks"  # Use KS e-ph matrix elements from GSTORE
+
+ #eph_np_pqbks1 2 1 1 1 1   # pert parallelism
+ #eph_np_pqbks1 1 1 1 2 1  # k-point
+ #eph_np_pqbks1 1 2 1 1 1  # q-point
+ #eph_np_pqbks1 2 2 1 2 1  # k-point
+
+ # =============
+ # For dataset 2
+ # =============
+ eph_task2 4              # ZPR computation with g computed on-the-fly
+
  eph_stern 1              # Activate Sterheimer to compute contribution given by states above nband
+ #eph_stern 0              # No Sterheimer
 
  tmesh 300 100 1          # Temperature mesh.
 
@@ -57,6 +78,7 @@
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t01.abi, t02.abi, t03.abi, t04.abi, t05.abi, t06.abi
+#%% exclude_builders = scope_gnu_10.2_paral
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt
 #%% files_to_test =
@@ -66,6 +88,10 @@
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH, GWPT, GSTORE
-#%% description = ZPR computation for Diamond with KS e-ph matrix elements.
-#%%   SImilar to t05.abi but here we read the KS matrix elements from the GSTORE.
+#%% description = ZPR calculation for diamond using KS electron–phonon (e-ph) matrix elements.
+#%%   This example is similar to gwpt_suite/t05.abi, but here the KS matrix elements
+#%%   are read from the GSTORE file (eph_task = 24) in dataset 1.
+#%%   In dataset 2, eph_task = 4 is used to perform the same KS-level calculation,
+#%%   with the e-ph matrix elements computed on the fly.
+#%%   Both approaches are expected to yield identical results.
 #%%<END TEST_INFO>

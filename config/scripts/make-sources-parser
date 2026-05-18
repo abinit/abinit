@@ -65,7 +65,7 @@ for (key, descr) in dtset.items():
   if (attType is not None):
     Cd  += "  AB7_INVARS_%-15s,  /* %-15s */\n" % (key.upper(), attType)
     Ct  += "           %-15s,  /* %-15s */\n" % (attType, key)
-    F90 += "integer, parameter, public :: ab7_invars_%-15s = %5d\n" % (key, n)  
+    F90 += "integer, parameter, public :: ab7_invars_%-15s = %5d\n" % (key, n)
     Py  += "  PyDict_SetItemString(DictIds, \"%s\", Py_BuildValue(\"ii\", AB7_INVARS_%s, %s));\n" % (key, key.upper(), attType)
     n += 1
 C  += Cd
@@ -148,7 +148,7 @@ subs.write("""
       errno = AB7_ERROR_INVARS_ID
       return
     end if
-    
+
     errno = AB7_NO_ERROR
     select case (id)
 """)
@@ -176,7 +176,7 @@ subs.write("""
       errno = AB7_ERROR_INVARS_ID
       return
     end if
-    
+
     errno = AB7_NO_ERROR
     select case (id)
 """)
@@ -205,7 +205,7 @@ subs.write("""
       errno = AB7_ERROR_INVARS_ID
       return
     end if
-    
+
     errno = AB7_NO_ERROR
     select case (id)
 """)
@@ -234,7 +234,7 @@ subs.write("""
       errno = AB7_ERROR_INVARS_ID
       return
     end if
-    
+
     errno = AB7_NO_ERROR
     select case (id)
 """)
@@ -262,7 +262,7 @@ subs.write("""
       errno = AB7_ERROR_INVARS_ID
       return
     end if
-    
+
     errno = AB7_NO_ERROR
     select case (id)
 """)

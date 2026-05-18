@@ -67,7 +67,7 @@ AC_DEFUN([SD_PAPI_INIT], [
   esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([papi],
     [AS_HELP_STRING([--with-papi],
       [Install prefix of the Flexible Data Format I/O library (e.g. /usr/local).])],

@@ -19,7 +19,7 @@ are relative to improvements of ABINITv6.8 with respect to v6.6.
 The list of contributors includes :
 F. Abreu, B. Amadon, A. Berger, J.-M. Beuken, F. Bruneval, D. Caliste, K. Delaney, C. Espejo,
 G.A. Franco, G. Geneste, M. Giantomassi, X. Gonze, Jiawang Hong, A. Jacques,
-L. He, A. Knyazev, S. Le Roux, A. Lherbier, F. Liu, M. Mancini, T. Nishimatsu, M. Oliveira, 
+L. He, A. Knyazev, S. Le Roux, A. Lherbier, F. Liu, M. Mancini, T. Nishimatsu, M. Oliveira,
 S. Ponce, Y. Pouillon, G.-M. Rignanese, A. Romero,
 M. Torrent, M. Stankovski, M. Verstraete, D. Waroquiers, J. Zwanziger .
 
@@ -51,7 +51,7 @@ A.1 The default value for optforces has been changed (to 2).
 __________________________________________________________________
 
 B.  Most noticeable achievements
- 
+
 B.1 The meta-GGA in the LibXC exchange-correlation library can now be used with ABINIT,
     in the norm-conserving case (not yet PAW), in the spin-non-polarized and collinear spin-polarized case
     (not yet non-collinear case).
@@ -76,7 +76,7 @@ B.4 A GUI for ABINIT has been set-up. It is available in the subdirectory "gui".
     Work done by F. Abreu. Integrated in the build system by Y. Pouillon.
 
 B.5 The definition of the set of q points (for phonon calculations) for different datasets can now be done in the same
-    spirit as for the generation of k points, that is, 
+    spirit as for the generation of k points, that is,
     based on the input of a homogeneous grid of points.
     Related input variables : qptopt, ngqpt, nshiftq, shiftq, qptrlatt, iqpt.
     By X. Gonze
@@ -105,14 +105,14 @@ C.1 A new subdirectory of tests has been introduced, called "unitary". At presen
     that form an inner library of ABINIT.
     By M. Giantomassi
 
-C.2 A link checker has been activated, to enforce correctness of the hyperlinks in the HTML documentation of ABINIT. 
+C.2 A link checker has been activated, to enforce correctness of the hyperlinks in the HTML documentation of ABINIT.
     NOTE : It detects correctly all the broken links with target INSIDE of the ABINIT package.
     The correct detection of the broken links OUTSIDE of the ABINIT package is problematic,
     as they do not depend on us, and some Web site can be temporarily down. So, the check of
     external links has not been activated.
-    By J.-M. Beuken. 
+    By J.-M. Beuken.
 
-C.3 Woopy is a new slave for the test farm, under Windows. 
+C.3 Woopy is a new slave for the test farm, under Windows.
     A new on-demand mechanism for testing ABINIT on the Web has been set-up, with address
     http://wwwold.abinit.org/on_demand
     The new slave ktulu is also available, to test debian/ubuntu packages.
@@ -135,8 +135,8 @@ D.1 A new automatic test (Tv6#94) and new input variables (bs_hayd_term and bs_n
     Test cases to be provided ...
     By M. Giantomassi.
 
-D.2 The input variable vdw_nfrag and vdw_typfrag have been introduced, 
-    related to Silvestrelli approach to van der Waals interactions. 
+D.2 The input variable vdw_nfrag and vdw_typfrag have been introduced,
+    related to Silvestrelli approach to van der Waals interactions.
     Also, added spin polarizarion support for vdW-Wannier.
     This is in the frame of an on-going effort to provide vdW functionals for ABINIT.
     Also, on-going effort to have VdW-DF interfaced with ABINIT.
@@ -167,7 +167,7 @@ D.6 On-going big restructuration of the routines involved in the change
 
 D.7 Atomic projection of the phonon band structure.
     See test v6#76, with input variables natprj_bs and iatprj_bs .
-    By M. Verstraete. 
+    By M. Verstraete.
 
 D.8 Add support for acml (4.4.0) in the build system
     By A. Jacques.
@@ -192,7 +192,7 @@ D.14 Work on library extraction.
      By D. Caliste
 
 D.15 Work on the input variable zeemanfield.
-     By Kris Delaney. 
+     By Kris Delaney.
 
 D.16 Work on the Effective Energy Technique by A. Berger.
 
@@ -236,7 +236,7 @@ D.23 Related to B.3, the maximal number of datasets that can be treated by ABINI
 
 D.24 Numerous miscellaneous bug fixes (to the sources, as well as to the build system, including the plug-ins),
      and improvements of documentation by
-     A. Berger, J.-M. Beuken, F. Bruneval, D. Caliste, 
+     A. Berger, J.-M. Beuken, F. Bruneval, D. Caliste,
      G.A. Franco, M. Giantomassi, X. Gonze, Jiawang Hong, A. Knyazev, A. Jacques, S. Le Roux,
      A. Lherbier, M. Mancini, T. Nishimatsu, S. Ponce, Y. Pouillon, G.-M. Rignanese,
      M. Torrent, M. Stankovski, M. Verstraete, J. Zwanziger .

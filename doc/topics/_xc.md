@@ -11,7 +11,7 @@ This page gives hints on how to set parameters related to the exchange and corre
 Total energy computation in ABINIT is done according to Density Functional
 Theory (DFT). Although formally exact, an approximate exchange-correlation
 (XC) functional must be chosen. This is governed by the input variable
-[[ixc]].  
+[[ixc]].
 However, the pseudopotentials (or PAW data sets) are constructed for one
 specific XC functional. If [[ixc]] is not specified, ABINIT will simply take
 the [[ixc]] of the given pseudopotential(s) - hoping they are coherent with
@@ -34,18 +34,18 @@ In the LibXC library (currently LibXC 7), as interfaced with ABINIT, there are a
 forms of the 3D LDA type, and more than one hundred of functional forms of the GGA type. They
 can be used with norm-conserving pseudopotentials as well as PAW atomic data.
 Also, metaGGAs can be used with ABINIT (they need [[usekden]]=1).
-In particular, the TB09 (not delivering reliable total energies) 
+In particular, the TB09 (not delivering reliable total energies)
 allows one to get cheap corrected band structures (use [[ixc]]=-12208, with HGH pseudopotentials).
 For response-function type calculations, the native ABINIT LDA and GGA kernels can
-be used as well as the LibXC ones.  
+be used as well as the LibXC ones.
 
 #### **Hybrid functionals:**
 
-  
+
 The exchange can also be computed on the basis of the Fock expression (exact
 exchange), and the correlation can be computed on the basis of the RPA
 approximation (see the GW section). [[topic:Hybrids|Hybrid functionals]]
-calculations (HSE06, PBE0, B3LYP) can be performed. 
+calculations (HSE06, PBE0, B3LYP) can be performed.
 
 #### **Local exact exchange:**
 
@@ -53,12 +53,12 @@ When [[useexexch]]=1, the hybrid functional PBE0 is used in PAW, inside PAW
 spheres only, and only for correlated orbitals given by [[lexexch]]. To change
 the ratio of exact exchange, see also [[exchmix]]. The implementation of local
 exact exchange in ABINIT is provided in [[cite:Jollet2009]]. See useful input
-variables [[exchmix]], [[lexexch]] and [[useexexch]].  
-  
+variables [[exchmix]], [[lexexch]] and [[useexexch]].
+
 
 #### **Van der Waals functionals:**
 
-  
+
 [[topic:vdw|Several Van der Waals functionals]] are available: Grimme (D2, D3,
 D3(Becke-Johnson)), Silvestrelli.
 
@@ -74,5 +74,5 @@ D3(Becke-Johnson)), Silvestrelli.
 
 ## Tutorials
 
-* The [[tutorial:base2]] deals with the H2 molecule: convergence studies, LDA versus GGA 
+* The [[tutorial:base2]] deals with the H2 molecule: convergence studies, LDA versus GGA
 

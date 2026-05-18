@@ -23,7 +23,7 @@
         #define CUDA_SAFE_CALL(a)  a
         #define CUFFT_SAFE_CALL(a) a
 
-#else 
+#else
         #define DEBUGLEN 0
         #define CUDA_SAFE_CALL(a)  a
         #define CUFFT_SAFE_CALL(a) a
@@ -66,9 +66,9 @@ float get_max_mem_dev(int);
 /* __host__ __device__ static __inline__ cucmplx add(cucmplx a,cucmplx b ); */
 /* __host__ __device__ static __inline__ cucmplx div(cucmplx a,cucmplx b ); */
 
-void density_calc(const cureal,const cureal,const cureal, 
+void density_calc(const cureal,const cureal,const cureal,
 		  const int,const int, const int,const int,
-		  const int,int*, cureal*,cureal*, cureal*, cureal*, 
+		  const int,int*, cureal*,cureal*, cureal*, cureal*,
 		  cucmplx*,cucmplx*,cucmplx*, cucmplx* );
 
 /* //interfaces kernels_rec */
@@ -77,7 +77,7 @@ __global__ void realtocmplx(cureal*,cucmplx*,int);
 __global__ void complex_prod(cucmplx*,cucmplx*,int);
 __global__ void complex_prod_tot(cucmplx*,cucmplx*,int,int);
 
-__global__ void setting_un(cureal*,cureal*,cureal*,cureal*,cureal*,int,int,cureal); 
+__global__ void setting_un(cureal*,cureal*,cureal*,cureal*,cureal*,int,int,cureal);
 __global__ void set_un_gratio(cureal*,cureal*,cureal*,cureal*,cureal*,int*,int,int,cureal,int);
 __global__ void un_x_pot(cucmplx*,cureal*,cureal*,int );
 __global__ void vn_x_pot_dv(cucmplx*,cureal*,cureal*,cureal,int );
@@ -89,7 +89,7 @@ __global__ void vn_x_pot_dv_cut(cucmplx*,cureal*,cureal*,cureal,int );
 
 __global__ void un_invsqrt_scale(cureal*,cureal*,int );
 __global__ void oldtonew(cureal*,cureal*,cureal*,cureal*,cureal*,int );
-__global__ void scalarProdGPU(cureal*,cureal*,cureal*,cureal); 
+__global__ void scalarProdGPU(cureal*,cureal*,cureal*,cureal);
 
 
 __host__ void copytoconstmem(int,int,int,int);

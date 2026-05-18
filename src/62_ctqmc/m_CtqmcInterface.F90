@@ -5,9 +5,9 @@
 !!****m* ABINIT/m_CtqmcInterface
 !! NAME
 !!  m_CtqmcInterface
-!! 
-!! FUNCTION 
-!!  Manage a ctqmc simulation. 
+!!
+!! FUNCTION
+!!  Manage a ctqmc simulation.
 !!  friendly interface for the user
 !!
 !! COPYRIGHT
@@ -209,7 +209,7 @@ END SUBROUTINE CtqmcInterface_init
 !! SOURCE
 
 SUBROUTINE CtqmcInterface_setOpts(this,opt_Fk,opt_order,opt_histo,opt_movie,&
-& opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
+& opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove)
 
 !Arguments ------------------------------------
   TYPE(CtqmcInterface), INTENT(INOUT) :: this
@@ -279,7 +279,7 @@ END SUBROUTINE CtqmcInterface_setOpts
 !! SOURCE
 
 SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt_levels,Magmom_orb,Magmom_spin,Magmom_tot,Iatom, &
-&fname) 
+&fname)
 
 !Arguments ------------------------------------
   TYPE(CtqmcInterface), INTENT(INOUT) :: this
@@ -310,7 +310,7 @@ SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt
 !  OPEN(UNIT=ifstream, FILE="Gw.dat")
 !  CALL Ctqmc_setG0w(Hybrid, ifstream)
 !  CLOSE(ifstream)
-!  
+!
 
   IF ( PRESENT(opt_levels) ) &
     CALL Ctqmc_setMu(this%Hybrid, opt_levels)

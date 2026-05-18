@@ -2228,7 +2228,7 @@ Variable(
 Controls the range of atoms for which local Zeeman fields will be considered in time-dispersion
 (Berry curvatures) computation, for the 1st perturbation.
 May take values from 1 to [[natom]], with **d3e_pert1_magat** (1)<=
-**d3e_pert1_magat** (2). 
+**d3e_pert1_magat** (2).
 """,
 ),
 
@@ -2245,7 +2245,7 @@ Variable(
     characteristics=["[[DEVELOP]]"],
     added_in_version="10.4",
     text=r"""
-Gives the Cartesian directions to be considered in the time-dispersion (Berry curvatures) computation, 
+Gives the Cartesian directions to be considered in the time-dispersion (Berry curvatures) computation,
 for the 1st perturbation.
 """,
 ),
@@ -2266,7 +2266,7 @@ Turns on magnetic field perturbations in time-dispersion (Berry-curvatures) comp
 perturbation. Can take two values:
 
  * 1 --> Uniform Zeeman field perturbation along Cartesian directions set by [[d3e_pert1_magdir]]
- * 2 --> Local Zeeman field perturbation to atoms and Cartesian directions set by [[d3e_pert1_magat]] and [[d3e_pert1_magdir]], respectively. 
+ * 2 --> Local Zeeman field perturbation to atoms and Cartesian directions set by [[d3e_pert1_magat]] and [[d3e_pert1_magdir]], respectively.
 """,
 ),
 
@@ -2356,7 +2356,7 @@ Variable(
 Controls the range of atoms for which local Zeeman fields will be considered in time-dispersion
 (Berry curvatures) computation, for the 2nd perturbation.
 May take values from 1 to [[natom]], with **d3e_pert2_magat** (1)<=
-**d3e_pert2_magat** (2). 
+**d3e_pert2_magat** (2).
 """,
 ),
 
@@ -2373,7 +2373,7 @@ Variable(
     characteristics=["[[DEVELOP]]"],
     added_in_version="10.4",
     text=r"""
-Gives the Cartesian directions to be considered in the time-dispersion (Berry curvatures) computation, 
+Gives the Cartesian directions to be considered in the time-dispersion (Berry curvatures) computation,
 for the 2nd perturbation.
 """,
 ),
@@ -2394,7 +2394,7 @@ Turns on magnetic field perturbations in time-dispersion (Berry-curvatures) comp
 perturbation. Can take two values:
 
  * 1 --> Uniform Zeeman field perturbation along Cartesian directions set by [[d3e_pert2_magdir]]
- * 2 --> Local Zeeman field perturbation to atoms and Cartesian directions set by [[d3e_pert2_magat]] and [[d3e_pert2_magdir]], respectively. 
+ * 2 --> Local Zeeman field perturbation to atoms and Cartesian directions set by [[d3e_pert2_magat]] and [[d3e_pert2_magdir]], respectively.
 """,
 ),
 
@@ -5407,7 +5407,7 @@ Variable(
     mnemonics="Electron-PHonon: Allen-Heine-Cardona type",
     added_in_version="9.11.6",
     text=r"""
-Only relevant for [[optdriver]]=7 and [[eph_task]]=4.
+Only relevant for [[optdriver]] = 7 and [[eph_task]] = 4 or 24.
 If set to 0, use the adiabatic version of the Allen-Heine-Cardona equation to compute the
 zero-point renormalisation as well as temperature dependence.
 If set to 1 (default), use the non-adiabatic version of the Allen-Heine-Cardona equation to compute the
@@ -5482,7 +5482,7 @@ Variable(
     mnemonics="Electron-PHonon: FROHLIich Number of THETA points",
     added_in_version="9.8.0",
     text=r"""
-Only relevant for [[optdriver]] = 7 and [[eph_task]] = 4 i.e. computation of the e-ph self-energy.
+Relevant for the computation of the e-ph self-energy or the Variational Polaron Equations.
 This variable defines the angular mesh for the spherical integration of the Frohlich divergence
 in the microzone around the Gamma point to accelerate the convergence with the number of q-points.
 
@@ -5646,7 +5646,7 @@ The choice is among:
 * 11 --> Compute e-ph matrix elements on homogeneous k- and q-meshes.
          Save results in GSTORE.nc file (requires netcdf library with MPI-IO support).
          The k-mesh must be equal to the one associated to the input WFK file, the q-mesh is specified
-         by [[eph_ngqpt_fine]] (NB: the q-mesh must be a sub-mesh of the k-mesh or equal).
+         by [[eph_ngqpt_fine]] and must be a sub-mesh of the k-mesh or equal.
 * 12 --> Migdal-Eliashberg equations (isotropic case).
 * -12 --> Migdal-Eliashberg equations (anisotropic case). UNDER DEVELOPMENT.
 * 13 --> Variational polaron equations. Requires GSTORE file specified via [[getgstore_filepath]]
@@ -5659,7 +5659,7 @@ The choice is among:
               An array D(R) with the decay of the W(R,r) as a function of R is computed and saved to file
               In the second case (-15) the q-points are taken directly from the DVDB file.
 * 16, -16 --> test_phrotation TO BE DOCUMENTED.
-* 17 --> Compute e-ph matrix elements with the GWPT formalism  Produce GSTORE file.
+* 17 --> Compute e-ph matrix elements with the GWPT formalism  Produce GSTORE.nc file.
          Requires netcdf library with MPI-IO support.
 * 18 --> Compute e-ph matrix g(k,q) along a high-symmetry path. See [[eph_fix_wavevec]] and other related variables.
 * 19 --> Compute matrix elements of the screened interaction W between two Cooper pairs.
@@ -8275,6 +8275,46 @@ semiconductors and insulators.
 ),
 
 Variable(
+    abivarname="gwpt_wmode",
+    varset="eph",
+    vartype="integer",
+    topics=["ElPhonInt_expert"],
+    dimensions="scalar",
+    defaultval=2,
+    mnemonics="GWPT omega MODE",
+    added_in_version="10.7.1",
+    text=r"""
+This variable controls the treatment of the frequency-dependence in the computation
+of the GWPT e-ph matrix elements when [[eph_task]] == 17.
+
+1 -> Use the original treatment as in [[cite:Li2019]] in which the
+     frequency convolution is evaluated at $\ee_\nk$ and $\ee_\mkq$ and the average is taken.
+2 -> Evaluate the convolution at $\ee_\nk$. This is the **recommended** approach when computing the ZPR of the band gap.
+""",
+),
+
+Variable(
+    abivarname="gwpt_g2mode",
+    varset="eph",
+    vartype="integer",
+    topics=["ElPhonInt_expert"],
+    dimensions="scalar",
+    defaultval=2,
+    mnemonics="GWPT G-MODE",
+    added_in_version="10.7.1",
+    text=r"""
+This variable controls the treatment of the e-ph matrix elements
+in the computation of the e-ph self-energy when one starts from a GSTORE.nc file
+containing both the GWPT and the KS matrix elements.
+
+1 -> Use |g|^2.
+
+2 -> Use g^*_KS g_GWPT.
+""",
+),
+
+
+Variable(
     abivarname="gwgmcorr",
     varset="gw",
     vartype="integer",
@@ -9117,7 +9157,7 @@ to define the Hartree potential, and using Ewald correction.
 
 Variable(
     abivarname="icutcoul",
-    varset="gstate, dfpt",
+    varset="gstate",
     vartype="integer",
     topics=["Coulomb_basic"],
     dimensions="scalar",
@@ -9160,8 +9200,8 @@ In the latter case, use a negative value for the cutoff radius of the sphere ([[
 which is automatically calculated so that the volume enclosed in the sphere is
 equal to the volume of the solid.
 
-Starting from version 10.4, the use of Coulomb cutoffs has been extended to the linear-response 
-driver for all perturbations except strain. However, only the [[icutcoul]] = 2, 22, or 55 options 
+Starting from version 10.4, the use of Coulomb cutoffs has been extended to the linear-response
+driver for all perturbations except strain. However, only the [[icutcoul]] = 2, 22, or 55 options
 have been validated so far.
 """,
 ),
@@ -11943,15 +11983,15 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     added_in_version="10.4",
     text=r"""
-This variable sets the amplitude of the penalty function applied to the first-order local magnetic moments in a constrained DFPT 
-calculation (see Ref. [[cite:Royo2019]]). Larger values of [[magpen]] shift the spin-wave excitations that hinder self-consistent 
-convergence to higher energies. However, the magnitude of this shift is limited by a material-dependent threshold associated with 
-the onset of cross-gap electronic excitations. Using values of [[magpen]] beyond this limit may be inefficient, as they can introduce 
-numerical instabilities. Typical values for insulators such as CrI$_3$ or Cr$_2$O$_3$ are on the order of 0.05. The factor-of-four 
+This variable sets the amplitude of the penalty function applied to the first-order local magnetic moments in a constrained DFPT
+calculation (see Ref. [[cite:Royo2019]]). Larger values of [[magpen]] shift the spin-wave excitations that hinder self-consistent
+convergence to higher energies. However, the magnitude of this shift is limited by a material-dependent threshold associated with
+the onset of cross-gap electronic excitations. Using values of [[magpen]] beyond this limit may be inefficient, as they can introduce
+numerical instabilities. Typical values for insulators such as CrI$_3$ or Cr$_2$O$_3$ are on the order of 0.05. The factor-of-four
 difference with respect to the values reported in Ref. [[cite:Royo2019]] arises from a different criterion used to define the magnetic moments.
 
 The size and boundary shape of the atomic spheres wherein the magnetic penalty is applied are specified by [[ratsph]] and [[ratsm]].
-The penalized ions and directions are specified by [[mpatpol]] and [[mpdir]], respectively. 
+The penalized ions and directions are specified by [[mpatpol]] and [[mpdir]], respectively.
 """,
 ),
 
@@ -12451,7 +12491,7 @@ Variable(
     characteristics=["[[DEVELOP]]"],
     added_in_version="10.4",
     text=r"""
-This variable specifies the range of atoms to which a magnetic penalty is applied on the 
+This variable specifies the range of atoms to which a magnetic penalty is applied on the
 first-order local magnetic moments. It may take values between 1 to [[natom]], with [[mpatpol]](1)<=[[mpatpol]](2).
 In practice, the penalty is typically applied only to the magnetic ions.
 
@@ -12471,8 +12511,8 @@ Variable(
     characteristics=["[[DEVELOP]]"],
     added_in_version="10.4",
     text=r"""
-Gives the Cartesian directions along which the first-order magnetic moments 
-are constrained during a linear-response calculatiuon when [[magpen]]/= 0.0. 
+Gives the Cartesian directions along which the first-order magnetic moments
+are constrained during a linear-response calculatiuon when [[magpen]]/= 0.0.
 """,
 ),
 
@@ -19840,7 +19880,7 @@ As a side technical information, the value [[rfatpol]](1)=-1 is admitted, and tr
 immediately to [[rfatpol]](1)=1, while [[rfatpol]](2)=-1 is transformed to  [[rfatpol]](2)=[[natom]],
 while the default input values are actually [[rfatpol]]=-1 .
 
-Starting from version 10.4, [[rfatpol]] also defines the range of atoms for which the local 
+Starting from version 10.4, [[rfatpol]] also defines the range of atoms for which the local
 Zeeman-field response function is computed when [[rfmagn]] = 2.
 """,
 ),
@@ -19934,16 +19974,16 @@ This variable enables response-function calculations with respect to external Ze
 
   * 0 --> no magnetic-field perturbation
   * 1 --> uniform magnetic-field perturbation (possibly at finite q) applied along the Cartesian directions specified by [[rfdir]]
-  * 2 --> local magnetic-field perturbations (possibly at finite q) applied to the atoms specified by [[rfatpol]] and along the 
-          Cartesian directions specified by [[rfdir]]. The size and boundary shape of the atomic spheres wherein the field is applied 
+  * 2 --> local magnetic-field perturbations (possibly at finite q) applied to the atoms specified by [[rfatpol]] and along the
+          Cartesian directions specified by [[rfdir]]. The size and boundary shape of the atomic spheres wherein the field is applied
           are specified by [[ratsph]] and [[ratsm]].
 
 Note for constrained DFPT calculations:
-A set of local magnetic-field response calculations, combined with a geometrically equivalent magnetic penalty 
-(defined by the variables [[magpen]], [[mpatpol]], and [[mpdir]]), enables the computation of the so-called 
-local spin susceptibility within the constrained-B functional introduced in Ref. [[cite:Royo2026]]. This quantity 
-is stored in the DDB file and subsequently used by anaddb to transform the second- and third-order energy derivatives 
-computed with the magnetic penalty--i.e., within the constrained-B functional--into the corresponding physically 
+A set of local magnetic-field response calculations, combined with a geometrically equivalent magnetic penalty
+(defined by the variables [[magpen]], [[mpatpol]], and [[mpdir]]), enables the computation of the so-called
+local spin susceptibility within the constrained-B functional introduced in Ref. [[cite:Royo2026]]. This quantity
+is stored in the DDB file and subsequently used by anaddb to transform the second- and third-order energy derivatives
+computed with the magnetic penalty--i.e., within the constrained-B functional--into the corresponding physically
 relevant magnetic functionals.
 """,
 ),
@@ -19982,8 +20022,8 @@ Variable(
     characteristics=["[[DEVELOP]]"],
     added_in_version="before_v9",
     text=r"""
-This variable sets the frequency (in Hartree energy units) of the perturbation in dynamic linear-response calculations. 
-If [[rfomega]]/=0, [[tim1rev]] must be set to 0, since a time-dependent perturbation automatically breaks time-reversal symmetry. 
+This variable sets the frequency (in Hartree energy units) of the perturbation in dynamic linear-response calculations.
+If [[rfomega]]/=0, [[tim1rev]] must be set to 0, since a time-dependent perturbation automatically breaks time-reversal symmetry.
 """,
 ),
 
@@ -21199,7 +21239,6 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="SYMmetrization of SIGMA matrix elements",
-    requires="[[optdriver]] in [4, 7]",
     commentdefault="The default value changed in Abinitv9 from 0 to 1",
     added_in_version="before_v9",
     text=r"""
@@ -21210,15 +21249,34 @@ by the point group of the wave-vector k specified in the [[kptgw]] list.
 
 The symmetrized expression leads to a considerable speedup of the run, especially
 for high-symmetry k points e.g. $\Gamma$.
-Unfortunately, this option is not yet compatible with self-consistent GW
-calculations (see [[gwcalctyp]]).
+Unfortunately, this option is not yet compatible with self-consistent GW calculations (see [[gwcalctyp]]).
 
 The code constructs a symmetric invariant
 for the diagonal matrix elements of the self-energy by averaging the self-energy matrix
 elements within the degenerate subspace. Therefore, particular care has to be
 taken in the presence of accidental degeneracies. Since calculations
 performed with [[symsigma]] = 1 will not be able to remove the initial
-accidental degeneracy. This is the reason why this option is not activated by default.
+accidental degeneracy.
+States are considered degenerate if their energies differ by less than [[symsigma_de]].
+""",
+),
+
+Variable(
+    abivarname="symsigma_de",
+    varset="gw",
+    vartype="real",
+    topics=['SelfEnergy_expert'],
+    dimensions="scalar",
+    defaultval="1 meV",
+    mnemonics="SYMmetrization of SIGMA matrix elements, Delta Energy",
+    characteristics=['[[ENERGY]]'],
+    added_in_version="10.7.0",
+    text=r"""
+
+This variable is used in conjunction with [[symsigma]] 1.
+States are considered degenerate if their energies differ by less than [[symsigma_de]].
+The cutoff can be specified in Ha units (the default), Ry, eV, meV or Kelvin, since **symsigma_de** has the
+[[ENERGY]] characteristics.
 """,
 ),
 
@@ -21361,12 +21419,12 @@ Variable(
     added_in_version="10.4",
     text=r"""
 
-If [[optdriver]] is equal to 10, which activates a longwave run, setting [[timdisp]]=1 enables the 
+If [[optdriver]] is equal to 10, which activates a longwave run, setting [[timdisp]]=1 enables the
 calculation of frequency-derivatives (Berry curvatures) of second-order energy derivatives
-specified by the variables: [[d3e_pert1_phon]], [[d3e_pert1_elfd]], 
+specified by the variables: [[d3e_pert1_phon]], [[d3e_pert1_elfd]],
 [[d3e_pert1_magn]], [[d3e_pert2_phon]], etc....
 
-This **requires** the precalculation of the corresponding first-order wavefunction files, 
+This **requires** the precalculation of the corresponding first-order wavefunction files,
 """,
 ),
 
@@ -21429,10 +21487,10 @@ If tim1rev is equal to 0, the Sternheimer equation is solved simultaneously at
 +q and -q perturbation wavevectors. The first order potential at -q is taken
 to be equal to the Hermitian conjugate of the first order potential at +q.
 The wavefunctions from both +q and -q are then combined to generate the first order density.
-Relevant in the following cases: 
+Relevant in the following cases:
 
  * Finite-q phonon response function calculation in a magnetic material.
- * Magnetic field perturbation [[rfmagn]]=1 or 2. 
+ * Magnetic field perturbation [[rfmagn]]=1 or 2.
  * Finite-frequency response function calculation (even in the q=0 limit).
  * Berry curvature calculation at finte q or finite frequency.
 """,
@@ -24218,7 +24276,7 @@ for increasing number of k points.
 When [[optdriver]] = 7, **zcut** defines the small complex shift used to avoid
 divergences in the expression for the Fan-Migdal e-ph self-energy.
 Note that the default value is too large for e-ph calculations, smaller values of the order
-of 0.001 or 0.001 eV should be used (and carefully tested).
+of 0.01 or 0.001 eV should be used (and carefully tested).
 """,
 ),
 
@@ -24963,14 +25021,15 @@ Variable(
     varset="eph",
     topics=["ElPhonInt_basic"],
     vartype="integer",
-    defaultval=0,
+    defaultval=1,
     dimensions="scalar",
     mnemonics="EPH RESTART.",
     added_in_version="9.0.0",
     text=r"""
 This variable can be used to restart an EPH calculation.
 At present, this feature is supported only when computing the electron-phonon self-energy ([[eph_task]] = 4, -4)
-and solving the variational polaron equations ([[eph_task]] = 13).
+or when solving the variational polaron equations ([[eph_task]] = 13).
+or when computing the GSTORE.nc file ([[eph_task]] 11, 17),
 
 In the first case, the code will look for a **pre-existing** SIGEPH.nc file and will compute the remaining k-points.
 Note that the restart in done **in-place** that is the output SIGEPH.nc is used as input of the calculation so there is no
@@ -24978,6 +25037,11 @@ need to specify getsigeph or irdsigeph input variables.
 
 In the second case, the code will look for a **pre-existing** VPQ.nc file and continue the optimization
 process from the last iteration available in the netcdf file.
+In this case the default value of [[eph_restart]] is 0, so restart must be activated explictly in the input file
+
+In the third case, the code will look for a **pre-existing** GSTORE.nc file and continue the computation of the missing elements.
+This feature is activated by default.
+
 
 !!! note
 
@@ -26169,6 +26233,25 @@ Possible values are:
 ),
 
 Variable(
+    abivarname="gstore_iv1p_comm",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics=r"GSTORE write matrix elements of i[V1_ka, p] commutator",
+    requires="[[optdriver]] == 7",
+    added_in_version="10.7.0",
+    text=r"""
+If set to 1, the EPH code computes and stores on file the matrix elements
+
+i <psi_mk[V1_q0ka, p]|psi_nk> in the full BZ in reduced coordinates.
+
+when computing the GSTORE.nc. See [[cite:Lihm2020]].
+""",
+),
+
+Variable(
     abivarname="gstore_use_lgk",
     varset="eph",
     vartype="integer",
@@ -26181,8 +26264,7 @@ Variable(
     text=r"""
 When generating a GSTORE file, setting [[gstore_use_lgk]] to 1,
 instructs Abinit to restrict the computation of the g(k,q) to the
-$\qq$-points in the IBZ_k where IBZ_k is the irreducible zone
-defined by the little group of the $\kk$-point.
+$\qq$-points in the IBZ_k where IBZ_k is the irreducible zone defined by the little group of the $\kk$-point.
 This allows one to reduce the number of e-ph matrix elements, but keep in mind that
 the generated GSTORE can only be used to compute electronic properties such
 as the electron self-energy $\Sigma_\kk$.
@@ -26207,8 +26289,8 @@ Variable(
     text=r"""
 When generating a GSTORE file, setting [[gstore_use_lgq]] to 1,
 instructs Abinit to restrict the computation of the g(k,q) to the
-$\kk$-points in the IBZ_q where IBZ_q is the irreducible zone
-defined by the little group of the $\qq$-point.
+$\kk$-points in the IBZ_q where IBZ_q is the irreducible zone defined by the little group of the $\qq$-point.
+
 This allows one to reduce the number of e-ph matrix elements, but keep in mind that
 the generated GSTORE can only be used to compute phonon properties such
 as the phonon self-energy $\Pi_\kk$.
@@ -26235,6 +26317,7 @@ Variable(
     text=r"""
 This input variable specifies whether the EPH code should compute the $g(\kk, \qq)$
 matrix elements with $\kk$ in the IBZ or in the BZ.
+Possible values are "ibz" or "bz".
 
 !!! important
 
@@ -26258,6 +26341,7 @@ Variable(
     text=r"""
 This input variable specifies whether the EPH code should compute the $g(\kk, \qq)$
 e-ph matrix elements for $\qq$ in the IBZ or in the BZ.
+Possible values are "ibz" or "bz".
 
 !!! important
 
@@ -26280,7 +26364,7 @@ Variable(
     added_in_version="9.6.2",
     text=r"""
 This input variable can be used to introduce a filter in the electronic wavevectors (k and k+q)
-when computing the e-ph matrix elements with [[eph_task]] == 11.
+when computing the e-ph matrix elements with [[eph_task]] in [11, 17].
 Possible values are:
 
 - "none" --> No filter is applied (default)
@@ -26308,28 +26392,13 @@ Variable(
 This input variable specifies the name of the netcdf variable from which the e-ph matrix elements
 will be **read** from the GSTORE.nc file.
 Possible values are: "gvals" (default) or "gvals_ks"
+
 This variable has an effect only where reading a GSTORE file produced by
 the GWPT subdriver ([[eph_task]] 17) for post-processing purposes.
 In this case, indeed, the "gvals" netcdf variables stores the GWPT electron-matrix elements
 while "gvals_ks" contains the KS e-ph matrix elements.
-Use "gvals_ks" if you want to compute physical properties using KS matrix elements instead of the GWPT ones
+Use "gvals_ks" if you wish to compute physical properties using KS matrix elements instead of the GWPT ones
 for comparison purposes.
-
-This input variable specifies the name of the NetCDF variable from which
-the electron–phonon matrix elements will be read in the GSTORE.nc file.
-
-Valid options are:
-
-- "gvals" (default)
-- "gvals_ks"
-
-This variable is only relevant when reading a GSTORE.nc file produced by
-the GWPT subdriver ([[eph_task]] = 17) for post-processing.
-In such cases: "gvals" stores the GWPT-renormalized electron–phonon matrix elements while
-"gvals_ks" contains the Kohn–Sham (KS) electron–phonon matrix elements.
-
-Select "gvals_ks" if you wish to compute physical properties using the KS matrix elements
-instead of the GWPT ones, for comparison purposes.
 """,
 ),
 
@@ -26351,7 +26420,7 @@ Note that the array depends on the value of [[nsppol]] thus one has to provide f
 two different spin channels when [[nsppol]] == 2.
 
 If not specified in input, ABINIT will use all the bands from 1 up to [[nband]]
-unless additional filters are activated, see [[gstore_kfilter]] and [[gstore_erange]].
+unless additional filters are activated, see also [[gstore_kfilter]] and [[gstore_erange]].
 """,
 ),
 
@@ -26368,13 +26437,31 @@ Variable(
     text=r"""
 This variable defines the path of the GSTORE.nc file with the e-ph matrix elements
 that should be used as input for further analysis.
+""",
 
-This variable can also be used when [[eph_task]] == 11 i.e. when we compute the GSTORE file.
-In this case, the code assumes we want to restart a GSTORE calculation and only the (k, q) entries
-that are missing in the nc file are computed.
-This option is very useful if the previous job has been killed due to timeout limit.
+# This variable can also be used when [[eph_task]] == 11 i.e. when we compute the GSTORE file.
+# In this case, the code assumes we want to restart a GSTORE calculation and only the (k, q) entries
+# that are missing in the nc file are computed.
+# This option is very useful if the previous job has been killed due to timeout limit.
+
+),
+
+Variable(
+    abivarname="getqpdata_filepath",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="GET the QPDATA.nc from FILEPATH",
+    added_in_version="10.7.0",
+    text=r"""
+This variable defines the path of the QPDATA file with the quasi-particle energies.
+to be used to update the initial KS band structure.
+To generate a QPDATA file, one can use AbiPy to extract the results from a SIGRES.nc file.
 """,
 ),
+
 
 Variable(
     abivarname="getabiwan_filepath",
@@ -26730,7 +26817,7 @@ Variable(
     mnemonics="GWPT Number of Processors for Wavevector sum, Perturbations, Q-points, Bands, K-points, Spin.",
     added_in_version="10.1.4",
     text=r"""
-This variable defines the Cartesian grid of MPI processors used for GWPT calculations.
+This variable defines the Cartesian grid of MPI processors used for GWPT calculations ([[eph_task]] = 17)
 If not specified in the input, the code will generate this grid automatically using the total number of processors
 and the basic dimensions of the job computed at runtime.
 

@@ -27,7 +27,7 @@
 #include "abi_common.h"
 
 module m_spmat_COO
-  use defs_basis  
+  use defs_basis
   use m_xmpi
   use m_errors
   use m_abicore
@@ -82,7 +82,7 @@ contains
   end subroutine diag
 
   !subroutine get_block(self, irow_start, icol_start, nrow, ncol, blk)
-  !  class(COO_mat_t), intent(in)::self 
+  !  class(COO_mat_t), intent(in)::self
   !  integer, intent(in) :: nrow,  irow_start, ncol, icol_start
   !  real(dp), intent(out) :: blk(nrow, ncol)
   !  integer :: ind, ind_i, ind_j
@@ -118,7 +118,7 @@ contains
    !!$OMP END PARALLEL DO
   end subroutine  mv
 
-  
+
 
 
   !-----------------------------------------------------------------------

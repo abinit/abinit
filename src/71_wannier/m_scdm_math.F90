@@ -271,7 +271,7 @@ contains
   pure function div2(x) result(y)
     integer, intent(in):: x
     integer:: y
-    if(mod(x, 2)==0 .and. x < 0) then 
+    if(mod(x, 2)==0 .and. x < 0) then
        y = x/2+1
     else
        y = x/2
@@ -288,9 +288,9 @@ contains
     n = kmesh(1) * kmesh(2) *kmesh(3)
     ABI_MALLOC(Rlist, (3, n))
     i = 0
-    ! Note that C/Fortran integer division is "truncate towards 0" division, 
+    ! Note that C/Fortran integer division is "truncate towards 0" division,
     ! whereas Python one is "floor" division.
-    ! For C/Fortran, the behavior for even and odd numbers is 
+    ! For C/Fortran, the behavior for even and odd numbers is
     !  not consistent and need special treatment in div2.
     do i3 = div2(-kmesh(3)), div2(kmesh(3))
        do i2 = div2(-kmesh(2)), div2(kmesh(2))

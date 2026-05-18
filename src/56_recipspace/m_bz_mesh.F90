@@ -2075,11 +2075,10 @@ subroutine findqg0(iq, g0, kmkp, nqbz, qbz, mG0)
  real(dp),intent(in) :: kmkp(3),qbz(3,nqbz)
 
 !Local variables-------------------------------
-!FIXME if I use 1.0d-4 the jobs crash, should understand why
 !scalars
  integer :: ig,iqbz,jg01,jg02,jg03
- real(dp) :: tolq0=1.0D-3
- character(len=500) :: msg
+ real(dp) :: tolq0=1.0D-3  !FIXME if I use 1.0d-4 the jobs crash, should understand why
+ !character(len=500) :: msg
 !arrays
  real(dp) :: glist1(2*ABS(mG0(1))+1),glist2(2*ABS(mG0(2))+1),glist3(2*ABS(mG0(3))+1), qpg0(3),rg(3)
 ! *************************************************************************
@@ -2109,24 +2108,21 @@ subroutine findqg0(iq, g0, kmkp, nqbz, qbz, mG0)
    !end do
 
    ! Init G0 lists to accelerate search below (small |G0| first)
-   glist1(1) = 0
-   ig = 2
+   glist1(1) = 0; ig = 2
    do jg01=1,mG0(1)
      glist1(ig)   =  jg01
      glist1(ig+1) = -jg01
      ig = ig + 2
    end do
 
-   glist2(1) = 0
-   ig = 2
+   glist2(1) = 0; ig = 2
    do jg02=1,mG0(2)
      glist2(ig)   =  jg02
      glist2(ig+1) = -jg02
      ig = ig + 2
    end do
 
-   glist3(1) = 0
-   ig = 2
+   glist3(1) = 0; ig = 2
    do jg03=1,mG0(3)
      glist3(ig)   =  jg03
      glist3(ig+1) = -jg03
@@ -2156,8 +2152,7 @@ subroutine findqg0(iq, g0, kmkp, nqbz, qbz, mG0)
   end do g1loop
 
   if (iq == 0) then
-    write(msg,'(a, 3f9.5)')' q = k-kp+G0 not found. kmkp:',kmkp
-    ABI_ERROR(msg)
+    ABI_ERROR(sjoin('q = k-kp+G0 not found. kmkp:', ktoa(kmkp)))
   end if
  end if
 

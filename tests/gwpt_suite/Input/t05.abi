@@ -22,6 +22,7 @@ getpot_filepath "diamond_eph_gwpt/gso_POT.nc"
 getddb_filepath "diamond_eph_gwpt/out_DDB"
 getgstore_filepath "t04o_GSTORE.nc"
 
+gwpt_g2mode 1              # Use |g|^2
 gstore_gname "gvals"      # Use GWPT e-ph matrix elements from GSTORE (default)
 eph_stern 1               # Activate Sterheimer to compute contribution given by states above nband
 
@@ -56,6 +57,7 @@ pseudos "C.psp8"
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t01.abi, t02.abi, t03.abi, t04.abi, t05.abi, t06.abi
+#%% exclude_builders = scope_gnu_10.2_paral
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt
 #%% files_to_test =

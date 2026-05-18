@@ -1,5 +1,5 @@
 
- **** DERIVATIVE DATABASE ****    
+ **** DERIVATIVE DATABASE ****
 +DDB, Version number  20240201
 
  Ti DDB file for elphon calculation
@@ -178,7 +178,7 @@
             0.33333333333333D+00  0.66666666666667D+00  0.50000000000000D+00
      znucl  0.22000000000000D+02
       zion  0.40000000000000D+01
- 
+
   Description of the potentials (KB energies)
   vrsio8 (for pseudopotentials)=100401
   usepaw =  0
@@ -187,10 +187,10 @@
   iln lpsang iproj  ekb(:)
      1     1     1     9.1553737E-01  0.0000000E+00
      2     2     1     0.0000000E+00 -8.0156917E+00
- 
+
  **** Database of total energy derivatives ****
  Number of data blocks=    4
-  
+
  2nd derivatives (non-stat.)  - # elements :          64
  qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
  frequency  0.00000000E+00
@@ -258,7 +258,7 @@
    2   2   3   4  0.00000000000000D+00  0.00000000000000D+00
    1   4   3   4  0.00000000000000D+00  0.00000000000000D+00
    2   4   3   4  0.00000000000000D+00  0.00000000000000D+00
-  
+
  2nd derivatives (non-stat.)  - # elements :          36
  qpt  5.00000000E-01  0.00000000E+00  0.00000000E+00   1.0
  frequency  0.00000000E+00
@@ -298,7 +298,7 @@
    1   2   3   2  0.67155390535009D-14  0.00000000000000D+00
    2   2   3   2 -0.63479869303090D-14  0.00000000000000D+00
    3   2   3   2  0.20849975536415D+02  0.00000000000000D+00
-  
+
  2nd derivatives (non-stat.)  - # elements :          36
  qpt  0.00000000E+00  0.00000000E+00  5.00000000E-01   1.0
  frequency  0.00000000E+00
@@ -338,7 +338,7 @@
    1   2   3   2 -0.11664551766420D-14  0.00000000000000D+00
    2   2   3   2 -0.56677551979490D-15  0.00000000000000D+00
    3   2   3   2  0.22113543045104D+02  0.00000000000000D+00
-  
+
  2nd derivatives (non-stat.)  - # elements :          36
  qpt  5.00000000E-01  0.00000000E+00  5.00000000E-01   1.0
  frequency  0.00000000E+00

@@ -341,7 +341,7 @@ end subroutine tdep_sampling_rotate
 !!
 !! SIDE EFFECTS
 !!  The following quantities in MD are computed:
-!!  
+!!
 !!  distance = Distance between the ideal positions of the atoms in the supercell,
 !!             (norm, and cartesian components).
 !!  Forces = Cartesian forces on the atoms at each time steps, as a flat array.

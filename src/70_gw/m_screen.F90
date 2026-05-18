@@ -807,7 +807,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
 !arrays
  integer :: units(2), g0(3), iperm(Qmesh%nibz)
  real(dp) :: wt_list(Qmesh%nibz)
- !complex(gwp),ABI_CONTIGUOUS pointer :: em1_ggw(:,:,:)
+ !complex(gwp),contiguous, pointer :: em1_ggw(:,:,:)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -1278,7 +1278,7 @@ subroutine screen_w0gemv(screen, trans, in_npw, nspinor, only_diago, alpha, beta
 !scalars
  integer :: ig,lda
 !arrays
- complex(gwp),ABI_CONTIGUOUS pointer :: em1_qbz(:,:)
+ complex(gwp),contiguous, pointer :: em1_qbz(:,:)
 ! *************************************************************************
 
  lda = screen%npw; em1_qbz => screen%Fgg_qbz%mat(:,:,1)
