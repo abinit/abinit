@@ -403,6 +403,7 @@ module m_slk
    module procedure slk_array2_free
    module procedure slk_array3_free
    module procedure slk_array4_free
+   module procedure slk_array5_free
  end interface slk_array_free
 
  public :: slk_array_set_zero                  ! Elemental routine to zero the value of the local buffer.
@@ -411,7 +412,10 @@ module m_slk
  public :: slk_array_gpu_set_zero              ! Zero the value of the local buffer on the GPU
  interface slk_array_gpu_set_zero
    module procedure slk_array1_gpu_set_zero
+   module procedure slk_array2_gpu_set_zero
    module procedure slk_array3_gpu_set_zero
+   module procedure slk_array4_gpu_set_zero
+   module procedure slk_array5_gpu_set_zero
  end interface slk_array_gpu_set_zero
 
  ! External functions.
@@ -1320,6 +1324,34 @@ end subroutine slk_array4_free
 
 !----------------------------------------------------------------------
 
+!!****f* m_slk/slk_array5_free
+!! NAME
+!!  slk_array5_free
+!!
+!! FUNCTION
+!!  Deallocate 5d array of slkmat_dp_t elements
+!!
+!! SOURCE
+
+subroutine slk_array5_free(slk_arr5)
+  class(basemat_t),intent(inout) :: slk_arr5(:,:,:,:,:)
+  integer :: i1, i2, i3, i4, i5
+  do i5=1,size(slk_arr5, dim=5)
+    do i4=1,size(slk_arr5, dim=4)
+      do i3=1,size(slk_arr5, dim=3)
+        do i2=1,size(slk_arr5, dim=2)
+          do i1=1,size(slk_arr5, dim=1)
+            call slk_arr5(i1, i2, i3, i4, i5)%free()
+          end do
+        end do
+      end do
+    end do
+  end do
+end subroutine slk_array5_free
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_slk/slk_array_set_zero
 !! NAME
 !!  slk_array_set_zero
@@ -1423,6 +1455,32 @@ subroutine slk_array1_gpu_set_zero(mat1d)
 end subroutine slk_array1_gpu_set_zero
 !!***
 
+!!****f* m_slk/slk_array2_gpu_set_zero
+!! NAME
+!!  slk_array2_gpu_set_zero
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine slk_array2_gpu_set_zero(mat2d)
+
+!Arguments ------------------------------------
+ class(basemat_t),intent(inout) :: mat2d(:,:)
+
+!Local variables-------------------------------
+ integer :: i1, i2
+! *********************************************************************
+
+ do i2=1,size(mat2d, dim=2)
+   do i1=1,size(mat2d, dim=1)
+     call mat2d(i1, i2)%gpu_set_zero()
+   end do
+ end do
+
+end subroutine slk_array2_gpu_set_zero
+!!***
+
 !!****f* m_slk/slk_array3_gpu_set_zero
 !! NAME
 !!  slk_array3_gpu_set_zero
@@ -1449,6 +1507,68 @@ subroutine slk_array3_gpu_set_zero(mat3d)
  end do
 
 end subroutine slk_array3_gpu_set_zero
+!!***
+
+!!****f* m_slk/slk_array4_gpu_set_zero
+!! NAME
+!!  slk_array4_gpu_set_zero
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine slk_array4_gpu_set_zero(mat4d)
+
+!Arguments ------------------------------------
+ class(basemat_t),intent(inout) :: mat4d(:,:,:,:)
+
+!Local variables-------------------------------
+ integer :: i1, i2, i3, i4
+! *********************************************************************
+
+ do i4=1,size(mat4d, dim=4)
+   do i3=1,size(mat4d, dim=3)
+     do i2=1,size(mat4d, dim=2)
+       do i1=1,size(mat4d, dim=1)
+         call mat4d(i1, i2, i3, i4)%gpu_set_zero()
+       end do
+     end do
+   end do
+ end do
+
+end subroutine slk_array4_gpu_set_zero
+!!***
+
+!!****f* m_slk/slk_array5_gpu_set_zero
+!! NAME
+!!  slk_array5_gpu_set_zero
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine slk_array5_gpu_set_zero(mat5d)
+
+!Arguments ------------------------------------
+ class(basemat_t),intent(inout) :: mat5d(:,:,:,:,:)
+
+!Local variables-------------------------------
+ integer :: i1,i2,i3,i4,i5
+! *********************************************************************
+
+ do i5=1,size(mat5d, dim=5)
+   do i4=1,size(mat5d, dim=4)
+     do i3=1,size(mat5d, dim=3)
+       do i2=1,size(mat5d, dim=2)
+         do i1=1,size(mat5d, dim=1)
+           call mat5d(i1,i2,i3,i4,i5)%gpu_set_zero()
+         end do
+       end do
+     end do
+   end do
+ end do
+
+end subroutine slk_array5_gpu_set_zero
 !!***
 
 !----------------------------------------------------------------------
