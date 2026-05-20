@@ -165,7 +165,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
                & dtset%pawprtvol,tdks%pawrhoij,pawrhoij_unsym,tdks%pawtab,qpt,    &
                & rhowfg,rhowfr,tdks%rhor,tdks%rprimd,dtset%symafm,tdks%symrec,    &
                & dtset%typat,tdks%ucvol,dtset%usewvl,tdks%xred,pawnhat=tdks%nhat, &
-               & rhog=tdks%rhog,silent=silence_please)
+               & rhog=tdks%rhog)
 
    ! 5-Take care of kinetic energy density
    if(dtset%usekden==1)then

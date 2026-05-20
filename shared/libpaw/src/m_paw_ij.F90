@@ -962,7 +962,7 @@ end subroutine paw_ij_copy
 !! SOURCE
 
 subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert, &
-&                       mpi_atmtab,comm_atom,natom,silent)
+&                       mpi_atmtab,comm_atom,natom)
 
 !Arguments ------------------------------------
 !scalars
@@ -971,7 +971,6 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
  integer,optional,intent(in) :: pawprtvol,pawspnorb
  integer,optional,intent(in) :: unit
  character(len=4),optional,intent(in) :: mode_paral
- logical, optional, intent(in) :: silent
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  type(Paw_ij_type),target,intent(in) :: Paw_ij(:)
@@ -981,7 +980,7 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
 !scalars
  integer :: cplex_dij,iatom,iatom_tot,idij,idij_sym,lmn2_size,lmn_size,my_comm_atom,my_natom,nspden !klmn,
  integer :: nsploop,nsppol,my_unt,ndij,qphase,tmp_cplex_dij,my_ipert,my_enunit,my_prtvol,size_paw_ij
- logical :: my_atmtab_allocated,paral_atom,my_silent
+ logical :: my_atmtab_allocated,paral_atom
  character(len=4) :: my_mode
  character(len=4000) :: msg
 !arrays
@@ -1003,7 +1002,6 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
  my_ipert =0         ; if (PRESENT(ipert))      my_ipert =ipert
  my_enunit=0         ; if (PRESENT(enunit))     my_enunit=enunit
  my_natom=size_paw_ij; if (PRESENT(natom))      my_natom=natom
- my_silent=.false.   ; if (PRESENT(silent))     my_silent=silent
 
 !Set up parallelism over atoms
  paral_atom=(present(comm_atom).and.my_natom/=size_paw_ij)
@@ -1211,7 +1209,7 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
    end if   !(ABS(my_prtvol)>=1.and.(iatom_tot==1.or.iatom_tot==my_natom.or.my_prtvol<0)
 
 !  =================== Standard output =====================================
-   if ((abs(my_prtvol)==0).and.(iatom_tot==1.or.iatom_tot==my_natom).and.(.not.my_silent)) then
+   if ((abs(my_prtvol)==0).and.(iatom_tot==1.or.iatom_tot==my_natom)) then
 
      !Title
      if (idij==1) then

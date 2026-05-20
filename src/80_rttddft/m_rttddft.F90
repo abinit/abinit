@@ -321,7 +321,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
              & atvshift=dtset%atvshift, &
              & fatvshift=one,comm_atom=mpi_enreg%comm_atom,                          &
              & mpi_atmtab=mpi_enreg%my_atmtab,mpi_comm_grid=mpi_enreg%comm_fft,      &
-             & nucdipmom=dtset%nucdipmom, silent=silence_please)
+             & nucdipmom=dtset%nucdipmom)
 
    !Symetrize Dij
    call symdij(tdks%gprimd,tdks%indsym,ipert,my_natom,dtset%natom,dtset%nsym, &

@@ -168,7 +168,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 &          pawxcdev,qphon,spnorbscl,ucvol,charge,vtrial,vxc,xred,znuc,&
 &          electronpositron_calctype,electronpositron_pawrhoij,electronpositron_lmselect,&
 &          atvshift,fatvshift,natvshift,nucdipmom,eijkl_is_sym,&
-&          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr,silent)
+&          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -183,7 +183,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  logical,optional,intent(in) :: electronpositron_lmselect(:,:)
  logical,optional,intent(in) :: eijkl_is_sym(ntypat)
- logical,optional,intent(in) :: silent
  real(dp),intent(in) :: gprimd(3,3),qphon(3)
  real(dp),intent(in) ::  vxc(:,:),xred(3,natom),znuc(ntypat)
  real(dp),intent(in),target :: vtrial(cplex*nfft,nspden)
@@ -220,7 +219,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  logical :: dijU_available,dijU_need,dijU_prereq
  logical :: has_nucdipmom,my_atmtab_allocated,is_sym
  logical :: need_to_print,paral_atom,v_dijhat_allocated
- logical :: lsilent
  real(dp) :: hyb_mixing_,hyb_mixing_sr_
  character(len=500) :: msg
 !arrays
@@ -261,8 +259,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  end if
 
  has_nucdipmom=present(nucdipmom)
-
- lsilent = .false.; if(present(silent)) lsilent = silent
 
 !  === Check complex character of arguments ===
 
@@ -1017,10 +1013,10 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  if (paral_atom) then
    call paw_ij_print(paw_ij,unit=std_out,pawprtvol=pawprtvol,pawspnorb=pawspnorb,&
 &   comm_atom=my_comm_atom,mpi_atmtab=my_atmtab,natom=natom,&
-&   mode_paral='PERS',enunit=enunit,ipert=ipert,silent=lsilent)
+&   mode_paral='PERS',enunit=enunit,ipert=ipert)
  else
    call paw_ij_print(paw_ij,unit=std_out,pawprtvol=pawprtvol,pawspnorb=pawspnorb,&
-&   mode_paral='COLL',enunit=enunit,ipert=ipert,silent=lsilent)
+&   mode_paral='COLL',enunit=enunit,ipert=ipert)
  end if
 
 !Free temporary storage
