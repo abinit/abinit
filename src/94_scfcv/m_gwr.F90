@@ -2549,6 +2549,8 @@ subroutine gwr_build_green(gwr, free_ugb)
  end if
 
  ABI_CHECK(allocated(gwr%ugb), "gwr%ugb array should be allocated!")
+ compute_svd = .False.
+ !compute_svd = .True.
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -2619,23 +2621,22 @@ subroutine gwr_build_green(gwr, free_ugb)
            call slk_pgemm("N", "C", work_gb(iiab), isgn*cone_gw, work_gb(jiab), czero_gw, green)
 
          ! SVD. NB: green matrix in destroyed in output.
-           compute_svd = .False.
-           if (compute_svd) then
-             call green%svd("N", "N", u_mat, s_vals, vt_mat)
-             s2_sum_all = sum(s_vals**2)
-             icomp = -1
-             do ii=1,size(s_vals)
-               s2_sum = sum(s_vals(1:ii)**2)
-               if (icomp == -1 .and. s2_sum / s2_sum_all > eratio) icomp = ii
-               !write(std_out, *)ii, s_vals(ii), 100 * s2_sum / s2_sum_all
-             end do
-             write(std_out, "(a,i0,2a,3(a,1x,i0))") &
-               "For ik_ibz: ", ik_ibz, ", kpt: ", trim(ktoa(kk_ibz)), ", itau: ", itau, ", ipm: ", ipm, ", spin: ", spin
-             write(std_out, "(a,i0,2(a,f5.2),a,i0)") &
-               "Need ", icomp, " vectors with frac: ", (100.0_dp * icomp) / size(s_vals), &
-               "% to reach eratio: ", eratio, ", G matrix size: ", size(s_vals)
-             ABI_FREE(s_vals)
-           end if
+         if (compute_svd) then
+           call green%svd("N", "N", u_mat, s_vals, vt_mat)
+           s2_sum_all = sum(s_vals**2)
+           icomp = -1
+           do ii=1,size(s_vals)
+             s2_sum = sum(s_vals(1:ii)**2)
+             if (icomp == -1 .and. s2_sum / s2_sum_all > eratio) icomp = ii
+             !write(std_out, *)ii, s_vals(ii), 100 * s2_sum / s2_sum_all
+           end do
+           write(std_out, "(a,i0,2a,3(a,1x,i0))") &
+              "SVD: For ik_ibz: ", ik_ibz, ", kpt: ", trim(ktoa(kk_ibz)), ", itau: ", itau, ", ipm: ", ipm, ", spin: ", spin
+           write(std_out, "(a,i0,2(a,f5.2),a,i0)") &
+              "SVD: Need ", icomp, " vectors with frac: ", (100.0_dp * icomp) / size(s_vals), &
+              "% to reach eratio: ", eratio, ", G matrix size: ", size(s_vals)
+           ABI_FREE(s_vals)
+         end if
 
          ! Redistribute data.
            call gwr%gt_kibz(ipm, ik_ibz, itau, spin, iab)%take_from(green)
@@ -2664,6 +2665,8 @@ subroutine gwr_build_green(gwr, free_ugb)
 
  call cwtime_report(" gwr_build_green:", cpu, wall, gflops)
  call timab(1922, 2, tsec)
+
+ !if (compute_svd) stop "compute_svd"
 
 end subroutine gwr_build_green
 !!***

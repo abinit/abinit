@@ -1802,7 +1802,7 @@ subroutine gstore_print(gstore, units, header, prtvol)
      call wrtout(units, sjoin("P Number of CPUs for parallelism over wavevector summation: ", itoa(gqk%pp_sum_comm%nproc)))
    end if
 
-   ! Print q-points
+   ! Print k-points
    call wrtout(units, " k-points included in gstore:")
    do ik_calc=1,gqk%glob_nk
      ik_bz = gstore%kglob2bz(ik_calc, spin)
@@ -1813,6 +1813,7 @@ subroutine gstore_print(gstore, units, header, prtvol)
        exit
      end if
    end do
+   !call wrtout(units, " ")
 
    ! Print q-points
    !call wrtout(units, " q-points included in gstore:")
@@ -1867,6 +1868,7 @@ subroutine gstore_print(gstore, units, header, prtvol)
  if (my_prtvol > 0) then
    call gstore%ebands%print(units, header="Electron bands in GSTORE", prtvol=my_prtvol)
  end if
+ call wrtout(units, " ")
 
 end subroutine gstore_print
 !!***
