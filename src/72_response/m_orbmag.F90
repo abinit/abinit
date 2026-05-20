@@ -2067,7 +2067,8 @@ subroutine nonlocal_me(adir,atindx,bdir,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
     do isp = 1, dtset%nspinor
       do jlmn = 1, pawtab(itypat)%lmn_size
 
-        if (need_ormesh .AND. iatom.EQ.t_atom) then
+        !if (need_ormesh .AND. iatom.EQ.t_atom) then
+        if (need_ormesh) then
           ! FFT ket-side to fofr, real space representation
           ket_mesh(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+dnlket,jlmn,itypat)*ket(1,1:npwsp)
           ket_mesh(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+dnlket,jlmn,itypat)*ket(2,1:npwsp)
@@ -2089,7 +2090,8 @@ subroutine nonlocal_me(adir,atindx,bdir,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
           ! see note at top of file near definition of MATPACK macro
           if (ilmn .GT. jlmn) dij = CONJG(dij)
          
-          if (need_ormesh .AND. iatom.EQ.t_atom) then
+          !if (need_ormesh .AND. iatom.EQ.t_atom) then
+          if (need_ormesh) then
             jl = pawtab(itypat)%indlmn(1,jlmn)
             il = pawtab(itypat)%indlmn(1,ilmn)
             ormesh_fac = prefac*trnrm*dij*four_pi*CONJG(j_dpc**il)*four_pi*(j_dpc**jl)
