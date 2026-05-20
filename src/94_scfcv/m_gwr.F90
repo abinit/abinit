@@ -163,6 +163,7 @@ module m_gwr
  use m_cplxtools,     only : cplx_mat_plus_bc
  use m_fftcore,       only : get_kg, sphereboundary, getng, print_ngfft, fftcore_set_mixprec, ngfft_seq
  use m_cgtk,          only : cgtk_rotate
+ use m_cgtools,       only : cg_zdotc
  use m_mpinfo,        only : initmpi_seq, destroy_mpi_enreg
  use m_kg,            only : getcut
  use m_fft,           only : fftbox_plan3_t, uplan_t, fft_ug, fft_ur, fourdp
@@ -7606,10 +7607,10 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
  !integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
  integer :: nkpt_summed, use_umklp, band1, band2, band1_start, band1_stop, band1_max
- integer :: ib, il_b1, il_b2, nb, block_size, ii, mband, block_counter
+ integer :: ib, il_b1, il_b2, nb, block_size, ii, mband, block_counter, idir, iab
  integer :: istwf_ki, npw_ki, istwf_kf, nI, nJ, nomega, io, iq, nq, dim_rtwg !ig,
  integer :: npwe, u_nfft, u_mgfft, u_mpw
- logical :: isirr_k, use_tr, is_metallic, print_time
+ logical :: isirr_k, use_tr, is_metallic, print_time, use_ddk
  real(dp) :: spin_fact, weight, deltaf_b1b2, deltaeGW_b1b2, gwr_boxcutmin_c, zcut, qlen, eig_nk, e0
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
  complex(dp) :: deltaeKS_b1b2
@@ -7621,25 +7622,26 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  type(littlegroup_t) :: ltg_q
  type(desc_t),pointer :: desc_ki
 !arrays
- integer :: gmax(3), u_ngfft(18), work_ngfft(18), units(2) ! spinor_padx(2,4), g0(3),
+ integer :: gmax(3), u_ngfft(18), work_ngfft(18), units(2), spinor_pad(2,4), spad1, spad2 !, ! g0(3),
  integer,contiguous, pointer :: kg_ki(:,:)
  integer,allocatable :: gvec_q0(:,:), gbound_q0(:,:), u_gbound(:,:)
- real(dp) :: kk_ibz(3), kk_bz(3), tsec(2)
- real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:), ks_eig(:,:,:) !, cwave(:,:)
- real(dp),allocatable :: work(:,:,:,:), qdirs(:,:)
+ real(dp) :: kk_ibz(3), kk_bz(3), tsec(2), rtmp(2)
+ real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:), ks_eig(:,:,:)
+ real(dp),allocatable :: work(:,:,:,:), qdirs(:,:), cwave(:,:)
  logical :: gradk_not_done(gwr%nkibz)
  logical,allocatable :: bbp_mask(:,:)
  complex(dp) :: chq(3) !, wng(3)
+ complex(dp) :: vg(3), vr(3)
  !complex(dp),allocatable :: ug1_block(:,:)
- complex(gwp) :: rhotwx(3, gwr%nspinor**2) !, new_rhotwx(3, gwr%nspinor**2)
+ complex(gwp) :: rhotwx(3, gwr%nspinor**2), new_rhotwx(3, gwr%nspinor**2)
  complex(gwp),allocatable :: ug2(:), ur1_kibz(:), ur2_kibz(:), ur_prod(:), rhotwg(:), ug1_block(:,:), ug1(:)
  complex(dp) :: green_w(gwr%ntau), omega(gwr%ntau)
  complex(dp),allocatable :: chi0_lwing(:,:,:), chi0_uwing(:,:,:), chi0_head(:,:,:), head_qvals(:)
- real(dp), allocatable :: gh1c_block(:,:,:,:)
+ real(dp), allocatable :: gh1c_block(:,:,:,:), cg2_dp(:,:)
  type(vkbr_t),allocatable :: vkbr(:)
  type(gsphere_t) :: gsph
  type(ddkop_t) :: ddkop
- !type(pawcprj_type),allocatable :: cwaveprj(:,:)
+ type(pawcprj_type),allocatable :: cwaveprj(:,:)
 ! *************************************************************************
 
  units = [std_out, ab_out]
@@ -7777,6 +7779,11 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ABI_MALLOC(rhotwg, (npwe * dim_rtwg))
 
  ! TODO: use ddkop instead of commutator so that we can handle SOC terms.
+ !use_ddk = gwr%dtset%userie == 432
+ use_ddk = .False.
+ !use_ddk = .True.
+ if (use_ddk) call wrtout(std_out, " Using DDK to compute the commutator matrix elements.")
+
  call ddkop%init(dtset, gwr%cryst, gwr%pawtab, gwr%psps, gwr%mpi_enreg, u_mpw, u_ngfft)
 
  ABI_CHECK_IEQ(dtset%symchi, 1, "symchi 0 not implemented")
@@ -7810,9 +7817,11 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      npw_ki   =  desc_ki%npw
      istwf_ki =  desc_ki%istwfk
      kg_ki    => desc_ki%gvec
+     spinor_pad = reshape([0, 0, npw_ki, npw_ki, 0, npw_ki, npw_ki, 0], [2, 4])
 
      ABI_MALLOC(ug1, (npw_ki * nspinor))
      ABI_MALLOC(ug2, (npw_ki * nspinor))
+     ABI_MALLOC(cg2_dp, (2, npw_ki * nspinor))
 
      call sphereboundary(u_gbound, istwf_ki, kg_ki, u_mgfft, npw_ki)
 
@@ -7822,31 +7831,13 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        gradk_not_done(ik_ibz) = .FALSE.
      end if
 
-!#define _DEV_USE_DDK 1
-
-!#if _DEV_USE_DDK
-!     ! In principle we should pass npw_kf ...
-!     call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_bz, istwf_ki, npw_ki, kg_ki)
-!
-!     !call wfd%copy_cg(ib_v, ik, spin, cg_v)
-!     !call ddkop%apply(ebands%eig(ib_v, ik, spin), npw_k, wfd%nspinor, cg_v, cwaveprj)
-!
-!     !call wfd%copy_cg(ib_c, ik, spin, cg_c)
-!     !vv = ddkop%get_braket(ebands%eig(ib_c, ik, spin), istwf_k, npw_k, nspinor, cg_c, mode=ds%mode)
-!#endif
-
-     ! HM: 24/07/2018
-     ! Transform dipoles to be consistent with results from DFPT
-     ! Perturbations with DFPT are along the reciprocal lattice vectors
-     ! Perturbations with Commutator are along real space lattice vectors
-     ! dot(A, DFPT) = X
-     ! dot(B, COMM) = X
-     ! B = 2 pi (A^{-1})^T =>
-     ! dot(B^T B,COMM) = 2 pi DFPT
-     !vr = (2*pi)*(2*pi)*sum(ihrc(:,:),dim=2)
-     !vg(1) = dot_product(Cryst%gmet(1,:), vr)
-     !vg(2) = dot_product(Cryst%gmet(2,:), vr)
-     !vg(3) = dot_product(Cryst%gmet(3,:), vr)
+     if (use_ddk) then
+       call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_bz, istwf_ki, npw_ki, kg_ki)
+       !call wfd%copy_cg(ib_v, ik, spin, cg_v)
+       !call ddkop%apply(ebands%eig(ib_v, ik, spin), npw_k, wfd%nspinor, cg_v, cwaveprj)
+       !call wfd%copy_cg(ib_c, ik, spin, cg_c)
+       !vv = ddkop%get_braket(ebands%eig(ib_c, ik, spin), istwf_k, npw_k, nspinor, cg_c, mode=ds%mode)
+     end if
 
      call chi0_bbp_mask(ik_ibz, ik_ibz, spin, spin_fact, use_tr, &
                         gwcomp0, spmeth0, gwr%ugb_nband, mband, now_ebands, bbp_mask)
@@ -7882,16 +7873,18 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        call ugb_kibz%collect_cplx(npw_ki * nspinor, nb, [1, band1_start], ug1_block)
 
        ABI_MALLOC(gh1c_block, (2, npw_ki*nspinor, 3, nb))
+
        do il_b1=1, ugb_kibz%size_local(2)
          band1 = ugb_kibz%loc2gcol(il_b1)
          eig_nk = gwr%ks_ebands%eig(band1, ik_ibz, spin)
 
-!#if _DEV_USE_DDK
-!         ! FIXME: This is wrong if spc
-!         !call c_f_pointer(c_loc(ugb_kibz%buffer_cplx(:,il_b1)), cwave, shape=[2, npw_ki*nspinor])
-!         !call ddkop%apply(eig_nk, npw_ki, nspinor, cwave, cwaveprj)
-!         !gh1c_block(:,:,:,il_b1) = ddkop%gh1c(:, 1:npw_ki*nspinor,:)
-!#endif
+         if (use_ddk) then
+           ! Compute DH_DK |psi_k,bi>, store results in gh1c_block
+           gh1c_block(1,:,1,il_b1) = real(ugb_kibz%buffer_cplx(:,il_b1))
+           gh1c_block(2,:,1,il_b1) = aimag(ugb_kibz%buffer_cplx(:,il_b1))
+           call ddkop%apply(eig_nk, npw_ki, nspinor, gh1c_block(:,:,1,il_b1), cwaveprj)
+           gh1c_block(:,:,:,il_b1) = ddkop%gh1c(:, 1:npw_ki*nspinor,:)
+         end if
        end do
 
        ! Loop over "conduction" states.
@@ -7959,8 +7952,45 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
              rhotwx = czero_gw
            end if
 
-           !new_rhotwx = zero
-           !gh1c_block(:,:,:,ib) = ddkop%gh1c(:, 1:npw_ki*nspinor,:)
+           if (use_ddk) then
+             cg2_dp(1,:) = real(ug2)
+             cg2_dp(2,:) = aimag(ug2)
+             do idir=1,3
+               do iab=1,gwr%nspinor**2
+                 spad1 = spinor_pad(1,iab); spad2 = spinor_pad(2,iab)
+                 rtmp = cg_zdotc(npw_ki, gh1c_block(:,spad1+1,idir,il_b1), cg2_dp(:,spad2+1))
+                 new_rhotwx(idir, iab) = rtmp(1) + j_dpc * rtmp(2)
+               end do ! iab
+             end do ! idir
+
+             if (abs(deltaeKS_b1b2) > GW_TOLQ0) then
+                new_rhotwx = -new_rhotwx / deltaeKS_b1b2
+                new_rhotwx = new_rhotwx / (two_pi ** 2)
+                !do iab=1,gwr%nspinor**2
+                !  new_rhotwx(:, iab) = matmul(cryst%gmet, new_rhotwx(:, iab))
+                !end do
+             else
+                new_rhotwx = zero
+             end if
+
+             ! HM: 24/07/2018
+             ! Transform dipoles to be consistent with results from DFPT
+             ! Perturbations with DFPT are along the reciprocal lattice vectors
+             ! Perturbations with commutator are along real space lattice vectors
+             ! dot(A, DFPT) = X
+             ! dot(B, COMM) = X
+             ! B = 2 pi (A^{-1})^T => dot(B^T B,COMM) = 2 pi DFPT
+             !
+             !vr = (2*pi)*(2*pi)*sum(ihrc(:,:),dim=2)
+             !vg(1) = dot_product(cryst%gmet(1,:), vr)
+             !vg(2) = dot_product(cryst%gmet(2,:), vr)
+             !vg(3) = dot_product(cryst%gmet(3,:), vr)
+             !do idir=1,3
+             !  write(100, *)"rhotwx:    ", sum(rhotwx(:, 1))
+             !  write(100, *)"new_rhotwx:", sum(new_rhotwx(:, 1))
+             !end do
+             !stop "gwr_build_chi0_head_and_wings"
+           end if
 
            ! NB: Using symrec conventions here
            ik_ibz = gwr%kbz2ibz(1, ik_bz); isym_k = gwr%kbz2ibz(2, ik_bz)
@@ -7986,6 +8016,8 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
      ABI_FREE(ug1)
      ABI_FREE(ug2)
+     ABI_FREE(cg2_dp)
+
      if (print_time) then
        write(msg,'(4x,3(a,i0),a)')"my_ikf [", my_ikf, "/", gwr%my_nkbz, "] (tot: ", gwr%nkbz, ")"
        call cwtime_report(msg, cpu_k, wall_k, gflops_k); if (my_ikf == LOG_MODK) call wrtout(std_out, " ...")
@@ -8078,6 +8110,8 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
  call cwtime_report(" gwr_build_chi0_head_and_wings:", cpu_all, wall_all, gflops_all)
  call timab(1927, 2, tsec)
+
+ !stop "gwr_build_chi0_head_and_wings"
 
 end subroutine gwr_build_chi0_head_and_wings
 !!***
