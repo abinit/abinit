@@ -6,7 +6,7 @@
 !!  Routines to initialize k-point and q-point sampling from input file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -504,6 +504,9 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pawspnorb',tread,'INT')
    if(tread/=0 .and. intarr(1)/=0)istwfk(1:nkpt)=1
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'zora',tread,'INT')
+   if( tread/=0 .and. intarr(1)/=0 .and. intarr(1)/=1)istwfk(1:nkpt)=1
 
    do ikpt=1,nkpt
      if(istwfk(ikpt)==0)then

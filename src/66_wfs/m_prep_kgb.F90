@@ -7,7 +7,7 @@
 !!  or to perform the FFT of the wavefunctions when the orbitals are distributed in linalg mode (paral_kgb = 1).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (FBottin,MT,GZ,MD,FDahm)
+!!  Copyright (C) 1998-2026 ABINIT group (FBottin,MT,GZ,MD,FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,6 +27,7 @@ module m_prep_kgb
  use m_errors
  use m_xmpi
  use m_xomp
+ use m_gputk
  use m_abi_linalg
 
  use, intrinsic :: iso_c_binding, only: c_loc, c_size_t
@@ -37,7 +38,7 @@ module m_prep_kgb
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_nonlop,      only : nonlop
  use m_getghc,      only : multithreaded_getghc
- use m_fft,         only : fourwf
+ use m_fft,         only : fourwf, fourwf_optmem
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -49,10 +50,6 @@ module m_prep_kgb
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
  use m_gpu_toolbox, only : CPU_DEVICE_ID, gpu_device_synchronize, gpu_data_prefetch_async
-#endif
-
-#if defined HAVE_OPENMP_OFFLOAD
- use m_ompgpu_fourwf
 #endif
 
  implicit none
@@ -131,21 +128,21 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
 !arrays
  integer,allocatable :: index_wavef_band(:),index_wavef_send(:),index_wavef_spband(:)
  integer,allocatable :: rdisplsloc(:),recvcountsloc(:),sdisplsloc(:),sendcountsloc(:)
- integer,ABI_CONTIGUOUS pointer :: kg_k_gather_sym(:,:)
- integer,ABI_CONTIGUOUS pointer :: rdispls(:),rdispls_sym(:)
- integer,ABI_CONTIGUOUS pointer :: recvcounts(:),recvcounts_sym(:),recvcounts_sym_tot(:)
- integer,ABI_CONTIGUOUS pointer :: sdispls(:),sdispls_sym(:)
- integer,ABI_CONTIGUOUS pointer :: sendcounts(:),sendcounts_sym(:),sendcounts_sym_all(:)
- integer,ABI_CONTIGUOUS pointer :: tab_proc(:)
+ integer,contiguous, pointer :: kg_k_gather_sym(:,:)
+ integer,contiguous, pointer :: rdispls(:),rdispls_sym(:)
+ integer,contiguous, pointer :: recvcounts(:),recvcounts_sym(:),recvcounts_sym_tot(:)
+ integer,contiguous, pointer :: sdispls(:),sdispls_sym(:)
+ integer,contiguous, pointer :: sendcounts(:),sendcounts_sym(:),sendcounts_sym_all(:)
+ integer,contiguous, pointer :: tab_proc(:)
  real(dp) :: tsec(2)
  real(dp),allocatable,target :: cwavef_alltoall1(:,:), gvnlxc_alltoall1(:,:)
  real(dp),allocatable,target :: gwavef_alltoall1(:,:), swavef_alltoall1(:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(c_double), ABI_CONTIGUOUS pointer :: cwavef_alltoall2(:,:) => null()
- real(c_double), ABI_CONTIGUOUS pointer :: gvnlxc_alltoall2(:,:) => null()
- real(c_double), ABI_CONTIGUOUS pointer :: gwavef_alltoall2(:,:) => null()
- real(c_double), ABI_CONTIGUOUS pointer :: swavef_alltoall2(:,:) => null()
+ real(c_double), contiguous, pointer :: cwavef_alltoall2(:,:) => null()
+ real(c_double), contiguous, pointer :: gvnlxc_alltoall2(:,:) => null()
+ real(c_double), contiguous, pointer :: gwavef_alltoall2(:,:) => null()
+ real(c_double), contiguous, pointer :: swavef_alltoall2(:,:) => null()
 #else
  real(dp),allocatable,target :: cwavef_alltoall2(:,:)
  real(dp),allocatable,target :: gvnlxc_alltoall2(:,:)
@@ -637,7 +634,7 @@ end subroutine prep_getghc
 
 subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,&
                        blocksize,mpi_enreg,nnlout,paw_opt,signs,gsc, tim_nonlop,cwavef,gvnlc, &
-                       already_transposed,gpu_option,vectproj) ! optional
+                       already_transposed,gpu_option,vectproj,cwavef_tr) ! optional
 
 !Arguments ------------------------------------
  integer,         intent(in)            :: blocksize,choice,cpopt,idir,signs,nnlout,paw_opt
@@ -646,7 +643,8 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  real(dp),        intent(in)            :: lambdablock(blocksize)
  real(dp),        intent(out)  , target :: enlout_block(nnlout*blocksize),gvnlc(:,:),gsc(:,:)
  real(dp),        intent(inout), target :: cwavef(:,:)
- real(dp),ABI_CONTIGUOUS optional,intent(inout)        :: vectproj(:,:,:)
+ real(dp),intent(inout), pointer,optional :: cwavef_tr(:,:)
+ real(dp),contiguous, optional,intent(inout)        :: vectproj(:,:,:)
  type(gs_hamiltonian_type),intent(in)   :: hamk
  type(mpi_type),intent(in)              :: mpi_enreg
  type(pawcprj_type),intent(inout)       :: cwaveprj(:,:)
@@ -664,19 +662,19 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 !arrays
  integer,  allocatable :: index_wavef_band(:)
  integer,  allocatable :: rdisplsloc(:),recvcountsloc(:),sdisplsloc(:),sendcountsloc(:)
- integer,ABI_CONTIGUOUS  pointer :: rdispls(:),recvcounts(:),sdispls(:),sendcounts(:)
+ integer,contiguous,  pointer :: rdispls(:),recvcounts(:),sdispls(:),sendcounts(:)
  real(dp) :: lambda_nonlop(mpi_enreg%bandpp)
  real(dp) :: tsec(2)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(c_double), ABI_CONTIGUOUS pointer :: cwavef_alltoall2(:,:) => null()
- real(c_double), ABI_CONTIGUOUS pointer :: gvnlc_alltoall2(:,:)  => null()
- real(c_double), ABI_CONTIGUOUS pointer :: gsc_alltoall2(:,:)    => null()
+ real(c_double), contiguous, pointer :: cwavef_alltoall2(:,:) => null()
+ real(c_double), contiguous, pointer :: gvnlc_alltoall2(:,:)  => null()
+ real(c_double), contiguous, pointer :: gsc_alltoall2(:,:)    => null()
  integer(kind=C_SIZE_T) :: cwavef_alltoall2_size
  integer(kind=C_SIZE_T) :: gvnlc_alltoall2_size
  integer(kind=C_SIZE_T) :: gsc_alltoall2_size
 #else
- real(dp), allocatable :: cwavef_alltoall2(:,:)
+ real(dp), pointer :: cwavef_alltoall2(:,:)
  real(dp), allocatable :: gvnlc_alltoall2(:,:)
  real(dp), allocatable :: gsc_alltoall2(:,:)
 #endif
@@ -705,8 +703,12 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  call timab(570,1,tsec)
 
  do_transpose = .true.
+ bandpp       = mpi_enreg%bandpp
  if(present(already_transposed)) then
-   if(already_transposed) do_transpose = .false.
+   if(already_transposed) then
+     do_transpose = .false.
+     bandpp = blocksize
+   end if
  end if
 
  l_gpu_option=ABI_GPU_DISABLED
@@ -715,7 +717,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  end if
 
  nproc_band = mpi_enreg%nproc_band
- bandpp     = mpi_enreg%bandpp
+
  spaceComm=mpi_enreg%comm_fft
  if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_band
  my_nspinor=max(1,hamk%nspinor/mpi_enreg%nproc_spinor)
@@ -739,7 +741,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    end if
  end if
  if(cpopt>=0.and. .not. present(vectproj)) then
-   if (size(cwaveprj)/=hamk%natom*my_nspinor*mpi_enreg%bandpp) then
+   if (size(cwaveprj)/=hamk%natom*my_nspinor*bandpp) then
      ABI_BUG('Incorrect size for cwaveprj!')
    end if
  end if
@@ -782,7 +784,14 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    gvnlc_alltoall2_size = 2*ndatarecv*my_nspinor*bandpp*dp
 #endif
  else
-   ABI_MALLOC(cwavef_alltoall2, (2,ndatarecv*my_nspinor*bandpp))
+   if(present(cwavef_tr)) then
+     if(any(shape(cwavef_tr)/=(/2,ndatarecv*my_nspinor*bandpp/))) then
+       ABI_BUG('cwavef_tr does not have the correct shape')
+     endif
+     cwavef_alltoall2 => cwavef_tr
+   else
+     ABI_MALLOC(cwavef_alltoall2, (2,ndatarecv*my_nspinor*bandpp))
+   endif
    ABI_MALLOC(gsc_alltoall2,    (2,ndatarecv*my_nspinor*(paw_opt/3)*bandpp))
    ABI_MALLOC(gvnlc_alltoall2,  (2,ndatarecv*my_nspinor*bandpp))
  end if
@@ -1024,7 +1033,11 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    end if
 #endif
  else
-   ABI_FREE(cwavef_alltoall2)
+   if(present(cwavef_tr)) then
+     nullify(cwavef_alltoall2)
+   else
+     ABI_FREE(cwavef_alltoall2)
+   endif
    ABI_FREE(gvnlc_alltoall2)
    ABI_FREE(gsc_alltoall2)
  end if
@@ -1080,10 +1093,11 @@ end subroutine prep_nonlop
 !!  option_fourwf=option for fourwf (see fourwf.F90)
 !!  prtvol=control print volume and debugging output
 !!  ucvol=unit cell volume
+!!  nfft_blocks=number of blocks fourwf is split into.
 !!  [bandfft_kpt_tab]= (optional) if present, contains tabs used to implement
 !!                     the "band-fft" parallelism
 !!                      if not present, the bandfft_kpt global variable is used
-!!  [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)  
+!!  [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!
 !! OUTPUT
 !!  gwavef=(2,npw*ndat)=matrix elements <G|H|C>.
@@ -1094,11 +1108,12 @@ end subroutine prep_nonlop
 
 subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 &          mpi_enreg,nband_k,ndat,ngfft,npw_k,n4,n5,n6,occ_k,option_fourwf,ucvol,wtk,&
+&          nfft_blocks,&
 &          bandfft_kpt_tab,gpu_option) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: blocksize,iblock,istwf_k,mgfft,n4,n5,n6,nband_k,ndat,npw_k
+ integer,intent(in) :: blocksize,iblock,istwf_k,mgfft,n4,n5,n6,nband_k,ndat,npw_k,nfft_blocks
  integer,intent(in) :: option_fourwf
  integer,intent(in),optional :: gpu_option
  real(dp),intent(in) :: ucvol,wtk
@@ -1109,24 +1124,25 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  real(dp),intent(in) :: occ_k(nband_k)
  real(dp),intent(out) :: rhoaug(n4,n5,n6)
  real(dp),intent(in), target :: cwavef(2,npw_k*blocksize)
- real(dp),target,intent(inout) :: wfraug(2,n4,n5,n6*ndat)
+ real(dp),target,intent(inout) :: wfraug(:,:,:,:) !(2,n4,n5,n6*{ndat,ndat/nfft_blocks+mod(ndat,nfft_blocks))
 
 !Local variables-------------------------------
 !scalars
  integer :: bandpp,bandpp_sym,ier,iibandpp,ikpt_this_proc,ind_occ,ind_occ1,ind_occ2,ipw
  integer :: istwf_k_,jjbandpp,me_fft,nd3,nproc_band,nproc_fft,npw_fft
+ integer :: nfft_blocks_sym,nband_fftblock
  integer :: spaceComm=0,tim_fourwf,gpu_option_
  integer,pointer :: idatarecv0,ndatarecv,ndatarecv_tot,ndatasend_sym
  logical :: flag_inv_sym,have_to_reequilibrate,transfer_cwavef
  real(dp) :: weight,weight1,weight2
  type(bandfft_kpt_type),pointer :: bandfft_kpt_ptr
 !arrays
- integer,ABI_CONTIGUOUS pointer :: indices_pw_fft(:),kg_k_fft(:,:),kg_k_gather(:,:),kg_k_gather_sym(:,:)
- integer,ABI_CONTIGUOUS pointer :: rdispls(:),rdispls_sym(:)
- integer,ABI_CONTIGUOUS pointer :: recvcounts(:),recvcount_fft(:),recvcounts_sym(:),recvcounts_sym_tot(:)
- integer,ABI_CONTIGUOUS pointer :: recvdisp_fft(:),sdispls(:),sdispls_sym(:)
- integer,ABI_CONTIGUOUS pointer :: sendcounts(:),sendcount_fft(:),sendcounts_sym(:),sendcounts_sym_all(:)
- integer,ABI_CONTIGUOUS pointer :: senddisp_fft(:),tab_proc(:)
+ integer,contiguous, pointer :: indices_pw_fft(:),kg_k_fft(:,:),kg_k_gather(:,:),kg_k_gather_sym(:,:)
+ integer,contiguous, pointer :: rdispls(:),rdispls_sym(:)
+ integer,contiguous, pointer :: recvcounts(:),recvcount_fft(:),recvcounts_sym(:),recvcounts_sym_tot(:)
+ integer,contiguous, pointer :: recvdisp_fft(:),sdispls(:),sdispls_sym(:)
+ integer,contiguous, pointer :: sendcounts(:),sendcount_fft(:),sendcounts_sym(:),sendcounts_sym_all(:)
+ integer,contiguous, pointer :: senddisp_fft(:),tab_proc(:)
  integer,allocatable :: rdisplsloc(:)
  integer,allocatable :: recvcountsloc(:),sdisplsloc(:)
  integer,allocatable :: sendcountsloc(:)
@@ -1136,7 +1152,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  real(dp),allocatable :: buff_wf(:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(c_double), ABI_CONTIGUOUS pointer :: cwavef_alltoall1(:,:) => null()
+ real(c_double), contiguous, pointer :: cwavef_alltoall1(:,:) => null()
 #else
  real(dp),allocatable :: cwavef_alltoall1(:,:)
 #endif
@@ -1160,6 +1176,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 ! *************************************************************************
 
  ABI_CHECK((option_fourwf/=3),'Option=3 (FFT r->g) not implemented')
+ ABI_CHECK((nfft_blocks>0),'nfft_blocks is null')
  ABI_CHECK((mpi_enreg%bandpp==ndat),'BUG: bandpp/=ndat')
 
  spaceComm=mpi_enreg%comm_band
@@ -1186,8 +1203,10 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
    istwf_k_       = 1
    if (modulo(bandpp,2)==0) then
      bandpp_sym   = bandpp/2
+     nfft_blocks_sym  = nfft_blocks/2; if(modulo(nfft_blocks,2)/=0) nfft_blocks_sym=nfft_blocks_sym+1
    else
      bandpp_sym   = bandpp
+     nfft_blocks_sym  = nfft_blocks
    end if
  end if
 
@@ -1377,7 +1396,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 !  -------------------
 !  Fourier calculation
 !  -------------------
-!  Cuda version
+!  GPU version
    if(gpu_option_/=ABI_GPU_DISABLED) then
      ABI_MALLOC(weight_t,(bandpp))
      do iibandpp=1,bandpp
@@ -1387,37 +1406,15 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
        weight_t(iibandpp)=occ_k(ind_occ)*wtk/ucvol
        if(abs(occ_k(ind_occ)) < tol8) weight_t(iibandpp) = zero
      end do
-!    Accumulate time because it is not done in gpu_fourwf
-     call timab(240+tim_fourwf,1,tsec)
-     if(gpu_option_==ABI_GPU_LEGACY) then
-#if defined HAVE_GPU_CUDA
-       call gpu_fourwf(1,rhoaug,&
-&       cwavef_alltoall1,&
-&       dummy,wfraug,gbound_,gbound_,&
-&       istwf_k_,kg_k_gather,kg_k_gather,mgfft,mpi_enreg,bandpp,&
-&       ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,&
-&       tim_fourwf,weight_t,weight_t)
-#endif
-     else if(gpu_option_==ABI_GPU_KOKKOS) then
-#if defined HAVE_GPU_CUDA
-       call gpu_fourwf_managed(1,rhoaug,&
-&       cwavef_alltoall1,&
-&       dummy,wfraug,gbound_,gbound_,&
-&       istwf_k_,kg_k_gather,kg_k_gather,mgfft,mpi_enreg,bandpp,&
-&       ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,&
-&       tim_fourwf,weight_t,weight_t)
-#endif
-     else if(gpu_option_==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-       call ompgpu_fourwf    (1,rhoaug,&
-&       cwavef_alltoall1,&
-&       dummy,wfraug,gbound_,gbound_,&
-&       istwf_k_,kg_k_gather,kg_k_gather,mgfft,mpi_enreg%me_g0_fft,bandpp,&
-&       ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,&
-&       weight_t,weight_t)
-#endif
-     end if ! gpu_option_
-     call timab(240+tim_fourwf,2,tsec)
+
+     nband_fftblock=bandpp/nfft_blocks+modulo(bandpp,nfft_blocks)
+     call fourwf_optmem(1,rhoaug,&
+     &      cwavef_alltoall1,&
+     &      dummy,wfraug(:,:,:,1:n6*nband_fftblock),gbound_,gbound_,&
+     &      istwf_k_,kg_k_gather,kg_k_gather,mgfft,mpi_enreg,bandpp,nfft_blocks,&
+     &      ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,tim_fourwf,weight,weight,&
+     &      weight_array_r=weight_t,weight_array_i=weight_t,&
+     &      gpu_option=gpu_option_)
      ABI_FREE(weight_t)
 
 !  Standard version
@@ -1503,7 +1500,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 !  ------------------------------------------------------------
 !  Fourier calculation
 !  ------------------------------------------------------------
-!  Cuda version
+!  GPU version
    if (gpu_option_/=ABI_GPU_DISABLED) then
      ABI_MALLOC(weight1_t,(bandpp_sym))
      ABI_MALLOC(weight2_t,(bandpp_sym))
@@ -1518,36 +1515,16 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
        weight1_t(iibandpp) = occ_k(ind_occ1)*wtk/ucvol
        weight2_t(iibandpp) = occ_k(ind_occ2)*wtk/ucvol
      end do
-     call timab(240+tim_fourwf,1,tsec)
-     if (gpu_option_==ABI_GPU_LEGACY) then
-#if defined HAVE_GPU_CUDA
-       call gpu_fourwf(1,rhoaug,&
-&       ewavef_alltoall_sym,&
-&       dummy,wfraug,gbound_,gbound_,&
-&       istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,mpi_enreg,bandpp_sym,&
-&       ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,&
-&       tim_fourwf,weight1_t,weight2_t)
-#endif
-     else if(gpu_option_==ABI_GPU_KOKKOS) then
-#if defined HAVE_GPU_CUDA
-       call gpu_fourwf_managed(1,rhoaug,&
-&       ewavef_alltoall_sym,&
-&       dummy,wfraug,gbound_,gbound_,&
-&       istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,mpi_enreg,bandpp_sym,&
-&       ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,&
-&       tim_fourwf,weight1_t,weight2_t)
-#endif
-     else if (gpu_option_==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-       call ompgpu_fourwf(1,rhoaug,&
-&       ewavef_alltoall_sym,&
-&       dummy,wfraug,gbound_,gbound_,&
-&       istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,mpi_enreg%me_g0_fft,bandpp_sym,&
-&       ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,&
-&       weight1_t,weight2_t)
-#endif
-     end if ! gpu_option_
-     call timab(240+tim_fourwf,2,tsec)
+
+     nband_fftblock=bandpp_sym/nfft_blocks_sym+modulo(bandpp_sym,nfft_blocks_sym)
+     call fourwf_optmem(1,rhoaug,&
+     &      ewavef_alltoall_sym,&
+     &      dummy,wfraug(:,:,:,1:n6*nband_fftblock),gbound_,gbound_,&
+     &      istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,mpi_enreg,bandpp_sym,nfft_blocks_sym,&
+     &      ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,tim_fourwf,weight,weight,&
+     &      weight_array_r=weight1_t,weight_array_i=weight2_t,&
+     &      gpu_option=gpu_option_)
+
      ABI_FREE(weight1_t)
      ABI_FREE(weight2_t)
 

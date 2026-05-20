@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (GJ, MT, JW)
+!!  Copyright (C) 1998-2026 ABINIT group (GJ, MT, JW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,7 +34,7 @@ module m_positron
  use m_dtset
  use m_dtfil
  use m_extfpmd
- 
+
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_special_funcs,  only : sbf8
@@ -103,6 +103,7 @@ contains
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  ecore=core psp energy (part of total energy) (hartree)
 !!  etotal=current value of total energy
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  forces_needed=if >0 forces are needed
 !!  gred(3,natom)=gradients wrt nuclear positions in reduced coordinates
@@ -611,21 +612,21 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 !  Inits/exchange news energies
 !  Retrieve energy of non-evolving particle(s)
    if (history_level== 0) then
-     call energies_init(energies)
-     call energies_init(electronpositron%energies_ep)
+     call energies%init()
+     call electronpositron%energies_ep%init()
      if (dtset%positron>0) energies%e0_electronpositron=etotal_read
      if (dtset%positron<0) energies%e0_electronpositron=zero
    else if (history_level== 1) then
-     call energies_init(electronpositron%energies_ep)
+     call electronpositron%energies_ep%init()
      if (dtset%positron>0) energies%e0_electronpositron=etotal_read
    else if (history_level== 2) then
-     call energies_copy(energies,electronpositron%energies_ep)
-     call energies_init(energies)
+     call energies%copy(electronpositron%energies_ep)
+     call energies%init()
      energies%e0_electronpositron=electronpositron%e0
    else if (history_level== 3) then
-     call energies_copy(electronpositron%energies_ep,energies_tmp)
-     call energies_copy(energies,electronpositron%energies_ep)
-     call energies_copy(energies_tmp,energies)
+     call electronpositron%energies_ep%copy(energies_tmp)
+     call energies%copy(electronpositron%energies_ep)
+     call energies_tmp%copy(energies)
      energies%e0_electronpositron=electronpositron%e0
 !    else if (history_level== 4) then
    end if
@@ -981,7 +982,7 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
    end if
  end if
 
- ! This to avoid using unitialized variables.
+ ! This to avoid using uninitialized variables.
  lambda_core = zero; lambda_paw = zero; lambda_core_paw = zero
 
 !Constants
@@ -1492,7 +1493,7 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
            rhotot(:,1)=sqfpi*rhosph(:);rhotot_ep(:,1)=sqfpi*rhosph_ep(:)
            call pawxcsum(1,1,1,lmselect,lmselect_ep,lm_size,mesh_size,3,dtset%pawxcdev,&
 &           pawang,rhotot,rhotot_ep,v1sum,v2sum)
-!          Compute final developpment of gamma moments
+!          Compute final development of gamma moments
            gammam(:,:,:)=zero
            gammam(:,:,1)=gam_(:,:,1)*sqfpi
            gammam(:,1,1)=gammam(:,1,1)+(d2gam(:,1,2)*v1sum(:,2) &
@@ -1902,8 +1903,8 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 !arrays
  integer,allocatable :: gbound(:,:),gbound_pos(:,:),kg_k(:,:),kg_k_pos(:,:)
  integer,allocatable :: lmncmax(:),my_ffttab(:),my_gridtab(:),nphicor(:)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  logical,allocatable :: have_intc(:,:,:),have_rad(:,:)
  real(dp) :: buf(4),contrib(2),cp(2),cp_pos(2),expipr(2),pbn(3),pcart(3)
  real(dp) :: radsumnfftc(2),ylmgr(1,1,0),ylmr_nrm(1)
@@ -1922,8 +1923,8 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  real(dp),allocatable :: rhocorej(:),rhoe(:,:),rhop(:,:),ylmp(:)
  real(dp),pointer :: cg_pos_ptr(:,:),cg_ptr(:,:),occ_ptr(:),occ_pos_ptr(:)
  real(dp),pointer :: rhor_(:,:),rhor_ep_(:,:)
- complex(dpc) :: ifac ! (-i)^L mod 4
- complex(dpc),dimension(0:3) :: ilfac(0:3)=(/(1.0,0.0),(0.0,-1.0),(-1.0,0.0),(0.0,1.0)/)
+ complex(dp) :: ifac ! (-i)^L mod 4
+ complex(dp),dimension(0:3) :: ilfac(0:3)=(/(1.0,0.0),(0.0,-1.0),(-1.0,0.0),(0.0,1.0)/)
  type(coeff1_type),allocatable :: gammastate_c(:)
  type(coeffi2_type),allocatable :: indlmncor(:)
  type(coeff2_type),allocatable :: phicor(:)
@@ -1940,8 +1941,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 
 !Compatibility tests
  if (.not.associated(electronpositron)) then
-   msg='electronpositron variable must be associated!'
-   ABI_BUG(msg)
+   ABI_BUG('electronpositron variable must be associated!')
  end if
  if (allocated(mpi_enreg%proc_distrb)) then
    do isppol=1,dtset%nsppol
@@ -2098,7 +2098,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
      ABI_MALLOC(atm,)
      do itypat=1,dtset%ntypat
        call pawpsp_init_core(atm,psp_filename=trim(filpsp(itypat)),radmesh=pawrad(itypat))
-       ABI_MALLOC(indlmncor(itypat)%value,(size(atm%indlmn(:,1)),atm%lmn_size)) 
+       ABI_MALLOC(indlmncor(itypat)%value,(size(atm%indlmn(:,1)),atm%lmn_size))
        ABI_MALLOC(phicor(itypat)%value,(atm%mesh_size,atm%ln_size))
        indlmncor(itypat)%value=atm%indlmn
        lmncmax(itypat)=atm%lmn_size
@@ -2503,7 +2503,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
        else
          call prep_fourwf(denpot_dum,blocksize,cwaveg_pos,cwaveaug_pos,&
 &         iblock_pos,istwf_k_pos,dtset%mgfft,mpi_enreg,nband_k_pos,&
-&         bandpp,ngfft,npw_k_pos,n4,n5,n6,occ_k_pos,option,Crystal%ucvol,wtk_k_pos,&
+&         bandpp,ngfft,npw_k_pos,n4,n5,n6,occ_k_pos,option,Crystal%ucvol,wtk_k_pos,1,&
 &         bandfft_kpt_tab=bandfft_kpt_pos,gpu_option=dtset%gpu_option)
        end if
 
@@ -2731,7 +2731,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
                      else
                        call prep_fourwf(denpot_dum,blocksize,cwaveg,cwaveaug,&
 &                       iblock,istwf_k,dtset%mgfft,mpi_enreg,nband_k,&
-&                       bandpp,ngfft,npw_k,n4,n5,n6,occ_k,option,Crystal%ucvol,wtk_k,&
+&                       bandpp,ngfft,npw_k,n4,n5,n6,occ_k,option,Crystal%ucvol,wtk_k,1,&
 &                       bandfft_kpt_tab=bandfft_kpt_el,gpu_option=dtset%gpu_option)
                      end if
 
@@ -3620,7 +3620,7 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
    rhotot(:,1)=sqfpi*rhosph(:);rhotot_ep(:,1)=sqfpi*rhosph_ep(:)
    call pawxcsum(1,1,1,lmselect,lmselect_ep,lm_size,mesh_size,3,dtset%pawxcdev,&
 &   pawang,rhotot,rhotot_ep,v1sum,v2sum)
-!  Compute final developpment of gamma moments
+!  Compute final development of gamma moments
    gammam(:,:)=zero
    gammam(:,1)=gam_(:,1,1)*sqfpi
    gammam(:,1)=gammam(:,1)+(d2gam(:,2)*v1sum(:,2) &

@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon, Marc Torrent)
+# Copyright (C) 2005-2026 ABINIT Group (Yann Pouillon, Marc Torrent)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -904,7 +904,7 @@ AC_DEFUN([_ABI_LINALG_SEARCH_BLAS], [
   abi_linalg_has_blas="unknown"
 
   # Look for libraries and routines
-  AC_MSG_CHECKING([for libraries that may contain BLAS]) 
+  AC_MSG_CHECKING([for libraries that may contain BLAS])
   AC_MSG_RESULT([$1])
   AC_LANG_PUSH([Fortran])
   AC_SEARCH_LIBS([zgemm], $1,
@@ -1018,7 +1018,7 @@ AC_DEFUN([_ABI_LINALG_SEARCH_LAPACKE], [
       if test "${abi_linalg_has_lapacke}" = "yes"; then
         abi_linalg_libs="-l${test_lib} $2 ${abi_linalg_libs}"
         break
-      fi  
+      fi
     done
     if test "${abi_linalg_has_lapacke}" = "no"; then
       LIBS="${tmp_saved_LIBS}"

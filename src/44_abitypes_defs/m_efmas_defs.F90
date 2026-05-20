@@ -6,7 +6,7 @@
 !! This module contains datatypes for efmas functionalities.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2025 ABINIT group (XG)
+!! Copyright (C) 2001-2026 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,12 +39,12 @@ module m_efmas_defs
  type efmasval_type
 
    !For k-point
-   complex(dpc),allocatable :: ch2c(:,:,:,:) ! ch2c(mdim,mdim,1:deg_dim,1:deg_dim)
+   complex(dp),allocatable :: ch2c(:,:,:,:) ! ch2c(mdim,mdim,1:deg_dim,1:deg_dim)
                                              ! where mdim=3 labels reciprocal space directions
                                              ! See Eq.(50) of Laflamme2016 : 2nd-order Hamiltonian contribution
                                              ! Two first indices are for number of directions
                                              ! Two last indices are for band indices within degenerate subspace
-   complex(dpc),allocatable :: eig2_diag(:,:,:,:) ! eig2_diag(mdim,mdim,1:deg_dim,1:deg_dim)
+   complex(dp),allocatable :: eig2_diag(:,:,:,:) ! eig2_diag(mdim,mdim,1:deg_dim,1:deg_dim)
                                              ! where mdim=3 labels reciprocal space directions
                                              ! See Eq.(50) of Laflamme2016 : generalized second-order k-derivative
 

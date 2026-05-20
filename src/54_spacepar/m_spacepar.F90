@@ -7,7 +7,7 @@
 !!  Unlike the procedures in m_cgtools, the routines declared in this module can use mpi_type.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV, JWZ)
+!!  Copyright (C) 2008-2026 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,7 +56,7 @@ public :: irrzg             ! Find the irreducible zone in reciprocal space (use
 public :: setsym            ! Set up irreducible zone in  G space by direct calculation.
 public :: hartredq          ! Compute the q-gradient of the Hartree potential (=FFT of -rho(G)*G_qdir/pi**2/|G|**4 )
 
-! MG FIXME This routine is deprecated. Now the symmetrization of the **potentials** is done in the m_dvdb
+! MG FIXME This routine is deprecated. Now the symmetrization of the DFPT **potentials** is done in the m_dvdb
 public :: rotate_rho
 !!***
 
@@ -103,17 +103,15 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nspden,nu
  integer :: ii,ii1,ing,me_fft,n1,n2,n3,nd_atom,nd_atom_tot,nproc_fft
  real(dp),parameter :: tolfix=1.000000001e0_dp
  real(dp) :: cutoff,gqgm12,gqg2p3,gqgm23,gqgm13,gs2,gs3,gs,phase,ucvol
- complex(dpc) :: prefac,cgr
+ complex(dp) :: prefac,cgr
  !arrays
  integer :: id(3)
  integer,allocatable :: nd_list(:)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gmet(3,3),gprimd(3,3),gqred(3),mcgc(3),rmet(3,3)
  real(dp) :: rgbasis(3,3,3)
  real(dp),allocatable :: gq(:,:),nd_m(:,:),ndvecr(:),work1(:,:),work2(:,:),work3(:,:)
-
-
 ! *************************************************************************
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -335,12 +333,10 @@ subroutine mkunitpawspherepot(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,&
  character(len=500) :: message
 !arrays
  integer :: id(3)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gmet(3,3),gprimd(3,3),gqred(3),qpt_(3),rmet(3,3)
  real(dp),allocatable :: gq(:,:),work1(:,:)
-
-
 ! *************************************************************************
 
  ! Check that cplex has an allowed value
@@ -534,6 +530,7 @@ end subroutine mkunitpawspherepot
 !!  cplex= if 1, vhartr is REAL, if 2, vhartr is COMPLEX
 !!  gsqcut=cutoff value on G**2 for sphere inside fft box.
 !!         (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
+!!  icutcoul= type of Coulomb cutoff to apply
 !!  izero=if 1, unbalanced components of Vhartree(g) are set to zero
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
@@ -541,6 +538,7 @@ end subroutine mkunitpawspherepot
 !!  [qpt(3)=reduced coordinates for a wavevector to be combined with the G vectors (needed if cplex==2).]
 !!  rhog(2,nfft)=electron density in G space
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  vcutgeo(3)= array to describe the geometry of the Coulomb cutoff
 !!
 !! OUTPUT
 !!  vhartr(cplex*nfft)=Hartree potential in real space, either REAL or COMPLEX
@@ -568,17 +566,17 @@ subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
  integer :: i1,i2,i23,i2_local,i3,id1,id2,id3
  integer :: ig,ig1min,ig1,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
  integer :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05,me_fft,nproc_fft
+ integer :: nog0
  real(dp),parameter :: tolfix=1.000000001e0_dp
  real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,ucvol
  character(len=500) :: message
 !arrays
  integer :: id(3)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gmet(3,3),gprimd(3,3),qpt_(3),rmet(3,3),tsec(2)
  real(dp),allocatable :: gcutoff(:)
  real(dp),allocatable :: gq(:,:),work1(:,:)
-
 ! *************************************************************************
 
  ! Keep track of total time spent in hartre
@@ -630,9 +628,11 @@ subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
    ABI_ERROR(message)
  end if
 
+ !PCM cut-off is implemented outside termcutoff
+ nog0=0; if (qeq0==1 .or. icutcoul==55) nog0=1
+
  !Initialize Gcut-off array from m_gtermcutoff
- !ABI_MALLOC(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3)))
- call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo,qpt=qpt_)
 
  ! In order to speed the routine, precompute the components of g+q
  ! Also check if the booked space was large enough...
@@ -669,7 +669,8 @@ subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
        i23=n1*(i2_local-1 +(n2/nproc_fft)*(i3-1))
        ! Do the test that eliminates the Gamma point outside of the inner loop
        ii1=1
-       if(i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0)then
+!       if(i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0)then
+       if(i23==0 .and. nog0==1  .and. ig2==0 .and. ig3==0)then
          ii1=2
          work1(re,1+i23)=zero
          work1(im,1+i23)=zero
@@ -813,7 +814,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
  l_gpu_thread_limit=0; if(present(gpu_thread_limit)) l_gpu_thread_limit=gpu_thread_limit
 
  if(l_gpu_thread_limit /= 0) then
-   nthreads_bak=xomp_get_num_threads(open_parallel=.True.)
+   nthreads_bak=xomp_get_max_threads()
    call xomp_set_num_threads(min(l_gpu_thread_limit,nthreads_bak))
  end if
 
@@ -985,10 +986,9 @@ subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,rdfuncr,&
  integer :: n3
  real(dp) :: b11,b12,b13,b21,b22,b23,b31,b32,b33
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
- real(dp),ABI_CONTIGUOUS pointer :: g2cart(:),laplacerdfuncg(:,:,:),rdfuncg(:,:,:)
-
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
+ real(dp),contiguous, pointer :: g2cart(:),laplacerdfuncg(:,:,:),rdfuncg(:,:,:)
 ! *************************************************************************
 
 !Keep local copy of fft dimensions
@@ -1300,11 +1300,10 @@ subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,rhog,rprimd,vh
 !arrays
  integer,save :: idx(12)=(/1,1,2,2,3,3,3,2,3,1,2,1/)
  integer :: id(3)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: dgmetds(3,3),gmet(3,3),gprimd(3,3),gqr(3),rmet(3,3)
  real(dp),allocatable :: gq(:,:),work1(:,:)
-
 ! *************************************************************************
 
  if( .not. (ipert==natom+3 .or. ipert==natom+4))then
@@ -1493,13 +1492,12 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
  !character(len=500) :: message
 !arrays
  integer,allocatable :: isymg(:)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: magngx(:,:),magngy(:,:),magngz(:,:)
  real(dp),allocatable :: rhosu1_arr(:),rhosu2_arr(:),work(:)
  real(dp),allocatable :: symafm_used(:),symrec_cart(:,:,:),symrel_cart(:,:,:),tnons_used(:,:),sym_det(:)
-
 !*************************************************************************
 !
 !Note the timing channel 17 excludes the different Fourier transforms
@@ -2615,12 +2613,6 @@ end subroutine setsym
 !!  (=FFT of -rho(G)*G_qdir/pi**2/|G|**4 ) -> Cartesian coordinates
 !!  The calculation is performed in reduced reciprocal space coordinates.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2021-2025 ABINIT group (FIXME: add author)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  cplex= if 1, vqgradhartr is REAL, if 2, vqgradhartr is COMPLEX
 !!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
@@ -2635,10 +2627,6 @@ end subroutine setsym
 !!
 !! OUTPUT
 !!  vqgradhart(cplex*nfft)=q-gradient of the Hartree potential at q=0in real space, either REAL or COMPLEX
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -2663,11 +2651,10 @@ subroutine hartredq(cplex,gmet,gsqcut,mpi_enreg,nfft,ngfft,qdir,rhog,vqgradhart)
  real(dp), parameter :: piinv2= piinv*two
  real(dp),parameter :: tolfix=1.000000001e0_dp
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp),allocatable :: work1(:,:)
  real(dp) :: gvec(3)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")

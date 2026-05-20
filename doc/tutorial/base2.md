@@ -26,7 +26,7 @@ This tutorial should take about 1 hour.
 We studied the H$_2$ molecule in a big box.
 We used 10 Ha as cut-off energy, a 10x10x10 Bohr$^3$ supercell, the local-density approximation
 (as well as the local-spin-density approximation) in the Perdew-Wang parametrization ([[ixc]] = -1012)
-and a pseudopotential from the pseudodojo <http://www.pseudo-dojo.org/>.
+and a pseudopotential from the pseudodojo <https://www.pseudo-dojo.org/>.
 
 At this stage, we compared our results:
 
@@ -83,7 +83,7 @@ and
             xcart1    -7.4307169181E-01  0.0000000000E+00  0.0000000000E+00
                        7.4307169181E-01  0.0000000000E+00  0.0000000000E+00
 
-These are similar to those determined in [tutorial 1](/tutorial/base1),
+These are similar to those determined in [tutorial 1](../tutorial/base1.md),
 although they have been obtained in one run.
 You can also check that the residual forces are lower than `5.0d-4`.
 Convergence issues are discussed in [[help:abinit#numerical-quality|section 6]] of the abinit help file, on numerical quality.
@@ -167,7 +167,7 @@ The corresponding atomisation energies and interatomic distances are:
   30         | .1774                     |  1.451
   35         | .1774                     |  1.451
 
-In order to obtain 0.2% relative accuracy on the bond length or atomisation
+In order to obtain 0.2% relative precision on the bond length or atomisation
 energy, one should use a kinetic cut-off energy of 25 Ha.
 We will keep in mind this value for the final run.
 

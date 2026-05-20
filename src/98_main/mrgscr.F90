@@ -7,7 +7,7 @@
 !! can be used to perform a sigma calculation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (RS, MG, MS)
+!! Copyright (C) 2005-2026 ABINIT group (RS, MG, MS)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -110,9 +110,9 @@ program mrgscr
  real(dp) :: gmet(3,3),gprimd(3,3),qdiff(3),rmet(3,3),mat(3,3),qtmp(3),tsec(2)
  real(dp),allocatable :: qlwl(:,:),real_omega(:),rhor(:,:),rhog(:,:),nhat(:,:)
  real(dp),allocatable :: work(:),ftab(:),ysp(:,:),eint(:),qratio(:,:)
- complex(gwpc),pointer :: vc_sqrt(:)
- complex(gwpc),allocatable :: tmp_epsm1(:,:,:,:),kxcg(:,:)
- complex(dpc),allocatable :: omega(:),em1_ppm(:),epsm1_eigen(:,:),ppm_eigen(:,:),rhoggp(:,:)
+ complex(gwp),pointer :: vc_sqrt(:)
+ complex(gwp),allocatable :: tmp_epsm1(:,:,:,:),kxcg(:,:)
+ complex(dp),allocatable :: omega(:),em1_ppm(:),epsm1_eigen(:,:),ppm_eigen(:,:),rhoggp(:,:)
  character(len=fnlen),allocatable :: filenames(:)
  type(pawrhoij_type),allocatable :: pawrhoij(:)
  type(hscr_t),target,allocatable :: Hscr_file(:)

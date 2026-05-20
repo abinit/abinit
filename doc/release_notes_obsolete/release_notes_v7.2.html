@@ -4,7 +4,7 @@
 </head>
 <body>
 
-<h5>Copyright (C) 2010-2025 ABINIT group (XG)
+<h5>Copyright (C) 2010-2026 ABINIT group (XG)
 <br> This file is distributed under the terms of the GNU General Public License, see
 ~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
 http://www.gnu.org/copyleft/gpl.txt </a>.
@@ -17,7 +17,7 @@ November 2012 and March 2013. These release notes
 are relative to improvements of ABINITv7.2 with respect to v7.0.
 
 The list of contributors includes :
-F. Abreu, J. Alberdi, B. Amadon, G. Antonius, A. Berger, J.-M. Beuken, F. Bruneval, D. Caliste, F. Dahm, 
+F. Abreu, J. Alberdi, B. Amadon, G. Antonius, A. Berger, J.-M. Beuken, F. Bruneval, D. Caliste, F. Dahm,
 M. Delaveau, T. Deutsch, C. Espejo, M. Giantomassi,
 Y. Gillet, G. Huhs, F. Jollet, M. Oliveira, S. Ponce, Y. Pouillon, T. Rangel,
 G.-M. Rignanese, D. Sangalli, M. Torrent, M. Verstraete, D. Waroquiers, B. Xu, J. Zwanziger
@@ -45,21 +45,21 @@ __________________________________________________________________
 
 A.  WARNINGS AND IMPORTANT REMARKS
 
-A.1 With the replacement of LibXC1.1 by LibXC2.0, numerical bugs have been eliminated (thus changing the references) : 
-    - in the evaluation of the Langreth-Mehl 
+A.1 With the replacement of LibXC1.1 by LibXC2.0, numerical bugs have been eliminated (thus changing the references) :
+    - in the evaluation of the Langreth-Mehl
      correlation energy (ixc -137 , the error was on the order of 0.1Ha in test libxc#04 and 0.5Ha in test libxc#05 ),
-    - in the evaluation of exchange in modified form of PW91 by Adamo and Barone (ixc -119, the error was on the order 
+    - in the evaluation of exchange in modified form of PW91 by Adamo and Barone (ixc -119, the error was on the order
      of 6 mHa in test libxc#04, and 3 mHa in test libxc#05),
     - in the Vosko-Wilk-Nussair functional, spin-polarized (ixc -007, the error was on the order of 2 mHa in test libxc#05).
     - in the MPWLYP1W functional [EE Dahlke and DG Truhlar, J. Phys. Chem. B 109, 15677 (2005)] (ixc  -174, 6 mHa in test libxc#06,
        and 4 mHa in test libxc#07)
-    - in the OPTPBE_VDW, ixc -141  ,PBE reparametrization for vdW 
+    - in the OPTPBE_VDW, ixc -141  ,PBE reparametrization for vdW
             [J Klimes, DR Bowler, and A Michaelides, J. Phys.: Condens. Matter 22, 022201 (2010)
             (40 mHa in test libxc#17, 4 mHa in test libxc#18)
     - in the XC_GGA_XC_KT2, ixc -146  ! Keal and Tozer version 2 [TW Keal and DJ Tozer, J. Chem. Phys. 119, 3015 (2003)
             (7 mHa in test libxc#17, 100 mHa in test libxc#18))
-    Small numerical differences are to be expected when using some of the other functionals, 
-    as changes were introduced in Libxc2.0 in the 
+    Small numerical differences are to be expected when using some of the other functionals,
+    as changes were introduced in Libxc2.0 in the
     evaluation of the functionals in the limit of vanishing densities (the new version should be more accurate).
 
 __________________________________________________________________
@@ -83,25 +83,25 @@ B.2 Libxc 2.0.1 is now linked to ABINIT.
     be either activated, or tested.
     Work by M. Oliveira and Y. Pouillon
 
-B.3 One can compute the STS signal for an STM tip atom placed at a given position, 
+B.3 One can compute the STS signal for an STM tip atom placed at a given position,
     according to the chemical nature of the tip (s- p- d- wave etc...),
-    thanks to the combination of new input variables natsph_extra, ratsph_extra, and xredsph_extra. 
+    thanks to the combination of new input variables natsph_extra, ratsph_extra, and xredsph_extra.
     At the end of a normal GS run this produces the l-decomposed
     partial DOS at the point xredsph_extra.
-    Previously, STM signal analysis was done for a fixed voltage by computing the total density 
+    Previously, STM signal analysis was done for a fixed voltage by computing the total density
     at the different points where the tip was located,
     no partial decomposition was allowed and only limited sets of voltages could be used (no spectroscopic STS mode).
-    See new test v7#04. 
-    Work by M. Verstraete 
+    See new test v7#04.
+    Work by M. Verstraete
 
 B.4 Automatic determination of the best processor repartition is now available for ground-state
-    and response function calculation: 
+    and response function calculation:
      - by means of a simple heuristics
      - by means of a series of small benchmarks using the scheme applied for the LOBPCG algorithm.
     The size of communicators for parallel matrix algebra routines can be optimized, as well
     as the use (or not) of matrix algebra on GPU.
     See the description in the input variable autoparal, values 1, 2 or 3..
-    Automatic tests should still be written. 
+    Automatic tests should still be written.
     Work by F. Dahm, M. Torrent and F. Jollet.
 
 __________________________________________________________________
@@ -201,7 +201,7 @@ D.12 Introduction of a double grid integration, for the computation of the tempe
     Work by S. Ponce
 
 D.13 The vdW-DF1 and DF2 are now in debugging phase.
-    Many new input variables have been introduced : irdvdw, prtvdw, 
+    Many new input variables have been introduced : irdvdw, prtvdw,
     vdw_df_acutmin, vdw_df_aratio, vdw_df_damax,
     vdw_df_dcut, vdw_df_dratio, vdw_df_dsoft,
     vdw_df_gcut, vdw_df_ndpts, vdw_df_nqpts, vdw_df_nrpts,
@@ -239,10 +239,10 @@ D.22 Parallelisation of the computation of the Bader charge computation
 D.23 Added writing/reading of polyfits.
      By D. Waroquiers
 
-D.24 Numerous miscellaneous additional bug fixes (to the sources, as well as to the build system, 
+D.24 Numerous miscellaneous additional bug fixes (to the sources, as well as to the build system,
      including patches for the fallbacks), and improvements of documentation by :
      B. Amadon, A. Berger, J.-M. Beuken, F. Bruneval, D. Caliste,
-     F. Dahm, M. Delaveau, M. Giantomassi, 
-     Y. Gillet, F. Jollet, Y. Pouillon, G.-M. Rignanese, 
+     F. Dahm, M. Delaveau, M. Giantomassi,
+     Y. Gillet, F. Jollet, Y. Pouillon, G.-M. Rignanese,
      M. Torrent, M. Verstraete, D. Waroquiers, B. Xu
 </pre>

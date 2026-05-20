@@ -6,7 +6,7 @@
 !!  Helper functions common to e-ph calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,6 +47,7 @@ module m_ephtk
  public :: ephtk_update_ebands        ! Update ebands according to dtset%occopt, tsmear, mbpt_sciss, eph_fermie, eph_extrael
  public :: ephtk_get_mpw_gmax         ! Compute maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
  public :: ephtk_v1atm_to_vqnu        ! Receive potentials in atomic representation and return potential in phonon representation
+ public :: ephtk_skip_phmode          ! Ignore contribution of phonon mode depending on phonon frequency value or mode index.
 !!***
 
  real(dp),public,parameter :: EPHTK_WTOL = tol6
@@ -216,7 +217,7 @@ subroutine ephtk_mkqtabs(cryst, nqibz, qibz, nqbz, qbz, qirredtofull, qpttoqpt)
  real(dp) :: qirr(3), tmp_qpt(3)
 ! *************************************************************************
 
- qrank = krank_new(nqbz, qbz)
+ call qrank%init(nqbz, qbz)
 
  ! Compute index of IBZ q-point in the BZ array
  ABI_CALLOC(qirredtofull, (nqibz))
@@ -284,8 +285,7 @@ subroutine ephtk_gam_atm2qnu(natom3, displ_red, gam_atm, gam_qnu)
 
 !Arguments -------------------------------
  integer, intent(in)  :: natom3
- real(dp), intent(in)  :: displ_red(2,natom3,natom3)
- real(dp), intent(in)  :: gam_atm(2,natom3,natom3)
+ real(dp), intent(in)  :: displ_red(2,natom3,natom3), gam_atm(2,natom3,natom3)
  real(dp), intent(out) :: gam_qnu(natom3)
 
 !Local variables -------------------------
@@ -343,7 +343,7 @@ subroutine ephtk_gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, 
 !scalars
  integer,intent(in) :: nb1, nb2, nk, natom
 !arrays
- real(dp),intent(in) :: phfrq(3*natom),displ_red(2,3*natom,3*natom)
+ real(dp),intent(in) :: phfrq(3*natom), displ_red(2,3*natom,3*natom)
  real(dp),intent(in) :: gkq_atm(2,nb1,nb2,nk,3*natom)
  real(dp),intent(out) :: gkq_nu(2,nb1,nb2,nk,3*natom)
 
@@ -358,7 +358,7 @@ subroutine ephtk_gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, 
    ! Ignore negative or too small frequencies
    if (phfrq(nu) < EPHTK_WTOL) cycle
 
-   ! Transform the gkk from (atom, reduced direction) basis to phonon mode representation
+   ! Transform the gkk from (atom, reduced direction) basis to phonon mode representation.
    do ipc=1,3*natom
      gkq_nu(1,:,:,:,nu) = gkq_nu(1,:,:,:,nu) &
        + gkq_atm(1,:,:,:,ipc) * displ_red(1,ipc,nu) &
@@ -369,13 +369,6 @@ subroutine ephtk_gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, 
    end do
 
    gkq_nu(:,:,:,:,nu) = gkq_nu(:,:,:,:,nu) / sqrt(two * phfrq(nu))
-
-   ! Perform the transformation using array operations
-   !gkq_nu(1,:,:,:,nu) = sum(gkq_atm(1,:,:,:,:) * displ_red(1,:,nu) - gkq_atm(2,:,:,:,:) * displ_red(2,:,nu), dim=5)
-   !gkq_nu(2,:,:,:,nu) = sum(gkq_atm(1,:,:,:,:) * displ_red(2,:,nu) + gkq_atm(2,:,:,:,:) * displ_red(1,:,nu), dim=5)
-   !! Apply the normalization factor
-   !factor = one / sqrt(two * phfrq(nu))
-   !gkq_nu(:,:,:,:,nu) = gkq_nu(:,:,:,:,nu) * factor
  end do
 
 end subroutine ephtk_gkknu_from_atm
@@ -392,6 +385,7 @@ end subroutine ephtk_gkknu_from_atm
 !!
 !! INPUTS
 !!  dtset<dataset_type>=All input variables for this dataset.
+!!  fileqpdatain: QPDATA file
 !!
 !! SOURCE
 
@@ -407,40 +401,39 @@ subroutine ephtk_update_ebands(dtset, ebands, header)
 !scalars
  real(dp),parameter :: nholes = zero
  character(len=500) :: msg
- integer :: unts(2)
+ integer :: units(2)
 ! *************************************************************************
 
- unts = [std_out, ab_out]
+ units = [std_out, ab_out]
+
+ if (abs(dtset%mbpt_sciss) > tol6) then
+   ! Apply the scissor operator
+   call wrtout(units, sjoin(" Applying scissors operator to the conduction states with value: ", &
+               ftoa(dtset%mbpt_sciss * Ha_eV, fmt="(f6.2)"), " (eV)"))
+   call ebands%apply_scissors(dtset%mbpt_sciss)
+ end if
 
  if (dtset%occopt /= ebands%occopt .or. abs(dtset%tsmear - ebands%tsmear) > tol12) then
- !if (.True.) then
    write(msg,"(2a,2(a,i0,a,f14.6,a))")&
    " Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.",ch10,&
    "   From WFK file: occopt = ",ebands%occopt,", tsmear = ",ebands%tsmear,ch10,&
    "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
-   call wrtout(unts, msg)
+   call wrtout(units, msg)
    call ebands%set_scheme(dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
-
-   if (abs(dtset%mbpt_sciss) > tol6) then
-     ! Apply the scissor operator
-     call wrtout(unts, sjoin(" Applying scissors operator to the conduction states with value: ", &
-                 ftoa(dtset%mbpt_sciss * Ha_eV, fmt="(f6.2)"), " (eV)"))
-     call ebands%apply_scissors(dtset%mbpt_sciss)
-   end if
  end if
 
  ! Default value of eph_fermie is zero hence no tolerance is used!
  if (dtset%eph_fermie /= zero) then
    ABI_CHECK(dtset%eph_extrael == zero, "eph_fermie and eph_extrael are mutually exclusive")
-   call wrtout(unts, sjoin(" Fermi level set by the user at:", ftoa(dtset%eph_fermie * Ha_eV, fmt="(f6.2)"), " (eV)"))
+   call wrtout(units, sjoin(" Fermi level set by the user at:", ftoa(dtset%eph_fermie * Ha_eV, fmt="(f6.2)"), " (eV)"))
    call ebands%set_fermie(dtset%eph_fermie, msg)
-   call wrtout(unts, msg)
+   call wrtout(units, msg)
 
  else if (abs(dtset%eph_extrael) > zero) then
-   call wrtout(unts, sjoin(" Adding eph_extrael:", ftoa(dtset%eph_extrael), "to input nelect:", ftoa(ebands%nelect)))
+   call wrtout(units, sjoin(" Adding eph_extrael:", ftoa(dtset%eph_extrael), "to input nelect:", ftoa(ebands%nelect)))
    call ebands%set_scheme(dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
    call ebands%set_extrael(dtset%eph_extrael, nholes, dtset%spinmagntarget, msg)
-   call wrtout(unts, msg)
+   call wrtout(units, msg)
  end if
 
  ! Recompute occupations. This is needed if WFK files have been produced in a NSCF run
@@ -572,6 +565,43 @@ pure subroutine ephtk_v1atm_to_vqnu(cplex, nfft, nspden, natom3, v1_atm, displ_r
  end do
 
 end subroutine ephtk_v1atm_to_vqnu
+!!***
+
+!!****f* m_ephtk/ephtk_skip_phmode
+!! NAME
+!!  ephtk_skip_mode
+!!
+!! FUNCTION
+!!  Ignore contribution of phonon mode depending on phonon frequency value or mode index.
+!!
+!! INPUTS
+!!  nu: mode index
+!!  wqnu: phonon frequency
+!!  eph_phrange_w: range for phonon frequency.
+!!
+!! SOURCE
+
+pure logical function ephtk_skip_phmode(nu, wqnu, phmodes_skip, eph_phrange_w) result(skip)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: nu, phmodes_skip(:)
+ real(dp),intent(in) :: wqnu, eph_phrange_w(2)
+! *************************************************************************
+
+ skip = wqnu < EPHTK_WTOL .or. phmodes_skip(nu) == 1
+
+ ! Check frequency range
+ if (abs(eph_phrange_w(2)) > tol12) then
+    if (eph_phrange_w(2) > zero) then
+      ! wqnu must be inside range
+      skip = skip .or. .not. (wqnu >= eph_phrange_w(1) .and. wqnu <= eph_phrange_w(2))
+    else
+      ! wqnu must be outside range
+      skip = skip .or. (wqnu >= eph_phrange_w(1) .and. wqnu <= eph_phrange_w(2))
+    end if
+ end if
+
+end function ephtk_skip_phmode
 !!***
 
 end module m_ephtk

@@ -1,0 +1,61 @@
+# Bi atom with projected SOC for Generalized Bloch Theorem
+
+# GBT
+use_gbt 2
+qgbt 0.0 0.0 0.02
+
+# SPIN
+nspinor  2
+nspden   4
+so_psp   1
+spinat   5.0 0.0 0.0
+
+occopt   7
+tsmear   0.01
+
+# Definition of the planewave basis set
+ecut  8        # Maximal kinetic energy cut-off, in Hartree
+
+# Definition of the k-point grids and symmetries
+nsym 1
+kptopt 4
+ngkpt 2 2 2
+nshiftk 1
+shiftk  0 0 0
+
+# Definition of the SCF procedure
+nstep 20         # Maximal number of SCF cycles
+toldfe 1.0d-8
+nline 11
+
+# Common input variables
+ natom  1
+ ntypat 1
+ typat  1
+ znucl  83
+ xred   3*0.0
+ acell  3*10
+ rprim  1  0  0
+        0  1  0
+        0  0  1
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "PseudosHGH_pwteter/83bi.5.hgh"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t50.abo, tolnlines = 18, tolabs = 2.000e-6, tolrel = 4.100e-3
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = L. Shu
+#%% keywords = GBT
+#%% description =
+#%%   Rhombohedral Bi: projected SOC for GBT calculation
+#%%<END TEST_INFO>

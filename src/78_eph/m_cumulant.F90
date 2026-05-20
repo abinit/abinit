@@ -7,7 +7,7 @@
 !!  and, optionally, transport properties within the Kubo formalism.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (JCA, MG)
+!!  Copyright (C) 2008-2026 ABINIT group (JCA, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,13 +27,12 @@ module m_cumulant
  use m_xmpi
  use m_errors
  use m_ebands
- use m_nctk
  use m_sigmaph
  use m_dtset
  use m_dtfil
  use netcdf
+ use m_nctk
 
- !use m_ebands, only: ebands_free, ebands_get_carriers, ebands_get_muT_with_fd
  !use m_ebands,   only : ebands_t
  use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : open_file, file_exists, is_open
@@ -41,7 +40,6 @@ module m_cumulant
  use m_crystal,        only : crystal_t
  use m_numeric_tools,  only : simpson_cplx, arth, c2r, simpson, safe_div, simpson_int, ctrap, linfit, linspace
  use m_fstrings,       only : strcat, sjoin, itoa, ltoa, stoa, ftoa
- use m_distribfft,     only : init_distribfft_seq
  !use m_kpts,           only : kpts_timrev_from_kptopt
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
  use m_fft,            only : fourdp
@@ -168,7 +166,7 @@ module m_cumulant
    ! Allocate using only the relevant bands for transport
    ! including valence states to allow to compute different doping
 
-  complex(dpc) :: ieta
+  complex(dp) :: ieta
    ! Used to shift the poles in the complex plane (Ha units)
    ! Corresponds to `i eta` term in equations.
 
@@ -243,37 +241,37 @@ module m_cumulant
   ! Frequency mesh along the real axis (Ha units) used for the different bands
   ! Each mesh is **centered** on the corresponding KS energy.
 
-  complex(dpc),allocatable :: vals_e0ks(:,:,:,:)
+  complex(dp),allocatable :: vals_e0ks(:,:,:,:)
    ! vals_e0ks(ntemp, max_nbcalc, my_nkcalc, nsppol))
    ! Sigma_eph(omega=eKS, kT, band, ikcalc, spin).
    ! Fan-Migdal + Debye-Waller
 
-  complex(dpc),allocatable :: vals_wr(:,:,:,:,:)
+  complex(dp),allocatable :: vals_wr(:,:,:,:,:)
    ! vals_wr(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Sigma_eph(omega, kT, band, ikcalc, spin).
    ! enk_KS corresponds to nwr/2 + 1.
 
-     complex(dpc),allocatable :: ct_vals(:,:,:,:,:)
+     complex(dp),allocatable :: ct_vals(:,:,:,:,:)
    ! ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Cumulant function (time, kT, band, ikcalc, spin).
 
-     complex(dpc),allocatable :: c1(:,:,:,:,:)
+     complex(dp),allocatable :: c1(:,:,:,:,:)
    ! FIXME ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Cumulant function (time, kT, band, ikcalc, spin).
 
-     complex(dpc),allocatable :: c2(:,:,:,:,:)
+     complex(dp),allocatable :: c2(:,:,:,:,:)
    ! FIXME ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Cumulant function (time, kT, band, ikcalc, spin).
 
-     complex(dpc),allocatable :: c3(:,:,:,:,:)
+     complex(dp),allocatable :: c3(:,:,:,:,:)
    ! FIXME ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Cumulant function (time, kT, band, ikcalc, spin).
 
-     complex(dpc),allocatable :: gt_vals(:,:,:,:,:)
+     complex(dp),allocatable :: gt_vals(:,:,:,:,:)
    ! FIXME vals_wr(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Green's function in time domain (time, kT, band, ikcalc, spin).
 
-     complex(dpc),allocatable :: gw_vals(:,:,:,:,:)
+     complex(dp),allocatable :: gw_vals(:,:,:,:,:)
    ! gw_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Green's function in frequency domain(omega, kT, band) for given (ikcalc, spin).
 
@@ -524,8 +522,8 @@ subroutine cumulant_init(self, dtset, dtfil, cryst, ebands, comm, sigmaph )
  !self%ce_ngfft(7)= 102
 
  call initmpi_seq(self%ce_mpi_enreg)
- call init_distribfft_seq(self%ce_mpi_enreg%distribfft, 'c', self%ce_ngfft(2), self%ce_ngfft(3), 'all')
- call init_distribfft_seq(self%ce_mpi_enreg%distribfft, 'f', self%ce_ngfft(2), self%ce_ngfft(3), 'all')
+ call self%ce_mpi_enreg%distribfft%init_seq('c', self%ce_ngfft(2), self%ce_ngfft(3), 'all')
+ call self%ce_mpi_enreg%distribfft%init_seq('f', self%ce_ngfft(2), self%ce_ngfft(3), 'all')
 
  call ngfft_seq(self%ce_ngfft_g, [self%nwr_ce, 1, 1])
  self%ce_ngfft_g(4:6) = self%ce_ngfft_g(1:3)
@@ -811,13 +809,13 @@ subroutine cumulant_compute(self)
 !arrays
  real(dp),allocatable :: temp_g(:,:,:), temp_r(:,:), temp_r_cplx(:,:), temp_g_ce(:,:,:)
  real(dp),allocatable :: betaoverw2(:) !, dfft(:)
- !complex(dpc),allocatable :: temp_reflex(:) ! betaoverw2c(:),
+ !complex(dp),allocatable :: temp_reflex(:) ! betaoverw2c(:),
  real(dp),allocatable :: wrmesh_shifted(:), wrmesh_shifted_ce(:), beta(:), c3(:)
  real(dp),allocatable :: time_mesh(:), time_mesh_temp(:)
  real(dp) :: output_c3!, output_test2r, output_test2i
  real(dp) :: m_fit_re, b_fit_re, m_fit_im, b_fit_im, res_re, res_im
- complex(dpc),allocatable :: c1(:), ct_temp(:), c_temp(:)
- complex(dpc),allocatable :: c2(:), ct(:), gt(:), gw(:), g1(:)
+ complex(dp),allocatable :: c1(:), ct_temp(:), c_temp(:)
+ complex(dp),allocatable :: c2(:), ct(:), gt(:), gw(:), g1(:)
  integer :: fftalg, fftalga
  logical :: use_fft
 
@@ -927,7 +925,7 @@ subroutine cumulant_compute(self)
          !!self%wrmesh_ce(:,ib,my_ik,spin) = wrmesh_shifted_ce(:) + self%e0vals(ib,my_ik,spin) + 0.5 *wr_step_ce
          !!wrmesh_shifted_ce = wrmesh_shifted
 
-         if (self%debug == 1) self%time_mesh(:,itemp,ib,my_ik,spin) = time_mesh_temp(:)! * 0.24188845385 *10E-4 ! picoseconds ( I think )
+         if (self%debug == 1) self%time_mesh(:,itemp,ib,my_ik,spin) = time_mesh_temp(:)
 
          if (time_mesh_temp(nwr) < time_max) ABI_WARNING(sjoin("KBT",itoa(my_ik),itoa(ib),itoa(itemp)))
          msg = sjoin( &
@@ -1148,7 +1146,7 @@ subroutine cumulant_compute(self)
  !
  !   integer,intent(in) :: f_size
  !   real(dp),intent(in) :: f_step
- !   complex(dpc),intent(in) :: f(f_size)
+ !   complex(dp),intent(in) :: f(f_size)
  !
  !   trapz = ( sum(f) - 0.5* f(1) - 0.5* f(f_size) )* f_step
  !
@@ -1287,6 +1285,7 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
      trev_k = self%kcalc2ibz(ikcalc, 6)
 
      wtk = self%ebands%wtk(ik_ibz)
+     ! TODO: this S is not used below - remove
      S = transpose(cryst%symrel_cart(:,:,isym_k))
 
      nbands = self%nbcalc_ks(ikcalc, spin)
@@ -1318,32 +1317,32 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
 &              - self%vals_wr(:, itemp, ib_eph, my_ik, my_spin))
 
          Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
-           do iw=1, self%nwr
-!             if (mod(iw, self%wt_comm%nproc) /= self%wt_comm%me) cycle  ! MPI parallelism over freqs
+         do iw=1, self%nwr
+!           if (mod(iw, self%wt_comm%nproc) /= self%wt_comm%me) cycle  ! MPI parallelism over freqs
 
-                !  Preparing all elements needed for conductivity
-                omega = self%wrmesh_b(iw,ib_eph,my_ik,my_spin)
+              !  Preparing all elements needed for conductivity
+              omega = self%wrmesh_b(iw,ib_eph,my_ik,my_spin)
 
 ! this retrieves the Cumulant spectral function
 ! TODO: add the Dyson Migdal as well, to compare properly the transport with the same KG equation
-                sp_func = -aimag (self%gw_vals(iw, itemp, ib_eph, my_ik, my_spin) ) / pi
-                sp_func_dm = -aimag (gdm_vals(iw)) / pi
+              sp_func = -aimag (self%gw_vals(iw, itemp, ib_eph, my_ik, my_spin) ) / pi
+              sp_func_dm = -aimag (gdm_vals(iw)) / pi
 
 
-                self%spfunc_dm_wr(iw, itemp, ib_eph, my_ik, my_spin) = sp_func_dm
+              self%spfunc_dm_wr(iw, itemp, ib_eph, my_ik, my_spin) = sp_func_dm
 
-                self%spfunc_wr(iw, itemp, ib_eph, my_ik, my_spin) = sp_func
-!                test_Aw(itemp) = test_Aw(itemp) + sp_func
-                dfdw = occ_dfde(omega, self%kTmesh(itemp), self%mu_e(itemp))
-                self%print_dfdw(iw,itemp) = dfdw
-!                test_dfdw(itemp) = test_dfdw(itemp) + dfdw
-                kernel(iw) = - dfdw * sp_func**2
-                kernel_dm(iw) = - dfdw * sp_func_dm**2
-                Aw(iw) = sp_func**2
-                Aw_dm(iw) = sp_func_dm**2
-                dfdw_acc(iw) = dfdw
+              self%spfunc_wr(iw, itemp, ib_eph, my_ik, my_spin) = sp_func
+!              test_Aw(itemp) = test_Aw(itemp) + sp_func
+              dfdw = occ_dfde(omega, self%kTmesh(itemp), self%mu_e(itemp))
+              self%print_dfdw(iw,itemp) = dfdw
+!              test_dfdw(itemp) = test_dfdw(itemp) + dfdw
+              kernel(iw) = - dfdw * sp_func**2
+              kernel_dm(iw) = - dfdw * sp_func_dm**2
+              Aw(iw) = sp_func**2
+              Aw_dm(iw) = sp_func_dm**2
+              dfdw_acc(iw) = dfdw
 
-           end do !iw
+         end do !iw
          mu_e = self%transport_mu_e(itemp)
          ieh = 2; if (eig_nk >= mu_e) ieh = 1
          integration = simpson( wr_step, kernel)
@@ -1356,41 +1355,62 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
 &          + integration*vv_tens(:,:)*wtk
          self%l0_dm( :, :, ieh, spin, itemp ) = self%l0_dm( :, :, ieh, spin, itemp ) &
 &          + integration_dm*vv_tens(:,:)*wtk
+
+! TODO: document this bit, why only use the xx component of vv_tens?? Aw_l0 is never used or output
          Aw_l0(itemp) = Aw_l0(itemp) + int_Aw*wtk*vv_tens(1,1)
          Aw_l0_dm(itemp) = Aw_l0_dm(itemp) + int_Aw_dm*wtk*vv_tens(1,1)
          dfdw_l0(itemp) = dfdw_l0(itemp) + int_dfdw*wtk*vv_tens(1,1)
+! END TODO
 
-         self%l1( :, :, ieh, spin, itemp ) = self%l0( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp))
-         self%l2( :, :, ieh, spin, itemp ) = self%l1( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp))
-         self%l1_dm( :, :, ieh, spin, itemp ) = self%l0_dm( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp))
-         self%l2_dm( :, :, ieh, spin, itemp ) = self%l1_dm( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp))
+! TODO : check these equations for l1 l2, they should not depend on the band indices, as we are inside the ib loop!!
+         self%l1( :, :, ieh, spin, itemp ) = self%l1( :, :, ieh, spin, itemp ) &
+             & + integration*vv_tens(:,:)*wtk*(eig_nk - self%mu_e(itemp))
+         self%l2( :, :, ieh, spin, itemp ) = self%l2( :, :, ieh, spin, itemp ) &
+             & + integration*vv_tens(:,:)*wtk*(eig_nk - self%mu_e(itemp))**2
+         self%l1_dm( :, :, ieh, spin, itemp ) = self%l1_dm( :, :, ieh, spin, itemp ) &
+             & + integration_dm*vv_tens(:,:)*wtk*(eig_nk - self%mu_e(itemp))
+         self%l2_dm( :, :, ieh, spin, itemp ) = self%l2_dm( :, :, ieh, spin, itemp ) &
+             & + integration_dm*vv_tens(:,:)*wtk*(eig_nk - self%mu_e(itemp))**2
 
-         call inv33(self%l0(:, :, ieh, spin, itemp), work_33)
-         l0inv_33nw(:,:,ieh) = work_33
-         self%seebeck(:,:,ieh,spin,itemp) = matmul(work_33, self%l1(:,:,ieh,spin,itemp)) / Tkelv
-
-         call inv33(self%l0_dm(:, :, ieh, spin, itemp), work_33)
-         l0inv_33nw_dm(:,:,ieh) = work_33
-         self%seebeck_dm(:,:,ieh,spin,itemp) = matmul(work_33, self%l1_dm(:,:,ieh,spin,itemp)) / Tkelv
-
-         work_33 = self%l1(:, :, ieh, spin, itemp)
-         work_33 = self%l2(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw(:, :, ieh), work_33))
-         self%kappa(:,:,ieh,spin,itemp) = work_33 / Tkelv
-
-
-         work_33 = self%l1_dm(:, :, ieh, spin, itemp)
-         work_33 = self%l2_dm(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw_dm(:, :, ieh), work_33))
-         self%kappa_dm(:,:,ieh,spin,itemp) = work_33 / Tkelv
-         !self%conductivity_mu( :, :, ieh, spin, itemp ) = self%conductivity_mu( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk
-!         call xmpi_sum(self%conductivity_mu(:, :, ieh, spin, itemp) , self%wt_comm%value, ierr)
-         end do ! itemp
+       end do ! itemp
 
      end do !ib
 
    end do ! my_ik
-   ! Collect data if k-points parallelism.
-   !call xmpi_sum(self%conductivity_mu , self%kcalc_comm%value, ierr)
+
  end do !my_spin
+
+ ! Collect data if k-points parallelism. TODO: if this is reactivated, mpi_sum the l0 l1 l2 arrays instead
+ !call xmpi_sum(self%l0, self%kcalc_comm%value, ierr)
+ !call xmpi_sum(self%l1, self%kcalc_comm%value, ierr)
+ !call xmpi_sum(self%l2, self%kcalc_comm%value, ierr)
+
+ do itemp = 1, self%ntemp
+   Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
+   do my_spin=1,self%my_nspins
+     spin = self%my_spins(my_spin)
+     do ieh = 1, 2
+       ! calculate the transport coefficients from the l0 l1 l2
+       call inv33(self%l0(:, :, ieh, spin, itemp), l0inv_33nw(:,:,ieh))
+       self%seebeck(:,:,ieh,spin,itemp) = matmul(l0inv_33nw(:,:,ieh), self%l1(:,:,ieh,spin,itemp)) / Tkelv
+
+       call inv33(self%l0_dm(:, :, ieh, spin, itemp), l0inv_33nw_dm(:,:,ieh))
+       self%seebeck_dm(:,:,ieh,spin,itemp) = matmul(l0inv_33nw_dm(:,:,ieh), self%l1_dm(:,:,ieh,spin,itemp)) / Tkelv
+
+       work_33 = self%l1(:, :, ieh, spin, itemp)
+       ! TODO: check if one of the work_33 below is incorrect or needs a transpose
+       work_33 = self%l2(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw(:, :, ieh), work_33))
+       self%kappa(:,:,ieh,spin,itemp) = work_33 / Tkelv
+
+       work_33 = self%l1_dm(:, :, ieh, spin, itemp)
+       work_33 = self%l2_dm(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw_dm(:, :, ieh), work_33))
+       self%kappa_dm(:,:,ieh,spin,itemp) = work_33 / Tkelv
+
+       !TODO: leftover below - can this be removed?
+       !self%conductivity_mu( :, :, ieh, spin, itemp ) = self%conductivity_mu( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk
+     end do ! ieh
+   end do !my_spin
+ end do ! itemp
 
  max_occ = two / (self%nspinor * self%nsppol)
  fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
@@ -1401,10 +1421,6 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
  self%conductivity_mu_dm = fact0 * self%l0_dm  ! siemens cm^-1
  self%seebeck_dm = - volt_SI  * max_occ * self%seebeck_dm
  self%kappa_dm = + volt_SI**2 * fact0 * self%kappa_dm
-
- do itemp=1, self%ntemp
-   Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
- end do
 
  ! Scale by the carrier concentration
  fact = 100**3 / e_Cb

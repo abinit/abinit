@@ -7,7 +7,7 @@
 !!  _SCR and _SUSC file as well as methods used to read/write/echo.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2025 ABINIT group (MG)
+!! Copyright (C) 2008-2026 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -183,7 +183,7 @@ MODULE m_io_screening
    ! Input variable (GW compensation energy technique)
 
   character(len=3) :: kind_cdata
-  ! Flag to signal whether the data is in single or double precision ("spc" or "dpc")
+  ! Flag to signal whether the data is in single or double precision ("spc" or "dp")
   ! For the time being, we always write/read in double precision.
   ! This flag could be use to reduce the memory requirements if spc:
   ! we run calculations in single precision dump the results with the same precision without
@@ -212,7 +212,7 @@ MODULE m_io_screening
     ! qlwl(3,nqlwl)
     ! q-points for the long wave-length limit treatment (r.l.u)
 
-  complex(dpc),allocatable :: omega(:)
+  complex(dp),allocatable :: omega(:)
     ! omega(nomega)
     ! All frequencies calculated both along the real and the imaginary axis.
     ! Real frequencies are packed in the first section.
@@ -408,7 +408,7 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
  character(len=nctk_slen) :: varname !,head_shape,wing_shape
 !arrays
  real(dp),allocatable :: real_omega(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: r2vals(:,:) !,rvals3(:,:,:)
+ real(dp), contiguous, pointer :: r2vals(:,:) !,rvals3(:,:,:)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1352,19 +1352,19 @@ subroutine write_screening(varname, unt, iomode, npwe, nomega, iq_ibz, epsm1)
  character(len=*),intent(in) :: varname
  integer,intent(in) :: nomega,npwe,iq_ibz,unt,iomode
 !arrays
- complex(gwpc),target,intent(in) :: epsm1(npwe,npwe,nomega)
+ complex(gwp),target,intent(in) :: epsm1(npwe,npwe,nomega)
 
 !Local variables-------------------------------
 !scalars
  integer :: ipwe,iomega,spins(2),s1,s2
  character(len=500) :: errmsg
 !arrays
- complex(dpc),allocatable :: epsm1d(:,:)
+ complex(dp),allocatable :: epsm1d(:,:)
  integer :: varid,ncerr
 #ifdef HAVE_GW_DPC
- real(dp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
+ real(dp), contiguous, pointer :: real_epsm1(:,:,:,:,:,:,:)
 #else
- real(sp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
+ real(sp), contiguous, pointer :: real_epsm1(:,:,:,:,:,:,:)
 #endif
 ! *************************************************************************
 
@@ -1453,7 +1453,7 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
  integer,optional,intent(in) :: iqiA
  character(len=*),intent(in) :: varname,fname
 !arrays
- complex(gwpc),target,intent(inout) :: epsm1(npweA,npweA,nomegaA,nqibzA)
+ complex(gwp),target,intent(inout) :: epsm1(npweA,npweA,nomegaA,nqibzA)
 
 !Local variables-------------------------------
 !scalars
@@ -1463,7 +1463,7 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
  integer :: test_fform,mpi_err,ierr,sc_mode, bsize_frm,mpi_type_frm
  integer :: mpi_fh,buf_dim !,mat_ggw,mat_ggwq
  integer(XMPI_OFFSET_KIND) :: offset,displ_wq !,my_offpad
- !complex(dpc) :: ctmp
+ !complex(dp) :: ctmp
 #endif
  real(dp) :: cpu, wall, gflops
  character(len=500) :: msg,errmsg
@@ -1473,12 +1473,12 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
 #ifdef HAVE_MPI_IO
  integer(MPI_OFFSET_KIND),allocatable :: offset_wq(:,:)
 #endif
- complex(dpc),allocatable :: bufdc2d(:,:),bufdc3d(:,:,:)
+ complex(dp),allocatable :: bufdc2d(:,:),bufdc3d(:,:,:)
  ! pointers passed to netcdf4 routines (complex datatypes are not supported).
 #ifdef HAVE_GW_DPC
- real(dp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
+ real(dp), contiguous, pointer :: real_epsm1(:,:,:,:,:,:,:)
 #else
- real(sp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
+ real(sp), contiguous, pointer :: real_epsm1(:,:,:,:,:,:,:)
 #endif
  integer :: spins(2),s1,s2
 ! *************************************************************************
@@ -1558,7 +1558,7 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
    ABI_COMMENT(msg)
  end if
 
- if (npweA>Hscr%npwe) then
+ if (npweA > Hscr%npwe) then
    write(msg,'(2(a,i0))')' Dimension of matrix = ',Hscr%npwe," requiring a too big matrix = ",npweA
    ABI_ERROR(msg)
  end if
@@ -1581,14 +1581,14 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
         buf_dim,epsm1,xmpio_chunk_bsize,sc_mode,comm,ierr)
      ABI_CHECK(ierr==0,"Fortran matrix too big")
 #else
-     ! Have to allocate workspace for dpc data.
+     ! Have to allocate workspace for dp data.
      ! FIXME: Change the file format of the SCR and SUC file so that
      ! they are written in single precision if not HAVE_GW_DPC
-     ABI_MALLOC_OR_DIE(bufdc3d,(npweA,npweA,nomegaA), ierr)
+     ABI_MALLOC_OR_DIE(bufdc3d, (npweA,npweA,nomegaA), ierr)
 
      call mpiotk_read_fsuba_dpc3D(mpi_fh,offset, [HScr%npwe,HScr%npwe,HScr%nomega], [npweA,npweA,nomegaA], [1,1,1],&
         buf_dim,bufdc3d,xmpio_chunk_bsize,sc_mode,comm,ierr)
-     ABI_CHECK(ierr==0,"Fortran matrix too big")
+     ABI_CHECK(ierr == 0,"Fortran matrix too big")
 
      epsm1(:,:,:,1) = bufdc3d
      ABI_FREE(bufdc3d)
@@ -1609,7 +1609,7 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
        buf_dim,epsm1,xmpio_chunk_bsize,sc_mode,comm,ierr)
      ABI_CHECK(ierr==0,"Fortran record too big")
 #else
-     ! Have to allocate workspace for dpc data.
+     ! Have to allocate workspace for dp data.
      ABI_MALLOC_OR_DIE(bufdc3d,(npweA,npweA,nomegaA), ierr)
      sc_mode = xmpio_collective
 
@@ -1864,7 +1864,7 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
 !arrays
  integer,allocatable :: merge_table(:,:)
  real(dp) :: qdiff(3)
- complex(gwpc),allocatable :: epsm1(:,:,:,:)
+ complex(gwp),allocatable :: epsm1(:,:,:,:)
 ! *************************************************************************
 
  comm = xmpi_comm_self
@@ -1986,7 +1986,7 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
  type(hscr_t) :: hscr_recov,hscr
  type(abifile_t) :: abifile
 !arrays
- complex(gwpc),allocatable :: epsm1(:,:,:,:)
+ complex(gwp),allocatable :: epsm1(:,:,:,:)
 ! *************************************************************************
 
  comm = xmpi_comm_self
@@ -2108,8 +2108,8 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
 !arrays
  integer,allocatable :: freq_indx(:,:),ifile_indx(:),pos_indx(:),i_temp(:),i2_temp(:,:)
  real(dp),allocatable :: real_omega(:), real_omega_wgs(:), imag_omega(:), imag_omega_wgs(:) ,omega_wgs_storage(:)
- complex(gwpc),allocatable :: epsm1(:,:,:,:),epsm1_temp(:,:,:,:)
- complex(dpc),allocatable :: omega_storage(:)
+ complex(gwp),allocatable :: epsm1(:,:,:,:),epsm1_temp(:,:,:,:)
+ complex(dp),allocatable :: omega_storage(:)
 ! *************************************************************************
 
  comm = xmpi_comm_self
@@ -2447,7 +2447,7 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
  character(len=nctk_slen) :: varname
  type(abifile_t) :: abifile
 !arrays
- complex(gwpc),allocatable :: epsm1(:,:,:),epsm1_temp(:,:,:)
+ complex(gwp),allocatable :: epsm1(:,:,:),epsm1_temp(:,:,:)
 ! *************************************************************************
 
  comm = xmpi_comm_self
@@ -2561,7 +2561,6 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
  integer,intent(in) :: comm
 
 !Local variables-------------------------------
-!scalars
  integer,parameter :: master = 0
  integer :: my_rank, fform, npwe_file, nqlwl, ierr
  character(len=500) :: msg
@@ -2576,16 +2575,16 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
      ABI_COMMENT(sjoin("File not found. Will try netcdf file: ", w_fname))
    end if
    ! Master reads npw and nqlwl from the SCR file.
-   call wrtout(std_out, sjoin('Testing file: ', w_fname))
+   call wrtout(std_out, sjoin('Testing SCR file: ', w_fname))
    call hscr%from_file(w_fname, fform, xmpi_comm_self)
 
    ! Have to change %npweps if it was larger than dim on disk.
-   npwe_file = Hscr%npwe
-   nqlwl     = Hscr%nqlwl
+   npwe_file = hscr%npwe
+   nqlwl     = hscr%nqlwl
 
    if (dtset%npweps > npwe_file) then
      write(msg,'(2(a,i0),2a,i0)')&
-      "The number of G-vectors stored on file (",npwe_file,") is smaller than dtset%npweps: ",dtset%npweps,ch10,&
+      "The number of G-vectors stored on file (",npwe_file,") is smaller than input dtset%npweps: ",dtset%npweps,ch10,&
       "Calculation will proceed with the maximum available set, npwe_file: ",npwe_file
      ABI_WARNING(msg)
      dtset%npweps = npwe_file
@@ -2598,15 +2597,15 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
      call Gsph_c%init(cryst, 0, ecut=dtset%ecuteps)
      if (Gsph_c%ng > npwe_file) then
         dtset%npweps = npwe_file
-        write(msg,'(2a,f4.1,a,i0,a,a,i0)')&
-        "npweps was not set in input",&
+        write(msg,'(2a,f4.1,a,i0,2a,i0)')&
+        "npweps was not set in input.",&
         ch10//"The number of G-vectors generated according to ecuteps (",dtset%ecuteps,") is larger than that stored on file (",npwe_file,")",&
         ch10//"Calculation will proceed with the maximum available set: ",npwe_file
         ABI_COMMENT(msg)
      else
         dtset%npweps = Gsph_c%ng
-        write(msg,'(2a,f4.1,a,i0,a,a,f3.1)')&
-        "npweps was not set in input",&
+        write(msg,'(2a,f4.1,a,i0,2a,f4.1)')&
+        "npweps was not set in input.",&
         ch10//"The number of G-vectors generated according to ecuteps (",dtset%ecuteps,") is smaller than that stored on file (",npwe_file,")",&
         ch10//"Calculation will proceed with ecuteps: ",dtset%ecuteps
         ABI_COMMENT(msg)
@@ -2616,19 +2615,19 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
  end if
 
  call xmpi_bcast(w_fname, master, comm, ierr)
- call Hscr%bcast(master, my_rank, comm)
+ call hscr%bcast(master, my_rank, comm)
  call xmpi_bcast(dtset%npweps, master, comm, ierr)
  call xmpi_bcast(nqlwl, master, comm, ierr)
 
  if (nqlwl > 0) then
    ABI_MALLOC(qlwl, (3, nqlwl))
-   qlwl = Hscr%qlwl
+   qlwl = hscr%qlwl
  end if
 
  ! Init qmesh from the SCR file.
- call Qmesh%init(cryst, Hscr%nqibz, Hscr%qibz, dtset%kptopt)
+ call qmesh%init(cryst, hscr%nqibz, hscr%qibz, dtset%kptopt)
 
- call Gsph_c%init(cryst, dtset%npweps, gvec=Hscr%gvec)
+ call gsph_c%init(cryst, dtset%npweps, gvec=hscr%gvec)
 
 end subroutine get_hscr_qmesh_gsph
 !!***

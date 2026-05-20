@@ -8,14 +8,10 @@
 !!  which leads to excellent CPU efficiency and OpenMP scalability.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2022-2025 ABINIT group (LB)
+!! Copyright (C) 2022-2026 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -210,11 +206,8 @@ contains
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
+
  subroutine xg_nonlop_init(xg_nonlop,indlmn,my_natom,nattyp,mkmem,ntypat,nspinor,ucvol,usepaw,&
      xg_nonlop_option,me_band,comm_band,comm_atom,mpi_atmtab)
 
@@ -233,7 +226,7 @@ contains
    integer,intent(in),target :: nattyp(:)
    real(dp) :: tsec(2)
 
-   integer :: itypat,cprjdim,nlmn,nlmn_max,natom,shift,nmpi
+   integer :: itypat,cprjdim,nlmn,nlmn_max,natom,shift,nmpi,nattyp_i
 
    call timab(tim_init,1,tsec)
 
@@ -285,10 +278,13 @@ contains
    do itypat=1,ntypat
      nlmn = count(indlmn(3,:,itypat)>0)
      if (nlmn>nlmn_max) nlmn_max=nlmn
-     cprjdim = cprjdim + nattyp(itypat)*nlmn
      xg_nonlop%nlmn_ntypat(itypat) = nlmn
-     xg_nonlop%nlmn_natom(1+shift:nattyp(itypat)+shift) = nlmn
-     shift = shift + nattyp(itypat)
+     nattyp_i = nattyp(itypat)
+     if (nattyp_i>0) then
+       cprjdim = cprjdim + nattyp_i*nlmn
+       xg_nonlop%nlmn_natom(1+shift:nattyp_i+shift) = nlmn
+       shift = shift + nattyp_i
+     end if
    end do
    xg_nonlop%nlmn_max = nlmn_max
    xg_nonlop%natom = natom
@@ -320,10 +316,6 @@ contains
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
  subroutine xg_nonlop_update_weight(xg_nonlop,ucvol)
 
@@ -342,10 +334,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine xg_nonlop_init_cplex_alldij(xg_nonlop,paw_ij)
@@ -628,6 +616,7 @@ contains
   do itypat=1,ntypat
 
     nlmn=xg_nonlop%nlmn_ntypat(itypat)
+
     shift=1+(itypat-1)*nlmn_max
     call xg_setBlock(xg_nonlop%Sij,Sij_itypat,nlmn,nlmn,fcol=shift)
     call xgBlock_reverseMap(Sij_itypat,Sij_itypat_)
@@ -711,7 +700,7 @@ contains
   complex(dp),pointer :: ph3d_gather_k_(:,:)
   real(dp),pointer :: ph3d_gather_k_real(:,:)
 
-  integer :: shift_itypat,shift_itypat_nlmn,ntypat,nattyp,shift_ipw
+  integer :: shift_itypat,shift_itypat_nlmn,ntypat,nattyp_i,shift_ipw
   integer :: icol,ilmn,nlmn,il,ipw,ia,iatom,itypat
   real(dp) :: ffnl_ipw
   complex(dp) :: cil(4),ph3d_ipw,ctmp
@@ -748,33 +737,35 @@ contains
       !$omp parallel default (none) &
       !$omp& shared(xg_nonlop,ph3d_gather_k_,ffnl_gather_k_,projectors_k_), &
       !$omp& firstprivate(compute_gather,ntypat,shift_ipw,shift_itypat,shift_itypat_nlmn,cil), &
-      !$omp& private(itypat,nattyp,nlmn,ia,ilmn,ipw,iatom,il,ph3d_ipw,ffnl_ipw,icol)
+      !$omp& private(itypat,nattyp_i,nlmn,ia,ilmn,ipw,iatom,il,ph3d_ipw,ffnl_ipw,icol)
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
-        nattyp = xg_nonlop%nattyp(itypat)
-        !! projectors = 4pi/sqrt(ucvol) * (-i)^l * conj(ph3d) * ffnl
-        !$omp do collapse(3)
-        do ia = 1, nattyp
-          do ilmn=1,nlmn
-            do ipw=1,xg_nonlop%npw_k
-              iatom = ia + shift_itypat
-              il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
-              ph3d_ipw = cmplx( xg_nonlop%ph3d_k(1,ipw,iatom), xg_nonlop%ph3d_k(2,ipw,iatom), kind=DP)
-              ffnl_ipw = xg_nonlop%ffnl_k(ipw, 1, ilmn, itypat)
-              !
-              if (compute_gather) then
-                ph3d_gather_k_(ipw+shift_ipw,iatom) = ph3d_ipw
-                ffnl_gather_k_(ipw+shift_ipw,ilmn+(itypat-1)*xg_nonlop%nlmn_max) = ffnl_ipw
-              end if
-              !
-              icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
-              projectors_k_(ipw,icol) = cil(il) * conjg(ph3d_ipw) * ffnl_ipw
+        nattyp_i = xg_nonlop%nattyp(itypat)
+        if (nattyp_i>0) then
+          !! projectors = 4pi/sqrt(ucvol) * (-i)^l * conj(ph3d) * ffnl
+          !$omp do collapse(3)
+          do ia = 1, nattyp_i
+            do ilmn=1,nlmn
+              do ipw=1,xg_nonlop%npw_k
+                iatom = ia + shift_itypat
+                il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
+                ph3d_ipw = cmplx( xg_nonlop%ph3d_k(1,ipw,iatom), xg_nonlop%ph3d_k(2,ipw,iatom), kind=DP)
+                ffnl_ipw = xg_nonlop%ffnl_k(ipw, 1, ilmn, itypat)
+                !
+                if (compute_gather) then
+                  ph3d_gather_k_(ipw+shift_ipw,iatom) = ph3d_ipw
+                  ffnl_gather_k_(ipw+shift_ipw,ilmn+(itypat-1)*xg_nonlop%nlmn_max) = ffnl_ipw
+                end if
+                !
+                icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
+                projectors_k_(ipw,icol) = cil(il) * conjg(ph3d_ipw) * ffnl_ipw
+              end do
             end do
           end do
-        end do
-        !$omp end do
-        shift_itypat      = shift_itypat      + nattyp
-        shift_itypat_nlmn = shift_itypat_nlmn + nattyp*nlmn
+          !$omp end do
+          shift_itypat      = shift_itypat      + nattyp_i
+          shift_itypat_nlmn = shift_itypat_nlmn + nattyp_i*nlmn
+        end if
       end do
       !$omp end parallel
 
@@ -789,36 +780,38 @@ contains
       !$omp parallel default (none) &
       !$omp& shared(xg_nonlop,ph3d_gather_k_real,ffnl_gather_k_,projectors_k_real), &
       !$omp& firstprivate(compute_gather,ntypat,shift_ipw,shift_itypat,shift_itypat_nlmn,cil), &
-      !$omp& private(itypat,nattyp,nlmn,ia,ilmn,ipw,iatom,il,ph3d_ipw,ffnl_ipw,icol,ctmp)
+      !$omp& private(itypat,nattyp_i,nlmn,ia,ilmn,ipw,iatom,il,ph3d_ipw,ffnl_ipw,icol,ctmp)
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
-        nattyp = xg_nonlop%nattyp(itypat)
-        !! projectors = 4pi/sqrt(ucvol) * (-i)^l * conj(ph3d) * ffnl
-        !$omp do collapse(3)
-        do ia = 1, nattyp
-          do ilmn=1,nlmn
-            do ipw=1,xg_nonlop%npw_k
-              iatom = ia + shift_itypat
-              il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
-              ph3d_ipw = cmplx( xg_nonlop%ph3d_k(1,ipw,iatom), xg_nonlop%ph3d_k(2,ipw,iatom), kind=DP)
-              ffnl_ipw = xg_nonlop%ffnl_k(ipw, 1, ilmn, itypat)
-              !
-              if (compute_gather) then
-                ph3d_gather_k_real(2*(ipw+shift_ipw)-1,iatom) = dble(ph3d_ipw)
-                ph3d_gather_k_real(2*(ipw+shift_ipw)  ,iatom) = dimag(ph3d_ipw)
-                ffnl_gather_k_(ipw+shift_ipw,ilmn+(itypat-1)*xg_nonlop%nlmn_max) = ffnl_ipw
-              end if
-              !
-              ctmp = cil(il) * conjg(ph3d_ipw) * ffnl_ipw
-              icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
-              projectors_k_real(2*ipw-1,icol) = dble(ctmp)
-              projectors_k_real(2*ipw  ,icol) = dimag(ctmp)
+        nattyp_i = xg_nonlop%nattyp(itypat)
+        if (nattyp_i>0) then
+          !! projectors = 4pi/sqrt(ucvol) * (-i)^l * conj(ph3d) * ffnl
+          !$omp do collapse(3)
+          do ia = 1, nattyp_i
+            do ilmn=1,nlmn
+              do ipw=1,xg_nonlop%npw_k
+                iatom = ia + shift_itypat
+                il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
+                ph3d_ipw = cmplx( xg_nonlop%ph3d_k(1,ipw,iatom), xg_nonlop%ph3d_k(2,ipw,iatom), kind=DP)
+                ffnl_ipw = xg_nonlop%ffnl_k(ipw, 1, ilmn, itypat)
+                !
+                if (compute_gather) then
+                  ph3d_gather_k_real(2*(ipw+shift_ipw)-1,iatom) = dble(ph3d_ipw)
+                  ph3d_gather_k_real(2*(ipw+shift_ipw)  ,iatom) = dimag(ph3d_ipw)
+                  ffnl_gather_k_(ipw+shift_ipw,ilmn+(itypat-1)*xg_nonlop%nlmn_max) = ffnl_ipw
+                end if
+                !
+                ctmp = cil(il) * conjg(ph3d_ipw) * ffnl_ipw
+                icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
+                projectors_k_real(2*ipw-1,icol) = dble(ctmp)
+                projectors_k_real(2*ipw  ,icol) = dimag(ctmp)
+              end do
             end do
           end do
-        end do
-        !$omp end do
-        shift_itypat      = shift_itypat      + nattyp
-        shift_itypat_nlmn = shift_itypat_nlmn + nattyp*nlmn
+          !$omp end do
+          shift_itypat      = shift_itypat      + nattyp_i
+          shift_itypat_nlmn = shift_itypat_nlmn + nattyp_i*nlmn
+        end if
       end do
       !$omp end parallel
 
@@ -845,7 +838,7 @@ contains
   real(dp),pointer :: projectors_k_real(:,:)
   real(dp),pointer :: projectors_deriv_atom_k_real(:,:)
 
-  integer :: shift_itypat_nlmn,shift_itypat_3nlmn,ntypat,nattyp
+  integer :: shift_itypat_nlmn,shift_itypat_3nlmn,ntypat,nattyp_i
   integer :: icol,icol_deriv,ilmn,nlmn,ipw,ia,itypat,idir
   complex(dp) :: ctmp
   real(dp) :: tmp,proj_deriv_ipw_re,proj_deriv_ipw_im
@@ -874,27 +867,29 @@ contains
       !$omp parallel default (none) &
       !$omp& shared(xg_nonlop,projectors_k_,projectors_deriv_atom_k_), &
       !$omp& firstprivate(ntypat,shift_itypat_nlmn,shift_itypat_3nlmn), &
-      !$omp& private(itypat,nattyp,nlmn,ia,ilmn,ipw,idir,icol,icol_deriv,ctmp)
+      !$omp& private(itypat,nattyp_i,nlmn,ia,ilmn,ipw,idir,icol,icol_deriv,ctmp)
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
-        nattyp = xg_nonlop%nattyp(itypat)
-        !! projectors_deriv_atom(k+G) = -i * 2pi * (k+G)_idir * projectors(k+G)
-        !$omp do collapse(4)
-        do ia = 1, nattyp
-          do ilmn=1,nlmn
-            do ipw=1,xg_nonlop%npw_k
-              do idir=1,3
-                icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
-                ctmp = ( 0.0_DP, -1.0_DP) * two_pi * xg_nonlop%kpg_k(ipw,idir)
-                icol_deriv = ilmn + (idir-1)*nlmn + (ia-1)*3*nlmn + shift_itypat_3nlmn
-                projectors_deriv_atom_k_(ipw,icol_deriv) = ctmp * projectors_k_(ipw,icol)
+        nattyp_i = xg_nonlop%nattyp(itypat)
+        if (nattyp_i>0) then
+          !! projectors_deriv_atom(k+G) = -i * 2pi * (k+G)_idir * projectors(k+G)
+          !$omp do collapse(4)
+          do ia = 1, nattyp_i
+            do ilmn=1,nlmn
+              do ipw=1,xg_nonlop%npw_k
+                do idir=1,3
+                  icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
+                  ctmp = ( 0.0_DP, -1.0_DP) * two_pi * xg_nonlop%kpg_k(ipw,idir)
+                  icol_deriv = ilmn + (idir-1)*nlmn + (ia-1)*3*nlmn + shift_itypat_3nlmn
+                  projectors_deriv_atom_k_(ipw,icol_deriv) = ctmp * projectors_k_(ipw,icol)
+                end do
               end do
             end do
           end do
-        end do
-        !$omp end do
-        shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp*nlmn
-        shift_itypat_3nlmn = shift_itypat_3nlmn + nattyp*3*nlmn
+          !$omp end do
+          shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp_i*nlmn
+          shift_itypat_3nlmn = shift_itypat_3nlmn + nattyp_i*3*nlmn
+        end if
       end do
       !$omp end parallel
 
@@ -907,33 +902,35 @@ contains
       !$omp parallel default (none) &
       !$omp& shared(xg_nonlop,projectors_k_real,projectors_deriv_atom_k_real), &
       !$omp& firstprivate(ntypat,shift_itypat_nlmn,shift_itypat_3nlmn), &
-      !$omp& private(itypat,nattyp,nlmn,ia,ilmn,ipw,idir,icol,icol_deriv,tmp), &
+      !$omp& private(itypat,nattyp_i,nlmn,ia,ilmn,ipw,idir,icol,icol_deriv,tmp), &
       !$omp& private(proj_deriv_ipw_re,proj_deriv_ipw_im)
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
-        nattyp = xg_nonlop%nattyp(itypat)
-        !! projectors_deriv_atom(k+G) = -i * 2pi * (k+G)_idir * projectors(k+G)
-        !$omp do collapse(4)
-        do ia = 1, nattyp
-          do ilmn=1,nlmn
-            do ipw=1,xg_nonlop%npw_k
-              do idir=1,3
-                icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
-                tmp  = - two_pi * xg_nonlop%kpg_k(ipw,idir)
-                icol_deriv = ilmn + (idir-1)*nlmn + (ia-1)*3*nlmn + shift_itypat_3nlmn
-                !! Re(projectors_deriv_atom) =  2pi * (k+G)_idir * Im(projectors)
-                !! Im(projectors_deriv_atom) = -2pi * (k+G)_idir * Re(projectors)
-                proj_deriv_ipw_re = - tmp * projectors_k_real(2*ipw  ,icol)
-                proj_deriv_ipw_im =   tmp * projectors_k_real(2*ipw-1,icol)
-                projectors_deriv_atom_k_real(2*ipw-1,icol_deriv) = proj_deriv_ipw_re
-                projectors_deriv_atom_k_real(2*ipw  ,icol_deriv) = proj_deriv_ipw_im
+        nattyp_i = xg_nonlop%nattyp(itypat)
+        if (nattyp_i>0) then
+          !! projectors_deriv_atom(k+G) = -i * 2pi * (k+G)_idir * projectors(k+G)
+          !$omp do collapse(4)
+          do ia = 1, nattyp_i
+            do ilmn=1,nlmn
+              do ipw=1,xg_nonlop%npw_k
+                do idir=1,3
+                  icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
+                  tmp  = - two_pi * xg_nonlop%kpg_k(ipw,idir)
+                  icol_deriv = ilmn + (idir-1)*nlmn + (ia-1)*3*nlmn + shift_itypat_3nlmn
+                  !! Re(projectors_deriv_atom) =  2pi * (k+G)_idir * Im(projectors)
+                  !! Im(projectors_deriv_atom) = -2pi * (k+G)_idir * Re(projectors)
+                  proj_deriv_ipw_re = - tmp * projectors_k_real(2*ipw  ,icol)
+                  proj_deriv_ipw_im =   tmp * projectors_k_real(2*ipw-1,icol)
+                  projectors_deriv_atom_k_real(2*ipw-1,icol_deriv) = proj_deriv_ipw_re
+                  projectors_deriv_atom_k_real(2*ipw  ,icol_deriv) = proj_deriv_ipw_im
+                end do
               end do
             end do
           end do
-        end do
-        !$omp end do
-        shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp*nlmn
-        shift_itypat_3nlmn = shift_itypat_3nlmn + nattyp*3*nlmn
+          !$omp end do
+          shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp_i*nlmn
+          shift_itypat_3nlmn = shift_itypat_3nlmn + nattyp_i*3*nlmn
+        end if
       end do
       !$omp end parallel
 
@@ -955,7 +952,7 @@ contains
   real(dp),pointer :: projectors_k_real(:,:)
   real(dp),pointer :: projectors_deriv_stress_k_real(:,:)
 
-  integer :: shift_itypat,shift_itypat_nlmn,shift_itypat_6nlmn,ntypat,nattyp
+  integer :: shift_itypat,shift_itypat_nlmn,shift_itypat_6nlmn,ntypat,nattyp_i
   integer :: iatom,icol_shift,icol_deriv,ilmn,nlmn,ipw,ia,itypat,idir,il
   complex(dp) :: ctmp(3),cil(4),ph3d_ipw,cipw
   real(dp) :: ffnl_ipw(3)
@@ -987,42 +984,44 @@ contains
       !$omp parallel default (none) &
       !$omp& shared(xg_nonlop,projectors_k_,projectors_deriv_stress_k_), &
       !$omp& firstprivate(cil,ntypat,shift_itypat,shift_itypat_nlmn,shift_itypat_6nlmn), &
-      !$omp& private(il,iatom,itypat,nattyp,nlmn,ia,ilmn,ipw,idir,icol_shift,icol_deriv), &
+      !$omp& private(il,iatom,itypat,nattyp_i,nlmn,ia,ilmn,ipw,idir,icol_shift,icol_deriv), &
       !$omp& private(ctmp,ph3d_ipw,ffnl_ipw)
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
-        nattyp = xg_nonlop%nattyp(itypat)
-        !! projectors_deriv_stress(k+G)_ab = 4pi/sqrt(ucvol) * (-i)^l * conj(ph3d) * (-(k+G)_b) * d/d(K_a)[ffnl_deriv(k+G)]
-        !$omp do collapse(3)
-        do ia = 1, nattyp
-          do ilmn=1,nlmn
-            do ipw=1,xg_nonlop%npw_k
-              iatom = ia + shift_itypat
-              il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
-              ph3d_ipw = cmplx( xg_nonlop%ph3d_k(1,ipw,iatom), xg_nonlop%ph3d_k(2,ipw,iatom), kind=DP)
-              ffnl_ipw(:) = xg_nonlop%ffnl_k(ipw, 2:4, ilmn, itypat)
-              ctmp(:) = - cil(il) * conjg(ph3d_ipw) * xg_nonlop%kpg_k(ipw,:)
-              icol_shift = ilmn + (ia-1)*6*nlmn + shift_itypat_6nlmn
-              ! diagonal part
-              do idir=1,3
-                icol_deriv = icol_shift + (idir-1)*nlmn
-                projectors_deriv_stress_k_(ipw,icol_deriv) = ctmp(idir) * ffnl_ipw(idir)
+        nattyp_i = xg_nonlop%nattyp(itypat)
+        if (nattyp_i>0) then
+          !! projectors_deriv_stress(k+G)_ab = 4pi/sqrt(ucvol) * (-i)^l * conj(ph3d) * (-(k+G)_b) * d/d(K_a)[ffnl_deriv(k+G)]
+          !$omp do collapse(3)
+          do ia = 1, nattyp_i
+            do ilmn=1,nlmn
+              do ipw=1,xg_nonlop%npw_k
+                iatom = ia + shift_itypat
+                il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
+                ph3d_ipw = cmplx( xg_nonlop%ph3d_k(1,ipw,iatom), xg_nonlop%ph3d_k(2,ipw,iatom), kind=DP)
+                ffnl_ipw(:) = xg_nonlop%ffnl_k(ipw, 2:4, ilmn, itypat)
+                ctmp(:) = - cil(il) * conjg(ph3d_ipw) * xg_nonlop%kpg_k(ipw,:)
+                icol_shift = ilmn + (ia-1)*6*nlmn + shift_itypat_6nlmn
+                ! diagonal part
+                do idir=1,3
+                  icol_deriv = icol_shift + (idir-1)*nlmn
+                  projectors_deriv_stress_k_(ipw,icol_deriv) = ctmp(idir) * ffnl_ipw(idir)
+                end do
+                ! off-diagonal part (which is symmetric)
+                ctmp(:) = half*ctmp(:)
+                icol_deriv = icol_shift + (4-1)*nlmn
+                projectors_deriv_stress_k_(ipw,icol_deriv) = ctmp(2) * ffnl_ipw(3) + ctmp(3) * ffnl_ipw(2)
+                icol_deriv = icol_shift + (5-1)*nlmn
+                projectors_deriv_stress_k_(ipw,icol_deriv) = ctmp(1) * ffnl_ipw(3) + ctmp(3) * ffnl_ipw(1)
+                icol_deriv = icol_shift + (6-1)*nlmn
+                projectors_deriv_stress_k_(ipw,icol_deriv) = ctmp(1) * ffnl_ipw(2) + ctmp(2) * ffnl_ipw(1)
               end do
-              ! off-diagonal part (which is symmetric)
-              ctmp(:) = half*ctmp(:)
-              icol_deriv = icol_shift + (4-1)*nlmn
-              projectors_deriv_stress_k_(ipw,icol_deriv) = ctmp(2) * ffnl_ipw(3) + ctmp(3) * ffnl_ipw(2)
-              icol_deriv = icol_shift + (5-1)*nlmn
-              projectors_deriv_stress_k_(ipw,icol_deriv) = ctmp(1) * ffnl_ipw(3) + ctmp(3) * ffnl_ipw(1)
-              icol_deriv = icol_shift + (6-1)*nlmn
-              projectors_deriv_stress_k_(ipw,icol_deriv) = ctmp(1) * ffnl_ipw(2) + ctmp(2) * ffnl_ipw(1)
             end do
           end do
-        end do
-        !$omp end do
-        shift_itypat       = shift_itypat       + nattyp
-        shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp*nlmn
-        shift_itypat_6nlmn = shift_itypat_6nlmn + nattyp*6*nlmn
+          !$omp end do
+          shift_itypat       = shift_itypat       + nattyp_i
+          shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp_i*nlmn
+          shift_itypat_6nlmn = shift_itypat_6nlmn + nattyp_i*6*nlmn
+        end if
       end do
       !$omp end parallel
 
@@ -1036,53 +1035,55 @@ contains
       !$omp parallel default (none) &
       !$omp& shared(xg_nonlop,projectors_k_real,projectors_deriv_stress_k_real), &
       !$omp& firstprivate(cil,ntypat,shift_itypat,shift_itypat_nlmn,shift_itypat_6nlmn), &
-      !$omp& private(il,iatom,itypat,nattyp,nlmn,ia,ilmn,ipw,idir,icol_shift,icol_deriv), &
+      !$omp& private(il,iatom,itypat,nattyp_i,nlmn,ia,ilmn,ipw,idir,icol_shift,icol_deriv), &
       !$omp& private(ctmp,cipw,ph3d_ipw,ffnl_ipw)
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
-        nattyp = xg_nonlop%nattyp(itypat)
-        !! projectors_deriv_stress(k+G)_ab = 4pi/sqrt(ucvol) * (-i)^l * conj(ph3d) * (-(k+G)_b) * d/d(K_a)[ffnl_deriv(k+G)]
-        !$omp do collapse(3)
-        do ia = 1, nattyp
-          do ilmn=1,nlmn
-            do ipw=1,xg_nonlop%npw_k
-              iatom = ia + shift_itypat
-              il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
-              ph3d_ipw = cmplx( xg_nonlop%ph3d_k(1,ipw,iatom), xg_nonlop%ph3d_k(2,ipw,iatom), kind=DP)
-              ffnl_ipw(:) = xg_nonlop%ffnl_k(ipw, 2:4, ilmn, itypat)
-              ctmp(:) = - cil(il) * conjg(ph3d_ipw) * xg_nonlop%kpg_k(ipw,:)
-              icol_shift = ilmn + (ia-1)*6*nlmn + shift_itypat_6nlmn
-              ! diagonal part
-              do idir=1,3
-                icol_deriv = icol_shift + (idir-1)*nlmn
-                projectors_deriv_stress_k_real(2*ipw-1,icol_deriv) =  dble(ctmp(idir)) * ffnl_ipw(idir)
-                projectors_deriv_stress_k_real(2*ipw  ,icol_deriv) = dimag(ctmp(idir)) * ffnl_ipw(idir)
+        nattyp_i = xg_nonlop%nattyp(itypat)
+        if (nattyp_i>0) then
+          !! projectors_deriv_stress(k+G)_ab = 4pi/sqrt(ucvol) * (-i)^l * conj(ph3d) * (-(k+G)_b) * d/d(K_a)[ffnl_deriv(k+G)]
+          !$omp do collapse(3)
+          do ia = 1, nattyp_i
+            do ilmn=1,nlmn
+              do ipw=1,xg_nonlop%npw_k
+                iatom = ia + shift_itypat
+                il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
+                ph3d_ipw = cmplx( xg_nonlop%ph3d_k(1,ipw,iatom), xg_nonlop%ph3d_k(2,ipw,iatom), kind=DP)
+                ffnl_ipw(:) = xg_nonlop%ffnl_k(ipw, 2:4, ilmn, itypat)
+                ctmp(:) = - cil(il) * conjg(ph3d_ipw) * xg_nonlop%kpg_k(ipw,:)
+                icol_shift = ilmn + (ia-1)*6*nlmn + shift_itypat_6nlmn
+                ! diagonal part
+                do idir=1,3
+                  icol_deriv = icol_shift + (idir-1)*nlmn
+                  projectors_deriv_stress_k_real(2*ipw-1,icol_deriv) =  dble(ctmp(idir)) * ffnl_ipw(idir)
+                  projectors_deriv_stress_k_real(2*ipw  ,icol_deriv) = dimag(ctmp(idir)) * ffnl_ipw(idir)
+                end do
+                ! off-diagonal part (which is symmetric)
+                ctmp(:) = half*ctmp(:)
+
+                icol_deriv = icol_shift + (4-1)*nlmn
+                cipw = ctmp(2) * ffnl_ipw(3) + ctmp(3) * ffnl_ipw(2)
+                projectors_deriv_stress_k_real(2*ipw-1,icol_deriv) =  dble(cipw)
+                projectors_deriv_stress_k_real(2*ipw  ,icol_deriv) = dimag(cipw)
+
+                icol_deriv = icol_shift + (5-1)*nlmn
+                cipw = ctmp(1) * ffnl_ipw(3) + ctmp(3) * ffnl_ipw(1)
+                projectors_deriv_stress_k_real(2*ipw-1,icol_deriv) =  dble(cipw)
+                projectors_deriv_stress_k_real(2*ipw  ,icol_deriv) = dimag(cipw)
+
+                icol_deriv = icol_shift + (6-1)*nlmn
+                cipw = ctmp(1) * ffnl_ipw(2) + ctmp(2) * ffnl_ipw(1)
+                projectors_deriv_stress_k_real(2*ipw-1,icol_deriv) =  dble(cipw)
+                projectors_deriv_stress_k_real(2*ipw  ,icol_deriv) = dimag(cipw)
+
               end do
-              ! off-diagonal part (which is symmetric)
-              ctmp(:) = half*ctmp(:)
-
-              icol_deriv = icol_shift + (4-1)*nlmn
-              cipw = ctmp(2) * ffnl_ipw(3) + ctmp(3) * ffnl_ipw(2)
-              projectors_deriv_stress_k_real(2*ipw-1,icol_deriv) =  dble(cipw)
-              projectors_deriv_stress_k_real(2*ipw  ,icol_deriv) = dimag(cipw)
-
-              icol_deriv = icol_shift + (5-1)*nlmn
-              cipw = ctmp(1) * ffnl_ipw(3) + ctmp(3) * ffnl_ipw(1)
-              projectors_deriv_stress_k_real(2*ipw-1,icol_deriv) =  dble(cipw)
-              projectors_deriv_stress_k_real(2*ipw  ,icol_deriv) = dimag(cipw)
-
-              icol_deriv = icol_shift + (6-1)*nlmn
-              cipw = ctmp(1) * ffnl_ipw(2) + ctmp(2) * ffnl_ipw(1)
-              projectors_deriv_stress_k_real(2*ipw-1,icol_deriv) =  dble(cipw)
-              projectors_deriv_stress_k_real(2*ipw  ,icol_deriv) = dimag(cipw)
-
             end do
           end do
-        end do
-        !$omp end do
-        shift_itypat       = shift_itypat       + nattyp
-        shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp*nlmn
-        shift_itypat_6nlmn = shift_itypat_6nlmn + nattyp*6*nlmn
+          !$omp end do
+          shift_itypat       = shift_itypat       + nattyp_i
+          shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp_i*nlmn
+          shift_itypat_6nlmn = shift_itypat_6nlmn + nattyp_i*6*nlmn
+        end if
       end do
       !$omp end parallel
 
@@ -1107,7 +1108,7 @@ contains
   real(dp),pointer :: ph3d_gather_k_real(:,:)
 
   integer :: nmpi,npw_k
-  integer :: shift_itypat,shift_itypat_nlmn,ntypat,nattyp,shift_ipw
+  integer :: shift_itypat,shift_itypat_nlmn,ntypat,nattyp_i,shift_ipw
   integer :: icol,ilmn,nlmn,il,ipw,ia,iatom,itypat
   real(dp) :: ffnl_ipw,ph3d_ipw_r(2)
   complex(dp) :: cil(4),ph3d_ipw,ctmp
@@ -1152,28 +1153,30 @@ contains
       !$omp parallel default (none) &
       !$omp& shared(xg_nonlop,ph3d_gather_k_,ffnl_gather_k_,projectors_k_), &
       !$omp& firstprivate(ntypat,npw_k,shift_ipw,shift_itypat,shift_itypat_nlmn,cil), &
-      !$omp& private(itypat,nattyp,nlmn,ia,ilmn,ipw,iatom,il,ph3d_ipw,ffnl_ipw,icol)
+      !$omp& private(itypat,nattyp_i,nlmn,ia,ilmn,ipw,iatom,il,ph3d_ipw,ffnl_ipw,icol)
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
-        nattyp = xg_nonlop%nattyp(itypat)
-        !! projectors = 4pi/sqrt(ucvol)* conj(ph3d) * ffnl * (-i)^l
-        !$omp do collapse(3)
-        do ia = 1, xg_nonlop%nattyp(itypat)
-          do ilmn=1,nlmn
-            do ipw=1,npw_k
-              iatom = ia + shift_itypat
-              il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
-              ph3d_ipw = ph3d_gather_k_(ipw+shift_ipw,iatom)
-              ffnl_ipw = ffnl_gather_k_(ipw+shift_ipw,ilmn+(itypat-1)*xg_nonlop%nlmn_max)
-              !
-              icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
-              projectors_k_(ipw,icol) = cil(il) * conjg(ph3d_ipw) * ffnl_ipw
+        nattyp_i = xg_nonlop%nattyp(itypat)
+        if (nattyp_i>0) then
+          !! projectors = 4pi/sqrt(ucvol)* conj(ph3d) * ffnl * (-i)^l
+          !$omp do collapse(3)
+          do ia = 1, nattyp_i
+            do ilmn=1,nlmn
+              do ipw=1,npw_k
+                iatom = ia + shift_itypat
+                il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
+                ph3d_ipw = ph3d_gather_k_(ipw+shift_ipw,iatom)
+                ffnl_ipw = ffnl_gather_k_(ipw+shift_ipw,ilmn+(itypat-1)*xg_nonlop%nlmn_max)
+                !
+                icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
+                projectors_k_(ipw,icol) = cil(il) * conjg(ph3d_ipw) * ffnl_ipw
+              end do
             end do
           end do
-        end do
-        !$omp end do
-        shift_itypat      = shift_itypat      + nattyp
-        shift_itypat_nlmn = shift_itypat_nlmn + nattyp*nlmn
+          !$omp end do
+          shift_itypat      = shift_itypat      + nattyp_i
+          shift_itypat_nlmn = shift_itypat_nlmn + nattyp_i*nlmn
+        end if
       end do
       !$omp end parallel
 
@@ -1186,32 +1189,34 @@ contains
       !$omp parallel default (none) &
       !$omp& shared(xg_nonlop,ph3d_gather_k_real,ffnl_gather_k_,projectors_k_real), &
       !$omp& firstprivate(ntypat,npw_k,shift_ipw,shift_itypat,shift_itypat_nlmn,cil), &
-      !$omp& private(itypat,nattyp,nlmn,ia,ilmn,ipw,iatom,il,ph3d_ipw_r,ffnl_ipw,icol,ctmp)
+      !$omp& private(itypat,nattyp_i,nlmn,ia,ilmn,ipw,iatom,il,ph3d_ipw_r,ffnl_ipw,icol,ctmp)
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
-        nattyp = xg_nonlop%nattyp(itypat)
-        !! projectors = 4pi/sqrt(ucvol)* conj(ph3d) * ffnl * (-i)^l
-        !$omp do collapse(3)
-        do ia = 1, nattyp
-          do ilmn=1,nlmn
-            do ipw=1,npw_k
-              iatom = ia + shift_itypat
-              il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
-              ph3d_ipw_r(1) = ph3d_gather_k_real(2*(ipw+shift_ipw)-1,iatom)
-              ph3d_ipw_r(2) = ph3d_gather_k_real(2*(ipw+shift_ipw)  ,iatom)
-              ffnl_ipw = ffnl_gather_k_(ipw+shift_ipw,ilmn+(itypat-1)*xg_nonlop%nlmn_max)
-              !
-              ctmp = cmplx( ph3d_ipw_r(1), ph3d_ipw_r(2), kind=DP)
-              ctmp = cil(il) * conjg(ctmp) * ffnl_ipw
-              icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
-              projectors_k_real(2*ipw-1,icol) = dble(ctmp)
-              projectors_k_real(2*ipw  ,icol) = dimag(ctmp)
+        nattyp_i = xg_nonlop%nattyp(itypat)
+        if (nattyp_i>0) then
+          !! projectors = 4pi/sqrt(ucvol)* conj(ph3d) * ffnl * (-i)^l
+          !$omp do collapse(3)
+          do ia = 1, nattyp_i
+            do ilmn=1,nlmn
+              do ipw=1,npw_k
+                iatom = ia + shift_itypat
+                il=mod(xg_nonlop%indlmn(1,ilmn,itypat),4)+1
+                ph3d_ipw_r(1) = ph3d_gather_k_real(2*(ipw+shift_ipw)-1,iatom)
+                ph3d_ipw_r(2) = ph3d_gather_k_real(2*(ipw+shift_ipw)  ,iatom)
+                ffnl_ipw = ffnl_gather_k_(ipw+shift_ipw,ilmn+(itypat-1)*xg_nonlop%nlmn_max)
+                !
+                ctmp = cmplx( ph3d_ipw_r(1), ph3d_ipw_r(2), kind=DP)
+                ctmp = cil(il) * conjg(ctmp) * ffnl_ipw
+                icol = ilmn + (ia-1)*nlmn + shift_itypat_nlmn
+                projectors_k_real(2*ipw-1,icol) = dble(ctmp)
+                projectors_k_real(2*ipw  ,icol) = dimag(ctmp)
+              end do
             end do
           end do
-        end do
-        !$omp end do
-        shift_itypat      = shift_itypat      + nattyp
-        shift_itypat_nlmn = shift_itypat_nlmn + nattyp*nlmn
+          !$omp end do
+          shift_itypat      = shift_itypat      + nattyp_i
+          shift_itypat_nlmn = shift_itypat_nlmn + nattyp_i*nlmn
+        end if
       end do
       !$omp end parallel
 
@@ -1243,7 +1248,8 @@ contains
   logical :: compute_gram_,compute_invS_approx_
   real(dp),pointer :: gram_proj_k_(:,:),Sijm1_(:,:)
   integer :: ierr, iblock, shift, shiftc, shift_sij, shift_itypat, itypat, ilmn, jlmn, nlmn, nlmn_max, ia
-  integer :: cplex,cols,ntypat,nmpi,me_g0_loc,me_g0_fft_loc,space_cprj
+  integer :: cplex,nattyp_i,ntypat,ncols,nmpi,me_g0_loc,me_g0_fft_loc,space_cprj
+  !integer :: cols,cond
   real(dp) :: tsec(2)
   type(xg_t) :: work
   type(xgBlock_t) :: projs,invSij_approx_k_itypat,Sijm1_itypat
@@ -1332,25 +1338,26 @@ contains
       call xg_init(xg_nonlop%invSij_approx_k,space_cprj,nlmn_max,nlmn_max*ntypat,xmpi_comm_self)
 
       shift_itypat=1
-      shift_sij=1
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
-
-        call xgBlock_setBlock(xg_nonlop%projectors_k%self,projs,npw_k,nlmn,fcol=shift_itypat)
-        call xg_setBlock(xg_nonlop%invSij_approx_k,invSij_approx_k_itypat,nlmn,nlmn,fcol=shift_sij)
-        call xg_setBlock(xg_nonlop%Sijm1,Sijm1_itypat,nlmn,nlmn,fcol=shift_sij)
-        if (space_cprj==SPACE_R) then
-          call xgBlock_copy(Sijm1_itypat,invSij_approx_k_itypat)
-        else
-          call xgBlock_r2c(Sijm1_itypat,invSij_approx_k_itypat,1)
+        nattyp_i = xg_nonlop%nattyp(itypat)
+        if (nattyp_i>0) then
+          shift_sij = 1+(itypat-1)*nlmn_max
+          call xgBlock_setBlock(xg_nonlop%projectors_k%self,projs,npw_k,nlmn,fcol=shift_itypat)
+          call xg_setBlock(xg_nonlop%invSij_approx_k,invSij_approx_k_itypat,nlmn,nlmn,fcol=shift_sij)
+          call xg_setBlock(xg_nonlop%Sijm1,Sijm1_itypat,nlmn,nlmn,fcol=shift_sij)
+          if (space_cprj==SPACE_R) then
+            call xgBlock_copy(Sijm1_itypat,invSij_approx_k_itypat)
+          else
+            call xgBlock_r2c(Sijm1_itypat,invSij_approx_k_itypat,1)
+          end if
+          call xg_init(work,space_cprj,nlmn,nlmn,xmpi_comm_self)
+          call xgBlock_gemm('t','n',1.0d0,projs,projs,0.0d0,work%self,comm=xg_nonlop%comm_band)
+          call xgBlock_add(invSij_approx_k_itypat,work%self)
+          call xgBlock_invert_sy(invSij_approx_k_itypat,work%self)
+          call xg_free(work)
+          shift_itypat = shift_itypat + nlmn*nattyp_i
         end if
-        call xg_init(work,space_cprj,nlmn,nlmn,xmpi_comm_self)
-        call xgBlock_gemm('t','n',1.0d0,projs,projs,0.0d0,work%self,comm=xg_nonlop%comm_band)
-        call xgBlock_add(invSij_approx_k_itypat,work%self)
-        call xgBlock_invert_sy(invSij_approx_k_itypat,work%self)
-        call xg_free(work)
-        shift_itypat = shift_itypat + nlmn*xg_nonlop%nattyp(itypat)
-        shift_sij    = shift_sij + nlmn_max
       end do
 
     end if
@@ -1363,30 +1370,39 @@ contains
         ABI_ERROR('Not implemented with paw=False.')
       end if
       cplex=xg_nonlop%cplex
-      cols = xg_nonlop%cprjdim
-      call xg_init(xg_nonlop%gram_proj_k,space_cprj,cols,cols,xmpi_comm_self)
+      ncols = xg_nonlop%cprjdim
+      call xg_init(xg_nonlop%gram_proj_k,space_cprj,ncols,ncols,xmpi_comm_self)
       projs = xg_nonlop%projectors_k%self
       call xgBlock_gemm('t','n',1.0d0,projs,projs,0.0d0,xg_nonlop%gram_proj_k%self,comm=xg_nonlop%comm_band)
       call xgBlock_reverseMap(xg_nonlop%gram_proj_k%self,gram_proj_k_)
       shift=0
       shiftc=0
-      shift_sij=1
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
-        call xg_setBlock(xg_nonlop%Sijm1,Sijm1_itypat,nlmn,nlmn,fcol=shift_sij)
-        call xgBlock_reverseMap(Sijm1_itypat,Sijm1_)
-        do ia = 1, xg_nonlop%nattyp(itypat)
-          do jlmn=1,nlmn
-            do ilmn=1,nlmn
-              gram_proj_k_(shiftc+cplex*(ilmn-1)+1,shift+jlmn) = gram_proj_k_(shiftc+cplex*(ilmn-1)+1,shift+jlmn) &
-                & + Sijm1_(ilmn,jlmn)
+        nattyp_i = xg_nonlop%nattyp(itypat)
+        if (nattyp_i>0) then
+          shift_sij = 1+(itypat-1)*nlmn_max
+          call xg_setBlock(xg_nonlop%Sijm1,Sijm1_itypat,nlmn,nlmn,fcol=shift_sij)
+          call xgBlock_reverseMap(Sijm1_itypat,Sijm1_)
+          do ia = 1, nattyp_i
+            do jlmn=1,nlmn
+              do ilmn=1,nlmn
+                gram_proj_k_(shiftc+cplex*(ilmn-1)+1,shift+jlmn) = gram_proj_k_(shiftc+cplex*(ilmn-1)+1,shift+jlmn) &
+                  & + Sijm1_(ilmn,jlmn)
+              end do
             end do
+            shift  = shift  + nlmn
+            shiftc = shiftc + cplex*nlmn
           end do
-          shift  = shift  + nlmn
-          shiftc = shiftc + cplex*nlmn
-        end do
-        shift_sij    = shift_sij + nlmn_max
+        end if
       end do
+
+      !ITEST
+      !write(903,*) 'make_cprj, compute gram', cols, space_cprj==SPACE_C
+      !call xgBlock_hermitian_pd_cond(xg_nonlop%gram_proj_k%self, cols, cond)
+      !write(903,*) 'cond(B)=', cond
+      !flush(903)
+      !ITEST
 
     end if
 
@@ -1915,7 +1931,7 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
    type(xgBlock_t), intent(inout) :: cprjout
 
    logical :: loop_over_atoms
-   integer :: ia, iband, cprjdim, shift_itypat, iatom, itypat, nattyp, nlmn, shift
+   integer :: ia, iband, cprjdim, shift_itypat, iatom, itypat, nattyp_i, nlmn, shift
    integer :: space_cprj, cplex, nlmn_max
    integer :: nspinor, nrows, ncols
 
@@ -1963,32 +1979,33 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
    shift_itypat = 0
    do itypat=1,xg_nonlop%ntypat
      nlmn=xg_nonlop%nlmn_ntypat(itypat)
-     nattyp=xg_nonlop%nattyp(itypat)
-     call xg_setBlock(cprjin_nlmn_max ,cprjin_nlmn ,nlmn,ncols)
-     call xg_setBlock(cprjout_nlmn_max,cprjout_nlmn,nlmn,ncols)
-     call xgBlock_reverseMap(cprjin_nlmn ,cprjin_nlmn_ )
-     call xgBlock_reverseMap(cprjout_nlmn,cprjout_nlmn_)
-     if (.not.loop_over_atoms) then
-       call xgBlock_setBlock(diag_op,diag_op_iatom,nlmn,1,fcol=itypat)
-     end if
-     do ia=1,nattyp
-       if (loop_over_atoms) then
-         iatom = ia + shift_itypat
-         call xgBlock_setBlock(diag_op,diag_op_iatom,nlmn,1,fcol=iatom)
+     nattyp_i=xg_nonlop%nattyp(itypat)
+     if (nattyp_i>0) then
+       call xg_setBlock(cprjin_nlmn_max ,cprjin_nlmn ,nlmn,ncols)
+       call xg_setBlock(cprjout_nlmn_max,cprjout_nlmn,nlmn,ncols)
+       call xgBlock_reverseMap(cprjin_nlmn ,cprjin_nlmn_ )
+       call xgBlock_reverseMap(cprjout_nlmn,cprjout_nlmn_)
+       if (.not.loop_over_atoms) then
+         call xgBlock_setBlock(diag_op,diag_op_iatom,nlmn,1,fcol=itypat)
        end if
-       ! Copy cprj of ONE atom for ALL bands from cprjin to cprin_nlmn
-       do iband=1,ncols
-         cprjin_nlmn_(1:cplex*nlmn,iband) = cprjin_(1+shift:cplex*nlmn+shift,iband)
+       do ia=1,nattyp_i
+         if (loop_over_atoms) then
+           iatom = ia + shift_itypat
+           call xgBlock_setBlock(diag_op,diag_op_iatom,nlmn,1,fcol=iatom)
+         end if
+         ! Copy cprj of ONE atom for ALL bands from cprjin to cprin_nlmn
+         do iband=1,ncols
+           cprjin_nlmn_(1:cplex*nlmn,iband) = cprjin_(1+shift:cplex*nlmn+shift,iband)
+         end do
+         call xgBlock_apply_diag(cprjin_nlmn,diag_op_iatom,1,Y=cprjout_nlmn)
+         do iband=1,ncols
+           cprjout_(1+shift:cplex*nlmn+shift,iband) = cprjout_(1+shift:cplex*nlmn+shift,iband) &
+           & + cprjout_nlmn_(1:cplex*nlmn,iband)
+         end do
+         shift=shift+cplex*nlmn
        end do
-       call xgBlock_apply_diag(cprjin_nlmn,diag_op_iatom,1,Y=cprjout_nlmn)
-       do iband=1,ncols
-         cprjout_(1+shift:cplex*nlmn+shift,iband) = cprjout_(1+shift:cplex*nlmn+shift,iband) &
-         & + cprjout_nlmn_(1:cplex*nlmn,iband)
-       end do
-       shift=shift+cplex*nlmn
-     end do
-
-     shift_itypat = shift_itypat + nattyp
+       shift_itypat = shift_itypat + nattyp_i
+     end if
 
    end do
 
@@ -2009,7 +2026,7 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
    logical,optional,intent(in) :: A_with_spin
 
    logical :: loop_over_atoms
-   integer :: ia, iband, cprjdim, shift_itypat, iatom, itypat, nattyp, nlmn, shift
+   integer :: ia, iband, cprjdim, shift_itypat, iatom, itypat, nattyp_i, nlmn, shift
    integer :: space_aij, space_cprj, cplex, nlmn_max
    integer :: nspinor, nrows, ncols, nrows_A, ncols_A
    integer :: nlmn_1atom,nlmn_max_1atom,ncols_1atom
@@ -2104,91 +2121,93 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
      else
        nlmn_1atom = nlmn
      end if
-     nattyp=xg_nonlop%nattyp(itypat)
-     call xg_setBlock(cprjin_nlmn_max ,cprjin_nlmn ,nlmn_1atom,ncols_1atom)
-     call xg_setBlock(cprjout_nlmn_max,cprjout_nlmn,nlmn_1atom,ncols_1atom)
-     call xgBlock_reverseMap(cprjin_nlmn ,cprjin_nlmn_ )
-     call xgBlock_reverseMap(cprjout_nlmn,cprjout_nlmn_)
-     if (aij_r2c) call xg_init(Aij_complex,SPACE_C,nlmn_1atom,nlmn_1atom)
-     if (.not.loop_over_atoms) then
-       if (aij_r2c) then
-         call xgBlock_setBlock(Aij,Aij_iatom,nlmn,nlmn,fcol=1+(itypat-1)*nlmn_max)
-       else
-         call xgBlock_setBlock(Aij,Aij_iatom,nlmn_1atom,nlmn_1atom,fcol=1+(itypat-1)*nlmn_max_1atom)
-       end if
-     end if
-     do ia=1,nattyp
-       if (loop_over_atoms) then
-         iatom = ia + shift_itypat
+     nattyp_i=xg_nonlop%nattyp(itypat)
+     if (nattyp_i>0) then
+       call xg_setBlock(cprjin_nlmn_max ,cprjin_nlmn ,nlmn_1atom,ncols_1atom)
+       call xg_setBlock(cprjout_nlmn_max,cprjout_nlmn,nlmn_1atom,ncols_1atom)
+       call xgBlock_reverseMap(cprjin_nlmn ,cprjin_nlmn_ )
+       call xgBlock_reverseMap(cprjout_nlmn,cprjout_nlmn_)
+       if (aij_r2c) call xg_init(Aij_complex,SPACE_C,nlmn_1atom,nlmn_1atom)
+       if (.not.loop_over_atoms) then
          if (aij_r2c) then
-           call xgBlock_setBlock(Aij,Aij_iatom,nlmn,nlmn,fcol=1+(iatom-1)*nlmn_max)
+           call xgBlock_setBlock(Aij,Aij_iatom,nlmn,nlmn,fcol=1+(itypat-1)*nlmn_max)
          else
-           call xgBlock_setBlock(Aij,Aij_iatom,nlmn_1atom,nlmn_1atom,fcol=1+(iatom-1)*nlmn_max_1atom)
+           call xgBlock_setBlock(Aij,Aij_iatom,nlmn_1atom,nlmn_1atom,fcol=1+(itypat-1)*nlmn_max_1atom)
          end if
        end if
-       call xgBlock_getsize(Aij_iatom,nrows_A,ncols_A)
-       if (.not.aij_r2c) then
-         if (nrows_A/=nlmn_1atom) then
-           ABI_ERROR('nrows_A/=nlmn_1atom')
+       do ia=1,nattyp_i
+         if (loop_over_atoms) then
+           iatom = ia + shift_itypat
+           if (aij_r2c) then
+             call xgBlock_setBlock(Aij,Aij_iatom,nlmn,nlmn,fcol=1+(iatom-1)*nlmn_max)
+           else
+             call xgBlock_setBlock(Aij,Aij_iatom,nlmn_1atom,nlmn_1atom,fcol=1+(iatom-1)*nlmn_max_1atom)
+           end if
          end if
-         if (ncols_A/=nlmn_1atom) then
-           ABI_ERROR('ncols_A/=nlmn_1atom')
+         call xgBlock_getsize(Aij_iatom,nrows_A,ncols_A)
+         if (.not.aij_r2c) then
+           if (nrows_A/=nlmn_1atom) then
+             ABI_ERROR('nrows_A/=nlmn_1atom')
+           end if
+           if (ncols_A/=nlmn_1atom) then
+             ABI_ERROR('ncols_A/=nlmn_1atom')
+           end if
+         else
+           if (nrows_A/=nlmn) then
+             ABI_ERROR('nrows_A/=nlmn')
+           end if
+           if (ncols_A/=nlmn) then
+             ABI_ERROR('ncols_A/=nlmn')
+           end if
          end if
-       else
-         if (nrows_A/=nlmn) then
-           ABI_ERROR('nrows_A/=nlmn')
+         ! if needed, transfer real matrix to a complex one
+         if (aij_r2c) then
+           call xgBlock_r2c(Aij_iatom,Aij_complex%self,nspinor)
+           Aij_iatom_ = Aij_complex%self
+         else
+           Aij_iatom_ = Aij_iatom
          end if
-         if (ncols_A/=nlmn) then
-           ABI_ERROR('ncols_A/=nlmn')
-         end if
-       end if
-       ! if needed, transfer real matrix to a complex one
-       if (aij_r2c) then
-         call xgBlock_r2c(Aij_iatom,Aij_complex%self,nspinor)
-         Aij_iatom_ = Aij_complex%self
-       else
-         Aij_iatom_ = Aij_iatom
-       end if
-       ! Copy cprj of ONE atom for ALL bands from cprjin to cprin_nlmn
-       if (A_with_spin_) then
-         do iband=1,ncols_1atom
-           cprjin_nlmn_(1:cplex*nlmn,iband) = cprjin_(1+shift:cplex*nlmn+shift,1+nspinor*(iband-1))
-         end do
-         if (nspinor==2) then
+         ! Copy cprj of ONE atom for ALL bands from cprjin to cprin_nlmn
+         if (A_with_spin_) then
            do iband=1,ncols_1atom
-             cprjin_nlmn_(1+cplex*nlmn:2*cplex*nlmn,iband) = cprjin_(1+shift:cplex*nlmn+shift,nspinor*iband)
+             cprjin_nlmn_(1:cplex*nlmn,iband) = cprjin_(1+shift:cplex*nlmn+shift,1+nspinor*(iband-1))
+           end do
+           if (nspinor==2) then
+             do iband=1,ncols_1atom
+               cprjin_nlmn_(1+cplex*nlmn:2*cplex*nlmn,iband) = cprjin_(1+shift:cplex*nlmn+shift,nspinor*iband)
+             end do
+           end if
+         else
+           do iband=1,ncols_1atom
+             cprjin_nlmn_(1:cplex*nlmn,iband) = cprjin_(1+shift:cplex*nlmn+shift,iband)
            end do
          end if
-       else
-         do iband=1,ncols_1atom
-           cprjin_nlmn_(1:cplex*nlmn,iband) = cprjin_(1+shift:cplex*nlmn+shift,iband)
-         end do
-       end if
 
-       call xgBlock_gemm('n','n',1.0d0,Aij_iatom_,cprjin_nlmn,0.d0,cprjout_nlmn,timing=.false.)
+         call xgBlock_gemm('n','n',1.0d0,Aij_iatom_,cprjin_nlmn,0.d0,cprjout_nlmn,timing=.false.)
 
-       if (A_with_spin_) then
-         do iband=1,ncols_1atom
-           cprjout_(1+shift:cplex*nlmn+shift,1+nspinor*(iband-1)) = cprjout_(1+shift:cplex*nlmn+shift,1+nspinor*(iband-1)) &
-           & + cprjout_nlmn_(1:cplex*nlmn,iband)
-         end do
-         if (nspinor==2) then
+         if (A_with_spin_) then
            do iband=1,ncols_1atom
-             cprjout_(1+shift:cplex*nlmn+shift,nspinor*iband) = cprjout_(1+shift:cplex*nlmn+shift,nspinor*iband) &
-             & + cprjout_nlmn_(1+cplex*nlmn:2*cplex*nlmn,iband)
+             cprjout_(1+shift:cplex*nlmn+shift,1+nspinor*(iband-1)) = cprjout_(1+shift:cplex*nlmn+shift,1+nspinor*(iband-1)) &
+             & + cprjout_nlmn_(1:cplex*nlmn,iband)
+           end do
+           if (nspinor==2) then
+             do iband=1,ncols_1atom
+               cprjout_(1+shift:cplex*nlmn+shift,nspinor*iband) = cprjout_(1+shift:cplex*nlmn+shift,nspinor*iband) &
+               & + cprjout_nlmn_(1+cplex*nlmn:2*cplex*nlmn,iband)
+             end do
+           end if
+         else
+           do iband=1,ncols_1atom
+             cprjout_(1+shift:cplex*nlmn+shift,iband) = cprjout_(1+shift:cplex*nlmn+shift,iband) &
+             & + cprjout_nlmn_(1:cplex*nlmn,iband)
            end do
          end if
-       else
-         do iband=1,ncols_1atom
-           cprjout_(1+shift:cplex*nlmn+shift,iband) = cprjout_(1+shift:cplex*nlmn+shift,iband) &
-           & + cprjout_nlmn_(1:cplex*nlmn,iband)
-         end do
-       end if
-       shift=shift+cplex*nlmn
-     end do
+         shift=shift+cplex*nlmn
+       end do
 
-     if (aij_r2c) call xg_free(Aij_complex)
-     shift_itypat = shift_itypat + nattyp
+       if (aij_r2c) call xg_free(Aij_complex)
+       shift_itypat = shift_itypat + nattyp_i
+     end if
 
    end do
 
@@ -2208,8 +2227,10 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
    type(xgBlock_t), intent(inout) :: cprj_out,cprj_work
 
    integer :: iter,cprjdim,ncols,additional_steps_to_take
+   !integer :: rows_A
    real(dp), parameter :: tolerance = 1e-14 ! maximum relative error. TODO: use tolwfr ?
    type(xg_t) :: err
+   !real(dp) :: cond
    real(dp) :: norm,max_err,previous_max_err,convergence_rate,tsec(2)
 
    call timab(tim_iter_refinement,1,tsec)
@@ -2239,6 +2260,13 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
    do iter=1,30
      ! compute AY_i
      call xgBlock_gemm('n','n',1.0d0,A,cprj_out,0.0d0,cprj_work)
+     ! ITEST
+     !write(903,*) 'Apply getBm1X to spd matrix of size', rows(A), cols(A)
+     !rows_A = rows(A)
+     !call xgBlock_hermitian_pd_cond(A, rows_A, cond)
+     !write(903,*) 'cond(B)=', cond
+     !flush(903)
+     ! ITEST
      ! RES = AY_i - X
      call xgBlock_saxpy(cprj_work,-1.0d0,cprj_in)
      call xgBlock_colwiseNorm2(cprj_work,err%self,max_val=max_err)
@@ -3093,7 +3121,7 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
    type(xgBlock_t), intent(inout) :: forces
 
    !real(dp) :: tsec(2)
-   integer :: ia,idir,ilmn,iband,iband_spinor,my_iband,itypat,nlmn,nattyp
+   integer :: ia,idir,ilmn,iband,iband_spinor,my_iband,itypat,nlmn,nattyp_i
    integer :: ispinor,iforces,icprj,icprj_deriv
    integer :: ncols_cprj,ncols_cprj_nospin
    integer :: nspinor
@@ -3124,35 +3152,37 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
        !$omp parallel default (none) &
        !$omp& shared(xg_nonlop,forces_,cprj_deriv_,cprj_), &
        !$omp& firstprivate(shift_itypat,shift_itypat_nlmn,shift_itypat_3nlmn,ncols_cprj_nospin,nspinor), &
-       !$omp& private(itypat,nattyp,nlmn,ia,ilmn,idir,iforces,my_iband), &
+       !$omp& private(itypat,nattyp_i,nlmn,ia,ilmn,idir,iforces,my_iband), &
        !$omp& private(iband_spinor,icprj,icprj_deriv,forces_tmp)
        do itypat = 1, xg_nonlop%ntypat
          nlmn = xg_nonlop%nlmn_ntypat(itypat)
-         nattyp = xg_nonlop%nattyp(itypat)
-         !$omp do collapse(3)
-         do iband=1,ncols_cprj_nospin
-           do ia = 1, nattyp
-             do idir=1,3
-               forces_tmp = zero
-               do ispinor=1,nspinor
-                 do ilmn=1,nlmn
-                   iband_spinor = ispinor + nspinor*(iband-1)
-                   icprj       = ilmn + nlmn*(ia-1) + shift_itypat_nlmn
-                   icprj_deriv = ilmn + nlmn*(idir-1) + 3*nlmn*(ia-1) + shift_itypat_3nlmn
-                   forces_tmp = forces_tmp &
-                     & + 2 * dble(conjg(cprj_deriv_(icprj_deriv,iband_spinor))*cprj_(icprj,iband_spinor))
+         nattyp_i = xg_nonlop%nattyp(itypat)
+         if (nattyp_i>0) then
+           !$omp do collapse(3)
+           do iband=1,ncols_cprj_nospin
+             do ia = 1, nattyp_i
+               do idir=1,3
+                 forces_tmp = zero
+                 do ispinor=1,nspinor
+                   do ilmn=1,nlmn
+                     iband_spinor = ispinor + nspinor*(iband-1)
+                     icprj       = ilmn + nlmn*(ia-1) + shift_itypat_nlmn
+                     icprj_deriv = ilmn + nlmn*(idir-1) + 3*nlmn*(ia-1) + shift_itypat_3nlmn
+                     forces_tmp = forces_tmp &
+                       & + 2 * dble(conjg(cprj_deriv_(icprj_deriv,iband_spinor))*cprj_(icprj,iband_spinor))
+                   end do
                  end do
+                 iforces  = idir + 3*(ia-1) + shift_itypat
+                 my_iband = iband + xg_nonlop%me_band*ncols_cprj_nospin
+                 forces_(iforces,my_iband) = forces_(iforces,my_iband) + forces_tmp
                end do
-               iforces  = idir + 3*(ia-1) + shift_itypat
-               my_iband = iband + xg_nonlop%me_band*ncols_cprj_nospin
-               forces_(iforces,my_iband) = forces_(iforces,my_iband) + forces_tmp
              end do
            end do
-         end do
-         !$omp end do
-         shift_itypat       = shift_itypat       + 3*nattyp
-         shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp*nlmn
-         shift_itypat_3nlmn = shift_itypat_3nlmn + nattyp*3*nlmn
+           !$omp end do
+           shift_itypat       = shift_itypat       + 3*nattyp_i
+           shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp_i*nlmn
+           shift_itypat_3nlmn = shift_itypat_3nlmn + nattyp_i*3*nlmn
+         end if
        end do
        !$omp end parallel
 
@@ -3167,35 +3197,37 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
        !$omp parallel default (none) &
        !$omp& shared(xg_nonlop,forces_,cprj_deriv_real,cprj_real), &
        !$omp& firstprivate(shift_itypat,shift_itypat_nlmn,shift_itypat_3nlmn,ncols_cprj_nospin,nspinor), &
-       !$omp& private(itypat,nattyp,nlmn,ia,ilmn,idir,iforces,my_iband), &
+       !$omp& private(itypat,nattyp_i,nlmn,ia,ilmn,idir,iforces,my_iband), &
        !$omp& private(iband_spinor,icprj,icprj_deriv,forces_tmp)
        do itypat = 1, xg_nonlop%ntypat
          nlmn = xg_nonlop%nlmn_ntypat(itypat)
-         nattyp = xg_nonlop%nattyp(itypat)
-         !$omp do collapse(3)
-         do iband=1,ncols_cprj_nospin
-           do ia = 1, nattyp
-             do idir=1,3
-               forces_tmp = zero
-               do ispinor=1,nspinor
-                 do ilmn=1,nlmn
-                   iband_spinor = ispinor + nspinor*(iband-1)
-                   icprj       = ilmn + nlmn*(ia-1) + shift_itypat_nlmn
-                   icprj_deriv = ilmn + nlmn*(idir-1) + 3*nlmn*(ia-1) + shift_itypat_3nlmn
-                   forces_tmp = forces_tmp &
-                     & + 2 * cprj_deriv_real(icprj_deriv,iband_spinor)*cprj_real(icprj,iband_spinor)
+         nattyp_i = xg_nonlop%nattyp(itypat)
+         if (nattyp_i>0) then
+           !$omp do collapse(3)
+           do iband=1,ncols_cprj_nospin
+             do ia = 1, nattyp_i
+               do idir=1,3
+                 forces_tmp = zero
+                 do ispinor=1,nspinor
+                   do ilmn=1,nlmn
+                     iband_spinor = ispinor + nspinor*(iband-1)
+                     icprj       = ilmn + nlmn*(ia-1) + shift_itypat_nlmn
+                     icprj_deriv = ilmn + nlmn*(idir-1) + 3*nlmn*(ia-1) + shift_itypat_3nlmn
+                     forces_tmp = forces_tmp &
+                       & + 2 * cprj_deriv_real(icprj_deriv,iband_spinor)*cprj_real(icprj,iband_spinor)
+                   end do
                  end do
+                 iforces  = idir + 3*(ia-1) + shift_itypat
+                 my_iband = iband + xg_nonlop%me_band*ncols_cprj_nospin
+                 forces_(iforces,my_iband) = forces_(iforces,my_iband) + forces_tmp
                end do
-               iforces  = idir + 3*(ia-1) + shift_itypat
-               my_iband = iband + xg_nonlop%me_band*ncols_cprj_nospin
-               forces_(iforces,my_iband) = forces_(iforces,my_iband) + forces_tmp
              end do
            end do
-         end do
-         !$omp end do
-         shift_itypat       = shift_itypat       + 3*nattyp
-         shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp*nlmn
-         shift_itypat_3nlmn = shift_itypat_3nlmn + nattyp*3*nlmn
+           !$omp end do
+           shift_itypat       = shift_itypat       + 3*nattyp_i
+           shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp_i*nlmn
+           shift_itypat_3nlmn = shift_itypat_3nlmn + nattyp_i*3*nlmn
+         end if
        end do
        !$omp end parallel
 
@@ -3223,7 +3255,7 @@ subroutine xg_nonlop_mult_cprj_stress(xg_nonlop,cprj,cprj_deriv,stress)
    type(xgBlock_t), intent(inout) :: stress
 
    !real(dp) :: tsec(2)
-   integer :: ia,idir,ilmn,iband,iband_spinor,my_iband,itypat,nlmn,nattyp
+   integer :: ia,idir,ilmn,iband,iband_spinor,my_iband,itypat,nlmn,nattyp_i
    integer :: ispinor,icprj,icprj_deriv
    integer :: ncols_cprj,ncols_cprj_nospin,nspinor
    integer :: shift_itypat,shift_itypat_nlmn,shift_itypat_6nlmn
@@ -3255,34 +3287,36 @@ subroutine xg_nonlop_mult_cprj_stress(xg_nonlop,cprj,cprj_deriv,stress)
        !$omp parallel default (none) &
        !$omp& shared(xg_nonlop,stress_,cprj_deriv_,cprj_), &
        !$omp& firstprivate(shift_itypat,shift_itypat_nlmn,shift_itypat_6nlmn,ncols_cprj_nospin,nspinor), &
-       !$omp& private(itypat,nattyp,nlmn,ia,ilmn,idir,my_iband), &
+       !$omp& private(itypat,nattyp_i,nlmn,ia,ilmn,idir,my_iband), &
        !$omp& private(iband_spinor,icprj,icprj_deriv,stress_tmp)
        do itypat = 1, xg_nonlop%ntypat
          nlmn = xg_nonlop%nlmn_ntypat(itypat)
-         nattyp = xg_nonlop%nattyp(itypat)
-         !$omp do collapse(2)
-         do iband=1,ncols_cprj_nospin
-           do idir=1,6
-             stress_tmp = zero
-             do ispinor=1,nspinor
-               do ia = 1, nattyp
-                 do ilmn=1,nlmn
-                   iband_spinor = ispinor + nspinor*(iband-1)
-                   icprj       = ilmn + nlmn*(ia-1) + shift_itypat_nlmn
-                   icprj_deriv = ilmn + nlmn*(idir-1) + 6*nlmn*(ia-1) + shift_itypat_6nlmn
-                   stress_tmp = stress_tmp &
-                     & + 2 * dble(conjg(cprj_deriv_(icprj_deriv,iband_spinor))*cprj_(icprj,iband_spinor))
+         nattyp_i = xg_nonlop%nattyp(itypat)
+         if (nattyp_i>0) then
+           !$omp do collapse(2)
+           do iband=1,ncols_cprj_nospin
+             do idir=1,6
+               stress_tmp = zero
+               do ispinor=1,nspinor
+                 do ia = 1, nattyp_i
+                   do ilmn=1,nlmn
+                     iband_spinor = ispinor + nspinor*(iband-1)
+                     icprj       = ilmn + nlmn*(ia-1) + shift_itypat_nlmn
+                     icprj_deriv = ilmn + nlmn*(idir-1) + 6*nlmn*(ia-1) + shift_itypat_6nlmn
+                     stress_tmp = stress_tmp &
+                       & + 2 * dble(conjg(cprj_deriv_(icprj_deriv,iband_spinor))*cprj_(icprj,iband_spinor))
+                   end do
                  end do
                end do
+               my_iband = iband + xg_nonlop%me_band*ncols_cprj_nospin
+               stress_(idir,my_iband) = stress_(idir,my_iband) + stress_tmp
              end do
-             my_iband = iband + xg_nonlop%me_band*ncols_cprj_nospin
-             stress_(idir,my_iband) = stress_(idir,my_iband) + stress_tmp
            end do
-         end do
-         !$omp end do
-         shift_itypat       = shift_itypat       + 6*nattyp
-         shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp*nlmn
-         shift_itypat_6nlmn = shift_itypat_6nlmn + nattyp*6*nlmn
+           !$omp end do
+           shift_itypat       = shift_itypat       + 6*nattyp_i
+           shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp_i*nlmn
+           shift_itypat_6nlmn = shift_itypat_6nlmn + nattyp_i*6*nlmn
+         end if
        end do
        !$omp end parallel
 
@@ -3297,34 +3331,36 @@ subroutine xg_nonlop_mult_cprj_stress(xg_nonlop,cprj,cprj_deriv,stress)
        !$omp parallel default (none) &
        !$omp& shared(xg_nonlop,stress_,cprj_deriv_real,cprj_real), &
        !$omp& firstprivate(shift_itypat,shift_itypat_nlmn,shift_itypat_6nlmn,ncols_cprj_nospin,nspinor), &
-       !$omp& private(itypat,nattyp,nlmn,ia,ilmn,idir,my_iband), &
+       !$omp& private(itypat,nattyp_i,nlmn,ia,ilmn,idir,my_iband), &
        !$omp& private(iband_spinor,icprj,icprj_deriv,stress_tmp)
        do itypat = 1, xg_nonlop%ntypat
          nlmn = xg_nonlop%nlmn_ntypat(itypat)
-         nattyp = xg_nonlop%nattyp(itypat)
-         !$omp do collapse(2)
-         do iband=1,ncols_cprj_nospin
-           do idir=1,6
-             stress_tmp = zero
-             do ispinor=1,nspinor
-               do ia = 1, nattyp
-                 do ilmn=1,nlmn
-                   iband_spinor = ispinor + nspinor*(iband-1)
-                   icprj       = ilmn + nlmn*(ia-1) + shift_itypat_nlmn
-                   icprj_deriv = ilmn + nlmn*(idir-1) + 6*nlmn*(ia-1) + shift_itypat_6nlmn
-                   stress_tmp = stress_tmp &
-                     & + 2 * cprj_deriv_real(icprj_deriv,iband_spinor)*cprj_real(icprj,iband_spinor)
+         nattyp_i = xg_nonlop%nattyp(itypat)
+         if (nattyp_i>0) then
+           !$omp do collapse(2)
+           do iband=1,ncols_cprj_nospin
+             do idir=1,6
+               stress_tmp = zero
+               do ispinor=1,nspinor
+                 do ia = 1, nattyp_i
+                   do ilmn=1,nlmn
+                     iband_spinor = ispinor + nspinor*(iband-1)
+                     icprj       = ilmn + nlmn*(ia-1) + shift_itypat_nlmn
+                     icprj_deriv = ilmn + nlmn*(idir-1) + 6*nlmn*(ia-1) + shift_itypat_6nlmn
+                     stress_tmp = stress_tmp &
+                       & + 2 * cprj_deriv_real(icprj_deriv,iband_spinor)*cprj_real(icprj,iband_spinor)
+                   end do
                  end do
                end do
+               my_iband = iband + xg_nonlop%me_band*ncols_cprj_nospin
+               stress_(idir,my_iband) = stress_(idir,my_iband) + stress_tmp
              end do
-             my_iband = iband + xg_nonlop%me_band*ncols_cprj_nospin
-             stress_(idir,my_iband) = stress_(idir,my_iband) + stress_tmp
            end do
-         end do
-         !$omp end do
-         shift_itypat       = shift_itypat       + 6*nattyp
-         shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp*nlmn
-         shift_itypat_6nlmn = shift_itypat_6nlmn + nattyp*6*nlmn
+           !$omp end do
+           shift_itypat       = shift_itypat       + 6*nattyp_i
+           shift_itypat_nlmn  = shift_itypat_nlmn  + nattyp_i*nlmn
+           shift_itypat_6nlmn = shift_itypat_6nlmn + nattyp_i*6*nlmn
+         end if
        end do
        !$omp end parallel
 

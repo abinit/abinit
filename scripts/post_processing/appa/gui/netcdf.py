@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Abinit Post Process Application
@@ -7,23 +6,20 @@ author: Martin Alexandre
 last edited: May 2014
 """
 
-import sys,os,time,commands
-import string, math
 
-#GUI 
-import gui.graph as Graph
-import gui.conv  as Conv
+#GUI
 
 #Utility
-import utility.writeHIST as Write
 import utility.analysis as Analysis
+import utility.writeHIST as Write
 
 try:
-    from PyQt4 import Qt,QtGui,QtCore
+    from PyQt4 import QtCore, QtGui
 except:
-    pass;
+    pass
 
 from numpy import *
+
 
 #----------------------------------------------------------------#
 #--------------------------NETCDF WRITER-------------------------#
@@ -32,7 +28,7 @@ class winNetcdf(QtGui.QWidget):
 
     PTOE = Analysis.PeriodicTableElement()
 
-    def __init__(self, file, parent = None,name =''):
+    def __init__(self, file, parent = None,name =""):
 
         self.file = file
         self.name = name
@@ -46,7 +42,7 @@ class winNetcdf(QtGui.QWidget):
         #-----------------Creation of the windows----------------------------#
         QtGui.QWidget.__init__(self, parent)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        self.setWindowTitle(self.name + ' Save Netcdf')
+        self.setWindowTitle(self.name + " Save Netcdf")
         self.setFixedSize(600, 450)
         self.center()
         self.layout = QtGui.QGridLayout()
@@ -57,10 +53,10 @@ class winNetcdf(QtGui.QWidget):
 
         self.lname = QtGui.QLineEdit()
         self.lname.setFixedWidth(200)
-        
+
         self.pbClose = QtGui.QPushButton("Close")
         self.pbClose.setFixedSize(70,20)
-        self.connect(self.pbClose,QtCore.SIGNAL("clicked()"),QtCore.SLOT('close()'))
+        self.connect(self.pbClose,QtCore.SIGNAL("clicked()"),QtCore.SLOT("close()"))
 
         self.pbSave = QtGui.QPushButton("Save")
         self.pbSave.setFixedSize(70,20)
@@ -80,7 +76,7 @@ class winNetcdf(QtGui.QWidget):
     def close(self):
         del self.graphMSD
         del self
-    
+
     def closeEvent(self, event):
         try:
             del self.graphMSD
@@ -89,8 +85,8 @@ class winNetcdf(QtGui.QWidget):
         try:
             del self
         except:
-            pass     
-        
+            pass
+
     def center(self):
         screen = QtGui.QDesktopWidget().screenGeometry()
         size =  self.geometry()

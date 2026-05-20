@@ -3,7 +3,7 @@
 !! m_abstract_potential
 !!
 !! FUNCTION
-!! This module contains the base type for all effective potentials. 
+!! This module contains the base type for all effective potentials.
 !!
 !!
 !! Datatypes:
@@ -16,7 +16,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2025 ABINIT group (hexu)
+!! Copyright (C) 2001-2026 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,7 +58,7 @@ module m_abstract_potential
      logical :: has_lwf = .False.
      logical :: is_null=.True.   ! if is_null, this term does not exist.
      ! it is important to set it to True before initialization.
-     ! Because it is used as the tag for deallocatign memory. 
+     ! Because it is used as the tag for deallocatign memory.
      type(mbsupercell_t) ,pointer :: supercell => null()
      ! every supercell potential has a pointer to the supercell,
      ! which could be used for like reference structure.
@@ -179,11 +179,11 @@ contains
   !----------------------------------------------------------------------
   !> @brief get_delta_E: calculate the energy difference when a given spin
   !> is changed. This is to be used for spin Monte Carlo. Currently the
-  !> only supported is the spin model. 
+  !> only supported is the spin model.
   !>
   !> @param[in]  S: spin of full structure. array of (3, nspin)
   !> @param[in]  ispin: the index of spin changed. integer
-  !> @param[in]  snew: the new value of the changed spin. 
+  !> @param[in]  snew: the new value of the changed spin.
   !> @param[out] deltaE: the energy difference
   !----------------------------------------------------------------------
   subroutine get_delta_E(self, S, ispin, Snew, deltaE)
@@ -204,11 +204,11 @@ contains
   !----------------------------------------------------------------------
   !> @brief get_delta_E_lwf: calculate the energy difference when a given lwf
   !> is changed. This is to be used for spin Monte Carlo. Currently the
-  !> only supported is the spin model. 
+  !> only supported is the spin model.
   !>
   !> @param[in]  lwf: lwf of full structure. array of (nlwf)
   !> @param[in]  ilwf: the index of spin changed. integer
-  !> @param[in]  lwf_new: the new value of the changed spin. 
+  !> @param[in]  lwf_new: the new value of the changed spin.
   !> @param[out] deltaE: the energy difference
   !----------------------------------------------------------------------
   subroutine get_delta_E_lwf(self, lwf, ilwf, lwf_new, deltaE)

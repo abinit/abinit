@@ -8,7 +8,7 @@
 !! It performs the data copy: dst(1:n:incdst) = src(1:n:incsrc)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2025 ABINIT group (LNguyen,FDahm (CS))
+!!  Copyright (C) 2001-2026 ABINIT group (LNguyen,FDahm (CS))
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,8 +33,8 @@ subroutine abi_zcopy(size,tsrc,incsrc,tdest,incdest)
  integer, intent(in) :: size
  integer, intent(in) :: incsrc
  integer, intent(in) :: incdest
- complex(dpc),intent(in) :: tsrc
- complex(dpc),intent(inout) :: tdest
+ complex(dp),intent(in) :: tsrc
+ complex(dp),intent(inout) :: tdest
 
  !Local variables-------------------------------
 #ifdef DEV_LINALG_TIMING
@@ -67,8 +67,8 @@ subroutine abi_zcopy_1d(size,tsrc,incsrc,tdest,incdest)
  integer, intent(in) :: size
  integer, intent(in) :: incsrc
  integer, intent(in) :: incdest
- complex(dpc), intent(in) :: tsrc(*)
- complex(dpc), intent(inout) :: tdest(*)
+ complex(dp), intent(in) :: tsrc(*)
+ complex(dp), intent(inout) :: tdest(*)
 
  call abi_zcopy(size,tsrc(1),incsrc,tdest(1),incdest)
 
@@ -237,7 +237,7 @@ subroutine abi_d2zcopy_2d(size,tsrc,incsrc,tdest,incdest,x_cplx)
  integer, intent(in) :: incsrc
  integer, intent(in) :: incdest
  real(dp),     DEV_CONTARRD intent(in) :: tsrc(:,:)
- complex(dpc), DEV_CONTARRD intent(inout) :: tdest(:,:)
+ complex(dp), DEV_CONTARRD intent(inout) :: tdest(:,:)
  !only in lobpcgwf
  integer, intent(in),optional :: x_cplx
 
@@ -279,7 +279,7 @@ subroutine abi_z2dcopy_2d(size,tsrc,incsrc,tdest,incdest,x_cplx)
  integer, intent(in) :: size
  integer, intent(in) :: incsrc
  integer, intent(in) :: incdest
- complex(dpc), DEV_CONTARRD intent(in) :: tsrc(:,:)
+ complex(dp), DEV_CONTARRD intent(in) :: tsrc(:,:)
  real(dp),     DEV_CONTARRD intent(inout) :: tdest(:,:)
  !only in lobpcgwf
  integer,intent(in), optional :: x_cplx

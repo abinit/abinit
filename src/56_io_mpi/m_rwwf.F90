@@ -6,7 +6,7 @@
 !!   Read/Write wavefunctions.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -695,9 +695,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 !---------------------------------------------------------------------------
 ! Free memory
 !---------------------------------------------------------------------------
- if (allocated(ind_cg_mpi_to_seq)) then
-   ABI_FREE(ind_cg_mpi_to_seq)
- end if
+ ABI_SFREE(ind_cg_mpi_to_seq)
 
 end subroutine readwf
 !!***
@@ -765,7 +763,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
  character(len=500) :: msg
  integer :: ikpt_this_proc,ispinor,me_cart_3d
  integer,allocatable :: ind_cg_mpi_to_seq(:)
- real(dp),ABI_CONTIGUOUS pointer :: cg_ptr(:,:)
+ real(dp),contiguous, pointer :: cg_ptr(:,:)
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr
  character(len=nctk_slen) :: kdep
 #ifdef HAVE_MPI
@@ -993,9 +991,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 !Final statements
 !---------------------------------------------------------------------------
 
- if (allocated(ind_cg_mpi_to_seq)) then
-   ABI_FREE(ind_cg_mpi_to_seq)
- end if
+ ABI_SFREE(ind_cg_mpi_to_seq)
 
  RETURN
 

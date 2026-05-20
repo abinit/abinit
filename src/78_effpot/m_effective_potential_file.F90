@@ -8,7 +8,7 @@
 !! (XML or DDB)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2025 ABINIT group (AM)
+!! Copyright (C) 2000-2026 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,9 +35,7 @@ module m_effective_potential_file
  use m_ifc
  use m_ddb
  use m_ddb_hdr
-#if defined HAVE_NETCDF
  use netcdf
-#endif
 
  use m_io_tools,   only : open_file, get_unit
  use m_geometry,   only : xcart2xred, xred2xcart, metric
@@ -252,7 +250,6 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
   integer :: ii,filetype,natom,ntypat,nqpt,nrpt
   character(500) :: message
   type(ddb_hdr_type) :: ddb_hdr
-
 ! *************************************************************************
 
   call effective_potential_file_getType(filename,filetype)
@@ -437,13 +434,9 @@ subroutine effective_potential_file_getType(filename,filetype)
  integer :: ddbun = 666,ios=0
  character(len=500) :: message
  character (len=1000) :: line,readline
-#if defined HAVE_NETCDF
  integer :: natom_id,time_id,xyz_id,six_id,ddb_version
  integer :: ncid,ncerr
  logical :: md_file
-#endif
-
-!arrays
 ! *************************************************************************
 
  filetype = 0
@@ -494,7 +487,6 @@ subroutine effective_potential_file_getType(filename,filetype)
  if(filetype/=0) return
 
 !try to read netcdf HIST file
-#if defined HAVE_NETCDF
  ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
  if(ncerr == NF90_NOERR) then
    md_file = .TRUE.
@@ -512,12 +504,10 @@ subroutine effective_potential_file_getType(filename,filetype)
    end if
  end if
  ncerr = nf90_close(ncid)
-#endif
 
  if(filetype/=0) return
 
 ! Try to read netcdf DDB file
-#if defined HAVE_NETCDF
  ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
  if(ncerr==NF90_NOERR) then
    ncerr = nf90_get_var(ncid, nctk_idname(ncid, 'ddb_version'), ddb_version)
@@ -526,7 +516,6 @@ subroutine effective_potential_file_getType(filename,filetype)
      return
    end if
  end if
-#endif
 
 !Try to get the dim of MD ASCII file
  call effective_potential_file_getDimMD(filename,natom,nstep)
@@ -573,7 +562,6 @@ subroutine effective_potential_file_getDimSystem(filename,comm,natom,ntypat,nqpt
 ! integer :: dimekb,lmnmax,mband,mtyp,msym,nblok,nkpt,usepaw
  character(len=500) :: message
  type(ddb_hdr_type) :: ddb_hdr
-!arrays
 ! *************************************************************************
 
  natom = 0
@@ -686,7 +674,6 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
  character (len=XML_RECL) :: line,readline
 #endif
  character(len=500) :: message
-
 ! *************************************************************************
 
  call effective_potential_file_getType(filename,filetype)
@@ -820,7 +807,6 @@ subroutine effective_potential_file_getDimStrainCoupling(filename,nrpt,voigt)
  character (len=XML_RECL) :: line,readline,strg,strg1
  character(len=500) :: message
 #endif
-
 ! *************************************************************************
 
    nrpt = 0
@@ -910,22 +896,18 @@ subroutine effective_potential_file_getDimMD(filename,natom,nstep)
  integer :: ios=0,ios2=0,ios3=0
  integer :: unit_md=24
  logical :: compatible,netcdf
-#if defined HAVE_NETCDF
  integer :: natom_id,time_id,xyz_id,six_id
  integer :: ncid,ncerr
  character(len=5) :: char_tmp
-#endif
 !arrays
  character (len=10000) :: readline,line
  character(len=500) :: msg
-
 ! *************************************************************************
 
  natom = 0
  nstep = 0
 !try to read netcdf
  netcdf = .false.
-#if defined HAVE_NETCDF
  ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
  if(ncerr == NF90_NOERR) then
    netcdf = .TRUE.
@@ -944,7 +926,6 @@ subroutine effective_potential_file_getDimMD(filename,natom,nstep)
      NCF_CHECK_MSG(ncerr," inquire dimension ID for time")
    end if
  end if
-#endif
 
  if(.not.netcdf) then
 !  try to read ASCII file...
@@ -1070,7 +1051,6 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 #ifndef HAVE_XML
   integer,allocatable :: typat(:)
 #endif
-
  ! *************************************************************************
 
 !Open the atomicdata XML file for reading
@@ -1278,9 +1258,7 @@ end subroutine system_getDimFromXML
 #ifndef HAVE_XML
  real(dp),allocatable :: work2(:,:)
 #endif
-
 ! *************************************************************************
-
 
  !Open the atomicdata XML file for reading
  write(message,'(a,a)')'-Opening the file ',filename
@@ -2188,7 +2166,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  integer,parameter :: master=0
  integer :: nptsym,nsym
  integer :: msym = 384,  use_inversion = 1, space_group
- real(dp):: max_phfq,tolsym = tol8
+ real(dp):: max_phfq,eta, tolsym = tol8
 !arrays
  integer :: bravais(11),cell_number(3),cell2(3)
  integer :: shift(3),rfelfd(4),rfphon(4),rfstrs(4)
@@ -2205,7 +2183,6 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  real(dp),allocatable :: eigval(:,:),eigvec(:,:,:,:,:),phfrq(:)
  real(dp),allocatable :: spinat(:,:),tnons(:,:)
  integer,allocatable  :: symrel(:,:,:),symafm(:),ptsymrel(:,:,:)
-
 ! *************************************************************************
 
 !0 MPI variables
@@ -2566,7 +2543,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
     ! long-range coulomb interaction through Ewald summation
     call gtdyn9(ddb%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip,ifc%dyewq0,d2cart,crystal%gmet,&
 &     ddb%gprim,mpert,natom,ifc%nrpt,qphnrm(1),qphon(:,1),crystal%rmet,ddb%rprim,ifc%rpt,&
-&     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff,qdrp_cart,ifc%ewald_option,&
+&     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff,qdrp_cart,ifc%ewald_option,eta,&
 &     xmpi_comm_self,ifc%asr,ifc%dim_msr,dielt_env=ifc%dielt_env,dielt_thick=ifc%dielt_thick)
 
     ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
@@ -2884,7 +2861,6 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  integer,allocatable :: strain(:,:,:),power_strain(:,:,:)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs
  type(polynomial_term_type),dimension(:,:),allocatable :: terms
-
 ! *************************************************************************
 
  filename_tmp = trim(filename)
@@ -3284,7 +3260,6 @@ subroutine effective_potential_file_readMDfile(filename,hist,option)
  character (len=10000) :: readline,line
  real(dp) :: tmp(6)
  real(dp),allocatable :: xcart(:,:)
-
 ! *************************************************************************
 
  call effective_potential_file_getType(filename,type)
@@ -3672,8 +3647,6 @@ subroutine effective_potential_file_readDisplacement(filename,disp,nstep,natom)
  character(500) :: message
  character (len=500000) :: line,readline
  integer :: funit = 666
-!array
-
 ! *************************************************************************
 
  if (open_file(filename,message,unit=funit,form="formatted",&

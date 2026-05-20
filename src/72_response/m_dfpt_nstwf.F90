@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group ()
+!!  Copyright (C) 2008-2026 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,6 +33,7 @@ module m_dfpt_nstwf
  use m_nctk
  use m_dtset
  use m_dtfil
+ use m_gputk
  use m_abi_linalg
 
  use defs_datatypes, only : pseudopotential_type
@@ -108,7 +109,7 @@ contains
 !!  - on-site contributions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2025 ABINIT group (MT, AM)
+!! Copyright (C) 2010-2026 ABINIT group (MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -319,7 +320,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  logical :: need_wfk,need_wf1,nmxc,paral_atom,qne0,t_exist,use_ompgpu,with_vxctau
  character(len=500) :: msg
  character(len=fnlen) :: fiwfddk(3)
- complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
+ complex(dp), parameter :: cminusone  = (-1._dp,0._dp)
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
  type(MPI_type) :: mpi_enreg_seq
@@ -336,7 +337,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),allocatable,target :: ch1c_tmp(:,:)
  real(dp),allocatable :: cs1c_tmp(:,:)
  real(dp),allocatable :: dcwavef(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: cwave0(:,:),cwavef(:,:)!,dcwavef(:,:)
+ real(dp), contiguous, pointer :: cwave0(:,:),cwavef(:,:)!,dcwavef(:,:)
  real(dp),allocatable :: cg_ddk(:,:,:)
  real(dp),allocatable :: doccde_k(:),doccde_kq(:)
  real(dp),allocatable :: dnhat1(:,:),drhoaug1(:,:,:,:)
@@ -353,7 +354,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),allocatable :: ylm_k(:,:),ylm1_k(:,:),ylmgr1_k(:,:,:),vtmp1(:,:),vxc10(:,:)
  real(dp),allocatable,target :: work(:,:,:),e1kb_work(:,:,:,:)
  real(dp),pointer :: e1kbfr(:,:,:,:,:),e1kb_ptr(:,:,:,:)
- real(dp), ABI_CONTIGUOUS pointer :: ffnl1_idir1(:,:,:,:)
+ real(dp), contiguous, pointer :: ffnl1_idir1(:,:,:,:)
  real(dp),pointer :: vhartr01(:),vpsp1_idir1(:),xccc3d1_idir1(:)
  type(pawcprj_type),allocatable :: dcwaveprj(:,:)
  type(pawcprj_type),allocatable,target :: cwaveprj0(:,:)
@@ -493,7 +494,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      if (ipert1/=ipert) then
        if(dtset%usepaw==1) then
          if((ipert1<=dtset%natom.or.(ipert1==dtset%natom+2.and.has_ddk_file).or.&
-&            ((ipert>dtset%natom.and.ipert/=dtset%natom+5).and.(ipert1==dtset%natom+3.or.ipert1==dtset%natom+4)).or. &
+&            ((ipert>dtset%natom.and.ipert/=dtset%natom+5.and.ipert/=dtset%natom+6).and.(ipert1==dtset%natom+3.or.ipert1==dtset%natom+4)).or. &
 &            ((ipert1==dtset%natom+2).and.has_ddk_file))) then
            mpert1=mpert1+1;jpert1(mpert1)=ipert1
          end if
@@ -686,9 +687,10 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &             nattyp,nfftf,ngfftf,dtset%ntypat,ph1df,psps%qgrid_vl,ucvol,&
 &             psps%vlspl,vpsp1_idir1,g0term=g0term)
            else
-             call dfpt_vlocal(gs_hamkq%atindx,cplex,gmet,gsqcut,idir1,ipert1,mpi_enreg,psps%mqgrid_vl,&
-&             dtset%natom,nattyp,nfftf,ngfftf,dtset%ntypat,ngfftf(1),ngfftf(2),ngfftf(3),&
-&             ph1df,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_idir1,xred)
+             call dfpt_vlocal(gs_hamkq%atindx,cplex,gmet,gsqcut,dtset%icutcoul,idir1,ipert1,mpi_enreg,psps%mqgrid_vl,&
+&             dtset%natom,nattyp,nfftf,ngfftf,dtset%nkpt,dtset%ntypat,ngfftf(1),ngfftf(2),ngfftf(3),&
+&             ph1df,psps%qgrid_vl,dtset%qptn,dtset%rcut,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1_idir1,xred,&
+&             zion=dtset%ziontypat)
            end if
            if(psps%n1xccc/=0)then
              call dfpt_mkcore(cplex,idir1,ipert1,dtset%natom,dtset%ntypat,ngfftf(1),psps%n1xccc,&
@@ -1499,8 +1501,10 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 #ifdef HAVE_OPENMP_OFFLOAD
                      !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw) MAP(to:gvnlx1,gvnlx1_tmp)
                      do ipw=1,npw1_k*nspinor
-                       gvnlx1(:,(idat-1)*npw1_k*nspinor + ipw) = &
-                         gvnlx1_tmp(:,ipw) - (my_nproc_band-1)*gvnlx1(:,(idat-1)*npw1_k*nspinor + ipw)
+                       gvnlx1(1,(idat-1)*npw1_k*nspinor + ipw) = &
+                         gvnlx1_tmp(1,ipw) - (my_nproc_band-1)*gvnlx1(1,(idat-1)*npw1_k*nspinor + ipw)
+                       gvnlx1(2,(idat-1)*npw1_k*nspinor + ipw) = &
+                         gvnlx1_tmp(2,ipw) - (my_nproc_band-1)*gvnlx1(2,(idat-1)*npw1_k*nspinor + ipw)
                      end do
 #endif
                    end if
@@ -2265,7 +2269,7 @@ end subroutine dfpt_nstpaw
 !! Only for norm-conserving pseudopotentials (no PAW)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2025 ABINIT group (XG,AR,MB,MVer,MT, MVeithen)
+!! Copyright (C) 1999-2026 ABINIT group (XG,AR,MB,MVer,MT, MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2623,6 +2627,12 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
                  gvnlx1(1,ipw)=gvnlx1(2,ipw)
                  gvnlx1(2,ipw)=-aa
                end do
+
+!              MRoyo 030925 :
+!              3) Case ipert1=natom+2 and ipert=natom+5 or ipert=natom+12:2*natom+11
+!              the computation of mixed derivatives wrt to Zeeman and electric fields needs $i \frac{d}{dk}.
+               if (ipert==dtset%natom+5.or.(ipert>=dtset%natom+12.and.ipert<=2*dtset%natom+11)) gvnlx1(:,:) = -gvnlx1(:,:)
+
              end if
 
 ! at this stage if iband is not mine I can cycle
@@ -2639,6 +2649,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !            the computation of the Born effective charge tensor uses
 !            the operator $-i \frac{d}{dk}.
              if (ipert==dtset%natom+2) gvnlx1(:,:) = -gvnlx1(:,:)
+
 
 !            <G|Vnl1|Cnk> is contained in gvnlx1
 !            construct the matrix element (<uj2|vj1|u0>)complex conjug and add it to the 2nd-order matrix

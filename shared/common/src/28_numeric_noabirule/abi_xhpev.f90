@@ -9,7 +9,7 @@
 !!  symmetric or hermitian matrix A in packed storage
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2025 ABINIT group (LNguyen,FDahm,MT)
+!!  Copyright (C) 2001-2026 ABINIT group (LNguyen,FDahm,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -123,15 +123,14 @@ end subroutine abi_dhpev
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n,ldz
- complex(spc), intent(inout) :: a(:,:)
- complex(spc), intent(out) :: z(:,:)
+ complex(sp), intent(inout) :: a(:,:)
+ complex(sp), intent(out) :: z(:,:)
  real(sp), intent(out) :: w(:)
 
 !Local variables-------------------------------
  integer :: info
  real(sp),pointer :: rwork(:)
- complex(spc),pointer :: work(:)
-
+ complex(sp),pointer :: work(:)
 ! *********************************************************************
 
  ABI_CHECK(lapack_packed_storage,"BUG(1) in abi_chpev (storage)!")
@@ -178,15 +177,14 @@ end subroutine abi_chpev
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n,ldz
- complex(dpc), intent(inout) :: a(:,:)
- complex(dpc), intent(out) :: z(:,:)
+ complex(dp), intent(inout) :: a(:,:)
+ complex(dp), intent(out) :: z(:,:)
  real(dp), intent(out) :: w(:)
 
 !Local variables-------------------------------
  integer :: info
  real(dp),pointer :: rwork(:)
- complex(dpc),pointer :: work(:)
-
+ complex(dp),pointer :: work(:)
 ! *********************************************************************
 
  ABI_CHECK(lapack_packed_storage,"BUG(1) in abi_zhpev (storage)!")

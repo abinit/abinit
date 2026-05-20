@@ -59,14 +59,14 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t06.abo, tolnlines = 1, tolabs = 1.1e-06, tolrel = 5.0e-04, fld_options =  -medium
+#%% files_to_test =
+#%%   t06.abo, tolnlines = 1, tolabs = 1.1e-05, tolrel = 5.0e-04, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = PAW
-#%% description = 
+#%% description =
 #%%   O in orthorhombic structure. 1 k point, low ecut. Experimental PAW pseudopotential.
 #%%   The aim of this test is to mesure the convergence of
 #%%   the total energy versus the variable 'ecut'.

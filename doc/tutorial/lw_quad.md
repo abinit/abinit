@@ -7,11 +7,11 @@ authors: SP, MR, MS
 This tutorial describes the computation of dynamical quadrupoles using
 density functional perturbation theory (DFPT), using AlAs as an example.
 
-It is assumed the user has already completed the two tutorials [RF1](/tutorial/rf1) and [RF2](/tutorial/rf2),
+It is assumed the user has already completed the two tutorials [RF1](../tutorial/rf1.md) and [RF2](../tutorial/rf2.md),
 and is comfortable with the concepts of ground-state and response properties,
 including phonons, Born effective charges and dielectric tensor.
 
-The first-order terms in the long-wavelength expansion of a material's charge response to atomic displacements
+The first-order terms in the long-wavelength expansion of a material charge response to atomic displacements
 are the Born effective charges (dynamical dipoles). The second-order terms in this expansion are known as
 dynamical quadrupoles. Accordingly, the quadrupoles can be considered as the spatial-dispersion of the Born charges.
 

@@ -1,8 +1,8 @@
 
-.Version 10.5.4.1 of ABINIT, released Jul 2025.
-.(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_nvhpc24.9-0 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 21 Jul 2025.
-- ( at 11h33 )
+.Starting date : Mon 22 Dec 2025.
+- ( at 07h38 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_no-more-bandpp-develop/tests/TestBot_MPI1/gpu_omp_t27/t27.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/TestBot_MPI1/gpu_omp_t27/t27.abi
 - output file    -> t27.abo
 - root for input  files -> t27i
 - root for output files -> t27o
 
 - inpspheads : Reading pseudopotential header in XML form from
--   /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_no-more-bandpp-develop/tests/Pspdir/Si.LDA_PW-JTH.xml
+-   /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/Si.LDA_PW-JTH.xml
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -193,7 +193,7 @@ P           mkmem           4
 -          useylm           1
               wtk        0.03704    0.29630    0.22222    0.44444
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -244,9 +244,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_no-more-bandpp-develop/tests/Pspdir/Si.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_no-more-bandpp-develop/tests/Pspdir/Si.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_no-more-bandpp-develop/tests/Pspdir/Si.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/Si.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/Si.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/Si.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90944987
@@ -326,9 +326,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+- [ -1.02947493E-31,  -1.02947493E-31,  -1.02947493E-31, ]
+- [  1.02947493E-31,   1.02947493E-31,   1.02947493E-31, ]
+force_length_stats: {min:   1.78310289E-31, max:   1.78310289E-31, mean:   1.78310289E-31, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -395,25 +395,25 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+ rms dE/dt=  1.0518E-30; max dE/dt=  1.0518E-30; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+    2      -0.000000000000     -0.000000000000     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35165088504101     1.35165088504101     1.35165088504101
+    2      1.35165089003201     1.35165089003201     1.35165089003201
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+    2      0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 1.0294749E-31 1.0294749E-31   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+    2      0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 5.2937730E-30 5.2937730E-30   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
-              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+              =  5.406603560128  5.406603560128  5.406603560128 angstroms
  prteigrs : about to open file t27o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.20431   Average Vxc (hartree)=  -0.35685
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -431,9 +431,9 @@ xc                  : -4.81679277910781E+00
 Ewald energy        : -8.43581958561899E+00
 psp_core            :  2.35232659959094E-01
 local_psp           : -2.37214877890279E+00
-spherical_terms     :  3.71062620272994E+00
+PAW spherical_terms :  3.71062620272994E+00
 total_energy        : -8.01311945407369E+00
-total_energy_eV     : -2.18048069380833E+02
+total_energy_eV     : -2.18048088499984E+02
 ...
 
 
@@ -444,9 +444,19 @@ band_energy         :  1.38681888806500E-01
 Ewald energy        : -8.43581958561899E+00
 psp_core            :  2.35232659959094E-01
 xc_dc               : -1.87598018784615E+00
-spherical_terms     :  1.92476577186326E+00
+PAW spherical_terms :  1.92476577186326E+00
 total_energy_dc     : -8.01311945283630E+00
-total_energy_dc_eV  : -2.18048069347162E+02
+total_energy_dc_eV  : -2.18048088466312E+02
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 1, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -5.78053842258408E+02
+Total energy DC     : -5.78053842257170E+02
+Total energy (eV)   : -1.57296463726669E+04
+Total energy DC (eV): -1.57296463726332E+04
 ...
 
 
@@ -456,9 +466,9 @@ total_energy_dc_eV  : -2.18048069347162E+02
   sigma(3 3)= -4.53229134E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.3334E+00 GPa]
-- sigma(1 1)= -1.33344593E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -1.33344593E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -1.33344593E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -1.33344615E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -1.33344615E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -1.33344615E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -500,9 +510,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_no-more-bandpp-develop/tests/Pspdir/Si.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_no-more-bandpp-develop/tests/Pspdir/Si.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_no-more-bandpp-develop/tests/Pspdir/Si.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/Si.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/Si.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/Si.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90944987
@@ -573,9 +583,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: # hartree/bohr
-- [  1.60636473E-21,   1.07740066E-20,   5.46813315E-21, ]
-- [ -1.60636473E-21,  -1.07740066E-20,  -5.46813315E-21, ]
-force_length_stats: {min:   1.21885235E-20, max:   1.21885235E-20, mean:   1.21885235E-20, }
+- [  1.20659045E-20,  -4.99140660E-21,  -4.99140660E-21, ]
+- [ -1.20659045E-20,   4.99140660E-21,   4.99140660E-21, ]
+force_length_stats: {min:   1.39790676E-20, max:   1.39790676E-20, mean:   1.39790676E-20, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -642,25 +652,25 @@ force_length_stats: {min:   1.21885235E-20, max:   1.21885235E-20, mean:   1.218
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  6.3746E-20; max dE/dt=  8.2973E-20; dE/dt below (all hartree)
-    1      -0.000000000000     -0.000000000000     -0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  4.1685E-20; max dE/dt=  5.0997E-20; dE/dt below (all hartree)
+    1       0.000000000000     -0.000000000000     -0.000000000000
+    2      -0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35165088504101     1.35165088504101     1.35165088504101
+    2      1.35165089003201     1.35165089003201     1.35165089003201
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000     0.00000000000000     0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 7.0370473E-21 1.0774007E-20   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 8.0708184E-21 1.2065904E-20   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000     0.00000000000000     0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 3.6185949E-19 5.5402165E-19   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 4.1501817E-19 6.2045375E-19   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
-              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+              =  5.406603560128  5.406603560128  5.406603560128 angstroms
  prteigrs : about to open file t27o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.17898   Average Vxc (hartree)=  -0.27481
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -673,14 +683,14 @@ force_length_stats: {min:   1.21885235E-20, max:   1.21885235E-20, mean:   1.218
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.09656518968535E+00
-hartree             :  5.74360545730896E-01
+hartree             :  5.74360545730895E-01
 xc                  : -4.28916292181708E+00
 Ewald energy        : -8.43581958561899E+00
 psp_core            :  2.35232659959094E-01
-local_psp           : -2.32269124116616E+00
-spherical_terms     :  3.19826695596064E+00
+local_psp           : -2.32269124116615E+00
+PAW spherical_terms :  3.19826695596064E+00
 total_energy        : -7.94324839726624E+00
-total_energy_eV     : -2.16146781233341E+02
+total_energy_eV     : -2.16146800185781E+02
 ...
 
 
@@ -691,9 +701,19 @@ band_energy         : -1.94925403992940E-01
 Ewald energy        : -8.43581958561899E+00
 psp_core            :  2.35232659959094E-01
 xc_dc               : -1.10167700992148E+00
-spherical_terms     :  1.55386611957538E+00
+PAW spherical_terms :  1.55386611957538E+00
 total_energy_dc     : -7.94332321999894E+00
-total_energy_dc_eV  : -2.16148817263442E+02
+total_energy_dc_eV  : -2.16148836216061E+02
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 2, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -5.70558411911472E+02
+Total energy DC     : -5.70558486734205E+02
+Total energy (eV)   : -1.55256853224166E+04
+Total energy DC (eV): -1.55256873584469E+04
 ...
 
 
@@ -703,9 +723,9 @@ total_energy_dc_eV  : -2.16148817263442E+02
   sigma(3 3)= -7.82698528E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  2.3028E+00 GPa]
-- sigma(1 1)= -2.30277819E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -2.30277819E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -2.30277819E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -2.30277857E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -2.30277857E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -2.30277857E+00  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -717,10 +737,10 @@ total_energy_dc_eV  : -2.16148817263442E+02
              ecut      6.00000000E+00 Hartree
            etotal1    -8.0131194528E+00
            etotal2    -7.9433232200E+00
-            fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart2     1.6063647252E-21  1.0774006564E-20  5.4681331541E-21
-                      -1.6063647252E-21 -1.0774006564E-20 -5.4681331541E-21
+            fcart1    -1.0294749342E-31 -1.0294749342E-31 -1.0294749342E-31
+                       1.0294749342E-31  1.0294749342E-31  1.0294749342E-31
+            fcart2     1.2065904482E-20 -4.9914066029E-21 -4.9914066029E-21
+                      -1.2065904482E-20  4.9914066029E-21  4.9914066029E-21
 -          fftalg         512
            getwfk          -1
 -      gpu_option           2
@@ -843,7 +863,7 @@ P           mkmem           4
 -          useylm           1
               wtk        0.03704    0.29630    0.22222    0.44444
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -941,10 +961,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         21.6  wall=         21.6
+- Proc.   0 individual time (sec): cpu=         89.8  wall=         89.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         21.6  wall=         21.6
++Overall time at end (sec) : cpu=         89.8  wall=         89.8

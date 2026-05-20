@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -120,7 +120,7 @@ subroutine outvar_i_n (dtsets,iout,&
  integer :: multi_atsph,multi_occopt
  integer :: natfix,natfixx,natfixy,natfixz,natnd,natom
  integer :: ndtset_kptopt,nimage,nqpt,nkpt_eff
- integer :: ntypalch,ntypat,size1,size2,tnkpt
+ integer :: ntypalch,ntypat,size1,size2,test_write,tnkpt
  real(dp) :: kpoint
  character(len=1) :: firstchar_gpu
 !arrays
@@ -401,13 +401,13 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%irdddk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdddk','INT',0)
- 
+
  intarr(1,:)=dtsets(:)%irddelfd
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irddelfd','INT',0)
 
  intarr(1,:)=dtsets(:)%irddkdk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irddkdk','INT',0)
- 
+
  intarr(1,:)=dtsets(:)%irddkde
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irddkde','INT',0)
 
@@ -448,6 +448,9 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%irdwfkfine
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdwfkfine','INT',0)
+
+ intarr(1,:)=dtsets(:)%irdwfmq
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdwfmq','INT',0)
 
  intarr(1,:)=dtsets(:)%irdwfq
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdwfq','INT',0)
@@ -768,6 +771,9 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%magconon
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'magconon','INT',0)
 
+ dprarr(1,:)=dtsets(:)%magpen
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'magpen','ENE',0)
+
  dprarr(1,:)=dtsets(:)%maxestep
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'maxestep','ENE',0)
 
@@ -857,6 +863,21 @@ subroutine outvar_i_n (dtsets,iout,&
    intarr(1,:)=dtsets(:)%mk1mem
    call prttagm(dprarr,intarr,iout,jdtset_,5,marr,1,narrm,ncid,ndtset_alloc,'mk1mem','INT',0)
  end if
+
+ test_write=0
+ do idtset=1,ndtset_alloc
+   if(dtsets(idtset)%mpatpol(1)/=1 .or. dtsets(idtset)%mpatpol(2)/=dtsets(idtset)%natom)test_write=1
+ enddo
+ if(test_write==1)then
+   intarr(1,:)=dtsets(:)%mpatpol(1)
+   intarr(2,:)=dtsets(:)%mpatpol(2)
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'mpatpol','INT',0)
+ endif
+
+ intarr(1,:)=dtsets(:)%mpdir(1)
+ intarr(2,:)=dtsets(:)%mpdir(2)
+ intarr(3,:)=dtsets(:)%mpdir(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'mpdir','INT',0)
 
  intarr(1,:)=dtsets(:)%mqgrid
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'mqgrid','INT',0)
@@ -949,11 +970,11 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nberry
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nberry','INT',0)
 
- intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nb_protected
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nb_protected','INT',0)
+ !:intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nb_protected
+ !:call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nb_protected','INT',0)
 
- intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nb_per_slice
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nb_per_slice','INT',0)
+ !intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nb_per_slice
+ !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nb_per_slice','INT',0)
 
  intarr(1,:)=dtsets(:)%nc_xccc_gspace
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nc_xccc_gspace','INT',0)
@@ -1028,6 +1049,9 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%nline
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nline','INT',0)
+
+ intarr(1,:)=dtsets(:)%nslice
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nslice','INT',0)
 
  intarr(1,:)=dtsets(:)%nblock_lobpcg
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nblock_lobpcg','INT',0)
@@ -1155,6 +1179,9 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%nstep
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nstep','INT',0)
+
+ intarr(1,:)=dtsets(:)%nstep_mixed
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nstep_mixed','INT',0)
 
  intarr(1,:)=dtsets(:)%nsym
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nsym','INT',0)

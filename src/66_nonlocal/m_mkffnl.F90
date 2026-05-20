@@ -7,7 +7,7 @@
 !! and for each angular momentum.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MT, DRH)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, MT, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -287,12 +287,12 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
  end if
 
  ! Compatibility tests
- if (mpsang>4) then
-   write(msg,'(a,i0,a,a)')&
-   'Called with mpsang > 4, =',mpsang,ch10,&
-   'This subroutine will not accept lmax+1 > 4.'
-   ABI_BUG(msg)
- end if
+ !if (mpsang>4) then
+ !  write(msg,'(a,i0,a,a)')&
+ !  'Called with mpsang > 4, =',mpsang,ch10,&
+ !  'This subroutine will not accept lmax+1 > 4.'
+ !  ABI_BUG(msg)
+ !end if
  if (idir<-7.or.idir>4) then
    ABI_BUG('Called with idir<-6 or idir>4 !')
  end if

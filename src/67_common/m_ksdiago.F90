@@ -6,7 +6,7 @@
 !!  Direct diagonalization of the KS Hamiltonian H_k(G,G')
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -241,7 +241,7 @@ module m_ksdiago
   ! TODO Not implemented
 
   real(dp) :: abstol
-   ! used fro RANGE= "V", "I", and "A" when do_full_diago=.FALSE.
+   ! used for RANGE= "V", "I", and "A" when do_full_diago=.FALSE.
    ! The absolute error tolerance for the eigenvalues. An approximate eigenvalue is accepted
    ! as converged when it is determined to lie in an interval [a,b] of width less than or equal to
    !
@@ -490,9 +490,9 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
  end if
 
  call initmpi_seq(mpi_enreg_seq) ! Fake MPI_type for sequential part.
- call init_distribfft_seq(mpi_enreg_seq%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
+ call mpi_enreg_seq%distribfft%init_seq('c', ngfftc(2), ngfftc(3), 'all')
  if (pawfgr%usefinegrid /= 0) then
-   call init_distribfft_seq(mpi_enreg_seq%distribfft, 'f', pawfgr%ngfft(2), pawfgr%ngfft(3), 'all')
+   call mpi_enreg_seq%distribfft%init_seq('f', pawfgr%ngfft(2), pawfgr%ngfft(3), 'all')
  end if
 
  spin  = Diago_ctl%spin
@@ -1045,7 +1045,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  real(dp),allocatable :: vlocal(:,:,:,:), ylm_k(:,:), dum_ylm_gr_k(:,:,:), eig_ene(:), ghc(:,:), gvnlxc(:,:), gsc(:,:), vcg_qbz(:,:)
  real(dp),target,allocatable :: bras(:,:)
  complex(dp),allocatable :: ps_ug(:,:,:)
- complex(gwpc),allocatable :: cbras_box(:,:), cbras_g(:,:), vc_sqrt(:), ur(:), rfg_box(:,:)
+ complex(gwp),allocatable :: cbras_box(:,:), cbras_g(:,:), vc_sqrt(:), ur(:), rfg_box(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 ! *********************************************************************
 
@@ -1082,9 +1082,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
 
  ! MPI_type for sequential part.
  call initmpi_seq(mpi_enreg_seq)
- call init_distribfft_seq(mpi_enreg_seq%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
+ call mpi_enreg_seq%distribfft%init_seq('c', ngfftc(2), ngfftc(3), 'all')
  if (pawfgr%usefinegrid /= 0) then
-   call init_distribfft_seq(mpi_enreg_seq%distribfft, 'f', pawfgr%ngfft(2), pawfgr%ngfft(3), 'all')
+   call mpi_enreg_seq%distribfft%init_seq('f', pawfgr%ngfft(2), pawfgr%ngfft(3), 'all')
  end if
 
  nspinor = dtset%nspinor; nsppol = dtset%nsppol; nspden = dtset%nspden
@@ -1103,10 +1103,10 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  ! Initialize the Hamiltonian on the coarse FFT mesh.
  if (present(electronpositron)) then
    call gs_hamk%init(psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
-    mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0, electronpositron=electronpositron)
+    mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0, gpu_option=dtset%gpu_option, electronpositron=electronpositron)
  else
    call gs_hamk%init(psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
-    mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0)
+    mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0, gpu_option=dtset%gpu_option)
  end if
 
  ! Check on the number of stored bands.
@@ -1205,6 +1205,10 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  batch_size = 8 * omp_nt
  if (istwf_k == 2) batch_size = 1  ! FIXME
  !batch_size = 1
+ if (gs_hamk%gpu_option == ABI_GPU_OPENMP) then
+   batch_size = 32
+ end if
+
  call wrtout(std_out, sjoin(" Building H^KS with batch_size:", itoa(batch_size)))
 
  ABI_MALLOC(bras, (2, npwsp * batch_size))
@@ -1277,7 +1281,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
      end do
      if (psps%usepaw == 1) then
        NOT_IMPLEMENTED_ERROR()
-       !gsg_mat%buffer_real(...)
        !gsg_mat%buffer_real(...)
      end if
    end if ! istwf_k
@@ -1354,7 +1357,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
 
    ! Build plans for (dense, g-sphere) FFTs.
    call box_plan%from_ngfft(ngfftc, nspinor*batch_size, dtset%gpu_option)
-   call uplan_k%init(npw_k, nspinor, batch_size, ngfftc, istwf_k, ugb%kg_k, gwpc, dtset%gpu_option)
+   call uplan_k%init(npw_k, nspinor, batch_size, ngfftc, istwf_k, ugb%kg_k, gwp, dtset%gpu_option)
 
    ! Blocked loop over the columns of F^k_{g1,g2}.
    do ig2=1, npwsp, batch_size
@@ -1538,7 +1541,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  ! ================
  ! Stochastic bands
  ! ================
- if (dtset%nb_protected /= 0) then
+ !if (dtset%nb_protected /= 0) then
+ if (.False.) then
    call wrtout(std_out, " Generating stochastic bands...")
    ! Initial setup.
    call psb%init(dtset, h_size, eig_ene, gs_fermie) !, nband_k)
@@ -1722,7 +1726,7 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
 !arrays
  integer :: units(2)
  real(dp),target,allocatable :: cg_work(:,:,:)
- real(dp),ABI_CONTIGUOUS pointer :: cg_k(:,:)
+ real(dp),contiguous, pointer :: cg_k(:,:)
 ! *********************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -1803,7 +1807,7 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
      do band=bstart, bstop
        ib = band - bstart + 1
        call ugb%mat%glob2loc(1, band, iloc, il_b, have_band); if (.not. have_band) cycle
-       ugb%mat%buffer_cplx(:, il_b) = cmplx(cg_work(1,:,ib), cg_work(2,:,ib), kind=gwpc)
+       ugb%mat%buffer_cplx(:, il_b) = cmplx(cg_work(1,:,ib), cg_work(2,:,ib), kind=gwp)
      end do
    end if
    ABI_FREE(cg_work)
@@ -2012,8 +2016,8 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, dia
  type(crystal_t) :: wfk_cryst
  type(krank_t) :: krank_ibz ! qrank,
  character(len=fnlen) :: wfk_path
- integer :: units(2)
  integer :: nqbzX
+ integer :: units(2)
  integer,allocatable :: nband(:,:), wfd_istwfk(:), qtab(:), qtabi(:), qtabo(:)
  real(dp),allocatable :: qbz(:,:), wtk(:), wtq(:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
@@ -2112,7 +2116,7 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, dia
 
  ! Note symrec convention.
  ebands_kptopt = hyb%ebands%kptopt
- krank_ibz = krank_from_kptrlatt(hyb%nkibz, hyb%kibz, hyb%ebands%kptrlatt, compute_invrank=.False.)
+ call krank_ibz%from_kptrlatt(hyb%nkibz, hyb%kibz, hyb%ebands%kptrlatt, compute_invrank=.False.)
 
  ABI_MALLOC(hyb%kbz2ibz, (6, hyb%nkbz))
  if (kpts_map("symrec", ebands_kptopt, cryst, krank_ibz, hyb%nkbz, hyb%kbz, hyb%kbz2ibz) /= 0) then
@@ -2247,12 +2251,15 @@ subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie)
  real(dp),allocatable :: tmp_eig_k(:)
 ! *********************************************************************
 
+ ABI_UNUSED(dtset%natom)
+
  ! Shift energies wrt the input Fermi level.
  ABI_MALLOC(tmp_eig_k, (eig_size))
  tmp_eig_k = eig_k - gs_fermie
 
- psb%nb_protected = dtset%nb_protected
- psb%maxsto_per_slice = dtset%nb_per_slice
+ psb%nb_protected = huge(1)
+ !psb%nb_protected = dtset%nb_protected
+ !psb%maxsto_per_slice = dtset%nb_per_slice
  ! TODO
  psb%efrac = 0.02_dp   ! dtset%efrac
 
@@ -2278,7 +2285,7 @@ subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie)
      ! Won't use pseudo bands in this case.
      psb%subspace(3, psb%nslices) = 1
    else
-     psb%subspace(3, psb%nslices) = min(dtset%nb_per_slice, nb)
+     !psb%subspace(3, psb%nslices) = min(dtset%nb_per_slice, nb)
    end if
    first_band = last_band + 1
    !write(std_out,'(a,i0,a,*(1x,i0))')" islice: ", psb%nslices, " subspace:", psb%subspace(:, psb%nslices)
@@ -2306,7 +2313,7 @@ subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie)
  units = [std_out, ab_out]
  call wrtout(units, ' Stochastic pseudobands setup:', pre_newlines=1)
  call wrtout(units, sjoin('     Number of stochastic subspaces: ', itoa(psb%nslices)))
- call wrtout(units, sjoin('     Number of stochastic pseudobands per subspace: ', itoa(dtset%nb_per_slice)))
+ !call wrtout(units, sjoin('     Number of stochastic pseudobands per subspace: ', itoa(dtset%nb_per_slice)))
  call wrtout(units, sjoin('     Original number of bands: ', itoa(eig_size)))
  call wrtout(units, sjoin('     Number of bands in the protection window: ', itoa(psb%nb_protected)))
  call wrtout(units, sjoin('     Final number of bands: ', itoa(psb%nb_tot)), newlines=1)

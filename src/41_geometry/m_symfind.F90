@@ -6,7 +6,7 @@
 !!  Symmetry finder high-level API.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2025 ABINIT group (XG, RC)
+!!  Copyright (C) 2000-2026 ABINIT group (XG, RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,7 +25,7 @@ module m_symfind
  use m_errors
  use m_abicore
  use m_symlist
-  
+
 
  use m_matrix,    only : mati3inv, matr3inv, mati3det
  use m_symtk,     only : chkprimit, symrelrot, symdet, symcharac, holocell, symatm, &

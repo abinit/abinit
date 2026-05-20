@@ -8,7 +8,7 @@
 !!  Mainly used in Berry phase formalism.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2025 ABINIT group (JWZ,TRangel,BA,FJ,PHermet)
+!! Copyright (C) 2018-2026 ABINIT group (JWZ,TRangel,BA,FJ,PHermet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -112,11 +112,10 @@ CONTAINS  !=====================================================================
 !scalars
  integer :: iatom,iband,ibs,ilmn,ispinor,itypat
  integer :: jband,jbs,jlmn,klmn
- complex(dpc) :: cpk1,cpk2,cterm,paw_onsite
+ complex(dp) :: cpk1,cpk2,cterm,paw_onsite
 
  ! arrays
  real(dp),allocatable :: calc_expibi(:,:),calc_qijb(:,:,:)
-
 ! *************************************************************************
 
 !initialize k1k2_paw output variable
@@ -629,8 +628,7 @@ CONTAINS  !=====================================================================
 !scalars
  integer :: iatom,iband,ibs,ilmn,ispinor,itypat
  integer :: jband,jbs,jlmn,klmn,nspinor
- complex(dpc) :: cpk,cpkb,cterm,paw_onsite
-
+ complex(dp) :: cpk,cpkb,cterm,paw_onsite
 ! *************************************************************************
 
 !initialize smat_k_paw
@@ -723,13 +721,12 @@ CONTAINS  !=====================================================================
  integer :: klm,kln,klmn,lbess,lbesslm,lmin,lmax,mbess,mesh_size
  integer :: ylmr_normchoice,ylmr_npts,ylmr_option
  real(dp) :: arg,bessg,bnorm,intg,rterm
- complex(dpc) :: cterm,etb,ifac
+ complex(dp) :: cterm,etb,ifac
 !arrays
  real(dp) :: bb(3),bbn(3),bcart(3),ylmgr(1,1,0),ylmr_nrm(1)
  real(dp),allocatable :: ff(:),j_bessel(:,:),ylmb(:),sb_out(:)
 ! the following is (i)^L mod 4.
- complex(dpc),dimension(0:3) :: il(0:3)=(/cone,j_dpc,-cone,-j_dpc/)
-
+ complex(dp),dimension(0:3) :: il(0:3)=(/cone,j_dpc,-cone,-j_dpc/)
 ! *************************************************************************
 
  calc_qijb(:,:,:) = zero

@@ -6,7 +6,7 @@
 !!  Utility for profiling the FFT libraries supported by ABINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2025 ABINIT group (MG)
+!! Copyright (C) 2004-2026 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@
 !!                 gw_fft --> Test the FFT transforms used in the GW code.
 !!                 all    --> Test all FFT routines (DEFAULT)
 !!     fftalgs = list of fftalg values (used to select the FFT libraries to use, see abinit doc for more info)
-!!     use_gpu_fftalgs = for each fftalg in fftalgs, it is set to 0 if the GPU version doesnt have
+!!     gpu_options = for each fftalg in fftalgs, it is set to 0 if the GPU version doesnt have
 !!                       to be used, or to the value selecting the GPU implementation (see defs_basis.F90)
 !!     ncalls = integer defining the number of calls for each tests. The final Wall time and CPU time
 !!              are computed by averaging the final results over ncalls executions.
@@ -70,6 +70,7 @@ program fftprof
  use m_errors
  use m_abicore
  use m_dfti
+ use m_abi_linalg
 #ifdef HAVE_GPU_CUDA
  use m_gpu_toolbox
  use m_manage_cuda
@@ -83,19 +84,19 @@ program fftprof
  use m_io_tools,     only : flush_unit
  use m_geometry,     only : metric
  use m_fftcore,      only : get_cache_kb, get_kg, fftalg_isavailable, fftalg_has_mpi, getng, fftcore_set_mixprec
- use m_fft,          only : fft_use_lib_threads, fftbox_utests, fftu_utests, fftbox_mpi_utests, fftu_mpi_utests
+ use m_fft,          only : fft_use_lib_threads, fftbox_utests, fftu_utests, fftbox_mpi_utests, fftu_mpi_utests, uplan_utests
  use m_fftw3,        only : fftw3_init_threads
  use m_fft_prof,     only : fft_test_t, fft_prof_t, fft_tests_free, fftprof_ncalls_per_test, fftprofs_free, &
-& fftprofs_print, prof_fourdp, prof_fourwf, prof_rhotwg
+                            fftprofs_print, prof_fourdp, prof_fourwf, prof_rhotwg
  use m_mpinfo,       only : destroy_mpi_enreg, initmpi_seq
 
  implicit none
 
 !Arguments -----------------------------------
 !scalars
- integer,parameter :: MAX_NFFTALGS = 50, MAX_NSYM = 48
- integer,parameter :: paral_kgb0 = 0, me_fft0 = 0, nproc_fft1 = 1, master = 0
- integer :: ii,fftcache,it,cplex,ntests,option_fourwf,osc_npw
+ integer,parameter :: MAX_NFFTALGS = 50, MAX_NSYM = 48, wfoptalg = 4
+ integer,parameter :: paral_kgb0 = 0, me_fft0 = 0, nproc_fft1 = 1, master = 0, np_slk1 = 1, use_slk0 = 0
+ integer :: ii,fftcache,it,cplex,ntests,option_fourwf,osc_npw, linalg_max_size
  integer :: map2sphere,use_padfft,isign,nthreads,comm,nprocs,my_rank
  integer :: iset,iall,inplace,nsets,avail,ith,idx,ut_nfft,ut_mgfft
  integer :: nfftalgs,alg,fftalg,fftalga,fftalgc,nfailed,ierr,paral_kgb,abimem_level
@@ -120,19 +121,16 @@ program fftprof
  integer :: ncalls = 10, max_nthreads = 1, ndat = 1, necut = 0, nsym = 1
  integer :: mixprec = 0, gpu_option = 0, init_gpu_flavor
  character(len=500) :: tasks="all"
- integer :: fftalgs(MAX_NFFTALGS) = 0, use_gpu_fftalgs(MAX_NFFTALGS) = 0
+ integer :: fftalgs(MAX_NFFTALGS) = 0, gpu_options(MAX_NFFTALGS) = 0
  integer :: symrel(3,3,MAX_NSYM) = 0
- real(dp),parameter :: k0(3)=(/zero,zero,zero/)
+ real(dp),parameter :: k0(3) = zero
  real(dp) :: ecut = 30, osc_ecut = 3
- real(dp) :: ecut_arth(2) = zero
- real(dp) :: rprimd(3,3)
- real(dp) :: kpoint(3) = (/0.1,0.2,0.3/)
- real(dp) :: tnons(3,MAX_NSYM) = zero
+ real(dp) :: ecut_arth(2) = zero, rprimd(3,3)
+ real(dp) :: kpoint(3) = [0.1,0.2,0.3], tnons(3,MAX_NSYM) = zero
  logical :: use_lib_threads = .FALSE.
- namelist /CONTROL/ tasks, ncalls, max_nthreads, ndat, fftalgs, use_gpu_fftalgs, &
+ namelist /CONTROL/ tasks, ncalls, max_nthreads, ndat, fftalgs, gpu_options, &
                     necut, ecut_arth, use_lib_threads, mixprec
  namelist /SYSTEM/ ecut, rprimd, kpoint, osc_ecut, nsym, symrel
-
 ! *************************************************************************
 
  ! Change communicator for I/O (mandatory!)
@@ -185,7 +183,7 @@ program fftprof
    call xmpi_bcast(max_nthreads,master,comm,ierr)
    call xmpi_bcast(ndat,master,comm,ierr)
    call xmpi_bcast(fftalgs,master,comm,ierr)
-   call xmpi_bcast(use_gpu_fftalgs,master,comm,ierr)
+   call xmpi_bcast(gpu_options,master,comm,ierr)
    call xmpi_bcast(necut,master,comm,ierr)
    call xmpi_bcast(ecut_arth,master,comm,ierr)
    call xmpi_bcast(use_lib_threads,master,comm,ierr)
@@ -231,7 +229,7 @@ program fftprof
  call fft_use_lib_threads(use_lib_threads)
  !write(std_out,*)"use_lib_threads: ",use_lib_threads
 
- init_gpu_flavor = maxval(use_gpu_fftalgs)
+ init_gpu_flavor = maxval(gpu_options)
 #if defined HAVE_GPU_CUDA
  if (init_gpu_flavor /= ABI_GPU_DISABLED) then
    gpu_devices(:)=-1
@@ -241,6 +239,11 @@ program fftprof
    call gpu_linalg_init()
  end if
 #endif
+
+ ! linalg initialisation (required by subdiago)
+ linalg_max_size = 1
+ !call abi_linalg_init(linalg_max_size, RUNL_GSTATE, wfoptalg, paral_kgb0,&
+ !                     init_gpu_flavor, use_slk0, np_slk1, xmpi_comm_self)
 
  if (do_mpi_utests) then
    ! Execute unit tests for MPI FFTs and terminate execution.
@@ -253,7 +256,7 @@ program fftprof
 
    nfailed = 0; nthreads = 0
    do ii=1,nfftalgs
-     fftalg = fftalgs(ii); gpu_option = use_gpu_fftalgs(ii)
+     fftalg = fftalgs(ii); gpu_option = gpu_options(ii)
      do paral_kgb=1,1
        write(msg,"(5(a,i0))")&
         "MPI fftu_utests with fftalg = ",fftalg,", paral_kgb = ",paral_kgb," ndat = ",ndat,", nthreads = ",nthreads
@@ -264,7 +267,7 @@ program fftprof
 
    nfailed = 0; nthreads = 0
    do ii=1,nfftalgs
-     fftalg = fftalgs(ii); gpu_option = use_gpu_fftalgs(ii)
+     fftalg = fftalgs(ii); gpu_option = gpu_options(ii)
      do cplex=1,2
        write(msg,"(4(a,i0))")&
          "MPI fftbox_utests with fftalg = ",fftalg,", cplex = ",cplex," ndat = ",ndat,", nthreads = ",nthreads
@@ -303,7 +306,7 @@ program fftprof
  ! Default Goedecker library.
  idx=0
  do alg=1,nfftalgs
-   fftalg = fftalgs(alg); gpu_option = use_gpu_fftalgs(alg)
+   fftalg = fftalgs(alg); gpu_option = gpu_options(alg)
    fftalga = fftalg/100; fftalgc = mod(fftalg, 10)
    avail = merge(1, 0, fftalg_isavailable(fftalg))
    !fftcache is machine-dependent.
@@ -315,8 +318,8 @@ program fftprof
  end do
 
  ! Init Ftest objects.
- ABI_MALLOC(Ftest,(ntests))
- ABI_MALLOC(Ftprof,(ntests))
+ ABI_MALLOC(Ftest, (ntests))
+ ABI_MALLOC(Ftprof, (ntests))
 
  do it=1,ntests
    call Ftest(it)%init(fft_setups(:,it), kpoint, ecut, boxcutmin2, rprimd, nsym, symrel, MPI_enreg)
@@ -330,7 +333,7 @@ program fftprof
      call Ftest(it)%print() !,header)
    end if
  end do
- !
+
  ! =======================
  ! ==== fourdp timing ====
  ! =======================
@@ -345,7 +348,7 @@ program fftprof
      end do
    end do
  end if
- !
+
  ! =======================
  ! ==== fourwf timing ====
  ! =======================
@@ -371,7 +374,7 @@ program fftprof
    end do
    ABI_FREE(fourwf_params)
  end if
- !
+
  ! ==========================
  ! ==== Test GW routines ====
  ! ==========================
@@ -421,7 +424,6 @@ program fftprof
 
  if (do_seq_utests) then
    call wrtout(std_out, "=== FFT Unit Tests ===")
-
    nfailed = 0
    do idx=1,ntests
      ! fft_setups(:,idx) = [fftalg,fftcache,ndat,ith,avail,gpu_option]
@@ -430,12 +432,12 @@ program fftprof
      ndat     = fft_setups(3, idx)
      nthreads = fft_setups(4, idx)
      ! Skip the test if library is not available.
-     if (fft_setups(5,idx) == 0) CYCLE
+     if (fft_setups(5, idx) == 0) CYCLE
      gpu_option = fft_setups(6, idx)
 
      write(msg,"(3(a,i0))")"fftbox_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
+     !write(msg,"(4(a,i0))")"fftbox_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads, ", gpu_option = ", gpu_option
      call wrtout(std_out, msg)
-
      nfailed = nfailed + fftbox_utests(fftalg, ndat, nthreads, gpu_option)
 
      ! Initialize ngfft(7:8) here.
@@ -444,12 +446,16 @@ program fftprof
      ut_ngfft(8) = fftcache
 
      call getng(boxcutmin2,0,ecut,gmet,k0,me_fft0,ut_mgfft,ut_nfft,ut_ngfft,nproc_fft1,nsym,&
-       paral_kgb0,symrel,tnons,unit=dev_null)
+       paral_kgb0,symrel,tnons, unit=dev_null, gpu_option=gpu_option)
 
      write(msg,"(3(a,i0))")"fftu_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
+     !write(msg,"(4(a,i0))")"fftu_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads, ", gpu_option = ", gpu_option
      call wrtout(std_out, msg)
-
      nfailed = nfailed + fftu_utests(ecut, ut_ngfft, rprimd, ndat, nthreads)
+
+     !write(msg,"(4(a,i0))")"uplan_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads, ", gpu_option = ", gpu_option
+     !call wrtout(std_out, msg)
+     !nfailed = nfailed + uplan_utests(ecut, ut_ngfft, rprimd, ndat, nthreads, gpu_option)
    end do
 
    write(msg,'(a,i0)')"Total number of failed tests = ",nfailed
@@ -496,7 +502,7 @@ program fftprof
       rprimd,nsym,symrel,gmet,MPI_enreg)
    end if
  end if
- !
+
  !===============================
  !=== End of run, free memory ===
  !===============================
@@ -508,6 +514,8 @@ program fftprof
  call fftprofs_free(Ftprof)
  ABI_FREE(Ftprof)
  call destroy_mpi_enreg(MPI_enreg)
+
+ !call abi_linalg_finalize(init_gpu_flavor)
 
 #if defined HAVE_GPU_CUDA
  if (init_gpu_flavor /= ABI_GPU_DISABLED) then

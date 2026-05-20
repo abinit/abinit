@@ -6,7 +6,7 @@
 !!  This module contains low-level procedures to check assertions and handle errors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2025 ABINIT group (MG,YP,NCJ,MT)
+!! Copyright (C) 2008-2026 ABINIT group (MG,YP,NCJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -977,10 +977,10 @@ end subroutine unused_real_sp
 elemental subroutine unused_cplx_spc(var)
 
 !Arguments ------------------------------------
- complex(spc),intent(in) :: var
+ complex(sp),intent(in) :: var
 
 !Local variables-------------------------------
- complex(spc) :: dummy
+ complex(sp) :: dummy
 ! *********************************************************************
 
  dummy = var
@@ -1009,10 +1009,10 @@ end subroutine unused_cplx_spc
 elemental subroutine unused_cplx_dpc(var)
 
 !Arguments ------------------------------------
- complex(dpc),intent(in) :: var
+ complex(dp),intent(in) :: var
 
 !Local variables-------------------------------
- complex(dpc) :: dummy
+ complex(dp) :: dummy
 ! *********************************************************************
 
  dummy = var
@@ -1256,8 +1256,6 @@ end subroutine bigdft_lib_error
 !! SOURCE
 
 subroutine xlf_set_sighandler()
-
-! *************************************************************************
 
 #ifdef FC_IBM
  call SIGNAL(SIGTRAP, xl__trcedump)

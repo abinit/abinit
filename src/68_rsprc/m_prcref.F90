@@ -6,7 +6,7 @@
 !!  Routines to precondition residual potential (or density) and forces.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, MT, PMA)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, MT, PMA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,7 +47,6 @@ module m_prcref
  use m_fft,      only : zerosym, indirect_parallel_fourier, fourdp
  use m_kg,       only : getph
  use m_spacepar, only : hartre, laplacian
- use m_distribfft, only : init_distribfft_seq
  use m_forces,     only : fresid
  use m_atm2fft,    only : atm2fft
  use m_rhotoxc,    only : rhotoxc
@@ -120,9 +119,10 @@ contains
 !!   | prtvol=control print volume and debugging
 !!   | typat(natom)=integer type for each atom in cell
 !!  etotal=total ennergy
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fcart(3,natom)=cartesian forces (hartree/bohr)
 !!  ffttomix(nfft*(1-nfftprc/nfft))=Index of the points of the FFT (fine) grid on the grid used for mixing (coarse)
-!!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
+!!  gmet(3,3)=metric tensor in G space in Bohr**-2.
 !!  gsqcut=cutoff on (k+G)^2 (bohr^-2)
 !!  istep= number of the step in the SCF cycle
 !!  kg_diel(3,npwdiel)=reduced planewave coordinates for the dielectric matrix.
@@ -240,7 +240,6 @@ subroutine prcref(atindx,dielar,dielinv,&
  real(dp),allocatable :: vres_diel(:,:),vxc_wk(:,:),work(:),work1(:,:),work2(:)
  real(dp),allocatable :: work3(:,:),xccc3d(:),xred_wk(:,:)
  logical,allocatable :: mask(:)
-
 ! *************************************************************************
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
@@ -776,7 +775,7 @@ end subroutine prcref
 !!   | typat(natom)=integer type for each atom in cell
 !!  fcart(3,natom)=cartesian forces (hartree/bohr)
 !!  ffttomix(nfft*(1-nfftprc/nfft))=Index of the points of the FFT (fine) grid on the grid used for mixing (coarse)
-!!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
+!!  gmet(3,3)=metric tensor in G space in Bohr**-2.
 !!  gsqcut=cutoff on (k+G)^2 (bohr^-2)
 !!  istep= number of the step in the SCF cycle
 !!  kg_diel(3,npwdiel)=reduced planewave coordinates for the dielectric matrix.
@@ -897,7 +896,6 @@ end subroutine prcref
  real(dp),allocatable :: vres_diel(:,:),vxc_wk(:,:),work(:),work1(:,:),work2(:)
  real(dp),allocatable :: work3(:,:),xccc3d(:),xred_wk(:,:)
  logical,allocatable :: mask(:)
-
 ! *************************************************************************
 
  if(optres==1)then
@@ -1374,11 +1372,10 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,qphon
  character(len=500) :: message
 !arrays
  integer :: id(3)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gmet(3,3),gprimd(3,3),potg0(4),rmet(3,3)
  real(dp),allocatable :: gq(:,:),work1(:,:),work2(:)
-
 ! *************************************************************************
 
 !Check that cplex has an allowed value
@@ -1602,15 +1599,12 @@ subroutine dielmt(dielinv,gmet,kg_diel,npwdiel,nspden,occopt,prtvol,susmat)
  real(dp) :: tsec(2)
  real(dp),allocatable :: dielh(:),dielmat(:,:,:,:,:),dielvec(:,:,:)
  real(dp),allocatable :: eig_diel(:),zhpev1(:,:),zhpev2(:)
-!no_abirules
 !integer :: ipw3
 !real(dp) :: elementi,elementr
-
 ! *************************************************************************
 
 !DEBUG
 !write(std_out,*)' dielmt : enter '
-!if(.true.)stop
 !ENDDEBUG
 
 !tpisq is (2 Pi) **2:
@@ -1972,7 +1966,6 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
 !this limit value is truly empirical (exprmt on small Sr cell).
 !real(dp) :: kxc_min=-200.0
 !ENDDEBUG
-
 ! *************************************************************************
 
  call timab(96,1,tsec)
@@ -2150,7 +2143,7 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
 !  wkxc(:)=merge(kxc(:,1), kxc_min, kxc(:,1) > kxc_min)
 !  ENDDEBUG
    call initmpi_seq(mpi_enreg_seq)
-   call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
+   call MPI_enreg_seq%distribfft%init_seq('c',ngfft(2),ngfft(3),'all')
    call fourdp(1,kxcg,wkxc,-1,mpi_enreg_seq,nfft,1,ngfft,0) ! trsfrm R to G
    call destroy_mpi_enreg(mpi_enreg_seq)
 
@@ -2387,7 +2380,7 @@ end subroutine dieltcel
 !!  gprimd(3,3)=dimensional primitive translations in fourier space (bohr**-1)
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  vresid(nfft,nspden)=residual potential
-!!  base(nfft) = real space function used as a basis to guess a fine dielectric funtion
+!!  base(nfft) = real space function used as a basis to guess a fine dielectric function
 !!  see the calling routine to know the content
 !!
 !! OUTPUT
@@ -2426,7 +2419,6 @@ subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,v
  real(dp) :: deltaW(nfft,nspden)
  real(dp) :: g2cart(nfft)
  real(dp) :: mat(nfft,nspden)
-
 ! *************************************************************************
 
 !DEBUG
@@ -2636,14 +2628,13 @@ subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vres
  real(dp) :: C1,C2,DE,core,dielng,diemac,diemix,diemixmag,doti,dr,l1,l2,l3,l4,r
  real(dp) :: rdummy1,rdummy2,rmin,xr,y,yr,zr
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: V1(nfft,nspden),V2(nfft,nspden),buffer(nfft,nspden)
  real(dp) :: deltaW(nfft,nspden)
  real(dp) :: mat(nfft,nspden)
  real(dp) :: rdielng(nfft),rdiemac(nfft),xcart(3,natom)
  real(dp) :: xcart27(3,natom*27)
-
 ! *************************************************************************
 
  dielng=dielar(2)
@@ -2842,7 +2833,7 @@ subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vres
 &rdielng,&          !the density
 &DE,&  !resulting dorproduct integrated over r  ! here DE is used has a buffer
 &doti,&          !imaginary part of the integral
-&size(rdielng,1),&          !number of localy(cpu) attributed grid point
+&size(rdielng,1),&          !number of locally(cpu) attributed grid point
 &nfftotf,&        !real total number of grid point
 &nspden,&        !nspden
 &option,&        !1=compute only the real part 2=compute also the imaginary part
@@ -2856,7 +2847,7 @@ subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vres
 &rdielng,&          !the density
 &C1,&  !resulting dorproduct integrated over r  ! here DE is used has a buffer
 &doti,&          !imaginary part of the integral
-&size(rdielng,1),&          !number of localy(cpu) attributed grid point
+&size(rdielng,1),&          !number of locally(cpu) attributed grid point
 &nfftotf,&        !real total number of grid point
 &nspden,&        !nspden
 &option,&        !1=compute only the real part 2=compute also the imaginary part
@@ -2870,7 +2861,7 @@ subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vres
 &rdielng,&          !the density
 &C2,&  !resulting dorproduct integrated over r  ! here DE is used has a buffer
 &doti,&          !imaginary part of the integral
-&size(rdielng,1),&          !number of localy(cpu) attributed grid point
+&size(rdielng,1),&          !number of locally(cpu) attributed grid point
 &nfftotf,&        !real total number of grid point
 &nspden,&        !nspden
 &option,&        !1=compute only the real part 2=compute also the imaginary part
@@ -2979,7 +2970,7 @@ end subroutine cgpr
 !! first bracket the minimum then perform the minimization
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, MT)
+!! Copyright (C) 1998-2026 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2990,7 +2981,7 @@ end subroutine cgpr
 !! vdp_dum_vdp: derivative of f
 !!
 !! OUTPUT
-!! fmin: minimun value reached for dp_dum_vdp
+!! fmin: minimum value reached for dp_dum_vdp
 !!
 !! SIDE EFFECTS
 !! grad: the gradient line along which the minimization is performed (not changed)
@@ -3032,16 +3023,14 @@ end subroutine linmin
 !! bracketing
 !!
 !! FUNCTION
-!! bracket a minimun of a function f
+!! bracket a minimum of a function f
 !!
 !! INPUTS
 !! dp_dum_vdp: the function of which the mimimum should be bracketted
 !!
-!!
 !! OUTPUT
 !! b= last member of the bracketing triplet a < x < b
 !! fa,fx,fb= value of the function at dp_dum_vdp(v(:)+y*grad(:))
-!!
 !!
 !! SIDE EFFECTS
 !! v: the initial vector for the function (return unchanged)
@@ -3065,7 +3054,6 @@ include "dummy_functions.inc"
 !scalars
  real(dp),parameter :: maglimit=10000.0_dp
  real(dp) :: c,fu,q,r,u,ulim
-
 ! *************************************************************************
 
  fa=dp_dum_v2dp(nv1,nv2,v(:,:)+(a*grad(:,:)))
@@ -3141,7 +3129,7 @@ end subroutine bracketing
 !! vdp_dum_vdp: derivative of the function (return a vector of dp from a vector of dp)
 !! itmax: number of iterations allowed
 !! tol: tolerance on error. It depend on the precision of the numbers
-!! (usualy chosen as sqrt(max precision available with your floating point reresentation))
+!! (usually chosen as sqrt(max precision available with your floating point reresentation))
 !! ax,xx,bx: a bracketing triplet around the minimum to be find
 !! OUTPUT
 !! xmin: value such that dp_dum_vdp(v(:)+xmin*grad(:)) is minimum

@@ -6,7 +6,7 @@
 !!  Post-processing tools for WFK file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -174,7 +174,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  real(dp),pointer :: gs_eigen(:,:,:)
  real(dp),allocatable :: eig_k(:), occ_k(:), thetas(:) !, out_cg(:,:), work(:,:,:,:), allcg_k(:,:)
  real(dp),allocatable,target :: cg_k(:,:)
- complex(gwpc),allocatable :: ur_ae(:)
+ complex(gwp),allocatable :: ur_ae(:)
  complex(dp),pointer :: cg_k_cplx(:,:)
  complex(dp),allocatable :: ps_ug(:,:)
  logical,allocatable :: keep_ur(:,:,:),bks_mask(:,:,:)
@@ -242,8 +242,8 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(mpi_enreg)
- call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfftc(2),ngfftc(3),'all')
- call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
+ call mpi_enreg%distribfft%init_seq('c',ngfftc(2),ngfftc(3),'all')
+ call mpi_enreg%distribfft%init_seq('f',ngfftf(2),ngfftf(3),'all')
 
  ! ===========================================
  ! === Open and read pseudopotential files ===

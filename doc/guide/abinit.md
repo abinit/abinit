@@ -6,7 +6,7 @@ authors: DCA,  XG
 
 This document explains the IO parameters and format needed for the main code (abinit) in the ABINIT package.
 
-The new user is advised to read first the [new user's guide](../new_user), before reading the present file.
+The new user is advised to read first the [new user's guide](new_user.md), before reading the present file.
 It will be easier to discover the present file with the help of the [[tutorial:index|tutorial]].
 Many user guides are also present on the Web.
 As an example, for calculating response properties using abinit, the complementary [[help:respfn]] is needed.
@@ -14,6 +14,7 @@ Some additional specialized documentation is not available on the Web, but insid
 advanced users only.
 
 <a id="intro"></a>
+<a id="intro1"></a>
 ## 1 How to run the code
 
 The main executable file is called abinit. Supposing that the input file is
@@ -209,6 +210,7 @@ produced by Abinit or text files with a reduced set of ABINIT variables.
 
 
 <a id="files-file"></a>
+<a id="32_file_names_in_abinit"></a>
 ### 3.2 File names in ABINIT
 
 File names in ABINIT are either given automatically by ABINIT, or build from
@@ -500,6 +502,7 @@ both cases, the stop is not immediate. It can take a significant fraction
 
 
 
+<a id="multidataset"></a>
 <a id="multidatasets"></a>
 ### 3.4 The multi-dataset mode
 
@@ -627,6 +630,7 @@ In both cases, there are six datasets, with increasing values of [[ecut]].
 
 
 <a id="loop"></a>
+<a id="35-defining-a-double-loop-dataset"></a>
 ### 3.6 Defining a double loop dataset
 
 To define a double loop dataset, one has first to define the upper limit of
@@ -738,12 +742,12 @@ For different other reasons, it might nevertheless be useful to be able to
 grasp some information from the file. For norm-conserving pseudopotentials
 different format are possible (labelled 1 to 8 presently). The associated
 internal variable is called pspcod. Information on the header of these
-pseudopotential files can be found in the abinit wiki at
-[[https://wiki.abinit.org/doku.php?id=developers:pseudos]], that you should
-read now (do not pursue with the description of each format, though).
+pseudopotential files can be found [here](../developers/pseudos_nc_header.md)
+that you should read now (quickly, do not pursue with the description of each format, though).
 
 
 
+<a id="5"></a>
 ## 5 The different output files
 
 Explanation of the output from the code

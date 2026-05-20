@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon, Marc Torrent)
+# Copyright (C) 2005-2026 ABINIT Group (Yann Pouillon, Marc Torrent)
 #
 # This file is part of the Steredeg software package. For license information,
 # please see the COPYING file in the top-level directory of the source
@@ -82,7 +82,7 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
     sd_linalg_serial_ok="no"
   fi
 
-  AC_MSG_NOTICE([start checking FOR MPI...]) 
+  AC_MSG_NOTICE([start checking FOR MPI...])
   if test "${sd_mpi_enable}" = "yes"; then
 
     # PLASMA?
@@ -419,7 +419,7 @@ AC_DEFUN([_SD_LINALG_EXPLORE], [
         test "${sd_linalg_has_lapack}" = "yes" || \
         test "${sd_linalg_has_plasma}" = "yes"; then
            sd_linalg_mpi_ok="yes"
-         else   
+         else
           sd_linalg_mpi_ok="no"
     fi
   fi

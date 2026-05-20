@@ -7,7 +7,7 @@
 !!  Uses some functions from a previous implementation by MJV
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2025 ABINIT group (HM,MJV)
+!!  Copyright (C) 2010-2026 ABINIT group (HM,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -671,8 +671,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  ! HM TODO: Avoid krank and map the k-point grid to indexes
  ! Make full k-point rank arrays
  !oct = octree_init(kpt_fullbz,2**4,[-one,-one,-one],[two,two,two])
- krank = krank_new(nkpt_fullbz, kpt_fullbz)
-
+ call krank%init(nkpt_fullbz, kpt_fullbz)
  !
  ! HM (13/04/2019): I implement two different versions:
  ! 1. I only use 24 tetrahedra around the IBZ k-point
@@ -898,9 +897,9 @@ end subroutine htetra_init
 subroutine htetra_init_mapping_ibz(tetra)
 
  class(htetra_t),intent(inout) :: tetra
+
  integer :: ikibz, itetra, isummit, ihash, ntetra
  integer :: tetra_count(tetra%nkibz),tetra_mibz(0:4)
-
  real(dp) :: mem_mb
 
  ! Only execute the following if not yet allocated

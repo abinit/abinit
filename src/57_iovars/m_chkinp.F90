@@ -6,7 +6,7 @@
 !! Check consistency of Abinit input data against itself.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer, MG)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,7 @@ module m_chkinp
 
  use defs_datatypes,   only : pspheader_type
  use defs_abitypes,    only : MPI_type
- use m_numeric_tools,  only : iseven, isdiagmat
+ use m_numeric_tools,  only : iseven, isdiagmat, wrap2_zero_one
  use m_symtk,          only : sg_multable, chkorthsy, symmetrize_xred
  use m_fstrings,       only : string_in, sjoin, itoa
  use m_geometry,       only : metric
@@ -88,29 +88,28 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !Local variables-------------------------------
 !scalars
- integer :: bantot,fixed_mismatch,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,intimage,ierrgrp
+ integer :: bantot,fixed_mismatch,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,intimage,ierrgrp!,ilang
  integer :: ipsp,isppol,isym,itypat,iz,jdtset,jj,kk,lpawu,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
  integer :: mband,miniatsph,minidyn,mod10,mpierr,all_nprocs
  integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu
- integer :: nproc,nthreads,nspden,nspinor,nsppol,optdriver,mismatch_fft_tnons,response,so_psp
- integer :: fftalg,fftalga,usepaw,usewvl,use_gbt
- integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
+ integer :: nproc,nthreads,nspden,nspinor,nsppol,optdriver,mismatch_fft_tnons,response !,so_psp
+ integer :: fftalg,fftalga,usepaw,usewvl
+ integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr,ttoldmag
  logical :: test,twvl,allowed,berryflag
  logical :: wvlbigdft=.false.
  logical :: xc_is_lda,xc_is_gga,xc_is_mgga,xc_is_hybrid,xc_is_pot_only,xc_need_kden
- real(dp) :: dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom,zval
+ real(dp) :: dotval,dz,norm_spinat,norm_spinaxis,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom,zval
  character(len=1000) :: msg
  type(dataset_type) :: dt
 !arrays
- integer :: cond_values(4),nprojmax(0:3)
+ integer :: cond_values(4)!,nprojmax(0:3)
  integer :: gpu_devices(12)=(/-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2/)
  integer,allocatable :: ierr_dtset(:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
- real(dp),allocatable :: frac(:,:),tnons_new(:,:),xred(:,:)
+ real(dp),allocatable :: frac(:,:),tnons_new(:,:),xred(:,:), my_xred(:,:), xshift(:,:)
  character(len=32) :: cond_string(4)
  character(len=32) :: input_name
  type(libxc_functional_type) :: xcfunc(2)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -284,8 +283,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    !  berryopt cannot be 4,6,7,14,16,17 when toldfe, tolvrs, toldff and tolrff are zero (or negative)
    if (any(dt%berryopt== [4,6,7,14,16,17] ) ) then
      cond_string(1)='berryopt' ; cond_values(1)=dt%berryopt
-     call chkdpr(1,1,cond_string,cond_values,ierr,'max(toldfe,toldff,tolrff,tolvrs)',&
-       max(dt%toldfe,dt%toldff,dt%tolrff,dt%tolvrs),1,tol16*tol16,iout)
+     call chkdpr(1,1,cond_string,cond_values,ierr,'max(toldfe,toldff,tolrff,tolvrs,toldmag)',&
+       max(dt%toldfe,dt%toldff,dt%tolrff,dt%tolvrs,dt%toldmag),1,tol16*tol16,iout)
    endif
    ! Non-zero berryopt and usepaw==1 cannot be done unless response==0
    if (usepaw==1.and.dt%berryopt/=0) then
@@ -551,8 +550,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        ABI_CHECK(dt%gpu_option==0,"cprj_in_memory/=0 is not implemented for GPUs. Change cprj_in_memory or gpu_option.")
        write(msg,'(a)') "cprj_in_memory/=0 is not compatible with use_gemm_nonlop/=0. Change cprj_in_memory or use_gemm_nonlop."
        ABI_CHECK(dt%use_gemm_nonlop==0,msg)
-       test = dt%wfoptalg==10 .or. dt%wfoptalg==114 .or. dt%wfoptalg==111
-       write(msg,'(a)') "With cprj_in_memory/=0, only wfoptalg==10,114 or 111 are implemented. Change cprj_in_memory or wfoptalg."
+       test = dt%wfoptalg==10 .or. dt%wfoptalg==114 .or. dt%wfoptalg==111 .or. dt%wfoptalg==112
+       write(msg,'(a)') "With cprj_in_memory/=0, only wfoptalg==10,114,112 or 111 are implemented. Change cprj_in_memory or wfoptalg."
        ABI_CHECK(test,msg)
        ABI_CHECK(dt%rmm_diis==0, "With cprj_in_memory/=0, rmm_diis/=0 is not implemented. Change cprj_in_memory or rmm_diis.")
        ABI_CHECK(dt%berryopt==0, "With cprj_in_memory/=0, berryopt/=0 is not implemented. Change cprj_in_memory or berryopt.")
@@ -581,6 +580,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end if
    end if
 
+!  spectrum slicing
+   if (dt%wfoptalg/=112 .and. dt%paral_slice/=0) then
+       ABI_ERROR_NOSTOP("paral_slice is useful only for Spectrum Slicing (wfoptalg=112).", ierr)
+   end if
+
 !  d3e_pert1_atpol
    call chkint_ge(0,0,cond_string,cond_values,ierr,'d3e_pert1_atpol(1)',dt%d3e_pert1_atpol(1),1,iout)
    cond_string(1)='natom' ; cond_values(1)=natom
@@ -595,6 +599,16 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    call chkint_ge(0,0,cond_string,cond_values,ierr,'d3e_pert3_atpol(1)',dt%d3e_pert3_atpol(1),1,iout)
    cond_string(1)='natom' ; cond_values(1)=natom
    call chkint_le(1,1,cond_string,cond_values,ierr,'d3e_pert3_atpol(2)',dt%d3e_pert3_atpol(2),natom,iout)
+
+!  d3e_pert1_magat
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'d3e_pert1_magat(1)',dt%d3e_pert1_magat(1),1,iout)
+   cond_string(1)='natom' ; cond_values(1)=natom
+   call chkint_le(1,1,cond_string,cond_values,ierr,'d3e_pert1_magat(2)',dt%d3e_pert1_magat(2),natom,iout)
+
+!  d3e_pert2_magat
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'d3e_pert2_magat(1)',dt%d3e_pert2_magat(1),1,iout)
+   cond_string(1)='natom' ; cond_values(1)=natom
+   call chkint_le(1,1,cond_string,cond_values,ierr,'d3e_pert2_magat(2)',dt%d3e_pert2_magat(2),natom,iout)
 
 !  densfor_pred
    if(dt%iscf>0)then
@@ -639,7 +653,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
    ! Warn the user if dilatmx > 1 and optcell == 0.
    if (dt%dilatmx>one.and.dt%optcell==0) then
-     write(msg, "(a)") 'dilatmx > 1 and optcell=0, this is a waste of ressources (computational time and memory). &
+     write(msg, "(a)") 'dilatmx > 1 and optcell=0, this is a waste of resources (computational time and memory). &
      & You should set dilatmx to 1.'
      ABI_WARNING(msg)
    end if
@@ -661,8 +675,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    if (dt%usedmft>0.and.dt%usedmft/=10) then
      cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftcheck',dt%dmftcheck,4,(/-1,0,1,2/),iout)
-     cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_optim',dt%dmft_optim,2,(/0,1/),iout)
      if(dt%dmftcheck/=-1) then
 
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
@@ -717,17 +729,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_rslf',dt%dmft_rslf,3,(/-1,0,1/),iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_use_all_bands',dt%dmft_use_all_bands,2,(/0,1/),iout)
-       cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_use_full_chipsi',dt%dmft_use_full_chipsi,2,(/0,1/),iout)
-       cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_fermi_step',dt%dmft_fermi_step,1,zero,iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_mxsf',dt%dmft_mxsf,1,zero,iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_mxsf',dt%dmft_mxsf,-1,one,iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,10,(/-2,-1,0,1,2,5,6,7,8,9/),iout)
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,11,(/-2,-1,0,1,2,5,6,7,8,9,10/),iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_tolfreq',dt%dmft_tolfreq,-1,0.01_dp,iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
@@ -738,6 +746,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_charge_prec',dt%dmft_charge_prec,1,tol20,iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,6,(/1,2,5,6,7,8/),iout)
+       cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_full_chipsi',dt%dmft_full_chipsi,2,(/0,1/),iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_wanorthnorm',dt%dmft_wanorthnorm,2,(/2,3/),iout)
        if(dt%getwfk==0.and.dt%irdwfk==0.and.dt%irdden==0.and.dt%getden==0.and.dt%ucrpa==0) then
@@ -754,7 +764,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_t2g',dt%dmft_t2g,2,(/0,1/),iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_x2my2d',dt%dmft_x2my2d,2,(/0,1/),iout)
-       if (dt%dmft_solv>=5.and.dt%ucrpa==0.and.dt%dmft_solv/=9) then
+       if (dt%dmft_solv>=5.and.dt%ucrpa==0.and.dt%dmft_solv/=9.and.dt%dmft_solv/=6.and.dt%dmft_solv/=7) then
          cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_l',dt%dmftqmc_l,1,iout)
          cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
@@ -772,9 +782,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        endif
        if (dt%dmft_dc==8) then
          cond_string(1)='dmft_dc' ; cond_values(1)=dt%dmft_dc
-         call chkint_eq(0,1,cond_string,cond_values,ierr,'ixc',dt%ixc,2,(/7,-1012/),iout)
+         call chkint_eq(0,1,cond_string,cond_values,ierr,'ixc',dt%ixc,4,(/7,-1012,11,-101130/),iout)
          cond_string(1)='dmft_dc' ; cond_values(1)=dt%dmft_dc
-         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,9,(/-2,0,1,2,5,6,7,8,9/),iout)
+         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,10,(/-2,0,1,2,5,6,7,8,9,10/),iout)
          cond_string(1)='dmft_dc' ; cond_values(1)=dt%dmft_dc
          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_t2g',dt%dmft_t2g,1,(/0/),iout)
          cond_string(1)='dmft_dc' ; cond_values(1)=dt%dmft_dc
@@ -783,11 +793,21 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_yukawa_param',dt%dmft_yukawa_param,4,(/1,2,3,4/),iout)
          if (dt%dmft_yukawa_param==4) then
            cond_string(1)='dmft_yukawa_param' ; cond_values(1)=dt%dmft_yukawa_param
-           call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_lambda_yukawa',dt%dmft_lambda_yukawa,1,zero,iout)
+           call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_yukawa_lambda',dt%dmft_yukawa_lambda,1,zero,iout)
            cond_string(1)='dmft_yukawa_param' ; cond_values(1)=dt%dmft_yukawa_param
-           call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_epsilon_yukawa',dt%dmft_epsilon_yukawa,1,zero,iout)
+           call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_yukawa_epsilon',dt%dmft_yukawa_epsilon,1,zero,iout)
          end if
        end if
+
+       if (dt%dmft_solv .eq. 10 .and. dt%nspinor .eq. 1) then
+         write(msg,'(2a)') "dmft_solv == 10 is not implemented for nspinor == 1 "
+         ABI_ERROR(msg)
+       endif
+
+       if (dt%dmft_solv .eq. 10) then
+          cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
+          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_hybri_limit',dt%dmft_hybri_limit,2,(/0,1/),iout)
+       endif
 
        do itypat=1,dt%ntypat
          if (dt%lpawu(itypat)==-1) cycle
@@ -798,21 +818,25 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          end if
        end do
 
-       if (dt%dmft_prtwan==1) then
-         cond_string(1)='dmft_prtwan' ; cond_values(1)=dt%dmft_prtwan
-         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_use_full_chipsi',dt%dmft_use_full_chipsi,1,(/1/),iout)
-       end if
+       !if (dt%dmft_prtwan==1) then
+       !  cond_string(1)='dmft_prtwan' ; cond_values(1)=dt%dmft_prtwan
+       !  call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,2,(/6,7/),iout)
+       !end if
 
-       if (dt%dmft_solv>=5) then
+       if (dt%dmft_solv>=5.and.dt%dmft_solv/=6.and.dt%dmft_solv/=7) then
          cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-         if (dt%dmft_solv == 6 .or. dt%dmft_solv == 7) then
+         if (dt%dmft_solv == 6 .or. dt%dmft_solv == 7 ) then
            call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_basis',dt%dmftctqmc_basis,5,(/0,1,2,3,4/),iout)
            if (dt%dmftctqmc_basis == 4) then
              cond_string(1)='dmftctqmc_basis' ; cond_values(1)=dt%dmftctqmc_basis
              call chkint_eq(0,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
            end if
          else
-           call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_basis',dt%dmftctqmc_basis,3,(/0,1,2/),iout)
+           call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_basis',dt%dmftctqmc_basis,4,(/0,1,2,4/),iout)
+           if (dt%dmftctqmc_basis == 4) then
+              cond_string(1)='dmftctqmc_basis' ; cond_values(1)=dt%dmftctqmc_basis
+              call chkint_eq(0,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
+            end if
          end if
          cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_check',dt%dmftctqmc_check,4,(/0,1,2,3/),iout)
@@ -824,7 +848,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          if (dt%dmft_solv==9) then
            call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_l',dt%dmftqmc_l,2*dt%dmft_nwli+1,iout)
            cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-           call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_nleg',dt%dmft_triqs_nleg,1,iout)
+           call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_n_l',dt%dmft_triqs_n_l,1,iout)
          end if
 #endif
 #if !defined HAVE_PYTHON_INVOCATION
@@ -868,7 +892,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          if (dt%dmft_t2g==1.and.lpawu/=2) ABI_ERROR("lpawu/=2 and dmft_t2g=1 are not compatible")
          if (dt%dmft_x2my2d==1.and.lpawu/=2) ABI_ERROR("lpawu/=2 and dmft_x2my2d=1 are not compatible")
          if (dt%dmft_dc==7.and.dt%dmft_nominal(iatom)<1) ABI_ERROR("Please set a physical value for nominal occupancies with dmft_nominal")
-         if (lpawu==0.and.dt%dmftctqmc_basis==4) ABI_ERROR("lpawu must be >0 in order to use JmJ basis")
+         if (lpawu==0.and.dt%dmft_triqs_basis==4) ABI_ERROR("lpawu must be >0 in order to use JmJ basis")
        end do
      end if
    end if
@@ -902,7 +926,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    endif
 #endif
 
-#if !defined HAVE_TRIQS_v3_4 && !defined HAVE_TRIQS_v3_2
+#if !defined HAVE_TRIQS_INTERNAL && !defined HAVE_TRIQS_v3_2
    if(dt%dmft_solv>=6.and.dt%dmft_solv<=7) then
      write(msg,'(3a)') &
       & ' dmft_solv=6, or 7 is only relevant if the TRIQS library v3.2>= is linked',ch10,&
@@ -913,9 +937,25 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
    if(dt%dmft_solv==6.or.dt%dmft_solv==7) then
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwli',dt%dmft_nwli,1,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_length_cycle',dt%dmft_triqs_length_cycle,1,iout)
+     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_basis',dt%dmft_triqs_basis,5,(/0,1,2,3,4/),iout)
+     if (dt%dmft_triqs_basis == 4) then
+       cond_string(1)='dmft_triqs_basis' ; cond_values(1)=dt%dmft_triqs_basis
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
+     end if
+     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_n_warmup_cycles_init',dt%dmft_triqs_n_warmup_cycles_init,0,iout)
+     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_n_cycles',dt%dmft_triqs_n_cycles,1,iout)
+     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_n_tau',dt%dmft_triqs_n_tau,1,iout)
+     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_n_iw',dt%dmft_triqs_n_iw,1,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_compute_integral',dt%dmft_triqs_compute_integral,2,(/0,1/),iout)
+     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_prt_entropy',dt%dmft_triqs_prt_entropy,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_det_init_size',dt%dmft_triqs_det_init_size,1,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -923,7 +963,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_entropy',dt%dmft_triqs_entropy,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_leg_measure',dt%dmft_triqs_leg_measure,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_measure_g_l',dt%dmft_triqs_measure_g_l,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_loc_n_min',dt%dmft_triqs_loc_n_min,0,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -935,8 +975,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_move_shift',dt%dmft_triqs_move_shift,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_nsubdivisions',dt%dmft_triqs_nsubdivisions,1,iout)
-     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_off_diag',dt%dmft_triqs_off_diag,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_pauli_prob',dt%dmft_triqs_pauli_prob,1,zero,iout)
@@ -944,8 +982,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_pauli_prob',dt%dmft_triqs_pauli_prob,-1,one,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_read_ctqmcdata',dt%dmft_triqs_read_ctqmcdata,2,(/0,1/),iout)
+#if defined HAVE_TRIQS_INTERNAL
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_therm_restart',dt%dmft_triqs_therm_restart,0,iout)
+     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_n_warmup_cycles_restart',dt%dmft_triqs_n_warmup_cycles_restart,0,iout)
+#endif
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_time_invariance',dt%dmft_triqs_time_invariance,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -957,10 +997,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_det_precision_error',dt%dmft_triqs_det_precision_error,1,dt%dmft_triqs_det_precision_warning,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_epsilon',dt%dmft_triqs_epsilon,1,zero,iout)
-     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_imag_threshold',dt%dmft_triqs_imag_threshold,1,zero,iout)
-     if (dt%dmft_triqs_time_invariance == 1) then
+     if (dt%dmft_triqs_time_invariance==1) then
        cond_string(1)='dmft_triqs_time_invariance' ; cond_values(1)=dt%dmft_triqs_time_invariance
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_measure_density_matrix',dt%dmft_triqs_measure_density_matrix,1,(/1/),iout)
      end if
@@ -969,37 +1007,37 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_use_norm_as_weight',dt%dmft_triqs_use_norm_as_weight,1,(/1/),iout)
      end if
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     cond_string(2)='dmft_triqs_leg_measure' ; cond_values(2)=dt%dmft_triqs_leg_measure
-     if (dt%dmft_triqs_leg_measure == 0) then
-       call chkdpr(0,2,cond_string,cond_values,ierr,'dmft_triqs_wmax',dt%dmft_triqs_wmax,1,zero,iout)
+     cond_string(2)='dmft_triqs_measure_g_l' ; cond_values(2)=dt%dmft_triqs_measure_g_l
+     if (dt%dmft_triqs_measure_g_l==0) then
+       call chkdpr(0,2,cond_string,cond_values,ierr,'dmft_triqs_dlr_wmax',dt%dmft_triqs_dlr_wmax,1,zero,iout)
+       cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
+       cond_string(2)='dmft_triqs_measure_g_l' ; cond_values(2)=dt%dmft_triqs_measure_g_l
+       call chkdpr(0,2,cond_string,cond_values,ierr,'dmft_triqs_dlr_epsilon',dt%dmft_triqs_dlr_epsilon,1,zero,iout)
      else
-       call chkint_ge(0,2,cond_string,cond_values,ierr,'dmft_triqs_nleg',dt%dmft_triqs_nleg,1,iout)
+       call chkint_ge(0,2,cond_string,cond_values,ierr,'dmft_triqs_n_l',dt%dmft_triqs_n_l,1,iout)
      end if
-     if (dt%dmft_triqs_off_diag == 1) then
+     if (dt%dmft_triqs_off_diag==1) then
        cond_string(1)='dmft_triqs_off_diag' ; cond_values(1)=dt%dmft_triqs_off_diag
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_measure_density_matrix',dt%dmft_triqs_measure_density_matrix,1,(/0/),iout)
      end if
-     if (dt%dmft_triqs_compute_integral==1 .and. dt%dmft_triqs_entropy==1) then
+     if (dt%dmft_triqs_compute_integral==1.and.dt%dmft_triqs_entropy==1) then
        cond_string(1)='dmft_triqs_compute_integral' ; cond_values(1)=dt%dmft_triqs_compute_integral
        cond_string(2)='dmft_triqs_entropy' ; cond_values(2)=dt%dmft_triqs_entropy
        call chkint_eq(0,2,cond_string,cond_values,ierr,'dmft_triqs_measure_density_matrix',dt%dmft_triqs_measure_density_matrix,1,(/1/),iout)
-     end if
-     if (dt%dmft_triqs_compute_integral>0 .and. dt%dmft_triqs_entropy==1) then
        cond_string(1)='dmft_triqs_compute_integral' ; cond_values(1)=dt%dmft_triqs_compute_integral
        cond_string(2)='dmft_triqs_entropy' ; cond_values(2)=dt%dmft_triqs_entropy
-       call chkint_ge(0,2,cond_string,cond_values,ierr,'dmft_triqs_gaussorder',dt%dmft_triqs_gaussorder,2,iout)
+       call chkint_ge(0,2,cond_string,cond_values,ierr,'dmft_triqs_gaussorder',dt%dmft_triqs_gaussorder,0,iout)
+       cond_string(1)='dmft_triqs_compute_integral' ; cond_values(1)=dt%dmft_triqs_compute_integral
+       cond_string(2)='dmft_triqs_entropy' ; cond_values(2)=dt%dmft_triqs_entropy
+       call chkint_ge(0,2,cond_string,cond_values,ierr,'dmft_triqs_nsubdivisions',dt%dmft_triqs_nsubdivisions,1,iout)
      end if
-     if (dt%dmft_triqs_entropy == 1) then
-       cond_string(1)='dmft_triqs_entropy' ; cond_values(1)=dt%dmft_triqs_entropy
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_use_all_bands',dt%dmft_use_all_bands,1,(/1/),iout)
-     end if
-     if (dt%dmft_t2g == 1) then
+     if (dt%dmft_t2g==1) then
        cond_string(1)='dmft_t2g' ; cond_values(1)=dt%dmft_t2g
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_basis',dt%dmftctqmc_basis,1,(/0/),iout)
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_basis',dt%dmft_triqs_basis,1,(/0/),iout)
      end if
-     if (dt%dmft_x2my2d == 1) then
+     if (dt%dmft_x2my2d==1) then
        cond_string(1)='dmft_x2my2d' ; cond_values(1)=dt%dmft_x2my2d
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_basis',dt%dmftctqmc_basis,1,(/0/),iout)
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_basis',dt%dmft_triqs_basis,1,(/0/),iout)
      end if
    end if
 
@@ -1219,13 +1257,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
-       26, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 9, 10, 11, -12, 13, -13, 14, 15, -15, 16, 17, 18, 19], iout)
+       27, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 9, 10, 11, -12, 13, -13, 14, 15, -15, 16, 17, 18, 19, 24], iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        ABI_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
      end if
 
-     ! TODO: Activate this check and update the two EPH tests that started to faiild
+     ! TODO: Activate this check and update the two EPH tests that started to failed
      ! We need "enough" valence states to compute the mu(T) in semiconductors
      if ((dt%nsppol == 1 .and. dt%nspinor == 1 .and. dt%nband(1) <= zval/two) .or. &
          (dt%nsppol == 2 .and. dt%nband(1) <= zval) .or. &   ! Magnetic semiconductors are not easy to predict!
@@ -1243,8 +1281,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%eph_task == 1 .and. .not. isdiagmat(dt%kptrlatt)) then
        ABI_ERROR_NOSTOP("kptrlatt must be diagonal in phgamma.", ierr)
      end if
-     if (dt%eph_task == 2 .and. dt%irdwfq == 0 .and. dt%getwfq == 0) then
-       ABI_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
+     if (dt%eph_task == 2 .and. dt%irdwfk == 0 .and. &
+          dt%getwfk == 0 .and. dt%getwfk_filepath == ABI_NOFILE) then
+       ABI_ERROR_NOSTOP('Neither getwfk, irdwfk, getwfk_filepath were given in order to compute the gkk', ierr)
      end if
      if (any(dt%eph_task == [-5])) then
        ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task == -5")
@@ -1307,6 +1346,17 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        end if
        if (dt%ecutsigx <= 0) then
          ABI_ERROR_NOSTOP("ecutsigx must be specified if GWPT is activated", ierr)
+       end if
+       if (any(dt%ppmodel == [3, 4])) then
+         ABI_ERROR_NOSTOP("GWPT does not support ppmodel 3 or 4", ierr)
+       end if
+     end if
+
+     if (dt%eph_task == 18) then
+       ! Compute e-ph matrix elements along q-path.
+       if (dt%nbdbuf == 0) then
+         msg = "nbdbuf > 0 is required for NSCF. Adjust nband and nbdbuf to converge only the bands of interests"
+         ABI_ERROR_NOSTOP(msg, ierr)
        end if
      end if
 
@@ -1377,7 +1427,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    !  fockoptmix
    call chkint_eq(0,0,cond_string,cond_values,ierr,'fockoptmix',&
      dt%fockoptmix,12,[0,1,11,201,211,301,401,501,601,701,801,901],iout)
-   if(dt%paral_kgb/=0)then
+
+   if (dt%paral_kgb/=0) then
      cond_string(1)='paral_kgb' ; cond_values(1)=dt%paral_kgb
      ! Make sure that dt%fockoptmix is 0, 1 or 11 (wfmixalg==0)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'fockoptmix',dt%fockoptmix,3,(/0,1,11/),iout)
@@ -1424,6 +1475,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end if
    end if
 
+!  gpu_nfft_blocks
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_nfft_blocks',dt%gpu_nfft_blocks,0,iout)
+   if (dt%gpu_option/=ABI_GPU_OPENMP .and. dt%gpu_nfft_blocks/=0) then
+     ABI_WARNING('gpu_nfft_blocks is ignored outside of OpenMP GPU (gpu_option 2)!')
+   end if
+
 !  gpu_kokkos_nthrd
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_kokkos_nthrd',dt%gpu_kokkos_nthrd,1,iout)
 
@@ -1434,8 +1491,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 
 !  gpu_nl_splitsize
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_nl_splitsize',dt%gpu_nl_splitsize,1,iout)
-   if (dt%gpu_option/=ABI_GPU_OPENMP .and. dt%gpu_nl_splitsize/=1) then
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_nl_splitsize',dt%gpu_nl_splitsize,0,iout)
+   if (dt%gpu_option/=ABI_GPU_OPENMP .and. dt%gpu_nl_splitsize/=0) then
      ABI_WARNING('gpu_nl_splitsize is ignored outside of OpenMP GPU (gpu_option 2)!')
    end if
 
@@ -1573,7 +1630,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_sigxcore',dt%gw_sigxcore,2,[0,1],iout)
 
    ! gwcomp
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'gwcomp',dt%gwcomp,2,[0,1],iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'gwcomp',dt%gwcomp,3,[0,1,2],iout)
+
    if (dt%gwcomp/=0) then
      if (optdriver==RUNL_SCREENING .and. (dt%awtr /=1 .or. dt%spmeth /=0)) then
        write(msg,'(3a)' )&
@@ -1603,11 +1661,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
    ! gwpara
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gwpara',dt%gwpara,3,[0,1,2],iout)
-   !if(dt%chkparal/=0.and.(dt%gwpara==0.and.(dt%optdriver==RUNL_SCREENING.and.dt%optdriver==RUNL_SIGMA))) then
-   !    cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
-   !    cond_string(2)='chkparal' ; cond_values(2)=dt%chkparal
-   !    call chkint_eq(2,2,cond_string,cond_values,ierr,'gwpara',dt%gwpara,1,(/0/),iout)
-   !end if
 
    ! gwrpacorr
    if(dt%gwrpacorr>0) then
@@ -1694,7 +1747,14 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 
    ! icutcoul
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,11,[0,1,2,3,4,5,6,7,14,15,16],iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,13,[0,1,2,3,4,5,6,7,14,15,16,22,55],iout)
+
+   if(optdriver/=RUNL_RESPFN.and.dt%icutcoul==55)then
+     write(msg, '(3a)' ) &
+     'The PCM short-circuit Coulomb cutoff is only available for linear-esponse calculations',ch10,&
+     'Action: set icutcoul /= 55 .'
+     ABI_ERROR_NOSTOP(msg, ierr)
+   end if
 
    ! ieig2rf
    if(optdriver==RUNL_RESPFN.and.usepaw==1)then
@@ -1880,12 +1940,15 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
       'Action: set istwfk to 1 for all k-points or change gpu_option.'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
-   if ( dt%gpu_option==2 .and. any( dt%istwfk(1:nkpt) > 2 ) ) then
+
+   ! MG: In EPH we read wfs from WFK and convert u(g) to istwfk 1 so the check on dt%istwfk is not relevant.
+   if ( dt%gpu_option==2 .and. any( dt%istwfk(1:nkpt) > 2 .and. all(dt%optdriver /= [RUNL_EPH]) )) then
      write(msg,'(3a)' )&
       'When gpu_option is 2, all the components of istwfk must be 1 or 2.',ch10,&
       'Action: change gpu_option or set "istwfk *1" in the input file. If there is one k-point which is "0 0 0" then set "istwfk 2".'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
+
    if ( dt%npfft>1 .and. any( dt%istwfk(1:nkpt) > 2 ) ) then
      write(msg,'(3a)' )&
       'When npfft>1, all the components of istwfk must be 1 or 2.',ch10,&
@@ -2104,6 +2167,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !     end if
 !   end if
 
+!  magpen
+   if(dt%magpen/=zero)then
+     cond_string(1)='magpen' ; cond_values(1)=dt%magpen
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'nspden',dt%nspden,1,(/4/),iout)
+   end if
+
 !  macro_uj
    if(dt%macro_uj/=0) then
      if (dt%ionmov/=0) then
@@ -2224,6 +2293,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
    end if
+
+!  mpatpol
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'mpatpol(1)',dt%mpatpol(1),1,iout)
+   cond_string(1)='natom' ; cond_values(1)=natom
+   call chkint_le(1,1,cond_string,cond_values,ierr,'mpatpol(2)',dt%mpatpol(2),natom,iout)
 
 !  natom
    if(dt%prtgeo>0)then
@@ -2487,7 +2561,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_eq(1,2,cond_string,cond_values,ierr,'npfft',dt%npfft,1,(/1/),iout)
    end if
 #ifdef HAVE_OPENMP
-   if (dt%wfoptalg==114 .or. dt%wfoptalg==1 .or. dt%wfoptalg==111) then
+   if (dt%wfoptalg==114 .or. dt%wfoptalg==1 .or. dt%wfoptalg==111 .or. dt%wfoptalg==112) then
      if ( nthreads > 1 ) then
        if ( dt%npfft > 1 ) then
          write(msg,'(4a,i4,a,i4,a)') "Using LOBPCG algorithm (wfoptalg=114), the FFT parallelization is not ",&
@@ -2510,7 +2584,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 #endif
    !Not yet implemented
-   if (dt%wfoptalg==111 .and. dt%npfft > 1) then
+   if ((dt%wfoptalg==111 .or. dt%wfoptalg==112) .and. dt%npfft > 1) then
      write(msg,'(5a,i3,5a)') "The FFT parallelization (npfft>1) is not compatible ",&
 &      "with Chebyshev filtering algorithm (wfoptalg=111)!",ch10,&
 &      "Please use multithreading instead (export OMP_NUM_THREADS=...)",&
@@ -2547,14 +2621,14 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  nproj
 !  If there is more than one projector for some angular momentum channel of some pseudopotential
-   do ilang=0,3
-     nprojmax(ilang)=pspheads(1)%nproj(ilang)
-     if(npsp>=2)then
-       do ii=2,npsp
-         nprojmax(ilang)=max(pspheads(ii)%nproj(ilang),nprojmax(ilang))
-       end do
-     end if
-   end do
+!   do ilang=0,3
+!     nprojmax(ilang)=pspheads(1)%nproj(ilang)
+!     if(npsp>=2)then
+!       do ii=2,npsp
+!         nprojmax(ilang)=max(pspheads(ii)%nproj(ilang),nprojmax(ilang))
+!       end do
+!     end if
+!   end do
 
 !  npspinor
 !  Must be equal to 1 or 2
@@ -2730,6 +2804,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
 
+     !  paral_atom not allowed at present
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
+
 !    nucdipmom requires complex rhoij
      if(dt%pawcpxocc/=2)then
        write(msg, '(3a)' )&
@@ -2755,13 +2832,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
 
-     ! nucdipmom is not currently compatible with spinat (this is necessary because both are used in symfind)
-     if( any(abs(dt%spinat) > tol8) ) then
-       write(msg, '(3a)' )&
-        ' Nuclear dipole moments (variable nucdipmom or atndlist) input as nonzero but spinat is also nonzero => stop',ch10,&
-        'Action: re-run with spinat zero '
-       ABI_ERROR_NOSTOP(msg, ierr)
-     end if
+     !! nucdipmom is not currently compatible with spinat (this is necessary because both are used in symfind)
+     !if( any(abs(dt%spinat) > tol8) ) then
+     !  write(msg, '(3a)' )&
+     !   ' Nuclear dipole moments (variable nucdipmom or atndlist) input as nonzero but spinat is also nonzero => stop',ch10,&
+     !   'Action: re-run with spinat zero '
+     !  ABI_ERROR_NOSTOP(msg, ierr)
+     !end if
 
    end if
 
@@ -2907,29 +2984,29 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
         [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_WFK,RUNL_NONLINEAR,RUNL_RTTDDFT,RUNL_GWR],iout)
    end if
 
-!  Linear and Non-linear response calculations
-   !Non-linear response not compatible with spinors
+   !  Linear and Non-linear response calculations
+   ! Non-linear response not compatible with spinors
    if(nspinor/=1)then
      cond_string(1)='nspinor' ; cond_values(1)=nspinor
-     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,2,(/RUNL_NONLINEAR,RUNL_LONGWAVE/),iout)
+     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
-   !Non-linear response only for insulators
+   ! Non-linear response only for insulators
    if(dt%occopt/=1 .and. dt%occopt/=2)then
      cond_string(1)='occopt' ; cond_values(1)=dt%occopt
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,2,(/RUNL_NONLINEAR,RUNL_LONGWAVE/),iout)
    end if
-   !Non-linear response not compatible with mkmem=0
+   ! Non-linear response not compatible with mkmem=0
    if(dt%mkmem==0)then
      cond_string(1)='mkmem' ; cond_values(1)=dt%mkmem
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
-   !Longwave needs all k-points
+   ! Longwave needs all k-points
    if(dt%kptopt==1 .or. dt%kptopt==4) then
      cond_string(1)='kptopt' ; cond_values(1)=dt%kptopt
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
    end if
 
-   !dkdk and dkde non-linear response only for occopt=1 (insulators)
+   ! dkdk and dkde non-linear response only for occopt=1 (insulators)
    if (dt%rf2_dkdk==1 .or. dt%rf2_dkdk==2 .or. dt%rf2_dkdk==3) then
      cond_string(1)='rf2_dkdk' ; cond_values(1)=dt%rf2_dkdk
      call chkint_eq(1,1,cond_string,cond_values,ierr,'occopt',dt%occopt,1,(/1/),iout)
@@ -2948,13 +3025,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_eq(1,1,cond_string,cond_values,ierr,'useylm',dt%useylm,1,(/1/),iout)
    end if
 
-   !PEAD non-linear response only for occopt=1 (insulators)
+   ! PEAD non-linear response only for occopt=1 (insulators)
    if(dt%usepead==0.and.dt%optdriver==RUNL_NONLINEAR)then
      cond_string(1)='usepead'   ; cond_values(1)=dt%usepead
      cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
      call chkint_eq(1,2,cond_string,cond_values,ierr,'occopt',dt%occopt,1,(/1/),iout)
    end if
-   !PAW non-linear response only with DFPT (PEAD not allowed)
+   ! PAW non-linear response only with DFPT (PEAD not allowed)
    if(usepaw==1.and.dt%optdriver==RUNL_NONLINEAR)then
      cond_string(1)='usepaw'    ; cond_values(1)=usepaw
      cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
@@ -2963,7 +3040,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(2)='optdriver' ; cond_values(2)=dt%optdriver
      call chkint_eq(1,2,cond_string,cond_values,ierr,'pawxcdev',dt%pawxcdev,1,(/0/),iout)
    end if
-   !Non-linear response not compatible with autoparal
+   ! Non-linear response not compatible with autoparal
    if(dt%optdriver==RUNL_NONLINEAR)then
      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'autoparal',dt%autoparal,1,(/0/),iout)
@@ -3015,10 +3092,15 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
+   !Longwave not compatible with spinors
+   if(nspinor/=1.and.dt%timdisp==0)then
+     cond_string(1)='nspinor' ; cond_values(1)=nspinor
+     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
+   end if
    !Longwave calculation only compatible with nonlinear core corrections for quadrupoles and NOA
-   if(dt%optdriver==RUNL_LONGWAVE.and.dt%lw_flexo/=0)then
+   if(dt%optdriver==RUNL_LONGWAVE.and.dt%timdisp==0.and.dt%lw_flexo/=0)then
      do ipsp=1,npsp
-  !    Check that xccc is zero
+       !  Check that xccc is zero
        if (pspheads(ipsp)%xccc/=0) then
          write(msg, '(5a,i0,3a)' )&
          'For a longwave calculation of flexoelectric properties it is not possible',ch10,&
@@ -3029,7 +3111,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        end if
      end do
    end if
-   !Longwave calculation function only for useylm=1
+   ! Longwave calculation function only for useylm=1
    if(dt%optdriver==RUNL_LONGWAVE.and.dt%useylm/=1.and.(dt%lw_qdrpl/=0.or.dt%lw_flexo/=0))then
     write(msg, '(3a,2a,2a)' )&
      'A longwave calculation can only be run with the input variable useylm/=1',ch10 ,&
@@ -3038,13 +3120,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      'Action: change "useylm" value in your input file.'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
-   !Longwave calculation not compatible with PAW
+   ! Longwave calculation not compatible with PAW
    if(dt%optdriver==RUNL_LONGWAVE)then
      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/0/),iout)
    endif
    !Longwave calculation not compatible with spin-dependent calculations
-   if(dt%nsppol/=1.or.dt%nspden/=1)then
+   if((dt%nsppol/=1.or.dt%nspden/=1).and.dt%timdisp==0)then
      cond_string(1)='nsppol' ; cond_values(1)=dt%nsppol
      cond_string(2)='nspden' ; cond_values(2)=dt%nspden
      call chkint_ne(1,2,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
@@ -3183,6 +3265,18 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      'd3e_pert1_elfd, d3e_pert2_elfd, d3e_pert3_elfd, d3e_pert1_phon, d3e_pert2_phon, and d3e_pert3_phon in your input file.'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
+
+!  paw_add_core
+   if (usepaw==1) then
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'paw_add_core',dt%paw_add_core,2,(/0,1/),iout)
+     if (dt%paw_add_core==1.and.any(pspheads(1:npsp)%pspcod/=17)) then
+       write(msg, '(5a)' )&
+        'paw_add_core input variable can only be used PAW datasets in XML format.',ch10,&
+        'However one of your PAW atomic dataset is not in PAW-XML format!',ch10,&
+        'Action: change your pseudopotential file to a PAW-XML one '
+       ABI_ERROR_NOSTOP(msg,ierr)
+     end if
+   endif
 
 !  pawcpxocc
    if (usepaw==1) then
@@ -3505,8 +3599,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtdos',dt%prtdos,6,(/0,1,2,3,4,5/),iout)
 
 ! for the moment prtdos 3,4,5 are not compatible with fft or band parallelization
-   if (dt%prtdos > 3 .and. (dt%npfft > 1 .or. dt%npband > 1)) then
-     ABI_ERROR_NOSTOP('prtdos>3 and FFT or band parallelization are not compatible yet. Set prtdos <= 2', ierr)
+   if (dt%prtdos > 4 .and. (dt%npfft > 1 .or. dt%npband > 1)) then
+     ABI_ERROR_NOSTOP('prtdos>4 and FFT or band parallelization are not compatible yet. Set prtdos <= 4', ierr)
    end if
 
 ! prtdos 5 only makes sense for nspinor == 2. Otherwise reset to prtdos 2
@@ -3639,6 +3733,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    !  call chkint(0,1,cond_string,cond_values,ierr,'prtlden',dt%prtlden,1,(/0/),0,0,iout)
    !end if
 
+!  prt1mag
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'prt1mag',dt%prt1mag,3,(/0,1,2/),iout)
+
 !  prtstm
    call chkint_le(0,0,cond_string,cond_values,ierr,'prtstm',dt%prtstm,1,iout)
    call chkint_ge(0,0,cond_string,cond_values,ierr,'prtstm',dt%prtstm,-dt%mband,iout)
@@ -3736,9 +3833,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtwf_full',dt%prtwf_full,1,(/0/),iout)
    end if
 
-
 !  random_atpos
    call chkint_eq(0,0,cond_string,cond_values,ierr,'random_atpos',dt%random_atpos,5,(/0,1,2,3,4/),iout)
+
+!  ratopt
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'ratopt',dt%ratopt,2,(/1,2/),iout)
 
 !  ratsph
 !  If PAW and (prtdos==3 or dt%prtdensph==1), must be greater than PAW radius
@@ -3759,9 +3858,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  rcpaw_frocc
    call chkint_eq(0,0,cond_string,cond_values,ierr,'rcpaw_frocc',dt%rcpaw_frocc,2,(/0,1/),iout)
 
-!  rcpaw_frtypat
+!  rcpaw_rctypat
    do itypat=1,dt%ntypat
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'rcpaw_frtypat',dt%rcpaw_frtypat(itypat),2,(/0,1/),iout)
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'rcpaw_rctypat',dt%rcpaw_rctypat(itypat),2,(/0,1/),iout)
    enddo
 
 !  recgratio
@@ -3796,6 +3895,18 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  rfmeth
    call chkint_eq(0,0,cond_string,cond_values,ierr,'rfmeth',dt%rfmeth,6,(/-3,-2,-1,1,2,3/),iout)
 
+!  rfomega
+   if(dt%rfomega/=zero)then
+     cond_string(1)='rfomega' ; cond_values(1)=dt%rfomega
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'tim1rev',dt%tim1rev,1,(/0/),iout)
+   end if
+
+!  rfeta
+   if(dt%rfeta/=zero)then
+     cond_string(1)='rfeta' ; cond_values(1)=dt%rfeta
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'tim1rev',dt%tim1rev,1,(/0/),iout)
+   end if
+
 !  rprimd
 !  With optcell beyond 4, one has constraints on rprimd.
    cond_string(1)='optcell' ; cond_values(1)=dt%optcell
@@ -3820,7 +3931,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ! Check for calculations that are not implemented with RMM-DIIS
      ABI_CHECK(dt%usefock == 0, "RMM-DIIS with Hartree-Fock or Hybrid Functionals is not implemented")
      ABI_CHECK(dt%wfoptalg /= 1, "RMM-DIIS with Chebyshev is not supported.")
-     ABI_CHECK(dt%gpu_option == ABI_GPU_DISABLED, "RMM-DIIS does not support GPUs.")
+     !ABI_CHECK(dt%gpu_option == ABI_GPU_DISABLED, "RMM-DIIS does not support GPUs.")
      berryflag = any(dt%berryopt == [4, 14, 6, 16, 7, 17])
      ABI_CHECK(.not. berryflag, "RMM-DIIS with Electric field is not supported.")
    end if
@@ -3828,7 +3939,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  so_psp
    if(usepaw==0)then
      do ipsp=1,npsp
-!      Check that so_psp is between 0 and 3
+       ! Check that so_psp is between 0 and 3
        if ( dt%so_psp(ipsp)<0 .or. dt%so_psp(ipsp)>3 ) then
          write(msg, '(a,i3,a,i3,a,a,a,a,a)' )&
          'so_psp(',ipsp,' ) was input as ',dt%so_psp(ipsp),' .',ch10,&
@@ -3836,7 +3947,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          'Action: modify value of so_psp (old name: so_typat) in input file.'
          ABI_ERROR_NOSTOP(msg, ierr)
        end if
-!      If nspinor=1, the spin-orbit contribution cannot be taken into account
+       ! If nspinor=1, the spin-orbit contribution cannot be taken into account
        if ( nspinor==1 .and. (dt%so_psp(ipsp)==2 .or. dt%so_psp(ipsp)==3) ) then
          write(msg, '(a,i2,a,i3,a,a,a,a,a)' )&
          'so_psp(',ipsp,') was input as ',dt%so_psp(ipsp),', with nspinor=1 and usepaw=0.',ch10,&
@@ -3844,8 +3955,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          'Action: modify value of so_psp (old name: so_typat) or nspinor in input file.'
          ABI_ERROR_NOSTOP(msg, ierr)
        end if
-!      If nspinor=2, the spin-orbit contribution should be present in the pseudopotentials,
-!      unless the user explicitly allows not to treat it.
+       ! If nspinor=2, the spin-orbit contribution should be present in the pseudopotentials,
+       ! unless the user explicitly allows not to treat it.
        if ( nspinor==2 .and. dt%so_psp(ipsp)/=0 .and. pspheads(ipsp)%pspso==0 ) then
          write(msg, '(2(a,i0),9a)' )&
          'so_psp(',ipsp,') was input as ',dt%so_psp(ipsp),', with nspinor=2 and usepaw=0.',ch10,&
@@ -3874,6 +3985,32 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
       'Action: re-run with spinat zero '
     ABI_ERROR_NOSTOP(msg,ierr)
   end if
+
+!  spinaxis: only avaliable for SOC/cDFT/hspinfield
+  norm_spinaxis = sqrt(dot_product(dt%spinaxis, dt%spinaxis))
+  ABI_CHECK_NOSTOP(norm_spinaxis > tol8, 'Spinaxis must be a non-zero vector', ierr)
+  if (dt%nspden == 2) then
+    do iatom = 1, dt%natom
+      ! use Cartesian spinat for consistency with spinaxis
+      norm_spinat = sqrt(dot_product(dt%spinat_cart(:,iatom),dt%spinat_cart(:,iatom)))
+      if (norm_spinat < tol8) cycle
+      dotval = dot_product(dt%spinat_cart(:,iatom), dt%spinaxis)
+      if (abs(abs(dotval) - norm_spinat*norm_spinaxis) > tol8*norm_spinat*norm_spinaxis) then
+        write(msg, '(3a)')&
+         'In collinear (nspden=2) calculation, spinat (Cartesian) must be parallel to spin quantization axis',ch10,&
+         'Action: modify spinat(_cart) or spinaxis in your input file '
+        ABI_ERROR_NOSTOP(msg,ierr)
+      end if
+    end do
+  end if
+
+  if (dt%spinaxis(1)**2 + dt%spinaxis(2)**2 > tol8*tol8 ) then
+    if(all(dt%so_psp(1:dt%ntypat)/=1) .and. &
+        all(abs(dt%hspinfield(:))<tol8) .and. &
+        all(dt%constraint_kind(1:dt%ntypat)==0)) then
+        ABI_WARNING("Spinaxis is defined but no SOC, hspinfield or cDFT is active. spinaxis will not affect the calculation.")
+     end if
+   end if
 
 !  spinmagntarget
    if(abs(dt%spinmagntarget+99.99d0)>tol8 .and. abs(dt%spinmagntarget)>tol8)then
@@ -3928,7 +4065,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  string_algo
    call chkint_eq(0,0,cond_string,cond_values,ierr,'string_algo',dt%string_algo,&
-&    2,(/STRING_ALGO_SIMPLIFIED_EQUAL,STRING_ALGO_SIMPLIFIED_ENERGY/),iout)
+     2, [STRING_ALGO_SIMPLIFIED_EQUAL,STRING_ALGO_SIMPLIFIED_ENERGY],iout)
 
 !  symafm
    if(nsppol==1 .and. nspden==2)then
@@ -4015,6 +4152,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtwf',dt%prtwf,1,(/0/),iout)
    end if
 
+!  timdisp
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'timdisp',dt%timdisp,2,(/0,1/),iout)
+   if(dt%timdisp/=0)then
+     cond_string(1)='timdisp' ; cond_values(1)=dt%timdisp
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
+   end if
+
 !  tolmxde
    call chkdpr(0,0,cond_string,cond_values,ierr,'tolmxde',dt%tolmxde,1,zero,iout)
 
@@ -4032,6 +4176,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  tolwfr
    call chkdpr(0,0,cond_string,cond_values,ierr,'tolwfr',dt%tolwfr,1,zero,iout)
+
+!!  tolwfr
+   call chkdpr(0,0,cond_string,cond_values,ierr,'toldmag',dt%tolwfr,1,zero,iout)
 
 !  tsmear
    call chkdpr(0,0,cond_string,cond_values,ierr,'tsmear',dt%tsmear,1,zero,iout)
@@ -4166,9 +4313,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        call chkint_eq(1,1,cond_string,cond_values,ierr,'lpawu',dt%lpawu(itypat),5,(/-1,0,1,2,3/),iout)
      end do
      if(dt%pawspnorb>0) then
-       write(msg,'(3a)' ) &
-       'DFT+U+SpinOrbit is still on test ',ch10,&
-       '(not yet in production)'
+       write(msg,'(3a)' ) 'DFT+U+SpinOrbit is still on test ',ch10,'(not yet in production)'
        ABI_WARNING(msg)
      end if
    end if
@@ -4222,15 +4367,22 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end if
    end if
 
-!  usercpaw
+!  use_rcpaw
    call chkint_eq(0,0,cond_string,cond_values,ierr,'use_rcpaw',dt%use_rcpaw,2,(/0,1/),iout)
    if(dt%use_rcpaw==1) then
      if((dt%npfft/=1).or.(dt%occopt<3).or.(dt%occopt>8).or.&
-       &(dt%stmbias/=zero).or.(dt%spinmagntarget/=-99.99_dp).or.(dt%nsppol==2).or.(dt%nspinor==2).or.&
-       &(dt%nspden>1).or.(dt%usewvl==1).or.(dt%positron/=0).or.(dt%icoulomb/=0).or.(dt%iscf<12).or.&
-       &(dt%usepaw/=1).or.(dt%usepawu==1).or.(dt%usedmft==1)) then
+        (dt%stmbias/=zero).or.(dt%spinmagntarget/=-99.99_dp).or.(dt%nspinor==2).or.&
+        (dt%usewvl==1).or.(dt%positron/=0).or.(dt%icoulomb/=0).or.(dt%iscf<12).or.&
+        (dt%usepaw/=1).or.(dt%usepawu==1).or.(dt%usedmft==1)) then
        ABI_ERROR('RCPAW: work in progress')
      endif
+     if (any(pspheads(1:npsp)%pspcod/=17)) then
+       write(msg, '(5a)' )&
+        'Relaxed-core PAW (use_rcpaw=1) can only be used PAW datasets in XML format.',ch10,&
+        'However one of your PAW atomic dataset is not in PAW-XML format!',ch10,&
+        'Action: change your pseudopotential file to a PAW-XML one '
+       ABI_ERROR_NOSTOP(msg,ierr)
+     end if
    endif
 
 !  usexcnhat
@@ -4274,14 +4426,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%vdw_xc==5) then
 !    Only with PBE, BP86 or BLYP GGA XC
        if(dt%ixc/=11.and.dt%ixc/=-101130.and.dt%ixc/=-130101.and. &
-&         dt%ixc/=18.and.dt%ixc/=-106131.and.dt%ixc/=-131106.and. &
-&         dt%ixc/=19.and.dt%ixc/=-106132.and.dt%ixc/=-132106.and. &
-&         dt%ixc/=-202231.and.dt%ixc/=-231202) then
-         write(msg,'(8a)') ch10,&
-&         ' chkinp: ERROR -',ch10,&
-&         '  Van der Waals DFT-D2 correction (vdw_xc=5) only available for the following XC functionals:',ch10,&
-&         '      GGA-PBE, GGA-BLYP, GGA-BP86, mGGA-TPSS',ch10,&
-&         '  Action: change your pseudopotential file.'
+          dt%ixc/=18.and.dt%ixc/=-106131.and.dt%ixc/=-131106.and. &
+          dt%ixc/=19.and.dt%ixc/=-106132.and.dt%ixc/=-132106.and. &
+          dt%ixc/=-202231.and.dt%ixc/=-231202) then
+         write(msg,'(6a)') ch10,&
+          'Van der Waals DFT-D2 correction (vdw_xc=5) only available for the following XC functionals:',ch10,&
+          '    GGA-PBE, GGA-BLYP, GGA-BP86, mGGA-TPSS',ch10,&
+          'Action: change your pseudopotential file.'
          call wrtout(std_out,msg)
          ierr=ierr+1
        end if
@@ -4300,27 +4451,23 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%vdw_xc==6.or.dt%vdw_xc==7) then
 !    Only with PBE, BP86  or BLYP GGA XC
        if(dt%ixc/=11.and.dt%ixc/=-101130.and.dt%ixc/=-130101.and. &
-&         dt%ixc/=18.and.dt%ixc/=-106131.and.dt%ixc/=-131106.and. &
-&         dt%ixc/=19.and.dt%ixc/=-106132.and.dt%ixc/=-132106.and. &
-&         dt%ixc/=-202231.and.dt%ixc/=-231202.and.&
-&         dt%ixc/=14.and.dt%ixc/=-102130.and.dt%ixc/=-130102.and. &
-&         dt%ixc/=-170.and.dt%ixc/=41.and.dt%ixc/=-406) then
-         write(msg,'(4a,i2,5a)') ch10,&
-&         ' chkinp: ERROR -',ch10,&
-&         '  Van der Waals DFT-D correction (vdw_xc=',dt%vdw_xc,') only available for the following XC functionals:',ch10,&
-&         '      GGA-PBE, GGA-BLYP, GGA-BP86, mGGA-TPSS, GGA-RevPBE, PBE0',ch10,&
-&         '  Action: change your pseudopotential file.'
-         call wrtout(std_out,msg)
-         ierr=ierr+1
+          dt%ixc/=18.and.dt%ixc/=-106131.and.dt%ixc/=-131106.and. &
+          dt%ixc/=19.and.dt%ixc/=-106132.and.dt%ixc/=-132106.and. &
+          dt%ixc/=-202231.and.dt%ixc/=-231202.and.&
+          dt%ixc/=14.and.dt%ixc/=-102130.and.dt%ixc/=-130102.and. &
+          dt%ixc/=-170.and.dt%ixc/=41.and.dt%ixc/=-406) then
+         write(msg,'(a,i0,5a)') &
+         'Van der Waals DFT-D correction (vdw_xc=',dt%vdw_xc,') only available for the following XC functionals:',ch10,&
+         '    GGA-PBE, GGA-BLYP, GGA-BP86, mGGA-TPSS, GGA-RevPBE, PBE0',ch10,&
+         'Action: change your pseudopotential file.'
+         ABI_CHECK_NOSTOP(.False., msg, ierr)
        end if
 !       Only up to chemical species 96
        do itypat=1,dt%ntypat
          if (dt%znucl(itypat)<0.or.dt%znucl(itypat)>96) then
-           write(msg,'(4a,i2,1a,f5.1,a)') ch10,&
-&           ' chkinp: ERROR -',ch10,&
-&           '  Van der Waals DFT-D correction (vdw_xc=',dt%vdw_xc,') not available for atom type Z=',dt%znucl(itypat),' !'
-           call wrtout(std_out,msg)
-           ierr=ierr+1
+           write(msg,'(a,i0,1a,f5.1,a)')&
+            'Van der Waals DFT-D correction (vdw_xc=',dt%vdw_xc,') not available for atom type Z=',dt%znucl(itypat),' !'
+           ABI_CHECK_NOSTOP(.False., msg, ierr)
          end if
        end do
      end if
@@ -4329,10 +4476,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  wfoptalg
 !  Must be greater or equal to 0
    call chkint_ge(0,0,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,0,iout)
-!  wfoptalg==0,1,4,10,14 or 114 if PAW
+!  wfoptalg==0,1,2,4,10,12,14 or 114 if PAW
    if (usepaw==1) then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,7,(/0,1,4,10,14,111,114/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,10,(/0,1,2,4,10,12,14,111,112,114/),iout)
    end if
 !  wfoptalg/=114 if PAW+Fock
    if (usepaw==1 .and. dt%usefock==1) then
@@ -4347,8 +4494,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_ERROR_NOSTOP(msg,ierr)
    end if
 
-   ! Chebyshev
-   if(dt%wfoptalg == 1 .or. dt%wfoptalg == 111) then
+   ! Chebyshev and Spectrum Slicing
+   if(dt%wfoptalg == 1 .or. dt%wfoptalg == 111 .or. dt%wfoptalg == 112) then
      if(dt%nspinor > 1 .and. dt%wfoptalg == 1) then
        msg='Nspinor > 1 not yet compatible with wfoptalg 1. Use chebfi V2 instead (wfoptalg=111).'
        ABI_ERROR_NOSTOP(msg, ierr)
@@ -4360,7 +4507,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        ABI_ERROR_NOSTOP('Istwfk > 2 not compatible with wfoptalg 1. Use chebfi V2 instead (wfoptalg=111).', ierr)
      end if
      if(dt%ecutsm > 0) then
-       ABI_ERROR_NOSTOP('Ecutsm > 0 not yet compatible with wfoptalg 1', ierr)
+       ABI_ERROR_NOSTOP('ecutsm > 0 not yet compatible with wfoptalg 1', ierr)
      end if
    end if
 
@@ -4416,18 +4563,18 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        end do
        do ia=1,natom-1
          do ib=ia+1,natom
-           if( abs(frac(1,ia)-frac(1,ib))<1.0d-6 .and. &
-&           abs(frac(2,ia)-frac(2,ib))<1.0d-6 .and. &
-&           abs(frac(3,ia)-frac(3,ib))<1.0d-6         ) then
+           if (abs(frac(1,ia)-frac(1,ib))<1.0d-6 .and. &
+               abs(frac(2,ia)-frac(2,ib))<1.0d-6 .and. &
+               abs(frac(3,ia)-frac(3,ib))<1.0d-6 ) then
              if(iimage>1)then
                write(msg,'(2a,i5)') ch10,' The following was observed for image=',iimage
                call wrtout(iout,msg)
                call wrtout(std_out,msg)
              end if
-             write(msg, '(a,i4,a,i4,a,a,a,a,a,a)' )&
-&             'Atoms number',ia,' and',ib,' are located at the same point',' of the unit cell',ch10,&
-&             '(periodic images are taken into account).',ch10,&
-&             'Action: change the coordinate of one of these atoms in the input file.'
+             write(msg, '(a,i0,a,i0,6a)') &
+              'Atoms number',ia,' and',ib,' are located at the same point',' of the unit cell',ch10,&
+              '(periodic images are taken into account).',ch10,&
+              'Action: change the coordinate of one of these atoms in the input file.'
              ABI_ERROR_NOSTOP(msg,ierr)
            end if
          end do
@@ -4448,27 +4595,27 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end if
    end do
 
-  !  ZORA
-  ! only values of -3,-2,-1,0,1,2,3 are allowed. 0 is the default.
-  call chkint_eq(0,0,cond_string,cond_values,ierr,'zora',dt%zora,7,(/-3,-2,-1,0,1,2,3/),iout)
+  ! ZORA
+  ! only values of -4,-3,-2,-1,0,1,2,3 are allowed. 0 is the default.
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'zora',dt%zora,8,(/-4,-3,-2,-1,0,1,2,3/),iout)
   if(dt%zora .NE. 0) then
      cond_string(1)='zora';cond_values(1)=dt%zora
   !  require PAW
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/1/),iout)
   end if
-  if(dt%zora .GT. 1) then
+  if(dt%zora .NE. 0 .and. dt%zora .NE. 1) then
      cond_string(1)='zora';cond_values(1)=dt%zora
-  !  require nspinor 2
+     ! require nspinor 2
      call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
   end if
 
 !  bandFFT
    if(dt%paral_kgb==1.and.dt%optdriver==RUNL_GSTATE) then
-     if (mod(dt%wfoptalg,10) /= 4 .and. mod(dt%wfoptalg,10) /= 1) then
+     if (mod(dt%wfoptalg,10) /= 4 .and. mod(dt%wfoptalg,10) /= 2 .and. mod(dt%wfoptalg,10) /= 1) then
        write(msg,'(a,i0,a,a,a,a)')&
-        'The value of wfoptalg is found to be ',dt%wfoptalg,ch10,&
-        'This is not allowed in the case of band-FFT parallelization.',ch10,&
-        'Action: put wfoptalg = 4, 14 or 114 in your input file'
+&       'The value of wfoptalg is found to be ',dt%wfoptalg,ch10,&
+&       'This is not allowed in the case of band-FFT parallelization.',ch10,&
+&       'Action: put wfoptalg = 4, 14 or 112, 114 in your input file'
        ABI_ERROR_NOSTOP(msg,ierr)
      end if
 !    Make sure all nband are equal
@@ -4547,7 +4694,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      enddo
      if (npsp /= dt%ntypat) then
        write(msg, '(a,a,a,a,I0,a,I0,a,a,a)' ) ch10,&
-       'wvl_wfs_set:  consistency checks failed,', ch10, &
+       'consistency checks failed,', ch10, &
        'dtset%npsp (', npsp, ') /= dtset%ntypat (', dt%ntypat, ').', ch10, &
        'No alchemy pseudo are allowed with wavelets.'
        ABI_ERROR_NOSTOP(msg,ierr)
@@ -4556,12 +4703,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
    ! Test on tolerances (similar tests are performed in scprqt, so keep the two versions in synch)
    if (any(optdriver == [RUNL_GSTATE, RUNL_RESPFN])) then
-     ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0
+     ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0; ttoldmag=0
      if(abs(dt%tolwfr)>tiny(zero))ttolwfr=1
      if(abs(dt%toldff)>tiny(zero))ttoldff=1
      if(abs(dt%tolrff)>tiny(zero))ttolrff=1
      if(abs(dt%toldfe)>tiny(zero))ttoldfe=1
      if(abs(dt%tolvrs)>tiny(zero))ttolvrs=1
+     if(abs(dt%toldmag)>tiny(zero))ttoldmag=1
 
      ! If non-scf calculations, tolwfr must be defined
      if(ttolwfr /= 1 .and. ((dt%iscf<0 .and. dt%iscf/=-3) .or. dt%rf2_dkdk/=0 .or. dt%rf2_dkde/=0))then
@@ -4578,12 +4726,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
      ! If SCF calculations, one and only one of these can differ from zero
      if ( (dt%iscf>0 .or. dt%iscf==-3) .and. &
-       & ( (ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff>1) .or. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff/=1) ) ) then
-       write(msg,'(6a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,i0,2a)' )&
+       & ( (ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff+ttoldmag>1) .or. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff+ttoldmag/=1) ) ) then
+       write(msg,'(6a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,es14.6,a,i0,2a)' )&
         'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
-        'toldff, tolrff, toldfe or tolvrs ','must differ from zero, while they are',ch10,&
+        'toldff, tolrff, toldfe, toldmag or tolvrs ','must differ from zero, while they are',ch10,&
         'toldff=',dt%toldff,', tolrff=',dt%tolrff,', toldfe=',dt%toldfe,ch10,&
-        'and tolvrs=',dt%tolvrs,' for idtset: ', idtset, ch10,&
+        'toldmag=',dt%toldmag,'and tolvrs=',dt%tolvrs,' for idtset: ', idtset, ch10,&
         'Action: change your input file and resubmit the job.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
@@ -4643,15 +4791,41 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_CHECK_NOSTOP(dt%gpu_option == ABI_GPU_DISABLED, 'GBT is not compatible with GPUs', ierr)
      ABI_CHECK_NOSTOP(dt%nspinor == 2, 'GBT requires nspinor 2', ierr)
      ABI_CHECK_NOSTOP(dt%nspden == 4, 'GBT requires nspden 4', ierr)
-     ABI_CHECK_NOSTOP(all(dt%so_psp(1:npsp) == 0), 'GBT requires so_psp == 0', ierr)
      ABI_CHECK_NOSTOP(all(dt%istwfk(1:nkpt) == 1), 'GBT requires istwfk == 1', ierr)
      ABI_CHECK_NOSTOP(dt%usefock == 0, 'GBT with Fock is not coded', ierr)
      ABI_CHECK_NOSTOP(.not. xc_is_mgga, 'GBT with meta-GGA is not coded', ierr)
-     ABI_CHECK_NOSTOP(dt%ionmov == 0, 'GBT and atomic relaxation not tested', ierr)
-     ABI_CHECK_NOSTOP(dt%optcell == 0, 'GBT and cell relaxation not coded', ierr)
+!     ABI_CHECK_NOSTOP(dt%ionmov == 0, 'GBT and atomic relaxation not tested', ierr)
+!     ABI_CHECK_NOSTOP(dt%optcell == 0, 'GBT and cell relaxation not coded', ierr)
      if (all(abs(dt%spinat(1:2, 1:dt%natom)) < tol8)) then
        ABI_CHECK_NOSTOP(.False., 'at least one spinat(:,iat) should have non-zero x or y components', ierr)
      end if
+     if(dt%use_gbt == 1) then
+       ABI_CHECK_NOSTOP(all(dt%so_psp(1:npsp) == 0), 'use_gbt = 1 requires so_psp == 0', ierr)
+     end if
+
+     ! in calcdenmagsph we wrap the atoms in the first unit cell assuming the magnetization is periodic
+     ! but this is not the case when GBT is used. So make sure all atomic sites are in the first unit cell.
+     ABI_MALLOC(my_xred, (3, dt%natom))
+     ABI_MALLOC(xshift, (3, dt%natom))
+     call wrap2_zero_one(dt%xred_orig(:,1:dt%natom,1), my_xred, xshift)
+
+     if (any(abs(dt%xred_orig(:,1:dt%natom,1) - my_xred) > tol6)) then
+       ABI_CHECK_NOSTOP(.False., "GBT requires fractional coordinates to be in the unit cell when computing mx, my!", ierr)
+     end if
+
+     ABI_FREE(my_xred)
+     ABI_FREE(xshift)
+   end if
+
+   ! Consistency check for GSTORE input variables.
+   if (dt%gstore_kzone == "ibz" .and. dt%gstore_qzone == "ibz") then
+     ABI_CHECK_NOSTOP(.False., "gstore_kzone and gstore_qzone cannot be both in the 'ibz' ", ierr)
+   end if
+   if (dt%gstore_use_lgk /= 0 .and. dt%gstore_qzone /= "bz") then
+     ABI_CHECK_NOSTOP(.False., "when gstore_use_lgk /= 0, gstore_qzone must be 'bz' ", ierr)
+   end if
+   if (dt%gstore_use_lgq /= 0 .and. dt%gstore_kzone /= "bz") then
+     ABI_CHECK_NOSTOP(.False., "when gstore_use_lgq /= 0, gstore_kzone must be 'bz' ", ierr)
    end if
 
 !  If molecular dynamics or structural optimization is being done
@@ -4716,21 +4890,22 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
  if (ierr==1) then
    write(msg,'(6a)')ch10,&
-   'Checking consistency of input data against itself revealed some problem(s).',ch10,&
-   'So, stopping. The details of the problem(s) are given in the error file or the standard output file (= "log" file).',ch10,&
-   'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
+     'Checking consistency of input data against itself revealed some problem(s).',ch10,&
+     'So, stopping. The details of the problem(s) are given in the error file or the standard output file (= "log" file).',ch10,&
+     'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
    call wrtout(iout,msg)
    write(msg,'(a,i0,5a)')&
-   'Checking consistency of input data against itself gave ',ierr,' inconsistency.',ch10,&
-   'The details of the problem can be found above (or in output or log file).',ch10,&
-   'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
+     'Checking consistency of input data against itself gave ',ierr,' inconsistency.',ch10,&
+     'The details of the problem can be FOUND ABOVE (or in output or log file).',ch10,&
+     'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
    ABI_ERROR(msg)
  end if
- if (ierr>1) then
-   write(msg,'(a,i0,5a)')&
-   'Checking consistency of input data against itself gave ',ierr,' inconsistencies.',ch10,&
-   'The details of the problems can be found above (or in output or log file), in an earlier WARNING.',ch10,&
-   'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
+ if (ierr > 1) then
+   write(msg,'(a,i0,7a)')&
+     'Checking consistency of input data against itself gave ',ierr,' inconsistencies.',ch10,&
+     'The details of the problems can be FOUND ABOVE (or in output or log file), in an earlier WARNING.',ch10,&
+     'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.',ch10,&
+     "Also, try to run abinit in sequential in dry-run mode with e.g., `abinit INPUT -d` to detect problems in the INPUT."
    ABI_ERROR(msg)
  end if
 

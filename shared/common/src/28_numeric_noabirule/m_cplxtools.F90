@@ -6,7 +6,7 @@
 !! This module defines helper functions to operate on complex arrays (mainly used in the GW code)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2025 ABINIT group (MG)
+!! Copyright (C) 1992-2026 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,14 +22,15 @@
 
 #include "abi_common.h"
 
-MODULE m_cplxtools
+module m_cplxtools
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_errors
  use m_xmpi
 
- use m_fstrings,  only : toupper
+ use m_fstrings,  only : toupper, sjoin
 
  implicit none
 
@@ -56,6 +57,7 @@ MODULE m_cplxtools
  public :: cplx_setaug_zero_dpc
  public :: cplx_setaug_zero_spc
  public :: cplx_addtorho
+ public :: cplx_mat_plus_bc
 !***
 
  ! Interfaces
@@ -78,15 +80,20 @@ MODULE m_cplxtools
    module procedure cplx_addtorho_dpc
  end interface cplx_addtorho
 
+ interface cplx_mat_plus_bc
+   module procedure cplx_mat_plus_bc_spc
+   module procedure cplx_mat_plus_bc_dpc
+ end interface cplx_mat_plus_bc
+
  !integer,parameter,private :: MIN_SIZE = 5000
 
- complex(spc),private,parameter :: czero_spc =  (0._sp,0._sp)
- complex(spc),private,parameter :: cone_spc  =  (1._sp,0._sp)
- !complex(spc) ,parameter :: j_spc=(0._sp,1.0_sp)
+ complex(sp),private,parameter :: czero_spc =  (0._sp,0._sp)
+ complex(sp),private,parameter :: cone_spc  =  (1._sp,0._sp)
+ !complex(sp) ,parameter :: j_spc=(0._sp,1.0_sp)
 
- complex(dpc),private,parameter :: czero_dpc =  (0._dp,0._dp)
- complex(dpc),private,parameter :: cone_dpc  =  (1._dp,0._dp)
- !complex(dpc) ,parameter :: j_dpc=(0._dp,1.0_dp)
+ complex(dp),private,parameter :: czero_dpc =  (0._dp,0._dp)
+ complex(dp),private,parameter :: cone_dpc  =  (1._dp,0._dp)
+ !complex(dp) ,parameter :: j_dpc=(0._dp,1.0_dp)
 
 CONTAINS  !========================================================================================
 !!***
@@ -116,7 +123,7 @@ subroutine cplx_fromreal(n,ireal,ocplx)
  integer,intent(in) :: n
 !arrays
  real(dp),intent(in) :: ireal(2,n)
- complex(dpc),intent(out) :: ocplx(n)
+ complex(dp),intent(out) :: ocplx(n)
 
 !Local variables ------------------------------
 !scalars
@@ -145,9 +152,6 @@ end subroutine cplx_fromreal
 !!  n=Specifies the number of elements in vectors x and y.
 !!  mask(n)=Logical array.
 !!
-!! SIDE EFFECTS
-!!  x(n)=See description.
-!!
 !! SOURCE
 
 subroutine cplx_filter(n, x, mask)
@@ -156,7 +160,7 @@ subroutine cplx_filter(n, x, mask)
 !scalars
  integer,intent(in) :: n
 !arrays
- complex(dpc),intent(inout) :: x(n)
+ complex(dp),intent(inout) :: x(n)
  logical,intent(in) :: mask(n)
 
 ! *************************************************************************
@@ -192,8 +196,8 @@ function cplx_real_zdotc(n,x,y) result(res)
 !scalars
  integer,intent(in) :: n
 !arrays
- complex(dpc),intent(in) :: x(n)
- complex(dpc),intent(in) :: y(n)
+ complex(dp),intent(in) :: x(n)
+ complex(dp),intent(in) :: y(n)
  real(dp) :: res
 
 !Local variables-------------------------------
@@ -233,11 +237,10 @@ subroutine cplx_zaxpby(n,a,x,b,y)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
- complex(dpc),intent(in) :: a,b
+ complex(dp),intent(in) :: a,b
 !arrays
- complex(dpc),intent(in) :: x(n)
- complex(dpc),intent(inout) :: y(n)
-
+ complex(dp),intent(in) :: x(n)
+ complex(dp),intent(inout) :: y(n)
 ! *************************************************************************
 
 #ifdef HAVE_LINALG_AXPBY
@@ -278,18 +281,17 @@ subroutine cplx_zgemv(trans,nrows,ncols,mat,vec,matvec,alpha,beta)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nrows,ncols
- complex(dpc),optional,intent(in) :: alpha,beta
+ complex(dp),optional,intent(in) :: alpha,beta
  character(len=1),intent(in) :: trans
 !arrays
- complex(dpc),intent(in) :: mat(nrows*ncols)
- complex(dpc),intent(in) :: vec(*)
- complex(dpc),intent(inout) :: matvec(*)
+ complex(dp),intent(in) :: mat(nrows*ncols)
+ complex(dp),intent(in) :: vec(*)
+ complex(dp),intent(inout) :: matvec(*)
 
 !Local variables-------------------------------
 !scalars
  integer :: mm,nn,kk,lda,ldb,ldc
- complex(dpc) :: my_alpha,my_beta
-
+ complex(dp) :: my_alpha,my_beta
 ! *************************************************************************
 
  lda = nrows
@@ -345,18 +347,17 @@ subroutine cplx_zgemm(transa,transb,npws,ncola,ncolb,amat,bmat,cmat,alpha,beta)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npws,ncola,ncolb
- complex(dpc),optional,intent(in) :: alpha,beta
+ complex(dp),optional,intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
 !arrays
- complex(dpc),intent(in) :: amat(npws*ncola)
- complex(dpc),intent(in) :: bmat(npws*ncolb)
- complex(dpc),intent(inout) :: cmat(*)
+ complex(dp),intent(in) :: amat(npws*ncola)
+ complex(dp),intent(in) :: bmat(npws*ncolb)
+ complex(dp),intent(inout) :: cmat(*)
 
 !Local variables-------------------------------
 !scalars
  integer :: mm,nn,kk,lda,ldb,ldc
- complex(dpc) :: my_alpha,my_beta
-
+ complex(dp) :: my_alpha,my_beta
 ! *************************************************************************
 
  lda = npws
@@ -413,13 +414,11 @@ subroutine cplx_box2gsph_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsp
  real(sp),optional,intent(in) :: rscal
 !arrays
  integer,intent(in) :: kg_k(3,npw_k)
- complex(spc),intent(in) :: iarrbox(ldx*ldy*ldz*ndat)
- complex(spc),intent(out) :: oarrsph(npw_k*ndat)
+ complex(sp),intent(in) :: iarrbox(ldx*ldy*ldz*ndat)
+ complex(sp),intent(out) :: oarrsph(npw_k*ndat)
 
 !Local variables-------------------------------
-!scalars
  integer :: ig,ix,iy,iz,dat,pad_sph,pad_box,ifft,ldxyz
-
 ! *************************************************************************
 
  ldxyz = ldx*ldy*ldz
@@ -487,7 +486,7 @@ end subroutine cplx_box2gsph_spc
 !!  cplx_box2gsph_dpc
 !!
 !! FUNCTION
-!!   Transfer data from the FFT box to the G-sphere. Target DPC complex array.
+!!   Transfer data from the FFT box to the G-sphere. Target DP complex array.
 !!
 !! INPUTS
 !!  nx,ny,nz=physical dimension of the FFT box.
@@ -511,8 +510,8 @@ subroutine cplx_box2gsph_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsp
  real(dp),optional,intent(in) :: rscal
 !arrays
  integer,intent(in) :: kg_k(3,npw_k)
- complex(dpc),intent(in) :: iarrbox(ldx*ldy*ldz*ndat)
- complex(dpc),intent(out) :: oarrsph(npw_k*ndat)
+ complex(dp),intent(in) :: iarrbox(ldx*ldy*ldz*ndat)
+ complex(dp),intent(out) :: oarrsph(npw_k*ndat)
 
 !Local variables-------------------------------
 !scalars
@@ -614,8 +613,8 @@ subroutine cplx_gsph2box_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
  integer,intent(in) :: istwf_k,nx,ny,nz,ldx,ldy,ldz,ndat,npw
 !arrays
  integer,intent(in) :: kg_k(3,npw)
- complex(spc),intent(in) :: iarrsph(npw*ndat)
- complex(spc),intent(out) :: oarrbox(ldx*ldy*ldz*ndat)
+ complex(sp),intent(in) :: iarrsph(npw*ndat)
+ complex(sp),intent(out) :: oarrbox(ldx*ldy*ldz*ndat)
 
 !Local variables-------------------------------
 !scalars
@@ -624,7 +623,6 @@ subroutine cplx_gsph2box_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
  !character(len=500) :: msg
 !arrays
  integer,allocatable :: ixinver(:),iyinver(:),izinver(:)
-
 ! *************************************************************************
 
 !In the case of special k-points, invariant under time-reversal,
@@ -749,7 +747,7 @@ end subroutine cplx_gsph2box_spc
 !! FUNCTION
 !! Array iarrsph is defined in sphere with npw points. Insert iarrsph inside box
 !! of nx*ny*nz points to define array oarrbox for fft box. rest of oarrbox is filled with 0 s.
-!! targer: DPC complex arrays
+!! targer: DP complex arrays
 !!
 !! INPUTS
 !! iarrsph(2,npw*ndat)= contains values for npw G vectors in basis sphere
@@ -778,8 +776,8 @@ subroutine cplx_gsph2box_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
  integer,intent(in) :: istwf_k,nx,ny,nz,ldx,ldy,ldz,ndat,npw
 !arrays
  integer,intent(in) :: kg_k(3,npw)
- complex(dpc),intent(in) :: iarrsph(npw*ndat)
- complex(dpc),intent(out) :: oarrbox(ldx*ldy*ldz*ndat)
+ complex(dp),intent(in) :: iarrsph(npw*ndat)
+ complex(dp),intent(out) :: oarrbox(ldx*ldy*ldz*ndat)
 
 !Local variables-------------------------------
 !scalars
@@ -788,7 +786,6 @@ subroutine cplx_gsph2box_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
  !character(len=500) :: msg
 !arrays
  integer,allocatable :: ixinver(:),iyinver(:),izinver(:)
-
 ! *************************************************************************
 
 !In the case of special k-points, invariant under time-reversal,
@@ -929,11 +926,10 @@ subroutine cplx_setaug_zero_spc(nx,ny,nz,ldx,ldy,ldz,ndat,arr)
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat
 !arrays
- complex(spc),intent(inout) :: arr(ldx,ldy,ldz*ndat)
+ complex(sp),intent(inout) :: arr(ldx,ldy,ldz*ndat)
 
 !Local variables-------------------------------
  integer :: iy,iz,dat,padat
-
 ! *************************************************************************
 
  if (nx /= ldx) then
@@ -987,11 +983,10 @@ subroutine cplx_setaug_zero_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,arr)
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat
 !arrays
- complex(dpc),intent(inout) :: arr(ldx,ldy,ldz*ndat)
+ complex(dp),intent(inout) :: arr(ldx,ldy,ldz*ndat)
 
 !Local variables-------------------------------
  integer :: iy,iz,dat,padat
-
 ! *************************************************************************
 
  if (nx /= ldx) then
@@ -1050,13 +1045,12 @@ subroutine cplx_addtorho_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,weight_r,ur,rho)
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat
  real(dp),intent(in) :: weight_r
 !arrays
- complex(dpc),intent(in) :: ur(ldx*ldy*ldz*ndat)
+ complex(dp),intent(in) :: ur(ldx*ldy*ldz*ndat)
  real(dp),intent(inout) :: rho(ldx*ldy*ldz)
 
 !Local variables-------------------------------
 !scalars
  integer :: ix,iy,iz,dat,ifft,ldxyz,pad_box,padz,pady
-
 ! *************************************************************************
 
  ldxyz = ldx*ldy*ldz
@@ -1101,5 +1095,133 @@ end subroutine cplx_addtorho_dpc
 
 !----------------------------------------------------------------------
 
-END MODULE m_cplxtools
+!!****f* m_cplxtools/cplx_mat_plus_bc_spc
+!! NAME
+!!  cplx_mat_plus_bc_spc
+!!
+!! FUNCTION
+!!  Compute a = a + fact * b * c
+!!
+!! SOURCE
+
+subroutine cplx_mat_plus_bc_spc(bufsize, aa, real_fact, bmode, bb, cc, gpu_option)
+
+!Arguments ------------------------------------
+!scalars
+ integer(c_size_t),intent(in) :: bufsize
+ integer,intent(in) :: gpu_option
+ real(sp),intent(in) :: real_fact
+ character(len=1),intent(in) :: bmode
+!arrays
+ complex(sp),intent(inout) :: aa(bufsize)
+ complex(sp),intent(in) :: bb(bufsize), cc(bufsize)
+
+!Local variables-------------------------------
+ integer(c_size_t) :: ii
+! *************************************************************************
+
+ if (gpu_option == ABI_GPU_DISABLED) then
+   select case (bmode)
+   case ("N")
+     !$OMP PARALLEL DO
+     do ii=1,bufsize
+       aa(ii) = aa(ii) + real_fact * bb(ii) * cc(ii)
+     end do
+  case ("C")
+     !$OMP PARALLEL DO
+     do ii=1,bufsize
+       aa(ii) = aa(ii) + real_fact * conjg(bb(ii)) * cc(ii)
+     end do
+  case default
+    ABI_ERROR(sjoin("Invalid bmode:", bmode))
+  end select
+
+ else
+#ifdef HAVE_OPENMP_OFFLOAD
+   select case (bmode)
+   case ("N")
+     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:aa, bb, cc)
+     do ii=1,bufsize
+       aa(ii) = aa(ii) + real_fact * bb(ii) * cc(ii)
+     end do
+   case ("C")
+     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:aa, bb, cc)
+     do ii=1,bufsize
+       aa(ii) = aa(ii) + real_fact * conjg(bb(ii)) * cc(ii)
+     end do
+  case default
+    ABI_ERROR(sjoin("Invalid bmode:", bmode))
+  end select
+#endif
+ end if
+
+end subroutine cplx_mat_plus_bc_spc
+!!***
+
+!!****f* m_cplxtools/cplx_mat_plus_bc_dpc
+!! NAME
+!!  cplx_mat_plus_bc_dpc
+!!
+!! FUNCTION
+!!  Compute a = a + fact * b * c
+!!
+!! SOURCE
+
+subroutine cplx_mat_plus_bc_dpc(bufsize, aa, real_fact, bmode, bb, cc, gpu_option)
+
+!Arguments ------------------------------------
+!scalars
+ integer(c_size_t),intent(in) :: bufsize
+ integer,intent(in) :: gpu_option
+ real(dp),intent(in) :: real_fact
+ character(len=1),intent(in) :: bmode
+!arrays
+ complex(dp),intent(inout) :: aa(bufsize)
+ complex(dp),intent(in) :: bb(bufsize), cc(bufsize)
+
+!Local variables-------------------------------
+ integer(c_size_t) :: ii
+! *************************************************************************
+
+ if (gpu_option == ABI_GPU_DISABLED) then
+   ! CPU version
+   select case (bmode)
+   case ("N")
+     !$OMP PARALLEL DO
+     do ii=1,bufsize
+       aa(ii) = aa(ii) + real_fact * bb(ii) * cc(ii)
+     end do
+  case ("C")
+     !$OMP PARALLEL DO
+     do ii=1,bufsize
+       aa(ii) = aa(ii) + real_fact * conjg(bb(ii)) * cc(ii)
+     end do
+  case default
+    ABI_ERROR(sjoin("Invalid bmode:", bmode))
+  end select
+
+ else
+   ! GPU version
+#ifdef HAVE_OPENMP_OFFLOAD
+   select case (bmode)
+   case ("N")
+     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:aa, bb, cc)
+     do ii=1,bufsize
+       aa(ii) = aa(ii) + real_fact * bb(ii) * cc(ii)
+     end do
+   case ("C")
+     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:aa, bb, cc)
+     do ii=1,bufsize
+       aa(ii) = aa(ii) + real_fact * conjg(bb(ii)) * cc(ii)
+     end do
+  case default
+    ABI_ERROR(sjoin("Invalid bmode:", bmode))
+  end select
+#endif
+ end if
+
+end subroutine cplx_mat_plus_bc_dpc
+!!***
+
+end module m_cplxtools
 !!***

@@ -6,7 +6,7 @@
 !!   object and procedures dealing with input/output filenames
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (XG, MT)
+!!  Copyright (C) 2008-2026 ABINIT group (XG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -196,6 +196,10 @@ module m_dtfil
    ! Filename used to read GSTORE.nc file.
    ! Initialize via getgstore_filepath
 
+  character(len=fnlen) :: filqpdatain
+   ! Filename used to read QPDATA file.
+   ! Initialize via getqpdata_filepath
+
   character(len=fnlen) :: filabiwanin
    ! Filename used to read ABIWAN.nc file.
    ! Initialize via getabiwan_filepath
@@ -213,6 +217,10 @@ module m_dtfil
 
   character(len=fnlen) :: fnamewffk
    ! the name of the ground-state wavefunction file to be read (see driver.F90)
+
+  character(len=fnlen) :: fnamewffmq
+   ! the name of the k-q ground-state wavefunction file to be read (see driver.F90)
+   ! only useful in the response-function case
 
   character(len=fnlen) :: fnamewffq
    ! the name of the k+q ground-state wavefunction file to be read (see driver.F90)
@@ -425,12 +433,13 @@ module m_dtfil
   character(len=fnlen) :: fnametmp_app_den
   character(len=fnlen) :: fnametmp_app_kden
 
+  contains
+    procedure  :: init => dtfil_init
+    procedure  :: init_img => dtfil_init_img
+    procedure  :: init_time => dtfil_init_time
  end type datafiles_type
 !!***
 
- public :: dtfil_init
- public :: dtfil_init_img
- public :: dtfil_init_time
  public :: mkfilename
  public :: isfile
  public :: iofn1
@@ -446,8 +455,7 @@ contains
 !!
 !! FUNCTION
 !! Initialize most of the dtfil structured variable
-!! (what is left should be initialized inside the itimimage,
-!! iimage and itime loops).
+!! (what is left should be initialized inside the itimimage, iimage and itime loops).
 !!
 !! INPUTS
 !! dtset=<type datasets_type>contain all input variables for the current dataset
@@ -476,19 +484,19 @@ contains
 !! SOURCE
 
 subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset,&
-&                      image_index) ! optional argument
+                      image_index) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
+ class(datafiles_type),intent(inout) :: dtfil
+ type(dataset_type),intent(in) :: dtset
  integer, intent(in) :: idtset,ndtset
  integer, optional, intent(in) :: image_index
  character(len=fnlen),intent(in) :: filstat
  type(MPI_type),intent(in) :: mpi_enreg
- type(datafiles_type),intent(inout) :: dtfil !vz_i
 !arrays
  integer :: jdtset_(0:ndtset)
  character(len=fnlen),intent(in) :: filnam(5)
- type(dataset_type),intent(in) :: dtset
 
 !Local variables-------------------------------
 !scalars
@@ -510,13 +518,12 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  character(len=15) :: stringfile
  character(len=500) :: msg
  character(len=fnlen) :: filsus,filctqmcdatain,filddbsin,fildens1in,fildensin,filpawdensin,filkdensin,filqps,filscr,filselfin,fil_efmas
- character(len=fnlen) :: fnamewff1,fnamewffddk,fnamewffdelfd,fnamewffdkdk,fnamewffdkde,fnamewffk,fnamewffq
+ character(len=fnlen) :: fnamewff1,fnamewffddk,fnamewffdelfd,fnamewffdkdk,fnamewffdkde,fnamewffk,fnamewffmq,fnamewffq
  character(len=fnlen) :: filbseig,filfft,filhaydock,fil_bsreso,fil_bscoup
  character(len=fnlen) :: filwfkfine
  character(len=fnlen) :: filnam_ds(5)
  character(len=fnlen) :: tmpfil(14)
  integer :: idtmpfil(14)
-
 !******************************************************************
 
  DBG_ENTER("COLL")
@@ -604,6 +611,13 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    ! If fnamewffq is not initialized thanks to getwfq or irdwfq, use fnamewffk
    if(will_read==0) fnamewffq = fnamewffk
 
+   ! According to getwfmq and irdwfmq, build _WFQ file name, referred as fnamewffmq
+   stringfile='_WFQ' ; stringvar='wfq'
+   call mkfilename(filnam,fnamewffmq,dtset%getwfmq,idtset,dtset%irdwfmq,jdtset_,ndtset,stringfile,stringvar,will_read, &
+                   getpath=dtset%getwfmq_filepath)
+   ! If fnamewffmq is not initialized thanks to getwfmq or irdwfmq, use fnamewffk
+   if(will_read==0) fnamewffmq = fnamewffk
+
    ! According to get1wf and ird1wf, build _1WF file name, referred as fnamewff1
    stringfile='_1WF' ; stringvar='1wf'
    call mkfilename(filnam,fnamewff1,dtset%get1wf,idtset,dtset%ird1wf,jdtset_,ndtset,stringfile,stringvar,will_read)
@@ -663,6 +677,12 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  call mkfilename(filnam, dtfil%filgstorein, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
                  getpath=dtset%getgstore_filepath)
  if (will_read == 0) dtfil%filgstorein = ABI_NOFILE
+
+ ! According to getgstore_filepath, build _GSTORE file name
+ stringfile='_QPDATA'; stringvar='qpdata'
+ call mkfilename(filnam, dtfil%filqpdatain, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                 getpath=dtset%getqpdata_filepath)
+ if (will_read == 0) dtfil%filqpdatain = ABI_NOFILE
 
  ! According to getabiwan_filepath, build _ABIWAN file name
  stringfile='_ABIWAN.nc'; stringvar='abiwan'
@@ -840,6 +860,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabi_wfkfine = filwfkfine
  dtfil%filstat       =filstat
  dtfil%fnamewffk     =fnamewffk
+ dtfil%fnamewffmq     =fnamewffmq
  dtfil%fnamewffq     =fnamewffq
  dtfil%fnamewffddk   =fnamewffddk
  dtfil%fnamewffdelfd =fnamewffdelfd
@@ -1033,7 +1054,6 @@ end subroutine dtfil_init
 !!***
 
 !!****f* m_dtfil/dtfil_init_time
-!!
 !! NAME
 !! dtfil_init_time
 !!
@@ -1048,25 +1068,20 @@ end subroutine dtfil_init
 !!         if -1 : append "_TIM0" (called from brdmin)
 !!         if -2, -3, -4, -5: append "_TIMA", ... ,"_TIMD", (called from move)
 !!
-!! OUTPUT
-!!
 !! SIDE EFFECTS
 !! dtfil=<type datafiles_type>infos about file names, file unit numbers
 !!  (part of which were initialized previously)
 !!
 !! SOURCE
 
-subroutine dtfil_init_time(dtfil,iapp)
+subroutine dtfil_init_time(dtfil, iapp)
 
 !Arguments ------------------------------------
-!scalars
+ class(datafiles_type),intent(inout) :: dtfil
  integer, intent(in) :: iapp
- type(datafiles_type),intent(inout) :: dtfil
 
 !Local variables-------------------------------
-!scalars
  character(len=fnlen) :: filapp,filprot
-
 !******************************************************************
 
  DBG_ENTER("COLL")
@@ -1238,17 +1253,15 @@ subroutine dtfil_init_img(dtfil,dtset,dtsets,idtset,jdtset,ndtset,ndtset_alloc)
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: idtset,ndtset,ndtset_alloc
- type(datafiles_type),intent(out) :: dtfil
+ class(datafiles_type),intent(inout) :: dtfil
  type(dataset_type),intent(in) :: dtset
+ integer, intent(in) :: idtset,ndtset,ndtset_alloc
 !arrays
  integer,intent(in) :: jdtset(0:ndtset)
  type(dataset_type),intent(in) :: dtsets(0:ndtset_alloc)
 
 !Local variables -------------------------
-!scalars
  integer :: iget
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")

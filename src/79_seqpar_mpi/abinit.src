@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2026 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -25,6 +25,8 @@ sources = [
  "m_lobpcgwf.F90",
  "m_lobpcgwf_cprj.F90",
  "m_lobpcg.F90",
+ "m_slicewf.F90",
+ "m_slicewf_cprj.F90",
  "m_tddft.F90",
  "m_vtowfk.F90",
  "m_vtorho.F90",

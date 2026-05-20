@@ -14,7 +14,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2025 ABINIT group (hexu)
+!! Copyright (C) 2001-2026 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@
 #include "abi_common.h"
 
 module m_spmat_csr
-  use defs_basis  
+  use defs_basis
   use m_abicore
   use m_xmpi
   use m_errors
@@ -81,12 +81,12 @@ contains
   !> @brief set the full csr matrix
   !> @param [in] nnz: number of entries
   !> @param [in] icol:
-  !> @param [in] row_shift: 
+  !> @param [in] row_shift:
   !> @param [in] val: values:
   !-----------------------------------------------------------------------
   subroutine set(self,  nnz, icol, row_shift, val)
     class(CSR_mat_t), intent(inout) :: self
-    integer, intent(in) :: nnz 
+    integer, intent(in) :: nnz
     ! i: col number of each entry
     ! j: first 0, n1, n1+n2, ...
     ! val(irow, irow+1) are the values of entries in row irow.
@@ -256,11 +256,11 @@ contains
   !> @param [out]  y: y
   !-----------------------------------------------------------------------
   subroutine CSR_mat_t_mv_one_row(self,  j, x, y)
-    class(CSR_mat_t), intent(in)::self 
+    class(CSR_mat_t), intent(in)::self
     integer, intent(in) ::j
     real(dp), intent(in) :: x(self%ncol)
     real(dp), intent(out) :: y
-    integer :: i,  i1, i2 
+    integer :: i,  i1, i2
     y=0.0_dp
     i1=self%row_shift(j)
     i2=self%row_shift(j+1)-1
@@ -278,7 +278,7 @@ contains
   !> @param [out]  y: y
   !-----------------------------------------------------------------------
   subroutine CSR_mat_t_mv_select_row(self, nrow, id_row, x, y)
-    class(CSR_mat_t), intent(in)::self 
+    class(CSR_mat_t), intent(in)::self
     integer, intent(in) :: nrow,  id_row(nrow)
     real(dp), intent(in) :: x(self%ncol)
     real(dp), intent(out) :: y(nrow)
@@ -295,7 +295,7 @@ contains
   end subroutine CSR_mat_t_mv_select_row
 
   subroutine CSR_mat_t_get_block(self,irow_start, icol_start, nrow, ncol, blk)
-    class(CSR_mat_t), intent(in)::self 
+    class(CSR_mat_t), intent(in)::self
     integer, intent(in) :: nrow,  irow_start, ncol, icol_start
     real(dp), intent(out) :: blk(nrow, ncol)
     integer :: i, irow, i1, i2, j, icol

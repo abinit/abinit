@@ -1,8 +1,8 @@
 
-.Version 10.3.4.1 of ABINIT, released Feb 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 31 Mar 2025.
-- ( at 18h27 )
-  
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/TestBot_MPI1/v9_t07-t08/t07.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h16 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v9_t07-t08/t07.abi
 - output file    -> t07.abo
 - root for input  files -> t07i
 - root for output files -> t07o
@@ -81,6 +81,7 @@ _ WF disk file :      2.063 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =          16
 -   mkqmem =          16        mk1mem =          16           mpw =         211
       nfft =        5832          nkpt =          16
+- my_mband =          20
 ================================================================================
 P This job should need less than                       9.521 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -98,6 +99,7 @@ _ WF disk file :      2.063 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =          16
 -   mkqmem =          16        mk1mem =          16           mpw =         211
       nfft =        5832          nkpt =          16
+- my_mband =          20
 ================================================================================
 P This job should need less than                       9.521 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -115,6 +117,7 @@ _ WF disk file :      2.063 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =          16
 -   mkqmem =          16        mk1mem =          16           mpw =         211
       nfft =        5832          nkpt =          16
+- my_mband =          20
 ================================================================================
 P This job should need less than                       9.521 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -391,7 +394,7 @@ P          mk1mem6         16
                          0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
                          0.06250    0.06250    0.06250    0.06250
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4023196028E+00  1.4023196028E+00  1.4023196028E+00
+                       1.4023196079E+00  1.4023196079E+00  1.4023196079E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6500000000E+00  2.6500000000E+00  2.6500000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -471,8 +474,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.18463
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/Pspdir/Ga-low_r.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/Pspdir/Ga-low_r.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Ga-low_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Ga-low_r.psp8
 - Ga    ONCVPSP-3.3.0  r_core=   1.85767   1.81388   2.62545
 - 31.00000   3.00000    170607                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -495,8 +498,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/Pspdir/As_r.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/Pspdir/As_r.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/As_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/As_r.psp8
 - As    ONCVPSP-3.3.0  r_core=   1.85233   1.80867   2.40819
 - 33.00000   5.00000    170607                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -532,14 +535,14 @@ solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-12, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -11.247173154483    -1.125E+01 9.545E-04 4.051E+00
- ETOT  2  -11.250405530405    -3.232E-03 3.906E-08 2.711E-01
- ETOT  3  -11.250577848936    -1.723E-04 1.938E-06 6.223E-03
- ETOT  4  -11.250579211526    -1.363E-06 6.892E-09 5.749E-04
- ETOT  5  -11.250579342469    -1.309E-07 5.498E-10 3.115E-06
- ETOT  6  -11.250579343470    -1.001E-09 1.675E-12 3.491E-08
- ETOT  7  -11.250579343476    -6.208E-12 9.109E-13 1.485E-09
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -11.247173154483    -1.125E+01 9.545E-04 4.051E+00 0.000E+00 0.000E+00
+ ETOT  2  -11.250405530405    -3.232E-03 3.906E-08 2.711E-01 0.000E+00 0.000E+00
+ ETOT  3  -11.250577848936    -1.723E-04 1.938E-06 6.223E-03 0.000E+00 0.000E+00
+ ETOT  4  -11.250579211526    -1.363E-06 6.892E-09 5.749E-04 0.000E+00 0.000E+00
+ ETOT  5  -11.250579342469    -1.309E-07 5.498E-10 3.115E-06 0.000E+00 0.000E+00
+ ETOT  6  -11.250579343470    -1.001E-09 1.675E-12 3.491E-08 0.000E+00 0.000E+00
+ ETOT  7  -11.250579343476    -6.208E-12 9.109E-13 1.485E-09 0.000E+00 0.000E+00
 
  At SCF step    7   max residual=  9.11E-13 < tolwfr=  1.00E-12 =>converged.
 
@@ -572,21 +575,22 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ga]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
 cartesian_forces: # hartree/bohr
-- [ -1.33181281E-23,  -1.33181281E-23,   3.99543843E-23, ]
-- [  1.33181281E-23,   1.33181281E-23,  -3.99543843E-23, ]
-force_length_stats: {min:   4.41712338E-23, max:   4.41712338E-23, mean:   4.41712338E-23, }
+- [  5.20239379E-26,   5.20239379E-26,  -1.56071814E-25, ]
+- [ -5.20239379E-26,  -5.20239379E-26,   1.56071814E-25, ]
+force_length_stats: {min:   1.72543882E-25, max:   1.72543882E-25, mean:   1.72543882E-25, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.542320     0.542320      1.084640     0.000000
-    2   2.00000     1.237560     1.237560      2.475120     0.000000
- ---------------------------------------------------------------------
-  Sum:              1.779880     1.779880      3.559760     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ga   2.00000     0.542320     0.542320      1.084640     0.000000
+    2 As   2.00000     1.237560     1.237560      2.475120     0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 1.779880     1.779880      3.559760     0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -595,25 +599,25 @@ force_length_stats: {min:   4.41712338E-23, max:   4.41712338E-23, mean:   4.417
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  1.9965E-22; max dE/dt=  2.8234E-22; dE/dt below (all hartree)
-    1      -0.000000000000     -0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  7.7987E-25; max dE/dt=  1.1029E-24; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+    2      -0.000000000000     -0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.40231960276350     1.40231960276350     1.40231960276350
+    2      1.40231960794160     1.40231960794160     1.40231960794160
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 2.5502274E-23 3.9954384E-23   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 9.9618257E-26 1.5607181E-25   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 1.3113795E-21 2.0545369E-21   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 5.1225767E-24 8.0255353E-24   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.600000000000 10.600000000000 10.600000000000 bohr
-              =  5.609278411054  5.609278411054  5.609278411054 angstroms
+              =  5.609278431766  5.609278431766  5.609278431766 angstroms
  prteigrs : about to open file t07o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.15916   Average Vxc (hartree)=  -0.34374
  Eigenvalues (hartree) for nkpt=   2  k points, SPIN UP:
@@ -638,7 +642,7 @@ psp_core            :  1.08742128495567E-01
 local_psp           : -2.97008596022435E+00
 non_local_psp       :  1.68555390926641E+00
 total_energy        : -1.12505793434763E+01
-total_energy_eV     : -3.06143833162721E+02
+total_energy_eV     : -3.06143860006390E+02
 band_energy         : -7.89972068554900E-02
 ...
 
@@ -649,9 +653,9 @@ band_energy         : -7.89972068554900E-02
   sigma(3 3)=  2.43385117E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -7.1606E+00 GPa]
-- sigma(1 1)=  7.16063616E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  7.16063616E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  7.16063616E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  7.16063736E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  7.16063736E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  7.16063736E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -740,15 +744,16 @@ force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.542320     0.542320      1.084640     0.000000
-    2   2.00000     1.237560     1.237560      2.475120     0.000000
- ---------------------------------------------------------------------
-  Sum:              1.779880     1.779880      3.559760     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ga   2.00000     0.542320     0.542320      1.084640     0.000000
+    2 As   2.00000     1.237560     1.237560      2.475120     0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 1.779880     1.779880      3.559760     0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -760,9 +765,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.40231960276350     1.40231960276350     1.40231960276350
+    2      1.40231960794160     1.40231960794160     1.40231960794160
  length scales= 10.600000000000 10.600000000000 10.600000000000 bohr
-              =  5.609278411054  5.609278411054  5.609278411054 angstroms
+              =  5.609278431766  5.609278431766  5.609278431766 angstroms
  prteigrs : about to open file t07o_DS2_EIG
  Eigenvalues (hartree) for nkpt=   2  k points, SPIN UP:
  kpt#   1, nband= 20, wtk=  0.75000, kpt= -0.2500  0.5000  0.0000 (reduced coord)
@@ -866,15 +871,16 @@ force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.542320     0.542320      1.084640     0.000000
-    2   2.00000     1.237560     1.237560      2.475120     0.000000
- ---------------------------------------------------------------------
-  Sum:              1.779880     1.779880      3.559760     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ga   2.00000     0.542320     0.542320      1.084640     0.000000
+    2 As   2.00000     1.237560     1.237560      2.475120     0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 1.779880     1.779880      3.559760     0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -886,9 +892,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.40231960276350     1.40231960276350     1.40231960276350
+    2      1.40231960794160     1.40231960794160     1.40231960794160
  length scales= 10.600000000000 10.600000000000 10.600000000000 bohr
-              =  5.609278411054  5.609278411054  5.609278411054 angstroms
+              =  5.609278431766  5.609278431766  5.609278431766 angstroms
  prteigrs : about to open file t07o_DS3_EIG
  Eigenvalues (hartree) for nkpt=  16  k points, SPIN UP:
  kpt#   1, nband= 20, wtk=  0.06250, kpt= -0.2500  0.5000  0.0000 (reduced coord)
@@ -938,7 +944,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -1003,7 +1009,7 @@ tolerances: {tolwfr: 1.00E-08, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.05951000E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1059509996E+02 Ha. Also 2DEtotal=   -0.288307332104E+03 eV
+ 2DEtotal=   -0.1059509996E+02 Ha. Also 2DEtotal=   -0.288307357383E+03 eV
     (  non-var. 2DEtotal :   -1.0595099962E+01 Ha)
 ================================================================================
 
@@ -1063,7 +1069,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 2    ipert=   3
@@ -1128,7 +1134,7 @@ tolerances: {tolwfr: 1.00E-08, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.05949832E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1059498320E+02 Ha. Also 2DEtotal=   -0.288304154791E+03 eV
+ 2DEtotal=   -0.1059498320E+02 Ha. Also 2DEtotal=   -0.288304180070E+03 eV
     (  non-var. 2DEtotal :   -1.0594983198E+01 Ha)
 ================================================================================
 
@@ -1188,7 +1194,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 3    ipert=   3
@@ -1253,7 +1259,7 @@ tolerances: {tolwfr: 1.00E-08, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.05950901E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1059509011E+02 Ha. Also 2DEtotal=   -0.288307063918E+03 eV
+ 2DEtotal=   -0.1059509011E+02 Ha. Also 2DEtotal=   -0.288307089198E+03 eV
     (  non-var. 2DEtotal :   -1.0595090106E+01 Ha)
 ================================================================================
 
@@ -1282,7 +1288,7 @@ tolerances: {tolwfr: 1.00E-08, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0600000000E+01  1.0600000000E+01  1.0600000000E+01 Bohr
               amu      6.97230000E+01  7.49215900E+01
@@ -1292,8 +1298,8 @@ tolerances: {tolwfr: 1.00E-08, }
            etotal4    -1.0595099962E+01
            etotal5    -1.0594983198E+01
            etotal6    -1.0595090106E+01
-            fcart1    -1.3318128101E-23 -1.3318128101E-23  3.9954384304E-23
-                       1.3318128101E-23  1.3318128101E-23 -3.9954384304E-23
+            fcart1     5.2023937896E-26  5.2023937896E-26 -1.5607181369E-25
+                      -5.2023937896E-26 -5.2023937896E-26  1.5607181369E-25
 -          fftalg         512
            getden1          0
            getden2          1
@@ -1551,7 +1557,7 @@ P          mk1mem6         16
                          0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
                          0.06250    0.06250    0.06250    0.06250
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4023196028E+00  1.4023196028E+00  1.4023196028E+00
+                       1.4023196079E+00  1.4023196079E+00  1.4023196079E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6500000000E+00  2.6500000000E+00  2.6500000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1592,7 +1598,7 @@ P          mk1mem6         16
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1620,12 +1626,12 @@ P          mk1mem6         16
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1643,15 +1649,15 @@ P          mk1mem6         16
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.6  wall=          2.7
+- Proc.   0 individual time (sec): cpu=          2.7  wall=          2.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  21 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.6  wall=          2.7
++Overall time at end (sec) : cpu=          2.7  wall=          2.8

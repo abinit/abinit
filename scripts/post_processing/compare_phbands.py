@@ -2,17 +2,18 @@
 """
 Script to plot the phonon band structure and compare with the LWF phonon band structure.
  COPYRIGHT
- Copyright (C) 1999-2025 ABINIT group (HeXu)
+ Copyright (C) 1999-2026 ABINIT group (HeXu)
  This file is distributed under the terms of the
  GNU General Public Licence, see ~abinit/COPYING
  or http://www.gnu.org/copyleft/gpl.txt .
  For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 """
 
-import os
 import argparse
-import numpy as np
+import os
+
 import matplotlib.pyplot as plt
+import numpy as np
 
 Ha_cmm1 = 219474.6313705
 
@@ -30,12 +31,12 @@ def plot_compare(prefix, ax):
     fname1 = prefix+"_PHFRQ"
     fname2 = prefix+"_lwf_PHFRQ"
     if os.path.exists(fname1):
-        plot_file(fname1, ax=ax, color='blue', alpha=0.9)
+        plot_file(fname1, ax=ax, color="blue", alpha=0.9)
     else:
-        raise IOError("Cannot find the file "+fname1+"Please check.")
+        raise OSError("Cannot find the file "+fname1+"Please check.")
     if os.path.exists(fname2):
-        plot_file(fname2, ax=ax, marker='o', color='green', alpha=0.7)
-    ax.axhline(linestyle='--', color='gray')
+        plot_file(fname2, ax=ax, marker="o", color="green", alpha=0.7)
+    ax.axhline(linestyle="--", color="gray")
     ax.set_ylabel("Frequency ($cm^{-1}$)")
     return ax
 

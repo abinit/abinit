@@ -3,7 +3,7 @@
 !!  m_symkpt
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2025 ABINIT group (XG,LSI,HM)
+!!  Copyright (C) 1999-2026 ABINIT group (XG,LSI,HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -484,7 +484,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
  end do
 
  ! Start krank
- krank = krank_new(nkbz, kbz)
+ call krank%init(nkbz, kbz)
 
  ! Here begins the serious business
  !call cwtime(cpu, wall, gflops, "start")
@@ -730,7 +730,7 @@ subroutine mapkptsets(chksymbreak,gmet,k_in,nk_in,&
  end do
 
  ! Start krank
- krank = krank_new(nkbz, kbz)
+ call krank%init(nkbz, kbz)
 
  ! Here begins the serious business
  !call cwtime(cpu, wall, gflops, "start")

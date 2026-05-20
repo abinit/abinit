@@ -17,7 +17,7 @@
 !!  compile the module in reasonable time when -O2 is used.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2025 ABINIT group (MG)
+!! Copyright (C) 2010-2026 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -97,11 +97,11 @@ module m_defs_ptgroups
    character(len=IRREPNAME_LEN) :: name="???"
    ! The name of the irreducible representation.
 
-   complex(dpc),allocatable :: mat(:,:,:)
+   complex(dp),allocatable :: mat(:,:,:)
    ! mat(dim,dim,nsym)
    ! The irreducible representations of the group.
 
-   complex(dpc),allocatable :: trace(:)
+   complex(dp),allocatable :: trace(:)
    ! trace(nsym)
    ! The trace of each matrix.
 

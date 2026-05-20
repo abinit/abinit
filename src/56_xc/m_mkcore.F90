@@ -6,7 +6,7 @@
 !!  Routines related to non-linear core correction.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, TRangel, MT)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, TRangel, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -123,13 +123,12 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
  character(len=500) :: message
 !arrays
  integer :: igrid(3),irange(3),ngfft(3)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  integer,allocatable :: ii(:,:)
  real(dp) :: yy,aa,bb,cc
  real(dp) :: corfra(3,3),lencp(3),rmet(3,3),scale(3),tau(3),tsec(2),tt(3)
  real(dp),allocatable :: rrdiff(:,:),work(:,:,:)
-
 !************************************************************************
 
  call timab(12,1,tsec)
@@ -637,16 +636,15 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !arrays
  integer :: igrid(3),irange(3),ishiftmax(3),ngfft(3)
  integer,allocatable :: ii(:,:),iindex(:),indx1(:),indx2(:)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  logical :: per(3)
  real(dp) :: corfra(3,3),corgr(3),lencp(3),rmet(3,3)
  real(dp) :: scale(3),tau(3),tsec(2),tt(3)
  real(dp),allocatable :: dtcore(:),d2tcore(:),rnorm(:)
  real(dp),allocatable :: rrdiff(:,:),tcore(:)
  real(dp),allocatable,target :: tcoretau(:,:) ! only needed in PAW case.
- real(dp), ABI_CONTIGUOUS pointer :: corespl(:,:),vxc_eff(:)
-
+ real(dp), contiguous, pointer :: corespl(:,:),vxc_eff(:)
 !************************************************************************
 
  call timab(12,1,tsec)
@@ -1133,8 +1131,7 @@ end subroutine mkcore_alt
 !!  xred(3,natom)=reduced coordinates for atoms in unit cell
 !!
 !! OUTPUT
-!!  xccc3d1(cplex*n1*n2*n3)=3D core electron density for XC core correction,
-!!    bohr^-3
+!!  xccc3d1(cplex*n1*n2*n3)=3D core electron density for XC core correction, bohr^-3
 !!
 !! NOTES
 !! Note that this routine is tightly connected to the mkcore.f routine
@@ -1170,7 +1167,6 @@ subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
  integer,allocatable :: ii(:,:)
  real(dp) :: drmetds(3,3),lencp(3),rmet(3,3),scale(3),tau(3)
  real(dp),allocatable :: rrdiff(:,:)
-
 ! *************************************************************************
 
 ! if( ipert<1 .or. ipert> natom+7) then

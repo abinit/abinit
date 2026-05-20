@@ -1,8 +1,8 @@
 
-.Version 9.6.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
+.Version 9.6.1 of ABINIT
+.(MPI version, prepared for a x86_64_linux_intel19.1 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,13 +16,13 @@
 
 .Starting date : Thu 28 Oct 2021.
 - ( at 12h58 )
-  
+
 - input  file    -> den.abi
 - output file    -> den.abo
 - root for input  files -> deni
 - root for output files -> deno
- 
- 
+
+
  Magnetic group, Shubnikov type III
  Fedorov space group P2 (#  3); Bravais mP (primitive monocl.)
  Magnetic point group 2' (#  2)
@@ -43,15 +43,15 @@ P This job should need less than                      50.798 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :    181.789 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   iomode0 =  0 , fftalg0 =512 , wfoptalg0 = 10
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
@@ -623,15 +623,15 @@ P           mkmem           9
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
             znucl       26.00000
- 
+
 ================================================================================
- 
+
  chkinp: Checking input parameters for consistency.
- 
+
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 32, omp_nthreads: 1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -645,24 +645,24 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  5.2120622  0.0000000  0.0000000  G(1)=  0.1918626  0.0000000  0.0000000
  R(2)=  0.0000000  5.2120622  0.0000000  G(2)=  0.0000000  0.1918626  0.0000000
  R(3)=  0.0000000  0.0000000  5.2120622  G(3)=  0.0000000  0.0000000  0.1918626
  Unit cell volume ucvol=  1.4158876E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
- 
+
  Coarse grid specifications (used for wave-functions):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  24  24  24
          ecut(hartree)=     25.000   => boxcut(ratio)=   2.04582
- 
+
  Fine grid specifications (used for densities):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  24  24  24
          ecut(hartree)=     25.000   => boxcut(ratio)=   2.04582
- 
+
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/bs544/.abinit/pseudos/26fe.pbe.paw
 - pspatm: opening atomic psp file    /home/bs544/.abinit/pseudos/26fe.pbe.paw
@@ -685,12 +685,12 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Radial grid used for pseudo valence density is grid 3
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
- 
+
    1.93120694E+03                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
- 
+
 _setup2: Arith. and geom. avg. npw (full set) are     845.533     845.512
- 
+
 ================================================================================
 
 --- !BeginCycle
@@ -698,7 +698,7 @@ iteration_state: {dtset: 1, }
 solver: {iscf: 17, nstep: 75, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-09, }
 ...
- 
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -244.97701285009    -2.450E+02 1.834E+01 9.059E+00
  ETOT  2  -249.18300510327    -4.206E+00 2.365E-01 1.902E+01
@@ -722,14 +722,14 @@ tolerances: {tolvrs: 1.00E-09, }
  ETOT 20  -248.86548070707    -2.849E-07 5.287E-04 1.993E-08
  ETOT 21  -248.86547985505     8.520E-07 4.108E-04 5.319E-08
  ETOT 22  -248.86548031388    -4.588E-07 5.143E-04 3.969E-10
- 
+
  At SCF step   22       nres2   =  3.97E-10 < tolvrs=  1.00E-09 =>converged.
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -7.05552303E-04  sigma(3 2)= -8.51694338E-10
   sigma(2 2)= -7.05553048E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -7.05552572E-04  sigma(2 1)=  0.00000000E+00
- 
+
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
@@ -768,15 +768,15 @@ force_length_stats: {min:   1.48311218E-08, max:   1.48311218E-08, mean:   1.483
  ---------------------------------------------------------------------
  Total magnetization (spheres)      -0.000000    0.036380    4.168687
  Total magnetization (exact)         0.000000    0.035874    4.110632
- 
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
  Compensation charge over spherical meshes =     19.568586356508007
  Compensation charge over fft grid         =     19.568663718235850
- 
+
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1 - Component up-up
    === REAL PART:
@@ -1010,8 +1010,8 @@ force_length_stats: {min:   1.48311218E-08, max:   1.48311218E-08, mean:   1.483
   -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00002 ...
    ...  only 12  components have been written...
- 
- 
+
+
  Augmentation waves occupancies Rhoij:
  Atom #  1 - Component dens (n)
    1.99714  -0.03537   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000 ...
@@ -1125,12 +1125,12 @@ force_length_stats: {min:   1.48311218E-08, max:   1.48311218E-08, mean:   1.483
   -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.64593   0.00000 ...
    0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.34173 ...
    ...  only 12  components have been written...
- 
- 
+
+
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   17.174E-08; max=  51.427E-05
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
@@ -1138,16 +1138,16 @@ force_length_stats: {min:   1.48311218E-08, max:   1.48311218E-08, mean:   1.483
  rms dE/dt=  4.4632E-08; max dE/dt=  7.6444E-08; dE/dt below (all hartree)
     1       0.000000076444      0.000000000000      0.000000000000
     2      -0.000000078157      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.37905227148510     1.37905227148510     1.37905227148510
- 
+
  cartesian forces (hartree/bohr) at end:
     1     -0.00000001483112     0.00000000000000     0.00000000000000
     2      0.00000001483112     0.00000000000000     0.00000000000000
  frms,max,avg= 8.5627522E-09 1.4831122E-08   1.643E-10  0.000E+00  0.000E+00 h/b
- 
+
  cartesian forces (eV/Angstrom) at end:
     1     -0.00000076264688     0.00000000000000     0.00000000000000
     2      0.00000076264688     0.00000000000000     0.00000000000000
@@ -1173,7 +1173,7 @@ force_length_stats: {min:   1.48311218E-08, max:   1.48311218E-08, mean:   1.483
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
- 
+
 
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
@@ -1206,20 +1206,20 @@ total_energy_dc     : -2.48865480313879E+02
 total_energy_dc_eV  : -6.77197411432423E+03
 ...
 
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -7.05552303E-04  sigma(3 2)= -8.51694338E-10
   sigma(2 2)= -7.05553048E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -7.05552572E-04  sigma(2 1)=  0.00000000E+00
- 
+
 -Cartesian components of stress tensor (GPa)         [Pressure=  2.0758E+01 GPa]
 - sigma(1 1)= -2.07580619E+01  sigma(3 2)= -2.50577083E-05
 - sigma(2 2)= -2.07580838E+01  sigma(3 1)=  0.00000000E+00
 - sigma(3 3)= -2.07580699E+01  sigma(2 1)=  0.00000000E+00
- 
+
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      9.6163509817E-01  9.6163509817E-01  9.6163509817E-01 Bohr
               amu      5.58470000E+01
@@ -1794,7 +1794,7 @@ P           mkmem           9
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
             znucl       26.00000
- 
+
 ================================================================================
 
 
@@ -1834,7 +1834,7 @@ P           mkmem           9
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1846,12 +1846,12 @@ P           mkmem           9
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1869,7 +1869,7 @@ P           mkmem           9
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1884,15 +1884,15 @@ P           mkmem           9
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - Proc.   0 individual time (sec): cpu=         75.3  wall=         78.8
- 
+
 ================================================================================
- 
+
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
 +Overall time at end (sec) : cpu=       2509.5  wall=       2517.4

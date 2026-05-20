@@ -7,7 +7,7 @@
 !! Container type is defined, and destruction, print subroutines as well as the central supercell_init
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2025 ABINIT group (MJV, DJA)
+!! Copyright (C) 2010-2026 ABINIT group (MJV, DJA)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -386,9 +386,9 @@ subroutine supercell_freeze_displ(scell, displ, freeze_displ)
 
 !Local variables-------------------------------
  integer :: iatom, ipratom
- complex(dpc) :: expqdotr, j=cmplx(zero,one)
- complex(dpc) :: phase
- complex(dpc) :: zdispl(3,scell%natom_primcell)
+ complex(dp) :: expqdotr, j=cmplx(zero,one)
+ complex(dp) :: phase
+ complex(dp) :: zdispl(3,scell%natom_primcell)
 ! *************************************************************************
 
  zdispl = (cmplx(reshape(displ(1,:), (/3,scell%natom_primcell/)),&

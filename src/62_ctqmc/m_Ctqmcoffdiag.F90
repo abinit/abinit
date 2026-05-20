@@ -12,7 +12,7 @@
 !!  Please use CtqmcoffdiagInterface
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder, B. Amadon, J. Denier)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder, B. Amadon, J. Denier)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -89,7 +89,7 @@ MODULE m_Ctqmcoffdiag
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -322,7 +322,7 @@ CONTAINS
 !!  Allocate all the non optional variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -480,7 +480,7 @@ END SUBROUTINE Ctqmcoffdiag_init
 !!  set all parameters and operators
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -545,7 +545,7 @@ END SUBROUTINE Ctqmcoffdiag_setParameters
 !!  set the number of sweeps
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -600,7 +600,7 @@ END SUBROUTINE Ctqmcoffdiag_setSweeps
 !!  initialize random number generator
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -649,7 +649,7 @@ END SUBROUTINE Ctqmcoffdiag_setSeed
 !!  Allocate all non option variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -716,7 +716,7 @@ END SUBROUTINE Ctqmcoffdiag_allocateAll
 !!  allocate all option variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -892,7 +892,7 @@ END SUBROUTINE Ctqmcoffdiag_allocateOpt
 !!  Set Gow from input array
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -910,20 +910,21 @@ END SUBROUTINE Ctqmcoffdiag_allocateOpt
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_setG0wTab(op,Gomega,opt_fk)
+SUBROUTINE Ctqmcoffdiag_setG0wTab(op,Gomega,opt_fk,fname)
 
 !Arguments ------------------------------------
   TYPE(Ctqmcoffdiag), INTENT(INOUT)                      :: op
   COMPLEX(KIND=8), DIMENSION(:,:,:), INTENT(IN ) :: Gomega
   INTEGER                         , INTENT(IN ) :: opt_fk
 !Local variable -------------------------------
+  CHARACTER(LEN=fnlen), INTENT(INOUT)             :: fname
   DOUBLE PRECISION, DIMENSION(:,:,:), ALLOCATABLE :: F
 
   IF ( .NOT. op%para ) &
     CALL ERROR("Ctqmcoffdiag_setG0wTab : Ctqmcoffdiag_setParameters never called    ")
 
   MALLOC(F,(1:op%samples+1,1:op%flavors,1:op%flavors))
-  CALL Ctqmcoffdiag_computeF(op,Gomega, F, opt_fk)  ! mu is changed
+  CALL Ctqmcoffdiag_computeF(op,Gomega, F, opt_fk,fname)  ! mu is changed
  !write(6,*) "eee111"
   CALL BathOperatoroffdiag_setF(op%Bath, F)
  ! CALL BathOperatoroffdiag_printF(op%Bath,333)
@@ -975,7 +976,7 @@ END SUBROUTINE Ctqmcoffdiag_setG0wTab
 !!  set the interaction matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1015,7 +1016,7 @@ END SUBROUTINE Ctqmcoffdiag_setU
 !!  clear a ctqmc run
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1095,7 +1096,7 @@ END SUBROUTINE Ctqmcoffdiag_clear
 !!  reset a ctqmc simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1154,7 +1155,7 @@ END SUBROUTINE Ctqmcoffdiag_reset
 !!  impose energy levels
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1195,7 +1196,7 @@ END SUBROUTINE Ctqmcoffdiag_setMu
 !!  use coefficient A such that F=-A/(iwn) given by DMFT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1234,7 +1235,7 @@ END SUBROUTINE Ctqmcoffdiag_sethybri_limit
 !!  Compute the hybridization function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1253,7 +1254,7 @@ END SUBROUTINE Ctqmcoffdiag_sethybri_limit
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
+SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk,fname)
 
  use m_hide_lapack,  only : xginv
 !Arguments ------------------------------------
@@ -1262,6 +1263,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
   !INTEGER                         , INTENT(IN   ) :: Wmax
   DOUBLE PRECISION, DIMENSION(:,:,:), INTENT(INOUT) :: F
   INTEGER                         , INTENT(IN   ) :: opt_fk
+  CHARACTER(LEN=fnlen), INTENT(INOUT)             :: fname
 !Local variables ------------------------------
   INTEGER                                         :: flavors
   INTEGER                                         :: samples
@@ -1665,6 +1667,17 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
     END DO
   ENDIF
   close(436)
+
+  IF (op%rank .eq. 0) then
+    open(unit=735,file=trim(fname)//'_Hybridization_iatom_01.dat',status='unknown',form='formatted')
+    write(735,'(6a)') " Real and Imaginary part of the Hybridization function Delta(tau) in the CTQMC basis"
+    do itau=1,op%samples+1
+      write(735,'(2x,393(e25.17e3,2x))') DBLE(itau-1)*(op%beta/op%samples),&
+      & ((-1*(F(op%samples+2-itau,iflavor,iflavor2)),0.d0,iflavor=1,flavors),iflavor2=1,flavors)
+   enddo
+   close(735)
+  ENDIF
+
   !   call xmpi_barrier(op%MY_COMM)
   !write(6,*) "QQQQ3"
   FREE(Gomega_tmp)
@@ -1735,7 +1748,7 @@ END SUBROUTINE Ctqmcoffdiag_computeF
 !!  set all options and run a simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1909,7 +1922,7 @@ END SUBROUTINE Ctqmcoffdiag_run
 !!  Definition the main loop of the CT-QMC
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2174,7 +2187,7 @@ END SUBROUTINE Ctqmcoffdiag_loop
 !!  Try to add or remove a segment and an anti-segment
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2612,7 +2625,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!  try a global move (swap to flavors)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2779,7 +2792,7 @@ END SUBROUTINE Ctqmcoffdiag_trySwap
 !!  with the correct weight.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2844,7 +2857,7 @@ END SUBROUTINE Ctqmcoffdiag_measN
 !!  measure all correlations in times for a flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2930,7 +2943,7 @@ END SUBROUTINE Ctqmcoffdiag_measCorrelation
 !!  measure perturbation order
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2982,7 +2995,7 @@ END SUBROUTINE Ctqmcoffdiag_measPerturbation
 !!  reduce everything to get the result of the simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder,F. Gendron)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder,F. Gendron)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2998,7 +3011,7 @@ END SUBROUTINE Ctqmcoffdiag_measPerturbation
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_getResult(op,Iatom,fname)
+SUBROUTINE Ctqmcoffdiag_getResult(op,Iatom,fname,jmjbasis)
 
 
 #ifdef HAVE_MPI1
@@ -3008,6 +3021,7 @@ include 'mpif.h'
   TYPE(Ctqmcoffdiag)  , INTENT(INOUT)                    :: op
   INTEGER, INTENT(IN ) :: Iatom
   character(len=fnlen), INTENT(INOUT) :: fname
+  INTEGER, OPTIONAL, INTENT(IN )   :: jmjbasis
 !Local variables ------------------------------
   INTEGER                                       :: iflavor
 !  INTEGER                                       :: iflavor1
@@ -3048,6 +3062,7 @@ include 'mpif.h'
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: buffer
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: buffer2,buffer2s
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: fullempty
+  DOUBLE PRECISION                              :: xsum
   TYPE(FFTHyb) :: FFTmrka
 
 #if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
@@ -3119,10 +3134,17 @@ include 'mpif.h'
     IF ( op%opt_order .GT. 0 ) &
       op%measPerturbation(:   ,iflavor) = op%measPerturbation(:,iflavor) &
                                     / SUM(op%measPerturbation(:,iflavor))
-    IF ( op%opt_order .GT. 0 ) &
-      op%meas_fullemptylines(:   ,iflavor) = op%meas_fullemptylines(:,iflavor) &
-                                    / SUM(op%meas_fullemptylines(:,iflavor))
-    !write(6,*) "sum fullempty",iflavor,op%meas_fullemptylines(:,iflavor)
+
+    IF ( op%opt_order .GT. 0 ) then
+      xsum = SUM(op%meas_fullemptylines(:,iflavor))
+      IF (xsum /= 0.0 ) then
+        op%meas_fullemptylines(:   ,iflavor) = op%meas_fullemptylines(:,iflavor) &
+                                      / SUM(op%meas_fullemptylines(:,iflavor))
+      else
+       op%meas_fullemptylines(:   ,iflavor) = zero
+      ENDIF
+      !write(6,*) "sum fullempty",iflavor,op%meas_fullemptylines(:,iflavor)
+    ENDIF
 
     IF ( op%opt_analysis .EQ. 1 ) THEN
       op%measCorrelation (:,1,iflavor) = op%measCorrelation  (:,1,iflavor) &
@@ -3667,14 +3689,29 @@ include 'mpif.h'
 
       else
         ! SOC
-        open (unit=735,file=trim(fname)//'_LocalMagnSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
-        write(735,*) '#Tau Total Orbital Spin'
-        do n1=1,op%samples
-          op%chi(:,n1) = op%chi(:,n1)/float(nbprocs)/float(op%samples)
-          write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*op%beta/op%samples,(op%chi(n2,n1),n2=1,3)
-        end do
-        !add tau=beta
-        write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (op%samples)*op%beta/op%samples,(op%chi(n2,1),n2=1,3)
+        ! In the jmj local basis
+        if (jmjbasis .eq. 1) then
+          open (unit=735,file=trim(fname)//'_LocalMagnSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+          write(735,*) '#Tau <gjJz(tau).gjJz(0)>'
+          do n1=1,op%samples
+            op%chi(:,n1) = op%chi(:,n1)/float(nbprocs)/float(op%samples)
+            write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*op%beta/op%samples,(op%chi(1,n1))
+          end do
+          !add tau=beta
+          write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (op%samples)*op%beta/op%samples,(op%chi(1,1))
+
+        else
+        ! SOC
+        ! In the Ylm or CTQMC basis
+          open (unit=735,file=trim(fname)//'_LocalMagnSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+          write(735,*) '#Tau Total Orbital Spin'
+          do n1=1,op%samples
+            op%chi(:,n1) = op%chi(:,n1)/float(nbprocs)/float(op%samples)
+            write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*op%beta/op%samples,(op%chi(n2,n1),n2=1,3)
+          end do
+          !add tau=beta
+          write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (op%samples)*op%beta/op%samples,(op%chi(n2,1),n2=1,3)
+        endif
       endif
     close(unit=735)
     endif
@@ -3709,7 +3746,7 @@ END SUBROUTINE Ctqmcoffdiag_getResult
 !!  optionnaly symmetrize the green functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3776,7 +3813,7 @@ END SUBROUTINE Ctqmcoffdiag_symmetrizeGreen
 !!  Get the full green functions in time and/or frequency
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4048,7 +4085,7 @@ END SUBROUTINE Ctqmcoffdiag_getGreen
 !!  get double occupation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4102,7 +4139,7 @@ END SUBROUTINE Ctqmcoffdiag_getD
 !!  get interaction energy and noise on it
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4140,7 +4177,7 @@ END SUBROUTINE Ctqmcoffdiag_getE
 !!  print different functions computed during the simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4192,7 +4229,7 @@ END SUBROUTINE Ctqmcoffdiag_printAll
 !!  print ctqmc statistics
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4347,7 +4384,7 @@ END SUBROUTINE Ctqmcoffdiag_printQMC
 !!  print green functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4466,7 +4503,7 @@ END SUBROUTINE Ctqmcoffdiag_printGreen
 !!  print individual double occupancy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4522,7 +4559,7 @@ END SUBROUTINE Ctqmcoffdiag_printD
 !!  print energy and noise
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4577,7 +4614,7 @@ END SUBROUTINE Ctqmcoffdiag_printE
 !!  print perturbation order
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4642,7 +4679,7 @@ END SUBROUTINE Ctqmcoffdiag_printPerturbation
 !!  print correlation fonctions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4716,7 +4753,7 @@ END SUBROUTINE Ctqmcoffdiag_printCorrelation
 !!  print fourier transform of time evolution of number of electrons
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4788,7 +4825,7 @@ END SUBROUTINE Ctqmcoffdiag_printSpectra
 !!  destroy and deallocate all variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4886,7 +4923,7 @@ END SUBROUTINE Ctqmcoffdiag_destroy
 !!  set the Magnetic moment matrix for susceptibility
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (F. Gendron)
+!!  Copyright (C) 2013-2026 ABINIT group (F. Gendron)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4894,16 +4931,6 @@ END SUBROUTINE Ctqmcoffdiag_destroy
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 

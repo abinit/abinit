@@ -10,16 +10,11 @@
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (LB)
+!! Copyright (C) 1998-2026 ABINIT group (LB)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! for the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! PARENTS
-!!      vtowfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -219,12 +214,6 @@ end subroutine lobpcgwf2_cprj
 !! SIDE EFFECTS
 !!  X  <type(xgBlock_t)>= memory block containing |C>
 !!  AX <type(xgBlock_t)>= memory block containing H|C>
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xgBlock_getSize,xgBlock_reverseMap,xgBlock_scale,xgBlock_copy
-!!      multithreaded_getghc
 !!
 !! SOURCE
 !

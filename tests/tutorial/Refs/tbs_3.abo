@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h06 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h06 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tbs_1-tbs_2-tbs_3-tbs_4/tbs_3.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorial_tbs_1-tbs_2-tbs_3-tbs_4/tbs_3.abi
 - output file    -> tbs_3.abo
 - root for input  files -> tbs_3i
 - root for output files -> tbs_3o
@@ -68,7 +68,7 @@ _ WF disk file :      3.659 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
   bs_coulomb_term          10
-     bs_freq_mesh      0.00000000E+00  2.20495952E-01  7.34986508E-04 Hartree
+     bs_freq_mesh      0.00000000E+00  2.20495933E-01  7.34986444E-04 Hartree
    bs_haydock_tol      5.00000000E-02  0.00000000E+00
         bs_loband1          3
         bs_loband2          2
@@ -136,7 +136,7 @@ _ WF disk file :      3.659 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
                        outvar_i_n : Printing only first  50 k-points.
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      2.88980399E+01
-       mbpt_sciss      2.93994603E-02 Hartree
+       mbpt_sciss      2.93994577E-02 Hartree
 P           mkmem          64
             natom           2
             nband1          6
@@ -218,12 +218,12 @@ P           mkmem          64
                          0.01563    0.01563
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
-             zcut      5.51239881E-03 Hartree
+             zcut      5.51239833E-03 Hartree
             znucl       14.00000
 
 ================================================================================
@@ -260,8 +260,8 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Si.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Si.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Si.psp8
 - Si    ONCVPSP-3.3.0  r_core=   1.60303   1.72197   1.91712
 - 14.00000   4.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -631,7 +631,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
   bs_coulomb_term          10
-     bs_freq_mesh      0.00000000E+00  2.20495952E-01  7.34986508E-04 Hartree
+     bs_freq_mesh      0.00000000E+00  2.20495933E-01  7.34986444E-04 Hartree
    bs_haydock_tol      5.00000000E-02  0.00000000E+00
         bs_loband1          3
         bs_loband2          2
@@ -705,7 +705,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
                        outvar_i_n : Printing only first  50 k-points.
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      2.88980399E+01
-       mbpt_sciss      2.93994603E-02 Hartree
+       mbpt_sciss      2.93994577E-02 Hartree
 P           mkmem          64
             natom           2
             nband1          6
@@ -791,12 +791,12 @@ P           mkmem          64
                          0.01563    0.01563
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
-             zcut      5.51239881E-03 Hartree
+             zcut      5.51239833E-03 Hartree
             znucl       14.00000
 
 ================================================================================
@@ -884,10 +884,10 @@ P           mkmem          64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         17.0  wall=         17.7
+- Proc.   0 individual time (sec): cpu=         17.8  wall=         17.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and  25 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.0  wall=         17.7
++Overall time at end (sec) : cpu=         17.8  wall=         17.9

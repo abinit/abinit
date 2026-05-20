@@ -1,7 +1,7 @@
 /* dev_spec_cuda.cpp*/
 
 /*
- * Copyright (C) 2008-2025 ABINIT Group (MMancini,FDahm)
+ * Copyright (C) 2008-2026 ABINIT Group (MMancini,FDahm)
  * this file is distributed under the terms of the
  * gnu general public license, see ~abinit/COPYING
  * or http://www.gnu.org/copyleft/gpl.txt.
@@ -27,12 +27,17 @@ static int s__nprocs_per_gpu = 1;
 // display CUDA device info
 static void prt_dev_info()
 {
-  int deviceCount;
+  int deviceCount, clockRate;
   cudaGetDeviceCount(&deviceCount);
   for (int dev = 0; dev < deviceCount; ++dev)
     {
       cudaDeviceProp deviceProp;
       cudaGetDeviceProperties(&deviceProp, dev);
+#if CUDA_VERSION >= 13000
+      cudaDeviceGetAttribute (&clockRate, cudaDevAttrClockRate, dev);
+#else
+      clockRate = deviceProp.clockRate;
+#endif
       int NProcs=deviceProp.multiProcessorCount;
       int NCores=version_2_cores(deviceProp.major, deviceProp.minor);
       printf("\n___________________________________________________________________\n");
@@ -43,12 +48,12 @@ static void prt_dev_info()
       if(s__nprocs_per_gpu > 1) {
         printf("  Amount of global memory per MPI task:          %3.1f Mbytes\n", deviceProp.totalGlobalMem/1048576./s__nprocs_per_gpu);
       }
-      printf("  Clock rate:                                    %3.1f GHz\n", deviceProp.clockRate/1000000.);
+      printf("  Clock rate:                                    %3.1f GHz\n", clockRate/1000000.);
       printf("  Number of processors/cores:                    %d/%d\n", NProcs,NCores);
       if (NCores<0) {
         printf("  Max FP64 GFLOPS:                                    undefined (add new def. in version_2_cores function)\n");
       } else {
-        printf("  Max FP64 GFLOPS:                                    %d GFP\n", NCores*deviceProp.multiProcessorCount * deviceProp.clockRate/1000000);
+        printf("  Max FP64 GFLOPS:                                    %d GFP\n", NCores*deviceProp.multiProcessorCount * clockRate/1000000);
       }
       printf("  Total amount of constant memory:               %d bytes\n",(int) deviceProp.totalConstMem);
       printf("  Total amount of shared memory per block:       %d bytes\n",(int) deviceProp.sharedMemPerBlock);
@@ -105,6 +110,22 @@ void get_gpu_uuid_(int* device, char* uuid)
    cudaGetDeviceProperties(&deviceProp, *device);
    strncpy(uuid, deviceProp.uuid.bytes, 16);
    return;
+}
+
+// Gives the major version number of CUDA library ---------
+extern "C"
+int gpu_get_lib_version_major_cpp()
+{
+  int version = CUDA_VERSION;
+  return version / 1000;
+}
+
+// Gives the minor version number of CUDA library ---------
+extern "C"
+int gpu_get_lib_version_minor_cpp()
+{
+  int version = CUDA_VERSION;
+  return (version % 1000) / 10;
 }
 
 // Set new value for #MPI tasks being assigned per GPU ---------
@@ -219,7 +240,12 @@ extern "C"
 void gpu_data_prefetch_async_cpp(const void* devPtr, size_t count, int deviceId)
 {
 
+#if CUDA_VERSION >= 13000
+  cudaMemLocation location = {.type = cudaMemLocationTypeDevice, .id = deviceId};
+  CHECK_CUDA_ERROR( cudaMemPrefetchAsync(devPtr, count, location, 0) );
+#else
   CHECK_CUDA_ERROR( cudaMemPrefetchAsync(devPtr, count, deviceId) );
+#endif
 
   return;
 }
@@ -229,7 +255,12 @@ extern "C"
 void gpu_memory_advise_cpp(const void* devPtr, size_t count, cudaMemoryAdvise advice, int deviceId)
 {
 
+#if CUDA_VERSION >= 13000
+  cudaMemLocation location = {.type = cudaMemLocationTypeDevice, .id = deviceId};
+  CHECK_CUDA_ERROR( cudaMemAdvise(devPtr, count, advice, location) );
+#else
   CHECK_CUDA_ERROR( cudaMemAdvise(devPtr, count, advice, deviceId) );
+#endif
 
   return;
 }
@@ -272,10 +303,16 @@ void  get_dev_info_(int* device,
   vers[0] = deviceProp.major;
   vers[1] = deviceProp.minor;
   *globalmem = deviceProp.totalGlobalMem/1048576.;
-  *clockrate = deviceProp.clockRate/1000000.;
+  int clockRate;
+#if CUDA_VERSION >= 13000
+  cudaDeviceGetAttribute (&clockRate, cudaDevAttrClockRate, *device);
+#else
+  clockRate = deviceProp.clockRate;
+#endif
+  *clockrate = clockRate/1000000.;
   *nprocs = deviceProp.multiProcessorCount;
   *ncores = version_2_cores(deviceProp.major,deviceProp.minor);
-  *gflops = int(deviceProp.multiProcessorCount*version_2_cores(deviceProp.major,deviceProp.minor)*(deviceProp.clockRate/1000000.));
+  *gflops = int(deviceProp.multiProcessorCount*version_2_cores(deviceProp.major,deviceProp.minor)*(clockRate/1000000.));
   *constmem = deviceProp.totalConstMem;
   *sharemem =  deviceProp.sharedMemPerBlock;
   *regist = deviceProp.regsPerBlock;
@@ -390,7 +427,7 @@ extern "C" void check_gpu_mem_(const char* str)
 /* OUTPUT gpu_ptr= C_PTR on gpu memory location that has been allocated       */
 /*============================================================================*/
 
-extern "C" void alloc_on_gpu_(void **gpu_ptr, const size_t* size)
+extern "C" void alloc_on_gpu_cpp_(void **gpu_ptr, const size_t* size)
 {
 
   //check_gpu_mem_("alloc_on_gpu_");
@@ -410,7 +447,7 @@ extern "C" void alloc_on_gpu_(void **gpu_ptr, const size_t* size)
 /*            the correct one is in xx_gpu_toolbox/dev_spec.cu                */
 /*============================================================================*/
 
-extern "C" void dealloc_on_gpu_(void **gpu_ptr)
+extern "C" void dealloc_on_gpu_cpp_(void **gpu_ptr)
 {
   if(*gpu_ptr==NULL)
     return;
@@ -541,7 +578,7 @@ extern "C" void gpu_allocated_impl_(void **gpu_ptr, bool* is_allocated)
 /* Utility routine to print memory location of a cuda managed pointer.        */
 /*                                                                            */
 /* We check that the pointer has actually been allocated with                 */
-/* cudaMallocManaged and then prints device and host addresses.               */
+/* cudaMallocManaged and then print device and host addresses.                */
 /*                                                                            */
 /* INPUTS                                                                     */
 /*  gpu_ptr = C_PTR on gpu memory location                                    */

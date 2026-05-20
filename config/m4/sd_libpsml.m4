@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2026 ABINIT group (Yann Pouillon)
 
 #
 # PSeudopotential Markup Language I/O library (LibPSML)
@@ -67,7 +67,7 @@ AC_DEFUN([SD_LIBPSML_INIT], [
   esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([libpsml],
     [AS_HELP_STRING([--with-libpsml],
       [Install prefix of the PSML I/O library (e.g. /usr/local).])],
@@ -272,6 +272,37 @@ AC_DEFUN([_SD_LIBPSML_CHECK_USE], [
   done
   AC_MSG_RESULT([${sd_libpsml_ok}])
   unset tmp_incs
+
+  # Check for meta-GGA kinetic energy density support (libpsml >= 2.0)
+  if test "${sd_libpsml_ok}" = "yes"; then
+    AC_MSG_CHECKING([whether LibPSML supports meta-GGA kinetic energy densities])
+    AC_LANG_PUSH([Fortran])
+    AC_LINK_IFELSE([[
+      subroutine psml_die(str)
+        character(len=*), intent(in) :: str
+        write(0,"(a)") str
+        stop
+      end subroutine
+      program main
+        use m_psml
+        use m_psml_api
+        interface
+          subroutine psml_die(str)
+            character(len=*), intent(in) :: str
+          end subroutine
+        end interface
+        type(ps_t) :: psxml
+        real(8) :: val
+        val = ps_CoreKineticDensity_Value(psxml, 1.0d0)
+      end program
+    ]], [sd_libpsml_metagga="yes"], [sd_libpsml_metagga="no"])
+    AC_LANG_POP([Fortran])
+    AC_MSG_RESULT([${sd_libpsml_metagga}])
+    if test "${sd_libpsml_metagga}" = "yes"; then
+      AC_DEFINE([HAVE_LIBPSML_METAGGA], 1,
+        [Define to 1 if LibPSML supports meta-GGA kinetic energy densities.])
+    fi
+  fi
 
   # Restore environment
   SD_ESL_RESTORE_FLAGS

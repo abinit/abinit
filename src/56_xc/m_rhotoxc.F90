@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT, SPr)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -311,11 +311,10 @@ subroutine rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp),allocatable :: vxc_b_apn(:),vxc_ep(:),vxctau_b_updn(:,:),vxclrho_b_updn(:,:)
  real(dp),allocatable,target :: rhonow(:,:,:),taunow(:,:,:)
  real(dp),pointer :: rhocorval(:,:),rhor_(:,:),taucorval(:,:),taur_(:,:)
- real(dp),ABI_CONTIGUOUS pointer :: rhonow_ptr(:,:,:)
+ real(dp),contiguous, pointer :: rhonow_ptr(:,:,:)
  real(dp) :: decdrho_vdw(nfft,xcdata%nspden),decdgrho_vdw(nfft,3,xcdata%nspden)
  real(dp) :: strsxc_vdw(3,3)
  type(libxc_functional_type) :: xc_funcs_auxc(2)
-
 ! *************************************************************************
 
 ! Note: the following cases seem to never be tested (should be fixed)

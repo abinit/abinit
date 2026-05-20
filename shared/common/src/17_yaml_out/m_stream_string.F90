@@ -8,7 +8,7 @@
 !!  Memory is automatically allocated on writing and freed on reading.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2025 ABINIT group (TC, MG)
+!! Copyright (C) 2009-2026 ABINIT group (TC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,6 +76,10 @@ subroutine stream_flush_unit(stream, unit, newline, firstchar)
 
   character(len=stream%length) :: s
   character(len=2 * stream%length) :: new_s
+#ifdef FC_CRAY
+  integer :: i,l
+  integer, parameter :: c = 32767
+#endif
 
   if (unit == dev_null) then
     call stream%free()
@@ -92,7 +96,19 @@ subroutine stream_flush_unit(stream, unit, newline, firstchar)
 #if defined FC_NVHPC || defined FC_LLVM
     write(unit, "(a)") s
 #else
+#ifdef FC_CRAY
+    if(len_trim(s) <= c) then
+      write(unit, "(a)") trim(s)
+    else
+      l=len_trim(s)/c
+      do i=1,l
+        write(unit, "(a)") s((i-1)*c+1:i*c)
+      end do
+      write(unit, "(a)") s(l*c+1:len_trim(s))
+    end if
+#else
     write(unit, "(a)") trim(s)
+#endif
 #endif
   end if
 
@@ -117,7 +133,6 @@ subroutine stream_flush_units(stream, units, newline)
  character(len=stream%length) :: s
 !arrays
  integer :: my_units(size(units))
-
 !******************************************************************
 
  ! Remove duplicated units (if any)
@@ -132,7 +147,11 @@ subroutine stream_flush_units(stream, units, newline)
 
  do ii=1,cnt
    if (units(ii) == dev_null) cycle
+#if defined FC_NVHPC || defined FC_LLVM
+   write(units(ii), "(a)")s
+#else
    write(units(ii), "(a)")trim(s)
+#endif
    if (present(newline)) then
      if (newline) write(units(ii), "(a)")""
    end if

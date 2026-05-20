@@ -15,7 +15,6 @@ except ImportError:
   import warnings
   warnings.warn("The numpy module is missing!")
   raise
-from numpy import zeros
 try:
   import netCDF4 as nc
 except ImportError:
@@ -24,7 +23,7 @@ except ImportError:
   raise
 import matplotlib.pyplot as P
 from numpy.linalg import inv
-from scipy.interpolate import UnivariateSpline 
+from scipy.interpolate import UnivariateSpline
 
 
 #############
@@ -32,17 +31,17 @@ from scipy.interpolate import UnivariateSpline
 #############
 class VariableContainer:pass
 csts = VariableContainer()
-csts.hartree2ev = N.float(27.211396132)
-csts.ev2hartree = N.float(1/csts.hartree2ev)
-csts.sqrtpi = N.float(N.sqrt(N.pi))
-csts.invsqrtpi = N.float(1/csts.sqrtpi)
-csts.TOLKPTS = N.float(0.00001)
+csts.hartree2ev = 27.211396132
+csts.ev2hartree = float(1/csts.hartree2ev)
+csts.sqrtpi = float(N.sqrt(N.pi))
+csts.invsqrtpi = float(1/csts.sqrtpi)
+csts.TOLKPTS = 0.00001
 
 def angle_kpt(vector1,vector2):
   dot_prod = N.dot(vector1,vector2.T)
   arg = dot_prod/(N.linalg.norm(vector1)*N.linalg.norm(vector2))
-  if arg > 1: arg=1
-  if arg < -1: arg=-1
+  arg = min(arg, 1)
+  arg = max(arg, -1)
   theta = N.arccos(arg)/(N.pi*180)
   return theta
 
@@ -67,33 +66,32 @@ class find_special_kpt:
         if N.allclose(kpt[ikpt-1,:],[3.0/8,3.0/8,3.0/4],1e-8):
           self.special_kpoints.append(kpt[ikpt-1,:])
           self.position_special.append(ikpt-1)
+        elif angle_kpt(vector1,vector2) < csts.TOLKPTS:
+          pass
         else:
-          if angle_kpt(vector1,vector2) < csts.TOLKPTS:
-            pass
-          else:
-            self.special_kpoints.append(kpt[ikpt-1,:])
-            self.position_special.append(ikpt-1)
+          self.special_kpoints.append(kpt[ikpt-1,:])
+          self.position_special.append(ikpt-1)
         vector2 = vector1
-     
+
 
 # Interaction with the user
-print("""
-  _____  _       _          ______ _____        ____   _____ 
+print(r"""
+  _____  _       _          ______ _____        ____   _____
  |  __ \| |     | |        |  ____|  __ \      |  _ \ / ____|
- | |__) | | ___ | |_ ______| |__  | |__) |_____| |_) | (___  
- |  ___/| |/ _ \| __|______|  __| |  ___/______|  _ < \___ \ 
+ | |__) | | ___ | |_ ______| |__  | |__) |_____| |_) | (___
+ |  ___/| |/ _ \| __|______|  __| |  ___/______|  _ < \___ \
  | |    | | (_) | |_       | |____| |          | |_) |____) |
  |_|    |_|\___/ \__|      |______|_|          |____/|_____/
 """)
-print(""" 
-This script allows you to plot an electronic bandstructure from en _EP.nc 
-file. If you computed the file including lifetime you can also plot 
+print("""
+This script allows you to plot an electronic bandstructure from en _EP.nc
+file. If you computed the file including lifetime you can also plot
 "fat-band".
 """)
 # Read the input file
-user_input = input('Enter name of the _EP.nc file\n')
+user_input = input("Enter name of the _EP.nc file\n")
 EP_file = user_input.strip()
-EP = system(directory='.',filename=EP_file)
+EP = system(directory=".",filename=EP_file)
 
 gprimd = inv(EP.rprimd)
 full_kpt = N.matrix(EP.kpt)*gprimd
@@ -104,31 +102,31 @@ special = find_special_kpt(EP.kpt)
 print("The special k-points are:")
 for ikpt in N.arange(len(special.special_kpoints)):
   print(str(special.special_kpoints[ikpt]))
-user_input = input('Enter the name of the '+str(len(special.special_kpoints))+' special k-points \n')
+user_input = input("Enter the name of the "+str(len(special.special_kpoints))+" special k-points \n")
 
 special_name = user_input.split()
 for ii in N.arange(len(special_name)):
-  special_name[ii] = "$\mathbf{"+str(special_name[ii])+"}$"
+  special_name[ii] = r"$\mathbf{"+str(special_name[ii])+"}$"
 
-user_input = input('Enter energy limit for the plot in eV: e.g. -5 10\n')
+user_input = input("Enter energy limit for the plot in eV: e.g. -5 10\n")
 user_tmp = user_input.split()
 if len(user_tmp) != 2:
   raise Exception("You should provide only 2 numbers")
 else: # Append and TRIM the input string with STRIP
-  lower = N.float(user_tmp[0])
-  upper = N.float(user_tmp[1])
+  lower = float(user_tmp[0])
+  upper = float(user_tmp[1])
 
 if EP.ntemp > 0:
   print("Enter the temperature at which you want to do the Bandstructure plot (in K)")
-  user_input = input('The possible temperature are:\n'+str(EP.temp[:])+'\n')
+  user_input = input("The possible temperature are:\n"+str(EP.temp[:])+"\n")
   if len(user_input.split()) != 1:
     raise Exception("You should provide only 1 number")
   else: # Append and TRIM the input string with STRIP
-    temp = N.float(user_input)
+    temp = float(user_input)
     for itemp in N.arange(EP.ntemp):
       if N.allclose(temp,EP.temp[itemp],csts.TOLKPTS):
         temp_index = itemp
-        break  
+        break
 
 # Compute the first conduction band
 for iband in N.arange(EP.nband):
@@ -141,8 +139,7 @@ for iband in N.arange(EP.nband):
 fermi = -1000000.0
 for ikpt in N.arange(EP.nkpt):
   for iband in N.arange(cond):
-    if (EP.eigenvalues[0,ikpt,iband] > fermi):
-      fermi = EP.eigenvalues[0,ikpt,iband]
+    fermi = max(fermi, EP.eigenvalues[0,ikpt,iband])
 
 
 xspan = N.arange(0,EP.nkpt,1)
@@ -152,8 +149,8 @@ xfine = N.arange(0,(EP.nkpt-1)+0.2,0.2)
 fig = P.figure(figsize=(5.196,7.5))
 #P.rc('text',usetex = True)
 #P.hold('on')
-P.grid('on')
-yprops = dict(rotation=0, horizontalalignment='right',verticalalignment='center',x=-0.01)
+P.grid("on")
+yprops = dict(rotation=0, horizontalalignment="right",verticalalignment="center",x=-0.01)
 
 ax = fig.add_subplot(111)
 #ax = P.gca()
@@ -161,7 +158,7 @@ ax = fig.add_subplot(111)
 
 P.xticks(special.position_special,special_name,fontsize=16)
 P.yticks(fontsize=16)
-ylabel = ax.set_ylabel('Energy [eV]',fontsize=16,**yprops)
+ylabel = ax.set_ylabel("Energy [eV]",fontsize=16,**yprops)
 ax.yaxis.set_label_coords(0.17, 1.05)
 ax.set_ylim([lower,upper])
 
@@ -171,17 +168,17 @@ for iband in N.arange(EP.nband):
     eigen =(EP.eigenvalues[0,:,iband]-fermi)*csts.hartree2ev
     spl = UnivariateSpline(xspan,eigen,k=1)
     eig_fine = spl(xfine)
-    #P.plot(xfine,eig_fine,linewidth=2,color='k')    
-    P.plot(xspan,(EP.eigenvalues[0,:,iband]-fermi)*csts.hartree2ev,linewidth=2,color='k')    
+    #P.plot(xfine,eig_fine,linewidth=2,color='k')
+    P.plot(xspan,(EP.eigenvalues[0,:,iband]-fermi)*csts.hartree2ev,linewidth=2,color="k")
   else:
-    eigen =(EP.eigenvalues[0,:,iband]-fermi)*csts.hartree2ev  
-    spl = UnivariateSpline(xspan,eigen, k=1)  
+    eigen =(EP.eigenvalues[0,:,iband]-fermi)*csts.hartree2ev
+    spl = UnivariateSpline(xspan,eigen, k=1)
     eig_fine = spl(xfine)
     #P.plot(xfine,eig_fine,linewidth=2,color='k')
-    P.plot(xspan,(EP.eigenvalues[0,:,iband]-fermi)*csts.hartree2ev,linewidth=2,color='k')    
+    P.plot(xspan,(EP.eigenvalues[0,:,iband]-fermi)*csts.hartree2ev,linewidth=2,color="k")
 
 # Plot renormalization
-if EP.ntemp > 0: 
+if EP.ntemp > 0:
   for iband in N.arange(EP.nband):
     if iband < cond:
       #renormalization = real part of zpr
@@ -193,8 +190,8 @@ if EP.ntemp > 0:
       #bandwith_fine = spl(xfine)
       #P.fill_between(xfine,renorm_fine+bandwith_fine/2, renorm_fine-bandwith_fine/2, alpha=.3,color='b')
       #P.plot(xfine,renorm_fine,color='b',linestyle='--',linewidth=2)
-      P.fill_between(xspan, renorm + bandwith / 2, renorm - bandwith / 2, alpha=.3,color='b')
-      P.plot(xspan, renorm, color='b', linestyle='--', linewidth=2)
+      P.fill_between(xspan, renorm + bandwith / 2, renorm - bandwith / 2, alpha=.3,color="b")
+      P.plot(xspan, renorm, color="b", linestyle="--", linewidth=2)
     else:
       #renormalization = real part of zpr
       renorm = (EP.eigenvalues[0,:,iband]-fermi + EP.zpm[temp_index,0,:,iband,0])*csts.hartree2ev
@@ -205,8 +202,8 @@ if EP.ntemp > 0:
       #bandwith_fine = spl(xfine)
       #P.fill_between(xfine,renorm_fine+bandwith_fine/2, renorm_fine-bandwith_fine/2, alpha=.3, color='r')
       #P.plot(xfine,renorm_fine,color='r',linestyle='--',linewidth=2)
-      P.fill_between(xspan, renorm + bandwith / 2, renorm - bandwith / 2, alpha=.3,color='r')
-      P.plot(xspan, renorm, color='r', linestyle='--', linewidth=2)      
+      P.fill_between(xspan, renorm + bandwith / 2, renorm - bandwith / 2, alpha=.3,color="r")
+      P.plot(xspan, renorm, color="r", linestyle="--", linewidth=2)
 
   bbox_props = dict(boxstyle="square", fc="w", ec="0.5", alpha=1.0)
   ax.text(EP.nkpt,upper, "Temperature: "+str(temp)+" K", ha="right", va="top", size=16,

@@ -9,7 +9,7 @@
 !!  Procedures to deal with the singularity for q --> 0 are also provided.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2025 ABINIT group (MG, FB)
+!! Copyright (C) 1999-2026 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -128,16 +128,16 @@ type,public :: vcoul_t
    ! (3, nqlwl)
    ! q-points for the treatment of the Coulomb singularity.
 
-  complex(gwpc),allocatable :: vc_sqrt(:,:)
+  complex(gwp),allocatable :: vc_sqrt(:,:)
    ! (ng, nqibz)
    ! Square root of the Coulomb interaction in reciprocal space.
    ! complex-valued to allow for a possible cutoff (Rozzi's method)
 
-  complex(gwpc),allocatable :: vcqlwl_sqrt(:,:)
+  complex(gwp),allocatable :: vcqlwl_sqrt(:,:)
    ! (ng, nqlwl)
    ! Square root of the Coulomb term calculated for small q-points
 
-  complex(gwpc),allocatable :: vc_sqrt_resid(:,:)
+  complex(gwp),allocatable :: vc_sqrt_resid(:,:)
    ! (ng, nqibz)
    ! Square root of the residual difference between the Coulomb interaction in the sigma self-energy for exchange,
    ! and the Coulomb interaction already present in the generalized Kohn-Sham eigenenergies (when they come from an hybrid)
@@ -149,7 +149,6 @@ contains
    procedure :: plot => vcoul_plot    ! Plot vc in real and reciprocal space.
    procedure :: print => vcoul_print  ! Print info on the object.
    procedure :: free => vcoul_free    ! Free memory
-
 end type vcoul_t
 !!***
 
@@ -159,7 +158,7 @@ end type vcoul_t
 !!
 !! FUNCTION
 !! Mimicking the BerkeleyGW technique
-!! A Monte-Carlo sampling of each miniBZ surrounding each (q+G) point
+!! A Monte-Carlo sampling of each miniBZ surrounding each (q+G) point.
 !! However:
 !!    - extended to multiple shifts
 !!    - with an adaptative number of MonteCarlo sampling points
@@ -299,9 +298,6 @@ end subroutine gw_icutcoul_to_mode
 !!  qlwl(3,nqlwl)= The nqlwl "small" q-points
 !!  comm=MPI communicator.
 !!
-!! OUTPUT
-!!  vcp=Datatype gathering information on the Coulomb interaction.
-!!
 !! SOURCE
 
 subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo, vc_ecut, ng, nqlwl, qlwl, comm)
@@ -332,6 +328,7 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  real(dp),contiguous, pointer :: qibz(:,:), qbz(:,:)
 ! *************************************************************************
 
+ !call wrtout(std_out, "in vcoul_init")
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  units = [std_out, ab_out]
 
@@ -570,6 +567,7 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  ABI_FREE(vcoul_lwl)
 
  call vcp%print(units)
+ !call wrtout(std_out, " exiting vcoul_init")
 
 end subroutine vcoul_init
 !!***
@@ -1187,8 +1185,7 @@ subroutine mc_init(mc, rprimd, ucvol, gprimd, gmet, kptrlatt)
  integer, allocatable :: seed(:)
 ! *************************************************************************
 
- mc%gmet = gmet
- mc%ucvol = ucvol
+ mc%gmet = gmet; mc%ucvol = ucvol
 
  ! Supercell defined by the k-mesh
  rprimd_sc(:,:) = MATMUL(rprimd, kptrlatt)
@@ -1564,6 +1561,7 @@ subroutine beigi_surface_limit(opt_slab, cryst, nqibz, nkbz, rcut, alpha, boxcen
  yy(:)=vcfit(1,:)
  !yy(:)=one
  ABI_FREE(vcfit)
+
  dx=(xx(2)-xx(1))
  ! integ = \int dr r f(r)
  integ=xx(2)*yy(2)*dx*3.0/2.0
@@ -1813,7 +1811,7 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm, &
  real(dp),intent(in) :: qpt(3), q0(3)
  integer,intent(in) :: npw, gvec(3,npw), comm
  type(crystal_t),intent(in) :: cryst
- complex(gwpc),intent(out) :: vc_sqrt(npw)
+ complex(gwp),intent(out) :: vc_sqrt(npw)
  real(dp),optional,intent(out) :: vc(npw)
 
 !Local variables-------------------------------

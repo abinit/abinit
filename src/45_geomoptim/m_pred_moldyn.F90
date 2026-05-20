@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, SE)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -395,12 +395,8 @@ real(dp),pointer :: fcart_cur(:,:),fcart_prev(:,:),fcart_prev2(:,:)
  time=time+hh
  hist%time(hist%ihist)=time
 
- if (allocated(xcart)) then
-   ABI_FREE(xcart)
- end if
- if (allocated(xcart_prev)) then
-   ABI_FREE(xcart_prev)
- end if
+ ABI_SFREE(xcart)
+ ABI_SFREE(xcart_prev)
 
  if (.false.) write(std_out,*) ntime
 

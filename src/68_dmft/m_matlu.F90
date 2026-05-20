@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,10 +30,11 @@
 
 MODULE m_matlu
 
+ use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
  use defs_basis
  use m_errors
  use m_abicore
- use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
+ use m_gputk
  use m_abi_linalg
 
 #ifdef HAVE_GPU
@@ -44,7 +45,7 @@ MODULE m_matlu
  use m_fstrings, only : int2char4
  use m_hide_lapack, only : xginv
  use m_io_tools, only : flush_unit
- use m_matrix, only : blockdiago_fordsyev
+ use m_matrix, only : blockdiago_fordsyev,blockdiago_forzheev
  use m_paw_dmft, only : paw_dmft_type
  use m_xmpi, only : xmpi_bcast,xmpi_sum
 
@@ -86,6 +87,7 @@ MODULE m_matlu
  public :: symmetrize_matlu
  public :: ylm2jmj_matlu
  public :: magnfield_matlu
+ public :: magmomjmj_matlu
 !!***
 
 !!****t* m_matlu/matlu_type
@@ -130,7 +132,7 @@ MODULE m_matlu
   integer :: nsppol
   ! Number of polarizations
 
-  complex(dpc), allocatable :: mat(:,:,:)
+  complex(dp), allocatable :: mat(:,:,:)
   ! Local quantity
 
  end type matlu_type
@@ -169,7 +171,7 @@ subroutine init_matlu(natom,nspinor,nsppol,lpawu_natom,matlu,gpu_option,ndat)
  type(matlu_type), target, intent(inout) :: matlu(natom)
 !Local variables ------------------------------------
  integer :: iatom,lpawu,ndim,l_gpu_option,l_ndat
- complex(dpc), ABI_CONTIGUOUS pointer :: mat(:,:,:)
+ complex(dp), ABI_CONTIGUOUS pointer :: mat(:,:,:)
 !************************************************************************
 
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
@@ -295,7 +297,7 @@ subroutine destroy_matlu(matlu,natom)
  type(matlu_type),target, intent(inout) :: matlu(natom)
 !Local variables-------------------------------
  integer :: iatom
- complex(dpc), ABI_CONTIGUOUS pointer :: mat(:,:,:)
+ complex(dp), ABI_CONTIGUOUS pointer :: mat(:,:,:)
 ! *********************************************************************
 
  do iatom=1,natom
@@ -569,7 +571,7 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
  integer :: arg_out,iatom,im,im1,ispinor,ispinor1,isppol,lpawu
  integer :: ndim,nspinor,nsppol,optab_out,optdiag
  logical :: testcmplx,testcmplx_
- complex(dpc), allocatable :: mat_nmrep(:,:)
+ complex(dp), allocatable :: mat_nmrep(:,:)
  character(len=500) :: message
  character(len=4) :: mode_paral,tag_at
  character(len=9), parameter :: dspinm(2,2) = RESHAPE((/"n        ","mx       ","my       ","mz       "/),(/2,2/))
@@ -709,7 +711,7 @@ end subroutine print_matlu
 !! Symmetrize local quantity.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -735,12 +737,12 @@ end subroutine print_matlu
 !Local variables-------------------------------
  integer :: at_indx,iatom,irot,isppol,lpawu,m1,m2,mu,natom
  integer :: ndim,ndim_max,nspinor,nsppol,nsym,nu,gpu_option
- complex(dpc), allocatable :: gloc_tmp(:,:,:),gloc_tmp2(:,:,:)
- complex(dpc), allocatable :: gloc_tmp3(:,:,:,:),gloc_tmp4(:,:,:,:)
+ complex(dp), target, allocatable :: gloc_tmp(:,:,:),gloc_tmp2(:,:,:)
+ complex(dp), target, allocatable :: gloc_tmp3(:,:,:,:),gloc_tmp4(:,:,:,:)
  type(matlu_type), allocatable, target :: gloc_nmrep(:),glocsym(:)
- complex(dpc), ABI_CONTIGUOUS pointer :: zarot(:,:,:,:),gloc_mat(:,:,:),glocsym_mat(:,:,:)
+ complex(dp), ABI_CONTIGUOUS pointer :: zarot(:,:,:,:),gloc_mat(:,:,:),glocsym_mat(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: symrec_cart(:,:,:)
- complex(dpc) :: ratio
+ complex(dp) :: ratio
 
  natom    = paw_dmft%natom
  ndim_max = 2*paw_dmft%maxlpawu + 1
@@ -1236,7 +1238,7 @@ end subroutine print_matlu
 !! Inverse local quantity.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1462,7 +1464,7 @@ end subroutine add_matlu
 !! Change representation of density matrix (useful for nspinor=2)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1492,7 +1494,7 @@ end subroutine add_matlu
  type(matlu_type), intent(inout), target :: glocnm(natom),glocspsp(natom)
 !Local variables-------------------------------
  integer :: iatom,lpawu,m1,m2,mu,ndim,nsppol,isppol,gpu_option
- complex(dpc), ABI_CONTIGUOUS pointer :: glocnm_mat(:,:,:),glocspsp_mat(:,:,:)
+ complex(dp), ABI_CONTIGUOUS pointer :: glocnm_mat(:,:,:),glocspsp_mat(:,:,:)
  character(len=500) :: message
 
 ! DBG_ENTER("COLL")
@@ -1511,7 +1513,7 @@ end subroutine add_matlu
      glocspsp_mat => glocspsp(iatom)%mat
 
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(isppol) MAP(to:glocnm,glocspsp) &
+     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(isppol) MAP(to:glocnm_mat,glocspsp_mat) &
      !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
      do isppol=1,nsppol
@@ -1554,7 +1556,7 @@ end subroutine add_matlu
      glocspsp_mat => glocspsp(iatom)%mat
 
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(isppol) MAP(to:glocnm,glocspsp) &
+     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(isppol) MAP(to:glocnm_mat,glocspsp_mat) &
      !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
      do isppol=1,nsppol
@@ -1627,10 +1629,10 @@ end subroutine add_matlu
  type(matlu_type), intent(in) :: matlu(natom)
  real(dp), target, optional, intent(inout) :: trace_loc(matlu(1)%nsppol+1,natom)
  integer, optional, intent(in) :: itau
- complex(dpc), optional, intent(out) :: trace
+ complex(dp), optional, intent(out) :: trace
 !Local variables-------------------------------
  integer :: iatom,im,isppol,lpawu,ndim,nspinor,nsppol
- complex(dpc) :: trace_tmp,trace_tmp2
+ complex(dp) :: trace_tmp,trace_tmp2
  real(dp), ABI_CONTIGUOUS pointer :: traceloc(:,:) => null()
  character(len=4) :: tag
  character(len=12) :: tag_nb_elec
@@ -1732,7 +1734,7 @@ end subroutine add_matlu
 !! Create new array from matlu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1759,7 +1761,7 @@ end subroutine add_matlu
 
 ! type  matlus_type
 !  SEQUENCE
-!  complex(dpc), pointer :: mat(:,:)
+!  complex(dp), pointer :: mat(:,:)
 ! end type matlus_type
 
 !Arguments ------------------------------------
@@ -1844,7 +1846,7 @@ end subroutine add_matlu
 !! Diagonalize hermitian matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1860,7 +1862,7 @@ end subroutine add_matlu
 !!  checkstop= if true (default), print the matrix for spin down in the diagonalization basis of spin up
 !!             (useful when nsppol=2 and nsppol_imp=1)
 !!  optreal= diagonalize the real matrix if max(imag(matlu)) < 1e-6
-!!  test= if 8, use the block diagonalization algorithm (only when the real matrix is diagonalized)
+!!  test= if 8 or 10, use the block diagonalization algorithm (8 for real and 10 for complex)
 !!
 !! OUTPUT
 !!  matlu_diag(natom) :: diagonalized density matrix
@@ -1883,17 +1885,18 @@ end subroutine add_matlu
 !Local variables-------------------------------
  integer :: iatom,im1,im2,info,isppol,lpawu,lwork,lworkr
  integer :: nspinor,nsppol,nsppolimp,optreal,tndim
- logical :: blockdiag,checkstop_in,print_temp_mat2
+ logical :: blockdiag,blockdiagc,checkstop_in,print_temp_mat2
  character(len=4) :: tag
  character(len=500) :: message
  real(dp), allocatable :: eig(:),rwork(:),valuer(:,:),work(:)!,valuer2(:,:)
  !real(dp),allocatable :: valuer3(:,:),valuer4(:,:)
 ! real(dp),allocatable :: eigvec(:,:)
- complex(dpc), allocatable :: temp_mat(:,:),zwork(:)
-!debug complex(dpc),allocatable :: temp_mat3(:,:)
+ complex(dp), allocatable :: temp_mat(:,:),zwork(:)
+!debug complex(dp),allocatable :: temp_mat3(:,:)
 !************************************************************************
 
  blockdiag    = .false.
+ blockdiagc   = .false.
  checkstop_in = .true.
  nspinor      = matlu(1)%nspinor
  nsppol       = matlu(1)%nsppol
@@ -1902,7 +1905,8 @@ end subroutine add_matlu
 
  if (present(nsppol_imp)) nsppolimp = nsppol_imp
  if (present(checkstop)) checkstop_in = checkstop
- if (present(test)) blockdiag = (test == 8)
+ if (present(test)) blockdiag = (test == 8 )
+ if (present(test)) blockdiagc = ( test == 10)
  if (present(opt_real)) optreal = opt_real
 
  call zero_matlu(matlu_diag(:),natom)
@@ -2015,7 +2019,7 @@ end subroutine add_matlu
 !debug       temp_mat2(:,:)=gathermatlu(iatom)%value(:,:)
 !           write(std_out,*)"diag"
 
-     if (optreal == 1 .and. maxval(abs(aimag(matlu(iatom)%mat(:,:,isppol)))) < tol6) then
+     if (optreal == 1 .and. maxval(abs(aimag(matlu(iatom)%mat(:,:,isppol)))) < tol6 ) then
        write(message,'(a,2x,a,e9.3,a)') ch10,"Imaginary part of Local Hamiltonian is lower than ",&
          & tol6,": the real matrix is used"
        call wrtout(std_out,message,'COLL')
@@ -2043,7 +2047,7 @@ end subroutine add_matlu
 !             call wrtout(std_out,message,'COLL')
 !           end do
            !call dsyev('v','u',tndim,valuer,tndim,eig,work,lworkr,info)
-       if (blockdiag) then
+       if (blockdiag .or. blockdiagc) then
          call blockdiago_fordsyev(valuer(:,:),tndim,eig(:))
        else
          ABI_MALLOC(work,(lworkr))
@@ -2105,24 +2109,40 @@ end subroutine add_matlu
 !             call wrtout(std_out,message,'COLL')
 !           end do
      else
-       if (optreal == 1 .and. maxval(abs(aimag(matlu(iatom)%mat(:,:,isppol)))) > tol8) then
-         write(message,'(a)') " Local hamiltonian in correlated basis is complex"
-         ABI_COMMENT(message)
-       end if
-       ABI_MALLOC(zwork,(lwork))
-       ABI_MALLOC(rwork,(3*tndim-2))
-       call zheev('v','u',tndim,eigvectmatlu(iatom)%mat(:,:,isppol),tndim,eig(:),zwork(:),lwork,rwork(:),info)
-       ABI_FREE(zwork)
-       ABI_FREE(rwork)
-           !call blockdiago_forzheev(gathermatlu(iatom)%value,tndim,eig)
+
+       if (blockdiagc) then
+        write(message,'(a,a,a)') ch10, "   == The local Hamiltonian in Ylm basis is complex.&
+          & The complex matrix is used for the diagonalisation. Printing real and imaginary part of rotation matrix:  "
+        call wrtout(std_out,message,'COLL')
+
+        eigvectmatlu(iatom)%mat(:,:,isppol) = matlu(iatom)%mat(:,:,isppol)
+
+        call blockdiago_forzheev(eigvectmatlu(iatom)%mat(:,:,isppol),tndim,eig(:))
+
+        !ABI_MALLOC(zwork,(lwork))
+        !ABI_MALLOC(rwork,(3*tndim-2))
+        !call zheev('v','u',tndim,eigvectmatlu(iatom)%mat(:,:,isppol),tndim,eig(:),zwork(:),lwork,rwork(:),info)
+        !ABI_FREE(zwork)
+        !ABI_FREE(rwork)
+       else
+          if (optreal == 1 .and. maxval(abs(aimag(matlu(iatom)%mat(:,:,isppol)))) > tol8 ) then
+            write(message,'(a)') " Local hamiltonian in correlated basis is complex"
+            ABI_COMMENT(message)
+          end if
+         !eigvectmatlu(iatom)%mat(:,:,isppol) = matlu(iatom)%mat(:,:,isppol)
+         ABI_MALLOC(zwork,(lwork))
+         ABI_MALLOC(rwork,(3*tndim-2))
+         call zheev('v','u',tndim,eigvectmatlu(iatom)%mat(:,:,isppol),tndim,eig(:),zwork(:),lwork,rwork(:),info)
+         ABI_FREE(zwork)
+         ABI_FREE(rwork)
+       endif !blockdiag
      end if ! present(optreal)
      if (prtopt >= 3) then
-       write(message,'(a)') ch10
-       call wrtout(std_out,message,'COLL')
        write(message,'(3a,i1)') "       EIGENVECTORS for atom ",trim(adjustl(tag))," and isppol ",isppol
        call wrtout(std_out,message,'COLL')
        do im1=1,tndim
-         write(message,'(12(1x,18(1x,"(",f9.3,",",f9.3,")")))') (eigvectmatlu(iatom)%mat(im1,im2,isppol),im2=1,tndim)
+         !write(message,'(12(1x,18(1x,"(",f9.3,",",f9.3,")")))') (eigvectmatlu(iatom)%mat(im1,im2,isppol),im2=1,tndim)
+         write(message,'(12(1x,18(1x,f6.3,1x,f6.3)))') (eigvectmatlu(iatom)%mat(im1,im2,isppol),im2=1,tndim)
          call wrtout(std_out,message,'COLL')
        end do ! im1
           ! do im1=1,tndim
@@ -2280,7 +2300,7 @@ end subroutine add_matlu
 !! Rotate matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2308,7 +2328,7 @@ end subroutine add_matlu
  type(matlu_type), intent(in) :: rot_mat(natom)
 !Local variables-------------------------------
  integer :: iatom,isppol,lpawu,nspinor,nsppol,tndim
- complex(dpc), allocatable :: temp_mat(:,:)
+ complex(dp), allocatable :: temp_mat(:,:)
  character(len=1) :: c1,c2
 !************************************************************************
 
@@ -2511,7 +2531,7 @@ end subroutine add_matlu
 !! Add/subtract a scalar to the diagonal part
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2537,7 +2557,7 @@ end subroutine add_matlu
 !Arguments ------------------------------------
  integer, intent(in) :: natom
  type(matlu_type), intent(inout) :: matlu(natom)
- complex(dpc), intent(in) :: shift(natom)
+ complex(dp), intent(in) :: shift(natom)
  integer, optional, intent(in) :: signe
 !Local variables-------------------------------
  integer :: iatom,im,lpawu,ndim,nspinor,nsppol,signe_used
@@ -2572,7 +2592,7 @@ end subroutine add_matlu
 !! Check that matlu is real and diagonal with given precision
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2664,7 +2684,7 @@ end subroutine add_matlu
 !! Check that matlu is diagonal in the orbital index with given precision
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2742,7 +2762,7 @@ end subroutine add_matlu
 !! Matrix product of two matlus
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2819,7 +2839,7 @@ end subroutine add_matlu
 !! conjugate of input matlu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2876,7 +2896,7 @@ end subroutine add_matlu
 !! Compute the logarithm of matlu (only if diagonal for the moment)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2936,7 +2956,7 @@ end subroutine add_matlu
 !! Transform mat from Slm to Ylm basis or vice versa
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2962,9 +2982,9 @@ end subroutine add_matlu
 !Local variables-------------------------------
  integer :: iatom,im1,im2,ispin,ispinor1,ispinor2,isppol
  integer :: lpawu,ndim,ndim_max,nspin,nspinor,nsppol
- complex(dpc), pointer :: mat_out(:,:) => null(), slm2ylm(:,:) => null()
- complex(dpc), allocatable :: mat_inp(:,:),mat_tmp(:,:)
- complex(dpc), target, allocatable :: mat_tmp2(:,:)
+ complex(dp), pointer :: mat_out(:,:) => null(), slm2ylm(:,:) => null()
+ complex(dp), allocatable :: mat_inp(:,:),mat_tmp(:,:)
+ complex(dp), target, allocatable :: mat_tmp2(:,:)
  character(len=1) :: c1,c2
  character(len=500) :: message
 !************************************************************************
@@ -3165,7 +3185,7 @@ end subroutine add_matlu
 !! Multiply matlu by a scalar
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3189,7 +3209,7 @@ end subroutine add_matlu
 !Arguments ------------------------------------
  integer, intent(in) :: natom
  type(matlu_type), intent(inout) :: matlu(natom)
- complex(dpc), intent(in) :: fac
+ complex(dp), intent(in) :: fac
 !Local variables-------------------------------
  integer :: iatom,lpawu
 ! character(len=500) :: message
@@ -3212,7 +3232,7 @@ end subroutine add_matlu
 !! Write matlu for a given frequency
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3291,7 +3311,7 @@ end subroutine add_matlu
 !!  Set the diagonal elements to 1 (the off-diagonal are not set to 0)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3345,7 +3365,7 @@ end subroutine add_matlu
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (FGendron)
+!! Copyright (C) 2005-2026 ABINIT group (FGendron)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3372,7 +3392,7 @@ end subroutine add_matlu
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom,option,optprt
- complex(dpc), allocatable, intent(out) :: mu
+ complex(dp), allocatable, intent(inout) :: mu(:)
 !arrays
  type(matlu_type), intent(inout) :: matlu(natom)
 !Local variables-------------------------------
@@ -3382,9 +3402,9 @@ end subroutine add_matlu
  character(len=500) :: message
  real(dp) :: xj
 !arrays
- complex(dpc),allocatable :: mat_out_c(:,:)
+ complex(dp),allocatable :: mat_out_c(:,:)
 ! integer, allocatable :: ind_msml(:,:)
- complex(dpc), allocatable :: temp_mat(:,:)
+ complex(dp), allocatable :: temp_mat(:,:)
  type(coeff2c_type), allocatable :: gathermatlu(:)
  type(coeff2c_type), allocatable :: muorb(:)
 !************************************************************************
@@ -3513,11 +3533,10 @@ end subroutine add_matlu
      ! Trace of matrix product
      !=====================================
 
-   mu=czero
    do im1=1,tndim
      do im2=1,tndim
        if(im1==im2) then
-         mu = mu + gathermatlu(iatom)%value(im1,im2)
+         mu(iatom) = mu(iatom) + gathermatlu(iatom)%value(im1,im2)
        end if
      end do
    end do
@@ -3586,7 +3605,7 @@ end subroutine add_matlu
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (FGendron)
+!! Copyright (C) 2005-2026 ABINIT group (FGendron)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3613,7 +3632,7 @@ end subroutine add_matlu
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom,option,optprt
- complex(dpc), allocatable, intent(out) :: mu
+ complex(dp), allocatable, intent(inout) :: mu(:)
 !arrays
  type(matlu_type), intent(inout) :: matlu(natom)
 !Local variables-------------------------------
@@ -3623,9 +3642,9 @@ end subroutine add_matlu
  character(len=500) :: message
  real(dp) :: xj
 !arrays
- complex(dpc),allocatable :: mat_out_c(:,:)
+ complex(dp),allocatable :: mat_out_c(:,:)
  integer, allocatable :: ind_msml(:,:)
- complex(dpc), allocatable :: temp_mat(:,:)
+ complex(dp), allocatable :: temp_mat(:,:)
  type(coeff2c_type), allocatable :: gathermatlu(:)
  type(coeff2c_type), allocatable :: muspin(:)
 !************************************************************************
@@ -3777,11 +3796,10 @@ end subroutine add_matlu
      ! Trace of matrix product
      !=====================================
 
-   mu=czero
    do im1=1,tndim
      do im2=1,tndim
        if(im1==im2) then
-         mu = mu + gathermatlu(iatom)%value(im1,im2)
+         mu(iatom) = mu(iatom) + gathermatlu(iatom)%value(im1,im2)
        end if
      end do
    end do
@@ -3852,7 +3870,7 @@ end subroutine add_matlu
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (FGendron)
+!! Copyright (C) 2005-2026 ABINIT group (FGendron)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3879,7 +3897,7 @@ end subroutine add_matlu
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom,option,optprt
- complex(dpc), allocatable, intent(out) :: mu
+ complex(dp), allocatable, intent(inout) :: mu(:)
 !arrays
  type(matlu_type), intent(inout) :: matlu(natom)
 !Local variables-------------------------------
@@ -3889,9 +3907,9 @@ end subroutine add_matlu
  character(len=500) :: message
  real(dp) :: xj
 !arrays
- complex(dpc),allocatable :: mat_out_c(:,:)
+ complex(dp),allocatable :: mat_out_c(:,:)
  integer, allocatable :: ind_msml(:,:)
- complex(dpc), allocatable :: temp_mat(:,:)
+ complex(dp), allocatable :: temp_mat(:,:)
  type(coeff2c_type), allocatable :: gathermatlu(:)
  type(coeff2c_type), allocatable :: muzeeman(:)
 !************************************************************************
@@ -4072,11 +4090,10 @@ end subroutine add_matlu
      ! Trace of matrix product
      !=====================================
 
-   mu=czero
    do im1=1,tndim
      do im2=1,tndim
        if(im1==im2) then
-         mu = mu + gathermatlu(iatom)%value(im1,im2)
+         mu(iatom) = mu(iatom) + gathermatlu(iatom)%value(im1,im2)
        end if
      end do
    end do
@@ -4129,7 +4146,6 @@ end subroutine add_matlu
  end do
  ABI_FREE(gathermatlu)
  ABI_FREE(muzeeman)
-
  end subroutine magmomfzeeman_matlu
 
 !!***
@@ -4147,7 +4163,7 @@ end subroutine add_matlu
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (FGendron)
+!! Copyright (C) 2005-2026 ABINIT group (FGendron)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4338,7 +4354,7 @@ end subroutine add_matlu
 !! suboptimal if this is the case.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2024 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4365,8 +4381,8 @@ end subroutine add_matlu
 !Arguments ------------------------------------
  integer, intent(in) :: natom
  type(matlu_type), intent(in) :: matlu1(natom),matlu2(natom)
- complex(dpc), intent(inout) :: trace(natom)
- complex(dpc), optional, intent(out) :: trace_tot
+ complex(dp), intent(inout) :: trace(natom)
+ complex(dp), optional, intent(out) :: trace_tot
  integer, optional, intent(in) :: iatom
 !Local variables-------------------------------
  integer :: ia1,ia2,iatom_,isppol,lpawu,nspinor,nsppol
@@ -4427,7 +4443,7 @@ end subroutine add_matlu
 !Local variables-------------------------------
  integer :: iatom,ibuf,im1,ierr,isppol,lpawu
  integer :: master_node,ndim,nspinor,nsppol,opt,siz_buf
- complex(dpc), allocatable :: buffer(:)
+ complex(dp), allocatable :: buffer(:)
 !************************************************************************
 
  nspinor = matlu(1)%nspinor
@@ -4510,7 +4526,7 @@ end subroutine add_matlu
 !Local variables-------------------------------
  integer :: iatom,isppol,lpawu,nspinor,nsppol,tndim
  real(dp) :: err_
- complex(dpc), allocatable :: mat_tmp(:,:)
+ complex(dp), allocatable :: mat_tmp(:,:)
 !************************************************************************
 
  nspinor = matlu(1)%nspinor
@@ -4546,7 +4562,7 @@ end subroutine add_matlu
 !! Transform mat from Ylm to JmJ basis or vice versa
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2024 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4571,7 +4587,7 @@ end subroutine add_matlu
  type(paw_dmft_type), intent(in) :: paw_dmft
 !Local variables-------------------------------
  integer :: iatom,lpawu,nspinor,tndim,tndim_max
- complex(dpc), allocatable :: mat_tmp(:,:)
+ complex(dp), allocatable :: mat_tmp(:,:)
  character(len=1) :: c1,c2
 !************************************************************************
 
@@ -4617,7 +4633,7 @@ end subroutine add_matlu
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (FGendron)
+!! Copyright (C) 2005-2026 ABINIT group (FGendron)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4657,18 +4673,18 @@ end subroutine add_matlu
  type(coeff2c_type), allocatable :: magnmatb(:)
 !************************************************************************
 
- !================================                               
- ! Allocate matrices                                             
- !================================                               
-                                                                 
- ABI_MALLOC(magnmatb,(natom))                                  
- do iatom=1,natom                                              
-   if(matlu(iatom)%lpawu .ne. -1) then                         
-     tndim=2*(2*matlu(iatom)%lpawu+1)                          
-     ABI_MALLOC(magnmatb(iatom)%value,(tndim,tndim))           
-     magnmatb(iatom)%value=czero                               
-   endif                                                       
- enddo                                                         
+ !================================
+ ! Allocate matrices
+ !================================
+
+ ABI_MALLOC(magnmatb,(natom))
+ do iatom=1,natom
+   if(matlu(iatom)%lpawu .ne. -1) then
+     tndim=2*(2*matlu(iatom)%lpawu+1)
+     ABI_MALLOC(magnmatb(iatom)%value,(tndim,tndim))
+     magnmatb(iatom)%value=czero
+   endif
+ enddo
 
  if(option .eq. 1) then
 
@@ -4745,6 +4761,126 @@ end subroutine add_matlu
 
  end subroutine magnfield_matlu
 !!***
+
+
+!!****f* m_matlu/magmomjmj_matlu
+!! NAME
+!! magmomjmj_matlu
+!!
+!! FUNCTION
+!! return the matrix of magnetic moments in the Jmj basis
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2005-2026 ABINIT group (FGendron)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+ subroutine magmomjmj_matlu(matlu,natom)
+ use defs_basis
+ use defs_wvltypes
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: natom
+!arrays
+ type(matlu_type), intent(inout) :: matlu(natom)
+!Local variables-------------------------------
+!scalars
+ integer :: iatom,lpawu,ll,ml1,ms1,jm,jc1,tndim,jj
+ real(dp) :: xj,xmj
+!arrays
+ integer, allocatable :: ind_msml(:,:)
+ type(coeff2c_type), allocatable :: gathermatlu(:)
+ complex(dpc),allocatable :: mlms2jmj(:,:)
+!************************************************************************
+
+ !=====================================
+ ! Allocate Matrices
+ !=====================================
+
+ ABI_MALLOC(gathermatlu,(natom))
+
+ do iatom=1,natom
+   lpawu=matlu(iatom)%lpawu
+   if(lpawu.ne.-1) then
+     ll=lpawu
+     tndim=2*(2*ll+1)
+
+     ABI_MALLOC(gathermatlu(iatom)%value,(tndim,tndim))
+     gathermatlu(iatom)%value=czero
+     ABI_MALLOC(mlms2jmj,(tndim,tndim))
+     mlms2jmj=czero
+     ABI_MALLOC(ind_msml,(2,-ll:ll))
+     mlms2jmj=czero
+
+ !=====================================
+ ! Build J,M_J matrix
+ !=====================================
+
+    jc1=0
+    do ms1=1,2
+      do ml1=-ll,ll
+        jc1=jc1+1
+        ind_msml(ms1,ml1)=jc1
+      end do
+    end do
+
+    jc1=0
+    do jj=ll,ll+1
+      xj=float(jj)-half !  xj is in {ll-0.5, ll+0.5}
+      do jm=-jj,jj-1
+        xmj=float(jm)+half  ! xmj is in {-xj,xj}
+        jc1=jc1+1           ! Global index for JMJ
+        if(nint(xj+0.5)==ll+1) then  ! if xj=ll+0.5
+          mlms2jmj(jc1,jc1)=xmj   !  J=L+0.5 and m_J=L+0.5
+        else if(nint(xj-0.5)==ll-1) then
+          mlms2jmj(jc1,jc1)=xmj   !  J=L+0.5 and m_J=-L-0.5
+        end if
+      end do
+    end do
+
+    !print to debug
+    !write(message,'(3a)') ch10,"JMJ Matrix"
+    !call wrtout(std_out,message,"COLL")
+    !do im=1,2*(ll*2+1)
+    !  write(message,'(12(1x,18(1x,f5.2,f5.2)))') (mlms2jmj(im,jm),jm=1,2*(ll*2+1))
+    !  call wrtout(std_out,message,"COLL")
+    !end do
+
+  !=====================================
+  ! Put back into matlu format
+  !=====================================
+
+   gathermatlu(iatom)%value=mlms2jmj
+
+   call gather_matlu(matlu,gathermatlu(iatom),natom=1,option=-1,prtopt=0)
+
+  !=====================================
+  ! Deallocate Matrices
+  !=====================================
+
+   ABI_FREE(gathermatlu(iatom)%value)
+    end if !lpawu
+  end do !natom
+
+ABI_FREE(mlms2jmj)
+ABI_FREE(ind_msml)
+ABI_FREE(gathermatlu)
+
+end subroutine magmomjmj_matlu
+
 
 END MODULE m_matlu
 !!***

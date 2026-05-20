@@ -6,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2025 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2026 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,7 @@ private
 !real(dp),allocatable :: lanczos_basis_complement(:,:,:)
 
 
-complex(dpc),public, allocatable :: A_array(:,:)
+complex(dp),public, allocatable :: A_array(:,:)
 
 integer, public  :: model_number
 real(dp),public  :: model_parameter

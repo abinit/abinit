@@ -1,13 +1,12 @@
 #!/usr/bin/env python
-"Check forbidden CPP flags"
+"""Check forbidden CPP flags"""
 #
-# Copyright (C) 2010-2025 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2010-2026 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
-from __future__ import unicode_literals, division, print_function, absolute_import
 
 from abirules_tools import find_abinit_src_directory
 
@@ -15,11 +14,11 @@ try:
     from ConfigParser import ConfigParser
 except ImportError:
     from configparser import ConfigParser
-from time import gmtime,strftime
 
 import os
 import re
 import sys
+
 
 class MyConfigParser(ConfigParser):
 

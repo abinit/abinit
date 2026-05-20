@@ -6,7 +6,7 @@
 !! This module produces inputs for the DMFT calculation
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -132,7 +132,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  character(len=500) :: message
  type(oper_type) :: loc_norm_check
  integer, allocatable :: displs(:),recvcounts(:)
- complex(dpc), allocatable :: buf_chipsi(:),buf_chipsi_tot(:),chipsi_tmp(:),cwprj(:,:)
+ complex(dp), allocatable :: buf_chipsi(:),buf_chipsi_tot(:),chipsi_tmp(:),cwprj(:,:)
  type(pawcprj_type), allocatable :: cwaveprj(:,:)
  type(matlu_type), allocatable :: matlu_temp(:)
  integer, parameter :: spinor_idxs(2,4) = RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
@@ -202,7 +202,12 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  nbandf = paw_dmft%dmftbandf
  t2g    = (paw_dmft%dmft_t2g == 1)
  x2my2d = (paw_dmft%dmft_x2my2d == 1)
- use_full_chipsi = (paw_dmft%dmft_use_full_chipsi == 1)
+ !use_full_chipsi = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
+ if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then
+   use_full_chipsi = .true.
+ else
+   use_full_chipsi = (paw_dmft%dmft_full_chipsi /= 0)
+ endif
 
  if (use_full_chipsi .and. mpi_enreg%nproc_fft > 1) then
    message = "datafordmft not working when nproc_fft > 1 and use_full_chipsi=1"
@@ -1184,14 +1189,14 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
  logical :: lexist
  type(oper_type) :: norm1,norm2,norm3
  real(dp), allocatable :: si(:),sr(:)
- complex(dpc), allocatable :: chipsivect(:,:),largeoverlap(:,:),mat_tmp(:,:)
+ complex(dp), allocatable :: chipsivect(:,:),largeoverlap(:,:),mat_tmp(:,:)
  character(len=1) :: tag_is
  character(len=4) :: tag_at
  character(len=5) :: tag
  character(len=500) :: message
  character(len=fnlen) :: tmpfil
 ! real(dp),allocatable :: e0pde(:,:,:),omegame0i(:)
- !complex(dpc), allocatable :: wan(:,:,:),sqrtmatinv(:,:),wanall(:)
+ !complex(dp), allocatable :: wan(:,:,:),sqrtmatinv(:,:),wanall(:)
  !type(coeff2c_type), allocatable :: overlap(:)
 !************************************************************************
 
@@ -1584,7 +1589,7 @@ subroutine chipsi_gather(paw_dmft)
  integer :: iatom,ib,ibuf,ierr,ikpt,irank,isppol,lpawu,mbandc,me_kpt
  integer :: mkmem,natom,ndim,nproc,nspinor,nsppol,shift,siz_buf
  integer, allocatable :: displs(:),recvcounts(:)
- complex(dpc), allocatable :: buffer(:),buffer_tot(:)
+ complex(dp), allocatable :: buffer(:),buffer_tot(:)
 !************************************************************************
 
  me_kpt  = paw_dmft%distrib%me_kpt

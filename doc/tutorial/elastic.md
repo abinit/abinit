@@ -14,7 +14,7 @@ an insulator and a metal:
   * the internal strain tensor
   * the atomic relaxation corrections to the elastic and piezoelectric tensor
 
-You should complete tutorials [RF1](/tutorial/rf1) and [RF2](/tutorial/rf2)
+You should complete tutorials [RF1](../tutorial/rf1.md) and [RF2](../tutorial/rf2.md)
 to introduce the density-functional perturbation theory (DFPT) features of
 ABINIT before starting this tutorial. You will learn to use additional DFPT
 features of ABINIT, and to use relevant parts of the associated codes Mrgddb and Anaddb.
@@ -66,13 +66,13 @@ new features here, and you should look at the following new input variables whic
 
 There are two datasets specified in *telast_1.abi*. First, let us examine the
 common input data. We specify a starting guess for [[acell]], and give an
-accurate decimal specification for [[rprim]]. The definition of the atom
-types and atoms follows [tutorial DFPT1](/tutorial/rf1). The reduced atomic
+precise decimal specification for [[rprim]]. The definition of the atom
+types and atoms follows [tutorial DFPT1](../tutorial/rf1.md). The reduced atomic
 positions [[xred]] are a starting approximation, and will be replaced by our
 converged results in the remaining input files, as will [[acell]].
 
 We will work with a fixed plane wave cutoff [[ecut]] (=6 Ha), but introduce
-[[ecutsm]] (0.5 Ha) as in [tutorial 3](/tutorial/base3) to smear the cutoff,
+[[ecutsm]] (0.5 Ha) as in [tutorial 3](../tutorial/base3.md) to smear the cutoff,
 which produces smoothly varying stresses as the lattice parameters are
 optimized. We will keep the same value of [[ecutsm]] for the DFPT calculations
 as well, since changing it from the optimization run value could reintroduce
@@ -80,14 +80,14 @@ non-zero forces and stresses. For the k-point grid, we must explicitly specify
 [[shiftk]] since the default value results in a grid shifted so as to break
 hexagonal symmetry. The RF strain calculations check this, and will exit with
 an error message if the grid does not have the proper symmetry.
-The self-consistency procedures follow [tutorial RF1](/tutorial/rf1).
+The self-consistency procedures follow [tutorial RF1](../tutorial/rf1.md).
 
 Dataset 1 optimizes the atomic positions keeping the lattice parameters fixed,
-setting [[geoopt]] "bfgs" as in [tutorial 1](/tutorial/base1). The optimization
+setting [[geoopt]] "bfgs" as in [tutorial 1](../tutorial/base1.md). The optimization
 steps proceed until the maximum force component on any atom is less than
 [[tolmxf]]. It is always advised to relax the forces before beginning the
 lattice parameter optimization. Dataset 2 optimizes the lattice parameters
-with [[optcell]]=2 as in [tutorial 3](/tutorial/base3). However, tutorial 3
+with [[optcell]]=2 as in [tutorial 3](../tutorial/base3.md). However, tutorial 3
 treats cubic Si, and the atom positions in reduced coordinates remained
 fixed. In the present, more general case, the reduced atomic coordinates must
 be reoptimized as the lattice parameters are optimized. Note that it is
@@ -164,7 +164,7 @@ acell and xred since these common values will apply to all datasets in the next 
 We will now compute second derivatives of the total energy (2DTE's) with
 respect to all the perturbations we need to compute elastic and piezoelectric
 properties. You may want to review the first paragraphs of the [[help:respfn]]
-which you studied in [tutorial RF1](/tutorial/rf1).
+which you studied in [tutorial RF1](../tutorial/rf1.md).
 We will introduce only one new input variable for the strain perturbation,
 
   * [[rfstrs]]
@@ -172,7 +172,7 @@ We will introduce only one new input variable for the strain perturbation,
 The treatment of strain as a perturbation has some subtle aspects. It would be
 a good idea to read  Metric tensor formulation of strain in density-functional
 perturbation theory, by D. R. Hamann, Xifan Wu, Karin M. Rabe, and David Vanderbilt [[cite:Hamann2005]]
-especially Sec. II and Sec. IV. We will do all the RF calculations you learned in [tutorial RF1](/tutorial/rf1) together
+especially Sec. II and Sec. IV. We will do all the RF calculations you learned in [tutorial RF1](../tutorial/rf1.md) together
 with strain, so you should review the variables
 
   * [[rfphon]]
@@ -203,7 +203,7 @@ Dataset 2 involves the calculation of the derivatives of the wave functions
 with respect to the Brillouin-zone wave vector, the so-called ddk wave
 functions. Recall that these are auxiliary quantities needed to compute the
 response to the [[lesson:rf1#5|electric field perturbation]] and
-introduced in [tutorial RF1](/tutorial/rf1). It would be a good idea to review the relevant
+introduced in [tutorial RF1](../tutorial/rf1.md). It would be a good idea to review the relevant
 parts of [[help:respfn#1|section 1]] of the respfn_help file.
 
 Examining this section of *telast_2.abi*, note that electric
@@ -240,7 +240,7 @@ component give us the rigid-ion piezoelectric tensor. Finally, derivatives
 with respect to one strain and one atomic displacement yield the internal-strain
 force-response tensor, an intermediate quantity that will be necessary
 to compute the atomic relaxation corrections to the rigid-ion quantities. As
-in [tutorial DFPT1](/tutorial/rf1), we specify convergence in terms of the residual of the
+in [tutorial DFPT1](../tutorial/rf1.md), we specify convergence in terms of the residual of the
 potential (here the first-order potential) using [[tolvrs]].
 
 Your run should have completed by now. Abinit should have created quite a few files,
@@ -332,7 +332,7 @@ has errors which are linearly proportional to convergence errors in the GS and
 first-order wave functions. Since errors in the variational 2DEtotal are
 second-order in wave-function convergence errors, comparing this to the non-variational
 result for the diagonal second derivative will give an idea of the
-accuracy of the latter and perhaps indicate the need for tighter convergence
+precision of the latter and perhaps indicate the need for tighter convergence
 tolerances for both the GS and RF wave functions.
 This is discussed in X. Gonze and C. Lee, Phys. Rev. B 55, 10355 (1997) [[cite:Gonze1997a]], Sec. II.
 For an atomic-displacement perturbation, the corresponding breakdown of the 2DTE is headed
@@ -460,7 +460,7 @@ can be analyzed by anaddb. One particular usage would be to combine the DDB
 file produced by the GS run, which contains first-derivative information such
 as stresses and forces with the RF DDB. It is anticipated that anaddb in a
 future release will implement the finite-stress corrections to the elastic
-tensor discussed in [notes by A. R. Oganov](/theory/documents/elasticity-oganov.pdf) .
+tensor discussed in [notes by A. R. Oganov](../theory/documents/elasticity-oganov.pdf) .
 
 Now would be a good time to edit *telast_3.abi* and observe that it is very
 simple, consisting of nothing more than the four variables listed above set to
@@ -637,10 +637,10 @@ in section 3. (Recall that our strains and stresses were both 3,3 or z,z or Voig
 compared to 34.8658 GPa, the 3,1 elastic-tensor element computed above.
 
 The good agreement we found from this simple numerical differentiation
-required that we had accurately relaxed the lattice so that the stress of the
+required that we had precisely relaxed the lattice so that the stress of the
 unstrained structure was very small. Similar numerical-derivative comparisons
 for systems with finite stress are more complicated, as discussed in
-[notes by A. R. Oganov](/theory/documents/elasticity-oganov.pdf).
+[notes by A. R. Oganov](../theory/documents/elasticity-oganov.pdf).
 Numerical-derivative comparisons for the relaxed-ion results are extremely challenging
 since they require relaxing atomic forces to exceedingly small limits.
 
@@ -656,7 +656,7 @@ focusing on the C/m^2 results,
            Polarization    -3.246052331E-01 C/m^2
 
 While not labeled as such, these are the Cartesian x, y, and z components,
-respectively, and the x and y components are zero within numerical accuracy as
+respectively, and the x and y components are zero within numerical precision as
 they must be from symmetry. Numerical differentiation of the z component
 yields -0.699337 C/m$^2$. This is to be compared with the z,3 element of our
 rigid-ion piezoelectric tensor from section 3, -0.696149 C/m$^2$, and the two
@@ -737,7 +737,7 @@ parameters of the calculation.
 
 For metals, the existence of partially occupied bands is a complicating
 feature for RF as well as GS calculations.
-Now would be a good time to review [tutorial 4](/tutorial/base4) which dealt in detail with the interplay between
+Now would be a good time to review [tutorial 4](../tutorial/base4.md) which dealt in detail with the interplay between
 **k**-sample convergence and Fermi-surface broadening, especially [[lesson:base4#3|section 3 of tutorial 4]].
 You should copy *telast_6.abi* into *Work_elast*, and begin your run
 while you read on, since it involves a convergence study with multiple datasets and may take about two minutes.
@@ -811,7 +811,7 @@ perfected knowledge of the Abinit perturbation indexing conventions to scan
 through *telast_6.abo* and find C$_{11}$ , C$_{12}$ , and C$_{44}$ for each of the three
 **k** -sample choices, which will be  under the " Rigid-atom elastic tensor"
 heading.  Also find the lattice constants for each case, whose convergence you
-studied in [tutorial 4](/tutorial/base4).
+studied in [tutorial 4](../tutorial/base4.md).
 You should be able to cut-and-paste these into a table like the following,
 
                 C_11        C_12        C_44        acell
@@ -825,7 +825,7 @@ acell is converged to 0.02%, while the C's have up to 15% error.  For [[ngkpt]]
 =3*8, the C's are converged to better than 0.5%, even for the largest,
 C$_{11}$, which should be acceptable.
 
-As in [tutorial 4](/tutorial/base4), the [[ngkpt]] convergence is controlled by [[tsmear]].  The
+As in [tutorial 4](../tutorial/base4.md), the [[ngkpt]] convergence is controlled by [[tsmear]].  The
 smaller the broadening, the denser the **k** sample that is needed to get a
 smooth variation of occupancy, and presumably stress, with strain.   While we
 will not explore [[tsmear]] convergence in this tutorial, you may wish to do so

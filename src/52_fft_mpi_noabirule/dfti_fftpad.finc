@@ -8,10 +8,9 @@
 
  nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
 
- call zpad_init(zpad, nx, ny, nz, ldx, ldy, ldz, mgfft, gbound)
+ call zpad%init(nx, ny, nz, ldx, ldy, ldz, mgfft, gbound)
 
  select case (isign)
-
  case (+1) ! G --> R
    ! 1) Transform along x.
    !    1D transform of f(Gx,Gy,Gz) along Gx for each Gx-line intersecting the G-sphere
@@ -21,15 +20,15 @@
    !
    ! TODO
    ! this value was added in mkl version 11.0.
-   ! It's the only way to avoid side effect in mkl_set_num_threads thus making this routine thread safe 
+   ! It's the only way to avoid side effect in mkl_set_num_threads thus making this routine thread safe
    !status = DftiSetValue(Desc1, DFTI_THREAD_LIMIT, 1)
    status = DftiSetValue(Desc1, DFTI_NUMBER_OF_USER_THREADS, nthreads)
 
    status = DftiCommitDescriptor(Desc1)
    DFTI_CHECK(status)
 
-!$OMP PARALLEL DO PRIVATE(dat,line,jj,kk,sidx,status) 
-   do cnt=0,(zpad%nlinex*ndat)-1 
+   !$OMP PARALLEL DO PRIVATE(dat,line,jj,kk,sidx,status)
+   do cnt=0,(zpad%nlinex*ndat)-1
      dat  = 1 + cnt / zpad%nlinex
      line = 1 + MOD(cnt, zpad%nlinex)
      jj   = zpad%linex2ifft_yz(1,line)
@@ -42,7 +41,7 @@
    status = DftiFreeDescriptor(Desc1)
    DFTI_CHECK(status)
    !
-   ! 2) Transform along y: 
+   ! 2) Transform along y:
    ! nx 1D transforms of f(x,Gy,Gz) along Gy for each Gz plane intersecting the sphere.
 
    status = DftiCreateDescriptor(Desc2, DEV_DFTI_PRECISION, DFTI_COMPLEX, 1, ny)
@@ -59,8 +58,8 @@
    status = DftiCommitDescriptor(Desc2)
    DFTI_CHECK(status)
 
-!$OMP PARALLEL DO PRIVATE(dat,zplane,kk,sidx,status) 
-   do cnt=0,(zpad%n_zplanes*ndat)-1 
+   !$OMP PARALLEL DO PRIVATE(dat,zplane,kk,sidx,status)
+   do cnt=0,(zpad%n_zplanes*ndat)-1
      dat    = 1 + cnt / zpad%n_zplanes
      zplane = 1 + MOD(cnt, zpad%n_zplanes)
      kk     = zpad%zplane(1,zplane)
@@ -82,7 +81,7 @@
      !status = DftiSetValue(Desc3, DFTI_THREAD_LIMIT, nthreads)
      status = DftiCreateDescriptor(Desc3, DEV_DFTI_PRECISION, DFTI_COMPLEX, 1, nz)
      DFTI_CHECK(status)
-                                                                            
+
      status = DftiSetValue(Desc3, DFTI_NUMBER_OF_TRANSFORMS, ldx*ldy)
      status = DftiSetValue(Desc3, DFTI_INPUT_DISTANCE,  1)
      arr(1) = 0
@@ -106,12 +105,12 @@
      status = DftiFreeDescriptor(Desc3)
      DFTI_CHECK(status)
 
-   else 
+   else
      ! Split ndat transforms among the threads.
      !call mkl_set_num_threads(1)
      status = DftiCreateDescriptor(Desc3, DEV_DFTI_PRECISION, DFTI_COMPLEX, 1, nz)
      DFTI_CHECK(status)
-                                                                            
+
      status = DftiSetValue(Desc3, DFTI_NUMBER_OF_TRANSFORMS, ldx*ldy)
      status = DftiSetValue(Desc3, DFTI_INPUT_DISTANCE,  1)
      arr(1) = 0
@@ -124,21 +123,21 @@
      if (iscale__ /= 0) then
        status = DftiSetValue(Desc3, DFTI_BACKWARD_SCALE, one/(nx*ny*nz))
      end if
-                                                                             
+
      status = DftiCommitDescriptor(Desc3)
      DFTI_CHECK(status)
 
-!$OMP PARALLEL DO PRIVATE(sidx,status) 
+     !$OMP PARALLEL DO PRIVATE(sidx,status)
      do dat=1,ndat
        sidx = 1 + (dat-1) *ldx*ldy*ldz
        status = DftiComputeBackward(Desc3, ff(sidx:))
        DFTI_CHECK(status)
      end do
-                                                                             
+
      status = DftiFreeDescriptor(Desc3)
      DFTI_CHECK(status)
    end if
- 
+
  case (-1) ! R --> G. Inverse of the algoritm used for G --> R
    !
    ! 1) Transform along z. Note We have to visit the entire augmented x-y plane!
@@ -166,11 +165,11 @@
 
      status = DftiFreeDescriptor(Desc3)
      DFTI_CHECK(status)
-   else 
+   else
      ! Split ndat transforms among the threads.
      status = DftiCreateDescriptor(Desc3, DEV_DFTI_PRECISION, DFTI_COMPLEX, 1, nz)
      DFTI_CHECK(status)
-                                                                            
+
      status = DftiSetValue(Desc3, DFTI_NUMBER_OF_TRANSFORMS, ldx*ldy)
      status = DftiSetValue(Desc3, DFTI_INPUT_DISTANCE,  1)
      arr(1) = 0
@@ -178,17 +177,17 @@
      status = DftiSetValue(Desc3, DFTI_INPUT_STRIDES,  arr)
      status = DftiSetValue(Desc3, DFTI_NUMBER_OF_USER_THREADS, nthreads)
      !status = DftiSetValue(Desc3, DFTI_THREAD_LIMIT, 1)
-                                                                            
+
      status = DftiCommitDescriptor(Desc3)
      DFTI_CHECK(status)
-                                                                            
-!$OMP PARALLEL DO PRIVATE(sidx,status) 
+
+     !$OMP PARALLEL DO PRIVATE(sidx,status)
      do dat=1,ndat
        sidx = 1 + (dat-1) *ldx*ldy*ldz
        status = DftiComputeForward(Desc3, ff(sidx:))
        DFTI_CHECK(status)
      end do
-                                                                            
+
      status = DftiFreeDescriptor(Desc3)
      DFTI_CHECK(status)
    end if
@@ -211,8 +210,8 @@
    status = DftiCommitDescriptor(Desc2)
    DFTI_CHECK(status)
 
-!$OMP PARALLEL DO PRIVATE(dat,zplane,kk,sidx,status) 
-   do cnt=0,(zpad%n_zplanes*ndat)-1 
+   !$OMP PARALLEL DO PRIVATE(dat,zplane,kk,sidx,status)
+   do cnt=0,(zpad%n_zplanes*ndat)-1
      dat    = 1 + cnt / zpad%n_zplanes
      zplane = 1 + MOD(cnt, zpad%n_zplanes)
      kk     = zpad%zplane(1,zplane)
@@ -224,7 +223,7 @@
    status = DftiFreeDescriptor(Desc2)
    DFTI_CHECK(status)
    !
-   ! 3) Transform along x. 
+   ! 3) Transform along x.
    !
    status = DftiCreateDescriptor(Desc1, DEV_DFTI_PRECISION, DFTI_COMPLEX, 1, nx)
    DFTI_CHECK(status)
@@ -240,8 +239,8 @@
    status = DftiCommitDescriptor(Desc1)
    DFTI_CHECK(status)
 
-!$OMP PARALLEL DO PRIVATE(dat,line,jj,kk,sidx,status) 
-   do cnt=0,(zpad%nlinex*ndat)-1 
+   !$OMP PARALLEL DO PRIVATE(dat,line,jj,kk,sidx,status)
+   do cnt=0,(zpad%nlinex*ndat)-1
      dat  = 1 + cnt / zpad%nlinex
      line = 1 + MOD(cnt, zpad%nlinex)
      jj   = zpad%linex2ifft_yz(1,line)
@@ -258,7 +257,7 @@
    ABI_BUG("Wrong isign")
  end select
 
- call zpad_free(zpad)
+ call zpad%free()
 
 #else
  ABI_ERROR("FFT_DFTI support not activated")

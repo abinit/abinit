@@ -7,7 +7,7 @@
 !! the linear and non-linear optical responses in the RPA.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2025 ABINIT group (SSharma,MVer,VRecoules,YG,NAP,VT)
+!! Copyright (C) 2002-2026 ABINIT group (SSharma,MVer,VRecoules,YG,NAP,VT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -104,7 +104,7 @@ program optic
  real(dp),target,allocatable :: eigen11(:),eigen12(:),eigen13(:)
  real(dp),allocatable :: eigtmp(:)
  real(dp), ABI_CONTIGUOUS pointer :: outeig(:)
- complex(dpc),target,allocatable :: pmat(:,:,:,:,:)
+ complex(dp),target,allocatable :: pmat(:,:,:,:,:)
  real(dp),contiguous, pointer :: pmat_ptr(:,:,:,:,:,:)
  logical :: use_ncevk(0:3)
  character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile,fname, infiles(0:3)
@@ -633,7 +633,7 @@ program optic
      ! This to be consistent with the value used in m_optic_tools
      ! In principle wmesh should be passed to the children and a lot of code
      ! should be rewritten to be more cache-friendly ...
-     wmesh(ii) = (ii-1)*domega * (13.60569172*2._dp)
+     wmesh(ii) = (ii-1)*domega * Ha_eV
    end do
    NCF_CHECK(nf90_put_var(optic_ncid, nctk_idname(optic_ncid, "wmesh"), wmesh))
    ABI_FREE(wmesh)

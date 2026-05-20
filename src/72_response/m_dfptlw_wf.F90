@@ -7,16 +7,10 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2022-2025 ABINIT group (MR)
+!!  Copyright (C) 2022-2026 ABINIT group (MR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -120,14 +114,6 @@ contains
 !! OUTPUT
 !! d3etot_t(1-5)_k= stationary 1wf contributions to the third-order energy
 !!                  derivatives for kpt
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -7,7 +7,7 @@
 !!  in order to initialize pspheads(1:npsp).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV, MG, DRH)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV, MG, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,7 +103,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
  character(len=70) :: testxml
  character(len=80) :: pspline
 !arrays
- integer :: nproj(0:3),nprojso(1:3)
+ integer,allocatable :: nproj(:),nprojso(:)
  integer,allocatable :: orb(:)
  real(dp) :: hdum(3)
 #if defined HAVE_BIGDFT
@@ -118,7 +118,6 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
  character(len=3) :: atmsymb
  character(len=30) :: creator
 #endif
-
 !*************************************************************************
 
  test_paw=0
@@ -177,6 +176,10 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      end if
      close(unit=unt,err=10,iomsg=errmsg)
    end if
+   if(test_paw==0) then
+     ABI_ICALLOC(nproj,(0:3))
+     ABI_ICALLOC(nprojso,(3))
+   endif
 
    ! Read the header of the pseudopotential file
    if (usexml /= 1 .and. useupf == 0) then
@@ -196,7 +199,14 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      write(msg,'(a,f5.1,a,i4,a,i4)')'  read the values zionpsp=',pspheads(ipsp)%zionpsp,' , pspcod=',pspcod,' , lmax=',lmax
      call wrtout(std_out,msg,'PERS')
 
-     nproj(0:3)=0 ; nprojso(1:3)=0
+     if(test_paw==1) then
+       ABI_MALLOC(nproj,(0:lmax))
+       ABI_MALLOC(nprojso,(lmax))
+       nproj(0:lmax)=0
+       nprojso(1:lmax)=0
+     else
+       nproj(0:3)=0 ; nprojso(1:3)=0
+     endif
 
      pspheads(ipsp)%xccc=0
      pspheads(ipsp)%pspso=0
@@ -214,8 +224,8 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      ! save some stuff locally for this ipsp
      pspcod = pspheads(ipsp)%pspcod
      lmax   = pspheads(ipsp)%lmax
-     nproj = pspheads(ipsp)%nproj
-     nprojso = pspheads(ipsp)%nprojso
+     nproj(0:min(lmax,3)) = pspheads(ipsp)%nproj(0:min(lmax,3))
+     nprojso(1:min(lmax,3)) = pspheads(ipsp)%nprojso(1:min(lmax,3))
 
 #else
      write(msg, '(2a)') "XML norm-conserving pseudopotential has been input,", &
@@ -265,8 +275,23 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
 
    ! Initialize nproj, nprojso, pspso, as well as xccc, for each type of psp
    pspheads(ipsp)%GTHradii = zero
+   if(test_paw/=1.and.lmax>3) then
+     ABI_ERROR('NC with l>3 not implmented')
+   endif
+    if(.not.allocated(pspheads(ipsp)%nproj)) then
+      ABI_MALLOC(pspheads(ipsp)%nproj,(0:lmax))
+   endif
+   if(.not.allocated(pspheads(ipsp)%nprojso)) then
+     ABI_MALLOC(pspheads(ipsp)%nprojso,(lmax))
+   endif
+   if(.not.allocated(nproj)) then
+     ABI_MALLOC(nproj,(0:lmax))
+   endif
+   if(.not.allocated(nprojso)) then
+     ABI_MALLOC(nprojso,(lmax))
+   endif
 
-   if(pspcod==1 .or. pspcod==4)then
+   if (pspcod==1 .or. pspcod==4)then
 
      ! Teter format
      do ilmax=0,lmax
@@ -276,7 +301,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      read(unt,*, err=10, iomsg=errmsg) rchrg,fchrg,qchrg
      if (fchrg>1.d-15) pspheads(ipsp)%xccc=n1xccc_default
 
-   else if(pspcod==2)then
+   else if (pspcod==2)then
 
      ! GTH pseudopotentials
      read(unt,*, err=10, iomsg=errmsg) pspheads(ipsp)%GTHradii(0) !rloc
@@ -286,7 +311,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      read(unt,*, err=10, iomsg=errmsg) pspheads(ipsp)%GTHradii(2),hdum(3)
      if(abs(hdum(3))>1.d-9) nproj(1)=1
 
-   else if(pspcod==3)then
+   else if (pspcod==3)then
 
      ! HGH pseudopotentials
      read (unt,*, err=10, iomsg=errmsg) pspheads(ipsp)%GTHradii(0) !rloc
@@ -309,7 +334,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
        end if
      end do
 
-   else if(pspcod==5)then
+   else if (pspcod==5)then
 
      ! PHONEY pseudopotentials
      ! read parameter for Hamman grid
@@ -331,7 +356,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      read (unt,*, err=10, iomsg=errmsg) rchrg,fchrg,qchrg
      if (fchrg>1.d-15) pspheads(ipsp)%xccc=n1xccc_default
 
-   else if(pspcod==6)then
+   else if (pspcod==6)then
 
      ! FHI pseudopotentials
      read (unt, '(a3)') testxc
@@ -349,7 +374,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
        nproj(ilmax)=1
      end do
 
-   else if(pspcod==7)then
+   else if (pspcod==7)then
 
      ! PAW pseudopotentials
      test_paw=1;pspheads(ipsp)%pawheader%pawver=1
@@ -429,7 +454,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      end if
 #endif
 
-   else if(pspcod==8)then
+   else if (pspcod==8)then
 
      ! DRH pseudopotentials
      read(unt,*, err=10, iomsg=errmsg) rchrg,fchrg,qchrg
@@ -444,10 +469,10 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      end if
      pspheads(ipsp)%pspso=pspso
 
-   else if(pspcod==9)then
+   else if (pspcod==9)then
       ! placeholder: nothing to do everything is read above
 
-   else if(pspcod==10)then
+   else if (pspcod==10)then
 
      ! HGH pseudopotentials, full h/k matrices
      read (unt,*,err=10,iomsg=errmsg) pspheads(ipsp)%GTHradii(0) !rloc
@@ -484,8 +509,8 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
 
    ! Store in pspheads
    if (pspcod /= 17) then
-     pspheads(ipsp)%nproj(0:3)=nproj(0:3)
-     pspheads(ipsp)%nprojso(1:3)=nprojso(1:3)
+     pspheads(ipsp)%nproj(0:lmax)=nproj(0:lmax)
+     pspheads(ipsp)%nprojso(1:lmax)=nprojso(1:lmax)
    end if
    !write(std_out,'(a,*(i0,1x))') 'nproj = ', pspheads(ipsp)%nproj(:)
    !write(std_out,'(a,*(i0,1x))') 'nprojso = ', pspheads(ipsp)%nprojso(:)
@@ -494,6 +519,8 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
 
    ! Compute md5 checksum
    pspheads(ipsp)%md5_checksum = md5_sum_from_file(filnam(ipsp))
+   ABI_FREE(nproj)
+   ABI_FREE(nprojso)
  end do ! ipsp=1,npsp
 
  ! Note that mpsang is the max of 1+lmax, with minimal value 1 (even for local psps, at present)
@@ -558,14 +585,13 @@ subroutine pspheads_comm(npsp,pspheads,test_paw)
 #if defined HAVE_MPI
 !scalars
  integer,parameter :: master=0
- integer :: ierr,comm
+ integer :: ierr,comm,ii,ipsp,il,list_size
 !arrays
  integer,allocatable :: list_int(:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: list_dpr(:)
  character(len=fnlen),allocatable :: list_char(:)
 #endif
-
 !*************************************************************************
 
 #if defined HAVE_MPI
@@ -587,38 +613,68 @@ subroutine pspheads_comm(npsp,pspheads,test_paw)
  ABI_FREE(list_char)
 
  ! Brodcast the integers
- ABI_MALLOC(list_int,(1+13*npsp))
- list_int(1        :   npsp) = pspheads(1:npsp)%nproj(0)
- list_int(1+   npsp: 2*npsp) = pspheads(1:npsp)%nproj(1)
- list_int(1+ 2*npsp: 3*npsp) = pspheads(1:npsp)%nproj(2)
- list_int(1+ 3*npsp: 4*npsp) = pspheads(1:npsp)%nproj(3)
- list_int(1+ 4*npsp: 5*npsp) = pspheads(1:npsp)%lmax
- list_int(1+ 5*npsp: 6*npsp) = pspheads(1:npsp)%xccc
- list_int(1+ 6*npsp: 7*npsp) = pspheads(1:npsp)%pspxc
- list_int(1+ 7*npsp: 8*npsp) = pspheads(1:npsp)%pspdat
- list_int(1+ 8*npsp: 9*npsp) = pspheads(1:npsp)%pspcod
- list_int(1+ 9*npsp:10*npsp) = pspheads(1:npsp)%pspso
- list_int(1+10*npsp:11*npsp) = pspheads(1:npsp)%nprojso(1)
- list_int(1+11*npsp:12*npsp) = pspheads(1:npsp)%nprojso(2)
- list_int(1+12*npsp:13*npsp) = pspheads(1:npsp)%nprojso(3)
- list_int(1+13*npsp)         = test_paw
+ list_size=6*npsp+1
+ ABI_MALLOC(list_int,(list_size))
+ list_int(1        :   npsp) = pspheads(1:npsp)%lmax
+ list_int(1+   npsp: 2*npsp) = pspheads(1:npsp)%xccc
+ list_int(1+ 2*npsp: 3*npsp) = pspheads(1:npsp)%pspxc
+ list_int(1+ 3*npsp: 4*npsp) = pspheads(1:npsp)%pspdat
+ list_int(1+ 4*npsp: 5*npsp) = pspheads(1:npsp)%pspcod
+ list_int(1+ 5*npsp: 6*npsp) = pspheads(1:npsp)%pspso
+ list_int(6*npsp+1) = test_paw
 
  call xmpi_bcast(list_int,master,comm,ierr)
 
- pspheads(1:npsp)%nproj(0)   = list_int(1        :   npsp)
- pspheads(1:npsp)%nproj(1)   = list_int(1+   npsp: 2*npsp)
- pspheads(1:npsp)%nproj(2)   = list_int(1+ 2*npsp: 3*npsp)
- pspheads(1:npsp)%nproj(3)   = list_int(1+ 3*npsp: 4*npsp)
- pspheads(1:npsp)%lmax       = list_int(1+ 4*npsp: 5*npsp)
- pspheads(1:npsp)%xccc       = list_int(1+ 5*npsp: 6*npsp)
- pspheads(1:npsp)%pspxc      = list_int(1+ 6*npsp: 7*npsp)
- pspheads(1:npsp)%pspdat     = list_int(1+ 7*npsp: 8*npsp)
- pspheads(1:npsp)%pspcod     = list_int(1+ 8*npsp: 9*npsp)
- pspheads(1:npsp)%pspso      = list_int(1+ 9*npsp:10*npsp)
- pspheads(1:npsp)%nprojso(1) = list_int(1+10*npsp:11*npsp)
- pspheads(1:npsp)%nprojso(2) = list_int(1+11*npsp:12*npsp)
- pspheads(1:npsp)%nprojso(3) = list_int(1+12*npsp:13*npsp)
- test_paw                    = list_int(1+13*npsp)
+ pspheads(1:npsp)%lmax       = list_int(1        :   npsp)
+ pspheads(1:npsp)%xccc       = list_int(1+   npsp: 2*npsp)
+ pspheads(1:npsp)%pspxc      = list_int(1+ 2*npsp: 3*npsp)
+ pspheads(1:npsp)%pspdat     = list_int(1+ 3*npsp: 4*npsp)
+ pspheads(1:npsp)%pspcod     = list_int(1+ 4*npsp: 5*npsp)
+ pspheads(1:npsp)%pspso      = list_int(1+ 5*npsp: 6*npsp)
+ test_paw = list_int(6*npsp+1)
+
+ ABI_FREE(list_int)
+
+ list_size=0
+ do ipsp=1,npsp
+   if(.not.allocated(pspheads(ipsp)%nproj)) then
+     ABI_MALLOC(pspheads(ipsp)%nproj,(0:pspheads(ipsp)%lmax))
+   endif
+   if(.not.allocated(pspheads(ipsp)%nprojso)) then
+     ABI_MALLOC(pspheads(ipsp)%nprojso,(pspheads(ipsp)%lmax))
+   endif
+   list_size=list_size+2*pspheads(ipsp)%lmax+1
+ enddo
+ ABI_MALLOC(list_int,(list_size))
+ ii=0
+ do ipsp=1,npsp
+   do il=0,pspheads(ipsp)%lmax
+     ii=ii+1
+     list_int(ii) = pspheads(ipsp)%nproj(il)
+   enddo
+ enddo
+ do ipsp=1,npsp
+   do il=1,pspheads(ipsp)%lmax
+     ii=ii+1
+     list_int(ii) = pspheads(ipsp)%nprojso(il)
+   enddo
+ enddo
+
+ call xmpi_bcast(list_int,master,comm,ierr)
+
+ ii=0
+ do ipsp=1,npsp
+   do il=0,pspheads(ipsp)%lmax
+     ii=ii+1
+     pspheads(ipsp)%nproj(il) = list_int(ii)
+   enddo
+ enddo
+ do ipsp=1,npsp
+   do il=1,pspheads(ipsp)%lmax
+     ii=ii+1
+     pspheads(ipsp)%nprojso(il) = list_int(ii)
+   enddo
+ enddo
  ABI_FREE(list_int)
 
  ! Unbeliveable, this cannot be sent with the others, for woopy
@@ -726,7 +782,6 @@ subroutine pawpsxml2ab(filnam, ecut_tmp, pspheads, option)
  integer :: ii,il,lloc,lmax,pspcod,pspxc
  real(dp) :: r2well,zionpsp,znuclpsp
 ! character(len=100) :: xclibxc, msg
-
 ! *********************************************************************
 
  if (option==1) then
@@ -749,6 +804,8 @@ subroutine pawpsxml2ab(filnam, ecut_tmp, pspheads, option)
    pspheads%pawheader%pawver,paw_setuploc,pspheads%pawheader%rpaw,&
    pspheads%pawheader%rshp,pspheads%pawheader%shape_type)
 
+ ABI_MALLOC(pspheads%nproj,(0:lmax))
+ ABI_MALLOC(pspheads%nprojso,(lmax))
  pspheads%nproj=0
  do il=0,pspheads%lmax
    do ii=1,pspheads%pawheader%basis_size
@@ -886,7 +943,6 @@ subroutine upf2_to_psphead(filpsp, znucl, zion, pspxc, lmax, n1xccc, nproj_l, np
  type(atomdata_t) :: atom
 ! arrays
  real(dp),allocatable :: vsr(:,:,:), esr(:,:), vso(:,:,:), eso(:,:)
-
 ! *********************************************************************
 
  ! See also https://github.com/QEF/qeschemas/blob/master/UPF/qe_pp-0.99.xsd
@@ -968,9 +1024,8 @@ subroutine upf2_jl2srso(upf, nproj_l, nprojso_l, vsr, esr, vso, eso)
  real(dp) :: jtot, eprmin !eps_srso,
  !character(len=500) :: msg
 ! arrays
-integer :: irc6(6),nproj6(6), done_ilk(6,2)
+ integer :: irc6(6),nproj6(6), done_ilk(6,2)
  real(dp),allocatable :: vkb(:,:,:,:), evkb(:,:,:)
-
 ! *********************************************************************
 
  lmax = upf%lmax; mmax = upf%mesh
@@ -1103,8 +1158,8 @@ subroutine upfxc2abi(dft, pspxc)
 !Local variables -------------------------
  integer :: iexch,icorr,igcx,igcc
  integer :: totalindex, offset
-
 ! *********************************************************************
+
 !extract from char*20 :: dft(:)
 !###  The following has been copied from pwscf src/Modules/upf_to_internal.f90:
 !workaround for rrkj format - it contains the indices, not the name
@@ -1191,7 +1246,6 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
 !Local variables-------------------------------
  integer :: start !, ii
  character(len=500) :: x_name, c_name, gcx_name, gcc_name
-
 !*************************************************************************
 
  ! This list taken from oncvpsp/src/upfout.f90
@@ -1216,7 +1270,7 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
    ixc = -106131
  case ("WC")
    ixc = -118130
- case ('SLA  PW   NOGX NOGC')  ! string produced by oncvpsp3
+ case ('SLA  PW   NOGX NOGC', "SLA+PW")  ! string produced by oncvpsp3
    ixc = -1012
  case ('R2SCAN01')
    ixc = -645642
@@ -1566,7 +1620,6 @@ end function upfdft_to_ixc
 end subroutine sr_so_r
 !!***
 
-!
 ! Copyright (c) 1989-2019 by D. R. Hamann, Mat-Sim Research LLC and Rutgers
 ! University
 !

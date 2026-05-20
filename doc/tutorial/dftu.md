@@ -12,7 +12,7 @@ You will learn what is a DFT+U calculation and what are the main input
 variables controlling this type of calculation.
 
 It is supposed that you already know how to do PAW calculations using ABINIT.
-Please follow the two tutorials on PAW in ABINIT ([PAW1](/tutorial/paw1), [PAW2](/tutorial/paw2)), if this is not the case.
+Please follow the two tutorials on PAW in ABINIT ([PAW1](../tutorial/paw1.md), [PAW2](../tutorial/paw2.md)), if this is not the case.
 
 This tutorial should take about 1 hour to complete.
 
@@ -86,19 +86,19 @@ and [[nspden]], that define this antiferromagnetic ordering along the <111>
 direction (of a conventional cubic cell).
 
 If you take a look at the output file (tdftu_1.out), you can see the
-integrated total density in the PAW spheres (see the [PAW1](/tutorial/paw1)
-and [PAW2](/tutorial/paw2) tutorials on PAW formalism). This value roughly
+integrated total density in the PAW spheres (see the [PAW1](../tutorial/paw1.md)
+and [PAW2](../tutorial/paw2.md) tutorials on PAW formalism). This value roughly
 estimates the magnetic moment of NiO:
 
      Integrated electronic and magnetization densities in atomic spheres:
      ---------------------------------------------------------------------
      Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
      Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-        1   1.81432     8.564383     7.188016     15.752398     1.376367
-        2   1.81432     7.188016     8.564383     15.752398    -1.376367
-        3   1.41465     2.260902     2.260902      4.521804    -0.000000
-        4   1.41465     2.260902     2.260902      4.521804     0.000000
-     
+     1 Ni   1.81432     8.564385     7.187993     15.752379     1.376392
+     2 Ni   1.81432     7.187993     8.564385     15.752379    -1.376392
+     3  O   1.41465     2.260909     2.260909      4.521817     0.000000
+     4  O   1.41465     2.260909     2.260909      4.521817     0.000000
+
 
 The atoms in the output file, are listed as in the [[typat]] variable (the
 first two are nickel atoms and the last two are oxygen atoms). The results
@@ -189,10 +189,10 @@ You can take a look at the result of the calculation. The magnetic moment is now
      ---------------------------------------------------------------------
      Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
      Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-        1   1.81432     8.749919     6.987384     15.737302     1.762535
-        2   1.81432     6.987384     8.749919     15.737302    -1.762535
-        3   1.41465     2.290397     2.290397      4.580793    -0.000000
-        4   1.41465     2.290397     2.290397      4.580793    -0.000000
+     1 Ni   1.81432     8.749918     6.987372     15.737289     1.762546
+     2 Ni   1.81432     6.987372     8.749918     15.737289    -1.762546
+     3  O   1.41465     2.290407     2.290407      4.580814    -0.000000
+     4  O   1.41465     2.290407     2.290407      4.580814    -0.000000
 
 
 NiO is found antiferromagnetic, with a moment that is in reasonable agreement
@@ -310,13 +310,13 @@ these results are not well converged. By contrast, the magnetization,
       ---------------------------------------------------------------------
       Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
       Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-         1   1.81432     8.675718     6.993823     15.669541     1.681895
-         2   1.81432     6.993823     8.675718     15.669541    -1.681895
-         3   1.41465     2.288681     2.288681      4.577361    -0.000000
-         4   1.41465     2.288681     2.288681      4.577361     0.000000
+      1 Ni   1.81432     8.675720     6.993816     15.669536     1.681904
+      2 Ni   1.81432     6.993816     8.675720     15.669536    -1.681904
+      3  O   1.41465     2.288685     2.288685      4.577371     0.000000
+      4  O   1.41465     2.288685     2.288685      4.577371    -0.000000
 
 
-is very similar to the DFT+U FLL. 
+is very similar to the DFT+U FLL.
 For other systems, the difference can be more important. FLL is designed
 to work well for systems in which occupations of orbitals are 0 or 1 for each
 spin. The AMF should be used when orbital occupations are near the average occupancies.
@@ -324,4 +324,4 @@ spin. The AMF should be used when orbital occupations are near the average occup
 ## 5 Projected density of states in DFT+U
 
 Using [[prtdos]] 3, you can now compute the projected d and f density of states.
-For more information about projected density of states, for more details see the [PAW1](/tutorial/paw1) tutorial.
+For more information about projected density of states, for more details see the [PAW1](../tutorial/paw1.md) tutorial.

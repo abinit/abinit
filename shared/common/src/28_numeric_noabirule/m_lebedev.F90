@@ -4,10 +4,10 @@
 !!
 !! FUNCTION
 !!  This module contains routines for performing integrations
-!!  on the sphere using lebedev-laikov angular grids.
+!!  on the sphere using Lebedev-Laikov angular grids.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2025 ABINIT group (MG)
+!! Copyright (C) 2008-2026 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,31 +47,28 @@ MODULE m_lebedev
  type,public :: lebedev_t
 
    integer :: npts
-   ! Number of points in the grid
+   ! Number of points in the grid.
 
    real(dp),allocatable :: versors(:,:)
-   ! versors(3, npts)
-   ! Points on the sphere.
+   ! (3, npts)
+   ! Points on the unit sphere in Cartesian coordinates.
 
    real(dp),allocatable :: weights(:)
-   ! weights(npts)
-   ! weights for Spherical integration.
+   ! (npts)
+   ! Weights for spherical integration.
 
  contains
 
    procedure :: from_npts  => lebedev_from_npts
+     ! Create a Lebedev grid for the number of points.
 
    procedure :: from_index  => lebedev_from_index
-     ! Create a lebedev grid for it's index
-     ! Useful if one has to loop over all the grids.
+     ! Create a Lebedev grid for its index. Useful if one has to loop over all the grids.
 
    procedure :: free => lebedev_free
      ! Free memory
 
  end type lebedev_t
-
- !public :: lebedev_from_index
- !public :: lebedev_free
 
 !----------------------------------------------------------------------
 
@@ -121,7 +118,7 @@ contains  !===========================================================
 !!  lebedev_from_npts
 !!
 !! FUNCTION
-!!  Create a lebedev grid given the number of points. npts
+!!  Create a lebedev grid given the number of points npts.
 !!  Exit status:
 !!    0 on success
 !!   -1 if npts is greater than the max number of points supported.
@@ -134,7 +131,6 @@ contains  !===========================================================
 subroutine lebedev_from_npts(new, npts, ierr)
 
 !Arguments ------------------------------------
-!scalars
  class(lebedev_t),intent(out) :: new
  integer,intent(in) :: npts
  integer,intent(out) :: ierr
@@ -170,15 +166,11 @@ end subroutine lebedev_from_npts
 !! INPUTS
 !!  seq_idx=Sequential index comprised between 1 and 32 defining the order of the mesh.
 !!
-!! OUTPUT
-!!  Lgrid<lebedev_t>=The grid fully initialized.
-!!
 !! SOURCE
 
 subroutine lebedev_from_index(new, seq_idx)
 
 !Arguments ------------------------------------
-!scalars
  class(lebedev_t),intent(out) :: new
  integer,intent(in) :: seq_idx
 
@@ -216,10 +208,8 @@ subroutine lebedev_free(lgrid)
 
 !Arguments ------------------------------------
  class(lebedev_t),intent(inout) :: lgrid
-
 ! *********************************************************************
 
- lgrid%npts=0
  ABI_SFREE(lgrid%versors)
  ABI_SFREE(lgrid%weights)
 
@@ -233,8 +223,7 @@ end subroutine lebedev_free
 !!  build_lebedev_grid
 !!
 !! FUNCTION
-!!  Helper subroutine returning the knots and weights of the angular grid
-!!  from its sequential index
+!!  Helper subroutine returning the knots and weights of the angular grid from its sequential index
 !!
 !! INPUTS
 !!  seq_idx=sequential index (must be in [1,32]
@@ -249,11 +238,9 @@ end subroutine lebedev_free
 subroutine build_lebedev_grid(seq_idx, npts, xx, yy, zz, ww)
 
 !Arguments ------------------------------------
-!scalars
  integer,intent(in) :: seq_idx
  integer,intent(out) :: npts
  real(dp),allocatable,intent(out) :: xx(:),yy(:),zz(:),ww(:)
-
 ! *********************************************************************
 
  if (seq_idx < 1 .or. seq_idx > lebedev_ngrids) then
@@ -261,6 +248,7 @@ subroutine build_lebedev_grid(seq_idx, npts, xx, yy, zz, ww)
  end if
 
  npts = lebedev_npts(seq_idx)
+
  ABI_MALLOC(xx, (npts))
  ABI_MALLOC(yy, (npts))
  ABI_MALLOC(zz, (npts))

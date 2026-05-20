@@ -15,11 +15,12 @@ module m_tdep_abitypes
   use netcdf
   use m_geometry,         only : xred2xcart
   use m_dynmat,           only : asrif9, d2cart_to_red
-  use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
+  use m_tdep_dataset,     only : atdep_dataset_type, MPI_enreg_type
   use m_tdep_latt,        only : Lattice_type
-  use m_tdep_phi2,        only : Eigen_type, tdep_build_phi2_33, Phi2_type
+  use m_tdep_phi2,        only : Eigen_type, tdep_build_phi2_33
+  use m_tdep_model,       only : Phi2_type
   use m_tdep_qpt,         only : Qpoints_type
-  use m_tdep_sym,         only : Symetries_type
+  use m_tdep_sym,         only : Symmetries_type
   use m_tdep_shell,       only : Shell_type
   use m_ifc,              only : ifc_type
   use m_crystal,          only : crystal_t
@@ -58,9 +59,9 @@ contains
  subroutine tdep_init_crystal(Crystal,Invar,Lattice,Sym)
 
   type(crystal_t),intent(out) :: Crystal
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Lattice_type),intent(in) :: Lattice
-  type(Symetries_type),intent(in) :: Sym
+  type(Symmetries_type),intent(in) :: Sym
 
   integer :: timrev,npsp
   logical :: remove_inv,use_antiferro
@@ -80,55 +81,35 @@ contains
   call crystal%init(Invar%amu,Sym%spgroup,Invar%natom_unitcell,npsp,&
 &   Invar%ntypat,Sym%nsym,Lattice%rprimdt,Invar%typat_unitcell,Sym%xred_zero,&
 &  zion,znucl,timrev,use_antiferro,remove_inv,title,&
-!BUG&  Sym%ptsymrel(:,:,1:Sym%nsym),Sym%tnons(:,1:Sym%nsym),Sym%symafm(1:Sym%nsym)) ! Optional
 &  Sym%symrel(:,:,1:Sym%nsym),Sym%tnons(:,1:Sym%nsym),Sym%symafm(1:Sym%nsym)) ! Optional
   ABI_FREE(title)
   ABI_FREE(znucl)
   ABI_FREE(zion)
 
  end subroutine tdep_init_crystal
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
- subroutine tdep_init_ifc(Crystal,DDB,Ifc,Invar,Lattice,MPIdata,Phi2,Rlatt_cart,Shell2at,Sym)
+!=====================================================================================================
+
+ subroutine tdep_init_ifc(Crystal,DDB,Ifc,Invar,Lattice,MPIdata,Phi2,Rlatt_scaled,Shell2at,Sym)
 
   type(crystal_t),intent(in) :: Crystal
   type(ifc_type),intent(out) :: Ifc
   type(ddb_type),intent(in) :: DDB
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Lattice_type),intent(in) :: Lattice
-  type(Symetries_type),intent(in) :: Sym
+  type(Symmetries_type),intent(in) :: Sym
   type(Shell_type),intent(in) :: Shell2at
   type(MPI_enreg_type), intent(in) :: MPIdata
   type(Phi2_type),intent(inout) :: Phi2
-  double precision,intent(in) :: Rlatt_cart(3,Invar%natom_unitcell,Invar%natom)
+  double precision,intent(in) :: Rlatt_scaled(3,Invar%natom_unitcell,Invar%natom)
 
-  integer :: iatcell,dipdip,ii,asr,symdynmat,rfmeth
+  integer :: ierr
+  integer :: dipdip,asr,symdynmat,rfmeth
   integer :: iatom,nsphere,prtsrlr,enunit,nqshft
   integer :: ngqpt_in(3)
   double precision :: rifcsph
-  double precision :: dielt(3,3)
-  double precision, allocatable :: zeff(:,:,:)
   double precision, allocatable :: q1shft(:,:)
   real(dp),allocatable :: qdrp_cart(:,:,:,:)
-
-! Define matrices for LO-TO
-! =========================
-  ABI_MALLOC(zeff, (3,3,Invar%natom_unitcell)); zeff (:,:,:)=zero
-  dielt(:,:)=    zero
-  dielt(1,1)=    1.d0
-  dielt(2,2)=    1.d0
-  dielt(3,3)=    1.d0
-  if (Invar%loto) then
-    dipdip=1
-    do iatcell=1,Invar%natom_unitcell
-      do ii=1,3
-        zeff(ii,ii,iatcell)=Invar%born_charge(Invar%typat_unitcell(iatcell))
-        dielt(ii,ii)       =Invar%dielec_constant
-      end do
-    end do
-  else
-    dipdip=0
-  end if
 
 ! Initialize the Ifc datatype
 ! ===========================
@@ -146,6 +127,12 @@ contains
   ABI_MALLOC(qdrp_cart,(3,3,3,Invar%natom_unitcell))
   ABI_MALLOC(q1shft,(3,nqshft))
 
+  if (Invar%loto) then
+    dipdip=1
+  else
+    dipdip=0
+  end if
+
 !LOTO Keep the Gamma point in the q-point mesh
   if (Invar%loto) then
     q1shft(:,:)=0.0d0
@@ -156,12 +143,11 @@ contains
   call ifc%init(Crystal,DDB,Lattice%brav,asr,symdynmat,dipdip,&
 !LOTO Keep the correct definition of the Lattice
 !LOTO  call ifc_init(Ifc,Crystal,DDB,1,asr,symdynmat,dipdip,&
-  rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
+  rfmeth,ngqpt_in,nqshft,q1shft,Invar%dielt,Invar%zeff,qdrp_cart,nsphere,rifcsph,&
   prtsrlr,enunit,1,XMPI_WORLD, prtout=.false.)
 
   ABI_FREE(q1shft)
   ABI_FREE(qdrp_cart)
-  ABI_FREE(zeff)
 
 ! Read an IFC from ifc_in.dat input file, write it in the ifc_check.dat file and copy to Phi2
 ! =================================================================================
@@ -173,9 +159,9 @@ contains
 !   Read IFC from ifc_in.dat (readifc=1)
     call tdep_read_ifc(Ifc,Invar,Invar%natom_unitcell)
 !   Copy Ifc%atmfrc to Phi2
-    call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,Invar%natom_unitcell,1,Phi2,Rlatt_cart,Shell2at,Sym)
+    call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,Invar%natom_unitcell,1,Phi2,Rlatt_scaled,Shell2at,Sym)
 !   Copy Phi2 to Ifc%atmfrc
-    call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,Invar%natom_unitcell,0,Phi2,Rlatt_cart,Shell2at,Sym)
+    call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,Invar%natom_unitcell,0,Phi2,Rlatt_scaled,Shell2at,Sym)
 !   Write IFC in ifc_check.dat (for check)
     if (MPIdata%iam_master) call tdep_write_ifc(Crystal,Ifc,Invar,Invar%natom_unitcell,1)
 
@@ -190,18 +176,35 @@ contains
     end if
   end if
 
-!TMP!LOTO
-!TMP! If the IFC is read (as above), we assume that there is no residual contribution of the
-!TMP! "LR part" within or that the decomposition between "LR" and "SR" parts is done (as it is
-!TMP! performed in the ABINIT output of IFC).
-!TMP! ============================================================================================
-!TMP  if (Invar%loto) then
-!TMP    if (MPIdata%iam_master) call tdep_write_ifc(Crystal,Ifc,Invar,Invar%natom_unitcell,1)
-!TMP    call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,Invar%natom_unitcell,1,Phi2,Rlatt_cart,Shell2at,Sym)
-!TMP  end if
+! If the IFC is read (as above), we assume that there is no residual contribution of the
+! "LR part" within or that the decomposition between "LR" and "SR" parts is done
+! (as it is performed in the ABINIT output of IFC).
+! ============================================================================================
+  if (Invar%loto) then
+
+
+    Ifc%short_atmfrc(:,:,:,:,:) = zero
+    Ifc%ewald_atmfrc(:,:,:,:,:) = zero
+
+    ! GA: It is necessary to write the ifc so that the long-range part of the IFC is computed.
+    if (MPIdata%iam_master) then
+      call tdep_write_ifc(Crystal,Ifc,Invar,Invar%natom_unitcell,1)
+    end if
+
+    ! Now communicate IFC
+    call xmpi_sum(Ifc%short_atmfrc, MPIdata%comm_step, ierr)
+    call xmpi_sum(Ifc%ewald_atmfrc, MPIdata%comm_step, ierr)
+    call xmpi_bcast(Ifc%short_atmfrc, MPIdata%master, MPIdata%comm_step, ierr)
+    call xmpi_bcast(Ifc%ewald_atmfrc, MPIdata%master, MPIdata%comm_step, ierr)
+
+    ! Copy long-range IFC into Phi2
+    call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,Invar%natom_unitcell,1,Phi2,Rlatt_scaled,Shell2at,Sym)
+
+  end if
 
  end subroutine tdep_init_ifc
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!=====================================================================================================
 
  subroutine tdep_init_ddb(Crystal,DDB,Invar,Lattice,MPIdata,Qbz)
 
@@ -209,7 +212,7 @@ contains
   type(ddb_type),intent(out) :: DDB
   type(Qbz_type),intent(out) :: Qbz
   type(MPI_enreg_type), intent(in) :: MPIdata
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Lattice_type),intent(in) :: Lattice
 
   integer :: option,nqshft,mqpt,nqbz,iq_ibz
@@ -272,9 +275,10 @@ contains
   DDB%qpt(1:3,:)=spqpt(:,:)
   ABI_FREE(spqpt)
   call alloc_copy(Invar%amu,DDB%amu)
+  DDB%acell=Lattice%acell_unitcell
+  ! GA: Note the peculiar convention here
   DDB%rprim=Lattice%rprimt
   DDB%gprim=Lattice%gprim
-  DDB%acell=Lattice%acell_unitcell
 
 ! Initialize useful quantities stored in the Qbz datatype
 ! =======================================================
@@ -325,7 +329,7 @@ contains
 
   type(crystal_t),intent(inout) :: Crystal
   type(ddb_type),intent(inout) :: DDB
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
 
   character (len=fnlen):: filename
   type(ddb_hdr_type) :: ddb_hdr
@@ -351,7 +355,7 @@ contains
 subroutine tdep_read_ifc(Ifc,Invar,natom_unitcell)
 
   integer,intent(in) :: natom_unitcell
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(ifc_type),intent(inout) :: Ifc
 
   integer :: iatcell,ifcout,ii,irpt,jatcell,jj,mu
@@ -455,7 +459,7 @@ end subroutine tdep_read_ifc
 subroutine tdep_write_ifc(Crystal,Ifc,Invar,natom_unitcell,unitfile)
 
   integer,intent(in) :: natom_unitcell,unitfile
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(ifc_type),intent(inout) :: Ifc
   type(crystal_t),intent(in) :: Crystal
 
@@ -473,7 +477,7 @@ subroutine tdep_write_ifc(Crystal,Ifc,Invar,natom_unitcell,unitfile)
     write(Invar%stdout,'(a)') ' Write the IFC of TDEP in ifc_out.dat (and ifc_out.nc)'
     open(unit=77,file=trim(Invar%output_prefix)//'_ifc_out.dat')
   else if (unitfile.eq.1) then
-    write(Invar%stdout,'(a)') ' Write in ifc_check.dat (and ifc_check.nc) the IFC read previously'
+    write(Invar%stdout,'(a)') ' Write the IFC in ifc_check.dat (and ifc_check.nc)'
     open(unit=77,file=trim(Invar%output_prefix)//'_ifc_check.dat')
   else if (unitfile.eq.2) then
     write(Invar%stdout,'(a)') ' Write in ifc_ddb.dat (and ifc_ddb.nc) the IFC read from DDB file'
@@ -498,18 +502,50 @@ subroutine tdep_write_ifc(Crystal,Ifc,Invar,natom_unitcell,unitfile)
   write(Invar%stdout,'(a)') ' ------- achieved'
 
 end subroutine tdep_write_ifc
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine tdep_ifc2phi2(dipdip,Ifc,Invar,Lattice,natom_unitcell,option,Phi2,Rlatt4abi,Shell2at,Sym)
+!=====================================================================================================
+
+!!****f* ABINIT/m_tdep_abitypes/tdep_ifc2phi2
+!! NAME
+!!  tdep_ifc2phi2
+!!
+!! FUNCTION
+!! Conversion between interatomic force constants (IFC) object
+!! and fitted second-order coefficients (Phi2).
+!!
+!! INPUTS
+!!  option
+!!      0 = Copy Phi2 into IFC
+!!      1 = Copy IFC into Phi2
+!!
+!!  Ifc = IFC object.
+!!  Phi2 = IFC object.
+!!  Invar = Input object containing the input variables.
+!!  Lattice = Lattice object describing the ideal structure.
+!!  Sym = Symetries object describing all the symmetry operations of the crystal.
+!!  Shell2at = Shell object for second-order interactions.
+!!  dipdip = Include long-range dipole-dipole interaction from IFC into Phi2.
+!!  Rlatt_scaled = Rlatt_cart divided by acell_unitcell.
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!  The following quantities in MD are computed:
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine tdep_ifc2phi2(dipdip,Ifc,Invar,Lattice,natom_unitcell,option,Phi2,Rlatt_scaled,Shell2at,Sym)
 
   integer,intent(in) :: dipdip,natom_unitcell,option
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Lattice_type),intent(in) :: Lattice
-  type(Symetries_type),intent(in) :: Sym
+  type(Symmetries_type),intent(in) :: Sym
   type(Shell_type),intent(in) :: Shell2at
   type(ifc_type),intent(inout) :: Ifc
   type(Phi2_type), intent(inout) :: Phi2
-  double precision, intent(in) :: Rlatt4abi(3,natom_unitcell,Invar%natom)
+  double precision, intent(in) :: Rlatt_scaled(3,natom_unitcell,Invar%natom)
 
   integer :: eatom,fatom,iatcell,ii,irpt,jatcell,jatom,jj,isym,kk
   integer :: ishell,iatref,jatref,iatshell,trans
@@ -534,7 +570,7 @@ subroutine tdep_ifc2phi2(dipdip,Ifc,Invar,Lattice,natom_unitcell,option,Phi2,Rla
   do iatcell=1,natom_unitcell
     do jatcell=1,natom_unitcell
       do jatom=jatcell,Invar%natom,natom_unitcell
-        vect_tdep(:)=Rlatt4abi(:,iatcell,jatom)+xcart(:,jatcell)-xcart(:,iatcell)
+        vect_tdep(:)=Rlatt_scaled(:,iatcell,jatom)+xcart(:,jatcell)-xcart(:,iatcell)
         tmp(:)=(vect_tdep(:)*Lattice%acell_unitcell(:))**2
         dist=dsqrt(sum(tmp(:)))
         if (dist.gt.(Invar%rcut*0.99).and.option==1) then
@@ -548,7 +584,7 @@ subroutine tdep_ifc2phi2(dipdip,Ifc,Invar,Lattice,natom_unitcell,option,Phi2,Rla
         do irpt=1,Ifc%nrpt
           if (Ifc%wghatm(iatcell,jatcell,irpt).lt.tol8) cycle
           vect_ddb (:)=Ifc%rpt(:,irpt)+Ifc%rcan(:,jatcell)-Ifc%rcan(:,iatcell)
-          tmp(:)=(vect_ddb(:)*Lattice%acell_unitcell(:))**2
+          tmp(:)=(vect_ddb(:)*Ifc%acell(:))**2
           dist=dsqrt(sum(tmp(:)))
           if (dist.gt.(Invar%rcut*0.99).and.option==0) then
             Ifc%atmfrc      (:,iatcell,:,jatcell,irpt)=zero
@@ -579,6 +615,8 @@ subroutine tdep_ifc2phi2(dipdip,Ifc,Invar,Lattice,natom_unitcell,option,Phi2,Rla
                   end if
                 else if (option==1) then
                   if (Invar%loto) then
+                    ! GA: FIXME  As it turns out, ewald_atmfrc is not even initialized at this point.
+
 !LOTO                    Phi2%LR (ii+(iatcell-1)*3,(jatom-1)*3+jj)=Ifc%ewald_atmfrc(ii,iatcell,jj,jatcell,irpt)*&
 !LOTO&                                                               Ifc%wghatm(iatcell,jatcell,irpt)
                     Phi2%LR (ii+(iatcell-1)*3,(jatom-1)*3+jj)=Ifc%ewald_atmfrc(ii,iatcell,jj,jatcell,irpt)

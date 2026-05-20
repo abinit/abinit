@@ -1,3 +1,463 @@
+## v10.6
+
+Version 10.6, released on Feb 6, 2026.
+<!-- Release notes updated on Mar 11, 2026. -->
+
+These release notes
+are relative to modifications/improvements of ABINIT v10.6 with respect to v10.4.
+<!-- Initially, beta-release v10.6.1, the included MRs are
+MR1160, 1165, 1168, 1170, 1172, 1173, 1183, 1187, 1191, 1194, 1106,
+then 1200 to 1275, except those that had been closed, and also
+EXCEPT MR1219, 1225, that had already been included in v10.4.
+MR1276, 1277, 1278, 1280, 1288 will be included in v10.8 . Perhaps MR 1282 if not a draft anymore.
+For release v10.6.3, also includes MR 1279 and 1281.
+MR 1284 and 1286 have been cherry-picked to 10.6.5 (perhaps also earlier ones, but I did not note ...)
+For release v10.6.5, also includes MR 1283, 1285, 1287, 1289 to 1292.
+-->
+
+Many thanks to the contributors to the ABINIT project between April 2025 and March 2026 !
+The list of contributors includes:
+
+B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, A. Blanchet, J. Boust, F. Brieuc, F. Bruneval,
+E. Castiel, F. Gendron, G. Geneste, M. Giantomassi, O. Gingras, X. Gonze, O. Mattelaer, G. Petretto,
+S. Ponce, S. Rostami, M. Royo, M. Sarraute, Le Shu, M. Torrent, Hsiaoyi Tsai, M. Verstraete, Xu He, A. Zabalo, J. Zwanziger.
+
+It is worthwhile to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases.
+This might take some time ...
+
+Xavier
+
+* * *
+
+### **A.** Remarks and warnings.
+
+**A.1** Remark: ABINIT paper
+
+The ABINIT project developments since 2020 have been the subject of a recently published paper, see [[cite:Verstraete2025]].
+
+**A.2** Update of ABINIT to CODATA2022 version of the fundamental constants
+
+Update ABINIT to the 2022 version of the fundamental constants,
+see [[https://www.nist.gov/publications/codata-internationally-recommended-2022-values-fundamental-physical-constants]] .
+In 2019, four of the seven SI based unit were defined as exact to avoid to depend on the standard kilogram.
+In SI, the Planck constant (h), the elementary electric charge (e), the Boltzmann constant (kB), and the Avogadro constant (NA) are now exact.
+In previous versions of ABINIT, CODATA2006 had been used (with some exceptions, from CODATA 2014 or 2017).
+The difference is not very large, usually at most at the fourth digit.
+All references of tests have been updated. However, the values quoted in most tutorials have not yet been updated (again this is a very small effect).
+
+By S. Ponce' and X. Gonze (MR1233).
+
+
+**A.3** Renaming of input variable zeemanfield to [[hspinfield]]
+
+The Zeeman effect is the global response of a system to a magnetic field, acting on both the spin and orbital magnetic moment.
+So, the previously defined input variable zeemanfield, where only the spin was considered, was wrongly named.
+
+New input variable : [[hspinfield]].
+See [[test:v10_30]], [[test:v6_17]].
+
+By Le Shu (MR1211)
+
+
+**A.4** Suppress `rfuser` (free natom+6 and natom+7). Not used anymore. Also suppress [[rfddk]]=2 (free natom+6). By X.Gonze (MR1229)
+
+* * *
+
+### **B.** Most noticeable developments
+
+
+**B.1** Progresses in Dynamical Mean Field Theory (DMFT) including interfacing with TRIQS
+
+There have been many improvements in the DMFT part of ABINIT, already started with ABINITv10.4 but now, with v10.6, ready for production, with adequate documentation and testing.
+
+* ABINIT has been interfaced with TRIQS [[https://triqs.github.io/triqs/latest/]]. About thirty new input variables have been defined, with the prefix dmft_triqs_XXXX .
+* A new tutorial [[tutorial:dmft_triqs]], has been introduced.
+* Massive optimization of the code, as well as cleaning.
+* It is possible to use the JMj local basis in DMFT with the CTQMC of abinit using [[dmftctqmc_basis]] = 4. It adds also the local susceptibility in this local basis and a test in paral repo
+* Add a new variable called [[dmft_magnfield]] that allows one to apply a small magnetic field for the DMFT calculations.
+  The contribution of the field is added using the Zeeman Hamiltonian either on the local impurity Hamiltonian or on the Kohn-Sham eigenvalues used to build the green's function.
+* When activating [[dmft_dc]]=8, the screened potential is assumed to have the form of a Yukawa potential. Controlling the parameters of this Yukawa potential is possible, see [[dmft_dc]]=8.
+* One can run dmft susceptibility with correlated and non correlated atoms.
+* A new option to run DFT+DMFT has been added: one can use Wannier90 to construct localized orbitals and call the impurity solver using the python invocation scheme
+* It is possible to take the CT-HYB configuration from the output of a previous dataset
+* It is possible to take the starting DMFT self-energy from the output of a previous dataset
+* OpenMP parallelization for CT-QMC solver.
+* Two extra components for the energy are printed.
+* Other new functionalities have been added (new double counting, possibility to work with an arbitrary orbital read from file, thermodynamic integration is now performed on both the interaction strength and the chemical potential strength instead of interaction only...).
+* There has also been miscellaneous DMFT fixes and improvements
+
+Two precompiler variables are now available: HAVE_TRIQS_INTERNAL when linking ABINIT with my internal version of TRIQS that I provide in my (ECastiel) Github repository, and HAVE_TRIQS_v3_2 when linking with the official version of TRIQS from v.3.2.x and upwards.
+
+Currently, the only parts of the code that are not tested are the interface with the complex version of TRIQS/CT-HYB (HAVE_TRIQS_COMPLEX) and with the additional features provided with my version of TRIQS, as the TRIQS bot in the test farm is only compiled with the real, official version of TRIQS. Testing these parts of the code would thus require configuring some new bots.
+
+See numerous new tests, [[test:paral_102]] to [[test:paral_118]], [[test:paral_121]], as well as the new [[tutorial:dmft_triqs]].
+
+New input variables :
+
+* about thirty variables with the prefix dmft_triqs_XXX, see above.
+* Yukawa : [[dmft_yukawa_epsilon]], [[dmft_yukawa_lambda]],  [[dmft_yukawa_param]]
+* Magnetic field : [[dmft_magnfield]], [[dmft_magnfield_b]]
+* Continuous Time QMC : [[dmftctqmc_chains]], [[dmftctqmc_localprop]] (replacing dmftctqmc_config), [[dmftctqmc_mov]], [[dmftctqmc_order]]
+* Init from previous datasets : [[getctqmcdata]], [[getself]]
+* Other miscellaneous new input variables : [[dmft_orbital_filepath]], [[dmft_prtself]], [[dmft_wanorthnorm]],[[dmft_fermi_step]], [[dmft_nominal]], [[dmft_orbital]],
+[[dmft_prt_maxent]], [[dmft_prtwan]], [[dmft_shiftself]], [[dmft_wanrad]], [[dmft_x2my2d]].
+
+See numerous tests, [[test:paral_102]] to [[test:paral_118]], [[test:paral_121]], as well as the new [[tutorial:dmft_triqs]].
+
+By F. Castiel, F. Gendron, O. Gingras, B. Amadon, M. Sarraute
+(MR1063, 1077, 1084, 1107, 1148 for v10.4, then MR1165, 1168, 1170, 1172, 1273, 1183, 1191, 1200, 1208, 1214, 1265, 1266, 1274 for v10.6)
+
+
+
+**B.2** Generalized Bloch theorem to study spin spirals
+
+The generalized Bloch theorem (GBT) can be used to study spin spirals, still keeping the usual small primitive cell instead of using a supercell.
+Full spin-orbit coupling (SOC) is not compatible with GBT. However, the periodic part of SOC (along the spin rotation axis) can be treated.
+See the following references, among others :
+[[cite:Sandratskii1986]], [[cite:Kurz2004]], [[cite:Heide2009]], and [[cite:Sandratskii2017]].
+
+In the present ABINIT implementation,
+the atomic magnetic moment rotates in the x-y plane (Cartesian coords.) while the z-component
+    remains lattice-periodic. For this reason, one should set [[spinat]] so to have non-zero
+    components in the x-y plane. Soon, this restriction should be waived, by defining an arbitrary spin projection axis.
+Forces, stresses and electric polarization are compatible with the GBT. Tests for forces and stresses are provided.
+The treatment of the periodic part of SOC (along the z direction) has been implemented as well.
+For the time being, only NC pseudos with [[useylm]] = 0 are supported.
+Also, [[paral_kgb]] must be set to 0 and GPUs cannot be used ([[gpu_option]]=0).
+
+New input variables: [[use_gbt]], [[qgbt]], [[qgbt_cart]].
+
+New tests : [[test:v10_27]], [[test:v10_28]], [[test:v10_29]]
+
+By Le Shu, M. Giantomassi and X. Gonze (MR1223, 1226, 1237, 1239)
+
+
+**B.3** New convergence criterion, suited for non-collinear magnetism studies
+
+A new tolerance parameter [[toldmag]] has been added to monitor and control the magnetization convergence in SCF cycles.
+The output file now reports the maximum value of the magnetization in the atomic spheres and the difference between the values between two SCF steps.
+
+Since [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] and [[tolvrs]] are aimed
+at the same goal (causing the SCF cycle to stop), they are seen as a unique
+input variable at reading. Hence, it is forbidden that two of these input
+variables have non-zero values for the same dataset, or generically (for all
+datasets).
+
+New [[test:v10_110]], and the output of many tests has been updated, due to the above-mentioned writings.
+
+By S. Rostami (MR1243)
+
+
+**B.4** Born contribution ("electron-phonon") to the total energy (beyond the usual Born-Oppenheimer energy)
+
+Calculation of the Born contribution ("electron-phonon") to the total energy.
+More information: [[https://arxiv.org/abs/2512.04897]].
+New tests:  [[test:v10_61]] to [[test:v10_65]].
+This energy contribution is printed with [[optdriver]]=7, [[eph_task]]=4.
+
+By S. Ponce with help by X. Gonze for the theory (MR1270)
+
+
+**B.5** Nuclear spin dipole coupling, indirect J coupling, control of ZORA Hamiltonian
+
+* Nuclear spin dipole coupling has been added, enabling electron-mediated spin-dipole coupling.
+* The tutorial on nucleus properties has been expanded to include indirect J coupling.
+* Provides a simplified, alternative input to [[nucdipmom]] for the atoms carrying explicit
+nuclear dipole moments: [[atndlist]], [[iatnd]], [[natnd]]
+* Added printing in 10^-21 SI units for point charge model output of EFG
+* Introduction of the [[zora]] input variable (zero-order relativistic approximation),
+to be able to include gradually corrections to the non-relativistic Hamiltonian, in the PAW case. [[zora]]=2 is equivalent to [[pawspnorb]]=1.
+* Also, update to CODATA2022, see A.2.
+* Corrected a bug in dfpt_nstpaw, whereby vlocal was not being allocated in the case of nonzero nuclear dipole vector potentials
+
+New input variables: [[atndlist]], [[iatnd]], [[natnd]], [[zora]].
+
+New tests: [[test:v10_44]], [[test:v10_84]], [[test:v9_141]] and tutorial [[test:nuc_5]]. Enlarged: [[test:v10_42]].
+
+By J. Zwanziger (MR1212, 1222, 1253, 1259, 1275)
+
+
+**B.6** ANADDB overhaul
+
+There has been a reorganization and beautification of Anaddb.
+
+* The main anaddb output file has been reorganized and the tests updated accordingly.
+* Certain parts of the code (phdos, BEC tensor, dielectric function) are no longer executed systematically, but are only executed if needed or activated with the appropriate input variables.
+* Anaddb no longer cares whether PAW was used.
+* Anaddb correctly report variables that are modified (dipquad, quadquad)
+* ASR is no longer deactivated just to preserve old behaviour.
+
+Moreover, internally,
+
+* the new anaddb_driver_type contains most of the subroutines that are executed by anaddb
+* the variable [[atifc@anaddb]] is no longer overwritten internally.
+* ddb_hdr_type uses logical variables to check for available block types (instead of mblktyp)
+
+By G. Antonius (MR1228)
+
+
+* * *
+
+
+### **C.** Changes for the developers or for the installation of ABINIT (including information about compilers)
+
+
+**C.1** ARM-based systems
+
+Support for ARM architectures in ABINIT has been significantly extended and improved.
+The code has been thoroughly tested on multiple ARM-based systems, including Amazon Graviton3 and Kunpeng 920, ensuring robust performance and compatibility across diverse hardware platforms.
+These developments further enhance ABINIT’s portability and efficiency on modern energy-efficient architectures.
+
+By G. Petretto (MR1240)
+
+
+**C.2** Improvements of the ABINIT build system: pkg_config and simplified usage of fallbacks.
+
+
+It is now possible to better discover how to configure FFTW3, libxc, netcdf, ELPA and hdf5 using pkg_config (if present).
+This follows the same strategy as for netcdf_fortran.
+One change of behavior is that ./configure will try to detect/configure FFTW3 (and fallback to Goedecker's version if FFTW3 is not installed/working).
+Therefore, some buildbot might be running now with FFTW3 instead of Goedecker.
+If that's problematic, one can add --without-fftw3 to forbid such detection.
+This is for example the case for alps_nag_7.2_serial which is now using FFTW3.
+This also allows having NAG compiler working with FFTW3 which was not working before (at least in general and in particular within buildbot).
+
+Simplified usage of fallbacks ("one-step fallbacks"). The idea is that even if some of the mandatory fallbacks code are not present then the code will configure itself as if the fallback were present.
+If the user then chooses to proceed by doing "make" then the fallbacks script is run (compiling only the needed one) and then abinit compile against those fallbacks.
+Note that currently the fallback always compile hdf5, a PR on the fallback repo has been created to fix that small issue. But technically this PR can be seen as independent.
+
+Fix detection of intel on manneback.
+
+Fix a typo in a config file: a copy-paste issue when hdf5 installation path was wrongly having reference to libxc.
+
+By O. Mattelaer, with some help from M. Giantomassi and S. Ponce' (MR1194, 1227, 1246, 1255, 1262)
+
+
+**C.3** Improvement of configure
+
+Configure now displays Python version and is OK with python version > 3.12
+There is a new version of the fallbacks (10.6).
+EOI and EOE builders have been fixed for new fallbacks
+
+By J.-M. Beuken (MR1213, 1267)
+
+**C.4**
+
+* Added better support for using many MPI tasks per GPU, by detecting and advising use of NVIDIA MPS.
+* Fix ARM detection with Autotools
+* Add minimal support for CUDA 13, which brought API changes in code mostly impacting Kokkos GPU implementation.
+* Fix enable_gpu_nvidia_unified_memory setting in Autotools
+* Fix replacing -lnvmalloc with -nvmalloc, whenever the former is spotted among FC_LIBS.
+* Avoid using a work array in ompgpu_fourwf (except option==3)
+* Fix configure with NVHPC on ARM & NVTX with CMake and CUDA 12.9
+* Fix CUDA 13 support (clockRate no longer in deviceProp)
+* Fix GPU memory leak in lobpcg2
+
+By M. Sarraute (MR1196, 1204, 1234, 1244, 1248, 1254, 1264)
+
+**C.5** Replace complex(dpc) with complex(dp).  Remove gwpc and spc; use gwp and sp instead. By M. Giantomassi (MR1235)
+
+
+* * *
+
+### **D.**  Other developments (possibly not yet finalized), other new tests, new input variables, new tutorials, optimizations.
+
+**D.1** Miscellaneous optimizations or testing for GPU
+
+Add GPU optimization for use cases with multiple K-points.
+
+This brings GPU acceleration to sections that bottlenecks GPU performance when using multiple K-points:
+
+* array initialization in mkrho (paral_kgb==1)
+* array initialization in vtowfk post diago
+* array initialization and MPI collective in prep_nonlop, prep_fourwf
+
+I slipped in a slight optimization of getgh1c, using CUDA/HIP math libs instead of OpenMP kernels when possible.
+
+Run [[test:gpu_omp_31]], a DFPT test, on a single direction to avoid timeout.
+Added [[test:gpu_omp_51]] for Chebyshev, and [[test:gpu_omp_52]] for non-collinear magnetism.
+
+By M. Sarraute (MR1196, 1210)
+
+
+**D.2** New GSTORE format. New input variables related to GSTORE.
+
+The GSTORE.nc file now always stores complex electron–phonon matrix elements in the atomic representation.
+The format also supports different numbers of bands for incoming and outgoing electrons.
+Backward compatibility with older GSTORE files is not preserved (too difficult to maintain).
+This is not a major issue since GSTORE is currently only used in varpeq, and V. Vasilchenko has agreed to adopt the new format.
+
+Introduced new variables [[gstore_use_lgk]], [[gstore_use_lgq]] to use symmetries by restricting
+the computation to the little group (of k or q).
+
+Introduced new variable [[gstore_gname]]. This input variable specifies the name of the netcdf variable from which the e-ph matrix elements
+will be **read** from the GSTORE.nc file.
+
+See `test:gwpt_suite_04` and `test:gwpt_suite_05`to be activated later.
+
+By M. Giantomassi (MR1235 and 1238)
+
+
+**D.3** New developments in GW and GWR
+
+* New variable [[scr_wrange]] to compute a subset of frequencies in SCREENING, see [[test:v67mbpt_54]] and [[test:v67mbpt_57]]
+* New variable [[nfreqim_conv]] defining the number of imaginary frequency points used to interpolate the convolution between G and W. See [[test:v67mbpt_60]].
+when computing the self-energy with the analytic continuation (AC) method (i.e., when [[gwcalctyp]] = x1).
+This setting enables a more accurate evaluation of the self-energy for a given SCR file containing [[nfreqim]] imaginary frequencies.
+* Use MPI shared window in SIGMA so that memory for epsm1 does not increase with the number of MPI procs per node
+* Add possibility of using minimax meshes in SCREENING and SIGMA with AC.
+* New file format for the header of the SCR file with info on frequency meshes.
+* Breaking change in GW: stop the code if [[nband]] is greater than the number of states found in the WFK file.
+Previously, we were just printing a WARNING in the log file.
+* Fix memory leak in gwr with [[gwr_chi_algo]] 2
+
+See [[test:v67mbpt_54]] to [[test:v67mbpt_60]], also [[test:gwr_suite_12]].
+
+By M. Giantomassi and Hsiao-Yi Tsai (MR1187, 1201)
+
+
+**D.4** It is now possible to separately define the rcut for GW and for Fock, thanks to the new input variables [[fock_rcut]] and [[gw_rcut]].
+
+For [[fock_rcut]], see [[test:gwr_suite_10]], [[test:gwr_suite_11]], and [[test:v10_121]]
+For [[gw_rcut]], see [[test:gwr_suite_10]], [[test:gwr_suite_11]], [[test:paral_75]], [[test:paral_77]], [[test:v67mbpt_03]], [[test:v67mbpt_09]],
+[[test:v67mbpt_15]], [[test:v67mbpt_19]], [[test:v7_68]], [[test:v9_31]].
+
+By F. Bruneval (commit 54d0c199f18 among others)
+
+**D.5** Relaxed-core PAW (Still in development, alsi extended FMPD.)
+
+Implemented the relaxed-core PAW method, see [[test:v10_108]].
+
+New input variables : use_rcpaw, rcpaw_frocc, rcpaw_elin, rcpaw_tpaw, rcpaw_vhtnzc, rcpaw_rctypat, rcpaw_sc, rcpaw_tolnc, rcpaw_updaepw, rcpaw_updatetnc
+To be documented.
+
+Print now core contribution when running PAW; with this contribution the total energy can be compared when using different pseudopotentials, even when they have different cores.
+Also, the total energy of the isolated atom is now identical to the one out put by atompaw.
+
+New [[paw_add_core]] (not activated by default) to include the core contribution in the total energy printed during iterations. By default, this is the behavior when running relaxed-core paw.
+See [[test:v10_109]]
+
+Other new input variables, to be tested, to be documented : `extfpmd_prterr`, `extfpmd_pawsph`, `cwfs_wouth`.
+
+**D.6** Remove the output in the log of PAW related quantities (Dij and Rhoij) at each SCF cycle when pawprtvol is 0
+
+By F. Brieuc (MR1207)
+
+**D.7** Allow dilatmx > 1 only for ground state.
+
+As discussed in the coredev meeting, now [[dilatmx]] > 1 is allowed only for ground state.
+Some tests were using dilatmx > 1 for DFPT, so they are changed.
+Also, a warning is printed if dilatmx > 1 and [[optcell]]==0.
+
+By L. Baguet (MR1216)
+
+**D.8** No more [[bandpp]] in testsuite.
+
+Remove [[bandpp]] in input files of the testsuite, except in paral[33] and v9[205], and replace it by [[nblock_lobpcg]].
+For now the [[tutorial:paral_bandpw]] is not changed, but has to be reworked.
+
+By L. Baguet (MR1217)
+
+**D.9** Fix unit cell matching in atdep, with three new input variables
+
+Three new input variables in atdep (to replace tolmotifinboxmatch):
+
+* [[tolmotif@atdep]]
+* [[tolinbox@atdep]]
+* [[tolmatch@atdep]]
+
+Cell matching fix:
+[[tolinbox@atdep]] is used when searching for reference unit cell in supercell.
+
+See [[test:atdep_07]], [[test:atdep_08]], [[test:atdep_12]] and [[test:atdep_15]]
+
+By G. Antonius (MR1218)
+
+**D.10** New test related to cprj, [[test:paral_120]] for metaGGA, PAW, cprj. F. Brieuc.
+
+**D.11** New test related to cprj, [[test:paral_18]] for chebfi2, test atoms not ordered by types, also [[test:v10_26]]. L. Baguet.
+
+**D.12** Some beautifications and cleaning in xg-tools
+
+* blockdim_cprj is now an optional parameter of xg_ortho_RR_cprj routine, only used in LOBPCG
+* improve timers related to xgblocks, add optional "timing" parameter to xgBlock_gemm
+* remove "fld_options = -ridiculous" of almost all tests I added
+* some other minor stuff
+
+By L. Baguet (MR1224)
+
+**D.13** Variables [[irddkdk]], [[irddkde]], and [[irddelfd]] added, to complement the existing [[getdkdk]], [[getdkde]], and [[getdelfd]].
+
+Their use is similar to the corresponding get* input variables, no test is provided.
+
+By J. Zwanziger (MR1230)
+
+**D.14** Replace complex(dpc) with complex(dp).  Remove gwpc and spc; use gwp and sp instead. By M. Giantomassi (MR1235)
+
+**D.15**
+Significantly improved the error message output to ABI_MPIABORTFILE. Use POSIX API to create a file lock.
+
+
+
+* * *
+
+### **E.**  Bug fixes, not yet mentioned in the previous sections of these release notes.
+
+**E.1** Axial vectors and symmetries
+
+An input axial vector, like [[hspinfield]] was wrongly treated as a normal vector for the determination of symmetries.
+For example, a non-zero [[hspinfield]] was wrongly preventing the inversion symmetry to occur. Same thing for [[spinat]].
+The recognition of symmetry groups was also incorrect. This has been fixed.
+
+See [[test:v10_30]].
+
+By Le Shu and X. Gonze (MR1205).
+
+**E.2** Various fixes for the extended dft model
+
+Fixes the estimation of the extended dft energy shift when using a fine grid (ecut ≠ pawecutdg).
+Before this fix, using a fine grid led to a misestimation of the shift factor and subsequently of all the contributions.
+Also fixes the evaluation of the hybrid Kohn-Sham + Thomas-Fermi contribution to the electron density (work in progress).
+
+By A. Blanchet (MR1252).
+
+**E.3** Re-enable SOC/spinor treatment with wannier90, which was broken some time ago.
+Catch PAW + W90 which is not functional for the moment (afaik).
+Start changes to enable PAW as well.
+
+By M. Verstraete (MR1215)
+
+**E.4** Bugfix: the Born effective charge was not printed in output when there was electric/displacement term at Gamma, but no displacement/displacement term.
+No autotest needed to be added as tutorespfn/telast_3 is in this case. The reference has been updated.
+
+By He Xu (MR1241)
+
+**E.5** Fix nhat overlap threads
+
+Fix a bug occuring with threads when a PAW sphere overlaps with itself (possible if the sphere is larger than the unit cell).
+In that particular case, the compensating charge density could be wrong (depending on the system and the number of threads...).
+This case is now covered by the [[test:v10_39]].
+
+By L. Baguet (MR1269)
+
+
+**E.6** Miscellaneous bug fixes and cleaning
+
+* Correct work array sizes used in fourwf in getghc and vtowfk. L. Baguet (MR1220)
+* Fix meta-GGA + PAW. F. Brieuc, L. Baguet, M. Torrent (MR1221)
+* Fix atdep files file. G. Antonius (MR1231)
+* Procedures + docs + minor fixes. M. Giantomassi (MR1232)
+* Fix abirules (unused local args). This test was not executed by buildbot after the migration to Python 3.12 (where SafeConfigParser was removed from the stdlib). M. Giantomassi (MR1235)
+* Fixed incorrect default value for [[dosdeltae]] in doc. A. Blanchet (MR1257).
+* Fix hist.nc file for PIMD calculations, writing correct temperature at correct time step. From M. Torrent and G. Geneste. (MR1268).
+* Small fix occuring with mGGA, big npw, threads and intel 19. L. Baguet (MR1272)
+* Do not check libxc fortran interface in configure as it is not used by the code. L. Baguet (MR1279).
+
+
+* * *
+
+
 ## v10.4
 
 Version 10.4, released on May 15, 2025.
@@ -5,9 +465,9 @@ Version 10.4, released on May 15, 2025.
 
 These release notes
 are relative to modifications/improvements of ABINIT v10.4 with respect to v10.2.
-<!-- Initially, beta-release v10.4.1, merge requests from MR1063, 1068, 1077, 1079, 1081, then 1083 to 1175, 
+<!-- Initially, be1Gta-release v10.4.1, merge requests from MR1063, 1068, 1077, 1079, 1081, then 1083 to 1175,
 EXCEPT MR1087, 1088, 1090, 1091, 1092, 1095, 1097, 1100, 1104, 1106, 1114, 1115, that had already been included in v10.2,
-and EXCEPT MR1160, 1165, 1168, 1170, 1172 and 1173  that will be included in v10.6 .  
+and EXCEPT MR1160, 1165, 1168, 1170, 1172 and 1173  that will be included in v10.6 .
 For release v10.4.3, also MR1176 to 1182 are included, as well as MR1184-1186, MR1188 and MR1190. However, MR1183 and MR1187 will be included in v10.6.
 For release v10.4.5, also MR1188 to 1190, MR1193, MR1195, MR1197-1199, MR1203 are included. However, MR1191-1192, MR1194, MR1196, MR1200-1202, MR1205-1210 will be included in v10.6.
 For release v10.4.7, also MR1219 and MR1225 are included.
@@ -74,24 +534,17 @@ By M. Giantomassi and X. Gonze.
 
 The variational polaron equation implementation in ABINIT is ready for production.
 It allows one to compute polaron formation energies and associated quantities, in the
-strong-coupling approximation. See [[cite:Vasilchenko2022]], and a forthcoming Vasilchenko2025 paper (reference to be added when published).
+strong-coupling approximation. See [[cite:Vasilchenko2025]] and [[cite:Vasilchenko2022]].
 Activate it using [[optdriver]]=7 and [[eph_task]]=13 (see also [[eph_task]]=-13).
 The corresponding [[tutorial:eph4vpq]] is available.
 In this tutorial, there are 10 tests, [[test:eph4vpq_1]] to [[test:eph4vpq_10]].
 
 Related input variables: [[getvpq]], [[getvpq_filepath]],[[vpq_aseed]], [[vpq_avg_g]], [[vpq_gpr_energy]], [[vpq_gpr_length]],
-[[vpq_interp]],
-[[vpq_mix_fact]],
-[[vpq_mesh_fact]],
-[[vpq_nstates]],
-[[vpq_nstep]],
-[[vpq_nstep_ort]],
-[[vpq_select]],
-[[vpq_pkind]],
-[[vpq_tolgrs]],
-[[vpq_translate]],
-[[vpq_trvec]].
-The previously introduced input variables varpeq_<...> (or containing the string varpeq) have been renamed with the prefix vpq_ (or the string vpq) .
+[[vpq_interp]], [[vpq_mix_fact]], [[vpq_mesh_fact]], [[vpq_nstates]],
+[[vpq_nstep]], [[vpq_nstep_ort]], [[vpq_select]], [[vpq_pkind]], [[vpq_tolgrs]],
+[[vpq_translate]], [[vpq_trvec]].
+The previously introduced input variables varpeq_<...> (or containing the string varpeq) have been renamed
+with the prefix vpq_ (or the string vpq).
 
 By V. Vasilchenko, with help from M. Giantomassi, X. Gonze and S. Ponce (MR1126, 1161, 1164, 1166)
 
@@ -104,14 +557,14 @@ It includes the calculation of the current density response to an impulse electr
 Activate it using [[optdriver]]=9. Control the number of time steps using [[ntime]], and the time step value using [[dtele]].
 The corresponding [[tutorial:rttddft]] is available.
 
-Related input variables : [[prtcurrent]], [[td_propagator]], [[dtele]], [[td_ef_type]], [[td_ef_induced_vecpot]], [[td_ef_tzero]], [[td_ef_pol]]
+Related input variables: [[prtcurrent]], [[td_propagator]], [[dtele]], [[td_ef_type]], [[td_ef_induced_vecpot]], [[td_ef_tzero]], [[td_ef_pol]]
 The new input units "fs" and "as" have been introduced (for "femtoseconds" and "attoseconds").
-Related tests : [[test:rttddft_suite_01]] to  [[test:rttddft_suite_06]] as well as the tests of the tutorial, [[test:rttddft_1]] to [[test:rttddft_4]].
+Related tests: [[test:rttddft_suite_01]] to  [[test:rttddft_suite_06]] as well as the tests of the tutorial, [[test:rttddft_1]] to [[test:rttddft_4]].
 
 By F. Brieuc (MR1137)
 
 
-**B.3** Electron-phonon interaction : thermal transport, cumulant and miscellaneous improvements.
+**B.3** Electron-phonon interaction: thermal transport, cumulant and miscellaneous improvements.
 
 Thanks to the treatment of thermal gradients in addition to electric fields,
 the calculation of Seebeck, electronic thermal conductivity and Peltier coefficients is available both in the Relexation-Time Approximation
@@ -225,12 +678,12 @@ See [[test:v9_95]].
 By M. Torrent (MR1099)
 
 
-**B.8** Orbital magnetization, chemical shielding, and electric field gradient : mGGA, abipy integration, GPU.
+**B.8** Orbital magnetization, chemical shielding, and electric field gradient: mGGA, abipy integration, GPU.
 
 * The mGGA has been implemented for the DDK DFPT perturbation, enabling mGGA calculations of the orbital magnetization, that has been tested with R2SCAN, both with and without spinors.
 * ZORA terms coupling electron spin to nuclear magnetic dipole moments are now computed. This accomplishes accurate chemical shielding calculations in the presence of significant relativistic effects.
 * Added GSR netcdf output of orbital magnetism and electric field gradient. Together with previous ORBMAG.nc additions, this completes abinit work for integration with abipy developments.
-* GPU porting : DDK and orbital magnetism response with nuclear dipole moment and nspinor 2 are available.
+* GPU porting: DDK and orbital magnetism response with nuclear dipole moment and nspinor 2 are available.
 See [[test:v10_41]], [[test:v10_42]] and [[test:gpu_omp_31]].
 
 By J. Zwanziger with help from M. Giantomassi (MR1101, 1111, 1119, 1128)
@@ -258,12 +711,12 @@ By M. Sarraute, with help from L. Baguet and M. Torrent (MR 1120, 1123, 1125, 11
 
 
 
-**B.10** aTDEP : Command-Line Interface, file format, and compatibility with Abipy.
+**B.10** aTDEP: Command-Line Interface, file format, and compatibility with Abipy.
 
 The aTDEP utility has been upgraded to match the standard of most executables in the ABINIT package.
 
-* New syntax : one can specify the input file as a command line argument, e.g.  atdep run.abi
-* Three new input variables were introduced to replace the files file : [[output_file@atdep]], [[outdata_prefix@atdep]] and [[indata_prefix@atdep]].
+* New syntax: one can specify the input file as a command line argument, e.g.  atdep run.abi
+* Three new input variables were introduced to replace the files file: [[output_file@atdep]], [[outdata_prefix@atdep]] and [[indata_prefix@atdep]].
 * The IO name conventions are now in accordance with other executables inside the ABINIT package.
 * The standard output is used instead of forcing the name 'atdep.log'.
 * The input file admits free format. One can give input variables in any order, spread them over several lines, etc.
@@ -284,7 +737,7 @@ By G. Antonius with some contribution by F. Bottin (MR 1105, 1112, 1113, 1117, 1
 **B.11** Variable cell NEB
 
 Generalized solid-state NEB algorithm has been implemented.
-New input variable : [[neb_cell_algo]].
+New input variable: [[neb_cell_algo]].
 See [[test:v10_83]].
 
 By Q. Delacroix and M. Torrent (MR1149)
@@ -302,7 +755,7 @@ By M. Royo (MR1154).
 
 
 
-**B.13** GWR (real-space imaginary-time GW) algorithm : tutorial and miscellaneous improvements.
+**B.13** GWR (real-space imaginary-time GW) algorithm: tutorial and miscellaneous improvements.
 
 * The [[tutorial:gwr1]] has been finalized (see also the introductory [[tutorial:gwr_intro]]).
 * [[ecutwfn]] can now be used for GWR.
@@ -329,7 +782,7 @@ The timing in chebfi has been corrected.
 By L. Baguet (MR1103) and M. Torrent (MR1098)
 
 
-**B.15** Abipy : Automated computation of luminescence spectra
+**B.15** Abipy: Automated computation of luminescence spectra
 
 A set of Python modules integrated into the AbiPy framework now facilitates the automated computation of phonon-resolved luminescence spectra for defects in inorganic solids.
 The workflow automates key steps in a classical computational process, from the initial ∆SCF DFT calculations with constrained occupations to simulate the excited state,
@@ -342,7 +795,7 @@ and <https://abinit.github.io/abipy/flow_gallery/run_lumi_NV_center.html>.
 By J. Bouquiaux, with help from M. Giantomassi (see the forthcoming ABINIT2025 paper and a forthcoming JOSS paper).
 
 
-**B.16** Abipy : Automated computation of thermal expansion (volumetric as well as anisotropic)
+**B.16** Abipy: Automated computation of thermal expansion (volumetric as well as anisotropic)
 
 Abipy workflows for thermal expansion calculations are available, within the Quasi-Harmonic Approximation (QHA) for materials with diverse crystallographic symmetries,
 with efficient Zero Static Internal Stress Approximation (ZSISA) and its volume-constrained variant, v-ZSISA.
@@ -396,11 +849,11 @@ By I. Lygatsika (MR1158)
 
 **C.4** Change HDF5 detection when using "with_hdf5=path/to/hdf5". Same for netcdf and netcdf-fortran
 
-The situation was the following :
+The situation was the following:
 
 When giving a path in the ac9 file ("with_hdf5=path/to/hdf5"), the build system kind of ignores the command line if some environment variables are found (HDF5_CPPFLAGS,HDF5_CFLAGS,HDF5_FFLAGS,HDF5_FCFLAGS,HDF5_LDFLAGS,HDF5_LIBS). In that case the build system uses only the environment variables, whatever the path given in the ac9 file. This feature leads to confusing situations, especially when environment variables are set by the system, not the developer himself.
 
-The new policy is the following :
+The new policy is the following:
 
 The build system follows the command line "with_hdf5=path/to/hdf5", whatever the context. If some environment variables are found, a warning is printed and the developer is advised to set "with_hdf5=yes" if he or she wants to use environment variables.
 
@@ -419,14 +872,14 @@ By O. Mattelaer (MR1140)
 
 **C.6** Intel debug
 
-Corrections to improve the use of debug options from the intel compiler (still 2020 version) :
+Corrections to improve the use of debug options from the intel compiler (still 2020 version):
 
-At first there were crashes at compiling time : the compiler does not like operations on arrays inside a matmul call.
+At first there were crashes at compiling time: the compiler does not like operations on arrays inside a matmul call.
 Then many of warnings of temporary arrays have been removed, sometimes allocating explicitly an array (when the subarray is not contiguous, or very small), sometimes using a pointer (when it is contiguous).
 There are still many warnings, but for GS computations with lobpcg or chebfi and
 PAW pseudos the amount of warnings is limited, so one can run big computations without generating gigabytes of output every minute.
 
-The debug options used are : -traceback -check all -check uninit -ftrapuv -debug all -warn declarations
+The debug options used are: -traceback -check all -check uninit -ftrapuv -debug all -warn declarations
 All these changes do not affect the performances at all.
 
 By L. Baguet (MR1139)
@@ -448,12 +901,11 @@ There have been many improvements in the DMFT part of ABINIT, not yet though to 
 * There has been a massive optimization of the code, as well as a cleaning.
 * New functionalities have been added (new double counting, possibility to work with an arbitrary orbital read from file...). List to be provided ...
 * One can run dmft susceptibility with correlated and non correlated atoms.
-* A new option to run DFT+DMFT has been added : one can use Wannier90 to construct localized orbitals and call the impurity solver using the python invocation scheme (still to be done: going back to DFT from the impurity solver).
-* Several routines have been added in preparation for a (working) interface with TRIQS. About thirty new input variables have been defined, with the prefix dmft_triqs_XXXX (to be tested and documented).
+* A new option to run DFT+DMFT has been added: one can use Wannier90 to construct localized orbitals and call the impurity solver using the python invocation scheme (still to be done: going back to DFT from the impurity solver).
+* Several routines have been added in preparation for a (working) interface with TRIQS. About thirty new input variables have been defined, with the prefix dmft_triqs_XXXX .
 * Two extra components for the energy are printed.
-* New input variables (to be tested and documented) : dmft_fermi_step, dmft_nominal, dmft_orbital, dmft_prt_maxent, dmft_prtwan, dmft_shiftself, dmft_test, dmft_use_all_bands, dmft_use_full_chipsi, dmft_wanrad, dmft_x2my2d.
+* New input variables (to be tested and documented): dmft_fermi_step, dmft_nominal, dmft_orbital, dmft_prt_maxent, dmft_prtwan, dmft_shiftself, dmft_test, dmft_use_all_bands, dmft_use_full_chipsi, dmft_wanrad, dmft_x2my2d.
 
-Input variables [[dmftctqmc_mov]], [[dmftctqmc_order]] and [[dmftctqmc_triqs_nleg]] are documented, but not tested.
 There has also been miscellaneous DMFT fixes and improvements
 
 By F. Castiel, F. Gendron, O. Gingras, B. Amadon (MR1063, 1077, 1084, 1107, 1148 give more details)
@@ -466,12 +918,12 @@ By F. Castiel, F. Gendron, O. Gingras, B. Amadon (MR1063, 1077, 1084, 1107, 1148
 
 As a consequence of the first point, xg_tools now uses OpenMP "collapse" directive when appropriate (as discussed with @torrent).
 
-Other minor corrections :
+Other minor corrections:
 
 * Prediction of memory footprint for chebfi with gemm_nonlop is now activated only if gemm_nonlop_use_gemm is activated
 * Timing of mkinvovl in vtorho was producing negative values of "other" timing in vtorho, so it is suppressed
 * Correction to reduce the numerical noise on stress and forces when comparing PAW calculations done with different compilers and/or different machines.
-* Change the design in xg_nonlop, which solves several issues :
+* Change the design in xg_nonlop, which solves several issues:
 no more warnings "temporary array was created" for some cases (seen on ubuntu and the testfarm), and
 no more crash for other (rare) cases.
 * Also set [[cprj_in_memory]] to 0 if optdriver is not GS.
@@ -527,7 +979,7 @@ per node when all cores on the node are used as MPI processes.
 
 By M. Giantomassi (MR1109)
 
-**D.10.** Optic utility : antiresonant terms and band decomposition
+**D.10.** Optic utility: antiresonant terms and band decomposition
 
 Anti-resonant contributions were missing in the Optic calculations of second-harmonic generation.
 Now they can be included. Use  do_antiresonant = .FALSE. parameter in the input file of optics (meaning that the antiresonant approximation is NOT done - this is confusing and should be changed).
@@ -589,19 +1041,12 @@ By M. Azizi (MR1086)
 * Include [[nbdbuf]] in the check of the last occupancy in vtorho (and correct the exit condition for [[nsppol]]=2)
 * xmpi_distrib_2D: fix edge case where the code would try to distribute n points over N>n processes
 * m_krank: add support for non-diagonal [[kptrlatt]] in krank_from_kptrlatt()
-* mGGA : Fix calculation of kinetic energy density with paral_kgb 1 ; Fix GGA + usekden 1 in PAW ; Fix meta-GGA when istwfk = 2 and bandpp > 1 ; Fix mistake in blocksize in case nstep 0 and wfoptalg 114 ; Adding one test in paral to test meta-GGA + PAW in different cases.
+* mGGA: Fix calculation of kinetic energy density with paral_kgb 1; Fix GGA + usekden 1 in PAW; Fix meta-GGA when istwfk = 2 and bandpp > 1; Fix mistake in blocksize in case nstep 0 and wfoptalg 114; Adding one test in paral to test meta-GGA + PAW in different cases.
 * restores the previous behaviour implemented by get_fastest_devices when GPUs were equal in performance, that was broken by MR1197.
 
 By L. Baguet (MR1127), M. Mignolet (MR1118), F. Brieuc (MR1219), M. Sarraute (MR1225).
 
 * * *
-
-
-
-
-
-
-
 
 ## v10.2
 
@@ -757,7 +1202,7 @@ By J.-M. Beuken (MR995) and M. Verstraete (MR1007)
 
 By M. Torrent (MR986, MR1032)
 
-**C.4** There is an embryo documentation for cmake build. Also, the need to modify CMakeLists.txt is not mentioned in doc/developers/developers_howto.md .
+**C.4** There is an embryo documentation for cmake build. Also, the need to modify CMakeLists.txt is not mentioned in [developers_howto](../developers/developers_howto.md).
 
 By P. Kestener (MR994), and a comment from Maxime Mignolet.
 
@@ -1826,7 +2271,7 @@ New tests of the band parallelism in DFPT: [[test:paral_65]] and [[test:paral_66
 By M. Giantomassi (commit 31e8aa66d8).
 
 **D.10** Improved developer documentation, section .
-[How to add a new test](https://docs.abinit.org/developers/developers_howto/#how-to-add-a-new-test-in-the-test-suite).
+[How to add a new test](../developers/developers_howto.md#how-to-add-a-new-test-in-the-test-suite).
 By X. Gonze (commit dabc1b905).
 
 **D.11** Fixed typo in CITATION.cff.
@@ -1854,6 +2299,7 @@ By X. Gonze (several commits)
 * * *
 
 
+<a id="98"></a>
 ## v9.8
 
 Version 9.8, released on December 23, 2022.
@@ -2083,7 +2529,7 @@ From X. Gonze (MR874)
 A new type of file 'GSTORE' has been introduced,  for the electron-phonon matrix element storage, where it is taken advantage
 of filters (on energy or band or wavevectors) to reduce the size compared to the more usual EIG1 file type.
 It contains also the related metadata.
-Related input variables: [[getgstore_filepath]], [[gstore_cplex]], [[gstore_with_vk]], [[gstore_kzone]], [[gstore_qzone]],
+Related input variables: [[getgstore_filepath]], [[gstore_with_vk]], [[gstore_kzone]], [[gstore_qzone]],
 [[gstore_kfilter]], [[gstore_brange]], [[gstore_erange]].
 
 By M. Giantomassi (MR870)
@@ -2688,7 +3134,7 @@ In particular:
 2. The build system of ABINITv9 does not build anymore the hard dependencies (Linalg, NetCDF4, HDF5, LibXC, ...),
    as this was not sustainable (see [B.6](#v9.2.B.6)) and nowadays most users install prerequisite libraries themselves.
    See also the specialized INSTALL notes for
-   [CentOS](/INSTALL_CentOS), [EasyBuild](/INSTALL_EasyBuild), [MacOS](/INSTALL_MacOS), and [Ubuntu](/INSTALL_Ubuntu).
+   [CentOS](../INSTALL_CentOS.md), [EasyBuild](../INSTALL_EasyBuild.md), [MacOS](../INSTALL_MacOS.md), and [Ubuntu](../INSTALL_Ubuntu.md).
 3. The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
    This means that some user-developed parsing tools might not work anymore,
    and should be adapted to the new ABINITv9 output file (see [B.9](#v9.2.B.9)).
@@ -2711,7 +3157,7 @@ A version of this paper that is not formatted for J. Chem. Phys.
 [is also available](https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf).
 The licence allows the authors to put it on the Web.
 
-Other specific publications are mentioned in the [Suggested acknowledgment page](/theory/acknowledgments).
+Other specific publications are mentioned in the [Suggested acknowledgment page](../theory/acknowledgments.md).
 
 <a name="v9.2.A.3"></a>
 **A.3**  The default values of the following ABINIT input variables have been changed:
@@ -2897,7 +3343,7 @@ fully in the Sec. 3.7 of [[cite:Gonze2020]], as follows.
 Also, the DMFT k-resolved spectral function is available (MR 529, 490).
 
 List of tests: [[test:paral_84]], [[test:paral_86]], [[test:paral_99]], [[test:v8_01]].
-New input variables: [[dmft_charge_prec]] and [[dmft_kspectral_func]] (test to be provided for the latter).
+New input variables: [[dmft_charge_prec]] and [[dmft_kspectralfunc]] (test to be provided for the latter).
 Also [[dmft_occnd_imag]], but only for keeping backward compatibility for tests.
 
 By T. Cavignac, B. Amadon and O. Gingras.
@@ -2977,7 +3423,7 @@ the build system will try to find them in the "usual" directories, and inform th
 The build system also can make suggestions to the user, to complete its *.ac9 file.
 
 Specialized INSTALL notes are available to help the user for
-[CentOS](/INSTALL_CentOS), [EasyBuild](/INSTALL_EasyBuild), [MacOS](/INSTALL_MacOS), and [Ubuntu](/INSTALL_Ubuntu).
+[CentOS](../INSTALL_CentOS.md), [EasyBuild](../INSTALL_EasyBuild.md), [MacOS](../INSTALL_MacOS.md), and [Ubuntu](../INSTALL_Ubuntu.md).
 
 By Y. Pouillon and JM Beuken
 
@@ -3481,7 +3927,7 @@ A version of this paper that is not formatted for J. Chem. Phys.
 [is also available](https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf).
 The licence allows the authors to put it on the Web.
 
-Other specific publications are mentioned in the [Suggested acknowledgment page](/theory/acknowledgments).
+Other specific publications are mentioned in the [Suggested acknowledgment page](../theory/acknowledgments.md).
 
 <a name="v9.0.A.3"></a>
 **A.3**  The default values of the following ABINIT input variables have been changed:
@@ -3643,7 +4089,7 @@ fully in the Sec. 3.7 of [[cite:Gonze2020]], as follows.
 Also, the DMFT k-resolved spectral function is available (MR 529, 490).
 
 List of tests: [[test:paral_84]], [[test:paral_86]], [[test:paral_99]], [[test:v8_01]].
-New input variables: [[dmft_charge_prec]] and [[dmft_kspectral_func]] (test to be provided for the latter).
+New input variables: [[dmft_charge_prec]] and [[dmft_kspectralfunc]] (test to be provided for the latter).
 Also [[dmft_occnd_imag]], but only for keeping backward compatibility for tests.
 
 By T. Cavignac, B. Amadon and O. Gingras.
@@ -4209,10 +4655,10 @@ C.1 All F90 ABINIT sources are now inside modules.
 C.2 Prepared the removal of the bindings subsystem.
     By Y. Pouillon and M. Torrent.
 
-C.2 New [Howto for developers](/developers/developers_howto) (variables, mkparents, robodoc, test_suite).
+C.2 New [Howto for developers](../developers/developers_howto.md) (variables, mkparents, robodoc, test_suite).
     By M. Giantomassi.
 
-C.3 New [Howto for the test suite](/developers/testsuite_howto).
+C.3 New [Howto for the test suite](../developers/testsuite_howto.md).
     By M. Giantomassi.
 
 * * *
@@ -4362,7 +4808,7 @@ B.1 The whole ABINIT documentation has been placed under the control of [mkdocs]
     The appearance is also new.
     The work on documentation is nearly complete, still not all bibliographical references of the doc have been entered in this
     central bibliographic database.
-    Entry point: see the new header of any ABINIT documentation file e.g. the [new user's guide](/guide/new_user).
+    Entry point: see the new header of any ABINIT documentation file e.g. the [new user's guide](../guide/new_user.md).
     By M. Giantomassi, with some help from X. Gonze.
 
 B.2 The DFPT has been extended to non-collinear systems ([[nspden]] = 4), with or without spin-orbit coupling,
@@ -4598,7 +5044,7 @@ B.1 The whole ABINIT documentation has been significantly improved by the introd
     - the list of related input variables (ordered according to their importance for the topics -compulsory, basic, useful or expert-);
     - possibly example input files;
     - list of references.
-    Entry point: see the new header of any ABINIT documentation file e.g. the [new user's guide](/guide/new_user)
+    Entry point: see the new header of any ABINIT documentation file e.g. the [new user's guide](../guide/new_user.md)
     By F. Jollet and X. Gonze (also tests/fixes by B. Amadon, M. Torrent).
 
 B.2 A central [[theory:bibliography]] database abiref.bib has been created, and linked to the
@@ -4661,9 +5107,7 @@ B.10 Implementation of the LDA-1/2 methodology.
 
 C.1 There are large changes of the procedure to document ABINIT, for most of the documentation files.
     The HTML files are now produced from YAML files, under the control of the script ~abinit/doc/generate_doc.py .
-    The documentation that describes this procedure is available on the ABINIT wiki, at https://wiki.abinit.org/doku.php?id=developers:generate_doc .
     This is directly linked to the modifications in the doc presented in B1-B4.
-    In particular, the Dokuwiki syntax is used for the hyperlinks.
     By F. Jollet and X. Gonze.
 
 * * *

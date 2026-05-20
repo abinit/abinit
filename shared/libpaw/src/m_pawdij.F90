@@ -8,7 +8,7 @@
 !!         VNL = Sum_ij [ Dij |pi><pj| ],  with pi, pj= projectors
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2025 ABINIT group (MT, FJ, BA, JWZ)
+!! Copyright (C) 2013-2026 ABINIT group (MT, FJ, BA, JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,6 +43,7 @@ MODULE m_pawdij
  use m_pawrhoij,     only : pawrhoij_type
  use m_paw_finegrid, only : pawgylm, pawexpiqr
  use m_paw_sphharm,  only : initylmr,slxyzs,make_dyadic,realgaunt
+ use m_numeric_tools,only : geteuler
 
  implicit none
 
@@ -168,7 +169,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 &          pawxcdev,qphon,spnorbscl,ucvol,charge,vtrial,vxc,xred,znuc,&
 &          electronpositron_calctype,electronpositron_pawrhoij,electronpositron_lmselect,&
 &          atvshift,fatvshift,natvshift,nucdipmom,eijkl_is_sym,&
-&          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr)
+&          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr,spinaxis)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -188,6 +189,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  real(dp),intent(in),target :: vtrial(cplex*nfft,nspden)
  real(dp),intent(in),optional :: atvshift(:,:,:)
  real(dp),intent(in),optional :: nucdipmom(3,natom)
+ real(dp),intent(in),optional :: spinaxis(3)
  type(paw_an_type),intent(in) :: paw_an(my_natom)
  type(paw_ij_type),target,intent(inout) :: paw_ij(my_natom)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom)
@@ -224,6 +226,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 !arrays
  integer,pointer :: my_atmtab(:)
  logical,allocatable :: lmselect(:)
+ real(dp) :: spinaxis_in(3)
  real(dp),allocatable :: dij0(:),dijhartree(:)
  real(dp),allocatable :: dijhat(:,:),dijexxc(:,:),dijfock_cv(:,:),dijfock_vv(:,:),dijpawu(:,:)
  real(dp),allocatable :: dijnd(:,:),dijso(:,:)
@@ -835,10 +838,11 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
 !    ===== Need to compute DijSO
        LIBPAW_ALLOCATE(dijso,(cplex_dij*qphase*lmn2_size,ndij))
+       spinaxis_in = [zero, zero, one]; if (present(spinaxis)) spinaxis_in = spinaxis
        call pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
 &                    pawang,pawrad(itypat),pawtab(itypat),pawxcdev,spnorbscl,&
 &                    paw_an(iatom)%vh1,paw_an(iatom)%vxc1,znuc(itypat),paw_ij(iatom)%zora,&
-&                    nucdipmom=nucdipmom(1:3,iatom))
+&                    nucdipmom=nucdipmom(1:3,iatom),spinaxis=spinaxis_in)
        if (dijso_need) paw_ij(iatom)%dijso(:,:)=dijso(:,:)
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+dijso(:,:)
        LIBPAW_DEALLOCATE(dijso)
@@ -2431,17 +2435,16 @@ subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,&
 !Local variables ---------------------------------------
 !scalars
  integer :: angl_size,idir,ii,ij_size,il,ilmn,im,imesh
- integer :: jatom,jl,jlmn,jm,klm,klmn,kln,lm_size,lmn2_size
+ integer :: jatom,jl,jlmn,jm,klmn,kln,lm_size,lmn2_size ! klm,
  integer :: mesh_size
  real(dp) :: rc,rr,rt
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
- complex(dpc) :: cmatrixelement,lms
+ complex(dp) :: cmatrixelement,lms
  logical :: usezora
 !arrays
  integer,pointer :: indlmn(:,:),indklmn(:,:)
  real(dp),allocatable :: ff(:),intgr3(:),v1(:),zk1(:)
  character(len=500) :: msg
-
 ! *************************************************************************
 
 !Useful data
@@ -2453,6 +2456,9 @@ subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,&
  lm_size=pawtab%lcut_size**2
  lmn2_size=pawtab%lmn2_size
  usezora=((zora.EQ.1).OR.(zora.EQ.3))
+
+ !write(std_out,'(a,I4,L4)')'JWZ debug pawdijnd zora use_zora ', &
+ !  & zora,usezora
 
 !Check data consistency
  if (cplex_dij/=2) then
@@ -2571,7 +2577,7 @@ subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,&
  ! in case of ndij > 1, note that there is no spin-flip in this term
  ! so therefore down-down = up-up, and up-down and down-up terms are still zero
  if(ndij > 1) dijnd(:,2)=dijnd(:,1)
- 
+
  if(allocated(zk1)) then
    LIBPAW_DEALLOCATE(zk1)
  end if
@@ -2648,13 +2654,13 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
  d2ij(1,1,1)=c3/three;  d2ij(1,1,7)=-c2/three; d2ij(1,1,9)=c1 ! xx/r^2 = c3/3 S_00-c2/3 S_20 + c1 S-{2,2}
  d2ij(2,2,1)=c3/three;  d2ij(2,2,7)=-c2/three; d2ij(2,2,9)=-c1 ! xx/r^2 = c3/3 S_00-c2/3 S_20 - c1 S-{2,2}
 
- ! need set of Gaunt integrals one larger than usual
- my_lmax=pawang%l_max+1
+ ! need set of Gaunt integrals two larger than usual
+ my_lmax=pawang%l_max+2
  my_lsizemax=2*my_lmax-1
  LIBPAW_ALLOCATE(my_gntselect,((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2))
  LIBPAW_ALLOCATE(my_realgnt,((2*my_lmax-1)**2*my_lmax**4))
  call realgaunt(my_lmax,my_ngnt,my_gntselect,my_realgnt)
- 
+
  ! obtain rprimd by inversion of gprimd
  ! have to use elaborate lapack calls because we are inside libpaw
  rprimd=gprimd
@@ -2665,8 +2671,8 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
  rvec(1:3,1)=MATMUL(rprimd,(xred(:,jatom)-xred(:,iatom)))
  rvec_len(1) = SQRT(DOT_PRODUCT(rvec(:,1),rvec(:,1)))
  dr = rvec_len(1)
-  
- ! generate Ylm's for rvec 
+
+ ! generate Ylm's for rvec
  LIBPAW_ALLOCATE(ylm_rvec,(my_lsizemax**2,1))
  call initylmr(my_lsizemax,1,1,rvec_len,1,rvec,ylm_rvec)
 
@@ -2700,7 +2706,7 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
  aa1b_fac = -half*FineStruct4*four_pi*m1m2/three
  ! term IIa factor: -1/2 \alpha^4
  aa2a_fac = -half*FineStruct4
- ! term IIb factor: 1/2 \alpha^4 (4\pi/3) 
+ ! term IIb factor: 1/2 \alpha^4 (4\pi/3)
  aa2b_fac = half*FineStruct4*four_pi/three
 
  do klmn=1,pawtab%lmn2_size
@@ -2717,7 +2723,7 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
        if (ignt > 0) then
          ! note that aaint second index is angmom + 1, so l2+1 here
          aa1a = aa1a + aa1a_fac*my_realgnt(ignt)*ylm_rvec(klm2,1)*aaint(kln,l2+1,1)
-         
+
          do l4=abs(l2-1),l2+1
            do m4=-l4,l4
              klm4=LMPACK(l4,m4)
@@ -2868,12 +2874,12 @@ end subroutine pawdijaa
 
 subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
     & pawxcdev,spnorbscl,vh1,vxc1,znuc,zora,&
-    & nucdipmom)
+    & nucdipmom,spinaxis)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex_dij,ndij,nspden,pawxcdev,qphase,zora
- real(dp), intent(in) :: spnorbscl,znuc
+ real(dp),intent(in) :: spnorbscl,znuc
  type(pawang_type),intent(in) :: pawang
  type(pawrad_type),intent(in) :: pawrad
  type(pawtab_type),target,intent(in) :: pawtab
@@ -2881,19 +2887,22 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
  real(dp),intent(out) :: dijso(:,:)
  real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:)
  real(dp),optional,intent(in) :: nucdipmom(3)
+ real(dp),optional,intent(in) :: spinaxis(3)
 !Local variables ---------------------------------------
 !scalars
  integer :: angl_size,gs1,gs2,idij,ii,ij_size,ilm,jlm,ispden
  integer :: klm,klmn,klmn1,kln
  integer :: lm_size,lmn2_size,mdir,mesh_size,ngnt,sdir
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
- real(dp) :: fact,me1,me2,rc,rr,rt,sme
+ real(dp) :: alpha,beta,fact,me1,me2,rc,rr,rt,sme,cb2,sb2
  logical :: has_nucdipmom,use_soc,use_sd,use_fc
  character(len=500) :: msg
 !arrays
  integer,pointer :: indklmn(:,:)
+ real(dp) :: spinaxis_in(3)
  real(dp),allocatable :: dijnd_rad(:,:),dijso_rad(:),dkdr(:),dv1dr(:),dyadic(:,:,:,:)
  real(dp),allocatable :: v1(:),zk1(:),z_intgd(:),z_kernel(:)
+ complex(dp) :: D(2,2),Drot(2,2),U(2,2),ep,em
 
 ! *************************************************************************
 
@@ -2906,6 +2915,8 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
  indklmn => pawtab%indklmn
 
  select case(zora)
+   case(-4)
+     use_soc=.FALSE.; use_sd=.TRUE.; use_fc=.TRUE.
    case(-3)
      use_soc=.FALSE.; use_sd=.FALSE.; use_fc=.TRUE.
    case(-2)
@@ -2930,6 +2941,9 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
    case default
      use_soc=.TRUE.; use_sd=.FALSE.; use_fc=.FALSE.
  end select
+
+ !write(std_out,'(a,3L4)')'JWZ debug pawdijso use_soc use_sd use_fc : ',&
+ !  & use_soc,use_sd,use_fc
 
 !Check data consistency
  if (qphase/=1) then
@@ -3138,6 +3152,40 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
    end do !loop on klmn
    LIBPAW_DEALLOCATE(dyadic)
    LIBPAW_DEALLOCATE(dijnd_rad)
+ end if
+
+ spinaxis_in = [zero, zero, one]; if (present(spinaxis)) spinaxis_in = spinaxis
+
+ if (ndij >= 4) then
+
+   call geteuler(spinaxis_in,alpha,beta)
+
+   if (.not.(abs(alpha) < tol8 .and. abs(beta) < tol8)) then
+   
+     cb2 = cos(half*beta); sb2 = sin(half*beta)
+     em = exp(-j_dpc*half*alpha); ep = conjg(em)
+     U(1,1) =  cb2 * em; U(1,2) = -sb2 * em
+     U(2,1) =  sb2 * ep; U(2,2) =  cb2 * ep
+     
+     ! spinaxis rotation assumes qphase=1
+     klmn1 = 1
+     do klmn = 1, lmn2_size
+
+       D(1,1) = cmplx(dijso(klmn1,1), dijso(klmn1+1,1), kind=dp)
+       D(2,2) = cmplx(dijso(klmn1,2), dijso(klmn1+1,2), kind=dp)
+       D(1,2) = cmplx(dijso(klmn1,3), dijso(klmn1+1,3), kind=dp)
+       D(2,1) = cmplx(dijso(klmn1,4), dijso(klmn1+1,4), kind=dp)
+       
+       Drot(:,:) = matmul(conjg(transpose(U)), matmul(D(:,:), U))
+
+       dijso(klmn1,1) = real(Drot(1,1), kind=dp); dijso(klmn1+1,1) = aimag(Drot(1,1))
+       dijso(klmn1,2) = real(Drot(2,2), kind=dp); dijso(klmn1+1,2) = aimag(Drot(2,2))
+       dijso(klmn1,3) = real(Drot(1,2), kind=dp); dijso(klmn1+1,3) = aimag(Drot(1,2))
+       dijso(klmn1,4) = real(Drot(2,1), kind=dp); dijso(klmn1+1,4) = aimag(Drot(2,1))
+
+       klmn1 = klmn1 + cplex_dij
+     end do
+   end if
  end if
 
 end subroutine pawdijso
@@ -4218,6 +4266,9 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
                  else ! no phase
                    do ilslm=1,lm_size
                      do ic=1,nfgd
+#if defined FC_NVHPC
+                       if (my_natom == -1) write(std_out, *)"NVHPC raises an internal compiler error that is fixed by this print statement."
+#endif
                        contrib(1:qphase)=vloc(1:qphase,ic)*pawfgrtab(iatom)%gylm(ic,ilslm)
                        intvloc(1:qphase,ilslm)=intvloc(1:qphase,ilslm)+contrib(1:qphase)
                      end do
@@ -5084,9 +5135,8 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 !integer :: i1,i2,i3,i4,symrel_conv(3,3)
 !real(dp) :: spinrot(4)
 !real(dp),allocatable :: dijtemp(:,:),sumrhoso(:,:)
-!complex(dpc) :: dijt(2,2),dijt2(2,2),Rspinrot(2,2)
+!complex(dp) :: dijt(2,2),dijt2(2,2),Rspinrot(2,2)
 !DEBUG_ALTERNATE_ALGO
-
 ! *********************************************************************
 
 !Tests consistency of options

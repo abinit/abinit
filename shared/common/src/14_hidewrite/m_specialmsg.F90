@@ -7,7 +7,7 @@
 !!  Special messages= WARNING, COMMENT, EXIT
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2025 ABINIT group (MT,XG)
+!! Copyright (C) 2008-2026 ABINIT group (MT,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -194,6 +194,7 @@ subroutine herald(code_name,code_version,iout)
  integer :: day,dd,ja,jy,jm,jdn,mm,mm_rel,year,year_rel
  integer :: values(8)
  character(len=5) :: strzone
+ character(len=7) :: version_rel
  character(len=8) :: strdat
  character(len=10) :: strtime
  character(len=500) :: msg
@@ -204,13 +205,15 @@ subroutine herald(code_name,code_version,iout)
 ! *************************************************************************
 
 !RELEASE TIME FROM ABIRULES
- year_rel=2025
- mm_rel=9
+ year_rel=2026
+ mm_rel=3
+ version_rel='10.7.1 '
 !END OF RELEASE TIME
 
 !The technique used hereafter is the only one that we have found to obtain
 !perfect transferability across platforms and OS.
- write(iout, '(/,a,a,a,a,a,a,a,i4,a)' ) '.Version ',trim(code_version),' of ',trim(code_name),', released ',month_names(mm_rel),' ',year_rel,'.'
+ write(iout, '(/,9a,i4,a)' )&
+& '.Version ',trim(code_version),' of ',trim(code_name),'. v',version_rel,'released ',month_names(mm_rel),' ',year_rel,'.'
 #if defined HAVE_MPI
  write(iout, '(a,a,a,/)' ) '.(MPI version, prepared for a ',build_target,' computer) '
 #else
@@ -219,7 +222,7 @@ subroutine herald(code_name,code_version,iout)
 
 !GNU GPL license
  write(iout, '(a,/,a,a,a,/,a,/,a,/,a,/)' ) &
- '.Copyright (C) 1998-2025 ABINIT group . ',&
+ '.Copyright (C) 1998-2026 ABINIT group . ',&
  ' ',trim(code_name),' comes with ABSOLUTELY NO WARRANTY.',&
  ' It is free software, and you are welcome to redistribute it',&
  ' under certain conditions (GNU General Public License,',&
@@ -262,7 +265,7 @@ subroutine herald(code_name,code_version,iout)
  jdn=jdn+2-ja+int(quarter*ja)
  day=mod(jdn,7)+1
 
-!Print date in nice format (* new format *)
+ ! Print date in nice format (* new format *)
  write(iout, '(/,a,a,1x,i2,1x,a,1x,i4,a,/,a,i2.2,a,i2.2,a)' ) &
  '.Starting date : ',day_names(day),dd,month_names(mm),year,'.','- ( at ',values(5),'h',values(6),' )'
  write(iout,*)' '

@@ -1,11 +1,11 @@
-!!****zeroi* ABINIT/m_gtermcutoff
+!!****m* ABINIT/m_gtermcutoff
 !! NAME
 !!  m_gtermcutoff
 !!
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2025 ABINIT group ()
+!! Copyright (C) 1999-2026 ABINIT group ()
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -116,7 +116,7 @@ contains
 !!
 !! SOURCE
 
-subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
+subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo,qpt) !optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -126,6 +126,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 !arrays
  integer,intent(in)    :: ngfft(18)
  real(dp),intent(in)   :: rprimd(3,3),vcutgeo(3)
+ real(dp),optional,intent(in) :: qpt(3)
 
 !Local variables-------------------------------
 !scalars
@@ -140,7 +141,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
  real(dp)           :: gvecg2p3,gvecgm12,gvecgm13,gvecgm23,gs2,gs3
  real(dp)           :: gcart_para,gcart_perp,gcart_x,gcart_y,gcart_z
  real(dp)           :: j0,j1,k0,k1
- real(dp)           :: quad,ucvol
+ real(dp)           :: odd2,quad,ucvol
  real(dp)           :: hcyl,hcyl2
  real(dp),parameter :: tolfix=1.0000001_dp,tol999=999.0
  character(len=50)  :: mode
@@ -151,7 +152,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
  integer              :: periodic_dir(3)
  real(dp)             :: a1(3),a2(3),a3(3),b1(3),b2(3),b3(3)
  real(dp)             :: gcart(3),gmet(3,3),gprimd(3,3)
- real(dp)             :: alpha(3)
+ real(dp)             :: alpha(3),qpt_(3)
  real(dp),allocatable :: gvec(:,:),gpq(:),gpq2(:)
  real(dp),allocatable,intent(inout) :: gcutoff(:)
 
@@ -174,12 +175,15 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
  ABI_MALLOC(gcutoff,(nfft))
  gcart(:) = zero ; gpq = zero ; gpq2 = zero ; gcutoff = zero
 
+ !Set the q point for calls from linear-response routines
+ qpt_=zero; if (present(qpt)) qpt_=qpt
+
  !In order to speed the routine, precompute the components of gvectors
  !Also check if the booked space was large enough...
  do ii=1,3
    id(ii)=ngfft(ii)/2+2
    do ing=1,ngfft(ii)
-     gvec(ii,ing)=ing-(ing/id(ii))*ngfft(ii)-1
+     gvec(ii,ing)=ing-(ing/id(ii))*ngfft(ii)-1 + qpt_(ii)
    end do
  end do
 
@@ -193,6 +197,8 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
  if (icutcoul==3) mode='CRYSTAL'
  if (icutcoul==4) mode='ERF'
  if (icutcoul==5) mode='ERFC'
+ if (icutcoul==22) mode='SLAB_SR'
+ if (icutcoul==55) mode='PCM'
 
  !Print in log info about the cut-off method at every call:
  enough = enough + 1
@@ -201,6 +207,9 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
    call wrtout(std_out,msg)
  end if
  !!!
+ !The Pick-Cohen-Martin cutoff is not a single factor on 1/G**2.
+ !It is therefore externally applied, not in this routine.
+ if (icutcoul==55) mode='CRYSTAL'
 
   do i3=1,n3
    ! Precompute some products that do not depend on i2 and i1
@@ -501,7 +510,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      periodic_dir(:)=0
      do ii=1,3
        check=vcutgeo(ii)
-       if (ABS(check)>zero) then 
+       if (ABS(check)>zero) then
          periodic_dir(ii)=1
          !For Rozzi"s method
          if (check<zero) alpha(ii)=normv(check*rprimd(:,ii),rmet,'R')
@@ -576,6 +585,22 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
          write(msg,'(a,i3)')' Wrong value of slab method: ',opt_slab
          ABI_BUG(msg)
        END SELECT
+
+   CASE('SLAB_SR')
+
+     test=COUNT(vcutgeo/=zero)
+     ABI_CHECK(test==2,"Wrong vcutgeo")
+
+     do i3=1,n3
+      odd2=1-(-1)**(i3-1)
+      do i2=1,n2
+       i23=n1*(i2-1 + n2*(i3-1))
+       do i1=1,n1
+        ii=i1+i23
+        gcutoff(ii)=odd2
+       end do
+      end do
+     end do
 
    CASE('ERF')
 

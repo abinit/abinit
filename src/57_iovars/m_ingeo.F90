@@ -6,7 +6,7 @@
 !! Initialize geometry variables for the ABINIT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (XG, RC)
+!!  Copyright (C) 1998-2026 ABINIT group (XG, RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,13 +28,15 @@ module m_ingeo
  use m_sort
  use m_dtset
 
- use m_matrix,     only : mati3inv, mati3det
- use m_symtk,      only : chkorthsy, symrelrot, chkprimit, symatm, &
-&                         symmetrize_rprimd, symmetrize_tnons,symmetrize_xred
- use m_spgbuilder, only : gensymspgr, gensymshub, gensymshub4
- use m_symfind,    only : symfind, symfind_expert, symanal, symlatt
- use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric, reduce2primitive
- use m_parser,     only : intagm, intagm_img, geo_t, geo_from_abivar_string, get_acell_rprim
+ use m_matrix,        only : mati3inv, mati3det
+ use m_symtk,         only : chkorthsy, symrelrot, chkprimit, symatm, &
+&                            symmetrize_rprimd, symmetrize_tnons,symmetrize_xred
+ use m_spgbuilder,    only : gensymspgr, gensymshub, gensymshub4
+ use m_symfind,       only : symfind, symfind_expert, symanal, symlatt
+ use m_geometry,      only : mkradim, mkrdim, xcart2xred, xred2xcart, &
+&                            randomcellpos, metric, reduce2primitive, cart2spinaxis
+ use m_parser,        only : intagm, intagm_img, geo_t, geo_from_abivar_string, get_acell_rprim
+ use m_numeric_tools, only : geteuler
 
  implicit none
 
@@ -43,6 +45,7 @@ module m_ingeo
 
  public :: ingeo        ! Initialize geometry variables for the ABINIT code.
  public :: invacuum     ! Determine whether there is vacuum along some of the primitive directions
+ public :: checkspvec   ! Check the consistency of spin-related input vectors with the spin quantization axis
 !!***
 
 contains
@@ -133,15 +136,15 @@ contains
 
 subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,field_red_axial,&
   genafm,iatfix,iatnd,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
-  msym,natnd,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
+  msym,natnd,natom,nimage,npsp,npspalch,nspden,nsym,ntypalch,ntypat,&
   nucdipmom,nzchempot,pawspnorb,&
-  ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,supercell_lattice,symafm,&
+  ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,spinat_cart,string,supercell_lattice,symafm,&
   symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl,comm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iimage,iout,jdtset,lenstr,msym
- integer,intent(in) :: natnd,nimage,npsp,npspalch,nspden,nsppol
+ integer,intent(in) :: natnd,nimage,npsp,npspalch,nspden
  integer,intent(in) :: ntypalch,ntypat,nzchempot,pawspnorb,comm
  integer,intent(inout) :: natom,symmorphi
  integer,intent(out) :: icoulomb,jellslab,ptgroupma,spgroup !vz_i
@@ -156,13 +159,13 @@ subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,field_red_ax
  integer,intent(out) :: typat(natom)
  real(dp),intent(inout) :: atndlist(3,natnd),chrgat(natom)
  real(dp),intent(inout) :: nucdipmom(3,natom),ratsph(ntypat)
- real(dp),intent(inout) :: spinat(3,natom)
+ real(dp),intent(inout) :: spinat(3,natom), spinat_cart(3,natom)
  real(dp),intent(out) :: acell(3),amu(ntypat),field_red(3),field_red_axial(3)
  real(dp),intent(out) :: genafm(3),mixalch(npspalch,ntypalch)
  real(dp),intent(inout) :: rprim(3,3),tnons(3,msym) !vz_i
  real(dp),intent(out) :: vel(3,natom),vel_cell(3,3),xred(3,natom)
  real(dp),intent(in) :: znucl(npsp)
- type(dataset_type),intent(in) :: dtset
+ type(dataset_type),intent(inout) :: dtset
 
 !Local variables-------------------------------
  character(len=*), parameter :: format01110 ="(1x,a6,1x,(t9,8i8) )"
@@ -172,7 +175,7 @@ subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,field_red_ax
  integer :: fixed_mismatch,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
  integer :: invar_z,ipsp,irreducible,isym,itranslat,itypat,jsym,marr,mismatch_fft_tnons,multi,multiplicity,natom_uc,natfix,natrd
  integer :: nobj,noncoll,nptsym,nsym_now,ntranslat,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
- integer :: spgroupma,tgenafm,tnatrd,tread,try_primitive,tscalecart,tspgroupma, tread_geo
+ integer :: spgroupma,tgenafm,tnatrd,tread,try_primitive,tscalecart,tspgroupma,tread_geo,tread_cart
  integer :: txcart,txred,txrandom,use_inversion
  real(dp) :: amu_default,ucvol,sumalch
  character(len=1000) :: msg
@@ -280,8 +283,8 @@ subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,field_red_ax
 end if
 
 do ii = 1, 3
-  if (norm2(dtset%hspinfield) > tol8) then
-    field_red_axial(ii) = dot_product(dtset%hspinfield(:), gprimd(:, ii))
+  if (norm2(dtset%hspinfield_cart) > tol8) then
+    field_red_axial(ii) = dot_product(dtset%hspinfield_cart(:), gprimd(:, ii))
   end if
 end do
 
@@ -567,13 +570,14 @@ end do
    call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'spinat',tread,'DPR')
    if(tread==1) then
      spinat(1:3,1:natom) = reshape( dprarr(1:3*natom) , [3, natom])
-   else if (nspden==4.or.(nspden==2.and.nsppol==1)) then
-     write(msg, '(5a)' )&
-      'When nspden=4 or (nspden==2 and nsppol==1), the input variable spinat must be',ch10,&
-      'defined in the input file, which is apparently not the case.',ch10,&
-      'Action: define spinat or use nspden=1 in your input file.'
-     ABI_ERROR(msg)
+     dtset%spinat_in(1:3,1:natom) = spinat(1:3,1:natom)
    end if
+
+   call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'spinat_cart',tread_cart,'DPR')
+   if(tread_cart==1) spinat_cart(1:3,1:natom) = reshape( dprarr(1:3*natom) , [3, natom])
+   
+   call checkspvec('spinat',natom,dtset%spinaxis,tread,tread_cart,spinat,spinat_cart)
+   if (tread == 0 .and. tread_cart == 1) dtset%spinat_in(1:3,1:natom) = spinat(1:3,1:natom) 
 
    ! nucdipmom is read for each irreducible atom, from 1 to natom
    nucdipmom=zero
@@ -621,8 +625,16 @@ end do
 
    ! Spinat is read for each irreducible atom, from 1 to natrd
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'spinat',tread,'DPR')
-   if(tread==1)spinat(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
+   if(tread==1) then
+     spinat(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
+     dtset%spinat_in(1:3,1:natrd) = spinat(1:3,1:natrd)
+   end if
 
+   call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'spinat_cart',tread_cart,'DPR')
+   if(tread_cart==1) spinat_cart(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natom])
+   call checkspvec('spinat',natrd,dtset%spinaxis,tread,tread_cart,spinat,spinat_cart) 
+   if (tread == 0 .and. tread_cart == 1) dtset%spinat_in(1:3,1:natrd) = spinat(1:3,1:natrd) 
+    
    ! nucdipmom is read for each irreducible atom, from 1 to natrd
    nucdipmom=zero
    if(natnd > 0) then
@@ -649,6 +661,7 @@ end do
              xcart(:,iatom_supercell) = xcart_read(:,iatom) + matmul(rprimd_read,(/i1-1,i2-1,i3-1/))
              chrgat(iatom_supercell) = chrgat(iatom)
              spinat(1:3,iatom_supercell) = spinat(1:3,iatom)
+             dtset%spinat_in(1:3,iatom_supercell) = dtset%spinat_in(1:3,iatom)
              typat(iatom_supercell) = typat_read(iatom)
            end do
          end do
@@ -844,10 +857,12 @@ end do
 
      end if
 
-     if(natom/=natrd.and.multiplicity == 1)then
-       ! Generate the full set of atoms from its knowledge in the irreducible part.
-       call fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym,typat,xred)
-     end if
+    if(natom/=natrd.and.multiplicity == 1)then
+      ! Generate the full set of atoms from its knowledge in the irreducible part.
+       call fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,spinat_cart,symafm,symrel,tnons,tolsym,typat,xred)
+      ! Keep spinat_in consistent with symmetry-expanded spinat for output/printing.
+      dtset%spinat_in(1:3,1:natom) = spinat(1:3,1:natom)
+    end if
 
      ! Check whether the symmetry operations are consistent with the lattice vectors
      iexit=0
@@ -1914,18 +1929,20 @@ end subroutine ingeobld
 !!  At input, for the asymmetric unit cell
 !!  nucdipmom(3,1:natrd)=nuclear magnetic dipole moments of the atoms
 !!  spinat(3,1:natrd)=spin-magnetization of the atoms
+!!  spinat_cart(3,1:natrd)=spin-magnetization of the atoms (Cartesian)
 !!  typat(1:natrd)=type integer for each atom in cell
 !!  xred(3,1:natrd)=reduced dimensionless atomic coordinates
 !!
 !!  At output, for the complete unit cell
 !!  nucdipmom(3,1:natom)=nuclear magnetic dipole moments of the atoms
 !!  spinat(3,1:natom)=spin-magnetization of the atoms
+!!  spinat_cart(3,1:natom)=spin-magnetization of the atoms (Cartesian)
 !!  typat(1:natom)=type integer for each atom in cell
 !!  xred(3,1:natom)=reduced dimensionless atomic coordinates
 !!
 !! SOURCE
 
-subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym,typat,xred)
+subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,spinat_cart,symafm,symrel,tnons,tolsym,typat,xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -1935,7 +1952,7 @@ subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons
  integer,intent(inout) :: typat(natom)
  real(dp),intent(in) :: tolsym
  real(dp),intent(in) :: tnons(3,nsym)
- real(dp),intent(inout) :: chrgat(natom),nucdipmom(3,natom),spinat(3,natom),xred(3,natom)
+ real(dp),intent(inout) :: chrgat(natom),nucdipmom(3,natom),spinat(3,natom),spinat_cart(3,natom),xred(3,natom)
 
 !Local variables ------------------------------
 !scalars
@@ -1944,7 +1961,7 @@ subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons
 !arrays
  integer :: bcktypat(nsym*natrd)
  real(dp) :: bckat(3),bcknucdipmom(3,nsym*natrd)
- real(dp) :: bckchrgat(nsym*natrd),bckspinat(3,nsym*natrd),bckxred(3,nsym*natrd)
+ real(dp) :: bckchrgat(nsym*natrd),bckspinat(3,nsym*natrd),bckspinat_cart(3,nsym*natrd),bckxred(3,nsym*natrd)
 
 ! *************************************************************************
 
@@ -1999,6 +2016,7 @@ subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons
        bckchrgat(curat)=chrgat(jj)
        bcknucdipmom(:,curat)=nucdipmom(:,jj)
        bckspinat(:,curat)=spinat(:,jj)*symafm(ii)
+       bckspinat_cart(:,curat)=spinat_cart(:,jj)*symafm(ii)
      end if
 
    end do
@@ -2035,6 +2053,7 @@ subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons
  chrgat(1:natom)=bckchrgat(1:natom)
  nucdipmom(1:3,1:natom)=bcknucdipmom(1:3,1:natom)
  spinat(1:3,1:natom)=bckspinat(1:3,1:natom)
+ spinat_cart(1:3,1:natom)=bckspinat_cart(1:3,1:natom)
 
 !DEBUG
 !write(std_out,*)' fillcell : exit with natom=',natom
@@ -2149,6 +2168,122 @@ subroutine invacuum(jdtset,lenstr,natom,rprimd,string,vacuum,xred)
  ABI_FREE(dprarr)
 
 end subroutine invacuum
+!!***
+
+!!****f* m_ingeo/checkspvec
+!!
+!! NAME
+!! checkspvec
+!!
+!! FUNCTION
+!! Check the consistency of spin-related input vectors (such as spinat or
+!! hspinfield) with the spin quantization axis (spinaxis), and convert
+!! Cartesian coordnate to the local spinaxis coordinate when needed
+!!
+!! INPUTS
+!! name=character string identifying the spin-related quantity: 'spinat' or 'hspinfield'
+!! nitem=number of spin vectors to be treated: natom for spinat, 1 for hspinfield
+!! spinaxis_in(3)=spin quantization axis
+!! tread=integer flag (0 or 1), set to 1 if the local-frame quantity
+!!       (spinat or hspinfield) is provided in the input
+!! tread_cart=integer flag (0 or 1), set to 1 if the Cartesian quantity
+!!            (spinat_cart or hspinfield_cart) is provided in the input 
+!! vec_local(nvec,nitem)=spin vectors defined in the local spin reference coordinates
+!! vec_cart(nvec,nitem)=spin vectors defined in Cartesian coordinates
+!!
+!! OUTPUT
+!! vec_local=updated consistent spin vectors in local spin reference coordinate
+!! vec_cart=updated consistent spin vectors in cartesian coordinate
+!!
+!! SOURCE
+
+subroutine checkspvec(name,nitem,spinaxis_in,tread,tread_cart,vec_local,vec_cart)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nitem, tread, tread_cart
+ character(len=*),intent(in) :: name
+!arrays
+ real(dp),intent(in) :: spinaxis_in(3)
+ real(dp),intent(inout) :: vec_local(3,nitem), vec_cart(3,nitem) 
+
+!Local variables-------------------------------
+!scalars
+ integer :: i, icase
+ real(dp) :: alpha, beta, norm
+!arrays
+ real(dp) :: spinaxis(3), R(3,3), RT(3,3), v_cart(3), v_local(3)
+ logical  :: trivial_axis
+ character(len=1000) :: msg
+
+! *************************************************************************
+
+! case 0: nothing provided
+ if (tread == 0 .and. tread_cart == 0) return
+
+ spinaxis(:) = spinaxis_in(:)
+ norm = sqrt(dot_product(spinaxis, spinaxis))
+ if (norm <= tol8) then
+   spinaxis(:) = [zero, zero, one]
+   trivial_axis = .true.
+ else
+   spinaxis(:) = spinaxis(:) / norm
+   trivial_axis = all(abs(spinaxis(:) - [zero, zero, one]) < tol8)
+ end if
+
+ R(:,:) = zero
+ R(1,1) = one; R(2,2) = one; R(3,3) = one
+
+ if (.not. trivial_axis) then
+   call geteuler(spinaxis, alpha, beta)
+   call cart2spinaxis(alpha, beta, R)
+ end if
+ RT(:,:) = transpose(R)
+
+ ! 3 cases: (tread, tread_cart)
+ icase = 2*tread + tread_cart
+ 
+ select case (icase)
+ 
+ case (1) ! case 1: only _cart provided (tread = 0, tread_cart = 1)
+   do i = 1, nitem
+     vec_local(:,i) = matmul(R, vec_cart(:,i))
+     end do
+   return
+
+ case (2) ! case 2: only local provided (tread = 1, tread_cart = 0)
+   if (.not. trivial_axis) then
+     write(msg,'(a)') 'Spinaxis is defined, but only ' // trim(name) // ' is present.' // ch10 // &
+                      'Action: please use ' // trim(name) // '_cart (Cartesian) instead of ' // trim(name) // &
+                      'when spinaxis is set.'
+     ABI_ERROR(msg)
+   end if
+   do i = 1, nitem    
+     vec_cart(:,i) = vec_local(:,i)
+   end do
+   return
+
+ case (3) ! case 3: both provided and check consistency: (tread = tread_cart = 1) 
+   do i = 1, nitem
+     v_cart(:) = matmul(RT, vec_local(:,i))
+     v_local(:) = matmul(R, vec_cart(:,i))
+
+     if (maxval(abs(v_local(:) - vec_local(:, i))) > tol8 .or. &
+         maxval(abs(v_cart(:) - vec_cart(:, i))) > tol8) then
+       write(msg,'(a,a,a,a,a,a,a,3(1x,es16.8),a,a,3(1x,es16.8),a,a,3(1x,es16.8),a,a)') &
+        'Both ', trim(name), ' and ', trim(name), '_cart are set but inconsistent.', ch10, &
+        'spinaxis =', spinaxis_in(1), spinaxis_in(2), spinaxis_in(3), ch10, &
+         trim(name)//' (local) =', vec_local(1,i), vec_local(2,i), vec_local(3,i), ch10, &
+         trim(name)//'_cart (cart) =', vec_cart(1,i), vec_cart(2,i), vec_cart(3,i), ch10, &
+        'Action: make them consistent or provide only one of them.'
+       ABI_ERROR(msg)
+     end if
+   end do
+   return
+
+ end select
+
+end subroutine checkspvec
 !!***
 
 end module m_ingeo

@@ -7,7 +7,7 @@
 !!  depends on sort_tetra and on m_kpt_rank
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2025 ABINIT group (MJV)
+!!  Copyright (C) 2010-2026 ABINIT group (MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -289,7 +289,7 @@ subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ier
 
  ! Make full k-point rank arrays
  ! TODO: Lot of memory allocated here if dense mesh e.g ~ 300 ** 3
- krank = krank_new(nkpt_fullbz, kpt_fullbz)
+ call krank%init(nkpt_fullbz, kpt_fullbz)
 
  ialltetra = 1
  do ikpt_full=1,nkpt_fullbz
@@ -306,7 +306,7 @@ subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ier
        symrankkpt =  krank%get_rank(k1)
        ikpt2 = krank%invrank(symrankkpt)
        if (ikpt2 < 1) then
-         errorstring='Error in ranking k-points - exiting with un-initialized tetrahedra.'
+         errorstring = 'Error in ranking k-points - exiting with un-initialized tetrahedra.'
          ierr = 2
          call krank%free()
          TETRA_ALLOCATE(tetra%tetra_full, (4,2,1))

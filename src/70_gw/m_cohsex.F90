@@ -6,7 +6,7 @@
 !! Calculate diagonal and off-diagonal matrix elements of the SEX or COHSEX self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2025 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
+!!  Copyright (C) 1999-2026 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,6 +29,7 @@ module m_cohsex
  use m_abicore
 
  use defs_datatypes,  only : pseudopotential_type
+ use m_dtset,         only : dataset_type
  use m_time,          only : timab, cwtime, cwtime_report
  use m_fstrings,      only : sjoin, itoa
  use m_hide_blas,     only : xdotc, xgemv
@@ -72,7 +73,7 @@ contains
 !! Calculate diagonal and off-diagonal matrix elements of the SEX or COHSEX self-energy operator.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2025 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
+!! Copyright (C) 1999-2026 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -150,12 +151,13 @@ contains
 !!
 !! SOURCE
 
-subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,epsm1,Gsph_c,Vcp,&
+subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,dtset, Cryst,QP_BSt,Sigp,Sr,epsm1,Gsph_c,Vcp,&
 & Kmesh,Qmesh,Ltg_k,Pawtab,Pawang,Paw_pwff,Psps,Wfd,allQP_sym,gwc_ngfft,iomode,prtvol,sigcme_tmp)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: sigmak_ibz,ikcalc,prtvol,iomode,nomega_sigc,minbnd,maxbnd
+ type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: Cryst
  type(ebands_t),target,intent(in) :: QP_BSt
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
@@ -170,7 +172,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  type(wfdgw_t),target,intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: gwc_ngfft(18)
- complex(dpc),intent(out) :: sigcme_tmp(nomega_sigc,minbnd:maxbnd,minbnd:maxbnd,Wfd%nsppol*Sigp%nsig_ab)
+ complex(dp),intent(out) :: sigcme_tmp(nomega_sigc,minbnd:maxbnd,minbnd:maxbnd,Wfd%nsppol*Sigp%nsig_ab)
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat)
  type(pawpwff_t),intent(in) :: Paw_pwff(Psps%ntypat*Psps%usepaw)
  type(esymm_t),target,intent(in) :: allQP_sym(Wfd%nkibz,Wfd%nsppol)
@@ -188,7 +190,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  integer :: isym_kgw,isym_ki,gwc_mgfft,use_padfft,gwc_fftalga,gwc_nfftot,ifft,npw_k
  real(dp) :: fact_spin,theta_mu_minus_e0i,tol_empty,gw_gsq
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
- complex(dpc) :: ctmp,ph_mkgwt,ph_mkt
+ complex(dp) :: ctmp,ph_mkgwt,ph_mkt
  logical :: iscompatibleFFT, q_is_gamma, print_time
  character(len=500) :: msg
  type(wave_t),pointer :: wave_sum, wave_jb
@@ -198,14 +200,14 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  integer,allocatable :: igfftcg0(:),gw_gfft(:,:),gw_gbound(:,:),irottb(:,:),ktabr(:,:)
  integer :: got(Wfd%nproc)
  real(dp) :: ksum(3),kgw(3),kgw_m_ksum(3),q0(3),tsec(2),qbz(3),spinrot_kbz(4),spinrot_kgw(4)
- real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
- complex(gwpc) :: sigcohme(Sigp%nsig_ab)
- complex(gwpc),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:),sigsex(:)
- complex(gwpc),allocatable :: sigc_ket(:,:)  ! epsm1_qbz(:,:,:),
- complex(gwpc),allocatable :: rhotwg_ki(:,:), sigctmp(:,:)
- complex(gwpc),allocatable :: wfr_bdgw(:,:),ur_sum(:),wf1swf2_g(:)
- complex(gwpc),ABI_CONTIGUOUS pointer :: cg_jb(:),cg_sum(:)
- complex(dpc),allocatable :: sym_cme(:,:,:,:),sigc(:,:,:,:,:)
+ real(dp),contiguous, pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
+ complex(gwp) :: sigcohme(Sigp%nsig_ab)
+ complex(gwp),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:),sigsex(:)
+ complex(gwp),allocatable :: sigc_ket(:,:)  ! epsm1_qbz(:,:,:),
+ complex(gwp),allocatable :: rhotwg_ki(:,:), sigctmp(:,:)
+ complex(gwp),allocatable :: wfr_bdgw(:,:),ur_sum(:),wf1swf2_g(:)
+ complex(gwp),contiguous, pointer :: cg_jb(:),cg_sum(:)
+ complex(dp),allocatable :: sym_cme(:,:,:,:),sigc(:,:,:,:,:)
  logical :: rank_mask(Wfd%nproc),can_symmetrize(Wfd%nsppol)
  logical,allocatable :: bks_mask(:,:,:)
  type(sigijtab_t),pointer :: Sigcij_tab(:)
@@ -426,7 +428,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
    do spin=1,nsppol
      do ib=ib1,ib2
        do jb=ib1,ib2
-        if (ABS(qp_ene(ib,jk_ibz,spin)-qp_ene(jb,jk_ibz,spin))<0.001/Ha_ev) then
+        if (ABS(qp_ene(ib,jk_ibz,spin)-qp_ene(jb,jk_ibz,spin)) < dtset%symsigma_de) then
           degtab(ib,jb,spin)=1
         end if
        end do
@@ -886,9 +888,9 @@ subroutine calc_coh(nspinor,nsig_ab,nfftot,ngfft,npwc,gvec,wfg2_jk,epsm1q_o,vc_s
  logical,intent(in) :: same_band
 !arrays
  integer,intent(in) :: gvec(3,npwc),ngfft(18)
- complex(gwpc),intent(in) :: epsm1q_o(npwc,npwc),vc_sqrt(npwc)
- complex(gwpc),intent(in) :: wfg2_jk(nfftot*nsig_ab)
- complex(gwpc),intent(out) :: sigcohme(nsig_ab)
+ complex(gwp),intent(in) :: epsm1q_o(npwc,npwc),vc_sqrt(npwc)
+ complex(gwp),intent(in) :: wfg2_jk(nfftot*nsig_ab)
+ complex(gwp),intent(out) :: sigcohme(nsig_ab)
 
 !Local variables-------------------------------
 !scalars

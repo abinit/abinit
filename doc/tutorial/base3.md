@@ -52,7 +52,7 @@ You should edit it, read it carefully, have a look at the following **new input 
 
 Note also the following: you will work at fixed [[ecut]] (12Ha).
 It is implicit that in *real life*, you should do a convergence test with respect to *ecut*.
-Here, a suitable *ecut* is given to you; it corresponds to the suggested *ecut* for this pseudopotential according to the [PseudoDojo website](http://www.pseudo-dojo.org/) where the silicon pseudopotential was taken.
+Here, a suitable *ecut* is given to you; it corresponds to the suggested *ecut* for this pseudopotential according to the [PseudoDojo website](https://www.pseudo-dojo.org/) where the silicon pseudopotential was taken.
 When we will relax the lattice parameter, it will result in a lattice parameter that is 0.2% off of the experimental value.
 Such convergence study has to be made for each physical property that is the target of your interest. While the
 value of [[ecut]] giving converged properties usually do not depend much on the property, this is not true
@@ -121,12 +121,12 @@ Then, the file at which the problem occurred is mentioned, as well as the number
 
 As the computation of [[nkpt]] for specific grids of k-points is not an easy task,
 while the even more important selection of specific economical grids
-(the best ratio between the accuracy of the integration in the Brillouin zone and the number of k-points)
+(the best ratio between the precision of the integration in the Brillouin zone and the number of k-points)
 is more difficult, some help to the user is provided by ABINIT.
 
 The code is able to examine automatically different k-point grids, and to propose the best grids for integration.
 This is described in the [[help:abinit]], see the input variable [[prtkpt]], and the associated characterisation
-of the integral accuracy, described in [[kptrlen]].
+of the integral precision, described in [[kptrlen]].
 
 !!! tip
 
@@ -138,7 +138,7 @@ When one begins the study of a new material, it is strongly advised to examine f
 and select (at least) three efficient ones, for the k-point convergence study.
 
 Do not forget that the CPU time will be linearly proportional to the number of k-points to be treated:
-using 10 k-points will take five times more than using 2 k-points. Even for a similar accuracy of the
+using 10 k-points will take five times more than using 2 k-points. Even for a similar precision of the
 Brillouin zone integration (that is to say for about the same value of [[kptrlen]]), there might be a grid that will reduce to 10 k-points in the irreducible Brillouin zone and another that will reduce to 2 k-points
 in the irreducible Brillouin zone.
 The latter is clearly to be preferred from a computational perspective!
@@ -171,7 +171,7 @@ From the output file, here is the evolution of total energy for the different k-
     etotal4    -8.5251270559E+00
 
 The difference between dataset 3 and dataset 4 is rather small.
-Even the dataset 2 gives an accuracy of about 0.0001 Ha. So, our converged value for the total energy,
+Even the dataset 2 gives a precision of about 0.0001 Ha. So, our converged value for the total energy,
 at fixed [[acell]], fixed [[ecut]], is -8.8251 Ha.
 
 !!! note
@@ -225,7 +225,7 @@ The stress tensor is given in Hartree/Bohr<sup>3</sup>, and the order of the com
                             23  13  12
 
 There is only a 0.13% relative difference between *acell1* and *acell2*.
-So, our converged LDA value for Silicon, with the *Si.psp8* pseudopotential of the [PseudoDojo website](http://www.pseudo-dojo.org/)
+So, our converged LDA value for Silicon, with the *Si.psp8* pseudopotential of the [PseudoDojo website](https://www.pseudo-dojo.org/)
 is 10.195 Bohr, that is 5.395 Angstrom.
 The experimental value is *5.431* Angstrom at 25 degree Celsius,
 see R.W.G. Wyckoff, Crystal structures Ed. Wiley and sons, New-York (1963)
@@ -344,7 +344,7 @@ with a band-gap of about 0.585 eV (this is quantitatively quite wrong: the exper
 The minimum of the conduction band is slightly displaced with respect to X, see kpt # 21 (this is correct).
 This underestimation of the band gap is well-known (the famous DFT band-gap problem).
 In order to obtain correct band gaps, you need to go beyond the Kohn-Sham Density Functional
-Theory: use the GW approximation. This is described in [the first GW tutorial](/tutorial/gw1).
+Theory: use the GW approximation. This is described in [the first GW tutorial](../tutorial/gw1.md).
 
 For experimental data and band structure representation, see the book by M.L. Cohen and J.R. Chelikowski [[cite:Cohen1988]].
 

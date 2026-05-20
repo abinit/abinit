@@ -13,7 +13,7 @@
 !!    where U is an upper triangular matrix and L is lower triangular.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2025 ABINIT group (LNguyen,FDahm (CS))
+!!  Copyright (C) 2001-2026 ABINIT group (LNguyen,FDahm (CS))
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -71,8 +71,7 @@ subroutine abi_zpotrf_2d(uplo,n,a,lda,info)
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: lda,n
  integer, intent(out) :: info
- complex(dpc), intent(inout) :: a(lda,*)
-
+ complex(dp), intent(inout) :: a(lda,*)
 ! *********************************************************************
 
  call abi_zpotrf(uplo,n,a(1,1),lda,info)
@@ -142,8 +141,7 @@ subroutine abi_zpotrf(uplo,n,a,lda,info)
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: lda,n
  integer, intent(out) :: info
- complex(dpc), intent(inout) :: a(*)
-
+ complex(dp), intent(inout) :: a(*)
 ! *********************************************************************
 
 #ifdef HAVE_LINALG_PLASMA

@@ -6,24 +6,19 @@
 !!  The high level wfd_t inteface for building wannier functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2022 ABINIT group (hexu)
+!!  Copyright (C) 2005-2026 ABINIT group (hexu)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !!
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-
 #include "abi_common.h"
-
 
 !===============================================================
 ! m_wfd_wannier
@@ -124,6 +119,8 @@ contains
     integer :: exclude_bands(hdr%mband, hdr%nsppol)
 
     integer :: spaceComm, nprocs, rank, master
+
+     ABI_UNUSED(ngfftf(1))
 
     !print *, "============================================================"
     !print *, "Starting WFD Wannier"

@@ -1,0 +1,97 @@
+# ZPR calculation for diamond using KS electron–phonon (e-ph) matrix elements.
+# This example is similar to gwpt_suite/t05.abi, but here the KS matrix elements
+# are read from the GSTORE file (eph_task = 24) in dataset 1.
+# In dataset 2, eph_task = 4 is used to perform the same KS-level calculation,
+# with the e-ph matrix elements computed on the fly.
+# Both approaches are expected to yield identical results.
+
+ ndtset   2
+
+ optdriver 7    # Enter EPH driver.
+
+ nband 12
+ ecut 45.0
+ #prtvol 10
+
+ # K-mesh (must be equal to the one of the WFK file).
+ ngkpt 2 2 2
+ nshiftk 1
+ shiftk 0 0 0
+
+ getwfk_filepath "t03o_WFK"
+
+ # We also need the KS GS density and potential.
+ getden_filepath "diamond_eph_gwpt/gso_DEN.nc"
+ getpot_filepath "diamond_eph_gwpt/gso_POT.nc"
+
+ # Read DDB file with dynamical matrix.
+ getddb_filepath "diamond_eph_gwpt/out_DDB"
+
+ # =============
+ # For dataset 1
+ # =============
+ eph_task1 24              # ZPR computation from GSTORE file
+ getgstore_filepath1 "t04o_GSTORE.nc"
+ gstore_gname1 "gvals_ks"  # Use KS e-ph matrix elements from GSTORE
+
+ #eph_np_pqbks1 2 1 1 1 1   # pert parallelism
+ #eph_np_pqbks1 1 1 1 2 1  # k-point
+ #eph_np_pqbks1 1 2 1 1 1  # q-point
+ #eph_np_pqbks1 2 2 1 2 1  # k-point
+
+ # =============
+ # For dataset 2
+ # =============
+ eph_task2 4              # ZPR computation with g computed on-the-fly
+
+ eph_stern 1              # Activate Sterheimer to compute contribution given by states above nband
+ #eph_stern 0              # No Sterheimer
+
+ tmesh 300 100 1          # Temperature mesh.
+
+ ddb_ngqpt 2 2 2          # The code expects to find in the DDB
+                          # all the IBZ q-points corresponding to a 2x2x2 q-mesh
+
+ # Read first-order potentials and densities from these two files.
+ getdvdb_filepath "t01_DVDB"
+ tolwfr 1e-20
+
+ # Disable output of phonon DOS and phonon bands.
+ prtphdos 0
+ prtphbands 0
+
+##############################################
+####                 SECTION: Sigma_nk
+##############################################
+ zcut 0.01 eV
+
+# Read crystal structure from DEN.nc file
+ structure "abifile:diamond_eph_gwpt/gso_DEN.nc"
+
+ pp_dirpath "$ABI_PSPDIR/Psdj_nc_fr_04_pbe_std_psp8"
+ pseudos "C.psp8"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t01.abi, t02.abi, t03.abi, t04.abi, t05.abi, t06.abi
+#%% exclude_builders = scope_gnu_10.2_paral
+#%% [files]
+#%% use_git_submodule = diamond_eph_gwpt
+#%% files_to_test =
+#%%   t06.abo, tolnlines= 25, tolabs= 5.000e-02, tolrel= 0.2
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH, GWPT, GSTORE
+#%% description = ZPR calculation for diamond using KS electron–phonon (e-ph) matrix elements.
+#%%   This example is similar to gwpt_suite/t05.abi, but here the KS matrix elements
+#%%   are read from the GSTORE file (eph_task = 24) in dataset 1.
+#%%   In dataset 2, eph_task = 4 is used to perform the same KS-level calculation,
+#%%   with the e-ph matrix elements computed on the fly.
+#%%   Both approaches are expected to yield identical results.
+#%%<END TEST_INFO>

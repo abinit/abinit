@@ -10,7 +10,7 @@
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2025 ABINIT group (BS)
+!! Copyright (C) 2018-2026 ABINIT group (BS, IML)
 !! This file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -250,12 +250,12 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
    call xgBlock_map_1d(xgocc,occ,SPACE_R,nband,gpu_option=dtset%gpu_option)
  end if
 
- call timab(tim_chebfiwf2,2,tsec)
+ call timab(tim_chebfiwf2,2,tsec) ! IL TODO this should be deactivated
 
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_INIT)
  call chebfi_init(chebfi,nband,npw*nspinor,dtset%tolwfr_diago,dtset%ecut, &
 &                 dtset%paral_kgb,l_mpi_enreg%bandpp, &
-&                 dtset%nline, dtset%nbdbuf, space,1, &
+&                 dtset%mdeg_filter, dtset%nbdbuf, space,1, &
 &                 l_mpi_enreg%comm_bandspinorfft,me_g0,me_g0_fft,l_paw,&
 &                 l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
 &                 dtset%chebfi_oracle,dtset%oracle_factor,dtset%oracle_min_occ,&

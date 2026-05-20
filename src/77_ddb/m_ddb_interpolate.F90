@@ -7,7 +7,7 @@
 !! the interatomic force constants and write the result in a DDB file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (GA)
+!!  Copyright (C) 2008-2026 ABINIT group (GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -88,6 +88,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, comm)
  integer :: rftyp
  integer :: ii,iblok,jblok,iqpt,ipert1,ipert2,idir1,idir2
  integer :: nprocs,my_rank
+ real(dp) :: eta
  character(len=500) :: msg
  character(len=fnlen) :: ddb_out_filename, ddb_out_nc_filename
  type(ddb_type) :: ddb_new
@@ -160,6 +161,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, comm)
    ddb_new%typ = 85
  end if
  ddb_new%qpt = zero
+ ddb_new%omega = zero
  ddb_new%nrm = one
 
  ABI_MALLOC(d2cart,(2,3,mpert,3,mpert))

@@ -1,6 +1,6 @@
 
- **** DERIVATIVE DATABASE ****    
-+DDB, Version number  20230401
+ **** DERIVATIVE DATABASE ****
++DDB, Version number  20240201
 
  DDB for AlAs, Raman tensor, Non-linear optical susceptibilities and EO tensor
 
@@ -112,7 +112,7 @@
             0.25000000000000D+00  0.25000000000000D+00  0.25000000000000D+00
      znucl  0.13000000000000D+02  0.33000000000000D+02
       zion  0.30000000000000D+01  0.50000000000000D+01
- 
+
   Description of the potentials (KB energies)
   vrsio8 (for pseudopotentials)=100401
   usepaw =  0
@@ -124,12 +124,13 @@
   Atom type=    2   pspso=  0   nekb=   1
   iln lpsang iproj  ekb(:)
      1     0     1     8.3875106E-01
- 
+
  **** Database of total energy derivatives ****
  Number of data blocks=    2
-  
+
  2nd derivatives (non-stat.)  - # elements :          81
  qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
+ frequency  0.00000000E+00
    1   1   1   1  0.53511071492248D+01  0.00000000000000D+00
    2   1   1   1  0.26755535746124D+01  0.00000000000000D+00
    3   1   1   1  0.26755535746124D+01  0.00000000000000D+00
@@ -211,11 +212,14 @@
    1   4   3   4  0.11596573658580D+03  0.00000000000000D+00
    2   4   3   4  0.11596573658580D+03  0.00000000000000D+00
    3   4   3   4 -0.34789720975740D+03  0.00000000000000D+00
-  
+
  3rd derivatives              - # elements :         189
  qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
       0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
       0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
+ frequency  0.00000000E+00
+            0.00000000E+00
+            0.00000000E+00
      1     4     1     4     1     1 -0.35603570676074D+02  0.00000000000000D+00
      2     4     1     4     1     1  0.17801785598369D+02  0.00000000000000D+00
      3     4     1     4     1     1  0.17801785598369D+02  0.00000000000000D+00

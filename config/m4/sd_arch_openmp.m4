@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon. MTorrent)
+## Copyright (C) 2019-2026 ABINIT group (Yann Pouillon. MTorrent)
 
 #
 # openMP support for Steredeg
@@ -266,9 +266,14 @@ AC_DEFUN([SD_OPENMP_DETECT], [
       if test "${sd_openmp_enable_cxx}" = "yes"; then
         CXXFLAGS="${CXXFLAGS} ${sd_openmp_cxxflags}"
       fi
-      if test "${sd_openmp_enable_fc}" = "yes"; then
-        FCFLAGS="${FCFLAGS} ${sd_openmp_fcflags}"
-      fi
+      # FIXME For now, OpenMP Fortran flags are specified
+      # early in FCFLAGS in configure.ac in order to be processed by
+      # AC_FC_LIBRARY_LDFLAGS and find related libraries.
+      # Commenting this here to avoid double-presence of those flags
+      # in final FCFLAGS
+      #if test "${sd_openmp_enable_fc}" = "yes"; then
+      #  FCFLAGS="${FCFLAGS} ${sd_openmp_fcflags}"
+      #fi
       LIBS="${sd_openmp_libs} ${LIBS}"
       LDFLAGS="${LDFLAGS} ${sd_openmp_ldflags}"
     else
@@ -423,7 +428,7 @@ AC_DEFUN([_SD_OPENMP_CHECK_CXX_API], [
                     # ------------------------------------ #
 
 #
-# Private macros for Fortran 
+# Private macros for Fortran
 #
 
 AC_DEFUN([_SD_OPENMP_CHECK_FC], [
@@ -461,10 +466,10 @@ AC_DEFUN([_SD_OPENMP_CHECK_FC_API], [
   AC_LANG_PUSH([Fortran])
   AC_RUN_IFELSE([AC_LANG_PROGRAM([],
     [[
-      use omp_lib 
+      use omp_lib
       integer :: i,n,m
       integer :: array(10)
-      n = 10 
+      n = 10
 !$OMP PARALLEL DO
       do i = 1, n
         array(i) = sqrt(real(i))

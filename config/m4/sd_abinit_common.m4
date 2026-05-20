@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2026 ABINIT group (Yann Pouillon)
 
 #
 # ABINIT Common low-level library
@@ -67,7 +67,7 @@ AC_DEFUN([SD_ABINIT_COMMON_INIT], [
   esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([abinit_common],
     [AS_HELP_STRING([--with-abinit_common],
       [Install prefix of the ABINIT Common library (e.g. /usr/local).])],

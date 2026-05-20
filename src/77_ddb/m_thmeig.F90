@@ -6,7 +6,7 @@
 !! Calculate thermal corrections to the eigenvalues.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (PB, XG, GA)
+!!  Copyright (C) 2008-2026 ABINIT group (PB, XG, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -168,7 +168,7 @@ subroutine thmeig(inp, ddb, crystal, iout, natom, mpert, msize, d2asr, comm)
 !=========================================================================
 
  !GA: TODO Perhaps those should be created at initialization of inp
- elph_base_name = trim(inp%prefix_outdata)//"_ep" 
+ elph_base_name = trim(inp%prefix_outdata)//"_ep"
  eig2_filnam = inp%filename_eigr2d
 
 

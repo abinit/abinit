@@ -11,7 +11,7 @@
 !!  one need the knowledge of several quantities at G-G0.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2025 ABINIT group (MG, GMR, VO, LR, RWG, MT, XG)
+!! Copyright (C) 1999-2026 ABINIT group (MG, GMR, VO, LR, RWG, MT, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,6 @@ module m_gsphere
  use defs_basis
  use m_abicore
  use m_errors
- use m_distribfft
  use m_sort
 
  use defs_abitypes,   only : MPI_type
@@ -149,11 +148,11 @@ module m_gsphere
   ! Radius of each shell.
 
   !TODO switch to dpc
-  complex(gwpc),allocatable :: phmGt(:,:)
+  complex(gwp),allocatable :: phmGt(:,:)
   ! phmGt(ng,nsym)
   ! Phase factor e^{-i2\pi(G.\tau)} where $\tau$ is the fractional translation associated to isym.
 
-  complex(gwpc),allocatable :: phmSGt(:,:)
+  complex(gwp),allocatable :: phmSGt(:,:)
   ! phmSGt(ng,nsym)
   ! Phase factor e^{-i2\pi(SG.\tau)} where S is one of the symmetry properties in reciprocal space.
 
@@ -517,7 +516,7 @@ subroutine gsph_fft_tabs(Gsph, g0, mgfft, ngfft, use_padfft, gmg0_gbound, gmg0_i
  if (use_padfft == 1) call sphereboundary(gmg0_gbound,1,gmg0,mgfft,ng)
 
  call initmpi_seq(MPI_enreg_seq) ! No FFT parallelism.
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
+ call MPI_enreg_seq%distribfft%init_seq('c',ngfft(2),ngfft(3),'all')
 
  ABI_MALLOC(kg_mask, (ng))
  call kgindex(gmg0_ifft, gmg0, kg_mask, MPI_enreg_seq, ngfft, ng)
@@ -1817,6 +1816,10 @@ subroutine kg_map(npw1, kg1, npw2, kg2, g2g1, nmiss)
    i1 = kg2(1,ipw); if (i1<0) i1=i1+n1; i1=i1+1
    i2 = kg2(2,ipw); if (i2<0) i2=i2+n2; i2=i2+1
    i3 = kg2(3,ipw); if (i3<0) i3=i3+n3; i3=i3+1
+!#if defined FC_NVHPC
+!   !if (n1 == -1) write(std_out, *)"NVHPC raises SIGSEGV"
+!   print *, "ipw, i1, i2, i3, n1, n2, n3", ipw, i1, i2, i3, n1, n2, n3
+!#endif
    g2g1(ipw) = iwork(i1,i2,i3)
    if (g2g1(ipw) == 0) nmiss = nmiss + 1
  end do
