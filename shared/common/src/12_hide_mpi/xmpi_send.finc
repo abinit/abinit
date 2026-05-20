@@ -10,7 +10,7 @@
 !!  xmpi_send is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2025 ABINIT group
+!!  Copyright (C) 2001-2026 ABINIT group
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@
 subroutine xmpi_send_char(xval,dest,tag,comm,ier)
 
 !Arguments-------------------------
- character(len=*),intent(inout),target :: xval  
+ character(len=*),intent(inout),target :: xval
  integer ,intent(in) :: dest,tag,comm
  integer ,intent(out) :: ier
 
@@ -180,12 +180,8 @@ subroutine xmpi_send_int1d(xval,dest,tag,comm,ier)
 !! SIDE EFFECTS
 !!  xval= buffer array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_send
-!!
 !! SOURCE
+
 subroutine xmpi_send_int2d(xval,dest,tag,comm,ier)
 
 !Arguments-------------------------
@@ -245,11 +241,6 @@ end subroutine xmpi_send_int2d
 !!
 !! SIDE EFFECTS
 !!  xval= buffer array
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_send
 !!
 !! SOURCE
 

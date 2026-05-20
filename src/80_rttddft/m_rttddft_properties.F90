@@ -7,7 +7,7 @@
 !!  properties (energy, occupations, eigenvalues..)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2025 ABINIT group (FB)
+!!  Copyright (C) 2021-2026 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -248,7 +248,7 @@ subroutine rttddft_calc_etot(dtset, energies, etotal, occ)
       & + energies%e_ewald       &
       & + energies%e_vdw_dftd    &
       & + energies%e_nlpsp_vfock &
-      & + energies%e_paw
+      & + energies%paw%epaw
 !     & + energies%e_entropy
 !FB: @MT Should one add the last e_paw contribution or not?
 !FB: Seeems like all the other contributions are not relevant here @MT?

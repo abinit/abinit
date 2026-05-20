@@ -1,8 +1,8 @@
 
-.Version 10.1.2.3 of ABINIT, released May 2025.
-.(MPI version, prepared for a x86_64_linux_gnu11.4 computer) 
+.Version 10.7.0.2 of ABINIT, released Dec 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 21 Jun 2025.
-- ( at 14h17 )
-  
-- input  file    -> /home/siyu/abinit/build/tests/Test_suite/gwpt_suite_t01-t02-t03-t04/t04.abi
+.Starting date : Sat  1 Nov 2025.
+- ( at 17h25 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/gmatteo_gwr/tests/TestBot_MPI1/gwpt_suite_t01-t02-t03-t04-t05/t04.abi
 - output file    -> t04.abo
 - root for input  files -> t04i
 - root for output files -> t04o
@@ -30,12 +30,12 @@
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       2
--    mband =           9        mffmem =           1         mkmem =           8
-       mpw =        1124          nfft =        4096          nkpt =           8
+-    mband =          12        mffmem =           1         mkmem =           3
+       mpw =         553          nfft =        4096          nkpt =           3
 ================================================================================
-P This job should need less than                       3.442 Mbytes of memory.
+P This job should need less than                       2.082 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      1.237 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+_ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -43,7 +43,7 @@ _ WF disk file :      1.237 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
@@ -54,35 +54,31 @@ _ WF disk file :      1.237 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
         boxcutmin      1.10000000E+00
         ddb_ngqpt        2    2    2
              ecut      4.50000000E+01 Hartree
-          ecuteps      1.00000000E+00 Hartree
-         ecutsigx      1.00000000E+00 Hartree
-    elph2_imagden      3.67493254E-03 Hartree
+          ecuteps      8.00000000E+00 Hartree
+         ecutsigx      8.00000000E+00 Hartree
+    elph2_imagden      3.67493222E-03 Hartree
          eph_task          17
--          fftalg         112
-           istwfk        2    0    3    0    0    0    7    0
+-          fftalg         312
+   gstore_use_lgk        1
+       gwpt_wmode           1
+           istwfk        2    3    7
               ixc          11
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       2.50000000E-01  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
-                       2.50000000E-01  2.50000000E-01  0.00000000E+00
-                       5.00000000E-01  2.50000000E-01  0.00000000E+00
-                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
-                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
-         kptrlatt        4    0    0      0    4    0      0    0    4
-          kptrlen      1.90947115E+01
-       mdf_epsinf      1.20000000E+01
-P           mkmem           8
+         kptrlatt        2    0    0      0    2    0      0    0    2
+          kptrlen      9.54735576E+00
+P           mkmem           3
             natom           2
-            nband           9
+            nband          12
             ngfft          16      16      16
-             nkpt           8
+             nkpt           3
+            nstep         150
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver           7
-          ppmodel           2
        prtphbands           0
          prtphdos           0
             rprim      0.0000000000E+00  3.3755000000E+00  3.3755000000E+00
@@ -137,17 +133,16 @@ P           mkmem           8
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-           tolwfr      1.00000000E-08
+           tolwfr      1.00000000E-16
             typat      1  1
-              wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
-                         0.04688    0.09375
+              wtk        0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       8.9311883380E-01  8.9311883380E-01  8.9311883380E-01
+                       8.9311883710E-01  8.9311883710E-01  8.9311883710E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.6877500000E+00  1.6877500000E+00  1.6877500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
-             zcut      3.67493254E-04 Hartree
+             zcut      3.67493222E-04 Hartree
             znucl        6.00000
 
 ================================================================================
@@ -161,7 +156,7 @@ P           mkmem           8
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
-dimensions: {natom: 2, nkpt: 8, mband: 9, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1124, }
+dimensions: {natom: 2, nkpt: 3, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 553, }
 cutoff_energies: {ecut:  45.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 7, eph_task: 17, }
@@ -178,6 +173,8 @@ meta: {optdriver: 7, eph_task: 17, }
  mkfilename: getdrhodb from: t02_DRHODB
 
  mkfilename: getden from: diamond_eph_gwpt/gso_DEN.nc
+
+ mkfilename: getscr from: diamond_eph_gwpt/gwo_SCR.nc
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
@@ -239,15 +236,17 @@ meta: {optdriver: 7, eph_task: 17, }
    6.90155232E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+- Cannot find pre-existent GSTORE file: t04o_GSTORE.nc
 P qpt_comm can use shmem: yes
 P kpt_comm can use shmem: yes
 P bsum_comm can use shmem: yes
 P pp_sum_comm can use shmem: yes
+
  === Gstore parameters ===
  kzone: ibz
  kfilter: qprange
- nkibz: 8
- nkbz: 64
+ nkibz: 3
+ nkbz: 8
  glob_nk_spin: [2]
  qzone: bz
  nqibz: 3
@@ -255,732 +254,824 @@ P pp_sum_comm can use shmem: yes
  glob_nq_spin: [8]
  kptopt: 1
  qptopt: 1
+ has_used_lgk: 0
+ has_used_lgq: 0
  with_vk: 1
 
  gqk_cplex: 2
- gqk_bstart: 1
- gqk_bstop: 9
- gqk_nb: 9
+ gqk_bstart_k: 2
+ gqk_bstart_kq: 1
+ gqk_bstop_k: 7
+ gqk_bstop_kq: 12
+ gqk_nb_k: 6
+ gqk_nb_kq: 12
  gqk_my_npert: 6
- gqk_my_nk: -1
- gqk_my_nq: -1
+P gqk_my_nk: -1
+P gqk_my_nq: -1
 
   === MPI distribution ===
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of CPUs for parallelism over k-points: 1
+ k-points included in gstore:
+1 : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+2 : [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ ==== Header of the SCR file ====
+ SCR file: epsilon^-1 , calculated using inclvkb = 2
+ TESTPARTICLE RPA
+ Identifier                       4
+ Kxc kernel                       0
+ Treatment of q-->0 limit         2
+- headform                        81
+ fform                         1004
+ gwcalctyp                        0
+ Number of components             1       1
+ Number of q-points               3
+ Number of q-directions           1
+ Number of frequencies            2
+ Number of bands used            60
+ Dimension of matrix            113
+ Number of planewaves used     1067
+ Spectral method                  0
+ Test_type                        0
+ Time-ordering                    1
+ Scissor Energy                 0.000000E+00
+ Spectral smearing              1.000000E-01
+ Complex Imaginary Shift        3.674933E-03
+ rw_mesh_type    None
+ iw_mesh_type    None
+ cw_mesh_type    None
+ The header contains additional records.
+ ==== Header of the correlation g-sphere ====
+  Number of G vectors ...       65
+  Number of shells ......        7
+
+ Time reversal symmetry is used
+ ==== Header of the exchange g-sphere ====
+  Number of G vectors ...       65
+  Number of shells ......        7
+
+ Time reversal symmetry is used
 
  vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
+ ==== K-mesh for wavefunctions ====
+ Number of points in the irreducible wedge :     3
+ Reduced coordinates and weights :
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
+
+ Together with 48 symmetry operations and time-reversal symmetry
+ yields     8 points in the full Brillouin Zone.
+
+
+ ==== P-mesh for Screening ====
+ Number of points in the irreducible wedge :     3
+ Reduced coordinates and weights :
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
+
+ Together with 48 symmetry operations and time-reversal symmetry
+ yields     8 points in the full Brillouin Zone.
+
+
+ ==== G-sphere for exchange ====
+  Number of G vectors ...       65
+  Number of shells ......        7
+
+ Time reversal symmetry is used
+ ==== G-sphere for correlation ====
+  Number of G vectors ...       65
+  Number of shells ......        7
+
+ Time reversal symmetry is used
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+ ==== Wavefunctions for GWPT calculation. ====
+  Number of irreducible k-points ........ 3
+  Number of spinorial components ........ 1
+  Number of spin-density components ..... 1
+  Number of spin polarizations .......... 1
+  Plane wave cutoff energy ..............  45.0
+  Max number of G-vectors ............... 1106
+  Total number of FFT points ............ 4096
+-  Number of FFT points treated by me .... 4096
+
+
+ ==== FFT mesh for wavefunctions ====
+-  FFT mesh divisions ........................    16   16   16
+-  Augmented FFT divisions ...................    17   17   16
+-  FFT algorithm .............................   512
+-  FFT cache size ............................    16
+
+P Total number of (b,k,s) states stored by this rank: 36
+P Memory allocated for Fourier components u(G):      0.6 [Mb] <<< MEM
+P Memory needed for wfd%s datastructure:      0.0 [Mb] <<< MEM
+P Memory needed for wfd%s(0)%k datastructure:      0.0 [Mb] <<< MEM
+P Memory allocated for Kdata array:      0.0 [Mb] <<< MEM
+
  Reading KS GS potential for Sternheimer from: diamond_eph_gwpt/gso_POT.nc
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
- 
+ ==== Info on the ppm_t object ====
+
+--- !Plasmonpole_params
+iteration_state: {dtset: 1, }
+dm2_botsq: 65
+dm_eig: 1
+dm2_otq: 65
+invalid_freq: 0
+model: 1
+mqmem: 3
+nqibz: 3
+npwc: 65
+userho: 0
+iq_bz: 0
+drude_plsmf:   1.14321459E+00
+force_plsmf:   0.00000000E+00
+...
+
+ Only q-points in the IBZ_k will be computed.
+ GWPT frequency convolution is evaluated at E_nk and E_mkq$ and the average is taken.
+
+ Sigma^x_nk and Sigma^c_nk(E0) in eV:
+Band     E0    <VxcDFT>   SigX SigC(E0)  for k-point:[ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+    2  10.221 -16.927 -19.764   4.004
+    3  10.221 -16.930 -19.764   4.006
+    4  10.221 -16.927 -19.764   4.006
+    5  15.832 -15.625  -7.951  -4.397
+    6  15.832 -15.623  -7.951  -4.389
+    7  15.832 -15.624  -7.951  -4.387
+Band     E0    <VxcDFT>   SigX SigC(E0)  for k-point:[ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+    2  -2.521 -15.646 -21.842   6.109
+    3   3.934 -15.890 -19.769   4.667
+    4   3.934 -15.893 -19.769   4.680
+    5  15.036 -13.573  -6.886  -4.616
+    6  15.036 -13.573  -6.886  -4.620
+    7  26.960 -17.095  -6.633  -6.456
+ Total number of failures in Sternheimer solvers at +q: 48
+ Total number of failures in Sternheimer solvers at -q: 48
+
  gstore_completed: 1
- gstore_done_qbz_spin: 8
- gqk%nb: 9
- gqk%glob_nq: 8
- gqk%glob_nk: 2
- E-PH matrix elements:
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1     1     4     1     1     3.900892E-01
-     1     1     4     1     2     9.387017E+02
-     1     1     4     1     3     3.460988E+01
-     1     1     4     1     4     1.271832E+04
-     1     1     4     1     5     4.131535E+00
-     1     1     4     1     6     7.994826E+00
-     1     1     4     1     7     8.619472E+01
-     1     1     4     1     8     7.162226E-02
-     1     1     4     1     9     4.929525E+00
-     1     1     4     2     1     1.184848E+03
-     1     1     4     2     2     5.501200E+02
-     1     1     4     2     3     5.632516E+01
-     1     1     4     2     4     2.243187E+03
-     1     1     4     2     5     7.402113E+02
-     1     1     4     2     6     1.217984E+03
-     1     1     4     2     7     2.928564E+03
-     1     1     4     2     8     9.091781E+02
-     1     1     4     2     9     2.202657E+03
-     1     1     4     3     1     1.782951E+01
-     1     1     4     3     2     1.179077E+01
-     1     1     4     3     3     5.753217E+00
-     1     1     4     3     4     7.179666E+02
-     1     1     4     3     5     4.118200E+01
-     1     1     4     3     6     1.064854E+02
-     1     1     4     3     7     1.550687E+03
-     1     1     4     3     8     3.275204E+01
-     1     1     4     3     9     3.198316E+01
-     1     1     4     4     1     1.682193E+04
-     1     1     4     4     2     1.048749E+03
-     1     1     4     4     3     2.481378E+03
-     1     1     4     4     4     4.223401E+02
-     1     1     4     4     5     2.184813E+03
-     1     1     4     4     6     2.307317E+03
-     1     1     4     4     7     1.811501E+03
-     1     1     4     4     8     1.328772E+04
-     1     1     4     4     9     3.467004E+04
-     1     1     4     5     1     1.552521E+02
-     1     1     4     5     2     1.924390E+02
-     1     1     4     5     3     3.429047E+01
-     1     1     4     5     4     4.992681E+02
-     1     1     4     5     5     3.298687E+01
-     1     1     4     5     6     1.737557E+02
-     1     1     4     5     7     6.682074E+02
-     1     1     4     5     8     4.699399E+03
-     1     1     4     5     9     7.713813E+02
-     1     1     4     6     1     3.407650E+02
-     1     1     4     6     2     3.466031E+02
-     1     1     4     6     3     5.611511E+01
-     1     1     4     6     4     9.669660E+02
-     1     1     4     6     5     1.168484E+01
-     1     1     4     6     6     1.986694E+02
-     1     1     4     6     7     2.675595E+02
-     1     1     4     6     8     9.796111E+03
-     1     1     4     6     9     1.648124E+03
-     1     1     4     7     1     2.888304E+03
-     1     1     4     7     2     7.257546E+02
-     1     1     4     7     3     7.702612E+02
-     1     1     4     7     4     5.494474E+02
-     1     1     4     7     5     3.280095E+01
-     1     1     4     7     6     4.396606E+02
-     1     1     4     7     7     5.292065E+02
-     1     1     4     7     8     8.570452E+04
-     1     1     4     7     9     1.344037E+04
-     1     1     4     8     1     2.438560E-01
-     1     1     4     8     2     3.387615E+02
-     1     1     4     8     3     1.858880E+01
-     1     1     4     8     4     4.588507E+03
-     1     1     4     8     5     5.079207E+03
-     1     1     4     8     6     1.144294E+04
-     1     1     4     8     7     1.011887E+05
-     1     1     4     8     8     1.300010E+00
-     1     1     4     8     9     1.090885E+00
-     1     1     4     9     1     1.475450E+00
-     1     1     4     9     2     1.261429E+02
-     1     1     4     9     3     5.953430E+01
-     1     1     4     9     4     1.410815E+03
-     1     1     4     9     5     6.408542E+02
-     1     1     4     9     6     1.302859E+03
-     1     1     4     9     7     1.143894E+04
-     1     1     4     9     8     1.876047E+00
-     1     1     4     9     9     4.118294E+01
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1     1     6     1     1     6.765142E-01
-     1     1     6     1     2     1.377068E+04
-     1     1     6     1     3     5.520656E+01
-     1     1     6     1     4     9.491209E+02
-     1     1     6     1     5     7.484364E+01
-     1     1     6     1     6     1.129246E+01
-     1     1     6     1     7     4.770889E+00
-     1     1     6     1     8     2.213817E-01
-     1     1     6     1     9     1.260473E+01
-     1     1     6     2     1     1.704633E+04
-     1     1     6     2     2     2.683777E+02
-     1     1     6     2     3     1.472126E+03
-     1     1     6     2     4     2.314896E+03
-     1     1     6     2     5     2.128455E+03
-     1     1     6     2     6     2.178761E+03
-     1     1     6     2     7     2.273623E+03
-     1     1     6     2     8     1.301607E+04
-     1     1     6     2     9     3.107917E+04
-     1     1     6     3     1     1.153073E+02
-     1     1     6     3     2     7.427279E+02
-     1     1     6     3     3     4.551417E+01
-     1     1     6     3     4     3.747711E+01
-     1     1     6     3     5     1.786529E+03
-     1     1     6     3     6     1.157225E+02
-     1     1     6     3     7     4.617795E+01
-     1     1     6     3     8     5.298574E+01
-     1     1     6     3     9     2.583008E+02
-     1     1     6     4     1     1.237103E+03
-     1     1     6     4     2     1.010354E+03
-     1     1     6     4     3     1.217515E+02
-     1     1     6     4     4     5.588964E+02
-     1     1     6     4     5     3.021879E+03
-     1     1     6     4     6     1.293875E+03
-     1     1     6     4     7     8.389295E+02
-     1     1     6     4     8     9.701676E+02
-     1     1     6     4     9     2.569640E+03
-     1     1     6     5     1     2.958726E+03
-     1     1     6     5     2     5.257238E+02
-     1     1     6     5     3     5.990426E+02
-     1     1     6     5     4     6.820573E+02
-     1     1     6     5     5     4.183190E+02
-     1     1     6     5     6     6.884960E+02
-     1     1     6     5     7     5.554300E+02
-     1     1     6     5     8     9.745509E+04
-     1     1     6     5     9     1.351054E+04
-     1     1     6     6     1     3.594218E+02
-     1     1     6     6     2     7.989778E+02
-     1     1     6     6     3     6.558382E+01
-     1     1     6     6     4     3.748410E+02
-     1     1     6     6     5     8.010374E+01
-     1     1     6     6     6     2.144102E+02
-     1     1     6     6     7     1.643539E+02
-     1     1     6     6     8     1.210810E+04
-     1     1     6     6     9     1.718447E+03
-     1     1     6     7     1     1.655620E+02
-     1     1     6     7     2     4.760693E+02
-     1     1     6     7     3     3.338015E+01
-     1     1     6     7     4     1.738424E+02
-     1     1     6     7     5     4.581230E+01
-     1     1     6     7     6     1.219730E+02
-     1     1     6     7     7     8.759036E+01
-     1     1     6     7     8     5.303353E+03
-     1     1     6     7     9     7.973279E+02
-     1     1     6     8     1     3.105329E-01
-     1     1     6     8     2     4.818384E+03
-     1     1     6     8     3     1.237368E+01
-     1     1     6     8     4     3.267290E+02
-     1     1     6     8     5     1.085278E+05
-     1     1     6     8     6     1.366271E+04
-     1     1     6     8     7     6.441481E+03
-     1     1     6     8     8     1.010009E+01
-     1     1     6     8     9     2.586265E+00
-     1     1     6     9     1     9.340663E+00
-     1     1     6     9     2     2.279329E+03
-     1     1     6     9     3     3.968676E+01
-     1     1     6     9     4     1.553295E+02
-     1     1     6     9     5     1.284914E+04
-     1     1     6     9     6     1.453538E+03
-     1     1     6     9     7     6.091073E+02
-     1     1     6     9     8     6.236612E+00
-     1     1     6     9     9     2.180400E+02
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 2 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1     2     4     1     1     1.277132E+03
-     1     2     4     1     2     3.244330E+03
-     1     2     4     1     3     5.819113E+03
-     1     2     4     1     4     7.205575E+03
-     1     2     4     1     5     8.731460E+00
-     1     2     4     1     6     3.666582E+02
-     1     2     4     1     7     1.589731E+01
-     1     2     4     1     8     8.373834E+01
-     1     2     4     1     9     5.685997E+02
-     1     2     4     2     1     2.853685E+03
-     1     2     4     2     2     2.917463E+02
-     1     2     4     2     3     6.405364E+03
-     1     2     4     2     4     4.955357E+03
-     1     2     4     2     5     2.316657E+04
-     1     2     4     2     6     2.485248E+02
-     1     2     4     2     7     1.989553E+03
-     1     2     4     2     8     2.190736E+03
-     1     2     4     2     9     1.602850E+03
-     1     2     4     3     1     5.724414E+03
-     1     2     4     3     2     2.095055E+03
-     1     2     4     3     3     1.389698E+00
-     1     2     4     3     4     1.611626E+01
-     1     2     4     3     5     2.810019E+03
-     1     2     4     3     6     1.111362E+04
-     1     2     4     3     7     1.074161E+04
-     1     2     4     3     8     3.672164E+02
-     1     2     4     3     9     4.022549E+03
-     1     2     4     4     1     6.245085E+03
-     1     2     4     4     2     1.611224E+03
-     1     2     4     4     3     9.185383E+00
-     1     2     4     4     4     1.736325E+01
-     1     2     4     4     5     2.572685E+03
-     1     2     4     4     6     1.006605E+04
-     1     2     4     4     7     2.868629E+02
-     1     2     4     4     8     8.138827E+03
-     1     2     4     4     9     3.031315E+03
-     1     2     4     5     1     1.186280E+03
-     1     2     4     5     2     2.696022E+04
-     1     2     4     5     3     8.418803E+02
-     1     2     4     5     4     9.185567E+02
-     1     2     4     5     5     1.740599E+02
-     1     2     4     5     6     4.302074E+03
-     1     2     4     5     7     2.660631E+02
-     1     2     4     5     8     1.232957E+02
-     1     2     4     5     9     4.112908E+04
-     1     2     4     6     1     6.586651E-01
-     1     2     4     6     2     1.158542E+02
-     1     2     4     6     3     1.042668E+04
-     1     2     4     6     4     8.842525E+03
-     1     2     4     6     5     1.177905E+03
-     1     2     4     6     6     9.747159E+02
-     1     2     4     6     7     1.608061E+04
-     1     2     4     6     8     5.350580E+03
-     1     2     4     6     9     1.518173E+02
-     1     2     4     7     1     6.532218E+02
-     1     2     4     7     2     2.370180E+03
-     1     2     4     7     3     2.599837E+03
-     1     2     4     7     4     2.932751E+01
-     1     2     4     7     5     1.104028E+01
-     1     2     4     7     6     6.199496E+03
-     1     2     4     7     7     3.980037E+03
-     1     2     4     7     8     5.482478E+02
-     1     2     4     7     9     2.789759E+04
-     1     2     4     8     1     1.726411E+02
-     1     2     4     8     2     2.412977E+03
-     1     2     4     8     3     2.826547E+01
-     1     2     4     8     4     2.809686E+03
-     1     2     4     8     5     4.934985E+01
-     1     2     4     8     6     1.762604E+03
-     1     2     4     8     7     6.134216E+02
-     1     2     4     8     8     2.653226E+03
-     1     2     4     8     9     1.602867E+04
-     1     2     4     9     1     2.794272E+03
-     1     2     4     9     2     5.514588E+03
-     1     2     4     9     3     1.368751E+03
-     1     2     4     9     4     8.049250E+02
-     1     2     4     9     5     8.325801E+04
-     1     2     4     9     6     3.153629E+03
-     1     2     4     9     7     2.980181E+04
-     1     2     4     9     8     2.278465E+04
-     1     2     4     9     9     1.321919E+04
- |g(k,q)|^2 in Ha^2 for iq: 1 ik: 2 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     1     2     6     1     1     8.130257E-01
-     1     2     6     1     2     3.546892E+00
-     1     2     6     1     3     2.633135E+04
-     1     2     6     1     4     1.935412E+02
-     1     2     6     1     5     2.222884E+00
-     1     2     6     1     6     2.660437E+00
-     1     2     6     1     7     3.203413E+01
-     1     2     6     1     8     6.943251E+00
-     1     2     6     1     9     2.200091E+01
-     1     2     6     2     1     8.709069E-01
-     1     2     6     2     2     1.254536E+00
-     1     2     6     2     3     2.289506E+04
-     1     2     6     2     4     1.239287E+02
-     1     2     6     2     5     3.249088E+00
-     1     2     6     2     6     2.850329E+00
-     1     2     6     2     7     7.653358E+03
-     1     2     6     2     8     1.013786E+02
-     1     2     6     2     9     2.618737E+01
-     1     2     6     3     1     2.666146E+04
-     1     2     6     3     2     7.367751E+03
-     1     2     6     3     3     4.299412E+01
-     1     2     6     3     4     5.274979E+01
-     1     2     6     3     5     9.909075E+03
-     1     2     6     3     6     4.108518E+04
-     1     2     6     3     7     3.730975E+01
-     1     2     6     3     8     2.106062E+01
-     1     2     6     3     9     1.540889E+04
-     1     2     6     4     1     1.036704E+02
-     1     2     6     4     2     2.671891E+01
-     1     2     6     4     3     3.819898E+01
-     1     2     6     4     4     9.230872E+00
-     1     2     6     4     5     1.049072E+02
-     1     2     6     4     6     1.759458E+02
-     1     2     6     4     7     2.938792E+01
-     1     2     6     4     8     3.108296E+01
-     1     2     6     4     9     5.209958E+01
-     1     2     6     5     1     9.307876E-01
-     1     2     6     5     2     2.542771E-01
-     1     2     6     5     3     3.256934E+03
-     1     2     6     5     4     3.126602E+01
-     1     2     6     5     5     2.998733E+01
-     1     2     6     5     6     1.635150E+01
-     1     2     6     5     7     1.147262E+03
-     1     2     6     5     8     1.335452E+02
-     1     2     6     5     9     3.163243E+01
-     1     2     6     6     1     8.861324E-02
-     1     2     6     6     2     3.394436E+00
-     1     2     6     6     3     3.783661E+04
-     1     2     6     6     4     1.750974E+02
-     1     2     6     6     5     7.665038E+00
-     1     2     6     6     6     2.486914E+01
-     1     2     6     6     7     5.350923E+04
-     1     2     6     6     8     6.766988E+02
-     1     2     6     6     9     7.564093E+00
-     1     2     6     7     1     2.259551E+03
-     1     2     6     7     2     9.058213E+03
-     1     2     6     7     3     5.131228E+01
-     1     2     6     7     4     3.253573E+01
-     1     2     6     7     5     1.527112E+02
-     1     2     6     7     6     2.305015E+04
-     1     2     6     7     7     8.629237E+01
-     1     2     6     7     8     1.426006E+02
-     1     2     6     7     9     7.541500E+04
-     1     2     6     8     1     2.446148E+01
-     1     2     6     8     2     1.082038E+02
-     1     2     6     8     3     6.631715E+00
-     1     2     6     8     4     6.072460E+01
-     1     2     6     8     5     4.606173E+01
-     1     2     6     8     6     3.708957E+02
-     1     2     6     8     7     1.354950E+02
-     1     2     6     8     8     2.014638E+02
-     1     2     6     8     9     5.840760E+02
-     1     2     6     9     1     1.353953E+01
-     1     2     6     9     2     2.790205E+01
-     1     2     6     9     3     5.486358E+03
-     1     2     6     9     4     5.801052E+01
-     1     2     6     9     5     4.227348E+01
-     1     2     6     9     6     1.445397E+01
-     1     2     6     9     7     1.049213E+05
-     1     2     6     9     8     1.601859E+03
-     1     2     6     9     9     1.405991E+02
- |g(k,q)|^2 in Ha^2 for iq: 8 ik: 1 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     8     1     4     1     1     2.070296E+04
-     8     1     4     1     2     6.936088E+04
-     8     1     4     1     3     3.053556E+04
-     8     1     4     1     4     6.845810E+05
-     8     1     4     1     5     7.592982E+03
-     8     1     4     1     6     7.030062E+02
-     8     1     4     1     7     3.213437E+04
-     8     1     4     1     8     1.843386E+04
-     8     1     4     1     9     1.114108E+04
-     8     1     4     2     1     9.240423E+04
-     8     1     4     2     2     3.614631E+04
-     8     1     4     2     3     7.249498E+04
-     8     1     4     2     4     2.769279E+05
-     8     1     4     2     5     1.651747E+04
-     8     1     4     2     6     3.628069E+04
-     8     1     4     2     7     1.744505E+05
-     8     1     4     2     8     1.879373E+04
-     8     1     4     2     9     3.630630E+04
-     8     1     4     3     1     3.355915E+04
-     8     1     4     3     2     8.068500E+03
-     8     1     4     3     3     4.160698E+04
-     8     1     4     3     4     3.510036E+04
-     8     1     4     3     5     5.659010E+03
-     8     1     4     3     6     2.670768E+04
-     8     1     4     3     7     8.141484E+03
-     8     1     4     3     8     6.661152E+02
-     8     1     4     3     9     1.398881E+03
-     8     1     4     4     1     6.530306E+03
-     8     1     4     4     2     2.238555E+04
-     8     1     4     4     3     2.329905E+05
-     8     1     4     4     4     2.004928E+04
-     8     1     4     4     5     7.441514E+02
-     8     1     4     4     6     3.211943E+04
-     8     1     4     4     7     1.738859E+04
-     8     1     4     4     8     4.822154E+04
-     8     1     4     4     9     3.538464E+04
-     8     1     4     5     1     7.702574E+03
-     8     1     4     5     2     1.245249E+04
-     8     1     4     5     3     1.148854E+03
-     8     1     4     5     4     1.797100E+05
-     8     1     4     5     5     2.298276E+04
-     8     1     4     5     6     1.200200E+04
-     8     1     4     5     7     3.193252E+04
-     8     1     4     5     8     7.679491E+03
-     8     1     4     5     9     8.135814E+04
-     8     1     4     6     1     7.154678E+04
-     8     1     4     6     2     8.590545E+03
-     8     1     4     6     3     8.771897E+03
-     8     1     4     6     4     3.391862E+04
-     8     1     4     6     5     1.466776E+04
-     8     1     4     6     6     7.727571E+03
-     8     1     4     6     7     7.560823E+03
-     8     1     4     6     8     3.565613E+03
-     8     1     4     6     9     1.572898E+04
-     8     1     4     7     1     4.717028E+01
-     8     1     4     7     2     2.959334E+04
-     8     1     4     7     3     1.185477E+04
-     8     1     4     7     4     6.998916E+02
-     8     1     4     7     5     4.234009E+03
-     8     1     4     7     6     3.146555E+04
-     8     1     4     7     7     1.597578E+04
-     8     1     4     7     8     2.865875E+04
-     8     1     4     7     9     1.157611E+04
-     8     1     4     8     1     1.280359E+02
-     8     1     4     8     2     4.285460E+03
-     8     1     4     8     3     2.586155E+04
-     8     1     4     8     4     2.698781E+04
-     8     1     4     8     5     3.757551E+04
-     8     1     4     8     6     4.070019E+04
-     8     1     4     8     7     1.054663E+05
-     8     1     4     8     8     2.992772E+04
-     8     1     4     8     9     4.094398E+04
-     8     1     4     9     1     7.214517E+03
-     8     1     4     9     2     4.510094E+03
-     8     1     4     9     3     6.240872E+03
-     8     1     4     9     4     2.461085E+04
-     8     1     4     9     5     1.884436E+03
-     8     1     4     9     6     2.498410E+04
-     8     1     4     9     7     4.774737E+04
-     8     1     4     9     8     7.945735E+03
-     8     1     4     9     9     6.794272E+04
- |g(k,q)|^2 in Ha^2 for iq: 8 ik: 1 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     8     1     6     1     1     6.989182E+04
-     8     1     6     1     2     6.893351E+05
-     8     1     6     1     3     9.903066E+04
-     8     1     6     1     4     4.741092E+04
-     8     1     6     1     5     3.742881E+04
-     8     1     6     1     6     1.277478E+04
-     8     1     6     1     7     3.080448E+02
-     8     1     6     1     8     7.842881E+03
-     8     1     6     1     9     3.037087E+03
-     8     1     6     2     1     2.650350E+05
-     8     1     6     2     2     2.512129E+05
-     8     1     6     2     3     4.155222E+04
-     8     1     6     2     4     9.335694E+04
-     8     1     6     2     5     2.366535E+05
-     8     1     6     2     6     3.084235E+04
-     8     1     6     2     7     8.542927E+03
-     8     1     6     2     8     1.037781E+02
-     8     1     6     2     9     2.844864E+04
-     8     1     6     3     1     1.475243E+04
-     8     1     6     3     2     1.045270E+05
-     8     1     6     3     3     1.210597E+05
-     8     1     6     3     4     3.776787E+05
-     8     1     6     3     5     2.149298E+04
-     8     1     6     3     6     5.246344E+03
-     8     1     6     3     7     1.005681E+04
-     8     1     6     3     8     4.058747E+03
-     8     1     6     3     9     2.352680E+04
-     8     1     6     4     1     1.402322E+04
-     8     1     6     4     2     1.041015E+05
-     8     1     6     4     3     1.094473E+04
-     8     1     6     4     4     1.112732E+04
-     8     1     6     4     5     4.086849E+04
-     8     1     6     4     6     3.680037E+03
-     8     1     6     4     7     4.169402E+03
-     8     1     6     4     8     1.572702E+03
-     8     1     6     4     9     7.978048E+02
-     8     1     6     5     1     4.297804E+04
-     8     1     6     5     2     1.450062E+05
-     8     1     6     5     3     5.871269E+04
-     8     1     6     5     4     2.422089E+04
-     8     1     6     5     5     4.997083E+04
-     8     1     6     5     6     8.364186E+03
-     8     1     6     5     7     1.692249E+04
-     8     1     6     5     8     2.494085E+04
-     8     1     6     5     9     1.554321E+04
-     8     1     6     6     1     2.143203E+04
-     8     1     6     6     2     7.858383E+04
-     8     1     6     6     3     1.480206E+04
-     8     1     6     6     4     1.205814E+04
-     8     1     6     6     5     8.290341E+04
-     8     1     6     6     6     1.063787E+04
-     8     1     6     6     7     1.359329E+04
-     8     1     6     6     8     2.570634E+04
-     8     1     6     6     9     5.230190E+03
-     8     1     6     7     1     8.976674E+01
-     8     1     6     7     2     8.161539E+03
-     8     1     6     7     3     1.162035E+04
-     8     1     6     7     4     9.990317E+03
-     8     1     6     7     5     9.560019E+04
-     8     1     6     7     6     3.723918E+04
-     8     1     6     7     7     9.459968E+04
-     8     1     6     7     8     2.071699E+05
-     8     1     6     7     9     9.850168E+04
-     8     1     6     8     1     1.597773E+03
-     8     1     6     8     2     1.338094E+03
-     8     1     6     8     3     1.755407E+03
-     8     1     6     8     4     2.523632E+03
-     8     1     6     8     5     1.797034E+04
-     8     1     6     8     6     1.202594E+04
-     8     1     6     8     7     8.673776E+04
-     8     1     6     8     8     1.065298E+04
-     8     1     6     8     9     8.595449E+03
-     8     1     6     9     1     8.265885E+00
-     8     1     6     9     2     2.906679E+04
-     8     1     6     9     3     1.009487E+03
-     8     1     6     9     4     6.814499E+02
-     8     1     6     9     5     5.577422E+04
-     8     1     6     9     6     4.263129E+03
-     8     1     6     9     7     4.379824E+03
-     8     1     6     9     8     4.347169E+03
-     8     1     6     9     9     2.919909E+04
- |g(k,q)|^2 in Ha^2 for iq: 8 ik: 2 mode: 4
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     8     2     4     1     1     3.008590E+03
-     8     2     4     1     2     4.236638E+05
-     8     2     4     1     3     9.471892E+03
-     8     2     4     1     4     1.550377E+04
-     8     2     4     1     5     1.451836E+04
-     8     2     4     1     6     6.530177E+03
-     8     2     4     1     7     2.496053E+04
-     8     2     4     1     8     6.849659E+04
-     8     2     4     1     9     3.426473E+04
-     8     2     4     2     1     1.702246E+05
-     8     2     4     2     2     5.812805E+02
-     8     2     4     2     3     1.343075E+04
-     8     2     4     2     4     4.061043E+04
-     8     2     4     2     5     7.884276E+03
-     8     2     4     2     6     1.861988E+04
-     8     2     4     2     7     1.508534E+04
-     8     2     4     2     8     1.371289E+04
-     8     2     4     2     9     4.617905E+03
-     8     2     4     3     1     7.003443E+04
-     8     2     4     3     2     1.632891E+04
-     8     2     4     3     3     3.367859E+02
-     8     2     4     3     4     7.579734E+04
-     8     2     4     3     5     1.125124E+04
-     8     2     4     3     6     3.637335E+04
-     8     2     4     3     7     1.205615E+04
-     8     2     4     3     8     1.204518E+03
-     8     2     4     3     9     1.501607E+04
-     8     2     4     4     1     1.193061E+04
-     8     2     4     4     2     1.532573E+04
-     8     2     4     4     3     2.219168E+04
-     8     2     4     4     4     1.338734E+04
-     8     2     4     4     5     6.729005E+04
-     8     2     4     4     6     6.147162E+04
-     8     2     4     4     7     7.519144E+03
-     8     2     4     4     8     3.248730E+04
-     8     2     4     4     9     1.968462E+04
-     8     2     4     5     1     3.212711E+04
-     8     2     4     5     2     5.790335E+04
-     8     2     4     5     3     4.259090E+03
-     8     2     4     5     4     5.472968E+04
-     8     2     4     5     5     5.063182E+04
-     8     2     4     5     6     1.580472E+04
-     8     2     4     5     7     8.748795E+03
-     8     2     4     5     8     5.043592E+03
-     8     2     4     5     9     3.162600E+05
-     8     2     4     6     1     2.796341E+03
-     8     2     4     6     2     2.755623E+04
-     8     2     4     6     3     3.286488E+03
-     8     2     4     6     4     1.382828E+04
-     8     2     4     6     5     7.067358E+04
-     8     2     4     6     6     2.056570E+04
-     8     2     4     6     7     7.525897E+03
-     8     2     4     6     8     6.467980E+04
-     8     2     4     6     9     2.647760E+04
-     8     2     4     7     1     9.179374E+03
-     8     2     4     7     2     2.773493E+03
-     8     2     4     7     3     2.375969E+04
-     8     2     4     7     4     1.099368E+04
-     8     2     4     7     5     2.226825E+04
-     8     2     4     7     6     2.500522E+04
-     8     2     4     7     7     2.878474E+03
-     8     2     4     7     8     3.173080E+03
-     8     2     4     7     9     1.265380E+04
-     8     2     4     8     1     8.949443E+04
-     8     2     4     8     2     8.701123E+03
-     8     2     4     8     3     5.884843E+03
-     8     2     4     8     4     8.690616E+04
-     8     2     4     8     5     1.833959E+04
-     8     2     4     8     6     4.993716E+04
-     8     2     4     8     7     7.529057E+03
-     8     2     4     8     8     9.211964E+03
-     8     2     4     8     9     8.122532E+04
-     8     2     4     9     1     9.121031E+04
-     8     2     4     9     2     1.604229E+03
-     8     2     4     9     3     4.060072E+04
-     8     2     4     9     4     3.120583E+04
-     8     2     4     9     5     1.427427E+05
-     8     2     4     9     6     6.102553E+03
-     8     2     4     9     7     3.317038E+04
-     8     2     4     9     8     1.133762E+05
-     8     2     4     9     9     1.161906E+03
- |g(k,q)|^2 in Ha^2 for iq: 8 ik: 2 mode: 6
-    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
-     8     2     6     1     1     9.026894E+02
-     8     2     6     1     2     2.630701E+05
-     8     2     6     1     3     1.214201E+05
-     8     2     6     1     4     7.802534E+02
-     8     2     6     1     5     5.181949E+03
-     8     2     6     1     6     7.225167E+03
-     8     2     6     1     7     1.167853E+05
-     8     2     6     1     8     2.430962E+02
-     8     2     6     1     9     1.158500E+04
-     8     2     6     2     1     5.022638E+05
-     8     2     6     2     2     9.148787E+02
-     8     2     6     2     3     1.295899E+05
-     8     2     6     2     4     7.204954E+03
-     8     2     6     2     5     1.007249E+05
-     8     2     6     2     6     8.460978E+04
-     8     2     6     2     7     3.592295E+04
-     8     2     6     2     8     4.052218E+02
-     8     2     6     2     9     1.780326E+03
-     8     2     6     3     1     4.083812E+04
-     8     2     6     3     2     8.039274E+04
-     8     2     6     3     3     4.724713E+04
-     8     2     6     3     4     4.362502E+03
-     8     2     6     3     5     1.592739E+05
-     8     2     6     3     6     7.640917E+04
-     8     2     6     3     7     2.814454E+04
-     8     2     6     3     8     3.047932E+03
-     8     2     6     3     9     4.802011E+04
-     8     2     6     4     1     4.205640E+03
-     8     2     6     4     2     5.464419E+03
-     8     2     6     4     3     1.773192E+05
-     8     2     6     4     4     3.806748E+04
-     8     2     6     4     5     6.446033E+02
-     8     2     6     4     6     2.431507E+04
-     8     2     6     4     7     4.851695E+02
-     8     2     6     4     8     1.865429E+04
-     8     2     6     4     9     2.527657E+03
-     8     2     6     5     1     1.747213E+04
-     8     2     6     5     2     6.171734E+04
-     8     2     6     5     3     2.344163E+04
-     8     2     6     5     4     1.499872E+04
-     8     2     6     5     5     5.288915E+04
-     8     2     6     5     6     1.045296E+04
-     8     2     6     5     7     4.723120E+04
-     8     2     6     5     8     1.632295E+04
-     8     2     6     5     9     7.051979E+04
-     8     2     6     6     1     9.149686E+03
-     8     2     6     6     2     3.042152E+04
-     8     2     6     6     3     7.316220E+03
-     8     2     6     6     4     4.043769E+02
-     8     2     6     6     5     4.603273E+04
-     8     2     6     6     6     3.793787E+04
-     8     2     6     6     7     1.215012E+05
-     8     2     6     6     8     7.694650E+02
-     8     2     6     6     9     6.249764E+03
-     8     2     6     7     1     8.950210E+04
-     8     2     6     7     2     3.355797E+04
-     8     2     6     7     3     4.975684E+04
-     8     2     6     7     4     1.454070E+03
-     8     2     6     7     5     4.507359E+04
-     8     2     6     7     6     2.440973E+05
-     8     2     6     7     7     3.676384E+03
-     8     2     6     7     8     3.775209E+03
-     8     2     6     7     9     2.646213E+05
-     8     2     6     8     1     1.159408E+04
-     8     2     6     8     2     2.560873E+03
-     8     2     6     8     3     3.668864E+04
-     8     2     6     8     4     1.598687E+04
-     8     2     6     8     5     2.070613E+04
-     8     2     6     8     6     4.485707E+03
-     8     2     6     8     7     2.377744E+04
-     8     2     6     8     8     5.944575E+03
-     8     2     6     8     9     7.765269E+03
-     8     2     6     9     1     2.024019E+04
-     8     2     6     9     2     3.953887E+03
-     8     2     6     9     3     1.887028E+05
-     8     2     6     9     4     7.953970E+02
-     8     2     6     9     5     4.508461E+04
-     8     2     6     9     6     5.139534E+03
-     8     2     6     9     7     3.793634E+05
-     8     2     6     9     8     8.361439E+03
-     8     2     6     9     9     1.807220E+04
+ gstore_done_qbz_spin: 4
+ nb_k: 6
+ bstart_k: 2
+ nb_kq: 12
+ bstart_kq: 1
+ glob_nq: 8
+ glob_nk: 2
+ E-PH matrix elements in the atom representation: pcase = (idir, iatom)
+ NB: Values are averaged over e_mk+q, and e_nk degenerate states.
+    iq    ik pcase  m_kq   n_k     |g^SE| in Ha    |g^KS| in Ha
+ |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 4
+    iq    ik pcase  m_kq   n_k            SE/KS          |g^SE|          |g^KS|
+-    1     1     4     1     2     1.030312E+00    3.627877E-01    3.521143E-01
+-    1     1     4     1     3     1.030312E+00    3.627877E-01    3.521143E-01
+-    1     1     4     1     4     1.030312E+00    3.627877E-01    3.521143E-01
+-    1     1     4     1     5     1.061260E+00    2.035780E-01    1.918267E-01
+-    1     1     4     1     6     1.061260E+00    2.035780E-01    1.918267E-01
+-    1     1     4     1     7     1.061260E+00    2.035780E-01    1.918267E-01
+-    1     1     4     2     2     1.108244E+00    7.425975E-01    6.700670E-01
+-    1     1     4     2     3     1.108244E+00    7.425975E-01    6.700670E-01
+-    1     1     4     2     4     1.108244E+00    7.425975E-01    6.700670E-01
+-    1     1     4     2     5     1.550773E+00    2.335664E-01    1.506128E-01
+-    1     1     4     2     6     1.550773E+00    2.335664E-01    1.506128E-01
+-    1     1     4     2     7     1.550773E+00    2.335664E-01    1.506128E-01
+-    1     1     4     3     2     1.108244E+00    7.425975E-01    6.700670E-01
+-    1     1     4     3     3     1.108244E+00    7.425975E-01    6.700670E-01
+-    1     1     4     3     4     1.108244E+00    7.425975E-01    6.700670E-01
+-    1     1     4     3     5     1.550773E+00    2.335664E-01    1.506128E-01
+-    1     1     4     3     6     1.550773E+00    2.335664E-01    1.506128E-01
+-    1     1     4     3     7     1.550773E+00    2.335664E-01    1.506128E-01
+-    1     1     4     4     2     1.108244E+00    7.425975E-01    6.700670E-01
+-    1     1     4     4     3     1.108244E+00    7.425975E-01    6.700670E-01
+-    1     1     4     4     4     1.108244E+00    7.425975E-01    6.700670E-01
+-    1     1     4     4     5     1.550773E+00    2.335664E-01    1.506128E-01
+-    1     1     4     4     6     1.550773E+00    2.335664E-01    1.506128E-01
+-    1     1     4     4     7     1.550773E+00    2.335664E-01    1.506128E-01
+-    1     1     4     5     2     1.456734E+00    2.194029E-01    1.506128E-01
+-    1     1     4     5     3     1.456734E+00    2.194029E-01    1.506128E-01
+-    1     1     4     5     4     1.456734E+00    2.194029E-01    1.506128E-01
+-    1     1     4     5     5     1.102648E+00    6.599556E-01    5.985187E-01
+-    1     1     4     5     6     1.102648E+00    6.599556E-01    5.985187E-01
+-    1     1     4     5     7     1.102648E+00    6.599556E-01    5.985187E-01
+-    1     1     4     6     2     1.456734E+00    2.194029E-01    1.506128E-01
+-    1     1     4     6     3     1.456734E+00    2.194029E-01    1.506128E-01
+-    1     1     4     6     4     1.456734E+00    2.194029E-01    1.506128E-01
+-    1     1     4     6     5     1.102648E+00    6.599556E-01    5.985187E-01
+-    1     1     4     6     6     1.102648E+00    6.599556E-01    5.985187E-01
+-    1     1     4     6     7     1.102648E+00    6.599556E-01    5.985187E-01
+-    1     1     4     7     2     1.456734E+00    2.194029E-01    1.506128E-01
+-    1     1     4     7     3     1.456734E+00    2.194029E-01    1.506128E-01
+-    1     1     4     7     4     1.456734E+00    2.194029E-01    1.506128E-01
+-    1     1     4     7     5     1.102648E+00    6.599556E-01    5.985187E-01
+-    1     1     4     7     6     1.102648E+00    6.599556E-01    5.985187E-01
+-    1     1     4     7     7     1.102648E+00    6.599556E-01    5.985187E-01
+-    1     1     4     8     2     1.288790E+00    6.857545E-01    5.320917E-01
+-    1     1     4     8     3     1.288790E+00    6.857545E-01    5.320917E-01
+-    1     1     4     8     4     1.288790E+00    6.857545E-01    5.320917E-01
+-    1     1     4     8     5     9.570080E-01    3.723326E-01    3.890591E-01
+-    1     1     4     8     6     9.570080E-01    3.723326E-01    3.890591E-01
+-    1     1     4     8     7     9.570080E-01    3.723326E-01    3.890591E-01
+-    1     1     4     9     2     1.061498E+00    3.194571E-01    3.009493E-01
+-    1     1     4     9     3     1.061498E+00    3.194571E-01    3.009493E-01
+-    1     1     4     9     4     1.061498E+00    3.194571E-01    3.009493E-01
+-    1     1     4     9     5     1.117686E+00    5.953274E-01    5.326427E-01
+-    1     1     4     9     6     1.117686E+00    5.953274E-01    5.326427E-01
+-    1     1     4     9     7     1.117686E+00    5.953274E-01    5.326427E-01
+-    1     1     4    10     2     1.216374E+00    1.111708E+00    9.139526E-01
+-    1     1     4    10     3     1.216374E+00    1.111708E+00    9.139526E-01
+-    1     1     4    10     4     1.216374E+00    1.111708E+00    9.139526E-01
+-    1     1     4    10     5     1.287302E+00    1.223040E+00    9.500800E-01
+-    1     1     4    10     6     1.287302E+00    1.223040E+00    9.500800E-01
+-    1     1     4    10     7     1.287302E+00    1.223040E+00    9.500800E-01
+-    1     1     4    11     2     1.216374E+00    1.111708E+00    9.139526E-01
+-    1     1     4    11     3     1.216374E+00    1.111708E+00    9.139526E-01
+-    1     1     4    11     4     1.216374E+00    1.111708E+00    9.139526E-01
+-    1     1     4    11     5     1.287302E+00    1.223040E+00    9.500800E-01
+-    1     1     4    11     6     1.287302E+00    1.223040E+00    9.500800E-01
+-    1     1     4    11     7     1.287302E+00    1.223040E+00    9.500800E-01
+-    1     1     4    12     2     1.268532E+00    5.126899E-01    4.041600E-01
+-    1     1     4    12     3     1.268532E+00    5.126899E-01    4.041600E-01
+-    1     1     4    12     4     1.268532E+00    5.126899E-01    4.041600E-01
+-    1     1     4    12     5     1.367772E+00    8.759361E-01    6.404109E-01
+-    1     1     4    12     6     1.367772E+00    8.759361E-01    6.404109E-01
+-    1     1     4    12     7     1.367772E+00    8.759361E-01    6.404109E-01
+- mean_g_ratio:    1.242309E+00
+- stdev_g_ratio:    1.787860E-01
+- min_g_ratio:    9.570080E-01
+- max_g_ratio:    1.550773E+00
+ |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 6
+    iq    ik pcase  m_kq   n_k            SE/KS          |g^SE|          |g^KS|
+-    1     1     6     1     2     8.468213E-01    2.981787E-01    3.521152E-01
+-    1     1     6     1     3     8.468213E-01    2.981787E-01    3.521152E-01
+-    1     1     6     1     4     8.468213E-01    2.981787E-01    3.521152E-01
+-    1     1     6     1     5     1.062862E+00    2.038859E-01    1.918272E-01
+-    1     1     6     1     6     1.062862E+00    2.038859E-01    1.918272E-01
+-    1     1     6     1     7     1.062862E+00    2.038859E-01    1.918272E-01
+-    1     1     6     2     2     1.106807E+00    7.416346E-01    6.700665E-01
+-    1     1     6     2     3     1.106807E+00    7.416346E-01    6.700665E-01
+-    1     1     6     2     4     1.106807E+00    7.416346E-01    6.700665E-01
+-    1     1     6     2     5     1.560066E+00    2.349647E-01    1.506120E-01
+-    1     1     6     2     6     1.560066E+00    2.349647E-01    1.506120E-01
+-    1     1     6     2     7     1.560066E+00    2.349647E-01    1.506120E-01
+-    1     1     6     3     2     1.106807E+00    7.416346E-01    6.700665E-01
+-    1     1     6     3     3     1.106807E+00    7.416346E-01    6.700665E-01
+-    1     1     6     3     4     1.106807E+00    7.416346E-01    6.700665E-01
+-    1     1     6     3     5     1.560066E+00    2.349647E-01    1.506120E-01
+-    1     1     6     3     6     1.560066E+00    2.349647E-01    1.506120E-01
+-    1     1     6     3     7     1.560066E+00    2.349647E-01    1.506120E-01
+-    1     1     6     4     2     1.106807E+00    7.416346E-01    6.700665E-01
+-    1     1     6     4     3     1.106807E+00    7.416346E-01    6.700665E-01
+-    1     1     6     4     4     1.106807E+00    7.416346E-01    6.700665E-01
+-    1     1     6     4     5     1.560066E+00    2.349647E-01    1.506120E-01
+-    1     1     6     4     6     1.560066E+00    2.349647E-01    1.506120E-01
+-    1     1     6     4     7     1.560066E+00    2.349647E-01    1.506120E-01
+-    1     1     6     5     2     1.430148E+00    2.153975E-01    1.506120E-01
+-    1     1     6     5     3     1.430148E+00    2.153975E-01    1.506120E-01
+-    1     1     6     5     4     1.430148E+00    2.153975E-01    1.506120E-01
+-    1     1     6     5     5     1.101057E+00    6.590042E-01    5.985194E-01
+-    1     1     6     5     6     1.101057E+00    6.590042E-01    5.985194E-01
+-    1     1     6     5     7     1.101057E+00    6.590042E-01    5.985194E-01
+-    1     1     6     6     2     1.430148E+00    2.153975E-01    1.506120E-01
+-    1     1     6     6     3     1.430148E+00    2.153975E-01    1.506120E-01
+-    1     1     6     6     4     1.430148E+00    2.153975E-01    1.506120E-01
+-    1     1     6     6     5     1.101057E+00    6.590042E-01    5.985194E-01
+-    1     1     6     6     6     1.101057E+00    6.590042E-01    5.985194E-01
+-    1     1     6     6     7     1.101057E+00    6.590042E-01    5.985194E-01
+-    1     1     6     7     2     1.430148E+00    2.153975E-01    1.506120E-01
+-    1     1     6     7     3     1.430148E+00    2.153975E-01    1.506120E-01
+-    1     1     6     7     4     1.430148E+00    2.153975E-01    1.506120E-01
+-    1     1     6     7     5     1.101057E+00    6.590042E-01    5.985194E-01
+-    1     1     6     7     6     1.101057E+00    6.590042E-01    5.985194E-01
+-    1     1     6     7     7     1.101057E+00    6.590042E-01    5.985194E-01
+-    1     1     6     8     2     1.221872E+00    6.501466E-01    5.320908E-01
+-    1     1     6     8     3     1.221872E+00    6.501466E-01    5.320908E-01
+-    1     1     6     8     4     1.221872E+00    6.501466E-01    5.320908E-01
+-    1     1     6     8     5     1.039070E+00    4.042580E-01    3.890574E-01
+-    1     1     6     8     6     1.039070E+00    4.042580E-01    3.890574E-01
+-    1     1     6     8     7     1.039070E+00    4.042580E-01    3.890574E-01
+-    1     1     6     9     2     7.931161E-01    2.386870E-01    3.009483E-01
+-    1     1     6     9     3     7.931161E-01    2.386870E-01    3.009483E-01
+-    1     1     6     9     4     7.931161E-01    2.386870E-01    3.009483E-01
+-    1     1     6     9     5     1.132394E+00    6.031610E-01    5.326422E-01
+-    1     1     6     9     6     1.132394E+00    6.031610E-01    5.326422E-01
+-    1     1     6     9     7     1.132394E+00    6.031610E-01    5.326422E-01
+-    1     1     6    10     2     1.168418E+00    1.067879E+00    9.139527E-01
+-    1     1     6    10     3     1.168418E+00    1.067879E+00    9.139527E-01
+-    1     1     6    10     4     1.168418E+00    1.067879E+00    9.139527E-01
+-    1     1     6    10     5     1.188690E+00    1.129350E+00    9.500801E-01
+-    1     1     6    10     6     1.188690E+00    1.129350E+00    9.500801E-01
+-    1     1     6    10     7     1.188690E+00    1.129350E+00    9.500801E-01
+-    1     1     6    11     2     1.168418E+00    1.067879E+00    9.139527E-01
+-    1     1     6    11     3     1.168418E+00    1.067879E+00    9.139527E-01
+-    1     1     6    11     4     1.168418E+00    1.067879E+00    9.139527E-01
+-    1     1     6    11     5     1.188690E+00    1.129350E+00    9.500801E-01
+-    1     1     6    11     6     1.188690E+00    1.129350E+00    9.500801E-01
+-    1     1     6    11     7     1.188690E+00    1.129350E+00    9.500801E-01
+-    1     1     6    12     2     1.275776E+00    4.932611E-01    3.866363E-01
+-    1     1     6    12     3     1.275776E+00    4.932611E-01    3.866363E-01
+-    1     1     6    12     4     1.275776E+00    4.932611E-01    3.866363E-01
+-    1     1     6    12     5     1.362779E+00    8.349000E-01    6.126450E-01
+-    1     1     6    12     6     1.362779E+00    8.349000E-01    6.126450E-01
+-    1     1     6    12     7     1.362779E+00    8.349000E-01    6.126450E-01
+- mean_g_ratio:    1.210131E+00
+- stdev_g_ratio:    2.015917E-01
+- min_g_ratio:    7.931161E-01
+- max_g_ratio:    1.560066E+00
+ |g(k,q)| in Ha for iq: 8 ik: 1 pcase: 4
+    iq    ik pcase  m_kq   n_k            SE/KS          |g^SE|          |g^KS|
+-    8     1     4     1     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     1     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     1     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     1     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     1     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     1     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     2     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     2     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     2     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     2     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     2     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     2     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     3     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     3     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     3     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     3     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     3     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     3     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     4     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     4     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     4     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     4     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     4     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     4     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     5     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     5     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     5     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     5     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     5     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     5     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     6     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     6     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     6     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     6     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     6     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     6     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     7     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     7     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     7     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     7     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     7     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     7     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     8     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     8     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     8     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     8     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     8     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     8     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     9     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     9     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     9     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     9     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     9     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4     9     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4    10     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4    10     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4    10     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4    10     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4    10     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4    10     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4    11     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4    11     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4    11     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4    11     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4    11     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4    11     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4    12     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4    12     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4    12     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4    12     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4    12     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     4    12     7    -1.000000E+00    0.000000E+00    0.000000E+00
+ |g(k,q)| in Ha for iq: 8 ik: 1 pcase: 6
+    iq    ik pcase  m_kq   n_k            SE/KS          |g^SE|          |g^KS|
+-    8     1     6     1     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     1     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     1     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     1     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     1     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     1     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     2     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     2     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     2     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     2     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     2     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     2     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     3     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     3     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     3     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     3     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     3     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     3     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     4     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     4     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     4     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     4     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     4     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     4     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     5     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     5     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     5     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     5     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     5     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     5     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     6     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     6     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     6     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     6     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     6     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     6     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     7     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     7     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     7     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     7     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     7     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     7     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     8     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     8     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     8     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     8     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     8     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     8     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     9     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     9     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     9     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     9     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     9     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6     9     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6    10     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6    10     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6    10     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6    10     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6    10     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6    10     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6    11     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6    11     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6    11     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6    11     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6    11     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6    11     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6    12     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6    12     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6    12     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6    12     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6    12     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     1     6    12     7    -1.000000E+00    0.000000E+00    0.000000E+00
+ |g(k,q)| in Ha for iq: 1 ik: 2 pcase: 4
+    iq    ik pcase  m_kq   n_k            SE/KS          |g^SE|          |g^KS|
+-    1     2     4     1     2     1.252696E+00    2.351662E-01    1.877281E-01
+-    1     2     4     1     3     1.173583E+00    3.772054E-01    3.214135E-01
+-    1     2     4     1     4     1.173583E+00    3.772054E-01    3.214135E-01
+-    1     2     4     1     5     1.318196E+00    4.049508E-01    3.072008E-01
+-    1     2     4     1     6     1.318196E+00    4.049508E-01    3.072008E-01
+-    1     2     4     1     7     1.255362E+00    1.148544E-01    9.149104E-02
+-    1     2     4     2     2     1.252696E+00    2.351662E-01    1.877281E-01
+-    1     2     4     2     3     1.173583E+00    3.772054E-01    3.214135E-01
+-    1     2     4     2     4     1.173583E+00    3.772054E-01    3.214135E-01
+-    1     2     4     2     5     1.318196E+00    4.049508E-01    3.072008E-01
+-    1     2     4     2     6     1.318196E+00    4.049508E-01    3.072008E-01
+-    1     2     4     2     7     1.255362E+00    1.148544E-01    9.149104E-02
+-    1     2     4     3     2     1.121945E+00    4.258583E-01    3.795715E-01
+-    1     2     4     3     3     1.114466E+00    2.518796E-01    2.260093E-01
+-    1     2     4     3     4     1.114466E+00    2.518796E-01    2.260093E-01
+-    1     2     4     3     5     1.275183E+00    5.254206E-01    4.120356E-01
+-    1     2     4     3     6     1.275183E+00    5.254206E-01    4.120356E-01
+-    1     2     4     3     7     1.239945E+00    2.633905E-01    2.124211E-01
+-    1     2     4     4     2     1.121945E+00    4.258583E-01    3.795715E-01
+-    1     2     4     4     3     1.114466E+00    2.518796E-01    2.260093E-01
+-    1     2     4     4     4     1.114466E+00    2.518796E-01    2.260093E-01
+-    1     2     4     4     5     1.275183E+00    5.254206E-01    4.120356E-01
+-    1     2     4     4     6     1.275183E+00    5.254206E-01    4.120356E-01
+-    1     2     4     4     7     1.239945E+00    2.633905E-01    2.124211E-01
+-    1     2     4     5     2     2.642555E+00    1.664964E-01    6.300584E-02
+-    1     2     4     5     3     1.275180E+00    5.254197E-01    4.120356E-01
+-    1     2     4     5     4     1.275180E+00    5.254197E-01    4.120356E-01
+-    1     2     4     5     5     1.002241E+00    2.218103E-01    2.213144E-01
+-    1     2     4     5     6     1.002241E+00    2.218103E-01    2.213144E-01
+-    1     2     4     5     7     1.196628E+00    8.265288E-01    6.907147E-01
+-    1     2     4     6     2     2.642555E+00    1.664964E-01    6.300584E-02
+-    1     2     4     6     3     1.275180E+00    5.254197E-01    4.120356E-01
+-    1     2     4     6     4     1.275180E+00    5.254197E-01    4.120356E-01
+-    1     2     4     6     5     1.002241E+00    2.218103E-01    2.213144E-01
+-    1     2     4     6     6     1.002241E+00    2.218103E-01    2.213144E-01
+-    1     2     4     6     7     1.196628E+00    8.265288E-01    6.907147E-01
+-    1     2     4     7     2     2.348614E+00    2.008352E-01    8.551222E-02
+-    1     2     4     7     3     1.251037E+00    2.657481E-01    2.124222E-01
+-    1     2     4     7     4     1.251037E+00    2.657481E-01    2.124222E-01
+-    1     2     4     7     5     1.200882E+00    8.294708E-01    6.907179E-01
+-    1     2     4     7     6     1.200882E+00    8.294708E-01    6.907179E-01
+-    1     2     4     7     7     1.041288E+00    4.758168E-01    4.569500E-01
+-    1     2     4     8     2     2.348614E+00    2.008352E-01    8.551222E-02
+-    1     2     4     8     3     1.251037E+00    2.657481E-01    2.124222E-01
+-    1     2     4     8     4     1.251037E+00    2.657481E-01    2.124222E-01
+-    1     2     4     8     5     1.200882E+00    8.294708E-01    6.907179E-01
+-    1     2     4     8     6     1.200882E+00    8.294708E-01    6.907179E-01
+-    1     2     4     8     7     1.041288E+00    4.758168E-01    4.569500E-01
+-    1     2     4     9     2     1.498878E+00    8.436741E-01    5.628703E-01
+-    1     2     4     9     3     1.224479E+00    2.829637E-01    2.310891E-01
+-    1     2     4     9     4     1.224479E+00    2.829637E-01    2.310891E-01
+-    1     2     4     9     5     1.531646E+00    1.714727E-01    1.119532E-01
+-    1     2     4     9     6     1.531646E+00    1.714727E-01    1.119532E-01
+-    1     2     4     9     7     1.240539E+00    1.884539E-01    1.519128E-01
+-    1     2     4    10     2     1.498878E+00    8.436741E-01    5.628703E-01
+-    1     2     4    10     3     1.224479E+00    2.829637E-01    2.310891E-01
+-    1     2     4    10     4     1.224479E+00    2.829637E-01    2.310891E-01
+-    1     2     4    10     5     1.531646E+00    1.714727E-01    1.119532E-01
+-    1     2     4    10     6     1.531646E+00    1.714727E-01    1.119532E-01
+-    1     2     4    10     7     1.240539E+00    1.884539E-01    1.519128E-01
+-    1     2     4    11     2     9.562223E-01    2.064096E-01    2.158594E-01
+-    1     2     4    11     3     1.169806E+00    9.241183E-01    7.899754E-01
+-    1     2     4    11     4     1.169806E+00    9.241183E-01    7.899754E-01
+-    1     2     4    11     5     1.291051E+00    3.385363E-01    2.622175E-01
+-    1     2     4    11     6     1.291051E+00    3.385363E-01    2.622175E-01
+-    1     2     4    11     7     1.168825E+00    6.586184E-01    5.634877E-01
+-    1     2     4    12     2     9.562223E-01    2.064096E-01    2.158594E-01
+-    1     2     4    12     3     1.169806E+00    9.241183E-01    7.899754E-01
+-    1     2     4    12     4     1.169806E+00    9.241183E-01    7.899754E-01
+-    1     2     4    12     5     1.291051E+00    3.385363E-01    2.622175E-01
+-    1     2     4    12     6     1.291051E+00    3.385363E-01    2.622175E-01
+-    1     2     4    12     7     1.168825E+00    6.586184E-01    5.634877E-01
+- mean_g_ratio:    1.294972E+00
+- stdev_g_ratio:    3.186455E-01
+- min_g_ratio:    9.562223E-01
+- max_g_ratio:    2.642555E+00
+ |g(k,q)| in Ha for iq: 1 ik: 2 pcase: 6
+    iq    ik pcase  m_kq   n_k            SE/KS          |g^SE|          |g^KS|
+-    1     2     6     1     2     2.524123E+03    1.803366E-03    7.144525E-07
+-    1     2     6     1     3     1.133454E+00    5.152090E-01    4.545478E-01
+-    1     2     6     1     4     1.133454E+00    5.152090E-01    4.545478E-01
+-    1     2     6     1     5     2.222232E+03    2.258746E-03    1.016431E-06
+-    1     2     6     1     6     2.222232E+03    2.258746E-03    1.016431E-06
+-    1     2     6     1     7     1.261992E+00    2.309254E-01    1.829848E-01
+-    1     2     6     2     2     2.524123E+03    1.803366E-03    7.144525E-07
+-    1     2     6     2     3     1.133454E+00    5.152090E-01    4.545478E-01
+-    1     2     6     2     4     1.133454E+00    5.152090E-01    4.545478E-01
+-    1     2     6     2     5     2.222232E+03    2.258746E-03    1.016431E-06
+-    1     2     6     2     6     2.222232E+03    2.258746E-03    1.016431E-06
+-    1     2     6     2     7     1.261992E+00    2.309254E-01    1.829848E-01
+-    1     2     6     3     2     1.078222E+00    5.816627E-01    5.394647E-01
+-    1     2     6     3     3     2.507603E+02    8.059109E-04    3.213869E-06
+-    1     2     6     3     4     2.507603E+02    8.059109E-04    3.213869E-06
+-    1     2     6     3     5     1.281581E+00    7.467851E-01    5.827063E-01
+-    1     2     6     3     6     1.281581E+00    7.467851E-01    5.827063E-01
+-    1     2     6     3     7     7.580037E+02    1.282129E-03    1.691454E-06
+-    1     2     6     4     2     1.078222E+00    5.816627E-01    5.394647E-01
+-    1     2     6     4     3     2.507603E+02    8.059109E-04    3.213869E-06
+-    1     2     6     4     4     2.507603E+02    8.059109E-04    3.213869E-06
+-    1     2     6     4     5     1.281581E+00    7.467851E-01    5.827063E-01
+-    1     2     6     4     6     1.281581E+00    7.467851E-01    5.827063E-01
+-    1     2     6     4     7     7.580037E+02    1.282129E-03    1.691454E-06
+-    1     2     6     5     2     1.616484E+03    1.732952E-03    1.072050E-06
+-    1     2     6     5     3     1.281582E+00    7.467856E-01    5.827063E-01
+-    1     2     6     5     4     1.281582E+00    7.467856E-01    5.827063E-01
+-    1     2     6     5     5     1.653595E+03    1.379389E-03    8.341760E-07
+-    1     2     6     5     6     1.653595E+03    1.379389E-03    8.341760E-07
+-    1     2     6     5     7     1.203264E+00    1.662232E+00    1.381436E+00
+-    1     2     6     6     2     1.616484E+03    1.732952E-03    1.072050E-06
+-    1     2     6     6     3     1.281582E+00    7.467856E-01    5.827063E-01
+-    1     2     6     6     4     1.281582E+00    7.467856E-01    5.827063E-01
+-    1     2     6     6     5     1.653595E+03    1.379389E-03    8.341760E-07
+-    1     2     6     6     6     1.653595E+03    1.379389E-03    8.341760E-07
+-    1     2     6     6     7     1.203264E+00    1.662232E+00    1.381436E+00
+-    1     2     6     7     2     2.571531E+00    3.136358E-01    1.219646E-01
+-    1     2     6     7     3     7.806481E+02    1.162751E-03    1.489469E-06
+-    1     2     6     7     4     7.806481E+02    1.162751E-03    1.489469E-06
+-    1     2     6     7     5     1.203358E+00    1.175467E+00    9.768228E-01
+-    1     2     6     7     6     1.203358E+00    1.175467E+00    9.768228E-01
+-    1     2     6     7     7     1.321526E+03    2.009273E-03    1.520419E-06
+-    1     2     6     8     2     2.571531E+00    3.136358E-01    1.219646E-01
+-    1     2     6     8     3     7.806481E+02    1.162751E-03    1.489469E-06
+-    1     2     6     8     4     7.806481E+02    1.162751E-03    1.489469E-06
+-    1     2     6     8     5     1.203358E+00    1.175467E+00    9.768228E-01
+-    1     2     6     8     6     1.203358E+00    1.175467E+00    9.768228E-01
+-    1     2     6     8     7     1.321526E+03    2.009273E-03    1.520419E-06
+-    1     2     6     9     2     1.183413E+03    3.293392E-03    2.782962E-06
+-    1     2     6     9     3     1.265513E+00    4.135805E-01    3.268087E-01
+-    1     2     6     9     4     1.265513E+00    4.135805E-01    3.268087E-01
+-    1     2     6     9     5     8.790049E+02    1.764313E-03    2.007171E-06
+-    1     2     6     9     6     8.790049E+02    1.764313E-03    2.007171E-06
+-    1     2     6     9     7     1.227346E+00    3.729004E-01    3.038265E-01
+-    1     2     6    10     2     1.183413E+03    3.293392E-03    2.782962E-06
+-    1     2     6    10     3     1.265513E+00    4.135805E-01    3.268087E-01
+-    1     2     6    10     4     1.265513E+00    4.135805E-01    3.268087E-01
+-    1     2     6    10     5     8.790049E+02    1.764313E-03    2.007171E-06
+-    1     2     6    10     6     8.790049E+02    1.764313E-03    2.007171E-06
+-    1     2     6    10     7     1.227346E+00    3.729004E-01    3.038265E-01
+-    1     2     6    11     2     8.659326E-01    2.576950E-01    2.975924E-01
+-    1     2     6    11     3     3.255400E+03    1.072594E-02    3.294814E-06
+-    1     2     6    11     4     3.255400E+03    1.072594E-02    3.294814E-06
+-    1     2     6    11     5     1.183108E+00    4.387326E-01    3.708306E-01
+-    1     2     6    11     6     1.183108E+00    4.387326E-01    3.708306E-01
+-    1     2     6    11     7     7.083034E+03    1.811952E-02    2.558158E-06
+-    1     2     6    12     2     8.659326E-01    2.576950E-01    2.975924E-01
+-    1     2     6    12     3     3.255400E+03    1.072594E-02    3.294814E-06
+-    1     2     6    12     4     3.255400E+03    1.072594E-02    3.294814E-06
+-    1     2     6    12     5     1.183108E+00    4.387326E-01    3.708306E-01
+-    1     2     6    12     6     1.183108E+00    4.387326E-01    3.708306E-01
+-    1     2     6    12     7     7.083034E+03    1.811952E-02    2.558158E-06
+- mean_g_ratio:    9.053547E+02
+- stdev_g_ratio:    1.422025E+03
+- min_g_ratio:    8.659326E-01
+- max_g_ratio:    7.083034E+03
+ |g(k,q)| in Ha for iq: 8 ik: 2 pcase: 4
+    iq    ik pcase  m_kq   n_k            SE/KS          |g^SE|          |g^KS|
+-    8     2     4     1     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     1     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     1     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     1     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     1     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     1     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     2     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     2     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     2     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     2     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     2     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     2     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     3     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     3     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     3     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     3     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     3     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     3     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     4     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     4     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     4     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     4     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     4     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     4     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     5     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     5     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     5     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     5     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     5     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     5     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     6     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     6     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     6     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     6     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     6     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     6     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     7     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     7     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     7     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     7     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     7     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     7     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     8     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     8     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     8     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     8     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     8     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     8     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     9     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     9     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     9     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     9     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     9     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4     9     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4    10     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4    10     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4    10     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4    10     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4    10     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4    10     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4    11     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4    11     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4    11     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4    11     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4    11     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4    11     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4    12     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4    12     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4    12     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4    12     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4    12     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     4    12     7    -1.000000E+00    0.000000E+00    0.000000E+00
+ |g(k,q)| in Ha for iq: 8 ik: 2 pcase: 6
+    iq    ik pcase  m_kq   n_k            SE/KS          |g^SE|          |g^KS|
+-    8     2     6     1     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     1     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     1     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     1     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     1     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     1     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     2     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     2     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     2     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     2     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     2     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     2     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     3     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     3     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     3     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     3     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     3     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     3     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     4     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     4     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     4     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     4     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     4     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     4     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     5     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     5     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     5     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     5     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     5     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     5     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     6     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     6     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     6     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     6     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     6     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     6     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     7     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     7     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     7     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     7     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     7     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     7     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     8     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     8     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     8     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     8     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     8     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     8     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     9     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     9     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     9     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     9     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     9     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6     9     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6    10     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6    10     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6    10     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6    10     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6    10     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6    10     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6    11     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6    11     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6    11     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6    11     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6    11     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6    11     7    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6    12     2    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6    12     3    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6    12     4    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6    12     5    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6    12     6    -1.000000E+00    0.000000E+00    0.000000E+00
+-    8     2     6    12     7    -1.000000E+00    0.000000E+00    0.000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      1.20110000E+01
         boxcutmin      1.10000000E+00
         ddb_ngqpt        2    2    2
              ecut      4.50000000E+01 Hartree
-          ecuteps      1.00000000E+00 Hartree
-         ecutsigx      1.00000000E+00 Hartree
-    elph2_imagden      3.67493254E-03 Hartree
+          ecuteps      8.00000000E+00 Hartree
+         ecutsigx      8.00000000E+00 Hartree
+    elph2_imagden      3.67493222E-03 Hartree
          eph_task          17
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         112
+-          fftalg         512
+   gstore_use_lgk        1
+       gwpt_wmode           1
               ixc          11
-         kptrlatt        4    0    0      0    4    0      0    0    4
-          kptrlen      1.90947115E+01
-       mdf_epsinf      1.20000000E+01
-P           mkmem           8
+         kptrlatt        2    0    0      0    2    0      0    0    2
+          kptrlen      9.54735576E+00
+P           mkmem           3
             natom           2
-            nband           9
+            nband          12
             ngfft          16      16      16
-             nkpt           8
+             nkpt           3
+            nstep         150
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver           7
-          ppmodel           2
        prtphbands           0
          prtphdos           0
             rprim      0.0000000000E+00  3.3755000000E+00  3.3755000000E+00
@@ -1037,15 +1128,15 @@ P           mkmem           8
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-           tolwfr      1.00000000E-08
+           tolwfr      1.00000000E-16
             typat      1  1
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       8.9311883380E-01  8.9311883380E-01  8.9311883380E-01
+                       8.9311883710E-01  8.9311883710E-01  8.9311883710E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.6877500000E+00  1.6877500000E+00  1.6877500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
-             zcut      3.67493254E-04 Hartree
+             zcut      3.67493222E-04 Hartree
             znucl        6.00000
 
 ================================================================================
@@ -1082,7 +1173,7 @@ P           mkmem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1099,12 +1190,12 @@ P           mkmem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1122,7 +1213,7 @@ P           mkmem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1137,15 +1228,15 @@ P           mkmem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        204.0  wall=        204.1
+- Proc.   0 individual time (sec): cpu=         23.4  wall=         23.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered 578 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        204.0  wall=        204.1
+.Delivered  86 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=         23.4  wall=         23.4

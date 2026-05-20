@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, FJ, MT)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -89,6 +89,7 @@ contains
 !!  efield = cartesian coordinates of the electric field in atomic units
 !!  ehart=Hartree energy (hartree)
 !!  eii=pseudoion core correction energy part of Etot (hartree)
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  gsqcut=cutoff value on G**2 for (large) sphere inside FFT box.
 !!                       gsqcut=(boxcut**2)*ecut/(2._dp*(Pi**2)
@@ -228,7 +229,6 @@ contains
  real(dp),allocatable :: dummy(:),dyfr_dum(:,:,:),gr_dum(:,:),rhog_ep(:,:),v_dum(:)
  real(dp),allocatable :: vxctotg(:,:)
  character(len=10) :: EPName(1:2)=(/"Electronic","Positronic"/)
-
 ! *************************************************************************
 
  call timab(37,1,tsec)
@@ -788,9 +788,8 @@ subroutine strhar(ehart,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,rprimd,&
  real(dp) :: cutoff,gsquar,rhogsq,tolfix=1.000000001_dp,ucvol
 !arrays
  real(dp) :: gcart(3),gmet(3,3),gprimd(3,3),rmet(3,3),tsec(2)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
-
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
 ! *************************************************************************
 
  call timab(568,1,tsec)

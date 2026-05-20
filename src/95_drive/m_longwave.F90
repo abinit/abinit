@@ -3,10 +3,10 @@
 !!  m_longwave
 !!
 !! FUNCTION
-!!  DFPT long-wave calculation of spatial dispersion properties
+!!  DFPT calculation of spatial and time dispersion properties
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2019-2025 ABINIT group (MR, MS)
+!!  Copyright (C) 2019-2026 ABINIT group (MR, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -81,7 +81,7 @@ contains
 !!  longwave
 !!
 !! FUNCTION
-!! Primary routine for conducting DFPT calculations of spatial dispersion properties
+!! Primary routine for conducting DFPT calculations of dispersion properties
 !!
 !! INPUTS
 !!  codvsn = code version
@@ -100,15 +100,10 @@ contains
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
 !!
-!! NOTES
-!!
-!! PARENTS
-!!      m_driver
-!!
 !! SOURCE
 
 subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
-&                   pawrad,pawtab,psps,xred)
+                   pawrad,pawtab,psps,xred)
 
 #ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
@@ -144,7 +139,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  real(dp) :: bigexc,bigsxc,boxcut,ecore,ecutdg_eff,ecut_eff,etot
  real(dp) :: fermie,fermih,gsqcut,gsqcut_eff,gsqcutc_eff,residm
  real(dp) :: ucvol,vxcavg
- logical :: non_magnetic_xc
+ logical :: non_magnetic_xc,just_timdisp
+! logical :: has_strain
  character(len=500) :: msg
  type(ebands_t) :: bstruct
  type(ddb_hdr_type) :: ddb_hdr
@@ -156,6 +152,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  type(wvl_data) :: wvl
  type(wffile_type) :: wffgs,wfftgs
  !arrays
+ integer :: d3e_dir1(3),d3e_dir2(3),d3e_dir3(3)
  integer :: ngfft(18),ngfftf(18),perm(6)
  real(dp) :: dummy6(6),other_dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3)
@@ -165,7 +162,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  integer,allocatable :: blkflg(:,:,:,:,:,:),blkflg_car(:,:,:,:,:,:)
  integer,allocatable :: d3e_pert1(:),d3e_pert2(:),d3e_pert3(:)
  integer,allocatable :: indsym(:,:,:),irrzon(:,:,:),kg(:,:)
- integer,allocatable :: nattyp(:),npwarr(:),pertsy(:,:),symrec(:,:,:)
+ integer,allocatable :: nattyp(:),npwarr(:),symrec(:,:,:)
  integer,allocatable :: rfpert(:,:,:,:,:,:)
  real(dp),allocatable :: cg(:,:)
  real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),d3etot_car(:,:,:,:,:,:,:)
@@ -182,6 +179,11 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
  DBG_ENTER("COLL")
 
+!Just time dispersion calculation
+ just_timdisp=.false.
+ if (dtset%lw_flexo==0.and.dtset%lw_qdrpl==0.and.&
+&  dtset%lw_natopt==0.and.dtset%timdisp==1) just_timdisp=.true.
+
 !Not valid for PAW
  if (psps%usepaw==1) then
    msg='This routine cannot be used for PAW!'
@@ -189,29 +191,33 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  end if
 
 !Not valid for finite wave-vector perturbations
- if (sqrt(sum(dtset%qptn**2))/=0_dp) then
-   msg='This routine cannot be used for q /= 0 '
+ if (.not.just_timdisp.and.sqrt(sum(dtset%qptn**2))>tol8) then
+   msg='This routine can only be used at q /= 0 for time dispersion calculation '
    ABI_BUG(msg)
  end if
 
 !Only usable with spherical harmonics
- if (dtset%useylm/=1.and.(dtset%lw_qdrpl/=0.or.dtset%lw_flexo/=0)) then
-   msg='This routine can only be used with useylm/=1 for lw_natopt=1'
+ if (dtset%useylm/=1.and.(.not.just_timdisp.and.dtset%lw_qdrpl/=0.or.dtset%lw_flexo/=0)) then
+   msg='This routine can only be used with useylm/=1 for the spatial dispersion given by lw_natopt=1'
    ABI_BUG(msg)
  end if
 
 !Not valid for spin-dependent calculations
- if (dtset%nspinor/=1.or.dtset%nsppol/=1.or.dtset%nspden/=1) then
-   msg='This routine cannot be used for spin-dependent calculations'
+ if (.not.just_timdisp.and.(dtset%nspinor/=1.or.dtset%nsppol/=1.or.dtset%nspden/=1)) then
+   msg='This routine cannot be used for spin-dependent calculations of spatial dispersion'
    ABI_BUG(msg)
  end if
 
 !Not usable with core electron density corrections and flexo
- if (psps%n1xccc/=0.and.dtset%lw_flexo/=0) then
+ if (.not.just_timdisp.and.psps%n1xccc/=0.and.dtset%lw_flexo/=0) then
    msg='This routine cannot be used to calculate flexoelectric properties with n1xccc/=0'
    ABI_BUG(msg)
  end if
 
+!Only usable for insulators
+ if(0>dtset%occopt .and. dtset%occopt>2)then
+   msg='This routine cannot be used with metallic occupations'
+ end if
 
 !Define some data
  ntypat=psps%ntypat
@@ -237,8 +243,14 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
 !Define the set of admitted perturbations taking into account
 !the possible permutations
-!  -> natom+8 refers to ddq perturbation
- mpert=natom+8
+!  -> natom+8 refers to ddq perturbation (spatial dispersion)
+!  -> natom+9 refers to ddw perturbation (time dispersion)
+ if (dtset%timdisp==0) then
+   mpert=natom+8
+ else
+   mpert=natom+9
+   if (dtset%d3e_pert1_magn==2.or.dtset%d3e_pert2_magn==2) mpert=2*dtset%natom+11
+ end if
  ABI_MALLOC(blkflg,(3,mpert,3,mpert,3,mpert))
  ABI_MALLOC(d3etot,(2,3,mpert,3,mpert,3,mpert))
  ABI_MALLOC(d3etot_nv,(2,3,mpert,3,mpert,3,mpert))
@@ -252,7 +264,9 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  rfpert(:,:,:,:,:,:) = 0
  d3e_pert1(:) = 0 ; d3e_pert2(:) = 0 ; d3e_pert3(:) = 0
 
- d3e_pert3(natom+8)=1
+!Spatial-dispersion perturbations
+ if (.not.just_timdisp) d3e_pert3(natom+8)=1
+
  if (dtset%lw_qdrpl==1) then
    d3e_pert1(natom+2)=1
    d3e_pert2(1:natom)=1
@@ -293,6 +307,56 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    end do
  end do
 
+!Time-dispersion perturbations
+! d3e_pert1(:) = 0 ; d3e_pert2(:) = 0 ; d3e_pert3(:) = 0
+! d3e_dir1(:) = 0 ; d3e_dir2(:) = 0 ; d3e_dir3(:) = 0
+ if (dtset%timdisp==1) then
+   d3e_pert3(natom+9)=1
+   d3e_dir3(1)=1
+   d3e_dir3(2)=0
+   d3e_dir3(3)=0
+
+   !Atomic displacements
+   if (dtset%d3e_pert1_phon==1) d3e_pert1(dtset%d3e_pert1_atpol(1):dtset%d3e_pert1_atpol(2))=1
+   if (dtset%d3e_pert2_phon==1) d3e_pert2(dtset%d3e_pert2_atpol(1):dtset%d3e_pert2_atpol(2))=1
+
+   !Electric fields
+   if (dtset%d3e_pert1_elfd/=0) d3e_pert1(natom+2)=1
+   if (dtset%d3e_pert2_elfd/=0) d3e_pert2(natom+2)=1
+
+   !Macroscopic hspinfields
+   if (dtset%d3e_pert1_magn==1) d3e_pert1(natom+5)=1
+   if (dtset%d3e_pert2_magn==1) d3e_pert2(natom+5)=1
+
+   !Local hspinfields
+   if (dtset%d3e_pert1_magn==2) d3e_pert1(natom+11+dtset%d3e_pert1_magat(1):natom+11+dtset%d3e_pert1_magat(2))=1
+   if (dtset%d3e_pert2_magn==2) d3e_pert2(natom+11+dtset%d3e_pert2_magat(1):natom+11+dtset%d3e_pert2_magat(2))=1
+
+   perm(:)=0
+   do i1pert = 1, mpert
+     d3e_dir1(:)=dtset%d3e_pert1_dir(:)
+     if (i1pert>natom+11.and.i1pert<=2*natom+11) &
+   & d3e_dir1(:)=dtset%d3e_pert1_magdir(:)
+     do i1dir = 1, 3
+       do i2pert = 1, mpert
+         d3e_dir2(:)=dtset%d3e_pert2_dir(:)
+         if (i2pert>natom+11.and.i2pert<=2*natom+11) &
+       & d3e_dir2(:)=dtset%d3e_pert2_magdir(:)
+         do i2dir = 1, 3
+           do i3pert = natom+9, natom+9
+             do i3dir = 1, 3
+               perm(1)=d3e_pert1(i1pert)*d3e_dir1(i1dir)* &
+             &         d3e_pert2(i2pert)*d3e_dir2(i2dir)* &
+             &         d3e_pert3(i3pert)*d3e_dir3(i3dir)
+               if ( sum(perm(:)) > 0 ) rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=1
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+ end if
+
 !Do symmetry stuff
  ABI_MALLOC(irrzon,(nfftot**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
  ABI_MALLOC(phnons,(2,nfftot**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
@@ -323,7 +387,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
  write(msg,'(a,a,a,a,a)') ch10, &
 & ' The list of irreducible elements of the spatial-dispersion third-order energy derivatives is: ', ch10,&
-& ' (in reduced coordinates except for strain pert.) ', ch10
+& ' (in reduced coordinates except for strain and hspinfield perturbations) ', ch10
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
 
@@ -414,8 +478,6 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  call bstruct%free()
 
 !Initialize wavefunction files and wavefunctions.
- ireadwf0=1
-
  mcg=dtset%mpw*dtset%nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
  ABI_STAT_MALLOC(cg,(2,mcg), ierr)
  ABI_CHECK(ierr==0, "out-of-memory in cg")
@@ -424,20 +486,22 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  eigen0(:)=zero ; ask_accurate=1
  optorth=0
 
+ ireadwf0=1
  hdr%rprimd=rprimd_for_kg ! We need the rprimd that was used to generate de G vectors
- call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
-& formeig,hdr,ireadwf0,dtset%istwfk,kg,dtset%kptns,&
-& dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,&
-& dtset%nband,ngfft,dtset%nkpt,npwarr,dtset%nsppol,dtset%nsym,&
-& occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
-& dtfil%unkg,wffgs,wfftgs,dtfil%unwffgs,dtfil%fnamewffk,wvl)
- hdr%rprimd=rprimd
+ if (.not.just_timdisp) then
+   call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
+  & formeig,hdr,ireadwf0,dtset%istwfk,kg,dtset%kptns,&
+  & dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,&
+  & dtset%nband,ngfft,dtset%nkpt,npwarr,dtset%nsppol,dtset%nsym,&
+  & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
+  & dtfil%unkg,wffgs,wfftgs,dtfil%unwffgs,dtfil%fnamewffk,wvl)
+   hdr%rprimd=rprimd
 
-!Close wffgs, if it was ever opened (in inwffil)
- if (ireadwf0==1) then
-   call WffClose(wffgs,ierr)
+  !Close wffgs, if it was ever opened (in inwffil)
+   if (ireadwf0==1) then
+     call WffClose(wffgs,ierr)
+   end if
  end if
-
 
 !Generate an index table of atoms, in order for them to be used
 !type after type.
@@ -467,36 +531,39 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_MALLOC(rhog,(2,nfftf))
  ABI_MALLOC(rhor,(nfftf,dtset%nspden))
 
- if (dtset%getden /= 0 .or. dtset%irdden /= 0) then
-   ! Read rho1(r) from a disk file and broadcast data.
-   ! This part is not compatible with MPI-FFT (note single_proc=.True. below)
+ if (.not.just_timdisp) then
+   if (dtset%getden /= 0 .or. dtset%irdden /= 0) then
+     ! Read rho1(r) from a disk file and broadcast data.
+     ! This part is not compatible with MPI-FFT (note single_proc=.True. below)
 
-   rdwrpaw=psps%usepaw
-   ABI_MALLOC(pawrhoij_read,(0))
+     rdwrpaw=psps%usepaw
+     ABI_MALLOC(pawrhoij_read,(0))
 
-!  MT july 2013: Should we read rhoij from the density file ?
-   call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor, &
-   hdr_den, pawrhoij_read, spaceworld, check_hdr=hdr)
-   etotal = hdr_den%etot; call hdr_den%free()
+!
+  !  MT july 2013: Should we read rhoij from the density file ?
+     call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor, &
+     hdr_den, pawrhoij_read, spaceworld, check_hdr=hdr)
+     etotal = hdr_den%etot; call hdr_den%free()
 
-   ABI_FREE(pawrhoij_read)
+     ABI_FREE(pawrhoij_read)
 
-!  Compute up+down rho(G) by fft
-   ABI_MALLOC(work,(nfftf))
-   work(:)=rhor(:,1)
-   call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
-   ABI_FREE(work)
- else
-!  Obtain the charge density from read wfs
-!  Be careful: in PAW, compensation density has to be added !
-   tim_mkrho=4
-   paw_dmft%use_sc_dmft=0 ! respfn with dmft not implemented
-   paw_dmft%use_dmft=0 ! respfn with dmft not implemented
+  !  Compute up+down rho(G) by fft
+     ABI_MALLOC(work,(nfftf))
+     work(:)=rhor(:,1)
+     call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
+     ABI_FREE(work)
+   else
+  !  Obtain the charge density from read wfs
+  !  Be careful: in PAW, compensation density has to be added !
+     tim_mkrho=4
+     paw_dmft%use_sc_dmft=0 ! respfn with dmft not implemented
+     paw_dmft%use_dmft=0 ! respfn with dmft not implemented
 
-     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
- end if ! getden
-! ABI_FREE(cg)
+       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+  &     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+   end if ! getden
+  ! ABI_FREE(cg)
+ end if
 
 !Compute large sphere cut-off gsqcut
  call getcut(boxcut,dtset%ecut,gmet,gsqcut,dtset%iboxcut,std_out,dtset%qptn,dtset%ngfft)
@@ -510,36 +577,37 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !driver are under way.
  n3xccc=0;if (psps%n1xccc/=0) n3xccc=nfftf
  ABI_MALLOC(xccc3d,(n3xccc))
- ABI_MALLOC(ncorespl,(psps%mqgrid_vl,2,ntypat))
- if (psps%n1xccc/=0) then
-   ABI_MALLOC(dummy_dyfrx2,(3,3,natom)) ! dummy
-   if (psps%nc_xccc_gspace==1) then
-     ABI_MALLOC(dummy_vpsp,(nfftf))
-     optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optv=0;optn=n3xccc/nfftf;optn2=1
-     call atm2fft(atindx1,xccc3d,dummy_vpsp,dummy_dyfrx2,dum_dyfrv,dum_eltfrxc,dum_gauss,gmet,gprimd,&
-  &   dum_grn,dum_grv,gsqcut,mgfftf,psps%mqgrid_vl,natom,nattyp,nfftf,ngfftf,&
-  &   ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,&
-  &   dtset%qprtrb,dtset%rcut,dum_rhog,rprimd,dummy6,other_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
+ if (.not.just_timdisp) then
+   ABI_MALLOC(ncorespl,(psps%mqgrid_vl,2,ntypat))
+   if (psps%n1xccc/=0) then
+     ABI_MALLOC(dummy_dyfrx2,(3,3,natom)) ! dummy
+     if (psps%nc_xccc_gspace==1) then
+       ABI_MALLOC(dummy_vpsp,(nfftf))
+       optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optv=0;optn=n3xccc/nfftf;optn2=1
+       call atm2fft(atindx1,xccc3d,dummy_vpsp,dummy_dyfrx2,dum_dyfrv,dum_eltfrxc,dum_gauss,gmet,gprimd,&
+    &   dum_grn,dum_grv,gsqcut,mgfftf,psps%mqgrid_vl,natom,nattyp,nfftf,ngfftf,&
+    &   ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,&
+    &   dtset%qprtrb,dtset%rcut,dum_rhog,rprimd,dummy6,other_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
 
-     ABI_FREE(dummy_vpsp)
+       ABI_FREE(dummy_vpsp)
+     end if
+     if (psps%nc_xccc_gspace==0) then
+       option=1
+       ABI_MALLOC(vxc,(0,0)) ! dummy
+       ABI_MALLOC(grxc,(3,natom))
+       call mkcore(dummy6,dummy_dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
+    &   ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
+    &   psps%xcccrc,psps%xccc1d,xccc3d,xred)
+       ABI_FREE(vxc) ! dummy
+       ABI_FREE(grxc) ! dummy
+     end if
+     ABI_FREE(dummy_dyfrx2) ! dummy
+
+     !Write the spl interpolation of the pseudo core density for all atom types
+     do itypat= 1, ntypat
+       ncorespl(:,:,itypat)= psps%nctab(itypat)%tcorespl(:,:)
+     end do
    end if
-   if (psps%nc_xccc_gspace==0) then
-     option=1
-     ABI_MALLOC(vxc,(0,0)) ! dummy
-     ABI_MALLOC(grxc,(3,natom))
-     call mkcore(dummy6,dummy_dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
-  &   ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
-  &   psps%xcccrc,psps%xccc1d,xccc3d,xred)
-     ABI_FREE(vxc) ! dummy
-     ABI_FREE(grxc) ! dummy
-   end if
-   ABI_FREE(dummy_dyfrx2) ! dummy
-
-   !Write the spl interpolation of the pseudo core density for all atom types
-   do itypat= 1, ntypat
-     ncorespl(:,:,itypat)= psps%nctab(itypat)%tcorespl(:,:)
-   end do
-
  end if
 
 !Set up xc potential. Compute kxc here.
@@ -555,14 +623,16 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_MALLOC(nhatgr,(0,0,0))
  non_magnetic_xc=.false.
 
+ usexcnhat=0
  bigexc=zero
  bigsxc=zero
- usexcnhat=0
 
- call xcdata_init(xcdata,dtset=dtset)
- call rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfftf,ngfftf,&
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
-& rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata)
+ if (.not.just_timdisp) then
+   call xcdata_init(xcdata,dtset=dtset)
+   call rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfftf,ngfftf,&
+  & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
+  & rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata)
+ end if
 
  ABI_FREE(xccc3d)
 
@@ -571,9 +641,11 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    useylmgr=1; option=2 ; nylmgr=9
    ABI_MALLOC(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
    ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
-   call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
-&  psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,option,&
-&  rprimd,ylm,ylmgr)
+   if (.not.just_timdisp) then
+     call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
+   & psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,option,&
+   & rprimd,ylm,ylmgr)
+   end if
  end if
 
 !Compute nonlocal form factors ffnl1, for all atoms and all k-points.
@@ -584,9 +656,11 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
      ABI_MALLOC(ffnl_i,(dtset%mkmem,dtset%mpw,dimffnl_i,psps%lmnmax,psps%ntypat))
      do idir=1, 3
        idir0=idir
-       call preca_ffnl(dimffnl_i,ffnl_i,gmet,gprimd,ider,idir0,kg, &
-     & dtset%kptns,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw, &
-     & dtset%nkpt,npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
+       if (.not.just_timdisp) then
+         call preca_ffnl(dimffnl_i,ffnl_i,gmet,gprimd,ider,idir0,kg, &
+       & dtset%kptns,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw, &
+       & dtset%nkpt,npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
+       end if
        ffnl(:,:,1,:,:)=ffnl_i(:,:,1,:,:)
        ffnl(:,:,1+idir,:,:)=ffnl_i(:,:,2,:,:)
      end do
@@ -602,78 +676,19 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
        ider=2; idir0=4; dimffnl=10
      end if
      ABI_MALLOC(ffnl,(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat))
-     call preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg, &
-   & dtset%kptns,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw, &
-   & dtset%nkpt,npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
+     if (.not.just_timdisp) then
+       call preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg, &
+     & dtset%kptns,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw, &
+     & dtset%nkpt,npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
+     end if
      useylmgr=0
-     ABI_FREE(ylmgr)
+     ABI_SFREE(ylmgr)
      ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
    end if
  else if (dtset%ffnl_lw == 1) then
    dimffnl=0
    ABI_MALLOC(ffnl,(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat))
  end if
-
-!TODO: This part of the implementation does not work properly to select specific directions
-!      for each perturbation. This development is temporarily frozen.
-!Initialize the list of perturbations rfpert
-! mpert=natom+11
-! ABI_MALLOC(rfpert,(mpert))
-! rfpert(:)=0
-! rfpert(natom+1)=1
-! if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4 &
-!&.or.dtset%d3e_pert1_phon==1.or.dtset%d3e_pert2_phon==1) then
-!   if (dtset%d3e_pert1_phon==1) rfpert(dtset%d3e_pert1_atpol(1):dtset%d3e_pert1_atpol(2))=1
-!   if (dtset%d3e_pert2_phon==1) rfpert(dtset%d3e_pert2_atpol(1):dtset%d3e_pert2_atpol(2))=1
-! end if
-! if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==3.or.&
-!& dtset%d3e_pert1_elfd==1) then
-!   rfpert(natom+2)=1
-!   rfpert(natom+10)=1
-!   rfpert(natom+11)=1
-! end if
-! if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4.or.dtset%d3e_pert2_strs/=0) then
-!   if (dtset%d3e_pert2_strs==1.or.dtset%d3e_pert2_strs==3) rfpert(natom+3)=1
-!   if (dtset%d3e_pert2_strs==2.or.dtset%d3e_pert2_strs==3) rfpert(natom+4)=1
-! endif
-!
-!!Determine which directions treat for each type of perturbation
-! ABI_MALLOC(pertsy,(3,natom+6))
-! pertsy(:,:)=0
-! !atomic displacement
-! do ipert=1,natom
-!   if (rfpert(ipert)==1.and.dtset%d3e_pert1_phon==1) then
-!     do idir=1,3
-!       if (dtset%d3e_pert1_dir(idir)==1) pertsy(idir,ipert)=1
-!     end do
-!   endif
-!   if (rfpert(ipert)==1.and.dtset%d3e_pert2_phon==1) then
-!     do idir=1,3
-!       if (dtset%d3e_pert2_dir(idir)==1) pertsy(idir,ipert)=1
-!     end do
-!   end if
-! end do
-! !ddk
-! do idir=1,3
-!   if (dtset%d3e_pert3_dir(idir)==1) pertsy(idir,natom+1)=1
-! end do
-! !electric field
-! if (rfpert(natom+2)==1) then
-!   do idir=1,3
-!     if (dtset%d3e_pert1_dir(idir)==1) pertsy(idir,natom+2)=1
-!   end do
-! end if
-! !strain
-! if (rfpert(natom+3)==1) pertsy(:,natom+3)=1
-! if (rfpert(natom+4)==1) pertsy(:,natom+4)=1
-
-!TODO:Add perturbation symmetries. See m_respfn_driver.F90.
-!........
-
-! All perturbations and directions are temporarily activated
- ABI_MALLOC(pertsy,(3,natom+6))
- pertsy(:,:)=1
-
 
 !#############  SPATIAL-DISPERSION PROPERTIES CALCULATION  ###########################
 
@@ -698,9 +713,9 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  end if
 
 !Main loop over the perturbations to calculate the stationary part
- call dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil,dtset,&
+ call dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil,dtset,&
 & ffnl,gmet,gprimd,gsqcut,&
-& hdr,kg,kxc,dtset%mband,dtset%mgfft,&
+& hdr,just_timdisp,kg,kxc,dtset%mband,dtset%mgfft,&
 & dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ncorespl,ngfftf,nfftf,&
 & dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,nylmgr,occ,&
 & pawfgr,pawtab,ph1d,&
@@ -712,6 +727,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !Real (imaginary) part of d3etot is zero for first (second) momentum derivatives
  if (dtset%kptopt /= 3) then
    do i3pert = 1, mpert
+     if (i3pert == natom+9 ) cycle
      do i3dir = 1, 3
        do i2pert = 1, mpert
          do i2dir = 1,3
@@ -751,6 +767,10 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
  call ddb%init(dtset, 1, mpert, with_d3E=.true.)
 
+ call ddb%set_omega(iblok=1, omega=dtset%rfomega)
+
+ call ddb%set_qpt(iblok=1, qpt=dtset%qptn(1:3))
+
  call ddb%set_d3matr(1, d3etot, blkflg, lw=.true.)
 
  call ddb%write_txt(ddb_hdr, dtfil%fnameabo_ddb)
@@ -764,7 +784,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_MALLOC(d3etot_car,(2,3,mpert,3,mpert,3,mpert))
  call lwcart(blkflg,blkflg_car,d3etot,d3etot_car,gprimd,mpert,natom,rprimd)
  if (me==0) then
-   call dfptlw_out(blkflg_car,d3etot_car,dtset%lw_flexo,dtset%lw_qdrpl,dtset%lw_natopt,mpert,natom,ucvol)
+   call dfptlw_out(blkflg_car,d3etot_car,dtset%lw_flexo,dtset%lw_qdrpl,dtset%lw_natopt,mpert,natom,dtset%timdisp,ucvol)
  end if
 
 !Deallocate arrays
@@ -790,7 +810,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_FREE(vxc)
  ABI_FREE(d3etot)
  ABI_FREE(d3etot_nv)
- ABI_FREE(pertsy)
+! ABI_FREE(pertsy)
  ABI_FREE(rfpert)
  ABI_FREE(d3e_pert1)
  ABI_FREE(d3e_pert2)
@@ -802,7 +822,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_SFREE(ylmgr)
  ABI_SFREE(blkflg_car)
  ABI_SFREE(d3etot_car)
- ABI_FREE(ncorespl)
+ ABI_SFREE(ncorespl)
  call pawfgr_destroy(pawfgr)
 
  ! Clean the header
@@ -821,7 +841,7 @@ end subroutine longwave
 !!  Write the relevant spatial-dispersion quantities in Cartesian coordinates
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2022-2025 ABINIT group (MR)
+!!  Copyright (C) 2022-2026 ABINIT group (MR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -833,28 +853,23 @@ end subroutine longwave
 !!  lw_flexo= flag that activates flexoelectric tensor calculation
 !!  mpert =maximum number of ipert
 !!  natom = number of atoms in unit cell
+!!  timdisp = if 1 write derivatives with respect to omega
 !!
 !! OUTPUT
 !!
 !! SIDE EFFECTS
 !!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,natom,ucvol)
+subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,natom,timdisp,ucvol)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: lw_flexo,lw_qdrpl,lw_natopt,mpert,natom
+ integer,intent(in) :: lw_flexo,lw_qdrpl,lw_natopt,mpert,natom,timdisp
  real(dp),intent(in) :: ucvol
 !arrays
  integer,intent(in) :: blkflg_car(3,mpert,3,mpert,3,mpert)
- real(dp),intent(out) :: d3etot_car(2,3,mpert,3,mpert,3,mpert)
+ real(dp),intent(in) :: d3etot_car(2,3,mpert,3,mpert,3,mpert)
 
 !Local variables-------------------------------
 !scalar
@@ -1127,6 +1142,27 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,na
        end do
      end do
      write(ab_out,*)' '
+   end do
+ end if
+
+ if (timdisp==1) then
+   i3pert=natom+9
+   i3dir=1
+   write(ab_out,'(a)')' Frequency derivative of second-order energies, in cartesian coordinates'
+   write(ab_out,'(a)')'     j1       j2                    matrix elementi'
+   write(ab_out,'(a)')'  dir pert dir pert           real part       imaginary part'
+   do i1pert=1,mpert
+     do i1dir=1,3
+       do i2pert=1,mpert
+         do i2dir=1,3
+           if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+             write(ab_out,'(2(i4,i5),2(1x,f20.10))')i1dir,i1pert,i2dir,i2pert,&
+           & d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert), &
+           & d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+           end if
+         end do
+       end do
+     end do
    end do
  end if
 

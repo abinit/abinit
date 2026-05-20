@@ -6,7 +6,7 @@
 !!  FIXME: Description is missing
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2025 ABINIT group
+!! Copyright (C) 2018-2026 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -16,11 +16,14 @@
 !! interfaces_80_tdep.F90
 !! m_tdep_abitypes.F90
 !! m_tdep_latt.F90
+!! m_tdep_model.F90
 !! m_tdep_phdos.F90
 !! m_tdep_phij.F90
 !! m_tdep_qpt.F90
 !! m_tdep_readwrite.F90
+!! m_tdep_sampling.F90
 !! m_tdep_shell.F90
+!! m_tdep_solver.F90
 !! m_tdep_sym.F90
 !! m_tdep_utils.F90
 !!

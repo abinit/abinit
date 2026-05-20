@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2026 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -162,29 +162,47 @@ AC_DEFUN([_ABI_FC_CHECK_IBM],[
 # If yes, tries to determine its version number and sets the abi_fc_vendor
 # and abi_fc_version variables accordingly.
 #
-AC_DEFUN([_ABI_FC_CHECK_INTEL],[
+AC_DEFUN([_ABI_FC_CHECK_INTEL], [
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  dnl AC_MSG_CHECKING([if we are using the Intel Fortran compiler])
-  fc_info_string=`$1 -V 2>&1 | head -n 1`
-  abi_result=`echo "${fc_info_string}" | grep '^Intel(R) Fortran'`
-  if test "${abi_result}" = ""; then
+  AC_MSG_CHECKING([if we are using the Intel Fortran compiler])
+
+  fc_command="$1"
+  fc_output=`$fc_command -V 2>&1 | head -n 1`
+  intel_check=`echo "${fc_output}" | grep '^Intel(R) Fortran'`
+  # If using mpiifx, it may crash with "usage: mpiifort"
+  #
+  if test "${intel_check}" = ""; then
+    fc_output=`$fc_command -V 2>&1`
+    usage_line=`echo "${fc_output}" | grep '^usage:'`
+    if test "${usage_line}" != ""; then
+      fallback_fc=`echo "${usage_line}" | cut -d " " -f 2`
+      if command -v "${fallback_fc}" >/dev/null 2>&1; then
+        fc_output=`${fallback_fc} -V 2>&1 | head -n 1`
+        intel_check=`echo "${fc_output}" | grep '^Intel(R) Fortran'`
+        fc_command="${fallback_fc}"
+      fi
+    fi
+  fi
+
+  if test "${intel_check}" = ""; then
     abi_result="no"
-    fc_info_string=""
+    fc_output=""
     abi_fc_vendor="unknown"
     abi_fc_version="unknown"
   else
-    AC_DEFINE([FC_INTEL],1,
+    AC_DEFINE([FC_INTEL], 1,
       [Define to 1 if you are using the Intel Fortran compiler.])
     abi_fc_vendor="intel"
-    abi_fc_version=`echo "${fc_info_string}" | sed -e 's/.*Version //;s/ .*//'`
+    abi_fc_version=`echo "${fc_output}" | sed -e 's/.*Version //;s/ .*//'`
     if test "${abi_fc_version}" = ""; then
       abi_fc_version="unknown"
     fi
     abi_result="yes"
   fi
-  dnl AC_MSG_RESULT(${abi_result})
+
+  AC_MSG_RESULT([${abi_result}])
 ]) # _ABI_FC_CHECK_INTEL
 
 
@@ -437,15 +455,15 @@ AC_DEFUN([_ABI_FC_CHECK_BACKTRACE],[
 
   # Try to compile a piece of code that calls BACKTRACE.
   AC_LANG_PUSH([Fortran])
-  AC_RUN_IFELSE([AC_LANG_PROGRAM([], 
+  AC_RUN_IFELSE([AC_LANG_PROGRAM([],
     [[
       call backtrace()
-      
+
     ]])], [fc_has_backtrace="yes"])
   AC_LANG_POP()
 
   if test "${fc_has_backtrace}" = "yes"; then
-    AC_DEFINE([HAVE_FC_BACKTRACE],1, 
+    AC_DEFINE([HAVE_FC_BACKTRACE],1,
       [Define to 1 if your Fortran compiler supports BACKTRACE.])
   fi
 
@@ -469,7 +487,7 @@ AC_DEFUN([_ABI_FC_CHECK_COMMAND_ARGUMENT],[
 
   # Try to compile a piece of code that calls get_command_argument.
   AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       integer :: ii
       character(len=500) :: arg
@@ -479,12 +497,12 @@ AC_DEFUN([_ABI_FC_CHECK_COMMAND_ARGUMENT],[
       do ii=1,command_argument_count()
         call get_command_argument(ii, arg)
       end do
-      
+
     ]])], [fc_has_command_argument="yes"])
   AC_LANG_POP()
 
   if test "${fc_has_command_argument}" = "yes"; then
-    AC_DEFINE([HAVE_FC_COMMAND_ARGUMENT],1, 
+    AC_DEFINE([HAVE_FC_COMMAND_ARGUMENT],1,
       [Define to 1 if your Fortran compiler supports GET_COMMAND_ARGUMENT.])
   fi
 
@@ -508,20 +526,20 @@ AC_DEFUN([_ABI_FC_CHECK_COMMAND_LINE],[
 
   # Try to compile a piece of code that calls execute_command_line.
   AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       integer :: i
-      
+
       call execute_command_line ("external_prog.exe", exitstat=i)
       print *, "Exit status of external_prog.exe was ", i
-      
+
       call execute_command_line ("reindex_files.exe", wait=.false.)
       print *, "Now reindexing files in the background"
     ]])], [fc_has_command_line="yes"])
   AC_LANG_POP()
 
   if test "${fc_has_command_line}" = "yes"; then
-    AC_DEFINE([HAVE_FC_COMMAND_LINE],1, 
+    AC_DEFINE([HAVE_FC_COMMAND_LINE],1,
       [Define to 1 if your Fortran compiler supports EXECUTE_COMMAND_LINE.])
   fi
 
@@ -545,14 +563,14 @@ AC_DEFUN([_ABI_FC_CHECK_SYSTEM],[
 
   # Try to compile a piece of code that calls system.
   AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       call system ("ls -l")
     ]])], [fc_has_system="yes"])
   AC_LANG_POP()
 
   if test "${fc_has_system}" = "yes"; then
-    AC_DEFINE([HAVE_FC_SYSTEM],1, 
+    AC_DEFINE([HAVE_FC_SYSTEM],1,
       [Define to 1 if your Fortran compiler supports SYSTEM.])
   fi
 
@@ -576,7 +594,7 @@ AC_DEFUN([_ABI_FC_CHECK_CONTIGUOUS],[
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
      integer, parameter :: dp=kind(1.0d0)
-     integer, parameter :: dpc=kind((1.0_dp,1.0_dp)) 
+     integer, parameter :: dpc=kind((1.0_dp,1.0_dp))
 
      integer,contiguous,pointer :: i_ptr(:)
      real(dp),contiguous,pointer :: r_ptr(:,:)
@@ -651,9 +669,9 @@ AC_DEFUN([_ABI_FC_CHECK_FLUSH],[
 
 # _ABI_FC_CHECK_FLUSH_()
 # ----------------------
-#   
+#
 # Checks whether the Fortran compiler supports the flush_() subroutine.
-# 
+#
 AC_DEFUN([_ABI_FC_CHECK_FLUSH_],[
   # Init
   fc_has_flush_="no"
@@ -753,7 +771,7 @@ AC_DEFUN([_ABI_FC_CHECK_GETENV],[
 
   # Try to compile a call to getenv
   AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       character(len=255) :: homedir
       call getenv("HOME", homedir)
@@ -762,7 +780,7 @@ AC_DEFUN([_ABI_FC_CHECK_GETENV],[
   AC_LANG_POP()
 
   if test "${fc_has_getenv}" = "yes"; then
-    AC_DEFINE([HAVE_FC_GETENV],1, 
+    AC_DEFINE([HAVE_FC_GETENV],1,
       [Define to 1 if your Fortran compiler supports getenv().])
   fi
 
@@ -845,23 +863,23 @@ AC_DEFUN([_ABI_FC_CHECK_DTARRAYS],[
 
   # Try to compile a type with an allocatable array
   AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
 
          integer, parameter :: dp=kind(1.0d0)
-         integer, parameter :: dpc=kind((1.0_dp,1.0_dp))  
+         integer, parameter :: dpc=kind((1.0_dp,1.0_dp))
 
          type test_type
-           integer,allocatable :: i(:) 
-           real(dp),allocatable :: r(:,:) 
-           complex(dpc),allocatable :: c(:,:,:) 
+           integer,allocatable :: i(:)
+           real(dp),allocatable :: r(:,:)
+           complex(dpc),allocatable :: c(:,:,:)
          end type test_type
 
     ]])], [fc_has_dtarrays="yes"])
   AC_LANG_POP()
 
   if test "${fc_has_dtarrays}" = "yes"; then
-    AC_DEFINE([HAVE_FC_ALLOCATABLE_DTARRAYS],1, 
+    AC_DEFINE([HAVE_FC_ALLOCATABLE_DTARRAYS],1,
       [Define to 1 if your Fortran compiler supports allocatable arrays in datatypes.])
   fi
 
@@ -883,7 +901,7 @@ AC_DEFUN([_ABI_FC_CHECK_IEEE_ARITHMETIC],[
 
   # Try to compile a piece of code that uses the module.
   AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       use, intrinsic :: ieee_arithmetic
       real :: val
@@ -896,7 +914,7 @@ AC_DEFUN([_ABI_FC_CHECK_IEEE_ARITHMETIC],[
   AC_LANG_POP([Fortran])
 
   if test "${fc_has_ieee_arithmetic}" = "yes"; then
-    AC_DEFINE([HAVE_FC_IEEE_ARITHMETIC],1, 
+    AC_DEFINE([HAVE_FC_IEEE_ARITHMETIC],1,
       [Define to 1 if your Fortran compiler supports IEEE_ARITHMETIC module.])
   fi
 
@@ -920,20 +938,20 @@ AC_DEFUN([_ABI_FC_CHECK_IEEE_EXCEPTIONS],[
 
   # Try to compile a piece of code that uses the module.
   AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
-      use, intrinsic :: ieee_exceptions 
+      use, intrinsic :: ieee_exceptions
       type(ieee_status_type) :: status_value
 
       call ieee_get_status(status_value)   ! Get the flags
       call ieee_set_flag(ieee_all,.false.) ! Set the flags quiet
       call ieee_set_status(status_value)   ! Restore the flags
-      
+
     ]])], [fc_has_ieee_exceptions="yes"])
   AC_LANG_POP()
 
   if test "${fc_has_ieee_exceptions}" = "yes"; then
-    AC_DEFINE([HAVE_FC_IEEE_EXCEPTIONS],1, 
+    AC_DEFINE([HAVE_FC_IEEE_EXCEPTIONS],1,
       [Define to 1 if your Fortran compiler supports IEEE_EXCEPTIONS.])
   fi
 
@@ -954,7 +972,7 @@ AC_DEFUN([_ABI_FC_CHECK_IOMSG],[
 
   # Try to compile a piece of code that opens, reads, writes and closes a file using iomsg.
   AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
          IMPLICIT NONE
          CHARACTER(len=500) :: ERRMSG, DUMMY
@@ -968,7 +986,7 @@ AC_DEFUN([_ABI_FC_CHECK_IOMSG],[
   AC_LANG_POP()
 
   if test "${fc_has_iomsg}" = "yes"; then
-    AC_DEFINE([HAVE_FC_IOMSG],1, 
+    AC_DEFINE([HAVE_FC_IOMSG],1,
       [Define to 1 if your Fortran compiler supports IOMSG.])
   fi
 
@@ -989,7 +1007,7 @@ AC_DEFUN([_ABI_FC_CHECK_ISO_C_BINDING],[
 
   # Try to compile a simple piece of code using iso_c_binding
   AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
          use iso_c_binding
          implicit none
@@ -997,13 +1015,13 @@ AC_DEFUN([_ABI_FC_CHECK_ISO_C_BINDING],[
          logical :: lbool
          type(c_ptr) :: ptr
          ptr = c_null_ptr
-         lbool = c_associated(ptr) 
+         lbool = c_associated(ptr)
 
     ]])], [fc_has_iso_c_binding="yes"])
   AC_LANG_POP()
 
   if test "${fc_has_iso_c_binding}" = "yes"; then
-    AC_DEFINE([HAVE_FC_ISO_C_BINDING],1, 
+    AC_DEFINE([HAVE_FC_ISO_C_BINDING],1,
       [Define to 1 if your Fortran compiler provides the iso_c_binding module.])
   else
     AC_MSG_ERROR([Fortran compiler does not provide iso_c_binding module. Use a more recent version or a different compiler])
@@ -1015,7 +1033,7 @@ AC_DEFUN([_ABI_FC_CHECK_ISO_C_BINDING],[
 
 # _ABI_FC_CHECK_LONG_LINES()
 # --------------------------
-# 
+#
 # Checks whether the Fortran compiler supports long lines.
 #
 AC_DEFUN([_ABI_FC_CHECK_LONG_LINES],[
@@ -1026,7 +1044,7 @@ AC_DEFUN([_ABI_FC_CHECK_LONG_LINES],[
 
   # Try to compile a single line exceeding 136 columns.
   AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
          write(*,*)"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" !142
     ]])], [fc_has_long_lines="yes"])
@@ -1038,7 +1056,7 @@ AC_DEFUN([_ABI_FC_CHECK_LONG_LINES],[
   fi
 
   if test "${fc_has_long_lines}" = "yes"; then
-    AC_DEFINE([HAVE_FC_LONG_LINES],1, 
+    AC_DEFINE([HAVE_FC_LONG_LINES],1,
       [Define to 1 if your Fortran compiler supports long lines.])
   fi
 
@@ -1063,7 +1081,7 @@ AC_DEFUN([_ABI_FC_CHECK_MACRO_NEWLINE],[
 
   # Try to compile a piece of code that opens a file using \newline in a macro (has to use F90 ext).
   AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
 #        define NEWLINE \newline
          print *,"foo1" NEWLINE print *,"foo2"
@@ -1094,7 +1112,7 @@ AC_DEFUN([_ABI_FC_CHECK_MOVE_ALLOC],[
 
   # Try to compile a piece of code that uses move_alloc (F2003)
   AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
      integer, allocatable :: a(:), b(:)
      allocate(a(3))
@@ -1143,9 +1161,9 @@ AC_DEFUN([_ABI_FC_CHECK_PRIVATE],[
 
   # remove the module.
   if test -f "FOO.${MODEXT}"; then
-    rm -f "FOO.${MODEXT}"; 
+    rm -f "FOO.${MODEXT}";
   elif test -f "foo.${MODEXT}"; then
-    rm -f "foo.${MODEXT}"; 
+    rm -f "foo.${MODEXT}";
   fi
 
   AC_MSG_RESULT(${fc_has_private})
@@ -1182,9 +1200,9 @@ AC_DEFUN([_ABI_FC_CHECK_PROTECTED],[
 
   # Remove the module
   if test -f "FOO.${MODEXT}"; then
-    rm -f "FOO.${MODEXT}"; 
+    rm -f "FOO.${MODEXT}";
   elif test -f "foo.${MODEXT}"; then
-    rm -f "foo.${MODEXT}"; 
+    rm -f "foo.${MODEXT}";
   fi
 
   AC_MSG_RESULT(${fc_has_protected})
@@ -1276,7 +1294,7 @@ AC_DEFUN([_ABI_FC_CHECK_TIMING],[
 # _ABI_FC_CHECK_CPUTIME()
 # -----------------------
 #
-# Checks whether the Fortran compiler supports CPU_TIME 
+# Checks whether the Fortran compiler supports CPU_TIME
 # (Fortran 95 and later).
 #
 AC_DEFUN([_ABI_FC_CHECK_CPUTIME],[
@@ -1287,7 +1305,7 @@ AC_DEFUN([_ABI_FC_CHECK_CPUTIME],[
 
   # Try to compile a call to cpu_time
   AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       real :: second
       call cpu_time(second)
@@ -1296,7 +1314,7 @@ AC_DEFUN([_ABI_FC_CHECK_CPUTIME],[
   AC_LANG_POP()
 
   if test "${fc_has_cputime}" = "yes"; then
-    AC_DEFINE([HAVE_FC_CPUTIME],1, 
+    AC_DEFINE([HAVE_FC_CPUTIME],1,
       [Define to 1 if your Fortran compiler supports cpu_time().])
   fi
 
@@ -1465,6 +1483,39 @@ AC_DEFUN([ABI_FC_MOD_CASE],[
   AC_MSG_CHECKING([whether Fortran modules are upper-case])
   AC_MSG_RESULT([${fc_mod_uppercase}])
 ]) # ABI_FC_MOD_CASE
+
+AC_DEFUN([ABI_FC_MODDIR_FLAG], [
+  AC_REQUIRE([AC_PROG_FC])
+  AC_MSG_CHECKING([how to set Fortran module output directory])
+  FC_MODDIR_FLAG=""
+  for flag in "-Jconftest_moddir" "-module conftest_moddir" "-Mmod=conftest_moddir" "-mdir conftest_moddir"; do
+    rm -rf conftest_moddir conftest.f90 conftest.o conftest.mod
+    mkdir -p conftest_moddir
+    echo "      module conftest" > conftest.f90
+    echo "      end module conftest" >> conftest.f90
+    if $FC $flag -c conftest.f90 > /dev/null 2>&1; then
+      # Check if .mod file was created in the target directory
+      if test -f conftest_moddir/conftest.mod; then
+        case $flag in
+          -J*) FC_MODDIR_FLAG="-J" ;;
+          -module*) FC_MODDIR_FLAG="-module " ;;
+          -Mmod=*) FC_MODDIR_FLAG="-Mmod=" ;;
+          -mdir*) FC_MODDIR_FLAG="-mdir=" ;;
+        esac
+        AC_MSG_RESULT([$FC_MODDIR_FLAG])
+        break
+      fi
+    fi
+    rm -rf conftest_moddir conftest.f90 conftest.o conftest.mod
+  done
+  if test -z "$FC_MODDIR_FLAG"; then
+    AC_MSG_RESULT([none])
+    AC_MSG_WARN([Could not determine Fortran module output flag])
+  fi
+  FCFLAGS_MODDIR="${FC_MODDIR_FLAG}../mods"
+  AC_SUBST([FCFLAGS_MODDIR])
+])
+
 
 
 # ABI_FC_MOD_INCS(MODULE)

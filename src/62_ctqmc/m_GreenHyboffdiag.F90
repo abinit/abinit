@@ -10,7 +10,7 @@
 !!  Manage a green function for one orbital
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (B.Amadon, J. Denier and J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (B.Amadon, J. Denier and J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,7 +57,7 @@ MODULE m_GreenHyboffdiag
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -163,7 +163,7 @@ CONTAINS
 !!  Initialize and allocate
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -290,7 +290,7 @@ END SUBROUTINE GreenHyboffdiag_init
 !!  reset green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -328,7 +328,7 @@ END SUBROUTINE GreenHyboffdiag_reset
 !!  clear green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -380,7 +380,7 @@ END SUBROUTINE GreenHyboffdiag_clear
 !!  set Green function in frequencies
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -430,7 +430,7 @@ END SUBROUTINE GreenHyboffdiag_setOperW
 !!  Measure Green's function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -534,13 +534,14 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
         DO iflavorbis=1, op%nflavors
           old_size = op%map(iflavor,iflavorbis)%tail
           !write(6,*) "size listDBLE",size(op%map(iflavor,iflavorbis)%listDBLE)
-        !sui!write(6,*) " measHybrid",old_size,iflavor,iflavorbis
+          !write(6,*) " measHybrid",old_size,iflavor,iflavorbis
           DO iC = 1, old_size
             if(op%map(iflavor,iflavorbis)%listINT(iC)==0) then
               !write(6,*) "listINT(iC)=",iC,op%map(iflavor,iflavorbis)%listINT(iC)
             endif
             !write(6,*) " measHybrid  iflavor,iflavorbis,iC listINT ",iflavor,iflavorbis,iC,op%map(iflavor,iflavorbis)%listINT(iC)
-               !write(6,*) " measHybrid  listDBLE ",iflavor,iflavorbis,iC,op%map(iflavor,iflavorbis)%listDBLE(iC),argument
+            !write(6,*) " measHybrid  listDBLE ",iflavor,iflavorbis,iC,op%map(iflavor,iflavorbis)%listDBLE(iC),argument
+            !write(6,*) "measHybrid ic iflavor1 iflavor2 oper",ic,iflavor,iflavorbis,op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold *  argument
             op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis) =                &
                            op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis) &
                          + op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold *  argument
@@ -698,8 +699,8 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
               ! --- define the new corresponding value of listINT(idx_old) from mat_tau (integers)
               ! --- idx_old has no meaning but listINT(idx_old) has.
               op%map(iflavor,iflavorbis)%listINT(idx_old)  = Mmatrix%mat_tau(iCdag_m,iC_m)
-             !write(6,*) " measHybrid  idx_old listINT ",idx_old,op%map(iflavor,iflavorbis)%listINT(idx_old)
-             !write(6,*) " measHybrid  iCdag_m, iC_m, mat_tau",iCdag_m,iC_m,Mmatrix%mat_tau(iCdag_m,iC_m)
+              !write(6,*) " measHybrid  idx_old listINT ",idx_old,op%map(iflavor,iflavorbis)%listINT(idx_old)
+              !write(6,*) " measHybrid  iCdag_m, iC_m, mat_tau",iCdag_m,iC_m,Mmatrix%mat_tau(iCdag_m,iC_m)
             !  if(iflavor==1.and.iflavorbis==2.and.op%map(iflavor,iflavorbis)%listINT(idx_old)==1) then
             !    !prt!if(prtopt==1) write(6,*) "---------------------------"
             !    !prt!if(prtopt==1) write(6,*) "GG12(0)", op%map(iflavor,iflavorbis)%listINT(idx_old),op%map(iflavor,iflavorbis)%listDBLE(idx_old),tcdag,tc,signe,signe2
@@ -784,7 +785,7 @@ END SUBROUTINE GreenHyboffdiag_measHybrid
 !!  reduce green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -835,7 +836,7 @@ END SUBROUTINE GreenHyboffdiag_getHybrid
 !!  impose number of electrons for this flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -899,7 +900,7 @@ END SUBROUTINE GreenHyboffdiag_setN
 !!  Set first moments for G
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -960,7 +961,7 @@ END SUBROUTINE GreenHyboffdiag_setMuD1
 !!  Compute full moments
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1024,7 +1025,7 @@ END SUBROUTINE GreenHyboffdiag_setMoments
 !!  perform back fourier transform
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1383,7 +1384,7 @@ END SUBROUTINE GreenHyboffdiag_backFourier
 !!  perform forward fourier transform
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1445,7 +1446,6 @@ include 'mpif.h'
   COMPLEX(KIND=8) :: iwtau
   COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: Gwtmp
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: omegatmp
-
 #if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
   INTEGER :: my_count
   COMPLEX(KIND=8), ALLOCATABLE , DIMENSION(:) :: Gwtmp_buf
@@ -1690,6 +1690,7 @@ include 'mpif.h'
       !write(6,*) "w",i,op%oper_w(i,iflavor1,iflavor1)
       enddo
   enddo
+
   FREE(Gwtmp)
   FREE(diagL)
   FREE(lastR)
@@ -1712,7 +1713,7 @@ END SUBROUTINE GreenHyboffdiag_forFourier
 !!  print Green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1777,7 +1778,7 @@ END SUBROUTINE GreenHyboffdiag_print
 !!  destroy green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

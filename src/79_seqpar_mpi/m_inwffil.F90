@@ -6,7 +6,7 @@
 !!  Initialization of wavefunctions.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, AR, MB, MVer, ZL, MB, TD, MG)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, AR, MB, MVer, ZL, MB, TD, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -244,7 +244,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
  headform0=0 !Default value for headform0 (will be needed later, to read wf blocks)
 
 !Chebyshev is more sensitive to the quality of input random numbers, so use a new algorithm
- if(dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) then
+ if(dtset%wfoptalg == 1 .or. dtset%wfoptalg == 2 .or. dtset%wfoptalg == 111 .or. dtset%wfoptalg == 112) then
    randalg = 1
  else
    ! Otherwise, use compatibility mode

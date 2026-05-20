@@ -6,7 +6,7 @@
 !! Sorting algorithms.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (XG, MG)
+!!  Copyright (C) 2008-2026 ABINIT group (XG, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -334,7 +334,6 @@ subroutine sort_rpts(n, rpts, metric, iperm, tol, rmod, order)
  real(dp) :: my_tol
 !arrays
  real(dp),allocatable :: my_rmod(:)
-
 !************************************************************************
 
  my_tol = tol12; if (present(tol)) my_tol = tol
@@ -395,7 +394,6 @@ subroutine sort_rvals(n, in_vals, iperm, sorted_vals, tol, order)
 !scalars
  integer :: ii, my_order
  real(dp) :: my_tol
-
 !************************************************************************
 
  my_tol = tol12; if (present(tol)) my_tol = tol
@@ -452,7 +450,6 @@ subroutine sort_gvecs(npw_k, kpoint, gmet, in_gvec, out_gvec, iperm, tol, order)
  real(dp) :: my_tol
  integer,allocatable :: iperm__(:)
  real(dp),allocatable :: kin_kg(:)
-
 !************************************************************************
 
  my_tol = tol14; if (present(tol)) my_tol = tol

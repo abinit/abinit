@@ -1,13 +1,11 @@
-# coding: utf-8
-from __future__ import print_function, division, unicode_literals, absolute_import
 
 executable = "multibinit"
 
 try:
-    from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+    from abimkdocs.variables import MultipleValue, Range, ValueWithUnit
 except ImportError:
     # This is needed for importing this module within Abipy
-    from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range
+    pass
 
 ValueWithConditions = dict
 Variable = dict
@@ -17,7 +15,7 @@ Variable(
     abivarname="dipdip@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['LatticeModel_basic'],
+    topics=["LatticeModel_basic"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="DIPole-DIPole interaction",
@@ -32,7 +30,7 @@ Variable(
     abivarname="dipdip_prt@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['LatticeModel_expert'],
+    topics=["LatticeModel_expert"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="DIPole-DIPole PRinT",
@@ -73,11 +71,11 @@ Variable(
     abivarname="energy_reference@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['LatticeModel_useful'],
+    topics=["LatticeModel_useful"],
     dimensions="scalar",
     defaultval=0.0,
-    mnemonics="Energy of the refences structure",
-    characteristics=['[[ENERGY]]'],
+    mnemonics="Energy of the references structure",
+    characteristics=["[[ENERGY]]"],
     added_in_version="before_v9",
     text=r"""
 Set the energy of the reference structure (from the DFT calculation)
@@ -111,7 +109,7 @@ Variable(
     abivarname="lwf_init_hist_fname@multibinit",
     varset="multibinit",
     vartype="string",
-    topics=['LWFModel_basic'],
+    topics=["LWFModel_basic"],
     dimensions="scalar",
     defaultval="",
     mnemonics="LWF INITIAL state HISTory file name",
@@ -136,7 +134,7 @@ Variable(
     text=r"""
 Flag to initialize spin state.
 
-* 1 --> The LWF amplitudes are homogenous random numbers between -0.1 to 0.1 Bohr.
+* 1 --> The LWF amplitudes are homogeneous random numbers between -0.1 to 0.1 Bohr.
 
 * 2 --> The LWF amplitudes are 0.
 
@@ -165,7 +163,7 @@ Variable(
     abivarname="lwf_dt@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['LWFModel_basic'],
+    topics=["LWFModel_basic"],
     dimensions="scalar",
     defaultval=100,
     mnemonics="Lattice Wannier Function Delta Time",
@@ -231,7 +229,7 @@ Variable(
     abivarname="lwf_taut@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['LWFModel_basic'],
+    topics=["LWFModel_basic"],
     dimensions="scalar",
     defaultval=1000,
     mnemonics="Lattice Wannier function dynamics relaxation time TAUT",
@@ -311,7 +309,7 @@ Variable(
     abivarname="ncoeff@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['LatticeModel_useful'],
+    topics=["LatticeModel_useful"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Number of anharmonic COEFFicients",
@@ -327,8 +325,8 @@ Variable(
     abivarname="coefficients@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['LatticeModel_useful'],
-    dimensions=['[[multibinit:ncoeff]]'],
+    topics=["LatticeModel_useful"],
+    dimensions=["[[multibinit:ncoeff]]"],
     defaultval=0.0,
     mnemonics="values of the COEFFICIENTS",
     added_in_version="before_v9",
@@ -342,7 +340,7 @@ Variable(
     abivarname="ngqpt@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['LatticeModel_useful'],
+    topics=["LatticeModel_useful"],
     dimensions=[3],
     defaultval="3*1",
     mnemonics="Number of Grids points for Q PoinTs",
@@ -356,7 +354,7 @@ Variable(
     abivarname="nqshft@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['LatticeModel_useful'],
+    topics=["LatticeModel_useful"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="Number of Q SHiFTs",
@@ -374,7 +372,7 @@ Variable(
     abivarname="prt_GF_csv@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['LatticeModel_expert'],
+    topics=["LatticeModel_expert"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Print the Goal-Function values in a CSV file",
@@ -383,7 +381,7 @@ Variable(
 * 0 --> do nothing (Default)
 * 1 --> Print the Goal-Function Values (GF) for all coefficients on a given processor
         at a given fit iteration into a csv file. Each iteration each processor
-        prints a csv file. The colums are the GF on Energy, Force+Stresses, Forces, Stresses.
+        prints a csv file. The columns are the GF on Energy, Force+Stresses, Forces, Stresses.
 """,
 ),
 
@@ -391,7 +389,7 @@ Variable(
     abivarname="prt_model@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['LatticeModel_basic'],
+    topics=["LatticeModel_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT the MODEL",
@@ -421,13 +419,13 @@ Variable(
     abivarname="test_prt_ph@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['LatticeModel_expert'],
+    topics=["LatticeModel_expert"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Prt test-set evaluation into file ph_test.nc",
     added_in_version="before_v9",
     text=r"""
-Flag to activate the printing of the evaluation of the effective potential on to a test set into  a seperate netcdf file called ph_test.nc.
+Flag to activate the printing of the evaluation of the effective potential on to a test set into a separate netcdf file called ph_test.nc.
 
 Forces, Energies, Stresses and Atomic Positions are written in ph_test.nc.
 """,
@@ -437,7 +435,7 @@ Variable(
     abivarname="fit_coeff@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="FIT anharmonic COEFFficients",
@@ -455,7 +453,7 @@ Variable(
     abivarname="fit_EFS@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions=[3],
     defaultval=[0,1,1],
     mnemonics="FIT on Energy, Forces, and or, Stresses",
@@ -472,13 +470,13 @@ Variable(
     abivarname="fit_factors@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions=[3],
     defaultval=[1,1,1],
     mnemonics="FIT FACTORS for Goal Function of Energy, Forces, and Stresses",
     added_in_version="v9",
     text=r"""
-Specifies three factors for Energy, Forces and Stresses in the calcluation of the Goal Function which is to be minimized during the
+Specifies three factors for Energy, Forces and Stresses in the calcukation of the Goal Function which is to be minimized during the
 fit process allowing to change the relative weight of the three quantities.
 
 Default value is 1 1 1, equally balancing energy, forces and stresses.
@@ -489,7 +487,7 @@ Variable(
     abivarname="fit_ncoeff@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="FIT Number of COEFFicients",
@@ -503,7 +501,7 @@ Variable(
     abivarname="fit_ncoeff_per_iatom@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="FIT Number of COEFFicients per Irreducible ATOM",
@@ -518,7 +516,7 @@ Variable(
     abivarname="fit_generateCoeff@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="FIT GENERATE anharmonic COEFFicient ",
@@ -534,7 +532,7 @@ Variable(
     abivarname="fit_iatom@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="FIT anharmonic terms around ATOM I",
@@ -549,7 +547,7 @@ Variable(
     abivarname="fit_initializeData@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="FIT INITIALIZE DATA for the fit",
@@ -563,7 +561,7 @@ Variable(
     abivarname="fit_rangePower@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions=[2],
     defaultval="3 4",
     mnemonics="FIT RANGE POWER for the coefficients",
@@ -579,8 +577,8 @@ Variable(
     abivarname="fit_max_nbody@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_basic'],
-    dimensions=['max([[multibinit:fit_rangePower]])-min([[multibinit:fit_rangePower]])+1'],
+    topics=["FitProcess_basic"],
+    dimensions=["max([[multibinit:fit_rangePower]])-min([[multibinit:fit_rangePower]])+1"],
     defaultval=0,
     mnemonics="FIT MAXimum Number of BODY for the coefficients",
     added_in_version="before_v9",
@@ -594,7 +592,7 @@ Variable(
     abivarname="fit_cutoff@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions="scalar",
     defaultval="Unit cell",
     mnemonics="FIT CUT-OFF of the anharmonic phonon interaction",
@@ -608,7 +606,7 @@ Variable(
     abivarname="fit_anhaStrain@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="FIT ANHARmonic STRAIN coefficients",
@@ -622,7 +620,7 @@ Variable(
     abivarname="fit_SPCoupling@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="FIT anharmonic Strain-Phonon COUPLING coefficients",
@@ -636,7 +634,7 @@ Variable(
     abivarname="fit_dispterms@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="FIT anharmonic Strain-Phonon COUPLING coefficients",
@@ -652,7 +650,7 @@ Variable(
     abivarname="fit_SPC_maxS@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="FIT Strain Phonon Coupling maximum Strain",
@@ -666,7 +664,7 @@ Variable(
     abivarname="fit_tolMSDE@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="FIT TOLerance on Mean Standard Deviation of the Energy",
@@ -680,7 +678,7 @@ Variable(
     abivarname="fit_tolMSDS@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="FIT TOLerance on Mean Standard Deviation of the Stresses",
@@ -694,7 +692,7 @@ Variable(
     abivarname="fit_tolMSDF@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="FIT TOLerance on Mean Standard Deviation of the Forces",
@@ -708,7 +706,7 @@ Variable(
     abivarname="fit_tolMSDFS@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="FIT TOLerance on Mean Standard Deviation of the Forces and Stresses",
@@ -722,7 +720,7 @@ Variable(
     abivarname="fit_nfixcoeff@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_expert'],
+    topics=["FitProcess_expert"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="FIT Number of FIXed COEFFicients",
@@ -742,8 +740,8 @@ Variable(
     abivarname="fit_fixcoeff@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_expert'],
-    dimensions=['[[multibinit:fit_nfixcoeff]]'],
+    topics=["FitProcess_expert"],
+    dimensions=["[[multibinit:fit_nfixcoeff]]"],
     defaultval=0,
     mnemonics="FIT FIXed COEFFicients",
     added_in_version="before_v9",
@@ -757,7 +755,7 @@ Variable(
     abivarname="fit_nimposecoeff@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_expert'],
+    topics=["FitProcess_expert"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="FIT Number of IMPOSEd COEFFicients",
@@ -777,8 +775,8 @@ Variable(
     abivarname="fit_imposecoeff@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_expert'],
-    dimensions=['[[multibinit:fit_nimposecoeff]]'],
+    topics=["FitProcess_expert"],
+    dimensions=["[[multibinit:fit_nimposecoeff]]"],
     defaultval=0,
     mnemonics="FIT Number of IMPOSEd COEFFicients",
     added_in_version="before_v9",
@@ -791,7 +789,7 @@ Variable(
     abivarname="fit_nbancoeff@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_expert'],
+    topics=["FitProcess_expert"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="FIT Number of BANed COEFFicients",
@@ -809,8 +807,8 @@ Variable(
     abivarname="fit_bancoeff@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_expert'],
-    dimensions=['[[multibinit:fit_nbancoeff]]'],
+    topics=["FitProcess_expert"],
+    dimensions=["[[multibinit:fit_nbancoeff]]"],
     defaultval=0,
     mnemonics="FIT BANed COEFFicients",
     added_in_version="before_v9",
@@ -822,23 +820,23 @@ Indices of the banned coefficients during the fit process of the model
 Variable(
     abivarname="fit_weight_T@multibinit",
     varset="multibinit",
-    vartype="float",
-    topics=['FitProcess_expert'],
-    dimensions='scalar',
+    vartype="real",
+    topics=["FitProcess_expert"],
+    dimensions="scalar",
     defaultval=-0.1,
     mnemonics="FIT WEIGHT characteristic Temperature",
     added_in_version="before_v9",
     text=r"""
-A temperature-like parameter to tune the weights of the structures in the training set. 
-If the value is negative or 0, this weight scheme is not used and all structures in the training set are seen as equally important. 
+A temperature-like parameter to tune the weights of the structures in the training set.
+If the value is negative or 0, this weight scheme is not used and all structures in the training set are seen as equally important.
 
 If it is positive:
-For each structure in the traning set, the average of the norm of the forces on the atoms are evaluated, and 
+For each structure in the training set, the average of the norm of the forces on the atoms are evaluated, and
 the weight is evaluated as exp(-average(norm(force))/(kb T)). And then it is normalized so that the average of the weights is 1.
-With this weight scheme, the structure with large forces are seen as less important than the structre with small forces. 
+With this weight scheme, the structure with large forces are seen as less important than the structure with small forces.
 For small fit_weight_T, the weight are more biased to the structures with low forces.
-This can be useful when the structure near local minima and saddle points (in which the forces are close to 0) need to the emphasized. 
-Note that if the fig_weight_T is too small, the algoritm becomes inefficient as a large part of the training set has very low weight and are wasted. 
+This can be useful when the structure near local minima and saddle points (in which the forces are close to 0) need to the emphasized.
+Note that if the fig_weight_T is too small, the algorithm becomes inefficient as a large part of the training set has very low weight and are wasted.
 """,
 ),
 
@@ -849,7 +847,7 @@ Variable(
     abivarname="ts_option@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_useful'],
+    topics=["FitProcess_useful"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="fit Training Set OPTION",
@@ -857,7 +855,7 @@ Variable(
     text=r"""
 * 0 --> the Training is hist from ABINIT
 
-* 1 --> the Training contains -1 * stress  (usualy output from VASP)
+* 1 --> the Training contains -1 * stress  (usually output from VASP)
 """,
 ),
 
@@ -865,7 +863,7 @@ Variable(
     abivarname="bound_factors@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions=[3],
     defaultval=[1,1,1],
     mnemonics="FACTORS for Goal Function of Energy, Forces, and Stresses during bounding process",
@@ -882,7 +880,7 @@ Variable(
     abivarname="bound_model@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['BoundingProcess_basic'],
+    topics=["BoundingProcess_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="BOUND MODEL",
@@ -892,7 +890,8 @@ Flag to activate the bound process:
 
 * 0 --> Do not activate the bound process
 
-* 1 --> This option will generate all the possible combinations of coefficients from 1 to [[multibinit:bound_maxCoeff]]. Some constrains are imposed during the generation and the fit of the coefficients, they have to be positive and with even power. Finaly, the code will try all the possible combinations and try to find a bounded model.
+* 1 --> This option will generate all the possible combinations of coefficients from 1 to [[multibinit:bound_maxCoeff]]. Some constrains are imposed during the generation and the fit of the coefficients, they have to be positive and with even power.
+Finally, the code will try all the possible combinations and try to find a bounded model.
 
 * 2 -->  **new version** This option will generate a set of coefficients with a power range defined by [[multibinit:bound_rangePower]] and keep only the coefficients with even power. Then the procedure is similar to the fit process with the constrains to only keep positive coefficients. The bound process will select the coefficients one by one up to [[multibinit:bound_maxCoeff]] and try if the model is bound at each step of the process.
 
@@ -906,7 +905,7 @@ Variable(
     abivarname="bound_maxCoeff@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['BoundingProcess_basic'],
+    topics=["BoundingProcess_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="BOUND MAX COEFFicient",
@@ -920,7 +919,7 @@ Variable(
         abivarname="bound_option@multibinit",
         varset="multibinit",
         vartype="integer",
-        topics=['BoundingProcess_basic'],
+        topics=["BoundingProcess_basic"],
         dimensions="scalar",
         defaultval=1,
         mnemonics="BOUND OPTION",
@@ -929,8 +928,8 @@ Variable(
 Type of bounding terms.
 Bounding terms are needed if the polynomial with all even terms are negative, or the polynomial contains odd terms. There are two strategies to generate bounding terms:
 
-* 1 -->  The bounding term should include all the types of displacement in the term to be bounded. 
-* 2 -->  The bounding term can inlude the terms with only part of the displacement types.
+* 1 -->  The bounding term should include all the types of displacement in the term to be bounded.
+* 2 -->  The bounding term can include the terms with only part of the displacement types.
 
 For example, for a polynomial term x^2y^1, the bounding terms of order 4 will include $x^4$ with option 2, but not with option 1.
 """,
@@ -941,7 +940,7 @@ Variable(
     abivarname="bound_penalty@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions="scalar",
     defaultval=1.001,
     mnemonics="Goal Function penalty for determination of bounding coefficients",
@@ -955,7 +954,7 @@ Variable(
     abivarname="bound_rangePower@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['BoundingProcess_basic'],
+    topics=["BoundingProcess_basic"],
     dimensions=[2],
     defaultval="6,6",
     mnemonics="BOUND RANGE POWER",
@@ -969,7 +968,7 @@ Variable(
     abivarname="bound_cutoff@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['BoundingProcess_basic'],
+    topics=["BoundingProcess_basic"],
     dimensions="scalar",
     defaultval="1 unit cell",
     mnemonics="BOUND CUT OFF",
@@ -984,7 +983,7 @@ Variable(
     abivarname="bound_anhaStrain@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['BoundingProcess_basic'],
+    topics=["BoundingProcess_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="BOUND ANHArmonic STRAIN coefficients",
@@ -998,7 +997,7 @@ Variable(
     abivarname="bound_SPCoupling@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['BoundingProcess_basic'],
+    topics=["BoundingProcess_basic"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="BOUND Strain Phonon COUPLING coefficients",
@@ -1012,7 +1011,7 @@ Variable(
     abivarname="bound_cell@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['BoundingProcess_expert'],
+    topics=["BoundingProcess_expert"],
     dimensions=[3],
     defaultval="6,6,6",
     mnemonics="BOUND superCELL size for the molecular dynamics",
@@ -1026,7 +1025,7 @@ Variable(
     abivarname="bound_temp@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['BoundingProcess_expert'],
+    topics=["BoundingProcess_expert"],
     dimensions="scalar",
     defaultval=500,
     mnemonics="BOUND TEMPerature for the molecular dynamics (in Kelvin)",
@@ -1040,7 +1039,7 @@ Variable(
     abivarname="bound_step@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['BoundingProcess_expert'],
+    topics=["BoundingProcess_expert"],
     dimensions="scalar",
     defaultval=1000,
     mnemonics="BOUND number of STEP for the molecular dynamics",
@@ -1054,7 +1053,7 @@ Variable(
     abivarname="dynamics@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamics option for Multibinit",
@@ -1127,7 +1126,8 @@ Within the HMC algorithm [[cite:Duane1987]], the trial states are generated via 
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:** The time step ([[dtion]]), the temperatures
-([[multibinit:temperature]]). The time step should be small enough to make the energy conserved. The temperature is set to intialize the velocities of the atoms, which is in principle not preserved during the NVE run.
+([[multibinit:temperature]]). The time step should be small enough to make the energy conserved.
+The temperature is set to initialize the velocities of the atoms, which is in principle not preserved during the NVE run.
 
 * 102 --> NVT ensemble with Langevin algorithm. [[cite:Vanden2006]] .
 **Purpose:** Molecular dynamics
@@ -1137,7 +1137,8 @@ Within the HMC algorithm [[cite:Duane1987]], the trial states are generated via 
 The atoms are coupled to the heat bath, which is represented by a gauss noise  in the forces, whose amplitude is defined by the temperature, and a friction term.
 
 
-* 103 --> NVT ensemble. The temperature is approached by scaling the velocity of atoms. The method is proposed by Berendsen et al. in  J. Chem. Phys., 81 3684–3690 (1984) [[cite:Berendsen1984]]. Note that this method does NOT generate properly the thermostated ensemble. It does not have the correct distribution of the kinetic energy but have the correct average.  However, it approches the target temperature exponentially without oscillation, for which the steps can be easily controlled.
+* 103 --> NVT ensemble. The temperature is approached by scaling the velocity of atoms. The method is proposed by Berendsen et al. in  J. Chem. Phys., 81 3684–3690 (1984) [[cite:Berendsen1984]]. Note that this method does NOT generate properly the thermostated ensemble. It does not have the correct distribution of the kinetic energy but have the correct average.
+However, it approaches the target temperature exponentially without oscillation, for which the steps can be easily controlled.
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:** The time step ([[dtion]]), the temperatures
@@ -1162,13 +1163,13 @@ Variable(
     abivarname="dyn_chksym@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="DYNamics CHeK SYMmetry",
+    mnemonics="DYNamics CHecK SYMmetry",
     added_in_version="v9",
     text=r"""
-Flag to activate symmetry finder and imposition of symmetry of the restart structure before dynamics run, when restartxf is negativ.
+Flag to activate symmetry finder and imposition of symmetry of the restart structure before dynamics run, when restartxf is negative.
 Useful to do symmetry constrained relaxation with structural realxations algorithms.
 Be cautious to use it with large number of atoms, symmetry detection might take a long time.
 
@@ -1180,7 +1181,7 @@ Variable(
     abivarname="dyn_tolsym@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=1e-10,
     mnemonics="DYNamics TOLerance on SYMmetries",
@@ -1195,7 +1196,7 @@ Variable(
     abivarname="dtion@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=100,
     mnemonics="Delta Time for IONs",
@@ -1209,7 +1210,7 @@ Variable(
     abivarname="efield_type@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Electric FIELD TYPE for Multibinit",
@@ -1236,15 +1237,15 @@ Variable(
     abivarname="efield@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions=[3, "[[multibinit:nefield]]"],
     defaultval=[0.0, 0.0, 0.0],
     mnemonics="Electric FIELD magnitude for Multibinit",
     added_in_version="before v9",
     text=r"""
 Set the magnitude for the electric field.
-For efield_type 6, multiple ([[multibinit:nefield]])  efield values  are allowed, the format is 
-Ex1, Ey1, Ez1, 
+For efield_type 6, multiple ([[multibinit:nefield]])  efield values  are allowed, the format is
+Ex1, Ey1, Ez1,
 Ex2, Ey2, Ez2
 """
 ),
@@ -1254,9 +1255,9 @@ Variable(
     abivarname="efield_background@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions=[3],
-    defaultval=[0.0, 0.0, 0.0], 
+    defaultval=[0.0, 0.0, 0.0],
     mnemonics="Electric FIELD magnitude for BACKGROUND field in Multibinit when efield_type is > 1",
     added_in_version="v10",
     text=r"""
@@ -1267,15 +1268,15 @@ Variable(
     abivarname="efield_lambda@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions=[3, "[[multibinit:nefield]]"],
-    defaultval=[0.0, 0.0, 0.0],  
+    defaultval=[0.0, 0.0, 0.0],
     mnemonics="Electric FIELD periodicity LAMBDA.",
     added_in_version="v10",
     text=r"""
 Set the periodicity in real space for spatially inhomogeneous vector fields. 0.0 is interpreted as infinite.
-For efield_type 6, multiple ([[multibinit:nefield]])  efield_lambda values  are allowed, the format is 
-λx1, λy1, λz1, 
+For efield_type 6, multiple ([[multibinit:nefield]])  efield_lambda values  are allowed, the format is
+λx1, λy1, λz1,
 λx2, λy2, λz2
 """
 ),
@@ -1284,7 +1285,7 @@ Variable(
     abivarname="efield_period@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=1000000000000000.0,
     mnemonics="Electric FIELD PERIOD.",
@@ -1297,13 +1298,13 @@ Variable(
     abivarname="efield_phase@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions=["[[multibinit:nefield]]"],
     defaultval=0.0,
     mnemonics="Electric FIELD PHASE shift.",
     added_in_version="v10",
     text=r"""
-Set the phase shift for spatially or time modulated fields. 
+Set the phase shift for spatially or time modulated fields.
 For efield_type 6, multiple ([[multibinit:nefield]])  efield_phase values  are allowed.
 """
 ),
@@ -1313,9 +1314,9 @@ Variable(
     abivarname="efield_gmean@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions=[3],
-    defaultval= [0.0, 0.0, 0.0],    
+    defaultval= [0.0, 0.0, 0.0],
     mnemonics="Electric FIELD Gaussian MEAN.",
     added_in_version="v10",
     text=r"""
@@ -1326,9 +1327,9 @@ Variable(
     abivarname="efield_gvel@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['DynamicsMultibinit_basic'],
-    dimensions=[3], 
-    defaultval= [0.0, 0.0, 0.0],    
+    topics=["DynamicsMultibinit_basic"],
+    dimensions=[3],
+    defaultval= [0.0, 0.0, 0.0],
     mnemonics="Electric FIELD Gaussian VELocity.",
     added_in_version="v10",
     text=r"""
@@ -1339,7 +1340,7 @@ Variable(
     abivarname="efield_sigma@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=0.01,
     mnemonics="Electric FIELD gaussian SIGMA.",
@@ -1353,7 +1354,7 @@ Variable(
     abivarname="latt_friction@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=1e-4,
     mnemonics="LATTice dynamics FRICTION parameter",
@@ -1367,7 +1368,7 @@ Variable(
     abivarname="latt_anharm_pot_fname@multibinit",
     varset="multibinit",
     vartype="string",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval="",
     mnemonics="LATTice HARMornic POTential File NAME",
@@ -1385,7 +1386,7 @@ Variable(
     abivarname="latt_harm_pot_fname@multibinit",
     varset="multibinit",
     vartype="string",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval="",
     mnemonics="LATTice HARMonic POTential File NAME",
@@ -1402,7 +1403,7 @@ Variable(
     abivarname="latt_training_set_fname@multibinit",
     varset="multibinit",
     vartype="string",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval="",
     mnemonics="LATTice potential TRAINING SET File NAME",
@@ -1419,7 +1420,7 @@ Variable(
     abivarname="latt_test_set_fname@multibinit",
     varset="multibinit",
     vartype="string",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval="",
     mnemonics="LATTice potential TEST SET File NAME",
@@ -1437,7 +1438,7 @@ Variable(
     abivarname="latt_pot_fname@multibinit",
     varset="multibinit",
     vartype="string",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval="",
     mnemonics="LATTice POTential FileNAME",
@@ -1454,7 +1455,7 @@ Variable(
     abivarname="latt_taut@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=1000,
     mnemonics="LATTice dynamics relaxation time TAUT",
@@ -1472,7 +1473,7 @@ Variable(
     abivarname="latt_taup@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=1000,
     mnemonics="LATTice dynamics relaxation time TAUP",
@@ -1492,14 +1493,14 @@ Variable(
     abivarname="nefield@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="Number of Electric FEIELDs",
     added_in_version="v10",
     text=r"""
 Number of Electric fields to be used in the dynamics when efield_type 6.
-Currently only 2 efields are allowed. 
+Currently only 2 efields are allowed.
 """,
 ),
 
@@ -1510,7 +1511,7 @@ Variable(
     abivarname="ntime@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=200,
     mnemonics="Number of TIME step",
@@ -1524,7 +1525,7 @@ Variable(
     abivarname="nnos@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Number of NOSe masses",
@@ -1538,8 +1539,8 @@ Variable(
     abivarname="qmass@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['DynamicsMultibinit_basic'],
-    dimensions=['[[abinit:nnos]]'],
+    topics=["DynamicsMultibinit_basic"],
+    dimensions=["[[abinit:nnos]]"],
     defaultval=0,
     mnemonics="Q thermostat MASS",
     added_in_version="before_v9",
@@ -1552,13 +1553,13 @@ Variable(
     abivarname="nctime@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=1,
-    mnemonics="NetCdf TIME between output of molecular dynamics informations ",
+    mnemonics="NetCdf TIME between output of molecular dynamics information",
     added_in_version="before_v9",
     text=r"""
-Set the number of step between output the molecular dynamics informations in the NetCDF file
+Set the number of step between output the molecular dynamics information in the NetCDF file
 """,
 ),
 
@@ -1566,7 +1567,7 @@ Variable(
     abivarname="temperature@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=325,
     mnemonics="molecular dynamics TEMPERATURE (in Kelvin)",
@@ -1580,7 +1581,7 @@ Variable(
     abivarname="ncell@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions=[3],
     defaultval=[6,6,6],
     mnemonics="Number of Cell",
@@ -1594,7 +1595,7 @@ Variable(
     abivarname="ncellmat@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions=[3, 3],
     defaultval=[[1,0,0],[0,1,0], [0,0,1]],
     mnemonics="Number of superCELL MATtrix",
@@ -1610,7 +1611,7 @@ Variable(
     abivarname="outdata_prefix",
     varset="multibinit",
     vartype="string",
-    topics=['Control_useful'],
+    topics=["Control_useful"],
     dimensions="scalar",
     defaultval=None,
     mnemonics="OUTput DATA PREFIX",
@@ -1632,7 +1633,7 @@ Variable(
     abivarname="strfact@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=100.0,
     mnemonics="STRess FACTor",
@@ -1646,7 +1647,7 @@ Variable(
     abivarname="strtarget@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions=[6],
     defaultval=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
     mnemonics="STRess TARGET",
@@ -1660,7 +1661,7 @@ Variable(
     abivarname="bmass@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=10,
     mnemonics="Barostat MASS",
@@ -1674,7 +1675,7 @@ Variable(
     abivarname="optcell@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="OPTimize the CELL shape and dimensions",
@@ -1688,7 +1689,7 @@ Variable(
     abivarname="restartxf@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="RESTART from (X,F) history",
@@ -1702,7 +1703,7 @@ Variable(
     abivarname="sel_EFS@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions=[3],
     defaultval=[0,1,1],
     added_in_version="v9",
@@ -1757,7 +1758,7 @@ Variable(
     abivarname="spin_calc_thermo_obs@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="SPIN CALCulate THERMO dynamics OBServables",
@@ -1778,7 +1779,7 @@ Variable(
     abivarname="spin_damping@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=-1.0,
     mnemonics="SPIN gilbert DAMPING factor",
@@ -1813,7 +1814,7 @@ Variable(
     abivarname="spin_dt@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=100,
     mnemonics="SPIN Delta Time",
@@ -1830,7 +1831,7 @@ Variable(
     abivarname="spin_dynamics@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="SPIN DYNAMICS",
@@ -1859,7 +1860,7 @@ Variable(
     abivarname="spin_init_hist_fname@multibinit",
     varset="multibinit",
     vartype="string",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval="",
     mnemonics="SPIN INITIAL state HISTory file name",
@@ -1878,7 +1879,7 @@ Variable(
     abivarname="spin_init_state@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="SPIN INITial STATE",
@@ -1901,7 +1902,7 @@ Variable(
     abivarname="spin_mag_field@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions=[3],
     defaultval=[0,0,0],
     mnemonics="SPIN Magnetic Field",
@@ -1916,7 +1917,7 @@ Variable(
     abivarname="spin_nctime@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="SPIN NetCdf write per number of TIME steps",
@@ -1930,7 +1931,7 @@ Variable(
     abivarname="spin_ntime@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="SPIN dynamics total Number of TIME steps",
@@ -1945,7 +1946,7 @@ Variable(
     abivarname="spin_ntime_pre@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="SPIN dynamics total Number of TIME steps for PREparing",
@@ -1962,7 +1963,7 @@ Variable(
     abivarname="spin_init_orientation@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions=[3],
     defaultval=[0,0,1],
     mnemonics="SPIN INITial ORIENTATION",
@@ -1982,7 +1983,7 @@ Variable(
     abivarname="spin_init_qpoint@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions=[3],
     defaultval=[0,0,0],
     mnemonics="SPIN INITial QPOINT",
@@ -2001,7 +2002,7 @@ Variable(
     abivarname="spin_init_rotate_axis@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions=[3],
     defaultval=[1,0,0],
     mnemonics="SPIN INITial ROTATE AXIS",
@@ -2018,7 +2019,7 @@ Variable(
     abivarname="spin_pot_fname@multibinit",
     varset="multibinit",
     vartype="string",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval="",
     mnemonics="SPIN POTential File NAME",
@@ -2035,7 +2036,7 @@ Variable(
     abivarname="spin_projection_qpoint@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions=[3],
     defaultval=[0,0,0],
     mnemonics="SPIN PROJECTION QPOINT",
@@ -2051,10 +2052,10 @@ Variable(
     abivarname="spin_sia_add@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="SPIN Single Ion Anistropy ADD",
+    mnemonics="SPIN Single Ion Anisotropy ADD",
     added_in_version="before_v9",
     text=r"""
 Add single ion anisotropy term to the spin model hamiltonian.
@@ -2075,13 +2076,13 @@ Variable(
     abivarname="spin_sia_k1amp@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=0.0,
-    mnemonics="SPIN Single Ion Anistropy K1 AMPtitude",
+    mnemonics="SPIN Single Ion Anisotropy K1 AMPtitude",
     added_in_version="before_v9",
     text=r"""
-User defined amplitude of single ion anistropy. Only used when [[multibinit:spin_sia_add]] is not 0.
+User defined amplitude of single ion anisotropy. Only used when [[multibinit:spin_sia_add]] is not 0.
 The direction is defined with [[multibinit:spin_sia_k1dir]]. The unit is Ha. To use eV or Ry as unit,
 put eV or Ry at the end.
 """,
@@ -2092,13 +2093,13 @@ Variable(
     abivarname="spin_sia_k1dir@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions=[3],
     defaultval=[0.0,0.0,1.0],
-    mnemonics="SPIN Single Ion Anistropy K1 DIRection",
+    mnemonics="SPIN Single Ion Anisotropy K1 DIRection",
     added_in_version="before_v9",
     text=r"""
-User defined direction of single ion anistropy. Only used when [[multibinit:spin_sia_add]] is not 0.
+User defined direction of single ion anisotropy. Only used when [[multibinit:spin_sia_add]] is not 0.
 It will be automatically normalized to 1.0.  The amplitude is defined with [[multibinit:spin_sia_k1amp]].
 Default value: [0.0, 0.0,1.0].
 """,
@@ -2109,7 +2110,7 @@ Variable(
     abivarname="spin_temperature@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=325,
     mnemonics="SPIN TEMPERATURE",
@@ -2125,7 +2126,7 @@ Variable(
     abivarname="spin_var_temperature@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="SPIN  VARiable TEMPERATURE",
@@ -2144,13 +2145,13 @@ Variable(
     abivarname="spin_write_traj@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="SPIN WRITE TRAJectory to spinhist.nc file",
     added_in_version="before_v9",
     text="""
-Switch for writting of spin trajectory file. 0: off. 1 on.
+Switch for writing of spin trajectory file. 0: off. 1 on.
 The trajectory is needed for postprocessing of correlation functions.
 """,
 ),
@@ -2160,7 +2161,7 @@ Variable(
     abivarname="spin_temperature_start@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="SPIN TEMPERATURE START",
@@ -2174,7 +2175,7 @@ Variable(
     abivarname="spin_temperature_end@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="SPIN TEMPERATURE END",
@@ -2188,7 +2189,7 @@ Variable(
     abivarname="spin_temperature_nstep@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="SPIN TEMPERATURE Number of STEPs",
@@ -2202,7 +2203,7 @@ Variable(
     abivarname="test_effpot@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['LatticeModel_basic'],
+    topics=["LatticeModel_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="TEST EFFective POTential",
@@ -2217,7 +2218,7 @@ Variable(
     abivarname="tolmxf@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['DynamicsMultibinit_basic'],
+    topics=["DynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=2e-5,
     mnemonics="TOLerance on the MaXimal Force",
@@ -2232,7 +2233,7 @@ Variable(
 abivarname="analyze_anh_pot@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['LatticeModel_expert'],
+    topics=["LatticeModel_expert"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="ANALYZE ANHarmonic POTential",
@@ -2251,7 +2252,7 @@ Variable(
     abivarname="opt_effpot@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_expert'],
+    topics=["FitProcess_expert"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="OPTimize EFFective POTential",
@@ -2269,13 +2270,13 @@ Variable(
     abivarname="opt_factors@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['FitProcess_basic'],
+    topics=["FitProcess_basic"],
     dimensions=[3],
     defaultval=[1,1,1],
     mnemonics="FACTORS for Goal Function of Energy, Forces, and Stresses during optimization of coefficients",
     added_in_version="v9",
     text=r"""
-Specifies three factors for Energy, Forces and Stresses in the calcluation of the Goal Function which is to be minimized during the
+Specifies three factors for Energy, Forces and Stresses in the calculation of the Goal Function which is to be minimized during the
 optimization process allowing to change the relative weight of the three quantities.
 
 Default value is 1 1 1, equally balancing energy, forces and stresses.
@@ -2286,7 +2287,7 @@ Variable(
   abivarname="opt_ncoeff@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_expert'],
+    topics=["FitProcess_expert"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="OPTimize NUMBER of COEFFicients",
@@ -2301,10 +2302,10 @@ Variable(
     abivarname="opt_coeff@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['FitProcess_expert'],
-    dimensions=['[[multibinit:opt_ncoeff]]'],
+    topics=["FitProcess_expert"],
+    dimensions=["[[multibinit:opt_ncoeff]]"],
     defaultval=0,
-    mnemonics="OPTimize Cofficients",
+    mnemonics="OPTimize Coefficients",
     added_in_version="before_v9",
     text=r"""
 Indices of the terms to refit in the effective potential.
@@ -2315,8 +2316,8 @@ Variable(
     abivarname="randomseed@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['SpinDynamicsMultibinit_expert'],
-    dimensions='scalar',
+    topics=["SpinDynamicsMultibinit_expert"],
+    dimensions="scalar",
     defaultval=0,
     mnemonics="RANDOM SEED",
     added_in_version="9.8",
@@ -2326,7 +2327,8 @@ It should be 0, or a large positive integer.
 The default value 0 means it will use the current clock time.
 DO NOT set this number unless you want to repeat the previous result. If a series
 of dynamics is done with the same seed, the results could be wrong due to the
-artificial periodicity of the random number that is generated. Even [[randomseed@multibinit]] is set, it is not guranteed
+artificial periodicity of the random number that is generated.
+Even [[randomseed@multibinit]] if set, it is not guaranteed
 that the previous result can be recovered, as the generation of numbers is also affected by the number of
 processors, type of type of CPU, compiler,  and version of MULTIBINIT.
 """,
@@ -2338,7 +2340,7 @@ Variable(
     abivarname="slc_coupling@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="SpinLatticeCoupling_Coupling",
@@ -2362,7 +2364,7 @@ Variable(
     abivarname="slc_pot_fname@multibinit",
     varset="multibinit",
     vartype="string",
-    topics=['SpinDynamicsMultibinit_basic'],
+    topics=["SpinDynamicsMultibinit_basic"],
     dimensions="scalar",
     defaultval="",
     mnemonics="SLC POTential FileNAME",
@@ -2379,7 +2381,7 @@ Variable(
     abivarname="outdata_prefix@multibinit",
     varset="multibinit",
     vartype="string",
-    topics=['Control_useful'],
+    topics=["Control_useful"],
     dimensions="scalar",
     defaultval=None,
     mnemonics="OUTput DATA PREFIX",

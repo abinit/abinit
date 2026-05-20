@@ -8,7 +8,7 @@
 !!  SCDM (select columns of density matrix method) and
 !!  projected wannier function (PWF)
 !! COPYRIGHT
-!!  Copyright (C) 2005-2025 ABINIT group (hexu)
+!!  Copyright (C) 2005-2026 ABINIT group (hexu)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,7 +56,7 @@ module m_wannier_builder
   !===============================================================
   type::  WannierBuilder_t
 
-     ! Inputs 
+     ! Inputs
      real(dp), allocatable:: kpts(:, :) !(idim, ikpt)
      real(dp), allocatable:: kweights(:) !(ikpt)
      !real(dp), allocatable:: weight(:, :) !(iband, ikpt)
@@ -120,7 +120,7 @@ module m_wannier_builder
   end type WannierBuilder_t
 
 
-  ! Extends WannierBuilder_t with pointer to eigens. 
+  ! Extends WannierBuilder_t with pointer to eigens.
   type, extends(WannierBuilder_t):: WannierBuilder_witheigen_t
      real(dp),  pointer:: evals(:, :) => null()   !(iband, ikpt)
      complex(dp),  pointer:: psi(:, :, :) => null() ! (ibasis, iband, ikpt)
@@ -140,7 +140,7 @@ contains
   !> nwann: number of Wannier functions to be calcualted.
   !> nbasis: number of basis in the original wavefunction.
   !> disentangle_func_type: the type of the disentanglement function. 1: unity function. 2. Fermi. 3. Gauss
-  !> project_to_anchor: whether to multiply the weight function by the projection to the anchor states. 
+  !> project_to_anchor: whether to multiply the weight function by the projection to the anchor states.
   !===============================================================
   subroutine initialize(self,kpts, kweights, Rlist, nwann, nbasis, nband, &
        &  disentangle_func_type, mu, sigma, exclude_bands, project_to_anchor, method)
@@ -262,7 +262,7 @@ contains
 
 
   ! automatically set the anchor points using the weight functions.
-  ! The bands with the largest weights are selected as the anchor points. 
+  ! The bands with the largest weights are selected as the anchor points.
   subroutine auto_find_anchors(self, ianchors)
     class(WannierBuilder_t), intent(inout):: self
     integer, intent(out):: ianchors(self%nwann)
@@ -550,7 +550,7 @@ contains
     !real(dp):: weights(self%nband)
     integer:: iband
     complex(dp),  pointer:: p(:, :)
- 
+
     call self%get_weight(ikpt, self%disentangle_func_type, self%mu, self%sigma, weight, &
          &project_to_anchor = self%project_to_anchor)
 
@@ -564,7 +564,7 @@ contains
     Amnk(:, :) = matmul(U, VT)
   end subroutine get_scdm_Amnk
 
-  
+
   subroutine get_projected_Amnk(self, ikpt, Amnk)
     class(WannierBuilder_t), intent(inout):: self
     integer, intent(in):: ikpt

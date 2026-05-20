@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2025 ABINIT group (LB)
+!!  Copyright (C) 2018-2026 ABINIT group (LB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +39,7 @@ contains
 !! Loop over the perturbations j1, j2 and j3
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2025 ABINIT group (LB)
+!! Copyright (C) 2018-2026 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -157,6 +157,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_ioarr,       only : read_rhor
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawdij,      only : pawdij, pawdijfr, symdij
+ use m_paw_energies,only : paw_energies_type
  use m_pawfgr,      only : pawfgr_type
  use m_pawfgrtab,   only : pawfgrtab_type
  use m_paw_an,      only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify, paw_an_reset_flags
@@ -232,10 +233,11 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  integer :: option,optene,optfr,optorth,pert1case,pert2case,pert3case
  integer :: qphase_rhoij,rdwrpaw,second_idir,timrev,usexcnhat
  logical :: non_magnetic_xc
- real(dp) :: dummy_real,dummy_real2,dummy_real3,dummy_real4,ecut_eff,el_temp
+ real(dp) :: dummy_real,ecut_eff,el_temp
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk,fnamewff(5)
  type(gs_hamiltonian_type) :: gs_hamkq
+ type(paw_energies_type) :: paw_energies_dum
  type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3
  type(wfk_t) :: ddk_f(5)
  type(wvl_data) :: wvl
@@ -603,18 +605,19 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 &                       n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d2,xred)
                      end if ! psps%n1xccc/=0
 
-                     call dfpt_vlocal(atindx,cplex,gmet,gsqcut,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
-&                     nattyp,nfftf,ngfftf,psps%ntypat,n1,n2,n3,ph1df,psps%qgrid_vl,&
-&                     dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
+                     call dfpt_vlocal(atindx,cplex,gmet,gsqcut,dtset%icutcoul,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
+&                     nattyp,nfftf,ngfftf,nkpt,psps%ntypat,n1,n2,n3,ph1df,psps%qgrid_vl,&
+&                     dtset%qptn,dtset%rcut,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1,xred)
 
                    end if ! usepaw
 
                    option=1;optene=0
-                   call dfpt_rhotov(cplex,dummy_real,dummy_real,dummy_real,dummy_real,dummy_real,&
-&                   gsqcut,i2dir,i2pert,dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,&
-&                   nhat1_i2pert,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,non_magnetic_xc,optene,option,&
-&                   dtset%qptn,rhog,rho2g1,rhor,rho2r1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_i2pert,&
-&                   vpsp1,vresid_dum,dummy_real,vtrial1_i2pert,vxc,vxc1_i2pert,xccc3d2,dtset%ixcrot)
+                   call dfpt_rhotov(cplex,dummy_real,dummy_real,dummy_real,dummy_real,dummy_real,dummy_real,&
+&                   gsqcut,dtset%icutcoul,i2dir,i2pert,dtset%ixc,kxc,dtset%magpen,dtset%mpatpol,dtset%mpdir,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,&
+&                   nhat1_i2pert,nhat1gr,nhat1grdim,nkxc,nspden,dtset%ntypat,n3xccc,non_magnetic_xc,optene,option,&
+&                   dtset%qptn,dtset%ratsm,dtset%ratsph,rhog,rho2g1,rhor,rho2r1,rprimd,dtset%typat,ucvol,psps%usepaw,&
+&                   usexcnhat,dtset%vcutgeo,vhartr1_i2pert,&
+&                   vpsp1,vresid_dum,dummy_real,vtrial1_i2pert,vxc,vxc1_i2pert,xccc3d2,dtset%ixcrot,xred,dtset%qgbt,dtset%use_gbt)
 
                    if (psps%usepaw==1.and.usexcnhat==0) then
                      rho2r1(:,:) = rho2r1(:,:) - nhat1_i2pert(:,:)
@@ -631,12 +634,11 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
 !                    Computation of "on-site" first-order potentials, first-order densities
                      option=1
-                     call pawdenpot(dummy_real,el_temp,dummy_real2,dummy_real3,dummy_real4,gprimd,&
-&                     i2pert,dtset%ixc,natom,dtset%natom,nspden,psps%ntypat,dtset%nucdipmom,&
-&                     0,option,paw_an1_i2pert,paw_an0,paw_ij1_i2pert,pawang,&
-&                     dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&                     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,&
-&                     xred,ucvol,psps%znuclpsp, &
+                     call pawdenpot(dummy_real,el_temp,gprimd,i2pert,dtset%ixc,natom,dtset%natom,&
+&                     nspden,psps%ntypat,dtset%nucdipmom,0,option,paw_an1_i2pert,paw_an0,&
+&                     paw_energies_dum,paw_ij1_i2pert,pawang,dtset%pawprtvol,pawrad,&
+&                     pawrhoij1_i2pert,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,&
+&                     dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp,dtset%spinaxis, &
 &                     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
                 !    First-order Dij computation
 !                     call timab(561,1,tsec)
@@ -655,7 +657,8 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 &                     pawfgrtab,dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,&
 &                     dtset%pawxcdev,qphon,dtset%spnorbscl,ucvol,dtset%cellcharge(1),&
 &                     vtrial1_tmp,vxc1_i2pert,xred,dtset%znucl,&
-&                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+&                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,&
+&                     spinaxis=dtset%spinaxis)
                      if (has_dijfr>0) then
                        ABI_FREE(vtrial1_tmp)
                      end if

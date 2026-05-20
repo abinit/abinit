@@ -5,12 +5,12 @@
 !!****m* ABINIT/m_ImpurityOperator
 !! NAME
 !!  m_ImpurityOperator
-!! 
-!! FUNCTION 
+!!
+!! FUNCTION
 !!  manage all related to Impurity
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,7 +37,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,35 +55,34 @@ TYPE, PUBLIC :: ImpurityOperator
   DOUBLE PRECISION _PRIVATE          :: beta
    !  Inverse of temperature.
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)          :: mat_U 
-   !  for iflavor1 and iflavor2, mat_U(iflavor1,iflavor2) is the
-   !  coulomb interaction between iflavor1 and iflavor2.
-
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)   :: mat_U
+  !  for iflavor1 and iflavor2, mat_U(iflavor1,iflavor2) is the
+  !  coulomb interaction between iflavor1 and iflavor2.
 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) _PRIVATE :: overlaps   ! total overlaps
    !  for iflavor1 and iflavor2 overlaps(iflavor1,iflavor2) is the total
    !  overlap between segments of iflavor1 and segments of iflavor2.
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:  ) _PRIVATE :: updates    ! new_(anti)seg 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:  ) _PRIVATE :: updates    ! new_(anti)seg
    !  For a given flavor (activeflavor), gives for each other flavors, the
    !  supplementary overlaps, called updates(otherflavor).
 
   TYPE(ListCdagC)                               _PRIVATE :: list_swap
-  TYPE(ListCdagC) , ALLOCATABLE, DIMENSION(:  )          :: particles 
-   !  for each flavor, particles(iflavor)%list(2,maxnbofsegment) 
+  TYPE(ListCdagC) , ALLOCATABLE, DIMENSION(:  )          :: particles
+   !  for each flavor, particles(iflavor)%list(2,maxnbofsegment)
    !  gives the beginning and end of each segment.
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)          :: Magmommat_orb 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)          :: Magmommat_orb
    !  for iflavor1 and iflavor2, Magmommat(iflavor1,iflavor2) is the
-   !  orbital magnetic moments 
+   !  orbital magnetic moments
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)          :: Magmommat_spin 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)          :: Magmommat_spin
    !  for iflavor1 and iflavor2, Magmommat(iflavor1,iflavor2) is the
-   !  spin magnetic moments 
+   !  spin magnetic moments
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)          :: Magmommat_tot 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)          :: Magmommat_tot
    !  for iflavor1 and iflavor2, Magmommat(iflavor1,iflavor2) is the
-   !  total magnetic moments 
+   !  total magnetic moments
 
   DOUBLE PRECISION _PRIVATE :: checkNumber
   DOUBLE PRECISION _PRIVATE :: tolerance
@@ -95,6 +94,7 @@ PUBLIC  :: ImpurityOperator_init
 PUBLIC  :: ImpurityOperator_reset
 PUBLIC  :: ImpurityOperator_computeU
 PUBLIC  :: ImpurityOperator_setUmat
+PUBLIC  :: ImpurityOperator_setUmatComplex
 PUBLIC  :: ImpurityOperator_setMu
 PUBLIC  :: ImpurityOperator_activateParticle
 PUBLIC  :: ImpurityOperator_getAvailableTime
@@ -112,6 +112,7 @@ PUBLIC  :: ImpurityOperator_overlapSwap
 PUBLIC  :: ImpurityOperator_swap
 PRIVATE :: ImpurityOperator_overlapIJ
 PUBLIC  :: ImpurityOperator_measDE
+PUBLIC  :: ImpurityOperator_measDEComplex
 PUBLIC  :: ImpurityOperator_cleanOverlaps
 PUBLIC  :: ImpurityOperator_measN
 PUBLIC  :: ImpurityOperator_destroy
@@ -135,7 +136,7 @@ CONTAINS
 !!  Initialize and allocate
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -165,7 +166,7 @@ SUBROUTINE ImpurityOperator_init(this, flavors, beta)
   !INTEGER               , INTENT(IN   ) :: N
 !Local variables ------------------------------
   INTEGER                               :: IT
-  
+
   this%flavors      = flavors
   this%activeFlavor = 0
   this%beta         = beta
@@ -199,18 +200,18 @@ SUBROUTINE ImpurityOperator_init(this, flavors, beta)
   !this%mat_U = U
   !IF ( ASSOCIATED(this%mu) ) FREE(this%mu)
   !MALLOC(this%mu,(1:flavors))
- 
-  !this%shift_mu = SUM(this%mat_U(:,1)) * .5d0 
+
+  !this%shift_mu = SUM(this%mat_U(:,1)) * .5d0
   DO IT = 1,flavors
     !CALL ListCdagC_init(this%particles(IT), DBLE(N)/beta,100) !FIXME size of the List
     CALL ListCdagC_init(this%particles(IT),100) !FIXME size of the List
-    this%particles(IT)%list(0,C_   ) = beta ! Empty orbital 
+    this%particles(IT)%list(0,C_   ) = beta ! Empty orbital
     this%particles(IT)%list(0,Cdag_) = 0.d0
-!    this%particles(IT)%list(0)%Cdag = beta ! Full orbital 
+!    this%particles(IT)%list(0)%Cdag = beta ! Full orbital
 !    this%particles(IT)%list(0)%C    = 0.d0
   END DO
   this%activeFlavor = 0
-END SUBROUTINE ImpurityOperator_init 
+END SUBROUTINE ImpurityOperator_init
 !!***
 
 !!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_reset
@@ -221,7 +222,7 @@ END SUBROUTINE ImpurityOperator_init
 !!  reset operator
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -254,10 +255,10 @@ SUBROUTINE ImpurityOperator_reset(this)
   this%doCheck      = .FALSE.
 !#endif
   DO IT = 1,this%flavors
-    CALL ListCdagC_clear(this%particles(IT)) 
-    this%particles(IT)%list(0,C_   )    = this%beta ! Empty orbital 
+    CALL ListCdagC_clear(this%particles(IT))
+    this%particles(IT)%list(0,C_   )    = this%beta ! Empty orbital
     this%particles(IT)%list(0,Cdag_) = 0.d0
-!    this%particles(IT)%list(0)%Cdag = beta ! Full orbital 
+!    this%particles(IT)%list(0)%Cdag = beta ! Full orbital
 !    this%particles(IT)%list(0)%C    = 0.d0
   END DO
 
@@ -272,7 +273,7 @@ END SUBROUTINE ImpurityOperator_reset
 !!  Compute an interaction this for t2g like interaction
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -329,7 +330,7 @@ SUBROUTINE ImpurityOperator_computeU(this, U, J)
       this%mat_U(flavor22, flavor12) = Uprime - J
     END DO
   END DO
-END SUBROUTINE ImpurityOperator_computeU 
+END SUBROUTINE ImpurityOperator_computeU
 !!***
 
 !!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_setUmat
@@ -340,7 +341,7 @@ END SUBROUTINE ImpurityOperator_computeU
 !!  Set directly the U interaction this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -362,6 +363,7 @@ SUBROUTINE ImpurityOperator_setUmat(this, matU)
 !Arguments ------------------------------------
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN   ) :: matU
+
   INTEGER :: iflavor1
   INTEGER :: iflavor2
 
@@ -377,6 +379,52 @@ SUBROUTINE ImpurityOperator_setUmat(this, matU)
 END SUBROUTINE ImpurityOperator_setUmat
 !!***
 
+!!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_setUmatComplex
+!! NAME
+!!  ImpurityOperator_setUmatComplex
+!!
+!! FUNCTION
+!!  Set directly the complex U interaction
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  this=ImpurtityOperator
+!!  matU=interaction this
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+
+SUBROUTINE ImpurityOperator_setUmatComplex(this, matU)
+
+!Arguments ------------------------------------
+  TYPE(ImpurityOperator), INTENT(INOUT) :: this
+  COMPLEX(KIND=8), DIMENSION(:,:), INTENT(IN ) :: matU
+
+  INTEGER :: iflavor1
+  INTEGER :: iflavor2
+
+  IF ( SIZE(matU) .NE. this%flavors*this%flavors ) &
+    CALL ERROR("ImpurityOperator_setUmatComplex : Wrong interaction this")
+
+  DO iflavor1 = 1, this%flavors
+    DO iflavor2 = iflavor1+1, this%flavors
+      this%mat_U(iflavor1,iflavor2) = matU(iflavor1,iflavor2)
+      this%mat_U(iflavor2,iflavor1) = matU(iflavor2,iflavor1)
+    END DO
+  END DO
+END SUBROUTINE ImpurityOperator_setUmatComplex
+!!***
+
 !!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_setMu
 !! NAME
 !!  ImpurityOperator_setMu
@@ -385,7 +433,7 @@ END SUBROUTINE ImpurityOperator_setUmat
 !!  Set directly the chemical potential
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -426,7 +474,7 @@ END SUBROUTINE ImpurityOperator_setMu
 !!  active a flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -451,7 +499,7 @@ SUBROUTINE ImpurityOperator_activateParticle(this,flavor)
 
   IF ( flavor .GT. this%flavors ) &
     CALL ERROR("ImpurityOperator_activateParticle : out of range  ")
-  IF ( ALLOCATED(this%particles) ) THEN 
+  IF ( ALLOCATED(this%particles) ) THEN
     this%activeFlavor   =  flavor
   ELSE
     CALL ERROR("ImpurityOperator_activateParticle : not allocated  ")
@@ -469,7 +517,7 @@ END SUBROUTINE ImpurityOperator_activateParticle
 !!  positive if outside a segment
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -502,27 +550,27 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_getAvailableTime(this, time, position
   aF = this%activeFlavor
   IF ( aF .LE. 0 ) &
     CALL ERROR("ImpurityOperator_getAvailableTime : no active flav")
-  
+
   IF ( this%particles(aF)%tail .EQ. 0 ) THEN
     t_avail = this%particles(aF)%list(0,C_) - this%particles(aF)%list(0,Cdag_)
     position = SIGN(1,INT(t_avail))
   ELSE
-!    position = ListCdagC_firstHigher( this%particles(aF), time ) 
-#define list_1 this%particles(aF) 
+!    position = ListCdagC_firstHigher( this%particles(aF), time )
+#define list_1 this%particles(aF)
 #include "ListCdagC_firstHigher"
 #undef list_1
     position = firstHigher
     position_dwn = position - 1
     IF ( position_dwn .LE. 0) position_dwn = this%particles(aF)%tail
-  
+
 !    t_avail = (time - this%particles(aF)%list(position_dwn)) .MOD. this%beta
     t_avail = time - this%particles(aF)%list(position_dwn,C_)
     IF ( this%particles(aF)%list(position_dwn,Cdag_) .GT. time ) &
-      t_avail = t_avail + this%beta 
-  
+      t_avail = t_avail + this%beta
+
     IF ( t_avail .GT. 0.d0 ) THEN  !! We are outside the position_dwn segment
-!      t_avail = (this%particles(aF)%list(ABS(position)) - time ) .MOD. this%beta 
-      t_avail = this%particles(aF)%list(ABS(position),Cdag_) - time 
+!      t_avail = (this%particles(aF)%list(ABS(position)) - time ) .MOD. this%beta
+      t_avail = this%particles(aF)%list(ABS(position),Cdag_) - time
       IF ( this%particles(aF)%list(ABS(position),Cdag_) .LT. time ) &
         t_avail = t_avail + this%beta
       ! ABS is used to prevent position to be -1 which is HERE the same as 1
@@ -530,7 +578,7 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_getAvailableTime(this, time, position
       position = - position_dwn
     END IF
   END IF
-  
+
     ImpurityOperator_getAvailableTime = t_avail
 
 END FUNCTION ImpurityOperator_getAvailableTime
@@ -544,7 +592,7 @@ END FUNCTION ImpurityOperator_getAvailableTime
 !!  get the time available without the segment "position"
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -600,7 +648,7 @@ END FUNCTION ImpurityOperator_getAvailedTime
 !!  add a segment to the active flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -638,7 +686,7 @@ SUBROUTINE ImpurityOperator_add(this, CdagC_1, position_val)
   aF = this%activeFlavor
   IF ( aF .LE. 0 ) &
     CALL ERROR("ImpurityOperator_add : no active flavor           ")
-  
+
   position = position_val
 
   IF ( CdagC_1(C_) .GT. CdagC_1(Cdag_) ) THEN ! Ajout d'un segment
@@ -676,14 +724,14 @@ SUBROUTINE ImpurityOperator_add(this, CdagC_1, position_val)
 !      CALL CdagC_init(C2modify,TCdag,TC)
       C2modify(Cdag_) = TCdag
       C2modify(C_   ) = TC
-  
+
 !      TCdag    = CdagC_1%Cdag.MOD.this%beta
       MODCYCLE(CdagC_1(Cdag_),this%beta,TCdag)
       TC       = this%particles(aF)%list(position,C_)
 !      CALL CdagC_init(C2add,TCdag,TC)
       C2add(Cdag_) = TCdag
       C2add(C_   ) = TC
-  
+
       this%particles(aF)%list(position,:) = C2modify
       IF ( C2modify(Cdag_) .GT. C2add(Cdag_) ) THEN
         position = 0
@@ -712,7 +760,7 @@ END SUBROUTINE ImpurityOperator_add
 !!  Return the segment at position_val
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -777,7 +825,7 @@ END FUNCTION ImpurityOperator_getSegment
 !!  Remove a segment for the active flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -815,7 +863,7 @@ SUBROUTINE ImpurityOperator_remove(this,ieme)
   IF ( position .GT. this%particles(aF)%tail ) &
     CALL ERROR("ImpurityOperator_removeIeme : out of range        ")
 
-  IF ( (ieme .LT. 0)  .AND. (this%particles(aF)%tail .GT. 1) ) THEN 
+  IF ( (ieme .LT. 0)  .AND. (this%particles(aF)%tail .GT. 1) ) THEN
     position_dwn = position
 !    position = (position+1).MOD.this%particles(aF)%tail
     tail = this%particles(aF)%tail
@@ -824,17 +872,17 @@ SUBROUTINE ImpurityOperator_remove(this,ieme)
     CdagC_1(C_   ) = this%particles(aF)%list(position,C_)
     IF (position_dwn .GT. position) CdagC_1(C_) = CdagC_1(C_) + this%beta
 !    toRemove  = this%particles(aF)%list(position)%C - (CdagC_1%C.MOD.this%beta)
-!    CdagC_1%C = CdagC_1%C + toRemove  
+!    CdagC_1%C = CdagC_1%C + toRemove
     this%particles(aF)%list(position_dwn,:) = CdagC_1
   END IF
 
   IF ( position .EQ. 1 ) THEN
     SELECT CASE (ieme)
-      CASE (1) 
+      CASE (1)
         this%particles(aF)%list(0,C_   ) = this%beta
-        this%particles(aF)%list(0,Cdag_) = 0.d0 
+        this%particles(aF)%list(0,Cdag_) = 0.d0
       CASE (-1)
-        this%particles(aF)%list(0,C_   ) = 0.d0 
+        this%particles(aF)%list(0,C_   ) = 0.d0
         this%particles(aF)%list(0,Cdag_) = this%beta
     END SELECT
   END IF
@@ -854,7 +902,7 @@ END SUBROUTINE ImpurityOperator_remove
 !!  Get the overlap induced by CdagC_1 in the current configuration
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -921,7 +969,7 @@ END FUNCTION ImpurityOperator_getNewOverlap
 !!  Get the sign of the ratio of impurity traces
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (B. Amadon)
+!!  Copyright (C) 2013-2026 ABINIT group (B. Amadon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -930,7 +978,7 @@ END FUNCTION ImpurityOperator_getNewOverlap
 !!  this     = ImpurityOperator
 !!  time2    = for segment/antisegment addition, end of segment
 !!  position = for segment/antisegment removal, position  of segment/antisegment removed
-!!  action = > 0.5 addition 
+!!  action = > 0.5 addition
 !!           < 0.5 removal
 !!
 !! OUTPUT
@@ -1009,11 +1057,11 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_getsign(this, time2, i, action, posit
     else ! segments do not wind around
       if (i==1) then ! suppress segment do not change winding
         sign_imp = 1
-      else if (i==2) then ! antisegment 
+      else if (i==2) then ! antisegment
         if(abs(position)==tailint) then  ! create winding around only tailint >=1
-          if(tailint==1)  then 
+          if(tailint==1)  then
             sign_imp = 1
-          else 
+          else
             sign_imp = -1
           endif
         else  !do not create winding around
@@ -1038,7 +1086,7 @@ END FUNCTION ImpurityOperator_getsign
 !!  new (anti-)segment.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1082,12 +1130,12 @@ FUNCTION ImpurityOperator_getTraceAdd(this, CdagC_1) RESULT(trace)
   ELSE IF ( this%particles(this%activeFlavor)%tail .EQ. 0 .AND. &
             ( ( (.NOT. antiseg) .AND. CdagC_1(C_) .GT. beta ) .OR. & ! >beta only possible for seg
               ( antiseg .AND. CdagC_1(Cdag_) .LT. beta ) & ! antiseg cdag < beta
-            ) & 
+            ) &
           ) THEN
     antisym_sign = -1.d0
   END IF
 
-  trace = antisym_sign * DEXP(this%mat_U(this%activeFlavor,this%activeFlavor)*length + overlap) 
+  trace = antisym_sign * DEXP(this%mat_U(this%activeFlavor,this%activeFlavor)*length + overlap)
 
 END FUNCTION ImpurityOperator_getTraceAdd
 !!***
@@ -1101,7 +1149,7 @@ END FUNCTION ImpurityOperator_getTraceAdd
 !!  (anti-)segment.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1147,7 +1195,7 @@ FUNCTION ImpurityOperator_getTraceRemove(this, position) RESULT(trace)
          ( length .LT. 0.d0 .AND. tail .EQ. 1 ) ) THEN
       antisym_sign = -1.d0
     END IF
-  ELSE 
+  ELSE
     IF ( tail .GT. 1 .AND. position .EQ. -tail ) & !tail>1 and last antisegment
     antisym_sign = -1.d0
   END IF
@@ -1165,7 +1213,7 @@ END FUNCTION ImpurityOperator_getTraceRemove
 !!  Compute the overlap of a segment with a flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1210,9 +1258,9 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_overlapSegFlav(this,CdagC_1,flavor)
   DOUBLE PRECISION                   :: itmax
   INTEGER                            :: tail
   INTEGER                            :: tp1
-  INTEGER                            :: scanning 
-  INTEGER                            :: imin 
-  INTEGER                            :: imax 
+  INTEGER                            :: scanning
+  INTEGER                            :: imin
+  INTEGER                            :: imax
   INTEGER                            :: loops
   INTEGER                            :: iloop
 #include "ListCdagC_firstHigher.h"
@@ -1234,11 +1282,11 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_overlapSegFlav(this,CdagC_1,flavor)
     loop = 0.d0
 !    imin = ListCdagC_firstHigher( this%particles(flavor), Tmin ) - 1
     Time = Tmin
-#define list_1 this%particles(flavor) 
+#define list_1 this%particles(flavor)
 #include "ListCdagC_firstHigher"
     imin = firstHigher - 1
 
-    SELECT CASE ( imin ) 
+    SELECT CASE ( imin )
       CASE(0)
         scanning = tail
         loop = -1.d0
@@ -1256,7 +1304,7 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_overlapSegFlav(this,CdagC_1,flavor)
     TscanMin = Tmin
     TscanMax = Tmax
 
-    ! Regarder avant 
+    ! Regarder avant
     IF ( (imin .EQ. 0) ) THEN
       C = this%particles(flavor)%list(scanning,C_) +loop*  beta
       Cdag = this%particles(flavor)%list(scanning,Cdag_) +loop* beta
@@ -1303,7 +1351,7 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_overlapSegFlav(this,CdagC_1,flavor)
     ! Regarder apres le segment
     IF ( (itmin .NE. TscanMax) ) THEN
       C = this%particles(flavor)%list(scanning,C_)
-      Cdag = this%particles(flavor)%list(scanning,Cdag_) 
+      Cdag = this%particles(flavor)%list(scanning,Cdag_)
       itmax = MAX(TscanMin, Cdag)
       itmin = MIN(TscanMax,C)
 
@@ -1320,7 +1368,7 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_overlapSegFlav(this,CdagC_1,flavor)
   IF ( this%doCheck .EQV. .TRUE. ) &
     CALL ImpurityOperator_checkOverlap(this, Tmin, Tmax,totalC-totalCdag,flavor)
 !#endif
-  ImpurityOperator_overlapSegFlav = totalC - totalCdag 
+  ImpurityOperator_overlapSegFlav = totalC - totalCdag
 
 END FUNCTION ImpurityOperator_overlapSegFlav
 !!***
@@ -1333,7 +1381,7 @@ END FUNCTION ImpurityOperator_overlapSegFlav
 !!  Returns the overlap of flavor with the others
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1366,7 +1414,7 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_overlapFlavor(this,flavor)
     IF ( otherFlavor .EQ. flavor ) CYCLE
     overlap = this%overlaps(otherFlavor,flavor)
     totalOverlap = totalOverlap &
-                 + overlap * this%mat_U(otherFlavor,flavor)
+            + overlap * this%mat_U(otherFlavor,flavor)
   END DO
 
   ImpurityOperator_overlapFlavor = totalOverlap
@@ -1382,7 +1430,7 @@ END FUNCTION ImpurityOperator_overlapflavor
 !!  compute the overlap of flavor1 with the configuration of flavor2
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1441,7 +1489,7 @@ END FUNCTION ImpurityOperator_overlapSwap
 !!  Swap to flavors
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1499,7 +1547,7 @@ END SUBROUTINE ImpurityOperator_swap
 !!  Compute overlap between two flavors
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1531,7 +1579,7 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_overlapIJ(this,i,j)
   DOUBLE PRECISION, DIMENSION(1:2)   :: CdagC_1
   INTEGER                            :: isegment
 
-!  particle1 => this%particles(i) 
+!  particle1 => this%particles(i)
 !  list1     => particle1%list
   tail1 = this%particles(i)%tail
 
@@ -1562,7 +1610,7 @@ END FUNCTION ImpurityOperator_overlapIJ
 !!  measure double occupancy and interaction energy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1598,16 +1646,72 @@ SUBROUTINE ImpurityOperator_measDE(this,DE)
   flavors = this%flavors
   DO iflavor1 = 1, flavors
     DO iflavor2 = iflavor1+1, flavors
-      !localD = ImpurityOperator_overlapIJ(this,iflavor1,iflavor2) 
+      !localD = ImpurityOperator_overlapIJ(this,iflavor1,iflavor2)
       localD = this%overlaps(iflavor2,iflavor1)
-      DE(iflavor2,iflavor1) = DE(iflavor2,iflavor1) + localD  
-      totalE = totalE + localD * this%mat_U(iflavor1,iflavor2)
+      DE(iflavor2,iflavor1) = DE(iflavor2,iflavor1) + localD
+      totalE = totalE + localD * real(this%mat_U(iflavor1,iflavor2))
     END DO
   END DO
 
   DE(1,1) = DE(1,1) + totalE
 
 END SUBROUTINE ImpurityOperator_measDE
+!!***
+
+!!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_measDEComplex
+!! NAME
+!!  ImpurityOperator_measDEComplex
+!!
+!! FUNCTION
+!!  measure double occupancy and interaction energy
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  this=ImpurityOperator
+!!
+!! OUTPUT
+!!  DE=array accumulating duoble occupancy and energy
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+
+SUBROUTINE ImpurityOperator_measDEComplex(this,DE)
+
+!Arguments ------------------------------------
+  TYPE(ImpurityOperator), INTENT(IN) :: this
+  COMPLEX(KIND=8), DIMENSION(:,:), INTENT(INOUT) :: DE
+!Local variables ------------------------------
+  COMPLEX(KIND=8)                               :: localD
+  COMPLEX(KIND=8)                               :: totalE
+  INTEGER                                       :: iflavor1
+  INTEGER                                       :: iflavor2
+  INTEGER                                       :: flavors
+
+  IF ( .NOT. ALLOCATED(this%particles) ) &
+    CALL ERROR("ImpurityOperator_measD : no particle set   ")
+
+  totalE = 0.d0
+  flavors = this%flavors
+  DO iflavor1 = 1, flavors
+    DO iflavor2 = iflavor1+1, flavors
+      !localD = ImpurityOperator_overlapIJ(this,iflavor1,iflavor2)
+      localD = cmplx(this%overlaps(iflavor2,iflavor1),0.d0,kind=8)
+      DE(iflavor2,iflavor1) = DE(iflavor2,iflavor1) + localD
+      totalE = totalE + localD * this%mat_U(iflavor1,iflavor2)
+    END DO
+  END DO
+
+  DE(1,1) = DE(1,1) + totalE
+
+END SUBROUTINE ImpurityOperator_measDEComplex
 !!***
 
 !!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_cleanOverlaps
@@ -1618,7 +1722,7 @@ END SUBROUTINE ImpurityOperator_measDE
 !!  Compute from scratch all overlaps
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1649,7 +1753,7 @@ SUBROUTINE ImpurityOperator_cleanOverlaps(this)
   flavors = this%flavors
   DO iflavor1 = 1, flavors
     DO iflavor2 = iflavor1+1, flavors
-      this%overlaps(iflavor2,iflavor1) = ImpurityOperator_overlapIJ(this,iflavor1,iflavor2) 
+      this%overlaps(iflavor2,iflavor1) = ImpurityOperator_overlapIJ(this,iflavor1,iflavor2)
     END DO
   END DO
 
@@ -1664,7 +1768,7 @@ END SUBROUTINE ImpurityOperator_cleanOverlaps
 !!  measure the number of electrons on flavor flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1699,10 +1803,10 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_measN(this,flavor)
     aF = this%activeFlavor
   END IF
 
-  IF ( aF .LE. 0 ) & 
+  IF ( aF .LE. 0 ) &
     CALL ERROR("ImpurityOperator_measN : no active flavor     ")
 
-  totalC    = (this%particles(aF)%list(0,Cdag_) - this%particles(aF)%list(0,C_) + this%beta) * .5d0 
+  totalC    = (this%particles(aF)%list(0,Cdag_) - this%particles(aF)%list(0,C_) + this%beta) * .5d0
   totalCdag = 0.d0
 
   DO scanning = 1, this%particles(aF)%tail
@@ -1723,7 +1827,7 @@ END FUNCTION ImpurityOperator_measN
 !!  destroy and deallocate
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1773,7 +1877,7 @@ END SUBROUTINE ImpurityOperator_destroy
 !!  compute error on the overlap (numerical accumulation)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1812,7 +1916,7 @@ SUBROUTINE ImpurityOperator_getErrorOverlap(this,DE)
   flavors = this%flavors
   DO iflavor1 = 1, flavors
     DO iflavor2 = iflavor1+1, flavors
-      localD1 = ImpurityOperator_overlapIJ(this,iflavor1,iflavor2) 
+      localD1 = ImpurityOperator_overlapIJ(this,iflavor1,iflavor2)
       localD2 = this%overlaps(iflavor2,iflavor1)
       totalE1 = totalE1 + localD1 * this%mat_U(iflavor1,iflavor2)
       totalE2 = totalE2 + localD2 * this%mat_U(iflavor1,iflavor2)
@@ -1822,6 +1926,7 @@ SUBROUTINE ImpurityOperator_getErrorOverlap(this,DE)
   DE(2,2) = ABS(totalE1 - totalE2)
 
 END SUBROUTINE ImpurityOperator_getErrorOverlap
+
 !!***
 !#ifdef CTQMC_CHECK
 !!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_doCheck
@@ -1832,7 +1937,7 @@ END SUBROUTINE ImpurityOperator_getErrorOverlap
 !!  set the check mechanism
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1869,7 +1974,7 @@ END SUBROUTINE ImpurityOperator_doCheck
 !!  between Tmin and Tmax (c+ and c)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1896,7 +2001,7 @@ SUBROUTINE ImpurityOperator_checkOverlap(this, Tmin, Tmax, iOverlap, iflavor)
   DOUBLE PRECISION      , INTENT(IN   )  :: Tmin
   DOUBLE PRECISION      , INTENT(IN   )  :: Tmax
   DOUBLE PRECISION      , INTENT(IN   )  :: iOverlap
-  INTEGER               , INTENT(IN   )  :: iflavor 
+  INTEGER               , INTENT(IN   )  :: iflavor
 !Local variables ------------------------------
   INTEGER, PARAMETER                     :: size=10000000
   INTEGER                                :: imin
@@ -1904,7 +2009,7 @@ SUBROUTINE ImpurityOperator_checkOverlap(this, Tmin, Tmax, iOverlap, iflavor)
   INTEGER                                :: imaxbeta
   INTEGER                                :: isegment
   INTEGER                                :: tail
-  INTEGER(1), DIMENSION(1:size,1:2)      :: checktab 
+  INTEGER(1), DIMENSION(1:size,1:2)      :: checktab
   CHARACTER(LEN=4)                       :: a
   DOUBLE PRECISION                       :: dt
   DOUBLE PRECISION                       :: inv_dt
@@ -1928,7 +2033,7 @@ SUBROUTINE ImpurityOperator_checkOverlap(this, Tmin, Tmax, iOverlap, iflavor)
     checktab(try,1)=INT(1,1)!IBSET(checktab(try,1),0)
   END DO
 
-  IF ( imax .NE. imaxbeta ) THEN 
+  IF ( imax .NE. imaxbeta ) THEN
     DO try = 1, imaxbeta
       checktab(try,1)=INT(1,1)!IBSET(checktab(try,1),0)
     END DO
@@ -1967,13 +2072,13 @@ SUBROUTINE ImpurityOperator_checkOverlap(this, Tmin, Tmax, iOverlap, iflavor)
     erreur = ABS(overlap                - iOverlap)
   END IF
   weight = ABS(2.d0 * DBLE(tail) * dt - iOverlap)
-  IF ( erreur .GT. weight  ) THEN 
+  IF ( erreur .GT. weight  ) THEN
     WRITE(a,'(I4)') INT(erreur*100.d0)
-    CALL WARN("ImpurityOperator_checkOverlap : "//a//"%              ") 
+    CALL WARN("ImpurityOperator_checkOverlap : "//a//"%              ")
   END IF
   IF ( iOverlap .LE. (2.d0 * DBLE(tail) * dt) ) &
     this%meanError = this%meanError + 1.d0
-  this%checkNumber = this%checkNumber + 1.d0 !weight 
+  this%checkNumber = this%checkNumber + 1.d0 !weight
 
 END SUBROUTINE ImpurityOperator_checkOverlap
 !!***
@@ -1986,7 +2091,7 @@ END SUBROUTINE ImpurityOperator_checkOverlap
 !!  get error on computing the overlap
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2012,9 +2117,9 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_getError(this)
   DOUBLE PRECISION :: error
 
   IF ( this%doCheck .EQV. .TRUE. ) THEN
-    error     = ABS(this%meanError/this%checkNumber) 
-!  tolerance = ABS(this%tolerance/this%checkNumber) 
-    ImpurityOperator_getError = error 
+    error     = ABS(this%meanError/this%checkNumber)
+!  tolerance = ABS(this%tolerance/this%checkNumber)
+    ImpurityOperator_getError = error
   ELSE
     ImpurityOperator_getError = 0.d0
   END IF
@@ -2030,7 +2135,7 @@ END FUNCTION ImpurityOperator_getError
 !!  print in a latex format all the configuration
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2086,7 +2191,7 @@ SUBROUTINE ImpurityOperator_printLatex(this, ostream, isweep)
     WRITE(ostream,'(6x,A7,I2,A18)')  "\put(2,",ordo,"){\line(1,0){100}}"
     WRITE(ostream,'(6x,A9,I2,A16)')  "\put(102,",lines,"){\line(0,1){2}}"
     WRITE(ostream,'(6x,A9,I2,A28)')  "\put(102,",letters,"){\makebox(0,0)[c]{$\beta$}}"
-    DO it = 1, tail 
+    DO it = 1, tail
       Cdag = 2.d0+(this%particles(iflavor)%list(it,Cdag_)/this%beta*100.d0)
       C    = 2.d0+(this%particles(iflavor)%list(it,C_   )/this%beta*100.d0)
       length = C - Cdag
@@ -2113,7 +2218,7 @@ SUBROUTINE ImpurityOperator_printLatex(this, ostream, isweep)
         WRITE(ostream,'(8x,A5,F5.1,A1,I2,A14)') "\put(",C-100.d0,",",ordo,"){\circle*{1}}"
       END IF
     END DO
-    IF ( tail .EQ. 0 .AND. this%particles(iflavor)%list(0,C_) .EQ. 0.d0 ) THEN 
+    IF ( tail .EQ. 0 .AND. this%particles(iflavor)%list(0,C_) .EQ. 0.d0 ) THEN
       WRITE(ostream,'(8x,A9,I2)')      "%segments", it
       WRITE(ostream,'(8x,A39,I2,A18)') "\linethickness{2pt}\color{black}\put(2,",ordo,"){\line(1,0){100}}"
     END IF
@@ -2133,7 +2238,7 @@ END SUBROUTINE ImpurityOperator_printLatex
 !!  Compute histogrammes of occupations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (B. Amadon, F. Gendron)
+!!  Copyright (C) 2013-2026 ABINIT group (B. Amadon, F. Gendron)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2166,7 +2271,7 @@ SUBROUTINE ImpurityOperator_occup_histo_time(this,histo,occupconfig,suscep,ntau,
   DOUBLE PRECISION                   :: tau
   INTEGER                            :: scanning, opt_histo,nspinor
   INTEGER                            :: iflavor, itau,jtau,kdeltatau,noccup,iconfig,sumh,nmeas
-  INTEGER                            :: iflavor1, iflavor2     
+  INTEGER                            :: iflavor1, iflavor2
   INTEGER, ALLOCATABLE, DIMENSION(:,:)        :: occup
   INTEGER, ALLOCATABLE, DIMENSION(:)          :: occuptot
   INTEGER, ALLOCATABLE, DIMENSION(:,:)          :: spinup,spindn
@@ -2206,13 +2311,13 @@ SUBROUTINE ImpurityOperator_occup_histo_time(this,histo,occupconfig,suscep,ntau,
         if(this%particles(iflavor)%list(scanning,C_)>this%beta.and.tau<this%particles(iflavor)%list(scanning,Cdag_)) then
 
           if(tau<(this%particles(iflavor)%list(scanning,C_)-this%beta).and.&
-&            tau>(this%particles(iflavor)%list(scanning,Cdag_)-this%beta)) then 
+&            tau>(this%particles(iflavor)%list(scanning,Cdag_)-this%beta)) then
             occup(iflavor,itau)=occup(iflavor,itau)+1
-          endif 
+          endif
 
         else
 
-          if(tau<this%particles(iflavor)%list(scanning,C_).and.tau>this%particles(iflavor)%list(scanning,Cdag_)) then 
+          if(tau<this%particles(iflavor)%list(scanning,C_).and.tau>this%particles(iflavor)%list(scanning,Cdag_)) then
              occup(iflavor,itau)=occup(iflavor,itau)+1
           endif
 
@@ -2258,7 +2363,7 @@ SUBROUTINE ImpurityOperator_occup_histo_time(this,histo,occupconfig,suscep,ntau,
             !endif
           endif
         endif
-      else 
+      else
       !spin-orbit case (here only useful for chi_charge and f-elements)
         if(iflavor < 7) then
           !mj=5/2
@@ -2272,14 +2377,14 @@ SUBROUTINE ImpurityOperator_occup_histo_time(this,histo,occupconfig,suscep,ntau,
           !mj=7/2
           spinup(3,itau) = spindn(3,itau) + occup(iflavor,itau)
         end if
-      end if 
+      end if
 
 !   === Construct index of configuration in base 10
       iconfig=iconfig+2**(iflavor-1)*occup(iflavor,itau)
 
     enddo
 
-!   === After the loop over flavor, iconfig has a meaning and can be used 
+!   === After the loop over flavor, iconfig has a meaning and can be used
     occupconfig_loc(iconfig+1)= occupconfig_loc(iconfig+1)+1
   nmeas=nmeas+1
 
@@ -2303,7 +2408,7 @@ SUBROUTINE ImpurityOperator_occup_histo_time(this,histo,occupconfig,suscep,ntau,
 !  write(6,*) "================================="
   sumh=zero
   do iconfig=1,2**(this%flavors)
-   ! occupconfig_loc(iconfig)=occupconfig_loc(iconfig)/float(ntau)*100.0 
+   ! occupconfig_loc(iconfig)=occupconfig_loc(iconfig)/float(ntau)*100.0
     occupconfig(iconfig)=occupconfig(iconfig)+float(occupconfig_loc(iconfig))/float(ntau)*100.0
 !    write(6,*) "one step",float(occupconfig_loc(iconfig))/float(ntau)*100.0
     sumh=sumh+occupconfig_loc(iconfig)
@@ -2379,7 +2484,7 @@ if(opt_histo .gt. 1) then
     FREE(magmommat_tot)
   endif
 endif
-  
+
 if(opt_histo .gt. 2) then
   if(nspinor .eq. 1) then
   ! == Scalar Charge Susceptibility
@@ -2403,24 +2508,24 @@ if(opt_histo .gt. 2) then
 
   else
   ! == Spin-orbit Charge Susceptibility
-  ! ntot(1) = Full occuptation, ntot(2) = mj_5/2, ntot(3) = mj_7/2 
-    do itau = 1,ntau                                                    
-      ntot(1) = ntot(1) + occuptot(itau)                                
-      ntot(2) = ntot(2) + float(spinup(2,itau))          
-      ntot(3) = ntot(3) + float(spinup(3,itau))          
-    enddo                                                               
+  ! ntot(1) = Full occuptation, ntot(2) = mj_5/2, ntot(3) = mj_7/2
+    do itau = 1,ntau
+      ntot(1) = ntot(1) + occuptot(itau)
+      ntot(2) = ntot(2) + float(spinup(2,itau))
+      ntot(3) = ntot(3) + float(spinup(3,itau))
+    enddo
 
-    do itau=1,ntau                                                                                                                  
-      do jtau=1,ntau                                                                                                                
-        kdeltatau=jtau-itau+1                                                                                                       
-        if(jtau<itau) kdeltatau=kdeltatau+ntau                                                                                      
-        if(kdeltatau> ntau) write(std_out,*) "Warning kdeltatau"                                                                    
-        chicharge(1,kdeltatau)=chicharge(1,kdeltatau)+float(occuptot(jtau))*float(occuptot(itau)) 
-        chicharge(2,kdeltatau)=chicharge(2,kdeltatau)+float(spinup(2,jtau))*float(spindn(2,itau)) 
-        chicharge(3,kdeltatau)=chicharge(3,kdeltatau)+float(spinup(3,jtau))*float(spinup(3,itau)) 
-      enddo                                                                                                                         
-    enddo                                                                                                                           
-  end if                                                                                                                                   
+    do itau=1,ntau
+      do jtau=1,ntau
+        kdeltatau=jtau-itau+1
+        if(jtau<itau) kdeltatau=kdeltatau+ntau
+        if(kdeltatau> ntau) write(std_out,*) "Warning kdeltatau"
+        chicharge(1,kdeltatau)=chicharge(1,kdeltatau)+float(occuptot(jtau))*float(occuptot(itau))
+        chicharge(2,kdeltatau)=chicharge(2,kdeltatau)+float(spinup(2,jtau))*float(spindn(2,itau))
+        chicharge(3,kdeltatau)=chicharge(3,kdeltatau)+float(spinup(3,jtau))*float(spinup(3,itau))
+      enddo
+    enddo
+  end if
 endif
 
   FREE(occup)
@@ -2442,7 +2547,7 @@ END SUBROUTINE ImpurityOperator_occup_histo_time
 !!  Set directly the Magnetic moment this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (F. Gendron)
+!!  Copyright (C) 2013-2026 ABINIT group (F. Gendron)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2456,12 +2561,6 @@ END SUBROUTINE ImpurityOperator_occup_histo_time
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 

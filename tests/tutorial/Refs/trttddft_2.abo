@@ -1,8 +1,8 @@
 
-.Version 10.4.0.2 of ABINIT, released May 2025.
-.(MPI version, prepared for a x86_64_linux_gnu9.1 computer) 
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  6 Jun 2025.
-- ( at 08h43 )
-  
-- input  file    -> /tmp/abinit/opt/Test_suite/tutorial_trttddft_1-trttddft_2-trttddft_3/trttddft_2.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h07 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorial_trttddft_1-trttddft_2-trttddft_3/trttddft_2.abi
 - output file    -> trttddft_2.abo
 - root for input  files -> trttddft_2i
 - root for output files -> trttddft_2o
 
-- inpspheads : Reading pseudopotential header in XML form from 
--   /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_paw_pw_std/C.xml
+- inpspheads : Reading pseudopotential header in XML form from
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/C.xml
  Symmetries : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -32,12 +32,12 @@
      natom =       2  nloc_mem =       2    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =       1    ntypat =       1
     occopt =       1   xclevel =       1
--    mband =           8        mffmem =           1         mkmem =           7
+-    mband =           8        mffmem =           1         mkmem =          28
        mpw =         282          nfft =        5832          nkpt =          28
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        27    nfftf =     19683
 ================================================================================
-P This job should need less than                       5.379 Mbytes of memory.
+P This job should need less than                       6.350 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.966 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
@@ -50,10 +50,10 @@ _ WF disk file :      0.966 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 -   iomode0 =  0 , fftalg0 =512 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file
--  max_nthreads =    1
+-  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
-            acell      6.6707332491E+00  6.6707332491E+00  6.6707332491E+00 Bohr
+            acell      6.6707332245E+00  6.6707332245E+00  6.6707332245E+00 Bohr
               amu      1.20110000E+01
            bandpp           8
              ecut      1.80000000E+01 Hartree
@@ -88,8 +88,8 @@ _ WF disk file :      0.966 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
                       -2.50000000E-01  0.00000000E+00  0.00000000E+00
                       -4.16666667E-01  0.00000000E+00  0.00000000E+00
          kptrlatt        6   -6    6     -6    6    6     -6   -6    6
-          kptrlen      4.00243995E+01
-P           mkmem           7
+          kptrlen      4.00243993E+01
+P           mkmem          28
             natom           2
             nband           8
            nbdbuf           2
@@ -102,7 +102,6 @@ P           mkmem           7
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000
         optdriver           9
--      paral_atom           0
         pawecutdg      3.60000000E+01 Hartree
            prtden           0
         prtebands           0
@@ -172,7 +171,7 @@ P           mkmem           7
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        8.8250000000E-01  8.8250000000E-01  8.8250000000E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.6676833123E+00  1.6676833123E+00  1.6676833123E+00
+                       1.6676833061E+00  1.6676833061E+00  1.6676833061E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl        6.00000
@@ -183,7 +182,7 @@ P           mkmem           7
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 4, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -208,7 +207,7 @@ meta: {optdriver: 9, }
  R(1)=  0.0000000  3.3353666  3.3353666  G(1)= -0.1499086  0.1499086  0.1499086
  R(2)=  3.3353666  0.0000000  3.3353666  G(2)=  0.1499086 -0.1499086  0.1499086
  R(3)=  3.3353666  3.3353666  0.0000000  G(3)=  0.1499086  0.1499086 -0.1499086
- Unit cell volume ucvol=  7.4209710E+01 bohr^3
+ Unit cell volume ucvol=  7.4209709E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
  Coarse grid specifications (used for wave-functions):
@@ -222,9 +221,9 @@ meta: {optdriver: 9, }
          ecut(hartree)=     36.000   => boxcut(ratio)=   2.04381
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_paw_pw_std/C.xml
-- pspatm: opening atomic psp file    /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_paw_pw_std/C.xml
-- pspatm : Reading pseudopotential header in XML form from /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_paw_pw_std/C.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/C.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/C.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/C.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -258,7 +257,13 @@ meta: {optdriver: 9, }
 Total energy =     -11.527561 Ha
 Integrated density (ie. total nb of electrons) =       8.0000035485
 
-- Time - cpu, wall (sec):    0.18    0.18
+ Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
+ Eigenvalues (hartree) for nkpt=  28  k points:
+ kpt#   1, nband=  8, wtk=  0.02778, kpt= -0.0833 -0.1667  0.0000 (reduced coord)
+  -0.38952    0.27506    0.31786    0.34829    0.59404    0.67310    0.67501    0.90388
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+- Time - cpu, wall (sec):    0.15    0.15
 
 
 ---------------------------------------------------------------------------
@@ -268,9 +273,9 @@ Integrated density (ie. total nb of electrons) =       8.0000035485
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
-            acell      6.6707332491E+00  6.6707332491E+00  6.6707332491E+00 Bohr
+            acell      6.6707332245E+00  6.6707332245E+00  6.6707332245E+00 Bohr
               amu      1.20110000E+01
            bandpp           8
              ecut      1.80000000E+01 Hartree
@@ -308,8 +313,8 @@ Integrated density (ie. total nb of electrons) =       8.0000035485
                       -2.50000000E-01  0.00000000E+00  0.00000000E+00
                       -4.16666667E-01  0.00000000E+00  0.00000000E+00
          kptrlatt        6   -6    6     -6    6    6     -6   -6    6
-          kptrlen      4.00243995E+01
-P           mkmem           7
+          kptrlen      4.00243993E+01
+P           mkmem          28
             natom           2
             nband           8
            nbdbuf           2
@@ -322,7 +327,6 @@ P           mkmem           7
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000
         optdriver           9
--      paral_atom           0
         pawecutdg      3.60000000E+01 Hartree
            prtden           0
         prtebands           0
@@ -394,7 +398,7 @@ P           mkmem           7
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        8.8250000000E-01  8.8250000000E-01  8.8250000000E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.6676833123E+00  1.6676833123E+00  1.6676833123E+00
+                       1.6676833061E+00  1.6676833061E+00  1.6676833061E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl        6.00000
@@ -444,7 +448,7 @@ P           mkmem           7
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -456,12 +460,12 @@ P           mkmem           7
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -479,15 +483,15 @@ P           mkmem           7
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.7
+- Proc.   0 individual time (sec): cpu=          0.9  wall=          1.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.4  wall=          6.6
+.Delivered   2 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.9  wall=          1.0

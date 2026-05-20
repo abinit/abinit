@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2025 ABINIT group (Yann Pouillon, Marc Torrent)
+# Copyright (C) 2005-2026 ABINIT group (Yann Pouillon, Marc Torrent)
 #
 # This file is part of the Steredeg software package. For license information,
 # please see the COPYING file in the top-level directory of the source
@@ -295,7 +295,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLACS], [
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
-      call blacs_gridinit
+       call blacs_gridinit
     ]])],
     [sd_linalg_has_blacs="yes"; sd_linalg_provided="${sd_linalg_provided} blacs"],
     [sd_linalg_has_blacs="no"])

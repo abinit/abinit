@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h07 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h09 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t54/t54.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v1_t54/t54.abi
 - output file    -> t54.abo
 - root for input  files -> t54i
 - root for output files -> t54o
@@ -103,8 +103,8 @@ P           mkmem           1
           spgroup           1
            toldfe      1.00000000E-14 Hartree
             typat      1  1
-           xangst     -1.1229140366E+00  0.0000000000E+00  0.0000000000E+00
-                       1.1229140366E+00  0.0000000000E+00  0.0000000000E+00
+           xangst     -1.1229140408E+00  0.0000000000E+00  0.0000000000E+00
+                       1.1229140408E+00  0.0000000000E+00  0.0000000000E+00
             xcart     -2.1220000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.1220000000E+00  0.0000000000E+00  0.0000000000E+00
              xred     -1.7683333333E-01  0.0000000000E+00  0.0000000000E+00
@@ -144,8 +144,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 2, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.09906
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -177,9 +177,9 @@ solver: {iscf: 2, nstep: 17, nline: 3, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
 
- ETOT  1  -8.6573182384232    -8.657E+00 8.245E-03 1.825E+01
+ ETOT  1  -8.6573182384232    -8.657E+00 8.245E-03 1.825E+01 3.398E-01 3.398E-01
 
  prteigrs : about to open file t54o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03957   Average Vxc (hartree)=  -0.22037
@@ -197,7 +197,7 @@ tolerances: {toldfe: 1.00E-14, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -10.37501   -5.79176   -3.08750   -1.08713   -1.07668    2.11713    2.20547    3.00469
 
- ETOT  2  -8.6692997492497    -1.198E-02 9.837E-06 5.280E+00
+ ETOT  2  -8.6692997492497    -1.198E-02 9.837E-06 5.280E+00 2.150E-03 3.377E-01
 
  prteigrs : about to open file t54o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04013   Average Vxc (hartree)=  -0.22159
@@ -215,7 +215,7 @@ tolerances: {toldfe: 1.00E-14, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.46893   -5.30101   -2.47207   -0.40772   -0.40399    2.57744    2.58148    3.38775
 
- ETOT  3  -8.6708415429244    -1.542E-03 2.921E-05 1.963E+00
+ ETOT  3  -8.6708415429244    -1.542E-03 2.921E-05 1.963E+00 9.368E-04 3.381E-01
 
  prteigrs : about to open file t54o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04216   Average Vxc (hartree)=  -0.22228
@@ -231,9 +231,9 @@ tolerances: {toldfe: 1.00E-14, }
  -10.06659   -5.89181   -2.81487   -1.15119   -1.14720    1.89514    1.89813    2.87553
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.30002   -5.25575   -2.34769   -0.31999   -0.31800    2.61837    2.62068    3.33868
+  -9.30003   -5.25575   -2.34769   -0.31999   -0.31800    2.61837    2.62068    3.33868
 
- ETOT  4  -8.6713448428578    -5.033E-04 7.479E-06 7.683E-01
+ ETOT  4  -8.6713448428578    -5.033E-04 7.479E-06 7.683E-01 1.147E-03 3.386E-01
 
  prteigrs : about to open file t54o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04386   Average Vxc (hartree)=  -0.22260
@@ -251,7 +251,7 @@ tolerances: {toldfe: 1.00E-14, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.21502   -5.23254   -2.28314   -0.27117   -0.27017    2.64278    2.64403    3.30294
 
- ETOT  5  -8.6715193045290    -1.745E-04 2.158E-06 3.160E-01
+ ETOT  5  -8.6715193045290    -1.745E-04 2.158E-06 3.160E-01 7.841E-04 3.394E-01
 
  prteigrs : about to open file t54o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04501   Average Vxc (hartree)=  -0.22276
@@ -264,12 +264,12 @@ tolerances: {toldfe: 1.00E-14, }
  Fermi (or HOMO) energy (eV) =  -1.22490   Average Vxc (eV)=  -6.06148
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -10.05646   -5.92527   -2.69894   -1.22636   -1.22490    1.82423    1.82525    2.83322
+ -10.05647   -5.92527   -2.69894   -1.22636   -1.22490    1.82423    1.82525    2.83322
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.16413   -5.21646   -2.24684   -0.23688   -0.23639    2.66232    2.66298    3.28222
 
- ETOT  6  -8.6715851081413    -6.580E-05 7.118E-07 1.361E-01
+ ETOT  6  -8.6715851081413    -6.580E-05 7.118E-07 1.361E-01 6.561E-04 3.399E-01
 
  prteigrs : about to open file t54o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04577   Average Vxc (hartree)=  -0.22284
@@ -282,12 +282,12 @@ tolerances: {toldfe: 1.00E-14, }
  Fermi (or HOMO) energy (eV) =  -1.24559   Average Vxc (eV)=  -6.06368
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -10.05958   -5.93477   -2.67328   -1.24648   -1.24559    1.80639    1.80698    2.82505
+ -10.05958   -5.93478   -2.67328   -1.24648   -1.24559    1.80639    1.80699    2.82505
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.13161   -5.20520   -2.22651   -0.21201   -0.21178    2.67749    2.67784    3.27022
 
- ETOT  7  -8.6716114635335    -2.636E-05 2.615E-07 6.081E-02
+ ETOT  7  -8.6716114635335    -2.636E-05 2.615E-07 6.081E-02 4.532E-04 3.403E-01
 
  prteigrs : about to open file t54o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04627   Average Vxc (hartree)=  -0.22288
@@ -303,9 +303,9 @@ tolerances: {toldfe: 1.00E-14, }
  -10.06282   -5.94118   -2.65776   -1.25965   -1.25910    1.79489    1.79524    2.82064
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.11004   -5.19718   -2.21511   -0.19386   -0.19373    2.68908    2.68925    3.26324
+  -9.11005   -5.19718   -2.21511   -0.19386   -0.19373    2.68908    2.68925    3.26324
 
- ETOT  8  -8.6716225579870    -1.109E-05 1.046E-07 2.796E-02
+ ETOT  8  -8.6716225579870    -1.109E-05 1.046E-07 2.796E-02 3.429E-04 3.407E-01
 
  prteigrs : about to open file t54o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04660   Average Vxc (hartree)=  -0.22290
@@ -326,7 +326,7 @@ tolerances: {toldfe: 1.00E-14, }
  Five largest eigenvalues of the hermitian RPA dielectric matrix:
   5.2178E+00  2.9358E+00  2.7767E+00  2.7767E+00  2.3971E+00
 
- ETOT  9  -8.6716311432422    -8.585E-06 2.398E-07 1.245E-03
+ ETOT  9  -8.6716311432422    -8.585E-06 2.398E-07 1.245E-03 6.831E-04 3.413E-01
 
  prteigrs : about to open file t54o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04725   Average Vxc (hartree)=  -0.22294
@@ -339,12 +339,12 @@ tolerances: {toldfe: 1.00E-14, }
  Fermi (or HOMO) energy (eV) =  -1.28566   Average Vxc (eV)=  -6.06662
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -10.07474   -5.95173   -2.63305   -1.28569   -1.28566    1.77500    1.77503    2.81580
+ -10.07474   -5.95173   -2.63306   -1.28569   -1.28566    1.77500    1.77503    2.81580
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.06681   -5.17539   -2.19951   -0.15074   -0.15068    2.72063    2.72065    3.25484
 
- ETOT 10  -8.6716315553800    -4.121E-07 1.805E-08 9.664E-05
+ ETOT 10  -8.6716315553800    -4.121E-07 1.805E-08 9.664E-05 1.056E-04 3.414E-01
 
  prteigrs : about to open file t54o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04726   Average Vxc (hartree)=  -0.22295
@@ -362,7 +362,7 @@ tolerances: {toldfe: 1.00E-14, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.06413   -5.17639   -2.20130   -0.14814   -0.14813    2.72116    2.72116    3.25298
 
- ETOT 11  -8.6716316050539    -4.967E-08 1.583E-09 9.107E-06
+ ETOT 11  -8.6716316050539    -4.967E-08 1.583E-09 9.107E-06 1.978E-05 3.414E-01
 
  prteigrs : about to open file t54o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04726   Average Vxc (hartree)=  -0.22295
@@ -380,7 +380,7 @@ tolerances: {toldfe: 1.00E-14, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.06336   -5.17675   -2.20123   -0.14771   -0.14770    2.72103    2.72103    3.25291
 
- ETOT 12  -8.6716316113636    -6.310E-09 1.174E-10 1.069E-06
+ ETOT 12  -8.6716316113636    -6.310E-09 1.174E-10 1.069E-06 4.577E-06 3.415E-01
 
  prteigrs : about to open file t54o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04726   Average Vxc (hartree)=  -0.22294
@@ -398,7 +398,7 @@ tolerances: {toldfe: 1.00E-14, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.06325   -5.17695   -2.20122   -0.14770   -0.14770    2.72089    2.72089    3.25286
 
- ETOT 13  -8.6716316121271    -7.635E-10 1.438E-11 1.365E-07
+ ETOT 13  -8.6716316121271    -7.635E-10 1.438E-11 1.365E-07 1.493E-06 3.415E-01
 
  prteigrs : about to open file t54o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04726   Average Vxc (hartree)=  -0.22294
@@ -414,9 +414,9 @@ tolerances: {toldfe: 1.00E-14, }
  -10.07363   -5.95361   -2.63122   -1.28592   -1.28592    1.77302    1.77302    2.81542
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.06322   -5.17701   -2.20119   -0.14771   -0.14771    2.72083    2.72084    3.25285
+  -9.06322   -5.17701   -2.20119   -0.14771   -0.14771    2.72084    2.72084    3.25285
 
- ETOT 14  -8.6716316122194    -9.228E-11 1.710E-12 1.763E-08
+ ETOT 14  -8.6716316122194    -9.228E-11 1.710E-12 1.763E-08 5.891E-07 3.415E-01
 
  prteigrs : about to open file t54o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04726   Average Vxc (hartree)=  -0.22294
@@ -432,9 +432,9 @@ tolerances: {toldfe: 1.00E-14, }
  -10.07362   -5.95364   -2.63121   -1.28592   -1.28592    1.77299    1.77299    2.81542
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.06321   -5.17704   -2.20118   -0.14771   -0.14771    2.72081    2.72081    3.25284
+  -9.06321   -5.17704   -2.20118   -0.14771   -0.14771    2.72082    2.72082    3.25284
 
- ETOT 15  -8.6716316122308    -1.142E-11 2.152E-13 2.250E-09
+ ETOT 15  -8.6716316122308    -1.142E-11 2.152E-13 2.250E-09 1.651E-07 3.415E-01
 
  prteigrs : about to open file t54o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04726   Average Vxc (hartree)=  -0.22294
@@ -452,7 +452,7 @@ tolerances: {toldfe: 1.00E-14, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.06321   -5.17704   -2.20117   -0.14771   -0.14771    2.72081    2.72081    3.25284
 
- ETOT 16  -8.6716316122323    -1.444E-12 2.767E-14 2.850E-10
+ ETOT 16  -8.6716316122323    -1.444E-12 2.767E-14 2.850E-10 4.727E-08 3.415E-01
 
  prteigrs : about to open file t54o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04726   Average Vxc (hartree)=  -0.22294
@@ -470,7 +470,7 @@ tolerances: {toldfe: 1.00E-14, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.06321   -5.17705   -2.20117   -0.14772   -0.14772    2.72081    2.72081    3.25284
 
- ETOT 17  -8.6716316122324    -1.386E-13 3.599E-15 3.608E-11
+ ETOT 17  -8.6716316122324    -1.386E-13 3.599E-15 3.608E-11 2.061E-08 3.415E-01
 
  prteigrs : about to open file t54o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04726   Average Vxc (hartree)=  -0.22294
@@ -522,21 +522,22 @@ xred      :
 - [ -1.7683E-01,   0.0000E+00,   0.0000E+00, Si]
 - [  1.7683E-01,   0.0000E+00,   0.0000E+00, Si]
 cartesian_forces: # hartree/bohr
-- [ -1.77515116E-02,   4.53542390E-12,   2.86258333E-11, ]
-- [  1.77515116E-02,  -4.53542390E-12,  -2.86258333E-11, ]
+- [ -1.77515116E-02,   4.53542330E-12,   2.86258306E-11, ]
+- [  1.77515116E-02,  -4.53542330E-12,  -2.86258306E-11, ]
 force_length_stats: {min:   1.77515116E-02, max:   1.77515116E-02, mean:   1.77515116E-02, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.951584     0.610130      1.561714     0.341454
-    2   2.00000     0.951584     0.610130      1.561714     0.341454
- ---------------------------------------------------------------------
-  Sum:              1.903169     1.220260      3.123429     0.682909
- Total magnetization (from the atomic spheres):             0.682909
- Total magnetization (exact up - dn):                       2.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.951584     0.610130      1.561714     0.341454
+    2 Si   2.00000     0.951584     0.610130      1.561714     0.341454
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 1.903169     1.220260      3.123429     0.682909
+ Total magnetization (from the atomic spheres):                0.682909
+ Total magnetization (exact up - dn):                          2.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -554,8 +555,8 @@ force_length_stats: {min:   1.77515116E-02, max:   1.77515116E-02, mean:   1.775
     2      -0.213018140059     -0.000000000215      0.000000001021
 
  cartesian coordinates (angstrom) at end:
-    1     -1.12291403662798     0.00000000000000     0.00000000000000
-    2      1.12291403662798     0.00000000000000     0.00000000000000
+    1     -1.12291404077437     0.00000000000000     0.00000000000000
+    2      1.12291404077437     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
     1     -0.01775151156931     0.00000000000454     0.00000000002863
@@ -563,11 +564,11 @@ force_length_stats: {min:   1.77515116E-02, max:   1.77515116E-02, mean:   1.775
  frms,max,avg= 1.0248840E-02 1.7751512E-02   1.023E-10  3.139E-11 -9.898E-11 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.91281934967437     0.00000000023322     0.00000000147200
-    2      0.91281934967437    -0.00000000023322    -0.00000000147200
- frms,max,avg= 5.2701650E-01 9.1281935E-01   5.260E-09  1.614E-09 -5.090E-09 e/A
+    1     -0.91281942634272     0.00000000023322     0.00000000147200
+    2      0.91281942634272    -0.00000000023322    -0.00000000147200
+ frms,max,avg= 5.2701654E-01 9.1281943E-01   5.260E-09  1.614E-09 -5.090E-09 e/A
  length scales= 12.000000000000  8.000000000000  8.000000000000 bohr
-              =  6.350126503080  4.233417668720  4.233417668720 angstroms
+              =  6.350126526528  4.233417684352  4.233417684352 angstroms
  prteigrs : about to open file t54o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04726   Average Vxc (hartree)=  -0.22294
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -624,7 +625,7 @@ psp_core            :  2.98722879456821E-02
 local_psp           : -6.11150557998640E+00
 non_local_psp       :  1.96150736745515E+00
 total_energy        : -8.67163161223240E+00
-total_energy_eV     : -2.35967096492967E+02
+total_energy_eV     : -2.35967117183315E+02
 band_energy         : -1.38441077554379E+00
 ...
 
@@ -652,9 +653,9 @@ band_energy         : -1.38441077554379E+00
   sigma(3 3)=  1.10399005E-04  sigma(2 1)=  1.17478272E-12
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.5062E+00 GPa]
-- sigma(1 1)=  4.02234984E+00  sigma(3 2)=  1.26712932E-08
-- sigma(2 2)=  3.24805025E+00  sigma(3 1)=  1.80687285E-08
-- sigma(3 3)=  3.24805032E+00  sigma(2 1)=  3.45632952E-08
+- sigma(1 1)=  4.02235051E+00  sigma(3 2)=  1.26712954E-08
+- sigma(2 2)=  3.24805080E+00  sigma(3 1)=  1.80687316E-08
+- sigma(3 3)=  3.24805086E+00  sigma(2 1)=  3.45633010E-08
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -669,8 +670,8 @@ band_energy         : -1.38441077554379E+00
              ecut      7.00000000E+00 Hartree
            enunit           2
            etotal     -8.6716316122E+00
-            fcart     -1.7751511569E-02  4.5354239030E-12  2.8625833291E-11
-                       1.7751511569E-02 -4.5354239030E-12 -2.8625833291E-11
+            fcart     -1.7751511569E-02  4.5354232987E-12  2.8625830590E-11
+                       1.7751511569E-02 -4.5354232987E-12 -2.8625830590E-11
 -          fftalg         512
             intxc           1
            iprcel          28
@@ -700,8 +701,8 @@ P           mkmem           1
                        4.3068857523E-13  6.1414370269E-13  1.1747827243E-12
            toldfe      1.00000000E-14 Hartree
             typat      1  1
-           xangst     -1.1229140366E+00  0.0000000000E+00  0.0000000000E+00
-                       1.1229140366E+00  0.0000000000E+00  0.0000000000E+00
+           xangst     -1.1229140408E+00  0.0000000000E+00  0.0000000000E+00
+                       1.1229140408E+00  0.0000000000E+00  0.0000000000E+00
             xcart     -2.1220000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.1220000000E+00  0.0000000000E+00  0.0000000000E+00
              xred     -1.7683333333E-01  0.0000000000E+00  0.0000000000E+00
@@ -807,10 +808,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.7
+- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.6  wall=          0.7
++Overall time at end (sec) : cpu=          0.7  wall=          0.8

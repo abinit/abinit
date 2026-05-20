@@ -7,7 +7,7 @@
 !! the interatomic force constants and write the result in a DDB file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (GA)
+!!  Copyright (C) 2008-2026 ABINIT group (GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -67,7 +67,7 @@ contains
 !!
 !! SOURCE
 
-subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
+subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, comm)
 
 !Arguments -------------------------------
 !scalars
@@ -78,17 +78,17 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
  type(asrq0_t),intent(inout) :: asrq0
  integer,intent(in) :: comm
- character(len=*),intent(in) :: prefix
 !arrays
 
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
  integer :: nsym,natom,ntypat,mband,nqpt_fine
- integer :: msize,nsize,mpert,nblok,mtyp
+ integer :: msize,nsize,mpert,nblok
  integer :: rftyp
  integer :: ii,iblok,jblok,iqpt,ipert1,ipert2,idir1,idir2
  integer :: nprocs,my_rank
+ real(dp) :: eta
  character(len=500) :: msg
  character(len=fnlen) :: ddb_out_filename, ddb_out_nc_filename
  type(ddb_type) :: ddb_new
@@ -140,11 +140,14 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 
  mband = ddb_hdr%mband
 
- mtyp = max(ddb_hdr%mblktyp, 2)  ! Limited to 2nd derivatives of total energy
- ddb_hdr%mblktyp = mtyp
+ ! Interpolation is limited to 2nd derivatives of total energy
+ ! GA: What??
+ ddb_hdr%has_d3E_xx = .false.
+ ddb_hdr%has_d3E_lw = .false.
+ ddb_hdr%has_d2eig = .false.
 
  mpert = ddb%mpert
- msize = 3 * mpert * 3 * mpert  !; if (mtyp==3) msize=msize*3*mpert
+ msize = 3 * mpert * 3 * mpert  !; if (ddb_hdr%has_d3E_xx) msize=msize*3*mpert
  nsize = 3 * mpert * 3 * mpert
  nblok = nqpt_fine
 
@@ -158,6 +161,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
    ddb_new%typ = 85
  end if
  ddb_new%qpt = zero
+ ddb_new%omega = zero
  ddb_new%nrm = one
 
  ABI_MALLOC(d2cart,(2,3,mpert,3,mpert))
@@ -200,10 +204,10 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
-     call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart, &
-      crystal%gmet,ddb%gprim,ddb%mpert,natom,Ifc%nrpt,qptnrm(1), &
-      qpt, crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,crystal%ucvol, &
-      Ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart,ifc%ewald_option,xmpi_comm_self, &
+     call gtdyn9(Ifc%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart, &
+      crystal%gmet,Ifc%gprim,Ifc%mpert,natom,Ifc%nrpt,qptnrm(1), &
+      qpt, crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,crystal%ucvol, &
+      Ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart,ifc%ewald_option,eta, xmpi_comm_self, &
       dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
 
    end if
@@ -272,11 +276,11 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  if (my_rank == master) then
 
    ! GA: TODO choice of txt vs. nc should be set by user
-   ddb_out_filename = strcat(prefix, "_DDB")
+   ddb_out_filename = strcat(inp%prefix_outdata, "_DDB")
 
    call ddb_new%write_txt(ddb_hdr, ddb_out_filename)
 
-   ddb_out_nc_filename = strcat(prefix, "_DDB.nc")
+   ddb_out_nc_filename = strcat(inp%prefix_outdata, "_DDB.nc")
    call ddb_new%write_nc(ddb_hdr, ddb_out_nc_filename)
 
    ! Write one separate nc file for each q-point

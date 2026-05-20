@@ -6,7 +6,7 @@
 !!  Calculate diagonal and off-diagonal matrix elements of the exchange part of the self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2025 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
+!!  Copyright (C) 1999-2026 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,6 +29,7 @@ module m_sigx
  use m_errors
 
  use defs_datatypes,  only : pseudopotential_type
+ use m_dtset,         only : dataset_type
  use m_time,          only : timab, cwtime, cwtime_report
  use m_fstrings,      only : itoa, sjoin, ktoa, ltoa
  use m_hide_blas,     only : xdotc, xgemv
@@ -121,7 +122,7 @@ contains
 !!     based on group theory, and it might lead to spurious results in case of accidental degeneracies.
 !!
 
-subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, Sr, Gsph_x, Vcp, Kmesh, Qmesh, &
+subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, dtset, Sigp, Sr, Gsph_x, Vcp, Kmesh, Qmesh, &
                         ltg_k, Pawtab, Pawang, Paw_pwff, Pawfgrtab, Paw_onsite, psps, wfd, Wfdf, &
                         allQP_sym, x_ngfft, ngfftf, prtvol, pawcross, tol_empty_in)
 
@@ -135,6 +136,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  type(gsphere_t),intent(in) :: Gsph_x
  type(littlegroup_t),intent(in) :: ltg_k
  type(Pseudopotential_type),intent(in) :: psps
+ type(dataset_type),intent(in) :: dtset
  type(sigparams_t),target,intent(in) :: Sigp
  type(sigma_t),intent(inout) :: Sr
  type(pawang_type),intent(in) :: Pawang
@@ -160,8 +162,8 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  integer :: nfftf, mgfftf, nhat12_grdim, my_nbks, use_padfft, use_padfftf
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
  real(dp) :: fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty
- complex(dpc) :: ctmp,ph_mkgwt,ph_mkt
- complex(gwpc) :: gwpc_sigxme,gwpc_sigxme2,xdot_tmp
+ complex(dp) :: ctmp,ph_mkgwt,ph_mkt
+ complex(gwp) :: gwpc_sigxme,gwpc_sigxme2,xdot_tmp
  logical :: iscompatibleFFT, q_is_gamma, print_time
  character(len=5000) :: msg
  type(wave_t),pointer :: wave_sum, wave_jb
@@ -172,18 +174,17 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  real(dp) :: ksum(3), kgw(3), kgw_m_ksum(3), qbz(3), q0(3), spinrot_kbz(4), spinrot_kgw(4), tsec(2)
  real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
  real(dp),allocatable :: nhat12(:,:,:),grnhat12(:,:,:,:)
- complex(gwpc),allocatable :: vc_sqrt_qbz(:), rhotwg(:), rhotwgp(:), rhotwg_ki(:,:), ur_bdgw(:,:), ur_ibz(:)
- complex(dpc),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:), sigx(:,:,:,:)
- complex(gwpc),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
- complex(gwpc),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:)
- complex(gwpc),contiguous, pointer :: cg_jb(:),cg_sum(:)
+ complex(gwp),allocatable :: vc_sqrt_qbz(:), rhotwg(:), rhotwgp(:), rhotwg_ki(:,:), ur_bdgw(:,:), ur_ibz(:)
+ complex(dp),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:), sigx(:,:,:,:)
+ complex(gwp),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
+ complex(gwp),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:)
+ complex(gwp),contiguous, pointer :: cg_jb(:),cg_sum(:)
  logical :: can_symmetrize(wfd%nsppol)
  logical,allocatable :: bks_mask(:,:,:)
  type(esymm_t),pointer :: QP_sym(:)
  type(sigijtab_t),pointer :: Sigxij_tab(:)
  type(pawcprj_type),allocatable :: Cprj_kgw(:,:),Cprj_ksum(:,:)
  type(pawpwij_t),allocatable :: Pwij_qg(:),Pwij_fft(:)
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -211,7 +212,10 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
   ' Calculating <nk|Sigma_x|nk> at k: ',trim(ktoa(kgw)), ", for bands: ", trim(ltoa([bmin, bmax])),ch10
  call wrtout(std_out, msg)
 
- if (any(x_ngfft(1:3) /= wfd%ngfft(1:3)) ) call wfd%change_ngfft(cryst, psps, x_ngfft)
+ if (any(x_ngfft(1:3) /= wfd%ngfft(1:3)) ) then
+   call wfd%change_ngfft(cryst, psps, x_ngfft)
+   if (dtset%userie == 456) call wfdf%change_ngfft(Cryst, Psps, x_ngfft)
+ end if
  x_nfft = product(x_ngfft(1:3)); x_mgfft = maxval(x_ngfft(1:3)); x_fftalga = x_ngfft(7) / 100
 
  if (pawcross==1) mgfftf = MAXVAL(ngfftf(1:3))
@@ -349,7 +353,13 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
    ! Load wavefunctions for Sigma_x matrix elements
    ! ===============================================
    ABI_MALLOC_OR_DIE(ur_bdgw, (x_nfft * nspinor, bmin:bmax), ierr)
-   call wfd%get_many_ur([(jb, jb=bmin, bmax)], jk_ibz, spin, ur_bdgw)
+
+   if (dtset%userie == 456) then
+     call wrtout(std_out, "Taking states from Sigma^x_nk from supercell WFK file")
+     call wfdf%get_many_ur([(jb, jb=bmin, bmax)], jk_ibz, spin, ur_bdgw)
+   else
+     call wfd%get_many_ur([(jb, jb=bmin, bmax)], jk_ibz, spin, ur_bdgw)
+   end if
 
    if (wfd%usepaw == 1) then
      ! Load cprj for GW states, note the indexing.
@@ -380,7 +390,6 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
    ! ==============================
    ! ==== Sum over k in the BZ ====
    ! ==============================
-
    do ik_bz=1,Kmesh%nbz
 
      ! Parallelization over k-points and spin.
@@ -651,7 +660,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
 
  do spin=1,nsppol
    if (.not. can_symmetrize(spin)) cycle
-   call sigx_symmetrize(jk_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab, qp_ene, sigx, sigxme_tmp)
+   call sigx_symmetrize(jk_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab, dtset%symsigma_de, qp_ene, sigx, sigxme_tmp)
  end do
 
  if (gwcalctyp >= 20) then
@@ -737,18 +746,17 @@ end subroutine calc_sigx_me
 !!  Symmetrize Sig_x matrix elements
 !!
 
-subroutine sigx_symmetrize(jk_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab, qp_ene, sigx, sigxme_tmp)
+subroutine sigx_symmetrize(jk_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab, symsigma_de, qp_ene, sigx, sigxme_tmp)
 
  integer,intent(in) :: jk_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab
- real(dp),intent(in) :: qp_ene(:,:,:)
+ real(dp),intent(in) :: symsigma_de, qp_ene(:,:,:)
  complex(dp),intent(in) :: sigx(2, bmin:bmax, bmin:bmax, nsppol * nsig_ab)
  complex(dp),intent(inout) :: sigxme_tmp(bmin:bmax, bmin:bmax, nsppol * nsig_ab)
 
 !Local variables ------------------------------
  integer :: ib, jb, ndegs, ii
  integer,allocatable :: degtab(:,:)
- complex(dpc),allocatable :: sym_sigx(:,:,:)
-
+ complex(dp),allocatable :: sym_sigx(:,:,:)
 !************************************************************************
 
  ! Find number of degenerates subspaces and number of bands in each subspace.
@@ -758,12 +766,11 @@ subroutine sigx_symmetrize(jk_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab, q
  ABI_ICALLOC(degtab, (bmin:bmax, bmin:bmax))
  do ib=bmin,bmax
    do jb=bmin,bmax
-    if (abs(qp_ene(ib, jk_ibz, spin) - qp_ene(jb, jk_ibz, spin)) < 0.001 / Ha_ev) degtab(ib, jb) = 1
+    if (abs(qp_ene(ib, jk_ibz, spin) - qp_ene(jb, jk_ibz, spin)) < symsigma_de) degtab(ib, jb) = 1
    end do
  end do
 
- ABI_MALLOC(sym_sigx, (bmin:bmax, bmin:bmax, nsig_ab))
- sym_sigx = czero
+ ABI_CALLOC(sym_sigx, (bmin:bmax, bmin:bmax, nsig_ab))
 
  ! Average over degenerate diagonal elements.
  do ib=bmin,bmax

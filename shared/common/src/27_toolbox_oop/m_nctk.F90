@@ -6,7 +6,7 @@
 !!  Tools and wrappers for NETCDF-IO.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -219,12 +219,9 @@ MODULE m_nctk
 
  public :: nctk_write_datar
  public :: nctk_read_datar
-
- ! FIXME These routines are specific to anaddb and should be moved at the level of 77_ddb
- public :: nctk_defwrite_nonana_terms  ! Write phonon frequencies and displacements for q-->0
-                                       ! in the presence of non-analytical behaviour.
- public :: nctk_defwrite_nonana_raman_terms   ! Write raman susceptiblities for q-->0
- public :: nctk_defwrite_raman_terms   ! Write raman susceptiblities and frequencies for q=0
+ public :: nctk_prepare_mpiio
+ ! This function appears to be required to prevent deadlocks during I/O operations in single mode.
+ ! It's called automatically when using nctk_open_modify and nctk_open_read
 
  public :: create_nc_file              ! FIXME: Deprecated
  public :: write_var_netcdf            ! FIXME: Deprecated
@@ -839,7 +836,7 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
  end if
 
  if (xmpi_comm_size(comm) > 1 .or. nctk_has_mpiio) then
-   call wrtout(std_out, sjoin("- Opening HDf5 file with MPI-IO support:", path))
+   call wrtout(std_out, sjoin(" nctk_open_modify: Opening HDf5 file with MPI-IO support:", path))
 #ifdef HAVE_NETCDF_MPI
    ncerr = nf90_open_par(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
                          comm=comm, info=xmpio_info, ncid=ncid)
@@ -848,13 +845,14 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
    ABI_ERROR("nprocs > 1 but netcdf does not support MPI-IO")
 #endif
  else
-   call wrtout(std_out, sjoin("- Opening netcdf file without MPI-IO support:", path))
+   call wrtout(std_out, sjoin(" nctk_open_modify: Opening netcdf file without MPI-IO support:", path))
    ncerr = nf90_open(path, nf90_write, ncid)
    NCF_CHECK_MSG(ncerr, sjoin("nf90_open: ", path))
  end if
 
  ! Set file in define mode.
  NCF_CHECK(nctk_set_defmode(ncid))
+ !call wrtout(std_out, "- Returning from nctk_open_modify")
 
 end function nctk_open_modify
 !!***
@@ -2239,6 +2237,33 @@ integer function nctk_read_datar(path,varname,ngfft,cplex,nfft,nspden,&
 end function nctk_read_datar
 !!***
 
+!!****f* m_nctk/nctk_prepare_mpiio
+!! NAME
+!! nctk_mpiio
+!!
+!! FUNCTION
+!! This function appears to be required to prevent deadlocks during I/O operations in single mode.
+!! Although single mode is the default, on some architectures or compilers, nf90_put_var
+!! can deadlock if not all processors in the communicator invoke the function.
+!! This solution was proposed by Hsiao-Yi Tsai.
+
+integer function nctk_prepare_mpiio(ncid, varname) result(ncerr)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ncid
+ character(len=*),intent(in) :: varname
+
+!Local variables-------------------------------
+ integer :: vid
+ character(len=nctk_slen) :: out_varname
+! *************************************************************************
+
+ vid = nctk_idname(ncid, varname)
+ ncerr = nf90_inquire_variable(ncid, vid, out_varname)
+
+end function nctk_prepare_mpiio
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_nctk/collect_datar
@@ -2471,177 +2496,6 @@ subroutine var_from_name(ncid, name, var)
  call var_from_id(ncid, varid, var)
 
 end subroutine var_from_name
-!!***
-
-!!****f* m_nctk/nctk_defwrite_nonana_terms
-!! NAME
-!! nctk_defwrite_nonana_terms
-!!
-!! FUNCTION
-!!  Write to ncfile the phonon frequencies and displacements for q --> 0 in the presence of non-analytical behaviour.
-!!
-!! INPUTS
-!!  ncid=netcdf file id.
-!!  iq_dir=Index of the q-point to be written to file
-!!  ndirs=Number of qpoints.
-!!  qdirs_cart(3,ndirs)=List of phonon wavevector directions along which the non-analytical correction
-!!    to the Gamma-point phonon frequencies will be calculated. The direction is in CARTESIAN COORDINATES
-!!  natom=Number of atoms
-!!  phfrq(3*natom)=Phonon frequencies in Ha
-!!  cart_displ(2,3*natom,3*natom)=displacements in CARTESIAN coordinates.
-!!
-!! OUTPUT
-!!  Only writing.
-!!
-!! SOURCE
-
-subroutine nctk_defwrite_nonana_terms(ncid, iq_dir, ndirs, qdirs_cart, natom, phfrq, cart_displ, mode)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: ncid,iq_dir,ndirs,natom
- character(len=*),intent(in) :: mode
-!arrays
- real(dp),intent(in) :: qdirs_cart(3, ndirs), phfrq(3*natom), cart_displ(2,3*natom,3*natom)
-
-!Local variables-------------------------------
- integer :: ncerr, na_phmodes_varid, na_phdispl_varid
-! *************************************************************************
-
- select case (mode)
- case ("define")
-   !NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
-   ncerr = nctk_def_dims(ncid, [nctkdim_t("number_of_non_analytical_directions", ndirs)], defmode=.True.)
-   NCF_CHECK(ncerr)
-
-   ncerr = nctk_def_arrays(ncid, [&
-     nctkarr_t('non_analytical_directions', "dp", "number_of_cartesian_directions, number_of_non_analytical_directions"),&
-     nctkarr_t('non_analytical_phonon_modes', "dp", "number_of_phonon_modes, number_of_non_analytical_directions"),&
-     nctkarr_t('non_analytical_phdispl_cart', "dp", &
-               "two, number_of_phonon_modes, number_of_phonon_modes, number_of_non_analytical_directions")])
-   NCF_CHECK(ncerr)
-
-   NCF_CHECK(nctk_set_datamode(ncid))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "non_analytical_directions"), qdirs_cart))
-
- case ("write")
-
-   NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_phonon_modes", na_phmodes_varid))
-   NCF_CHECK(nf90_put_var(ncid,na_phmodes_varid,phfrq*Ha_eV,start=[1, iq_dir], count=[3*natom, 1]))
-   NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_phdispl_cart", na_phdispl_varid))
-   ncerr = nf90_put_var(ncid,na_phdispl_varid,cart_displ*Bohr_Ang,&
-   start=[1,1,1,iq_dir], count=[2,3*natom,3*natom, 1])
-   NCF_CHECK(ncerr)
-
- case default
-   ABI_ERROR(sjoin("Wrong value for mode", mode))
- end select
-
-end subroutine nctk_defwrite_nonana_terms
-!!***
-
-!!****f* m_nctk/nctk_defwrite_nonana_raman_terms
-!! NAME
-!! nctk_defwrite_nonana_raman_terms
-!!
-!! FUNCTION
-!! Write the Raman susceptiblities for q-->0 along different directions in the netcdf file.
-!!
-!! INPUTS
-!!  ncid=netcdf file id.
-!!  iq_dir=Index of the q-point to be written to file.
-!!  ndirs=Number of qpoints.
-!!  rsus(3*natom,3,3)=List of Raman susceptibilities along the direction corresponding to iq_dir.
-!!  natom=Number of atoms
-!!
-!! OUTPUT
-!!  Only writing.
-!!
-!! SOURCE
-
-subroutine nctk_defwrite_nonana_raman_terms(ncid, iq_dir, ndirs, natom, rsus, mode)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: ncid,natom,iq_dir,ndirs
- character(len=*),intent(in) :: mode
-!arrays
- real(dp),intent(in) :: rsus(3*natom,3,3)
-
-!Local variables-------------------------------
-!scalars
- integer :: ncerr, raman_sus_varid
-! *************************************************************************
-
- ! Fake use of ndirs, to keep it as argument. This should be removed when ndirs will be used.
- if(.false.) ncerr=ndirs
-
- select case (mode)
- case ("define")
-   NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
-   ncerr = nctk_def_arrays(ncid, [ nctkarr_t("non_analytical_raman_sus", "dp", &
-"number_of_non_analytical_directions,number_of_phonon_modes,number_of_cartesian_directions,number_of_cartesian_directions")])
-   NCF_CHECK(ncerr)
-
-   NCF_CHECK(nctk_set_datamode(ncid))
-
- case ("write")
-   NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_raman_sus", raman_sus_varid))
-   ncerr = nf90_put_var(ncid,raman_sus_varid,rsus, start=[iq_dir,1,1,1], count=[1,3*natom,3,3])
-   NCF_CHECK(ncerr)
-
- case default
-   ABI_ERROR(sjoin("Wrong value for mode", mode))
- end select
-
-end subroutine nctk_defwrite_nonana_raman_terms
-!!***
-
-!!****f* m_nctk/nctk_defwrite_raman_terms
-!! NAME
-!! nctk_defwrite_raman_terms
-!!
-!! FUNCTION
-!! Write the Raman susceptiblities for q=0 and also the phonon frequncies at gamma.
-!!
-!! INPUTS
-!!  ncid=netcdf file id.
-!!  rsus(3*natom,3,3)=List of Raman susceptibilities.
-!!  natom=Number of atoms
-!!
-!! OUTPUT
-!!  Only writing.
-!!
-!! SOURCE
-
-subroutine nctk_defwrite_raman_terms(ncid, natom, rsus, phfrq)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: ncid,natom
-!arrays
- real(dp),intent(in) :: rsus(3*natom,3,3)
- real(dp),intent(in) :: phfrq(3*natom)
-
-!Local variables-------------------------------
-!scalars
- integer :: ncerr, raman_sus_varid, phmodes_varid
-! *************************************************************************
-
- NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
- ncerr = nctk_def_arrays(ncid, [ nctkarr_t("raman_sus", "dp", &
-  "number_of_phonon_modes,number_of_cartesian_directions,number_of_cartesian_directions"), &
-  nctkarr_t("gamma_phonon_modes", "dp", "number_of_phonon_modes")])
- NCF_CHECK(ncerr)
-
- NCF_CHECK(nctk_set_datamode(ncid))
-
- NCF_CHECK(nf90_inq_varid(ncid, "raman_sus", raman_sus_varid))
- NCF_CHECK(nf90_put_var(ncid,raman_sus_varid,rsus))
- NCF_CHECK(nf90_inq_varid(ncid, "gamma_phonon_modes", phmodes_varid))
- NCF_CHECK(nf90_put_var(ncid,phmodes_varid,phfrq*Ha_eV))
-
-end subroutine nctk_defwrite_raman_terms
 !!***
 
 !!****f* m_nctk/create_nc_file

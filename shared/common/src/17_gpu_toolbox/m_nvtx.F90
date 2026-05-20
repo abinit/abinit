@@ -9,7 +9,7 @@
 !! This module should (TBC) only be activated when GPU execution is enabled.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2025 ABINIT group
+!!  Copyright (C) 2010-2026 ABINIT group
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -106,8 +106,6 @@ contains
 
   subroutine nvtxStartRange(name,id)
 
-    implicit none
-
     character(kind=c_char,len=*) :: name
     integer, optional:: id
     type(nvtxEventAttributes):: event
@@ -136,7 +134,7 @@ contains
   end subroutine nvtxStartRange
 
   subroutine nvtxEndRange
-    call nvtxRangePop
+    call nvtxRangePop()
   end subroutine nvtxEndRange
 
 #endif

@@ -7,7 +7,7 @@
 !!  They permit to hide the complex/real form of the WFs.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2025 ABINIT group (FBottin,CS,FDahm,MT)
+!! Copyright (C) 2009-2026 ABINIT group (FBottin,CS,FDahm,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,7 +56,7 @@ CONTAINS
 !!  for a block of band (band-FFT parallelisation)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2025 ABINIT group (FBottin,CS)
+!! Copyright (C) 1998-2026 ABINIT group (FBottin,CS)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,9 +103,8 @@ subroutine xprecon(cg,eval,blocksize,iterationnumber,kinpw,&
  real(dp),intent(inout) :: pcon(npw,blocksize),vect(vectsize,blocksize)
 
 !Local variables-------------------------------
- complex(dpc),dimension(:,:),allocatable :: z_cg,z_eval,z_ghc,z_vect
+ complex(dp),dimension(:,:),allocatable :: z_cg,z_eval,z_ghc,z_vect
  real(dp) :: tsec(2)
-
 ! *********************************************************************
 
  if (present(tim_xprecon).and.present(timopt)) then

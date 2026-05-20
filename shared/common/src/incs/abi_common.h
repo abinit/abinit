@@ -1,7 +1,7 @@
 /* abi_common.h */
 
 /*
- * Copyright (C) 2008-2025 ABINIT Group (MG)
+ * Copyright (C) 2008-2026 ABINIT Group (MG)
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
@@ -312,8 +312,6 @@
 #define ABI_ERROR_NODUMP(msg) call msg_hndl(msg, "ERROR", "PERS", NODUMP=.TRUE. _FILE_LINE_ARGS_)
 #define ABI_ERROR_NOSTOP(msg, ierr) \
    ierr=ierr+1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_)
-#define MSG_ERROR_NOSTOP_IF(condition, msg, ierr) \
-   if (condition)  then NEWLINE ABI_ERROR_NOSTOP(msg, ierr) NEWLINE endif
 
 #define NCF_CHECK(ncerr) if (ncerr/=nf90_noerr) call netcdf_check(ncerr,"No msg from caller" _FILE_LINE_ARGS_)
 #define NCF_CHECK_MSG(ncerr,msg) if (ncerr/=nf90_noerr) call netcdf_check(ncerr,msg _FILE_LINE_ARGS_)
@@ -411,8 +409,10 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
  *   - emit deprecation warnings at USE_DEVICE_PTR, while still supporting it
  * This macro exists to keep support for older NVHPC versions.
  */
+#ifdef FC_NVHPC
 #if __NVCOMPILER_MAJOR__ < 25
 #define USE_DEVICE_ADDR USE_DEVICE_PTR
+#endif
 #endif
 
 /* DFTI macros (should be declared in m_dfti but build-sys tests complain */
@@ -429,6 +429,16 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #  define GWPC_CMPLX(re,im) CMPLX(re,im)
 #  define __slkmat_t slkmat_sp_t
 #endif
+
+
+/* Macros used to hide OpenMp target statements */
+
+#ifdef HAVE_OPENMP_OFFLOAD
+#  define _OMP_TARGET !$OMP TARGET
+#else
+#  define _OMP_TARGET ! no_openmp_target
+#endif
+
 
 #endif
 /* _ABINIT_COMMON_H */

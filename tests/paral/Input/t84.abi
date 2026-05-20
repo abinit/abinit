@@ -6,7 +6,7 @@ tmpdata_prefix = "t84_MPI10t"
 # end runtests.py section
 
 # _== Convergency and starting
-# DATASET 1: LDA 
+# DATASET 1: LDA
 # DATASET 2: LDA+DMFT
 ndtset 2
 prtvol    4
@@ -31,14 +31,14 @@ nsppol  1
 nspden  4
 pawspnorb 1
 natom 1 ntypat 1 typat 1
-znucl  23.0 
+znucl  23.0
 # V Sr O*3
 xred 0.00 0.00 0.00
 acell   3*7.00 # not physical
 pawovlp -1
 rprim 0.5 0.5 0.0
       0.0 0.5 0.5
-      0.5 0.0 0.5 
+      0.5 0.0 0.5
 
 # == Points k and symetries
 kptopt 4
@@ -53,15 +53,16 @@ istwfk *1
 # == LDA+DMFT
 usedmft1 0
 usedmft2 1
-dmftbandi 9 
-dmftbandf 20 
+dmftbandi 9
+dmftbandf 20
 dmft_nwlo 100
 dmft_nwli 100000
 dmft_iter 1
-dmftcheck 0  
+dmftcheck 0
 dmft_rslf 0
 dmft_mxsf 0.7
 dmft_dc 1
+dmft_wanorthnorm 2
 
 # == CTQMC
 dmft_solv 8 # CTQMC
@@ -73,13 +74,13 @@ dmft_charge_prec 1e-10
 
 
 # == DFT+U
-usepawu1    1  
+usepawu1    1
 usepawu     10
 dmatpuopt  1   # The density matrix: the simplest expression.
-lpawu  2 
+lpawu  2
 upawu1  0.0  eV
 upawu2  4.1   eV
-f4of2_sla3    0.0 
+f4of2_sla3    0.0
 jpawu2  0.5   eV
 
 # == Parallelism
@@ -107,7 +108,8 @@ iomode 1
 #%% max_nprocs = 10
 #%% [NCPU_10]
 #%% files_to_test =
-#%%   t84_MPI10.abo, tolnlines =  3, tolabs =5.0e-1, tolrel = 5.0e-1, fld_options=-medium ;
+#%%   t84_MPI10.abo, tolnlines =  3, tolabs =5.0e-1, tolrel = 5.0e-1, fld_options=-easy ;
+#%%   t84_MPI10o_DS2_atom_01_Gtau_full_CTQMC_02.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 2.e-3, fld_options=-ridiculous;
 #%% [extra_info]
 #%% authors = B. Amadon, T. Cavignac
 #%% keywords = DMFT, CTQMC, FAILS_IFMPI

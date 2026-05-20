@@ -4,7 +4,7 @@
 </head>
 <body>
 
-<h5>Copyright (C) 2009-2025 ABINIT group (XG)
+<h5>Copyright (C) 2009-2026 ABINIT group (XG)
 <br> This file is distributed under the terms of the GNU General Public License, see
 ~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
 http://www.gnu.org/copyleft/gpl.txt </a>.
@@ -17,7 +17,7 @@ between September 2008 and January 2009. These release notes
 are relative to improvements of ABINITv5.7 with respect to v5.6.
 
 The list of contributors includes :
-D. Berkholz, F. Bottin, F. Bruneval, D. Caliste, M. Delaveau, T. Deutsch, G.A. Franco, M. Giantomassi, 
+D. Berkholz, F. Bottin, F. Bruneval, D. Caliste, M. Delaveau, T. Deutsch, G.A. Franco, M. Giantomassi,
 D. Hamann, A. Jacques, A. Lherbier, M. Oliveira, M. Mancini, M. Marques, M. Mikami,
 H. Peelaers, Y. Pouillon, T. Rangel, G.-M. Rignanese, L. Sindic, M. stankowski,
 M. Torrent, M. Verstraete, G. Zerah, Zhenhua Zeng, J. Zwanziger
@@ -61,7 +61,7 @@ B.1 The ETSF LibXC, from Miguel Marques, can now be used in production.
     At present the LibXC cannot be used for response function calculations.
     The interfacing with ABINIT has been done by M. Oliveira and Y. Pouillon.
 
-B.2 The Wannier90 interpolation of band structure can be used to interpolate 
+B.2 The Wannier90 interpolation of band structure can be used to interpolate
     self-consistent GW calculations. See test Wannier90#03.
     Work done by Tonatiuh Rangel, Don Hamann, Matteo Giantomassi, Gian-Marco Rignanese.
     However, the testing procedure is still rather incomplete. Only the .out is tested.
@@ -76,7 +76,7 @@ B.3 Implemented broadening of the electronic states due to interaction with phon
 B.4. Large improvement of the band FFT parallelism by M. Delaveau and F. Bottin.
     In particular, solved many problems with preconditioning,
     ability to write in parallel the binary files, in an efficient way,
-    using MPI OI, implementation of restart within LOBPCG in order to avoid crash during the minimization. 
+    using MPI OI, implementation of restart within LOBPCG in order to avoid crash during the minimization.
     Introduction of the cpp directive MPI_IO_MORE.
 
 B.5 Spin generalisation (nspden=2, 4) of the ability to compute the Fermi contact interaction at each nuclear
@@ -140,7 +140,7 @@ D.8 Improvement of the direct computation
     of the density based on the recursion method (instead of the
     iterative determination of the eigenfunctions) : use of two grids (to speed up the calculation)
     Introduction of the new input variables recgratio.
-    Still to be documented. 
+    Still to be documented.
     Work by Marco Mancini and Gilles Zerah.
 
 D.9. Suggestions for acknowledgments are now automatically generated, at the end of the output file.

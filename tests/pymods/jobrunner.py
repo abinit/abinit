@@ -1,23 +1,27 @@
-from __future__ import print_function, division, absolute_import #, unicode_literals
+"""
+Job execution and management tools for ABINIT tests.
 
+This module provides a unified interface for running ABINIT binaries in various
+environments, including sequential, MPI (OpenMPI, MPICH, srun, poe), and OpenMP.
+It also includes facilities for enforcing timeouts, profiling with Valgrind or
+perf, and managing environment variables.
+"""
 import os
 import sys
 import time
 
+from configparser import NoOptionError
 from subprocess import Popen
+
 from .subprocesswithtimeout import SubProcessWithTimeout
 
 try:
-    from ConfigParser import SafeConfigParser, NoOptionError
+    from configparser import SafeConfigParser
 except ImportError:
-    # The ConfigParser module has been renamed to configparser in Python 3
-    from configparser import NoOptionError
-    try:
-        from configparser import SafeConfigParser
-    except ImportError:
-        from configparser import ConfigParser as SafeConfigParser
+    from configparser import ConfigParser as SafeConfigParser
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 __version__ = "0.1"
@@ -25,8 +29,8 @@ __author__ = "Matteo Giantomassi"
 
 __all__ = [
     "JobRunner",
-    "TimeBomb",
     "OMPEnvironment",
+    "TimeBomb",
 ]
 
 
@@ -46,6 +50,15 @@ CFG_KEYWORDS = {
 
 
 def is_string(s):
+    """
+    Check if the input is a string-like object.
+
+    Args:
+        s: The object to check.
+
+    Returns:
+        bool: True if s is a string, False otherwise.
+    """
     try:
         s + "hello"
         return True
@@ -54,7 +67,16 @@ def is_string(s):
 
 
 def mpicfg_parser(fname, defaults=None):
-    """Parse the configuration file with MPI options."""
+    """
+    Parse a configuration file (INI format) for MPI options.
+
+    Args:
+        fname: Path to the configuration file.
+        defaults: Default values for the parser.
+
+    Returns:
+        dict: A dictionary containing the parsed MPI options.
+    """
     logger.debug("Parsing [MPI] section in file : " + str(fname))
 
     parser = SafeConfigParser(defaults)
@@ -90,8 +112,7 @@ def mpicfg_parser(fname, defaults=None):
 # used to store info about the exception in JobRunner exceptions (see run method)
 
 class JobRunnerError:
-#class JobRunnerError(Exception):
-    """Exceptions raised by `Jobrunner`."""
+    """Exception-like object to store information about job execution failures."""
 
     def __init__(self, return_code, cmd, run_etime, prev_errmsg=None):
         """
@@ -101,8 +122,6 @@ class JobRunnerError:
             run_etime: Elapsed-time
             prev_errmsg: Previous error message.
         """
-        # This is needed for pickle
-        #super(JobRunnerError, self).__init__("jobrunner error")
         self.return_code = return_code
         self.cmd = cmd
         self.run_etime = run_etime
@@ -115,28 +134,31 @@ class JobRunnerError:
 
         return string
 
-    #def __getstate__(self):
-    #    """
-    #    Return state is pickled as the contents for the instance.
-    #    """
-    #    print("in getstate")
-    #    return {k: getattr(self, k) for k in ("return_code", "cmd", "run_etime", "prev_errmsg")}
-
-    #def __setstate__(self, state):
-    #    print("in setstate")
-    #    self.return_code = state["return_code"]
-    #    self.cmd = state["cmd"]
-    #    self.run_etime = state["run_etime"]
-    #    self.prev_errmsg = state["prev_errmsg"]
-
 
 class JobRunner:
-    """Base Class used to manage the execution of jobs in an MPI environment."""
-    #Error = JobRunnerError
+    """
+    Manages the execution of jobs in an MPI or sequential environment.
+
+    This class provides a unified interface for running binaries with support for
+    MPI (via mpirun, srun, or poe), OpenMP, and diagnostic tools like Valgrind or perf.
+
+    It abstracts the complexities of different MPI launchers and environment
+    configurations, providing resource management and timeout enforcement.
+    """
 
     @classmethod
     def fromdict(cls, kwargs, ompenv=None, timebomb=None):
-        """Initialize the object from a dictionary"""
+        """
+        Create a JobRunner instance from a dictionary of options.
+
+        Args:
+            kwargs: Dictionary containing runner options.
+            ompenv: Optional OMPEnvironment instance.
+            timebomb: Optional TimeBomb instance for enforcing timeouts.
+
+        Returns:
+            JobRunner: A new instance configured with the provided options.
+        """
         d = dict(ompenv=ompenv, timebomb=timebomb)
         d.update(kwargs)
 
@@ -144,7 +166,16 @@ class JobRunner:
 
     @classmethod
     def fromfile(cls, fname, timebomb=None):
-        """Initialize the object from a INI configuration file."""
+        """
+        Create a JobRunner instance from an INI configuration file.
+
+        Args:
+            fname: Path to the configuration file.
+            timebomb: Optional TimeBomb instance.
+
+        Returns:
+            JobRunner: A new instance configured from the file.
+        """
         d = mpicfg_parser(fname)
         d["ompenv"] = OMPEnvironment.from_file(fname, allow_empty=True)
         d["timebomb"] = timebomb
@@ -153,13 +184,30 @@ class JobRunner:
 
     @classmethod
     def sequential(cls, ompenv=None, timebomb=None):
-        """Build a simple `JobRunner` for sequential runs."""
+        """
+        Create a JobRunner for sequential (non-MPI) execution.
+
+        Args:
+            ompenv: Optional OMPEnvironment.
+            timebomb: Optional TimeBomb.
+
+        Returns:
+            JobRunner: A sequential runner instance.
+        """
         return cls(dict(ompenv=ompenv, timebomb=timebomb))
 
     @classmethod
     def srun(cls, ompenv=None, timebomb=None, mpi_args=""):
         """
-        Build a `JobRunner` based on srun (assumes some default values).
+        Create a JobRunner configured for Slurm's `srun`.
+
+        Args:
+            ompenv: Optional OMPEnvironment.
+            timebomb: Optional TimeBomb.
+            mpi_args: Extra arguments for the mpirun command.
+
+        Returns:
+            JobRunner: A runner instance configured for Slurm.
         """
         d = dict(ompenv=ompenv, timebomb=timebomb, mpi_args=mpi_args)
         d["mpirun_np"] = "srun -n"
@@ -168,7 +216,16 @@ class JobRunner:
     @classmethod
     def generic_mpi(cls, ompenv=None, use_mpiexec=False, mpi_args="", timebomb=None):
         """
-        Build a `JobRunner` for MPI jobs (assumes some default values).
+        Create a JobRunner for generic MPI execution (mpirun or mpiexec).
+
+        Args:
+            ompenv: Optional OMPEnvironment.
+            use_mpiexec: If True, use `mpiexec` instead of `mpirun`.
+            mpi_args: Extra arguments for the MPI launcher.
+            timebomb: Optional TimeBomb.
+
+        Returns:
+            JobRunner: A generic MPI runner instance.
         """
         # It should work, provided that the shell environment is properly defined.
         d = dict(ompenv=ompenv, timebomb=timebomb, mpi_args=mpi_args)
@@ -181,7 +238,15 @@ class JobRunner:
         return cls(d)
 
     def __init__(self, dic):
+        """
+        Initialize the JobRunner.
 
+        Args:
+            dic (dict): Dictionary of configuration options.
+
+        Raises:
+            ValueError: If poe and (mpirun or srun) are both specified.
+        """
         self.exceptions = []
 
         for k, v in dic.items():
@@ -197,8 +262,12 @@ class JobRunner:
             raise ValueError("poe and (mpirun||srun) are mutually exclusive")
 
     def __str__(self):
-        #return "\n".join([str(k) + " : " + str(v) for (k, v) in self.__dict__.items()] )
+        """
+        Return a string representation of the job runner's configuration.
 
+        Returns:
+            str: The configuration summary.
+        """
         string = ""
         for key in CFG_KEYWORDS:
             attr = getattr(self, str(key), None)
@@ -213,13 +282,26 @@ class JobRunner:
         return string
 
     def set_timebomb(self, timebomb):
+        """
+        Set the timebomb for the runner.
+
+        Args:
+            timebomb (TimeBomb): The TimeBomb instance.
+
+        Raises:
+            ValueError: If a timebomb is already defined.
+        """
         if self.has_timebomb:
             raise ValueError("timebomb is already defined")
-        else:
-            self.timebomb = timebomb
+        self.timebomb = timebomb
 
     def set_valgrind_cmdline(self, cmdline):
-        """Set the command line options to be passed to VALGRIND."""
+        """
+        Set the command line options to be passed to VALGRIND.
+
+        Args:
+            cmdline (str): The command line options.
+        """
         self.valgrind_cmdline = cmdline
 
     @property
@@ -228,12 +310,25 @@ class JobRunner:
         return hasattr(self, "valgrind_cmdline")
 
     def build_valgrind_parser(self):
+        """
+        Build and return a parser for Valgrind output.
+
+        Returns:
+            MemcheckParser: The initialized parser.
+
+        Raises:
+            ValueError: If Valgrind is not enabled for this runner.
+        """
         if not self.has_valgrind: raise ValueError("Runner does not use valgrind!")
-        # TODO build specialized parsers for the different tools (XML?)
         return MemcheckParser()
 
     def set_debugger(self, debugger):
-        """Set the debugger."""
+        """
+        Set the debugger executable.
+
+        Args:
+            debugger (str): Path to the debugger executable.
+        """
         self.debugger = debugger
 
     @property
@@ -242,7 +337,12 @@ class JobRunner:
         return hasattr(self, "debugger")
 
     def set_perf_command(self, perf_command):
-        """Set the perf command to be used."""
+        """
+        Set the perf command to be used.
+
+        Args:
+            perf_command (str): The perf command string.
+        """
         self.perf_command = perf_command
 
     @property
@@ -253,18 +353,18 @@ class JobRunner:
     @property
     def has_srun(self):
         """True if we are running with Slurm srun"""
-        return hasattr(self, "mpirun_np") and getattr(self, "mpirun_np") == "srun -n"
+        return hasattr(self, "mpirun_np") and self.mpirun_np == "srun -n"
 
     @property
     def has_mpirun(self):
         """True if we are running a MPI job with mpirun"""
-        return hasattr(self, "mpirun_np") and getattr(self, "mpirun_np") != "srun -n"
+        return hasattr(self, "mpirun_np") and self.mpirun_np != "srun -n"
 
 
     @property
     def has_poe(self):
         """True if are using IBM poe for MPI executions."""
-        return hasattr(self, "poe") and bool(getattr(self, "poe"))
+        return hasattr(self, "poe") and bool(self.poe)
 
     @property
     def has_timebomb(self):
@@ -272,32 +372,42 @@ class JobRunner:
         True if we are running the job under the control of
         an application that will enforce a timeout.
         """
-        return hasattr(self, "timebomb") and bool(getattr(self, "timebomb"))
+        return hasattr(self, "timebomb") and bool(self.timebomb)
 
     @property
     def has_ompenv(self):
         """True if we are using OpenMP."""
-        return hasattr(self, "ompenv") and bool(getattr(self, "ompenv"))
+        return hasattr(self, "ompenv") and bool(self.ompenv)
 
     def set_ompenv(self, ompenv):
-        """Set the value of the OpenMP env variables."""
+        """
+        Set the value of the OpenMP environmental variables.
+
+        Args:
+            ompenv (OMPEnvironment): The OMP environment instance.
+
+        Raises:
+            ValueError: If an OMP environment is already defined.
+        """
         if self.has_ompenv:
             raise ValueError("ompenv is already defined")
-        else:
-            self.ompenv = ompenv
+        self.ompenv = ompenv
 
     def run(self, mpi_nprocs, bin_path, stdin_fname, stdout_fname, stderr_fname, bin_argstr="", cwd=None):
         """
-        Args:
-            mpi_nprocs: Number of MPI nodes.
-            bin_path: Path of the executable.
-            stdin_fname: Input file
-            stdout_fname: Output file
-            stderr_fname: Error file
-            bin_argstr: String with command line options passed to `bin_path`.
-            cwd: cd to cwd before launching the job.
+        Execute the job.
 
-        Set self.retcode
+        Args:
+            mpi_nprocs: Number of MPI processes to launch.
+            bin_path: Path to the executable.
+            stdin_fname: Optional path to the input file.
+            stdout_fname: Optional path to the output file.
+            stderr_fname: Optional path to the error file.
+            bin_argstr: Extra command-line arguments for the binary.
+            cwd: Optional working directory for the execution.
+
+        Returns:
+            float: Elapsed time of the execution (in seconds).
         """
         env = os.environ.copy()
         if self.has_ompenv: env.update(self.ompenv)
@@ -380,15 +490,9 @@ class JobRunner:
 
 class BaseValgrindParser:
     """
-    Base class for parsers used to analyze the output of Valgrind
-    Concrete classes must implement the methods:
+    Abstract base class for Valgrind output parsers.
 
-        parse(filename) to parse the content of filename
-
-
-    error_report
-        string that evaluates to True if errors are found.
-        ...
+    Subclasses must implement the `parse(filename)` method.
     """
     # I really miss python 2.6 abc and context managers but must be compatible with py 2.4
     def parse(self, filename):
@@ -400,6 +504,7 @@ class BaseValgrindParser:
 
 
 class MemcheckParser(BaseValgrindParser):
+    """Parser for Valgrind Memcheck tool output."""
     #==3851== HEAP SUMMARY:
     #==3851==     in use at exit: 25,149 bytes in 13 blocks
     #==3851==   total heap usage: 841 allocs, 828 frees, 579,777,815 bytes allocated
@@ -417,6 +522,19 @@ class MemcheckParser(BaseValgrindParser):
     #==3851== ERROR SUMMARY: 10000000 errors from 60 contexts (suppressed: 0 from 0)
 
     def parse(self, filename):
+        """
+        Parse the Memcheck output file.
+
+        Args:
+            filename (str): Path to the output file.
+
+        Returns:
+            dict: Dictionary of detected errors.
+
+        Raises:
+            RuntimeError: If 'LEAK SUMMARY' section is missing.
+            ValueError: If a required key is not found in the line.
+        """
 
         def fragile_parser(key, string):
             """
@@ -428,7 +546,7 @@ class MemcheckParser(BaseValgrindParser):
             return bytes_lost
 
         lost_bytes = 0
-        fh = open(filename, "r")
+        fh = open(filename)
 
         for line in fh:
             if "LEAK SUMMARY:" in line: break
@@ -462,8 +580,17 @@ class MemcheckParser(BaseValgrindParser):
 
 
 class TimeBomb:
+    """Enforces execution timeouts on subprocesses."""
 
     def __init__(self, timeout, delay=.05, exec_path=None):
+        """
+        Initialize the TimeBomb object.
+
+        Args:
+            timeout (int): Timeout in seconds.
+            delay (float, optional): Delay between checks.
+            exec_path (str, optional): Path to the timeout executable.
+        """
         self.timeout = int(timeout)
         self.delay = float(delay)
         self.exec_path = exec_path
@@ -471,8 +598,14 @@ class TimeBomb:
     def run(self, args,
             bufsize=0, executable=None, stdin=None, stdout=None, stderr=None, preexec_fn=None,
             close_fds=False, shell=False, cwd=None, env=None, universal_newlines=False, startupinfo=None, creationflags=0):
-        """Same interface as Popen."""
+        """
+        Execute a command with the configured timeout.
 
+        Supports the same interface as subprocess.Popen.
+
+        Returns:
+            tuple: (subprocess.Popen object, return_code)
+        """
         try:
 
             if self.exec_path:
@@ -493,37 +626,37 @@ class TimeBomb:
 
                 ret_code = p.wait()
 
+            #
+            # timeout exec is NOT available.
+            #
+            elif self.timeout > 0.0:
+                logger.debug("Using SubprocesswithTimeout and timeout_time : "+str(self.timeout))
+                p = SubProcessWithTimeout(self.timeout, delay=self.delay)
+
+                p, ret_code = p.run(args,
+                    bufsize=bufsize, executable=executable, stdin=stdin, stdout=stdout, stderr=stderr, preexec_fn=preexec_fn,
+                    close_fds=close_fds, shell=shell, cwd=cwd, env=env, universal_newlines=universal_newlines, startupinfo=startupinfo,
+                    creationflags=creationflags)
             else:
-                #
-                # timeout exec is NOT available.
-                #
-                if self.timeout > 0.0:
-                    logger.debug("Using SubprocesswithTimeout and timeout_time : "+str(self.timeout))
-                    p = SubProcessWithTimeout(self.timeout, delay=self.delay)
+                logger.debug("Using Popen (no timeout_time)")
+                p = Popen(args,
+                          bufsize=bufsize, executable=executable, stdin=stdin, stdout=stdout, stderr=stderr, preexec_fn=preexec_fn,
+                          close_fds=close_fds, shell=shell, cwd=cwd, env=env, universal_newlines=universal_newlines, startupinfo=startupinfo,
+                          creationflags=creationflags)
 
-                    p, ret_code = p.run(args,
-                        bufsize=bufsize, executable=executable, stdin=stdin, stdout=stdout, stderr=stderr, preexec_fn=preexec_fn,
-                        close_fds=close_fds, shell=shell, cwd=cwd, env=env, universal_newlines=universal_newlines, startupinfo=startupinfo,
-                        creationflags=creationflags)
-                else:
-                    logger.debug("Using Popen (no timeout_time)")
-                    p = Popen(args,
-                              bufsize=bufsize, executable=executable, stdin=stdin, stdout=stdout, stderr=stderr, preexec_fn=preexec_fn,
-                              close_fds=close_fds, shell=shell, cwd=cwd, env=env, universal_newlines=universal_newlines, startupinfo=startupinfo,
-                              creationflags=creationflags)
-
-                    ret_code = p.wait()
+                ret_code = p.wait()
 
             return p, ret_code
 
-        except:
+        except Exception:
             raise
 
 
 class OMPEnvironment(dict):
     """
-    OpenMP variables.
-    see https://computing.llnl.gov/tutorials/openMP/#EnvironmentVariables
+    Dictionary-like object storing OpenMP environment variables.
+
+    Supports validation of OpenMP-standard keys and initialization from INI files.
     """
     _keys = [
        "OMP_SCHEDULE",

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MT)
+!!  Copyright (C) 2008-2026 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,14 +26,13 @@ module m_opernlb_gemm
  USE_MPI
  use m_xmpi
  use m_abi_linalg
+ use m_gputk
  use m_gemm_nonlop_projectors
 
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
 
-#ifdef HAVE_FC_ISO_C_BINDING
  use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_size_t
-#endif
 
  implicit none
 
@@ -69,10 +68,9 @@ subroutine opernlb_gemm_distributed(rank,nprocs,npw,ndat,&
 
  !Local variables
  integer :: iblock,ibeg,iend,req(2),ierr,nprojs_cur_blk,rank_prev,rank_next
- complex(dpc) :: beta
+ complex(dp) :: beta
  real(dp), ABI_CONTIGUOUS pointer :: recv_buf(:,:,:), work_buf(:,:,:)
  real(dp), allocatable, target  :: projs_recv(:,:,:)
-
 ! *************************************************************************
 
  ABI_MALLOC(projs_recv, (cplex, npw, nprojs_last_blk))
@@ -209,7 +207,7 @@ subroutine opernlb_xgemm(cplex,transa,transb,npw,ndat,nprojs,alpha,a,lda,b,ldb,b
  integer,intent(in) :: rank,nprocs,nprojs_blk,nprojs_last_blk
  integer,intent(in) :: iblock
  logical,intent(in) :: use_distrib,use_sliced_gemms
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
  real(dp),target,intent(in) :: a(cplex,lda,nprojs), b(cplex,ldb,ndat)
  real(dp),target,intent(inout) :: c(cplex,ldc,ndat)
@@ -393,7 +391,7 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
  integer :: projs_beg,projs_end,dprojs_beg,dprojs_end
  integer :: nprojs_blk,nprojs_last_blk,nprojs_cur_blk,rank,nprocs,iblock,nblocks
  logical :: use_sliced_gemms
- complex(dpc) :: beta
+ complex(dp) :: beta
  real(dp), ABI_CONTIGUOUS pointer :: projs(:,:,:),projs_r(:,:,:),projs_i(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: dprojs(:,:,:),dprojs_r(:,:,:),dprojs_i(:,:,:)
 

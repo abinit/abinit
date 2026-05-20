@@ -7,7 +7,7 @@
 !!  a set of degenerate bands at a given k-point and spin.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,20 +68,12 @@ contains
 !!
 !! INPUTS
 !!  Wfd(wfd_t)= structure gathering information on wave functions
-!!    %nibz=Number of points in the IBZ.
-!!    %nsppol=number of independent spin polarizations
-!!    %usepaw=1 if PAW
 !!  ik_ibz=The index of the k-point in the IBZ.
 !!  spin=The spin index.
 !!  ngfft(18)=Info on the FFT mesh to be used for evaluting u(r) and the rotated u(R^{1}(r-t)).
 !!    ngfft must be compatible with the symmetries of the crystal and can differ from Wfd%ngfft.
 !!    wfd_change_ngfft is called if ANY(Wfd%ngfft(1:3) =/ ngfft).
 !!  Cryst<crystal_t>=Type gathering info on the crystal structure.
-!!    %nsym=Number of operations in space group
-!!    %ntypat=Number of type of atoms (onlu for PAW)
-!!    %symrec(3,3,nsym)=Symmetry operations in reciprocal space (reduced coordinates)
-!!    %tnons(3,nsym)=Fractional translations
-!!    %typat(natom)=Type of each atom
 !!  BSt<ebands_t>=Datatype with electronic energies.
 !!  Pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  Pawrad(ntypat*usepaw)<type(pawrad_type)>=paw radial mesh and related data.
@@ -140,8 +132,8 @@ contains
 !! SOURCE
 
 subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngfftf,&
-& Cryst,BSt,Pawtab,Pawrad,Pawang,Psps,tolsym,BSym,&
-& EDIFF_TOL) ! optional
+                          Cryst,BSt,Pawtab,Pawrad,Pawang,Psps,tolsym,BSym,&
+                          EDIFF_TOL) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -169,7 +161,7 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
  integer :: ii,jj,lmax
  integer :: optcut,optgr0,optgr1,optgr2,optrad
  real(dp) :: EDIFF_TOL_,arg,fft_fact
- complex(dpc) :: exp_mikg0t,exp_ikg0t,cmat_ab
+ complex(dp) :: exp_mikg0t,exp_ikg0t,cmat_ab
  logical :: iscompatibleFFT,found,only_trace
  character(len=500) :: msg
 !arrays
@@ -180,23 +172,22 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
  real(dp) :: kpt(3),kpg0(3),omat(2)
  real(dp),pointer :: ene_k(:)
  real(dp),pointer :: zarot(:,:,:,:)
- complex(dpc),allocatable :: eig0r(:,:),tr_emig0r(:,:)
- complex(gwpc),allocatable :: ur1(:),ur2(:),ur2_rot(:)
+ complex(dp),allocatable :: eig0r(:,:),tr_emig0r(:,:)
+ complex(gwp),allocatable :: ur1(:),ur2(:),ur2_rot(:)
  type(pawcprj_type),allocatable :: Cprj_b1(:,:),Cprj_b2(:,:),Cprj_b2rot(:,:)
  type(Pawfgrtab_type),allocatable :: Pawfgrtab(:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
- !
+
  ! Consistency check on input.
  ABI_CHECK(Wfd%nspinor==1,'nspinor/=1 not coded')
  !
  ! By default all bands are included
  !first_band=1; last_band=Wfd%nband(ik_ibz,spin)
- ABI_CHECK(first_band==1,"first_band/=1 not coded")
- ABI_CHECK(last_band<=Wfd%nband(ik_ibz,spin),"last_band cannot be > nband_k")
+ ABI_CHECK(first_band==1, "first_band/=1 not coded")
+ ABI_CHECK(last_band<=Wfd%nband(ik_ibz,spin), "last_band cannot be > nband_k")
 
  EDIFF_TOL_=0.005/Ha_eV; if (PRESENT(EDIFF_TOL)) EDIFF_TOL_=ABS(EDIFF_TOL)
 
@@ -214,14 +205,14 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
 
  if (.not.iscompatibleFFT) then
    write(msg,'(3a)')&
-&    ' For symmetry analysis, the real space FFT mesh must be compatible with the symmetries of the space group',ch10,&
-&    ' classify_bands will return. Action: change the input variable ngfftf '
+    ' For symmetry analysis, the real space FFT mesh must be compatible with the symmetries of the space group',ch10,&
+    ' classify_bands will return. Action: change the input variable ngfftf '
    ABI_WARNING(msg)
    Bsym%err_status=1
    Bsym%err_msg= msg
    RETURN
  end if
- !
+
  ! only_trace=if .TRUE. only the trace of a single matrix per class is calculated (standard procedure if
  ! only the symmetry of bands is required). If .FALSE. all the matrices for each irreducible representation
  ! are calculated and stored in BSym
@@ -243,7 +234,7 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
 
  if (Bsym%err_status/=0) then
    write(msg,'(a,i0,a)')" esymm_init returned err_status= ",Bsym%err_status,&
-&    " Band classifications cannot be performed."
+     " Band classifications cannot be performed."
    ABI_WARNING(msg)
    RETURN
  end if
@@ -302,9 +293,8 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
    optgr0=0; optgr1=0; optgr2=0 ! dont need gY terms locally
    optrad=1                     ! do store r-R
 
-
    call nhatgrid(Cryst%atindx1,Cryst%gmet,Cryst%natom,Cryst%natom,Cryst%nattyp,Wfd%ngfft,Cryst%ntypat,&
-&    optcut,optgr0,optgr1,optgr2,optrad,Pawfgrtab,pawtab,Cryst%rprimd,Cryst%typat,Cryst%ucvol,Cryst%xred)
+    optcut,optgr0,optgr1,optgr2,optrad,Pawfgrtab,pawtab,Cryst%rprimd,Cryst%typat,Cryst%ucvol,Cryst%xred)
 
    !call pawfgrtab_print(Pawfgrtab,unit=std_out,Wfd%prtvol=10)
 
@@ -313,10 +303,10 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
    if (use_paw_aeur) then
      ABI_WARNING("Using AE wavefunction for rotation in real space!")
      call paw_pwaves_lmn_init(Paw_onsite,Cryst%natom,Cryst%natom,Cryst%ntypat,&
-&                             Cryst%rprimd,Cryst%xcart,Pawtab,Pawrad,Pawfgrtab)
+                             Cryst%rprimd,Cryst%xcart,Pawtab,Pawrad,Pawfgrtab)
    end if
  end if
- !
+
  ! ===============================================
  ! ==== Calculate the representation matrices ====
  ! ===============================================
@@ -340,8 +330,9 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
      call calc_ceigr(-g0,nfft,nspinor1,Wfd%ngfft,tr_emig0r(:,isym))
    end do
  end if
- !
- do idg=1,Bsym%ndegs ! Loop over the set of degenerate states.
+
+ ! Loop over the set of degenerate states.
+ do idg=1,Bsym%ndegs
    ib_start=Bsym%degs_bounds(1,idg)
    ib_stop =Bsym%degs_bounds(2,idg)
    dim_degs=Bsym%degs_dim(idg)
@@ -380,14 +371,14 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
            end if
          end if
        end if
-       !
+
        ! ===================================================
        ! ==== Loop over the classes of the little group ====
        ! ===================================================
        sym_idx=0
        do iclass=1,Bsym%nclass
          nsym_class=Bsym%nelements(iclass)
-         !
+
          do isym_class=1,nsym_class ! Loop over elements in each class.
            sym_idx=sym_idx+1
            if (Bsym%only_trace.and.isym_class/=1) CYCLE ! Do it once if only the character is required.
@@ -476,8 +467,8 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
 
      end do !ib2
    end do !ib1
-   !
-   ! === Calculate the trace for each class ===
+
+   ! Calculate the trace for each class.
    if (Bsym%only_trace) then ! TODO this is valid if only trace.
      ABI_ERROR("Have to reconstruct missing traces")
    else
@@ -497,7 +488,7 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
 
  call esymm_print(Bsym,unit=std_out,prtvol=Wfd%prtvol)
  call esymm_print(Bsym,unit=ab_out ,prtvol=Wfd%prtvol)
- !
+
  ! ===================
  ! === Free memory ===
  ! ===================
@@ -506,9 +497,7 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
  ABI_FREE(ur2)
  ABI_FREE(ur2_rot)
  ABI_FREE(eig0r)
- if (Bsym%can_use_tr)  then
-   ABI_FREE(tr_emig0r)
- end if
+ ABI_SFREE(tr_emig0r)
 
  if (Wfd%usepaw==1) then
    call pawcprj_free(Cprj_b1)

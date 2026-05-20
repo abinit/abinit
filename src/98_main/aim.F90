@@ -6,7 +6,7 @@
 !! Main routine for Bader Atom-In-Molecule analysis.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2025 ABINIT group (PCasek,FF,XG)
+!! Copyright (C) 2002-2026 ABINIT group (PCasek,FF,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -64,7 +64,6 @@ program aim
  type(aim_dataset_type) :: aim_dtset
  character(len=500) :: msg
  character(len=fnlen) :: fcfile(natm)
-
 !******************************************************************
 
 !Change communicator for I/O (mandatory!)

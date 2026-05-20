@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h14 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h15 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v8_t82/t82.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v8_t82/t82.abi
 - output file    -> t82.abo
 - root for input  files -> t82i
 - root for output files -> t82o
@@ -65,6 +65,7 @@ _ WF disk file :      0.303 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =          16
 -   mkqmem =          16        mk1mem =          16           mpw =          77
       nfft =        1728          nkpt =          16
+- my_mband =           8
 ================================================================================
 P This job should need less than                       2.216 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -82,6 +83,7 @@ _ WF disk file :      0.303 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =          16
 -   mkqmem =          16        mk1mem =          16           mpw =          77
       nfft =        1728          nkpt =          16
+- my_mband =           8
 ================================================================================
 P This job should need less than                       2.216 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -99,6 +101,7 @@ _ WF disk file :      0.303 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =          16
 -   mkqmem =          16        mk1mem =          16           mpw =          77
       nfft =        1728          nkpt =          16
+- my_mband =           8
 ================================================================================
 P This job should need less than                       2.313 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -116,6 +119,7 @@ _ WF disk file :      0.303 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =          16
 -   mkqmem =          16        mk1mem =          16           mpw =          77
       nfft =        1728          nkpt =          16
+- my_mband =           8
 ================================================================================
 P This job should need less than                       2.313 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -560,7 +564,7 @@ P          mk1mem7         16
                          0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
                          0.06250    0.06250    0.06250    0.06250
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4076113748E+00  1.4076113748E+00  1.4076113748E+00
+                       1.4076113800E+00  1.4076113800E+00  1.4076113800E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6600000000E+00  2.6600000000E+00  2.6600000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -647,8 +651,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.04564
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -665,8 +669,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    1.353815
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -693,14 +697,14 @@ solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-08, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -10.094827884334    -1.009E+01 1.028E-02 2.495E+00
- ETOT  2  -10.100321874155    -5.494E-03 3.720E-07 7.182E-02
- ETOT  3  -10.100467999801    -1.461E-04 6.450E-06 6.854E-03
- ETOT  4  -10.100478337230    -1.034E-05 3.451E-07 2.302E-04
- ETOT  5  -10.100478521904    -1.847E-07 8.218E-09 2.289E-06
- ETOT  6  -10.100478524047    -2.143E-09 9.543E-11 4.626E-08
- ETOT  7  -10.100478524078    -3.141E-11 1.950E-12 1.617E-09
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -10.094827884334    -1.009E+01 1.028E-02 2.495E+00 0.000E+00 0.000E+00
+ ETOT  2  -10.100321874155    -5.494E-03 3.720E-07 7.182E-02 0.000E+00 0.000E+00
+ ETOT  3  -10.100467999801    -1.461E-04 6.450E-06 6.854E-03 0.000E+00 0.000E+00
+ ETOT  4  -10.100478337230    -1.034E-05 3.451E-07 2.302E-04 0.000E+00 0.000E+00
+ ETOT  5  -10.100478521904    -1.847E-07 8.218E-09 2.289E-06 0.000E+00 0.000E+00
+ ETOT  6  -10.100478524047    -2.143E-09 9.543E-11 4.626E-08 0.000E+00 0.000E+00
+ ETOT  7  -10.100478524078    -3.141E-11 1.950E-12 1.617E-09 0.000E+00 0.000E+00
 
  At SCF step    7       vres2   =  1.62E-09 < tolvrs=  1.00E-08 =>converged.
 
@@ -739,15 +743,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.448821     0.448821      0.897642     0.000000
-    2   2.00000     1.259907     1.259907      2.519813     0.000000
- ---------------------------------------------------------------------
-  Sum:              1.708728     1.708728      3.417455     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Al   2.00000     0.448821     0.448821      0.897642     0.000000
+    2 As   2.00000     1.259907     1.259907      2.519813     0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 1.708728     1.708728      3.417455     0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -762,7 +767,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.40761137484940     1.40761137484940     1.40761137484940
+    2      1.40761138004704     1.40761138004704     1.40761138004704
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -774,7 +779,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
-              =  5.630445499398  5.630445499398  5.630445499398 angstroms
+              =  5.630445520188  5.630445520188  5.630445520188 angstroms
  prteigrs : about to open file t82o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.06899   Average Vxc (hartree)=  -0.34367
  Eigenvalues (hartree) for nkpt=   2  k points, SPIN UP:
@@ -799,7 +804,7 @@ psp_core            :  7.28633223792855E-01
 local_psp           : -2.40142855258595E+00
 non_local_psp       :  6.42965147043973E-01
 total_energy        : -1.01004785240780E+01
-total_energy_eV     : -2.74847998288374E+02
+total_energy_eV     : -2.74848022387923E+02
 band_energy         : -6.83850537123135E-01
 ...
 
@@ -810,9 +815,9 @@ band_energy         : -6.83850537123135E-01
   sigma(3 3)=  2.54650715E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -7.4921E+00 GPa]
-- sigma(1 1)=  7.49208142E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  7.49208142E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  7.49208142E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  7.49208268E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  7.49208268E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  7.49208268E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -858,16 +863,16 @@ solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-26, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -10.100478524077    -1.010E+01 1.649E-17 3.233E-10
- ETOT  2  -10.100478524078    -7.727E-13 4.372E-19 1.329E-11
- ETOT  3  -10.100478524078    -2.842E-14 1.397E-15 2.166E-13
- ETOT  4  -10.100478524078     1.066E-14 6.735E-18 6.268E-15
- ETOT  5  -10.100478524078     7.105E-15 2.329E-19 6.180E-17
- ETOT  6  -10.100478524078    -3.908E-14 2.603E-21 1.621E-18
- ETOT  7  -10.100478524078     4.263E-14 7.512E-23 1.663E-20
- ETOT  8  -10.100478524078    -2.842E-14 6.802E-25 8.199E-23
- ETOT  9  -10.100478524078    -7.105E-15 9.364E-27 9.625E-25
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -10.100478524077    -1.010E+01 1.649E-17 3.233E-10 0.000E+00 0.000E+00
+ ETOT  2  -10.100478524078    -7.727E-13 4.372E-19 1.329E-11 0.000E+00 0.000E+00
+ ETOT  3  -10.100478524078    -2.842E-14 1.397E-15 2.166E-13 0.000E+00 0.000E+00
+ ETOT  4  -10.100478524078     1.066E-14 6.735E-18 6.268E-15 0.000E+00 0.000E+00
+ ETOT  5  -10.100478524078     7.105E-15 2.329E-19 6.180E-17 0.000E+00 0.000E+00
+ ETOT  6  -10.100478524078    -3.908E-14 2.603E-21 1.621E-18 0.000E+00 0.000E+00
+ ETOT  7  -10.100478524078     4.263E-14 7.512E-23 1.663E-20 0.000E+00 0.000E+00
+ ETOT  8  -10.100478524078    -2.842E-14 6.802E-25 8.199E-23 0.000E+00 0.000E+00
+ ETOT  9  -10.100478524078    -7.105E-15 9.364E-27 9.625E-25 0.000E+00 0.000E+00
 
  At SCF step    9   max residual=  9.36E-27 < tolwfr=  1.00E-26 =>converged.
 
@@ -900,21 +905,22 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
 cartesian_forces: # hartree/bohr
-- [ -5.56057969E-32,   5.56057969E-32,   5.56057969E-32, ]
-- [  5.56057969E-32,  -5.56057969E-32,  -5.56057969E-32, ]
-force_length_stats: {min:   9.63120654E-32, max:   9.63120654E-32, mean:   9.63120654E-32, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.448822     0.448822      0.897643     0.000000
-    2   2.00000     1.259906     1.259906      2.519812     0.000000
- ---------------------------------------------------------------------
-  Sum:              1.708728     1.708728      3.417456     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Al   2.00000     0.448822     0.448822      0.897643     0.000000
+    2 As   2.00000     1.259906     1.259906      2.519812     0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 1.708728     1.708728      3.417456     0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -923,25 +929,25 @@ force_length_stats: {min:   9.63120654E-32, max:   9.63120654E-32, mean:   9.631
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  4.8308E-31; max dE/dt=  1.1833E-30; dE/dt below (all hartree)
+ rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.40761137484940     1.40761137484940     1.40761137484940
+    2      1.40761138004704     1.40761138004704     1.40761138004704
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 5.5605797E-32 5.5605797E-32   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 2.8593648E-30 2.8593648E-30   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
-              =  5.630445499398  5.630445499398  5.630445499398 angstroms
+              =  5.630445520188  5.630445520188  5.630445520188 angstroms
  prteigrs : about to open file t82o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.06899   Average Vxc (hartree)=  -0.34367
  Eigenvalues (hartree) for nkpt=  16  k points, SPIN UP:
@@ -966,7 +972,7 @@ psp_core            :  7.28633223792855E-01
 local_psp           : -2.40142882765487E+00
 non_local_psp       :  6.42965866139348E-01
 total_energy        : -1.01004785240776E+01
-total_energy_eV     : -2.74847998288362E+02
+total_energy_eV     : -2.74848022387912E+02
 band_energy         : -6.83850400291711E-01
 ...
 
@@ -977,9 +983,9 @@ band_energy         : -6.83850400291711E-01
   sigma(3 3)=  2.54650509E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -7.4921E+00 GPa]
-- sigma(1 1)=  7.49207539E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  7.49207539E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  7.49207539E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  7.49207665E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  7.49207665E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  7.49207665E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -1081,7 +1087,7 @@ tolerances: {tolwfr: 1.00E-26, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -9.76330502E+00
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.9763305016E+01 Ha. Also 2DEtotal=   -0.265673040530E+03 eV
+ 2DEtotal=   -0.9763305016E+01 Ha. Also 2DEtotal=   -0.265673063825E+03 eV
     (  non-var. 2DEtotal :   -9.7633050159E+00 Ha)
 
 --------------------------------------------------------------------------------
@@ -1138,7 +1144,7 @@ tolerances: {tolwfr: 1.00E-26, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -9.76330502E+00
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.9763305016E+01 Ha. Also 2DEtotal=   -0.265673040526E+03 eV
+ 2DEtotal=   -0.9763305016E+01 Ha. Also 2DEtotal=   -0.265673063821E+03 eV
     (  non-var. 2DEtotal :   -9.7633050157E+00 Ha)
 
 --------------------------------------------------------------------------------
@@ -1195,7 +1201,7 @@ tolerances: {tolwfr: 1.00E-26, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -9.76330502E+00
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.9763305016E+01 Ha. Also 2DEtotal=   -0.265673040522E+03 eV
+ 2DEtotal=   -0.9763305016E+01 Ha. Also 2DEtotal=   -0.265673063817E+03 eV
     (  non-var. 2DEtotal :   -9.7633050156E+00 Ha)
 ================================================================================
 
@@ -1301,27 +1307,38 @@ solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-26, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   6.6719882342295     -1.388E+01 3.167E-02 3.662E+02
- ETOT  2   5.2799465231021     -1.392E+00 7.063E-04 8.338E+00
- ETOT  3   5.2548848351144     -2.506E-02 2.681E-05 2.173E-01
- ETOT  4   5.2544138042939     -4.710E-04 5.786E-07 5.611E-03
- ETOT  5   5.2544030706704     -1.073E-05 1.446E-08 9.132E-05
- ETOT  6   5.2544029057576     -1.649E-07 5.082E-10 2.217E-06
- ETOT  7   5.2544029015591     -4.199E-09 2.158E-11 1.623E-08
- ETOT  8   5.2544029015266     -3.245E-11 1.011E-13 1.129E-10
- ETOT  9   5.2544029015263     -2.665E-13 6.009E-16 2.865E-12
- ETOT 10   5.2544029015263     -1.421E-14 2.066E-17 6.412E-14
- ETOT 11   5.2544029015263      3.553E-15 3.911E-19 4.125E-16
- ETOT 12   5.2544029015263     -1.776E-14 3.225E-21 3.107E-18
- ETOT 13   5.2544029015264      4.263E-14 2.734E-23 1.578E-20
- ETOT 14   5.2544029015263     -2.132E-14 1.992E-25 7.269E-22
- ETOT 15   5.2544029015263      0.000E+00 9.995E-27 5.497E-23
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1   6.6719882342295     -1.388E+01 3.167E-02 3.662E+02 0.000E+00 0.000E+00
+ ETOT  2   5.2799465231021     -1.392E+00 7.063E-04 8.338E+00 0.000E+00 0.000E+00
+ ETOT  3   5.2548848351144     -2.506E-02 2.681E-05 2.173E-01 0.000E+00 0.000E+00
+ ETOT  4   5.2544138042939     -4.710E-04 5.786E-07 5.611E-03 0.000E+00 0.000E+00
+ ETOT  5   5.2544030706704     -1.073E-05 1.446E-08 9.132E-05 0.000E+00 0.000E+00
+ ETOT  6   5.2544029057576     -1.649E-07 5.082E-10 2.217E-06 0.000E+00 0.000E+00
+ ETOT  7   5.2544029015591     -4.199E-09 2.158E-11 1.623E-08 0.000E+00 0.000E+00
+ ETOT  8   5.2544029015266     -3.245E-11 1.011E-13 1.129E-10 0.000E+00 0.000E+00
+ ETOT  9   5.2544029015263     -2.665E-13 6.009E-16 2.865E-12 0.000E+00 0.000E+00
+ ETOT 10   5.2544029015263     -1.421E-14 2.066E-17 6.412E-14 0.000E+00 0.000E+00
+ ETOT 11   5.2544029015263      3.553E-15 3.911E-19 4.125E-16 0.000E+00 0.000E+00
+ ETOT 12   5.2544029015263     -1.776E-14 3.225E-21 3.107E-18 0.000E+00 0.000E+00
+ ETOT 13   5.2544029015264      4.263E-14 2.734E-23 1.578E-20 0.000E+00 0.000E+00
+ ETOT 14   5.2544029015263     -2.132E-14 1.992E-25 7.269E-22 0.000E+00 0.000E+00
+ ETOT 15   5.2544029015263      0.000E+00 9.995E-27 5.497E-23 0.000E+00 0.000E+00
 
  At SCF step   15   max residual=  1.00E-26 < tolwfr=  1.00E-26 =>converged.
 -open ddk wf file :t82o_DS3_1WF7
 -open ddk wf file :t82o_DS3_1WF8
 -open ddk wf file :t82o_DS3_1WF9
+ Integrated electronic and magnetization densities in atomic spheres:
+ ------------------------------------------------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Al   2.00000     0.000000     0.000000      0.000000    -0.000000
+    2 As   2.00000    -0.000000    -0.000000     -0.000000     0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.000000     0.000000      0.000000    -0.000000
+ Total magnetization (from the atomic spheres):               -0.000000
+ Total magnetization (exact up - dn):                          0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1343,7 +1360,7 @@ tolerances: {tolwfr: 1.00E-26, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -4.80977090E+00  frxc 2 =   3.93754119E+00
  Resulting in :
- 2DEtotal=    0.5254402902E+01 Ha. Also 2DEtotal=    0.142979574309E+03 eV
+ 2DEtotal=    0.5254402902E+01 Ha. Also 2DEtotal=    0.142979586845E+03 eV
     (2DErelax=   -1.5301261756E+01 Ha. 2DEnonrelax=    2.0555664658E+01 Ha)
     (  non-var. 2DEtotal :    5.2544029015E+00 Ha)
 
@@ -1366,28 +1383,39 @@ solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-26, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   38.016648718311     -4.701E+01 1.163E-01 7.091E+03
- ETOT  2   5.4434141074662     -3.257E+01 2.403E-02 3.529E+01
- ETOT  3   5.2626381546535     -1.808E-01 2.436E-04 3.038E+00
- ETOT  4   5.2545851339351     -8.053E-03 1.979E-05 5.815E-02
- ETOT  5   5.2544760843124     -1.090E-04 5.170E-07 6.547E-04
- ETOT  6   5.2544750069466     -1.077E-06 2.739E-09 8.502E-06
- ETOT  7   5.2544749909137     -1.603E-08 2.794E-11 1.110E-07
- ETOT  8   5.2544749906859     -2.278E-10 5.885E-13 3.519E-10
- ETOT  9   5.2544749906848     -1.094E-12 6.540E-15 5.180E-12
- ETOT 10   5.2544749906850      2.558E-13 7.519E-17 2.154E-13
- ETOT 11   5.2544749906849     -9.948E-14 2.263E-18 1.633E-15
- ETOT 12   5.2544749906850      7.105E-14 1.383E-20 6.398E-18
- ETOT 13   5.2544749906851      7.105E-14 1.238E-22 1.135E-19
- ETOT 14   5.2544749906852      9.948E-14 8.453E-25 7.026E-21
- ETOT 15   5.2544749906851     -1.137E-13 6.562E-26 1.036E-22
- ETOT 16   5.2544749906851     -1.421E-14 9.840E-27 1.185E-24
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1   38.016648718311     -4.701E+01 1.163E-01 7.091E+03 0.000E+00 0.000E+00
+ ETOT  2   5.4434141074662     -3.257E+01 2.403E-02 3.529E+01 0.000E+00 0.000E+00
+ ETOT  3   5.2626381546535     -1.808E-01 2.436E-04 3.038E+00 0.000E+00 0.000E+00
+ ETOT  4   5.2545851339351     -8.053E-03 1.979E-05 5.815E-02 0.000E+00 0.000E+00
+ ETOT  5   5.2544760843124     -1.090E-04 5.170E-07 6.547E-04 0.000E+00 0.000E+00
+ ETOT  6   5.2544750069466     -1.077E-06 2.739E-09 8.502E-06 0.000E+00 0.000E+00
+ ETOT  7   5.2544749909137     -1.603E-08 2.794E-11 1.110E-07 0.000E+00 0.000E+00
+ ETOT  8   5.2544749906859     -2.278E-10 5.885E-13 3.519E-10 0.000E+00 0.000E+00
+ ETOT  9   5.2544749906848     -1.094E-12 6.540E-15 5.180E-12 0.000E+00 0.000E+00
+ ETOT 10   5.2544749906850      2.558E-13 7.519E-17 2.154E-13 0.000E+00 0.000E+00
+ ETOT 11   5.2544749906849     -9.948E-14 2.263E-18 1.633E-15 0.000E+00 0.000E+00
+ ETOT 12   5.2544749906850      7.105E-14 1.383E-20 6.398E-18 0.000E+00 0.000E+00
+ ETOT 13   5.2544749906851      7.105E-14 1.238E-22 1.135E-19 0.000E+00 0.000E+00
+ ETOT 14   5.2544749906852      9.948E-14 8.453E-25 7.026E-21 0.000E+00 0.000E+00
+ ETOT 15   5.2544749906851     -1.137E-13 6.562E-26 1.036E-22 0.000E+00 0.000E+00
+ ETOT 16   5.2544749906851     -1.421E-14 9.840E-27 1.185E-24 0.000E+00 0.000E+00
 
  At SCF step   16   max residual=  9.84E-27 < tolwfr=  1.00E-26 =>converged.
 -open ddk wf file :t82o_DS3_1WF7
 -open ddk wf file :t82o_DS3_1WF8
 -open ddk wf file :t82o_DS3_1WF9
+ Integrated electronic and magnetization densities in atomic spheres:
+ ------------------------------------------------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Al   2.00000     0.000000     0.000000      0.000000    -0.000000
+    2 As   2.00000     0.000000     0.000000      0.000000     0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.000000     0.000000      0.000000     0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1409,7 +1437,7 @@ tolerances: {tolwfr: 1.00E-26, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.88200509E+01  frxc 2 =   2.16136715E+01
  Resulting in :
- 2DEtotal=    0.5254474991E+01 Ha. Also 2DEtotal=    0.142981535954E+03 eV
+ 2DEtotal=    0.5254474991E+01 Ha. Also 2DEtotal=    0.142981548491E+03 eV
     (2DErelax=   -7.9774636454E+01 Ha. 2DEnonrelax=    8.5029111444E+01 Ha)
     (  non-var. 2DEtotal :    5.2544749907E+00 Ha)
 
@@ -1433,28 +1461,39 @@ solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-26, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -346.33536731297     -3.463E+02 3.863E+00 3.092E+03
- ETOT  2  -360.55579136795     -1.422E+01 1.361E-02 1.923E+01
- ETOT  3  -360.65453029872     -9.874E-02 7.660E-05 1.443E+00
- ETOT  4  -360.65865012205     -4.120E-03 7.114E-06 5.232E-02
- ETOT  5  -360.65875550872     -1.054E-04 4.421E-07 5.260E-04
- ETOT  6  -360.65875633439     -8.257E-07 3.147E-09 5.751E-06
- ETOT  7  -360.65875634517     -1.078E-08 2.363E-11 1.515E-07
- ETOT  8  -360.65875634558     -4.065E-10 9.198E-13 5.320E-09
- ETOT  9  -360.65875634559     -1.393E-11 4.777E-14 1.539E-11
- ETOT 10  -360.65875634559     -3.411E-13 2.184E-16 3.533E-13
- ETOT 11  -360.65875634559      2.842E-13 5.730E-18 1.851E-15
- ETOT 12  -360.65875634559     -5.684E-14 2.283E-20 2.608E-17
- ETOT 13  -360.65875634559      2.274E-13 4.708E-22 3.194E-19
- ETOT 14  -360.65875634559     -2.274E-13 2.188E-24 1.877E-20
- ETOT 15  -360.65875634559      5.684E-14 5.243E-26 1.475E-21
- ETOT 16  -360.65875634559      3.979E-13 9.813E-27 4.417E-24
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1  -346.33536731297     -3.463E+02 3.863E+00 3.092E+03 0.000E+00 0.000E+00
+ ETOT  2  -360.55579136795     -1.422E+01 1.361E-02 1.923E+01 0.000E+00 0.000E+00
+ ETOT  3  -360.65453029872     -9.874E-02 7.660E-05 1.443E+00 0.000E+00 0.000E+00
+ ETOT  4  -360.65865012205     -4.120E-03 7.114E-06 5.232E-02 0.000E+00 0.000E+00
+ ETOT  5  -360.65875550872     -1.054E-04 4.421E-07 5.260E-04 0.000E+00 0.000E+00
+ ETOT  6  -360.65875633439     -8.257E-07 3.147E-09 5.751E-06 0.000E+00 0.000E+00
+ ETOT  7  -360.65875634517     -1.078E-08 2.363E-11 1.515E-07 0.000E+00 0.000E+00
+ ETOT  8  -360.65875634558     -4.065E-10 9.198E-13 5.320E-09 0.000E+00 0.000E+00
+ ETOT  9  -360.65875634559     -1.393E-11 4.777E-14 1.539E-11 0.000E+00 0.000E+00
+ ETOT 10  -360.65875634559     -3.411E-13 2.184E-16 3.533E-13 0.000E+00 0.000E+00
+ ETOT 11  -360.65875634559      2.842E-13 5.730E-18 1.851E-15 0.000E+00 0.000E+00
+ ETOT 12  -360.65875634559     -5.684E-14 2.283E-20 2.608E-17 0.000E+00 0.000E+00
+ ETOT 13  -360.65875634559      2.274E-13 4.708E-22 3.194E-19 0.000E+00 0.000E+00
+ ETOT 14  -360.65875634559     -2.274E-13 2.188E-24 1.877E-20 0.000E+00 0.000E+00
+ ETOT 15  -360.65875634559      5.684E-14 5.243E-26 1.475E-21 0.000E+00 0.000E+00
+ ETOT 16  -360.65875634559      3.979E-13 9.813E-27 4.417E-24 0.000E+00 0.000E+00
 
  At SCF step   16   max residual=  9.81E-27 < tolwfr=  1.00E-26 =>converged.
 -open ddk wf file :t82o_DS3_1WF7
 -open ddk wf file :t82o_DS3_1WF8
 -open ddk wf file :t82o_DS3_1WF9
+ Integrated electronic and magnetization densities in atomic spheres:
+ ------------------------------------------------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Al   2.00000    -0.000000    -0.000000     -0.000000     0.000000
+    2 As   2.00000    -0.000000    -0.000000     -0.000000     0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                -0.000000    -0.000000     -0.000000     0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                         -0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1471,7 +1510,7 @@ tolerances: {tolwfr: 1.00E-26, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -3.60658756E+02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.3606587563E+03 Ha. Also 2DEtotal=   -0.981402386139E+04 eV
+ 2DEtotal=   -0.3606587563E+03 Ha. Also 2DEtotal=   -0.981402472192E+04 eV
     (  non-var. 2DEtotal :   -3.6065875635E+02 Ha)
 
 --------------------------------------------------------------------------------
@@ -1493,28 +1532,39 @@ solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-26, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -346.33537940710     -3.463E+02 3.863E+00 3.092E+03
- ETOT  2  -360.55579089219     -1.422E+01 1.361E-02 1.923E+01
- ETOT  3  -360.65453042198     -9.874E-02 7.660E-05 1.443E+00
- ETOT  4  -360.65865011330     -4.120E-03 7.114E-06 5.232E-02
- ETOT  5  -360.65875549655     -1.054E-04 4.421E-07 5.260E-04
- ETOT  6  -360.65875632234     -8.258E-07 3.148E-09 5.750E-06
- ETOT  7  -360.65875633313     -1.078E-08 2.364E-11 1.518E-07
- ETOT  8  -360.65875633353     -4.076E-10 9.207E-13 5.325E-09
- ETOT  9  -360.65875633355     -1.376E-11 4.780E-14 1.544E-11
- ETOT 10  -360.65875633355     -1.137E-13 2.188E-16 3.531E-13
- ETOT 11  -360.65875633355      6.821E-13 5.717E-18 1.842E-15
- ETOT 12  -360.65875633355     -5.116E-13 2.274E-20 2.597E-17
- ETOT 13  -360.65875633355     -1.137E-13 4.642E-22 3.236E-19
- ETOT 14  -360.65875633355     -1.705E-13 2.171E-24 1.911E-20
- ETOT 15  -360.65875633355      1.137E-13 5.146E-26 1.478E-21
- ETOT 16  -360.65875633355      4.547E-13 9.579E-27 4.509E-24
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1  -346.33537940710     -3.463E+02 3.863E+00 3.092E+03 0.000E+00 0.000E+00
+ ETOT  2  -360.55579089219     -1.422E+01 1.361E-02 1.923E+01 0.000E+00 0.000E+00
+ ETOT  3  -360.65453042198     -9.874E-02 7.660E-05 1.443E+00 0.000E+00 0.000E+00
+ ETOT  4  -360.65865011330     -4.120E-03 7.114E-06 5.232E-02 0.000E+00 0.000E+00
+ ETOT  5  -360.65875549655     -1.054E-04 4.421E-07 5.260E-04 0.000E+00 0.000E+00
+ ETOT  6  -360.65875632234     -8.258E-07 3.148E-09 5.750E-06 0.000E+00 0.000E+00
+ ETOT  7  -360.65875633313     -1.078E-08 2.364E-11 1.518E-07 0.000E+00 0.000E+00
+ ETOT  8  -360.65875633353     -4.076E-10 9.207E-13 5.325E-09 0.000E+00 0.000E+00
+ ETOT  9  -360.65875633355     -1.376E-11 4.780E-14 1.544E-11 0.000E+00 0.000E+00
+ ETOT 10  -360.65875633355     -1.137E-13 2.188E-16 3.531E-13 0.000E+00 0.000E+00
+ ETOT 11  -360.65875633355      6.821E-13 5.717E-18 1.842E-15 0.000E+00 0.000E+00
+ ETOT 12  -360.65875633355     -5.116E-13 2.274E-20 2.597E-17 0.000E+00 0.000E+00
+ ETOT 13  -360.65875633355     -1.137E-13 4.642E-22 3.236E-19 0.000E+00 0.000E+00
+ ETOT 14  -360.65875633355     -1.705E-13 2.171E-24 1.911E-20 0.000E+00 0.000E+00
+ ETOT 15  -360.65875633355      1.137E-13 5.146E-26 1.478E-21 0.000E+00 0.000E+00
+ ETOT 16  -360.65875633355      4.547E-13 9.579E-27 4.509E-24 0.000E+00 0.000E+00
 
  At SCF step   16   max residual=  9.58E-27 < tolwfr=  1.00E-26 =>converged.
 -open ddk wf file :t82o_DS3_1WF7
 -open ddk wf file :t82o_DS3_1WF8
 -open ddk wf file :t82o_DS3_1WF9
+ Integrated electronic and magnetization densities in atomic spheres:
+ ------------------------------------------------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Al   2.00000    -0.000000    -0.000000     -0.000000     0.000000
+    2 As   2.00000     0.000000     0.000000      0.000000    -0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                -0.000000    -0.000000     -0.000000    -0.000000
+ Total magnetization (from the atomic spheres):               -0.000000
+ Total magnetization (exact up - dn):                          0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1531,7 +1581,7 @@ tolerances: {tolwfr: 1.00E-26, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -3.60658756E+02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.3606587563E+03 Ha. Also 2DEtotal=   -0.981402386106E+04 eV
+ 2DEtotal=   -0.3606587563E+03 Ha. Also 2DEtotal=   -0.981402472159E+04 eV
     (  non-var. 2DEtotal :   -3.6065875633E+02 Ha)
 
 --------------------------------------------------------------------------------
@@ -1553,28 +1603,39 @@ solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-26, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -346.33536746903     -3.463E+02 3.863E+00 3.092E+03
- ETOT  2  -360.55579135850     -1.422E+01 1.361E-02 1.923E+01
- ETOT  3  -360.65453027379     -9.874E-02 7.660E-05 1.443E+00
- ETOT  4  -360.65865009796     -4.120E-03 7.114E-06 5.232E-02
- ETOT  5  -360.65875548464     -1.054E-04 4.421E-07 5.260E-04
- ETOT  6  -360.65875631031     -8.257E-07 3.147E-09 5.751E-06
- ETOT  7  -360.65875632110     -1.078E-08 2.363E-11 1.515E-07
- ETOT  8  -360.65875632150     -4.077E-10 9.198E-13 5.320E-09
- ETOT  9  -360.65875632152     -1.290E-11 4.777E-14 1.539E-11
- ETOT 10  -360.65875632152      2.842E-13 2.184E-16 3.533E-13
- ETOT 11  -360.65875632152     -2.274E-13 5.730E-18 1.851E-15
- ETOT 12  -360.65875632152     -4.547E-13 2.283E-20 2.608E-17
- ETOT 13  -360.65875632152      2.842E-13 4.707E-22 3.193E-19
- ETOT 14  -360.65875632152     -4.547E-13 2.190E-24 1.877E-20
- ETOT 15  -360.65875632152      3.979E-13 5.226E-26 1.475E-21
- ETOT 16  -360.65875632152      1.705E-13 9.817E-27 4.483E-24
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1  -346.33536746903     -3.463E+02 3.863E+00 3.092E+03 0.000E+00 0.000E+00
+ ETOT  2  -360.55579135850     -1.422E+01 1.361E-02 1.923E+01 0.000E+00 0.000E+00
+ ETOT  3  -360.65453027379     -9.874E-02 7.660E-05 1.443E+00 0.000E+00 0.000E+00
+ ETOT  4  -360.65865009796     -4.120E-03 7.114E-06 5.232E-02 0.000E+00 0.000E+00
+ ETOT  5  -360.65875548464     -1.054E-04 4.421E-07 5.260E-04 0.000E+00 0.000E+00
+ ETOT  6  -360.65875631031     -8.257E-07 3.147E-09 5.751E-06 0.000E+00 0.000E+00
+ ETOT  7  -360.65875632110     -1.078E-08 2.363E-11 1.515E-07 0.000E+00 0.000E+00
+ ETOT  8  -360.65875632150     -4.077E-10 9.198E-13 5.320E-09 0.000E+00 0.000E+00
+ ETOT  9  -360.65875632152     -1.290E-11 4.777E-14 1.539E-11 0.000E+00 0.000E+00
+ ETOT 10  -360.65875632152      2.842E-13 2.184E-16 3.533E-13 0.000E+00 0.000E+00
+ ETOT 11  -360.65875632152     -2.274E-13 5.730E-18 1.851E-15 0.000E+00 0.000E+00
+ ETOT 12  -360.65875632152     -4.547E-13 2.283E-20 2.608E-17 0.000E+00 0.000E+00
+ ETOT 13  -360.65875632152      2.842E-13 4.707E-22 3.193E-19 0.000E+00 0.000E+00
+ ETOT 14  -360.65875632152     -4.547E-13 2.190E-24 1.877E-20 0.000E+00 0.000E+00
+ ETOT 15  -360.65875632152      3.979E-13 5.226E-26 1.475E-21 0.000E+00 0.000E+00
+ ETOT 16  -360.65875632152      1.705E-13 9.817E-27 4.483E-24 0.000E+00 0.000E+00
 
  At SCF step   16   max residual=  9.82E-27 < tolwfr=  1.00E-26 =>converged.
 -open ddk wf file :t82o_DS3_1WF7
 -open ddk wf file :t82o_DS3_1WF8
 -open ddk wf file :t82o_DS3_1WF9
+ Integrated electronic and magnetization densities in atomic spheres:
+ ------------------------------------------------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Al   2.00000     0.000000     0.000000      0.000000     0.000000
+    2 As   2.00000     0.000000     0.000000      0.000000     0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.000000     0.000000      0.000000     0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1591,7 +1652,7 @@ tolerances: {tolwfr: 1.00E-26, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -3.60658756E+02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.3606587563E+03 Ha. Also 2DEtotal=   -0.981402386074E+04 eV
+ 2DEtotal=   -0.3606587563E+03 Ha. Also 2DEtotal=   -0.981402472126E+04 eV
     (  non-var. 2DEtotal :   -3.6065875632E+02 Ha)
 ================================================================================
 
@@ -1914,8 +1975,8 @@ meta: {optdriver: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.04564
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1932,8 +1993,8 @@ meta: {optdriver: 1, }
              1    1.353815
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1953,6 +2014,9 @@ meta: {optdriver: 1, }
  ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
+    1)    idir= 1    ipert=  12
+    2)    idir= 2    ipert=  12
+    3)    idir= 3    ipert=  12
 
 ================================================================================
 
@@ -2164,6 +2228,9 @@ meta: {optdriver: 1, }
  ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
+    1)    idir= 1    ipert=  13
+    2)    idir= 2    ipert=  13
+    3)    idir= 3    ipert=  13
 
 ================================================================================
 
@@ -2205,7 +2272,7 @@ tolerances: {tolwfr: 1.00E-26, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   5.06869270E+04 eigvalue=  -1.37511463E+03  local=  -4.68851581E+04
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+    Hspinfield=   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.70783248E+04   enl1=   0.00000000E+00
@@ -2245,7 +2312,7 @@ tolerances: {tolwfr: 1.00E-26, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   5.06869270E+04 eigvalue=  -1.37511463E+03  local=  -4.68851581E+04
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+    Hspinfield=   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.70783248E+04   enl1=   0.00000000E+00
@@ -2286,7 +2353,7 @@ tolerances: {tolwfr: 1.00E-26, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   4.29632165E+04 eigvalue=  -3.62476246E+03  local=  -3.91284923E+04
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+    Hspinfield=   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.09012449E+04   enl1=   0.00000000E+00
@@ -2327,7 +2394,7 @@ tolerances: {tolwfr: 1.00E-26, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   4.29632165E+04 eigvalue=  -3.62476246E+03  local=  -3.91284923E+04
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+    Hspinfield=   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.09012449E+04   enl1=   0.00000000E+00
@@ -2368,7 +2435,7 @@ tolerances: {tolwfr: 1.00E-26, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   4.29632165E+04 eigvalue=  -3.62476246E+03  local=  -3.91284923E+04
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+    Hspinfield=   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.09012449E+04   enl1=   0.00000000E+00
@@ -2409,7 +2476,7 @@ tolerances: {tolwfr: 1.00E-26, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   4.29632165E+04 eigvalue=  -3.62476246E+03  local=  -3.91284923E+04
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+    Hspinfield=   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.09012449E+04   enl1=   0.00000000E+00
@@ -2486,8 +2553,8 @@ NONLINEAR : PEAD=0, full DFPT computation of third order derivatives
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.04564
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2504,8 +2571,8 @@ NONLINEAR : PEAD=0, full DFPT computation of third order derivatives
              1    1.353815
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2822,23 +2889,23 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
       1      1      3          0.000000000
       1      2      1         -0.000000001
       1      2      2          0.000000001
-      1      2      3         45.236084386
+      1      2      3         45.236080570
       1      3      1          0.000000000
-      1      3      2         45.236084386
+      1      3      2         45.236080570
       1      3      3         -0.000000001
       2      1      1         -0.000000001
       2      1      2          0.000000001
-      2      1      3         45.236084386
+      2      1      3         45.236080570
       2      2      1          0.000000001
       2      2      2         -0.000000001
       2      2      3         -0.000000001
-      2      3      1         45.236084386
+      2      3      1         45.236080570
       2      3      2         -0.000000001
       2      3      3         -0.000000000
       3      1      1          0.000000000
-      3      1      2         45.236084386
+      3      1      2         45.236080570
       3      1      3         -0.000000001
-      3      2      1         45.236084386
+      3      2      1         45.236080570
       3      2      2         -0.000000001
       3      2      3         -0.000000000
       3      3      1         -0.000000001
@@ -2915,8 +2982,8 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
            etotal7     0.0000000000E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart2    -5.5605796891E-32  5.5605796891E-32  5.5605796891E-32
-                       5.5605796891E-32 -5.5605796891E-32 -5.5605796891E-32
+            fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -3321,7 +3388,7 @@ P          mk1mem7         16
                          0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
                          0.06250    0.06250    0.06250    0.06250
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4076113748E+00  1.4076113748E+00  1.4076113748E+00
+                       1.4076113800E+00  1.4076113800E+00  1.4076113800E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6600000000E+00  2.6600000000E+00  2.6600000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -3419,10 +3486,10 @@ P          mk1mem7         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          8.4  wall=          8.5
+- Proc.   0 individual time (sec): cpu=          9.0  wall=          9.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  71 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.4  wall=          8.5
++Overall time at end (sec) : cpu=          9.0  wall=          9.0

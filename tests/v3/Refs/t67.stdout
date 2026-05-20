@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of CUT3D, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  CUT3D comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 14 Sep 2024.
 - ( at 06h44 )
-  
+
 
   What is the name of the 3D function (density, potential or wavef) file ?
   => Your 3D function file is: t65o_DS3_WFK
@@ -24,11 +24,11 @@
 - Your file contains unformatted binary header + 3D data
 
  ===============================================================================
- ECHO of the ABINIT file header 
- 
+ ECHO of the ABINIT file header
+
  First record :
 .codvsn,headform,fform = 10.1.4.5   80    2
- 
+
  Second record :
  bantot,intxc,ixc,natom  =    30     0     7     1
  ngfft(1:3),nkpt         =    24    24    24     3
@@ -77,12 +77,12 @@
  title=Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
   znuclpsp= 13.00, zionpsp=  3.00, pspso=  0, pspdat=960528, pspcod=  2, pspxc=  1
   lmnmax  =  3
- 
+
  Last record :
  residm,etot,fermie=    9.960040E-17   -1.912169624853E+00   -7.655537E-02
  xred =
             2.000000E-01    3.000000E-01    4.000000E-01
- End the ECHO of the ABINIT file header 
+ End the ECHO of the ABINIT file header
  ===============================================================================
 
  ===========================================================
@@ -100,7 +100,7 @@
    #    Atomic positions (cartesian coordinates - Bohr)
    1    2.800000E+00    4.200300E+00    5.600800E+00
 
-  This file is a WF file. 
+  This file is a WF file.
 
  For which k-points? (1 to    3)
   => Your k-point is :            1
@@ -114,13 +114,13 @@
  Do you want to analyze a GW wavefunction? (1=yes,0=no)
  => Your choice is :           0
 
- Do you want the atomic analysis for this state : 
- (kpt,band)= (    1    1)? 
- If yes, enter the radius of the atomic spheres, in bohr 
- If no, enter 0 
- You entered ratsph=      7.00000000 Bohr 
+ Do you want the atomic analysis for this state :
+ (kpt,band)= (    1    1)?
+ If yes, enter the radius of the atomic spheres, in bohr
+ If no, enter 0
+ You entered ratsph=      7.00000000 Bohr
 
- Atomic sphere analysis 
+ Atomic sphere analysis
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
  Angular analysis (real spherical harmonics)
@@ -141,7 +141,7 @@
 
  Total over all atoms and l=0 to 4 :  0.996233
 
- Charge in the sphere around each atom 
+ Charge in the sphere around each atom
  Atom number    1 :  charge =    0.99637180
 
   3D wave function was read. Ready for further treatment.
@@ -162,11 +162,11 @@
         (bare 3D data, preceeded by 3D index)
    6 => 3D indexed imaginary data
         (bare 3D data, preceeded by 3D index)
-   7 => 3D Data Explorer formatted data 
+   7 => 3D Data Explorer formatted data
         (Real file and Imaginary file)
-   8 => 3D Data Explorer formatted data 
+   8 => 3D Data Explorer formatted data
         (Only the Real file)
-   9 => 3D Data Explorer formatted data 
+   9 => 3D Data Explorer formatted data
         (Only the Imaginary file)
   10 => 3D Data Explorer formatted data and position files
   11 => XCrysden formatted data (norm of wf) and position files
@@ -193,13 +193,13 @@
  Do you want to analyze a GW wavefunction? (1=yes,0=no)
  => Your choice is :           0
 
- Do you want the atomic analysis for this state : 
- (kpt,band)= (    1    2)? 
- If yes, enter the radius of the atomic spheres, in bohr 
- If no, enter 0 
- You entered ratsph=      7.00000000 Bohr 
+ Do you want the atomic analysis for this state :
+ (kpt,band)= (    1    2)?
+ If yes, enter the radius of the atomic spheres, in bohr
+ If no, enter 0
+ You entered ratsph=      7.00000000 Bohr
 
- Atomic sphere analysis 
+ Atomic sphere analysis
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
  Angular analysis (real spherical harmonics)
@@ -220,7 +220,7 @@
 
  Total over all atoms and l=0 to 4 :  0.987234
 
- Charge in the sphere around each atom 
+ Charge in the sphere around each atom
  Atom number    1 :  charge =    0.98730916
 
   3D wave function was read. Ready for further treatment.
@@ -241,11 +241,11 @@
         (bare 3D data, preceeded by 3D index)
    6 => 3D indexed imaginary data
         (bare 3D data, preceeded by 3D index)
-   7 => 3D Data Explorer formatted data 
+   7 => 3D Data Explorer formatted data
         (Real file and Imaginary file)
-   8 => 3D Data Explorer formatted data 
+   8 => 3D Data Explorer formatted data
         (Only the Real file)
-   9 => 3D Data Explorer formatted data 
+   9 => 3D Data Explorer formatted data
         (Only the Imaginary file)
   10 => 3D Data Explorer formatted data and position files
   11 => XCrysden formatted data (norm of wf) and position files
@@ -272,13 +272,13 @@
  Do you want to analyze a GW wavefunction? (1=yes,0=no)
  => Your choice is :           0
 
- Do you want the atomic analysis for this state : 
- (kpt,band)= (    1    3)? 
- If yes, enter the radius of the atomic spheres, in bohr 
- If no, enter 0 
- You entered ratsph=      7.00000000 Bohr 
+ Do you want the atomic analysis for this state :
+ (kpt,band)= (    1    3)?
+ If yes, enter the radius of the atomic spheres, in bohr
+ If no, enter 0
+ You entered ratsph=      7.00000000 Bohr
 
- Atomic sphere analysis 
+ Atomic sphere analysis
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
  Angular analysis (real spherical harmonics)
@@ -299,7 +299,7 @@
 
  Total over all atoms and l=0 to 4 :  0.987239
 
- Charge in the sphere around each atom 
+ Charge in the sphere around each atom
  Atom number    1 :  charge =    0.98731406
 
   3D wave function was read. Ready for further treatment.
@@ -320,11 +320,11 @@
         (bare 3D data, preceeded by 3D index)
    6 => 3D indexed imaginary data
         (bare 3D data, preceeded by 3D index)
-   7 => 3D Data Explorer formatted data 
+   7 => 3D Data Explorer formatted data
         (Real file and Imaginary file)
-   8 => 3D Data Explorer formatted data 
+   8 => 3D Data Explorer formatted data
         (Only the Real file)
-   9 => 3D Data Explorer formatted data 
+   9 => 3D Data Explorer formatted data
         (Only the Imaginary file)
   10 => 3D Data Explorer formatted data and position files
   11 => XCrysden formatted data (norm of wf) and position files
@@ -351,13 +351,13 @@
  Do you want to analyze a GW wavefunction? (1=yes,0=no)
  => Your choice is :           0
 
- Do you want the atomic analysis for this state : 
- (kpt,band)= (    1    4)? 
- If yes, enter the radius of the atomic spheres, in bohr 
- If no, enter 0 
- You entered ratsph=      7.00000000 Bohr 
+ Do you want the atomic analysis for this state :
+ (kpt,band)= (    1    4)?
+ If yes, enter the radius of the atomic spheres, in bohr
+ If no, enter 0
+ You entered ratsph=      7.00000000 Bohr
 
- Atomic sphere analysis 
+ Atomic sphere analysis
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
  Angular analysis (real spherical harmonics)
@@ -378,7 +378,7 @@
 
  Total over all atoms and l=0 to 4 :  0.987244
 
- Charge in the sphere around each atom 
+ Charge in the sphere around each atom
  Atom number    1 :  charge =    0.98731899
 
   3D wave function was read. Ready for further treatment.
@@ -399,11 +399,11 @@
         (bare 3D data, preceeded by 3D index)
    6 => 3D indexed imaginary data
         (bare 3D data, preceeded by 3D index)
-   7 => 3D Data Explorer formatted data 
+   7 => 3D Data Explorer formatted data
         (Real file and Imaginary file)
-   8 => 3D Data Explorer formatted data 
+   8 => 3D Data Explorer formatted data
         (Only the Real file)
-   9 => 3D Data Explorer formatted data 
+   9 => 3D Data Explorer formatted data
         (Only the Imaginary file)
   10 => 3D Data Explorer formatted data and position files
   11 => XCrysden formatted data (norm of wf) and position files
@@ -430,13 +430,13 @@
  Do you want to analyze a GW wavefunction? (1=yes,0=no)
  => Your choice is :           0
 
- Do you want the atomic analysis for this state : 
- (kpt,band)= (    1    5)? 
- If yes, enter the radius of the atomic spheres, in bohr 
- If no, enter 0 
- You entered ratsph=      7.00000000 Bohr 
+ Do you want the atomic analysis for this state :
+ (kpt,band)= (    1    5)?
+ If yes, enter the radius of the atomic spheres, in bohr
+ If no, enter 0
+ You entered ratsph=      7.00000000 Bohr
 
- Atomic sphere analysis 
+ Atomic sphere analysis
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
  Angular analysis (real spherical harmonics)
@@ -457,7 +457,7 @@
 
  Total over all atoms and l=0 to 4 :  0.486308
 
- Charge in the sphere around each atom 
+ Charge in the sphere around each atom
  Atom number    1 :  charge =    0.48632905
 
   3D wave function was read. Ready for further treatment.
@@ -478,11 +478,11 @@
         (bare 3D data, preceeded by 3D index)
    6 => 3D indexed imaginary data
         (bare 3D data, preceeded by 3D index)
-   7 => 3D Data Explorer formatted data 
+   7 => 3D Data Explorer formatted data
         (Real file and Imaginary file)
-   8 => 3D Data Explorer formatted data 
+   8 => 3D Data Explorer formatted data
         (Only the Real file)
-   9 => 3D Data Explorer formatted data 
+   9 => 3D Data Explorer formatted data
         (Only the Imaginary file)
   10 => 3D Data Explorer formatted data and position files
   11 => XCrysden formatted data (norm of wf) and position files
@@ -509,13 +509,13 @@
  Do you want to analyze a GW wavefunction? (1=yes,0=no)
  => Your choice is :           0
 
- Do you want the atomic analysis for this state : 
- (kpt,band)= (    1    6)? 
- If yes, enter the radius of the atomic spheres, in bohr 
- If no, enter 0 
- You entered ratsph=      7.00000000 Bohr 
+ Do you want the atomic analysis for this state :
+ (kpt,band)= (    1    6)?
+ If yes, enter the radius of the atomic spheres, in bohr
+ If no, enter 0
+ You entered ratsph=      7.00000000 Bohr
 
- Atomic sphere analysis 
+ Atomic sphere analysis
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
  Angular analysis (real spherical harmonics)
@@ -536,7 +536,7 @@
 
  Total over all atoms and l=0 to 4 :  0.713503
 
- Charge in the sphere around each atom 
+ Charge in the sphere around each atom
  Atom number    1 :  charge =    0.71383213
 
   3D wave function was read. Ready for further treatment.
@@ -557,11 +557,11 @@
         (bare 3D data, preceeded by 3D index)
    6 => 3D indexed imaginary data
         (bare 3D data, preceeded by 3D index)
-   7 => 3D Data Explorer formatted data 
+   7 => 3D Data Explorer formatted data
         (Real file and Imaginary file)
-   8 => 3D Data Explorer formatted data 
+   8 => 3D Data Explorer formatted data
         (Only the Real file)
-   9 => 3D Data Explorer formatted data 
+   9 => 3D Data Explorer formatted data
         (Only the Imaginary file)
   10 => 3D Data Explorer formatted data and position files
   11 => XCrysden formatted data (norm of wf) and position files
@@ -588,13 +588,13 @@
  Do you want to analyze a GW wavefunction? (1=yes,0=no)
  => Your choice is :           0
 
- Do you want the atomic analysis for this state : 
- (kpt,band)= (    1    7)? 
- If yes, enter the radius of the atomic spheres, in bohr 
- If no, enter 0 
- You entered ratsph=      7.00000000 Bohr 
+ Do you want the atomic analysis for this state :
+ (kpt,band)= (    1    7)?
+ If yes, enter the radius of the atomic spheres, in bohr
+ If no, enter 0
+ You entered ratsph=      7.00000000 Bohr
 
- Atomic sphere analysis 
+ Atomic sphere analysis
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
  Angular analysis (real spherical harmonics)
@@ -615,7 +615,7 @@
 
  Total over all atoms and l=0 to 4 :  0.713662
 
- Charge in the sphere around each atom 
+ Charge in the sphere around each atom
  Atom number    1 :  charge =    0.71399158
 
   3D wave function was read. Ready for further treatment.
@@ -636,11 +636,11 @@
         (bare 3D data, preceeded by 3D index)
    6 => 3D indexed imaginary data
         (bare 3D data, preceeded by 3D index)
-   7 => 3D Data Explorer formatted data 
+   7 => 3D Data Explorer formatted data
         (Real file and Imaginary file)
-   8 => 3D Data Explorer formatted data 
+   8 => 3D Data Explorer formatted data
         (Only the Real file)
-   9 => 3D Data Explorer formatted data 
+   9 => 3D Data Explorer formatted data
         (Only the Imaginary file)
   10 => 3D Data Explorer formatted data and position files
   11 => XCrysden formatted data (norm of wf) and position files
@@ -667,13 +667,13 @@
  Do you want to analyze a GW wavefunction? (1=yes,0=no)
  => Your choice is :           0
 
- Do you want the atomic analysis for this state : 
- (kpt,band)= (    1    8)? 
- If yes, enter the radius of the atomic spheres, in bohr 
- If no, enter 0 
- You entered ratsph=      7.00000000 Bohr 
+ Do you want the atomic analysis for this state :
+ (kpt,band)= (    1    8)?
+ If yes, enter the radius of the atomic spheres, in bohr
+ If no, enter 0
+ You entered ratsph=      7.00000000 Bohr
 
- Atomic sphere analysis 
+ Atomic sphere analysis
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
  Angular analysis (real spherical harmonics)
@@ -694,7 +694,7 @@
 
  Total over all atoms and l=0 to 4 :  0.458464
 
- Charge in the sphere around each atom 
+ Charge in the sphere around each atom
  Atom number    1 :  charge =    0.46210224
 
   3D wave function was read. Ready for further treatment.
@@ -715,11 +715,11 @@
         (bare 3D data, preceeded by 3D index)
    6 => 3D indexed imaginary data
         (bare 3D data, preceeded by 3D index)
-   7 => 3D Data Explorer formatted data 
+   7 => 3D Data Explorer formatted data
         (Real file and Imaginary file)
-   8 => 3D Data Explorer formatted data 
+   8 => 3D Data Explorer formatted data
         (Only the Real file)
-   9 => 3D Data Explorer formatted data 
+   9 => 3D Data Explorer formatted data
         (Only the Imaginary file)
   10 => 3D Data Explorer formatted data and position files
   11 => XCrysden formatted data (norm of wf) and position files
@@ -746,13 +746,13 @@
  Do you want to analyze a GW wavefunction? (1=yes,0=no)
  => Your choice is :           0
 
- Do you want the atomic analysis for this state : 
- (kpt,band)= (    1    9)? 
- If yes, enter the radius of the atomic spheres, in bohr 
- If no, enter 0 
- You entered ratsph=      7.00000000 Bohr 
+ Do you want the atomic analysis for this state :
+ (kpt,band)= (    1    9)?
+ If yes, enter the radius of the atomic spheres, in bohr
+ If no, enter 0
+ You entered ratsph=      7.00000000 Bohr
 
- Atomic sphere analysis 
+ Atomic sphere analysis
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
  Angular analysis (real spherical harmonics)
@@ -773,7 +773,7 @@
 
  Total over all atoms and l=0 to 4 :  0.458452
 
- Charge in the sphere around each atom 
+ Charge in the sphere around each atom
  Atom number    1 :  charge =    0.46209279
 
   3D wave function was read. Ready for further treatment.
@@ -794,11 +794,11 @@
         (bare 3D data, preceeded by 3D index)
    6 => 3D indexed imaginary data
         (bare 3D data, preceeded by 3D index)
-   7 => 3D Data Explorer formatted data 
+   7 => 3D Data Explorer formatted data
         (Real file and Imaginary file)
-   8 => 3D Data Explorer formatted data 
+   8 => 3D Data Explorer formatted data
         (Only the Real file)
-   9 => 3D Data Explorer formatted data 
+   9 => 3D Data Explorer formatted data
         (Only the Imaginary file)
   10 => 3D Data Explorer formatted data and position files
   11 => XCrysden formatted data (norm of wf) and position files
@@ -825,13 +825,13 @@
  Do you want to analyze a GW wavefunction? (1=yes,0=no)
  => Your choice is :           0
 
- Do you want the atomic analysis for this state : 
- (kpt,band)= (    1   10)? 
- If yes, enter the radius of the atomic spheres, in bohr 
- If no, enter 0 
- You entered ratsph=      7.00000000 Bohr 
+ Do you want the atomic analysis for this state :
+ (kpt,band)= (    1   10)?
+ If yes, enter the radius of the atomic spheres, in bohr
+ If no, enter 0
+ You entered ratsph=      7.00000000 Bohr
 
- Atomic sphere analysis 
+ Atomic sphere analysis
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
  Angular analysis (real spherical harmonics)
@@ -852,7 +852,7 @@
 
  Total over all atoms and l=0 to 4 :  0.458440
 
- Charge in the sphere around each atom 
+ Charge in the sphere around each atom
  Atom number    1 :  charge =    0.46208348
 
   3D wave function was read. Ready for further treatment.
@@ -873,11 +873,11 @@
         (bare 3D data, preceeded by 3D index)
    6 => 3D indexed imaginary data
         (bare 3D data, preceeded by 3D index)
-   7 => 3D Data Explorer formatted data 
+   7 => 3D Data Explorer formatted data
         (Real file and Imaginary file)
-   8 => 3D Data Explorer formatted data 
+   8 => 3D Data Explorer formatted data
         (Only the Real file)
-   9 => 3D Data Explorer formatted data 
+   9 => 3D Data Explorer formatted data
         (Only the Imaginary file)
   10 => 3D Data Explorer formatted data and position files
   11 => XCrysden formatted data (norm of wf) and position files
@@ -904,13 +904,13 @@
  Do you want to analyze a GW wavefunction? (1=yes,0=no)
  => Your choice is :           0
 
- Do you want the atomic analysis for this state : 
- (kpt,band)= (    2    1)? 
- If yes, enter the radius of the atomic spheres, in bohr 
- If no, enter 0 
- You entered ratsph=      7.00000000 Bohr 
+ Do you want the atomic analysis for this state :
+ (kpt,band)= (    2    1)?
+ If yes, enter the radius of the atomic spheres, in bohr
+ If no, enter 0
+ You entered ratsph=      7.00000000 Bohr
 
- Atomic sphere analysis 
+ Atomic sphere analysis
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
  Angular analysis (real spherical harmonics)
@@ -931,7 +931,7 @@
 
  Total over all atoms and l=0 to 4 :  0.997321
 
- Charge in the sphere around each atom 
+ Charge in the sphere around each atom
  Atom number    1 :  charge =    0.99743900
 
   3D wave function was read. Ready for further treatment.
@@ -952,11 +952,11 @@
         (bare 3D data, preceeded by 3D index)
    6 => 3D indexed imaginary data
         (bare 3D data, preceeded by 3D index)
-   7 => 3D Data Explorer formatted data 
+   7 => 3D Data Explorer formatted data
         (Real file and Imaginary file)
-   8 => 3D Data Explorer formatted data 
+   8 => 3D Data Explorer formatted data
         (Only the Real file)
-   9 => 3D Data Explorer formatted data 
+   9 => 3D Data Explorer formatted data
         (Only the Imaginary file)
   10 => 3D Data Explorer formatted data and position files
   11 => XCrysden formatted data (norm of wf) and position files
@@ -983,13 +983,13 @@
  Do you want to analyze a GW wavefunction? (1=yes,0=no)
  => Your choice is :           0
 
- Do you want the atomic analysis for this state : 
- (kpt,band)= (    3    1)? 
- If yes, enter the radius of the atomic spheres, in bohr 
- If no, enter 0 
- You entered ratsph=      7.00000000 Bohr 
+ Do you want the atomic analysis for this state :
+ (kpt,band)= (    3    1)?
+ If yes, enter the radius of the atomic spheres, in bohr
+ If no, enter 0
+ You entered ratsph=      7.00000000 Bohr
 
- Atomic sphere analysis 
+ Atomic sphere analysis
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
  Angular analysis (real spherical harmonics)
@@ -1010,7 +1010,7 @@
 
  Total over all atoms and l=0 to 4 :  0.998950
 
- Charge in the sphere around each atom 
+ Charge in the sphere around each atom
  Atom number    1 :  charge =    0.99906787
 
   3D wave function was read. Ready for further treatment.
@@ -1031,11 +1031,11 @@
         (bare 3D data, preceeded by 3D index)
    6 => 3D indexed imaginary data
         (bare 3D data, preceeded by 3D index)
-   7 => 3D Data Explorer formatted data 
+   7 => 3D Data Explorer formatted data
         (Real file and Imaginary file)
-   8 => 3D Data Explorer formatted data 
+   8 => 3D Data Explorer formatted data
         (Only the Real file)
-   9 => 3D Data Explorer formatted data 
+   9 => 3D Data Explorer formatted data
         (Only the Imaginary file)
   10 => 3D Data Explorer formatted data and position files
   11 => XCrysden formatted data (norm of wf) and position files

@@ -11,14 +11,14 @@
 !! * lwf_mc_t : MCMC. It defines how to move lwfs in one step,
 !! attempt function: whether to accept move
 !! accecpt/reject method which define what to do if move is
-!! accepted or rejected!! . 
+!! accepted or rejected!! .
 !!
 !! Subroutines:
 !! TODO: add this when F2003 doc style is determined.
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2025 ABINIT group (hexu)
+!! Copyright (C) 2001-2026 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

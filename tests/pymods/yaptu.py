@@ -1,38 +1,47 @@
+from __future__ import annotations
+
 """Yet Another Python Templating Utility, Version 1.2. Taken from http://code.activestate.com/recipes/52305/"""
-from __future__ import print_function, division, absolute_import #, unicode_literals
 
 import sys
+from typing import Any
 
 from .six import exec_
 
+
 # utility stuff to avoid tests in the mainline code
 class _nevermatch:
-    "Polymorphic with a regex that never matches"
-    def match(self, line):
+    """Polymorphic with a regex that never matches"""
+    def match(self, line: str) -> Any | None:
         return None
 
 _never = _nevermatch()     # one reusable instance of it suffices
 
-def identity(string, why):
-    "A do-nothing-special-to-the-input, just-return-it function"
+def identity(string: str, why: str) -> str:
+    """A do-nothing-special-to-the-input, just-return-it function"""
     return string
 
 def nohandle(string):
-    "A do-nothing handler that just re-raises the exception"
+    """A do-nothing handler that just re-raises the exception"""
     raise
 
 # and now the real thing
 class copier:
-    "Smart-copier (YAPTU) class"
+    """Smart-copier (YAPTU) class."""
     def copyblock(self, i=0, last=None):
-        "Main copy method: process lines [i,last) of block"
+        """
+        Main copy method: process lines [i, last) of block.
+
+        Args:
+            i (int): Start index.
+            last (int, optional): End index. Defaults to end of block.
+        """
         def repl(match, self=self):
-            "return the eval of a found expression, for replacement"
+            """Return the eval of a found expression, for replacement"""
             # uncomment for debug: print '!!! replacing',match.group(1)
-            expr = self.preproc(match.group(1), 'eval')
+            expr = self.preproc(match.group(1), "eval")
             try: return str(eval(expr, self.globals, self.locals))
             except: return str(self.handle(expr))
-        block = self.locals['_bl']
+        block = self.locals["_bl"]
         if last is None: last = len(block)
         while i<last:
             line = block[i]
@@ -54,11 +63,11 @@ class copier:
                         match = self.recont.match(line)
                         if match:                   # found a contin.-statement
                             nestat = match.string[match.end(0):].strip()
-                            stat = '%s _cb(%s,%s)\n%s' % (stat,i+1,j,nestat)
+                            stat = "%s _cb(%s,%s)\n%s" % (stat,i+1,j,nestat)
                             i=j     # again, i is the last line to _not_ process
                     j=j+1
-                stat = self.preproc(stat, 'exec')
-                stat = '%s _cb(%s,%s)' % (stat,i+1,j)
+                stat = self.preproc(stat, "exec")
+                stat = "%s _cb(%s,%s)" % (stat,i+1,j)
                 # for debugging, uncomment...: print "-> Executing: {"+stat+"}"
                 exec_(stat, self.globals, self.locals)
                 i=j+1
@@ -68,10 +77,22 @@ class copier:
     def __init__(self, regex=_never, dict={},
             restat=_never, restend=_never, recont=_never,
             preproc=identity, handle=nohandle, ouf=sys.stdout):
-        "Initialize self's attributes"
+        """
+        Initialize the copier.
+
+        Args:
+            regex (regex, optional): Regex for expressions.
+            dict (dict, optional): Global namespace.
+            restat (regex, optional): Regex for statement starts.
+            restend (regex, optional): Regex for statement ends.
+            recont (regex, optional): Regex for statement continuations.
+            preproc (callable, optional): Preprocessor function.
+            handle (callable, optional): Exception handler for expressions.
+            ouf (file, optional): Output stream.
+        """
         self.regex   = regex
         self.globals = dict
-        self.locals  = { '_cb':self.copyblock }
+        self.locals  = { "_cb":self.copyblock }
         self.restat  = restat
         self.restend = restend
         self.recont  = recont
@@ -79,21 +100,27 @@ class copier:
         self.handle  = handle
         self.ouf     = ouf
     def copy(self, block=None, inf=sys.stdin):
-        "Entry point: copy-with-processing a file, or a block of lines"
+        """
+        Entry point for copying with processing.
+
+        Args:
+            block (list, optional): A block of lines.
+            inf (file, optional): Input stream if block is None.
+        """
         if block is None: block = inf.readlines()
-        self.locals['_bl'] = block
+        self.locals["_bl"] = block
         self.copyblock()
 
-if __name__=='__main__':
+if __name__=="__main__":
     "Test: copy a block of lines, with full processing"
     import re
-    rex=re.compile('@([^@]+)@')
-    rbe=re.compile(r'\+')
-    ren=re.compile('-')
-    rco=re.compile('= ')
+    rex=re.compile("@([^@]+)@")
+    rbe=re.compile(r"\+")
+    ren=re.compile("-")
+    rco=re.compile("= ")
     x=23 # just a variable to try substitution
     cop = copier(rex, globals(), rbe, ren, rco)
-    lines_block = [line+'\n' for line in """
+    lines_block = [line+"\n" for line in """
 A first, plain line -- it just gets copied.
 A second line, with @x@ substitutions.
 + x+=1   # non-block statements MUST end with comments
@@ -107,9 +134,9 @@ After all, @x@ is rather small!
 + for i in range(3):
   Also, @i@ times @x@ is @i*x@.
 -
-One last, plain line at the end.""".split('\n')]
+One last, plain line at the end.""".split("\n")]
     print("*** input:")
-    print(''.join(lines_block))
+    print("".join(lines_block))
     print("*** output:")
     cop.copy(lines_block)
 

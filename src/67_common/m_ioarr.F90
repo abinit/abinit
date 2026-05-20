@@ -10,7 +10,7 @@
 !!  MPI-IO primitives are used when the FFT arrays are MPI distributed.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MVer, MT, MG)
+!! Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, MVer, MT, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,7 +47,6 @@ MODULE m_ioarr
  use m_numeric_tools, only : interpolate_denpot
  use m_geometry,      only : metric
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, initmpi_seq
- use m_distribfft,    only : init_distribfft_seq
  use m_fourier_interpol,only : fourier_interpol
 
  implicit none
@@ -165,11 +164,10 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  type(MPI_type) :: MPI_enreg_seq
 !arrays
  integer :: ngfft_in(18),ngfft_out(18)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
- real(dp), ABI_CONTIGUOUS pointer :: arr_file(:,:),my_density(:,:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
+ real(dp), contiguous, pointer :: arr_file(:,:),my_density(:,:)
  real(dp),allocatable :: rhor_file(:,:),rhog_in(:,:),rhor_out(:,:),rhog_out(:,:)
  type(pawrhoij_type),pointer:: pawrhoij__(:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -300,11 +298,11 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
            call initmpi_seq(MPI_enreg_seq)
            ! Which one is coarse? Note that this part is not very robust and can fail!
            if (ngfft_in(2) * ngfft_in(3) < ngfft_out(2) * ngfft_out(3)) then
-             call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft_in(2),ngfft_in(3),'all')
-             call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfft_out(2),ngfft_out(3),'all')
+             call MPI_enreg_seq%distribfft%init_seq('c',ngfft_in(2),ngfft_in(3),'all')
+             call MPI_enreg_seq%distribfft%init_seq('f',ngfft_out(2),ngfft_out(3),'all')
            else
-             call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfft_in(2),ngfft_in(3),'all')
-             call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft_out(2),ngfft_out(3),'all')
+             call MPI_enreg_seq%distribfft%init_seq('f',ngfft_in(2),ngfft_in(3),'all')
+             call MPI_enreg_seq%distribfft%init_seq('c',ngfft_out(2),ngfft_out(3),'all')
            end if
 
            call fourier_interpol(cplex,hdr0%nspden,0,0,nfftot_in,ngfft_in,nfftot_out,ngfft_out,&
@@ -694,9 +692,8 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
  character(len=500) :: msg,errmsg
  type(abifile_t) :: abifile
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
  integer(XMPI_OFFSET_KIND) :: bsize_frecord(nspden)
-
 ! *************************************************************************
 
  abifile = abifile_from_varname(varname)
@@ -884,7 +881,6 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
  type(ebands_t) :: ebands
 !arrays
  real(dp),allocatable :: ene3d(:,:,:)
-
 ! *************************************************************************
 
  crystal = hdr%get_crystal()
@@ -991,11 +987,10 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
  character(len=fnlen) :: my_fname
  character(len=nctk_slen) :: varname
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),tsec(2)
  real(dp),allocatable :: rhor_file(:,:),rhor_tmp(:,:)
  type(pawrhoij_type),allocatable :: pawrhoij_file(:)
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)

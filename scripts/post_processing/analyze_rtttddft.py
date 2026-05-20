@@ -60,7 +60,7 @@ def fourier_direct(time,signal,wcut,nfft):
         sys.exit("!Error - in fourier_direct - signal and time do not have the same length")
     dt = time[1] - time[0]
     # Apply filter if required
-    # Exponential windaow (exp(-wcut*t))
+    # Exponential window (exp(-wcut*t))
     if wcut > 0:
         filter = np.exp(np.multiply(time,-wcut))
         f = np.multiply(filter,signal)

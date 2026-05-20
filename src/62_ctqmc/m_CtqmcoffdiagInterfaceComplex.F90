@@ -1,0 +1,437 @@
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+!!****m* ABINIT/m_CtqmcoffdiagInterfaceComplex
+!! NAME
+!!  m_CtqmcoffdiagInterfaceComplex
+!!
+!! FUNCTION
+!!  Manage a ctqmc simulation.
+!!  friendly interface for the user
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder, B. Amadon, J. Denier)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! NOTES
+!!
+!! SOURCE
+
+#include "defs.h"
+MODULE m_CtqmcoffdiagInterfaceComplex
+USE m_CtqmcoffdiagComplex
+use defs_basis
+
+IMPLICIT NONE
+
+!!***
+
+!!****t* m_CtqmcoffdiagInterfaceComplex/CtqmcoffdiagInterfaceComplex
+!! NAME
+!!  CtqmcoffdiagInterfaceComplex
+!!
+!! FUNCTION
+!!  This structured datatype contains the necessary data
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! SOURCE
+
+TYPE CtqmcoffdiagInterfaceComplex
+  TYPE(CtqmcoffdiagComplex) :: Hybrid
+  INTEGER :: opt_fk       = 0
+  INTEGER :: opt_order    = 0
+  INTEGER :: opt_histo    = 0
+  INTEGER :: opt_movie    = 0
+  INTEGER :: opt_analysis = 0
+  INTEGER :: opt_check    = 0
+  INTEGER :: opt_spectra  = 0
+  INTEGER :: opt_noise    = 0
+  INTEGER :: opt_gMove    = 0
+END TYPE CtqmcoffdiagInterfaceComplex
+!!***
+
+CONTAINS
+!!***
+
+!!****f* ABINIT/m_CtqmcoffdiagInterfaceComplex/CtqmcoffdiagInterfaceComplex_init
+!! NAME
+!!  CtqmcoffdiagInterfaceComplex_init
+!!
+!! FUNCTION
+!!  Initialize with permanent parameters
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  op=ctqmcinterface
+!!  iseed=seed for rng
+!!  sweeps=number of sweeps for the run
+!!  thermalization=number of sweeps to thermalize
+!!  measurements=how often we measure (modulo)
+!!  flavors=number of orbitals (spin degenerated)
+!!  samples=imaginary time slices
+!!  beta=inverse temperature
+!!  U=interaction parameter
+!!  ostream=where to write output
+!!  MPI_COMM=mpi communicator for the run
+!!  nspinor=number of spinor
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+
+SUBROUTINE CtqmcoffdiagInterfaceComplex_init(op,iseed,sweeps,thermalization,&
+&measurements,flavors,samples,beta,U,ostream,MPI_COMM,opt_nondiag,nspinor)
+
+!Arguments ------------------------------------
+  TYPE(CtqmcoffdiagInterfaceComplex), INTENT(INOUT) :: op
+  INTEGER, OPTIONAL, INTENT(IN) :: MPI_COMM
+  INTEGER, INTENT(IN) :: iseed
+  DOUBLE PRECISION, INTENT(IN) :: sweeps
+  INTEGER, INTENT(IN) :: thermalization
+  INTEGER, INTENT(IN) :: measurements
+  INTEGER, INTENT(IN) :: flavors
+  INTEGER, INTENT(IN) :: samples
+  !INTEGER, INTENT(IN) :: Wmax
+  INTEGER, INTENT(IN) :: ostream
+  INTEGER, INTENT(IN) :: opt_nondiag
+  DOUBLE PRECISION, INTENT(IN) :: beta
+  DOUBLE PRECISION, INTENT(IN) :: u
+  INTEGER, INTENT(IN) :: nspinor
+  !DOUBLE PRECISION, INTENT(IN) :: mu
+!Local arguements -----------------------------
+  INTEGER          :: ifstream
+  DOUBLE PRECISION, DIMENSION(1:11) :: buffer
+
+  ifstream = 42
+
+  buffer(1)=DBLE(iseed)
+  buffer(2)=sweeps
+  buffer(3)=DBLE(thermalization)
+  buffer(4)=DBLE(measurements)
+  buffer(5)=DBLE(flavors)
+  buffer(6)=DBLE(samples)
+  buffer(7)=beta
+  buffer(8)=U
+  buffer(9)=GREENHYB_TAU
+  buffer(10)=DBLE(opt_nondiag)
+  buffer(11)=nspinor
+  !buffer(9)=0.d0!mu
+  !buffer(9)=DBLE(Wmax)
+
+  IF ( PRESENT( MPI_COMM ) ) THEN
+    CALL CtqmcoffdiagComplex_init(op%Hybrid, ostream, ifstream, .FALSE., MPI_COMM,buffer)
+  ELSE
+    CALL CtqmcoffdiagComplex_init(op%Hybrid, ostream, ifstream, .FALSE.,iBuffer=buffer)
+  END IF
+  op%opt_fk       = 0
+  op%opt_order    = 0
+  op%opt_histo    = 0
+  op%opt_movie    = 0
+  op%opt_analysis = 0
+  op%opt_check    = 0
+  op%opt_noise    = 0
+  op%opt_spectra  = 0
+END SUBROUTINE CtqmcoffdiagInterfaceComplex_init
+!!***
+
+!!****f* ABINIT/m_CtqmcoffdiagInterfaceComplex/CtqmcoffdiagInterfaceComplex_setOpts
+!! NAME
+!!  CtqmcoffdiagInterfaceComplex_setOpts
+!!
+!! FUNCTION
+!!  Set and save options for many runs
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  op=ctqmcinterface
+!!  opt_Fk=0 if we give us Gw0 and 1 if 1/Gw0+iwn
+!!  opt_order=maximal perturbation order to scope(>0)
+!!  opt_movie=print a latex file (0 or 1)
+!!  opt_analysis=measure correlations (0 or 1)
+!!  opt_check=check fast calculation :0 nothing
+!!                                    1 Impurity
+!!                                    2 Bath
+!!                                    3 Both
+!!  opt_noise=calculate noise ofr green functions(0 ro 1)
+!!  opt_spectra=fourier transform of time evolution of number of electrons
+!!               (0 or 1)
+!!  opt_gMove=number of global moves (>0)
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+
+SUBROUTINE CtqmcoffdiagInterfaceComplex_setOpts(op,opt_Fk,opt_order,opt_histo,opt_movie,&
+& opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove)
+
+!Arguments ------------------------------------
+  TYPE(CtqmcoffdiagInterfaceComplex), INTENT(INOUT) :: op
+  INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_Fk
+  INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_order
+  INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_histo
+  INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_movie
+  INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_analysis
+  INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_check
+  INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_noise
+  INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_spectra
+  INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_gMove
+
+  IF ( PRESENT(opt_Fk) ) &
+    op%opt_Fk = opt_fk
+  IF ( PRESENT(opt_order) ) &
+    op%opt_order = opt_order
+  IF ( PRESENT(opt_histo) ) &
+    op%opt_histo = opt_histo
+  IF ( PRESENT(opt_analysis) ) &
+    op%opt_analysis = opt_analysis
+  IF ( PRESENT(opt_check) ) &
+    op%opt_check = opt_check
+  IF ( PRESENT(opt_movie) ) &
+    op%opt_movie = opt_movie
+  IF ( PRESENT(opt_noise) ) &
+    op%opt_noise = opt_noise
+  IF ( PRESENT(opt_spectra) ) &
+    op%opt_spectra = opt_spectra
+  IF ( PRESENT(opt_gMove) ) &
+    op%opt_gMove = opt_gMove
+
+END SUBROUTINE CtqmcoffdiagInterfaceComplex_setOpts
+!!***
+
+!!****f* ABINIT/m_CtqmcoffdiagInterfaceComplex/CtqmcoffdiagInterfaceComplex_run
+!! NAME
+!!  CtqmcoffdiagInterfaceComplex_run
+!!
+!! FUNCTION
+!!  run a ctqmc simu and get results
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  op=ctqmcinterface
+!!  G0omega=Gw0 (according to opt_Fk)
+!!  matU=interaction matrice
+!!  opt_sym=weight factors to symmetrise G
+!!  opt_levels=energy for each level (with respect to fermi level)
+!!
+!! OUTPUT
+!!  Gtau=G(tau)
+!!  Gw=fourier transform of Gtau
+!!  D=full double occupancy
+!!  E=Interaction energy
+!!  Noise=Noise on E
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+
+SUBROUTINE CtqmcoffdiagInterfaceComplex_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,opt_sym,opt_levels,hybri_limit,Magmom_orb,&
+&Magmom_spin,Magmom_tot,Iatom,fname,opthybri)
+
+!Arguments ------------------------------------
+  TYPE(CtqmcoffdiagInterfaceComplex), INTENT(INOUT) :: op
+  COMPLEX(KIND=8)      , DIMENSION(:,:,:), INTENT(IN ) :: G0omega
+  COMPLEX(KIND=8), DIMENSION(:,:,:), OPTIONAL, INTENT(OUT) :: Gtau
+  COMPLEX(KIND=8)      , DIMENSION(:,:,:), OPTIONAL, INTENT(INOUT) :: Gw
+  DOUBLE PRECISION, OPTIONAL      , INTENT(OUT) :: D
+  DOUBLE PRECISION, OPTIONAL      , INTENT(OUT) :: E
+  DOUBLE PRECISION, OPTIONAL      , INTENT(OUT) :: Noise
+  COMPLEX(KIND=8), DIMENSION(:,:), OPTIONAL, INTENT(IN ) :: matU
+  DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL,  INTENT(OUT ) :: Docc
+  DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL,  INTENT(IN ) :: opt_sym
+  COMPLEX(KIND=8), DIMENSION(:), OPTIONAL, INTENT(IN ) :: opt_levels
+  COMPLEX(KIND=8) , DIMENSION(:,:),OPTIONAL,  INTENT(IN ) :: hybri_limit
+  DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL, INTENT(IN ) :: Magmom_orb
+  DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL, INTENT(IN ) :: Magmom_spin
+  DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL, INTENT(IN ) :: Magmom_tot
+  INTEGER, INTENT(IN ) :: Iatom
+  INTEGER, INTENT(IN ) :: opthybri
+  character(len=fnlen), INTENT(INOUT) :: fname
+!local variables--------------------------------
+!  INTEGER :: iflavor1,iflavor2
+
+ ! do iflavor1=1,10
+ !   do iflavor2=1,10
+ !      if(iflavor1==iflavor2) THEN
+ !        write(6,*) iflavor1, iflavor2, Magmom(iflavor1,iflavor2)
+ !      end if
+ !   end do
+ ! end do
+
+  CALL CtqmcoffdiagComplex_reset(op%Hybrid)
+
+  IF ( PRESENT(opt_levels)) &
+    CALL CtqmcoffdiagComplex_setMu(op%Hybrid, opt_levels)
+
+  IF ( PRESENT(hybri_limit)) &
+    CALL CtqmcoffdiagComplex_sethybri_limit(op%Hybrid, hybri_limit,opthybri)
+
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
+  CALL CtqmcoffdiagComplex_setG0wTab(op%Hybrid, G0omega,op%opt_fk,Iatom,fname)
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
+
+  IF ( PRESENT(matU) ) &
+    CALL CtqmcoffdiagComplex_setU(op%Hybrid, matU)
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
+
+  IF ( PRESENT(Magmom_orb) ) &
+    CALL CtqmcoffdiagComplex_setMagmom(op%Hybrid, Magmom_orb, Magmom_spin, Magmom_tot)
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
+
+
+  CALL CtqmcoffdiagComplex_run(op%Hybrid,opt_order=op%opt_order, &
+                           opt_histo=op%opt_histo, &
+                           opt_movie=op%opt_movie, &
+                           opt_analysis=op%opt_analysis, &
+                           opt_check=op%opt_check, &
+                           opt_noise=op%opt_noise, &
+                           opt_spectra=op%opt_spectra, &
+                           opt_gMove=op%opt_gMove)
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
+
+ ! write(6,*) "op%Hybrid%stats",op%Hybrid%stats
+ ! write(6,*) "opt_gMove",op%opt_gMove
+
+  CALL CtqmcoffdiagComplex_getResult(op%Hybrid,Iatom,fname)
+
+  IF ( PRESENT(opt_sym) ) THEN
+    CALL CtqmcoffdiagComplex_symmetrizeGreen(op%Hybrid,opt_sym)
+  END IF
+
+ ! write(6,*) "op%Hybrid%stats",op%Hybrid%stats
+
+  IF ( PRESENT(Gtau) .AND. PRESENT(Gw) ) THEN
+    CALL CtqmcoffdiagComplex_getGreen(op%Hybrid, Gtau=Gtau, Gw=Gw)
+  !      write(6,*) "size",size(Gw,dim=1),size(gw,dim=2)
+  !      IF ( hybrid%rank .EQ. 0 ) write(389,*) Gw(:,hybrid%flavors+1)
+  !      call flush(389)
+  ELSE IF ( PRESENT(Gtau) .AND. .NOT. PRESENT(Gw) ) THEN
+    CALL CtqmcoffdiagComplex_getGreen(op%Hybrid, Gtau=Gtau)
+  ELSE IF ( .NOT. PRESENT(Gtau) .AND. PRESENT(Gw) ) THEN
+    CALL CtqmcoffdiagComplex_getGreen(op%Hybrid, Gw=Gw)
+  END IF
+
+  !write(6,*) "op%Hybrid%stats",op%Hybrid%stats
+
+  IF ( PRESENT(D) ) &
+  CALL CtqmcoffdiagComplex_getD(op%Hybrid, D)
+  Docc=op%Hybrid%measDE
+
+  !write(6,*) "op%Hybrid%stats",op%Hybrid%stats
+
+  IF ( PRESENT(E) .AND. PRESENT(Noise) ) &
+  CALL CtqmcoffdiagComplex_getE(op%Hybrid, E, Noise)
+
+  CALL CtqmcoffdiagComplex_printAll(op%Hybrid)
+  !CALL CtqmcoffdiagComplex_printQMC(op%Hybrid)
+
+END SUBROUTINE CtqmcoffdiagInterfaceComplex_run
+!!***
+
+!!****f* ABINIT/m_CtqmcoffdiagInterfaceComplex/CtqmcoffdiagInterfaceComplex_setSweeps
+!! NAME
+!!  CtqmcoffdiagInterfaceComplex_setSweeps
+!!
+!! FUNCTION
+!!  change sweeps on the fly
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  op=ctqmcinterface
+!!  sweeps=new number of sweeps
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+
+SUBROUTINE CtqmcoffdiagInterfaceComplex_setSweeps(op, sweeps)
+
+!Arguments ------------------------------------
+  TYPE(CtqmcoffdiagInterfaceComplex), INTENT(INOUT) :: op
+  DOUBLE PRECISION, INTENT(IN) :: sweeps
+
+  CALL CtqmcoffdiagComplex_setSweeps(op%Hybrid,sweeps)
+END SUBROUTINE CtqmcoffdiagInterfaceComplex_setSweeps
+!!***
+
+!!****f* ABINIT/m_CtqmcoffdiagInterfaceComplex/CtqmcoffdiagInterfaceComplex_finalize
+!! NAME
+!!  CtqmcoffdiagInterfaceComplex_finalize
+!!
+!! FUNCTION
+!!  Destroy simulation
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  op=ctqmcinterface
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+
+SUBROUTINE CtqmcoffdiagInterfaceComplex_finalize(op)
+
+!Arguments ------------------------------------
+  TYPE(CtqmcoffdiagInterfaceComplex), INTENT(INOUT) :: op
+
+  !IF ( op%Hybrid%init .EQV. .TRUE. ) THEN
+!    CALL CtqmcoffdiagComplex_printAll(op%Hybrid)
+         !write(6,*) "before ctqmc_destroy in CtqmcoffdiagComplexinterface_finalize"
+    CALL CtqmcoffdiagComplex_destroy(op%Hybrid)
+  !END IF
+
+END SUBROUTINE CtqmcoffdiagInterfaceComplex_finalize
+!!***
+
+END MODULE m_CtqmcoffdiagInterfaceComplex
+!!***

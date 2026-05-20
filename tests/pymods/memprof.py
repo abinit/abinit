@@ -1,11 +1,8 @@
-from __future__ import print_function, division, unicode_literals
 
 import time
-
-from pprint import pprint
+from collections import OrderedDict, defaultdict, deque, namedtuple
 from itertools import groupby
-from collections import namedtuple, deque, defaultdict
-from collections import OrderedDict
+from pprint import pprint
 
 from .plotting import add_fig_kwargs, get_ax_fig_plt
 from .tools import lazy_property
@@ -13,13 +10,16 @@ from .tools import lazy_property
 
 class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memory")):
     """
-    vname: Variable name.
-    prt: Address of variable.
-    action: "A" for allocation, "D" for deallocation.
-    size: Size of allocation in bits.
-    file: Name of Fortran file in which allocation/deallocation is performed.
-    line: Line number in file.
-    tot_memory: Total memory in bits allocated so far.
+    Named tuple representing a memory allocation/deallocation entry.
+
+    Attributes:
+        vname (str): Variable name.
+        ptr (int): Address of variable.
+        action (str): "A" for allocation, "D" for deallocation.
+        size (int): Size of allocation in bits.
+        file (str): Fortran file name.
+        line (int): Line number in file.
+        tot_memory (int): Total memory in bits allocated so far.
     """
 
     @classmethod
@@ -50,9 +50,8 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
         if with_addr:
             return "<var=%s, %s@%s:%s, addr=%s, size_mb=%.3f>" % (
               self.vname, self.action, self.file, self.line, hex(self.ptr), self.size_mb)
-        else:
-            return "<var=%s, %s@%s:%s, size_mb=%.3f>" %  (
-              self.vname, self.action, self.file, self.line, self.size_mb)
+        return "<var=%s, %s@%s:%s, size_mb=%.3f>" %  (
+          self.vname, self.action, self.file, self.line, self.size_mb)
 
     @lazy_property
     def size_mb(self):
@@ -86,20 +85,35 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
         return "%s:%s@%s:%s" % (self.action, self.vname, self.file, self.line)
 
     def __hash__(self):
+        """Standard hash implementation using locus and size."""
         return hash(self.locus, self.size)
 
     def __eq__(self, other):
+        """Check equality of two entries."""
         return self.locus == other.locus and self.size == other.size
 
     def __neq__(self, other):
+        """Check inequality of two entries."""
         return not (self == other)
 
     def frees_onheap(self, other):
+        """
+        Check if this entry deallocates the object allocated by 'other' on the heap.
+
+        Returns:
+            bool: True if it matches.
+        """
         if (not self.isfree) or other.isalloc: return False
         if self.size + other.size != 0: return False
         return True
 
     def frees_onstack(self, other):
+        """
+        Check if this entry deallocates the object allocated by 'other' on the stack.
+
+        Returns:
+            bool: True if it matches.
+        """
         if (not self.isfree) or other.isalloc: return False
         if self.size + other.size != 0: return False
         if self.locus != other.locus: return False
@@ -130,21 +144,51 @@ def entries_to_dataframe(entries):
 
 
 class AbimemFile:
+    """
+    Cloud of memory allocation entries extracted from ABINIT memory log files.
+
+    Attributes:
+        path (str): Path to the memory log file.
+    """
+
     def __init__(self, path):
+        """
+        Initialize the AbimemFile object.
+
+        Args:
+            path (str): Path to the log file.
+        """
         self.path = path
 
     def __str__(self):
         return self.to_string()
 
     def to_string(self, verbose=0):
+        """
+        Return string representation of the memory usage.
+
+        Args:
+            verbose (int): Verbosity level.
+
+        Returns:
+            str: Description of memory usage.
+        """
         lines = []
         app = lines.append
         df = self.get_intense_dataframe()
         app(df.to_string())
         return "\n".join(lines)
 
-    def find_small_allocs(self, nbits=160*8):
-        """Zero sized allocations are not counted."""
+    def find_small_allocs(self, nbits=160 * 8):
+        """
+        Find small allocations in the memory log.
+
+        Args:
+            nbits (int): Threshold for 'small' allocation in bits.
+
+        Returns:
+            list: List of small Entry objects.
+        """
         smallest = []
         for e in self.all_entries:
             if not e.isalloc: continue
@@ -199,7 +243,12 @@ class AbimemFile:
         return entries_to_dataframe(elist) if as_dataframe else elist
 
     def find_weird_ptrs(self):
-        """Find negative or zero pointers."""
+        """
+        Find and report negative or zero pointers in the memory log.
+
+        Returns:
+            list: List of weird Entry objects.
+        """
         elist = []
         eapp = elist.append
         for e in self.all_entries:
@@ -217,7 +266,7 @@ class AbimemFile:
         """Parse file and create list of Entries."""
         all_entries = []
         app = all_entries.append
-        with open(self.path, "rt") as fh:
+        with open(self.path) as fh:
             for lineno, line in enumerate(fh):
                 # skip header line of abimem files
                 if line.startswith("#"): continue
@@ -376,10 +425,13 @@ class AbimemFile:
 
     def get_hotspots_dataframe(self, accumulated=True):
         """
-        Return DataFrame with total memory allocated per Fortran file.
+        Return a DataFrame with total memory allocated per Fortran file.
 
         Args:
-            accumulated: True to use accumulated entries instead of raw ones.
+            accumulated (bool, optional): If True, use accumulated entries.
+
+        Returns:
+            pd.DataFrame: Hotspots data.
         """
         df = self.dataframe_accumulated if accumulated else self.dataframe
 
@@ -415,7 +467,13 @@ class AbimemFile:
 
     def find_memleaks(self, verbose=0):
         """
-        Try to find memory leaks using the address of the arrays and the action performed (allocation/free).
+        Analyze memory log to identify potential memory leaks.
+
+        Args:
+            verbose (int, optional): Verbosity level.
+
+        Returns:
+            int: Number of detected leaks.
         """
         heap, stack = Heap(), Stack()
         reallocs = []
@@ -435,43 +493,42 @@ class AbimemFile:
                     # Likely comes from a reallocation
                     reallocs.append(newe)
 
+            elif newe.isfree and len(heap[p]) == 1 and heap[p][0].size + newe.size == 0:
+                heap.pop(p)
             else:
-                if newe.isfree and len(heap[p]) == 1 and heap[p][0].size + newe.size == 0:
-                    heap.pop(p)
+                # In principle this should never happen but there are exceptions:
+                #
+                # 1) The compiler may decide to put the allocatable on the stack
+                #    In this case the ptr reported by gfortran is 0.
+                #
+                # 2) The allocatable variable is "reallocated" by the compiler (F2003).
+                #    Example:
+                #
+                #    allocate(foo(2,1))           ! p0 = &foo
+                #    foo = reshape([0,0], [2,1])  ! p1 = &foo. Reallocation of the LHS.
+                #                                 ! Use foo(:) to avoid that
+                #    deallocate(foo)              ! p2 = &foo
+                #
+                #    In this case, p2 != p0
+                if verbose:
+                    print("WARNING:", newe.ptr, newe, "ptr already on the heap ", len(heap[p]), \
+                          " sizes: ", heap[p][0].size, newe.size)
+                #print("HEAP:", heap[newe.ptr])
+
+                locus = newe.locus
+                if locus not in stack:
+                    stack[locus] = [newe]
                 else:
-                    # In principle this should never happen but there are exceptions:
-                    #
-                    # 1) The compiler may decide to put the allocatable on the stack
-                    #    In this case the ptr reported by gfortran is 0.
-                    #
-                    # 2) The allocatable variable is "reallocated" by the compiler (F2003).
-                    #    Example:
-                    #
-                    #    allocate(foo(2,1))           ! p0 = &foo
-                    #    foo = reshape([0,0], [2,1])  ! p1 = &foo. Reallocation of the LHS.
-                    #                                 ! Use foo(:) to avoid that
-                    #    deallocate(foo)              ! p2 = &foo
-                    #
-                    #    In this case, p2 != p0
-                    if verbose:
-                        print("WARNING:", newe.ptr, newe, "ptr already on the heap ", len(heap[p]), \
-                              " sizes: ", heap[p][0].size, newe.size)
-                    #print("HEAP:", heap[newe.ptr])
+                    #if newe.ptr != 0: print(newe)
+                    stack_loc = stack[locus]
+                    ifind = -1
+                    for i, olde in enumerate(stack_loc):
+                        if newe.frees_onstack(olde):
+                            ifind = i
+                            break
 
-                    locus = newe.locus
-                    if locus not in stack:
-                        stack[locus] = [newe]
-                    else:
-                        #if newe.ptr != 0: print(newe)
-                        stack_loc = stack[locus]
-                        ifind = -1
-                        for i, olde in enumerate(stack_loc):
-                            if newe.frees_onstack(olde):
-                                ifind = i
-                                break
-
-                        if ifind != -1:
-                            stack_loc.pop(ifind)
+                    if ifind != -1:
+                        stack_loc.pop(ifind)
                         #else:
                         #    print(newe)
 
@@ -527,15 +584,23 @@ class AbimemFile:
 
 
 class Heap(dict):
+    """Container for heap memory allocations."""
 
     def show(self):
+        """Print the contents of the heap."""
         print("=== HEAP OF LEN %s ===" % len(self))
         if not self: return
         # for p, elist in self.items():
         pprint(self, indent=4)
-        print("")
+        print()
 
     def pop_alloc(self, entry):
+        """
+        Remove the allocation corresponding to the given deallocation entry.
+
+        Returns:
+            int: 1 if removed, 0 otherwise.
+        """
         if not entry.isfree: return 0
         elist = self.get[entry.ptr]
         if elist is None: return 0
@@ -547,19 +612,20 @@ class Heap(dict):
 
 
 class Stack(dict):
+    """Container for stack memory allocations."""
 
     def show(self):
+        """Print the contents of the stack."""
         print("=== STACK OF LEN %s ===" % len(self))
         if not self: return
         pprint(self)
-        print("")
+        print()
 
 
 # Copied  from abipy.tools.plotting
 class MplExpose: # pragma: no cover
     """
     Example:
-
         with MplExpose() as e:
             e(obj.plot1(show=False))
             e(obj.plot2(show=False))
@@ -589,8 +655,10 @@ class MplExpose: # pragma: no cover
 
     def __call__(self, obj):
         """
-        Add an object to MplExpose. Support mpl figure, list of figures or
-        generator yielding figures.
+        Add an object to MplExpose.
+
+        Args:
+            obj: matplotlib Figure, list of figures, or generator.
         """
         import types
         if isinstance(obj, (types.GeneratorType, list, tuple)):
@@ -600,7 +668,12 @@ class MplExpose: # pragma: no cover
             self.add_fig(obj)
 
     def add_fig(self, fig):
-        """Add a matplotlib figure."""
+        """
+        Add a single matplotlib figure.
+
+        Args:
+            fig: The figure to add.
+        """
         if fig is None: return
 
         if not self.slide_mode:
@@ -622,11 +695,13 @@ class MplExpose: # pragma: no cover
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """Activated at the end of the with statement. """
+        """Activated at the end of the with statement."""
         self.expose()
 
     def expose(self):
-        """Show all figures. Clear figures if needed."""
+        """
+        Show all loaded figures.
+        """
         if not self.slide_mode:
             print("All figures in memory, elapsed time: %.3f s" % (time.time() - self.start_time))
             import matplotlib.pyplot as plt

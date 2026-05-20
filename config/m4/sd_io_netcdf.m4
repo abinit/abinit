@@ -1,4 +1,4 @@
-## Copyright (C) 2020-2024 Yann Pouillon
+## Copyright (C) 2020-2026 Yann Pouillon
 
 #
 # NetCDF I/O library
@@ -36,6 +36,16 @@ AC_DEFUN([SD_NETCDF_INIT], [
   sd_netcdf_fcflags_def="$6"
   sd_netcdf_ldflags_def="$7"
   sd_netcdf_enable_def=""
+
+AC_ARG_WITH([fb-netcdf-version],
+  [AS_HELP_STRING([--with-fb-netcdf-version=VERSION],
+    [Specify the version of netcdf to use when installed via fallback])],
+  [abi_fb_netcdf_version="$withval"],
+  [abi_fb_netcdf_version="4.9.3"]
+)
+
+AC_SUBST([abi_fb_netcdf_version])
+
 
   # Process options
   for kwd in ${sd_netcdf_options}; do
@@ -118,10 +128,9 @@ AC_DEFUN([SD_NETCDF_INIT], [
             AC_PATH_TOOL(PKG_CONFIG,pkg-config)
             if "$PKG_CONFIG" --exists netcdf; then
                   AC_MSG_RESULT([yes])
-                  #sd_netcdf_init="pkg"
+                  sd_netcdf_init="pkg"
            else
                   AC_MSG_RESULT([no])
-                  sd_netcdf_init="def"
            fi
         fi
      fi
@@ -173,9 +182,9 @@ AC_DEFUN([SD_NETCDF_INIT], [
         ;;
 
       pkg)
-        TMP_netcdf_CPPFLAGS=`$PKG_CONFIG --cflags --keep-system-cflags netcdf`
+        TMP_netcdf_CPPFLAGS=`$PKG_CONFIG --cflags netcdf`
         TMP_netcdf_FFFLAGS="${TMP_netcdf_CPPFLAGS}"
-        TMP_netcdf_LIBS=`$PKG_CONFIG --libs  --keep-system-libs netcdf`
+        TMP_netcdf_LIBS=`$PKG_CONFIG --libs netcdf`
         sd_netcdf_cppflags="${TMP_netcdf_CPPFLAGS} "
         sd_netcdf_cflags="${TMP_netcdf_CPPFLAGS}"
         sd_netcdf_cxxflags="${TMP_netcdf_CPPFLAGS}"
@@ -240,16 +249,19 @@ AC_DEFUN([SD_NETCDF_DETECT], [
           [Define to 1 if you have a parallel NetCDF library.])
       fi
     else
-      if test "${sd_netcdf_status}" = "optional" -a \
-              "${sd_netcdf_init}" = "def"; then
+        sd_netcdf_ok="yes"
         sd_netcdf_enable="no"
         sd_netcdf_cppflags=""
-        sd_netcdf_cflags=""
+        sd_netcdf_cflags="-I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4/${abi_fb_netcdf_version}/include"
         sd_netcdf_cxxflags=""
-        sd_netcdf_fcflags=""
+        sd_netcdf_fcflags="${sd_netcdf_fcflags_def} -I${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4/${abi_fb_netcdf_version}/include"
         sd_netcdf_ldflags=""
-        sd_netcdf_libs=""
+        sd_netcdf_libs="-L${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4/${abi_fb_netcdf_version}/lib ${sd_netcdf_libs_def} ${sd_netcdf_libs}"
+      if test "${sd_netcdf_status}" = "optional" -a \
+              "${sd_netcdf_init}" = "def"; then
+	sd_netcdf_init='fb'
       else
+        sd_netcdf_init='fb'
         if test "${sd_netcdf_policy}" = "fail"; then
               AC_MSG_FAILURE([invalid NetCDF configuration])
         else

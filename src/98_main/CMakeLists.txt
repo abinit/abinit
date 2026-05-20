@@ -49,7 +49,7 @@ macro(abi_build_exe exe_name)
   if (HDF5_FOUND)
     target_link_libraries(${exe_name}
       PUBLIC
-      HDF5::HDF5)
+      abinit::hdf5)
   endif (HDF5_FOUND)
 
   if (ABINIT_NETCDF_FOUND)

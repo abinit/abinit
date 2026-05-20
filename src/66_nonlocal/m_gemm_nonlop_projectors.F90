@@ -8,7 +8,7 @@
 !!  which leads to excellent CPU efficiency and OpenMP scalability.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2025 ABINIT group (AL)
+!! Copyright (C) 2014-2026 ABINIT group (AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,6 +39,7 @@ module m_gemm_nonlop_projectors
  use m_xomp
  use m_xmpi
  use m_fstrings,    only : itoa, ftoa, sjoin
+ use m_gputk
  use m_abi_linalg
 
  use defs_abitypes, only : MPI_type
@@ -53,9 +54,7 @@ module m_gemm_nonlop_projectors
  use m_alloc_hamilt_gpu, only : gemm_nonlop_gpu_data
 #endif
 
-#ifdef HAVE_FC_ISO_C_BINDING
  use, intrinsic :: iso_c_binding, only : c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc, c_ptr
-#endif
 
  implicit none
 
@@ -129,6 +128,10 @@ module m_gemm_nonlop_projectors
 
  logical, save, public :: gemm_nonlop_is_distributed = .false.
  ! Public variable indicating whether we should gemm_nonlop operated in a distributed manner. Set to false by default
+ ! but might be enabled by memory constraints or forced by user through parameters.
+
+ logical, save, public :: gemm_nonlop_split_choice23 = .false.
+ ! Public variable indicating whether choice 23 computation should be splitted. Set to false by default
  ! but might be enabled by memory constraints or forced by user through parameters.
 
  integer, save :: gemm_nonlop_nblocks = 1
@@ -883,7 +886,7 @@ contains
         end if
 
         lmn_beg = max(1,ibeg-shift_do)
-        if(shift_do+nlmn > iend) nlmn = iend - shift_do - 1
+        if(shift_do+nlmn > iend - 1) nlmn = iend - shift_do - 1
       end if
 
       !! build atom_projs, from opernlb
@@ -977,7 +980,8 @@ contains
           !$OMP& PRIVATE(ipw,ilmn) MAP(to:projs,atom_projs)
           do ilmn=1,nlmn-(lmn_beg-1)
             do ipw=1,npw
-              projs(:, ipw, shift+ilmn) = atom_projs(:, ipw, ilmn+(lmn_beg-1))
+              projs(1, ipw, shift+ilmn) = atom_projs(1, ipw, ilmn+(lmn_beg-1))
+              projs(2, ipw, shift+ilmn) = atom_projs(2, ipw, ilmn+(lmn_beg-1))
             end do
           end do
         else ! istwf_k>1
@@ -1181,7 +1185,7 @@ contains
 
         lmn_beg = max(1,ibeg-shift_do)
         if(lmn_grad_beg==-1) lmn_grad_beg = (lmn_beg-1)*ngrads
-        if(shift_do+nlmn > iend) nlmn = iend - shift_do - 1
+        if(shift_do+nlmn > iend - 1) nlmn = iend - shift_do - 1
       end if
 
       !! build atom_dprojs, from opernlb
@@ -1201,45 +1205,68 @@ contains
       end if
       if (signs==1 .and. (choice==3 .or. choice==23 .or. choice==54 .or. choice==55 .or. choice==6)) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_dprojs,ffnl) &
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+        !$OMP& PRIVATE(ilmn,idir,ipw) MAP(to:atom_dprojs,ffnl) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-        do ipw=1, npw
-          atom_dprojs(1,ipw, 1:ndprojs, 1:nlmn_o) = wt * ffnl(ipw, 2:ndprojs+1, 1:nlmn_o, itypat)
+        do ilmn=1,nlmn_o
+          do idir=1,ndprojs
+            do ipw=1, npw
+              atom_dprojs(1, ipw, idir, ilmn) = wt * ffnl(ipw, idir+1, ilmn, itypat)
+            end do
+          end do
         end do
       end if
       if (signs==2 .and. (choice==3 .or. choice==5 .or. choice==51)) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_dprojs,ffnl) &
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+        !$OMP& PRIVATE(ilmn,ipw) MAP(to:atom_dprojs,ffnl) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-        do ipw=1, npw
-          atom_dprojs(1,ipw, 1, 1:nlmn_o) = wt * ffnl(ipw, 1+ffnl_dir, 1:nlmn_o, itypat)
+        do ilmn=1,nlmn_o
+          do ipw=1, npw
+            atom_dprojs(1, ipw, 1, ilmn) = wt * ffnl(ipw, 1+ffnl_dir, ilmn, itypat)
+          end do
         end do
       end if
       if(signs==1 .and. choice==54) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_d2projs,ffnl) &
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+        !$OMP& PRIVATE(ilmn,idir,ipw) MAP(to:atom_d2projs,ffnl) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-        do ipw=1, npw
-          atom_d2projs(1,ipw, 1:nd2projs, 1:nlmn_o) = wt * ffnl(ipw, 2:nd2projs+1, 1:nlmn_o, itypat)
+        do ilmn=1,nlmn_o
+          do idir=1,nd2projs
+            do ipw=1, npw
+              atom_d2projs(1, ipw, idir, ilmn) = wt * ffnl(ipw, idir+1, ilmn, itypat)
+            end do
+          end do
         end do
       else if(signs==1 .and. choice==55) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_d2projs,ffnl) &
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+        !$OMP& PRIVATE(ilmn,idir,ipw) MAP(to:atom_d2projs,ffnl) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-        do ipw=1, npw
-          atom_d2projs(1,ipw, 1:nd2projs, 1:nlmn_o) = wt * ffnl(ipw, 5:nd2projs+4, 1:nlmn_o, itypat)
+        do ilmn=1,nlmn_o
+          do idir=1,nd2projs
+            do ipw=1, npw
+              atom_d2projs(1, ipw, idir, ilmn) = wt * ffnl(ipw, idir+4, ilmn, itypat)
+            end do
+          end do
         end do
       else if(signs==1 .and. choice==6) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_d2projs,ffnl) &
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+        !$OMP& PRIVATE(ilmn,idir,ipw) MAP(to:atom_d2projs,ffnl) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-        do ipw=1, npw
-          atom_d2projs(1,ipw, 1:10, 1:nlmn_o) = wt * ffnl(ipw, 1:10, 1:nlmn_o, itypat)
+        do ilmn=1,nlmn_o
+          do idir=1,10
+            do ipw=1, npw
+              atom_d2projs(1, ipw, idir, ilmn) = wt * ffnl(ipw, idir, ilmn, itypat)
+            end do
+          end do
         end do
       end if
 
@@ -1387,7 +1414,7 @@ contains
         if(istwf_k <= 1) then
 #ifdef HAVE_OPENMP_OFFLOAD
           !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-          !$OMP& PRIVATE(ilmn,ipw,idir,idir1,idir2) MAP(to:atom_dprojs,dprojs,kpg,ipw,idir,idir1,idir2) &
+          !$OMP& PRIVATE(ilmn,ipw,idir,idir1,idir2) MAP(to:atom_dprojs,dprojs,kpg) &
           !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
           do ilmn=lmn_beg,nlmn

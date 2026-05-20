@@ -6,7 +6,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2019-2025 ABINIT group (MR,MS)
+!!  Copyright (C) 2019-2026 ABINIT group (MR,MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,7 +55,7 @@ contains
 !!  asr= if /=0 acustic sume rule is imposed on the dynamical matrix
 !!  d2asr(2,3,natom,3,natom)=ASR-correction
 !!  ddb<type(ddb_type)>=2nd order derivative database.
-!!  ddb<type(ddb_type)>=Long wave 3rd order derivative database.
+!!  ddb_lw<type(ddb_type)>=Long wave 3rd order derivative database.
 !!  ddb_version = 8 digit integer giving date. To mantain compatibility with old DDB files.
 !!  Crystal<type(crystal_t)>=Crystal structure parameters
 !!  filnamddb = name of the ddb file

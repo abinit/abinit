@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,6 +38,7 @@ module m_forstr
  use m_ompgpu_utils
  use m_xg
  use m_xg_nonlop
+ use m_xgTransposer
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -59,7 +60,7 @@ module m_forstr
  use m_initylmg,         only : initylmg
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_kg,               only : mkkpg
- use m_hamiltonian,      only : gs_hamiltonian_type, gs_hamiltonian_type, gspot_transgrid_and_pack !,K_H_KPRIME
+ use m_hamiltonian,      only : gs_hamiltonian_type, gs_hamiltonian_type, gspot_transgrid_and_pack, K_H_K, KPRIME_H_KPRIME !,K_H_KPRIME
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype
  use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, prep_bandfft_tabs, &
 &                               bandfft_kpt_savetabs, bandfft_kpt_restoretabs
@@ -79,6 +80,7 @@ module m_forstr
  use m_psolver,          only : psolver_hartree
  use m_wvl_psi,          only : wvl_nl_gradient
  use m_fft,              only : fourdp,fourwf
+ use m_alloc_hamilt_gpu, only : hamilt_gpu_nfft_blocks
  use, intrinsic :: iso_c_binding,      only : c_loc,c_f_pointer,c_double,c_size_t
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
@@ -156,6 +158,7 @@ contains
 !!   | e_corepsp(IN)=psp core-core energy
 !!   | e_kinetic(IN)=kinetic energy part of total energy.
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  grchempottn(3,natom)=d(E_chemical potential)/d(xred) (hartree)
 !!  grcondft(3,natom)=d(E_constrainedDFT)/d(xred) (hartree)
@@ -330,8 +333,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  real(dp) :: kinstr(6),mggastr(6),nlstr(6),tsec(2),strdum(6),gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp) :: dummy(0)
  real(dp),allocatable :: grnl(:),vlocal(:,:),vxc_hf(:,:),xcart(:,:),ylmbz(:,:),ylmgrbz(:,:,:)
- real(dp), ABI_CONTIGUOUS pointer :: resid(:,:)
-
+ real(dp), contiguous, pointer :: resid(:,:)
 ! *************************************************************************
 
  call timab(910,1,tsec)
@@ -421,9 +423,9 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   dtset%istwfk,kg,kinstr,nlstr,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,mggastr,dtset%mkmem,&
 &   mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,nfftf,dtset%ngfft,&
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%nsym,ntypat,&
-&   dtset%nucdipmom,occ,optfor,paw_ij,pawfgr,pawtab,ph1d,psps,rprimd,stress_needed,symrec,dtset%typat,&
-&   usecprj,dtset%usefock,usevxctau,vxctau,usexg,dtset%gpu_option,dtset%gpu_nl_distrib,&
-&   dtset%gpu_nl_splitsize,dtset%wtk,xred,ylm,ylmgr,xg_nonlop)
+&   dtset%nucdipmom,occ,optfor,paw_ij,pawfgr,pawtab,ph1d,psps,dtset%qgbt,rprimd,stress_needed,symrec,dtset%typat,&
+&   dtset%use_gbt,usecprj,dtset%usefock,usevxctau,vxctau,usexg,dtset%gpu_option,dtset%gpu_nl_distrib,&
+&   dtset%gpu_nl_splitsize,dtset%gpu_nfft_blocks,dtset%wtk,xred,ylm,ylmgr,xg_nonlop)
  else if (optfor>0) then !WVL
    ABI_MALLOC(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
@@ -632,15 +634,16 @@ end subroutine forstr
 subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,fock,&
 &  grnl,istwfk,kg,kinstr,npsstr,kpt,mband,mcg,mcprj,mgfft,mggastr,mkmem,mpi_enreg,mpsang,&
 &  mpw,my_natom,natom,nband,nfft,nfftf,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
-&  ntypat,nucdipmom,occ,optfor,paw_ij,pawfgr,pawtab,ph1d,psps,rprimd,&
-&  stress_needed,symrec,typat,usecprj,usefock,usevxctau,vxctau,usexg,&
-&  gpu_option,gpu_nl_distrib,gpu_nl_splitsize,wtk,xred,ylm,ylmgr,xg_nonlop)
+&  ntypat,nucdipmom,occ,optfor,paw_ij,pawfgr,pawtab,ph1d,psps,qgbt,rprimd,&
+&  stress_needed,symrec,typat,use_gbt,usecprj,usefock,usevxctau,vxctau,usexg,&
+&  gpu_option,gpu_nl_distrib,gpu_nl_splitsize,gpu_nfft_blocks,wtk,xred,ylm,ylmgr,xg_nonlop)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,nfft,nfftf,nkpt
  integer,intent(in) :: nspden,nsppol,nspinor,nsym,ntypat,optfor,stress_needed
- integer,intent(in) :: usecprj,usefock,usevxctau,usexg,gpu_option,gpu_nl_distrib,gpu_nl_splitsize
+ integer,intent(in) :: use_gbt,usecprj,usefock,usevxctau,usexg,gpu_option
+ integer,intent(in) :: gpu_nl_distrib,gpu_nl_splitsize,gpu_nfft_blocks
  real(dp),intent(in) :: ecut,ecutsm,effmass_free
  type(electronpositron_type),pointer :: electronpositron
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -653,7 +656,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  integer,intent(in) :: symrec(3,3,nsym),typat(natom)
  real(dp),intent(in) :: cg(2,mcg)
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol),kpt(3,nkpt),nucdipmom(3,my_natom)
- real(dp),intent(in) :: occ(mband*nkpt*nsppol),ph1d(2,3*(2*mgfft+1)*natom)
+ real(dp),intent(in) :: occ(mband*nkpt*nsppol),ph1d(2,3*(2*mgfft+1)*natom),qgbt(3)
  real(dp),intent(in) :: rprimd(3,3),wtk(nkpt),xred(3,natom)
  real(dp),intent(in),target :: vxctau(nfftf,nspden,4*usevxctau)
  real(dp),intent(in) :: ylm(mpw*mkmem,mpsang*mpsang*psps%useylm)
@@ -667,33 +670,38 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !scalars
  integer,parameter :: tim_rwwf=7
  integer :: bandpp,bdtot_index,choice,cpopt,dimffnl,dimffnl_str,iband,iband_cprj,iband_last,ibg,icg,ider,ider_str
- integer :: idir,idir_str,ierr,ii,ikg,ikpt,ilm,ipositron,ipw,ishift,isppol,istwf_k
+ integer :: idir,idir_str,ierr,ii,ikg,ikpt,ilm,ipositron,ipw,ishift,isppol,istwf_k,npw_k_
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: nnlout,npw_k,paw_opt,signs,spaceComm
  integer :: tim_nonlop,tim_nonlop_prep,usecprj_local,use_ACE_old
  integer :: blocksize,iblock,iblocksize,ibs,nblockbd,nblk_gemm_nonlop
- integer :: space,me_g0,ncols_cprj
- real(dp) :: ar,renorm_factor,dfsm,ecutsm_inv,fact_kin,fsm,htpisq,kgc1
- real(dp) :: kgc2,kgc3,kin,xx
- type(gs_hamiltonian_type) :: gs_hamk
+ integer :: space,me_g0,ncols_cprj,me_g0_fft
+ real(dp) :: ar,ar2,renorm_factor,dfsm,ecutsm_inv,fact_kin,fsm,htpisq
+ real(dp) :: kin,kin_kphq,xx
+ type(gs_hamiltonian_type),target :: gs_hamk
  logical :: compute_gbound,usefock_loc
  character(len=500) :: msg
  type(fock_common_type),pointer :: fockcommon
+ type(xgBlock_t) :: xgx0_tr
+ type(xgTransposer_t) :: xgTransposer
 !arrays
- integer,allocatable :: kg_k(:,:)
- real(dp) :: kpoint(3),nonlop_dum(1,1),rmet(3,3),tsec(2)
+ integer,allocatable,target :: kg_k(:,:)
+ integer,pointer :: gbound_k(:,:),kg_k_(:,:)
+ real(dp) :: kpoint(3),kphq(3),nonlop_dum(1,1),rmet(3,3),tsec(2)
+ real(dp) :: kgr(3),kgr_kphq(3),kgc(3),kgc_kphq(3)
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(c_double), ABI_CONTIGUOUS pointer :: cwavef(:,:) => null()
+ real(c_double), contiguous, pointer :: cwavef(:,:) => null()
 #else
  real(dp),allocatable,target :: cwavef(:,:)
 #endif
  real(dp),allocatable :: enlout(:),ffnl_sav(:,:,:,:),ffnl_str(:,:,:,:)
- real(dp),allocatable :: ghc_dum(:,:),gprimd(:,:),kpg_k(:,:),kpg_k_sav(:,:)
+ real(dp),allocatable :: ghc_dum(:,:),gprimd(:,:),kpg_k(:,:),kpg_kphq(:,:),kpg_k_sav(:,:)
  real(dp),allocatable :: kstr1(:),kstr2(:),kstr3(:),kstr4(:),kstr5(:),kstr6(:)
- real(dp),allocatable :: lambda(:),occblock(:),ph3d(:,:,:),ph3d_sav(:,:,:)
+ real(dp),allocatable :: kstr1_kphq(:),kstr2_kphq(:),kstr3_kphq(:),kstr4_kphq(:),kstr5_kphq(:),kstr6_kphq(:)
+ real(dp),allocatable :: lambda(:),occblock(:),ph3d(:,:,:),ph3d_kphq(:,:,:),ph3d_sav(:,:,:)
  real(dp),allocatable :: vxctaulocal(:,:,:,:,:)
  real(dp),allocatable :: weight(:),ylm_k(:,:),ylmgr_k(:,:,:)
- real(dp),allocatable,target :: ffnl(:,:,:,:)
+ real(dp),allocatable,target :: ffnl(:,:,:,:),ffnl_kphq(:,:,:,:)
  real(dp),pointer :: vxctau_ptr(:,:,:)
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
@@ -701,7 +709,8 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  type(xgBlock_t) :: xgx0,xgeigen,xgforces,xgstress
  type(xg_t) :: cprj_xgx0,cprj_work
  real(dp),allocatable :: enlout_2d(:,:),enlout_2d_stress(:,:)
-
+ real(dp),allocatable :: cwavef_spin(:,:),enlout_spin(:)
+ real(dp),pointer :: cwavef_tr(:,:)
 !*************************************************************************
 
  ABI_NVTX_START_RANGE(NVTX_FORSTRNPS)
@@ -775,7 +784,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj_local,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
-& nucdipmom=nucdipmom,gpu_option=gpu_option)
+& nucdipmom=nucdipmom,gpu_option=gpu_option,nfft_blocks=gpu_nfft_blocks)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
 
  if (usevxctau>0) then
@@ -833,6 +842,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      istwf_k=istwfk(ikpt)
      npw_k=npwarr(ikpt)
      kpoint(:)=kpt(:,ikpt)
+     if (use_gbt/=0) then
+       kpoint(:)=kpt(:,ikpt)-half*qgbt(:)
+       kphq(:)=kpt(:,ikpt)+half*qgbt(:)
+     end if
 
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) then
        bdtot_index=bdtot_index+nband_k
@@ -877,6 +890,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        ABI_MALLOC(kstr4,(npw_k))
        ABI_MALLOC(kstr5,(npw_k))
        ABI_MALLOC(kstr6,(npw_k))
+       if (use_gbt /= 0) then
+         ABI_MALLOC(kstr1_kphq,(npw_k))
+         ABI_MALLOC(kstr2_kphq,(npw_k))
+         ABI_MALLOC(kstr3_kphq,(npw_k))
+         ABI_MALLOC(kstr4_kphq,(npw_k))
+         ABI_MALLOC(kstr5_kphq,(npw_k))
+         ABI_MALLOC(kstr6_kphq,(npw_k))
+       end if
      end if
 
      ABI_MALLOC(kg_k,(3,mpw))
@@ -910,61 +931,104 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        end if
      end if
 
+
 !    Prepare kinetic contribution to stress tensor (Warning : the symmetry
 !    has not been broken, like in mkkin.f or kpg3.f . It should be, in order to be coherent).
      if (stress_needed==1) then
        ABI_MALLOC(gprimd,(3,3))
        gprimd=gs_hamk%gprimd
-!$OMP PARALLEL DO PRIVATE(fact_kin,ipw,kgc1,kgc2,kgc3,kin,xx,fsm,dfsm) &
-!$OMP&SHARED(ecut,ecutsm,ecutsm_inv,gs_hamk,htpisq,kg_k,kpoint,kstr1,kstr2,kstr3,kstr4,kstr5,kstr6,npw_k)
+!$OMP PARALLEL DO PRIVATE(fact_kin,ipw,kgr,kgr_kphq,kgc,kgc_kphq,kin,xx,fsm,dfsm) &
+!$OMP&SHARED(ecut,ecutsm,ecutsm_inv,gs_hamk,htpisq,kg_k,kpoint,kphq,kstr1,kstr2,kstr3,kstr4,kstr5,kstr6,kstr1_kphq,kstr2_kphq,kstr3_kphq,kstr4_kphq,kstr5_kphq,kstr6_kphq,npw_k)
        do ipw=1,npw_k
 !        Compute Cartesian coordinates of (k+G)
-         kgc1=gprimd(1,1)*(kpoint(1)+kg_k(1,ipw))+&
-&         gprimd(1,2)*(kpoint(2)+kg_k(2,ipw))+&
-&         gprimd(1,3)*(kpoint(3)+kg_k(3,ipw))
-         kgc2=gprimd(2,1)*(kpoint(1)+kg_k(1,ipw))+&
-&         gprimd(2,2)*(kpoint(2)+kg_k(2,ipw))+&
-&         gprimd(2,3)*(kpoint(3)+kg_k(3,ipw))
-         kgc3=gprimd(3,1)*(kpoint(1)+kg_k(1,ipw))+&
-&         gprimd(3,2)*(kpoint(2)+kg_k(2,ipw))+&
-&         gprimd(3,3)*(kpoint(3)+kg_k(3,ipw))
-         kin=htpisq* ( kgc1**2 + kgc2**2 + kgc3**2 )
+         kgr = kpoint + kg_k(:,ipw)
+         kgc = MATMUL(gprimd, kgr)
+         kin = htpisq * DOT_PRODUCT(kgc, kgc)
+!          kgc1=gprimd(1,1)*(kpoint(1)+kg_k(1,ipw))+&
+! &         gprimd(1,2)*(kpoint(2)+kg_k(2,ipw))+&
+! &         gprimd(1,3)*(kpoint(3)+kg_k(3,ipw))
+!          kgc2=gprimd(2,1)*(kpoint(1)+kg_k(1,ipw))+&
+!  &         gprimd(2,2)*(kpoint(2)+kg_k(2,ipw))+&
+!  &         gprimd(2,3)*(kpoint(3)+kg_k(3,ipw))
+!           kgc3=gprimd(3,1)*(kpoint(1)+kg_k(1,ipw))+&
+!  &         gprimd(3,2)*(kpoint(2)+kg_k(2,ipw))+&
+!  &         gprimd(3,3)*(kpoint(3)+kg_k(3,ipw))
+!           kin=htpisq* ( kgc1**2 + kgc2**2 + kgc3**2 )
          fact_kin=1.0_dp
-         if(kin>ecut-ecutsm)then
-           if(kin>ecut)then
-             fact_kin=0.0_dp
+         if (kin>ecut-ecutsm) then
+           if (kin>ecut) then
+               fact_kin=0.0_dp
            else
 !            See the routine mkkin.f, for the smearing procedure
-             xx=(ecut-kin)*ecutsm_inv
+               xx=(ecut-kin)*ecutsm_inv
 !            This kinetic cutoff smoothing function and its xx derivatives
 !            were produced with Mathematica and the fortran code has been
 !            numerically checked against Mathematica.
-             fsm=1.0_dp/(xx**2*(3+xx*(1+xx*(-6+3*xx))))
-             dfsm=-3.0_dp*(-1+xx)**2*xx*(2+5*xx)*fsm**2
+               fsm=1.0_dp/(xx**2*(3+xx*(1+xx*(-6+3*xx))))
+               dfsm=-3.0_dp*(-1+xx)**2*xx*(2+5*xx)*fsm**2
 !            d2fsm=6.0_dp*xx**2*(9+xx*(8+xx*(-52+xx*(-3+xx*(137+xx*&
 !            &                         (-144+45*xx))))))*fsm**3
-             fact_kin=fsm+kin*(-ecutsm_inv)*dfsm
+               fact_kin=fsm+kin*(-ecutsm_inv)*dfsm
            end if
          end if
-         kstr1(ipw)=fact_kin*kgc1*kgc1
-         kstr2(ipw)=fact_kin*kgc2*kgc2
-         kstr3(ipw)=fact_kin*kgc3*kgc3
-         kstr4(ipw)=fact_kin*kgc3*kgc2
-         kstr5(ipw)=fact_kin*kgc3*kgc1
-         kstr6(ipw)=fact_kin*kgc2*kgc1
+         kstr1(ipw) = fact_kin * kgc(1) * kgc(1)
+         kstr2(ipw) = fact_kin * kgc(2) * kgc(2)
+         kstr3(ipw) = fact_kin * kgc(3) * kgc(3)
+         kstr4(ipw) = fact_kin * kgc(3) * kgc(2)
+         kstr5(ipw) = fact_kin * kgc(3) * kgc(1)
+         kstr6(ipw) = fact_kin * kgc(2) * kgc(1)
+!           kstr1(ipw)=fact_kin*kgc1*kgc1
+!           kstr2(ipw)=fact_kin*kgc2*kgc2
+!           kstr3(ipw)=fact_kin*kgc3*kgc3
+!           kstr4(ipw)=fact_kin*kgc3*kgc2
+!           kstr5(ipw)=fact_kin*kgc3*kgc1
+!           kstr6(ipw)=fact_kin*kgc2*kgc1
        end do ! ipw
+       if (use_gbt/=0) then
+         do ipw=1,npw_k
+           kgr_kphq = kphq+kg_k(:,ipw)
+           kgc_kphq = MATMUL(gprimd, kgr_kphq)
+           kin_kphq = htpisq * DOT_PRODUCT(kgc_kphq, kgc_kphq)
+           fact_kin=1.0_dp
+           if (kin_kphq>ecut-ecutsm) then
+             if (kin_kphq>ecut) then
+                 fact_kin=0.0_dp
+             else
+                 xx=(ecut-kin_kphq)*ecutsm_inv
+                 fsm=1.0_dp/(xx**2*(3+xx*(1+xx*(-6+3*xx))))
+                 dfsm=-3.0_dp*(-1+xx)**2*xx*(2+5*xx)*fsm**2
+                 fact_kin=fsm+kin_kphq*(-ecutsm_inv)*dfsm
+             end if
+           end if
+           kstr1_kphq(ipw)=fact_kin*kgc_kphq(1)*kgc_kphq(1)
+           kstr2_kphq(ipw)=fact_kin*kgc_kphq(2)*kgc_kphq(2)
+           kstr3_kphq(ipw)=fact_kin*kgc_kphq(3)*kgc_kphq(3)
+           kstr4_kphq(ipw)=fact_kin*kgc_kphq(3)*kgc_kphq(2)
+           kstr5_kphq(ipw)=fact_kin*kgc_kphq(3)*kgc_kphq(1)
+           kstr6_kphq(ipw)=fact_kin*kgc_kphq(2)*kgc_kphq(1)
+         end do ! ipw
+       end if ! GBT
        ABI_FREE(gprimd)
      end if
+
 
 !    Compute (k+G) vectors (only if useylm=1)
      if (usexg/=1) then
        nkpg=3*nloalg(3)
        ABI_MALLOC(kpg_k,(npw_k,nkpg))
        if (nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+       if (use_gbt/=0) then
+         ABI_MALLOC(kpg_kphq,(npw_k,nkpg))
+         call mkkpg(kg_k,kpg_kphq,kphq,nkpg,npw_k)
+       end if
      else ! cprj_in_memory = 1
        nkpg=3
        ABI_MALLOC(kpg_k,(npw_k,nkpg))
        call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+       if (use_gbt/=0) then
+         ABI_MALLOC(kpg_kphq,(npw_k,nkpg))
+         call mkkpg(kg_k,kpg_kphq,kphq,nkpg,npw_k)
+       end if
      end if
 
 !    Compute nonlocal form factors ffnl at all (k+G)
@@ -976,6 +1040,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
 &     ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,&
 &     nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
+     if (use_gbt/=0) then
+       ABI_MALLOC(ffnl_kphq,(npw_k,dimffnl,psps%lmnmax,ntypat)) ! 0
+       call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl_kphq,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
+&        ider,idir,psps%indlmn,kg_k,kpg_kphq,kphq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,&
+&        nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
+     end if
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET ENTER DATA MAP(to:ffnl) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
@@ -997,6 +1067,11 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      ABI_MALLOC(ph3d,(2,npw_k,gs_hamk%matblk))
      call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
 &     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_gbound=compute_gbound,compute_ph3d=.true.)
+     if (use_gbt/=0) then
+       ABI_MALLOC(ph3d_kphq,(2,npw_k,gs_hamk%matblk))
+       call gs_hamk%load_kprime(kpt_kp=kphq,&
+&       kpg_kp=kpg_kphq,ffnl_kp=ffnl_kphq,ph3d_kp=ph3d_kphq,compute_gbound=compute_gbound,compute_ph3d=.true.)
+     end if
 
 !    Load band-FFT tabs (transposed k-dependent arrays)
      if (mpi_enreg%paral_kgb==1.and.usexg/=1) then
@@ -1032,7 +1107,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          call get_gemm_nonlop_ompgpu_blocksize(my_ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
          &                        nspinor,1,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
          &                        optfor,stress_needed,-1,gs_hamk%gpu_option,(gpu_nl_distrib/=0),&
-         &                        gemm_nonlop_block_size,nblk_gemm_nonlop,warn_on_fail=.true.)
+         &                        gemm_nonlop_block_size,nblk_gemm_nonlop,gs_hamk%nfft_blocks,warn_on_fail=.true.)
          gemm_nonlop_is_distributed = (gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
          if(nblk_gemm_nonlop==-1) then
            gs_hamk%gpu_option=ABI_GPU_DISABLED
@@ -1112,29 +1187,77 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          lambda(1:blocksize)= eigen(1+(iblock-1)*blocksize+bdtot_index:iblock*blocksize+bdtot_index)
          ABI_NVTX_START_RANGE(NVTX_FORSTR_NONLOP)
          if (mpi_enreg%paral_kgb/=1.and.usexg/=1) then
-           call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
-&           paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
-         else if (usexg/=1) then
+           if (use_gbt == 0) then
+             call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
+&             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
+           else
+             gs_hamk%nspinor=1
+             ABI_MALLOC(cwavef_spin, (2, npw_k*blocksize))
+             ABI_MALLOC(enlout_spin,(nnlout*blocksize))
+             enlout_spin(:) = zero
+             gs_hamk%ispin_gbt = 1
+             call cg_copy_spin(1,npw_k,my_nspinor,blocksize,cwavef,cwavef_spin)
+             call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
+&             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef_spin,cwavef_spin,select_k=K_H_K)
+
+             gs_hamk%ispin_gbt = 2
+             call cg_copy_spin(2,npw_k,my_nspinor,blocksize,cwavef,cwavef_spin)
+             call nonlop(choice,cpopt,cwaveprj,enlout_spin,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
+&             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef_spin,cwavef_spin,select_k=KPRIME_H_KPRIME)
+
+             enlout(1:nnlout*blocksize) = enlout(1:nnlout*blocksize) + enlout_spin(1:nnlout*blocksize)
+             gs_hamk%nspinor = 2
+             ABI_FREE(cwavef_spin)
+             ABI_FREE(enlout_spin)
+           end if ! GBT
+           if((stress_needed==1).and.(usevxctau==1)) then
+             cwavef_tr=>cwavef
+           endif
+         else if (usexg/=1) then ! paral_kgb = 1
            ! here we MUST pass option gpu_option=ABI_GPU_DISABLED, as cwavef here is a host memory buffer
+          if((stress_needed==1).and.(usevxctau==1).and.mpi_enreg%nproc_band>1) then
+            ABI_MALLOC(cwavef_tr,(2,my_bandfft_kpt%ndatarecv*my_nspinor*mpi_enreg%bandpp))
+            call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,blocksize,&
+&           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef,&
+&           already_transposed=.False.,gpu_option=ABI_GPU_DISABLED,cwavef_tr=cwavef_tr)
+          else
            call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,blocksize,&
 &           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef,&
 &           already_transposed=.False.,gpu_option=ABI_GPU_DISABLED)
+            if((stress_needed==1).and.(usevxctau==1)) cwavef_tr=>cwavef
+          endif
          else ! usexg==1
-
            if ( istwf_k > 1 ) then ! Real only
              space = SPACE_CR
            else ! complex
              space = SPACE_C
            end if
            me_g0 = -1
+           me_g0_fft = -1
            if (space==SPACE_CR) then
              me_g0 = 0
+             me_g0_fft = 0
              if (istwf_k == 2) then
                if (mpi_enreg%me_g0 == 1) me_g0 = 1
+               if (mpi_enreg%me_g0_fft == 1) me_g0_fft = 1
              end if
            end if
+
            call xgBlock_map(xgx0,cwavef,space,npw_k*my_nspinor,blocksize,comm=mpi_enreg%comm_band,me_g0=me_g0,&
  &         gpu_option=gpu_option)
+
+          if ((stress_needed==1).and.(usevxctau==1)) then 
+             if(mpi_enreg%nproc_band>1) then
+               call xgTransposer_constructor(xgTransposer,xgx0,xgx0_tr,my_nspinor,&
+                   STATE_LINALG,TRANS_ALL2ALL,mpi_enreg%comm_spinorfft,mpi_enreg%comm_band,0,0,me_g0_fft)
+               call xgTransposer_transpose(xgTransposer,STATE_COLSROWS)
+               call xgBlock_reverseMap(xgx0_tr,cwavef_tr,rows=1,cols=my_nspinor*mpi_enreg%bandpp*my_bandfft_kpt%ndatarecv) !,rows=1,cols=spacedim*blockdim)
+             else
+               cwavef_tr=>cwavef  
+             endif      
+          endif
+
+
            call xgBlock_map_1d(xgeigen,lambda,SPACE_R,blocksize)
 
            if (psps%usepaw==1.and.usecprj_local==1) then
@@ -1206,41 +1329,106 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !        Accumulate stress tensor kinetic contributions
          if (stress_needed==1) then
            call timab(925,1,tsec)
-           do iblocksize=1,blocksize
-             call meanvalue_g(ar,kstr1,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
-&             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),&
-&             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),0)
-             kinstr(1)=kinstr(1)+weight(iblocksize)*ar
-             call meanvalue_g(ar,kstr2,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
-&             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),&
-&             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),0)
-             kinstr(2)=kinstr(2)+weight(iblocksize)*ar
-             call meanvalue_g(ar,kstr3,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
-&             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),&
-&             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),0)
-             kinstr(3)=kinstr(3)+weight(iblocksize)*ar
-             call meanvalue_g(ar,kstr4,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
-&             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),&
-&             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),0)
-             kinstr(4)=kinstr(4)+weight(iblocksize)*ar
-             call meanvalue_g(ar,kstr5,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
-&             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),&
-&             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),0)
-             kinstr(5)=kinstr(5)+weight(iblocksize)*ar
-             call meanvalue_g(ar,kstr6,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
-&             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),&
-&             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),0)
-             kinstr(6)=kinstr(6)+weight(iblocksize)*ar
-           end do
+           if (use_gbt == 0) then
+             do iblocksize=1,blocksize
+               call meanvalue_g(ar,kstr1,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
+&               cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),&
+&               cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),0)
+               kinstr(1)=kinstr(1)+weight(iblocksize)*ar
+               call meanvalue_g(ar,kstr2,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
+&               cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),&
+&               cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),0)
+               kinstr(2)=kinstr(2)+weight(iblocksize)*ar
+               call meanvalue_g(ar,kstr3,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
+&               cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),&
+&               cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),0)
+               kinstr(3)=kinstr(3)+weight(iblocksize)*ar
+               call meanvalue_g(ar,kstr4,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
+&               cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),&
+&               cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),0)
+               kinstr(4)=kinstr(4)+weight(iblocksize)*ar
+               call meanvalue_g(ar,kstr5,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
+&               cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),&
+&               cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),0)
+               kinstr(5)=kinstr(5)+weight(iblocksize)*ar
+               call meanvalue_g(ar,kstr6,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
+&               cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),&
+&               cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),0)
+               kinstr(6)=kinstr(6)+weight(iblocksize)*ar
+             end do
+           else
+             do iblocksize=1,blocksize
+                call meanvalue_g(ar,kstr1,0,istwf_k,mpi_enreg,npw_k,1,&
+&                 cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:(iblocksize-1)*npw_k*my_nspinor+npw_k),&
+&                 cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:(iblocksize-1)*npw_k*my_nspinor+npw_k),0)
+                call meanvalue_g(ar2,kstr1_kphq,0,istwf_k,mpi_enreg,npw_k,1,&
+&                 cwavef(:,1 + (iblocksize-1)*npw_k*my_nspinor+npw_k:),&
+&                 cwavef(:,1 + (iblocksize-1)*npw_k*my_nspinor+npw_k:),0)
+                kinstr(1)=kinstr(1)+weight(iblocksize)*(ar+ar2) ! (1,1)
+                call meanvalue_g(ar,kstr2,0,istwf_k,mpi_enreg,npw_k,1,&
+&                 cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:(iblocksize-1)*npw_k*my_nspinor+npw_k),&
+&                 cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:(iblocksize-1)*npw_k*my_nspinor+npw_k),0)
+                call meanvalue_g(ar2,kstr2_kphq,0,istwf_k,mpi_enreg,npw_k,1,&
+&                 cwavef(:,1 + (iblocksize-1)*npw_k*my_nspinor+npw_k:),&
+&                 cwavef(:,1 + (iblocksize-1)*npw_k*my_nspinor+npw_k:),0)
+                kinstr(2)=kinstr(2)+weight(iblocksize)*(ar+ar2) ! (2,2)
+                call meanvalue_g(ar,kstr3,0,istwf_k,mpi_enreg,npw_k,1,&
+&                 cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:(iblocksize-1)*npw_k*my_nspinor+npw_k),&
+&                 cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:(iblocksize-1)*npw_k*my_nspinor+npw_k),0)
+                call meanvalue_g(ar2,kstr3_kphq,0,istwf_k,mpi_enreg,npw_k,1,&
+&                 cwavef(:,1 + (iblocksize-1)*npw_k*my_nspinor+npw_k:),&
+&                 cwavef(:,1 + (iblocksize-1)*npw_k*my_nspinor+npw_k:),0)
+                kinstr(3)=kinstr(3)+weight(iblocksize)*(ar+ar2) ! (3,3)
+                call meanvalue_g(ar,kstr4,0,istwf_k,mpi_enreg,npw_k,1,&
+&                 cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:(iblocksize-1)*npw_k*my_nspinor+npw_k),&
+&                 cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:(iblocksize-1)*npw_k*my_nspinor+npw_k),0)
+                call meanvalue_g(ar2,kstr4_kphq,0,istwf_k,mpi_enreg,npw_k,1,&
+&                 cwavef(:,1 + (iblocksize-1)*npw_k*my_nspinor+npw_k:),&
+&                 cwavef(:,1 + (iblocksize-1)*npw_k*my_nspinor+npw_k:),0)
+                kinstr(4)=kinstr(4)+weight(iblocksize)*(ar+ar2) ! (3,2)
+                call meanvalue_g(ar,kstr5,0,istwf_k,mpi_enreg,npw_k,1,&
+&                 cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:(iblocksize-1)*npw_k*my_nspinor+npw_k),&
+&                 cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:(iblocksize-1)*npw_k*my_nspinor+npw_k),0)
+                call meanvalue_g(ar2,kstr5_kphq,0,istwf_k,mpi_enreg,npw_k,1,&
+&                 cwavef(:,1 + (iblocksize-1)*npw_k*my_nspinor+npw_k:),&
+&                 cwavef(:,1 + (iblocksize-1)*npw_k*my_nspinor+npw_k:),0)
+                kinstr(5)=kinstr(5)+weight(iblocksize)*(ar+ar2) ! (3,1)
+                call meanvalue_g(ar,kstr6,0,istwf_k,mpi_enreg,npw_k,1,&
+&                 cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:(iblocksize-1)*npw_k*my_nspinor+npw_k),&
+&                 cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:(iblocksize-1)*npw_k*my_nspinor+npw_k),0)
+                call meanvalue_g(ar2,kstr6_kphq,0,istwf_k,mpi_enreg,npw_k,1,&
+&                 cwavef(:,1 + (iblocksize-1)*npw_k*my_nspinor+npw_k:),&
+&                 cwavef(:,1 + (iblocksize-1)*npw_k*my_nspinor+npw_k:),0)
+                kinstr(6)=kinstr(6)+weight(iblocksize)*(ar+ar2) ! (2,1)`
+             end do
+           end if ! GBT
            call timab(925,2,tsec)
          end if
 
 !        Accumulate stress tensor in case meta-GGA using v_tau
          if ((stress_needed==1).and.(usevxctau==1)) then
-           call stress_mGGA(mggastr,cwavef,effmass_free,gs_hamk%gbound_k,gs_hamk%gprimd,istwf_k, &
-&               kg_k,kpoint,mgfft,mpi_enreg,my_nspinor,blocksize,ngfft,npw_k,gs_hamk%nvloc, &
-&               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occblock,gs_hamk%ucvol,vxctaulocal, &
+           if(mpi_enreg%paral_kgb==1) then
+             gbound_k => my_bandfft_kpt%gbound
+             kg_k_ => my_bandfft_kpt%kg_k_gather
+             npw_k_=my_bandfft_kpt%ndatarecv
+           else
+             gbound_k => gs_hamk%gbound_k
+             kg_k_ => kg_k
+             npw_k_=npw_k
+           endif
+           call stress_mGGA(mggastr,cwavef_tr,effmass_free,gbound_k,gs_hamk%gprimd,istwf_k, &
+&               kg_k_,kpoint,mgfft,mpi_enreg,my_nspinor,mpi_enreg%bandpp,ngfft,npw_k_,gs_hamk%nvloc, &
+&               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occblock(1+mpi_enreg%me_band*mpi_enreg%bandpp:(mpi_enreg%me_band+1)*mpi_enreg%bandpp),gs_hamk%ucvol,vxctaulocal, &
 &               wtk(ikpt),gpu_option=gpu_option)
+           if(mpi_enreg%paral_kgb==1.and.mpi_enreg%nproc_band>1) then
+             if(usexg==1) then
+               call xgTransposer_free(xgTransposer)
+             else
+               ABI_FREE(cwavef_tr)
+             endif
+           else
+             nullify(cwavef_tr)
+           endif
          end if
 
 !        Accumulate stress tensor and forces for the Fock part
@@ -1331,11 +1519,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      !$OMP TARGET EXIT DATA MAP(delete:ffnl) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
      ABI_FREE(ffnl)
+     ABI_SFREE(ffnl_kphq)
      ABI_FREE(kg_k)
      ABI_FREE(kpg_k)
+     ABI_SFREE(kpg_kphq)
      ABI_FREE(ylm_k)
      ABI_FREE(ylmgr_k)
      ABI_FREE(ph3d)
+     ABI_SFREE(ph3d_kphq)
      if (stress_needed==1) then
        ABI_FREE(kstr1)
        ABI_FREE(kstr2)
@@ -1343,6 +1534,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        ABI_FREE(kstr4)
        ABI_FREE(kstr5)
        ABI_FREE(kstr6)
+       if (use_gbt /= 0) then
+         ABI_FREE(kstr1_kphq)
+         ABI_FREE(kstr2_kphq)
+         ABI_FREE(kstr3_kphq)
+         ABI_FREE(kstr4_kphq)
+         ABI_FREE(kstr5_kphq)
+         ABI_FREE(kstr6_kphq)
+       end if
      end if
      if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -1524,7 +1723,6 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  real(dp) :: gmet(3,3),gprimd(3,3),qq(3),rmet(3,3)
  real(dp),allocatable :: dummy(:),kxc_cur(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: nresg(:,:),rhor0(:,:),vhres(:)
-
 ! *************************************************************************
 
 !Compatibility tests:
@@ -1870,7 +2068,7 @@ subroutine stress_mGGA(mggastr,cwavef,effmass_free,gbound_k,gprimd,istwf_k,kg_k,
 !    Compute grad of WF (multiplication by 2pi i (G+k)_idir in reciprocal space)
      if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET TEAMS DISTRIBUTE MAP(to:my_cwavef,gcwavef) PRIVATE(idat)
+       !$OMP TARGET TEAMS DISTRIBUTE MAP(to:my_cwavef,gcwavef,kg_k) PRIVATE(idat)
        do idat=1,ndat
          !$OMP PARALLEL DO PRIVATE(ipw,kg_k_cart)
          do ipw=1,npw_k

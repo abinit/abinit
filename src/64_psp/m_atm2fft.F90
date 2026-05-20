@@ -4,9 +4,8 @@
 !!
 !! FUNCTION
 !!
-!!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (FJ, MT)
+!!  Copyright (C) 1998-2026 ABINIT group (FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,12 +27,12 @@ module m_atm2fft
  use m_abicore
  use m_errors
  use m_xmpi
- use m_distribfft
  use m_dtset
 
  use defs_abitypes, only : mpi_type
  use m_time,        only : timab
  use defs_datatypes,only : pseudopotential_type
+ use m_distribfft,  only : distribfft_type
  use m_gtermcutoff, only : termcutoff
  use m_pawtab,      only : pawtab_type
  use m_fft,         only : zerosym, fourdp
@@ -238,17 +237,15 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  type(distribfft_type),target :: my_distribfft_
  type(mpi_type) :: mpi_enreg_fft
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- real(dp), ABI_CONTIGUOUS pointer :: tvalespl(:,:),tcorespl(:,:),ttaucorespl(:,:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ real(dp), contiguous, pointer :: tvalespl(:,:),tcorespl(:,:),ttaucorespl(:,:)
  real(dp), pointer :: dncdq0, dtaucdq0, dnvdq0
  integer,save :: idx(12)=(/1,1,2,2,3,3,3,2,3,1,2,1/)
  integer  :: delta(6)=(/1,1,1,0,0,0/)
  real(dp) :: dgm(3,3,6),d2gm(3,3,6,6),gcart(3),tsec(2)
  real(dp),allocatable :: dyfrn_indx(:,:,:),dyfrv_indx(:,:,:),grn_indx(:,:)
  real(dp),allocatable :: grv_indx(:,:),phim_igia(:),phre_igia(:),workn(:,:)
- real(dp),allocatable :: gcutoff(:)
- real(dp),allocatable :: workv(:,:)
-
+ real(dp),allocatable :: gcutoff(:), workv(:,:)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -268,7 +265,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
    my_distribfft => distribfft
  else
    my_distribfft => my_distribfft_
-   call init_distribfft_seq(my_distribfft,'f',n2,n3,'fourdp')
+   call my_distribfft%init_seq('f',n2,n3,'fourdp')
  end if
  if (n2==my_distribfft%n2_coarse) then
    fftn2_distrib => my_distribfft%tab_fftdp2_distrib
@@ -878,7 +875,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  end if
 
  if (.not.present(distribfft)) then
-   call destroy_distribfft(my_distribfft)
+   call my_distribfft%free()
  end if
 
  DBG_EXIT("COLL")
@@ -1047,17 +1044,12 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
  type(mpi_type) :: mpi_enreg_fft
 !arrays
  integer :: eps1(6)=(/1,2,3,2,3,1/),eps2(6)=(/1,2,3,3,1,2/),jdir(ndir)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:)
- real(dp), ABI_CONTIGUOUS pointer :: tvalespl(:,:),tcorespl(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: ttaucorespl(:,:)
+ integer, contiguous, pointer :: fftn2_distrib(:)
+ real(dp), contiguous, pointer :: tvalespl(:,:),tcorespl(:,:)
+ real(dp), contiguous, pointer :: ttaucorespl(:,:)
  real(dp), pointer :: dncdq0, dtaucdq0, dnvdq0
  real(dp) ::  gq(6),gcart(3)
  real(dp),allocatable :: phim_igia(:),phre_igia(:),workn(:,:,:),workv(:,:,:)
-
-!no_abirules
-!Define G^2 based on G space metric gmet.
-! gsq(g1,g2,g3)=g1*g1*gmet(1,1)+g2*g2*gmet(2,2)+g3*g3*gmet(3,3) &
-! &       +two*(g1*g2*gmet(1,2)+g2*g3*gmet(2,3)+g3*g1*gmet(3,1))
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1115,7 +1107,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
    optv  = 0
  end if
 
- if(ipert==natom+1.or.ipert==natom+2.or.ipert==natom+10.or.ipert==natom+11) then
+ if(ipert==natom+1.or.ipert==natom+2.or.ipert==natom+6.or.ipert==natom+10.or.ipert==natom+11) then
 
 !  (In case of d/dk or an electric/magnetic field)
    if (optn==1) then
@@ -1134,7 +1126,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      iatom=ipert;iatm=atindx(iatom)
      itypat=typat(iatom)
    else
-      !sum of all (strain pertubation)
+      !sum of all (strain perturbation)
      iatom  = 1
      iatm   = 1
      itypat = 1
@@ -1156,7 +1148,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      my_distribfft => distribfft
    else
      my_distribfft => my_distribfft_
-     call init_distribfft_seq(my_distribfft_,'f',n2,n3,'fourdp')
+     call my_distribfft_%init_seq('f',n2,n3,'fourdp')
    end if
    if (n2==my_distribfft%n2_coarse) then
      fftn2_distrib => my_distribfft%tab_fftdp2_distrib
@@ -1537,7 +1529,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
    end if
 
    if (.not.present(distribfft)) then
-     call destroy_distribfft(my_distribfft)
+     call my_distribfft%free()
    end if
 
 !  End the condition of non-electric-field

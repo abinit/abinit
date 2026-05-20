@@ -13,10 +13,10 @@ Then we discuss how to run isotropic $T_c$-calculations and how to perform typic
 for MgB$_2$, a well-known phonon-mediated superconductor with $T_c$ = 39 K.
 For a more complete theoretical introduction, see [[cite:Giustino2017]] and references therein.
 
-It is assumed the user has already completed the two tutorials [RF1](/tutorial/rf1) and [RF2](/tutorial/rf2),
+It is assumed the user has already completed the two tutorials [RF1](../tutorial/rf1.md) and [RF2](../tutorial/rf2.md),
 and that he/she is familiar with the calculation of ground state and vibrational properties **in metals**.
-The user should have read the [fourth lesson on Al](/tutorial/base4) as well
-as the [introduction page for the EPH code](/tutorial/eph_intro) before running these examples.
+The user should have read the [fourth lesson on Al](../tutorial/base4.md) as well
+as the [introduction page for the EPH code](../tutorial/eph_intro.md) before running these examples.
 
 This lesson should take about 1.5 hour.
 
@@ -33,7 +33,7 @@ $$
 
 where only contributions up to the second order in the e-ph vertex $g$ have been included.
 The sum over the electron wavevector $\kk$ is performed over the first BZ, $\eta$ is a positive real infinitesimal
-and $\gkkp$ are the e-ph matrix element discussed in the [EPH introduction](eph_intro).
+and $\gkkp$ are the e-ph matrix element discussed in the [EPH introduction](eph_intro.md).
 The self-energy depends on the temperature via the Fermi-Dirac distribution function $f(\ee, T)$
 and the factor two accounts for spin degeneracy (henceforth we assume a non-magnetic system
 with scalar wavefunctions i.e. [[nsppol]] == 1 and [[nspinor]] == 1
@@ -123,7 +123,7 @@ is employed since the DDA is ill-defined for $\qq = \Gamma$.
 
 !!! important
 
-    The tetrahedron method is more accurate and does not require any broadening parameter.
+    The tetrahedron method is more precise and does not require any broadening parameter.
     Note, however, that in the present implementation the computational cost of the double
     delta with the tetrahedron method quickly increases with the size of the $\kk$-mesh
     so the adaptive Gaussian scheme may represent a valid alternative, especially
@@ -326,7 +326,7 @@ and the Marzari smearing ([[occopt]] = 4) with [[tsmear]] = 0.02 Ha.
 The DFPT computations is done for 12 irreducible $\qq$-points corresponding
 to a $\Gamma$-centered 4x4x4 $\qq$-mesh (again, **too coarse** as we will see in the next sections).
 
-Please keep in mind that several parameters have been tuned in order to reach a reasonable **compromise between accuracy
+Please keep in mind that several parameters have been tuned in order to reach a reasonable **compromise between precision
 and computational cost** so do not expect the results obtained at the end of the lesson to be fully converged.
 It is clear that, in real life, one should start from convergence studies for
 lattice parameters and vibrational properties as a function of the $\kk$-mesh and [[tsmear]]
@@ -617,7 +617,7 @@ Other differences are visible above 40 meV, especially in the  $E_{2g}$ modes.
 
 <!--
 Note also that phonon frequencies in metals are also quite sensitive to the $\kk$-mesh and the smearing [[tsmear]].
-In real life one should perform an accurate convergence study...
+In real life one should perform a careful convergence study...
 -->
 
 !!! note
@@ -963,7 +963,7 @@ on a 24x24x24 $\kk$-mesh so that we can compare the following configurations:
 TODO: Discuss energy window, sigma_erange in connection with the FS window and the integration scheme
 
 As already mentioned in the introduction, the integration of the double delta requires very dense $\kk$-meshes
-for electrons in order to obtain accurate results for $\gamma_\qnu$.
+for electrons in order to obtain precise results for $\gamma_\qnu$.
 By the same token, converging the fine details of $\alpha^2F(\ww)$ and $\lambda$ requires
 sampling enough phonon $\qq$-wavectors in the IBZ.
 For this reason, convergence studies are performed by densifying both the mesh for electrons and for phonons.
@@ -994,7 +994,7 @@ to prepare our convergence studies.
 The NSCF computation of the WFK becomes quite CPU-consuming and memory-demanding if dense $\kk$-meshes are needed.
 Fortunately, we can optimize this part since the computation of $\gamma_\qnu$
 requires the knowledge of Bloch states inside a relatively small energy window around $\ee_F$.
-Similarly to what is done in the [eph4mob tutorial](eph4mob), we can therefore take advantage of
+Similarly to what is done in the [eph4mob tutorial](eph4mob.md), we can therefore take advantage of
 the star-function SKW interpolation to find the $\kk$ wavevectors whose energy is inside
 the [[sigma_erange]] energy window **around the Fermi level**.
 The choice of an optimal window is discussed afterwards.
@@ -1139,7 +1139,7 @@ the use of [[eph_ngqpt_fine]], [[getwfk_filepath]] and [[ngkpt]]:
 {% dialog tests/tutorespfn/Input/teph4isotc_5.abi %}
 
 <!--
-## A more accurate calculation
+## A more precise calculation
 
 If you want to reproduce the results, you can find another github repository here
 with the DFPT computation performed with a 24x24x24 $\kk$-mesh and a 6x6x6 $\qq$-mesh for phonons.

@@ -6,7 +6,7 @@
 !! Procedures for the IO of the WFK file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
+!! Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1127,6 +1127,9 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        if (xmpi_comm_rank(comm_bandfft) == master) then
          ncerr = nf90_put_var(ncid, kg_varid, kg_k, start=[1,1,ikpt], count=[3,npwtot_k,1])
          NCF_CHECK_MSG(ncerr, "putting kg_k")
+       else
+         ncerr = nf90_put_var(ncid, kg_varid, kg_k, start=[1,1,ikpt], count=[0,0,0])
+         NCF_CHECK_MSG(ncerr, "skiping kg_k")
        end if
        ABI_FREE(kg_k)
 

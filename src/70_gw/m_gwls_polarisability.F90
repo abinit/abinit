@@ -6,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2025 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2026 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -713,8 +713,8 @@ subroutine matrix_function_epsilon_k(vector_out,vector_in,Hsize)
 ! algorithm.
 !----------------------------------------------------------------------------------------------------
 integer,      intent(in)  :: Hsize
-complex(dpc), intent(out) :: vector_out(Hsize)
-complex(dpc), intent(in)  :: vector_in(Hsize)
+complex(dp), intent(out) :: vector_out(Hsize)
+complex(dp), intent(in)  :: vector_in(Hsize)
 
 
 ! local variables

@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2026 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -278,7 +278,7 @@ ABI_FC_EXTENSIONS
 
 # Get module file case
 ABI_FC_MOD_CASE
-
+ABI_FC_MODDIR_FLAG
 # The IBM Fortran compiler crashes if the mpi module is included
 # more than once
 if test "${abi_fc_vendor}" = "ibm" -a "${abi_mpi_enable}" = "yes"; then
@@ -471,19 +471,9 @@ ABI_OPTIM_INIT([${abi_optim_flavor}])
   AC_MSG_NOTICE([disabling optimizations for src/43_ptgroups/])
   fcflags_opt_43_ptgroups="-O0"
 
-# FIXME: AMD LLVM fork for OpenMP GPU (aka AOMP) has a sensitive OpenMP GPU implementation, so we enable it where needed.
-# Checked with version 16.0.0 shipped with ROCm 5.6.0 (July 2023).
-if test "${abi_fc_vendor}" == "llvm" -a "${abi_gpu_flavor}" == "hip-double"; then
-  if test "${abi_openmp_offload_enable}" = "yes"; then
-    fcflags_opt_28_numeric_noabirule="${amd_openmp_flags}"
-    fcflags_opt_45_xgTools="${amd_openmp_flags}"
-    fcflags_opt_46_ghc_omp="${amd_openmp_flags}"
-    fcflags_opt_66_nonlocal="${amd_openmp_flags}"
-    fcflags_opt_66_wfs="${amd_openmp_flags}"
-    fcflags_opt_67_common="${amd_openmp_flags}"
-    fcflags_opt_79_seqpar_mpi="${amd_openmp_flags}"
-    fcflags_opt_98_main="${amd_openmp_flags}"
-  fi
+if test "${abi_fc_vendor}" == "cray"; then
+  AC_MSG_NOTICE([disabling optimizations for src/70_gw/])
+  fcflags_opt_70_gw="-O1"
 fi
 
 # Set per-directory Fortran optimizations
@@ -557,7 +547,7 @@ test "${CXX_LIBS}" = "" && \
 # Final adjustments for Fortran
 # Note: FCFLAGS_OPTIM must not be included (per-directory optimizations)
 test "${FCFLAGS}" = "" && \
-  FCFLAGS="${FCFLAGS_DEBUG} ${FCFLAGS_HINTS} ${FCFLAGS_OPENMP} ${FCFLAGS_OPENMP_OFFLOAD} ${FCFLAGS_EXTRA}"
+  FCFLAGS="${FCFLAGS_DEBUG} ${FCFLAGS_HINTS} ${FCFLAGS_OPENMP} ${FCFLAGS_OPENMP_OFFLOAD} ${FCFLAGS_EXTRA} "
 test "${FC_LDFLAGS}" = "" && \
   FC_LDFLAGS="${FC_LDFLAGS_DEBUG} ${FC_LDFLAGS_OPTIM} ${FC_LDFLAGS_HINTS} ${FC_LDFLAGS_EXTRA}"
 test "${FC_LIBS}" = "" && \
@@ -585,12 +575,40 @@ fi
 # Determine Fortran link flags (FCLIBS)
 # This is needed after FCFLAGS has been set as some compilers have extra
 # libraries linked due to optimizations levels or OpenMP
-# This step would be performed inside AC_FC_WRAPPERS but it fails due to a mischievous
+# This step would norally be performed inside AC_FC_WRAPPERS but...
+
+# With CRAY, it fails due to a mischievous
 # double-quote in FCLIBS when using Cray compiler, so we trim it out in that specific case.
 AC_FC_LIBRARY_LDFLAGS
 
 if test "${abi_fc_vendor}" = "cray"; then
   FCLIBS=`echo ${FCLIBS} | tr '"' ' '`
+fi
+
+# With LLVM, a syntax error happens
+# An error also occurs with multiple definitions that is addressed by a linker flag
+# And a weird error occurs due to the inclusion of device-specific libs, that need to be removed
+if test "${abi_fc_vendor}" = "llvm"; then
+  FCLIBS=`echo ${FCLIBS} | sed -e "s/-l \// \//"`
+  FCLIBS=`echo ${FCLIBS} -Wl,--allow-multiple-definition`
+  FCLIBS=`echo ${FCLIBS} | sed -e "s/-lompdevice -lclang_rt.builtins//"`
+fi
+
+# Remove -lsr-complexity-limit=<some-number> from FCLIBS, as it is
+# not an actual linker flag, but a flag passed to 'llc'. This flag
+# was observed in the FCLIBS variable when using the NVHPC compiler
+# on aarch64 systems.
+# Fixed in autoconf > 2.72.
+if test "${abi_fc_vendor}" = "nvhpc" -a "${target_cpu}" = "aarch64"; then
+  FCLIBS=`echo ${FCLIBS} | sed -e 's/-lsr-complexity-limit=[[0-9]]* //g' -e 's/-lsr-complexity-limit=[[0-9]]*$//g'`
+
+  # Remove "ignoring -lnvmalloc" warnings on recent NVHPC versions
+  nvhpc_version_major=`echo ${abi_fc_version} | sed "s/-.*//" | cut -f1 -d'.'`
+  nvhpc_version_minor=`echo ${abi_fc_version} | sed "s/-.*//" | cut -f2 -d'.'`
+  nvhpc_version=`printf %d%02d ${nvhpc_version_major} ${nvhpc_version_minor}`
+  if test ${nvhpc_version} -gt 2501; then
+    FCLIBS=`echo ${FCLIBS} | sed -e 's/-lnvmalloc/-nvmalloc/g'`
+  fi
 fi
 
 # Determine Fortran-C name mangling scheme
@@ -1004,6 +1022,7 @@ ABI_TRIGGERS_SUMMARY
 
 status=""
 mandatory=""
+fb_path=""
 
 # Check linalg
 if test "${sd_linalg_flavor_req}" != "auto"; then
@@ -1014,13 +1033,16 @@ fi
 
 if test "${sd_linalg_enable}" != "yes"; then
       ABI_MSG_NOTICE_L([linalg-mandatory],[__CAUTION__ : linalg is __MANDATORY__ !])
-      mandatory="#"
+      mandatory="fail"
 fi
 
 # Check HDF5 serial
-if test "${sd_hdf5_enable}" = "no"; then
+if test "${sd_hdf5_enable}" = "no" -o "${sd_hdf5_init}" = "fb"; then
       ABI_MSG_NOTICE_L([hdf5-mandatory],[__CAUTION__ : HDF5 is __MANDATORY__ !])
       mandatory="#"
+      fb_path="--with-hdf5=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}/ "
+      fb_path+="--with-netcdf=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4/${abi_fb_netcdf_version}/ "
+      fb_path+="--with-netcdf-fortran=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/ "
 else
   if test "${sd_hdf5_ok}" != "yes";then
       ABI_MSG_NOTICE_L([hdf5-nw],[__WARNING__ : HDF5 is not __WORKING__ !])
@@ -1028,11 +1050,14 @@ else
   fi
 fi
 
-if test "${sd_hdf5_ok}" = "yes";then
+if test "${sd_hdf5_ok}" = "yes" -o "${sd_hdf5_init}" = "fb";then
 # Check NetCDF
-  if test "${sd_netcdf_enable}" = "no"; then
+  if test "${sd_netcdf_enable}" = "no" -o "${sd_netcdf_init}" = "fb"; then
       ABI_MSG_NOTICE_L([netcdf-mandatory],[__CAUTION__ : NetCDF is __MANDATORY__ !])
       mandatory="#"
+      fb_path="--with-hdf5=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}/ "
+      fb_path+="--with-netcdf=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4/${abi_fb_netcdf_version}/ "
+      fb_path+="--with-netcdf-fortran=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/ "
   else
      if test "${sd_netcdf_ok}" != "yes";then
         ABI_MSG_NOTICE_L([netcdf-nw],[__WARNING__ : NetCDF is not __WORKING__ !])
@@ -1041,9 +1066,12 @@ if test "${sd_hdf5_ok}" = "yes";then
   fi
 
 # Check NetCDF_fortran
-  if test "${sd_netcdf_fortran_enable}" = "no"; then
+  if test "${sd_netcdf_fortran_enable}" = "no" -o "${sd_netcdf_fortran_init}" = "fb"; then
       ABI_MSG_NOTICE_L([netcdf_fortran-mandatory],[__CAUTION__ : NetCDF Fortran is __MANDATORY__ !])
       mandatory="#"
+      fb_path="--with-hdf5=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}/ "
+      fb_path+="--with-netcdf=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4/${abi_fb_netcdf_version}/ "
+      fb_path+="--with-netcdf-fortran=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/ "
   else
     if test "${sd_netcdf_fortran_ok}" != "yes";then
       ABI_MSG_NOTICE_L([netcdf_fortran-nw],[__WARNING__ : NetCDF Fortran is not __WORKING__ !])
@@ -1053,9 +1081,10 @@ if test "${sd_hdf5_ok}" = "yes";then
 fi
 
 # Check LibXC
-if test "${sd_libxc_enable}" = "no"; then
+if test "${sd_libxc_enable}" = "no" -o "${sd_libxc_init}" = "fb"; then
       ABI_MSG_NOTICE_L([libxc-mandatory],[__CAUTION__ : LibXC is __MANDATORY__ !])
       mandatory="#"
+      fb_path+=" --with-libxc=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_libxc_version} "
 else
   if test "${sd_libxc_ok}" != "yes";then
       ABI_MSG_NOTICE_L([libxc-nw],[__WARNING__ : LibXC is not __WORKING__ !])
@@ -1091,9 +1120,14 @@ if test "${sd_xmlf90_enable}" = "yes"; then
 fi
 
 # Help to produce libraires
-if test ! -z "${mandatory}"; then
+if test "${mandatory}" = "#"; then
       ABI_MSG_NOTICE_L([help-fb],[We can __help__ you !])
+else
+   if test "${mandatory}" = "fail"; then
+   	ABI_MSG_NOTICE_S([ __Problems must be solved before continuing__ ])
+   fi
 fi
+
 
 if test ! -z "${status}" -o ! -z "${mandatory}"; then
       ABI_MSG_NOTICE_S([ __Problems must be solved before continuing__ ])
@@ -1104,8 +1138,12 @@ fi
 # AC_CONFIG_FILES([fallbacks/build-abinit-fallbacks.sh])
 #AC_CONFIG_COMMANDS([chmod +x fallbacks/build-abinit-fallbacks.sh])
 #AC_OUTPUT
-# Old formulation: AC_OUTPUT([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh],[chmod +x fallbacks/build-abinit-fallbacks.sh])
-AC_OUTPUT([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh],[chmod +x fallbacks/build-abinit-fallbacks.sh])
+# Old formulation: AC_CONFIG_FILES([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh])
+#AC_CONFIG_COMMANDS([default],[chmod +x fallbacks/build-abinit-fallbacks.sh],[])
+#AC_OUTPUT
+AC_CONFIG_FILES([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh])
+AC_CONFIG_COMMANDS([default],[chmod +x fallbacks/build-abinit-fallbacks.sh],[])
+AC_OUTPUT
 
 # Check that we have all required fallbacks
 ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])
@@ -1119,9 +1157,9 @@ ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])
 #fi
 
 # Check exit
-if test ! -z "${status}" -o ! -z "${mandatory}"; then
-      exit 2
-fi
+#if test ! -z "${status}" -o ! -z "${mandatory}"; then
+#      exit 2
+#fi
 
 
 #-------------------- END JMB --------------------------------------------#
@@ -1252,9 +1290,64 @@ ABI_OUTPUT
 
 # FIXME: Generate fake makefile for the fallbacks until the test farm is
 #        updated
+AC_MSG_NOTICE(["INSTALL is ${INSTALL}"])
 test -e "fallbacks" || ${INSTALL} -d -m 755 "fallbacks"
-${INSTALL} -m 644 "${abinit_srcdir}/config/makefiles/fallbacks.mf" \
+${INSTALL} -m 644 "${abinit_srcdir}/fallbacks/Makefile.am" \
   "fallbacks/Makefile"
+
+
+# ---------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+
+ABI_MSG_SECTION([Final remarks])
+
+# The end
+if test "${sd_linalg_flavor}" = "netlib-fallback"; then
+  ABI_MSG_NOTICE([linalg-abinit],
+    [Suboptimal linear algebra configuration])
+fi
+if test "${sd_libxc_kxc_ok}" = "no"; then
+  ABI_MSG_NOTICE([libxc-kxc],
+    [Suboptimal libxc configuration])
+fi
+if test "${sd_fft_flavor}" = "fftw3" -a "${abi_openmp_enable}" = "yes"; then
+  ABI_MSG_NOTICE([fftw3-openmp],
+    [WARNING: OpenMP enabled but FFTW3 Threads disabled])
+fi
+# GPU 2024 implementation : deactivate this warning
+#if test "${abi_gpu_enable}" = "yes" -a "${sd_linalg_chk_gpu}" != "magma"; then
+#  ABI_MSG_NOTICE([gpu-without-magma],
+#    [Suboptimal GPU configuration])
+#fi
+ABI_MSG_FC_BUGGY(${abi_fc_vendor})
+ABI_MSG_END
+
+
+
+FALLBACKS_SUBDIRS=""
+AC_ARG_ENABLE([create_reconfigure_for_fb],
+    [],                                 dnl <- no help string: keeps it hidden
+    [enable_reconfigure_for_fb="$enableval"],       dnl action if given
+    [enable_reconfigure_for_fb="yes"]                dnl default if not given
+)
+
+
+
+if test "x${mandatory}" = "x#"; then
+  AC_MSG_NOTICE(["running cp ${abinit_srcdir}/config/scripts/install_fallbacks.sh ${abinit_builddir}"])
+  cp ${abinit_srcdir}/config/scripts/install_fallbacks.sh .
+  if test "x$enable_reconfigure_for_fb" = "xyes"; then
+      printf '%s/configure %s %s --disable-create_reconfigure_for_fb \n' "${abinit_srcdir}"  "$ac_configure_args" "$fb_path" > ${abinit_builddir}/.reconfigure
+      chmod +x ${abinit_builddir}/.reconfigure
+  fi
+  chmod +x ${abinit_builddir}/install_fallbacks.sh
+#  FALLBACKS_SUBDIRS="fallbacks"
+#else
+fi
+#AC_SUBST(FALLBACKS_SUBDIRS)
+
+AC_OUTPUT
+
 
 # Call CMake to generate Makefile for Kokkos sources directories
 if test "${sd_kokkos_enable}" = "yes"; then
@@ -1276,24 +1369,8 @@ if test "${sd_kokkos_enable}" = "yes"; then
     cd -
 fi
 
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
 
-ABI_MSG_SECTION([Final remarks])
-
-# The end
-if test "${sd_linalg_flavor}" = "netlib-fallback"; then
-  ABI_MSG_NOTICE([linalg-abinit],
-    [Suboptimal linear algebra configuration])
+if test "x${mandatory}" = "x#"; then
+  ABI_TRIGGERS_SUMMARY
+  ABI_MSG_NOTICE_L([help-fb], [Missing Mandatory library!])
 fi
-if test "${sd_libxc_kxc_ok}" = "no"; then
-  ABI_MSG_NOTICE([libxc-kxc],
-    [Suboptimal libxc configuration])
-fi
-# GPU 2024 implementation : deactivate this warning
-#if test "${abi_gpu_enable}" = "yes" -a "${sd_linalg_chk_gpu}" != "magma"; then
-#  ABI_MSG_NOTICE([gpu-without-magma],
-#    [Suboptimal GPU configuration])
-#fi
-ABI_MSG_FC_BUGGY(${abi_fc_vendor})
-ABI_MSG_END

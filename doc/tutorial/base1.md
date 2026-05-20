@@ -346,7 +346,7 @@ You have read completely an output file! Could you answer the following question
 
     Side note: in most of the tutorial examples, [[nstep]] will be enough to reach
     the target tolerance, defined by one of the **tolXXX** input variables. However,
-    this is not always the case (e.g. the test case 1 of the [tutorial DFPT1](/tutorial/rf1)
+    this is not always the case (e.g. the test case 1 of the [tutorial DFPT1](../tutorial/rf1.md)
     because of some portability problems, that could only be
     solved by stopping the SCF cycles before the required tolerance.
 
@@ -530,7 +530,7 @@ It is also worth to change the stopping criterion for the SCF cycle, in order
 to be sure that the forces generated for each trial interatomic distance are
 sufficiently converged. Indeed, the value used for [[toldfe]], namely 1.0d-6,
 might be sufficient for total energy calculations, but definitely not for the
-accurate computation of other properties. So, change [[toldfe]] in [[tolrff]],
+precise computation of other properties. So, change [[toldfe]] in [[tolrff]],
 and set the latter input variable to 0.02.
 The input file *tbase1_3.abi* is an example of file that will do the job
 
@@ -632,7 +632,7 @@ There are some subtleties in the calculation of an isolated atom.
 * In many cases, the ground state of an isolated atom is spin-polarized, see the variables [[nsppol]] and [[spinat]];
 
 * The highest occupied level might be degenerate with the lowest unoccupied level of the same spin,
-  in which case the techniques usually appropriate for metals are to be used (see [tutorial 4](/tutorial/base4))
+  in which case the techniques usually appropriate for metals are to be used (see [tutorial 4](../tutorial/base4.md))
 
 * also often, the symmetry of the ground-state charge density **will not be spherical**, so that the automatic
   determination of symmetries by the code, based on the atomic coordinates, should be disabled,
@@ -753,9 +753,9 @@ These are:
 
 We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell,
 the LDA (=local-density approximation, as well as the local-spin-density approximation in the spin-polarized case) in the
-Perdew-Wang parametrization ([[ixc]]=-1012), and a LDA pseudopotential from the pseudodojo <http://www.pseudo-dojo.org/>,
+Perdew-Wang parametrization ([[ixc]]=-1012), and a LDA pseudopotential from the pseudodojo <https://www.pseudo-dojo.org/>,
 copied in the ABINIT directory $ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8 . You might have a look at
 the file $ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8/README.md to learn more about pseudopotentials.
 
-We will see in the [next tutorial](/tutorial/base2) how to address the choice
+We will see in the [next tutorial](../tutorial/base2.md) how to address the choice
 of these parameters (except the pseudopotential).

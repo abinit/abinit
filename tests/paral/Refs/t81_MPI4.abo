@@ -3,10 +3,10 @@
  a software platform designed for the construction and use of second-principles models
                    for lattice, spin and electron degrees of freedom.
 
-.Version 10.0.0.3 of MULTIBINIT
+.Version 10.5.8.2 of MULTIBINIT
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group .
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -32,20 +32,19 @@
 
 
 
-.Starting date : Sat 22 Mar 2025.
-- ( at 06h37 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h25 )
 
-- The starting date is more than 2 years after the initial release
+- The starting date is more than 3 years after the initial release
 - of this version of ABINIT, namely Jul 2022.
-- Note that the use beyond 3 years after the release will not be supported.
+- This version of ABINIT is not supported anymore.
 - Action: please, switch to a more recent version of ABINIT.
-
 -  nproc =    4
 
 ================================================================================
 
  Read the information in the reference structure in
--/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t81_ddb.in
+-/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/paral/Input/t81_ddb.in
  to initialize the multibinit input
 
 ================================================================================
@@ -134,12 +133,12 @@
 
  Extraction of the clamped elastic tensor (unit:10^2GPa)
 
-   3.1281435   1.0182533   1.0182548  -0.0000004  -0.0000033  -0.0000014
-   1.0182569   3.1281493   1.0182548  -0.0000007  -0.0000003  -0.0000014
-   1.0182569   1.0182533   3.1281273  -0.0000007  -0.0000033   0.0000003
-   0.0000000   0.0000000  -0.0000000   0.6540901   0.0000000   0.0000000
-   0.0000000   0.0000000  -0.0000000   0.0000000   0.6540918   0.0000000
-   0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000   0.6540936
+   3.1281441   1.0182535   1.0182550  -0.0000004  -0.0000033  -0.0000014
+   1.0182571   3.1281498   1.0182550  -0.0000007  -0.0000003  -0.0000014
+   1.0182571   1.0182535   3.1281278  -0.0000007  -0.0000033   0.0000003
+   0.0000000   0.0000000  -0.0000000   0.6540902   0.0000000   0.0000000
+   0.0000000   0.0000000  -0.0000000   0.0000000   0.6540919   0.0000000
+   0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000   0.6540937
 
 ================================================================================
 
@@ -213,7 +212,7 @@
 ================================================================================
 
 -Reading the training-set file :
--/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t81_HIST
+-/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/paral/Input/t81_HIST
 
 
 ================================================================================
@@ -353,6 +352,6 @@
 
 ================================================================================
 
-+Total cpu time      4.324  and wall time      4.326 sec
++Total cpu time      4.459  and wall time      4.464 sec
 
  multibinit : the run completed successfully.

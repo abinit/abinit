@@ -6,7 +6,7 @@
 !!  Functions to compute optical matrix elements using the wavefunction descriptor.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -89,7 +89,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
 !arrays
  integer,intent(in) :: lomo_spin(Wfd%nsppol)
  real(dp),intent(in) :: qpoint(3)
- complex(dpc),intent(out) :: opt_cvk(lomo_min:max_band,lomo_min:max_band,nkbz,Wfd%nsppol)
+ complex(dp),intent(out) :: opt_cvk(lomo_min:max_band,lomo_min:max_band,nkbz,Wfd%nsppol)
  type(pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*Wfd%usepaw)
  type(pawhur_t),intent(in) :: Hur(Cryst%natom*Wfd%usepaw)
 
@@ -98,20 +98,19 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
  integer :: nsppol,usepaw,nspinor,comm,spin,npw_k,istwf_k,my_nbbp
  integer :: ik_bz,ik_ibz,itim_k,isym_k,ib_c,ib_v,ierr,my_rank
  real(dp) :: ediff
- complex(dpc) :: emcvk
+ complex(dp) :: emcvk
  character(len=500) :: msg
  type(vkbr_t) :: vkbr
  type(wave_t),pointer :: wave_v, wave_c
 !arrays
  integer,allocatable :: bbp_distrb(:,:)
- integer,ABI_CONTIGUOUS pointer :: kg_k(:,:)
+ integer,contiguous, pointer :: kg_k(:,:)
  real(dp) :: mat_dp(3,3),qrot(3),b1(3),b2(3),b3(3),kbz(3)
- complex(dpc),allocatable :: ir_kibz(:,:,:,:,:)
- complex(gwpc), ABI_CONTIGUOUS pointer :: ug_c(:),ug_v(:)
- complex(gwpc) :: ihrc(3,Wfd%nspinor**2)
+ complex(dp),allocatable :: ir_kibz(:,:,:,:,:)
+ complex(gwp), contiguous, pointer :: ug_c(:),ug_v(:)
+ complex(gwp) :: ihrc(3,Wfd%nspinor**2)
  logical :: bbp_mask(Wfd%mband,Wfd%mband)
  type(pawcprj_type),allocatable :: Cp_v(:,:),Cp_c(:,:)
-
 !************************************************************************
 
  call wrtout(std_out," Calculating optical matrix elements in the IBZ","COLL")
@@ -272,13 +271,12 @@ pure function pdtqrc(R,C,b1,b2,b3)
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in) :: R(3),b1(3),b2(3),b3(3)
- complex(dpc),intent(in) :: C(3)
- complex(dpc) :: pdtqrc
+ complex(dp),intent(in) :: C(3)
+ complex(dp) :: pdtqrc
 
 !Local variables ------------------------------
 !scalars
  integer :: ii
-
 !************************************************************************
 
  pdtqrc=czero

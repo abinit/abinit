@@ -16,7 +16,7 @@
 !! only these types to perfom calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2016-2025 ABINIT group (J. Bieder, MS, L. Baguet)
+!!  Copyright (C) 2016-2026 ABINIT group (J. Bieder, MS, L. Baguet, IML)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,13 +35,14 @@ module m_xg
 
   use, intrinsic :: iso_c_binding, only: c_loc, c_double, c_double_complex, c_int32_t, c_size_t, c_ptr
 
+  USE_MPI
   use m_errors
   use m_abicore
   use defs_basis
   use m_time, only : timab
-  USE_MPI
   use m_xmpi
   use m_xomp
+  use m_gputk
   use m_abi_linalg
 
 #if defined(HAVE_GPU)
@@ -110,6 +111,7 @@ module m_xg
   integer, parameter :: tim_add_diag    = 2013
   integer, parameter :: tim_invert      = 2014
   integer, parameter :: tim_invert_sy   = 2015
+  integer, parameter :: tim_dot         = 2016
 
   integer, save, private :: lrwork = 0
   integer, save, private :: lcwork = 0
@@ -157,6 +159,10 @@ module m_xg
     module procedure xgBlock_saxpyC
   end interface xgBlock_saxpy
 
+  interface xgBlock_dot
+    module procedure xgBlock_dotC
+  end interface xgBlock_dot
+
   interface xgBlock_colwiseMul
     module procedure xgBlock_colwiseMulR
     module procedure xgBlock_colwiseMulC
@@ -199,7 +205,7 @@ module m_xg
   private :: getClocC
   private :: checkResize
 
-  public :: xg_init
+  public :: xg_init ! IL-10/03/25: on GPU- Contains OMP call to free/allocate memory on GPU
   public :: xg_set ! LB-06/03/24: Be careful, this routine is not used (so not tested)
   public :: xg_get ! LB-06/03/24: Be careful, this routine is not used (so not tested)
   public :: xg_setBlock
@@ -209,16 +215,22 @@ module m_xg
 
   public :: xgBlock_setBlock
   public :: xgBlock_set ! LB-06/03/24: Be careful, this routine is not used (so not tested)
-  public :: xgBlock_map
+  public :: xgBlock_map ! IL-10/03/25: on GPU- Contains safe OMP call with target presence check
   public :: xgBlock_map_1d
   public :: xgBlock_reverseMap
   public :: xgBlock_reverseMap_1d
   public :: xgBlock_prefetch_async
   public :: xgBlock_get ! LB-06/03/24: Be careful, this routine is not used (so not tested)
-  public :: xgBlock_copy
+  public :: xgBlock_copy ! IL-10/03/25: on GPU- Contains hidden one-way OMP calls (implicit H2D or D2H)
+  public :: xgBlock_colwiseSwap
   public :: xgBlock_partialcopy
+  public :: xgBlock_permuteCols
+  public :: xgBlock_hermitian_pd_cond ! computes condition number of Hermitian positive definite
+  public :: xgBlock_spd_cond ! condition matrix for symmetric positive definite
   public :: xgBlock_pack
   public :: xgBlock_getSize
+  public :: xgBlock_get_gpu_option
+  public :: xgBlock_get_communicator
 
   public :: xgBlock_check
   public :: xgBlock_check_gpu_option
@@ -251,6 +263,7 @@ module m_xg
   public :: xgBlock_yxmax
   public :: xgBlock_colwiseCymax
   public :: xgBlock_saxpy
+  public :: xgBlock_dot
   public :: xgBlock_colwiseMul
   public :: xgBlock_scale
   public :: xgBlock_transpose
@@ -275,8 +288,14 @@ module m_xg
   public :: xgBlock_zerotri
   public :: xgBlock_zero_im_g0
   public :: xgBlock_one
+  public :: xgBlock_ones
   public :: xgBlock_diagonal
   public :: xgBlock_diagonalOnly
+
+  public :: xgBlock_colwiseRandom
+  public :: xgBlock_colwiseRandomGaussian
+  public :: xgBlock_colwiseRandomRademacher
+  public :: xgBlock_randomSketching
 
   public :: xgBlock_minmax
   public :: xgBlock_average
@@ -286,10 +305,10 @@ module m_xg
   public :: xgBlock_reshape_spinor
   public :: xgBlock_free_reshape
   public :: xgBlock_print
-  public :: xgBlock_getId
+  public :: xgBlock_getid
   public :: xgBlock_get_im_g0
-  public :: xgBlock_copy_from_gpu
-  public :: xgBlock_copy_to_gpu
+  public :: xgBlock_copy_from_gpu ! TODO IL-10/03/25: on GPU- Contains unsafe OMP call to copy memory from GPU
+  public :: xgBlock_copy_to_gpu ! TODO IL-10/03/25: on GPU- Contains unsafe OMP call to copy memory to GPU
   public :: xg_finalize
 
 contains
@@ -409,7 +428,7 @@ contains
     integer(kind=c_int32_t), parameter :: izero = 0
 #endif
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-    complex(dpc), pointer :: xg__vecC(:,:)
+    complex(dp), pointer :: xg__vecC(:,:)
     real(dp), pointer :: xg__vecR(:,:)
 #endif
 
@@ -552,7 +571,7 @@ contains
 !    double precision :: tsec(2)
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-    complex(dpc), pointer :: xg__vecC(:,:)
+    complex(dp), pointer :: xg__vecC(:,:)
     real(dp), pointer :: xg__vecR(:,:)
 #endif
 
@@ -913,7 +932,7 @@ contains
   subroutine xgBlock_reverseMapC(xgBlock,array,rows,cols)
     use, intrinsic :: iso_c_binding
     type(xgBlock_t) , intent(in) :: xgBlock
-    complex(dpc), pointer, intent(inout) :: array(:,:)
+    complex(dp), pointer, intent(inout) :: array(:,:)
     integer,optional,intent(in) :: rows
     integer,optional,intent(in) :: cols
     type(c_ptr) :: cptr
@@ -945,7 +964,7 @@ contains
   subroutine xgBlock_reverseMap_1dC(xgBlock,array,array_dim)
     use, intrinsic :: iso_c_binding
     type(xgBlock_t) , intent(in) :: xgBlock
-    complex(dpc), pointer, intent(inout) :: array(:)
+    complex(dp), pointer, intent(inout) :: array(:)
     integer,optional,intent(in) :: array_dim
     type(c_ptr) :: cptr
 
@@ -999,7 +1018,7 @@ contains
     case ( SPACE_CR )
       byte_count = 2*ldim*blockdim*dp
     case ( SPACE_C )
-      byte_count = ldim*blockdim*2*dpc ! Note the factor 2, needed here!
+      byte_count = ldim*blockdim*2*dp ! Note the factor 2, needed here!
     end select
 
     ! now we can call the memory prefetch
@@ -1232,7 +1251,7 @@ contains
     type(xg_t),target, intent(inout) :: xg
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-    complex(dpc), pointer :: xg__vecC(:,:)
+    complex(dp), pointer :: xg__vecC(:,:)
     real(dp), pointer :: xg__vecR(:,:)
 #endif
 
@@ -1386,7 +1405,7 @@ contains
 
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:)
 #endif
 
@@ -1465,6 +1484,33 @@ contains
     call timab(tim_copy,2,tsec)
 
   end subroutine xgBlock_copy
+  !!***
+
+  !!****f* m_xg/xgBlock_colwiseSwap
+  !!
+  !! NAME
+  !! xgBlock_colwiseSwap
+
+  subroutine xgBlock_colwiseSwap(xgBlock, j, k, tmp)
+
+      implicit none
+
+      type(xgBlock_t), intent(inout) :: xgBlock
+      integer, intent(in) :: j, k
+      type(xgBlock_t), intent(inout) :: tmp
+
+      type(xgBlock_t) :: col_j, col_k
+
+      if (j == k) return
+
+      call xgBlock_setBlock(xgBlock, col_j, xgBlock%rows, 1, j)
+      call xgBlock_setBlock(xgBlock, col_k, xgBlock%rows, 1, k)
+
+      call xgBlock_copy(col_j, tmp)
+      call xgBlock_copy(col_k, col_j)
+      call xgBlock_copy(tmp,   col_k)
+
+  end subroutine xgBlock_colwiseSwap
   !!***
 
 !!****f* m_xg/xgBlock_partialcopy
@@ -1576,6 +1622,135 @@ contains
   end subroutine xgBlock_partialcopy
 !!***
 
+!!****f* m_xg/xgBlock_permuteCols
+!!
+!! NAME
+!! xgBlock_permuteCols
+!!
+!! FUNCTION
+!! Sequential in-place permute columns of xgBlock according to index permutation pcol.
+!! Performs the swap M(i,j) = M(i,perm(j)) for j=1,m using LAPACK.
+!! Checks memory location before applying LAPACK on CPU /!\
+!! Warning: implicit GPU transfer to place on CPU.
+!!
+  subroutine xgBlock_permuteCols(xgBlock, rows, cols, pcol)
+
+    type(xgBlock_t), intent(inout) :: xgBlock
+    integer        , intent(in) :: rows,cols
+    integer        , intent(in) :: pcol(cols)
+
+    logical :: forwrd = .true.
+
+    ! Size check
+    if (size(pcol,dim=1)/=cols) then
+        ABI_ERROR("Permutation size must be equal to number of columns")
+    end if
+
+    ! Device to host transfer
+    if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
+        call xgBlock_copy_from_gpu(xgBlock)
+    end if
+
+    ! LAPACK calls
+    select case(xgBlock%space)
+    case (SPACE_R)
+        call dlapmt(forwrd, rows, cols, xgBlock%vecR, xgBlock%LDim, pcol)
+    case (SPACE_CR)
+        call dlapmt(forwrd, 2*rows, cols, xgBlock%vecR, xgBlock%LDim, pcol)
+    case (SPACE_C)
+        call zlapmt(forwrd, rows, cols, xgBlock%vecC, xgBlock%LDim, pcol)
+    end select
+
+    ! Update GPU with modified CPU memory
+    if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
+        call xgBlock_copy_to_gpu(xgBlock)
+    end if
+
+  end subroutine xgBlock_permuteCols
+!!***
+
+  !!****f* m_xg/xgBlock_hermitian_pd_cond
+  !!
+  !! NAME
+  !! xgBlock_hermitian_pf_cond
+  !!
+  !! FUNCTION
+  !! Condition number with 2-norm.
+  !! kappa2(A)
+  !!
+  !! Convention:
+  !! for compatibility with xg_RayleighRitz_cprj,
+  !! xgBlock stores the upper triangle of matrix
+  !! uplo = 'u'
+
+  subroutine xgBlock_hermitian_pd_cond(xgBlock, n, cond2)
+
+      implicit none
+      type(xgBlock_t), intent(in) :: xgBlock
+      integer, intent(in) :: n
+      real(dp), intent(inout) :: cond2
+
+      complex(dpc) :: vecC(n,n)
+      real(dp) :: w(n)
+      complex(dp) :: work(2*n)
+      real(dp) :: rwork(3*n-2)
+      integer :: info
+      external :: zheev
+
+      ! IML debug
+      !write(901,*) 'space B', xgBlock%space
+
+      !# Validation
+      ! Fill Hermitian SPD matrix (upper triangle only)
+      !vecC(1,1) = (4.0_dp, 0.0_dp)
+      !vecC(1,2) = (1.0_dp, 0.5_dp)
+      !vecC(2,1) = dconjg(vecC(1,2))
+      !vecC(2,2) = (3.0_dp, 0.0_dp)
+      !#
+      ! comment following line
+
+      ! Copy input since LAPACK overwrites matrix
+      vecC(1:n,1:n) = xgBlock%vecC(1:n,1:n)
+
+      ! IML debug
+      ! Objects are independent(check)
+      !write(901,*) 'temp', vecC(1,11)
+      !write(901,*) 'ref', xgBlock%vecC(1,11)
+      !vecC(1,11) = 2222
+      !write(901,*) 'new temp', vecC(1,11)
+      !write(901,*) 'new ref', xgBlock%vecC(1,11)
+      !flush(901)
+
+      call zheev('N','U', n, vecC, n, w, work, size(work), rwork, info)
+      cond2 = maxval(w) / minval(w)
+
+      ! IML debug
+      !write(901,*) 'eigenval(=singval)='
+      !write(901,*) w
+      !flush(901)
+
+  end subroutine xgBlock_hermitian_pd_cond
+  !!***
+
+  subroutine xgBlock_spd_cond(xgBlock, n, cond2)
+
+      implicit none
+      type(xgBlock_t), intent(in) :: xgBlock
+      integer, intent(in) :: n
+      real(dp), intent(inout) :: cond2
+
+      real(dp) :: vecR(n,n)
+      real(dp) :: w(n)
+      real(dp) :: rwork(8*n)
+      integer :: info
+      external :: dsyev
+
+      vecR(1:n,1:n) = xgBlock%vecR(1:n,1:n)
+      call dsyev('N','U', n, vecR, n, w, rwork, 8*n, info)
+      cond2 = abs(maxval(w) / minval(w))
+
+  end subroutine xgBlock_spd_cond
+
   !!****f* m_xg/xgBlock_pack
   !!
   !! NAME
@@ -1671,7 +1846,7 @@ contains
   !! NAME
   !! xgBlock_gemmR
 
-  subroutine xgBlock_gemmR(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW, comm)
+  subroutine xgBlock_gemmR(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW, comm, timing)
 
     character,        intent(in   )           :: transa
     character,        intent(in   )           :: transb
@@ -1681,18 +1856,20 @@ contains
     double precision, intent(in   )           :: beta
     type(xgBlock_t),  intent(inout)           :: xgBlockW
     integer,optional, intent(in)              :: comm
+    logical,optional, intent(in)              :: timing
 
     real(dp)       :: alpha_
-    complex(dpc)   :: calpha
-    complex(dpc)   :: cbeta
+    complex(dp)   :: calpha
+    complex(dp)   :: cbeta
     character(kind=1) :: transa_,transb_
     integer           :: K
     double precision  :: tsec(2)
+    logical :: timing_
 
 #if defined HAVE_OPENMP_OFFLOAD
 #if !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),xgBlockW__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),xgBlockW__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),xgBlockW__vecR(:,:)
 #endif
 #if !defined HAVE_MPI2_INPLACE
@@ -1701,7 +1878,11 @@ contains
 #endif
 #endif
 
-    call timab(tim_gemm_blas,1,tsec)
+    timing_ = .true.
+    if (present(timing)) then
+      timing_ = timing
+    end if
+    if (timing_) call timab(tim_gemm_blas,1,tsec)
 
     call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
     call xgBlock_check_gpu_option(xgBlockA,xgBlockW)
@@ -1957,14 +2138,14 @@ contains
 
     end if
 
-    call timab(tim_gemm_blas,2,tsec)
+    if (timing_) call timab(tim_gemm_blas,2,tsec)
     ! END CALL GEMM
 
     ! MPI SUM
     if ( present(comm) ) then
-      call timab(tim_gemm_mpi,1,tsec)
+      if (timing_) call timab(tim_gemm_mpi,1,tsec)
       call xgBlock_mpi_sum(xgBlockW,comm=comm)
-      call timab(tim_gemm_mpi,2,tsec)
+      if (timing_) call timab(tim_gemm_mpi,2,tsec)
     end if
 
   end subroutine xgBlock_gemmR
@@ -1975,7 +2156,7 @@ contains
   !! NAME
   !! xgBlock_gemmC
 
-  subroutine xgBlock_gemmC(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW, comm)
+  subroutine xgBlock_gemmC(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW, comm, timing)
 
     character,       intent(in   ) :: transa
     character,       intent(in   ) :: transb
@@ -1985,12 +2166,18 @@ contains
     complex(kind=8), intent(in   ) :: beta
     type(xgBlock_t), intent(inout) :: xgBlockW
     integer,optional,intent(in)    :: comm
+    logical,optional,intent(in)    :: timing
 
     integer          :: K
     double precision :: tsec(2)
     character(kind=1) :: transa_,transb_
+    logical :: timing_
 
-    call timab(tim_gemm_blas,1,tsec)
+    timing_ = .true.
+    if (present(timing)) then
+      timing_ = timing
+    end if
+    if (timing_) call timab(tim_gemm_blas,1,tsec)
 
     call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
     call xgBlock_check_gpu_option(xgBlockA,xgBlockW)
@@ -2037,13 +2224,13 @@ contains
         xgBlockW%vecC, xgBlockW%LDim)
     end if
     ! END CALL GEMM
-    call timab(tim_gemm_blas,2,tsec)
+    if (timing_) call timab(tim_gemm_blas,2,tsec)
 
     ! MPI SUM
     if ( present(comm) ) then
-      call timab(tim_gemm_mpi,1,tsec)
+      if (timing_) call timab(tim_gemm_mpi,1,tsec)
       call xgBlock_mpi_sum(xgBlockW,comm=comm)
-      call timab(tim_gemm_mpi,2,tsec)
+      if (timing_) call timab(tim_gemm_mpi,2,tsec)
     end if
 
   end subroutine xgBlock_gemmC
@@ -2105,7 +2292,7 @@ contains
     double precision :: tsec(2)
 
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
 #endif
 
@@ -2234,7 +2421,7 @@ contains
     double precision :: tsec(2)
 
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockW__vecR(:,:)
 #endif
 
@@ -2679,7 +2866,7 @@ contains
     double precision :: tsec(2)
 
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),xgBlockW__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),xgBlockW__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),xgBlockW__vecR(:,:)
 #endif
 
@@ -3083,7 +3270,7 @@ contains
     integer :: fact
 
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:)
 #endif
 
@@ -3169,7 +3356,7 @@ contains
     double precision :: tsec(2)
 
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:)
 #endif
 
     call timab(tim_trsm,1,tsec)
@@ -3208,6 +3395,10 @@ contains
   !!
   !! NAME
   !! xgBlock_ymax
+  !!
+  !! FUNCTION
+  !! TODO IL-10/03/2025 Be careful, GPU version not tested
+
   subroutine xgBlock_ymax(xgBlockA, da, shift, nblocks)
 
     type(xgBlock_t), intent(inout) :: xgBlockA
@@ -3217,10 +3408,15 @@ contains
     integer :: iblock,ncols,irow,nrows,fact
     double precision :: tsec(2)
 
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),da__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),da__vecR(:,:)
+#endif
+
     call timab(tim_ymax,1,tsec)
 
-    if (xgBlockA%gpu_option/=ABI_GPU_DISABLED) then
-      ABI_ERROR('Not implemented for GPU')
+    if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
+      ABI_ERROR('Not implemented for GPU Kokkos')
     end if
     call xgBlock_check_gpu_option(xgBlockA,da)
 
@@ -3239,41 +3435,88 @@ contains
 
     fact = 1 ; if (xgBlockA%space==SPACE_CR) fact = 2
 
-    if (space(da)==SPACE_R) then
-      select case(xgBlockA%space)
-      case (SPACE_R,SPACE_CR)
-        !$omp parallel do collapse(2) shared(da,xgBlockA) private(irow,iblock)
-        do iblock = 1, ncols
-          do irow = 1, fact*nrows
-            xgBlockA%vecR(irow,iblock) = - da%vecR(iblock+shift,1) &
-             & * xgBlockA%vecR(irow,iblock)
-          end do
-        end do
-        !$omp end parallel do
-      case (SPACE_C)
-        !$omp parallel do collapse(2) shared(da,xgBlockA) private(irow,iblock)
-        do iblock = 1, ncols
-          do irow = 1, nrows
-            xgBlockA%vecC(irow,iblock) = - da%vecR(iblock+shift,1) &
-             & * xgBlockA%vecC(irow,iblock)
-          end do
-        end do
-        !$omp end parallel do
-      end select
-    else if (space(da)==SPACE_C) then
-      if (xgBlockA%space/=SPACE_C) then
-        ABI_ERROR('If space(da)=SPACE_C, space(xgBlockA) has to be SPACE_C')
-      end if
-      !$omp parallel do collapse(2) shared(da,xgBlockA) private(irow,iblock)
-      do iblock = 1, ncols
-        do irow = 1, nrows
-          xgBlockA%vecC(irow,iblock) = - da%vecC(iblock+shift,1) &
-           & * xgBlockA%vecC(irow,iblock)
-        end do
-      end do
-      !$omp end parallel do
-    else
-      ABI_ERROR('Only SPACE_R or SPACE_C (for da) are implemented.')
+    if (xgBlockA%gpu_option==ABI_GPU_DISABLED) then
+
+        if (space(da)==SPACE_R) then
+            select case(xgBlockA%space)
+            case (SPACE_R,SPACE_CR)
+                !$omp parallel do collapse(2) shared(da,xgBlockA) private(irow,iblock)
+                do iblock = 1, ncols
+                    do irow = 1, fact*nrows
+                        xgBlockA%vecR(irow,iblock) = - da%vecR(iblock+shift,1) * xgBlockA%vecR(irow,iblock)
+                    end do
+                end do
+                !$omp end parallel do
+            case (SPACE_C)
+                !$omp parallel do collapse(2) shared(da,xgBlockA) private(irow,iblock)
+                do iblock = 1, ncols
+                    do irow = 1, nrows
+                        xgBlockA%vecC(irow,iblock) = - da%vecR(iblock+shift,1) * xgBlockA%vecC(irow,iblock)
+                    end do
+                end do
+                !$omp end parallel do
+            end select
+        else if (space(da)==SPACE_C) then
+            if (xgBlockA%space/=SPACE_C) then
+                ABI_ERROR('If space(da)=SPACE_C, space(xgBlockA) has to be SPACE_C')
+            end if
+            !$omp parallel do collapse(2) shared(da,xgBlockA) private(irow,iblock)
+            do iblock = 1, ncols
+                do irow = 1, nrows
+                    xgBlockA%vecC(irow,iblock) = - da%vecC(iblock+shift,1) * xgBlockA%vecC(irow,iblock)
+                end do
+            end do
+            !$omp end parallel do
+        else
+            ABI_ERROR('Only SPACE_R or SPACE_C (for da) are implemented.')
+        end if
+
+    else if (xgBlockA%gpu_option==ABI_GPU_OPENMP) then
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+
+        if (space(da)==SPACE_R) then
+            select case(xgBlockA%space)
+            case (SPACE_R,SPACE_CR)
+                xgBlockA__vecR => xgBlockA%vecR
+                da__vecR => da%vecR
+                !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+                !$OMP& MAP(to:xgBlockA__vecR,da__vecR)
+                do iblock = 1, ncols
+                    do irow = 1, fact*nrows
+                        xgBlockA__vecR(irow,iblock) = - da__vecR(iblock+shift,1) * xgBlockA__vecR(irow,iblock)
+                    end do
+                end do
+            case (SPACE_C)
+                xgBlockA__vecC => xgBlockA%vecC
+                da__vecR => da%vecR
+                !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+                !$OMP& MAP(to:xgBlockA__vecC,da__vecR)
+                do iblock = 1, ncols
+                    do irow = 1, nrows
+                        xgBlockA__vecC(irow,iblock) = - da__vecR(iblock+shift,1) * xgBlockA__vecC(irow,iblock)
+                    end do
+                end do
+            end select
+        else if (space(da)==SPACE_C) then
+            if (xgBlockA%space/=SPACE_C) then
+                ABI_ERROR('If space(da)=SPACE_C, space(xgBlockA) has to be SPACE_C')
+            end if
+            xgBlockA__vecC => xgBlockA%vecC
+            da__vecC => da%vecC
+            !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+            !$OMP& MAP(to:xgBlockA__vecC,da__vecC)
+            do iblock = 1, ncols
+                do irow = 1, nrows
+                    xgBlockA__vecC(irow,iblock) = - da__vecC(iblock+shift,1) * xgBlockA__vecC(irow,iblock)
+                end do
+            end do
+        else
+            ABI_ERROR('Only SPACE_R or SPACE_C (for da) are implemented.')
+        end if
+
+#endif
+
     end if
 
     call timab(tim_ymax,2,tsec)
@@ -3295,7 +3538,7 @@ contains
 
     integer :: iblock,fact,rows,cols,jblock
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),xgBlockW__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),xgBlockW__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),xgBlockW__vecR(:,:),da__vecR(:,:)
 #endif
     double precision :: tsec(2)
@@ -3478,7 +3721,7 @@ contains
 
     type(xgBlock_t) :: X_spinor, Y_spinor
     real(dp)    , pointer :: array(:)
-    complex(dpc), pointer :: arrayc(:)
+    complex(dp), pointer :: arrayc(:)
     double precision :: tsec(2)
 
     call timab(tim_apply_diag,1,tsec)
@@ -3753,11 +3996,11 @@ contains
 
     type(xgBlock_t) , intent(in)    :: xgBlockA,xgBlockB
     type(xgBlock_t) , intent(inout) :: xgBlockW
-    integer,intent(in) :: blocksize,me_comm
-    integer,intent(in),optional :: comm
+    integer,intent(in) :: me_comm
+    integer,intent(in),optional :: blocksize,comm
 
     logical :: multiblock
-    integer :: ierr,comm_,source,dest,tag,request
+    integer :: ierr,blocksize_,comm_,source,dest,tag,request
     integer :: iblock_left,iblock_right,iblock_mpi,nblocks_mpi,nblocks_left,nblocks_right
     integer :: shift_col,shift_row,shift_col_mpi,shift_row_mpi
     double precision :: tsec(2)
@@ -3790,16 +4033,28 @@ contains
       ABI_ERROR('cols(xgBlockB)/=nblocks_mpi*cols(xgBlockW)')
     end if
 
+    blocksize_ = xgBlockA%cols
+    if (present(blocksize)) then
+      if (mod(xgBlockA%cols,blocksize)/=0) then
+        ABI_ERROR('invalid blocksize')
+      end if
+      if (mod(xgBlockB%cols/nblocks_mpi,blocksize)/=0) then
+        ABI_ERROR('invalid blocksize')
+      end if
+      blocksize_ = blocksize
+    end if
+
     if (nblocks_mpi==1) then
 
+      ! If only one mpi process, use timing from gemm routine
       call timab(tim_gemmcyclic,2,tsec)
       call xgBlock_gemm('n','n',1.0d0,xgBlockA,xgBlockB,1.d0,xgBlockW)
       call timab(tim_gemmcyclic,1,tsec)
 
     else
 
-      nblocks_left  = xgBlockA%cols / blocksize
-      nblocks_right = xgBlockB%cols / (blocksize*nblocks_mpi)
+      nblocks_left  = xgBlockA%cols / blocksize_
+      nblocks_right = xgBlockB%cols / (blocksize_*nblocks_mpi)
       multiblock = .false.
       if (nblocks_left>1.or.nblocks_right>1) then
         multiblock = .true.
@@ -3808,32 +4063,30 @@ contains
       call xg_init(xg_mpi_work,xgBlockA%space,xgBlockA%rows,xgBlockA%cols,xmpi_comm_null)
       call xg_init(subB_mpi,xgBlockB%space,xgBlockB%rows/nblocks_mpi,xgBlockB%cols/nblocks_mpi,xmpi_comm_null)
       if (multiblock) then
-        call xg_init(subB,xgBlockB%space,blocksize,blocksize,xmpi_comm_null)
+        call xg_init(subB,xgBlockB%space,blocksize_,blocksize_,xmpi_comm_null)
       end if
 
       do iblock_mpi=1,nblocks_mpi
 
-        shift_row_mpi = mod((iblock_mpi-1)+me_comm,nblocks_mpi) * blocksize
-        shift_col_mpi = me_comm * blocksize
+        shift_row_mpi = mod((iblock_mpi-1)+me_comm,nblocks_mpi) * blocksize_
+        shift_col_mpi = me_comm * blocksize_
         if (.not.multiblock) then
           call xgBlock_partialcopy(xgBlockB,subB_mpi%self,shift_row_mpi,shift_col_mpi,BIG2SMALL)
         else
           do iblock_right=1,nblocks_right
             do iblock_left=1,nblocks_left
-              shift_row = shift_row_mpi + (iblock_left-1) * blocksize*nblocks_mpi
-              shift_col = shift_col_mpi + (iblock_right-1) * blocksize*nblocks_mpi
+              shift_row = shift_row_mpi + (iblock_left-1) * blocksize_*nblocks_mpi
+              shift_col = shift_col_mpi + (iblock_right-1) * blocksize_*nblocks_mpi
               call xgBlock_partialcopy(xgBlockB,subB%self,shift_row,shift_col,BIG2SMALL)
-              shift_row = (iblock_left-1) * blocksize
-              shift_col = (iblock_right-1) * blocksize
+              shift_row = (iblock_left-1) * blocksize_
+              shift_col = (iblock_right-1) * blocksize_
               call xgBlock_partialcopy(subB%self,subB_mpi%self,shift_row,shift_col,SMALL2BIG)
             end do
           end do
         end if
 
         if (iblock_mpi==1) then
-          call timab(tim_gemmcyclic,2,tsec)
-          call xgBlock_gemm('n','n',1.0d0,xgBlockA,subB_mpi%self,1.d0,xgBlockW)
-          call timab(tim_gemmcyclic,1,tsec)
+          call xgBlock_gemm('n','n',1.0d0,xgBlockA,subB_mpi%self,1.d0,xgBlockW,timing=.false.)
         else
           tag = iblock_mpi
           dest = mod(me_comm-(iblock_mpi-1),nblocks_mpi)
@@ -3841,9 +4094,7 @@ contains
           call xgBlock_mpi_isend(xgBlockA,dest,tag,request,comm=comm_)
           source = mod(me_comm+(iblock_mpi-1),nblocks_mpi)
           call xgBlock_mpi_recv(xg_mpi_work%self,source,tag,comm=comm_)
-          call timab(tim_gemmcyclic,2,tsec)
-          call xgBlock_gemm('n','n',1.0d0,xg_mpi_work%self,subB_mpi%self,1.d0,xgBlockW)
-          call timab(tim_gemmcyclic,1,tsec)
+          call xgBlock_gemm('n','n',1.0d0,xg_mpi_work%self,subB_mpi%self,1.d0,xgBlockW,timing=.false.)
         end if
 
         if (iblock_mpi>1) call xmpi_wait(request,ierr)
@@ -3878,7 +4129,8 @@ contains
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     integer :: cols
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+    logical :: map_vec
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
 #endif
     double precision :: tsec(2)
@@ -3914,7 +4166,8 @@ contains
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
-      !$OMP TARGET ENTER DATA MAP(to:vec)
+      map_vec=.not. xomp_target_is_present(c_loc(vec))
+      !$OMP TARGET ENTER DATA MAP(to:vec) IF(map_vec)
       cols=xgBlock%cols
       select case(xgBlock%space)
       case (SPACE_R)
@@ -3943,7 +4196,7 @@ contains
           end do
         end do
       end select
-      !$OMP TARGET EXIT DATA MAP(delete:vec)
+      !$OMP TARGET EXIT DATA MAP(delete:vec) IF(map_vec)
 #endif
 
     else
@@ -3995,7 +4248,7 @@ contains
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     integer :: cols
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
 #endif
     double precision :: tsec(2)
 
@@ -4078,9 +4331,9 @@ contains
     type(xgBlock_t),  intent(in   ) :: xgBlock2
 
     integer :: fact
-    complex(dpc) :: da_cplx
+    complex(dp) :: da_cplx
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock1__vecC(:,:),xgBlock2__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlock1__vecC(:,:),xgBlock2__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock1__vecR(:,:),xgBlock2__vecR(:,:)
 #endif
     double precision :: tsec(2)
@@ -4156,7 +4409,7 @@ contains
     type(xgBlock_t), intent(in   ) :: xgBlock2
 
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock1__vecC(:,:),xgBlock2__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlock1__vecC(:,:),xgBlock2__vecC(:,:)
 #endif
     double precision :: tsec(2)
 
@@ -4198,6 +4451,66 @@ contains
   end subroutine xgBlock_saxpyC
   !!***
 
+  !!****f* m_xg/xgBlock_dotC
+  !!
+  !! NAME
+  !! xgBlock_dotC
+
+  subroutine xgBlock_dotC(xgBlock1, xgBlock2, xgBlock_out)
+
+    type(xgBlock_t), intent(in  ) :: xgBlock1
+    type(xgBlock_t), intent(in  ) :: xgBlock2
+    type(xgBlock_t),  intent(inout ) :: xgBlock_out
+
+    double complex,external :: zdotc !conjugated dot product
+#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlock1__vecC(:,:),xgBlock2__vecC(:,:)
+#endif
+    double precision :: tsec(2)
+
+    call timab(tim_dot,1,tsec)
+
+    if ( xgBlock1%space /= xgBlock2%space ) then
+        ABI_ERROR("Must be same space for dot")
+    end if
+    if ( xgBlock1%LDim /= xgBlock2%LDim ) then
+        ABI_ERROR("Must have same LDim for dot")
+    end if
+    if ( xgBlock1%cols /= xgBlock2%cols ) then
+        ABI_ERROR("Must have same cols for dot")
+    end if
+    if ( xgBlock1%space /= SPACE_C .or. xgBlock_out%space /= SPACE_C) then
+      ABI_ERROR("Not correct space")
+    end if
+
+    call xgBlock_check_gpu_option(xgBlock1,xgBlock2)
+    call xgBlock_check_gpu_option(xgBlock2,xgBlock_out)
+
+    if (xgBlock1%gpu_option==ABI_GPU_KOKKOS .or. xgBlock2%gpu_option==ABI_GPU_OPENMP) then
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+      ! /IML\ will fix later compilation bug
+      ABI_ERROR("not implemented")
+      !call abi_gpu_xdot(2, xgBlock1%cols*xgBlock1%LDim, xgBlock_out%vecC, xgBlock1%vecC, 1, xgBlock2%vecC, 1)
+#elif defined HAVE_OPENMP_OFFLOAD
+!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
+      xgBlock1__vecC => xgBlock1%vecC
+      xgBlock2__vecC => xgBlock2%vecC
+      !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock1__vecC,xgBlock2__vecC)
+      ! /IML\ will fix later compilation bug
+      ABI_ERROR("not implemented")
+      !call abi_gpu_xdot(2, xgBlock1%cols*xgBlock1%LDim, xgBlock_out%vecC, c_loc(xgBlock1__vecC),1,c_loc(xgBlock2__vecC),1)
+      !$OMP END TARGET DATA
+#endif
+
+    else
+      xgBlock_out%vecC = zdotc(xgBlock1%cols*xgBlock1%LDim, xgBlock1%vecC, 1, xgBlock2%vecC, 1)
+    end if
+
+    call timab(tim_dot,2,tsec)
+
+  end subroutine xgBlock_dotC
+  !!***
+
   !!****f* m_xg/xgBlock_add
   !!
   !! NAME
@@ -4214,7 +4527,7 @@ contains
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:), xgBlockB__vecR(:,:)
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:), xgBlockB__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:), xgBlockB__vecC(:,:)
 #endif
     double precision :: tsec(2)
 
@@ -4332,7 +4645,7 @@ contains
     double precision,external :: ddot
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     integer :: cols,rows
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:),dot__vecR(:,:)
 #endif
 
@@ -4544,7 +4857,7 @@ contains
 #if (defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD) || defined(FC_NVHPC) || defined(FC_CRAY)
     integer :: rows,cols,ii,me_g0
     double precision :: tmp
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),dot__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),dot__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),dot__vecR(:,:)
 #endif
     double precision :: tsec(2)
@@ -4849,7 +5162,7 @@ contains
     ! does spacedim * neigenpairs be larger than 2^31 = 2. 10^9
     integer(kind=c_int32_t)  :: total_size
 #if defined HAVE_OPENMP_OFFLOAD
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),divResult__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),divResult__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),divResult__vecR(:,:)
 #endif
 #endif
@@ -5058,10 +5371,10 @@ contains
     integer         , intent(in   )           :: inc
 
     integer      :: i,fact
-    complex(dpc) :: valc
+    complex(dp) :: valc
 
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
 #endif
     double precision :: tsec(2)
@@ -5403,6 +5716,42 @@ contains
   end subroutine xgBlock_getSize
   !!***
 
+  !!****f* m_xg/xgBlock_get_gpu_option
+  !!
+  !! NAME
+  !! xgBlock_get_gpu_option
+  !!
+  !! FUNCTION
+  !! Getter routine for private variable of xgBlock type
+
+  subroutine xgBlock_get_gpu_option(xgBlock, gpu_option)
+
+    type(xgBlock_t)  , intent(in   ) :: xgBlock
+    integer          , intent(  out) :: gpu_option
+
+    gpu_option = xgBlock%gpu_option
+
+  end subroutine xgBlock_get_gpu_option
+  !!***
+
+  !!****f* m_xg/xgBlock_get_communicator
+  !!
+  !! NAME
+  !! xgBlock_get_communicator
+  !!
+  !! FUNCTION
+  !! Getter routine for private variable of xgBlock type
+
+  subroutine xgBlock_get_communicator(xgBlock, comm)
+
+    type(xgBlock_t)  , intent(in   ) :: xgBlock
+    integer          , intent(  out) :: comm
+
+    comm = xgBlock%spacedim_comm
+
+  end subroutine xgBlock_get_communicator
+  !!***
+
   !!****f* m_xg/xgBlock_check
   !!
   !! NAME
@@ -5424,7 +5773,7 @@ contains
       ABI_ERROR('X%space/=Y%space')
     end if
     if (X%rows/=Y%rows) then
-      ABI_ERROR('X%rows/=Y%rows')
+        ABI_ERROR('X%rows/=Y%rows')
     end if
     if (fact_col_*X%cols/=Y%cols) then
       ABI_ERROR('X%cols/=Y%cols')
@@ -5459,7 +5808,7 @@ contains
     type(xgBlock_t), target, intent(in   ) :: xgBlock
 #if defined(HAVE_GPU) && defined(HAVE_OPENMP_OFFLOAD)
     integer(c_size_t) :: size
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
 
     select case(xgBlock%space)
@@ -5485,7 +5834,7 @@ contains
   subroutine xgBlock_copy_from_gpu(xgBlock)
     type(xgBlock_t), target, intent(in   ) :: xgBlock
 #if defined(HAVE_GPU) && defined(HAVE_OPENMP_OFFLOAD)
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
 
     select case(xgBlock%space)
@@ -5662,7 +6011,7 @@ contains
 #endif
 
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
     integer :: rows,cols,iblock,jblock
 #endif
@@ -5680,7 +6029,7 @@ contains
         byte_count = fact * xgBlock%ldim * xgBlock%cols * dp
         call gpu_memset(c_loc(xgBlock%vecR), 0, byte_count)
       case (SPACE_C)
-        byte_count = xgBlock%ldim * xgBlock%cols * 2 * dpc ! Note the factor 2, needed here!
+        byte_count = xgBlock%ldim * xgBlock%cols * 2 * dp ! Note the factor 2, needed here!
         call gpu_memset(c_loc(xgBlock%vecC), 0, byte_count)
       end select
 #endif
@@ -5696,7 +6045,7 @@ contains
         call gpu_memset(c_loc(xgBlock%vecR), 0, byte_count)
         !$OMP END TARGET DATA
       case (SPACE_C)
-        byte_count = int(xgBlock%ldim, c_size_t) * xgBlock%cols * 2 * dpc ! Note the factor 2, needed here!
+        byte_count = int(xgBlock%ldim, c_size_t) * xgBlock%cols * 2 * dp ! Note the factor 2, needed here!
         !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock%vecC)
         call gpu_memset(c_loc(xgBlock%vecC), 0, byte_count)
         !$OMP END TARGET DATA
@@ -5744,6 +6093,71 @@ contains
     call timab(tim_zero,2,tsec)
 
   end subroutine xgBlock_zero
+  !!***
+
+  !!****f* m_xg/xgBlock_ones
+  !!
+  !! NAME
+  !! xgBlock_ones
+
+  subroutine xgBlock_ones(xgBlock)
+
+    type(xgBlock_t), intent(inout) :: xgBlock
+
+    integer :: i,fact
+#if defined HAVE_GPU
+    integer(C_SIZE_T) :: byte_count
+#endif
+
+#if defined HAVE_OPENMP_OFFLOAD
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
+    integer :: rows,cols,iblock,jblock
+#endif
+
+    fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
+
+    if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
+
+#if defined HAVE_OPENMP_OFFLOAD
+      rows = xgBlock%rows; cols = xgBlock%cols
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        xgBlock__vecR => xgBlock%vecR
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlock__vecR)
+        do iblock = 1, cols
+          do jblock = 1, fact * rows
+            xgBlock__vecR(jblock,iblock) = 1.d0
+          end do
+        end do
+      case (SPACE_C)
+        xgBlock__vecC => xgBlock%vecC
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlock__vecC)
+        do iblock = 1, cols
+          do jblock = 1, fact * rows
+            xgBlock__vecC(jblock,iblock) = dcmplx(1.d0,0)
+          end do
+        end do
+      end select
+#endif
+
+    else
+
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        !$omp parallel do
+        do i = 1, xgBlock%cols
+          xgBlock%vecR(:,i) = 1.d0
+        end do
+      case (SPACE_C)
+        !$omp parallel do
+        do i = 1, xgBlock%cols
+          xgBlock%vecC(:,i) = dcmplx(1.d0)
+        end do
+      end select
+    end if
+
+  end subroutine xgBlock_ones
   !!***
 
   !!****f* m_xg/xgBlock_zerotri
@@ -6164,6 +6578,313 @@ contains
   end subroutine xgBlock_one
   !!***
 
+  !!****f* m_xg/xgBlock_colwiseRandom
+  !!
+  !! NAME
+  !! xgBlock_colwiseRandom
+
+  subroutine xgBlock_colwiseRandom(xgBlock, my_rank, jcol)
+
+    type(xgBlock_t), intent(inout) :: xgBlock
+    integer, intent(in) :: my_rank ! mpi-parallel safe seed
+    integer, intent(in) :: jcol
+
+    type(xgBlock_t) :: xgBlock_part
+    real(dp) :: re, reim(2)
+    real(dp) :: norm2_vec
+    integer :: tid, seed_size, i, n, fact
+    integer, allocatable :: seed(:)
+    complex(kind=c_double_complex), ABI_CONTIGUOUS pointer :: vecC(:) => null()
+    real(kind=c_double), ABI_CONTIGUOUS pointer:: vecR(:) => null()
+
+    if (jcol > xgBlock%cols) then
+        ABI_ERROR('given column is out of block')
+    end if
+
+    tid = 0
+    n = xgBlock%rows
+    fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
+
+    if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
+        call xgBlock_setBlock(xgBlock, xgBlock_part, n, 1, fcol=jcol)
+        call xgBlock_copy_from_gpu(xgBlock_part)
+    end if
+
+    ! Each thread each MPI process maintains its own seed
+    select case(xgBlock%space)
+    case (SPACE_R,SPACE_CR)
+        vecR => xgBlock%vecR(1:fact*n,jcol) ! contiguous in memory
+        !$omp parallel default(none) &
+        !$omp private(tid, seed, re, i, seed_size) &
+        !$omp shared(vecR, my_rank, n)
+            call random_seed(size=seed_size)
+            ABI_MALLOC(seed, (seed_size))
+            tid = xomp_get_thread_num()
+            seed = 123456 + 1000*my_rank + 97*tid + (/ (i, i=1,seed_size) /)
+            call random_seed(put=seed)
+            ! Avoid multiple threads modify the same RNG state race condition
+            ! execute each iteration i by exactly one thread
+            !$omp do
+            do i=1,n
+                call random_number(re)
+                vecR(i) = merge(1.d0, -1.d0, re>=0.5d0)
+            end do
+            !$omp end do
+            ABI_FREE(seed)
+        !$omp end parallel
+    case (SPACE_C)
+        vecC => xgBlock%vecC(:,jcol) ! contiguous in memory
+        !$omp parallel default(none) &
+        !$omp private(tid, seed, reim, i, seed_size) &
+        !$omp shared(vecC, my_rank, n)
+            call random_seed(size=seed_size)
+            ABI_MALLOC(seed, (seed_size))
+            tid = xomp_get_thread_num()
+            seed = 123456 + 1000*my_rank + 97*tid + (/ (i, i=1,seed_size) /)
+            call random_seed(put=seed)
+            !$omp do
+            do i=1,n
+                call random_number(reim)
+                vecC(i) = dcmplx(reim(1)-0.5_dp, reim(2)-0.5_dp) ! zero mean
+            end do
+            !$omp end do
+            ABI_FREE(seed)
+        !$omp end parallel
+        norm2_vec = sum(conjg(vecC)*vecC)
+        vecC = vecC / sqrt(real(norm2_vec, dp))
+    end select
+
+    if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
+        call xgBlock_copy_to_gpu(xgBlock_part)
+    end if
+
+  end subroutine xgBlock_colwiseRandom
+  !!***
+
+  !!****f* m_xg/xgBlock_colwiseRandomGaussian
+  !!
+  !! NAME
+  !! xgBlock_colwiseRandomGaussian
+
+  subroutine xgBlock_colwiseRandomGaussian(xgBlock, my_rank, jcol)
+
+    type(xgBlock_t), intent(inout) :: xgBlock
+    integer, intent(in) :: my_rank ! mpi-parallel safe seed
+    integer, intent(in) :: jcol
+
+    type(xgBlock_t) :: xgBlock_part
+    real(dp) :: u1, u2, r, theta
+    complex(dp) :: z
+    integer :: tid, seed_size, i, n
+    integer, allocatable :: seed(:)
+    complex(kind=c_double_complex), ABI_CONTIGUOUS pointer :: vecC(:) => null()
+
+    if (jcol > xgBlock%cols) then
+        ABI_ERROR('given column is out of block')
+    end if
+
+    tid = 0
+    n = xgBlock%rows
+
+    if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
+        call xgBlock_setBlock(xgBlock, xgBlock_part, n, 1, fcol=jcol)
+        call xgBlock_copy_from_gpu(xgBlock_part)
+    end if
+
+    ! Each thread each MPI process maintains its own seed
+    select case(xgBlock%space)
+    case (SPACE_R)
+        ABI_ERROR('Not implemented for SPACE_R')
+    case (SPACE_C)
+        vecC => xgBlock%vecC(:,jcol) ! contiguous in memory
+        !$omp parallel default(none) &
+        !$omp private(tid, seed, u1, u2, r, theta, z, i, seed_size) &
+        !$omp shared(vecC, my_rank, n)
+            call random_seed(size=seed_size)
+            ABI_MALLOC(seed, (seed_size))
+            tid = xomp_get_thread_num()
+            seed = 123456 + 1000*my_rank + 97*tid + (/ (i, i=1,seed_size) /)
+            call random_seed(put=seed)
+            !$omp do
+            do i=1,n
+                call random_number(u1)
+                call random_number(u2)
+                if (u1 == 0.0d0) u1 = 1.0e-12
+                r = sqrt(-2.d0 * log(u1))
+                theta = 2.d0 * PI * u2
+                z = (r*cos(theta)+(0.d0,1.d0)*r*sin(theta))/sqrt(2.d0)
+                vecC(i) = dcmplx(real(z), aimag(z)) ! zero mean
+            end do
+            !$omp end do
+            ABI_FREE(seed)
+        !$omp end parallel
+    case (SPACE_CR)
+        ABI_ERROR('Not implemented for SPACE_CR')
+    end select
+
+    if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
+        call xgBlock_copy_to_gpu(xgBlock_part)
+    end if
+
+  end subroutine xgBlock_colwiseRandomGaussian
+  !!***
+
+  !!****f* m_xg/xgBlock_colwiseRandomRademacher
+  !!
+  !! NAME
+  !! xgBlock_colwiseRandomRademacher
+  !!
+  !! FUNCTION
+  !! Every entry has |z_j| = 1 and E[z_j] = 0
+
+  subroutine xgBlock_colwiseRandomRademacher(xgBlock, my_rank, jcol)
+
+    type(xgBlock_t), intent(inout) :: xgBlock
+    integer, intent(in) :: my_rank ! mpi-parallel safe seed
+    integer, intent(in) :: jcol
+
+    type(xgBlock_t) :: xgBlock_part
+    real(dp) :: u
+    complex(dp) :: meanz
+    real(dp)    :: norm2_, variance
+    integer :: tid, seed_size, i, n, k, fact
+    integer, allocatable :: seed(:)
+    complex(kind=c_double_complex), ABI_CONTIGUOUS pointer :: vecC(:) => null()
+    real(kind=c_double)            , ABI_CONTIGUOUS pointer :: vecR(:) => null()
+
+    if (jcol > xgBlock%cols) then
+        ABI_ERROR('given column is out of block')
+    end if
+
+    tid = 0
+    fact = 1
+    fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
+
+    n = fact*xgBlock%rows
+
+    if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
+        call xgBlock_setBlock(xgBlock, xgBlock_part, n, 1, fcol=jcol)
+        call xgBlock_copy_from_gpu(xgBlock_part)
+    end if
+
+    ! Each thread each MPI process maintains its own seed
+    select case(xgBlock%space)
+    case (SPACE_R)
+        ABI_ERROR('Not implemented for SPACE_R')
+    case (SPACE_C)
+        vecC => xgBlock%vecC(:,jcol) ! contiguous in memory
+        !$omp parallel default(none) &
+        !$omp private(tid, seed, u, k, i, seed_size) &
+        !$omp shared(vecC, my_rank, n)
+            call random_seed(size=seed_size)
+            ABI_MALLOC(seed, (seed_size))
+            tid = xomp_get_thread_num()
+            seed = 123456 + 1000*my_rank + 97*tid + (/ (i, i=1,seed_size) /)
+            call random_seed(put=seed)
+            !$omp do
+            do i=1,n
+                call random_number(u)
+                k = int(4.0d0 * u)   ! 0,1,2,3
+                vecC(i) = exp(dcmplx(0.0d0, 1.0d0) * (0.5d0 * PI * k))
+            end do
+            !$omp end do
+            ABI_FREE(seed)
+        !$omp end parallel
+        meanz = sum(vecC) / dcmplx(n,0.0d0)
+        norm2_ = sum(abs(vecC)**2) / n
+        variance = norm2_ - abs(meanz)**2
+        ! IML debug
+        !write(901,*) "mean = ", meanz
+        !write(901,*) "E|z|^2 = ", norm2_
+        !write(901,*) "variance = ", variance
+        !flush(901)
+    case (SPACE_CR)
+        vecR => xgBlock%vecR(1:fact*xgBlock%rows,jcol) ! contiguous in memory
+        !$omp parallel default(none) &
+        !$omp private(tid, seed, u, k, i, seed_size) &
+        !$omp shared(vecR, my_rank, n)
+            call random_seed(size=seed_size)
+            ABI_MALLOC(seed, (seed_size))
+            tid = xomp_get_thread_num()
+            seed = 123456 + 1000*my_rank + 97*tid + (/ (i, i=1,seed_size) /)
+            call random_seed(put=seed)
+            !$omp do
+            do i=1,n
+                call random_number(u)
+                vecR(i) = merge(1.d0, -1.d0, u>=0.5d0)
+            end do
+            !$omp end do
+            ABI_FREE(seed)
+        !$omp end parallel
+    end select
+
+    if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
+        call xgBlock_copy_to_gpu(xgBlock_part)
+    end if
+
+  end subroutine xgBlock_colwiseRandomRademacher
+  !!***
+
+  !!****f* m_xg/xgBlock_randomSketching
+  !!
+  !! NAME
+  !! xgBlock_randomSketching
+  !!
+
+  subroutine xgBlock_randomSketching(X, X_sketch, k_sketch)
+
+    implicit none
+
+    type(xgBlock_t), intent(in) :: X
+    type(xgBlock_t), intent(inout) :: X_sketch
+    integer, intent(in) :: k_sketch
+
+    integer :: k
+    integer :: rank
+    integer :: spacecom, space
+    integer :: ncols, nrows
+    integer :: gpu_option
+    type(xg_t) :: Omega
+    !type(xgBlock_t) :: q
+
+  ! *********************************************************************
+
+    space = X%space
+    ncols = X%cols
+    nrows = X%rows
+    gpu_option = X%gpu_option
+    spacecom = X%spacedim_comm
+
+    if (k_sketch > ncols) then
+        ABI_ERROR("sketching dimension cannot be more than initial one")
+    end if
+
+    ! Each MPI has the same sketch matrix
+    call xg_init(Omega, space, ncols, k_sketch, xmpi_comm_null, gpu_option=gpu_option)
+
+    rank = xmpi_comm_rank(spacecom)
+
+    do k = 1, k_sketch
+        ! seed depends on column index
+        ! rank * offset + k, with offset > ncols to avoid overlap between columns across ranks
+        call xgBlock_colwiseRandomGaussian(Omega%self, rank*(k_sketch+10)+k, k)
+
+        ! test
+        ! q = random column vector
+        !call xgBlock_setBlock(Omega%self, q, ncols, 1, fcol=k)
+        !write(std_out,*) 'Random id=', xgBlock_getid(q)
+        !flush(std_out)
+    end do
+
+    ! Compute X * Omega
+    call xgBlock_gemm('n','n',1.0d0,X,Omega%self,0.d0,X_sketch,comm=xmpi_comm_null)
+    !call xgBlock_copy(Omega%self, X_sketch)
+
+    call xg_free(Omega)
+
+  end subroutine xgBlock_randomSketching
+  !!***
+
   !!****f* m_xg/xgBlock_diagonal
   !!
   !! NAME
@@ -6377,7 +7098,7 @@ contains
     real(dp), allocatable :: vecR_tmp(:)
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-    complex(dpc), pointer :: xgBlock__vecC(:,:)
+    complex(dp), pointer :: xgBlock__vecC(:,:)
     real(dp), pointer :: xgBlock__vecR(:,:)
 #endif
 

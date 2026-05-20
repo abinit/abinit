@@ -1,7 +1,7 @@
 /* rec_kernel.cu */
 
 /*
- * Copyright (C) 2008-2025 ABINIT Group (MMancini)
+ * Copyright (C) 2008-2026 ABINIT Group (MMancini)
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
@@ -23,7 +23,7 @@
    scalarProdGPU - computes the scalar prudocts of vectorN pairs of vectors of
    dimension elementN. The results is multiplied for scale factor
    (directly inspired from SDK).
-   
+
 
    Host function:
    copytoconstmem - Copies in constant memory some variable used by
@@ -34,7 +34,7 @@
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 /*========================================================================*/
-__global__ void 
+__global__ void
 setting_un(cureal* un,    //un(height_max,un_pitch)=delta(i) Initial vector
 	   cureal* unold, //unold(height_max,un_pitch)=0 Old initial vector
 	   cureal* vn,    //vn(height_max,un_pitch)=0  work vector
@@ -46,14 +46,14 @@ setting_un(cureal* un,    //un(height_max,un_pitch)=delta(i) Initial vector
 { /* Kernel to initalise the arrays on the Device if gratio==1*/
  int x = IMUL(blockDim.x,blockIdx.x) + threadIdx.x;
  int y = IMUL(blockDim.y,blockIdx.y) + threadIdx.y;
-  
+
  if(x<dc_pthsize && y<dc_nptrec)
   {
    int ind = IMUL(y, dc_pthsize)+x;
    *(un+ind) = cuzero;
    *(unold+ind) = cuzero;
    *(vn+ind) = cuzero;
-   
+
    if(x==pos0+y && x<pos1){
     *(un+ind) = scale;
     an[y]  = cuzero;
@@ -63,7 +63,7 @@ setting_un(cureal* un,    //un(height_max,un_pitch)=delta(i) Initial vector
 }
 
 /*========================================================================*/
-__global__ void 
+__global__ void
 set_un_gratio(cureal* un,    //un(height_max,un_pitch)=delta(i) Initial vector
 	      cureal* unold, //unold(height_max,un_pitch)=0 Old initial vector
 	      cureal* vn,    //vn(height_max,un_pitch)=0  work vector
@@ -73,11 +73,11 @@ set_un_gratio(cureal* un,    //un(height_max,un_pitch)=delta(i) Initial vector
 	      int pos0,      //first pt to calculate
 	      int maxcoord,  //max of pt to calculate
 	      cureal scale,  //weight of the dirac delta
-	      int gratio)    //gratio                              
+	      int gratio)    //gratio
 { /* Kernel to initalise the arrays on the Device when grati>1*/
  int x = IMUL(blockDim.x,blockIdx.x) + threadIdx.x;
  int y = IMUL(blockDim.y,blockIdx.y) + threadIdx.y;
- 
+
  if(x<dc_pthsize && y<dc_nptrec)
   {
    int ind = IMUL(y, dc_pthsize)+x;
@@ -96,7 +96,7 @@ set_un_gratio(cureal* un,    //un(height_max,un_pitch)=delta(i) Initial vector
 }
 
 /*========================================================================*/
-__global__ void 
+__global__ void
 setting_un_cut(cureal* un,    //un(height_max,un_pitch)=delta(i) Initial vector
 	       cureal* unold, //unold(height_max,un_pitch)=0 Old initial vector
 	       cureal* vn,    //vn(height_max,un_pitch)=0  work vector
@@ -123,7 +123,7 @@ setting_un_cut(cureal* un,    //un(height_max,un_pitch)=delta(i) Initial vector
 }
 
 /*========================================================================*/
-__global__ void 
+__global__ void
 get_loc_potent(cureal* pot_gpu,     //potential on the ngfft grid
 	       cureal* locpot_gpu, //potential on the ngfftrec grid
 	       int3    trasl,      //the origin of ngfftrec grid
@@ -131,7 +131,7 @@ get_loc_potent(cureal* pot_gpu,     //potential on the ngfft grid
 	       int     ngfftrec,   //linear dim of the cutted grid
 	       int     ngfft)      //linear dim of the grid
 { /* Kernel to re-positioning potential accorting to trasl for recrcut!=0 */
-  /*we use in this kernel cubic grid (is very simple to extend)   */       
+  /*we use in this kernel cubic grid (is very simple to extend)   */
 
  int x = IMUL(blockDim.x,blockIdx.x) + threadIdx.x;
  int y = IMUL(blockDim.y,blockIdx.y) + threadIdx.y;
@@ -145,24 +145,24 @@ get_loc_potent(cureal* pot_gpu,     //potential on the ngfft grid
  if(modj<0) modj+=ngfft;
  if(modi>=ngfft)  modi -= ngfft;
  if(modi<0) modi+=ngfft;
-  
+
  int part2 = modi+IMUL(ngfft,modj);
  for(int z = 0;z<ngfftrec;++z){
-  
+
   if(x<ngfftrec && y<ngfftrec){
    for(int z = 0;z<ngfftrec;++z){
     int tot = part+IMUL(z,mult);
-    int modk = z+trasl.z; 
-    if(modk>=ngfft) modk -= ngfft; 
-    if(modk<0) modk+=ngfft; 
+    int modk = z+trasl.z;
+    if(modk>=ngfft) modk -= ngfft;
+    if(modk<0) modk+=ngfft;
     GET_TAB(locpot_gpu,tot,ipt,dc_pthsize) = pot_gpu[part2+IMUL(mult2,modk)];
    }  ; __syncthreads();
   };
- } 
+ }
 }
 
 /*========================================================================*/
-__global__ void 
+__global__ void
 cmplxtoreal(cureal* a_r,  //out real vector
 	    cucmplx* a_c, //in complex vector
 	    int size)
@@ -174,7 +174,7 @@ cmplxtoreal(cureal* a_r,  //out real vector
 
 
 /*========================================================================*/
-__global__ void 
+__global__ void
 realtocmplx(cureal* a_r,  //in real vector
 	    cucmplx* a_c, //out complex vector
 	    int size)
@@ -186,8 +186,8 @@ realtocmplx(cureal* a_r,  //in real vector
 
 
 /*========================================================================*/
-__global__ void 
-complex_prod(cucmplx* cvn,    //inout cvn(cucmplx) 
+__global__ void
+complex_prod(cucmplx* cvn,    //inout cvn(cucmplx)
 	     cucmplx* ZT_p,   //in  ZT_p(cucmplx)
 	     int size)
 { /* Complex multiplication of two vector of size size*/
@@ -199,8 +199,8 @@ complex_prod(cucmplx* cvn,    //inout cvn(cucmplx)
 
 
 /*========================================================================*/
-__global__ void 
-complex_prod_tot(cucmplx* cvn,  //inout cvn(cucmplx) 
+__global__ void
+complex_prod_tot(cucmplx* cvn,  //inout cvn(cucmplx)
 		 cucmplx* ZT_p, //in  ZT_p(cucmplx)
 		 int height,    //height<height_max number of pts to calculate
 		 int size)
@@ -214,7 +214,7 @@ complex_prod_tot(cucmplx* cvn,  //inout cvn(cucmplx)
 }
 
 /*========================================================================*/
-__global__ void 
+__global__ void
 scalarProdGPU(cureal* d_C,   //out d_C(vectorN)
 	      cureal* d_A,   //in d_A(vectorN,elementN)
 	      cureal* d_B,   //in d_B(vectorN,elementN)
@@ -240,10 +240,10 @@ scalarProdGPU(cureal* d_C,   //out d_C(vectorN)
   ////////////////////////////////////////////////////////////////////////
   for(int iAccum = threadIdx.x; iAccum < ACCUM_N; iAccum += blockDim.x){
    cureal sum = cuzero;
-	
+
    for(int pos = vectorBase + iAccum; pos < vectorEnd; pos += ACCUM_N)
     sum += d_A[pos] * d_B[pos];
-	
+
    accumResult[iAccum] = sum;
   }
   ////////////////////////////////////////////////////////////////////////
@@ -261,7 +261,7 @@ scalarProdGPU(cureal* d_C,   //out d_C(vectorN)
 
 
 /*========================================================================*/
-__global__ void 
+__global__ void
 un_x_pot(cucmplx* cvn,  //out vn(height_max,dc_pthsize)
 	 cureal* un,    //in un(height_max,dc_pthsize)
 	 cureal* pot,   //in pot(size)
@@ -280,7 +280,7 @@ un_x_pot(cucmplx* cvn,  //out vn(height_max,dc_pthsize)
 
 /*========================================================================*/
 
-__global__ void 
+__global__ void
 un_x_pot_cut(cucmplx* cvn,  //out vn(height_max,dc_pthsize)
 	     cureal* un,    //in un(height_max,dc_pthsize)
 	     cureal* pot,   //in pot(size)
@@ -300,33 +300,12 @@ un_x_pot_cut(cucmplx* cvn,  //out vn(height_max,dc_pthsize)
 
 
 /*========================================================================*/
-__global__ void 
+__global__ void
 vn_x_pot_dv(cucmplx* cvn,  //in cvn(height_max,dc_pthsize)
-	    cureal* vn,    //out vn(height_max,dc_pthsize)		     
-	    cureal* pot,   //in pot(size)			     
-	    cureal scale,  //scale factor				     
-	    int height)    //height<height_max number of pts to calculate    
-{ /* Kernel to multiply vn(size*height) times pot(size) and scale element- by-element */
- int x = IMUL(blockDim.x,blockIdx.x) + threadIdx.x;
- int y = IMUL(blockDim.y,blockIdx.y);
- volatile cucmplx locc;
- if(x<dc_nfftrec && y<height){
-  int ind  = IMUL(y, dc_pthsize)+x;     
-  int indc = IMUL(y, dc_cvpthsz)+x;
-  locc.x = cvn[indc].x;
-  locc.y = cvn[indc].y; //needed for performance
-  vn[ind] = locc.x*pot[x]*scale;
- }
-}
-
-
-/*========================================================================*/
-__global__ void 
-vn_x_pot_dv_cut(cucmplx* cvn,  //in vn(height_max,dc_pthsize)
-		cureal* vn,    //out vn(height_max,dc_pthsize)		     
-		cureal* pot,   //in pot(size)			     
-		cureal scale,  //scale factor				     
-		int height)    //height<height_max number of pts to calculate    
+	    cureal* vn,    //out vn(height_max,dc_pthsize)
+	    cureal* pot,   //in pot(size)
+	    cureal scale,  //scale factor
+	    int height)    //height<height_max number of pts to calculate
 { /* Kernel to multiply vn(size*height) times pot(size) and scale element- by-element */
  int x = IMUL(blockDim.x,blockIdx.x) + threadIdx.x;
  int y = IMUL(blockDim.y,blockIdx.y);
@@ -336,38 +315,59 @@ vn_x_pot_dv_cut(cucmplx* cvn,  //in vn(height_max,dc_pthsize)
   int indc = IMUL(y, dc_cvpthsz)+x;
   locc.x = cvn[indc].x;
   locc.y = cvn[indc].y; //needed for performance
-  vn[ind] = locc.x*pot[ind]*scale; 
+  vn[ind] = locc.x*pot[x]*scale;
  }
 }
 
 
 /*========================================================================*/
-__global__ void 
-un_invsqrt_scale(cureal* un,     //inout un(height_max,dc_pthsize)		       
-		 cureal* scale,  //in scale(height_max)			     
-		 int height)	 //height<height_max number of pts to calculate    
+__global__ void
+vn_x_pot_dv_cut(cucmplx* cvn,  //in vn(height_max,dc_pthsize)
+		cureal* vn,    //out vn(height_max,dc_pthsize)
+		cureal* pot,   //in pot(size)
+		cureal scale,  //scale factor
+		int height)    //height<height_max number of pts to calculate
+{ /* Kernel to multiply vn(size*height) times pot(size) and scale element- by-element */
+ int x = IMUL(blockDim.x,blockIdx.x) + threadIdx.x;
+ int y = IMUL(blockDim.y,blockIdx.y);
+ volatile cucmplx locc;
+ if(x<dc_nfftrec && y<height){
+  int ind  = IMUL(y, dc_pthsize)+x;
+  int indc = IMUL(y, dc_cvpthsz)+x;
+  locc.x = cvn[indc].x;
+  locc.y = cvn[indc].y; //needed for performance
+  vn[ind] = locc.x*pot[ind]*scale;
+ }
+}
+
+
+/*========================================================================*/
+__global__ void
+un_invsqrt_scale(cureal* un,     //inout un(height_max,dc_pthsize)
+		 cureal* scale,  //in scale(height_max)
+		 int height)	 //height<height_max number of pts to calculate
 { /* Kernel to multiply vn(size*height) times scale(height)  */
  int x = IMUL(blockDim.x,blockIdx.x) + threadIdx.x;
  int y = IMUL(blockDim.y,blockIdx.y);
  __shared__ cureal val;
  if(threadIdx.x==0) {
   val = rsqrt(scale[y]);
-  if(scale[y] == cuzero ) val = cuzero; 
+  if(scale[y] == cuzero ) val = cuzero;
  }
  __syncthreads();
- if(x<dc_nfftrec && y<height)  
+ if(x<dc_nfftrec && y<height)
   GET_TAB(un,x,y,dc_pthsize) *= val;
 }
 
 /*========================================================================*/
-__global__ void 
-oldtonew(cureal* un,     //inout un(height_max,dc_pthsize)=delta(i) 
-	 cureal* vn,     //in vn(height_max,dc_pthsize)=0  work vector		 
-	 cureal* unold,  //inout unold(height_max,dc_pthsize)=0 Old  vector 
-	 cureal* an,     //an(height_max)=0 recursion coeff an		 
-	 cureal* bn2,    //bn2(height_max)=0 recursion coeff bn2		 
-	 int height)     //height<height_max number of pts to calculate	 
- 
+__global__ void
+oldtonew(cureal* un,     //inout un(height_max,dc_pthsize)=delta(i)
+	 cureal* vn,     //in vn(height_max,dc_pthsize)=0  work vector
+	 cureal* unold,  //inout unold(height_max,dc_pthsize)=0 Old  vector
+	 cureal* an,     //an(height_max)=0 recursion coeff an
+	 cureal* bn2,    //bn2(height_max)=0 recursion coeff bn2
+	 int height)     //height<height_max number of pts to calculate
+
 {/* getting new un from vn,unold,an.bn */
  cureal switchu;
  __shared__ cureal anloc[1], bnloc[1];
@@ -375,7 +375,7 @@ oldtonew(cureal* un,     //inout un(height_max,dc_pthsize)=delta(i)
  int y = IMUL(blockDim.y,blockIdx.y);
  if(threadIdx.x==0) {anloc[0] = an[y]; bnloc[0] = sqrt(bn2[y]);}
  __syncthreads();
- 
+
  if(x<dc_nfftrec && y<height) {
   int ind = IMUL(y, dc_pthsize)+x;
   switchu = *(un+ind);
@@ -384,16 +384,16 @@ oldtonew(cureal* un,     //inout un(height_max,dc_pthsize)=delta(i)
  }
 }
 
-/*========================================================================*/ 
-__host__ void 
+/*========================================================================*/
+__host__ void
 find_positions(const int3* pt0,  //first pt to calculate
                const int3* pt1,  //last pt to calculate
 	       int delta,        //inital linear point
 	       int final,        //final lineat point
 	       int* pos_cpu,     //points where compute recursion
-	       const int* ngfft, //grid 
+	       const int* ngfft, //grid
 	       int gratio)       //ratio between fine and coarse grid
-{//intial point 
+{//intial point
  int nn = 0;
  for(int kk=pt0->z;kk<1+pt1->z;kk+=gratio){
   int boz = kk*ngfft[1];
@@ -414,7 +414,7 @@ find_positions(const int3* pt0,  //first pt to calculate
 }
 
 /*========================================================================*/
-__host__ void 
+__host__ void
 copytoconstmem(int nfftrec,int nptrec,int pth_size,int cvpthsz)
 {/*Host charge in constant memory some constant used in all kernels*/
  cudaMemcpyToSymbol( dc_nfftrec, &nfftrec, sizeof(int),0,cudaMemcpyHostToDevice);

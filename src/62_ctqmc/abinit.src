@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2026 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -20,21 +20,28 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "m_BathOperator.F90",
  "m_BathOperatoroffdiag.F90",
+ "m_BathOperatoroffdiagComplex.F90",
  "m_data4entropyDMFT.F90",
  "m_Ctqmc.F90",
  "m_Ctqmcoffdiag.F90",
+ "m_CtqmcoffdiagComplex.F90",
  "m_CtqmcInterface.F90",
+ "m_CtqmcoffdiagInterfaceComplex.F90",
  "m_CtqmcoffdiagInterface.F90",
  "m_FFTHyb.F90",
  "m_GreenHyb.F90",
  "m_GreenHyboffdiag.F90",
+ "m_GreenHyboffdiagComplex.F90",
  "m_ImpurityOperator.F90",
  "m_ListCdagC.F90",
  "m_MapHyb.F90",
+ "m_MapHybComplex.F90",
  "m_MatrixHyb.F90",
+ "m_MatrixHybComplex.F90",
  "m_OurRng.F90",
  "m_Stat.F90",
  "m_Vector.F90",
+ "m_VectorComplex.F90",
  "m_VectorInt.F90",
  "m_global.F90"
  ]

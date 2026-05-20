@@ -1,23 +1,20 @@
-# coding: utf-8
-"""
-"""
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import annotations
 
-import os
-import sys
-import io
-import re
-import time
-import shutil
-import pickle
 import difflib
-
+import functools
+import os
+import pickle
+import sys
+import time
 from collections import OrderedDict, defaultdict
+from collections.abc import Iterator
+from pprint import pformat, pprint
 from textwrap import TextWrapper
-from pprint import pprint, pformat
-from .parser import FortranKissParser, fort2html
-from .tools import lazy_property, NotebookWriter
+from typing import Any
+
+from .parser import FortranKissParser
 from .termcolor import cprint
+from .tools import NotebookWriter, lazy_property
 
 try:
     from ConfigParser import ConfigParser
@@ -83,7 +80,7 @@ EXTERNAL_MODS_DEPS = {
 EXTERNAL_MODS = EXTERNAL_MODS_DEPS.keys()
 
 
-def load_mod(filepath):
+def load_mod(filepath: str) -> Any:
     """To maintain compatibility with py <= 3.12"""
     try:
         import imp
@@ -93,21 +90,46 @@ def load_mod(filepath):
         return SourceFileLoader(filepath, filepath).load_module()
 
 
+def remove_trailing_whitespace(filepath: str) -> None:
+    from pathlib import Path
+    path = Path(filepath)
+    lines = path.read_text().splitlines()
+
+    cleaned = [line.rstrip(" \t") for line in lines]
+
+    path.write_text("\n".join(cleaned))
+
+
 class FortranFile:
     """
-    Base class for files containing Fortran source code.
-    A FortranFile can have modules, programs, subroutines and functions.
+    Representation of a single Fortran source file in the ABINIT project.
 
-    .. attributes:
+    This class provides high-level interfaces to procedures, datatypes,
+    and dependencies extracted from a source file.
 
-        modules:
-        programs:
-        subroutines
-        functions
+    Attributes:
+        path: Absolute path to the source file.
+        basename: Basename of the file.
+        dirname: Directory containing the file.
+        programs: List of `Program` objects found in the file.
+        modules: List of `Module` objects found in the file.
+        subroutines: List of `Subroutine` objects found in the file.
+        functions: List of `Function` objects found in the file.
     """
 
     @classmethod
-    def from_path(cls, path, macros=None, verbose=0):
+    def from_path(cls, path: str, macros: str | dict[str, str] | None = None, verbose: int = 0) -> FortranFile:
+        """
+        Create a FortranFile instance by parsing a source file.
+
+        Args:
+            path: Path to the .f90 or .F90 file.
+            macros: Optional preprocessor macros. If "abinit", uses default ABINIT macros.
+            verbose: Verbosity level for the parser.
+
+        Returns:
+            FortranFile: The populated instance.
+        """
         if macros == "abinit": macros = AbinitProject.MACROS
         p = FortranKissParser(macros=macros, verbose=verbose).parse_file(path)
 
@@ -120,7 +142,7 @@ class FortranFile:
 
         return new
 
-    def __init__(self, path):
+    def __init__(self, path: str):
         # A file can contain multiples modules but not procedures outside modules
         # A file with program cannot contain other procedures/modules outside program
         # module/program must be followed by end [module|program] to facilitate parsing.
@@ -142,19 +164,19 @@ class FortranFile:
         self.all_usedby_mods = []
         #self.num_f90lines, self.num_doclines = 0, 0
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         """Use path to compare for equality and compute hash value."""
         if other is None: return False
         if not isinstance(other, self.__class__): return False
         return self.path == other.path
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.path)
 
-    def stree(self):
+    def stree(self) -> str:
         """
         Return string with textual representation of the tree.
         """
@@ -171,7 +193,7 @@ class FortranFile:
     def __str__(self):
         return self.to_string()
 
-    def to_string(self, verbose=0, with_stats=True, width=90):
+    def to_string(self, verbose: int = 0, with_stats: bool = True, width: int = 90) -> str:
         """
         String representation with verbosity level `verbose`.
         Text is wrapped at `width` columns.
@@ -219,7 +241,7 @@ class FortranFile:
     #    return sorted(set(all_mods))
 
     @lazy_property
-    def all_uses(self):
+    def all_uses(self) -> list[str]:
         """
         Full list of modules (string) used by the Fortran file
         Includes modules used by the procedures declared in the file.
@@ -231,8 +253,10 @@ class FortranFile:
         return sorted(set(all_uses))
 
     @lazy_property
-    def dirlevel(self):
-        """Integer given the directory level in the Abinit hierarchy."""
+    def dirlevel(self) -> int:
+        """
+        Integer representing the directory level in the ABINIT hierarchy (e.g., 72 for '72_response').
+        """
         # 72_response --> 72
         dname = os.path.dirname(self.path)
         try:
@@ -246,17 +270,17 @@ class FortranFile:
             raise
 
     @lazy_property
-    def min_dirlevel(self):
+    def min_dirlevel(self) -> int:
         """Minimum directory level used by this file."""
         return max(mod.dirlevel for mod in self.all_used_mods) if self.all_used_mods else 999
 
     @lazy_property
-    def max_dirlevel(self):
+    def max_dirlevel(self) -> int:
         """Maximum directory level used by this file."""
         return min(mod.dirlevel for mod in self.all_usedby_mods) if self.all_usedby_mods else 0
 
     @lazy_property
-    def all_public_procedures(self):
+    def all_public_procedures(self) -> dict[str, Any]:
         """Dictionary name --> public_procedure in the file."""
         pubs = OrderedDict()
         for a in ["modules", "programs", "subroutines", "functions"]:
@@ -266,7 +290,7 @@ class FortranFile:
         return pubs
 
     @lazy_property
-    def all_datatypes(self):
+    def all_datatypes(self) -> dict[str, Any]:
         """Dictionary name --> datatype in the file."""
         dtypes = OrderedDict()
         for mod in self.modules:
@@ -276,7 +300,7 @@ class FortranFile:
 
         return dtypes
 
-    def find_public_entity(self, name, all_names=None):
+    def find_public_entity(self, name: str, all_names: list[str] | None = None) -> Any | None:
         """
         Find and return the public procedure or datatype with `name`.
         Return None if not found.
@@ -297,18 +321,18 @@ class FortranFile:
 
         return None
 
-    def find_datatype(self, name, all_names=None):
+    def find_datatype(self, name: str, all_names: list[str] | None = None) -> Any | None:
         """
         Find and return the public datatype with `name`. Return None if not found.
         """
-        for p in getattr(self, "modules"):
+        for p in self.modules:
             for e in p.types:
                 if e.name == name: return e
                 if all_names is not None: all_names.append(e.name)
 
         return None
 
-    def get_stats(self, as_dict=False):
+    def get_stats(self, as_dict: bool = False) -> Any:
         """
         Return pandas dataframe with FortFile stats or dictionary as_dict.
         """
@@ -331,7 +355,7 @@ class FortranFile:
         import pandas as pd
         return pd.DataFrame([d], index=[self.basename], columns=d.keys() if d else None)
 
-    def check_abirules(self, verbose=0):
+    def check_abirules(self, verbose: int = 0) -> int:
         if verbose: print("Checking abirules for", self.name)
         retcode = 0
 
@@ -346,7 +370,7 @@ class FortranFile:
 
         return retcode
 
-    def get_graphviz(self, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
+    def get_graphviz(self, engine: str = "automatic", graph_attr: dict[str, str] | None = None, node_attr: dict[str, str] | None = None, edge_attr: dict[str, str] | None = None) -> Any:
         """
         Generate dependency graph for this Fortran file in the DOT language
         (only all_used_mods and children of this file).
@@ -368,7 +392,7 @@ class FortranFile:
 
         # Set graph attributes.
         fg.attr(label=self.name, rankdir="LR", pagedir="BL") # constraint="false", pack="true", packMode="clust")
-        fg.node_attr.update(color='lightblue2', style='filled')
+        fg.node_attr.update(color="lightblue2", style="filled")
 
         # Build clusters representing directories.
         all_nodes = sorted([self] + self.all_used_mods + self.all_usedby_mods, key=lambda o: o.dirname)
@@ -393,7 +417,7 @@ class FortranFile:
         return fg
 
 
-def enclose(lines, magic_line, filepath):
+def enclose(lines: list[str], magic_line: str, filepath: str) -> tuple[int, int]:
     """
     Find magic_line in list of lines read from filepath.
     Return: (start, stop)
@@ -414,7 +438,7 @@ def enclose(lines, magic_line, filepath):
     raise ValueError("Cannot find closing `)` after magic_line=%s in filepath=%s" % (magic_line, filepath))
 
 
-def parse_extra_dist(filepath, varname):
+def parse_extra_dist(filepath: str, varname: str) -> list[str]:
     """
     Parses a file containing EXTRA_DIST lines and extracts file names.
 
@@ -425,7 +449,7 @@ def parse_extra_dist(filepath, varname):
         list: A list of extracted file names.
     """
     filenames = []
-    with open(filepath, 'rt') as file:
+    with open(filepath) as file:
         multiline = False
         for line in file:
             line = line.strip()
@@ -445,7 +469,7 @@ def parse_extra_dist(filepath, varname):
     return filenames
 
 
-def parse_amf(filepath):
+def parse_amf(filepath: str) -> list[str]:
     """
     Parse the amf file. Return list of files.
     """
@@ -471,21 +495,23 @@ def parse_amf(filepath):
 
 class AbinitProject(NotebookWriter):
     """
-    This object defines the main entry point for client code.
-    It contains a dictionary (fort_files) mapping the basename of the Fortran files to FortranFile instances.
-    Provides methods to traverse the DAG, print information about the source code
-    and generate the configuration files required by the build system.
+    Main entry point for analyzing the ABINIT source code tree.
+
+    This class manages a collection of `FortranFile` objects and provides
+    methods to traverse the dependency graph (DAG), analyze source stats,
+    and generate build system configurations.
+
+    Attributes:
+        top: Root directory of the ABINIT project.
+        fort_files: Ordered dictionary mapping file basenames to `FortranFile` instances.
+        verbose: Verbosity level for analysis.
     """
 
-    # m_optim_dumper and m_build_info are generated by makemake so its source is not available in the src tree
-    # if one uses build directories
-    # Note from YP (20190514): The .F90.in are however available and the
-    # rest of the build system knows about them through the abinit.src files
-    # and the ABI_SRC_BLT variable declared there.
+    # Files generated by the build system during post-processing.
+    # Their .in templates are used for analysis when they are missing.
     BUILDSYS_POSTPROCESS_FILES = {"m_build_info.F90", "m_optim_dumper.F90"}
 
-    # Macros used to import modules in abinit libraries.
-    # Must be consistent with CPP version. See incs/abi_common.h
+    # Default preprocessor macros used across ABINIT libraries.
     MACROS = {
         # Abinit MACROS.
         "USE_MPI": "use mpi_abinit_macro ",
@@ -502,7 +528,7 @@ class AbinitProject(NotebookWriter):
     }
 
     @classmethod
-    def get_default_pickle_file(cls):
+    def get_default_pickle_file(cls) -> str:
         """
         Return string with the default name of the pickle file used to save the object to disk.
         The string contains the python major version to avoid possible incompatibilites
@@ -511,15 +537,21 @@ class AbinitProject(NotebookWriter):
         return "_project_py%s.pickle" % sys.version_info[0]
 
     @classmethod
-    def pickle_load(cls, filepath=None):
+    def pickle_load(cls, filepath: str | None = None) -> AbinitProject:
         """
-        Reconstruct object from pickle file. Default is used if filepath is None.
+        Reconstruct an AbinitProject instance from a pickle file.
+
+        Args:
+            filepath: Path to the pickle file. If None, the default filename is used.
+
+        Returns:
+            AbinitProject: The deserialized instance.
         """
         if filepath is None: filepath = cls.get_default_pickle_file()
         with open(filepath, "rb") as fh:
             return pickle.load(fh)
 
-    def __init__(self, top, processes=1, verbose=0):
+    def __init__(self, top: str, processes: int = 1, verbose: int = 0):
         # Find directories with abinit.src files inside srcdir
         # and get list of files treated by the build system.
         self.top = os.path.abspath(top)
@@ -573,12 +605,15 @@ class AbinitProject(NotebookWriter):
         print("Parsing completed in %.2f [s]" % (time.time() - start))
         self.correlate()
 
-    def _pool_f(self, item):
+    def _pool_f(self, item: tuple[str, str]) -> tuple[str, FortranFile]:
         #sys.stdout, sys.stderr = open(str(os.getpid()) + ".out", "w"), open(str(os.getpid()) + ".err", "w")
         basename, path = item
         return (basename, FortranFile.from_path(path, macros=self.MACROS, verbose=self.verbose))
 
-    def correlate(self):
+    def correlate(self) -> None:
+        """
+        Establish links between files and modules to build the global dependency graph.
+        """
         print("Building dependency graph ...")
         start = time.time()
 
@@ -591,8 +626,8 @@ class AbinitProject(NotebookWriter):
                 except KeyError:
                     #print(self.all_modules.keys())
                     raise RuntimeError((
-                        "Cannot find Fortran module `%s`\n used by `%s`\nin Abinit project.\n" +
-                        "It may be a syntax error or a stale import if you've removed the module.\n" +
+                        "Cannot find Fortran module `%s`\n used by `%s`\nin Abinit project.\n"
+                        "It may be a syntax error or a stale import if you've removed the module.\n"
                         "If it's an external module (e.g. mpi), add it to the EXTERNAL_MODS list in ~abinit/fkiss/project.py.\n"
                         ) % (use_name, fort_file.path))
                 fort_file.all_used_mods.append(used_mod)
@@ -646,7 +681,7 @@ class AbinitProject(NotebookWriter):
     def __str__(self):
          return self.to_string()
 
-    def to_string(self, verbose=0, width=90):
+    def to_string(self, verbose: int = 0, width: int = 90) -> str:
         """
         String representation with verbosity level `verbose`.
         Text is wrapped at `width` columns.
@@ -659,7 +694,7 @@ class AbinitProject(NotebookWriter):
         return "\n".join(lines)
 
     @lazy_property
-    def all_modules(self):
+    def all_modules(self) -> dict[str, Any]:
         """
         Mapping modules name --> Module object with all modules in project.
         """
@@ -670,7 +705,7 @@ class AbinitProject(NotebookWriter):
                 omods[m.name] = m
         return omods
 
-    def pickle_dump(self, filepath=None):
+    def pickle_dump(self, filepath: str | None = None) -> str:
         """
         Save the object in pickle format. Default name is used if filepath is None.
         """
@@ -679,7 +714,7 @@ class AbinitProject(NotebookWriter):
             return pickle.dump(self, fh)
 
     @lazy_property
-    def all_src_dirs(self):
+    def all_src_dirs(self) -> list[str]:
         """List with all top level directories containing subdirectories with F90 file."""
         return [
             os.path.join(self.top, "shared", "common", "src"),
@@ -689,7 +724,7 @@ class AbinitProject(NotebookWriter):
             os.path.join(self.top, "src"),
         ]
 
-    def get_dirpaths(self):
+    def get_dirpaths(self) -> list[str]:
         """
         Return list of directory names containing source files.
         """
@@ -711,7 +746,7 @@ class AbinitProject(NotebookWriter):
         # 98_main does not have abinit.src so we have to add it here.
         return sorted(l + [os.path.join(self.top, "src", "98_main")])
 
-    def needs_reload(self):
+    def needs_reload(self) -> bool:
         """
         Returns True if source tree must be parsed again because:
 
@@ -737,7 +772,7 @@ class AbinitProject(NotebookWriter):
     #    dir2files = self.groupby_dirname()
     #    return dir2files[dirname]
 
-    def groupby_dirname(self):
+    def groupby_dirname(self) -> dict[str, list[FortranFile]]:
         """
         Return dictionary {dirname --> [List of FortranFile in dirname]}
 
@@ -752,16 +787,19 @@ class AbinitProject(NotebookWriter):
 
         return OrderedDict(dir2files.items())
 
-    def iter_dirname_fortfile(self):
+    def iter_dirname_fortfile(self) -> Iterator[tuple[str, FortranFile]]:
         """Iterate over (dirname, fort_file)"""
         dir2files = self.groupby_dirname()
         for dirname, fort_files in dir2files.items():
             for fort_file in fort_files:
                 yield dirname, fort_file
 
-    def get_all_public_procedures(self):
+    def get_all_public_procedures(self) -> dict[str, Any]:
         """
-        Return Dictionary mapping name --> Procedure
+        Return a dictionary mapping public procedure names to their `Procedure` objects.
+
+        Returns:
+            dict: Mapping of name (str) to `Procedure`.
         """
         # FIXME: Check that there's no name collision
         d = {}
@@ -772,9 +810,12 @@ class AbinitProject(NotebookWriter):
 
         return {k: d[k] for k in sorted(d.keys())}
 
-    def get_all_datatypes_and_fortfile(self):
+    def get_all_datatypes_and_fortfile(self) -> dict[str, tuple[Any, FortranFile]]:
         """
-        Dictionary name -> datatype with all datatypes available in the project.
+        Return a dictionary mapping datatype names to (Datatype, FortranFile) tuples.
+
+        Returns:
+            dict: Mapping of name (str) to (Datatype, FortranFile).
         """
         dtypes = {}
         for f in self.fort_files.values():
@@ -787,7 +828,7 @@ class AbinitProject(NotebookWriter):
 
         return {k: dtypes[k] for k in sorted(dtypes.keys())}
 
-    def get_all_interfaces(self):
+    def get_all_interfaces(self) -> dict[str, Any]:
         """
         Dictionary mapping name --> Interface
         """
@@ -798,7 +839,7 @@ class AbinitProject(NotebookWriter):
 
         return {k: d[k] for k in sorted(d.keys())}
 
-    def print_interfaces(self, what=None, verbose=0):
+    def print_interfaces(self, what: str | None = None, verbose: int = 0) -> None:
         """
         Print ALL Fortran interfaces defined in project if what is None else interface with name `what`.
         """
@@ -812,18 +853,23 @@ class AbinitProject(NotebookWriter):
                 cprint("Cannot find interface `%s` in project" % what, color="red")
                 matches = difflib.get_close_matches(what, name2interface.keys())
                 if matches:
-                    cprint("Perhaps you meant: {}".format(matches), color="red")
+                    cprint(f"Perhaps you meant: {matches}", color="red")
         else:
             # Print all interfaces.
             for interface in name2interface.values():
                 cprint(repr(interface), color="yellow")
                 print(interface.to_string(verbose=verbose))
-                print("")
+                print()
 
-    def find_public_entity(self, name):
+    def find_public_entity(self, name: str) -> Any | None:
         """
-        Find and return Procedure object with name `name`.
-        Assume name is unique in the project.
+        Find and return the public procedure or datatype with the given name.
+
+        Args:
+            name: The name of the entity to find.
+
+        Returns:
+            Node or None: The entity object, or None if not found.
         """
         all_names = []
         for f in self.fort_files.values():
@@ -834,14 +880,19 @@ class AbinitProject(NotebookWriter):
         cprint("Cannot find public entity `%s`" % str(name), color="red")
         matches = difflib.get_close_matches(name, all_names)
         if matches:
-            cprint("Perhaps you meant: {}".format(matches), color="red")
+            cprint(f"Perhaps you meant: {matches}", color="red")
 
         return None
 
-    def find_datatype(self, name):
+    def find_datatype(self, name: str) -> Any | None:
         """
-        Find and return Datatype object with name `name`.
-        Assume name is unique in the project.
+        Find and return the `Datatype` object with the given name.
+
+        Args:
+            name: The name of the datatype to find.
+
+        Returns:
+            Datatype or None: The datatype object, or None if not found.
         """
         all_names = []
         for f in self.fort_files.values():
@@ -850,11 +901,11 @@ class AbinitProject(NotebookWriter):
 
         # Print closest matches
         matches = difflib.get_close_matches(name, all_names)
-        if matches: cprint("Perhaps you meant: {}".format(matches), color="red")
+        if matches: cprint(f"Perhaps you meant: {matches}", color="red")
 
         return None
 
-    def find_module_from_entity(self, name):
+    def find_module_from_entity(self, name: str) -> Any:
         """
         Return the Module object that contains the public entity `name`.
         """
@@ -863,7 +914,7 @@ class AbinitProject(NotebookWriter):
         assert obj.ancestor is not None and obj.ancestor.is_module
         return obj.ancestor
 
-    def print_dir(self, dirname, verbose=0):
+    def print_dir(self, dirname: str, verbose: int = 0) -> None:
         if dirname.endswith(os.sep): dirname = dirname[:-1]
 
         print("Printing info on directory:", dirname)
@@ -911,7 +962,7 @@ class AbinitProject(NotebookWriter):
     #                cycles[fort_file].append(child)
     #    return cycles
 
-    def find_allmods(self, head_path, include_files_in_dirs=True):
+    def find_allmods(self, head_path: str, include_files_in_dirs: bool = True) -> set[Any]:
         """
         Traverse the *entire* graph starting from head_path.
         Return full list of `Module` objects required by head_path.
@@ -926,7 +977,7 @@ class AbinitProject(NotebookWriter):
                 set of dependencies of the directory.
         """
         dir2files = self.groupby_dirname()
-        allmods = self._find_allmods(head_path, dir2files=dir2files)
+        allmods = set(self._find_allmods(head_path))
         if not include_files_in_dirs: return allmods
         #print("initial list of modules", "\n".join(mod.basename for mod in allmods), "end initial list"
 
@@ -944,7 +995,7 @@ class AbinitProject(NotebookWriter):
             #print("In dirpath:", dirpath)
             for fort_file in dir2files[dirpath]:
                 #print("Adding", fort_file.basename, "in dir", fort_file.dirpath)
-                other_mods = self._find_allmods(fort_file.basename, dir2files=dir2files)
+                other_mods = self._find_allmods(fort_file.basename)
                 allmods.update(other_mods)
                 #other_dirpaths = set(os.path.join(self.srcdir, os.path.basename(d))
                 #        for d in set(mod.dirname for mod in other_mods))
@@ -953,9 +1004,8 @@ class AbinitProject(NotebookWriter):
 
         return allmods
 
-    def _find_allmods(self, head_path, dir2files=None, include_files_in_dirs=True):
-        dir2files = dir2files if dir2files is not None else self.groupby_dirname()
-
+    @functools.cache
+    def _find_allmods(self, head_path: str) -> frozenset[Any]:
         # This trick is needed for F90.in files that will be post-processed by the build system
         if head_path.endswith(".F90.in"): head_path = head_path[:-3]
         head = self.fort_files[head_path]
@@ -970,9 +1020,9 @@ class AbinitProject(NotebookWriter):
                 allmods.add(mod)
                 queue.add(self.fort_files[mod.basename])
 
-        return allmods
+        return frozenset(allmods)
 
-    def get_program_names_dirnames(self, verbose):
+    def get_program_names_dirnames(self, verbose: int) -> tuple[list[str], list[list[str]]]:
         """
         Return list of program names and list of directories required by each program name.
         """
@@ -999,7 +1049,7 @@ class AbinitProject(NotebookWriter):
 
         return prog_names, prog_dirnames
 
-    def write_binaries_conf(self, dryrun=False, verbose=0):
+    def write_binaries_conf(self, dryrun: bool = False, verbose: int = 0) -> int:
         """
         Write new binaries.conf file
 
@@ -1023,13 +1073,12 @@ class AbinitProject(NotebookWriter):
         # Read header with comments to be added to the new conf file.
         # NB: use [DEFAULT] as sentinel.
         header = []
-        with io.open(binconf_path, "rt", encoding="utf8") as fh:
+        with open(binconf_path, encoding="utf8") as fh:
             for line in fh:
                 line = line.strip()
                 if line == "[DEFAULT]":
                     break
-                else:
-                    header.append(line)
+                header.append(line)
             else:
                 raise ValueError("Cannot find `[DEFAULT]` string in %s" % binconf_path)
         header.append("")
@@ -1057,13 +1106,17 @@ class AbinitProject(NotebookWriter):
         if dryrun:
             print(fobj.getvalue())
         else:
-            with open(binconf_path, "wt") as fh:
+            with open(binconf_path, "w") as fh:
                 fh.write(fobj.getvalue())
         fobj.close()
 
+        # Trailing whitespace can appear in config/specs/binaries.conf,
+        # causing unnecessary diffs or linting issues. Clean it here.
+        remove_trailing_whitespace(binconf_path)
+
         return 0
 
-    def write_buildsys_files(self, dryrun=False, verbose=0):
+    def write_buildsys_files(self, dryrun: bool = False, verbose: int = 0) -> None:
         """
         Write files require by buildsys:
 
@@ -1120,7 +1173,7 @@ class AbinitProject(NotebookWriter):
                 print("# For dirpath:", dirpath)
                 print(s, end=2 * "\n")
             else:
-                with open(abinitdep_path, "wt") as fh:
+                with open(abinitdep_path, "w") as fh:
                     fh.write(s)
 
             # Find dependencies outside this directory (abinit.dir).
@@ -1135,7 +1188,7 @@ class AbinitProject(NotebookWriter):
             if dryrun:
                 print(s, end=2 * "\n")
             else:
-                with open(abinitdir_path, "wt") as fh:
+                with open(abinitdir_path, "w") as fh:
                     fh.write(s)
 
             # TODO
@@ -1194,7 +1247,7 @@ class AbinitProject(NotebookWriter):
 
             # Here we check that all binaries are listed in CmakeLists.txt
             path = os.path.join(self.top, "src", "98_main", "CMakeLists.txt")
-            with open(path, "rt") as fh:
+            with open(path) as fh:
                 lines = [l.lstrip().rstrip() for l in fh]
 
             prog_names, _ = self.get_program_names_dirnames(verbose)
@@ -1206,7 +1259,7 @@ class AbinitProject(NotebookWriter):
             if errors:
                 raise RuntimeError("\n".join(errors))
 
-    def update_corelibs(self, dryrun=False, verbose=0):
+    def update_corelibs(self, dryrun: bool = False, verbose: int = 0) -> None:
         """
         Update corelibs.conf file taking into account the external dependencies.
 
@@ -1232,7 +1285,7 @@ class AbinitProject(NotebookWriter):
 
             new_dependencies = []
             for use_name in fortfile.all_uses:
-                deps = EXTERNAL_MODS_DEPS.get(use_name, None)
+                deps = EXTERNAL_MODS_DEPS.get(use_name)
                 if deps is None: continue
                 if verbose:
                     print("use_name:", use_name, "deps", deps)
@@ -1256,7 +1309,7 @@ class AbinitProject(NotebookWriter):
         header = """\
 # -*- INI -*-
 #
-# Copyright (C) 2009-2025 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2009-2026 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -1292,18 +1345,18 @@ class AbinitProject(NotebookWriter):
 #
 """
         if not dryrun:
-            with io.open(corelibs_path, "wt", encoding="utf8") as fh:
+            with open(corelibs_path, "w", encoding="utf8") as fh:
                 fh.write(header)
                 config.write(fh)
 
-    def touch_alldeps(self, verbose=0):
+    def touch_alldeps(self, verbose: int = 0) -> int:
         """
         Touch all files that depend on the modules that have been changed.
         Return number of touched files.
         """
         def touch(fname, times=None):
             """Emulate Unix touch."""
-            with open(fname, 'a'):
+            with open(fname, "a"):
                 os.utime(fname, times)
 
         # TODO: possible problem if new files have been added.
@@ -1329,7 +1382,7 @@ class AbinitProject(NotebookWriter):
 
         return count
 
-    def validate(self, verbose=0):
+    def validate(self, verbose: int = 0) -> int:
         """
         Validate project. Return exit status.
         """
@@ -1368,7 +1421,7 @@ class AbinitProject(NotebookWriter):
 
         return retcode
 
-    def pedit(self, name, verbose=0):
+    def pedit(self, name: str, verbose: int = 0) -> int:
         """
         Edit all children of a public entity specified by name.
         """
@@ -1382,10 +1435,10 @@ class AbinitProject(NotebookWriter):
         from fkiss.tools import Editor
         return Editor().edit_files(paths, ask_for_exit=True)
 
-    def get_stats_file(self, filename, as_dict=False):
+    def get_stats_file(self, filename: str, as_dict: bool = False) -> Any:
         return self.fort_files[os.path.basename(filename)].get_stats(as_dict=as_dict)
 
-    def get_stats_dir(self, dirname):
+    def get_stats_dir(self, dirname: str) -> Any:
         """
         Return dataframe with statistics about directory.
         """
@@ -1400,7 +1453,7 @@ class AbinitProject(NotebookWriter):
         import pandas as pd
         return pd.DataFrame(rows, index=index, columns=list(rows[0].keys() if rows else None))
 
-    def get_stats(self):
+    def get_stats(self) -> Any:
         df_list = []
         for dirpath in self.dirpaths:
             dirname = os.path.basename(dirpath)
@@ -1415,7 +1468,7 @@ class AbinitProject(NotebookWriter):
         import pandas as pd
         return pd.concat(df_list)
 
-    def print_orphans(self, verbose=0):
+    def print_orphans(self, verbose: int = 0) -> None:
         """Print orphan procedures and modules."""
         # FIXME: this does not work as expected.
 
@@ -1443,7 +1496,7 @@ class AbinitProject(NotebookWriter):
                 for o in orphans:
                     print("\t", repr(o))
 
-    def get_parent_dirs_of_dirname(self, dirname):
+    def get_parent_dirs_of_dirname(self, dirname: str) -> dict[str, Any] | None:
         """
         {parent_dirname --> [{module_name_in_parent_dirname: [list_of_modules_in_dirname]}]
         """
@@ -1472,7 +1525,7 @@ class AbinitProject(NotebookWriter):
         # Order keys.
         #return {k: used_dirs[k] for k in sorted(used_dirs.keys())}
 
-    def get_dirs_used_by_dirname(self, dirname):
+    def get_dirs_used_by_dirname(self, dirname: str) -> dict[str, Any]:
         """
         {used_dirname --> [{module_name_in_used_dirname: [list_of_modules_in_dirname]}]
         """
@@ -1497,7 +1550,7 @@ class AbinitProject(NotebookWriter):
                 used_dirs[used_mod.dirname].append(used_mod.name)
 
         for k, v in used_dirs.items():
-            d = {k: [] for k in sorted(set(used_dirs[k]))}
+            d = {k: [] for k in sorted(set(v))}
             for fort_file in fort_files_indirname:
                 for use_name in fort_file.all_uses:
                     if use_name in EXTERNAL_MODS: continue
@@ -1509,7 +1562,7 @@ class AbinitProject(NotebookWriter):
         # Order keys.
         return {k: used_dirs[k] for k in sorted(used_dirs.keys())}
 
-    def get_graphviz_dir(self, dirname, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
+    def get_graphviz_dir(self, dirname: str, engine: str = "automatic", graph_attr: dict[str, str] | None = None, node_attr: dict[str, str] | None = None, edge_attr: dict[str, str] | None = None) -> Any:
         """
         Generate dependency graph for directory `dirname` in the DOT language
 
@@ -1534,7 +1587,7 @@ class AbinitProject(NotebookWriter):
         # Set graph attributes.
         fg.attr(label="Connections of dir: %s" % dirname,
                 rankdir="LR", pagedir="BL") # constraint="false", pack="true", packMode="clust")
-        fg.node_attr.update(color='lightblue2', style='filled')
+        fg.node_attr.update(color="lightblue2", style="filled")
 
         target = os.path.basename(dirname)
         fg.node(name=target)
@@ -1545,7 +1598,7 @@ class AbinitProject(NotebookWriter):
 
         return fg
 
-    def get_graphviz_pubname(self, name, engine="automatic", graph_attr=None, node_attr=None, edge_attr=None):
+    def get_graphviz_pubname(self, name: str, engine: str = "automatic", graph_attr: dict[str, str] | None = None, node_attr: dict[str, str] | None = None, edge_attr: dict[str, str] | None = None) -> Any:
         """
         Generate dependency graph for public procedure `name` in the DOT language
         (only parents and children modules of this file).
@@ -1578,7 +1631,7 @@ class AbinitProject(NotebookWriter):
         # Set graph attributes.
         fg.attr(label="Connections of %s: %s" % (obj.__class__.__name__, obj.name),
                 rankdir="LR", pagedir="BL") # constraint="false", pack="true", packMode="clust")
-        fg.node_attr.update(color='lightblue2', style='filled')
+        fg.node_attr.update(color="lightblue2", style="filled")
 
         target = obj.name
         fg.node(name=target)
@@ -1589,7 +1642,7 @@ class AbinitProject(NotebookWriter):
 
         return fg
 
-    def master(self):
+    def master(self) -> str:
         return """\
 
 Master Foo and the Hardware Designer
@@ -1618,7 +1671,7 @@ In that moment, the hardware designer achieved enlightenment.
 From http://www.catb.org/esr/writings/unix-koans/
 """
 
-    def write_notebook(self, nbpath=None):
+    def write_notebook(self, nbpath: str | None = None) -> str:
         """
         Write a jupyter notebook to ``nbpath``. If nbpath is None, a temporary file in the current
         working directory is created. Return path to the notebook.
@@ -1635,7 +1688,7 @@ proj = AbinitProject.pickle_load(filepath=None)
             nbv.new_code_cell('proj.get_graphviz_pubname("crystal_init")'),
             nbv.new_code_cell('proj.get_graphviz_pubname("fourdp")'),
             nbv.new_code_cell('proj.get_graphviz_pubname("m_geometry")'),
-            nbv.new_code_cell('proj.get_stats()'),
+            nbv.new_code_cell("proj.get_stats()"),
             nbv.new_code_cell('proj.get_stats_dir("src/41_geometry")'),
             nbv.new_code_cell("""
 # To visualize the panel dashboard inside the notebook, uncomment the below lines.
@@ -1648,15 +1701,15 @@ proj = AbinitProject.pickle_load(filepath=None)
 
         return self._write_nb_nbpath(nb, nbpath)
 
-    def yield_figs(self, **kwargs):  # pragma: no cover
+    def yield_figs(self, **kwargs: Any) -> Iterator[Any] | None:  # pragma: no cover
         # TODO: Activate this
         return None
 
-    def get_panel(self):
+    def get_panel(self) -> Any:
         """Return tabs with widgets to interact with the DDB file."""
         from fkiss.viewer import ProjectViewer
         return ProjectViewer(self).panel
 
-    def get_procedure_viewer(self):
+    def get_procedure_viewer(self) -> Any:
         """Return tabs with widgets to interact with the DDB file."""
         return ProcedureViewer(self).get_tabs()

@@ -7,7 +7,7 @@
 !! the irreducible representations associated to electronic eigenstates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -263,7 +263,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
  integer :: iel,icls,msym,iord !isym1,!iprod,dim_irrep,icls2, isym2,isym_tr,
  integer :: spgroup,chkprim !,ptgroupma
  real(dp) :: mkt
- !complex(dpc) :: phase_k
+ !complex(dp) :: phase_k
  character(len=5) :: ptgroup,ptgroup_name
  character(len=10) :: spgroup_str
  character(len=1000) :: msg
@@ -282,10 +282,9 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
  integer,allocatable :: new_idx(:),new_g0(:,:),tmp_symrec(:,:,:),conv_symrec(:,:,:) !,tr_conv_symrec(:,:,:)
  integer,allocatable :: dummy_symafm(:)
  real(dp) :: conv_gprimd(3,3),axes(3,3) !,tau2(3)
- !complex(dpc),allocatable :: her_test(:) !,mat_test(:,:)
- complex(dpc),allocatable :: phase_mkt(:)
+ !complex(dp),allocatable :: her_test(:) !,mat_test(:,:)
+ complex(dp),allocatable :: phase_mkt(:)
  type(point_group_t) :: Ptg
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -938,11 +937,9 @@ end subroutine esymm_print
 subroutine esymm_free_0D(esymm)
 
 !Arguments ------------------------------------
-!scalars
  type(esymm_t),intent(inout) :: esymm
 
 !Local variables ------------------------------
-!scalars
  integer :: ii
 ! *************************************************************************
 
@@ -985,7 +982,6 @@ end subroutine esymm_free_0D
 subroutine esymm_free_2D(esymm)
 
 !Arguments ------------------------------------
-!scalars
  type(esymm_t),intent(inout) :: esymm(:,:)
 
 !Local variables ------------------------------
@@ -1030,16 +1026,15 @@ subroutine esymm_finalize(esymm,prtvol)
  !real(dp),parameter :: TOL_TRACE=0.01_dp,TOL_ORTHO=0.01_dp,TOL_UNITARY=0.01_dp ! Large tolerance is needed to avoid problems.
  !real(dp),parameter :: TOL_TRACE=tol3,TOL_ORTHO=tol3,TOL_UNITARY=tol3 ! Large tolerance is needed to avoid problems.
  real(dp) :: uerr,max_err
- complex(dpc) :: ctest
+ complex(dp) :: ctest
  logical :: isnew
  character(len=500) :: msg
 !arrays
  integer,allocatable :: dims_seen(:)
- complex(dpc),allocatable :: traces_seen(:,:)
- complex(dpc),pointer :: trace(:)
- complex(dpc),pointer :: calc_mat(:,:),trace1(:),trace2(:)
- complex(dpc),allocatable :: cidentity(:,:)
-
+ complex(dp),allocatable :: traces_seen(:,:)
+ complex(dp),pointer :: trace(:)
+ complex(dp),pointer :: calc_mat(:,:),trace1(:),trace2(:)
+ complex(dp),allocatable :: cidentity(:,:)
 ! *************************************************************************
 
  !@esymm_t
@@ -1053,9 +1048,9 @@ subroutine esymm_finalize(esymm,prtvol)
  if (.not.esymm%has_chtabs) then
 
    write(msg,'(5a)')&
-&    "Reference character table not available. ",ch10,&
-&    "Symmetry analysis not available. Using heuristic method to classify the states.",ch10,&
-&    "It might not work, especially if accidental degeneracies are present."
+    "Reference character table not available. ",ch10,&
+    "Symmetry analysis not available. Using heuristic method to classify the states.",ch10,&
+    "It might not work, especially if accidental degeneracies are present."
    ABI_WARNING(msg)
    !
    ! The simplest thing we can do here is using the calculated matrices to get the
@@ -1275,12 +1270,11 @@ function which_irrep(esymm,trace,tolerr)
  real(dp),intent(in) :: tolerr
  type(esymm_t),intent(in) :: esymm
 !arrays
- complex(dpc),intent(in) :: trace(esymm%nsym_gk)
+ complex(dp),intent(in) :: trace(esymm%nsym_gk)
 
 !Local variables-------------------------------
 !scalars
  integer :: irp
-
 ! *********************************************************************
 
  which_irrep = 0
@@ -1316,18 +1310,17 @@ subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
  integer :: lbnd,ubnd
  type(esymm_t),target,intent(in) :: esymm
 !arrays
- complex(dpc),intent(in) :: in_me(2,lbnd:ubnd,lbnd:ubnd)
- complex(dpc),intent(out) :: out_me(lbnd:ubnd,lbnd:ubnd)
+ complex(dp),intent(in) :: in_me(2,lbnd:ubnd,lbnd:ubnd)
+ complex(dp),intent(out) :: out_me(lbnd:ubnd,lbnd:ubnd)
 
 !Local variables-------------------------------
 !scalars
  integer :: idg1,b1_start,b1_stop,irp1
  integer :: idg2,b2_start,b2_stop,irp2
  integer :: ii,jj,ib,jb,kk,kb,lb,ll
- complex(dpc) :: tr_ofd,ofd,dsd,tr_dsd
+ complex(dp) :: tr_ofd,ofd,dsd,tr_dsd
  type(irrep_t),pointer :: Irrep1,Irrep2
  type(irrep_t),pointer :: tr_Irrep1,tr_Irrep2
-
 ! *********************************************************************
 
  if (esymm_failed(esymm)) then
@@ -1440,9 +1433,8 @@ subroutine polish_irreps(Irreps)
  integer :: irp,sym,dim,ldvr,ii,ivec,jvec,info
  !character(len=500) :: msg
 !arrays
- complex(dpc),allocatable :: vl(:,:),vr(:,:),vrm1(:,:),overlap(:,:)
- complex(dpc),allocatable :: cmat(:,:),eigval(:)
-
+ complex(dp),allocatable :: vl(:,:),vr(:,:),vrm1(:,:),overlap(:,:)
+ complex(dp),allocatable :: cmat(:,:),eigval(:)
 ! *********************************************************************
 
  ! Eigen decomposition: A = V D V^{-1}.

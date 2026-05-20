@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h08 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h10 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v2_t43/t43.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v2_t43/t43.abi
 - output file    -> t43.abo
 - root for input  files -> t43i
 - root for output files -> t43o
@@ -212,8 +212,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.17699
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/42mo.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/42mo.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/42mo.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/42mo.pspnc
 -  Troullier-Martins psp for element  Mo        Thu Oct 27 17:40:28 EDT 1994
 - 42.00000   6.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -311,7 +311,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.950000000000  5.950000000000  5.950000000000 bohr
-              =  3.148604391110  3.148604391110  3.148604391110 angstroms
+              =  3.148604402737  3.148604402737  3.148604402737 angstroms
  prteigrs : about to open file t43o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.09581   Average Vxc (hartree)=  -0.50751
  Eigenvalues (hartree) for nkpt=   2  k points:
@@ -335,7 +335,7 @@ non_local_psp       : -1.83801013571739E+00
 internal            : -8.67871977219434E+00
 '-kT*entropy'       :  6.56001998917295E-03
 total_energy        : -8.67215975220517E+00
-total_energy_eV     : -2.35981467912497E+02
+total_energy_eV     : -2.35981488604106E+02
 band_energy         : -1.40610137918386E+00
 ...
 
@@ -346,9 +346,9 @@ band_energy         : -1.40610137918386E+00
   sigma(3 3)=  8.50119335E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.5011E+01 GPa]
-- sigma(1 1)=  2.50113701E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  2.50113701E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  2.50113701E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  2.50113744E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  2.50113744E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  2.50113744E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -516,7 +516,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  5.950000000000  5.950000000000  5.950000000000 bohr
-              =  3.148604391110  3.148604391110  3.148604391110 angstroms
+              =  3.148604402737  3.148604402737  3.148604402737 angstroms
  prteigrs : about to open file t43o_DS2_EIG
  Eigenvalues (hartree) for nkpt=  31  k points:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)

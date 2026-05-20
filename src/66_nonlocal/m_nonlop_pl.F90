@@ -5,10 +5,15 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, GZ, MT, FF, DRH)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, GZ, MT, FF, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!      m_nonlop
+!!
+!! CHILDREN
 !!
 !! SOURCE
 
@@ -35,11 +40,12 @@ module m_nonlop_pl
  use m_metstr
  use m_opernl
 
- use defs_abitypes, only : MPI_type
- use m_geometry,   only : strconv
- use m_kg,         only : ph1d3d
- use m_contract,   only : cont22cso, cont22so, cont24, cont33cso, cont33so, cont35, cont22, cont3, cont13, &
-                          metcon, metcon_so, metric_so
+ use defs_abitypes,   only : MPI_type
+ use m_geometry,      only : strconv
+ use m_kg,            only : ph1d3d
+ use m_contract,      only : cont22cso, cont22so, cont24, cont33cso, cont33so, cont35, cont22, cont3, cont13, &
+                             metcon, metcon_so, metric_so
+ use m_numeric_tools, only : geteuler
  implicit none
 
  private
@@ -130,6 +136,8 @@ contains
 !!         if 2, applies the non-local operator to a function in reciprocal space
 !!  ucvol=unit cell volume (bohr^3)
 !!  vectin(2,nspinor*npwin)=input cmplx wavefunction coefficients <G|Cnk>
+!!  use_gbt= if 1, no spin-orbit coupling (scaler-Relativistic only);
+!!           if 2, include only the \sigma_z component of the spin-orbit coupling.
 !!
 !! OUTPUT
 !!  ==== if (signs==1) ====
@@ -165,23 +173,33 @@ contains
 !!    but it matters here only when nspinor==2.
 !!  - Warning 2: the order of atoms is governed by atindx
 !!
+!! PARENTS
+!!      nonlop
+!!
+!! CHILDREN
+!!      cont13,cont22,cont22cso,cont22so,cont24,cont3,cont33cso,cont33so,cont35
+!!      contistr01,contistr03,contistr12,contstr21,contstr23,contstr25
+!!      contstr25a,contstr26,ddkten,metcon,metcon_so,metric_so,metstr,opernl2
+!!      opernl3,opernl4a,opernl4b,ph1d3d,scalewf_nonlop,strconv,strsocv,trace2
+!!      xmpi_sum
+!!
 !! SOURCE
 
 subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
-&                     ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,kgin,kgout,kpgin,kpgout,&
+&                     ffnlin,ffnlout,gmet,gprimd,idir,indlmn,ispin_gbt,istwf_k,kgin,kgout,kpgin,kpgout,&
 &                     kptin,kptout,lmnmax,matblk,mgfft,mpi_enreg,mpsang,mpssoang,&
 &                     natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,npwin,npwout,nspinor,nspinortot,&
 &                     ntypat,only_SO,phkxredin,phkxredout,ph1d,ph3din,ph3dout,signs,&
-&                     ucvol,vectin,vectout)
+&                     spinaxis,ucvol,use_gbt,vectin,vectout)
 
 !Arguments ------------------------------------
 !This type is defined in defs_mpi
 !The (inout) classification below is misleading; mpi_enreg is temporarily
 ! changed but reset to its initial condition before exiting.
 !scalars
- integer,intent(in) :: choice,dimekb1,dimekb2,dimffnlin,dimffnlout,idir,istwf_k
+ integer,intent(in) :: choice,dimekb1,dimekb2,dimffnlin,dimffnlout,idir,istwf_k,ispin_gbt
  integer,intent(in) :: lmnmax,matblk,mgfft,mpsang,mpssoang,natom,nkpgin,nkpgout
- integer,intent(in) :: npwin,npwout,nspinor,nspinortot,ntypat,only_SO,signs
+ integer,intent(in) :: npwin,npwout,nspinor,nspinortot,ntypat,only_SO,signs,use_gbt
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -193,7 +211,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  real(dp),intent(in) :: gprimd(3,3),kpgin(npwin,nkpgin),kpgout(npwout,nkpgout)
 !real(dp),intent(in) :: kptin(3),kptout(3),ph1d(2,3*(2*mgfft+1)*natom) !vz_d
  real(dp),intent(in) :: kptin(3),kptout(3) !vz_d
- real(dp),intent(in) :: ph1d(2,*) !vz_d
+ real(dp),intent(in) :: ph1d(2,*),spinaxis(3) !vz_d
  real(dp),intent(in) :: phkxredin(2,natom),phkxredout(2,natom)
  real(dp),intent(inout) :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
  real(dp),intent(inout) :: vectin(:,:)
@@ -226,17 +244,17 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  integer,save :: mlang5=((mlang+3)*(mlang+4)*(mlang+5))/6-10
  integer,save :: mlang6=((mlang+4)*(mlang+5)*(mlang+6))/6-20
  integer :: compact,ia,ia1,ia2,ia3,ia4,ia5,ierr,iest,ig,ii,ilang,ilang2,ilmn
- integer :: iln,iln0,indx,iproj,ipsang,ishift,isp,ispin,ispinor,ispinor_index,ispinp
+ integer :: iln,iln0,indx,iproj,ipsang,ishift,isp,ispin,ispinor,ispinor_index,ispinp,ispinor_ekb
  integer :: istr,istr1,istr2,iterm,itypat,jj,jjk,jjs,jjs1,jjs2,jjs3,jjs4,jjstr,jspin
  integer :: mincat,mproj,mu,mumax,n1,n2,n3,ndgxdt,ndgxdtfac,nincat,nlang
  integer :: nproj,nspinso,rank
  integer :: sign,spaceComm,  isft
- real(dp) :: e2nl,e2nldd,enlk
+ real(dp) :: alpha,beta,e2nl,e2nldd,enlk
  character(len=500) :: msg
 !arrays
  integer,allocatable :: indlmn_s(:,:,:),jproj(:)
  real(dp) :: amet(2,3,3,2,2),amet_lo(3,3),e2nl_tmp(6),eisnl(3),rank2(6)
- real(dp) :: rank2c(2,6),strsnl(6),strsnl_out(6),strsso(6,3),strssoc(6),trace(2)!,tsec(2)
+ real(dp) :: rank2c(2,6),soc_weight(3),strsnl(6),strsnl_out(6),strsso(6,3),strssoc(6),trace(2)!,tsec(2)
  real(dp),allocatable :: d2gxdis(:,:,:,:,:),d2gxdis_s(:,:,:,:)
  real(dp),allocatable :: d2gxds2(:,:,:,:,:),d2gxds2_s(:,:,:,:)
  real(dp),allocatable :: dgxdis(:,:,:,:,:),dgxdis_s(:,:,:,:),dgxds(:,:,:,:,:)
@@ -281,7 +299,14 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !Eventually compute the spin-orbit metric tensor:
  if (mpssoang>mpsang) then
    ABI_MALLOC(pauli,(2,2,2,3))
-   call metric_so(amet,gprimd,pauli)
+   soc_weight = one
+! GBT: keep only the z-component, optionally flip its sign
+   if (use_gbt == 2) then
+     soc_weight(1:2) = 0
+     if (ispin_gbt == 2) soc_weight(3) = -1
+   end if
+   call geteuler(spinaxis,alpha,beta)
+   call metric_so(amet,soc_weight,gprimd,pauli,alpha,beta)
  end if
 
 !Allocate array gxa (contains projected scalars).
@@ -437,7 +462,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 
      ! Change nspinso if collinear run or if nspinor == 2 and SOC is not wanted.
      ! TODO: The last check requires pspso
-     if (nspinortot == 1) nspinso = 1
+     if (nspinortot == 1 .and. use_gbt /= 2) nspinso = 1
 
      do ispinor=1,nspinso
        ispinor_index=ispinor
@@ -467,7 +492,9 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
            iproj=indlmn(3,ilmn,itypat)
 !          This shift is not needed anymore
 !          if (ispinor==2) ipsang=indlmn(1,ilmn,itypat)-mpsang+2
-           ekb_s(ipsang,iproj)=ekb(iln,itypat,ispinor)
+!           ekb_s(ipsang,iproj)=ekb(iln,itypat,ispinor)
+           ispinor_ekb=min(ispinor,ubound(ekb,3))
+           ekb_s(ipsang,iproj)=ekb(iln,itypat,ispinor_ekb)
            wt(ipsang,iproj)=4.d0*pi/ucvol*dble(2*ipsang-1)*ekb_s(ipsang,iproj)
 !
 !          mjv 27 6 2008: if only_SO == 2 remove the factor of l in the operator
@@ -565,7 +592,60 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !        XG030513 : MPIWF, at this place, one should perform the reduction
 !        and spread of data of gxa, dgxdt and dgxds
 
-!        Loop over spins:
+
+
+! BUG FIX START
+!        MS100725: First loop over spins, ilang, proj to take care of the ddk
+!        decompaction PRIOR to entering the main loop. This fixes a subtle bug
+!        in the calculation of the velocity operator with SOC
+         do isp=1,nspinor
+           ispin=isp;if (mpi_enreg%paral_spinor==1) ispin=ispinor_index
+
+           do ia=1,nincat
+             do ilang=1,nlang
+               nproj=jproj(ilang)
+               if(nproj/=0) then
+                 ilang2=(ilang*(ilang+1))/2
+                 do iproj=1,nproj
+
+!                  The rank of the tensor gxa equals l:
+                   rank=ilang-1
+!                  jjs gives the starting address of the relevant components
+                   jjs=1+((ilang-1)*ilang*(ilang+1))/6
+                   if (ilang>4) then
+                     write(msg,'(a,i0)')' ilang must fall in range [1..4] but value is ',ilang
+                     ABI_BUG(msg)
+                   end if
+
+!                  Eventual tensorial decompaction for ddk perturbation:
+                   if(choice==5 .and. ilang>=2) then
+                     jjk=1+((ilang-2)*(ilang-1)*ilang)/6
+                     compact=-1
+                     temp(:,1:(rank*(rank+1))/2)= &
+&                     dgxdt(:,2,jjk:jjk-1+(rank*(rank+1))/2,ia,iproj,ispin)
+                     call ddkten(compact,idir,rank,temp,tmpfac)
+                     dgxdt(:,1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispin)=&
+&                     dgxdt(:,1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispin)&
+&                     +tmpfac(:,1:((rank+1)*(rank+2))/2)
+                    end if
+
+!                  End loop over iproj:
+                 end do
+!                End condition of existence of a reference state:
+               end if
+
+!              End loop over ilang:
+             end do
+
+!            End loop over ia:
+           end do
+
+!            End loop over isp
+         end do
+! BUG FIX END
+
+
+!        Main loop over spins:
          do isp=1,nspinor
            ispin=isp;if (mpi_enreg%paral_spinor==1) ispin=ispinor_index
 
@@ -601,38 +681,42 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
                      gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)=zero
 !                    Contraction over spins:
                      do ispinp=1,nspinortot
-!                      => Imaginary part (multiplying by i, then by the Im of amet):
-                       temp(1,1:((rank+1)*(rank+2))/2)= &
-&                       -gxa(2,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispinp)
-                       temp(2,1:((rank+1)*(rank+2))/2)= &
-&                       gxa(1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispinp)
-                       amet_lo(:,:)=amet(2,:,:,ispin,ispinp)
-                       call metcon_so(rank,gmet,amet_lo,temp,tmpfac)
-                       gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)= &
-&                       gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)+ &
-&                       wt(ilang,iproj)*tmpfac(:,1:((rank+1)*(rank+2))/2)
-!                      => Real part:
-                       temp(:,1:((rank+1)*(rank+2))/2)= &
-&                       gxa(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispinp)
-                       amet_lo(:,:)=amet(1,:,:,ispin,ispinp)
-                       call metcon_so(rank,gmet,amet_lo,temp,tmpfac)
-                       gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)= &
-&                       gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)+ &
-&                       wt(ilang,iproj)*tmpfac(:,1:((rank+1)*(rank+2))/2)
+!                        => Imaginary part (multiplying by i, then by the Im of amet):
+                         temp(1,1:((rank+1)*(rank+2))/2)= &
+&                         -gxa(2,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispinp)
+                         temp(2,1:((rank+1)*(rank+2))/2)= &
+&                          gxa(1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispinp)
+                         amet_lo(:,:)=amet(2,:,:,ispin,ispinp)
+                         call metcon_so(rank,gmet,amet_lo,temp,tmpfac)
+                         gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)= &
+&                         gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)+ &
+&                         wt(ilang,iproj)*tmpfac(:,1:((rank+1)*(rank+2))/2)
+!                        => Real part:
+                         temp(:,1:((rank+1)*(rank+2))/2)= &
+&                         gxa(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispinp)
+                         amet_lo(:,:)=amet(1,:,:,ispin,ispinp)
+                         call metcon_so(rank,gmet,amet_lo,temp,tmpfac)
+                         gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)= &
+&                         gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)+ &
+&                         wt(ilang,iproj)*tmpfac(:,1:((rank+1)*(rank+2))/2)
                      end do
                    end if
 
-!                  Eventual tensorial compaction/decompaction for ddk
+!                  Eventual tensorial compaction of gxafac for ddk
 !                  perturbation:
                    if(choice==5 .and. ilang>=2) then
                      jjk=1+((ilang-2)*(ilang-1)*ilang)/6
-                     compact=-1
-                     temp(:,1:(rank*(rank+1))/2)= &
-&                     dgxdt(:,2,jjk:jjk-1+(rank*(rank+1))/2,ia,iproj,ispin)
-                     call ddkten(compact,idir,rank,temp,tmpfac)
-                     dgxdt(:,1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispin)= &
-&                     dgxdt(:,1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispin)&
-&                     +tmpfac(:,1:((rank+1)*(rank+2))/2)
+! BUG FIX START
+! MS100725: Moved this chunk of code to a separate preliminary loop (see above),
+!           to fix the k-derivative of the SOC Hamiltonian
+!                     compact=-1
+!                     temp(:,1:(rank*(rank+1))/2)= &
+!&                     dgxdt(:,2,jjk:jjk-1+(rank*(rank+1))/2,ia,iproj,ispin)
+!                     call ddkten(compact,idir,rank,temp,tmpfac)
+!                     dgxdt(:,1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispin)= &
+!&                     dgxdt(:,1,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispin)&
+!&                     +tmpfac(:,1:((rank+1)*(rank+2))/2)
+! BUG FIX END
                      compact=1
                      tmpfac(:,1:((rank+1)*(rank+2))/2)= &
 &                     gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)
@@ -1288,6 +1372,11 @@ contains
 !! The components are given in the order 11 22 33 32 31 21.
 !! The initial 2 handles the Re and Im parts.
 !!
+!! PARENTS
+!!      m_nonlop_pl
+!!
+!! CHILDREN
+!!
 !! SOURCE
 
 subroutine trace2(gxa,gmet,trace)
@@ -1347,6 +1436,11 @@ end subroutine trace2
 !! cart(3,1) & = &  0.5 ( & red(i,j,3) G(3,i) G(2,j) + red(i,j,1) G(2,i) G(1,j)) \nonumber
 !! cart(2,1) & = &  0.5 ( & red(i,j,2) G(3,i) G(2,j) + red(i,j,1) G(1,i) G(3,j))
 !! \end{eqnarray} }}
+!!
+!! PARENTS
+!!      m_nonlop_pl
+!!
+!! CHILDREN
 !!
 !! SOURCE
 
@@ -1425,6 +1519,11 @@ end subroutine strsocv
 !! NOTES
 !!  XG030513 : MPIWF One should pay attention to the
 !!  G=0 component, that will be only one one proc...
+!!
+!! PARENTS
+!!      m_nonlop_pl
+!!
+!! CHILDREN
 !!
 !! SOURCE
 
@@ -1530,6 +1629,11 @@ end subroutine scalewf_nonlop
 !!
 !! NOTES
 !! For l=0, there is no contribution.
+!!
+!! PARENTS
+!!      m_nonlop_pl
+!!
+!! CHILDREN
 !!
 !! SOURCE
 

@@ -1,0 +1,142 @@
+# Constrained DFPT calculation in antiferromagnetic MnF2 (omega=0 and q=0).
+# (M. Royo, 12.12.2025)
+
+  ndtset   4
+  jdtset   3 4 5 6
+
+## PARALELIZATION OPTIONS
+#  paral_rf   1
+#  nppert   2
+
+## GENERAL LINEAR RESPONSE PARAMETERS
+  tolvrs   1.0d-2
+    nqpt   1
+     qpt   0.0 0.0 0.0
+  getwfk   1
+
+# Print options
+  prt1mag  1
+  prtwf    1
+
+# Magnetic penalty
+  magpen   0.0125   # Penalty amplitude
+  mpatpol  1 2      # Atoms on which the penalty is applied
+  mpdir    1 1 0    # Directions on which the penalty is applied
+
+# Finite omega parameters
+  rfomega  0.0      # Frequency of the perturbations
+  tim1rev  1        # Krammer's degeneracy assumed
+  ixcrot   3         # Algorithm to rotate the noncolinear XC (must be 3 if rfomega or qpt are different form zero)
+
+### 3) LINEAR RESPONSE TO PHONONS, ELECTRIC AND ZEEMAN FIELD (hw=0)
+  rfphon3   1
+ rfatpol3   1 1
+  rfelfd3   3
+  rfmagn3   1
+   rfdir3   1 0 0
+  getddk3   2
+
+### 4) LINEAR RESPONSE TO LOCAL ZEEMAN FIELDS (hw=0)
+  rfmagn4   2       # Activates linear response to local Zeeman fields
+ rfatpol4   1 1     # Atoms on the spheres of which the Zeeman fields are applied
+   rfdir4   1 0 0   # Directions of the Zeeman fields
+  getddk4   2
+
+### 5) LINEAR RESPONSE TO PHONONS, ELECTRIC AND ZEEMAN FIELD (finite hw)
+  rfphon5   1
+ rfatpol5   1 1
+  rfelfd5   3
+  rfmagn5   1
+   rfdir5   1 0 0
+  getddk5   2
+ rfomega5   0.0006  # Frequency of the perturbations
+ tim1rev5   0       # Broken Krammer's degeneracy
+   prtwf5   0
+
+### 6) LINEAR RESPONSE TO LOCAL ZEEMAN FIELDS (finite hw)
+  rfmagn6   2       # Activates linear response to local Zeeman fields
+ rfatpol6   1 1     # Atoms on the spheres of which the Zeeman fields are applied
+   rfdir6   1 0 0   # Directions of the Zeeman fields
+  getddk6   2
+ rfomega6   0.0006  # Frequency of the perturbations
+ tim1rev6   0       # Broken Krammer's degeneracy
+   prtwf6   0
+
+### MORE GENERAL PARAMETERS
+
+#Definition of the atom types
+ntypat 2
+znucl 25 9
+
+#Definition of the atoms
+natom 6
+typat 2*1 4*2
+
+#Definition of the unit cell
+acell     9.2100000000E+00  9.2100000000E+00  6.2560000000E+00 Bohr
+rprim     1.0000 0.0000 0.0000
+          0.0000 1.0000 0.0000
+          0.0000 0.0000 1.0000
+xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+          5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+          6.9627618231E-01  6.9627618231E-01  0.0000000000E+00
+          1.9627618231E-01  8.0372381769E-01  5.0000000000E-01
+          3.0372381769E-01  3.0372381769E-01  0.0000000000E+00
+          8.0372381769E-01  1.9627618231E-01  5.0000000000E-01
+
+
+#Definition of the planewave basis set
+ecut   3.0         # Maximal kinetic energy cut-off, in Hartree
+nband  42
+
+#Definition of the k-point grid
+kptopt 3          # Option for the automatic generation of k points, taking
+                  # into account the symmetry
+ngkpt 2 2 3
+
+nshiftk 1
+shiftk 0.5 0.5 0.5
+
+#Symmetries deactivated for magnetic systems
+nsym 1
+
+#Definition of the SCF procedure
+nstep 50        # Maximal number of SCF cycles
+diemac  8.0       # Although this is not mandatory, it is worth to
+
+nline 12
+diemix1    0.6
+diemixmag1 0.4
+nnsclo -4
+
+nspden   4
+nspinor  2
+asr 0
+chneut 0
+
+#Pseudos
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain =  tcdfpt_1.abi, tcdfpt_2.abi, tcdfpt_3.abi, tcdfpt_4.abi, tcdfpt_5.abi, tcdfpt_6.abi, tcdfpt_7.abi
+#%% [files]
+#%% files_to_test =
+#%%   tcdfpt_2.abo, tolnlines=  10, tolabs=  4.192e-06, tolrel=  4.000e-07, fld_options=-easy
+#%% [shell]
+#%% post_commands= ww_mv tcdfpt_2o_DS4_1WF55 tcdfpt_2o_DS3_1WF55
+#%% [paral_info]
+#%% max_nprocs = 12
+#%% [extra_info]
+#%% authors = M. Royo
+#%% keywords = CDFPT
+#%% description = Constrained DFPT calculation for MnF2 at two values of omega
+#%%<END TEST_INFO>
+
+

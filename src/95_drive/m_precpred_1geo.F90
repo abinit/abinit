@@ -7,7 +7,7 @@
 !! Choose among the whole set of geometry predictors defined by iommov.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2025 ABINIT group (DCA, XG, GMR, SE)
+!!  Copyright (C) 2018-2026 ABINIT group (DCA, XG, GMR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

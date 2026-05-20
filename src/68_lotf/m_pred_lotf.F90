@@ -6,7 +6,7 @@
 !! Contains the predictor for LOTF (ionmov==23)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, JCC, SE)
+!! Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, JCC, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,7 @@ CONTAINS !===========================================================
  !! Lotf ensemble molecular dynamics.
  !!
  !! COPYRIGHT
- !! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, JCC, SE)
+ !! Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, JCC, SE)
  !! This file is distributed under the terms of the
  !! GNU General Public License, see ~abinit/COPYING
  !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -110,18 +110,10 @@ CONTAINS !===========================================================
   !***************************************************************************
 
   if(iexit/=0)then
-    if (allocated(fcart_m))       then
-      ABI_FREE(fcart_m)
-    end if
-    if (allocated(vel_nexthalf))  then
-      ABI_FREE(vel_nexthalf)
-    end if
-    if (allocated(xcart_old))       then
-      ABI_FREE(xcart_old)
-    end if
-    if (allocated(vel_old))       then
-      ABI_FREE(vel_old)
-    end if
+    ABI_SFREE(fcart_m)
+    ABI_SFREE(vel_nexthalf)
+    ABI_SFREE(xcart_old)
+    ABI_SFREE(vel_old)
     return
   end if
 

@@ -1,108 +1,140 @@
-##########################################################
-# Automatic test for ABINIT:                             #
-#    C 2 atoms, Diamond, LDA, PAW                        #
-#   DS1: GS calculation to create initial WFK            #
-#   DS2: RT-TDDFT with Impulsional TDEF                  #
-#   DS3: RT-TDDFT with Impulsional TDEF -- restart       #
-#   Test Impulse TD Electric field and restart           #
-#   without induced vector potential with paral_kgb 1    #
-##########################################################
-
+# Multi_dataset parameters
 ndtset 3
+jdtset 1 2 3
+getden1 0
+getden  1
+getctqmcdata 0
 
-# Parallelism
-paral_kgb 1
-npkpt 4
-npband 2
+pawprtvol 3  # Printing additional information
+prtvol 4     #
 
-optdriver1 0 # Ground-state
-optdriver 9  # RT-TDDFT
+############################
+# Structural Parameters
+############################
+# Definition of unit cell
+acell 3*5.44761       # lattice parameter
+rprim -0.5  0.5  0.5  # Primitive cell
+       0.5 -0.5  0.5
+       0.5  0.5 -0.5
 
-# RT-TDDFT section
-getwfk2 -1         # Read initial orbitals from the first dataset
-dtele  0.1         # Electronic time step
-ntime  50          # Maximum number or time step
-td_ef_type 1       # Impulse electric field
-td_ef_tzero 0.3    # applied at time tzero
-td_restart3 1      # DS3 restart trajectory from DS2
+# Definition atom
+ntypat 1   # number of different types of atoms
+znucl 26   # z number of atom
 
-#Definition of the unit cell
-acell 3*3.53 angstrom  # Lengths of the primitive vectors (equilibrium volume)
-rprim                  # 3 orthogonal primitive vectors (FCC lattice)
-  0.0 1/2 1/2
-  1/2 0.0 1/2
-  1/2 1/2 0.0
-nsym 0                 # Automatic detection of symetries
+# Definition of the atoms
+natom 1           # number of atom
+typat 1           # type of atom
+xred 0.0 0.0 0.0  # reduced coordinates for primitive cell
 
-#Definition of the atom types and pseudopotentials
-ntypat 1          # There is only one type of atom
-znucl 6           # Atomic number of the possible type(s) of atom. Here carbon.
-pp_dirpath "$ABI_PSPDIR"        # Path to the directory where
-                                # pseudopotentials for tests are stored
-pseudos "Psdj_paw_pw_std/C.xml" # PAW atomic data for Carbon
+# Definition pseudopotentials
+pp_dirpath "$ABI_PSPDIR"            # repository with pseudopotentials
+pseudos "Fe-paw-abinit.xml"
 
-#Definition of the atoms
-natom 2           # There are two atoms
-typat 1 1         # They both are of type 1, that is, Carbon
-xred              # Location of the atoms: Diamond structure
-  0.0 0.0 0.0     #  Triplet giving the reduced coordinates of atom 1
-  1/4 1/4 1/4     #  Triplet giving the reduced coordinates of atom 2
+# Definition of the k-point grid
+kptopt 1
+ngkpt 4 4 4              # Reciprocal space vectors are built from
+                         # the rprim parameters. This is the size of the
+                         # reciprocal k-points.
+nshiftk 2                # Convergence of the density with regular shifts.
+shiftk 0.25  0.25  0.25
+      -0.25 -0.25 -0.25
 
-#Definition of bands and occupation numbers
-nband 8           # Compute 8 bands (4 occupied, 4 empty)
-nbdbuf 2          # No need to converge the last two empty bands
-occopt 1          # Automatic generation of occupation numbers, as a semiconductor
+############################
+# Energy Parameters
+############################
 
-#Numerical parameters of the calculation : planewave basis set and k point grid
-ecut 12           # Maximal plane-wave kinetic energy cut-off, in Hartree
-pawecutdg 24      # Max. plane-wave kinetic energy cut-off, in Ha, for the PAW double grid
-kptopt 3          # Automatic generation of k points, no taking symmetry into account
-ngkpt 2 2 2       # k-points grid based on the primitive vectors
-nshiftk 4         # of the reciprocal space, repeated four times,
-shiftk            # with different shifts:
-  0.5 0.5 0.5
-  0.5 0.0 0.0
-  0.0 0.5 0.0
-  0.0 0.0 0.5
-istwfk *1         # Wavefunctions are complex for all k-points
+ecut 20         # Maximal plane-wave kinetic energy cut-off, in Hartree
+pawecutdg 50    # PAW: Energy Cutoff for the Double Grid
+nband 20        # Number of bands
+occopt 3        # Smearing type
+tsmear 2000 K   # Electronic smearing temperature
 
-#Parameters for the SCF procedure
-nstep 20          # Maximal number of SCF cycles
-tolvrs 1.0d-10    # Will stop when, twice in a row, the difference
-                  # between two consecutive evaluations of potential residual
-                  # differ by less than tolvrs
-tolwfr 1.0d-20    # Additional convergence criterion on the largest residual
-                  # to ensure that wavefunctions are also tighlty converged
-                  # as they will be used as initial conditions for the following
-                  # RT-TDDFT run
+############################
+# DFT Calculation
+############################
 
-#Printing parameters
-prtwf1 1          # Print wavefunctions (required for following RT-TDDFT runs)
-prtwf 0           # Do not print wavefunctions at each step during RT-TDDFT
-prtden 0          # Do not print density
-prteig 0          # Do not print eigenvalues
-prtebands 0       # Do not print ebands
-prtgsr 0          # Do not print GSR
-prtcurrent 1      # Print current
+usedmft1 0       # DFT alone
+nstep1 30        # Number of iterations for the DFT convergence
+tolvrs 1.0d-10  # Tolerance of the density for DFT convergence
+
+# Definition of the spin properties
+nsppol 2     # No spin-polarization
+nspden 2     # No Scalar magnetism
+nspinor 1    # No Spin-orbit
+spinat 0.0 0.0 0.0
+
+############################
+# DMFT Calculation
+############################
+usedmft   1       # DMFT calculation
+nstep     2       # Number of iterations for the DFT+DMFT convergence
+nline1    4
+nnsclo1   0
+nline    10
+nnsclo    7
+
+# Definition for DMFT loop
+dmftbandi 5             # First KS band included in the projection for Wannier orbitals
+dmftbandf 13            # Last KS band included in the projection for Wannier orbitals
+dmft_triqs_n_iw 1000    # Linear frequency mesh
+dmft_iter 1             # Number of iterations of the DMFT part.
+
+dmft_mxsf 0.7           # Mixing of the old and new self-energy at every iterations.
+dmft_dc   8             # Double counting type. 6 is Around Mean Field (AMF)
+
+#Definition of impurity solver
+dmft_solv  6           # TRIQS in the density-density approximation
+dmft_triqs_n_tau        500   # Number of time slices for G(tau).
+dmft_triqs_n_cycles     1250  # Number of QMC sweeps
+dmft_triqs_n_warmup_cycles_init    1000  # Thermalization
+dmft_triqs_length_cycle   100
+
+dmft_triqs_off_diag 0
+dmft_triqs_dlr_wmax  1.0
+dmft_triqs_basis 0
+dmft_triqs_dlr_epsilon 1.d-2
+dmft_fermi_step 0.02
+dmft_prt_maxent 1
+dmft_prtself 1
+dmft_x2my2d 0
+dmft_triqs_det_init_size 100
+dmft_triqs_det_n_operations_before_check 10000
+dmft_triqs_det_precision_error 1.d-5
+dmft_triqs_det_precision_warning 1.d-8
+dmft_triqs_det_singular_threshold -1.0
+dmft_triqs_imag_threshold 1.d-13
+dmft_triqs_measure_density_matrix 1
+dmft_triqs_move_shift 0
+dmft_triqs_pauli_prob 1.0
+dmft_triqs_read_ctqmcdata 1
+dmft_triqs_n_warmup_cycles_restart 0
+dmft_triqs_time_invariance 1
+dmft_triqs_use_norm_as_weight 1
+
+#Definition of DFT+U
+usepawu1    4           #
+usepawu     14          #
+dmatpuopt   2           #
+lpawu       2           # Angular momentum for the projected Hamiltonian
+upawu1      0.00 eV
+upawu       5.5  eV  # Values of U for each angular momentum
+jpawu1      0.00 eV
+jpawu       0.84 eV  # Values of J
+
+dmft_yukawa_param3 3
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% [files]
+#%% need_cpp_vars = HAVE_TRIQS_v3_2
 #%% [paral_info]
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
 #%% [NCPU_8]
-#%% files_to_test =
-#%%   t103_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
-#%%   t103_MPI8o_DS2_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
-#%%   t103_MPI8o_DS2_TDCURRENT, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
-#%%   t103_MPI8o_DS2_TDEFIELD, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
+#%% files_to_test = t113_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;;
 #%% [extra_info]
-#%% authors = F. Brieuc
-#%% keywords = RTTDDFT
-#%% description =
-#%%   Diamond, LDA, PAW
-#%%   Tests RT-TDDFT with time-dependent electric field
-#%% topics = RTTDDFT
+#%% authors = E. Castiel, F. Gendron
+#%% keywords = DMFT, TRIQS
+#%% description = DFT+DMFT for Fe : test exact DC in GGA
+#%% topics = DMFT
 #%%<END TEST_INFO>

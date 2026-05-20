@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h11 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h13 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v67mbpt_t03/t03.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v67mbpt_t03/t03.abi
 - output file    -> t03.abo
 - root for input  files -> t03i
 - root for output files -> t03o
@@ -149,6 +149,11 @@ _ WF disk file :      0.510 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
            getwfk3          1
            getwfk4          1
            getwfk5          1
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2     0.00000000E+00 Bohr
+          gw_rcut3     0.00000000E+00 Bohr
+          gw_rcut4     0.00000000E+00 Bohr
+          gw_rcut5     5.00000000E+00 Bohr
          gw_nqlwl1          0
          gw_nqlwl2          1
          gw_nqlwl3          0
@@ -209,11 +214,6 @@ P           mkmem           5
         prtsuscep3          0
         prtsuscep4          0
         prtsuscep5          0
-             rcut1     0.00000000E+00 Bohr
-             rcut2     0.00000000E+00 Bohr
-             rcut3     0.00000000E+00 Bohr
-             rcut4     0.00000000E+00 Bohr
-             rcut5     5.00000000E+00 Bohr
           spgroup         123
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                       -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
@@ -244,7 +244,7 @@ P           mkmem           5
           vcutgeo5     0.0000000  0.0000000 -4.0000000
               wtk        0.12500    0.25000    0.25000    0.25000    0.12500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  1.0583544172E+00
+                       0.0000000000E+00  0.0000000000E+00  1.0583544211E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  2.0000000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -292,8 +292,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.01533
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/01h_WC.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/01h_WC.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/01h_WC.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/01h_WC.fhi
 - OPIUM generated H potential
 -  1.00000   1.00000     70427                znucl, zion, pspdat
     6   23    0    0      1045   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -404,7 +404,7 @@ force_length_stats: {min:   4.97292859E-02, max:   4.97292859E-02, mean:   4.972
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000     1.05835441718000
+    2      0.00000000000000     0.00000000000000     1.05835442108800
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000     0.04972928592922
@@ -412,11 +412,11 @@ force_length_stats: {min:   4.97292859E-02, max:   4.97292859E-02, mean:   4.972
  frms,max,avg= 2.8711217E-02 4.9729286E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000     2.55718248355635
-    2     -0.00000000000000    -0.00000000000000    -2.55718248355635
- frms,max,avg= 1.4763900E+00 2.5571825E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000    -0.00000000000000     2.55718269833581
+    2     -0.00000000000000    -0.00000000000000    -2.55718269833581
+ frms,max,avg= 1.4763901E+00 2.5571827E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000  4.500000000000 bohr
-              =  5.291772085900  5.291772085900  2.381297438655 angstroms
+              =  5.291772105440  5.291772105440  2.381297447448 angstroms
  prteigrs : about to open file t03o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.20076   Average Vxc (hartree)=  -0.11019
  Eigenvalues (hartree) for nkpt=   5  k points:
@@ -429,9 +429,9 @@ force_length_stats: {min:   4.97292859E-02, max:   4.97292859E-02, mean:   4.972
  Fermi (or HOMO) energy (eV) =  -5.46307   Average Vxc (eV)=  -2.99855
  Eigenvalues (   eV  ) for nkpt=   5  k points:
  kpt#   1, nband= 20, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -11.03581    0.23795    2.16996    2.16996    3.93210    7.56122    8.24847    8.24847
-   8.55070   12.07752   15.93176   17.74409   17.74410   18.69693   19.14243   23.04343
-  23.47295   23.47303   23.79897   25.13562
+ -11.03581    0.23795    2.16996    2.16996    3.93210    7.56122    8.24848    8.24848
+   8.55070   12.07752   15.93176   17.74410   17.74410   18.69694   19.14244   23.04343
+  23.47295   23.47303   23.79897   25.13563
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -446,7 +446,7 @@ psp_core            : -1.08410116146500E-04
 local_psp           : -2.05857589408838E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.07933734108761E+00
-total_energy_eV     : -2.93702627027666E+01
+total_energy_eV     : -2.93702652780450E+01
 band_energy         : -6.56204198404697E-01
 ...
 
@@ -457,9 +457,9 @@ band_energy         : -6.56204198404697E-01
   sigma(3 3)=  2.89009533E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -4.8342E+00 GPa]
-- sigma(1 1)=  2.99986948E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  2.99986948E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  8.50295259E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  2.99986999E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  2.99986999E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  8.50295402E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -1142,6 +1142,11 @@ data: !SigmaeeData |
            getwfk3          1
            getwfk4          1
            getwfk5          1
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2     0.00000000E+00 Bohr
+          gw_rcut3     0.00000000E+00 Bohr
+          gw_rcut4     0.00000000E+00 Bohr
+          gw_rcut5     5.00000000E+00 Bohr
          gw_nqlwl1          0
          gw_nqlwl2          1
          gw_nqlwl3          0
@@ -1202,11 +1207,6 @@ P           mkmem           5
         prtsuscep3          0
         prtsuscep4          0
         prtsuscep5          0
-             rcut1     0.00000000E+00 Bohr
-             rcut2     0.00000000E+00 Bohr
-             rcut3     0.00000000E+00 Bohr
-             rcut4     0.00000000E+00 Bohr
-             rcut5     5.00000000E+00 Bohr
           spgroup         123
            strten1     1.0196350837E-04  1.0196350837E-04  2.8900953302E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1247,7 +1247,7 @@ P           mkmem           5
           vcutgeo5     0.0000000  0.0000000 -4.0000000
               wtk        0.12500    0.25000    0.25000    0.25000    0.12500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  1.0583544172E+00
+                       0.0000000000E+00  0.0000000000E+00  1.0583544211E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  2.0000000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1349,10 +1349,10 @@ P           mkmem           5
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.5  wall=          2.5
+- Proc.   0 individual time (sec): cpu=          2.5  wall=          2.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  15 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.5  wall=          2.5
+.Delivered   5 WARNINGs and  20 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.5  wall=          2.6

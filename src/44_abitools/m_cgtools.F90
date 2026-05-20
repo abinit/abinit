@@ -7,7 +7,7 @@
 !! using the "cg" convention, namely real array of shape cg(2,...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2025 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer, DCA, GMR, FF)
+!! Copyright (C) 1992-2026 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer, DCA, GMR, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,20 +36,20 @@
 
 module m_cgtools
 
+ use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
  use defs_basis
  use m_abicore
  use m_errors
  use m_xmpi
  use m_xomp
+ use m_gputk
  use m_abi_linalg
+ use m_linalg_interfaces
 
  use m_fstrings,      only : toupper, itoa, sjoin
  use m_time,          only : timab, cwtime, cwtime_report
  use m_numeric_tools, only : hermit, rhophi
  use m_pawcprj,       only : pawcprj_type,pawcprj_axpby,pawcprj_zaxpby
- use m_abi_linalg
-
- use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
 
  implicit none
 
@@ -59,14 +59,12 @@ module m_cgtools
  real(dp),public,parameter :: cg_cone(2)  = (/1._dp,0._dp/)
 
  ! Helper functions.
- !public :: cg_prod
  public :: cg_tocplx
  public :: cg_fromcplx
  public :: cg_kfilter
  public :: cg_setaug_zero
  public :: cg_to_reim
  public :: cg_from_reim
- !public :: cg_times_eigr
 
  ! Blas1
  public :: cg_zcopy
@@ -80,7 +78,6 @@ module m_cgtools
 
  ! Blas2
  public :: cg_zgemv         ! alpha*A*x + beta*y,
- !public :: cg_dgemv
 
  ! Blas3
  public :: cg_zgemm
@@ -136,6 +133,9 @@ module m_cgtools
  public :: cg_zaxpy_many_areal
  public :: cg_set_imag0_to_zero
  public :: cg_randomize             ! Initialize cg_k with random numbers.
+ public :: cg_copy_spin
+ public :: cg_put_spin
+ public :: cg_p_psi                 ! Compute <g|-i\Nabla|psi_nk>.
 !***
 
 CONTAINS  !========================================================================================
@@ -166,12 +166,11 @@ subroutine cg_tocplx(n, cg, ocplx)
  integer,intent(in) :: n
 !arrays
  real(dp),intent(in) :: cg(2*n)
- complex(dpc),intent(out) :: ocplx(n)
+ complex(dp),intent(out) :: ocplx(n)
 
 !Local variables ------------------------------
 !scalars
  integer :: ii,idx
-
 ! *************************************************************************
 
 !$OMP PARALLEL DO PRIVATE(idx)
@@ -208,12 +207,11 @@ subroutine cg_fromcplx(n, icplx, ocg)
  integer,intent(in) :: n
 !arrays
  real(dp),intent(out) :: ocg(2*n)
- complex(dpc),intent(in) :: icplx(n)
+ complex(dp),intent(in) :: icplx(n)
 
 !Local variables ------------------------------
 !scalars
  integer :: ii,idx
-
 ! *************************************************************************
 
 !$OMP PARALLEL DO PRIVATE(idx)
@@ -250,7 +248,6 @@ pure subroutine cg_kfilter(npw_k, my_nspinor, nband_k, kinpw, cg)
 
 !Local variables-------------------------------
  integer :: ispinor, iband, igs, iwavef, ipw
-
 ! *************************************************************************
 
 ! Filter the WFs when modified kinetic energy is too large (see routine mkkin.f)
@@ -260,10 +257,7 @@ pure subroutine cg_kfilter(npw_k, my_nspinor, nband_k, kinpw, cg)
    do iband=1,nband_k
      iwavef=(iband-1)*npw_k*my_nspinor
      do ipw=1+igs,npw_k+igs
-       if (kinpw(ipw-igs)>huge(zero)*1.d-11)then
-         cg(1,ipw+iwavef)=zero
-         cg(2,ipw+iwavef)=zero
-       end if
+       if (kinpw(ipw-igs)>huge(zero)*1.d-11) cg(:,ipw+iwavef)=zero
      end do
    end do
  end do
@@ -300,7 +294,6 @@ pure subroutine cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,arr)
 
 !Local variables-------------------------------
  integer :: iy,iz,dat,padat
-
 ! *************************************************************************
 
  if (nx /= ldx) then
@@ -353,7 +346,6 @@ subroutine cg_to_reim(npw, ndat, cg, factor, reim)
 
 !Local variables-------------------------------
  integer :: idat
-
 ! *************************************************************************
 
  ! Pack real and imaginary part of the wavefunctions.
@@ -391,7 +383,6 @@ subroutine cg_from_reim(npw, ndat, reim, factor, cg)
 
 !Local variables-------------------------------
  integer :: idat
-
 ! *************************************************************************
 
  ! UnPack real and imaginary part and multiply by scale factor if /= one.
@@ -430,7 +421,6 @@ subroutine cg_zcopy(n, x, y)
 !arrays
  real(dp),intent(in) :: x(2*n)
  real(dp),intent(out) :: y(2*n)
-
 ! *************************************************************************
 
  call zcopy(n, x, 1, y, 1)
@@ -464,7 +454,6 @@ subroutine cg_zscal(n, a, x)
  real(dp),intent(in) :: a(2)
 !arrays
  real(dp),intent(inout) :: x(2*n)
-
 ! *************************************************************************
 
  if (a(2) == zero) then
@@ -503,7 +492,6 @@ function cg_dznrm2(n, x) result(res)
 !arrays
  real(dp),intent(in) :: x(2*n)
  real(dp),external :: dznrm2
-
 ! *************************************************************************
 
  res = dznrm2(n, x, 1)
@@ -534,18 +522,16 @@ function cg_zdotc(n, x, y) result(res)
 !scalars
  integer,intent(in) :: n
 !arrays
- real(dp),intent(in) :: x(2,n)
- real(dp),intent(in) :: y(2,n)
+ real(dp),intent(in) :: x(2,n), y(2,n)
  real(dp) :: res(2)
 
 !Local variables-------------------------------
 #ifdef HAVE_LINALG_ZDOTC_BUG
  integer :: ii
 #else
- complex(dpc) :: cres
- complex(dpc),external :: zdotc
+ complex(dp) :: cres
+ complex(dp),external :: zdotc
 #endif
-
 ! *************************************************************************
 
 #ifdef HAVE_LINALG_ZDOTC_BUG
@@ -596,7 +582,6 @@ function cg_real_zdotc(n,x,y) result(res)
 
 !Local variables-------------------------------
  real(dp),external :: ddot
-
 ! *************************************************************************
 
  res = ddot(2*n, x, 1, y, 1)
@@ -637,10 +622,9 @@ function cg_zdotu(n, x, y) result(res)
 #ifdef HAVE_LINALG_ZDOTU_BUG
  integer :: ii
 #else
- complex(dpc) :: cres
- complex(dpc),external :: zdotu
+ complex(dp) :: cres
+ complex(dp),external :: zdotu
 #endif
-
 ! *************************************************************************
 
 #ifdef HAVE_LINALG_ZDOTU_BUG
@@ -688,7 +672,6 @@ subroutine cg_zaxpy(n, alpha, x, y)
 !arrays
  real(dp),intent(in) :: x(2*n)
  real(dp),intent(inout) :: y(2*n)
-
 ! *************************************************************************
 
  if (alpha(2) == zero) then
@@ -731,7 +714,6 @@ subroutine cg_zaxpby(n, a, x, b, y)
 !arrays
  real(dp),intent(in) :: x(2*n)
  real(dp),intent(inout) :: y(2*n)
-
 ! *************************************************************************
 
 #ifdef HAVE_LINALG_AXPBY
@@ -777,16 +759,14 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta, gpu_op
  character(len=1),intent(in) :: trans
  integer,optional,intent(in) :: gpu_option
 !arrays
- real(dp),intent(in) :: cgmat(2,nrows*ncols), vec(2,*)
- real(dp),intent(inout) :: matvec(2,*)
+ real(dp),intent(in), target :: cgmat(2,nrows*ncols), vec(2,*)
+ real(dp),intent(inout), target :: matvec(2,*)
 
 !Local variables-------------------------------
 !scalars
- integer :: mm, nn, kk, lda, ldb, ldc
- integer :: my_gpu_option
+ integer :: mm, nn, kk, lda, ldb, ldc, my_gpu_option
  real(dp) :: my_alpha(2), my_beta(2)
- complex(dpc) :: my_calpha, my_cbeta
-
+ complex(dp) :: my_calpha, my_cbeta
 ! *************************************************************************
 
  my_alpha = cg_cone;  if (present(alpha)) my_alpha = alpha
@@ -799,16 +779,19 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta, gpu_op
  end if
  ldb = kk; ldc = mm
 
+ ! ZGEMM(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
+
  if(my_gpu_option==ABI_GPU_DISABLED) then
    call ZGEMM(trans, "N", mm, nn, kk, my_alpha, cgmat, lda, vec, ldb, my_beta, matvec, ldc)
  else if(my_gpu_option==ABI_GPU_OPENMP) then
    my_calpha = DCMPLX(my_alpha(1), my_alpha(2))
    my_cbeta  = DCMPLX(my_beta(1), my_beta(2))
-   call abi_gpu_xgemm(2, trans, "N", mm, nn, kk, my_calpha, cgmat, lda, vec, ldb, my_cbeta, matvec, ldc)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET DATA USE_DEVICE_ADDR(cgmat,vec(1:2,1:nn*kk),matvec(1:2,1:mm*nn))
+   call abi_gpu_xgemm(2, trans, "N", mm, nn, kk, my_calpha, c_loc(cgmat), lda, c_loc(vec), ldb, my_cbeta, c_loc(matvec), ldc)
+   !$OMP END TARGET DATA
+#endif
  end if
- ! ZGEMM(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
-
- !call ZGEMV(trans,mm,nn,my_alpha,cgmat,lda,vec,1,my_beta,matvec,1)
 
 end subroutine cg_zgemv
 !!***
@@ -837,13 +820,14 @@ end subroutine cg_zgemv
 !!
 !! SOURCE
 
-subroutine cg_zgemm(transa, transb, npwsp, ncola, ncolb, cg_a, cg_b, cg_c, alpha, beta)
+subroutine cg_zgemm(transa, transb, npwsp, ncola, ncolb, cg_a, cg_b, cg_c, &
+                    alpha, beta) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwsp,ncola,ncolb
- real(dp),optional,intent(in) :: alpha(2), beta(2)
  character(len=1),intent(in) :: transa, transb
+ real(dp),optional,intent(in) :: alpha(2), beta(2)
 !arrays
  real(dp),intent(in) :: cg_a(2,npwsp*ncola), cg_b(2,npwsp*ncolb)
  real(dp),intent(inout) :: cg_c(2,*)
@@ -852,8 +836,7 @@ subroutine cg_zgemm(transa, transb, npwsp, ncola, ncolb, cg_a, cg_b, cg_c, alpha
 !scalars
  integer :: mm,nn,kk,lda,ldb,ldc
  !real(dp) :: my_alpha(2),my_beta(2)
- complex(dpc) :: my_calpha, my_cbeta
-
+ complex(dp) :: my_calpha, my_cbeta
 ! *************************************************************************
 
  lda = npwsp
@@ -926,7 +909,6 @@ integer pure function set_istwfk(kpoint) result(istwfk)
  integer :: bit0,ii
 !arrays
  integer :: bit(3)
-
 ! *************************************************************************
 
  bit0=1
@@ -982,7 +964,6 @@ subroutine sqnorm_g(dotr, istwf_k, npwsp, vect, me_g0, comm)
 !Local variables-------------------------------
 !scalars
  integer :: ierr
-
 ! *************************************************************************
 
  if (istwf_k==1) then ! General k-point
@@ -1053,10 +1034,9 @@ subroutine dotprod_g(dotr, doti, istwf_k, npw, option, vect1, vect2, me_g0, comm
 !Local variables-------------------------------
  integer :: ierr
  real(dp) :: dotarr(2)
-
 ! *************************************************************************
 
- ! Init results indipendently of option.
+ ! Init results independently of option.
  dotr = zero
  doti = zero
 
@@ -1146,11 +1126,10 @@ subroutine dotprod_g_batch_half(dotr, doti, istwf_k, npw, ndat, option, vect1, v
 !Local variables-------------------------------
  integer :: ierr,idat,ii,l_gpu_option
  real(dp) :: dotarr(2)
-
 ! *************************************************************************
 
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option = gpu_option
- ! Init results indipendently of option.
+ ! Init results independently of option.
  if(l_gpu_option==ABI_GPU_DISABLED) then
    dotr = zero;  doti = zero
  else if(l_gpu_option==ABI_GPU_OPENMP) then
@@ -1266,11 +1245,10 @@ subroutine dotprod_g_batch_full(dotr, doti, istwf_k, npw, ndat, option, vect1, v
 !Local variables-------------------------------
  integer :: ierr,idat,ii,l_gpu_option
  real(dp) :: dotarr(2)
-
 ! *************************************************************************
 
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option = gpu_option
- ! Init results indipendently of option.
+ ! Init results independently of option.
  if(l_gpu_option==ABI_GPU_DISABLED) then
    dotr = zero;  doti = zero
  else if(l_gpu_option==ABI_GPU_OPENMP) then
@@ -1416,7 +1394,6 @@ subroutine matrixelmt_g(ai,ar,diag,istwf_k,needimag,npw,nspinor,vect1,vect2,me_g
 !arrays
  real(dp) :: buffer2(2)
  !real(dp),allocatable :: re_prod(:), im_prod(:)
-
 ! *************************************************************************
 
  if (nspinor==2 .and. istwf_k/=1) then
@@ -1565,7 +1542,6 @@ subroutine dotprod_v(cplex,dotr,nfft,nspden,opt_storage,pot1,pot2,comm)
  integer :: ierr,ifft,ispden
  real(dp) :: ar
 !arrays
-
 ! *************************************************************************
 
 !Real or complex inputs are coded
@@ -1669,7 +1645,6 @@ subroutine dotprod_vn(cplex,dens,dotr,doti,nfft,nfftot,nspden,option,pot,ucvol, 
  real(dp) :: bx_re,bx_im,by_re,by_im,bz_re,bz_im,v0_re,v0_im
 !arrays
  real(dp) :: buffer2(2)
-
 ! *************************************************************************
 
 !Real or complex inputs are coded
@@ -1820,22 +1795,49 @@ subroutine dotprod_vn(cplex,dens,dotr,doti,nfft,nfftot,nspden,option,pot,ucvol, 
          pim12= pot(jfft  ,3)
          pre21= pot(jfft  ,4)
          pim21=-pot(jfft-1,4)
-         dotr=dotr + pre11 * dre11 &
-&         + pim11 * dim11 &
-&         + pre22 * dre22 &
-&         + pim22 * dim22 &
-&         + pre12 * dre12 &
-&         + pim12 * dim12 &
-&         + pre21 * dre21 &
-&         + pim21 * dim21
-         doti=doti + pre11 * dim11 &
-&         - pim11 * dre11 &
-&         + pre22 * dim22 &
-&         - pim22 * dre22 &
-&         + pre12 * dim12 &
-&         - pim12 * dre12 &
-&         + pre21 * dim21 &
-&         - pim21 * dre21
+         v0_re=half*(pre11+pre22)
+         v0_im=half*(pim11+pim22)
+         bx_re=half*(pre12+pre21)
+         bx_im=half*(pim12+pim21)
+         by_re=half*(-pim12+pim21)
+         by_im=half*(pre12-pre21)
+         bz_re=half*(pre11-pre22)
+         bz_im=half*(pim11-pim22)
+
+         dotr=dotr+v0_re * dens(jfft-1,1)&
+&         + v0_im * dens(jfft  ,1) &
+&         + bx_re * dens(jfft-1,2) &
+&         + bx_im * dens(jfft  ,2) &
+&         + by_re * dens(jfft-1,3) &
+&         + by_im * dens(jfft  ,3) &
+&         + bz_re * dens(jfft-1,4) &
+&         + bz_im * dens(jfft  ,4)
+
+         doti=doti+ v0_re * dens(jfft  ,1)&
+&         - v0_im * dens(jfft-1,1) &
+&         + bx_re * dens(jfft  ,2) &
+&         - bx_im * dens(jfft-1,2) &
+&         + by_re * dens(jfft  ,3) &
+&         - by_im * dens(jfft-1,3) &
+&         + bz_re * dens(jfft  ,4) &
+&         - bz_im * dens(jfft-1,4)
+
+!         dotr=dotr + pre11 * dre11 &
+!&         + pim11 * dim11 &
+!&         + pre22 * dre22 &
+!&         + pim22 * dim22 &
+!&         + pre12 * dre12 &
+!&         + pim12 * dim12 &
+!&         + pre21 * dre21 &
+!&         + pim21 * dim21
+!         doti=doti + pre11 * dim11 &
+!&         - pim11 * dre11 &
+!&         + pre22 * dim22 &
+!&         - pim22 * dre22 &
+!&         + pre12 * dim12 &
+!&         - pim12 * dre12 &
+!&         + pre21 * dim21 &
+!&         - pim21 * dre21
        end do
      end if ! option
    end if ! cplex
@@ -1900,7 +1902,6 @@ subroutine sqnorm_v(cplex,nfft,norm2,nspden,opt_storage,pot,mpi_comm_sphgrid)
 !scalars
  integer :: ierr,ifft,ispden,nproc_sphgrid
  real(dp) :: ar
-
 ! *************************************************************************
 
 !Real or complex inputs are coded
@@ -1981,14 +1982,13 @@ subroutine mean_fftr(arraysp,meansp,nfft,nfftot,nspden,mpi_comm_sphgrid,gpu_thre
 !scalars
  integer :: ierr,ifft,ispden,nproc_sphgrid,l_gpu_thread_limit,nthreads_bak
  real(dp) :: invnfftot,tmean
-
 ! *************************************************************************
 
  l_gpu_thread_limit=0; if(present(gpu_thread_limit)) l_gpu_thread_limit=gpu_thread_limit
  invnfftot=one/(dble(nfftot))
 
  if(l_gpu_thread_limit /= 0) then
-   nthreads_bak=xomp_get_num_threads(open_parallel=.True.)
+   nthreads_bak=xomp_get_max_threads()
    call xomp_set_num_threads(min(l_gpu_thread_limit,nthreads_bak))
  end if
 
@@ -2002,7 +2002,7 @@ subroutine mean_fftr(arraysp,meansp,nfft,nfftot,nspden,mpi_comm_sphgrid,gpu_thre
  end do
 
 !XG030514 : MPIWF The values of meansp(ispden) should
-!now be summed accross processors in the same WF group, and spread on all procs.
+!now be summed across processors in the same WF group, and spread on all procs.
  if(present(mpi_comm_sphgrid)) then
    nproc_sphgrid=xmpi_comm_size(mpi_comm_sphgrid)
    if(nproc_sphgrid>1) then
@@ -2040,12 +2040,12 @@ subroutine cg_getspin(cgcband, npw_k, spin, cgcmat)
 !scalars
  integer, intent(in) :: npw_k
  real(dp), intent(in) :: cgcband(2,2*npw_k)
- complex(dpc), intent(out),optional :: cgcmat(2,2)
+ complex(dp), intent(out),optional :: cgcmat(2,2)
  real(dp), intent(out) :: spin(3)
 
 !Local variables-------------------------------
 !scalars
- complex(dpc) :: cspin(0:3), cgcmat_(2,2)
+ complex(dp) :: cspin(0:3), cgcmat_(2,2)
 ! ***********************************************************************
 
 ! cgcmat_ = cgcband * cgcband^T*  i.e. 2x2 matrix of spin components (dpcomplex)
@@ -2118,7 +2118,6 @@ subroutine cg_gsph2box(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,istwf_k,kg_k,iarrsph,oarr
  character(len=500) :: msg
 !arrays
  integer,allocatable :: ixinver(:),iyinver(:),izinver(:)
-
 ! *************************************************************************
 
 !In the case of special k-points, invariant under time-reversal,
@@ -2271,7 +2270,6 @@ subroutine cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rsca
 !Local variables-------------------------------
 !scalars
  integer :: ig,ix,iy,iz,idat,sph_pad,box_pad,ifft
-
 ! *************************************************************************
 
  if (.not. PRESENT(rscal)) then
@@ -2365,7 +2363,7 @@ end subroutine cg_box2gsph
 !!
 !! SIDE EFFECTS
 !!  rho(ldx,ldy,ldz) = contains the input density at input,
-!!                  modified in input with the contribution gived by ur.
+!!                  modified in input with the contribution given by ur.
 !!
 !! SOURCE
 
@@ -2382,7 +2380,6 @@ subroutine cg_addtorho(nx,ny,nz,ldx,ldy,ldz,ndat,weight_r,weight_i,ur,rho)
 !Local variables-------------------------------
 !scalars
  integer :: ix,iy,iz,idat,izdat
-
 ! *************************************************************************
 
  if (ndat==1) then
@@ -2455,7 +2452,6 @@ subroutine cg_vlocpsi(nx,ny,nz,ldx,ldy,ldz,ndat,cplex,vloc,ur)
 !scalars
  integer :: idat,ix,iy,iz,padat
  real(dp) :: fim,fre
-
 ! *************************************************************************
 
  if (cplex==1) then
@@ -2575,7 +2571,6 @@ subroutine cgnc_cholesky(npwsp, nband, cg, istwfk, me_g0, comm_pw, use_gemm, uma
 !arrays
  real(dp) :: rcg0(nband)
  real(dp),allocatable :: r_ovlp(:,:), c_ovlp(:,:,:)
-
 ! *************************************************************************
 
 #ifdef DEBUG_MODE
@@ -2730,7 +2725,6 @@ subroutine cgpaw_cholesky(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw, umat)
 !arrays
  real(dp) :: rcg0(nband), rg0sc(nband)
  real(dp),allocatable :: r_ovlp(:,:), c_ovlp(:,:,:)
-
 ! *************************************************************************
 
  if (istwfk /= 1) then
@@ -2850,7 +2844,6 @@ subroutine cgnc_normalize(npwsp, nband, cg, istwfk, me_g0, comm_pw)
  !character(len=500) :: msg
 !arrays
  real(dp) :: norm(nband),alpha(2)
-
 ! *************************************************************************
 
 !$OMP PARALLEL DO PRIVATE(ptr) IF (nband > 1)
@@ -2936,7 +2929,6 @@ subroutine cgnc_gsortho(npwsp, nband1, icg1, nband2, iocg2, istwfk, normalize, m
 !arrays
  real(dp) :: r_icg1(nband1),r_iocg2(nband2)
  real(dp),allocatable :: proj(:,:,:)
-
 ! *************************************************************************
 
  ABI_MALLOC(proj, (2, nband1, nband2))
@@ -3013,7 +3005,6 @@ subroutine cgnc_gramschmidt(npwsp, nband, cg, istwfk, me_g0, comm_pw)
 !scalars
  integer :: b1,nb2,opt
  logical :: normalize
-
 ! *************************************************************************
 
  ! Normalize the first vector.
@@ -3071,7 +3062,6 @@ subroutine cgpaw_normalize(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw)
  character(len=500) :: msg
 !arrays
  real(dp) :: norm(nband),alpha(2)
-
 ! *************************************************************************
 
 !$OMP PARALLEL DO PRIVATE(ptr) IF (nband > 1)
@@ -3142,7 +3132,7 @@ end subroutine cgpaw_normalize
 !!
 !! SIDE EFFECTS
 !!  iocg2(2*npwsp*nband2), iogsc2(2*npwsp*nband1)
-!!    input: set of |C> and S|C> wher |C> is the set of states to orthogonalize
+!!    input: set of |C> and S|C> where |C> is the set of states to orthogonalize
 !!    output: Orthonormalized set.
 !!
 !! SOURCE
@@ -3164,7 +3154,6 @@ subroutine cgpaw_gsortho(npwsp, nband1, icg1, igsc1, nband2, iocg2, iogsc2, istw
 !arrays
  real(dp) :: r_icg1(nband1),r_iocg2(nband2)
  real(dp),allocatable :: proj(:,:,:)
-
 ! *************************************************************************
 
  ABI_MALLOC(proj,(2,nband1,nband2))
@@ -3243,7 +3232,6 @@ subroutine cgpaw_gramschmidt(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw)
 !scalars
  integer :: b1,nb2,opt
  logical :: normalize
-
 ! *************************************************************************
 
  ! Normalize the first vector.
@@ -3309,7 +3297,7 @@ end subroutine cgpaw_gramschmidt
 !!    if scprod_io=1, scprod is input
 !!
 !! NOTES
-!!  1) MPIWF Might have to be recoded for efficient paralellism
+!!  1) MPIWF Might have to be recoded for efficient parallelism
 !!
 !!  2) The new version employs BLAS2 routine so that the OMP parallelism is delegated to BLAS library.
 !!     May use BLAS3 if multiple wavefunctions are optimized at the same time.
@@ -3337,11 +3325,9 @@ subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
 
 !Local variables-------------------------------
 !scalars
- integer :: nbandm,npw_sp,ierr
- integer :: my_gpu_option
+ integer :: nbandm,npw_sp,ierr, my_gpu_option
 !arrays
  real(dp) :: tsec(2),bkp_scprod(2),bkp_dirg0(2)
-
 ! *************************************************************************
 
  call timab(210+tim_projbd,1,tsec)
@@ -3494,7 +3480,6 @@ subroutine cg_envlop(cg, ecut, gmet, icgmod, kg, kpoint, mcg, nband, npw, nspino
  !character(len=500) :: msg
 !arrays
  real(dp),allocatable :: cut_pws(:)
-
 ! *************************************************************************
 
 !$(k+G)^2$ cutoff from $(1/2)(2 Pi (k+G))^2 = ecut$
@@ -3573,7 +3558,6 @@ subroutine cg_normev(cg, npw, nband)
  integer :: ii,jj
  real(dp) :: den,evim,evre,phim,phre,xnorm
  character(len=500) :: msg
-
 ! *************************************************************************
 
 !Loop over vectors
@@ -3656,17 +3640,16 @@ subroutine cg_precon(cg, eval, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pco
  real(dp),intent(in) :: eval
 !arrays
  real(dp),intent(in) :: cg(2,npw*nspinor),kinpw(npw)
- real(dp),intent(inout) :: vect(2,npw*nspinor)
  real(dp),intent(out) :: pcon(npw)
+ real(dp),intent(inout) :: vect(2,npw*nspinor)
 
 !Local variables-------------------------------
 !scalars
  integer :: ierr,ig,igs,ipw1,ispinor
  real(dp) :: ek0,ek0_inv,fac,poly,xx
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
-
 ! *************************************************************************
 
 !Compute mean kinetic energy of band
@@ -3704,8 +3687,7 @@ subroutine cg_precon(cg, eval, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pco
  call timab(48,2,tsec)
 
  if(ek0<1.0d-10)then
-   write(msg,'(3a)')'The mean kinetic energy of a wavefunction vanishes.',ch10,'It is reset to 0.1 Ha.'
-   ABI_WARNING(msg)
+   ABI_WARNING('The mean kinetic energy of a wavefunction vanishes. It is reset to 0.1 Ha.')
    ek0=0.1_dp
  end if
 
@@ -3722,7 +3704,7 @@ subroutine cg_precon(cg, eval, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pco
    do ig=1+igs,npw+igs
      if(kinpw(ig-igs)<huge(zero)*1.d-11)then
        xx=kinpw(ig-igs)*ek0_inv
-!      Teter polynomial ratio
+       ! Teter polynomial ratio
        poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
        fac=poly/(poly+16._dp*xx**4)
        if (optekin==1) fac=two*fac
@@ -3764,7 +3746,7 @@ end subroutine cg_precon
 !!           0 otherwise
 !!  optpcon= 0 the TPA preconditionning matrix does not depend on band
 !!           1 the TPA preconditionning matrix (not modified)
-!!           2 the TPA preconditionning matrix is independant of iteration number
+!!           2 the TPA preconditionning matrix is independent of iteration number
 !!  vectsize= size of vectors
 !!  mg_g0=1 if this node has Gamma, 0 otherwise.
 !!
@@ -3798,7 +3780,6 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: ek0(:),ek0_inv(:)
-
 ! *************************************************************************
 
  call timab(536,1,tsec)
@@ -4050,7 +4031,7 @@ end subroutine cg_precon_block
 !!           0 otherwise
 !!  optpcon= 0 the TPA preconditionning matrix does not depend on band
 !!           1 the TPA preconditionning matrix (not modified)
-!!           2 the TPA preconditionning matrix is independant of iteration number
+!!           2 the TPA preconditionning matrix is independent of iteration number
 !!  vectsize= size of vectors
 !!  comm=MPI communicator.
 !!
@@ -4074,9 +4055,9 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 !arrays
  real(dp),intent(in) :: kinpw(npw)
  real(dp),intent(inout) :: pcon(npw,blocksize)
- complex(dpc),intent(in) :: cg(vectsize,blocksize),eval(blocksize,blocksize)
- complex(dpc),intent(in) :: ghc(vectsize,blocksize)
- complex(dpc),intent(inout) :: vect(vectsize,blocksize)
+ complex(dp),intent(in) :: cg(vectsize,blocksize),eval(blocksize,blocksize)
+ complex(dp),intent(in) :: ghc(vectsize,blocksize)
+ complex(dp),intent(inout) :: vect(vectsize,blocksize)
 
 !Local variables-------------------------------
 !scalars
@@ -4086,7 +4067,6 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: ek0(:),ek0_inv(:)
-
 ! *************************************************************************
 
  call timab(536,1,tsec)
@@ -4238,7 +4218,6 @@ subroutine fxphas_seq(cg, gsc, icg, igsc, istwfk, mcg, mgsc, nband_k, npw_k, use
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: cimb(:),creb(:),saab(:),sabb(:),sbbb(:) !,sarr(:,:)
-
 ! *************************************************************************
 
 !The general case, where a complex phase indeterminacy is present
@@ -4418,7 +4397,7 @@ end subroutine fxphas_seq
 
 !!****f* m_cgtools/fxphas_and_cmp
 !! NAME
-!! fxphas_and_com
+!! fxphas_and_cmp
 !!
 !! FUNCTION
 !! Fix phase and compare two set of wavefunctions
@@ -4438,10 +4417,9 @@ logical function fxphas_and_cmp(npw_k, nspinor, nband_k, istwfk, cg1, cg2, eig_k
 
 !Local variables-------------------------------
  integer, parameter :: useoverlap0 = 0, mgsc = 0
- integer :: ipw, ipwsp, isp, mcg, band
+ integer :: ipw, mcg, band, ipwsp, isp
  real(dp) :: phi1, rho1, phi2, rho2, max_rho_adiff, atol_rho__, phi_diff_ref, max_dphi_adiff, atol_dphi__, gsc(0,0)
  character(len=500) :: btype
-
 ! ***********************************************************************
 
  atol_rho__ = tol6; if (present(atol_rho)) atol_rho__ = atol_rho
@@ -4455,20 +4433,20 @@ logical function fxphas_and_cmp(npw_k, nspinor, nband_k, istwfk, cg1, cg2, eig_k
  do band=1,nband_k
    call band_type(band, btype)
    if (btype == "degenerate") cycle
-   write(234, *)"band: ", band, "istwfk: ", istwfk, trim(btype)
-   write(235, *)"band: ", band, "istwfk:", istwfk, trim(btype)
-   write(234, *)"cg1:"; write(235, *)"cg2:"
+   !write(234, *)"band: ", band, "istwfk: ", istwfk, trim(btype)
+   !write(235, *)"band: ", band, "istwfk:", istwfk, trim(btype)
+   !write(234, *)"cg1:"; write(235, *)"cg2:"
    !write(234, *)"cg1 rho:"; write(235, *)"cg2 rho phi:"
    do isp=1,nspinor
      do ipw=1,npw_k
        ipwsp = ipw + (isp - 1) * npw_k
-       if (npw_k > 15 .and. ipw > 15 .and. ipw < npw_k - 15) cycle
+       !if (npw_k > 15 .and. ipw > 15 .and. ipw < npw_k - 15) cycle
        !write(234, *)ipwsp, cg1(1, ipwsp, band); write(234, *)ipwsp, cg1(2, ipwsp, band)
        !write(235, *)ipwsp, cg2(1, ipwsp, band); write(235, *)ipwsp, cg2(2, ipwsp, band)
        call rhophi(cg1(:, ipwsp, band), phi1, rho1)
        call rhophi(cg2(:, ipwsp, band), phi2, rho2)
-       write(234, *)ipwsp, rho1!; write(234, *)ipwsp, phi1
-       write(235, *)ipwsp, rho2!; write(235, *)ipwsp, phi2
+       !write(234, *)ipwsp, rho1!; write(234, *)ipwsp, phi1
+       !write(235, *)ipwsp, rho2!; write(235, *)ipwsp, phi2
      end do
    end do
  end do
@@ -4563,7 +4541,6 @@ subroutine overlap_g(doti,dotr,mpw,npw_k1,npw_k2,nspinor,pwind_k,vect1,vect2)
 !Local variables-------------------------------
 !scalars
  integer :: ipw,ispinor,jpw,spnshft1,spnshft2
-
 ! *************************************************************************
 
 !Check if vect1(:,0) = 0 and vect2(:,0) = 0
@@ -4622,9 +4599,6 @@ end subroutine overlap_g
 
 subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k, npw_k, my_nspinor, paral_kgb, &
                     subham, subovl, use_subovl, usepaw, me_g0)
-
- use m_linalg_interfaces
- use m_abi_linalg
 
 !Arguments ------------------------------------
  integer,intent(in) :: icg,igsc,istwf_k,mcg,mgsc,nband_k,npw_k,me_g0
@@ -4855,9 +4829,6 @@ subroutine subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
 &                   mcg,nband_k,npw_k,nspinor,paral_kgb,&
 &                   subham)
 
- use m_linalg_interfaces
- use m_abi_linalg
-
 !Arguments ------------------------------------
  integer,intent(in) :: icg,istwf_k,mcg,nband_k,npw_k
  integer,intent(in) :: nspinor,paral_kgb
@@ -4870,11 +4841,9 @@ subroutine subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
  integer :: iband,ii,ierr,vectsize,use_slk
  character(len=500) :: message
  ! real(dp) :: tsec(2)
- real(dp),allocatable :: evec_tmp(:,:),subham_tmp(:)
- real(dp),allocatable :: work(:,:)
+ real(dp),allocatable :: evec_tmp(:,:),subham_tmp(:), work(:,:)
  real(dp),allocatable :: blockvectora(:,:),blockvectorb(:,:),blockvectorc(:,:)
- real(dp),pointer :: cg_block(:,:)
-
+ real(dp), contiguous, pointer :: cg_block(:,:)
 ! *********************************************************************
 
  if (paral_kgb<0) then
@@ -5080,8 +5049,6 @@ end subroutine subdiago_low_memory
 
 subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_vecnm, useoverlap, vecnm, me_g0, comm)
 
- use m_abi_linalg
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,useoverlap,me_g0,comm
@@ -5101,8 +5068,7 @@ subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_ve
  integer :: cgindex(nvec), gscindex(nvec)
  real(dp) :: buffer2(2),tsec(2)
  real(dp),allocatable :: rblockvectorbx(:,:),rblockvectorx(:,:),rgramxbx(:,:)
- complex(dpc),allocatable :: cblockvectorbx(:,:),cblockvectorx(:,:), cgramxbx(:,:)
-
+ complex(dp),allocatable :: cblockvectorbx(:,:),cblockvectorx(:,:), cgramxbx(:,:)
 ! *************************************************************************
 
 #ifdef DEBUG_MODE
@@ -5532,7 +5498,7 @@ subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_ve
 !            Avoid double counting G=0 contribution
 !            Imaginary part of vecnm at G=0 should be zero,so only take real part
              dotr=zero
-!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotr) SHARED(ii1,ii2,nelem,vecnm)
+             !$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotr) SHARED(ii1,ii2,nelem,vecnm)
              do ii=1,nelem
                dotr=dotr+vecnm(1,ii1+ii)*vecnm(1,ii2+ii)+vecnm(2,ii1+ii)*vecnm(2,ii2+ii)
              end do
@@ -5542,8 +5508,8 @@ subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_ve
              call xmpi_sum(dotr,comm,ierr)
              call timab(48,2,tsec)
 
-!            Then subtract the appropriate amount of the lower state
-!$OMP PARALLEL DO PRIVATE(ii) SHARED(dotr,ii1,ii2,nelem,vecnm)
+             ! Then subtract the appropriate amount of the lower state
+             !$OMP PARALLEL DO PRIVATE(ii) SHARED(dotr,ii1,ii2,nelem,vecnm)
              do ii=1,nelem
                vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)
                vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-dotr*vecnm(2,ii1+ii)
@@ -5598,8 +5564,6 @@ end subroutine pw_orthon
 
 subroutine pw_orthon_cprj(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
 
- use m_abi_linalg
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: icg,mcg,nelem,nspinor,nvec,ortalgo
@@ -5615,7 +5579,6 @@ subroutine pw_orthon_cprj(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
 !arrays
  real(dp) :: ovl_row_tmp(2*nvec),ovl_col_tmp(2*nvec)
  real(dp) :: re,im
-
 ! *************************************************************************
 
 !Nothing to do if ortalgo=-1
@@ -5651,7 +5614,7 @@ subroutine pw_orthon_cprj(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
    ! ovl(i1,i1) = <psi_i1|S|psi_i1>
    summ = ovl_mat(iv1r+iv1l)
    xnorm = sqrt(abs(summ)) ;  summ=1.0_dp/xnorm
-!$OMP PARALLEL DO PRIVATE(ii) SHARED(icg,ivec,nelem,summ,vecnm)
+   !$OMP PARALLEL DO PRIVATE(ii) SHARED(icg,ivec,nelem,summ,vecnm)
    do ii=1+nelem*(ivec-1)+icg,nelem*ivec+icg
      vecnm(1,ii)=vecnm(1,ii)*summ
      vecnm(2,ii)=vecnm(2,ii)*summ
@@ -5677,7 +5640,7 @@ subroutine pw_orthon_cprj(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
        if (abs(re-1)>tol10.or.abs(im)>tol10) then
          write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (re)',re
          write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (im)',im
-         ABI_WARNING('In pw_orthon_cprj : the result should be equal to one!')
+         ABI_WARNING('In pw_orthon_cprj: the result should be equal to one!')
        end if
      end if
    end do
@@ -5696,13 +5659,13 @@ subroutine pw_orthon_cprj(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
 !      Then subtract the appropriate amount of the lower state
        ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
        ! |psi'_i2> = |psi_i2> - <psi_i1|S|psi_i2> |psi_i1>
-!$OMP PARALLEL DO PRIVATE(ii) SHARED(doti,dotr,ii1,ii2,nelem,vecnm)
+       !$OMP PARALLEL DO PRIVATE(ii) SHARED(doti,dotr,ii1,ii2,nelem,vecnm)
        do ii=1,nelem
          vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)+doti*vecnm(2,ii1+ii)
          vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-doti*vecnm(1,ii1+ii)-dotr*vecnm(2,ii1+ii)
        end do
        if (do_cprj) call pawcprj_zaxpby((/-dotr,-doti/),(/one,zero/),cprj(:,nspinor*(ivec-1)+1:nspinor*ivec),&
-&                                                                    cprj(:,nspinor*(ivec2-1)+1:nspinor*ivec2))
+                                                                     cprj(:,nspinor*(ivec2-1)+1:nspinor*ivec2))
        ! As |psi_i2> changed, we update the overlap matrix accordingly.
        ! We have: <psi'_i3|S|psi'_i2> = <psi'_i3|S|psi_i2> - <psi_i1|S|psi_i2> <psi'_i3|S|psi_i1>
        ! Remember that i2>i1.
@@ -5790,7 +5753,6 @@ subroutine cg_hprotate_and_get_diag(nband_k, subvnlx, evec, enlx_k)
 !scalars
  integer :: ii,jj,pidx,iband
  real(dp),allocatable :: mat1(:,:,:),matvnl(:,:,:)
-
 ! *************************************************************************
 
  ABI_MALLOC(matvnl,(2,nband_k,nband_k))
@@ -5808,7 +5770,7 @@ subroutine cg_hprotate_and_get_diag(nband_k, subvnlx, evec, enlx_k)
 
  call zhemm('L','U',nband_k,nband_k,cone,matvnl,nband_k,evec,nband_k,czero,mat1,nband_k)
 
-!$OMP PARALLEL DO
+ !$OMP PARALLEL DO
  do iband=1,nband_k
    enlx_k(iband) = cg_real_zdotc(nband_k,evec(:,iband),mat1(:,:,iband))
  end do
@@ -5849,7 +5811,6 @@ subroutine cg_hrotate_and_get_diag(istwf_k, nband_k, totvnlx, evec, enlx_k)
  real(dp),external :: ddot
  integer :: jj,iband
  real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:), evec_loc(:,:)
-
 ! *************************************************************************
 
  ABI_MALLOC(matvnl, (2,nband_k, nband_k))
@@ -5913,7 +5874,7 @@ subroutine cg_get_eigens(usepaw, istwf_k, npwsp, ndat, cg, ghc, gsc, eig, me_g0,
 ! *************************************************************************
 
  ! <psi|H|psi> / <psi|S|psi>
-!$OMP PARALLEL DO
+ !$OMP PARALLEL DO IF (ndat > 1)
  do idat=1,ndat
    call dotprod_g(eig(idat), doti, istwf_k, npwsp, option1, ghc(:,idat), cg(:,idat), me_g0, xmpi_comm_self)
    if (usepaw == 1) then
@@ -5936,7 +5897,7 @@ end subroutine cg_get_eigens
 !!  cg_get_residvecs
 !!
 !! FUNCTION
-!!  Compute redidual vectors (H - eS) |psi> for ndat states.
+!!  Compute residual vectors (H - eS) |psi> for ndat states.
 !!
 !! INPUTS
 !!
@@ -5995,7 +5956,7 @@ subroutine cg_norm2g(istwf_k, npwsp, ndat, cg, norms, me_g0, comm)
  integer :: idat, ierr
 ! *************************************************************************
 
-!$OMP PARALLEL DO IF (ndat > 1)
+ !$OMP PARALLEL DO IF (ndat > 1)
  do idat=1,ndat
    call sqnorm_g(norms(idat), istwf_k, npwsp, cg(:,idat), me_g0, xmpi_comm_self)
  end do
@@ -6081,6 +6042,8 @@ subroutine cg_precon_many(istwf_k, npw, nspinor, ndat, cg, optekin, kinpw, vect,
 
  ! TODO: Optimized version for MPI with ndat > 1
  ABI_MALLOC(pcon, (npw))
+
+ !$OMP PARALLEL DO IF (ndat > 1)
  do idat=1,ndat
    call cg_precon(cg(:,idat), zero, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pcon, vect(:,idat), comm)
  end do
@@ -6126,7 +6089,7 @@ subroutine cg_zaxpy_many_areal(npwsp, ndat, alphas, x, y)
  integer :: idat
 ! *************************************************************************
 
-!$OMP PARALLEL DO IF (ndat > 1)
+ !$OMP PARALLEL DO IF (ndat > 1)
  do idat=1,ndat
    call daxpy(2*npwsp, alphas(idat), x(1,idat), 1, y(1,idat), 1)
  end do
@@ -6240,6 +6203,116 @@ subroutine cg_randomize(istwf_k, npw_k, nspinor, nband_k, me_g0, cg_k)
 
 end subroutine cg_randomize
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_cgtools/cg_copy_spin
+!! NAME
+!!  cg_copy_spin
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine cg_copy_spin(spin, npw_k, nspinor, ndat, in_cg, out_cg)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: spin, npw_k, nspinor, ndat
+!arrays
+ real(dp),intent(inout) :: in_cg(2,npw_k,nspinor,ndat)
+ real(dp),intent(out) :: out_cg(2,npw_k,ndat)
+
+!Local variables ------------------------------
+ integer :: idat
+! *************************************************************************
+
+ !$OMP PARALLEL DO IF (ndat > 1)
+ do idat=1,ndat
+   out_cg(:,:,idat) = in_cg(:,:,spin,idat)
+ end do
+
+end subroutine cg_copy_spin
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_cgtools/cg_put_spin
+!! NAME
+!!  cg_put_spin
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine cg_put_spin(spin, npw_k, nspinor, ndat, in_cg, out_cg)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: spin, npw_k, nspinor, ndat
+!arrays
+ real(dp),intent(inout) :: in_cg(2,npw_k,ndat)
+ real(dp),intent(out) :: out_cg(2,npw_k,nspinor,ndat)
+
+!Local variables ------------------------------
+ integer :: idat
+! *************************************************************************
+
+ !$OMP PARALLEL DO IF (ndat > 1)
+ do idat=1,ndat
+   out_cg(:,:,spin, idat) = in_cg(:,:,idat)
+ end do
+
+end subroutine cg_put_spin
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_cgtools/cg_p_psi
+!! NAME
+!!  cg_g_psi
+!!
+!! FUNCTION
+!!  Compute <g|-i\Nabla |psi_nk>.
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine cg_p_psi(npw_k, nspinor, ndat, kk, kg_k, cg_k, p_cg_k)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: npw_k, nspinor, ndat
+!arrays
+ real(dp),intent(in) :: kk(3)
+ integer,intent(in) :: kg_k(3,npw_k)
+ real(dp),intent(in) :: cg_k(2,npw_k*nspinor,ndat)
+ real(dp),intent(out) :: p_cg_k(2,npw_k*nspinor,ndat,3)
+
+!Local variables ------------------------------
+ integer :: idir, ig, ispinor, idat, spad, ipwsp
+! *************************************************************************
+
+ !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(spad, ipwsp)
+ do idir=1,3
+   do idat=1,ndat
+     do ispinor=1,nspinor
+       spad = (ispinor - 1) * npw_k
+       do ig=1,npw_k
+         ipwsp = ig + spad
+         p_cg_k(:, ipwsp, idat, idir) = cg_k(:, ipwsp, idat) * (kg_k(idir, ig) + kk(idir))
+       end do ! ig
+     end do ! ispinor
+   end do ! idir
+ end do ! idat
+
+end subroutine cg_p_psi
+!!**
 
 end module m_cgtools
 !!***

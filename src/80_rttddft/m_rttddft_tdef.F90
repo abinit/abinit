@@ -7,7 +7,7 @@
 !!  related to time-dependent electric field
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2023 ABINIT group (FB)
+!!  Copyright (C) 2021-2026 ABINIT group (FBrieuc)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -112,15 +112,15 @@ subroutine tdef_init(tdef,td_ef_type,td_ef_pol,td_ef_ezero,td_ef_tzero,td_ef_lam
 
 ! ***********************************************************************
 
- if (td_ef_type > 2 .or. td_ef_type < 0) then
+ if (td_ef_type > 1 .or. td_ef_type < 0) then
    ABI_ERROR("Wrong value of td_ef_type")
  end if
 
  tdef%ef_type  = td_ef_type
  tdef%ef_ezero = td_ef_pol*td_ef_ezero
- tdef%ef_tzero = td_ef_tzero
  tdef%ef_tau   = td_ef_tau
- tdef%ef_omega = 2.0_dp*pi*Sp_Lt/td_ef_lambda !2*pi*f=2*pi*c/lambda
+ tdef%ef_omega = 2.0_dp*pi*Speed_Light/td_ef_lambda !2*pi*f=2*pi*c/lambda
+ tdef%ef_tzero = td_ef_tzero
  tdef%ef_sin_a = 2.0_dp*pi/td_ef_tau + tdef%ef_omega
  tdef%ef_sin_b = 2.0_dp*pi/td_ef_tau - tdef%ef_omega
  if (td_ef_induced_vecpot == 0) then

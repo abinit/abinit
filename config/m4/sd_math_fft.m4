@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon <devops@materialsevolution.es>)
+## Copyright (C) 2019-2026 ABINIT group (Yann Pouillon <devops@materialsevolution.es>)
 
 #
 # Multi-flavor Fast Fourier Transform support
@@ -120,9 +120,11 @@ AC_DEFUN([SD_FFT_DETECT], [
             AC_DEFINE([HAVE_FFTW3_MPI], 1,
               [Define to 1 if you have a MPI-enabled FFTW3 library.])
           fi
-          if test "${sd_fftw3_threads_ok}" = "yes" ; then
+          if test "${sd_fft_flavor}" = "fftw3-threads" -a "${sd_fftw3_threads_ok}" = "yes" ; then
             AC_DEFINE([HAVE_FFTW3_THREADS], 1,
               [Define to 1 if you have a threads-enabled FFTW3 library.])
+            sd_fft_libs="-lfftw3_threads -lpthread -lfftw3f_threads ${sd_fft_libs}"
+            sd_fft_ldflags="-lfftw3_threads -lpthread -lfftw3f_threads ${sd_fft_ldflags}"
           fi
         fi
         ;;
@@ -329,19 +331,19 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
     sd_fft_selected_flavors="dfti ${sd_fft_selected_flavors}"
   fi
 
-  AC_MSG_RESULT([ ${sd_fft_selected_flavors}])
+  AC_MSG_RESULT([${sd_fft_selected_flavors}])
+
   # Warn about incompatibilities
   if test "${tmp_linalg_has_mkl}" != ""; then
-  AC_MSG_WARN([MKL is incompatible with FFTW3
+      AC_MSG_WARN([MKL is incompatible with FFTW3
 
                     Please use DFTI instead and consult
                     https://software.intel.com/content/www/us/en/develop/documentation/onemkl-developer-reference-fortran/top/fourier-transform-functions.html
 
                     If you set the FFT flavor to fftw3, the configure script
                     will abort. Otherwise, your FFTW3 settings will be ignored.
-
-])
-  sd_fftw3_enable="no"
+      ])
+    sd_fftw3_enable="no"
   fi
 
   # Clean-up the mess

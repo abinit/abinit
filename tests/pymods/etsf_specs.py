@@ -3,28 +3,36 @@
 This module provides functions and objects to validate netcdf files written in the ETSF-IO file format.
 For a quick reference to the etsf specs see: http://esl.cecam.org/mediawiki/index.php/ETSF_File_Format_Specifications
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
 
+from __future__ import annotations
+
+import logging
 import os
 import re
-import logging
+from typing import Any
+
 logger = logging.getLogger(__name__)
 
 from .termcolor import cprint
 
 try:
-    import numpy as np
     import netCDF4
+    import numpy as np
 except ImportError as exc:
     errmsg = str(exc) + "\nCannot import numpy or netCDF4. Use `anaconda or pip install netcdf`\n"
     logger.warning(errmsg)
     raise ImportError(errmsg)
 
 
-def all_subclasses(cls):
+def all_subclasses(cls: type[Any]) -> list[type[Any]]:
     """
-    Given a class `cls`, this recursive function returns a list with
-    all subclasses, subclasses of subclasses, and so on.
+    Given a class `cls`, return all its subclasses recursively.
+
+    Args:
+        cls (type): The base class.
+
+    Returns:
+        list: All subclasses, subclasses of subclasses, etc.
     """
     subclasses = cls.__subclasses__()
     return subclasses + [g for s in subclasses for g in all_subclasses(s)]
@@ -32,9 +40,14 @@ def all_subclasses(cls):
 
 class EtsfObject:
     """
-    Base class for netcdf Dimensions, Variables, Attributes.
-    Subclasses implement a `validate` method that receives a nc dataset
-    and return a list of errors (strings).
+    Base class for ETSF-specified NetCDF objects (Dimensions, Variables, Attributes).
+
+    This class serves as a foundation for implementing specific validation rules
+    associated with different types of NetCDF entities defined in the ETSF-IO
+    specification.
+
+    Subclasses must implement a `validate` method that takes a NetCDF dataset instance
+    as input and returns a list of strings describing any validation failures.
     """
     def __str__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.name)
@@ -43,12 +56,28 @@ class EtsfObject:
 class EtsfDimension(EtsfObject):
     """A dimension has a name, a type and, optionally, a list of allowed values."""
     def __init__(self, name, xtype, allowed=None):
+        """
+        Initialize an EtsfDimension instance.
+
+        Args:
+            name (str): Dimension name.
+            xtype (str): Data type.
+            allowed (list, optional): List of allowed values.
+        """
         self.name = name
         self.xtype = xtype
         self.allowed = allowed
 
     def validate(self, ncdata):
-        """Validate the content in the nc dataset, return list of errors."""
+        """
+        Validate the dimension in the NC dataset.
+
+        Args:
+            ncdata (netCDF4.Dataset): The dataset to validate.
+
+        Returns:
+            list: List of error strings.
+        """
         errors = []
         eapp = errors.append
 
@@ -69,11 +98,27 @@ class EtsfDimension(EtsfObject):
 class EtsfAttribute(EtsfObject):
     """A dimension has a name, a type and, optionally, a shape and list of allowed values."""
     def __init__(self, name, xtype, shape=None, allowed=None):
+        """
+        Initialize an EtsfAttribute instance.
+
+        Args:
+            name (str): Attribute name.
+            xtype (str): Data type.
+            shape (list, optional): Expected shape.
+            allowed (list, optional): List of allowed values.
+        """
         self.name = name
-        self.allowed = allowed
 
     def validate(self, ncdata):
-        """Validate the content in the nc dataset, return list of errors."""
+        """
+        Validate the attribute in the NC dataset.
+
+        Args:
+            ncdata (netCDF4.Dataset): The dataset to validate.
+
+        Returns:
+            list: List of error strings.
+        """
         errors = []
         eapp = errors.append
         nc_attrs = ncdata.ncattrs()
@@ -93,8 +138,19 @@ class EtsfAttribute(EtsfObject):
 
 class EtsfVariable(EtsfObject):
     """
-    A variable has a name, a type and a list of dimensions.
-    The list of allowed values and the attributes that must be specified are optional.
+    A variable with a name, a type, and a list of dimensions.
+
+    This class provides a representation of a NetCDF Variable as defined in the
+    ETSF-IO specifications. It handles expected names, data types, and
+    dimensions, and can specify allowed values and required attributes.
+
+    Attributes:
+        all_variables (list[EtsfVariable]): Registry of all EtsfVariable instances created.
+        name (str): The name of the variable.
+        xtype (str): The expected NetCDF data type (e.g., 'double', 'char').
+        dimensions (list[EtsfDimension]): List of dimension objects defining the variable's shape.
+        allowed (list, optional): A collection of values the variable is allowed to take.
+        reqattrs (list[EtsfAttribute], optional): Attributes that the variable must possess.
     """
     # Stores all the instances we are gonna create.
     all_variables = []
@@ -115,7 +171,15 @@ class EtsfVariable(EtsfObject):
         self.__class__.all_variables.append(self)
 
     def validate(self, ncdata):
-        """Validate the content in the nc dataset, return list of errors."""
+        """
+        Validate the variable in the NC dataset.
+
+        Args:
+            ncdata (netCDF4.Dataset): The dataset to validate.
+
+        Returns:
+            list: List of error strings.
+        """
         errors = []
         eapp = errors.append
 
@@ -174,11 +238,19 @@ class VariableWithUnits(EtsfVariable):
         reqattrs = reqattrs[:]
         reqattrs.append(units)
 
-        super(VariableWithUnits, self).__init__(name, xtype, dimensions, allowed=allowed, reqattrs=reqattrs)
+        super().__init__(name, xtype, dimensions, allowed=allowed, reqattrs=reqattrs)
 
     def validate(self, ncdata):
-        """Validate the content in the nc dataset, return list of errors."""
-        errors = super(VariableWithUnits, self).validate(ncdata)
+        """
+        Validate the variable (with units) in the NC dataset.
+
+        Args:
+            ncdata (netCDF4.Dataset): The dataset to validate.
+
+        Returns:
+            list: List of error strings.
+        """
+        errors = super().validate(ncdata)
 
         if self.name not in ncdata.variables:
             assert errors
@@ -302,7 +374,7 @@ reduced_symmetry_translations = EtsfVariable("reduced_symmetry_translations", "d
 # The "symmorphic" attribute is needed.
 
 # In principle: allowed=range(1, 233)) but I usually use 0 when the space_group is not available
-space_group = EtsfVariable("space_group", "integer", [], allowed=range(0, 233))
+space_group = EtsfVariable("space_group", "integer", [], allowed=range(233))
 atom_species = EtsfVariable("atom_species", "integer", [number_of_atoms]) # Between 1 and number_of_atom_species.
 
 reduced_atom_positions = EtsfVariable("reduced_atom_positions", "double", [number_of_atoms, number_of_reduced_dimensions])
@@ -354,10 +426,14 @@ exchange_correlation_potential = VariableWithUnits("exchange_correlation_potenti
 # Units attribute required. The attribute "scale to atomic units" might also be mandatory
 
 
-class EtsfGroup(object):
-    """"
-    This object is essentially a container of variables
+class EtsfGroup:
+    """
+    This object is essentially a container of variables.
     A Group can contain other subgroups.
+
+    It represents a logical container for ETSF variables, dimensions, and attributes,
+    satisfying specific parts of the ETSF core specification (e.g., Crystallographic
+    data, K-points, etc.).
     """
     attributes = []
     dimensions = []
@@ -367,6 +443,15 @@ class EtsfGroup(object):
 
     @classmethod
     def validate_file(cls, path):
+        """
+        Validate the NetCDF file at path.
+
+        Args:
+            path (str): Path to the NetCDF file.
+
+        Returns:
+            list: List of error strings.
+        """
         ncdata = netCDF4.Dataset(path, mode="r")
         errors = cls.validate(ncdata)
         ncdata.close()
@@ -374,6 +459,15 @@ class EtsfGroup(object):
 
     @classmethod
     def validate(cls, ncdata):
+        """
+        Validate the NetCDF data.
+
+        Args:
+            ncdata: The NetCDF dataset to validate.
+
+        Returns:
+            list: List of error strings.
+        """
         errors = []
 
         # Test attributes.
@@ -658,12 +752,10 @@ class WavefunctionGroup(EtsfGroup):
         #real_or_complex_coefficients and/or real_or_complex_wavefunctions
         number_of_symmetry_operations,
         number_of_reduced_dimensions,
-        #
         max_number_of_states,
         number_of_kpoints,
         number_of_spins,
         number_of_spinor_components,
-        #
         number_of_grid_points_vector1,
         number_of_grid_points_vector2,
         number_of_grid_points_vector3,
@@ -685,10 +777,15 @@ class PotentialGroup(DenPotGroup):
     pass
 
 
-def validate_vars(path):
+def validate_vars(path: str) -> list[str]:
     """
-    Validate the etsf variables declared in file `path`.
-    Return list of errors.
+    Validate the ETSF variables declared in file `path`.
+
+    Args:
+        path (str): Path to the NetCDF file.
+
+    Returns:
+        list: List of error strings.
     """
     ncdata = netCDF4.Dataset(path, mode="r")
     evars, all_errors = [] , []
@@ -725,7 +822,15 @@ def validate_vars(path):
 
 
 def find_groups(path):
-    """Find the etsf groups present in path and validate them."""
+    """
+    Find the ETSF groups present in path and validate them.
+
+    Args:
+        path (str): Path to the NetCDF file.
+
+    Returns:
+        list: List of groups present and validated.
+    """
     ncdata = netCDF4.Dataset(path, mode="r")
     groups = []
     for g in all_subclasses(EtsfGroup):
@@ -740,8 +845,14 @@ def find_groups(path):
 
 def validate_groups(path, groups):
     """
-    Validate the presence and the consistency of a list of groups..
-    Return list of errors
+    Validate the presence and consistency of a list of groups.
+
+    Args:
+        path (str): Path to the NetCDF file.
+        groups (list): List of EtsfGroup subclasses to validate.
+
+    Returns:
+        list: List of error strings.
     """
     ncdata = netCDF4.Dataset(path, mode="r")
 
@@ -786,10 +897,13 @@ def validate_groups(path, groups):
 
 def validate_ncfile(path):
     """
-    This function validates the netcdf files produced by Abinit.
+    Validate the NetCDF files produced by ABINIT.
 
-    Return:
-        List of strings with error messages.
+    Args:
+        path (str): Path to the NetCDF file.
+
+    Returns:
+        list: List of error strings.
     """
     # Every netcdf file produced by Abinit must be listed in this dictionary.
     # that maps the file extension to the list of Groups contained in the file.
@@ -861,7 +975,7 @@ def validate_ncfile(path):
     ext = fname.split("_")[-1]
     try:
         groups = ext2groups[ext]
-    except KeyError as exc:
+    except KeyError:
         errors = ["Unknown file extension in file %s" % fname]
         print(errors)
         return errors

@@ -5,9 +5,8 @@
 !! FUNCTION
 !!  Small module to define data used to profile and trace abinit with nvtx library (Nvidia nsys).
 !!
-!!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2025 ABINIT group (MT)
+!!  Copyright (C) 2000-2026 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +25,7 @@ module m_nvtx_data
 
   implicit none
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 117
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 135
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -147,6 +146,28 @@ module m_nvtx_data
   integer, parameter :: NVTX_DMFT_RW_SELF = 115
   integer, parameter :: NVTX_DMFT_SAVEOCC = 116
   integer, parameter :: NVTX_TRANSPOSER_MPI_ALL2ALL = 117
+  integer, parameter :: NVTX_SLICE_GET_AX_BX = 118
+  integer, parameter :: NVTX_SLICE_TRANSPOSE = 119
+  integer, parameter :: NVTX_SLICE_RRQ = 120
+  integer, parameter :: NVTX_SLICE_SCHEDULE = 121
+  integer, parameter :: NVTX_SLICE_NONLOP = 122
+
+  ! GWR code.
+  integer, parameter :: NVTX_GWR_GKBZ_RPR_PM = 123
+  integer, parameter :: NVTX_GWR_RPR_TO_GGP = 124
+  integer, parameter :: NVTX_GWR_ROTATE_WC = 125
+  integer, parameter :: NVTX_GWR_MYQ_WW_GPR = 126
+  integer, parameter :: NVTX_GWR_WC_RPR_QBZ = 127
+  integer, parameter :: NVTX_GWR_COS_TRANSFORM = 128
+  integer, parameter :: NVTX_GWR_BUILD_WC = 129
+  integer, parameter :: NVTX_GWR_BRAKET_UR = 130
+
+  ! GETGH1C SECTIONS
+  integer, parameter :: NVTX_GETGH1_LOCPOT = 131
+  integer, parameter :: NVTX_GETGH1_NLOCPOT = 132
+  integer, parameter :: NVTX_GETGH1_DDK = 133
+  integer, parameter :: NVTX_GETGH1_DDE = 134
+  integer, parameter :: NVTX_GETGH1_STRAIN = 135
 
 contains
 
@@ -271,7 +292,27 @@ contains
          & "DMFT_SYM_MATLU", &
          & "DMFT_RW_SELF", &
          & "DMFT_SAVEOCC", &
-         & "TRANSPOSER_MPI_ALL2ALL" &
+         & "TRANSPOSER_MPI_ALL2ALL", &
+         & "SLICE_GET_AX_BX", &
+         & "SLICE_TRANSPOSE", &
+         & "SLICE_RRQ", &
+         & "SLICE_SCHEDULE", &
+         & "SLICE_NONLOP", &
+         ! GWR CODE
+         & "GWR_GKBZ_RPR_PM", &
+         & "GWR_RPR_TO_GGP", &
+         & "GWR_ROTATE_WC", &
+         & "GWR_MYQ_WW_GPR", &
+         & "GWR_WC_RPR_QBZ", &
+         & "GWR_COS_TRANSFORM", &
+         & "GWR_BUILD_WC", &
+         & "GWR_BRAKET_UR", &
+         ! GETGH1C SECTIONS
+         & "NVTX_GETGH1_LOCPOT", &
+         & "NVTX_GETGH1_NLOCPOT", &
+         & "NVTX_GETGH1_DDK", &
+         & "NVTX_GETGH1_DDE", &
+         & "NVTX_GETGH1_STRAIN" &
          & ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
@@ -391,6 +432,28 @@ contains
     nvtx_ids(115)=NVTX_DMFT_RW_SELF
     nvtx_ids(116)=NVTX_DMFT_SAVEOCC
     nvtx_ids(117)=NVTX_TRANSPOSER_MPI_ALL2ALL
+    nvtx_ids(118)=NVTX_SLICE_GET_AX_BX
+    nvtx_ids(119)=NVTX_SLICE_TRANSPOSE
+    nvtx_ids(120)=NVTX_SLICE_RRQ
+    nvtx_ids(121)=NVTX_SLICE_SCHEDULE
+    nvtx_ids(122)=NVTX_SLICE_NONLOP
+
+    ! GWR CODE
+    nvtx_ids(123) = NVTX_GWR_GKBZ_RPR_PM
+    nvtx_ids(124) = NVTX_GWR_RPR_TO_GGP
+    nvtx_ids(125) = NVTX_GWR_ROTATE_WC
+    nvtx_ids(126) = NVTX_GWR_MYQ_WW_GPR
+    nvtx_ids(127) = NVTX_GWR_WC_RPR_QBZ
+    nvtx_ids(128) = NVTX_GWR_COS_TRANSFORM
+    nvtx_ids(129) = NVTX_GWR_BUILD_WC
+    nvtx_ids(130) = NVTX_GWR_BRAKET_UR
+
+    ! GETGH1C SECTIONS
+    nvtx_ids(131) = NVTX_GETGH1_LOCPOT
+    nvtx_ids(132) = NVTX_GETGH1_NLOCPOT
+    nvtx_ids(133) = NVTX_GETGH1_DDK
+    nvtx_ids(134) = NVTX_GETGH1_DDE
+    nvtx_ids(135) = NVTX_GETGH1_STRAIN
 
   end subroutine nvtx_init
 

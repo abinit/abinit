@@ -8,7 +8,7 @@
 !! It mainly defines a 'chebfi' datatypes and associated methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2023-2025 ABINIT group (LB)
+!! Copyright (C) 2023-2026 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,7 +76,6 @@ module m_chebfi2_cprj
    integer :: space_cprj
    integer :: spacedim                      ! Space dimension for one vector
    integer :: cprjdim                       ! cprj dimension
-   integer :: blockdim_cprj                 !
    integer :: total_spacedim                ! Maybe not needed
    integer :: neigenpairs                   ! Number of eigen values/vectors we want
    integer :: ndeg_filter                   ! Degree of the polynomial filter
@@ -199,7 +198,6 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,cprjdim,tolerance,ecut,bandpp
  chebfi%neigenpairs   = neigenpairs
  chebfi%spacedim      = spacedim
  chebfi%cprjdim       = cprjdim
- chebfi%blockdim_cprj = bandpp*xg_nonlop%nspinor
  if (tolerance > 0.0) then
    chebfi%tolerance = tolerance
  else
@@ -275,8 +273,8 @@ subroutine chebfi_allocateAll(chebfi)
  call xg_setBlock(chebfi%X_NP,chebfi%X_prev,total_spacedim,chebfi%bandpp,fcol=chebfi%bandpp+1)
 
  call xg_init(chebfi%AX,space,spacedim,neigenpairs,chebfi%spacecom,me_g0=chebfi%me_g0)
- call xg_init(chebfi%cprj_work ,space_cprj,chebfi%cprjdim,chebfi%blockdim_cprj,chebfi%spacecom)
- call xg_init(chebfi%cprj_work2,space_cprj,chebfi%cprjdim,chebfi%blockdim_cprj,chebfi%spacecom)
+ call xg_init(chebfi%cprj_work ,space_cprj,chebfi%cprjdim,chebfi%bandpp*nspinor,chebfi%spacecom)
+ call xg_init(chebfi%cprj_work2,space_cprj,chebfi%cprjdim,chebfi%bandpp*nspinor,chebfi%spacecom)
 
  call xg_init(chebfi%proj_work,space,chebfi%xg_nonlop%max_npw_k,chebfi%xg_nonlop%cprjdim,chebfi%spacecom,me_g0=chebfi%me_g0)
 
@@ -595,6 +593,8 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
 
  call timab(tim_amp_f,1,tsec)
  call chebfi_ampfactor(chebfi, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
+ ! this results in higher condition number so avoid
+ !call chebfi_ampfactorMax(chebfi, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
  call timab(tim_amp_f,2,tsec)
 
  call xg_free(DivResults)
@@ -615,7 +615,7 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  call timab(tim_cprj,1,tsec)
  call xg_nonlop_getcprj(xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%cprj_work%self)
  call timab(tim_cprj,2,tsec)
- call xg_RayleighRitz_cprj(chebfi%xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,chebfi%blockdim_cprj,ierr,0,&
+ call xg_RayleighRitz_cprj(chebfi%xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,ierr,0,&
    tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
 
  if (chebfi%paw) then
@@ -895,6 +895,37 @@ subroutine chebfi_ampfactor(chebfi,DivResults,lambda_minus,lambda_plus,ndeg_filt
 end subroutine chebfi_ampfactor
 !!***
 
+subroutine chebfi_ampfactorMax(chebfi,DivResults,lambda_minus,lambda_plus,ndeg_filter_bands)
+
+  ! Arguments ------------------------------------
+  integer,           intent(in   ) :: ndeg_filter_bands(:)
+  type(xgBlock_t),   intent(in   ) :: DivResults
+  real(dp),          intent(in   ) :: lambda_minus
+  real(dp),          intent(in   ) :: lambda_plus
+  type(chebfi_t),    intent(inout) :: chebfi
+
+  ! Local variables-------------------------------
+  ! scalars
+  integer         :: iband
+  real(dp)        :: ampfactor
+  !type(xgBlock_t) :: X_part
+  !type(xgBlock_t) :: AX_part
+  real(dp),pointer :: eig(:,:)
+
+  ! *********************************************************************
+
+  call xgBlock_reverseMap(DivResults,eig,rows=1,cols=cols(DivResults))
+
+  !cheb_poly1(x, n, a, b)
+  ampfactor = maxval( (/ (cheb_poly1(eig(1,iband), ndeg_filter_bands(iband), lambda_minus, lambda_plus),&
+      iband=1,cols(DivResults)) /) )
+
+  call xgBlock_scale(chebfi%xXColsRows, 1/ampfactor, 1)
+  call xgBlock_scale(chebfi%xAXColsRows, 1/ampfactor, 1)
+
+end subroutine chebfi_ampfactorMax
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_chebfi2_cprj/chebfi_oracle1
@@ -1103,6 +1134,38 @@ subroutine chebfi_set_ndeg_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivRe
  ABI_FREE(ndeg_filter_bands)
 
 end subroutine chebfi_set_ndeg_from_residu
+!!***
+
+!!****f* m_chebfi2/jackson_lowpass_coeffs
+!! NAME
+!! jackson_lowpass_coeffs
+!!
+!! FUNCTION
+!! Compute Jackson-damped Chebyshev coefficients for a lowpass step
+!! on interval [lambda_min, lambda_max], degree M
+
+subroutine jackson_lowpass_coeffs(M, c)
+    implicit none
+    integer, intent(in) :: M
+    real(dp), intent(out) :: c(1:M+1)
+    integer :: k
+    real(dp) :: theta, g
+
+    ! Chebyshev coefficients for step at left end (-1 in scaled coords)
+    theta = acos(-1.0d0)   ! step at left edge
+    c(1) = theta / Pi       ! k = 0
+
+    do k = 1, M
+        c(k+1) = -2.0d0 / Pi * sin(k*theta) / k
+    end do
+
+    ! Apply Jackson damping
+    do k = 0, M
+        g = ((M-k+1)*cos(Pi*k/(M+1)) + sin(Pi*k/(M+1))/tan(Pi/(M+1)))/(M+1)
+        c(k+1) = c(k+1) * g
+    end do
+
+end subroutine jackson_lowpass_coeffs
 !!***
 
 end module m_chebfi2_cprj

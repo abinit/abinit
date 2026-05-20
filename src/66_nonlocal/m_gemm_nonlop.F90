@@ -8,7 +8,7 @@
 !!  which leads to excellent CPU efficiency and OpenMP scalability.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2025 ABINIT group (AL,MS)
+!! Copyright (C) 2014-2026 ABINIT group (AL,MS)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,6 +38,7 @@ module m_gemm_nonlop
  use m_abicore
  use m_xmpi
  use m_xomp
+ use m_gputk
  use m_abi_linalg
  use m_gemm_nonlop_projectors
 
@@ -222,7 +223,7 @@ contains
   real(dp),intent(out),  target :: svectout(:,:)
   real(dp),intent(inout),target :: vectout(:,:)
   real(dp),intent(inout),optional, ABI_CONTIGUOUS target :: vectproj(:,:,:)
-  type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
+  type(pawcprj_type),intent(inout) :: cprjin(:,:)
 
   ! locals
   integer :: ii, idat, igrad, nprojs, ngrads, ngrads2, shift, iatom, nlmn, ierr, ibeg, iend, ikin, ikout
@@ -486,7 +487,7 @@ contains
   !$OMP TARGET ENTER DATA MAP(alloc:vectout)  IF(transfer_vectout)
   !$OMP TARGET ENTER DATA MAP(alloc:svectout) IF(transfer_svectout)
 
-  !$OMP TARGET ENTER DATA MAP(to:atindx1,indlmn,enl_) IF(gpu_option==ABI_GPU_OPENMP)
+  !$OMP TARGET ENTER DATA MAP(to:atindx1,indlmn) IF(gpu_option==ABI_GPU_OPENMP)
   if(size(enl_)>0) then
     !$OMP TARGET ENTER DATA MAP(to:enl_) IF(gpu_option==ABI_GPU_OPENMP)
   end if

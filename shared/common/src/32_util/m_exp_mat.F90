@@ -6,7 +6,7 @@
 !!  This subroutine calculate the exponential of a  matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2025 ABINIT group (XG)
+!! Copyright (C) 2002-2026 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -65,8 +65,8 @@ CONTAINS  !===========================================================
   ! scalars
   real(dp),intent(in) ::  factor
   ! arrays
-  complex(dpc),intent(inout) :: mat_a(:,:)
-  !complex(dpc) :: exp_mat_cx(mat_a_size,mat_a_size)
+  complex(dp),intent(inout) :: mat_a(:,:)
+  !complex(dp) :: exp_mat_cx(mat_a_size,mat_a_size)
 
   !Local ------------------------------------------
   ! scalars
@@ -78,8 +78,8 @@ CONTAINS  !===========================================================
   integer :: ipvt(mat_a_size)
   character(len=500) :: msg
   real(dp) :: rwork(2*maxsize)
-  complex(dpc),allocatable :: ww(:),uu(:,:)
-  complex(dpc) :: work(lwork),vl(1,1)
+  complex(dp),allocatable :: ww(:),uu(:,:)
+  complex(dp) :: work(lwork),vl(1,1)
   ! *********************************************************************
 
   mat_a_size = max(1,size(mat_a,dim=1))

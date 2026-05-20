@@ -333,6 +333,9 @@
 /* Define to 1 if you have the HIP library. */
 #cmakedefine HAVE_GPU_HIP @HAVE_GPU_HIP@
 
+/* Define to 1 if code was built with GPU unified memory support. */
+#cmakedefine HAVE_GPU_UNIFIED_MEMORY @HAVE_GPU_UNIFIED_MEMORY@
+
 /* Define to 1 if Kokkos is enabled */
 #cmakedefine HAVE_KOKKOS @HAVE_KOKKOS@
 
@@ -630,6 +633,7 @@
 #cmakedefine HAVE_LEVMAR @HAVE_LEVMAR@
 
 #cmakedefine HAVE_LIBPSML @HAVE_LIBPSML@
+#cmakedefine HAVE_LIBPSML_METAGGA @HAVE_LIBPSML_METAGGA@
 
 #cmakedefine HAVE_HDF5 @HAVE_HDF5@
 #cmakedefine HAVE_HDF5_MPI @HAVE_HDF5_MPI@

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Copyright (C) 2010-2025 ABINIT Group (Jean-Michel Beuken)
+# Copyright (C) 2010-2026 ABINIT Group (Jean-Michel Beuken)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -13,14 +13,14 @@
 # a script located on ref slave ( abiref:~buildbot/bin/LinkChecker.sh )
 #
 
-from __future__ import unicode_literals, division, print_function, absolute_import
 
-import sys
+import argparse
 import os
 import re
-from lxml import etree
+import sys
+
 import requests
-import argparse
+from lxml import etree
 
 # ---------------------------------------------------------------------------- #
 
@@ -28,7 +28,7 @@ import argparse
 #printable_tags = [ 'url', 'name', 'parent', 'realurl', 'valid' ]
 
 version_info = (1, 0, 0)
-version = '.'.join(str(c) for c in version_info)
+version = ".".join(str(c) for c in version_info)
 
 debug = False
 server = "http://localhost:8000"
@@ -68,7 +68,7 @@ def Checking_on_no_error_list(url, info, valid):
 
     url_rc = None
     try:
-       url_rc = no_error['url'].search(url.text)
+       url_rc = no_error["url"].search(url.text)
     except:
        print("-- no URL NAME --")
     norc = norc and ( url_rc != None )
@@ -76,7 +76,7 @@ def Checking_on_no_error_list(url, info, valid):
     info_rc = None
     if info is not None:
       try:
-       info_rc = no_error['info'].search(info.text)
+       info_rc = no_error["info"].search(info.text)
        norc = norc and ( info_rc != None )
       except:
        pass
@@ -84,7 +84,7 @@ def Checking_on_no_error_list(url, info, valid):
        info_rc = True
 
     valid_rc = None
-    valid_rc = no_error['valid'].search(valid)
+    valid_rc = no_error["valid"].search(valid)
     norc = norc and ( valid_rc != None )
 
     if url_rc != None and info_rc != None and valid_rc != None:
@@ -104,29 +104,28 @@ def Checking_on_false_error_list(url, valid, parent, cnx):
 
     url_rc = None
     try:
-       url_rc = false_error['url'].search(URL)
+       url_rc = false_error["url"].search(URL)
     except:
        url_rc = True
 
     valid_rc = None
     try:
-       valid_rc = false_error['valid'].search(valid)
+       valid_rc = false_error["valid"].search(valid)
     except:
        valid_rc = True
 
     parent_rc = None
     try:
-       parent_rc = false_error['parent'].search(parent)
+       parent_rc = false_error["parent"].search(parent)
     except:
        parent_rc = True
 
     if cnx == 0:
        if url_rc != None and valid_rc != None and parent_rc != None:
           return True # is a false error
-    else:
-       if url_rc != None and valid_rc != None and parent_rc != None and cnx == 404:
-          #print("found a false error...")
-          return True # is a false error
+    elif url_rc != None and valid_rc != None and parent_rc != None and cnx == 404:
+       #print("found a false error...")
+       return True # is a false error
 
   return False # may be a error
 
@@ -135,9 +134,9 @@ def Checking_on_warning_error_list(valid) :
   global warning_list
 
   for warning_error in warning_list:
-    
+
     v_rc = None
-    v_rc = warning_error['valid'].search(valid) 
+    v_rc = warning_error["valid"].search(valid)
     if v_rc != None :
        return True
 
@@ -155,36 +154,36 @@ def Checking_on_warning_error_list(valid) :
 #    ConnectionError: ('Connection aborted.
 
 warning_list = [
-    { 'valid': re.compile('^ReadTimeout')
+    { "valid": re.compile("^ReadTimeout")
     },
 ]
 
 no_error_list = [
-    { 'url'  : re.compile('(doi|aps|stacks.iop).org'),
-      'info' : re.compile('^Redirected'),
-      'valid': re.compile('^403 Forbidden')
+    { "url"  : re.compile("(doi|aps|stacks.iop).org"),
+      "info" : re.compile("^Redirected"),
+      "valid": re.compile("^403 Forbidden")
     },
-    { 'url'  : re.compile('jstor.org'),
-      'valid': re.compile('^403 Unauthorized')
+    { "url"  : re.compile("jstor.org"),
+      "valid": re.compile("^403 Unauthorized")
     },
 ]
 
 false_error_list = [
-    { 'url'  : re.compile('(dx.doi.orgg|en.wwikipedia.org)'),
-      'valid': re.compile('^ConnectionError'),
+    { "url"  : re.compile("(dx.doi.orgg|en.wwikipedia.org)"),
+      "valid": re.compile("^ConnectionError"),
     },
-    { 'url'  : re.compile('10.1102/physrevb.27.4760'),
-      'cnx'  : 404
+    { "url"  : re.compile("10.1102/physrevb.27.4760"),
+      "cnx"  : 404
     },
-    { 'url'  : re.compile('10.1103/physrevb.87.085323'),
-      'cnx'  : 404
+    { "url"  : re.compile("10.1103/physrevb.87.085323"),
+      "cnx"  : 404
     },
-    { 'url'   : re.compile('abiconfigg'),
-      'parent': re.compile('testlink/'),
-      'cnx'   : 404
+    { "url"   : re.compile("abiconfigg"),
+      "parent": re.compile("testlink/"),
+      "cnx"   : 404
     },
-    { 'url'   : re.compile('FAKE_URL'),
-      'parent': re.compile('testlink/')
+    { "url"   : re.compile("FAKE_URL"),
+      "parent": re.compile("testlink/")
     },
 ]
 
@@ -238,32 +237,30 @@ def main(filename,home_dir=""):
     print("%s: Aborting now." % my_name)
     sys.exit(1)
 
-  #
   tree = etree.parse(filename)
-  
-  rc=0 # true error counter 
+
+  rc=0 # true error counter
   frc=0 # false error counter
   wrc=0 # warning error counter
 
   urls=set()
 
   for child in tree.xpath("/linkchecker/urldata"):
-  
-    url    = child.find('url')
-    parent = child.find('parent')
+
+    url    = child.find("url")
+    parent = child.find("parent")
     URL    = url.text
-    info   = child.find('infos/info')
-    extern = child.find('extern')
-    valid  = child.find('valid').get("result")
+    info   = child.find("infos/info")
+    extern = child.find("extern")
+    valid  = child.find("valid").get("result")
 
     ### check for duplicate entry except for FAKE_URL
 
     try:
-      if not ("FAKE_URL" in URL) :
+      if "FAKE_URL" not in URL :
           if URL in urls :
              continue
-          else: 
-             urls.add(URL)
+          urls.add(URL)
       #else:
       #    if not ("index.html" in parent.text) :
       #       continue
@@ -298,17 +295,17 @@ def main(filename,home_dir=""):
     if valid == "syntax OK" :
         Check_connection = True
         if debug : print("check cnx : ",url.text)
-        try: 
+        try:
            request = requests.get(url.text, headers={"content-type":"text"}, timeout=(2,2) )
            cnx_status = request.status_code
         except (requests.Timeout, requests.ConnectionError, KeyError) as e:
-           if debug : print('failed to connect to website ({})'.format(e))
+           if debug : print(f"failed to connect to website ({e})")
            continue
         if cnx_status == 200 :  # OK
            continue
         if cnx_status == 403 :  # cnx ok but Forbidden for robot
            continue
-    
+
     # check if the error is a "false" error
     if Checking_on_false_error_list(url=url, valid=valid, parent=parent.text, cnx=cnx_status) :
         frc += 1
@@ -320,35 +317,34 @@ def main(filename,home_dir=""):
 
     # found a true error... : reporting on bb
     rc += 1
-    name=child.find('name')
-    realurl=child.find('realurl')
+    name=child.find("name")
+    realurl=child.find("realurl")
     try:
-       print("{0:12} {1}".format('URL',url.text))
+       print("{0:12} {1}".format("URL",url.text))
     except:
-       print("{0:12} {1}".format('URL',' ** NO URL **'))
+       print("{0:12} {1}".format("URL"," ** NO URL **"))
     try:
-       print("{0:12} {1}".format('Name',name.text))
+       print("{0:12} {1}".format("Name",name.text))
     except:
-       print("{0:12} {1}".format('Name','** NO NAME **'))
-    print("{0:12} {1}, line {2}".format('Parent URL',rm_server(parent.text),parent.get('line')))
+       print("{0:12} {1}".format("Name","** NO NAME **"))
+    print("{0:12} {1}, line {2}".format("Parent URL",rm_server(parent.text),parent.get("line")))
     try:
-       print("{0:12} {1}".format('Infos',info.text))
+       print("{0:12} {1}".format("Infos",info.text))
     except:
-       pass 
-    print("{0:12} {1}".format('Real URL',realurl.text))
-    print("{0:12} {1}".format('Result',valid))
-    if Check_connection : 
-          print("{0:12} {1}".format('Status CNX',request.status_code))
-    print('---------------------------')
+       pass
+    print("{0:12} {1}".format("Real URL",realurl.text))
+    print("{0:12} {1}".format("Result",valid))
+    if Check_connection :
+          print("{0:12} {1}".format("Status CNX",request.status_code))
+    print("---------------------------")
 
-  print('false errors found : ',frc,' ( must be : 7 )')
+  print("false errors found : ",frc," ( must be : 7 )")
 
   if rc != 0:
      if rc - wrc != 0:
         return 2 # FAILED
-     else:
-        print('warning errors found : ',wrc, ' [probably, these errors are transient...]')
-        return 1 # WARNING
+     print("warning errors found : ",wrc, " [probably, these errors are transient...]")
+     return 1 # WARNING
 
   return 0 # SUCCESS
 
@@ -356,14 +352,14 @@ def main(filename,home_dir=""):
 
 if __name__ == "__main__":
 
-  parser = argparse.ArgumentParser(description='Remove false errors')
-  parser.add_argument('--verbose', '-v', action='count',
-                      help='increase verbosity. Specify multiple times')
-  parser.add_argument('--version', action='version',
-                      version='%(prog)s {}'.format(version),
-                      help='show the version number and exit')
-  parser.add_argument('filename', help='input file (xml format)'),
-  parser.add_argument('home_dir', nargs='?', default=os.getcwd())
+  parser = argparse.ArgumentParser(description="Remove false errors")
+  parser.add_argument("--verbose", "-v", action="count",
+                      help="increase verbosity. Specify multiple times")
+  parser.add_argument("--version", action="version",
+                      version=f"%(prog)s {version}",
+                      help="show the version number and exit")
+  parser.add_argument("filename", help="input file (xml format)"),
+  parser.add_argument("home_dir", nargs="?", default=os.getcwd())
 
   args = parser.parse_args()
 

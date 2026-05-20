@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h01 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h02 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/libxc_t43/t43.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/libxc_t43/t43.abi
 - output file    -> t43.abo
 - root for input  files -> t43i
 - root for output files -> t43o
@@ -296,7 +296,7 @@ P           mkmem           8
               wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       8.9174999628E-01  8.9174999628E-01  8.9174999628E-01
+                       8.9174999957E-01  8.9174999957E-01  8.9174999957E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.6851632720E+00  1.6851632720E+00  1.6851632720E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -340,8 +340,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.15267
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -432,7 +432,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.89174999627579     0.89174999627579     0.89174999627579
+    2      0.89174999956860     0.89174999956860     0.89174999956860
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -444,12 +444,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.740653087852  6.740653087852  6.740653087852 bohr
-              =  3.566999985103  3.566999985103  3.566999985103 angstroms
+              =  3.566999998274  3.566999998274  3.566999998274 angstroms
  prteigrs : about to open file t43o_DS1_EIG
- Fermi (or HOMO) energy (eV) =  12.98584   Average Vxc (eV)= -13.72999
+ Fermi (or HOMO) energy (eV) =  12.98585   Average Vxc (eV)= -13.72999
  Eigenvalues (   eV  ) for nkpt=   8  k points:
  kpt#   1, nband=  8, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -8.94583   12.98584   12.98584   12.98584   18.54266   18.54266   18.54266   25.73994
+  -8.94583   12.98585   12.98585   12.98585   18.54266   18.54266   18.54266   25.73994
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -464,7 +464,7 @@ psp_core            :  1.93481650847052E-01
 local_psp           : -5.26446316291861E+00
 non_local_psp       :  1.37299428334597E+00
 total_energy        : -1.19230560739291E+01
-total_energy_eV     : -3.24442855611990E+02
+total_energy_eV     : -3.24442884060175E+02
 band_energy         :  1.15131034408477E+00
 ...
 
@@ -475,9 +475,9 @@ band_energy         :  1.15131034408477E+00
   sigma(3 3)=  3.64680539E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.0729E+02 GPa]
-- sigma(1 1)=  1.07292701E+02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.07292701E+02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.07292701E+02  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.07292719E+02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.07292719E+02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.07292719E+02  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -513,8 +513,8 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -782,8 +782,8 @@ data: !SigmaeeData |
         2     0.765   -15.917     0.765     3.928    -5.105     0.000     1.000     0.000    -5.105    -1.942    -1.177    -1.177
         3     4.541   -14.930     4.541     7.533    -4.207     0.000     1.000     0.000    -4.207    -1.214     3.326     3.320
         4     4.541   -14.930     4.541     7.533    -4.207     0.000     1.000     0.000    -4.207    -1.214     3.326     3.320
-        5    23.587   -14.213    23.587    26.480    -1.763     0.000     1.000     0.000    -1.763     1.130    24.717    24.724
-        6    23.587   -14.213    23.587    26.480    -1.763     0.000     1.000     0.000    -1.763     1.130    24.717    24.724
+        5    23.588   -14.213    23.588    26.480    -1.763     0.000     1.000     0.000    -1.763     1.130    24.717    24.724
+        6    23.588   -14.213    23.588    26.480    -1.763     0.000     1.000     0.000    -1.763     1.130    24.717    24.724
         7    25.392   -15.947    25.392    28.559    -1.917     0.000     1.000     0.000    -1.917     1.250    26.642    26.642
         8    25.392   -15.947    25.392    28.559    -1.917     0.000     1.000     0.000    -1.917     1.250    26.642    26.642
 ...
@@ -1097,8 +1097,8 @@ data: !SigmaeeData |
         2     0.765   -15.917     0.765     5.214    -7.147     0.000     1.000     0.000    -7.147    -2.697    -1.933    -1.933
         3     4.541   -14.930     4.541     8.698    -5.890     0.000     1.000     0.000    -5.890    -1.733     2.808     2.800
         4     4.541   -14.930     4.541     8.698    -5.890     0.000     1.000     0.000    -5.890    -1.733     2.808     2.800
-        5    23.587   -14.213    23.587    27.547    -2.468     0.000     1.000     0.000    -2.468     1.492    25.079    25.087
-        6    23.587   -14.213    23.587    27.547    -2.468     0.000     1.000     0.000    -2.468     1.492    25.079    25.087
+        5    23.588   -14.213    23.588    27.547    -2.468     0.000     1.000     0.000    -2.468     1.492    25.079    25.087
+        6    23.588   -14.213    23.588    27.547    -2.468     0.000     1.000     0.000    -2.468     1.492    25.079    25.087
         7    25.392   -15.947    25.392    29.850    -2.684     0.000     1.000     0.000    -2.684     1.774    27.166    27.166
         8    25.392   -15.947    25.392    29.850    -2.683     0.000     1.000     0.000    -2.683     1.775    27.166    27.166
 ...
@@ -1360,7 +1360,7 @@ P           mkmem           8
               wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       8.9174999628E-01  8.9174999628E-01  8.9174999628E-01
+                       8.9174999957E-01  8.9174999957E-01  8.9174999957E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.6851632720E+00  1.6851632720E+00  1.6851632720E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1461,10 +1461,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.8  wall=          2.9
+- Proc.   0 individual time (sec): cpu=          3.0  wall=          3.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.8  wall=          2.9
++Overall time at end (sec) : cpu=          3.0  wall=          3.0

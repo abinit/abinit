@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h08 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h10 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v2_t02-t03/t03.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v2_t02-t03/t03.abi
 - output file    -> t03.abo
 - root for input  files -> t02o
 - root for output files -> t03o
@@ -33,6 +33,7 @@
 -    mband =           4        mffmem =           1         mkmem =           2
 -   mkqmem =           2        mk1mem =           2           mpw =          69
       nfft =        4096          nkpt =           2
+- my_mband =           4
 ================================================================================
 P This job should need less than                       1.237 Mbytes of memory.
 P Max. in main chain + fourwf.f
@@ -94,7 +95,7 @@ P          mk1mem           2
             typat      1  1
               wtk        0.50000    0.50000
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  1.5875316258E+00
+                       0.0000000000E+00  0.0000000000E+00  1.5875316316E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  3.0000000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -140,8 +141,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/32ge.SJ_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/32ge.SJ_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/32ge.SJ_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/32ge.SJ_mod
 -   Starkloff-Joannopoulos local psp ( !!! OLD : only for tests)
 - 32.00000   4.00000    900101                znucl, zion, pspdat
     5    3    0    0       700   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -234,7 +235,7 @@ tolerances: {tolwfr: 1.00E-15, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1165345805E+03 Ha. Also 2DEtotal=    0.317106720207E+04 eV
+ 2DEtotal=    0.1165345805E+03 Ha. Also 2DEtotal=    0.317106748012E+04 eV
     (2DErelax=   -5.1073464819E+01 Ha. 2DEnonrelax=    1.6760804529E+02 Ha)
     (  non-var. 2DEtotal :    1.1653458106E+02 Ha)
 
@@ -455,7 +456,7 @@ P          mk1mem           2
             typat      1  1
               wtk        0.50000    0.50000
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  1.5875316258E+00
+                       0.0000000000E+00  0.0000000000E+00  1.5875316316E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  3.0000000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -552,10 +553,10 @@ P          mk1mem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
+- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.2  wall=          0.2
++Overall time at end (sec) : cpu=          0.2  wall=          0.3

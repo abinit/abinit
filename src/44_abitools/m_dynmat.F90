@@ -6,7 +6,7 @@
 !!  This module provides low-level tools to operate on the dynamical matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2025 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
+!!  Copyright (C) 2014-2026 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -102,8 +102,6 @@ module m_dynmat
  ! TODO: Change name,
  public :: ftgam
  public :: ftgam_init
-
-
 ! *************************************************************************
 
 contains
@@ -151,7 +149,6 @@ subroutine asria_calc(asr,d2asr,d2cart,mpert,natom)
  real(dp), allocatable :: singvals(:)
  real(dp), allocatable :: constr_rhs(:,:)
  real(dp), allocatable :: work(:,:),rwork(:)
-
 ! *********************************************************************
 
  d2asr = zero
@@ -303,7 +300,6 @@ subroutine asria_corr(asr,d2asr,d2cart,mpert,natom)
 !Local variables-------------------------------
 !scalars
  integer :: idir1,idir2,ipert1,ipert2
-
 ! *********************************************************************
 
  if (asr==0) return
@@ -381,7 +377,6 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
  real(dp),allocatable :: d2cartold(:,:,:,:,:),d2vecc(:),d2veccnew(:),d2vecr(:)
  real(dp),allocatable :: d2vecrnew(:),superm(:,:),umatrix(:,:),vtmatrix(:)
  real(dp),allocatable :: work(:)
-
 ! *********************************************************************
 
  if(asr/=3 .and. asr/=4)then
@@ -709,8 +704,8 @@ subroutine cart29(blkflg,blkval,carflg,d2cart,&
  integer :: idir1,idir2,ii,ipert1,ipert2
 !arrays
  integer :: flg1(3),flg2(3)
+ integer :: mflg(3,mpert,3,mpert)
  real(dp) :: vec1(3),vec2(3)
-
 ! *********************************************************************
 
 !First, copy the data blok in place.
@@ -803,6 +798,73 @@ subroutine cart29(blkflg,blkval,carflg,d2cart,&
    end do
  end do
 
+!MRoyo: For magnetic Zeeman perturbations, apply a negative sign to get induced magnetic moments.
+!Macroscopic Zeeman
+ mflg= 0
+ ipert1=natom+5
+ do idir1=1,3
+   do ipert2= 1, natom+6 !exclude local Zeemans, to be done below
+     do idir2=1,3
+       if (mflg(idir1,ipert1,idir2,ipert2)==0) then
+         do ii=1,2
+           d2cart(ii,idir1,ipert1,idir2,ipert2)=&
+&          -one*d2cart(ii,idir1,ipert1,idir2,ipert2)
+           mflg(idir1,ipert1,idir2,ipert2)=1
+         end do
+       end if
+       if (mflg(idir2,ipert2,idir1,ipert1)==0) then
+         do ii=1,2
+           d2cart(ii,idir2,ipert2,idir1,ipert1)=&
+&          -one*d2cart(ii,idir2,ipert2,idir1,ipert1)
+           mflg(idir2,ipert2,idir1,ipert1)=1
+         end do
+       end if
+     end do
+   end do
+ end do
+
+!Local Zeemans
+ if (mpert>natom+MPERT_MAX) then
+   do ipert1= natom+12,2*natom+11
+     do idir1=1,3
+       do ipert2= 1, mpert
+         do idir2=1,3
+           if (mflg(idir1,ipert1,idir2,ipert2)==0) then
+             do ii=1,2
+               d2cart(ii,idir1,ipert1,idir2,ipert2)=&
+&              -one*d2cart(ii,idir1,ipert1,idir2,ipert2)
+               mflg(idir1,ipert1,idir2,ipert2)=1
+             end do
+           end if
+           if (mflg(idir2,ipert2,idir1,ipert1)==0) then
+             do ii=1,2
+               d2cart(ii,idir2,ipert2,idir1,ipert1)=&
+&              -one*d2cart(ii,idir2,ipert2,idir1,ipert1)
+               mflg(idir2,ipert2,idir1,ipert1)=1
+             end do
+           end if
+         end do
+       end do
+     end do
+   end do
+ end if
+
+ !For magnetoelectric and magnetic susceptibility apply a 1/ucvol factor
+ ipert1= natom + 2
+ ipert2= natom + 5
+ do idir1= 1, 3
+   do idir2= 1, 3
+     do ii=1,2
+       d2cart(ii,idir1,ipert1,idir2,ipert2)=&
+&      d2cart(ii,idir1,ipert1,idir2,ipert2)/ucvol
+       d2cart(ii,idir2,ipert2,idir1,ipert1)=&
+&      d2cart(ii,idir2,ipert2,idir1,ipert1)/ucvol
+       d2cart(ii,idir1,ipert2,idir2,ipert2)=&
+&      d2cart(ii,idir1,ipert2,idir2,ipert2)/ucvol
+     end do
+   end do
+ end do
+
 end subroutine cart29
 !!***
 
@@ -846,7 +908,6 @@ subroutine cart39(flg1,flg2,gprimd,ipert,natom,rprimd,vec1,vec2)
 !Local variables -------------------------
 !scalars
  integer :: idir,ii
-
 ! *********************************************************************
 
 !Treat phonon-type perturbation
@@ -948,7 +1009,6 @@ subroutine d2cart_to_red(d2cart, d2red, gprimd, rprimd, mpert, natom, &
  integer :: flg1(3),flg2(3)
  real(dp) :: vec1(3),vec2(3)
  real(dp) :: gprimdt(3,3),rprimdt(3,3)
-
 ! *********************************************************************
 
  flg1 = one
@@ -1084,7 +1144,6 @@ subroutine chkph3(carflg,idir,mpert,natom)
 !scalars
  integer :: idir1,idir2,ipert1,ipert2,send
  character(len=500) :: msg
-
 ! *********************************************************************
 
  send=0
@@ -1191,7 +1250,6 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
 !arrays
  real(dp) :: sumwght(2)
  real(dp),allocatable :: wghtat(:)
-
 ! *********************************************************************
 
  ABI_MALLOC(wghtat,(natom))
@@ -1420,7 +1478,7 @@ end subroutine chneu9
 !!
 !! SOURCE
 
-subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,zero_by_symm)
+subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,zero_by_symm,eta)
 
 !Arguments -------------------------------
 !scalars
@@ -1431,6 +1489,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  integer,intent(inout) :: blkflg(3,mpert,3,mpert)
  real(dp),intent(in) :: qpt(3)
  real(dp),intent(inout) :: d2(2,3,mpert,3,mpert)
+ real(dp),optional,intent(in) :: eta
 
 !Local variables -------------------------
 !scalars
@@ -1438,11 +1497,10 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  logical :: qzero
  integer :: exch12,found,idir1,idir2,idisy1,idisy2,ipert1,ipert2
  integer :: ipesy1,ipesy2,isgn,isym,ithree,itirev,nblkflg_is_one,noccur,nsym_used,quit,quit1
- real(dp) :: arg1,arg2,im,norm,re,sumi,sumr,xi,xr
+ real(dp) :: arg1,arg2,im,norm,eta_,re,sumi,sumr,xi,xr
 !arrays
  integer,pointer :: sym1_(:,:,:),sym2_(:,:,:)
  real(dp),allocatable :: d2tmp1(:,:,:),d2tmp2(:,:,:),d2work(:,:,:,:,:)
-
 ! *********************************************************************
 
  qzero=(qpt(1)**2+qpt(2)**2+qpt(3)**2<tol16)
@@ -1467,21 +1525,21 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
    end do
  end if
 
-!Exchange of perturbations
+ eta_=zero; if(present(eta)) eta_=eta
 
 !Consider two cases : either time-reversal symmetry
 !conserves the wavevector, or not
- if(timrev==0)then
+ if(timrev==0.and.abs(eta_)<tol8)then
 
-!  do ipert1=1,mpert  See notes
-   do ipert1=1,min(natom+2,mpert)
+  do ipert1=1,mpert !See notes
+!   do ipert1=1,min(natom+2,mpert)
      do idir1=1,3
 
 !      Since the matrix is hermitian, the diagonal elements are real
        d2(2,idir1,ipert1,idir1,ipert1)=zero
 
-!      do ipert2=1,mpert See notes
-       do ipert2=1,min(natom+2,mpert)
+      do ipert2=1,mpert !See notes
+!       do ipert2=1,min(natom+2,mpert)
          do idir2=1,3
 
            ! FIXME use is_type functions
@@ -1518,11 +1576,11 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
 !  Here, case with time-reversal symmetry
  else
 
-!  do ipert1=1,mpert See notes
-   do ipert1=1,min(natom+2,mpert)
+  do ipert1=1,mpert !See notes
+!   do ipert1=1,min(natom+2,mpert)
      do idir1=1,3
-!      do ipert2=1,mpert See notes
-       do ipert2=1,min(natom+2,mpert)
+      do ipert2=1,mpert !See notes
+!       do ipert2=1,min(natom+2,mpert)
          do idir2=1,3
            d2(2,idir1,ipert1,idir2,ipert2)=zero
 
@@ -1557,8 +1615,8 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  do ithree=1,3
 
 !  Big loop on all elements
-!  do ipert1=1,mpert See notes
-   do ipert1=1,min(natom+2,mpert)
+  do ipert1=1,mpert !See notes
+!   do ipert1=1,min(natom+2,mpert)
 
 !    Select the symmetries according to pertubation 1
      if (ipert1<=natom)then
@@ -1568,8 +1626,8 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
      end if
 
      do idir1=1,3
-!      do ipert2=1,mpert See notes
-       do ipert2=1,min(natom+2,mpert)
+      do ipert2=1,mpert !See notes
+!       do ipert2=1,min(natom+2,mpert)
 
     !    Select the symmetries according to pertubation 2
          if (ipert2<=natom)then
@@ -1679,7 +1737,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
                      end do
                    end if
 
-!                  In case zero_by_symm==0, the computed materix element must be associated to at least one really computed matrix element
+!                  In case zero_by_symm==0, the computed matrix element must be associated to at least one really computed matrix element
                    if(zero_by_symm==0 .and. nblkflg_is_one==0)then
                      found=0
                    endif
@@ -1767,14 +1825,16 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
    ABI_MALLOC(d2tmp2,(2,3,3))
    ABI_MALLOC(d2work,(2,3,mpert,3,mpert))
    d2work(:,:,:,:,:)=d2(:,:,:,:,:)
-   do ipert1=1,min(natom+2,mpert)
+   do ipert1=1,mpert
+   !do ipert1=1,min(natom+2,mpert)
      if ((ipert1==natom+1.or.ipert1==natom+10.or.ipert1==natom+11).or.(ipert1==natom+2.and.(.not.qzero))) cycle
      if (ipert1<=natom)then
        sym1_ => symrec
      else
        sym1_ => symrel
      end if
-     do ipert2=1,min(natom+2,mpert)
+     do ipert2=1,mpert
+     !do ipert2=1,min(natom+2,mpert)
 !      if (any(blkflg(:,ipert1,:,ipert2)==0)) cycle
        if ((ipert2==natom+1.or.ipert2==natom+10.or.ipert2==natom+11).or.(ipert2==natom+2.and.(.not.qzero))) cycle
        if (ipert2<=natom)then
@@ -1888,7 +1948,6 @@ subroutine q0dy3_apply(natom,dyewq0,dyew)
 !Local variables -------------------------
 !scalars
  integer :: ia,mu,nu
-
 ! *********************************************************************
 
  do mu=1,3
@@ -1959,7 +2018,6 @@ subroutine q0dy3_calc(natom,dyewq0,dyew,option)
 !scalars
  integer :: ia,ib,mu,nu
  character(len=500) :: msg
-
 ! *********************************************************************
 
  if(option==1.or.option==2)then
@@ -2051,7 +2109,6 @@ subroutine symdyma(dmati,indsym,natom,nsym,qptn,rprimd,symrel,symafm)
  real(dp) :: TqR(3,3),TqS_(3,3),dynmat(2,3,natom,3,natom)
  real(dp) :: dynmatint(2*nsym,2,3,natom,3,natom),gprimd(3,3)
  real(dp) :: symcart(3,3,nsym)
-
 ! *********************************************************************
 !FIXME Disabling optimization with NVHPC in this routine
 !      because of significant numerical divergence
@@ -2246,7 +2303,6 @@ subroutine dfpt_sygra(natom,desym,deunsy,indsym,ipert,nsym,qpt,symrec)
 !scalars
  integer :: ia,ind,isym,mu
  real(dp) :: arg,im,re,sumi,sumr
-
 ! *********************************************************************
 
  if (nsym==1) then
@@ -2366,7 +2422,6 @@ subroutine dfpt_sydy(cplex,dyfrow,indsym,natom,nondiag,nsym,qphon,sdyfro,symq,sy
  real(dp) :: arg,div,phasei,phaser
 !arrays
  real(dp) :: work(cplex,3,3)
-
 ! *********************************************************************
 
  if (nsym==1) then
@@ -2508,7 +2563,6 @@ subroutine wings3(carflg,d2cart,mpert)
 !Local variables -------------------------
 !scalars
  integer :: idir,idir1,ipert,ipert1
-
 ! *********************************************************************
 
  do ipert=1,mpert
@@ -2574,7 +2628,6 @@ subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
 !scalars
  integer :: found,ia,ib,irpt,izero,mu,nu
  real(dp) :: sumifc
-
 ! *********************************************************************
 
  if(asr==1.or.asr==2)then
@@ -2686,7 +2739,6 @@ subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshift, qshift, rpr
 !arrays
  integer,allocatable :: all_cell(:,:)
  real(dp),allocatable :: all_rpt(:,:), all_wghatm(:,:,:)
-
 ! *********************************************************************
 
  ABI_CHECK(any(cutmode == [0, 1, 2]), "cutmode should be in [0, 1, 2]")
@@ -2825,7 +2877,6 @@ subroutine make_bigbox(brav, cell, ngqpt, nqshft, rprim, nrpt, rpt)
 !arrays
  real(dp) :: dummy_rpt(3,1)
  integer:: dummy_cell(1,3)
-
 ! *********************************************************************
 
  ! Compute the number of points (cells) in real space
@@ -2895,7 +2946,6 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
  integer,parameter :: buffer=1
  integer :: irpt,lim1,lim2,lim3,lqshft,r1,r2,r3
  character(len=500) :: msg
-
 ! *********************************************************************
 
  lqshft=1
@@ -3064,7 +3114,6 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
  character(len=500) :: msg
 !arrays
  real(dp) :: dontno(3,4),rec(3),rok(3),shift(3),tt(3)
-
 ! *********************************************************************
 
 !Normalization of the cartesian atomic coordinates
@@ -3265,7 +3314,6 @@ subroutine canct9(acell,gprim,ib,index,irpt,natom,nrpt,rcan,rcart,rprim,rpt)
  integer :: jj
 !arrays
  real(dp) :: xred(3)
-
 ! *********************************************************************
 
  irpt=(index-1)/natom+1
@@ -3321,7 +3369,6 @@ subroutine chkrp9(brav,rprim)
 !scalars
  integer :: ii,jj
  character(len=500) :: msg
-
 ! *********************************************************************
 
  if (abs(brav)==1) then
@@ -3433,7 +3480,6 @@ subroutine dist9(acell,dist,gprim,natom,nrpt,rcan,rprim,rpt)
  integer :: ia,ib,ii,irpt
 !arrays
  real(dp) :: ra(3),rb(3),rdiff(3),red(3),rptcar(3),xred(3)
-
 ! *********************************************************************
 
 !BIG loop on all generic atoms
@@ -3514,7 +3560,6 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,comm)
  real(dp) :: im,kr,re
 !arrays
  real(dp) :: kk(3)
-
 ! *********************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -3541,7 +3586,7 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,comm)
        do nu=1,3
          do ia=1,natom
            do mu=1,3
-             ! Real and imaginary part of the interatomic forces
+             ! Real part of the interatomic forces
              atmfrc(mu,ia,nu,ib,irpt)=atmfrc(mu,ia,nu,ib,irpt) &
               +re*dynmat(1,mu,ia,nu,ib,iqpt)&
               +im*dynmat(2,mu,ia,nu,ib,iqpt)
@@ -3610,7 +3655,6 @@ subroutine ftifc_r2q(atmfrc, dynmat, gprim, natom, nqpt, nrpt, rpt, spqpt, wghat
  !real(dp) : w(2, natom, natom)
 !arrays
  real(dp) :: kk(3)
-
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -3719,7 +3763,6 @@ subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
  real(dp) :: im,kr,re
 !arrays
  real(dp) :: kk(3),fact(2,3)
-
 ! *********************************************************************
 
  dddq = zero
@@ -3793,7 +3836,6 @@ subroutine ifclo9(ifccar,ifcloc,vect1,vect2,vect3)
  integer :: ii,jj
 !arrays
  real(dp) :: work(3,3)
-
 ! *********************************************************************
 
  do jj=1,3
@@ -3854,6 +3896,7 @@ end subroutine ifclo9
 !! OUTPUT
 !! wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
 !!  The vector r(atom2)-r(atom1)+rpt should be inside the moving box
+!! r_inscribed_sphere= The radius of the sphere inscribed inside the big box.
 !! ngqpt(6)= can be modified
 !!
 !! SOURCE
@@ -3879,7 +3922,6 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
 !arrays
  integer :: nbord(9)
  real(dp) :: rdiff(9),red(3,3),ptws(4, 729),pp(3),rdiff_tmp(3)
-
 ! *********************************************************************
 
  ierr = 0
@@ -4267,7 +4309,6 @@ subroutine d3sym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
  real(dp) :: sumi,sumr
 !arrays
  integer :: sym1(3,3),sym2(3,3),sym3(3,3)
-
 ! *********************************************************************
 
 !DEBUG
@@ -4470,7 +4511,6 @@ subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 !arrays
  integer :: sym1(3,3),sym2(3,3),sym3(3,3)
  integer,allocatable :: pertsy(:,:,:,:,:,:)
-
 !***********************************************************************
 
  ABI_MALLOC(pertsy,(3,mpert,3,mpert,3,mpert))
@@ -4645,6 +4685,7 @@ subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 end subroutine sytens
 !!***
 
+
 !----------------------------------------------------------------------
 
 !!****f* m_dynmat/axial9
@@ -4680,7 +4721,6 @@ subroutine axial9(ifccar,vect1,vect2,vect3)
  real(dp) :: innorm,scprod
 !arrays
  real(dp) :: work(3)
-
 ! *********************************************************************
 
  work (:) = matmul(ifccar,vect1)
@@ -4763,7 +4803,6 @@ subroutine dymfz9(dynmat,natom,nqpt,gprim,option,spqpt,trans)
  real(dp) :: im,ktrans,re
 !arrays
  real(dp) :: kk(3)
-
 ! *********************************************************************
 
  do iqpt=1,nqpt
@@ -4836,7 +4875,6 @@ subroutine nanal9(dyew,dynmat,iqpt,natom,nqpt,plus)
 !scalars
  integer :: ia,ib,mu,nu
  character(len=500) :: msg
-
 ! *********************************************************************
 
  if (plus==0) then
@@ -4868,7 +4906,7 @@ subroutine nanal9(dyew,dynmat,iqpt,natom,nqpt,plus)
  else
    write(msg,'(3a,i0,a)' )&
     'The argument "plus" must be equal to 0 or 1.',ch10,&
-    'The value ',plus,' is not available.'
+    'The value: ',plus,' is not available.'
    ABI_BUG(msg)
  end if
 
@@ -4915,11 +4953,12 @@ end subroutine nanal9
 !!
 !! OUTPUT
 !! d2cart(2,3,mpert,3,mpert)=dynamical matrix obtained for the wavevector qpt (normalized using qphnrm)
+!! eta: parameter used to split R and G-space summation
 !!
 !! SOURCE
 
 subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom,&
-                  nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,qdrp_cart,ewald_option,comm,&
+                  nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,qdrp_cart,ewald_option,eta,comm,&
                   dipquad,quadquad)  ! optional
 
 !Arguments -------------------------------
@@ -4935,7 +4974,7 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
  real(dp),intent(in) :: qdrp_cart(3,3,3,natom)
  real(dp),intent(in) :: atmfrc(3,natom,3,natom,nrpt)
  real(dp),intent(in) :: dyewq0(3,3,natom)
- real(dp),intent(out) :: d2cart(2,3,mpert,3,mpert)
+ real(dp),intent(out) :: d2cart(2,3,mpert,3,mpert), eta
 
 !Local variables -------------------------
 !scalars
@@ -4944,7 +4983,6 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
 !arrays
  real(dp) :: qphon(3) !, tsec(2)
  real(dp),allocatable :: dq(:,:,:,:,:),dyew(:,:,:,:,:)
-
 ! *********************************************************************
 
  ! Keep track of time spent in gtdyn9
@@ -4978,7 +5016,7 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
 
    call ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff,&
-      qdrp_cart,option=ewald_option,dipquad=dipquad_,quadquad=quadquad_)
+      qdrp_cart,eta,option=ewald_option,dipquad=dipquad_,quadquad=quadquad_)
 
    call q0dy3_apply(natom,dyewq0,dyew)
    call nanal9(dyew,dq,iqpt1,natom,nqpt1,plus1)
@@ -5018,7 +5056,6 @@ end subroutine gtdyn9
 !----------------------------------------------------------------------
 
 !!****f* m_dynmat/dfpt_phfrq
-!!
 !! NAME
 !! dfpt_phfrq
 !!
@@ -5065,6 +5102,8 @@ end subroutine gtdyn9
 !! NOTES
 !!   1) One makes the dynamical matrix hermitian...
 !!   2) In case of q=Gamma, only the real part is used.
+!!      (MR: Modified since at finite omega imaginary components may arise
+!!      also at Gamma in broken time-reversal symmetry crystals)
 !!
 !! SOURCE
 
@@ -5094,11 +5133,15 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 !arrays
  real(dp) :: qptn(3),dum(2,0) !, tsec(2)
  real(dp),allocatable :: matrx(:,:),zeff(:,:),zhpev1(:,:),zhpev2(:)
-
 ! *********************************************************************
 
  ! Keep track of time spent in dfpt_phfrq
  !call timab(1751, 1, tsec)
+
+ ! GA: I find it strange that both msym and nsym are needed here.
+ !     Moreover, there is an inconsistency in the dimensions of indsym
+ !     when it is passed to symdyma.
+ !     TODO: eliminate msym.
 
  ! Prepare the diagonalisation: analytical part.
  ! Note: displ is used as work space here
@@ -5127,7 +5170,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    do i1=1,3*natom
      do i2=1,3*natom
        index=i1+3*natom*(i2-1)
-       displ(2*index)=zero
+       if (abs(displ(2*index)) < tol14) displ(2*index)=zero
      end do
    end do
  end if
@@ -5171,7 +5214,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
            i2=i2+1
            index=i1+3*natom*(i2-1)
            displ(2*index-1)=displ(2*index-1)+four_pi/ucvol*zeff(idir1,ipert1)*zeff(idir2,ipert2)/epsq
-           displ(2*index  )=zero
+           if (abs(displ(2*index)) < tol14) displ(2*index)=zero
          end do
        end do
      end do
@@ -5182,7 +5225,6 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 
  ! Multiply IFC(q) by masses
  call massmult_and_breaksym(natom, ntypat, typat, amu, displ)
-
  ! ***********************************************************************
  ! Diagonalize the dynamical matrix
 
@@ -5227,7 +5269,6 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
      end do
    end do
  end if
-
  !***********************************************************************
 
  ! Get the phonon frequencies (negative by convention, if the eigenvalue of the dynamical matrix is negative)
@@ -5304,7 +5345,6 @@ pure subroutine pheigvec_normalize(natom, eigvec)
 !scalars
  integer :: i1,idir1,imode,ipert1,index
  real(dp) :: norm
-
 ! *********************************************************************
 
  do imode=1,3*natom
@@ -5368,7 +5408,6 @@ pure subroutine phdispl_from_eigvec(natom, ntypat, typat, amu, eigvec, displ)
 !Local variables -------------------------
 !scalars
  integer :: i1,idir1,imode,ipert1, index
-
 ! *********************************************************************
 
  do imode=1,3*natom
@@ -5419,7 +5458,6 @@ pure subroutine phangmom_from_eigvec(natom, eigvec, phangmom)
  integer :: imode,ipert, index
 !arrays
  real(dp) :: eigvecatom(2*3)
-
 ! *********************************************************************
 
  phangmom = zero
@@ -5698,7 +5736,6 @@ subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat, &
  real(dp) :: fac
 !arrays
  real(dp) :: nearidentity(3,3)
-
 ! *********************************************************************
 
  herm_opt__ = 1; if (present(herm_opt)) herm_opt__ = herm_opt
@@ -5827,7 +5864,6 @@ subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
  integer :: iatom,idir,ip,iqpt,irpt,jatom,jdir
  real(dp) :: im,re
  character(len=500) :: msg
-
 ! *********************************************************************
 
  select case (qtor)
@@ -5867,9 +5903,7 @@ subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
                ip= jdir + (jatom-1)*3 + (idir-1)*3*natom + (iatom-1)*9*natom
                ! Real and imaginary part of the interatomic forces
                gam_qpt(1,ip,iqpt) = gam_qpt(1,ip,iqpt) + re*gam_rpt(1,ip,irpt) - im*gam_rpt(2,ip,irpt)
-               !DEBUG
                gam_qpt(2,ip,iqpt) = gam_qpt(2,ip,iqpt) + im*gam_rpt(1,ip,irpt) + re*gam_rpt(2,ip,irpt)
-               !ENDDEBUG
              end do ! end jdir
            end do ! end idir
          end do
@@ -5924,7 +5958,6 @@ subroutine ftgam_init (gprim,nqpt,nrpt,qpt_full,rpt,coskr, sinkr)
  real(dp) :: kr
 !arrays
  real(dp) :: kk(3)
-
 ! *********************************************************************
 
 ! Prepare the phase factors

@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group ()
+!!  Copyright (C) 2008-2026 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -44,7 +44,7 @@ contains
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2025 ABINIT group (FBottin,GZ,AR,MT,FDahm)
+!! Copyright (C) 1998-2026 ABINIT group (FBottin,GZ,AR,MT,FDahm)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,6 +85,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  use defs_basis
  use m_abicore
  use m_lobpcg
+ use m_gputk
  use m_abi_linalg
  use m_wfutils
  use m_xmpi
@@ -97,6 +98,9 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  use m_pawcprj,     only : pawcprj_type
  use m_getghc,      only : getghc
  use m_prep_kgb,    only : prep_getghc
+#ifdef HAVE_GPU
+ use m_gputk
+#endif
 
 !Arguments ------------------------------------
  integer,intent(in) :: icg,igsc,mcg,mgsc,nband_k,nbdblock,npw_k,prtvol,use_totvnlx
@@ -122,7 +126,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  logical :: gen_eigenpb
  integer :: cplx
  real(dp) :: condestgramb,deltae,deold,dum
- complex(dpc) :: cminusone
+ complex(dp) :: cminusone
  real(dp) :: zvar(2)
  logical :: havetoprecon
  real(dp) :: tsec(2)

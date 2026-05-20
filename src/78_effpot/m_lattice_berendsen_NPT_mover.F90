@@ -5,13 +5,13 @@
 !!
 !! FUNCTION
 !! This module contains the berendsen  (NPT) lattice mover.
-!! The method is described in  
+!! The method is described in
 !! H.J.C. Berendsen, J.P.M. Postma, A. DiNola, and J.R. Haak,
 !! "Molecular dynamics with coupling to an external bath,"
 !!  J. Chem. Phys., 81 3684-3690 (1984)
 !! NOTE: that this method does NOT generate properly the thermostated
 !! ensemble. It does not have the correct distribution of the kinetic energy.
-!! However, it approches the target temperature exponentially without oscillation, 
+!! However, it approches the target temperature exponentially without oscillation,
 !! for which the steps can be easily controlled.
 !!
 !! Datatypes:
@@ -23,7 +23,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2025 ABINIT group (hexu)
+!! Copyright (C) 2001-2026 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -117,7 +117,7 @@ contains
     endif
     self%current_vcart(:,:) = self%current_vcart(:,:) * scale_temperature
   end subroutine scale_velocities
- 
+
 
   !-------------------------------------------------------------------!
   ! run_one_step.

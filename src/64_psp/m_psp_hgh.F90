@@ -6,7 +6,7 @@
 !! Initialize pspcod=2, 3, 10 pseudopotentials (GTH)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MT, FD, PT)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, MT, FD, PT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

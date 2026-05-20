@@ -5,12 +5,12 @@
 !!****m* ABINIT/m_ListCdagC
 !! NAME
 !!  m_ListCdagC
-!! 
-!! FUNCTION 
+!!
+!! FUNCTION
 !!  Manage a 2D vector to store couple of c+c
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,7 +37,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,7 +48,7 @@ TYPE, PUBLIC :: ListCdagC
   INTEGER _PRIVATE :: size = 0
 !  max size of matrix list
 
-  INTEGER          :: tail = 0 
+  INTEGER          :: tail = 0
 !  the size of matrix list that contains physical data (ie number of
 !  segment)
   !DOUBLE PRECISION :: inv_dt = 0.d0
@@ -100,7 +100,7 @@ CONTAINS
 !!  initialize
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -146,7 +146,7 @@ END SUBROUTINE ListCdagC_init
 !!  Impose size of the list
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -182,7 +182,7 @@ SUBROUTINE ListCdagC_setSize(this,new_tail)
     CALL ListCdagC_enlarge(this,MAX(Global_SIZE, new_tail-size))
   END IF
   this%tail = new_tail
-END SUBROUTINE ListCdagC_setSize  
+END SUBROUTINE ListCdagC_setSize
 !!***
 
 !!****f* ABINIT/m_ListCdagC/ListCdagC_enlarge
@@ -193,7 +193,7 @@ END SUBROUTINE ListCdagC_setSize
 !!  Enlarge memory space of the list
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -219,8 +219,8 @@ SUBROUTINE ListCdagC_enlarge(this, size)
   INTEGER                                :: width
   INTEGER                                :: tail
   INTEGER                                :: size_val
-  !INTEGER         , ALLOCATABLE, DIMENSION(:,:) :: ind_temp 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: list_temp 
+  !INTEGER         , ALLOCATABLE, DIMENSION(:,:) :: ind_temp
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: list_temp
 
   IF ( ALLOCATED(this%list) ) THEN
     FREEIF(list_temp)
@@ -228,7 +228,7 @@ SUBROUTINE ListCdagC_enlarge(this, size)
     width = this%size
     tail  = this%tail
     size_val = width
-    IF ( PRESENT(size) ) size_val = size 
+    IF ( PRESENT(size) ) size_val = size
     MALLOC(list_temp,(0:tail,1:2))
     !MALLOC( ind_temp,(0:width,1:2))
     list_temp(0:tail,:) = this%list(0:tail,:)
@@ -256,7 +256,7 @@ END SUBROUTINE ListCdagC_enlarge
 !!  assign routine
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -297,7 +297,7 @@ END SUBROUTINE ListCdagC_assign
 !!  Swap two lists
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -359,7 +359,7 @@ END SUBROUTINE ListCdagC_swap
 !!  push at the end of the list a couple
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -410,7 +410,7 @@ END SUBROUTINE ListCdagC_pushBack
 !!  insert somewhere a couple
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -432,26 +432,26 @@ SUBROUTINE ListCdagC_insert(this, CdagC_1, position)
 
 !Arguments ------------------------------------
   TYPE(ListCdagC), INTENT(INOUT) :: this
-  DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN   ) :: CdagC_1 
+  DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN   ) :: CdagC_1
   INTEGER        , INTENT(IN   ) :: position
 !Local variables ------------------------------
   INTEGER                        :: new_position
   INTEGER                        :: tail
-  
+
   tail         = this%tail + 1
-  new_position = position 
+  new_position = position
   IF ( tail .GT. this%size ) THEN
     CALL ListCdagC_enlarge(this)
   END IF
   IF ( position .EQ. -1 ) THEN
     new_position = tail
   ELSE IF ( position .LE. tail ) THEN
-  ! new_position = position 
+  ! new_position = position
     this%list(tail:position+1:-1,1:2) = this%list(this%tail:position:-1,1:2)
-  ELSE 
+  ELSE
     CALL ERROR("ListCdagC_insert : position > tail                ")
   END IF
-  
+
   this%list(new_position,1:2) = CdagC_1
   !this%ind (new_position,Cdag_) = INT(CdagC_1(Cdag_) * this%inv_dt + 0.5d0)
   !this%ind (new_position,C_   ) = INT(CdagC_1(C_   ) * this%inv_dt + 0.5d0)
@@ -467,7 +467,7 @@ END SUBROUTINE ListCdagC_insert
 !!  Remove the last element
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -504,7 +504,7 @@ END SUBROUTINE ListCdagC_popBack
 !!  Erase a couple at a given position
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -530,7 +530,7 @@ SUBROUTINE ListCdagC_erase(this,position)
   INTEGER                        :: tail
   INTEGER                        :: new_tail
   INTEGER                        :: continueing
-  
+
   tail = this%tail
   IF ( position .GT. tail ) &
     CALL ERROR("ListCdagC_erase : position > tail                 ")
@@ -550,7 +550,7 @@ END SUBROUTINE ListCdagC_erase
 !!  assume the list is already sorted
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -577,7 +577,7 @@ INTEGER FUNCTION ListCdagC_firstHigherThanReal(this, time)
 #define list_1 this
 #include "ListCdagC_firstHigher"
 #undef list_1
-!  unefficient function for long list  
+!  unefficient function for long list
 !  it = 1
 !  DO WHILE ( it .LE. this%tail .AND. this%list(it) .LE. value )
 !    it = it + 1
@@ -596,7 +596,7 @@ END FUNCTION ListCdagC_firstHigherThanReal
 !!  sort the list by c+ increasing
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -616,7 +616,7 @@ SUBROUTINE ListCdagC_sort(this)
 
 !Arguments ------------------------------------
   TYPE(ListCdagC), INTENT(INOUT) :: this
- 
+
   IF ( this%tail .EQ. 1 ) RETURN
   CALL ListCdagC_quickSort(this, 1, this%tail)
 END SUBROUTINE ListCdagC_sort
@@ -630,7 +630,7 @@ END SUBROUTINE ListCdagC_sort
 !!  sort the list by c+ increasing with the quick sort algo
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -692,7 +692,7 @@ RECURSIVE SUBROUTINE ListCdagC_quickSort(this, begin, end)
 
 END SUBROUTINE ListCdagC_quickSort
 !!***
- 
+
 !!****f* ABINIT/m_ListCdagC/ListCdagC_print
 !! NAME
 !!  ListCdagC_print
@@ -701,7 +701,7 @@ END SUBROUTINE ListCdagC_quickSort
 !!  print the list
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -731,7 +731,7 @@ SUBROUTINE ListCdagC_print(this,ostream)
   IF ( PRESENT(ostream) ) ostream_val = ostream
   WRITE(ostream_val,'(A,2x,A4,22x,A)') "#","Cdag", "C"
   DO it = 1, this%tail
-    WRITE(ostream_val,*) this%list(it,Cdag_), this%list(it,C_) 
+    WRITE(ostream_val,*) this%list(it,Cdag_), this%list(it,C_)
   END DO
 END SUBROUTINE ListCdagC_print
 !!***
@@ -744,7 +744,7 @@ END SUBROUTINE ListCdagC_print
 !!  Clear the list
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -764,7 +764,7 @@ SUBROUTINE ListCdagC_clear(this)
 
 !Arguments ------------------------------------
   TYPE(ListCdagC), INTENT(INOUT) :: this
-  this%tail = 0 
+  this%tail = 0
 END SUBROUTINE ListCdagC_clear
 !!***
 
@@ -776,7 +776,7 @@ END SUBROUTINE ListCdagC_clear
 !!  destroy the list
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

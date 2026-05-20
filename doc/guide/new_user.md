@@ -2,6 +2,10 @@
 authors: DCA, XG, RC
 ---
 
+<!-- This file must be kept in sync with the doc/index.md file.
+Since they are not placed in the same directory, their hyperlinks might differ.
+This problem problem should be solved, when time permits. -->
+
 # New user help file
 
 This page gives a beginner's introduction to the ABINIT resources,
@@ -25,7 +29,7 @@ Chemistry package, you should complete such reading by going (at your own
 pace) through the Chaps. 1 to 13 , and appendices L and M of R.M. Martin's book [[cite:Martin2004]].
 
 After having gone through the present New User's Guide, you should follow the
-[[tutorial:index|ABINIT tutorial]].
+[[tutorial:index|ABINIT tutorials]].
 
 ## Introduction
 
@@ -35,7 +39,7 @@ density and electronic structure of systems made of electrons and nuclei
 pseudopotentials and a planewave basis, or augmented plane waves, or even wavelets.
 
 Some possibilities of ABINIT go beyond Density Functional Theory,
-i.e. the many-body perturbation theory (GW approximation the Bethe-Salpether
+i.e. the many-body perturbation theory (GW approximation the Bethe-Salpeter
 equation), Time-Dependent Density Functional Theory, Dynamical Mean-Field
 Theory, the Allen-Heine-Cardona theory to find temperature-dependent electronic structure.
 
@@ -50,13 +54,13 @@ We suppose that you have downloaded the ABINIT package from the Web site,
 unpacked it and installed it. If not, you might nevertheless continue reading
 the present Web page, just to get an overview, but it might prove more
 fruitful to have first downloaded the ABINIT package and at least unpacked it,
-see the [installation notes](/installation).
+see the [installation notes](../installation.md).
 
 !!! note
 
     We will use the name "~abinit" to refer to the directory that contains the
     ABINIT package after download. In practice, a version number is appended to
-    this name, to give for example: abinit-8.8.0. The ABINIT package versioning
+    this name, to give for example: abinit-10.6.3. The ABINIT package versioning
     scheme is explained later in this file.
 
 ~abinit contains different subdirectories. For example, the present file, as
@@ -90,7 +94,7 @@ The detailed description of input variables is given in many "Variable Set" file
 A set of examples aimed at guiding the beginner is available in the [[tutorial:index|tutorials]].
 
 Other test cases (more than 1000 input files) can be found in the ~abinit/test
-subdirectories, e.g. "fast", the "vX" series (v1, v2, ... v67mbpt, v7, v8),
+subdirectories, e.g. "fast", the "vX" series (v1, v2, ... v67mbpt, v7, .., v9, v10),
 "libxc", "paral", the "tutoX" series ...
 
 Many different sorts of pseudopotentials can be used with ABINIT.
@@ -99,7 +103,8 @@ page of the ABINIT web site.
 There are official recommended pseudopotentials tables
 (the PAW JTH table, and the norm-conserving table from ONCVPSP), and also some older sets of pseudopotentials.
 Information on pseudopotential files can be found in the [[help:abinit#5|ABINIT help file]],
-the [[theory:pseudopotentials|Pseudopotential theory document]], on the [ABINIT wiki](https://wiki.abinit.org/doku.php?id=developers:pseudos),
+the [[theory:pseudopotentials|Pseudopotential theory document]],
+the [[developers:pseudos_nc_header|Description of the format for the norm-conserving pseudopotential header]],
 and in the [[topic:PseudosPAW|PseudosPAW]] topics.
 
 !!! warning
@@ -121,6 +126,12 @@ mrgddb and anaddb
     thermodynamical functions, piezoelectric properties, superconducting
     properties, to name a few. `mrgddb` is for "Merge of Derivative DataBases",
     while `anaddb` is for "Analysis of Derivative DataBases".
+
+abitk
+:   This simple tool is used to parse and supply descriptive output concerning a
+    completed run, and is designed primarily to examine output files in `netcdf`
+    format. The name stands for "Abinit Tool Kit". Running `abitk -h` gives
+    the various options.
 
 cut3d
 :   It can be used to post-process the three-dimensional density (or
@@ -203,7 +214,7 @@ input file, are listed below:
 
 [[typat]]([[natom]]):
 :   sequence of integers, specifying the type of each atom.
-    NOTE: the atomic coordinates ([[xcart]] or [[xred]])
+:   NOTE: the atomic coordinates ([[xcart]] or [[xred]])
     must be specified in the same order
 
 [[rprim]](3,3)
@@ -211,12 +222,12 @@ input file, are listed below:
     each COLUMN of this array is one primitive translation
 
 [[xcart]](3,[[natom]])
-:   cartesian coordinates (Bohr) of atoms in unit cell
-    NOTE: only used when [[xred]] is absent
+:   cartesian coordinates (Bohr) of atoms in unit cell;
+:   NOTE: only used when [[xred]] is absent
 
 [[xred]](3,[[natom]])
 :   fractional coordinates for atomic locations;
-    NOTE: leave out if [[xcart]] is used
+:   NOTE: leave out if [[xcart]] is used
 
 [[znucl]]([[ntypat]])
 :   Nuclear charge of each type of element; must agree with
@@ -228,7 +239,7 @@ input file, are listed below:
 :       planewave kinetic energy cutoff in Hartree
 
 [[kptopt]]
-:       option for specifying the k-point grid
+:       option for specifying the k-point grid;
         if [[kptopt]]=1, automatic generation, using ngkpt and shiftk.
 
 [[ngkpt]](3)
@@ -236,18 +247,18 @@ input file, are listed below:
 
 [[occopt]]
 :       set the occupation of electronic levels:
-        =1 for semiconductors
+        =1 for semiconductors;
         =3 ... 7  for metals
 
 **Specification of the type of calculation to be done:**
 
 [[moldyn]]
-:       when [[moldyn]] is "none": the ions and cell shape are fixed
-                        is "nve_verlet": molecular dynamics (NVE)
+:       when [[moldyn]] is "none": the ions and cell shape are fixed ;
+        when [[moldyn]] is "nve_verlet": molecular dynamics (NVE)
 
 [[geoopt]]
-:       when [[geoopt]] is "none": the ions and cell shape are fixed
-                        is "bfgs": search for the equilibrium geometry
+:       when [[geoopt]] is "none": the ions and cell shape are fixed ;
+        when [[moldyn]] is "bfgs": search for the equilibrium geometry
 
 [[iscf]]
 :       either a positive number for defining self-consistent
@@ -262,7 +273,7 @@ input file, are listed below:
 [[rfphon]]
 :       when = 1: will do response calculation to atomic displacements
 
-**Specification of the numerical convergency of the calculation:**
+**Specification of the numerical convergence of the calculation:**
 
 [[nstep]]
 :    maximal number of self-consistent cycles (on the order of 20)
@@ -303,7 +314,7 @@ There are also different temporary files, also constructed from a "root" name.
 Amongst these files, there is a "status" file, summarizing the current status of advancement of the
 code, in long jobs. The [[help:abinit|ABINIT help file]] contains more details.
 
-## What does the code do?
+## What the code does
 
 The simplest sort of job computes an electronic structure for a fixed set of
 atomic positions within a periodic unit cell. By electronic structure, we mean
@@ -328,7 +339,7 @@ structure can be constructed.
 
 We finish this "help for new user" with a brief explanation of the logic of ABINIT version releases.
 
-The full name of a version has three digits (for example, 9.10.5). The first
+The full name of a version has three digits (for example, 10.6.3). The first
 digit is the slowly varying one (in average, it is changed after two or three
 years). It indicates the major efforts and trends in that version. At the
 level of 1.x.y ABINIT (before 2000 !), the major effort was placed on the
@@ -343,16 +354,14 @@ the speed of ABINIT (e.g. PAW), and its parallelisation. These historical
 developments explain why the tests are gathered in directories "v1", "v2",
 "v3", etc. Every 4 to 8 months, we release a "production version" of ABINIT in
 which the second digit, an even number, is incremented, which usually goes
-with additional features. A [release notes document](/about/release-notes) is issued, with the list of
+with additional features. A [release notes document](../about/release-notes.md) is issued, with the list of
 additional capabilities, and other information with respect to modifications
 with the previous release. The odd second digits are used for internal
 management only, so-called "development versions" of ABINIT (for example
-9.11.4). Two versions differing by the last (third) digit have the same
+10.7.0). Two versions differing by the last (third) digit have the same
 capabilities, but the one with the largest last digit is more debugged than
-the other: version 9.10.5 is more debugged than 9.10.3, but no new features has
+the other: version 10.6.5 is more debugged than 10.6.3, but no new features has
 been added (so likely, no additional bug!).
 
-In order to start using ABINIT, please follow [[tutorial:index|this tutorial.]]
-To learn how to compile the code from source, please consult the following guide:
-
-<embed src="https://wiki.abinit.org/lib/exe/fetch.php?media=build:installing_abinit.pdf" type="application/pdf" width="100%" height="480px">
+In order to start using ABINIT, please follow [[tutorial:index|the tutorials.]]
+The tutorials also include information about how to compile the code from source.

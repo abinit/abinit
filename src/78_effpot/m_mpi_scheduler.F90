@@ -16,7 +16,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2025 ABINIT group (hexu)
+!! Copyright (C) 2001-2026 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -73,7 +73,7 @@ module m_mpi_scheduler
      procedure :: allgatherv_dp1d ! helper function to gather 1d real(dp) array from nodes.
      procedure :: allgatherv_dp2d ! helper function to gather 2d real(dp) array from nodes.
     ! procedure :: allgatherv_dp2d_inplace ! helper function to gather 2d real(dp) array from nodes.
-    ! disabled because an openmpi I tried does not support this. 
+    ! disabled because an openmpi I tried does not support this.
 
   end type mpi_scheduler_t
 
@@ -85,7 +85,7 @@ contains
 
   !integer :: master, my_rank, comm, nproc, ierr
   !logical :: iam_master
-  !call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+  !call init_mpi_info(master, iam_master, my_rank, comm, nproc)
   subroutine init_mpi_info(master, iam_master, my_rank, comm, nproc)
    integer, intent(inout) :: master
    logical, intent(inout) :: iam_master
@@ -122,7 +122,7 @@ contains
   !----------------------------------------------------------------------
 
   subroutine mpi_scheduler_t_initialize(self, ntasks, master, comm, nblock)
-    ! 
+    !
     ! ntask: number of tasks
     ! nblock: number of subtask per task. TODO: should improve the naming.
     class(mpi_scheduler_t), intent(inout) :: self
@@ -305,7 +305,7 @@ contains
   end subroutine gatherv_dp2d
 
   !----------------------------------------------------------------------
-  !> @brief helper function to gather real(dp) 1D array to  master node 
+  !> @brief helper function to gather real(dp) 1D array to  master node
   !>    and bcast to every node
   !> @param[in]  data: the data array to be gathered
   !> @param[out] buffer: a buffer to be used for the gathering.
@@ -326,7 +326,7 @@ contains
 
 
   !----------------------------------------------------------------------
-  !> @brief helper function to gather real(dp) 2D array to  master node 
+  !> @brief helper function to gather real(dp) 2D array to  master node
   !>    and bcast to every node
   !> @param[in]  data: the data array to be gathered
   !> @param[out] buffer: a buffer to be used for the gathering.

@@ -6,7 +6,7 @@
 !!  Initialize MPI parameters and datastructures for parallel execution
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2025 ABINIT group (FJ, MT, FD)
+!!  Copyright (C) 1999-2026 ABINIT group (FJ, MT, FD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -203,6 +203,9 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
    call intagm(dprarr,intarr,jdtset,marr,12,string(1:lenstr),'gpu_devices',tread0,'INT')
    if(tread0==1) dtsets(idtset)%gpu_devices(1:12)=intarr(1:12)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_nfft_blocks',tread0,'INT')
+   if(tread0==1) dtsets(idtset)%gpu_nfft_blocks=intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_kokkos_nthrd',tread0,'INT')
    if(tread0==1) dtsets(idtset)%gpu_kokkos_nthrd=intarr(1)
@@ -429,7 +432,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    response=0
    if (dtsets(idtset)%rfddk/=0 .or. dtsets(idtset)%rf2_dkdk/=0 .or. dtsets(idtset)%rf2_dkde/=0 .or. &
 &   dtsets(idtset)%rfelfd/=0 .or. dtsets(idtset)%rfphon/=0 .or. dtsets(idtset)%rfstrs/=0 .or. &
-&   dtsets(idtset)%rfuser/=0 .or. dtsets(idtset)%rfmagn/=0) response=1
+&   dtsets(idtset)%rfmagn/=0) response=1
 
 !  If no MPI, set all npxxx variables to 1
    if (nproc==1) then
@@ -561,7 +564,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    end if ! Fock
 
    !When using chebfi, the number of blocks is equal to the number of processors
-   if((dtsets(idtset)%wfoptalg == 1) .or. (dtsets(idtset)%wfoptalg == 111)) then
+   if((dtsets(idtset)%wfoptalg == 1) .or. (dtsets(idtset)%wfoptalg == 111) .or. &
+  &   (dtsets(idtset)%wfoptalg == 2) .or. (dtsets(idtset)%wfoptalg == 112)) then
      !Nband might have different values for different kpoint, but not bandpp.
      !In this case, we just use the largest nband (mband_upper), and the input will probably fail
      !at the bandpp check later on
@@ -569,7 +573,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      if(tread(8)==1) then
        write(msg, '(a,i8,3a)' ) &
        'bandpp has been internally set to ',dtsets(idtset)%bandpp,'.',ch10,&
-       'Indeed, there is no need to specify bandpp in the input when using chebfi (wfoptalg=1,111).'
+       'Indeed, there is no need to specify bandpp in the input when using chebfi (wfoptalg=1,111)&
+       or spectrum slicing (wfoptalg=2,112).'
        ABI_COMMENT(msg)
      end if
    end if
@@ -817,7 +822,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        end if
      end if
 
-   end do  ! End the loop on the three possiblities mkmem, mkqmem, mk1mem.
+   end do  ! End the loop on the three possibilities mkmem, mkqmem, mk1mem.
 
    if(dtsets(idtset)%paral_kgb==1) mpi_enregs(idtset)%paralbd=0
 
@@ -1001,7 +1006,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    fftalg=ngfft(7); fftalga=fftalg/100; fftalgc=mod(fftalg,10)
 
    ! Initialize tables for MPI-FFT.
-   call init_distribfft(mpi_enregs(idtset)%distribfft,'c',mpi_enregs(idtset)%nproc_fft,ngfft(2),ngfft(3))
+   call mpi_enregs(idtset)%distribfft%init('c',mpi_enregs(idtset)%nproc_fft,ngfft(2),ngfft(3))
 
    if(response/=0)then
 !    This value of mpw is used in the first part of respfn.f
@@ -1065,7 +1070,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      dtsets(idtset)%nfftdg=nfftdg
 !    Compute fft distribution for fine grid
      fftalg=ngfft(7); fftalga=fftalg/100; fftalgc=mod(fftalg,10)
-     call init_distribfft(mpi_enregs(idtset)%distribfft,'f', mpi_enregs(idtset)%nproc_fft,ngfftdg(2),ngfftdg(3))
+     call mpi_enregs(idtset)%distribfft%init('f', mpi_enregs(idtset)%nproc_fft,ngfftdg(2),ngfftdg(3))
    end if
 
    dtsets(idtset)%mpw=mpw
@@ -1145,13 +1150,13 @@ end subroutine mpi_setup
 !! INPUTS
 !!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables,
 !!   for all datasets; at this stage only datasets with index lower than
-!!   idtset are already initalized
+!!   idtset are already initialized
 !!  filnam(5)=character strings giving file names
 !!  idtset=number of the current dataset
 !!  mpi_enreg=information about MPI parallelization
 !!  mband=maximum number of bands.
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least one data set
-!!  tread(11)=flags indicating wether parallel input parameters were read from input file
+!!  tread(11)=flags indicating whether parallel input parameters were read from input file
 !!            tread(1)  : paral_kgb      tread(6) : npfft
 !!            tread(2)  : npimage        tread(7) : npband
 !!            tread(3)  : nppert         tread(8) : bandpp
@@ -1696,8 +1701,8 @@ end subroutine mpi_setup
    dtset%npband   = max(1,dtset%npband)
    dtset%bandpp   = max(1,dtset%bandpp)
    write(msg,'(a,i0,2a,i0,a)')  &
-&  'Your input dataset does not let Abinit find an appropriate process distribution with nCPUs=',nproc*nthreads,ch10, &
-&  'Try to comment all the np* vars and set max_ncpus=',nthreads*nproc,' to have advices on process distribution.'
+  'Your input dataset does not let Abinit find an appropriate process distribution with nCPUs=',nproc*nthreads,ch10, &
+  'Try to comment all the np* vars and set max_ncpus=',nthreads*nproc,' to have advice on process distribution.'
    ABI_WARNING(msg)
    if (max_ncpus>0) call wrtout(ab_out,msg, do_flush=.True.)
    iexit=iexit+1
@@ -2154,8 +2159,7 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
 !arrays
  integer,allocatable :: ranks(:),val_npslk(:)
  real(dp),allocatable :: eigen(:),grama(:,:),gramb(:,:)
- complex(dpc),allocatable :: blockvectorbx(:,:),blockvectorx(:,:),sqgram(:,:)
-
+ complex(dp),allocatable :: blockvectorbx(:,:),blockvectorx(:,:),sqgram(:,:)
 !******************************************************************
 
  DBG_ENTER("COLL")

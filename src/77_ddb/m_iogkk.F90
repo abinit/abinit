@@ -6,7 +6,7 @@
 !!  IO routines for GKK files
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MVer)
+!!  Copyright (C) 2008-2026 ABINIT group (MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -977,7 +977,7 @@ end subroutine prt_gkk_yambo
 !! then maps them into the FS kpt states
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2025 ABINIT group (JPCroc) based on conducti
+!! Copyright (C) 2002-2026 ABINIT group (JPCroc) based on conducti
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1003,21 +1003,15 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
 
 !Local variables-------------------------------
 !scalars
- integer :: bd2tot_index
- integer :: iband,ii,ikpt, ikpt_ddk
- integer :: isppol,l1,mband
- integer :: bantot1
- integer :: unit_ddk
- integer :: symrankkpt
+ integer :: bd2tot_index, iband,ii,ikpt, ikpt_ddk, isppol,l1,mband
+ integer :: bantot1, unit_ddk, symrankkpt
  character(len=fnlen) :: filnam1,filnam2,filnam3
  character(len=500) :: msg
  type(hdr_type) :: hdr1
  type(krank_t) :: krank
 !arrays
  real(dp) :: im_el_veloc(3)
- real(dp),allocatable :: eig1_k(:,:)
- real(dp),allocatable :: eigen11(:),eigen12(:),eigen13(:)
-
+ real(dp),allocatable :: eig1_k(:,:), eigen11(:),eigen12(:),eigen13(:)
 ! *********************************************************************************
 
 !Read data file name
@@ -1073,7 +1067,7 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
  elph_tr_ds%el_veloc=zero
 
 !need correspondence between the DDK kpoints and the kpt_phon
- krank = krank_new(hdr1%nkpt, hdr1%kptns)
+ call krank%init(hdr1%nkpt, hdr1%kptns)
 
  do isppol=1,nsppol_in
    im_el_veloc(:)=zero

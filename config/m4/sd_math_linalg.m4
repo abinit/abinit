@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2024 Yann Pouillon, Marc Torrent
+# Copyright (C) 2005-2026 Yann Pouillon, Marc Torrent
 #
 # This file is part of the Steredeg software package. For license information,
 # please see the COPYING file in the top-level directory of the source
@@ -486,10 +486,18 @@ AC_DEFUN([_SD_LINALG_CHECK_FLAVOR], [
           sd_linalg_chk_serial="mkl ${sd_linalg_chk_serial}"
         fi
         sd_linalg_chk_serial="openblas atlas ${sd_linalg_chk_serial}"
+	AC_CHECK_PROG([PKG_CONFIG], [pkg-config], [pkg-config], [no])
+	if test "$PKG_CONFIG" != "no"; then
+		sd_linalg_chk_serial="${sd_linalg_chk_serial} openblas_pkg"
+	fi
         ;;
       intel)
         sd_linalg_chk_serial="mkl atlas ${sd_linalg_chk_serial}"
         sd_linalg_chk_mpi="mkl netlib"
+	AC_CHECK_PROG([PKG_CONFIG], [pkg-config], [pkg-config], [no])
+	if test "$PKG_CONFIG" != "no"; then
+		sd_linalg_chk_serial="${sd_linalg_chk_serial} openblas_pkg"
+	fi
         ;;
     esac
 

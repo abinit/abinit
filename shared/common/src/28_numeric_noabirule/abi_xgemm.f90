@@ -16,7 +16,7 @@
 !! an m by k matrix,  op( B )  a  k by n matrix and  C an m by n matrix.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2025 ABINIT group (LNguyen,FDahm (CS))
+!!  Copyright (C) 2001-2026 ABINIT group (LNguyen,FDahm (CS))
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,11 +48,11 @@
  integer,intent(in) :: LDC
  integer,intent(in) :: M
  integer,intent(in) :: N
- complex(dpc),intent(in) :: ALPHA
- complex(dpc),intent(in) :: BETA
- complex(dpc),target,intent(in) :: A(*)
- complex(dpc),target,intent(in) :: B(*)
- complex(dpc),target,intent(inout) :: C(*)
+ complex(dp),intent(in) :: ALPHA
+ complex(dp),intent(in) :: BETA
+ complex(dp),target,intent(in) :: A(*)
+ complex(dp),target,intent(in) :: B(*)
+ complex(dp),target,intent(inout) :: C(*)
 
  integer :: info
 #ifdef DEV_LINALG_TIMING
@@ -95,11 +95,11 @@ end subroutine abi_zgemm_2dd
  integer,intent(in) :: LDC
  integer,intent(in) :: M
  integer,intent(in) :: N
- complex(dpc),intent(in) :: ALPHA
- complex(dpc),intent(in) :: BETA
- complex(dpc),target,intent(in) :: A(lda,*)
- complex(dpc),target,intent(in) :: B(ldb,*)
- complex(dpc),target,intent(inout) :: C(ldc,*)
+ complex(dp),intent(in) :: ALPHA
+ complex(dp),intent(in) :: BETA
+ complex(dp),target,intent(in) :: A(lda,*)
+ complex(dp),target,intent(in) :: B(ldb,*)
+ complex(dp),target,intent(inout) :: C(ldc,*)
 
  integer :: info
 #ifdef DEV_LINALG_TIMING
@@ -154,8 +154,8 @@ end subroutine abi_zgemm_2d
  integer,intent(in) :: LDC
  integer,intent(in) :: M
  integer,intent(in) :: N
- complex(dpc),intent(in) :: ALPHA
- complex(dpc),intent(in) :: BETA
+ complex(dp),intent(in) :: ALPHA
+ complex(dp),intent(in) :: BETA
  real(dp),target,intent(in) :: A(*)
  real(dp),target,intent(in) :: B(*)
  real(dp),target,intent(inout) :: C(*)
@@ -213,8 +213,8 @@ subroutine abi_d2zgemm(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC,&
  integer, intent(in) :: m
  integer, intent(in) :: n
  integer, intent(in) :: k
- complex(dpc),intent(in) :: alpha
- complex(dpc),intent(in) :: beta
+ complex(dp),intent(in) :: alpha
+ complex(dp),intent(in) :: beta
  real(dp),target, intent(in)    :: a(lda,*)    ! FIXME should be lda * x_cplx
  real(dp),target, intent(in)    :: b(ldb,*)
  real(dp),target, intent(inout) :: c(ldc,*)

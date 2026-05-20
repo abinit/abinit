@@ -11,7 +11,7 @@
 !!  of the point group that preserve the external q-point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2025 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!! Copyright (C) 2008-2026 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -162,7 +162,7 @@ module m_bz_mesh
   ! (nibz)
   ! Weights for each point in the IBZ.
 
-  complex(dpc),allocatable :: tabp(:)
+  complex(dp),allocatable :: tabp(:)
   ! (nkbz)
   ! For each point in the BZ, this table gives the phase factors associated
   ! to non-symmorphic operations, i.e., e^{-i2\pi k_IBZ.R{^-1}t}=e^{-i2\pi k_BZ cdot t}
@@ -247,6 +247,9 @@ module m_bz_mesh
 
  contains
 
+  procedure :: init => kpath_init
+   ! Construct a new path
+
   procedure :: free => kpath_free
    ! Free memory
 
@@ -258,7 +261,7 @@ module m_bz_mesh
 
  end type kpath_t
 
- public :: kpath_new        ! Construct a new path
+
  public :: make_path        ! Construct a normalized path. TODO: Remove it as it's deprecated
 !!***
 
@@ -280,13 +283,13 @@ module m_bz_mesh
 !! including the operations such as
 !!  -Sq = q+ G0.
 !!
-!! The operations belongin to the little group define an irriducible wedge in the Brillouin zone
+!! The operations belonging to the little group define an irriducible wedge in the Brillouin zone
 !! that is, usually, larger than the irredubile zone defined by the space group.
 !! The two zone coincide when q=0
 !!
 !! TODO
 !! Rationalize most of the arrays, in particular the tables
-!! This structure shoud be rewritten almost from scratch, thus avoid using it
+!! This structure should be rewritten almost from scratch, thus avoid using it
 !! for your developments.
 !!
 !! SOURCE
@@ -318,7 +321,7 @@ module m_bz_mesh
 
   integer,allocatable :: ibz2bz(:)
   ! ibz2bz(nibz_ltg)
-  ! The correspondind index in the BZ array
+  ! The corresponding index in the BZ array
 
   integer,allocatable :: igmG0(:,:,:)
   ! iumklp(npw,2,nsym_sg)
@@ -359,6 +362,7 @@ module m_bz_mesh
    procedure :: init => littlegroup_init
    procedure :: print => littlegroup_print
    procedure :: free => littlegroup_free_0D
+   !procedure :: find => littlegroup_find
 
  end type littlegroup_t
 
@@ -546,7 +550,6 @@ subroutine kmesh_free(Kmesh)
 
 !Arguments ------------------------------------
  class(kmesh_t),intent(inout) :: Kmesh
-
 ! *********************************************************************
 
  ! integer
@@ -582,7 +585,6 @@ end subroutine kmesh_free
 !! units: unit numbers
 !! [header]=optional header
 !! [prtvol]=verbosity level
-!! [mode_paral]=either "COLL" or "PERS"
 !!
 !! OUTPUT
 !!  Only printing.
@@ -831,14 +833,14 @@ end subroutine setup_k_rotation
 !!
 !! SOURCE
 
-subroutine get_bz_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim,ph_mkbzt,umklp,isirred)
+subroutine get_bz_item(Kmesh, ik_bz, kbz, ik_ibz, isym, itim, ph_mkbzt, umklp, isirred)
 
 !Arguments ------------------------------------
 !scalars
  class(kmesh_t),intent(in) :: Kmesh
  integer,intent(in) :: ik_bz
  integer,intent(out) :: ik_ibz,isym,itim
- complex(dpc),optional,intent(out) :: ph_mkbzt
+ complex(dp),optional,intent(out) :: ph_mkbzt
  logical,optional,intent(out) :: isirred
 !arrays
  integer,optional,intent(out) :: umklp(3)
@@ -847,7 +849,6 @@ subroutine get_bz_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim,ph_mkbzt,umklp,isirred)
 !Local variables-------------------------------
 !scalars
  character(len=500) :: msg
-
 ! *********************************************************************
 
  if (ik_bz>Kmesh%nbz.or.ik_bz<=0) then
@@ -899,7 +900,6 @@ subroutine get_IBZ_item(Kmesh,ik_ibz,kibz,wtk)
  real(dp),intent(out) :: wtk
 !arrays
  real(dp),intent(out) :: kibz(3)
-
 ! *********************************************************************
 
  if (ik_ibz>Kmesh%nibz.or.ik_ibz<=0) then
@@ -951,7 +951,6 @@ subroutine get_BZ_diff(Kmesh,k1,k2,idiff_bz,g0,nfound)
 !arrays
  integer :: umklp(3)
  real(dp) :: kdiff(3),ktrial(3)
-
 ! *********************************************************************
 
  if (.not.has_BZ_item(Kmesh,k1,ikp,umklp)) then
@@ -1189,7 +1188,7 @@ end function has_IBZ_item
 !!  ik_bz=Index of the k-point in the BZ.
 !!
 !! OUTPUT
-!! Returm TRUE. if the k-point is in the IBZ (NB: a non-zero umklapp is not allowed)
+!! Return TRUE. if the k-point is in the IBZ (NB: a non-zero umklapp is not allowed)
 !!
 !! SOURCE
 
@@ -1203,7 +1202,6 @@ pure logical function bz_mesh_isirred(Kmesh, ik_bz)
 !Local variables-------------------------------
 !scalars
  integer :: isym,itim
-
 ! *********************************************************************
 
  isym = Kmesh%tabo(ik_bz)
@@ -1691,7 +1689,7 @@ subroutine getkptnorm_bycomponent(vect,factor,norm)
 ! *************************************************************************
 
  ! Checking the factor is large enough (skipping zero components, since in this case the product will be 0)
- if(ANY(vect(:)*factor < 1.0 .and. vect(:) > tol7)) then
+ if (ANY(vect(:)*factor < 1.0 .and. vect(:) > tol7)) then
     write(msg,'(a,a,a,a,a,a,a,a)') ' Not able to give unique norm to order vectors',ch10,&
        'This is likely related to a truncation error for a k-point in the input file',ch10,&
        'Always prefer fractional numbers in the input file instead of truncated ones',ch10,&
@@ -1712,7 +1710,7 @@ end subroutine getkptnorm_bycomponent
 !!
 !! FUNCTION
 !!  Generate a normalized path given the extrema.
-!!  See also kpath_t and kpath_new (recommended API).
+!!  See also kpath_t and kpath_init (recommended API).
 !!
 !! INPUTS
 !!  nbounds=Number of extrema defining the path.
@@ -2077,11 +2075,10 @@ subroutine findqg0(iq, g0, kmkp, nqbz, qbz, mG0)
  real(dp),intent(in) :: kmkp(3),qbz(3,nqbz)
 
 !Local variables-------------------------------
-!FIXME if I use 1.0d-4 the jobs crash, should understand why
 !scalars
  integer :: ig,iqbz,jg01,jg02,jg03
- real(dp) :: tolq0=1.0D-3
- character(len=500) :: msg
+ real(dp) :: tolq0=1.0D-3  !FIXME if I use 1.0d-4 the jobs crash, should understand why
+ !character(len=500) :: msg
 !arrays
  real(dp) :: glist1(2*ABS(mG0(1))+1),glist2(2*ABS(mG0(2))+1),glist3(2*ABS(mG0(3))+1), qpg0(3),rg(3)
 ! *************************************************************************
@@ -2111,24 +2108,21 @@ subroutine findqg0(iq, g0, kmkp, nqbz, qbz, mG0)
    !end do
 
    ! Init G0 lists to accelerate search below (small |G0| first)
-   glist1(1) = 0
-   ig = 2
+   glist1(1) = 0; ig = 2
    do jg01=1,mG0(1)
      glist1(ig)   =  jg01
      glist1(ig+1) = -jg01
      ig = ig + 2
    end do
 
-   glist2(1) = 0
-   ig = 2
+   glist2(1) = 0; ig = 2
    do jg02=1,mG0(2)
      glist2(ig)   =  jg02
      glist2(ig+1) = -jg02
      ig = ig + 2
    end do
 
-   glist3(1) = 0
-   ig = 2
+   glist3(1) = 0; ig = 2
    do jg03=1,mG0(3)
      glist3(ig)   =  jg03
      glist3(ig+1) = -jg03
@@ -2158,8 +2152,7 @@ subroutine findqg0(iq, g0, kmkp, nqbz, qbz, mG0)
   end do g1loop
 
   if (iq == 0) then
-    write(msg,'(a, 3f9.5)')' q = k-kp+G0 not found. kmkp:',kmkp
-    ABI_ERROR(msg)
+    ABI_ERROR(sjoin('q = k-kp+G0 not found. kmkp:', ktoa(kmkp)))
   end if
  end if
 
@@ -2542,7 +2535,6 @@ subroutine littlegroup_free_1D(Ltg)
 
 !Local variables-------------------------------
  integer :: ipt
-
 ! *********************************************************************
 
  do ipt=1,SIZE(Ltg)
@@ -2702,9 +2694,9 @@ end function box_len
 
 !----------------------------------------------------------------------
 
-!!****f* m_bz_mesh/kpath_new
+!!****f* m_bz_mesh/kpath_init
 !! NAME
-!! kpath_new
+!! kpath_init
 !!
 !! FUNCTION
 !!  Create a normalized path given the extrema.
@@ -2717,10 +2709,11 @@ end function box_len
 !!
 !! SOURCE
 
-type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
+subroutine kpath_init(kpath, bounds, gprimd, ndivsm)
 
 !Arguments ------------------------------------
 !scalars
+ class(kpath_t),intent(out) :: kpath
  integer,intent(in) :: ndivsm
 !!arrays
  real(dp),intent(in) :: bounds(:,:),gprimd(3,3)
@@ -2768,7 +2761,7 @@ type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
    kpath%bounds2kpt(ii+1) = sum(kpath%ndivs(:ii)) + 1
  end do
 
-end function kpath_new
+end subroutine kpath_init
 !!***
 
 !----------------------------------------------------------------------
@@ -2779,7 +2772,7 @@ end function kpath_new
 !!
 !! FUNCTION
 !!  Return all the versors emanating from the Gamma point.
-
+!!
 !! OUTPUT
 !!  nvers=number of versors
 !!  red_versors(3,nvers)=versors in reduced coords

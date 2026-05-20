@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (XG, MJV, DCA, GMR, JCC, SE)
+!!  Copyright (C) 1998-2026 ABINIT group (XG, MJV, DCA, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -145,9 +145,8 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
 &   '  while ndim=',ndim,' and 3*natom+1=',3*natom+1,'.'
    ABI_BUG(message)
  end if
- 
- if( (optcell==2 .or. optcell==3) &
-& .and. ndim/=3*natom+6)then
+
+ if( (optcell==2 .or. optcell==3) .and. ndim/=3*natom+6) then
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=2 or 3, ndim MUST be equal to 3*natom+6,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+6=',3*natom+6,'.'
@@ -187,21 +186,21 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
    else if(optcell==4)then
      scaling(1,1)=vin(3*natom+1)
      if (abs(scaling(1,1) - 1.0_dp) <1.E-14) scaling(1,1)=1.0_dp
-     scaling(3,1)=vin(3*natom+2)  
+     scaling(3,1)=vin(3*natom+2)
      if (abs(scaling(3,1)) <1.E-14) scaling(3,1)=0.0_dp
      scaling(2,1)=vin(3*natom+3)
      if (abs(scaling(2,1)) <1.E-14) scaling(2,1)=0.0_dp
    else if(optcell==5)then
      scaling(2,2)=vin(3*natom+1)
      if (abs(scaling(2,2) - 1.0_dp) <1.E-14) scaling(2,2)=1.0_dp
-     scaling(3,2)=vin(3*natom+2)  
+     scaling(3,2)=vin(3*natom+2)
      if (abs(scaling(3,2)) <1.E-14) scaling(3,2)=0.0_dp
      scaling(1,2)=vin(3*natom+3)
      if (abs(scaling(1,2)) <1.E-14) scaling(1,2)=0.0_dp
    else if(optcell==6)then
      scaling(3,3)=vin(3*natom+1)
      if (abs(scaling(3,3) - 1.0_dp) <1.E-14) scaling(3,3)=1.0_dp
-     scaling(2,3)=vin(3*natom+2)  
+     scaling(2,3)=vin(3*natom+2)
      if (abs(scaling(2,3)) <1.E-14) scaling(2,3)=0.0_dp
      scaling(1,3)=vin(3*natom+3)
      if (abs(scaling(1,3)) <1.E-14) scaling(1,3)=0.0_dp

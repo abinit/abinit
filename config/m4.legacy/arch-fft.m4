@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2014-2025 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2014-2026 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -216,7 +216,7 @@ AC_DEFUN([_ABI_FFTW3_CHECK_LIBS],[
         integer, parameter :: N = 10
         complex :: a1(N), a2(N)
         integer :: plan
-   
+
         call dfftw_plan_dft_1d(plan, N, a1, a2, FFTW_FORWARD, FFTW_ESTIMATE)
         call dfftw_execute_dft(plan, a1, a2)
         call dfftw_destroy_plan(plan)
@@ -385,7 +385,7 @@ AC_DEFUN([ABI_FFT_DETECT],[
         ;;
 
       fftw3-threads)
-        _ABI_FFT_CHECK_LIB([fftw3],[dfftw_execute])	
+        _ABI_FFT_CHECK_LIB([fftw3],[dfftw_execute])
         if test "${abi_fft_ok}" = "yes"; then
           AC_DEFINE([HAVE_FFT_FFTW3],1,[Define to 1 if you want to use the FFTW3 library.])
           AC_DEFINE([HAVE_FFT_FFTW3_THREADS],1,[Define to 1 if you want to use the threaded FFTW3 library.])
@@ -399,13 +399,13 @@ AC_DEFUN([ABI_FFT_DETECT],[
         ;;
 
       fftw3-mpi)
-	_ABI_FFT_CHECK_LIB([fftw3],[dfftw_execute])	
+	_ABI_FFT_CHECK_LIB([fftw3],[dfftw_execute])
         _ABI_FFT_CHECK_LIB([fftw3_threads],[dfftw_init_threads])
         #_ABI_FFT_CHECK_LIB([fftw3_mpi],[fftw_mpi_init])
         if test "${abi_fft_ok}" = "yes"; then
           AC_DEFINE([HAVE_FFT_FFTW3],1,[Define to 1 if you want to use the FFTW3 library.])
-          AC_DEFINE([HAVE_FFT_FFTW3_THREADS],1,[Define to 1 if you want to use the threaded FFTW3 library.])	
-          AC_DEFINE([HAVE_FFT_FFTW3_MPI],1,[Define to 1 if you want to use the distributed FFTW3 library.])	
+          AC_DEFINE([HAVE_FFT_FFTW3_THREADS],1,[Define to 1 if you want to use the threaded FFTW3 library.])
+          AC_DEFINE([HAVE_FFT_FFTW3_MPI],1,[Define to 1 if you want to use the distributed FFTW3 library.])
           abi_fft_serial="yes"
           abi_fft_mpi="yes"
           abi_fft_fcflags="${abi_fft_fcflags}"

@@ -6,7 +6,7 @@
 !! Several definitions used in libPAW: named constants, physical constants, datatypes
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2025 ABINIT group
+!! Copyright (C) 2000-2026 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,7 @@ module m_libpaw_defs
 !Double precision real/complex subtypes
 !-----------------------------------------------
  integer, parameter :: dp=kind(1.0d0)                   !Nb of bytes related to DP real numbers
- integer, parameter :: dpc=kind((1.0_dp,1.0_dp))        !Nb of bytes related to DP complex numbers
+ integer, parameter :: dp=kind((1.0_dp,1.0_dp))        !Nb of bytes related to DP complex numbers
 
 !Real constants
 !-----------------------------------------------
@@ -69,8 +69,8 @@ module m_libpaw_defs
 
 !Complex constants
 !-----------------------------------------------
- complex(dpc), parameter :: czero=(0._dp,0._dp)         ! 0 (complex)
- complex(dpc), parameter :: cone =(1._dp,0._dp)         ! 1 (complex)
+ complex(dp), parameter :: czero=(0._dp,0._dp)         ! 0 (complex)
+ complex(dp), parameter :: cone =(1._dp,0._dp)         ! 1 (complex)
 
 !Character constants
 !-----------------------------------------------

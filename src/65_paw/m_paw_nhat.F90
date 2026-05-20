@@ -7,7 +7,7 @@
 !!    charge density (i.e. n^hat(r)).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2025 ABINIT group (FJ, MT, MG, TRangel)
+!! Copyright (C) 2018-2026 ABINIT group (FJ, MT, MG, TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,6 +27,7 @@ MODULE m_paw_nhat
  use m_errors
  use m_xmpi
  use m_xomp
+ use m_gputk
  use m_abi_linalg
  use, intrinsic :: iso_c_binding, only: c_size_t,c_loc
 
@@ -39,7 +40,7 @@ MODULE m_paw_nhat
  use m_pawcprj,      only : pawcprj_type
  use m_paw_finegrid, only : pawgylm,pawrfgd_fft,pawrfgd_wvl,pawexpiqr
  use m_paral_atom,   only : get_my_atmtab, free_my_atmtab
- use m_distribfft,   only : distribfft_type,init_distribfft_seq,destroy_distribfft
+ use m_distribfft,   only : distribfft_type
  use m_geometry,     only : xred2xcart
  use m_cgtools,      only : mean_fftr
  use m_mpinfo,       only : set_mpi_enreg_fft,unset_mpi_enreg_fft,initmpi_seq
@@ -479,15 +480,18 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
      end if
 
 !    Add the contribution of the atom to the compensation charge
+!    LB-2025-12-11 : if the PAW sphere overlaps with itself (true if it is larger than the unit cell, rare case but possible...),
+!    then several values of ic can give the same kc in the following loops, so the iterations are not independent,
+!    and cannot be parallelized (for example with OpenMP directives)
      if (compute_nhat) then
        if (cplex==1) then
-         !$OMP PARALLEL DO PRIVATE(kc)
+         ! Not possible to parallelize here (see comment above)
          do ic=1,nfgd
            kc=pawfgrtab(iatom)%ifftsph(ic)
            pawnhat(kc,ispden)=pawnhat(kc,ispden)+pawnhat_atm(ic)
          end do
        else
-         !$OMP PARALLEL DO PRIVATE(jc)
+         ! Not possible to parallelize here (see comment above)
          do ic=1,nfgd
            jc=2*ic-1;kc=2*pawfgrtab(iatom)%ifftsph(ic)-1
            pawnhat(kc:kc+1,ispden)=pawnhat(kc:kc+1,ispden)+pawnhat_atm(jc:jc+1)
@@ -496,13 +500,13 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
      end if
      if (compute_grad) then
        if (cplex==1) then
-         !$OMP PARALLEL DO PRIVATE(kc)
+         ! Not possible to parallelize here (see comment above)
          do ic=1,nfgd
            kc=pawfgrtab(iatom)%ifftsph(ic)
            pawgrnhat(kc,ispden,1:3)=pawgrnhat(kc,ispden,1:3)+pawgrnhat_atm(ic,1:3)
          end do
        else
-         !$OMP PARALLEL DO PRIVATE(jc,ii)
+         ! Not possible to parallelize here (see comment above)
          do ic=1,nfgd
            jc=2*ic-1;kc=2*pawfgrtab(iatom)%ifftsph(ic)-1
            do ii=1,3
@@ -579,7 +583,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
      my_distribfft => distribfft
    else
      ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'f',ngfft(2),ngfft(3),'fourdp')
+     call my_distribfft%init_seq('f',ngfft(2),ngfft(3),'fourdp')
    end if
    call initmpi_seq(mpi_enreg_fft)
    ABI_FREE(mpi_enreg_fft%distribfft)
@@ -601,7 +605,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !  Destroy fake mpi_enreg
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
-     call destroy_distribfft(my_distribfft)
+     call my_distribfft%free()
      ABI_FREE(my_distribfft)
    end if
  end if
@@ -671,7 +675,7 @@ end subroutine pawmknhat
 !! SOURCE
 
 subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
-&          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,nattyp,pawtab, &
+&          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,nhat12_work,nattyp,pawtab, &
 &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft,gpu_option) ! optional arguments
 
 !Arguments ---------------------------------------------
@@ -687,15 +691,16 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),optional, intent(in) ::gprimd(3,3),qphon(3),xred(3,natom)
  real(dp),intent(out) :: grnhat12(2,nfft,nspinor**2,3*nhat12_grdim,ndat2,ndat1)
- real(dp),optional,intent(out) :: grnhat_12(2,nfft,nspinor**2,3,natom*(ider/3),ndat2,ndat1)
- real(dp),intent(out) :: nhat12(2,nfft,nspinor**2,ndat2,ndat1)
+ real(dp),optional,target,intent(out) :: grnhat_12(2,nfft,nspinor**2,3,natom*(ider/3),ndat2,ndat1)
+ real(dp),target,intent(out) :: nhat12(2,nfft,nspinor**2,ndat2,ndat1)
+ real(dp),target, intent(in) ::nhat12_work(:,:,:,:,:,:)
  type(pawfgrtab_type),intent(inout),target :: pawfgrtab(my_natom)
  type(pawtab_type),intent(in),target :: pawtab(ntypat)
  type(pawcprj_type),intent(in) :: cprj1(natom,nspinor*ndat1),cprj2(natom,nspinor*ndat2)
 
 !Local variables ---------------------------------------
 !scalars
- complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
+ complex(dp), parameter :: cminusone  = (-1._dp,0._dp)
  integer :: iatm,iatom,iatom_tot,ic,ierr,ils,ilslm,isp1,isp2,isploop,itypat,jc,klm,klmn,idat1,idat2,ia,nfgd_max
  integer :: lmax,lmin,lm_size,mm,my_comm_atom,my_comm_fft,optgr0,optgr1,paral_kgb_fft
  integer :: cplex,ilmn,jlmn,lmn_size,lmn2_size,gpu_option_,nprojs,shift,nlmn,nfgd
@@ -710,7 +715,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
  integer,pointer :: my_atmtab(:)
  real(dp) :: rdum(1),tsec(2),ro(2),ro_ql(2)
- real(dp),allocatable :: work(:,:), qijl(:,:), nhat12_atm(:,:,:,:,:,:),projs1(:,:,:),projs2(:,:,:),cpf(:,:,:,:,:),gnt_scal(:,:)
+ real(dp),allocatable :: work(:,:), qijl(:,:),projs1(:,:,:),projs2(:,:,:),cpf(:,:,:,:,:),gnt_scal(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: nhat12_atm(:,:,:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: atom_expiqr(:,:,:),atom_gylm(:,:,:),atom_dltij(:),atom_gylmgr(:,:,:,:)
  integer,  ABI_CONTIGUOUS pointer :: atom_nfgd(:),atom_ifftsph(:,:),ang_gntselect(:,:),atom_indklmn(:,:)
 
@@ -822,7 +828,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    end do
  end do
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(to:projs1,projs2) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:projs1,projs2,nattyp) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif
 !------------------------------------------------------------------------
 !----- Loop over atoms types
@@ -839,10 +845,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    qijl=pawtab(itypat)%qijl
    nlmn = cprj1(iatm+1, 1)%nlmn
 
-   ABI_MALLOC(nhat12_atm, (2,nfft,nspinor**2,ndat2,ndat1,nattyp(itypat)))
-#ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(alloc:nhat12_atm) IF(gpu_option_==ABI_GPU_OPENMP)
-#endif
+   nhat12_atm => nhat12_work
 
    if (compute_nhat) then
      if(gpu_option_==ABI_GPU_DISABLED) then
@@ -907,7 +910,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  ABI_MALLOC(atom_nfgd,   (nfgd_max))
  ABI_MALLOC(atom_gylm,   (  nfgd_max,lm_size,nattyp(itypat)))
  ABI_MALLOC(atom_ifftsph,(nfgd_max,nattyp(itypat)))
- if(compute_phonon) then
+ if(compute_phonon.and.(.not.qeq0).and.pawfgrtab(iatom)%expiqr_allocated/=0) then
    ABI_MALLOC(atom_expiqr, (2,nfgd_max,nattyp(itypat)))
  end if
  if(compute_grad1) then
@@ -921,7 +924,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    atom_nfgd(ia) = pawfgrtab(iatom)%nfgd
    atom_gylm(1:nfgd,1:lm_size,ia)      = pawfgrtab(iatom)%gylm(1:nfgd,1:lm_size)
    atom_ifftsph(1:nfgd,ia)             = pawfgrtab(iatom)%ifftsph(1:nfgd)
-   if(compute_phonon) then
+   if(compute_phonon.and.(.not.qeq0).and.pawfgrtab(iatom)%expiqr_allocated/=0) then
      atom_expiqr(1:2,1:nfgd,ia)          = pawfgrtab(iatom)%expiqr(1:2,1:nfgd)
    end if
    if(compute_grad1) then
@@ -930,8 +933,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  end do
 
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_ifftsph,atom_dltij,qijl,gnt_scal) IF(gpu_option_==ABI_GPU_OPENMP)
-   !$OMP TARGET ENTER DATA MAP(to:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_phonon)
+   !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_indklmn,atom_nfgd,atom_ifftsph,atom_dltij,qijl,gnt_scal) IF(gpu_option_==ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(to:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_phonon .and. (.not.qeq0))
    !$OMP TARGET ENTER DATA MAP(to:atom_gylmgr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_grad1)
 #endif
 
@@ -966,7 +969,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-       !$OMP& PRIVATE(idat1,idat2) MAP(to:cpf,projs1,projs2)
+       !$OMP& PRIVATE(idat1,idat2) MAP(to:cpf,projs1,projs2,atom_indklmn,atom_nfgd)
        do idat1=1,ndat1
          do idat2=1,ndat2
            !$OMP PARALLEL DO PRIVATE(ilmn,jlmn,klmn)
@@ -1023,7 +1026,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 #ifdef HAVE_OPENMP_OFFLOAD
          ang_gntselect => pawang%gntselect
          !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(3) &
-         !$OMP& MAP(to:nhat12_atm,atom_gylm,cpf,qijl,atom_ifftsph,atom_dltij,atom_indklmn,gnt_scal)&
+         !$OMP& MAP(to:nhat12_atm,atom_gylm,cpf,qijl,atom_ifftsph,atom_dltij,atom_indklmn,atom_nfgd,gnt_scal,nattyp)&
          !$OMP& PRIVATE(idat1,idat2,ia)
          do ia=1,nattyp(itypat)
            do idat1=1,ndat1
@@ -1095,7 +1098,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
        else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(3) &
-         !$OMP& MAP(to:grnhat_12,atom_gylmgr,cpf,qijl,atom_ifftsph,atom_dltij,atom_indklmn,gnt_scal)&
+         !$OMP& MAP(to:grnhat_12,atom_gylmgr,cpf,qijl,atom_ifftsph,atom_dltij,atom_indklmn,atom_nfgd,gnt_scal,nattyp)&
          !$OMP& PRIVATE(idat1,idat2,sumr,sumi,sumr2,sumi2,sumr3,sumi3)
          do ia=1,nattyp(itypat)
            do idat1=1,ndat1
@@ -1167,14 +1170,15 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
          else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
            !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-           !$OMP& MAP(to:atom_ifftsph,atom_expiqr,nhat12_atm)
+           !$OMP& MAP(to:atom_ifftsph,atom_expiqr,atom_nfgd,nhat12_atm,nattyp)
            do ia=1,nattyp(itypat)
              do idat1=1,ndat1
                !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ic,jc,ro)
                do idat2=1,ndat2
                  do ic=1,atom_nfgd(ia)
                    jc=atom_ifftsph(ic,ia)
-                   ro(1:2)=nhat12_atm(1:2,jc,isploop,idat2,idat1,ia)
+                   ro(1)=nhat12_atm(1,jc,isploop,idat2,idat1,ia)
+                   ro(2)=nhat12_atm(2,jc,isploop,idat2,idat1,ia)
                    nhat12_atm(1,jc,isploop,idat2,idat1,ia)=ro(1)*atom_expiqr(1,ic,ia)-ro(2)*atom_expiqr(2,ic,ia)
                    nhat12_atm(2,jc,isploop,idat2,idat1,ia)=ro(2)*atom_expiqr(1,ic,ia)+ro(1)*atom_expiqr(2,ic,ia)
                  end do
@@ -1216,7 +1220,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
          else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
            !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(3) &
-           !$OMP&  MAP(to:atom_ifftsph,atom_expiqr,nhat12_atm,grnhat_12) PRIVATE(idat1,idat2)
+           !$OMP&  MAP(to:atom_ifftsph,atom_expiqr,atom_nfgd,nhat12_atm,grnhat_12,nattyp) PRIVATE(idat1,idat2)
            do ia=1,nattyp(itypat)
              do idat1=1,ndat1
                do idat2=1,ndat2
@@ -1299,8 +1303,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 
  iatm=iatm+nattyp(itypat)
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT  DATA MAP(delete:atom_nfgd,atom_gylm,atom_ifftsph,atom_dltij,qijl,gnt_scal) IF(gpu_option_==ABI_GPU_OPENMP)
- !$OMP TARGET EXIT DATA MAP(delete:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_phonon)
+ !$OMP TARGET EXIT DATA MAP(delete:atom_nfgd,atom_indklmn,atom_gylm,atom_ifftsph,atom_dltij,qijl,gnt_scal) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_phonon .and. (.not.qeq0))
  !$OMP TARGET EXIT DATA MAP(delete:atom_gylmgr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_grad1)
 #endif
  ABI_FREE(atom_nfgd)
@@ -1308,20 +1312,20 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  if (compute_grad1) then
    ABI_FREE(atom_gylmgr)
  end if
- if (compute_phonon) then
+ if (compute_phonon.and.(.not.qeq0).and.pawfgrtab(iatom)%expiqr_allocated/=0) then
    ABI_FREE(atom_expiqr)
  end if
  ABI_FREE(atom_ifftsph)
  ABI_FREE(qijl)
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(delete:nhat12_atm,cpf) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:cpf) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif
  ABI_FREE(cpf)
- ABI_FREE(nhat12_atm)
+ nullify(nhat12_atm)
  end do ! itypat
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(delete:projs1,projs2) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:projs1,projs2,nattyp) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif
  ABI_FREE(projs1)
  ABI_FREE(projs2)
@@ -1365,7 +1369,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      my_distribfft => distribfft
    else
      ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'f',ngfft(2),ngfft(3),'fourdp')
+     call my_distribfft%init_seq('f',ngfft(2),ngfft(3),'fourdp')
    end if
    call initmpi_seq(mpi_enreg_fft)
    ABI_FREE(mpi_enreg_fft%distribfft)
@@ -1392,7 +1396,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 !  Destroy fake mpi_enreg
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
-     call destroy_distribfft(my_distribfft)
+     call my_distribfft%free()
      ABI_FREE(my_distribfft)
    end if
  end if
@@ -1407,7 +1411,8 @@ end subroutine pawmknhat_psipsi_ndat
 
 subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
 &          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,pawtab, &
-&          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft,gpu_option,nattyp) ! optional arguments
+&          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,&
+&          distribfft,gpu_option,nattyp,nhat12_work) ! optional arguments
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1422,6 +1427,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
  integer,optional,intent(in) ::atindx(natom)
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),optional, intent(in) ::gprimd(3,3),qphon(3),xred(3,natom)
+ real(dp),optional,target, intent(in) ::nhat12_work(:,:,:,:,:,:)
  real(dp),intent(out) :: grnhat12(2,nfft,nspinor**2,3*nhat12_grdim,ndat2,ndat1)
  real(dp),optional,intent(out) :: grnhat_12(2,nfft,nspinor**2,3,natom*(ider/3),ndat2,ndat1)
  real(dp),intent(out) :: nhat12(2,nfft,nspinor**2,ndat2,ndat1)
@@ -1468,9 +1474,11 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
  gpu_option_=ABI_GPU_DISABLED; if (present(gpu_option)) gpu_option_=gpu_option
  if(gpu_option_==ABI_GPU_OPENMP) then
    ABI_CHECK(present(nattyp), "nattyp must be present when using GPU pawmknhat !")
+   ABI_CHECK(present(nhat12_work), "nhat12_work must be present when using GPU pawmknhat !")
    call pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
-   &          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,nattyp,pawtab, &
-   &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft,gpu_option)
+   &          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,nhat12_work,nattyp,pawtab, &
+   &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0, &
+   &          paral_kgb,distribfft,gpu_option)
    return
  end if
 
@@ -1753,7 +1761,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
      my_distribfft => distribfft
    else
      ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'f',ngfft(2),ngfft(3),'fourdp')
+     call my_distribfft%init_seq('f',ngfft(2),ngfft(3),'fourdp')
    end if
    call initmpi_seq(mpi_enreg_fft)
    ABI_FREE(mpi_enreg_fft%distribfft)
@@ -1780,7 +1788,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !  Destroy fake mpi_enreg
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
-     call destroy_distribfft(my_distribfft)
+     call my_distribfft%free()
      ABI_FREE(my_distribfft)
    end if
  end if
@@ -2193,11 +2201,11 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
  integer :: lm0,lm_size,lmax,lmin,lmn2_size,mm,nfgd,nsploop,optgr0,gpu_option_
  logical :: has_qphase,qne0
  real(dp) :: vi,vr
- complex(dpc) :: scal
+ complex(dp) :: scal
  character(len=500) :: msg
 !arrays
  real(dp) :: rdum1(1),rdum2(2), sum_r, sum_i
- real(dp),allocatable :: dijhat_idij(:,:,:),prod(:,:,:),gnt_scal(:,:)
+ real(dp),allocatable,target :: dijhat_idij(:,:,:),prod(:,:,:),gnt_scal(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: atom_expiqr(:,:,:),atom_gylm(:,:,:),atom_qijl(:,:)
  integer,  ABI_CONTIGUOUS pointer :: atom_ifftsph(:,:),atom_indklmn(:,:),atom_nfgd(:)
 
@@ -2292,7 +2300,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET ENTER DATA MAP(alloc:prod,dijhat_idij) IF(gpu_option_==ABI_GPU_OPENMP)
- !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_ifftsph,gnt_scal,atom_qijl,atom_indklmn) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_ifftsph,gnt_scal,atom_qijl,atom_indklmn,atom_nfgd) IF(gpu_option_==ABI_GPU_OPENMP)
  !$OMP TARGET ENTER DATA MAP(to:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. has_qphase)
 #endif
 !----------------------------------------------------------
@@ -2351,7 +2359,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
 #ifdef HAVE_OPENMP_OFFLOAD
              !$OMP TARGET TEAMS DISTRIBUTE &
              !$OMP& PRIVATE(ia) &
-             !$OMP& MAP(to:prod) MAP(to:Pot,atom_ifftsph,atom_expiqr,atom_gylm)
+             !$OMP& MAP(to:prod,Pot,atom_ifftsph,atom_gylm,atom_nfgd)
              do ia=1,nattyp
                !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat,sum_r,sum_i,ilslm,ic,jc)
                do idat=1,ndat
@@ -2408,7 +2416,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
 #ifdef HAVE_OPENMP_OFFLOAD
              !$OMP TARGET TEAMS DISTRIBUTE &
              !$OMP& PRIVATE(ia) &
-             !$OMP& MAP(to:prod) MAP(to:Pot,atom_ifftsph,atom_expiqr,atom_gylm)
+             !$OMP& MAP(to:prod) MAP(to:Pot,atom_ifftsph,atom_expiqr,atom_gylm,atom_nfgd)
              do ia=1,nattyp
                !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ic,jc,ilslm,idat,sum_r,sum_i)
                do idat=1,ndat
@@ -2637,7 +2645,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET EXIT DATA MAP(delete:prod,dijhat_idij) IF(gpu_option_==ABI_GPU_OPENMP)
- !$OMP TARGET EXIT DATA MAP(delete:atom_gylm,atom_ifftsph,gnt_scal,atom_qijl,atom_indklmn) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:atom_gylm,atom_ifftsph,gnt_scal,atom_qijl,atom_indklmn,atom_nfgd) IF(gpu_option_==ABI_GPU_OPENMP)
  !$OMP TARGET EXIT DATA MAP(delete:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. has_qphase)
  !$OMP TARGET EXIT DATA MAP(from:dijhat) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif
@@ -2897,7 +2905,7 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
      my_distribfft => distribfft
    else
      ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'c',ngfftdiel(2),ngfftdiel(3),'fourwf')
+     call my_distribfft%init_seq('c',ngfftdiel(2),ngfftdiel(3),'fourwf')
    end if
    call initmpi_seq(mpi_enreg_fft)
    ABI_FREE(mpi_enreg_fft%distribfft)
@@ -2919,7 +2927,7 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
    ABI_FREE(wfraug_paw)
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
-     call destroy_distribfft(my_distribfft)
+     call my_distribfft%free()
      ABI_FREE(my_distribfft)
    end if
  end if
@@ -3364,4 +3372,3 @@ end subroutine wvl_nhatgrid
 
 END MODULE m_paw_nhat
 !!***
-

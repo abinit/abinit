@@ -7,7 +7,7 @@
 !!  the xcdata_type used to drive the computation of the XC energy, potential, kernel, etc.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2025 ABINIT group (XG)
+!!  Copyright (C) 2017-2026 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -218,8 +218,6 @@ end subroutine xcdata_init
 !! OUTPUT
 !!  [usefock = 1 if the XC functional needs the Fock operator]
 !!  xclevel= 0 if no XC functional except possibly Fock; 1 if LDA; 2 if GGA ; 3 for TDDFT kernel tests
-!!
-!! SIDE EFFECTS
 !!
 !! SOURCE
 

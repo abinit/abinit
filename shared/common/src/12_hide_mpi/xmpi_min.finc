@@ -9,15 +9,10 @@
 !!  xmpi_min is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2025 ABINIT group (AR,XG,MB)
+!!  Copyright (C) 2001-2026 ABINIT group (AR,XG,MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce
 !!
 !! SOURCE
 
@@ -70,11 +65,6 @@ end subroutine xmpi_min_intv
 !! SIDE EFFECTS
 !!  xval= buffer array
 !!  xmin= number of elements in send buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce
 !!
 !! SOURCE
 

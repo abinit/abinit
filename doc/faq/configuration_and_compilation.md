@@ -8,7 +8,7 @@ This page collects FAQs related to
 
 ## I'm new to configure. Can you explain how to use it?
 
-Please consult <https://wiki.abinit.org/doku.php?id=build:configure>
+Please consult <https://docs.abinit.org/installation/>
 
 To obtain the full list of available options and their documentation, use
 
@@ -37,7 +37,7 @@ Well, there are many reasons why configure can fail.
 First of all, make sure that your LD_LIBRARY_PATH (DYLD_LIBRARY_PATH on MacOs), PATH environment variables
 are properly set **before** running configure.
 By the same token, one should load all the modules before configuring.
-If your environment is propertly set and configure keeps on failing, you will need to search 
+If your environment is propertly set and configure keeps on failing, you will need to search
 for inside *config.log*.
 
 ## Compilation stops with "internal compiler error"
@@ -62,7 +62,7 @@ Again, you are supposed to **load the same modules** that were used for configur
 
 ## Is there any precompiled package for Abinit?
 
-Yes, please consult the different subsections available in the [installation](/installation) page.
+Yes, please consult the different subsections available in the [installation](../installation.md) page.
 
 ## Where can I find examples of configuration files for HPC clusters?
 
@@ -73,7 +73,7 @@ Examples for Abinit v9 are available [here](https://github.com/abinit/abiconfig/
 
 ## Is there any EasyBuild recipe for Abinit?
 
-Yes. An HowTo tutorial is also available [here](/INSTALL_EasyBuild)
+Yes. An HowTo tutorial is also available [here](../INSTALL_EasyBuild.md)
 
 ## Is there any Spack recipe for Abinit?
 

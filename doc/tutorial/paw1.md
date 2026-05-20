@@ -148,7 +148,7 @@ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  32  32  32
 ```
 
 
-* A specific description of the PAW dataset (you might follow the tutorial [PAW2](/tutorial/paw2),
+* A specific description of the PAW dataset (you might follow the tutorial [PAW2](../tutorial/paw2.md),
 devoted to the building of the PAW atomic data, for a complete understanding of the file):
 
 ```
@@ -317,7 +317,7 @@ thanks to the input variable [[pawecutdg]] (PAW: ECUT for Double Grid).
 This is mainly needed to allow the mapping of densities and potentials, located
 in the augmentation regions (spheres), onto the global FFT grid.
 The number of points of the Fourier grid located in the spheres must be large
-enough to preserve a minimal accuracy. It is determined from the cut-off energy
+enough to preserve a minimal precision. It is determined from the cut-off energy
 [[pawecutdg]].
 One of the most sensitive objects affected by this "grid
 transfer" is the compensation charge density; its integral over the
@@ -424,12 +424,13 @@ This indicates that [[ecut]] 14 or lower is not sufficient to reach the toleranc
 One should stick to [[ecut]] 16 and [[pawecutdg]] 18 (or may be 16 if memory problems might be present).
 
 
+<a id="dos"></a>
 ## 5. Plotting PAW contributions to the Density of States (DOS)
 
 We now use the input file *tpaw1_4.abi* file.
 ABINIT is used to compute the Density Of State (DOS)
 (see the [[prtdos]] keyword in the input file).
-Also note that more k-points are used in order to increase the accuracy of the DOS.
+Also note that more k-points are used in order to increase the precision of the DOS.
 [[ecut]] is set to 12 Ha, while [[pawecutdg]] is 24 Ha.
 
 {% dialog tests/tutorial/Input/tpaw1_4.abi %}
@@ -568,7 +569,7 @@ You can compare other results in the 3 output files: total energy, eigenvalues, 
     The CPU time increases with the size of the partial wave basis. This is why it is
     not recommended to use systematically high-precision PAW datasets.
     If you want to learn how to generate PAW datasets with different *partial wave* basis,
-    you might follow the [tutorial on generating PAW datasets (PAW2)](/tutorial/paw2).
+    you might follow the [tutorial on generating PAW datasets (PAW2)](../tutorial/paw2.md).
 
 ## 7. Checking the validity of PAW results
 
@@ -639,7 +640,7 @@ The overlap check can even be by-passed with [[pawovlp]]=-1 (not recommended!).
     is eventually printed.
 
 Also note that you can control the compensation charge radius and shape
-function while generating the PAW dataset (see [tutorial on generating PAW datasets (PAW2)](/tutorial/paw2)).
+function while generating the PAW dataset (see [tutorial on generating PAW datasets (PAW2)](../tutorial/paw2.md)).
 
 
 ### 8.b. Mixing scheme for the Self-Consistent cycle; decomposition of the total energy###
@@ -687,7 +688,7 @@ computed; it is indeed a very good approximation.
 
 Converging a _Self-Consistent Cycle_, or ensuring the global minimum is reached,
 with PAW+U is sometimes difficult. Using [[usedmatpu]] and [[dmatpawu]] can help.
-See [tutorial on DFT+U](/tutorial/dftu).
+See [tutorial on DFT+U](../tutorial/dftu.md).
 
 ### 8.d. Printing volume for PAW###
 
@@ -700,7 +701,7 @@ $D_{ij}$ or _partial waves occupancies_ $\rho_{ij}$.
 
 Looking at the [[varset:paw|PAW variable set]], you can find the description
 of additional input keywords related to PAW.
-They are to be used when tuning the computation, in order to gain accuracy or save CPU time.
+They are to be used when tuning the computation, in order to gain precision or save CPU time.
 
 See also descriptions of these variables and input file examples in the [[topic:PAW|PAW topic]] page.
 

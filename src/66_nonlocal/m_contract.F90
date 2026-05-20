@@ -6,7 +6,7 @@
 !! Low-level procedeures used in nonlop_pl to contract tensors
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, MT, GZ)
+!! Copyright (C) 1998-2026 ABINIT group (DCA, XG, MT, GZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2025,6 +2025,11 @@ end subroutine metcon_so
 !! INPUTS
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space
 !!              (bohr**-1)
+!!  soc_weight(3)=prefactors for the spin-orbit components (dimensionless):
+!!                (soc_weight(1),soc_weight(2),soc_weight(3))
+!!                scale the \sigma_x, \sigma_y, \sigma_z contributions, respectively.
+!!  alpha=Euler angle for rotation around z-axis
+!!  beta =Euler angle for rotation around y-axis
 !!
 !! OUTPUT
 !!  amet(2,3,3,2,2)=the antisymmetric tensor A(Re/Im,y,y'',s,s'')
@@ -2053,19 +2058,21 @@ end subroutine metcon_so
 !!
 !! SOURCE
 
-subroutine metric_so(amet,gprimd,pauli)
+subroutine metric_so(amet,soc_weight,gprimd,pauli,alpha,beta)
 
 !Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: alpha, beta
 !arrays
- real(dp),intent(in) :: gprimd(3,3)
+ real(dp),intent(in) :: gprimd(3,3),soc_weight(3)
  real(dp),intent(out) :: amet(2,3,3,2,2),pauli(2,2,2,3)
 
 !Local variables-------------------------------
 !scalars
  integer :: iy1,iy2,m1,m2,n
 !arrays
- real(dp) :: buffer1(3,3,2,2) !,buffer2(3,3,3,3,2,2)
-
+ real(dp) :: buffer1(3,3,2,2), cb2, sb2 !,buffer2(3,3,3,3,2,2)
+ complex(dp) :: S(2,2,3), Srot(2,2), U(2,2), ep, em
 ! **********************************************************************
 
 !Fill in Pauli matrices and make them spin matrices:
@@ -2076,6 +2083,25 @@ subroutine metric_so(amet,gprimd,pauli)
  pauli(1,1,1,3)= 1.d0;pauli(1,2,2,3)=-1.d0
  pauli(:,:,:,:)= 0.5d0*pauli(:,:,:,:)
 
+ if (.not.(abs(alpha) < tol8 .and. abs(beta) < tol8)) then
+   S(:,:,:) = cmplx(pauli(1,:,:,:), pauli(2,:,:,:), kind=dp)
+
+   cb2 = cos(half*beta); sb2 = sin(half*beta)
+   em = exp(-j_dpc*half*alpha); ep = conjg(em)
+
+   U(1,1) =  cb2 * em; U(1,2) = -sb2 * em
+   U(2,1) =  sb2 * ep; U(2,2) =  cb2 * ep
+
+   do n = 1, 3
+     Srot(:,:) = matmul(conjg(transpose(U)), matmul(S(:,:,n), U))
+     S(:,:,n)  = Srot(:,:)
+   end do
+    
+   pauli(:,:,:,:) = zero
+   pauli(1,:,:,:) = real(S(:,:,:), kind=dp)
+   pauli(2,:,:,:) = aimag(S(:,:,:))
+ end if
+
 !Construct the antisymmetric tensor:
  amet(:,:,:,:,:)=0.d0
  do iy2=1,3
@@ -2084,7 +2110,7 @@ subroutine metric_so(amet,gprimd,pauli)
        m1=mod(n ,3)+1    !  n,m1,m2 is an even permutation
        m2=mod(m1,3)+1
        amet(1:2,iy1,iy2,1:2,1:2) = amet(:,iy1,iy2,:,:) &
-&       + pauli(:,:,:,n) &
+&       + soc_weight(n)*pauli(:,:,:,n) &
 &       *(gprimd(m1,iy1)*gprimd(m2,iy2) &
 &       -gprimd(m2,iy1)*gprimd(m1,iy2))
      end do

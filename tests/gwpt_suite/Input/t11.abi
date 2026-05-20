@@ -1,0 +1,72 @@
+# ZPR computation for Diamond with GWPT e-ph matrix elements.
+
+nsym 1
+optdriver 7    # Enter EPH driver.
+eph_task 24    # ZPR computation from GSTORE file
+
+nband 12
+ecut 45.0
+#prtvol 10
+
+# K-mesh (must be equal to the one of the WFK file).
+ngkpt 2 2 2
+nshiftk 1
+shiftk 0 0 0
+
+getwfk_filepath "t09o_WFK"
+
+# We also need the KS GS density and potential.
+getden_filepath "diamond_eph_gwpt_nosym/gso_DEN.nc"
+getpot_filepath "diamond_eph_gwpt_nosym/gso_POT.nc"
+
+# Read DDB file with dynamical matrix.
+getddb_filepath "diamond_eph_gwpt_nosym/out_DDB"
+getgstore_filepath "t10o_GSTORE.nc"
+
+gstore_gname "gvals"      # Use GWPT e-ph matrix elements from GSTORE (default)
+gwpt_g2mode 1
+eph_stern 1               # Activate Sterheimer to compute contribution given by states above nband
+
+tmesh 300 100 1         # Temperature mesh.
+
+ddb_ngqpt 2 2 2          # The code expects to find in the DDB
+                         # all the IBZ q-points corresponding to a 2x2x2 q-mesh
+
+# Read first-order potentials and densities from these two files.
+getdvdb_filepath "t07_DVDB"
+tolwfr 1e-20
+
+# Disable output of phonon DOS and phonon bands.
+prtphdos 0
+prtphbands 0
+
+#############################################
+###                 SECTION: Sigma_nk
+#############################################
+zcut 0.01 eV
+
+# Read crystal structure from DEN.nc file
+structure "abifile:diamond_eph_gwpt_nosym/gso_DEN.nc"
+
+pp_dirpath "$ABI_PSPDIR/Psdj_nc_fr_04_pbe_std_psp8"
+pseudos "C.psp8"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t07.abi, t08.abi, t09.abi, t10.abi, t11.abi, t12.abi
+#%% exclude_builders = scope_gnu_10.2_paral
+#%% [files]
+#%% use_git_submodule = diamond_eph_gwpt_nosym
+#%% files_to_test =
+#%%   t11.abo, tolnlines= 25, tolabs= 5.000e-02, tolrel= 0.2
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH, GWPT, GSTORE
+#%% description = ZPR computation for Diamond with GWPT e-ph matrix elements without symmetries
+#%%<END TEST_INFO>

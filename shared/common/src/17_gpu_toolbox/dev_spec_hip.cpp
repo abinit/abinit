@@ -1,7 +1,7 @@
 /* dev_spec_hip.cpp*/
 
 /*
- * Copyright (C) 2008-2025 ABINIT Group (MMancini,FDahm)
+ * Copyright (C) 2008-2026 ABINIT Group (MMancini,FDahm)
  * this file is distributed under the terms of the
  * gnu general public license, see ~abinit/COPYING
  * or http://www.gnu.org/copyleft/gpl.txt.
@@ -9,8 +9,11 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <abi_gpu_header_common.h>
 #include <hip/hip_runtime_api.h>
+#include <rocm-core/rocm_version.h>
 #include "hip_api_error_check.h"
 
 static int version_2_cores(int major, int minor);
@@ -102,6 +105,20 @@ void get_gpu_uuid_(int* device, char* uuid)
    HIP_API_CHECK(hipGetDeviceProperties(&deviceProp, *device));
    strncpy(uuid, deviceProp.uuid.bytes, 16);
    return;
+}
+
+// Gives the major version number of HIP library ---------
+extern "C"
+int gpu_get_lib_version_major_cpp()
+{
+  return ROCM_VERSION_MAJOR;
+}
+
+// Gives the minor version number of HIP library ---------
+extern "C"
+int gpu_get_lib_version_minor_cpp()
+{
+  return ROCM_VERSION_MINOR;
 }
 
 // Set new value for #MPI tasks being assigned per GPU ---------
@@ -355,7 +372,7 @@ extern "C" void check_gpu_mem_(const char* str)
 /* OUTPUT gpu_ptr= C_PTR on gpu memory location that has been allocated       */
 /*============================================================================*/
 
-extern "C" void alloc_on_gpu_(void **gpu_ptr, const size_t* size)
+extern "C" void alloc_on_gpu_cpp_(void **gpu_ptr, const size_t* size)
 {
 
   if (hipMalloc(gpu_ptr,*size) != hipSuccess)
@@ -373,7 +390,7 @@ extern "C" void alloc_on_gpu_(void **gpu_ptr, const size_t* size)
 /*            the correct one is in xx_gpu_toolbox/dev_spec.cu                */
 /*============================================================================*/
 
-extern "C" void dealloc_on_gpu_(void **gpu_ptr)
+extern "C" void dealloc_on_gpu_cpp_(void **gpu_ptr)
 {
   if(*gpu_ptr==NULL)
     return;

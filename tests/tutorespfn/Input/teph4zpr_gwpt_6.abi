@@ -1,0 +1,51 @@
+# G0W0 computation at k=Gamma for MgO.
+ecut 35.0
+
+# K-mesh. Must be consistent with WFK file.
+ngkpt 4 4 4
+nshiftk 1
+shiftk 0 0 0
+
+optdriver 4                               # Enter SIGMA driver
+getwfk_filepath "teph4zpr_gwpt_4o_WFK"    # 4x4x4 k-mesh
+getscr_filepath "teph4zpr_gwpt_5o_SCR"
+
+nband 50           # Number of bands in sum over states.
+ecuteps 8          # Cutoff for Sigma_c
+ecutsigx 35.0      # Cutoff for Sigma_c
+
+##############################################
+####                 SECTION: Sigma_nk
+##############################################
+ #nkptgw 1
+ #kptgw
+ #   0.0    0.0    0.0
+ #bdgw
+ #   8 9
+ gw_qprange -4
+
+ structure = "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
+
+ pp_dirpath = "$ABI_PSPDIR"
+ pseudos = "O.psp8, Mg-sp-gw.psp8"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain =  teph4zpr_gwpt_1.abi, teph4zpr_gwpt_2.abi, teph4zpr_gwpt_3.abi, teph4zpr_gwpt_4.abi,
+#%%               teph4zpr_gwpt_5.abi, teph4zpr_gwpt_6.abi, teph4zpr_gwpt_7.abi, teph4zpr_gwpt_8.abi
+#%% exclude_builders = scope_gnu_10.2_paral
+#%% [files]
+#%% use_git_submodule = MgO_eph_zpr
+#%% files_to_test =
+#%%   teph4zpr_gwpt_6.abo, tolnlines= 57, tolabs=  0.3, tolrel=  0.02
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH, GWPT
+#%% description = G0W0 computation at k=Gamma for MgO.
+#%%<END TEST_INFO>

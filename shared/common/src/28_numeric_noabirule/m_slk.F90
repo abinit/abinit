@@ -6,7 +6,7 @@
 !! High-level objects and wrappers around the ScaLAPACK and ELPA API.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2025 ABINIT group (CS,GZ,FB,MG,MT)
+!! Copyright (C) 2004-2026 ABINIT group (CS,GZ,FB,MG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,18 +24,21 @@
 
 module m_slk
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  USE_MPI
  use m_xmpi
+ use m_xomp
  use m_errors
  use m_abicore
+ use m_gputk
 #ifdef HAVE_LINALG_ELPA
  use m_elpa
 #endif
 
- use m_fstrings,      only : firstchar, toupper, itoa, sjoin, ltoa
+ use m_fstrings,      only : firstchar, toupper, itoa, sjoin, ltoa, string_in
  use m_time,          only : cwtime, cwtime_report
- use m_numeric_tools, only : blocked_loop !, print_arr
+ !use m_numeric_tools, only : blocked_loop !, print_arr
 
  implicit none
 
@@ -114,10 +117,8 @@ module m_slk
    ! the grid to which the processor is associated to.
 
  contains
-   procedure :: init => slk_processor_init
-    ! Initializes an instance of processor ScaLAPACK from a MPI communicator.
-   procedure :: free => slk_processor_free
-    ! Free the object
+   procedure :: init => slk_processor_init     ! Initializes an instance of processor ScaLAPACK from a MPI communicator.
+   procedure :: free => slk_processor_free     ! Free the object
  end type slk_processor_t
 !!***
 
@@ -139,6 +140,9 @@ module m_slk
    integer :: size_local(2) = -1
    ! dimensions of the local buffer.
 
+   integer(c_size_t) :: bufsize = -1
+   ! Size of the local buffer.
+
    integer :: size_global(2) = -1
    ! dimensions of the global matrix.
 
@@ -155,7 +159,7 @@ module m_slk
  contains
 
    procedure :: init => basemat_init
-    ! Constructor
+    ! Basic Constructor
 
    procedure :: glob2loc => basemat_glob2loc
     ! Determine the local indices of an element from its global indices and return haveit bool flag.
@@ -181,6 +185,15 @@ module m_slk
 
    procedure :: check_local_shape => basemat_check_local_shape
    !  Debugging tool to test the local shape `lshape` of the local buffer.
+
+   procedure :: is_gpu_mapped => basemat_is_gpu_mapped
+   !  True if the local buffer is mapped to the GPU.
+
+   procedure :: gpu_map => basemat_gpu_map
+   ! Use Opemp to allocate/delete the local buffer on the GPU.
+
+   procedure :: gpu_set_zero => basemat_gpu_set_zero
+   ! Fill the local buffer on the GPU with zeros.
 
    procedure :: free => basemat_free
     ! Free memory
@@ -392,11 +405,17 @@ module m_slk
    module procedure slk_array4_free
  end interface slk_array_free
 
- public :: slk_array_set                       ! Elemental routine to set the value of the buffer to a costant value `cvalue`.
+ public :: slk_array_set_zero                  ! Elemental routine to zero the value of the local buffer.
  public :: slk_array_locmem_mb                 ! Compute memory allocated for an array of slkmat_dp_t elements
 
+ public :: slk_array_gpu_set_zero              ! Zero the value of the local buffer on the GPU
+ interface slk_array_gpu_set_zero
+   module procedure slk_array1_gpu_set_zero
+   module procedure slk_array3_gpu_set_zero
+ end interface slk_array_gpu_set_zero
+
  ! External functions.
-#ifdef HAVE_LINALG_SCALAPACK
+#if defined(HAVE_LINALG_SCALAPACK) || defined(HAVE_LINALG_ELPA)
  integer,external :: indxl2g, numroc
  real(dp),external :: PDLAMCH
  real(dp),external :: PDLATRA
@@ -405,7 +424,8 @@ module m_slk
  complex(dp),external :: PZLATRA
 #endif
 
-CONTAINS  !==============================================================================
+
+contains  !==============================================================================
 !!***
 
 !!****f* m_slk/slk_grid_init
@@ -607,13 +627,14 @@ end subroutine slk_processor_free
 !! SOURCE
 
 subroutine basemat_init(matrix, nbli_global, nbco_global, processor, istwf_k, &
-                        size_blocs) ! optional
+                        size_blocs, gpu_action) ! optional
 
 !Arguments ------------------------------------
  class(basemat_t),intent(inout) :: matrix
  integer,intent(in) :: nbli_global, nbco_global, istwf_k
  type(slk_processor_t),target,intent(in) :: processor
- integer,intent(in),optional :: size_blocs(2)
+ integer,optional,intent(in) :: size_blocs(2)
+ character(len=*),optional,intent(in) :: gpu_action
 
 #ifdef HAVE_LINALG_SCALAPACK
 !Local variables-------------------------------
@@ -674,6 +695,8 @@ subroutine basemat_init(matrix, nbli_global, nbco_global, processor, istwf_k, &
  matrix%size_local(2) = NUMROC(nbco_global,matrix%size_blocs(2), &
                                processor%coords(2), 0, processor%grid%dims(2))
 
+ matrix%bufsize = int(matrix%size_local(1), c_size_t) * int(matrix%size_local(2), c_size_t)
+
  call matrix%idx_loc(matrix%size_global(1), matrix%size_global(2), &
                      matrix%size_local(1), matrix%size_local(2))
 
@@ -711,6 +734,8 @@ subroutine basemat_init(matrix, nbli_global, nbco_global, processor, istwf_k, &
  class default
    ABI_ERROR("Wrong class")
  end select
+
+ if (present(gpu_action)) call matrix%gpu_map(gpu_action)
 #endif
 
 end subroutine basemat_init
@@ -1078,6 +1103,7 @@ subroutine slkmat_dp_copy(in_mat, out_mat, empty)
 
 !Local variables-------------------------------
  logical :: empty__
+ type(c_ptr) :: gpu_ptr
 ! *********************************************************************
 
  call out_mat%init(in_mat%size_global(1), in_mat%size_global(2), in_mat%processor, in_mat%istwf_k, &
@@ -1089,6 +1115,15 @@ subroutine slkmat_dp_copy(in_mat, out_mat, empty)
      out_mat%buffer_cplx = in_mat%buffer_cplx
    else
      out_mat%buffer_real = in_mat%buffer_real
+   end if
+ end if
+
+ if (in_mat%is_gpu_mapped(gpu_ptr)) then
+   call out_mat%gpu_map("alloc")
+   if (in_mat%istwf_k == 1) then
+     call gpu_copy_complex(out_mat%buffer_cplx, in_mat%buffer_cplx, in_mat%bufsize)
+   else
+     call gpu_copy(out_mat%buffer_real, in_mat%buffer_real, in_mat%bufsize)
    end if
  end if
 
@@ -1115,6 +1150,7 @@ subroutine slkmat_sp_copy(in_mat, out_mat, empty)
 
 !Local variables-------------------------------
  logical :: empty__
+ type(c_ptr) :: gpu_ptr
 ! *********************************************************************
 
  call out_mat%init(in_mat%size_global(1), in_mat%size_global(2), in_mat%processor, in_mat%istwf_k, &
@@ -1126,6 +1162,15 @@ subroutine slkmat_sp_copy(in_mat, out_mat, empty)
      out_mat%buffer_cplx = in_mat%buffer_cplx
    else
      out_mat%buffer_real = in_mat%buffer_real
+   end if
+ end if
+
+ if (in_mat%is_gpu_mapped(gpu_ptr)) then
+   call out_mat%gpu_map("alloc")
+   if (in_mat%istwf_k == 1) then
+     call gpu_copy_complex_sp(out_mat%buffer_cplx, in_mat%buffer_cplx, in_mat%bufsize)
+   else
+     call gpu_copy_sp(out_mat%buffer_real, in_mat%buffer_real, in_mat%bufsize)
    end if
  end if
 
@@ -1147,6 +1192,9 @@ subroutine basemat_free(mat)
 
 !Arguments ------------------------------------
  class(basemat_t),intent(inout) :: mat
+
+!Local variables-------------------------------
+ type(c_ptr) :: gpu_ptr
 ! *********************************************************************
 
  ! Don't free the grid. Just nullify the pointer as there might be other objects keeping a ref to processor.
@@ -1156,6 +1204,11 @@ subroutine basemat_free(mat)
  mat%size_blocs = 0
  mat%size_local = 0
  mat%desc = 0
+
+ if (mat%is_gpu_mapped(gpu_ptr)) then
+   call wrtout(std_out, "Deallocating mat%buffer on the GPU")
+   call mat%gpu_map("delete")
+ end if
 
  select type (mat)
  class is (slkmat_dp_t)
@@ -1267,32 +1320,291 @@ end subroutine slk_array4_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_array_set
+!!****f* m_slk/slk_array_set_zero
 !! NAME
-!!  slk_array_set
+!!  slk_array_set_zero
 !!
 !! FUNCTION
-!!  Elemental routine to set the value of the PBLAS buffer to a costant value `cvalue`.
-!!  Usually used to zero all the buffers in an array of slkmat_dp_t objects.
+!!  Elemental routine to set the value of the PBLAS buffer to zero
 !!
 !! SOURCE
 
-elemental subroutine slk_array_set(mat, cvalue)
+elemental subroutine slk_array_set_zero(mat)
 
 !Arguments ------------------------------------
  class(basemat_t),intent(inout) :: mat
- complex(dp),intent(in) :: cvalue
 
  select type (mat)
  class is (slkmat_dp_t)
-   if (allocated(mat%buffer_cplx)) mat%buffer_cplx = cvalue
-   if (allocated(mat%buffer_real)) mat%buffer_real = real(cvalue, kind=dp)
+   if (allocated(mat%buffer_cplx)) mat%buffer_cplx = zero
+   if (allocated(mat%buffer_real)) mat%buffer_real = zero
  class is (slkmat_sp_t)
-   if (allocated(mat%buffer_cplx)) mat%buffer_cplx = cmplx(cvalue, kind=sp)
-   if (allocated(mat%buffer_real)) mat%buffer_real = real(cvalue, kind=sp)
+   if (allocated(mat%buffer_cplx)) mat%buffer_cplx = cmplx(zero, kind=sp)
+   if (allocated(mat%buffer_real)) mat%buffer_real = real(zero, kind=sp)
  end select
 
-end subroutine slk_array_set
+end subroutine slk_array_set_zero
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/basemat_gpu_set_zero
+!! NAME
+!!  basemat_gpu_set_zero
+!!
+!! FUNCTION
+!!  Elemental routine to set the value of the PBLAS buffer to zero
+!!
+!! SOURCE
+
+subroutine basemat_gpu_set_zero(mat)
+
+!Arguments ------------------------------------
+ class(basemat_t),target,intent(inout) :: mat
+
+#ifdef HAVE_OPENMP_OFFLOAD
+!Local variables-------------------------------
+ type(c_ptr) :: gpu_ptr
+! *********************************************************************
+
+ select type (mat)
+ class is (slkmat_dp_t)
+   if (allocated(mat%buffer_cplx)) then
+     gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_cplx))
+     ABI_CHECK_CNULL(gpu_ptr, "buffer_cplx not on GPU!")
+     call gpu_memset(gpu_ptr, 0, mat%bufsize*dp*2)
+   end if
+   if (allocated(mat%buffer_real)) then
+     gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_real))
+     ABI_CHECK_CNULL(gpu_ptr, "buffer_real not on GPU!")
+     call gpu_memset(gpu_ptr, 0, mat%bufsize*dp)
+   end if
+ class is (slkmat_sp_t)
+   if (allocated(mat%buffer_cplx)) then
+     gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_cplx))
+     ABI_CHECK_CNULL(gpu_ptr, "buffer_cplx not on GPU!")
+     call gpu_memset(gpu_ptr, 0, mat%bufsize*sp*2)
+   end if
+   if (allocated(mat%buffer_real)) then
+     gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_real))
+     ABI_CHECK_CNULL(gpu_ptr, "buffer_real not on GPU!")
+     call gpu_memset(gpu_ptr, 0, mat%bufsize*sp)
+   end if
+ end select
+#else
+ ABI_ERROR("basemat_gpu_set cannot be used if HAVE_OPENMP_OFFLOAD is not defined!")
+ ABI_UNUSED(mat%size_local(1))
+#endif
+
+end subroutine basemat_gpu_set_zero
+!!***
+
+!!****f* m_slk/slk_array1_gpu_set_zero
+!! NAME
+!!  slk_array1_gpu_set_zero
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine slk_array1_gpu_set_zero(mat1d)
+
+!Arguments ------------------------------------
+ class(basemat_t),intent(inout) :: mat1d(:)
+
+!Local variables-------------------------------
+ integer :: i1
+! *********************************************************************
+
+ do i1=1,size(mat1d, dim=1)
+   call mat1d(i1)%gpu_set_zero()
+ end do
+
+end subroutine slk_array1_gpu_set_zero
+!!***
+
+!!****f* m_slk/slk_array3_gpu_set_zero
+!! NAME
+!!  slk_array3_gpu_set_zero
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine slk_array3_gpu_set_zero(mat3d)
+
+!Arguments ------------------------------------
+ class(basemat_t),intent(inout) :: mat3d(:,:,:)
+
+!Local variables-------------------------------
+ integer :: i1,i2,i3
+! *********************************************************************
+
+ do i3=1,size(mat3d, dim=3)
+   do i2=1,size(mat3d, dim=2)
+     do i1=1,size(mat3d, dim=1)
+       call mat3d(i1,i2,i3)%gpu_set_zero()
+     end do
+   end do
+ end do
+
+end subroutine slk_array3_gpu_set_zero
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/basemat_is_gpu_mapped
+!! NAME
+!!  basemat_is_gpu_mapped
+!!
+!! FUNCTION
+!!  Return True if the local buffer is mapped to the GPU and the pointer on the gpu.
+!!
+!! SOURCE
+
+logical function basemat_is_gpu_mapped(mat, gpu_ptr) result(is_gpu_mapped)
+
+!Arguments ------------------------------------
+ class(basemat_t),target,intent(in) :: mat
+ type(c_ptr),intent(out) :: gpu_ptr
+
+!Local variables-------------------------------
+#ifdef HAVE_OPENMP_OFFLOAD
+ real(sp), contiguous, pointer :: buf_real_sp(:,:)
+ real(dp), contiguous, pointer :: buf_real_dp(:,:)
+ complex(sp), contiguous, pointer :: buf_cplx_sp(:,:)
+ complex(dp), contiguous, pointer :: buf_cplx_dp(:,:)
+#endif
+! *********************************************************************
+
+ is_gpu_mapped = .False.; gpu_ptr = c_null_ptr
+#ifdef HAVE_OPENMP_OFFLOAD
+ select type (mat)
+ class is (slkmat_dp_t)
+   if (allocated(mat%buffer_cplx)) then
+     buf_cplx_dp => mat%buffer_cplx
+     gpu_ptr = xomp_get_mapped_ptr(c_loc(buf_cplx_dp))
+     is_gpu_mapped = c_associated(gpu_ptr)
+   end if
+   if (allocated(mat%buffer_real)) then
+     buf_real_dp => mat%buffer_real
+     gpu_ptr = xomp_get_mapped_ptr(c_loc(buf_real_dp))
+     is_gpu_mapped = c_associated(gpu_ptr)
+   end if
+
+ class is (slkmat_sp_t)
+   if (allocated(mat%buffer_cplx)) then
+     buf_cplx_sp => mat%buffer_cplx
+     gpu_ptr= xomp_get_mapped_ptr(c_loc(buf_cplx_sp))
+     is_gpu_mapped = c_associated(gpu_ptr)
+   end if
+   if (allocated(mat%buffer_real)) then
+     buf_real_sp => mat%buffer_real
+     gpu_ptr = xomp_get_mapped_ptr(c_loc(buf_real_sp))
+     is_gpu_mapped = c_associated(gpu_ptr)
+   end if
+ end select
+#else
+ ABI_UNUSED(mat%size_local(1))
+#endif
+
+end function basemat_is_gpu_mapped
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/basemat_gpu_map
+!! NAME
+!!  basemat_gpu_map
+!!
+!! FUNCTION
+!!  Use Opemp to allocate/delete the local buffer on the GPU.
+!!
+!! SOURCE
+
+subroutine basemat_gpu_map(mat, gpu_action)
+
+!Arguments ------------------------------------
+ class(basemat_t),target,intent(inout) :: mat
+ character(len=*), intent(in) :: gpu_action
+
+!Local variables-------------------------------
+#ifdef HAVE_OPENMP_OFFLOAD
+ real(sp), contiguous, pointer :: buf_real_sp(:,:)
+ real(dp), contiguous, pointer :: buf_real_dp(:,:)
+ complex(sp), contiguous, pointer :: buf_cplx_sp(:,:)
+ complex(dp), contiguous, pointer :: buf_cplx_dp(:,:)
+#endif
+! *********************************************************************
+
+ if (.not. string_in(gpu_action, "None, alloc, alloc_zero, delete, update_from, update_to")) then
+   ABI_ERROR(sjoin("Invalid gpu_action", gpu_action))
+   ABI_UNUSED(mat%size_local(1))
+ end if
+
+ if (gpu_action == "None") return
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ select type (mat)
+ class is (slkmat_dp_t)
+   if (allocated(mat%buffer_cplx)) then
+     buf_cplx_dp => mat%buffer_cplx
+     if (string_in(gpu_action, "alloc, alloc_zero")) then
+       !$OMP TARGET ENTER DATA MAP(alloc:buf_cplx_dp)
+       if (gpu_action == "alloc_zero") call gpu_set_to_zero_complex(mat%buffer_cplx, mat%bufsize)
+     else if (gpu_action == "delete") then !.and. c_associated(xomp_get_mapped_ptr(c_loc(buf_cplx_dp))
+       !$OMP TARGET EXIT DATA MAP(delete:buf_cplx_dp)
+     else if (gpu_action == "update_from") then
+       !$OMP TARGET UPDATE FROM(buf_cplx_dp)
+     else if (gpu_action == "update_to") then
+       !$OMP TARGET UPDATE TO(buf_cplx_dp)
+     end if
+   end if
+   if (allocated(mat%buffer_real)) then
+     buf_real_dp => mat%buffer_real
+     if (string_in(gpu_action, "alloc, alloc_zero")) then
+       !$OMP TARGET ENTER DATA MAP(alloc:buf_real_dp)
+       if (gpu_action == "alloc_zero") call gpu_set_to_zero(mat%buffer_real, mat%bufsize)
+     else if (gpu_action == "delete") then !.and. c_associated(xomp_get_mapped_ptr(c_loc(buf_real_dp))
+       !$OMP TARGET EXIT DATA MAP(delete:buf_real_dp)
+     else if (gpu_action == "update_from") then
+       !$OMP TARGET UPDATE FROM(buf_real_dp)
+     else if (gpu_action == "update_to") then
+       !$OMP TARGET UPDATE TO(buf_real_dp)
+     end if
+   end if
+
+ class is (slkmat_sp_t)
+   if (allocated(mat%buffer_cplx)) then
+     buf_cplx_sp => mat%buffer_cplx
+     if (string_in(gpu_action, "alloc, alloc_zero")) then
+       !$OMP TARGET ENTER DATA MAP(alloc:buf_cplx_sp)
+       if (gpu_action == "alloc_zero") call gpu_set_to_zero_complex_sp(mat%buffer_cplx, mat%bufsize)
+     else if (gpu_action == "delete") then !.and. c_associated(xomp_get_mapped_ptr(c_loc(buf_cplx_sp))
+       !$OMP TARGET EXIT DATA MAP(delete:buf_cplx_sp)
+     else if (gpu_action == "update_from") then
+       !$OMP TARGET UPDATE FROM(buf_cplx_sp)
+     else if (gpu_action == "update_to") then
+       !$OMP TARGET UPDATE TO(buf_cplx_sp)
+     end if
+   end if
+   if (allocated(mat%buffer_real)) then
+     buf_real_sp => mat%buffer_real
+     if (string_in(gpu_action, "alloc, alloc_zero")) then
+       !$OMP TARGET ENTER DATA MAP(alloc:buf_real_sp)
+       if (gpu_action == "alloc_zero") call gpu_set_to_zero_sp(mat%buffer_real, mat%bufsize)
+     else if (gpu_action == "delete") then !.and. c_associated(xomp_get_mapped_ptr(c_loc(buf_real_sp))
+       !$OMP TARGET EXIT DATA MAP(delete:buf_real_sp)
+     else if (gpu_action == "update_from") then
+       !$OMP TARGET UPDATE FROM(buf_real_sp)
+     else if (gpu_action == "update_to") then
+       !$OMP TARGET UPDATE TO(buf_real_sp)
+     end if
+   end if
+ end select
+#endif
+
+end subroutine basemat_gpu_map
 !!***
 
 !----------------------------------------------------------------------
@@ -2450,10 +2762,10 @@ integer function my_locc(mat)
  integer :: N, NB_A, MYCOL, CSRC_A, NPCOL
 ! *************************************************************************
 
- N      = mat%desc(N_ )      ! The number of columns in the global matrix.
- NB_A   = mat%desc(NB_)      ! The number of columns in a block.
+ N      = mat%desc(N_ )              ! The number of columns in the global matrix.
+ NB_A   = mat%desc(NB_)              ! The number of columns in a block.
  MYCOL  = mat%processor%coords(2)    ! The column index of my processor
- CSRC_A = mat%desc(CSRC_)    ! The column of the processors at the beginning.
+ CSRC_A = mat%desc(CSRC_)            ! The column of the processors at the beginning.
  NPCOL  = mat%processor%grid%dims(2) ! The number of processors per column in the Scalapack grid.
 
  my_locc = NUMROC( N, NB_A, MYCOL, CSRC_A, NPCOL )
@@ -2904,7 +3216,7 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   integer,optional,intent(in) :: use_gpu_elpa
   real*8 :: ev(na)
   real*8 :: a(na_rows,na_cols),b(na_rows,na_cols),z(na_rows,na_cols)
-  real*8::tmp1(na_rows,na_cols),tmp2(na_rows,na_cols)
+  real*8 :: tmp1(na_rows,na_cols),tmp2(na_rows,na_cols)
   !-Local variables
   integer :: i, n_col, n_row, use_gpu_elpa_
   type(elpa_hdl_t) :: elpa_hdl
@@ -3960,7 +4272,7 @@ end subroutine slkmat_dp_pzheevx
 !!
 !!  Slk_matA<slkmat_dp_t>:
 !!    %buffer_cplx
-!!      (local input/local output) complex(DPC) pointer into the
+!!      (local input/local output) complex(DP) pointer into the
 !!      local memory to an array of dimension (LLD_A, LOCc(JA+N-1)).
 !!      On entry, this array contains the local pieces of the
 !!      N-by-N Hermitian distributed matrix sub( A ). If UPLO = 'U',
@@ -3980,7 +4292,7 @@ end subroutine slkmat_dp_pzheevx
 !!
 !!  Slk_matB=
 !!    %buffer_cplx
-!!      (local input/local output) complex*(DPC) pointer into the
+!!      (local input/local output) complex*(DP) pointer into the
 !!      local memory to an array of dimension (LLD_B, LOCc(JB+N-1)).
 !!      On entry, this array contains the local pieces of the
 !!      N-by-N Hermitian distributed matrix sub( B ). If UPLO = 'U',

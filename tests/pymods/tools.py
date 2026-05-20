@@ -1,21 +1,18 @@
-from __future__ import print_function, division, absolute_import #, unicode_literals
 
 import os
-import sys
 import shutil
+import sys
 import tempfile
 import warnings
-
-from subprocess import Popen, PIPE, call
-
+from subprocess import PIPE, Popen, call
 
 __version__ = "0.1"
 __author__ = "Matteo Giantomassi"
 
 __all__ = [
+    "Editor",
     "RestrictedShell",
     "StringColorizer",
-    "Editor",
 ]
 
 # Helper functions
@@ -23,8 +20,14 @@ __all__ = [
 
 def patch(fromfile, tofile):
     """
-    Use the unix tools diff and patch to patch tofile.
-    Returns 0 if success
+    Use the Unix tools `diff` and `patch` to patch `tofile`.
+
+    Args:
+        fromfile: Path to the source file (patch source).
+        tofile: Path to the file to be patched.
+
+    Returns:
+        int: The return code of the patch command (0 if success).
     """
     with tempfile.NamedTemporaryFile(delete=True, suffix=".patch") as f:
         tmp = f.name
@@ -60,14 +63,20 @@ def patch(fromfile, tofile):
 
 
 def unzip(gz_fname, dest=None):
-    """Decompress a gz file."""
+    """
+    Decompress a .gz file.
+
+    Args:
+        gz_fname: Path to the .gz file.
+        dest: Optional destination path. Defaults to `gz_fname` without the .gz extension.
+    """
     import gzip
 
     if not gz_fname.endswith(".gz"):
         raise ValueError("%s should end with .gz" % gz_fname)
 
     try:
-        gz_fh = gzip.open(gz_fname, 'rb')
+        gz_fh = gzip.open(gz_fname, "rb")
         file_content = gz_fh.read()
     finally:
         gz_fh.close() # Cannot use try, except, finally in python2-4
@@ -81,14 +90,30 @@ def unzip(gz_fname, dest=None):
 
 
 def touch(fname, times=None):
-    """Emulate unix touch."""
+    """
+    Emulate the Unix `touch` command.
+
+    Args:
+        fname: Path to the file to touch.
+        times: Optional tuple of (atime, mtime).
+    """
     import os
-    with open(fname, 'a'):
+    with open(fname, "a"):
         os.utime(fname, times)
 
 
 def tail_file(fname, n, aslist=False):
-    """Emulate unix tail. Assumes a unix-like system."""
+    """
+    Emulate the Unix `tail` command. Assumes a Unix-like system.
+
+    Args:
+        fname: Path to the file.
+        n: Number of lines to return.
+        aslist: If True, returns a list of strings instead of a single string.
+
+    Returns:
+        str or list: The last `n` lines of the file.
+    """
     args = ["tail", "-n " + str(n), fname]
 
     if sys.version_info >= (3, 0):
@@ -103,15 +128,18 @@ def tail_file(fname, n, aslist=False):
 
     if aslist:
         return p.stdout.readlines()
-    else:
-        return p.stdout.read()
+    return p.stdout.read()
 
 
 def which(program):
     """
-    python version of the unix tool which locate a program file in the user's path
-    Return:
-        None if program cannot be found.
+    Locate an executable in the user's PATH.
+
+    Args:
+        program: Name of the program or absolute path.
+
+    Returns:
+        str: Absolute path to the executable, or None if not found.
     """
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
@@ -130,7 +158,19 @@ def which(program):
 
 
 def tonumber(s):
-    """Convert string to number, raise ValueError if s cannot be converted."""
+    """
+    Convert a string to a number.
+
+    Args:
+        s: The string to convert.
+
+    Returns:
+        float: The converted number.
+
+    Raises:
+        ValueError: If the string cannot be converted to a float.
+        RuntimeError: If an unexpected error occurs during conversion.
+    """
     # Duck test. Much more readable than the ugly strfltrem routine in fldiff.pl
     try:
         stnum = s.upper().replace("D","E")  # D-01 is not recognized by python: Replace it with E.
@@ -143,7 +183,15 @@ def tonumber(s):
 
 
 def nums_and_text(line):
-    """split line into (numbers, text)."""
+    """
+    Split a line into a list of numbers and a combined text string.
+
+    Args:
+        line: The line to split.
+
+    Returns:
+        tuple: (list of floats, string of non-numeric tokens).
+    """
     tokens = line.split()
     text = ""
     numbers = []
@@ -161,12 +209,11 @@ class RShellError(Exception):
 
 class RestrictedShell:
     """
-    This object executes a restricted set of shell commands.
-    It's main goal is to provide a restricted access to the
-    computing environment as we want to avoid executing
-    arbitrary code passed through the TEST_INFO sections.
+    Executes a restricted set of shell commands.
 
-    At present, it supports rm, cp, mv and touch
+    This object provides a restricted access to the computing environment
+    to avoid executing arbitrary code passed through the TEST_INFO sections.
+    It currently supports: cp, mv, and touch.
     """
     _key2command = {
         # key (function,   nargs)
@@ -179,8 +226,14 @@ class RestrictedShell:
     Error = RShellError
 
     def __init__(self, inp_dir, workdir, psps_dir):
-        """Helper function executing simple commands passed via a string."""
+        """
+        Initialize the RestrictedShell with directory context.
 
+        Args:
+            inp_dir (str): Directory for input files.
+            workdir (str): Working directory for the test.
+            psps_dir (str): Directory for pseudopotential files.
+        """
         self.exceptions = []
 
         self.prefix2dir = {
@@ -194,8 +247,16 @@ class RestrictedShell:
 
     def execute(self, string):
         """
-        Don't raise exceptions since python threads get stuck.
-        Exceptions are stored in self.exceptions
+        Execute a basic command string.
+
+        Exceptions are not raised (to avoid blocking threads) but are stored
+        in `self.exceptions`.
+
+        Args:
+            string: Command string (e.g., "w_touch filename" or "i_cp src w_dest").
+
+        Returns:
+            The result of the command execution, or None if failed.
         """
         #print("executing %s" % string)
         _key2command = RestrictedShell._key2command
@@ -211,11 +272,11 @@ class RestrictedShell:
             if nargs != expected_nargs:
                 err_msg = " Too many arguments, cmd = %s, args = %s " % (cmd, args)
                 self.exceptions.append(self.Error(err_msg))
-                return
+                return None
         except:
             err_msg = "Not able to interpret the string: %s " % string
             self.exceptions.append(self.Error(err_msg))
-            return
+            return None
 
         new_args = []
         for pref, arg in zip(pre_s, args):
@@ -228,7 +289,7 @@ class RestrictedShell:
                 assert pre_s == "w"
                 return cmd(new_args[0])
 
-            elif nargs == 2:
+            if nargs == 2:
                 # Copy or Move
                 src, dest = new_args[0], new_args[1]
 
@@ -254,8 +315,7 @@ class RestrictedShell:
                 # Execute command
                 return cmd(src, dest)
 
-            else:
-                raise NotImplementedError("nargs = %s is too large" % nargs)
+            raise NotImplementedError("nargs = %s is too large" % nargs)
 
         except:
             import sys
@@ -265,7 +325,13 @@ class RestrictedShell:
 
 def stream_has_colours(stream):
     """
-    True if stream supports colours. Python cookbook, #475186
+    Check if a stream supports ANSI colors.
+
+    Args:
+        stream: The stream to check.
+
+    Returns:
+        bool: True if colors are supported.
     """
     if not hasattr(stream, "isatty"):
         return False
@@ -282,6 +348,9 @@ def stream_has_colours(stream):
 
 
 class StringColorizer:
+    """
+    Helper object to colorize strings using ANSI escape sequences.
+    """
     colours = {
         "default": "",
         "blue":  "\x1b[01;34m",
@@ -293,20 +362,43 @@ class StringColorizer:
         }
 
     def __init__(self, stream):
+        """
+        Initialize the StringColorizer.
+
+        Args:
+            stream: The output stream to check for color support.
+        """
         self.has_colours = stream_has_colours(stream)
 
     def __call__(self, string, colour):
+        """
+        Colorize a string if the stream supports it.
+
+        Args:
+            string (str): The string to colorize.
+            colour (str): The color name (e.g., 'blue', 'red').
+
+        Returns:
+            str: Colorized string or original string if colors disabled.
+        """
         if self.has_colours:
             code = self.colours.get(colour, "")
             if code:
                 return code + string + "\x1b[00m"
-            else:
-                return string
-        else:
             return string
+        return string
 
 
 def prompt(question):
+    """
+    Replacement for `input` / `raw_input` to support both Python 2 and 3.
+
+    Args:
+        question: The prompt string.
+
+    Returns:
+        str: The user input.
+    """
     if sys.version_info >= (3, 0):
         my_input = input
     else:
@@ -327,14 +419,31 @@ def user_wants_to_exit():
 
 
 class Editor:
-    """Python interface to text editors."""
+    """Python interface to system text editors."""
     def __init__(self, editor=None):
+        """
+        Initialize the Editor.
+
+        Args:
+            editor (str, optional): Name of the editor executable.
+                Defaults to $EDITOR or 'vi'.
+        """
         if editor is None:
             self.editor = os.getenv("EDITOR", "vi")
         else:
             self.editor = str(editor)
 
     def edit_file(self, fname, lineno=None):
+        """
+        Open a file in the editor, optionally at a specific line.
+
+        Args:
+            fname (str): Path to the file.
+            lineno (int, optional): Line number to jump to.
+
+        Returns:
+            int: The return code of the editor process.
+        """
         from subprocess import call
         if lineno is None:
             retcode = call([self.editor, fname])
@@ -408,7 +517,19 @@ class Patcher:
         return self.patcher in Patcher.interactive_patchers
 
     def patch(self, fromfile, tofile):
-        """Patch a file."""
+        """
+        Apply a patch or launch an interactive patcher.
+
+        Args:
+            fromfile (str): Source patch file.
+            tofile (str): File to be patched.
+
+        Returns:
+            int: Exit status of the patch operation.
+
+        Raises:
+            PatcherError: If the patching operation fails.
+        """
         if self.patcher == "patch":
             try:
                 return patch(fromfile, tofile)
@@ -422,7 +543,16 @@ class Patcher:
                 raise self.Error("%s: trying to patch  %s %s:\n%s" % (self.patcher, fromfile, tofile, str(exc)))
 
     def patch_files(self, fromfiles, tofiles):
-        """Patch a list of files."""
+        """
+        Patch a list of files.
+
+        Args:
+            fromfiles: List of source paths.
+            tofiles: List of destination paths.
+
+        Returns:
+            int: The exit status of the overall operation.
+        """
         assert len(fromfiles) == len(tofiles)
         exit_status = 0
 
@@ -618,13 +748,13 @@ class lazy_property:
         if inst is None:
             return self
 
-        if not hasattr(inst, '__dict__'):
+        if not hasattr(inst, "__dict__"):
             raise AttributeError("'%s' object has no attribute '__dict__'"
                                  % (inst_cls.__name__,))
 
         name = self.__name__
-        if name.startswith('__') and not name.endswith('__'):
-            name = '_%s%s' % (inst_cls.__name__, name)
+        if name.startswith("__") and not name.endswith("__"):
+            name = "_%s%s" % (inst_cls.__name__, name)
 
         value = self.__func(inst)
         inst.__dict__[name] = value
@@ -639,12 +769,12 @@ class lazy_property:
         """
         inst_cls = inst.__class__
 
-        if not hasattr(inst, '__dict__'):
+        if not hasattr(inst, "__dict__"):
             raise AttributeError("'%s' object has no attribute '__dict__'"
                                  % (inst_cls.__name__,))
 
-        if name.startswith('__') and not name.endswith('__'):
-            name = '_%s%s' % (inst_cls.__name__, name)
+        if name.startswith("__") and not name.endswith("__"):
+            name = "_%s%s" % (inst_cls.__name__, name)
 
         if not isinstance(getattr(inst_cls, name), cls):
             raise AttributeError("'%s.%s' is not a %s attribute"

@@ -9,7 +9,7 @@
 !!  of recursion_type
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2025 ABINIT group (MMancini)
+!! Copyright (C) 2002-2026 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1387,8 +1387,7 @@ subroutine pspnl_hgh_rec(psps,temperature,nlrec,debug)
  real(dp) :: h_mat_init(3,3), rework(lwork)
  real(dp), allocatable :: g_mat(:,:),h_mat(:,:),eig_val_h(:)
  real(dp), allocatable :: identity(:,:),inv_g_mat(:,:),u_mat(:,:)
-
- complex(dpc),allocatable :: hg_mat(:,:)
+ complex(dp),allocatable :: hg_mat(:,:)
 ! *************************************************************************
 
  if(debug)then

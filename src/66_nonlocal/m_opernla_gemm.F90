@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MT)
+!!  Copyright (C) 2008-2026 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,15 +25,14 @@ module m_opernla_gemm
  use m_errors
  USE_MPI
  use m_xmpi
+ use m_gputk
  use m_abi_linalg
  use m_gemm_nonlop_projectors
 
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
 
-#ifdef HAVE_FC_ISO_C_BINDING
  use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_size_t
-#endif
 
  implicit none
 
@@ -61,7 +60,7 @@ subroutine opernla_gemm_distributed(rank,nprocs,npw,ndat,&
 &                                   projs_local,vectin,projections,gpu_option)
  integer,  intent(in)     :: rank,nprocs,npw,ndat,gpu_option
  integer,  intent(in)     :: nprojs,nprojs_blk,nprojs_last_blk,cplex
- complex(dpc), intent(in) :: beta
+ complex(dp), intent(in) :: beta
  real(dp), intent(in),  target    :: projs_local(cplex,npw,nprojs_last_blk)
  real(dp), intent(in),  target    :: vectin(2,npw*ndat)
  real(dp), intent(out), target    :: projections(cplex,nprojs,ndat)
@@ -215,7 +214,7 @@ subroutine opernla_xgemm(cplex,transa,transb,nprojs,ndat,npw,alpha,a,lda,b,ldb,b
  integer,intent(in) :: rank,nprocs,nprojs_blk,nprojs_last_blk
  integer,intent(in) :: iblock
  logical,intent(in) :: use_distrib,use_sliced_gemms
- complex(dpc),intent(in) :: alpha,beta
+ complex(dp),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
  real(dp),target,intent(in) :: a(cplex,lda,nprojs),b(cplex,ldb,ndat)
  real(dp),target,intent(inout) :: c(cplex,ldc,ndat)

@@ -6,7 +6,7 @@
 !!  Thin wrappers and tools for OpenMP parallelization.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,13 +41,13 @@ MODULE m_xomp
  ! OpenMP 5.0 GPU device routines
  public :: xomp_set_default_device
  public :: xomp_get_default_device
+ public :: xomp_get_device_num
  public :: xomp_get_initial_device
  public :: xomp_get_num_devices
  public :: xomp_is_initial_device
  public :: xomp_target_is_present
  ! OpenMP 5.1 GPU device routine
  public :: xomp_get_mapped_ptr
-
 
 !----------------------------------------------------------------------
 
@@ -120,7 +120,6 @@ function xomp_get_max_threads()
 
 !Arguments ------------------------------------
  integer :: xomp_get_max_threads
-
 ! *************************************************************************
 
 #ifdef HAVE_OPENMP
@@ -152,7 +151,6 @@ function xomp_get_thread_num()
 !Arguments ------------------------------------
 !scalars
  integer :: xomp_get_thread_num
-
 ! *************************************************************************
 
 #ifdef HAVE_OPENMP
@@ -196,7 +194,6 @@ function xomp_get_num_threads(open_parallel) result(nthreads)
 !Local variables-------------------------------
 !scalars
  logical :: do_open
-
 ! *************************************************************************
 
  do_open = .FALSE.; if (PRESENT(open_parallel)) do_open = open_parallel
@@ -242,7 +239,6 @@ subroutine xomp_set_num_threads(nthreads)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nthreads
-
 ! *************************************************************************
 
 #ifdef HAVE_OPENMP
@@ -269,7 +265,6 @@ function xomp_in_parallel() result(ans)
 
 !Arguments-------------------------
  logical :: ans
-
 ! *************************************************************************
 
 #ifdef HAVE_OPENMP
@@ -301,7 +296,6 @@ function xomp_get_num_cores_node()
 !Arguments ------------------------------------
 !scalars
  integer :: xomp_get_num_cores_node
-
 ! *************************************************************************
 
 #ifdef HAVE_OPENMP
@@ -338,7 +332,6 @@ subroutine xomp_set_default_device(device_id)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: device_id
-
 ! *************************************************************************
 
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -373,7 +366,6 @@ function xomp_get_default_device()
 !Arguments ------------------------------------
 !scalars
  integer :: xomp_get_default_device
-
 ! *************************************************************************
 
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -383,6 +375,42 @@ function xomp_get_default_device()
 #endif
 
 end function xomp_get_default_device
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xomp/xomp_get_device_num
+!! NAME
+!!  xomp_get_device_num
+!!
+!! FUNCTION
+!!  Wrapper for omp_get_device_num
+!!
+!! OUTPUT
+!!  (integer) id of OpenMP device on which the calling thread is executing.
+!!  When called on the host device, it will return the same value as the
+!!  omp_get_initial_device routine.
+!!  Inside a target OpenMP region: device number executing that region.
+!!                                 CPU-only this is host (device 0).
+!!  Outside a target region: return -1 as running on host not a device.
+!!
+!! SOURCE
+
+function xomp_get_device_num()
+
+!Arguments ------------------------------------
+!scalars
+ integer :: xomp_get_device_num
+
+! *************************************************************************
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ xomp_get_device_num = omp_get_device_num()
+#else
+ xomp_get_device_num = -1
+#endif
+
+end function xomp_get_device_num
 !!***
 
 !----------------------------------------------------------------------
@@ -405,7 +433,6 @@ function xomp_get_initial_device()
 !Arguments ------------------------------------
 !scalars
  integer :: xomp_get_initial_device
-
 ! *************************************************************************
 
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -437,7 +464,6 @@ function xomp_get_num_devices()
 !Arguments ------------------------------------
 !scalars
  integer :: xomp_get_num_devices
-
 ! *************************************************************************
 
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -469,7 +495,6 @@ function xomp_is_initial_device()
 !Arguments ------------------------------------
 !scalars
  logical :: xomp_is_initial_device
-
 ! *************************************************************************
 
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -506,14 +531,17 @@ function xomp_target_is_present(ptr)
 
  logical :: xomp_target_is_present
  integer(kind=c_int) :: device_id, rc
-
 ! *************************************************************************
 
 #ifdef HAVE_OPENMP_OFFLOAD
+#ifdef HAVE_GPU_UNIFIED_MEMORY
+ xomp_target_is_present = .true. ! No check needed in unified memory
+#else
  device_id = xomp_get_default_device()
  rc = omp_target_is_present(ptr, device_id)
  xomp_target_is_present = .true.
  if(rc==0) xomp_target_is_present = .false.
+#endif
 #else
  xomp_target_is_present = .false.
  ! this macro is called before m_errors is compiled
@@ -550,7 +578,6 @@ function xomp_get_mapped_ptr(ptr) result(gpu_ptr)
  type(c_ptr),intent(in) :: ptr
  integer :: device_id, rc
  type(c_ptr) :: gpu_ptr
-
 ! *************************************************************************
 
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -566,9 +593,6 @@ function xomp_get_mapped_ptr(ptr) result(gpu_ptr)
  end if
 #else
  gpu_ptr = c_null_ptr
- ! this macro is called before m_errors is compiled
-! ABI_UNUSED(device_id)
-! ABI_UNUSED(rc)
  if (.FALSE.) write(std_out,*)device_id
  if (.FALSE.) write(std_out,*)rc
  ABI_UNUSED_A(ptr)

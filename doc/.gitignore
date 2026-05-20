@@ -46,6 +46,7 @@ topics/Berry.md
 topics/BandOcc.md
 topics/BoundingProcess.md
 topics/BSE.md
+topics/ConstrainedDFPT.md
 topics/ConstrainedDFT.md
 topics/ConstrainedPol.md
 topics/Control.md
@@ -59,6 +60,7 @@ topics/DensityPotential.md
 topics/Dev.md
 topics/DFPT.md
 topics/DMFT.md
+topics/DmftTriqsCthyb.md
 topics/DynamicsMultibinit.md
 topics/EffectiveMass.md
 topics/EFG.md

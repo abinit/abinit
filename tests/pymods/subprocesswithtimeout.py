@@ -1,10 +1,10 @@
-from __future__ import print_function, division, absolute_import #, unicode_literals
+from __future__ import annotations
 
-import time
-import os
 import errno
+import os
 import signal
 import subprocess
+import time
 
 
 class TimeoutError(Exception):
@@ -17,7 +17,17 @@ class SubProcessWithTimeout:
     """
     Error = TimeoutError
 
-    def __init__(self, timeout, delay=.05):
+    def __init__(self, timeout: float, delay: float = .05):
+        """
+        Initialize the SubProcessWithTimeout object.
+
+        Args:
+            timeout (float): Timeout in seconds.
+            delay (float): Delay between checks.
+
+        Raises:
+            ValueError: If delay or timeout are invalid.
+        """
         self.timeout = float(timeout)
         self.delay = float(delay)
 
@@ -27,8 +37,14 @@ class SubProcessWithTimeout:
     def run(self, args,
             bufsize=0, executable=None, stdin=None, stdout=None, stderr=None, preexec_fn=None,
             close_fds=False, shell=False, cwd=None, env=None, universal_newlines=False, startupinfo=None, creationflags=0):
-        """Same interface as Popen"""
+        """
+        Run a subprocess with a timeout.
 
+        Supports the same interface as subprocess.Popen.
+
+        Returns:
+            tuple: (subprocess.Popen object, return_code)
+        """
         self.proc = subprocess.Popen(args,
                                      bufsize, executable, stdin, stdout, stderr, preexec_fn,
                                      close_fds, shell, cwd, env, universal_newlines, startupinfo, creationflags)
@@ -37,12 +53,20 @@ class SubProcessWithTimeout:
         return self.proc, return_code
 
     def _wait_testcomplete(self):
+        """
+        Wait for the subprocess to complete or for the timeout to trigger.
+
+        If the timeout is reached, the process is terminated with SIGTERM,
+        followed by SIGKILL if it still hasn't exited.
+
+        Returns:
+            int: The return code of the process.
+        """
         start = time.time()
         while (time.time()-start) < self.timeout:
             if self.proc.poll() is not None:  # 0 just means successful exit
                 return self.proc.returncode
-            else:
-                time.sleep(self.delay)
+            time.sleep(self.delay)
         # The process may exit between the time we check and the
         # time we send the signal.
         try:
@@ -60,8 +84,7 @@ class SubProcessWithTimeout:
                 if e.errno != errno.ESRCH:
                     raise e
             return 137  # timeout return code for SIGKILL
-        else:
-            return 124  # timeout return code for SIGTERM
+        return 124  # timeout return code for SIGTERM
 
 
 #############################################################################################################

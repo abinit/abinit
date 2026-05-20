@@ -7,7 +7,7 @@
 !!  and the functions needed to extract them
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2025 ABINIT group (MMancini, MT, FDahm)
+!!  Copyright (C) 2009-2026 ABINIT group (MMancini, MT, FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -104,7 +104,7 @@ CONTAINS !===========================================================
  integer :: ii,regist,lenname,ncores,nprocs,nprocs_per_gpu
  real(sp) :: globalmem,clockRate
  integer  :: uuid(4)
- character(20)  :: name
+ character(256) :: name
  character(20)  :: formatdev
  character(60)  :: gflops_stg
  character(500) :: msg
@@ -324,8 +324,7 @@ end subroutine Get_Mem_Dev
    if(nb_devices==1) then
      device=0
    else if(all(gpu_devices_node(1:nb_devices)==-1)) then
-     nprocs_per_gpu=max(1,nproc/nb_devices)
-     device=me/nprocs_per_gpu
+     device=modulo(me,nb_devices)
    else
      jj=nb_devices
      do ii=jj,2,-1

@@ -6,7 +6,7 @@
 !! Move ion or change acell according to forces and stresses
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, SE, FLambert,MT)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, SE, FLambert,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -211,7 +211,7 @@ type(pawfgr_type) :: pawfgr
 type(mttk_type) :: mttk_vars
 type(pimd_type) :: pimd_param
 integer :: itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
-integer :: ntime,option,comm,mgfftf,nfftf
+integer :: nmpi,ntime,option,comm,mgfftf,nfftf
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
 integer ABI_ASYNC :: quitsum_async
 character(len=500) :: msg
@@ -236,7 +236,7 @@ real(dp) :: minE,wtime_step,now,prev
 !arrays
 integer :: itimes(2),ngfft(18),ngfftf(18)
 real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3),gmet(3,3),rmet(3,3)
-real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:),ph1df(:,:)
+real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:),ph1df(:,:),tmp(:,:),tmp_1d(:)
 real(dp) :: k0(3)
 ! ***************************************************************
  need_verbose=.TRUE.
@@ -407,7 +407,7 @@ real(dp) :: k0(3)
  else
    if(need_verbose)then
      write(msg,'(a,a,i2,a,a,a,80a)')&
-&     ch10,'=== [ionmov=',ab_mover%ionmov,'] ',specs%method,&
+&     ch10,'=== [ionmov=',ab_mover%ionmov,'] ',trim(specs%method),&
 &     ch10,('=',kk=1,80)
      call wrtout([std_out, ab_out], msg)
    end if
@@ -641,8 +641,8 @@ real(dp) :: k0(3)
 !        MAIN CALL TO SELF-CONSISTENT FIELD ROUTINE
          if (need_scfcv_cycle) then
 
-           call dtfil_init_time(dtfil,iapp)
-           itimes(1)=itime ; itimes(2)=1
+           call dtfil%init_time(iapp)
+           itimes(1)=itime; itimes(2)=1
            if(present(itimimage_gstate))then
              itimes(2)=itimimage_gstate
            endif
@@ -809,7 +809,7 @@ real(dp) :: k0(3)
        write(msg,'(a,3a,a,72a)')ch10,('-',kk=1,3),'OUTPUT',('-',kk=1,71)
        call wrtout([std_out, ab_out], msg)
      end if
-     if (useprtxfase) then
+     if (useprtxfase.and..not.ab_mover%use_pimd_routine) then
        call prtxfase(ab_mover,hist,itime_hist,ab_out,mover_AFTER)
        call prtxfase(ab_mover,hist,itime_hist,std_out,mover_AFTER)
      end if
@@ -852,7 +852,7 @@ real(dp) :: k0(3)
 !    ### 16. => Precondition forces, stress and energy
 !    ### 17. => Call to each predictor
 !    Some MOLDYN algorithms require pimd_param to be initialized
-     if(scfcv_args%dtset%ionmov==16) then
+     if(ab_mover%use_pimd_routine) then
        call pimd_init(scfcv_args%dtset,pimd_param,me==master,force_imgmov=9)
      end if
 
@@ -887,6 +887,44 @@ real(dp) :: k0(3)
 !    ### 18. Use the history  to extract the new values of acell, rprimd and xred
 
      call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
+     ! /!\ ---- DO NOT CHANGE THESE LINES WITHOUT CORE DEVELOPERS PERMISSION ---- /!\
+     ! LB-03/2026:
+     ! A noise can accumulate in acell,rprimd and xred after each iterations,
+     ! resulting in different results for different MPI processes.
+     ! This has been observed using threads, but could happen in other contexts.
+     ! This slowly worsens the ionic dynamics, leading to wrong results after many iterations.
+     ! So here we compute the mean over all MPI processes to reduce the noise.
+     ! This error is difficult to test as it is observed in long runs only, so BE VERY CAREFUL.
+     ! Note : the cost of these MPI communications is negligible.
+     ! comm = comm_cell
+     nmpi = xmpi_comm_size(comm)
+     if (nmpi>1) then
+       ABI_MALLOC(tmp,(size(xred,1),size(xred,2)))
+       tmp(:,:) = xred(:,:) / nmpi
+       call xmpi_sum(tmp,comm,ierr)
+       if (ierr/=0) then
+         ABI_ERROR("Error in mpi sum (tmp)")
+       end if
+       xred(:,:) = tmp(:,:)
+       ABI_FREE(tmp)
+       ABI_MALLOC(tmp,(size(rprimd,1),size(rprimd,2)))
+       tmp(:,:) = rprimd(:,:) / nmpi
+       call xmpi_sum(tmp,comm,ierr)
+       if (ierr/=0) then
+         ABI_ERROR("Error in mpi sum (tmp)")
+       end if
+       rprimd(:,:) = tmp(:,:)
+       ABI_FREE(tmp)
+       ABI_MALLOC(tmp_1d,(size(acell)))
+       tmp_1d(:) = acell(:) / nmpi
+       call xmpi_sum(tmp_1d,comm,ierr)
+       if (ierr/=0) then
+         ABI_ERROR("Error in mpi sum (tmp)")
+       end if
+       acell(:) = tmp_1d(:)
+       ABI_FREE(tmp_1d)
+     end if
+     ! /!\--------------------/!\
 
      if (ab_mover%optcell/=0) then
        ! Cell may change
@@ -1052,9 +1090,9 @@ contains
 !! If optcell=1, takes only the trace into account
 !!    optcell=2, takes all components into account
 !!    optcell=3, takes traceless stress into account
-!!    optcell=4, takes sigma(1 1) into account
-!!    optcell=5, takes sigma(2 2) into account
-!!    optcell=6, takes sigma(3 3) into account
+!!    optcell=4, takes sigma(1,1), sigma(2,1) and sigma(3,1) into account
+!!    optcell=5, takes sigma(1,2), sigma(2,2) and sigma(3,2) into account
+!!    optcell=6, takes sigma(1,3), sigma(2,3) and sigma(3,3) into account
 !!    optcell=7, takes sigma(2,2),(2,3) and (3 3) into account
 !!    optcell=8, takes sigma(1,1),(1,3) and (3 3) into account
 !!    optcell=9, takes sigma(1,1),(1,2) and (2 2) into account
@@ -1097,7 +1135,7 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
 !Local variables-------------------------------
 !scalars
  integer :: iatom,idir,istr
- real(dp) :: fmax,strdiag!,fcell
+ real(dp) :: fmax,strdiag,fcell
  character(len=500) :: msg
 !arrays
  real(dp) :: dstr(6)
@@ -1138,30 +1176,18 @@ ABI_UNUSED(rprim)
 !  else if(optcell==4 .or. optcell==5 .or. optcell==6)then
 !    if(abs(dstr(optcell-3))*strfact >= fmax ) fmax=abs(dstr(optcell-3))*strfact
  else if(optcell==4) then
-   ! only dstr 1 5 6 are in xfpack_f2vout. The other component shouldn't be checked.
-   !fcell = dstr(1) * rprim(1,1) + dstr(6) * rprim(2,1) + dstr(5) * rprim(3,1)
-   !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-   !fcell = dstr(6) * rprim(1,1)
-   !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-   !fcell = dstr(5) * rprim(1,1)
-   !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-   fmax = maxval(abs(dstr([1, 5, 6])))*strfact
- else if(optcell==5) then ! 2 4 6
-    !fcell = dstr(5) * rprim(3,3)
-    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-    !fcell = dstr(6) * rprim(1,2) + dstr(2) * rprim(2,2) + dstr(4) * rprim(3,2)
-    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-    !fcell = dstr(4) * rprim(2,2)
-    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-   fmax = maxval(abs(dstr([2, 4, 6])))*strfact
+!  Only the first lattice vector is relaxed. Check the three stress components
+!  conjugate to its generalized coordinates, consistently with xfpack_f2vout.
+   fcell = maxval(abs(dstr([1,5,6]))) * strfact
+   if (fcell >= fmax) fmax=fcell
+ else if(optcell==5) then
+!  Only the second lattice vector is relaxed.
+   fcell = maxval(abs(dstr([2,4,6]))) * strfact
+   if (fcell >= fmax) fmax=fcell
  else if(optcell==6) then
-    !fcell =  dstr(5) * rprim(3,3)
-    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-    !fcell =  dstr(4) * rprim(3,3)
-    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-    !fcell = dstr(5) * rprim(1,3) + dstr(4) * rprim(2,3) + dstr(3) * rprim(3,3)
-    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-    fmax = maxval(abs(dstr([3, 4, 5])))*strfact
+!  Only the third lattice vector is relaxed.
+   fcell = maxval(abs(dstr([3,4,5]))) * strfact
+   if (fcell >= fmax) fmax=fcell
  else if(optcell==7)then
    if(abs(dstr(2))*strfact >= fmax ) fmax=abs(dstr(2))*strfact
    if(abs(dstr(3))*strfact >= fmax ) fmax=abs(dstr(3))*strfact

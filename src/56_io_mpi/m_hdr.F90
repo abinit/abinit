@@ -10,7 +10,7 @@
 !!   hdr_mpio_skip, hdr_fort_read, hdr_fort_write, hdr_ncread, hdr_ncwrite
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2025 ABINIT group (XG, MB, MT, DC, MG)
+!! Copyright (C) 2008-2026 ABINIT group (XG, MB, MT, DC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1029,9 +1029,7 @@ end subroutine hdr_init
 subroutine hdr_free(hdr)
 
 !Arguments ------------------------------------
-!scalars
  class(hdr_type),intent(inout) :: hdr
-
 ! *************************************************************************
 
  !integer
@@ -1313,7 +1311,6 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
  integer :: cplex_rhoij,nspden_rhoij,qphase_rhoij
  integer :: idx,isppol,ikpt,iband,ipsp
  character(len=8) :: date_time
-
 ! *************************************************************************
 
  !@hdr_type
@@ -1861,7 +1858,6 @@ subroutine hdr_io_wfftype(fform,hdr,rdwr,wff)
 #if defined HAVE_MPI
  integer :: ierr
 #endif
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1961,7 +1957,6 @@ subroutine hdr_io_int(fform,hdr,rdwr,unitfi)
 
 !Local variables-------------------------------
  integer :: ierr
-
 !*************************************************************************
 
  DBG_ENTER("COLL")
@@ -2183,7 +2178,6 @@ subroutine hdr_skip_int(unitfi,ierr)
 
 !Local variables-------------------------------
  type(wffile_type) :: wff
-
 ! *************************************************************************
 
 !Use default values for wff
@@ -2235,7 +2229,6 @@ subroutine hdr_skip_wfftype(wff,ierr)
  integer(kind=MPI_OFFSET_KIND) :: delim_record,posit,positloc,off(1)
  integer :: iread(1),statux(MPI_STATUS_SIZE)
 #endif
-
 !*************************************************************************
 
  !@hdr_type
@@ -2362,6 +2355,7 @@ end subroutine hdr_skip_wfftype
 !! INPUTS
 !! bantot=total number of bands
 !! etot=total energy (Hartree)
+!! extfpmd_eshift=--optional-- extfpmd energy shift (Hartree)
 !! fermie=Fermi energy (Hartree)
 !! fermih=Fermi energy for holes (Hartree), useful when occopt = 9
 !! mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
@@ -2392,7 +2386,6 @@ subroutine hdr_update(hdr,bantot,etot,fermie,fermih,residm,rprimd,occ,pawrhoij,x
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),intent(in) :: occ(bantot),rprimd(3,3),xred(3,hdr%natom),amu(hdr%ntypat)
  type(pawrhoij_type),intent(inout) :: pawrhoij(:)
-
 ! *************************************************************************
 
  !@hdr_type
@@ -2770,8 +2763,8 @@ end subroutine hdr_bcast
 !!
 !! FUNCTION
 !!  Read the first record of the header.
-!!  This function is neede to support for pre-Abinitv9 headers:
-!!  length of codvsn was changed from 6 to 8 in v9
+!!  This function is needed to support pre-Abinitv9 headers
+!!  since length of codvsn was changed from 6 to 8 in v9
 !!
 !! SOURCE
 
@@ -2786,7 +2779,6 @@ integer function read_first_record(unit, codvsn8, headform, fform, errmsg) resul
 !Local variables-------------------------------
  integer :: major, ii
  character(len=6) :: codvsn6
-
 !*************************************************************************
 
  ! Try pre-v9 first. This read should not fail as we have enough space in the record
@@ -3204,7 +3196,6 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
  integer :: headform,ipsp,major,ii
  character(len=500) :: errmsg
  real(dp),allocatable :: occ3d(:,:,:)
-
 !*************************************************************************
 
  ! TODO: Change intent to in. Change pawrhoij_io first!
@@ -3301,7 +3292,6 @@ integer function hdr_backspace(hdr, unit, msg) result(ierr)
 
 !Local variables-------------------------------
  integer :: irec
-
 !*************************************************************************
 
  ierr = 0
@@ -3364,7 +3354,6 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
  integer,allocatable :: arr2d(:,:)
  real(dp),allocatable :: arr3d(:,:,:)
  type(pawrhoij_type),pointer :: rhoij_ptr(:)
-
 ! *************************************************************************
 
  call check_fform(fform)
@@ -3695,7 +3684,6 @@ subroutine hdr_set_occ(hdr, occ3d)
 !Local variables-------------------------------
 !scalars
  integer :: ii,band,ikpt,spin
-
 !*************************************************************************
 
  ii = 0
@@ -3729,7 +3717,6 @@ subroutine hdr_get_occ3d(hdr, occ3d)
 !Local variables-------------------------------
 !scalars
  integer :: ii,band,ikpt,spin
-
 !*************************************************************************
 
  ii = 0; occ3d = huge(one)
@@ -3837,7 +3824,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
 !Local variables-------------------------------
  character(len=500) :: bndfmt, occfmt, wtkfmt, zatfmt, typfmt
 !scalars
- integer,parameter :: mwarning=5,nkpt_max=5
+ integer,parameter :: mwarning=3,nkpt_max=5
  integer :: bantot,bantot_eff,ii,ipsp,isppol,istart,istop,isym,itest,iwarning
  integer :: jj,mu,natom,nelm,nkpt,npsp,nsppol,nsym,ntypat,tatty,tband,tdg
  integer :: tecut,tgrid,tkpt,tlmn,tng,tpaw,tprim,tpsch,tpseu,tspinor,tsym,twfk
@@ -3846,7 +3833,6 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
  logical :: tfform2,tfform52
  character(len=500) :: msg
  type(abifile_t) :: abifile,abifile0
-
 ! *************************************************************************
 
  !@hdr_type
@@ -4286,7 +4272,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
        ABI_WARNING(msg)
        tkpt=1 ; iwarning=iwarning+1
        if(iwarning>=mwarning)then
-         call wrtout(std_out,'The number of warning messages is sufficient ... stop writing them.',mode_paral)
+         call wrtout(std_out,'The number of comment messages is sufficient ... stop writing them.',mode_paral)
          exit
        end if
      end if
@@ -4347,7 +4333,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
    do ii=1,bantot
      if (abs( hdr%occ(ii)-hdr0%occ(ii) )>tol6) then
        write(msg,'(a,i0,a,1p,e15.7,a,e15.7)')'band,k: ',ii,', input occ=',hdr%occ(ii),' disk occ=',hdr0%occ(ii)
-       ABI_WARNING(msg)
+       ABI_COMMENT(msg)
        tband=1 ; iwarning=iwarning+1
        if(iwarning>=mwarning)then
          call wrtout(std_out,'The number of warning msgs is sufficient ... stop writing them.',mode_paral)
@@ -4941,7 +4927,6 @@ subroutine hdr_vs_dtset(hdr, dtset)
 
 !Local variables-------------------------------
  character(len=500) :: msg
-
 ! *************************************************************************
 
  if (.not. iexp == ifound) then

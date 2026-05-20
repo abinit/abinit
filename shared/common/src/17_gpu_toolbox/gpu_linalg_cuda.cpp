@@ -1,7 +1,7 @@
 /* gpu_linalg.cu */
 
 /*
- * Copyright (C) 2008-2025 ABINIT Group (MMancini,FDahm)
+ * Copyright (C) 2008-2026 ABINIT Group (MMancini,FDahm)
  * this file is distributed under the terms of the
  * gnu general public license, see ~abinit/COPYING
  * or http://www.gnu.org/copyleft/gpl.txt .
@@ -710,6 +710,58 @@ extern "C" void gpu_xscal_(int* cplx, int *N,
                               alpha,
                               (cuDoubleComplex *)(*X_ptr), *incrx) );
 } // gpu_xscal_
+
+/*=========================================================================*/
+// NAME
+//  gpu_xdot
+//
+// FUNCTION
+//  Compute blas-3 DOT on GPU
+//  trace(X^H*Y)
+//
+// INPUTS
+//  cplx  = 1 if real 2 if complex
+//  N     = number of elements n*s
+//  X     = array (n,s)
+//  incrx = stride for X
+//  Y     = array (n,s)
+//  incry = stride for Y
+//  alpha = output pointer
+//
+// OUTPUT
+//  alpha
+/*=========================================================================*/
+
+extern "C" void gpu_xdot_(int* cplx, int *N,
+                           cuDoubleComplex *alpha,
+                           void **X_ptr, int *incrx, void **Y_ptr, int *incry)
+{
+  if (*cplx == 1) {
+    double result;
+
+    CUDA_API_CHECK(
+      cublasDdot(cublas_handle, *N,
+                 (const double *)(*X_ptr), *incrx,
+                 (const double *)(*Y_ptr), *incry,
+                 &result)
+    );
+
+    alpha->x = result;
+    alpha->y = 0.0;
+
+  } else {
+    cuDoubleComplex result;
+
+    CUDA_API_CHECK(
+      cublasZdotc(cublas_handle, *N,
+                  (const cuDoubleComplex *)(*X_ptr), *incrx,
+                  (const cuDoubleComplex *)(*Y_ptr), *incry,
+                  &result)
+    );
+
+    *alpha = result;
+  }
+} // gpu_xdot_
 
 /*=========================================================================*/
 // NAME

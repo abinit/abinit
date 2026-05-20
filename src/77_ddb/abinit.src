@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2026 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -21,6 +21,7 @@ sources = [
  "m_epweights.F90",
  "defs_elphon.F90",
  "m_anaddb_dataset.F90",
+ "m_anaddb_driver.F90",
  "m_atprj.F90",
  "m_a2ftr.F90",
  "m_band2eps_dataset.F90",
@@ -29,6 +30,8 @@ sources = [
  "m_ddb_flexo.F90",
  "m_ddb_internalstr.F90",
  "m_ddb_interpolate.F90",
+ "m_ddb_magpen.F90",
+ "m_ddb_omega_interpol.F90",
  "m_ddb_piezo.F90",
  "m_eliashberg_1d.F90",
  "m_elphon.F90",

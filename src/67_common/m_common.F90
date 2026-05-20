@@ -7,7 +7,7 @@
 !!  Mainly printing routines.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,9 +45,10 @@ module m_common
  use m_invars2
  use m_dtset
 
+ use m_rcpaw,             only : rcpaw_type
  use m_fstrings,          only : indent, endswith, sjoin, itoa
  use m_electronpositron,  only : electronpositron_type
- use m_energies,          only : energies_type, energies_eval_eint
+ use m_energies,          only : energies_type
  use m_pair_list,         only : pair_list
  use m_geometry,          only : mkrdim, metric
  use m_kg,                only : getcut
@@ -66,6 +67,7 @@ module m_common
  use m_lobpcg2,            only : lobpcg_memInfo
  use m_invovl,             only : invovl_ompgpu_static_mem,invovl_ompgpu_work_mem
  use m_gemm_nonlop,        only : gemm_nonlop_ompgpu_static_mem,gemm_nonlop_ompgpu_work_mem
+ use m_gemm_nonlop_projectors, only : gemm_nonlop_split_choice23
  use m_getghc,      only : getghc_ompgpu_work_mem
  use, intrinsic :: iso_c_binding, only : c_size_t
 
@@ -109,6 +111,7 @@ contains
 !!  cpus=cpu time limit in seconds
 !!  deltae=change in energy between the previous and present SCF cycle
 !!  diffor=maximum absolute change in component of fcart between present and previous SCF cycle.
+!!  difmagsph=maximum absolute change in magnetization between present and previous SCF cycle.
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!   | chkexit= if non-zero, check whether the user wishes to exit
 !!   | enunit=parameter determining units of output energies
@@ -150,6 +153,7 @@ contains
 !!  istep_mix=number of inner SCF iteration in the double loop approach
 !!  kpt(3,nkpt)=reduced coordinates of k points.
 !!  maxfor=maximum absolute value of fcart
+!!  maxmagsph=maximum absolute value of magnetization among all atoms.
 !!  moved_atm_inside: if==1, the atoms are allowed to move.
 !!  mpi_enreg=information about MPI parallelization
 !!  nband(nkpt*nsppol)=number of bands at each k point, for each polarization
@@ -168,7 +172,7 @@ contains
 !!  tollist(12)=tolerance list. Presently, the following are defined :
 !!    tollist(1)=tolmxf ; tollist(2)=tolwfr ; tollist(3)=toldff
 !!    tollist(4)=toldfe ; tollist(5)=toleig ; tollist(6)=tolvrs
-!!    tollist(7)=tolrff
+!!    tollist(7)=tolrff ; tollist(9)=toldmag
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  vxcavg=mean of the vxc potential
 !!  wtk(nkpt)=weight assigned to each k point.
@@ -180,13 +184,13 @@ contains
 !!
 !! SOURCE
 
-subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
+subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
 &  eigen,etotal,favg,fcart,fermie,fermih,fname_eig,filnam1,initGS,&
 &  iscf,istep,istep_fock_outer,istep_mix,kpt,maxfor,moved_atm_inside,mpi_enreg,&
 &  nband,nkpt,nstep,occ,optres,&
 &  prtfor,prtxml,quit,res2,resid,residm,response,tollist,usepaw,&
 &  vxcavg,wtk,xred,conv_retcode,&
-&  electronpositron, fock) ! optional arguments)
+&  electronpositron, fock,rcpaw) ! optional arguments)
 
 !Arguments ------------------------------------
 !scalars
@@ -194,13 +198,14 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  integer,intent(in) :: moved_atm_inside,nkpt,nstep
  integer,intent(in) :: optres,prtfor,prtxml,response,usepaw
  integer,intent(out) :: quit,conv_retcode
- real(dp),intent(in) :: cpus,deltae,diffor,etotal,fermie,fermih,maxfor,res2,residm
+ real(dp),intent(in) :: cpus,deltae,diffor,etotal,fermie,fermih,maxfor,res2,residm,maxmagsph,difmagsph
  real(dp),intent(in) :: vxcavg
  character(len=fnlen),intent(in) :: fname_eig,filnam1
  type(electronpositron_type),pointer,optional :: electronpositron
  type(fock_type),pointer,optional :: fock
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
+ type(rcpaw_type),intent(inout),optional,pointer :: rcpaw
 !arrays
  integer,intent(in) :: nband(nkpt*dtset%nsppol)
  real(dp),intent(in) :: eigen(dtset%mband*nkpt*dtset%nsppol),favg(3)
@@ -212,19 +217,21 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer,save :: toldfe_ok,toldff_ok,tolrff_ok,ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
+ !integer,save :: toldfe_ok,toldff_ok,tolrff_ok,ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
+ integer,save :: toldfe_ok,toldff_ok,tolrff_ok,toldmag_ok,ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr,ttoldmag
  integer :: iatom,iband,iexit,ikpt,ii,ishift,isppol,my_rank
  integer :: nband_index,nband_k,nnsclohf
  integer :: openexit,option,tmagnet,usefock
 #if defined DEV_YP_VDWXC
  integer :: ivdw
 #endif
- real(dp),save :: toldfe,toldff,tolrff,tolvrs,tolwfr,vdw_df_threshold
+ !real(dp),save :: toldfe,toldff,tolrff,tolvrs,tolwfr,vdw_df_threshold
+ real(dp),save :: toldfe,toldff,tolrff,tolvrs,tolwfr,vdw_df_threshold, toldmag
  real(dp) :: diff_e,diff_f,magnet,rhodn,rhoup
  logical :: noquit,use_dpfft
  character(len=500) :: message, message2, message3
  character(len=2) :: format_istep
- character(len=5) :: format_magnet
+ !character(len=5) :: format_magnet
  character(len=8) :: colname
  character(len=1) :: firstchar
  type(yamldoc_t) :: ydoc
@@ -243,7 +250,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  use_dpfft = .False.
 
  tmagnet=0
- if(response==0.and.(iscf>0.or.iscf==-3).and.dtset%nsppol==2.and.dtset%occopt>2)tmagnet=1
+ if(response==0.and.(iscf>0.or.iscf==-3).and.dtset%nsppol==2.and.dtset%occopt>2) tmagnet=1
+ if((iscf>0.or.iscf==-3).and.(dtset%nsppol==2.or.dtset%nspden>1)) tmagnet=2
 
  ishift=0
  residm_band = zero
@@ -268,12 +276,14 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    tolvrs=tollist(6)
    tolrff=tollist(7)
    vdw_df_threshold=tollist(8)
-   ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0;
+   toldmag=tollist(9)
+   ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0; ttoldmag=0 ;
    if(abs(tolwfr)>tiny(zero))ttolwfr=1
    if(abs(toldff)>tiny(zero))ttoldff=1
    if(abs(tolrff)>tiny(zero))ttolrff=1
    if(abs(toldfe)>tiny(zero))ttoldfe=1
    if(abs(tolvrs)>tiny(zero))ttolvrs=1
+   if(abs(toldmag)>tiny(zero))ttoldmag=1
    !  If non-scf calculations, tolwfr must be defined
    if(ttolwfr /= 1 .and. (iscf<0 .and. iscf/=-3) )then
      write(message,'(a,a,a,es14.6,a,a)')&
@@ -288,13 +298,16 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      ABI_ERROR('toldff only allowed when prtfor=1!')
    end if
    ! If SCF calculations, one and only one of these can differ from zero
-   if( (iscf>0 .or. iscf==-3) .and.(ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff>1) &
-    .and. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff/=1) ) then
+   !if( (iscf>0 .or. iscf==-3) .and.(ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff>1) &
+   if( (iscf>0 .or. iscf==-3) .and.(ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff+ttoldmag>1) &
+    .and. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff+ttoldmag/=1) ) then
+    !.and. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff/=1) ) then
      write(message,'(6a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,a,a)' )&
 &     'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
-&     'toldff, tolrff, toldfe or tolvrs ','must differ from zero, while they are',ch10,&
+&     'toldff, tolrff, toldfe, toldmag or tolvrs ','must differ from zero, while they are',ch10,&
 &     'toldff=',toldff,', tolrff=',tolrff,', toldfe=',toldfe,ch10,&
-&     'and tolvrs=',tolvrs,' .',ch10,&
+!&     'and tolvrs=',tolvrs,' .',ch10,&
+&     'toldmag=',toldmag,' and tolvrs=',tolvrs,' .',ch10,&
 &     'Action: change your input file and resubmit the job.'
      ABI_ERROR(message)
    end if
@@ -305,22 +318,22 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      write(colname, "(A)") "residm  "
    end if
    if (nstep>0 .and. (iscf>=0 .or.iscf==-3) .and. dtset%prtstm==0) then
-     if(tmagnet==1)then
+     if(tmagnet==2 .and. response==0)then
        if (prtfor==0) then
          if (optres==0) then
            write(message, '(4a)' ) ch10,&
-            '     iter   Etot(hartree)     deltaE(h) ',colname,'  vres2    magn'
+            '     iter   Etot(hartree)      deltaE(h)  ',colname,  '   vres2   difmagsph maxmagsph'
          else
            write(message, '(4a)' ) ch10,&
-            '     iter   Etot(hartree)     deltaE(h) ',colname,'  nres2    magn'
+            '     iter   Etot(hartree)      deltaE(h)  ',colname,  '   nres2   difmagsph maxmagsph'
          end if
        else
          if (optres==0) then
            write(message, '(4a)' ) ch10,&
-            '     iter   Etot(hartree)     deltaE(h) ',colname,'  vres2   diffor   maxfor   magn'
+            '     iter   Etot(hartree)      deltaE(h)  ',colname,  '   vres2    diffor    maxfor   difmagsph maxmagsph'
          else
            write(message, '(4a)' ) ch10,&
-            '     iter   Etot(hartree)     deltaE(h) ',colname,'  nres2   diffor   maxfor   magn'
+            '     iter   Etot(hartree)      deltaE(h)  ',colname,  '   nres2    diffor    maxfor   difmagsph maxmagsph'
          end if
        end if
      else
@@ -343,22 +356,34 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
            end if
          end if
        else
-         if (optres==0) then
-           write(message, '(4a)' ) ch10,&
-            '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  vres2'
+         if(tmagnet==2 .and. iscf>0 )then
+           if (optres==0) then
+             write(message, '(4a)' ) ch10,&
+              '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  vres2    difmagsph maxmagsph'
+           else
+             write(message, '(4a)' ) ch10,&
+              '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  nres2    difmagsph maxmagsph'
+           end if
          else
-           write(message, '(4a)' ) ch10,&
-            '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  nres2'
+           if (optres==0) then
+             write(message, '(4a)' ) ch10,&
+              '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  vres2 '
+           else
+             write(message, '(4a)' ) ch10,&
+              '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  nres2 '
+           end if
          end if
        end if
      end if
 
      ydoc = yamldoc_open('BeginCycle')
-!    If wfoptalg=1 or 111, we should write mdeg_filter
+!    If wfoptalg=1 or 111 or 112, we should write mdeg_filter
      call ydoc%add_ints("iscf, nstep, nline, wfoptalg", &
                         [dtset%iscf, dtset%nstep, dtset%nline, dtset%wfoptalg], dict_key="solver")
-     call ydoc%add_reals("tolwfr, toldff, toldfe, tolvrs, tolrff", & ! , vdw_df_threshold", &
-                        [tolwfr, toldff, toldfe, tolvrs, tolrff], & !, vdw_df_threshold], &
+     call ydoc%add_reals("tolwfr, toldff, toldfe, tolvrs, tolrff, toldmag", & ! , vdw_df_threshold", &
+                        [tolwfr, toldff, toldfe, tolvrs, tolrff, toldmag], & !, vdw_df_threshold], &
+     !call ydoc%add_reals("tolwfr, toldff, toldfe, tolvrs, tolrff", & ! , vdw_df_threshold", &
+     !                   [tolwfr, toldff, toldfe, tolvrs, tolrff], & !, vdw_df_threshold], &
                         real_fmt="(es8.2)", dict_key="tolerances", ignore=zero)
 
      call ydoc%write_and_free(ab_out, newline=.False.)
@@ -374,18 +399,21 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    tolvrs=tollist(6)
    tolrff=tollist(7)
    vdw_df_threshold=tollist(8)
-   ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0;
+   toldmag=tollist(9)
+   ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0; ttoldmag=0;
+   !ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0;
    if(abs(tolwfr)>tiny(0.0_dp))ttolwfr=1
    if(abs(toldff)>tiny(0.0_dp))ttoldff=1
    if(abs(tolrff)>tiny(0.0_dp))ttolrff=1
    if(abs(toldfe)>tiny(0.0_dp))ttoldfe=1
    if(abs(tolvrs)>tiny(0.0_dp))ttolvrs=1
+   if(abs(toldmag)>tiny(0.0_dp))ttoldmag=1
 
    ! Conduct printing. If extra output follows, then put a blank line into the output here
    if (dtset%prtvol>=10) call wrtout([std_out, ab_out], ' ')
 
    ! Calculate up and down charge and magnetization
-   if(tmagnet==1) then
+   if(tmagnet==1 ) then
      rhoup = zero
      rhodn = zero
      nband_index = 1
@@ -434,20 +462,23 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      format_istep='i3'
      if(istep>99)format_istep='i5'
      if(istep>9999)format_istep='i7'
-     if(tmagnet==1)then
-       if(magnet<10)then
-         format_magnet='f6.3)'
-       else if(magnet<100)then
-         format_magnet='f6.2)'
-       else
-         format_magnet='f6.1)'
-       end if
+     !if(tmagnet==1)then
+     if(tmagnet==2 .and. response==0)then
+     !  if(magnet<10)then
+     !    format_magnet='f6.3)'
+     !  else if(magnet<100)then
+     !    format_magnet='f6.2)'
+     !  else
+     !    format_magnet='f6.1)'
+     !  end if
        if (prtfor==0) then
-         write(message, '(a,'//format_istep//',1p,g22.14,3es9.2,0p,'//format_magnet ) &
-          ' ETOT',istep,etotal,deltae,residm,res2,magnet
+         !write(message, '(a,'//format_istep//',1p,g22.14,3es9.2,0p,'//format_magnet ) &
+         write(message, '(a,'//format_istep//',1p,g22.14,5es10.3)' ) &
+          !' ETOT',istep,etotal,deltae,residm,res2,magnet
+          ' ETOT',istep,etotal,deltae,residm,res2,difmagsph,maxmagsph
        else
-         write(message, '(a,'//format_istep//',1p,g22.14,3es9.2,es8.1,es9.2,0p,'//format_magnet ) &
-          ' ETOT',istep,etotal,deltae,residm,res2,diffor,maxfor,magnet
+         write(message, '(a,'//format_istep//',1p,g22.14,7es10.3)' ) &
+          ' ETOT',istep,etotal,deltae,residm,res2,diffor,maxfor,difmagsph,maxmagsph
        end if
      else
        firstchar=' '
@@ -461,8 +492,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
             firstchar,'ETOT',istep,etotal,deltae,residm,res2,diffor,maxfor
          end if
        else
-         write(message, '(2a,'//format_istep//',1p,g22.14,1x,3es10.3)' ) &
-          firstchar,'ETOT',istep,etotal,deltae,residm,res2
+         if(tmagnet==2 .and. iscf>0 )then
+           write(message, '(2a,'//format_istep//',1p,g22.14,1x,5es10.3)' ) &
+            firstchar,'ETOT',istep,etotal,deltae,residm,res2,difmagsph,maxmagsph
+         else
+           write(message, '(2a,'//format_istep//',1p,g22.14,1x,3es10.3)' ) &
+            firstchar,'ETOT',istep,etotal,deltae,residm,res2
+         end if
        end if
      end if
      !if (etot_yaml_doc%stream%length /= 0) call etot_yaml_doc%add_tabular_line('  '//message(6:))
@@ -526,7 +562,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    end if
 
    if(response==0)then
-     write(message, '(a,1p,e15.7,a)'  ) ' scprqt: <Vxc>=',vxcavg,' hartree'
+     write(message, '(a,1p,e15.7,a)'  ) ' scprqt: <Vxc>=',vxcavg,' Hartree'
      call wrtout(std_out,message)
    end if
 
@@ -544,7 +580,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    if (present(electronpositron)) then
      if (associated(electronpositron)) then
        if (electronpositron%istep_scf==1) then
-         toldff_ok=0;tolrff_ok=0;toldfe_ok=0
+         toldff_ok=0;tolrff_ok=0;toldfe_ok=0; toldmag_ok=0;
        end if
      end if
    end if
@@ -562,7 +598,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 #endif
      ! Here treat the tolwfr criterion: if maximum residual is less than
      ! input tolwfr, stop steps (exit loop here)
-     if (ttolwfr == 1 .and. (ttolvrs+ttoldfe+ttoldff+ttolrff==0) .and. .not. noquit) then
+     if (ttolwfr == 1 .and. (ttolvrs+ttoldfe+ttoldff+ttolrff+ttoldmag==0) .and. .not. noquit) then
+     !if (ttolwfr == 1 .and. (ttolvrs+ttoldfe+ttoldff+ttolrff==0) .and. .not. noquit) then
        if (residm < tolwfr) then
          if (dtset%usewvl == 0) then
            write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a)' )ch10, &
@@ -576,6 +613,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        else
          use_dpfft = residm < tol7
        end if
+       if(present(rcpaw)) then
+         if (associated(rcpaw).and.residm < (tolwfr)**third) then
+           if(rcpaw%updatepaw(1)==0.and.rcpaw%updatepaw(2)==0) then
+             rcpaw%updatepaw(:)=istep
+           endif
+         endif
+       endif
      end if
 
      ! Here treat the toldff criterion: if maximum change of fcart is less than
@@ -597,6 +641,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          toldff_ok=0
          use_dpfft = diffor < tol6
        end if
+       if(present(rcpaw)) then
+         if (associated(rcpaw).and.diffor < (toldff)**third) then
+           if(rcpaw%updatepaw(1)==0.and.rcpaw%updatepaw(2)==0) then
+             rcpaw%updatepaw(:)=istep
+           endif
+         endif
+       endif
 
        if(toldff_ok>=2 .and..not.noquit)then
          if (ttolwfr==0) then
@@ -609,6 +660,43 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
            write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a,a,es11.3,a,es11.3)' ) ch10, &
             ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND forces are converged : ',ch10,&
             '  for the second time, max diff in force=',diffor,' < toldff=',toldff
+           call wrtout([std_out, ab_out], message)
+           quit=1
+        end if
+       end if
+     end if
+
+     ! HEREEEE
+     if (ttoldmag==1) then
+       if (istep==1) then
+         toldmag_ok=0
+       else if (difmagsph < toldmag) then
+         toldmag_ok=toldmag_ok+1
+         ! add warning for magnetizations which are 0 . Check below that the wave
+         ! functions are relatively converged as well
+         if (maxmagsph < tol8) then
+           write (message,'(3a)') ' toldmag criterion is satisfied, but your magnetizations are suspiciously low.', ch10,&
+            ' Check if the magnetizations are 0 : in that case you can not use the toldmag convergence criterion!'
+           ABI_WARNING(message)
+     ! HEREE  ??
+         end if
+         if (res2 > tol9) toldmag_ok=0
+       else
+         toldmag_ok=0
+         use_dpfft = difmagsph < tol6
+       end if
+
+       if(toldmag_ok>=2 .and..not.noquit)then
+         if (ttolwfr==0) then
+           write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
+            ' At SCF step',istep,', magnetizations are converged : ',ch10,&
+            '  for the second time, max diff in magnetization=',difmagsph,' < toldmag=',toldmag
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         else if (ttolwfr==1 .and. residm < tolwfr )then
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a,a,es11.3,a,es11.3)' ) ch10, &
+            ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND magnetizations are converged : ',ch10,&
+            '  for the second time, max diff in magnetization=',difmagsph,' < toldmag=',toldmag
            call wrtout([std_out, ab_out], message)
            quit=1
         end if
@@ -630,6 +718,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          tolrff_ok=0
          use_dpfft = diffor < tolrff * maxfor * five
        end if
+       if(present(rcpaw)) then
+         if (associated(rcpaw).and.(diffor < ( tolrff*maxfor)**third.or.(maxfor < tol6 .and. diffor < tol6))) then
+           if(rcpaw%updatepaw(1)==0.and.rcpaw%updatepaw(2)==0) then
+             rcpaw%updatepaw(:)=istep
+           endif
+         endif
+       endif
        if(tolrff_ok>=2 .and. (.not.noquit))then
          if (ttolwfr==0) then
            write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3,a)' ) ch10, &
@@ -660,6 +755,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          toldfe_ok=0
          use_dpfft = abs(deltae) < tol8
        end if
+       if(present(rcpaw)) then
+         if (associated(rcpaw).and.abs(deltae) < (toldfe)**third) then
+           if(rcpaw%updatepaw(1)==0.and.rcpaw%updatepaw(2)==0) then
+             rcpaw%updatepaw(:)=istep
+           endif
+         endif
+       endif
        ! Fock : tolwfr not taken into account
        if(usefock/=0.and.nnsclohf>=2) then
          if (toldfe_ok==2 .and. (.not.noquit))then
@@ -760,6 +862,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
            use_dpfft = res2 < tol5
          end if
        end if
+       if(present(rcpaw)) then
+         if (associated(rcpaw).and.res2 < (tolvrs)**third) then
+           if(rcpaw%updatepaw(1)==0.and.rcpaw%updatepaw(2)==0) then
+             rcpaw%updatepaw(:)=istep
+           endif
+         endif
+       endif
      end if
 
      if (quit==1.and.noquit) then
@@ -776,8 +885,18 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      ii = fftcore_set_mixprec(0)
    end if
 
+   ! Additional stuff for rcpaw
+   if(present(rcpaw)) then
+     if(associated(rcpaw)) then
+       if(rcpaw%updatepaw(2)>0.and.rcpaw%frocc) rcpaw%updateocc=rcpaw%updatepaw(2)
+       if(rcpaw%updatetnc==0)rcpaw%updatetnc=rcpaw%updatepaw(2)
+       if(quit==1.and.(rcpaw%istep<rcpaw%updatepaw(2).or.rcpaw%updatepaw(2)==0))quit=0
+     endif
+   endif
+
  case (3)
    ! If wavefunction convergence was not reached (for nstep>0) print a warning and return conv_retcode
+
    conv_retcode = 0
    if(nstep>0) then
      if (.not. converged()) then
@@ -832,6 +951,10 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          write(message, '(a,es11.3,a,es11.3,a)' ) &
          '  maximum force difference=',diffor,' exceeds toldff=',toldff,ch10
 
+       else if (ttoldmag==1) then
+         write(message, '(a,es11.3,a,es11.3,a)' ) &
+         '  maximum magnetization difference=',difmagsph,' exceeds toldmag=',toldmag,ch10
+
        else if (ttolrff==1) then
          write(message, '(a,es11.3,a,es11.3,a)' ) &
          '  maximum force difference=',diffor,' exceeds tolrff*maxfor=',tolrff*maxfor,ch10
@@ -874,6 +997,12 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
            write(ab_xml_out, "(A)") ' stop-criterion="toldff" />'
          else
            write(ab_xml_out, "(A)") ' stop-criterion="toldff+tolwfr" />'
+         end if
+       else if (ttoldmag == 1) then
+         if (ttolwfr==0) then
+           write(ab_xml_out, "(A)") ' stop-criterion="toldmag" />'
+         else
+           write(ab_xml_out, "(A)") ' stop-criterion="toldmag+tolwfr" />'
          end if
        else if (ttolrff == 1) then
          if (ttolwfr==0) then
@@ -994,6 +1123,9 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    end if
    if (ttoldff==1) then
      if (diffor > toldff) loc_conv=.false.
+   end if
+   if (ttoldmag==1) then
+     if (difmagsph > toldmag) loc_conv=.false.
    end if
    if (ttolrff==1) then
      if (diffor > tolrff*maxfor .and. maxfor > tol16) loc_conv=.false.
@@ -1485,12 +1617,12 @@ subroutine prtene(dtset,energies,iout,usepaw)
 !Local variables-------------------------------
 !scalars
  integer :: ipositron,optdc
- logical :: directE_avail,testdmft,write_entropy=.false.,write_totalxc=.false.
+ logical :: directE_avail,testdmft,write_entropy=.false.,write_totalxc=.false.,write_epaw_core=.false.
  real(dp) :: eent,enevalue,etotal,etotaldc,exc_semilocal,el_temp
  ! Do not modify the length of these strings
  character(len=14) :: eneName
  character(len=500) :: info,msg
- type(yamldoc_t) :: edoc,dc_edoc,sdoc,ftxcdoc
+ type(yamldoc_t) :: edoc,dc_edoc,pawcore_edoc,sdoc,ftxcdoc
 !arrays
  !character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
 
@@ -1502,7 +1634,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
 
  optdc=-1;ipositron=merge(0,2,dtset%positron==0)
  if (abs(energies%e_ewald)<1.e-15_dp.and.abs(energies%e_hartree)<1.e-15_dp) ipositron=1
- call energies_eval_eint(energies,dtset,usepaw,optdc,etotal,etotaldc)
+ call energies%eval_eint(dtset,usepaw,optdc,etotal,etotaldc)
 
  call entropy(dtset,energies)
  eent=energies%e_entropy
@@ -1533,8 +1665,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
    if (directE_avail) then
      info = 'Components of total free energy in Hartree'
      if(testdmft) info = 'Components of total energy in Hartree'
-     edoc = yamldoc_open('EnergyTerms', info=trim(adjustl(info)), &
-                         width=20, real_fmt='(es21.14)')
+     edoc = yamldoc_open('EnergyTerms', info=trim(adjustl(info)), width=20, real_fmt='(es21.14)')
      call edoc%add_real('kinetic', energies%e_kinetic)
      if(abs(energies%e_extfpmd)>tiny(zero)) call edoc%add_real('extfpmd',energies%e_extfpmd)
      if (ipositron/=1) then
@@ -1561,7 +1692,15 @@ subroutine prtene(dtset,energies,iout,usepaw)
          call edoc%add_real('non_local_psp+x', energies%e_nlpsp_vfock-energies%e_fock0)
        endif
      else
-       call edoc%add_real('spherical_terms', energies%e_paw)
+       if (dtset%use_rcpaw/=0) then
+         call edoc%add_real('PAW spherical_terms', energies%paw%epaw)
+         call edoc%add_real('PAW core', energies%paw%epaw_core)
+       else if (dtset%paw_add_core==1) then
+         call edoc%add_real('PAW spherical_terms', energies%paw%epaw-energies%paw%epaw_core)
+         call edoc%add_real('PAW core', energies%paw%epaw_core)
+       else
+         call edoc%add_real('PAW spherical_terms', energies%paw%epaw)
+       end if
        !!!XG20181025 Does not work (yet)...
        !!!if(abs(energies%e_nlpsp_vfock)>tol8)then
        !!!  write(msg, '(a,es21.14)' )'    Fock-type term  = ',energies%e_nlpsp_vfock
@@ -1569,9 +1708,6 @@ subroutine prtene(dtset,energies,iout,usepaw)
        !!!  write(msg, '(a,es21.14)' ) '    -frozen Fock en.= ',-energies%e_fock0
        !!!  call wrtout(iout,msg)
        !!!endif
-       if(abs(energies%e_cpaw)>tiny(0.0_dp)) then
-         call edoc%add_real('cpaw', energies%e_cpaw)
-       endif
      end if
      if (ANY(ABS(dtset%nucdipmom)>tol8)) then
        call edoc%add_real('nucl. magn. dipoles',energies%e_nucdip)
@@ -1657,10 +1793,15 @@ subroutine prtene(dtset,energies,iout,usepaw)
      call dc_edoc%add_real('electric_field', energies%e_elecfield)
    end if
    if (usepaw==1) then
-     call dc_edoc%add_real('spherical_terms', energies%e_pawdc)
-     if(abs(energies%e_cpawdc)>tiny(0.0_dp)) then
-       call dc_edoc%add_real('cpaw_dc', energies%e_cpawdc)
-     endif
+     if (dtset%use_rcpaw/=0) then
+       call dc_edoc%add_real('PAW spherical_terms', energies%paw%epaw_dc)
+       call dc_edoc%add_real('PAW core dc', energies%paw%epaw_core_dc)
+     else if (dtset%paw_add_core==1) then
+       call dc_edoc%add_real('PAW spherical_terms', energies%paw%epaw_dc-energies%paw%epaw_core)
+       call dc_edoc%add_real('PAW core', energies%paw%epaw_core)
+     else
+       call dc_edoc%add_real('PAW spherical_terms', energies%paw%epaw_dc)
+     end if
    end if
    if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
      call dc_edoc%add_real('VdWaals_dft_d', energies%e_vdw_dftd)
@@ -1706,13 +1847,12 @@ subroutine prtene(dtset,energies,iout,usepaw)
      call dc_edoc%add_real('electron_positron_interaction', energies%e_electronpositron)
    end if
 
-
    write(msg, '(a,es21.14)' ) '    >>>> Etotal (DC)= ',etotaldc
    !call wrtout(iout,msg)
    call dc_edoc%add_real('total_energy_dc', etotaldc)
  end if
 
-!======= Additional printing for compatibility  ==========
+!======= Additional printing ==========
 
  if (usepaw==0.and.optdc==0) then
    call edoc%add_real('total_energy_eV', etotal*Ha_eV)
@@ -1747,6 +1887,22 @@ subroutine prtene(dtset,energies,iout,usepaw)
    call edoc%add_real('monopole_correction_eV', energies%e_monopole*Ha_eV)
  end if
 
+!Print total energy including PAW core contribution
+ if (usepaw==1) then
+   if (dtset%paw_add_core==0.and.dtset%use_rcpaw==0) then
+     if (abs(energies%paw%epaw_core)>tiny(zero).or.abs(energies%paw%epaw_core_dc)>tiny(zero)) then
+       write_epaw_core=.true.
+       info = 'Components of total free energy, including PAW core contributions'
+       pawcore_edoc = yamldoc_open('EnergyTermsWithPAWCore', info=trim(adjustl(info)), &
+                                   width=20, real_fmt='(es21.14)')
+       call pawcore_edoc%add_real('Total energy', etotal+energies%paw%epaw_core)
+       if(optdc>=1) call pawcore_edoc%add_real('Total energy DC', etotaldc+energies%paw%epaw_core)
+       call pawcore_edoc%add_real('Total energy (eV)', (etotal+energies%paw%epaw_core)*Ha_eV)
+       if(optdc>=1) call pawcore_edoc%add_real('Total energy DC (eV)', (etotaldc+energies%paw%epaw_core)*Ha_eV)
+     end if
+   end if
+ end if
+
 !======== In case other sources of entropies than the non-interacting entropy =========
 !============= of the Kohn-Sham states come into play, print the details ==============
  if(dtset%occopt>=3.and.dtset%occopt<=8) then
@@ -1756,7 +1912,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      & width=20, real_fmt="(es21.14)") ! in kB units
      call sdoc%add_real('noninteracting',energies%entropy_ks) ! Noninteracting entropy = Entropy of the Kohn-Sham states
      if(abs(energies%entropy_xc)>tiny(zero)) call sdoc%add_real('xc',energies%entropy_xc)
-     if(usepaw==1.and.abs(energies%entropy_paw)>tiny(zero)) call sdoc%add_real('spherical_terms',energies%entropy_paw)
+     if(usepaw==1.and.abs(energies%paw%entropy_paw)>tiny(zero)) call sdoc%add_real('spherical_terms',energies%paw%entropy_paw)
      if(abs(energies%entropy_extfpmd)>tiny(zero)) call sdoc%add_real('extfpmd',energies%entropy_extfpmd)
      if(abs(energies%entropy_imp)>tiny(zero)) call sdoc%add_real('impurity',energies%entropy_imp)
      call sdoc%add_real('total_entropy',energies%entropy) ! Total entropy energy
@@ -1776,10 +1932,10 @@ subroutine prtene(dtset,energies,iout,usepaw)
        ! For now, only finite-temperature xc functionals contribute to entropy_paw.
        ! We may introduce 'energies%entropy_pawxc' in the future.
        call ftxcdoc%add_real('xc',energies%e_xc)
-       call ftxcdoc%add_real('spherical_terms_xc',energies%e_pawxc)
-       call ftxcdoc%add_real('internal_xc',energies%e_xc+energies%e_pawxc)
-       call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*(energies%entropy_xc+energies%entropy_paw))
-       call ftxcdoc%add_real('free_xc',energies%e_xc+energies%e_pawxc-el_temp*(energies%entropy_xc+energies%entropy_paw))
+       call ftxcdoc%add_real('spherical_terms_xc',energies%paw%epaw_xc)
+       call ftxcdoc%add_real('internal_xc',energies%e_xc+energies%paw%epaw_xc)
+       call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*(energies%entropy_xc+energies%paw%entropy_paw))
+       call ftxcdoc%add_real('free_xc',energies%e_xc+energies%paw%epaw_xc-el_temp*(energies%entropy_xc+energies%paw%entropy_paw))
      else
        call ftxcdoc%add_real('internal_xc',energies%e_xc)
        call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*energies%entropy_xc)
@@ -1788,9 +1944,10 @@ subroutine prtene(dtset,energies,iout,usepaw)
    end if
  end if
 
-!Write components of total energies in Yaml format.
+ ! Write components of total energies in Yaml format.
  call edoc%write_and_free(iout)
  if(optdc >= 1) call dc_edoc%write_and_free(iout)
+ if (write_epaw_core) call pawcore_edoc%write_and_free(iout)
  if(write_entropy) call sdoc%write_and_free(iout)
  if(write_totalxc) call ftxcdoc%write_and_free(iout)
 
@@ -2120,32 +2277,36 @@ end function crystal_from_file
 !!  wfoptalg         :  Which diago algorithm if used:
 !!                                         -1: none (GEMM nonlop isn't used for diago)
 !!                                        111: CHEBFI2
+!!                                        112: SLICE
 !!                                        114: LOBPCG2
 !!                                      other: Only account for getghc
 !!  gpu_option       :  If GPU is enabled (expected to be ABI_GPU_OPENMP for now)
 !!  blocksize        :  if higher than 0, only print memory estimation and exit
 !!
 !! OUTPUT
+!!  nfft_blocks      :  Number of blocks fourwf computation will be divided into
 !!  blocksize        :  Size of MPI tasks blocks to be used in GEMM nonlop
 !!  nblocks          :  Number of MPI blocks to be used in GEMM nonlop
 !!
 !! SOURCE
 subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspden,paral_kgb,&
 &                                           npband,optfor,optstr,wfoptalg,gpu_option,use_distrib,&
-&                                           blocksize,nblocks,warn_on_fail)
+&                                           blocksize,nblocks,nfft_blocks,warn_on_fail)
 
    integer,intent(in)     :: ikpt,ndat,nband,nspinor,nspden,paral_kgb,npband,optfor,optstr,wfoptalg,gpu_option
    logical,intent(in)     :: use_distrib
    logical,intent(in),optional  :: warn_on_fail
    type(gs_hamiltonian_type),intent(in) :: gs_hamk
-   integer,intent(inout)  :: blocksize
+   integer,intent(inout)  :: blocksize,nfft_blocks
    integer,intent(out)    :: nblocks
 
    integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem,gs_ham_smem,updrho_wmem,prep_nonlop_wmem
-   integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem
-   integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices,npw,npw_fft,signs
-   logical  :: print_and_exit,l_warn_on_fail
+   integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem,fourwf_smem,fourwf_wmem,fourwf_mem,hegvd_mem
+   integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices,npw,npw_fft,signs,nprojs,itypat
+   integer, target :: t_fft(3)
+   logical  :: print_and_exit,l_warn_on_fail,fixed_blocksize,fixed_fourwf_blocks
    integer(kind=c_size_t) :: chebfiMem(2),lobpcgMem(2)
+   character(len=500) :: message
 
 ! *********************************************************************
 
@@ -2169,7 +2330,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
 
    if(gpu_option /= ABI_GPU_OPENMP) then
      ! No distribution is attempted outside of OpenMP GPU. User is already warned in chkinp
-     blocksize=1; nblocks=0;
+     blocksize=1; nblocks=0; nfft_blocks=1
      return
    end if
 
@@ -2192,9 +2353,55 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    signs=2
    !wfoptalg==-1 means we're in forstr
    if(wfoptalg==-1) signs=1
+   t_fft(1) = gs_hamk%ngfft(3);
+   t_fft(2) = gs_hamk%ngfft(2);
+   t_fft(3) = gs_hamk%ngfft(1);
+   nprojs=0
+   do itypat=1,gs_hamk%ntypat
+     nprojs = nprojs + count(gs_hamk%indlmn(3,:,itypat)>0)*gs_hamk%nattyp(itypat)
+   end do
 
-   nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, 1, ndgxdt, use_distrib)
-   getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat_try)
+   nonlop_smem=0; invovl_smem=0; getghc_wmem=0; invovl_wmem=0; nonlop_wmem=0; gs_ham_smem=0
+   updrho_wmem=0; prep_nonlop_wmem=0; sum_mem=0; sum_bandpp_mem=0; sum_other_mem=0;
+   localMem=0; fourwf_smem=0; fourwf_wmem=0; fourwf_mem=0; hegvd_mem=0
+   chebfiMem(:)=0; lobpcgMem(:)=0
+
+   !HEGVD work memory estimate.
+   ! Since *_bufferSize routines from (cu/hip)SOLVER require buffer
+   ! to be provided, I measeured the work size given by those routines
+   ! on many big cases and guess an approximate value.
+   ! hipSolver is eager than cuSolver, hence the extra multiplier
+
+   if(wfoptalg==111 .or. wfoptalg==11) then
+     hegvd_mem = int(dp, c_size_t) * nband * nband * 3
+   else if(wfoptalg==114 .or. wfoptalg==14) then
+     hegvd_mem = int(dp, c_size_t) * (ndat*3) * (ndat*3) * 3
+   end if
+#ifdef HAVE_GPU_CUDA
+   if(space == SPACE_C) hegvd_mem = hegvd_mem * 2
+#endif
+#ifdef HAVE_GPU_HIP
+   if(space == SPACE_C) hegvd_mem = hegvd_mem * 3
+   ! ROCm 7 memory usage was measured to be more or less
+   ! on par with CUDA but ROCm 6 was indeed ~9 times higher.
+   ! For now, we can't drop ROCm 6 so we keep this workaround.
+   if(gpu_get_lib_version_major() < 7) then
+     hegvd_mem = hegvd_mem * 9
+   end if
+#endif
+
+   if(wfoptalg>=0) then
+#ifdef HAVE_GPU
+     call gpu_fft_get_estimate_work_size(3, c_loc(t_fft), FFT_Z2Z, ndat, fourwf_smem);
+#endif
+   end if
+
+   nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, max(1,blocksize), ndgxdt, use_distrib)
+   getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat, max(nfft_blocks,1))
+   fourwf_wmem  = int(2, c_size_t) * dp * gs_hamk%n4 * gs_hamk%n5 * gs_hamk%n6 &
+   &             * (ndat/max(nfft_blocks,1) + modulo(ndat,max(nfft_blocks,1)))
+   fourwf_mem  = fourwf_wmem+fourwf_smem
+
    nonlop_wmem = gemm_nonlop_ompgpu_work_mem(gs_hamk%istwf_k, ndat, ndgxdt, npw_fft,&
    &               gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, gs_hamk%lmnmax, signs, wfoptalg)
    gs_ham_smem = int(2,c_size_t)*npw_fft*size(gs_hamk%ffnl_k,dim=3)*size(gs_hamk%ffnl_k,dim=4) + int(3,c_size_t)*npw_fft
@@ -2210,138 +2417,314 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    prep_nonlop_wmem = 0
    if(paral_kgb==1) prep_nonlop_wmem = int(2,c_size_t)*npw_fft*ndat*nspinor*3*dp ! cwavef_alltoall{1,2} + cwavef
 
-   if(wfoptalg==111) then
+   if(wfoptalg==111 .or. wfoptalg==112) then
      chebfiMem = chebfi_memInfo(nband,icplx*npw*nspinor,space,paral_kgb,icplx*npw*nspinor,blockdim)
      invovl_smem = invovl_ompgpu_static_mem(gs_hamk)
-     invovl_wmem = invovl_ompgpu_work_mem(gs_hamk, ndat_try)
+     invovl_wmem = invovl_ompgpu_work_mem(gs_hamk, ndat)
    end if
    if(wfoptalg==114) then
      lobpcgMem = lobpcg_memInfo(nband,icplx*npw*nspinor,space,paral_kgb,blockdim)
    end if
    localMem  = (int(2,c_size_t)*npw*nspinor*nband+3*nband)*kind(1.d0) ! cg, eig, occ, resid in chebfiwf/lobpcgwf
 
+   ! Check if arrays outside of GEMM nonlop projectors and ompgpu_fourwf fit in GPU memory
+   sum_other_mem    = gs_ham_smem
+
+   if(wfoptalg>=0) then
+     sum_other_mem    = sum_other_mem+updrho_wmem+prep_nonlop_wmem
+   else
+     sum_other_mem    = sum_other_mem+nonlop_wmem+prep_nonlop_wmem
+   end if
+
+   if(wfoptalg==111) then
+     sum_other_mem    = sum_other_mem  + invovl_wmem+invovl_smem+chebfiMem(1)+chebfiMem(2)+localMem
+   end if
+
+   if(wfoptalg==114) then
+     sum_other_mem    = sum_other_mem  + lobpcgMem(1)+lobpcgMem(2)+localMem
+   end if
+
    print_and_exit=.false.
+   fixed_blocksize=.false.
+   fixed_fourwf_blocks=.false.
    nblocks=0
-   if(blocksize > 1) then
+   if(blocksize > 0 .and. nfft_blocks > 0) then
      nblocks=max(1,nprocs/blocksize)
      print_and_exit=.true.
    else
-     blocksize=1
-     write(std_out,*) "Setting GEMM nonlop block number...", new_line('A')
+     if(blocksize > 0) then
+       nblocks=max(1,nprocs/blocksize)
+       fixed_blocksize=.true.
+     else
+       blocksize=1
+       write(std_out,*) "Setting GEMM nonlop block number...", new_line('A')
+     end if
+
+     if(nfft_blocks > 0) then
+       fixed_fourwf_blocks=.true.
+     else
+       nfft_blocks=1
+       write(std_out,*) "Setting FFT blocks number...", new_line('A')
+     end if
    end if
 
-   max_slices=max(100,nprocs*2); if(use_distrib) max_slices=nprocs
-   ! How the number of blocks is decided:
-   ! We try to divide bandpp with dividers from 1 to max_slices (#MPI tasks if in distributed mode, magical value otherwise)
-   ! If we fail, that means test case is too fat for given hardware, and that's it
-   do i=1,nprocs
+   max_slices=max(100,nprocs*2); if(sum_other_mem > free_mem) max_slices=1
+   ! How we try to optimize GPU memory consumption:
+   ! We work on two variables :
+   !    - blocksize : for slicing GEMM nonlop projectors arrays
+   !    - nfft_blocks : for slicing ompgpu_fourwf work buffer
+   ! At each iteration, we check which routine from GEMM nonlop or ompgpu_fourwf
+   ! have the higher memory requirement and increase related variable.
+   !
+   ! We arbitraly give at least 100 tries to improve GPU memory consumption before eventually
+   ! ruling out that use case is too big to run with available GPU memory and abort.
+   !
+   ! User may hard set slicing for both fourwf and GEMM nonlop, in which case the code will
+   ! warn the user about possible GPU memory overpassing instead of aborting.
+   !
+   ! However, if arrays from other parts of the code already have higher memory requirements,
+   ! we fail anyway and advise the user to increase nblock_lobpcg or run on more nodes.
+   do i=1,max_slices
 
-     ! Gemm nonlop static memory requirement is higher, split here
-     if(i>1 .and. .not. print_and_exit) blocksize = blocksize + 1
-     if(modulo(nprocs,blocksize)/=0 .and. use_distrib) cycle
-     !FIXME : Skipping uneven blocksize <=5 if using MPI distrib, as the amount of GPU per node is even usually
-     !For example, with 3 nodes of 4 GPU, we don't want to have a blocksize of 3 as
-     !it would generate 4 comms-block, with 2 inter-node comms.
-     !While using a blocksize of 4 would generate 3 comms, one for each node, leading to less MPI comms
-     if(i>1 .and. modulo(blocksize,2)/=0 .and. use_distrib .and. .not. print_and_exit) cycle
-     if(i>1) nblocks=nprocs/blocksize
+     ! First iteration or user provided parameters to split fourwf and GEMM nonlop
+     ! Just measure
+     if(i==1 .or. print_and_exit) then
+       if(wfoptalg>=0) then
+#ifdef HAVE_GPU
+         call gpu_fft_get_estimate_work_size(3, c_loc(t_fft), FFT_Z2Z, ndat/nfft_blocks, fourwf_smem);
+#endif
+         getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat, nfft_blocks)
+         fourwf_wmem  = int(2, c_size_t) * dp * gs_hamk%n4 * gs_hamk%n5 * gs_hamk%n6 &
+         &             * (ndat/nfft_blocks + modulo(ndat,nfft_blocks))
+         fourwf_mem  = fourwf_wmem + fourwf_smem
+       end if
+       nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft,gs_hamk%indlmn,gs_hamk%nattyp,&
+       &             gs_hamk%ntypat,blocksize,ndgxdt,use_distrib)
+     else
+       ! Raise fourwf slicing if :
+       ! - GEMM nonlop block has been set by user
+       ! or
+       ! - fourwf memory requirements are higher
+       ! - fourwf slicing wasn't set by user
+       ! - fourwf is still sliceable
+       !
+       ! Raise GEMM nonlop blocks otherwise
+       if(fixed_blocksize .or. &
+       &    (wfoptalg >= 0 &
+       &     .and. nonlop_smem < fourwf_mem  &
+       &     .and. fourwf_mem >= getghc_wmem &
+       &     .and. .not. fixed_fourwf_blocks &
+       &     .and. nfft_blocks < ndat &
+       &     .and. ndat_try > 1)) then
+         ! Fourwf work memory requirement is higher, split here
+         if(nfft_blocks == ndat) cycle ! Can't split more than ndat
 
-     nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,blocksize, ndgxdt, use_distrib)
+         if(i>1 .and. .not. print_and_exit) then
+           do while(ndat_try <= (ndat/nfft_blocks + modulo(ndat,nfft_blocks)))
+             nfft_blocks=nfft_blocks+1
+           end do
+           ndat_try = (ndat/nfft_blocks + modulo(ndat,nfft_blocks))
+         end if
+#ifdef HAVE_GPU
+         call gpu_fft_get_estimate_work_size(3, c_loc(t_fft), FFT_Z2Z, ndat/nfft_blocks, fourwf_smem);
+#endif
+         getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat, nfft_blocks)
+         fourwf_wmem  = int(2, c_size_t) * dp * gs_hamk%n4 * gs_hamk%n5 * gs_hamk%n6 &
+         &             * (ndat/nfft_blocks + modulo(ndat,nfft_blocks))
+         fourwf_mem  = fourwf_wmem + fourwf_smem
+       else
+         ! Gemm nonlop static memory requirement is higher, split here
+         if(i>1 .and. .not. print_and_exit) blocksize = blocksize + 1
+         if(modulo(nprocs,blocksize)/=0 .and. use_distrib) cycle
+         if(nprocs < blocksize .and. use_distrib) cycle
+         !FIXME : Skipping uneven blocksize <=5 if using MPI distrib, as the amount of GPU per node is even usually
+         !For example, with 3 nodes of 4 GPU, we don't want to have a blocksize of 3 as
+         !it would generate 4 comms-block, with 2 inter-node comms.
+         !While using a blocksize of 4 would generate 3 comms, one for each node, leading to less MPI comms
+         if(i>1 .and. modulo(blocksize,2)/=0 .and. use_distrib .and. .not. print_and_exit) cycle
+         if(i>1) nblocks=nprocs/blocksize
+
+         nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft,gs_hamk%indlmn,gs_hamk%nattyp,&
+         &             gs_hamk%ntypat,blocksize,ndgxdt,use_distrib)
+       end if
+     end if
 
      ! Bandpp~ndat sized buffer memory requirements are higher, split there
      sum_mem          = nonlop_smem + gs_ham_smem
      sum_bandpp_mem   = getghc_wmem
-     sum_other_mem    = nonlop_smem + gs_ham_smem
 
      if(wfoptalg>=0) then
-       sum_mem          = sum_mem+getghc_wmem+updrho_wmem+prep_nonlop_wmem
+       sum_mem          = sum_mem+getghc_wmem+updrho_wmem+prep_nonlop_wmem+fourwf_smem+hegvd_mem
      else
        sum_mem          = sum_mem+nonlop_wmem+prep_nonlop_wmem
      end if
 
-     if(wfoptalg==111) then
+     if(wfoptalg==111 .or. wfoptalg==112) then
        sum_mem          = sum_mem        + invovl_smem+invovl_wmem+chebfiMem(1)+chebfiMem(2)+localMem
        sum_bandpp_mem   = sum_bandpp_mem + invovl_wmem
-       sum_other_mem    = sum_other_mem  + invovl_smem+chebfiMem(1)+chebfiMem(2)+localMem
      end if
 
      if(wfoptalg==114) then
        sum_mem          = sum_mem        + lobpcgMem(1)+lobpcgMem(2)+localMem
-       sum_other_mem    = sum_other_mem  + lobpcgMem(1)+lobpcgMem(2)+localMem
      end if
 
      if(sum_mem < free_mem .or. print_and_exit) exit
 
    end do
-   if(blocksize==1) then
-     write(std_out,'(A,A,I3,A)') "GPU memory consumption estimate without ",&
-     &                        "distribution in GEMM nonlop for K-point ",ikpt,":"
-   else if(use_distrib) then
-     write(std_out,'(A,I3,A,I3,A,I3,A)') "GPU memory consumption estimate using ",&
-     &                        nblocks, " blocks of ", blocksize,&
-     &                        " MPI tasks in GEMM nonlop for K-point ",ikpt,":"
-   else
-     write(std_out,'(A,I3,A,I3,A)') "GPU memory consumption estimate using ",&
-       &                        blocksize, " slices in GEMM nonlop for K-point ",ikpt,":"
-   end if
-   write(std_out,'(A,F10.3,1x,A)') " Available memory                        : ", real(free_mem)/(1024*1024), "MiB"
-   write(std_out,*) "Memory requirements per MPI task (OpenMP GPU)"
-   write(std_out,*) "---------------------------------------------------------"
-   write(std_out,*) "GEMM nonlop projectors, gouverned by blocking"
-   write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop_ompgpu (projectors)       : ",  real(nonlop_smem,dp)/(1024*1024), "MiB"
 
+   ! Corner case : not enough GPU memory in forstrnps for forces and stress computation.
+   ! By default, forces and stress are computed in one gemm_nonlop call using choice==23
+   ! This translates to have various arrays sized by ndgxdt == 9 (6 for stress, 3 for forces)
+   ! To try circumventing the lack of GPU memory in that case, we may compute stress and forces
+   ! separately so arrays will be sized after ndgxdt=6 at most instead.
+   if(sum_mem > free_mem .and. optfor > 0 .and. optstr > 0 .and. wfoptalg < 0) then
+     ndgxdt = 6 ! number of derivatives for stress
+     nonlop_wmem = gemm_nonlop_ompgpu_work_mem(gs_hamk%istwf_k, ndat, ndgxdt, npw_fft,&
+     &               gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, gs_hamk%lmnmax, signs, wfoptalg)
+     blocksize=1
+     ! Same loop as above, simplified to forstrnps use case
+     do i=1,nprocs
+       ! Gemm nonlop static memory requirement is higher, split here
+       if(i>1 .and. .not. print_and_exit) blocksize = blocksize + 1
+       if(modulo(nprocs,blocksize)/=0 .and. use_distrib) cycle
+       !FIXME : Skipping uneven blocksize <=5 if using MPI distrib, as the amount of GPU per node is even usually
+       !For example, with 3 nodes of 4 GPU, we don't want to have a blocksize of 3 as
+       !it would generate 4 comms-block, with 2 inter-node comms.
+       !While using a blocksize of 4 would generate 3 comms, one for each node, leading to less MPI comms
+       if(i>1 .and. modulo(blocksize,2)/=0 .and. use_distrib .and. .not. print_and_exit) cycle
+       if(i>1) nblocks=nprocs/blocksize
 
-   write(std_out,*) "Static buffers, computed once and permanently on card"
-   ! CHEBFI2
-   if(wfoptalg==111) then
-     write(std_out,'(A,F10.3,1x,A)') "   invovl_ompgpu (mkinvovl)              : ",  real(invovl_smem,dp)/(1024*1024), "MiB"
-     write(std_out,'(A,F10.3,1x,A)') "   chebfi2                               : ",    real(chebfiMem(1))/(1024*1024), "MiB"
-   end if
+       nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,&
+       &                                           blocksize,ndgxdt, use_distrib)
+       sum_mem     = nonlop_smem + gs_ham_smem + nonlop_wmem + prep_nonlop_wmem
 
-   ! LOBPCG2
-   if(wfoptalg==114) then
-     write(std_out,'(A,F10.3,1x,A)') "   lobpcg2                               : ",    real(lobpcgMem(1))/(1024*1024), "MiB"
-   end if
-
-   write(std_out,'(A,F10.3,1x,A)') "   hamiltonian arrays                    : ",      real(gs_ham_smem)/(1024*1024), "MiB"
-
-   write(std_out,*) "Work buffers (sized after bandpp or nblock_lobpcg)"
-
-   ! getghc (any diago algorithm)
-   if(wfoptalg>=0) then
-     write(std_out,'(A,F10.3,1x,A)') "   getghc (inc. fourwf+gemm_nonlop)      : ",  real(getghc_wmem,dp)/(1024*1024), "MiB"
-     write(std_out,'(A,F10.3,1x,A)') "   mkrho~vtowfk_extra             )      : ",  real(updrho_wmem,dp)/(1024*1024), "MiB"
-   else
-     write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop                           : ",  real(nonlop_wmem,dp)/(1024*1024), "MiB"
-   end if
-   if(paral_kgb==1) then
-     write(std_out,'(A,F10.3,1x,A)') "   prep_nonlop                           : ",  real(prep_nonlop_wmem,dp)/(1024*1024), "MiB"
+       if(sum_mem < free_mem) then
+         gemm_nonlop_split_choice23 = .true.
+         exit
+       end if
+     end do
    end if
 
-   ! CHEBFI2
-   if(wfoptalg==111) then
-     write(std_out,'(A,F10.3,1x,A)') "   invovl                                : ",  real(invovl_wmem,dp)/(1024*1024), "MiB"
-     write(std_out,'(A,F10.3,1x,A)') "   chebfi2 (RR buffers)                  : ",    real(chebfiMem(2))/(1024*1024), "MiB"
-     write(std_out,'(A,F10.3,1x,A)') "   chebfiwf (cg,resid,eig)               : ",        real(localMem)/(1024*1024), "MiB"
-   end if
-
-   ! LOBPCG2
-   if(wfoptalg==114) then
-     write(std_out,'(A,F10.3,1x,A)') "   lobpcg2 (RR buffers)                  : ",    real(lobpcgMem(2))/(1024*1024), "MiB"
-     write(std_out,'(A,F10.3,1x,A)') "   lobpcgwf (cg,resid,eig)               : ",        real(localMem)/(1024*1024), "MiB"
-   end if
-
-   write(std_out,*) "---------------------------------------------------------"
-   write(std_out,'(A,F10.3,1x,A)') "Sum                                      : ", real(sum_mem)/(1024*1024), "MiB"
-   write(std_out,'(A)') new_line('A')
-   flush(std_out)
-   if(sum_mem > free_mem) then
-     if(l_warn_on_fail) then
-       ABI_WARNING("It seems the test case you're trying to run is too big to run with given GPU resources !")
+   ! Quickfix : sometimes, we may run out of GPU memory when computing forces/stresses because of fragmentation.
+   ! We try to reduce the risk by forcing even more blocking:
+   if((wfoptalg < 0 .and. (optfor > 0 .or. optstr > 0)) .and. sum_mem > 0.95*free_mem) then
+     if(blocksize > 5) then
+       if(.not. gemm_nonlop_split_choice23) then
+         gemm_nonlop_split_choice23 = .true.
+         ndgxdt=6
+       else
+         blocksize=blocksize*1.5
+         blocksize=min(nprojs,blocksize)
+       end if
      else
-       ABI_ERROR("It seems the test case you're trying to run is too big to run with given GPU resources !")
+       blocksize=blocksize*1.5
+     end if
+
+     nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,&
+     &                                           blocksize,ndgxdt,use_distrib)
+     sum_mem     = nonlop_smem + gs_ham_smem + nonlop_wmem + prep_nonlop_wmem
+   end if
+
+   write(std_out,'(A,I3,A)') "GPU memory consumption estimate per MPI task for K-point ",ikpt,":"
+   if(blocksize>1) then
+     if(use_distrib) then
+       write(std_out,'(A,I3,A,I3,A)') "MPI distribution of GEMM nonlop projectors using ",&
+       &                        nblocks, " blocks of ", blocksize, " MPI tasks."
+     else
+       write(std_out,'(A,I3,A)') "Local slicing of GEMM nonlop projectors using ",&
+         &                        blocksize, " blocks."
      end if
    end if
+   if(nfft_blocks>1 .and. wfoptalg>=0) then
+     write(std_out,'(A,I3,A)') "Local slicing of FFT work array using ",&
+       &                        nfft_blocks, " blocks."
+   end if
+   write(std_out,'(A,F10.3,1x,A)') " Considered available memory             : ", real(free_mem)/(1024*1024), "MiB"
+   write(std_out,'(A)')
+   write(std_out,'(A)') "|                 Buffers gouverned by blocking/slicing                |"
+   write(std_out,'(A)') "|:--------------------------|---------:|-------------:|---------------:|"
+   write(std_out,'(A,I4,A,F10.2,1x,A)') "|  gemm_nonlop_projectors   | ", blocksize, " blk |  npw,*natom* | ",  real(nonlop_smem,dp)/(1024*1024), "MiB |"
+   if(wfoptalg>=0) then
+     write(std_out,'(A,I4,A,F10.2,1x,A)') "|  fourwf (fofr work array) | ", nfft_blocks, " blk | npw,*bandpp* | ",  real(fourwf_wmem,dp)/(1024*1024), "MiB |"
+     write(std_out,'(A,F10.2,1x,A)') "|  xFFT~internal buffers    |       NA |           NA | ",  real(fourwf_smem,dp)/(1024*1024), "MiB |"
+   end if
+
+   if(sum_other_mem > free_mem) then
+     write(std_out,'(A)')
+     write(std_out,'(A)') "/!\ No slicing attempted as other arrays are too big to fit"
+     write(std_out,'(A)')
+   end if
+
+   write(std_out,'(A)')
+   write(std_out,'(A)') "|   Static buffers, computed once and permanently on card    |"
+   write(std_out,'(A)') "|:-------------------------|--------------:|----------------:|"
+   ! CHEBFI2 or SLICE
+   if(wfoptalg==111 .or. wfoptalg==112) then
+     write(std_out,'(A,F10.2,1x,A)') "|  invovl (mkinvovl)       |        natom  |  ",  real(invovl_smem,dp)/(1024*1024), "MiB |"
+     write(std_out,'(A,F10.2,1x,A)') "|  chebfi2                 |          npw  |  ",    real(chebfiMem(1))/(1024*1024), "MiB |"
+   end if
+
+   ! LOBPCG2
+   if(wfoptalg==114) then
+     write(std_out,'(A,F10.2,1x,A)') "|  lobpcg2                 |          npw  |  ",    real(lobpcgMem(1))/(1024*1024), "MiB |"
+   end if
+
+   write(std_out,'(A,F10.2,1x,A)') "|  hamiltonian arrays      |          npw  |  ",      real(gs_ham_smem)/(1024*1024), "MiB |"
+
+   write(std_out,'(A)')
+   write(std_out,'(A)') "|  Work buffers (mostly sized after bandpp or nblock_lobpcg) |"
+   write(std_out,'(A)') "|:-------------------------|--------------:|----------------:|"
+   ! getghc (any diago algorithm)
+   if(wfoptalg>=0) then
+     if(getghc_wmem /= fourwf_wmem) then
+       write(std_out,'(A,F10.2,1x,A)') "|  gemm_nonlop             |       bandpp  |  ",  real(getghc_wmem,dp)/(1024*1024), "MiB |"
+     end if
+     write(std_out,'(A,F10.2,1x,A)') "|  mkrho~vtowfk_extra      |   npw,bandpp  |  ",  real(updrho_wmem,dp)/(1024*1024), "MiB |"
+     write(std_out,'(A,F10.2,1x,A)') "|  hegvd                   |       bandpp  |  ",  real(hegvd_mem,dp)/(1024*1024), "MiB |"
+   else
+     write(std_out,'(A,F10.2,1x,A)') "|  gemm_nonlop             | natom,bandpp  |  ",  real(nonlop_wmem,dp)/(1024*1024), "MiB |"
+   end if
+   if(paral_kgb==1) then
+     write(std_out,'(A,F10.2,1x,A)') "|  prep_nonlop             |   npw,bandpp  |  ",  real(prep_nonlop_wmem,dp)/(1024*1024), "MiB |"
+   end if
+
+   ! CHEBFI2 or SLICE
+   if(wfoptalg==111 .or. wfoptalg==112) then
+     write(std_out,'(A,F10.2,1x,A)') "|  invovl                  | natom,bandpp  |  ",  real(invovl_wmem,dp)/(1024*1024), "MiB |"
+     write(std_out,'(A,F10.2,1x,A)') "|  chebfi2 (RR buffers)    |        nband  |  ",    real(chebfiMem(2))/(1024*1024), "MiB |"
+     write(std_out,'(A,F10.2,1x,A)') "|  chebfiwf (cg,resid,eig) |    npw,nband  |  ",        real(localMem)/(1024*1024), "MiB |"
+   end if
+
+   ! LOBPCG2
+   if(wfoptalg==114) then
+     write(std_out,'(A,F10.2,1x,A)') "|  lobpcg2 (RR buffers)    |       bandpp  |  ",    real(lobpcgMem(2))/(1024*1024), "MiB |"
+     write(std_out,'(A,F10.2,1x,A)') "|  lobpcgwf (cg,resid,eig) |    npw,nband  |  ",        real(localMem)/(1024*1024), "MiB |"
+   end if
+
+   write(std_out,'(A)')
+   if(sum_other_mem > free_mem) then
+     write(std_out,'(A,F10.2,1x,A)') "Sum                                      : ", real(sum_other_mem)/(1024*1024), "MiB"
+   else
+     write(std_out,'(A,F10.2,1x,A)') "Sum                                      : ", real(sum_mem)/(1024*1024), "MiB"
+   end if
+   write(std_out,'(A)')
+   flush(std_out)
+   if(rank==0) then
+     if(sum_other_mem > free_mem) then
+       write(message,'(3a)') &
+         &   '  Your case is too big to fit in GPU memory regardless of possible array optimizations in fourwf and GEMM nonlop.',ch10,&
+         &   '  Action : run on more nodes and/or increase nblock_lobpcg if using LOBPCG.'
+       ABI_ERROR(message)
+     end if
+     if(sum_mem > free_mem) then
+       if(l_warn_on_fail) then
+         ABI_WARNING("It seems the test case you're trying to run is too big to run with given GPU resources !")
+       else
+         ABI_ERROR("It seems the test case you're trying to run is too big to run with given GPU resources !")
+       end if
+     end if
+   end if
+   !call xmpi_barrier(xmpi_world)
 
  end subroutine get_gemm_nonlop_ompgpu_blocksize
 !!***

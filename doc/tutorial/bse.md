@@ -11,7 +11,7 @@ including excitonic effects within the Bethe-Salpeter (BS) approach.
 Crystalline silicon is used as test case. A brief description of the formalism
 can be found in the [[theory:bse|Bether-Salpeter notes]].
 
-The user should be familiarized with the four basic tutorials of ABINIT and the [first GW tutorial](/tutorial/gw1).
+The user should be familiarized with the four basic tutorials of ABINIT and the [first GW tutorial](../tutorial/gw1.md).
 
 Visualisation tools are NOT covered in this tutorial.
 Powerful visualisation procedures have been developed in the Abipy context,
@@ -30,7 +30,7 @@ for the other tutorials. Why not Work_bs?
 Copy the input files *\$ABI_TESTS/tutorial/Input/tbs_\*.abi*.
 in the working directory *Work_bs*.
 
-Make sure that the Si.psp8 pseudopotential needed for running the tutorial is placed under 
+Make sure that the Si.psp8 pseudopotential needed for running the tutorial is placed under
 *\$ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8*.
 
 Now run immediately the calculation with the command:
@@ -71,7 +71,7 @@ It is anticipated that optical spectra **converge slowly** with the BZ sampling,
 **symmetry-breaking k-meshes** lead to faster convergence in [[nkpt]] than the
 standard symmetric k-meshes commonly used for ground-state or GW calculations.
 
-This explains the bizarre shift but, still, why two WFK files? Why not 
+This explains the bizarre shift but, still, why two WFK files? Why not
 simply use the WFK file on the shifted k-mesh to compute the screening?
 
 The reason is that a screening calculation done with many empty bands on the
@@ -94,7 +94,7 @@ we can finally proceed to analyze the screening computation performed in the
 last dataset of *tbs_1.abi*.
 
 The SCR file is calculated in dataset 4 using [[nband]] = 100 and [[ecuteps]] = 6.0 Ha.
-In the [first GW tutorial](/tutorial/gw1), these
+In the [first GW tutorial](../tutorial/gw1.md), these
 values were found to give QP energies converged within 0.01 eV, so we are
 confident that our SCR file is well converged and it can be safely used for
 performing convergence tests in the Bethe-Salpeter part.
@@ -224,7 +224,7 @@ have any significant effect on the CPU time, but it is important to stress
 that the number of bands included in the transition space defines, in
 conjunction with the number of k-points, the frequency range that can be
 described. As a consequence [[bs_loband]] and [[nband]] should be subject to
-an accurate converge study.
+a careful convergence study.
 
 Then we have the parameters that define and control the algorithm employed to
 calculate the macroscopic dielectric function
@@ -270,7 +270,7 @@ The last section of the input file
 
 specifies the parameters used to calculate the kernel matrix elements and the
 matrix elements of the dipole operator.
-We have already encountered these variables in the [first GW tutorial](/tutorial/gw1) of the GW tutorial
+We have already encountered these variables in the [first GW tutorial](../tutorial/gw1.md) of the GW tutorial
 so their meaning is (hopefully) familiar to you.
 A more detailed discussion of the role played by these variables in the BS code
 can be found in the [[theory:bse|Bether-Salpeter notes]].
@@ -373,7 +373,7 @@ Then comes the section with the real and the imaginary part of the macroscopic
 dielectric as a function of frequency for the different directions:
 
 ```sh
-# omega [eV]    RE(eps(q=1)) IM(eps(q=1) RE(eps(q=2) ) ... 
+# omega [eV]    RE(eps(q=1)) IM(eps(q=1) RE(eps(q=2) ) ...
   0.000   17.9912    0.0000   17.9578    0.0000   14.2584    0.0000   13.9627    0.0000   17.0848    0.0000   17.0421    0.0000
 .... .... ...
 ```
@@ -476,7 +476,7 @@ Converging the excitonic spectrum requires a careful analysis of many different 
 Since the memory requirements scale quadratically with the number of k-points
 in the **full** Brillouin zone **times** the number of valence bands
 **times** the number of conduction bands included in the transition space,
-it is very important to find a good compromise between accuracy and computational efficiency.
+it is very important to find a good compromise between precision and computational efficiency.
 
 First of all one should select the frequency range of interest since this
 choice has an important effect on the number of valence and conduction states
@@ -485,7 +485,7 @@ expected to converge faster in the number of bands than the GW corrections
 since only those transitions whose energy is "close" to the frequency range
 under investigation are expected to contribute.
 
-[[ecutwfn]] usually plays a secondary role since it only affects the accuracy
+[[ecutwfn]] usually plays a secondary role since it only affects the precision
 of the oscillator matrix elements. We suggest avoiding any truncation of the
 initial basis set by setting [[ecutwfn]] to a value slightly larger than the
 value of [[ecut]] used to generate the WFK file. One should truncate the
@@ -493,9 +493,9 @@ initial planewave basis set only when experiencing memory problems although
 this kind of problems can be usually solved by just increasing the number of
 processors or, alternatively, with an appropriate choice of [[gwmem]].
 
-The value of [[ecuteps]] affects the accuracy of the matrix elements of the
+The value of [[ecuteps]] affects the precision of the matrix elements of the
 Coulomb term, the fundamental term that drives the creation of the excitons.
-As a consequence [[ecuteps]] should be subject to an accurate convergence
+As a consequence [[ecuteps]] should be subject of a careful convergence
 test. As a rule of thumb, [[ecuteps]] can be chosen equal or, sometimes, even
 smaller than the value needed to converge the GW corrections.
 
@@ -672,7 +672,7 @@ with [[ecuteps]] = 3 and 4 Ha are almost indistinguishable from each other. Our
 final estimate for [[ecuteps]] is therefore 3 Ha.
 
 Note that this value is smaller than the one required to converge the QP
-corrections within 0.01 eV (in the [first GW tutorial](/tutorial/gw1) of the GW
+corrections within 0.01 eV (in the [first GW tutorial](../tutorial/gw1.md) of the GW
 tutorial we obtained 6.0 Ha). This is a general behavior, in the sense that
 Bethe-Salpeter spectra, unlike GW corrections, are not very sensitive
 to truncations in the planewave expansion of W. Reasonable BS spectra are
@@ -722,7 +722,7 @@ test in the figure below.
 
 As anticipated, the spectrum converges slowly with the number of k-points and
 our first calculation done with the 4x4x4 grid is severely unconverged. The
-most accurate results are obtained with the 12x12x12 k-mesh, but even this
+most precise results are obtained with the 12x12x12 k-mesh, but even this
 sampling leads to converged results only for frequencies below 4.5 eV. This is
 a problem common to all BS computations, in the sense that it is extremely
 difficult to achieve global converge in the spectra. This analysis shows that
@@ -746,7 +746,7 @@ agreement with the experiment.
   Do you find significant differences? (Caveat: calculations with coupling cannot use the Haydock method
   and are much more CPU demanding. You might have to decrease some input parameters to have results in reasonable time.)
 
-* Calculate the one-shot GW corrections for silicon following the [first GW tutorial](/tutorial/gw1).
+* Calculate the one-shot GW corrections for silicon following the [first GW tutorial](../tutorial/gw1.md).
   Then use the `_GW` file produced by the code to calculate the absorption spectrum.
 
 * Learn how to use AbiPy to automate BS calculations as described in this

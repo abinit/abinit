@@ -8,8 +8,7 @@ A simple example:
 
     ![](http://lorempixel.com/350/150/)
     :   Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-        Praesent at consequat magna, faucibus ornare eros. Nam et
-        mattis urna. Cras sodales, massa id gravida
+        Praesent at consequat magna, faucibus ornare eros.
 
 Outputs:
 
@@ -17,8 +16,8 @@ Outputs:
         <img alt="" src="http://lorempixel.com/350/150/" />
         <figcaption>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Praesent at consequat magna, faucibus ornare eros. Nam et
-            mattis urna. Cras sodales, massa id gravida</p>
+            Praesent at consequat magna, faucibus ornare eros.
+            </p>
         </figcaption>
     </figure>
 
@@ -27,29 +26,29 @@ Copyright 2013 - [Helder Correia](http://heldercorreia.com)
 
 """
 
-from __future__ import unicode_literals
 from markdown import Extension
-from markdown.inlinepatterns import IMAGE_LINK_RE, IMAGE_REFERENCE_RE
 from markdown.blockprocessors import BlockProcessor
+from markdown.inlinepatterns import IMAGE_LINK_RE, IMAGE_REFERENCE_RE
+
 try:
     from markdown.util import etree
 except ImportError:
     import xml.etree.ElementTree as etree
 
+import logging
 import re
 
-import logging
-logger = logging.getLogger('MARKDOWN')
+logger = logging.getLogger("MARKDOWN")
 
 FIGURES = [IMAGE_LINK_RE, IMAGE_REFERENCE_RE]
 
 
 class FigcaptionProcessor(BlockProcessor):
-    """ Process figure captions."""
+    """Process figure captions."""
 
-    RE = re.compile(r'(^|\n)[ ]{0,3}:[ ]{1,3}(?P<caption>.*?)(\n|$)')
-    FIGURES_RE = re.compile('|'.join(f for f in FIGURES))
-    NO_INDENT_RE = re.compile(r'^[ ]{0,3}[^ :]')
+    RE = re.compile(r"(^|\n)[ ]{0,3}:[ ]{1,3}(?P<caption>.*?)(\n|$)")
+    FIGURES_RE = re.compile("|".join(f for f in FIGURES))
+    NO_INDENT_RE = re.compile(r"^[ ]{0,3}[^ :]")
 
     def test(self, parent, block):
         return bool(self.RE.search(block))
@@ -79,17 +78,17 @@ class FigcaptionProcessor(BlockProcessor):
         else:
             caption, theRest = self.detab(block)
         if caption:
-            caption = '%s\n%s' % (m.group('caption'), caption)
+            caption = "%s\n%s" % (m.group("caption"), caption)
         else:
-            caption = m.group('caption')
+            caption = m.group("caption")
 
         # Create figure
-        figure = etree.SubElement(parent, 'figure')
+        figure = etree.SubElement(parent, "figure")
         figure.text = elements
 
         # Add definition
-        self.parser.state.set('fig')
-        figcaption = etree.SubElement(figure, 'figcaption')
+        self.parser.state.set("fig")
+        figcaption = etree.SubElement(figure, "figcaption")
         self.parser.parseBlocks(figcaption, [caption])
         self.parser.state.reset()
 
@@ -98,16 +97,15 @@ class FigcaptionProcessor(BlockProcessor):
 
 
 class FigcaptionExtension(Extension):
-    """ Add definition lists to Markdown. """
+    """Add definition lists to Markdown."""
 
     #def extendMarkdown(self, md, md_globals):
     def extendMarkdown(self, md,):
-        """ Add an instance of FigcaptionProcessor to BlockParser. """
-
+        """Add an instance of FigcaptionProcessor to BlockParser."""
         # def_list = 'def_list' in md.registeredExtensions
         #md.parser.blockprocessors.add('figcaption',
         md.parser.blockprocessors.register(
-                                      FigcaptionProcessor(md.parser), 'figcaption', -10
+                                      FigcaptionProcessor(md.parser), "figcaption", -10
                                       #'figcaption', FigcaptionProcessor(md.parser), '<ulist'
                                       )
 

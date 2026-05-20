@@ -5,7 +5,7 @@
 !! FUNCTION
 !! This module contains definition the type lwf_hist_t
 !! and its related routines
-!! The observables are also calculated. 
+!! The observables are also calculated.
 !!
 !! Datatypes:
 !!
@@ -18,7 +18,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2025 ABINIT group (hexu)
+!! Copyright (C) 2001-2026 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

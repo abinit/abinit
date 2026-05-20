@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2025 ABINIT group (MG)
+!! Copyright (C) 2010-2026 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,7 @@ contains
  character(len=5),allocatable,intent(out) :: class_names(:)
  type(irrep_t),allocatable,intent(out) :: Irr(:)
  !Local variables-------------------------------
- complex(dpc) :: j=(0.0_dp,1.0_dp)
+ complex(dp) :: j=(0.0_dp,1.0_dp)
  ! ********************************************************************************
 ! List of symmetries packed in classes
  nsym = 48

@@ -6,7 +6,7 @@
 !!  Compute spatial multipole moments of input array on FFT grid
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2003-2025 ABINIT group (MJV, MT, XG)
+!!  Copyright (C) 2003-2026 ABINIT group (MJV, MT, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -91,11 +91,9 @@ subroutine multipoles_fftr(arraysp,dipole,nfft,ngfft,nspden,rprimd,origin,&
  character(len=500) :: msg
  type(distribfft_type),pointer :: my_distribfft
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: dipole_tmp(3,nspden)
-
 ! *************************************************************************
-
 
 !Several initializations
  my_mpi_comm=xmpi_comm_self;if (present(mpi_comm_grid)) my_mpi_comm=mpi_comm_grid
@@ -111,7 +109,7 @@ subroutine multipoles_fftr(arraysp,dipole,nfft,ngfft,nspden,rprimd,origin,&
    my_distribfft => distribfft
  else
    ABI_MALLOC(my_distribfft,)
-   call init_distribfft_seq(my_distribfft,'f',n2,n3,'fourdp')
+   call my_distribfft%init_seq('f',n2,n3,'fourdp')
  end if
  fftgrid_found=.false.
  if (n2 == my_distribfft%n2_coarse ) then
@@ -180,7 +178,7 @@ subroutine multipoles_fftr(arraysp,dipole,nfft,ngfft,nspden,rprimd,origin,&
  end do
 
  if (.not.present(distribfft)) then
-   call destroy_distribfft(my_distribfft)
+   call my_distribfft%free()
    ABI_FREE(my_distribfft)
  end if
 
@@ -234,7 +232,6 @@ subroutine multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,nspden,&
 !arrays
  real(dp) :: center_of_charge(3),dipole_el(3,2),dipole_ions_cart(3)
  real(dp) :: dipole_ions_red(3),dipole_tot(3),tmp(3)
-
 ! *************************************************************************
 
 !Separate spins only for nspden=2
@@ -359,11 +356,10 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
  character(len=500) :: message
  type(atomdata_t) :: atom
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp),allocatable :: lin_den(:),mean_pot(:),reduced_coord(:),xcart(:,:)
  character(len=8),allocatable :: iden(:)
-
 ! *************************************************************************
 
 !Initialize the file
