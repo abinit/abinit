@@ -2641,13 +2641,11 @@ subroutine gwr_build_green(gwr, free_ugb)
          ! Redistribute data.
            call gwr%gt_kibz(ipm, ik_ibz, itau, spin, iab)%take_from(green)
          end do ! iab
+       call slk_array_free(work_gb)
 
        end do ! ipm
      end do ! my_it
 
-     do ispinor = 1, gwr%nspinor
-       call work_gb(ispinor)%free()
-     end do
      call green%free()
      ! Free wavefunctions if asked for.
      if (free_ugb) call ugb_ks%free()
@@ -2967,12 +2965,12 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list)
      call gk_i(iab)%copy(gk_f(iab))
    end do
    !!$OMP PARALLEL DO PRIVATE(ig1, g2, ph2, ig1, g2, ph1)
-   do il_g2=1, gk_f(iab)%size_local(2)
-     ig2 = mod(gk_f(iab)%loc2gcol(il_g2) - 1, desc_kbz%npw) + 1
+   do il_g2=1, gk_f(1)%size_local(2)
+     ig2 = mod(gk_f(1)%loc2gcol(il_g2) - 1, desc_kbz%npw) + 1
      g2 = desc_kbz%gvec(:,ig2)
      ph2 = exp(+j_dpc * two_pi * dot_product(g2, tnon))
-     do il_g1=1, gk_f(iab)%size_local(1)
-       ig1 = mod(gk_f(iab)%loc2grow(il_g1) - 1, desc_kbz%npw) + 1
+     do il_g1=1, gk_f(1)%size_local(1)
+       ig1 = mod(gk_f(1)%loc2grow(il_g1) - 1, desc_kbz%npw) + 1
        g1 = desc_kbz%gvec(:,ig1)
        ph1 = exp(-j_dpc * two_pi * dot_product(g1, tnon))
        if (gwr%nspinor == 1) then
