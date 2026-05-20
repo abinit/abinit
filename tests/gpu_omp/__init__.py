@@ -79,5 +79,11 @@ inp_files = [
 #GS with blocked FFT
 "t53.abi", # test CHEBFI (istwfk==1, npband==1, paral_kgb==1, gpu_nfft_blocks=3)
 "t54.abi", # test CHEBFI (istwfk==1, npband==1, paral_kgb==1, gpu_nfft_blocks=3, gpu_nl_splitsize=4)
+#Various testing cases to ensure GPU works with basic vars
+"t55.abi", # checks nkpath and einterp
+"t56.abi", # checks ionmov 2
+"t57.abi", # checks accuracy, rprim and tsmear
+"t58.abi", # checks nkpath, einterp and istwfk > 2
+"t59.abi", # checks tolwfr_diago
 "t60.abi", # RMM-DIIS with NC pseudos
 ]
