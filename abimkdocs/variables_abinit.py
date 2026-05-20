@@ -8289,7 +8289,8 @@ of the GWPT e-ph matrix elements when [[eph_task]] == 17.
 
 1 -> Use the original treatment as in [[cite:Li2019]] in which the
      frequency convolution is evaluated at $\ee_\nk$ and $\ee_\mkq$ and the average is taken.
-2 -> Evaluate the convolution at $\ee_\nk$. This is the **recommended** approach when computing the ZPR of the band gap.
+2 -> Evaluate the convolution at $\ee_\nk$.
+     This is the **recommended** approach when computing the ZPR of the band gap.
 """,
 ),
 
@@ -8299,7 +8300,7 @@ Variable(
     vartype="integer",
     topics=["ElPhonInt_expert"],
     dimensions="scalar",
-    defaultval=2,
+    defaultval=1,
     mnemonics="GWPT G-MODE",
     added_in_version="10.7.1",
     text=r"""
@@ -8309,7 +8310,7 @@ containing both the GWPT and the KS matrix elements.
 
 1 -> Use |g|^2 where g is either GWPT or KS depending on [[gstore_gname]].
 
-2 -> Use the real part of g^*\KS g_\GWPT.
+2 -> Use the real part of $g^*\KS g_\GWPT$.
 """,
 ),
 
@@ -17746,7 +17747,7 @@ Variable(
     mnemonics="PRinT the DENsity",
     added_in_version="before_v9",
     text=r"""
-If set to 1 or a larger value, provide output of electron density in real
+If set to 1 or a larger value, provide output of the GS or of the DFPT electron density in real
 space rho(r), in units of electrons/Bohr^3.
 If [[geoopt]] or [[moldyn]] are set to "none", the name of the density file will be the root output name,
 followed by _DEN.
