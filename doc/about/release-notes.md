@@ -1,3 +1,11 @@
+## v10.8
+
+Version 10.8, beta-release v10.8.1 on May 22, 2026.
+
+The release notes should still to be written. The May 22, 2026 beta-release v10.8.1 is only to make available on github a version that includes 
+the GWPT implementation and corresponding tutorial and documentation.
+
+
 ## v10.6
 
 Version 10.6, released on Feb 6, 2026.
