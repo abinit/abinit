@@ -938,7 +938,7 @@ subroutine anaddb_driver_dielectric_q0(driver, dtset, crystal, ifc, ddb, asrq0, 
      Ifc%dyewq0, driver%d2cart, crystal%gmet, Ifc%gprim, dtset%mpert, crystal%natom, &
      Ifc%nrpt, qphnrm(1), qphon, crystal%rmet, Ifc%rprim, Ifc%rpt, &
      Ifc%trans, crystal%ucvol, Ifc%wghatm, crystal%xred, driver%zeff, driver%qdrp_cart, &
-     Ifc%ewald_option, xmpi_comm_self, Ifc%asr,dtset%dim_msr,&
+     Ifc%ewald_option, eta, xmpi_comm_self, dtset%dim_msr,&
      dipquad=Ifc%dipquad, quadquad=Ifc%quadquad, dielt_thick=dtset%dielt_thick,&
      dielt_env=dtset%dielt_env)
 

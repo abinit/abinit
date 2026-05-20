@@ -202,8 +202,6 @@ program anaddb
    call wrtout(units, msg)
  end if
  call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal, dtset%dim_msr, driver%dcdq, driver%dcdqdq)
- write(msg, '(a, a)' )' ASR done',ch10
- call wrtout(units, msg)
  ! MR: Second- and third-order total energy derivatives calculated with the
  ! magnetic penalty (constrained DFPT) are converted to physically relevant ones here.
  if (abs(dtset%magpen) > tol8) then
@@ -239,9 +237,7 @@ program anaddb
 ! Acoustic Sum Rule
 ! In case the interatomic forces are not calculated, the
 ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
- call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal%xcart)
->>>>>>> trunk/develop
-
+ call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal, dtset%dim_msr, driver%dcdq, driver%dcdqdq)
 
 ! Open netcdf output and write basic quantities
  call driver%open_write_nc(ana_ncid, dtset, crystal, comm)

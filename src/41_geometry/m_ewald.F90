@@ -1229,9 +1229,6 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 end subroutine ewald9
 !!***
 
-end module m_ewald
-!!***
-
 !!****f* m_ewald/ewald9_2D
 !!
 !! NAME
@@ -1504,7 +1501,6 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
             mirror_perpperp = zero
             !if (abs(fac_mirror1)>tol6) then
             mirror_perpperp = fac_mirror*(dcosh(eta*mean2_perp)-fac_exp*dcosh(eta*delta_perp))
-            !print *, fac_exp1,fac_exp1**2,dcosh(eta1*mean2_perp),dcosh(eta1*delta_perp), mirror_perpperp
             !end if
             mirror_paraperp = fac_mirror*fac_exp*dsinh(eta*delta_perp)
             mirror_diff = fac_mirror*dsinh(eta*mean2_perp)

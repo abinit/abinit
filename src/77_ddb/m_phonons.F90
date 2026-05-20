@@ -1928,9 +1928,9 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm,dcdq)
 
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
-     call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,ddb%mpert,natom, &
-      Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff,&
-      ifc%qdrp_cart,ifc%ewald_option,eta,xmpi_comm_self,Ifc%asr,Ifc%dim_msr,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad,&
+     call gtdyn9(Ifc%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,Ifc%gprim,Ifc%mpert,natom, &
+      Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff,&
+      ifc%qdrp_cart,ifc%ewald_option,eta,xmpi_comm_self,Ifc%dim_msr,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad,&
       dielt_env=Ifc%dielt_env,dielt_thick=Ifc%dielt_thick)
      if (asrq0%asr==6) then
        qphon_padded = zero; qphon_padded(:,1) = qphon(:)
@@ -1943,7 +1943,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm,dcdq)
 
      ! Look for the information in the DDB (no interpolation here!)
      rfphon(1:2)=1; rfelfd(1:2)=0; rfstrs(1:2)=0
-     qphon_padded = zero; qphon_padded(:,1) = qphon(:)
+     qphon_padded = zero; qphon_padded(:,1) = qphon
 
      call ddb%get_block(iblok,qphon_padded,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
@@ -2036,9 +2036,9 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm,dcdq)
    NCF_CHECK(crystal%ncwrite(ncid))
    call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart,save_phangmom)
    ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
-   !if (inp%nph2l /= 0 .and. inp%ifcflag == 1) then
-   !  call ifc%calcnwrite_nana_terms(crystal, inp%nph2l, inp%qph2l, inp%qnrml2, ncid)
-   !end if
+   if (inp%nph2l /= 0 .and. inp%ifcflag == 1) then
+     call ifc%calcnwrite_nana_terms(crystal, inp%nph2l, inp%qph2l, inp%qnrml2, ncid)
+   end if
    NCF_CHECK(nf90_close(ncid))
 
    call phonons_write_phfrq(prefix, natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart, save_phangmom)

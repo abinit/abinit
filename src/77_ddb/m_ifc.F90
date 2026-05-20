@@ -50,7 +50,7 @@ MODULE m_ifc
  use m_bz_mesh,       only : kpath_t
  use m_dynmat,        only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, dynmat_dq, &
                              make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, nanal9, gtdyn9, dymfz9, &
-                             massmult_and_breaksym, dfpt_phfrq, dfpt_prtph, d2cart_to_red
+                             massmult_and_breaksym, dfpt_phfrq, dfpt_prtph, d2cart_to_red, ftifc_r2q
 
  implicit none
 
@@ -181,9 +181,9 @@ MODULE m_ifc
      ! trans(3,natom)
      ! Atomic translations: xred = rcan + trans
 
-   real(dp),allocatable :: dyewq0(:,:,:,:)
-     ! dyewq0(3,natom,3,natom)
-     ! Atomic zone-center electrostatic correction to the dynamical matrix (only when dipdip = 1).
+   real(dp),allocatable :: dyewq0(:,:,:)
+     ! dyewq0(3,3,natom)
+     ! Atomic electrostatic self-interaction correction to the dynamical matrix (only when dipdip = 1).
 
    real(dp),allocatable :: zeff(:,:,:)
      ! zeff(3,3,natom)
@@ -357,7 +357,7 @@ end subroutine ifc_free
 !!
 !! SOURCE
 
-subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
+subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
                     rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
                     prtsrlr,enunit, dim_msr,& ! TODO: TO BE REMOVED
                     comm, &
@@ -365,7 +365,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
 !Arguments ------------------------------------
  class(ifc_type),intent(inout) :: Ifc
- integer,intent(in) :: asr,brav,dipdip,symdynmat,nqshft,rfmeth,nsphere,comm,dim_msr
+ integer,intent(in) :: asr,dipdip,symdynmat,nqshft,rfmeth,nsphere,comm,dim_msr
  real(dp),intent(in) :: rifcsph
  type(crystal_t),intent(in) :: Crystal
  type(ddb_type),intent(in) :: ddb
@@ -396,7 +396,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  integer :: ngqpt(9),qptrlatt(3,3)
  integer,allocatable :: qmissing(:),ibz2bz(:),bz2ibz_smap(:,:)
  real(dp) :: gprim(3,3),rprim(3,3),qpt(3),rprimd(3,3), gprim_tmp(3,3), rprim_tmp(3,3)
- real(dp):: rcan(3,Crystal%natom),trans(3,Crystal%natom),dyewq0(3,Crystal%natom,3,Crystal%natom)
+ real(dp):: rcan(3,Crystal%natom),trans(3,Crystal%natom),dyewq0(3,3,Crystal%natom)
  real(dp) :: displ_cart(2*3*Crystal%natom*3*Crystal%natom)
  real(dp) :: phfrq(3*Crystal%natom)
  real(dp) :: eigvec(2,3,Crystal%natom,3,Crystal%natom)
@@ -491,10 +491,10 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
    if (dim_msr==1) then
      if (Ifc%dipquad==1.or.Ifc%quadquad==1) then
-       call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
-                   Crystal%xred,zeff,qdrp_cart,option=ifc%ewald_option,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
+       call ewald9(Ifc%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
+                   Crystal%xred,zeff,qdrp_cart,ifc%eta,option=ifc%ewald_option,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
      else
-       call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
+             call ewald9(Ifc%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                    Crystal%xred,zeff,qdrp_cart,ifc%eta, option=ifc%ewald_option)
      end if
    else
@@ -628,7 +628,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
        ! 2D case
        call ewald9_2D(natom,ddb%acell,Crystal%xred,rprim,dielt,dyew,qpt,zeff,qdrp_cart,one,dielt_thick,dim_msr)      
      end if        
-     call q0dy3_apply(natom,dyewq0,dyew,0)
+     call q0dy3_apply(natom,dyewq0,dyew)
      plus=0
      ! Implement Eq.(76) of Gonze&Lee PRB 55, 10355 (1997) [[cite:Gonze1997a]], possibly generalized for quadrupoles
      call nanal9(dyew,Ifc%dynmat,iqpt,natom,nqbz,plus)
@@ -1052,7 +1052,7 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
  ! The dynamical matrix d2cart is calculated here:
  call gtdyn9(Ifc%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,Ifc%gprim,Ifc%mpert,natom,&
    Ifc%nrpt,qphnrm,my_qpt,Crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,Ifc%zeff,&
-   Ifc%qdrp_cart,Ifc%ewald_option,comm_, Ifc%asr,Ifc%dim_msr,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad,&
+   Ifc%qdrp_cart,Ifc%ewald_option,eta,comm_, Ifc%dim_msr,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad,&
    dielt_env=Ifc%dielt_env,dielt_thick=Ifc%dielt_thick)
 
  ! Calculate the eigenvectors and eigenvalues of the dynamical matrix
@@ -1074,7 +1074,7 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
  !call phdispl_cart2red(natom, crystal%gprimd, out_eigvec, out_eigvec_red)
 
  ! Compute group velocities.
- if (present(dwdq)) call ifc%get_dwdq(crystal, my_qpt, phfrq, eigvec, dwdq, comm_, Ifc%asr)
+ if (present(dwdq)) call ifc%get_dwdq(crystal, my_qpt, phfrq, eigvec, dwdq, comm_)
 
  call timab(1748, 2, tsec)
 
@@ -1137,7 +1137,6 @@ subroutine ifc_get_dcdq(ifc, cryst, dcdq, dcdqdq, dyewq0, dipdip, comm)
  ! atoms coordinates in other unit cells)
  ! Only a phase shift, but since we look at the derivative, this also have a contribution here
  call ftifc_r2q(ifc%atmfrc,dyntmp, ifc%gprim, cryst%natom, 1, ifc%nrpt, ifc%rpt, qpt, ifc%wghatm, comm)
- print *, 'Hello dcdq'
  do mu=1,cryst%natom
    print *, ifc%trans(:,mu)
  end do
@@ -1210,13 +1209,13 @@ subroutine ifc_get_dcdq(ifc, cryst, dcdq, dcdqdq, dyewq0, dipdip, comm)
 !!
 !! SOURCE
 
-subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm, asr)
+subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
 
 !Arguments ------------------------------------
 !scalars
  class(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: cryst
- integer,intent(in) :: comm,asr
+ integer,intent(in) :: comm
 !arrays
  real(dp),intent(in) :: qpt(3)
  real(dp),intent(in) :: phfrq(3*cryst%natom)
@@ -1268,11 +1267,7 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm, asr)
        call ewald9(ifc%acell,ifc%dielt,dyew,cryst%gmet,ifc%gprim,cryst%natom,qfd,&
           cryst%rmet,ifc%rprim,sumg0,cryst%ucvol,cryst%xred,ifc%zeff,ifc%qdrp_cart, eta, &
           ifc%ewald_option,dipquad=ifc%dipquad,quadquad=ifc%quadquad)
-       if (asr==2 .or. asr==6) then
-         call q0dy3_apply(cryst%natom,ifc%dyewq0,dyew,1)
-       else
-         call q0dy3_apply(cryst%natom,ifc%dyewq0,dyew,0)
-       end if
+       call q0dy3_apply(cryst%natom,ifc%dyewq0,dyew)
        dddq(:,:,:,ii) = dddq(:,:,:,ii) + (jj * half / hh) * dyew
      end do
    end do
@@ -2392,7 +2387,7 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
        do nu=1,3
          ew1=zero
          if(ii==1)then
-           ew1=-Ifc%dyewq0(mu,ia,nu,ia)
+           ew1=-Ifc%dyewq0(mu,nu,ia)
          end if
          do jj=1,3
            do kk=1,3
@@ -2914,7 +2909,7 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
  call gtdyn9(ifc%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip, &
    ifc%dyewq0,d2cart,crystal%gmet,ifc%gprim,ifc%mpert,crystal%natom, &
    ifc%nrpt,qphnrm(1),qphon,crystal%rmet,ifc%rprim,ifc%rpt, &
-   ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart,ifc%ewald_option,ifc%asr,xmpi_comm_self,ifc%asr)
+   ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart,ifc%ewald_option,eta,xmpi_comm_self,ifc%dim_msr)
 
  if (present(ncid)) then
    iphl2 = 0
@@ -3164,7 +3159,7 @@ subroutine ifc_to_ddb(ifc, ddb, crystal)
      crystal%gmet,ddb%gprim,ddb%mpert,crystal%natom,ifc%nrpt,qptnrm,qpt,&
      crystal%rmet,ddb%rprim,ifc%rpt,ifc%trans,crystal%ucvol, &
      ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart,ifc%ewald_option, ifc%eta,&
-     xmpi_comm_self,ifc%asr,ifc%dim_msr)
+     xmpi_comm_self,ifc%dim_msr)
 
     ! Impose the acoustic sum rule
     !asrq0 = ddb%get_asrq0(1,1,crystal%xcart)

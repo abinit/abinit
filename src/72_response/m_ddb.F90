@@ -4406,6 +4406,7 @@ subroutine asrq0_init(asrq0, ddb,  asr, rftyp, crystal, dim_msr, dcdq, dcdqdq)
  class(ddb_type),intent(inout) :: ddb
  type(crystal_t),intent(in) :: crystal
  class(asrq0_t), intent(out) :: asrq0
+!arrays
  real(dp), optional, intent(in) :: dcdq(3,crystal%natom,3,crystal%natom,3)
  real(dp), optional, intent(in) :: dcdqdq(3,crystal%natom,3,3,3)
 !Local variables-------------------------------
@@ -4477,7 +4478,6 @@ subroutine asrq0_init(asrq0, ddb,  asr, rftyp, crystal, dim_msr, dcdq, dcdqdq)
  case (6)
    call msria_calc(asr,crystal,asrq0%d2asr,ddb%val(:,:,iblok),&
    dcdq,dcdqdq,asrq0%d2dqmsr,asrq0%d2dqdqmsr,dim_msr,ddb%mpert,ddb%natom)
-   print *, maxval(asrq0%d2asr)
  case default
    ABI_ERROR(sjoin("Wrong value for asr:", itoa(asr)))
  end select

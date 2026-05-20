@@ -1987,7 +1987,7 @@ end subroutine q0dy3_apply
 !!     2: use dyew to calculate dyewq0 symmetrical form
 !!
 !! OUTPUT
-!!  dyewq0(3,natom,3,natom) = part needed to correct
+!!  dyewq0(3,3,natom) = part needed to correct
 !!    the dynamical matrix for atom self-interaction.
 !!
 !! NOTES
@@ -2019,7 +2019,7 @@ subroutine q0dy3_calc(natom,dyewq0,dyew,option)
  integer,intent(in) :: natom,option
 !arrays
  real(dp),intent(in) :: dyew(2,3,natom,3,natom)
- real(dp),intent(out) :: dyewq0(3,natom,3,natom)
+ real(dp),intent(out) :: dyewq0(3,3,natom)
 
 !Local variables -------------------------
 !scalars
@@ -2027,19 +2027,17 @@ subroutine q0dy3_calc(natom,dyewq0,dyew,option)
  character(len=500) :: msg
 ! *********************************************************************
 
- if(option==1.or.option==2)then
-   dyewq0(:,:,:,:)=zero
+ if(option==1.or.option==2.or.option==6)then
    do mu=1,3
      do nu=1,3
        do ia=1,natom
+         dyewq0(mu,nu,ia)=zero
          do ib=1,natom
-           dyewq0(mu,ia,nu,ia)=dyewq0(mu,ia,nu,ia)+dyew(1,mu,ia,nu,ib)
+           dyewq0(mu,nu,ia)=dyewq0(mu,nu,ia)+dyew(1,mu,ia,nu,ib)
          end do
        end do
      end do
    end do
- else if (option==6)then
-   dyewq0(:,:,:,:)=dyew(1,:,:,:,:)
  else
    write (msg, '(3a)')&
 &   'option should be 1 or 2 or 6.',ch10,&
@@ -2049,12 +2047,10 @@ subroutine q0dy3_calc(natom,dyewq0,dyew,option)
 
  if(option==2)then
    do ia=1,natom
-     do ib=1,natom
-       do mu=1,3
-         do nu=mu,3
-           dyewq0(mu,ia,nu,ib)=(dyewq0(mu,ia,nu,ib)+dyewq0(nu,ib,mu,ia))/2
-           dyewq0(nu,ib,mu,ia)=dyewq0(mu,ia,nu,ib)
-         end do
+     do mu=1,3
+       do nu=mu,3
+         dyewq0(mu,nu,ia)=(dyewq0(mu,nu,ia)+dyewq0(nu,mu,ia))/2
+         dyewq0(nu,mu,ia)=dyewq0(mu,nu,ia)
        end do
      end do
    end do
@@ -3770,10 +3766,10 @@ subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
 
 !Local variables -------------------------
 !scalars
- integer :: ia,ib,irpt,mu,nu,ii,jj,ll
+ integer :: ia,ib,irpt,mu,nu,ii
  real(dp) :: im,kr,re
 !arrays
- real(dp) :: kk(3),fact(2,3), fact2(2,3,3)
+ real(dp) :: kk(3),fact(2,3)
 ! *********************************************************************
 
  dddq = zero
@@ -4939,7 +4935,7 @@ end subroutine nanal9
 !! dielt(3,3) = dielectric tensor
 !! dipdip= if 0, no dipole-dipole interaction was subtracted in atmfrc
 !!  if 1, atmfrc has been build without dipole-dipole part
-!! dyewq0(3,natom,3,natom)= Ewald part of the dynamical matrix, at q=0.
+!! dyewq0(3,3,natom)= Ewald part of the dynamical matrix, at q=0.
 !! gmet(3,3)= metric tensor in reciprocal space.
 !! gprim(3,3)= Normalized coordinates in reciprocal space
 !! mpert =maximum number of ipert
@@ -4968,11 +4964,11 @@ end subroutine nanal9
 
 subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom,&
                   nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,qdrp_cart,ewald_option,eta,comm,&
-                  asr,dim_msr,dipquad,quadquad,dielt_env,dielt_thick)  ! optional
+                  dim_msr,dipquad,quadquad,dielt_env,dielt_thick)  ! optional
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: asr,dipdip,mpert,natom,nrpt,ewald_option,comm,dim_msr
+ integer,intent(in) :: dipdip,mpert,natom,nrpt,ewald_option,comm,dim_msr
  real(dp),intent(in) :: qphnrm,ucvol
  real(dp),optional,intent(in) :: dielt_env
  integer,optional,intent(in) :: dipquad, quadquad
@@ -4984,7 +4980,7 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
  real(dp),intent(in) :: zeff(3,3,natom)
  real(dp),intent(in) :: qdrp_cart(3,3,3,natom)
  real(dp),intent(in) :: atmfrc(3,natom,3,natom,nrpt)
- real(dp),intent(in) :: dyewq0(3,natom,3,natom)
+ real(dp),intent(in) :: dyewq0(3,3,natom)
  real(dp),intent(out) :: d2cart(2,3,mpert,3,mpert), eta
 
 !Local variables -------------------------
