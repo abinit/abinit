@@ -273,20 +273,67 @@ Frequency-dependent dielectric tensor flag.
 """,
     ),
 
+    Variable(
+        abivarname="dielt_env@anaddb",
+        varset="anaddb",
+        vartype="real",
+        topics=['PhononBands_basic'],
+        dimensions="scalar",
+        defaultval=1,
+        mnemonics="DIELecTric constant ENVironment",
+        added_in_version="v10",
+        text=r"""
+  Dielectric constant of embedding dielectric materials when considering a bi-dimensional material.
+  Dipoles and dynamical quadrupoles generate an electrostatic potential that is reflected at the
+  dielectric interfaces with the environment (in ab initio calculations, typically vacuum). The sign
+  and amplitude of the reflection entirely depends on the dielectric mismatch. This variable fixes
+  such dielectric environment constant, allowing to compute the phonon band structure of a material
+  in different dielectric environment. The dielectric constant can be positive or negative (corresponding
+  to a metal where the plasmon frequency has been tuned by doping).
+
+""",
+    ),
         Variable(
+        abivarname="dielt_thick@anaddb",
+        varset="anaddb",
+        vartype="real",
+        topics=['PhononBands_basic'],
+        dimensions="scalar",
+        defaultval=2,
+        mnemonics="dielectric thickness of 2D materials",
+        added_in_version="v10",
+        text=r"""
+  In low-dimensional materials, the electronic density doesn't extend infinitively in space, and it is 
+  necessary to define a dielectric thickness when considering electrostatics in such a system (simple)
+  or several ones (more advanced electrostatic model) to add the potential variation along the z direction.
+  The embedding dielectric constant is controlled by [[anaddb:dielt_env]]. Right now two cases are possible: 
+
+  * If only the first value of [[anaddb:dielt_thick]] is non-zero, consider one dielectric constant for
+  the whole 2D (dielectric slab). Both in-plane and out-of-plane dipole responses are estimated using this 
+  thickness. The dielectric constants of the 2D are then computed based on DFPT dielectric tensors with 
+  vacuum considering capacitors in parallel or in series, respectively.
+
+  * If two values are input, the first one corresponds to the total (outer) dielectric thickness 
+  (beyond that value, the dielectric constant is fixed by [[anaddb:dielt_env]]), while the second gives
+   the inner dielectric thickness with the dielectric constant fixed to 1. The outer dielectric constant
+   is then computed based on DFPT dielectric tensors.
+""",
+    ),
+
+    Variable(
         abivarname="dim_msr@anaddb",
         varset="anaddb",
         vartype="integer",
         topics=['PhononBands_basic'],
         dimensions="scalar",
         defaultval=1,
-        mnemonics="dimensionality rotational sum rule",
+        mnemonics="DIMensionality acoustic moment sum rule",
         added_in_version="v10",
         text=r"""
   Control the dimensionaility of the problem when rotational invariance is imposed on the interatomic force constants
   Indeed, along periodic lattices, rotational invariance imposes conditions on the IFCs derivative, while along
   non-periodic ones, only the zone-center IFCs are impacted. The code doesn't automatically detect it based on the
-  input structure.
+  input structure. Also used in the long-range electrostatics in 2D materials for internal consistency.
 
   * 1 --> consider a 3D problem (IFCs derivatives used everywhere).
 

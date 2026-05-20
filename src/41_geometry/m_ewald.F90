@@ -1230,6 +1230,38 @@ ABI_FREE(dyqqt)
 end subroutine ewald9
 !!***
 
+!!****f* m_ewald/ewald9_2D
+!!
+!! NAME
+!! ewald9_2D
+!!
+!! FUNCTION
+!! Compute the long-range electrostatics contribution to interatomic force constants
+!! in the bi-dimensional (2D) case, considering the 2D is embedded in a dielectric environment
+!! and has a given dielectric thickness. The singularity of the Coulomb potential is treated
+!! using the Ewald summation approach. It is possible to input a more complicate model
+!! with two consecutive dielectric slabs. 
+!!
+!! INPUTS
+!! natom=number of atoms in unit cell
+!! acell(3)=length of unit cell vectors
+!! xred(3,natom)=reduced coordinates of the atoms
+!! rprim(3,3)=unit cell vectors (unscaled)
+!! dielt(3,3)=dielectric tensor of the 2D 
+!! dyew(2,3,natom,3,natom)=long-range electrostatics IFCs following Ewald
+!! qphon(3)=phonon wavevector in reduced coordinates
+!! zeff(3,3,natom)=Born effective charge tensor
+!! qdrp_cart(3,3,3,natom)=Dynamical quadrupoles
+!! dielt_env=dielectric constant of the embedding environment (1 in vacuum)
+!! thick(2)=dielectric thicknesses of the slab, first value correspond to the outer
+!! dielectric, second to the inner dielectric slab (if any)
+!! dim_msr=dimensionality of the system (indicates axis without periodicity)
+!!
+!! OUTPUT
+!! dyew(2,3,natom,3,natom)=long-range electrostatics IFCs following Ewald
+!!
+!! SOURCE
+
 subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,dielt_env,thick,dim_msr)  
 
 !Arguments -------------------------------
@@ -1252,6 +1284,7 @@ real(dp) :: rflct_coeff1, rflct_coeff2, rprimd_perp, gprimd_perp, inv_qdrp, inv_
 real(dp) :: fac_erfc, fac_ewald1, fac_ewald2, fac_ewald2b,fac_exp, fac_exp1, trans_fun, fac_gauss, fac_mirror, fac_mirror1, fac_real
 real(dp) :: mean2_perp, mirror_diff, mirror_parapara, mirror_paraperp, mirror_perpperp, mirror_perpperp1
 real(dp) :: rvec_norm, sqrt_norm, ucsurf, xmean, sign_dip, sign_dip2
+logical, save :: firstcall = .TRUE.
 !arrays
 integer :: periodic_dir(3)
 real(dp) :: dyew_real(2,3,natom,3,natom),dyew_rec(2,3,natom,3,natom),kvec(2),invdlt_para(2,2)
@@ -1389,14 +1422,15 @@ lambda = dsqrt(maxval(norm_dielt))/dsqrt(-two*dlog(one-(one-tol9)**2))
 ! Note that the worst case scenario is always when considering Rka=Rk'b in this case
 
 gmax = int(dsqrt(-two*dlog(one-(one-tol12)**2))/lambda/(two_pi/dsqrt(minval(norm_dielt))))
-!gmax=0
-print *, gmax
-write(msg, '(4a,f9.4,2a,i3,1a)' ) ch10,&
+if (firstcall) then
+  firstcall = .FALSE.
+  write(msg, '(6a,f9.4,2a,i3,1a)' ) ch10,&
+        ' Ewald treatment of 2D long-range electrostatics interatomic force constants', ch10,  &
         ' To restrict the real-part summation of Ewald to the first unit cell, the Gaussian broadening', ch10, &
         ' has been set to ', lambda, ' 1/Bohr. For the reciprocal sum, this corresponds to max.', ch10, &
         2*gmax-1, ' Brillouin zone repetitions in either in-plane directions' 
 call wrtout([ab_out,std_out], msg)
-
+end if
 
 ndir=0
 do idir1=1,3 
@@ -1406,6 +1440,9 @@ if (periodic_dir(idir1)==1) then
 end if
 end do
 dyew_rec = zero
+! If one dielectric slab model, same dielectric for both regions
+! Otherwise, inner dielectric ~1 and other has been computed 
+! accordingly in the anaddb driver
 if (out_thick> zero) then
    dielt_perp1 = one 
 else
@@ -1413,184 +1450,189 @@ else
 end if
 dielt_perp2 = dielt_perp
 do ibz1 = -gmax,gmax
-do ibz2 = -gmax,gmax
-gvec(:) = ibz1*gprimd_para(:,1)+ibz2*gprimd_para(:,2)
-kvec(:) = gvec(:) + qvec_para(:)
-kvec(:) = kvec(:)*two_pi 
-kvec_para(:) = matmul(dielt_para,kvec)
-norm_kvec = dot_product(kvec,kvec_para)
-if (abs(norm_kvec)>tol6) then !Remove G=q=0 case
-        eta = dsqrt(norm_kvec/dielt_perp)
-        eta1 = dsqrt(norm_kvec/dielt_perp1)
-        xi = dsqrt(norm_kvec/dielt_perp2)
-        dielt_eff = dsqrt(norm_kvec*dielt_perp/dot_product(kvec,kvec))
-        dielt_eff1 = dsqrt(norm_kvec*dielt_perp1/dot_product(kvec,kvec))
-        dielt_eff2 = dsqrt(norm_kvec*dielt_perp2/dot_product(kvec,kvec))
-        ! Reflection coefficient at the dielectric interface
-        rflct_coeff = (dielt_eff-dielt_env)/(dielt_eff+dielt_env)
-        rflct_coeff2 = (dielt_eff2-dielt_env)/(dielt_eff2+dielt_env)
-        trans_fun = (one+rflct_coeff2*dexp(-xi*(inner_thick-out_thick)))
-        trans_fun = trans_fun/(one-rflct_coeff2*dexp(-xi*(inner_thick-out_thick)))
-        rflct_coeff1 = (dielt_eff1*trans_fun-dielt_eff2)/(dielt_eff1*trans_fun+dielt_eff2)
-        ! Dipole-dipole charges prefactors
-        fac_exp = rflct_coeff*dexp(-eta*inner_thick)
-        fac_exp1 = rflct_coeff1*dexp(-eta1*out_thick)
-        fac_mirror = two*fac_exp/(one-fac_exp**2)
-        fac_mirror1 = two*fac_exp1/(one-fac_exp1**2)
-        ! Ewald factor in error function
-        fac_ewald1= eta*dsqrt(dielt_perp)*lambda/dsqrt(two)
-        do ipert1=1,natom
-        do ipert2=1,natom
-        delta_perp = (xcart_perp(ipert2)-xcart_perp(ipert1))
-        mean2_perp = (xcart_perp(ipert2)+xcart_perp(ipert1))
-        fac_ewald2= delta_perp/lambda/sqrt(two*dielt_perp)
-        fac_ewald2b= delta_perp/lambda/sqrt(two*dielt_perp1)
-        ! Ewald function and derivatives (eta factorized)
-        ewald_fun = half*(dexp(-eta*delta_perp)*(one-erf(fac_ewald1-fac_ewald2)))+ &
-                half*(dexp(eta*delta_perp)*(one-erf(fac_ewald1+fac_ewald2)))
-        ewald_fun1 = half*(-dexp(-eta*delta_perp)*(one-erf(fac_ewald1-fac_ewald2)))+ &
-                half*(dexp(eta*delta_perp)*(one-erf(fac_ewald1+fac_ewald2)))
-        ewald_fun2 = half*(dexp(-eta1*delta_perp)*(one-erf(fac_ewald1-fac_ewald2b)))+ &
+  do ibz2 = -gmax,gmax
+    gvec(:) = ibz1*gprimd_para(:,1)+ibz2*gprimd_para(:,2)
+    kvec(:) = gvec(:) + qvec_para(:)
+    kvec(:) = kvec(:)*two_pi 
+    kvec_para(:) = matmul(dielt_para,kvec)
+    norm_kvec = dot_product(kvec,kvec_para)
+    if (abs(norm_kvec)>tol6) then !Remove G=q=0 case
+       eta = dsqrt(norm_kvec/dielt_perp)
+       eta1 = dsqrt(norm_kvec/dielt_perp1)
+       xi = dsqrt(norm_kvec/dielt_perp2)
+       dielt_eff = dsqrt(norm_kvec*dielt_perp/dot_product(kvec,kvec))
+       dielt_eff1 = dsqrt(norm_kvec*dielt_perp1/dot_product(kvec,kvec))
+       dielt_eff2 = dsqrt(norm_kvec*dielt_perp2/dot_product(kvec,kvec))
+       ! Reflection coefficient at the dielectric interfaces
+       rflct_coeff = (dielt_eff-dielt_env)/(dielt_eff+dielt_env)
+       rflct_coeff2 = (dielt_eff2-dielt_env)/(dielt_eff2+dielt_env)
+       trans_fun = (one+rflct_coeff2*dexp(-xi*(inner_thick-out_thick)))
+       trans_fun = trans_fun/(one-rflct_coeff2*dexp(-xi*(inner_thick-out_thick)))
+       rflct_coeff1 = (dielt_eff1*trans_fun-dielt_eff2)/(dielt_eff1*trans_fun+dielt_eff2)
+       ! Dipole-dipole charges prefactors
+       fac_exp = rflct_coeff*dexp(-eta*inner_thick)
+       fac_exp1 = rflct_coeff1*dexp(-eta1*out_thick)
+       fac_mirror = two*fac_exp/(one-fac_exp**2)
+       fac_mirror1 = two*fac_exp1/(one-fac_exp1**2)
+       ! Ewald factor in error function
+       fac_ewald1= eta*dsqrt(dielt_perp)*lambda/dsqrt(two)
+       do ipert1=1,natom
+         do ipert2=1,natom
+           delta_perp = (xcart_perp(ipert2)-xcart_perp(ipert1))
+           mean2_perp = (xcart_perp(ipert2)+xcart_perp(ipert1))
+           fac_ewald2= delta_perp/lambda/sqrt(two*dielt_perp)
+           fac_ewald2b= delta_perp/lambda/sqrt(two*dielt_perp1)
+           ! Ewald function and derivatives (eta factorized)
+           ewald_fun = half*(dexp(-eta*delta_perp)*(one-erf(fac_ewald1-fac_ewald2)))+ &
+               half*(dexp(eta*delta_perp)*(one-erf(fac_ewald1+fac_ewald2)))
+           ewald_fun1 = half*(-dexp(-eta*delta_perp)*(one-erf(fac_ewald1-fac_ewald2)))+ &
+               half*(dexp(eta*delta_perp)*(one-erf(fac_ewald1+fac_ewald2)))
+           ! For second derivative, there is in principle a Gaussian term as well
+           ! However, by an appropriate choice of the electrostatic gauge (mean average
+           ! potential, we can neglect it. This approximation has been validated   
+           ! with respect to real-space dipoles and exact calculated points
+           ewald_fun2 = half*(dexp(-eta1*delta_perp)*(one-erf(fac_ewald1-fac_ewald2b)))+ &
                 half*(dexp(eta1*delta_perp)*(one-erf(fac_ewald1+fac_ewald2b)))
-        ewald_fun2=-ewald_fun2*eta1**2
-        !& eta/(dsqrt(two_pi*dielt_perp)*lambda)*dexp(-fac_ewald1**2)*dexp(-fac_ewald2**2)
-        
-        ! Phase factor
-        phi = dot_product(kvec,xcart_para(:,ipert1)-xcart_para(:,ipert2))
-        mirror_parapara = fac_mirror*(dcosh(eta*mean2_perp)+fac_exp*dcosh(eta*delta_perp))
-        mirror_perpperp = zero
-        if (fac_mirror1>tol20) then
-          mirror_perpperp = fac_mirror1*(dcosh(eta1*mean2_perp)-fac_exp1*dcosh(eta1*delta_perp))
-        end if
-        mirror_paraperp = fac_mirror*fac_exp*dsinh(eta*delta_perp)
-        mirror_diff = fac_mirror*dsinh(eta*mean2_perp)
-        ! First, calculate the source polarization and its contribution to IFCs
-        do idir1=1,3
-        do idir2=1,3
-        rho_gerade1(1) = half*dot_product(kvec,matmul(qdrp_parapara(:,:,idir1,ipert1),kvec))
-        rho_gerade2(1) = half*dot_product(kvec,matmul(qdrp_parapara(:,:,idir2,ipert2),kvec))
-        rho_gerade1(1) = rho_gerade1(1)-half*eta1**2*qdrp_perpperp(idir1,ipert1)
-        rho_gerade2(1) = rho_gerade2(1)-half*eta1**2*qdrp_perpperp(idir2,ipert2)
-        rho_gerade1(2) = -dot_product(kvec,zeff_para(:,idir1,ipert1))
-        rho_gerade2(2) = -dot_product(kvec,zeff_para(:,idir2,ipert2))
-        rho_ungerade1(1) = -zeff_perp(idir1,ipert1)
-        rho_ungerade1(2) = -eta1*dot_product(kvec,qdrp_paraperp(:,idir1,ipert1))
-        rho_ungerade2(1) = -zeff_perp(idir2,ipert2)
-        rho_ungerade2(2) = -eta1*dot_product(kvec,qdrp_paraperp(:,idir2,ipert2))
-        ! First, add the source charges (gerade gerade)
-        dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
-                (rho_gerade1(1)*rho_gerade2(1)+rho_gerade1(2)*rho_gerade2(2))&
-                *ewald_fun/eta/dielt_perp*cos(phi)
-        dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
-                (rho_gerade1(2)*rho_gerade2(1)-rho_gerade1(1)*rho_gerade2(2))&
-                *ewald_fun/eta/dielt_perp*sin(phi)
-        dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
-                (rho_gerade1(1)*rho_gerade2(1)+rho_gerade1(2)*rho_gerade2(2))&
-                *ewald_fun/eta/dielt_perp*sin(phi)
-        dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
-                (rho_gerade1(2)*rho_gerade2(1)-rho_gerade1(1)*rho_gerade2(2))&
-                *ewald_fun/eta/dielt_perp*cos(phi)        
-        ! Second, add the source charge (ungerade ungerade)
-        dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
-                (rho_ungerade1(1)*rho_ungerade2(1)+rho_ungerade1(2)*rho_ungerade2(2))&
-                *ewald_fun2/eta1/dielt_perp1*cos(phi)
-        dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
-                (rho_ungerade1(2)*rho_ungerade2(1)-rho_ungerade1(1)*rho_ungerade2(2))&
-                *ewald_fun2/eta1/dielt_perp1*sin(phi)
-        dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
-                (rho_ungerade1(1)*rho_ungerade2(1)+rho_ungerade1(2)*rho_ungerade2(2))&
-                *ewald_fun2/eta1/dielt_perp1*sin(phi)
-        dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
-                (rho_ungerade1(2)*rho_ungerade2(1)-rho_ungerade1(1)*rho_ungerade2(2))&
-                *ewald_fun2/eta1/dielt_perp1*cos(phi)
-        ! Third, add the source charge (gerade ungerade)
-      !  dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
-      !          (rho_gerade1(1)*rho_ungerade2(1)+rho_ungerade1(1)*rho_gerade2(1)&
-      !          +rho_gerade1(2)*rho_ungerade2(2)+rho_ungerade1(2)*rho_gerade2(2)) &
-      !          *ewald_fun1/eta*cos(phi)
-      !  dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
-      !          (rho_gerade1(2)*rho_ungerade2(1)+rho_ungerade1(2)*rho_gerade2(1)&
-      !           -rho_gerade1(1)*rho_ungerade2(2)-rho_ungerade1(1)*rho_gerade2(2)) &
-      !          *ewald_fun1/eta*sin(phi)
-      !  dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)-&
-      !          (rho_gerade1(1)*rho_ungerade2(1)+rho_ungerade1(1)*rho_gerade2(1)&
-      !           +rho_gerade1(2)*rho_ungerade2(2)+rho_ungerade1(2)*rho_gerade2(2)) &
-      !          *ewald_fun1/eta*sin(phi)
-      !  dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)-&
-      !          (rho_gerade1(2)*rho_ungerade2(1)+rho_ungerade1(2)*rho_gerade2(1)&
-      !           -rho_gerade1(1)*rho_ungerade2(2)-rho_ungerade1(1)*rho_gerade2(2)) &
-      !          *ewald_fun1/eta*cos(phi)
-        ! Now add the interactions with the mirror charges... para para
-        !rho_gerade1(1) = half*dot_product(kvec,matmul(qdrp_parapara(:,:,idir1,ipert1),kvec))&
-        !-eta**2*qdrp_perpperp(idir1,ipert1)
-        !rho_gerade2(1) = half*dot_product(kvec,matmul(qdrp_parapara(:,:,idir2,ipert2),kvec))&
-        !-eta**2*qdrp_perpperp(idir2,ipert2)
-        dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
-                (rho_gerade1(1)*rho_gerade2(1)+rho_gerade1(2)*rho_gerade2(2))&
-                *mirror_parapara/eta/dielt_perp*cos(phi)
-        dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
-                (rho_gerade1(2)*rho_gerade2(1)-rho_gerade1(1)*rho_gerade2(2))&
-                *mirror_parapara/eta/dielt_perp*sin(phi)
-        dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
-                (rho_gerade1(1)*rho_gerade2(1)+rho_gerade1(2)*rho_gerade2(2))&
-                *mirror_parapara/eta/dielt_perp*sin(phi)
-        dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
-                (rho_gerade1(2)*rho_gerade2(1)-rho_gerade1(1)*rho_gerade2(2))&
-                *mirror_parapara/eta/dielt_perp*cos(phi)
-        ! Now with perp perp
-        dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
-                (rho_ungerade1(1)*rho_ungerade2(1)+rho_ungerade1(2)*rho_ungerade2(2))&
-                *mirror_perpperp*eta1/dielt_perp1*cos(phi)
-        dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
-                (rho_ungerade1(2)*rho_ungerade2(1)-rho_ungerade1(1)*rho_ungerade2(2))&
-                *mirror_perpperp*eta1/dielt_Perp1*sin(phi)
-        dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
-                (rho_ungerade1(1)*rho_ungerade2(1)+rho_ungerade1(2)*rho_ungerade2(2))&
-                *mirror_perpperp*eta1/dielt_perp1*sin(phi)
-        dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
-                (rho_ungerade1(2)*rho_ungerade2(1)-rho_ungerade1(1)*rho_ungerade2(2))&
-                *mirror_perpperp*eta1/dielt_perp1*cos(phi)
-        ! Third, add the source charge (gerade ungerade)
-    !    dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
-    !            (rho_gerade1(1)*rho_ungerade2(1)+rho_ungerade1(1)*rho_gerade2(1)&
-    !            +rho_gerade1(2)*rho_ungerade2(2)+rho_ungerade1(2)*rho_gerade2(2)) &
-    !            *mirror_paraperp/eta*cos(phi)
-    !    dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
-    !            (rho_gerade1(2)*rho_ungerade2(1)+rho_ungerade1(2)*rho_gerade2(1)&
-    !             -rho_gerade1(1)*rho_ungerade2(2)-rho_ungerade1(1)*rho_gerade2(2)) &
-    !            *mirror_paraperp/eta*sin(phi)
-    !    dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)-&
-    !            (rho_gerade1(1)*rho_ungerade2(1)+rho_ungerade1(1)*rho_gerade2(1)&
-    !             +rho_gerade1(2)*rho_ungerade2(2)+rho_ungerade1(2)*rho_gerade2(2)) &
-    !            *mirror_paraperp/eta*sin(phi)
-    !    dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
-    !            (rho_gerade1(2)*rho_ungerade2(1)+rho_ungerade1(2)*rho_gerade2(1)&
-    !             -rho_gerade1(1)*rho_ungerade2(2)-rho_ungerade1(1)*rho_gerade2(2)) &
-    !            *mirror_paraperp/eta*cos(phi)
-    !    ! Finally, there is a term on the sum of Born effective charge
-    !            ! Third, add the source charge (gerade ungerade)
-    !    dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
-    !            (rho_gerade1(1)*rho_ungerade2(1)-rho_ungerade1(1)*rho_gerade2(1)&
-    !            +rho_gerade1(2)*rho_ungerade2(2)-rho_ungerade1(2)*rho_gerade2(2)) &
-    !            *mirror_diff/eta*cos(phi)
-    !    dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
-    !            (rho_gerade1(2)*rho_ungerade2(1)-rho_ungerade1(2)*rho_gerade2(1)&
-    !             -rho_gerade1(1)*rho_ungerade2(2)+rho_ungerade1(1)*rho_gerade2(2)) &
-    !            *mirror_diff/eta*sin(phi)
-    !    dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
-    !            (rho_gerade1(1)*rho_ungerade2(1)-rho_ungerade1(1)*rho_gerade2(1)&
-    !             +rho_gerade1(2)*rho_ungerade2(2)-rho_ungerade1(2)*rho_gerade2(2)) &
-    !            *mirror_diff/eta*sin(phi)
-    !    dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)-&
-    !            (rho_gerade1(2)*rho_ungerade2(1)-rho_ungerade1(2)*rho_gerade2(1)&
-    !             +rho_gerade1(1)*rho_ungerade2(2)+rho_ungerade1(1)*rho_gerade2(2)) &
-    !            *mirror_diff/eta*sin(phi)
-        end do
-        end do      
-        end do
-        end do   
-end if
-end do
+           ewald_fun2=-ewald_fun2*eta1**2
+
+           ! Phase factor and mirror terms
+           phi = dot_product(kvec,xcart_para(:,ipert1)-xcart_para(:,ipert2))
+           mirror_parapara = fac_mirror*(dcosh(eta*mean2_perp)+fac_exp*dcosh(eta*delta_perp))
+           mirror_perpperp = zero
+           !if (abs(fac_mirror1)>tol6) then
+           mirror_perpperp = fac_mirror*(dcosh(eta*mean2_perp)-fac_exp*dcosh(eta*delta_perp))
+           !print *, fac_exp1,fac_exp1**2,dcosh(eta1*mean2_perp),dcosh(eta1*delta_perp), mirror_perpperp
+           !end if
+           mirror_paraperp = fac_mirror*fac_exp*dsinh(eta*delta_perp)
+           mirror_diff = fac_mirror*dsinh(eta*mean2_perp)
+       ! Then compute the charge prefactor
+           do idir1=1,3
+           do idir2=1,3
+           rho_gerade1(1) = -half*dot_product(kvec,matmul(qdrp_parapara(:,:,idir1,ipert1),kvec))
+           rho_gerade2(1) = -half*dot_product(kvec,matmul(qdrp_parapara(:,:,idir2,ipert2),kvec))
+           rho_gerade1(1) = rho_gerade1(1)+half*eta1**2*qdrp_perpperp(idir1,ipert1)
+           rho_gerade2(1) = rho_gerade2(1)+half*eta1**2*qdrp_perpperp(idir2,ipert2)
+           rho_gerade1(2) = -dot_product(kvec,zeff_para(:,idir1,ipert1))
+           rho_gerade2(2) = -dot_product(kvec,zeff_para(:,idir2,ipert2))
+           rho_ungerade1(1) = -zeff_perp(idir1,ipert1)
+           rho_ungerade1(2) = eta1*dot_product(kvec,qdrp_paraperp(:,idir1,ipert1))
+           rho_ungerade2(1) = -zeff_perp(idir2,ipert2)
+           rho_ungerade2(2) = eta1*dot_product(kvec,qdrp_paraperp(:,idir2,ipert2))
+           ! First, add the source charges (gerade gerade)
+           dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
+                   (rho_gerade1(1)*rho_gerade2(1)+rho_gerade1(2)*rho_gerade2(2))&
+                   *ewald_fun/eta/dielt_perp*cos(phi)
+           dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
+                   (rho_gerade1(2)*rho_gerade2(1)-rho_gerade1(1)*rho_gerade2(2))&
+                   *ewald_fun/eta/dielt_perp*sin(phi)
+           dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
+                   (rho_gerade1(1)*rho_gerade2(1)+rho_gerade1(2)*rho_gerade2(2))&
+                   *ewald_fun/eta/dielt_perp*sin(phi)
+           dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
+                   (rho_gerade1(2)*rho_gerade2(1)-rho_gerade1(1)*rho_gerade2(2))&
+                   *ewald_fun/eta/dielt_perp*cos(phi)        
+           ! Second, add the source charges (ungerade ungerade)
+           dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
+                   (rho_ungerade1(1)*rho_ungerade2(1)+rho_ungerade1(2)*rho_ungerade2(2))&
+                   *ewald_fun2/eta1/dielt_perp1*cos(phi)
+           dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
+                   (rho_ungerade1(2)*rho_ungerade2(1)-rho_ungerade1(1)*rho_ungerade2(2))&
+                   *ewald_fun2/eta1/dielt_perp1*sin(phi)
+           dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
+                   (rho_ungerade1(1)*rho_ungerade2(1)+rho_ungerade1(2)*rho_ungerade2(2))&
+                   *ewald_fun2/eta1/dielt_perp1*sin(phi)
+           dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
+                   (rho_ungerade1(2)*rho_ungerade2(1)-rho_ungerade1(1)*rho_ungerade2(2))&
+                   *ewald_fun2/eta1/dielt_perp1*cos(phi)
+           ! Third, add the source charge (gerade ungerade)
+           ! For sake of consistenty, only used when there is only one dielectric thickness
+           if (out_thick > zero) then
+           dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
+                   (rho_gerade1(1)*rho_ungerade2(1)+rho_ungerade1(1)*rho_gerade2(1)&
+                   +rho_gerade1(2)*rho_ungerade2(2)+rho_ungerade1(2)*rho_gerade2(2)) &
+                   *ewald_fun1/eta*cos(phi)
+           dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
+                   (rho_gerade1(2)*rho_ungerade2(1)+rho_ungerade1(2)*rho_gerade2(1)&
+                    -rho_gerade1(1)*rho_ungerade2(2)-rho_ungerade1(1)*rho_gerade2(2)) &
+                   *ewald_fun1/eta*sin(phi)
+           dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)-&
+                   (rho_gerade1(1)*rho_ungerade2(1)+rho_ungerade1(1)*rho_gerade2(1)&
+                    +rho_gerade1(2)*rho_ungerade2(2)+rho_ungerade1(2)*rho_gerade2(2)) &
+                   *ewald_fun1/eta*sin(phi)
+           dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)-&
+                   (rho_gerade1(2)*rho_ungerade2(1)+rho_ungerade1(2)*rho_gerade2(1)&
+                    -rho_gerade1(1)*rho_ungerade2(2)-rho_ungerade1(1)*rho_gerade2(2)) &
+                   *ewald_fun1/eta*cos(phi)
+           end if
+           ! Now add the interactions with the mirror charges... para para
+           dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
+                   (rho_gerade1(1)*rho_gerade2(1)+rho_gerade1(2)*rho_gerade2(2))&
+                   *mirror_parapara/eta/dielt_perp*cos(phi)
+           dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
+                   (rho_gerade1(2)*rho_gerade2(1)-rho_gerade1(1)*rho_gerade2(2))&
+                   *mirror_parapara/eta/dielt_perp*sin(phi)
+           dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
+                   (rho_gerade1(1)*rho_gerade2(1)+rho_gerade1(2)*rho_gerade2(2))&
+                   *mirror_parapara/eta/dielt_perp*sin(phi)
+           dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
+                   (rho_gerade1(2)*rho_gerade2(1)-rho_gerade1(1)*rho_gerade2(2))&
+                   *mirror_parapara/eta/dielt_perp*cos(phi)
+           ! Now with perp perp
+           dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
+                   (rho_ungerade1(1)*rho_ungerade2(1)+rho_ungerade1(2)*rho_ungerade2(2))&
+                   *mirror_perpperp*eta1/dielt_perp*cos(phi)
+           dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
+                   (rho_ungerade1(2)*rho_ungerade2(1)-rho_ungerade1(1)*rho_ungerade2(2))&
+                   *mirror_perpperp*eta1/dielt_Perp*sin(phi)
+           dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
+                   (rho_ungerade1(1)*rho_ungerade2(1)+rho_ungerade1(2)*rho_ungerade2(2))&
+                   *mirror_perpperp*eta1/dielt_perp*sin(phi)
+           dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
+                   (rho_ungerade1(2)*rho_ungerade2(1)-rho_ungerade1(1)*rho_ungerade2(2))&
+                   *mirror_perpperp*eta1/dielt_perp*cos(phi)
+           ! Third, add the source charge (gerade ungerade)
+           if (out_thick > zero) then
+           dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
+                   (rho_gerade1(1)*rho_ungerade2(1)+rho_ungerade1(1)*rho_gerade2(1)&
+                   +rho_gerade1(2)*rho_ungerade2(2)+rho_ungerade1(2)*rho_gerade2(2)) &
+                   *mirror_paraperp/eta*cos(phi)
+           dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
+                   (rho_gerade1(2)*rho_ungerade2(1)+rho_ungerade1(2)*rho_gerade2(1)&
+                    -rho_gerade1(1)*rho_ungerade2(2)-rho_ungerade1(1)*rho_gerade2(2)) &
+                   *mirror_paraperp/eta*sin(phi)
+           dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)-&
+                   (rho_gerade1(1)*rho_ungerade2(1)+rho_ungerade1(1)*rho_gerade2(1)&
+                    +rho_gerade1(2)*rho_ungerade2(2)+rho_ungerade1(2)*rho_gerade2(2)) &
+                   *mirror_paraperp/eta*sin(phi)
+           dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
+                   (rho_gerade1(2)*rho_ungerade2(1)+rho_ungerade1(2)*rho_gerade2(1)&
+                    -rho_gerade1(1)*rho_ungerade2(2)-rho_ungerade1(1)*rho_gerade2(2)) &
+                   *mirror_paraperp/eta*cos(phi)
+           ! Finally, there is a term on the sum of charge, only for mirror charges
+                   ! Third, add the source charge (gerade ungerade)
+           dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
+                   (rho_gerade1(1)*rho_ungerade2(1)-rho_ungerade1(1)*rho_gerade2(1)&
+                   +rho_gerade1(2)*rho_ungerade2(2)-rho_ungerade1(2)*rho_gerade2(2)) &
+                   *mirror_diff/eta*cos(phi)
+           dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
+                   (rho_gerade1(2)*rho_ungerade2(1)-rho_ungerade1(2)*rho_gerade2(1)&
+                    -rho_gerade1(1)*rho_ungerade2(2)+rho_ungerade1(1)*rho_gerade2(2)) &
+                   *mirror_diff/eta*sin(phi)
+           dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
+                   (rho_gerade1(1)*rho_ungerade2(1)-rho_ungerade1(1)*rho_gerade2(1)&
+                    +rho_gerade1(2)*rho_ungerade2(2)-rho_ungerade1(2)*rho_gerade2(2)) &
+                   *mirror_diff/eta*sin(phi)
+           dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)-&
+                   (rho_gerade1(2)*rho_ungerade2(1)-rho_ungerade1(2)*rho_gerade2(1)&
+                    +rho_gerade1(1)*rho_ungerade2(2)+rho_ungerade1(1)*rho_gerade2(2)) &
+                   *mirror_diff/eta*sin(phi)
+           end if
+           end do
+           end do      
+         end do
+       end do   
+     end if
+  end do
 end do 
 ucsurf = rprimd_para(1,1)*rprimd_para(2,2)-rprimd_para(1,2)*rprimd_para(2,1)
 ! Renormalize by surface of periodic 2D lattice and out-of-plane dielectric constant
@@ -1610,12 +1652,12 @@ do ipert1=1,natom
       do idir2=1,3
         if (ipert1 .NE. ipert2) then ! Only off-sites contributions
           ! First, contribution from eps^-1 (Rk'b-Rka) eps^-1
-          fac_real = three*(1-erf(fac_erfc))/sqrt_norm**5+6*exp(fac_gauss)/rvec_norm**2/&
+          fac_real = three*(one-erf(fac_erfc))/sqrt_norm**5+6*exp(fac_gauss)/rvec_norm**2/&
           sqrt(two_pi)/lambda+two*exp(fac_gauss)/rvec_norm/sqrt(two_pi)/lambda**3
           dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2)+&
           fac_real*rvec_dielt(idir1)*rvec_dielt(idir2) 
           ! Second contribution from esp^-1(alpha,beta)  
-          fac_real = (1-erf(fac_erfc))/sqrt_norm**3+exp(fac_gauss)/rvec_norm/sqrt(two_pi)/lambda 
+          fac_real = (one-erf(fac_erfc))/sqrt_norm**3+exp(fac_gauss)/rvec_norm/sqrt(two_pi)/lambda 
           dyew_real(1,idir1,ipert1,idir2,ipert2)=dyew_real(1,idir1,ipert1,idir2,ipert2)-&
           fac_real*dielt(idir1,idir2)
         end if          
@@ -1624,204 +1666,6 @@ do ipert1=1,natom
   end do
 end do  
 dyew_real = dyew_real / dsqrt(detdlt)
-rmax=50
-rmax2=20
-!int(1d-6**(-one/three)/dsqrt(minval(norm_dielt))) ; rmax2= 20
-! Sum of dipole interactions in 2D 
-!dyew_real=zero
-!dielt_eff = dsqrt(dielt_para(1,1)*dielt_perp)
-!rflct_coeff = (dielt_eff-dielt_env)/(dielt_eff+dielt_env)
-!dielt_perp=dielt_perp1
-!invdlt(3,3)=one/dielt_perp1
-!do ipert1=1,natom
-!  do ipert2=1,natom
-!    do ibz1=-rmax,rmax
-!      do ibz2=-rmax,rmax
-!        diff_xcart(:) =xcart(:,ipert2)-xcart(:,ipert1)
-!        diff_xcart(1:2)=diff_xcart(1:2)+ibz1*rprimd_para(:,1)+ibz2*rprimd_para(:,2)
-!        if (dot_product(diff_xcart,diff_xcart)>tol12) then
-!        kvec(:) = qvec_para(:)
-!        kvec(:) = kvec(:)*two_pi
-!        rvec_dielt(:) = matmul(invdlt,diff_xcart)
-!        rvec_norm = dot_product(diff_xcart,rvec_dielt)
-!        sqrt_norm = dsqrt(rvec_norm)
-!        phi = dot_product(kvec,diff_xcart(1:2))
-!        do idir1=1,3
-!          do idir2=1,3
-!            fun_real(:) = matmul(invdlt,zeff(:,idir1,ipert1))
-!            fun_real2(:) = matmul(invdlt,zeff(:,idir2,ipert2)) 
-!            ! Dipole-Dipole
-!            !if (dipdip==1) then
-!            dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) + &
-!                    half*zeff_perp(idir1,ipert1)*fun_real2(3)/sqrt_norm**3*cos(phi)
-!            dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) + &
-!                    half*zeff_perp(idir1,ipert1)*fun_real2(3)/sqrt_norm**3*sin(phi)
-!            dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) + &
-!                    half*zeff_perp(idir2,ipert2)*fun_real(3)/sqrt_norm**3*cos(phi)
-!            dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) + &
-!                    half*zeff_perp(idir2,ipert2)*fun_real(3)/sqrt_norm**3*sin(phi)
-!            dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) - &
-!                    three*zeff_perp(idir1,ipert1)*rvec_dielt(3)**2*zeff_perp(idir2,ipert2)/sqrt_norm**5*cos(phi)
-!            dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) - &
-!                    three*zeff_perp(idir1,ipert1)*rvec_dielt(3)**2*zeff_perp(idir2,ipert2)/sqrt_norm**5*sin(phi)
-!            !end if
-!            ! Dipole-quadrupole
-!            !if (dipquad==1) then
-!            dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) -three* &
-!                    half*fun_real(3)*qdrp_perpperp(idir2,ipert2)*rvec_dielt(3)/sqrt_norm**5*cos(phi)
-!            dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) -three* &
-!                    half*fun_real(3)*qdrp_perpperp(idir2,ipert2)*rvec_dielt(3)/sqrt_norm**5*sin(phi)
-!            dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) -three* &
-!                    half*rvec_dielt(3)*qdrp_perpperp(idir2,ipert2)*fun_real(3)/sqrt_norm**5*cos(phi)
-!            dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) -three* &
-!                    half*rvec_dielt(3)*qdrp_perpperp(idir2,ipert2)*fun_real(3)/sqrt_norm**5*sin(phi)
-!            inv_qdrp2=zero
-!            do idir3=3,3
-!              do idir4=3,3
-!              inv_qdrp2=inv_qdrp2+qdrp_cart(idir2,ipert2,idir3,idir4)*invdlt(idir3,idir4)
-!              end do
-!            end do
-!            dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) -three* &
-!                    half*inv_qdrp2*rvec_dielt(3)*fun_real(3)/sqrt_norm**5*cos(phi)
-!            dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) -three* &
-!                    half*inv_qdrp2*rvec_dielt(3)*fun_real(3)/sqrt_norm**5*sin(phi)
-!            dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) +15* &
-!                    half*rvec_dielt(3)*zeff_perp(idir1,ipert1)*&
-!                    rvec_dielt(3)*qdrp_perpperp(idir2,ipert2)*rvec_dielt(3)/sqrt_norm**7*cos(phi)
-!            dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) +15* &
-!                    half*rvec_dielt(3)*zeff_perp(idir1,ipert1)*&
-!                    rvec_dielt(3)*qdrp_perpperp(idir2,ipert2)*rvec_dielt(3)/sqrt_norm**7*sin(phi)
-!            ! Quadrupole-dipole
-!            dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) +three* &
-!                    half*fun_real2(3)*rvec_dielt(3)*qdrp_perpperp(idir1,ipert1)/sqrt_norm**5*cos(phi)
-!            dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) +three* &
-!                    half*fun_real2(3)*rvec_dielt(3)*qdrp_perpperp(idir1,ipert1)/sqrt_norm**5*sin(phi)
-!            dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) +three* &
-!                    half*rvec_dielt(3)*qdrp_perpperp(idir1,ipert1)*fun_real2(3)/sqrt_norm**5*cos(phi)
-!            dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) +three* &
-!                    half*rvec_dielt(3)*qdrp_perpperp(idir1,ipert1)*fun_real2(3)/sqrt_norm**5*sin(phi)            
-!            inv_qdrp=zero
-!            do idir3=3,3
-!              do idir4=3,3
-!              inv_qdrp=inv_qdrp+qdrp_cart(idir1,ipert1,idir3,idir4)*invdlt(idir3,idir4)
-!              end do
-!            end do
-!            dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) +three* &
-!                    half*inv_qdrp*rvec_dielt(3)*fun_real2(3)/sqrt_norm**5*cos(phi)
-!            dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) +three* &
-!                    half*inv_qdrp*rvec_dielt(3)*fun_real2(3)/sqrt_norm**5*sin(phi)
-!            dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) -15* &
-!                    half*rvec_dielt(3)*zeff_perp(idir2,ipert2)*&
-!                    rvec_dielt(3)*qdrp_perpperp(idir1,ipert1)*rvec_dielt(3)/sqrt_norm**7*cos(phi)
-!            dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) -15* &
-!                    half*rvec_dielt(3)*zeff_perp(idir2,ipert2)*&
-!                    rvec_dielt(3)*qdrp_perpperp(idir1,ipert1)*rvec_dielt(3)/sqrt_norm**7*sin(phi)
-!
-!            !end if
-!            ! Quadrupole-quadrupole
-!            !if (quadquad==1) then
-!            inv2_qdrp(:,:)=matmul(invdlt,qdrp_cart(idir1,ipert1,:,:))
-!            inv2_qdrp2(:,:)=matmul(invdlt,qdrp_cart(idir2,ipert2,:,:))
-!            qdrp_ctrcted = 0 ; qdrp_ctrcted2=0
-!            do idir3=3,3
-!              do idir4=3,3
-!                qdrp_ctrcted=qdrp_ctrcted+inv2_qdrp(idir3,idir4)*inv2_qdrp2(idir3,idir4)
-!                qdrp_ctrcted2=qdrp_ctrcted2+inv2_qdrp(idir3,idir4)*inv2_qdrp2(idir4,idir3)
-!              end do
-!            end do
-!
-!            dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) +three/ &
-!                    four*(inv_qdrp*inv_qdrp2+qdrp_ctrcted+qdrp_ctrcted2)/sqrt_norm**5*cos(phi)
-!            dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) +three/ &
-!                    four*(inv_qdrp*inv_qdrp2+qdrp_ctrcted+qdrp_ctrcted2)/sqrt_norm**5*sin(phi)
-!            dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) -3*15/ &
-!                    four*inv_qdrp*rvec_dielt(3)**2*qdrp_perpperp(idir2,ipert2)/sqrt_norm**7*cos(phi)
-!            dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) -3*15/ &
-!                    four*inv_qdrp*rvec_dielt(3)**2*qdrp_perpperp(idir2,ipert2)/sqrt_norm**7*sin(phi)
-!            dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) -3*15/ &
-!                    four*inv_qdrp2*rvec_dielt(3)**2*qdrp_perpperp(idir1,ipert1)/sqrt_norm**7*cos(phi)
-!            dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) -3*15/ &
-!                    four*inv_qdrp2*rvec_dielt(3)**2*qdrp_perpperp(idir1,ipert1)/sqrt_norm**7*sin(phi)
-!            dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) +15*7/four &
-!                    *rvec_dielt(3)**3*qdrp_perpperp(idir1,ipert1)*qdrp_perpperp(idir2,ipert2)/sqrt_norm**9*cos(phi)
-!            dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) +15*7/four &
-!                    *rvec_dielt(3)**3*qdrp_perpperp(idir1,ipert1)*qdrp_perpperp(idir2,ipert2)/sqrt_norm**9*sin(phi)
-!            !end if
-!          end do
-!        end do
-!      end if
-!    !  do ibz3=1,rmax2
-!    !  if (mod(ibz3,2)==0) then
-!    !    diff_xcart(:) =xcart(:,ipert2)-xcart(:,ipert1)+ibz3*thick
-!    !    diff_xcart(1:2)=diff_xcart(1:2)+ibz1*rprimd_para(:,1)+ibz2*rprimd_para(:,2)
-!    !    sign_dip=one !rflct_coeff**ibz3
-!    !    diff_xcart2(:) =xcart(:,ipert2)-xcart(:,ipert1)-ibz3*thick
-!    !    diff_xcart2(1:2)=diff_xcart2(1:2)+ibz1*rprimd_para(:,1)+ibz2*rprimd_para(:,2)
-!    !    sign_dip2=one !rflct_coeff**ibz3
-!    !  else
-!    !    diff_xcart(:) =xcart(:,ipert2)+xcart(:,ipert1)+ibz3*thick
-!    !    diff_xcart(1:2)=diff_xcart(1:2)+ibz1*rprimd_para(:,1)+ibz2*rprimd_para(:,2)
-!    !    sign_dip=one !rflct_coeff**ibz3
-!    !    diff_xcart2(:) =xcart(:,ipert2)+xcart(:,ipert1)-ibz3*thick
-!    !    diff_xcart2(1:2)=diff_xcart2(1:2)+ibz1*rprimd_para(:,1)+ibz2*rprimd_para(:,2)     
-!    !    sign_dip2=one !rflct_coeff**ibz3
-!    !  end if
-!    !    kvec(:) = qvec_para(:)
-!    !    kvec(:) = kvec(:)*two_pi
-!    !    rvec_dielt(:) = matmul(invdlt,diff_xcart)
-!    !    rvec_norm = dot_product(diff_xcart,rvec_dielt)
-!    !    sqrt_norm = dsqrt(rvec_norm)
-!    !    phi = dot_product(kvec,diff_xcart(1:2))
-!    !    if (ibz1==0.and.ibz2==0.and.ipert1==1.and.ipert2==1) then
-!    !    print *, rflct_coeff**ibz3,diff_xcart(3)
-!    !    end if
-!    !    do idir1=1,3
-!    !      do idir2=1,3
-!    !        fun_real(:) = matmul(invdlt,zeff(:,idir1,ipert1))
-!    !        fun_real2(:) = matmul(invdlt,zeff(:,idir2,ipert2))
-!    !        dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) + & 
-!    !                rflct_coeff**ibz3*half*(dot_product(zeff_para(:,idir1,ipert1),fun_real2(1:2))+sign_dip*zeff_perp(idir1,ipert1)*fun_real2(3))/sqrt_norm**3*cos(phi)
-!    !        dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) + & 
-!    !                rflct_coeff**ibz3*half*(dot_product(zeff_para(:,idir1,ipert1),fun_real2(1:2))+sign_dip*zeff_perp(idir1,ipert1)*fun_real2(3))/sqrt_norm**3*sin(phi)
-!    !        dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) + & 
-!    !                rflct_coeff**ibz3*half*(dot_product(zeff_para(:,idir2,ipert2),fun_real(1:2))+sign_dip*zeff_perp(idir2,ipert2)*fun_real(3))/sqrt_norm**3*cos(phi)
-!    !        dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) + & 
-!    !                rflct_coeff**ibz3*half*(dot_product(zeff_para(:,idir2,ipert2),fun_real(1:2))+sign_dip*zeff_perp(idir2,ipert2)*fun_real(3))/sqrt_norm**3*sin(phi)
-!    !        dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) - &
-!    !                rflct_coeff**ibz3*three*dot_product(zeff(:,idir1,ipert1),rvec_dielt)*dot_product(zeff(:,idir2,ipert2),rvec_dielt)/sqrt_norm**5*cos(phi)
-!    !        dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) - &
-!    !                rflct_coeff**ibz3*three*dot_product(zeff(:,idir1,ipert1),rvec_dielt)*dot_product(zeff(:,idir2,ipert2),rvec_dielt)/sqrt_norm**5*sin(phi)
-!    !  end do
-!    !  end do
-!    !    rvec_dielt(:) = matmul(invdlt,diff_xcart2)
-!    !    rvec_norm = dot_product(diff_xcart2,rvec_dielt)
-!    !    sqrt_norm = dsqrt(rvec_norm)
-!    !    phi = dot_product(kvec,diff_xcart2(1:2))
-!    !    do idir1=1,3
-!    !      do idir2=1,3
-!    !        fun_real(:) = matmul(invdlt,zeff(:,idir1,ipert1))
-!    !        fun_real2(:) = matmul(invdlt,zeff(:,idir2,ipert2))
-!    !        dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) + &
-!    !                sign_dip2*half*(dot_product(zeff_para(:,idir1,ipert1),fun_real2(1:2))+zeff_perp(idir1,ipert1)*fun_real2(3))/sqrt_norm**3*cos(phi)
-!    !        dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) + &
-!    !                sign_dip2*half*(dot_product(zeff_para(:,idir1,ipert1),fun_real2(1:2))+zeff_perp(idir1,ipert1)*fun_real2(3))/sqrt_norm**3*sin(phi)
-!    !        dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) + &
-!    !                sign_dip2*half*(dot_product(zeff_para(:,idir2,ipert2),fun_real(1:2))+zeff_perp(idir2,ipert2)*fun_real(3))/sqrt_norm**3*cos(phi)
-!    !        dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) + &
-!    !                sign_dip2*half*(dot_product(zeff_para(:,idir2,ipert2),fun_real(1:2))+zeff_perp(idir2,ipert2)*fun_real(3))/sqrt_norm**3*sin(phi)
-!    !        dyew_real(1,idir1,ipert1,idir2,ipert2) = dyew_real(1,idir1,ipert1,idir2,ipert2) - &
-!    !                sign_dip2*three*dot_product(zeff(:,idir1,ipert1),rvec_dielt)*dot_product(zeff(:,idir2,ipert2),rvec_dielt)/sqrt_norm**5*cos(phi)
-!    !        dyew_real(2,idir1,ipert1,idir2,ipert2) = dyew_real(2,idir1,ipert1,idir2,ipert2) - &
-!    !                sign_dip2*three*dot_product(zeff(:,idir1,ipert1),rvec_dielt)*dot_product(zeff(:,idir2,ipert2),rvec_dielt)/sqrt_norm**5*sin(phi)
-!    !  end do
-!    !  end do
-!    !end do
-!    end do
-!    end do
-!  end do
-!end do
-!dyew_real = dyew_real / dsqrt(dielt_para(1,1)*dielt_para(2,2)*dielt_perp)
-
 dyew = dyew_real + dyew_rec
 end subroutine ewald9_2D
 

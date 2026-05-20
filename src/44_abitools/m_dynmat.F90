@@ -6046,7 +6046,7 @@ subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,dim
    write(msg, '(a,a,a,a,a,a,a,a)' ) ch10, &
    'Imposition of the ASR + rotational invariance for the interatomic forces (AMSR)', ch10, &
    'Rotational invariance impose conditions on the IFCs moments and their derivatives',ch10,&
-   'At the moment, because of missing long-range contributions to the second IFCs derivatives',&
+   'At the moment, because of missing long-range contributions to the second IFCs derivatives',ch10,&
    'rotational invariance is only imposed on the first-derivatives (first-order condition)'
    call wrtout(std_out,msg)
  end if
@@ -6083,8 +6083,8 @@ subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,dim
    ABI_BUG(msg)
  end if
 
- !write(msg, '(a,a)' ) ch10, msg2
- !call wrtout(std_out,msg)
+ write(msg, '(a,a)' ) ch10, trim(msg2)
+ call wrtout(std_out,msg)
 
  ! Matrix sizing for pseudoinverse and alocation of corresponding matrix
  nrow = 3+2*3*3*natom ! 9*natom conditions for ASR, 9*natom+3 conditions for MSR
@@ -6164,6 +6164,8 @@ subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,dim
             if (idir1 == idir2 .and. bool_ldir(idir1) ==1) then !  
               col= ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
               row = 2*9*natom+idir2 ! second moment of IFCs
+              ! Currently desactivated because long-range electrostatics, only need to uncomment
+              ! when it will be available.
               !rcond(row,col) = -(crystal%xcart(idir3,ipert2)-crystal%xcart(idir3,ipert1))**2
               col= ipert1+natom*(idir1-1)+3*natom*(ipert2-1)+3*natom**2*(idir2-1)
               !rcond(row,col) = -(crystal%xcart(idir3,ipert2)-crystal%xcart(idir3,ipert1))**2
@@ -6369,12 +6371,12 @@ end subroutine msria_calc
 !! asr=(0 => no ASR, 1 or 2=> the diagonal element is modified to give the ASR,
 !!      5 => impose hermitian solution using lapack call, 6 => rotational invariance)
 !! d2asr=matrix used to store the correction needed to fulfill the acoustic sum rule.
-!! d2dqmsr = same, but for the IFCs moment for rotational invariance
+!! d2dqmsr = same, but for the first IFCs moment for rotational invariance
+!! d2dqdqmsr = same, but for the second IFCs moment for rotational invariance
 !! mpert =maximum number of ipert
 !! natom=number of atom
 !! qphon(3,3)=wavevectors for the three possible phonons
 !! crystal<type(crystal_t)>=Crystal structure parameters
-!! dcdq=Moment of IFCs from real-space moments or long-wavelength driver
 !!
 !! OUTPUT
 !! Input/Output:
@@ -6398,9 +6400,9 @@ subroutine msria_apply(asr,d2asr,d2dqmsr,d2dqdqmsr,d2cart,mpert,natom,qphon,crys
  integer :: kk,tiat,tjat,isym,indij(natom,natom),indij2(natom,natom,3)
  integer :: isgn, itirev, symq(4,2,crystal%nsym), timrev 
  real(dp) :: tol=1d-4, qsym(3), qsym2(3), symcart(3,3,crystal%nsym),arg1,arg2
- real(dp) :: re,im,re2,im2,sumr,sumi,sigma2, dcdq_after_ft(3,natom,3,natom,3)
+ real(dp) :: re,im,re2,im2,sumr,sumi
  real(dp) :: d2tmp(2,3,mpert,3,mpert),pert(2,3,natom,3,natom,2*crystal%nsym)
- real(dp) :: pert2(2,3,natom,3,natom,2*crystal%nsym,3), Levi_Civita(3,3,3), dc1(3), dc2(3)
+ real(dp) :: pert2(2,3,natom,3,natom,2*crystal%nsym,3), Levi_Civita(3,3,3)
 ! *********************************************************************
  if (asr/=6) return
  Levi_Civita(:,:,:)=zero
@@ -6446,7 +6448,8 @@ subroutine msria_apply(asr,d2asr,d2dqmsr,d2dqdqmsr,d2cart,mpert,natom,qphon,crys
                do jj=1,3
 !                Correction from on-site and first-neighbors in the same cells (or images)
                   sumr=sumr+symcart(idir1,ii,isym)*symcart(idir2,jj,isym)*d2asr(1,ii,tiat,jj,tjat)
-                  ! Second order disactivated
+                  ! Second order desactivated because of missing contribution from electrostatics
+                  ! simply uncomment when available
                   !do idir3=1,3
                   !  sumr=sumr-symcart(idir1,ii,isym)*symcart(idir2,jj,isym)*&
                   !          d2dqdqmsr(ii,tiat,jj,tjat,idir3,idir3)/four
@@ -6492,11 +6495,8 @@ subroutine msria_apply(asr,d2asr,d2dqmsr,d2dqdqmsr,d2cart,mpert,natom,qphon,crys
      end do !ipert1
    end do !itirev
  end do !isym  
- dcdq_after_ft = zero
  do ipert1=1,natom
    do idir1 =1,3
-     dc1 = zero 
-     dc2 = zero
      do idir2=1,3
        do ipert2=1,natom
          do isym=1,crystal%nsym
@@ -6513,25 +6513,6 @@ subroutine msria_apply(asr,d2asr,d2dqmsr,d2dqdqmsr,d2cart,mpert,natom,qphon,crys
                pert2(2,idir1,ipert1,idir2,ipert2,crystal%nsym*(itirev-1)+isym,idir3)/dble(indij2(ipert1,ipert2,idir3))
              end do
            end do
-         end do
-         do idir3=1,3
-             do idir4=1,3
-               do jj=1,3
-                 dc1(idir4) =&
-                 dc1(idir4)+d2cart(1,idir1,ipert1,idir2,ipert2)*crystal%rprimd(idir3,jj)*&
-                 (crystal%xred(idir3,ipert2)-crystal%xred(idir3,ipert1))*Levi_Civita(idir2,jj,idir4)
-               end do
-             end do
-           if (abs(qphon(idir3,1))>tol) then
-             do idir4=1,3
-               do jj=1,3
-                 dc2(idir4) = dc2(idir4)+d2cart(2,idir1,ipert1,idir2,ipert2)*&
-                 crystal%rprimd(jj,idir3)/qphon(idir3,1)/two_pi*Levi_Civita(idir2,jj,idir4)
-               end do
-               dcdq_after_ft(idir1,ipert1,idir2,ipert2,idir4)=dcdq_after_ft(idir1,ipert1,idir2,ipert2,idir4)&
-                 + d2cart(2,idir1,ipert1,idir2,ipert2)*crystal%rprimd(idir4,idir3)/qphon(idir3,1)
-             end do
-           end if
          end do
        end do
      end do
