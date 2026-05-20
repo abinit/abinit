@@ -283,7 +283,7 @@ with the input file given by:
 
 {% dialog tests/tutorespfn/Input/teph4zpr_gwpt_6.abi %}
 
-Let's now have a look at the QP results reported in the output file:
+Let us now have a look at the QP results reported in the output file:
 
 {% dialog tests/tutorespfn/Refs/teph4zpr_gwpt_6.abo %}
 
@@ -352,7 +352,7 @@ mpirun -n 4 abinit teph4zpr_7.abi > teph4zpr_7.log 2> err &
     The code will do its best to efficiently distribute the workload for the given number of MPI processes.
     If finer control is needed, please consult the documentation of [[gwpt_np_wpqbks]].
 
-While the calculation is running, let's discuss the input file in more detail:
+While the calculation is running, let us discuss the input file in more detail:
 
 {% dialog tests/tutorespfn/Input/teph4zpr_gwpt_7.abi %}
 
@@ -373,6 +373,8 @@ This is clearly seen in the output file
 if you search for "k-points included in gstore:":
 
 ```
+grep "k-points included in gstore:" teph4zpr_gwpt_7.abo
+
  k-points included in gstore:
 1 : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 ```
@@ -554,7 +556,7 @@ Now let us have a look at the final results reported in the main output file:
 Thi section tells us that  computation we will use
 the real part of the $g^*_KS g_GWPT$ instead of $|g_GWPT|^2$
 when computing the diagonal matrix elements of the FM self-energy.
-The default behaviour can be changed via [[gwpt_gmode]].
+The default behaviour can be changed via [[gwpt_g2mode]].
 
 ```
  Computing Fan-Migdal + DW self-energy from GSTORE.nc
