@@ -7607,7 +7607,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
  !integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
  integer :: nkpt_summed, use_umklp, band1, band2, band1_start, band1_stop, band1_max
- integer :: ib, il_b1, il_b2, nb, block_size, ii, mband, block_counter, idir, iab
+ integer :: ib, il_b2, nb, block_size, ii, mband, block_counter, idir, iab
  integer :: istwf_ki, npw_ki, istwf_kf, nI, nJ, nomega, io, iq, nq, dim_rtwg !ig,
  integer :: npwe, u_nfft, u_mgfft, u_mpw
  logical :: isirr_k, use_tr, is_metallic, print_time, use_ddk
@@ -7627,13 +7627,13 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer,allocatable :: gvec_q0(:,:), gbound_q0(:,:), u_gbound(:,:)
  real(dp) :: kk_ibz(3), kk_bz(3), tsec(2), rtmp(2)
  real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:), ks_eig(:,:,:)
- real(dp),allocatable :: work(:,:,:,:), qdirs(:,:), cwave(:,:)
+ real(dp),allocatable :: work(:,:,:,:), qdirs(:,:) !, cwave(:,:)
  logical :: gradk_not_done(gwr%nkibz)
  logical,allocatable :: bbp_mask(:,:)
  complex(dp) :: chq(3) !, wng(3)
- complex(dp) :: vg(3), vr(3)
+ !complex(dp) :: vg(3), vr(3)
  !complex(dp),allocatable :: ug1_block(:,:)
- real(dp) :: new_rhotwx_dp(2, 3, gwr%nspinor**2), vred(2,3), vcar(2,3)
+ !real(dp) :: new_rhotwx_dp(2, 3, gwr%nspinor**2), vred(2,3), vcar(2,3)
  complex(gwp) :: rhotwx(3, gwr%nspinor**2), new_rhotwx(3, gwr%nspinor**2)
  complex(gwp),allocatable :: ug2(:), ur1_kibz(:), ur2_kibz(:), ur_prod(:), rhotwg(:), ug1_block(:,:), ug1(:)
  complex(dp) :: green_w(gwr%ntau), omega(gwr%ntau)

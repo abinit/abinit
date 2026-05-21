@@ -8310,7 +8310,7 @@ containing both the GWPT and the KS matrix elements.
 
 1 -> Use |g|^2 where g is either GWPT or KS depending on [[gstore_gname]].
 
-2 -> Use the real part of $g^*\KS g_\GWPT$.
+2 -> Use the real part of $g{KS}^* g_{\GWPT}$.
 """,
 ),
 
