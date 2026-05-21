@@ -3217,9 +3217,9 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, &
    ! Allocate temporary rgp PBLAS matrix to store G(r,g')
    npwsp = desc_kbz%npw !* gwr%nspinor
    ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
-   call rgp%init(gwr%g_nfft, npwsp, gwr%g_slkproc, desc_kbz%istwfk, &
-                 size_blocs=[-1, col_bsize]) !, gpu_action=gpu_action)
    do iab=1,gwr%nsig_ab
+     call rgp%init(gwr%g_nfft, npwsp, gwr%g_slkproc, desc_kbz%istwfk, &
+                   size_blocs=[-1, col_bsize]) !, gpu_action=gpu_action)
      associate (g_gp => gt_pm(ipm, iab))
      gpu_mode = 1
      do ig2=1, g_gp%size_local(2), gwr%uc_batch_size
@@ -4812,7 +4812,7 @@ subroutine gwr_build_tchi(gwr)
            else
            ! use_shmem_for_k --> MPI shared window version. Only gt_scbox is shared.
 
-             call gwr%gk_to_scbox(sc_ngfft, select_my_kbz, desc_mykbz, green_scgvec, my_ir, ndat, gt_gpr, gt_scbox, &
+             call gwr%gk_to_scbox(sc_ngfft, select_my_kbz, desc_mykbz, green_scgvec, my_ir, ndat, gt_gpr(:,:,iab), gt_scbox, &
                                   gt_scbox_win=gt_scbox_win)
 
              ! Now each MPI proc operates on different idat entries.
@@ -4841,7 +4841,8 @@ subroutine gwr_build_tchi(gwr)
              do ig=1,desc_q%npw
                chi_scgvec(:,ig) = gg + gwr%ngqpt(:) * desc_q%gvec(:,ig) ! q+g
              end do
-             call box2gsph(OP_COPY, sc_ngfft, desc_q%npw, ndat, chi_scgvec, &
+             call box2gsph(merge(OP_COPY, OP_ACC, iab == 1),&
+                           sc_ngfft, desc_q%npw, ndat, chi_scgvec, &
                            gt_scbox(:,1,1), chiq_gpr(my_iqi)%buffer_cplx(:,my_ir))
              ! TODO:
              !call desc_q%box2gsph(qq_ibz, gwr%ngqpt, sc_ngfft, gwr%nspinor * ndat, &
@@ -5047,7 +5048,7 @@ subroutine gwr_build_tchi(gwr)
          do iab=1,gwr%nsig_ab
            call cplx_mat_plus_bc(chiq_rpr(iq_ibz)%bufsize, chiq_rpr(iq_ibz)%buffer_cplx(:,1), &
                                wtqp, "C", gkq_rpr_pm(2, iab)%buffer_cplx(:,1), gk_rpr_pm(1, iab)%buffer_cplx(:,1), gpu_option)
-         end do
+         end do ! iab
        end do ! iq_ibz
 
        if (print_time) then
@@ -6355,7 +6356,7 @@ end if
  call xmpi_sum(sigc_it_mat, gwr%comm%value, ierr)
 
  ! Average over degenerate states.
-!if (gwr%dtset%symsigma == +1 .and. .not. gwr%use_supercell_for_sigma) then
+!  if (gwr%dtset%symsigma == +1 .an出发d. .not. gwr%use_supercell_for_sigma) then
  if (gwr%dtset%symsigma == +1) then
    call wrtout(std_out, " Symsigma 1 --> Averaging Sig_c matrix elements within degenerate subspaces.")
    ABI_CHECK(gwr%sig_diago, "symsigma = 1 requires diagonal Sigma_c")
@@ -6773,7 +6774,7 @@ subroutine ncwrite_sigmac(myncid)
      nctkarr_t("ks_gaps", "dp", "nkcalc, nsppol"), &
      nctkarr_t("qpz_gaps", "dp", "nkcalc, nsppol"), &
      nctkarr_t("qp_pade_gaps", "dp", "nkcalc, nsppol"), &
-     nctkarr_t("sigx_mat", "dp", "two, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
+     nctkarr_t("sigx_mat", "dp", "two, smat_bsize1, smat_bsize2, nkcalc, nspin_channel"), &
      nctkarr_t("sigc_it_mat", "dp", "two, two, ntau, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
      nctkarr_t("sigc_iw_mat", "dp", "two, ntau, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
      nctkarr_t("sigxc_rw_diag", "dp", "two, nwr, smat_bsize1, nkcalc, nsppol"), &
