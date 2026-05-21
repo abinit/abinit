@@ -71,12 +71,14 @@ are stored in the SCR file.
 The first-order derivative of the KS states, on the contrary, is computed on the fly by the GWPT subdriver
 by solving a non-self-consistent (NSCF) Sternheimer equation as explained in the sections below.
 
-Please note that ZPR computations at the GWPT level are still a field of active research,
-especially in polar materials where additional long-range (LR) terms of many-body nature appear in the e-ph matrix elements.
-In this tutorial, we won't be able to converge the calculation; hence, we mainly focus on explaining the different
-steps involved and the input parameters affecting the quality of the calculation and the predictive power.
-Hopefully, additional techniques and algorithmic improvements will be made available in forthcoming Abinit versions
-in order to accelerate GWPT calculations without spoiling accuracy (stay tuned).
+!!! important
+
+    Please note that ZPR computations at the GWPT level are still a field of active research,
+    especially in polar materials where additional long-range (LR) terms of many-body nature appear in the e-ph matrix elements.
+    In this tutorial, we won't be able to converge the calculation; hence, we mainly focus on explaining the different
+    steps involved and the input parameters affecting the quality of the calculation and the predictive power.
+    Hopefully, additional techniques and algorithmic improvements will be made available in forthcoming Abinit versions
+    in order to accelerate GWPT calculations without spoiling accuracy (stay tuned).
 
 ## Getting started
 
@@ -186,6 +188,7 @@ with the following input file:
 
         mrgdv merge out_DVDB POT1 POT2 ...
 
+    where out_DVDB is the name of the output file, followed by the list of partial files.
     This is especially useful in cojunction with shell globbing.
     For instance,
 
@@ -195,7 +198,7 @@ with the following input file:
 ## Computing the WFK files with empty states
 
 At this point, we need to generate a WFK file with empty bands by performing an NSCF KS calculation
-starting from a well-converged GS  density.
+starting from a well-converged GS density.
 This WFK file will then be used to compute $W$, the $G_0W_0$ self-energy, and the GWPT matrix elements.
 
 Let us start the NSCF calculation immediately by issuing:
@@ -336,7 +339,8 @@ At this stage, one should perform convergence studies for [[nband]], [[ecuteps]]
 and [[ngkpt]] to ensure that the GW results are reasonably well converged.
 The converged parameters can then be reused in the subsequent GWPT calculation.
 
-For the sake of conciseness and performance reasons, these convergence studies are omitted here.
+For the sake of conciseness and performance reasons, these convergence studies are omitted here,
+and left as additional exercise to the reader.
 
 ## Computing e-ph matrix elements with GWPT
 
@@ -356,8 +360,7 @@ While the calculation is running, let us discuss the input file in more detail:
 
 {% dialog tests/tutorespfn/Input/teph4zpr_gwpt_7.abi %}
 
-To activate the computation of the GWPT matrix elements, we use the
-two variables [[optdriver]] and [[eph_task]]
+To activate the computation of the GWPT matrix elements, we use the two variables [[optdriver]] and [[eph_task]]
 
 ```
 optdriver 7  # Enter EPH driver.
@@ -370,7 +373,7 @@ This is clearly seen in the output file
 
 {% dialog tests/tutorespfn/Refs/teph4zpr_gwpt_7.abo %}
 
-if you search for "k-points included in gstore:":
+if you search for "k-points included in gstore:", you will get:
 
 ```
 grep "k-points included in gstore:" teph4zpr_gwpt_7.abo
@@ -415,7 +418,7 @@ The screening is read from the SCR file specified with [[getscr_filepath]].
 The cutoff energy in $W$ is given by [[ecuteps]], while [[ecutsigx]] defines
 the cutoff energy for the exchange part of the self-energy.
 Clearly, [[ecuteps]] **cannot be larger** than the value used in the previous screening calculation.
-The SCR file defines the $\pp$-mesh for the integration over the transferred momenta in Eq.
+The SCR file defines the $\pp$-mesh for the integration over the transferred momenta.
 This $\pp$-mesh must be identical to, or a submesh of, the $\kk$-mesh associated with the WFK file.
 No interpolation in $\pp$-space is possible at present.
 In a typical scenario, one works with a fixed reasonably-dense $\pp$-mesh, e.g. 6x6x6, uses a WFK file
@@ -424,7 +427,7 @@ one used for electrons by using the interpolation of the DFPT scattering potenti
 
 Finally, the GWPT code needs to read the GS KS potential from the file specified with [[getpot_filepath]].
 This file is used to build the GS Hamiltonian required by the Sternheimer solver.
-The GS POT is produced at the end of the GS SCF cycle by setting [[prtpot]] to 1 (note that the default is 0).
+The GS POT file is produced at the end of the GS SCF cycle by setting [[prtpot]] to 1 (note that the default is 0).
 
 The first-order derivative of the KS wavefunctions due to an atomic perturbation is computed on-the-fly
 by solving the NSCF Sternheimer equation for each $n'$ band, atomic displacement, and quasi-momentum transfer.
@@ -440,6 +443,9 @@ The treatment of the frequency dependence in the GWPT matrix elements is governe
 By default, the GWPT matrix elements are computed at the energy of the incoming state $\varepsilon_\nk$.
 
 Other variables worth mentioning here are [[zcut]] and [[elph2_imagden]].
+[[zcut]] defines the imaginary shift in the denominator of the Green's function while
+[[elph2_imagden]] determines the imaginary shift of the
+denominator of the sum-over-states expression for the full first-order wavefunction.
 
 !!! Important
 
@@ -484,7 +490,6 @@ of the range is exluded.
 
 In our calculation, MgO has 16 valence electrons (see `nelect` in the main output file) so
 there are 8 occupied bands as [[nsppol]] = 1 and [[nspinor]] 1.
-Our GSTORE.nc thus contains $\gkq$ matrix elements
 
 Now let us explain how to visualize the data using the following AbiPy script:
 
@@ -512,6 +517,8 @@ In other words, the quality of the ZPR obtained here mainly depends on the densi
 used in the previous section, the number of empty states ($n'$ index) and the different cutoff energies.
 In order to perform convergence studies, one should go back to the previous step, increase the relevant parameters
 and monitor how the ZPR is affected by these settings.
+Let us stress again that the calculations in this tutorial are severely underconverged and there are several theoretical and
+technical and aspect that are still under investigation.
 
 After this preamble, let us start the calculation by issuing:
 
@@ -540,8 +547,6 @@ The imaginary shift in the denominator of the self-energy is given by [[zcut]].
 We also use [[eph_stern]] 1 and [[getpot_filepath]] to activate the Sternheimer approach
 to account for the contribution of the bands beyond the active space defined by [[nband]].
 
-TODO: One should check that nband is consistent with nb_kq
-
 !!! Important
 
   The Sternheimer method is exact if one is interested
@@ -553,10 +558,12 @@ Now let us have a look at the final results reported in the main output file:
 
 {% dialog tests/tutorespfn/Refs/teph4zpr_gwpt_8.abo %}
 
+<!--
 Thi section tells us that  computation we will use
 the real part of the $g^*_KS g_GWPT$ instead of $|g_GWPT|^2$
 when computing the diagonal matrix elements of the FM self-energy.
 The default behaviour can be changed via [[gwpt_g2mode]].
+-->
 
 ```
  Computing Fan-Migdal + DW self-energy from GSTORE.nc
@@ -677,5 +684,3 @@ Finally, let us mention that [[eph_ahc_type]] 0 can be used to use the adiabatic
 This is the version that should be used when comparing GWPT ZPR with finite-difference $G_0 W_0$
 calculations performed at fixed screening ignoring contributions beyond the rigid-ion approximation
 commonly used to deal with the Debye-Waller term.
-
-## Where to go next?

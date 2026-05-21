@@ -1,4 +1,4 @@
-# NSCF computation of WFK files with empty states.
+# NSCF computation of WFK file with empty states.
 ecut 35.0
 
 nband  110
