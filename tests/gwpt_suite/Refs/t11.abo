@@ -56,7 +56,6 @@ _ WF disk file :      0.812 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
         eph_stern           1
          eph_task          24
 -          fftalg         312
-      gwpt_g2mode           1
            istwfk        2    3    6    7    4    5    8    9
               ixc          11
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -241,6 +240,7 @@ P Number of CPUs for parallelism over k-points: 1
  k-points included in gstore:
 1 : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 2 : [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+
  Little group operations of the k-point will be used to symmetry reduce the integral in q-space.
 
  === Gaps, band edges and relative position wrt Fermi level ===
@@ -318,7 +318,6 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:   13.558
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
-      gwpt_g2mode           1
               ixc          11
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      9.54735576E+00
