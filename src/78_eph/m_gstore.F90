@@ -4858,7 +4858,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
            wqnu = gqk%my_wnuq(my_ip, my_iq)
 
            do my_ik=1,gqk%my_nk
-             if (.not. gqk%has_both_g) then
+             if (.not. gqk%has_both_g .or. dtset%gwpt_g2mode == 1) then
                call calc_and_store_gdw2(gqk, my_ik, my_iq, my_ip, wqnu, tpp_red, &
                                         my_gq0nm_atm(:,:,:,my_ik), my_gq0nm_atm(:,:,:,my_ik))
              else
