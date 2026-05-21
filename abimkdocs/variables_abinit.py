@@ -5365,7 +5365,7 @@ Variable(
 
 The variable [[elph2_imagden]] determines the imaginary shift of the
 denominator of the sum-over-states in the perturbation,
-$(e_{nk}-e_{n'k'}+i$[[elph2_imagden]]).
+$(e_{nk}-e_{n'k'} + i $[[elph2_imagden]]).
 One should use a width comparable with the Debye frequency or the maximum phonon frequency.
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[elph2_imagden]] has the
 [[ENERGY]] characteristics (1 Ha = 27.2113845 eV).
