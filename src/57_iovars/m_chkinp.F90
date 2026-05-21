@@ -1941,14 +1941,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
 
-   ! MG: In EPH we read wfs from WFK and convert u(g) to istwfk 1 so the check on dt%istwfk is not relevant.
-   if ( dt%gpu_option==2 .and. any( dt%istwfk(1:nkpt) > 2 .and. all(dt%optdriver /= [RUNL_EPH]) )) then
-     write(msg,'(3a)' )&
-      'When gpu_option is 2, all the components of istwfk must be 1 or 2.',ch10,&
-      'Action: change gpu_option or set "istwfk *1" in the input file. If there is one k-point which is "0 0 0" then set "istwfk 2".'
-     ABI_ERROR_NOSTOP(msg, ierr)
-   end if
-
    if ( dt%npfft>1 .and. any( dt%istwfk(1:nkpt) > 2 ) ) then
      write(msg,'(3a)' )&
       'When npfft>1, all the components of istwfk must be 1 or 2.',ch10,&

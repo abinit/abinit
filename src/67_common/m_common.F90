@@ -2677,7 +2677,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    ! getghc (any diago algorithm)
    if(wfoptalg>=0) then
      if(getghc_wmem /= fourwf_wmem) then
-       write(std_out,'(A,F10.2,1x,A)') "|  gemm_nonlop             |     bandpp  |  ",  real(getghc_wmem,dp)/(1024*1024), "MiB |"
+       write(std_out,'(A,F10.2,1x,A)') "|  gemm_nonlop             |       bandpp  |  ",  real(getghc_wmem,dp)/(1024*1024), "MiB |"
      end if
      write(std_out,'(A,F10.2,1x,A)') "|  mkrho~vtowfk_extra      |   npw,bandpp  |  ",  real(updrho_wmem,dp)/(1024*1024), "MiB |"
      write(std_out,'(A,F10.2,1x,A)') "|  hegvd                   |       bandpp  |  ",  real(hegvd_mem,dp)/(1024*1024), "MiB |"
