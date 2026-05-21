@@ -8239,7 +8239,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  logical :: isirr_k, isirr_q, sigc_is_herm, compute_qp__
  real(dp) :: fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty, tol_empty_in, gwr_boxcutmin_x
  real(dp) :: cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
- complex(dp) :: gwpc_sigxme, gwpc_sigxme2, xdot_tmp, ctmp
+ complex(gwp) :: gwpc_sigxme, gwpc_sigxme2, xdot_tmp, ctmp
  character(len=5000) :: msg
  logical :: q_is_gamma
  type(__slkmat_t),pointer :: ugb_kibz
@@ -8254,8 +8254,9 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  real(dp),contiguous, pointer :: ks_eig(:,:,:), qp_eig(:,:,:), qp_occ(:,:,:), cg2_ptr(:,:) ! cg1_ptr(:,:),
  real(dp),allocatable :: work(:,:,:,:), cg1_ibz(:,:) !, cg2_bz(:,:)
  complex(gwp),allocatable :: vc_sqrt_qbz(:), ur_bdgw(:,:)
- complex(dp),allocatable :: rhotwg(:), rhotwgp(:), rhotwg_ki(:,:), ur_ksum(:), ur_prod(:), eig0r(:), ugb_kcalcibz(:)
- complex(dp),target,allocatable :: ug_ksum(:)
+ complex(gwp),allocatable :: rhotwg(:), rhotwgp(:), rhotwg_ki(:,:), ur_ksum(:), ur_prod(:), eig0r(:), ugb_kcalcibz(:)
+ complex(gwp),allocatable :: ug_ksum(:)
+ complex(dp),target,allocatable :: ug_ksum_dp(:)
  complex(dp),allocatable  :: sigxme_tmp(:,:,:), sigx(:,:,:,:)
  type(sigijtab_t),allocatable :: Sigxij_tab(:,:), Sigcij_tab(:,:)
 ! *************************************************************************
@@ -8446,6 +8447,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
      end if
 
      ABI_MALLOC(ug_ksum, (npw_k * nspinor))
+     ABI_MALLOC(ug_ksum_dp, (npw_k * nspinor))
      ABI_MALLOC(ugb_kcalcibz, (npw_k * nspinor))
      ABI_MALLOC(cg1_ibz, (2, desc_ki%npw * nspinor))
      !ABI_MALLOC(cg2_bz, (2, npw_k * nspinor))
@@ -8477,18 +8479,19 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
          ! Reconstruct u_kq(G) from the IBZ image.
 
          ! FIXME: This is wrong if spc
-         call c_f_pointer(c_loc(ug_ksum), cg2_ptr, shape=[2, npw_k * nspinor])
+         call c_f_pointer(c_loc(ug_ksum_dp), cg2_ptr, shape=[2, npw_k * nspinor])
 
          !call c_f_pointer(c_loc(ugb_kibz%buffer_cplx(:, il_b)), cg1_ptr, shape=[2, desc_ki%npw * nspinor])
          !call cgtk_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, nspinor, ndat1, &
          !                 desc_ki%npw, desc_ki%gvec, &
          !                 npw_k, kg_k, desc_ki%istwfk, istwf_k, cg1_ptr, cg2_ptr, work_ngfft, work)
 
-         cg1_ibz(1,:) = real(ugb_kibz%buffer_cplx(:, il_b))
-         cg1_ibz(2,:) = aimag(ugb_kibz%buffer_cplx(:, il_b))
+         cg1_ibz(1,:) = real(ugb_kibz%buffer_cplx(:, il_b), kind=dp)
+         cg1_ibz(2,:) = real(aimag(ugb_kibz%buffer_cplx(:, il_b)), kind=dp)
          call cgtk_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, nspinor, ndat1, &
                           desc_ki%npw, desc_ki%gvec, &
                           npw_k, kg_k, desc_ki%istwfk, istwf_k, cg1_ibz, cg2_ptr, work_ngfft, work)
+          ug_ksum(:) = ug_ksum_dp(:)
        end if
 
        call fft_ug(npw_k, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_k, kg_k, gbound_ksum, ug_ksum, ur_ksum)
@@ -8593,6 +8596,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
      ABI_FREE(gbound_x)
      ABI_FREE(kg_k)
      ABI_FREE(ug_ksum)
+     ABI_FREE(ug_ksum_dp)
      ABI_FREE(ugb_kcalcibz)
      ABI_FREE(cg1_ibz)
      !ABI_FREE(cg2_bz)
