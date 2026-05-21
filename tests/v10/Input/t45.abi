@@ -1,4 +1,4 @@
-!Input file for the anaddb code. Analysis of the AlAs DDB
+!Input file for the anaddb code. Analysis of the H2O molecule DDB
 
 ! ddb file
 ddb_filepath = "t45.ddb.abo"
@@ -17,8 +17,8 @@ outdata_prefix = "t45o"
   q1shft  3*0.0
 
 !Effective charges
-     asr   6     ! Activate rotational invariance
- dim_msr 8       ! Treat the system as a molecule
+  asr   6     ! Activate translational + rotational invariance
+  sys_dim 8       ! Treat the system as a molecule
 
  
 !Interatomic force constant info

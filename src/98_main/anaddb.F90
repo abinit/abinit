@@ -201,7 +201,6 @@ program anaddb
     write(msg, '(a, a)' )' IFCs derivatives read',ch10
    call wrtout(units, msg)
  end if
- call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal, dtset%dim_msr, driver%dcdq, driver%dcdqdq)
  ! MR: Second- and third-order total energy derivatives calculated with the
  ! magnetic penalty (constrained DFPT) are converted to physically relevant ones here.
  if (abs(dtset%magpen) > tol8) then
@@ -237,7 +236,7 @@ program anaddb
 ! Acoustic Sum Rule
 ! In case the interatomic forces are not calculated, the
 ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
- call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal, dtset%dim_msr, driver%dcdq, driver%dcdqdq)
+ call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal, dtset%sys_dim, driver%dcdq, driver%dcdqdq)
 
 ! Open netcdf output and write basic quantities
  call driver%open_write_nc(ana_ncid, dtset, crystal, comm)
@@ -250,8 +249,8 @@ program anaddb
  end if
 
  ! If low-dimensional systems, convert dielectric tensors if present
- if (dtset%dim_msr>1 .and. dtset%dipdip>0) then
-   call driver%convertdim_dielt(crystal%rprimd, dtset%dim_msr,dtset%dielt_thick)
+ if (dtset%sys_dim>1 .and. dtset%dipdip>0) then
+   call driver%convertdim_dielt(crystal%rprimd, dtset%sys_dim,dtset%dielt_thick)
  end if
 
 ! Structural response at fixed polarization
@@ -271,7 +270,7 @@ program anaddb
    if (dtset%flexoflag /= 1 .and. dtset%asr == 6) then
      write(msg, '(a, a)' )' IFCs derivatives computed from real-space moment',ch10
      call wrtout(units, msg)
-     call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal, dtset%dim_msr, driver%dcdq, driver%dcdqdq)
+     call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal, dtset%sys_dim, driver%dcdq, driver%dcdqdq)
    end if
  end if
 

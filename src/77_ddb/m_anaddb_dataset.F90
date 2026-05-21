@@ -66,7 +66,6 @@ module m_anaddb_dataset
   integer:: brav
   integer:: chneut
   integer:: dieflag
-  integer:: dim_msr
   integer:: dipdip
   integer:: dipquad
   integer:: dossum
@@ -126,6 +125,7 @@ module m_anaddb_dataset
   integer:: rfmeth
   integer:: selectz
   integer:: symdynmat
+  integer:: sys_dim
   integer:: telphint
   integer:: thmflag
   integer:: qgrid_type
@@ -449,16 +449,6 @@ subroutine invars9(dtset, lenstr, natom, string)
    write(message, '(a, es14.4, 3a)' )&
    'dielt_thick is ',dtset%dielt_thick(1), ', which is lower than 0 .',ch10, &
    'Action: correct dielt_thick in your input file.'
-   ABI_ERROR(message)
- end if
-
- dtset%dim_msr=1
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dim_msr',tread,'INT')
- if(tread==1) dtset%dim_msr=intarr(1)
- if(dtset%dim_msr<1.or.dtset%dim_msr>9)then
-   write(message, '(a,i0,5a)' )&
-   'dim_msr is ',dtset%dim_msr,', but the only allowed values',ch10,&
-   'are 1, 2, 3, 4, 5, 6, 7 or 8.',ch10,'Action: correct dim_msr in your input file.'
    ABI_ERROR(message)
  end if
 
@@ -1457,6 +1447,15 @@ if(tread == 1) dtset%lwf_sigma = dprarr(1)
    ABI_ERROR(message)
  end if
 
+ dtset%sys_dim=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'sys_dim',tread,'INT')
+ if(tread==1) dtset%sys_dim=intarr(1)
+ if(dtset%sys_dim<1.or.dtset%sys_dim>9)then
+   write(message, '(a,i0,5a)' )&
+   'sys_dim is ',dtset%sys_dim,', but the only allowed values',ch10,&
+   'are 1, 2, 3, 4, 5, 6, 7 or 8.',ch10,'Action: correct sys_dim in your input file.'
+   ABI_ERROR(message)
+ end if
 !T
 
  dtset%targetpol(:) = 0._dp
@@ -2570,7 +2569,7 @@ subroutine anaddb_chkvars(string)
 !C
  list_vars = trim(list_vars)//' chneut'
 !D
- list_vars = trim(list_vars)//' dieflag dielt_env dielt_thick dim_msr dipdip dipquad dossum dosdeltae dossmear dostol dos_maxmode'
+ list_vars = trim(list_vars)//' dieflag dielt_env dielt_thick dipdip dipquad dossum dosdeltae dossmear dostol dos_maxmode'
 !E
  list_vars = trim(list_vars)//' ep_scalprod eivec elaflag elphflag enunit'
  list_vars = trim(list_vars)//' ep_b_min ep_b_max ep_int_gkk ep_keepbands ep_nqpt ep_nspline ep_prt_yambo'
@@ -2605,7 +2604,7 @@ subroutine anaddb_chkvars(string)
 !R
  list_vars = trim(list_vars)//' ramansr relaxat relaxstr rfmeth rifcsph'
 !S
- list_vars = trim(list_vars)//' selectz symdynmat symgkq'
+ list_vars = trim(list_vars)//' selectz symdynmat symgkq sys_dim'
 !T
  list_vars = trim(list_vars)//' targetpol telphint thmflag temperinc tempermin thermal_supercell thmtol timdisp'
 !U

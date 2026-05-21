@@ -92,8 +92,8 @@ MODULE m_ifc
    real(dp) :: dielt_thick(2) = zero
      ! Dielectric thickness of the 2D materials for electrostatics
 
-   integer :: dim_msr
-     ! Dimmensionality of the problem for electrostatics treatment
+   integer :: sys_dim
+     ! System dimmensionality for electrostatic treatment + rotational invariance
 
    integer :: dipdip = -1
      ! dipole dipole interaction flag.
@@ -359,13 +359,13 @@ end subroutine ifc_free
 
 subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
                     rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
-                    prtsrlr,enunit, dim_msr,& ! TODO: TO BE REMOVED
+                    prtsrlr,enunit, sys_dim,& ! TODO: TO BE REMOVED
                     comm, &
                     Ifc_coarse,dipquad,quadquad,dielt_env,dielt_thick,prtout) ! Optional
 
 !Arguments ------------------------------------
  class(ifc_type),intent(inout) :: Ifc
- integer,intent(in) :: asr,dipdip,symdynmat,nqshft,rfmeth,nsphere,comm,dim_msr
+ integer,intent(in) :: asr,dipdip,symdynmat,nqshft,rfmeth,nsphere,comm,sys_dim
  real(dp),intent(in) :: rifcsph
  type(crystal_t),intent(in) :: Crystal
  type(ddb_type),intent(in) :: ddb
@@ -430,7 +430,7 @@ subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  Ifc%brav = brav
  Ifc%dielt_env=0; if (present(dielt_env)) Ifc%dielt_env = dielt_env
  Ifc%dielt_thick(:)=0; if (present(dielt_thick)) Ifc%dielt_thick = dielt_thick(1:2)
- Ifc%dim_msr = dim_msr
+ Ifc%sys_dim = sys_dim
  Ifc%dipdip = abs(dipdip)
  Ifc%dipquad=0; if (present(dipquad)) Ifc%dipquad = dipquad
  Ifc%quadquad=0; if (present(quadquad)) Ifc%quadquad = quadquad
@@ -489,7 +489,7 @@ subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    sumg0=0
    qpt(:)=zero
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
-   if (dim_msr==1) then
+   if (sys_dim==1) then
      if (Ifc%dipquad==1.or.Ifc%quadquad==1) then
        call ewald9(Ifc%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                    Crystal%xred,zeff,qdrp_cart,ifc%eta,option=ifc%ewald_option,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
@@ -501,7 +501,7 @@ subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
       ! 2D materials are embedded in a dielectric environment (typically vacuum in DFT calculations)
       ! which leads to a different long-range electrostatics than in 2D. The next routine allows
       ! to estimate it. 
-      call ewald9_2D(natom,ddb%acell,Crystal%xred,rprim,dielt,dyew,qpt,zeff,qdrp_cart,dielt_env,dielt_thick,dim_msr)     
+      call ewald9_2D(natom,ddb%acell,Crystal%xred,rprim,dielt,dyew,qpt,zeff,qdrp_cart,dielt_env,dielt_thick,sys_dim)     
    end if        
    call q0dy3_calc(natom,dyewq0,dyew,Ifc%asr)
    ABI_FREE(dyew)
@@ -613,7 +613,7 @@ subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      end if
      qpt(:)=qbz(:,iqpt)
      sumg0=0
-     if (dim_msr==1) then
+     if (sys_dim==1) then
              ! 3D case     
        if (Ifc%dipquad==1.or.Ifc%quadquad==1) then
          call ewald9(Ifc%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
@@ -626,7 +626,7 @@ subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
        end if 
      else 
        ! 2D case
-       call ewald9_2D(natom,ddb%acell,Crystal%xred,rprim,dielt,dyew,qpt,zeff,qdrp_cart,one,dielt_thick,dim_msr)      
+       call ewald9_2D(natom,ddb%acell,Crystal%xred,rprim,dielt,dyew,qpt,zeff,qdrp_cart,one,dielt_thick,sys_dim)      
      end if        
      call q0dy3_apply(natom,dyewq0,dyew)
      plus=0
@@ -1052,7 +1052,7 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
  ! The dynamical matrix d2cart is calculated here:
  call gtdyn9(Ifc%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,Ifc%gprim,Ifc%mpert,natom,&
    Ifc%nrpt,qphnrm,my_qpt,Crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,Ifc%zeff,&
-   Ifc%qdrp_cart,Ifc%ewald_option,eta,comm_, Ifc%dim_msr,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad,&
+   Ifc%qdrp_cart,Ifc%ewald_option,eta,comm_, Ifc%sys_dim,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad,&
    dielt_env=Ifc%dielt_env,dielt_thick=Ifc%dielt_thick)
 
  ! Calculate the eigenvectors and eigenvalues of the dynamical matrix
@@ -1156,18 +1156,18 @@ subroutine ifc_get_dcdq(ifc, cryst, dcdq, dcdqdq, dyewq0, dipdip, comm)
      end do
    end do
  end do
-
+ if (ifc%dipdip==1) ABI_WARNING("2D electrostatics + IFCs derivatives from real-space IFCs not fully tested")
  ! If long-range electrostatics are treated separately, we need to add here the contribution to the torque
  ! Note that there is only a contribution coming from the zone-center IFCs here
  ! In 3D the derivative diverges; in 2D it does not, so we can add it with finite difference
- !if (dipdip==1 .and. (ifc%dim_msr==2 .or. ifc%dim_msr==3 .or. ifc%dim_msr==4)) then
+ !if (dipdip==1 .and. (ifc%sys_dim==2 .or. ifc%sys_dim==3 .or. ifc%sys_dim==4)) then
     !do kk=1,3
-      !if (kk /= ifc%dim_msr-1) then
+      !if (kk /= ifc%sys_dim-1) then
         !do jj=-1,1,2
           !qtmp(:) = zero
           !qtmp(kk)=jj*0.01_dp
           !call ewald9_2D(cryst%natom,ifc%acell,cryst%xred,ifc%rprim,ifc%dielt,dyew_tmp,&
-          !        qtmp,ifc%zeff,ifc%qdrp_cart,ifc%dielt_env,ifc%dielt_thick,ifc%dim_msr)      
+          !        qtmp,ifc%zeff,ifc%qdrp_cart,ifc%dielt_env,ifc%dielt_thick,ifc%sys_dim)      
           !dcdqred(2,:,:,:,:,kk) = dcdqred(2,:,:,:,:,kk)+half*dyew_tmp(2,:,:,:,:)/qtmp(kk)
  !       end do
  !     end if
@@ -2909,7 +2909,7 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
  call gtdyn9(ifc%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip, &
    ifc%dyewq0,d2cart,crystal%gmet,ifc%gprim,ifc%mpert,crystal%natom, &
    ifc%nrpt,qphnrm(1),qphon,crystal%rmet,ifc%rprim,ifc%rpt, &
-   ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart,ifc%ewald_option,eta,xmpi_comm_self,ifc%dim_msr)
+   ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart,ifc%ewald_option,eta,xmpi_comm_self,ifc%sys_dim)
 
  if (present(ncid)) then
    iphl2 = 0
@@ -3159,7 +3159,7 @@ subroutine ifc_to_ddb(ifc, ddb, crystal)
      crystal%gmet,ddb%gprim,ddb%mpert,crystal%natom,ifc%nrpt,qptnrm,qpt,&
      crystal%rmet,ddb%rprim,ifc%rpt,ifc%trans,crystal%ucvol, &
      ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart,ifc%ewald_option, ifc%eta,&
-     xmpi_comm_self,ifc%dim_msr)
+     xmpi_comm_self,ifc%sys_dim)
 
     ! Impose the acoustic sum rule
     !asrq0 = ddb%get_asrq0(1,1,crystal%xcart)

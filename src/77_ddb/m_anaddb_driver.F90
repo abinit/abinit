@@ -673,7 +673,7 @@ subroutine anaddb_driver_interatomic_force_constants(driver, ifc, dtset, crystal
    call Ifc_coarse%init(crystal, ddb, &
      dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, ngqpt_coarse, dtset%nqshft, dtset%q1shft, &
      driver%epsinf, driver%zeff, driver%qdrp_cart, &
-     dtset%nsphere, dtset%rifcsph, dtset%prtsrlr, dtset%enunit, dtset%dim_msr, comm, &
+     dtset%nsphere, dtset%rifcsph, dtset%prtsrlr, dtset%enunit, dtset%sys_dim, comm, &
      dipquad=dtset%dipquad, quadquad=dtset%quadquad, dielt_env=dtset%dielt_env,dielt_thick=dtset%dielt_thick)
 
    ! Now use the coarse q-mesh to fill the entries in dynmat(q)
@@ -681,7 +681,7 @@ subroutine anaddb_driver_interatomic_force_constants(driver, ifc, dtset, crystal
    call ifc%init(crystal, ddb, &
     dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, &
     dtset%ngqpt(1:3), dtset%nqshft, dtset%q1shft, driver%epsinf, driver%zeff, driver%qdrp_cart, &
-    dtset%nsphere, dtset%rifcsph, dtset%prtsrlr, dtset%enunit, dtset%dim_msr, comm, &
+    dtset%nsphere, dtset%rifcsph, dtset%prtsrlr, dtset%enunit, dtset%sys_dim, comm, &
     Ifc_coarse=Ifc_coarse, dipquad=dtset%dipquad, quadquad=dtset%quadquad, &
     dielt_env=dtset%dielt_env, dielt_thick=dtset%dielt_thick)
    call Ifc_coarse%free()
@@ -690,7 +690,7 @@ subroutine anaddb_driver_interatomic_force_constants(driver, ifc, dtset, crystal
    call ifc%init(crystal, ddb, &
      dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, &
      dtset%ngqpt(1:3), dtset%nqshft, dtset%q1shft, driver%epsinf, driver%zeff, driver%qdrp_cart, &
-     dtset%nsphere, dtset%rifcsph, dtset%prtsrlr, dtset%enunit, dtset%dim_msr, comm, &
+     dtset%nsphere, dtset%rifcsph, dtset%prtsrlr, dtset%enunit, dtset%sys_dim, comm, &
      dipquad=dtset%dipquad, quadquad=dtset%quadquad, dielt_env=dtset%dielt_env, dielt_thick=dtset%dielt_thick)
  end if
 
@@ -938,7 +938,7 @@ subroutine anaddb_driver_dielectric_q0(driver, dtset, crystal, ifc, ddb, asrq0, 
      Ifc%dyewq0, driver%d2cart, crystal%gmet, Ifc%gprim, dtset%mpert, crystal%natom, &
      Ifc%nrpt, qphnrm(1), qphon, crystal%rmet, Ifc%rprim, Ifc%rpt, &
      Ifc%trans, crystal%ucvol, Ifc%wghatm, crystal%xred, driver%zeff, driver%qdrp_cart, &
-     Ifc%ewald_option, eta, xmpi_comm_self, dtset%dim_msr,&
+     Ifc%ewald_option, eta, xmpi_comm_self, dtset%sys_dim,&
      dipquad=Ifc%dipquad, quadquad=Ifc%quadquad, dielt_thick=dtset%dielt_thick,&
      dielt_env=dtset%dielt_env)
 
@@ -1492,11 +1492,11 @@ end subroutine anaddb_driver_lattice_wannier
 !!
 !! SOURCE
 
-subroutine anaddb_driver_convertdim_dielt(driver, rprimd, dim_msr, dielt_thick)
+subroutine anaddb_driver_convertdim_dielt(driver, rprimd, sys_dim, dielt_thick)
 
 !Arguments -------------------------------
  class(anaddb_driver_type), intent(inout):: driver
- integer,intent(in):: dim_msr
+ integer,intent(in):: sys_dim
  real(dp) :: dielt_thick(2), rprimd(3,3)
 
 !Local variables -------------------------------
@@ -1509,18 +1509,18 @@ subroutine anaddb_driver_convertdim_dielt(driver, rprimd, dim_msr, dielt_thick)
  thick = dielt_thick(1)-dielt_thick(2)
  bool_isolated(:) = 0 
  ! When periodic, additional variable spaces coming from dynamical matrices derivatives
- if (dim_msr == 1) then ! 3D
+ if (sys_dim == 1) then ! 3D
     bool_isolated = 0
- elseif (dim_msr == 2) then ! 2D yz
+ elseif (sys_dim == 2) then ! 2D yz
     bool_isolated(1) = 1
- elseif (dim_msr == 3) then ! 2D xz
+ elseif (sys_dim == 3) then ! 2D xz
     bool_isolated(2) = 1
- elseif (dim_msr == 4) then ! 2D xy
+ elseif (sys_dim == 4) then ! 2D xy
     bool_isolated(3) = 1
  else
     write(msg,'(3a,i0)') &
-   'For dipole-dipole in 2D, the argument dim_msr should',ch10,&
-   'be between 1 and 4. However, dim_msr = ',dim_msr
+   'For dipole-dipole in 2D, the argument sys_dim should',ch10,&
+   'be between 1 and 4. However, sys_dim = ',sys_dim
    ABI_ERROR(msg)
  end if
  do idir = 1,3

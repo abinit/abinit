@@ -4964,11 +4964,11 @@ end subroutine nanal9
 
 subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom,&
                   nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,qdrp_cart,ewald_option,eta,comm,&
-                  dim_msr,dipquad,quadquad,dielt_env,dielt_thick)  ! optional
+                  sys_dim,dipquad,quadquad,dielt_env,dielt_thick)  ! optional
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: dipdip,mpert,natom,nrpt,ewald_option,comm,dim_msr
+ integer,intent(in) :: dipdip,mpert,natom,nrpt,ewald_option,comm,sys_dim
  real(dp),intent(in) :: qphnrm,ucvol
  real(dp),optional,intent(in) :: dielt_env
  integer,optional,intent(in) :: dipquad, quadquad
@@ -5022,11 +5022,11 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
    ! second energy derivative wrt xred(3,natom) in Hartrees (Denoted A-bar in the notes)
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
 
-   if (dim_msr==1) then ! 3D case
+   if (sys_dim==1) then ! 3D case
      call ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff,&
         qdrp_cart,eta,option=ewald_option,dipquad=dipquad_,quadquad=quadquad_)
-   elseif (dim_msr<5) then
-     call ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qpt,zeff,qdrp_cart,dielt_env,dielt_thick,dim_msr)      
+   elseif (sys_dim<5) then
+     call ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qpt,zeff,qdrp_cart,dielt_env,dielt_thick,sys_dim)      
    end if       
 
    call q0dy3_apply(natom,dyewq0,dyew)
@@ -6007,7 +6007,7 @@ end subroutine ftgam_init
 !!  crystal<type(crystal_t)>=Crystal structure parameters
 !!  d2cart(2,3,natom,3,natom)= Dynamical matrices coming from the Derivative Data Base at Gamma
 !!  d2dq (3,natom,3,natom,3): moment of IFCs (Phi^(1)) in cartesian coordinates 
-!!  dim_msr=System dimensionality (0D, 1D, ...) used for rotational invariance
+!!  sys_dim=System dimensionality (0D, 1D, ...) used for rotational invariance
 !!  mpert =maximum number of ipert
 !!  natom=number of atom
 !!
@@ -6020,10 +6020,10 @@ end subroutine ftgam_init
 
 !!***
 !
-subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,dim_msr,mpert,natom)
+subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,sys_dim,mpert,natom)
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: dim_msr,asr,mpert,natom
+ integer,intent(in) :: sys_dim,asr,mpert,natom
  type(crystal_t),intent(in) :: crystal
 !arrays
  real(dp),intent(in) :: d2cart(2,3,mpert,3,mpert)
@@ -6054,42 +6054,42 @@ subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,dim
 
  if (asr==6)then
    write(msg, '(a,a,a,a,a,a,a,a)' ) ch10, &
-   'Imposition of the ASR + rotational invariance for the interatomic forces (AMSR)', ch10, &
-   'Rotational invariance impose conditions on the IFCs moments and their derivatives',ch10,&
-   'At the moment, because of missing long-range contributions to the second IFCs derivatives',ch10,&
-   'rotational invariance is only imposed on the first-derivatives (first-order condition)'
+   ' Imposition of the ASR + rotational invariance for the interatomic forces (AMSR)', ch10, &
+   ' Rotational invariance impose conditions on the IFCs moments and their derivatives',ch10,&
+   ' At the moment, because of missing long-range contributions to the second IFCs derivatives',ch10,&
+   ' rotational invariance is only imposed on the first-derivatives (first-order condition)'
    call wrtout(std_out,msg)
  end if
  bool_kdir = 0
  bool_ldir = 0
  ! When periodic, additional variable spaces coming from dynamical matrices derivatives
- if (dim_msr == 1) then ! 3D
+ if (sys_dim == 1) then ! 3D
     bool_kdir = 0 ; bool_ldir = 1
-    msg2='3D treatment'
- elseif (dim_msr == 2) then ! 2D yz
+    msg2=' 3D treatment'
+ elseif (sys_dim == 2) then ! 2D yz
     bool_kdir(1) = 1 ; bool_ldir(2) = 1 ; bool_ldir(3) = 1
-    msg2='2D with x as out-of-plane direction'
- elseif (dim_msr == 3) then ! 2D xz
+    msg2=' 2D with x as out-of-plane direction'
+ elseif (sys_dim == 3) then ! 2D xz
     bool_kdir(2) = 1 ; bool_ldir(1) = 1 ; bool_ldir(3) = 1
-    msg2='2D with y as out-of-plane direction'
- elseif (dim_msr == 4) then ! 2D xy
+    msg2=' 2D with y as out-of-plane direction'
+ elseif (sys_dim == 4) then ! 2D xy
     bool_kdir(3) = 1 ; bool_ldir(1) = 1 ; bool_ldir(2) = 1
-    msg2='2D with z as out-of-plane direction'
- elseif (dim_msr == 5) then ! 1D x
+    msg2=' 2D with z as out-of-plane direction'
+ elseif (sys_dim == 5) then ! 1D x
     bool_kdir(2) = 1 ; bool_kdir(3) = 1 ; bool_ldir(1) = 1
-    msg2='1D with x as periodic direction'
- elseif (dim_msr == 6) then ! 1D y
+    msg2=' 1D with x as periodic direction'
+ elseif (sys_dim == 6) then ! 1D y
     bool_kdir(1) = 1 ; bool_kdir(2) = 1 ; bool_ldir(2) = 1
-    msg2='1D with y as periodic direction'
- elseif (dim_msr == 7) then ! 1D z
+    msg2=' 1D with y as periodic direction'
+ elseif (sys_dim == 7) then ! 1D z
     bool_kdir(1) = 1 ;  bool_kdir(2) = 1 ; bool_ldir(3) = 1
-    msg2='1D with z as periodic direction'
- elseif (dim_msr == 8) then ! Molecule
+    msg2=' 1D with z as periodic direction'
+ elseif (sys_dim == 8) then ! Molecule
     bool_kdir = 1 ; bool_ldir = 0
-    msg2='0D treatment (molecules)'
+    msg2=' 0D treatment (molecules)'
  else
     write(msg,'(3a,i0)')&
-   'The argument dim_msr should be between 1 and 8,',ch10, 'however, dim_msr = ',dim_msr
+   'The argument sys_dim should be between 1 and 8,',ch10, 'however, sys_dim = ',sys_dim
    ABI_BUG(msg)
  end if
 
@@ -6241,7 +6241,7 @@ subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,dim
  ABI_FREE(umat)
  ABI_FREE(work)
 
- write(msg, '(a,es16.8,es16.8)' )' Largest and smallest values from svd', sing(1), sing(nrow)
+ write(msg, '(a,es16.8,es16.8)' )' Largest and smallest values from Singular Value Decomposition', sing(1), sing(nrow)
  call wrtout([std_out], msg)
 
  ABI_MALLOC(vmat,(1:ncol,1:ncol))
@@ -6342,14 +6342,14 @@ subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,dim
    end do
  end do
  write(msg, '(a,a,a,a)' ) ch10, &
-   'Rotational invariance breaking, before and after imposition', ch10, &
-   '   ipert1   idir1   idir2   torque initial  [Ha/Bohr]  torque final [Ha/Bohr]'
+   ' Rotational invariance breaking, before and after imposition', ch10, &
+   '    ipert1   idir1   idir2   torque initial  [Ha/Bohr]  torque final [Ha/Bohr]'
    call wrtout([std_out, ab_out],msg)
  do ipert1=1,natom
    do idir1=1,3
      do idir4=1,3
        write(msg, '(a,i0,a,i0,a,i0,a, es16.8,a,es16.8)') '     ', ipert1,'        ', idir1, &
-              '       ', idir4 , '    ', msr_init(idir1,ipert1,idir4),'           ', msr(idir1,ipert1,idir4)
+              '        ', idir4 , '    ', msr_init(idir1,ipert1,idir4),'           ', msr(idir1,ipert1,idir4)
        call wrtout([std_out, ab_out],msg)
      end do
    end do

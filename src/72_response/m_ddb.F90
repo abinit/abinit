@@ -4383,8 +4383,7 @@ end function ddb_get_strten
 !!           2 if stationary block
 !!           3 if third order derivatives
 !!  Crystal<type(crystal_t)>=Crystal structure parameter
-!!  dim_msr=System dimensionality (0D, 1D, ...) used for rotational invariance
-!!  comm=MPI communicator.
+!!  sys_dim=System dimensionality (0D, 1D, ...) used for rotational invariance
 !!  dcdq = derivative of interatomic force constants at the zone center
 !!  dcdqdq = second derivative of interatomic force constants at the zone center
 !!
@@ -4398,11 +4397,11 @@ end function ddb_get_strten
 !!
 !! SOURCE
 
-subroutine asrq0_init(asrq0, ddb,  asr, rftyp, crystal, dim_msr, dcdq, dcdqdq)
+subroutine asrq0_init(asrq0, ddb,  asr, rftyp, crystal, sys_dim, dcdq, dcdqdq)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: asr,dim_msr,rftyp
+ integer,intent(in) :: asr,sys_dim,rftyp
  class(ddb_type),intent(inout) :: ddb
  type(crystal_t),intent(in) :: crystal
  class(asrq0_t), intent(out) :: asrq0
@@ -4477,7 +4476,7 @@ subroutine asrq0_init(asrq0, ddb,  asr, rftyp, crystal, dim_msr, dcdq, dcdqdq)
    ABI_FREE(d2asr_res)
  case (6)
    call msria_calc(asr,crystal,asrq0%d2asr,ddb%val(:,:,iblok),&
-   dcdq,dcdqdq,asrq0%d2dqmsr,asrq0%d2dqdqmsr,dim_msr,ddb%mpert,ddb%natom)
+   dcdq,dcdqdq,asrq0%d2dqmsr,asrq0%d2dqdqmsr,sys_dim,ddb%mpert,ddb%natom)
  case default
    ABI_ERROR(sjoin("Wrong value for asr:", itoa(asr)))
  end select

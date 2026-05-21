@@ -1254,19 +1254,19 @@ end subroutine ewald9
 !! dielt_env=dielectric constant of the embedding environment (1 in vacuum)
 !! thick(2)=dielectric thicknesses of the slab, first value correspond to the outer
 !! dielectric, second to the inner dielectric slab (if any)
-!! dim_msr=dimensionality of the system (indicates axis without periodicity)
+!! sys_dim= system dimensionality (indicates axis without periodicity)
 !!
 !! OUTPUT
 !! dyew(2,3,natom,3,natom)=long-range electrostatics IFCs following Ewald
 !!
 !! SOURCE
 
-subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,dielt_env,thick,dim_msr)
+subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,dielt_env,thick,sys_dim)
 
 !Arguments -------------------------------
 !scalars
  real(dp), intent(in) :: dielt_env
- integer :: natom, dim_msr
+ integer :: natom, sys_dim
 !arrays
  real(dp),intent(in) :: acell(3),thick(2),xred(3,natom),dielt(3,3),qphon(3)
  real(dp),intent(in) :: rprim(3,3),zeff(3,3,natom),qdrp_cart(3,3,3,natom)
@@ -1296,15 +1296,12 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
  real(dp) :: rho_gerade1(2),rho_gerade2(2), rho_ungerade1(2), rho_ungerade2(2)
 ! *************************************************************************
  
- inner_thick = thick(1)
- out_thick = thick(2)
- 
  periodic_dir(:) = 0
- if (dim_msr ==2) then ! 2D along x
+ if (sys_dim ==2) then ! 2D along x
          periodic_dir(2) =1 ; periodic_dir(3) = 1
- elseif (dim_msr==3) then ! 2D along y
+ elseif (sys_dim==3) then ! 2D along y
          periodic_dir(1) = 1 ; periodic_dir(3) = 1
- elseif (dim_msr==4) then ! 2D along z
+ elseif (sys_dim==4) then ! 2D along z
          periodic_dir(1) = 1 ; periodic_dir(2) = 1
  end if
  
@@ -1402,7 +1399,44 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
  end if
  end do
  end do
- 
+
+
+ ! Consistency check for dielectric thicknesses
+ inner_thick = thick(2)
+ out_thick = thick(1)
+
+ do ipert1=1,natom
+   do ipert2=1,natom
+     if (xcart_perp(ipert1)-xcart_perp(ipert2)>out_thick .or. xcart_perp(ipert1)+xcart_perp(ipert2)>out_thick) then
+       write(msg, '(5a)' )&
+       'Some atoms seem to be located away from the dielectric slab.',ch10,&
+       'The present model only allows for this specific scenario. Please increases slightly',ch10,&
+       'the dielectric slab thickness'
+       ABI_ERROR(msg)        
+     end if
+   end do
+ end do
+ if (inner_thick>zero) then
+   if (inner_thick>out_thick) then
+        write(msg, '(3a)' )&
+         'When considering consecutive dielectric slab models, inner thickness',ch10,&
+         'should be smaller than the outer thickness. Please check your input file'
+         ABI_ERROR(msg)
+   else
+       do ipert1=1,natom
+         do ipert2=1,natom
+           if (xcart_perp(ipert1)-xcart_perp(ipert2)>inner_thick .or. xcart_perp(ipert1)+xcart_perp(ipert2)>inner_thick) then
+             write(msg, '(5a)' )&
+             'Some atoms seem to be located away from the inner dielectric slab.',ch10,&
+             'The present model only allows for this specific scenario. Please increases slightly',ch10,&
+             'the inner dielectric slab thickness'
+             ABI_ERROR(msg)        
+           end if
+         end do
+       end do
+   end if
+ end if
+
  ! First needs to determine the Gaussian broadening intrinsic to the Ewald summation. In 2D, both the real and
  ! reciprocal summation are related to the complementary error function. We want to restrict the real-part to
  ! the first Wigner cell. We use the fact that sqrt(1-e^{-x^2}) < erf(x) < sqrt(1-e^{-4x^2/pi})
@@ -1424,11 +1458,11 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
  gmax = int(dsqrt(-two*dlog(one-(one-tol12)**2))/lambda/(two_pi/dsqrt(minval(norm_dielt))))
  if (firstcall) then
    firstcall = .FALSE.
-   write(msg, '(6a,f9.4,2a,i3,1a)' ) ch10,&
+   write(msg, '(6a,f9.4,3a,i3,1a)' ) ch10,&
          ' Ewald treatment of 2D long-range electrostatics interatomic force constants', ch10,  &
          ' To restrict the real-part summation of Ewald to the first unit cell, the Gaussian broadening', ch10, &
          ' has been set to ', lambda, ' 1/Bohr. For the reciprocal sum, this corresponds to max.', ch10, &
-         2*gmax-1, ' Brillouin zone repetitions in either in-plane directions'
+         ' ',2*gmax-1, ' Brillouin zone repetitions in either in-plane directions'
  call wrtout([ab_out,std_out], msg)
  end if
  
@@ -1441,9 +1475,9 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
  end do
  dyew_rec = zero
  ! If one dielectric slab model, same dielectric for both regions
- ! Otherwise, inner dielectric ~1 and other has been computed
+ ! Otherwise, inner dielectric ~1 and the other has been computed
  ! accordingly in the anaddb driver
- if (out_thick> zero) then
+ if (inner_thick> zero) then
     dielt_perp1 = one
  else
     dielt_perp1=dielt_perp
@@ -1460,18 +1494,19 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
         eta = dsqrt(norm_kvec/dielt_perp)
         eta1 = dsqrt(norm_kvec/dielt_perp1)
         xi = dsqrt(norm_kvec/dielt_perp2)
+        ! Effective dielectric constants (depends on direction)
         dielt_eff = dsqrt(norm_kvec*dielt_perp/dot_product(kvec,kvec))
         dielt_eff1 = dsqrt(norm_kvec*dielt_perp1/dot_product(kvec,kvec))
         dielt_eff2 = dsqrt(norm_kvec*dielt_perp2/dot_product(kvec,kvec))
         ! Reflection coefficient at the dielectric interfaces
         rflct_coeff = (dielt_eff-dielt_env)/(dielt_eff+dielt_env)
         rflct_coeff2 = (dielt_eff2-dielt_env)/(dielt_eff2+dielt_env)
-        trans_fun = (one+rflct_coeff2*dexp(-xi*(inner_thick-out_thick)))
-        trans_fun = trans_fun/(one-rflct_coeff2*dexp(-xi*(inner_thick-out_thick)))
+        trans_fun = (one+rflct_coeff2*dexp(-xi*(out_thick-inner_thick)))
+        trans_fun = trans_fun/(one-rflct_coeff2*dexp(-xi*(out_thick-inner_thick)))
         rflct_coeff1 = (dielt_eff1*trans_fun-dielt_eff2)/(dielt_eff1*trans_fun+dielt_eff2)
         ! Dipole-dipole charges prefactors
-        fac_exp = rflct_coeff*dexp(-eta*inner_thick)
-        fac_exp1 = rflct_coeff1*dexp(-eta1*out_thick)
+        fac_exp = rflct_coeff*dexp(-eta*out_thick)
+        fac_exp1 = rflct_coeff1*dexp(-eta1*inner_thick)
         fac_mirror = two*fac_exp/(one-fac_exp**2)
         fac_mirror1 = two*fac_exp1/(one-fac_exp1**2)
         ! Ewald factor in error function
@@ -1489,7 +1524,7 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
                 half*(dexp(eta*delta_perp)*(one-erf(fac_ewald1+fac_ewald2)))
             ! For second derivative, there is in principle a Gaussian term as well
             ! However, by an appropriate choice of the electrostatic gauge (mean average
-            ! potential, we can neglect it. This approximation has been validated
+            ! potential), we can neglect it. This approximation has been validated
             ! with respect to real-space dipoles and exact calculated points
             ewald_fun2 = half*(dexp(-eta1*delta_perp)*(one-erf(fac_ewald1-fac_ewald2b)))+ &
                  half*(dexp(eta1*delta_perp)*(one-erf(fac_ewald1+fac_ewald2b)))
@@ -1498,10 +1533,7 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
             ! Phase factor and mirror terms
             phi = dot_product(kvec,xcart_para(:,ipert1)-xcart_para(:,ipert2))
             mirror_parapara = fac_mirror*(dcosh(eta*mean2_perp)+fac_exp*dcosh(eta*delta_perp))
-            mirror_perpperp = zero
-            !if (abs(fac_mirror1)>tol6) then
             mirror_perpperp = fac_mirror*(dcosh(eta*mean2_perp)-fac_exp*dcosh(eta*delta_perp))
-            !end if
             mirror_paraperp = fac_mirror*fac_exp*dsinh(eta*delta_perp)
             mirror_diff = fac_mirror*dsinh(eta*mean2_perp)
         ! Then compute the charge prefactor
@@ -1545,23 +1577,23 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
                     *ewald_fun2/eta1/dielt_perp1*cos(phi)
             ! Third, add the source charge (gerade ungerade)
             ! For sake of consistenty, only used when there is only one dielectric thickness
-            if (out_thick > zero) then
+            if (inner_thick <tol6) then
             dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
                     (rho_gerade1(1)*rho_ungerade2(1)+rho_ungerade1(1)*rho_gerade2(1)&
                     +rho_gerade1(2)*rho_ungerade2(2)+rho_ungerade1(2)*rho_gerade2(2)) &
-                    *ewald_fun1/eta*cos(phi)
+                    *ewald_fun1/eta/dielt_perp*cos(phi)
             dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
                     (rho_gerade1(2)*rho_ungerade2(1)+rho_ungerade1(2)*rho_gerade2(1)&
                      -rho_gerade1(1)*rho_ungerade2(2)-rho_ungerade1(1)*rho_gerade2(2)) &
-                    *ewald_fun1/eta*sin(phi)
+                    *ewald_fun1/eta/dielt_perp*sin(phi)
             dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)-&
                     (rho_gerade1(1)*rho_ungerade2(1)+rho_ungerade1(1)*rho_gerade2(1)&
                      +rho_gerade1(2)*rho_ungerade2(2)+rho_ungerade1(2)*rho_gerade2(2)) &
-                    *ewald_fun1/eta*sin(phi)
+                    *ewald_fun1/eta/dielt_perp*sin(phi)
             dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)-&
                     (rho_gerade1(2)*rho_ungerade2(1)+rho_ungerade1(2)*rho_gerade2(1)&
                      -rho_gerade1(1)*rho_ungerade2(2)-rho_ungerade1(1)*rho_gerade2(2)) &
-                    *ewald_fun1/eta*cos(phi)
+                    *ewald_fun1/eta/dielt_perp*cos(phi)
             end if
             ! Now add the interactions with the mirror charges... para para
             dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
@@ -1579,52 +1611,52 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
             ! Now with perp perp
             dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
                     (rho_ungerade1(1)*rho_ungerade2(1)+rho_ungerade1(2)*rho_ungerade2(2))&
-                    *mirror_perpperp*eta1/dielt_perp*cos(phi)
+                    *mirror_perpperp*eta1/dielt_perp1*cos(phi)
             dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
                     (rho_ungerade1(2)*rho_ungerade2(1)-rho_ungerade1(1)*rho_ungerade2(2))&
-                    *mirror_perpperp*eta1/dielt_Perp*sin(phi)
+                    *mirror_perpperp*eta1/dielt_perp1*sin(phi)
             dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
                     (rho_ungerade1(1)*rho_ungerade2(1)+rho_ungerade1(2)*rho_ungerade2(2))&
-                    *mirror_perpperp*eta1/dielt_perp*sin(phi)
+                    *mirror_perpperp*eta1/dielt_perp1*sin(phi)
             dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
                     (rho_ungerade1(2)*rho_ungerade2(1)-rho_ungerade1(1)*rho_ungerade2(2))&
-                    *mirror_perpperp*eta1/dielt_perp*cos(phi)
+                    *mirror_perpperp*eta1/dielt_perp1*cos(phi)
             ! Third, add the source charge (gerade ungerade)
-            if (out_thick > zero) then
+            if (inner_thick <tol6) then
             dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
                     (rho_gerade1(1)*rho_ungerade2(1)+rho_ungerade1(1)*rho_gerade2(1)&
                     +rho_gerade1(2)*rho_ungerade2(2)+rho_ungerade1(2)*rho_gerade2(2)) &
-                    *mirror_paraperp/eta*cos(phi)
+                    *mirror_paraperp/eta/dielt_perp*cos(phi)
             dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)+&
                     (rho_gerade1(2)*rho_ungerade2(1)+rho_ungerade1(2)*rho_gerade2(1)&
                      -rho_gerade1(1)*rho_ungerade2(2)-rho_ungerade1(1)*rho_gerade2(2)) &
-                    *mirror_paraperp/eta*sin(phi)
+                    *mirror_paraperp/eta/dielt_perp*sin(phi)
             dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)-&
                     (rho_gerade1(1)*rho_ungerade2(1)+rho_ungerade1(1)*rho_gerade2(1)&
                      +rho_gerade1(2)*rho_ungerade2(2)+rho_ungerade1(2)*rho_gerade2(2)) &
-                    *mirror_paraperp/eta*sin(phi)
+                    *mirror_paraperp/eta/dielt_perp*sin(phi)
             dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
                     (rho_gerade1(2)*rho_ungerade2(1)+rho_ungerade1(2)*rho_gerade2(1)&
                      -rho_gerade1(1)*rho_ungerade2(2)-rho_ungerade1(1)*rho_gerade2(2)) &
-                    *mirror_paraperp/eta*cos(phi)
+                    *mirror_paraperp/eta/dielt_perp*cos(phi)
             ! Finally, there is a term on the sum of charge, only for mirror charges
                     ! Third, add the source charge (gerade ungerade)
             dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
                     (rho_gerade1(1)*rho_ungerade2(1)-rho_ungerade1(1)*rho_gerade2(1)&
                     +rho_gerade1(2)*rho_ungerade2(2)-rho_ungerade1(2)*rho_gerade2(2)) &
-                    *mirror_diff/eta*cos(phi)
+                    *mirror_diff/eta/dielt_perp*cos(phi)
             dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
                     (rho_gerade1(2)*rho_ungerade2(1)-rho_ungerade1(2)*rho_gerade2(1)&
                      -rho_gerade1(1)*rho_ungerade2(2)+rho_ungerade1(1)*rho_gerade2(2)) &
-                    *mirror_diff/eta*sin(phi)
+                    *mirror_diff/eta/dielt_perp*sin(phi)
             dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)+&
                     (rho_gerade1(1)*rho_ungerade2(1)-rho_ungerade1(1)*rho_gerade2(1)&
                      +rho_gerade1(2)*rho_ungerade2(2)-rho_ungerade1(2)*rho_gerade2(2)) &
-                    *mirror_diff/eta*sin(phi)
+                    *mirror_diff/eta/dielt_perp*sin(phi)
             dyew_rec(2,idir1,ipert1,idir2,ipert2)= dyew_rec(2,idir1,ipert1,idir2,ipert2)-&
                     (rho_gerade1(2)*rho_ungerade2(1)-rho_ungerade1(2)*rho_gerade2(1)&
                      +rho_gerade1(1)*rho_ungerade2(2)+rho_ungerade1(1)*rho_gerade2(2)) &
-                    *mirror_diff/eta*sin(phi)
+                    *mirror_diff/eta/dielt_perp*sin(phi)
             end if
             end do
             end do

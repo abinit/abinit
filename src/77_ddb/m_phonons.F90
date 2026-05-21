@@ -1930,7 +1930,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm,dcdq)
      ! long-range coulomb interaction through Ewald summation
      call gtdyn9(Ifc%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,Ifc%gprim,Ifc%mpert,natom, &
       Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff,&
-      ifc%qdrp_cart,ifc%ewald_option,eta,xmpi_comm_self,Ifc%dim_msr,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad,&
+      ifc%qdrp_cart,ifc%ewald_option,eta,xmpi_comm_self,Ifc%sys_dim,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad,&
       dielt_env=Ifc%dielt_env,dielt_thick=Ifc%dielt_thick)
      if (asrq0%asr==6) then
        qphon_padded = zero; qphon_padded(:,1) = qphon(:)

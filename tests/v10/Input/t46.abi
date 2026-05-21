@@ -17,11 +17,16 @@ outdata_prefix = "t46o"
   q1shft  3*0.0
   symdynmat 0
 !Effective charges
-  asr  6     ! Acoustic Sum Rule. 1 => imposed asymetrically
-  dim_msr 4
-  !rifcsph 20
+  asr  6     ! Rotational invariance + acoustic sum rule
+  sys_dim 4  ! 2D material with non-periodic axis along z
+ ! With this sys_dim choice, correct both the zone-center IFCs
+ ! and the first-derivatives of IFCs at the zone-center.
+ ! Note that, rotational invariance also in principle correct
+ ! the second-derivatives of IFCs, but we have seen that it
+ ! requires a specific treatment of the long-range electrostatics
+ ! that is currently not available (for 3D or any dimensions)
 !Interatomic force constant info
-  dipdip 0      ! Dipole-dipole interaction treatment
+  dipdip 0      ! Desactivate the long-range electrostatics here
 
 !Phonon band structure output for band2eps - See note near end for
 ! dealing with gamma LO-TO splitting issue.

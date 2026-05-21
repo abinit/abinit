@@ -67,7 +67,6 @@ module m_multibinit_dataset
   integer :: confinement
   integer :: conf_power_disp
   integer :: conf_power_strain
-  integer :: dim_msr
   integer :: dipdip
   integer :: eivec
   integer :: elphflag
@@ -132,6 +131,7 @@ module m_multibinit_dataset
   integer :: rfmeth
   integer :: restartxf
   integer :: symdynmat
+  integer :: sys_dim
   integer :: test_effpot
   integer :: test_prt_ph
   integer :: dipdip_range(3)
@@ -1073,16 +1073,6 @@ ABI_FREE(dptmp)
  if(tread==1) multibinit_dtset%conf_power_fact_strain=dprarr(1)
 
 !D
-
-multibinit_dtset%dim_msr=1
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dim_msr',tread,'INT')
- if(tread==1) multibinit_dtset%dim_msr=intarr(1)
- if(multibinit_dtset%dim_msr<1.or.multibinit_dtset%dim_msr>9)then
-   write(message, '(a,i0,5a)' )&
-   'dim_msr is ',multibinit_dtset%dim_msr,', but the only allowed values',ch10,&
-   'are 1, 2, 3, 4, 5, 6, 7 or 8.',ch10,'Action: correct dim_msr in your input file.'
-   ABI_ERROR(message)
- end if
 
  multibinit_dtset%dipdip=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread,'INT')
@@ -2483,6 +2473,15 @@ multibinit_dtset%lwf_temperature_start=0.0
    ABI_ERROR(message)
  end if
 
+ multibinit_dtset%sys_dim=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'sys_dim',tread,'INT')
+ if(tread==1) multibinit_dtset%sys_dim=intarr(1)
+ if(multibinit_dtset%sys_dim<1.or.multibinit_dtset%sys_dim>9)then
+   write(message, '(a,i0,5a)' )&
+   'sys_dim is ',multibinit_dtset%sys_dim,', but the only allowed values',ch10,&
+   'are 1, 2, 3, 4, 5, 6, 7 or 8.',ch10,'Action: correct sys_dim in your input file.'
+   ABI_ERROR(message)
+ end if 
 
  multibinit_dtset%strfact=100.0d0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'strfact',tread,'DPR')
