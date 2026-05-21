@@ -4000,7 +4000,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
         do my_it=1,gwr%my_ntau
           itau = gwr%my_itaus(my_it)
 
-          if (gwr%nsppol == 1) then
+          if (gwr%nsppol == 1 .and. gwr%nspinor == 1) then
            mats(itau)%buffer_cplx = two * mats(itau)%buffer_cplx
 
           else if (gwr%nsppol == 2) then
@@ -6356,7 +6356,7 @@ end if
  call xmpi_sum(sigc_it_mat, gwr%comm%value, ierr)
 
  ! Average over degenerate states.
-!  if (gwr%dtset%symsigma == +1 .an出发d. .not. gwr%use_supercell_for_sigma) then
+!  if (gwr%dtset%symsigma == +1 .and. .not. gwr%use_supercell_for_sigma) then
  if (gwr%dtset%symsigma == +1) then
    call wrtout(std_out, " Symsigma 1 --> Averaging Sig_c matrix elements within degenerate subspaces.")
    ABI_CHECK(gwr%sig_diago, "symsigma = 1 requires diagonal Sigma_c")
