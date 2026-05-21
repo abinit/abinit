@@ -7268,7 +7268,7 @@ subroutine gwr_run_energy_scf(gwr)
    ! This is more difficult to implement as we need to store G0 and eG
    ! and then use G only for chi and not in Sigma
    call wrtout(units, " Begin energy-only self-consistency in W (G0EW)")
-   ABI_ERROR("G0WE is not yet implemented")
+   ABI_ERROR("G0EW is not yet implemented")
    call gwr%run_g0w0(free_ugb=.False.)
    converged = .False.
    do while (.not. converged .and. gwr%scf_iteration <= gwr%dtset%gwr_nstep)
@@ -8271,6 +8271,17 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
    call wrtout(units, " Computing diagonal + off-diagonal matrix elements of Sigma_x", pre_newlines=1)
  end if
 
+ if (gwr%scf_iteration /= 1) then
+   associate (now => gwr%qp_ebands, prev => gwr%qp_ebands_prev)
+     if (all(now%occ == prev%occ)) then
+       call wrtout(units, " Occupations have not changed since last iteration, skipping Sigma_x matrix elements computation...", pre_newlines=1)
+     else
+       call wrtout(units, " Occupations have changed since last iteration, recomputing Sigma_x matrix elements...", pre_newlines=1)
+     end if
+   end associate
+   goto 10
+ end if
+
  call gwr%vcgen%print(units, " Info on Coulomb term used in Sigma_x", dtset%prtvol)
 
  nsppol = gwr%nsppol; nspinor = gwr%nspinor; cryst => gwr%cryst; dtset => gwr%dtset
@@ -8685,6 +8696,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
    ! TODO
  end if
 
+10 continue
  call cwtime_report(" gwr_build_sigxme:", cpu_all, wall_all, gflops_all)
  call timab(1920, 2, tsec)
 
