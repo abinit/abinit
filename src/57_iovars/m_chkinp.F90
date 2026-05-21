@@ -1134,7 +1134,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        !end if
        if (optdriver == RUNL_SIGMA .and. &
            any(mod(dt%gwcalctyp, 10) == [SIG_QPGW_PPM, SIG_QPGW_CD])) then
-         ABI_ERROR_NOSTOP("analytic-continuation, model GW with nspinor 2 are not implemented", ierr)
+         ABI_ERROR_NOSTOP("model GW with nspinor 2 are not implemented", ierr)
        end if
        !if (optdriver == RUNL_SIGMA .and. mod(dt%gwcalctyp, 100) >= 10) then
        !  ABI_ERROR_NOSTOP("Self-consistent GW with nspinor == 2 not implemented", ierr)
