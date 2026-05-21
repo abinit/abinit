@@ -2515,7 +2515,7 @@ subroutine gwr_build_green(gwr, free_ugb)
  !integer :: occ_idx(gwr%ks_ebands%nkpt, gwr%ks_ebands%nsppol)
  real(dp) :: tsec(2) , kk_ibz(3) !, kg(3)
  real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:)
- integer :: i, j, iab, is_idx, iiab, jiab, ispinor
+ integer :: i, j, iab, iiab, jiab, ispinor
  integer, parameter :: spinor_idxs(2, 4) = RESHAPE([1, 1, 2, 2, 1, 2, 2, 1], [2, 4])
 ! *************************************************************************
 
@@ -5754,7 +5754,7 @@ subroutine gwr_build_sigmac(gwr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, my_ir, my_nr, iw, idat, max_ndat, ndat, ii, jj, irow, iab, iiab, jiab, is_idx
+ integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, my_ir, my_nr, iw, idat, max_ndat, ndat, ii, jj, irow, iab, iiab, jiab
  integer :: iq_ibz, iq_bz, itau, ierr, ibc, ib1, ib2, bmin, bmax, band, band1, ifft, gpu_option
  integer :: band2, band2_start, band2_stop, nbc
  integer :: my_ikf, ipm, ik_bz, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp, iter_ncid
@@ -5988,7 +5988,7 @@ if (gwr%use_supercell_for_sigma) then
 
        ! TODO: Should block using nproc in kpt_comm, scatter data and perform multiple FFTs in parallel.
        do iab=1,gwr%nsig_ab
-         iiab = spinor_idxs(1, is_idx); jiab = spinor_idxs(2, is_idx)
+         iiab = spinor_idxs(1, iab); jiab = spinor_idxs(2, iab)
 if (.not. use_shmem_for_k) then
 
          ! Insert G_k(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir).
@@ -6310,7 +6310,7 @@ else
      ! TODO: Off-diagonal terms although this is not the most efficient algorithm
      do ikcalc=1,gwr%nkcalc
        do iab=1,gwr%nsig_ab
-         iiab = spinor_idxs(1, is_idx); jiab = spinor_idxs(2, is_idx)
+         iiab = spinor_idxs(1, iab); jiab = spinor_idxs(2, iab)
          if (gpu_option == ABI_GPU_OPENMP) then
            do ipm=1,2
              call sigc_rpr(1,ipm,ikcalc,iab)%gpu_map("update_from")
