@@ -7781,7 +7781,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
  ! TODO: use ddkop instead of commutator so that we can handle SOC terms.
  use_ddk = .False.
- !use_ddk = .True.
+ use_ddk = .True.
  !use_ddk = gwr%dtset%userie == 432
  if (use_ddk) call wrtout(std_out, " Using DDK to compute the commutator matrix elements.")
 
@@ -7805,6 +7805,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      if (dtset%symchi == 1 .and. ltg_q%ibzq(ik_bz) /= 1) CYCLE ! Only IBZ_q
      print_time = gwr%comm%me == 0 .and. (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0)
      if (print_time) call cwtime(cpu_k, wall_k, gflops_k, "start")
+     !write(*, *)" For kpoint:", trim(ktoa(kk_bz))
 
      ! FIXME: Be careful with the symmetry conventions here! and the interplay between umklapp in q and FFT
      ! Also, the assembly_chi0 routines assume symrec and trev_k in [1, 2]
@@ -7966,18 +7967,8 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
              !write(100, *)"temp:", sum(new_rhotwx)
              if (abs(deltaeKS_b1b2) > GW_TOLQ0) then
                 new_rhotwx = -new_rhotwx / deltaeKS_b1b2
-                !new_rhotwx = 2.6664594573771905 * new_rhotwx
-                !new_rhotwx = new_rhotwx / (two_pi ** 2)
-                !new_rhotwx = new_rhotwx / (two_pi)
-                !new_rhotwx = new_rhotwx * two_pi
-                !new_rhotwx = new_rhotwx
                 do iab=1,gwr%nspinor**2
-                  !new_rhotwx(:, iab) = matmul(cryst%gprimd, new_rhotwx(:, iab))
-                  !new_rhotwx(:, iab) = matmul(cryst%rprimd, new_rhotwx(:, iab))
-                  !vred(1,:) = real(new_rhotwx(:, iab))
-                  !vred(2,:) = aimag(new_rhotwx(:, iab))
-                  !call ddk_red2car(cryst%rprimd, vred, vcar)
-                  !new_rhotwx(:, iab) = vcar(1,:) + j_dpc * vcar(2,:)
+                  new_rhotwx(:, iab) = matmul(cryst%rmet, new_rhotwx(:, iab)) / (two_pi ** 2)
                 end do
              else
                 new_rhotwx = zero
@@ -7996,8 +7987,9 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
              !vg(2) = dot_product(cryst%gmet(2,:), vr)
              !vg(3) = dot_product(cryst%gmet(3,:), vr)
              do idir=1,3
-               !write(*, "(a, *(es12.5,2x))")"rhotwx:    ", rhotwx(:, 1)
-               !write(*, "(a, *(es12.5,2x))")"new_rhotwx:", new_rhotwx(:, 1)
+               !write(*, *)" For kpoint:", trim(ktoa(kk_ibz))
+               write(*, "(a, *(es12.5,2x))")"rhotwx:    ", rhotwx(:, 1)
+               write(*, "(a, *(es12.5,2x))")"new_rhotwx:", new_rhotwx(:, 1)
                !write(*, "(a, *(es12.5,2x))")"ratio old/new:", rhotwx(:, 1) / new_rhotwx(:, 1)
              end do
              !stop "gwr_build_chi0_head_and_wings"
@@ -8122,7 +8114,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  call cwtime_report(" gwr_build_chi0_head_and_wings:", cpu_all, wall_all, gflops_all)
  call timab(1927, 2, tsec)
 
- !stop "gwr_build_chi0_head_and_wings"
+ if (use_ddk) stop "gwr_build_chi0_head_and_wings"
 
 end subroutine gwr_build_chi0_head_and_wings
 !!***

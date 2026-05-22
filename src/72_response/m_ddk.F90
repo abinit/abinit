@@ -115,10 +115,10 @@ module m_ddk
   ! Store arrays targetted by the hamiltonians.
 
   real(dp), allocatable :: gh1c(:,:,:)
-   !gh1c, (2, mpw*nspinor, 3))
+   !gh1c, (2, npw_k*nspinor, 3))
 
   real(dp), allocatable :: gs1c(:,:,:)
-   ! gs1c, (2, mpw*nspinor, 3*psps%usepaw))
+   ! gs1c, (2, npw_k*nspinor, 3*psps%usepaw))
 
  contains
 
@@ -722,9 +722,6 @@ subroutine ddkop_init(new, dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft)
  nfft = product(ngfft(1:3))
  mgfft = maxval(ngfft(1:3))
 
- ABI_MALLOC(new%gh1c, (2, new%mpw*dtset%nspinor, 3))
- ABI_MALLOC(new%gs1c, (2, new%mpw*dtset%nspinor, 3))
-
  do idir=1,3
    ! ==== Initialize most of the Hamiltonian (and derivative) ====
    ! 1) Allocate all arrays and initialize quantities that do not depend on k and spin.
@@ -796,6 +793,9 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
    useylmgr1 = 1; optder = 1
  end if
 
+ ABI_RECALLOC(self%gh1c, (2, npw_k*dtset%nspinor, 3))
+ ABI_RECALLOC(self%gs1c, (2, npw_k*dtset%nspinor, 3))
+
  ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
  ABI_MALLOC(ylmgr1_k, (npw_k, 3+6*(optder/2), psps%mpsang**2*psps%useylm*useylmgr1))
 
@@ -851,7 +851,7 @@ end subroutine ddkop_setup_spin_kpoint
 !!
 !! SIDE EFFECTS
 !! Stores:
-!!  gh1c(2,npw1*nspinor)= <G|H^(1)|C> or <G|H^(1)-lambda.S^(1)|C> on the k+q sphere
+!!  gh1c(2,npw_k*nspinor)= <G|H^(1)|C> or <G|H^(1)-lambda.S^(1)|C> on the k+q sphere
 !!                        (only kinetic+non-local parts if optlocal=0)
 !!
 !! SOURCE
@@ -860,7 +860,7 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
 
 !Arguments ------------------------------------
 !scalars
- class(ddkop_t),intent(inout) :: self
+ class(ddkop_t),target,intent(inout) :: self
  integer,intent(in) :: npw_k, nspinor
  real(dp),intent(in) :: eig0nk
 !arrays
@@ -880,10 +880,11 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
  self%eig0nk = eig0nk
 
  if (self%inclvkb /= 0) then
+ !if (.True.) then
    ! optlocal0 = 0: local part of H^(1) is not computed in gh1c=<G|H^(1)|C>
    ! optnl = 2: non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
    ! opt_gvnlx1 = option controlling the use of gvnlx1 array:
-   optnl = 2 !; if (self%inclvkb == 0) optnl = 0
+   optnl = 2; if (self%inclvkb == 0) optnl = 0
 
    eshift = self%eig0nk - self%dfpt_sciss
    do idir=1,3
