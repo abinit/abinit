@@ -71,7 +71,7 @@ are stored in the SCR file.
 The first-order derivative of the KS states, on the contrary, is computed on the fly by the GWPT subdriver
 by solving a non-self-consistent (NSCF) Sternheimer equation as explained in the sections below.
 
-!!! important
+!!! warning
 
     Please note that ZPR computations at the GWPT level are still a field of active research,
     especially in polar materials where additional long-range (LR) terms of many-body nature appear in the e-ph matrix elements.
@@ -95,7 +95,7 @@ cd Work_eph4zpr_gwpt
 
 In this tutorial, we prefer to focus on the use of the GWPT subdriver of the EPH code hence
 we will be using **pre-computed** DDB and DFPT POT and DEN files to bypass the DFPT part.
-We also provide a GS DEN.nc file to initialize the NSCF calculations
+We also provide a GS DEN.nc file to initialize the NSCF calculation
 and a GS POT file with the KS potential required to solve the NSCF Sternheimer equation.
 
 If *git* is installed on your machine, one can easily fetch the entire repository with:
@@ -128,6 +128,15 @@ mv MgO_eph_zpr-master MgO_eph_zpr_gwpt
 
     The directory with the precomputed files must be located in the same working directory
     in which you will be executing the tutorial and must be named `MgO_eph_zpr_gwpt`.
+
+
+At this point, copy all the input files for the tutorial with:
+
+```
+cp ../Input/teph4zpr_gwpt_* .
+```
+
+and we are ready to go.
 
 
 ## Merging partial DDB, DFPT POT and DEN files
@@ -279,7 +288,7 @@ with [[optdriver]] 4 in the next step (see alsp [[ppmodel]])
 To compute the $G_0W_0$ self-energy, execute e.g.:
 
 ```sh
-mpirun -n 4 abinit teph4zpr_gwpt_6.abi > teph4zpr_6.log 2> err &
+mpirun -n 4 abinit teph4zpr_gwpt_6.abi > teph4zpr_gwpt_6.log 2> err &
 ```
 
 with the input file given by:
@@ -347,7 +356,7 @@ and left as additional exercise to the reader.
 At this point, we can finally start our first GWPT calculation by issuing:
 
 ```sh
-mpirun -n 4 abinit teph4zpr_7.abi > teph4zpr_7.log 2> err &
+mpirun -n 4 abinit teph4zpr_gwpt_7.abi > teph4zpr_7.log 2> err &
 ```
 
 !!! tip
@@ -411,13 +420,14 @@ This $\qq$-mesh must be identical to, or a submesh of, the $\kk$-mesh associated
 
 It is worth mentioning that it is possible to densify the $\qq$-mesh by using [[eph_ngqpt_fine]].
 In a typical scenario, one generates a WFK file on a $\kk$-mesh much denser than the one used in the DFPT part,
-and then use the Fourier interpolation of the DFPT potentials to reach a $\qq$-mesh that is equal or half the $kk$-mesh.
+and then use the Fourier interpolation of the DFPT potentials to reach a $\qq$-mesh that is equal or half the $\kk$-mesh.
 Further details on the interpolation of the DFPT scattering potentials are available on the [eph_intro page](eph_intro.md).
 
 The screening is read from the SCR file specified with [[getscr_filepath]].
 The cutoff energy in $W$ is given by [[ecuteps]], while [[ecutsigx]] defines
 the cutoff energy for the exchange part of the self-energy.
 Clearly, [[ecuteps]] **cannot be larger** than the value used in the previous screening calculation.
+
 The SCR file defines the $\pp$-mesh for the integration over the transferred momenta.
 This $\pp$-mesh must be identical to, or a submesh of, the $\kk$-mesh associated with the WFK file.
 No interpolation in $\pp$-space is possible at present.
@@ -454,7 +464,7 @@ denominator of the sum-over-states expression for the full first-order wavefunct
     By default, we use the Godby-Needs model.
 
 
-Now let's use AbiPy to analyze the the GSTORE.nc file produced by the job:
+Now let us use AbiPy to analyze the the GSTORE.nc file produced by the job:
 As usual, we can "print" basic info on the file by using the abiopen.py script:
 
 ```
@@ -489,22 +499,27 @@ Note that here we are using python conventions so we start to count from zero, a
 of the range is exluded.
 
 In our calculation, MgO has 16 valence electrons (see `nelect` in the main output file) so
-there are 8 occupied bands as [[nsppol]] = 1 and [[nspinor]] 1.
+there are 8 occupied bands as [[nsppol]] = 1 and [[nspinor]] = 1.
 
-Now let us explain how to visualize the data using the following AbiPy script:
+Now let us visualize the data using the following |AbiPy| script:
 
-```
-#!/usr/bin/env python
+```python
 from abipy.eph.gstore import GstoreFile
 
 with GstoreFile.from_file("teph4zpr_gwpt_7o_GSTORE.nc") as g:
-    g.plot_gwpt_vs_ks_scatter()                                   # auto
-    g.plot_gwpt_vs_ks_scatter(ratio_min=0, ratio_max=3)           # clipped
-    g.plot_gwpt_vs_ks_scatter(fit_intercept=True, with_inset=False)
+    g.plot_gwpt_vs_ks_scatter()
 ```
 
-TODO: Discussion
+Save the example in a python script e.g. `plot_gwpt.py` and execute it with:
 
+```
+python plot_gwtp.py
+```
+
+to obtain the following plot:
+
+
+![](eph4zpr_gwpt_assets/plot_gwpt.png)
 
 ## Computing the ZPR with GWPT e-ph matrix elements
 
@@ -515,9 +530,10 @@ as this run is essentially a post-processing of the data stored in the GSTORE fi
 The price to pay is that there are few parameters that can be changed as this level.
 In other words, the quality of the ZPR obtained here mainly depends on the density of the $\qq$- and $\pp$-meshes
 used in the previous section, the number of empty states ($n'$ index) and the different cutoff energies.
+
 In order to perform convergence studies, one should go back to the previous step, increase the relevant parameters
 and monitor how the ZPR is affected by these settings.
-Let us stress again that the calculations in this tutorial are severely underconverged and there are several theoretical and
+Let us stress again that the calculations in this tutorial are **severely underconverged** and there are several theoretical and
 technical and aspect that are still under investigation.
 
 After this preamble, let us start the calculation by issuing:
@@ -549,10 +565,10 @@ to account for the contribution of the bands beyond the active space defined by 
 
 !!! Important
 
-  The Sternheimer method is exact if one is interested
-  in the on-the-mass-shell corrections at the KS level in the adiabatic approximation.
-  In the case of GWPT calculations, one assumes that the GWPT matrix elements are
-  very close to the KS ones when $m$ > [[nband]].
+    The Sternheimer method is exact if one is interested
+    in the on-the-mass-shell corrections at the KS level in the adiabatic approximation.
+    In the case of GWPT calculations, one assumes that the GWPT matrix elements are
+    very close to the KS ones when $m$ > [[nband]].
 
 Now let us have a look at the final results reported in the main output file:
 
@@ -674,13 +690,34 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.270
  QP_gap - KS_gap:   -0.301 (OTMS:   -0.417)
 ```
 
+
+In order to compute the ZPR with KS matrix elements, run the same input file but
+now use [[gstore_gname]] = "gvals_ks".
+You should get:
+
+```
+ Using g(k,q) of type: KS
+
+
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.270
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   6   4.490    4.570    0.080    0.097   -0.002    0.829   -4.014    4.111    0.000    0.000
+   7   4.490    4.570    0.080    0.097   -0.002    0.829   -4.014    4.111    0.000    0.000
+   8   4.490    4.570    0.080    0.097   -0.002    0.829   -4.014    4.111    0.000    0.000
+   9   8.969    8.887   -0.081   -0.083   -0.000    0.983   -0.056   -0.027    4.479    4.317
+
+ KS gap:    4.479 (assuming bval:8 ==> bcond:9)
+ QP gap:    4.317 (OTMS:    4.299)
+ QP_gap - KS_gap:   -0.162 (OTMS:   -0.180)
+```
+
+To summarize, with GWPT the on-the-mass-shell gap is 4.062 eV while KS gives 4.299.
+Again, these results should be carefully converged.
+
+
 !!! tip
 
-    One can use [[gstore_gname]] to select the kind of e-ph matrix elements that should
-    be read from the GSTORE.
-    In order to compute the ZPR with KS matrix elements, use [[gstore_gname]] = "gvals_ks"
-
-Finally, let us mention that [[eph_ahc_type]] 0 can be used to use the adiabatic version of the Allen-Heine-Cardona equation.
-This is the version that should be used when comparing GWPT ZPR with finite-difference $G_0 W_0$
-calculations performed at fixed screening ignoring contributions beyond the rigid-ion approximation
-commonly used to deal with the Debye-Waller term.
+    [[eph_ahc_type]] 0 can be used to use the adiabatic version of the Allen-Heine-Cardona equation.
+    This is the version that should be used when comparing GWPT ZPR with finite-difference $G_0 W_0$
+    calculations performed at fixed screening ignoring contributions beyond the rigid-ion approximation
+    commonly used to deal with the Debye-Waller term.

@@ -8289,6 +8289,7 @@ of the GWPT e-ph matrix elements when [[eph_task]] == 17.
 
 1 -> Use the original treatment as in [[cite:Li2019]] in which the
      frequency convolution is evaluated at $\ee_\nk$ and $\ee_\mkq$ and the average is taken.
+
 2 -> Evaluate the convolution at $\ee_\nk$.
      This is the **recommended** approach when computing the ZPR of the band gap.
 """,
@@ -8815,7 +8816,7 @@ Variable(
     requires="[[ionmov]] == 25",
     added_in_version="before_v9",
     text=r"""
-Number of strain teps per MC trial trajectory, for the Hybrid Monte Carlo algorithm [[ionmov]]=25.
+Number of strain steps per MC trial trajectory, for the Hybrid Monte Carlo algorithm [[ionmov]]=25.
 """,
 ),
 
@@ -8902,11 +8903,9 @@ Variable(
     requires="[[usefock]] > 0",
     added_in_version="before_v9",
     text=r"""
-Mixing coefficient for the screened Fock operator in case of hybrid
-functionals. HSE has 0.25.
+Mixing coefficient for the screened Fock operator in case of hybrid functionals. HSE has 0.25.
 
-ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune
-this mixing coefficient.
+ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune this mixing coefficient.
 """,
 ),
 

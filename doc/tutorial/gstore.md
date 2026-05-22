@@ -50,6 +50,7 @@ gstore_qzone = "ibz"
 ```
 
 !!! important
+
     The combination [[gstore_kzone]] = "ibz" and [[gstore_qzone]] = "ibz" is not allowed.
     Typically, one wavevector is restricted to the IBZ while the other covers the full BZ.
     Using the full BZ for both $\kk$ and $\qq$ is primarily for testing (as it is much slower)
@@ -85,6 +86,7 @@ gstore_use_lgq 1   # Default is 0
 ```
 
 !!! important
+
     Not all e-ph calculations are compatible with little group filtering.
     Please verify the documentation or run small test calculations before launching large-scale jobs.
 
@@ -103,6 +105,7 @@ within an energy window around the Fermi level or band edges.
 In these cases, it is more efficient to filter bands automatically using an energy range defined by [[gstore_erange]].
 
 !!! important
+
     [[gstore_erange]] is not compatible with [[gstore_brange]].
 
 Other applications may require filtering $\kk$-points or using different band ranges for the $\psi_\nk$ and $\psi_\mkq$ states.
@@ -114,7 +117,7 @@ while $\qq$-points cover the full BZ or an appropriate irreducible wedge.
 The [[gstore_kfilter]] variable allows you to apply additional filtering directly to electronic states.
 The most appropriate choice depends on the specific physical property being computed; please refer to the [[gstore_kfilter]] documentation for details.
 Finally, [[gstore_with_vk]] allows you to include electronic group velocities (and optionally off-diagonal velocity matrix elements)
-in the GSTORE file, which is useful for transport calculations or for maintaining gauge consistency.
+in the GSTORE file, which is useful for transport calculations.
 
 The following examples provide recommended settings for different properties.
 We rely on default behavior whenever appropriate.
@@ -128,11 +131,13 @@ nband         12
 ```
 
 !!! important
+
     By "band edges," we refer to the $\kk$-points in the WFK file where the conduction band minimum (CBM) and valence band maximum (VBM) are found.
     These points do not necessarily coincide with the true band extrema if the latter do not lie on the chosen $\kk$-mesh (e.g., in Silicon).
     If a more accurate description of the true band edges is required, generate a WFK file using a shifted $\kk$-mesh via [[nshiftk]] and [[shiftk]].
 
-To manually control the list of $\kk$-points and bands for the $|n\kk\rangle$ states, remove the "kfilter" option and use [[nkptgw]], [[kptgw]], and [[bdgw]]:
+To manually control the list of $\kk$-points and bands for the $|n\kk\rangle$ states,
+remove the "kfilter" option and use [[nkptgw]], [[kptgw]], and [[bdgw]]:
 
 ```
 gstore_use_lgk 1  # Only q-points in the IBZ_k
@@ -203,4 +208,5 @@ eph_task 24         # SIGMAPH from GSTORE
 getgstore_filepath  "teph4zpr_10o_DS1_GSTORE.nc"
 ```
 
-Other options or files may be required depending on the value of [[eph_task]]. Please consult the documentation and available tutorials.
+Other options or files may be required depending on the value of [[eph_task]].
+Please consult the documentation and available tutorials.

@@ -14,6 +14,7 @@ nband 20
 eph_stern 1              # Activate Sterheimer method
 gwpt_g2mode 2            # See documentation.
 zcut 0.01 eV             # Imaginary shift in Green's function denominator.
+#gstore_gname "gvals_ks" # Activate this line to use KS matrix elements
 
 ddb_ngqpt 4 4 4
 
