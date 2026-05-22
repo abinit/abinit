@@ -5,9 +5,9 @@
 !!****m* ABINIT/m_CtqmcoffdiagInterface
 !! NAME
 !!  m_CtqmcoffdiagInterface
-!! 
-!! FUNCTION 
-!!  Manage a ctqmc simulation. 
+!!
+!! FUNCTION
+!!  Manage a ctqmc simulation.
 !!  friendly interface for the user
 !!
 !! COPYRIGHT
@@ -188,7 +188,7 @@ END SUBROUTINE CtqmcoffdiagInterface_init
 !! SOURCE
 
 SUBROUTINE CtqmcoffdiagInterface_setOpts(op,opt_Fk,opt_order,opt_histo,opt_movie,&
-& opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
+& opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove)
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
@@ -258,7 +258,7 @@ END SUBROUTINE CtqmcoffdiagInterface_setOpts
 !! SOURCE
 
 SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,opt_sym,opt_levels,hybri_limit,Magmom_orb,&
-&Magmom_spin,Magmom_tot,Iatom,fname,jmjbasis) 
+&Magmom_spin,Magmom_tot,Iatom,fname,jmjbasis)
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
@@ -297,7 +297,7 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
 !  OPEN(UNIT=ifstream, FILE="Gw.dat")
 !  CALL Ctqmcoffdiag_setG0w(Hybrid, ifstream)
 !  CLOSE(ifstream)
-!  
+!
 
   IF ( PRESENT(opt_levels)) &
     CALL Ctqmcoffdiag_setMu(op%Hybrid, opt_levels)

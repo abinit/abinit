@@ -57,7 +57,7 @@ module m_lattice_langevin_mover
 
   !-------------------------------------------------------------------!
   ! Lattice_langevin_mover_t
-  ! 
+  !
   !-------------------------------------------------------------------!
   type, public, extends(lattice_mover_t) :: lattice_langevin_mover_t
      ! c1 to c5 are a constants (temperature and mass dependent)
@@ -88,7 +88,7 @@ contains
     type(rng_t), target, intent(in) :: rng
     call self%lattice_mover_t%initialize(params, supercell, rng)
 
-    ! TODO: add friction 
+    ! TODO: add friction
     self%fr = params%latt_friction
 
     ABI_MALLOC(self%c3, (self%natom))
@@ -174,7 +174,7 @@ contains
        self%current_vcart(:,i) = self%current_vcart(:,i) + &
             & self%c1 * self%forces(:,i) / self%masses(i) - &
             & self%c2 * self%current_vcart(:,i) + &
-            & self%c3(i) * self%xi(:, i) - self%c4(i) * self%eta(:,i) 
+            & self%c3(i) * self%xi(:, i) - self%c4(i) * self%eta(:,i)
 
        self%displacement(:, i) = self%displacement(:, i) &
             & + self%dt * self%current_vcart(:, i) + self%c5( i) *self%eta(:,i)

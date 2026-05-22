@@ -1,8 +1,8 @@
 
-.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.Version 10.5.8.1 of ABINIT, released Dec 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 20 Dec 2025.
-- ( at 17h16 )
+.Starting date : Wed 11 Feb 2026.
+- ( at 14h31 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t68.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t68.abi
 - output file    -> t68.abo
 - root for input  files -> t68i
 - root for output files -> t68o
@@ -161,8 +161,8 @@ meta: {optdriver: 1, rfmagn: 1, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   1.98828
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -192,6 +192,7 @@ meta: {optdriver: 1, rfmagn: 1, }
 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.500000  0.000000  0.000000
+ Perturbation : homogeneous spin magnetic field along direction   3
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
 
@@ -213,68 +214,63 @@ tolerances: {toldfe: 1.00E-03, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   6.0303699863354      6.030E+00 4.111E+00 1.109E+04 9.513E+00 9.513E+00
- ETOT  2   40.832032183020      3.480E+01 7.132E-03 1.853E+05 5.458E-01 1.006E+01
- ETOT  3   6.8449443901474     -3.399E+01 9.031E+00 6.825E+03 1.199E+00 1.126E+01
- ETOT  4   6.5139333284250     -3.310E-01 2.207E-03 7.692E+02 8.876E-01 1.215E+01
- ETOT  5   8.1336858227221      1.620E+00 1.274E+01 5.982E+01 1.857E+00 1.400E+01
- ETOT  6   9.4642124447611      1.331E+00 1.078E-02 5.034E+00 1.374E+00 1.538E+01
- ETOT  7   9.5750016599484      1.108E-01 1.428E+01 3.887E+00 2.096E-01 1.559E+01
- ETOT  8   9.6511294860883      7.613E-02 4.496E-03 2.272E+00 2.761E-01 1.586E+01
- ETOT  9   9.7885303068367      1.374E-01 1.406E+01 8.948E-01 7.702E-01 1.663E+01
- ETOT 10   9.8624581986615      7.393E-02 4.305E-03 7.057E-01 5.636E-01 1.720E+01
- ETOT 11   9.8674810482538      5.023E-03 1.411E+01 3.466E+00 1.524E-01 1.735E+01
- ETOT 12   9.9191182861834      5.164E-02 3.632E-03 7.332E-02 4.320E-01 1.778E+01
- ETOT 13   9.9312617825027      1.214E-02 1.422E+01 1.071E-02 1.614E-01 1.794E+01
- ETOT 14   9.9326615513585      1.400E-03 1.540E-03 1.112E-03 2.175E-02 1.796E+01
- ETOT 15   9.9306489188911     -2.013E-03 1.422E+01 4.231E-04 1.245E-03 1.796E+01
- ETOT 16   9.9304910439588     -1.579E-04 6.709E-04 9.922E-05 1.500E-03 1.796E+01
- ETOT 17   9.9299254707128     -5.656E-04 1.422E+01 4.195E-05 1.404E-03 1.796E+01
+-ETOT  1  -6.7776611077979     -6.778E+00 4.111E+00 1.109E+04 9.513E+00 9.513E+00
+ ETOT  2   27.739392287401      3.452E+01 7.132E-03 1.853E+05 5.458E-01 1.006E+01
+ ETOT  3  -7.8603177863963     -3.560E+01 9.031E+00 6.825E+03 1.199E+00 1.126E+01
+ ETOT  4  -9.2444408905095     -1.384E+00 2.207E-03 7.692E+02 8.876E-01 1.215E+01
+ ETOT  5  -9.6774172969651     -4.330E-01 1.274E+01 5.982E+01 1.857E+00 1.400E+01
+ ETOT  6  -9.7978393334025     -1.204E-01 1.078E-02 5.034E+00 1.374E+00 1.538E+01
+ ETOT  7  -9.8172902422726     -1.945E-02 1.428E+01 3.887E+00 2.096E-01 1.559E+01
+ ETOT  8  -9.8454193345138     -2.813E-02 4.496E-03 2.272E+00 2.761E-01 1.586E+01
+ ETOT  9  -9.8988006870525     -5.338E-02 1.406E+01 8.948E-01 7.702E-01 1.663E+01
+ ETOT 10  -9.9193704764507     -2.057E-02 4.305E-03 7.057E-01 5.636E-01 1.720E+01
+ ETOT 11  -9.9225447749071     -3.174E-03 1.411E+01 3.466E+00 1.524E-01 1.735E+01
+ ETOT 12  -9.9284961030302     -5.951E-03 3.632E-03 7.332E-02 4.320E-01 1.778E+01
+ ETOT 13  -9.9290368303402     -5.407E-04 1.422E+01 1.071E-02 1.614E-01 1.794E+01
+ ETOT 14  -9.9290479913556     -1.116E-05 1.540E-03 1.112E-03 2.175E-02 1.796E+01
 
- At SCF step   17, etot is converged :
-  for the second time, diff in etot=  5.656E-04 < toldfe=  1.000E-03
-
- ---------------------------------------------------------------------------
+ At SCF step   14, etot is converged :
+  for the second time, diff in etot=  1.116E-05 < toldfe=  1.000E-03
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Real part of magnetization:
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
-    1 Fe   2.00000       -0.061999     17.962226    4.069265   -7.915422   15.602203   29.702269  -62.792612
+    1 Fe   2.00000       -0.061719     17.963375    4.068114   -7.913184   15.604961   29.690938  -62.792612
  ------------------------------------------------------------------------------------------------------------
  Total magnetization (spheres)
- (cart.coord.)                                      4.069265   -7.915422   15.602203
- (sph.coord.)                          17.962226                                       29.702269  -62.792612
+ (cart.coord.)                                      4.068114   -7.913184   15.604961
+ (sph.coord.)                          17.963375                                       29.690938  -62.792612
  Total magnetization (exact)
- (cart.coord.)                                      4.244530   -8.256343   19.858973
- (sph.coord.)                          21.921726                                       25.054721  -62.792612
+ (cart.coord.)                                      4.243361   -8.254070   19.861709
+ (sph.coord.)                          21.923122                                       25.045642  -62.792612
 ----------------------------
  Imaginary part of magnetization:
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
-    1 Fe   2.00000       -0.000013      0.000003   -0.000002    0.000002    0.000002   58.017359  145.695106
+    1 Fe   2.00000       -0.000018      0.000005   -0.000002    0.000002    0.000005   33.134859  143.673341
  ------------------------------------------------------------------------------------------------------------
  Total magnetization (spheres)
- (cart.coord.)                                     -0.000002    0.000002    0.000002
- (sph.coord.)                           0.000003                                       58.017359  145.695106
+ (cart.coord.)                                     -0.000002    0.000002    0.000005
+ (sph.coord.)                           0.000005                                       33.134859  143.673341
  Total magnetization (exact)
- (cart.coord.)                                     -0.000002    0.000002    0.000002
- (sph.coord.)                           0.000004                                        52.854259  142.918228
+ (cart.coord.)                                     -0.000003    0.000002    0.000005
+ (sph.coord.)                           0.000006                                        31.766553  141.161813
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   11.680E-02; max=  14.219E+00
+ Mean square residual over all n,k,spin=  -62.452E-03; max=  15.403E-04
 
- Eight components of 2nd-order total energy (hartree) are
+ Seven components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   2.39062786E+00 eigvalue=   3.41559868E-01  local=  -4.00477175E-01
+     kin0=   2.39108721E+00 eigvalue=   3.41613360E-01  local=  -4.00520378E-01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   1.01553335E+00     xc=  -9.46756906E+00
+    Hspinfield=  -1.98617088E+01  Hartree=   1.01576121E+00     xc=  -9.46868919E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   1.71943123E+01     enl0=  -1.14406167E+00   enl1=   0.00000000E+00
+    edocc=   1.71977790E+01     enl0=  -1.14436969E+00   enl1=   0.00000000E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=   9.92992547E+00
+   erelax=  -9.92904727E+00
 ================================================================================
 
  ---- first-order wavefunction calculations are completed ----
@@ -287,6 +283,22 @@ tolerances: {toldfe: 1.00E-03, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
 
+   1    1   3    6         0.0000013322        -3.3990998344
+
+   2    1   3    6        -0.0000019320         0.0000105035
+
+   3    1   3    6        -0.0000017948         0.0000084386
+
+   3    6   1    1         0.0000013322         3.3990998344
+   3    6   2    1        -0.0000019320        -0.0000105035
+   3    6   3    1        -0.0000017948        -0.0000084386
+
+
+  Magnetic susceptibility, in cartesian coordinates
+  (from uniform spin field response)
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -295,7 +307,7 @@ tolerances: {toldfe: 1.00E-03, }
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
              ecut      3.00000000E+01 Hartree
-           etotal      9.9299254707E+00
+           etotal     -9.9290479914E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         512
            irdwfk           1
@@ -399,7 +411,25 @@ P          mk1mem           8
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] The Abinit project: Impact, environment and recent developments.
+- [1] Abinit 2025: New Capabilities for the Predictive Modeling of Solids and Nanomaterials.
+- J. Chem. Phys. 163, 164126 (2025).
+- M.J. Verstraete, J. Abreu, G. Allemand, B. Amadon, G. Antonius,
+- M. Azizi, L. Baguet, C. Barat, L. Bastogne, R. Bejaud, J.-M. Beuken,
+- J. Bieder, A. Blanchet, F. Bottin, J. Bouchet, J. Bouquiaux, E. Bousquet,
+- J. Boust, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval,
+- A. Castellano, E. Castiel, J.-B. Charraud, J. Clerouin, M. Cote, C. Duval,
+- A. Gallo, F. Gendron, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras,
+- F. Gomez-Ortiz, X. Gonze, F. Goudreault, A. Gruneis, R. Gupta, B. Guster,
+- D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
+- I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
+- Comment: the sixth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#verstraete2025
+-
+- [2] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -412,28 +442,30 @@ P          mk1mem           8
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] ABINIT: Overview, and focus on selected capabilities
-- J. Chem. Phys. 152, 124102 (2020).
-- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
-- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
-- G.Brunin, D.Caliste, M.Cote,
-- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
-- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
-- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
-- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
-- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- [3] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
-- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
+- is available at
+-  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [3] Recent developments in the ABINIT software package.
+- [4] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -447,13 +479,14 @@ P          mk1mem           8
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - And optionally:
 -
-- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -462,14 +495,15 @@ P          mk1mem           8
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         25.4  wall=         25.4
+- Proc.   0 individual time (sec): cpu=         20.9  wall=         20.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  12 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         25.4  wall=         25.4
+.Delivered  10 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=         20.9  wall=         20.9

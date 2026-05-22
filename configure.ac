@@ -1138,8 +1138,12 @@ fi
 # AC_CONFIG_FILES([fallbacks/build-abinit-fallbacks.sh])
 #AC_CONFIG_COMMANDS([chmod +x fallbacks/build-abinit-fallbacks.sh])
 #AC_OUTPUT
-# Old formulation: AC_OUTPUT([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh],[chmod +x fallbacks/build-abinit-fallbacks.sh])
-AC_OUTPUT([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh],[chmod +x fallbacks/build-abinit-fallbacks.sh])
+# Old formulation: AC_CONFIG_FILES([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh])
+#AC_CONFIG_COMMANDS([default],[chmod +x fallbacks/build-abinit-fallbacks.sh],[])
+#AC_OUTPUT
+AC_CONFIG_FILES([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh])
+AC_CONFIG_COMMANDS([default],[chmod +x fallbacks/build-abinit-fallbacks.sh],[])
+AC_OUTPUT
 
 # Check that we have all required fallbacks
 ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])
@@ -1330,7 +1334,7 @@ AC_ARG_ENABLE([create_reconfigure_for_fb],
 
 
 if test "x${mandatory}" = "x#"; then
-  AC_MSG_NOTICE(["running cp ${abinit_srcdir}/config/scripts/install_fallbacks.sh ${abinit_builddir}"])	
+  AC_MSG_NOTICE(["running cp ${abinit_srcdir}/config/scripts/install_fallbacks.sh ${abinit_builddir}"])
   cp ${abinit_srcdir}/config/scripts/install_fallbacks.sh .
   if test "x$enable_reconfigure_for_fb" = "xyes"; then
       printf '%s/configure %s %s --disable-create_reconfigure_for_fb \n' "${abinit_srcdir}"  "$ac_configure_args" "$fb_path" > ${abinit_builddir}/.reconfigure

@@ -1,0 +1,821 @@
+
+.Version 10.5.8.1 of ABINIT. v10.7.1 released Mar 2026.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+
+.Copyright (C) 1998-2026 ABINIT group .
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Mon 20 Apr 2026.
+- ( at 12h12 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/tutorespfn_tcdfpt_1-tcdfpt_2-tcdfpt_3-tcdfpt_4-tcdfpt_5-tcdfpt_6-tcdfpt_7/tcdfpt_3.abi
+- output file    -> tcdfpt_3.abo
+- root for input  files -> tcdfpt_3i
+- root for output files -> tcdfpt_2o
+
+ DATASET    7 : space group P1 (#  1); Bravais aP (primitive triclinic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  7.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =      13
+     lnmax =      13     mgfft =      16  mpssoang =       5    mqgrid =    3001
+     natom =       6  nloc_mem =       1    nspden =       4   nspinor =       2
+    nsppol =       1      nsym =       1    n1xccc =    2501    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =          42        mffmem =           1         mkmem =          12
+       mpw =         133          nfft =        2560          nkpt =          12
+================================================================================
+P This job should need less than                       6.127 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      1.025 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
+================================================================================
+
+ DATASET    8 : space group P1 (#  1); Bravais aP (primitive triclinic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  8.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =      13
+     lnmax =      13     mgfft =      16  mpssoang =       5    mqgrid =    3001
+     natom =       6  nloc_mem =       1    nspden =       4   nspinor =       2
+    nsppol =       1      nsym =       1    n1xccc =    2501    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =          42        mffmem =           1         mkmem =          12
+       mpw =         133          nfft =        2560          nkpt =          12
+================================================================================
+P This job should need less than                       6.127 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      1.025 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
+================================================================================
+
+ DATASET    9 : space group P1 (#  1); Bravais aP (primitive triclinic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  9.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =      13
+     lnmax =      13     mgfft =      16  mpssoang =       5    mqgrid =    3001
+     natom =       6  nloc_mem =       1    nspden =       4   nspinor =       2
+    nsppol =       1      nsym =       1    n1xccc =    2501    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =          42        mffmem =           1         mkmem =          12
+       mpw =         133          nfft =        2560          nkpt =          12
+================================================================================
+P This job should need less than                       6.127 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      1.025 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
+================================================================================
+
+ DATASET   10 : space group P1 (#  1); Bravais aP (primitive triclinic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 10.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =      13
+     lnmax =      13     mgfft =      16  mpssoang =       5    mqgrid =    3001
+     natom =       6  nloc_mem =       1    nspden =       4   nspinor =       2
+    nsppol =       1      nsym =       1    n1xccc =    2501    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =          42        mffmem =           1         mkmem =          12
+       mpw =         133          nfft =        2560          nkpt =          12
+================================================================================
+P This job should need less than                       6.127 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      1.025 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
+================================================================================
+
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
+-
+- outvars: echo of global parameters not present in the input file
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      9.2100000000E+00  9.2100000000E+00  6.2560000000E+00 Bohr
+              amu      5.49380500E+01  1.89984032E+01
+              asr           0
+           chneut           0
+  d3e_pert1_atpol7          1       1
+  d3e_pert1_atpol8          1       1
+  d3e_pert1_atpol9          1       6
+  d3e_pert1_atpol10         1       6
+    d3e_pert1_dir7          1       0       0
+    d3e_pert1_dir8          1       0       0
+    d3e_pert1_dir9          1       0       0
+    d3e_pert1_dir10         1       1       1
+   d3e_pert1_elfd7          1
+   d3e_pert1_elfd8          1
+   d3e_pert1_elfd9          0
+   d3e_pert1_elfd10         0
+  d3e_pert1_magat7          1       6
+  d3e_pert1_magat8          1       1
+  d3e_pert1_magat9          1       6
+  d3e_pert1_magat10         1       1
+ d3e_pert1_magdir7          1       0       0
+ d3e_pert1_magdir8          1       0       0
+ d3e_pert1_magdir9          1       1       1
+ d3e_pert1_magdir10         1       0       0
+   d3e_pert1_magn7          1
+   d3e_pert1_magn8          2
+   d3e_pert1_magn9          1
+   d3e_pert1_magn10         2
+   d3e_pert1_phon7          1
+   d3e_pert1_phon8          1
+   d3e_pert1_phon9          0
+   d3e_pert1_phon10         0
+  d3e_pert2_atpol7          1       1
+  d3e_pert2_atpol8          1       1
+  d3e_pert2_atpol9          1       6
+  d3e_pert2_atpol10         1       6
+    d3e_pert2_dir7          1       0       0
+    d3e_pert2_dir8          1       0       0
+    d3e_pert2_dir9          1       1       1
+    d3e_pert2_dir10         1       0       0
+   d3e_pert2_elfd7          1
+   d3e_pert2_elfd8          1
+   d3e_pert2_elfd9          0
+   d3e_pert2_elfd10         0
+  d3e_pert2_magat7          1       6
+  d3e_pert2_magat8          1       1
+  d3e_pert2_magat9          1       1
+  d3e_pert2_magat10         1       6
+ d3e_pert2_magdir7          1       0       0
+ d3e_pert2_magdir8          1       0       0
+ d3e_pert2_magdir9          1       0       0
+ d3e_pert2_magdir10         1       1       1
+   d3e_pert2_magn7          1
+   d3e_pert2_magn8          2
+   d3e_pert2_magn9          2
+   d3e_pert2_magn10         1
+   d3e_pert2_phon7          1
+   d3e_pert2_phon8          1
+   d3e_pert2_phon9          0
+   d3e_pert2_phon10         0
+             ecut      3.00000000E+00 Hartree
+-          fftalg         512
+           getwfk           1
+           get1wf           3
+              ixc       -1012
+           jdtset        7    8    9   10
+              kpt      2.50000000E-01  2.50000000E-01  1.66666667E-01
+                      -2.50000000E-01  2.50000000E-01  1.66666667E-01
+                       2.50000000E-01 -2.50000000E-01  1.66666667E-01
+                      -2.50000000E-01 -2.50000000E-01  1.66666667E-01
+                       2.50000000E-01  2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01  2.50000000E-01  5.00000000E-01
+                       2.50000000E-01 -2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01 -2.50000000E-01  5.00000000E-01
+                       2.50000000E-01  2.50000000E-01 -1.66666667E-01
+                      -2.50000000E-01  2.50000000E-01 -1.66666667E-01
+                       2.50000000E-01 -2.50000000E-01 -1.66666667E-01
+                      -2.50000000E-01 -2.50000000E-01 -1.66666667E-01
+           kptopt           3
+         kptrlatt        2    0    0      0    2    0      0    0    3
+          kptrlen      1.84200000E+01
+P           mkmem          12
+            natom           6
+            nband          42
+           ndtset           4
+            ngfft          16      16      10
+             nkpt          12
+             nqpt           1
+           nspden           4
+          nspinor           2
+             nsym           1
+           ntypat           2
+              occ      1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+        optdriver          10
+           shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
+          spgroup           1
+          timdisp           1
+            typat      1  1  2  2  2  2
+              wtk        0.08333    0.08333    0.08333    0.08333    0.08333    0.08333
+                         0.08333    0.08333    0.08333    0.08333    0.08333    0.08333
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.4368610546E+00  2.4368610546E+00  1.6552663146E+00
+                       3.3934566238E+00  3.3934566238E+00  0.0000000000E+00
+                       9.5659556922E-01  3.9171265399E+00  1.6552663146E+00
+                       1.4802654853E+00  1.4802654853E+00  0.0000000000E+00
+                       3.9171265399E+00  9.5659556922E-01  1.6552663146E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       4.6050000000E+00  4.6050000000E+00  3.1280000000E+00
+                       6.4127036391E+00  6.4127036391E+00  0.0000000000E+00
+                       1.8077036391E+00  7.4022963609E+00  3.1280000000E+00
+                       2.7972963609E+00  2.7972963609E+00  0.0000000000E+00
+                       7.4022963609E+00  1.8077036391E+00  3.1280000000E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+                       6.9627618231E-01  6.9627618231E-01  0.0000000000E+00
+                       1.9627618231E-01  8.0372381769E-01  5.0000000000E-01
+                       3.0372381769E-01  3.0372381769E-01  0.0000000000E+00
+                       8.0372381769E-01  1.9627618231E-01  5.0000000000E-01
+            znucl       25.00000    9.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency, jdtset=   7.
+
+ chkinp: Checking input parameters for consistency, jdtset=   8.
+
+ chkinp: Checking input parameters for consistency, jdtset=   9.
+
+ chkinp: Checking input parameters for consistency, jdtset=  10.
+
+================================================================================
+== DATASET  7 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 7, }
+dimensions: {natom: 6, nkpt: 12, mband: 42, nsppol: 1, nspinor: 2, nspden: 4, mpw: 133, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   4.20000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 10, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
+
+ mkfilename : get1wf/=0, take file _1WF from output of DATASET   3.
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  9.2100000  0.0000000  0.0000000  G(1)=  0.1085776  0.0000000  0.0000000
+ R(2)=  0.0000000  9.2100000  0.0000000  G(2)=  0.0000000  0.1085776  0.0000000
+ R(3)=  0.0000000  0.0000000  6.2560000  G(3)=  0.0000000  0.0000000  0.1598465
+ Unit cell volume ucvol=  5.3065957E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+ setup1 : take into account q-point for computing boxcut.
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  10
+         ecut(hartree)=      3.000   => boxcut(ratio)=   2.05011
+
+ The list of irreducible elements of the spatial-dispersion third-order energy derivatives is:
+ (in reduced coordinates except for strain and hspinfield perturbations)
+
+            i1dir   i1pert  i2dir   i2pert  i3dir  i3pert
+     1)       1       1       1       1       1      15
+     2)       1       1       1       8       1      15
+     3)       1       8       1       8       1      15
+     4)       1       1       1      11       1      15
+     5)       1       8       1      11       1      15
+     6)       1      11       1      11       1      15
+
+
+
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Mn_LDA_FR_7e.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Mn_LDA_FR_7e.psp8
+- Mn    ONCVPSP-4.0.1  r_core=   3.51846   2.80304   2.20653
+- 25.00000   7.00000    260121                znucl, zion, pspdat
+    8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
+    5.99000000000000    4.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
+     nproj     2     2     2
+     spin-orbit psp, extension_switch     3
+        nprojso     3     4
+  pspatm : epsatm=   20.09337559
+         --- l  ekb(1:nproj) -->
+             0    6.531922    1.103991
+             1    3.644599    0.556591
+             2   -5.843607   -1.659201
+  spin-orbit 1    0.180363   -0.051207    0.019378
+  spin-orbit 2   -0.012806    0.009932    0.001874   -0.000335
+ pspatm: atomic psp has been read  and splines computed
+
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/F_LDA_FR.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/F_LDA_FR.psp8
+- F     ONCVPSP-4.0.1  r_core=   1.30176   1.45845   1.60495
+-  9.00000   7.00000    250506                znucl, zion, pspdat
+    8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
+    5.99000000000000    2.50000000000000    0.00000000000000   rchrg,fchrg,qchrg
+     nproj     2     2     1
+     spin-orbit psp, extension_switch     3
+        nprojso     3     2
+  pspatm : epsatm=    4.89093080
+         --- l  ekb(1:nproj) -->
+             0    6.441220    1.026405
+             1   -3.898823   -1.236403
+             2   -2.461691
+  spin-orbit 1    0.008005    0.002900   -0.000089
+  spin-orbit 2   -0.008605    0.000211
+ pspatm: atomic psp has been read  and splines computed
+
+   2.50951992E+03                                ecore*ucvol(ha*bohr**3)
+--------------------------------------------------------------------------------
+
+
+================================================================================
+ ==> Compute spatial-dispersion 3rd-order energy derivatives <==
+
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF1
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF1
+
+TIMDISP :  perts :  1.1 /  1.1 / 15.1
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF22
+
+TIMDISP :  perts :  1.1 /  8.1 / 15.1
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF31
+
+TIMDISP :  perts :  1.1 / 11.1 / 15.1
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF22
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF22
+
+TIMDISP :  perts :  8.1 /  8.1 / 15.1
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF31
+
+TIMDISP :  perts :  8.1 / 11.1 / 15.1
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF31
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF31
+
+TIMDISP :  perts : 11.1 / 11.1 / 15.1
+
+
+ -- Spatial-dispersion 3rd-order derivatives completed --
+
+ Frequency derivative of second-order energies, in cartesian coordinates
+     j1       j2                    matrix elementi
+  dir pert dir pert           real part       imaginary part
+   1    1   1    1         0.0000000000         0.0000000000
+   1    1   1    8         0.0000000000        -0.0000002264
+   1    1   1   11         0.0000000000         0.0000000003
+   1    8   1    1         0.0000000000         0.0000002264
+   1    8   1    8         0.0000000000         0.0000000000
+   1    8   1   11         0.0000000000         0.0000000181
+   1   11   1    1         0.0000000000        -0.0000000003
+   1   11   1    8         0.0000000000        -0.0000000181
+   1   11   1   11         0.0000000000         0.0000000000
+
+================================================================================
+== DATASET  8 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 8, }
+dimensions: {natom: 6, nkpt: 12, mband: 42, nsppol: 1, nspinor: 2, nspden: 4, mpw: 133, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   4.20000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 10, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
+
+ mkfilename : get1wf/=0, take file _1WF from output of DATASET   3.
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  9.2100000  0.0000000  0.0000000  G(1)=  0.1085776  0.0000000  0.0000000
+ R(2)=  0.0000000  9.2100000  0.0000000  G(2)=  0.0000000  0.1085776  0.0000000
+ R(3)=  0.0000000  0.0000000  6.2560000  G(3)=  0.0000000  0.0000000  0.1598465
+ Unit cell volume ucvol=  5.3065957E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+ setup1 : take into account q-point for computing boxcut.
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  10
+         ecut(hartree)=      3.000   => boxcut(ratio)=   2.05011
+
+ The list of irreducible elements of the spatial-dispersion third-order energy derivatives is:
+ (in reduced coordinates except for strain and hspinfield perturbations)
+
+            i1dir   i1pert  i2dir   i2pert  i3dir  i3pert
+     1)       1       1       1       1       1      15
+     2)       1       1       1       8       1      15
+     3)       1       8       1       8       1      15
+     4)       1       1       1      18       1      15
+     5)       1       8       1      18       1      15
+     6)       1      18       1      18       1      15
+
+
+
+--------------------------------------------------------------------------------
+
+
+================================================================================
+ ==> Compute spatial-dispersion 3rd-order energy derivatives <==
+
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF1
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF1
+
+TIMDISP :  perts :  1.1 /  1.1 / 15.1
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF22
+
+TIMDISP :  perts :  1.1 /  8.1 / 15.1
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF55
+
+TIMDISP :  perts :  1.1 / 18.1 / 15.1
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF22
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF22
+
+TIMDISP :  perts :  8.1 /  8.1 / 15.1
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF55
+
+TIMDISP :  perts :  8.1 / 18.1 / 15.1
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF55
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF55
+
+TIMDISP :  perts : 18.1 / 18.1 / 15.1
+
+
+ -- Spatial-dispersion 3rd-order derivatives completed --
+
+ Frequency derivative of second-order energies, in cartesian coordinates
+     j1       j2                    matrix elementi
+  dir pert dir pert           real part       imaginary part
+   1    1   1    1         0.0000000000         0.0000000000
+   1    1   1    8         0.0000000000        -0.0000002264
+   1    1   1   18         0.0000000000         0.0000000007
+   1    8   1    1         0.0000000000         0.0000002264
+   1    8   1    8         0.0000000000         0.0000000000
+   1    8   1   18         0.0000000000         0.0000000286
+   1   18   1    1         0.0000000000        -0.0000000007
+   1   18   1    8         0.0000000000        -0.0000000286
+   1   18   1   18         0.0000000000         0.0000000000
+
+================================================================================
+== DATASET  9 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 9, }
+dimensions: {natom: 6, nkpt: 12, mband: 42, nsppol: 1, nspinor: 2, nspden: 4, mpw: 133, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   4.20000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 10, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
+
+ mkfilename : get1wf/=0, take file _1WF from output of DATASET   3.
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  9.2100000  0.0000000  0.0000000  G(1)=  0.1085776  0.0000000  0.0000000
+ R(2)=  0.0000000  9.2100000  0.0000000  G(2)=  0.0000000  0.1085776  0.0000000
+ R(3)=  0.0000000  0.0000000  6.2560000  G(3)=  0.0000000  0.0000000  0.1598465
+ Unit cell volume ucvol=  5.3065957E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+ setup1 : take into account q-point for computing boxcut.
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  10
+         ecut(hartree)=      3.000   => boxcut(ratio)=   2.05011
+
+ The list of irreducible elements of the spatial-dispersion third-order energy derivatives is:
+ (in reduced coordinates except for strain and hspinfield perturbations)
+
+            i1dir   i1pert  i2dir   i2pert  i3dir  i3pert
+     1)       1      11       1      18       1      15
+
+
+
+--------------------------------------------------------------------------------
+
+
+================================================================================
+ ==> Compute spatial-dispersion 3rd-order energy derivatives <==
+
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF31
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF55
+
+TIMDISP :  perts : 11.1 / 18.1 / 15.1
+
+
+ -- Spatial-dispersion 3rd-order derivatives completed --
+
+ Frequency derivative of second-order energies, in cartesian coordinates
+     j1       j2                    matrix elementi
+  dir pert dir pert           real part       imaginary part
+   1   11   1   18         0.0000000000         0.0000000058
+   1   18   1   11         0.0000000000        -0.0000000058
+
+================================================================================
+== DATASET 10 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 10, }
+dimensions: {natom: 6, nkpt: 12, mband: 42, nsppol: 1, nspinor: 2, nspden: 4, mpw: 133, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   4.20000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 10, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
+
+ mkfilename : get1wf/=0, take file _1WF from output of DATASET   3.
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  9.2100000  0.0000000  0.0000000  G(1)=  0.1085776  0.0000000  0.0000000
+ R(2)=  0.0000000  9.2100000  0.0000000  G(2)=  0.0000000  0.1085776  0.0000000
+ R(3)=  0.0000000  0.0000000  6.2560000  G(3)=  0.0000000  0.0000000  0.1598465
+ Unit cell volume ucvol=  5.3065957E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+ setup1 : take into account q-point for computing boxcut.
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  10
+         ecut(hartree)=      3.000   => boxcut(ratio)=   2.05011
+
+ The list of irreducible elements of the spatial-dispersion third-order energy derivatives is:
+ (in reduced coordinates except for strain and hspinfield perturbations)
+
+            i1dir   i1pert  i2dir   i2pert  i3dir  i3pert
+     1)       1      18       1      11       1      15
+
+
+
+--------------------------------------------------------------------------------
+
+
+================================================================================
+ ==> Compute spatial-dispersion 3rd-order energy derivatives <==
+
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF55
+-inwffil : will read wavefunctions from disk file tcdfpt_2o_DS3_1WF31
+
+TIMDISP :  perts : 18.1 / 11.1 / 15.1
+
+
+ -- Spatial-dispersion 3rd-order derivatives completed --
+
+ Frequency derivative of second-order energies, in cartesian coordinates
+     j1       j2                    matrix elementi
+  dir pert dir pert           real part       imaginary part
+   1   11   1   18         0.0000000000         0.0000000058
+   1   18   1   11         0.0000000000        -0.0000000058
+
+== END DATASET(S) ==============================================================
+================================================================================
+
+ -outvars: echo values of variables after computation  --------
+            acell      9.2100000000E+00  9.2100000000E+00  6.2560000000E+00 Bohr
+              amu      5.49380500E+01  1.89984032E+01
+              asr           0
+           chneut           0
+  d3e_pert1_atpol7          1       1
+  d3e_pert1_atpol8          1       1
+  d3e_pert1_atpol9          1       6
+  d3e_pert1_atpol10         1       6
+    d3e_pert1_dir7          1       0       0
+    d3e_pert1_dir8          1       0       0
+    d3e_pert1_dir9          1       0       0
+    d3e_pert1_dir10         1       1       1
+   d3e_pert1_elfd7          1
+   d3e_pert1_elfd8          1
+   d3e_pert1_elfd9          0
+   d3e_pert1_elfd10         0
+  d3e_pert1_magat7          1       6
+  d3e_pert1_magat8          1       1
+  d3e_pert1_magat9          1       6
+  d3e_pert1_magat10         1       1
+ d3e_pert1_magdir7          1       0       0
+ d3e_pert1_magdir8          1       0       0
+ d3e_pert1_magdir9          1       1       1
+ d3e_pert1_magdir10         1       0       0
+   d3e_pert1_magn7          1
+   d3e_pert1_magn8          2
+   d3e_pert1_magn9          1
+   d3e_pert1_magn10         2
+   d3e_pert1_phon7          1
+   d3e_pert1_phon8          1
+   d3e_pert1_phon9          0
+   d3e_pert1_phon10         0
+  d3e_pert2_atpol7          1       1
+  d3e_pert2_atpol8          1       1
+  d3e_pert2_atpol9          1       6
+  d3e_pert2_atpol10         1       6
+    d3e_pert2_dir7          1       0       0
+    d3e_pert2_dir8          1       0       0
+    d3e_pert2_dir9          1       1       1
+    d3e_pert2_dir10         1       0       0
+   d3e_pert2_elfd7          1
+   d3e_pert2_elfd8          1
+   d3e_pert2_elfd9          0
+   d3e_pert2_elfd10         0
+  d3e_pert2_magat7          1       6
+  d3e_pert2_magat8          1       1
+  d3e_pert2_magat9          1       1
+  d3e_pert2_magat10         1       6
+ d3e_pert2_magdir7          1       0       0
+ d3e_pert2_magdir8          1       0       0
+ d3e_pert2_magdir9          1       0       0
+ d3e_pert2_magdir10         1       1       1
+   d3e_pert2_magn7          1
+   d3e_pert2_magn8          2
+   d3e_pert2_magn9          2
+   d3e_pert2_magn10         1
+   d3e_pert2_phon7          1
+   d3e_pert2_phon8          1
+   d3e_pert2_phon9          0
+   d3e_pert2_phon10         0
+             ecut      3.00000000E+00 Hartree
+           etotal7     0.0000000000E+00
+           etotal8     0.0000000000E+00
+           etotal9     0.0000000000E+00
+           etotal10    0.0000000000E+00
+            fcart7     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart8     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart9     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart10    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+-          fftalg         512
+           getwfk           1
+           get1wf           3
+              ixc       -1012
+           jdtset        7    8    9   10
+              kpt      2.50000000E-01  2.50000000E-01  1.66666667E-01
+                      -2.50000000E-01  2.50000000E-01  1.66666667E-01
+                       2.50000000E-01 -2.50000000E-01  1.66666667E-01
+                      -2.50000000E-01 -2.50000000E-01  1.66666667E-01
+                       2.50000000E-01  2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01  2.50000000E-01  5.00000000E-01
+                       2.50000000E-01 -2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01 -2.50000000E-01  5.00000000E-01
+                       2.50000000E-01  2.50000000E-01 -1.66666667E-01
+                      -2.50000000E-01  2.50000000E-01 -1.66666667E-01
+                       2.50000000E-01 -2.50000000E-01 -1.66666667E-01
+                      -2.50000000E-01 -2.50000000E-01 -1.66666667E-01
+           kptopt           3
+         kptrlatt        2    0    0      0    2    0      0    0    3
+          kptrlen      1.84200000E+01
+P           mkmem          12
+            natom           6
+            nband          42
+           ndtset           4
+            ngfft          16      16      10
+             nkpt          12
+             nqpt           1
+           nspden           4
+          nspinor           2
+             nsym           1
+           ntypat           2
+              occ      1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+        optdriver          10
+           shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
+          spgroup           1
+           strten7     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten8     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten9     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten10    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+          timdisp           1
+            typat      1  1  2  2  2  2
+              wtk        0.08333    0.08333    0.08333    0.08333    0.08333    0.08333
+                         0.08333    0.08333    0.08333    0.08333    0.08333    0.08333
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.4368610546E+00  2.4368610546E+00  1.6552663146E+00
+                       3.3934566238E+00  3.3934566238E+00  0.0000000000E+00
+                       9.5659556922E-01  3.9171265399E+00  1.6552663146E+00
+                       1.4802654853E+00  1.4802654853E+00  0.0000000000E+00
+                       3.9171265399E+00  9.5659556922E-01  1.6552663146E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       4.6050000000E+00  4.6050000000E+00  3.1280000000E+00
+                       6.4127036391E+00  6.4127036391E+00  0.0000000000E+00
+                       1.8077036391E+00  7.4022963609E+00  3.1280000000E+00
+                       2.7972963609E+00  2.7972963609E+00  0.0000000000E+00
+                       7.4022963609E+00  1.8077036391E+00  3.1280000000E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+                       6.9627618231E-01  6.9627618231E-01  0.0000000000E+00
+                       1.9627618231E-01  8.0372381769E-01  5.0000000000E-01
+                       3.0372381769E-01  3.0372381769E-01  0.0000000000E+00
+                       8.0372381769E-01  1.9627618231E-01  5.0000000000E-01
+            znucl       25.00000    9.00000
+
+================================================================================
+
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
+
+- Timing analysis has been suppressed with timopt=0
+
+
+
+================================================================================
+
+ Suggested references for the acknowledgment of ABINIT usage.
+
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
+-
+- [1] Libxc: A library of exchange and correlation functionals for density functional theory.
+- M.A.L. Marques, M.J.T. Oliveira, T. Burnus, Computer Physics Communications 183, 2227 (2012).
+- Comment: to be cited when LibXC is used (negative value of ixc)
+- Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#marques2012
+-
+- [2] Abinit 2025: New Capabilities for the Predictive Modeling of Solids and Nanomaterials.
+- J. Chem. Phys. 163, 164126 (2025).
+- M.J. Verstraete, J. Abreu, G. Allemand, B. Amadon, G. Antonius,
+- M. Azizi, L. Baguet, C. Barat, L. Bastogne, R. Bejaud, J.-M. Beuken,
+- J. Bieder, A. Blanchet, F. Bottin, J. Bouchet, J. Bouquiaux, E. Bousquet,
+- J. Boust, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval,
+- A. Castellano, E. Castiel, J.-B. Charraud, J. Clerouin, M. Cote, C. Duval,
+- A. Gallo, F. Gendron, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras,
+- F. Gomez-Ortiz, X. Gonze, F. Goudreault, A. Gruneis, R. Gupta, B. Guster,
+- D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
+- I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
+- Comment: the sixth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#verstraete2025
+-
+- [3] Optimized norm-conserving Vanderbilt pseudopotentials.
+- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
+- Comment: Some pseudopotential generated using the ONCVPSP code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
+-
+- [4] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [5] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
+- is available at
+-  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.2
+
+================================================================================
+
+ Calculation completed.
+.Delivered  24 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.2  wall=          1.2

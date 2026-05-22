@@ -140,7 +140,7 @@ contains
  ABI_MALLOC(psinablapsi,(2,3,mband,mband))
  pnp_size=size(psinablapsi)
  psinablapsi=zero
- 
+
  iomode= IO_MODE_FORTRAN_MASTER
  fformopt=612
  ount = get_unit()

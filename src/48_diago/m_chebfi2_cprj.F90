@@ -629,7 +629,7 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
 
  if (.not.chebfi%paw) then
    call xgBlock_yxmax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X)
- end if    
+ end if
 
  call xgBlock_colwiseNorm2(chebfi%AX%self, residu)
  call timab(tim_residu, 2, tsec)
@@ -917,7 +917,7 @@ subroutine chebfi_ampfactorMax(chebfi,DivResults,lambda_minus,lambda_plus,ndeg_f
   call xgBlock_reverseMap(DivResults,eig,rows=1,cols=cols(DivResults))
 
   !cheb_poly1(x, n, a, b)
-  ampfactor = maxval( (/ (cheb_poly1(eig(1,iband), ndeg_filter_bands(iband), lambda_minus, lambda_plus),& 
+  ampfactor = maxval( (/ (cheb_poly1(eig(1,iband), ndeg_filter_bands(iband), lambda_minus, lambda_plus),&
       iband=1,cols(DivResults)) /) )
 
   call xgBlock_scale(chebfi%xXColsRows, 1/ampfactor, 1)

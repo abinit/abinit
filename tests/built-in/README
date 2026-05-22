@@ -22,9 +22,9 @@ In the main directory, type the command `make` with one of the following keyword
 
 like:
 
-    $ make test_fast    
+    $ make test_fast
 
-Also, 
+Also,
 
     $ make tests_in
 

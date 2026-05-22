@@ -9,13 +9,14 @@ keywords = [
 ]
 
 subsuites = [
+"cdfpt",
 "elast",
 "eph_legacy",
 "eph_tdep_legacy",
 "eph4mob",
 "eph4isotc",
 "eph4zpr",
-#"eph4zpr_gwpt",
+"eph4zpr_gwpt",
 "eph4vpq",
 "lw",
 "nlo",
@@ -27,6 +28,18 @@ subsuites = [
 
 #: List of input files
 inp_files = [
+"tcdfpt_1.abi",
+"tcdfpt_2.abi",
+"tcdfpt_3.abi",
+"tcdfpt_4.abi",
+"tcdfpt_5.abi",
+"tcdfpt_6.abi",
+"tcdfpt_7.abi",
+"tcdfpt_8.abi",
+"tcdfpt_9.abi",
+"tcdfpt_10.abi",
+"tcdfpt_11.abi",
+#
 "teph_tdep_legacy_1.abi",
 "teph_tdep_legacy_2.abi",
 "teph_tdep_legacy_3.abi",
@@ -69,14 +82,14 @@ inp_files = [
 "teph4zpr_9.abi",
 "teph4zpr_10.abi",
 #
-#"teph4zpr_gwpt_1.abi",
-#"teph4zpr_gwpt_2.abi",
-#"teph4zpr_gwpt_3.abi",
-#"teph4zpr_gwpt_4.abi",
-#"teph4zpr_gwpt_5.abi",
-#"teph4zpr_gwpt_6.abi",
-#"teph4zpr_gwpt_7.abi",
-#"teph4zpr_gwpt_8.abi",
+"teph4zpr_gwpt_1.abi",
+"teph4zpr_gwpt_2.abi",
+"teph4zpr_gwpt_3.abi",
+"teph4zpr_gwpt_4.abi",
+"teph4zpr_gwpt_5.abi",
+"teph4zpr_gwpt_6.abi",
+"teph4zpr_gwpt_7.abi",
+"teph4zpr_gwpt_8.abi",
 #
 "teph4vpq_1.abi",
 "teph4vpq_2.abi",

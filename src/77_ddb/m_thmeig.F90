@@ -168,7 +168,7 @@ subroutine thmeig(inp, ddb, crystal, iout, natom, mpert, msize, d2asr, comm)
 !=========================================================================
 
  !GA: TODO Perhaps those should be created at initialization of inp
- elph_base_name = trim(inp%prefix_outdata)//"_ep" 
+ elph_base_name = trim(inp%prefix_outdata)//"_ep"
  eig2_filnam = inp%filename_eigr2d
 
 

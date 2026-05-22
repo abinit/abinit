@@ -1,0 +1,26 @@
+tcdfpt_4.ddb.out
+MnF2
+4
+tcdfpt_2o_DS3_DDB
+tcdfpt_2o_DS4_DDB
+tcdfpt_2o_DS5_DDB
+tcdfpt_2o_DS6_DDB
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% test_chain =  tcdfpt_1.abi, tcdfpt_2.abi, tcdfpt_3.abi, tcdfpt_4.abi, tcdfpt_5.abi, tcdfpt_6.abi, tcdfpt_7.abi
+#%% [files]
+#%% files_to_test =
+#%%   tcdfpt_4.ddb.out, tolnlines=  10, tolabs=  2.000e-08, tolrel=  4.000e-07, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Royo
+#%% keywords = CDFPT
+#%% description =  Input file for mrgddb of 2nd derivatives of ETOT at different frequencies
+#%%<END TEST_INFO>
+

@@ -3,8 +3,8 @@
 !! m_slice
 !!
 !! FUNCTION
-!! This module contains the types and routines used to apply the Spectrum Slicing 
-!! method. It mainly defines 'slice' datatypes and associated methods. 
+!! This module contains the types and routines used to apply the Spectrum Slicing
+!! method. It mainly defines 'slice' datatypes and associated methods.
 !!
 !! Main features:
 !! - uses 'xgTools' implementation for matrix data structure.
@@ -111,7 +111,7 @@ module m_slice
     integer, parameter :: tim_slice_X     = 2165
     integer, parameter :: tim_lanczos     = 2167
     integer, parameter :: tim_trace       = 2168
-      
+
     ! Public 'slice' datatype
     !-------------------------------------------------
     type, public :: slice_t
@@ -121,7 +121,7 @@ module m_slice
         integer :: comm_rows                            ! xmpi_comm_self ...
         integer :: comm_cols                            ! same as spacecom
         integer :: spacecom                             ! same as comm_cols
-        integer :: bandpp                               ! nb of bands per process in colsrows representation 
+        integer :: bandpp                               ! nb of bands per process in colsrows representation
         integer :: me_g0                                ! 1 if this processors treats G=0, 0 otherwise
         integer :: me_g0_fft                            ! 1 if this processors treats G=0 in FFT, 0 otherwise
 
@@ -132,19 +132,19 @@ module m_slice
         integer :: nslice                               ! number of spectral slices
         integer :: space                                ! real or complex eigenvectors
         integer :: nbdbuf                               ! fixme for the moment not clear if useful
-        
+
         ! GPU-related
-        integer :: gpu_kokkos_nthrd                 
-        integer :: gpu_thread_limit 
-        
+        integer :: gpu_kokkos_nthrd
+        integer :: gpu_thread_limit
+
         ! Various options
         integer :: gpu_option                           ! enable GPU
         integer :: paral_kgb                            ! enable parallel (k-points, G basis, bands)
         integer :: paral_slice                          ! how to allocate resources for parallel slices
         integer :: spectral_cut                         ! how to decompose spectrum into slices
-        
+
         ! Various model parameters
-        logical :: paw                                  ! use PAW or not 
+        logical :: paw                                  ! use PAW or not
         integer :: ndeg_filter                          ! lowpass degree of polynomial filter
         real(dp) :: tolerance                           ! tolerance on the residu to stop the minimization
         real(dp) :: ramp                                ! bandpass filter tolerance
@@ -157,7 +157,7 @@ module m_slice
         integer, allocatable :: neigen_per_slice(:)     ! total number of eigenpairs per slice
         integer, allocatable :: poly_degrees(:)         ! polynomial filter degrees per slice
         real(dp), allocatable :: low_bounds(:)          ! lower bounds in spectral partition (disjoint)
-        real(dp), allocatable :: upp_bounds(:)          ! upper bounds in spectral partition (disjoint) 
+        real(dp), allocatable :: upp_bounds(:)          ! upper bounds in spectral partition (disjoint)
 
     end type slice_t
 
@@ -167,7 +167,7 @@ module m_slice
     public :: slice_free                                ! free slice datatype object
     public :: slice_run                                 ! run Spectrum Slicing for active slice task
 
-    CONTAINS  
+    CONTAINS
 !=====================================================================
 !!***
 
@@ -232,7 +232,7 @@ subroutine slice_init(slice,nslice,neigenpairs,spacedim,tolerance,paral_kgb,&
     type(slice_t), intent(inout) :: slice
     integer      , intent(in   ), optional :: gpu_kokkos_nthrd
     integer      , intent(in   ), optional :: gpu_thread_limit
-    
+
     ! Local variables --------------------------------
     integer :: total_spacedim, ierr
     !logical :: on_host, on_device
@@ -338,9 +338,9 @@ end subroutine slice_free
 !! slice_run
 !!
 !! FUNCTION
-!! Run Spectrum slicing on a given set of active vectors. 
+!! Run Spectrum slicing on a given set of active vectors.
 !! Computation uses marked resources for current task **only**.
-!! 
+!!
 !! INPUTS
 !! X0=           size (spacedim, neigenpairs)
 !! eigen,residu= size (neigenpairs, 1) (column vectors)
@@ -349,10 +349,10 @@ end subroutine slice_free
 !! getBm1X= pointer to the function giving B^-1|X>
 !!          B is typically the overlap operator S
 !! nspinor= number of spinorial components of the wavefunctions
-!! 
+!!
 !! SIDE EFFECTS
 !! slice <type(slice_t)>= memory workspace used for Spectrum slicing
-!! 
+!!
 !! SOURCE
 
 subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
@@ -398,14 +398,14 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     type(activeTask_t) :: task
     type(taskScheduler_t) :: scheduler
     type(asyncMemory_t) :: asyncMemory
-    ! <----- 
+    ! <-----
     ! Arrays
     !real(dp) :: tsec(2)
     real(dp), allocatable :: moments(:)
     logical, allocatable, target :: mapper(:,:)
-    
+
     ! *********************************************************************
-    
+
     tim_slice_me = tim_slice_X
     select case(task%me_id_slice)
     case(1)
@@ -415,7 +415,7 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     case(3)
         tim_slice_me = tim_slice_3
     end select
-    
+
     nrows = slice%spacedim
     ncols = slice%neigenpairs
     if (slice%paral_kgb==1) then ! colsrows distribution
@@ -491,7 +491,7 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     write(std_out,*) 'getid after init', xgBlock_getid(asyncMemory%XextLinalg)
     flush(std_out)
-    
+
     ! =========================== MPI distribution for slices ==================================
 
     ! MPI phase I: Compute 'process-to-slice(task)' distribution according to paral options
@@ -522,18 +522,18 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     !
 !    call timab(tim_slice_me,1,tsec)
-!    
+!
 !    if (slice%paral_kgb==0 .or. slice%paral_slice==DISABLE_PARAL) then
 !        ! execute active tasks sequentially
 !
 !        do islice=1, nslice
-!            if (task%active(islice)) then                   ! <--- normally it should not be that different.. 
+!            if (task%active(islice)) then                   ! <--- normally it should not be that different..
 !            call schedule_next_task(schedule, neigenpairs)
 !            call init_active_memory(asyncMemory, task, X0, p)
 !            call execute_active_task(task)
 !            call mask_active_task(task, tol) ! mask extendedMem
 !        end do
-!       
+!
 !    else
 !        ! execute active tasks in parallel
 !
@@ -542,7 +542,7 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
 !        call mask_active_task(task, tol) ! mask extendedMem
 !
 !    end if
-!   
+!
 !    ! Copy to spectrum memory only when active tasks have finished
 !    call compress_extended_memory(work) ! extendendMem -> spectrumMem
 !
@@ -577,11 +577,11 @@ end subroutine slice_run
 !! Approximate eigenvalue spectrum and query input X for Ritz values and residuals.
 !! This is a Hamiltonian-application-based approximation.
 !! Inner calculations use colsrows representation to apply the Hamiltonian.
-!! 
+!!
 !! INPUTS
 !! X        =eigenvector guess
 !! getAX_BX =Hamiltonian application
-!! 
+!!
 !! SOURCE
 
 subroutine slice_getSpectralInfo(slice, X, matrixInfo, moments, eigen, resid, getAX_BX, getBm1X)
@@ -663,9 +663,9 @@ subroutine slice_getSpectralInfo(slice, X, matrixInfo, moments, eigen, resid, ge
         call xgTransposer_constructor(xgTransposerX, X, xXColsRows, nspinor, STATE_LINALG,&
             TRANS_ALL2ALL, slice%comm_rows, slice%comm_cols, 0, 0, slice%me_g0_fft,&
             gpu_option=slice%gpu_option, gpu_thread_limit=slice%gpu_thread_limit)
-         
+
         xgTransposerX%gpu_kokkos_nthrd  = slice%gpu_kokkos_nthrd
-        
+
         !call xmpi_barrier(slice%spacecom)
         ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
         call xgTransposer_transpose(xgTransposerX, STATE_COLSROWS)
@@ -680,7 +680,7 @@ subroutine slice_getSpectralInfo(slice, X, matrixInfo, moments, eigen, resid, ge
 
     ! Prevent invovl error
     ! dummy invovl calculation to allocate buffers of full size
-    ! Workaround: getBm1X error related to invovl allocated buffers. 
+    ! Workaround: getBm1X error related to invovl allocated buffers.
     ! With this setup we allocate large then use 1 in Lanczos.
     ! The inverse is not possible with current implementation. This order allows to avoid
     ! make_invovl for 1 vector then make_invovl for nband vectors.
@@ -722,15 +722,15 @@ subroutine slice_getSpectralInfo(slice, X, matrixInfo, moments, eigen, resid, ge
 
     call computeTraceEstimation(matrixInfo, slice%ecut, slice%paw, slice%tolerance, &
         getAX_BX, getBm1X, ndeg_filter_max, m_probe, lanczos_lowb_global, moments)
-   
+
     ! Define working spectrum to be splitted to slices
-    slice%mineig = lanczos_lowb 
+    slice%mineig = lanczos_lowb
     slice%mineig_global = lanczos_lowb_global
     slice%maxeig_global = slice%ecut
 
     write(std_out,*) 'STE exited'
     flush(std_out)
- 
+
     ! Compute Rayleigh quotients (colsrows distribution) ! fixme timers
     !ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RRQ)
     !call timab(tim_RR_q, 1, tsec)
@@ -764,7 +764,7 @@ subroutine slice_getSpectralInfo(slice, X, matrixInfo, moments, eigen, resid, ge
         ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
         call xgTransposer_transpose(xgTransposerX, STATE_LINALG)
         ABI_NVTX_END_RANGE()
-        
+
         ! reset buffers to right address
         if (xmpi_comm_size(slice%spacecom) == 1) then
             call xgBlock_setBlock(xXColsRows, X, spacedim, neigenpairs)
@@ -785,12 +785,12 @@ end subroutine slice_getSpectralInfo
 !!****f* m_slice/slice_queryCandidates
 !! NAME
 !! slice_queryCandidates
-!! 
+!!
 !! FUNCTION
 !! Compute Rayleigh-Ritz quotients and residuals in colsrows MPI representation.
 !! Return bandpp indicators per MPI process.
 !! These two indicators are useful to rank candidates per slices.
-!! 
+!!
 !! SOURCE
 
 subroutine slice_queryCandidates(slice, xXColsRows, eigen, resid, getAX_BX)
@@ -824,7 +824,7 @@ subroutine slice_queryCandidates(slice, xXColsRows, eigen, resid, getAX_BX)
     real(dp) :: tsec(2)
 
     ! *********************************************************************
-    
+
     if (slice%space==SPACE_C) then
         space_res = SPACE_C
     else if (slice%space==SPACE_CR) then
@@ -850,7 +850,7 @@ subroutine slice_queryCandidates(slice, xXColsRows, eigen, resid, getAX_BX)
     call xg_setBlock(XAB, xAXColsRows, nrows, ncols)
     call xg_setBlock(XAB, xBXColsRows, nrows, ncols, fcol=ncols+1)
     call xg_setBlock(XAB, xRXColsRows, nrows, ncols, fcol=2*ncols+1)
-    
+
     ! Compute A*Psi
     call timab(tim_getAX_BX,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
@@ -897,7 +897,7 @@ end subroutine slice_queryCandidates
 !!****f* m_slice/slice_unitTest
 !! NAME
 !! slice_unitTest
-!! 
+!!
 !! FUNCTION
 !! Given a set of vectors X computes the columnwise norm squared, on:
 !! - CPU sequential,
@@ -905,7 +905,7 @@ end subroutine slice_queryCandidates
 !! - GPU sequential (if GPU available),
 !! - GPU MPI (if GPU available).
 !! Checks that all four are the same.
-!! 
+!!
 !! SOURCE
 
 function slice_unitTest(X) result(ierr)
@@ -914,8 +914,8 @@ function slice_unitTest(X) result(ierr)
 
     !Arguments ------------------------------------
     type(xgBlock_t), intent(in) :: X
-    integer                     :: ierr         
-    
+    integer                     :: ierr
+
     !Local variables-------------------------------
     integer :: nrows,ncols
     integer :: comm
@@ -942,7 +942,7 @@ function slice_unitTest(X) result(ierr)
     if (gpu_option==ABI_GPU_DISABLED) then
         id_cpu = xgBlock_getid(X, comm)
         write(std_out,*) 'id_cpu     =', id_cpu
-    end if        
+    end if
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     if (gpu_option/=ABI_GPU_DISABLED) then
@@ -959,7 +959,7 @@ function slice_unitTest(X) result(ierr)
         write(std_out,*) 'id_to_gpu  =', id_to_gpu
     end if
 #endif
-    
+
     ! TODO getid on xmpi_comm_null
     ! then sum across comm
     ! should give the same as
@@ -979,19 +979,19 @@ end function slice_unitTest
 !!****f* m_slice/slice_splitSpectrum
 !! NAME
 !! slice_splitSpectrum
-!! 
+!!
 !! FUNCTION
 !! Split working spectrum [a,b) mapped to [-1,1) with center and radius.
 !!
 !! INPUT
 !! a= slice%mineig_global
-!! b= slice%maxeig_global 
-!! 
+!! b= slice%maxeig_global
+!!
 !! SIDE EFFECTS
 !! slice%low_bounds
 !! slice%upp_bounds
 !! slice%neigen_per_slice
-!! 
+!!
 !! SOURCE
 
   subroutine slice_splitSpectrum(slice, moments)
@@ -1029,18 +1029,18 @@ end function slice_unitTest
 
       ngrid_coarse = 10 ! coarse, just to find uppb, hardcoded
       ngrid_fine = 30 ! used for cumulative eigenvalue count, hardcoded
-    
+
       a = slice%mineig_global
       b = slice%maxeig_global
 
-      num_moments = size(moments) 
+      num_moments = size(moments)
       ABI_MALLOC(work, (num_moments))
       ABI_MALLOC(bgrid_coarse, (ngrid_coarse))
       ABI_MALLOC(bgrid_fine, (ngrid_fine))
       ABI_MALLOC(cumm_eigen_count, (ngrid_fine))
 
       center = (a + b) / 2.d0
-      radius = (b - a) / 2.d0 
+      radius = (b - a) / 2.d0
 
       ! #########################################
       ! ########## Coarse resolution ############
@@ -1053,9 +1053,9 @@ end function slice_unitTest
       uppb_loc = -1
       do ib=1, ngrid_coarse
           b_scaled = (bgrid_coarse(ib) - center) / radius
-          partial_mass = get_eigenvalue_count(b_scaled, moments, work) 
+          partial_mass = get_eigenvalue_count(b_scaled, moments, work)
 
-          write(std_out,*) ib, 'scan: <=', bgrid_coarse(ib), 'mass=', partial_mass 
+          write(std_out,*) ib, 'scan: <=', bgrid_coarse(ib), 'mass=', partial_mass
           flush(std_out)
 
           if (partial_mass > slice%neigenpairs) then
@@ -1077,7 +1077,7 @@ end function slice_unitTest
 
       ! Now compute eigenvalue count
       step_fine = (lambda_plus_wanted - a) / (ngrid_fine - 1)
-      bgrid_fine = (/ (a + (ib-1)*step_fine, ib=1,ngrid_fine) /) 
+      bgrid_fine = (/ (a + (ib-1)*step_fine, ib=1,ngrid_fine) /)
       do ib=1, ngrid_fine
           b_scaled = (bgrid_fine(ib) - center) / radius
           partial_mass = get_eigenvalue_count(b_scaled, moments, work)
@@ -1093,10 +1093,10 @@ end function slice_unitTest
 
       ! Prepare: detect gap existence in the interior of slice
       ! define value of smallest_gap
-      ! todo 
+      ! todo
 
       ! step 1 cut in half balanced mass
-      half_mass = cumm_eigen_count(ngrid_fine)/2.d0 
+      half_mass = cumm_eigen_count(ngrid_fine)/2.d0
       half_index = minloc(abs(half_mass - cumm_eigen_count), dim=1)
       ! step 2 adjust so that it is on constant mass (predicts gap)
       ! bidirectional search left and right
@@ -1108,7 +1108,7 @@ end function slice_unitTest
       gap_left = .false.
       gap_right = .false.
       do while((.not.gap_right .and. .not.gap_left) .and. (i_left >= 2 .and. i_right <=ngrid_fine-1))
-          ! this is if gap exists. If it does not exist.. must minimize using smallest_gap 
+          ! this is if gap exists. If it does not exist.. must minimize using smallest_gap
           gap_left = abs(cumm_eigen_count(i_left) - cumm_eigen_count(i_left-1)) < 1e-4
           gap_right = abs(cumm_eigen_count(i_right) - cumm_eigen_count(i_right+1)) < 1e-4
           i_left = i_left - 1
@@ -1139,8 +1139,8 @@ end function slice_unitTest
       slice%low_bounds(2) = bgrid_fine(i_split)
 
       slice%upp_bounds(1) = bgrid_fine(i_split)
-      slice%upp_bounds(2) = bgrid_fine(ngrid_fine) 
-    
+      slice%upp_bounds(2) = bgrid_fine(ngrid_fine)
+
       ABI_FREE(bgrid_fine)
       ABI_FREE(bgrid_coarse)
       ABI_FREE(cumm_eigen_count)
@@ -1167,7 +1167,7 @@ end function slice_unitTest
 !!
 !! OUTPUT
 !! mapper contains the column indices per slice (allowing repetitions)
-!! 
+!!
 !! SOURCE
 
   subroutine slice_applySelectionWindow(slice, mapper, eigen, resid, tol, safe)
@@ -1193,7 +1193,7 @@ end function slice_unitTest
 
     call xgBlock_reverseMap(eigen, thetas, rows=nband, cols=1)
     call xgBlock_reverseMap(resid, resid_vals, rows=nband, cols=1)
-   
+
     ! apply selection window per slice
     do islice=1,slice%nslice
         m = slice%neigen_per_slice(islice)
@@ -1214,7 +1214,7 @@ end function slice_unitTest
                 theta = real(thetas(iband, 1))
                 write(std_out,*) iband, 'theta=', theta, 'resid=', relres
                 flush(std_out)
-            
+
                 ! accept if lambda in relaxed interval
                 if (theta < uppb_plus .and. theta > lowb_minus) then
                     k_kept = k_kept + 1
@@ -1227,8 +1227,8 @@ end function slice_unitTest
         ! because split spectrum will store info on slice object that is invisible from trace
         write(std_out,*) 'selection window kept', k_kept, 'for eigendimension', m
         flush(std_out)
-    end do 
-   
+    end do
+
   end subroutine slice_applySelectionWindow
 !!***
 

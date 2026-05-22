@@ -114,7 +114,7 @@ for exp in abinit_exports:
 
   # Library description
   exp_dscs += "# Export: %s\n" % (exp)
-  exp_dscs += exp_objs+"\n\n" 
+  exp_dscs += exp_objs+"\n\n"
   exp_dscs += "lib%s_a_SOURCES =\n" % (exp)
   exp_dscs += "lib%s_a_LIBADD = $(%s_objs)\n\n" % (exp,exp)
 

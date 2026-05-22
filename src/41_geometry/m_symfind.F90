@@ -25,7 +25,7 @@ module m_symfind
  use m_errors
  use m_abicore
  use m_symlist
-  
+
 
  use m_matrix,    only : mati3inv, matr3inv, mati3det
  use m_symtk,     only : chkprimit, symrelrot, symdet, symcharac, holocell, symatm, &

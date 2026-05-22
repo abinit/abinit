@@ -67,7 +67,7 @@ AC_DEFUN([SD_BIGDFT_INIT], [
   esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([bigdft],
     [AS_HELP_STRING([--with-bigdft],
       [Install prefix of the PSML I/O library (e.g. /usr/local).])],

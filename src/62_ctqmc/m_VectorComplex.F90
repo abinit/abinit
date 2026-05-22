@@ -5,8 +5,8 @@
 !!****m* ABINIT/m_VectorComplex
 !! NAME
 !!  m_VectorComplex
-!! 
-!! FUNCTION 
+!!
+!! FUNCTION
 !!  Manage a double precision vector
 !!
 !! COPYRIGHT
@@ -46,7 +46,7 @@ PRIVATE
 TYPE, PUBLIC :: VectorComplex
   INTEGER         :: size
   INTEGER         :: tail
-  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:)         :: vec 
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:)         :: vec
 END TYPE VectorComplex
 !!***
 
@@ -99,7 +99,7 @@ SUBROUTINE VectorComplex_init(this, size)
   this%size = size_val
   FREEIF(this%vec)
   MALLOC(this%vec,(1:size_val))
-  this%tail     = 0 
+  this%tail     = 0
   this%vec = cmplx(0.d0,0.d0,kind=8)
 END SUBROUTINE VectorComplex_init
 !!***
@@ -146,7 +146,7 @@ SUBROUTINE VectorComplex_setSize(this,new_tail)
     END IF
   END IF
   this%tail = new_tail
-END SUBROUTINE VectorComplex_setSize  
+END SUBROUTINE VectorComplex_setSize
 !!***
 
 !!****f* ABINIT/m_VectorComplex/VectorComplex_enlarge
@@ -182,14 +182,14 @@ SUBROUTINE VectorComplex_enlarge(this, size)
 !Local variables ------------------------------
   INTEGER                                 :: width
   INTEGER                                 :: tail
-  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: thistemp 
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: thistemp
   INTEGER                                 :: size_val
 
   IF ( ALLOCATED(this%vec) ) THEN
     FREEIF(thistemp)
     width = this%size
     tail  = this%tail
-    size_val = size 
+    size_val = size
     MALLOC(thistemp,(1:tail))
     thistemp(1:tail) = this%vec(1:tail)
     FREE(this%vec)
@@ -277,7 +277,7 @@ SUBROUTINE VectorComplex_clear(this)
 
 !Arguments ------------------------------------
   TYPE(VectorComplex), INTENT(INOUT) :: this
-  this%tail = 0 
+  this%tail = 0
 END SUBROUTINE VectorComplex_clear
 !!***
 
@@ -334,7 +334,7 @@ END SUBROUTINE VectorComplex_print
 !!  VectorComplex_destroy
 !!
 !! FUNCTION
-!!  Destroy vector 
+!!  Destroy vector
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)

@@ -401,7 +401,6 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,mpw,kg_k,vkbsign,vkb,vkbd)
  real(dp) :: effmass_free,ecutsm,ecut
 !arrays
  real(dp),allocatable :: ffnl(:,:,:,:),kpg_dum(:,:),modkplusg(:),ylm_gr(:,:,:),ylm_k(:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")

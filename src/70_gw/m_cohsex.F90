@@ -29,6 +29,7 @@ module m_cohsex
  use m_abicore
 
  use defs_datatypes,  only : pseudopotential_type
+ use m_dtset,         only : dataset_type
  use m_time,          only : timab, cwtime, cwtime_report
  use m_fstrings,      only : sjoin, itoa
  use m_hide_blas,     only : xdotc, xgemv
@@ -150,12 +151,13 @@ contains
 !!
 !! SOURCE
 
-subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,epsm1,Gsph_c,Vcp,&
+subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,dtset, Cryst,QP_BSt,Sigp,Sr,epsm1,Gsph_c,Vcp,&
 & Kmesh,Qmesh,Ltg_k,Pawtab,Pawang,Paw_pwff,Psps,Wfd,allQP_sym,gwc_ngfft,iomode,prtvol,sigcme_tmp)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: sigmak_ibz,ikcalc,prtvol,iomode,nomega_sigc,minbnd,maxbnd
+ type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: Cryst
  type(ebands_t),target,intent(in) :: QP_BSt
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
@@ -198,13 +200,13 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  integer,allocatable :: igfftcg0(:),gw_gfft(:,:),gw_gbound(:,:),irottb(:,:),ktabr(:,:)
  integer :: got(Wfd%nproc)
  real(dp) :: ksum(3),kgw(3),kgw_m_ksum(3),q0(3),tsec(2),qbz(3),spinrot_kbz(4),spinrot_kgw(4)
- real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
+ real(dp),contiguous, pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  complex(gwp) :: sigcohme(Sigp%nsig_ab)
  complex(gwp),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:),sigsex(:)
  complex(gwp),allocatable :: sigc_ket(:,:)  ! epsm1_qbz(:,:,:),
  complex(gwp),allocatable :: rhotwg_ki(:,:), sigctmp(:,:)
  complex(gwp),allocatable :: wfr_bdgw(:,:),ur_sum(:),wf1swf2_g(:)
- complex(gwp),ABI_CONTIGUOUS pointer :: cg_jb(:),cg_sum(:)
+ complex(gwp),contiguous, pointer :: cg_jb(:),cg_sum(:)
  complex(dp),allocatable :: sym_cme(:,:,:,:),sigc(:,:,:,:,:)
  logical :: rank_mask(Wfd%nproc),can_symmetrize(Wfd%nsppol)
  logical,allocatable :: bks_mask(:,:,:)
@@ -426,7 +428,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
    do spin=1,nsppol
      do ib=ib1,ib2
        do jb=ib1,ib2
-        if (ABS(qp_ene(ib,jk_ibz,spin)-qp_ene(jb,jk_ibz,spin))<0.001/Ha_ev) then
+        if (ABS(qp_ene(ib,jk_ibz,spin)-qp_ene(jb,jk_ibz,spin)) < dtset%symsigma_de) then
           degtab(ib,jb,spin)=1
         end if
        end do

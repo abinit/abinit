@@ -705,6 +705,22 @@ or high symmetry points. I do not know why...
 """,
     ),
 
+
+    Variable(
+        abivarname="eta@anaddb",
+        varset="anaddb",
+        vartype="real",
+        topics=["DFPT_expert", "ConstrainedDFPT_expert"],
+        dimensions="scalar",
+        defaultval=0.0,
+        mnemonics="causality ETA parameter",
+        characteristics=["[[DEVELOP]]"],
+        added_in_version="10.4",
+        text=r"""
+This variable specifies the amplitude of the infinitesimal imaginary part used in the frequency interpolation of second-order quantities computed in a constrained DFPT ABINIT run, in order to account for causality and dissipation effects.
+""",
+    ),
+
     Variable(
         abivarname="flexoflag@anaddb",
         varset="anaddb",
@@ -729,6 +745,27 @@ Flag for calculation of bulk flexoelectrics tensors
   * 4 --> The lattice-mediated flexoelectric tensor is calculated and printed along with the piezoelectric and flexoelectric
           internal strain tensors and the Lagrange elastic tensors.
           Requires a preceding generation of 2nd and 3rd order DDB with a [[lw_flexo]] = 1 or 4 run.
+""",
+    ),
+
+
+    Variable(
+        abivarname="freqflag@anaddb",
+        varset="anaddb",
+        vartype="integer",
+        topics=["DFPT_expert","ConstrainedDFPT_expert"],
+        dimensions="scalar",
+        defaultval=3,
+        mnemonics="FREQuency interpolation FLAG",
+        characteristics=["[[DEVELOP]]"],
+        added_in_version="10.4",
+        text=r"""
+
+This variable selects the type of frequency interpolation applied to the second-order quantities computed in a constrained DFPT ABINIT run.
+
+  * 1 --> Adiabatic (beyond-Born-Oppenheimer) dynamics. Equivalent to a linear-in-frequency interpolation. The zeroth-order terms are taken from the static ([[rfomega]] = 0.0) second-order DDB entries, while the first-order frequency terms are given by the Berry curvatures stored in the DDB file. This option requires [[timdisp@anaddb]] = 1 and allows to include dissipation via [[eta@anaddb]] /= 0.0.
+  * 2 --> Nonadiabatic polynomial interpolation. Uses DDB blocks computed at different [[rfomega]] values to perform a polynomial interpolation (using the polint routine). This option does not allow [[eta@anaddb]] /= 0.0.
+  * 3 --> Nonadiabatic polynomial interpolation with dissipation. Extracts the polynomial coefficients from the DDB blocks at different [[rfomega]] values using the polcoe routine, and then performs an analytical continuation to complex frequencies, where [[eta@anaddb]] enters as an infinitesimal imaginary part.
 """,
     ),
 
@@ -768,13 +805,16 @@ be used with a small number [[anaddb:nph1l]] of q-points for interpolation.
         abivarname="frmax@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=["Phonons_useful"],
+        topics=["Phonons_useful", "ConstrainedDFPT_useful"],
         dimensions="scalar",
         defaultval=10.0,
         mnemonics="FRequency MAXimum",
         added_in_version="before_v9",
         text=r"""
 Value of the largest frequency for the frequency-dependent dielectric tensor, in Hartree.
+
+Starting from version 10.4, this variable specifies the largest frequency used for the
+frequency interpolation of second-order quantities computed in a constrained DFPT ABINIT run.
 """,
     ),
 
@@ -782,13 +822,16 @@ Value of the largest frequency for the frequency-dependent dielectric tensor, in
         abivarname="frmin@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=["Phonons_useful"],
+        topics=["Phonons_useful", "ConstrainedDFPT_useful"],
         dimensions="scalar",
         defaultval=0.0,
         mnemonics="FRequency MINimum",
         added_in_version="before_v9",
         text=r"""
 Value of the lowest frequency for the frequency-dependent dielectric tensor, in Hartree.
+
+Starting from version 10.4, this variable specifies the lowest frequency used for the
+frequency interpolation of second-order quantities computed in a constrained DFPT ABINIT run.
 """,
     ),
 
@@ -1239,8 +1282,74 @@ Lattice Wannier function flag.
     ),
 
 
+    Variable(
+        abivarname="magpen@anaddb",
+        varset="anaddb",
+        vartype="real",
+        topics=["DFPT_expert", "ConstrainedDFPT_expert"],
+        dimensions="scalar",
+        defaultval=0.0,
+        mnemonics="MAGnetic PENalty DFPT parameter",
+        characteristics=["[[DEVELOP]]"],
+        added_in_version="10.4",
+        text=r"""
+This variable specifies the amplitude of the penalty function applied to the first-order local magnetic moments in a constrained DFPT calculation (see [[magpen]]). A nonzero value in an anaddb input activates the transformation of the second-order total-energy derivatives to the magnetic functional specified by [[mpopt@anaddb]].
+
+The Legendre transformations between magnetic functionals require that the DDB file contain second-order data obtained from a set of local Zeeman-field linear-response calculations (see the [[rfmagn]] = 2 option), combined with a geometrically equivalent magnetic penalty.
+
+The penalized ions and directions are specified by [[mpatpol@anaddb]] and [[mpdir@anaddb]], respectively.
+        """,
+    ),
 
 
+    Variable(
+        abivarname="mpatpol@anaddb",
+        varset="anaddb",
+        vartype="integer",
+        topics=["DFPT_expert", "ConstrainedDFPT_expert"],
+        dimensions=[2],
+        defaultval=[1, "[[natom]]" ],
+        mnemonics="Magnetic Penalty: ATomic POLarisation",
+        characteristics=["[[DEVELOP]]"],
+        added_in_version="10.4",
+        text=r"""
+This variable specifies the range of atoms to which a magnetic penalty has been applied in a constrained DFPT calculation on the first-order local magnetic moments. It may take values between 1 to [[natom]], with [[mpatpol]](1)<=[[mpatpol]](2).
+In practice, the penalty is typically applied only to the magnetic ions.
+""",
+    ),
+
+    Variable(
+        abivarname="mpdir@anaddb",
+        varset="anaddb",
+        vartype="integer",
+        topics=["DFPT_expert", "ConstrainedDFPT_expert"],
+        dimensions=[3],
+        defaultval=[1, 1, 1],
+        mnemonics="Magnetic Penalty: DIRections",
+        characteristics=["[[DEVELOP]]"],
+        added_in_version="10.4",
+        text=r"""
+Gives the Cartesian directions along which the first-order magnetic moments
+have been constrained during a linear-response calculatiuon when [[magpen]]/= 0.0.
+""",
+    ),
+
+    Variable(
+        abivarname="mpopt@anaddb",
+        varset="anaddb",
+        vartype="integer",
+        topics=["DFPT_expert", "ConstrainedDFPT_expert"],
+        dimensions="scalar",
+        defaultval=2,
+        mnemonics="Magnetic Penalty: OPTion",
+        characteristics=["[[DEVELOP]]"],
+        added_in_version="10.4",
+        text=r"""
+This variable sets the type of magnetic functional (see Ref. [[cite:Royo2019]]) to which the second-order total-energy derivatives computed with a magnetic penalty are transformed.
+  * 1 --> Fully constrained magnetic moments (spins fixed to the ground-state configuration)
+  * 2 --> Constrained Zeeman fields (spins allowed to relax)
+""",
+    ),
 
     Variable(
         abivarname="mustar@anaddb",
@@ -1339,7 +1448,7 @@ along the path using the coordinates given in the array [[anaddb:qpath]].
         abivarname="nfreq@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=["Phonons_useful"],
+        topics=["Phonons_useful", "ConstrainedDFPT_useful"],
         dimensions="scalar",
         defaultval=1,
         mnemonics="Number of FREQuencies",
@@ -1348,6 +1457,8 @@ along the path using the coordinates given in the array [[anaddb:qpath]].
 Number of frequencies wanted for the frequency-dependent dielectric tensor.
 Should be positive. See [[anaddb:dieflag]]. The code will take **nfreq**
 equidistant values from [[anaddb:frmin]] to [[anaddb:frmax]].
+
+Starting from version 10.4, this variable specifies the number of frequencies used for the frequency interpolation of second-order quantities computed in a constrained DFPT ABINIT run.
 """,
     ),
 
@@ -2404,6 +2515,24 @@ The relative tolerance on the thermodynamical functions This number will
 determine when the series of channel widths with which the DOS is calculated
 can be stopped, i.e. the mean of the relative change going from one grid to
 the next bigger is smaller than **thmtol**.
+""",
+    ),
+
+
+    Variable(
+        abivarname="timdisp@anaddb",
+        varset="anaddb",
+        vartype="integer",
+        topics=["longwave_expert", "ConstrainedDFPT_expert"],
+        dimensions="scalar",
+        defaultval=0,
+        mnemonics="TIMe DISpersion",
+        characteristics=["[[DEVELOP]]"],
+        added_in_version="10.4",
+        text=r"""
+    If [[timdisp@anaddb]] = 1 and [[magpen@anaddb]] /= 0.0, the Berry curvatures calculated with the magnetic penalty are transformed to the fully fixed-spin functional and can be used in adiabatic (beyond–Born–Oppenheimer) dynamics calculations.
+
+    This requires that the DDB file contain a third-order block with the frequency derivatives of the required second-order quantities.
 """,
     ),
 

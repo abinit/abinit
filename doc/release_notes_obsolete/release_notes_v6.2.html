@@ -22,7 +22,7 @@ P. Boulanger, F. Bruneval, D. Caliste, F. Da Pieve, M. Delaveau,
 T. Deutsch, C. Espejo, G.A. Franco, M. Gatti,
 M. Giantomassi, X. Gonze, P. Hermet, A. Jacques, F. Jollet, G. Jomard,
 A. Lherbier, M. Mancini, S. Miller, T. Nishimatsu, V. Olevano, M. Oliveira, G. Onida, Y. Pouillon,
-T. Rangel, V. Recoules, L. Reining, AH. Romero, F. Sottile, 
+T. Rangel, V. Recoules, L. Reining, AH. Romero, F. Sottile,
 M. Stankovski, M. Torrent, M. Verstraete, D. Waroquiers, Z. Zanolli, J. Zwanziger
 
 It is worth to read carefully
@@ -49,15 +49,15 @@ __________________________________________________________________
 A.  WARNINGS AND IMPORTANT REMARKS
 
 A.1  Solved a bug in the calculation of the head and of the wings of the dielectric matrix in the optical limit
-     when PAW is used. The bug mainly affectes optical properties while the errors in the GW results 
-     for bulk systems were marginal provided that a sufficiently dense k-point sampling was used. 
+     when PAW is used. The bug mainly affectes optical properties while the errors in the GW results
+     for bulk systems were marginal provided that a sufficiently dense k-point sampling was used.
      GW calculations in anisotropic or isolated systems were more severely affected though.
 
 __________________________________________________________________
 
 B.  Most noticeable achievements
 
-B.1. The string method has been implemented. This method allows to find transition paths  
+B.1. The string method has been implemented. This method allows to find transition paths
      between two known geometries (quite similar to the NEB method). At present it is restricted to
      fixed cell paths (only atomic coordinates can vary). Also it should still be optimized (no parallelism over images yet).
      See the input variables imgmov, dynimage, fxcartfactor, imgmov, ntimimage (later, npimage, to take care of the parallelism).
@@ -66,17 +66,17 @@ B.1. The string method has been implemented. This method allows to find transiti
 
 B.2 Finite electric field calculations with PAW are now possible.
     See the automatic test v6#43 . Also, the polarization calculation with PAW
-    has been debugged, and is now tested in test v6#42 . Calculations may be done in 
+    has been debugged, and is now tested in test v6#42 . Calculations may be done in
     parallel over k points. Only kptopt 3 is allowed; development to take advantage of
     symmetries is in progress.
-    By J. Zwanziger 
+    By J. Zwanziger
 
 B.3 A first type of meta-GGA is available : from the kinetic energy density
     to the xc potential (like in the Becke Johnson one, ixc -12207).
     This implementation relies on the Libxc (a plug-in of ABINIT), that must
     be available for this feature to work.
     See the automatic test Tlibxc#08 (presently only for ixc -12207, while
-    the Rasanen, Pittalis, Proetto functional -12209 is available also, 
+    the Rasanen, Pittalis, Proetto functional -12209 is available also,
     but is currently non-tested. Should be available in next ABINIT release).
     By M. Oliveira, A. Lherbier and X. Gonze.
 
@@ -109,7 +109,7 @@ B.6 The Bethe-Salpeter equation (BSE) can be used to compute the optical spectra
 
     The BSE routines now present in ABINIT originate from the EXC code,
     by F. Sottile, V. Olevano, L. Reining, M. Gatti, G. Onida, S. Albrecht, with
-    the porting, the MPI parallelization  and generalization to PAW having been 
+    the porting, the MPI parallelization  and generalization to PAW having been
     realized by M. Giantomassi.
 
 B.7 Input from xyz files can be activated, with input variable xyzfile . The atomic types
@@ -146,8 +146,8 @@ C.6 Build system modifications : update minimum autotools required version ; had
 C.7 Upgraded FoX support to version 4.0.4 ; added support for the Atlas library ; detection of math libraries (GSL for now) ;
     new GPU support, detection of CUDA ; improved FFT detection, and also linalg detection
     By Y. Pouillon
-    
-    
+
+
 __________________________________________________________________
 
 D.  Other changes
@@ -173,7 +173,7 @@ D.4 The use of Density Functional Perturbation Theory with PAW
     by M. Torrent, F. Jollet and J. Zwanziger.
 
 D.5 Work on finite magnetic field in progress
-    Input variable bfield. 
+    Input variable bfield.
     By J. Zwanziger.
 
 D.6 ABINIT warns the user about potential problems with symmetry breakings,
@@ -181,14 +181,14 @@ D.6 ABINIT warns the user about potential problems with symmetry breakings,
     By X. Gonze.
 
 D.7 The use of LDA+Dynamical Mean Field Theory is in progress.
-    At present, the following solvers are available : Hubbard I 
+    At present, the following solvers are available : Hubbard I
     and two versions of LDA+U (for testing purposes).
     These solvers are not sufficiently sophisticated to reproduce all the
     possibilities of DMFT: In particular, they fail to describe metals.
     Related input variables usedmft, dmftbandi, dmftbandf,
     dmft_iter, dmft_mxsf, dmft_nwli, dmft_nwlo, dmft_rslf, dmft_solv, dmftcheck
     Automatic tests : 07, 51, 52, 53.
-    By B. Amadon 
+    By B. Amadon
 
 D.8 Calculation of the Hartree-Fock levels can be done using different ways to the Coulomb divergence
     Test v6#89. icutcoul=6 is new . To be documented.
@@ -211,20 +211,20 @@ D.11 An alternative way to scale the cell parameters has been introduced, acting
      See the input variable scalecart. Automatic test v6#16.
      By X. Gonze.
 
-D.12 A new test case for electric field gradient of indium metal, body-centered tetragonal, 
+D.12 A new test case for electric field gradient of indium metal, body-centered tetragonal,
      has been included to check EFG symmetry in this case.
      See Tv6#44 .
      By J. Zwanziger.
 
 D.13 Implementation of the GW Effective Energy technique, by A. Berger, is in progress,
      with help for the porting by M. Giantomassi. Presently only norm-conserving pseudos are
-     supported, parallel implementation in under testing. 
-     Related input variables (not operational yet) gw_EET and gw_EET_nband. 
+     supported, parallel implementation in under testing.
+     Related input variables (not operational yet) gw_EET and gw_EET_nband.
      Automatic test Tv6#90
 
 D.14 The input variable bdgw(2,nkptgw) has been generalized for spin, to bdgw(2,nkptgw,nsppol)
-     Besides, in the case of SCGW calculations or GW calculations with symsigma=1, bdgw will 
-     be automatically modified such that all the degenerate states at each k-point are included. 
+     Besides, in the case of SCGW calculations or GW calculations with symsigma=1, bdgw will
+     be automatically modified such that all the degenerate states at each k-point are included.
      This change in needed in order to preserve the symmetries of the quasiparticle
      energies and wavefunctions. By M. Giantomassi.
 
@@ -236,11 +236,11 @@ D.16 On-going effort to provide vdW functionals for ABINIT :
      access to the vdw-DF functionals by Langreth et al .
      Also, efforts related to Silvestrelli approach.
      The new functional C09, will be provided as native.
-     Tests provided in the new directory tests/vdwxc, input variables vdwxc . 
+     Tests provided in the new directory tests/vdwxc, input variables vdwxc .
      Work by C. Espejo, Y. Pouillon, AH. Romero and X. Gonze.
 
 D.17 In the PAW case, one can choose the way the compensation charge density
-     is taken into account or not, to compute the exchange-correlation potential 
+     is taken into account or not, to compute the exchange-correlation potential
      See the input variable usexcnhat, test v5#06 .
      By M. Torrent
 
@@ -249,16 +249,16 @@ D.18 A new optdriver level has been addded for performing self-consistent GW cal
     QPSCGW + PAW is still under testing due to some regressions introduced in the previous merges.
     one-shot COHSEX + PAW is available for production, self-consistency with COHSEX + PAW is under testing.
     The memory is better controlled, thanks to the gwmem input variable.
-    Two different FFT meshes defined by ecuteps and ecusigx are used to calculate the 
+    Two different FFT meshes defined by ecuteps and ecusigx are used to calculate the
     matrix elements the exchange and the correlation part of the self-energy, respectively.
     Extrapolar works with SCGW. Also with PAW.
     On-going effort to take into account the anisotropy of the inverse dielectric matrix in the
     optical limit: the full dielectric tensor is now available thus opening the way to
-    a more accurate treatment of the Coulomb divergence in the correlated self-energy thanks to the 
+    a more accurate treatment of the Coulomb divergence in the correlated self-energy thanks to the
     use of the Lebedev-Laikov quadrature scheme on the sphere.
     Preliminary implementation of SCGW with symmetries (not fully operational yet)
     Hermitianicity of HF, COHSEX, SEX is employed to speed up SCGW
-    Work by M. Giantomassi 
+    Work by M. Giantomassi
 
 D.19 The capability to compute the U or J values, within the LDA+U (or GGA+U) approach
     according to the method of Coccocioni and De Gironcoli, is under development.
@@ -267,11 +267,11 @@ D.19 The capability to compute the U or J values, within the LDA+U (or GGA+U) ap
     Work by D. Adams, with B. Amadon
 
 D.20 Work on the recursion approach to high-temperature DFT calculations continues + implementation of
-     GPU capabilities (CUDA 3.0), by M. Mancini. 
+     GPU capabilities (CUDA 3.0), by M. Mancini.
 
-D.21 Use of FFTW3 library is under development. Both complex to complex and real to complex 
-     transforms are supported. The zero-padding FFT algorithm can be used for transforming the 
-     wavefunctions. Threaded version is supported but its use is still under testing. 
+D.21 Use of FFTW3 library is under development. Both complex to complex and real to complex
+     transforms are supported. The zero-padding FFT algorithm can be used for transforming the
+     wavefunctions. Threaded version is supported but its use is still under testing.
      (by M. Giantomassi, also Y. Pouillon).
 
 D.22 Parallelism over atoms in PAW is progressing (F. Bottin and M. Torrent)
@@ -282,9 +282,9 @@ D.23 The distribution of processors in the FFT/Band/k point parallelism can be f
 D.24 Check of MD5 sums for download of plug-ins, for better security.
      By G.A. Franco and Y. Pouillon
 
-D.25 Recognition of irreducible representation for wavefunctions is available with the 
+D.25 Recognition of irreducible representation for wavefunctions is available with the
      exception of k-points on the Brilouin zone border when the corresponding little group
-     contains non-symmorphic operations and a non-zero umklapp vector is required to 
+     contains non-symmorphic operations and a non-zero umklapp vector is required to
      preserve the crystalline momentum. Both PAW and norm-conserving pseudopotentials are supported.
      For the time being, this feature is only accessible in the GW part of the code.
      (Automatic test to be provided). By M. Giantomassi
@@ -299,9 +299,9 @@ D.27 The variable cell string method is under development.
      By AH. Romero and X. Gonze
 
 D.28 Numerous miscellaneous bug fixes (to the sources, as well as to the build system, including the plug-ins),
-     and improvements of documentation by 
-     B. Amadon, A. Berger, J.-M. Beuken, P. Boulanger, F. Bruneval, D. Caliste, 
+     and improvements of documentation by
+     B. Amadon, A. Berger, J.-M. Beuken, P. Boulanger, F. Bruneval, D. Caliste,
      M. Delaveau, T. Deutsch, G.A. Franco,
-     M. Giantomassi, X. Gonze, P. Hermet, A. Jacques, F. Jollet, S. Miller, T. Nishimatsu, Y. Pouillon, 
+     M. Giantomassi, X. Gonze, P. Hermet, A. Jacques, F. Jollet, S. Miller, T. Nishimatsu, Y. Pouillon,
      T. Rangel, V. Recoules, M. Stankovski, M. Torrent, M. Verstraete, D. Waroquiers, J. Zwanziger
 </pre>

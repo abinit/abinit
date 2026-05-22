@@ -48,7 +48,7 @@ A.  WARNINGS AND IMPORTANT REMARKS
 __________________________________________________________________
 
 B.  Most noticeable achievements
- 
+
 B.1 Spinor parallelization is available,
     and can be combined with the k-point/planewave/band parallelisation.
     Algorithm LOBPCG must be used (wfoptalg=4 or 14 / paral_kbg=1)
@@ -67,7 +67,7 @@ B.2 Parallelism over images is available, and can be combined with the k-point/p
 
 B.3 Contour deformation GW calculations have been vastly improved, e.g. through
     the availability of input variables to control the frequency grid spacing
-    (gw_use_freqre_tangrid, cd_halfway_freq, cd_max_freq, cd_subset_freq). 
+    (gw_use_freqre_tangrid, cd_halfway_freq, cd_max_freq, cd_subset_freq).
     There have also been big improvements in the abilities of the utility
     mrgscr : now it is not only possible to split up a screening calculation
     by q-points and later merge them, but also to split up the calculation
@@ -90,13 +90,13 @@ B.4 A whole set of tutorials on parallelism has been added (see doc/tutorial/les
     [They were announced in v6.10.2 , and will be further tuned during the School on parallelism with ABINIT,
       http://sites.google.com/site/abinit2011tutorial ]
     Also, the tutorial on GW has been considerably improved.
-    Work by F. Bottin, J. Bouchet, D. Caliste, G. Geneste, M. Giantomassi, X. Gonze, M. Stankovski, M. Torrent 
+    Work by F. Bottin, J. Bouchet, D. Caliste, G. Geneste, M. Giantomassi, X. Gonze, M. Stankovski, M. Torrent
 
 __________________________________________________________________
 
 C. Changes for the developers
 
-C.1 The memory leaks that are present in all automatic tests have been removed. The slave green_g95 
+C.1 The memory leaks that are present in all automatic tests have been removed. The slave green_g95
     now tests the presence of any such memory leak.
     By M. Verstraete, JM Beuken, X Gonze.
 
@@ -114,7 +114,7 @@ D.1 Orbital magnetization can now be computed, but at present, only in the nspin
     Activated by berryopt=-5. See test v6#48.
     By JZwanziger
 
-D.2 Imported the full GANDALF set of scripts (in psps/scripts/GANDALF), from F. Bottin. 
+D.2 Imported the full GANDALF set of scripts (in psps/scripts/GANDALF), from F. Bottin.
     This is to test the pseudopotentials.
 
 D.3 Earlier, the computation of susceptibility matrix in view of preconditioning the SCF cycle (non-zero positive iprcel)
@@ -122,10 +122,10 @@ D.3 Earlier, the computation of susceptibility matrix in view of preconditioning
     The new input variable pawsushat has been introduced for this purpose.
     By MTorrent
 
-D.4 The new input variable pimass has been introduced, to control the mass of particules 
+D.4 The new input variable pimass has been introduced, to control the mass of particules
     for the path-integral molecular dynamics algorithm.
-    The numerical calculation have been stabilized. The implementation is modularized. 
-    Work has been done on the random number generator, see the new irandom input variables. 
+    The numerical calculation have been stabilized. The implementation is modularized.
+    Work has been done on the random number generator, see the new irandom input variables.
     See the new test v6#26.
     By G. Geneste and M. Torrent
 
@@ -148,7 +148,7 @@ D.9 Print nesting factor (input variable prtnest) is now OK.
     By M. Verstraete
 
 D.10 Work on modularization of ANADDB
-     By M. Verstraete 
+     By M. Verstraete
 
 D.11 Abinit can now translate polarized WF (nsspol=2) in spinors (nspinors=2) (and the contrary)
      By M. Torrent
@@ -178,7 +178,7 @@ D.17 Bether-Salpeter part of ABINIT.
     By M. Giantomassi.
 
 D.18 Phonon calculations using DFPT can now be done reliably with the PAW methodology,
-   for the insulating case. 
+   for the insulating case.
    The metal case is operational (under the same conditions), except for q=0 (not fully implemented).
    The electric field response was already available previously.
    Still, for the time being, mixing of electric field and atomic displacement is not allowed.
@@ -202,7 +202,7 @@ D.21 On going work on new slave tikal, with pathscale 4.0.
 
 D.22 Upgraded version of AtomPAW (3.0.1.2) delivered as a plugin of ABINIT.
 
-D.23 Parallelisation/distribution on the atoms in the PAW case 
+D.23 Parallelisation/distribution on the atoms in the PAW case
      By M. Delaveau, M. Torrent and F. Bottin.
 
 D.24 Automation of the paralelism (no need to explicitly specify the splitting of processors in npband / npfft / npspin / npkpt ...)
@@ -210,6 +210,6 @@ D.24 Automation of the paralelism (no need to explicitly specify the splitting o
 
 D.25 Numerous miscellaneous additional bug fixes (to the sources, as well as to the build system, including the plug-ins),
      and improvements of documentation by
-     A. Berger, J.M. Beuken, F. Bottin, D. Caliste, M. Delaveau, A. Knyazev, A. Jacques, F. Jollet, 
+     A. Berger, J.M. Beuken, F. Bottin, D. Caliste, M. Delaveau, A. Knyazev, A. Jacques, F. Jollet,
      M. Mancini, G.-M. Rignanese, M. Torrent, M. Verstraete, Bin Xu, J. Zwanziger.
 </pre>

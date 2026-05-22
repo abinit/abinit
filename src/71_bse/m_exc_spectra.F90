@@ -1156,8 +1156,7 @@ subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
 !Local variables-------------------------------
 !scalars
  integer :: ncerr
- real(dp), ABI_CONTIGUOUS pointer :: rvals(:,:,:)
-
+ real(dp), contiguous, pointer :: rvals(:,:,:)
 ! *************************************************************************
  ! =========================
  ! === Write the dimensions

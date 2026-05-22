@@ -139,6 +139,7 @@ contains
 !!   at each k+q point of the reduced Brillouin zone.
 !!  occ_rbz(mband*nkpt_rbz*nsppol)=occupation number for each band and k
 !!   (usually 2)
+!!  omega= frequency of the perturbation
 !!  optres=0: the new value of the density is computed in place of the input value
 !!         1: only the density residual is computed ; the input density is kept
 !!  paw_ij(natom*usepaw) <type(paw_ij_type)>=paw arrays given on (i,j) channels for the GS
@@ -230,7 +231,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 & nsppol,nsym1,ntypat,nvresid1,occkq,occ_rbz,optres,&
 & paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,pawrhoij1,pawtab,&
 & phnons1,ph1d,prtvol,psps,pwindall,qmat,resid,residm,rhog1,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,&
-& usecprj,useylmgr1,usevxctau,ddk_f,vectornd,vtrial,vtrial1,vxctau,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out)
+& usecprj,useylmgr1,usevxctau,ddk_f,vectornd,vtrial,vtrial1,vxctau,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out,eta,omega)
 
 !Arguments -------------------------------
 !scalars
@@ -240,6 +241,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer,intent(in) :: nsppol,nsym1,ntypat,optres,prtvol,usecprj,useylmgr1,usevxctau,with_vectornd
  integer,optional,intent(in) :: cg1_out
  real(dp),intent(in) :: fermie1,ucvol
+ real(dp),optional,intent(in) :: eta,omega
  real(dp),intent(out) :: edocc,eeig0,ek0,ek1,eloc0,end0,end1,enl0,enl1,evxctau0,evxctau1,nres2,residm
  type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
@@ -309,7 +311,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,qphase_rhoij,spaceworld,test_dot
  integer :: nband_me
  logical :: has_vectornd,paral_atom,qne0,with_vxctau
- real(dp) :: arg,wtk_k
+ real(dp) :: arg,eta_,omega_,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq,rf_hamk_dir2
 !arrays
@@ -378,6 +380,9 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  n4=dtset%ngfft(4); n5=dtset%ngfft(5); n6=dtset%ngfft(6)
  qne0=(qphon(1)**2+qphon(2)**2+qphon(3)**2>=tol14)
 
+ omega_=zero; if(present(omega))omega_=omega
+ eta_=zero; if(present(eta))eta_=eta
+
 !Initialize PW 1st-order density if needed
 !Also store old rho1 in case of density mixing
  if (iscf_mod>0) then
@@ -415,7 +420,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
 !Initialisation of the wfdot file in case of electric field (or 2nd order Sternheimer equation)
  test_dot=0
- if (ipert==natom+2.and.sum((dtset%qptn(1:3))**2 )<=tol7.and.&
+ if (ipert==natom+2.and.sum((qphon(1:3))**2 )<=tol7.and.&
 & (dtset%berryopt/= 4.and.dtset%berryopt/= 6.and.dtset%berryopt/= 7.and.&
 & dtset%berryopt/=14.and.dtset%berryopt/=16.and.dtset%berryopt/=17).or.&
 & (ipert==natom+10.or.ipert==natom+11)) then
@@ -496,7 +501,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      end if
    end if
 
-   if (ipert==natom+5) then !SPr deb, in case of magnetic field perturbation, no non-local
+   if (ipert==natom+5.or.ipert==natom+6.or.(ipert>natom+11.and.ipert<=2*natom+11)) then !SPr deb, in case of magnetic field perturbation, no non-local
      call rf_hamkq%load_spin(isppol,vlocal1=vlocal1)
    end if
 
@@ -549,7 +554,9 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      end if
 
      kpoint(:)=kpt_rbz(:,ikpt)
-     kpq(:)=kpoint(:);if (ipert<natom+3.or.ipert==natom+5) kpq(:)=kpq(:)+qphon(1:3)
+     kpq(:)=kpoint(:)
+     if (ipert<natom+3.or.ipert==natom+5.or.ipert==natom+6.or.&
+    &(ipert>natom+11.and.ipert<=2*natom+11)) kpq(:)=kpq(:)+qphon(1:3)
      ABI_MALLOC(kg_k,(3,npw_k))
      ABI_MALLOC(kg1_k,(3,npw1_k))
      ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
@@ -673,7 +680,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 &     ffnl1,ffnl1_test,gh0c1_set,gh1c_set,grad_berry,gs_hamkq,ibg,ibgq,ibg1,icg,icgq,icg1,idir,ikpt,ipert,isppol,&
 &     mband,mband_mem,mcgq,mcprjq,mkmem,mk1mem,mpi_enreg,mpw,mpw1,natom,nband_k,ncpgr,nnsclo_now,&
 &     npw_k,npw1_k,dtset%nspinor,nsppol,n4,n5,n6,occ_k,pawrhoij1_unsym,prtvol,psps,resid_k,&
-&     rf_hamkq,rf_hamk_dir2,rhoaug1,rocceig,ddk_f,wtk_k,nlines_done,cg1_out)
+&     rf_hamkq,rf_hamk_dir2,rhoaug1,rocceig,ddk_f,wtk_k,nlines_done,cg1_out,eta=eta_,omega=omega_)
 
      if ( gs_hamkq%gpu_option == ABI_GPU_OPENMP) then
        call ompgpu_free_hamilt_buffers()

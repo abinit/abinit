@@ -1489,19 +1489,19 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
          qpg(:) = two_pi*MATMUL(Cryst%gprimd,q_point(:))
          abs_qpg_sq = dot_product(qpg(:),rvec(:,ir))
          abs_qpgp_sq = dot_product(qpg(:),rvec(:,irp))
-         dummy(ir,irp) = EXP(-j_dpc*abs_qpg_sq)* &
-&         dummy(ir,irp)* &
-&         EXP(j_dpc*abs_qpgp_sq)
+         dummy(ir,irp) = EXP(-j_dpc*abs_qpg_sq) * dummy(ir,irp)* EXP(j_dpc*abs_qpgp_sq)
        end do
      end do
+
      call fourdp_6d(2,dummy,-1,MPI_enreg_seq,nfft,ngfft, 0)
+
      do ig=1,npw
        do igp=1,npw
          FT_fxc_ADA_ggpq(ig,igp,iqbz) = dummy(ig_idx_fft(ig),ig_idx_fft(igp))
        end do
      end do
 
-!    Output
+     ! Output
      msg=''
      if (iqbz<10) write(msg,'(a,i1,a)') './debug_fxc_ADA_q',iqbz,'.dat'
      if ((iqbz>9).and.(iqbz<100)) write(msg,'(a,i2,a)') './debug_fxc_ADA_q',iqbz,'.dat'

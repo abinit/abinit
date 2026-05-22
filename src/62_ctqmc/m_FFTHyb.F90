@@ -5,8 +5,8 @@
 !!****m* ABINIT/m_FFTHyb
 !! NAME
 !!  m_FFTHyb
-!! 
-!! FUNCTION 
+!!
+!! FUNCTION
 !!  Almost useless. Just uses for FFT time evolution
 !!  of number of electrons
 !!
@@ -52,7 +52,7 @@ TYPE, PUBLIC :: FFTHyb
   INTEGER          :: size
   DOUBLE PRECISION _PRIVATE :: Ts
   DOUBLE PRECISION _PRIVATE :: fs
-  INTEGER         , ALLOCATABLE, DIMENSION(:) _PRIVATE :: bit_rev   
+  INTEGER         , ALLOCATABLE, DIMENSION(:) _PRIVATE :: bit_rev
   COMPLEX(KIND=8) , ALLOCATABLE, DIMENSION(:) _PRIVATE :: data_inout
 END TYPE FFTHyb
 !!***
@@ -116,7 +116,7 @@ SUBROUTINE FFTHyb_init(this,n,samples_sec)
   ELSE
     total_size = n
   END IF
-  
+
   this%size = total_size
   this%Ts = DBLE(total_size) / samples_sec
   this%fs = 1.d0 / DBLE(total_size)
@@ -130,7 +130,7 @@ SUBROUTINE FFTHyb_init(this,n,samples_sec)
 
   DO i = 1, total_size-1
     inv_bit = FFTHyb_mirror(i,total_size)
-    this%bit_rev(inv_bit) = i 
+    this%bit_rev(inv_bit) = i
   END DO
 
   this%set = .TRUE.
@@ -222,7 +222,7 @@ SUBROUTINE FFTHyb_setData(this, array_in)
   this%data_inout = CMPLX(0.d0,0.d0,KIND=4)
 !  IF ( size_in .NE. this%size ) &
 !    CALL WARNALL("FFTHyb_setData : size_in != size")
-  
+
   DO i = 0, MIN(this%size,size_in)-1
     this%data_inout(i) = CMPLX(array_in(i+1), 0.d0,8)
   END DO
@@ -274,12 +274,12 @@ SUBROUTINE FFTHyb_run(this, dir)
   DOUBLE PRECISION :: theta
   DOUBLE PRECISION :: twoPi
   COMPLEX(KIND=8) :: tc
- 
+
   imax = 1;
   istep = 2;
-  
+
   twoPi = DBLE(dir)*2.d0*ACOS(-1.d0)
- 
+
   DO WHILE ( imax .LT. this%size )
     istep = ISHFT(imax,1)
     theta = twoPi/DBLE(istep)
@@ -362,12 +362,12 @@ SUBROUTINE FFTHyb_getData(this, bound, array_out, freqs)
   END DO
   IF ( PRESENT( freqs ) .AND. bound .LE. SIZE(freqs)) THEN
     DO i=1, bound
-        freqs(i) = DBLE(i-1)/this%Ts 
+        freqs(i) = DBLE(i-1)/this%Ts
     END DO
 !  ELSE IF ( PRESENT( freqs ) .AND. bound .GT. SIZE(freqs) ) THEN
 !    CALL WARNALL("FFHyb_getData : freqs does is too small")
   END IF
-  
+
 END SUBROUTINE FFTHyb_getData
 !!***
 

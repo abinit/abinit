@@ -124,6 +124,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_gwr
 
  use, intrinsic :: iso_c_binding
@@ -183,6 +186,9 @@ module m_gwr
  use m_dyson_solver,  only : sigma_pade_t
  use minimax_grids,   only : gx_minimax_grid
  use m_occ,           only : get_fact_spin_tol_empty
+#if defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -823,8 +829,6 @@ module m_gwr
 
  integer,private,parameter :: CHI_FIT = 1, SIGMA_FIT = 2
 
- real(dp),private,parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
-
 contains
 !!***
 
@@ -1164,7 +1168,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      cnt = 0
      do spin=1,gwr%nsppol
        bstop = gwr%bstart_ks(ikcalc, spin) + gwr%nbcalc_ks(ikcalc, spin) - 1
-       call ks_ebands%enclose_degbands(ik_ibz, spin, gwr%bstart_ks(ikcalc, spin), bstop, changed, TOL_EDIFF, &
+       call ks_ebands%enclose_degbands(ik_ibz, spin, gwr%bstart_ks(ikcalc, spin), bstop, changed, gwr%dtset%symsigma_de, &
                                        degblock=degblock)
        if (changed) then
          gwr%nbcalc_ks(ikcalc, spin) = bstop - gwr%bstart_ks(ikcalc, spin) + 1
@@ -1886,10 +1890,12 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
  integer :: my_is, my_it, ipm, npwsp, col_bsize, itau, spin, ik_ibz, iq_ibz
  !integer :: ii, num_pm, ipm_list__(2)
  type(__slkmat_t), pointer :: mat
- character(len=500) :: msg
+ character(len=500) :: msg !, gpu_action
 ! *************************************************************************
 
  ABI_CHECK(string_in(action, "malloc, free"), sjoin("Invalid action:", action))
+
+ !gpu_action = "None"; if (gwr%dtset%gpu_option == ABI_GPU_OPENMP) gpu_action = "alloc"
 
  !num_pm = 2; ipm_list__ = [1, 2]
  !if (present(ipm_list)) then
@@ -1917,7 +1923,7 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
          ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
          associate (gt => gwr%gt_kibz(:, ik_ibz, itau, spin))
          do ipm=1,2
-           if (action == "malloc") call gt(ipm)%init(npwsp, npwsp, gwr%g_slkproc, istwfk1, size_blocs=[-1, col_bsize])
+           if (action == "malloc") call gt(ipm)%init(npwsp, npwsp, gwr%g_slkproc, istwfk1, size_blocs=[-1, col_bsize]) !, gpu_action=gpu_action)
            if (action == "free") call gt(ipm)%free()
          end do
          end associate
@@ -1935,7 +1941,7 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
          ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
          if (what == "tchi") mat => gwr%tchi_qibz(iq_ibz, itau, spin)
          if (what == "wc") mat => gwr%wc_qibz(iq_ibz, itau, spin)
-         if (action == "malloc") call mat%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+         if (action == "malloc") call mat%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize]) !, gpu_action=gpu_action)
          if (action == "free") call mat%free()
        end do
 
@@ -1950,7 +1956,7 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
          ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
          associate (sigc => gwr%sigc_kibz(:, ik_ibz, itau, spin))
          do ipm=1,2
-           if (action == "malloc") call sigc(ipm)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+           if (action == "malloc") call sigc(ipm)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize]) !, gpu_action=gpu_action)
            if (action == "free") call sigc(ipm)%free()
          end do
          end associate
@@ -2892,6 +2898,7 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list)
  !       2) Make sure that the FFT box is large enough to accommodate umklapps
 
  desc_kbz%ig0 = -1
+ !$OMP PARALLEL DO
  do ig1=1,desc_kbz%npw
    desc_kbz%gvec(:,ig1) = tsign_k * matmul(gwr%cryst%symrec(:,:,isym_k), desc_kibz%gvec(:,ig1)) - g0_k
    if (all(desc_kbz%gvec(:,ig1) == 0)) desc_kbz%ig0 = ig1
@@ -2969,13 +2976,14 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
  logical :: k_is_gamma
  real(dp) :: kk_bz(3), cpu, wall, gflops, mem_mb
  complex(gwp),allocatable :: ceikr(:)
- character(len=500) :: msg
+ character(len=500) :: msg, gpu_action
  type(__slkmat_t) :: rgp, gt_pm(2)
  type(uplan_t) :: uplan_k
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
  gpu_option = gwr%dtset%gpu_option
+ gpu_action = "None"; if (gpu_option == ABI_GPU_OPENMP) gpu_action = "alloc"
 
  mem_mb = two * gwr%my_nkbz * two * gwp * gwr%g_nfft * gwr%green_mpw * b2Mb /  gwr%g_slkproc%grid%nprocs
  call wrtout(std_out, sjoin(" Estimated local memory for Green's functions: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
@@ -3010,7 +3018,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
      associate (g_gp => gt_pm(ipm))
      npwsp = desc_k%npw * gwr%nspinor
      ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
-     call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_k%istwfk, size_blocs=[-1, col_bsize])
+     call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_k%istwfk, size_blocs=[-1, col_bsize]) !, gpu_action=gpu_action)
 
      ! Perform FFT G_k(g,g') -> G_k(r,g') and store results in rgp.
      gpu_mode = 1
@@ -3083,6 +3091,8 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, &
 ! *************************************************************************
 
  !call cwtime(cpu, wall, gflops, "start")
+ ABI_NVTX_START_RANGE(NVTX_GWR_GKBZ_RPR_PM)
+
  gpu_option = gwr%dtset%gpu_option
 
  num_pm = 2; ipm_list__ = [1, 2]
@@ -3154,7 +3164,6 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, &
      end if
    end do ! ir1
    call gpr%free()
-
  end do ! ii
 
  call slk_array_free(gt_pm); call desc_kbz%free(); call uplan_k%free()
@@ -3167,7 +3176,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, &
    ABI_FREE(conjg_ceig0r)
  end if
 
- ! Transfer data from CPU to GPU.
+ ! FIXME: Transfer data from CPU to GPU.
  if (gpu_option == ABI_GPU_OPENMP) then
    do ii=1,num_pm
      ipm = ipm_list__(ii)
@@ -3175,6 +3184,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, &
    end do
  end if
 
+ ABI_NVTX_END_RANGE()
  !call cwtime_report(" gwr_get_gkbz_rpr_pm:", cpu, wall, gflops)
 
 end subroutine gwr_get_gkbz_rpr_pm
@@ -3273,6 +3283,8 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, rfact, g_gp)
  type(uplan_t) :: uplan_k
 ! *************************************************************************
 
+ ABI_NVTX_START_RANGE(NVTX_GWR_RPR_TO_GGP)
+
  ! Allocate intermediate gp_r PBLAS matrix to store F(g',r)
  npwsp = desc%npw * gwr%nspinor; nrsp = gwr%g_nfft * gwr%nspinor
  ABI_CHECK(block_dist_1d(nrsp, gwr%g_comm%nproc, col_bsize, msg), msg)
@@ -3317,6 +3329,7 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, rfact, g_gp)
  if (gwr%dtset%gpu_option == ABI_GPU_OPENMP) call g_gp%gpu_map("update_to") ! FIXME
 
  call uplan_k%free(); call r_gp%free()
+ ABI_NVTX_END_RANGE()
 
 end subroutine gwr_rpr_to_ggp
 !!***
@@ -3354,6 +3367,7 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
  complex(dp) :: ph2, ph1
 ! *************************************************************************
 
+ ABI_NVTX_START_RANGE(NVTX_GWR_ROTATE_WC)
  ABI_CHECK(gwr%wc_space == "itau", sjoin("wc_space:", gwr%wc_space, " != itau"))
 
  qq_bz = gwr%qbz(:, iq_bz)
@@ -3372,7 +3386,7 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
 
  if (isirr_q) then
    ! Copy the PBLAS matrix in wc_qbz and we are done.
-   call gwr%wc_qibz(iq_ibz, itau, spin)%copy(wc_qbz); return
+   call gwr%wc_qibz(iq_ibz, itau, spin)%copy(wc_qbz); goto 10
  end if
 
  !ABI_WARNING_IF(trev_q == 0, "trev_q should be tested")
@@ -3415,6 +3429,9 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
  end do
  end associate
  end associate
+
+10 continue
+ ABI_NVTX_END_RANGE()
 
 end subroutine gwr_rotate_wc
 !!***
@@ -3460,6 +3477,8 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
+ ABI_NVTX_START_RANGE(NVTX_GWR_MYQ_WW_GPR)
+
  gpu_option = gwr%dtset%gpu_option
 
  ABI_MALLOC(ceiqr, (gwr%g_nfft * gwr%nspinor))
@@ -3523,6 +3542,8 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
  call wrtout(std_out, sjoin(" Local memory for Wc(g',r):", ftoa(mem_mb, fmt="f8.1"), "[Mb] <<< MEM"))
  call cwtime_report(" gwr_get_myq_wc_gpr:", cpu, wall, gflops)
 
+ ABI_NVTX_END_RANGE()
+
 end subroutine gwr_get_myq_wc_gpr
 !!***
 
@@ -3559,6 +3580,8 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
  complex(gwp),allocatable :: ceig0r(:), conjg_ceig0r(:)
 ! *************************************************************************
 
+ ABI_NVTX_START_RANGE(NVTX_GWR_WC_RPR_QBZ)
+
  gpu_option = gwr%dtset%gpu_option
  gpu_action = "None"; if (gpu_option == ABI_GPU_OPENMP) gpu_action = "alloc"
 
@@ -3581,7 +3604,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
  nrsp = gwr%g_nfft * gwr%nspinor
  npwsp = desc_qbz%npw * gwr%nspinor
  ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
- call rgp%init(nrsp, npwsp, gwr%g_slkproc, desc_qbz%istwfk, size_blocs=[-1, col_bsize])
+ call rgp%init(nrsp, npwsp, gwr%g_slkproc, desc_qbz%istwfk, size_blocs=[-1, col_bsize]) ! , gpu_action=gpu_action)
 
  call uplan_k%init(desc_qbz%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_qbz%istwfk, &
                    desc_qbz%gvec, gwp, gpu_option)
@@ -3627,6 +3650,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
  end if
 
  if (gpu_option == ABI_GPU_OPENMP) call wc_rpr%gpu_map("update_to")
+ ABI_NVTX_END_RANGE()
 
 end subroutine gwr_get_wc_rpr_qbz
 !!***
@@ -3673,7 +3697,9 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
  units = [std_out, ab_out]
 
+ ABI_NVTX_START_RANGE(NVTX_GWR_COS_TRANSFORM)
  call cwtime(cpu, wall, gflops, "start")
+
  sum_spins_ = .False.; if (present(sum_spins)) sum_spins_ = sum_spins
 
  call wrtout(std_out, sjoin(" Performing cosine transform. what:", what, ", mode:", mode))
@@ -3907,6 +3933,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
    end do ! my_iqi
  end if
 
+ ABI_NVTX_END_RANGE()
  call cwtime_report(" gwr_cos_transform:", cpu, wall, gflops)
 
 end subroutine gwr_cos_transform
@@ -4840,7 +4867,7 @@ subroutine gwr_build_tchi(gwr)
    ! Allocate G_k(r',r, +/- tau) and G_kq(r',r, +/- tau)
    ! TODO: Can save memory here as we don't need +/- tau for each k+q.
    do ipm=1,2
-     call gk_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])  !, gpu_action=gpu_action)
+     call gk_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize]) !, gpu_action=gpu_action)
      call gkq_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize]) !, gpu_action=gpu_action)
    end do
 
@@ -4903,7 +4930,7 @@ subroutine gwr_build_tchi(gwr)
 
        ! Accumulate contribution to chi_q(r',r) with q in the IBZ.
        do iq_ibz=1,gwr%nqibz
-         if (gwr%dtset%symchi /= 0 .and. ltg_qibz(iq_ibz)%ibzq(ik_bz) == 0) cycle ! FIXME: iq_bz or ikq?
+         if (gwr%dtset%symchi /= 0 .and. ltg_qibz(iq_ibz)%ibzq(ik_bz) == 0) cycle
          qq_ibz = gwr%qibz(:,iq_ibz); kpq_bz = kk_bz + qq_ibz
 
          call findqg0(ikq_bz, g0_kq, kpq_bz, gwr%nkbz, gwr%kbz, gwr%mG0)
@@ -4929,9 +4956,7 @@ subroutine gwr_build_tchi(gwr)
          !  !wtqp * gkq_rpr_pm(1)%buffer_cplx * conjg(gk_rpr_pm(2)%buffer_cplx)  ! This should be OK
 
          call cplx_mat_plus_bc(chiq_rpr(iq_ibz)%bufsize, chiq_rpr(iq_ibz)%buffer_cplx(:,1), &
-                               wtqp, "C", gkq_rpr_pm(2)%buffer_cplx(:,1), gk_rpr_pm(1)%buffer_cplx(:,1), &
-                               !0)
-                               gpu_option) ! TODO
+                               wtqp, "C", gkq_rpr_pm(2)%buffer_cplx(:,1), gk_rpr_pm(1)%buffer_cplx(:,1), gpu_option)
        end do ! iq_ibz
 
        if (print_time) then
@@ -5421,6 +5446,7 @@ subroutine gwr_build_wc(gwr)
  complex(dp) :: em1_wq(gwr%ntau, gwr%nqibz), eps_wq(gwr%ntau, gwr%nqibz)
 ! *************************************************************************
 
+ ABI_NVTX_START_RANGE(NVTX_GWR_BUILD_WC)
  units = [std_out, ab_out]
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
@@ -5600,6 +5626,7 @@ subroutine gwr_build_wc(gwr)
 
  call cwtime_report(" gwr_build_wc:", cpu_all, wall_all, gflops_all)
  call timab(1924, 2, tsec)
+ ABI_NVTX_END_RANGE()
 
 end subroutine gwr_build_wc
 !!***
@@ -5630,10 +5657,10 @@ subroutine gwr_build_sigmac(gwr)
  integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, my_ir, my_nr, iw, idat, max_ndat, ndat, ii, jj, irow
  integer :: iq_ibz, iq_bz, itau, ierr, ibc, ib1, ib2, bmin, bmax, band, band1, ifft, gpu_option
  integer :: band2, band2_start, band2_stop, nbc
- integer :: my_ikf, ipm, ik_bz, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp
+ integer :: my_ikf, ipm, ik_bz, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp, iter_ncid
  integer :: isym_k, trev_k, g0_k(3), tsign_k !, b1gw, b2gw, ! npwsp, my_iqi, sc_ir, ig, my_iqf
  integer :: gt_request, wct_request
- integer :: band_val, ibv, ncerr, unt_it, unt_iw, unt_rw
+ integer :: band_val, ibv, unt_it, unt_iw, unt_rw ! ncerr,
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
  integer :: gt_scbox_win, wct_scbox_win, use_umklp, ideg, nstates, nb1, nb2, nspinor
  integer(c_size_t) :: bufsize
@@ -5645,7 +5672,7 @@ subroutine gwr_build_sigmac(gwr)
  real(gwp) :: wtqm, wtqp
  complex(dp) :: zz, zsc, sigc_e0__, dsigc_de0, z_e0, sig_xc, hhartree_bk, qp_ene, qp_ene_prev, alpha_c, sigc_zsc
  logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k, do_sigma_fit
- logical :: compute_this_kbz, print_time, define, sigc_is_herm, band_inversion
+ logical :: compute_this_kbz, print_time, sigc_is_herm, band_inversion ! define,
  character(len=500) :: msg, gpu_action
  type(gaps_t) :: new_gaps
  type(yamldoc_t) :: ydoc
@@ -5673,7 +5700,7 @@ subroutine gwr_build_sigmac(gwr)
  real(dp) :: e0_kcalc(gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol), rw_mesh(gwr%nwr)
  real(dp) :: spfunc_diag(gwr%nwr, gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol)
  integer :: pade_solver_ierr(gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol)
- real(dp) :: ks_gaps(gwr%nkcalc, gwr%nsppol), qpz_gaps(gwr%nkcalc, gwr%nsppol) !, qp_pade_gaps(gwr%nkcalc, gwr%nsppol)
+ real(dp) :: ks_gaps(gwr%nkcalc, gwr%nsppol), qpz_gaps(gwr%nkcalc, gwr%nsppol), qp_pade_gaps(gwr%nkcalc, gwr%nsppol)
  complex(dp) :: ze0_kcalc(gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: sigc_e0(gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: qpz_ene(gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol), imag_zmesh(gwr%ntau)
@@ -6140,16 +6167,14 @@ else
            bufsize = sigc_rpr(1,ipm,ikcalc)%bufsize
            call cplx_mat_plus_bc(bufsize, sigc_rpr(1,ipm,ikcalc)%buffer_cplx(:,1), &
                                  wtqp, "N", gk_rpr_pm(ipm)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
-                                 !0)
-                                 gpu_option) ! TODO
+                                 gpu_option)
 
            if (abs(wtqm) > tol12) then
              ABI_ERROR(sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
 
              call cplx_mat_plus_bc(bufsize, sigc_rpr(2,ipm,ikcalc)%buffer_cplx(:,1), &
                                    wtqm, "C", gk_rpr_pm(ipm)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
-                                   !0)
-                                   gpu_option) ! TODO
+                                   gpu_option)
 
              !sigc_rpr(1, ipm, ikcalc)%buffer_cplx = sigc_rpr(1, ipm, ikcalc)%buffer_cplx + &
              !    (wtqp + wtqm) * real(gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx, kind=gwp) &
@@ -6246,7 +6271,7 @@ end if
 
  e0_kcalc = zero; spfunc_diag = zero; pade_solver_ierr = 0; ze0_kcalc = zero; sigc_e0 = zero
  qpz_ene = zero; qp_pade = zero; sigxc_rw_diag = zero
- ks_gaps = -one; qpz_gaps = -one !; qp_pade_gaps = -one
+ ks_gaps = -one; qpz_gaps = -one ; qp_pade_gaps = -one
 
  do spin=1,gwr%nsppol
  do ikcalc=1,gwr%nkcalc
@@ -6431,7 +6456,7 @@ end if
            call ydoc%add_int('QP_VBM_band', iperm(ibv) + gwr%bstart_ks(ikcalc, spin) - 1)
            call ydoc%add_int('QP_CBM_band', iperm(ibv+1) + gwr%bstart_ks(ikcalc, spin) - 1)
            qp_gap = sorted_qpe(ibv+1) - sorted_qpe(ibv)
-           !qp_pade_gap = qp_pade(band_val+1, ikcalc, spin) - qp_pade(band_val, ikcalc, spin)
+           qp_pade_gap = qp_pade(band_val+1, ikcalc, spin) - qp_pade(band_val, ikcalc, spin)
          else
            call ydoc%add_int('QP_VBM_band', ibv + gwr%bstart_ks(ikcalc, spin) - 1)
            call ydoc%add_int('QP_CBM_band', ibv+1 + gwr%bstart_ks(ikcalc, spin) - 1)
@@ -6446,7 +6471,7 @@ end if
          call ydoc%add_real('Delta_QP_KS', (qp_gap - ks_gap) * Ha_eV)
          ks_gaps(ikcalc, spin)= ks_gap
          qpz_gaps(ikcalc, spin) = qp_gap
-         !qp_pade_gaps(ikcalc, spin) = qp_pade_gap
+         qp_pade_gaps(ikcalc, spin) = qp_pade_gap
        end if
 
        call ydoc%open_tabular('data') !, tag='SigmaeeData')
@@ -6560,42 +6585,14 @@ end if
 
      ! Define arrays with results.
      ! TODO: Add matrix elements of vxc, have to trasfer data from vxcval to nkcalc packing
-     define = .True.
-     if (define) then
-       ncerr = nctk_def_arrays(ncid, [ &
-         nctkarr_t("e0_kcalc", "dp", "smat_bsize1, nkcalc, nsppol"), &
-         nctkarr_t("ze0_kcalc", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
-         !nctkarr_t("vxc_kcalc", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
-         nctkarr_t("qpz_ene", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
-         nctkarr_t("qp_pade", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
-         nctkarr_t("pade_solver_ierr", "int", "smat_bsize1, nkcalc, nsppol"), &
-         nctkarr_t("ks_gaps", "dp", "nkcalc, nsppol"), &
-         nctkarr_t("qpz_gaps", "dp", "nkcalc, nsppol"), &
-         !nctkarr_t("qp_pade_gaps", "dp", "nkcalc, nsppol"), &
-         nctkarr_t("sigx_mat", "dp", "two, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
-         nctkarr_t("sigc_it_mat", "dp", "two, two, ntau, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
-         nctkarr_t("sigc_iw_mat", "dp", "two, ntau, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
-         nctkarr_t("sigxc_rw_diag", "dp", "two, nwr, smat_bsize1, nkcalc, nsppol"), &
-         nctkarr_t("spfunc_diag", "dp", "nwr, smat_bsize1, nkcalc, nsppol") &
-       ])
-       NCF_CHECK(ncerr)
+     call ncwrite_sigmac(ncid)
+
+     if (.true.) then
+       NCF_CHECK(nf90_def_grp(ncid, strcat("iter", itoa(gwr%scf_iteration)), iter_ncid))
+       call ncwrite_sigmac(iter_ncid)
      end if
 
-     ! Write data.
-     NCF_CHECK(nctk_set_datamode(ncid))
-     NCF_CHECK(nf90_put_var(ncid, vid("e0_kcalc"), e0_kcalc))
-     NCF_CHECK(nf90_put_var(ncid, vid("ze0_kcalc"), c2r(ze0_kcalc)))
-     NCF_CHECK(nf90_put_var(ncid, vid("sigx_mat"), c2r(gwr%sigx_mat)))
-     NCF_CHECK(nf90_put_var(ncid, vid("qpz_ene"), c2r(qpz_ene)))
-     NCF_CHECK(nf90_put_var(ncid, vid("qp_pade"), c2r(qp_pade)))
-     NCF_CHECK(nf90_put_var(ncid, vid("pade_solver_ierr"), pade_solver_ierr))
-     NCF_CHECK(nf90_put_var(ncid, vid("ks_gaps"), ks_gaps))
-     NCF_CHECK(nf90_put_var(ncid, vid("qpz_gaps"), qpz_gaps))
-     !NCF_CHECK(nf90_put_var(ncid, vid("qp_pade_gaps"), qp_pade_gaps))
-     NCF_CHECK(nf90_put_var(ncid, vid("sigc_it_mat"), c2r(sigc_it_mat)))
-     NCF_CHECK(nf90_put_var(ncid, vid("sigc_iw_mat"), c2r(gwr%sigc_iw_mat)))
-     NCF_CHECK(nf90_put_var(ncid, vid("sigxc_rw_diag"), c2r(sigxc_rw_diag)))
-     NCF_CHECK(nf90_put_var(ncid, vid("spfunc_diag"), spfunc_diag))
+     NCF_CHECK(nf90_put_var(ncid, vid("scf_iteration"), gwr%scf_iteration))
      NCF_CHECK(nf90_put_var(ncid, vid("gwr_completed"), 1))
      NCF_CHECK(nf90_close(ncid))
    end if
@@ -6630,6 +6627,51 @@ subroutine print_sigma_header()
  call wrtout(std_out, sjoin("- FFT sc_batch_size:", itoa(gwr%sc_batch_size)), do_flush=.True.)
 
 end subroutine print_sigma_header
+
+subroutine ncwrite_sigmac(myncid)
+ integer,intent(in) :: myncid
+ !logical,intent(in), optional :: mydefine
+ integer :: myncerr
+
+ ! Write Sigma_c to GWR.nc
+ NCF_CHECK(nctk_set_datamode(myncid))
+!  if (.not. present(mydefine) .or. mydefine) then
+ if (.true.) then
+   myncerr = nctk_def_arrays(myncid, [ &
+     nctkarr_t("e0_kcalc", "dp", "smat_bsize1, nkcalc, nsppol"), &
+     nctkarr_t("ze0_kcalc", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
+     !nctkarr_t("vxc_kcalc", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
+     nctkarr_t("qpz_ene", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
+     nctkarr_t("qp_pade", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
+     nctkarr_t("pade_solver_ierr", "int", "smat_bsize1, nkcalc, nsppol"), &
+     nctkarr_t("ks_gaps", "dp", "nkcalc, nsppol"), &
+     nctkarr_t("qpz_gaps", "dp", "nkcalc, nsppol"), &
+     nctkarr_t("qp_pade_gaps", "dp", "nkcalc, nsppol"), &
+     nctkarr_t("sigx_mat", "dp", "two, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
+     nctkarr_t("sigc_it_mat", "dp", "two, two, ntau, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
+     nctkarr_t("sigc_iw_mat", "dp", "two, ntau, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
+     nctkarr_t("sigxc_rw_diag", "dp", "two, nwr, smat_bsize1, nkcalc, nsppol"), &
+     nctkarr_t("spfunc_diag", "dp", "nwr, smat_bsize1, nkcalc, nsppol") &
+   ])
+   NCF_CHECK(myncerr)
+ end if
+ ! Write data.
+ NCF_CHECK(nctk_set_datamode(myncid))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "e0_kcalc"), e0_kcalc))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "ze0_kcalc"), c2r(ze0_kcalc)))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "sigx_mat"), c2r(gwr%sigx_mat)))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "qpz_ene"), c2r(qpz_ene)))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "qp_pade"), c2r(qp_pade)))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "pade_solver_ierr"), pade_solver_ierr))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "ks_gaps"), ks_gaps))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "qpz_gaps"), qpz_gaps))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "qp_pade_gaps"), qp_pade_gaps))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "sigc_it_mat"), c2r(sigc_it_mat)))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "sigc_iw_mat"), c2r(gwr%sigc_iw_mat)))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "sigxc_rw_diag"), c2r(sigxc_rw_diag)))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "spfunc_diag"), spfunc_diag))
+
+end subroutine ncwrite_sigmac
 
 end subroutine gwr_build_sigmac
 !!***
@@ -6697,6 +6739,8 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_glob, loc_cwork, sigm_pm)
  !complex(gwp),allocatable :: loc_cwork(:)
 ! *************************************************************************
 
+ ABI_NVTX_START_RANGE(NVTX_GWR_BRAKET_UR)
+
  ! (r',r) with r' local and r-index PBLAS-distributed.
  sigm_pm = czero_gw
  do ipm=1,2
@@ -6717,6 +6761,8 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_glob, loc_cwork, sigm_pm)
    !ABI_FREE(loc_cwork)
    end associate
  end do
+
+ ABI_NVTX_END_RANGE()
 
 end subroutine sig_braket_ur
 !!***
@@ -8451,9 +8497,9 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
    ! TODO it does not work if nspinor == 2.
 
    if (gwr%dtset%symsigma == 1) then
-     call sigx_symmetrize(ikcalc_ibz, spin, bmin, bmax, nsppol, nspinor, gwr%nsig_ab, ks_eig, sigx, sigxme_tmp)
+     call sigx_symmetrize(ikcalc_ibz, spin, bmin, bmax, nsppol, nspinor, gwr%nsig_ab, gwr%dtset%symsigma_de, ks_eig, sigx, sigxme_tmp)
      !do ii=bmin, bmax; print *, "qp_eig:", ii, qp_eig(ii, ikcalc_ibz, spin) * Ha_eV; end do
-     !call sigx_symmetrize(ikcalc_ibz, spin, bmin, bmax, nsppol, nspinor, gwr%nsig_ab, qp_eig, sigx, sigxme_tmp)
+     !call sigx_symmetrize(ikcalc_ibz, spin, bmin, bmax, nsppol, nspinor, gwr%nsig_ab, gwr%dtset%symsigma_de, qp_eig, sigx, sigxme_tmp)
    end if
 
    ! Reconstruct the full sigma_x matrix from the upper triangle.
