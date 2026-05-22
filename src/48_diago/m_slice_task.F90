@@ -431,7 +431,7 @@ subroutine slice_task_copyToAsyncMemory(work, X0, minfo, mapper, ncols_per_task)
             call xgBlock_setBlock(X0, col_in, nrows, 1, fcol=fcol)
             call xgBlock_setBlock(work%XextLinalg, col_out, nrows, 1, fcol=fcol_ext)
 
-            ! Reminder: xgBlock_copy is always on CPU expect if both blocks are on GPU
+            ! Reminder: xgBlock_copy is always on CPU except if both blocks are on GPU
             call xgBlock_copy(col_in, col_out)
         end do
         nrand_per_task(islice) = ncols_per_task(islice) - nselect
