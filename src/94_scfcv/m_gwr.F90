@@ -156,7 +156,7 @@ module m_gwr
  use m_copy,          only : alloc_copy
  use m_geometry,      only : normv, vdotw, spinrot_cmat
  use m_fstrings,      only : sjoin, itoa, strcat, ktoa, ltoa, ftoa, string_in, yesno
- use m_sort,          only : sort_rvals, sort_gvecs
+ use m_sort,          only : sort_rvals, sort_gvecs, sort_dp
  use m_krank,         only : krank_t, get_ibz2bz, star_from_ibz_idx
  use m_crystal,       only : crystal_t
  use m_dtset,         only : dataset_type
@@ -240,6 +240,23 @@ module m_gwr
    ! Square root of the Coulomb interaction in reciprocal space.
    ! Allocated and computed for tchi/W descriptors.
    ! A cutoff might be applied.
+
+   integer,allocatable :: rottb(:,:,:)
+   ! rottb(ng,timrev,nsym)
+   ! rottb(G,I,S) is the index of (SI) G in the array gvec
+   ! where I is either the identity or the inversion.
+
+   integer,allocatable :: rottbm1(:,:,:)
+   ! rottb(ng,timrev,nsym)
+   ! rottbm1(G,I,S) is the index of IS{^-1} G in the array gvec
+  
+   complex(gwp),allocatable :: phmGt(:,:)
+   ! phmGt(ng,nsym)
+   ! Phase factor e^{-i2\pi(G.\tau)} where $\tau$ is the fractional translation associated to isym.
+
+   complex(gwp),allocatable :: phmSGt(:,:)
+   ! phmSGt(ng,nsym)
+   ! Phase factor e^{-i2\pi(SG.\tau)} where S is one of the symmetry properties in reciprocal space.
 
  contains
 
@@ -4250,7 +4267,11 @@ subroutine desc_init(desc, kk, istwfk, ecut, gwr, kin_sorted)
  logical,optional,intent(in) :: kin_sorted
 
 !Local variables-------------------------------
- integer :: ig
+ integer :: ig, ig1, ig2, itim, isym, istep_forward, istep_backward, grot(3)
+ character(len=256) :: msg
+ logical :: found
+ real(dp),allocatable :: gnorm(:)
+ integer,allocatable :: igvec(:)
 ! *************************************************************************
 
  desc%kin_sorted = .False.; if (present(kin_sorted)) desc%kin_sorted = kin_sorted
@@ -4267,6 +4288,69 @@ subroutine desc_init(desc, kk, istwfk, ecut, gwr, kin_sorted)
      desc%ig0 = ig; exit
    end if
  end do
+
+ ABI_ICALLOC(desc%rottb, (desc%npw, gwr%cryst%timrev, gwr%cryst%nsym))
+ ABI_ICALLOC(desc%rottbm1, (desc%npw, gwr%cryst%timrev, gwr%cryst%nsym))
+ ABI_CALLOC(desc%phmGt, (desc%npw, gwr%cryst%nsym))
+ ABI_CALLOC(desc%phmSGt, (desc%npw, gwr%cryst%nsym))
+ ! Fast sort for norm(desc%gvec) and store indices in igvec.
+ ABI_MALLOC(gnorm, (desc%npw))
+ ABI_MALLOC(igvec, (desc%npw))
+
+ do ig=1,desc%npw
+   igvec(ig) = ig
+   gnorm(ig) = normv(desc%gvec(:,ig), gwr%cryst%gmet, "G") ** 2
+ end do
+
+ call sort_dp(desc%npw, gnorm, igvec, tol14)
+
+ ABI_FREE(gnorm)
+
+ do ig1=1,desc%npw
+   do itim=1,gwr%cryst%timrev
+     do isym=1,gwr%cryst%nsym
+       grot=(3-2*itim)*MATMUL(gwr%cryst%symrec(:,:,isym),desc%gvec(:,ig1))
+       found=.FALSE.
+       ! * Loop on the shell of ig1 to speed up the search.
+       istep_forward = ig1; istep_backward = ig1
+       do while (istep_forward <= desc%npw .or. istep_backward >= 1)
+         if (istep_forward <= desc%npw) then
+           ig2 = igvec(istep_forward)
+           if (ALL(ABS(grot(:)-desc%gvec(:,ig2))==0)) then
+             found=.TRUE.
+             desc%rottb(ig1,itim,isym)=ig2
+             desc%rottbm1(ig2,itim,isym)=ig1
+             desc%phmGt(ig1,isym) = exp(-j_dpc*two_pi*DOT_PRODUCT(desc%gvec(:,ig1), gwr%cryst%tnons(:,isym)))
+             desc%phmSGt(ig1,isym) = exp(-j_dpc*two_pi*DOT_PRODUCT(grot(:), gwr%cryst%tnons(:,isym)))
+             exit
+           end if
+         end if
+         if (istep_backward >= 1) then
+           ig2 = igvec(istep_backward)
+           if (ALL(ABS(grot(:)-desc%gvec(:,ig2))==0)) then
+             found=.TRUE.
+             desc%rottb(ig1,itim,isym)=ig2
+             desc%rottbm1(ig2,itim,isym)=ig1
+             desc%phmGt(ig1,isym) = exp(-j_dpc*two_pi*DOT_PRODUCT(desc%gvec(:,ig1), gwr%cryst%tnons(:,isym)))
+             desc%phmSGt(ig1,isym) = exp(-j_dpc*two_pi*DOT_PRODUCT(grot(:), gwr%cryst%tnons(:,isym)))
+             exit
+           end if
+         end if
+         istep_forward = istep_forward + 1
+         istep_backward = istep_backward - 1
+       end do
+      !  if (.not.found) then
+      !    write(msg,'(3a,i5,a,i5,1x,2(3i10,a),a,i3,a,i3)')&
+      !     'G-shell not closed',ch10,&
+      !     '  Initial G vector ',ig1,'/',desc%npw,desc%gvec(:,ig1),' Rotated G vector ',grot(:),ch10,&
+      !     '  Through sym ',isym,' and itim ',itim
+      !    ABI_ERROR(msg)
+      !  end if
+     end do ! itim
+   end do ! isym
+ end do ! ig1
+
+ ABI_FREE(igvec)
 
 end subroutine desc_init
 !!***
@@ -4445,6 +4529,10 @@ subroutine desc_free(desc)
  ABI_SFREE(desc%gbound)
  ABI_SFREE(desc%vc_sqrt)
  ABI_SFREE(desc%g2box)
+ ABI_SFREE(desc%rottb)
+ ABI_SFREE(desc%rottbm1)
+ ABI_SFREE(desc%phmGt)
+ ABI_SFREE(desc%phmSGt)
  desc%cached_sc_ngfft = -1
 
 end subroutine desc_free
@@ -4599,6 +4687,7 @@ subroutine gwr_build_tchi(gwr)
  integer :: idat, ndat, max_ndat, sc_nfft, sc_nfftsp, spin, ik_bz, iq_ibz, ikq_ibz, ikq_bz, ierr, ipm, itau, ig2, ifft !, ii
  integer :: use_umklp, gpu_mode ! ik_ibz, isym_k, trev_k, tsign_k, ! g0_k(3),
  !integer :: my_ikf_start, my_ikf_stop !, nkf_batch_size, nkf_now, op_type
+ integer :: itim, isym, ig1
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu_ir, wall_ir, gflops_ir
  real(dp) :: cpu_ikf, wall_ikf, gflops_ikf
@@ -4620,8 +4709,8 @@ subroutine gwr_build_tchi(gwr)
  complex(gwp) ABI_ASYNC, contiguous, pointer :: gt_scbox(:,:,:)
  complex(gwp),allocatable :: low_wing_q(:), up_wing_q(:), cemiqr(:)
  !complex(gwp),contiguous, pointer :: buf_cplx(:,:)
- type(__slkmat_t) :: gkq_rpr_pm(2, gwr%nsig_ab), gk_rpr_pm(2, gwr%nsig_ab)
- type(__slkmat_t),target,allocatable :: gt_gpr(:,:,:), chiq_gpr(:), chiq_rpr(:)
+ type(__slkmat_t) :: gkq_rpr_pm(2, gwr%nsig_ab), gk_rpr_pm(2, gwr%nsig_ab), gpsg, sggp,sgpsg, sgsgp, test, chiq_ggp, chiq_rpr
+ type(__slkmat_t),target,allocatable :: gt_gpr(:,:,:), chiq_gpr(:)!, chiq_rpr(:)
  type(desc_t),target,allocatable :: desc_mykbz(:)
  type(littlegroup_t),allocatable :: ltg_qibz(:)
  type(fftbox_plan3_t) :: green_plan
@@ -4941,16 +5030,17 @@ subroutine gwr_build_tchi(gwr)
    ! Need all nqibz matrices in chi_q here as the iq_ibz loop is the innermost one unlike in the legacy GW code.
    nrsp = gwr%g_nfft !* gwr%nspinor
    col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+   tchi_rfact = one / gwr%cryst%ucvol
 
    gpu_action = "None";
    if (gpu_option == ABI_GPU_OPENMP) then
      gpu_action = "alloc"; call wrtout(std_out, " Allocating Chi_q(r,r', +tau) on the GPU...")
    end if
 
-   ABI_MALLOC(chiq_rpr, (gwr%nqibz))
-   do iq_ibz=1,gwr%nqibz
-     call chiq_rpr(iq_ibz)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
-   end do
+  !  ABI_MALLOC(chiq_rpr, (gwr%nqibz))
+  !  do iq_ibz=1,gwr%nqibz
+  !    call chiq_rpr(iq_ibz)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
+  !  end do
 
    call pstat_proc%print(_PSTAT_ARGS_)
 
@@ -4963,7 +5053,7 @@ subroutine gwr_build_tchi(gwr)
      end do
    end do
 
-   mem_mb = sum(slk_array_locmem_mb(chiq_rpr)) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(gkq_rpr_pm))
+  !  mem_mb = sum(slk_array_locmem_mb(chiq_rpr)) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(gkq_rpr_pm))
    call wrtout(std_out, sjoin(" Local memory for Chi_q(r',r) (gt_gpr): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
    call pstat_proc%print(_PSTAT_ARGS_)
 
@@ -4973,7 +5063,8 @@ subroutine gwr_build_tchi(gwr)
    ABI_MALLOC(ltg_qibz, (gwr%nqibz))
    use_umklp = 0
    do iq_ibz=1,gwr%nqibz
-     call ltg_qibz(iq_ibz)%init(gwr%qibz(:,iq_ibz), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0, timrev=1)
+     call ltg_qibz(iq_ibz)%init(gwr%qibz(:,iq_ibz), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=gwr%tchi_desc_qibz(iq_ibz)%npw, timrev=1, gvec=gwr%tchi_desc_qibz(iq_ibz)%gvec)
+    !  call ltg_qibz(iq_ibz)%init(gwr%qibz(:,iq_ibz), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0, timrev=1)
      call ltg_qibz(iq_ibz)%print([std_out], prtvol=gwr%dtset%prtvol)
    end do
 
@@ -5005,11 +5096,11 @@ subroutine gwr_build_tchi(gwr)
      if (my_it == 1 .and. gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
      ! Sum over my k-points in the BZ.
-     if (gpu_option == ABI_GPU_OPENMP) then
-       call slk_array_gpu_set_zero(chiq_rpr)
-     else
-       call slk_array_set_zero(chiq_rpr)
-     end if
+    !  if (gpu_option == ABI_GPU_OPENMP) then
+    !    call slk_array_gpu_set_zero(chiq_rpr)
+    !  else
+    !    call slk_array_set_zero(chiq_rpr)
+    !  end if
 
      do my_ikf=1,gwr%my_nkbz
        print_time = gwr%comm%me == 0 .and. (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0)
@@ -5022,7 +5113,7 @@ subroutine gwr_build_tchi(gwr)
 
        ! Accumulate contribution to chi_q(r',r) with q in the IBZ.
        do iq_ibz=1,gwr%nqibz
-        !  if (gwr%dtset%symchi /= 0 .and. ltg_qibz(iq_ibz)%ibzq(ik_bz) == 0) cycle
+         if (gwr%dtset%symchi /= 0 .and. ltg_qibz(iq_ibz)%ibzq(ik_bz) == 0) cycle
          qq_ibz = gwr%qibz(:,iq_ibz); kpq_bz = kk_bz + qq_ibz
 
          call findqg0(ikq_bz, g0_kq, kpq_bz, gwr%nkbz, gwr%kbz, gwr%mG0)
@@ -5041,15 +5132,48 @@ subroutine gwr_build_tchi(gwr)
         !    ABI_CHECK(wtqm == zero, sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
         !  end if
 
+         call chiq_rpr%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
          ! Accumulate.
 
          !chiq_rpr(iq_ibz)%buffer_cplx = chiq_rpr(iq_ibz)%buffer_cplx + &
          !  wtqp * gk_rpr_pm(1)%buffer_cplx * conjg(gkq_rpr_pm(2)%buffer_cplx)   ! RECHECK EQ. This one works but requires ptrans with C
          !  !wtqp * gkq_rpr_pm(1)%buffer_cplx * conjg(gk_rpr_pm(2)%buffer_cplx)  ! This should be OK
          do iab=1,gwr%nsig_ab
-           call cplx_mat_plus_bc(chiq_rpr(iq_ibz)%bufsize, chiq_rpr(iq_ibz)%buffer_cplx(:,1), &
+           call cplx_mat_plus_bc(chiq_rpr%bufsize, chiq_rpr%buffer_cplx(:,1), &
                                wtqp, "C", gkq_rpr_pm(2, iab)%buffer_cplx(:,1), gk_rpr_pm(1, iab)%buffer_cplx(:,1), gpu_option)
          end do ! iab
+
+         call gwr%tchi_qibz(iq_ibz, itau, spin)%copy(chiq_ggp, empty=.True.)
+         call gwr%rpr_to_ggp(gwr%tchi_desc_qibz(iq_ibz), chiq_rpr, tchi_rfact, chiq_ggp)
+         call chiq_rpr%free()
+
+         call chiq_ggp%copy(test, empty=.True.)
+         do itim=1, ltg_qibz(iq_ibz)%timrev
+           do isym=1, ltg_qibz(iq_ibz)%nsym_sg
+             if (ltg_qibz(iq_ibz)%wtksym(itim,isym,ik_bz) == 1) then
+               call chiq_ggp%copy(sggp, empty=.True.)
+               do ig1=1,sggp%size_local(2)
+                 sggp%buffer_cplx(:,ig1) = chiq_ggp%buffer_cplx(gwr%tchi_desc_qibz(iq_ibz)%rottbm1(ltg_qibz(iq_ibz)%igmG0(1:gwr%tchi_desc_qibz(iq_ibz)%npw,itim,isym), itim, isym),ig1) * conjg(gwr%tchi_desc_qibz(iq_ibz)%phmGt(gwr%tchi_desc_qibz(iq_ibz)%rottbm1(ltg_qibz(iq_ibz)%igmG0(1:gwr%tchi_desc_qibz(iq_ibz)%npw,itim,isym), itim, isym),isym))
+               end do
+               call sggp%ptrans("C", gpsg, free=.True.)
+               call gpsg%copy(sgpsg, empty=.True.)
+               do ig1=1,sgpsg%size_local(2)
+                 sgpsg%buffer_cplx(:,ig1) = gpsg%buffer_cplx(gwr%tchi_desc_qibz(iq_ibz)%rottbm1(ltg_qibz(iq_ibz)%igmG0(1:gwr%tchi_desc_qibz(iq_ibz)%npw,itim,isym), itim, isym),ig1) * conjg(gwr%tchi_desc_qibz(iq_ibz)%phmGt(gwr%tchi_desc_qibz(iq_ibz)%rottbm1(ltg_qibz(iq_ibz)%igmG0(1:gwr%tchi_desc_qibz(iq_ibz)%npw,itim,isym), itim, isym),isym))
+               end do
+               call sgpsg%ptrans("C", sgsgp, free=.True.)
+               test%buffer_cplx(:,:) = test%buffer_cplx(:,:) + sgsgp%buffer_cplx(:,:)
+               call sgsgp%free()
+               call gpsg%free()               
+             end if
+           end do ! isym
+         end do ! itim
+
+         chiq_ggp%buffer_cplx(:,:) = test%buffer_cplx(:,:)
+         call test%free()
+         
+         gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:) = gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:) + chiq_ggp%buffer_cplx(:,:)
+         call chiq_ggp%free()
+
        end do ! iq_ibz
 
        if (print_time) then
@@ -5063,14 +5187,15 @@ subroutine gwr_build_tchi(gwr)
 
      ! From chi_q(r',r) to chi_q(g,g') for each q in the IBZ.
      do iq_ibz=1,gwr%nqibz
-       call xmpi_sum(chiq_rpr(iq_ibz)%buffer_cplx, gwr%kpt_comm%value, ierr)
+      !  call xmpi_sum(chiq_rpr(iq_ibz)%buffer_cplx, gwr%kpt_comm%value, ierr)
+       call xmpi_sum(gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx, gwr%kpt_comm%value, ierr)
      end do
 
-     tchi_rfact = one / gwr%cryst%ucvol
-     do iq_ibz=1,gwr%nqibz
-       if (.not. any(iq_ibz == gwr%my_qibz_inds)) cycle
-       call gwr%rpr_to_ggp(gwr%tchi_desc_qibz(iq_ibz), chiq_rpr(iq_ibz), tchi_rfact, gwr%tchi_qibz(iq_ibz,itau,spin))
-     end do ! iq_ibz
+    !  tchi_rfact = one / gwr%cryst%ucvol
+    !  do iq_ibz=1,gwr%nqibz
+    !    if (.not. any(iq_ibz == gwr%my_qibz_inds)) cycle
+    !    call gwr%rpr_to_ggp(gwr%tchi_desc_qibz(iq_ibz), chiq_rpr(iq_ibz), tchi_rfact, gwr%tchi_qibz(iq_ibz,itau,spin))
+    !  end do ! iq_ibz
 
      write(msg,'(3(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
      call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau)
@@ -5078,8 +5203,8 @@ subroutine gwr_build_tchi(gwr)
    end do ! spin
 
    ! Free memory
-   call slk_array_free(gk_rpr_pm); call slk_array_free(gkq_rpr_pm); call slk_array_free(chiq_rpr)
-   ABI_FREE(chiq_rpr)
+   call slk_array_free(gk_rpr_pm); call slk_array_free(gkq_rpr_pm); !call slk_array_free(chiq_rpr)
+  !  ABI_FREE(chiq_rpr)
 
    do iq_ibz=1,gwr%nqibz
      call ltg_qibz(iq_ibz)%free()
