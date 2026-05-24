@@ -4687,7 +4687,7 @@ subroutine gwr_build_tchi(gwr)
  integer :: idat, ndat, max_ndat, sc_nfft, sc_nfftsp, spin, ik_bz, iq_ibz, ikq_ibz, ikq_bz, ierr, ipm, itau, ig2, ifft !, ii
  integer :: use_umklp, gpu_mode ! ik_ibz, isym_k, trev_k, tsign_k, ! g0_k(3),
  !integer :: my_ikf_start, my_ikf_stop !, nkf_batch_size, nkf_now, op_type
- integer :: itim, isym, ig1
+ integer :: itim, isym
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu_ir, wall_ir, gflops_ir
  real(dp) :: cpu_ikf, wall_ikf, gflops_ikf
@@ -4709,7 +4709,7 @@ subroutine gwr_build_tchi(gwr)
  complex(gwp) ABI_ASYNC, contiguous, pointer :: gt_scbox(:,:,:)
  complex(gwp),allocatable :: low_wing_q(:), up_wing_q(:), cemiqr(:)
  !complex(gwp),contiguous, pointer :: buf_cplx(:,:)
- type(__slkmat_t) :: gkq_rpr_pm(2, gwr%nsig_ab), gk_rpr_pm(2, gwr%nsig_ab), gpsg, sggp,sgpsg, sgsgp, test, chiq_ggp, chiq_rpr
+ type(__slkmat_t) :: gkq_rpr_pm(2, gwr%nsig_ab), gk_rpr_pm(2, gwr%nsig_ab), work2, work1, chiq_ggp, chiq_rpr
  type(__slkmat_t),target,allocatable :: gt_gpr(:,:,:), chiq_gpr(:)!, chiq_rpr(:)
  type(desc_t),target,allocatable :: desc_mykbz(:)
  type(littlegroup_t),allocatable :: ltg_qibz(:)
@@ -5147,31 +5147,33 @@ subroutine gwr_build_tchi(gwr)
          call gwr%rpr_to_ggp(gwr%tchi_desc_qibz(iq_ibz), chiq_rpr, tchi_rfact, chiq_ggp)
          call chiq_rpr%free()
 
-         call chiq_ggp%copy(test, empty=.True.)
-         do itim=1, ltg_qibz(iq_ibz)%timrev
-           do isym=1, ltg_qibz(iq_ibz)%nsym_sg
-             if (ltg_qibz(iq_ibz)%wtksym(itim,isym,ik_bz) == 1) then
-               call chiq_ggp%copy(sggp, empty=.True.)
-               do ig1=1,sggp%size_local(2)
-                 sggp%buffer_cplx(:,ig1) = chiq_ggp%buffer_cplx(gwr%tchi_desc_qibz(iq_ibz)%rottbm1(ltg_qibz(iq_ibz)%igmG0(1:gwr%tchi_desc_qibz(iq_ibz)%npw,itim,isym), itim, isym),ig1) * conjg(gwr%tchi_desc_qibz(iq_ibz)%phmGt(gwr%tchi_desc_qibz(iq_ibz)%rottbm1(ltg_qibz(iq_ibz)%igmG0(1:gwr%tchi_desc_qibz(iq_ibz)%npw,itim,isym), itim, isym),isym))
-               end do
-               call sggp%ptrans("C", gpsg, free=.True.)
-               call gpsg%copy(sgpsg, empty=.True.)
-               do ig1=1,sgpsg%size_local(2)
-                 sgpsg%buffer_cplx(:,ig1) = gpsg%buffer_cplx(gwr%tchi_desc_qibz(iq_ibz)%rottbm1(ltg_qibz(iq_ibz)%igmG0(1:gwr%tchi_desc_qibz(iq_ibz)%npw,itim,isym), itim, isym),ig1) * conjg(gwr%tchi_desc_qibz(iq_ibz)%phmGt(gwr%tchi_desc_qibz(iq_ibz)%rottbm1(ltg_qibz(iq_ibz)%igmG0(1:gwr%tchi_desc_qibz(iq_ibz)%npw,itim,isym), itim, isym),isym))
-               end do
-               call sgpsg%ptrans("C", sgsgp, free=.True.)
-               test%buffer_cplx(:,:) = test%buffer_cplx(:,:) + sgsgp%buffer_cplx(:,:)
-               call sgsgp%free()
-               call gpsg%free()               
-             end if
+         associate(desc => gwr%tchi_desc_qibz(iq_ibz), ltg => ltg_qibz(iq_ibz))
+         do itim=1, ltg%timrev
+           do isym=1, ltg%nsym_sg
+             if (ltg%wtksym(itim,isym,ik_bz) /= 1) cycle
+             associate(sglist => desc%rottbm1(ltg%igmG0(1:desc%npw, itim, isym), itim, isym))
+             associate(phase => conjg(desc%phmGt(sglist, isym)))
+             call chiq_ggp%copy(work1, empty=.False.)
+             ! (g,g') --> (Sg, g')
+             do ig2=1,work1%size_local(2)
+               work1%buffer_cplx(:,ig2) = work1%buffer_cplx(sglist, ig2) * phase
+             end do
+             ! (Sg, g') --> (g', Sg)
+             call work1%ptrans("C", work2, free=.False.)
+             ! (g', Sg) --> (Sg', Sg)
+             do ig2=1,work2%size_local(2)
+               work2%buffer_cplx(:,ig2) = work2%buffer_cplx(sglist, ig2) * phase
+             end do
+             ! (Sg', Sg) --> (Sg, Sg')
+             call work2%ptrans("C", work1, free=.True.)
+             gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:)=gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:)+work1%buffer_cplx(:,:)
+             call work1%free()
+             end associate
+             end associate
            end do ! isym
          end do ! itim
+         end associate
 
-         chiq_ggp%buffer_cplx(:,:) = test%buffer_cplx(:,:)
-         call test%free()
-         
-         gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:) = gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:) + chiq_ggp%buffer_cplx(:,:)
          call chiq_ggp%free()
 
        end do ! iq_ibz
