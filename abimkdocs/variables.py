@@ -246,6 +246,7 @@ ABI_TOPICS = [
     "GeoConstraints",
     "GeoOpt",
     "Git",
+    "GPU",
     "GSintroduction",
     "GW",
     "GWR",
