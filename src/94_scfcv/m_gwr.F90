@@ -4709,8 +4709,8 @@ subroutine gwr_build_tchi(gwr)
  complex(gwp) ABI_ASYNC, contiguous, pointer :: gt_scbox(:,:,:)
  complex(gwp),allocatable :: low_wing_q(:), up_wing_q(:), cemiqr(:)
  !complex(gwp),contiguous, pointer :: buf_cplx(:,:)
- type(__slkmat_t) :: gkq_rpr_pm(2, gwr%nsig_ab), gk_rpr_pm(2, gwr%nsig_ab), work2, work1, chiq_ggp, chiq_rpr
- type(__slkmat_t),target,allocatable :: gt_gpr(:,:,:), chiq_gpr(:)!, chiq_rpr(:)
+ type(__slkmat_t) :: gkq_rpr_pm(2, gwr%nsig_ab), gk_rpr_pm(2, gwr%nsig_ab), work2, work1, chiq_ggp
+ type(__slkmat_t),target,allocatable :: gt_gpr(:,:,:), chiq_gpr(:), chiq_rpr(:)
  type(desc_t),target,allocatable :: desc_mykbz(:)
  type(littlegroup_t),allocatable :: ltg_qibz(:)
  type(fftbox_plan3_t) :: green_plan
@@ -5037,10 +5037,10 @@ subroutine gwr_build_tchi(gwr)
      gpu_action = "alloc"; call wrtout(std_out, " Allocating Chi_q(r,r', +tau) on the GPU...")
    end if
 
-  !  ABI_MALLOC(chiq_rpr, (gwr%nqibz))
-  !  do iq_ibz=1,gwr%nqibz
-  !    call chiq_rpr(iq_ibz)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
-  !  end do
+   ABI_MALLOC(chiq_rpr, (gwr%nqibz))
+   do iq_ibz=1,gwr%nqibz
+     call chiq_rpr(iq_ibz)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
+   end do
 
    call pstat_proc%print(_PSTAT_ARGS_)
 
@@ -5053,7 +5053,7 @@ subroutine gwr_build_tchi(gwr)
      end do
    end do
 
-  !  mem_mb = sum(slk_array_locmem_mb(chiq_rpr)) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(gkq_rpr_pm))
+   mem_mb = sum(slk_array_locmem_mb(chiq_rpr)) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(gkq_rpr_pm))
    call wrtout(std_out, sjoin(" Local memory for Chi_q(r',r) (gt_gpr): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
    call pstat_proc%print(_PSTAT_ARGS_)
 
@@ -5096,11 +5096,11 @@ subroutine gwr_build_tchi(gwr)
      if (my_it == 1 .and. gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
      ! Sum over my k-points in the BZ.
-    !  if (gpu_option == ABI_GPU_OPENMP) then
-    !    call slk_array_gpu_set_zero(chiq_rpr)
-    !  else
-    !    call slk_array_set_zero(chiq_rpr)
-    !  end if
+     if (gpu_option == ABI_GPU_OPENMP) then
+       call slk_array_gpu_set_zero(chiq_rpr)
+     else
+       call slk_array_set_zero(chiq_rpr)
+     end if
 
      do my_ikf=1,gwr%my_nkbz
        print_time = gwr%comm%me == 0 .and. (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0)
@@ -5126,55 +5126,21 @@ subroutine gwr_build_tchi(gwr)
 
          ! The weight depends on q_ibz and the symmetries of the little group of qq_ibz.
          wtqp = one / gwr%nkbz; wtqm = zero
-        !  if (gwr%dtset%symchi /= 0) then
-        !    wtqp = (one * sum(ltg_qibz(iq_ibz)%wtksym(1,:,ik_bz))) / gwr%nkbz
-        !    wtqm = (one * sum(ltg_qibz(iq_ibz)%wtksym(2,:,ik_bz))) / gwr%nkbz
-        !    ABI_CHECK(wtqm == zero, sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
-        !  end if
+         if (gwr%dtset%symchi /= 0) then
+           wtqp = (one * sum(ltg_qibz(iq_ibz)%wtksym(1,:,ik_bz))) / gwr%nkbz
+           wtqm = (one * sum(ltg_qibz(iq_ibz)%wtksym(2,:,ik_bz))) / gwr%nkbz
+           ABI_CHECK(wtqm == zero, sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
+         end if
 
-         call chiq_rpr%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
          ! Accumulate.
 
          !chiq_rpr(iq_ibz)%buffer_cplx = chiq_rpr(iq_ibz)%buffer_cplx + &
          !  wtqp * gk_rpr_pm(1)%buffer_cplx * conjg(gkq_rpr_pm(2)%buffer_cplx)   ! RECHECK EQ. This one works but requires ptrans with C
          !  !wtqp * gkq_rpr_pm(1)%buffer_cplx * conjg(gk_rpr_pm(2)%buffer_cplx)  ! This should be OK
          do iab=1,gwr%nsig_ab
-           call cplx_mat_plus_bc(chiq_rpr%bufsize, chiq_rpr%buffer_cplx(:,1), &
+           call cplx_mat_plus_bc(chiq_rpr(iq_ibz)%bufsize, chiq_rpr(iq_ibz)%buffer_cplx(:,1), &
                                wtqp, "C", gkq_rpr_pm(2, iab)%buffer_cplx(:,1), gk_rpr_pm(1, iab)%buffer_cplx(:,1), gpu_option)
          end do ! iab
-
-         call gwr%tchi_qibz(iq_ibz, itau, spin)%copy(chiq_ggp, empty=.True.)
-         call gwr%rpr_to_ggp(gwr%tchi_desc_qibz(iq_ibz), chiq_rpr, tchi_rfact, chiq_ggp)
-         call chiq_rpr%free()
-
-         associate(desc => gwr%tchi_desc_qibz(iq_ibz), ltg => ltg_qibz(iq_ibz))
-         do itim=1, ltg%timrev
-           do isym=1, ltg%nsym_sg
-             if (ltg%wtksym(itim,isym,ik_bz) /= 1) cycle
-             associate(sglist => desc%rottbm1(ltg%igmG0(1:desc%npw, itim, isym), itim, isym))
-             associate(phase => conjg(desc%phmGt(sglist, isym)))
-             call chiq_ggp%copy(work1, empty=.False.)
-             ! (g,g') --> (Sg, g')
-             do ig2=1,work1%size_local(2)
-               work1%buffer_cplx(:,ig2) = work1%buffer_cplx(sglist, ig2) * phase
-             end do
-             ! (Sg, g') --> (g', Sg)
-             call work1%ptrans("C", work2, free=.False.)
-             ! (g', Sg) --> (Sg', Sg)
-             do ig2=1,work2%size_local(2)
-               work2%buffer_cplx(:,ig2) = work2%buffer_cplx(sglist, ig2) * phase
-             end do
-             ! (Sg', Sg) --> (Sg, Sg')
-             call work2%ptrans("C", work1, free=.True.)
-             gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:)=gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:)+work1%buffer_cplx(:,:)
-             call work1%free()
-             end associate
-             end associate
-           end do ! isym
-         end do ! itim
-         end associate
-
-         call chiq_ggp%free()
 
        end do ! iq_ibz
 
@@ -5189,15 +5155,46 @@ subroutine gwr_build_tchi(gwr)
 
      ! From chi_q(r',r) to chi_q(g,g') for each q in the IBZ.
      do iq_ibz=1,gwr%nqibz
-      !  call xmpi_sum(chiq_rpr(iq_ibz)%buffer_cplx, gwr%kpt_comm%value, ierr)
-       call xmpi_sum(gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx, gwr%kpt_comm%value, ierr)
+       call xmpi_sum(chiq_rpr(iq_ibz)%buffer_cplx, gwr%kpt_comm%value, ierr)
+      !  call xmpi_sum(gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx, gwr%kpt_comm%value, ierr)
      end do
 
-    !  tchi_rfact = one / gwr%cryst%ucvol
-    !  do iq_ibz=1,gwr%nqibz
-    !    if (.not. any(iq_ibz == gwr%my_qibz_inds)) cycle
-    !    call gwr%rpr_to_ggp(gwr%tchi_desc_qibz(iq_ibz), chiq_rpr(iq_ibz), tchi_rfact, gwr%tchi_qibz(iq_ibz,itau,spin))
-    !  end do ! iq_ibz
+     tchi_rfact = one / gwr%cryst%ucvol
+     do iq_ibz=1,gwr%nqibz
+       if (.not. any(iq_ibz == gwr%my_qibz_inds)) cycle
+       call gwr%tchi_qibz(iq_ibz, itau, spin)%copy(chiq_ggp, empty=.True.)
+       call gwr%rpr_to_ggp(gwr%tchi_desc_qibz(iq_ibz), chiq_rpr(iq_ibz), tchi_rfact, chiq_ggp)
+       call chiq_ggp%copy(work1, empty=.True.)
+       associate(desc => gwr%tchi_desc_qibz(iq_ibz), ltg => ltg_qibz(iq_ibz))
+       do itim=1, ltg%timrev
+         do isym=1, ltg%nsym_sg
+           if (ltg%preserve(itim,isym) /= 1) cycle
+           associate(sglist => desc%rottbm1(ltg%igmG0(1:desc%npw, itim, isym), itim, isym))
+           associate(phase => conjg(desc%phmGt(sglist, isym)))
+           call slk_array_set_zero(work1)
+           ! (g,g') --> (Sg, g')
+           do ig2=1,work1%size_local(2)
+             work1%buffer_cplx(:,ig2) = chiq_ggp%buffer_cplx(sglist, ig2) * phase
+           end do
+           ! (Sg, g') --> (g', Sg)
+           call work1%ptrans("C", work2, free=.False.)
+           ! (g', Sg) --> (Sg', Sg)
+           do ig2=1,work2%size_local(2)
+             work2%buffer_cplx(:,ig2) = work2%buffer_cplx(sglist, ig2) * phase
+           end do
+           ! (Sg', Sg) --> (Sg, Sg')
+           call work2%ptrans("C", work1, free=.True.)
+           gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:) = gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:)+work1%buffer_cplx(:,:)
+           end associate
+           end associate
+         end do ! isym
+       end do ! itim
+       call work1%free()
+       gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:) = gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:) / real(ltg%nsym_ltg)
+
+       end associate
+       call chiq_ggp%free()
+     end do ! iq_ibz
 
      write(msg,'(3(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
      call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau)
@@ -5205,8 +5202,8 @@ subroutine gwr_build_tchi(gwr)
    end do ! spin
 
    ! Free memory
-   call slk_array_free(gk_rpr_pm); call slk_array_free(gkq_rpr_pm); !call slk_array_free(chiq_rpr)
-  !  ABI_FREE(chiq_rpr)
+   call slk_array_free(gk_rpr_pm); call slk_array_free(gkq_rpr_pm); call slk_array_free(chiq_rpr)
+   ABI_FREE(chiq_rpr)
 
    do iq_ibz=1,gwr%nqibz
      call ltg_qibz(iq_ibz)%free()
