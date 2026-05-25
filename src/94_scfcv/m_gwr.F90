@@ -1668,7 +1668,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    iq_ibz = gwr%my_qibz_inds(my_iqi); qq_ibz = gwr%qibz(:, iq_ibz)
    ! Note ecuteps instead of ecut. Also, sort the g-vectors by |q+g|^2/2 when q is in the IBZ to facilitate
    ! the extrapolation of the RPA energy as a function of ecut_chi
-   call gwr%tchi_desc_qibz(iq_ibz)%init(qq_ibz, istwfk1, dtset%ecuteps, gwr, kin_sorted=.True.)
+   call gwr%tchi_desc_qibz(iq_ibz)%init(qq_ibz, istwfk1, dtset%ecuteps, gwr, kin_sorted=.True., rot=.True.)
 
    ! Compute sqrt(vc(q,G))
    associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
@@ -4256,7 +4256,7 @@ end function fit_iomega_eval
 !!
 !! SOURCE
 
-subroutine desc_init(desc, kk, istwfk, ecut, gwr, kin_sorted)
+subroutine desc_init(desc, kk, istwfk, ecut, gwr, kin_sorted, rot)
 
 !Arguments ------------------------------------
  class(desc_t),intent(inout) :: desc
@@ -4264,17 +4264,18 @@ subroutine desc_init(desc, kk, istwfk, ecut, gwr, kin_sorted)
  integer,intent(in) :: istwfk
  real(dp),intent(in) :: ecut
  class(gwr_t),intent(in) :: gwr
- logical,optional,intent(in) :: kin_sorted
+ logical,optional,intent(in) :: kin_sorted, rot
 
 !Local variables-------------------------------
  integer :: ig, ig1, ig2, itim, isym, istep_forward, istep_backward, grot(3)
  character(len=256) :: msg
- logical :: found
+ logical :: found, rot__
  real(dp),allocatable :: gnorm(:)
  integer,allocatable :: igvec(:)
 ! *************************************************************************
 
  desc%kin_sorted = .False.; if (present(kin_sorted)) desc%kin_sorted = kin_sorted
+ rot__ = .False.; if (present(rot)) rot__ = rot
  desc%istwfk = istwfk
  call get_kg(kk, desc%istwfk, ecut, gwr%cryst%gmet, desc%npw, desc%gvec, kin_sorted=desc%kin_sorted)
 
@@ -4289,68 +4290,71 @@ subroutine desc_init(desc, kk, istwfk, ecut, gwr, kin_sorted)
    end if
  end do
 
- ABI_ICALLOC(desc%rottb, (desc%npw, gwr%cryst%timrev, gwr%cryst%nsym))
- ABI_ICALLOC(desc%rottbm1, (desc%npw, gwr%cryst%timrev, gwr%cryst%nsym))
- ABI_CALLOC(desc%phmGt, (desc%npw, gwr%cryst%nsym))
- ABI_CALLOC(desc%phmSGt, (desc%npw, gwr%cryst%nsym))
- ! Fast sort for norm(desc%gvec) and store indices in igvec.
- ABI_MALLOC(gnorm, (desc%npw))
- ABI_MALLOC(igvec, (desc%npw))
-
- do ig=1,desc%npw
-   igvec(ig) = ig
-   gnorm(ig) = normv(desc%gvec(:,ig), gwr%cryst%gmet, "G") ** 2
- end do
-
- call sort_dp(desc%npw, gnorm, igvec, tol14)
-
- ABI_FREE(gnorm)
-
- do ig1=1,desc%npw
-   do itim=1,gwr%cryst%timrev
-     do isym=1,gwr%cryst%nsym
-       grot=(3-2*itim)*MATMUL(gwr%cryst%symrec(:,:,isym),desc%gvec(:,ig1))
-       found=.FALSE.
-       ! * Loop on the shell of ig1 to speed up the search.
-       istep_forward = ig1; istep_backward = ig1
-       do while (istep_forward <= desc%npw .or. istep_backward >= 1)
-         if (istep_forward <= desc%npw) then
-           ig2 = igvec(istep_forward)
-           if (ALL(ABS(grot(:)-desc%gvec(:,ig2))==0)) then
-             found=.TRUE.
-             desc%rottb(ig1,itim,isym)=ig2
-             desc%rottbm1(ig2,itim,isym)=ig1
-             desc%phmGt(ig1,isym) = exp(-j_dpc*two_pi*DOT_PRODUCT(desc%gvec(:,ig1), gwr%cryst%tnons(:,isym)))
-             desc%phmSGt(ig1,isym) = exp(-j_dpc*two_pi*DOT_PRODUCT(grot(:), gwr%cryst%tnons(:,isym)))
-             exit
+ if (rot__) then
+   ABI_ICALLOC(desc%rottb, (desc%npw, gwr%cryst%timrev, gwr%cryst%nsym))
+   ABI_ICALLOC(desc%rottbm1, (desc%npw, gwr%cryst%timrev, gwr%cryst%nsym))
+   ABI_CALLOC(desc%phmGt, (desc%npw, gwr%cryst%nsym))
+   ABI_CALLOC(desc%phmSGt, (desc%npw, gwr%cryst%nsym))
+   ! Fast sort for norm(desc%gvec) and store indices in igvec.
+   ABI_MALLOC(gnorm, (desc%npw))
+   ABI_MALLOC(igvec, (desc%npw))
+   
+   do ig=1,desc%npw
+     igvec(ig) = ig
+     gnorm(ig) = normv(desc%gvec(:,ig), gwr%cryst%gmet, "G") ** 2
+   end do
+   
+   call sort_dp(desc%npw, gnorm, igvec, tol14)
+   
+   ABI_FREE(gnorm)
+   
+   do ig1=1,desc%npw
+     do itim=1,gwr%cryst%timrev
+       do isym=1,gwr%cryst%nsym
+         grot=(3-2*itim)*MATMUL(gwr%cryst%symrec(:,:,isym),desc%gvec(:,ig1))
+         found=.FALSE.
+         ! * Loop on the shell of ig1 to speed up the search.
+         istep_forward = ig1; istep_backward = ig1
+         do while (istep_forward <= desc%npw .or. istep_backward >= 1)
+           if (istep_forward <= desc%npw) then
+             ig2 = igvec(istep_forward)
+             if (ALL(ABS(grot(:)-desc%gvec(:,ig2))==0)) then
+               found=.TRUE.
+               desc%rottb(ig1,itim,isym)=ig2
+               desc%rottbm1(ig2,itim,isym)=ig1
+               desc%phmGt(ig1,isym) = exp(-j_dpc*two_pi*DOT_PRODUCT(desc%gvec(:,ig1), gwr%cryst%tnons(:,isym)))
+               desc%phmSGt(ig1,isym) = exp(-j_dpc*two_pi*DOT_PRODUCT(grot(:), gwr%cryst%tnons(:,isym)))
+               exit
+             end if
            end if
-         end if
-         if (istep_backward >= 1) then
-           ig2 = igvec(istep_backward)
-           if (ALL(ABS(grot(:)-desc%gvec(:,ig2))==0)) then
-             found=.TRUE.
-             desc%rottb(ig1,itim,isym)=ig2
-             desc%rottbm1(ig2,itim,isym)=ig1
-             desc%phmGt(ig1,isym) = exp(-j_dpc*two_pi*DOT_PRODUCT(desc%gvec(:,ig1), gwr%cryst%tnons(:,isym)))
-             desc%phmSGt(ig1,isym) = exp(-j_dpc*two_pi*DOT_PRODUCT(grot(:), gwr%cryst%tnons(:,isym)))
-             exit
+           if (istep_backward >= 1) then
+             ig2 = igvec(istep_backward)
+             if (ALL(ABS(grot(:)-desc%gvec(:,ig2))==0)) then
+               found=.TRUE.
+               desc%rottb(ig1,itim,isym)=ig2
+               desc%rottbm1(ig2,itim,isym)=ig1
+               desc%phmGt(ig1,isym) = exp(-j_dpc*two_pi*DOT_PRODUCT(desc%gvec(:,ig1), gwr%cryst%tnons(:,isym)))
+               desc%phmSGt(ig1,isym) = exp(-j_dpc*two_pi*DOT_PRODUCT(grot(:), gwr%cryst%tnons(:,isym)))
+               exit
+             end if
            end if
-         end if
-         istep_forward = istep_forward + 1
-         istep_backward = istep_backward - 1
-       end do
-      !  if (.not.found) then
-      !    write(msg,'(3a,i5,a,i5,1x,2(3i10,a),a,i3,a,i3)')&
-      !     'G-shell not closed',ch10,&
-      !     '  Initial G vector ',ig1,'/',desc%npw,desc%gvec(:,ig1),' Rotated G vector ',grot(:),ch10,&
-      !     '  Through sym ',isym,' and itim ',itim
-      !    ABI_ERROR(msg)
-      !  end if
-     end do ! itim
-   end do ! isym
- end do ! ig1
+           istep_forward = istep_forward + 1
+           istep_backward = istep_backward - 1
+         end do
+        !  if (.not.found) then
+        !    write(msg,'(3a,i5,a,i5,1x,2(3i10,a),a,i3,a,i3)')&
+        !     'G-shell not closed',ch10,&
+        !     '  Initial G vector ',ig1,'/',desc%npw,desc%gvec(:,ig1),' Rotated G vector ',grot(:),ch10,&
+        !     '  Through sym ',isym,' and itim ',itim
+        !    ABI_ERROR(msg)
+        !  end if
+       end do ! itim
+     end do ! isym
+   end do ! ig1
+   
+   ABI_FREE(igvec)
 
- ABI_FREE(igvec)
+ end if ! rot__
 
 end subroutine desc_init
 !!***
