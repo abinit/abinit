@@ -69,10 +69,10 @@ module m_abi_mixing
     integer, dimension(:), pointer :: i_rhor, i_vtrial, i_vresid, i_vrespc
     real(dp), dimension(:,:,:), pointer :: f_fftgr, f_atm
     real(sp), dimension(:,:,:), pointer :: f_fftgr_sp
-     real(sp), dimension(:,:), pointer :: f_fftgr_trial_sp
-     integer(c_int16_t), dimension(:,:,:), pointer :: f_fftgr_delta_i2
-     real(dp), dimension(:), pointer :: f_fftgr_delta_scale
-     real(dp), dimension(:,:), pointer :: f_paw
+    real(sp), dimension(:,:), pointer :: f_fftgr_trial_sp
+    integer(c_int16_t), dimension(:,:,:), pointer :: f_fftgr_delta_i2
+    real(dp), dimension(:), pointer :: f_fftgr_delta_scale
+    real(dp), dimension(:,:), pointer :: f_paw
 
     real(dp),dimension(:),pointer :: f_extfpmd
     real(dp),dimension(:,:), pointer :: f_rcpaw
@@ -125,9 +125,9 @@ subroutine init_(mix)
  mix%n_atom    = 0
  mix%space     = 0
  mix%useprec   = .true.
-  mix%useextfpmd = 0
-  mix%use_rcpaw = 0
-  mix%n_rcpawmix = 0
+ mix%useextfpmd = 0
+ mix%use_rcpaw = 0
+ mix%n_rcpawmix = 0
 
  call nullify_(mix)
 
@@ -155,11 +155,11 @@ subroutine nullify_(mix)
  nullify(mix%i_vtrial)
  nullify(mix%i_vresid)
  nullify(mix%i_vrespc)
-  nullify(mix%f_fftgr)
-  nullify(mix%f_fftgr_sp)
-   nullify(mix%f_fftgr_trial_sp)
-   nullify(mix%f_fftgr_delta_i2)
-   nullify(mix%f_fftgr_delta_scale)
+ nullify(mix%f_fftgr)
+ nullify(mix%f_fftgr_sp)
+ nullify(mix%f_fftgr_trial_sp)
+ nullify(mix%f_fftgr_delta_i2)
+ nullify(mix%f_fftgr_delta_scale)
  nullify(mix%f_atm)
  nullify(mix%f_paw)
  nullify(mix%f_extfpmd)
@@ -242,12 +242,12 @@ subroutine abi_mixing_new(mix, iscf, kind, space, nfft, nspden, &
 
  ! Optional arguments.
  if (present(useprec)) mix%useprec = useprec
-  if (present(pulayhist_storage)) mix%pulayhist_storage = pulayhist_storage
-  if (mix%pulayhist_storage /= ABI_MIXING_PULAY_STORAGE_FULL .and. &
-  &     mix%pulayhist_storage /= ABI_MIXING_PULAY_STORAGE_DELTA) then
-    errid = AB7_ERROR_MIXING_ARG
-    write(errmess, "(A,I0,A)") "Unknown Pulay history storage mode (", mix%pulayhist_storage, ")."
-    return
+ if (present(pulayhist_storage)) mix%pulayhist_storage = pulayhist_storage
+ if (mix%pulayhist_storage /= ABI_MIXING_PULAY_STORAGE_FULL .and. &
+ &     mix%pulayhist_storage /= ABI_MIXING_PULAY_STORAGE_DELTA) then
+   errid = AB7_ERROR_MIXING_ARG
+   write(errmess, "(A,I0,A)") "Unknown Pulay history storage mode (", mix%pulayhist_storage, ")."
+   return
  end if
 
  ! Set-up internal dimensions.
@@ -297,16 +297,16 @@ subroutine abi_mixing_new(mix, iscf, kind, space, nfft, nspden, &
     !    The indices number 2 and 3 are attributed to two old precond. residuals
     !    Other indices are attributed now.
     if (present(npulayit)) mix%n_pulayit = npulayit
-     mix%n_fftgr=2+2*mix%n_pulayit ; mix%n_index=1+mix%n_pulayit
-     if (.not. mix%useprec) mix%n_fftgr = 1+2*mix%n_pulayit
-      if (mix%pulayhist_storage == ABI_MIXING_PULAY_STORAGE_DELTA .and. .not. mix%useprec) then
-        errid = AB7_ERROR_MIXING_ARG
-        write(errmess, '(4a)' ) ch10,&
- &       ' abi_mixing_new: ERROR -',ch10,&
-  &       '  Delta-encoded Pulay history currently requires preconditioned Pulay storage.'
-        return
-      end if
-  end if ! iscf cases
+    mix%n_fftgr=2+2*mix%n_pulayit ; mix%n_index=1+mix%n_pulayit
+    if (.not. mix%useprec) mix%n_fftgr = 1+2*mix%n_pulayit
+    if (mix%pulayhist_storage == ABI_MIXING_PULAY_STORAGE_DELTA .and. .not. mix%useprec) then
+      errid = AB7_ERROR_MIXING_ARG
+      write(errmess, '(4a)' ) ch10,&
+ &     ' abi_mixing_new: ERROR -',ch10,&
+ &     '  Delta-encoded Pulay history currently requires preconditioned Pulay storage.'
+      return
+    end if
+ end if ! iscf cases
 
  ! Allocate new arrays.
  !allocate(mix%i_rhor(mix%n_index), stat = i_stat)
@@ -501,10 +501,10 @@ subroutine abi_mixing_copy_current_step(mix, arr_resid, errid, errmess, &
  errid = AB7_NO_ERROR
 
  if (mix%n_fftgr>0) then
-    if (mix%iscf == ABI_MIXING_PULAY .and. &
- &       mix%pulayhist_storage /= ABI_MIXING_PULAY_STORAGE_FULL) then
-      if (mix%i_vresid(1)>0) mix%f_fftgr(:,:,2) = arr_resid(:,:)
-      if (present(arr_respc).and.mix%i_vrespc(1)>0) mix%f_fftgr(:,:,1) = arr_respc(:,:)
+   if (mix%iscf == ABI_MIXING_PULAY .and. &
+&      mix%pulayhist_storage /= ABI_MIXING_PULAY_STORAGE_FULL) then
+     if (mix%i_vresid(1)>0) mix%f_fftgr(:,:,2) = arr_resid(:,:)
+     if (present(arr_respc).and.mix%i_vrespc(1)>0) mix%f_fftgr(:,:,1) = arr_respc(:,:)
    else
      if (mix%i_vresid(1)>0) mix%f_fftgr(:,:,mix%i_vresid(1)) = arr_resid(:,:)
      if (present(arr_respc).and.mix%i_vrespc(1)>0) mix%f_fftgr(:,:,mix%i_vrespc(1)) = arr_respc(:,:)
@@ -569,11 +569,11 @@ subroutine abi_mixing_eval_allocate(mix, istep)
  if (.not. associated(mix%f_fftgr)) then
    !allocate(mix%f_fftgr(mix%space * mix%nfft,mix%nspden,mix%n_fftgr), stat = i_stat)
    !call memocc_abi(i_stat, mix%f_fftgr, 'mix%f_fftgr', subname)
-    if (mix%iscf == ABI_MIXING_PULAY .and. &
- &       mix%pulayhist_storage /= ABI_MIXING_PULAY_STORAGE_FULL) then
-      ABI_MALLOC(mix%f_fftgr,(mix%space * mix%nfft,mix%nspden,2))
-    else
-      ABI_MALLOC(mix%f_fftgr,(mix%space * mix%nfft,mix%nspden,mix%n_fftgr))
+   if (mix%iscf == ABI_MIXING_PULAY .and. &
+&      mix%pulayhist_storage /= ABI_MIXING_PULAY_STORAGE_FULL) then
+     ABI_MALLOC(mix%f_fftgr,(mix%space * mix%nfft,mix%nspden,2))
+   else
+     ABI_MALLOC(mix%f_fftgr,(mix%space * mix%nfft,mix%nspden,mix%n_fftgr))
    end if
    mix%f_fftgr(:,:,:)=zero
    if (mix%mffmem == 0 .and. istep_ > 1 .and. mix%n_fftgr>0) then
@@ -587,25 +587,25 @@ subroutine abi_mixing_eval_allocate(mix, istep)
      call timab(83,2,tsec)
    end if
  end if
-  if (mix%iscf == ABI_MIXING_PULAY .and. &
- &     mix%pulayhist_storage == ABI_MIXING_PULAY_STORAGE_DELTA) then
-    if (.not. associated(mix%f_fftgr_sp)) then
-      ABI_MALLOC(mix%f_fftgr_sp,(mix%space * mix%nfft,mix%nspden,mix%n_pulayit+1))
-      mix%f_fftgr_sp(:,:,:)=zero_sp
-    end if
-    if (.not. associated(mix%f_fftgr_trial_sp)) then
-      ABI_MALLOC(mix%f_fftgr_trial_sp,(mix%space * mix%nfft,mix%nspden))
-      mix%f_fftgr_trial_sp(:,:)=zero_sp
-    end if
-    if (.not. associated(mix%f_fftgr_delta_i2)) then
-      ABI_MALLOC(mix%f_fftgr_delta_i2,(mix%space * mix%nfft,mix%nspden,mix%n_pulayit))
-      mix%f_fftgr_delta_i2(:,:,:)=0_c_int16_t
-    end if
-    if (.not. associated(mix%f_fftgr_delta_scale)) then
-      ABI_MALLOC(mix%f_fftgr_delta_scale,(mix%n_pulayit))
-      mix%f_fftgr_delta_scale(:)=one
-    end if
-  end if
+ if (mix%iscf == ABI_MIXING_PULAY .and. &
+&    mix%pulayhist_storage == ABI_MIXING_PULAY_STORAGE_DELTA) then
+   if (.not. associated(mix%f_fftgr_sp)) then
+     ABI_MALLOC(mix%f_fftgr_sp,(mix%space * mix%nfft,mix%nspden,mix%n_pulayit+1))
+     mix%f_fftgr_sp(:,:,:)=zero_sp
+   end if
+   if (.not. associated(mix%f_fftgr_trial_sp)) then
+     ABI_MALLOC(mix%f_fftgr_trial_sp,(mix%space * mix%nfft,mix%nspden))
+     mix%f_fftgr_trial_sp(:,:)=zero_sp
+   end if
+   if (.not. associated(mix%f_fftgr_delta_i2)) then
+     ABI_MALLOC(mix%f_fftgr_delta_i2,(mix%space * mix%nfft,mix%nspden,mix%n_pulayit))
+     mix%f_fftgr_delta_i2(:,:,:)=0_c_int16_t
+   end if
+   if (.not. associated(mix%f_fftgr_delta_scale)) then
+     ABI_MALLOC(mix%f_fftgr_delta_scale,(mix%n_pulayit))
+     mix%f_fftgr_delta_scale(:)=one
+   end if
+ end if
  ! Allocate PAW work array.
  if (.not. associated(mix%f_paw)) then
     !allocate(mix%f_paw(mix%n_pawmix,mix%n_fftgr), stat = i_stat)
@@ -690,7 +690,6 @@ subroutine abi_mixing_eval_allocate(mix, istep)
     ! VALGRIND complains not all of f_fftgr_disk is initialized
     if (mix%n_fftgr > 0) then
       write(temp_unit) mix%f_fftgr
-      if (associated(mix%f_fftgr_sp)) write(temp_unit) mix%f_fftgr_sp
     end if
     if (mix%n_pawmix > 0 .and. mix%n_fftgr > 0) then
       write(temp_unit) mix%f_paw
@@ -700,22 +699,6 @@ subroutine abi_mixing_eval_allocate(mix, istep)
     if (associated(mix%f_fftgr)) then
       ABI_FREE(mix%f_fftgr)
       nullify(mix%f_fftgr)
-    end if
-    if (associated(mix%f_fftgr_sp)) then
-      ABI_FREE(mix%f_fftgr_sp)
-      nullify(mix%f_fftgr_sp)
-    end if
-    if (associated(mix%f_fftgr_trial_sp)) then
-      ABI_FREE(mix%f_fftgr_trial_sp)
-      nullify(mix%f_fftgr_trial_sp)
-    end if
-    if (associated(mix%f_fftgr_delta_i2)) then
-      ABI_FREE(mix%f_fftgr_delta_i2)
-      nullify(mix%f_fftgr_delta_i2)
-    end if
-    if (associated(mix%f_fftgr_delta_scale)) then
-      ABI_FREE(mix%f_fftgr_delta_scale)
-      nullify(mix%f_fftgr_delta_scale)
     end if
     if (associated(mix%f_paw)) then
        ABI_FREE(mix%f_paw)
@@ -841,7 +824,7 @@ end subroutine abi_mixing_eval_deallocate
     call scfeig(istep, mix%space * mix%nfft, mix%nspden, &
          & mix%f_fftgr(:,:,mix%i_vrespc(1)), arr, &
          & mix%f_fftgr(:,:,1), mix%f_fftgr(:,:,4:5), errid, errmess)
-  else if (mix%iscf == ABI_MIXING_SIMPLE .or. &
+ else if (mix%iscf == ABI_MIXING_SIMPLE .or. &
       & mix%iscf == ABI_MIXING_ANDERSON .or. &
       & mix%iscf == ABI_MIXING_ANDERSON_2 .or. &
       & mix%iscf == ABI_MIXING_PULAY) then
@@ -946,12 +929,12 @@ subroutine abi_mixing_deallocate(mix)
  ABI_SFREE_PTR(mix%i_vtrial)
  ABI_SFREE_PTR(mix%i_vresid)
  ABI_SFREE_PTR(mix%i_vrespc)
-  ABI_SFREE_PTR(mix%f_fftgr)
-  ABI_SFREE_PTR(mix%f_fftgr_sp)
-   ABI_SFREE_PTR(mix%f_fftgr_trial_sp)
-   ABI_SFREE_PTR(mix%f_fftgr_delta_i2)
-   ABI_SFREE_PTR(mix%f_fftgr_delta_scale)
-   ABI_SFREE_PTR(mix%f_paw)
+ ABI_SFREE_PTR(mix%f_fftgr)
+ ABI_SFREE_PTR(mix%f_fftgr_sp)
+ ABI_SFREE_PTR(mix%f_fftgr_trial_sp)
+ ABI_SFREE_PTR(mix%f_fftgr_delta_i2)
+ ABI_SFREE_PTR(mix%f_fftgr_delta_scale)
+ ABI_SFREE_PTR(mix%f_paw)
  ABI_SFREE_PTR(mix%f_atm)
  ABI_SFREE_PTR(mix%f_extfpmd)
  ABI_SFREE_PTR(mix%f_rcpaw)
@@ -2297,7 +2280,7 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 
 !  _______________________________________________________________
 !  Here Pulay algorithm
-  else if(iscf==7)then
+ else if(iscf==7)then
 
    niter=min(istep,npulay+1)
 
@@ -2341,27 +2324,27 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
    end if
 
 !  Invert "A" matrix
-    ABI_MALLOC(amatinv,(niter,niter))
-    amatinv(1:niter,1:niter)=amat(1:niter,1:niter)
-    ABI_MALLOC(ipiv,(niter))
-    ABI_MALLOC(rwork,(niter))
-    call dgetrf(niter,niter,amatinv,niter,ipiv,ierr)
-    call dgetri(niter,amatinv,niter,ipiv,rwork,niter,ierr)
-    ABI_FREE(ipiv)
-    ABI_FREE(rwork)
+   ABI_MALLOC(amatinv,(niter,niter))
+   amatinv(1:niter,1:niter)=amat(1:niter,1:niter)
+   ABI_MALLOC(ipiv,(niter))
+   ABI_MALLOC(rwork,(niter))
+   call dgetrf(niter,niter,amatinv,niter,ipiv,ierr)
+   call dgetri(niter,amatinv,niter,ipiv,rwork,niter,ierr)
+   ABI_FREE(ipiv)
+   ABI_FREE(rwork)
 
 !  Compute "alpha" factors
-    ABI_MALLOC(alpha,(niter))
-    det=zero
-    alpha(:)=zero
-    do ii=1,niter
-      do jj=1,niter
-        alpha(ii)=alpha(ii)+amatinv(jj,ii)
-        det=det+amatinv(jj,ii)
-      end do
-    end do
-    alpha(:)=alpha(:)/det
-    ABI_FREE(amatinv)
+   ABI_MALLOC(alpha,(niter))
+   det=zero
+   alpha(:)=zero
+   do ii=1,niter
+     do jj=1,niter
+       alpha(ii)=alpha(ii)+amatinv(jj,ii)
+       det=det+amatinv(jj,ii)
+     end do
+   end do
+   alpha(:)=alpha(:)/det
+   ABI_FREE(amatinv)
    write(message,'(a,5(1x,g10.3))')' mixing of old trial potential: alpha(m:m-4)=',(alpha(ii),ii=niter,max(1,niter-4),-1)
    call wrtout(std_out,message,'COLL')
 
