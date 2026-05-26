@@ -69,16 +69,9 @@ Note that there is a similar input variable [[asr]] for ABINIT.
   * 6 --> impose ASR and rotational invariance on the interatomic force constants. 
   This requires the knowledge of the IFCS derivatives, estimated based on real-space
   IFCs moments (requires [[anaddb:ifcflag]]=1) or reading them from flexoddb
-  (requires [[anaddb:flexoflag]]=1). Rotational invariance has a different
-  impact depending on the dimensionality of the problem, see [[anaddb:sys_dim]].
-  Invariance is imposed on the zone-center IFCs and/or their derivatives
-  thanks to a Moore-Penrose pseudo-inverse, correcting on-site and first-neigbhors
-  interactions. In principle, rotational invariance also propagates to the second
-  derivatives of the IFCs, but this requires a rotational-invariant long-range
-  electrostatics treatments of the IFCs, which is now missing both in 3D or in
-  low-dimmensional materials. It is therefore desactivated. As an extension,
-  be very prudent when IFCs moments are used in combination to the long-range
-  electrostatic treatments of IFCs ([[anaddb:dipdip]]).
+  (requires [[anaddb:flexoflag]]=1). Right now, scaling is not optimum with
+  the number of atoms, but it could be in principle improved using sparse matrix
+  algorithms. Additional information are provided at the end of this description.
 
 More detailed explanations: the total energy should be invariant under
 translation of the crystal as a whole. This would guarantee that the three
@@ -86,7 +79,10 @@ lowest phonon modes at Gamma have zero frequency (Acoustic Sum Rule - ASR).
 Unfortunately, the way the DDB is generated (presence of a discrete grid of
 points for the evaluation of the exchange-correlation potential and energy)
 slightly breaks the translational invariance. Well, in some pathological
-cases, the breaking can be rather important.
+cases, the breaking can be rather important. Meanwhile, rotational invariance,
+i.e. the total energy should be invariant under rotation and leaves no torque
+on the atoms. Its imposition has different impacts depending on the dimensionality
+of the problem, see [[anaddb:sys_dim]]. 
 
 Two quantities are affected: the interatomic forces (or dynamical matrices),
 and the effective charges. The ASR for the effective charges is called the
@@ -127,6 +123,17 @@ generated from IFCs coming from dynamical matrices none of which are Gamma,
 the breaking of the ASR is rather severe. In order to clear the situation, one
 should use a diagonalisation routine for non-hermitian matrices.
 ).
+
+For rotational infariance [[anaddb:asr]]==6, invariance is imposed on the zone-center
+IFCs and/or their derivatives thanks to a Moore-Penrose pseudo-inverse,
+correcting on-site and first-neigbhors interactions. In principle, rotational 
+invariance also propagates to the second derivatives of the IFCs, but this requires a
+rotational-invariant long-range electrostatics treatments of the IFCs, which is now
+missing both in 3D or in low-dimmensional materials. It is therefore desactivated. 
+As an extension, be very prudent when IFCs moments are used in combination to the
+long-range electrostatic treatments of IFCs ([[anaddb:dipdip]]): they have been 
+tested on a limited amount of systems.
+
 """,
     ),
 
