@@ -8441,11 +8441,12 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  real(dp),contiguous, pointer :: ks_eig(:,:,:), qp_eig(:,:,:), qp_occ(:,:,:), cg2_ptr(:,:) ! cg1_ptr(:,:),
  real(dp),allocatable :: work(:,:,:,:), cg1_ibz(:,:) !, cg2_bz(:,:)
  complex(gwp),allocatable :: vc_sqrt_qbz(:), ur_bdgw(:,:)
- complex(gwp),allocatable :: rhotwg(:), rhotwgp(:), rhotwg_ki(:,:), ur_ksum(:), ur_prod(:), eig0r(:), ugb_kcalcibz(:)
+ complex(gwp),allocatable :: rhotwg(:), rhotwgp(:), rhotwg_ki(:,:), ur_ksum(:), ur_prod(:), eig0r(:)!, ugb_kcalcibz(:)
  complex(gwp),allocatable :: ug_ksum(:)
  complex(dp),target,allocatable :: ug_ksum_dp(:)
  complex(dp),allocatable  :: sigxme_tmp(:,:,:), sigx(:,:,:,:)
  type(sigijtab_t),allocatable :: Sigxij_tab(:,:), Sigcij_tab(:,:)
+ type(yamldoc_t) :: ydoc
 ! *************************************************************************
 
  call timab(1920, 1, tsec)
@@ -8646,7 +8647,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
 
      ABI_MALLOC(ug_ksum, (npw_k * nspinor))
      ABI_MALLOC(ug_ksum_dp, (npw_k * nspinor))
-     ABI_MALLOC(ugb_kcalcibz, (npw_k * nspinor))
+    !  ABI_MALLOC(ugb_kcalcibz, (npw_k * nspinor))
      ABI_MALLOC(cg1_ibz, (2, desc_ki%npw * nspinor))
      !ABI_MALLOC(cg2_bz, (2, npw_k * nspinor))
 
@@ -8735,12 +8736,13 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
                !ABI_CHECK(wfd%get_wave_ptr(jb, jk_ibz, spin, wave_jb, msg) == 0, msg)
                !cg_jb  => wave_jb%ug
                !ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
-               ugb_kcalcibz = gwr%ugb(ikcalc_ibz, spin)%buffer_cplx(:,il_b)
+               associate(ugb_kcalcibz => gwr%ugb(ikcalc_ibz, spin)%buffer_cplx(:,il_b))
                ABI_CHECK(size(ug_ksum) == size(ugb_kcalcibz), "Size mismatch in Sigma_x")
                ctmp = xdotc(npw_k, ug_ksum(1:), 1, ugb_kcalcibz(1:), 1)
                rhotwg_ki(1, jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp) * real(ctmp)
                ctmp = xdotc(npw_k, ug_ksum(npw_k+1:), 1, ugb_kcalcibz(npw_k+1:), 1)
                rhotwg_ki(npwx+1, jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp) * real(ctmp)
+               end associate
              end if
              !!!rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
              !!! PAW is missing
@@ -8795,7 +8797,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
      ABI_FREE(kg_k)
      ABI_FREE(ug_ksum)
      ABI_FREE(ug_ksum_dp)
-     ABI_FREE(ugb_kcalcibz)
+    !  ABI_FREE(ugb_kcalcibz)
      ABI_FREE(cg1_ibz)
      !ABI_FREE(cg2_bz)
      ABI_FREE(gbound_ksum)
@@ -8880,7 +8882,29 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  compute_qp__ = .False.; if (present(compute_qp)) compute_qp__ = compute_qp
  if (compute_qp__ .and. gwr%comm%me == 0) then
    call write_notations(units)
-   ! TODO
+   do spin=1,gwr%nsppol
+     do ikcalc=1,gwr%nkcalc
+
+       ydoc = yamldoc_open('GWR_SelfEnergy_ee', width=11, real_fmt='(3f8.3)')
+       call ydoc%add_real1d('kpoint', gwr%kcalc(:, ikcalc))
+       call ydoc%add_int('spin', spin, int_fmt="(i1)")
+       call ydoc%add_int('gwr_scf_iteration', gwr%scf_iteration)
+       call ydoc%add_string('gwr_task', gwr%dtset%gwr_task)
+
+       call ydoc%open_tabular('data') !, tag='SigmaeeData')
+       write(msg, "(a5, *(a9))") "Band", "SigX"
+       call ydoc%add_tabular_line(msg)
+
+       do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
+         write(msg,'(i5, *(f9.3))') &
+           band, &                                                        ! Band
+           real(merge(gwr%sigx_mat(band, 1, ikcalc, spin), gwr%sigx_mat(band, band, ikcalc, spin), gwr%sig_diago)) * Ha_eV                                             ! SigX
+         call ydoc%add_tabular_line(msg)
+       end do
+
+       call ydoc%write_units_and_free([std_out, ab_out])
+     end do ! ikcalc
+   end do ! spin
  end if
 
 10 continue
