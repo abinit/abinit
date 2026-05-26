@@ -565,11 +565,6 @@ subroutine abi_mixing_eval_allocate(mix, istep)
  istep_ = 1
  if (present(istep)) istep_ = istep
 
-  if (mix%mffmem == 0 .and. mix%iscf == ABI_MIXING_PULAY .and. &
- &    mix%pulayhist_storage /= ABI_MIXING_PULAY_STORAGE_FULL) then
-    ABI_ERROR("Non-full Pulay history storage is not compatible with the Pulay disk-cache path")
-  end if
-
  ! Allocate work array.
  if (.not. associated(mix%f_fftgr)) then
    !allocate(mix%f_fftgr(mix%space * mix%nfft,mix%nspden,mix%n_fftgr), stat = i_stat)
@@ -781,7 +776,7 @@ end subroutine abi_mixing_eval_deallocate
 
 !Local variables-------------------------------
 !scalars
- integer :: moveAtm, dbl_nnsclo, initialized, isecur_
+ integer :: moveAtm, dbl_nnsclo, initialized, isecur_, comm_atom_
  integer :: usepaw, pawoptmix_, response_
  real(dp) :: resnrm_,nelect_extfpmd_
 !arrays
@@ -825,6 +820,8 @@ end subroutine abi_mixing_eval_deallocate
  if (mix%n_atom > 0) moveAtm = 1
  isecur_ = 0
  if (present(isecur)) isecur_ = isecur
+ comm_atom_ = xmpi_comm_self
+ if (present(comm_atom)) comm_atom_ = comm_atom
  usepaw = 0
  if (mix%n_pawmix > 0) usepaw = 1
  pawoptmix_ = 0
@@ -844,31 +841,20 @@ end subroutine abi_mixing_eval_deallocate
     call scfeig(istep, mix%space * mix%nfft, mix%nspden, &
          & mix%f_fftgr(:,:,mix%i_vrespc(1)), arr, &
          & mix%f_fftgr(:,:,1), mix%f_fftgr(:,:,4:5), errid, errmess)
- else if (mix%iscf == ABI_MIXING_SIMPLE .or. &
+  else if (mix%iscf == ABI_MIXING_SIMPLE .or. &
       & mix%iscf == ABI_MIXING_ANDERSON .or. &
       & mix%iscf == ABI_MIXING_ANDERSON_2 .or. &
       & mix%iscf == ABI_MIXING_PULAY) then
     if (mix%iscf == ABI_MIXING_PULAY .and. &
  &       mix%pulayhist_storage == ABI_MIXING_PULAY_STORAGE_DELTA) then
-      if (present(comm_atom)) then
-        call scfopt_pulay_delta_sp(mix%space, mix%f_fftgr, mix%f_fftgr_sp, &
- &          mix%f_fftgr_trial_sp, mix%f_fftgr_delta_i2, mix%f_fftgr_delta_scale, &
- &          mix%f_paw, istep, mix%i_vrespc, mix%i_vtrial, mpi_comm, &
- &          mpi_summarize, mix%nfft, mix%n_pawmix, mix%nspden, mix%n_fftgr, &
- &          mix%n_index, mix%kind, pawoptmix_, usepaw, pawarr_, resnrm_, &
- &          arr, errid, errmess, mix%useextfpmd, mix%f_extfpmd, &
- &          nelect_extfpmd_, mix%use_rcpaw, mix%n_rcpawmix, mix%f_rcpaw, &
- &          rcpawarr_, comm_atom=comm_atom)
-      else
-        call scfopt_pulay_delta_sp(mix%space, mix%f_fftgr, mix%f_fftgr_sp, &
- &          mix%f_fftgr_trial_sp, mix%f_fftgr_delta_i2, mix%f_fftgr_delta_scale, &
- &          mix%f_paw, istep, mix%i_vrespc, mix%i_vtrial, mpi_comm, &
- &          mpi_summarize, mix%nfft, mix%n_pawmix, mix%nspden, mix%n_fftgr, &
- &          mix%n_index, mix%kind, pawoptmix_, usepaw, pawarr_, resnrm_, &
- &          arr, errid, errmess, mix%useextfpmd, mix%f_extfpmd, &
- &          nelect_extfpmd_, mix%use_rcpaw, mix%n_rcpawmix, mix%f_rcpaw, &
- &          rcpawarr_)
-      end if
+      call scfopt_pulay_delta_sp(mix%space, mix%f_fftgr, mix%f_fftgr_sp, &
+ &       mix%f_fftgr_trial_sp, mix%f_fftgr_delta_i2, mix%f_fftgr_delta_scale, &
+ &       mix%f_paw, istep, mix%i_vrespc, mix%i_vtrial, mpi_comm, &
+ &       mpi_summarize, mix%nfft, mix%n_pawmix, mix%nspden, mix%n_fftgr, &
+ &       mix%n_index, mix%kind, pawoptmix_, usepaw, pawarr_, resnrm_, &
+ &       arr, errid, errmess, mix%useextfpmd, mix%f_extfpmd, &
+ &       nelect_extfpmd_, mix%use_rcpaw, mix%n_rcpawmix, mix%f_rcpaw, &
+ &       rcpawarr_, comm_atom_)
     else if (present(comm_atom)) then
       call scfopt(mix%space, mix%f_fftgr,mix%f_paw,mix%iscf,istep,&
          & mix%i_vrespc,mix%i_vtrial, &
@@ -2455,13 +2441,12 @@ subroutine scfopt_pulay_delta_sp(cplex,f_fftgr,f_respc_sp,f_trial_sp,f_trial_del
 & f_trial_delta_scale,f_paw,istep,i_vrespc,i_vtrial,mpicomm,mpi_summarize,nfft, &
 & npawmix,nspden,n_fftgr,n_index,opt_denpot,pawoptmix,usepaw,vpaw,vresid,vtrial, &
 & errid,errmess,useextfpmd,f_extfpmd,nelect_extfpmd,use_rcpaw,nrcpawmix,f_rcpaw, &
-& rcpaw_occ,comm_atom) ! optional
+& rcpaw_occ,comm_atom)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,istep,n_fftgr,n_index,nfft,useextfpmd,use_rcpaw,nrcpawmix
- integer,intent(in) :: npawmix,nspden,opt_denpot,pawoptmix,usepaw,mpicomm
- integer, intent(in),optional :: comm_atom
+ integer,intent(in) :: npawmix,nspden,opt_denpot,pawoptmix,usepaw,mpicomm,comm_atom
  integer,intent(out) :: errid
  character(len = 500), intent(out) :: errmess
  logical, intent(in) :: mpi_summarize
@@ -2481,7 +2466,7 @@ subroutine scfopt_pulay_delta_sp(cplex,f_fftgr,f_respc_sp,f_trial_sp,f_trial_del
 !Local variables-------------------------------
 !scalars
  integer,parameter :: npulaymax=50,pulay_delta_qmax=32767
- integer :: ierr,ifft,ii,index,isp,jj,kk,comm_atom_,niter,npulay,tmp
+ integer :: ierr,ifft,ii,index,isp,jj,kk,niter,npulay,tmp
  integer :: i_vstore,order,respc_comp,trial_comp,qint
  real(dp) :: alpha_sum,current,det,max_delta,old_newest,trial_value
  logical :: pulay_fallback
@@ -2495,8 +2480,6 @@ subroutine scfopt_pulay_delta_sp(cplex,f_fftgr,f_respc_sp,f_trial_sp,f_trial_del
 ! *************************************************************************
 
  errid = AB7_NO_ERROR
- comm_atom_=xmpi_comm_self; if(present(comm_atom)) comm_atom_=comm_atom
-
  if (modulo(n_fftgr, 2) == 0 ) then
    npulay=(n_fftgr-2)/2
  else
@@ -2511,7 +2494,7 @@ subroutine scfopt_pulay_delta_sp(cplex,f_fftgr,f_respc_sp,f_trial_sp,f_trial_del
    do index=1,npawmix
      resid_new(1)=resid_new(1)+f_paw(index,i_vrespc(1))**2
    end do
-   call xmpi_sum(resid_new(1),comm_atom_,ierr)
+   call xmpi_sum(resid_new(1),comm_atom,ierr)
  end if
  vresid = resid_new(1)
 
@@ -2552,7 +2535,7 @@ subroutine scfopt_pulay_delta_sp(cplex,f_fftgr,f_respc_sp,f_trial_sp,f_trial_del
        end do
      end if
    end do
-   call xmpi_sum(amat_paw,comm_atom_,ierr)
+   call xmpi_sum(amat_paw,comm_atom,ierr)
  end if
  do ii=1,niter
    if (ii==niter) then
