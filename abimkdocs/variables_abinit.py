@@ -5365,7 +5365,7 @@ Variable(
 
 The variable [[elph2_imagden]] determines the imaginary shift of the
 denominator of the sum-over-states in the perturbation,
-$(e_{nk}-e_{n'k'}+i$[[elph2_imagden]]).
+$(e_{nk}-e_{n'k'} + i $[[elph2_imagden]]).
 One should use a width comparable with the Debye frequency or the maximum phonon frequency.
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[elph2_imagden]] has the
 [[ENERGY]] characteristics (1 Ha = 27.2113845 eV).
@@ -8289,7 +8289,9 @@ of the GWPT e-ph matrix elements when [[eph_task]] == 17.
 
 1 -> Use the original treatment as in [[cite:Li2019]] in which the
      frequency convolution is evaluated at $\ee_\nk$ and $\ee_\mkq$ and the average is taken.
-2 -> Evaluate the convolution at $\ee_\nk$. This is the **recommended** approach when computing the ZPR of the band gap.
+
+2 -> Evaluate the convolution at $\ee_\nk$.
+     This is the **recommended** approach when computing the ZPR of the band gap.
 """,
 ),
 
@@ -8299,7 +8301,7 @@ Variable(
     vartype="integer",
     topics=["ElPhonInt_expert"],
     dimensions="scalar",
-    defaultval=2,
+    defaultval=1,
     mnemonics="GWPT G-MODE",
     added_in_version="10.7.1",
     text=r"""
@@ -8307,9 +8309,9 @@ This variable controls the treatment of the e-ph matrix elements
 in the computation of the e-ph self-energy when one starts from a GSTORE.nc file
 containing both the GWPT and the KS matrix elements.
 
-1 -> Use |g|^2.
+1 -> Use |g|^2 where g is either GWPT or KS depending on [[gstore_gname]].
 
-2 -> Use g^*_KS g_GWPT.
+2 -> Use the real part of $g{KS}^* g_{\GWPT}$.
 """,
 ),
 
@@ -8814,7 +8816,7 @@ Variable(
     requires="[[ionmov]] == 25",
     added_in_version="before_v9",
     text=r"""
-Number of strain teps per MC trial trajectory, for the Hybrid Monte Carlo algorithm [[ionmov]]=25.
+Number of strain steps per MC trial trajectory, for the Hybrid Monte Carlo algorithm [[ionmov]]=25.
 """,
 ),
 
@@ -8901,11 +8903,9 @@ Variable(
     requires="[[usefock]] > 0",
     added_in_version="before_v9",
     text=r"""
-Mixing coefficient for the screened Fock operator in case of hybrid
-functionals. HSE has 0.25.
+Mixing coefficient for the screened Fock operator in case of hybrid functionals. HSE has 0.25.
 
-ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune
-this mixing coefficient.
+ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune this mixing coefficient.
 """,
 ),
 
@@ -17746,7 +17746,7 @@ Variable(
     mnemonics="PRinT the DENsity",
     added_in_version="before_v9",
     text=r"""
-If set to 1 or a larger value, provide output of electron density in real
+If set to 1 or a larger value, provide output of the GS or of the DFPT electron density in real
 space rho(r), in units of electrons/Bohr^3.
 If [[geoopt]] or [[moldyn]] are set to "none", the name of the density file will be the root output name,
 followed by _DEN.

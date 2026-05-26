@@ -693,7 +693,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,fermih,ivalence,spinmagntarget,mba
 
 
  ! If the target nelect is not between nelectlo and nelecthi, exit
- if ((nelect < nelectlo .or. nelect > nelecthi) .and. (occopt <= 8)) then
+ if ((nelect < nelectlo - tol8 .or. nelect > nelecthi + tol8) .and. (occopt <= 8)) then
    not_enough_bands = .true.
    write(msg, '(a,a,a,a,d16.8,a,a,d16.8,a,d16.8,a,a,d16.8,a,d16.8)') ch10,&
     ' newocc: ',ch10,&

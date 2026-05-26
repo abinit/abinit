@@ -306,7 +306,7 @@ type, public :: dataset_type
  integer :: gwcomp = 0
  integer :: gwgamma = 0
  integer :: gwpt_wmode = 2
- integer :: gwpt_g2mode = 2
+ integer :: gwpt_g2mode = 1
  ! GWLS
  integer :: gwls_stern_kmax             ! number of Lanczos steps taken by the gw_sternheimer routine
  integer :: gwls_npt_gauss_quad         ! number of points used in Gaussian quadrature in gw_sternheimer routine

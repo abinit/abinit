@@ -211,11 +211,12 @@ meta: {optdriver: 7, eph_task: 24, }
    6.90155232E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+
  Computing Fan-Migdal + DW self-energy from GSTORE.nc
- Using e-ph self-energy expression with g^*_KS g_GWPT
+ Using e-ph self-energy expression with |g|^2
 
 - Reading e-ph matrix elements from: t10o_GSTORE.nc
- Asking for with_cplex: 2
+ Asking for with_cplex: 1
  Asking for with_gmode: phonon
  Asking for gvals_name: gvals_ks
  Asking for g2dw: yes
@@ -262,6 +263,7 @@ P Number of CPUs for parallelism over k-points: 1
  k-points included in gstore:
 1 : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 2 : [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+
  Little group operations of the k-point will be used to symmetry reduce the integral in q-space.
 
  === Gaps, band edges and relative position wrt Fermi level ===
