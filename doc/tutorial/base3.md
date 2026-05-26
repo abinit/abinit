@@ -172,7 +172,7 @@ From the output file, here is the evolution of total energy for the different k-
 
 The difference between dataset 3 and dataset 4 is rather small.
 Even the dataset 2 gives a precision of about 0.0001 Ha. So, our converged value for the total energy,
-at fixed [[acell]], fixed [[ecut]], is -8.8251 Ha.
+at fixed [[acell]], fixed [[ecut]], is -8.5251 Ha.
 
 !!! note
     ABINIT never outputs the value of input variable [[ngkpt]], but instead uses [[kptrlatt]], a 3x3 matrix of integers.
