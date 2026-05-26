@@ -177,7 +177,7 @@ module m_gwr
                              slk_array_locmem_mb, block_dist_1d, slk_pgemm
  use m_wfk,           only : wfk_read_ebands, wfk_t
  use m_wfd,           only : wfd_t, wfdgw_t
- use m_ddk,           only : ddkop_t, ddk_red2car
+ use m_ddk,           only : ddkop_t
  use m_pawtab,        only : pawtab_type
  use m_pawcprj,       only : pawcprj_type
  use m_vcoul,         only : vcgen_t
@@ -7627,13 +7627,10 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer,allocatable :: gvec_q0(:,:), gbound_q0(:,:), u_gbound(:,:)
  real(dp) :: kk_ibz(3), kk_bz(3), tsec(2), rtmp(2)
  real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:), ks_eig(:,:,:)
- real(dp),allocatable :: work(:,:,:,:), qdirs(:,:) !, cwave(:,:)
+ real(dp),allocatable :: work(:,:,:,:), qdirs(:,:)
  logical :: gradk_not_done(gwr%nkibz)
  logical,allocatable :: bbp_mask(:,:)
- complex(dp) :: chq(3) !, wng(3)
- !complex(dp) :: vg(3), vr(3)
- !complex(dp),allocatable :: ug1_block(:,:)
- !real(dp) :: new_rhotwx_dp(2, 3, gwr%nspinor**2), vred(2,3), vcar(2,3)
+ complex(dp) :: chq(3)
  complex(gwp) :: rhotwx(3, gwr%nspinor**2), new_rhotwx(3, gwr%nspinor**2)
  complex(gwp),allocatable :: ug2(:), ur1_kibz(:), ur2_kibz(:), ur_prod(:), rhotwg(:), ug1_block(:,:), ug1(:)
  complex(dp) :: green_w(gwr%ntau), omega(gwr%ntau)
@@ -7783,9 +7780,10 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  use_ddk = .False.
  use_ddk = .True.
  !use_ddk = gwr%dtset%userie == 432
- if (use_ddk) call wrtout(std_out, " Using DDK to compute the commutator matrix elements.")
-
- call ddkop%init(dtset, gwr%cryst, gwr%pawtab, gwr%psps, gwr%mpi_enreg, u_mpw, u_ngfft)
+ if (use_ddk) then
+   call wrtout(std_out, " Using DDK to compute the commutator matrix elements.")
+   call ddkop%init(dtset, gwr%cryst, gwr%pawtab, gwr%psps, gwr%mpi_enreg, u_mpw, u_ngfft)
+ end if
 
  ABI_CHECK_IEQ(dtset%symchi, 1, "symchi 0 not implemented")
  if (dtset%nspinor == 2) then
@@ -7836,8 +7834,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      if (use_ddk) then
        call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_ibz, istwf_ki, npw_ki, kg_ki)
        ABI_CHECK(istwf_ki == 1, "istwfk_k1 not coded")
-       ! TODO: istwfk_k should be 1 here
-       !vv = ddkop%get_braket(ebands%eig(ib_c, ik, spin), istwf_k, npw_k, nspinor, cg_c, mode=ds%mode)
      end if
 
      call chi0_bbp_mask(ik_ibz, ik_ibz, spin, spin_fact, use_tr, &
@@ -7885,7 +7881,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
          ! FFT band1 from g to r
          ug1 = ug1_block(:, ib)
          call fft_ug(npw_ki, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_ki, kg_ki, u_gbound, ug1, ur1_kibz)
-         !call fft_ug(npw_ki, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_ki, kg_ki, u_gbound, ug1_block(:,ib), ur1_kibz)
 
          if (use_ddk) then
            ! Compute DH_DK |psi_k,bi>, store results in ddk_ug1
@@ -7951,7 +7946,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
            end if
 
            if (use_ddk) then
-             !print *, "max abs ddk_ug1:", maxval(abs(ddk_ug1(:,:,:)))
              cg2_dp(1,:) = real(ug2)
              cg2_dp(2,:) = aimag(ug2)
              do iab=1,gwr%nspinor**2
@@ -7963,8 +7957,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
                end do ! iab
              end do ! idir
 
-             !vk(2,3) = call ddkop%get_braket(eig0mk, istwf_k, npw_k, nspinor, brag, mode) result(vk)
-             !write(100, *)"temp:", sum(new_rhotwx)
              if (abs(deltaeKS_b1b2) > GW_TOLQ0) then
                 new_rhotwx = -new_rhotwx / deltaeKS_b1b2
                 do iab=1,gwr%nspinor**2
@@ -7982,17 +7974,11 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
              ! dot(B, COMM) = X
              ! B = 2 pi (A^{-1})^T => dot(B^T B,COMM) = 2 pi DFPT
              !
-             !vr = (2*pi)*(2*pi)*sum(ihrc(:,:),dim=2)
-             !vg(1) = dot_product(cryst%gmet(1,:), vr)
-             !vg(2) = dot_product(cryst%gmet(2,:), vr)
-             !vg(3) = dot_product(cryst%gmet(3,:), vr)
              do idir=1,3
-               !write(*, *)" For kpoint:", trim(ktoa(kk_ibz))
                write(*, "(a, *(es12.5,2x))")"rhotwx:    ", rhotwx(:, 1)
                write(*, "(a, *(es12.5,2x))")"new_rhotwx:", new_rhotwx(:, 1)
                !write(*, "(a, *(es12.5,2x))")"ratio old/new:", rhotwx(:, 1) / new_rhotwx(:, 1)
              end do
-             !stop "gwr_build_chi0_head_and_wings"
            end if
 
            ! NB: Using symrec conventions here
@@ -8012,10 +7998,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        ABI_FREE(ug1_block)
        ABI_SFREE(ddk_ug1)
      end do ! band1_start
-
-     !if (gwr%usepaw == 0 .and. dtset%inclvkb /= 0 .and. dtset%symchi == 1) then
-     !  call vkbr_free(vkbr(ik_ibz)) ! Not need anymore as we loop only over IBZ.
-     !end if
 
      ABI_FREE(ug1)
      ABI_FREE(ug2)

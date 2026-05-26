@@ -672,7 +672,7 @@ end subroutine ddk_red2car
 !!  ddkop_init
 !!
 !! FUNCTION
-!!  Build new object. Use dtset%inclvkb to determine whether non-local part should be included.
+!!  Build new object. Use dtset%inclvkb to determine whether the non-local part should be included.
 !!
 !! INPUTS
 !! dtset<dataset_type>=All input variables for this dataset.
@@ -682,8 +682,6 @@ end subroutine ddk_red2car
 !! mpi_enreg=information about MPI parallelization
 !! mpw=Maximum number of plane-waves over k-points.
 !! ngfft(18)=contain all needed information about 3D FFT
-!!
-!! OUTPUT
 !!
 !! SOURCE
 
@@ -729,9 +727,10 @@ subroutine ddkop_init(new, dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft)
    ! * Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
    ! * PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
    call new%gs_hamkq(idir)%init(psps, pawtab, dtset%nspinor, dtset%nsppol, dtset%nspden, cryst%natom,&
-     cryst%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg)
+     cryst%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg, &
      !paw_ij=paw_ij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-     !usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
+     !usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,
+     gpu_option=dtset%gpu_option)
 
    ! Prepare application of the NL part.
    call new%rf_hamkq(idir)%init(cplex1, new%gs_hamkq(idir), new%ipert, has_e1kbsc=.true.)
@@ -874,7 +873,6 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
  real(dp) :: eshift
 !arrays
  real(dp) :: grad_berry(2,(berryopt0/4)), gvnlx1(2,usevnl0)
- real(dp),pointer :: dkinpw(:),kinpw1(:)
 !************************************************************************
 
  self%eig0nk = eig0nk
@@ -898,8 +896,7 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
    ! FIXME: optnl 0 with DDK does not work as expected.
    ! So I treat the kinetic term explicitly without calling getgh1c.
    do idir=1,3
-     kinpw1 => self%gs_hamkq(idir)%kinpw_kp
-     dkinpw => self%rf_hamkq(idir)%dkinpw_k
+     associate (kinpw1 => self%gs_hamkq(idir)%kinpw_kp, dkinpw => self%rf_hamkq(idir)%dkinpw_k)
      do ispinor=1,nspinor
        do ipw=1,npw_k
          ipws = ipw + npw_k*(ispinor-1)
@@ -910,7 +907,8 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
          end if
        end do
      end do
-   end do
+     end associate
+   end do ! idir
  end if
 
 end subroutine ddkop_apply
