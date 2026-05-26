@@ -5914,14 +5914,14 @@ subroutine gwr_build_sigmac(gwr)
  logical :: select_my_kbz(gwr%my_nkbz), select_my_qbz(gwr%my_nqbz)
  real(dp) :: kk_bz(3), kcalc_bz(3), qq_bz(3), tsec(2) !, qq_ibz(3)
  real(dp),allocatable :: betas_r(:,:,:), zcut_pm(:,:,:)
- complex(gwp) :: cpsi_r, sigc_pm(2)
+ complex(gwp) :: cpsi_r, sigc_pm(2), sigc
  complex(dp) :: odd_t(gwr%ntau), even_t(gwr%ntau), avg_2ntau(2,gwr%ntau), cvals(gwr%ntau)
  complex(dp),target,allocatable :: sigc_it_mat(:,:,:,:,:,:), alphas_c(:,:,:)
  complex(gwp),allocatable :: loc_cwork(:)
  complex(gwp) ABI_ASYNC, contiguous, pointer :: gt_scbox(:,:,:), wct_scbox(:,:)
  complex(gwp),allocatable :: uc_psir_bk(:,:,:), scph1d_kcalc(:,:,:), uc_ceikr(:), ur(:), ucpsi_r(:)
  type(__slkmat_t) :: gt_gpr(2, gwr%my_nkbz, gwr%nsig_ab), gk_rpr_pm(2, gwr%nsig_ab), wc_rpr, wc_gpr(gwr%my_nqbz)
- type(__slkmat_t), target :: sigc_rpr(2,2,gwr%nkcalc, gwr%nsig_ab)
+ type(__slkmat_t), target :: sigc_rpr(2)
  type(desc_t), target :: desc_mykbz(gwr%my_nkbz), desc_myqbz(gwr%my_nqbz)
  type(fftbox_plan3_t) :: green_plan, wt_plan
  type(littlegroup_t) :: ltg_kcalc(gwr%nkcalc)
@@ -6287,19 +6287,19 @@ else
  do ipm=1,2
    do iab=1,gwr%nsig_ab
      call gk_rpr_pm(ipm, iab)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
-     do ikcalc=1,gwr%nkcalc
-       call sigc_rpr(1,ipm,ikcalc, iab)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
-       ! For sigma we have to decompose it in hermitian/anti-hermitian part.
-       !call sigc_rpr(2,ipm,ikcalc, iab)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
-     end do
+  !  end do
+    !  do ikcalc=1,gwr%nkcalc
+     ! For sigma we have to decompose it in hermitian/anti-hermitian part.
+     !call sigc_rpr(2,ipm,ikcalc, iab)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
    end do
  end do
+ call sigc_rpr(1)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
 
  mem_mb = slk_array_locmem_mb(wc_rpr) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(sigc_rpr))
  call wrtout(std_out, sjoin(" Local memory for PBLAS (r,r') matrices: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
  if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
- ii = sigc_rpr(1,1,1,1)%size_local(2)
+ ii = sigc_rpr(1)%size_local(2)
  ABI_MALLOC(loc_cwork, (ii))
 
  do my_is=1,gwr%my_nspins
@@ -6346,12 +6346,6 @@ else
      call gwr%redistrib_mats_qibz("wc", itau, spin, need_qibz, got_qibz, "communicate")
      if (my_it == 1 .and. gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
-     if (gpu_option == ABI_GPU_OPENMP) then
-       call slk_array_gpu_set_zero(sigc_rpr)
-     end if
-     !else
-       call slk_array_set_zero(sigc_rpr)
-     !end if
 
      ! Sum over my k-points in the BZ.
      do my_ikf=1,gwr%my_nkbz
@@ -6404,15 +6398,21 @@ else
            !sigc_rpr(1,ipm,ikcalc)%buffer_cplx = sigc_rpr(1,ipm,ikcalc)%buffer_cplx + &
            !   wtqp * gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx
            do iab=1,gwr%nsig_ab
-             bufsize = sigc_rpr(1,ipm,ikcalc,iab)%bufsize
-             call cplx_mat_plus_bc(bufsize, sigc_rpr(1,ipm,ikcalc,iab)%buffer_cplx(:,1), &
+             if (gpu_option == ABI_GPU_OPENMP) then
+               call slk_array_gpu_set_zero(sigc_rpr)
+             end if
+           !else
+             call slk_array_set_zero(sigc_rpr)
+           !end if
+             bufsize = sigc_rpr(1)%bufsize
+             call cplx_mat_plus_bc(bufsize, sigc_rpr(1)%buffer_cplx(:,1), &
                                    wtqp, "N", gk_rpr_pm(ipm,iab)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
                                    gpu_option)
 
              if (abs(wtqm) > tol12) then
                ABI_ERROR(sjoin("TR is not yet implemented:, wtqm:", ftoa(wtqm)))
 
-               call cplx_mat_plus_bc(bufsize, sigc_rpr(2,ipm,ikcalc,iab)%buffer_cplx(:,1), &
+               call cplx_mat_plus_bc(bufsize, sigc_rpr(2)%buffer_cplx(:,1), &
                                      wtqm, "C", gk_rpr_pm(ipm,iab)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
                                      gpu_option)
 
@@ -6420,6 +6420,20 @@ else
                !    (wtqp + wtqm) * real(gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx, kind=gwp) &
                !  + (wtqp - wtqm) * j_gw * aimag(gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx)
              end if
+
+             iiab = spinor_idxs(1, iab); jiab = spinor_idxs(2, iab)
+             if (gpu_option == ABI_GPU_OPENMP) then
+               !  do ipm=1,2
+               call sigc_rpr(1)%gpu_map("update_from")
+               !  end do
+             end if
+             do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
+               call sig_braket_ur(sigc_rpr(:), gwr%g_nfft, &
+                               &  uc_psir_bk((jiab-1)*gwr%g_nfft+1:jiab*gwr%g_nfft, band, ikcalc), &
+                               &  uc_psir_bk((iiab-1)*gwr%g_nfft+1:iiab*gwr%g_nfft, band, ikcalc), &
+                               &  sigc, loc_cwork)
+               if (gwr%sig_diago) sigc_it_mat(ipm, itau, band, 1, ikcalc, spin) = sigc_it_mat(ipm, itau, band, 1, ikcalc, spin) + sigc
+             end do ! band
            end do ! iab
          end do ! ipm
 
@@ -6438,23 +6452,23 @@ else
      ! Remember that Sigma is stored as (r',r) and that the second dimension is MPI-distributed.
      ! In case of k or g distribution, sigc_pm is a partial 6d integral that will be ALL_REDUCED in gwr%comm afterwards.
      ! TODO: Off-diagonal terms although this is not the most efficient algorithm
-     do ikcalc=1,gwr%nkcalc
-       do iab=1,gwr%nsig_ab
-         iiab = spinor_idxs(1, iab); jiab = spinor_idxs(2, iab)
-         if (gpu_option == ABI_GPU_OPENMP) then
-           do ipm=1,2
-             call sigc_rpr(1,ipm,ikcalc,iab)%gpu_map("update_from")
-           end do
-         end if
-         do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
-           call sig_braket_ur(sigc_rpr(:,:,ikcalc,iab), gwr%g_nfft, &
-                           &  uc_psir_bk((jiab-1)*gwr%g_nfft+1:jiab*gwr%g_nfft, band, ikcalc), &
-                           &  uc_psir_bk((iiab-1)*gwr%g_nfft+1:iiab*gwr%g_nfft, band, ikcalc), &
-                           &  sigc_pm, loc_cwork)
-           if (gwr%sig_diago) sigc_it_mat(:, itau, band, 1, ikcalc, spin) = sigc_it_mat(:, itau, band, 1, ikcalc, spin) + sigc_pm(:)
-         end do ! band
-       end do ! iab
-     end do ! ikcalc
+    !  do ikcalc=1,gwr%nkcalc
+    !    do iab=1,gwr%nsig_ab
+    !      iiab = spinor_idxs(1, iab); jiab = spinor_idxs(2, iab)
+    !      if (gpu_option == ABI_GPU_OPENMP) then
+    !        do ipm=1,2
+    !          call sigc_rpr(1,ipm,ikcalc,iab)%gpu_map("update_from")
+    !        end do
+    !      end if
+    !      do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
+    !        call sig_braket_ur(sigc_rpr(:,:,ikcalc,iab), gwr%g_nfft, &
+    !                        &  uc_psir_bk((jiab-1)*gwr%g_nfft+1:jiab*gwr%g_nfft, band, ikcalc), &
+    !                        &  uc_psir_bk((iiab-1)*gwr%g_nfft+1:iiab*gwr%g_nfft, band, ikcalc), &
+    !                        &  sigc_pm, loc_cwork)
+    !        if (gwr%sig_diago) sigc_it_mat(:, itau, band, 1, ikcalc, spin) = sigc_it_mat(:, itau, band, 1, ikcalc, spin) + sigc_pm(:)
+    !      end do ! band
+    !    end do ! iab
+    !  end do ! ikcalc
 
      write(msg,'(3(a,i0),a)')" Sigma_c my_itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
      call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau)
@@ -6984,13 +6998,13 @@ end subroutine write_notations
 subroutine sig_braket_ur(sig_rpr, nfftsp, ur_bra_glob, ur_ket_glob, sigm_pm, loc_cwork)
 
 !Arguments ------------------------------------
- type(__slkmat_t),intent(in) :: sig_rpr(2,2)
+ type(__slkmat_t),intent(in) :: sig_rpr(2)
  integer,intent(in) :: nfftsp
  complex(gwp),intent(in) :: ur_bra_glob(nfftsp)
  complex(gwp),intent(in) :: ur_ket_glob(nfftsp)
 
- complex(gwp),intent(out) :: sigm_pm(2)
- complex(gwp),intent(inout) :: loc_cwork(sig_rpr(1,1)%size_local(2))
+ complex(gwp),intent(out) :: sigm_pm
+ complex(gwp),intent(inout) :: loc_cwork(sig_rpr(1)%size_local(2))
  
  !Local variables-------------------------------
  integer :: ipm, ir1, il_r1, nrows, ncols
@@ -7001,8 +7015,8 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_bra_glob, ur_ket_glob, sigm_pm, loc
 
  ! (r',r) with r' local and r-index PBLAS-distributed.
  sigm_pm = czero_gw
- do ipm=1,2
-   associate (rp_r => sig_rpr(1,ipm))
+!  do ipm=1,2
+   associate (rp_r => sig_rpr(1))
    ! Integrate over r'
    !ABI_CHECK_IEQ(nfftsp, rp_r%size_local(1), "First dimension should be local to each MPI proc!")
    !ABI_MALLOC(loc_cwork, (rp_r%size_local(2)))
@@ -7014,11 +7028,11 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_bra_glob, ur_ket_glob, sigm_pm, loc
    ! Integrate over r. Note complex conjugate.
    do il_r1=1,rp_r%size_local(2)
      ir1 = rp_r%loc2gcol(il_r1)
-     sigm_pm(ipm) = sigm_pm(ipm) + conjg(ur_bra_glob(ir1)) * loc_cwork(il_r1)
+     sigm_pm = sigm_pm + conjg(ur_bra_glob(ir1)) * loc_cwork(il_r1)
    end do
    !ABI_FREE(loc_cwork)
    end associate
- end do
+!  end do
 
  ABI_NVTX_END_RANGE()
 
