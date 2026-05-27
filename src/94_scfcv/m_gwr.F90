@@ -7779,7 +7779,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ! TODO: use ddkop instead of commutator so that we can handle SOC terms.
  use_ddk = .False.
  use_ddk = gwr%dtset%userie == 432
- use_ddk = .True.
+ !use_ddk = .True.
  if (use_ddk) then
    call wrtout(std_out, " Using DDK to compute the commutator matrix elements.")
    call ddkop%init(dtset, gwr%cryst, gwr%pawtab, gwr%psps, gwr%mpi_enreg, u_mpw, u_ngfft)
@@ -7832,7 +7832,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
      if (use_ddk) then
        call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_ibz, istwf_ki, npw_ki, kg_ki)
-       ABI_CHECK(istwf_ki == 1, "istwfk_k1 not coded")
      end if
 
      call chi0_bbp_mask(ik_ibz, ik_ibz, spin, spin_fact, use_tr, &
@@ -7846,8 +7845,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      !  3) Invert the loops
 
      block_size = min(48, gwr%ugb_nband)
-     !block_size = min(200, gwr%ugb_nband)
-     !block_size = 1
 
      block_counter = 0
      do band1_start=1, gwr%ugb_nband, block_size

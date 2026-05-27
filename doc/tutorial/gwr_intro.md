@@ -33,7 +33,8 @@ As concerns the frequency dependence, GWR evaluates $G$, $W$ and $\Sigma$ along 
 using minimax meshes that are adaptive grids that place points non-uniformly, concentrating them where they are most needed,
 leading to higher accuracy with fewer points [[cite:Kaltak2014]].
 Inhomogeneous sine/cosine transforms are then used to from imaginary time to imaginary frequency with quadratic scaling
-in the number of imaginary points. For this reason, it is very important to keep the number of points as small possible
+in the number of imaginary points.
+For this reason, it is very important to keep the number of points as small possible
 without spoiling accuracy [[cite:Liu2016]].
 The minimax meshes used in ABINIT are provided by the GreenX library ([[cite:Azizi2023]], [[cite:Azizi2024]]).
 
@@ -76,6 +77,7 @@ and then select the computation to be performed via [[gwr_task]].
 In the first step, you will very likely use [[gwr_task]] = "HDIAGO" or "HDIAGO_FULL"
 to perform a **direct diagonalization** with ScaLAPACK or ELPA in order to generate a WFK with empty states and cutoff [[ecut]].
 This feature can also be used if you want to use other many-body codes that are able to read ABINIT’s WFK file
+in netcdf format ([[iomode]] 3).
 Please take some time to read the documentation of [[gwr_task]] to see which calculations are supported.
 
 The $\kk$-points and the band range for the QP corrections in $\Sigma_\nk$ can be specified in different ways.
@@ -130,7 +132,7 @@ where the number of PWs is controlled by [[ecutwfn]] that by default is equal to
 These matrices are stored in memory for the entire duration of the calculation.
 The $\bg, \bg'$ components are distributed inside the `g` level of [[gwr_np_kgts]].
 Only the $\kk$-points in the IBZ are stored in memory and distributed inside the $\kk$-level
-as the code can use symmetries to reconstruct the Green's function in the full on-the-fly.
+as the code can use symmetries to reconstruct the Green's function in the full BZ on-the-fly.
 Finally, the $\tau$ points are distributed inside the `t` level and collinear spins are distributed inside the `s` level.
 
 !!! important
@@ -145,6 +147,11 @@ in the WFK file specified via [[getwfk_filepath]] ([[getwfk]] if you really insi
 This WFK file is usually produced by performing a NSCF calculation including empty states and the GWR driver
 provides a specialized option to perform a **direct diagonalization** of the KS Hamiltonian in parallel
 with Scalapack.
+
+!!! important
+
+    The ELPA library is strongly suggested for the direct diagonalization.
+    It is much faster than the Scalapack version and requires less memory.
 
 When computing the KS Green's function $G^0$, the number of bands is controlled by [[nband]].
 Clearly, it does not make any sense to ask for more bands than the ones available in the WFK file.
@@ -192,7 +199,6 @@ The input variable [[inclvkb]] can be used to deactivate it, if needed.
 
 The exchange part of $\Sigma$ is computed using the standard sum over occupied states
 similarly to what is done in the conventional code:
-
 
 <!--
 \begin{equation}\label{eq:Sigma_x}
@@ -334,10 +340,12 @@ over minimax points and spins is rather efficient (few communications required).
 On the contrary, the parallelism over $\gg$-vectors and $\kk$-points is much more network intensive,
 although these two additional levels allow one to decrease the memory requirements required to store the two-point functions.
 
-In case out-of-memory problems occur, we recommend increasing as much as possible the number of CPUs
-used to distribute the matrices with PBLAS (g-level).
-Once the memory usage for $\chi$ and $W$ has dropped to an acceptable level, one can start increasing
-the number of MPI processes for \tau-parallelism.
+!!! important
+
+  In case out-of-memory problems occur, we recommend increasing as much as possible the number of CPUs
+  used to distribute the matrices with PBLAS (g-level).
+  Once the memory usage for $\chi$ and $W$ has dropped to an acceptable level, one can start increasing
+  the number of MPI processes for \tau-parallelism.
 
 <!--
 TODO: Additional trick to be tested/documented in more detail:
@@ -378,7 +386,7 @@ To run computations in double-precision, one has to configure the package with  
 when the command line interface is used or `enable_gw_dpc="yes"` when `--with-config-file=FILE` is used
 to pass the configuration options to `configure` via an external FILE.
 
-To configure with ELPA + MKL, set the ELPAROOT env variable with :
+To configure with ELPA + MKL, set the ELPAROOT env variable with:
 
 ```
 export ELPAROOT="PATH_TO_ELPA_INSTALLATION_DIR"
