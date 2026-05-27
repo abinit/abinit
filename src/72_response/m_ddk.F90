@@ -134,6 +134,9 @@ module m_ddk
    procedure :: get_braket => ddkop_get_braket
     ! Compute matrix element (complex results) in cartesian coords.
 
+   procedure :: get_ihr_comm => ddkop_get_ihr_comm
+    ! Compute matrix elements of i[H,r] (complex results) in cartesian coords.
+
    procedure :: get_vdiag => ddkop_get_vdiag
     ! Compute diagonal matrix element (real) in cartesian coords.
 
@@ -988,6 +991,88 @@ function ddkop_get_braket(self, eig0mk, istwf_k, npw_k, nspinor, brag, mode) res
  end select
 
 end function ddkop_get_braket
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddk/ddkop_get_ihr_comm
+!! NAME
+!!  ddkop_get_ihr_comm
+!!
+!! FUNCTION
+!!  Compute matrix element in Cartesian coordinates.
+!!
+!! INPUTS
+!!  eig0mk: Eigenvalue associated to the "bra" wavefunction
+!!  istwkf_k: defines storage of wavefunctions for this k-point
+!!  npw_k: Number of planewaves.
+!!  nspinor: Number of spinor components.
+!!  brag(2,npw_k*nspinor)=input wavefunction in reciprocal space
+!!
+!! SOURCE
+
+subroutine ddkop_get_ihr_comm(self, cryst, eig0mk, istwf_k, npw_k, nspinor, brag, new_rhotwx)
+
+!Arguments ------------------------------------
+!scalars
+ class(ddkop_t),intent(in) :: self
+ type(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: istwf_k, npw_k, nspinor
+ real(dp),intent(in) :: eig0mk
+!arrays
+ real(dp),intent(in) :: brag(2,npw_k*nspinor)
+ complex(gwp),intent(out) :: new_rhotwx(3, nspinor**2)
+
+!Local variables-------------------------------
+!scalars
+ integer :: idir, iab
+ real(dp) :: doti
+!arrays
+ integer :: spinor_pad(2,4), spad1, spad2, rtmp(2)
+ real(dp) :: dotarr(2)
+ real(dp), allocatable :: cg2_dp(:,:),  ddk_ug1(:,:,:)
+!************************************************************************
+
+ spinor_pad = reshape([0, 0, npw_k, npw_k, 0, npw_k, npw_k, 0], [2, 4])
+
+ if (self%usepaw == 0) then
+   ! <u_(iband,k+q)^(0)|H_(k+q,k)^(1)|u_(jband,k)^(0)>  (NC psps)
+   do iab=1,nspinor**2
+     spad1 = spinor_pad(1,iab); spad2 = spinor_pad(2,iab)
+     do idir=1,3
+       dotarr = cg_zdotc(npw_k, brag(:,spad2+1), self%gh1c(:,spad1+1,idir))
+       if (istwf_k > 1) then
+         doti = two * dotarr(2)
+         if (istwf_k == 2 .and. self%mpi_enreg%me_g0 == 1) then
+           ! nspinor always 1
+           ! TODO: Recheck this part but it should be ok.
+           doti = doti - (brag(1,1) * self%gh1c(2,1,idir) - brag(2,1) * self%gh1c(1,1,idir))
+         end if
+         dotarr(2) = doti; dotarr(1) = zero
+       end if
+       new_rhotwx(idir, iab) = dotarr(1) + j_dpc * dotarr(2)
+     end do
+   end do ! iab
+ else
+   ABI_ERROR("PAW Not Implemented")
+   ! <u_(iband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(jband,k)^(0)> (PAW)
+   ! eshiftkq = half * (eig0mk - self%eig0nk)
+   ABI_UNUSED(eig0mk)
+ end if
+
+ ! HM: 24/07/2018
+ ! Transform dipoles to be consistent with results from DFPT
+ ! Perturbations with DFPT are along the reciprocal lattice vectors
+ ! Perturbations with commutator are along real space lattice vectors
+ ! dot(A, DFPT) = X
+ ! dot(B, COMM) = X
+ ! B = 2 pi (A^{-1})^T => dot(B^T B,COMM) = 2 pi DFPT
+
+ do iab=1,nspinor**2
+   new_rhotwx(:, iab) = matmul(cryst%rmet, new_rhotwx(:, iab)) / (two_pi ** 2)
+ end do
+
+end subroutine ddkop_get_ihr_comm
 !!***
 
 !----------------------------------------------------------------------

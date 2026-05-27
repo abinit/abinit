@@ -342,8 +342,7 @@ subroutine mkunitpawspherepot(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,&
  ! Check that cplex has an allowed value
  if(cplex/=1 .and. cplex/=2)then
    write(message, '(a,i0,a,a)' )&
-   'From the calling routine, cplex=',cplex,ch10,&
-   'but the only value allowed are 1 and 2.'
+   'From the calling routine, cplex=',cplex,ch10, 'but the only value allowed are 1 and 2.'
    ABI_BUG(message)
  end if
 
@@ -583,10 +582,9 @@ subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
  call timab(10,1,tsec)
 
  ! Check that cplex has an allowed value
- if(cplex/=1 .and. cplex/=2)then
+ if (cplex/=1 .and. cplex/=2) then
    write(message, '(a,i0,a,a)' )&
-   'From the calling routine, cplex=',cplex,ch10,&
-   'but the only value allowed are 1 and 2.'
+   'From the calling routine, cplex=',cplex,ch10,'but the only value allowed are 1 and 2.'
    ABI_BUG(message)
  end if
 
@@ -796,9 +794,8 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
  DBG_CHECK(ANY(istwf_k==(/(ipw,ipw=1,9)/)),"Wrong istwf_k")
 
  if(nspinor==2 .and. istwf_k/=1)then
-   write(message,'(a,a,a,i6,a,i6)')&
-   'When istwf_k/=1, nspinor must be 1,',ch10,&
-   'however, nspinor=',nspinor,', and istwf_k=',istwf_k
+   write(message,'(3a,i0,a,i0)')&
+   'When istwf_k/=1, nspinor must be 1,',ch10, 'however, nspinor=',nspinor,', and istwf_k=',istwf_k
    ABI_BUG(message)
  end if
 
@@ -963,7 +960,7 @@ end subroutine meanvalue_g
 !! SOURCE
 
 subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,rdfuncr,&
-&  laplacerdfuncr,rdfuncg_out,laplacerdfuncg_out,g2cart_out,rdfuncg_in,g2cart_in)
+                     laplacerdfuncr,rdfuncg_out,laplacerdfuncg_out,g2cart_out,rdfuncg_in,g2cart_in)
 
 !Arguments ------------------------------------
 !scalars
@@ -1149,7 +1146,6 @@ subroutine redgr(frin,frredgr,mpi_enreg,nfft,ngfft)
  integer :: cplex_tmp,i1,i2,i3,id,idir,ifft,ig,ii,ing,n1,n2,n3
 !arrays
  real(dp),allocatable :: gg(:,:),wkcmpx(:,:),work(:),workgr(:,:)
-
 ! *************************************************************************
 
 !Only real arrays are treated
@@ -1308,8 +1304,8 @@ subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,rhog,rprimd,vh
 
  if( .not. (ipert==natom+3 .or. ipert==natom+4))then
    write(message, '(a,i0,a,a)' )&
-&   'From the calling routine, ipert=',ipert,ch10,&
-&   'so this routine for the strain perturbation should not be called.'
+    'From the calling routine, ipert=',ipert,ch10,&
+    'so this routine for the strain perturbation should not be called.'
    ABI_BUG(message)
  end if
 
@@ -1923,11 +1919,10 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 
  contains
 
-   function map_symrhg(j1,n1)
+   integer function map_symrhg(j1, n1)
 
-   integer :: map_symrhg
-   integer,intent(in) :: j1,n1
-!  Map into [0,n-1]
+   integer,intent(in) :: j1, n1
+   ! Map into [0,n-1]
    map_symrhg=mod(n1+mod(j1,n1),n1)
  end function map_symrhg
 
@@ -2010,7 +2005,6 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
  integer,allocatable :: class(:),iperm(:),symafm_used(:),symrel_used(:,:,:)
  integer,allocatable :: work1(:)
  real(dp),allocatable :: tnons_used(:,:),work2(:,:)
-
 ! *************************************************************************
 
  ABI_MALLOC(class,(nsym))
@@ -2393,7 +2387,6 @@ subroutine rotate_rho(cplex, itirev, mpi_enreg, nfft, ngfft, nspden, &
  real(dp) :: phnon1(2)
  real(dp), allocatable :: workg(:,:), workg_eq(:,:)
  character(len=500) :: message
-
 ! *************************************************************************
 
  n1=ngfft(1);n2=ngfft(2);n3=ngfft(3);nproc_fft=ngfft(10);me_fft=ngfft(11);nd2=n2/nproc_fft
@@ -2558,12 +2551,7 @@ subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,
 !arrays
  integer,allocatable :: determinant(:)
  real(dp) :: tsec(2)
-
 ! *************************************************************************
-
-!DEBUG
-!write(std_out,*)' m_spacepar%setsym : enter '
-!ENDDEBUG
 
  call timab(6,1,tsec)
 
