@@ -1376,6 +1376,10 @@ if test "${abi_openmp_offload_enable}" = "yes"; then
       [WARNING: GPU support with non-validated compiler.])
   fi
 fi
+if test "${abi_gpu_hip_old}" = "yes"; then
+  ABI_MSG_NOTICE([old-rocm],
+    [WARNING: Suboptimal ROCm/HIP version])
+fi
 # GPU 2024 implementation : deactivate this warning
 #if test "${abi_gpu_enable}" = "yes" -a "${sd_linalg_chk_gpu}" != "magma"; then
 #  ABI_MSG_NOTICE([gpu-without-magma],
