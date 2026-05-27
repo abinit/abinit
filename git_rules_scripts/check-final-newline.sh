@@ -14,7 +14,8 @@ for file in "$@"; do
 
   last_byte="$(LC_ALL=C tail -c 1 -- "${file}" | od -An -tx1 | tr -d ' \n')"
   if [ "${last_byte}" != "0a" ]; then
-    printf 'Missing final newline in %s. Add one newline at the end of the file.\n' "${file}"
+    printf '\n' >> "${file}"
+    printf 'Added final newline to %s. Stage the fixed file and commit again.\n' "${file}"
     failed=1
   fi
 done

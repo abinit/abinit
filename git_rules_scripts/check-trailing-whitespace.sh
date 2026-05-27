@@ -13,7 +13,8 @@ for file in "$@"; do
   fi
 
   if grep -n '[[:blank:]]$' -- "${file}"; then
-    printf 'Trailing whitespace found in %s. Remove spaces or tabs at line ends.\n' "${file}"
+    perl -0pi -e 's/[ \t]+$//mg' -- "${file}"
+    printf 'Removed trailing whitespace from %s. Stage the fixed file and commit again.\n' "${file}"
     failed=1
   fi
 done

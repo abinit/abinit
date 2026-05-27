@@ -9,7 +9,8 @@ for file in "$@"; do
   fi
 
   if grep -Iq . -- "${file}" && grep -n $'\r' -- "${file}" >/dev/null; then
-    printf 'CRLF line endings found in %s. Use LF line endings.\n' "${file}"
+    perl -0pi -e 's/\r\n/\n/g; s/\r/\n/g' -- "${file}"
+    printf 'Converted CRLF line endings to LF in %s. Stage the fixed file and commit again.\n' "${file}"
     failed=1
   fi
 done
