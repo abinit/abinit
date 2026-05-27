@@ -363,7 +363,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  character(len=fnlen) :: fildata
  type(MPI_type) :: mpi_enreg_diel
  type(xcdata_type) :: xcdata
- type(energies_type) :: energies
+ type(energies_type), target :: energies
  type(abi_mixing_object) :: mix,mix_mgga
  type(precon_object) :: precon
  logical,parameter :: VERBOSE=.FALSE.

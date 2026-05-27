@@ -145,6 +145,7 @@ contains
     ! - TODO : check places where it is assumed that nspinor=2 => nspden=4 and nsppol=2 => nspden=2
     !                                       on peut avoir nspden=1 dans les deux cas.
     ! - Linear solver : the tol is the absolute tol -> change to relative tol (in gmresm?)
+    ! - In PAW : use pawmixdg 1 for right size of fft grid (enforce this in ?iovars?)
 
     !****f* m_precon/precon_init
     !! NAME
@@ -327,7 +328,6 @@ contains
             !Initializing variables needed for Kxc
             if (this%use_kxc) then
                 !Preparing the allocation of Kxc
-                write(6,*)'chi0diel precon_init : dtset%xclevel', dtset%xclevel; flush(6) !DEBUG
                 if (dtset%xclevel==1) then  !LDA
                     this%nkxc = 2*min(dtset%nspden,2)-1
                 else if (dtset%xclevel==2)then  !GGA+...
@@ -340,7 +340,6 @@ contains
                         ! TODO : update this if it gets implemented.
                     end if
                 end if
-                write(6,*)'chi0diel precon_init : this%nkxc', this%nkxc; flush(6) !DEBUG
             end if
 
             !Linear solver parameters
@@ -356,11 +355,6 @@ contains
                                                     ! (the smearing temperature is not adjusted for the preonditioner).
                 this%precon_tsmear = dtset%precon_tsmear    ! Only used for chi0_diag and chi0_quasidiag for now.
             end if
-            write(6,*)'chi0diel init : dtset%iprcel=', dtset%iprcel; flush(6) !DEBUG
-            write(6,*)'chi0diel init : dtset%precon_ls_maxite=', dtset%precon_ls_maxite; flush(6) !DEBUG
-            write(6,*)'chi0diel init : this%linsolve_maxiter=', this%linsolve_maxiter; flush(6) !DEBUG
-            write(6,*)'chi0diel init : dtset%precon_tsmear=', dtset%precon_tsmear; flush(6) !DEBUG
-            write(6,*)'chi0diel init : this%precon_tsmear=', this%precon_tsmear; flush(6) !DEBUG
 
             !Usefull : indices mapping arrays
             if (this%use_indices_arrays)then
@@ -433,13 +427,7 @@ contains
 
         ! *************************************************************************
         write(6,*)'chi0diel precon%update'; flush(6) !DEBUG
-                    write(6,*)'chi0diel init : dtset%iprcel=', dtset%iprcel; flush(6) !DEBUG
-            write(6,*)'chi0diel init : dtset%precon_ls_maxite=', dtset%precon_ls_maxite; flush(6) !DEBUG
-            write(6,*)'chi0diel init : this%linsolve_maxiter=', this%linsolve_maxiter; flush(6) !DEBUG
-            write(6,*)'chi0diel init : dtset%precon_tsmear=', dtset%precon_tsmear; flush(6) !DEBUG
-            write(6,*)'chi0diel init : this%precon_tsmear=', this%precon_tsmear; flush(6) !DEBUG
 
-        !write(100+mpi_enreg%me,*)'apply_precon%update : dtset%nband', dtset%nband; flush(100+mpi_enreg%me)
         if (this%use_precon) then
             
             ! Indices in cg array
@@ -947,7 +935,6 @@ contains
         cplex = 1   ! Input vector is real in real (direct) space.
         non_magnetic_xc = .false.
         nkxc = size(this%kxc, 2)
-        write(6,*)'chi0diel apply_kxc : nkxc',nkxc; flush(6) !DEBUG
 
         usexcnhat = 0                                                           !
         nhat1dim = 0                                                            ! 
@@ -983,7 +970,7 @@ contains
             &               n3xccc, optnc, option, qphon, this%rhor, vec_r, this%rprimd, usexcnhat,        &
             &               this%vxc, Kxc_vec_r, dummy_xccc3d1)
             ! TODO : add an option for the precon to only compute V_11 V_22
-            ABI_FREE(nhat)
+            ABI_FREE(nhat)²
             ! TODO noncoll : check in what spin-basis Kxc_vec_r is returned and adapt 'to_pauli'.
         end if
 
@@ -1227,7 +1214,8 @@ contains
                 ABI_BUG("iprcel=2** : nfftprc /= nfft in Norm-conserving not implemented.")
             end if
         else
-        ! In PAW : Add rhoij terms to w_rhowfr.
+        ! In PAW : 
+            ! First option : Add rhoij terms to w_rhowfr and transfer to fine grid. -UNUSED-
             if (this%use_paw_rhoij .and. this%nfftprc == this%pawfgr%nfft) then
                 
                 !Compute the rhoij equivalent for the weighted density.
@@ -1275,6 +1263,7 @@ contains
 
                 call pawrhoij_free(pawrhoij)
             
+            ! Second option : Transfer density from coarse to fine grid without rhoij corrections.
             elseif (this%nfftprc == this%pawfgr%nfft) then
                 !Transfering the weighted density to the fine (PAW) grid, no rhoij correction added.
                 cplex = 1
@@ -1283,9 +1272,12 @@ contains
                 optout = 0  !
                 ABI_MALLOC(dummy_rhog, (2, this%pawfgr%nfftc))
                 ABI_MALLOC(dummy_rhogf, (2, this%pawfgr%nfft))
-                call transgrid(cplex, mpi_enreg, 1, optgrid, optin, optout, dtset%paral_kgb, this%pawfgr, dummy_rhog, dummy_rhogf, w_rhowfr, w_rhor)
+                call transgrid(cplex, mpi_enreg, dtset%nspden, optgrid, optin, optout, dtset%paral_kgb, this%pawfgr, &
+                &              dummy_rhog, dummy_rhogf, w_rhowfr, w_rhor)
                 ABI_FREE(dummy_rhog)
                 ABI_FREE(dummy_rhogf)
+                !call symrhg(1, this%gprimd, this%irrzon, mpi_enreg, this%nfftprc, ?nfftot, dtset%ngfft, 1, dtset%nsppol, dtset%nsym, &
+                !this%phnons, rhog, rhor, this%rprimd, dtset%symafm, dtset%symrel, dtset%tnons)
             else
                 ABI_BUG("iprcel=2** : nfftprc /= pawfgr%nfft in PAW not implemented.")
             end if
@@ -1610,7 +1602,7 @@ contains
         call apply_chi0_ldos(this, dtset, mpi_enreg, dielmat_v_r)
         !2) Apply vc (in the Pauli basis)
         call apply_vc(this, dtset, mpi_enreg, dielmat_v_r)
-        !3) dielmat_v_r = v_r - vc * chi0 * v_r = adjdielmat * v_r
+        !3) dielmat_v_r = v_r - vc * chi0 * v_r = dielmat * v_r
         dielmat_v_r = v_r - dielmat_v_r
 
     end subroutine apply_dielmat_ldos
@@ -2969,11 +2961,9 @@ contains
 
         ABI_MALLOC(delta_rho_g, (2, this%nfftprc))
         call symrhg(1, this%gprimd, this%irrzon, mpi_enreg, dtset%nfft, dtset%nfft, dtset%ngfft, dtset%nspden, dtset%nsppol, &
-        &   dtset%nsym, this%phnons, delta_rho_g, delta_rho, this%rprimd, dtset%symafm, dtset%symrel, dtset%tnons)
+        &   dtset%nsym, this%phnons, delta_rho_g, delta_rho, this%rprimd, dtset%symafm, dtset%symrel, dtset%tnons)  ! TODO : carefull with tnons and symrel (do they get updated during structure optimization ?)
         ABI_FREE(delta_rho_g)
         ! TODO : deal with symmetries when spin (nsppol in non coll)
-        !write(6,*)'chi0diel compute_delta_rho, delta_rho1 = ', delta_rho(1:20, 1); flush(6) !DEBUG
-        !write(6,*)'chi0diel compute_delta_rho, delta_rho2 = ', delta_rho(1:20, 2); flush(6) !DEBUG
 
         call to_pauli(this, 1, delta_rho)
 
@@ -3211,7 +3201,6 @@ contains
         
         ! *************************************************************************
         write(6,*)'chi0diel apply_dielmat'; flush(6) !DEBUG
-        !write(100+mpi_enreg%me,*)'chi0diel apply_dielmat'; flush(100+mpi_enreg%me)   !DEBUG
         if (this%use_precon) then
 
             if (this%iprcel == 200) then
