@@ -1370,6 +1370,12 @@ if test "${sd_fft_flavor}" = "fftw3" -a "${abi_openmp_enable}" = "yes"; then
   ABI_MSG_NOTICE([fftw3-openmp],
     [WARNING: OpenMP enabled but FFTW3 Threads disabled])
 fi
+if test "${abi_openmp_offload_enable}" = "yes"; then
+  if test "${abi_fc_vendor}" != "nvhpc" -a  "${abi_fc_vendor}" != "cray"; then
+    ABI_MSG_NOTICE([omp-offload-compiler],
+      [WARNING: GPU support with non-validated compiler.])
+  fi
+fi
 # GPU 2024 implementation : deactivate this warning
 #if test "${abi_gpu_enable}" = "yes" -a "${sd_linalg_chk_gpu}" != "magma"; then
 #  ABI_MSG_NOTICE([gpu-without-magma],
