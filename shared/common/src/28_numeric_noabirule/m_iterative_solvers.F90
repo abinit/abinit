@@ -272,12 +272,13 @@ module m_iterative_solvers
 ! Linear solvers (CG and GMRES)
 !-------------------------------------------------------------------------------------------
 
-    subroutine cg_linear_solver(n, matvec, rhs, est, cg_maxiter, cg_rtol)
+    subroutine cg_linear_solver(n, matvec, rhs, est, cg_maxiter, cg_rtol, verbose)
         
         !Arguments ------------------------------------
         integer, intent(in) :: n, cg_maxiter
         real(dp), intent(in) :: cg_rtol
-        real(dp),intent(in) :: rhs(:)
+        real(dp), intent(in) :: rhs(:)
+        logical, intent(in) :: verbose
         real(dp),intent(inout) :: est(:)
         interface
             subroutine matvec(n_, x, y)
@@ -316,8 +317,7 @@ module m_iterative_solvers
 
             beta = rsnew / rsold
             p = r + beta * p
-            write(6,*)'cg_linear_solver : alpha, dot_product(p, Ap), beta, rsold, rsnew', alpha, dot_product(p, Ap), beta, rsold, rsnew; flush(6) !DEBUG
-            write(6,*)'cg_linear_solver : sqrt(rsnew)', sqrt(rsnew); flush(6) !DEBUG
+            if (verbose) call wrtout(std_out, 'cg: it=', iter,' res=', sqrt(rsnew))
             rsold = rsnew
         end do
 
@@ -435,17 +435,19 @@ module m_iterative_solvers
     !!  rhs            = Right-hand side vector of the linear system.
     !!  gmres_maxiter  = Maximum number of iterations for the GMRES algorithm.
     !!  gmres_rtol     = Relative tolerance for convergence.
+    !!  verbose        = Logical, if true, print residuals at each iteration.
     !!
     !! INPUT/OUTPUTS
     !!  est            = Initial guess for the solution vector, updated with the computed solution.
     !!
     !! SOURCE
-    subroutine call_gmresm(n, matvec, est, rhs, gmres_maxiter, gmres_rtol)
+    subroutine call_gmresm(n, matvec, est, rhs, gmres_maxiter, gmres_rtol, verbose)
         !Arguments ------------------------------------
         integer, intent(in) :: n, gmres_maxiter
         real(dp), intent(in) :: gmres_rtol
-        real(dp),intent(in) :: rhs(n)
-        real(dp),intent(inout) :: est(n)
+        real(dp), intent(in) :: rhs(n)
+        logical, intent(in) :: verbose
+        real(dp), intent(inout) :: est(n)
         interface
             subroutine matvec(n_, x, y)
                 integer, intent(in) :: n_
@@ -466,7 +468,7 @@ module m_iterative_solvers
         del = 0
         its = gmres_maxiter  ! No restart
         info = 0
-        if (xmpi_comm_rank(xmpi_world) == 0) then
+        if (xmpi_comm_rank(xmpi_world) == 0 .and. verbose) then
             info = 1        ! Print residuals only on master
         end if
         call gmresm(m, n, est, rhs, matvec, psolve, dotprd, h, v, res, del, its, info)
@@ -509,11 +511,12 @@ module m_iterative_solvers
     !!  est            = Initial guess for the solution vector, updated with the computed solution.
     !!
     !! SOURCE
-    subroutine gmres_linear_solver(n, matvec, rhs, est, gmres_maxiter, gmres_rtol)
+    subroutine gmres_linear_solver(n, matvec, rhs, est, gmres_maxiter, gmres_rtol, verbose)
         !Arguments ------------------------------------
         integer, intent(in) :: n, gmres_maxiter
         real(dp), intent(in) :: gmres_rtol
         real(dp), intent(in) :: rhs(n)
+        logical :: verbose
         real(dp), intent(inout) :: est(n)
         interface
             subroutine matvec(n_, x, y)
@@ -530,7 +533,7 @@ module m_iterative_solvers
         call call_FGMRES(n, matvec, rhs, est, gmres_maxiter, gmres_rtol)
 #else
         write(6,*)'    gmresm'; flush(6) !DEBUG
-        call call_gmresm(n, matvec, est, rhs, gmres_maxiter, gmres_rtol)
+        call call_gmresm(n, matvec, est, rhs, gmres_maxiter, gmres_rtol, verbose)
 #endif
       
     end subroutine gmres_linear_solver

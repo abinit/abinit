@@ -953,6 +953,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'precon_tsmear',tread,'DPR')
  if(tread==1) dtset%precon_tsmear=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'precon_verbose',tread,'INT')
+ if(tread==1) dtset%precon_verbose=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prepalw',tread,'INT')
  if(tread==1) dtset%prepalw=intarr(1)
 
