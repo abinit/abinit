@@ -586,6 +586,7 @@ type, public :: dataset_type
  integer :: posnstep
  integer :: ppmodel = 1
  integer :: precon_ls_maxite = 20
+ integer :: precon_verbose = 0
  integer :: prepalw
  integer :: prepanl
  integer :: prepgkk = 0

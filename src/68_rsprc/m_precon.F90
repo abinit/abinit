@@ -109,6 +109,8 @@ module m_precon
         real(dp), allocatable :: precomputed_psii(:, :, :, :)
         integer, allocatable :: precomputed_psii_indices(:, :, :)
 
+        !Preconditioner parameters
+        integer :: precon_verbose
         !Linear solver parameters
         integer :: linsolve_maxiter
         real(dp) :: linsolve_rtol, ridge_param
@@ -140,7 +142,7 @@ contains
     ! - non col with band paral
     ! - non coll : what spin representations are use for : kxc (dfpt_mkvxc_noncoll), prcref.
     ! - LOBPCG : loop over blocks
-    ! - write actual logs that can be controlled by an input param (ex precon_verbose?)
+    ! - __ok__write actual logs that can be controlled by an input param (ex precon_verbose?)
     ! - in chkinp : forbid iprcel that need kxc + noncoll + not LSDA
     ! - TODO : check places where it is assumed that nspinor=2 => nspden=4 and nsppol=2 => nspden=2
     !                                       on peut avoir nspden=1 dans les deux cas.
@@ -214,7 +216,7 @@ contains
         real(dp), intent(in), target :: ylm(:, :)
 
         ! *************************************************************************
-        write(6,*)'chi0diel precon%init'; flush(6) !DEBUG
+        if (this%precon_verbose>1) call wrtout(std_out, 'precon%init')
 
         this%iprcel = dtset%iprcel
         this%use_precon = .false.
@@ -342,6 +344,8 @@ contains
                 end if
             end if
 
+            !Preconditioner parameters
+            this%precon_verbose = dtset%precon_verbose
             !Linear solver parameters
             this%linsolve_maxiter = dtset%precon_ls_maxite
             this%linsolve_rtol = dtset%precon_ls_rtol
@@ -391,7 +395,7 @@ contains
         real(dp), intent(in), target :: kxc(:, :)
 
         ! *************************************************************************
-        write(6,*)'chi0diel precon%init_kxc'; flush(6) !DEBUG
+        if (this%precon_verbose>1) call wrtout(std_out, 'precon%init_kxc')
         if (this%use_precon) then
             if (this%use_kxc) then
                 this%kxc => kxc
@@ -426,7 +430,7 @@ contains
         integer :: ispden
 
         ! *************************************************************************
-        write(6,*)'chi0diel precon%update'; flush(6) !DEBUG
+        if (this%precon_verbose>1) call wrtout(std_out, 'precon%update')
 
         if (this%use_precon) then
             
@@ -508,7 +512,7 @@ contains
         class(precon_object), intent(inout) :: this
         
         ! *************************************************************************
-        write(6,*)'chi0diel precon%free'; flush(6) !DEBUG
+        if (this%precon_verbose>1) call wrtout(std_out, 'precon%free')
         if (this%use_precon) then
 
             if (this%use_indices_arrays) then
@@ -1010,7 +1014,7 @@ contains
         real(dp), allocatable :: Kxc_vec_r(:, :)
 
         ! *************************************************************************
-        write(6,*)'chi0diel apply_kernel'; flush(6) !DEBUG
+        if (this%precon_verbose>1) call wrtout(std_out, 'apply_kernel')
         
         ! RPA : LDOS/Kerker model - only vc
         if (.not. this%use_kxc) then
@@ -1455,7 +1459,7 @@ contains
         real(dp) :: delta_fermie
 
         ! *************************************************************************
-        write(6,*)'chi0diel apply_chi0_dfermie'; flush(6) !DEBUG
+        if (this%precon_verbose>1) call wrtout(std_out, 'apply_chi0_dfermie')
 
         ! Precompute the dot product between the ldos and vec for each spin coordinate
         delta_fermie = zero
@@ -1500,7 +1504,7 @@ contains
         real(dp), allocatable :: work_r(:, :)
         
         ! *************************************************************************
-        write(6,*)'chi0diel apply_chi0_ldos'; flush(6) !DEBUG
+        if (this%precon_verbose>1) call wrtout(std_out, 'apply_chi0_ldos')
        
         if (abs(this%tdos) > epsilon(this%tdos)) then   !Checking that tdos is not 0.
             ABI_MALLOC(work_r, (this%nfftprc, dtset%nspden))
@@ -2790,7 +2794,7 @@ contains
         real(dp), allocatable :: delta_occ(:)
         
         ! *************************************************************************
-        write(6,*)'chi0diel apply_chi0_diag'; flush(6) !DEBUG
+        if (this%precon_verbose>1) call wrtout(std_out, 'apply_chi0_diag')
        
         ABI_MALLOC(delta_occ, (size(this%eigen)))
         call compute_delta_occ(this, dtset, mpi_enreg, vec_r, delta_occ)
@@ -2984,7 +2988,6 @@ contains
         real(dp), allocatable :: delta_occ(:), delta_wf(:, :)
         
         ! *************************************************************************
-        write(6,*)'chi0diel apply_chi0_quasidiag'; flush(6) !DEBUG
        
         ABI_MALLOC(delta_occ, (size(this%eigen)))
         ABI_MALLOC(delta_wf, (2, size(this%cg, 2)))
@@ -3031,7 +3034,7 @@ contains
         integer :: ispden
         
         ! *************************************************************************
-        write(6,*)'chi0diel apply_chi0'; flush(6) !DEBUG
+        if (this%precon_verbose>1) call wrtout(std_out, 'apply_chi0')
        
         !Kerker with user_defined parameter dielng
         if (this%iprcel == 201) then
@@ -3102,7 +3105,7 @@ contains
         real(dp), allocatable :: chi0_kxc_rho_r(:, :)
         
         ! *************************************************************************
-        write(6,*)'chi0diel apply_adjdielmat'; flush(6) !DEBUG
+        if (this%precon_verbose>1) call wrtout(std_out, 'apply_adjdielmat')
         if (this%use_precon) then
 
             if (this%iprcel == 200) then
@@ -3200,7 +3203,7 @@ contains
         real(dp), allocatable :: kxc_chi0_v_r(:, :), chi0_v_r(:, :)
         
         ! *************************************************************************
-        write(6,*)'chi0diel apply_dielmat'; flush(6) !DEBUG
+        if (this%precon_verbose>1) call wrtout(std_out, 'apply_dielmat')
         if (this%use_precon) then
 
             if (this%iprcel == 200) then
@@ -3356,22 +3359,20 @@ contains
             !est = rhs
 
             !3) Resolution of the linear system :
-            write(6,*)'chi0diel linsolve : '; flush(6) !DEBUG
+            if (this%precon_verbose>0) call wrtout(std_out, '| chi0diel preconditioning - Linear Solver:')
             if (this%use_ridgereg) then
-                write(6,*)'chi0diel linsolve with CG'; flush(6) !DEBUG
                 ! P is ill-conditionned :
                 ! Ridge/Tikhonov regularization and CG : 
                 ! We solve (P^*P + ridge_param*I) * est = P * rhs
                 ! (P^*P + ridge_param*I) is self-adjoint and can be solved with CG.
                 ABI_MALLOC(P_rhs, (n))
                 call matvec(n, rhs, P_rhs)  ! TODO apply P_adj !!!
-                call cg_linear_solver(n, ridge_matvec, P_rhs, est, (this%linsolve_maxiter-1)/2+1, this%linsolve_rtol)
+                call cg_linear_solver(n, ridge_matvec, P_rhs, est, (this%linsolve_maxiter-1)/2+1, this%linsolve_rtol, this%precon_verbose>0)
                 ABI_FREE(P_rhs)
             else
                 ! P is well conditionned :
                 ! GMRES (P is not self-adjoint)
-                write(6,*)'chi0diel linsolve with GMRES'; flush(6) !DEBUG
-                call gmres_linear_solver(n, matvec, rhs, est, this%linsolve_maxiter, this%linsolve_rtol)
+                call gmres_linear_solver(n, matvec, rhs, est, this%linsolve_maxiter, this%linsolve_rtol, this%precon_verbose>0)
 
             end if
 
