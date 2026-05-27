@@ -8690,7 +8690,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
          call cgtk_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, nspinor, ndat1, &
                           desc_ki%npw, desc_ki%gvec, &
                           npw_k, kg_k, desc_ki%istwfk, istwf_k, cg1_ibz, cg2_ptr, work_ngfft, work)
-          ug_ksum(:) = ug_ksum_dp(:)
+         ug_ksum(:) = ug_ksum_dp(:)
        end if
 
        call fft_ug(npw_k, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_k, kg_k, gbound_ksum, ug_ksum, ur_ksum)
