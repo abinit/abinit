@@ -2859,8 +2859,12 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
    iband_me = iband_me + 1
 
 !  Get ground-state and first-order wavefunctions
-   cwave0(:,:)=cg(:,1+(iband_me-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg)
-   cwavef(:,:)=cg1(:,1+(iband_me-1)*npw1_k*nspinor+icg1:iband*npw1_k*nspinor+icg1)
+!  Use the LOCAL band index (iband_me) for both slice bounds. Mixing the global
+!  band index (iband) on the upper bound caused an out-of-bounds read of cg/cg1
+!  and a segfault whenever DFPT band parallelism was active (npband>1), which
+!  ABINIT auto-selects in many strain-response runs even with paral_kgb=0.
+   cwave0(:,:)=cg(:,1+(iband_me-1)*npw_k*nspinor+icg:iband_me*npw_k*nspinor+icg)
+   cwavef(:,:)=cg1(:,1+(iband_me-1)*npw1_k*nspinor+icg1:iband_me*npw1_k*nspinor+icg1)
 
 !  Double loop over strain perturbations
    do ipert1=natom+3,natom+4
