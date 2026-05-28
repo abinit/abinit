@@ -1277,7 +1277,7 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
 !scalars
  integer :: gmax,idir1,idir2,idir3,idir4,ibz1,ibz2,ibz3,ipert1,ipert2,inner_thick,ndir,mdir
  real(dp) :: detdlt, delta_perp, lambda, dielt_perp,dielt_perp1,dielt_perp2, eta,eta1,xi, dielt_eff
- real(dp) :: dielt_eff1,dielt_eff2, norm_kvec, phi 
+ real(dp) :: dielt_eff1,dielt_eff2, norm_kvec, norm_kvec0, phi 
  real(dp) :: ewald_fun, ewald_fun1, ewald_fun2, rflct_coeff, out_thick
  real(dp) :: rflct_coeff1, rflct_coeff2, rprimd_perp, gprimd_perp
  real(dp) :: fac_erfc, fac_ewald1, fac_ewald2, fac_ewald2b,fac_exp
