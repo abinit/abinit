@@ -444,7 +444,6 @@ subroutine invars9(dtset, lenstr, natom, string)
  dtset%dielt_thick(:) = 0
  call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'dielt_thick',tread, 'DPR')
  if(tread == 1) dtset%dielt_thick(:) = dprarr(1:2)
- print *, dtset%dielt_thick
  if(dtset%dielt_thick(1) < zero)then
    write(message, '(a, es14.4, 3a)' )&
    'dielt_thick is ',dtset%dielt_thick(1), ', which is lower than 0 .',ch10, &

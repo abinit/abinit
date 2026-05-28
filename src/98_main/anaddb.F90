@@ -197,7 +197,7 @@ program anaddb
 
 ! Acoustic Sum Rule call 
  if (dtset%flexoflag == 1 .and. dtset%asr == 6) then
-    call driver%get_dcdq(dtset, crystal, ddb, ddb_lw, ddb_hdr)
+    call driver%get_dcdq(dtset, ddb, ddb_lw, ddb_hdr)
     write(msg, '(a, a)' )' IFCs derivatives read',ch10
    call wrtout(units, msg)
  end if

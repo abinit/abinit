@@ -1118,7 +1118,7 @@ subroutine ifc_get_dcdq(ifc, cryst, dcdq, dcdqdq, comm)
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,jj, mu, kk ,ind
+ integer :: ii,jj, mu, kk
  real(dp) :: qpt(3)
 !arrays
  real(dp) :: dyntmp(2,3,cryst%natom,3,cryst%natom)
