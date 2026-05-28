@@ -47,7 +47,7 @@ outdata_prefix = "t48o"
 #%%   iw_cp t48.ddb.abo t48.ddb.abo
 #%% [files]
 #%% files_to_test =
-#%%  t48.abo, tolnlines = 0,  tolabs=  1.2e-01, tolrel= 1.1
+#%%  t48.abo, tolnlines = 0,  tolabs=  1.2e-07, tolrel= 1.1
 #%% [paral_info]
 #%%  max_nprocs = 1
 #%% [extra_info]

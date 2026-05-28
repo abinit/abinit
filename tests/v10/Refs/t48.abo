@@ -1,6 +1,5 @@
-
-.Version 10.7.2.1 of ANADDB. v10.7.1 released Mar 2026.
-.(MPI version, prepared for a x86_64_linux_gnu11.4 computer) 
+.Version 10.3.4.5 of ANADDB. v10.8.1 released May 2026.
+.(sequential version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +13,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 21 May 2026.
-- ( at 14h42 )
+.Starting date : Wed 27 May 2026.
+- ( at 20h13 )
   
 
 ================================================================================
@@ -167,7 +166,7 @@ Converted dielectric tensor  3.46010878E+00  -4.83977817E-16    0.00000000E+00  
   1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
  Symmetry characters of vibration mode #   5
         degenerate with vibration mode #   6
-  2.0 -0.0 -1.0  0.0 -1.0  0.0  2.0 -0.0 -1.0  0.0 -1.0  0.0
+  2.0  0.0 -1.0  0.0 -1.0 -0.0  2.0  0.0 -1.0  0.0 -1.0 -0.0
 
   Phonon wavevector (reduced coordinates) :  0.00833  0.00833  0.00000
  Phonon energies in Hartree :
@@ -180,7 +179,7 @@ Converted dielectric tensor  3.46010878E+00  -4.83977817E-16    0.00000000E+00  
    in atomic units:     0.1642532377E-03
    in units km/s:              0.35934
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.6998259380E-04
+   in atomic units:     0.6998259379E-04
    in SI units K  :             22.09876
 
  Speed of sound for this q and mode:
@@ -1698,10 +1697,10 @@ Converted dielectric tensor  3.46010878E+00  -4.83977817E-16    0.00000000E+00  
 -  7.925363E-01  2.678927E+01  4.377391E+01  8.246511E+02  1.388760E+03
 -  1.411555E+03
  Speed of sound for this q and mode:
-   in atomic units:     0.1637946388E-03
+   in atomic units:     0.1637946387E-03
    in units km/s:              0.35833
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.6978720074E-04
+   in atomic units:     0.6978720072E-04
    in SI units K  :             22.03706
 
  Speed of sound for this q and mode:
@@ -1737,12 +1736,12 @@ Converted dielectric tensor  3.46010878E+00  -4.83977817E-16    0.00000000E+00  
   1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
  Symmetry characters of vibration mode #   5
         degenerate with vibration mode #   6
-  2.0 -0.0 -1.0  0.0 -1.0  0.0  2.0 -0.0 -1.0  0.0 -1.0  0.0
+  2.0  0.0 -1.0  0.0 -1.0 -0.0  2.0  0.0 -1.0  0.0 -1.0 -0.0
 -
 - Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
 
 ================================================================================
 
-+Total cpu time      0.192  and wall time      0.227 sec
++Total cpu time      0.160  and wall time      0.160 sec
 
  anaddb : the run completed successfully.
