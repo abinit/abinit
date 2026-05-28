@@ -142,7 +142,6 @@ contains
     ! - non col with band paral
     ! - non coll : what spin representations are use for : kxc (dfpt_mkvxc_noncoll), prcref.
     ! - LOBPCG : loop over blocks
-    ! - __ok__write actual logs that can be controlled by an input param (ex precon_verbose?)
     ! - in chkinp : forbid iprcel that need kxc + noncoll + not LSDA
     ! - TODO : check places where it is assumed that nspinor=2 => nspden=4 and nsppol=2 => nspden=2
     !                                       on peut avoir nspden=1 dans les deux cas.
@@ -2019,7 +2018,7 @@ contains
                         call prep_fourwf(dummy_denpot, blocksize, this%cg(:, i_cg_ibandblock1(1):i_cg_ibandblock2(2)),    &
                         &           psii_aug(:, :, :, 1:n6*ndat), iblock, dtset%istwfk(ikpt), dtset%mgfft, mpi_enreg, nband_k,      &
                         &           ndat, dtset%ngfft, this%npwarr(ikpt),                                       &
-                        &           n4, n5, n6, dummy_occ_k, option_fourwf, this%ucvol, dtset%wtk(ikpt))
+                        &           n4, n5, n6, dummy_occ_k, option_fourwf, this%ucvol, dtset%wtk(ikpt), nfft_blocks) ! TODO 1-> nfft_blocks
 
                         ABI_FREE(dummy_occ_k)
                         !ABI_FREE(dummy_denpot)
@@ -2219,7 +2218,7 @@ contains
                         call prep_fourwf(dummy_denpot, blocksize, this%cg(:, i_cg_ibandblock1(1):i_cg_ibandblock2(2)),    &
                         &           psii_aug, iblock, dtset%istwfk(ikpt), dtset%mgfft, mpi_enreg, nband_k,      &
                         &           ndat, dtset%ngfft, this%npwarr(ikpt),                                       &
-                        &           n4, n5, n6, dummy_occ_k, option_fourwf, this%ucvol, dtset%wtk(ikpt))
+                        &           n4, n5, n6, dummy_occ_k, option_fourwf, this%ucvol, dtset%wtk(ikpt), 1) ! TODO 1-> nfft_blocks
 
                         ABI_FREE(dummy_occ_k)
                         ABI_FREE(dummy_denpot)
