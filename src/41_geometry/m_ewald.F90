@@ -1366,7 +1366,7 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
  ! The dielectric tensor must be diagonal in the confined direction
  rprimd_para = zero ; rprimd_perp = zero
  dielt_para = zero ; dielt_perp = zero
- invdlt_para = zero
+ invdlt_para = zero ; gprimd_para = zero
  ndir=0
  do idir1=1,3
  if (periodic_dir(idir1)==1) then
@@ -1395,6 +1395,7 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
  else
          dielt_para(ndir,mdir) = dielt(idir1,idir2)
          rprimd_para(ndir,mdir)=rprimd(idir1,idir2)
+         gprimd_para(ndir,mdir) = gprimd(idir1,idir2)
          invdlt_para(ndir,mdir)=invdlt(idir1,idir2)
          qdrp_parapara(ndir,mdir,:,:) = qdrp_cart(idir1,idir2,:,:)
  end if
@@ -1467,13 +1468,6 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
  call wrtout([ab_out,std_out], msg)
  end if
  
- ndir=0
- do idir1=1,3
- if (periodic_dir(idir1)==1) then
-         ndir=ndir+1
-         gprimd_para(ndir,:) = gprimd(ndir,1:2)
- end if
- end do
  dyew_rec = zero
  ! If one dielectric slab model, same dielectric for both regions
  ! Otherwise, inner dielectric ~1 and the other has been computed
