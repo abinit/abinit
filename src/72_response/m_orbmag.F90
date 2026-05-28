@@ -1502,6 +1502,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
        end do
 
        do np = 1, nband_k
+         if (np.EQ.nn) cycle
          if (occ_k(np).LT.tol8) cycle
          bra => cg_k(1:2,(np-1)*npwsp+1:np*npwsp)
          gpdot=cg_zdotc(npwsp,bra,svectoutg); gpdotc=CMPLX(gpdot(1),gpdot(2))
