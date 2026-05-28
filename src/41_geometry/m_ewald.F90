@@ -1275,21 +1275,22 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
  
 !Local variables -------------------------
 !scalars
- integer :: gmax,idir1,idir2,idir3,idir4,ibz1,ibz2,ibz3,ipert1,ipert2,inner_thick,ndir,mdir, rmax, rmax2
+ integer :: gmax,idir1,idir2,idir3,idir4,ibz1,ibz2,ibz3,ipert1,ipert2,inner_thick,ndir,mdir
  real(dp) :: detdlt, delta_perp, lambda, dielt_perp,dielt_perp1,dielt_perp2, eta,eta1,xi, dielt_eff
- real(dp) :: dielt_eff1,dielt_eff2, norm_kvec, phi, qdrp_ctrcted, qdrp_ctrcted2
- real(dp) :: ewald_fun, ewald_fun1, ewald_fun2, norm_real, rflct_coeff, out_thic, out_thick
- real(dp) :: rflct_coeff1, rflct_coeff2, rprimd_perp, gprimd_perp, inv_qdrp, inv_qdrp2
- real(dp) :: fac_erfc, fac_ewald1, fac_ewald2, fac_ewald2b,fac_exp, fac_exp1, trans_fun, fac_gauss, fac_mirror, fac_mirror1, fac_real
- real(dp) :: mean2_perp, mirror_diff, mirror_parapara, mirror_paraperp, mirror_perpperp, mirror_perpperp1
- real(dp) :: rvec_norm, sqrt_norm, ucsurf, xmean, sign_dip, sign_dip2
+ real(dp) :: dielt_eff1,dielt_eff2, norm_kvec, phi 
+ real(dp) :: ewald_fun, ewald_fun1, ewald_fun2, rflct_coeff, out_thick
+ real(dp) :: rflct_coeff1, rflct_coeff2, rprimd_perp, gprimd_perp
+ real(dp) :: fac_erfc, fac_ewald1, fac_ewald2, fac_ewald2b,fac_exp
+ real(dp) :: fac_exp1, trans_fun, fac_gauss, fac_mirror, fac_mirror1, fac_real
+ real(dp) :: mean2_perp, mirror_diff, mirror_parapara, mirror_paraperp, mirror_perpperp
+ real(dp) :: rvec_norm, sqrt_norm, ucsurf, xmean
  logical, save :: firstcall = .TRUE.
 !arrays
  integer :: periodic_dir(3)
  real(dp) :: dyew_real(2,3,natom,3,natom),dyew_rec(2,3,natom,3,natom),kvec(2),invdlt_para(2,2)
- real(dp) :: rprimd_para(2,2), gprimd_para(2,2), gvec(2),kvec_dielt(2,2)
- real(dp) :: norm_dielt(2), dielt_para(2,2), invdlt(3,3), inv2_qdrp(3,3), inv2_qdrp2(3,3),qvec(3), qvec_para(2)
- real(dp) :: diff_xcart(3), diff_xcart2(3),xcart_para(2,natom),xcart_perp(natom),fun_real(3), fun_real2(3)
+ real(dp) :: rprimd_para(2,2), gprimd_para(2,2), gvec(2)
+ real(dp) :: norm_dielt(2), dielt_para(2,2), invdlt(3,3), qvec(3), qvec_para(2)
+ real(dp) :: diff_xcart(3), xcart_para(2,natom),xcart_perp(natom)
  real(dp) :: kvec_para(2),zeff_para(2,3,natom), zeff_perp(3,natom)
  real(dp) :: xcart(3,natom), rprimd(3,3), gprimd(3,3), rvec_dielt(3)
  real(dp) :: qdrp_parapara(2,2,3,natom),qdrp_perpperp(3,natom), qdrp_paraperp(2,3,natom)
@@ -1331,7 +1332,7 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
  else
          zeff_perp(:,:) = zeff(idir1,:,:)
          xcart_perp(:) = xcart(idir1,:)
-         if (qvec(idir1)>tol6) then
+         if (qvec(idir1)>tol6) then !Check if phonon mode is not out-of-plane
                  write(msg, '(a,es16.6,5a)')&
                          'The phonon wavevector along the confined direction is',qvec(idir1),' 1/Bohr >1.0d-6',ch10,&
                          'The phonon wavevector should be purely along the periodic direction', ch10, &
@@ -1378,7 +1379,7 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
  end if
  if ((periodic_dir(idir1)==1 .and. periodic_dir(idir2)==0) .or. &
          (periodic_dir(idir1)==0 .and. periodic_dir(idir2)==1)) then
-         if (abs(dielt(idir1,idir2))>tol6 .or. abs(rprimd(idir1,idir2))>tol6) then
+         if (abs(dielt(idir1,idir2))>tol6 .or. abs(rprimd(idir1,idir2))>tol6) then !No cross in-plane out-of-plane are allowed
                  write(msg, '(7a)' )&
                          'The dielectric matrix shows off-diagonal components in the confined direction larger than 1d-6',ch10,&
                          'This is forbidden when considering the Ewald summation for 2D systems. Please check if your', ch10, &
@@ -1441,7 +1442,7 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
  ! reciprocal summation are related to the complementary error function. We want to restrict the real-part to
  ! the first Wigner cell. We use the fact that sqrt(1-e^{-x^2}) < erf(x) < sqrt(1-e^{-4x^2/pi})
  ! and invert those relationships to estimate the broadening required  to restrict the real-part summation of
- !the Ewald summation; here fixes the threshold to 1e-6 for contribution from later unit cells
+ !the Ewald summation; here fixes the threshold to 1e-9 for contribution from later unit cells
  rvec_dielt = zero
  ndir=0
  do idir1=1,2
@@ -1489,15 +1490,16 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
      kvec(:) = gvec(:) + qvec_para(:)
      kvec(:) = kvec(:)*two_pi
      kvec_para(:) = matmul(dielt_para,kvec)
+     norm_kvec0 = dot_product(kvec,kvec)
      norm_kvec = dot_product(kvec,kvec_para)
      if (abs(norm_kvec)>tol6) then !Remove G=q=0 case
         eta = dsqrt(norm_kvec/dielt_perp)
         eta1 = dsqrt(norm_kvec/dielt_perp1)
         xi = dsqrt(norm_kvec/dielt_perp2)
         ! Effective dielectric constants (depends on direction)
-        dielt_eff = dsqrt(norm_kvec*dielt_perp/dot_product(kvec,kvec))
-        dielt_eff1 = dsqrt(norm_kvec*dielt_perp1/dot_product(kvec,kvec))
-        dielt_eff2 = dsqrt(norm_kvec*dielt_perp2/dot_product(kvec,kvec))
+        dielt_eff = dsqrt(norm_kvec*dielt_perp/norm_kvec0)
+        dielt_eff1 = dsqrt(norm_kvec*dielt_perp1/norm_kvec0)
+        dielt_eff2 = dsqrt(norm_kvec*dielt_perp2/norm_kvec0)
         ! Reflection coefficient at the dielectric interfaces
         rflct_coeff = (dielt_eff-dielt_env)/(dielt_eff+dielt_env)
         rflct_coeff2 = (dielt_eff2-dielt_env)/(dielt_eff2+dielt_env)
@@ -1577,7 +1579,7 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
                     *ewald_fun2/eta1/dielt_perp1*cos(phi)
             ! Third, add the source charge (gerade ungerade)
             ! For sake of consistenty, only used when there is only one dielectric thickness
-            if (inner_thick <tol6) then
+            if (inner_thick <tol6) then 
             dyew_rec(1,idir1,ipert1,idir2,ipert2)= dyew_rec(1,idir1,ipert1,idir2,ipert2)-&
                     (rho_gerade1(1)*rho_ungerade2(1)+rho_ungerade1(1)*rho_gerade2(1)&
                     +rho_gerade1(2)*rho_ungerade2(2)+rho_ungerade1(2)*rho_gerade2(2)) &

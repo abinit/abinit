@@ -6037,8 +6037,8 @@ subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,sys
  character(len=500) :: msg,msg2
  integer :: bool_kdir(3), bool_ldir(3)
 !arrays
- real(dp) :: tmp,tmp2,tmp3,Levi_Civita(3,3,3), d2dqdqcart(3,natom,3,natom,3,3)
- real(dp) :: d2dqred(3,natom,3,natom,3),d2dqdqred(3,natom,3,natom,3,3),d2tmp(2,3,natom,3,natom)
+ real(dp) :: tmp,tmp2,Levi_Civita(3,3,3), d2dqdqcart(3,natom,3,natom,3,3)
+ real(dp) :: d2dqred(3,natom,3,natom,3),d2dqdqred(3,natom,3,natom,3,3)
  real(dp),allocatable :: msr(:,:,:),msr_init(:,:,:)
  real(dp),allocatable :: d2cart_vec(:),rcond(:,:),cond(:)
  real(dp),allocatable :: mat_tmp(:,:),mat_tmp2(:,:),mat_tmp3(:,:),d2cart_sol(:),umat(:,:),vtmat(:,:)
@@ -6257,8 +6257,8 @@ subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,sys
  ! To compute the pseudoinverse, product of the singular matrix with its inverse
  do ipert1=1,min(nrow,ncol)
    sing1(ipert1,ipert1) = sing(ipert1)
-   if (sing(ipert1)>1d-12) then
-     sing2(ipert1,ipert1) = 1d0/sing(ipert1)
+   if (sing(ipert1)>tol12) then ! Avoids numerical problems
+     sing2(ipert1,ipert1) = 1_dp/sing(ipert1)
    end if
  end do
 
@@ -6358,6 +6358,7 @@ subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,sys
  ABI_FREE(msr_init)
  ABI_FREE(d2cart_vec)
  ABI_FREE(d2cart_sol)
+ ABI_FREE(vtmat)
  ABI_FREE(cond)
  ABI_FREE(rcond)
 
@@ -6406,11 +6407,11 @@ subroutine msria_apply(asr,d2asr,d2dqmsr,d2dqdqmsr,d2cart,mpert,natom,qphon,crys
 !Local variables-------------------------------
 !scalars
  integer :: idir1,idir2,ipert1,ipert2,idir3,idir4,idir5,ii,jj
- integer :: kk,tiat,tjat,isym,indij(natom,natom),indij2(natom,natom,3)
- integer :: isgn, itirev, symq(4,2,crystal%nsym), timrev 
- real(dp) :: tol=1d-4, qsym(3), qsym2(3), symcart(3,3,crystal%nsym),arg1,arg2
+ integer :: tiat,tjat,isym,indij(natom,natom),indij2(natom,natom,3)
+ integer :: isgn, itirev 
+ real(dp) :: qsym(3), qsym2(3), symcart(3,3,crystal%nsym),arg1,arg2
  real(dp) :: re,im,re2,im2,sumr,sumi
- real(dp) :: d2tmp(2,3,mpert,3,mpert),pert(2,3,natom,3,natom,2*crystal%nsym)
+ real(dp) :: pert(2,3,natom,3,natom,2*crystal%nsym)
  real(dp) :: pert2(2,3,natom,3,natom,2*crystal%nsym,3), Levi_Civita(3,3,3)
 ! *********************************************************************
  if (asr/=6) return
@@ -6436,7 +6437,6 @@ subroutine msria_apply(asr,d2asr,d2dqmsr,d2dqdqmsr,d2cart,mpert,natom,qphon,crys
  pert = zero;  pert2 = zero
  indij = 0 ; indij2 = 0
  ! Need to loop over symmetries to properly impose rotational invariance
- !call littlegroup_q(crystal%nsym,qphon(:,1),symq,crystal%symrec,crystal%symafm,timrev,prtvol=0)
  do isym=1,crystal%nsym
    do itirev=1,2  ! loop over the time-reversal symmetry
      isgn=3-2*itirev
