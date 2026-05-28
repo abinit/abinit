@@ -1021,6 +1021,9 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  ABI_FREE(rdisplsloc)
 
 #ifdef HAVE_OPENMP_OFFLOAD
+ if(present(cwavef_tr)) then
+   !$OMP TARGET UPDATE FROM(cwavef_alltoall2) IF(hamk%gpu_option==ABI_GPU_OPENMP)
+ end if
  !$OMP TARGET EXIT DATA MAP(delete:cwavef_alltoall2) IF(hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 
