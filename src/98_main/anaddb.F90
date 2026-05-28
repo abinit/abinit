@@ -266,7 +266,7 @@ program anaddb
 
 ! Interatomic force constants
  if (driver%do_ifc) then
-   call driver%interatomic_force_constants(Ifc, dtset, crystal, ddb, ana_ncid, asrq0, comm)
+   call driver%interatomic_force_constants(Ifc, dtset, crystal, ddb, ana_ncid, comm)
    if (dtset%flexoflag /= 1 .and. dtset%asr == 6) then
      write(msg, '(a, a)' )' IFCs derivatives computed from real-space moment',ch10
      call wrtout(units, msg)

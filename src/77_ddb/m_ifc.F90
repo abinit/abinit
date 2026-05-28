@@ -1104,27 +1104,26 @@ end subroutine ifc_fourq
 !!
 !! SOURCE
 
-subroutine ifc_get_dcdq(ifc, cryst, dcdq, dcdqdq, dyewq0, dipdip, comm)
+subroutine ifc_get_dcdq(ifc, cryst, dcdq, dcdqdq, comm)
 
 !Arguments ------------------------------------
 !scalars
  class(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: cryst
- integer,intent(in) :: comm, dipdip
+ integer,intent(in) :: comm!, dipdip
 !arrays
  real(dp), intent(inout) :: dcdq(3,cryst%natom,3,cryst%natom,3)
  real(dp), intent(out) :: dcdqdq(3,cryst%natom,3,3,3)
- real(dp), intent(in) :: dyewq0(cryst%natom,3,cryst%natom,3)
+ !real(dp), intent(in) :: dyewq0(cryst%natom,3,cryst%natom,3)
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,jj, mu, kk, ll,mm,nn,ind
+ integer :: ii,jj, mu, kk ,ind
  real(dp) :: qpt(3)
 !arrays
  real(dp) :: dyntmp(2,3,cryst%natom,3,cryst%natom)
  real(dp) :: dcdqcan(2,3,cryst%natom,3,cryst%natom,3)
  real(dp) :: dcdqred(2,3,cryst%natom,3,cryst%natom,3)
- real(dp) :: qtmp(3), dyew_tmp(2,3,cryst%natom,3,cryst%natom)
 ! ************************************************************************
 
  ABI_UNUSED((/comm/))
@@ -1137,9 +1136,6 @@ subroutine ifc_get_dcdq(ifc, cryst, dcdq, dcdqdq, dyewq0, dipdip, comm)
  ! atoms coordinates in other unit cells)
  ! Only a phase shift, but since we look at the derivative, this also have a contribution here
  call ftifc_r2q(ifc%atmfrc,dyntmp, ifc%gprim, cryst%natom, 1, ifc%nrpt, ifc%rpt, qpt, ifc%wghatm, comm)
- do mu=1,cryst%natom
-   print *, ifc%trans(:,mu)
- end do
  ! Move to reduced coordinates
  do ii= 1,3
    do jj=1,3

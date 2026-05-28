@@ -2428,7 +2428,7 @@ some slight symmetry breaking effects. The latter can be bypassed by this additi
         added_in_version="v10",
         text=r"""
   Control the dimensionaility of the problem when rotational invariance is imposed on the interatomic force constants
-  [[anaddb:asr==6]] AND/OR when long-range electrostatics IFCs of 2D materials are considered (in this case,
+  [[anaddb:asr]]==6 AND/OR when long-range electrostatics IFCs of 2D materials are considered (in this case,
   only available with [[anaddb:sys_dim]]<5, but both for [[anaddb:dipdip]] and [[anaddb:quadquad]]). Currently, only
   possible to consider [[anaddb:dipquad]] and [[anaddb:quadquad]] interactions at the same time.
 

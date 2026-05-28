@@ -6394,19 +6394,19 @@ end subroutine msria_calc
 !!
 !! SOURCE
 
-subroutine msria_apply(asr,d2asr,d2dqmsr,d2dqdqmsr,d2cart,mpert,natom,qphon,crystal)
+subroutine msria_apply(asr,d2asr,d2dqmsr,d2cart,mpert,natom,qphon,crystal)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: asr,mpert,natom
  type(crystal_t),intent(in) :: crystal
 !arrays
- real(dp),intent(in) :: d2dqmsr(3,natom,3,natom,3), d2dqdqmsr(3,natom,3,natom,3,3)
+ real(dp),intent(in) :: d2dqmsr(3,natom,3,natom,3)!, d2dqdqmsr(3,natom,3,natom,3,3)
  real(dp),intent(in) :: d2asr(2,3,natom,3,natom), qphon(3,3)
  real(dp),intent(inout) :: d2cart(2,3,mpert,3,mpert)
 !Local variables-------------------------------
 !scalars
- integer :: idir1,idir2,ipert1,ipert2,idir3,idir4,idir5,ii,jj
+ integer :: idir1,idir2,ipert1,ipert2,idir3,ii,jj
  integer :: tiat,tjat,isym,indij(natom,natom),indij2(natom,natom,3)
  integer :: isgn, itirev 
  real(dp) :: qsym(3), qsym2(3), symcart(3,3,crystal%nsym),arg1,arg2

@@ -1439,7 +1439,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,ddb_version,intstrn,lattflex
 !!
 !! SOURCE
 
-subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1,phi2,natom)
+subroutine ddb_phi1(ddb,ddb_lw,ddb_version,filnamddb,phi1,phi2,natom)
 
  implicit none
 
@@ -1447,7 +1447,6 @@ subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1,phi2,natom)
 !scalars
  integer,intent(in) :: ddb_version, natom
  class(ddb_type),intent(in) :: ddb,ddb_lw
- type(crystal_t),intent(in) :: crystal
  character(len=fnlen) :: filnamddb
 !arrays
  real(dp), intent(out) :: phi1(3,natom,3,natom,3)
@@ -1456,7 +1455,6 @@ subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1,phi2,natom)
 !Local variables-------------------------------
  integer,parameter :: cvrsio8=20100401
  integer :: iblok,istrs,strsd1,strsd2,strst,strsd,qvecd
- logical :: intstrn_only,iwrite
  character(len=500) :: msg
 
 !arrays

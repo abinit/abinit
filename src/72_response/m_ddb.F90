@@ -4411,7 +4411,7 @@ subroutine asrq0_init(asrq0, ddb,  asr, rftyp, crystal, sys_dim, dcdq, dcdqdq)
 !Local variables-------------------------------
 !scalars
  integer :: dims,iblok
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp) :: qphnrm(3),qphon(3,3)
@@ -4812,7 +4812,7 @@ subroutine asrq0_apply(asrq0, natom, mpert, msize, qphon, crystal, d2cart)
    ! Impose acoustic sum rule plus rotational symmetry for 0D and 1D systems
    call asrprs(asrq0%asr,2,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,d2cart,mpert,natom,crystal%xcart)
  case (6)
-   call msria_apply(asrq0%asr,asrq0%d2asr,asrq0%d2dqmsr,asrq0%d2dqdqmsr,d2cart,mpert,natom,qphon,crystal)
+   call msria_apply(asrq0%asr,asrq0%d2asr,asrq0%d2dqmsr,d2cart,mpert,natom,qphon,crystal)
  case default
    ABI_ERROR(sjoin("Wrong value for asr:", itoa(asrq0%asr)))
  end select

@@ -1824,14 +1824,13 @@ end subroutine phdos_ncwrite
 !! prefix=Prefix for output files.
 !! dielt(3,3)=dielectric tensor
 !! comm=MPI communicator
-!!  dcdq=Moment of IFCs from Fourier transform or long-wavelength driver
 !!
 !! OUTPUT
 !!  Only writing.
 !!
 !! SOURCE
 
-subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm,dcdq)
+subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
 !Arguments -------------------------------
 !scalars
@@ -1842,7 +1841,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm,dcdq)
  type(anaddb_dataset_type),target,intent(in) :: inp
  type(ddb_type),intent(in) :: ddb
  type(asrq0_t),intent(inout) :: asrq0
- real(dp),intent(in),optional :: dcdq(3,Crystal%natom,3,Crystal%natom,3)
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
