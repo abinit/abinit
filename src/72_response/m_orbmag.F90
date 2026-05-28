@@ -209,6 +209,7 @@ module m_orbmag
   private :: orbmag_vv_k
   private :: orbmag_nl_k
   private :: orbmag_nl1_k
+  private :: nonlocal_me
   private :: make_d
   private :: dterm_aij
   private :: dterm_qij
