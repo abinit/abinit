@@ -5021,7 +5021,6 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
    ! Compute dyew(2,3,natom,3,natom)= Ewald part of the dynamical matrix,
    ! second energy derivative wrt xred(3,natom) in Hartrees (Denoted A-bar in the notes)
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
-
    if (sys_dim==1) then ! 3D case
      call ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff,&
         qdrp_cart,eta,option=ewald_option,dipquad=dipquad_,quadquad=quadquad_)

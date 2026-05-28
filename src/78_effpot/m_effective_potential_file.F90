@@ -2506,7 +2506,6 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   call ifc%init(crystal,ddb,inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,&
 &   inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,effective_potential%harmonics_terms%zeff,qdrp_cart,&
 &   inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,inp%sys_dim,comm)
-
 !***************************************************************************
 ! Interpolation of the dynamical matrix for each qpoint from ifc
 !***************************************************************************
@@ -2544,7 +2543,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
     call gtdyn9(ddb%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip,ifc%dyewq0,d2cart,crystal%gmet,&
 &     ddb%gprim,mpert,natom,ifc%nrpt,qphnrm(1),qphon(:,1),crystal%rmet,ddb%rprim,ifc%rpt,&
 &     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff,qdrp_cart,ifc%ewald_option,eta,&
-&     xmpi_comm_self,ifc%asr,ifc%sys_dim,dielt_env=ifc%dielt_env,dielt_thick=ifc%dielt_thick)
+&     xmpi_comm_self,ifc%sys_dim)
 
     ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
     call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,crystal%indsym,&

@@ -92,7 +92,7 @@ MODULE m_ifc
    real(dp) :: dielt_thick(2) = zero
      ! Dielectric thickness of the 2D materials for electrostatics
 
-   integer :: sys_dim
+   integer :: sys_dim = 1
      ! System dimmensionality for electrostatic treatment + rotational invariance
 
    integer :: dipdip = -1
@@ -359,8 +359,8 @@ end subroutine ifc_free
 
 subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
                     rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
-                    prtsrlr,enunit, sys_dim,& ! TODO: TO BE REMOVED
-                    comm, &
+                    prtsrlr,enunit,& ! TODO: TO BE REMOVED
+                    sys_dim,comm, &
                     Ifc_coarse,dipquad,quadquad,dielt_env,dielt_thick,prtout) ! Optional
 
 !Arguments ------------------------------------

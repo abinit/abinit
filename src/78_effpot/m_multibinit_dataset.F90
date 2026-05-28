@@ -514,6 +514,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%strfact=100.0d0
  multibinit_dtset%strprecon=1.0d0
  multibinit_dtset%symdynmat=1
+ multibinit_dtset%sys_dim=1
  multibinit_dtset%temperature=325
  multibinit_dtset%test_effpot=0
  multibinit_dtset%test_prt_ph=0
