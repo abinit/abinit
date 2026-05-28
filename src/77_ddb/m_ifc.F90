@@ -494,14 +494,14 @@ subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
        call ewald9(Ifc%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                    Crystal%xred,zeff,qdrp_cart,ifc%eta,option=ifc%ewald_option,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
      else
-             call ewald9(Ifc%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
-                   Crystal%xred,zeff,qdrp_cart,ifc%eta, option=ifc%ewald_option)
+       call ewald9(Ifc%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
+                  Crystal%xred,zeff,qdrp_cart,ifc%eta, option=ifc%ewald_option)
      end if
    else
-      ! 2D materials are embedded in a dielectric environment (typically vacuum in DFT calculations)
-      ! which leads to a different long-range electrostatics than in 2D. The next routine allows
-      ! to estimate it. 
-      call ewald9_2D(natom,ddb%acell,Crystal%xred,rprim,dielt,dyew,qpt,zeff,qdrp_cart,dielt_env,dielt_thick,sys_dim)     
+     ! 2D materials are embedded in a dielectric environment (typically vacuum in DFT calculations)
+     ! which leads to a different long-range electrostatics than in 2D. The next routine allows
+     ! to estimate it. 
+     call ewald9_2D(natom,ddb%acell,Crystal%xred,rprim,dielt,dyew,qpt,zeff,qdrp_cart,dielt_env,dielt_thick,sys_dim)     
    end if        
    call q0dy3_calc(natom,dyewq0,dyew,Ifc%asr)
    ABI_FREE(dyew)

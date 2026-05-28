@@ -4838,6 +4838,8 @@ subroutine asrq0_free(asrq0)
 
  ! real
  ABI_SFREE(asrq0%d2asr)
+ ABI_SFREE(asrq0%d2dqmsr)
+ ABI_SFREE(asrq0%d2dqdqmsr)
  ABI_SFREE(asrq0%singular)
  ABI_SFREE(asrq0%uinvers)
  ABI_SFREE(asrq0%vtinvers)

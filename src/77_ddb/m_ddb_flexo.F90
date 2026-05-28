@@ -1472,6 +1472,11 @@ subroutine ddb_phi1(ddb,ddb_lw,ddb_version,filnamddb,phi1,phi2,natom)
 
  qphon(:,:)=zero
  qphnrm(:)=one
+ rfphon(:)=0
+ rfelfd(:)=0
+ rfstrs(:)=0
+ rfqvec(:)=0
+ 
  rfphon(1)=1
  rfphon(2)=1
  rfqvec(3)=1
