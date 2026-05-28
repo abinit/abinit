@@ -198,7 +198,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      lmax=pspheads(ipsp)%lmax
      write(msg,'(a,f5.1,a,i4,a,i4)')'  read the values zionpsp=',pspheads(ipsp)%zionpsp,' , pspcod=',pspcod,' , lmax=',lmax
      call wrtout(std_out,msg,'PERS')
-   
+
      if(test_paw==1) then
        ABI_MALLOC(nproj,(0:lmax))
        ABI_MALLOC(nprojso,(lmax))
@@ -206,7 +206,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
        nprojso(1:lmax)=0
      else
        nproj(0:3)=0 ; nprojso(1:3)=0
-     endif 
+     endif
 
      pspheads(ipsp)%xccc=0
      pspheads(ipsp)%pspso=0

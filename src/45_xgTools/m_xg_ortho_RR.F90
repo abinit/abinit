@@ -826,7 +826,7 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,info,prtvol,tim
       case default
         ABI_ERROR("Error for Eigen Solver HEEV")
       end select
-    else 
+    else
       ! Solve Hermitian general eigen problem only for first blockdim eigenvalues
       select case (eigenSolver)
       case (EIGENVX)

@@ -26,7 +26,7 @@
 #include "abi_common.h"
 
 module m_dfpttd_berrycurv
-    
+
  use defs_basis
  use defs_abitypes
  use defs_datatypes
@@ -46,7 +46,7 @@ module m_dfpttd_berrycurv
 
 ! *************************************************************************
 
-contains 
+contains
 !!***
 
 !!****f* ABINIT/m_dfpttd_berrycurv/dfpttd_berrycurv
@@ -73,8 +73,8 @@ contains
 !!  mpi_enreg=MPI-parallelisation information
 !!  mpw   = maximum number of planewaves in basis sphere (large number)
 !!  natom = number of atoms in unit cell
-!!  nfft= number of FFT grid points (for this proc) 
-!!  ngfft(1:18)=integer array with FFT box dimensions and other 
+!!  nfft= number of FFT grid points (for this proc)
+!!  ngfft(1:18)=integer array with FFT box dimensions and other
 !!  nkpt = number of k points
 !!  nspden = number of spin-density components
 !!  nspinor = number of spinorial components of the wavefunctions
@@ -97,9 +97,9 @@ contains
 !! SOURCE
 
 subroutine dfpttd_berrycurv(cg1,cg2,d3etot_td,dtset,&
- & mband,mk1mem,mpi_enreg,mpw,nkpt,nspinor,nsppol, & 
+ & mband,mk1mem,mpi_enreg,mpw,nkpt,nspinor,nsppol, &
  & npwarr,occ)
-    
+
  use defs_basis
 
  implicit none
@@ -121,20 +121,20 @@ subroutine dfpttd_berrycurv(cg1,cg2,d3etot_td,dtset,&
 !Local variables-------------------------------
 !scalars
  integer :: bandtot,iband,icg,ierr,ikpt,isppol,istwf_k,me
- integer :: nband_k,npw_k,offset_cgi,size_wf,spaceworld 
- real(dp) :: doti,dotr,wtk_k                                    
+ integer :: nband_k,npw_k,offset_cgi,size_wf,spaceworld
+ real(dp) :: doti,dotr,wtk_k
 !arrays
  real(dp) :: d3etot_k(2)
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: occ_k(:)
- 
+
 ! *************************************************************************
 
  DBG_ENTER("COLL")
- 
+
 !Init parallelism
  spaceworld=mpi_enreg%comm_cell
- me=mpi_enreg%me_kpt 
+ me=mpi_enreg%me_kpt
 
 !Loop over spins
  d3etot_td=zero
@@ -165,9 +165,9 @@ subroutine dfpttd_berrycurv(cg1,cg2,d3etot_td,dtset,&
 
      !Loop over bands
      do iband=1,nband_k
-    
+
        if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
-       
+
        !Select bks wf1
        offset_cgi = (iband-1)*size_wf+icg
        cwavef1(:,:)= cg1(:,1+offset_cgi:size_wf+offset_cgi)
@@ -180,13 +180,13 @@ subroutine dfpttd_berrycurv(cg1,cg2,d3etot_td,dtset,&
 
        d3etot_k(1)=d3etot_k(1)+occ_k(iband)*dotr
        d3etot_k(2)=d3etot_k(2)+occ_k(iband)*doti
- 
+
      end do !iband
-   
+
 !    Scale d3etot_k contributions by the kpt weight
      d3etot_k(:)=d3etot_k(:)*wtk_k
 
-!    Add the contribution from each k-point. 
+!    Add the contribution from each k-point.
      d3etot_td= d3etot_td + d3etot_k
 
 !    Keep track of total number of bands
@@ -208,7 +208,7 @@ subroutine dfpttd_berrycurv(cg1,cg2,d3etot_td,dtset,&
  if (xmpi_paral==1) then
    call xmpi_sum(d3etot_td,spaceworld,ierr)
  end if
- 
+
  DBG_EXIT("COLL")
 
 end subroutine dfpttd_berrycurv

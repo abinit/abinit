@@ -1,6 +1,6 @@
 !Input file for the anaddb code. Analysis of the AlAs ddb
 
-! ddb file 
+! ddb file
 ddb_filepath = "trf2_3.ddb.abo"
 
 ! output file
@@ -44,6 +44,6 @@ outdata_prefix = "trf2_6o"
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = X. Gonze, J. Zwanziger
-#%% keywords = 
+#%% keywords =
 #%% description = Input file for the anaddb code. Analysis of the SiO2 DDB
 #%%<END TEST_INFO>

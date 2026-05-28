@@ -195,7 +195,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
        strainfact_jj(1:nimage)=(ucvol(1:nimage)**third)*(natom**sixth)
        do iimage=1,nimage
          mat3_1(1:3,1:3)=rprimd(1:3,1:3,iimage)-rprimd_start(1:3,1:3,iimage)
-         xcart_eff(1:3,natom+1:natom+3,iimage)=strainfact_jj(iimage)*matmul(rprimd_start_inv(:,:,iimage),mat3_1)       
+         xcart_eff(1:3,natom+1:natom+3,iimage)=strainfact_jj(iimage)*matmul(rprimd_start_inv(:,:,iimage),mat3_1)
          strten_mat(1:3,1:3,iimage)=strten_mat(1:3,1:3,iimage)+pressure(iimage)*identity_real(1:3,1:3)
          fcart_eff(1:3,natom+1:natom+3,iimage)= &
 &                 -(ucvol(iimage)/strainfact_jj(iimage))*strten_mat(1:3,1:3,iimage)

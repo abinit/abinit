@@ -732,7 +732,7 @@ extern "C" void gpu_xscal_(int* cplx, int *N,
 //  alpha
 /*=========================================================================*/
 
-extern "C" void gpu_xdot_(int* cplx, int *N, 
+extern "C" void gpu_xdot_(int* cplx, int *N,
                            cuDoubleComplex *alpha,
                            void **X_ptr, int *incrx, void **Y_ptr, int *incry)
 {

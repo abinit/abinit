@@ -78,7 +78,7 @@ MODULE m_geometry
  public :: wedge_product      ! compute wedge product given wedge basis
  public :: d3lwsym
  public :: sylwtens             ! Determines the set of irreductible elements of the spatial-dispersion tensors
- public :: cart2spinaxis        ! Compute the rotation matrix from cartesian to spinaxis coordinate     
+ public :: cart2spinaxis        ! Compute the rotation matrix from cartesian to spinaxis coordinate
  public :: vcart2ylm          ! Convert Cartesian vector to spherical coordinates for Y_lm
 
  interface normv
@@ -4118,8 +4118,8 @@ subroutine vcart2ylm(vector, length, theta, phi)
 !scalars
   real(8),intent(out) :: length, theta, phi
 
-! Local 
-  real(8):: pi 
+! Local
+  real(8):: pi
 
   pi=4.0d0*datan(1.0d0)
   ! Compute spherical coordinates
@@ -4146,13 +4146,13 @@ end subroutine vcart2ylm
 !! cart2spinaxis
 !!
 !! FUNCTION
-!! Compute the rotation matrix R = Rz(alpha)*Ry(beta) and rotate a vector in 
+!! Compute the rotation matrix R = Rz(alpha)*Ry(beta) and rotate a vector in
 !! cartesian coordinate to spinaxis coordinates
 !!
 !! INPUTS
 !! alpha=Euler angle for rotation around z-axis
 !! beta=Euler angle for rotation around y-axis
-!! vin(3)=vector in the cartesian coordinate 
+!! vin(3)=vector in the cartesian coordinate
 !!
 !! OUTPUT
 !! R(3,3)=rotation matrix from cartesian to spinaxis coordinates
@@ -4188,6 +4188,6 @@ subroutine cart2spinaxis(alpha, beta, R, vin, vout)
 
 end subroutine cart2spinaxis
 !!***
- 
+
 end module  m_geometry
 !!***

@@ -266,7 +266,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
 !Spatial-dispersion perturbations
  if (.not.just_timdisp) d3e_pert3(natom+8)=1
- 
+
  if (dtset%lw_qdrpl==1) then
    d3e_pert1(natom+2)=1
    d3e_pert2(1:natom)=1
@@ -354,7 +354,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
          end do
        end do
      end do
-   end do 
+   end do
  end if
 
 !Do symmetry stuff
@@ -496,7 +496,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
   & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
   & dtfil%unkg,wffgs,wfftgs,dtfil%unwffgs,dtfil%fnamewffk,wvl)
    hdr%rprimd=rprimd
-  
+
   !Close wffgs, if it was ever opened (in inwffil)
    if (ireadwf0==1) then
      call WffClose(wffgs,ierr)
@@ -535,18 +535,18 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    if (dtset%getden /= 0 .or. dtset%irdden /= 0) then
      ! Read rho1(r) from a disk file and broadcast data.
      ! This part is not compatible with MPI-FFT (note single_proc=.True. below)
-  
+
      rdwrpaw=psps%usepaw
      ABI_MALLOC(pawrhoij_read,(0))
-  
+
 !
   !  MT july 2013: Should we read rhoij from the density file ?
      call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor, &
      hdr_den, pawrhoij_read, spaceworld, check_hdr=hdr)
      etotal = hdr_den%etot; call hdr_den%free()
-  
+
      ABI_FREE(pawrhoij_read)
-  
+
   !  Compute up+down rho(G) by fft
      ABI_MALLOC(work,(nfftf))
      work(:)=rhor(:,1)
@@ -558,13 +558,13 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
      tim_mkrho=4
      paw_dmft%use_sc_dmft=0 ! respfn with dmft not implemented
      paw_dmft%use_dmft=0 ! respfn with dmft not implemented
-  
+
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
   &     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
    end if ! getden
   ! ABI_FREE(cg)
  end if
-  
+
 !Compute large sphere cut-off gsqcut
  call getcut(boxcut,dtset%ecut,gmet,gsqcut,dtset%iboxcut,std_out,dtset%qptn,dtset%ngfft)
 
@@ -626,8 +626,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  usexcnhat=0
  bigexc=zero
  bigsxc=zero
- 
- if (.not.just_timdisp) then 
+
+ if (.not.just_timdisp) then
    call xcdata_init(xcdata,dtset=dtset)
    call rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfftf,ngfftf,&
   & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
@@ -644,7 +644,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    if (.not.just_timdisp) then
      call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
    & psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,option,&
-   & rprimd,ylm,ylmgr)                                   
+   & rprimd,ylm,ylmgr)
    end if
  end if
 

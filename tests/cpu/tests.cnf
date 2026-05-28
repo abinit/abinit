@@ -13,7 +13,7 @@ various cpu tests of the sequential version of abinit
 # they will be converted by function transpath if necessary
 # file paths may contain a perl variable (e.g. $PSPS)
 #
-#   The following lines describe the tests to be run. The general syntax of 
+#   The following lines describe the tests to be run. The general syntax of
 # these lines is:	[testID | end] [command | program] parameters.
 #
 #   The first word is the test identification. All consecutive lines that begin
@@ -63,7 +63,7 @@ various cpu tests of the sequential version of abinit
 #     -istwfk1	for a cpu tests serie
 #     -istwfk11	for a cpu tests serie
 #
-# default options to call fldiff are: -ignore -ignoreP 
+# default options to call fldiff are: -ignore -ignoreP
 #
 #   Default file names for the test with Id NNN (1 to 3 characters string):
 # 1) mrg/mrgddb

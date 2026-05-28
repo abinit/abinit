@@ -88,7 +88,7 @@ module m_linked_list
 
   !----------------------------------------------------------------------
   !> @brief append to the end of the list
-  !> @param[in]  i: int 
+  !> @param[in]  i: int
   !> @param[in]  val: real value
   !----------------------------------------------------------------------
   subroutine llist_append(self, i, val)
@@ -121,7 +121,7 @@ module m_linked_list
   !> @brief insert to the node after one node ptr
   !>
   !> @param[in] ptr: a pointer to a node in the list
-  !> @param[in] i: the integer 
+  !> @param[in] i: the integer
   !> @param[in] val: the real value
   !----------------------------------------------------------------------
   subroutine llist_insert_after(self, ptr, i, val)
@@ -172,7 +172,7 @@ module m_linked_list
   !>
   !> @param[in]  i :  integer value
   !> @param[in]  val : real value
-  !> @param[in]  mode : 
+  !> @param[in]  mode :
   !> if mode=0: if i already exist, substitute i, val
   !> if mode=1: val+=val
   !----------------------------------------------------------------------

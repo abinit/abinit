@@ -2291,7 +2291,7 @@ subroutine outvars_anaddb(dtset, nunit)
    write(nunit, '(3x, a9, 2i3)')        '  mpatpol',dtset%mpatpol(1:2)
    write(nunit, '(3x, a9, 3i3)')        '    mpdir',dtset%mpdir(1:3)
    write(nunit, '(3x, a9,  i3)')        '    mpopt',dtset%mpopt
-   if (dtset%timdisp == 1) then 
+   if (dtset%timdisp == 1) then
      write(nunit, '(a)') ' Third-order frequency derivatives calculated with constrained DFPT response functions will be transformed'
    write(nunit, '(3x, a9,  i3)') '   timdisp',dtset%timdisp
    end if

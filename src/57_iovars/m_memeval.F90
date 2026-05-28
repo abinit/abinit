@@ -2002,7 +2002,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  call wrtout(std_out,msg)
 
  write(msg,'(4(3(a,i12),a))') &
-& '- my_mband =',my_mband 
+& '- my_mband =',my_mband
  call wrtout(iout,msg)
  call wrtout(std_out,msg)
 

@@ -101,7 +101,7 @@ module m_tdep_solver
 
    double precision, allocatable :: theta(:)
    ! theta(ntotcoeff)
-   ! The IFC coefficients at all orders, as a flat array. 
+   ! The IFC coefficients at all orders, as a flat array.
 
    double precision, allocatable :: Forces(:)
    ! Forces(3*natom*my_nstep)
@@ -140,14 +140,14 @@ contains
   !Rotational invariances (1st order)
   !    constraints = 3
   Solver%nconst_1st = 3**2
-  
+
   !Rotational invariances (2nd order) + Symetry of the Dynamical Matrix + Huang invariances
   !    constraints = natom*3**2 + (3*natom_unitcell)**2 + 3**4
   Solver%nconst_rot2nd = 3**3*Solver%natom_unitcell
   Solver%nconst_dynmat = (3*Solver%natom_unitcell)**2
   Solver%nconst_huang  = 3**4
   Solver%nconst_2nd = Solver%nconst_rot2nd + Solver%nconst_dynmat + Solver%nconst_huang
-  
+
   !Rotational invariances (3rd order) + acoustic sum rules (3rd order)
   Solver%nconst_3rd=0
   if (Solver%order.ge.3) then
@@ -156,7 +156,7 @@ contains
     Solver%nconst_asr3rd = 3**3 * Solver%natom_unitcell * Solver%natom
     Solver%nconst_3rd = Solver%nconst_rot3rd + Solver%nconst_asr3rd
   end if
-  
+
   !Rotational invariances (4th order) + acoustic sum rules (4th order)
   Solver%nconst_4th=0
   if (Solver%order.ge.4) then
@@ -167,7 +167,7 @@ contains
     Solver%nconst_asr4th = 0
     Solver%nconst_4th = Solver%nconst_rot4th + Solver%nconst_asr4th
   end if
- 
+
   Solver%ncoeff1st = Shell1at%ntotcoeff
   Solver%ncoeff2nd = Shell2at%ntotcoeff
   Solver%ncoeff3rd = 0
@@ -220,7 +220,7 @@ contains
 !!
 !! SIDE EFFECTS
 !!  The following quantities in MD are computed:
-!!  
+!!
 !! NOTES
 !!
 !! SOURCE
@@ -781,7 +781,7 @@ end subroutine tdep_calc_phi4fcoeff
 !====================================================================================================
 
 subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
-&                                Shell1at,Shell2at,Shell3at,Shell4at) 
+&                                Shell1at,Shell2at,Shell3at,Shell4at)
 
   type(tdep_Solver_type), intent(inout) :: Solver
   type(atdep_dataset_type),intent(in) :: Invar
@@ -848,8 +848,8 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
     do isym=1,Sym%nsym
       do itrans=1,6
         ABI_CALLOC(Const3%Sprod(isym,itrans)%SSS,(3,27,3,3))
-      end do  
-    end do  
+      end do
+    end do
     do isym=1,Sym%nsym
       do alpha=1,3
         do mu=1,3
@@ -879,8 +879,8 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
     do isym=1,Sym%nsym
       do itrans=1,24
         ABI_CALLOC(Const4%Sprod(isym,itrans)%SSSS,(3,81,3,3,3))
-      end do  
-    end do  
+      end do
+    end do
     do isym=1,Sym%nsym
       do alpha=1,3
         do mu=1,3
@@ -899,28 +899,28 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
                       Const4%Sprod(isym,4 )%SSSS(beta,counter,gama,alpha,delta)=temp !\Phi4_fgeh
                       Const4%Sprod(isym,5 )%SSSS(gama,counter,alpha,beta,delta)=temp !\Phi4_gefh
                       Const4%Sprod(isym,6 )%SSSS(gama,counter,beta,alpha,delta)=temp !\Phi4_gfeh
-  
+
                       Const4%Sprod(isym,7 )%SSSS(alpha,counter,beta,delta,gama)=temp !\Phi4_efhg
                       Const4%Sprod(isym,8 )%SSSS(alpha,counter,gama,delta,beta)=temp !\Phi4_eghf
                       Const4%Sprod(isym,9 )%SSSS(beta,counter,alpha,delta,gama)=temp !\Phi4_fehg
                       Const4%Sprod(isym,10)%SSSS(beta,counter,gama,delta,alpha)=temp !\Phi4_fghe
                       Const4%Sprod(isym,11)%SSSS(gama,counter,alpha,delta,beta)=temp !\Phi4_gehf
                       Const4%Sprod(isym,12)%SSSS(gama,counter,beta,delta,alpha)=temp !\Phi4_gfhe
-  
+
                       Const4%Sprod(isym,13)%SSSS(alpha,counter,delta,beta,gama)=temp !\Phi4_ehfg
                       Const4%Sprod(isym,14)%SSSS(alpha,counter,delta,gama,beta)=temp !\Phi4_ehgf
                       Const4%Sprod(isym,15)%SSSS(beta,counter,delta,alpha,gama)=temp !\Phi4_fheg
                       Const4%Sprod(isym,16)%SSSS(beta,counter,delta,gama,alpha)=temp !\Phi4_fhge
                       Const4%Sprod(isym,17)%SSSS(gama,counter,delta,alpha,beta)=temp !\Phi4_ghef
                       Const4%Sprod(isym,18)%SSSS(gama,counter,delta,beta,alpha)=temp !\Phi4_ghfe
-  
+
                       Const4%Sprod(isym,19)%SSSS(delta,counter,alpha,beta,gama)=temp !\Phi4_hefg
                       Const4%Sprod(isym,20)%SSSS(delta,counter,alpha,gama,beta)=temp !\Phi4_hegf
                       Const4%Sprod(isym,21)%SSSS(delta,counter,beta,alpha,gama)=temp !\Phi4_hfeg
                       Const4%Sprod(isym,22)%SSSS(delta,counter,beta,gama,alpha)=temp !\Phi4_hfge
                       Const4%Sprod(isym,23)%SSSS(delta,counter,gama,alpha,beta)=temp !\Phi4_hgef
                       Const4%Sprod(isym,24)%SSSS(delta,counter,gama,beta,alpha)=temp !\Phi4_hgfe
-  
+
                     end do
                   end do
                 end do
@@ -929,8 +929,8 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
           end do
         end do
       end do
-    end do  
-  end if 
+    end do
+  end if
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Compute the constraints !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -945,7 +945,7 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
     do ishell=1,Shell1at%nshell
       if (Shell1at%neighbours(1,ishell)%n_interactions.eq.0) cycle
       do iatshell=1,Shell1at%neighbours(1,ishell)%n_interactions
-        iatom=Shell1at%neighbours(1,ishell)%atomj_in_shell(iatshell) 
+        iatom=Shell1at%neighbours(1,ishell)%atomj_in_shell(iatshell)
         if (iatom.ge.natom_unitcell) cycle
         if (iatom.eq.1) cycle
         isym=Shell1at%neighbours(1,ishell)%sym_in_shell(iatshell)
@@ -959,10 +959,10 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
               terme2=sum(Sym%S_ref(beta ,:,isym,1)*Shell1at%proj(:,icoeff,ishell))*distance(1,iatom,alpha+1)
               const_rot1st(alpha,beta,icoeff+ncoeff_prev)= &
 &             const_rot1st(alpha,beta,icoeff+ncoeff_prev)+terme1-terme2
-  
+
 !             2/ Rotational invariances (for the 2nd order)
               do gama=1,3
-                terme1=zero ; terme2=zero 
+                terme1=zero ; terme2=zero
                 if (alpha.eq.gama) terme1=sum(Sym%S_ref(beta,:,isym,1)*Shell1at%proj(:,icoeff,ishell))
                 if (alpha.eq.beta) terme2=sum(Sym%S_ref(gama,:,isym,1)*Shell1at%proj(:,icoeff,ishell))
                 const_rot2nd(alpha,beta,gama,iatom,icoeff+ncoeff_prev)=&
@@ -970,9 +970,9 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
                 const_rot2nd(alpha,beta,gama,1,icoeff+ncoeff_prev)=&
 &               const_rot2nd(alpha,beta,gama,1,icoeff+ncoeff_prev)-terme1+terme2
               end do
-            end do    
-          end do    
-        end do  
+            end do
+          end do
+        end do
       end do !iatshell
     end do !ishell
 
@@ -997,7 +997,7 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
                   terme1=sum(SS_ref(alpha,:,beta,isym,itrans)*Shell2at%proj(:,icoeff,ishell))*distance(iatom,jatom,gama+1)
                   terme2=sum(SS_ref(alpha,:,gama,isym,itrans)*Shell2at%proj(:,icoeff,ishell))*distance(iatom,jatom,beta+1)
                   const_rot2nd(alpha,beta,gama,iatom,icoeff+ncoeff_prev)=&
-&                 const_rot2nd(alpha,beta,gama,iatom,icoeff+ncoeff_prev)+terme1-terme2                  
+&                 const_rot2nd(alpha,beta,gama,iatom,icoeff+ncoeff_prev)+terme1-terme2
                 end do
               end do
             end do
@@ -1047,14 +1047,14 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
         do icoeff=1,ntotcoeff
           ABI_MALLOC(Const3%AsrRot3(iatom,jatom,icoeff)%ABG,   (3,3,3)); Const3%AsrRot3(iatom,jatom,icoeff)%ABG(:,:,:)   =zero
           ABI_MALLOC(Const3%AsrRot3(iatom,jatom,icoeff)%ABGD,(3,3,3,3)); Const3%AsrRot3(iatom,jatom,icoeff)%ABGD(:,:,:,:)=zero
-        end do  
-      end do  
-    end do  
+        end do
+      end do
+    end do
     do ishell=1,Shell2at%nshell
       do iatom=1,natom_unitcell
         if (Shell2at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
         do iatshell=1,Shell2at%neighbours(iatom,ishell)%n_interactions
-          jatom=Shell2at%neighbours(iatom,ishell)%atomj_in_shell(iatshell) 
+          jatom=Shell2at%neighbours(iatom,ishell)%atomj_in_shell(iatshell)
           if (iatom==jatom) cycle
           isym=Shell2at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
           itrans=Shell2at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
@@ -1082,8 +1082,8 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
                     end do
                   end do
                 end do
-              end do    
-            end do  
+              end do
+            end do
           end if !proj3rd
         end do !iatshell
       end do !iatom
@@ -1125,11 +1125,11 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
                   end do
                 end do
               end do
-            end do    
-          end do  
+            end do
+          end do
         end do !iatshell
-      end do !iatom   
-    end do !ishell   
+      end do !iatom
+    end do !ishell
   end if !order=3
 
 ! Fourth order
@@ -1144,15 +1144,15 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
                        Const4%AsrRot4(iatom,jatom,katom,icoeff)%ABGD(:,:,:,:)   =zero
 !FB            ABI_MALLOC(Const4%AsrRot4(iatom,jatom,katom,icoeff)%ABGDE,(3,3,3,3,3))
 !FB                       Const4%AsrRot4(iatom,jatom,katom,icoeff)%ABGDE(:,:,:,:,:)=zero
-          end do  
-        end do  
-      end do  
-    end do  
+          end do
+        end do
+      end do
+    end do
 !FB    do ishell=1,Shell2at%nshell
 !FB      do iatom=1,natom_unitcell
 !FB        if (Shell2at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
 !FB        do iatshell=1,Shell2at%neighbours(iatom,ishell)%n_interactions
-!FB          jatom=Shell2at%neighbours(iatom,ishell)%atomj_in_shell(iatshell) 
+!FB          jatom=Shell2at%neighbours(iatom,ishell)%atomj_in_shell(iatshell)
 !FB          if (iatom==jatom) cycle
 !FB          isym=Shell2at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
 !FB          itrans=Shell2at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
@@ -1180,8 +1180,8 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
 !FB                    end do
 !FB                  end do
 !FB                end do
-!FB              end do    
-!FB            end do  
+!FB              end do
+!FB            end do
 !FB          end if !proj3rd
 !FB        end do !iatshell
 !FB      end do !iatom
@@ -1226,16 +1226,16 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
 !FB                  end do
 !FB                end do
 !FB              end do
-!FB            end do    
-!FB          end do  
+!FB            end do
+!FB          end do
         end do !iatshell
-      end do !iatom   
-    end do !ishell   
+      end do !iatom
+    end do !ishell
   end if !order=4
 
   if (order2.or.order3) then
     ABI_FREE(SS_ref)
-  end if  
+  end if
   if (order3.or.order4) then
     do isym=1,Sym%nsym
       do itrans=1,6
@@ -1243,7 +1243,7 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
       end do
     end do
     ABI_FREE(Const3%Sprod)
-  end if  
+  end if
   if (order4) then
     do isym=1,Sym%nsym
       do itrans=1,24
@@ -1251,7 +1251,7 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
       end do
     end do
     ABI_FREE(Const4%Sprod)
-  end if  
+  end if
 
 ! Reduce the number of constraints by selecting the non-zero equations
   write(Invar%stdout,*) '################## Reduce the number of constraints #########################'
@@ -1262,7 +1262,7 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
     ABI_MALLOC(vect,(ntotcoeff,Solver%nconst_1st)) ; vect(:,:)=zero
     do alpha=1,3
       do beta=1,3
-        iconst=iconst+1 
+        iconst=iconst+1
         vect(:,iconst)=const_rot1st(alpha,beta,:)
       end do
     end do
@@ -1284,7 +1284,7 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
       do alpha=1,3
         do beta=1,3
           do gama=1,3
-            iconst=iconst+1  
+            iconst=iconst+1
             vect(:,iconst)=const_rot2nd(alpha,beta,gama,iatom,:)
           end do
         end do
@@ -1359,11 +1359,11 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
       do jatom=1,natom
         do alpha=1,3
           do beta=1,3
-            do gama=1,3 
+            do gama=1,3
               iconst=iconst+1
               do ii=1,ntotcoeff
                 vect(ii,iconst)=Const3%AsrRot3(iatom,jatom,ii)%ABG(alpha,beta,gama)
-              end do  
+              end do
             end do
           end do
         end do
@@ -1374,7 +1374,7 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
       do iconst_loc=1,nconst_loc
         iconst_new=iconst_new+1
         Solver%const(iconst_new,:)=vect(:,iconst_loc)
-      end do  
+      end do
     end if
     ABI_FREE(vect)
     Solver%nconst_asr3rd=nconst_loc
@@ -1391,7 +1391,7 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
                 iconst=iconst+1
                 do ii=1,ntotcoeff
                   vect(ii,iconst)=Const3%AsrRot3(iatom,jatom,ii)%ABGD(alpha,beta,gama,lambda)
-                  end do  
+                  end do
               end do
             end do
           end do
@@ -1403,7 +1403,7 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
       do iconst_loc=1,nconst_loc
         iconst_new=iconst_new+1
         Solver%const(iconst_new,:)=vect(:,iconst_loc)
-      end do  
+      end do
     end if
     ABI_FREE(vect)
     do iatom=1,natom_unitcell
@@ -1411,9 +1411,9 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
         do icoeff=1,ntotcoeff
           ABI_FREE(Const3%AsrRot3(iatom,jatom,icoeff)%ABG)
           ABI_FREE(Const3%AsrRot3(iatom,jatom,icoeff)%ABGD)
-        end do  
-      end do  
-    end do  
+        end do
+      end do
+    end do
     ABI_FREE(Const3%AsrRot3)
     Solver%nconst_rot3rd=nconst_loc
     Solver%nconst_3rd=Solver%nconst_asr3rd+Solver%nconst_rot3rd
@@ -1428,12 +1428,12 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
         do katom=1,natom
           do alpha=1,3
             do beta=1,3
-              do gama=1,3 
-                do delta=1,3 
+              do gama=1,3
+                do delta=1,3
                   iconst=iconst+1
                   do ii=1,ntotcoeff
                     vect(ii,iconst)=Const4%AsrRot4(iatom,jatom,katom,ii)%ABGD(alpha,beta,gama,delta)
-                  end do  
+                  end do
                 end do
               end do
             end do
@@ -1446,7 +1446,7 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
       do iconst_loc=1,nconst_loc
         iconst_new=iconst_new+1
         Solver%const(iconst_new,:)=vect(:,iconst_loc)
-      end do  
+      end do
     end if
     ABI_FREE(vect)
     Solver%nconst_asr4th=nconst_loc
@@ -1473,7 +1473,7 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
 !FB      do iconst_loc=1,nconst_loc
 !FB        iconst_new=iconst_new+1
 !FB        Solver%const(iconst_new,:)=vect(:,iconst_loc)
-!FB      end do  
+!FB      end do
 !FB    end if
 !FB    ABI_FREE(vect)
 !FB    Solver%nconst_rot3rd=nconst_loc
@@ -1483,16 +1483,16 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
           do icoeff=1,ntotcoeff
             ABI_FREE(Const4%AsrRot4(iatom,jatom,katom,icoeff)%ABGD)
 !FB            ABI_FREE(Const4%AsrRot4(iatom,jatom,katom,icoeff)%ABGDE)
-          end do  
-        end do  
-      end do  
-    end do  
+          end do
+        end do
+      end do
+    end do
     ABI_FREE(Const4%AsrRot4)
     Solver%nconst_rot4th=0
     Solver%nconst_4th=Solver%nconst_asr4th+Solver%nconst_rot4th
   end if
 
-! Finalize the orthonormalization   
+! Finalize the orthonormalization
 !FB  nconst=iconst_new
 !FB  ABI_MALLOC(vect,(ntotcoeff,nconst)) ; vect(:,:)=zero
 !FB  do iconst=1,nconst
@@ -1502,10 +1502,10 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
 !FB  call tdep_calc_orthonorm(ntotcoeff,nconst,nconst_loc,vect)
 !FB  Solver%ntotconst=nconst_loc
 !FB  if (nconst_loc.ne.0) then
-!FB    ABI_MALLOC(Solver%const ,(Solver%ntotconst,ntotcoeff)); Solver%const (:,:)=0.d0 
+!FB    ABI_MALLOC(Solver%const ,(Solver%ntotconst,ntotcoeff)); Solver%const (:,:)=0.d0
 !FB    do iconst_loc=1,nconst_loc
 !FB      Solver%const(iconst_loc,:)=vect(:,iconst_loc)
-!FB    end do  
+!FB    end do
 !FB  end if
 !FB  ABI_FREE(vect)
   Solver%ntotconst=iconst_new
@@ -1534,7 +1534,7 @@ subroutine tdep_calc_constraints(Solver,distance,Invar,MPIdata,Sym,&
     write(16,*) ' ======================================================================='
     write(16,*) ' Total number of constraints =',Solver%ntotconst
     close(16)
-  end if  
+  end if
 
 end subroutine tdep_calc_constraints
 

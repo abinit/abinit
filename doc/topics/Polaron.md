@@ -13,21 +13,32 @@ TBD
 
 ## Related Input Variables
 
+*compulsory:*
+
+- [[abinit:vpq_pkind]]  Variational Polaron eQuations: Polaron KIND
+
 *basic:*
 
-- [[abinit:getvarpeq]]  GET the VARPEQ.nc from dataset
-- [[abinit:getvarpeq_filepath]]  GET the VARPEQ.nc from FILEPATH
-- [[abinit:varpeq_aseed]]  VARiational Polaron EQuations: A_nk-coefficients SEED
-- [[abinit:varpeq_erange]]  VARiational Polaron EQuations: Energy Range
-- [[abinit:varpeq_gau_params]]  VARiational Polaron EQuations: Gaussian PaRameters
-- [[abinit:varpeq_interpolate]]  VARiational Polaron EQuations: INTERPolation
-- [[abinit:varpeq_nstep]]  VARiational Polaron EQuations: Number of iteration STEPs
-- [[abinit:varpeq_orth]]  VARiational Polaron EQuations: ORTHogonalization
-- [[abinit:varpeq_pc_factor]]  VARiational Polaron EQuations: PreConditioner FACTOR
-- [[abinit:varpeq_pc_nupdate]]  VARiational Polaron EQuations: PreConditioner N-th step UPDATE
-- [[abinit:varpeq_pkind]]  VARiational Polaron EQuations: Polaron KIND
-- [[abinit:varpeq_tolgrs]]  VARiational Polaron EQuations: TOLerance on the Gradient ReSidual
- 
+- [[abinit:getvpq]]  GET the VPQ.nc from dataset
+- [[abinit:getvpq_filepath]]  GET the VPQ.nc from FILEPATH
+- [[abinit:vpq_aseed]]  Variational Polaron eQuations: A_nk-coefficients SEED
+- [[abinit:vpq_avg_g]]  Variational Polaron eQuations: AVeraGe matrix-elements at Gamma
+- [[abinit:vpq_gpr_energy]]  Variational Polaron eQuations: Gaussian PaRameters -- electronic ENERGY
+- [[abinit:vpq_gpr_length]]  Variational Polaron eQuations: Gaussian PaRameters -- localization LENGTH
+- [[abinit:vpq_interp]]  Variational Polaron eQuations: INTERPolation
+- [[abinit:vpq_mesh_fact]]  Variational Polaron eQuations: SCALE MESH for polaron wavefunction
+- [[abinit:vpq_nstates]]  Variational Polaron eQuations: Number of polaronic STATES
+- [[abinit:vpq_nstep]]  Variational Polaron eQuations: Number of iteration STEPs
+- [[abinit:vpq_nstep_ort]]  Variational Polaron eQuations: Number of STEPs with ORThogonalisation
+- [[abinit:vpq_select]]  Variational Polaron eQuations: SELECT polaronic state
+- [[abinit:vpq_tolgrs]]  Variational Polaron eQuations: TOLerance on the Gradient ReSidual
+- [[abinit:vpq_translate]]  Variational Polaron eQuations: TRANSLATE solutions
+- [[abinit:vpq_trvec]]  Variational Polaron eQuations: TRanslation VECtor
+
+*expert:*
+
+- [[abinit:vpq_mix_fact]]  Variational Polaron eQuations: MIXing FACTor
+
 
 ## Selected Input Files
 

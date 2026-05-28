@@ -196,6 +196,10 @@ module m_dtfil
    ! Filename used to read GSTORE.nc file.
    ! Initialize via getgstore_filepath
 
+  character(len=fnlen) :: filqpdatain
+   ! Filename used to read QPDATA file.
+   ! Initialize via getqpdata_filepath
+
   character(len=fnlen) :: filabiwanin
    ! Filename used to read ABIWAN.nc file.
    ! Initialize via getabiwan_filepath
@@ -673,6 +677,12 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  call mkfilename(filnam, dtfil%filgstorein, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
                  getpath=dtset%getgstore_filepath)
  if (will_read == 0) dtfil%filgstorein = ABI_NOFILE
+
+ ! According to getgstore_filepath, build _GSTORE file name
+ stringfile='_QPDATA'; stringvar='qpdata'
+ call mkfilename(filnam, dtfil%filqpdatain, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                 getpath=dtset%getqpdata_filepath)
+ if (will_read == 0) dtfil%filqpdatain = ABI_NOFILE
 
  ! According to getabiwan_filepath, build _ABIWAN file name
  stringfile='_ABIWAN.nc'; stringvar='abiwan'

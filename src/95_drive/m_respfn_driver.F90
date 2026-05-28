@@ -333,7 +333,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if (rfmagn==3) then
    rfdir(:)= 0
    rfdir(1)= 1
- end if 
+ end if
 
  pawbec=0  ; if(psps%usepaw==1.and.(rfphon==1.or.(rfelfd==1.or.rfelfd==3))) pawbec=1
  pawpiezo=0; if(psps%usepaw==1.and.(rfstrs/=0.or.(rfelfd==1.or.rfelfd==3))) pawpiezo=1

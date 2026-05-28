@@ -52,6 +52,7 @@ module m_abi_linalg
 #endif
 
  use m_time,  only : timab
+ use m_fstrings, only : sjoin, itoa
 
  implicit none
 
@@ -159,6 +160,8 @@ module m_abi_linalg
     module procedure abi_gpu_xgemm_2d
     module procedure abi_gpu_xgemm_2z
  end interface abi_gpu_xgemm
+
+ public :: abi_gpu_xgemm_d
 
  interface abi_gpu_xgemm_strided
     module procedure abi_gpu_xgemm_strided_cptr
@@ -448,7 +451,9 @@ CONTAINS  !===========================================================
 !******************************************************************
 
 !Use only abi_linalg in case of GS calculations
- abi_linalg_in_use=(optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS.or.optdriver==RUNL_RESPFN)
+ !abi_linalg_in_use=(optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS.or.optdriver==RUNL_RESPFN)
+ !abi_linalg_in_use= any(optdriver == [RUNL_GSTATE, RUNL_GWLS, RUNL_RESPFN, RUNL_GWR, RUNL_EPH])
+ abi_linalg_in_use= any(optdriver == [RUNL_GSTATE, RUNL_GWLS, RUNL_RESPFN, RUNL_EPH])
 
  max_eigen_pb_size_eff=0
  lapack_single_precision=.false.

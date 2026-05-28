@@ -1201,7 +1201,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !arrays
  integer :: cond_values(4),vacuum(3), units(2)
  integer,allocatable :: iatfix(:,:),iatnd(:),intarr(:),istwfk(:),nband(:),typat(:)
- real(dp) :: acell(3),rprim(3,3),field_loc(3),field_cart(3),hloc(3,1),hcart(3,1) 
+ real(dp) :: acell(3),rprim(3,3),field_loc(3),field_cart(3),hloc(3,1),hcart(3,1)
  real(dp),allocatable :: amu(:),atndlist(:,:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:)
  real(dp),allocatable :: nucdipmom(:,:),ratsph(:),reaalloc(:),spinat(:,:),spinat_cart(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
@@ -1433,7 +1433,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
  end if
  dtset%nsppol=nsppol
- 
+
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spinaxis',tread,'DPR')
  if (tread==1) dtset%spinaxis(1:3) = dprarr(1:3)
 
@@ -2178,9 +2178,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !Some special cases are not compatible with GPU implementation
 !Warn user if value is changed at runtime.
 !We don't stop the code because we may want to run the test suite in GPU mode.
- if (all(dtset%optdriver /= [RUNL_GSTATE, RUNL_RESPFN, RUNL_GWR])) then
+ if (all(dtset%optdriver /= [RUNL_GSTATE, RUNL_RESPFN, RUNL_GWR, RUNL_EPH])) then
    if (dtset%gpu_option /= ABI_GPU_DISABLED) then
-     call wrtout(units, "- WARNING: GPU only compatible with GS, RESPFN and GWR. gpu_option has been set to 0!")
+     call wrtout(units, "- WARNING: GPU only compatible with GS, RESPFN, GWR, EPH. gpu_option has been set to 0!")
    end if
    dtset%gpu_option=ABI_GPU_DISABLED
  end if
@@ -2643,7 +2643,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%mgfft = -1
    dtsets(idtset)%mgfftdg = -1
    dtsets(idtset)%mixesimgf(:)=zero
-   dtsets(idtset)%mpatpol(1:2)=-1 
+   dtsets(idtset)%mpatpol(1:2)=-1
    dtsets(idtset)%mpdir(1:3)=0
    dtsets(idtset)%moldyn = "none"
    dtsets(idtset)%mpw = -1
@@ -2973,11 +2973,20 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 
    dtsets(idtset)%bs_loband=0
 
+   !dtsets(idtset)%eph_restart = 0
+   !print *, dtsets(idtset)%optdriver
+   !print *, dtsets(idtset)%eph_task
    !if (dtsets(idtset)%optdriver == RUNL_EPH) then
-   !  dtsets(idtset)%mixprec = 1
-   !  dtsets(idtset)%boxcutmin = 1.1_dp
+   !  if (any(dtsets(idtset)%eph_task == [13, -13])) then
+   !    ! In VARPEQ, restart must be activated explicitly.
+   !    dtsets(idtset)%eph_restart = 0
+   !    stop "hello"
+   !  end if
+   !  !dtsets(idtset)%mixprec = 1
+   !  !dtsets(idtset)%boxcutmin = 1.1_dp
    !end if
  end do
+ !stop
 
  DBG_EXIT("COLL")
 

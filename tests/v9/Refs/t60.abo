@@ -2,7 +2,7 @@
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -302,7 +302,6 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
    eph_prtscratew10         0
    eph_prtscratew11         0
    eph_prtscratew12         0
-      eph_restart           1
          eph_task1          4
          eph_task2          5
          eph_task3          4
@@ -3148,7 +3147,6 @@ meta: {optdriver: 7, eph_task: 9, }
    eph_prtscratew10         0
    eph_prtscratew11         0
    eph_prtscratew12         0
-      eph_restart           1
          eph_task1          4
          eph_task2          5
          eph_task3          4

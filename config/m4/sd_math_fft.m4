@@ -336,12 +336,12 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
   # Warn about incompatibilities
   if test "${tmp_linalg_has_mkl}" != ""; then
       AC_MSG_WARN([MKL is incompatible with FFTW3
-  
+
                     Please use DFTI instead and consult
                     https://software.intel.com/content/www/us/en/develop/documentation/onemkl-developer-reference-fortran/top/fourier-transform-functions.html
-  
+
                     If you set the FFT flavor to fftw3, the configure script
-                    will abort. Otherwise, your FFTW3 settings will be ignored. 
+                    will abort. Otherwise, your FFTW3 settings will be ignored.
       ])
     sd_fftw3_enable="no"
   fi

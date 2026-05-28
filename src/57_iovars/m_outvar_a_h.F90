@@ -818,7 +818,7 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%dmft_triqs_tol_block
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_tol_b','DPR',0)
 
- intarr(1,:)=dtsets(:)%dmft_full_chipsi                                                              
+ intarr(1,:)=dtsets(:)%dmft_full_chipsi
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_full_chipsi','INT',0)
 
  intarr(1,:)=dtsets(:)%dmft_wanorthnorm
@@ -1435,6 +1435,9 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)  =dtsets(:)%gstore_with_vk
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gstore_with_vk','INT',0)
 
+ intarr(1,:)  =dtsets(:)%gstore_iv1p_comm
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gstore_iv1p_comm','INT',0)
+
  intarr(1,:)  =dtsets(:)%gstore_use_lgk
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gstore_use_lgk','INT',0)
 
@@ -1583,6 +1586,12 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%gwgamma
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwgamma','INT',0)
+
+ intarr(1,:)=dtsets(:)%gwpt_wmode
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwpt_wmode','INT',0)
+
+ intarr(1,:)=dtsets(:)%gwpt_g2mode
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwpt_g2mode','INT',0)
 
  intarr(1,:)=dtsets(:)%gwmem
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwmem','INT',0)

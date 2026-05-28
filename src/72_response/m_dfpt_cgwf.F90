@@ -29,6 +29,7 @@ module m_dfpt_cgwf
  use defs_basis
  use m_abicore
  use m_errors
+ use m_xomp
  use m_xmpi
  use m_cgtools
  use m_rf2
@@ -1091,7 +1092,6 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      end if
    end do
 
-
    !DEBUG Keep this debugging feature !
    !call sqnorm_g(dotr,istwf_k,npw1*nspinor,direc,me_g0,comm_fft)
    !write(std_out,*)' dfpt_cgwf: after projbd, direc**2=',dotr
@@ -1820,7 +1820,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
                        full_cg1, full_ur1, init_mode) ! optional
 
 !Arguments ------------------------------------
- class(stern_t),intent(inout) :: stern
+ class(stern_t),target,intent(inout) :: stern
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(rf_hamiltonian_type),intent(inout) :: rf_hamkq
  integer,intent(in) :: u1_band, band_me, idir, ipert
@@ -1838,12 +1838,14 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 !Local variables ------------------------------
 !scalars
  integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, ibgq0 = 0, nbdbuf0 = 0, quit0 = 0, istwfk1 = 1, ndat1 = 1, timcount0 = 0
- integer :: opt_gvnlx1, grad_berry_size_mpw1, iband
+ integer :: opt_gvnlx1, grad_berry_size_mpw1, iband, gpu_option
  real(dp) :: out_resid, fermie1, eig0nk !, dotr
+ logical :: map_cgq, map_vlocal
  character(len=500) :: init_mode__
  type(rf2_t) :: rf2
 !arrays
  real(dp),allocatable :: grad_berry(:,:)
+ real(dp), contiguous, pointer :: cgq_ptr(:,:,:), vlocal_ptr(:,:,:,:) !, work_ptr(:,:,:,:), gscq_ptr(:,:,:)
  complex(gwp),allocatable :: cwork_sp(:)
  logical :: cycle_bands(stern%nband)
 #ifdef HAVE_GW_DPC
@@ -1874,6 +1876,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 
  !if (psps%usepaw==1) mcprjq = stern%nspinor*mband_mem*mkqmem*nsppol*usecprj
 
+ gpu_option = stern%dtset%gpu_option
  init_mode__ = "None"; if (present(init_mode)) init_mode__ = init_mode
 
  select case (init_mode__)
@@ -1905,6 +1908,20 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    ABI_ERROR(sjoin("Invalid init_mode:", init_mode__))
  end select
 
+ cgq_ptr => stern%cgq
+ vlocal_ptr => gs_hamkq%vlocal
+
+ if (gpu_option == ABI_GPU_OPENMP) then
+   ! Upload cgq array to GPU
+   map_cgq  =  .not. (xomp_target_is_present(c_loc(cgq_ptr)))
+   map_vlocal = .not. (xomp_target_is_present(c_loc(vlocal_ptr)))
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:cgq_ptr) IF (map_cgq)
+   !$OMP TARGET ENTER DATA MAP(to:vlocal_ptr) IF (map_vlocal)
+#endif
+ end if
+
+ !print *, "before dfpt_cgwf
  call dfpt_cgwf(u1_band, band_me, stern%rank_band, stern%bands_treated_now, berryopt0, &
    stern%cgq, ug1_nkq, ug0_nk, &  ! Important stuff
    cprj1_nkq, cprj0_nk, rf2, stern%dcwavef, &
@@ -1915,8 +1932,17 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    nbdbuf0, stern%nline_in, stern%npw_k, stern%npw_kq, stern%nspinor, &
    opt_gvnlx1, stern%dtset%prtvol, quit0, out_resid, rf_hamkq, stern%dtset%dfpt_sciss, -one, stern%dtset%tolwfr, &
    stern%usedcwavef, stern%dtset%wfoptalg, stern%nlines_done, usetolrde=0)
+ !print *, "after dfpt_cgwf
 
  ABI_FREE(grad_berry)
+
+ if (gpu_option == ABI_GPU_OPENMP) then
+   if (map_vlocal) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:vlocal_ptr)
+#endif
+   end if
+ end if
 
  if (stern%use_cache) then
    ! Store |Psi_1> to init Sternheimer solver for the next q-point.
@@ -2016,7 +2042,10 @@ end subroutine stern_solve
 subroutine stern_free(stern)
 
 !Arguments ------------------------------------
- class(stern_t),intent(inout) :: stern
+ class(stern_t),target,intent(inout) :: stern
+
+!Local variables ------------------------------
+ real(dp), contiguous, pointer :: cgq_ptr(:,:,:) !, work_ptr(:,:,:,:), gscq_ptr(:,:,:)
 !************************************************************************
 
  ! integer
@@ -2031,7 +2060,7 @@ subroutine stern_free(stern)
  ABI_SFREE(stern%ghc)
  ABI_SFREE(stern%gsc)
  ABI_SFREE(stern%gvnlxc)
- ABI_SFREE(stern%cgq)
+
  ABI_SFREE(stern%gscq)
  ABI_SFREE(stern%gvnlx1)
  ABI_SFREE(stern%work)
@@ -2046,6 +2075,15 @@ subroutine stern_free(stern)
  !end if
  ABI_SFREE(stern%cprjq)
  ABI_SFREE(stern%cwaveprj1)
+
+ cgq_ptr => stern%cgq
+#ifdef HAVE_OPENMP_OFFLOAD
+ ! Free array on the GPU
+ if (xomp_target_is_present(c_loc(cgq_ptr))) then
+   !$OMP TARGET EXIT DATA MAP(delete:cgq_ptr)
+ end if
+#endif
+ ABI_SFREE(stern%cgq)
 
 end subroutine stern_free
 !!***

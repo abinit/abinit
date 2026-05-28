@@ -142,7 +142,7 @@ fermie_nest 0
 #%% executable = abinit
 #%% test_chain = t72.abi, t73.abi, t74.abi, t75.abi, t76.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t72.abo, tolnlines = 11, tolabs = 4.0e-3, tolrel = 1.1, fld_options =  -easy
 #%% [paral_info]
 #%% max_nprocs = 2
@@ -151,6 +151,6 @@ fermie_nest 0
 #%% keywords = NC, DFPT
 #%% description = Ground state and phonons of hcp TiNb alloy
 #%%  Note that this test has been made very fast for the purpose of non-regression. Not all results are meaningful.
-#%%  For example, using nstep 1 nline 1 in DS 7 to 12 is a problem, 
+#%%  For example, using nstep 1 nline 1 in DS 7 to 12 is a problem,
 #%%  e.g. the hermiticity of the echoed dynamical matrix is broken...
 #%%<END TEST_INFO>

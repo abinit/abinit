@@ -458,7 +458,7 @@ subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  !    Ifc%gprim(ii, 2) = crystal%gprimd(ii, 2) * Ifc%acell(2)
  !    Ifc%gprim(ii, 3) = crystal%gprimd(ii, 3) * Ifc%acell(3)
  !  end do
- !  
+ !
  !end if
 
  ! Check if the rprim are coherent with the choice used in the interatomic forces generation

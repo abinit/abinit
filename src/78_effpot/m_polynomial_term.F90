@@ -370,7 +370,7 @@ subroutine polynomial_term_free(polynomial_term)
  ABI_SFREE(polynomial_term%power_strain)
  ABI_SFREE(polynomial_term%strain)
  ABI_SFREE(polynomial_term%index_coeff)
- 
+
 end subroutine polynomial_term_free
 !!***
 

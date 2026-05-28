@@ -1,5 +1,5 @@
 
- **** DERIVATIVE DATABASE ****    
+ **** DERIVATIVE DATABASE ****
 +DDB, Version number  20240201
 
  DDB for GaAs, 2.0Ha, 2SP in the IBZ. For testing purposes only.
@@ -133,7 +133,7 @@
             0.25000000000000D+00  0.25000000000000D+00  0.25000000000000D+00
      znucl  0.31000000000000D+02  0.33000000000000D+02
       zion  0.30000000000000D+01  0.50000000000000D+01
- 
+
   Description of the potentials (KB energies)
   vrsio8 (for pseudopotentials)=100401
   usepaw =  0
@@ -146,10 +146,10 @@
   iln lpsang iproj  ekb(:)
      1     0     1     9.0194587E+00  0.0000000E+00
      2     1     1     0.0000000E+00 -9.0827370E-01
- 
+
  **** Database of total energy derivatives ****
  Number of data blocks=    3
-  
+
  2nd derivatives (non-stat.)  - # elements :          81
  qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
  frequency  0.00000000E+00
@@ -234,7 +234,7 @@
    1   4   3   4  0.39727759770603D+02  0.00000000000000D+00
    2   4   3   4  0.39727759770603D+02  0.00000000000000D+00
    3   4   3   4 -0.11918327931181D+03  0.00000000000000D+00
-  
+
  2nd derivatives (non-stat.)  - # elements :          36
  qpt  2.50000000E-01  2.50000000E-01  2.50000000E-01   1.0
  frequency  0.00000000E+00
@@ -274,7 +274,7 @@
    1   2   3   2  0.86095273201523D+01  0.14401354273721D-15
    2   2   3   2  0.86095273201523D+01  0.27796462972872D-17
    3   2   3   2  0.17566297273703D+02 -0.43865436814143D-16
-  
+
  2nd derivatives (non-stat.)  - # elements :          36
  qpt  2.50000000E-01  5.00000000E-01  5.00000000E-01   1.0
  frequency  0.00000000E+00
