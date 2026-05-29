@@ -1,8 +1,8 @@
 
-.Version 10.6.4.5 of ABINIT, released Dec 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.Version 10.9.0.1 of ABINIT. v10.8.1 released May 2026.
+.(sequential version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2026 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 Mar 2026.
-- ( at 12h42 )
+.Starting date : Fri 29 May 2026.
+- ( at 20h26 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/TestBot_MPI1/v10_t42/t42.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/jzwanzig_develop/tests/Test_suite/v10_t42/t42.abi
 - output file    -> t42.abo
 - root for input  files -> t42i
 - root for output files -> t42o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_serial/jzwanzig_develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_serial/jzwanzig_develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
 
  invars1: COMMENT -
   With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.
@@ -233,9 +233,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/jzwanzig_develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/jzwanzig_develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_serial/jzwanzig_develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90690075
@@ -254,9 +254,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/jzwanzig_develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/jzwanzig_develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_serial/jzwanzig_develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -764,9 +764,9 @@ meta: {optdriver: 1, rfddk: 1, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/jzwanzig_develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/jzwanzig_develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_serial/jzwanzig_develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90690075
@@ -785,9 +785,9 @@ meta: {optdriver: 1, rfddk: 1, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/jzwanzig_develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/jzwanzig_develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_serial/jzwanzig_develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -1000,100 +1000,100 @@ tolerances: {tolwfr: 1.00E-20, }
  Orbital magnetic moment computed with DFPT derivative wavefunctions 
 
  Orbital magnetic moment, Cartesian directions :
- -3.83068481E-04 -3.69218254E-09  6.35255714E-10
+ -3.83071198E-04 -2.08142020E-10 -2.99655049E-10
 
 
  Chern vector, Cartesian directions :
-  2.52292580E-06  7.13139116E-11  2.93766916E-13
+  2.52292580E-06  7.13139116E-11  2.93766920E-13
 
 
  Orbital magnetic moment, term-by-term breakdown :
-     rho(1) CC :   2.32709914E-04 -3.70922843E-09  6.06843675E-10
-    rho(1) VV1 :  -6.15803628E-06 -6.66578692E-12  9.09278143E-13
-    rho(1) VV2 :  -7.63447826E-10  4.92619555E-13 -1.15535517E-12
-     rho(0) NL :   1.62821823E-04 -1.48515201E-11  8.53551832E-11
-   <L_R> terms :  -3.28164900E-06  3.80678350E-11 -5.66987040E-11
- <A0.An> terms :  -2.39638514E-06  2.73396205E-15  1.63680270E-15
+     rho(1) CC :   2.32707198E-04 -2.25187874E-10 -3.28067064E-10
+    rho(1) VV1 :  -6.15803628E-06 -6.66578705E-12  9.09278257E-13
+    rho(1) VV2 :  -7.63447826E-10  4.92619556E-13 -1.15535518E-12
+     rho(0) NL :   1.62821823E-04 -1.48515477E-11  8.53551586E-11
+   <L_R> terms :  -3.28164900E-06  3.80678351E-11 -5.66987042E-11
+ <A0.An> terms :  -2.39638514E-06  2.73396205E-15  1.63680269E-15
     Lamb terms :  -7.66763385E-04  0.00000000E+00  0.00000000E+00
  Chern vector, term-by-term breakdown :
   Ch CC :   2.37474921E-06  7.00719129E-11  3.34215793E-13
- Ch vv1 :   1.48176589E-07  1.24199879E-12 -4.04488767E-14
- Ch vv2 :   1.05879118E-22  3.18536254E-23 -7.64415368E-23
+ Ch vv1 :   1.48176589E-07  1.24199879E-12 -4.04488732E-14
+ Ch vv2 :   1.58818678E-22  5.28937264E-23 -1.06752366E-22
 
 
  Term-by-term breakdowns for each band :
 
 
  band   1 of   8
- Orbital magnetic moment :  -5.06235159E-04  1.70294979E-10 -2.33865399E-10
-     rho(1) CC :  -1.47996625E-04 -2.27501002E-12 -1.69683431E-11
-    rho(1) VV1 :   4.28470603E-05  3.35205237E-13  2.12737542E-13
-    rho(1) VV2 :  -1.04638602E-06  3.61577404E-13  7.78542680E-15
-     rho(0) NL :  -4.00420698E-04  1.71460773E-10 -2.16870368E-10
-   <L_R> terms :   5.34296971E-07  4.06193548E-13 -2.53405190E-13
+ Orbital magnetic moment :  -5.06235178E-04  1.63937838E-10 -2.25128154E-10
+     rho(1) CC :  -1.47996644E-04 -8.63215019E-12 -8.23109900E-12
+    rho(1) VV1 :   4.28470603E-05  3.35205241E-13  2.12737535E-13
+    rho(1) VV2 :  -1.04638602E-06  3.61577403E-13  7.78542585E-15
+     rho(0) NL :  -4.00420698E-04  1.71460772E-10 -2.16870366E-10
+   <L_R> terms :   5.34296971E-07  4.06193556E-13 -2.53405180E-13
  <A0.An> terms :  -1.52806323E-07  6.23962760E-15  6.19348098E-15
 
 
  Chern vector :  -2.91953497E-07  1.88145487E-13  2.60065581E-13
   Ch CC :   1.30931767E-07  1.94853489E-13  2.63345747E-13
  Ch VV1 :  -4.33397398E-07 -3.91384356E-15 -2.79560223E-15
- Ch VV2 :   1.05121338E-08 -2.79415873E-15 -4.84564051E-16
+ Ch VV2 :   1.05121338E-08 -2.79415872E-15 -4.84564038E-16
 
 
  band   2 of   8
- Orbital magnetic moment :   5.36278821E-04 -4.17421420E-10  2.37009385E-10
-     rho(1) CC :   1.54003439E-04  2.36601736E-13  4.54758002E-13
+ Orbital magnetic moment :   5.36278809E-04 -4.05982180E-10  2.47160999E-10
+     rho(1) CC :   1.54003427E-04  1.16758425E-11  1.06063726E-11
     rho(1) VV1 :  -4.46943208E-05 -5.49414092E-12 -1.44019506E-12
-    rho(1) VV2 :   1.03108923E-06 -5.06262782E-14 -1.31576216E-12
-     rho(0) NL :   4.26721623E-04 -4.12676142E-10  2.38995566E-10
-   <L_R> terms :  -6.30443369E-07  5.56602916E-13  3.08854306E-13
- <A0.An> terms :  -1.52565897E-07  6.28441532E-15  6.16375605E-15
+    rho(1) VV2 :   1.03108923E-06 -5.06262745E-14 -1.31576216E-12
+     rho(0) NL :   4.26721623E-04 -4.12676143E-10  2.38995565E-10
+   <L_R> terms :  -6.30443369E-07  5.56602916E-13  3.08854310E-13
+ <A0.An> terms :  -1.52565897E-07  6.28441532E-15  6.16375604E-15
 
 
- Chern vector :   3.08818394E-07 -1.94022205E-13 -2.21688229E-13
+ Chern vector :   3.08818394E-07 -1.94022206E-13 -2.21688229E-13
   Ch CC :  -1.32866013E-07 -2.50905317E-13 -2.49787075E-13
  Ch VV1 :   4.52063380E-07  5.64711688E-14  1.50962529E-14
- Ch VV2 :  -1.03789740E-08  4.11943105E-16  1.30025926E-14
+ Ch VV2 :  -1.03789740E-08  4.11943074E-16  1.30025926E-14
 
 
  band   3 of   8
- Orbital magnetic moment :  -5.52080795E-04 -1.32271487E-10  3.75712010E-10
-     rho(1) CC :  -2.33229325E-04 -6.03598786E-11  2.70822100E-10
-    rho(1) VV1 :   6.86652974E-06 -3.07789651E-13  3.36339736E-13
-    rho(1) VV2 :   3.15736793E-07  9.14523755E-14 -2.33677015E-14
-     rho(0) NL :  -3.82145004E-04 -8.20465582E-11  1.15007163E-10
+ Orbital magnetic moment :  -5.52080795E-04 -7.08516858E-11  1.06484566E-10
+     rho(1) CC :  -2.33229326E-04  1.05992109E-12  1.59465607E-12
+    rho(1) VV1 :   6.86652974E-06 -3.07789655E-13  3.36339730E-13
+    rho(1) VV2 :   3.15736793E-07  9.14523773E-14 -2.33677027E-14
+     rho(0) NL :  -3.82145004E-04 -8.20465562E-11  1.15007163E-10
    <L_R> terms :   5.64482021E-05  1.03513168E-11 -1.04299317E-11
  <A0.An> terms :  -3.36933614E-07 -3.01388160E-17 -2.93482116E-16
 
 
  Chern vector :  -1.87422368E-05  8.54510081E-13 -1.23401365E-12
   Ch CC :  -1.85566067E-05  8.49583570E-13 -1.22587164E-12
- Ch VV1 :  -1.77935119E-07  7.14625869E-15 -8.47416989E-15
- Ch VV2 :  -7.69490061E-09 -2.21974726E-15  3.32169243E-16
+ Ch VV1 :  -1.77935119E-07  7.14625864E-15 -8.47416993E-15
+ Ch VV2 :  -7.69490061E-09 -2.21974729E-15  3.32169268E-16
 
 
  band   4 of   8
- Orbital magnetic moment :   7.00117045E-04 -2.05642776E-10  5.52662670E-11
-     rho(1) CC :   3.05431039E-04 -2.96629820E-10  5.93301738E-11
-    rho(1) VV1 :  -8.91874481E-06 -1.45094570E-12  1.86598518E-12
-    rho(1) VV2 :  -2.95233499E-07  9.01810443E-14  1.59066409E-13
-     rho(0) NL :   4.59282533E-04  7.13019711E-11  2.33133913E-12
-   <L_R> terms :  -5.50456704E-05  2.10460488E-11 -8.42010934E-12
+ Orbital magnetic moment :   7.00116709E-04  8.76592705E-11 -9.53061703E-12
+     rho(1) CC :   3.05430703E-04 -3.32777026E-12 -5.46671023E-12
+    rho(1) VV1 :  -8.91874481E-06 -1.45094570E-12  1.86598517E-12
+    rho(1) VV2 :  -2.95233499E-07  9.01810436E-14  1.59066409E-13
+     rho(0) NL :   4.59282533E-04  7.13019674E-11  2.33133917E-12
+   <L_R> terms :  -5.50456704E-05  2.10460488E-11 -8.42010935E-12
  <A0.An> terms :  -3.36878067E-07 -2.10850091E-16 -1.88203944E-16
 
 
  Chern vector :   1.80167129E-05  2.48921047E-12  5.17350566E-14
   Ch CC :   1.77832025E-05  2.45789365E-12  9.61687066E-14
- Ch VV1 :   2.26284614E-07  3.34074488E-14 -4.17942560E-14
- Ch VV2 :   7.22579783E-09 -2.09062949E-15 -2.63939394E-15
+ Ch VV1 :   2.26284614E-07  3.34074487E-14 -4.17942560E-14
+ Ch VV2 :   7.22579783E-09 -2.09062951E-15 -2.63939396E-15
 
 
  band   5 of   8
- Orbital magnetic moment :  -1.18575016E-02 -4.66879199E-09 -8.12359838E-09
-     rho(1) CC :  -2.08906667E-02 -8.23727849E-09 -1.16157327E-08
+ Orbital magnetic moment :  -1.18575018E-02 -5.52067112E-09 -5.58968984E-09
+     rho(1) CC :  -2.08906669E-02 -9.08915762E-09 -9.08182412E-09
     rho(1) VV1 :  -1.24780302E-05  2.90175560E-11  2.88063271E-11
-    rho(1) VV2 :   5.38022658E-08  1.46884834E-13  8.35541904E-14
-     rho(0) NL :   1.09491391E-02  4.23065691E-09  4.15730961E-09
+    rho(1) VV2 :   5.38022658E-08  1.46884834E-13  8.35541916E-14
+     rho(0) NL :   1.09491391E-02  4.23065692E-09  4.15730959E-09
    <L_R> terms :  -1.90321101E-03 -6.91485091E-10 -6.94215878E-10
  <A0.An> terms :  -3.38734481E-07  1.50234572E-13  1.50691135E-13
 
@@ -1105,11 +1105,11 @@ tolerances: {tolwfr: 1.00E-20, }
 
 
  band   6 of   8
- Orbital magnetic moment :   1.25064837E-02  4.93095688E-09  7.78576161E-09
-     rho(1) CC :   2.15027895E-02  8.49078517E-09  1.13037443E-08
-    rho(1) VV1 :   1.10331773E-05 -2.87323465E-11 -2.88915271E-11
-    rho(1) VV2 :  -5.38169726E-08 -1.54157941E-13 -6.54067822E-14
-     rho(0) NL :  -1.09098240E-02 -4.27330939E-09 -4.18411841E-09
+ Orbital magnetic moment :   1.25064841E-02  5.46779660E-09  6.02665457E-09
+     rho(1) CC :   2.15027899E-02  9.02762491E-09  9.54463723E-09
+    rho(1) VV1 :   1.10331773E-05 -2.87323468E-11 -2.88915269E-11
+    rho(1) VV2 :  -5.38169726E-08 -1.54157941E-13 -6.54067819E-14
+     rho(0) NL :  -1.09098240E-02 -4.27330940E-09 -4.18411842E-09
    <L_R> terms :   1.90287868E-03  7.42209788E-10  6.94935166E-10
  <A0.An> terms :  -3.39834430E-07  1.57808721E-13  1.57526200E-13
 
@@ -1121,12 +1121,12 @@ tolerances: {tolwfr: 1.00E-20, }
 
 
  band   7 of   8
- Orbital magnetic moment :  -1.72212866E-02 -3.20122935E-09 -3.61136133E-09
-     rho(1) CC :  -2.85037728E-02 -3.63080587E-09 -3.62541243E-09
+ Orbital magnetic moment :  -1.72212876E-02 -2.88276287E-09 -3.25237745E-09
+     rho(1) CC :  -2.85037738E-02 -3.31233937E-09 -3.26642855E-09
     rho(1) VV1 :   7.45476172E-07  4.41494782E-11  4.41816485E-11
-    rho(1) VV2 :   5.47252559E-08  2.48825938E-13  2.58611919E-13
-     rho(0) NL :   1.36522407E-02  4.13604616E-10  8.91745415E-15
-   <L_R> terms :  -2.37018520E-03 -2.82654848E-11 -3.02368755E-11
+    rho(1) VV2 :   5.47252559E-08  2.48825937E-13  2.58611917E-13
+     rho(0) NL :   1.36522407E-02  4.13604601E-10  8.91832690E-15
+   <L_R> terms :  -2.37018520E-03 -2.82654848E-11 -3.02368758E-11
  <A0.An> terms :  -3.69489807E-07 -1.60920765E-13 -1.61198096E-13
 
 
@@ -1137,19 +1137,19 @@ tolerances: {tolwfr: 1.00E-20, }
 
 
  band   8 of   8
- Orbital magnetic moment :   1.67779195E-02 -1.68077374E-10  4.15033154E-09
-     rho(1) CC :   2.80461514E-02  2.70988636E-11  4.23060583E-09
-    rho(1) VV1 :  -1.55918394E-06 -4.41828035E-11 -4.41620377E-11
-    rho(1) VV2 :  -6.06804919E-08 -2.41517822E-13 -2.59836478E-13
-     rho(0) NL :  -1.36321724E-02 -1.33843706E-10 -2.73086278E-11
-   <L_R> terms :   2.36592950E-03 -1.67515391E-11 -8.38652465E-12
+ Orbital magnetic moment :   1.67779180E-02  2.95273213E-09  2.39677086E-09
+     rho(1) CC :   2.80461499E-02  3.14790837E-09  2.47704515E-09
+    rho(1) VV1 :  -1.55918394E-06 -4.41828035E-11 -4.41620378E-11
+    rho(1) VV2 :  -6.06804919E-08 -2.41517823E-13 -2.59836477E-13
+     rho(0) NL :  -1.36321724E-02 -1.33843711E-10 -2.73086323E-11
+   <L_R> terms :   2.36592950E-03 -1.67515392E-11 -8.38652465E-12
  <A0.An> terms :  -3.69142517E-07 -1.56671621E-13 -1.57257987E-13
 
 
  Chern vector :   3.16987660E-03  2.57210314E-10  1.82815072E-10
   Ch CC :   3.22836926E-03  2.58040812E-10  1.83668842E-10
  Ch VV1 :  -5.81946073E-05 -8.29734786E-13 -8.47626662E-13
- Ch VV2 :  -2.98055113E-07 -7.62909190E-16 -6.14379605E-15
+ Ch VV2 :  -2.98055113E-07 -7.62909140E-16 -6.14379607E-15
 
 ====================================================
 
@@ -1287,10 +1287,59 @@ P          mk1mem          32
  and a postprocessing based on the final acell, rprim, and xred.
  More details in the log file.
 
+- Total cpu        time (s,m,h):         54.5        0.91      0.015
+- Total wall clock time (s,m,h):         54.5        0.91      0.015
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0
+-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           54.5, wall_time =           54.5
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- fourwf%(pot)                             36.901  67.7        37.040  67.9         835856      -1.00        1.00       1.00
+- pawdenpot                                 7.057  13.0         7.060  13.0             11      -1.00        1.00       1.00
+- dfpt_vtowfk(contrib)                      6.259  11.5         6.271  11.5             -1      -1.00        1.00       1.00
+- dfpt_cgwf-O(npw)                          2.901   5.3         2.888   5.3             -1      -1.00        1.00       1.00
+- pspini                                    2.232   4.1         2.232   4.1              2      -1.00        1.00       1.00
+- dfpt_nstpaw                               1.250   2.3         1.250   2.3              3      -1.00        1.00       1.00
+- nonlop(apply)                             1.096   2.0         1.053   1.9          38417      -1.00        1.04       1.04
+- vtowfk(contrib)                           0.818   1.5         0.808   1.5            320      -1.00        1.01       1.01
+- fourwf%(den)                              0.593   1.1         0.614   1.1          22528      -1.00        0.97       0.97
+- mkrho/=                                   0.549   1.0         0.548   1.0             46      -1.00        1.00       1.00
+- projbd                                    0.360   0.7         0.355   0.7          57569      -1.00        1.01       1.01
+- pawdij/symdij                             0.309   0.6         0.310   0.6             32      -1.00        1.00       1.00
+- getghc(/=fourXX,nonlop,fock_XX)          -7.882 -14.5        -7.984 -14.6             -1      -1.00        0.99       0.99
+- others (204)                              1.300   2.4         1.331   2.4             -1      -1.00        0.98       0.98
+-<END_TIMER>
+-
+- subtotal                                 53.744  98.6        53.776  98.6                                  1.00       1.00
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =          54.5, wall_time =          54.5
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- fourwf%(pot)                             36.901  67.7        37.040  67.9         835856      -1.00        1.00       1.00
+- pawdenpot                                 7.057  13.0         7.060  13.0             11      -1.00        1.00       1.00
+- dfpt_vtowfk(contrib)                      6.259  11.5         6.271  11.5             -1      -1.00        1.00       1.00
+- dfpt_cgwf-O(npw)                          2.901   5.3         2.888   5.3             -1      -1.00        1.00       1.00
+- pspini                                    2.232   4.1         2.232   4.1              2      -1.00        1.00       1.00
+- dfpt_nstpaw                               1.250   2.3         1.250   2.3              3      -1.00        1.00       1.00
+- nonlop(apply)                             1.096   2.0         1.053   1.9          38417      -1.00        1.04       1.04
+- vtowfk(contrib)                           0.818   1.5         0.808   1.5            320      -1.00        1.01       1.01
+- fourwf%(den)                              0.593   1.1         0.614   1.1          22528      -1.00        0.97       0.97
+- mkrho/=                                   0.549   1.0         0.548   1.0             46      -1.00        1.00       1.00
+- projbd                                    0.360   0.7         0.355   0.7          57569      -1.00        1.01       1.01
+- pawdij/symdij                             0.309   0.6         0.310   0.6             32      -1.00        1.00       1.00
+- others (205)                             -6.581 -12.1        -6.653 -12.2             -1      -1.00        0.99       0.99
+-<END_TIMER>
 
+- subtotal                                 53.744  98.6        53.776  98.6                                  1.00       1.00
 
 ================================================================================
 
@@ -1387,10 +1436,10 @@ P          mk1mem          32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- Proc.   0 individual time (sec): cpu=         50.7  wall=         50.7
+- Proc.   0 individual time (sec): cpu=         54.5  wall=         54.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  26 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         50.7  wall=         50.7
+.Delivered  28 WARNINGs and  19 COMMENTs to log file.
++Overall time at end (sec) : cpu=         54.5  wall=         54.5
