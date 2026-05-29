@@ -33,6 +33,7 @@ target_compile_definitions(45_xgTools
 
 target_link_libraries(45_xgTools
   PUBLIC
+  abinit::16_hideleave
   abinit::44_abitools
   abinit::44_abitypes_defs
 )
