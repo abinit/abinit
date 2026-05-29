@@ -459,7 +459,7 @@ module m_iterative_solvers
         m = gmres_maxiter
         ABI_MALLOC(h, (m+1, m))
         ABI_MALLOC(v, (n, m+1))
-        res = gmres_rtol
+        res = gmres_rtol * norm2(rhs)
         del = 0
         its = gmres_maxiter  ! No restart
         info = 0
