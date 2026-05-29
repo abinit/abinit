@@ -1,8 +1,8 @@
 
 .Version 10.5.8.1 of ABINIT. v10.7.1 released Mar 2026.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Mon 20 Apr 2026.
 - ( at 10h00 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v10_t54/t54.abi
 - output file    -> t54.abo
 - root for input  files -> t54i
@@ -805,7 +805,7 @@ meta: {optdriver: 1, rfmagn: 3, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=  12
@@ -900,54 +900,54 @@ tolerances: {tolvrs: 1.00E-05, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1   12        -0.0006621638        -0.1738299263
-  
+
    2    1   1   12         0.0005296759        -0.0902693493
-  
+
    3    1   1   12        -0.0001042950         0.0001097062
-  
+
    1    2   1   12         0.0049339431        -0.1737070267
-  
+
    2    2   1   12        -0.0027076130         0.0905104403
-  
+
    3    2   1   12         0.0001778417        -0.0001188600
-  
+
    1    3   1   12        -0.0084214790        -0.2734037220
-  
+
    2    3   1   12        -0.0102096475        -0.0287108242
-  
+
    3    3   1   12        -0.0000649593         0.0000548429
-  
+
    1    4   1   12        -0.0172506858        -0.2732123285
-  
+
    2    4   1   12         0.0110916072         0.0285147446
-  
+
    3    4   1   12         0.0000298613         0.0001429871
-  
+
    1    5   1   12         0.0260387118        -0.2729266848
-  
+
    2    5   1   12         0.0122513817        -0.0282895992
-  
+
    3    5   1   12        -0.0000657693        -0.0000556103
-  
+
    1    6   1   12         0.0350407605        -0.2715637998
-  
+
    2    6   1   12        -0.0137495770         0.0274626363
-  
+
    3    6   1   12         0.0000629420        -0.0001231036
-  
+
    1   11   1   12         0.0000191433         0.0000015434
-  
+
    2   11   1   12         0.0000031354         0.0000244714
-  
+
    3   11   1   12        -0.0000329360        -0.0000176803
-  
+
    1   12   1    1        -0.0006621638         0.1738299263
    1   12   2    1         0.0005296759         0.0902693493
    1   12   3    1        -0.0001042950        -0.0001097062
@@ -988,46 +988,46 @@ tolerances: {tolvrs: 1.00E-05, }
    1   12   1   23        -0.0000030303        -0.0000017351
    1   12   2   23         0.0000054139        -0.0000092877
    1   12   3   23         0.0000071646         0.0000039933
-  
+
    1   18   1   12        -0.0004315145        -0.0001837883
-  
+
    2   18   1   12        -0.0002963035        -0.0001281592
-  
+
    3   18   1   12         0.0001647781         0.0001033527
-  
+
    1   19   1   12         0.0004389237         0.0001868744
-  
+
    2   19   1   12         0.0002891086         0.0001354424
-  
+
    3   19   1   12        -0.0001812655        -0.0001091867
-  
+
    1   20   1   12        -0.0000091914         0.0000005065
-  
+
    2   20   1   12         0.0000062477         0.0000103052
-  
+
    3   20   1   12         0.0000072475        -0.0000036805
-  
+
    1   21   1   12         0.0000102317        -0.0000055078
-  
+
    2   21   1   12         0.0000160418         0.0000010555
-  
+
    3   21   1   12         0.0000007370         0.0000042927
-  
+
    1   22   1   12         0.0000007883        -0.0000025928
-  
+
    2   22   1   12         0.0000010057        -0.0000020353
-  
+
    3   22   1   12         0.0000024151         0.0000022401
-  
+
    1   23   1   12        -0.0000030303         0.0000017351
-  
+
    2   23   1   12         0.0000054139         0.0000092877
-  
+
    3   23   1   12         0.0000071646        -0.0000039933
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      9.2100000000E+00  9.2100000000E+00  6.2560000000E+00 Bohr
               amu      5.49380500E+01  1.89984032E+01
@@ -1266,7 +1266,7 @@ P          mk1mem          12
 - D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
 - I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
 - Comment: the sixth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
 - The licence allows the authors to put it on the Web.
@@ -1289,7 +1289,7 @@ P          mk1mem          12
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
@@ -1307,7 +1307,7 @@ P          mk1mem          12
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
 - is available at
 -  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.

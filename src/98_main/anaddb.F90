@@ -195,16 +195,16 @@ program anaddb
    call ddb_lw_copy(ddb, ddb_lw, ddb_hdr)
  end if
 
- ! MR: Second- and third-order total energy derivatives calculated with the 
- ! magnetic penalty (constrained DFPT) are converted to physically relevant ones here. 
+ ! MR: Second- and third-order total energy derivatives calculated with the
+ ! magnetic penalty (constrained DFPT) are converted to physically relevant ones here.
  if (abs(dtset%magpen) > tol8) then
-   call ddb_magpen(ddb, ddb_lw, dtset%magpen, dtset%mpatpol, & 
+   call ddb_magpen(ddb, ddb_lw, dtset%magpen, dtset%mpatpol, &
  & dtset%mpdir, dtset%mpert, dtset%mpopt,  Crystal%natom, dtset%prtvol, 1, Crystal%ucvol, dtset%timdisp, &
  & Crystal%xred)
 
    if (dtset%freqflag/=0) then
      call ddb_omega_interpol(Crystal%amu, ddb, ddb_lw, dtset%eta, dtset%prefix_outdata, &
-   & dtset%magpen, dtset%mpatpol, dtset%mpdir, dtset%mpert, dtset%mpopt,  Crystal%natom, dtset%nfreq, Crystal%ntypat, & 
+   & dtset%magpen, dtset%mpatpol, dtset%mpdir, dtset%mpert, dtset%mpopt,  Crystal%natom, dtset%nfreq, Crystal%ntypat, &
    & dtset%freqflag, dtset%frmax, dtset%frmin, dtset%prtvol, Crystal%typat, Crystal%ucvol, Crystal%xred)
    end if
 

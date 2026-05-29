@@ -996,27 +996,27 @@ class FortranKissParser(HasRegex):
         if not omp and m.group("value").strip():
             self.num_doclines += 1
 
-        # Robodoc (deactivated for the time being)
-        if False:
-            m = RobodocHeader.RE_HEADER_START.match(line)
-            if m:
-                robo_lines = [line]
-                while self.lines:
-                    line = self.lines.popleft()
-                    if not line.startswith("!!"):
-                        self.lines.appendleft(line)
-                        try:
-                            header = RobodocHeader.from_lines(robo_lines)
-                            # break
-                        except Exception as exc:
-                            cprint("Wrong Robodoc header in %s" % self.path, "red")
-                            cprint(str(exc), "red")
-                        finally:
-                            break
-                    else:
-                        robo_lines.append(line)
-                else:
-                    raise ValueError("You should not be here.")
+        # Robodoc (TODO: deactivated for the time being)
+        #if False:
+        #    m = RobodocHeader.RE_HEADER_START.match(line)
+        #    if m:
+        #        robo_lines = [line]
+        #        while self.lines:
+        #            line = self.lines.popleft()
+        #            if not line.startswith("!!"):
+        #                self.lines.appendleft(line)
+        #                try:
+        #                    header = RobodocHeader.from_lines(robo_lines)
+        #                    # break
+        #                except Exception as exc:
+        #                    cprint("Wrong Robodoc header in %s" % self.path, "red")
+        #                    cprint(str(exc), "red")
+        #                finally:
+        #                    break
+        #            else:
+        #                robo_lines.append(line)
+        #        else:
+        #            raise ValueError("You should not be here.")
 
         # TODO Must handle comments after contains here!
         # if not self.stack or (self.stack and self.stack[-1][1] != "open"):

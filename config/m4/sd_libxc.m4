@@ -206,7 +206,7 @@ AC_SUBST([abi_fb_libxc_version])
 	  #    else
           #        AC_MSG_ERROR([invalid PKG-CONFIG  for LibXC: neither fortran90 nor fortran03 interface available])
 	  #    fi
-	  #else	  
+	  #else
           #     TMP_LIBXC04OR90_LIBS=''
 	  #fi
 
@@ -215,8 +215,8 @@ AC_SUBST([abi_fb_libxc_version])
           sd_libxc_cxxflags="${TMP_LIBXC_CPPFLAGS}"
           test "${sd_libxc_enable_fc}" = "yes" && \
                sd_libxc_fcflags="${TMP_LIBXC_FFLAGS}"
-          sd_libxc_ldflags="${TMP_LIBXC_LIBS}" 
-          sd_libxc_libs="${TMP_LIBXC_LIBS}" 
+          sd_libxc_ldflags="${TMP_LIBXC_LIBS}"
+          sd_libxc_libs="${TMP_LIBXC_LIBS}"
           ;;
 
 
@@ -299,7 +299,7 @@ AC_DEFUN([SD_LIBXC_DETECT], [
         sd_libxc_libs="-L${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_libxc_version}/lib ${sd_libxc_libs_def}"
       if test "${sd_libxc_status}" = "optional" -a \
               "${sd_libxc_init}" = "def"; then
- 
+
             sd_libxc_init='fb'
       else
         sd_libxc_init='fb'

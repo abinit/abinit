@@ -262,7 +262,7 @@ contains
 
  intarr(1,:)=dtsets(:)%paral_slice
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'paral_slice','INT',0)
- 
+
  intarr(1,:)=dtsets(:)%paw_add_core
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'paw_add_core','INT',0)
 
@@ -714,7 +714,7 @@ contains
  dprarr(2,:)=dtsets(:)%qgbt(2)
  dprarr(3,:)=dtsets(:)%qgbt(3)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'qgbt','DPR',0)
- 
+
  dprarr(1,:)=dtsets(:)%qgbt_cart(1)
  dprarr(2,:)=dtsets(:)%qgbt_cart(2)
  dprarr(3,:)=dtsets(:)%qgbt_cart(3)
@@ -1138,6 +1138,9 @@ contains
 
  intarr(1,:)=dtsets(:)%symsigma
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'symsigma','INT',0)
+
+ dprarr(1,:)=dtsets(:)%symsigma_de
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'symsigma_de','ENE',0)
 
  intarr(1,:)=dtsets(:)%symv1scf
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'symv1scf','INT',0)

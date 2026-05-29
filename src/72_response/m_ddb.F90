@@ -210,7 +210,7 @@ module m_ddb
 
     procedure :: set_omega => ddb_set_omega
      ! Set the frequency
-     
+
     !procedure :: get_qptopt => ddb_get_qptopt
 
     procedure :: set_qpt => ddb_set_qpt
@@ -1232,8 +1232,8 @@ end subroutine ddb_set_brav
 !!  ddb_to_d2etot
 !!
 !! FUNCTION
-!! Convert the physical quantities (Born charges, dielectric tensor, 
-!! magnetic susceptibility, etc...) 
+!! Convert the physical quantities (Born charges, dielectric tensor,
+!! magnetic susceptibility, etc...)
 !! stored in ddb%val to mathematical second-derivatives of the total energy
 !!
 !! INPUTS
@@ -1250,7 +1250,7 @@ end subroutine ddb_set_brav
 !!
 !! SOURCE
 
-subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,optgb,omega) 
+subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,optgb,omega)
 
 !Arguments -------------------------------
 !scalars
@@ -1284,7 +1284,7 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,optgb,o
 
  if (qeq0) then
 
-   !Born charges 
+   !Born charges
    if (optgb==1) then
      rfphon(1:2)=1
      rfelfd(1:2)=2
@@ -1321,13 +1321,13 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,optgb,o
            if (idir1==idir2) then
              blkval(:,idir1,ipert1,idir2,ipert2,kblok)= (one - val(:))*ucvol/four_pi
            else
-             blkval(:,idir1,ipert1,idir2,ipert2,kblok)= -ucvol/four_pi*val(:) 
+             blkval(:,idir1,ipert1,idir2,ipert2,kblok)= -ucvol/four_pi*val(:)
            end if
          else if (option==1) then
            if (idir1==idir2) then
              blkval(:,idir1,ipert1,idir2,ipert2,kblok)= one - four_pi/ucvol*val(:)
            else
-             blkval(:,idir1,ipert1,idir2,ipert2,kblok)= -four_pi/ucvol*val(:) 
+             blkval(:,idir1,ipert1,idir2,ipert2,kblok)= -four_pi/ucvol*val(:)
            end if
          end if
        end do
@@ -1561,7 +1561,7 @@ end subroutine ddb_bcast
 !!
 !! SOURCE
 
-subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, & 
+subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, &
 & mpatpol,mpdir,omega,rffreq,rfmagn,rfqvec)
 
 !Arguments -------------------------------
@@ -1920,7 +1920,7 @@ subroutine ddb_read_block_txt(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 !scalars
  integer,intent(in) :: mband,mpert,msize,nkpt,nunit
  integer,intent(in) :: iblok
- integer,intent(in) :: ddb_version 
+ integer,intent(in) :: ddb_version
  !logical, intent(in), optional :: eig2d
  class(ddb_type),intent(inout) :: ddb
 !arrays
@@ -5694,7 +5694,7 @@ subroutine ddb_read_d2E_nc(ddb, ncid, iblok, iblok_d2E, ddb_version)
 !scalars
  class(ddb_type),intent(inout) :: ddb
  integer,intent(in) :: ncid,iblok,iblok_d2E
- integer,intent(in) :: ddb_version 
+ integer,intent(in) :: ddb_version
 
 !Local variables -------------------------
 !scalars
@@ -5766,7 +5766,7 @@ subroutine ddb_read_d3E_nc(ddb, ncid, iblok, iblok_d3E, ddb_version)
 !scalars
  class(ddb_type),intent(inout) :: ddb
  integer,intent(in) :: ncid,iblok,iblok_d3E
- integer,intent(in) :: ddb_version 
+ integer,intent(in) :: ddb_version
 
 !Local variables -------------------------
 !scalars

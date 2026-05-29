@@ -2,15 +2,15 @@
 authors: XG
 ---
 
-# File format for ABINIT : Norm-Conserving Pseudopotentials 
+# File format for ABINIT : Norm-Conserving Pseudopotentials
 
-The pseudopotential files for ABINIT consist of a number of header lines, followed by the data on a radial grid.  
+The pseudopotential files for ABINIT consist of a number of header lines, followed by the data on a radial grid.
 The three first lines of the header have the same format and meaning for all norm-conserving pseudopotential files that can be read by ABINIT. They are :
 
      title  (single 80 character line)
      zatom, zion, pspdat
      pspcod, pspxc, lmax, lloc, mmax, r2well
-     
+
 The data may be located anywhere on the line as long as it is provided
 in the order indicated (it is read with free format).
 In the case of Si with lmax=2, the header may look like the following three lines:
@@ -29,9 +29,9 @@ The next two lines are important for ABINIT, with the following meaning:
      pspcod  : identifier for the pseudopotential format (crucial for further reading, see below !)
      pspxc   : the choice of exchange-correlation, coherent with the ABINIT nomenclature
      lmax    : highest angular momentum for which a pseudopotential
-      is defined, which is also used for the local potential 
+      is defined, which is also used for the local potential
      lloc    : angular momentum used for the local potential
-     mmax    : number of grid points 
+     mmax    : number of grid points
      r2well  : prefactor of a harmonic well sometimes used to bind
       electrons which would otherwise be unbound in lda (usually 0.000)
 

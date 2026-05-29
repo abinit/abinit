@@ -801,7 +801,7 @@ subroutine cart29(blkflg,blkval,carflg,d2cart,&
 !MRoyo: For magnetic Zeeman perturbations, apply a negative sign to get induced magnetic moments.
 !Macroscopic Zeeman
  mflg= 0
- ipert1=natom+5 
+ ipert1=natom+5
  do idir1=1,3
    do ipert2= 1, natom+6 !exclude local Zeemans, to be done below
      do idir2=1,3
@@ -825,7 +825,7 @@ subroutine cart29(blkflg,blkval,carflg,d2cart,&
 
 !Local Zeemans
  if (mpert>natom+MPERT_MAX) then
-   do ipert1= natom+12,2*natom+11 
+   do ipert1= natom+12,2*natom+11
      do idir1=1,3
        do ipert2= 1, mpert
          do idir2=1,3
@@ -846,12 +846,12 @@ subroutine cart29(blkflg,blkval,carflg,d2cart,&
          end do
        end do
      end do
-   end do 
+   end do
  end if
 
  !For magnetoelectric and magnetic susceptibility apply a 1/ucvol factor
  ipert1= natom + 2
- ipert2= natom + 5 
+ ipert2= natom + 5
  do idir1= 1, 3
    do idir2= 1, 3
      do ii=1,2
@@ -861,9 +861,9 @@ subroutine cart29(blkflg,blkval,carflg,d2cart,&
 &      d2cart(ii,idir2,ipert2,idir1,ipert1)/ucvol
        d2cart(ii,idir1,ipert2,idir2,ipert2)=&
 &      d2cart(ii,idir1,ipert2,idir2,ipert2)/ucvol
-     end do 
+     end do
    end do
- end do 
+ end do
 
 end subroutine cart29
 !!***
@@ -5102,7 +5102,7 @@ end subroutine gtdyn9
 !! NOTES
 !!   1) One makes the dynamical matrix hermitian...
 !!   2) In case of q=Gamma, only the real part is used.
-!!      (MR: Modified since at finite omega imaginary components may arise 
+!!      (MR: Modified since at finite omega imaginary components may arise
 !!      also at Gamma in broken time-reversal symmetry crystals)
 !!
 !! SOURCE

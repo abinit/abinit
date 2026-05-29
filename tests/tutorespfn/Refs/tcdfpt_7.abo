@@ -1,8 +1,8 @@
 
 .Version 10.5.8.1 of ANADDB. v10.7.1 released Mar 2026.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Mon 20 Apr 2026.
 - ( at 12h12 )
-  
+
 
 ================================================================================
 
@@ -35,7 +35,7 @@
 
 ================================================================================
 
- Frequency interpolation of second-order quantities calculated with constrained DFPT 
+ Frequency interpolation of second-order quantities calculated with constrained DFPT
        nfreq        10
        frmin         0.00000000E+00
        frmax         1.00000000E-02
@@ -63,7 +63,7 @@
 
 ================================================================================
 
- Constrained DFPT section 
+ Constrained DFPT section
 
  (Quantities are in atomic units and along Cartesian directions)
 
@@ -71,7 +71,7 @@
  q point        0.00000000      0.00000000      0.00000000
  frequency      0.00000000
 
- Spin susceptibility (Local Zeeman) 
+ Spin susceptibility (Local Zeeman)
 
  Local spin susceptibility
   atom1  dir  atom2  dir        Real              Imag
@@ -171,7 +171,7 @@
 
 --------------------------------------------------------------------------------
 
- First-order magnetic moments 
+ First-order magnetic moments
 
  Local Zeeman fields induced by atomic displacements (at constrained magnetic moments)
   atom1  dir  atom2  dir        Real              Imag
@@ -596,7 +596,7 @@
 
 --------------------------------------------------------------------------------
 
- Second-order linear-response tensors 
+ Second-order linear-response tensors
 
  Relaxed-spin interatomic force constants
   atom1  dir  atom2  dir        Real              Imag
@@ -1118,7 +1118,7 @@
 
 ================================================================================
 
- Frequency-derivatives (Berry curvatures) constrained DFPT section 
+ Frequency-derivatives (Berry curvatures) constrained DFPT section
 
 
 --------------------------------------------------------------------------------
@@ -1763,7 +1763,7 @@
 
 ================================================================================
 
- Frequency interpolation of constrained DFPT quantities section 
+ Frequency interpolation of constrained DFPT quantities section
 
 #  Relaxed-spin dielectric tensor calculated and interpolated by ANADDB
 
@@ -1872,13 +1872,13 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement

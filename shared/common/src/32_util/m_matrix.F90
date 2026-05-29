@@ -637,7 +637,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
  do im1=1,tndim
    Permutcol(im1,im1)=1.d0
  end do
- 
+
  if(prtopt == 1) then
    write(std_out,*) "MATRIX"
    do im1=1,tndim
@@ -754,7 +754,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
  end do
 
  if(prtopt == 1) then
-   write(std_out,*) "Check product of Apermutcol matrix by permutation matrix of the line "  
+   write(std_out,*) "Check product of Apermutcol matrix by permutation matrix of the line "
    write(std_out,*) "Permutline*Apermutcol"
    do im1=1,tndim
       write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (Apermutline(im1,im2),im2=1,tndim)

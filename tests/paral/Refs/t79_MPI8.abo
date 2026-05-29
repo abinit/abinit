@@ -298,14 +298,14 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  5  -10.404108358987     2.755E-06 9.200E-06 4.895E-07
  ETOT  6  -10.404111245059    -2.886E-06 8.657E-06 1.133E-08
  ETOT  7  -10.404111245071    -1.187E-11 1.778E-06 1.743E-10
- 
+
  At SCF step    7       vres2   =  1.74E-10 < tolvrs=  1.00E-08 =>converged.
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.01546857E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.01546857E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -1.01546857E-05  sigma(2 1)=  0.00000000E+00
- 
+
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
@@ -343,7 +343,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ================================================================================
 
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   24.235E-09; max=  17.776E-07
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
@@ -396,12 +396,12 @@ band_energy         :  1.30658300684521E+00
   sigma(1 1)= -1.01546857E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.01546857E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -1.01546857E-05  sigma(2 1)=  0.00000000E+00
- 
+
 -Cartesian components of stress tensor (GPa)         [Pressure=  2.9876E-01 GPa]
 - sigma(1 1)= -2.98761116E-01  sigma(3 2)=  0.00000000E+00
 - sigma(2 2)= -2.98761116E-01  sigma(3 1)=  0.00000000E+00
 - sigma(3 3)= -2.98761116E-01  sigma(2 1)=  0.00000000E+00
- 
+
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 8, omp_nthreads: -1 (-1 if OMP is not activated)
@@ -623,7 +623,7 @@ meta: {optdriver: 6, }
    VBM:    -0.456 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     0.456 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
  Direct gap:         4.425 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
- 
+
 P kpt_comm can use shmem: yes
 P g_comm can use shmem: yes
 P tau_comm can use shmem: yes
@@ -683,12 +683,12 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
  7.77172E+00  -3.36658E-07  -3.36658E-07  -3.36658E-07  -3.36658E-07  -3.36658E-07  -3.36658E-07
  2.12110E+01  -8.50922E-08  -8.50922E-08  -8.50922E-08  -8.50922E-08  -8.50922E-08  -8.50922E-08
  6.96354E+01  -9.85962E-09  -9.85962E-09  -9.85962E-09  -9.85962E-09  -9.85962E-09  -9.85962E-09
- 
+
 
  Computing diagonal matrix elements of Sigma_x
- 
+
  === Info on Coulomb term used in Sigma_x ===
- 
+
  cutoff-mode = AUXILIARY_FUNCTION
  Using KS orbitals and KS energies...
 
@@ -702,25 +702,25 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
        1       2       3       4       5       6
     1 -21.665  -9.859  -2.743  -0.400  -0.009  -0.000
         0.000   0.000   0.000   0.000   0.000   0.000
- 
+
     2 -21.675  -9.717  -2.530  -0.349  -0.008  -0.000
         0.000   0.000   0.000   0.000   0.000   0.000
- 
+
     3 -21.741  -9.689  -2.443  -0.402  -0.014  -0.000
         0.000   0.000   0.000   0.000   0.000   0.000
- 
+
     4 -21.679  -9.689  -2.539  -0.514  -0.053  -0.001
         0.000   0.000   0.000   0.000   0.000   0.000
- 
+
     5 -21.751  -9.640  -2.351  -0.494  -0.072  -0.002
         0.000   0.000   0.000   0.000   0.000   0.000
- 
+
     6 -21.725  -9.642  -2.338  -0.339  -0.014  -0.000
         0.000   0.000   0.000   0.000   0.000   0.000
- 
+
     7 -21.729  -9.638  -2.583  -1.156  -0.720  -0.396
         0.000   0.000   0.000   0.000   0.000   0.000
- 
+
     8 -21.768  -9.600  -2.197  -0.338  -0.019  -0.000
        -0.000   0.000  -0.000   0.000  -0.000  -0.000
 
@@ -739,10 +739,10 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
     4   3.869   3.291   2.290   1.160   0.278   0.011
         0.000   0.000   0.000   0.000   0.000   0.000
- 
+
     5   3.845   3.145   1.893   0.673   0.104   0.002
         0.000   0.000   0.000   0.000   0.000   0.000
- 
+
     6   3.850   3.181   2.005   0.862   0.251   0.029
         0.000  -0.000  -0.000   0.000  -0.000   0.000
 
@@ -794,7 +794,7 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
     3  -3.146  -3.120  -3.016  -2.657  -1.727  -0.502
         0.000   0.000   0.000   0.000   0.000   0.000
- 
+
     4  -3.099  -3.081  -2.987  -2.629  -1.708  -0.496
         0.000   0.000   0.000   0.000   0.000   0.000
 
@@ -812,9 +812,9 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
 
  Building correlated screening Wc(i omega) ...
- 
+
  === Info on Coulomb term used in epsilon and W ===
- 
+
  cutoff-mode = AUXILIARY_FUNCTION
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
@@ -870,9 +870,9 @@ iteration_state: {dtset: 3, }
         0.000   0.000   0.000   0.000   0.000   0.000
 
  Computing diagonal matrix elements of Sigma_c
- 
+
  === Info on Coulomb term used in Sigma_c ===
- 
+
  cutoff-mode = AUXILIARY_FUNCTION
 
 

@@ -578,7 +578,7 @@ extern "C" void gpu_allocated_impl_(void **gpu_ptr, bool* is_allocated)
 /* Utility routine to print memory location of a cuda managed pointer.        */
 /*                                                                            */
 /* We check that the pointer has actually been allocated with                 */
-/* cudaMallocManaged and then prints device and host addresses.               */
+/* cudaMallocManaged and then print device and host addresses.                */
 /*                                                                            */
 /* INPUTS                                                                     */
 /*  gpu_ptr = C_PTR on gpu memory location                                    */

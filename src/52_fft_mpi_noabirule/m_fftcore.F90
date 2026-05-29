@@ -4483,8 +4483,8 @@ subroutine kgindex(indpw_k, kg_k, mask, mpi_enreg, ngfft, npw_k)
  integer :: ig,ig1,ig2,ig3,me_fft,n1,n2,n3,nd2
  character(len=500) :: msg
  !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- !integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ !integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
 ! *************************************************************************
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)

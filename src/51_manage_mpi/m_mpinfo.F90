@@ -455,9 +455,6 @@ end subroutine unset_mpi_enreg_fft
 !!   1) These pointers are references to the internal tables stored in MPI_enreg hence
 !!      *** DO NOT DEALLOCATE THE POINTERS YOU HAVE RECEIVED! ***
 !!
-!!   2) Client code should declare the pointers with the attribute ABI_CONTIGUOUS
-!!      (this macro expands to F2008 CONTIGUOUS if the compiler supports it)
-!!
 !! INPUTS
 !!  MPI_enreg<MPI_type>=Datatype gathering information on the parallelism.
 !!  n2,n3=Number of FFT divisions along y and z
@@ -475,8 +472,8 @@ subroutine ptabs_fourdp(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,
 !Arguments ------------------------------------
  class(MPI_type),intent(in) :: MPI_enreg
  integer,intent(in) :: n2,n3
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
 
 !Local variables-------------------------------
 !scalars
@@ -527,9 +524,6 @@ end subroutine ptabs_fourdp
 !!   1) These pointers are references to the internal tables stored in MPI_enreg hence
 !!      *** DO NOT DEALLOCATE THE POINTERS YOU HAVE RECEIVED! ***
 !!
-!!   2) Client code should declare the pointers with the attribute ABI_CONTIGUOUS
-!!      (this macro expands to F2008 CONTIGUOUS if the compiler supports it)
-!!
 !! INPUTS
 !!  MPI_enreg<MPI_type>=Datatype gathering information on the parallelism.
 !!  n2,n3=Number of FFT divisions along y and z
@@ -548,8 +542,8 @@ subroutine ptabs_fourwf(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,
 !scalars
  class(MPI_type),intent(in) :: MPI_enreg
  integer,intent(in) :: n2,n3
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
 
 !Local variables-------------------------------
 !scalars

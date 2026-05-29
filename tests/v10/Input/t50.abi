@@ -34,7 +34,7 @@ nline 11
  typat  1
  znucl  83
  xred   3*0.0
- acell  3*10 
+ acell  3*10
  rprim  1  0  0
         0  1  0
         0  0  1

@@ -485,7 +485,6 @@ subroutine cgtk_fixphase(cg, gsc, icg, igsc, istwfk, mcg, mgsc, mpi_enreg, nband
 !arrays
  real(dp) :: buffer2(nband_k,2),buffer3(nband_k,3),tsec(2)
  real(dp),allocatable :: cimb(:),creb(:),saab(:),sabb(:),sbbb(:) !,sarr(:,:)
-
 ! *************************************************************************
 
  do_cprj=.false.

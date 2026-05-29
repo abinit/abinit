@@ -3,7 +3,7 @@
 !! m_spin_mover
 !!
 !! FUNCTION
-!! This module contains the spin mover, which controls how the spin 
+!! This module contains the spin mover, which controls how the spin
 !!
 !!
 !! Datatypes:
@@ -138,7 +138,7 @@ contains
 
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     self%params=>params
     self%supercell=>supercell
@@ -288,7 +288,7 @@ contains
     NCF_CHECK_MSG(ierr, "Close netcdf file")
 #else
     ABI_ERROR("spin_init_state set to 4 but abinit is not compiled with netcdf.")
-#endif 
+#endif
 
   end subroutine read_hist_spin_state
 
@@ -311,7 +311,7 @@ contains
     logical :: iam_master
     real(dp), allocatable :: Sprim(:,:)
 
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     if(iam_master) then
        if (present(mode)) then
@@ -365,7 +365,7 @@ contains
          case (4)
           ! read from last step of hist file
           write(msg,'(a,a,a)') "Initial spins set to input spin hist file ",&
-             &  trim(self%params%spin_init_hist_fname), '.'  
+             &  trim(self%params%spin_init_hist_fname), '.'
           call wrtout(ab_out,msg,'COLL')
           call wrtout(std_out,msg,'COLL')
            call self%read_hist_spin_state(fname=self%params%spin_init_hist_fname)
@@ -390,7 +390,7 @@ contains
 
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     if(iam_master) then
        call self%spin_ncfile%initialize( trim(fname), params%spin_write_traj)
@@ -410,7 +410,7 @@ contains
 
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     if(present(temperature)) self%temperature=temperature
     call xmpi_bcast(self%temperature, master, comm, ierr)
@@ -474,7 +474,7 @@ contains
 
     !integer :: master, my_rank, comm, nproc, ierr
     !logical :: iam_master
-    !call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    !call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     ! predict
     etot=0.0
@@ -576,7 +576,7 @@ contains
     real(dp), intent(in) :: S_in(3), Heff(3), dt
     real(dp) :: S_out(3)
     real(dp) :: B(3) , w, u, Bnorm, R(3,3), cosw, sinw
-    Bnorm=sqrt(sum(Heff*Heff)) 
+    Bnorm=sqrt(sum(Heff*Heff))
     B(:)=Heff(:)/Bnorm   ! axis of rotation
     w=Bnorm*dt             ! amplitude of rotation
     sinw=sin(w)
@@ -621,7 +621,7 @@ contains
     call self%get_Langevin_Heff(self%H_lang)
     do i=self%mps%istart, self%mps%iend
        Htmp=self%Heff_tmp(:,i)+self%H_lang(:,i)
-       ! Note that there is no - , because dsdt =-cross (S, Hrotate) 
+       ! Note that there is no - , because dsdt =-cross (S, Hrotate)
        self%Hrotate(:,i) = self%gamma_L(i) * (Htmp + self%damping(i)* cross(S_in(:,i), Htmp))
        self%Stmp2(:,i)= rotate_S_DM(S_in(:,i), self%Hrotate(:,i), self%dt)
     end do
@@ -722,7 +722,7 @@ contains
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
 
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     t=0.0
     counter=0
@@ -768,7 +768,7 @@ contains
                 write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
                      & self%spin_ob%Mst_norm_total/self%spin_ob%Snorm_total, &
                      & etotal/self%spin_ob%nscell
-                ! total : 13+4+...= 64 
+                ! total : 13+4+...= 64
                 call wrtout(std_out,msg,'COLL')
                 call wrtout(ab_out, msg, 'COLL')
              endif
@@ -898,7 +898,7 @@ contains
 
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     if (iam_master) then
        T_start=self%params%spin_temperature_start
@@ -912,7 +912,7 @@ contains
        else
           T_step=(T_end-T_start)/(T_nstep-1)
        endif
-       write(msg, "(A52, ES13.5, A11, ES13.5, A1)") & 
+       write(msg, "(A52, ES13.5, A11, ES13.5, A1)") &
             & "Starting temperature dependent calculations. T from ", &
             & T_start*Ha_K, "K to ", T_end*Ha_K, " K."
        call wrtout(std_out, msg, "COLL")
@@ -965,7 +965,7 @@ contains
           ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
        if(i==1) then
           call self%set_initial_state(mode=self%params%spin_init_state)
-       else   
+       else
           if(iam_master) then
             call self%hist%inc1()
            endif
@@ -1055,7 +1055,7 @@ contains
   !! return the current spin state
   !!
   !! INPUTS
-  !! 
+  !!
   !!
   !! OUTPUT
   !!

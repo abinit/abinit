@@ -631,7 +631,7 @@ subroutine hexc_compute_subhinterp(BSp,grid,nbnd_coarse,&
  integer :: lumo2,lomo2,humo2,homo2
  complex(dp) :: tmp_val, tmp2, tmp4
 !arrays
- complex(dp),ABI_CONTIGUOUS pointer :: btemp(:),ctemp(:)
+ complex(dp),contiguous, pointer :: btemp(:),ctemp(:)
 !*********************************************************************
 
  btemp => interpolator%btemp
@@ -758,7 +758,7 @@ subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coar
  complex(dp),allocatable :: tmp_Cmat(:)
  complex(dp),allocatable :: work_coeffs(:,:)
  integer,allocatable :: band2it(:)
- complex(dp),ABI_CONTIGUOUS pointer :: btemp(:),ctemp(:)
+ complex(dp),contiguous, pointer :: btemp(:),ctemp(:)
 !************************************************************************
 
  call timab(696,1,tsec)

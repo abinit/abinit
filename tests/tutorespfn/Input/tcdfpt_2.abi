@@ -11,15 +11,15 @@
 ## GENERAL LINEAR RESPONSE PARAMETERS
   tolvrs   1.0d-2
     nqpt   1
-     qpt   0.0 0.0 0.0   
-  getwfk   1            
+     qpt   0.0 0.0 0.0
+  getwfk   1
 
 # Print options
   prt1mag  1
   prtwf    1
 
 # Magnetic penalty
-  magpen   0.0125   # Penalty amplitude    
+  magpen   0.0125   # Penalty amplitude
   mpatpol  1 2      # Atoms on which the penalty is applied
   mpdir    1 1 0    # Directions on which the penalty is applied
 
@@ -31,46 +31,46 @@
 ### 3) LINEAR RESPONSE TO PHONONS, ELECTRIC AND ZEEMAN FIELD (hw=0)
   rfphon3   1
  rfatpol3   1 1
-  rfelfd3   3             
+  rfelfd3   3
   rfmagn3   1
-   rfdir3   1 0 0         
-  getddk3   2            
+   rfdir3   1 0 0
+  getddk3   2
 
 ### 4) LINEAR RESPONSE TO LOCAL ZEEMAN FIELDS (hw=0)
   rfmagn4   2       # Activates linear response to local Zeeman fields
  rfatpol4   1 1     # Atoms on the spheres of which the Zeeman fields are applied
    rfdir4   1 0 0   # Directions of the Zeeman fields
-  getddk4   2            
+  getddk4   2
 
 ### 5) LINEAR RESPONSE TO PHONONS, ELECTRIC AND ZEEMAN FIELD (finite hw)
   rfphon5   1
  rfatpol5   1 1
-  rfelfd5   3             
+  rfelfd5   3
   rfmagn5   1
-   rfdir5   1 0 0         
-  getddk5   2            
+   rfdir5   1 0 0
+  getddk5   2
  rfomega5   0.0006  # Frequency of the perturbations
- tim1rev5   0       # Broken Krammer's degeneracy 
+ tim1rev5   0       # Broken Krammer's degeneracy
    prtwf5   0
 
 ### 6) LINEAR RESPONSE TO LOCAL ZEEMAN FIELDS (finite hw)
   rfmagn6   2       # Activates linear response to local Zeeman fields
  rfatpol6   1 1     # Atoms on the spheres of which the Zeeman fields are applied
    rfdir6   1 0 0   # Directions of the Zeeman fields
-  getddk6   2            
+  getddk6   2
  rfomega6   0.0006  # Frequency of the perturbations
- tim1rev6   0       # Broken Krammer's degeneracy 
+ tim1rev6   0       # Broken Krammer's degeneracy
    prtwf6   0
 
 ### MORE GENERAL PARAMETERS
 
 #Definition of the atom types
-ntypat 2          
+ntypat 2
 znucl 25 9
-                
+
 #Definition of the atoms
-natom 6           
-typat 2*1 4*2     
+natom 6
+typat 2*1 4*2
 
 #Definition of the unit cell
 acell     9.2100000000E+00  9.2100000000E+00  6.2560000000E+00 Bohr
@@ -92,9 +92,9 @@ nband  42
 #Definition of the k-point grid
 kptopt 3          # Option for the automatic generation of k points, taking
                   # into account the symmetry
-ngkpt 2 2 3      
+ngkpt 2 2 3
 
-nshiftk 1         
+nshiftk 1
 shiftk 0.5 0.5 0.5
 
 #Symmetries deactivated for magnetic systems
@@ -109,8 +109,8 @@ diemix1    0.6
 diemixmag1 0.4
 nnsclo -4
 
-nspden   4   
-nspinor  2   
+nspden   4
+nspinor  2
 asr 0
 chneut 0
 
@@ -129,7 +129,7 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%% [files]
 #%% files_to_test =
 #%%   tcdfpt_2.abo, tolnlines=  10, tolabs=  4.192e-06, tolrel=  4.000e-07, fld_options=-easy
-#%% [shell]  
+#%% [shell]
 #%% post_commands= ww_mv tcdfpt_2o_DS4_1WF55 tcdfpt_2o_DS3_1WF55
 #%% [paral_info]
 #%% max_nprocs = 12

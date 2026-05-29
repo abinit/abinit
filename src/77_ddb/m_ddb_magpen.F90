@@ -5,8 +5,8 @@
 !!
 !! FUNCTION
 !!  Convert second- and -third (Berry curvatures) order total energy derivatives
-!!  calculated with the magnetic penalty (constrained-B functional) into the 
-!!  corresponding quantities of different magnetic functionals: 
+!!  calculated with the magnetic penalty (constrained-B functional) into the
+!!  corresponding quantities of different magnetic functionals:
 !!  --constrained-M (fixed-spin)
 !!  --constrained-H (relaxed spin)
 !!  Calculate and write the ensuing clamped-ion susceptibilities. Lattice-mediated
@@ -33,7 +33,7 @@
 #include "abi_common.h"
 
 module m_ddb_magpen
-    
+
  use defs_basis
  use m_abicore
  use m_profiling_abi
@@ -58,7 +58,7 @@ module m_ddb_magpen
 
 ! *************************************************************************
 
-contains 
+contains
 !!***
 
 !!****f* m_ddb_magpen/ddb_magpen
@@ -72,12 +72,12 @@ contains
 !! INPUTS
 !! ddb (INOUT) = ddb block datastructure
 !! ddb_lw (INOUT) = ddb_lw block datastructure
-!! magpen = amplitude (in Ha) of the applied magnetic penalty 
+!! magpen = amplitude (in Ha) of the applied magnetic penalty
 !! mpatpol(2) = Atoms on which the magnetic penalty has been applied
-!! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened 
+!! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened
 !! mpert = maximum number of ipert
 !! mpopt = 1 calculate the frozen-magnetic second-order quantities
-!!         2 calculate the spin-relaxed second-order quantities 
+!!         2 calculate the spin-relaxed second-order quantities
 !! natom= number of atoms in unit cell
 !! ntypat= number of atom types
 !! timdisp= 1 calculate the third-order Berry curvatures
@@ -88,7 +88,7 @@ contains
 !!
 !! SOURCE
 
- subroutine ddb_magpen(ddb,ddb_lw,& 
+ subroutine ddb_magpen(ddb,ddb_lw,&
 & magpen,mpatpol,mpdir,mpert,mpopt,natom, &
 & prtvol,rftyp,ucvol,timdisp,xred)
 
@@ -103,7 +103,7 @@ contains
 
 !Local variables -------------------------
 !scalars
- integer :: iblok,ii,jblok,kblok,lblok,nblok,ndim 
+ integer :: iblok,ii,jblok,kblok,lblok,nblok,ndim
  integer :: nmat,nmdir,optgb,prtopt
  character(len=500) :: msg
  logical :: qeq0
@@ -204,7 +204,7 @@ contains
 
    end if
 
-   ! Calculate and write the induced magnetic moments 
+   ! Calculate and write the induced magnetic moments
    if (prtvol>1) then
      write(msg, '(2a,(80a),4a)' ) ch10,('-',ii=1,80),ch10,ch10,&
      ' First-order magnetic moments ',ch10
@@ -293,7 +293,7 @@ contains
    rfmagn(:)=0
    rfelfd(:)=0
    rfphon(:)=0
-   
+
  end do
 
  ! BERRY CURVATURES
@@ -318,7 +318,7 @@ contains
      !Berry curvature of the penalized spin-susceptibility
      qphon=zero
      qphon(:,1)=ddb_lw%qpt(1:3,kblok)
-     qpt= qphon(:,1) 
+     qpt= qphon(:,1)
      qphnrm(:)=ddb_lw%nrm(1,kblok)
      omega(:)=ddb_lw%omega(:,kblok)
      rfphon(1:3)=0
@@ -334,8 +334,8 @@ contains
 
      write(msg, '(a,(80a),a,3(a,3f16.8,a),3(a,f16.8,a))' ) ch10,('-',ii=1,80),ch10, &
      ' q point 1  ', qphon(:,1),ch10,&
-     ' q point 2  ', qphon(:,2),ch10,&  
-     ' q point 3  ', qphon(:,3),ch10,&  
+     ' q point 2  ', qphon(:,2),ch10,&
+     ' q point 3  ', qphon(:,3),ch10,&
      ' frequency 1', ddb_lw%omega(1,kblok), ch10,&
      ' frequency 2', ddb_lw%omega(2,kblok), ch10,&
      ' frequency 3', ddb_lw%omega(3,kblok), ch10
@@ -437,16 +437,16 @@ contains
 !! INPUTS
 !! ddb=  Second-order derivative arrais
 !! iblok= index of the current block
-!! magpen = amplitude (in Ha) of the applied magnetic penalty 
+!! magpen = amplitude (in Ha) of the applied magnetic penalty
 !! mpatpol(2) = Atoms on which the magnetic penalty has been applied
-!! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened 
+!! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened
 !! mpert =maximum number of ipert
 !! natom= number of atoms in unit cell
 !! nblok= number of blocks in the DDB
 !! nmdir= number of directions along which the magnetic penalty was applied
-!! ndim= dimension of the square susceptibilities 
+!! ndim= dimension of the square susceptibilities
 !! prtvol= control the volume of information written on output
-!! fs2rs= (optional) if 1, the routine starts from a precalculated blkval_fs 
+!! fs2rs= (optional) if 1, the routine starts from a precalculated blkval_fs
 !! blkval_fs(2,3,mpert,3,mpert)= fixed-spin 2nd-order derivatives
 !! xred(3,natom)= reduced atomic coordinates
 !!
@@ -502,7 +502,7 @@ contains
      write(msg, '(3a)' )' No fixed-spin array has been passed to local_spinsus', &
    & ' but fs2rs=1 ',ch10
      ABI_ERROR(msg)
-   end if 
+   end if
  end if
 
 !Extract the penalized susceptibility
@@ -531,7 +531,7 @@ contains
          index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
 
          !Apply a phase factor to adopt the same Gonze&Lee convention as for atomic
-         !displacements at finite q (See M. Stengel PRB 2013). 
+         !displacements at finite q (See M. Stengel PRB 2013).
          if (fs2rs_==0) then
            barmagsus(irow,icol)= &
          & cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),kind=dpc) &
@@ -549,7 +549,7 @@ contains
 
 !Use magsus to store the intermediate array
  magsus=idty-magpen*barmagsus
-     
+
 !Invert the arrays
  ABI_MALLOC(work1,(ndim,ndim))
  ABI_MALLOC(work2,(ndim,ndim))
@@ -596,7 +596,7 @@ contains
 
  !Write the results in meaningfull arrays
  invbarmagsus=work1
- 
+
  !At last, calculate the susceptibility and its inverse
  invhmat=work2
  magsus=matmul(work2,barmagsus)
@@ -607,7 +607,7 @@ contains
  ABI_FREE(work2)
 
  if (prtopt==1.and.prtvol>1) then
-  
+
    !Write results in output
    if (magpen > zero) then
      call wrtout([ab_out,std_out], ' Local spin susceptibility ')
@@ -621,7 +621,7 @@ contains
        end do
      end do
      call wrtout([ab_out,std_out], '   ')
-  
+
      call wrtout([ab_out,std_out], ' Inverse of local spin susceptibility ')
      call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
      do irow=1, ndim
@@ -633,7 +633,7 @@ contains
        end do
      end do
      call wrtout([ab_out,std_out], '   ')
-  
+
      if (prtvol > 2) then
        call wrtout([ab_out,std_out], ' Penalized local spin susceptibility ')
        call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
@@ -646,7 +646,7 @@ contains
          end do
        end do
        call wrtout([ab_out,std_out], '   ')
-    
+
        call wrtout([ab_out,std_out], ' Inverse of penalized local spin susceptibility ')
        call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
        do irow=1, ndim
@@ -658,7 +658,7 @@ contains
          end do
        end do
        call wrtout([ab_out,std_out], '   ')
-  
+
        call wrtout([ab_out,std_out], ' Inverse of H matrix (I-alpha barchi)^{-1} ')
        call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
        do irow=1, ndim
@@ -671,7 +671,7 @@ contains
        end do
        call wrtout([ab_out,std_out], '   ')
      end if
-  
+
    end if !magpen>zero
 
  end if !prtopt
@@ -696,18 +696,18 @@ contains
          idir1_red=idir1_red+1
          irow=idir1_red+(ipert1_red-1)*nmdir
          index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
- 
+
          ddb%val_fs(1,index,iblok)=real(invmagsus(irow,icol))
          ddb%val_fs(2,index,iblok)=aimag(invmagsus(irow,icol))
 
          ddb%val_rs(1,index,iblok)=real(magsus(irow,icol))
          ddb%val_rs(2,index,iblok)=aimag(magsus(irow,icol))
- 
+
        end do
      end do
    end do
  end do
- 
+
  end subroutine local_spinsus
 !!***
 
@@ -725,22 +725,22 @@ contains
 !! iblok= index of the atomic displacement block
 !! jblok= index of the electric field block
 !! magsus(ndim,ndim)= Spin-sussceptibility tensor
-!! magpen = amplitude (in Ha) of the applied magnetic penalty 
+!! magpen = amplitude (in Ha) of the applied magnetic penalty
 !! mpatpol(2) = Atoms on which the magnetic penalty has been applied
-!! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened 
+!! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened
 !! mpert =maximum number of ipert
 !! natom= number of atoms in unit cell
 !! nblok= number of blocks in the DDB
 !! nmdir= number of directions along which the magnetic penalty was applied
-!! ndim= dimension of the square susceptibilities 
+!! ndim= dimension of the square susceptibilities
 !! prtvol= control the volume of information written on output
-!! fs2rs= (optional) if 1, the routine starts from a precalculated blkval_fs 
+!! fs2rs= (optional) if 1, the routine starts from a precalculated blkval_fs
 !! blkval_fs(2,3,mpert,3,mpert)= fixed-spin 2nd-order derivatives
 !!
 !! OUTPUT
-!! barmmom(ndim,(natom+2)*3)= penalized first order magnetic moments on the atoms and 
+!! barmmom(ndim,(natom+2)*3)= penalized first order magnetic moments on the atoms and
 !!  directions of the penalty induced by atomic displacements and/or electric fields.
-!! mmom(ndim,(natom+2)*3)= first order magnetic moments on the atoms and 
+!! mmom(ndim,(natom+2)*3)= first order magnetic moments on the atoms and
 !!  directions of the penalty induced by atomic displacements and/or electric fields.
 !! zfield(ndim,(natom+2)*3)= Zeeman fields at constrained magnetic moments.
 !!
@@ -791,7 +791,7 @@ contains
      write(msg, '(3a)' )' No fixed-spin array has been passed to magmom', &
    & ' but fs2rs=1 ',ch10
      ABI_ERROR(msg)
-   end if 
+   end if
  end if
 
 !Extract the penalized moments
@@ -810,7 +810,7 @@ contains
        idir1_red= 0
 
        !Apply a phase factor to adopt the same Gonze&Lee convention as for atomic
-       !displacements at finite q (See M. Stengel PRB 2013). 
+       !displacements at finite q (See M. Stengel PRB 2013).
        qfac= exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,iat1)))
        qfac_tr= exp(-two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,iat1)))
        do idir1= 1, 3
@@ -824,8 +824,8 @@ contains
 
          if (fs2rs_==0) then
            if (iblok /=0 .and. ipert2 <= natom) then
-             barmmom(irow,icol)= cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),kind=dpc) * qfac 
-             barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,iblok),ddb%val(2,jndex,iblok),kind=dpc) * qfac_tr 
+             barmmom(irow,icol)= cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),kind=dpc) * qfac
+             barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,iblok),ddb%val(2,jndex,iblok),kind=dpc) * qfac_tr
            else if (jblok /=0 .and. ipert2 == natom+2) then
              barmmom(irow,icol)= cmplx(ddb%val(1,index,jblok),ddb%val(2,index,jblok),kind=dpc)
              barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,jblok),ddb%val(2,jndex,jblok),kind=dpc)
@@ -847,7 +847,7 @@ contains
    end do
  end do
 
-!Compute the Zeeman fields 
+!Compute the Zeeman fields
  if (fs2rs_==0) then
    zfield=-matmul(invbarmagsus,barmmom)
    zfield_tr=-matmul(barmmom_tr,invbarmagsus)
@@ -865,7 +865,7 @@ contains
  end if
 
  if (prtopt==1.and.prtvol>1) then
-  
+
   !Write the results
    if (magpen > zero) then
 
@@ -882,7 +882,7 @@ contains
          end do
        end do
        call wrtout([ab_out,std_out], '   ')
-  
+
        call wrtout([ab_out,std_out], ' Local magnetic moments induced by atomic displacements (from induced Zeeman fields)')
        call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
        do irow=1, ndim
@@ -894,7 +894,7 @@ contains
          end do
        end do
        call wrtout([ab_out,std_out], '   ')
-  
+
        call wrtout([ab_out,std_out], ' Local magnetic moments induced by atomic displacements (from induced penalized moments)')
        call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
        do irow=1, ndim
@@ -907,7 +907,7 @@ contains
        end do
        call wrtout([ab_out,std_out], '   ')
      end if
-     
+
      !Electric field
      if (jblok /= 0) then
        call wrtout([ab_out,std_out], ' Local Zeeman fields induced by electric field (at constrained magnetic moments)')
@@ -944,7 +944,7 @@ contains
        end do
        call wrtout([ab_out,std_out], '   ')
      end if
-     
+
      !Macroscopic Zeeman
      if (lblok /= 0) then
        call wrtout([ab_out,std_out], ' Local Zeeman fields induced by macroscopic Zeeman field (at constrained magnetic moments)')
@@ -1024,8 +1024,8 @@ contains
        end if
      end if
    end if
- end if 
-  
+ end if
+
 !Store the FS and RS flavors on the DDB array
  do ipert2=1,natom+5
    do idir2=1,3
@@ -1046,7 +1046,7 @@ contains
          indexdir1(irow)=idir1
          index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
          jndex= idir2 + 3*((ipert2-1)+mpert*((idir1-1)+3*(ipert1-1)))
-         
+
          zblok= 0
          if (iblok /=0 .and. ipert2 <= natom) zblok= iblok
          if (jblok /=0 .and. ipert2 == natom+2) zblok= jblok
@@ -1086,10 +1086,10 @@ contains
 !! iblok= index of the IFCs block
 !! invhmat(ndim,ndim)= (I-\alpha\bar{\chi})^-1 matrix
 !! magsus(ndim,ndim)= Spin-sussceptibility tensor
-!! magpen= magnetic penalty amplitude 
+!! magpen= magnetic penalty amplitude
 !! mpert =maximum number of ipert
 !! mpopt = 1 calculate the frozen-spin second-order quantities
-!!         2 calculate the relaxed-spin second-order quantities 
+!!         2 calculate the relaxed-spin second-order quantities
 !! natom= number of atoms in unit cell
 !! nblok= number of blocks in the DDB
 !! ndim= number of local magnetic degres of freedom
@@ -1098,7 +1098,7 @@ contains
 !! zfield(ndim,(natom+2)*3)= First-order induced Zeeman fields
 !! zfield_tr(natom+2)*3,ndim)= Linear-responses to external Zeeman fields
 !! (equal to zfield^{\dagger} in the nondissipative regime)
-!! fs2rs= (optional) if 1, the routine starts from a precalculated blkval_fs 
+!! fs2rs= (optional) if 1, the routine starts from a precalculated blkval_fs
 !! blkval_fs(2,3,mpert,3,mpert,1)= fixed-spin 2nd-order derivatives
 !!
 !! OUTPUT
@@ -1134,7 +1134,7 @@ contains
  complex(dpc) :: val_ps,val_fs, val_rs
  character(len=1000) :: msg
 !arrays
- 
+
 ! *********************************************************************
 
 !If fixed-spin case has been precalculated do less stuff
@@ -1144,12 +1144,12 @@ contains
      write(msg, '(3a)' )' No fixed-spin array has been passed to mp_d2etot', &
    & ' but fs2rs=1 ',ch10
      ABI_ERROR(msg)
-   end if 
+   end if
    if (.not.present(blkval_rs)) then
      write(msg, '(3a)' )' No relaxed-spin array has been passed to mp_d2etot', &
    & ' but fs2rs=1 ',ch10
      ABI_ERROR(msg)
-   end if 
+   end if
  end if
 
 !Extract the penalized/constrained quantities
@@ -1162,11 +1162,11 @@ contains
          index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
 
          if (fs2rs_==0) then
-           !Extract the penalized second-order derivatives 
+           !Extract the penalized second-order derivatives
            val_ps= cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),kind=dpc)
            !Calculate the fixed-spin flavor
            val_fs= val_ps + &
-         & sum( zfield_tr(irow,:) * matmul( barmagsus,zfield(:,icol) ) ) 
+         & sum( zfield_tr(irow,:) * matmul( barmagsus,zfield(:,icol) ) )
            ddb%val_fs(1,index,iblok)= real(val_fs)
            ddb%val_fs(2,index,iblok)= aimag(val_fs)
          else if (fs2rs_==1) then
@@ -1178,7 +1178,7 @@ contains
          if (mpopt==2) then
            !Calculate the relaxed-spin flavor
            val_rs= val_fs - &
-         & sum( zfield_tr(irow,:) * matmul( magsus,zfield(:,icol) ) ) 
+         & sum( zfield_tr(irow,:) * matmul( magsus,zfield(:,icol) ) )
            if (fs2rs_==0) then
              ddb%val_rs(1,index,iblok)= real(val_rs)
              ddb%val_rs(2,index,iblok)= aimag(val_rs)
@@ -1191,7 +1191,7 @@ contains
        end do
      end do
    end do
- end do 
+ end do
 
  end subroutine mp_d2etot
 !!***
@@ -1204,10 +1204,10 @@ contains
 !! Write on output file the fixed- and relaxed-spin susceptibilities
 !!
 !! INPUTS
-!! blkval= 2nd-order susceptibilities matrix 
+!! blkval= 2nd-order susceptibilities matrix
 !! kblok= index of the current block
 !! opt= 1 write the frozen-spin second-order quantities
-!!      2 write the relaxed-spin second-order quantities 
+!!      2 write the relaxed-spin second-order quantities
 !! omega= frequency of the perturbation
 !! qphon= momentum wave-vector
 !! ucvol= unit-cell volume
@@ -1237,7 +1237,7 @@ contains
  integer :: rfelfd(4),rfmagn(4),rfphon(4),rfstrs(4)
  real(dp) :: val(2)
  character(len=1) :: cart(3)=(/'x','y','z'/)
- 
+
 ! *********************************************************************
 
  rfelfd(:)=0
@@ -1276,7 +1276,7 @@ contains
 
  if (qeq0) then
 
-   !Born charges 
+   !Born charges
    rfphon(1:2)=1
    rfelfd(1:2)=2
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
@@ -1469,7 +1469,7 @@ contains
 
 ! *********************************************************************
 
-!Calculate the ASR correction 
+!Calculate the ASR correction
  if (option == 0) then
    delta_asrw0= zero
    do idir1= 1, 3
@@ -1485,7 +1485,7 @@ contains
      end do
    end do
  end if
-           
+
 !Apply the ASR
  do idir1= 1, 3
    do ipert1= 1, natom
@@ -1496,7 +1496,7 @@ contains
      end do
    end do
  end do
-  
+
  end subroutine asrw0
 !!***
 
@@ -1514,12 +1514,12 @@ contains
 !! iblok= index of the current block
 !! invbarmagsus(ndim,ndim)= Inverse of the penalized spin-sussceptibility tensor
 !! mpatpol(2) = Atoms on which the magnetic penalty has been applied
-!! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened 
+!! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened
 !! mpert =maximum number of ipert
 !! natom= number of atoms in unit cell
 !! nblok= number of blocks in the DDB
 !! nmdir= number of directions along which the magnetic penalty was applied
-!! ndim= dimension of the square susceptibilities 
+!! ndim= dimension of the square susceptibilities
 !! prtvol= control the volume of information written on output
 !!
 !! OUTPUT
@@ -1584,7 +1584,7 @@ contains
        & 3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
 
          !Apply a phase factor to adopt the same Gonze&Lee convention as for atomic
-         !displacements at finite q (See M. Stengel PRB 2013). 
+         !displacements at finite q (See M. Stengel PRB 2013).
          bc_barmagsus(irow,icol)= -one* & !To convert from d3etot to local susc.
        & cmplx(ddb_lw%val(1,index,iblok),ddb_lw%val(2,index,iblok),kind=dpc) &
        & * exp(two_pi*(0.d0,1.d0)*dot_product(qphon,xred(:,iat1)-xred(:,iat2)))
@@ -1595,7 +1595,7 @@ contains
  end do
 
 !Calculate the Berry-curvature of the inverse magnetic susceptibility
- bc_ss=-matmul(invbarmagsus,matmul(bc_barmagsus,invbarmagsus)) 
+ bc_ss=-matmul(invbarmagsus,matmul(bc_barmagsus,invbarmagsus))
 
  if (prtvol>1) then
    call wrtout([ab_out,std_out], ' Fixed-spin Berry curvature of the inverse spin susceptibility ')
@@ -1611,7 +1611,7 @@ contains
    call wrtout([ab_out,std_out], '   ')
  end if
 
-!Store the FM flavor in the DDB object 
+!Store the FM flavor in the DDB object
  ipert2_red= 0
  do iat2= mpatpol(1), mpatpol(2)
    ipert2= natom + 11 + iat2
@@ -1659,12 +1659,12 @@ contains
 !! iblok= index of the current block
 !! invbarmagsus(ndim,ndim)= Inverse of the penalized spin-sussceptibility tensor
 !! mpatpol(2) = Atoms on which the magnetic penalty has been applied
-!! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened 
+!! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened
 !! mpert =maximum number of ipert
 !! natom= number of atoms in unit cell
 !! nblok= number of blocks in the DDB
 !! nmdir= number of directions along which the magnetic penalty was applied
-!! ndim= dimension of the square susceptibilities 
+!! ndim= dimension of the square susceptibilities
 !! prtvol= control the volume of information written on output
 !!
 !! OUTPUT
@@ -1718,7 +1718,7 @@ contains
        idir1_red= 0
 
        !Apply a phase factor to adopt the same Gonze&Lee convention as for atomic
-       !displacements at finite q (See M. Stengel PRB 2013). 
+       !displacements at finite q (See M. Stengel PRB 2013).
        qfac= exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,iat1)))
        do idir1= 1, 3
          if (mpdir(idir1)==0) cycle
@@ -1729,7 +1729,7 @@ contains
          index = idir1 + &
        & 3*((ipert1 - 1) + mpert*((idir2 - 1) + &
        & 3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
-         
+
          if (iblok /=0 .and. ipert2 <= natom) then
            bc_barsp(irow,icol)= -one* &  !To go from d3etot to induced local field
          & cmplx(ddb_lw%val(1,index,iblok),ddb_lw%val(2,index,iblok),kind=dpc) * qfac
@@ -1813,7 +1813,7 @@ contains
          jndex = idir2 + &
        & 3*((ipert2 - 1) + mpert*((idir1 - 1) + &
        & 3*((ipert1 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
-         
+
          if (iblok /=0 .and. ipert2 <= natom) then
            ddb_lw%val_fs(1,index,iblok)=real(bc_sp(irow,icol))
            ddb_lw%val_fs(2,index,iblok)=aimag(bc_sp(irow,icol))
@@ -1853,12 +1853,12 @@ contains
 !! kblok= index of the current block
 !! invbarmagsus(ndim,ndim)= Inverse of the penalized spin-sussceptibility tensor
 !! mpatpol(2) = Atoms on which the magnetic penalty has been applied
-!! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened 
+!! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened
 !! mpert =maximum number of ipert
 !! natom= number of atoms in unit cell
 !! nblok= number of blocks in the DDB
 !! nmdir= number of directions along which the magnetic penalty was applied
-!! ndim= dimension of the square susceptibilities 
+!! ndim= dimension of the square susceptibilities
 !! prtvol= control the volume of information written on output
 !!
 !! OUTPUT
@@ -1885,7 +1885,7 @@ contains
  complex(dpc), parameter :: ione=(0.d0,1.d0)
  complex(dpc) :: cval
 !arrays
- complex(dpc) :: bc_barpp((natom+5)*3,(natom+5)*3), bc_pp((natom+5)*3,(natom+5)*3) 
+ complex(dpc) :: bc_barpp((natom+5)*3,(natom+5)*3), bc_pp((natom+5)*3,(natom+5)*3)
  complex(dpc) :: term((natom+5)*3,(natom+5)*3,3)
 
 ! *********************************************************************
@@ -1908,7 +1908,7 @@ contains
        end do
      end do
    end do
- end do 
+ end do
 
 !Calculate the different terms entering the Berry curvature
  term(:,:,1)=matmul(transpose(conjg(bc_sp)),matmul(barmagsus,zfield))
@@ -2009,7 +2009,7 @@ contains
        end do
      end do
    end do
- end do 
+ end do
 
  end subroutine berrycurv_pp
 !!***
@@ -2023,10 +2023,10 @@ contains
 !! Only macroscopic quantities are printed if prtvol=1
 !!
 !! INPUTS
-!! blkval= 2nd-order susceptibilities matrix 
+!! blkval= 2nd-order susceptibilities matrix
 !! kblok= index of the current block
 !! opt= 1 write the frozen-spin second-order quantities
-!!      2 write the relaxed-spin second-order quantities 
+!!      2 write the relaxed-spin second-order quantities
 !! omega= frequency of the perturbation
 !! qphon= momentum wave-vector
 !! ucvol= unit-cell volume
@@ -2057,7 +2057,7 @@ contains
  integer :: rfelfd(4),rfmagn(4),rfphon(4),rfstrs(4),rffreq(4)
  real(dp) :: val(2)
  character(len=1) :: cart(3)=(/'x','y','z'/)
- 
+
 ! *********************************************************************
 
  rfelfd(:)=0
@@ -2070,7 +2070,7 @@ contains
 
  ipert3= natom + 9
  idir3= 1
- tmp=opt ! 
+ tmp=opt !
  !IFCs
  if (prtvol>1) then
    rfphon(1:2)=1
@@ -2106,7 +2106,7 @@ contains
 
  if (qeq0) then
 
-   !Born charges 
+   !Born charges
    rfphon(1:2)=1
    rfelfd(1:2)=2
    call ddb_lw%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega, &

@@ -3,8 +3,8 @@
 !! m_polynomial_filter
 !!
 !! FUNCTION
-!! This module contains routines to implement various polynomial filters (scalar) and 
-!! damping coefficients. 
+!! This module contains routines to implement various polynomial filters (scalar) and
+!! damping coefficients.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2018-2026 ABINIT group (IML)
@@ -75,7 +75,7 @@ module m_polynomial_filter
     public :: print_scalar_filter
     public :: bandpassIndicator_sca
 
-    CONTAINS  
+    CONTAINS
 !=====================================================================
 !!***
 
@@ -84,14 +84,14 @@ module m_polynomial_filter
 !!****f* m_polynomial_filter/jackson_step_coeffs
 !! NAME
 !! jackson_step_coeffs
-!! 
+!!
 !! FUNCTION
 !! Jackson damped coefficients
-!! 
+!!
 !! SOURCE
 
   subroutine jackson_step_coeffs(a,b,lmin,lmax,deg,ctilde)
-      
+
       implicit none
 
       integer, intent(in) :: deg
@@ -129,10 +129,10 @@ module m_polynomial_filter
 !!****f* m_polynomial_filter/erf_step_coeffs
 !! NAME
 !! erf_step_coeffs
-!! 
+!!
 !! FUNCTION
 !! Erf damped coefficients
-!! 
+!!
 !! SOURCE
 
   function erf_step_coeffs(b, ndeg, sigma, Ngrid) result(coeffs)
@@ -148,11 +148,11 @@ module m_polynomial_filter
 
       x = (/ ( cos(Pi*(i-2)/(Ngrid-1) ) , i=1,Ngrid+1) /)
       f = (/ ( 0.5 * (1.0 - fast_erf((x(i) - b)/sigma)), i=1,Ngrid+1) /)
-      
+
       do k=0, ndeg
         coeffs(k+1) = (2.0/Ngrid) * sum( (/ (f(i)*cos(k*acos(x(i))), i=1,Ngrid+1 ) /) )
       end do
-      coeffs(1) = coeffs(1) / 2.d0 
+      coeffs(1) = coeffs(1) / 2.d0
 
   end function erf_step_coeffs
 !!***
@@ -162,7 +162,7 @@ module m_polynomial_filter
 !!****f* m_polynomial_filter/fast_erf
 !! NAME
 !! fast_erf
-!! 
+!!
 !! FUNCTION
 !! Fast approximation of erf(x) using Abramowitz & Stegun 7.1.26
 
@@ -191,10 +191,10 @@ module m_polynomial_filter
 !!****f* m_polynomial_filter/smooth_step_coeffs
 !! NAME
 !! smooth_step_coeffs
-!! 
+!!
 !! FUNCTION
 !! Smooth damped coefficients
-!! 
+!!
 !! SOURCE
 
   function smooth_step_coeffs(b, ndeg, alpha, Ngrid) result(coeffs)
@@ -210,11 +210,11 @@ module m_polynomial_filter
 
       x = (/ ( cos(Pi*(i-2)/(Ngrid-1) ) , i=1,Ngrid+1) /)
       f = (/ ( 0.5 * (1.0 - tanh( alpha*(x(i) - b) )) , i=1,Ngrid+1) /)
-      
+
       do k=0, ndeg
         coeffs(k+1) = (2.0/Ngrid) * sum( (/ (f(i)*cos(k*acos(x(i))), i=1,Ngrid+1 ) /) )
       end do
-      coeffs(1) = coeffs(1) / 2.d0 
+      coeffs(1) = coeffs(1) / 2.d0
 
   end function smooth_step_coeffs
 !!***
@@ -224,10 +224,10 @@ module m_polynomial_filter
 !!****f* m_polynomial_filter/lanczos_step_coeffs
 !! NAME
 !! lanczos_step_coeffs
-!! 
+!!
 !! FUNCTION
 !! Chebyshev coefficients with Lanczos damping
-!! 
+!!
 !! SOURCE
 
 function lanczos_step_coeffs(b, ndeg) result(coeffs)
@@ -249,10 +249,10 @@ function lanczos_step_coeffs(b, ndeg) result(coeffs)
         coeffs(j) = 2.0d0 / (ndeg+1) * &
             sum( f(:) * cos( pi*(j-1)*(2.0d0*k_array(:)-1.0d0) / (2.0d0*(ndeg+1)) ) )
     end do
-    coeffs(1) = coeffs(1) / 2.d0 
+    coeffs(1) = coeffs(1) / 2.d0
     do j = 2, ndeg+1
         coeffs(j) = coeffs(j) * sin(pi*(j-1)/(ndeg+1)) / (pi*(j-1)/(ndeg+1))
-    end do 
+    end do
 
 end function lanczos_step_coeffs
 !!***
@@ -275,7 +275,7 @@ subroutine buildChebyshevJacksonCoeffs(ls, us, ndeg_filter, cja)
     integer :: ideg
     real(dp) :: cdeg
     real(dp) :: mu, damp
-    
+
     ! *********************************************************************
 
     cdeg = Pi/(ndeg_filter+2)
@@ -285,14 +285,14 @@ subroutine buildChebyshevJacksonCoeffs(ls, us, ndeg_filter, cja)
     cja(1) = mu*damp
 
     do ideg = 0, ndeg_filter - 1
-        
+
         ! Accumulate X with weight in Xsum for bandpass filters
         mu = 2/Pi * (SIN((ideg+1)*ACOS(ls)) - SIN((ideg+1)*ACOS(us)))/(ideg+1)
         damp = ((1 - (ideg+1)/(ndeg_filter+2))*SIN(cdeg)*COS((ideg+1)*cdeg) + &
                 1/(ndeg_filter+2)*COS(cdeg)*SIN((ideg+1)*cdeg))/SIN(cdeg)
-        
+
         cja(ideg+2) = mu*damp
-        
+
     end do
 
 end subroutine buildChebyshevJacksonCoeffs
@@ -375,18 +375,18 @@ function bandpass_sca(t, deg, gam) result(f_t)
     integer , intent(in ) :: deg
 
     real(dp) :: f_t
-    
+
     !Local variables-------------------------------
     real(dp) :: yt0, yt, yg0, yg, yt_swap, yg_swap
     real(dp) :: mu, damp, rho, rhog, theta
     integer  :: i
-    
+
     ! *********************************************************************
 
     ! init cheby of deg=0,1 eval at t,gamma
     yt0 = 1.d0
     yt = t
-    
+
     yg0 = 1.d0
     yg = gam
 
@@ -396,13 +396,13 @@ function bandpass_sca(t, deg, gam) result(f_t)
     rho = 0.5d0 + gam * damp * yt
     rhog = 0.5d0 + gam * damp * yg
 
-    do i=2,deg 
+    do i=2,deg
 
         ! Update Chebyshev polynomials
         yt_swap = yt
         yt = 2 * t * yt - yt0
         yt0 = yt_swap
-        
+
         yg_swap = yg
         yg = 2 * gam * yg - yg0
         yg0 = yg_swap
@@ -412,7 +412,7 @@ function bandpass_sca(t, deg, gam) result(f_t)
         damp = SIN(i * theta) / (i * theta)
         rho = rho + mu * damp * yt
         rhog = rhog + mu * damp * yg
-        
+
     end do
 
     f_t = rho / rhog
@@ -425,10 +425,10 @@ end function bandpass_sca
 !!****f* m_polynomial_filter/print_scalar_filter
 !! NAME
 !! print_scalar_filter
-!! 
+!!
 !! FUNCTION
 !! Print x,f(x) for every x in (a,b).
-!! 
+!!
 !! INPUTS
 !! lb,ub= interval to amplify/vanish
 !! glb,gub= guaranteed spectral bounds used to scale to [-1,1]
@@ -476,7 +476,7 @@ end subroutine print_scalar_filter
 !! bandpassIndicator_sca
 !!
 !! FUNCTION
-!! Scalar Chebyshev-Jackson polynomial filter f(x) approximating an 
+!! Scalar Chebyshev-Jackson polynomial filter f(x) approximating an
 !! indicator function, using degree deg evaluated at point x=t
 !!
 !! INPUTS
@@ -498,11 +498,11 @@ function bandpassIndicator_sca(t,a,b,deg) result(f_t)
     integer , intent(in ) :: deg
 
     real(dp) :: f_t
-    
+
     !Local variables-------------------------------
     real(dp) :: yt0,yt,yt_swap,ck,mu,damp
     integer  :: i
-    
+
     ! *********************************************************************
 
     ! init cheby of deg=0,1 eval at t
@@ -515,8 +515,8 @@ function bandpassIndicator_sca(t,a,b,deg) result(f_t)
     damp = 1.d0
     f_t = mu * damp * yt0
 
-    do i=1,deg 
-        
+    do i=1,deg
+
         ! Update damping and expansion coefficient
         mu = 2/Pi * (SIN(i*ACOS(a)) - SIN(i*ACOS(b)))/i
         damp = ((1 - i/(deg+2))*SIN(ck)*COS(i*ck) + 1/(deg+2)*COS(ck)*SIN(i*ck))/SIN(ck)
@@ -528,7 +528,7 @@ function bandpassIndicator_sca(t,a,b,deg) result(f_t)
         yt_swap = yt
         yt = 2 * t * yt - yt0
         yt0 = yt_swap
-        
+
     end do
 
 end function bandpassIndicator_sca

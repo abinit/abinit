@@ -5,7 +5,7 @@ ndtset 3
 boxcutmin 1.5
 nspden   1
 
-# TODO: Likely bug is use_gemm_nonlop is used in multidataset mode.
+# TODO: Likely bug if use_gemm_nonlop is used in multidataset mode.
 #use_gemm_nonlop1 1 # test nonlop with BLAS, requires useylm 1
 #useylm1 1
 #useylm2 0

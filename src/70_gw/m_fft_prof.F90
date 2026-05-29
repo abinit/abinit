@@ -930,14 +930,14 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
  ABI_MALLOC(gbound_out, (2*Ftest%mgfft+8,2))
  call sphereboundary(gbound_out,Ftest%istwf_k,Ftest%kg_kout,Ftest%mgfft,Ftest%npw_kout)
 
- ABI_CALLOC(denpot,(cplex*n4,n5,n6))
- ABI_CALLOC(fofg_in,(2,Ftest%npw_k*ndat))
- ABI_CALLOC(fofg_out,(2,npw_out*ndat))
- ABI_CALLOC(fofr_4,(2,n4,n5,n6*ndat))
+ ABI_CALLOC(denpot, (cplex*n4,n5,n6))
+ ABI_CALLOC(fofg_in, (2,Ftest%npw_k*ndat))
+ ABI_CALLOC(fofg_out, (2,npw_out*ndat))
+ ABI_CALLOC(fofr_4, (2,n4,n5,n6*ndat))
  ABI_CALLOC(results, (Ftest%nfft*ndat))
 
  select case (option_fourwf)
- case (0,1,2)
+ case (0, 1, 2)
    !! for option==0, fofgin(2,npwin*ndat)=holds input wavefunction in G sphere;
    !!                fofr(2,n4,n5,n6) contains the output Fourier Transform of fofgin;
    !!                no use of denpot, fofgout and npwout.
@@ -949,7 +949,7 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
    !!                denpot(cplex*n4,n5,n6) contains the input local potential;
    !!                fofgout(2,npwout*ndat) contains the output function;
    !!
-   do cnt=0,(Ftest%npw_k * ndat) - 1
+   do cnt=0, (Ftest%npw_k * ndat) - 1
      ipw = 1 + MOD(cnt, Ftest%npw_k)
      gg = Ftest%kg_k(:,ipw)
      gsq = two_pi**2 * DOT_PRODUCT(gg,MATMUL(Ftest%gmet,gg))
@@ -957,12 +957,10 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
      fofg_in(2,cnt+1) = zero
    end do
 
-   if (option_fourwf==1) then ! Init denpot
-     denpot = one
-   end if
-   !
-   if (option_fourwf==2) then ! Init denpot
-     !
+   if (option_fourwf==1) denpot = one
+
+   if (option_fourwf==2) then
+     ! Init denpot
      if (cplex==1) then
        do i3=0,n3-1
          do i2=0,n2-1

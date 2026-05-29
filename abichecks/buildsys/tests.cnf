@@ -10,7 +10,7 @@ Build-system consistency checks
 # they will be converted by function transpath if necessary
 # file paths may contain a perl variable (e.g. $PSPS)
 #
-#   The following lines describe the tests to be run. The general syntax of 
+#   The following lines describe the tests to be run. The general syntax of
 # these lines is:	testID [command | program] parameters.
 #
 #   The first word is the test identification. All consecutive lines that begin
@@ -36,7 +36,7 @@ Build-system consistency checks
 #	+xml	also apply diff/fldiff to the .cml file
 # or the following options to modify the flow of operations during the test:
 #	-keepfn4
-# default options to call fldiff are: -ignore -ignoreP 
+# default options to call fldiff are: -ignore -ignoreP
 #
 #   Default file names for the test with Id NNN (1 to 3 characters string):
 # 1) abinis/seq

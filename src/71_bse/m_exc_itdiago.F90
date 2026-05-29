@@ -19,7 +19,6 @@
 
 #include "abi_common.h"
 
-
 MODULE m_exc_itdiago
 
  use defs_basis
@@ -136,7 +135,7 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
 ! real(dp),allocatable :: gsc(:,:),cg(:,:)
  !complex,allocatable :: hexc(:,:)
  complex(dp),allocatable :: hexc(:,:),hji(:),vec_tmp(:)
- complex(dp),ABI_CONTIGUOUS pointer :: my_phi(:)
+ complex(dp),contiguous, pointer :: my_phi(:)
  real(dp),allocatable :: hexc_diagonal(:)
  complex(dp),target,allocatable :: phi_block(:,:)
  complex(dp),allocatable :: hphi(:) !,buffer_dpc(:)

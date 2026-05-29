@@ -1066,7 +1066,7 @@ def get_parser(with_epilog: bool = False) -> argparse.ArgumentParser:
     p_run = subparsers.add_parser("run", # parents=[copts_parser],
         help="Run tests.")
     p_run.add_argument("builder_name", type=str, help="Name of the builder")
-    p_run.add_argument("-d", "--dry-run", default=True, action="store_true", help="Dry-run mode.")
+    p_run.add_argument('-d', '--dry-run', default=False, action="store_true", help='Dry-run mode.')
 
     p_info = subparsers.add_parser("info", help="Print info on options.")
 
