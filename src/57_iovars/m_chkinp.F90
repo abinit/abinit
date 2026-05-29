@@ -1851,10 +1851,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
    if(dt%iprcel>=200 .and. dt%iprcel<300) then
+
+     cond_string(1)='iprcel' ; cond_values(1)=dt%iprcel
      !Implemented models for chi0-based preconditioning are 200, 201, 202, [203, 210, 211, 212, 299]
      call chkint_eq(1, 1, cond_string, cond_values(1), ierr, 'iprcel', dt%iprcel, 8, [200, 201, 202, 203, 210, 211, 212, 299], iout)
      !chi0-based preconditioning (iprcel=2**) incompatible with fft-grid parallelization.
-     cond_string(1)='iprcel' ; cond_values(1)=dt%iprcel
      call chkint_eq(1, 1, cond_string, cond_values, ierr, 'npfft', dt%npfft, 1, [1], iout)
      !chi0-based preconditioning (iprcel=2**) needs a smooth smearing.
      call chkint_eq(1, 1, cond_string, cond_values, ierr, 'occopt', dt%occopt, 5, [3, 4, 5, 6, 7], iout) 
@@ -1869,14 +1870,23 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          call chkint_ne(1, 2, cond_string, cond_values, ierr, 'nspden', dt%nspden, 1, [4], iout)
        end if
      end if
-     !Hybrid preconditioning (iprcel=202/3) not (yet) implemented with band parallelisation and non-collinear magnetism.
+     !Hybrid preconditioning (iprcel=202/3)
      if (dt%iprcel>=202 .and. dt%iprcel<=203) then
+       !Hybrid preconditioning (iprcel=202/3) not (yet) implemented with band parallelisation and non-collinear magnetism.
        if (dt%nspden>2) then
          cond_string(2)='nspden' ; cond_values(2)=dt%nspden
-         call chkint_eq(1, 2, cond_string, cond_values, ierr, 'npband', dt%nspden, 1, [1], iout)
+         call chkint_eq(1, 2, cond_string, cond_values, ierr, 'npband', dt%npband, 1, [1], iout)
+       end if
+       !Hybrid preconditioning (iprcel=202/3) needs nsppol=2 => nspden=2 and nspinor=2 => nspden=4
+       if (dt%nsppol=2) then
+         cond_string(2)='nsppol' ; cond_values(2)=dt%nsppol
+         call chkint_eq(1, 2, cond_string, cond_values, ierr, 'nspden', dt%nspden, 1, [2], iout)
+       end if
+       if (dt%nspinor=2) then
+         cond_string(2)='nspinor' ; cond_values(2)=dt%nspinor
+         call chkint_eq(1, 2, cond_string, cond_values, ierr, 'nspden', dt%nspden, 1, [4], iout)
        end if
      end if
-
      
    end if
 

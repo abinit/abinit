@@ -133,12 +133,11 @@ module m_precon
 contains 
 
     ! TODO :  
-    ! - debug quasidiag
-    ! - non-collinear magnetism with band paral (Hyprid precon)
+    ! - Debug apply_chi0_quasidiag
+    ! - Implement non-collinear magnetism with band paral (Hyprid preconditioner)
+    ! - Non-collinear magnetism: We assume nspinor=2 => nspden=4 and nsppol=2 => nspden=2, but we could have nspden=1 in both cases.
+    !                            For now, it is enforced in chkinp.
     ! - non coll : what spin representations are use for : kxc (dfpt_mkvxc_noncoll), prcref.
-    ! - TODO : check places where it is assumed that nspinor=2 => nspden=4 and nsppol=2 => nspden=2
-    !                                       on peut avoir nspden=1 dans les deux cas.
-    ! - Linear solver : the tol is the absolute tol -> change to relative tol (in gmresm?)
 
     !****f* m_precon/precon_init
     !! NAME
