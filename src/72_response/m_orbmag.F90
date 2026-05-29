@@ -1202,7 +1202,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,cpopt,fourwf_cplex,fourwf_option,iatom,ipw,ndat
+  integer :: adir,cpopt,dum_dnlbra,dum_dnlket,fourwf_cplex,fourwf_option,iatom,ipw,ndat
   integer :: nn,npwsp,sij_opt,t_atom,tim_fourwf,tim_getghc,type_calc
   integer :: kg1,kg2,kg3,n1,n2,n3,shift1,shift2,shift3
   real(dp) :: lams,weight_i,weight_r
@@ -1238,6 +1238,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
  ndat = 1
  
  if (need_ormesh) then
+   dum_dnlbra = 0; dum_dnlket = 0
    ABI_MALLOC(ghc_local,(2,npwsp))
    ABI_MALLOC(gsc_local,(2,npwsp))
    ABI_MALLOC(gvnlxc_local,(2,npwsp))
@@ -1274,12 +1275,30 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
        & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
 
      ghc(1:2,1:npwsp) = ghc(1:2,1:npwsp) + gsc(1:2,1:npwsp)*(eig_k(nn) - two*fermie)
+
+     if (need_ormesh) then
+       type_calc = 3 ! apply local and kinetic only
+       sij_opt = 0 ! compute ghc only
+       call getghc(cpopt,du_dgamma,cwaveprj1,ghc_local,gsc_local,gs_hamk,gvnlxc_local,lams,mpi_enreg,&
+         & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
+     end if
     
      du_dbeta => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir(adir))
      mdot = cg_zdotc(npwsp,du_dbeta,ghc); bdot = cg_zdotc(npwsp,du_dbeta,gsc)
 
      m1(adir) = m1(adir) + prefac_m*CMPLX(mdot(1),mdot(2))
      b1(adir) = b1(adir) - two*prefac_b*CMPLX(bdot(1),bdot(2))
+
+     if (need_ormesh) then
+       ormesh_fac = trnrm(nn)*prefac_m
+       ! local part 
+       call orbmag_mesh%accum_rmesh(adir,du_dbeta,dtset,gs_hamk,ghc_local,.TRUE.,mpi_enreg,&
+         & npwsp,ph1d,ormesh_fac,t_atom,incc)
+       ! nonlocal part
+       call nonlocal_me(adir,atindx,du_dbeta,cwaveprj1,dum_dnlbra,dum_dnlket,dterm,dtset,&
+         & eig_k(nn),fermie,gs_hamk,du_dgamma,mpi_enreg,nlme,npw_k,orbmag_mesh,incc,ph1d,&
+         & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
+     end if
 
    end do ! adir
 
@@ -1427,7 +1446,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,choice,cpopt,iatom,ndat,nn,nnlout,np,npwsp
+  integer :: adir,choice,cpopt,dum_dnlbra,dum_dnlket,iatom,ndat,nn,nnlout,np,npwsp
   integer :: paw_opt,signs,t_atom,tim_getghc
   real(dp) :: weight_i,weight_r
   complex(dp) :: bdotc,bpdotc,gdotc,gpdotc,nlme,prefac_b,prefac_m
@@ -1466,6 +1485,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
  nnlout = 1
 
  if (need_ormesh) then
+   dum_dnlbra=0; dum_dnlket=0
    ! need atom index with dipole for ph3d use below
    do iatom = 1, dtset%natom
      if ( ANY(ABS(dtset%nucdipmom(1:3,iatom))>tol8) ) then
@@ -1515,6 +1535,28 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
      b1(adir) = b1(adir) - prefac_b*CONJG(bdotc)
      m1(adir) = m1(adir) + prefac_m*CONJG(bdotc)*eig_k(nn)
      m1_mu(adir) = m1_mu(adir) - prefac_m*CONJG(bdotc)*fermie
+
+     if (need_ormesh) then
+       ! <u|p>qij<d_beta p|Pc d_gamma u>
+       call nonlocal_me(adir,atindx,unk,cwaveprj,dum_dnlbra,bdir(adir),dterm,dtset,&
+         & eig_k(nn),fermie,gs_hamk,du_dgamma,mpi_enreg,nlme,npw_k,orbmag_mesh,invv1,ph1d,&
+         & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
+       
+       ! <u|d_beta p>qij<p|Pc d_gamma u>
+       call nonlocal_me(adir,atindx,unk,cwaveprj,bdir(adir),dum_dnlket,dterm,dtset,&
+         & eig_k(nn),fermie,gs_hamk,du_dgamma,mpi_enreg,nlme,npw_k,orbmag_mesh,invv1,ph1d,&
+         & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
+       
+       ! <Pc d_beta u|p>qij<d_gamma p|u>
+       call nonlocal_me(adir,atindx,du_dbeta,cwaveprj,dum_dnlbra,gdir(adir),dterm,dtset,&
+         & eig_k(nn),fermie,gs_hamk,unk,mpi_enreg,nlme,npw_k,orbmag_mesh,invv1,ph1d,&
+         & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
+       
+       ! <Pc d_beta u|d_gamma p>qij<p|u>
+       call nonlocal_me(adir,atindx,du_dbeta,cwaveprj,gdir(adir),dum_dnlket,dterm,dtset,&
+         & eig_k(nn),fermie,gs_hamk,unk,mpi_enreg,nlme,npw_k,orbmag_mesh,invv1,ph1d,&
+         & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
+     end if
 
      ! compute VV2 contributions
      do np = 1, nband_k
@@ -3071,7 +3113,7 @@ subroutine orbmag_rmesh(self,adir,bra,dtset,gs_hamk,ket,local_term,mpi_enreg,&
     ABI_SFREE(work)
   else
     ! if nonlocal, transform ket with fourwf, then slow FT as scalar_factor*(sum_G exp(+iG.R)*conjg(bra))*fofr
-    ! here R is t_atom location; slow FT computes nonlocal field T(r',r) as T(R,r)
+    ! here R is t_atom location; slow FT computes nonlocal field T(r',r) at r'=R: T(R,r)
     fourwf_cplex = 1
     fourwf_option = 0
     tim_fourwf = 1
@@ -3087,7 +3129,9 @@ subroutine orbmag_rmesh(self,adir,bra,dtset,gs_hamk,ket,local_term,mpi_enreg,&
     fofr(1,:,:,:) = fofr(1,:,:,:)*REAL(cpw) - fofr(2,:,:,:)*AIMAG(cpw)
   end if
 
-  self%rmesh(:,:,:,adir,term_index)=self%rmesh(:,:,:,adir,term_index)+fofr(1,:,:,:)
+  ! factor of two because we are skipping explicit sums over eps_alpha,beta,gamma and second
+  ! term appears from symmetry
+  self%rmesh(:,:,:,adir,term_index)=self%rmesh(:,:,:,adir,term_index)+two*fofr(1,:,:,:)
   
   ABI_SFREE(fofr)
   ABI_SFREE(phgr)
