@@ -1851,6 +1851,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
    if(dt%iprcel>=200 .and. dt%iprcel<300) then
+     !Implemented models for chi0-based preconditioning are 200, 201, 202, [203, 210, 211, 212, 299]
+     call chkint_eq(1, 1, cond_string, cond_values(1), ierr, 'iprcel', dt%iprcel, 8, [200, 201, 202, 203, 210, 211, 212, 299], iout)
      !chi0-based preconditioning (iprcel=2**) incompatible with fft-grid parallelization.
      cond_string(1)='iprcel' ; cond_values(1)=dt%iprcel
      call chkint_eq(1, 1, cond_string, cond_values, ierr, 'npfft', dt%npfft, 1, [1], iout)
@@ -1864,14 +1866,14 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%iprcel>=201 .and. dt%iprcel<=203) then
        if (.not. xc_is_lda) then
          cond_string(2)='ixc' ; cond_values(2)=dt%ixc
-         call chkint_ne(1, 2, cond_string, cond_values(1), ierr, 'nspden', dt%nspden, 1, [4], iout)
+         call chkint_ne(1, 2, cond_string, cond_values, ierr, 'nspden', dt%nspden, 1, [4], iout)
        end if
      end if
      !Hybrid preconditioning (iprcel=202/3) not (yet) implemented with band parallelisation and non-collinear magnetism.
      if (dt%iprcel>=202 .and. dt%iprcel<=203) then
        if (dt%nspden>2) then
          cond_string(2)='nspden' ; cond_values(2)=dt%nspden
-         call chkint_eq(1, 2, cond_string, cond_values(1), ierr, 'npband', dt%nspden, 1, [1], iout)
+         call chkint_eq(1, 2, cond_string, cond_values, ierr, 'npband', dt%nspden, 1, [1], iout)
        end if
      end if
 
