@@ -7970,10 +7970,10 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
                  end if
                end do
              end do
-           end if
-           ! TODO: Activate this and get rid of vkbr
-           new_rhotwx = rhotwx
 #endif
+           end if ! use_ddk
+           ! TODO: Activate this and get rid of vkbr
+           !new_rhotwx = rhotwx
 
            ! NB: Using symrec conventions here
            ik_ibz = gwr%kbz2ibz(1, ik_bz); isym_k = gwr%kbz2ibz(2, ik_bz)
@@ -8013,7 +8013,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ABI_FREE(ur_prod)
  ABI_FREE(rhotwg)
  ABI_FREE(u_gbound)
- call ddkop%free()
+ if (use_ddk) call ddkop%free()
  call vkbr_free(vkbr)
  ABI_FREE(vkbr)
 

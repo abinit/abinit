@@ -44,7 +44,7 @@ module m_chi0
  use m_gsphere,         only : gsphere_t
  use m_io_tools,        only : flush_unit
  use m_oscillators,     only : rho_tw_g, calc_wfwfg
- use m_ddk,             only : ddkop_t
+ !use m_ddk,             only : ddkop_t
  use m_vkbr,            only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
  use m_chi0tk,          only : hilbert_transform, setup_spectral, assemblychi0_sym, assemblychi0sf, symmetrize_afm_chi0, &
                                approxdelta, completechi0_deltapart, accumulate_chi0sumrule, make_transitions, &
@@ -216,11 +216,11 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  real(dp) :: max_rest,min_rest,my_max_rest,my_min_rest, qlen
  real(dp) :: en_high,deltaeGW_enhigh_b2,wl,wr,numerator,deltaeGW_b1b2,gw_gsq,memreq
  complex(dp) :: deltaeKS_b1b2
- logical :: qzero, luwindow, is_metallic, print_time, use_ddk
+ logical :: qzero, luwindow, is_metallic, print_time !, use_ddk
  character(len=500) :: msg_tmp,msg,allup
  type(gsphere_t) :: Gsph_FFT
  type(wave_t),pointer :: wave1, wave2
- type(ddkop_t) :: ddkop
+ !type(ddkop_t) :: ddkop
 !arrays
  integer,contiguous, pointer :: kg_k(:,:)
  integer :: ucrpa_bands(2), got(Wfd%nproc)
@@ -300,13 +300,14 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  end if
 
  ! TODO: use ddkop instead of commutator so that we can handle SOC terms.
- use_ddk = .False.
- !use_ddk = .True.
- use_ddk = dtset%userie == 432
- if (use_ddk) then
-   call wrtout(std_out, " Using DDK to compute the commutator matrix elements.")
-   call ddkop%init(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft_gw)
- end if
+ ! Unfortunately, PAW is not supported yet. Also m_ddk should be relocated below 72_response
+ !use_ddk = .False.
+ !!use_ddk = .True.
+ !use_ddk = dtset%userie == 432
+ !if (use_ddk) then
+ !  call wrtout(std_out, " Using DDK to compute the commutator matrix elements.")
+ !  call ddkop%init(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft_gw)
+ !end if
 
  ! Initialize the completeness correction.
  ABI_MALLOC(green_enhigh_w, (Ep%nomega))
@@ -559,10 +560,10 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
        gradk_not_done(ik_ibz) = .FALSE.
      end if
 
-     if (use_ddk) then
-       call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, Kmesh%ibz(:,ik_ibz), istwf_k, npw_k, kg_k)
-       ABI_CHECK(istwf_k == 1, "istwfk_k1 not coded")
-     end if
+     !if (use_ddk) then
+     !  call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, Kmesh%ibz(:,ik_ibz), istwf_k, npw_k, kg_k)
+     !  ABI_CHECK(istwf_k == 1, "istwfk_k1 not coded")
+     !end if
 
      ! Loop over "conduction" states.
      do band1=1,Ep%nbnds
@@ -921,7 +922,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
 
  call vkbr_free(vkbr)
  ABI_FREE(vkbr)
- call ddkop%free()
+ !call ddkop%free()
 
  ! === After big fat loop over transitions, now MPI ===
  ! * Master took care of the contribution in case of (metallic|spin) polarized systems.
