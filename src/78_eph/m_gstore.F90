@@ -1802,7 +1802,7 @@ subroutine gstore_print(gstore, units, header, prtvol)
      call wrtout(units, sjoin("P Number of CPUs for parallelism over wavevector summation: ", itoa(gqk%pp_sum_comm%nproc)))
    end if
 
-   ! Print q-points
+   ! Print k-points
    call wrtout(units, " k-points included in gstore:")
    do ik_calc=1,gqk%glob_nk
      ik_bz = gstore%kglob2bz(ik_calc, spin)
@@ -1813,6 +1813,7 @@ subroutine gstore_print(gstore, units, header, prtvol)
        exit
      end if
    end do
+   !call wrtout(units, " ")
 
    ! Print q-points
    !call wrtout(units, " q-points included in gstore:")
@@ -1867,6 +1868,7 @@ subroutine gstore_print(gstore, units, header, prtvol)
  if (my_prtvol > 0) then
    call gstore%ebands%print(units, header="Electron bands in GSTORE", prtvol=my_prtvol)
  end if
+ call wrtout(units, " ")
 
 end subroutine gstore_print
 !!***
@@ -4856,7 +4858,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
            wqnu = gqk%my_wnuq(my_ip, my_iq)
 
            do my_ik=1,gqk%my_nk
-             if (.not. gqk%has_both_g) then
+             if (.not. gqk%has_both_g .or. dtset%gwpt_g2mode == 1) then
                call calc_and_store_gdw2(gqk, my_ik, my_iq, my_ip, wqnu, tpp_red, &
                                         my_gq0nm_atm(:,:,:,my_ik), my_gq0nm_atm(:,:,:,my_ik))
              else
@@ -5278,7 +5280,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
    end if
 
    if (with_ks__) then
-     write(ab_out, "(1x,5(a5,1x),2(a16))") "iq", "ik", "pcase", "m_kq", "n_k", "|g^SE| in Ha", "|g^KS| in Ha"
+     write(ab_out, "(1x,5(a5,1x),2(a16))") "iq", "ik", "pcase", "m_kq", "n_k", "|g^GW| in Ha", "|g^KS| in Ha"
    else
      write(ab_out, "(1x,5(a5,1x),a16)") "iq", "ik", "pcase", "m_kq", "n_k", "|g| in Ha"
    end if
@@ -5354,13 +5356,13 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
              end do
            end do
         else
-          ! SE/KS ratio, g^SE, g^KS
+          ! GW/KS ratio, g^GW, g^KS
           ncerr = nf90_get_var(spin_ncid, spin_vid("gvals_ks"), gslice_ks_mn, &
                                start=[1,1,1,ipc,ik_glob,iq_glob], count=[2,nb_kq,nb_k,1,1,1])
           NCF_CHECK(ncerr)
           call average_g2_mn(do_avg, nb_kq, nb_k, bstart_kq, bstart_k, degblock_kq, degblock_k, gslice_ks_mn, g2ks_mn)
 
-          write(ab_out, "(1x,5(a5,1x),3a16)")"iq", "ik", "pcase", "m_kq", "n_k", "SE/KS", "|g^SE|", "|g^KS|"
+          write(ab_out, "(1x,5(a5,1x),3a16)")"iq", "ik", "pcase", "m_kq", "n_k", "GW/KS", "|g^GW|", "|g^KS|"
           min_g_ratio = +huge(one); max_g_ratio = -huge(one); mean_g_ratio = zero; stdev_g_ratio = zero; nn = 0
 
           do im_kq=1,nb_kq
