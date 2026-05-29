@@ -178,14 +178,9 @@ module m_trace_estimation
     ABI_NVTX_END_RANGE()
     call timab(tim_getAX_BX,2,tsec)
     
-    write(std_out,*) 'bug is here 1'; flush(std_out)
-
     call xgBlock_colwiseDotProduct(q, Bv, dot_qTBv)
-    write(std_out,*) 'bug is here 2'; flush(std_out)
     call xgBlock_reverseMap(dot_qTBv,dot_qTBv_layout,rows=1,cols=1)
     
-    write(std_out,*) 'bug is here 3'; flush(std_out)
-
     norml_q = 1.d0 / sqrt(dot_qTBv_layout(1,1))
     call xgBlock_scale(q, norml_q, 1)
     call xgBlock_scale(v, norml_q, 1)
