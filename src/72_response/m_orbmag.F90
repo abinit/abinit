@@ -1463,7 +1463,8 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
      end if
 
      ! compute VV2 contributions
-     do np = 1, nband_k
+     !do np = 1, nband_k
+     do np = nn+1, nband_k
        if (np.EQ.nn) cycle
        if (occ_k(np).LT.tol8) cycle
        bra => cg_k(1:2,(np-1)*npwsp+1:np*npwsp)
@@ -1471,9 +1472,11 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
        bpdot=cg_zdotc(npwsp,bra,svectoutb); bpdotc=CMPLX(bpdot(1),bpdot(2))
 
        ! terms in <u|dS|u'><u'|dS|u>
-       bv2b(adir) = bv2b(adir) + prefac_b*CONJG(bpdotc)*gpdotc
-       mv2b(adir) = mv2b(adir) - prefac_m*CONJG(bpdotc)*gpdotc*eig_k(nn)
-       mv2b_mu(adir) = mv2b_mu(adir) + prefac_m*CONJG(bpdotc)*gpdotc*fermie
+       !bv2b(adir) = bv2b(adir) + prefac_b*CONJG(bpdotc)*gpdotc
+       bv2b(adir) = bv2b(adir) + czero
+       mv2b(adir) = mv2b(adir) - prefac_m*CONJG(bpdotc)*gpdotc*(eig_k(nn) - eig_k(np))
+       !mv2b_mu(adir) = mv2b_mu(adir) + prefac_m*CONJG(bpdotc)*gpdotc*fermie
+       mv2b_mu(adir) = mv2b_mu(adir) + czero
      end do ! np
 
    end do ! adir
