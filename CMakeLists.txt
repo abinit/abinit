@@ -575,7 +575,6 @@ find_library(LEVMAR_LIBRARY
   PATHS ${LEVMAR_ROOT}/lib ${LEVMAR_ROOT}/lib64 /opt/levmar/lib
   DOC "Location of the levmar library"
 )
-include(CheckIncludeFile)
 check_include_file("levmar.h" LEVMAR_HEADER_FOUND)
 if(LEVMAR_LIBRARY AND LEVMAR_HEADER_FOUND)
   target_link_libraries(abinit ${LEVMAR_LIBRARY})
