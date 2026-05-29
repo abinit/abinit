@@ -1067,11 +1067,12 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,gdir,nn,npwsp
+  integer :: adir,nn,npwsp
   real(dp) :: epsabg
   complex(dp) :: prefac_m,txt
   logical :: my_suppress_ormesh
   !arrays
+  integer,dimension(3) :: bdir=(/2,3,1/), gdir=(/3,1,2/)
   real(dp),pointer :: unk(:,:)
   complex(dp) :: m1(3)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
@@ -1094,29 +1095,40 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
      & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
 
    m1(1:3) = czero
-   do bdir = 1, 3
-     do gdir = 1, 3
-       do adir = 1, 3
-         
-         epsabg = eijk(adir,bdir,gdir)
-         if (ABS(epsabg) .LT. half) cycle
-         ! note rho^0 H^1 terms have opposite sign of rho^1 H^0
-         prefac_m = -com*c2*epsabg
-
-         call nonlocal_me(adir,atindx,bdir,unk,cwaveprj,bdir,gdir,&
-           & dterm,dtset,eig_k(nn),fermie,gdir,gs_hamk,unk,mpi_enreg,&
-           & txt,npw_k,orbmag_mesh,innl,ph1d,prefac_m,pawtab,trnrm(nn),&
-           & suppress_ormesh=my_suppress_ormesh)
-       
-         m1(adir) = m1(adir) + txt
-
-       end do ! adir
-     end do !gdir
-   end do !bdir
-
-   orbmag_mesh%omesh(nn,ikpt,isppol,1:3,innl) = real(m1(1:3))
+   prefac_m = -com*c2
+   do adir = 1, 3
+     call nonlocal_me(adir,atindx,bdir(adir),unk,cwaveprj,bdir(adir),gdir(adir),&
+       & dterm,dtset,eig_k(nn),fermie,gdir(adir),gs_hamk,unk,mpi_enreg,&
+       & txt,npw_k,orbmag_mesh,innl,ph1d,prefac_m,pawtab,trnrm(nn),&
+       & suppress_ormesh=my_suppress_ormesh)
+     m1(adir) = m1(adir) + txt
+   end do ! adir
+   orbmag_mesh%omesh(nn,ikpt,isppol,1:3,innl) = two*real(m1(1:3))
 
  end do !nn
+!!   do bdir = 1, 3
+!!     do gdir = 1, 3
+!!       do adir = 1, 3
+!!         
+!!         epsabg = eijk(adir,bdir,gdir)
+!!         if (ABS(epsabg) .LT. half) cycle
+!!         ! note rho^0 H^1 terms have opposite sign of rho^1 H^0
+!!         prefac_m = -com*c2*epsabg
+!!
+!!         call nonlocal_me(adir,atindx,bdir,unk,cwaveprj,bdir,gdir,&
+!!           & dterm,dtset,eig_k(nn),fermie,gdir,gs_hamk,unk,mpi_enreg,&
+!!           & txt,npw_k,orbmag_mesh,innl,ph1d,prefac_m,pawtab,trnrm(nn),&
+!!           & suppress_ormesh=my_suppress_ormesh)
+!!       
+!!         m1(adir) = m1(adir) + txt
+!!
+!!       end do ! adir
+!!     end do !gdir
+!!   end do !bdir
+!!
+!!   orbmag_mesh%omesh(nn,ikpt,isppol,1:3,innl) = real(m1(1:3))
+
+!!  end do !nn
 
  call pawcprj_free(cwaveprj)
  ABI_SFREE(cwaveprj)
@@ -1190,13 +1202,14 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,cpopt,fourwf_cplex,fourwf_option,gdir,iatom,ipw,ndat
+  integer :: adir,cpopt,fourwf_cplex,fourwf_option,iatom,ipw,ndat
   integer :: nn,npwsp,sij_opt,t_atom,tim_fourwf,tim_getghc,type_calc
   integer :: kg1,kg2,kg3,n1,n2,n3,shift1,shift2,shift3
-  real(dp) :: epsabg,lams,weight_i,weight_r
+  real(dp) :: lams,weight_i,weight_r
   complex(dp) :: bc,kc,nlme,ormesh_fac,ph1,ph2,ph3,prefac_b,prefac_m
   logical :: my_suppress_ormesh,need_ormesh
   !arrays
+  integer,dimension(3) :: bdir=(/2,3,1/), gdir=(/3,1,2/)
   real(dp) bdot(2),mdot(2)
   real(dp),allocatable :: denpot(:,:,:),fofgout(:,:)
   real(dp),allocatable :: ghc(:,:),gsc(:,:),gvnlxc(:,:)
@@ -1237,17 +1250,19 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
    end do
  end if
 
+ prefac_b = cbc*c2
+ prefac_m = com*c2
  do nn = 1, nband_k
 
    m1 = czero
    b1 = czero
+
+   do adir = 1, 3
      
-   do gdir = 1, 3
-
      cpopt = 2
-     du_dgamma => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
+     du_dgamma => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir(adir))
 
-     call pawcprj_get(atindx,cwaveprj1,cprj1_k(:,:,gdir),dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
+     call pawcprj_get(atindx,cwaveprj1,cprj1_k(:,:,gdir(adir)),dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
        & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
 
      ! compute H|Pc d_\gamma u> and S|Pc d_\gamma u>
@@ -1259,47 +1274,76 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
        & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
 
      ghc(1:2,1:npwsp) = ghc(1:2,1:npwsp) + gsc(1:2,1:npwsp)*(eig_k(nn) - two*fermie)
-     
-     if (need_ormesh) then
-       type_calc = 3 ! apply local and kinetic only
-       sij_opt = 0 ! compute ghc only
-       call getghc(cpopt,du_dgamma,cwaveprj1,ghc_local,gsc_local,gs_hamk,gvnlxc_local,lams,mpi_enreg,&
-         & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
-     end if
+    
+     du_dbeta => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir(adir))
+     mdot = cg_zdotc(npwsp,du_dbeta,ghc); bdot = cg_zdotc(npwsp,du_dbeta,gsc)
 
-     do bdir = 1, 3
-       !bra(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
-       du_dbeta => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
+     m1(adir) = m1(adir) + prefac_m*CMPLX(mdot(1),mdot(2))
+     b1(adir) = b1(adir) - two*prefac_b*CMPLX(bdot(1),bdot(2))
 
-       mdot = cg_zdotc(npwsp,du_dbeta,ghc); bdot = cg_zdotc(npwsp,du_dbeta,gsc)
+   end do ! adir
 
-       ! assemble contributions alpha_dir \propto \beta_dir x \gamma_dir
-       do adir = 1, 3
-         epsabg = eijk(adir,bdir,gdir)
-         if (ABS(epsabg) .LT. half) cycle
-         prefac_b = cbc*c2*epsabg
-         prefac_m = com*c2*epsabg
-         m1(adir) = m1(adir) + prefac_m*CMPLX(mdot(1),mdot(2))
-         b1(adir) = b1(adir) - two*prefac_b*CMPLX(bdot(1),bdot(2))
-         
-         if (need_ormesh) then
-           ormesh_fac = trnrm(nn)*prefac_m
-           ! local part 
-           call orbmag_mesh%accum_rmesh(adir,du_dbeta,dtset,gs_hamk,ghc_local,.TRUE.,mpi_enreg,&
-             & npwsp,ph1d,ormesh_fac,t_atom,incc)
-           ! nonlocal part
-           call nonlocal_me(adir,atindx,bdir,du_dbeta,cwaveprj1,0,0,dterm,dtset,&
-             & eig_k(nn),fermie,gdir,gs_hamk,du_dgamma,mpi_enreg,nlme,npw_k,orbmag_mesh,incc,ph1d,&
-             & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
-         end if
-       
-       end do ! adir
-   
-     end do !bdir
-   end do !gdir
+   orbmag_mesh%omesh(nn,ikpt,isppol,1:3,incc) = two*real(m1(1:3))
+   orbmag_mesh%cmesh(nn,ikpt,isppol,1:3,ibcc) = two*real(b1(1:3))
 
-   orbmag_mesh%omesh(nn,ikpt,isppol,1:3,incc) = real(m1(1:3))
-   orbmag_mesh%cmesh(nn,ikpt,isppol,1:3,ibcc) = real(b1(1:3))
+!!   do gdir = 1, 3
+!!
+!!     cpopt = 2
+!!     du_dgamma => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
+!!
+!!     call pawcprj_get(atindx,cwaveprj1,cprj1_k(:,:,gdir),dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
+!!       & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
+!!
+!!     ! compute H|Pc d_\gamma u> and S|Pc d_\gamma u>
+!!     ! [H+E*S - 2\mu*S]|ket> is needed for orbmag
+!!     ! -2*S|ket> needed for Chern
+!!     type_calc = 0 ! apply local and non-local Hamiltonian
+!!     sij_opt = 1 ! compute gsc in addition to ghc
+!!     call getghc(cpopt,du_dgamma,cwaveprj1,ghc,gsc,gs_hamk,gvnlxc,lams,mpi_enreg,&
+!!       & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
+!!
+!!     ghc(1:2,1:npwsp) = ghc(1:2,1:npwsp) + gsc(1:2,1:npwsp)*(eig_k(nn) - two*fermie)
+!!     
+!!     if (need_ormesh) then
+!!       type_calc = 3 ! apply local and kinetic only
+!!       sij_opt = 0 ! compute ghc only
+!!       call getghc(cpopt,du_dgamma,cwaveprj1,ghc_local,gsc_local,gs_hamk,gvnlxc_local,lams,mpi_enreg,&
+!!         & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
+!!     end if
+!!
+!!     do bdir = 1, 3
+!!       !bra(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
+!!       du_dbeta => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
+!!
+!!       mdot = cg_zdotc(npwsp,du_dbeta,ghc); bdot = cg_zdotc(npwsp,du_dbeta,gsc)
+!!
+!!       ! assemble contributions alpha_dir \propto \beta_dir x \gamma_dir
+!!       do adir = 1, 3
+!!         epsabg = eijk(adir,bdir,gdir)
+!!         if (ABS(epsabg) .LT. half) cycle
+!!         prefac_b = cbc*c2*epsabg
+!!         prefac_m = com*c2*epsabg
+!!         m1(adir) = m1(adir) + prefac_m*CMPLX(mdot(1),mdot(2))
+!!         b1(adir) = b1(adir) - two*prefac_b*CMPLX(bdot(1),bdot(2))
+!!         
+!!         if (need_ormesh) then
+!!           ormesh_fac = trnrm(nn)*prefac_m
+!!           ! local part 
+!!           call orbmag_mesh%accum_rmesh(adir,du_dbeta,dtset,gs_hamk,ghc_local,.TRUE.,mpi_enreg,&
+!!             & npwsp,ph1d,ormesh_fac,t_atom,incc)
+!!           ! nonlocal part
+!!           call nonlocal_me(adir,atindx,bdir,du_dbeta,cwaveprj1,0,0,dterm,dtset,&
+!!             & eig_k(nn),fermie,gdir,gs_hamk,du_dgamma,mpi_enreg,nlme,npw_k,orbmag_mesh,incc,ph1d,&
+!!             & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
+!!         end if
+!!       
+!!       end do ! adir
+!!   
+!!     end do !bdir
+!!   end do !gdir
+
+!!   orbmag_mesh%omesh(nn,ikpt,isppol,1:3,incc) = real(m1(1:3))
+!!   orbmag_mesh%cmesh(nn,ikpt,isppol,1:3,ibcc) = real(b1(1:3))
 
  end do !nn
 
