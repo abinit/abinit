@@ -136,12 +136,13 @@ contains
 
 subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &                rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wvl_wfs,&
-&                option,extfpmd,nfft_blocks) !optional
+&                option,extfpmd,nfft_blocks, printout) !optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mcg,tim_mkrho
  integer,intent(in),optional :: option,nfft_blocks
+ logical, optional :: printout  ! Controls wether results are printed at the end. Default=yes.
  real(dp),intent(in) :: ucvol
  type(extfpmd_type),intent(in),pointer,optional :: extfpmd
  type(MPI_type),intent(in) :: mpi_enreg
@@ -173,6 +174,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  integer :: mband_mem
  real(dp) :: kpt_cart,kg_k_cart,gp2pi1,gp2pi2,gp2pi3,cwftmp
  real(dp) :: weight,weight_i
+ logical :: l_printout
  !character(len=500) :: message
 !arrays
  integer,allocatable :: gbound(:,:)
@@ -210,6 +212,12 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
    ioption=0
  else
    ioption=option
+ end if
+
+ if(.not.(present(printout))) then
+   l_printout = .true.
+ else
+   l_printout = printout
  end if
 
 ! Not sure what to do for Wannier90 DMFT
@@ -1148,8 +1156,10 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
 !Find and print minimum and maximum total electron density
 !(or total kinetic energy density, or total element of kinetic energy density tensor) and locations
- call wrtout(std_out,' mkrho: echo density (plane-wave part only)','COLL')
- call prtrhomxmn(std_out,mpi_enreg,dtset%nfft,dtset%ngfft,dtset%nspden,1,rhor,optrhor=ioption,ucvol=ucvol)
+ if (l_printout) then
+   call wrtout(std_out,' mkrho: echo density (plane-wave part only)','COLL')
+   call prtrhomxmn(std_out,mpi_enreg,dtset%nfft,dtset%ngfft,dtset%nspden,1,rhor,optrhor=ioption,ucvol=ucvol)
+ end if
 
  call timab(799,2,tsec)
  call timab(790+tim_mkrho,2,tsec)

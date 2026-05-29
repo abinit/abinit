@@ -134,7 +134,7 @@ contains
 
     ! TODO :  
     ! - debug quasidiag
-    ! - non col with band paral
+    ! - non-collinear magnetism with band paral (Hyprid precon)
     ! - non coll : what spin representations are use for : kxc (dfpt_mkvxc_noncoll), prcref.
     ! - TODO : check places where it is assumed that nspinor=2 => nspden=4 and nsppol=2 => nspden=2
     !                                       on peut avoir nspden=1 dans les deux cas.
@@ -1159,7 +1159,7 @@ contains
         dummy_paw_dmft%use_dmft = 0
         dummy_paw_dmft%use_sc_dmft = 0
         call mkrho(this%cg, dtset, this%gprimd, this%irrzon, this%kg, mcg, mpi_enreg, this%npwarr, weights, &
-        &   dummy_paw_dmft, this%phnons, w_rhowfg, w_rhowfr, this%rprimd, 0, this%ucvol, dummy_wvl_den, dummy_wvl_wfs, option=0)
+        &   dummy_paw_dmft, this%phnons, w_rhowfg, w_rhowfr, this%rprimd, 0, this%ucvol, dummy_wvl_den, dummy_wvl_wfs, option=0, printout=.false.)
         ! symrhg already called in mkrho
 
         if (this%psps%usepaw==0) then
