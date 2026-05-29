@@ -1855,19 +1855,25 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='iprcel' ; cond_values(1)=dt%iprcel
      call chkint_eq(1, 1, cond_string, cond_values, ierr, 'npfft', dt%npfft, 1, [1], iout)
      !chi0-based preconditioning (iprcel=2**) needs a smooth smearing.
-     call chkint_eq(0, 1, cond_string, cond_values, ierr, 'occopt', dt%occopt, 5, [3, 4, 5, 6, 7], iout) 
+     call chkint_eq(1, 1, cond_string, cond_values, ierr, 'occopt', dt%occopt, 5, [3, 4, 5, 6, 7], iout) 
      !chi0-based preconditioning (iprcel=2**) only implemented on the fine grid (PAW).
      if (usepaw==1) then
        call chkint_eq(1, 1, cond_string, cond_values, ierr, 'pawmixdg', dt%pawmixdg, 1, [1], iout)
      end if
      !chi0-based preconditioning without RPA (iprcel=201/2/3) incompatible with non-collinear magnetism and non-LDA functionals.
-     if (.not. xc_is_lda) then
-       call chkint_ne(1, 1, cond_string, (/201, 202, 203/), ierr, 'nspden', dt%nspden, 1, [4], iout)
+     if (dt%iprcel>=201 .and. dt%iprcel<=203) then
+       if (.not. xc_is_lda) then
+         cond_string(2)='ixc' ; cond_values(2)=dt%ixc
+         call chkint_ne(1, 2, cond_string, cond_values(1), ierr, 'nspden', dt%nspden, 1, [4], iout)
+       end if
      end if
      !Hybrid preconditioning (iprcel=202/3) not (yet) implemented with band parallelisation and non-collinear magnetism.
-     if (dt%nspden>2) then
-      call chkint_eq(1, 1, cond_string, (/202, 203/), ierr, 'npband', dt%nspden, 1, [1], iout)
-    end if
+     if (dt%iprcel>=202 .and. dt%iprcel<=203) then
+       if (dt%nspden>2) then
+         cond_string(2)='nspden' ; cond_values(2)=dt%nspden
+         call chkint_eq(1, 2, cond_string, cond_values(1), ierr, 'npband', dt%nspden, 1, [1], iout)
+       end if
+     end if
 
      
    end if
