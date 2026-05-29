@@ -317,7 +317,7 @@ module m_iterative_solvers
 
             beta = rsnew / rsold
             p = r + beta * p
-            if (verbose) call wrtout(std_out, 'cg: it=', iter,' res=', sqrt(rsnew))
+            if (verbose) write(std_out,*) 'cg: it=', iter,' res=', sqrt(rsnew)
             rsold = rsnew
         end do
 
