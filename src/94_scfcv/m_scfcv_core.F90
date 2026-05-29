@@ -1015,7 +1015,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  if (nkxc>0) then
    call check_kxc(dtset%ixc,dtset%optdriver)
  end if
- write(6,*)'chi0diel scfcv_core:nfftf,nkxc', nfftf,nkxc; flush(6) !DEBUG
  ABI_MALLOC(kxc,(nfftf,nkxc))
  call precon%init_kxc(kxc)
  

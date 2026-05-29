@@ -27,8 +27,6 @@ module m_iterative_solvers
  
     contains
 
-! TODO : Delete writes
-
 !-------------------------------------------------------------------------------------------
 ! Eigensolvers
 !-------------------------------------------------------------------------------------------
@@ -95,7 +93,6 @@ module m_iterative_solvers
         ! Conjugate Gradient iterations to minimize Rayleigh quotient
         do iter = 1, max_iter
             call cg_update(n, matvec, x, Ax, p, g, beta, rayleigh_quotient, residual_norm)
-            write(6,*)'cg_eigen_solver_treshold : iter, rayleigh_quotient, residual norm', iter, rayleigh_quotient, residual_norm; flush(6) !DEBUG
             do_exit = (residual_norm < tol)
             call xmpi_bcast(do_exit, 0, xmpi_world, ierr)
             if (do_exit) exit
@@ -108,7 +105,6 @@ module m_iterative_solvers
 
         ! If more eigenvalues are required, use deflation to compute subsequent eigenvalues
         do j = 2, max_neig
-            write(6,*)'cg_eigen_solver_treshold : eigenvalues(1:j-1)', eigenvalues(1:j-1); flush(6) !DEBUG
 
             ! Check if the eigenvalue is below the threshold
             do_exit = (eigenvalues(j-1) < eigenvalue_threshold)
@@ -134,7 +130,6 @@ module m_iterative_solvers
                 call cg_update(n, matvec, x, Ax, p, g, beta, rayleigh_quotient, residual_norm, eigenvectors(:, 1:j-1))
                 do_exit = (residual_norm < tol)
                 call xmpi_bcast(do_exit, 0, xmpi_world, ierr)   ! MPI aware: avoid desynchronization.
-                write(6,*)'cg_eigen_solver_treshold : iter, rayleigh_quotient, residual norm', iter, rayleigh_quotient, residual_norm; flush(6) !DEBUG
                 if (do_exit) exit
             end do
 
@@ -529,10 +524,8 @@ module m_iterative_solvers
         
         !TODO : dirty check of MKL availability
 #if defined HAVE_LINALG_MKL_OMATCOPY
-        write(6,*)'    FGMRES'; flush(6) !DEBUG
         call call_FGMRES(n, matvec, rhs, est, gmres_maxiter, gmres_rtol)
 #else
-        write(6,*)'    gmresm'; flush(6) !DEBUG
         call call_gmresm(n, matvec, est, rhs, gmres_maxiter, gmres_rtol, verbose)
 #endif
       
