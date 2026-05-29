@@ -492,6 +492,9 @@ contains
  intarr(1,:)=dtsets(:)%ppmodel
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ppmodel','INT',0)
 
+ intarr(1,:)=dtsets(:)%precon_in_memory
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'precon_in_memory','INT',0)
+
  intarr(1,:)=dtsets(:)%precon_ls_maxite
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'precon_ls_maxite','INT',0)
 
@@ -499,7 +502,7 @@ contains
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'precon_ls_rtol','DPR',0)
 
  dprarr(1,:)=dtsets(:)%precon_tsmear
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'precon_tsmear','DPR',0)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'precon_tsmear','ENE',0)
 
  intarr(1,:)=dtsets(:)%precon_verbose
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'precon_verbose','INT',0)

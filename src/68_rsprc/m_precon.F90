@@ -123,16 +123,11 @@ module m_precon
         procedure :: init_kxc => precon_init_kxc            ! Initialize kxc in the precon_object.
         procedure :: update => precon_update                ! Update the precon_object according to iprcel.
         procedure :: free => precon_free                    ! Dealocate arrays that are allocated in precon_init.
-        procedure :: save => precon_save                    ! Save the LDOS contained in the precon_object in a file. (Debug)
 
         procedure :: apply_dielmat => apply_dielmat         ! Apply the dielectric matrix to an input vector.
         procedure :: apply_adjdielmat => apply_adjdielmat   ! Apply the adjoint dielectric matrix to an input vector.
         procedure :: apply_precon => apply_precon           ! Apply the preconditioner to an input vector.
         
-        ! For code validation :
-        procedure :: save_applied_op_g => save_applied_op_g ! Save the application of an operator in reciprocal space (for code validation).
-        procedure :: save_applied_op_r => save_applied_op_r ! Save the application of an operator in direct space (for code validation).
-
     end type precon_object
 
 contains 
@@ -141,11 +136,9 @@ contains
     ! - debug quasidiag
     ! - non col with band paral
     ! - non coll : what spin representations are use for : kxc (dfpt_mkvxc_noncoll), prcref.
-    ! - in chkinp : forbid iprcel that need kxc + noncoll + not LSDA
     ! - TODO : check places where it is assumed that nspinor=2 => nspden=4 and nsppol=2 => nspden=2
     !                                       on peut avoir nspden=1 dans les deux cas.
     ! - Linear solver : the tol is the absolute tol -> change to relative tol (in gmresm?)
-    ! - In PAW : use pawmixdg 1 for right size of fft grid (enforce this in ?iovars?)
 
     !****f* m_precon/precon_init
     !! NAME
@@ -260,12 +253,13 @@ contains
             ! this%use_indices_arrays = .true. indicates that we will use the arrays this%cg_indices and this%kg_indices.
             this%use_indices_arrays = .false.
             if (this%iprcel == 202) this%use_indices_arrays = .true.
+            if (this%iprcel == 203) this%use_indices_arrays = .true.
 
             this%use_precomputed_rhoi = .false.
-            if (this%iprcel == 202) this%use_precomputed_rhoi = .true.
+            if (this%iprcel == 202 .and. dtset%precon_in_memory==1) this%use_precomputed_rhoi = .true.
 
             this%use_precomputed_psii = .false.
-            if (this%iprcel == 203) this%use_precomputed_psii = .true.
+            if (this%iprcel == 203 .and. dtset%precon_in_memory==1) this%use_precomputed_psii = .true.
             
             ! Other than here, iprcel is only used in apply_chi0, apply_dielmat and apply_adjdielmat.
 
@@ -1310,83 +1304,6 @@ contains
 
     end subroutine compute_ldos
 
-    !****f* m_precon/save_applied_op_g
-    !! NAME
-    !!  save_applied_op_g
-    !!
-    !! FUNCTION
-    !!  Save the applied operator vec/op_vec in the reciprocal (G) space in a file.
-    !!  For code validation only.
-    !!
-    !! SOURCE
-    subroutine save_applied_op_g(this, dtset, ngfft, vec, op_vec, filename)
-
-        !Arguments ------------------------------------
-        class(precon_object), intent(in) :: this
-        !scalars
-        type(dataset_type),intent(in) :: dtset
-        character(len=*), intent(in) :: filename ! Filename for the output file
-        !arrays
-        real(dp), intent(in) :: vec(:, :, :), op_vec(:, :, :)
-        integer, intent(in) :: ngfft(:)
-       
-        !Local variables-------------------------------
-        !scalars
-        integer :: io, n, i, ispden
-        
-        ! *************************************************************************
-        n = size(vec, 2)
-        ! Writing the file
-        open(newunit=io, file=filename, status="replace", action="write")
-            do ispden=1, dtset%nspden
-                do i=1, n
-                    write (io, '(*(G0.6,:,","))') two_pi*matmul(this%gprimd, get_g_vector(i, ngfft)),   &
-                    &                             vec(1, i, ispden), vec(2, i, ispden),                 &
-                    &                             op_vec(1, i, ispden), op_vec(2, i, ispden)
-                end do
-            end do
-        close(io)
-
-    end subroutine save_applied_op_g
-
-    !****f* m_precon/save_applied_op_r
-    !! NAME
-    !!  save_applied_op_r
-    !!
-    !! FUNCTION
-    !!  Save the applied operator vec/op_vec in the direct (real) space in a file.
-    !!  For code validation only.
-    !!
-    !! SOURCE
-    subroutine save_applied_op_r(this, dtset, ngfft, vec, op_vec, filename)
-
-        !Arguments ------------------------------------
-        class(precon_object), intent(in) :: this
-        !scalars
-        type(dataset_type),intent(in) :: dtset
-        character(len=*), intent(in) :: filename ! Filename for the output file
-        !arrays
-        real(dp), intent(in) :: vec(:, :), op_vec(:, :)
-        integer, intent(in) :: ngfft(:)
-       
-        !Local variables-------------------------------
-        !scalars
-        integer :: io, n, i, ispden
-        
-        ! *************************************************************************
-        n = size(vec, 1)
-        ! Writing the file
-        open(newunit=io, file=filename, status="replace", action="write")
-            do ispden=1, dtset%nspden
-                do i=1, n
-                    write (io, '(*(G0.6,:,","))') matmul(this%rprimd, get_r_vector(i, ngfft)),      &
-                    &                             vec(i, ispden), op_vec(i, ispden)                
-                end do
-            end do
-        close(io)
-
-    end subroutine save_applied_op_r
-
     !****f* m_precon/apply_chi0_dfermie
     !! NAME
     !!  apply_chi0_dfermie
@@ -1777,7 +1694,7 @@ contains
                 &           gbound, gbound, istwf_k, kg_k, kg_k, dtset%mgfft, mpi_enreg, ndat, dtset%ngfft, npw_k, &
                 &           dummy_int, n4, n5, n6, option, tim_fourwf, one, one)
             else
-                ABI_BUG("'compute_rhoi_coll should not be called with band parallelization.")
+                ABI_BUG("'compute_rhoi_coll' should not be called with band parallelization.")
             end if
             ABI_FREE(kg_k)
 
@@ -2801,7 +2718,6 @@ contains
         real(dp) ::  dummy_denpot(0, dtset%ngfft(5), dtset%ngfft(6)), dummy_fofgout(2, 0), dummy_fofrout(2, dtset%ngfft(4), dtset%ngfft(5), dtset%ngfft(6))
         
         ! *************************************************************************
-        !write(6,*)'chi0diel compute_delta_rho'; flush(6) !DEBUG
         !  TODO : NOT WORKING
         n1 = dtset%ngfft(1)
         n2 = dtset%ngfft(2)
