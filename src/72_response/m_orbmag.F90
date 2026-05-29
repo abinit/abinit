@@ -69,19 +69,6 @@ module m_orbmag
 
   implicit none
 
-  ! antisymmetric unit tensor, for doing the crossproduct summations
-  real(dp),parameter :: eijk(3,3,3) = reshape((/zero,zero,zero,& !{1..3}11
-                                               &zero,zero,-one,& !{1..3}21
-                                               &zero,one,zero,& !{1..3}31
-                                               &zero,zero,one,& !{1..3}12
-                                               &zero,zero,zero,& !{1..3}22
-                                               &-one,zero,zero,& !{1..3}32
-                                               &zero,-one,zero,& !{1..3}13
-                                               &one,zero,zero,& !{1..3}23
-                                               &zero,zero,zero/),& !{1..3}33
-                                               &(/3,3,3/))
-
-
   ! these parameters name the various output terms
   integer,parameter :: chern_nterms=3
   integer,parameter :: ibcc=1,ibvv1=2,ibvv2=3
@@ -1068,7 +1055,6 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
   !Local variables -------------------------
   !scalars
   integer :: adir,nn,npwsp
-  real(dp) :: epsabg
   complex(dp) :: prefac_m,txt
   logical :: my_suppress_ormesh
   !arrays
