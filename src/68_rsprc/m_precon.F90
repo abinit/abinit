@@ -3241,7 +3241,7 @@ contains
             !est = rhs
 
             !3) Resolution of the linear system :
-            if (this%precon_verbose>0) call wrtout(std_out, '| chi0diel preconditioning - Linear Solver:')
+            if (this%precon_verbose>0) call wrtout(std_out, '-- chi0-based preconditioning - Linear Solver --')
             if (this%use_ridgereg) then
                 ! P is ill-conditionned :
                 ! Ridge/Tikhonov regularization and CG : 

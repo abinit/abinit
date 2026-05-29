@@ -2422,15 +2422,10 @@ subroutine chi0diel(precon, dtset, mpi_enreg, optreal, optres, vresid, vrespc)
  real(dp),intent(out) :: vrespc(optreal*precon%nfftprc, dtset%nspden)
 
 ! *************************************************************************
- write(6,*)'chi0diel start'; flush(6) !DEBUG
-
- !if (precon%ngfftprc(10)>1) then
- !  ABI_BUG("chi0-based preconditioning (chi0diel) used with fft-grid parallelization")
- !end if
 
  call precon%apply_precon(dtset, mpi_enreg, optreal, optres, vresid, vrespc)
 
- !Simple mixing : TODO diemixmag
+ !Simple mixing
  vrespc = precon%diemix * vrespc
 
 end subroutine chi0diel
