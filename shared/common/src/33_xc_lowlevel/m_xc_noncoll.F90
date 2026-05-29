@@ -165,9 +165,13 @@ subroutine rotate_mag(rho_in,rho_out,mag,vectsize,cplex,&
        rho_out(2*ipt  ,2)=half*(rho_in(2*ipt ,1)-mm)
      else
        rho_out(2*ipt-1,1)=half*rho_in(2*ipt-1,1)
-       rho_out(2*ipt-1,2)=half*rho_in(2*ipt-1,2)
+!MR: BUG FIXED HERE
+!       rho_out(2*ipt-1,2)=half*rho_in(2*ipt-1,2)
+       rho_out(2*ipt-1,2)=half*rho_in(2*ipt-1,1)
        rho_out(2*ipt  ,1)=half*rho_in(2*ipt  ,1)
-       rho_out(2*ipt  ,2)=half*rho_in(2*ipt  ,2)
+!MR: BUG FIXED HERE
+!       rho_out(2*ipt  ,2)=half*rho_in(2*ipt  ,2)
+       rho_out(2*ipt  ,2)=half*rho_in(2*ipt  ,1)
      end if
 
      if (out_mag_norm) then

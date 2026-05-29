@@ -5,8 +5,8 @@
 !!****m* ABINIT/m_VectorInt
 !! NAME
 !!  m_VectorInt
-!! 
-!! FUNCTION 
+!!
+!! FUNCTION
 !!  Manage an integer vector
 !!
 !! COPYRIGHT
@@ -99,7 +99,7 @@ SUBROUTINE VectorInt_init(this, size)
   this%size = size_val
   FREEIF(this%vec)
   MALLOC(this%vec,(1:size_val))
-  this%tail = 0 
+  this%tail = 0
   this%vec  = 0
 END SUBROUTINE VectorInt_init
 !!***
@@ -146,7 +146,7 @@ SUBROUTINE VectorInt_setSize(this,new_tail)
     END IF
   END IF
   this%tail = new_tail
-END SUBROUTINE VectorInt_setSize  
+END SUBROUTINE VectorInt_setSize
 !!***
 
 !!****f* ABINIT/m_VectorInt/VectorInt_enlarge
@@ -182,14 +182,14 @@ SUBROUTINE VectorInt_enlarge(this, size)
 !Local variables ------------------------------
   INTEGER                                 :: width
   INTEGER                                 :: tail
-  INTEGER, ALLOCATABLE, DIMENSION(:) :: thistemp 
+  INTEGER, ALLOCATABLE, DIMENSION(:) :: thistemp
   INTEGER                                 :: size_val
 
   IF ( ALLOCATED(this%vec) ) THEN
     FREEIF(thistemp)
     width = this%size
     tail  = this%tail
-    size_val = size 
+    size_val = size
     MALLOC(thistemp,(1:tail))
     thistemp(1:tail) = this%vec(1:tail)
     FREE(this%vec)
@@ -277,7 +277,7 @@ SUBROUTINE VectorInt_clear(this)
 
 !Arguments ------------------------------------
   TYPE(VectorInt), INTENT(INOUT) :: this
-  this%tail = 0 
+  this%tail = 0
 END SUBROUTINE VectorInt_clear
 !!***
 
@@ -334,7 +334,7 @@ END SUBROUTINE VectorInt_print
 !!  VectorInt_destroy
 !!
 !! FUNCTION
-!!  Destroy vector 
+!!  Destroy vector
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)

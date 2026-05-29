@@ -16,24 +16,24 @@
 #include <unistd.h>
 #include "cuda_header.h"
 
-void 
+void
 recursion_no_bth(
-		 const int ,const int ,const int ,const int ,      
+		 const int ,const int ,const int ,const int ,
 		 const int ,int* ,const cureal ,const cureal ,
 		 const cureal ,const cureal ,const int3* ,
-		 const int3* , int* , const cureal* ,const cureal* ,       
-		 cureal* ,cureal* );  
-  
-void 
+		 const int3* , int* , const cureal* ,const cureal* ,
+		 cureal* ,cureal* );
+
+void
 recursion_bth(
-	      const int, const int, const int, const int,           
+	      const int, const int, const int, const int,
 	      const int, int* ,const cureal ,const cureal ,
-	      const cureal ,const cureal ,const int3*,          
-	      const int3*,int*, const cureal*, 
+	      const cureal ,const cureal ,const int3*,
+	      const int3*,int*, const cureal*,
 	      const cureal* , cureal* ,cureal* );
-				      
+
 extern "C"
-void cuda_rec_cal_(const int* trotter, 
+void cuda_rec_cal_(const int* trotter,
 		   const int* gratio,
 		   const int* npt,
 		   const int* nrec,              //- Max number of recursion
@@ -50,7 +50,7 @@ void cuda_rec_cal_(const int* trotter,
 		   const cureal* pot,            //- Potential
 		   cureal* an,cureal* bn2)       //- Rec coefficients an and bn2
 {
-  printf("\n-------cudarec---------- \n"); 
+  printf("\n-------cudarec---------- \n");
   /*    printf("pt0 %d %d %d \n",pt0->x,pt0->y,pt0->z); */
   /*    printf("pt1 %d %d %d \n",pt1->x,pt1->y,pt1->z); */
   /*    printf("ngfftrec %d %d \n",ngfftrec[0],ngfftrec[2]); */
@@ -68,7 +68,7 @@ void cuda_rec_cal_(const int* trotter,
 		  pt0,pt1,ngfftrec,T_p,pot,an,bn2);
   }
   else{
-     
+
     recursion_no_bth(*trotter,*gratio,*npt,
 		     *nrec,*height_max,max_rec,
 		     *beta,*fermie,*tolrec,*inf_vol,

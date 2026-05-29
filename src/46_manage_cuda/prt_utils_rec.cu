@@ -48,7 +48,7 @@ __host__ void prt_dbg_arrc(cucmplx* v_d,
   for(int jj=0;jj<num; jj++) printf("%9.5e ",v_h[jj].x);
   printf("\n");
   free(v_h);
-#endif 
+#endif
   return;
 }
 
@@ -92,7 +92,7 @@ __host__ void calctime(cudaEvent_t* stop,cudaEvent_t start,
   CHECK_CUDA_ERROR( cudaEventRecord(*stop,0) );
   CHECK_CUDA_ERROR( cudaEventSynchronize(*stop) );
   CHECK_CUDA_ERROR( cudaEventElapsedTime(&bo,start,*stop) );
-  timer[index] += bo; 
+  timer[index] += bo;
 #endif
   return;
 }
@@ -118,7 +118,7 @@ __host__ void  prt_device_timing(float* timing,int size)
       if(timing[ii]>1.e-6){
       printf(" debug execution   %02u   :    %10.3f (ms)\n",ii,timing[ii]);}
     }
-  printf(" summed execution time  :    %10.3f (ms)\n", accoum_time) ; 
+  printf(" summed execution time  :    %10.3f (ms)\n", accoum_time) ;
 
   /*END TOTAL TIMING*/
   printf( "___________________________________________________________________\n");

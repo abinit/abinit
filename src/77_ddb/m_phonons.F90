@@ -227,7 +227,7 @@ module m_phonons
    ! (0:%nprocs-1))
    ! Initial and final index of the IBZ qpoint treated by this MPI proc inside comm.
 
-   real(dp), ABI_CONTIGUOUS pointer :: qibz(:,:)
+   real(dp), contiguous, pointer :: qibz(:,:)
    ! q-points in the IBZ.
 
    real(dp),allocatable :: phfreqs_qibz(:,:)

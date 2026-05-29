@@ -183,7 +183,7 @@ _tsuite_dirs = [
     "etsf_io",
     "fast",
     "gwr_suite",
-    # "gwpt_suite",
+    "gwpt_suite",
     "psml",
     "gpu",
     "libxc",

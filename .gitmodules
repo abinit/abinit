@@ -14,3 +14,6 @@
 	path = tests/modules_with_data/LiF_eph_varpeq
 	url = https://github.com/abinit/LiF_eph_varpeq.git
 	branch = main
+[submodule "tests/modules_with_data/diamond_eph_gwpt_nosym"]
+	path = tests/modules_with_data/diamond_eph_gwpt_nosym
+	url = https://github.com/abinit/diamond_eph_gwpt_nosym.git

@@ -181,7 +181,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
  &  indexes=idx_so)
  if (nprojs<=0) then
    call ps_NonlocalProjectors_Filter(psxml, set=SET_SREL, number=nprojsr)
- endif 
+ endif
  if (nprojs > 0) then
    call ps_NonlocalProjectors_Filter(psxml, set=SET_NONREL, indexes=idx_sr)
  else

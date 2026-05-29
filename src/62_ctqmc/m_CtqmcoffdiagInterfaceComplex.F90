@@ -5,9 +5,9 @@
 !!****m* ABINIT/m_CtqmcoffdiagInterfaceComplex
 !! NAME
 !!  m_CtqmcoffdiagInterfaceComplex
-!! 
-!! FUNCTION 
-!!  Manage a ctqmc simulation. 
+!!
+!! FUNCTION
+!!  Manage a ctqmc simulation.
 !!  friendly interface for the user
 !!
 !! COPYRIGHT
@@ -188,7 +188,7 @@ END SUBROUTINE CtqmcoffdiagInterfaceComplex_init
 !! SOURCE
 
 SUBROUTINE CtqmcoffdiagInterfaceComplex_setOpts(op,opt_Fk,opt_order,opt_histo,opt_movie,&
-& opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
+& opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove)
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagInterfaceComplex), INTENT(INOUT) :: op
@@ -258,7 +258,7 @@ END SUBROUTINE CtqmcoffdiagInterfaceComplex_setOpts
 !! SOURCE
 
 SUBROUTINE CtqmcoffdiagInterfaceComplex_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,opt_sym,opt_levels,hybri_limit,Magmom_orb,&
-&Magmom_spin,Magmom_tot,Iatom,fname,opthybri) 
+&Magmom_spin,Magmom_tot,Iatom,fname,opthybri)
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagInterfaceComplex), INTENT(INOUT) :: op

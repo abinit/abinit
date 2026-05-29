@@ -14,6 +14,7 @@ add_library(72_response STATIC
   m_dfpt_nstwf.F90
   m_dfpt_rhotov.F90
   m_dfpt_scfcv.F90
+  m_dfpttd_berrycurv.F90
   m_dfpt_vtorho.F90
   m_dfpt_vtowfk.F90
   m_d2frnl.F90

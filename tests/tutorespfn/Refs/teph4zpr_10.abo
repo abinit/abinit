@@ -2,7 +2,7 @@
 .Version 10.7.0.2 of ABINIT, released Dec 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -888,6 +888,9 @@ meta: {optdriver: 7, eph_task: 24, }
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
 
+
+ Computing Fan-Migdal + DW self-energy from GSTORE.nc
+ Using e-ph self-energy expression with |g|^2
 
 - Reading e-ph matrix elements from: teph4zpr_10o_DS1_GSTORE.nc
  Asking for with_cplex: 1

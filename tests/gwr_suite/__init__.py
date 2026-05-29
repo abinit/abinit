@@ -24,4 +24,6 @@ inp_files = [
 "t10.abi",  # test Gamma-only HF with time-reversal symmetry (real wavefunctions)
 "t11.abi",  # test Gamma-only HF without time-reversal symmetry (complex wavefunctions)
 "t12.abi",
+"t13.abi",  # Similar to t01.abi but with gpu_option 2
+"t14.abi",  # Similar to t12.abi but with gpu_option 2
 ]

@@ -1,6 +1,6 @@
 
- **** DERIVATIVE DATABASE ****    
-+DDB, Version number  20230401
+ **** DERIVATIVE DATABASE ****
++DDB, Version number  20240201
 
  He BCC conventional cell  EIGR2D file
 
@@ -50,17 +50,17 @@
             0.50000000000000D+00  0.50000000000000D+00  0.50000000000000D+00
      znucl  0.20000000000000D+01
       zion  0.20000000000000D+01
- 
+
   Description of the potentials (KB energies)
   vrsio8 (for pseudopotentials)=100401
   usepaw =  0
   dimekb =  1       lmnmax=  1
   Atom type=    1   pspso=  0   nekb=   0
   iln lpsang iproj  ekb(:)
- 
+
  **** Database of total energy derivatives ****
  Number of data blocks=    4
-  
+
  2nd eigenvalue derivatives   - # elements :          36
  qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
  K-point:  0.00000000E+00  5.00000000E-01  0.00000000E+00
@@ -1251,7 +1251,7 @@
    1   2   3   2  0.38880199252638D+00 -0.10186397506653D-16
    2   2   3   2  0.10403512626089D+01 -0.28329962633639D-16
    3   2   3   2  0.29173811530420D+01 -0.86736173798840D-17
-  
+
  2nd eigenvalue derivatives   - # elements :          36
  qpt  0.00000000E+00  5.00000000E-01  5.00000000E-01   1.0
  K-point:  0.00000000E+00  5.00000000E-01  0.00000000E+00
@@ -2442,7 +2442,7 @@
    1   2   3   2  0.10610705891673D-01 -0.98710931904499D-16
    2   2   3   2  0.77677693815068D+00  0.31028036551586D-17
    3   2   3   2  0.12543415755229D+00  0.20816681711722D-16
-  
+
  2nd eigenvalue derivatives   - # elements :          36
  qpt  5.00000000E-01  0.00000000E+00  5.00000000E-01   1.0
  K-point:  0.00000000E+00  5.00000000E-01  0.00000000E+00
@@ -3633,7 +3633,7 @@
    1   2   3   2  0.29477755626238D+00  0.56210443237856D-16
    2   2   3   2  0.83543315244696D-01  0.10795999392473D-15
    3   2   3   2  0.15028702331878D+00  0.69388939039072D-17
-  
+
  2nd eigenvalue derivatives   - # elements :          36
  qpt  5.00000000E-01  5.00000000E-01  0.00000000E+00   1.0
  K-point:  0.00000000E+00  5.00000000E-01  0.00000000E+00

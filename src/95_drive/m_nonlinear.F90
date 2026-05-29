@@ -1072,7 +1072,7 @@ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.
 
    call ddb%set_d3matr(1, d3etot, blkflg)
 
-   call ddb%write_txt(ddb_hdr, dtfil%fnameabo_ddb)
+   call ddb%write(ddb_hdr, dtfil%fnameabo_ddb)
 
    call ddb_hdr%free()
    call ddb%free()

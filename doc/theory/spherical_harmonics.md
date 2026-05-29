@@ -187,7 +187,7 @@ The effect of a proper or improper rotation on a RSH can be deduced from:
 \begin{equation}
 \label{eq:RSH_rotation}
 \omcR\,\rYlm(\rrhat) = \rYlm(\mcRm \rrhat) = 
-\sum_\alpha D^l_{\alpha m}(\mcR)\,\rYlm(\rrhat).
+\sum_\alpha D^l_{\alpha m}(\mcR)\,\rYl\alpha(\rrhat).
 \end{equation}
 
 That is, spherical harmonics of given $l$ are transformed into a linear combination

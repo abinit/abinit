@@ -53,6 +53,17 @@ program anaddb
  use m_ddb_interpolate, only : ddb_interpolate
  use m_elphon,         only : elphon
  use m_thmeig,         only : thmeig
+ use m_symfind,        only : symanal
+ use m_raman,          only : ramansus, electrooptic
+ use m_ddb_diel,       only : ddb_diel
+ use m_relaxpol,       only : relaxpol
+ use m_ddb_elast,      only : ddb_elast
+ use m_ddb_piezo,      only : ddb_piezo
+ use m_ddb_internalstr, only : ddb_internalstr
+ use m_ddb_flexo,      only : ddb_flexo
+ use m_ddb_magpen,     only : ddb_magpen
+ use m_ddb_omega_interpol, only : ddb_omega_interpol
+ use m_lwf,            only : run_lattice_wannier
  use m_phonons,        only : mkphbs
  use m_gruneisen,      only : gruns_anaddb
 
@@ -63,12 +74,13 @@ program anaddb
  integer:: comm, ii, ierr
  integer:: nproc, my_rank, ana_ncid
  logical:: iam_master
- integer:: units(2)
  real(dp):: tcpu, tcpui, twall, twalli !,cpu, wall, gflops
- real(dp):: tsec(2)
+ real(dp)::  tsec(2)
+ integer:: units(2)
  character(len=10):: procstr
  character(len=24):: codename, start_datetime
- character(len=fnlen):: worker_logfile
+! character(len = strlen):: string, raw_string
+ character(len = fnlen):: worker_logfile
  character(len=500):: msg
  type(args_t):: args
  type(anaddb_dataset_type):: dtset
@@ -176,14 +188,50 @@ program anaddb
 
 ! Change the bravais lattice if needed
  call ddb%set_brav(dtset%brav)
-
-! Copy the long-wave ddb
+ ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with automatic reshapes
+ ! that ddb%val and ddb%flg experience when passed as arguments of some routines
+ ! Copy the long-wave ddb
  if (ddb_hdr%has_d3E_lw) then
    call ddb_lw_copy(ddb, ddb_lw, ddb_hdr)
  end if
 
+ ! MR: Second- and third-order total energy derivatives calculated with the
+ ! magnetic penalty (constrained DFPT) are converted to physically relevant ones here.
+ if (abs(dtset%magpen) > tol8) then
+   call ddb_magpen(ddb, ddb_lw, dtset%magpen, dtset%mpatpol, &
+ & dtset%mpdir, dtset%mpert, dtset%mpopt,  Crystal%natom, dtset%prtvol, 1, Crystal%ucvol, dtset%timdisp, &
+ & Crystal%xred)
+
+   if (dtset%freqflag/=0) then
+     call ddb_omega_interpol(Crystal%amu, ddb, ddb_lw, dtset%eta, dtset%prefix_outdata, &
+   & dtset%magpen, dtset%mpatpol, dtset%mpdir, dtset%mpert, dtset%mpopt,  Crystal%natom, dtset%nfreq, Crystal%ntypat, &
+   & dtset%freqflag, dtset%frmax, dtset%frmin, dtset%prtvol, Crystal%typat, Crystal%ucvol, Crystal%xred)
+   end if
+
+   !Proceed with a normal anaddb run with relaxed- or fixed-spin quantities
+   if (dtset%mpopt==1) then
+     ddb%val= ddb%val_fs
+   else if (dtset%mpopt==2) then
+     ddb%val= ddb%val_rs
+   end if
+ end if
+
+
+! ! TODO: This is to maintain the previous behaviour in which all the arrays were initialized to zero.
+! ! In the new version asrq0%d2asr is always computed if the Gamma block is present
+! ! and this causes changes in [v5][t28]
+! if (.not. (dtset%ifcflag == 0 .or. dtset%instrflag /= 0 .or. dtset%elaflag /= 0)) then
+!   asrq0%d2asr = zero
+!   if (asrq0%asr == 3 .or. asrq0%asr == 4) then
+!     asrq0%singular = zero; asrq0%uinvers = zero; asrq0%vtinvers = zero
+!   end if
+! end if
+
 ! Acoustic Sum Rule
+! In case the interatomic forces are not calculated, the
+! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
  call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal%xcart)
+
 
 ! Open netcdf output and write basic quantities
  call driver%open_write_nc(ana_ncid, dtset, crystal, comm)

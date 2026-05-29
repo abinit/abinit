@@ -79,7 +79,7 @@ def sh_cases(case_data,case_indent=0,case_item=True):
         ret += indent_snippet(case_indent,"fi\n")
     else:
       raise ValueError("case_data must contain at least 2 items")
-      
+
   else:
     return indent_snippet(case_indent,"%s\n;;\n" % (case_data.strip()))
 

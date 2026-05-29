@@ -1,0 +1,125 @@
+# Linear-response to phonons (at Gamma and finite q) and electric field
+# with the 2D short-range Coulomb kernel in BN monolayer
+# (M. Royo, 16.01.2025)
+
+ndtset 5
+
+# 2D Coulomb cutoff (Beigi)
+icutcoul 22
+vcutgeo  1 1 0
+
+#Set 1: Ground state self-consistency
+getwfk1   0
+getden1   0
+kptopt1   1
+nqpt1     0
+tolwfr1   1.0d-18
+prtwf1    1
+
+#Set 2: Response function calculation of d/dk wave function
+iscf2    -3
+kptopt2   2
+rfelfd2   2
+tolwfr2   1.0d-18
+rfdir2    1 1 1
+prtwf2    1
+
+#Set 3: Response function calculation of Q=0 phononsand electric field pert.
+getddk3   2
+kptopt3   2
+rfphon3   1
+rfatpol3  1 2
+rfelfd3   3
+rfdir3    1 1 1
+prtwf3    0
+tolwfr3   1.0d-10
+
+#Set 4: Non-self consistent ground-state calculation, with q=(0.01 0 0)
+nqpt4     1
+qpt4      0.01 0.0 0.0
+kptopt4   3
+tolwfr4   1.0d-18
+iscf4    -2
+prtwf4    1
+
+#Set 5: Response Function calculation of phonons at q=(0.01 0 0)
+rfphon5   1
+rfatpol5  1 2
+rfdir5    1 1 1
+nqpt5     1
+qpt5      0.01 0.0 0.0
+getwfq5  -1
+kptopt5   3
+tolwfr5   1.1d-10
+
+###################  Common data  ######################
+prtwf     0
+getwfk    1
+getden    1
+nqpt      1
+qpt       0.00000000E+00  0.00000000E+00  0.00000000E+00
+
+#Definition of the unit cell
+acell  4.6895  4.6895  4.00000E+01
+rprim      1.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           5.0000000000E-01  8.6602540378E-01  0.0000000000E+00
+           0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
+
+chkprim  1
+
+#Definition of the atom types
+ntypat 2
+znucl 5 7
+
+#Definition of the atoms
+natom 2
+typat 1 2
+
+#Atomic positions
+xred
+0.00000000  0.00000000 0.000000
+0.33333333  0.33333333 0.000000
+
+#Gives the number of band, explicitely (do not take the default)
+nband 4
+
+#Exchange-correlation functional
+ixc   7           # Perdew-Wang 92
+
+#Definition of the planewave basis set
+ecut   5.0       # Maximal kinetic energy cut-off, in Hartree
+
+#Definition of the k-point grid
+ngkpt 6 6 1
+nshiftk 1
+
+shiftk 0.0 0.0 0.5
+
+#Definition of the SCF procedure
+nstep 100         # Maximal number of SCF cycles
+diemac 15.0      # Although this is not mandatory, it is worth to
+asr 0
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "B.psp8, N.psp8"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = scope_gnu_12.2_mpich ,bob_gnu_13.2_openmp
+#%% test_chain =  t53.abi
+#%% [files]
+#%% files_to_test =
+#%%   t53.abo, tolnlines=  19, tolabs=  1.000e-03, tolrel=  5.000e-04, fld_options=-easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Royo
+#%% keywords = DFPT
+#%% description = Linear response to phonons and electric field with the 2D short-range Coulomb kernel
+#%%<END TEST_INFO>
+

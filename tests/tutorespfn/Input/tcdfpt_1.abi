@@ -1,0 +1,98 @@
+# Ground-state and ddk response funcion calculation for antiferromagnetic MnF2
+# (M. Royo, 12.12.2025)
+
+   ndtset 2
+
+### 1) GROUND STATE
+   tolvrs1  1.0d-10
+   spinat1  0.0 0.0  5.0     #Magnetism
+            0.0 0.0 -5.0
+            0.0 0.0  0.0
+            0.0 0.0  0.0
+            0.0 0.0  0.0
+            0.0 0.0  0.0
+
+### 2) DDK
+  tolwfr2   1.0d-10
+  rfelfd2   2
+   rfdir2   1 1 1
+    nqpt2   1
+     qpt2   0.0 0.0 0.0
+  getwfk2   1
+    iscf2  -3
+
+### GENERAL PARAMETERS
+
+#Definition of the atom types
+ntypat 2
+znucl 25 9
+
+#Definition of the atoms
+natom 6
+typat 2*1 4*2
+
+#Definition of the unit cell
+acell     9.2100000000E+00  9.2100000000E+00  6.2560000000E+00 Bohr
+rprim     1.0000 0.0000 0.0000
+          0.0000 1.0000 0.0000
+          0.0000 0.0000 1.0000
+xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+          5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+          6.9627618231E-01  6.9627618231E-01  0.0000000000E+00
+          1.9627618231E-01  8.0372381769E-01  5.0000000000E-01
+          3.0372381769E-01  3.0372381769E-01  0.0000000000E+00
+          8.0372381769E-01  1.9627618231E-01  5.0000000000E-01
+
+#Definition of the planewave basis set
+ecut   3.0
+nband  42
+
+#Definition of the k-point grid
+kptopt 3
+
+ngkpt 2 2 3
+
+nshiftk 1
+shiftk 0.5 0.5 0.5
+
+#Symmetries deactivated for magnetic systems
+nsym 1
+
+#Definition of the SCF procedure
+nstep 50
+diemac  8.0
+
+nline 12
+diemix1    0.6
+diemixmag1 0.4
+nnsclo -4
+
+nspden   4
+nspinor  2
+
+#Pseudos
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain =  tcdfpt_1.abi, tcdfpt_2.abi, tcdfpt_3.abi, tcdfpt_4.abi, tcdfpt_5.abi, tcdfpt_6.abi, tcdfpt_7.abi
+#%% [files]
+#%% files_to_test =
+#%%   tcdfpt_1.abo, tolnlines=  5, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-easy
+#%% [shell]
+#%% post_commands= ww_mv tcdfpt_1o_DS1_WFK tcdfpt_2o_DS1_WFK; ww_mv tcdfpt_1o_DS2_1WF19 tcdfpt_2o_DS2_1WF19; ww_mv tcdfpt_1o_DS2_1WF20 tcdfpt_2o_DS2_1WF20; ww_mv tcdfpt_1o_DS2_1WF21 tcdfpt_2o_DS2_1WF21
+#%% [paral_info]
+#%% max_nprocs = 12
+#%% [extra_info]
+#%% authors = M. Royo
+#%% keywords = CDFPT
+#%% description = Noncolinear ground state and ddk response functions for MnF2
+#%%<END TEST_INFO>
+
+

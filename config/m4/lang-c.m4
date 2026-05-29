@@ -368,7 +368,7 @@ AC_DEFUN([_ABI_CC_CHECK_HEADERS],[
 AC_DEFUN([_ABI_CC_CHECK_FUNCTIONS],[
   # Init AC_MSG_CHECKING([for library functions])
 
-  dnl AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime]) 
+  dnl AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime])
   AC_CHECK_FUNCS([abort])
   AC_CHECK_FUNCS([mallinfo])
 

@@ -1667,7 +1667,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk,fname)
     END DO
   ENDIF
   close(436)
-  
+
   IF (op%rank .eq. 0) then
     open(unit=735,file=trim(fname)//'_Hybridization_iatom_01.dat',status='unknown',form='formatted')
     write(735,'(6a)') " Real and Imaginary part of the Hybridization function Delta(tau) in the CTQMC basis"

@@ -7,9 +7,9 @@ Please, see the README file in the tests directory (above this one) to get help.
 
 ------------------------------------------------------------------
 
-* Tests 1-40 concern ground state 
+* Tests 1-40 concern ground state
 
-* Tests 41-60 concern response functions except electron-phonon 
+* Tests 41-60 concern response functions except electron-phonon
 
 * Tests 61-80 concern electron-phonon and polaron
 

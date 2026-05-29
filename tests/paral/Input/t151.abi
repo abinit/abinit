@@ -102,6 +102,6 @@ xred
 #%% [extra_info]
 #%% authors = I.-M. Lygatsika
 #%% keywords = PAW, SLICING
-#%% description = 
-#%%   Test parallel slice execution with 4 MPI in spectrum slicing algorithm for ground state energy. 
+#%% description =
+#%%   Test parallel slice execution with 4 MPI in spectrum slicing algorithm for ground state energy.
 #%%<END TEST_INFO>

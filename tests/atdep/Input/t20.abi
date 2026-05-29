@@ -31,7 +31,7 @@ born_charge 5.31 -2.655
 ngqpt1 6 6 6
 ngqpt2 12 12 12
 enunit 1
- 
+
 # This test is excluded from bob_gnu_13.2_openmp, starting 20240627. Previously, on that machine, with OMP2, it needed 890 secs (!),
 # while on other machines with one core, the timing was on the order of 300..450 secs. Apparently in June 2024 some modification
 # in the branch sarrautem  drove the timing beyond the allowed limit of 900 secs.
@@ -40,7 +40,7 @@ enunit 1
 #%% executable = atdep
 #%% md_hist = t20
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t20.abo, tolnlines = 2, tolabs = 2.e-0, tolrel = 2.e-2, fld_options = -medium;
 #%%   t20_omega.dat, tolnlines = 5, tolabs = 2.e-1, tolrel = 2.e-2, fld_options = -medium;
 #%%   t20_thermo.dat, tolnlines = 5, tolabs = 2.e-1, tolrel = 2.e-2, fld_options = -medium;
@@ -49,7 +49,7 @@ enunit 1
 #%% [extra_info]
 #%% authors = F. Bottin & J. Bouchet; G. Antonius
 #%% keywords = atdep
-#%% description = 
+#%% description =
 #%%   test aTDEP (2nd order)
 #%%   UO2 (fluorite) with 192 atoms at T = 1200 K. With LOTO.
 #%% topics = aTDEP

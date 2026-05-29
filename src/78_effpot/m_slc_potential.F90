@@ -40,7 +40,7 @@ module  m_slc_potential
   type, public, extends(abstract_potential_t) :: slc_potential_t
      integer :: nspin=0
      integer :: natom=0
-     logical :: has_bilin=.False.   ! bilinear coupling term, i.e. liu        
+     logical :: has_bilin=.False.   ! bilinear coupling term, i.e. liu
      logical :: has_linquad=.False. ! spin first then lattice, i.e. niuv
      logical :: has_quadlin=.False. ! spin first then lattice, i.e. oiju
      logical :: has_biquad=.False.  ! biquadratic coupling term, i.e. tijuv
@@ -77,7 +77,7 @@ module  m_slc_potential
      procedure :: add_tijuv_term
      procedure :: calculate
   end type slc_potential_t
- 
+
 contains
 
   subroutine initialize(self, nspin, natom)
@@ -100,7 +100,7 @@ contains
     self%is_null=.False.
     self%nspin=nspin
     self%natom=natom
-    
+
     call xmpi_bcast(self%nspin, master, comm, ierr)
     call xmpi_bcast(self%natom, master, comm, ierr)
     ABI_MALLOC(self%ms, (self%nspin))
@@ -111,7 +111,7 @@ contains
     class(slc_potential_t), intent(inout):: self
     ABI_SFREE(self%ms)
 
-    if(self%has_bilin) then 
+    if(self%has_bilin) then
       call self%liu_sc%finalize()
       ABI_SFREE(self%luref)
     endif
@@ -122,7 +122,7 @@ contains
     if(self%has_linquad) then
       call self%niuv_sc%finalize()
       call self%nuvref%finalize()
-    endif 
+    endif
     if(self%has_biquad) then
       call self%tijuv_sc%finalize()
       call self%tuvij_sc%finalize()
@@ -146,7 +146,7 @@ contains
 
     coupling = params%slc_coupling
 
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     if(iam_master) then
       if(coupling .ge. 1000) then
@@ -167,7 +167,7 @@ contains
         coupling=coupling - 10
       endif
 
-      if(coupling .ge. 1) then   
+      if(coupling .ge. 1) then
         self%has_bilin=.True.
         call xmpi_bcast(self%has_bilin, master, comm, ierr)
       endif
@@ -184,7 +184,7 @@ contains
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
 
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     self%supercell=>supercell
     self%ms(:)=supercell%spin%ms(:)
@@ -211,7 +211,7 @@ contains
     beta = 0.5_dp
 
     ABI_MALLOC(force, (3*self%natom))
-    if(self%has_bilin) then 
+    if(self%has_bilin) then
       ABI_MALLOC(self%luref, (3*self%natom))
       self%luref=0.0d0
       force = 0.0d0
@@ -219,14 +219,14 @@ contains
       self%luref(:) = - force(:)
     endif
     if(self%has_quadlin) then
-      ABI_MALLOC(self%ouref, (3*self%natom))     
+      ABI_MALLOC(self%ouref, (3*self%natom))
       force = 0.0d0
       call self%oiju_sc%vec_product(1, spref, 2, spref, 3, force)
       self%ouref(:) = - beta*force(:)
     endif
     ABI_SFREE(force)
 
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     if(self%has_linquad) then
       if(iam_master) then
@@ -256,7 +256,7 @@ contains
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
 
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
     if(iam_master) then
        call self%liu_sc%add_entry(ind=[i,u],val=val)
     endif
@@ -271,7 +271,7 @@ contains
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
 
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
     if(iam_master) then
        call self%niuv_sc%add_entry(ind=[i,u,v],val=val)
     endif
@@ -287,7 +287,7 @@ contains
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
 
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
     if(iam_master) then
        call self%oiju_sc%add_entry(ind=[i,j,u],val=val)
     endif
@@ -301,7 +301,7 @@ contains
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
 
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
     if(iam_master) then
        call self%tijuv_sc%add_entry(ind=[i,j,u,v],val=val)
        call self%tuvij_sc%add_entry(ind=[u,v,i,j],val=val)
@@ -320,11 +320,11 @@ contains
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
     type(hash_table_t),optional, intent(inout) :: energy_table
- 
+
     integer :: ii
     character(len=80) :: label
     real(dp) :: eslc, beta, eterm
-    real(dp) :: disp(1:3*self%natom), sp(1:3*self%nspin), spref(1:3*self%nspin) 
+    real(dp) :: disp(1:3*self%natom), sp(1:3*self%nspin), spref(1:3*self%nspin)
     real(dp) :: f1(1:3*self%natom), b1(1:3*self%nspin)
     real(dp) :: btmp(3, self%nspin), bslc(1:3*self%nspin), fslc(1:3*self%natom)
 
@@ -346,12 +346,12 @@ contains
         b1(:) = 0.0d0
         call self%liu_sc%vec_product2d(2, disp, 1, b1)
         bslc(:) = bslc(:) + b1(:)
-      endif      
+      endif
       if(self%has_linquad) then
         b1(:) = 0.0d0
         call self%niuv_sc%vec_product(2, disp, 3, disp, 1, b1)
         bslc(:) = bslc(:) + beta*b1(:)
-      endif      
+      endif
       if(self%has_quadlin) then
         b1(:) = 0.0d0
         call self%oiju_sc%vec_product(1, sp, 3, disp, 2, b1)
@@ -393,7 +393,7 @@ contains
           call energy_table%put(label, eterm)
         endif
         eslc = eslc + eterm
-      endif      
+      endif
       if(self%has_linquad) then
         f1(:) = 0.0d0
         eterm = 0.0d0
@@ -410,7 +410,7 @@ contains
           call energy_table%put(label, eterm)
         endif
         eslc = eslc + eterm
-      endif      
+      endif
       if(self%has_quadlin) then
         f1(:) = 0.0d0
         eterm = 0.0d0
@@ -461,7 +461,7 @@ contains
     ABI_UNUSED_A(lwf)
     ABI_UNUSED_A(stress)
     ABI_UNUSED_A(lwf_force)
-    
+
   end subroutine calculate
 
   !!***

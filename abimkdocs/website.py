@@ -1032,10 +1032,10 @@ The full bibtex file is available [here](../abiref.bib).
     In this lesson, we rely on the iterative KS eigensolvers to compute empty states.
     However, when a large number of unoccupied states is required, a direct diagonalization
     of the KS Hamiltonian is generally more efficient.
-    This can be done by setting:
+    This can be done by using [[optdriver]] and [[gwr_task]].
 
-        [[optdriver]] = 6
-        [[gwr_task]] = "HDIAGO"
+        optdriver = 6
+        gwr_task = "HDIAGO"
 
     and, when available, enabling the ELPA library for optimal performance
     For additional information, please consult the [[tutorial:gwr_intro|gwr_intro]] page

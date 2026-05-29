@@ -176,26 +176,26 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  !character(len=500) :: message
 !arrays
  integer,allocatable :: gbound(:,:)
- integer, ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
+ integer, contiguous, pointer :: kg_k(:,:) => null()
  logical :: locc_test,nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,gpu_cwavef
  real(dp) :: dummy(2,1) = reshape( (/0.0, 0.0/), shape(dummy))
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwavef_rot(:,:,:,:),occ_diag(:),occ_k(:)
  real(dp),allocatable :: kg_k_cart_block(:),taur_alphabeta(:,:,:,:),weight_t(:)
- real(dp), ABI_CONTIGUOUS pointer :: cwavef(:,:,:)  => null()
- real(dp), ABI_CONTIGUOUS pointer :: cwavefb(:,:,:) => null()
- real(dp), ABI_CONTIGUOUS pointer :: cwavef_x(:,:)  => null()
- real(dp), ABI_CONTIGUOUS pointer :: cwavef_y(:,:)  => null()
- real(dp), ABI_CONTIGUOUS pointer :: cwavefb_2(:,:) => null() ! only use when paral_kgb=0
- real(dp), ABI_CONTIGUOUS pointer :: cwavefb_x(:,:) => null() ! only use when paral_kgb=0
- real(dp), ABI_CONTIGUOUS pointer :: cwavefb_y(:,:) => null() ! only use when paral_kgb=0
- real(dp), ABI_CONTIGUOUS pointer :: rhoaug(:,:,:)      => null()
- real(dp), ABI_CONTIGUOUS pointer :: rhoaug_down(:,:,:) => null()
- real(dp), ABI_CONTIGUOUS pointer :: rhoaug_up(:,:,:)   => null()
- real(dp), ABI_CONTIGUOUS pointer :: rhoaug_mx(:,:,:)   => null()
- real(dp), ABI_CONTIGUOUS pointer :: rhoaug_my(:,:,:)   => null()
- real(dp), ABI_CONTIGUOUS pointer :: wfraug(:,:,:,:)    => null()
- real(dp), ABI_CONTIGUOUS pointer :: cg_k(:,:) => null()
+ real(dp), contiguous,  pointer :: cwavef(:,:,:)  => null()
+ real(dp), contiguous,  pointer :: cwavefb(:,:,:) => null()
+ real(dp), contiguous,  pointer :: cwavef_x(:,:)  => null()
+ real(dp), contiguous,  pointer :: cwavef_y(:,:)  => null()
+ real(dp), contiguous,  pointer :: cwavefb_2(:,:) => null() ! only use when paral_kgb=0
+ real(dp), contiguous,  pointer :: cwavefb_x(:,:) => null() ! only use when paral_kgb=0
+ real(dp), contiguous,  pointer :: cwavefb_y(:,:) => null() ! only use when paral_kgb=0
+ real(dp), contiguous,  pointer :: rhoaug(:,:,:)      => null()
+ real(dp), contiguous,  pointer :: rhoaug_down(:,:,:) => null()
+ real(dp), contiguous,  pointer :: rhoaug_up(:,:,:)   => null()
+ real(dp), contiguous,  pointer :: rhoaug_mx(:,:,:)   => null()
+ real(dp), contiguous,  pointer :: rhoaug_my(:,:,:)   => null()
+ real(dp), contiguous,  pointer :: wfraug(:,:,:,:)    => null()
+ real(dp), contiguous,  pointer :: cg_k(:,:) => null()
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1229,11 +1229,10 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
  real(dp) :: xnorm
  character(len=500) :: message
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
  real(dp) :: length(ntypat)
  real(dp),allocatable :: work(:), spinat_indx(:,:)
  logical :: use_gaussian(ntypat)
-
 ! *************************************************************************
 
  if (nspden==4) then
@@ -1639,7 +1638,6 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
  real(dp) :: zetmn2(2),zetmx1(2),zetmx2(2)
  real(dp),allocatable :: array(:),coord(:,:,:,:),value(:,:,:),integrated(:)
  real(dp),allocatable :: value_fft(:,:,:)
-
 ! *************************************************************************
 
  if(.not.(present(optrhor))) then
