@@ -951,7 +951,7 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,dnlbra,dnlket,gdir,nn,npwsp
+  integer :: adir,dum_dnlbra,dum_dnlket,nn,npwsp
   complex(dp) :: prefac_m,tt
   logical :: my_suppress_ormesh
   !arrays
@@ -966,8 +966,8 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
  end if
  npwsp = npw_k*dtset%nspinor
  prefac_m = cone
- bdir=0;gdir=0
- dnlbra=0; dnlket=0
+ ! do not need projector derivatives in these calls to nonlocal_me
+ dum_dnlbra=0; dum_dnlket=0
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
  !ABI_MALLOC(cwavef,(2,npwsp))
  call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
@@ -981,14 +981,14 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
 
      select case (nl1_option)
      case(1)
-       call nonlocal_me(adir,atindx,bdir,cwavef,cwaveprj,dnlbra,dnlket,&
-         & dterm,dtset,eig_k(nn),fermie,gdir,gs_hamk,cwavef,mpi_enreg,tt,npw_k,&
+       call nonlocal_me(adir,atindx,cwavef,cwaveprj,dum_dnlbra,dum_dnlket,&
+         & dterm,dtset,eig_k(nn),fermie,gs_hamk,cwavef,mpi_enreg,tt,npw_k,&
          & orbmag_mesh,inlr,ph1d,prefac_m,pawtab,trnrm(nn),&
          & suppress_ormesh=my_suppress_ormesh)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inlr) = real(tt)
      case(2)
-       call nonlocal_me(adir,atindx,bdir,cwavef,cwaveprj,dnlbra,dnlket,&
-         & dterm,dtset,eig_k(nn),fermie,gdir,gs_hamk,cwavef,mpi_enreg,tt,npw_k,&
+       call nonlocal_me(adir,atindx,cwavef,cwaveprj,dum_dnlbra,dum_dnlket,&
+         & dterm,dtset,eig_k(nn),fermie,gs_hamk,cwavef,mpi_enreg,tt,npw_k,&
          & orbmag_mesh,inbm,ph1d,prefac_m,pawtab,trnrm(nn),&
          & suppress_ormesh=my_suppress_ormesh)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inbm) = real(tt)
@@ -1097,8 +1097,8 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
    m1(1:3) = czero
    prefac_m = -com*c2
    do adir = 1, 3
-     call nonlocal_me(adir,atindx,bdir(adir),unk,cwaveprj,bdir(adir),gdir(adir),&
-       & dterm,dtset,eig_k(nn),fermie,gdir(adir),gs_hamk,unk,mpi_enreg,&
+     call nonlocal_me(adir,atindx,unk,cwaveprj,bdir(adir),gdir(adir),&
+       & dterm,dtset,eig_k(nn),fermie,gs_hamk,unk,mpi_enreg,&
        & txt,npw_k,orbmag_mesh,innl,ph1d,prefac_m,pawtab,trnrm(nn),&
        & suppress_ormesh=my_suppress_ormesh)
      m1(adir) = m1(adir) + txt
@@ -2090,12 +2090,12 @@ end subroutine lamb_core
 !!
 !! SOURCE
 
-subroutine nonlocal_me(adir,atindx,bdir,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
-    & eignk,fermie,gdir,gs_hamk,ket,mpi_enreg,nlme,npw_k,orbmag_mesh,oterm,ph1d,&
+subroutine nonlocal_me(adir,atindx,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
+    & eignk,fermie,gs_hamk,ket,mpi_enreg,nlme,npw_k,orbmag_mesh,oterm,ph1d,&
     & prefac,pawtab,trnrm,suppress_ormesh)
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: adir,bdir,dnlbra,dnlket,gdir,npw_k,oterm
+  integer,intent(in) :: adir,dnlbra,dnlket,npw_k,oterm
   real(dp),intent(in) :: eignk,fermie,trnrm
   complex(dp),intent(in) :: prefac
   complex(dp),intent(out) :: nlme
