@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sat 30 May 2026.
-- ( at 10h24 )
+- ( at 11h05 )
   
 - input  file    -> /home/jzwanzig/local/abinit-develop/tmp-intel/tests/Test_suite/tutorial_tnuc_4/tnuc_4.abi
 - output file    -> tnuc_4.abo
@@ -417,6 +417,10 @@ meta: {optdriver: 1, rfddk: 1, }
  pspatm: atomic psp has been read  and splines computed
  
 --------------------------------------------------------------------------------
+ 
+ 
+ ==>  initialize data related to q vector <== 
+ 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   2
     2)    idir= 2    ipert=   2
@@ -535,6 +539,21 @@ tolerances: {tolwfr: 1.00E-20, }
  11 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -9.53400237E-02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
+ 2DEtotal=   -0.7111839232E+00 Ha. Also 2DEtotal=   -0.193523004274E+02 eV
+    (  non-var. 2DEtotal :   -7.1118392340E-01 Ha)
+ 
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : derivative vs k along direction   3
+ The set of symmetries contains only one element for this perturbation.
+ symkpt : not enough symmetry to change the number of k points.
+ 
+--------------------------------------------------------------------------------
+ 
+--------------------------------------------------------------------------------
+ 
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
 
 --- !BeginCycle
 iteration_state: {dtset: 2, }
@@ -684,61 +703,10 @@ P          mk1mem           1
  and a postprocessing based on the final acell, rprim, and xred.
  More details in the log file.
 
-- Total cpu        time (s,m,h):         45.4        0.76      0.013
-- Total wall clock time (s,m,h):         45.4        0.76      0.013
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0
--
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           45.4, wall_time =           45.4
--
-- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
--                                                                                (-1=no count)
-- fourwf%(pot)                             17.844  39.3        17.859  39.3           3968      -1.00        1.00       1.00
-- xc:pot/=fourdp                            9.955  21.9         9.954  21.9             65      -1.00        1.00       1.00
-- fourdp                                    9.020  19.9         9.040  19.9           1117      -1.00        1.00       1.00
-- dfpt_vtorho (1)                           1.557   3.4         1.558   3.4             18      -1.00        1.00       1.00
-- dfpt_vtowfk(contrib)                      1.444   3.2         1.446   3.2             -1      -1.00        1.00       1.00
-- vtowfk(contrib)                           1.435   3.2         1.439   3.2             25      -1.00        1.00       1.00
-- pspini                                    1.173   2.6         1.173   2.6              2      -1.00        1.00       1.00
-- nonlop(apply)                             0.622   1.4         0.631   1.4            818      -1.00        0.99       0.99
-- pawmkrho                                  0.562   1.2         0.564   1.2             25      -1.00        1.00       1.00
-- dfpt_cgwf-O(npw)                          0.505   1.1         0.482   1.1             -1      -1.00        1.05       1.05
-- dfpt_nstpaw                               0.425   0.9         0.424   0.9              3      -1.00        1.00       1.00
-- dfpt_scfcv  (1)                           0.336   0.7         0.337   0.7              3      -1.00        1.00       1.00
-- fourwf%(den)                              0.268   0.6         0.264   0.6            104      -1.00        1.01       1.01
-- getghc(/=fourXX,nonlop,fock_XX)          -2.455  -5.4        -2.465  -5.4             -1      -1.00        1.00       1.00
-- others (203)                              1.199   2.6         1.207   2.7             -1      -1.00        0.99       0.99
--<END_TIMER>
--
-- subtotal                                 43.891  96.7        43.913  96.6                                  1.00       1.00
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          45.4, wall_time =          45.4
--
-- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
--                                                                                (-1=no count)
-- fourwf%(pot)                             17.844  39.3        17.859  39.3           3968      -1.00        1.00       1.00
-- xc:pot/=fourdp                            9.955  21.9         9.954  21.9             65      -1.00        1.00       1.00
-- fourdp                                    9.020  19.9         9.040  19.9           1117      -1.00        1.00       1.00
-- dfpt_vtorho (1)                           1.557   3.4         1.558   3.4             18      -1.00        1.00       1.00
-- dfpt_vtowfk(contrib)                      1.444   3.2         1.446   3.2             -1      -1.00        1.00       1.00
-- vtowfk(contrib)                           1.435   3.2         1.439   3.2             25      -1.00        1.00       1.00
-- pspini                                    1.173   2.6         1.173   2.6              2      -1.00        1.00       1.00
-- nonlop(apply)                             0.622   1.4         0.631   1.4            818      -1.00        0.99       0.99
-- pawmkrho                                  0.562   1.2         0.564   1.2             25      -1.00        1.00       1.00
-- dfpt_cgwf-O(npw)                          0.505   1.1         0.482   1.1             -1      -1.00        1.05       1.05
-- dfpt_nstpaw                               0.425   0.9         0.424   0.9              3      -1.00        1.00       1.00
-- dfpt_scfcv  (1)                           0.336   0.7         0.337   0.7              3      -1.00        1.00       1.00
-- fourwf%(den)                              0.268   0.6         0.264   0.6            104      -1.00        1.01       1.01
-- others (204)                             -1.256  -2.8        -1.258  -2.8             -1      -1.00        1.00       1.00
--<END_TIMER>
 
-- subtotal                                 43.891  96.7        43.913  96.6                                  1.00       1.00
 
 ================================================================================
 
@@ -841,10 +809,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- Proc.   0 individual time (sec): cpu=         33.1  wall=         33.4
+- Proc.   0 individual time (sec): cpu=         33.2  wall=         33.6
  
 ================================================================================
  
  Calculation completed.
 .Delivered  51 WARNINGs and  18 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         33.1  wall=         33.4
++Overall time at end (sec) : cpu=         33.2  wall=         33.6
