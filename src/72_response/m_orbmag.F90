@@ -70,8 +70,8 @@ module m_orbmag
   implicit none
 
   ! these parameters name the various output terms
-  integer,parameter :: chern_nterms=3
-  integer,parameter :: ibcc=1,ibvv1=2,ibvv2=3
+  integer,parameter :: chern_nterms=2
+  integer,parameter :: ibcc=1,ibvv1=2
   integer,parameter :: orbmag_nterms=6
   integer,parameter :: incc=1,invv1=2,invv2=3
   integer,parameter :: innl=4,inlr=5,inbm=6
@@ -609,8 +609,8 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      ! accumulate terms
      do nn = 1, nband_k
        if(abs(trnrm(nn)).LT.tol8) cycle
-       orbmag_mesh%chern_terms(nn,isppol,1:3,ibcc:ibvv2) = orbmag_mesh%chern_terms(nn,isppol,1:3,ibcc:ibvv2) + &
-           & trnrm(nn)*orbmag_mesh%cmesh(nn,ikpt,isppol,1:3,ibcc:ibvv2)
+       orbmag_mesh%chern_terms(nn,isppol,1:3,ibcc:ibvv1) = orbmag_mesh%chern_terms(nn,isppol,1:3,ibcc:ibvv1) + &
+           & trnrm(nn)*orbmag_mesh%cmesh(nn,ikpt,isppol,1:3,ibcc:ibvv1)
        orbmag_mesh%orbmag_terms(nn,isppol,1:3,incc:inbm) = orbmag_mesh%orbmag_terms(nn,isppol,1:3,incc:inbm) + &
            & trnrm(nn)*orbmag_mesh%omesh(nn,ikpt,isppol,1:3,incc:inbm)
      end do ! loop on bands
@@ -1463,7 +1463,9 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
      end if
 
      ! compute VV2 contributions
-     !do np = 1, nband_k
+     ! sum over n,n'. but n=n' term vanishes and n,n' term = -n',n term. Thus
+     ! sum over only the "upper diagonal" of terms and include the lower diagonal
+     ! by symmetry
      do np = nn+1, nband_k
        if (np.EQ.nn) cycle
        if (occ_k(np).LT.tol8) cycle
@@ -1471,21 +1473,17 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
        gpdot=cg_zdotc(npwsp,bra,svectoutg); gpdotc=CMPLX(gpdot(1),gpdot(2))
        bpdot=cg_zdotc(npwsp,bra,svectoutb); bpdotc=CMPLX(bpdot(1),bpdot(2))
 
-       ! terms in <u|dS|u'><u'|dS|u>
-       !bv2b(adir) = bv2b(adir) + prefac_b*CONJG(bpdotc)*gpdotc
-       bv2b(adir) = bv2b(adir) + czero
+       ! terms in <u|dS|u'><u'|dS|u>. The <u'|dS|u><u|dS|u'> term is included
+       ! by way of the -eig_k(np) contribution.
        mv2b(adir) = mv2b(adir) - prefac_m*CONJG(bpdotc)*gpdotc*(eig_k(nn) - eig_k(np))
-       !mv2b_mu(adir) = mv2b_mu(adir) + prefac_m*CONJG(bpdotc)*gpdotc*fermie
-       mv2b_mu(adir) = mv2b_mu(adir) + czero
      end do ! np
 
    end do ! adir
 
    orbmag_mesh%cmesh(nn,ikpt,isppol,1:3,ibvv1) = two*real(b1(1:3))
-   orbmag_mesh%cmesh(nn,ikpt,isppol,1:3,ibvv2) = two*real(bv2b(1:3))
 
    orbmag_mesh%omesh(nn,ikpt,isppol,1:3,invv1) = two*real(m1(1:3)+m1_mu(1:3))
-   orbmag_mesh%omesh(nn,ikpt,isppol,1:3,invv2) = two*real(mv2b(1:3)+mv2b_mu(1:3))
+   orbmag_mesh%omesh(nn,ikpt,isppol,1:3,invv2) = two*real(mv2b(1:3))
 
  end do !nn
 
@@ -2465,71 +2463,27 @@ subroutine orbmag_output(self,dtset,omlamb)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Orbital magnetic moment, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '     rho(1) CC : ',(self%orbmag_trace(adir,incc),adir=1,3)
+   write(message,'(a,3es16.8)') '      rho(1) CC : ',(self%orbmag_trace(adir,incc),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '    rho(1) VV1 : ',(self%orbmag_trace(adir,invv1),adir=1,3)
+   write(message,'(a,3es16.8)') '     rho(1) VV1 : ',(self%orbmag_trace(adir,invv1),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '    rho(1) VV2 : ',(self%orbmag_trace(adir,invv2),adir=1,3)
+   write(message,'(a,3es16.8)') '     rho(1) VV2 : ',(self%orbmag_trace(adir,invv2),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '     rho(0) NL : ',(self%orbmag_trace(adir,innl),adir=1,3)
+   write(message,'(a,3es16.8)') '      rho(0) NL : ',(self%orbmag_trace(adir,innl),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '   <L_R> terms : ',(self%orbmag_trace(adir,inlr),adir=1,3)
+   write(message,'(a,3es16.8)') '          <L_R> : ',(self%orbmag_trace(adir,inlr),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' <A0.An> terms : ',(self%orbmag_trace(adir,inbm),adir=1,3)
+   write(message,'(a,3es16.8)') '        <A0.An> : ',(self%orbmag_trace(adir,inbm),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '    Lamb terms : ',(omlamb(adir),adir=1,3)
+   write(message,'(a,3es16.8)') ' Lamb shielding : ',(omlamb(adir),adir=1,3)
+   write(message,'(a)')ch10
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Chern vector, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '  Ch CC : ',(self%chern_trace(adir,ibcc),adir=1,3)
+   write(message,'(a,3es16.8)') '       Chern CC : ',(self%chern_trace(adir,ibcc),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' Ch vv1 : ',(self%chern_trace(adir,ibvv1),adir=1,3)
+   write(message,'(a,3es16.8)') '      Chern VV1 : ',(self%chern_trace(adir,ibvv1),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' Ch vv2 : ',(self%chern_trace(adir,ibvv2),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
- end if
-
- if(abs(dtset%orbmag) .GE. 2) then
-   write(message,'(a)')ch10
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a)')' Term-by-term breakdowns for each band : '
-   call wrtout(ab_out,message,'COLL')
-   do iband = 1, dtset%mband
-     do isppol = 1, dtset%nsppol
-       write(message,'(a)')ch10
-       call wrtout(ab_out,message,'COLL')
-       if (dtset%nsppol .EQ. 2) then
-         write(message,'(a,i3,a,i3,a,i2,a,i2)') ' band ',iband,' of ',dtset%mband,'; spin polarization ',isppol,' of ',dtset%nsppol
-       else
-         write(message,'(a,i3,a,i3)') ' band ',iband,' of ',dtset%mband
-       end if
-       call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') ' Orbital magnetic moment : ',(orbmag_bb(iband,adir),adir=1,3)
-       call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') '     rho(1) CC : ',(self%orbmag_terms(iband,isppol,adir,incc),adir=1,3)
-       call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') '    rho(1) VV1 : ',(self%orbmag_terms(iband,isppol,adir,invv1),adir=1,3)
-       call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') '    rho(1) VV2 : ',(self%orbmag_terms(iband,isppol,adir,invv2),adir=1,3)
-       call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') '     rho(0) NL : ',(self%orbmag_terms(iband,isppol,adir,innl),adir=1,3)
-       call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') '   <L_R> terms : ',(self%orbmag_terms(iband,isppol,adir,inlr),adir=1,3)
-       call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') ' <A0.An> terms : ',(self%orbmag_terms(iband,isppol,adir,inbm),adir=1,3)
-       call wrtout(ab_out,message,'COLL')
-       write(message,'(a)')ch10
-       call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') ' Chern vector : ',(berry_bb(iband,adir),adir=1,3)
-       call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') '  Ch CC : ',(self%chern_terms(iband,isppol,adir,ibcc),adir=1,3)
-       call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') ' Ch VV1 : ',(self%chern_terms(iband,isppol,adir,ibvv1),adir=1,3)
-       call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') ' Ch VV2 : ',(self%chern_terms(iband,isppol,adir,ibvv2),adir=1,3)
-       call wrtout(ab_out,message,'COLL')
-     end do !isppol
-   end do ! iband
  end if
 
  write(message,'(a,a,a)')ch10,'====================================================',ch10
