@@ -1485,11 +1485,10 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
      end if
 
      ! compute VV2 contributions
-     ! sum over n,n'. but n=n' term vanishes and n,n' term = -n',n term. Thus
+     ! sum over n,n', but n=n' term vanishes and n,n' term = -n',n term. Thus
      ! sum over only the "upper diagonal" of terms and include the lower diagonal
      ! by symmetry
      do np = nn+1, nband_k
-       if (np.EQ.nn) cycle
        if (occ_k(np).LT.tol8) cycle
        bra => cg_k(1:2,(np-1)*npwsp+1:np*npwsp)
        gpdot=cg_zdotc(npwsp,bra,svectoutg); gpdotc=CMPLX(gpdot(1),gpdot(2))
@@ -1497,6 +1496,8 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
 
        ! terms in <u|dS|u'><u'|dS|u>. The <u'|dS|u><u|dS|u'> term is included
        ! by way of the -eig_k(np) contribution.
+       ! note that this symmetry cancels any Fermi level (mu) contribution, here and in 
+       ! the Chern vector
        mv2b(adir) = mv2b(adir) - prefac_m*CONJG(bpdotc)*gpdotc*(eig_k(nn) - eig_k(np))
      end do ! np
 
