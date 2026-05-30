@@ -1636,7 +1636,7 @@ allowed, and means that the first one applies to the adjacent space with lower
 values of z, while the second applies to the adjacent space with higher values
 of z. When the spatial chemical potential is defined only for one type of atom
 (and no chemical potential is present for the other atoms), simply set the
-related values to *0.0 in the [[chempot]] array. In the present input array,
+related values to 0.0 in the [[chempot]] array. In the present input array,
 reduced positions, energies and derivatives of energies are mixed. Hence,
 although the chemical potential is an energy, one cannot use the usual energy
 definitions (i.e. the chemical potential is always to be input in Hartree atomic units).
@@ -20469,13 +20469,15 @@ The z-direction is parallel to the third crystal primitive lattice vector which 
 to be orthogonal to the other ones, so the length of the cell along z is
 [[rprimd]](3,3). In addition [[slabzbeg]] and [[slabzend]] have to be such that:
 
-      0 ≤ [[slabzbeg]]  < [[slabzend]] ≤ [[rprimd]](3,3)
+\begin{equation}
+      0 \leq slabzbeg  \lt slabzend \leq rprimd(3,3)
+\end{equation}
 
 Together with [[slabwsrad]] they define the jellium positive charge density
 distribution $n_{+}(x,y,z)$ in this way:
 
 \begin{eqnarray}
-      n_{+}(x,y,z) &=& n_{bulk} \quad \text{if} \quad [[slabzbeg]]  \leq z \leq [[slabzend]]  \nonumber\\
+      n_{+}(x,y,z) &=& n_{bulk} \quad \text{if} \quad slabzbeg  \leq z \leq slabzend  \nonumber\\
                 &=& 0       \quad \text{otherwise}                           \nonumber
 \end{eqnarray}
 
@@ -20501,13 +20503,15 @@ The z-direction is parallel to the third crystal primitive lattice vector which 
 to be orthogonal to the other ones, so the length of the cell along z is
 [[rprimd]](3,3). In addition [[slabzbeg]] and [[slabzend]] have to be such that:
 
-      0 ≤ [[slabzbeg]] < [[slabzend]]  ≤ [[rprimd]](3,3)
+\begin{equation}
+      0 \leq slabzbeg  \lt slabzend \leq rprimd(3,3)
+\end{equation}
 
 Together with [[slabwsrad]] they define the jellium positive charge density
 distribution $n_{+}(x,y,z)$ in this way:
 
 \begin{eqnarray}
-      n_{+}(x,y,z) &=& n_{bulk} \quad  \text{if} \quad [[slabzbeg]] \leq z \leq [[slabzend]] \nonumber \\
+      n_{+}(x,y,z) &=& n_{bulk} \quad  \text{if} \quad slabzbeg \leq z \leq slabzend \nonumber \\
                    &=& 0        \quad  \text{otherwise}                                    \nonumber
 \end{eqnarray}
 
