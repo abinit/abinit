@@ -1054,11 +1054,10 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,nn,npwsp
+  integer :: adir,bdir,gdir,nn,npwsp
   complex(dp) :: prefac_m,txt
   logical :: my_suppress_ormesh
   !arrays
-  integer,dimension(3) :: bdir=(/2,3,1/), gdir=(/3,1,2/)
   real(dp),pointer :: unk(:,:)
   complex(dp) :: m1(3)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
@@ -1083,12 +1082,23 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
    m1(1:3) = czero
    prefac_m = -com*c2
    do adir = 1, 3
-     call nonlocal_me(adir,atindx,unk,cwaveprj,bdir(adir),gdir(adir),&
+     
+     ! even permutation of adir,bdir,gdir
+     ! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
+     ! double the original even term
+     bdir=modulo(adir,3)+1
+     gdir=modulo(bdir,3)+1
+   
+     call nonlocal_me(adir,atindx,unk,cwaveprj,bdir,gdir,&
        & dterm,dtset,eig_k(nn),fermie,gs_hamk,unk,mpi_enreg,&
        & txt,npw_k,orbmag_mesh,innl,ph1d,prefac_m,pawtab,trnrm(nn),&
        & suppress_ormesh=my_suppress_ormesh)
      m1(adir) = m1(adir) + txt
+  
    end do ! adir
+   
+   ! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
+   ! double the original even term: this is the origin of the factor of two
    orbmag_mesh%omesh(nn,ikpt,isppol,1:3,innl) = two*real(m1(1:3))
 
  end do !nn
@@ -1165,14 +1175,13 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,cpopt,dum_dnlbra,dum_dnlket,fourwf_cplex,fourwf_option,iatom,ipw,ndat
-  integer :: nn,npwsp,sij_opt,t_atom,tim_fourwf,tim_getghc,type_calc
+  integer :: adir,bdir,cpopt,dum_dnlbra,dum_dnlket,fourwf_cplex,fourwf_option,gdir
+  integer :: iatom,ipw,ndat,nn,npwsp,sij_opt,t_atom,tim_fourwf,tim_getghc,type_calc
   integer :: kg1,kg2,kg3,n1,n2,n3,shift1,shift2,shift3
   real(dp) :: lams,weight_i,weight_r
   complex(dp) :: bc,kc,nlme,ormesh_fac,ph1,ph2,ph3,prefac_b,prefac_m
   logical :: my_suppress_ormesh,need_ormesh
   !arrays
-  integer,dimension(3) :: bdir=(/2,3,1/), gdir=(/3,1,2/)
   real(dp) bdot(2),mdot(2)
   real(dp),allocatable :: denpot(:,:,:),fofgout(:,:)
   real(dp),allocatable :: ghc(:,:),gsc(:,:),gvnlxc(:,:)
@@ -1222,11 +1231,17 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
    b1 = czero
 
    do adir = 1, 3
+
+     ! even permutation of adir,bdir,gdir
+     ! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
+     ! double the original even term
+     bdir=modulo(adir,3)+1
+     gdir=modulo(bdir,3)+1
      
      cpopt = 2
-     du_dgamma => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir(adir))
+     du_dgamma => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
 
-     call pawcprj_get(atindx,cwaveprj1,cprj1_k(:,:,gdir(adir)),dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
+     call pawcprj_get(atindx,cwaveprj1,cprj1_k(:,:,gdir),dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
        & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
 
      ! compute H|Pc d_\gamma u> and S|Pc d_\gamma u>
@@ -1246,7 +1261,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
          & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
      end if
     
-     du_dbeta => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir(adir))
+     du_dbeta => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
      mdot = cg_zdotc(npwsp,du_dbeta,ghc); bdot = cg_zdotc(npwsp,du_dbeta,gsc)
 
      m1(adir) = m1(adir) + prefac_m*CMPLX(mdot(1),mdot(2))
@@ -1265,6 +1280,8 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
 
    end do ! adir
 
+  ! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
+  ! double the original even term: this is the origin of the factor of two
    orbmag_mesh%omesh(nn,ikpt,isppol,1:3,incc) = two*real(m1(1:3))
    orbmag_mesh%cmesh(nn,ikpt,isppol,1:3,ibcc) = two*real(b1(1:3))
 
@@ -1350,13 +1367,12 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,choice,cpopt,dum_dnlbra,dum_dnlket,iatom,ndat,nn,nnlout,np,npwsp
-  integer :: paw_opt,signs,t_atom,tim_getghc
+  integer :: adir,bdir,choice,cpopt,dum_dnlbra,dum_dnlket,gdir,iatom
+  integer :: ndat,nn,nnlout,np,npwsp,paw_opt,signs,t_atom,tim_getghc
   real(dp) :: weight_i,weight_r
   complex(dp) :: bdotc,bpdotc,gdotc,gpdotc,nlme,prefac_b,prefac_m
   logical :: my_suppress_ormesh,need_ormesh
   !arrays
-  integer,dimension(3) :: bdir=(/2,3,1/),gdir=(/3,1,2/)
   real(dp) :: bdot(2),bpdot(2),gdot(2),gpdot(2),enlout(1),lamv(1)
   real(dp),allocatable :: vectout(:,:)
   real(dp),allocatable,target :: svectoutb(:,:),svectoutg(:,:)
@@ -1414,20 +1430,26 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
 
    do adir=1,3
 
+     ! even permutation of adir,bdir,gdir
+     ! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
+     ! double the original even term
+     bdir=modulo(adir,3)+1
+     gdir=modulo(bdir,3)+1
+     
      ! compute dS/dk_b|u_nk>
-     call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,bdir(adir),lamv,mpi_enreg,ndat,nnlout,&
+     call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,bdir,lamv,mpi_enreg,ndat,nnlout,&
        & paw_opt,signs,svectoutb,tim_getghc,unk,vectout)
 
      ! compute dS/dk_g |u_nk>
-     call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,gdir(adir),lamv,mpi_enreg,ndat,nnlout,&
+     call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,gdir,lamv,mpi_enreg,ndat,nnlout,&
        & paw_opt,signs,svectoutg,tim_getghc,unk,vectout)
 
      ! extract |Pc du/dk_b>
-     du_dbeta => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir(adir))
+     du_dbeta => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
      gdot=cg_zdotc(npwsp,du_dbeta,svectoutg); gdotc=CMPLX(gdot(1),gdot(2))
 
      ! extract |Pc du/dk_g>
-     du_dgamma => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir(adir))
+     du_dgamma => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
      bdot=cg_zdotc(npwsp,du_dgamma,svectoutb); bdotc=CMPLX(bdot(1),bdot(2))
 
      ! add <Pc du/dk_b|dS/dk_g|u_nk>*E_nk
@@ -1442,22 +1464,22 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
 
      if (need_ormesh) then
        ! <u|p>qij<d_beta p|Pc d_gamma u>
-       call nonlocal_me(adir,atindx,unk,cwaveprj,dum_dnlbra,bdir(adir),dterm,dtset,&
+       call nonlocal_me(adir,atindx,unk,cwaveprj,dum_dnlbra,bdir,dterm,dtset,&
          & eig_k(nn),fermie,gs_hamk,du_dgamma,mpi_enreg,nlme,npw_k,orbmag_mesh,invv1,ph1d,&
          & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
        
        ! <u|d_beta p>qij<p|Pc d_gamma u>
-       call nonlocal_me(adir,atindx,unk,cwaveprj,bdir(adir),dum_dnlket,dterm,dtset,&
+       call nonlocal_me(adir,atindx,unk,cwaveprj,bdir,dum_dnlket,dterm,dtset,&
          & eig_k(nn),fermie,gs_hamk,du_dgamma,mpi_enreg,nlme,npw_k,orbmag_mesh,invv1,ph1d,&
          & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
        
        ! <Pc d_beta u|p>qij<d_gamma p|u>
-       call nonlocal_me(adir,atindx,du_dbeta,cwaveprj,dum_dnlbra,gdir(adir),dterm,dtset,&
+       call nonlocal_me(adir,atindx,du_dbeta,cwaveprj,dum_dnlbra,gdir,dterm,dtset,&
          & eig_k(nn),fermie,gs_hamk,unk,mpi_enreg,nlme,npw_k,orbmag_mesh,invv1,ph1d,&
          & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
        
        ! <Pc d_beta u|d_gamma p>qij<p|u>
-       call nonlocal_me(adir,atindx,du_dbeta,cwaveprj,gdir(adir),dum_dnlket,dterm,dtset,&
+       call nonlocal_me(adir,atindx,du_dbeta,cwaveprj,gdir,dum_dnlket,dterm,dtset,&
          & eig_k(nn),fermie,gs_hamk,unk,mpi_enreg,nlme,npw_k,orbmag_mesh,invv1,ph1d,&
          & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
      end if
@@ -1480,8 +1502,9 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
 
    end do ! adir
 
+   ! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
+   ! double the original even term: this is the origin of the factor of two
    orbmag_mesh%cmesh(nn,ikpt,isppol,1:3,ibvv1) = two*real(b1(1:3))
-
    orbmag_mesh%omesh(nn,ikpt,isppol,1:3,invv1) = two*real(m1(1:3)+m1_mu(1:3))
    orbmag_mesh%omesh(nn,ikpt,isppol,1:3,invv2) = two*real(mv2b(1:3))
 
