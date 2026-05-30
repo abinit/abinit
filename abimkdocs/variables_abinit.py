@@ -15847,7 +15847,7 @@ unless a very specific ground state feature is also needed.
 
 * [[orbmag]] = 1: Compute orbital magnetization and Chern vector
 * [[orbmag]] = 2: Same as [[orbmag]] 1 but also print out values of each term making up total
-orbital magnetic moment and a band-by-band decomposition.
+orbital magnetic moment.
 """,
 ),
 
