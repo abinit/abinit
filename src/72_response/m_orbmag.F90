@@ -144,6 +144,7 @@ module m_orbmag
       procedure :: init => orbmag_init
       procedure :: free => orbmag_free
       procedure :: accum_rmesh => orbmag_rmesh
+      procedure :: accum_rmesh_local => orbmag_rmesh_local
       procedure :: mpisum => orbmag_mpisum
       procedure :: term_scale => orbmag_term_scale
       procedure :: output => orbmag_output
@@ -212,6 +213,7 @@ module m_orbmag
   private :: orbmag_free
   private :: orbmag_mpisum
   private :: orbmag_rmesh
+  private :: orbmag_rmesh_local
   private :: orbmag_term_scale
   private :: orbmag_output
   private :: orbmag_ncwrite   ! Write orbmag_mesh contributions to netcdf file.
@@ -1270,7 +1272,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
      if (need_ormesh) then
        ormesh_fac = trnrm(nn)*prefac_m
        ! local part 
-       call orbmag_mesh%accum_rmesh(adir,du_dbeta,dtset,gs_hamk,ghc_local,.TRUE.,mpi_enreg,&
+       call orbmag_mesh%accum_rmesh_local(adir,du_dbeta,dtset,gs_hamk,ghc_local,mpi_enreg,&
          & npwsp,ph1d,ormesh_fac,t_atom,incc)
        ! nonlocal part
        call nonlocal_me(adir,atindx,du_dbeta,cwaveprj1,dum_dnlbra,dum_dnlket,dterm,dtset,&
@@ -2821,6 +2823,97 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_ij,pawrad,pawtab,psps)
 
 end subroutine make_d
 !!***
+
+!!****f* ABINIT/orbmag_rmesh_local
+!! NAME
+!! orbmag_rmesh
+!!
+!! FUNCTION
+!! accumulate orbmag density local term on real mesh into orbmag structure
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!! orbmag_mesh%rmesh updated
+!! 
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine orbmag_rmesh_local(self,adir,bra,dtset,gs_hamk,ket,mpi_enreg,&
+    & npw_k,ph1d,scalar_factor,t_atom,term_index)
+
+  !Arguments ------------------------------------
+  !scalars
+  class(orbmag_mesh_type),intent(inout),target :: self
+  integer,intent(in) :: adir,npw_k,t_atom,term_index
+  complex(dp),intent(in) :: scalar_factor
+  type(dataset_type),intent(in) :: dtset
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+  type(MPI_type), intent(inout) :: mpi_enreg
+  !arrays
+  real(dp),intent(in),pointer :: bra(:,:),ket(:,:),ph1d(:,:)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: fourwf_cplex,fourwf_option,ig,kg1,kg2,kg3,n1,n2,n3,n4,n5,n6,ndat
+  integer :: shift1,shift2,shift3,tim_fourwf
+  real(dp) :: weight_i,weight_r
+  complex(dp) :: cpw,ph1,ph2,ph3
+  !arrays
+  real(dp),allocatable :: denpot(:,:,:),fofgout(:,:),fofr(:,:,:,:),work(:,:)
+  complex(dp),allocatable :: phgr(:)
+
+!--------------------------------------------------------------------
+
+  ndat=1
+  n1=dtset%ngfft(1); n2=dtset%ngfft(2); n3=dtset%ngfft(3)
+  n4=dtset%ngfft(4); n5=dtset%ngfft(5); n6=dtset%ngfft(6)
+  ABI_MALLOC(fofr,(2,n4,n5,n6*ndat))
+
+  shift1=1+n1+(t_atom-1)*(2*n1+1)
+  shift2=1+n2+(t_atom-1)*(2*n2+1)+dtset%natom*(2*n1+1)
+  shift3=1+n3+(t_atom-1)*(2*n3+1)+dtset%natom*(2*n1+1+2*n2+1) 
+  ABI_MALLOC(phgr,(npw_k))
+  do ig=1,npw_k
+    kg1=gs_hamk%kg_k(1,ig)+shift1
+    kg2=gs_hamk%kg_k(2,ig)+shift2
+    kg3=gs_hamk%kg_k(3,ig)+shift3
+    ph1=CMPLX(ph1d(1,kg1),ph1d(2,kg1))
+    ph2=CMPLX(ph1d(1,kg2),ph1d(2,kg2))
+    ph3=CMPLX(ph1d(1,kg3),ph1d(2,kg3))
+    phgr(ig)=ph1*ph2*ph3
+  end do
+
+  ! if term of interest is local, compute exp(-iG.R)*conjg(bra)*scalar_factor*ket 
+  ! and then transform with fourwf. Here R is t_atom position; factor shifts from 
+  ! unit cell origin to dipole location
+  ABI_MALLOC(work,(2,npw_k))
+  do ig = 1, npw_k
+    cpw = CONJG(phgr(ig))*CONJG(CMPLX(bra(1,ig),bra(2,ig)))*scalar_factor*CMPLX(ket(1,ig),ket(2,ig))
+    work(1,ig) = REAL(cpw); work(2,ig) = AIMAG(cpw)
+  end do
+  fourwf_cplex = 1
+  fourwf_option = 0
+  tim_fourwf = 1
+  call fourwf(fourwf_cplex,denpot,work,fofgout,fofr,gs_hamk%gbound_k,&
+    & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
+    & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,npw_k,&
+    & n4,n5,n6,fourwf_option,tim_fourwf,weight_r,weight_i)
+  ABI_SFREE(work)
+
+  ! factor of two because we are skipping explicit sums over eps_alpha,beta,gamma and second
+  ! term appears from symmetry
+  self%rmesh(:,:,:,adir,term_index)=self%rmesh(:,:,:,adir,term_index)+two*fofr(1,:,:,:)
+  
+  ABI_SFREE(fofr)
+  ABI_SFREE(phgr)
+
+end subroutine orbmag_rmesh_local
+!!***
+
 
 !!****f* ABINIT/orbmag_rmesh
 !! NAME
