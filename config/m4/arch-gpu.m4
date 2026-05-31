@@ -432,6 +432,26 @@ AC_DEFUN([_ABI_GPU_CHECK_HIP],[
     AC_MSG_WARN([your Fortran compiler does not provide any ISO C binding module])
   fi
 
+
+  # call this macro here to make sure variable `abi_gpu_hip_old`
+  #
+  # check if we are using ROCm/HIP runtime version at least 7.0.2
+  # version 7.0.2 of ROCm/HIP features a DSYGVD/ZHEGVD that we consider
+  # to be good. It is mostly for advising user when running configure.
+  #
+  AC_MSG_CHECKING([whether we have ROCm/HIP >= 7.0.2])
+  AC_LANG_PUSH(C)
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+      [[
+      #include <hip/hip_runtime_api.h>
+      ]],
+      [[
+#if HIP_VERSION < 70000002
+#error
+#endif
+      ]])], [abi_gpu_hip_old="no"], [abi_gpu_hip_old="yes"])
+  AC_MSG_RESULT([${abi_gpu_hip_old}])
+
   if test "${abi_gpu_markers_enable}" = "yes"; then
     # Look for newer rocProfiler API (ROCm ≥ 6.2.0)
     if test -e "${abi_gpu_hip_libdir}/librocprofiler-sdk-roctx.${abi_so_ext}"; then
@@ -457,6 +477,7 @@ AC_DEFUN([_ABI_GPU_CHECK_HIP],[
     fi
   fi
 
+  AC_SUBST(abi_gpu_hip_old)
   # Restore build environment
   AC_LANG_POP([C])
   LIBS="${abi_saved_LIBS}"
