@@ -137,6 +137,7 @@ contains
     ! - Implement non-collinear magnetism with band paral (Hyprid preconditioner)
     ! - Non-collinear magnetism: We assume nspinor=2 => nspden=4 and nsppol=2 => nspden=2, but we could have nspden=1 in both cases.
     !                            For now, it is enforced in chkinp.
+    ! - Compute the dos in an efficient way.
     ! - non coll : what spin representations are use for : kxc (dfpt_mkvxc_noncoll), prcref.
 
     !****f* m_precon/precon_init
@@ -217,33 +218,33 @@ contains
             
             !Logical variables that describe the preconditioner :
             !   200 -> LDOS with RPA
-            !   201 -> LDOS without RPA
+            !   201 -> Kerker with DOS+ and DOS-
             !   202 -> Hybrid (LDOS+diag)
             !   203 -> Hybrid for antiferro (LDOS+quasidiag) - WIP - Not documented
             !   210 -> Kerker with dielng   - Not documented
             !   211 -> Kerker with DOS      - Not documented
-            !   212 -> Kerker with DOS+ and DOS - Not documented
+            !   212 -> LDOS without RPA     - Not documented
             !   299 -> No preconditioning   - Not documented
 
             ! this%use_ldos = .true. activates the computation of the ldos.
             this%use_ldos = .false.                     
             if (this%iprcel == 200) this%use_ldos = .true.
-            if (this%iprcel == 201) this%use_ldos = .true.
+            if (this%iprcel == 212) this%use_ldos = .true.
             if (this%iprcel == 202) this%use_ldos = .true.
             if (this%iprcel == 211) this%use_ldos = .true.
-            if (this%iprcel == 212) this%use_ldos = .true.
+            if (this%iprcel == 201) this%use_ldos = .true.
             
             this%use_paw_rhoij = .false.
 
             ! If this%use_dos = .true. we will use this%dos.
             this%use_dos = .false.                     
             if (this%iprcel == 211) this%use_dos = .true.
-            if (this%iprcel == 212) this%use_dos = .true.
+            if (this%iprcel == 201) this%use_dos = .true.
             
             ! this%use_kxc = .true. activates the use of the exchange and correlation kernel.
             ! If this%use_kxc = .false. the RPA will be used.
             this%use_kxc = .false.                      
-            if (this%iprcel == 201) this%use_kxc = .true.
+            if (this%iprcel == 212) this%use_kxc = .true.
             if (this%iprcel == 202) this%use_kxc = .true.
 
             ! this%use_ridgereg = .true. activates the use of an adapted linear solver.
@@ -402,7 +403,7 @@ contains
     !!
     !! FUNCTION
     !!  Update the precon_object :
-    !!      For preconditioners using the LDOS (iprcel = 200 or 201) : 
+    !!      For preconditioners using the LDOS (iprcel = 200 or 212) : 
     !!          Compute the new ldos (local density of state) with current wavefunctions 
     !!          and the new tdos (total density of state = integral of ldos).
     !!
@@ -440,7 +441,7 @@ contains
                 this%tdos = sum(this%ldos(:, 1)) * this%dvol
                 ! TODO : More options to control when the ldos is updated
 
-                ! Extremely Inefficient way to compute the DOS ...
+                ! TODO : Extremely Inefficient way to compute the DOS ...
                 if (this%use_dos) then
                     do ispden = 1, dtset%nspden
                         this%dos(ispden) = sum(this%ldos(:, ispden)) * this%dvol
@@ -2936,7 +2937,7 @@ contains
         end if
 
         !Kerker based on the DOS, that can be different between the up and down chanels in spin-polarized cases.
-        if (this%iprcel == 212) then
+        if (this%iprcel == 201) then
             vec_r(:, 1) = 0
             do ispden = 1, dtset%nspden
                 vec_r(:, 1) = vec_r(:, 1) - this%dos(ispden) * vec_r(:, ispden)
@@ -2947,7 +2948,7 @@ contains
         end if
         
         !LDOS model
-        if (this%iprcel == 200 .or. this%iprcel == 201) then
+        if (this%iprcel == 200 .or. this%iprcel == 212) then
             call apply_chi0_ldos(this, dtset, mpi_enreg, vec_r)
         end if
 
