@@ -578,7 +578,8 @@ ABI_FREE(xcart)
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
-&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp,sc_size=sc_size(:),multibinit_dtset=inp)
+&     verbose=verbose,verbose_cycle=dtset%ionmov/=25,writeHIST=writeHIST,scup_dtset=scup_inp,sc_size=sc_size(:),&
+&     multibinit_dtset=inp)
      INQUIRE(FILE='MD_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_out)
      if(file_opened) close(unit_out)
    else if(option== -1.or.option==-2)then
@@ -593,7 +594,8 @@ ABI_FREE(xcart)
 !    Try the model
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
-&     effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST, multibinit_dtset=inp )
+&     effective_potential=effective_potential,verbose=verbose,verbose_cycle=dtset%ionmov/=25,writeHIST=writeHIST,&
+&     multibinit_dtset=inp )
 
      write(message, '(a)' ) ' => The model'
      if(effective_potential%anharmonics_terms%bounded)then
@@ -688,7 +690,7 @@ ABI_FREE(xcart)
 !          Run mover to check if the model is bound
            call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &           rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
-&           effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
+&           effective_potential=effective_potential,verbose=verbose,verbose_cycle=dtset%ionmov/=25,writeHIST=writeHIST)
            if(.not.effective_potential%anharmonics_terms%bounded)then
              write(message, '(2a)' ) ' => The model is not bounded'
            else
@@ -875,7 +877,7 @@ ABI_FREE(xcart)
 !              Run mover
                  call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &                 rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
-&                 effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
+&                 effective_potential=effective_potential,verbose=verbose,verbose_cycle=dtset%ionmov/=25,writeHIST=writeHIST)
 
                  if(.not.effective_potential%anharmonics_terms%bounded)then
                    write(message, '(2a)' ) ' => The model is not bounded'
