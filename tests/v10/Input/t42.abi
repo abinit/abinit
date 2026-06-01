@@ -27,6 +27,7 @@ ndtset 2
 
 tolvrs1 1.0D-18
 prtwf1 1
+nstep1 12
 
 tolwfr2 1.0D-20
 getwfk2 -1
@@ -34,6 +35,7 @@ rfddk2 1
 rfdir2 1 1 1
 iscf2 -3
 orbmag2 2
+nstep2 15
 
 istwfk *1
 
