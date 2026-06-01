@@ -19060,6 +19060,32 @@ Related input variables: [[spgroup]], [[spgroupma]], [[genafm]], [[symafm]].
 ),
 
 Variable(
+    abivarname="pulayhiststore",
+    varset="dev",
+    vartype="integer",
+    topics=["SCFAlgorithms_expert"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PULAY HISTory STORAGE mode",
+    characteristics=["[[DEVELOP]]"],
+    requires="[[iscf]] in [7,17]",
+    added_in_version="v10.5",
+    text=r"""
+Selects the storage mode used for the FFT-grid part of the Pulay mixing history.
+Mode `1` can reduce the memory footprint of Pulay mixing history, but convergence
+should be validated for the target system, especially for very tight tolerances.
+Use the default full-precision storage for calculations that must converge close
+to the double-precision limit, e.g. residual tolerances around `1.0d-16` or
+tighter.
+
+Possible values are:
+
+  * 0: use the historical full double-precision Pulay history storage. This is the default and stable mode.
+  * 1: use experimental compact storage. Historical preconditioned residuals are stored in single precision, the most recent trial vector is stored in single precision, and older trial vectors are reconstructed from it using quantized 16-bit adjacent differences with per-slot scale factors.
+""",
+),
+
+Variable(
     abivarname="pvelmax",
     varset="gw",
     vartype="real",

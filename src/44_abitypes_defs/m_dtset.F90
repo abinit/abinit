@@ -646,6 +646,7 @@ type, public :: dataset_type
  integer :: prtxml = 0
  integer :: prt1dm = 0
  integer :: ptgroupma
+ integer :: pulayhiststore = 0
 !Q
  integer :: qptopt
  integer :: quadquad = 1
@@ -2211,6 +2212,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%prtxml             = dtin%prtxml
  dtout%prt1dm             = dtin%prt1dm
  dtout%ptgroupma          = dtin%ptgroupma
+ dtout%pulayhiststore     = dtin%pulayhiststore
  dtout%qptopt             = dtin%qptopt
  dtout%quadquad           = dtin%quadquad
  dtout%random_atpos       = dtin%random_atpos
@@ -3949,7 +3951,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc prtkbff'
  list_vars=trim(list_vars)//' prtvol prtvolimg prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm'
  list_vars=trim(list_vars)//' prt_GF_csv prt_lorbmag prt_model'
- list_vars=trim(list_vars)//' pseudos ptcharge'
+ list_vars=trim(list_vars)//' pseudos ptcharge pulayhiststore'
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q
  list_vars=trim(list_vars)//' q1shft qgbt qgbt_cart qmass qprtrb qpt qptdm qptnrm qph1l'
