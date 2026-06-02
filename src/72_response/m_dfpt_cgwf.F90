@@ -1837,7 +1837,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, ibgq0 = 0, nbdbuf0 = 0, quit0 = 0, istwfk1 = 1, ndat1 = 1, timcount0 = 0
+ integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, ibgq0 = 0, quit0 = 0, istwfk1 = 1, ndat1 = 1, timcount0 = 0
  integer :: opt_gvnlx1, grad_berry_size_mpw1, iband, gpu_option
  real(dp) :: out_resid, fermie1, eig0nk !, dotr
  logical :: map_cgq, map_vlocal
@@ -1929,7 +1929,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    stern%ghc, stern%gh1c_n, grad_berry, stern%gsc, stern%gscq, &
    gs_hamkq, stern%gvnlxc, stern%gvnlx1, icgq0, idir, ipert, igscq0, &
    stern%mcgq, stern%mgscq, stern%mpi_enreg, grad_berry_size_mpw1, stern%dtset%natom, stern%nband, stern%nband_me, &
-   nbdbuf0, stern%nline_in, stern%npw_k, stern%npw_kq, stern%nspinor, &
+   stern%dtset%nbdbuf, stern%nline_in, stern%npw_k, stern%npw_kq, stern%nspinor, &
    opt_gvnlx1, stern%dtset%prtvol, quit0, out_resid, rf_hamkq, stern%dtset%dfpt_sciss, -one, stern%dtset%tolwfr, &
    stern%usedcwavef, stern%dtset%wfoptalg, stern%nlines_done, usetolrde=0)
  !print *, "after dfpt_cgwf
