@@ -132,3 +132,34 @@ repos:
         name: run check-unprotected-omp-target.py
         entry: python abichecks/scripts/check-unprotected-omp-target.py
         language: python
+      - id: check-trailing-whitespace-local
+        name: Check trailing whitespace
+        entry: git_rules_scripts/check-trailing-whitespace.sh
+        language: script
+      - id: check-final-newline-local
+        name: Check final newline
+        entry: git_rules_scripts/check-final-newline.sh
+        language: script
+      - id: check-yaml-syntax-local
+        name: Check YAML syntax
+        entry: git_rules_scripts/check-yaml-syntax.sh
+        language: script
+        files: '\.(ya?ml)$'
+      - id: check-merge-conflicts-local
+        name: Check merge conflict markers
+        entry: git_rules_scripts/check-merge-conflicts.sh
+        language: script
+      - id: check-line-endings-local
+        name: Check LF line endings
+        entry: git_rules_scripts/check-line-endings.sh
+        language: script
+      - id: check-executable-shebangs-local
+        name: Check executable shebangs
+        entry: git_rules_scripts/check-executable-shebangs.sh
+        language: script
+      - id: check-staged-file-sizes
+        name: Check staged file sizes
+        entry: git_rules_scripts/check-staged-file-sizes.sh
+        language: script
+        pass_filenames: false
+        stages: [pre-commit]

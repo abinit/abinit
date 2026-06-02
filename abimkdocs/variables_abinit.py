@@ -1636,7 +1636,7 @@ allowed, and means that the first one applies to the adjacent space with lower
 values of z, while the second applies to the adjacent space with higher values
 of z. When the spatial chemical potential is defined only for one type of atom
 (and no chemical potential is present for the other atoms), simply set the
-related values to *0.0 in the [[chempot]] array. In the present input array,
+related values to 0.0 in the [[chempot]] array. In the present input array,
 reduced positions, energies and derivatives of energies are mixed. Hence,
 although the chemical potential is an energy, one cannot use the usual energy
 definitions (i.e. the chemical potential is always to be input in Hartree atomic units).
@@ -19060,6 +19060,32 @@ Related input variables: [[spgroup]], [[spgroupma]], [[genafm]], [[symafm]].
 ),
 
 Variable(
+    abivarname="pulayhiststore",
+    varset="dev",
+    vartype="integer",
+    topics=["SCFAlgorithms_expert"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PULAY HISTory STORAGE mode",
+    characteristics=["[[DEVELOP]]"],
+    requires="[[iscf]] in [7,17]",
+    added_in_version="v10.5",
+    text=r"""
+Selects the storage mode used for the FFT-grid part of the Pulay mixing history.
+Mode `1` can reduce the memory footprint of Pulay mixing history, but convergence
+should be validated for the target system, especially for very tight tolerances.
+Use the default full-precision storage for calculations that must converge close
+to the double-precision limit, e.g. residual tolerances around `1.0d-16` or
+tighter.
+
+Possible values are:
+
+  * 0: use the historical full double-precision Pulay history storage. This is the default and stable mode.
+  * 1: use experimental compact storage. Historical preconditioned residuals are stored in single precision, the most recent trial vector is stored in single precision, and older trial vectors are reconstructed from it using quantized 16-bit adjacent differences with per-slot scale factors.
+""",
+),
+
+Variable(
     abivarname="pvelmax",
     varset="gw",
     vartype="real",
@@ -20469,13 +20495,15 @@ The z-direction is parallel to the third crystal primitive lattice vector which 
 to be orthogonal to the other ones, so the length of the cell along z is
 [[rprimd]](3,3). In addition [[slabzbeg]] and [[slabzend]] have to be such that:
 
-      0 ≤ [[slabzbeg]]  < [[slabzend]] ≤ [[rprimd]](3,3)
+\begin{equation}
+      0 \leq slabzbeg  \lt slabzend \leq rprimd(3,3)
+\end{equation}
 
 Together with [[slabwsrad]] they define the jellium positive charge density
 distribution $n_{+}(x,y,z)$ in this way:
 
 \begin{eqnarray}
-      n_{+}(x,y,z) &=& n_{bulk} \quad \text{if} \quad [[slabzbeg]]  \leq z \leq [[slabzend]]  \nonumber\\
+      n_{+}(x,y,z) &=& n_{bulk} \quad \text{if} \quad slabzbeg  \leq z \leq slabzend  \nonumber\\
                 &=& 0       \quad \text{otherwise}                           \nonumber
 \end{eqnarray}
 
@@ -20501,13 +20529,15 @@ The z-direction is parallel to the third crystal primitive lattice vector which 
 to be orthogonal to the other ones, so the length of the cell along z is
 [[rprimd]](3,3). In addition [[slabzbeg]] and [[slabzend]] have to be such that:
 
-      0 ≤ [[slabzbeg]] < [[slabzend]]  ≤ [[rprimd]](3,3)
+\begin{equation}
+      0 \leq slabzbeg  \lt slabzend \leq rprimd(3,3)
+\end{equation}
 
 Together with [[slabwsrad]] they define the jellium positive charge density
 distribution $n_{+}(x,y,z)$ in this way:
 
 \begin{eqnarray}
-      n_{+}(x,y,z) &=& n_{bulk} \quad  \text{if} \quad [[slabzbeg]] \leq z \leq [[slabzend]] \nonumber \\
+      n_{+}(x,y,z) &=& n_{bulk} \quad  \text{if} \quad slabzbeg \leq z \leq slabzend \nonumber \\
                    &=& 0        \quad  \text{otherwise}                                    \nonumber
 \end{eqnarray}
 
@@ -23771,9 +23801,6 @@ The different possibilities are:
 
 * [[wfoptalg]] = 111: A **modern and highly efficient version** of [[wfoptalg]] = 1, a spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](../theory/howto_chebfi.pdf) and [[cite:Levitt2015]].
 
-* [[wfoptalg]] = 112: A **highly** experimental version of Spectrum Slicing algorithm. A spectral filtering
-algorithm by spectral slices based on lowpass and bandpass Chebyshev polynomials. The polynomial degree is tuned
-using [[mdeg_filter]] (formerly [[nline]]). The number of slices is tuned with [[nslice]] variable.
 > **Notes**:
 >
 > * For more performance, try enabling [[use_gemm_nonlop]] (default on [[GPU]]).
@@ -23781,6 +23808,9 @@ using [[mdeg_filter]] (formerly [[nline]]). The number of slices is tuned with [
 > * This algorithm struggles to converge the last bands, so it is advisable to use slightly more bands than required. When using [[tolwfr_diago]], it is mandatory to set [[nbdbuf]].
 >
 > * By design, this algorithm cannot use preconditioning and, therefore, cannot handle [[ecutsm]]. Consequently, _Pulay stresses_ are not corrected. If stresses are important for the calculation (e.g., when pressure is required), it is necessary to slightly increase the plane-wave cutoff ([[ecut]]).
+
+* [[wfoptalg]] = 112: A **highly** experimental Spectrum Slicing algorithm. A spectral filtering
+algorithm by spectral slices based on lowpass and bandpass Chebyshev polynomials. The polynomial degree is tuned using [[mdeg_filter]] (formerly [[nline]]). The number of slices is tuned with [[nslice]] variable.
 """,
 ),
 

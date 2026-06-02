@@ -2560,6 +2560,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%ptcharge(1:ntypat)=dprarr(1:ntypat)
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pulayhiststore',tread,'INT')
+ if(tread==1) dtset%pulayhiststore=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'quadmom',tread,'DPR')
  if(tread==1)then
    dtset%quadmom(1:ntypat)=dprarr(1:ntypat)
