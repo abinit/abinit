@@ -945,7 +945,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  ! SCF-Preconditioning input variables
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'precon_in_memory',tread,'INT')
- if(tread==1) dtset%precon_verbose=intarr(1)
+ if(tread==1) dtset%precon_in_memory=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'precon_ls_maxite',tread,'INT')
  if(tread==1) dtset%precon_ls_maxite=intarr(1)
