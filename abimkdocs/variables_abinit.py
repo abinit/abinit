@@ -9748,11 +9748,8 @@ The possible values of [[iprcel]] are:
  > * No meaning for RF calculations yet.
  > * The exchange term in the full dielectric matrix diverges for vanishing densities. Therefore the values of [[iprcel]] beyond 60 must not be used for cells containing vacuum, unless ones computes this matrix for every step ([[iprcel]] = 161).
 
-  * Between 200 and 299 --> Model dielectric operator $\varepsilon^\mathrm{model}$ based of a model non-interacting susceptibility $\chi_0^\mathrm{model}$:
-$$ \varepsilon^\mathrm{model} = I - K \chi_0^\mathrm{model} $$
-where $K$ is a potential kernel (the Coulomb kernel $K_H$ and/or the exchange-correlation kernel $K_\mathrm{XC}$). 
+  * Between 200 and 299 --> Model dielectric operator $\varepsilon^\mathrm{model}$ based of a model non-interacting susceptibility $\chi_0^\mathrm{model}$: $$ \varepsilon^\mathrm{model} = I - K \chi_0^\mathrm{model} $$ where $K$ is a potential kernel (the Coulomb kernel $K_H$ and/or the exchange-correlation kernel $K_\mathrm{XC}$).
 The preconditioner, $P = (\varepsilon^\mathrm{model})^{-1}$ for potential mixing or $P = ((\varepsilon^\mathrm{model})^\dagger)^{-1}$ for density mixing, is applied using an iterative linear solver (GMRES) to invert the model dielectric matrix or its adjoint.  
-This preconditioner can be tuned with the parameters [[precon_ls_maxite]], [[precon_ls_rtol]], [[precon_verbose]], [[precon_tsmear]], [[precon_in_memory]].
 Available models are :
     * 200 --> LDOS-preconditioner [[cite:Herbst2020]]: $$ \varepsilon^\mathrm{LDOS} = I - K_H \chi_0^\mathrm{LDOS} .$$ This preconditioner is well suited for metallic system in large homogeneous or inhomogeneous systems. It requires a smooth smearing function ([[occopt]] = 3 to 7) and we suggest using it as a **default** for such cases.
     * 201 --> DOS-preconditioner: $$\varepsilon^\mathrm{DOS} = I - DK_\mathrm{H}$$ with $D$ the (scalar) density of state at the Fermi-level. This is a parameter-free version of the Kerker preconditioner (suggested in [[cite:Herbst2020]]).
@@ -9760,6 +9757,8 @@ Available models are :
 
  > Notes :
  > * The mixing factor [[diemix]] is used and [[diemixmag]] is ignored.
+ > * The preconditioner can be tuned with the parameters [[precon_ls_maxite]], [[precon_ls_rtol]], [[precon_verbose]], [[precon_tsmear]] and [[precon_in_memory]].  
+ > * In PAW, this is only compatible with [[pawmixdg]] = 1.
 """,
 ),
 

@@ -1878,14 +1878,19 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          call chkint_eq(1, 2, cond_string, cond_values, ierr, 'npband', dt%npband, 1, [1], iout)
        end if
        !Hybrid preconditioning (iprcel=202/3) needs nsppol=2 => nspden=2 and nspinor=2 => nspden=4
-       if (dt%nsppol=2) then
+       if (dt%nsppol==2) then
          cond_string(2)='nsppol' ; cond_values(2)=dt%nsppol
          call chkint_eq(1, 2, cond_string, cond_values, ierr, 'nspden', dt%nspden, 1, [2], iout)
        end if
-       if (dt%nspinor=2) then
+       if (dt%nspinor==2) then
          cond_string(2)='nspinor' ; cond_values(2)=dt%nspinor
          call chkint_eq(1, 2, cond_string, cond_values, ierr, 'nspden', dt%nspden, 1, [4], iout)
        end if
+       !Hybrid preconditioning (iprcel=202/3) needs precon_in_memory=1 with band parallelization.
+       if (dt%npband>1) then
+        cond_string(2)='npband' ; cond_values(2)=dt%npband
+        call chkint_eq(1, 2, cond_string, cond_values, ierr, 'precon_in_memory', dt%precon_in_memory, 1, [1], iout)
+      end if
      end if
      
    end if
