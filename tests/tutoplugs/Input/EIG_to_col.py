@@ -9,7 +9,7 @@ print(nband/8.)
 nrows_eig = np.ceil(nband/8.)
 print(nrows_eig)
 
-with open("tw90_6_2o_DS4_EIG") as fopen:
+with open("tw90_6o_DS4_EIG") as fopen:
     for l, line in enumerate(fopen.readlines()):
         print(l, line)
         if not l:

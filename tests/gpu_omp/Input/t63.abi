@@ -1,41 +1,27 @@
 # Ge diamond with slightly displaced atoms (to have non-zero forces)
-# test metaGGA + PAW + paral_kgb + istwfk + cprj_in_memory + nspinor
-# DS 1: paral_kgb 0 + cprj_in_memory 0 + istwfk 1
-# DS 2: paral_kgb 0 + cprj_in_memory 0 + istwfk > 1
-# DS 3: paral_kgb 1 + cprj_in_memory 0 + istwfk > 1
-# DS 4: paral_kgb 1 + cprj_in_memory 1 + istwfk > 1
-# DS 5: paral_kgb 1 + cprj_in_memory 1 + istwfk 1 + nspinor 2
-# All datasets should give the same results
+# test metaGGA + PAW + paral_kgb + istwfk + nspinor + npband
+# DS 1: cprj_in_memory 0 + istwfk 1
+# DS 2: cprj_in_memory 0 + istwfk > 1
+# DS 3: cprj_in_memory 0 + istwfk 1 + nspinor 2
+# All datasets should give the same results and the same as t120.abi in paral
 
-ndtset 5
+ndtset 3
+paral_kgb 1
+npband 2
+bandpp 1
+gpu_option "GPU_OPENMP"
 
 #DS 1
-paral_kgb1 0
-cprj_in_memory1 0
 istwfk1 1
 
-#DS 2
-paral_kgb2 0
-cprj_in_memory2 0
+# DS 2
 istwfk2 2
 
-#DS 3
-paral_kgb3 1
-cprj_in_memory3 0
-istwfk3 2
-
-#DS 4
-paral_kgb4 1
-cprj_in_memory4 1
-istwfk4 2
-
-#DS 5
-paral_kgb5 1
-cprj_in_memory5 1
-istwfk5 1
-nspinor5 2
-nband5 40
-pawspnorb5 0
+# DS 3
+istwfk3 1
+nspinor3 2
+nband3 40
+pawspnorb3 0
 
 # Simulation box
 acell 3*5.8 angstrom
@@ -88,16 +74,15 @@ write_files "none"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = bob_gnu_13.2_openmp, haicgu_gnu_14.1_hpc, manneback_gnu_14.2_hpc
 #%% need_cpp_vars = HAVE_FFTW3 or HAVE_DFTI
 #%% [paral_info]
-#%% nprocs_to_test = 1
-#%% max_nprocs = 1
-#%% [NCPU_1]
+#%% nprocs_to_test = 2
+#%% max_nprocs = 2
+#%% [NCPU_2]
 #%% files_to_test =
-#%%   t120_MPI1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium
+#%%   t63_MPI2.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium
 #%% [extra_info]
-#%% authors = F. Brieuc
+#%% authors = J. Boust
 #%% keywords = metaGGA, PAW, CPRJ
-#%% description = Tests metaGGA + PAW + cprj_in_memory + paral_kgb + istwf + nspinor . All datasets should give the same results.
+#%% description = Tests metaGGA + PAW + cprj_in_memory + paral_kgb + istwf + nspinor + npband. All datasets should give the same results.
 #%%<END TEST_INFO>

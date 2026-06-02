@@ -163,7 +163,7 @@ module m_trace_estimation
     call xgBlock_setBlock(W_dot%self, dot_qTBv, 1, 1)
     call xgBlock_setBlock(W_dot%self,  dot_qTv, 1, 1, fcol=2)
     call xgBlock_setBlock(W_dot%self, dot_vTBv, 1, 1, fcol=3)
-
+    
     ! q = random column vector
     call xgBlock_colwiseRandom(q, rank, 1)
     !write(std_out,*) 'Random id=', xgBlock_getid(q)
@@ -177,15 +177,15 @@ module m_trace_estimation
     call xgBlock_zero_im_g0(Bv) ! Bv stores Bq
     ABI_NVTX_END_RANGE()
     call timab(tim_getAX_BX,2,tsec)
-
+    
     call xgBlock_colwiseDotProduct(q, Bv, dot_qTBv)
     call xgBlock_reverseMap(dot_qTBv,dot_qTBv_layout,rows=1,cols=1)
-
+    
     norml_q = 1.d0 / sqrt(dot_qTBv_layout(1,1))
     call xgBlock_scale(q, norml_q, 1)
     call xgBlock_scale(v, norml_q, 1)
     call xgBlock_scale(Bv, norml_q, 1)
-
+    
     alpha = 0.d0
     beta = 0.d0
 

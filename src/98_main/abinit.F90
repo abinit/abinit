@@ -373,12 +373,14 @@ program abinit
  call setdevice_cuda(gpu_devices,gpu_option)
  lib_vers(1) = gpu_get_lib_version_major()
  lib_vers(2) = gpu_get_lib_version_minor()
+ if(gpu_option/=ABI_GPU_DISABLED) then
 #ifdef HAVE_GPU_CUDA
- write(std_out,'(a,i1,a,i1)') ' Using CUDA version: ',lib_vers(1),'.',lib_vers(2)
+   write(std_out,'(a,i2,a,i1)') ' Using CUDA version: ',lib_vers(1),'.',lib_vers(2)
 #endif
 #ifdef HAVE_GPU_HIP
- write(std_out,'(a,i1,a,i1)') ' Using ROCm/HIP version: ',lib_vers(1),'.',lib_vers(2)
+   write(std_out,'(a,i1,a,i1)') ' Using ROCm/HIP version: ',lib_vers(1),'.',lib_vers(2)
 #endif
+  end if
 
 #else
  if (gpu_option/=ABI_GPU_DISABLED) then
