@@ -69,12 +69,13 @@ qph1l
 #%% [setup]
 #%%  executable = anaddb
 #%%  test_chain = t47.abi
+#%% exclude_builders = alps_nag_7.2_serial
 #%% [shell]
 #%% pre_commands =
 #%%   iw_cp t46.ddb.abo t46.ddb.abo
 #%% [files]
 #%% files_to_test =
-#%%  t47.abo, tolnlines = 0,  tolabs=  1e-02, tolrel= 1.1
+#%%  t47.abo, tolnlines = 0,  tolabs=  1e-03, tolrel= 1.1
 #%% [paral_info]
 #%%  max_nprocs = 1
 #%% [extra_info]

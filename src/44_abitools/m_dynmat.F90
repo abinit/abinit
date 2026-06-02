@@ -6410,7 +6410,7 @@ subroutine msria_apply(asr,d2asr,d2dqmsr,d2cart,mpert,natom,qphon,crystal)
  integer :: tiat,tjat,isym,indij(natom,natom),indij2(natom,natom,3)
  integer :: isgn, itirev 
  real(dp) :: qsym(3), qsym2(3), symcart(3,3,crystal%nsym),arg1,arg2
- real(dp) :: re,im,re2,im2,sumr,sumi,valr,vali,carttmp
+ real(dp) :: re,im,re2,im2,sumr,sumi,valr,vali,cartsum_r,cartsum_i
  real(dp), allocatable :: pert(:,:,:,:,:,:), pert2(:,:,:,:,:,:,:)
  real(dp) :: Levi_Civita(3,3,3)
 ! *********************************************************************
@@ -6512,25 +6512,23 @@ subroutine msria_apply(asr,d2asr,d2dqmsr,d2cart,mpert,natom,qphon,crystal)
    do idir1 =1,3
      do idir2=1,3
        do ipert2=1,natom
+         cartsum_r = d2cart(1,idir1,ipert1,idir2,ipert2)
+         cartsum_i = d2cart(2,idir1,ipert1,idir2,ipert2)
          do isym=1,crystal%nsym
            do itirev=1,2  ! loop over the time-reversal symmetry
              isgn=3-2*itirev
-             carttmp = d2cart(1,idir1,ipert1,idir2,ipert2)- &
-             pert(1,idir1,ipert1,idir2,ipert2,crystal%nsym*(itirev-1)+isym)/dble(indij(ipert1,ipert2))
-             d2cart(1,idir1,ipert1,idir2,ipert2) = carttmp
-             carttmp = d2cart(2,idir1,ipert1,idir2,ipert2)- &
-             pert(2,idir1,ipert1,idir2,ipert2,crystal%nsym*(itirev-1)+isym)/dble(indij(ipert1,ipert2))
-             d2cart(2,idir1,ipert1,idir2,ipert2) = carttmp
+             cartsum_r = cartsum_r -pert(1,idir1,ipert1,idir2,ipert2,crystal%nsym*(itirev-1)+isym)/dble(indij(ipert1,ipert2))
+             cartsum_i = cartsum_i -pert(2,idir1,ipert1,idir2,ipert2,crystal%nsym*(itirev-1)+isym)/dble(indij(ipert1,ipert2))
              do idir3=1,3
-               carttmp = d2cart(1,idir1,ipert1,idir2,ipert2)- &
-               pert2(1,idir1,ipert1,idir2,ipert2,crystal%nsym*(itirev-1)+isym,idir3)/dble(indij2(ipert1,ipert2,idir3))
-               d2cart(1,idir1,ipert1,idir2,ipert2) = carttmp
-               carttmp = d2cart(2,idir1,ipert1,idir2,ipert2)- &
-               pert2(2,idir1,ipert1,idir2,ipert2,crystal%nsym*(itirev-1)+isym,idir3)/dble(indij2(ipert1,ipert2,idir3))
-               d2cart(2,idir1,ipert1,idir2,ipert2) = carttmp
+               cartsum_r = cartsum_r&
+               -pert2(1,idir1,ipert1,idir2,ipert2,crystal%nsym*(itirev-1)+isym,idir3)/dble(indij2(ipert1,ipert2,idir3))
+               cartsum_i = cartsum_i&
+               -pert2(2,idir1,ipert1,idir2,ipert2,crystal%nsym*(itirev-1)+isym,idir3)/dble(indij2(ipert1,ipert2,idir3))
              end do
            end do
          end do
+         d2cart(1,idir1,ipert1,idir2,ipert2)=cartsum_r
+         d2cart(2,idir1,ipert1,idir2,ipert2)=cartsum_i
        end do
      end do
    end do
