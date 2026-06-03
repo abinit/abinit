@@ -951,11 +951,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    gwr%use_supercell_for_sigma = gwr%dtset%gwr_sigma_algo == 1
  end if
 
- !!!FIXME HT: Bugs here
- if (.not. gwr%use_supercell_for_tchi .and. gwr%use_supercell_for_sigma) then
-   ABI_ERROR("BUG: Invalid combination for some reason.")
- end if
-
  ! Set q0 for long-wavelength limit
  if (dtset%gw_nqlwl /= 0) gwr%q0 = dtset%gw_qlwl(:, 1)
 
@@ -989,7 +984,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ABI_CHECK_IEQ(gwr%nkibz, ks_ebands%nkpt, "nkibz != ks_ebands%nkpt")
  ABI_CHECK(all(abs(ks_ebands%kptns - kibz) < tol12), "ks_ebands%kibz != kibz")
 
- can_use_kshifts = .not. gwr%use_supercell_for_tchi .and. .not. gwr%use_supercell_for_tchi
+ can_use_kshifts = .not. gwr%use_supercell_for_tchi .and. .not. gwr%use_supercell_for_sigma
  !can_use_kshifts = .False.
 
  if (.not. (isdiagmat(ks_ebands%kptrlatt) .and. ks_ebands%nshiftk == 1) .and. .not. can_use_kshifts) then
