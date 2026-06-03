@@ -2802,6 +2802,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    do ii=1,dtsets(idtset)%natom,1
      dtsets(idtset)%prtatlist(ii)=ii
    end do
+   dtsets(idtset)%pulayhiststore=0
    dtsets(idtset)%pvelmax(:)=one
    dtsets(idtset)%pw_unbal_thresh=40._dp
 !  Q
