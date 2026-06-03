@@ -8837,21 +8837,26 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
    call write_notations(units)
    do spin=1,gwr%nsppol
      do ikcalc=1,gwr%nkcalc
-
+       ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
        ydoc = yamldoc_open('GWR_SelfEnergy_ee', width=11, real_fmt='(3f8.3)')
        call ydoc%add_real1d('kpoint', gwr%kcalc(:, ikcalc))
        call ydoc%add_int('spin', spin, int_fmt="(i1)")
        call ydoc%add_int('gwr_scf_iteration', gwr%scf_iteration)
        call ydoc%add_string('gwr_task', gwr%dtset%gwr_task)
 
+       call ydoc%add_real('KS_gap', &
+            & (gwr%ks_ebands%eig(gwr%ks_vbik(ik_ibz, spin)+1, ik_ibz, spin) - &
+            & gwr%ks_ebands%eig(gwr%ks_vbik(ik_ibz, spin), ik_ibz, spin)) * Ha_eV)
        call ydoc%open_tabular('data') !, tag='SigmaeeData')
-       write(msg, "(a5, *(a9))") "Band", "SigX"
+       write(msg, "(a5, *(a9))") "Band", "E0", "SigX", "Occ(E)"
        call ydoc%add_tabular_line(msg)
 
        do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
          write(msg,'(i5, *(f9.3))') &
            band, &                                                        ! Band
-           real(merge(gwr%sigx_mat(band, 1, ikcalc, spin), gwr%sigx_mat(band, band, ikcalc, spin), gwr%sig_diago)) * Ha_eV                                             ! SigX
+           gwr%ks_ebands%eig(band, ik_ibz, spin) * Ha_eV, &               ! E0
+           real(merge(gwr%sigx_mat(band, 1, ikcalc, spin), gwr%sigx_mat(band, band, ikcalc, spin), gwr%sig_diago)) * Ha_eV, & ! SigX
+           gwr%qp_ebands%occ(band, ik_ibz, spin)                          ! Occ(E)
          call ydoc%add_tabular_line(msg)
        end do
 
