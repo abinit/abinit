@@ -5615,7 +5615,11 @@ subroutine gwr_print_trace(gwr, units, what)
      do spin=1,gwr%nsppol
        do ipm=1,2
          do iab=1,gwr%nsig_ab
-           call wrtout(units, sjoin(" Trace of:", what, "for ipm:", itoa(ipm), ", spin:", itoa(spin), ", iab:", itoa(iab), "for testing purposes:"))
+           if (gwr%nspinor == 2) then
+             call wrtout(units, sjoin(" Trace of:", what, "for ipm:", itoa(ipm), ", spin:", itoa(spin), ", iab:", itoa(iab), "for testing purposes:"))
+           else
+             call wrtout(units, sjoin(" Trace of:", what, "for ipm:", itoa(ipm), ", spin:", itoa(spin), "for testing purposes:"))
+           end if
            call wrtout(units, comment, newlines=1)
            call print_arr(units, ctrace5(:,:, ipm, spin, iab))
          end do
@@ -6898,7 +6902,7 @@ subroutine ncwrite_sigmac(myncid)
      nctkarr_t("ks_gaps", "dp", "nkcalc, nsppol"), &
      nctkarr_t("qpz_gaps", "dp", "nkcalc, nsppol"), &
      nctkarr_t("qp_pade_gaps", "dp", "nkcalc, nsppol"), &
-     nctkarr_t("sigx_mat", "dp", "two, smat_bsize1, smat_bsize2, nkcalc, nspin_channel"), &
+     nctkarr_t("sigx_mat", "dp", "two, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
      nctkarr_t("sigc_it_mat", "dp", "two, two, ntau, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
      nctkarr_t("sigc_iw_mat", "dp", "two, ntau, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
      nctkarr_t("sigxc_rw_diag", "dp", "two, nwr, smat_bsize1, nkcalc, nsppol"), &
@@ -6910,7 +6914,7 @@ subroutine ncwrite_sigmac(myncid)
  NCF_CHECK(nctk_set_datamode(myncid))
  NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "e0_kcalc"), e0_kcalc))
  NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "ze0_kcalc"), c2r(ze0_kcalc)))
- NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "sigx_mat"), c2r(gwr%sigx_mat)))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "sigx_mat"), c2r(gwr%sigx_mat(:,:,:,1:gwr%nsppol))))
  NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "qpz_ene"), c2r(qpz_ene)))
  NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "qp_pade"), c2r(qp_pade)))
  NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "pade_solver_ierr"), pade_solver_ierr))
