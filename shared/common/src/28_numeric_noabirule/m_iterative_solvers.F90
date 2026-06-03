@@ -16,9 +16,6 @@ module m_iterative_solvers
     
     use m_errors
     use defs_basis
-#if defined HAVE_LINALG_MKL_OMATCOPY
-    use mkl_rci, only : dfgmres, dfgmres_check, dfgmres_get, dfgmres_init
-#endif
     use m_xmpi
 
     implicit none
@@ -318,105 +315,6 @@ module m_iterative_solvers
 
     end subroutine cg_linear_solver
 
-    !****f* m_iterative_solvers/call_FGMRES
-    !! NAME
-    !!  call_FGMRES
-    !!
-    !! FUNCTION
-    !!  Call the MKL FGMRES routine to solve a linear system. MPI aware.
-    !!
-    !! INPUTS
-    !!  n              = Size of the matrix.
-    !!  matvec         = Subroutine that performs matrix-vector multiplication.
-    !!  rhs            = Right-hand side vector of the linear system.
-    !!  gmres_maxiter  = Maximum number of iterations for the FGMRES algorithm.
-    !!  gmres_rtol     = Relative tolerance for convergence.
-    !!
-    !! INPUT/OUTPUTS
-    !!  est            = Initial guess for the solution vector, updated with the computed solution.
-    !!
-    !! SOURCE
-    subroutine call_FGMRES(n, matvec, rhs, est, gmres_maxiter, gmres_rtol)
-        !Arguments ------------------------------------
-        integer, intent(in) :: n, gmres_maxiter
-        real(dp), intent(in) :: gmres_rtol
-        real(dp),intent(in) :: rhs(:)
-        real(dp),intent(inout) :: est(:)
-        interface
-            subroutine matvec(n_, x, y)
-                integer, intent(in) :: n_
-                double precision, intent(inout), target :: x(n_), y(n_)
-            end subroutine matvec
-        end interface
-        !Local variables-------------------------------
-        !MKL FGMRES
-        integer :: RCI_request, itercount, size_vres
-        integer :: ipar(128)
-        real(dp) :: dpar(128)
-        real(dp), allocatable :: tmp(:)
-        integer :: ierr
-
-        ! *************************************************************************
-        
-        !FGMRES initialization
-
-        ABI_MALLOC(tmp, ((2*gmres_maxiter+1)*n + gmres_maxiter*(gmres_maxiter+9)/2 + 1))
-        call dfgmres_init(n, est, rhs, RCI_request, ipar, dpar, tmp)
-        !setting FGMRES parameters
-        ipar(7) = 0              ! control verbosity : no warning message
-        ipar(5) = gmres_maxiter  ! maximum number of iterations
-        ipar(8) = 1              ! dfgmres routine performs the stopping test for the maximum number of iterations ipar(4)≤ipar(5)
-        ipar(9) = 1              ! dfgmres routine performs the residual stopping test dpar(5)≤dpar(4)=dpar(1)*dpar(3)+dpar(2)
-        ipar(10) = 0             ! no user defined stopping tests
-        ipar(11) = 0             ! non-preconditioned GMRES
-        ipar(12) = 1             ! dfgmres routine performs the automatic test dpar(7)≤dpar(8)
-        ipar(15) = gmres_maxiter ! number of the non-restarted FGMRES iterations (no restart here)
-        dpar(1) = gmres_rtol     ! relative tolerance
-        !dpar(2) = 0.01          ! absolute tolerance
-        
-        !FGMRES iterations
-        
-        call dfgmres_check(n, est, rhs, RCI_request, ipar, dpar, tmp)
-        call dfgmres(n, est, rhs, RCI_request, ipar, dpar, tmp)
-        
-        do
-            if (RCI_request==-1) then
-            !    maximum number of iterations is reached
-                call dfgmres_get(n, est, rhs, RCI_request, ipar, dpar, tmp, itercount)
-                exit
-            else if (RCI_request==0) then
-            !    successful completion of the task
-                call dfgmres_get(n, est, rhs, RCI_request, ipar, dpar, tmp, itercount)
-                exit
-            else  if (RCI_request==1) then
-            !    multiply the matrix P by tmp(ipar(22)) and put the result in tmp(ipar(23))
-                call matvec(n, tmp(ipar(22):ipar(22)+2*size_vres-1), tmp(ipar(23):ipar(23)+2*size_vres-1))
-            !    proceed with FGMRES iterations
-                call dfgmres(2*size_vres, est, rhs, RCI_request, ipar, dpar, tmp)
-            !---------------------------------------------------------------------
-            !  FGMRES Errors
-            else if (RCI_request==-10) then
-                ABI_BUG('FGMRES : attempt to divide by zero')
-                exit
-            else if (RCI_request==-11) then
-                ABI_BUG('FGMRES : infinite cycle')
-                exit
-            else if (RCI_request==-12) then
-                ABI_BUG('FGMRES : errors were found in the method parameters')
-                exit
-            ! RCI_request = 2, 3, 4 should not happen with this choice of parameters
-            else
-                ABI_BUG('FGMRES : RCI_request has unexpected value')
-            end if
-            !---------------------------------------------------------------------
-
-            ! MPI aware: broadcast the 'RCI_request' of master to avoid desynchronization.
-            call xmpi_bcast(RCI_request, 0, xmpi_world, ierr)
-
-        end do
-        ABI_FREE(tmp)
-    end subroutine call_FGMRES
-
     !****f* m_iterative_solvers/call_gmresm
     !! NAME
     !!  call_gmresm
@@ -522,12 +420,7 @@ module m_iterative_solvers
       
         ! *************************************************************************
         
-        !TODO : dirty check of MKL availability
-#if defined HAVE_LINALG_MKL_OMATCOPY
-        call call_FGMRES(n, matvec, rhs, est, gmres_maxiter, gmres_rtol)
-#else
         call call_gmresm(n, matvec, est, rhs, gmres_maxiter, gmres_rtol, verbose)
-#endif
       
     end subroutine gmres_linear_solver
 
