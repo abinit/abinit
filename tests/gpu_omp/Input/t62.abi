@@ -1,5 +1,7 @@
 # copper atom in a box. Test norm conserving oncvpsp pseudopotential with meta GGA R2SCAN01
 iscf 17
+gpu_option "GPU_OPENMP"
+wfoptalg 114
 
 ecut 40
 
@@ -38,10 +40,9 @@ nc_xccc_gspace 0 # calculates model core contribution in real space. Cleaner
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = bob_gnu_13.2_openmp, haicgu_gnu_14.1_hpc, manneback_gnu_14.2_hpc
 #%% [files]
 #%% files_to_test =
-#%%   t95.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00 , fld_options= -ridiculous;
+#%%   t62.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00 , fld_options= -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

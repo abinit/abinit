@@ -1299,30 +1299,6 @@ ${INSTALL} -m 644 "${abinit_srcdir}/fallbacks/Makefile.am" \
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
 
-ABI_MSG_SECTION([Final remarks])
-
-# The end
-if test "${sd_linalg_flavor}" = "netlib-fallback"; then
-  ABI_MSG_NOTICE([linalg-abinit],
-    [Suboptimal linear algebra configuration])
-fi
-if test "${sd_libxc_kxc_ok}" = "no"; then
-  ABI_MSG_NOTICE([libxc-kxc],
-    [Suboptimal libxc configuration])
-fi
-if test "${sd_fft_flavor}" = "fftw3" -a "${abi_openmp_enable}" = "yes"; then
-  ABI_MSG_NOTICE([fftw3-openmp],
-    [WARNING: OpenMP enabled but FFTW3 Threads disabled])
-fi
-# GPU 2024 implementation : deactivate this warning
-#if test "${abi_gpu_enable}" = "yes" -a "${sd_linalg_chk_gpu}" != "magma"; then
-#  ABI_MSG_NOTICE([gpu-without-magma],
-#    [Suboptimal GPU configuration])
-#fi
-ABI_MSG_FC_BUGGY(${abi_fc_vendor})
-ABI_MSG_END
-
-
 
 FALLBACKS_SUBDIRS=""
 AC_ARG_ENABLE([create_reconfigure_for_fb],
@@ -1374,3 +1350,40 @@ if test "x${mandatory}" = "x#"; then
   ABI_TRIGGERS_SUMMARY
   ABI_MSG_NOTICE_L([help-fb], [Missing Mandatory library!])
 fi
+
+
+# ---------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+
+ABI_MSG_SECTION([Final remarks])
+
+# The end
+if test "${sd_linalg_flavor}" = "netlib-fallback"; then
+  ABI_MSG_NOTICE([linalg-abinit],
+    [Suboptimal linear algebra configuration])
+fi
+if test "${sd_libxc_kxc_ok}" = "no"; then
+  ABI_MSG_NOTICE([libxc-kxc],
+    [Suboptimal libxc configuration])
+fi
+if test "${sd_fft_flavor}" = "fftw3" -a "${abi_openmp_enable}" = "yes"; then
+  ABI_MSG_NOTICE([fftw3-openmp],
+    [WARNING: OpenMP enabled but FFTW3 Threads disabled])
+fi
+if test "${abi_openmp_offload_enable}" = "yes"; then
+  if test "${abi_fc_vendor}" != "nvhpc" -a  "${abi_fc_vendor}" != "cray"; then
+    ABI_MSG_NOTICE([omp-offload-compiler],
+      [WARNING: GPU support with non-validated compiler.])
+  fi
+fi
+if test "${abi_gpu_hip_old}" = "yes"; then
+  ABI_MSG_NOTICE([old-rocm],
+    [WARNING: Suboptimal ROCm/HIP version])
+fi
+# GPU 2024 implementation : deactivate this warning
+#if test "${abi_gpu_enable}" = "yes" -a "${sd_linalg_chk_gpu}" != "magma"; then
+#  ABI_MSG_NOTICE([gpu-without-magma],
+#    [Suboptimal GPU configuration])
+#fi
+ABI_MSG_FC_BUGGY(${abi_fc_vendor})
+ABI_MSG_END
