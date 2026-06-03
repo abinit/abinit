@@ -45,7 +45,12 @@ MODULE m_invovl
  use m_prep_kgb,    only : prep_nonlop
 
 #ifdef HAVE_FC_ISO_C_BINDING
+! FIXME Don't know what's wrong with GCC when OpenMP GPU Offload is enabled here...
+#ifdef FC_GNU
+ use, intrinsic :: iso_c_binding, only : c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc
+#else
  use, intrinsic :: iso_c_binding, only : c_ptr, c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc
+#endif
 #endif
 
 #if defined(HAVE_GPU_MARKERS)

@@ -8,15 +8,13 @@ optdriver 7   # Enter EPH driver.
 eph_task 24   # ZPR from GSTORE.
 getgstore_filepath "teph4zpr_gwpt_7o_GSTORE.nc"
 
-tmesh 0 100 4             # [start, step, num_T] in Kelving.
-
-#eph_frohl_ntheta 0       # Disable spherical integration of FM integrand in the microzone around Gamma.
-#                         # to preserve previous behaviour.
+tmesh 0 100 4             # [start, step, num_T] in Kelvin
 
 nband 20
-eph_stern 1
-
-zcut 0.01 eV
+eph_stern 1              # Activate Sterheimer method
+gwpt_g2mode 2            # See documentation.
+zcut 0.01 eV             # Imaginary shift in Green's function denominator.
+#gstore_gname "gvals_ks" # Activate this line to use KS matrix elements
 
 ddb_ngqpt 4 4 4
 

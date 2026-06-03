@@ -177,7 +177,7 @@ module m_gwr
                              slk_array_locmem_mb, block_dist_1d, slk_pgemm
  use m_wfk,           only : wfk_read_ebands, wfk_t
  use m_wfd,           only : wfd_t, wfdgw_t
- use m_ddk,           only : ddkop_t, ddk_red2car
+ use m_ddk,           only : ddkop_t
  use m_pawtab,        only : pawtab_type
  use m_pawcprj,       only : pawcprj_type
  use m_vcoul,         only : vcgen_t
@@ -7874,7 +7874,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer :: istwf_ki, npw_ki, istwf_kf, nI, nJ, nomega, io, iq, nq, dim_rtwg !ig,
  integer :: npwe, u_nfft, u_mgfft, u_mpw
  logical :: isirr_k, use_tr, is_metallic, print_time, use_ddk
- real(dp) :: spin_fact, weight, deltaf_b1b2, deltaeGW_b1b2, gwr_boxcutmin_c, zcut, qlen, eig_nk, e0
+ real(dp) :: spin_fact, weight, deltaf_b1b2, deltaeGW_b1b2, gwr_boxcutmin_c, zcut, qlen, eig_nk, eig_mk, e0
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
  complex(dp) :: deltaeKS_b1b2
  type(__slkmat_t),pointer :: ugb_kibz
@@ -7885,18 +7885,15 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  type(littlegroup_t) :: ltg_q
  type(desc_t),pointer :: desc_ki
 !arrays
- integer :: gmax(3), u_ngfft(18), work_ngfft(18), units(2), spinor_pad(2,4), spad1, spad2 !, ! g0(3),
+ integer :: gmax(3), u_ngfft(18), work_ngfft(18), units(2) !, spinor_pad(2,4), spad1, spad2 !, ! g0(3),
  integer,contiguous, pointer :: kg_ki(:,:)
  integer,allocatable :: gvec_q0(:,:), gbound_q0(:,:), u_gbound(:,:)
  real(dp) :: kk_ibz(3), kk_bz(3), tsec(2), rtmp(2)
  real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:), ks_eig(:,:,:)
- real(dp),allocatable :: work(:,:,:,:), qdirs(:,:) !, cwave(:,:)
+ real(dp),allocatable :: work(:,:,:,:), qdirs(:,:)
  logical :: gradk_not_done(gwr%nkibz)
  logical,allocatable :: bbp_mask(:,:)
- complex(dp) :: chq(3) !, wng(3)
- !complex(dp) :: vg(3), vr(3)
- !complex(dp),allocatable :: ug1_block(:,:)
- !real(dp) :: new_rhotwx_dp(2, 3, gwr%nspinor**2), vred(2,3), vcar(2,3)
+ complex(dp) :: chq(3)
  complex(gwp) :: rhotwx(3, gwr%nspinor**2), new_rhotwx(3, gwr%nspinor**2)
  complex(gwp),allocatable :: ug2(:), ur1_kibz(:), ur2_kibz(:), ur_prod(:), rhotwg(:), ug1_block(:,:), ug1(:)
  complex(dp) :: green_w(gwr%ntau), omega(gwr%ntau)
@@ -8044,11 +8041,12 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
  ! TODO: use ddkop instead of commutator so that we can handle SOC terms.
  use_ddk = .False.
+ use_ddk = gwr%dtset%userie == 432
  !use_ddk = .True.
- !use_ddk = gwr%dtset%userie == 432
- if (use_ddk) call wrtout(std_out, " Using DDK to compute the commutator matrix elements.")
-
- call ddkop%init(dtset, gwr%cryst, gwr%pawtab, gwr%psps, gwr%mpi_enreg, u_mpw, u_ngfft)
+ if (use_ddk) then
+   call wrtout(std_out, " Using DDK to compute the commutator matrix elements.")
+   call ddkop%init(dtset, gwr%cryst, gwr%pawtab, gwr%psps, gwr%mpi_enreg, u_mpw, u_ngfft)
+ end if
 
  ABI_CHECK_IEQ(dtset%symchi, 1, "symchi 0 not implemented")
  if (dtset%nspinor == 2) then
@@ -8068,6 +8066,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      if (dtset%symchi == 1 .and. ltg_q%ibzq(ik_bz) /= 1) CYCLE ! Only IBZ_q
      print_time = gwr%comm%me == 0 .and. (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0)
      if (print_time) call cwtime(cpu_k, wall_k, gflops_k, "start")
+     !write(*, *)" For kpoint:", trim(ktoa(kk_bz))
 
      ! FIXME: Be careful with the symmetry conventions here! and the interplay between umklapp in q and FFT
      ! Also, the assembly_chi0 routines assume symrec and trev_k in [1, 2]
@@ -8081,7 +8080,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      npw_ki   =  desc_ki%npw
      istwf_ki =  desc_ki%istwfk
      kg_ki    => desc_ki%gvec
-     spinor_pad = reshape([0, 0, npw_ki, npw_ki, 0, npw_ki, npw_ki, 0], [2, 4])
 
      ABI_MALLOC(ug1, (npw_ki * nspinor))
      ABI_MALLOC(ug2, (npw_ki * nspinor))
@@ -8097,9 +8095,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
      if (use_ddk) then
        call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_ibz, istwf_ki, npw_ki, kg_ki)
-       ABI_CHECK(istwf_ki == 1, "istwfk_k1 not coded")
-       ! TODO: istwfk_k should be 1 here
-       !vv = ddkop%get_braket(ebands%eig(ib_c, ik, spin), istwf_k, npw_k, nspinor, cg_c, mode=ds%mode)
      end if
 
      call chi0_bbp_mask(ik_ibz, ik_ibz, spin, spin_fact, use_tr, &
@@ -8113,8 +8108,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      !  3) Invert the loops
 
      block_size = min(48, gwr%ugb_nband)
-     !block_size = min(200, gwr%ugb_nband)
-     !block_size = 1
 
      block_counter = 0
      do band1_start=1, gwr%ugb_nband, block_size
@@ -8147,20 +8140,20 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
          ! FFT band1 from g to r
          ug1 = ug1_block(:, ib)
          call fft_ug(npw_ki, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_ki, kg_ki, u_gbound, ug1, ur1_kibz)
-         !call fft_ug(npw_ki, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_ki, kg_ki, u_gbound, ug1_block(:,ib), ur1_kibz)
 
          if (use_ddk) then
            ! Compute DH_DK |psi_k,bi>, store results in ddk_ug1
            ddk_ug1(1,:,1) = real(ug1)
            ddk_ug1(2,:,1) = aimag(ug1)
            call ddkop%apply(eig_nk, npw_ki, nspinor, ddk_ug1(:,:,1), cwaveprj)
-           ddk_ug1(:,:,:) = ddkop%gh1c
          end if
 
          ! Loop over "valence" states.
          !do band2=1,gwr%ugb_nband
          do il_b2=1, ugb_kibz%size_local(2)
            band2 = ugb_kibz%loc2gcol(il_b2)
+
+           eig_mk = gwr%ks_ebands%eig(band2, ik_ibz, spin)
 
            deltaeKS_b1b2 = ks_eig(band1, ik_ibz, spin) - ks_eig(band2, ik_ibz, spin)
            deltaf_b1b2  = spin_fact * (qp_occ(band1, ik_ibz, spin) - qp_occ(band2, ik_ibz, spin))
@@ -8213,58 +8206,37 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
            end if
 
            if (use_ddk) then
-             !print *, "max abs ddk_ug1:", maxval(abs(ddk_ug1(:,:,:)))
              cg2_dp(1,:) = real(ug2)
              cg2_dp(2,:) = aimag(ug2)
-             do iab=1,gwr%nspinor**2
-               do idir=1,3
-                 ! DH_DK operator is Hermitian.
-                 spad1 = spinor_pad(1,iab); spad2 = spinor_pad(2,iab)
-                 rtmp = cg_zdotc(npw_ki, ddk_ug1(:,spad1+1,idir), cg2_dp(:,spad2+1))
-                 new_rhotwx(idir, iab) = rtmp(1) + j_dpc * rtmp(2)
-               end do ! iab
-             end do ! idir
 
-             !vk(2,3) = call ddkop%get_braket(eig0mk, istwf_k, npw_k, nspinor, brag, mode) result(vk)
-             !write(100, *)"temp:", sum(new_rhotwx)
+             ! DH_DK operator is Hermitian.
+             call ddkop%get_ihr_comm(cryst, eig_mk, istwf_ki, npw_ki, nspinor, cg2_dp, new_rhotwx)
+             new_rhotwx = conjg(new_rhotwx)
+
              if (abs(deltaeKS_b1b2) > GW_TOLQ0) then
                 new_rhotwx = -new_rhotwx / deltaeKS_b1b2
-                !new_rhotwx = 2.6664594573771905 * new_rhotwx
-                !new_rhotwx = new_rhotwx / (two_pi ** 2)
-                !new_rhotwx = new_rhotwx / (two_pi)
-                !new_rhotwx = new_rhotwx * two_pi
-                !new_rhotwx = new_rhotwx
-                do iab=1,gwr%nspinor**2
-                  !new_rhotwx(:, iab) = matmul(cryst%gprimd, new_rhotwx(:, iab))
-                  !new_rhotwx(:, iab) = matmul(cryst%rprimd, new_rhotwx(:, iab))
-                  !vred(1,:) = real(new_rhotwx(:, iab))
-                  !vred(2,:) = aimag(new_rhotwx(:, iab))
-                  !call ddk_red2car(cryst%rprimd, vred, vcar)
-                  !new_rhotwx(:, iab) = vcar(1,:) + j_dpc * vcar(2,:)
-                end do
              else
                 new_rhotwx = zero
              end if
 
-             ! HM: 24/07/2018
-             ! Transform dipoles to be consistent with results from DFPT
-             ! Perturbations with DFPT are along the reciprocal lattice vectors
-             ! Perturbations with commutator are along real space lattice vectors
-             ! dot(A, DFPT) = X
-             ! dot(B, COMM) = X
-             ! B = 2 pi (A^{-1})^T => dot(B^T B,COMM) = 2 pi DFPT
-             !
-             !vr = (2*pi)*(2*pi)*sum(ihrc(:,:),dim=2)
-             !vg(1) = dot_product(cryst%gmet(1,:), vr)
-             !vg(2) = dot_product(cryst%gmet(2,:), vr)
-             !vg(3) = dot_product(cryst%gmet(3,:), vr)
+#if 0
              do idir=1,3
-               !write(*, "(a, *(es12.5,2x))")"rhotwx:    ", rhotwx(:, 1)
-               !write(*, "(a, *(es12.5,2x))")"new_rhotwx:", new_rhotwx(:, 1)
-               !write(*, "(a, *(es12.5,2x))")"ratio old/new:", rhotwx(:, 1) / new_rhotwx(:, 1)
+               write(std_out, "(a, *(es12.5,2x))")"rhotwx:    ", rhotwx(:, 1)
+               write(std_out, "(a, *(es12.5,2x))")"new_rhotwx:", new_rhotwx(:, 1)
+               !write(std_out, "(a, *(es12.5,2x))")"ratio old/new:", rhotwx(:, 1) / new_rhotwx(:, 1)
+               do iab=1,gwr%nspinor**2
+                 if (abs(rhotwx(iab,1) - new_rhotwx(iab,1)) > tol6 .and. &
+                     (abs(rhotwx(iab,1)) > tol6 .or. abs(new_rhotwx(iab,1)) > tol6)) then
+                     write(std_out, "(a, *(es12.5,2x))")"rhotwx:    ", rhotwx(iab, 1)
+                     write(std_out, "(a, *(es12.5,2x))")"new_rhotwx:", new_rhotwx(iab, 1)
+                     ABI_ERROR("Too large diff")
+                 end if
+               end do
              end do
-             !stop "gwr_build_chi0_head_and_wings"
-           end if
+#endif
+           end if ! use_ddk
+           ! TODO: Activate this and get rid of vkbr
+           !new_rhotwx = rhotwx
 
            ! NB: Using symrec conventions here
            ik_ibz = gwr%kbz2ibz(1, ik_bz); isym_k = gwr%kbz2ibz(2, ik_bz)
@@ -8283,10 +8255,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        ABI_FREE(ug1_block)
        ABI_SFREE(ddk_ug1)
      end do ! band1_start
-
-     !if (gwr%usepaw == 0 .and. dtset%inclvkb /= 0 .and. dtset%symchi == 1) then
-     !  call vkbr_free(vkbr(ik_ibz)) ! Not need anymore as we loop only over IBZ.
-     !end if
 
      ABI_FREE(ug1)
      ABI_FREE(ug2)
@@ -8308,7 +8276,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ABI_FREE(ur_prod)
  ABI_FREE(rhotwg)
  ABI_FREE(u_gbound)
- call ddkop%free()
+ if (use_ddk) call ddkop%free()
  call vkbr_free(vkbr)
  ABI_FREE(vkbr)
 
@@ -8385,7 +8353,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  call cwtime_report(" gwr_build_chi0_head_and_wings:", cpu_all, wall_all, gflops_all)
  call timab(1927, 2, tsec)
 
- !stop "gwr_build_chi0_head_and_wings"
+ !if (use_ddk) stop "gwr_build_chi0_head_and_wings"
 
 end subroutine gwr_build_chi0_head_and_wings
 !!***
