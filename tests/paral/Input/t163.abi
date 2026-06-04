@@ -45,8 +45,6 @@ getwfk3 2            # WFK file with empty states
 
 prtvol3 1            # Write additional stuff to abo file for testing purposes.
                      # DO NOT USE this option for production runs!
-prtsuscep3 1         # Write TCHI file.
-                     # DO NOT USE this option for production runs unless you really need a TCHI file.
 
 gwr_ntau3   6        # Number of imaginary-time points
 gwr_chi_algo3 1      # Use supercell for chi
@@ -91,8 +89,6 @@ getwfk4 2            # WFK file with empty states
 
 prtvol4 1            # Write additional stuff to abo file for testing purposes.
                      # DO NOT USE this option for production runs!
-prtsuscep4 1         # Write TCHI file.
-                     # DO NOT USE this option for production runs unless you really need a TCHI file.
 
 gwr_ntau4   6        # Number of imaginary-time points
 gwr_chi_algo4 2      # Use supercell for chi
