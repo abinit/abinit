@@ -3249,13 +3249,12 @@ contains
     !!                            When nspden > 1 vec_r is in the Pauli basis.
     !!
     !! SOURCE
-    subroutine apply_chi0(this, dtset, mpi_enreg, vec_r)
+    subroutine apply_chi0(this, dtset, vec_r)
 
         !Arguments ------------------------------------
         class(precon_object) :: this
         !scalars
         type(dataset_type),intent(in) :: dtset
-        type(MPI_type), intent(in) :: mpi_enreg
         !arrays
         real(dp), intent(inout) :: vec_r(this%nfftprc, dtset%nspden)
        
@@ -3388,7 +3387,7 @@ contains
                 !1) Apply the Kernel (vc or vc + Kxc depending on iprcel)
                 call apply_kernel(this, dtset, mpi_enreg, adjdielmat_rho_r)
                 !2) Applythe model chi0 operator
-                call apply_chi0(this, dtset, mpi_enreg, adjdielmat_rho_r)
+                call apply_chi0(this, dtset, adjdielmat_rho_r)
                 !3) adjdielmat_rho_r = rho_r - K * chi0 * rho_r = adjdielmat * rho_r
                 adjdielmat_rho_r = rho_r - adjdielmat_rho_r
                 
@@ -3487,7 +3486,7 @@ contains
                 
                 dielmat_v_r = v_r
                 !1) Apply the model chi0 operator
-                call apply_chi0(this, dtset, mpi_enreg, dielmat_v_r)
+                call apply_chi0(this, dtset, dielmat_v_r)
                 !2) Apply the Kernel (vc or vc + Kxc depending on iprcel)
                 call apply_kernel(this, dtset, mpi_enreg, dielmat_v_r)
                 !3) dielmat_v_r = v_r - K * chi0 * v_r = dielmat * v_r
