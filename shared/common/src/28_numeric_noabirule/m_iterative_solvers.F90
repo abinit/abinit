@@ -382,9 +382,9 @@ module m_iterative_solvers
             real(dp), intent(inout) :: x(n_)
             ! ***********************
             ! We do nothing here but don't wan't to be flashed by abirule.
-            if (.false.) then
-                x = zero
-            end if
+            !if (.false.) then
+            !    x = zero
+            !end if
         end subroutine psolve
         ! Dot product
         function dotprd(n_, a, b) result(c)
