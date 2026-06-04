@@ -1,8 +1,8 @@
 
-.Version 10.5.8.2 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.9.0 of ABINIT. v10.8.1 released May 2026.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2026 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 20 Dec 2025.
-- ( at 17h10 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorial_tgwr_1-tgwr_2-tgwr_3-tgwr_4-tgwr_5/tgwr_5.abi
+.Starting date : Wed  3 Jun 2026.
+- ( at 18h24 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr_soc_dim/tests/TestBot_MPI1/tutorial_tgwr_1-tgwr_2-tgwr_3-tgwr_4-tgwr_5/tgwr_5.abi
 - output file    -> tgwr_5.abo
 - root for input  files -> tgwr_5i
 - root for output files -> tgwr_5o
@@ -210,8 +210,8 @@ meta: {optdriver: 6, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr_soc_dim/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr_soc_dim/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
 - Si    ONCVPSP-3.2.3.1  r_core=   1.60303   1.72197   1.91712
 - 14.00000   4.00000    170510                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -413,8 +413,8 @@ iteration_state: {dtset: 1, }
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
-
-
+ 
+ 
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 1, }
@@ -422,7 +422,7 @@ kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 gwr_scf_iteration: 1
 gwr_task   : G0W0
-QP_VBM_band: 2
+QP_VBM_band: 4
 QP_CBM_band: 5
 KS_gap     :    2.556
 QP_gap     :    3.449
@@ -431,7 +431,7 @@ data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
         1  -12.323  -10.470  -16.449    5.548    0.716   -0.049   -0.049  -12.373    2.000
         2   -0.354  -11.319  -13.616    1.514    0.777   -0.459   -0.459   -0.813    2.000
-        3   -0.354  -11.319  -13.616    1.514    0.777   -0.460   -0.460   -0.813    2.000
+        3   -0.354  -11.319  -13.616    1.514    0.777   -0.459   -0.459   -0.813    2.000
         4   -0.354  -11.319  -13.616    1.514    0.777   -0.459   -0.459   -0.813    2.000
         5    2.202  -10.034   -4.915   -4.753    0.778    0.434    0.434    2.636    0.000
         6    2.202  -10.034   -4.915   -4.753    0.778    0.434    0.434    2.636    0.000
@@ -446,20 +446,20 @@ kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 gwr_scf_iteration: 1
 gwr_task   : G0W0
-QP_VBM_band: 3
+QP_VBM_band: 4
 QP_CBM_band: 5
 KS_gap     :    2.733
 QP_gap     :    3.578
 Delta_QP_KS:    0.845
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
-        1   -9.991  -10.853  -15.973    4.636    0.732   -0.147   -0.147  -10.138    2.000
+        1   -9.991  -10.853  -15.973    4.636    0.732   -0.146   -0.146  -10.138    2.000
         2   -7.331  -10.209  -13.774    3.120    0.761   -0.171   -0.171   -7.502    2.000
         3   -1.556  -11.058  -13.442    1.686    0.774   -0.391   -0.391   -1.947    2.000
-        4   -1.556  -11.058  -13.442    1.686    0.774   -0.392   -0.392   -1.947    2.000
+        4   -1.556  -11.058  -13.442    1.686    0.774   -0.391   -0.391   -1.947    2.000
         5    1.177  -10.088   -5.037   -4.663    0.786    0.454    0.454    1.631    0.000
         6    2.983   -9.664   -4.428   -4.837    0.784    0.461    0.461    3.445    0.000
-        7    2.983   -9.664   -4.428   -4.838    0.784    0.461    0.461    3.444    0.000
+        7    2.983   -9.664   -4.428   -4.837    0.784    0.461    0.461    3.445    0.000
         8    7.378   -7.761   -2.017   -5.677    0.789    0.192    0.192    7.571    0.000
 ...
 
@@ -483,8 +483,8 @@ data: !Tabular |
         4   -3.211  -10.592  -13.169    1.991    0.770   -0.302   -0.302   -3.513    2.000
         5    0.354   -8.989   -4.197   -4.403    0.800    0.459    0.459    0.813    0.000
         6    0.354   -8.989   -4.197   -4.403    0.800    0.459    0.459    0.813    0.000
-        7    9.744  -10.558   -3.773   -6.677    0.756    0.198    0.198    9.942    0.000
-        8    9.744  -10.558   -3.773   -6.678    0.756    0.197    0.197    9.941    0.000
+        7    9.744  -10.558   -3.773   -6.678    0.756    0.198    0.198    9.941    0.000
+        8    9.744  -10.558   -3.773   -6.678    0.756    0.198    0.198    9.941    0.000
 ...
 
 
@@ -506,7 +506,7 @@ data: !Tabular |
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
@@ -662,7 +662,30 @@ P           mkmem           3
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] The Abinit project: Impact, environment and recent developments.
+- [1] Abinit 2025: New Capabilities for the Predictive Modeling of Solids and Nanomaterials.
+- J. Chem. Phys. 163, 164126 (2025).
+- M.J. Verstraete, J. Abreu, G. Allemand, B. Amadon, G. Antonius,
+- M. Azizi, L. Baguet, C. Barat, L. Bastogne, R. Bejaud, J.-M. Beuken,
+- J. Bieder, A. Blanchet, F. Bottin, J. Bouchet, J. Bouquiaux, E. Bousquet,
+- J. Boust, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval,
+- A. Castellano, E. Castiel, J.-B. Charraud, J. Clerouin, M. Cote, C. Duval,
+- A. Gallo, F. Gendron, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras,
+- F. Gomez-Ortiz, X. Gonze, F. Goudreault, A. Gruneis, R. Gupta, B. Guster,
+- D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
+- I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
+- Comment: the sixth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#verstraete2025
+-
+- [2] Optimized norm-conserving Vanderbilt pseudopotentials.
+- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
+- Comment: Some pseudopotential generated using the ONCVPSP code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
+-
+- [3] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -674,34 +697,31 @@ P           mkmem           3
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] Optimized norm-conserving Vanderbilt pseudopotentials.
-- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
-- Comment: Some pseudopotential generated using the ONCVPSP code were used.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
--
-- [3] ABINIT: Overview, and focus on selected capabilities
-- J. Chem. Phys. 152, 124102 (2020).
-- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
-- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
-- G.Brunin, D.Caliste, M.Cote,
-- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
-- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
-- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
-- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
-- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- [4] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
-- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- is available at
+-  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [4] Recent developments in the ABINIT software package.
+- [5] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -714,30 +734,16 @@ P           mkmem           3
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- And optionally:
--
-- [5] ABINIT: First-principles approach of materials and nanosystem properties.
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
-- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
-- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
-- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
-- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
-- The licence allows the authors to put it on the Web.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
--
-- Proc.   0 individual time (sec): cpu=         88.1  wall=         88.2
+- Proc.   0 individual time (sec): cpu=         87.2  wall=         87.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         88.1  wall=         88.2
++Overall time at end (sec) : cpu=         87.2  wall=         87.3

@@ -8377,7 +8377,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
  integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
  logical :: isirr_k, isirr_q, sigc_is_herm, compute_qp__
- real(dp) :: fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty, tol_empty_in, gwr_boxcutmin_x, sigx_tmp
+ real(dp) :: fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty, tol_empty_in, gwr_boxcutmin_x
  real(dp) :: cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
  complex(gwp) :: gwpc_sigxme, gwpc_sigxme2, xdot_tmp, ctmp
  character(len=5000) :: msg
@@ -8852,15 +8852,10 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
        call ydoc%add_tabular_line(msg)
 
        do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
-         if (gwr%sig_diago) then
-           sigx_tmp = real(gwr%sigx_mat(band, 1, ikcalc, spin), kind=dp) * Ha_eV
-         else
-           sigx_tmp = real(gwr%sigx_mat(band, band, ikcalc, spin), kind=dp) * Ha_eV
-         end if
          write(msg,'(i5, *(f9.3))') &
            band, &                                                        ! Band
            gwr%ks_ebands%eig(band, ik_ibz, spin) * Ha_eV, &               ! E0
-           sigx_tmp, &                                                    ! SigX
+           real(gwr%sigx_mat(band, merge(1, band, gwr%sig_diago), ikcalc, spin), kind=dp) * Ha_eV, & ! SigX
            gwr%qp_ebands%occ(band, ik_ibz, spin)                          ! Occ(E)
          call ydoc%add_tabular_line(msg)
        end do
