@@ -6115,6 +6115,22 @@ if (gwr%use_supercell_for_sigma) then
        ndat = blocked_loop(my_ir, my_nr, gwr%sc_batch_size)
        uc_ir = gt_gpr(1,1,1)%loc2gcol(my_ir)  ! FIXME: This won't work if nspinor 2
 
+if (.not. use_shmem_for_k) then
+       ! Insert Wc_q(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir)
+       call gwr%wcq_to_scbox(sc_ngfft, select_my_qbz, desc_myqbz, wc_scgvec, my_ir, ndat, wc_gpr, wct_scbox)
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$omp target update to(wct_scbox) if (gpu_option == ABI_GPU_OPENMP)
+#endif
+       if (gwr%kpt_comm%nproc > 1) call xmpi_isum_ip(wct_scbox, gwr%kpt_comm%value, wct_request, ierr)
+
+       ! Wc(G',r) --> Wc(R',r)
+       if (gwr%kpt_comm%nproc > 1) call xmpi_wait(wct_request, ierr)
+       call wt_plan%execute(wct_scbox(:,1), -1, max_ndat, iscale=0)
+else
+       call gwr%wcq_to_scbox(sc_ngfft, select_my_qbz, desc_myqbz, wc_scgvec, my_ir, ndat, wc_gpr, wct_scbox, &
+                             wct_scbox_win=wct_scbox_win)
+end if
+
        ! TODO: Should block using nproc in kpt_comm, scatter data and perform multiple FFTs in parallel.
        do iab=1,gwr%nsig_ab
          iiab = spinor_idxs(1, iab); jiab = spinor_idxs(2, iab)
@@ -6127,20 +6143,9 @@ if (.not. use_shmem_for_k) then
 #endif
          if (gwr%kpt_comm%nproc > 1) call xmpi_isum_ip(gt_scbox, gwr%kpt_comm%value, gt_request, ierr)
 
-         ! Insert Wc_q(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir)
-         call gwr%wcq_to_scbox(sc_ngfft, select_my_qbz, desc_myqbz, wc_scgvec, my_ir, ndat, wc_gpr, wct_scbox)
-#ifdef HAVE_OPENMP_OFFLOAD
-         !$omp target update to(wct_scbox) if (gpu_option == ABI_GPU_OPENMP)
-#endif
-         if (gwr%kpt_comm%nproc > 1) call xmpi_isum_ip(wct_scbox, gwr%kpt_comm%value, wct_request, ierr)
-
          ! G(G',r) --> G(R',r)
          if (gwr%kpt_comm%nproc > 1) call xmpi_wait(gt_request, ierr)
          call green_plan%execute(gt_scbox(:,1,1), -1, max_ndat*2, iscale=0)
-
-         ! Wc(G',r) --> Wc(R',r)
-         if (gwr%kpt_comm%nproc > 1) call xmpi_wait(wct_request, ierr)
-         call wt_plan%execute(wct_scbox(:,1), -1, max_ndat, iscale=0)
 
          ! Use gt_scbox to store GW (R',r, +/- i tau) for this set of ndat r-point
          !gt_scbox(:,:,1) = gt_scbox(:,:,1) * wct_scbox(:,:) * sigma_fact
@@ -6162,11 +6167,8 @@ if (.not. use_shmem_for_k) then
 
 else
          ! use_shmem_for_k --> MPI shared window version. Only gt_scbox are wct_scbox are shared.
-         call gwr%gk_to_scbox(sc_ngfft, select_my_kbz, desc_mykbz, green_scgvec, my_ir, ndat, gt_gpr, gt_scbox, &
+         call gwr%gk_to_scbox(sc_ngfft, select_my_kbz, desc_mykbz, green_scgvec, my_ir, ndat, gt_gpr(:,:,iab), gt_scbox, &
                               gt_scbox_win=gt_scbox_win)
-
-         call gwr%wcq_to_scbox(sc_ngfft, select_my_qbz, desc_myqbz, wc_scgvec, my_ir, ndat, wc_gpr, wct_scbox, &
-                               wct_scbox_win=wct_scbox_win)
 
          ! Now each MPI proc operates on different idat entries.
          call xmpi_win_fence(XMPI_MODE_NOSUCCEED, gt_scbox_win, ierr) ! Start the RMA epoch

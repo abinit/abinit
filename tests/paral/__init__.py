@@ -120,4 +120,8 @@ inp_files = [
 "t122.abi", # meta-GGA with npband>1
 "t150.abi",  # Test sequential slice execution in spectrum slicing diagonalization with 4 MPI
 "t151.abi",  # Test parallel slice execution in spectrum slicing diagonalization with 4 MPI
+"t160.abi",
+"t161.abi",
+"t162.abi",
+"t163.abi",
 ]
