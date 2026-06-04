@@ -2416,16 +2416,16 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
          call xmpi_bcast(cg_work, master, bcast_comm, ierr)
        endif
 
-       ! Table with the correspondence btw the k-centered sphere of the WFK file
-       ! and the one used in wfd (possibly smaller due to ecutwfn).
-       if (cut_ug .and. bstart == 1) then
-         ABI_MALLOC(gf2wfd, (npw_k_disk))
-         call kg_map(npw_k, gwr%green_desc_kibz(ik_ibz)%gvec, npw_k_disk, kg_k_disk, gf2wfd, nmiss)
-       end if
-
        ! Copy my portion of cg_work to buffer_cplx (here we have dp --> sp conversion).
        if (need_block_ks) then
          associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
+
+         ! Table with the correspondence btw the k-centered sphere of the WFK file
+         ! and the one used in wfd (possibly smaller due to ecutwfn).
+         if (cut_ug .and. bstart == 1) then
+           ABI_MALLOC(gf2wfd, (npw_k_disk))
+           call kg_map(npw_k, desc_k%gvec, npw_k_disk, kg_k_disk, gf2wfd, nmiss)
+         end if
 
          do band=bstart, bstop
            ib = band - bstart + 1
