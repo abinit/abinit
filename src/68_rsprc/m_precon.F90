@@ -7,6 +7,10 @@
 !!
 !! SOURCE
 
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "abi_common.h"
 
 module m_precon
@@ -206,10 +210,10 @@ contains
         real(dp), intent(in), target :: ylm(:, :)
 
         ! *************************************************************************
-        if (this%precon_verbose>1) call wrtout(std_out, 'precon%init')
 
         this%iprcel = dtset%iprcel
         this%use_precon = .false.
+        this%use_kxc = .false.
 
         if (this%iprcel >= 200 .and. this%iprcel < 300) then
 
@@ -246,8 +250,8 @@ contains
             if (this%iprcel == 212) this%use_kxc = .true.
             if (this%iprcel == 202) this%use_kxc = .true.
 
-            ! this%use_ridgereg = .true. activates the use of an adapted linear solver.
-            this%use_ridgereg = .false.                 
+            ! this%use_ridgereg = .true. activates the use of an adapted linear solver. 
+            this%use_ridgereg = .false.
             
             ! this%use_indices_arrays = .true. indicates that we will use the arrays this%cg_indices and this%kg_indices.
             this%use_indices_arrays = .false.
@@ -385,7 +389,6 @@ contains
         real(dp), intent(in), target :: kxc(:, :)
 
         ! *************************************************************************
-        if (this%precon_verbose>1) call wrtout(std_out, 'precon%init_kxc')
         if (this%use_precon) then
             if (this%use_kxc) then
                 this%kxc => kxc
@@ -420,7 +423,6 @@ contains
         integer :: ispden
 
         ! *************************************************************************
-        if (this%precon_verbose>1) call wrtout(std_out, 'precon%update')
 
         if (this%use_precon) then
             
@@ -501,7 +503,6 @@ contains
         class(precon_object), intent(inout) :: this
         
         ! *************************************************************************
-        if (this%precon_verbose>1) call wrtout(std_out, 'precon%free')
         if (this%use_precon) then
 
             if (this%use_indices_arrays) then
@@ -663,8 +664,7 @@ contains
     !!                    On output : Potential/density in the Pauli basis.
     !!
     !! SOURCE
-    subroutine to_pauli(this, opt, v)
-        class(precon_object), intent(in) :: this
+    subroutine to_pauli(opt, v)
         !Arguments ------------------------------------
         real(dp), intent(inout) ::  v(:, :)
         integer :: opt
@@ -729,8 +729,7 @@ contains
     !!                    On output : Potential/density in the default Abinit spin-basis.
     !!
     !! SOURCE
-    subroutine from_pauli(this, opt, v)
-        class(precon_object), intent(in) :: this
+    subroutine from_pauli(opt, v)
         !Arguments ------------------------------------
         real(dp), intent(inout) ::  v(:, :)
         integer :: opt
@@ -908,7 +907,7 @@ contains
             ! Basis change to the default Abinit spin-basis for densities in case 
             ABI_MALLOC(vec_r_default, ((this%nfftprc), dtset%nspden))
             vec_r_default = vec_r
-            call from_pauli(this, 1, vec_r_default)
+            call from_pauli(1, vec_r_default)
             call dfpt_mkvxc(cplex, dtset%ixc ,this%kxc, mpi_enreg, this%nfftprc, this%ngfftprc, nhat1, nhat1dim, &
             &               nhat1gr, nhat1grdim, nkxc, non_magnetic_xc, dtset%nspden, n3xccc, option, &
             &               qphon, vec_r_default, this%rprimd, usexcnhat, Kxc_vec_r, dummy_xccc3d1)
@@ -929,7 +928,7 @@ contains
         ABI_FREE(nhat1)
         ABI_FREE(nhat1gr)
 
-        call to_pauli(this, 0, Kxc_vec_r)
+        call to_pauli(0, Kxc_vec_r)
 
     end subroutine apply_kxc
 
@@ -962,7 +961,6 @@ contains
         real(dp), allocatable :: Kxc_vec_r(:, :)
 
         ! *************************************************************************
-        if (this%precon_verbose>1) call wrtout(std_out, 'apply_kernel')
         
         ! RPA : LDOS/Kerker model - only vc
         if (.not. this%use_kxc) then
@@ -1296,7 +1294,6 @@ contains
         real(dp) :: delta_fermie
 
         ! *************************************************************************
-        if (this%precon_verbose>1) call wrtout(std_out, 'apply_chi0_dfermie')
 
         ! Precompute the dot product between the ldos and vec for each spin coordinate
         delta_fermie = zero
@@ -1317,20 +1314,18 @@ contains
     !!  Apply the ldos model chi0 operator to the vector vec_r (in place) in the Pauli basis.
     !!
     !! INPUTS
-    !!  mpi_enreg    = Information about MPI parallelization.
+    !!  dtset    = 
     !!
     !! SIDE EFFECTS
     !!  vec_r (nfftprc, nspden) = Vector (in direct space) to which the model chi0 operator is applied (in place).
     !!                            When nspden > 1 vec_r is in the Pauli basis.
     !!
     !! SOURCE
-    subroutine apply_chi0_ldos(this, dtset, mpi_enreg, vec_r)
+    subroutine apply_chi0_ldos(this, dtset, vec_r)
 
         !Arguments ------------------------------------
         class(precon_object), intent(in) :: this
         type(dataset_type),intent(in) :: dtset
-        !scalars
-        type(MPI_type), intent(in) :: mpi_enreg
         !arrays
         real(dp), intent(inout) :: vec_r(this%nfftprc, dtset%nspden)
        
@@ -1341,7 +1336,6 @@ contains
         real(dp), allocatable :: work_r(:, :)
         
         ! *************************************************************************
-        if (this%precon_verbose>1) call wrtout(std_out, 'apply_chi0_ldos')
        
         if (abs(this%tdos) > epsilon(this%tdos)) then   !Checking that tdos is not 0.
             ABI_MALLOC(work_r, (this%nfftprc, dtset%nspden))
@@ -1401,7 +1395,7 @@ contains
         !1) Apply vc (in the Pauli basis)
         call apply_vc(this, dtset, mpi_enreg, adjdielmat_rho_r)
         !2) Apply chi0_ldos (in the Pauli basis)
-        call apply_chi0_ldos(this, dtset, mpi_enreg, adjdielmat_rho_r)
+        call apply_chi0_ldos(this, dtset, adjdielmat_rho_r)
         !3) adjdielmat_rho_r = rho_r - vc * chi0 * rho_r = adjdielmat * rho_r
         adjdielmat_rho_r = rho_r - adjdielmat_rho_r
 
@@ -1440,7 +1434,7 @@ contains
 
         dielmat_v_r = v_r
         !1) Apply chi0_ldos (in the Pauli basis)
-        call apply_chi0_ldos(this, dtset, mpi_enreg, dielmat_v_r)
+        call apply_chi0_ldos(this, dtset, dielmat_v_r)
         !2) Apply vc (in the Pauli basis)
         call apply_vc(this, dtset, mpi_enreg, dielmat_v_r)
         !3) dielmat_v_r = v_r - vc * chi0 * v_r = dielmat * v_r
@@ -1705,7 +1699,6 @@ contains
        
         !Local variables-------------------------------
         !scalars
-        integer :: cplex, optin, optout, optgrid
         integer :: ndat, option, tim_fourwf
         integer :: i_cg(2), i_kg(2)
         integer :: n1, n2, n3, n4, n5, n6
@@ -1868,24 +1861,18 @@ contains
        
         !Local variables-------------------------------
         !scalars
-        integer :: cplex, optin, optout, optgrid
-        integer :: ndat, option, tim_fourwf, ier
+        integer :: ndat, option, tim_fourwf
         integer :: i_cg(4), i_kg(2)
         integer :: n1, n2, n3, n4, n5, n6
         integer :: istwf_k, npw_k
-        integer :: ispden
-        real(dp) :: norm_tot
         !arrays
         integer :: gbound(2*dtset%mgfft+8,2)
         integer, allocatable :: kg_k(:, :)
-        real(dp), allocatable :: rhoi_aug_r(:, :, :, :)
-        real(dp), allocatable :: rhoi_coarse_r(:, :)
         real(dp), allocatable :: psi_r_up(:, :, :, :), psi_r_down(:, :, :, :)
         !dummy arguments
         integer :: dummy_int
-        real(dp) :: dummy_fofgout(2, 0), dummy_fofrout(2, dtset%ngfft(4), dtset%ngfft(5), dtset%ngfft(6))
+        real(dp) :: dummy_fofgout(2, 0)
         real(dp) :: dummy_denpot(dtset%ngfft(4), dtset%ngfft(5), dtset%ngfft(6))
-        real(dp), allocatable :: dummy_rhog(:, :), dummy_rhogf(:, :)
         
         ! *************************************************************************
         
@@ -2008,7 +1995,7 @@ contains
         integer, allocatable :: needed_bands_bounds(:, :)
         integer, allocatable :: needed_bands_number(:)
         !for band parall
-        integer :: option_fourwf, ndat, blocksize, iblock, option, ibandblock1, ibandblock2, nbdblock, nfft_blocks
+        integer :: option_fourwf, ndat, blocksize, iblock, ibandblock1, ibandblock2, nbdblock, nfft_blocks
         integer :: n1, n2, n3, n4, n5, n6
         integer :: idat, idat_down
         integer :: i_cg_ibandblock1(2*dtset%nspinor), i_cg_ibandblock2(2*dtset%nspinor)
@@ -2478,7 +2465,7 @@ contains
         real(dp), intent(inout) :: delta_rho(this%nfftprc, dtset%nspden)
        
         !Local variables-------------------------------
-        integer :: iband, isppol, ispden, ikpt, i_eigen, nband_k, nbdblock, blocksize
+        integer :: iband, isppol, ispden, ikpt, i_eigen, nband_k
         integer :: ier
         integer :: maxocc
         integer :: iband1, iband2, i_kpt_sppol
@@ -2598,7 +2585,7 @@ contains
         end if
         ABI_FREE(delta_rho_g)
 
-        call to_pauli(this, 1, delta_rho)
+        call to_pauli(1, delta_rho)
 
     end subroutine compute_delta_rho_from_delta_occ_only
 
@@ -2631,7 +2618,7 @@ contains
         !Local variables-------------------------------
         !scalars
         integer :: n1, n2, n3, n4, n5, n6
-        integer :: nspin, i_rhoi, isppol, ikpt, i_kpt_sppol, nband_k, iband, iband1, iband2
+        integer :: isppol, ikpt, i_kpt_sppol, nband_k, iband, iband1, iband2
         integer :: i_psii, option, ndat, istwf_k, npw_k, idat, ispinor, icplex, tim_fourwf
         integer :: i_kg(2), i_cg_iband1(2*dtset%nspinor), i_cg_iband2(2*dtset%nspinor)
         real(dp) :: sum_rhoi_r
@@ -2644,7 +2631,6 @@ contains
         integer :: gbound_k(2*dtset%mgfft+8,2)
         real(dp), allocatable :: psii_aug(:, :, :, :)
         real(dp), allocatable :: rhoi_aug(:, :, :)
-        real(dp), allocatable :: delta_rho_coarse_r(:, :)
         !for band parall
         integer :: option_fourwf, blocksize, iblock, ibandblock1, ibandblock2, nbdblock, nfft_blocks
         integer :: i_cg_ibandblock1(2*dtset%nspinor), i_cg_ibandblock2(2*dtset%nspinor)
@@ -2909,11 +2895,11 @@ contains
                     &           gbound, gbound, istwf_k, this%kg(:, i_kg(1):i_kg(2)), this%kg(:, i_kg(1):i_kg(2)), &
                     &           dtset%mgfft, mpi_enreg, ndat, dtset%ngfft, npw_k, &
                     &           dummy_int, n4, n5, n6, option, tim_fourwf, dummy_real, dummy_real)
-                    write(6,*)'chi0diel compute_delta_wf - ok2 '; flush(6) !DEBUG
+                    !write(6,*)'chi0diel compute_delta_wf - ok2 '; flush(6) !DEBUG
                     ! result stored in delta_V_wf_i(:, i_cg(1):i_cg(2))
     
                     do jband = 1, nband_k
-                        write(6,*)'chi0diel compute_delta_wf - if yes '; flush(6) !DEBUG
+                        !write(6,*)'chi0diel compute_delta_wf - if yes '; flush(6) !DEBUG
                         j_eigen = get_eigen_index(dtset, jband, ikpt, isppol)  ! Index of (jband, ikpt, isppol) in eigen array.
 
                         if (abs(this%eigen(j_eigen) - this%fermie) > tol1) then ! TODO : condition as input
@@ -2934,17 +2920,17 @@ contains
                             ddiff = (fi - fj)/(this%eigen(i_eigen) - this%eigen(j_eigen))
                         end if
                         coeff = ddiff * fi/(fi**2+fj**2)  ! From DFTK
-                        write(6,*)'chi0diel compute_delta_wf - ok3 '; flush(6) !DEBUG
+                        !write(6,*)'chi0diel compute_delta_wf - ok3 '; flush(6) !DEBUG
 
                         ! Compute dot product between wavefunction (j) and delta_V
                         call dotprod_g(dotr, doti, istwf_k, npw_k, 2, this%cg(:, j_cg(1):j_cg(2)), delta_V_wf_i(:, 1:npw_k), 0, mpi_enreg%comm_spinorfft) ! TODO : check dotprof(psi_i, psi_i) = 1
-                        write(6,*)'chi0diel compute_delta_wf - ok4 '; flush(6) !DEBUG
+                        !write(6,*)'chi0diel compute_delta_wf - ok4 '; flush(6) !DEBUG
 
                         delta_wf(1, i_cg(1):i_cg(2)) = delta_wf(1, i_cg(1):i_cg(2)) + &
                         &                              coeff * ( dotr * this%cg(1, j_cg(1):j_cg(2)) - doti * this%cg(2, j_cg(1):j_cg(2)) )
                         delta_wf(2, i_cg(1):i_cg(2)) = delta_wf(2, i_cg(1):i_cg(2)) + &
                         &                              coeff * ( dotr * this%cg(2, j_cg(1):j_cg(2)) + doti * this%cg(1, j_cg(1):j_cg(2)) )
-                        write(6,*)'chi0diel compute_delta_wf - ok5 '; flush(6) !DEBUG
+                        !write(6,*)'chi0diel compute_delta_wf - ok5 '; flush(6) !DEBUG
                     
                     end do
                 end do
@@ -3006,12 +2992,11 @@ contains
         integer :: gbound(2*dtset%mgfft+8,2)
         integer, allocatable :: kg_k(:, :)
         real(dp), allocatable :: rho_aug_r_i(:, :, :), wf_aug_r_i(:, :, :, :), delta_wf_aug_r_i(:, :, :, :), delta_rho_aug_r(:, :, :, :)
-        real(dp), allocatable :: delta_rho_coarse_r(:, :)
         real(dp), allocatable :: delta_rho_g(:, :)
         !dummy arguments
         integer :: dummy_int
         real(dp) :: dummy_real
-        real(dp) ::  dummy_denpot(0, dtset%ngfft(5), dtset%ngfft(6)), dummy_fofgout(2, 0), dummy_fofrout(2, dtset%ngfft(4), dtset%ngfft(5), dtset%ngfft(6))
+        real(dp) ::  dummy_denpot(0, dtset%ngfft(5), dtset%ngfft(6)), dummy_fofgout(2, 0)
         
         ! *************************************************************************
         ABI_BUG("WIP - compute_delta_rho")
@@ -3151,7 +3136,7 @@ contains
         ABI_FREE(delta_rho_g)
         ! TODO : deal with symmetries when spin (nsppol in non coll)
 
-        call to_pauli(this, 1, delta_rho)
+        call to_pauli(1, delta_rho)
 
     end subroutine compute_delta_rho
 
@@ -3190,7 +3175,6 @@ contains
         real(dp), allocatable :: delta_occ(:)
         
         ! *************************************************************************
-        if (this%precon_verbose>1) call wrtout(std_out, 'apply_chi0_diag')
        
         ABI_MALLOC(delta_occ, (size(this%eigen)))
         call compute_delta_occ(this, dtset, mpi_enreg, vec_r, delta_occ)
@@ -3280,7 +3264,6 @@ contains
         integer :: ispden
         
         ! *************************************************************************
-        if (this%precon_verbose>1) call wrtout(std_out, 'apply_chi0')
        
         !Kerker with user_defined parameter dielng
         if (this%iprcel == 210) then
@@ -3313,7 +3296,7 @@ contains
         
         !LDOS model
         if (this%iprcel == 200 .or. this%iprcel == 212) then
-            call apply_chi0_ldos(this, dtset, mpi_enreg, vec_r)
+            call apply_chi0_ldos(this, dtset, vec_r)
         end if
 
     end subroutine apply_chi0
@@ -3351,7 +3334,6 @@ contains
         real(dp), allocatable :: chi0_kxc_rho_r(:, :)
         
         ! *************************************************************************
-        if (this%precon_verbose>1) call wrtout(std_out, 'apply_adjdielmat')
         if (this%use_precon) then
 
             if (this%iprcel == 299) then
@@ -3449,7 +3431,6 @@ contains
         real(dp), allocatable :: kxc_chi0_v_r(:, :), chi0_v_r(:, :)
         
         ! *************************************************************************
-        if (this%precon_verbose>1) call wrtout(std_out, 'apply_dielmat')
         if (this%use_precon) then
 
             if (this%iprcel == 299) then
@@ -3587,7 +3568,7 @@ contains
             end if
 
             !0.2) Convert the input to the Pauli basis
-            call to_pauli(this, optres, vrespc)
+            call to_pauli(optres, vrespc)
 
             !1) Right-hand side : rhs is vresid (flattened) in the direct/real space.
             ABI_MALLOC(rhs, (n))
@@ -3640,7 +3621,7 @@ contains
                 end if
             end do
             ! vrespc must be returned in the default Abinit spin-basis.
-            call from_pauli(this, optres, vrespc)
+            call from_pauli(optres, vrespc)
         
             ABI_FREE(rhs)
             ABI_FREE(est)
