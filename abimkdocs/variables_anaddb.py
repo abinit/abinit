@@ -66,6 +66,12 @@ Note that there is a similar input variable [[asr]] for ABINIT.
   * 1 or 2 --> the ASR for interatomic force constants is imposed by modifying
   the on-site interatomic force constants, in a symmetric way ( **asr** =2),
   or in the more general case, unconstrained way ( **asr** =1).
+  * 6 --> impose ASR and rotational invariance on the interatomic force constants. 
+  This requires the knowledge of the IFCS derivatives, estimated based on real-space
+  IFCs moments (requires [[anaddb:ifcflag]]=1) or reading them from flexoddb
+  (requires [[anaddb:flexoflag]]=1). Right now, scaling is not optimum with
+  the number of atoms, but it could be in principle improved using sparse matrix
+  algorithms. Additional information are provided at the end of this description.
 
 More detailed explanations: the total energy should be invariant under
 translation of the crystal as a whole. This would guarantee that the three
@@ -73,7 +79,10 @@ lowest phonon modes at Gamma have zero frequency (Acoustic Sum Rule - ASR).
 Unfortunately, the way the DDB is generated (presence of a discrete grid of
 points for the evaluation of the exchange-correlation potential and energy)
 slightly breaks the translational invariance. Well, in some pathological
-cases, the breaking can be rather important.
+cases, the breaking can be rather important. Meanwhile, rotational invariance,
+i.e. the total energy should be invariant under rotation and leaves no torque
+on the atoms. Its imposition has different impacts depending on the dimensionality
+of the problem, see [[anaddb:sys_dim]]. 
 
 Two quantities are affected: the interatomic forces (or dynamical matrices),
 and the effective charges. The ASR for the effective charges is called the
@@ -114,6 +123,17 @@ generated from IFCs coming from dynamical matrices none of which are Gamma,
 the breaking of the ASR is rather severe. In order to clear the situation, one
 should use a diagonalisation routine for non-hermitian matrices.
 ).
+
+For rotational infariance [[anaddb:asr]]==6, invariance is imposed on the zone-center
+IFCs and/or their derivatives thanks to a Moore-Penrose pseudo-inverse,
+correcting on-site and first-neigbhors interactions. In principle, rotational 
+invariance also propagates to the second derivatives of the IFCs, but this requires a
+rotational-invariant long-range electrostatics treatments of the IFCs, which is now
+missing both in 3D or in low-dimmensional materials. It is therefore desactivated. 
+As an extension, be very prudent when IFCs moments are used in combination to the
+long-range electrostatic treatments of IFCs ([[anaddb:dipdip]]): they have been 
+tested on a limited amount of systems.
+
 """,
     ),
 
@@ -263,6 +283,53 @@ Frequency-dependent dielectric tensor flag.
     ),
 
     Variable(
+        abivarname="dielt_env@anaddb",
+        varset="anaddb",
+        vartype="real",
+        topics=['PhononBands_basic'],
+        dimensions="scalar",
+        defaultval=1,
+        mnemonics="DIELecTric constant ENVironment",
+        added_in_version="v10",
+        text=r"""
+  Dielectric constant of embedding dielectric materials when considering a bi-dimensional material.
+  Dipoles and dynamical quadrupoles generate an electrostatic potential that is reflected at the
+  dielectric interfaces with the environment (in ab initio calculations, typically vacuum). The sign
+  and amplitude of the reflection entirely depends on the dielectric mismatch. This variable fixes
+  such dielectric environment constant, allowing to compute the phonon band structure of a material
+  in different dielectric environment. The dielectric constant can be positive or negative (corresponding
+  to a metal where the plasmon frequency has been tuned by doping).
+
+""",
+    ),
+        Variable(
+        abivarname="dielt_thick@anaddb",
+        varset="anaddb",
+        vartype="real",
+        topics=['PhononBands_basic'],
+        dimensions="scalar",
+        defaultval=2,
+        mnemonics="dielectric thickness of 2D materials",
+        added_in_version="v10",
+        text=r"""
+  In low-dimensional materials, the electronic density doesn't extend infinitively in space, and it is 
+  necessary to define a dielectric thickness when considering electrostatics in such a system (simple)
+  or several ones (more advanced electrostatic model) to add the potential variation along the z direction.
+  The embedding dielectric constant is controlled by [[anaddb:dielt_env]]. Right now two cases are possible: 
+
+  * If only the first value of [[anaddb:dielt_thick]] is non-zero, consider one dielectric constant for
+  the whole 2D (dielectric slab). Both in-plane and out-of-plane dipole responses are estimated using this 
+  thickness. The dielectric constants of the 2D are then computed based on DFPT dielectric tensors with 
+  vacuum considering capacitors in parallel or in series, respectively.
+
+  * If two values are input, the first one corresponds to the total (outer) dielectric thickness 
+  (beyond that value, the dielectric constant is fixed by [[anaddb:dielt_env]]), while the second gives
+   the inner dielectric thickness with the dielectric constant fixed to 1. The outer dielectric constant
+   is then computed based on DFPT dielectric tensors.
+""",
+    ),
+
+    Variable(
         abivarname="dipdip@anaddb",
         varset="anaddb",
         vartype="integer",
@@ -293,6 +360,10 @@ Frequency-dependent dielectric tensor flag.
     [[anaddb:dipquad]] or [[anaddb:quadquad]] are set to 1.
     It is recommended to check that calculations with dipdip = 1 and -1 (both with dipquad = 0 and quadquad = 0)
     lead to identical results. Otherwise increase the resolution of the q-point grid and repeat this test.
+
+    Note that when [[anaddb:sys_dim]] =2-4 (2D materials), a specific correction is applied to account to
+    the reduction of dimensionality and the appearance of potential reflections at the dielectric interfaces.
+    See [[anaddb:dielt_thick]] and [[anaddb:dielt_env]] for more information.
 """,
     ),
 
@@ -2343,6 +2414,44 @@ and their opposite do not reflect the symmetries of the Bravais lattice
 be treated with the proper setting of the [[anaddb:brav]] variable), and the
 interpolation procedure based on interatomic force constant is used: there are
 some slight symmetry breaking effects. The latter can be bypassed by this additional symmetrization.
+""",
+    ),
+
+    Variable(
+        abivarname="sys_dim@anaddb",
+        varset="anaddb",
+        vartype="integer",
+        topics=['PhononBands_basic'],
+        dimensions="scalar",
+        defaultval=1,
+        mnemonics="SYStem DIMensionality",
+        added_in_version="v10",
+        text=r"""
+  Control the dimensionaility of the problem when rotational invariance is imposed on the interatomic force constants
+  [[anaddb:asr]]==6 AND/OR when long-range electrostatics IFCs of 2D materials are considered (in this case,
+  only available with [[anaddb:sys_dim]]<5, but both for [[anaddb:dipdip]] and [[anaddb:quadquad]]). Currently, only
+  possible to consider [[anaddb:dipquad]] and [[anaddb:quadquad]] interactions at the same time.
+
+  For rotational invariance: along periodic lattices, rotational invariance imposes conditions on the IFCs derivative,
+  while along non-periodic ones, only the zone-center IFCs are impacted. The code doesn't automatically detect it based
+  on the input structure and this variable allows to identify the periodic directions. Similar principles for long-range
+  electrotatics.
+
+  * 1 --> consider a 3D problem (IFCs derivatives used everywhere).
+
+  * 2 --> consider a 2D problem with non-periodic lattice along x
+
+  * 3 --> consider a 2D problem with non-periodic lattice along y
+
+  * 4 --> consider a 2D problem with non-periodic lattice along z
+
+  * 5 --> consider a 1D problem with periodic lattice along x
+
+  * 6 --> consider a 2D problem with periodic lattice along y
+
+  * 7 --> consider a 2D problem with periodic lattice along z
+
+  * 8 --> consider a 0D problem (molecule)
 """,
     ),
 
