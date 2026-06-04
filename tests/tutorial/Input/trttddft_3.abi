@@ -87,7 +87,7 @@ prtebands 0       # Do not print ebands
 #%%   trttddft_3o_DS2_TDENER, tolnlines=  0, tolabs=  0.0, tolrel=  0.0, fld_options= -medium;
 #%%   trttddft_3o_DS3_TDENER, tolnlines=  0, tolabs=  0.0, tolrel=  0.0, fld_options= -medium;
 #%% [paral_info]
-#%% max_nprocs = 7
+#%% max_nprocs = 8
 #%% [extra_info]
 #%% authors = F. Brieuc
 #%% keywords = RTTDDFT, PAW
