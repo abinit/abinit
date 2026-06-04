@@ -493,13 +493,6 @@ force_plsmf:   0.00000000E+00
 
  Only q-points in the IBZ_k will be computed.
  GWPT frequency convolution is evaluated at E_nk.
-
- Sigma^x_nk and Sigma^c_nk(E0) in eV:
-Band     E0    <VxcDFT>   SigX SigC(E0)  for k-point:[ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-    6   4.490 -19.984 -25.413   4.784
-    7   4.490 -19.984 -25.413   4.792
-    8   4.490 -20.023 -25.413   4.786
-    9   8.969 -13.327  -8.607  -2.649
  Total number of failures in Sternheimer solvers at +q: 50
  Total number of failures in Sternheimer solvers at -q: 50
 
