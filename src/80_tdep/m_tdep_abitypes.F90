@@ -141,8 +141,10 @@ contains
   end if
 
   call ifc%init(Crystal,DDB,Lattice%brav,asr,symdynmat,dipdip,&
+!LOTO Keep the correct definition of the Lattice
+!LOTO  call ifc_init(Ifc,Crystal,DDB,1,asr,symdynmat,dipdip,&
   rfmeth,ngqpt_in,nqshft,q1shft,Invar%dielt,Invar%zeff,qdrp_cart,nsphere,rifcsph,&
-  prtsrlr,enunit,XMPI_WORLD, prtout=.false.)
+  prtsrlr,enunit,1,XMPI_WORLD, prtout=.false.)
 
   ABI_FREE(q1shft)
   ABI_FREE(qdrp_cart)
