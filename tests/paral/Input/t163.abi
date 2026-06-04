@@ -4,8 +4,9 @@
 # Dataset 1: ground state calculation to get the density
 # Dataset 2: Direct diagonalization to produce the WFK file with empty states.
 # Dataset 3: one-shot G0W0 calculation in real-space and imaginary-time.
+# Dataset 4: same as dataset 3 but with convolution algorithms.
 
-ndtset      3
+ndtset      4
 timopt 1
 nsppol      2 spinmagntarget 0.0
 iomode 1
@@ -56,7 +57,7 @@ gwr_boxcutmin3  1.1  # This should be subject to convergence studies
 #gw_icutcoul3   16   # Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
 #gw_icutcoul3   0     # Spherical cutoff
 gwr_ucsc_batch3 4 2
-gwr_np_kgts 1 2 1 2
+gwr_np_kgts3 1 2 1 2
 
 nband3      30       # Bands to be used in the screening calculation
 ecuteps3    4        # Cut-off energy of the planewave set to represent the dielectric matrix.
@@ -79,6 +80,52 @@ bdgw3       # calculate GW corrections for bands from 4 to 5
 # Spectral function (very coarse grid to reduce txt file size)
 nfreqsp3 50
 freqspmax3 5 eV
+
+################################
+# Dataset 4: G0W0 with GWR code
+################################
+optdriver4  6        # Activate GWR code
+gwr_task4 "G0W0"     # One-shot calculation
+getden4 1
+getwfk4 2            # WFK file with empty states
+
+prtvol4 1            # Write additional stuff to abo file for testing purposes.
+                     # DO NOT USE this option for production runs!
+prtsuscep4 1         # Write TCHI file.
+                     # DO NOT USE this option for production runs unless you really need a TCHI file.
+
+gwr_ntau4   6        # Number of imaginary-time points
+gwr_chi_algo4 2      # Use supercell for chi
+gwr_sigma_algo4 3    # Use supercell for Sigma
+
+gwr_boxcutmin4  1.1  # This should be subject to convergence studies
+#mixprec4    1       # Mixed precision FFT.
+#gw_icutcoul4   16   # Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+#gw_icutcoul4   0     # Spherical cutoff
+gwr_ucsc_batch4 4 2
+gwr_np_kgts4 1 2 1 2
+
+nband4      30       # Bands to be used in the screening calculation
+ecuteps4    4        # Cut-off energy of the planewave set to represent the dielectric matrix.
+                     # It is important to adjust this parameter.
+ecutsigx4    4.0     # Dimension of the G sum in Sigma_x.
+                     # ecutsigx = ecut is usually a wise choice
+                     # (the dimension in Sigma_c is controlled by ecuteps)
+
+nkptgw4      2       # number of k-point where to calculate the GW correction
+kptgw4               # k-points in reduced coordinates
+   0.0    0.0    0.0
+   0.5    0.0    0.0
+
+bdgw4       # calculate GW corrections for bands from 4 to 5
+   4  5
+   4  5
+   4  5
+   4  5
+
+# Spectral function (very coarse grid to reduce txt file size)
+nfreqsp4 50
+freqspmax4 5 eV
 
 # Definition of the k-point grid
 # IMPORTANT: GWR requires Gamma-centered k-meshes
@@ -121,6 +168,7 @@ pseudos "Psdj_nc_sr_04_pbe_std_psp8/Si.psp8"
 #%% [setup]
 #%% executable = abinit
 #%% exclude_builders = haicgu_*
+#%% need_cpp_vars = HAVE_LINALG_SCALAPACK
 #%% [NCPU_4]
 #%% files_to_test =
 #%%   t163_MPI4.abo, tolnlines = 25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
