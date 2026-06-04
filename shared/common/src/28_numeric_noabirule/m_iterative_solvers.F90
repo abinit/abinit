@@ -368,8 +368,8 @@ module m_iterative_solvers
         del = 0
         its = gmres_maxiter  ! No restart
         info = 0
-        if (xmpi_comm_rank(xmpi_world) == 0 .and. verbose) then
-            info = 1        ! Print residuals only on master
+        if (verbose) then
+            info = 1
         end if
         call gmresm(m, n, est, rhs, matvec, psolve, dotprd, h, v, res, del, its, info)
         ABI_FREE(h)
@@ -381,7 +381,10 @@ module m_iterative_solvers
             integer, intent(in) :: n_
             real(dp), intent(inout) :: x(n_)
             ! ***********************
-            x = x
+            ! We do nothing here but don't wan't to be flashed by abirule.
+            if (.false.) then
+                x = zero
+            end if
         end subroutine psolve
         ! Dot product
         function dotprd(n_, a, b) result(c)
