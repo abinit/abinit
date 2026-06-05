@@ -2514,21 +2514,21 @@ subroutine gwr_build_green(gwr, free_ugb)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, my_iki, spin, ik_ibz, band, itau, ipm, il_b, npwsp, isgn, my_it, nb_occ, nbsum ! ig_glob, ig_loc, jg_loc,
+ integer :: my_is, my_iki, spin, ik_ibz, band, itau, ipm, il_b, npwsp, isgn, my_it, nbsum !, ig_glob, ig_loc, jg_loc, nb_occ
  integer :: ii, icomp
  real(dp), parameter :: eratio = 0.95_dp
- real(dp) :: f_nk, eig_nk, cpu, wall, gflops, cpu_k, wall_k, gflops_k
+ real(dp) :: eig_nk, cpu, wall, gflops, cpu_k, wall_k, gflops_k !, f_nk
  logical :: print_time, compute_svd
  character(len=500) :: msg
  real(dp) :: gt_rfact, s2_sum, s2_sum_all
  type(__slkmat_t), target :: work_gb(gwr%nspinor), green, u_mat, vt_mat
  real(gwp),allocatable :: s_vals(:)
 !arrays
- integer :: mask_kibz(gwr%nkibz), units(2), ija(2), ijb(2)
+ integer :: mask_kibz(gwr%nkibz), units(2) !, ija(2), ijb(2)
  !integer :: occ_idx(gwr%ks_ebands%nkpt, gwr%ks_ebands%nsppol)
  real(dp) :: tsec(2) , kk_ibz(3) !, kg(3)
  real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:)
- integer :: i, j, iab, iiab, jiab, ispinor
+ integer :: iab, iiab, jiab, ispinor !,i, j
  integer, parameter :: spinor_idxs(2, 4) = RESHAPE([1, 1, 2, 2, 1, 2, 2, 1], [2, 4])
 ! *************************************************************************
 
@@ -4263,7 +4263,7 @@ subroutine desc_init(desc, kk, istwfk, ecut, gwr, kin_sorted, rot)
 
 !Local variables-------------------------------
  integer :: ig, ig1, ig2, itim, isym, istep_forward, istep_backward, grot(3)
- character(len=256) :: msg
+!  character(len=256) :: msg
  logical :: found, rot__
  real(dp),allocatable :: gnorm(:)
  integer,allocatable :: igvec(:)
@@ -5544,7 +5544,7 @@ subroutine gwr_print_trace(gwr, units, what)
  integer,parameter :: master = 0
  integer :: my_is, spin, my_it, itau, iq_ibz, ierr, my_iqi, my_iki, ik_ibz, ipm, iab
  character(len=5000) :: comment
- complex(dp),allocatable :: ctrace3(:,:,:), ctrace4(:,:,:,:), ctrace5(:,:,:,:,:)
+ complex(dp),allocatable :: ctrace3(:,:,:), ctrace5(:,:,:,:,:) !, ctrace4(:,:,:,:)
  type(__slkmat_t),contiguous, pointer :: mats(:,:,:)
 ! *************************************************************************
 
@@ -6200,7 +6200,7 @@ end if
                cpsi_r = conjg(uc_psir_bk((iiab-1)*gwr%g_nfft + ir, band1, ikcalc))
                ucpsi_r = uc_psir_bk((jiab-1)*gwr%g_nfft+1:jiab*gwr%g_nfft, band2, ikcalc)
                do ipm=1,2
-                 call sc_sum(gwr%ngkpt, gwr%g_ngfft, 1, scph1d_kcalc(:,:,ikcalc), k_is_gamma, &
+                 call sc_sum(gwr%ngkpt, gwr%g_ngfft, scph1d_kcalc(:,:,ikcalc), k_is_gamma, &
                              cpsi_r, gt_scbox(:,idat,ipm), ucpsi_r, sigc_pm(ipm))
                end do
                if (gwr%sig_diago) then
@@ -7862,7 +7862,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
  !integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
  integer :: nkpt_summed, use_umklp, band1, band2, band1_start, band1_stop, band1_max
- integer :: ib, il_b2, nb, block_size, ii, mband, block_counter, idir, iab
+ integer :: ib, il_b2, nb, block_size, ii, mband, block_counter, idir !, iab
  integer :: istwf_ki, npw_ki, istwf_kf, nI, nJ, nomega, io, iq, nq, dim_rtwg !ig,
  integer :: npwe, u_nfft, u_mgfft, u_mpw
  logical :: isirr_k, use_tr, is_metallic, print_time, use_ddk
@@ -7880,7 +7880,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer :: gmax(3), u_ngfft(18), work_ngfft(18), units(2) !, spinor_pad(2,4), spad1, spad2 !, ! g0(3),
  integer,contiguous, pointer :: kg_ki(:,:)
  integer,allocatable :: gvec_q0(:,:), gbound_q0(:,:), u_gbound(:,:)
- real(dp) :: kk_ibz(3), kk_bz(3), tsec(2), rtmp(2)
+ real(dp) :: kk_ibz(3), kk_bz(3), tsec(2) !, rtmp(2)
  real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:), ks_eig(:,:,:)
  real(dp),allocatable :: work(:,:,:,:), qdirs(:,:)
  logical :: gradk_not_done(gwr%nkibz)
@@ -9006,10 +9006,10 @@ end subroutine get_1d_sc_phases
 !!
 !! SOURCE
 
-subroutine sc_sum(sc_shape, uc_ngfft, nspinor, ph1d, k_is_gamma, alpha, sc_data, uc_psi, cout)
+subroutine sc_sum(sc_shape, uc_ngfft, ph1d, k_is_gamma, alpha, sc_data, uc_psi, cout)
 
 !Arguments ------------------------------------
- integer,intent(in) :: sc_shape(3), uc_ngfft(18), nspinor
+ integer,intent(in) :: sc_shape(3), uc_ngfft(18)
  complex(gwp),intent(in) :: ph1d(maxval(sc_shape), 3)
  logical,intent(in) :: k_is_gamma
  complex(gwp),target,intent(in) :: alpha, uc_psi(uc_ngfft(1)*uc_ngfft(2)*uc_ngfft(3))
@@ -9018,7 +9018,7 @@ subroutine sc_sum(sc_shape, uc_ngfft, nspinor, ph1d, k_is_gamma, alpha, sc_data,
  complex(gwp),intent(out) :: cout
 
 !Local variables-------------------------------
- integer :: il1, il2, il3, spinor, uc_n1, uc_n2, uc_n3, ix, iy, iz !, idat
+ integer :: il1, il2, il3, uc_n1, uc_n2, uc_n3, ix, iy, iz !, idat
  complex(gwp) :: cphase, phl32, phl3
  complex(gwp),contiguous,pointer :: uc_psi_ptr(:,:,:), sc_data_ptr(:,:,:,:,:,:)
 ! *************************************************************************
@@ -9029,7 +9029,6 @@ subroutine sc_sum(sc_shape, uc_ngfft, nspinor, ph1d, k_is_gamma, alpha, sc_data,
  call c_f_pointer(c_loc(sc_data), sc_data_ptr, &
                   shape=[uc_n1, sc_shape(1), uc_n2, sc_shape(2), uc_n3, sc_shape(3)])
 
-!  ABI_CHECK(nspinor == 1, "nspinor 2 not coded")
  cout = zero
 
  if (k_is_gamma) then

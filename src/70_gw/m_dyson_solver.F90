@@ -155,7 +155,6 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
 !arrays
  real(dp),intent(in) :: qp_ene(Sr%nbnds,Sr%nkibz,Sr%nsppol)
  complex(dp),intent(in) :: sigcme(nomega_sigc,minbnd:maxbnd,minbnd:maxbnd,Sigp%nsppol*Sigp%nsig_ab)
- complex(dp) :: sigcme_tmp(nomega_sigc)
 
 !Local variables-------------------------------
 !scalars

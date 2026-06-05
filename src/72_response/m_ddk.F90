@@ -1028,9 +1028,9 @@ subroutine ddkop_get_ihr_comm(self, cryst, eig0mk, istwf_k, npw_k, nspinor, brag
  integer :: idir, iab
  real(dp) :: doti
 !arrays
- integer :: spinor_pad(2,4), spad1, spad2, rtmp(2)
+ integer :: spinor_pad(2,4), spad1, spad2 !, rtmp(2)
  real(dp) :: dotarr(2)
- real(dp), allocatable :: cg2_dp(:,:),  ddk_ug1(:,:,:)
+!  real(dp), allocatable :: cg2_dp(:,:),  ddk_ug1(:,:,:)
 !************************************************************************
 
  spinor_pad = reshape([0, 0, npw_k, npw_k, 0, npw_k, npw_k, 0], [2, 4])

@@ -170,7 +170,7 @@ contains
 
 subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_epsG0,&
                   Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,&
-                  nfftot_gw,ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q,chi0_sumrule,Wfd,Wfdf,wan,mpi_enreg)
+                  nfftot_gw,ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q,chi0_sumrule,Wfd,Wfdf,wan) !,mpi_enreg
 
 !Arguments ------------------------------------
 !scalars
@@ -186,7 +186,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  type(Pseudopotential_type),intent(in) :: Psps
  type(Pawang_type),intent(in) :: Pawang
  type(wfdgw_t),target,intent(inout) :: Wfd,Wfdf
- type(MPI_type),intent(in) :: mpi_enreg
+!  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ktabr(nfftot_gw,Kmesh%nbz),ktabrf(nfftf_tot*Dtset%pawcross,Kmesh%nbz)
  integer,intent(in) :: ngfft_gw(18),ngfftf(18)
