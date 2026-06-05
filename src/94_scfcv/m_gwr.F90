@@ -2517,7 +2517,7 @@ subroutine gwr_build_green(gwr, free_ugb)
  integer :: my_is, my_iki, spin, ik_ibz, band, itau, ipm, il_b, npwsp, isgn, my_it, nbsum !, ig_glob, ig_loc, jg_loc, nb_occ
  integer :: ii, icomp
  real(dp), parameter :: eratio = 0.95_dp
- real(dp) :: eig_nk, cpu, wall, gflops, cpu_k, wall_k, gflops_k !, f_nk
+ real(dp) :: eig_nk, cpu, wall, gflops, cpu_k, wall_k, gflops_k, f_nk
  logical :: print_time, compute_svd
  character(len=500) :: msg
  real(dp) :: gt_rfact, s2_sum, s2_sum_all
@@ -2597,7 +2597,8 @@ subroutine gwr_build_green(gwr, free_ugb)
          ! Multiply my columns by exponentials in imaginary time.
                   !  work_gb%buffer_cplx = ugb_ks%buffer_cplx
 
-         !$OMP PARALLEL DO PRIVATE(band, f_nk, eig_nk, gt_rfact)
+         !!!$OMP PARALLEL DO PRIVATE(band, f_nk, eig_nk, gt_rfact)
+         !$OMP PARALLEL DO PRIVATE(band, eig_nk, gt_rfact)
            do il_b = 1, work_gb(ispinor)%size_local(2)
              band = work_gb(ispinor)%loc2gcol(il_b)
                   ! f_nk = qp_occ(band, ik_ibz, spin)
@@ -2973,10 +2974,10 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list)
  tnon = gwr%cryst%tnons(:, isym_k)
  do ii=1,num_pm
    ipm = ipm_list__(ii)
-   associate (gk_i => gwr%gt_kibz(ipm, ik_ibz, itau, spin, :), gk_f => gt_pm(ipm, :))
    do iab=1,gwr%nsig_ab
-     call gk_i(iab)%copy(gk_f(iab))
+     call gwr%gt_kibz(ipm, ik_ibz, itau, spin, iab)%copy(gt_pm(ipm, iab))
    end do
+   associate (gk_i => gwr%gt_kibz(ipm, ik_ibz, itau, spin, :), gk_f => gt_pm(ipm, :))
    !!$OMP PARALLEL DO PRIVATE(ig1, g2, ph2, ig1, g2, ph1)
    do il_g2=1, gk_f(1)%size_local(2)
      ig2 = mod(gk_f(1)%loc2gcol(il_g2) - 1, desc_kbz%npw) + 1
