@@ -2918,9 +2918,9 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
    case(-4)
      use_soc=.FALSE.; use_sd=.TRUE.; use_fc=.TRUE.
    case(-3)
-     use_soc=.FALSE.; use_sd=.FALSE.; use_fc=.TRUE.
+     use_soc=.TRUE.; use_sd=.FALSE.; use_fc=.TRUE.
    case(-2)
-     use_soc=.FALSE.; use_sd=.TRUE.; use_fc=.FALSE.
+     use_soc=.TRUE.; use_sd=.TRUE.; use_fc=.FALSE.
    case(-1)
      use_soc=.TRUE.; use_sd=.FALSE.; use_fc=.FALSE.
    case(1)
