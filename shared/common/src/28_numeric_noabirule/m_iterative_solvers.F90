@@ -21,7 +21,8 @@ module m_iterative_solvers
     use m_errors
     use defs_basis
     use m_xmpi
-    !use m_specialmsg
+    use m_abicore
+    use m_specialmsg
 
     implicit none
     private
@@ -276,7 +277,7 @@ module m_iterative_solvers
         real(dp), intent(in) :: rhs(:)
         logical, intent(in) :: verbose
         real(dp),intent(inout) :: est(:)
-        !character(len=500) :: msg
+        character(len=500) :: msg
         interface
             subroutine matvec(n_, x, y)
                 integer, intent(in) :: n_
@@ -314,8 +315,8 @@ module m_iterative_solvers
 
             beta = rsnew / rsold
             p = r + beta * p
-            !write(msg, *)'cg: it=', iter,' res=', sqrt(rsnew)
-            !if (verbose) call wrtout(std_out, msg)
+            write(msg, *)'cg: it=', iter,' res=', sqrt(rsnew)
+            if (verbose) call wrtout(std_out, msg)
             !if (verbose) write(std_out,*) 'cg: it=', iter,' res=', sqrt(rsnew)
             rsold = rsnew
         end do
@@ -382,9 +383,9 @@ module m_iterative_solvers
             real(dp), intent(inout) :: x(n_)
             ! ***********************
             ! We do nothing here but don't wan't to be flashed by abirule.
-            !if (.false.) then
-            !    x = zero
-            !end if
+            if (.false.) then
+                x = zero
+            end if
         end subroutine psolve
         ! Dot product
         function dotprd(n_, a, b) result(c)
@@ -491,7 +492,7 @@ module m_iterative_solvers
    integer, save :: j
    logical :: done
    integer :: ierr  
-   !character(len=500) :: msg
+   character(len=500) :: msg
 
 
    if(info==2) then
@@ -546,8 +547,8 @@ module m_iterative_solvers
       ! MPI aware: broadcast the 'res' value of master to avoid desynchronization.
       call xmpi_bcast(res, 0, xmpi_world, ierr)
       !if(info==1) print*, 'gmresm: it=', its,' res=', real(res)
-      !write(msg, *)'gmresm: it=', its,' res=', real(res)
-      !if(info==1) call wrtout(std_out, msg)
+      write(msg, *)'gmresm: it=', its,' res=', real(res)
+      if(info==1) call wrtout(std_out, msg)
 
       done = (res<=tol .or. its==imx .or. res>res_)
       if(done .or. j==m) then
@@ -560,7 +561,7 @@ module m_iterative_solvers
         if(res<=tol) info = 0
          if(done)     return
         !if(del>0d0)  print*, 'gmres: warning! restart affects hookstep'
-        !if(del>0d0) call wrtout(std_out, 'gmres: warning! restart affects hookstep')
+        if(del>0d0) call wrtout(std_out, 'gmres: warning! restart affects hookstep')
          goto 1       ! (j==m) restart
       end if
       res_ = res*stgn
