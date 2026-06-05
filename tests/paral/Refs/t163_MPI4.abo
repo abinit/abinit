@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu  4 Jun 2026.
-- ( at 16h00 )
+- ( at 20h10 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr_soc_dim/tests/TestBot_MPI4/paral_t163_MPI4/t163.abi
 - output file    -> t163_MPI4.abo
@@ -231,10 +231,6 @@ P           mkmem           2
         optdriver2          6
         optdriver3          6
         optdriver4          6
-        prtsuscep1          0
-        prtsuscep2          0
-        prtsuscep3          1
-        prtsuscep4          1
            prtvol1          0
            prtvol2          0
            prtvol3          1
@@ -1660,10 +1656,6 @@ P           mkmem           2
         optdriver2          6
         optdriver3          6
         optdriver4          6
-        prtsuscep1          0
-        prtsuscep2          0
-        prtsuscep3          1
-        prtsuscep4          1
            prtvol1          0
            prtvol2          0
            prtvol3          1
@@ -1746,54 +1738,52 @@ P           mkmem           2
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         13.4        0.22      0.004
-- Total wall clock time (s,m,h):         13.8        0.23      0.004
+- Total cpu        time (s,m,h):         12.3        0.20      0.003
+- Total wall clock time (s,m,h):         12.6        0.21      0.003
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0
 -
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            3.4, wall_time =            3.5
+- cpu_time =            3.1, wall_time =            3.2
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- gwr_build_sigmac                          1.212   9.0         1.213   8.8              2      -1.00        1.00       1.00
-- gwr_build_tchi                            0.917   6.8         0.925   6.7              2      -1.00        0.99       0.99
-- get_dtsets_pspheads                       0.231   1.7         0.231   1.7              1      -1.00        1.00       1.00
-- pspini                                    0.188   1.4         0.188   1.4              4      -1.00        1.00       1.00
-- gwr_init                                  0.167   1.2         0.169   1.2              4      -1.00        0.99       0.99
-- timing timab                              0.116   0.9         0.116   0.8             12      -1.00        1.00       1.00
-- gwr_build_wc                              0.108   0.8         0.115   0.8              2      -1.00        0.93       0.93
-- others (210)                              0.384   2.9         0.459   3.3             -1      -1.00        0.84       0.84
+- gwr_build_sigmac                          1.115   9.1         1.117   8.9              2      -1.00        1.00       1.00
+- gwr_build_tchi                            0.822   6.7         0.823   6.6              2      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.217   1.8         0.217   1.7              1      -1.00        1.00       1.00
+- pspini                                    0.188   1.5         0.188   1.5              4      -1.00        1.00       1.00
+- gwr_init                                  0.166   1.4         0.168   1.3              4      -1.00        0.99       0.99
+- timing timab                              0.116   0.9         0.116   0.9             12      -1.00        1.00       1.00
+- others (211)                              0.423   3.5         0.498   4.0             -1      -1.00        0.85       0.85
 -<END_TIMER>
 -
-- subtotal                                  3.322  24.7         3.417  24.8                                  0.97       0.97
+- subtotal                                  3.047  24.9         3.126  24.9                                  0.97       0.97
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          13.4, wall_time =          13.8
+- cpu_time =          12.3, wall_time =          12.6
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- gwr_build_sigmac                          4.761  35.4         4.763  34.6              8      -1.00        1.00       1.00
-- gwr_build_tchi                            3.682  27.4         3.700  26.9              8      -1.00        1.00       1.00
-- get_dtsets_pspheads                       0.904   6.7         0.904   6.6              4      -1.00        1.00       1.00
-- pspini                                    0.755   5.6         0.756   5.5             16      -1.00        1.00       1.00
-- gwr_init                                  0.591   4.4         0.593   4.3             16      -1.00        1.00       1.00
-- timing timab                              0.466   3.5         0.466   3.4             48      -1.00        1.00       1.00
-- gwr_build_wc                              0.443   3.3         0.461   3.3              8      -1.00        0.96       0.96
-- abinit(chkinp,chkvars)                    0.321   2.4         0.322   2.3              4      -1.00        1.00       1.00
-- gwr_build_head_wings                      0.166   1.2         0.166   1.2              8      -1.00        1.00       1.00
-- ewald                                     0.147   1.1         0.147   1.1             16      -1.00        1.00       1.00
-- fourwf%(pot)                              0.132   1.0         0.430   3.1           1588      -1.00        0.31       0.31
-- abinit(outvars)                           0.090   0.7         0.090   0.7              4      -1.00        1.00       1.00
-- gwr_build_green                           0.084   0.6         0.084   0.6              8      -1.00        1.00       1.00
-- others (204)                              0.452   3.4         0.452   3.3             -1      -1.00        1.00       1.00
+- gwr_build_sigmac                          4.379  35.7         4.382  34.9              8      -1.00        1.00       1.00
+- gwr_build_tchi                            3.293  26.9         3.293  26.2              8      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.891   7.3         0.891   7.1              4      -1.00        1.00       1.00
+- pspini                                    0.756   6.2         0.756   6.0             16      -1.00        1.00       1.00
+- gwr_init                                  0.589   4.8         0.592   4.7             16      -1.00        1.00       1.00
+- timing timab                              0.464   3.8         0.464   3.7             48      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    0.235   1.9         0.235   1.9              4      -1.00        1.00       1.00
+- gwr_build_head_wings                      0.221   1.8         0.221   1.8              8      -1.00        1.00       1.00
+- gwr_build_wc                              0.153   1.3         0.153   1.2              8      -1.00        1.00       1.00
+- ewald                                     0.148   1.2         0.148   1.2             16      -1.00        1.00       1.00
+- fourwf%(pot)                              0.132   1.1         0.426   3.4           1588      -1.00        0.31       0.31
+- abinit(outvars)                           0.087   0.7         0.087   0.7              4      -1.00        1.00       1.00
+- others (205)                              0.495   4.0         0.495   3.9             -1      -1.00        1.00       1.00
 -<END_TIMER>
 
-- subtotal                                 12.994  96.7        13.335  96.8                                  0.97       0.97
+- subtotal                                 11.843  96.7        12.143  96.7                                  0.98       0.98
 
 ================================================================================
 
@@ -1888,10 +1878,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.4  wall=          3.5
+- Proc.   0 individual time (sec): cpu=          3.1  wall=          3.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.6  wall=         13.9
++Overall time at end (sec) : cpu=         12.4  wall=         12.7
