@@ -2517,7 +2517,7 @@ subroutine gwr_build_green(gwr, free_ugb)
  integer :: my_is, my_iki, spin, ik_ibz, band, itau, ipm, il_b, npwsp, isgn, my_it, nbsum !, ig_glob, ig_loc, jg_loc, nb_occ
  integer :: ii, icomp
  real(dp), parameter :: eratio = 0.95_dp
- real(dp) :: eig_nk, cpu, wall, gflops, cpu_k, wall_k, gflops_k, f_nk
+ real(dp) :: eig_nk, cpu, wall, gflops, cpu_k, wall_k, gflops_k !, f_nk
  logical :: print_time, compute_svd
  character(len=500) :: msg
  real(dp) :: gt_rfact, s2_sum, s2_sum_all
@@ -7863,7 +7863,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
  !integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
  integer :: nkpt_summed, use_umklp, band1, band2, band1_start, band1_stop, band1_max
- integer :: ib, il_b2, nb, block_size, ii, mband, block_counter, idir !, iab
+ integer :: ib, il_b2, nb, block_size, ii, mband, block_counter, !idir !, iab
  integer :: istwf_ki, npw_ki, istwf_kf, nI, nJ, nomega, io, iq, nq, dim_rtwg !ig,
  integer :: npwe, u_nfft, u_mgfft, u_mpw
  logical :: isirr_k, use_tr, is_metallic, print_time, use_ddk
