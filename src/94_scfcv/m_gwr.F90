@@ -7863,7 +7863,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
  !integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
  integer :: nkpt_summed, use_umklp, band1, band2, band1_start, band1_stop, band1_max
- integer :: ib, il_b2, nb, block_size, ii, mband, block_counter, !idir !, iab
+ integer :: ib, il_b2, nb, block_size, ii, mband, block_counter !,idir !, iab
  integer :: istwf_ki, npw_ki, istwf_kf, nI, nJ, nomega, io, iq, nq, dim_rtwg !ig,
  integer :: npwe, u_nfft, u_mgfft, u_mpw
  logical :: isirr_k, use_tr, is_metallic, print_time, use_ddk
