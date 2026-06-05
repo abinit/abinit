@@ -2977,18 +2977,18 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list)
    do iab=1,gwr%nsig_ab
      call gwr%gt_kibz(ipm, ik_ibz, itau, spin, iab)%copy(gt_pm(ipm, iab))
    end do
-   associate (gk_i => gwr%gt_kibz(ipm, ik_ibz, itau, spin, :), gk_f => gt_pm(ipm, :))
+  !  associate (gk_i => gwr%gt_kibz(ipm, ik_ibz, itau, spin, :), gk_f => gt_pm(ipm, :))
    !!$OMP PARALLEL DO PRIVATE(ig1, g2, ph2, ig1, g2, ph1)
-   do il_g2=1, gk_f(1)%size_local(2)
-     ig2 = mod(gk_f(1)%loc2gcol(il_g2) - 1, desc_kbz%npw) + 1
+   do il_g2=1, gt_pm(ipm, 1)%size_local(2)
+     ig2 = mod(gt_pm(ipm, 1)%loc2gcol(il_g2) - 1, desc_kbz%npw) + 1
      g2 = desc_kbz%gvec(:,ig2)
      ph2 = exp(+j_dpc * two_pi * dot_product(g2, tnon))
-     do il_g1=1, gk_f(1)%size_local(1)
-       ig1 = mod(gk_f(1)%loc2grow(il_g1) - 1, desc_kbz%npw) + 1
+     do il_g1=1, gt_pm(ipm, 1)%size_local(1)
+       ig1 = mod(gt_pm(ipm, 1)%loc2grow(il_g1) - 1, desc_kbz%npw) + 1
        g1 = desc_kbz%gvec(:,ig1)
        ph1 = exp(-j_dpc * two_pi * dot_product(g1, tnon))
        if (gwr%nspinor == 1) then
-         gk_f(1)%buffer_cplx(il_g1, il_g2) = gk_i(1)%buffer_cplx(il_g1, il_g2) * ph1 * ph2
+         gt_pm(ipm, 1)%buffer_cplx(il_g1, il_g2) = gwr%gt_kibz(ipm, ik_ibz, itau, spin, 1)%buffer_cplx(il_g1, il_g2) * ph1 * ph2
        else
          spinrot_k = gwr%cryst%spinrot(:, isym_k)
 
@@ -3004,27 +3004,27 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list)
 
          do iab=1,gwr%nsig_ab
            iiab = spinor_idxs(1, iab); jiab = spinor_idxs(2, iab)
-           tmp_mat(iiab, jiab) = gk_i(iab)%buffer_cplx(il_g1, il_g2)
+           tmp_mat(iiab, jiab) = gwr%gt_kibz(ipm, ik_ibz, itau, spin, iab)%buffer_cplx(il_g1, il_g2)
          end do
          tmp_mat = matmul(spinrot_cmat1, matmul(tmp_mat, spinrot_cmat2)) * ph1 * ph2
          do iab=1,gwr%nsig_ab
            iiab = spinor_idxs(1, iab); jiab = spinor_idxs(2, iab)
-           gk_f(iab)%buffer_cplx(il_g1, il_g2) = tmp_mat(iiab, jiab)
+           gt_pm(ipm, iab)%buffer_cplx(il_g1, il_g2) = tmp_mat(iiab, jiab)
          end do
        end if
        if (trev_k == 1) then
          if (gwr%nspinor == 1) then
-           gk_f(1)%buffer_cplx(il_g1, il_g2) = conjg(gk_f(1)%buffer_cplx(il_g1, il_g2))
+           gt_pm(ipm, 1)%buffer_cplx(il_g1, il_g2) = conjg(gt_pm(ipm, 1)%buffer_cplx(il_g1, il_g2))
          else
-           gk_f(1)%buffer_cplx(il_g1, il_g2) = conjg(tmp_mat(2, 2))
-           gk_f(2)%buffer_cplx(il_g1, il_g2) = conjg(tmp_mat(1, 1))
-           gk_f(3)%buffer_cplx(il_g1, il_g2) = - conjg(tmp_mat(2, 1))
-           gk_f(4)%buffer_cplx(il_g1, il_g2) = - conjg(tmp_mat(1, 2))
+           gt_pm(ipm, 1)%buffer_cplx(il_g1, il_g2) = conjg(tmp_mat(2, 2))
+           gt_pm(ipm, 2)%buffer_cplx(il_g1, il_g2) = conjg(tmp_mat(1, 1))
+           gt_pm(ipm, 3)%buffer_cplx(il_g1, il_g2) = - conjg(tmp_mat(2, 1))
+           gt_pm(ipm, 4)%buffer_cplx(il_g1, il_g2) = - conjg(tmp_mat(1, 2))
          end if
        end if
      end do
    end do
-   end associate
+  !  end associate
  end do ! ii
  end associate
 
