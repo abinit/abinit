@@ -249,7 +249,7 @@ module m_gwr
    integer,allocatable :: rottbm1(:,:,:)
    ! rottb(ng,timrev,nsym)
    ! rottbm1(G,I,S) is the index of IS{^-1} G in the array gvec
-  
+
    complex(gwp),allocatable :: phmGt(:,:)
    ! phmGt(ng,nsym)
    ! Phase factor e^{-i2\pi(G.\tau)} where $\tau$ is the fractional translation associated to isym.
@@ -4294,16 +4294,16 @@ subroutine desc_init(desc, kk, istwfk, ecut, gwr, kin_sorted, rot)
    ! Fast sort for norm(desc%gvec) and store indices in igvec.
    ABI_MALLOC(gnorm, (desc%npw))
    ABI_MALLOC(igvec, (desc%npw))
-   
+
    do ig=1,desc%npw
      igvec(ig) = ig
      gnorm(ig) = normv(desc%gvec(:,ig), gwr%cryst%gmet, "G") ** 2
    end do
-   
+
    call sort_dp(desc%npw, gnorm, igvec, tol14)
-   
+
    ABI_FREE(gnorm)
-   
+
    do ig1=1,desc%npw
      do itim=1,gwr%cryst%timrev
        do isym=1,gwr%cryst%nsym
@@ -4347,7 +4347,7 @@ subroutine desc_init(desc, kk, istwfk, ecut, gwr, kin_sorted, rot)
        end do ! itim
      end do ! isym
    end do ! ig1
-   
+
    ABI_FREE(igvec)
 
  end if ! rot__
@@ -6993,7 +6993,7 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_bra_glob, ur_ket_glob, sigm_pm, loc
 
  complex(gwp),intent(out) :: sigm_pm(2)
  complex(gwp),intent(inout) :: loc_cwork(sig_rpr(1,1)%size_local(2))
- 
+
  !Local variables-------------------------------
  integer :: ipm, ir1, il_r1, nrows, ncols
  !complex(gwp),allocatable :: loc_cwork(:)
@@ -8035,7 +8035,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ! TODO: use ddkop instead of commutator so that we can handle SOC terms.
  use_ddk = .False.
  use_ddk = gwr%dtset%userie == 432
- !use_ddk = .True.
+ use_ddk = .True.
  if (use_ddk) then
    call wrtout(std_out, " Using DDK to compute the commutator matrix elements.")
    call ddkop%init(dtset, gwr%cryst, gwr%pawtab, gwr%psps, gwr%mpi_enreg, u_mpw, u_ngfft)
@@ -8229,7 +8229,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 #endif
            end if ! use_ddk
            ! TODO: Activate this and get rid of vkbr
-           !new_rhotwx = rhotwx
+           rhotwx = new_rhotwx
 
            ! NB: Using symrec conventions here
            ik_ibz = gwr%kbz2ibz(1, ik_bz); isym_k = gwr%kbz2ibz(2, ik_bz)
