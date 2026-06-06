@@ -688,11 +688,11 @@ end subroutine ddk_red2car
 !!
 !! SOURCE
 
-subroutine ddkop_init(new, dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft)
+subroutine ddkop_init(ddkop, dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft)
 
 !Arguments ------------------------------------
 !scalars
- class(ddkop_t),intent(out) :: new
+ class(ddkop_t),intent(out) :: ddkop
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
@@ -710,14 +710,14 @@ subroutine ddkop_init(new, dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft)
 
  ABI_CHECK(dtset%usepaw == 0, "PAW not tested/implemented!")
 
- new%inclvkb = dtset%inclvkb
- new%usepaw = dtset%usepaw
- new%ipert = cryst%natom + 1
- new%dfpt_sciss = dtset%dfpt_sciss
- new%mpw = mpw
+ ddkop%inclvkb = dtset%inclvkb
+ ddkop%usepaw = dtset%usepaw
+ ddkop%ipert = cryst%natom + 1
+ ddkop%dfpt_sciss = dtset%dfpt_sciss
+ ddkop%mpw = mpw
 
- new%rprimd = cryst%rprimd
- new%mpi_enreg => mpi_enreg
+ ddkop%rprimd = cryst%rprimd
+ ddkop%mpi_enreg => mpi_enreg
 
  ! Not used because vlocal1 is not applied.
  nfft = product(ngfft(1:3))
@@ -729,14 +729,17 @@ subroutine ddkop_init(new, dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft)
    ! 2) Perform the setup needed for the non-local factors:
    ! * Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
    ! * PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
-   call new%gs_hamkq(idir)%init(psps, pawtab, dtset%nspinor, dtset%nsppol, dtset%nspden, cryst%natom,&
-     cryst%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg, &
+   call ddkop%gs_hamkq(idir)%init(psps, pawtab, dtset%nspinor, dtset%nsppol, dtset%nspden, cryst%natom,&
+     cryst%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg &
+     )
      !paw_ij=paw_ij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
      !usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,
-     gpu_option=dtset%gpu_option)
+     ! TODO
+     !gpu_option=dtset%gpu_option)
+
 
    ! Prepare application of the NL part.
-   call new%rf_hamkq(idir)%init(cplex1, new%gs_hamkq(idir), new%ipert, has_e1kbsc=.true.)
+   call ddkop%rf_hamkq(idir)%init(cplex1, ddkop%gs_hamkq(idir), ddkop%ipert, has_e1kbsc=.true.)
  end do
 
 end subroutine ddkop_init
@@ -763,11 +766,11 @@ end subroutine ddkop_init
 !!
 !! SOURCE
 
-subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf_k, npw_k, kg_k)
+subroutine ddkop_setup_spin_kpoint(ddkop, dtset, cryst, psps, spin, kpoint, istwf_k, npw_k, kg_k)
 
 !Arguments ------------------------------------
 !scalars
- class(ddkop_t),intent(inout) :: self
+ class(ddkop_t),intent(inout) :: ddkop
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
@@ -786,8 +789,8 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
  real(dp),allocatable :: ylm_k(:,:),ylmgr1_k(:,:,:)
 !************************************************************************
 
- ABI_CHECK_ILEQ(npw_k, self%mpw, "npw_k > mpw!")
- self%kpoint = kpoint
+ ABI_CHECK_ILEQ(npw_k, ddkop%mpw, "npw_k > mpw!")
+ ddkop%kpoint = kpoint
 
  ! Set up the spherical harmonics (Ylm) at k+q if useylm = 1
  useylmgr1 = 0; optder = 0
@@ -795,8 +798,8 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
    useylmgr1 = 1; optder = 1
  end if
 
- ABI_RECALLOC(self%gh1c, (2, npw_k*dtset%nspinor, 3))
- ABI_RECALLOC(self%gs1c, (2, npw_k*dtset%nspinor, 3))
+ ABI_RECALLOC(ddkop%gh1c, (2, npw_k*dtset%nspinor, 3))
+ ABI_RECALLOC(ddkop%gs1c, (2, npw_k*dtset%nspinor, 3))
 
  ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
  ABI_MALLOC(ylmgr1_k, (npw_k, 3+6*(optder/2), psps%mpsang**2*psps%useylm*useylmgr1))
@@ -811,21 +814,21 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
  end if
 
  do idir=1,3
-   call self%htg(idir)%free()
+   call ddkop%htg(idir)%free()
 
    ! Continue to initialize the Hamiltonian
-   call self%gs_hamkq(idir)%load_spin(spin, with_nonlocal=.true.)
-   call self%rf_hamkq(idir)%load_spin(spin, with_nonlocal=.true.)
+   call ddkop%gs_hamkq(idir)%load_spin(spin, with_nonlocal=.true.)
+   call ddkop%rf_hamkq(idir)%load_spin(spin, with_nonlocal=.true.)
 
    ! We need ffnl1 and dkinpw for 3 dirs. Note that the Hamiltonian objects use pointers to keep a reference
    ! to the output results of this routine.
-   ! This is the reason why we need to store the targets in self%htg
-   call getgh1c_setup(self%gs_hamkq(idir), self%rf_hamkq(idir), dtset, psps, kpoint, kpoint, idir, self%ipert, & ! In
+   ! This is the reason why we need to store the targets in ddkop%htg
+   call getgh1c_setup(ddkop%gs_hamkq(idir), ddkop%rf_hamkq(idir), dtset, psps, kpoint, kpoint, idir, ddkop%ipert, & ! In
      cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, npw_k, npw_k, &            ! In
      useylmgr1, kg_k, ylm_k, kg_k, ylm_k, ylmgr1_k, &                                       ! In
-     self%htg(idir)%dkinpw, nkpg, nkpg1, self%htg(idir)%kpg_k, self%htg(idir)%kpg1_k, &     ! Out
-     self%htg(idir)%kinpw1, self%htg(idir)%ffnlk, self%htg(idir)%ffnl1, &                   ! Out
-     self%htg(idir)%ph3d, self%htg(idir)%ph3d1)                                             ! Out
+     ddkop%htg(idir)%dkinpw, nkpg, nkpg1, ddkop%htg(idir)%kpg_k, ddkop%htg(idir)%kpg1_k, &     ! Out
+     ddkop%htg(idir)%kinpw1, ddkop%htg(idir)%ffnlk, ddkop%htg(idir)%ffnl1, &                   ! Out
+     ddkop%htg(idir)%ph3d, ddkop%htg(idir)%ph3d1)                                             ! Out
  end do
 
  ABI_FREE(ylm_k)
@@ -858,11 +861,11 @@ end subroutine ddkop_setup_spin_kpoint
 !!
 !! SOURCE
 
-subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
+subroutine ddkop_apply(ddkop, eig0nk, npw_k, nspinor, cwave, cwaveprj)
 
 !Arguments ------------------------------------
 !scalars
- class(ddkop_t),target,intent(inout) :: self
+ class(ddkop_t),target,intent(inout) :: ddkop
  integer,intent(in) :: npw_k, nspinor
  real(dp),intent(in) :: eig0nk
 !arrays
@@ -878,35 +881,35 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
  real(dp) :: grad_berry(2,(berryopt0/4)), gvnlx1(2,usevnl0)
 !************************************************************************
 
- self%eig0nk = eig0nk
+ ddkop%eig0nk = eig0nk
 
- if (self%inclvkb /= 0) then
+ if (ddkop%inclvkb /= 0) then
  !if (.True.) then
    ! optlocal0 = 0: local part of H^(1) is not computed in gh1c=<G|H^(1)|C>
    ! optnl = 2: non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
    ! opt_gvnlx1 = option controlling the use of gvnlx1 array:
-   optnl = 2; if (self%inclvkb == 0) optnl = 0
+   optnl = 2; if (ddkop%inclvkb == 0) optnl = 0
 
-   eshift = self%eig0nk - self%dfpt_sciss
+   eshift = ddkop%eig0nk - ddkop%dfpt_sciss
    do idir=1,3
-     sij_opt = self%gs_hamkq(idir)%usepaw
-     call getgh1c(berryopt0, cwave, cwaveprj, self%gh1c(:,:,idir), &
-       grad_berry, self%gs1c(:,:,idir), self%gs_hamkq(idir), gvnlx1, idir, self%ipert, (/eshift/), self%mpi_enreg, 1, optlocal0, &
-       optnl, opt_gvnlx1, self%rf_hamkq(idir), sij_opt, tim_getgh1c, usevnl0)
+     sij_opt = ddkop%gs_hamkq(idir)%usepaw
+     call getgh1c(berryopt0, cwave, cwaveprj, ddkop%gh1c(:,:,idir), &
+       grad_berry, ddkop%gs1c(:,:,idir), ddkop%gs_hamkq(idir), gvnlx1, idir, ddkop%ipert, [eshift], ddkop%mpi_enreg, 1, optlocal0, &
+       optnl, opt_gvnlx1, ddkop%rf_hamkq(idir), sij_opt, tim_getgh1c, usevnl0)
    end do
 
  else
    ! FIXME: optnl 0 with DDK does not work as expected.
    ! So I treat the kinetic term explicitly without calling getgh1c.
    do idir=1,3
-     associate (kinpw1 => self%gs_hamkq(idir)%kinpw_kp, dkinpw => self%rf_hamkq(idir)%dkinpw_k)
+     associate (kinpw1 => ddkop%gs_hamkq(idir)%kinpw_kp, dkinpw => ddkop%rf_hamkq(idir)%dkinpw_k)
      do ispinor=1,nspinor
        do ipw=1,npw_k
          ipws = ipw + npw_k*(ispinor-1)
          if (kinpw1(ipw) < huge(zero)*1.d-11) then
-           self%gh1c(:,ipws,idir) = dkinpw(ipw) * cwave(:,ipws)
+           ddkop%gh1c(:,ipws,idir) = dkinpw(ipw) * cwave(:,ipws)
          else
-           self%gh1c(:,ipws,idir) = zero
+           ddkop%gh1c(:,ipws,idir) = zero
          end if
        end do
      end do
@@ -935,11 +938,11 @@ end subroutine ddkop_apply
 !!
 !! SOURCE
 
-function ddkop_get_braket(self, eig0mk, istwf_k, npw_k, nspinor, brag, mode) result(vk)
+function ddkop_get_braket(ddkop, eig0mk, istwf_k, npw_k, nspinor, brag, mode) result(vk)
 
 !Arguments ------------------------------------
 !scalars
- class(ddkop_t),intent(in) :: self
+ class(ddkop_t),intent(in) :: ddkop
  integer,intent(in) :: istwf_k, npw_k, nspinor
  real(dp),intent(in) :: eig0mk
  character(len=*),optional,intent(in) :: mode
@@ -956,17 +959,17 @@ function ddkop_get_braket(self, eig0mk, istwf_k, npw_k, nspinor, brag, mode) res
  character(len=50) :: my_mode
 !************************************************************************
 
- if (self%usepaw == 0) then
+ if (ddkop%usepaw == 0) then
    ! <u_(iband,k+q)^(0)|H_(k+q,k)^(1)|u_(jband,k)^(0)>  (NC psps)
    do idir=1,3
-     dotarr = cg_zdotc(npw_k * nspinor, brag, self%gh1c(:,:,idir))
+     dotarr = cg_zdotc(npw_k * nspinor, brag, ddkop%gh1c(:,:,idir))
      if (istwf_k > 1) then
        !dum = two * j_dpc * AIMAG(dum); if (vkbr%istwfk==2) dum = dum - j_dpc * AIMAG(gamma_term)
        doti = two * dotarr(2)
-       if (istwf_k == 2 .and. self%mpi_enreg%me_g0 == 1) then
+       if (istwf_k == 2 .and. ddkop%mpi_enreg%me_g0 == 1) then
          ! nspinor always 1
          ! TODO: Recheck this part but it should be ok.
-         doti = doti - (brag(1) * self%gh1c(2,1,idir) - brag(2) * self%gh1c(1,1,idir))
+         doti = doti - (brag(1) * ddkop%gh1c(2,1,idir) - brag(2) * ddkop%gh1c(1,1,idir))
        end if
        dotarr(2) = doti; dotarr(1) = zero
      end if
@@ -975,7 +978,7 @@ function ddkop_get_braket(self, eig0mk, istwf_k, npw_k, nspinor, brag, mode) res
  else
    ABI_ERROR("PAW Not Implemented")
    ! <u_(iband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(jband,k)^(0)> (PAW)
-   ! eshiftkq = half * (eig0mk - self%eig0nk)
+   ! eshiftkq = half * (eig0mk - ddkop%eig0nk)
    ABI_UNUSED(eig0mk)
  end if
 
@@ -983,7 +986,7 @@ function ddkop_get_braket(self, eig0mk, istwf_k, npw_k, nspinor, brag, mode) res
  select case (mode)
  case ("cart")
    vk_red = vk
-   call ddk_red2car(self%rprimd, vk_red, vk)
+   call ddk_red2car(ddkop%rprimd, vk_red, vk)
  case ("reduced")
    continue
  case default
@@ -1011,11 +1014,11 @@ end function ddkop_get_braket
 !!
 !! SOURCE
 
-subroutine ddkop_get_ihr_comm(self, cryst, eig0mk, istwf_k, npw_k, nspinor, brag, new_rhotwx)
+subroutine ddkop_get_ihr_comm(ddkop, cryst, eig0mk, istwf_k, npw_k, nspinor, brag, new_rhotwx)
 
 !Arguments ------------------------------------
 !scalars
- class(ddkop_t),intent(in) :: self
+ class(ddkop_t),intent(in) :: ddkop
  type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: istwf_k, npw_k, nspinor
  real(dp),intent(in) :: eig0mk
@@ -1035,18 +1038,18 @@ subroutine ddkop_get_ihr_comm(self, cryst, eig0mk, istwf_k, npw_k, nspinor, brag
 
  spinor_pad = reshape([0, 0, npw_k, npw_k, 0, npw_k, npw_k, 0], [2, 4])
 
- if (self%usepaw == 0) then
+ if (ddkop%usepaw == 0) then
    ! <u_(iband,k+q)^(0)|H_(k+q,k)^(1)|u_(jband,k)^(0)>  (NC psps)
    do iab=1,nspinor**2
      spad1 = spinor_pad(1,iab); spad2 = spinor_pad(2,iab)
      do idir=1,3
-       dotarr = cg_zdotc(npw_k, brag(:,spad2+1), self%gh1c(:,spad1+1,idir))
+       dotarr = cg_zdotc(npw_k, brag(:,spad2+1), ddkop%gh1c(:,spad1+1,idir))
        if (istwf_k > 1) then
          doti = two * dotarr(2)
-         if (istwf_k == 2 .and. self%mpi_enreg%me_g0 == 1) then
+         if (istwf_k == 2 .and. ddkop%mpi_enreg%me_g0 == 1) then
            ! nspinor always 1
            ! TODO: Recheck this part but it should be ok.
-           doti = doti - (brag(1,1) * self%gh1c(2,1,idir) - brag(2,1) * self%gh1c(1,1,idir))
+           doti = doti - (brag(1,1) * ddkop%gh1c(2,1,idir) - brag(2,1) * ddkop%gh1c(1,1,idir))
          end if
          dotarr(2) = doti; dotarr(1) = zero
        end if
@@ -1056,7 +1059,7 @@ subroutine ddkop_get_ihr_comm(self, cryst, eig0mk, istwf_k, npw_k, nspinor, brag
  else
    ABI_ERROR("PAW Not Implemented")
    ! <u_(iband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(jband,k)^(0)> (PAW)
-   ! eshiftkq = half * (eig0mk - self%eig0nk)
+   ! eshiftkq = half * (eig0mk - ddkop%eig0nk)
    ABI_UNUSED(eig0mk)
  end if
 
@@ -1088,11 +1091,11 @@ end subroutine ddkop_get_ihr_comm
 !!
 !! SOURCE
 
-function ddkop_get_vdiag(self, eig0nk, istwf_k, npw_k, nspinor, cwave, cwaveprj, mode) result(vk)
+function ddkop_get_vdiag(ddkop, eig0nk, istwf_k, npw_k, nspinor, cwave, cwaveprj, mode) result(vk)
 
 !Arguments ------------------------------------
 !scalars
- class(ddkop_t),intent(inout) :: self
+ class(ddkop_t),intent(inout) :: ddkop
  integer,intent(in) :: istwf_k, npw_k, nspinor
  real(dp),intent(in) :: eig0nk
  character(len=*),optional,intent(in) :: mode
@@ -1108,8 +1111,8 @@ function ddkop_get_vdiag(self, eig0nk, istwf_k, npw_k, nspinor, cwave, cwaveprj,
 !************************************************************************
 
  my_mode = "cart"; if (present(mode)) my_mode = mode
- call self%apply(eig0nk, npw_k, nspinor, cwave, cwaveprj)
- cvk = self%get_braket(eig0nk, istwf_k, npw_k, nspinor, cwave, mode=my_mode)
+ call ddkop%apply(eig0nk, npw_k, nspinor, cwave, cwaveprj)
+ cvk = ddkop%get_braket(eig0nk, istwf_k, npw_k, nspinor, cwave, mode=my_mode)
  vk = cvk(1, :)
 
 end function ddkop_get_vdiag
@@ -1126,11 +1129,11 @@ end function ddkop_get_vdiag
 !!
 !! SOURCE
 
-function ddkop_get_vnondiag(self, eig0nk_bra, istwf_k, npw_k, nspinor, cwave_bra, cwave_ket, cwaveprj, mode) result(cvk)
+function ddkop_get_vnondiag(ddkop, eig0nk_bra, istwf_k, npw_k, nspinor, cwave_bra, cwave_ket, cwaveprj, mode) result(cvk)
 
 !Arguments ------------------------------------
 !scalars
- class(ddkop_t),intent(inout) :: self
+ class(ddkop_t),intent(inout) :: ddkop
  integer,intent(in) :: istwf_k, npw_k, nspinor
  real(dp),intent(in) :: eig0nk_bra
  character(len=*),optional,intent(in) :: mode
@@ -1144,8 +1147,8 @@ function ddkop_get_vnondiag(self, eig0nk_bra, istwf_k, npw_k, nspinor, cwave_bra
 !************************************************************************
 
  my_mode = "cart"; if (present(mode)) my_mode = mode
- call self%apply(eig0nk_bra, npw_k, nspinor, cwave_ket, cwaveprj)
- cvk = self%get_braket(eig0nk_bra, istwf_k, npw_k, nspinor, cwave_bra, mode=my_mode)
+ call ddkop%apply(eig0nk_bra, npw_k, nspinor, cwave_ket, cwaveprj)
+ cvk = ddkop%get_braket(eig0nk_bra, istwf_k, npw_k, nspinor, cwave_bra, mode=my_mode)
 
 end function ddkop_get_vnondiag
 !!***
@@ -1161,26 +1164,26 @@ end function ddkop_get_vnondiag
 !!
 !! SOURCE
 
-subroutine ddkop_free(self)
+subroutine ddkop_free(ddkop)
 
 !Arguments ------------------------------------
 !scalars
- class(ddkop_t),intent(inout) :: self
+ class(ddkop_t),intent(inout) :: ddkop
 
 !Local variables-------------------------------
  integer :: idir
 !************************************************************************
 
- ABI_SFREE(self%gh1c)
- ABI_SFREE(self%gs1c)
+ ABI_SFREE(ddkop%gh1c)
+ ABI_SFREE(ddkop%gs1c)
 
  do idir=1,3
-   call self%gs_hamkq(idir)%free()
-   call self%htg(idir)%free()
-   call self%rf_hamkq(idir)%free()
+   call ddkop%gs_hamkq(idir)%free()
+   call ddkop%htg(idir)%free()
+   call ddkop%rf_hamkq(idir)%free()
  end do
 
- self%mpi_enreg => null()
+ ddkop%mpi_enreg => null()
 
 end subroutine ddkop_free
 !!***
@@ -1196,20 +1199,20 @@ end subroutine ddkop_free
 !!
 !! SOURCE
 
-subroutine ham_targets_free(self)
+subroutine ham_targets_free(ddkop)
 
 !Arguments ------------------------------------
- class(ham_targets_t),intent(inout) :: self
+ class(ham_targets_t),intent(inout) :: ddkop
 !************************************************************************
 
- ABI_SFREE(self%ffnlk)
- ABI_SFREE(self%ffnl1)
- ABI_SFREE(self%kpg_k)
- ABI_SFREE(self%kpg1_k)
- ABI_SFREE(self%dkinpw)
- ABI_SFREE(self%kinpw1)
- ABI_SFREE(self%ph3d)
- ABI_SFREE(self%ph3d1)
+ ABI_SFREE(ddkop%ffnlk)
+ ABI_SFREE(ddkop%ffnl1)
+ ABI_SFREE(ddkop%kpg_k)
+ ABI_SFREE(ddkop%kpg1_k)
+ ABI_SFREE(ddkop%dkinpw)
+ ABI_SFREE(ddkop%kinpw1)
+ ABI_SFREE(ddkop%ph3d)
+ ABI_SFREE(ddkop%ph3d1)
 
 end subroutine ham_targets_free
 !!***

@@ -5826,6 +5826,8 @@ subroutine gwr_build_wc(gwr)
            ! Handle divergence in Wc for q --> 0
            ! Here we always use vcgen_eps
            i_sz = gwr%vcgen_eps%i_sz
+           !if (gwr%has_vcgen_sigma) i_sz = gwr%vcgen_sigma%i_sz
+
            if (q_is_gamma .and. (iglob1 == ig0 .or. iglob2 == ig0)) then
              if (iglob1 == ig0 .and. iglob2 == ig0) then
                vcs_g1 = sqrt(i_sz); vcs_g2 = sqrt(i_sz)
