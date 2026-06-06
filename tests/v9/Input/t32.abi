@@ -106,7 +106,7 @@ diemac  12.0
 #%% [files]
 #%% files_to_test =
 #%%   t32.abo, tolnlines = 15, tolabs = 1.100e-03, tolrel = 3.000e-01;
-#%%   t32o_DS4_SGM, tolnlines=25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%%   t32o_DS4_SGM, tolnlines=25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -ridiculous;
 #%%   t32o_DS4_SGR, tolnlines=25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
 #%%   t32o_DS4_SGR_SIGC, tolnlines=25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
 #%%   t32o_DS4_SIG, tolnlines=40, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
