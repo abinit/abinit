@@ -737,7 +737,6 @@ subroutine ddkop_init(ddkop, dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft)
      ! TODO
      !gpu_option=dtset%gpu_option)
 
-
    ! Prepare application of the NL part.
    call ddkop%rf_hamkq(idir)%init(cplex1, ddkop%gs_hamkq(idir), ddkop%ipert, has_e1kbsc=.true.)
  end do
