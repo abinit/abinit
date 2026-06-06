@@ -1,8 +1,8 @@
 
 .Version 10.9.0 of ABINIT. v10.8.1 released May 2026.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Wed  3 Jun 2026.
 - ( at 18h14 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr_soc_dim/tests/TestBot_MPI1/gwr_suite_t12/t12.abi
 - output file    -> t12.abo
 - root for input  files -> t12i
@@ -595,7 +595,7 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
  === Info on Coulomb term used in epsilon and W ===
 
- cutoff-mode = MINIBZ
+ cutoff-mode = AUXILIARY_FUNCTION
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
@@ -641,8 +641,8 @@ iteration_state: {dtset: 3, }
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
- 
- 
+
+
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 3, }
@@ -653,16 +653,16 @@ gwr_task   : G0W0
 QP_VBM_band: 4
 QP_CBM_band: 5
 KS_gap     :    2.454
-QP_gap     :    7.649
-Delta_QP_KS:    5.194
+QP_gap     :    7.771
+Delta_QP_KS:    5.317
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
-        2   -0.451  -11.382  -13.885   -0.272    0.862   -2.393   -2.393   -2.844    2.000
-        3   -0.451  -11.382  -13.885   -0.272    0.862   -2.393   -2.393   -2.844    2.000
-        4   -0.451  -11.382  -13.885   -0.272    0.862   -2.393   -2.393   -2.844    2.000
-        5    2.003   -9.974   -5.148   -1.577    0.862    2.801    2.801    4.804    0.000
-        6    2.003   -9.974   -5.148   -1.577    0.862    2.801    2.801    4.804    0.000
-        7    2.003   -9.974   -5.148   -1.577    0.862    2.801    2.801    4.804    0.000
+        2   -0.451  -11.382  -13.885   -0.289    0.866   -2.418   -2.418   -2.869    2.000
+        3   -0.451  -11.382  -13.885   -0.289    0.866   -2.418   -2.418   -2.869    2.000
+        4   -0.451  -11.382  -13.885   -0.289    0.866   -2.418   -2.418   -2.869    2.000
+        5    2.003   -9.974   -5.148   -1.484    0.867    2.899    2.899    4.902    0.000
+        6    2.003   -9.974   -5.148   -1.484    0.867    2.899    2.899    4.902    0.000
+        7    2.003   -9.974   -5.148   -1.484    0.867    2.899    2.899    4.902    0.000
 ...
 
 
@@ -675,13 +675,13 @@ gwr_task   : G0W0
 QP_VBM_band: 4
 QP_CBM_band: 5
 KS_gap     :    3.497
-QP_gap     :    8.546
-Delta_QP_KS:    5.049
+QP_gap     :    8.686
+Delta_QP_KS:    5.189
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
-        3   -1.736  -11.091  -13.756   -0.097    0.842   -2.326   -2.326   -4.062    2.000
-        4   -1.736  -11.091  -13.756   -0.097    0.842   -2.326   -2.326   -4.062    2.000
-        5    1.761   -9.965   -5.157   -1.657    0.864    2.723    2.723    4.484    0.000
+        3   -1.736  -11.091  -13.756   -0.119    0.846   -2.356   -2.356   -4.093    2.000
+        4   -1.736  -11.091  -13.756   -0.119    0.846   -2.356   -2.356   -4.093    2.000
+        5    1.761   -9.965   -5.157   -1.550    0.869    2.832    2.832    4.593    0.000
 ...
 
 
@@ -695,15 +695,15 @@ data: !Tabular |
 
  === QP gaps and band edges taking into account Sigma_nk corrections for 2 k-points ===
  Indirect band gap semiconductor
- Fundamental gap:     3.295 (eV)
-   VBM:    -2.844 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     3.320 (eV)
+   VBM:    -2.869 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     0.451 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
  Direct gap:         3.887 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
 
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
@@ -896,7 +896,7 @@ P           mkmem           3
 - D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
 - I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
 - Comment: the sixth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
 - The licence allows the authors to put it on the Web.
@@ -919,7 +919,7 @@ P           mkmem           3
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
@@ -937,7 +937,7 @@ P           mkmem           3
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
 - is available at
 -  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
@@ -956,7 +956,7 @@ P           mkmem           3
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.

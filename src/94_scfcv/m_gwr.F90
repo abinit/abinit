@@ -235,11 +235,17 @@ module m_gwr
 
    integer :: cached_sc_ngfft(6) = -1
 
-   complex(gwp),allocatable :: vc_sqrt(:)
+   complex(gwp),allocatable :: vc_sqrt_eps(:)
    ! (npw)
    ! Square root of the Coulomb interaction in reciprocal space.
    ! Allocated and computed for tchi/W descriptors.
-   ! A cutoff might be applied.
+   ! A Coulomb cutoff might be applied but NOT the MC technique
+
+   complex(gwp),allocatable :: vc_sqrt_sigma(:)
+   ! (npw)
+   ! Square root of the Coulomb interaction in reciprocal space.
+   ! Allocated and computed for Sigma descriptors.
+   ! A Coulomb cutoff might be applied. MC technique can be used here
 
    integer,allocatable :: rottb(:,:,:)
    ! rottb(ng,timrev,nsym)
@@ -644,8 +650,14 @@ module m_gwr
    integer :: ugb_nband = -1
    ! Number of bands in ugb.
 
-   type(vcgen_t) :: vcgen
-   ! Object used to compute Coulomb term vc(q,g)
+   type(vcgen_t) :: vcgen_eps
+   ! Object used to compute Coulomb term vc(q,g) in epsilon.
+
+   type(vcgen_t) :: vcgen_sigma
+   ! Object used to compute Coulomb term vc(q,g) in Sigma
+
+   logical :: has_vcgen_sigma = .False.
+   ! True if vcgen_sigma is allocated
 
    character(len=fnlen) :: gwrnc_path = ABI_NOFILE
    ! Path to the GWR.nc file with output results.
@@ -893,7 +905,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: my_it, my_ikf, ii, kptopt, my_iki, my_iqi, itau, spin, my_iqf
  integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid, smat_bsize1, smat_bsize2
  integer :: comm_cart, me_cart, ierr, all_nproc, my_rank, qprange_, gap_err, ncerr, omp_nt
- integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum, jj, gw_icutcoul
+ integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum, jj, gw_icutcoul_
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  integer :: ip_g, ip_k, ip_t, ip_s, np_g, np_k, np_t, np_s, isym, itim
  real(dp) :: cpu, wall, gflops, wmax, vc_ecut, delta, abs_rerr, exact_int, eval_int, drude_plasmon_freq
@@ -1641,11 +1653,23 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ABI_FREE(iwork)
 
  ! Initialize Coulomb interaction.
+ ! Note: MC integration should not be used when computing epsilon, only when integrating in q-space.
  vc_ecut = max(dtset%ecutsigx, dtset%ecuteps)
- gw_icutcoul = dtset%gw_icutcoul
- !if (gw_icutcoul == 16) gw_icutcoul = 6
- call gwr%vcgen%init(cryst, ks_ebands%kptrlatt, gwr%nkbz, gwr%nqibz, gwr%nqbz, gwr%qbz, &
-                     dtset%gw_rcut, gw_icutcoul, dtset%vcutgeo, vc_ecut, gwr%comm%value)
+ gw_icutcoul_ = dtset%gw_icutcoul
+
+ gwr%has_vcgen_sigma = .False.
+ if (any(gw_icutcoul_ == [14, 15, 16])) then
+   gw_icutcoul_ = mod(gw_icutcoul_, 10); gwr%has_vcgen_sigma = .True.
+ end if
+
+ call gwr%vcgen_eps%init(cryst, ks_ebands%kptrlatt, gwr%nkbz, gwr%nqibz, gwr%nqbz, gwr%qbz, &
+                         dtset%gw_rcut, gw_icutcoul_, dtset%vcutgeo, vc_ecut, gwr%comm%value)
+
+ if (gwr%has_vcgen_sigma) then
+   ! Note dtset%gw_icutcoul here.
+   call gwr%vcgen_sigma%init(cryst, ks_ebands%kptrlatt, gwr%nkbz, gwr%nqibz, gwr%nqbz, gwr%qbz, &
+                             dtset%gw_rcut, dtset%gw_icutcoul, dtset%vcutgeo, vc_ecut, gwr%comm%value)
+ end if
 
  ! Now we know the value of g_ngfft. Setup tables for zero-padded FFTs.
  ! Build descriptors for Green's functions and tchi and setup tables for zero-padded FFTs.
@@ -1669,7 +1693,10 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
    if (gwr%itreat_iqibz(iq_ibz)) gwr%chinpw_qibz(iq_ibz) = desc_q%npw
    q_is_gamma = (normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0)
-   call desc_q%get_vc_sqrt(qq_ibz, q_is_gamma, gwr, gwr%gtau_comm%value)
+   call desc_q%get_vc_sqrt(qq_ibz, q_is_gamma, gwr, "epsilon", gwr%gtau_comm%value)
+   if (gwr%has_vcgen_sigma) then
+     call desc_q%get_vc_sqrt(qq_ibz, q_is_gamma, gwr, "sigma", gwr%gtau_comm%value)
+   end if
    end associate
  end do
 
@@ -2115,7 +2142,8 @@ subroutine gwr_free(gwr)
 
  ! datatypes.
  call gwr%ks_me%free()
- call gwr%vcgen%free()
+ call gwr%vcgen_eps%free()
+ if (gwr%has_vcgen_sigma) call gwr%vcgen_sigma%free()
 
  if (allocated(gwr%degtab)) then
    call degtab_array_free(gwr%degtab)
@@ -2955,8 +2983,8 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list)
 
  !ABI_WARNING_IF(trev_k == 0, "green: trev_k /= 0 should be tested")
 
- ! Rotate gvec, recompute gbound and rotate vc_sqrt
- ! TODO: 1) Handle TR and routine to rotate tchi/W including vc_sqrt
+ ! Rotate gvec, recompute gbound and rotate vc_sqrt_eps
+ ! TODO: 1) Handle TR and routine to rotate tchi/W including vc_sqrt_eps
  !       2) Make sure that the FFT box is large enough to accommodate umklapps
 
  desc_kbz%ig0 = -1
@@ -3492,8 +3520,8 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
  end if
 
  !ABI_WARNING_IF(trev_q == 0, "trev_q should be tested")
- ! rotate gvec, recompute gbound and rotate vc_sqrt.
- ! TODO: 1) Handle TR and routine to rotate tchi/W including vc_sqrt
+ ! rotate gvec, recompute gbound and rotate vc_sqrt_eps.
+ ! TODO: 1) Handle TR and routine to rotate tchi/W including vc_sqrt_eps
  !       2) Make sure that FFT box is large enough to accomodate umklapps
  desc_qbz%ig0 = -1
  do ig1=1,desc_qbz%npw
@@ -3506,10 +3534,10 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
  call sphereboundary(desc_qbz%gbound, desc_qbz%istwfk, desc_qbz%gvec, gwr%g_mgfft, desc_qbz%npw)
 
  ! Compute sqrt(vc(q,G))
- ! TODO: rotate vc_sqrt
+ ! TODO: rotate vc_sqrt_eps
  ! vc(Sq, Sg) = vc(q, g)
  ! vc(-q, -g) = vc(q, g)
- call desc_qbz%get_vc_sqrt(qq_bz, q_is_gamma, gwr, gwr%gtau_comm%value)
+ call desc_qbz%get_vc_sqrt(qq_bz, q_is_gamma, gwr, "sigma", gwr%gtau_comm%value)
 
  ! Get Wc_q with q in the BZ.
  tnon = gwr%cryst%tnons(:, isym_q)
@@ -4366,20 +4394,32 @@ end subroutine desc_init
 !!
 !! SOURCE
 
-subroutine desc_get_vc_sqrt(desc, qpt, q_is_gamma, gwr, comm)
+subroutine desc_get_vc_sqrt(desc, qpt, q_is_gamma, gwr, mode, comm)
 
 !Arguments ------------------------------------
  class(desc_t),intent(inout) :: desc
  real(dp),intent(in) :: qpt(3)
  logical, intent(in) :: q_is_gamma
  class(gwr_t),intent(in) :: gwr
+ character(len=*),intent(in) :: mode
  integer,intent(in) :: comm
 ! *************************************************************************
 
  ABI_UNUSED([q_is_gamma])
- if (allocated(desc%vc_sqrt)) return
- ABI_MALLOC(desc%vc_sqrt, (desc%npw))
- call gwr%vcgen%get_vc_sqrt(qpt, desc%npw, desc%gvec, gwr%q0, gwr%cryst, desc%vc_sqrt, comm)
+
+ if (mode == "epsilon" .or. .not. gwr%has_vcgen_sigma) then
+   if (allocated(desc%vc_sqrt_eps)) return
+   ABI_MALLOC(desc%vc_sqrt_eps, (desc%npw))
+   call gwr%vcgen_eps%get_vc_sqrt(qpt, desc%npw, desc%gvec, gwr%q0, gwr%cryst, desc%vc_sqrt_eps, comm)
+
+ else if (mode == "sigma") then
+   if (allocated(desc%vc_sqrt_sigma)) return
+   ABI_MALLOC(desc%vc_sqrt_sigma, (desc%npw))
+   call gwr%vcgen_sigma%get_vc_sqrt(qpt, desc%npw, desc%gvec, gwr%q0, gwr%cryst, desc%vc_sqrt_sigma, comm)
+
+ else
+   ABI_ERROR(sjoin("Invalid mode:", mode))
+ end if
 
 end subroutine desc_get_vc_sqrt
 !!***
@@ -4413,7 +4453,8 @@ subroutine desc_copy(in_desc, new_desc)
 
  call alloc_copy(in_desc%gvec, new_desc%gvec)
  call alloc_copy(in_desc%gbound, new_desc%gbound)
- if (allocated(in_desc%vc_sqrt)) call alloc_copy(in_desc%vc_sqrt, new_desc%vc_sqrt)
+ if (allocated(in_desc%vc_sqrt_eps)) call alloc_copy(in_desc%vc_sqrt_eps, new_desc%vc_sqrt_eps)
+ if (allocated(in_desc%vc_sqrt_sigma)) call alloc_copy(in_desc%vc_sqrt_sigma, new_desc%vc_sqrt_sigma)
 
  if (allocated(in_desc%g2box)) then
    call alloc_copy(in_desc%g2box, new_desc%g2box)
@@ -4527,7 +4568,8 @@ subroutine desc_free(desc)
 
  ABI_SFREE(desc%gvec)
  ABI_SFREE(desc%gbound)
- ABI_SFREE(desc%vc_sqrt)
+ ABI_SFREE(desc%vc_sqrt_eps)
+ ABI_SFREE(desc%vc_sqrt_sigma)
  ABI_SFREE(desc%g2box)
  ABI_SFREE(desc%rottb)
  ABI_SFREE(desc%rottbm1)
@@ -5661,7 +5703,7 @@ subroutine gwr_build_wc(gwr)
  integer,parameter :: master = 0
  integer :: my_iqi, my_it, my_is, iq_ibz, spin, itau, iw, ierr, npwe
  integer :: il_g1, il_g2, ig1, ig2, iglob1, iglob2, ig0
- real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q !, cpu_tmp, wall_tmp, gflops_tmp
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q, i_sz !, cpu_tmp, wall_tmp, gflops_tmp
  logical :: q_is_gamma, free_tchi, print_time, keep_wcimw
  character(len=5000) :: msg
  complex(dp) :: vcs_g1, vcs_g2
@@ -5680,7 +5722,7 @@ subroutine gwr_build_wc(gwr)
  call timab(1924, 1, tsec)
  call wrtout(units, " Building correlated screening Wc(i omega) ...", pre_newlines=2)
 
- call gwr%vcgen%print(units, " Info on Coulomb term used in epsilon and W", gwr%dtset%prtvol)
+ call gwr%vcgen_eps%print(units, " Info on Coulomb term used in epsilon and W", gwr%dtset%prtvol)
 
  ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space: ", gwr%tchi_space, " != iomega"))
 
@@ -5725,6 +5767,7 @@ subroutine gwr_build_wc(gwr)
        itau = gwr%my_itaus(my_it)
 
        ! Build symmetrized RPA epsilon: 1 - Vc^{1/2} chi0 Vc^{1/2}
+       ! Note vc_sqrt_eps here.
        associate (wc => gwr%wc_qibz(iq_ibz, itau, spin))
        call gwr%tchi_qibz(iq_ibz, itau, spin)%copy(wc)
        if (free_tchi) call gwr%tchi_qibz(iq_ibz, itau, spin)%free()
@@ -5732,11 +5775,11 @@ subroutine gwr_build_wc(gwr)
        do il_g2=1,wc%size_local(2)
          iglob2 = wc%loc2gcol(il_g2)
          ig2 = mod(iglob2 - 1, desc_q%npw) + 1
-         vcs_g2 = desc_q%vc_sqrt(ig2)
+         vcs_g2 = desc_q%vc_sqrt_eps(ig2)
          do il_g1=1,wc%size_local(1)
            iglob1 = wc%loc2grow(il_g1)
            ig1 = mod(iglob1 - 1, desc_q%npw) + 1
-           vcs_g1 = desc_q%vc_sqrt(ig1)
+           vcs_g1 = desc_q%vc_sqrt_eps(ig1)
            wc%buffer_cplx(il_g1, il_g2) = -wc%buffer_cplx(il_g1, il_g2) * vcs_g1 * vcs_g2
            if (iglob1 == iglob2) then
              wc%buffer_cplx(il_g1, il_g2) = one + wc%buffer_cplx(il_g1, il_g2)
@@ -5766,11 +5809,11 @@ subroutine gwr_build_wc(gwr)
        do il_g2=1,wc%size_local(2)
          iglob2 = wc%loc2gcol(il_g2)
          ig2 = mod(iglob2 - 1, desc_q%npw) + 1
-         vcs_g2 = desc_q%vc_sqrt(ig2)
+         vcs_g2 = desc_q%vc_sqrt_eps(ig2)
          do il_g1=1,wc%size_local(1)
            iglob1 = wc%loc2grow(il_g1)
            ig1 = mod(iglob1 - 1, desc_q%npw) + 1
-           vcs_g1 = desc_q%vc_sqrt(ig1)
+           vcs_g1 = desc_q%vc_sqrt_eps(ig1)
 
            if (iglob1 == ig0 .and. iglob2 == ig0) then
              ! Store epsilon^{-1}_{iw, iq_ibz}(0, 0). Rescale by np_qibz because we will MPI reduce this array.
@@ -5781,13 +5824,15 @@ subroutine gwr_build_wc(gwr)
            if (iglob1 == iglob2) wc%buffer_cplx(il_g1, il_g2) = wc%buffer_cplx(il_g1, il_g2) - one
 
            ! Handle divergence in Wc for q --> 0
+           ! Here we always use vcgen_eps
+           i_sz = gwr%vcgen_eps%i_sz
            if (q_is_gamma .and. (iglob1 == ig0 .or. iglob2 == ig0)) then
              if (iglob1 == ig0 .and. iglob2 == ig0) then
-               vcs_g1 = sqrt(gwr%vcgen%i_sz); vcs_g2 = sqrt(gwr%vcgen%i_sz)
+               vcs_g1 = sqrt(i_sz); vcs_g2 = sqrt(i_sz)
              else if (iglob1 == ig0) then
-               vcs_g1 = sqrt(gwr%vcgen%i_sz)
+               vcs_g1 = sqrt(i_sz)
              else if (iglob2 == ig0) then
-               vcs_g2 = sqrt(gwr%vcgen%i_sz)
+               vcs_g2 = sqrt(i_sz)
              end if
            end if
 
@@ -5953,7 +5998,11 @@ subroutine gwr_build_sigmac(gwr)
    call wrtout(units, " Computing diagonal + off-diagonal matrix elements of Sigma_c", pre_newlines=1)
  end if
 
- call gwr%vcgen%print(units, " Info on Coulomb term used in Sigma_c", gwr%dtset%prtvol)
+ if (gwr%has_vcgen_sigma) then
+   call gwr%vcgen_sigma%print(units, " Info on Coulomb term used in Sigma_c", gwr%dtset%prtvol)
+ else
+   call gwr%vcgen_eps%print(units, " Info on Coulomb term used in Sigma_c", gwr%dtset%prtvol)
+ end if
 
  ABI_CHECK(gwr%wc_space == "itau", sjoin("wc_space: ", gwr%wc_space, " != itau"))
 
@@ -7140,7 +7189,7 @@ subroutine gwr_rpa_energy(gwr)
            !if (kin_qg(ig2) > ecut_soft) then
            !  damp = sqrt(half * (one + cos(pi * (kin_qg(ig2) - ecut_soft) / (ecut_chi(icut) - ecut_soft))))
            !end if
-           vcs_g2 = desc_q%vc_sqrt(ig2) * damp
+           vcs_g2 = desc_q%vc_sqrt_eps(ig2) * damp
            if (q_is_gamma .and. ig2 == ig0) vcs_g2 = zero
 
            do il_g1=1,tchi%size_local(1)
@@ -7150,7 +7199,7 @@ subroutine gwr_rpa_energy(gwr)
              !if (kin_qg(ig1) > ecut_soft) then
              !  damp = sqrt(half * (one + cos(pi * (kin_qg(ig1) - ecut_soft) / (ecut_chi(icut) - ecut_soft))))
              !end if
-             vcs_g1 = desc_q%vc_sqrt(ig1) * damp
+             vcs_g1 = desc_q%vc_sqrt_eps(ig1) * damp
              if (q_is_gamma .and. ig1 == ig0) vcs_g1 = zero
 
              chi_tmp%buffer_cplx(il_g1, il_g2) = tchi%buffer_cplx(il_g1, il_g2) * vcs_g1 * vcs_g2
@@ -8380,7 +8429,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
  integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
  logical :: isirr_k, isirr_q, sigc_is_herm, compute_qp__
- real(dp) :: fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty, tol_empty_in, gwr_boxcutmin_x
+ real(dp) :: fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty, tol_empty_in, gwr_boxcutmin_x, i_sz
  real(dp) :: cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
  complex(gwp) :: gwpc_sigxme, gwpc_sigxme2, xdot_tmp, ctmp
  character(len=5000) :: msg
@@ -8426,7 +8475,11 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
    goto 10
  end if
 
- call gwr%vcgen%print(units, " Info on Coulomb term used in Sigma_x", dtset%prtvol)
+ if (gwr%has_vcgen_sigma) then
+   call gwr%vcgen_sigma%print(units, " Info on Coulomb term used in Sigma_x", gwr%dtset%prtvol)
+ else
+   call gwr%vcgen_eps%print(units, " Info on Coulomb term used in Sigma_x", dtset%prtvol)
+ end if
 
  nsppol = gwr%nsppol; nspinor = gwr%nspinor; cryst => gwr%cryst; dtset => gwr%dtset
 
@@ -8585,9 +8638,13 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
      spinor_padx = reshape([0, 0, npwx, npwx, 0, npwx, npwx, 0], [2, 4])
 
      ! Get Fourier components of the Coulomb interaction in the BZ
-     ! In 3D systems, neglecting umklapp,  vc(Sq,sG)=vc(q,G)=4pi/|q+G|
+     ! In 3D systems, neglecting umklapp, vc(Sq,sG)=vc(q,G)=4pi/|q+G|
      ! The same relation holds for 0-D systems, but not in 1-D or 2D systems. It depends on S.
-     call gwr%vcgen%get_vc_sqrt(qq_bz, npwx, gvec_x, gwr%q0, gwr%cryst, vc_sqrt_qbz, gwr%gtau_comm%value)
+     if (gwr%has_vcgen_sigma) then
+       call gwr%vcgen_sigma%get_vc_sqrt(qq_bz, npwx, gvec_x, gwr%q0, gwr%cryst, vc_sqrt_qbz, gwr%gtau_comm%value)
+     else
+       call gwr%vcgen_eps%get_vc_sqrt(qq_bz, npwx, gvec_x, gwr%q0, gwr%cryst, vc_sqrt_qbz, gwr%gtau_comm%value)
+     end if
 
      desc_ki => gwr%green_desc_kibz(ik_ibz)
 
@@ -8603,7 +8660,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
 
      ABI_MALLOC(ug_ksum, (npw_k * nspinor))
      ABI_MALLOC(ug_ksum_dp, (npw_k * nspinor))
-    !  ABI_MALLOC(ugb_kcalcibz, (npw_k * nspinor))
+     !ABI_MALLOC(ugb_kcalcibz, (npw_k * nspinor))
      ABI_MALLOC(cg1_ibz, (2, desc_ki%npw * nspinor))
      !ABI_MALLOC(cg2_bz, (2, npw_k * nspinor))
 
@@ -8679,25 +8736,23 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
            !   * Note the use of i_sz_resid and not i_sz, to account for the possibility
            !     to have generalized KS basis set from hybrid
 
+           i_sz = gwr%vcgen_eps%i_sz
+           if (gwr%has_vcgen_sigma) i_sz = gwr%vcgen_sigma%i_sz
+
            if (nspinor == 1) then
              rhotwg_ki(1, jb) = czero_gw
-             if (band_sum == jb) rhotwg_ki(1,jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp)
+             if (band_sum == jb) rhotwg_ki(1,jb) = cmplx(sqrt(i_sz), 0.0_gwp)
              !rhotwg_ki(1,jb) = czero_gw ! DEBUG
 
            else
              rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
              if (band_sum == jb) then
-               !ABI_CHECK(wfd%get_wave_ptr(band_sum, ik_ibz, spin, wave_sum, msg) == 0, msg)
-               !cg_sum => wave_sum%ug
-               !ABI_CHECK(wfd%get_wave_ptr(jb, jk_ibz, spin, wave_jb, msg) == 0, msg)
-               !cg_jb  => wave_jb%ug
-               !ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
                associate(ugb_kcalcibz => gwr%ugb(ikcalc_ibz, spin)%buffer_cplx(:,il_b))
                ABI_CHECK(size(ug_ksum) == size(ugb_kcalcibz), "Size mismatch in Sigma_x")
                ctmp = xdotc(npw_k, ug_ksum(1:), 1, ugb_kcalcibz(1:), 1)
-               rhotwg_ki(1, jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp) * real(ctmp)
+               rhotwg_ki(1, jb) = cmplx(sqrt(i_sz), 0.0_gwp) * real(ctmp)
                ctmp = xdotc(npw_k, ug_ksum(npw_k+1:), 1, ugb_kcalcibz(npw_k+1:), 1)
-               rhotwg_ki(npwx+1, jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp) * real(ctmp)
+               rhotwg_ki(npwx+1, jb) = cmplx(sqrt(i_sz), 0.0_gwp) * real(ctmp)
                end associate
              end if
              !!!rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
