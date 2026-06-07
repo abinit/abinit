@@ -856,9 +856,7 @@ module m_gwr
  ! Handy named costants (private stuff)
  integer,private,parameter :: LOG_MODR = 500, LOG_MODK = 5
  integer,private,parameter :: istwfk1 = 1, ndat1 = 1, me_fft0 = 0, paral_fft0 = 0, nproc_fft1 = 1
-
  integer,private,parameter :: OP_COPY = 0, OP_ACC = 1
-
  integer,private,parameter :: CHI_FIT = 1, SIGMA_FIT = 2
 
 contains
@@ -1116,10 +1114,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! Setup k-points in Sigma_nk
  ! ==========================
  gwr%ks_gaps = ks_ebands%get_gaps(gap_err)
- if (my_rank == master) then
-   !call ks_ebands%print(units, header="KS band structure", prtvol=gwr%dtset%prtvol)
-   call gwr%ks_gaps%print(units, header="Kohn-Sham gaps and band edges from IBZ mesh")
- end if
+
+ if (my_rank == master) call gwr%ks_gaps%print(units, header="Kohn-Sham gaps and band edges from IBZ mesh")
 
  ! TODO: nkcalc should be spin dependent.
  ! This piece of code is taken from m_sigmaph.
@@ -1456,7 +1452,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      write(msg, "(a,4(i4,2x),3(es12.5,2x))")"- ", ip_k, ip_g, ip_t, ip_s, est%mem_total, est%efficiency, est%speedup
      call wrtout(units, msg, newlines=1)
      call est%print(units)
-     !call gwr%ps%print([std_out])
    end if
  end if
 
@@ -2615,7 +2610,7 @@ subroutine gwr_build_green(gwr, free_ugb)
          do ispinor = 1, gwr%nspinor
            call ugb_ks%cut(npw, ugb_ks%size_global(2), work_gb(ispinor), ija=[(ispinor - 1)*npw + 1, 1])
 
-           !  work_gb(my_is)%buffer_cplx = gwr   %ugb(ik_ibz, spin)%buffer_cplx
+           !work_gb(my_is)%buffer_cplx = gwr   %ugb(ik_ibz, spin)%buffer_cplx
 
            !call ugb_ks%change_size_blocs(work_gb, size_blocs=, processor=)
            !call work_gb%copy(green, empty=.True.)
@@ -2631,7 +2626,7 @@ subroutine gwr_build_green(gwr, free_ugb)
            !$OMP PARALLEL DO PRIVATE(band, eig_nk, gt_rfact)
            do il_b = 1, work_gb(ispinor)%size_local(2)
              band = work_gb(ispinor)%loc2gcol(il_b)
-             ! f_nk = qp_occ(band, ik_ibz, spin)
+             !f_nk = qp_occ(band, ik_ibz, spin)
              eig_nk = qp_eig(band, ik_ibz, spin)
              gt_rfact = zero
              if (ipm == 2) then

@@ -1,8 +1,8 @@
 
-.Version 10.9.0 of ABINIT. v10.8.1 released May 2026.
-.(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer) 
+.Version 10.9.0.1 of ABINIT. v10.8.1 released May 2026.
+.(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,12 +16,12 @@
 
 .Starting date : Fri  5 Jun 2026.
 - ( at 15h45 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/tsaih_gwr_soc_dim/tests/TestBot_MPI1/gwr_suite_t14/t14.abi
 - output file    -> t14.abo
 - root for input  files -> t14i
 - root for output files -> t14o
- 
+
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -37,7 +37,7 @@ P This job should need less than                       1.866 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.033 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
- 
+
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -53,7 +53,7 @@ P This job should need less than                       1.860 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.028 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
- 
+
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
@@ -69,7 +69,7 @@ P This job should need less than                       1.973 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.157 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -228,19 +228,19 @@ P           mkmem           3
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl       14.00000
- 
+
 ================================================================================
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   1.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   2.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   3.
- 
+
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -254,17 +254,17 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1300000  5.1300000  G(1)= -0.0974659  0.0974659  0.0974659
  R(2)=  5.1300000  0.0000000  5.1300000  G(2)=  0.0974659 -0.0974659  0.0974659
  R(3)=  5.1300000  5.1300000  0.0000000  G(3)=  0.0974659  0.0974659 -0.0974659
  Unit cell volume ucvol=  2.7001139E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  15  15  15
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.15429
- 
+
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/tsaih_gwr_soc_dim/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/tsaih_gwr_soc_dim/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
@@ -280,12 +280,12 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    2.571282    0.578307
              2   -2.427311   -0.488097
  pspatm: atomic psp has been read  and splines computed
- 
+
    1.49491472E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
- 
+
 _setup2: Arith. and geom. avg. npw (full set) are     108.625     108.613
- 
+
 ================================================================================
 
 --- !BeginCycle
@@ -293,7 +293,7 @@ iteration_state: {dtset: 1, }
 solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-08, }
 ...
- 
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -8.3065585710601    -8.307E+00 2.835E-03 1.253E+00
  ETOT  2  -8.3092522919542    -2.694E-03 1.276E-05 1.900E-02
@@ -301,14 +301,14 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  4  -8.3092786882415    -5.358E-08 3.990E-08 1.071E-05
  ETOT  5  -8.3092786937512    -5.510E-09 7.251E-10 3.403E-07
  ETOT  6  -8.3092786939796    -2.284E-10 8.366E-11 5.822E-09
- 
+
  At SCF step    6       vres2   =  5.82E-09 < tolvrs=  1.00E-08 =>converged.
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.50765204E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.50765204E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.50765204E-05  sigma(2 1)=  0.00000000E+00
- 
+
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
@@ -344,9 +344,9 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1        2.00000          1.78506391
     2        2.00000          1.72909565
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   79.049E-13; max=  83.664E-12
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
@@ -354,16 +354,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.35733954504536     1.35733954504536     1.35733954504536
- 
+
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
- 
+
  cartesian forces (eV/Angstrom) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -376,7 +376,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  kpt#   1, nband=  6, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.25677    0.17086    0.17086    0.17086    0.26105    0.26105
  prteigrs : prtvol=0 or 1, do not print more k-points.
- 
+
 
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
@@ -393,21 +393,21 @@ total_energy_eV     : -2.26106991967379E+02
 band_energy         : -1.03027581517223E-02
 ...
 
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.50765204E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.50765204E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.50765204E-05  sigma(2 1)=  0.00000000E+00
- 
+
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.0320E+00 GPa]
 - sigma(1 1)=  1.03198686E+00  sigma(3 2)=  0.00000000E+00
 - sigma(2 2)=  1.03198686E+00  sigma(3 1)=  0.00000000E+00
 - sigma(3 3)=  1.03198686E+00  sigma(2 1)=  0.00000000E+00
- 
+
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
@@ -418,38 +418,38 @@ meta: {optdriver: 6, }
 ...
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
- 
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
- 
+
 .Using double precision arithmetic; gwpc =  8
- 
+
 - Reading GS density from: t14o_DS1_DEN
- 
- 
- 
+
+
+
 --------------------------------------------------------------------------------
- 
+
  Total charge density [el/Bohr^3]
 )     Maximum=    9.7811E-02  at reduced coord.    0.1333    0.1333    0.6000
 )     Minimum=    1.9174E-03  at reduced coord.    0.7333    0.7333    0.7333
    Integrated=    8.0000E+00
- 
+
  === KS gaps after direct diagonalization ===
  Indirect band gap semiconductor
  Fundamental gap:     0.903 (eV)
    VBM:     4.649 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     5.552 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
  Direct gap:         2.454 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- 
+
 - Cannot deallocate gwr datatype if FC_NVHPC, DO NOT USE DATASETS!
- 
+
 ================================================================================
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
@@ -460,21 +460,21 @@ meta: {optdriver: 6, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
- 
+
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
- 
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
- 
+
 .Using double precision arithmetic; gwpc =  8
- 
+
 - Reading GS density from: t14o_DS1_DEN
- 
- 
- 
- 
+
+
+
+
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/tsaih_gwr_soc_dim/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/tsaih_gwr_soc_dim/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
@@ -490,9 +490,9 @@ meta: {optdriver: 6, }
              1    2.571282    0.578307
              2   -2.427311   -0.488097
  pspatm: atomic psp has been read  and splines computed
- 
+
 --------------------------------------------------------------------------------
- 
+
  Total charge density [el/Bohr^3]
 )     Maximum=    9.7811E-02  at reduced coord.    0.1333    0.1333    0.6000
 )     Minimum=    1.9174E-03  at reduced coord.    0.7333    0.7333    0.7333
@@ -509,8 +509,8 @@ meta: {optdriver: 6, }
      6  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3     1     0  [0, 0, 0]
      7  [ 5.0000E-01,  0.0000E+00,  5.0000E-01]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3     9     0  [1, 0, 1]
      8  [ 0.0000E+00,  5.0000E-01,  5.0000E-01]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3    17     0  [0, 0, 0]
- 
- 
+
+
   Mapping qBZ --> qIBZ
  Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
         BZ                                       IBZ                                       ibz  isym  itim  g0
@@ -522,16 +522,16 @@ meta: {optdriver: 6, }
      6  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3     1     0  [0, 0, 0]
      7  [-5.0000E-01,  0.0000E+00, -5.0000E-01]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3     9     0  [0, 0, 0]
      8  [ 0.0000E+00,  5.0000E-01,  5.0000E-01]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3    17     0  [0, 0, 0]
- 
- 
- 
+
+
+
  === Kohn-Sham gaps and band edges from IBZ mesh ===
  Indirect band gap semiconductor
  Fundamental gap:     0.903 (eV)
    VBM:    -0.451 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     0.451 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
  Direct gap:         2.454 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- 
+
 
 - Optimizing MPI grid with mem_per_cpu_mb: 2.048000E+03 [Mb]
 - Use `abinit run.abi --mem-per-cpu=4G` to set mem_per_cpu_mb in the submission script
@@ -600,9 +600,9 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
 
  Computing diagonal matrix elements of Sigma_x
- 
+
  === Info on Coulomb term used in Sigma_x ===
- 
+
  cutoff-mode = MINIBZ
  Using KS orbitals and KS energies...
 
@@ -613,10 +613,10 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
 
  Building correlated screening Wc(i omega) ...
- 
+
  === Info on Coulomb term used in epsilon and W ===
- 
- cutoff-mode = MINIBZ
+
+ cutoff-mode = AUXILIARY_FUNCTION
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
@@ -643,9 +643,9 @@ iteration_state: {dtset: 3, }
 
 
  Computing diagonal matrix elements of Sigma_c
- 
+
  === Info on Coulomb term used in Sigma_c ===
- 
+
  cutoff-mode = MINIBZ
 
 
@@ -662,8 +662,8 @@ iteration_state: {dtset: 3, }
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
- 
- 
+
+
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 3, }
@@ -674,16 +674,16 @@ gwr_task   : G0W0
 QP_VBM_band: 4
 QP_CBM_band: 5
 KS_gap     :    2.454
-QP_gap     :    7.648
-Delta_QP_KS:    5.193
+QP_gap     :    7.770
+Delta_QP_KS:    5.316
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
-        2   -0.451  -11.382  -13.884   -0.272    0.862   -2.392   -2.392   -2.843    2.000
-        3   -0.451  -11.382  -13.884   -0.272    0.862   -2.392   -2.392   -2.843    2.000
-        4   -0.451  -11.382  -13.884   -0.272    0.862   -2.392   -2.392   -2.843    2.000
-        5    2.003   -9.974   -5.148   -1.577    0.862    2.801    2.801    4.804    0.000
-        6    2.003   -9.974   -5.148   -1.577    0.862    2.801    2.801    4.804    0.000
-        7    2.003   -9.974   -5.148   -1.577    0.862    2.801    2.801    4.804    0.000
+        2   -0.451  -11.382  -13.884   -0.289    0.866   -2.417   -2.417   -2.868    2.000
+        3   -0.451  -11.382  -13.884   -0.289    0.866   -2.417   -2.417   -2.868    2.000
+        4   -0.451  -11.382  -13.884   -0.289    0.866   -2.417   -2.417   -2.868    2.000
+        5    2.003   -9.974   -5.148   -1.484    0.867    2.899    2.899    4.902    0.000
+        6    2.003   -9.974   -5.148   -1.484    0.867    2.899    2.899    4.902    0.000
+        7    2.003   -9.974   -5.148   -1.484    0.867    2.899    2.899    4.902    0.000
 ...
 
 
@@ -696,36 +696,36 @@ gwr_task   : G0W0
 QP_VBM_band: 4
 QP_CBM_band: 5
 KS_gap     :    3.497
-QP_gap     :    8.544
-Delta_QP_KS:    5.047
+QP_gap     :    8.684
+Delta_QP_KS:    5.187
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
-        3   -1.736  -11.091  -13.754   -0.096    0.842   -2.324   -2.324   -4.060    2.000
-        4   -1.736  -11.091  -13.754   -0.096    0.842   -2.324   -2.324   -4.060    2.000
-        5    1.761   -9.965   -5.156   -1.657    0.864    2.724    2.724    4.484    0.000
+        3   -1.736  -11.091  -13.754   -0.119    0.846   -2.355   -2.355   -4.091    2.000
+        4   -1.736  -11.091  -13.754   -0.119    0.846   -2.355   -2.355   -4.091    2.000
+        5    1.761   -9.965   -5.156   -1.550    0.869    2.833    2.833    4.593    0.000
 ...
 
- 
+
  === Kohn-Sham gaps and band edges from IBZ mesh ===
  Indirect band gap semiconductor
  Fundamental gap:     0.903 (eV)
    VBM:    -0.451 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     0.451 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
  Direct gap:         2.454 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- 
- 
+
+
  === QP gaps and band edges taking into account Sigma_nk corrections for 2 k-points ===
  Indirect band gap semiconductor
- Fundamental gap:     3.294 (eV)
-   VBM:    -2.843 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     3.319 (eV)
+   VBM:    -2.868 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     0.451 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
  Direct gap:         3.887 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
- 
+
 - Cannot deallocate gwr datatype if FC_NVHPC, DO NOT USE DATASETS!
- 
+
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
 -          iomode           1
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
@@ -889,7 +889,7 @@ P           mkmem           3
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl       14.00000
- 
+
 ================================================================================
 
 
@@ -924,7 +924,7 @@ P           mkmem           3
 - D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
 - I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
 - Comment: the sixth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
 - The licence allows the authors to put it on the Web.
@@ -947,7 +947,7 @@ P           mkmem           3
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
@@ -965,7 +965,7 @@ P           mkmem           3
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
 - is available at
 -  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
@@ -984,16 +984,16 @@ P           mkmem           3
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - Proc.   0 individual time (sec): cpu=         10.8  wall=         10.8
- 
+
 ================================================================================
- 
+
  Calculation completed.
 .Delivered   1 WARNINGs and   7 COMMENTs to log file.
 +Overall time at end (sec) : cpu=         10.8  wall=         10.8
