@@ -1094,7 +1094,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        end if
      end if
      if (any(dt%gw_icutcoul == [14, 15, 16])) then
-       msg = "Monte-carlo integration method should be used when computing the screening. Please change gw_icutcoul."
+       msg = "Monte-carlo integration method should not be used when computing the screening. Please change gw_icutcoul."
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
    end if
