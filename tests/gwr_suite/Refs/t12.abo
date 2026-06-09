@@ -1,8 +1,8 @@
 
 .Version 10.9.0 of ABINIT. v10.8.1 released May 2026.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2026 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  3 Jun 2026.
-- ( at 18h14 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr_soc_dim/tests/TestBot_MPI1/gwr_suite_t12/t12.abi
+.Starting date : Tue  9 Jun 2026.
+- ( at 11h50 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr/tests/TestBot_MPI1/gwr_suite_t12/t12.abi
 - output file    -> t12.abo
 - root for input  files -> t12i
 - root for output files -> t12o
@@ -260,8 +260,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.15429
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr_soc_dim/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr_soc_dim/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
 - Si    ONCVPSP-3.2.3.1  r_core=   1.60303   1.72197   1.91712
 - 14.00000   4.00000    170510                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -641,8 +641,8 @@ iteration_state: {dtset: 3, }
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
-
-
+ 
+ 
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 3, }
@@ -675,8 +675,8 @@ gwr_task   : G0W0
 QP_VBM_band: 4
 QP_CBM_band: 5
 KS_gap     :    3.497
-QP_gap     :    8.586
-Delta_QP_KS:    5.089
+QP_gap     :    8.587
+Delta_QP_KS:    5.090
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
         3   -1.736  -11.091  -13.756   -0.103    0.843   -2.335   -2.335   -4.071    2.000
@@ -703,7 +703,7 @@ data: !Tabular |
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
@@ -896,7 +896,7 @@ P           mkmem           3
 - D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
 - I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
 - Comment: the sixth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for J. Chem. Phys.
+- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
 - The licence allows the authors to put it on the Web.
@@ -919,7 +919,7 @@ P           mkmem           3
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
@@ -937,7 +937,7 @@ P           mkmem           3
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys.
+- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
 - is available at
 -  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
@@ -956,16 +956,16 @@ P           mkmem           3
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          6.9  wall=          7.0
+- Proc.   0 individual time (sec): cpu=          7.0  wall=          7.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.9  wall=          7.0
++Overall time at end (sec) : cpu=          7.0  wall=          7.1
