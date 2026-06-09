@@ -5813,10 +5813,12 @@ subroutine gwr_build_wc(gwr)
          iglob2 = wc%loc2gcol(il_g2)
          ig2 = mod(iglob2 - 1, desc_q%npw) + 1
          vcs_g2 = desc_q%vc_sqrt_eps(ig2)
+         if (gwr%has_vcgen_sigma) vcs_g2 = desc_q%vc_sqrt_sigma(ig2)
          do il_g1=1,wc%size_local(1)
            iglob1 = wc%loc2grow(il_g1)
            ig1 = mod(iglob1 - 1, desc_q%npw) + 1
            vcs_g1 = desc_q%vc_sqrt_eps(ig1)
+           if (gwr%has_vcgen_sigma) vcs_g1 = desc_q%vc_sqrt_sigma(ig1)
 
            if (iglob1 == ig0 .and. iglob2 == ig0) then
              ! Store epsilon^{-1}_{iw, iq_ibz}(0, 0). Rescale by np_qibz because we will MPI reduce this array.
@@ -5829,7 +5831,7 @@ subroutine gwr_build_wc(gwr)
            ! Handle divergence in Wc for q --> 0
            ! Here we always use vcgen_eps
            i_sz = gwr%vcgen_eps%i_sz
-           !if (gwr%has_vcgen_sigma) i_sz = gwr%vcgen_sigma%i_sz
+           if (gwr%has_vcgen_sigma) i_sz = gwr%vcgen_sigma%i_sz
 
            if (q_is_gamma .and. (iglob1 == ig0 .or. iglob2 == ig0)) then
              if (iglob1 == ig0 .and. iglob2 == ig0) then
