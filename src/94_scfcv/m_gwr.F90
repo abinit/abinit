@@ -7945,7 +7945,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  logical :: gradk_not_done(gwr%nkibz)
  logical,allocatable :: bbp_mask(:,:)
  complex(dp) :: chq(3)
- complex(gwp) :: rhotwx(3, gwr%nspinor**2), new_rhotwx(3, gwr%nspinor**2)
+ complex(gwp) :: rhotwx(3, gwr%nspinor**2)
  complex(gwp),allocatable :: ug2(:), ur1_kibz(:), ur2_kibz(:), ur_prod(:), rhotwg(:), ug1_block(:,:), ug1(:)
  complex(dp) :: green_w(gwr%ntau), omega(gwr%ntau)
  complex(dp),allocatable :: chi0_lwing(:,:,:), chi0_uwing(:,:,:), chi0_head(:,:,:), head_qvals(:)
@@ -8100,7 +8100,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  end if
 
  ABI_CHECK_IEQ(dtset%symchi, 1, "symchi 0 not implemented")
- if (dtset%nspinor == 2) then
+ if (dtset%nspinor == 2 .and. .not. use_ddk) then
    ABI_CHECK_IEQ(dtset%inclvkb, 0, "inclvkb must be 0 when nspinor == 2 as SOC term is not coded.")
  end if
 
@@ -8241,34 +8241,20 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
            ! if nspinor == 2, sum 11, 22 terms in spin space
            if (nspinor == 2) rhotwg(1:npwe) = rhotwg(1:npwe) + rhotwg(npwe+1:2*npwe)
 
-           if (gwr%usepaw == 0) then
-             ! Matrix elements of i[H,r] for NC pseudopotentials.
-             ! NB ug1 and ug2 are kind=gwp
-             rhotwx = nc_ihr_comm(vkbr(ik_ibz), cryst, gwr%psps, npw_ki, nspinor, istwf_ki, gwr%dtset%inclvkb, &
-                                  kk_ibz, ug1, ug2, kg_ki)
-           end if
-
-           ! Treat a possible degeneracy between v and c.
-           ! Adler-Wiser expression, to be consistent here we use the KS eigenvalues (?)
-           if (abs(deltaeKS_b1b2) > GW_TOL_W0) then
-             rhotwx = -rhotwx / deltaeKS_b1b2
+           if (.not. use_ddk)  then
+             if (gwr%usepaw == 0 ) then
+               ! Matrix elements of i[H,r] for NC pseudopotentials.
+               ! NB ug1 and ug2 are kind=gwp
+               rhotwx = nc_ihr_comm(vkbr(ik_ibz), cryst, gwr%psps, npw_ki, nspinor, istwf_ki, gwr%dtset%inclvkb, &
+                                    kk_ibz, ug1, ug2, kg_ki)
+             end if
            else
-             rhotwx = czero_gw
-           end if
-
-           if (use_ddk) then
              cg2_dp(1,:) = real(ug2)
              cg2_dp(2,:) = aimag(ug2)
 
              ! DH_DK operator is Hermitian.
-             call ddkop%get_ihr_comm(cryst, eig_mk, istwf_ki, npw_ki, nspinor, cg2_dp, new_rhotwx)
-             new_rhotwx = conjg(new_rhotwx)
-
-             if (abs(deltaeKS_b1b2) > GW_TOLQ0) then
-                new_rhotwx = -new_rhotwx / deltaeKS_b1b2
-             else
-                new_rhotwx = zero
-             end if
+             call ddkop%get_ihr_comm(cryst, eig_mk, istwf_ki, npw_ki, nspinor, cg2_dp, rhotwx)
+             rhotwx = conjg(rhotwx)
 
              ! debug section
              !do idir=1,3
@@ -8286,8 +8272,13 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
              !end do
            end if ! use_ddk
 
-           ! TODO: Activate this and get rid of vkbr
-           rhotwx = new_rhotwx
+           ! Treat a possible degeneracy between v and c.
+           ! Adler-Wiser expression, to be consistent here we use the KS eigenvalues (?)
+           if (abs(deltaeKS_b1b2) > GW_TOL_W0) then
+             rhotwx = -rhotwx / deltaeKS_b1b2
+           else
+             rhotwx = czero_gw
+           end if
 
            ! NB: Using symrec conventions here
            ik_ibz = gwr%kbz2ibz(1, ik_bz); isym_k = gwr%kbz2ibz(2, ik_bz)
