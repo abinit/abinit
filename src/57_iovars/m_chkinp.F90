@@ -1078,7 +1078,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 
 !  ecuteps
-   if( ANY(optdriver == [RUNL_SCREENING]) )then
+   if (any(optdriver == [RUNL_SCREENING]) )then
      call chkdpr(0,0,cond_string,cond_values,ierr,'ecuteps',dt%ecuteps,1,0.0_dp,iout)
      if (dt%ecuteps <= 0) then
        ABI_ERROR_NOSTOP("ecuteps must be > 0 if optdriver == 3", ierr)
@@ -1092,6 +1092,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
           'Action: use another value of fftgw (e.g. 21), or adjust ecutwfn with ecuteps.'
          ABI_ERROR_NOSTOP(msg, ierr)
        end if
+     end if
+     if (any(dt%gw_icutcoul == [14, 15, 16])) then
+       msg = "Monte-carlo integration method should not be used when computing the screening. Please change gw_icutcoul."
+       ABI_ERROR_NOSTOP(msg, ierr)
      end if
    end if
 
