@@ -25,10 +25,6 @@
  getpot_filepath2  "t61o_DS11_POT"
  prtphdos2 0       # Disable computation of PHDOS to save some time
  zcut2             0.005 eV  # Smearing delta
-<<<<<<< HEAD
- nkptgw2  3
- bdgw2
-=======
  nkptgw2  8
  bdgw2
 1 4                # For total energy, you need all the valence states
@@ -36,16 +32,11 @@
 1 4
 1 4
 1 4
->>>>>>> trunk/develop
 1 4
 1 4
 1 4
  kptgw2
      0.000000     0.000000     0.000000
-<<<<<<< HEAD
-     0.500000     0.000000     0.000000
-     0.500000     0.500000     0.000000
-=======
      0.250000     0.000000     0.000000
      0.500000     0.000000     0.000000
      0.250000     0.250000     0.000000
@@ -53,7 +44,6 @@
     -0.250000     0.250000     0.000000
      0.500000     0.500000     0.000000
     -0.250000     0.500000     0.250000
->>>>>>> trunk/develop
 
  acell 3*6.751
  rprim 0 .5 .5 .5 0 .5 .5 .5 0
