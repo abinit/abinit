@@ -1529,7 +1529,7 @@ subroutine ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qphon,zeff,qdrp_cart,diel
             ! Phase factor and mirror terms
             phi = dot_product(kvec,xcart_para(:,ipert1)-xcart_para(:,ipert2))
             mirror_parapara = fac_mirror*(dcosh(eta*mean2_perp)+fac_exp*dcosh(eta*delta_perp))
-            mirror_perpperp = fac_mirror*(dcosh(eta*mean2_perp)-fac_exp*dcosh(eta*delta_perp))
+            mirror_perpperp = fac_mirror1*(dcosh(eta1*mean2_perp)-fac_exp1*dcosh(eta1*delta_perp))
             mirror_paraperp = fac_mirror*fac_exp*dsinh(eta*delta_perp)
             mirror_diff = fac_mirror*dsinh(eta*mean2_perp)
         ! Then compute the charge prefactor
