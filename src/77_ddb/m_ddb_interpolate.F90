@@ -208,12 +208,13 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, comm)
       crystal%gmet,Ifc%gprim,Ifc%mpert,natom,Ifc%nrpt,qptnrm(1), &
       qpt, crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,crystal%ucvol, &
       Ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart,ifc%ewald_option,eta, xmpi_comm_self, &
-      dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
+      inp%sys_dim,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad,&
+      dielt_thick=inp%dielt_thick,dielt_env=inp%dielt_env)
 
    end if
 
    ! Eventually impose the acoustic sum rule based on previously calculated d2asr
-   call asrq0%apply(natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
+   call asrq0%apply(natom, ddb%mpert, ddb%msize, qpt_padded, crystal, d2cart)
 
    ! Transform d2cart into reduced coordinates.
    call d2cart_to_red(d2cart,d2red,crystal%gprimd,crystal%rprimd,mpert, &

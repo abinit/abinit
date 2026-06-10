@@ -933,9 +933,7 @@ subroutine kss_calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
  real(dp) :: ucvol,effmass_free,ecutsm,ecut
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
- real(dp),allocatable :: ffnl(:,:,:,:),kpg_dum(:,:),modkplusg(:)
- real(dp),allocatable :: ylm(:,:),ylm_gr(:,:,:),ylm_k(:,:)
-
+ real(dp),allocatable :: ffnl(:,:,:,:),kpg_dum(:,:),modkplusg(:), ylm(:,:),ylm_gr(:,:,:),ylm_k(:,:)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1207,7 +1205,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
  real(dp),pointer :: eig_ene(:),eig_vec(:,:,:)
  real(dp),allocatable :: occ_k(:)
  real(dp),allocatable,target :: wfg(:,:,:)
- real(dp),ABI_CONTIGUOUS pointer :: ug1(:,:),ug2(:,:)
+ real(dp),contiguous, pointer :: ug1(:,:),ug2(:,:)
  type(pawcprj_type),allocatable :: Cprjnk_k(:,:)
  type(pawcprj_type),pointer :: Cprj_diago_k(:,:)
  type(ddiago_ctl_type) :: Diago_ctl

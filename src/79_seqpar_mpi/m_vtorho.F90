@@ -416,7 +416,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(gs_hamiltonian_type) :: gs_hamk
 !arrays
- integer(int32), ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
+ integer(int32), contiguous, pointer :: kg_k(:,:) => null()
  real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0), kphq(3)
  real(dp),allocatable :: EigMin(:,:),buffer1(:),cgq(:,:)
  real(dp),allocatable :: cgrkxc(:,:),doccde(:)
@@ -426,8 +426,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: nvresid_tmp(:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(c_double), ABI_CONTIGUOUS pointer :: kinpw(:) => null()
- real(c_double), ABI_CONTIGUOUS pointer :: eig_k(:) => null()
+ real(c_double), contiguous, pointer :: kinpw(:) => null()
+ real(c_double), contiguous, pointer :: eig_k(:) => null()
 #else
  real(dp),allocatable :: kinpw(:), eig_k(:)
 #endif
@@ -436,8 +436,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: pwnsfacq(:,:), kinpw_kphq(:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(c_double), ABI_CONTIGUOUS pointer :: resid_k(:) => null()
- real(c_double), ABI_CONTIGUOUS pointer :: rhoaug(:,:,:,:) => null()
+ real(c_double), contiguous, pointer :: resid_k(:) => null()
+ real(c_double), contiguous, pointer :: rhoaug(:,:,:,:) => null()
 #else
  real(dp),allocatable :: resid_k(:), rhoaug(:,:,:,:)
 #endif
@@ -445,7 +445,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: rhowfg(:,:),rhowfr(:,:),tauwfg(:,:),tauwfr(:,:), vectornd_pac(:,:,:,:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(real64), ABI_CONTIGUOUS pointer :: vlocal(:,:,:,:) => null()
+ real(real64), contiguous, pointer :: vlocal(:,:,:,:) => null()
 #else
  real(dp), allocatable :: vlocal(:,:,:,:)
 #endif

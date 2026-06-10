@@ -1,0 +1,88 @@
+# Ge diamond with slightly displaced atoms (to have non-zero forces)
+# test metaGGA + PAW + paral_kgb + istwfk + nspinor + npband
+# DS 1: cprj_in_memory 0 + istwfk 1
+# DS 2: cprj_in_memory 0 + istwfk > 1
+# DS 3: cprj_in_memory 0 + istwfk 1 + nspinor 2
+# All datasets should give the same results and the same as t120.abi in paral
+
+ndtset 3
+paral_kgb 1
+npband 2
+bandpp 1
+gpu_option "GPU_OPENMP"
+
+#DS 1
+istwfk1 1
+
+# DS 2
+istwfk2 2
+
+# DS 3
+istwfk3 1
+nspinor3 2
+nband3 40
+pawspnorb3 0
+
+# Simulation box
+acell 3*5.8 angstrom
+rprim  0.0 1/2 1/2
+       1/2 0.0 1/2
+       1/2 1/2 0.0
+
+# Atom types and positions
+# Slightly displaced the second atom to have non-zero forces
+ntypat 1
+znucl 32
+pp_dirpath="$ABI_PSPDIR/"
+pseudos="Ge.GGA-PBE-paw-kden-nonrel.xml"
+ixc -645642
+natom 2
+typat *1
+xred
+  -0.001  -0.001  -0.001
+   0.251   0.251   0.251
+
+# Nb of bands and occupation
+nband  20
+nbdbuf 2
+occopt 3
+tsmear 300 K
+
+# Basis set (probably unconverged)
+ecut 12
+pawecutdg 24
+
+# K-point grid (unrealistic)
+# Gamma point only for testing
+kptopt 3
+ngkpt 1 1 1
+nshiftk 1
+shiftk 0 0 0
+
+# Convergence
+nstep 20
+tolvrs 1e-10
+wfoptalg 114 # LOBPCG
+
+# Output
+write_files "none"
+
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = HAVE_FFTW3 or HAVE_DFTI
+#%% [paral_info]
+#%% nprocs_to_test = 2
+#%% max_nprocs = 2
+#%% [NCPU_2]
+#%% files_to_test =
+#%%   t63_MPI2.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium
+#%% [extra_info]
+#%% authors = J. Boust
+#%% keywords = metaGGA, PAW, CPRJ
+#%% description = Tests metaGGA + PAW + cprj_in_memory + paral_kgb + istwf + nspinor + npband. All datasets should give the same results.
+#%%<END TEST_INFO>

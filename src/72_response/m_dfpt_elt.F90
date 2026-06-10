@@ -2454,7 +2454,7 @@ subroutine dfpt_ewald(dyew,gmet,gsqcut,icutcoul,my_natom,natom,ngfft,nkpt,qphon,
 !        Larger arg gives 0 contribution:
          if (arg <= 80._dp) then
 
-           ! Apply cutoff 
+           ! Apply cutoff
            if ((abs(ig1).lt.ngfft(1)/2).and.&
            &   (abs(ig2).lt.ngfft(2)/2).and.&
            &   (abs(ig3).lt.ngfft(3)/2)) then
@@ -2463,7 +2463,7 @@ subroutine dfpt_ewald(dyew,gmet,gsqcut,icutcoul,my_natom,natom,ngfft,nkpt,qphon,
              ii=inv_ig(1,ig1)+ig23
              term=exp(-arg-facg0)/gsq * gcutoff(ii)
            else if (icutcoul.ne.3) then
-             term=zero 
+             term=zero
            else
              term=exp(-arg)/gsq
            end if
@@ -2494,7 +2494,7 @@ subroutine dfpt_ewald(dyew,gmet,gsqcut,icutcoul,my_natom,natom,ngfft,nkpt,qphon,
    end do
  end do
 
- ABI_FREE(gcutoff) 
+ ABI_FREE(gcutoff)
  ABI_FREE(inv_ig)
 
 !End G summation by accounting for some common factors.

@@ -272,7 +272,6 @@ subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, 
 
 !Local variables ------------------------------
 !scalars
- real(dp),parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
  integer :: spin, nsppol, ii, ik_ibz, nk_found, ifo, jj, ib_min, ib_max
  logical :: found, changed
 !arrays
@@ -319,7 +318,7 @@ subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, 
      ! Enlarge initial band range to include degenerate states.
      ib_min = val_indices(ik_ibz, spin)
      ib_max = ib_min + 1
-     call ebands%enclose_degbands(ik_ibz, spin, ib_min, ib_max, changed, TOL_EDIFF)
+     call ebands%enclose_degbands(ik_ibz, spin, ib_min, ib_max, changed, dtset%symsigma_de)
      bstart_ks(ii,spin) = ib_min
      nbcalc_ks(ii,spin) = ib_max - ib_min + 1
    end do

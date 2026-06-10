@@ -215,7 +215,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  logical(kind=c_bool) :: k1_eq_k2
  logical :: double_rfft_trick,have_to_reequilibrate,has_fock,local_gvnlxc
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,use_cwavef_r, filter_dilatmx_loc_
- real(dp) :: ghcim,ghcre,weight
+ real(dp) :: ghcim,ghcre,weight !, kscale
 #ifdef HAVE_OPENMP_OFFLOAD
  complex(dp), parameter :: cminusone  = (-1._dp,0._dp)
 #endif
@@ -223,9 +223,9 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !arrays
  integer,  contiguous, pointer :: gbound_k1(:,:), gbound_k2(:,:)
  integer,  contiguous, pointer :: kg_k1(:,:), kg_k2(:,:)
- integer,  ABI_CONTIGUOUS pointer :: indices_pw_fft(:), kg_k_fft(:,:)
- integer,  ABI_CONTIGUOUS pointer :: recvcount_fft(:), recvdisp_fft(:)
- integer,  ABI_CONTIGUOUS pointer :: sendcount_fft(:), senddisp_fft(:)
+ integer,  contiguous, pointer :: indices_pw_fft(:), kg_k_fft(:,:)
+ integer,  contiguous, pointer :: recvcount_fft(:), recvdisp_fft(:)
+ integer,  contiguous, pointer :: sendcount_fft(:), senddisp_fft(:)
  integer,  allocatable:: dimcprj(:)
  real(dp)                         :: enlout(ndat), lambda_ndat(ndat), tsec(2)
  real(dp), target                 :: nonlop_dum(1,1)
@@ -244,8 +244,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(dp), allocatable            :: cwavef_spin(:,:), gvnlxc_spin(:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(c_double), ABI_CONTIGUOUS pointer :: gvnlc(:,:)
- real(c_double), ABI_CONTIGUOUS pointer :: gvnlxc_(:,:)
+ real(c_double), contiguous, pointer :: gvnlc(:,:)
+ real(c_double), contiguous, pointer :: gvnlxc_(:,:)
 #else
  real(dp), target, allocatable                :: gvnlc(:,:)
  real(dp), contiguous, pointer                :: gvnlxc_(:,:)
@@ -946,6 +946,9 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      ABI_CHECK_IEQ(size(gs_ham%vxctaulocal), gs_ham%n4*gs_ham%n5*gs_ham%n6*gs_ham%nvloc*4, 'wrong sizes for vxctaulocal!')
 
      ABI_MALLOC(ghc_mGGA,(2,npw_k1*my_nspinor*ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(cwavef) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
+#endif
      if (double_rfft_trick) then
        ABI_MALLOC(kg_k_fft,(3,npw_fft))
        ABI_MALLOC(cwavef_fft,(2,npw_fft*ndat_))
@@ -989,6 +992,9 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      end if
      ABI_MALLOC(ghc_vectornd,(2,npw_k1*my_nspinor*ndat))
      ghc_vectornd=zero
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(cwavef) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
+#endif
      call getghc_nucdip(cwavef,ghc_vectornd,gbound_k1,istwf_k_,kg_k1,kpt_k1,&
        gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
        gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vectornd,gs_ham%vlocal,gs_ham%zora,gs_ham%gpu_option)
@@ -1024,7 +1030,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          do ispinor=1,my_nspinor
            do ig=1,npw_k2
              igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-             if(kinpw_k2(ig)>huge(zero)*1.d-11) ghc(:,igspinor)=zero
+             if(kinpw_k2(ig)>hugevalue) ghc(:,igspinor)=zero
            end do ! ig
          end do ! ispinor
        end do
@@ -1035,7 +1041,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          do ispinor=1,my_nspinor
            do ig=1,npw_k2
              igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-             if(kinpw_k2(ig)>huge(zero)*1.d-11) ghc(:,igspinor)=zero
+             if(kinpw_k2(ig)>hugevalue) ghc(:,igspinor)=zero
            end do ! ig
          end do ! ispinor
        end do
@@ -1208,12 +1214,30 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          ! OpenMP GPU
 #ifdef HAVE_OPENMP_OFFLOAD
          if (k1_eq_k2) then
+
+           !MG 20260102: With nvfortran 23.11-0, this kernel is a bottleneck due to the filter on kinpw_k2 and the update of ghc.
+           ! Solution:  branch-free mask + manual loop unrolling. loop unrolling is crucial.
+           ! The version with COLLAPSE(3) is faster.
+
+           ! !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,kinpw_k2,gvnlxc_,gsc,cwavef)
+           ! !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) PRIVATE(igspinor, kscale) MAP(to:ghc,kinpw_k2,gvnlxc_,gsc,cwavef)
            !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,kinpw_k2,gvnlxc_,cwavef)
            do idat=1,ndat
              do ispinor=1,my_nspinor
+               ! !$OMP PARALLEL DO PRIVATE(igspinor, kscale)
                !$OMP PARALLEL DO PRIVATE(igspinor)
                do ig=1,npw_k2
                  igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
+
+                 ! ! New version with branch-free mask + manual loop unrolling.
+                 ! kscale = merge(one, zero, kinpw_k2(ig) < hugevalue)
+
+                 ! ghc(1,igspinor) = kscale * (ghc(1,igspinor) + kinpw_k2(ig)*cwavef(1,igspinor) + gvnlxc_(1,igspinor))
+                 ! ghc(2,igspinor) = kscale * (ghc(2,igspinor) + kinpw_k2(ig)*cwavef(2,igspinor) + gvnlxc_(2,igspinor))
+                 ! if (sij_opt == 1) then
+                 !   gsc(1,igspinor) = kscale * gsc(1,igspinor)
+                 !   gsc(2,igspinor) = kscale * gsc(2,igspinor)
+                 ! end if
                  if(kinpw_k2(ig)<huge(zero)*1.d-11)then
                    ghc(1,igspinor) = ghc(1,igspinor) + kinpw_k2(ig)*cwavef(1,igspinor) + gvnlxc_(1,igspinor)
                    ghc(2,igspinor) = ghc(2,igspinor) + kinpw_k2(ig)*cwavef(2,igspinor) + gvnlxc_(2,igspinor)
@@ -1246,7 +1270,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
                !$OMP PARALLEL DO PRIVATE(igspinor)
                do ig=1,npw_k2
                  igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-                 if(kinpw_k2(ig)<huge(zero)*1.d-11)then
+                 if(kinpw_k2(ig)<hugevalue)then
                    ghc(1,igspinor)= ghc(1,igspinor) + gvnlxc_(1,igspinor)
                    ghc(2,igspinor)= ghc(2,igspinor) + gvnlxc_(2,igspinor)
                  else
@@ -1283,7 +1307,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
              do ispinor=1,my_nspinor
                do ig=1,npw_k2
                  igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-                 if(kinpw_k2(ig)<huge(zero)*1.d-11)then
+                 if(kinpw_k2(ig)<hugevalue)then
                    ghc(:,igspinor) = ghc(:,igspinor) + kinpw_k2(ig)*cwavef(:,igspinor) + gvnlxc_(:,igspinor)
                  else
                    ghc(:,igspinor)=zero
@@ -1299,7 +1323,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
                do ispinor=1,my_nspinor
                  do ig=1,npw_k2
                    igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-                   if(kinpw_k2(ig)<huge(zero)*1.d-11)then
+                   if(kinpw_k2(ig)<hugevalue)then
                      ghc(:,igspinor)= ghc(:,igspinor) + gvnlxc_(:,igspinor)
                    else
                      ghc(:,igspinor)=zero
@@ -1317,7 +1341,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
                  if (iispinor == 1) then
                    do ig=1,npw_k2
                      igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-                     if(gs_ham%kinpw_k(ig)<huge(zero)*1.d-11)then
+                     if(gs_ham%kinpw_k(ig)<hugevalue)then
                        ghc(:,igspinor) = ghc(:,igspinor) + gs_ham%kinpw_k(ig)*cwavef(:,igspinor) + gvnlxc_(:,igspinor)
                      else
                        ghc(:,igspinor)=zero
@@ -1327,7 +1351,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
                 else
                    do ig=1,npw_k2
                      igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-                     if(gs_ham%kinpw_kp(ig)<huge(zero)*1.d-11)then
+                     if(gs_ham%kinpw_kp(ig)<hugevalue)then
                        ghc(:,igspinor) = ghc(:,igspinor) + gs_ham%kinpw_kp(ig)*cwavef(:,igspinor) + gvnlxc_(:,igspinor)
                      else
                        ghc(:,igspinor)=zero
@@ -1355,7 +1379,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          do ispinor=1,my_nspinor
            do ig=1,npw_k2
              igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-             if(kinpw_k2(ig)<huge(zero)*1.d-11)then
+             if(kinpw_k2(ig)<hugevalue)then
                if (k1_eq_k2) then
                  ghcre=kinpw_k2(ig)*cwavef(1,igspinor)+ghc(1,igspinor)+gvnlxc_(1,igspinor)
                  ghcim=kinpw_k2(ig)*cwavef(2,igspinor)+ghc(2,igspinor)+gvnlxc_(2,igspinor)
@@ -2250,7 +2274,7 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
  !character(len=500) :: msg
 !arrays
  real(dp) :: enlout_dum(ndat),tsec(2)
- real(dp), ABI_CONTIGUOUS pointer :: cwavef(:,:),scwavef(:,:)
+ real(dp), contiguous, pointer :: cwavef(:,:),scwavef(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 ! *********************************************************************
 

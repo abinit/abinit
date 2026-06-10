@@ -2426,7 +2426,7 @@ end subroutine polyn_interp
   integer, parameter :: NMAX=15
   integer :: i,j,k
   real(dp) :: b,ff,phi
-!arrays 
+!arrays
   real(dp) :: s(NMAX)
 ! *************************************************************************
 
@@ -6776,10 +6776,10 @@ subroutine geteuler(spinaxis, alpha, beta)
 !scalars
  real(dp) :: sx, sy, sz, norm, rxy
 !***********************************************************************
-  
+
  alpha = zero; beta = zero
  norm = DOT_PRODUCT(spinaxis, spinaxis)
-  
+
  if (norm <= tol8*tol8) return
 
  sx = spinaxis(1); sy = spinaxis(2); sz = spinaxis(3)

@@ -2003,6 +2003,7 @@ subroutine polstate_setup(self, ip, a_src, load)
 
  if (present(load) .and. load) then
    ABI_CHECK(present(a_src), "polstate_setup: A_nk is expected but not provided")
+   !print *, "load"
    call self%load_a(a_src, ip)
  else
    call self%seed_a(self%aseed, ip)

@@ -1726,7 +1726,7 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
 !arrays
  integer :: units(2)
  real(dp),target,allocatable :: cg_work(:,:,:)
- real(dp),ABI_CONTIGUOUS pointer :: cg_k(:,:)
+ real(dp),contiguous, pointer :: cg_k(:,:)
 ! *********************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)

@@ -1,8 +1,8 @@
 
-.Version 9.0.0 of CUT3D 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.0.0 of CUT3D
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  CUT3D comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Mon 24 Feb 2020.
 - ( at 16h20 )
-  
+
 
   What is the name of the 3D function (density, potential or wavef) file ?
   => Your 3D function file is: t04o_DEN
@@ -24,11 +24,11 @@
 - Your file contains unformatted binary header + 3D data
 
  ===============================================================================
- ECHO of the ABINIT file header 
- 
+ ECHO of the ABINIT file header
+
  First record :
 .codvsn,headform,fform = 9.0.0      80   52
- 
+
  Second record :
  bantot,intxc,ixc,natom  =     2     0     1     2
  ngfft(1:3),nkpt         =    64    45    45     1
@@ -67,13 +67,13 @@
  title=Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
   znuclpsp=  1.00, zionpsp=  1.00, pspso=  0, pspdat= 10605, pspcod=  3, pspxc=  1
   lmnmax  =  1
- 
+
  Last record :
  residm,etot,fermie=    8.416143E-19   -1.127481096274E+00   -3.636638E-01
  xred =
            -4.921158E-02    0.000000E+00    0.000000E+00
             4.921158E-02    0.000000E+00    0.000000E+00
- End the ECHO of the ABINIT file header 
+ End the ECHO of the ABINIT file header
  ===============================================================================
 
  ===========================================================
@@ -92,7 +92,7 @@
    1   -7.381737E-01    0.000000E+00    0.000000E+00
    2    7.381737E-01    0.000000E+00    0.000000E+00
 
-  This file is a Density or Potential file 
+  This file is a Density or Potential file
 
   3D function was read. Ready for further treatment.
 
@@ -106,7 +106,7 @@
    4 => volume (interpolation of data in a volume)
    5 => 3D formatted data (output the bare 3D data - one column)
    6 => 3D indexed data (bare 3D data, preceeded by 3D index)
-   7 => 3D Molekel formatted data 
+   7 => 3D Molekel formatted data
    8 => 3D data with coordinates (tecplot ASCII format)
    9 => output .xsf file for XCrysDen
   11 => compute atomic charge using the Hirshfeld method
@@ -126,11 +126,11 @@
 - Your file contains unformatted binary header + 3D data
 
  ===============================================================================
- ECHO of the ABINIT file header 
- 
+ ECHO of the ABINIT file header
+
  First record :
 .codvsn,headform,fform = 9.0.0      80  104
- 
+
  Second record :
  bantot,intxc,ixc,natom  =     2     0     1     2
  ngfft(1:3),nkpt         =    64    45    45     1
@@ -169,13 +169,13 @@
  title=Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
   znuclpsp=  1.00, zionpsp=  1.00, pspso=  0, pspdat= 10605, pspcod=  3, pspxc=  1
   lmnmax  =  1
- 
+
  Last record :
  residm,etot,fermie=    8.416143E-19   -1.127481096274E+00   -3.636638E-01
  xred =
            -4.921158E-02    0.000000E+00    0.000000E+00
             4.921158E-02    0.000000E+00    0.000000E+00
- End the ECHO of the ABINIT file header 
+ End the ECHO of the ABINIT file header
  ===============================================================================
 
  ===========================================================
@@ -194,7 +194,7 @@
    1   -7.381737E-01    0.000000E+00    0.000000E+00
    2    7.381737E-01    0.000000E+00    0.000000E+00
 
-  This file is a Density or Potential file 
+  This file is a Density or Potential file
 
   3D function was read. Ready for further treatment.
 
@@ -208,7 +208,7 @@
    4 => volume (interpolation of data in a volume)
    5 => 3D formatted data (output the bare 3D data - one column)
    6 => 3D indexed data (bare 3D data, preceeded by 3D index)
-   7 => 3D Molekel formatted data 
+   7 => 3D Molekel formatted data
    8 => 3D data with coordinates (tecplot ASCII format)
    9 => output .xsf file for XCrysDen
   11 => compute atomic charge using the Hirshfeld method
@@ -228,11 +228,11 @@
 - Your file contains unformatted binary header + 3D data
 
  ===============================================================================
- ECHO of the ABINIT file header 
- 
+ ECHO of the ABINIT file header
+
  First record :
 .codvsn,headform,fform = 9.0.0      80  107
- 
+
  Second record :
  bantot,intxc,ixc,natom  =     2     0     1     2
  ngfft(1:3),nkpt         =    64    45    45     1
@@ -271,13 +271,13 @@
  title=Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
   znuclpsp=  1.00, zionpsp=  1.00, pspso=  0, pspdat= 10605, pspcod=  3, pspxc=  1
   lmnmax  =  1
- 
+
  Last record :
  residm,etot,fermie=    8.416143E-19   -1.127481096274E+00   -3.636638E-01
  xred =
            -4.921158E-02    0.000000E+00    0.000000E+00
             4.921158E-02    0.000000E+00    0.000000E+00
- End the ECHO of the ABINIT file header 
+ End the ECHO of the ABINIT file header
  ===============================================================================
 
  ===========================================================
@@ -296,7 +296,7 @@
    1   -7.381737E-01    0.000000E+00    0.000000E+00
    2    7.381737E-01    0.000000E+00    0.000000E+00
 
-  This file is a Density or Potential file 
+  This file is a Density or Potential file
 
   3D function was read. Ready for further treatment.
 
@@ -310,7 +310,7 @@
    4 => volume (interpolation of data in a volume)
    5 => 3D formatted data (output the bare 3D data - one column)
    6 => 3D indexed data (bare 3D data, preceeded by 3D index)
-   7 => 3D Molekel formatted data 
+   7 => 3D Molekel formatted data
    8 => 3D data with coordinates (tecplot ASCII format)
    9 => output .xsf file for XCrysDen
   11 => compute atomic charge using the Hirshfeld method
@@ -330,11 +330,11 @@
 - Your file contains unformatted binary header + 3D data
 
  ===============================================================================
- ECHO of the ABINIT file header 
- 
+ ECHO of the ABINIT file header
+
  First record :
 .codvsn,headform,fform = 9.0.0      80  103
- 
+
  Second record :
  bantot,intxc,ixc,natom  =     2     0     1     2
  ngfft(1:3),nkpt         =    64    45    45     1
@@ -373,13 +373,13 @@
  title=Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
   znuclpsp=  1.00, zionpsp=  1.00, pspso=  0, pspdat= 10605, pspcod=  3, pspxc=  1
   lmnmax  =  1
- 
+
  Last record :
  residm,etot,fermie=    8.416143E-19   -1.127481096274E+00   -3.636638E-01
  xred =
            -4.921158E-02    0.000000E+00    0.000000E+00
             4.921158E-02    0.000000E+00    0.000000E+00
- End the ECHO of the ABINIT file header 
+ End the ECHO of the ABINIT file header
  ===============================================================================
 
  ===========================================================
@@ -398,7 +398,7 @@
    1   -7.381737E-01    0.000000E+00    0.000000E+00
    2    7.381737E-01    0.000000E+00    0.000000E+00
 
-  This file is a Density or Potential file 
+  This file is a Density or Potential file
 
   3D function was read. Ready for further treatment.
 
@@ -412,7 +412,7 @@
    4 => volume (interpolation of data in a volume)
    5 => 3D formatted data (output the bare 3D data - one column)
    6 => 3D indexed data (bare 3D data, preceeded by 3D index)
-   7 => 3D Molekel formatted data 
+   7 => 3D Molekel formatted data
    8 => 3D data with coordinates (tecplot ASCII format)
    9 => output .xsf file for XCrysDen
   11 => compute atomic charge using the Hirshfeld method

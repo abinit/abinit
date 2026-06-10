@@ -300,6 +300,97 @@ def runemall(
 
 
 @task
+def bisect(ctx: Context, start: str, end: str, runtests_args: str) -> None:
+    """
+    Perform a bisection search between two commits to find where a bug was introduced.
+
+    Args:
+        ctx: Invoke context.
+        start: The last known GOOD commit hash.
+        end: The first known BAD commit hash.
+        runtests_args: String containing arguments for `runtests.py`.
+    """
+    from tests.pymods.termcolor import cprint
+
+    cprint(f"Bisection started: start (good)={start}, end (bad)={end}", color="yellow")
+
+    # Get the list of commits between start and end.
+    # git rev-list end ^start gives commits from start to end.
+    res = ctx.run(f"git rev-list --reverse {end} ^{start}", hide=True)
+    commits = res.stdout.strip().split("\n")
+
+    if not commits:
+        cprint("No commits found between the specified points.", color="red")
+        return
+
+    cprint(f"Testing {len(commits)} commits...", color="yellow")
+
+    low = 0
+    high = len(commits) - 1
+    first_bad = end
+
+    with open("_bisection.txt", "w") as log:
+        log.write(f"Bisection started: start (good)={start}, end (bad)={end}\n")
+        log.write(f"Number of commits to check: {len(commits)}\n\n")
+
+        try:
+            while low <= high:
+                mid = (low + high) // 2
+                current_commit = commits[mid]
+
+                msg = f"\n--- Checking commit {mid+1}/{len(commits)}: {current_commit} ---"
+                cprint(msg, color="cyan")
+                log.write(msg + "\n")
+
+                # 1. Checkout
+                ctx.run(f"git checkout {current_commit}", hide=True)
+
+                # 2. Compile (required for runtests.py)
+                cprint("Compiling...", color="yellow")
+                make_res = ctx.run("invoke makedeep", warn=True)
+                if not make_res.ok:
+                    skip_msg = f"Compilation failed for {current_commit}. Skipping this commit."
+                    cprint(skip_msg, color="red")
+                    log.write(skip_msg + "\n")
+                    low = mid + 1
+                    continue
+
+                # 3. Run tests
+                top = find_top_build_tree(".", with_abinit=True)
+                with cd(os.path.join(top, "tests")):
+                    cmd = f"./runtests.py {runtests_args}"
+                    cprint(f"Running tests: {cmd}", color="yellow")
+                    test_res = ctx.run(cmd, warn=True)
+
+                    if test_res.ok:
+                        cprint(f"Commit {current_commit} is GOOD", color="green")
+                        log.write(f"{current_commit}: GOOD\n")
+                        low = mid + 1
+                    else:
+                        cprint(f"Commit {current_commit} is BAD", color="red")
+                        log.write(f"{current_commit}: BAD\n")
+                        first_bad = current_commit
+                        high = mid - 1
+
+            res_msg = f"\nResult: The bug was introduced in commit {first_bad}"
+            cprint(res_msg, color="magenta")
+            log.write(res_msg + "\n")
+
+            show_res = ctx.run(f"git show --summary {first_bad}", hide=True)
+            log.write("\nCommit Details:\n")
+            log.write(show_res.stdout)
+            ctx.run(f"git show --summary {first_bad}")
+
+        except Exception as e:
+            err_msg = f"An error occurred during bisection: {e}"
+            cprint(err_msg, color="red")
+            log.write(err_msg + "\n")
+
+        finally:
+            cprint("\nBisection finished.", color="yellow")
+
+
+@task
 def makemake(ctx: Context) -> None:
     """
     Invoke the `makemake` script to rebuild the build system.
@@ -721,7 +812,6 @@ def omp_check(
         make(ctx)
 
     differ = which_differ()
-
     omp_threads = list_from_string(omp_threads)
 
     cprint(
@@ -1493,3 +1583,48 @@ def config_log(ctx: Context, log_path: str = "config.log") -> None:
         print(f"--- Error block #{idx} ---")
         print(block)
         print("-" * 40)
+
+
+@task
+def nvidia_prof(ctx, sh_path="nv_prof.sh"):
+    """Generate a shell script to run an Abinit input file with GPU and profile it with nsys."""
+    sh_template = r"""\
+#!/bin/bash
+set -x
+set -e
+
+invoke make -b abinit
+
+export OMP_TARGET_OFFLOAD=MANDATORY
+#export LIBOMPTARGET_INFO=4     # LLVM
+#export NVCOMPILER_OMP_DEBUG=1  # NVHPC
+
+# Set OpenMP environment
+export nt=1
+echo "Running ABINIT with OMP_NUM_THREADS=${nt}"
+export OMP_NUM_THREADS=${nt}
+#export OMP_PLACES=cores
+#export OMP_PROC_BIND=close
+
+# GPU version
+rm profile_*
+nsys profile \
+  --trace=cuda,openmp,nvtx \
+  --cuda-memory-usage=true \
+  -o profile_run \
+  mpirun -n 1 abinit run_gpu.abi | tee run_gpu.log
+
+nsys stats profile_run.nsys-rep | tee prof.out
+#nsys-ui profile_run.nsys-rep
+
+#ncu \
+#  --set roofline \
+#  --kernel-name your_kernel_name \
+#  mpirun -n 1 abinit run_gpu.abi | tee run_gpu.log
+
+#vimdiff run_gpu.abo ref_cpu.abo
+#vimdiff run_gpu.abo ref_cpu.log
+"""
+
+    with open(sh_path, "wt") as fh:
+        fh.write(sh_template)

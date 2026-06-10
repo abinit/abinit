@@ -1903,8 +1903,8 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 !arrays
  integer,allocatable :: gbound(:,:),gbound_pos(:,:),kg_k(:,:),kg_k_pos(:,:)
  integer,allocatable :: lmncmax(:),my_ffttab(:),my_gridtab(:),nphicor(:)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  logical,allocatable :: have_intc(:,:,:),have_rad(:,:)
  real(dp) :: buf(4),contrib(2),cp(2),cp_pos(2),expipr(2),pbn(3),pcart(3)
  real(dp) :: radsumnfftc(2),ylmgr(1,1,0),ylmr_nrm(1)

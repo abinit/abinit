@@ -1,5 +1,5 @@
 
- **** DERIVATIVE DATABASE ****    
+ **** DERIVATIVE DATABASE ****
 +DDB, Version number  20240201
 
  C diamond EIGR2D file
@@ -55,7 +55,7 @@
             0.25000000000000D+00  0.25000000000000D+00  0.25000000000000D+00
      znucl  0.60000000000000D+01
       zion  0.40000000000000D+01
- 
+
   Description of the potentials (KB energies)
   vrsio8 (for pseudopotentials)=100401
   usepaw =  0
@@ -63,10 +63,10 @@
   Atom type=    1   pspso=  0   nekb=   1
   iln lpsang iproj  ekb(:)
      1     0     1     4.9214663E+00
- 
+
  **** Database of total energy derivatives ****
  Number of data blocks=    2
-  
+
  2nd eigenvalue derivatives   - # elements :          36
  qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
  K-point:  0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -2445,7 +2445,7 @@
    1   2   3   2 -0.26733276964861D+02 -0.62670644170789D-14
    2   2   3   2 -0.26733276846636D+02 -0.11183528611859D-13
    3   2   3   2 -0.32587410151737D+02  0.00000000000000D+00
-  
+
  2nd eigenvalue derivatives   - # elements :          36
  qpt  5.00000000E-01  5.00000000E-01  0.00000000E+00   1.0
  K-point:  0.00000000E+00  0.00000000E+00  0.00000000E+00

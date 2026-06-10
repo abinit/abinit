@@ -1,8 +1,8 @@
 
 .Version 10.5.8.1 of ABINIT, released Dec 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Wed 11 Feb 2026.
 - ( at 14h30 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v8_t66/t66.abi
 - output file    -> t66.abo
 - root for input  files -> t66i
@@ -465,7 +465,7 @@ meta: {optdriver: 1, rfmagn: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 3    ipert=   6
@@ -503,7 +503,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  7  -15.088602265592     -4.767E-07 5.031E-08 6.622E-07 4.029E-03 2.401E+01
  ETOT  8  -15.088602266543     -9.509E-10 1.861E-09 7.020E-10 1.332E-04 2.401E+01
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  9.509E-10 < toldfe=  1.000E-06
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
@@ -538,47 +538,47 @@ tolerances: {toldfe: 1.00E-06, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
    1    1   3    6        -0.0000001169         0.0000000000
-  
+
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
    2    1   3    6         0.0000001470         0.0000000000
-  
+
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
    3    1   3    6         0.0000001222         0.0000000000
-  
+
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
-  
+
    2    3   1    1         0.0000000000         0.0000000000
    2    3   3    1         0.0000000000         0.0000000000
-  
+
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
-  
+
    3    6   1    1        -0.0000001169         0.0000000000
    3    6   2    1         0.0000001470         0.0000000000
    3    6   3    1         0.0000001222         0.0000000000
-  
-  
+
+
   Magnetic susceptibility, in cartesian coordinates
   (from uniform spin field response)
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
@@ -769,7 +769,7 @@ P          mk1mem           8
 - D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
 - I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
 - Comment: the sixth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
 - The licence allows the authors to put it on the Web.
@@ -787,7 +787,7 @@ P          mk1mem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
@@ -805,7 +805,7 @@ P          mk1mem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
 - is available at
 -  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
@@ -824,7 +824,7 @@ P          mk1mem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
@@ -840,7 +840,7 @@ P          mk1mem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.

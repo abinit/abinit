@@ -44,12 +44,12 @@ module m_cgtools
  use m_xomp
  use m_gputk
  use m_abi_linalg
+ use m_linalg_interfaces
 
  use m_fstrings,      only : toupper, itoa, sjoin
  use m_time,          only : timab, cwtime, cwtime_report
  use m_numeric_tools, only : hermit, rhophi
  use m_pawcprj,       only : pawcprj_type,pawcprj_axpby,pawcprj_zaxpby
- use m_abi_linalg
 
  implicit none
 
@@ -135,6 +135,7 @@ module m_cgtools
  public :: cg_randomize             ! Initialize cg_k with random numbers.
  public :: cg_copy_spin
  public :: cg_put_spin
+ public :: cg_p_psi                 ! Compute <g|-i\Nabla|psi_nk>.
 !***
 
 CONTAINS  !========================================================================================
@@ -778,6 +779,8 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta, gpu_op
  end if
  ldb = kk; ldc = mm
 
+ ! ZGEMM(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
+
  if(my_gpu_option==ABI_GPU_DISABLED) then
    call ZGEMM(trans, "N", mm, nn, kk, my_alpha, cgmat, lda, vec, ldb, my_beta, matvec, ldc)
  else if(my_gpu_option==ABI_GPU_OPENMP) then
@@ -789,9 +792,6 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta, gpu_op
    !$OMP END TARGET DATA
 #endif
  end if
- ! ZGEMM(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
-
- !call ZGEMV(trans,mm,nn,my_alpha,cgmat,lda,vec,1,my_beta,matvec,1)
 
 end subroutine cg_zgemv
 !!***
@@ -820,13 +820,14 @@ end subroutine cg_zgemv
 !!
 !! SOURCE
 
-subroutine cg_zgemm(transa, transb, npwsp, ncola, ncolb, cg_a, cg_b, cg_c, alpha, beta)
+subroutine cg_zgemm(transa, transb, npwsp, ncola, ncolb, cg_a, cg_b, cg_c, &
+                    alpha, beta) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwsp,ncola,ncolb
- real(dp),optional,intent(in) :: alpha(2), beta(2)
  character(len=1),intent(in) :: transa, transb
+ real(dp),optional,intent(in) :: alpha(2), beta(2)
 !arrays
  real(dp),intent(in) :: cg_a(2,npwsp*ncola), cg_b(2,npwsp*ncolb)
  real(dp),intent(inout) :: cg_c(2,*)
@@ -3703,7 +3704,7 @@ subroutine cg_precon(cg, eval, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pco
    do ig=1+igs,npw+igs
      if(kinpw(ig-igs)<huge(zero)*1.d-11)then
        xx=kinpw(ig-igs)*ek0_inv
-!      Teter polynomial ratio
+       ! Teter polynomial ratio
        poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
        fac=poly/(poly+16._dp*xx**4)
        if (optekin==1) fac=two*fac
@@ -4599,9 +4600,6 @@ end subroutine overlap_g
 subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k, npw_k, my_nspinor, paral_kgb, &
                     subham, subovl, use_subovl, usepaw, me_g0)
 
- use m_linalg_interfaces
- use m_abi_linalg
-
 !Arguments ------------------------------------
  integer,intent(in) :: icg,igsc,istwf_k,mcg,mgsc,nband_k,npw_k,me_g0
  integer,intent(in) :: my_nspinor,paral_kgb,use_subovl,usepaw
@@ -4831,9 +4829,6 @@ subroutine subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
 &                   mcg,nband_k,npw_k,nspinor,paral_kgb,&
 &                   subham)
 
- use m_linalg_interfaces
- use m_abi_linalg
-
 !Arguments ------------------------------------
  integer,intent(in) :: icg,istwf_k,mcg,nband_k,npw_k
  integer,intent(in) :: nspinor,paral_kgb
@@ -5053,8 +5048,6 @@ end subroutine subdiago_low_memory
 !! SOURCE
 
 subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_vecnm, useoverlap, vecnm, me_g0, comm)
-
- use m_abi_linalg
 
 !Arguments ------------------------------------
 !scalars
@@ -5505,7 +5498,7 @@ subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_ve
 !            Avoid double counting G=0 contribution
 !            Imaginary part of vecnm at G=0 should be zero,so only take real part
              dotr=zero
-!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotr) SHARED(ii1,ii2,nelem,vecnm)
+             !$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotr) SHARED(ii1,ii2,nelem,vecnm)
              do ii=1,nelem
                dotr=dotr+vecnm(1,ii1+ii)*vecnm(1,ii2+ii)+vecnm(2,ii1+ii)*vecnm(2,ii2+ii)
              end do
@@ -5515,8 +5508,8 @@ subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_ve
              call xmpi_sum(dotr,comm,ierr)
              call timab(48,2,tsec)
 
-!            Then subtract the appropriate amount of the lower state
-!$OMP PARALLEL DO PRIVATE(ii) SHARED(dotr,ii1,ii2,nelem,vecnm)
+             ! Then subtract the appropriate amount of the lower state
+             !$OMP PARALLEL DO PRIVATE(ii) SHARED(dotr,ii1,ii2,nelem,vecnm)
              do ii=1,nelem
                vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)
                vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-dotr*vecnm(2,ii1+ii)
@@ -5571,8 +5564,6 @@ end subroutine pw_orthon
 
 subroutine pw_orthon_cprj(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
 
- use m_abi_linalg
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: icg,mcg,nelem,nspinor,nvec,ortalgo
@@ -5623,7 +5614,7 @@ subroutine pw_orthon_cprj(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
    ! ovl(i1,i1) = <psi_i1|S|psi_i1>
    summ = ovl_mat(iv1r+iv1l)
    xnorm = sqrt(abs(summ)) ;  summ=1.0_dp/xnorm
-!$OMP PARALLEL DO PRIVATE(ii) SHARED(icg,ivec,nelem,summ,vecnm)
+   !$OMP PARALLEL DO PRIVATE(ii) SHARED(icg,ivec,nelem,summ,vecnm)
    do ii=1+nelem*(ivec-1)+icg,nelem*ivec+icg
      vecnm(1,ii)=vecnm(1,ii)*summ
      vecnm(2,ii)=vecnm(2,ii)*summ
@@ -5668,13 +5659,13 @@ subroutine pw_orthon_cprj(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
 !      Then subtract the appropriate amount of the lower state
        ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
        ! |psi'_i2> = |psi_i2> - <psi_i1|S|psi_i2> |psi_i1>
-!$OMP PARALLEL DO PRIVATE(ii) SHARED(doti,dotr,ii1,ii2,nelem,vecnm)
+       !$OMP PARALLEL DO PRIVATE(ii) SHARED(doti,dotr,ii1,ii2,nelem,vecnm)
        do ii=1,nelem
          vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)+doti*vecnm(2,ii1+ii)
          vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-doti*vecnm(1,ii1+ii)-dotr*vecnm(2,ii1+ii)
        end do
        if (do_cprj) call pawcprj_zaxpby((/-dotr,-doti/),(/one,zero/),cprj(:,nspinor*(ivec-1)+1:nspinor*ivec),&
-&                                                                    cprj(:,nspinor*(ivec2-1)+1:nspinor*ivec2))
+                                                                     cprj(:,nspinor*(ivec2-1)+1:nspinor*ivec2))
        ! As |psi_i2> changed, we update the overlap matrix accordingly.
        ! We have: <psi'_i3|S|psi'_i2> = <psi'_i3|S|psi_i2> - <psi_i1|S|psi_i2> <psi'_i3|S|psi_i1>
        ! Remember that i2>i1.
@@ -5779,7 +5770,7 @@ subroutine cg_hprotate_and_get_diag(nband_k, subvnlx, evec, enlx_k)
 
  call zhemm('L','U',nband_k,nband_k,cone,matvnl,nband_k,evec,nband_k,czero,mat1,nband_k)
 
-!$OMP PARALLEL DO
+ !$OMP PARALLEL DO
  do iband=1,nband_k
    enlx_k(iband) = cg_real_zdotc(nband_k,evec(:,iband),mat1(:,:,iband))
  end do
@@ -5883,7 +5874,7 @@ subroutine cg_get_eigens(usepaw, istwf_k, npwsp, ndat, cg, ghc, gsc, eig, me_g0,
 ! *************************************************************************
 
  ! <psi|H|psi> / <psi|S|psi>
-!$OMP PARALLEL DO
+ !$OMP PARALLEL DO IF (ndat > 1)
  do idat=1,ndat
    call dotprod_g(eig(idat), doti, istwf_k, npwsp, option1, ghc(:,idat), cg(:,idat), me_g0, xmpi_comm_self)
    if (usepaw == 1) then
@@ -5965,7 +5956,7 @@ subroutine cg_norm2g(istwf_k, npwsp, ndat, cg, norms, me_g0, comm)
  integer :: idat, ierr
 ! *************************************************************************
 
-!$OMP PARALLEL DO IF (ndat > 1)
+ !$OMP PARALLEL DO IF (ndat > 1)
  do idat=1,ndat
    call sqnorm_g(norms(idat), istwf_k, npwsp, cg(:,idat), me_g0, xmpi_comm_self)
  end do
@@ -6051,6 +6042,8 @@ subroutine cg_precon_many(istwf_k, npw, nspinor, ndat, cg, optekin, kinpw, vect,
 
  ! TODO: Optimized version for MPI with ndat > 1
  ABI_MALLOC(pcon, (npw))
+
+ !$OMP PARALLEL DO IF (ndat > 1)
  do idat=1,ndat
    call cg_precon(cg(:,idat), zero, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pcon, vect(:,idat), comm)
  end do
@@ -6096,7 +6089,7 @@ subroutine cg_zaxpy_many_areal(npwsp, ndat, alphas, x, y)
  integer :: idat
 ! *************************************************************************
 
-!$OMP PARALLEL DO IF (ndat > 1)
+ !$OMP PARALLEL DO IF (ndat > 1)
  do idat=1,ndat
    call daxpy(2*npwsp, alphas(idat), x(1,idat), 1, y(1,idat), 1)
  end do
@@ -6236,6 +6229,7 @@ subroutine cg_copy_spin(spin, npw_k, nspinor, ndat, in_cg, out_cg)
  integer :: idat
 ! *************************************************************************
 
+ !$OMP PARALLEL DO IF (ndat > 1)
  do idat=1,ndat
    out_cg(:,:,idat) = in_cg(:,:,spin,idat)
  end do
@@ -6268,12 +6262,57 @@ subroutine cg_put_spin(spin, npw_k, nspinor, ndat, in_cg, out_cg)
  integer :: idat
 ! *************************************************************************
 
+ !$OMP PARALLEL DO IF (ndat > 1)
  do idat=1,ndat
    out_cg(:,:,spin, idat) = in_cg(:,:,idat)
  end do
 
 end subroutine cg_put_spin
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_cgtools/cg_p_psi
+!! NAME
+!!  cg_g_psi
+!!
+!! FUNCTION
+!!  Compute <g|-i\Nabla |psi_nk>.
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine cg_p_psi(npw_k, nspinor, ndat, kk, kg_k, cg_k, p_cg_k)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: npw_k, nspinor, ndat
+!arrays
+ real(dp),intent(in) :: kk(3)
+ integer,intent(in) :: kg_k(3,npw_k)
+ real(dp),intent(in) :: cg_k(2,npw_k*nspinor,ndat)
+ real(dp),intent(out) :: p_cg_k(2,npw_k*nspinor,ndat,3)
+
+!Local variables ------------------------------
+ integer :: idir, ig, ispinor, idat, spad, ipwsp
+! *************************************************************************
+
+ !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(spad, ipwsp)
+ do idir=1,3
+   do idat=1,ndat
+     do ispinor=1,nspinor
+       spad = (ispinor - 1) * npw_k
+       do ig=1,npw_k
+         ipwsp = ig + spad
+         p_cg_k(:, ipwsp, idat, idir) = cg_k(:, ipwsp, idat) * (kg_k(idir, ig) + kk(idir))
+       end do ! ig
+     end do ! ispinor
+   end do ! idir
+ end do ! idat
+
+end subroutine cg_p_psi
+!!**
 
 end module m_cgtools
 !!***

@@ -125,6 +125,7 @@ module m_anaddb_dataset
   integer:: rfmeth
   integer:: selectz
   integer:: symdynmat
+  integer:: sys_dim
   integer:: telphint
   integer:: thmflag
   integer:: qgrid_type
@@ -160,6 +161,8 @@ module m_anaddb_dataset
 ! Real(dp)
   real(dp):: a2fsmear
   real(dp):: band_gap
+  real(dp):: dielt_env
+  real(dp):: dielt_thick(2)
   real(dp):: dosdeltae
   real(dp):: dossmear
   real(dp):: dostol
@@ -381,10 +384,10 @@ subroutine invars9(dtset, lenstr, natom, string)
  dtset%asr = 1
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'asr',tread, 'INT')
  if(tread == 1) dtset%asr = intarr(1)
- if(dtset%asr < -2 .or. dtset%asr > 5)then
+ if(dtset%asr < -2 .or. dtset%asr > 6)then
    write(message, '(a, i0, 5a)' )&
    'asr is ',dtset%asr, ', but the only allowed values',ch10, &
-   'are 0, 1, 2, 3, 4, 5, -1 or-2 .',ch10, 'Action: correct asr in your input file.'
+   'are 0, 1, 2, 3, 4, 5, 6, -1 or-2 .',ch10, 'Action: correct asr in your input file.'
 !  Note : negative values are allowed when the acoustic sum rule
 !  is to be applied after the analysis of IFCs
 !  3, 4 are for rotational invariance (under development)
@@ -431,6 +434,20 @@ subroutine invars9(dtset, lenstr, natom, string)
    write(message, '(a, i0, 5a)' )&
    'dieflag is ',dtset%dieflag, ', but the only allowed values',ch10, &
    'are 0, 1, 2, 3 or 4.',ch10, 'Action: correct dieflag in your input file.'
+   ABI_ERROR(message)
+ end if
+
+ dtset%dielt_env = one
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'dielt_env',tread, 'DPR')
+ if(tread == 1) dtset%dielt_env = dprarr(1)
+
+ dtset%dielt_thick(:) = 0
+ call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'dielt_thick',tread, 'DPR')
+ if(tread == 1) dtset%dielt_thick(:) = dprarr(1:2)
+ if(dtset%dielt_thick(1) < zero)then
+   write(message, '(a, es14.4, 3a)' )&
+   'dielt_thick is ',dtset%dielt_thick(1), ', which is lower than 0 .',ch10, &
+   'Action: correct dielt_thick in your input file.'
    ABI_ERROR(message)
  end if
 
@@ -1429,6 +1446,15 @@ if(tread == 1) dtset%lwf_sigma = dprarr(1)
    ABI_ERROR(message)
  end if
 
+ dtset%sys_dim=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'sys_dim',tread,'INT')
+ if(tread==1) dtset%sys_dim=intarr(1)
+ if(dtset%sys_dim<1.or.dtset%sys_dim>9)then
+   write(message, '(a,i0,5a)' )&
+   'sys_dim is ',dtset%sys_dim,', but the only allowed values',ch10,&
+   'are 1, 2, 3, 4, 5, 6, 7 or 8.',ch10,'Action: correct sys_dim in your input file.'
+   ABI_ERROR(message)
+ end if
 !T
 
  dtset%targetpol(:) = 0._dp
@@ -2291,7 +2317,7 @@ subroutine outvars_anaddb(dtset, nunit)
    write(nunit, '(3x, a9, 2i3)')        '  mpatpol',dtset%mpatpol(1:2)
    write(nunit, '(3x, a9, 3i3)')        '    mpdir',dtset%mpdir(1:3)
    write(nunit, '(3x, a9,  i3)')        '    mpopt',dtset%mpopt
-   if (dtset%timdisp == 1) then 
+   if (dtset%timdisp == 1) then
      write(nunit, '(a)') ' Third-order frequency derivatives calculated with constrained DFPT response functions will be transformed'
    write(nunit, '(3x, a9,  i3)') '   timdisp',dtset%timdisp
    end if
@@ -2542,7 +2568,7 @@ subroutine anaddb_chkvars(string)
 !C
  list_vars = trim(list_vars)//' chneut'
 !D
- list_vars = trim(list_vars)//' dieflag dipdip dipquad dossum dosdeltae dossmear dostol dos_maxmode'
+ list_vars = trim(list_vars)//' dieflag dielt_env dielt_thick dipdip dipquad dossum dosdeltae dossmear dostol dos_maxmode'
 !E
  list_vars = trim(list_vars)//' ep_scalprod eivec elaflag elphflag enunit'
  list_vars = trim(list_vars)//' ep_b_min ep_b_max ep_int_gkk ep_keepbands ep_nqpt ep_nspline ep_prt_yambo'
@@ -2577,7 +2603,7 @@ subroutine anaddb_chkvars(string)
 !R
  list_vars = trim(list_vars)//' ramansr relaxat relaxstr rfmeth rifcsph'
 !S
- list_vars = trim(list_vars)//' selectz symdynmat symgkq'
+ list_vars = trim(list_vars)//' selectz symdynmat symgkq sys_dim'
 !T
  list_vars = trim(list_vars)//' targetpol telphint thmflag temperinc tempermin thermal_supercell thmtol timdisp'
 !U

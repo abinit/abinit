@@ -22,7 +22,7 @@ More detailed instructions are available at
 Customize build-abinit-fallbacks.sh
 ===================================
 
-If only a few fallbacks need to be built, 
+If only a few fallbacks need to be built,
 the script build-abinit-fallbacks.sh  can be modified
 
 Examples with the building of the libpsml/xmlf90/wanniers90 fallbacks:

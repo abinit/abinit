@@ -8,15 +8,15 @@ outdata_prefix = "tcdfpt_2o"
 
 ## GENERAL PARAMETERS
     nqpt   1
-     qpt   0.0 0.0 0.0   
-  getwfk   1            
+     qpt   0.0 0.0 0.0
+  getwfk   1
   get1wf   3
 
 optdriver  10
   timdisp  1
   tim1rev  1
 ### 7) BERRY CURVATURES WITH MACROSCOPIC ZEEMAN
-  
+
   d3e_pert1_magn7  1
 d3e_pert1_magdir7  1 0 0
   d3e_pert1_elfd7  1
@@ -32,7 +32,7 @@ d3e_pert2_magdir7  1 0 0
  d3e_pert2_atpol7  1 1
 
 ### 8) BERRY CURVATURES WITH LOCAL ZEEMAN
-  
+
   d3e_pert1_magn8  2
  d3e_pert1_magat8  1 1
 d3e_pert1_magdir8  1 0 0
@@ -50,7 +50,7 @@ d3e_pert2_magdir8  1 0 0
  d3e_pert2_atpol8  1 1
 
 ### 9) BERRY CURVATURES BETWEEN MACRO AND LOCAL ZEEMAN
-  
+
   d3e_pert1_magn9  1
   d3e_pert1_elfd9  0
    d3e_pert1_dir9  1 0 0
@@ -63,7 +63,7 @@ d3e_pert2_magdir9  1 0 0
   d3e_pert2_phon9  0
 
 ### 10) BERRY CURVATURES BETWEEN LOCAL AND MACRO ZEEMAN
-  
+
   d3e_pert1_magn10  2
  d3e_pert1_magat10  1 1
 d3e_pert1_magdir10  1 0 0
@@ -79,12 +79,12 @@ d3e_pert1_magdir10  1 0 0
 ### MORE GENERAL PARAMETERS
 
 #Definition of the atom types
-ntypat 2          
+ntypat 2
 znucl 25 9
-                
+
 #Definition of the atoms
-natom 6           
-typat 2*1 4*2     
+natom 6
+typat 2*1 4*2
 
 #Definition of the unit cell
 acell     9.2100000000E+00  9.2100000000E+00  6.2560000000E+00 Bohr
@@ -105,16 +105,16 @@ nband  42
 #Definition of the k-point grid
 kptopt 3          # Option for the automatic generation of k points, taking
                   # into account the symmetry
-ngkpt 2 2 3      
+ngkpt 2 2 3
 
-nshiftk 1         
+nshiftk 1
 shiftk 0.5 0.5 0.5
 
 #Symmetries deactivated for magnetic systems
 nsym 1
 
-nspden   4   
-nspinor  2   
+nspden   4
+nspinor  2
 asr 0
 chneut 0
 
@@ -133,7 +133,7 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%% [files]
 #%% files_to_test =
 #%%   tcdfpt_3.abo, tolnlines=  5, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-easy
-#%% [shell]  
+#%% [shell]
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [extra_info]

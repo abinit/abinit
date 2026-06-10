@@ -64,7 +64,6 @@ program aim
  type(aim_dataset_type) :: aim_dtset
  character(len=500) :: msg
  character(len=fnlen) :: fcfile(natm)
-
 !******************************************************************
 
 !Change communicator for I/O (mandatory!)

@@ -1,5 +1,5 @@
 tcdfpt_6.ddb.out
-MnF2 
+MnF2
 6
 tcdfpt_2o_DS3_DDB
 tcdfpt_2o_DS4_DDB
@@ -23,6 +23,6 @@ tcdfpt_2o_DS10_DDB
 #%% [extra_info]
 #%% authors = M. Royo
 #%% keywords = CDFPT
-#%% description =  Input file for mrgddb of 2nd and 3rd (Berry Curvs.) derivatives of ETOT 
+#%% description =  Input file for mrgddb of 2nd and 3rd (Berry Curvs.) derivatives of ETOT
 #%%<END TEST_INFO>
 

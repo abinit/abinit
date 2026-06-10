@@ -1,8 +1,8 @@
 
-.Version 6.11.2 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu4.6 computer) 
+.Version 6.11.2 of ANADDB
+.(MPI version, prepared for a x86_64_linux_gnu4.6 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Mon 12 Dec 2011.
 - ( at 15h 0 )
-  
+
 
 ================================================================================
 
@@ -61,12 +61,12 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 -begin at tcpu      0.077  and twall      0.077 sec
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -105,7 +105,7 @@
 
 ================================================================================
 
- Calculation of the interatomic forces 
+ Calculation of the interatomic forces
 
 -begin at tcpu      0.078  and twall      0.078 sec
        Homogeneous q point set in the B.Z.
@@ -120,10 +120,10 @@
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- 
+
  Long-Range/Short-Range decomposed phonon freq. (cm-1)**2
  at wavevector number:           1
- 
+
  Mode number.           tot**2             SR**2             LR**2
    1               -48119.7458       679373.7099      -727493.4556
    2               -48119.7402       679373.7088      -727493.4490
@@ -140,10 +140,10 @@
   13               205529.2361       208824.2590        -3295.0229
   14               205529.2390       208824.2622        -3295.0232
   15               205529.2452       208824.3015        -3295.0563
- 
+
  Long-Range/Short-Range decomposed phonon freq. (cm-1)**2
  at wavevector number:           2
- 
+
  Mode number.           tot**2             SR**2             LR**2
    1               -80502.7213       631369.2436      -711871.9649
    2               -80502.6840       631369.2808      -711871.9648
@@ -160,10 +160,10 @@
   13               125018.0933       174647.8675       -49629.7741
   14               201798.1586       -42185.5317       243983.6903
   15               108255.8366       495050.2038      -386794.3672
- 
+
  Long-Range/Short-Range decomposed phonon freq. (cm-1)**2
  at wavevector number:           3
- 
+
  Mode number.           tot**2             SR**2             LR**2
    1               -80502.6839       631369.2810      -711871.9648
    2               -80502.7215       631369.2434      -711871.9648
@@ -180,10 +180,10 @@
   13               125018.0437       174647.8179       -49629.7741
   14               201798.1586       -42185.5317       243983.6903
   15               108255.8366       495050.2038      -386794.3672
- 
+
  Long-Range/Short-Range decomposed phonon freq. (cm-1)**2
  at wavevector number:           4
- 
+
  Mode number.           tot**2             SR**2             LR**2
    1               -83035.3669       562340.9348      -645376.3017
    2                   -0.0001        -3059.6788         3059.6787
@@ -200,10 +200,10 @@
   13               106415.9427        62979.2034        43436.7393
   14                82128.6023       -95965.6053       178094.2076
   15               170604.8070       379898.5266      -209293.7196
- 
+
  Long-Range/Short-Range decomposed phonon freq. (cm-1)**2
  at wavevector number:           5
- 
+
  Mode number.           tot**2             SR**2             LR**2
    1               -80502.7008       631369.2640      -711871.9648
    2               -80502.7045       631369.2604      -711871.9649
@@ -220,10 +220,10 @@
   13               125018.0437       174647.8179       -49629.7741
   14               201798.1586       -42185.5317       243983.6903
   15               108255.8366       495050.2038      -386794.3672
- 
+
  Long-Range/Short-Range decomposed phonon freq. (cm-1)**2
  at wavevector number:           6
- 
+
  Mode number.           tot**2             SR**2             LR**2
    1               -83035.3669       562340.9348      -645376.3017
    2                   -0.0001        -3059.6788         3059.6787
@@ -240,10 +240,10 @@
   13                98663.2037        55226.4644        43436.7393
   14                82128.6023       -95965.6053       178094.2076
   15               170604.8070       379898.5266      -209293.7196
- 
+
  Long-Range/Short-Range decomposed phonon freq. (cm-1)**2
  at wavevector number:           7
- 
+
  Mode number.           tot**2             SR**2             LR**2
    1               -83035.3669       562340.9348      -645376.3017
    2                   -0.0001        -3059.6788         3059.6787
@@ -260,10 +260,10 @@
   13               107282.5986        63845.8593        43436.7393
   14                82128.6023       -95965.6053       178094.2076
   15               170604.8070       379898.5266      -209293.7196
- 
+
  Long-Range/Short-Range decomposed phonon freq. (cm-1)**2
  at wavevector number:           8
- 
+
  Mode number.           tot**2             SR**2             LR**2
    1                   -3.8866        -5527.2849         5523.3984
    2                   -3.8863        -5527.2847         5523.3984
@@ -283,10 +283,10 @@
 
 ================================================================================
 
- Treat the first list of vectors 
+ Treat the first list of vectors
 
 -begin at tcpu      0.171  and twall      0.171 sec
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
   -9.994874E-04 -9.994874E-04 -9.994873E-04  0.000000E+00  0.000000E+00
@@ -325,7 +325,7 @@
   3.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -0.0  0.0 -1.0  1.0  1.0  1.0  0.0  0.0  1.0
   1.0 -1.0  1.0  0.0 -0.0  1.0 -1.0  1.0 -3.0  0.0  0.0 -1.0 -1.0 -1.0 -1.0  0.0
  -0.0  1.0 -1.0 -1.0 -1.0 -0.0  0.0 -1.0 -1.0  1.0 -1.0 -0.0  0.0 -1.0  1.0 -1.0
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
   -8.623533E-04 -8.623533E-04  4.733384E-04  4.733384E-04  6.659872E-04
@@ -335,7 +335,7 @@
 - -1.892647E+02 -1.892647E+02  1.038858E+02  1.038858E+02  1.461673E+02
 -  1.937635E+02  1.937635E+02  2.602184E+02  3.218118E+02  3.299186E+02
 -  3.299186E+02  4.213555E+02  4.213555E+02  5.166152E+02  6.266576E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.50000  0.50000
  Phonon energies in Hartree :
   -7.616279E-04  4.676215E-04  4.735931E-04  4.735931E-04  9.478701E-04
@@ -345,7 +345,7 @@
 - -1.671580E+02  1.026311E+02  1.039417E+02  1.039417E+02  2.080334E+02
 -  2.695087E+02  2.695087E+02  3.332911E+02  3.444340E+02  3.444340E+02
 -  3.542327E+02  4.352140E+02  4.352140E+02  4.555602E+02  6.831474E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
  Phonon energies in Hartree :
    5.844793E-04  5.844793E-04  5.844793E-04  8.309228E-04  8.309228E-04
@@ -360,7 +360,7 @@
       6.74669080     -0.00000000     -0.00000000
      -0.00000000      6.74669080     -0.00000000
      -0.00000000     -0.00000000      6.74669080
- 
+
 
 ================================================================================
 

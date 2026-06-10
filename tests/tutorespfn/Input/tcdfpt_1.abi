@@ -4,7 +4,7 @@
    ndtset 2
 
 ### 1) GROUND STATE
-   tolvrs1  1.0d-10   
+   tolvrs1  1.0d-10
    spinat1  0.0 0.0  5.0     #Magnetism
             0.0 0.0 -5.0
             0.0 0.0  0.0
@@ -13,23 +13,23 @@
             0.0 0.0  0.0
 
 ### 2) DDK
-  tolwfr2   1.0d-10 
-  rfelfd2   2       
-   rfdir2   1 1 1         
+  tolwfr2   1.0d-10
+  rfelfd2   2
+   rfdir2   1 1 1
     nqpt2   1
-     qpt2   0.0 0.0 0.0   
-  getwfk2   1            
-    iscf2  -3   
-                
+     qpt2   0.0 0.0 0.0
+  getwfk2   1
+    iscf2  -3
+
 ### GENERAL PARAMETERS
 
 #Definition of the atom types
-ntypat 2          
+ntypat 2
 znucl 25 9
-                
+
 #Definition of the atoms
-natom 6           
-typat 2*1 4*2     
+natom 6
+typat 2*1 4*2
 
 #Definition of the unit cell
 acell     9.2100000000E+00  9.2100000000E+00  6.2560000000E+00 Bohr
@@ -41,34 +41,34 @@ xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
           6.9627618231E-01  6.9627618231E-01  0.0000000000E+00
           1.9627618231E-01  8.0372381769E-01  5.0000000000E-01
           3.0372381769E-01  3.0372381769E-01  0.0000000000E+00
-          8.0372381769E-01  1.9627618231E-01  5.0000000000E-01  
+          8.0372381769E-01  1.9627618231E-01  5.0000000000E-01
 
 #Definition of the planewave basis set
-ecut   3.0         
+ecut   3.0
 nband  42
 
 #Definition of the k-point grid
-kptopt 3          
-                  
-ngkpt 2 2 3      
+kptopt 3
 
-nshiftk 1         
+ngkpt 2 2 3
+
+nshiftk 1
 shiftk 0.5 0.5 0.5
 
 #Symmetries deactivated for magnetic systems
 nsym 1
 
 #Definition of the SCF procedure
-nstep 50        
-diemac  8.0    
+nstep 50
+diemac  8.0
 
 nline 12
 diemix1    0.6
 diemixmag1 0.4
 nnsclo -4
 
-nspden   4   
-nspinor  2   
+nspden   4
+nspinor  2
 
 #Pseudos
 pp_dirpath "$ABI_PSPDIR"
@@ -85,7 +85,7 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%% [files]
 #%% files_to_test =
 #%%   tcdfpt_1.abo, tolnlines=  5, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-easy
-#%% [shell]  
+#%% [shell]
 #%% post_commands= ww_mv tcdfpt_1o_DS1_WFK tcdfpt_2o_DS1_WFK; ww_mv tcdfpt_1o_DS2_1WF19 tcdfpt_2o_DS2_1WF19; ww_mv tcdfpt_1o_DS2_1WF20 tcdfpt_2o_DS2_1WF20; ww_mv tcdfpt_1o_DS2_1WF21 tcdfpt_2o_DS2_1WF21
 #%% [paral_info]
 #%% max_nprocs = 12

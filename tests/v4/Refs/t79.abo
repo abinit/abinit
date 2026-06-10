@@ -1,8 +1,8 @@
 
 .Version 10.5.8.9 of ABINIT. v10.7.1 released Mar 2026.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Thu 26 Mar 2026.
 - ( at 11h32 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/TestBot_MPI1/v4_t79/t79.abi
 - output file    -> t79.abo
 - root for input  files -> t79i
@@ -562,7 +562,7 @@ meta: {optdriver: 1, rfstrs: 3, }
 
  symkchk : k-point set has full space-group symmetry.
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   4
@@ -716,38 +716,38 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
-  cartesian coordinates for strain terms (1/ucvol factor 
-   for elastic tensor components not included) 
+  cartesian coordinates for strain terms (1/ucvol factor
+   for elastic tensor components not included)
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
    1    1   1    4         0.0000000261         0.0000000000
    1    1   1    5         0.0000000097         0.0000000000
-  
+
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
    2    1   1    4        -0.0000000415         0.0000000000
    2    1   1    5        -0.0000000063         0.0000000000
-  
+
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
    3    1   1    4        -0.0000000334         0.0000000000
    3    1   1    5        -0.0000000274         0.0000000000
-  
+
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
-  
+
    2    3   1    1         0.0000000000         0.0000000000
    2    3   3    1         0.0000000000         0.0000000000
-  
+
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
-  
+
    1    4   1    1         0.0000000261         0.0000000000
    1    4   2    1        -0.0000000415         0.0000000000
    1    4   3    1        -0.0000000334         0.0000000000
@@ -757,13 +757,13 @@ tolerances: {tolvrs: 1.00E-08, }
    1    4   1    5         0.0000000450         0.0000000000
    1    4   2    5         0.0000000002         0.0000000000
    1    4   3    5        -0.0000000023         0.0000000000
-  
+
    2    4   1    4         3.0755456475         0.0000000000
    2    4   1    5         0.0000000332         0.0000000000
-  
+
    3    4   1    4         3.0755456414         0.0000000000
    3    4   1    5         0.0000000331         0.0000000000
-  
+
    1    5   1    1         0.0000000097         0.0000000000
    1    5   2    1        -0.0000000063         0.0000000000
    1    5   3    1        -0.0000000274         0.0000000000
@@ -773,61 +773,61 @@ tolerances: {tolvrs: 1.00E-08, }
    1    5   1    5         4.1424088849         0.0000000000
    1    5   2    5         0.0000000010         0.0000000000
    1    5   3    5        -0.0000000023         0.0000000000
-  
+
    2    5   1    4         0.0000000002         0.0000000000
    2    5   1    5         0.0000000010         0.0000000000
-  
+
    3    5   1    4        -0.0000000023         0.0000000000
    3    5   1    5        -0.0000000023         0.0000000000
-  
-  
+
+
   Rigid-atom elastic tensor , in cartesian coordinates,
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4         0.1247148003         0.0000000000
    1    4   2    4         0.0386326334         0.0000000000
    1    4   3    4         0.0386326334         0.0000000000
    1    4   1    5         0.0000000006         0.0000000000
    1    4   2    5         0.0000000000         0.0000000000
    1    4   3    5        -0.0000000000         0.0000000000
-  
+
    2    4   1    4         0.0386326334         0.0000000000
    2    4   1    5         0.0000000004         0.0000000000
-  
+
    3    4   1    4         0.0386326334         0.0000000000
    3    4   1    5         0.0000000004         0.0000000000
-  
+
    1    5   1    4         0.0000000000         0.0000000000
    1    5   2    4         0.0000000004         0.0000000000
    1    5   3    4         0.0000000004         0.0000000000
    1    5   1    5         0.0520337470         0.0000000000
    1    5   2    5         0.0000000000         0.0000000000
    1    5   3    5        -0.0000000000         0.0000000000
-  
+
    2    5   1    4         0.0000000000         0.0000000000
    2    5   1    5         0.0000000000         0.0000000000
-  
+
    3    5   1    4        -0.0000000000         0.0000000000
    3    5   1    5        -0.0000000000         0.0000000000
-  
+
   Internal strain coupling parameters, in cartesian coordinates,
-   zero average net force deriv. has been imposed  
+   zero average net force deriv. has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    4        -0.0000000000         0.0000000000
    1    1   1    5        -0.0000000000         0.0000000000
-  
+
    2    1   1    4        -0.0000000000         0.0000000000
    2    1   1    5        -0.0000000000         0.0000000000
-  
+
    3    1   1    4        -0.0000000000         0.0000000000
    3    1   1    5        -0.0000000000         0.0000000000
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
@@ -996,7 +996,7 @@ P          mk1mem3          4
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Metric tensor formulation of strain in density-functional perturbation theory, 
+- [1] Metric tensor formulation of strain in density-functional perturbation theory,
 - D. R. Hamann, X. Wu, K. M. Rabe, and D. Vanderbilt, Phys. Rev. B71, 035117 (2005).
 - Comment: Non-vanishing rfstrs. Strong suggestion to cite this paper in your publications.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2005
@@ -1013,7 +1013,7 @@ P          mk1mem3          4
 - D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
 - I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
 - Comment: the sixth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
 - The licence allows the authors to put it on the Web.
@@ -1031,7 +1031,7 @@ P          mk1mem3          4
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
@@ -1049,7 +1049,7 @@ P          mk1mem3          4
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
 - is available at
 -  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
@@ -1068,7 +1068,7 @@ P          mk1mem3          4
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.

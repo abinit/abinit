@@ -22,7 +22,7 @@ alchemical potentials are used (see later), the number of pseudopotentials to
 be read, [[npsp]], is the same as [[ntypat]]. Note that one cannot mix norm-
 conserving pseudopotentials with PAW atomic data files in a single ABINIT run,
 even for different datasets. One has to stick either to norm-conserving
-pseudopotentials or to PAW.  
+pseudopotentials or to PAW.
 More on the pseudos/PAW in [[topic:PseudosPAW]].
 
 ABINIT also has a default table of the atomic masses, but this can be
@@ -31,8 +31,8 @@ superceded by specifying [[amu]].
 **Alchemical potentials**
 
 For norm-conserving pseudopotentials, ABINIT can mix the pseudopotentials
-(see the formats at [[developers:pseudos_nc_header|this page]]), 
-to create so-called "alchemical potentials", see [[mixalch]].  
+(see the formats at [[developers:pseudos_nc_header|this page]]),
+to create so-called "alchemical potentials", see [[mixalch]].
 In this case, the number of pseudopotentials to be given, [[npsp]], will
 usually be larger than the number of types of atoms, [[ntypat]]. Using
 alchemical potentials makes sense to treat alloys in which similar ions are
@@ -53,5 +53,5 @@ electronic properties.
 
 ## Tutorials
 
-* [[tutorial:polarization|Tutorial on polarization and finite electric fields]]. Polarization, and responses to finite electric fields for AlAs. In the present topic, it is an example of the definition of several atom types ... 
+* [[tutorial:polarization|Tutorial on polarization and finite electric fields]]. Polarization, and responses to finite electric fields for AlAs. In the present topic, it is an example of the definition of several atom types ...
 

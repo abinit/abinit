@@ -237,16 +237,15 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  type(distribfft_type),target :: my_distribfft_
  type(mpi_type) :: mpi_enreg_fft
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- real(dp), ABI_CONTIGUOUS pointer :: tvalespl(:,:),tcorespl(:,:),ttaucorespl(:,:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ real(dp), contiguous, pointer :: tvalespl(:,:),tcorespl(:,:),ttaucorespl(:,:)
  real(dp), pointer :: dncdq0, dtaucdq0, dnvdq0
  integer,save :: idx(12)=(/1,1,2,2,3,3,3,2,3,1,2,1/)
  integer  :: delta(6)=(/1,1,1,0,0,0/)
  real(dp) :: dgm(3,3,6),d2gm(3,3,6,6),gcart(3),tsec(2)
  real(dp),allocatable :: dyfrn_indx(:,:,:),dyfrv_indx(:,:,:),grn_indx(:,:)
  real(dp),allocatable :: grv_indx(:,:),phim_igia(:),phre_igia(:),workn(:,:)
- real(dp),allocatable :: gcutoff(:)
- real(dp),allocatable :: workv(:,:)
+ real(dp),allocatable :: gcutoff(:), workv(:,:)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1045,17 +1044,12 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
  type(mpi_type) :: mpi_enreg_fft
 !arrays
  integer :: eps1(6)=(/1,2,3,2,3,1/),eps2(6)=(/1,2,3,3,1,2/),jdir(ndir)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:)
- real(dp), ABI_CONTIGUOUS pointer :: tvalespl(:,:),tcorespl(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: ttaucorespl(:,:)
+ integer, contiguous, pointer :: fftn2_distrib(:)
+ real(dp), contiguous, pointer :: tvalespl(:,:),tcorespl(:,:)
+ real(dp), contiguous, pointer :: ttaucorespl(:,:)
  real(dp), pointer :: dncdq0, dtaucdq0, dnvdq0
  real(dp) ::  gq(6),gcart(3)
  real(dp),allocatable :: phim_igia(:),phre_igia(:),workn(:,:,:),workv(:,:,:)
-
-!no_abirules
-!Define G^2 based on G space metric gmet.
-! gsq(g1,g2,g3)=g1*g1*gmet(1,1)+g2*g2*gmet(2,2)+g3*g3*gmet(3,3) &
-! &       +two*(g1*g2*gmet(1,2)+g2*g3*gmet(2,3)+g3*g1*gmet(3,1))
 ! *************************************************************************
 
  DBG_ENTER("COLL")

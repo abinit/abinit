@@ -305,12 +305,11 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
  real(dp) :: svion,svioni,svionr,term,vion1,vion2,xnorm
  character(len=500) :: message
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gcart(3),tsec(2)
  real(dp),allocatable :: gcutoff(:)
  real(dp),allocatable :: work1(:,:)
-
 ! *************************************************************************
 
 !Define G^2 based on G space metric gmet.
@@ -821,17 +820,16 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,icutcoul,idir,ipert,&
  real(dp) :: qxred2pi,sfi,sfr,vion1,xnorm
  logical :: qeq0
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gq(3)
  real(dp),allocatable :: gcutoff(:)
  real(dp),allocatable :: work1(:,:)
-
 ! *********************************************************************
 
  iatom=ipert
 
- if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 & 
+ if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 &
 & .or. iatom==natom+5 .or. iatom==natom+6 .or. iatom==natom+6 .or. (iatom>natom+11.and.iatom<=2*natom+11))then
 
 !  (In case of d/dk or an electric field, or magnetic (Zeeman) field->[natom+5] SPr deb )
@@ -1095,11 +1093,10 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
  character(len=500) :: message
 !arrays
  integer,save :: idx(12)=(/1,1,2,2,3,3,3,2,3,1,2,1/)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: dgmetds(3,3)
  real(dp),allocatable :: work1(:,:)
-
 ! *************************************************************************
 
 !Define G^2 based on G space metric gmet.
@@ -1438,11 +1435,10 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
  logical :: qeq0
  character(len=500) :: msg
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gq(3),gvec(3),vion1(1),vion1dq(1)
  real(dp),allocatable :: work1(:,:)
-
 ! *********************************************************************
 
  iatom=ipert
@@ -1703,11 +1699,10 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
  logical :: qeq0
  character(len=500) :: msg
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gq(3),gvec(3),vion1(1),vion1dq(1),vion1dqdq(1)
  real(dp),allocatable :: work1(:,:)
-
 ! *********************************************************************
 
  iatom=ipert
@@ -1997,13 +1992,11 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
  character(len=500) :: msg
 !arrays
  integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gq(3),gqc(3),vion1(1),vion1dq(1),vion1dqdq(1)
  real(dp),allocatable :: work1(:,:)
-
 ! *********************************************************************
-
 
  if(ipert/=natom+3 .and. ipert/=natom+4)then
 

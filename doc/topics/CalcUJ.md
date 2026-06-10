@@ -41,12 +41,12 @@ particular, considerably higher effective values for U are found.
 *compulsory:*
 
 - [[abinit:ucrpa]]  calculation of the screened interaction U with the Constrained RPA method
- 
+
 *basic:*
 
 - [[abinit:ucrpa_bands]]  For the calculation of U with the Constrained RPA method, gives correlated BANDS
 - [[abinit:ucrpa_window]]  For the calculation of U with the Constrained RPA method, gives energy WINDOW
- 
+
 
 ## Selected Input Files
 
@@ -57,7 +57,7 @@ particular, considerably higher effective values for U are found.
 - [[tests/v7/Input/t25.abi]]
 - [[tests/v7/Input/t78.abi]]
 - [[tests/v7/Input/t79.abi]]
- 
+
 
 ## Tutorials
 

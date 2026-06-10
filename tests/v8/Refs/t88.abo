@@ -2,7 +2,7 @@
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -327,7 +327,7 @@ meta: {optdriver: 1, }
     1)    idir= 1    ipert=  12
     2)    idir= 2    ipert=  12
     3)    idir= 3    ipert=  12
- 
+
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -638,7 +638,7 @@ meta: {optdriver: 1, }
     1)    idir= 1    ipert=  13
     2)    idir= 2    ipert=  13
     3)    idir= 3    ipert=  13
- 
+
 ================================================================================
 
 --------------------------------------------------------------------------------

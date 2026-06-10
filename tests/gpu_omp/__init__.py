@@ -8,6 +8,7 @@ need_cpp_vars = [
 
 #: List of keywords that are automatically added to all the tests of this suite.
 keywords = [
+"GPU_OMP",
 ]
 
 #: This suite contains tests executed with different numbers of MPI processes.
@@ -78,4 +79,14 @@ inp_files = [
 #GS with blocked FFT
 "t53.abi", # test CHEBFI (istwfk==1, npband==1, paral_kgb==1, gpu_nfft_blocks=3)
 "t54.abi", # test CHEBFI (istwfk==1, npband==1, paral_kgb==1, gpu_nfft_blocks=3, gpu_nl_splitsize=4)
+#Various testing cases to ensure GPU works with basic vars
+"t55.abi", # checks nkpath and einterp
+"t56.abi", # checks ionmov 2
+"t57.abi", # checks accuracy, rprim and tsmear
+"t58.abi", # checks nkpath, einterp and istwfk > 2
+"t59.abi", # checks tolwfr_diago
+"t60.abi", # RMM-DIIS with NC pseudos
+"t61.abi", # nstep 0
+"t62.abi", # ixc -645642 (metaGGA) - NC
+"t63.abi", # ixc -645642 (metaGGA) - PAW & npband 2 (2 MPI)
 ]

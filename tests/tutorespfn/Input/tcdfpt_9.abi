@@ -2,14 +2,14 @@
 # (M. Royo, 22.01.2026)
 
    ndtset 2
-   jdtset 4 5 
+   jdtset 4 5
 
 outdata_prefix = "tcdfpt_8o"
 
 ## GENERAL PARAMETERS
     nqpt   1
      qpt   5.00000000E-01  5.00000000E-01  0.00000000E+00
-  getwfk   1            
+  getwfk   1
   get1wf   2
 
 optdriver  10
@@ -17,7 +17,7 @@ optdriver  10
   tim1rev  0
 
 ### 4) ADIABATIC DYNAMICS WITH MACROSCOPIC ZEEMAN
-  
+
   d3e_pert1_magn4  1
 d3e_pert1_magdir4  1 0 0
    d3e_pert1_dir4  1 0 0
@@ -31,7 +31,7 @@ d3e_pert2_magdir4  1 0 0
  d3e_pert2_atpol4  1 1
 
 ### 5) ADIABATIC DYNAMICS WITH LOCAL ZEEMAN
-  
+
   d3e_pert1_magn5  2
  d3e_pert1_magat5  1 1
 d3e_pert1_magdir5  1 0 0
@@ -49,12 +49,12 @@ d3e_pert2_magdir5  1 0 0
 ### MORE GENERAL PARAMETERS
 
 #Definition of the atom types
-ntypat 2          
+ntypat 2
 znucl 25 9
-                
+
 #Definition of the atoms
-natom 6           
-typat 2*1 4*2     
+natom 6
+typat 2*1 4*2
 
 #Definition of the unit cell
 acell     9.2100000000E+00  9.2100000000E+00  6.2560000000E+00 Bohr
@@ -75,16 +75,16 @@ nband  42
 #Definition of the k-point grid
 kptopt 3          # Option for the automatic generation of k points, taking
                   # into account the symmetry
-ngkpt 2 2 3      
+ngkpt 2 2 3
 
-nshiftk 1         
+nshiftk 1
 shiftk 0.5 0.5 0.5
 
 #Symmetries deactivated for magnetic systems
 nsym 1
 
-nspden   4   
-nspinor  2   
+nspden   4
+nspinor  2
 
 #Pseudos
 pp_dirpath "$ABI_PSPDIR"
@@ -102,7 +102,7 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%% [files]
 #%% files_to_test =
 #%%   tcdfpt_9.abo, tolnlines=  5, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-easy
-#%% [shell]  
+#%% [shell]
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [extra_info]
