@@ -1802,7 +1802,7 @@ end if
            ! Second-order contribution to the total energy.
            ! This is he phonon contribution (\hbar\omega/2)
            do it=1, sigma%ntemp
-             rtmp = (two * nqnu_tlist(it) + one) * wqnu * sigma%wtq(iq_ibz) / two
+             rtmp = (two * nqnu_tlist(it) + one) * wqnu * sigma%wtq_k(iq_ibz_k) / two
              sigma%E2(it) = sigma%E2(it) + rtmp
            enddo
          end do  ! imyp
