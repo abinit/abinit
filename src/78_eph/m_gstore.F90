@@ -1106,7 +1106,6 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      nctkarr_t("gstore_qglob2bz", "i", "gstore_max_nq, number_of_spins"), &
      nctkarr_t("gstore_kglob2bz", "i", "gstore_max_nk, number_of_spins"), &
      !nctkarr_t("gstore_glob_state_kqs", "i", "gstore_max_nk, gstore_max_nq, number_of_spins"), &
-     !
      ! These quantities are needed to interface GSTORE.nc with external codes.
      ! For the meaning of the different variables and conventions see m_ifc module.
      nctkarr_t("ifc_zeff", "dp", "three, three, number_of_atoms"), &
@@ -6732,8 +6731,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands,
      iq_glob = my_iq + gqk%my_qstart - 1
      call gqk%myqpt(my_iq, gstore, weight_qq, qpt); q_is_gamma = sum(qpt**2) < tol14
 
-     ! Symmetry tables for q-points.
-     ! NB: Use symrec convention for q
+     ! Symmetry tables for q-points. NB: Using symrec convention for q
      iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
      trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
      isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))

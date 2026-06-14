@@ -74,7 +74,7 @@ contains
 !!    ngfft must be compatible with the symmetries of the crystal and can differ from Wfd%ngfft.
 !!    wfd_change_ngfft is called if ANY(Wfd%ngfft(1:3) =/ ngfft).
 !!  Cryst<crystal_t>=Type gathering info on the crystal structure.
-!!  BSt<ebands_t>=Datatype with electronic energies.
+!!  ebands<ebands_t>=Datatype with electronic energies.
 !!  Pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  Pawrad(ntypat*usepaw)<type(pawrad_type)>=paw radial mesh and related data.
 !!  Pawang <type(pawang_type)>=paw angular mesh and related data
@@ -132,7 +132,7 @@ contains
 !! SOURCE
 
 subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngfftf,&
-                          Cryst,BSt,Pawtab,Pawrad,Pawang,Psps,tolsym,BSym,&
+                          Cryst,ebands,Pawtab,Pawrad,Pawang,Psps,tolsym,BSym,&
                           EDIFF_TOL) ! optional
 
 !Arguments ------------------------------------
@@ -145,7 +145,7 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
  type(pawang_type),intent(in) :: Pawang
  type(pseudopotential_type),intent(in) :: Psps
  class(wfd_t),intent(inout) :: Wfd
- type(ebands_t),target,intent(in) :: BSt
+ type(ebands_t),target,intent(in) :: ebands
  type(esymm_t),intent(out) :: BSym
 !arrays
  integer,intent(in) :: ngfftf(18)
@@ -165,13 +165,12 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
  logical :: iscompatibleFFT,found,only_trace
  character(len=500) :: msg
 !arrays
- integer :: g0(3),toinv(Cryst%nsym),trial(3,3)
+ integer :: g0(3), toinv(Cryst%nsym), trial(3,3)
  integer,pointer :: Rm1_rmt(:)
  integer,target,allocatable :: irottb(:,:)
  integer,allocatable :: tmp_sym(:,:,:),l_size_atm(:)
  real(dp) :: kpt(3),kpg0(3),omat(2)
- real(dp),pointer :: ene_k(:)
- real(dp),pointer :: zarot(:,:,:,:)
+ real(dp),pointer :: ene_k(:), zarot(:,:,:,:)
  complex(dp),allocatable :: eig0r(:,:),tr_emig0r(:,:)
  complex(gwp),allocatable :: ur1(:),ur2(:),ur2_rot(:)
  type(pawcprj_type),allocatable :: Cprj_b1(:,:),Cprj_b2(:,:),Cprj_b2rot(:,:)
@@ -179,26 +178,24 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
 ! *************************************************************************
 
- DBG_ENTER("COLL")
-
  ! Consistency check on input.
- ABI_CHECK(Wfd%nspinor==1,'nspinor/=1 not coded')
- !
+ ABI_CHECK(Wfd%nspinor == 1, 'nspinor/=1 not coded')
+
  ! By default all bands are included
  !first_band=1; last_band=Wfd%nband(ik_ibz,spin)
- ABI_CHECK(first_band==1, "first_band/=1 not coded")
- ABI_CHECK(last_band<=Wfd%nband(ik_ibz,spin), "last_band cannot be > nband_k")
+ ABI_CHECK(first_band == 1, "first_band/=1 not coded")
+ ABI_CHECK(last_band <= Wfd%nband(ik_ibz,spin), "last_band cannot be > nband_k")
 
- EDIFF_TOL_=0.005/Ha_eV; if (PRESENT(EDIFF_TOL)) EDIFF_TOL_=ABS(EDIFF_TOL)
+ EDIFF_TOL_= 0.005/Ha_eV; if (PRESENT(EDIFF_TOL)) EDIFF_TOL_=ABS(EDIFF_TOL)
 
  call wfd%change_ngfft(Cryst,Psps,ngfftf)
- !
- ! === Get index of the rotated FFT points ===
- ! * FFT mesh in real space _must_ be compatible with symmetries.
- nr1=Wfd%ngfft(1)
- nr2=Wfd%ngfft(2)
- nr3=Wfd%ngfft(3)
- nfft=Wfd%nfft ! No FFT parallelism
+
+ ! Get index of the rotated FFT points ===
+ ! FFT mesh in real space _must_ be compatible with symmetries.
+ nr1 = Wfd%ngfft(1)
+ nr2 = Wfd%ngfft(2)
+ nr3 = Wfd%ngfft(3)
+ nfft = Wfd%nfft ! No FFT parallelism
 
  ABI_MALLOC(irottb,(nfft,Cryst%nsym))
  call rotate_FFT_mesh(Cryst%nsym,Cryst%symrel,Cryst%tnons,Wfd%ngfft,irottb,iscompatibleFFT)
@@ -221,20 +218,19 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
  ! ==========================================
  ! ==== Analyse k-point symmetries first ====
  ! ==========================================
- ! * The analysis is done here so that we already know if there is a problem.
- kpt=Wfd%kibz(:,ik_ibz)
+ ! The analysis is done here so that we already know if there is a problem.
+ kpt = Wfd%kibz(:,ik_ibz)
  !
  !----Initialize the Bsym structure for this k-point and spin----!
  ! * NOTE that all the degenerate states should be included! No check is done.
 
- ene_k => BSt%eig(first_band:,ik_ibz,spin) ! Select a slice of eigenvalues
+ ene_k => ebands%eig(first_band:,ik_ibz,spin) ! Select a slice of eigenvalues
 
- call esymm_init(Bsym,kpt,Cryst,only_trace,Wfd%nspinor,first_band,last_band,EDIFF_TOL_,ene_k,tolsym)
+ call Bsym%init(kpt, Cryst, only_trace, Wfd%nspinor, first_band, last_band, EDIFF_TOL_, ene_k, tolsym)
  !Bsym%degs_bounds = Bsym%degs_bounds + (first_band -1)
 
- if (Bsym%err_status/=0) then
-   write(msg,'(a,i0,a)')" esymm_init returned err_status= ",Bsym%err_status,&
-     " Band classifications cannot be performed."
+ if (Bsym%err_status /= 0) then
+   write(msg,'(a,i0,a)')" esymm_init returned err_status= ",Bsym%err_status," Band classifications cannot be performed."
    ABI_WARNING(msg)
    RETURN
  end if
@@ -311,15 +307,15 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
  ! ==== Calculate the representation matrices ====
  ! ===============================================
  fft_fact=one/nfft
- ABI_MALLOC(ur1,(nfft))
- ABI_MALLOC(ur2,(nfft))
- ABI_MALLOC(ur2_rot,(nfft))
- !
- ! * Precalculate eig0r = e^{iG0.r} on the FFT mesh.
- ABI_MALLOC(eig0r,(nfft,Bsym%nsym_gk))
+ ABI_MALLOC(ur1, (nfft))
+ ABI_MALLOC(ur2, (nfft))
+ ABI_MALLOC(ur2_rot, (nfft))
+
+ ! Precalculate eig0r = e^{iG0.r} on the FFT mesh.
+ ABI_MALLOC(eig0r, (nfft, Bsym%nsym_gk))
 
  do isym=1,Bsym%nsym_gk
-   g0=Bsym%g0(:,isym)
+   g0 = Bsym%g0(:,isym)
    call calc_ceigr(g0,nfft,nspinor1,Wfd%ngfft,eig0r(:,isym))
  end do
 
@@ -333,9 +329,9 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
 
  ! Loop over the set of degenerate states.
  do idg=1,Bsym%ndegs
-   ib_start=Bsym%degs_bounds(1,idg)
-   ib_stop =Bsym%degs_bounds(2,idg)
-   dim_degs=Bsym%degs_dim(idg)
+   ib_start = Bsym%degs_bounds(1,idg)
+   ib_stop  = Bsym%degs_bounds(2,idg)
+   dim_degs = Bsym%degs_dim(idg)
 
    do ib1=ib_start,ib_stop ! First band index in the degenerate set.
      jb1=ib1-ib_start+1
@@ -351,16 +347,12 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
      end if
 
      do ib2=ib_start,ib_stop ! Second band index in the degenerate set.
-
        if (Bsym%only_trace.and.ib1/=ib2) CYCLE ! Only the diagonal is needed.
 
        if (ib2==ib1) then
          call xcopy(nfft,ur1,1,ur2,1)
-         if (Wfd%usepaw==1) then
-           call pawcprj_copy(Cprj_b1,Cprj_b2)
-         end if
+         if (Wfd%usepaw==1) call pawcprj_copy(Cprj_b1,Cprj_b2)
        else
-         !
          ! debugging: use AE wave on dense FFT mesh.
          if (Wfd%usepaw==1.and.use_paw_aeur) then
            call wfd%paw_get_aeur(ib2,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,ur2)
@@ -377,48 +369,47 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
        ! ===================================================
        sym_idx=0
        do iclass=1,Bsym%nclass
-         nsym_class=Bsym%nelements(iclass)
+         nsym_class = Bsym%nelements(iclass)
 
          do isym_class=1,nsym_class ! Loop over elements in each class.
-           sym_idx=sym_idx+1
+           sym_idx = sym_idx+1
            if (Bsym%only_trace.and.isym_class/=1) CYCLE ! Do it once if only the character is required.
 
-           isym=Bsym%sgk2symrec(sym_idx)
+           isym = Bsym%sgk2symrec(sym_idx)
            Rm1_rmt => irottb(:,isym)
-           !
+
            ! Classify states according to the irreps of the little group of k.
            kpg0= kpt + Bsym%g0(:,sym_idx)
-
            arg=-two_pi * DOT_PRODUCT(kpg0,Cryst%tnons(:,isym))
 
            if (ABS(arg) > tol6) then
-             exp_mikg0t=DCMPLX(DCOS(arg),DSIN(arg))
+             exp_mikg0t = DCMPLX(DCOS(arg),DSIN(arg))
            else
-             exp_mikg0t=cone
+             exp_mikg0t = cone
            end if
 
            !if (Wfd%usepaw==1) then
            !end if
            !
-           ! === Rotate the right wave function and apply the phase ===
-           ! * Note that the k-point is the same within a lattice vector.
+           ! Rotate the right wave function and apply the phase ===
+           ! Note that the k-point is the same within a lattice vector.
            do ir=1,nfft
              ur2_rot(ir)=ur2(Rm1_rmt(ir))*eig0r(ir,sym_idx)
            end do
 
-           ! * The matrix element on the FFT mesh.
+           ! The matrix element on the FFT mesh.
            cmat_ab = xdotc(nfft,ur1,1,ur2_rot,1)*fft_fact*exp_mikg0t
 
            if (Wfd%usepaw==1.and..not.use_paw_aeur) then ! Add the on-site contribution.
              call rotate_cprj(kpt,isym,Wfd%nspinor,1,Cryst%natom,Cryst%nsym,Cryst%typat,Cryst%indsym,Cprj_b2,Cprj_b2rot)
 
              omat = paw_phirotphj(Wfd%nspinor,Cryst%natom,Cryst%typat,&
-&              zarot(:,:,:,isym),Pawtab,Psps,Cprj_b1,Cprj_b2rot)
+               zarot(:,:,:,isym),Pawtab,Psps,Cprj_b1,Cprj_b2rot)
 
              cmat_ab = cmat_ab + DCMPLX(omat(1),omat(2)) !* exp_mikg0t
            end if
-           !
-           jb2=ib2-ib_start+1
+
+           jb2 = ib2 - ib_start+1
            Bsym%Calc_irreps(idg)%mat(jb1,jb2,sym_idx)=cmat_ab
 
          end do !isym_class
@@ -429,10 +420,9 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
        ! =========================================================
        ! <-k,a| S |k b>  = e^{i(k+G0).t} \int e^{-ig0.r} u_a u_b(R^{1}(r-t))
        if (Bsym%can_use_tr) then
-
          do tr_isym=1,Bsym%nsym_trgk
 
-           isym=Bsym%tr_sgk2symrec(tr_isym)
+           isym = Bsym%tr_sgk2symrec(tr_isym)
            Rm1_rmt => irottb(:,isym)
 
            kpg0= kpt + Bsym%tr_g0(:,tr_isym)
@@ -443,24 +433,24 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
            else
              exp_ikg0t=cone
            end if
-           !
-           ! === Rotate the right wave function and apply the phase ===
-           ! * Note that the k-point is the same within a lattice vector.
+
+           ! Rotate the right wave function and apply the phase
+           ! Note that the k-point is the same within a lattice vector.
            do ir=1,nfft
              ur2_rot(ir)=ur2(Rm1_rmt(ir)) * tr_emig0r(ir,tr_isym)
            end do
-           !
-           ! * The matrix element on the FFT mesh.
+
+           ! The matrix element on the FFT mesh.
            cmat_ab = xdotu(nfft,ur1,1,ur2_rot,1)*fft_fact*exp_ikg0t
 
            if (Wfd%usepaw==1.and..not.use_paw_aeur) then ! Add the on-site contribution. ! TODO rechek this part.
                call rotate_cprj(kpt,isym,Wfd%nspinor,1,Cryst%natom,Cryst%nsym,Cryst%typat,Cryst%indsym,Cprj_b2,Cprj_b2rot)
                omat = paw_phirotphj(Wfd%nspinor,Cryst%natom,Cryst%typat,&
-&                zarot(:,:,:,isym),Pawtab,Psps,Cprj_b1,Cprj_b2rot,conjg_left=.TRUE.)
+                 zarot(:,:,:,isym),Pawtab,Psps,Cprj_b1,Cprj_b2rot,conjg_left=.TRUE.)
              cmat_ab = cmat_ab + DCMPLX(omat(1),omat(2)) !* exp_ikg0t
            end if
-           !
-           jb2=ib2-ib_start+1
+
+           jb2 = ib2 - ib_start+1
            Bsym%trCalc_irreps(idg)%mat(jb1,jb2,tr_isym)=cmat_ab
          end do ! tr_isym
        end if
@@ -484,14 +474,11 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
 
  end do ! idg
 
- call esymm_finalize(Bsym,Wfd%prtvol)
+ call Bsym%finalize(Wfd%prtvol)
+ call Bsym%print(unit=std_out, prtvol=Wfd%prtvol)
+ call Bsym%print(unit=ab_out , prtvol=Wfd%prtvol)
 
- call esymm_print(Bsym,unit=std_out,prtvol=Wfd%prtvol)
- call esymm_print(Bsym,unit=ab_out ,prtvol=Wfd%prtvol)
-
- ! ===================
- ! === Free memory ===
- ! ===================
+ ! Free memory
  ABI_FREE(irottb)
  ABI_FREE(ur1)
  ABI_FREE(ur2)
@@ -512,8 +499,6 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
    call paw_pwaves_lmn_free(Paw_onsite)
    ABI_FREE(Paw_onsite)
  end if
-
- DBG_EXIT("COLL")
 
 end subroutine classify_bands
 !!***

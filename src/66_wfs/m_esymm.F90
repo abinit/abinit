@@ -35,7 +35,7 @@ MODULE m_esymm
  use m_hide_lapack,    only : xgeev, xginv
  use m_crystal,        only : crystal_t
  use m_defs_ptgroups,  only : point_group_t, irrep_t
- use m_ptgroups,       only : get_classes, point_group_init, irrep_free,&
+ use m_ptgroups,       only : get_classes, point_group_init, irrep_free, &
                               copy_irrep, init_irrep, mult_table, sum_irreps
 
  implicit none
@@ -192,14 +192,16 @@ MODULE m_esymm
   !   Reference irreducible representations of the group of k derived from the point group
   !   or from the external database downloaded from the Bilbao web site.
 
+ contains
+   procedure :: init => esymm_init         ! Initialize the object
+   procedure :: print => esymm_print       ! Print info
+   procedure :: finalize => esymm_finalize ! Finalize the object
+   procedure :: failed => esymm_failed     ! True if symmetry analysis failed.
+   procedure :: esymm_symmetrize_mels      ! Symmetrize given matrix elements
+
  end type esymm_t
 
- public :: esymm_init             ! Initialize the object
- public :: esymm_print            ! Print info
  public :: esymm_free             ! Free memory
- public :: esymm_finalize         ! Finalize the object
- public :: esymm_symmetrize_mels  ! Symmetrize given matrix elements
- public :: esymm_failed           ! True if symmetry analysis failed.
 !!***
 
 !----------------------------------------------------------------------
@@ -211,7 +213,7 @@ MODULE m_esymm
    module procedure esymm_free_2D
  end interface esymm_free
 
-CONTAINS  !==============================================================================
+contains
 !!***
 
 !----------------------------------------------------------------------
@@ -222,7 +224,7 @@ CONTAINS  !=====================================================================
 !!
 !! FUNCTION
 !!  Initialize a esymm_t datatype containing data and parameters
-!!  needed to analyze the irreducible representations at a particular k-point....
+!!  needed to analyze the irreducible representations at a particular k-point.
 !!
 !! INPUTS
 !!  kpt_in(3)=The k-point where the classification of bands is required.
@@ -244,15 +246,15 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF_TOL,ene_k,tolsym)
+subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds, EDIFF_TOL, ene_k, tolsym)
 
 !Arguments ------------------------------------
 !scalars
+ class(esymm_t),intent(out) :: esymm
  integer,intent(in) :: nbnds,nspinor,first_ib
  real(dp),intent(in) :: EDIFF_TOL,tolsym
  logical,intent(in) :: only_trace
  type(crystal_t),intent(in) :: Cryst
- type(esymm_t),intent(out) :: esymm
 !arrays
  real(dp),intent(in) :: ene_k(nbnds),kpt_in(3)
 
@@ -327,11 +329,11 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
  ABI_MALLOC(esymm%degs_bounds,(2,esymm%ndegs))
  esymm%degs_bounds = degs_bounds(:,1:esymm%ndegs)
  ABI_FREE(degs_bounds)
- !
+
  ! Each band is initialized as "Unknown".
  ABI_MALLOC(esymm%b2irrep,(esymm%nbnds))
  esymm%b2irrep = 0
- !
+
  ! ==================================
  ! ==== Find the group of kpt_in ====
  ! ==================================
@@ -352,13 +354,13 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
    ABI_COMMENT(msg)
  end if
 
- ABI_MALLOC(symrec_fm,(3,3,nsym_fm))
- ABI_MALLOC(fm2symrec,(nsym_fm))
+ ABI_MALLOC(symrec_fm, (3,3,nsym_fm))
+ ABI_MALLOC(fm2symrec, (nsym_fm))
 
  idx_fm = 0
  do isym=1,Cryst%nsym
    if (Cryst%symafm(isym) == 1) then
-     idx_fm = idx_fm+1
+     idx_fm = idx_fm + 1
      symrec_fm(:,:,idx_fm) = Cryst%symrec(:,:,isym)
      fm2symrec(idx_fm) = isym
    end if
@@ -369,9 +371,9 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
  ABI_MALLOC(dummy_symafm,(nsym_fm))
 
  dummy_symafm = 1
- call littlegroup_q(nsym_fm,esymm%kpt,ksym_table,symrec_fm,dummy_symafm,dummy_timrev,prtvol=0)
+ call littlegroup_q(nsym_fm, esymm%kpt, ksym_table, symrec_fm, dummy_symafm, dummy_timrev, prtvol=0)
 
- esymm%nsym_gk  =COUNT(ksym_table(4,1,:)==1)  ! # S such that  S k = k +G0
+ esymm%nsym_gk =COUNT(ksym_table(4,1,:)==1)  ! # S such that  S k = k +G0
 
  esymm%nsym_trgk=0
  if (esymm%can_use_tr) esymm%nsym_trgk=COUNT(ksym_table(4,2,:)==1)  ! # S such that -S k = k +G0
@@ -391,8 +393,8 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
  ! an external database retrieved from the bilbao server (REPRES) is found.
  idx_gk=0; idx_trgk=0
  esymm%sgk2symrec=-999; esymm%tr_sgk2symrec=-999
- do isym=1,nsym_fm
 
+ do isym=1,nsym_fm
    if (ksym_table(4,1,isym)==1) then ! S k = k +G0
      idx_gk=idx_gk+1
      sgk(:,:,idx_gk)=symrec_fm(:,:,isym)
@@ -418,20 +420,20 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
 ! ==========================================
 ! ==== Divide the operations in classes ====
 ! ==========================================
- ABI_MALLOC(dum_symafm,(esymm%nsym_gk))
- dum_symafm=1
+ ABI_MALLOC(dum_symafm, (esymm%nsym_gk))
+ dum_symafm = 1
 
-!Check group closure
+ ! Check group closure
  call sg_multable(esymm%nsym_gk,dum_symafm,sgk,grp_ierr)
- ABI_CHECK(grp_ierr==0,"sg_multable failed")
+ ABI_CHECK(grp_ierr == 0, "sg_multable failed")
  ABI_FREE(dum_symafm)
 
- ABI_MALLOC(tmp_nelements,(esymm%nsym_gk))
- ABI_MALLOC(elements_idx,(esymm%nsym_gk,esymm%nsym_gk))
+ ABI_MALLOC(tmp_nelements, (esymm%nsym_gk))
+ ABI_MALLOC(elements_idx, (esymm%nsym_gk, esymm%nsym_gk))
 
- call get_classes(esymm%nsym_gk,sgk,esymm%nclass,tmp_nelements,elements_idx)
+ call get_classes(esymm%nsym_gk, sgk, esymm%nclass, tmp_nelements, elements_idx)
 
- ABI_MALLOC(esymm%nelements,(esymm%nclass))
+ ABI_MALLOC(esymm%nelements, (esymm%nclass))
  esymm%nelements = tmp_nelements(1:esymm%nclass)
  ABI_FREE(tmp_nelements)
 
@@ -486,9 +488,9 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
 
    else
      write(msg,'(7a)')&
-&      "Non-symmorphic small group and zone border. ",ch10,&
-&      "External file: ",TRIM(lgroup_fname)," containing Bilbao tables not found ",ch10,&
-&      "Character analysis cannot be performed. Accidental degeneracies cannot be detected. "
+       "Non-symmorphic small group and zone border. ",ch10,&
+       "External file: ",TRIM(lgroup_fname)," containing Bilbao tables not found ",ch10,&
+       "Character analysis cannot be performed. Accidental degeneracies cannot be detected. "
      ABI_WARNING(msg)
 
      esymm%has_chtabs = .FALSE.
@@ -826,21 +828,19 @@ end subroutine esymm_init
 !!
 !! SOURCE
 
-subroutine esymm_print(esymm,unit,mode_paral,prtvol)
+subroutine esymm_print(esymm, unit, mode_paral, prtvol)
 
 !Arguments ------------------------------------
 !scalars
+ class(esymm_t),intent(in) :: esymm
  integer,optional,intent(in) :: prtvol,unit
  character(len=4),optional,intent(in) :: mode_paral
- type(esymm_t),intent(in) :: esymm
 
 !Local variables-------------------------------
 !scalars
- integer :: icl,idg,my_unt,my_prtvol
- integer :: irr_idx,nstates,nunknown,istart,istop,ii
+ integer :: icl,idg,my_unt,my_prtvol, irr_idx,nstates,nunknown,istart,istop,ii
  character(len=4) :: my_mode
  character(len=1000) :: fmt,msg,msg0
-
 ! *********************************************************************
 
  my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
@@ -914,8 +914,8 @@ subroutine esymm_print(esymm,unit,mode_paral,prtvol)
    write(fmt,*)'(i2,a,i2,1x,',esymm%nclass,'(a,2f5.2),a)'
    do idg=1,esymm%ndegs
      write(msg,fmt)&
-&      esymm%degs_bounds(1,idg),'-',esymm%degs_bounds(2,idg),&
-&      ('|',esymm%Calc_irreps(idg)%trace(esymm%nelements(icl)), icl=1,esymm%nclass),'|'
+       esymm%degs_bounds(1,idg),'-',esymm%degs_bounds(2,idg),&
+       ('|',esymm%Calc_irreps(idg)%trace(esymm%nelements(icl)), icl=1,esymm%nclass),'|'
      call wrtout(my_unt,msg,my_mode)
    end do
  end if
@@ -937,13 +937,12 @@ end subroutine esymm_print
 subroutine esymm_free_0D(esymm)
 
 !Arguments ------------------------------------
- type(esymm_t),intent(inout) :: esymm
+ class(esymm_t),intent(inout) :: esymm
 
 !Local variables ------------------------------
  integer :: ii
 ! *************************************************************************
 
- !@esymm_t
  ABI_SFREE(esymm%g0)
  ABI_SFREE(esymm%tr_g0)
  ABI_SFREE(esymm%nelements)
@@ -982,7 +981,7 @@ end subroutine esymm_free_0D
 subroutine esymm_free_2D(esymm)
 
 !Arguments ------------------------------------
- type(esymm_t),intent(inout) :: esymm(:,:)
+ class(esymm_t),intent(inout) :: esymm(:,:)
 
 !Local variables ------------------------------
  integer :: id1,id2
@@ -1007,16 +1006,14 @@ end subroutine esymm_free_2D
 !!
 !! INPUTS
 !!
-!! OUTPUT
-!!
 !! SOURCE
 
-subroutine esymm_finalize(esymm,prtvol)
+subroutine esymm_finalize(esymm, prtvol)
 
 !Arguments ------------------------------------
 !scalars
+ class(esymm_t),target,intent(inout) :: esymm
  integer,intent(in) :: prtvol
- type(esymm_t),target,intent(inout) :: esymm
 
 !Local variables-------------------------------
  integer :: idg,ib1,ib2,idx,nunknown,dg_dim
@@ -1080,7 +1077,7 @@ subroutine esymm_finalize(esymm,prtvol)
    end do
 
    if (nseen>esymm%nclass) then
-     write(msg,'(3a)')&
+     write(msg, '(3a)') &
       "The number of different calculated traces is found to be greater than nclasses!",ch10,&
       "Heuristic method clearly failed. Symmetry analysis cannot be performed."
      ABI_WARNING(msg)
@@ -1119,8 +1116,7 @@ subroutine esymm_finalize(esymm,prtvol)
    ABI_FREE(dims_seen)
 
  else
-   !
-   ! * Search in the lookup table definining the irreducible representation
+   ! Search in the lookup table definining the irreducible representation
    nunknown = 0
    do idg=1,esymm%ndegs
 
@@ -1138,10 +1134,9 @@ subroutine esymm_finalize(esymm,prtvol)
      end if
    end do
  end if
- !
+
  ! %irrep2b(0)) gives the indices of the states that have not been classified.
  ABI_MALLOC(esymm%irrep2b,(0:esymm%nclass))
-
  !write(std_out,*)"b2irrep",esymm%b2irrep
 
  do irep=0,esymm%nclass
@@ -1238,9 +1233,7 @@ subroutine esymm_finalize(esymm,prtvol)
        write(msg,'(a,es10.2)')" maximum error on the unitary of representions matrices: ",max_err
        call wrtout(std_out,msg)
      end if
-
    end if
-
  end if
 
 end subroutine esymm_finalize
@@ -1262,18 +1255,16 @@ end subroutine esymm_finalize
 !!
 !! SOURCE
 
-function which_irrep(esymm,trace,tolerr)
+integer function which_irrep(esymm, trace, tolerr)
 
 !Arguments ------------------------------------
 !scalars
- integer :: which_irrep
+ class(esymm_t),intent(in) :: esymm
  real(dp),intent(in) :: tolerr
- type(esymm_t),intent(in) :: esymm
 !arrays
  complex(dp),intent(in) :: trace(esymm%nsym_gk)
 
 !Local variables-------------------------------
-!scalars
  integer :: irp
 ! *********************************************************************
 
@@ -1299,16 +1290,15 @@ end function which_irrep
 !! FUNCTION
 !!
 !! INPUTS
-!!  esymm<esymm_t>
 !!
 !! SOURCE
 
-subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
+subroutine esymm_symmetrize_mels(esymm, lbnd, ubnd, in_me, out_me)
 
 !Arguments ------------------------------------
 !scalars
+ class(esymm_t),target,intent(in) :: esymm
  integer :: lbnd,ubnd
- type(esymm_t),target,intent(in) :: esymm
 !arrays
  complex(dp),intent(in) :: in_me(2,lbnd:ubnd,lbnd:ubnd)
  complex(dp),intent(out) :: out_me(lbnd:ubnd,lbnd:ubnd)
@@ -1319,8 +1309,8 @@ subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
  integer :: idg2,b2_start,b2_stop,irp2
  integer :: ii,jj,ib,jb,kk,kb,lb,ll
  complex(dp) :: tr_ofd,ofd,dsd,tr_dsd
- type(irrep_t),pointer :: Irrep1,Irrep2
- type(irrep_t),pointer :: tr_Irrep1,tr_Irrep2
+ type(irrep_t),pointer :: Irrep1, Irrep2
+ type(irrep_t),pointer :: tr_Irrep1, tr_Irrep2
 ! *********************************************************************
 
  if (esymm_failed(esymm)) then
@@ -1390,18 +1380,12 @@ end subroutine esymm_symmetrize_mels
 !!
 !! FUNCTION
 !!
-!! INPUTS
-!!  esymm<esymm_t>
-!!
 !! SOURCE
 
-function esymm_failed(esymm)
+logical function esymm_failed(esymm)
 
 !Arguments ------------------------------------
-!scalars
- logical :: esymm_failed
- type(esymm_t),intent(in) :: esymm
-
+ class(esymm_t),intent(in) :: esymm
 ! *********************************************************************
 
  esymm_failed = (esymm%err_status /= ESYM_NOERROR)
@@ -1424,7 +1408,6 @@ end function esymm_failed
 subroutine polish_irreps(Irreps)
 
 !Arguments ------------------------------------
-!scalars
  type(irrep_t),intent(inout) :: Irreps(:)
 
 !Local variables-------------------------------
@@ -1433,8 +1416,7 @@ subroutine polish_irreps(Irreps)
  integer :: irp,sym,dim,ldvr,ii,ivec,jvec,info
  !character(len=500) :: msg
 !arrays
- complex(dp),allocatable :: vl(:,:),vr(:,:),vrm1(:,:),overlap(:,:)
- complex(dp),allocatable :: cmat(:,:),eigval(:)
+ complex(dp),allocatable :: vl(:,:),vr(:,:),vrm1(:,:),overlap(:,:), cmat(:,:),eigval(:)
 ! *********************************************************************
 
  ! Eigen decomposition: A = V D V^{-1}.
@@ -1450,21 +1432,18 @@ subroutine polish_irreps(Irreps)
    do sym=1,Irreps(irp)%nsym
      cmat = Irreps(irp)%mat(:,:,sym)
      call xgeev("No vectors","Vectors",dim,cmat,dim,eigval,vl,ldvl1,vr,ldvr)
-     !
      ! Orthogonalize the eigenvectors using Cholesky orthogonalization.
      do jvec=1,dim
        do ivec=1,jvec
          overlap(ivec,jvec) = DOT_PRODUCT(vr(:,ivec),vr(:,jvec))
        end do
      end do
-     !
      ! 2) Cholesky factorization: overlap = U^H U with U upper triangle matrix.
      call ZPOTRF('U',dim,overlap,dim,info)
      ABI_CHECK(info == 0, sjoin('ZPOTRF returned info=', itoa(info)))
 
      ! 3) Solve X U = Vr, on exit the Vr treated by this node is orthonormalized.
      call ZTRSM('R','U','N','N',dim,dim,cone,overlap,dim,vr,dim)
-
      !write(std_out,*)"After ortho",MATMUL(TRANSPOSE(CONJG(vr)),vr)
 
      vrm1 = vr
@@ -1489,5 +1468,5 @@ end subroutine polish_irreps
 
 !----------------------------------------------------------------------
 
-END MODULE m_esymm
+end module m_esymm
 
