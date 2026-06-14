@@ -653,7 +653,7 @@ contains
 end type gstore_t
 !!***
 
-public :: gstore_check_restart, gstore_read_gtype
+public :: gstore_check_restart, gstore_read_gtype, gstore_symmetrize
  ! Check whether restart is possible.
 
 contains
@@ -6614,6 +6614,139 @@ subroutine gstore_read_gtype(path, gtype, comm)
  if (nproc > 1) call xmpi_bcast(gtype, master, comm, ierr)
 
 end subroutine gstore_read_gtype
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gstore/gstore_symmetrize
+!! NAME
+!! gstore_symmetrize
+!!
+!! FUNCTION
+!! Reconstruct the electron-phonon matrix elements g(k,q) in the full
+!! Brillouin Zone (BZ) using the values stored in the Irreducible Brillouin
+!! Zone (IBZ). Uses the NetCDF API for in-place modification of the GSTORE file
+!! and wfd_t to fetch wavefunctions and compute unitary matrices.
+!!
+!! SOURCE
+
+subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands, ifc, comm)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: gstore_path
+ character(len=*),intent(in) :: wfk_path
+ type(dataset_type),intent(in) :: dtset
+ type(datafiles_type),intent(in) :: dtfil
+ class(crystal_t),target,intent(in) :: cryst
+ class(ebands_t),target,intent(in) :: ebands
+ class(ifc_type),target,intent(in) :: ifc
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+!scalars
+ integer :: units(2)
+
+ type(wfd_t) :: wfd
+ type(gstore_t) :: gstore
+ integer :: with_cplex, ik_ibz, my_is, spin, my_ik, my_iq, iq_glob
+ integer :: ncid, spin_ncid, nprocs, my_rank
+ !integer :: my_is, spin !, nkibz, nqibz, nkbz, nqbz, natom3, nb_k, nb_kq, ik_bz, iq_bz, my_ik
+ real(dp) :: weight_qq
+ logical :: with_g2dw, q_is_gamma
+ character(len=abi_slen) :: with_gmode, gtype, gvals_name
+ character(len=5000) :: msg
+!arrays
+ real(dp) :: qpt(3), kk_bz(3), kk_ibz(3)
+ ! TODO: Add arrays to hold precomputed U and D matrices
+!----------------------------------------------------------------------
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ units = [std_out, ab_out]
+ call wrtout(units, " Entering gstore_symmetrize...")
+ call wrtout(units, sjoin(" GSTORE file: ", gstore_path))
+ call wrtout(units, sjoin(" WFK file: ", wfk_path))
+
+ ! 1. Initialize wavefunctions (wfd_t)
+ ! Open the WFK file and create a wfd_t object with the ground-state
+ ! wavefunctions for the required BZ and IBZ points.
+ ! TODO: Implement wfd_t initialization using wfk_path
+ ! call wfd%init(...)
+
+ ! 2. Compute Unitary and D Matrices
+ ! Allocate memory for storing U and D matrices for all required symmetries/wavevectors.
+ ! Loop over the relevant symmetry operations S.
+ ! Unitary Matrices (U): Compute the mixing matrices U^{k}(S) from the states stored in wfd_t.
+ ! Phonon Matrices (D): Compute the rotation matrices D_{nu, nu'}(S) using pheigvec_rotate.
+ ! TODO: Implement U and D matrix computation and store them in memory
+
+ ! 3. Release Wavefunctions
+ ! Call wfd%free() to immediately release the wavefunction memory.
+ ! call wfd%free()
+
+ if (my_rank /= 0) goto 100
+
+ call gstore_read_gtype(gstore_path, gtype, xmpi_comm_self)
+ gvals_name = "gvals"
+ !if (gtype == "gwpt" .and. dtset%gstore_gname == "gvals_ks") gvals_name = "gvals_ks"
+
+ ! Read GSTORE.nc dimensions and metadata, without allocating gvals.
+ with_cplex = 0; with_gmode = GSTORE_GMODE_PHONON; with_g2dw = .False.
+
+ call gstore%from_ncpath(gstore_path, with_cplex, dtset, dtfil, cryst, ebands, ifc, &
+                         with_gmode, gvals_name, with_g2dw, xmpi_comm_self)
+
+ ! For wannierization, we need the same number of bands for m and n.
+ ! Also, k and q must be in the BZ without any filter.
+ ! Once the symmetrization of the g's has been implemented, this routine
+ ! will receive a gstore file in which all g(k,q) matrix elements in the BZ
+ ! have been reconstructed using symmetry operations.
+ ABI_CHECK(gstore%same_nbands(msg), msg)
+ if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "phonon", kfilter="none") /= 0) then
+   ABI_ERROR("GSTORE.nc should have both k and q in the full BZ. See messages above.")
+ end if
+
+ ! 4. Symmetrize and I/O Loop
+ ! Loop over collinear spins.
+ do my_is=1,gstore%my_nspins
+   spin = gstore%my_spins(my_is)
+   associate (gqk => gstore%gqk(my_is))
+
+   ! Get the group id for this spin
+   NCF_CHECK(nf90_inq_ncid(ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+
+   ! Loop over q-points in the BZ.
+   do my_iq=1, gqk%my_nq
+     iq_glob = my_iq + gqk%my_qstart - 1
+     call gqk%myqpt(my_iq, gstore, weight_qq, qpt); q_is_gamma = sum(qpt**2) < tol14
+
+     ! Read the reference IBZ matrix elements.
+     ! TODO: allocate and read IBZ g(k,q) for this spin
+
+     do my_ik=1,gqk%my_nk
+       kk_bz = gqk%my_kpts(:, my_ik)
+       ik_ibz = gqk%my_k2ibz(1, my_ik)
+       kk_ibz = ebands%kptns(:,ik_ibz)
+
+       ! Perform the tensor contraction using precomputed arrays.
+       ! TODO: core tensor contraction loop
+       ! Write the newly computed g_{mn, nu} array back to the netcdf file (in-place modification).
+       ! TODO: Write back to spin_ncid
+
+       !do nu=1,gqk%natom3
+       !end do
+     end do ! my_ik
+   end do ! my_iq
+   end associate
+ end do ! my_is
+
+ call gstore%free()
+
+ 100 call xmpi_barrier(comm)
+ call wrtout(units, " Symmetrization completed successfully.")
+
+end subroutine gstore_symmetrize
 !!***
 
 end module m_gstore
