@@ -51,7 +51,7 @@ module m_sigx
  use m_wfd,           only : wfdgw_t, wave_t
  use m_sigma,         only : sigma_t, sigma_distribute_bks
  use m_oscillators,   only : rho_tw_g
- use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
+ use m_esymm,         only : esymm_t
  use m_occ,           only : get_fact_spin_tol_empty
  use m_ebands,        only : ebands_t
  use m_pstat,         only : pstat_proc
@@ -226,7 +226,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, dtset,
    can_symmetrize = .TRUE.
    if (gwcalctyp >= 20) then
      do spin=1,nsppol
-       can_symmetrize(spin) = .not. esymm_failed(QP_sym(spin))
+       can_symmetrize(spin) = .not. QP_sym(spin)%failed()
        if (.not.can_symmetrize(spin)) then
          write(msg,'(a,i0,4a)')&
           "Symmetrization cannot be performed for spin: ",spin,ch10,&
@@ -790,7 +790,7 @@ subroutine sigx_symmetrize(jk_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab, s
    sym_sigx(ib,ib,:) = sym_sigx(ib,ib,:) / ndegs
  end do
 
- !if (gwcalctyp >= 20) call esymm_symmetrize_mels(QP_sym(spin),bmin,bmax,sigx(:,:,:,spin),sym_sigx(:,:,1))
+ !if (gwcalctyp >= 20) call QP_sym(spin)%symmetrize_mels(,bmin,bmax,sigx(:,:,:,spin),sym_sigx(:,:,1))
 
  ! Copy symmetrized values.
  do ib=bmin,bmax

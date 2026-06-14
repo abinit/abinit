@@ -47,7 +47,7 @@ module m_sigc
  use m_ppmodel,       only : ppmodel_t
  use m_screen,        only : em1_symmetrize_op
  use m_sigma,         only : sigma_t, sigma_distribute_bks
- use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
+ use m_esymm,         only : esymm_t
  use m_pawang,        only : pawang_type
  use m_pawtab,        only : pawtab_type
  use m_pawfgrtab,     only : pawfgrtab_type
@@ -287,7 +287,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    can_symmetrize = .TRUE.
    if (Sigp%gwcalctyp >= 20) then
     do spin=1,Wfd%nsppol
-      can_symmetrize(spin) = .not. esymm_failed(QP_sym(spin))
+      can_symmetrize(spin) = .not. QP_sym(spin)%failed()
       if (.not.can_symmetrize(spin)) then
         write(msg,'(a,i0,4a)')&
           " Symmetrization cannot be performed for spin: ",spin,ch10,&
@@ -980,7 +980,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                          czero_gw, rhotw_epsm1_rhotw(:,:,iiw,iab), maxbnd-minbnd+1)
             !   call xherk('L','C',maxbnd-minbnd+1,neig(iiw),one_gw,epsm1_sqrt_rhotw,neig(iiw),zero_gw,&
             !              rhotw_epsm1_rhotw(:,:,iiw,iab), maxbnd-minbnd+1)
-   
+
               ! Get the upper part of rhotw_epsm1_rhotw that is hermitian by construction
               do jb=minbnd,maxbnd
                 do kb=jb+1,maxbnd
@@ -1400,7 +1400,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
      if (Sigp%gwcalctyp >= 20) then
        do iwc=1,nomega_sigc
-         call esymm_symmetrize_mels(QP_sym(spin),ib1,ib2,sigc(:,iwc,:,:,spin),sym_cme(iwc,:,:,1))
+         call QP_sym(spin)%symmetrize_mels(ib1,ib2,sigc(:,iwc,:,:,spin),sym_cme(iwc,:,:,1))
        end do
      end if
 

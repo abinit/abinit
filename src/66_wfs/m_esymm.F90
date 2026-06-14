@@ -20,7 +20,7 @@
 
 #include "abi_common.h"
 
-MODULE m_esymm
+module m_esymm
 
  use defs_basis
  use m_abicore
@@ -197,7 +197,7 @@ MODULE m_esymm
    procedure :: print => esymm_print       ! Print info
    procedure :: finalize => esymm_finalize ! Finalize the object
    procedure :: failed => esymm_failed     ! True if symmetry analysis failed.
-   procedure :: esymm_symmetrize_mels      ! Symmetrize given matrix elements
+   procedure :: symmetrize_mels => esymm_symmetrize_mels      ! Symmetrize given matrix elements
 
  end type esymm_t
 
@@ -800,12 +800,12 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
 
  if (esymm%has_chtabs) then
    ABI_FREE(dim_irreps)
-   if (nacc_deg/=0) then
+   if (nacc_deg /= 0) then
      write(msg,'(a,i0,a)')" Detected ",nacc_deg," accidental degeneracies."
      ABI_WARNING(msg)
-     esymm%err_status=ESYM_ACCDEG_ERROR
+     esymm%err_status = ESYM_ACCDEG_ERROR
      ! TODO this should signal to the caller that we have to decompose the calculated representation.
-     esymm%err_msg =msg(1:500)
+     esymm%err_msg = msg(1:500)
    end if
  end if
 
@@ -1162,10 +1162,8 @@ subroutine esymm_finalize(esymm, prtvol)
  ! ==== Test basic properties of irreducible representations ====
  ! ==============================================================
 
- if (.not.esymm_failed(esymm)) then
-   !
+ if (.not. esymm%failed()) then
    ! 1) \sum_R \chi^*_a(R)\chi_b(R)= N_R \delta_{ab}
-   !
    !call wrtout(std_out," \sum_R \chi^*_a(R)\chi_b(R) = N_R \delta_{ab} ")
    max_err=zero
    do idg2=1,esymm%ndegs
@@ -1281,7 +1279,6 @@ end function which_irrep
 !!***
 
 !----------------------------------------------------------------------
-
 
 !!****f* m_esymm/esymm_symmetrize_mels
 !! NAME
@@ -1469,4 +1466,3 @@ end subroutine polish_irreps
 !----------------------------------------------------------------------
 
 end module m_esymm
-

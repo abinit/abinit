@@ -552,18 +552,13 @@ subroutine rotate_cprj(kpoint,isym,nspinor,nbnds,natom,nsym,typat,indsym,Cprj_in
 !arrays
  integer :: r0(3)
  real(dp) :: phase_kr0(2)
-
 ! *************************************************************************
-
- !call pawcprj_copy(cprj_in,cprj_out)
- !RETURN
 
  do iat=1,natom
    itypat=typat(iat)
-   !
    ! The index of the symmetric atom.
-   ! * R^{-1} (xred(:,iat)-tnons) = xred(:,iat_sym) + r0.
-   ! * phase_kr0 takes into account the case in which rotated atom is in another unit cell.
+   ! R^{-1} (xred(:,iat)-tnons) = xred(:,iat_sym) + r0.
+   ! phase_kr0 takes into account the case in which rotated atom is in another unit cell.
    iat_sym=indsym(4,isym,iat); r0=indsym(1:3,isym,iat)
 
    kdotr0 = two_pi*DOT_PRODUCT(kpoint,r0)
@@ -574,10 +569,10 @@ subroutine rotate_cprj(kpoint,isym,nspinor,nbnds,natom,nsym,typat,indsym,Cprj_in
 
    do iband=1,nspinor*nbnds
      Cprj_out(iat,iband)%cp(1,:)=  Cprj_in(iat_sym,iband)%cp(1,:)*phase_kr0(1) &
-&                                 -Cprj_in(iat_sym,iband)%cp(2,:)*phase_kr0(2)
+                                  -Cprj_in(iat_sym,iband)%cp(2,:)*phase_kr0(2)
 
      Cprj_out(iat,iband)%cp(2,:)=  Cprj_in(iat_sym,iband)%cp(1,:)*phase_kr0(2) &
-&                                 +Cprj_in(iat_sym,iband)%cp(2,:)*phase_kr0(1)
+                                  +Cprj_in(iat_sym,iband)%cp(2,:)*phase_kr0(1)
    end do
  end do ! iat
 
@@ -633,7 +628,6 @@ function paw_phirotphj(nspinor,natom,typat,zarot_isym,Pawtab,Psps,Cprj_b1,Cprj_b
  integer :: iat,il,ilmn,ilpm,im,itypat,jl,jlmn,jlpm,jm,k0lmn,klmn,nlmn
  real(dp) :: dmimj,fij,im_p,re_p,sij
  logical :: do_conjg_left
-
 ! *************************************************************************
 
  do_conjg_left = .FALSE.; if (PRESENT(conjg_left)) do_conjg_left = conjg_left
@@ -671,27 +665,26 @@ function paw_phirotphj(nspinor,natom,typat,zarot_isym,Pawtab,Psps,Cprj_b1,Cprj_b
 
        if (do_conjg_left) then  ! take the complex conjugate of the left cprj.
          re_p=  Cprj_b1(iat,1)%cp(1,ilmn) * Cprj_b2(iat,1)%cp(1,jlmn) &
-&              -Cprj_b1(iat,1)%cp(2,ilmn) * Cprj_b2(iat,1)%cp(2,jlmn) &
-&              +Cprj_b1(iat,1)%cp(1,jlmn) * Cprj_b2(iat,1)%cp(1,ilmn) &
-&              -Cprj_b1(iat,1)%cp(2,jlmn) * Cprj_b2(iat,1)%cp(2,ilmn)
+               -Cprj_b1(iat,1)%cp(2,ilmn) * Cprj_b2(iat,1)%cp(2,jlmn) &
+               +Cprj_b1(iat,1)%cp(1,jlmn) * Cprj_b2(iat,1)%cp(1,ilmn) &
+               -Cprj_b1(iat,1)%cp(2,jlmn) * Cprj_b2(iat,1)%cp(2,ilmn)
 
          im_p=  Cprj_b1(iat,1)%cp(1,ilmn) * Cprj_b2(iat,1)%cp(2,jlmn) &
-&              +Cprj_b1(iat,1)%cp(2,ilmn) * Cprj_b2(iat,1)%cp(1,jlmn) &
-&              -Cprj_b1(iat,1)%cp(1,jlmn) * Cprj_b2(iat,1)%cp(2,ilmn) &
-&              -Cprj_b1(iat,1)%cp(2,jlmn) * Cprj_b2(iat,1)%cp(1,ilmn)
+               +Cprj_b1(iat,1)%cp(2,ilmn) * Cprj_b2(iat,1)%cp(1,jlmn) &
+               -Cprj_b1(iat,1)%cp(1,jlmn) * Cprj_b2(iat,1)%cp(2,ilmn) &
+               -Cprj_b1(iat,1)%cp(2,jlmn) * Cprj_b2(iat,1)%cp(1,ilmn)
        else
          re_p=  Cprj_b1(iat,1)%cp(1,ilmn) * Cprj_b2(iat,1)%cp(1,jlmn) &
-&              +Cprj_b1(iat,1)%cp(2,ilmn) * Cprj_b2(iat,1)%cp(2,jlmn) &
-&              +Cprj_b1(iat,1)%cp(1,jlmn) * Cprj_b2(iat,1)%cp(1,ilmn) &
-&              +Cprj_b1(iat,1)%cp(2,jlmn) * Cprj_b2(iat,1)%cp(2,ilmn)
+               +Cprj_b1(iat,1)%cp(2,ilmn) * Cprj_b2(iat,1)%cp(2,jlmn) &
+               +Cprj_b1(iat,1)%cp(1,jlmn) * Cprj_b2(iat,1)%cp(1,ilmn) &
+               +Cprj_b1(iat,1)%cp(2,jlmn) * Cprj_b2(iat,1)%cp(2,ilmn)
 
          im_p=  Cprj_b1(iat,1)%cp(1,ilmn) * Cprj_b2(iat,1)%cp(2,jlmn) &
-&              -Cprj_b1(iat,1)%cp(2,ilmn) * Cprj_b2(iat,1)%cp(1,jlmn) &
-&              +Cprj_b1(iat,1)%cp(1,jlmn) * Cprj_b2(iat,1)%cp(2,ilmn) &
-&              -Cprj_b1(iat,1)%cp(2,jlmn) * Cprj_b2(iat,1)%cp(1,ilmn)
+               -Cprj_b1(iat,1)%cp(2,ilmn) * Cprj_b2(iat,1)%cp(1,jlmn) &
+               +Cprj_b1(iat,1)%cp(1,jlmn) * Cprj_b2(iat,1)%cp(2,ilmn) &
+               -Cprj_b1(iat,1)%cp(2,jlmn) * Cprj_b2(iat,1)%cp(1,ilmn)
        end if
-       !
-       ! * Accumulate the atom-centered contributions.
+       ! Accumulate the atom-centered contributions.
        fij = Pawtab(itypat)%dltij(klmn)/two
        omat(1)= omat(1) + fij*sij*re_p*dmimj
        omat(2)= omat(2) + fij*sij*im_p*dmimj

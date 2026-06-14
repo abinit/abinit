@@ -40,7 +40,7 @@ module m_sigtk
  use defs_datatypes, only : pseudopotential_type
  use defs_wvltypes,  only : wvl_internal_type
  use m_gwdefs,       only : sigijtab_t, sigijtab_free
- use m_esymm,        only : esymm_t, esymm_failed
+ use m_esymm,        only : esymm_t
  use m_pawtab,       only : pawtab_type
  use m_kpts,         only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
 
@@ -869,7 +869,7 @@ subroutine sigtk_sigma_tables(nkcalc, nkibz, nsppol, bstart_ks, bstop_ks, kcalc2
    do spin=1,nsppol
      do ikcalc=1,nkcalc
       ik_ibz = kcalc2ibz(ikcalc)
-      use_sym_at(ik_ibz, spin) = .not. esymm_failed(esymm(ik_ibz, spin))
+      use_sym_at(ik_ibz, spin) = .not. esymm(ik_ibz, spin)%failed()
      end do
    end do
  end if

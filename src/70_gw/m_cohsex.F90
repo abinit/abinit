@@ -45,7 +45,7 @@ module m_cohsex
  use m_wfd,           only : wfdgw_t, wave_t
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
  use m_screening,     only : epsm1_t
- use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
+ use m_esymm,         only : esymm_t
  use m_sigma,         only : sigma_t, sigma_distribute_bks
  use m_pawang,        only : pawang_type
  use m_pawtab,        only : pawtab_type
@@ -257,7 +257,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,dtset, Cryst,QP
    can_symmetrize = .TRUE.
    if (Sigp%gwcalctyp >= 20) then
     do spin=1,Wfd%nsppol
-      can_symmetrize(spin) = .not. esymm_failed(QP_sym(spin))
+      can_symmetrize(spin) = .not. QP_sym(spin)%failed()
       if (.not.can_symmetrize(spin)) then
         write(msg,'(a,i0,4a)')" Symmetrization cannot be performed for spin: ",spin,ch10,&
           " band classification encountered the following problem: ",ch10,TRIM(QP_sym(spin)%err_msg)
@@ -779,7 +779,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,dtset, Cryst,QP
      end do
 
      if (Sigp%gwcalctyp >= 20) then
-       call esymm_symmetrize_mels(QP_sym(spin),ib1,ib2,sigc(:,1,:,:,spin),sym_cme(1,:,:,1))
+       call QP_sym(spin)%symmetrize_mels(ib1,ib2,sigc(:,1,:,:,spin),sym_cme(1,:,:,1))
      end if
 
      ! Copy symmetrized values.
