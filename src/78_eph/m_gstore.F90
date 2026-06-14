@@ -3233,6 +3233,7 @@ pure subroutine gqk_myqpt(gqk, my_iq, gstore, weight_q, qpt)
  logical :: isirr_q
 !----------------------------------------------------------------------
 
+ ! Symmetry tables for q-points.
  iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
  trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
  isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
@@ -3648,7 +3649,7 @@ end subroutine gstore_set_perts_distrib
 !!
 !! SOURCE
 
-subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands, dvdb, &
+subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, dvdb, &
                           pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
 !Arguments ------------------------------------
@@ -3657,8 +3658,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  character(len=*),intent(in) :: wfk0_path
  integer,intent(in) :: comm
  type(dataset_type),intent(in) :: dtset
+ type(datafiles_type),intent(in) :: dtfil
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
+ class(ifc_type),intent(in) :: ifc
  type(dvdb_t),intent(inout) :: dvdb
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
@@ -4249,9 +4252,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  NCF_CHECK(nf90_close(root_ncid))
  call xmpi_barrier(gstore%comm)
 
- ! Output some of the results to ab_out for testing purposes
- call gstore%print_for_abitests(dtset, ebands, .True.)
-
  ! Free memory
  ABI_FREE(grad_berry)
  ABI_FREE(dummy_vtrial)
@@ -4266,6 +4266,12 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  call gs_ham_kq%free(); call wfd%free()
  call pawcprj_free(cwaveprj0)
  ABI_FREE(cwaveprj0)
+
+ ! Reconstruct matrix elements by symmetry
+ !call gstore_symmetrize(gstore%path, wfk0_path, dtset, dtfil, cryst, ebands, ifc, comm)
+
+ ! Output some of the results to ab_out for testing purposes
+ call gstore%print_for_abitests(dtset, ebands, .True.)
 
 contains
 
@@ -6645,19 +6651,23 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands,
 
 !Local variables-------------------------------
 !scalars
- integer :: units(2)
-
- type(wfd_t) :: wfd
- type(gstore_t) :: gstore
- integer :: with_cplex, ik_ibz, my_is, spin, my_ik, my_iq, iq_glob
- integer :: ncid, spin_ncid, nprocs, my_rank
+ integer :: with_cplex, my_is, spin, my_ik, my_iq, iq_glob, units(2)
+ integer :: ncid, spin_ncid, nprocs, my_rank, ierr, ncerr
+ integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3) !, nb_k, nb_kq
+ integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3)
+ integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
  !integer :: my_is, spin !, nkibz, nqibz, nkbz, nqbz, natom3, nb_k, nb_kq, ik_bz, iq_bz, my_ik
  real(dp) :: weight_qq
  logical :: with_g2dw, q_is_gamma
+ logical :: isirr_k, isirr_kq, isirr_q
  character(len=abi_slen) :: with_gmode, gtype, gvals_name
  character(len=5000) :: msg
+ type(wfd_t) :: wfd
+ type(gstore_t) :: gstore
 !arrays
- real(dp) :: qpt(3), kk_bz(3), kk_ibz(3)
+ real(dp) :: qpt(3), kk_bz(3), kk_ibz(3), qq_ibz(3)
+ real(dp),allocatable :: gwork_q(:,:,:,:,:) !, slice_bb(:,:,:), iv1p_comm(:,:,:,:,:)
+ integer,allocatable :: my_kqmap(:,:), kmesh_map(:,:)
  ! TODO: Add arrays to hold precomputed U and D matrices
 !----------------------------------------------------------------------
 
@@ -6689,6 +6699,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands,
 
  call gstore_read_gtype(gstore_path, gtype, xmpi_comm_self)
  gvals_name = "gvals"
+ ! TODO: Remember to handle GWPT STORE
  !if (gtype == "gwpt" .and. dtset%gstore_gname == "gvals_ks") gvals_name = "gvals_ks"
 
  ! Read GSTORE.nc dimensions and metadata, without allocating gvals.
@@ -6721,13 +6732,47 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands,
      iq_glob = my_iq + gqk%my_qstart - 1
      call gqk%myqpt(my_iq, gstore, weight_qq, qpt); q_is_gamma = sum(qpt**2) < tol14
 
-     ! Read the reference IBZ matrix elements.
-     ! TODO: allocate and read IBZ g(k,q) for this spin
+     ! Symmetry tables for q-points.
+     ! NB: Use symrec convention for q
+     iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
+     trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
+     isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
+     tsign_q = 1; if (trev_q == 1) tsign_q = -1
+     qq_ibz = gstore%qibz(:, iq_ibz)
+
+     ! Here we get the ph displacement for this q-point in the BZ from the image in the IBZ.
+     ! This is important for complex g as we have to enforce the gauge in the ph eigenvectors, including e(-q) = e(q)^*.
+     !call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_cart_ibz(:,:,:,:,iq_ibz), pheigvec_cart_qbz, displ_cart_qbz, &
+     !                     displ_red_qbz=displ_red_qbz)
+
+     ! Find k + q in the IBZ for all my k-points.
+     ABI_MALLOC(my_kqmap, (6, gqk%my_nk))
+     if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, my_kqmap, qpt=qpt) /= 0) then
+       ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qpt)))
+     end if
+
+     ! Read q-slice of the e-ph matrix elements (individual IO).
+     ! TODO: Remember to handle GWPT STORE
+     gvals_name = "gvals"
+     ABI_MALLOC_OR_DIE(gwork_q, (2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%glob_nk), ierr)
+     ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
+     NCF_CHECK(ncerr)
+     ABI_FREE(gwork_q)
 
      do my_ik=1,gqk%my_nk
        kk_bz = gqk%my_kpts(:, my_ik)
-       ik_ibz = gqk%my_k2ibz(1, my_ik)
+
+       ! Note symrel^T convention for k
+       ik_ibz = gqk%my_k2ibz(1, my_ik); isym_k = gqk%my_k2ibz(2, my_ik)
+       trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5, my_ik)
+       isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+       tsign_k = 1; if (trev_k == 1) tsign_k = -1
        kk_ibz = ebands%kptns(:,ik_ibz)
+
+       ikq_ibz = my_kqmap(1, my_ik); isym_kq = my_kqmap(2, my_ik)
+       trev_kq = my_kqmap(6, my_ik); g0_kq = my_kqmap(3:5, my_ik)
+       isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
+       tsign_kq = 1; if (trev_kq == 1) tsign_kq = -1
 
        ! Perform the tensor contraction using precomputed arrays.
        ! TODO: core tensor contraction loop
@@ -6737,6 +6782,8 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands,
        !do nu=1,gqk%natom3
        !end do
      end do ! my_ik
+
+     ABI_FREE(my_kqmap)
    end do ! my_iq
    end associate
  end do ! my_is
@@ -6745,6 +6792,17 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands,
 
  100 call xmpi_barrier(comm)
  call wrtout(units, " Symmetrization completed successfully.")
+
+contains
+integer function vid(var_name)
+  character(len=*),intent(in) :: var_name
+  vid = nctk_idname(ncid, var_name)
+end function vid
+
+integer function spin_vid(var_name)
+  character(len=*),intent(in) :: var_name
+  spin_vid = nctk_idname(spin_ncid, var_name)
+end function spin_vid
 
 end subroutine gstore_symmetrize
 !!***

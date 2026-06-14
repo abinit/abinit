@@ -744,7 +744,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, qp_ebands, ifc, comm)
    end if
 
-   call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, qp_ebands, dvdb, &
+   call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, qp_ebands, ifc, dvdb, &
                        pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
    gstore_path = gstore%path
