@@ -270,7 +270,7 @@ module m_crystal
 
  end type crystal_t
 
- public :: symbols_crystal         ! Return an array with the atomic symbol:["Sr","Ru","O1","O2","O3"]
+ public :: symbols_crystal         ! Return an array with the atomic symbol: ["Sr","Ru","O1","O2","O3"]
  public :: prt_cif                 ! Print CIF file.
  public :: prtposcar               ! output VASP style POSCAR and FORCES files.
 !!***
@@ -1325,9 +1325,9 @@ function symbol_type(crystal, itypat) result(symbol)
 
 !Arguments ------------------------------------
 !scalars
+ class(crystal_t),intent(in) :: crystal
  integer,intent(in) :: itypat
  character(len=2) :: symbol
- class(crystal_t),intent(in) :: crystal
 
 !Local variables-------------------------------
  type(atomdata_t) :: atom

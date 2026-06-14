@@ -6611,9 +6611,7 @@ subroutine gstore_read_gtype(path, gtype, comm)
    NCF_CHECK(nf90_close(ncid))
  end if
 
- if (nproc > 1) then
-   call xmpi_bcast(gtype, master, comm, ierr)
- end if
+ if (nproc > 1) call xmpi_bcast(gtype, master, comm, ierr)
 
 end subroutine gstore_read_gtype
 !!***

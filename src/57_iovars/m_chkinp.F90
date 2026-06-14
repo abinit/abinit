@@ -1261,7 +1261,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
-       27, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 9, 10, 11, -12, 13, -13, 14, 15, -15, 16, 17, 18, 19, 24], iout)
+       28, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 9, 10, 11, -12, 13, -13, 14, 15, -15, 16, 17, 18, 19, 20, 24], iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        ABI_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
