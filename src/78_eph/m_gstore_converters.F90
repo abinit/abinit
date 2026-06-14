@@ -105,19 +105,21 @@ subroutine gstore_convert(gstore_path, dtset, dtfil, cryst, ebands, ifc, comm)
  call wrtout(units, sjoin(" Begin conversion GSTORE --> ", dtset%gstore_convert))
  ABI_CHECK(gstore_path /= ABI_NOFILE, sjoin("Invalid gstore_path:", gstore_path))
  ABI_CHECK(dtset%gstore_convert == "epiq", "only gstore_convert == 'epiq' is supported.")
- ABI_CHECK(.not. cryst%isalchemical(), "'epiq' format does not support alchemical pseudos.")
+ !ABI_CHECK(.not. cryst%isalchemical(), "'epiq' format does not support alchemical pseudos.")
 
- ! Read g(k,q) from GSTORE and store them in gqk%my_g(nu, ib_kq, my_iq, in_k, ik)
+ ! Read g(k,q) from GSTORE and store them in gqk%my_g(nu, im_kq, my_iq, in_k, ik)
+ !
+ ! Shape of array is:
  !
  ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
  ! (       p, b1_kq,     q, b2_k, k)  -->  <k+q, b1| D_{q,p}H |k, b2>
- !gqk%my_g(nu, ib_kq, my_iq, in_k, ik)
- !
- ! The g are complex and in the phonon representation.
+
+ ! The g's are complex and in the phonon representation.
+ ! Note <k+q| for the final state and |k> for the initial state. I guess epiq uses the same convention.
  ! All quantities are in atomic units (Hartree and Bohr).
  !
- ! The gstore file produced by GWPT has both GWPT and KS g.
- ! By default, we convert the GWPT matrix elements but one can still select
+ ! The gstore file produced by the GWPT code has both GWPT and KS g.
+ ! In this case, we convert the GWPT matrix elements but one can still select
  ! the KS e-ph vertex via gstore_gname.
 
  call gstore_read_gtype(gstore_path, gtype, this_comm)
@@ -134,12 +136,15 @@ subroutine gstore_convert(gstore_path, dtset, dtfil, cryst, ebands, ifc, comm)
 
  ! For wannierization, we need the same number of bands for m and n.
  ! Also, k and q must be in the BZ without any filter.
+ ! Once the symmetrization of the g's has been implemented, this routine
+ ! will receive a gstore file in which all g(k,q) matrix elements in the BZ
+ ! have been reconstructed using symmetry operations.
  ABI_CHECK(gstore%same_nbands(msg), msg)
  if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "phonon", kfilter="none") /= 0) then
    ABI_ERROR("GSTORE.nc should have both k and q in the full BZ. See messages above.")
  end if
 
- ! Create directory to host output files.
+ ! Create directory to store output files.
  prefix = "epiq"
  elphmat_dir = strcat(dtfil%filnam_ds(4), "_", prefix)
  call wrtout(units, sjoin(" Output files written to directory:", elphmat_dir))
@@ -154,17 +159,16 @@ subroutine gstore_convert(gstore_path, dtset, dtfil, cryst, ebands, ifc, comm)
  end do
 
  ! TODO: Need helper function to get ibrav, celldm from crystal
- ! Some help from the EPIC developers would be great.
+ ! Some input from the EPIC developers would be greatly appreciated.
  !call cryst%get_ibrav_celldm(ibrav, celldm)
 
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
    associate (gqk => gstore%gqk(my_is))
-
    !num_bands = gqk%nb_k
 
-   ! Loop over q-points: MG TODO: Here I assume the q-points are in the BZ, right?
+   ! Loop over q-points in the BZ.
    do my_iq=1, gqk%my_nq
      iq_glob = my_iq + gqk%my_qstart - 1
 
@@ -197,10 +201,11 @@ subroutine gstore_convert(gstore_path, dtset, dtfil, cryst, ebands, ifc, comm)
      !end do
 
      ! MG TODO:
-     ! - I assume w2 is omega and not omega^2, right?
-     ! - Is lborn used, how do you read BECS, dynamical quadrupoles?
-     ! - I assume tau are atom positions in reduced coords.
-     ! - I assume nel_aux is the number of electrons including possible doping (real variable)
+     ! - Is lborn used? how do you read BECS, dynamical quadrupoles?
+     ! - I assume:
+    !       w2 is omega and not omega^2, right?
+     !      tau are atom positions in reduced coords.
+     !      nel_aux is the number of electrons including possible doping (real variable)
      ! - I don't know the conventions for zz and I assume dyn are in Cartesian coords in Bohr.
      lborn = .False.
      write(unt) qpt
@@ -209,7 +214,7 @@ subroutine gstore_convert(gstore_path, dtset, dtfil, cryst, ebands, ifc, comm)
      write(unt) gqk%bstart_k, gqk%bstop_k, gqk%bstop_k - gqk%bstart_k + 1
      write(unt) nmodes, gqk%glob_nk, natom, cryst%ntypat
      !write(unt) ibrav, (celldm(j), j=1,6) ! FIXME
-     ! amu are the mass of the atoms (atomic mass unit).
+     ! In abinit, amu are the mass of the atoms (atomic mass unit).
      write(unt) (atm(j), j=1,cryst%ntypat), (cryst%amu(j), j=1,cryst%ntypat), &
                 (cryst%typat(j), j=1,natom), ((cryst%xred(j,i), j=1,3), i=1,natom)
      write(unt) (gqk%my_wnuq(nu, my_iq) * Ha2Ry, nu=1,nmodes)

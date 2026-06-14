@@ -870,8 +870,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !=====================
  call cryst%free(); call dvdb%free(); call drhodb%free(); call ddb_hdr%free()
  call ddb%free(); call ifc%free(); call wfk0_hdr%free()
- call ks_ebands%free(); call ks_ebands_kq%free()
- call qp_ebands%free()
+ call ks_ebands%free(); call ks_ebands_kq%free(); call qp_ebands%free()
  call pawfgr_destroy(pawfgr); call destroy_mpi_enreg(mpi_enreg)
 
  if (allocated(efmasdeg)) call efmasdeg_free_array(efmasdeg)

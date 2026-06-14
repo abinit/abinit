@@ -26442,17 +26442,20 @@ Variable(
     defaultval="''",
     mnemonics=r"GSTORE CONVERT",
     requires="[[optdriver]] == 7",
-    added_in_version="10.5.6",
+    added_in_version="10.8.2",
     text=r"""
-This variable is used to activate the conversion of a GSTORE file to another format.
-that can be used to interface Abinit with external codes.
-If [[gstore_convert]] is not an empty string, ABINIT will automatically invoke the conversion routine
-once the GSTORE.nc has been computed.
-A specialized eph_task can also be used to convert a pre-existent GSTORE.nc file
+This variable activates the conversion of a GSTORE file to an external format that
+can be used to interface ABINIT with other codes.
 
-At present, the following formats are supported:
+If gstore_convert is not an empty string, ABINIT automatically invokes the conversion routine
+after the GSTORE.nc file has been generated with [[eph_task]] 11 or 17.
 
-- "epiq"
+A dedicated eph_task can also be used to convert an existing GSTORE.nc file by using
+[[eph_task]] 20 and [[getgstore_filepath]].
+
+Currently, the following formats are supported:
+
+- "epiq" to interface gstore with [EPIq](https://the-epiq-team.gitlab.io/epiq-site/)
 
 """,
 ),
