@@ -24361,9 +24361,9 @@ due to nuclear magnetic dipoles (see [[nucdipmom]]).
 [[zora]] 3 activates both kinetic energy and electron spin terms.
 
 Negative values of [[zora]] are present only for debugging purposes. [[zora]] -1 permits only
-spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits only
-the electron spin-nuclear dipole through space interaction, and [[zora]] -3 permits only the
-electron spin-nuclear dipole Fermi-contact-like interaction.
+spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits spin-orbit
+coupling and the electron spin-nuclear dipole through space interaction, while [[zora]] -3 permits 
+only spin-orbit coupling and the electron spin-nuclear dipole Fermi-contact-like interaction.
 """,
 ),
 
