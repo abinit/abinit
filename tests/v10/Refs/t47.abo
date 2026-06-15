@@ -1,3 +1,4 @@
+
 .Version 10.3.4.5 of ANADDB. v10.8.1 released May 2026.
 .(sequential version, prepared for a x86_64_linux_gnu13.2 computer) 
 
@@ -13,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 28 May 2026.
-- ( at 10h30 )
+.Starting date : Thu 11 Jun 2026.
+- ( at 13h01 )
   
 
 ================================================================================
@@ -785,7 +786,7 @@ Converted dielectric tensor  1.38602438E+01  -0.00000000E+00    0.00000000E+00  
    in atomic units:     0.1441918206E-03
    in units km/s:              0.31545
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.4437858083E-04
+   in atomic units:     0.4437858082E-04
    in SI units K  :             14.01365
 
  Speed of sound for this q and mode:
@@ -813,7 +814,7 @@ Converted dielectric tensor  1.38602438E+01  -0.00000000E+00    0.00000000E+00  
 -  2.251401E+02  3.642196E+02  4.270720E+02  4.306129E+02  4.337304E+02
 -  4.547634E+02  4.690568E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1470300655E-03
+   in atomic units:     0.1470300654E-03
    in units km/s:              0.32166
  Partial Debye temperature for this q and mode:
    in atomic units:     0.4525212052E-04
@@ -873,6 +874,6 @@ Converted dielectric tensor  1.38602438E+01  -0.00000000E+00    0.00000000E+00  
 
 ================================================================================
 
-+Total cpu time      1.522  and wall time      1.523 sec
++Total cpu time      1.518  and wall time      1.517 sec
 
  anaddb : the run completed successfully.
