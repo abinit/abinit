@@ -2487,6 +2487,9 @@ end if
        if (ignore_ibsum_kq /= 0) write(std_out, "(a, 1x, i0)")" Number of ignored (k+q, m) states:", ignore_ibsum_kq
      end if
 
+     ! Reduce E2 over perturbations and q-points only (E2 does not depend on bands)                                  
+     call xmpi_sum(sigma%E2, sigma%pert_comm%value, ierr)                                                            
+     call xmpi_sum(sigma%E2, sigma%qpt_comm%value, ierr)     
      ! Collect results inside pqb_comm and write results for this (k-point, spin) to NETCDF file.
      call sigma%gather_and_write(dtset, ebands, ikcalc, spin, sigma%pqb_comm%value)
 
@@ -2524,7 +2527,6 @@ end if
  !              In that case, it is recommended to read E4 from the _SIGEPH.nc file and perform the k-integral
  !              with a post-processing script.
  ! --------------------
- call xmpi_sum_master(sigma%E2, master, comm, ierr)
  call xmpi_sum_master(E4, master, comm, ierr)
  if (my_rank == master .and. dtset%eph_task == 4 .and. dtset%eph_stern /= 0 .and. .not. sigma%imag_only ) then
    ! Spin factor
@@ -4598,7 +4600,6 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  iwrite = self%ncwrite_comm%value /= xmpi_comm_null
  call xmpi_sum_master(self%vals_e0ks, master, comm, ierr)
  call xmpi_sum_master(self%fan_vals, master, comm, ierr)
- call xmpi_sum_master(self%E2, master, comm, ierr)
  call xmpi_sum_master(self%E4_vals, master, comm, ierr)
  call xmpi_sum_master(self%E4_vals2, master, comm, ierr)
  call xmpi_sum_master(self%fan_stern_vals, master, comm, ierr)

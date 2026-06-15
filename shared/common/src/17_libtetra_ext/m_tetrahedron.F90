@@ -39,6 +39,11 @@ module m_tetrahedron
 #ifdef HAVE_LIBTETRA_ABINIT
  use m_io_tools, only : open_file
  use m_xmpi
+ use defs_basis, only : dp, zero, one, tol14, pi
+#elif
+ integer, parameter :: dp = kind(1.0d0)
+ real(dp), parameter :: tol14 = 1.d-14, zero = 0.d0, one = 1.d0
+ real(dp), parameter :: pi=3.141592653589793238462643383279502884197_dp
 #endif
 
 implicit none
@@ -49,13 +54,6 @@ implicit none
 
 private
 !!***
-
-integer, parameter :: dp = kind(1.0d0)
-
-real(dp),parameter  :: tol6 = 1.d-14, tol14 = 1.d-14, zero = 0.d0, one = 1.d0
-
-real(dp), parameter :: sqrtpi = 1.7724538509055159d0
-
 
 !!****t* m_tetrahedron/t_tetrahedron
 !! NAME
@@ -418,7 +416,7 @@ subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ier
    reforder(ialltetra) = ialltetra
  end do
 
- call sort_tetra(tetra%ntetra, tetra_hash, reforder, tol6)
+ call sort_tetra(tetra%ntetra, tetra_hash, reforder, tol14)
  ! Most of the wall-time is spent in the  preamble of this routine (up to this point).
  ! sort_tetra is not easy to parallelize...
 
@@ -427,7 +425,7 @@ subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ier
  jalltetra = 1
  irred_itetra(1) = 1
  do ialltetra=2, tetra%ntetra
-   if (abs(tetra_hash(ialltetra)-tetra_hash(ialltetra-1)) > tol6) then
+   if (abs(tetra_hash(ialltetra)-tetra_hash(ialltetra-1)) > tol14) then
      ! found a new series
      jalltetra = jalltetra + 1
    end if
@@ -452,7 +450,7 @@ subroutine init_tetra(indkpt, gprimd, klatt, kpt_fullbz, nkpt_fullbz, tetra, ier
  tetra%tetra_wrap(:,:,1) = tetra_wrap_(:,:,reforder(1))
  do ialltetra=2, tetra%ntetra
    ! TODO: check if tolerance is adapted
-   if (abs(tetra_hash(ialltetra)-tetra_hash(ialltetra-1)) > tol6) then
+   if (abs(tetra_hash(ialltetra)-tetra_hash(ialltetra-1)) > tol14) then
      ! found a new series
      jalltetra = jalltetra + 1
      tetra%tetra_full(:,:,jalltetra) = tetra_full_(:,:,reforder(ialltetra))
@@ -917,7 +915,7 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
    inv_epsilon1 = zero
    do ieps1 = 1, 4
      do ieps2 = ieps1+1, 4
-       if (abs(epsilon1(ieps1,ieps2)) > tol6) then
+       if (abs(epsilon1(ieps1,ieps2)) > tol14) then
          inv_epsilon1(ieps1,ieps2) = 1.d0 / epsilon1(ieps1,ieps2)
          inv_epsilon1(ieps2,ieps1) = -inv_epsilon1(ieps1,ieps2)
        end if
@@ -953,9 +951,9 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
    delaa(2) = aa(3)-aa(1)
    delaa(3) = aa(3)-aa(2)
    inv_delaa = zero
-   if(delaa(1)> tol6) inv_delaa(1)= 1.0d0 / delaa(1)
-   if(delaa(2)> tol6) inv_delaa(2)= 1.0d0 / delaa(2)
-   if(delaa(3)> tol6) inv_delaa(3)= 1.0d0 / delaa(3)
+   if(delaa(1)> tol14) inv_delaa(1)= 1.0d0 / delaa(1)
+   if(delaa(2)> tol14) inv_delaa(2)= 1.0d0 / delaa(2)
+   if(delaa(3)> tol14) inv_delaa(3)= 1.0d0 / delaa(3)
 
    bb(1) = epsilon2(1,2) * inv_epsilon1(1,2)
    bb(2) = epsilon2(3,2) * inv_epsilon1(3,2)
@@ -966,9 +964,9 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
    delbb(2) = bb(3)-bb(1)
    delbb(3) = bb(3)-bb(2)
    inv_delbb = zero
-   if(delbb(1)> tol6) inv_delbb(1)= 1.0d0 / delbb(1)
-   if(delbb(2)> tol6) inv_delbb(2)= 1.0d0 / delbb(2)
-   if(delbb(3)> tol6) inv_delbb(3)= 1.0d0 / delbb(3)
+   if(delbb(1)> tol14) inv_delbb(1)= 1.0d0 / delbb(1)
+   if(delbb(2)> tol14) inv_delbb(2)= 1.0d0 / delbb(2)
+   if(delbb(3)> tol14) inv_delbb(3)= 1.0d0 / delbb(3)
 
    cc(1) = epsilon2(1,4) * inv_epsilon1(1,4)
    cc(2) = epsilon2(2,4) * inv_epsilon1(2,4)
@@ -979,9 +977,9 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
    delcc(2) = cc(3)-cc(1)
    delcc(3) = cc(3)-cc(2)
    inv_delcc = zero
-   if(delcc(1)> tol6) inv_delcc(1)= 1.0d0 / delcc(1)
-   if(delcc(2)> tol6) inv_delcc(2)= 1.0d0 / delcc(2)
-   if(delcc(3)> tol6) inv_delcc(3)= 1.0d0 / delcc(3)
+   if(delcc(1)> tol14) inv_delcc(1)= 1.0d0 / delcc(1)
+   if(delcc(2)> tol14) inv_delcc(2)= 1.0d0 / delcc(2)
+   if(delcc(3)> tol14) inv_delcc(3)= 1.0d0 / delcc(3)
 
    !----------------------------------------------------------------------
    ! start main loop A B C over eps1
@@ -1518,12 +1516,12 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
  epsilon32 = eigen_1tetra(3)-eigen_1tetra(2)
  epsilon42 = eigen_1tetra(4)-eigen_1tetra(2)
  epsilon43 = eigen_1tetra(4)-eigen_1tetra(3)
- inv_epsilon21 = zero; if (epsilon21 > tol6) inv_epsilon21 = 1.d0 / epsilon21
- inv_epsilon31 = zero; if (epsilon31 > tol6) inv_epsilon31 = 1.d0 / epsilon31
- inv_epsilon41 = zero; if (epsilon41 > tol6) inv_epsilon41 = 1.d0 / epsilon41
- inv_epsilon32 = zero; if (epsilon32 > tol6) inv_epsilon32 = 1.d0 / epsilon32
- inv_epsilon42 = zero; if (epsilon42 > tol6) inv_epsilon42 = 1.d0 / epsilon42
- inv_epsilon43 = zero; if (epsilon43 > tol6) inv_epsilon43 = 1.d0 / epsilon43
+ inv_epsilon21 = zero; if (epsilon21 > tol14) inv_epsilon21 = 1.d0 / epsilon21
+ inv_epsilon31 = zero; if (epsilon31 > tol14) inv_epsilon31 = 1.d0 / epsilon31
+ inv_epsilon41 = zero; if (epsilon41 > tol14) inv_epsilon41 = 1.d0 / epsilon41
+ inv_epsilon32 = zero; if (epsilon32 > tol14) inv_epsilon32 = 1.d0 / epsilon32
+ inv_epsilon42 = zero; if (epsilon42 > tol14) inv_epsilon42 = 1.d0 / epsilon42
+ inv_epsilon43 = zero; if (epsilon43 > tol14) inv_epsilon43 = 1.d0 / epsilon43
 
  nn1 = int((eigen_1tetra(1)-enemin)/deltaene)+1
  nn2 = int((eigen_1tetra(2)-enemin)/deltaene)+1
@@ -1746,14 +1744,14 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
  !  1) the tweight is a Heaviside (step) function, which is correct above, but
  !  2) the dtweightde should contain a Dirac function: add a Gaussian here
  !
- if (epsilon41 < tol6) then
+ if (epsilon41 < tol14) then
 
    !  to ensure the gaussian will integrate properly:
    !  WARNING: this smearing could be problematic if too large
    !  and doesnt integrate well if its too small
    gau_width = 10.0d0*deltaene
    gau_width2 = 1.0 / gau_width / gau_width
-   gau_prefactor = volconst_mult / gau_width / sqrtpi
+   gau_prefactor = volconst_mult / gau_width / sqrt(pi)
    !
    ! average position since bracket for epsilon41 is relatively large
    cc = (eigen_1tetra(1)+eigen_1tetra(2)+eigen_1tetra(3)+eigen_1tetra(4))/4.d0
