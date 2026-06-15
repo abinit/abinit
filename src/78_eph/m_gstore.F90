@@ -6650,12 +6650,12 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands,
 
 !Local variables-------------------------------
 !scalars
- integer :: with_cplex, my_is, spin, my_ik, my_iq, iq_glob, units(2)
+ integer :: with_cplex, my_is, spin, my_ik, my_iq, ik_glob, iq_glob, units(2)
  integer :: ncid, spin_ncid, nprocs, my_rank, ierr, ncerr
- integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3) !, nb_k, nb_kq
+ integer :: nb, nkbz, nqbz, nsym, itim, isym, ib, ik_bz
+ integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
  integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3)
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
- !integer :: my_is, spin !, nkibz, nqibz, nkbz, nqbz, natom3, nb_k, nb_kq, ik_bz, iq_bz, my_ik
  real(dp) :: weight_qq
  logical :: with_g2dw, q_is_gamma
  logical :: isirr_k, isirr_kq, isirr_q
@@ -6665,9 +6665,10 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands,
  type(gstore_t) :: gstore
 !arrays
  real(dp) :: qpt(3), kk_bz(3), kk_ibz(3), qq_ibz(3)
- real(dp),allocatable :: gwork_q(:,:,:,:,:) !, slice_bb(:,:,:), iv1p_comm(:,:,:,:,:)
+ real(dp),allocatable :: gwork_q(:,:,:,:,:) !, slice_bb(:,:,:)
  integer,allocatable :: my_kqmap(:,:), kmesh_map(:,:)
  ! TODO: Add arrays to hold precomputed U and D matrices
+ complex(dp),allocatable :: dmn_ksym(:,:,:,:,:)
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -6717,14 +6718,33 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands,
    ABI_ERROR("GSTORE.nc should have both k and q in the full BZ. See messages above.")
  end if
 
+ ! Useful dimensions.
+ nkbz = gstore%nkbz
+ nqbz = gstore%nqbz
+ nsym = cryst%nsym
+
  ! 4. Symmetrize and I/O Loop
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
    associate (gqk => gstore%gqk(my_is))
+   nb = gqk%nb_k
 
    ! Get the group id for this spin
    NCF_CHECK(nf90_inq_ncid(ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+
+   ! Initialize D matrices with identity.
+   ABI_CALLOC(dmn_ksym, (nb, nb, nkbz, nsym, 2))
+   do itim=1,2
+     do isym=1,nsym
+       do ik_bz=1,nkbz
+         do ib=1,nb
+           dmn_ksym(ib, ib, ik_bz, isym, itim) = cone
+         end do
+       end do
+     end do
+   end do
+   ABI_FREE(dmn_ksym)
 
    ! Loop over q-points in the BZ.
    do my_iq=1, gqk%my_nq
@@ -6749,15 +6769,15 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands,
        ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qpt)))
      end if
 
-     ! Read q-slice of the e-ph matrix elements (individual IO).
+     ! Read q-slice of the e-ph matrix elements
      ! TODO: Remember to handle GWPT STORE
      gvals_name = "gvals"
      ABI_MALLOC_OR_DIE(gwork_q, (2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%glob_nk), ierr)
      ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
      NCF_CHECK(ncerr)
-     ABI_FREE(gwork_q)
 
      do my_ik=1,gqk%my_nk
+       ik_glob = my_ik + gqk%my_kstart - 1
        kk_bz = gqk%my_kpts(:, my_ik)
 
        ! Note symrel^T convention for k
@@ -6773,15 +6793,13 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands,
        tsign_kq = 1; if (trev_kq == 1) tsign_kq = -1
 
        ! Perform the tensor contraction using precomputed arrays.
-       ! TODO: core tensor contraction loop
-       ! Write the newly computed g_{mn, nu} array back to the netcdf file (in-place modification).
-       ! TODO: Write back to spin_ncid
-
        !do nu=1,gqk%natom3
        !end do
+       ! Write the newly computed g_{mn, nu} array back to the netcdf file (in-place modification).
      end do ! my_ik
 
      ABI_FREE(my_kqmap)
+     ABI_FREE(gwork_q)
    end do ! my_iq
    end associate
  end do ! my_is
