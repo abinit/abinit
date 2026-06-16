@@ -3344,7 +3344,7 @@ contains
                 call apply_adjdielmat_ldos(this, dtset, mpi_enreg, rho_r, adjdielmat_rho_r)
 
             elseif (this%iprcel == 202) then
-            ! When iprcel = 205, P = (I - chi0_ldos*vc - chi0_diag*Kxc)
+            ! When iprcel = 202, P = (I - chi0_ldos*vc - chi0_diag*Kxc)
                 
                 !1) Compute adjdielmat_rho_r = rho_r - chi0_ldos * vc *rho_r
                 call apply_adjdielmat_ldos(this, dtset, mpi_enreg, rho_r, adjdielmat_rho_r)
