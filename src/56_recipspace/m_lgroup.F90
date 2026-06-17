@@ -411,8 +411,8 @@ end function lgroup_find_ibzimage
 !!  Print the object
 !!
 !! INPUTS
+!!  units=Unit numbers
 !!  [title]=String to be printed as header for additional info.
-!!  [unit]=Unit number for output
 !!  [prtvol]=Verbosity level
 !!
 !! OUTPUT
@@ -420,38 +420,38 @@ end function lgroup_find_ibzimage
 !!
 !! SOURCE
 
-subroutine lgroup_print(self, title, unit, prtvol)
+subroutine lgroup_print(self, units, title, prtvol)
 
 !Arguments ------------------------------------
  class(lgroup_t),intent(in) :: self
- integer,optional,intent(in) :: unit, prtvol
+ integer,intent(in) :: units(:)
  character(len=*),optional,intent(in) :: title
+ integer,optional,intent(in) :: prtvol
 
 !Local variables-------------------------------
 !scalars
- integer :: my_prtvol, my_unt, ik, ii
+ integer :: my_prtvol, ik, ii
  character(len=500) :: msg
 ! *************************************************************************
 
- my_unt = std_out; if (present(unit)) my_unt = unit
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
  msg = ' ==== Info on the <lgroup_t> object ==== '
  if (present(title)) msg = ' ==== '//trim(adjustl(title))//' ==== '
- call wrtout(my_unt, msg)
+ call wrtout(units, msg)
 
  write(msg, '(3a, 2(a, i0, a))') &
   ' Little group point: ................... ', trim(ktoa(self%point)), ch10, &
   ' Number of points in IBZ(p) ............ ', self%nibz, ch10, &
   ' Time-reversal flag (0: No, 1: Yes) .... ', self%input_timrev, ch10
- call wrtout(my_unt, msg)
+ call wrtout(units, msg)
 
  if (my_prtvol > 1) then
    do ii=1,self%nsym_lg
-     call wrtout(std_out, sjoin("lgsym2glob:", ltoa(self%lgsym2glob(:, ii))))
+     call wrtout(units, sjoin("lgsym2glob:", ltoa(self%lgsym2glob(:, ii))))
    end do
    do ik=1,self%nibz
-      call wrtout(my_unt, sjoin(ktoa(self%ibz(:,ik)), ftoa(self%weights(ik))))
+      call wrtout(units, sjoin(ktoa(self%ibz(:,ik)), ftoa(self%weights(ik))))
    end do
  end if
 

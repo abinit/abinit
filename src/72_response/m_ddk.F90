@@ -825,9 +825,9 @@ subroutine ddkop_setup_spin_kpoint(ddkop, dtset, cryst, psps, spin, kpoint, istw
    call getgh1c_setup(ddkop%gs_hamkq(idir), ddkop%rf_hamkq(idir), dtset, psps, kpoint, kpoint, idir, ddkop%ipert, & ! In
      cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, npw_k, npw_k, &            ! In
      useylmgr1, kg_k, ylm_k, kg_k, ylm_k, ylmgr1_k, &                                       ! In
-     ddkop%htg(idir)%dkinpw, nkpg, nkpg1, ddkop%htg(idir)%kpg_k, ddkop%htg(idir)%kpg1_k, &     ! Out
-     ddkop%htg(idir)%kinpw1, ddkop%htg(idir)%ffnlk, ddkop%htg(idir)%ffnl1, &                   ! Out
-     ddkop%htg(idir)%ph3d, ddkop%htg(idir)%ph3d1)                                             ! Out
+     ddkop%htg(idir)%dkinpw, nkpg, nkpg1, ddkop%htg(idir)%kpg_k, ddkop%htg(idir)%kpg1_k, &  ! Out
+     ddkop%htg(idir)%kinpw1, ddkop%htg(idir)%ffnlk, ddkop%htg(idir)%ffnl1, &                ! Out
+     ddkop%htg(idir)%ph3d, ddkop%htg(idir)%ph3d1)                                           ! Out
  end do
 
  ABI_FREE(ylm_k)

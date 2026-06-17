@@ -4267,7 +4267,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
  ABI_FREE(cwaveprj0)
 
  ! Reconstruct matrix elements by symmetry
- !call gstore_symmetrize(gstore%path, wfk0_path, dtset, dtfil, cryst, ebands, ifc, comm)
+ if (dtset%gstore_kzone == "bz" .and. dtset%gstore_qzone == "bz" .and. dtset%gstore_use_lgk /= 0 &
+     .and. dtset%userie == 789) then
+   call gstore_symmetrize(gstore%path, wfk0_path, dtset, dtfil, cryst, ebands, ifc, comm)
+ end if
 
  ! Output some of the results to ab_out for testing purposes
  call gstore%print_for_abitests(dtset, ebands, .True.)
@@ -6652,7 +6655,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands,
 !scalars
  integer :: with_cplex, my_is, spin, my_ik, my_iq, ik_glob, iq_glob, units(2)
  integer :: ncid, spin_ncid, nprocs, my_rank, ierr, ncerr
- integer :: nb, nkbz, nqbz, nsym, itim, isym, ib, ik_bz
+ integer :: nb, nkbz, nkibz, nqbz, nqibz, nsym, itim, isym, ib, ik_bz
  integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
  integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3)
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
@@ -6720,7 +6723,9 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands,
 
  ! Useful dimensions.
  nkbz = gstore%nkbz
+ nkibz = gstore%nkibz
  nqbz = gstore%nqbz
+ nqibz = gstore%nqbz
  nsym = cryst%nsym
 
  ! 4. Symmetrize and I/O Loop

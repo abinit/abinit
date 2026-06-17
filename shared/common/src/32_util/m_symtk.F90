@@ -143,19 +143,17 @@ subroutine chkgrp(nsym, symafm, symrel, ierr)
  integer :: chk(3,3)
 ! *************************************************************************
 
-!DEBUG
 !write(std_out,*)' chkgrp : enter'
 !write(std_out,*)'     isym         symrel            symafm '
 !do isym=1,nsym
 !write(std_out,'(i3,a,9i3,a,i3)' )isym,'   ',symrel(:,:,isym),'   ',symafm(isym)
 !end do
-!ENDDEBUG
 
  ierr = 0
  print_warning = 1
 
  ! 1) Identity must be the first symmetry.
- if (ANY(symrel(:,:,1) /= identity_3d .or. symafm(1)/=1 )) then
+ if (any(symrel(:,:,1) /= identity_3d .or. symafm(1)/=1 )) then
    ABI_WARNING("First operation must be the identity operator")
    ierr = ierr + 1
  end if
@@ -173,8 +171,7 @@ subroutine chkgrp(nsym, symafm, symrel, ierr)
 
    if (.not. found_inv) then
      write(msg,'(a,i0,2a)')&
-      "Cannot find the inverse of symmetry operation ",isym,ch10,&
-      "Input symmetries do not form a group!"
+      "Cannot find the inverse of symmetry operation ",isym,ch10,"Input symmetries do not form a group!"
      ABI_WARNING(msg)
      ierr = ierr + 1
    end if
@@ -252,8 +249,8 @@ end subroutine chkgrp
 !!
 !! SOURCE
 
- subroutine sg_multable(nsym, symafm, symrel, ierr, &
-&  tnons, tnons_tol, multable, toinv)    ! optional
+subroutine sg_multable(nsym, symafm, symrel, ierr, &
+                       tnons, tnons_tol, multable, toinv) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -267,9 +264,7 @@ end subroutine chkgrp
 
 !Local variables-------------------------------
 !scalars
- integer :: echo,found,ilist_symrel,nptsymm,prd_symafm,prd_ptsymm,ptsymm1,ptsymm2,ptsymm3
- integer :: sym1,sym2,sym3
- !integer :: isym
+ integer :: echo,found,ilist_symrel,nptsymm,prd_symafm,prd_ptsymm,ptsymm1,ptsymm2,ptsymm3, sym1,sym2,sym3
  real(dp) :: tnons_tol_
  logical :: found_inv,iseq
  character(len=500) :: msg
@@ -280,10 +275,7 @@ end subroutine chkgrp
  real(dp),allocatable :: tnons_(:,:)
 ! *************************************************************************
 
-!DEBUG
-!write(std_out,*)' m_symtk%sg_multable : enter, nsym= ',nsym
-!ENDDEBUG
-
+ !write(std_out,*)' m_symtk%sg_multable : enter, nsym= ',nsym
  ierr = 0
 
  ABI_MALLOC(tnons_,(3,nsym))
@@ -292,6 +284,7 @@ end subroutine chkgrp
  else
    tnons_=zero
  endif
+
  if(present(tnons_tol))then
    tnons_tol_=tnons_tol
  else
@@ -324,8 +317,7 @@ end subroutine chkgrp
    if (.not. found_inv) then
      if(echo == 1) then
        write(msg,'(a,i0,2a)')&
-        "Cannot find the inverse of symmetry operation ",sym1,ch10,&
-        "Input symmetries do not form a group "
+        "Cannot find the inverse of symmetry operation ",sym1,ch10,"Input symmetries do not form a group "
        ABI_WARNING(msg)
        echo = 0
      endif
@@ -365,9 +357,7 @@ end subroutine chkgrp
      enddo
      if(found==0)then
        nptsymm=nptsymm+1
-!DEBUG
-!      write(std_out,*)' current value of nptsymm, sym1=',nptsymm, sym1
-!ENDDEBUG
+       !write(std_out,*)' current value of nptsymm, sym1=',nptsymm, sym1
        ptsymrel(1:3,1:3,nptsymm)=symrel(:,:,sym1)
        ptsymm(sym1)=nptsymm
        nlist_symrel(nptsymm)=1
@@ -381,11 +371,11 @@ end subroutine chkgrp
    do ptsymm1=1,nptsymm
      if(nlist_symrel(ptsymm1)/=nlist_symrel(1))then
        write(msg, '(9a)' )&
-&        'The number of translations (and possibly symafm) associated to the same symrel',ch10,&
-&        'is not the same for all point symmetries',ch10,&
-&        'This indicates that the input symmetry elements',ch10,&
-&        'do not possess closure under group composition.',ch10,&
-&        'Action: check symrel, symafm and fix them.'
+        'The number of translations (and possibly symafm) associated to the same symrel',ch10,&
+        'is not the same for all point symmetries',ch10,&
+        'This indicates that the input symmetry elements',ch10,&
+        'do not possess closure under group composition.',ch10,&
+        'Action: check symrel, symafm and fix them.'
        ABI_WARNING(msg)
        echo = 0
        ierr = ierr + 1
@@ -397,9 +387,7 @@ end subroutine chkgrp
    enddo
  endif
 
-!DEBUG
-!  write(std_out,*)' final value of nptsymm=',nptsymm
-!ENDDEBUG
+ !write(std_out,*)' final value of nptsymm=',nptsymm
 
  ! 4)
  !Check closure under composition and construct multiplication table of ptsymrel
@@ -444,12 +432,10 @@ end subroutine chkgrp
 
    end do ! ptsymm2
 
-!DEBUG
-!  write(std_out,*)' ptmultable for ptsymm1=',ptsymm1,' by batch of 16 values '
-!  write(std_out,'(16i3)')ptmultable(ptsymm1,1:16)
-!  write(std_out,'(16i3)')ptmultable(ptsymm1,17:32)
-!  write(std_out,'(16i3)')ptmultable(ptsymm1,33:48)
-!ENDDEBUG
+   !write(std_out,*)' ptmultable for ptsymm1=',ptsymm1,' by batch of 16 values '
+   !write(std_out,'(16i3)')ptmultable(ptsymm1,1:16)
+   !write(std_out,'(16i3)')ptmultable(ptsymm1,17:32)
+   !write(std_out,'(16i3)')ptmultable(ptsymm1,33:48)
 
    if (echo == 0) exit
  end do ! ptsymm1
@@ -475,21 +461,17 @@ end subroutine chkgrp
          endif
        end if
 
-       !DEBUG
        !if(ptsymm2<1 .or. ptsymm2>48)then
        !write(std_out,*)' sym1,sym2,ptsymm1,ptsymm2=',sym1,sym2,ptsymm1,ptsymm2
        !endif
-       !ENDDEBUG
 
        ! Compute the product of the two symmetries. Convention {A,a} {B,b} = {AB, a + Ab}
-!      prd_symrel = matmul(symrel(:,:,sym1), symrel(:,:,sym2))
+       ! prd_symrel = matmul(symrel(:,:,sym1), symrel(:,:,sym2))
        prd_ptsymm=ptmultable(ptsymm1,ptsymm2)
        prd_symrel=ptsymrel(:,:,prd_ptsymm)
        prd_symafm = symafm(sym1) * symafm(sym2)
        prd_tnons = tnons_(:, sym1) + matmul(symrel(:,:,sym1), tnons_(:,sym2))
-       !DEBUG
        !write(std_out,*)' prd_ptsymm,prdsymrel=',prd_ptsymm,prd_symrel
-       !DEBUG
 
        ! Check that product array is one of the original symmetries.
        ! Only explore those symmetries that have a symrel that is the product of the two symrel of sym1 and sym2.
@@ -551,9 +533,7 @@ end subroutine chkgrp
  ABI_FREE(ptsymm)
  ABI_FREE(tnons_)
 
-!DEBUG
 !write(std_out,*)' m_symtk%sg_multable : exit '
-!ENDDEBUG
 
  end subroutine sg_multable
 !!***
