@@ -1,8 +1,8 @@
 
-.Version 10.5.8.2 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.9.0 of ABINIT. v10.8.1 released May 2026.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2026 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 20 Dec 2025.
-- ( at 17h01 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/gwr_suite_t04/t04.abi
+.Starting date : Thu  4 Jun 2026.
+- ( at 12h14 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr_soc_dim/tests/TestBot_MPI1/gwr_suite_t04/t04.abi
 - output file    -> t04.abo
 - root for input  files -> t04i
 - root for output files -> t04o
@@ -300,8 +300,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.15429
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr_soc_dim/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr_soc_dim/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
 - Si    ONCVPSP-3.2.3.1  r_core=   1.60303   1.72197   1.91712
 - 14.00000   4.00000    170510                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -711,8 +711,8 @@ iteration_state: {dtset: 3, }
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
-
-
+ 
+ 
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 3, }
@@ -720,27 +720,27 @@ kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 gwr_scf_iteration: 1
 gwr_task   : EGW0
-QP_VBM_band: 3
-QP_CBM_band: 7
+QP_VBM_band: 4
+QP_CBM_band: 5
 KS_gap     :    2.271
-QP_gap     :    2.614
-Delta_QP_KS:    0.343
+QP_gap     :    2.618
+Delta_QP_KS:    0.346
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
         1  -12.956  -10.138  -16.451    5.888    0.807   -0.195   -0.195  -13.150    2.000
-        2   -1.136  -11.572  -16.769    4.854    0.773   -0.172   -0.172   -1.307    2.000
-        3   -1.136  -11.572  -16.769    4.854    0.773   -0.171   -0.171   -1.307    2.000
-        4   -1.136  -11.572  -16.769    4.848    0.771   -0.176   -0.176   -1.311    2.000
-        5    1.136   -9.538   -3.235   -6.203    0.792    0.173    0.173    1.308    0.000
-        6    1.136   -9.538   -3.235   -6.199    0.789    0.176    0.176    1.312    0.000
-        7    1.136   -9.538   -3.235   -6.205    0.791    0.171    0.171    1.307    0.000
+        2   -1.136  -11.572  -16.769    4.852    0.772   -0.173   -0.173   -1.309    2.000
+        3   -1.136  -11.572  -16.769    4.852    0.772   -0.173   -0.173   -1.309    2.000
+        4   -1.136  -11.572  -16.769    4.852    0.772   -0.173   -0.173   -1.309    2.000
+        5    1.136   -9.538   -3.235   -6.202    0.791    0.173    0.173    1.309    0.000
+        6    1.136   -9.538   -3.235   -6.202    0.791    0.173    0.173    1.309    0.000
+        7    1.136   -9.538   -3.235   -6.202    0.791    0.173    0.173    1.309    0.000
         8    2.931  -10.313   -3.480   -6.510    0.793    0.349    0.349    3.280    0.000
-        9    6.552   -9.801   -3.234   -6.198    0.815    0.394    0.394    6.945    0.000
-       10    6.552   -9.801   -3.234   -6.201    0.815    0.391    0.391    6.943    0.000
-       11    6.622   -7.157   -2.258   -6.361    0.832   -1.123   -1.123    5.498    0.000
-       12    9.587   -7.330   -1.381   -6.715    0.852   -0.563   -0.563    9.024    0.000
-       13    9.587   -7.330   -1.381   -6.705    0.851   -0.554   -0.554    9.033    0.000
-       14    9.587   -7.330   -1.381   -6.714    0.852   -0.562   -0.562    9.025    0.000
+        9    6.552   -9.801   -3.234   -6.200    0.815    0.392    0.392    6.944    0.000
+       10    6.552   -9.801   -3.234   -6.200    0.815    0.392    0.392    6.944    0.000
+       11    6.622   -7.157   -2.258   -6.361    0.832   -1.124   -1.124    5.498    0.000
+       12    9.587   -7.330   -1.381   -6.711    0.852   -0.560   -0.560    9.027    0.000
+       13    9.587   -7.330   -1.381   -6.711    0.852   -0.560   -0.560    9.027    0.000
+       14    9.587   -7.330   -1.381   -6.711    0.852   -0.560   -0.560    9.027    0.000
 ...
 
 
@@ -754,10 +754,10 @@ data: !Tabular |
 
  === QP gaps and band edges taking into account Sigma_nk corrections for 1 k-points ===
  Direct band gap semiconductor
- Fundamental gap:     2.620 (eV)
-   VBM:    -1.311 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   CBM:     1.308 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- Direct gap:         2.620 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     2.618 (eV)
+   VBM:    -1.309 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.309 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.618 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
 
@@ -767,7 +767,7 @@ data: !Tabular |
  (ik_ibz, itau) table
 
        1       2       3       4       5       6
-    1 -23.244 -14.728  -7.473  -3.814  -1.912  -0.783
+    1 -23.243 -14.728  -7.472  -3.814  -1.912  -0.783
         0.000   0.000   0.000   0.000   0.000   0.000
 
  Trace of: gt_kibz for ipm: 2 , spin: 1 for testing purposes:
@@ -780,11 +780,7 @@ data: !Tabular |
 
  Computing diagonal matrix elements of Sigma_x
 
- === Info on Coulomb term used in Sigma_x ===
-
- cutoff-mode = AUXILIARY_FUNCTION
- Using KS orbitals and QP energies...
-
+ Occupations have not changed since last iteration, skipping Sigma_x matrix elements computation...
 
  Computing diagonal matrix elements of Sigma_c
 
@@ -803,8 +799,8 @@ data: !Tabular |
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
-
-
+ 
+ 
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 3, }
@@ -812,27 +808,27 @@ kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 gwr_scf_iteration: 2
 gwr_task   : EGW0
-QP_VBM_band: 3
-QP_CBM_band: 7
+QP_VBM_band: 4
+QP_CBM_band: 5
 KS_gap     :    2.271
-QP_gap     :    2.648
-Delta_QP_KS:    0.376
+QP_gap     :    2.652
+Delta_QP_KS:    0.380
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
-        1  -12.956  -10.138  -16.451    5.834    0.809   -0.234   -0.039  -13.189    2.000
-        2   -1.136  -11.572  -16.769    4.825    0.777   -0.189   -0.017   -1.324    2.000
-        3   -1.136  -11.572  -16.769    4.826    0.777   -0.188   -0.017   -1.324    2.000
-        4   -1.136  -11.572  -16.769    4.819    0.775   -0.193   -0.017   -1.329    2.000
-        5    1.136   -9.538   -3.235   -6.191    0.794    0.190    0.017    1.325    0.000
-        6    1.136   -9.538   -3.235   -6.186    0.793    0.193    0.017    1.329    0.000
-        7    1.136   -9.538   -3.235   -6.192    0.794    0.188    0.017    1.324    0.000
+        1  -12.956  -10.138  -16.451    5.834    0.809   -0.234   -0.039  -13.190    2.000
+        2   -1.136  -11.572  -16.769    4.824    0.776   -0.190   -0.017   -1.326    2.000
+        3   -1.136  -11.572  -16.769    4.823    0.776   -0.190   -0.017   -1.326    2.000
+        4   -1.136  -11.572  -16.769    4.823    0.776   -0.190   -0.017   -1.326    2.000
+        5    1.136   -9.538   -3.235   -6.190    0.794    0.190    0.017    1.326    0.000
+        6    1.136   -9.538   -3.235   -6.190    0.794    0.190    0.017    1.326    0.000
+        7    1.136   -9.538   -3.235   -6.190    0.794    0.190    0.017    1.326    0.000
         8    2.931  -10.313   -3.480   -6.472    0.795    0.386    0.037    3.317    0.000
-        9    6.552   -9.801   -3.234   -6.159    0.816    0.432    0.039    6.984    0.000
-       10    6.552   -9.801   -3.234   -6.161    0.816    0.431    0.040    6.982    0.000
+        9    6.552   -9.801   -3.234   -6.160    0.816    0.431    0.039    6.983    0.000
+       10    6.552   -9.801   -3.234   -6.160    0.816    0.431    0.039    6.983    0.000
        11    6.622   -7.157   -2.258   -6.625    0.818   -1.313   -0.190    5.309    0.000
-       12    9.587   -7.330   -1.381   -6.900    0.848   -0.714   -0.151    8.874    0.000
-       13    9.587   -7.330   -1.381   -6.887    0.848   -0.702   -0.148    8.885    0.000
-       14    9.587   -7.330   -1.381   -6.900    0.848   -0.714   -0.151    8.873    0.000
+       12    9.587   -7.330   -1.381   -6.895    0.848   -0.710   -0.150    8.877    0.000
+       13    9.587   -7.330   -1.381   -6.895    0.848   -0.710   -0.150    8.877    0.000
+       14    9.587   -7.330   -1.381   -6.895    0.848   -0.710   -0.150    8.877    0.000
 ...
 
 
@@ -846,21 +842,21 @@ data: !Tabular |
 
  === QP gaps and band edges taking into account Sigma_nk corrections for 1 k-points ===
  Direct band gap semiconductor
- Fundamental gap:     2.654 (eV)
-   VBM:    -1.329 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   CBM:     1.325 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- Direct gap:         2.654 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     2.652 (eV)
+   VBM:    -1.326 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.326 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.652 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Checking for convergence at iteration: 2
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
-    max(abs(E_i - E_{i-1})):  1.89620E+02 (meV) for band: 11
+    max(abs(E_i - E_{i-1})):  1.89592E+02 (meV) for band: 11
 
  === QP gaps at iteration: 2 (Fermi energy set to zero) ===
  Direct band gap semiconductor
- Fundamental gap:     2.654 (eV)
-   VBM:    -1.329 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   CBM:     1.325 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- Direct gap:         2.654 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     2.652 (eV)
+   VBM:    -1.326 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.326 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.652 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Not converged --> start new iteration ...
 
@@ -871,24 +867,20 @@ data: !Tabular |
  (ik_ibz, itau) table
 
        1       2       3       4       5       6
-    1 -23.259 -14.775  -7.511  -3.827  -1.903  -0.769
+    1 -23.259 -14.774  -7.511  -3.827  -1.903  -0.769
         0.000   0.000   0.000   0.000   0.000   0.000
 
  Trace of: gt_kibz for ipm: 2 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
 
        1       2       3       4       5       6
-    1   3.897   3.493   2.896   2.252   1.547   0.734
+    1   3.897   3.493   2.896   2.252   1.546   0.734
         0.000   0.000   0.000   0.000   0.000   0.000
 
 
  Computing diagonal matrix elements of Sigma_x
 
- === Info on Coulomb term used in Sigma_x ===
-
- cutoff-mode = AUXILIARY_FUNCTION
- Using KS orbitals and QP energies...
-
+ Occupations have not changed since last iteration, skipping Sigma_x matrix elements computation...
 
  Computing diagonal matrix elements of Sigma_c
 
@@ -907,8 +899,8 @@ data: !Tabular |
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
-
-
+ 
+ 
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 3, }
@@ -916,27 +908,27 @@ kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 gwr_scf_iteration: 3
 gwr_task   : EGW0
-QP_VBM_band: 3
-QP_CBM_band: 7
+QP_VBM_band: 4
+QP_CBM_band: 5
 KS_gap     :    2.271
-QP_gap     :    2.651
-Delta_QP_KS:    0.379
+QP_gap     :    2.655
+Delta_QP_KS:    0.383
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
         1  -12.956  -10.138  -16.451    5.824    0.810   -0.240   -0.006  -13.196    2.000
-        2   -1.136  -11.572  -16.769    4.821    0.777   -0.190   -0.001   -1.326    2.000
-        3   -1.136  -11.572  -16.769    4.822    0.777   -0.190   -0.001   -1.325    2.000
-        4   -1.136  -11.572  -16.769    4.815    0.776   -0.194   -0.002   -1.330    2.000
-        5    1.136   -9.538   -3.235   -6.191    0.795    0.191    0.001    1.327    0.000
-        6    1.136   -9.538   -3.235   -6.187    0.793    0.194    0.001    1.330    0.000
-        7    1.136   -9.538   -3.235   -6.193    0.795    0.190    0.001    1.325    0.000
+        2   -1.136  -11.572  -16.769    4.819    0.777   -0.192   -0.001   -1.327    2.000
+        3   -1.136  -11.572  -16.769    4.819    0.777   -0.192   -0.001   -1.327    2.000
+        4   -1.136  -11.572  -16.769    4.819    0.777   -0.192   -0.001   -1.327    2.000
+        5    1.136   -9.538   -3.235   -6.191    0.794    0.192    0.001    1.327    0.000
+        6    1.136   -9.538   -3.235   -6.191    0.794    0.192    0.001    1.327    0.000
+        7    1.136   -9.538   -3.235   -6.191    0.794    0.192    0.001    1.327    0.000
         8    2.931  -10.313   -3.480   -6.471    0.795    0.389    0.003    3.320    0.000
-        9    6.552   -9.801   -3.234   -6.157    0.817    0.437    0.005    6.989    0.000
-       10    6.552   -9.801   -3.234   -6.158    0.816    0.435    0.005    6.987    0.000
-       11    6.622   -7.157   -2.258   -6.649    0.818   -1.330   -0.017    5.291    0.000
-       12    9.587   -7.330   -1.381   -6.946    0.846   -0.750   -0.036    8.838    0.000
-       13    9.587   -7.330   -1.381   -6.932    0.846   -0.737   -0.035    8.850    0.000
-       14    9.587   -7.330   -1.381   -6.947    0.846   -0.750   -0.036    8.837    0.000
+        9    6.552   -9.801   -3.234   -6.157    0.816    0.436    0.005    6.988    0.000
+       10    6.552   -9.801   -3.234   -6.157    0.816    0.436    0.005    6.988    0.000
+       11    6.622   -7.157   -2.258   -6.649    0.818   -1.331   -0.017    5.291    0.000
+       12    9.587   -7.330   -1.381   -6.941    0.846   -0.746   -0.036    8.841    0.000
+       13    9.587   -7.330   -1.381   -6.941    0.846   -0.746   -0.036    8.841    0.000
+       14    9.587   -7.330   -1.381   -6.941    0.846   -0.746   -0.036    8.841    0.000
 ...
 
 
@@ -950,21 +942,21 @@ data: !Tabular |
 
  === QP gaps and band edges taking into account Sigma_nk corrections for 1 k-points ===
  Direct band gap semiconductor
- Fundamental gap:     2.657 (eV)
-   VBM:    -1.330 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     2.655 (eV)
+   VBM:    -1.327 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     1.327 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- Direct gap:         2.657 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.655 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Checking for convergence at iteration: 3
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
-    max(abs(E_i - E_{i-1})):  3.63452E+01 (meV) for band: 14
+    max(abs(E_i - E_{i-1})):  3.58862E+01 (meV) for band: 12
 
  === QP gaps at iteration: 3 (Fermi energy set to zero) ===
  Direct band gap semiconductor
- Fundamental gap:     2.657 (eV)
-   VBM:    -1.330 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     2.655 (eV)
+   VBM:    -1.327 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     1.327 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- Direct gap:         2.657 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.655 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Not converged --> start new iteration ...
 
@@ -975,24 +967,20 @@ data: !Tabular |
  (ik_ibz, itau) table
 
        1       2       3       4       5       6
-    1 -23.263 -14.786  -7.520  -3.830  -1.903  -0.768
+    1 -23.262 -14.785  -7.520  -3.830  -1.903  -0.768
         0.000   0.000   0.000   0.000   0.000   0.000
 
  Trace of: gt_kibz for ipm: 2 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
 
        1       2       3       4       5       6
-    1   3.897   3.493   2.896   2.251   1.545   0.733
+    1   3.897   3.493   2.895   2.251   1.545   0.733
         0.000   0.000   0.000   0.000   0.000   0.000
 
 
  Computing diagonal matrix elements of Sigma_x
 
- === Info on Coulomb term used in Sigma_x ===
-
- cutoff-mode = AUXILIARY_FUNCTION
- Using KS orbitals and QP energies...
-
+ Occupations have not changed since last iteration, skipping Sigma_x matrix elements computation...
 
  Computing diagonal matrix elements of Sigma_c
 
@@ -1011,8 +999,8 @@ data: !Tabular |
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
-
-
+ 
+ 
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 3, }
@@ -1020,27 +1008,27 @@ kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 gwr_scf_iteration: 4
 gwr_task   : EGW0
-QP_VBM_band: 3
-QP_CBM_band: 7
+QP_VBM_band: 4
+QP_CBM_band: 5
 KS_gap     :    2.271
-QP_gap     :    2.651
-Delta_QP_KS:    0.379
+QP_gap     :    2.655
+Delta_QP_KS:    0.383
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
         1  -12.956  -10.138  -16.451    5.822    0.810   -0.241   -0.001  -13.197    2.000
-        2   -1.136  -11.572  -16.769    4.820    0.777   -0.190   -0.000   -1.326    2.000
-        3   -1.136  -11.572  -16.769    4.821    0.777   -0.190   -0.000   -1.325    2.000
-        4   -1.136  -11.572  -16.769    4.814    0.776   -0.195   -0.000   -1.330    2.000
-        5    1.136   -9.538   -3.235   -6.192    0.795    0.191    0.000    1.327    0.000
-        6    1.136   -9.538   -3.235   -6.188    0.793    0.194    0.000    1.330    0.000
-        7    1.136   -9.538   -3.235   -6.194    0.795    0.190    0.000    1.325    0.000
-        8    2.931  -10.313   -3.480   -6.471    0.795    0.390    0.000    3.321    0.000
-        9    6.552   -9.801   -3.234   -6.156    0.817    0.438    0.001    6.989    0.000
-       10    6.552   -9.801   -3.234   -6.158    0.816    0.436    0.001    6.987    0.000
+        2   -1.136  -11.572  -16.769    4.818    0.777   -0.192   -0.000   -1.327    2.000
+        3   -1.136  -11.572  -16.769    4.818    0.777   -0.192   -0.000   -1.327    2.000
+        4   -1.136  -11.572  -16.769    4.818    0.777   -0.192   -0.000   -1.327    2.000
+        5    1.136   -9.538   -3.235   -6.191    0.794    0.192    0.000    1.327    0.000
+        6    1.136   -9.538   -3.235   -6.191    0.794    0.192    0.000    1.327    0.000
+        7    1.136   -9.538   -3.235   -6.191    0.794    0.192    0.000    1.327    0.000
+        8    2.931  -10.313   -3.480   -6.471    0.795    0.389    0.000    3.320    0.000
+        9    6.552   -9.801   -3.234   -6.157    0.816    0.437    0.001    6.988    0.000
+       10    6.552   -9.801   -3.234   -6.157    0.816    0.437    0.001    6.988    0.000
        11    6.622   -7.157   -2.258   -6.652    0.818   -1.332   -0.002    5.290    0.000
-       12    9.587   -7.330   -1.381   -6.957    0.846   -0.758   -0.008    8.829    0.000
-       13    9.587   -7.330   -1.381   -6.943    0.845   -0.745   -0.008    8.842    0.000
-       14    9.587   -7.330   -1.381   -6.957    0.846   -0.759   -0.008    8.828    0.000
+       12    9.587   -7.330   -1.381   -6.952    0.846   -0.754   -0.008    8.833    0.000
+       13    9.587   -7.330   -1.381   -6.952    0.846   -0.754   -0.008    8.833    0.000
+       14    9.587   -7.330   -1.381   -6.952    0.846   -0.754   -0.008    8.833    0.000
 ...
 
 
@@ -1054,21 +1042,21 @@ data: !Tabular |
 
  === QP gaps and band edges taking into account Sigma_nk corrections for 1 k-points ===
  Direct band gap semiconductor
- Fundamental gap:     2.657 (eV)
-   VBM:    -1.330 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     2.655 (eV)
+   VBM:    -1.327 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     1.327 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- Direct gap:         2.657 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.655 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Checking for convergence at iteration: 4
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
-    max(abs(E_i - E_{i-1})):  8.36851E+00 (meV) for band: 14
+    max(abs(E_i - E_{i-1})):  8.24267E+00 (meV) for band: 12
 
  === QP gaps at iteration: 4 (Fermi energy set to zero) ===
  Direct band gap semiconductor
- Fundamental gap:     2.657 (eV)
-   VBM:    -1.330 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     2.655 (eV)
+   VBM:    -1.327 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     1.327 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- Direct gap:         2.657 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.655 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  EGW0 self-consistent loop:
  Convergence achieved at iteration: 4 with gwr_tolqpe:   20.000 (meV)
@@ -1305,8 +1293,8 @@ iteration_state: {dtset: 4, }
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
-
-
+ 
+ 
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 4, }
@@ -1314,27 +1302,27 @@ kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 gwr_scf_iteration: 1
 gwr_task   : EGEW
-QP_VBM_band: 3
-QP_CBM_band: 7
+QP_VBM_band: 4
+QP_CBM_band: 5
 KS_gap     :    2.271
-QP_gap     :    2.614
-Delta_QP_KS:    0.343
+QP_gap     :    2.618
+Delta_QP_KS:    0.346
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
         1  -12.956  -10.138  -16.451    5.888    0.807   -0.195   -0.195  -13.150    2.000
-        2   -1.136  -11.572  -16.769    4.854    0.773   -0.172   -0.172   -1.307    2.000
-        3   -1.136  -11.572  -16.769    4.854    0.773   -0.171   -0.171   -1.307    2.000
-        4   -1.136  -11.572  -16.769    4.848    0.771   -0.176   -0.176   -1.311    2.000
-        5    1.136   -9.538   -3.235   -6.203    0.792    0.173    0.173    1.308    0.000
-        6    1.136   -9.538   -3.235   -6.199    0.789    0.176    0.176    1.312    0.000
-        7    1.136   -9.538   -3.235   -6.205    0.791    0.171    0.171    1.307    0.000
+        2   -1.136  -11.572  -16.769    4.852    0.772   -0.173   -0.173   -1.309    2.000
+        3   -1.136  -11.572  -16.769    4.852    0.772   -0.173   -0.173   -1.309    2.000
+        4   -1.136  -11.572  -16.769    4.852    0.772   -0.173   -0.173   -1.309    2.000
+        5    1.136   -9.538   -3.235   -6.202    0.791    0.173    0.173    1.309    0.000
+        6    1.136   -9.538   -3.235   -6.202    0.791    0.173    0.173    1.309    0.000
+        7    1.136   -9.538   -3.235   -6.202    0.791    0.173    0.173    1.309    0.000
         8    2.931  -10.313   -3.480   -6.510    0.793    0.349    0.349    3.280    0.000
-        9    6.552   -9.801   -3.234   -6.198    0.815    0.394    0.394    6.945    0.000
-       10    6.552   -9.801   -3.234   -6.201    0.815    0.391    0.391    6.943    0.000
-       11    6.622   -7.157   -2.258   -6.361    0.832   -1.123   -1.123    5.498    0.000
-       12    9.587   -7.330   -1.381   -6.715    0.852   -0.563   -0.563    9.024    0.000
-       13    9.587   -7.330   -1.381   -6.705    0.851   -0.554   -0.554    9.033    0.000
-       14    9.587   -7.330   -1.381   -6.714    0.852   -0.562   -0.562    9.025    0.000
+        9    6.552   -9.801   -3.234   -6.200    0.815    0.392    0.392    6.944    0.000
+       10    6.552   -9.801   -3.234   -6.200    0.815    0.392    0.392    6.944    0.000
+       11    6.622   -7.157   -2.258   -6.361    0.832   -1.124   -1.124    5.498    0.000
+       12    9.587   -7.330   -1.381   -6.711    0.852   -0.560   -0.560    9.027    0.000
+       13    9.587   -7.330   -1.381   -6.711    0.852   -0.560   -0.560    9.027    0.000
+       14    9.587   -7.330   -1.381   -6.711    0.852   -0.560   -0.560    9.027    0.000
 ...
 
 
@@ -1348,21 +1336,21 @@ data: !Tabular |
 
  === QP gaps and band edges taking into account Sigma_nk corrections for 1 k-points ===
  Direct band gap semiconductor
- Fundamental gap:     2.620 (eV)
-   VBM:    -1.311 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   CBM:     1.308 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- Direct gap:         2.620 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     2.618 (eV)
+   VBM:    -1.309 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.309 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.618 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Checking for convergence at iteration: 2
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
-    max(abs(E_i - E_{i-1})):  1.12349E+03 (meV) for band: 11
+    max(abs(E_i - E_{i-1})):  1.12368E+03 (meV) for band: 11
 
  === QP gaps at iteration: 2 (Fermi energy set to zero) ===
  Direct band gap semiconductor
- Fundamental gap:     2.620 (eV)
-   VBM:    -1.311 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   CBM:     1.308 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- Direct gap:         2.620 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     2.618 (eV)
+   VBM:    -1.309 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.309 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.618 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Not converged --> start new iteration ...
 
@@ -1373,21 +1361,17 @@ data: !Tabular |
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
- 7.17731E-01  -1.08805E-05  -1.08853E-05  -1.08901E-05  -1.08900E-05  -1.08870E-05  -1.08840E-05
- 2.49343E+00  -6.45652E-06  -6.45684E-06  -6.45715E-06  -6.45687E-06  -6.45693E-06  -6.45698E-06
- 5.53527E+00  -2.47331E-06  -2.47263E-06  -2.47195E-06  -2.47192E-06  -2.47239E-06  -2.47285E-06
- 1.17300E+01  -6.97712E-07  -6.97433E-07  -6.97155E-07  -6.97194E-07  -6.97337E-07  -6.97480E-07
- 2.59361E+01  -1.54453E-07  -1.54387E-07  -1.54321E-07  -1.54335E-07  -1.54364E-07  -1.54393E-07
- 6.82527E+01  -2.28159E-08  -2.28061E-08  -2.27963E-08  -2.27987E-08  -2.28027E-08  -2.28068E-08
+ 7.17731E-01  -1.08870E-05  -1.08870E-05  -1.08870E-05  -1.08870E-05  -1.08870E-05  -1.08870E-05
+ 2.49343E+00  -6.45693E-06  -6.45693E-06  -6.45693E-06  -6.45693E-06  -6.45693E-06  -6.45693E-06
+ 5.53527E+00  -2.47239E-06  -2.47239E-06  -2.47239E-06  -2.47239E-06  -2.47239E-06  -2.47239E-06
+ 1.17300E+01  -6.97340E-07  -6.97340E-07  -6.97340E-07  -6.97340E-07  -6.97340E-07  -6.97340E-07
+ 2.59361E+01  -1.54365E-07  -1.54365E-07  -1.54365E-07  -1.54365E-07  -1.54365E-07  -1.54365E-07
+ 6.82527E+01  -2.28028E-08  -2.28028E-08  -2.28028E-08  -2.28028E-08  -2.28028E-08  -2.28028E-08
 
 
  Computing diagonal matrix elements of Sigma_x
 
- === Info on Coulomb term used in Sigma_x ===
-
- cutoff-mode = AUXILIARY_FUNCTION
- Using KS orbitals and QP energies...
-
+ Occupations have not changed since last iteration, skipping Sigma_x matrix elements computation...
 
 
  Building Green's functions from KS orbitals and QP energies...
@@ -1396,7 +1380,7 @@ data: !Tabular |
  (ik_ibz, itau) table
 
        1       2       3       4       5       6
-    1 -23.244 -14.728  -7.473  -3.814  -1.912  -0.783
+    1 -23.243 -14.728  -7.472  -3.814  -1.912  -0.783
         0.000   0.000   0.000   0.000   0.000   0.000
 
  Trace of: gt_kibz for ipm: 2 , spin: 1 for testing purposes:
@@ -1420,7 +1404,7 @@ data: !Tabular |
  (iq_ibz, iomega) table
        1       2       3       4       5       6
     1  -3.793  -3.010  -2.128  -1.396  -0.730  -0.192
-       -0.000  -0.000  -0.000  -0.000   0.000   0.000
+       -0.000   0.000   0.000   0.000  -0.000  -0.000
 
 
 
@@ -1433,24 +1417,24 @@ data: !Tabular |
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      2.63761313E-02    1.37902496E+02    6.34722879E-19
-      9.16320406E-02    8.21432323E+01    1.14119390E-18
-      2.03417403E-01    3.20554024E+01    2.98309562E-19
-      4.31070640E-01    9.75801241E+00    4.57669000E-19
-      9.53132482E-01    2.93866820E+00   -1.41051464E-19
-      2.50824148E+00    1.28638176E+00   -1.34846716E-20
+      2.63761313E-02    1.37809707E+02    1.98970828E-18
+      9.16320406E-02    8.21401197E+01   -2.51001882E-19
+      2.03417403E-01    3.20689850E+01   -1.70332107E-18
+      4.31070640E-01    9.76302807E+00   -3.32935754E-19
+      9.53132482E-01    2.93980399E+00    3.17431294E-20
+      2.50824148E+00    1.28654897E+00    2.26181771E-20
 ...
 
 
 --- !EMACRO_WITH_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      2.63761313E-02    9.94790030E-03    0.00000000E+00
-      9.16320406E-02    1.49230994E-02    0.00000000E+00
-      2.03417403E-01    3.42021638E-02    0.00000000E+00
-      4.31070640E-01    1.05884323E-01    0.00000000E+00
-      9.53132482E-01    3.42971494E-01    0.00000000E+00
-      2.50824148E+00    7.77794858E-01    0.00000000E+00
+      2.63761313E-02    9.95284523E-03    0.00000000E+00
+      9.16320406E-02    1.49236548E-02    0.00000000E+00
+      2.03417403E-01    3.41888026E-02    0.00000000E+00
+      4.31070640E-01    1.05831071E-01    0.00000000E+00
+      9.53132482E-01    3.42839651E-01    0.00000000E+00
+      2.50824148E+00    7.77693936E-01    0.00000000E+00
 ...
 
  Trace of: wc_qibz for spin: 1 for testing purposes:
@@ -1479,8 +1463,8 @@ iteration_state: {dtset: 4, }
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
-
-
+ 
+ 
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 4, }
@@ -1488,27 +1472,27 @@ kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 gwr_scf_iteration: 2
 gwr_task   : EGEW
-QP_VBM_band: 3
-QP_CBM_band: 7
+QP_VBM_band: 4
+QP_CBM_band: 5
 KS_gap     :    2.271
-QP_gap     :    2.596
-Delta_QP_KS:    0.325
+QP_gap     :    2.600
+Delta_QP_KS:    0.328
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
-        1  -12.956  -10.138  -16.451    5.728    0.834   -0.320   -0.125  -13.275    2.000
-        2   -1.136  -11.572  -16.769    4.864    0.779   -0.163    0.009   -1.299    2.000
-        3   -1.136  -11.572  -16.769    4.865    0.779   -0.162    0.009   -1.298    2.000
-        4   -1.136  -11.572  -16.769    4.859    0.778   -0.167    0.009   -1.302    2.000
-        5    1.136   -9.538   -3.235   -6.219    0.798    0.164   -0.009    1.300    0.000
-        6    1.136   -9.538   -3.235   -6.215    0.797    0.167   -0.009    1.302    0.000
-        7    1.136   -9.538   -3.235   -6.221    0.798    0.162   -0.009    1.298    0.000
-        8    2.931  -10.313   -3.480   -6.524    0.800    0.343   -0.006    3.273    0.000
-        9    6.552   -9.801   -3.234   -6.224    0.825    0.378   -0.016    6.929    0.000
-       10    6.552   -9.801   -3.234   -6.227    0.825    0.375   -0.016    6.926    0.000
-       11    6.622   -7.157   -2.258   -6.607    0.830   -1.322   -0.198    5.300    0.000
-       12    9.587   -7.330   -1.381   -6.566    0.843   -0.423    0.140    9.164    0.000
-       13    9.587   -7.330   -1.381   -6.558    0.842   -0.415    0.138    9.172    0.000
-       14    9.587   -7.330   -1.381   -6.565    0.842   -0.422    0.140    9.165    0.000
+        1  -12.956  -10.138  -16.451    5.728    0.834   -0.320   -0.125  -13.276    2.000
+        2   -1.136  -11.572  -16.769    4.863    0.778   -0.164    0.009   -1.300    2.000
+        3   -1.136  -11.572  -16.769    4.863    0.778   -0.164    0.009   -1.300    2.000
+        4   -1.136  -11.572  -16.769    4.863    0.778   -0.164    0.009   -1.300    2.000
+        5    1.136   -9.538   -3.235   -6.218    0.798    0.164   -0.009    1.300    0.000
+        6    1.136   -9.538   -3.235   -6.218    0.798    0.164   -0.009    1.300    0.000
+        7    1.136   -9.538   -3.235   -6.218    0.798    0.164   -0.009    1.300    0.000
+        8    2.931  -10.313   -3.480   -6.524    0.800    0.342   -0.006    3.273    0.000
+        9    6.552   -9.801   -3.234   -6.226    0.825    0.376   -0.016    6.928    0.000
+       10    6.552   -9.801   -3.234   -6.226    0.825    0.376   -0.016    6.928    0.000
+       11    6.622   -7.157   -2.258   -6.607    0.830   -1.322   -0.199    5.300    0.000
+       12    9.587   -7.330   -1.381   -6.562    0.842   -0.419    0.141    9.168    0.000
+       13    9.587   -7.330   -1.381   -6.562    0.842   -0.419    0.141    9.168    0.000
+       14    9.587   -7.330   -1.381   -6.562    0.842   -0.419    0.141    9.168    0.000
 ...
 
 
@@ -1522,21 +1506,21 @@ data: !Tabular |
 
  === QP gaps and band edges taking into account Sigma_nk corrections for 1 k-points ===
  Direct band gap semiconductor
- Fundamental gap:     2.602 (eV)
-   VBM:    -1.302 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     2.600 (eV)
+   VBM:    -1.300 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     1.300 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- Direct gap:         2.602 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.600 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Checking for convergence at iteration: 3
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
-    max(abs(E_i - E_{i-1})):  1.98291E+02 (meV) for band: 11
+    max(abs(E_i - E_{i-1})):  1.98597E+02 (meV) for band: 11
 
  === QP gaps at iteration: 3 (Fermi energy set to zero) ===
  Direct band gap semiconductor
- Fundamental gap:     2.602 (eV)
-   VBM:    -1.302 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     2.600 (eV)
+   VBM:    -1.300 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     1.300 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- Direct gap:         2.602 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.600 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Not converged --> start new iteration ...
 
@@ -1547,21 +1531,17 @@ data: !Tabular |
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
- 7.17731E-01  -1.09412E-05  -1.09458E-05  -1.09504E-05  -1.09503E-05  -1.09475E-05  -1.09447E-05
- 2.49343E+00  -6.46022E-06  -6.46051E-06  -6.46079E-06  -6.46051E-06  -6.46059E-06  -6.46067E-06
- 5.53527E+00  -2.46491E-06  -2.46427E-06  -2.46363E-06  -2.46359E-06  -2.46403E-06  -2.46447E-06
- 1.17300E+01  -6.94243E-07  -6.93980E-07  -6.93717E-07  -6.93754E-07  -6.93885E-07  -6.94016E-07
- 2.59361E+01  -1.53611E-07  -1.53548E-07  -1.53486E-07  -1.53500E-07  -1.53526E-07  -1.53552E-07
- 6.82527E+01  -2.26897E-08  -2.26804E-08  -2.26711E-08  -2.26735E-08  -2.26771E-08  -2.26807E-08
+ 7.17731E-01  -1.09479E-05  -1.09479E-05  -1.09479E-05  -1.09479E-05  -1.09479E-05  -1.09479E-05
+ 2.49343E+00  -6.46062E-06  -6.46062E-06  -6.46062E-06  -6.46062E-06  -6.46062E-06  -6.46062E-06
+ 5.53527E+00  -2.46397E-06  -2.46397E-06  -2.46397E-06  -2.46397E-06  -2.46397E-06  -2.46397E-06
+ 1.17300E+01  -6.93861E-07  -6.93861E-07  -6.93861E-07  -6.93861E-07  -6.93861E-07  -6.93861E-07
+ 2.59361E+01  -1.53520E-07  -1.53520E-07  -1.53520E-07  -1.53520E-07  -1.53520E-07  -1.53520E-07
+ 6.82527E+01  -2.26762E-08  -2.26762E-08  -2.26762E-08  -2.26762E-08  -2.26762E-08  -2.26762E-08
 
 
  Computing diagonal matrix elements of Sigma_x
 
- === Info on Coulomb term used in Sigma_x ===
-
- cutoff-mode = AUXILIARY_FUNCTION
- Using KS orbitals and QP energies...
-
+ Occupations have not changed since last iteration, skipping Sigma_x matrix elements computation...
 
 
  Building Green's functions from KS orbitals and QP energies...
@@ -1594,7 +1574,7 @@ data: !Tabular |
  (iq_ibz, iomega) table
        1       2       3       4       5       6
     1  -3.799  -3.006  -2.120  -1.391  -0.730  -0.192
-       -0.000  -0.000   0.000   0.000   0.000  -0.000
+        0.000  -0.000  -0.000   0.000  -0.000  -0.000
 
 
 
@@ -1607,24 +1587,24 @@ data: !Tabular |
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      2.63761313E-02    1.38658276E+02    3.79445241E-19
-      9.16320406E-02    8.21886839E+01    1.91197688E-18
-      2.03417403E-01    3.19509760E+01   -1.52754973E-18
-      4.31070640E-01    9.71488629E+00   -3.94731327E-20
-      9.53132482E-01    2.92819977E+00   -1.54954736E-19
-      2.50824148E+00    1.28481220E+00    3.06592511E-20
+      2.63761313E-02    1.38575234E+02   -2.30871592E-18
+      9.16320406E-02    8.21865389E+01    1.74748747E-18
+      2.03417403E-01    3.19631947E+01    1.21364673E-18
+      4.31070640E-01    9.71930883E+00   -2.06132732E-19
+      9.53132482E-01    2.92918972E+00    2.76924746E-20
+      2.50824148E+00    1.28495738E+00    4.12875303E-21
 ...
 
 
 --- !EMACRO_WITH_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      2.63761313E-02    9.91053749E-03    0.00000000E+00
-      9.16320406E-02    1.49187269E-02    0.00000000E+00
-      2.03417403E-01    3.43082369E-02    0.00000000E+00
-      4.31070640E-01    1.06343000E-01    0.00000000E+00
-      9.53132482E-01    3.44185250E-01    0.00000000E+00
-      2.50824148E+00    7.78742945E-01    0.00000000E+00
+      2.63761313E-02    9.91492725E-03    0.00000000E+00
+      9.16320406E-02    1.49191485E-02    0.00000000E+00
+      2.03417403E-01    3.42961600E-02    0.00000000E+00
+      4.31070640E-01    1.06295590E-01    0.00000000E+00
+      9.53132482E-01    3.44069402E-01    0.00000000E+00
+      2.50824148E+00    7.78655084E-01    0.00000000E+00
 ...
 
  Trace of: wc_qibz for spin: 1 for testing purposes:
@@ -1653,8 +1633,8 @@ iteration_state: {dtset: 4, }
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
-
-
+ 
+ 
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 4, }
@@ -1662,27 +1642,27 @@ kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 gwr_scf_iteration: 3
 gwr_task   : EGEW
-QP_VBM_band: 3
-QP_CBM_band: 7
+QP_VBM_band: 4
+QP_CBM_band: 5
 KS_gap     :    2.271
-QP_gap     :    2.594
-Delta_QP_KS:    0.323
+QP_gap     :    2.598
+Delta_QP_KS:    0.327
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
-        1  -12.956  -10.138  -16.451    5.702    0.836   -0.344   -0.024  -13.300    2.000
-        2   -1.136  -11.572  -16.769    4.869    0.778   -0.162    0.001   -1.298    2.000
-        3   -1.136  -11.572  -16.769    4.869    0.778   -0.162    0.001   -1.297    2.000
-        4   -1.136  -11.572  -16.769    4.863    0.777   -0.166    0.001   -1.301    2.000
-        5    1.136   -9.538   -3.235   -6.216    0.798    0.163   -0.001    1.299    0.000
-        6    1.136   -9.538   -3.235   -6.212    0.796    0.166   -0.001    1.301    0.000
-        7    1.136   -9.538   -3.235   -6.218    0.798    0.162   -0.001    1.297    0.000
+        1  -12.956  -10.138  -16.451    5.702    0.836   -0.345   -0.024  -13.300    2.000
+        2   -1.136  -11.572  -16.769    4.867    0.777   -0.163    0.001   -1.299    2.000
+        3   -1.136  -11.572  -16.769    4.867    0.777   -0.163    0.001   -1.299    2.000
+        4   -1.136  -11.572  -16.769    4.867    0.777   -0.163    0.001   -1.299    2.000
+        5    1.136   -9.538   -3.235   -6.215    0.797    0.163   -0.001    1.299    0.000
+        6    1.136   -9.538   -3.235   -6.215    0.797    0.163   -0.001    1.299    0.000
+        7    1.136   -9.538   -3.235   -6.215    0.797    0.163   -0.001    1.299    0.000
         8    2.931  -10.313   -3.480   -6.523    0.799    0.340   -0.002    3.271    0.000
-        9    6.552   -9.801   -3.234   -6.221    0.825    0.376   -0.001    6.928    0.000
-       10    6.552   -9.801   -3.234   -6.225    0.825    0.373   -0.001    6.925    0.000
-       11    6.622   -7.157   -2.258   -6.629    0.828   -1.340   -0.018    5.282    0.000
-       12    9.587   -7.330   -1.381   -6.529    0.843   -0.395    0.028    9.192    0.000
-       13    9.587   -7.330   -1.381   -6.521    0.842   -0.388    0.028    9.200    0.000
-       14    9.587   -7.330   -1.381   -6.528    0.842   -0.394    0.028    9.193    0.000
+        9    6.552   -9.801   -3.234   -6.223    0.825    0.375   -0.001    6.926    0.000
+       10    6.552   -9.801   -3.234   -6.223    0.825    0.375   -0.001    6.926    0.000
+       11    6.622   -7.157   -2.258   -6.629    0.828   -1.340   -0.018    5.281    0.000
+       12    9.587   -7.330   -1.381   -6.525    0.842   -0.391    0.028    9.196    0.000
+       13    9.587   -7.330   -1.381   -6.525    0.842   -0.391    0.028    9.196    0.000
+       14    9.587   -7.330   -1.381   -6.525    0.842   -0.391    0.028    9.196    0.000
 ...
 
 
@@ -1696,21 +1676,21 @@ data: !Tabular |
 
  === QP gaps and band edges taking into account Sigma_nk corrections for 1 k-points ===
  Direct band gap semiconductor
- Fundamental gap:     2.600 (eV)
-   VBM:    -1.301 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     2.598 (eV)
+   VBM:    -1.299 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     1.299 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- Direct gap:         2.600 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.598 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Checking for convergence at iteration: 4
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
-    max(abs(E_i - E_{i-1})):  2.84100E+01 (meV) for band: 14
+    max(abs(E_i - E_{i-1})):  2.82590E+01 (meV) for band: 13
 
  === QP gaps at iteration: 4 (Fermi energy set to zero) ===
  Direct band gap semiconductor
- Fundamental gap:     2.600 (eV)
-   VBM:    -1.301 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     2.598 (eV)
+   VBM:    -1.299 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     1.299 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- Direct gap:         2.600 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.598 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Not converged --> start new iteration ...
 
@@ -1721,21 +1701,17 @@ data: !Tabular |
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
- 7.17731E-01  -1.09477E-05  -1.09523E-05  -1.09569E-05  -1.09568E-05  -1.09540E-05  -1.09512E-05
- 2.49343E+00  -6.46077E-06  -6.46105E-06  -6.46133E-06  -6.46105E-06  -6.46113E-06  -6.46122E-06
- 5.53527E+00  -2.46403E-06  -2.46339E-06  -2.46274E-06  -2.46270E-06  -2.46314E-06  -2.46359E-06
- 1.17300E+01  -6.93850E-07  -6.93587E-07  -6.93323E-07  -6.93360E-07  -6.93491E-07  -6.93623E-07
- 2.59361E+01  -1.53514E-07  -1.53451E-07  -1.53389E-07  -1.53403E-07  -1.53429E-07  -1.53455E-07
- 6.82527E+01  -2.26751E-08  -2.26658E-08  -2.26565E-08  -2.26589E-08  -2.26625E-08  -2.26662E-08
+ 7.17731E-01  -1.09544E-05  -1.09544E-05  -1.09544E-05  -1.09544E-05  -1.09544E-05  -1.09544E-05
+ 2.49343E+00  -6.46116E-06  -6.46116E-06  -6.46116E-06  -6.46116E-06  -6.46116E-06  -6.46116E-06
+ 5.53527E+00  -2.46310E-06  -2.46310E-06  -2.46310E-06  -2.46310E-06  -2.46310E-06  -2.46310E-06
+ 1.17300E+01  -6.93470E-07  -6.93470E-07  -6.93470E-07  -6.93470E-07  -6.93470E-07  -6.93470E-07
+ 2.59361E+01  -1.53424E-07  -1.53424E-07  -1.53424E-07  -1.53424E-07  -1.53424E-07  -1.53424E-07
+ 6.82527E+01  -2.26617E-08  -2.26617E-08  -2.26617E-08  -2.26617E-08  -2.26617E-08  -2.26617E-08
 
 
  Computing diagonal matrix elements of Sigma_x
 
- === Info on Coulomb term used in Sigma_x ===
-
- cutoff-mode = AUXILIARY_FUNCTION
- Using KS orbitals and QP energies...
-
+ Occupations have not changed since last iteration, skipping Sigma_x matrix elements computation...
 
 
  Building Green's functions from KS orbitals and QP energies...
@@ -1744,7 +1720,7 @@ data: !Tabular |
  (ik_ibz, itau) table
 
        1       2       3       4       5       6
-    1 -23.228 -14.686  -7.448  -3.819  -1.925  -0.792
+    1 -23.228 -14.686  -7.447  -3.819  -1.926  -0.792
         0.000   0.000   0.000   0.000   0.000   0.000
 
  Trace of: gt_kibz for ipm: 2 , spin: 1 for testing purposes:
@@ -1767,8 +1743,8 @@ data: !Tabular |
 
  (iq_ibz, iomega) table
        1       2       3       4       5       6
-    1  -3.799  -3.005  -2.118  -1.390  -0.730  -0.192
-        0.000  -0.000  -0.000  -0.000   0.000   0.000
+    1  -3.799  -3.004  -2.118  -1.390  -0.730  -0.192
+        0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
 
 
@@ -1781,24 +1757,24 @@ data: !Tabular |
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      2.63761313E-02    1.38741121E+02   -1.16938559E-19
-      9.16320406E-02    8.21954833E+01    1.43073984E-18
-      2.03417403E-01    3.19397916E+01    1.80561319E-18
-      4.31070640E-01    9.70992389E+00    2.94111860E-19
-      9.53132482E-01    2.92697401E+00   -2.16279210E-19
-      2.50824148E+00    1.28462851E+00   -7.46440681E-21
+      2.63761313E-02    1.38656896E+02   -1.54175671E-18
+      9.16320406E-02    8.21933493E+01    4.63787950E-19
+      2.03417403E-01    3.19521788E+01   -2.00615851E-19
+      4.31070640E-01    9.71440482E+00    3.32018088E-19
+      9.53132482E-01    2.92797728E+00    1.22941689E-19
+      2.50824148E+00    1.28477566E+00    2.04543253E-20
 ...
 
 
 --- !EMACRO_WITH_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      2.63761313E-02    9.90661689E-03    0.00000000E+00
-      9.16320406E-02    1.49181482E-02    0.00000000E+00
-      2.03417403E-01    3.43197894E-02    0.00000000E+00
-      4.31070640E-01    1.06396227E-01    0.00000000E+00
-      9.53132482E-01    3.44328287E-01    0.00000000E+00
-      2.50824148E+00    7.78854170E-01    0.00000000E+00
+      2.63761313E-02    9.91106149E-03    0.00000000E+00
+      9.16320406E-02    1.49185668E-02    0.00000000E+00
+      2.03417403E-01    3.43075345E-02    0.00000000E+00
+      4.31070640E-01    1.06348146E-01    0.00000000E+00
+      9.53132482E-01    3.44210794E-01    0.00000000E+00
+      2.50824148E+00    7.78765093E-01    0.00000000E+00
 ...
 
  Trace of: wc_qibz for spin: 1 for testing purposes:
@@ -1827,8 +1803,8 @@ iteration_state: {dtset: 4, }
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
-
-
+ 
+ 
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 4, }
@@ -1836,27 +1812,27 @@ kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 gwr_scf_iteration: 4
 gwr_task   : EGEW
-QP_VBM_band: 3
-QP_CBM_band: 7
+QP_VBM_band: 4
+QP_CBM_band: 5
 KS_gap     :    2.271
-QP_gap     :    2.595
-Delta_QP_KS:    0.323
+QP_gap     :    2.598
+Delta_QP_KS:    0.327
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
-        1  -12.956  -10.138  -16.451    5.698    0.836   -0.349   -0.005  -13.304    2.000
-        2   -1.136  -11.572  -16.769    4.869    0.778   -0.162   -0.000   -1.298    2.000
-        3   -1.136  -11.572  -16.769    4.870    0.778   -0.162   -0.000   -1.297    2.000
-        4   -1.136  -11.572  -16.769    4.864    0.776   -0.166   -0.000   -1.301    2.000
-        5    1.136   -9.538   -3.235   -6.215    0.798    0.163    0.000    1.299    0.000
-        6    1.136   -9.538   -3.235   -6.212    0.796    0.166    0.000    1.302    0.000
-        7    1.136   -9.538   -3.235   -6.217    0.798    0.162    0.000    1.297    0.000
+        1  -12.956  -10.138  -16.451    5.697    0.836   -0.350   -0.005  -13.305    2.000
+        2   -1.136  -11.572  -16.769    4.868    0.777   -0.163   -0.000   -1.299    2.000
+        3   -1.136  -11.572  -16.769    4.868    0.777   -0.163   -0.000   -1.299    2.000
+        4   -1.136  -11.572  -16.769    4.868    0.777   -0.163   -0.000   -1.299    2.000
+        5    1.136   -9.538   -3.235   -6.215    0.797    0.163    0.000    1.299    0.000
+        6    1.136   -9.538   -3.235   -6.215    0.797    0.163    0.000    1.299    0.000
+        7    1.136   -9.538   -3.235   -6.215    0.797    0.163    0.000    1.299    0.000
         8    2.931  -10.313   -3.480   -6.523    0.799    0.340   -0.000    3.271    0.000
-        9    6.552   -9.801   -3.234   -6.221    0.825    0.376   -0.000    6.928    0.000
-       10    6.552   -9.801   -3.234   -6.224    0.824    0.373   -0.000    6.925    0.000
-       11    6.622   -7.157   -2.258   -6.630    0.828   -1.341   -0.002    5.280    0.000
-       12    9.587   -7.330   -1.381   -6.521    0.843   -0.388    0.007    9.199    0.000
-       13    9.587   -7.330   -1.381   -6.513    0.842   -0.381    0.007    9.206    0.000
-       14    9.587   -7.330   -1.381   -6.519    0.842   -0.387    0.007    9.200    0.000
+        9    6.552   -9.801   -3.234   -6.223    0.825    0.375   -0.000    6.926    0.000
+       10    6.552   -9.801   -3.234   -6.223    0.825    0.375   -0.000    6.926    0.000
+       11    6.622   -7.157   -2.258   -6.631    0.828   -1.342   -0.002    5.280    0.000
+       12    9.587   -7.330   -1.381   -6.516    0.842   -0.384    0.007    9.203    0.000
+       13    9.587   -7.330   -1.381   -6.516    0.842   -0.384    0.007    9.203    0.000
+       14    9.587   -7.330   -1.381   -6.516    0.842   -0.384    0.007    9.203    0.000
 ...
 
 
@@ -1870,21 +1846,21 @@ data: !Tabular |
 
  === QP gaps and band edges taking into account Sigma_nk corrections for 1 k-points ===
  Direct band gap semiconductor
- Fundamental gap:     2.600 (eV)
-   VBM:    -1.301 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     2.598 (eV)
+   VBM:    -1.299 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     1.299 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- Direct gap:         2.600 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.598 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Checking for convergence at iteration: 5
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
-    max(abs(E_i - E_{i-1})):  6.81381E+00 (meV) for band: 14
+    max(abs(E_i - E_{i-1})):  6.75960E+00 (meV) for band: 13
 
  === QP gaps at iteration: 5 (Fermi energy set to zero) ===
  Direct band gap semiconductor
- Fundamental gap:     2.600 (eV)
-   VBM:    -1.301 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     2.598 (eV)
+   VBM:    -1.299 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     1.299 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- Direct gap:         2.600 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.598 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  EGEW self-consistent loop:
  Convergence achieved at iteration: 5 with gwr_tolqpe:   20.000 (meV)
@@ -2014,10 +1990,50 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
  cutoff-mode = AUXILIARY_FUNCTION
  Using KS orbitals and KS energies...
 
+================================================================================
+ QP results (energies in eV)
+ Notations:
+     E0: Kohn-Sham energy
+     <VxcDFT>: Matrix elements of Vxc[n_val] without non-linear core correction (if any)
+     SigX: Matrix elements of Sigma_x
+     SigC(E0): Matrix elements of Sigma_c at E0
+     Z: Renormalization factor
+     E-E0: Difference between the QP and the KS energy.
+     E-Eprev: Difference between QP energy at iteration i and i-1
+     E: Quasi-particle energy
+     Occ(E): Occupancy of QP state
+ 
+ 
+
+--- !GWR_SelfEnergy_ee
+iteration_state: {dtset: 5, }
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+gwr_scf_iteration: 1
+gwr_task   : G0V
+KS_gap     :    2.271
+data: !Tabular |
+     Band       E0     SigX   Occ(E)
+        1  -12.956  -16.451    2.000
+        2   -1.136  -16.769    2.000
+        3   -1.136  -16.769    2.000
+        4   -1.136  -16.769    2.000
+        5    1.136   -3.235    0.000
+        6    1.136   -3.235    0.000
+        7    1.136   -3.235    0.000
+        8    2.931   -3.480    0.000
+        9    6.552   -3.234    0.000
+       10    6.552   -3.234    0.000
+       11    6.622   -2.258    0.000
+       12    9.587   -1.381    0.000
+       13    9.587   -1.381    0.000
+       14    9.587   -1.381    0.000
+...
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
 -          iomode           1
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
@@ -2212,7 +2228,30 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] The Abinit project: Impact, environment and recent developments.
+- [1] Abinit 2025: New Capabilities for the Predictive Modeling of Solids and Nanomaterials.
+- J. Chem. Phys. 163, 164126 (2025).
+- M.J. Verstraete, J. Abreu, G. Allemand, B. Amadon, G. Antonius,
+- M. Azizi, L. Baguet, C. Barat, L. Bastogne, R. Bejaud, J.-M. Beuken,
+- J. Bieder, A. Blanchet, F. Bottin, J. Bouchet, J. Bouquiaux, E. Bousquet,
+- J. Boust, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval,
+- A. Castellano, E. Castiel, J.-B. Charraud, J. Clerouin, M. Cote, C. Duval,
+- A. Gallo, F. Gendron, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras,
+- F. Gomez-Ortiz, X. Gonze, F. Goudreault, A. Gruneis, R. Gupta, B. Guster,
+- D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
+- I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
+- Comment: the sixth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#verstraete2025
+-
+- [2] Optimized norm-conserving Vanderbilt pseudopotentials.
+- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
+- Comment: Some pseudopotential generated using the ONCVPSP code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
+-
+- [3] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -2224,34 +2263,31 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] Optimized norm-conserving Vanderbilt pseudopotentials.
-- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
-- Comment: Some pseudopotential generated using the ONCVPSP code were used.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
--
-- [3] ABINIT: Overview, and focus on selected capabilities
-- J. Chem. Phys. 152, 124102 (2020).
-- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
-- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
-- G.Brunin, D.Caliste, M.Cote,
-- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
-- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
-- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
-- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
-- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- [4] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
-- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- is available at
+-  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [4] Recent developments in the ABINIT software package.
+- [5] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -2264,30 +2300,16 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- And optionally:
--
-- [5] ABINIT: First-principles approach of materials and nanosystem properties.
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
-- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
-- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
-- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
-- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
-- The licence allows the authors to put it on the Web.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
--
-- Proc.   0 individual time (sec): cpu=          4.3  wall=          4.4
+- Proc.   0 individual time (sec): cpu=          4.5  wall=          4.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.3  wall=          4.4
++Overall time at end (sec) : cpu=          4.5  wall=          4.6
