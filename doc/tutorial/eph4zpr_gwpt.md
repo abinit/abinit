@@ -361,7 +361,7 @@ mpirun -n 4 abinit teph4zpr_gwpt_7.abi > teph4zpr_7.log 2> err &
 
 !!! tip
 
-    Feel free to use more MPI processes here as GWPT are expensive.
+    Feel free to use more MPI processes here as GWPT calculations are expensive.
     The code will do its best to efficiently distribute the workload for the given number of MPI processes.
     If finer control is needed, please consult the documentation of [[gwpt_np_wpqbks]].
 
