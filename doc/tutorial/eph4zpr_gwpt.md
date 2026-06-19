@@ -342,7 +342,7 @@ data: !SigmaeeData |
 
 For the meaning of the different columns, please consult the [GWR1 tutorial](../tutorial/gwr1.md).
 The experimental gap of MgO is 7.67 eV.
-A well converged G0W0 calculation should give 7.25 eV while our calculation gives 6.528.
+A well converged G0W0 calculation should give 7.25 eV while our calculation gives 6.528 eV.
 
 At this stage, one should perform convergence studies for [[nband]], [[ecuteps]], [[ecutsigx]],
 and [[ngkpt]] to ensure that the GW results are reasonably well converged.
