@@ -46,8 +46,8 @@
  #eph_np_pqbks1 1 2 1 1 1  # q-point
  #eph_np_pqbks1 2 2 1 2 1  # k-point
 
- eph_stern 1              # Activate Sterheimer to compute contribution given by states above nband
- #eph_stern 0              # No Sterheimer
+ eph_stern 1              # Activate Sternheimer to compute contribution given by states above nband
+ #eph_stern 0              # No Sternheimer
 
  tmesh 300 100 1          # Temperature mesh.
 
