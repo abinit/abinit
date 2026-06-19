@@ -534,7 +534,7 @@ used in the previous section, the number of empty states ($n'$ index) and the di
 In order to perform convergence studies, one should go back to the previous step, increase the relevant parameters
 and monitor how the ZPR is affected by these settings.
 Let us stress again that the calculations in this tutorial are **severely underconverged** and there are several theoretical and
-technical and aspect that are still under investigation.
+technical aspects that are still under investigation.
 
 After this preamble, let us start the calculation by issuing:
 
