@@ -20,6 +20,8 @@ You need to run on a server-grade GPU such as those usually found in computing c
 You are supposed to know already some basics of ABINIT.
 Some useful references: [[cite:Levitt2015]], [[cite:Bottin2008]], [[cite:Knyazev2001]]
 
+If you are interested in details of the GPU implementation and its performance, please refer to [[cite:Lygatsika2026]].
+
 [TUTORIAL_README]
 
 ## Introduction
