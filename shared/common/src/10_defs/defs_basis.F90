@@ -501,6 +501,10 @@ module defs_basis
  type coeff2c_type
   complex(dp), allocatable :: value(:,:)
  end type coeff2c_type
+!A small datatype for ragged real 5D-arrays
+ type coeff5c_type
+  complex(dp), allocatable :: value(:,:,:,:,:)
+ end type coeff5c_type
 !A small datatype for ragged real 3D-arrays
  type coeff3_type
   real(dp), allocatable :: value(:,:,:)

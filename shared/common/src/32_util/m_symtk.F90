@@ -923,9 +923,7 @@ end subroutine symrelrot
 !!   modulo a reciprocal lattice vector (in principle, see below).
 !!
 !! NOTES
-!! The condition is:
-!!
-!!    $q =  O S(q) - G$
+!! The condition is: $q =  O S(q) - G$
 !!
 !! with O being either the identity or the time reversal symmetry (= inversion in reciprocal space)
 !! and G being a primitive vector of the reciprocal lattice.

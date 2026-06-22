@@ -222,7 +222,7 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
  kpt = Wfd%kibz(:,ik_ibz)
  !
  !----Initialize the Bsym structure for this k-point and spin----!
- ! * NOTE that all the degenerate states should be included! No check is done.
+ ! NOTE that all the degenerate states should be included! No check is done.
 
  ene_k => ebands%eig(first_band:,ik_ibz,spin) ! Select a slice of eigenvalues
 

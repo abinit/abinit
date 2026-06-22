@@ -209,6 +209,7 @@ subroutine gstore_convert(gstore_path, dtset, dtfil, cryst, ebands, ifc, comm)
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
+   associate (gqk => gstore%gqk(my_is))
 
    ! Buffer for the e-ph matrix elements rotated to the Cartesian atomic-displacement basis.
    ABI_MALLOC(g_cart, (nmodes, gqk%nb_kq, gqk%nb_k))
