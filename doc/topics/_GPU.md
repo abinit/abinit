@@ -18,7 +18,7 @@ Unless stated otherwise, this page only covers the OpenMP GPU Offload implementa
 
 The following use cases are supported when using [[gpu_option]]=`GPU_OPENMP`:
 
-- Basic Ground-State calculations, with ChebFI or LOBPCG as SCF solvers ([[wfoptalg]]={111,114}), including LDA, GGA, meta-GGA and hybrid functionals
+- Basic Ground-State calculations, with ChebFI or LOBPCG as SCF solvers ([[wfoptalg]]={111,114}, described in [[cite:Lygatsika2026]]), including LDA, GGA, meta-GGA and hybrid functionals
 
 - Response Function calculations (DFPT), with respect to atom displacement, electric fields and strain perturbation ([[rfphon]], [[rfelfd]] and [[rfstrs]], along [[rfddk]])
 
