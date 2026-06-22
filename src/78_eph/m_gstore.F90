@@ -4295,7 +4295,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
  ! Reconstruct matrix elements by symmetry.
  if (dtset%gstore_kzone == "bz" .and. dtset%gstore_qzone == "bz" .and. dtset%gstore_use_lgk /= 0 &
      .and. dtset%userie == 789) then
-   call gstore_symmetrize(gstore%path, wfk0_path, dtset, dtfil, cryst, ebands, ifc, comm)
+   call gstore_symmetrize(gstore%path, wfk0_path, ngfft, dtset, dtfil, cryst, psps, pawtab, ebands, ifc, comm)
  end if
 
  ! Output some of the results to ab_out for testing purposes
@@ -6620,12 +6620,14 @@ end function gstore_nc_has_iv1p_comm
 !!
 !! SOURCE
 
-subroutine gstore_read_gtype(path, gtype, comm)
+subroutine gstore_read_gtype(path, gtype, comm, &
+                             brange_k_spin) ! optional
 
 !Arguments ------------------------------------
  character(len=*), intent(in) :: path
  character(len=abi_slen), intent(out) :: gtype
  integer, intent(in) :: comm
+ integer,optional,intent(out) :: brange_k_spin(:,:)
 
 !Local variables-------------------------------
  integer, parameter :: master = 0
@@ -6642,10 +6644,23 @@ subroutine gstore_read_gtype(path, gtype, comm)
      NCF_CHECK(nf90_get_var(ncid, varid, gtype))
      call replace_ch0(gtype)
    end if
+   if (present(brange_k_spin)) then
+     NCF_CHECK(nf90_get_var(ncid, vid("brange_k_spin"), brange_k_spin))
+   end if
    NCF_CHECK(nf90_close(ncid))
  end if
 
- if (nproc > 1) call xmpi_bcast(gtype, master, comm, ierr)
+ if (nproc > 1) then
+   call xmpi_bcast(gtype, master, comm, ierr)
+   if (present(brange_k_spin)) call xmpi_bcast(brange_k_spin, master, comm, ierr)
+ end if
+
+ contains
+
+integer function vid(var_name)
+  character(len=*),intent(in) :: var_name
+  vid = nctk_idname(ncid, var_name)
+end function vid
 
 end subroutine gstore_read_gtype
 !!***
@@ -6664,17 +6679,20 @@ end subroutine gstore_read_gtype
 !!
 !! SOURCE
 
-subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands, ifc, comm)
+subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, psps, pawtab, ebands, ifc, comm)
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: gstore_path
  character(len=*),intent(in) :: wfk_path
+ integer,intent(in) :: ngfft(18)
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
  class(crystal_t),target,intent(in) :: cryst
  class(ebands_t),target,intent(in) :: ebands
  class(ifc_type),target,intent(in) :: ifc
+ type(pseudopotential_type),intent(in) :: psps
+ type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  integer,intent(in) :: comm
 
 !Local variables-------------------------------
@@ -6692,10 +6710,11 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands,
  character(len=5000) :: msg
  type(wfd_t) :: wfd
  type(gstore_t) :: gstore
- !type(dmats_t) :: dmats
+ type(dmats_t) :: dmats
 !arrays
  real(dp) :: qpt(3), kk_bz(3), kk_ibz(3), qq_ibz(3)
  real(dp),allocatable :: gwork_q(:,:,:,:,:) !, slice_bb(:,:,:)
+ integer :: brange_k_spin(2, dtset%nsppol)
  integer,allocatable :: my_kqmap(:,:), kmesh_map(:,:)
  ! TODO: Add arrays to hold precomputed U and D matrices
  !complex(dp),allocatable :: dmn_ksym(:,:,:,:,:)
@@ -6708,15 +6727,13 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands,
  call wrtout(units, sjoin(" GSTORE file: ", gstore_path))
  call wrtout(units, sjoin(" WFK file: ", wfk_path))
 
+ call gstore_read_gtype(gstore_path, gtype, comm, brange_k_spin=brange_k_spin)
+
  ! TODO:
  ! Compute the mixing matrices D^{k}(S) from the states stored in wfd_t.
- !call dmats%init(wfk_path, wfk_path, dtset, dtfil, cryst, ebands, brange_spin, ngfft, pawtab, psps, comm)
- !dmats%entry_spin(spin)%cmat(:,:,isym, itimrev, ik_ibz)
- !call dmats%free()
-
+ call dmats%init(wfk_path, dtset, dtfil, cryst, brange_k_spin, ngfft, pawtab, psps, comm)
  if (my_rank /= 0) goto 100
 
- call gstore_read_gtype(gstore_path, gtype, xmpi_comm_self)
  gvals_name = "gvals"
  ! TODO: Remember to handle GWPT STORE
  !if (gtype == "gwpt" .and. dtset%gstore_gname == "gvals_ks") gvals_name = "gvals_ks"
@@ -6753,19 +6770,6 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands,
 
    ! Get the group id for this spin
    NCF_CHECK(nf90_inq_ncid(ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
-
-   ! Initialize D matrices with identity.
-   !ABI_CALLOC(dmn_ksym, (nb, nb, nkbz, nsym, 2))
-   !do itim=1,2
-   !  do isym=1,nsym
-   !    do ik_bz=1,nkbz
-   !      do ib=1,nb
-   !        dmn_ksym(ib, ib, ik_bz, isym, itim) = cone
-   !      end do
-   !    end do
-   !  end do
-   !end do
-   !ABI_FREE(dmn_ksym)
 
    ! Loop over q-points in the BZ.
    do my_iq=1, gqk%my_nq
@@ -6817,6 +6821,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands,
        !do nu=1,gqk%natom3
        !end do
        ! Write the newly computed g_{mn, nu} array back to the netcdf file (in-place modification).
+       !dmats%entry_spin(spin)%cmat(:,:,isym, timrev, ik_ibz)
      end do ! my_ik
 
      ABI_FREE(my_kqmap)
@@ -6828,6 +6833,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, dtset, dtfil, cryst, ebands,
  call gstore%free()
 
  100 call xmpi_barrier(comm)
+ call dmats%free()
  call wrtout(units, " Symmetrization completed successfully.")
 
 contains
@@ -6858,9 +6864,11 @@ end subroutine gstore_symmetrize
 !!
 !! SOURCE
 
-subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, ks_ebands, brange_spin, ngfft, pawtab, psps, comm)
+subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, pawtab, psps, comm)
 
- use m_symtk,  only : littlegroup_q
+ use m_symtk,   only : littlegroup_q
+ use m_common,  only : ebands_from_file
+ use m_fftcore, only : sphere
 
 !Arguments ------------------------------------
 !scalars
@@ -6869,8 +6877,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, ks_ebands, brange_sp
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
  class(crystal_t),intent(in) :: cryst
- class(ebands_t),intent(in) :: ks_ebands
- integer,intent(in) :: brange_spin(2, ks_ebands%nsppol), ngfft(18)
+ integer,intent(in) :: brange_spin(2, dtset%nsppol), ngfft(18)
  integer,intent(in) :: comm
  type(pseudopotential_type),intent(in) :: psps
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
@@ -6882,19 +6889,25 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, ks_ebands, brange_sp
  integer :: ib1, ib2, band1, band2, n1, n2, n3, n4, n5, n6, nfft, nspinor, mpw, ii, ipw
  real(dp),parameter :: xnorm1 = one
  real(dp) :: e_b1, e_b2
+ type(ebands_t) :: ks_ebands
  type(wfd_t) :: wfd
+ type(hdr_type) :: hdr
 !arrays
- integer :: symtab(4,2,cryst%nsym), g0(3), gmax(3), work_ngfft(18)
+ integer :: symtab(4,2,cryst%nsym), g0(3), gmax(3), work_ngfft(18), shiftg(3), symrec1(3,3)
  integer,allocatable :: nband(:,:), wfd_istwfk(:)
- real(dp) :: kk_ibz(3), kk_bz(3)
- real(dp),allocatable :: ug1_box(:), ug2_box(:), cg1_work(:,:), cg2_work(:,:)
+ real(dp) :: kk_ibz(3), kk_bz(3), dot(2)
+ real(dp),allocatable :: ug1_box(:,:), ug2_box(:,:), cg_ib(:,:,:)
  complex(dp) :: ctmp
  complex(dp),allocatable :: cmat(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
 !----------------------------------------------------------------------
 
+ ks_ebands = ebands_from_file(wfk_path, comm)
  nsppol = ks_ebands%nsppol; nsym = cryst%nsym; nkibz = ks_ebands%nkpt
  mband = maxval(brange_spin(2, :))
+
+ ABI_CHECK_IEQ(dtset%usepaw, 0, "PAW is not coded")
+ ABI_CHECK_IEQ(dtset%nspinor, 1, "nspinor 2 not coded")
 
  ! Initialize the wave function descriptor.
  ! Only wavefunctions for the symmetrical image of the k/k+q wavevectors treated by this MPI rank are stored.
@@ -6925,7 +6938,9 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, ks_ebands, brange_sp
  ABI_FREE(bks_mask)
 
  ! Read wavefunctions.
- call wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))
+ call wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path), out_hdr=hdr)
+ call hdr%vs_dtset(dtset)
+ ABI_CHECK(abs(dtset%ecut - hdr%ecut) < tol6, "input ecut should be equal to the value used in the WFK file.")
 
  ! Compute max |G_i|.
  gmax = 0
@@ -6952,15 +6967,13 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, ks_ebands, brange_sp
  nfft = n1 * n2 * n3; mpw = maxval(wfd%npwarr)
  nspinor = wfd%nspinor
 
- ABI_MALLOC(ug1_box, (nfft * nspinor))
- ABI_MALLOC(ug2_box, (nfft * nspinor))
- ABI_MALLOC(cg1_work, (2, mpw*nspinor))
- ABI_MALLOC(cg2_work, (2, mpw*nspinor))
+ ABI_MALLOC(ug1_box, (2, nfft * nspinor))
+ ABI_MALLOC(ug2_box, (2, nfft * nspinor))
 
  ! Allocate D-matrices.
  ABI_MALLOC(dmats%entry_spin, (nsppol))
  do spin=1,nsppol
-   nb = brange_spin(2,spin) - brange_spin(2,spin) + 1
+   nb = brange_spin(2,spin) - brange_spin(1,spin) + 1
    ABI_CALLOC(dmats%entry_spin(spin)%value, (nb, nb, nsym, 2, nkibz))
  end do
 
@@ -6971,12 +6984,19 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, ks_ebands, brange_sp
 
    do ik_ibz=1,nkibz
      kk_ibz = ks_ebands%kptns(:, ik_ibz)
-     associate (npw_k => wfd%npwarr(ik_ibz), kg_k => wfd%kdata(ik_ibz)%kg_k)
+     associate (npw_k => wfd%npwarr(ik_ibz), istwf_k => wfd%kdata(ik_ibz)%istwfk, kg_k => wfd%kdata(ik_ibz)%kg_k)
 
      ! symtab(4,2,nsym)= three first numbers define the G vector;
      !     fourth number is zero if the q-vector is not preserved, 1 otherwise
      !     second index is one without time-reversal symmetry, two with time-reversal symmetry
      call littlegroup_q(cryst%nsym, kk_ibz, symtab, cryst%symrec, cryst%symafm, otimrev_k, prtvol=0)
+
+     ! Copy wavefunctions for this k-point
+     ABI_MALLOC(cg_ib, (2, npw_k*nspinor, nb))
+     do ib1=1,nb
+       band1 = ib1 + bstart - 1
+       call wfd%copy_cg(band1, ik_ibz, spin, cg_ib(:,:,ib1))
+     end do
 
      do itime=1,2
        do isym=1,cryst%nsym
@@ -6984,30 +7004,32 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, ks_ebands, brange_sp
          ! Compute cmat.
          cmat = zero
          if (symtab(4, itime, isym) == 0) then
-           ! Sk /= k
+           ! Sk /= k + G.
            do ib=1,nb
              cmat(ib, ib) = cone
            end do
          else
            ! The condition is: $q =  O S(q) - G$
            g0 = symtab(1:3, itime, isym)
-           do ib1=1,nb
-             band1 = ib1 + bstart - 1
-             e_b1 = ks_ebands%eig(band1, ik_ibz, spin)
-             call wfd%copy_cg(band1, ik_ibz, spin, cg1_work)
-             !call sphere(cg, nspinor, npw_k, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, iflag1, me_g0, shiftg, symrec, xnorm1)
+           do ib2=1,nb
+             band2 = ib2 + bstart - 1
+             e_b2 = ks_ebands%eig(band2, ik_ibz, spin)
+             symrec1 = cryst%symrec(:,:, isym) * (3-2*itime)
+             call sphere(cg_ib(:,:,ib2), nspinor, npw_k, ug2_box, n1, n2, n3, n4, n5, n6, &
+                         kg_k, istwf_k, iflag1, me_g0, [0,0,0], symrec1, xnorm1)
 
-             do ib2=1,nb
-               band2 = ib2 + bstart - 1
-               e_b2 = ks_ebands%eig(band2, ik_ibz, spin)
-               ctmp = zero
+             do ib1=1,nb
+               band1 = ib1 + bstart - 1
+               e_b1 = ks_ebands%eig(band1, ik_ibz, spin)
                ! Only if e_b1 == e_b2.
+               ctmp = zero
                if (abs(e_b2  - e_b1) <= dtset%symsigma_de)  then
-                 call wfd%copy_cg(band2, ik_ibz, spin, cg2_work)
-                 !call sphere(cg, nspinor, npw_k, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, iflag1, me_g0, shiftg, symrec, xnorm1)
+                 shiftg = 0 ! TODO
+                 call sphere(cg_ib(:,:,ib1), nspinor, npw_k, ug1_box, n1, n2, n3, n4, n5, n6, &
+                             kg_k, istwf_k, iflag1, me_g0, shiftg, identity_3d, xnorm1)
 
-                 !dot = cg_zdotc(npw_k*nspinor, x, y)
-                 !ctmp = dot(1) + j_dp * dot(2)
+                 dot = cg_zdotc(nfft * nspinor, ug1_box, ug2_box)
+                 ctmp = dot(1) + j_dpc * dot(2)
                end if
 
                cmat(ib1, ib2) = ctmp
@@ -7021,15 +7043,15 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, ks_ebands, brange_sp
      end do ! itime
 
      end associate
+     ABI_FREE(cg_ib)
    end do ! ik_ibz
    ABI_FREE(cmat)
  end do ! spin
 
  ABI_FREE(ug1_box)
  ABI_FREE(ug2_box)
- ABI_FREE(cg1_work)
- ABI_FREE(cg2_work)
- call wfd%free()
+
+ call ks_ebands%free(); call wfd%free()
 
 end subroutine dmats_init
 !!***
