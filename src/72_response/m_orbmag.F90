@@ -2497,7 +2497,8 @@ subroutine orbmag_output(self,dtset,omlamb)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '        <A0.An> : ',(self%orbmag_trace(adir,inbm),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' Lamb shielding : ',(omlamb(adir),adir=1,3)
+   write(message,'(a,3es16.8)') '    Lamb (core) : ',(omlamb(adir),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
    write(message,'(a)')ch10
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Chern vector, term-by-term breakdown : '
