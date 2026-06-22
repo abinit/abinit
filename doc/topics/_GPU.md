@@ -64,6 +64,9 @@ Some compilation flags should be enabled to take advantage of some hardware feat
 - GPU-aware MPI: allows the MPI library to access GPU buffers directly, avoiding additional data transfers between CPU and GPU
 - Unified memory (NVHPC): this flag is specific to NVHPC and is only useful on NVIDIA so-called Superchips such as GH200 or GB200 that feature unified memory
 
+Usually, it is always a good idea to enable GPU-aware MPI directives.
+As for Unified memory, it may improve performance in some cases but is currently known to be penalizing on huge systems.
+
 See the installation procedure for [enabling GPU in ABINIT](../INSTALL_gpu.md#how-to-enable-gpu-during-compilation) where those flags are documented.
 
 
