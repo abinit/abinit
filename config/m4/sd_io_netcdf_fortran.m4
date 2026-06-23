@@ -37,11 +37,12 @@ AC_DEFUN([SD_NETCDF_FORTRAN_INIT], [
   sd_netcdf_fortran_ldflags_def="$7"
   sd_netcdf_fortran_enable_def=""
 
+# Default version will be updated by config/scripts/make-macros-fbversions from config/specs/fbversion.conf
 AC_ARG_WITH([fb-netcdf-fortran-version],
   [AS_HELP_STRING([--with-fb-netcdf-fortran-version=VERSION],
     [Specify the version of netcdf to use when installed via fallback])],
   [abi_fb_netcdf_fortran_version="$withval"],
-  [abi_fb_netcdf_fortran_version="4.6.1"]
+  [abi_fb_netcdf_fortran_version="4.6.2"]
 )
 
 AC_SUBST([abi_fb_netcdf_fortran_version])
@@ -255,11 +256,11 @@ AC_DEFUN([SD_NETCDF_FORTRAN_DETECT], [
         sd_netcdf_fortran_ok="yes"
         sd_netcdf_fortran_enable="no"
         sd_netcdf_fortran_cppflags=""
-        sd_netcdf_fortran_cflags="-I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/include"
+        sd_netcdf_fortran_cflags="-I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_fc_vendor}/${abi_fc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/include"
         sd_netcdf_fortran_cxxflags=""
-        sd_netcdf_fortran_fcflags="${sd_netcdf_fortran_fcflags_def} -I${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/include"
+        sd_netcdf_fortran_fcflags="${sd_netcdf_fortran_fcflags_def} -I${ac_abs_top_builddir}/fallbacks/install_fb/${abi_fc_vendor}/${abi_fc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/include"
         sd_netcdf_fortran_ldflags=""
-        sd_netcdf_fortran_libs="-L${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/lib ${sd_netcdf_fortran_libs_def} ${sd_netcdf_fortran_libs}"
+        sd_netcdf_fortran_libs="-L${ac_abs_top_builddir}/fallbacks/install_fb/${abi_fc_vendor}/${abi_fc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/lib ${sd_netcdf_fortran_libs_def} ${sd_netcdf_fortran_libs}"
       if test "${sd_netcdf_fortran_status}" = "optional" -a \
               "${sd_netcdf_fortran_init}" = "def"; then
 	sd_netcdf_fortran_init='fb'
