@@ -1,6 +1,6 @@
 
-.Version 10.9.0 of ABINIT. v10.8.1 released May 2026.
-.(MPI version, prepared for a x86_64_Linux_IntelLLVM_2026.0.0 computer) 
+.Version 10.9.0.1 of ABINIT. v10.8.1 released May 2026.
+.(MPI version, prepared for a x86_64_linux_intel2026.0 computer) 
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 30 May 2026.
-- ( at 10h24 )
+.Starting date : Mon 22 Jun 2026.
+- ( at 15h55 )
   
-- input  file    -> /home/jzwanzig/local/abinit-develop/tmp-intel/tests/Test_suite/v9_t142/t142.abi
+- input  file    -> /home/jzwanzig/local/abinit-develop/tmp-intel-llvm/tests/Test_suite/v9_t142/t142.abi
 - output file    -> t142.abo
 - root for input  files -> t142i
 - root for output files -> t142o
@@ -67,16 +67,16 @@ _ WF disk file :      0.588 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  3 , fftalg0 =112 , wfoptalg0 = 10
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file
--  max_nthreads =    1
+-  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      1.0300896971E+01  1.0300896971E+01  1.0300896971E+01 Bohr
               amu      3.09737620E+01  2.69815390E+01
              ecut      5.00000000E+00 Hartree
--          fftalg         112
+-          fftalg         512
            getwfk1          0
            getwfk2         -1
              iscf1         17
@@ -199,7 +199,7 @@ P          mk1mem          32
  
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
  
 
 --- !DatasetInfo
@@ -290,13 +290,13 @@ tolerances: {tolvrs: 1.00E-18, }
  
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
  ETOT  1  -8.7885319693499    -8.789E+00 4.023E-02 8.824E-01 0.000E+00 0.000E+00
- ETOT  2  -8.7995960492666    -1.106E-02 9.674E-05 1.402E-01 0.000E+00 0.000E+00
- ETOT  3  -8.7986861218449     9.099E-04 6.266E-06 6.576E-03 0.000E+00 0.000E+00
- ETOT  4  -8.7988042825134    -1.182E-04 6.951E-08 6.592E-04 0.000E+00 0.000E+00
- ETOT  5  -8.7988412447884    -3.696E-05 1.626E-08 4.905E-05 0.000E+00 0.000E+00
- ETOT  6  -8.7988453665850    -4.122E-06 8.878E-10 2.374E-06 0.000E+00 0.000E+00
- ETOT  7  -8.7988455572349    -1.906E-07 4.092E-10 4.867E-08 0.000E+00 0.000E+00
- ETOT  8  -8.7988455588942    -1.659E-09 2.516E-11 1.023E-08 0.000E+00 0.000E+00
+ ETOT  2  -8.7995960492720    -1.106E-02 9.674E-05 1.402E-01 0.000E+00 0.000E+00
+ ETOT  3  -8.7986861219631     9.099E-04 6.266E-06 6.576E-03 0.000E+00 0.000E+00
+ ETOT  4  -8.7988042825320    -1.182E-04 6.951E-08 6.592E-04 0.000E+00 0.000E+00
+ ETOT  5  -8.7988412447868    -3.696E-05 1.626E-08 4.905E-05 0.000E+00 0.000E+00
+ ETOT  6  -8.7988453665849    -4.122E-06 8.878E-10 2.374E-06 0.000E+00 0.000E+00
+ ETOT  7  -8.7988455572348    -1.906E-07 4.092E-10 4.867E-08 0.000E+00 0.000E+00
+ ETOT  8  -8.7988455588941    -1.659E-09 2.516E-11 1.023E-08 0.000E+00 0.000E+00
  ETOT  9  -8.7988455595754    -6.813E-10 4.241E-12 1.707E-09 0.000E+00 0.000E+00
  ETOT 10  -8.7988455596860    -1.106E-10 1.117E-13 2.978E-10 0.000E+00 0.000E+00
  
@@ -343,8 +343,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.546065124775014
- Compensation charge over fine fft grid    =     -0.545952688288083
+ Compensation charge over spherical meshes =     -0.546065124780829
+ Compensation charge over fine fft grid    =     -0.545952688288549
  
  ==== Results concerning PAW augmentation regions ====
  
@@ -510,7 +510,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  
  ----iterations are completed or convergence reached----
  
- Mean square residual over all n,k,spin=   41.829E-15; max=  11.166E-14
+ Mean square residual over all n,k,spin=   41.830E-15; max=  11.166E-14
  reduced coordinates (array xred) for    2 atoms
        0.250000000000      0.250000000000      0.250000000000
        0.000000000000      0.000000000000      0.000000000000
@@ -538,45 +538,45 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.59033324518687E+00
-hartree             :  9.18229958667496E-01
-xc                  : -3.11568102160311E+00
+kinetic             :  3.59033324517901E+00
+hartree             :  9.18229958665544E-01
+xc                  : -3.11568102160526E+00
 Ewald energy        : -8.73435537339883E+00
 psp_core            : -9.73433600340450E-02
-local_psp           : -3.09233785644703E+00
-PAW spherical_terms :  1.73230162170755E+00
-nucl. magn. dipoles : -9.84953966072190E-09
-total_energy        : -8.79885279577064E+00
-total_energy_eV     : -2.39428981947245E+02
+local_psp           : -3.09233785645555E+00
+PAW spherical_terms :  1.73230162172550E+00
+nucl. magn. dipoles : -9.84953966078266E-09
+total_energy        : -8.79885279577317E+00
+total_energy_eV     : -2.39428981947314E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  3.04637607278241E-01
+band_energy         :  3.04637607279188E-01
 Ewald energy        : -8.73435537339883E+00
 psp_core            : -9.73433600340450E-02
-xc_dc               : -3.52446345072899E-01
-PAW spherical_terms :  8.06619115415480E-02
-total_energy_dc     : -8.79884555968598E+00
-total_energy_dc_eV  : -2.39428785043350E+02
+xc_dc               : -3.52446345070389E-01
+PAW spherical_terms :  8.06619115380727E-02
+total_energy_dc     : -8.79884555968600E+00
+total_energy_dc_eV  : -2.39428785043351E+02
 ...
 
 
 --- !EnergyTermsWithPAWCore
 iteration_state     : {dtset: 1, }
 comment             : 'Components of total free energy, including PAW core contributions'
-Total energy        : -5.84948614358853E+02
+Total energy        : -5.84948614358855E+02
 Total energy DC     : -5.84948607122768E+02
-Total energy (eV)   : -1.59172626793701E+04
+Total energy (eV)   : -1.59172626793702E+04
 Total energy DC (eV): -1.59172624824662E+04
 ...
 
  
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
  
 
 --- !DatasetInfo
@@ -686,14 +686,14 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
  
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -9.7149352337108     -9.715E+00 1.129E-02 0.000E+00
- ETOT  2  -9.7175790566080     -2.644E-03 6.706E-06 0.000E+00
- ETOT  3  -9.7175808276556     -1.771E-06 5.966E-09 0.000E+00
- ETOT  4  -9.7175808298913     -2.236E-09 5.156E-12 0.000E+00
- ETOT  5  -9.7175808298944     -3.064E-12 9.513E-15 0.000E+00
- ETOT  6  -9.7175808298944     -3.553E-15 9.544E-18 0.000E+00
- ETOT  7  -9.7175808298944      3.553E-15 1.845E-20 0.000E+00
- ETOT  8  -9.7175808298944     -3.553E-15 8.807E-21 0.000E+00
+-ETOT  1  -9.7149352336905     -9.715E+00 1.129E-02 0.000E+00
+ ETOT  2  -9.7175790565878     -2.644E-03 6.706E-06 0.000E+00
+ ETOT  3  -9.7175808276353     -1.771E-06 5.966E-09 0.000E+00
+ ETOT  4  -9.7175808298710     -2.236E-09 5.156E-12 0.000E+00
+ ETOT  5  -9.7175808298741     -3.064E-12 9.513E-15 0.000E+00
+ ETOT  6  -9.7175808298741      1.421E-14 9.544E-18 0.000E+00
+ ETOT  7  -9.7175808298741     -3.553E-15 1.845E-20 0.000E+00
+ ETOT  8  -9.7175808298741      0.000E+00 8.807E-21 0.000E+00
  
  At SCF step    8   max residual=  8.81E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -729,7 +729,7 @@ tolerances: {tolwfr: 1.00E-20, }
  11 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -5.45021012E-02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.9717580830E+01 Ha. Also 2DEtotal=   -0.264428845339E+03 eV
+ 2DEtotal=   -0.9717580830E+01 Ha. Also 2DEtotal=   -0.264428845338E+03 eV
     (  non-var. 2DEtotal :   -9.7175808280E+00 Ha)
  
 --------------------------------------------------------------------------------
@@ -752,14 +752,14 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
  
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -9.7149343519390     -9.715E+00 1.129E-02 0.000E+00
- ETOT  2  -9.7175781723344     -2.644E-03 6.706E-06 0.000E+00
- ETOT  3  -9.7175799433797     -1.771E-06 5.967E-09 0.000E+00
- ETOT  4  -9.7175799456154     -2.236E-09 5.162E-12 0.000E+00
- ETOT  5  -9.7175799456185     -3.050E-12 9.520E-15 0.000E+00
- ETOT  6  -9.7175799456185     -2.665E-14 9.559E-18 0.000E+00
- ETOT  7  -9.7175799456185      3.553E-15 1.848E-20 0.000E+00
- ETOT  8  -9.7175799456185     -7.105E-15 8.807E-21 0.000E+00
+-ETOT  1  -9.7149343519683     -9.715E+00 1.129E-02 0.000E+00
+ ETOT  2  -9.7175781723639     -2.644E-03 6.706E-06 0.000E+00
+ ETOT  3  -9.7175799434092     -1.771E-06 5.967E-09 0.000E+00
+ ETOT  4  -9.7175799456448     -2.236E-09 5.162E-12 0.000E+00
+ ETOT  5  -9.7175799456479     -3.071E-12 9.520E-15 0.000E+00
+ ETOT  6  -9.7175799456479     -1.421E-14 9.559E-18 0.000E+00
+ ETOT  7  -9.7175799456479     -7.105E-15 1.848E-20 0.000E+00
+ ETOT  8  -9.7175799456479      3.553E-15 8.807E-21 0.000E+00
  
  At SCF step    8   max residual=  8.81E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -795,7 +795,7 @@ tolerances: {tolwfr: 1.00E-20, }
  11 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -5.45021005E-02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.9717579946E+01 Ha. Also 2DEtotal=   -0.264428821276E+03 eV
+ 2DEtotal=   -0.9717579946E+01 Ha. Also 2DEtotal=   -0.264428821277E+03 eV
     (  non-var. 2DEtotal :   -9.7175799493E+00 Ha)
  
 --------------------------------------------------------------------------------
@@ -818,14 +818,14 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
  
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -9.7149331432271     -9.715E+00 1.130E-02 0.000E+00
- ETOT  2  -9.7175769591420     -2.644E-03 6.705E-06 0.000E+00
- ETOT  3  -9.7175787301836     -1.771E-06 5.968E-09 0.000E+00
- ETOT  4  -9.7175787324193     -2.236E-09 5.169E-12 0.000E+00
- ETOT  5  -9.7175787324224     -3.054E-12 9.531E-15 0.000E+00
- ETOT  6  -9.7175787324224     -4.086E-14 9.582E-18 0.000E+00
- ETOT  7  -9.7175787324224      1.776E-15 1.852E-20 0.000E+00
- ETOT  8  -9.7175787324224      1.776E-15 8.807E-21 0.000E+00
+-ETOT  1  -9.7149331432321     -9.715E+00 1.130E-02 0.000E+00
+ ETOT  2  -9.7175769591471     -2.644E-03 6.705E-06 0.000E+00
+ ETOT  3  -9.7175787301887     -1.771E-06 5.968E-09 0.000E+00
+ ETOT  4  -9.7175787324244     -2.236E-09 5.169E-12 0.000E+00
+ ETOT  5  -9.7175787324275     -3.073E-12 9.531E-15 0.000E+00
+ ETOT  6  -9.7175787324275      1.243E-14 9.582E-18 0.000E+00
+ ETOT  7  -9.7175787324275      7.105E-15 1.852E-20 0.000E+00
+ ETOT  8  -9.7175787324275     -3.553E-15 8.807E-21 0.000E+00
  
  At SCF step    8   max residual=  8.81E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -862,32 +862,33 @@ tolerances: {tolwfr: 1.00E-20, }
  eovl1 =  -5.45020988E-02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
  2DEtotal=   -0.9717578732E+01 Ha. Also 2DEtotal=   -0.264428788264E+03 eV
-    (  non-var. 2DEtotal :   -9.7175787437E+00 Ha)
+    (  non-var. 2DEtotal :   -9.7175787438E+00 Ha)
  
 ====================================================
  
  Orbital magnetic moment computed with DFPT derivative wavefunctions 
  
  Orbital magnetic moment, Cartesian directions :
- -3.19787959E-04  1.88594521E-10  9.47174078E-10
+ -3.19787387E-04  4.19885791E-10  1.67536949E-10
  
  
  Chern vector, Cartesian directions :
-  4.56641271E-06  3.60957646E-11 -3.72935496E-11
+  4.56644945E-06  7.25266566E-11 -7.36796433E-11
  
  
  Orbital magnetic moment, term-by-term breakdown :
-      rho(1) CC :   2.80717167E-04 -6.86157901E-10  1.22170964E-09
-     rho(1) VV1 :  -6.95506615E-06  5.23534964E-12 -4.89149627E-12
-     rho(1) VV2 :  -1.26051154E-09 -1.43738268E-13  1.59676403E-12
-      rho(0) NL :   1.79311665E-04  9.30343517E-10 -3.35309872E-10
-          <L_R> :  -3.66852715E-06 -6.06632085E-11  6.40764615E-11
-        <A0.An> :  -2.43193706E-06 -1.94972616E-14 -7.42107029E-15
+      rho(1) CC :   2.80718108E-04 -3.71413676E-10  2.81096649E-10
+     rho(1) VV1 :  -6.95506620E-06  5.20372557E-12 -4.87258706E-12
+     rho(1) VV2 :  -1.25969011E-09  5.75985129E-13  5.64155992E-13
+      rho(0) NL :   1.79311329E-04  8.31714855E-10 -1.67954777E-10
+          <L_R> :  -3.66856036E-06 -4.61750652E-11  5.87110374E-11
+        <A0.An> :  -2.43193705E-06 -2.00338232E-14 -7.52896765E-15
+    Lamb (core) :  -7.66760000E-04  0.00000000E+00  0.00000000E+00
  
  
  Chern vector, term-by-term breakdown :
-       Chern CC :   4.39312202E-06  3.45117763E-11 -3.67886638E-11
-      Chern VV1 :   1.73290690E-07  1.58398832E-12 -5.04885780E-13
+       Chern CC :   4.39315879E-06  7.09201637E-11 -7.32062080E-11
+      Chern VV1 :   1.73290661E-07  1.60649291E-12 -4.73435239E-13
  
 ====================================================
  
@@ -909,7 +910,7 @@ tolerances: {tolwfr: 1.00E-20, }
            etotal2    -9.7175787324E+00
             fcart1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
--          fftalg         112
+-          fftalg         512
            getwfk1          0
            getwfk2         -1
              iscf1         17
@@ -1023,71 +1024,10 @@ P          mk1mem          32
  and a postprocessing based on the final acell, rprim, and xred.
  More details in the log file.
 
-- Total cpu        time (s,m,h):         15.5        0.26      0.004
-- Total wall clock time (s,m,h):         15.6        0.26      0.004
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0
--
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           15.5, wall_time =           15.6
--
-- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
--                                                                                (-1=no count)
-- fourwf%(pot)                              8.965  57.7         8.956  57.3         200456      -1.00        1.00       1.00
-- pspini                                    2.010  12.9         2.011  12.9              2      -1.00        1.00       1.00
-- dfpt_vtowfk(contrib)                      1.332   8.6         1.355   8.7             -1      -1.00        0.98       0.98
-- nonlop(apply)                             0.657   4.2         0.644   4.1          39938      -1.00        1.02       1.02
-- dfpt_cgwf-O(npw)                          0.646   4.2         0.673   4.3             -1      -1.00        0.96       0.96
-- vtowfk(contrib)                           0.429   2.8         0.436   2.8            640      -1.00        0.98       0.98
-- dfpt_nstpaw                               0.232   1.5         0.231   1.5              3      -1.00        1.01       1.01
-- projbd                                    0.199   1.3         0.187   1.2          60794      -1.00        1.07       1.07
-- fourdp                                    0.190   1.2         0.270   1.7           2538      -1.00        0.70       0.70
-- pawdenpot                                 0.180   1.2         0.180   1.2             11      -1.00        1.00       1.00
-- xc:pot/=fourdp                            0.165   1.1         0.151   1.0             62      -1.00        1.09       1.09
-- fourwf%(G->r)                             0.152   1.0         0.173   1.1           6144      -1.00        0.88       0.88
-- timing timab                              0.127   0.8         0.127   0.8             10      -1.00        1.00       1.00
-- mkffnl                                    0.125   0.8         0.147   0.9           2688      -1.00        0.85       0.85
-- dfpt_vtorho-kpt loop                      0.117   0.8         0.128   0.8             48      -1.00        0.91       0.91
-- get_dtsets_pspheads                       0.107   0.7         0.107   0.7              1      -1.00        1.00       1.00
-- getgh1c_setup                             0.100   0.6         0.109   0.7           1536      -1.00        0.91       0.91
-- dfpt_vtowfk (1)                           0.090   0.6         0.085   0.5           1536      -1.00        1.05       1.05
-- getghc(/=fourXX,nonlop,fock_XX)          -1.111  -7.2        -1.159  -7.4             -1      -1.00        0.96       0.96
-- others (198)                              0.400   2.6         0.389   2.5             -1      -1.00        1.03       1.03
--<END_TIMER>
--
-- subtotal                                 15.112  97.2        15.200  97.3                                  0.99       0.99
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          15.5, wall_time =          15.6
--
-- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
--                                                                                (-1=no count)
-- fourwf%(pot)                              8.965  57.7         8.956  57.3         200456      -1.00        1.00       1.00
-- pspini                                    2.010  12.9         2.011  12.9              2      -1.00        1.00       1.00
-- dfpt_vtowfk(contrib)                      1.332   8.6         1.355   8.7             -1      -1.00        0.98       0.98
-- nonlop(apply)                             0.657   4.2         0.644   4.1          39938      -1.00        1.02       1.02
-- dfpt_cgwf-O(npw)                          0.646   4.2         0.673   4.3             -1      -1.00        0.96       0.96
-- vtowfk(contrib)                           0.429   2.8         0.436   2.8            640      -1.00        0.98       0.98
-- dfpt_nstpaw                               0.232   1.5         0.231   1.5              3      -1.00        1.01       1.01
-- projbd                                    0.199   1.3         0.187   1.2          60794      -1.00        1.07       1.07
-- fourdp                                    0.190   1.2         0.270   1.7           2538      -1.00        0.70       0.70
-- pawdenpot                                 0.180   1.2         0.180   1.2             11      -1.00        1.00       1.00
-- xc:pot/=fourdp                            0.165   1.1         0.151   1.0             62      -1.00        1.09       1.09
-- fourwf%(G->r)                             0.152   1.0         0.173   1.1           6144      -1.00        0.88       0.88
-- timing timab                              0.127   0.8         0.127   0.8             10      -1.00        1.00       1.00
-- mkffnl                                    0.125   0.8         0.147   0.9           2688      -1.00        0.85       0.85
-- dfpt_vtorho-kpt loop                      0.117   0.8         0.128   0.8             48      -1.00        0.91       0.91
-- get_dtsets_pspheads                       0.107   0.7         0.107   0.7              1      -1.00        1.00       1.00
-- getgh1c_setup                             0.100   0.6         0.109   0.7           1536      -1.00        0.91       0.91
-- dfpt_vtowfk (1)                           0.090   0.6         0.085   0.5           1536      -1.00        1.05       1.05
-- others (199)                             -0.711  -4.6        -0.770  -4.9             -1      -1.00        0.92       0.92
--<END_TIMER>
 
-- subtotal                                 15.112  97.2        15.200  97.3                                  0.99       0.99
 
 ================================================================================
 
@@ -1104,18 +1044,12 @@ P          mk1mem          32
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Specification of an extensible and portable file format for electronic structure and crystallographic data
-- X. Gonze, C.-O. Almbladh, A. Cucca, D. Caliste, C. Freysoldt, M. Marques, V. Olevano, Y. Pouillon, M.J. Verstraete,
-- Comput. Material Science 43, 1056 (2008).
-- Comment: to be cited in case the ETSF_IO file format is used, i.e. iomode=3.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2008
--
-- [2] Orbital magnetism and chemical shielding in the projector augmented-wave formalism.
+- [1] Orbital magnetism and chemical shielding in the projector augmented-wave formalism.
 - J.W. Zwanziger, M. Torrent, and X. Gonze Phys. Rev. B 107, 165157 (2023).
 - Comment: to be cited in case the computation of orbital magnetism is used, i.e. orbmag>0.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#zwanziger2023
 -
-- [3] Projector augmented-wave approach to density-functional perturbation theory.
+- [2] Projector augmented-wave approach to density-functional perturbation theory.
 - C. Audouze, F. Jollet, M. Torrent and X. Gonze, Phys. Rev. B 73, 235101 (2006).
 - Comparison between projector augmented-wave and ultrasoft pseudopotential formalisms
 - at the density-functional perturbation theory level.
@@ -1125,18 +1059,18 @@ P          mk1mem          32
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#audouze2006,
 - and https://docs.abinit.org/theory/bibliography/#audouze2008
 -
-- [4] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
+- [3] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
 - Comment: PAW calculations. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
-- [5] Libxc: A library of exchange and correlation functionals for density functional theory.
+- [4] Libxc: A library of exchange and correlation functionals for density functional theory.
 - M.A.L. Marques, M.J.T. Oliveira, T. Burnus, Computer Physics Communications 183, 2227 (2012).
 - Comment: to be cited when LibXC is used (negative value of ixc)
 - Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#marques2012
 -
-- [6] Abinit 2025: New Capabilities for the Predictive Modeling of Solids and Nanomaterials.
+- [5] Abinit 2025: New Capabilities for the Predictive Modeling of Solids and Nanomaterials.
 - J. Chem. Phys. 163, 164126 (2025).
 - M.J. Verstraete, J. Abreu, G. Allemand, B. Amadon, G. Antonius,
 - M. Azizi, L. Baguet, C. Barat, L. Bastogne, R. Bejaud, J.-M. Beuken,
@@ -1154,7 +1088,7 @@ P          mk1mem          32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#verstraete2025
 -
-- [7] The Abinit project: Impact, environment and recent developments.
+- [6] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -1172,7 +1106,7 @@ P          mk1mem          32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [8] The Abinit project: Impact, environment and recent developments.
+- [7] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -1190,10 +1124,10 @@ P          mk1mem          32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- Proc.   0 individual time (sec): cpu=         10.2  wall=         10.4
+- Proc.   0 individual time (sec): cpu=          3.8  wall=          3.9
  
 ================================================================================
  
  Calculation completed.
-.Delivered  11 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.2  wall=         10.4
+.Delivered  11 WARNINGs and  17 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.8  wall=          3.9

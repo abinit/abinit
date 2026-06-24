@@ -307,11 +307,11 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  !Local
  !scalars
  character(len=fnlen) :: fname
- integer :: adir,bdtot_index,buff_size,choice,cpopt,dimffnl,exchn2n3d
- integer :: iat,iatom,icg,icprj,ider,idir,ierr
+ integer :: adir,bdtot_index,choice,cpopt,dimffnl,exchn2n3d
+ integer :: iat,iatom,icg,icprj,ider,idir
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,itypat,lmn2max
  integer :: me,mcgk,mcprjk,my_nspinor,nband_k,nband_me,ncid,ngfft1,ngfft2,ngfft3,ngfft4
- integer :: ngfft5,ngfft6,ngnt,nl1_option,nn,nkpg,npw_k,npwsp,nproc,nucdip_dirs,spaceComm
+ integer :: ngfft5,ngfft6,nl1_option,nn,nkpg,npw_k,npwsp,nproc,nucdip_dirs,spaceComm
  integer,parameter :: master=0
  real(dp) :: arg,ecut_eff,fermie
  logical :: has_nucdip
@@ -1177,15 +1177,13 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,cpopt,dum_dnlbra,dum_dnlket,fourwf_cplex,fourwf_option,gdir
-  integer :: iatom,ipw,ndat,nn,npwsp,sij_opt,t_atom,tim_fourwf,tim_getghc,type_calc
-  integer :: kg1,kg2,kg3,n1,n2,n3,shift1,shift2,shift3
-  real(dp) :: lams,weight_i,weight_r
-  complex(dp) :: bc,kc,nlme,ormesh_fac,ph1,ph2,ph3,prefac_b,prefac_m
+  integer :: adir,bdir,cpopt,dum_dnlbra,dum_dnlket,gdir
+  integer :: iatom,ndat,nn,npwsp,sij_opt,t_atom,tim_getghc,type_calc
+  real(dp) :: lams
+  complex(dp) :: nlme,ormesh_fac,prefac_b,prefac_m
   logical :: my_suppress_ormesh,need_ormesh
   !arrays
   real(dp) bdot(2),mdot(2)
-  real(dp),allocatable :: denpot(:,:,:),fofgout(:,:)
   real(dp),allocatable :: ghc(:,:),gsc(:,:),gvnlxc(:,:)
   real(dp),allocatable,target :: ghc_local(:,:),gsc_local(:,:),gvnlxc_local(:,:)
   real(dp),pointer :: du_dbeta(:,:),du_dgamma(:,:)
@@ -1371,7 +1369,6 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
   !scalars
   integer :: adir,bdir,choice,cpopt,dum_dnlbra,dum_dnlket,gdir,iatom
   integer :: ndat,nn,nnlout,np,npwsp,paw_opt,signs,t_atom,tim_getghc
-  real(dp) :: weight_i,weight_r
   complex(dp) :: bdotc,bpdotc,gdotc,gpdotc,nlme,prefac_b,prefac_m
   logical :: my_suppress_ormesh,need_ormesh
   !arrays
@@ -1582,7 +1579,7 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_
   !scalars
   integer :: adir,berryopt,cplex,iband,ipert,jband,ndat,npwsp
   integer :: optlocal,optnl,opt_gvnlx1,sij_opt,tim_getgh1c,usevnl
-  real(dp) :: corrfac,deltae,deltapert,doti,dotr,pertr,perti,pertsize
+  real(dp) :: corrfac,deltae,pertr,perti,pertsize
   type(rf_hamiltonian_type) :: rf_hamk
   !arrays
   real(dp) :: hij(2),lambda(1),sij(2)
@@ -1646,6 +1643,7 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_
       dcg1=zero
       do jband = 1, nband_k
         if (jband .EQ. iband) cycle
+        if(abs(occ_k(jband)).LT.tol8) cycle
         deltae = eig_k(jband) - eig_k(iband)
         ! deltae test seems to work best compared to deltapert test
         !if (abs(deltae) .LT. dtset%ggtrcut) cycle
@@ -2501,7 +2499,8 @@ subroutine orbmag_output(self,dtset,omlamb)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '        <A0.An> : ',(self%orbmag_trace(adir,inbm),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' Lamb shielding : ',(omlamb(adir),adir=1,3)
+   write(message,'(a,3es16.8)') '    Lamb (core) : ',(omlamb(adir),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
    write(message,'(a)')ch10
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Chern vector, term-by-term breakdown : '
