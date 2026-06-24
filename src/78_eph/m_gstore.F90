@@ -184,9 +184,9 @@ module m_gstore
  character(len=abi_slen),public,parameter :: GSTORE_GMODE_PHONON = "phonon"
 
  ! Flags
- integer :: GSTORE_KQ_MISSING = 0
- integer :: GSTORE_KQ_COMPUTED = 1
- integer :: GSTORE_KQ_SYMMETRIZED = 2
+ integer :: GSTORE_KQ_MISSING = 0        !  (k, q, spin) has not been computed.
+ integer :: GSTORE_KQ_COMPUTED = 1       !  (k, q, spin) has been computed.
+ integer :: GSTORE_KQ_SYMMETRIZED = 2    !  (k, q, spin) has been reconstructed by symmetry.
 
  ! Rank of the MPI Cartesian grid.
  integer,private,parameter :: ndims = 6
@@ -1143,7 +1143,9 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      nctkarr_t("gstore_qbz2ibz", "i", "six, gstore_nqbz"), &
      nctkarr_t("gstore_qglob2bz", "i", "gstore_max_nq, number_of_spins"), &
      nctkarr_t("gstore_kglob2bz", "i", "gstore_max_nk, number_of_spins"), &
-     !nctkarr_t("gstore_glob_state_kqs", "i", "gstore_max_nk, gstore_max_nq, number_of_spins"), &
+     ! Table with status of (k, q, spin) entry, used to symmetrize matrix-elements.
+     nctkarr_t("gstore_glob_state_kqs", "i", "gstore_max_nk, gstore_max_nq, number_of_spins"), &
+     !
      ! These quantities are needed to interface GSTORE.nc with external codes.
      ! For the meaning of the different variables and conventions see m_ifc module.
      nctkarr_t("ifc_zeff", "dp", "three, three, number_of_atoms"), &
@@ -1169,11 +1171,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    ! In order to check if the whole generation is completed, one should test if "gstore_completed" == 1
    NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_done_qbz_spin"), NF90_FILL, 0))
 
-   ! TODO:
-   !  0 --> (k, q, spin) has not been computed.
-   !  1 --> (k, q, spin) has been computed.
-   !  2 --> (k, q, spin) has been reconstructed by symmetry.
-   !NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_glob_state_kqs"), NF90_FILL, 0))
+   NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_glob_state_kqs"), NF90_FILL, GSTORE_KQ_MISSING))
 
    ! Optional arrays
    if (allocated(gstore%delta_ef_kibz_spin)) then
@@ -6718,7 +6716,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 !Local variables-------------------------------
 !scalars
  integer :: with_cplex, my_is, spin, my_ik, my_iq, ik_glob, iq_glob, units(2)
- integer :: ncid, spin_ncid, nprocs, my_rank, ierr, ncerr, state_kq
+ integer :: ncid, spin_ncid, nprocs, my_rank, ierr, ncerr, this_state
  integer :: nb, nkbz, nkibz, nqbz, nqibz, nsym, itim, isym, ib, ik_bz
  integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
  integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3)
@@ -6735,7 +6733,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  real(dp) :: qpt(3), kk_bz(3), kk_ibz(3), qq_ibz(3)
  real(dp),allocatable :: gwork_q(:,:,:,:,:)
  integer :: brange_k_spin(2, dtset%nsppol)
- integer,allocatable :: my_kqmap(:,:), kmesh_map(:,:), table_kq(:,:)
+ integer,allocatable :: my_kqmap(:,:), kmesh_map(:,:), state_kq(:,:)
  complex(dp),allocatable :: dmat_k(:,:), dmat_kq(:,:), gkq_base(:,:,:), gkq_rot(:,:,:)
 !----------------------------------------------------------------------
 
@@ -6797,8 +6795,9 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
    NCF_CHECK(nf90_inq_ncid(ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
 
    ! Read table with status of the (k, q) entry.
-   ABI_MALLOC(table_kq, (gqk%glob_nk, gqk%glob_nq))
-   !NCF_CHECK(nf90_get_var(spin_ncid, nctk_idname(spin_ncid, "table_kq"), table_kq))
+   ABI_MALLOC(state_kq, (gqk%glob_nk, gqk%glob_nq))
+   ncerr = nf90_get_var(ncid, nctk_idname(ncid, "gstore_glob_state_kqs"), state_kq, start=[1,1,spin])
+   NCF_CHECK(ncerr)
 
    ! Loop over q-points in the BZ.
    do my_iq=1, gqk%my_nq
@@ -6830,7 +6829,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        ik_glob = my_ik + gqk%my_kstart - 1
        kk_bz = gqk%my_kpts(:, my_ik)
 
-       !state_kq = table_kq(ik_glob, iq_glob)); if (state_kq == GSTORE_KQ_COMPUTED) cycle
+       this_state = state_kq(ik_glob, iq_glob); if (this_state == GSTORE_KQ_COMPUTED) cycle
 
        ! Note symrel^T convention for k
        ik_ibz = gqk%my_k2ibz(1, my_ik); isym_k = gqk%my_k2ibz(2, my_ik)
@@ -6857,12 +6856,12 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        !end do
 
        ! Write the newly computed g_{mn, nu} back to the netcdf file (in-place modification).
-       ! and update the entry in table_kq.
+       ! and update the entry in state_kq.
        !ncerr = nf90_put_var(spin_ncid, spin_vid("gvals"), my_gbuf, &
        !                     start=[1, 1, 1, 1, gqk%my_kstart, iq_glob], &
        !                     count=[2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt])
        !NCF_CHECK(ncerr)
-       !table_kq(ik_glob, iq_glob) = GSTORE_KQ_SYMMETRIZED
+       state_kq(ik_glob, iq_glob) = GSTORE_KQ_SYMMETRIZED
      end do ! my_ik
 
      ABI_FREE(my_kqmap)
@@ -6870,14 +6869,15 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
    end do ! my_iq
    end associate
 
-   ! Update table_kq.
-   !NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("table_kq"), table_kq))
+   ! Update state_kq for this spin.
+   ncerr = nf90_put_var(ncid, vid("gstore_glob_state_kqs"), state_kq, start=[1,1,spin])
+   NCF_CHECK(ncerr)
 
    ABI_FREE(dmat_k)
    ABI_FREE(dmat_kq)
    ABI_FREE(gkq_base)
    ABI_FREE(gkq_rot)
-   ABI_FREE(table_kq)
+   ABI_FREE(state_kq)
  end do ! my_is
 
  NCF_CHECK(nf90_close(ncid))

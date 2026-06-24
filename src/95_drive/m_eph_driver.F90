@@ -744,10 +744,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, qp_ebands, ifc, comm)
    end if
 
-   call gstore_symmetrize(dtfil%filgstorein, wfk0_path, ngfftf, dtset, dtfil, cryst, psps, pawtab, qp_ebands, ifc, comm)
+   call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, qp_ebands, ifc, dvdb, &
+                       pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-   !call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, qp_ebands, ifc, dvdb, &
-   !                    pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+   !call gstore_symmetrize(dtfil%filgstorein, wfk0_path, ngfftf, dtset, dtfil, cryst, psps, pawtab, qp_ebands, ifc, comm)
 
    gstore_path = gstore%path
    call gstore%free()
