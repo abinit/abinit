@@ -65,7 +65,7 @@ module m_eph_driver
  use m_pspini,          only : pspini
  use m_ephtk,           only : ephtk_update_ebands
  use m_migdal_eliashberg, only : migdal_eliashberg_iso !, migdal_eliashberg_aniso
- use m_gstore,          only : gstore_t
+ use m_gstore,          only : gstore_t, gstore_symmetrize
  use m_gstore_sigmaph,   only : gstore_sigmaph
  use m_gstore_converters, only : gstore_convert
  use m_berry_curvature, only : berry_curvature
@@ -744,8 +744,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, qp_ebands, ifc, comm)
    end if
 
-   call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, qp_ebands, ifc, dvdb, &
-                       pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+   call gstore_symmetrize(dtfil%filgstorein, wfk0_path, ngfftf, dtset, dtfil, cryst, psps, pawtab, qp_ebands, ifc, comm)
+
+   !call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, qp_ebands, ifc, dvdb, &
+   !                    pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
    gstore_path = gstore%path
    call gstore%free()
@@ -856,6 +858,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (19)
    ! Compute matrix elements of W_kk'.
+
    call wkk_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, qp_ebands, wfk0_hdr, pawtab, psps, mpi_enreg, comm)
 
  case (20)

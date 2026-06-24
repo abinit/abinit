@@ -183,6 +183,11 @@ module m_gstore
  character(len=abi_slen),public,parameter :: GSTORE_GMODE_ATOM   = "atom"
  character(len=abi_slen),public,parameter :: GSTORE_GMODE_PHONON = "phonon"
 
+ ! Flags
+ integer :: GSTORE_KQ_MISSING = 0
+ integer :: GSTORE_KQ_COMPUTED = 1
+ integer :: GSTORE_KQ_SYMMETRIZED = 2
+
  ! Rank of the MPI Cartesian grid.
  integer,private,parameter :: ndims = 6
 !!***
@@ -662,7 +667,6 @@ public :: gstore_read_gtype
 public :: gstore_symmetrize
  ! Reconstruct the electron-phonon matrix elements g(k,q) in the full BZ
 
-
 !----------------------------------------------------------------------
 
 !!****t* m_gstore/dmats_t
@@ -675,12 +679,20 @@ public :: gstore_symmetrize
 
 type, public :: dmats_t
 
- type(coeff5c_type), allocatable :: entry_spin(:)
+ type(ebands_t) :: ks_ebands
+ ! KS bands.
+
+ integer,allocatable :: brange_spin(:,:)
+ ! (2, nsppol)
+ ! start and end band index for each spin
+
+ type(coeff5c_type), allocatable :: for_spin(:)
+
  contains
- procedure :: init => dmats_init
- procedure :: free => dmats_free
- !procedure :: print => dmats_print
-end type
+   procedure :: init => dmats_init    ! Initialize object
+   procedure :: free => dmats_free    ! Free memory.
+   procedure :: print => dmats_print  ! Print object.
+end type dmats_t
 
 contains
 !!***
@@ -1157,6 +1169,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    ! In order to check if the whole generation is completed, one should test if "gstore_completed" == 1
    NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_done_qbz_spin"), NF90_FILL, 0))
 
+   ! TODO:
    !  0 --> (k, q, spin) has not been computed.
    !  1 --> (k, q, spin) has been computed.
    !  2 --> (k, q, spin) has been reconstructed by symmetry.
@@ -1280,7 +1293,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    NCF_CHECK(nf90_close(ncid))
  end if ! master
 
- ! Make sure GSTORE.nc has been written by master
+ ! Make sure GSTORE.nc has been written by master.
  call xmpi_barrier(gstore%comm)
 
  ABI_FREE(wtk)
@@ -1394,7 +1407,7 @@ end function gstore_same_nbands
 !!    Manual specification of bands (nb_k) and k-points also works by setting gstore_kfilter = "none" (default)
 !!    and providing the values via kptgw and bdgw.
 !!
-!!  What doesn't work:
+!!  What does nott work:
 !!
 !!  - There is currently no effective way to control nb_kq directly.
 !!    The only workaround is using gstore_brange. For example, gstore_brange = '1, 8' sets nb_k = nb_kq = 8.
@@ -1695,7 +1708,7 @@ subroutine gstore_set_mpi_grid__(gstore, dtfil, nproc_spin, comm_spin)
    dims = [gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, gqk%band_comm%nproc, &
            gqk%bsum_comm%nproc, gqk%pp_sum_comm%nproc]
 
-   ! Note comm_spin(spin)
+   ! Note comm_spin(spin).
    gqk%comm = xcomm_from_mpi_int(comm_spin(spin))
    gqk%coords_qkpb_sumbp = 0
 
@@ -4292,7 +4305,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
  call pawcprj_free(cwaveprj0)
  ABI_FREE(cwaveprj0)
 
- ! Reconstruct matrix elements by symmetry.
+ ! Reconstruct g(k,q) matrix elements in the full BZ by symmetry.
  if (dtset%gstore_kzone == "bz" .and. dtset%gstore_qzone == "bz" .and. dtset%gstore_use_lgk /= 0 &
      .and. dtset%userie == 789) then
    call gstore_symmetrize(gstore%path, wfk0_path, ngfft, dtset, dtfil, cryst, psps, pawtab, ebands, ifc, comm)
@@ -4396,16 +4409,19 @@ end subroutine gstore_compute
 !!
 !! SOURCE
 
-integer function gstore_check_cplex_qkzone_gmode(gstore, cplex, qzone, kzone, gmode, kfilter) result(ierr)
+integer function gstore_check_cplex_qkzone_gmode(gstore, cplex, qzone, kzone, gmode, &
+                                                 kfilter, check_alloc) result(ierr)  ! optional
 
 !Arguments ------------------------------------
  class(gstore_t),target,intent(in) :: gstore
  integer,intent(in) :: cplex
  character(len=*),intent(in) :: qzone, kzone, gmode
  character(len=*),optional,intent(in) :: kfilter
+ logical,optional,intent(in) :: check_alloc
 
 !Local variables-------------------------------
  integer :: my_is
+ logical :: check_alloc__
 ! *************************************************************************
 
  ierr = 0
@@ -4416,13 +4432,17 @@ integer function gstore_check_cplex_qkzone_gmode(gstore, cplex, qzone, kzone, gm
    ABI_CHECK_NOSTOP(gstore%kfilter == kfilter, sjoin("kfilter: ", kfilter, "required but got: ", gstore%kfilter), ierr)
  end if
 
+ check_alloc__ = .True.; if (present(check_alloc)) check_alloc__ = check_alloc
+
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is))
    ABI_CHECK_NOSTOP(gqk%cplex == cplex, sjoin("cplex:", itoa(cplex), "required but got: ", itoa(gqk%cplex)), ierr)
-   if (cplex == 1) then
-     ABI_CHECK_NOSTOP(allocated(gqk%my_g2), "my_g2 array is not allocated", ierr)
-   else if (cplex == 2) then
-     ABI_CHECK_NOSTOP(allocated(gqk%my_g), "my_g array is not allocated", ierr)
+   if (check_alloc__) then
+     if (cplex == 1) then
+       ABI_CHECK_NOSTOP(allocated(gqk%my_g2), "my_g2 array is not allocated", ierr)
+     else if (cplex == 2) then
+       ABI_CHECK_NOSTOP(allocated(gqk%my_g), "my_g array is not allocated", ierr)
+     end if
    end if
    end associate
  end do
@@ -6645,7 +6665,7 @@ subroutine gstore_read_gtype(path, gtype, comm, &
      call replace_ch0(gtype)
    end if
    if (present(brange_k_spin)) then
-     NCF_CHECK(nf90_get_var(ncid, vid("brange_k_spin"), brange_k_spin))
+     NCF_CHECK(nf90_get_var(ncid, vid("gstore_brange_k_spin"), brange_k_spin))
    end if
    NCF_CHECK(nf90_close(ncid))
  end if
@@ -6673,8 +6693,8 @@ end subroutine gstore_read_gtype
 !!
 !! FUNCTION
 !! Reconstruct the electron-phonon matrix elements g(k,q) in the full
-!! Brillouin Zone (BZ) using the values stored in the Irreducible Brillouin
-!! Zones. Uses the NetCDF API for in-place modification of the GSTORE file
+!! Brillouin Zone (BZ) using the values stored in the IBZ for k and IBZ_k for q.
+!! Uses the NetCDF API for in-place modification of the GSTORE file
 !! and wfd_t to fetch wavefunctions and compute unitary matrices.
 !!
 !! SOURCE
@@ -6698,7 +6718,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 !Local variables-------------------------------
 !scalars
  integer :: with_cplex, my_is, spin, my_ik, my_iq, ik_glob, iq_glob, units(2)
- integer :: ncid, spin_ncid, nprocs, my_rank, ierr, ncerr
+ integer :: ncid, spin_ncid, nprocs, my_rank, ierr, ncerr, state_kq
  integer :: nb, nkbz, nkibz, nqbz, nqibz, nsym, itim, isym, ib, ik_bz
  integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
  integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3)
@@ -6713,11 +6733,10 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  type(dmats_t) :: dmats
 !arrays
  real(dp) :: qpt(3), kk_bz(3), kk_ibz(3), qq_ibz(3)
- real(dp),allocatable :: gwork_q(:,:,:,:,:) !, slice_bb(:,:,:)
+ real(dp),allocatable :: gwork_q(:,:,:,:,:)
  integer :: brange_k_spin(2, dtset%nsppol)
- integer,allocatable :: my_kqmap(:,:), kmesh_map(:,:)
- ! TODO: Add arrays to hold precomputed U and D matrices
- !complex(dp),allocatable :: dmn_ksym(:,:,:,:,:)
+ integer,allocatable :: my_kqmap(:,:), kmesh_map(:,:), table_kq(:,:)
+ complex(dp),allocatable :: dmat_k(:,:), dmat_kq(:,:), gkq_base(:,:,:), gkq_rot(:,:,:)
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -6729,8 +6748,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
  call gstore_read_gtype(gstore_path, gtype, comm, brange_k_spin=brange_k_spin)
 
- ! TODO:
- ! Compute the mixing matrices D^{k}(S) from the states stored in wfd_t.
+ ! Compute the mixing matrices D^{k}(S) from the wavefunctions stored in wfd_t.
  call dmats%init(wfk_path, dtset, dtfil, cryst, brange_k_spin, ngfft, pawtab, psps, comm)
  if (my_rank /= 0) goto 100
 
@@ -6738,8 +6756,8 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  ! TODO: Remember to handle GWPT STORE
  !if (gtype == "gwpt" .and. dtset%gstore_gname == "gvals_ks") gvals_name = "gvals_ks"
 
- ! Read GSTORE.nc dimensions and metadata, without allocating gvals.
- with_cplex = 0; with_gmode = GSTORE_GMODE_PHONON; with_g2dw = .False.
+ ! Read GSTORE.nc dimensions and metadata, without allocating gvals buffer.
+ with_cplex = 0; with_gmode = GSTORE_GMODE_ATOM; with_g2dw = .False.
 
  call gstore%from_ncpath(gstore_path, with_cplex, dtset, dtfil, cryst, ebands, ifc, &
                          with_gmode, gvals_name, with_g2dw, xmpi_comm_self)
@@ -6750,43 +6768,49 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  ! will receive a gstore file in which all g(k,q) matrix elements in the BZ
  ! have been reconstructed using symmetry operations.
  ABI_CHECK(gstore%same_nbands(msg), msg)
- if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "phonon", kfilter="none") /= 0) then
+ if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "atom", kfilter="none", check_alloc=.False.) /= 0) then
    ABI_ERROR("GSTORE.nc should have both k and q in the full BZ. See messages above.")
  end if
 
+ ABI_CHECK_IEQ(gstore%has_used_lgq, 0, "Symmetrization of g(k,q) with use_lgq /= 0 is not coded")
+ ABI_CHECK_IEQ(gstore%has_used_lgk, 1, "Symmetrization of g(k,q) with use_lgk /= 1 is not coded")
+
  ! Useful dimensions.
- nkbz = gstore%nkbz
- nkibz = gstore%nkibz
- nqbz = gstore%nqbz
- nqibz = gstore%nqbz
+ nkbz = gstore%nkbz; nkibz = gstore%nkibz
+ nqbz = gstore%nqbz; nqibz = gstore%nqbz
  nsym = cryst%nsym
 
- ! 4. Symmetrize and I/O Loop
+ NCF_CHECK(nctk_open_read(ncid, gstore_path, xmpi_comm_self))
+
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
    associate (gqk => gstore%gqk(my_is))
    nb = gqk%nb_k
 
-   ! Get the group id for this spin
+   ABI_MALLOC(dmat_k, (nb, nb))
+   ABI_MALLOC(dmat_kq, (nb, nb))
+   ABI_MALLOC(gkq_base, (nb, nb, gqk%natom3))
+   ABI_MALLOC(gkq_rot, (nb, nb, gqk%natom3))
+
+   ! Get the group id for this spin.
    NCF_CHECK(nf90_inq_ncid(ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+
+   ! Read table with status of the (k, q) entry.
+   ABI_MALLOC(table_kq, (gqk%glob_nk, gqk%glob_nq))
+   !NCF_CHECK(nf90_get_var(spin_ncid, nctk_idname(spin_ncid, "table_kq"), table_kq))
 
    ! Loop over q-points in the BZ.
    do my_iq=1, gqk%my_nq
      iq_glob = my_iq + gqk%my_qstart - 1
      call gqk%myqpt(my_iq, gstore, weight_qq, qpt); q_is_gamma = sum(qpt**2) < tol14
 
-     ! Symmetry tables for q-points. NB: Using symrec convention for q
+     ! Symmetry tables for q-points. NB: Using symrec convention for q.
      iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
      trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
      isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
      tsign_q = 1; if (trev_q == 1) tsign_q = -1
      qq_ibz = gstore%qibz(:, iq_ibz)
-
-     ! Here we get the ph displacement for this q-point in the BZ from the image in the IBZ.
-     ! This is important for complex g as we have to enforce the gauge in the ph eigenvectors, including e(-q) = e(q)^*.
-     !call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_cart_ibz(:,:,:,:,iq_ibz), pheigvec_cart_qbz, displ_cart_qbz, &
-     !                     displ_red_qbz=displ_red_qbz)
 
      ! Find k + q in the IBZ for all my k-points.
      ABI_MALLOC(my_kqmap, (6, gqk%my_nk))
@@ -6801,9 +6825,12 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
      ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
      NCF_CHECK(ncerr)
 
+     ! Loop over k-points in the IBZ.
      do my_ik=1,gqk%my_nk
        ik_glob = my_ik + gqk%my_kstart - 1
        kk_bz = gqk%my_kpts(:, my_ik)
+
+       !state_kq = table_kq(ik_glob, iq_glob)); if (state_kq == GSTORE_KQ_COMPUTED) cycle
 
        ! Note symrel^T convention for k
        ik_ibz = gqk%my_k2ibz(1, my_ik); isym_k = gqk%my_k2ibz(2, my_ik)
@@ -6817,19 +6844,43 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
        tsign_kq = 1; if (trev_kq == 1) tsign_kq = -1
 
-       ! Perform the tensor contraction using precomputed arrays.
-       !do nu=1,gqk%natom3
+       ! Get D matrices at k and k+q from the matrices computed in the IBZ.
+       ! Note that the operation S is in the little group of k hence...
+       !
+       !dmats%for_spin(spin)%cmat(:,:, isym, itime, ik_ibz)
+       !dmat_k =
+       !dmat_kq =
+
+       ! Perform symmetrization.
+       !do ip=1,gqk%natom3
+       !  gkq_rot(:,:,ip) = gkq_base(:,:,ip)
        !end do
-       ! Write the newly computed g_{mn, nu} array back to the netcdf file (in-place modification).
-       !dmats%entry_spin(spin)%cmat(:,:,isym, timrev, ik_ibz)
+
+       ! Write the newly computed g_{mn, nu} back to the netcdf file (in-place modification).
+       ! and update the entry in table_kq.
+       !ncerr = nf90_put_var(spin_ncid, spin_vid("gvals"), my_gbuf, &
+       !                     start=[1, 1, 1, 1, gqk%my_kstart, iq_glob], &
+       !                     count=[2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt])
+       !NCF_CHECK(ncerr)
+       !table_kq(ik_glob, iq_glob) = GSTORE_KQ_SYMMETRIZED
      end do ! my_ik
 
      ABI_FREE(my_kqmap)
      ABI_FREE(gwork_q)
    end do ! my_iq
    end associate
+
+   ! Update table_kq.
+   !NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("table_kq"), table_kq))
+
+   ABI_FREE(dmat_k)
+   ABI_FREE(dmat_kq)
+   ABI_FREE(gkq_base)
+   ABI_FREE(gkq_rot)
+   ABI_FREE(table_kq)
  end do ! my_is
 
+ NCF_CHECK(nf90_close(ncid))
  call gstore%free()
 
  100 call xmpi_barrier(comm)
@@ -6888,7 +6939,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  integer :: spin, nsppol, nsym, nb, nkibz, mband, ik_ibz, i_m, i_n, isym, itime, otimrev_k, bstart, ib
  integer :: ib1, ib2, band1, band2, n1, n2, n3, n4, n5, n6, nfft, nspinor, mpw, ii, ipw
  real(dp),parameter :: xnorm1 = one
- real(dp) :: e_b1, e_b2
+ real(dp) :: e_b1, e_b2, cpu, wall, gflops
  type(ebands_t) :: ks_ebands
  type(wfd_t) :: wfd
  type(hdr_type) :: hdr
@@ -6902,19 +6953,26 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
 !----------------------------------------------------------------------
 
- ks_ebands = ebands_from_file(wfk_path, comm)
- nsppol = ks_ebands%nsppol; nsym = cryst%nsym; nkibz = ks_ebands%nkpt
- mband = maxval(brange_spin(2, :))
+ ! Read KS energies from WFK file.
+ call wrtout(std_out, " Computing dmats matrices...")
+ call cwtime(cpu, wall, gflops, "start")
 
- ABI_CHECK_IEQ(dtset%usepaw, 0, "PAW is not coded")
- ABI_CHECK_IEQ(dtset%nspinor, 1, "nspinor 2 not coded")
+ ABI_CHECK_IEQ(dtset%usepaw, 0, "PAW not coded!")
+ ABI_CHECK_IEQ(dtset%nspinor, 1, "nspinor 2 not coded!")
+
+ dmats%ks_ebands = ebands_from_file(wfk_path, comm)
+ nsppol = dmats%ks_ebands%nsppol; nsym = cryst%nsym; nkibz = dmats%ks_ebands%nkpt
 
  ! Initialize the wave function descriptor.
  ! Only wavefunctions for the symmetrical image of the k/k+q wavevectors treated by this MPI rank are stored.
+ mband = maxval(brange_spin(2, :))
  ABI_MALLOC(nband, (nkibz, nsppol))
  ABI_MALLOC(bks_mask, (mband, nkibz, nsppol))
  ABI_MALLOC(keep_ur, (mband, nkibz, nsppol))
  nband = mband; bks_mask = .False.; keep_ur = .False.
+
+ ABI_MALLOC(dmats%brange_spin, (2, nsppol))
+ dmats%brange_spin = brange_spin
 
  ! TODO: MPI distribution
  do spin=1,nsppol
@@ -6927,7 +6985,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  wfd_istwfk = 1
 
  call wfd%init(cryst, pawtab, psps, keep_ur, mband, nband, nkibz, nsppol, bks_mask,&
-               dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ks_ebands%kptns, ngfft,&
+               dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, dmats%ks_ebands%kptns, ngfft,&
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
  call wfd%print([std_out], header="Wavefunctions for DMATS calculation")
@@ -6941,8 +6999,9 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  call wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path), out_hdr=hdr)
  call hdr%vs_dtset(dtset)
  ABI_CHECK(abs(dtset%ecut - hdr%ecut) < tol6, "input ecut should be equal to the value used in the WFK file.")
+ call hdr%free()
 
- ! Compute max |G_i|.
+ ! Compute max |G_i| to build box.
  gmax = 0
  do ik_ibz=1,nkibz
     associate (npw_k => wfd%npwarr(ik_ibz), kg_k => wfd%kdata(ik_ibz)%kg_k)
@@ -6953,7 +7012,6 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
     end do
     end associate
  end do
-
  !my_gmax = gmax; call xmpi_max(my_gmax, gmax, wfd%comm, ierr)
 
  ! Init work_ngfft
@@ -6970,11 +7028,11 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  ABI_MALLOC(ug1_box, (2, nfft * nspinor))
  ABI_MALLOC(ug2_box, (2, nfft * nspinor))
 
- ! Allocate D-matrices.
- ABI_MALLOC(dmats%entry_spin, (nsppol))
+ ! Allocate D(k, S) matrices for each spin.
+ ABI_MALLOC(dmats%for_spin, (nsppol))
  do spin=1,nsppol
    nb = brange_spin(2,spin) - brange_spin(1,spin) + 1
-   ABI_CALLOC(dmats%entry_spin(spin)%value, (nb, nb, nsym, 2, nkibz))
+   ABI_CALLOC(dmats%for_spin(spin)%value, (nb, nb, nsym, 2, nkibz))
  end do
 
  do spin=1,nsppol
@@ -6982,26 +7040,30 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
    nb = brange_spin(2, spin) - brange_spin(1, spin) + 1
    ABI_MALLOC(cmat, (nb, nb))
 
+   ! Loop over k-points in the IBZ.
    do ik_ibz=1,nkibz
-     kk_ibz = ks_ebands%kptns(:, ik_ibz)
+     kk_ibz = dmats%ks_ebands%kptns(:, ik_ibz)
+     ! NB: istwf_k is always 1 here. See call to wfd%init.
      associate (npw_k => wfd%npwarr(ik_ibz), istwf_k => wfd%kdata(ik_ibz)%istwfk, kg_k => wfd%kdata(ik_ibz)%kg_k)
 
-     ! symtab(4,2,nsym)= three first numbers define the G vector;
-     !     fourth number is zero if the q-vector is not preserved, 1 otherwise
-     !     second index is one without time-reversal symmetry, two with time-reversal symmetry
+     ! symtab(4,2,nsym)=
+     !  three first numbers define the G vector,
+     !  fourth number is zero if the q-vector is not preserved, 1 otherwise,
+     !  second index is one without time-reversal symmetry, two with time-reversal symmetry.
      call littlegroup_q(cryst%nsym, kk_ibz, symtab, cryst%symrec, cryst%symafm, otimrev_k, prtvol=0)
 
-     ! Copy wavefunctions for this k-point
+     ! Copy wavefunctions for this k-point.
      ABI_MALLOC(cg_ib, (2, npw_k*nspinor, nb))
      do ib1=1,nb
        band1 = ib1 + bstart - 1
        call wfd%copy_cg(band1, ik_ibz, spin, cg_ib(:,:,ib1))
      end do
 
+     ! Loop over symmetry operations.
      do itime=1,2
        do isym=1,cryst%nsym
 
-         ! Compute cmat.
+         ! Compute cmat(b,b')
          cmat = zero
          if (symtab(4, itime, isym) == 0) then
            ! Sk /= k + G.
@@ -7013,14 +7075,14 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
            g0 = symtab(1:3, itime, isym)
            do ib2=1,nb
              band2 = ib2 + bstart - 1
-             e_b2 = ks_ebands%eig(band2, ik_ibz, spin)
+             e_b2 = dmats%ks_ebands%eig(band2, ik_ibz, spin)
              symrec1 = cryst%symrec(:,:, isym) * (3-2*itime)
              call sphere(cg_ib(:,:,ib2), nspinor, npw_k, ug2_box, n1, n2, n3, n4, n5, n6, &
                          kg_k, istwf_k, iflag1, me_g0, [0,0,0], symrec1, xnorm1)
 
              do ib1=1,nb
                band1 = ib1 + bstart - 1
-               e_b1 = ks_ebands%eig(band1, ik_ibz, spin)
+               e_b1 = dmats%ks_ebands%eig(band1, ik_ibz, spin)
                ! Only if e_b1 == e_b2.
                ctmp = zero
                if (abs(e_b2  - e_b1) <= dtset%symsigma_de)  then
@@ -7038,7 +7100,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
          end if
 
          ! Save results.
-         dmats%entry_spin(spin)%value(:, :, isym, itime, ik_ibz) = cmat
+         dmats%for_spin(spin)%value(:, :, isym, itime, ik_ibz) = cmat
        end do ! isym
      end do ! itime
 
@@ -7051,7 +7113,8 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  ABI_FREE(ug1_box)
  ABI_FREE(ug2_box)
 
- call ks_ebands%free(); call wfd%free()
+ call wfd%free()
+ call cwtime_report(" dmats_init:", cpu, wall, gflops)
 
 end subroutine dmats_init
 !!***
@@ -7076,14 +7139,61 @@ subroutine dmats_free(dmats)
  integer :: spin
 !----------------------------------------------------------------------
 
- do spin=1,size(dmats%entry_spin)
-   ABI_SFREE(dmats%entry_spin(spin)%value)
+ call dmats%ks_ebands%free()
+ ABI_SFREE(dmats%brange_spin)
+
+ do spin=1,size(dmats%for_spin)
+   ABI_SFREE(dmats%for_spin(spin)%value)
  end do
- ABI_SFREE(dmats%entry_spin)
+ ABI_SFREE(dmats%for_spin)
 
 end subroutine dmats_free
 !!***
 
-end module m_gstore
+!----------------------------------------------------------------------
+
+!!****f* m_gstore/dmats_print
+!! NAME
+!! dmats_print
+!!
+!! FUNCTION
+!!  Print object.
+!!
+!! SOURCE
+
+subroutine dmats_print(dmats, units, prtvol, header)
+
+!Arguments ------------------------------------
+ class(dmats_t),intent(in) :: dmats
+ integer,intent(in) :: units(:), prtvol
+ character(len=*),optional,intent(in) :: header
+
+!Local variables-------------------------------
+ integer :: spin, bstart, nb !, ikpt, ii
+ character(len=500) :: msg
+! *************************************************************************
+
+ msg = ' ==== Info on the dmats_t ==== '
+ if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
+ call wrtout(units, msg)
+
+ do spin=1,size(dmats%for_spin)
+   !bstart = dmats%brange_spin(1, spin)
+   !nb = dmats%brange_spin(2, spin) - dmats%brange_spin(1, spin) + 1
+   !do ik_ibz=1,dmats%ks_ebands%nkpts
+   !  kk_ibz = dmats%ks_ebands%kptns(:, ik_ibz)
+   !  do itime=1,2
+   !    do isym=1,cryst%nsym
+   !      cmat = dmats%for_spin(spin)%value(:, :, isym, itime, ik_ibz)
+   !    end do ! isym
+   !  end do ! itime
+   !end do ! ik_ibz
+ end do ! spin
+
+end subroutine dmats_print
+!!***
 
 !----------------------------------------------------------------------
+
+end module m_gstore
+!!***
