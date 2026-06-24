@@ -1548,9 +1548,9 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  real(dp),intent(out),optional  :: intgf2(natom,natom)
  real(dp),intent(out),optional  :: rhomag(2,nspden)
  real(dp),intent(out),optional  :: strs_intgden(6,nspden,natom)
- real(dp),intent(out),optional  :: fatsph(nfft,natom)
+ real(dp),intent(out),optional,target  :: fatsph(nfft,natom)
  real(dp),intent(in),optional   :: qphon(3)
- real(dp),intent(out),optional  :: taumr(nfft,natom,3)
+ real(dp),intent(out),optional,target  :: taumr(nfft,natom,3)
 !Local variables ------------------------------
 
 !scalars
@@ -1570,11 +1570,11 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  real(dp) :: gmet(3,3),gprimd(3,3),gr_intg(3,4)
  real(dp) :: intg(cplex,4),qphon_(3),rhomag_(2,nspden)
 ! real(dp) :: intg_im(4),intg_re(4)
- real(dp) :: fatsph_(nfft,natom),taumr_(nfft,natom,3)
  real(dp) :: strs(3,3),strs_cartred(3,3),strs_intg(6,4),tsec(2)
  real(dp) :: dist_ij(natom,natom),intgden_(cplex,nspden,natom)!,intgden_im_(nspden,natom)
- real(dp) :: my_xred(3, natom), rmet(3,3),xshift(3, natom)
+ real(dp) :: my_xred(3, natom), rmet(3,3),xshift(3, natom), taumr_local(3)
  real(dp), allocatable :: fsm_atom(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: fatsph_(:,:),taumr_(:,:,:)
 !real(dp) :: rprimd_mod(3,3),strain
 ! *************************************************************************
 
@@ -1592,8 +1592,15 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  if(present(qphon))then
    qphon_=qphon
  endif
- fatsph_=zero
- taumr_=zero
+
+ if(present(fatsph)) then
+   fatsph_ => fatsph
+   fatsph_=zero
+ end if
+ if(present(taumr)) then
+   taumr_ => taumr
+   taumr_=zero
+ end if
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -1709,13 +1716,21 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
            call radsmear(dfsm,fsm,r2,r2atsph,ratsm2)
 
            ifft_local=1+ix+n1*(iy+n2*izloc)
-           fatsph_(ifft_local,iatom)=fsm
+
+           if(present(fatsph)) then
+             fatsph_(ifft_local,iatom)=fsm
+           end if
+           if(present(taumr)) then
+             taumr_(ifft_local,iatom,1)=difx
+             taumr_(ifft_local,iatom,2)=dify
+             taumr_(ifft_local,iatom,3)=difz
+           end if
 
 !          Compute the finite-q real-space phase
-           taumr_(ifft_local,iatom,1)=difx
-           taumr_(ifft_local,iatom,2)=dify
-           taumr_(ifft_local,iatom,3)=difz
-           arg=two_pi*dot_product(qphon_,taumr_(ifft_local,iatom,:))
+           taumr_local(1)=difx
+           taumr_local(2)=dify
+           taumr_local(3)=difz
+           arg=two_pi*dot_product(qphon_,taumr_local)
            phr1d_re=dcos(arg)
            phr1d_im=dsin(arg)
            ifft_local_cplex=1+cplex*(ifft_local-1)
@@ -1945,14 +1960,6 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
      call xmpi_sum(strs_intgden,mpi_enreg%comm_fft,ierr)
      call timab(48,2,tsec)
    end if
- end if
-
-!TODO: Adapt to fft parallelization
- if(present(fatsph)) then
-   fatsph=fatsph_
- end if
- if(present(taumr)) then
-   taumr=taumr_
  end if
 
 !EB  - Compute magnetization of the whole cell
