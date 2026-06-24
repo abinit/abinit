@@ -198,6 +198,8 @@ module m_orbmag
   private :: orbmag_nl_k
   private :: orbmag_nl1_k
   private :: nonlocal_me
+  private :: convolution_vv2
+  private :: tatomfft
   private :: make_d
   private :: dterm_aij
   private :: dterm_qij
@@ -1949,6 +1951,139 @@ subroutine lamb_core(atindx,dtset,omlamb,pawtab)
 end subroutine lamb_core
 !!***
 
+!!****f* ABINIT/vv2_convolution
+!! NAME
+!! vv2_convolution
+!!
+!! FUNCTION
+!! convolution of vv2 term for real space
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!! complex(dp) nlme
+!!
+!! NOTES
+!! computes on-site prefac*\sum_{Rij}<bra|d_bra_dir p_i>aij<d_ket_dir p_j|ket>
+!! dnlbra = 0 if no derivative, dnlbra = adir,bdir,gdir for derivative in *dir direction
+!! dnlket = 0 if no derivative, dnlket = adir,bdir,gdir for derivative in *dir direction
+!!
+!! SOURCE
+
+subroutine convolution_vv2(adir,atindx,bra,bdir,cwaveprj,dterm,dtset,&
+    & eignk,eignpk,gdir,gs_hamk,ket,mpi_enreg,npw_k,orbmag_mesh,ph1d,&
+    & prefac,pawtab,trnrm,suppress_ormesh)
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: adir,bdir,gdir,npw_k
+  real(dp),intent(in) :: eignk,eignpk,trnrm
+  complex(dp),intent(in) :: prefac
+  logical,intent(in),optional :: suppress_ormesh
+  type(dataset_type),intent(in) :: dtset
+  type(dterm_type),intent(in) :: dterm
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+  type(MPI_type), intent(inout) :: mpi_enreg
+  type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(in),pointer :: bra(:,:),ket(:,:),ph1d(:,:)
+  type(pawcprj_type),intent(in) :: cwaveprj(dtset%natom,dtset%nspinor)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: iat,iatom,il,ilmn,isp,itypat,jl,jlmn,klmn,npwsp,t_atom
+  complex(dp) :: cpi,cpj,dij,ormesh_fac
+  logical :: my_suppress_ormesh,need_ormesh
+  ! arrays
+  real(dp),allocatable,target :: bra_mesh(:,:),ket_mesh(:,:)
+  complex(dp),allocatable :: dij_data(:,:,:)
+!--------------------------------------------------------------------
+  
+  if(present(suppress_ormesh)) then
+    my_suppress_ormesh=suppress_ormesh
+  else
+    my_suppress_ormesh=.FALSE.
+  end if
+  need_ormesh = ((dtset%orbmag .EQ. 4) .AND. (.NOT. my_suppress_ormesh))
+  npwsp = npw_k*dtset%nspinor
+  
+  ABI_MALLOC(dij_data,(dtset%natom,dterm%lmn2max,dterm%ndij))
+  dij_data = (eignk-eignpk)*dterm%qij
+
+  if (need_ormesh) then
+    ABI_CHECK(ASSOCIATED(ket),"convolution_vv2: input ket needed for ormesh is not associated")
+    ABI_CHECK(ASSOCIATED(bra),"convolution_vv2: input bra needed for ormesh is not associated")
+    ABI_CHECK(dtset%nspinor.EQ.1,"convolution_vv2: orbmag_rmesh not coded for spinors yet")
+    t_atom=0
+    do iat = 1, dtset%natom
+      if ( ANY(ABS(dtset%nucdipmom(1:3,iat))>tol8) ) then
+        t_atom = atindx(iat)
+        exit
+      end if
+    end do
+    ABI_MALLOC(bra_mesh,(2,npwsp))
+    ABI_MALLOC(ket_mesh,(2,npwsp))
+  end if
+
+  do iat = 1, dtset%natom
+    iatom = atindx(iat)
+    itypat=dtset%typat(iat)
+    do isp = 1, dtset%nspinor
+      do jlmn = 1, pawtab(itypat)%lmn_size
+        do ilmn = 1, pawtab(itypat)%lmn_size
+          klmn=MATPACK(ilmn,jlmn)
+          
+          dij = dij_data(iatom,klmn,isp)
+          ! see note at top of file near definition of MATPACK macro
+          if (ilmn .GT. jlmn) dij = CONJG(dij)
+         
+          !if (need_ormesh .AND. iatom.EQ.t_atom) then
+          if (need_ormesh) then
+
+            jl = pawtab(itypat)%indlmn(1,jlmn)
+            il = pawtab(itypat)%indlmn(1,ilmn)
+            ormesh_fac = prefac*trnrm*dij*four_pi*CONJG(j_dpc**il)*four_pi*(j_dpc**jl)
+            
+            ! <unk|(|db p_i><p_j| + |p_i><db p_j|)|un'k><un'k|(|dg p_i><p_j| + |p_i><dg p_j|)|unk>
+            
+            bra_mesh(1,1:npwsp)=bra(1,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1+bdir,ilmn,itypat)
+            bra_mesh(2,1:npwsp)=bra(2,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1+bdir,ilmn,itypat)
+            ket_mesh(1,1:npwsp)= gs_hamk%ffnl_k(1:npwsp,1,jlmn,itypat)*ket(1,1:npwsp)
+            ket_mesh(2,1:npwsp)= gs_hamk%ffnl_k(1:npwsp,1,jlmn,itypat)*ket(2,1:npwsp)
+
+            bra_mesh(1,1:npwsp)=bra(1,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1,ilmn,itypat)
+            bra_mesh(2,1:npwsp)=bra(2,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1,ilmn,itypat)
+            ket_mesh(1,1:npwsp)= gs_hamk%ffnl_k(1:npwsp,1+bdir,jlmn,itypat)*ket(1,1:npwsp)
+            ket_mesh(2,1:npwsp)= gs_hamk%ffnl_k(1:npwsp,1+bdir,jlmn,itypat)*ket(2,1:npwsp)
+            
+            bra_mesh(1,1:npwsp)=ket(1,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1+gdir,ilmn,itypat)
+            bra_mesh(2,1:npwsp)=ket(2,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1+gdir,ilmn,itypat)
+            ket_mesh(1,1:npwsp)= gs_hamk%ffnl_k(1:npwsp,1,jlmn,itypat)*bra(1,1:npwsp)
+            ket_mesh(2,1:npwsp)= gs_hamk%ffnl_k(1:npwsp,1,jlmn,itypat)*bra(2,1:npwsp)
+
+            bra_mesh(1,1:npwsp)=ket(1,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1,ilmn,itypat)
+            bra_mesh(2,1:npwsp)=ket(2,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1,ilmn,itypat)
+            ket_mesh(1,1:npwsp)= gs_hamk%ffnl_k(1:npwsp,1+gdir,jlmn,itypat)*bra(1,1:npwsp)
+            ket_mesh(2,1:npwsp)= gs_hamk%ffnl_k(1:npwsp,1+gdir,jlmn,itypat)*bra(2,1:npwsp)
+            
+            !call orbmag_mesh%accum_rmesh(adir,bra_mesh,dtset,gs_hamk,ket_mesh,.FALSE.,&
+            !  & mpi_enreg,npwsp,ph1d,ormesh_fac,t_atom,oterm)
+
+          end if
+          
+        end do !ilmn
+      end do !jlmn
+    end do ! isp
+  end do !iat
+
+  ABI_SFREE(dij_data)
+  ABI_SFREE(bra_mesh)
+  ABI_SFREE(ket_mesh)
+
+end subroutine convolution_vv2
+!!***
+
 !!****f* ABINIT/nonlocal_me
 !! NAME
 !! nonlocal_me
@@ -1995,6 +2130,7 @@ subroutine nonlocal_me(adir,atindx,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
   complex(dp) :: cpi,cpj,dij,ormesh_fac
   logical :: my_suppress_ormesh,need_ormesh
   ! arrays
+  real(dp),allocatable :: fofr(:,:,:,:)
   real(dp),allocatable,target :: bra_mesh(:,:),ket_mesh(:,:)
   complex(dp),allocatable :: dij_data(:,:,:)
 !--------------------------------------------------------------------
@@ -2077,8 +2213,14 @@ subroutine nonlocal_me(adir,atindx,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
             ormesh_fac = prefac*trnrm*dij*four_pi*CONJG(j_dpc**il)*four_pi*(j_dpc**jl)
             bra_mesh(1,1:npwsp)=bra(1,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1+dnlbra,ilmn,itypat)
             bra_mesh(2,1:npwsp)=bra(2,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1+dnlbra,ilmn,itypat)
-            call orbmag_mesh%accum_rmesh(adir,bra_mesh,dtset,gs_hamk,ket_mesh,.FALSE.,&
-              & mpi_enreg,npwsp,ph1d,ormesh_fac,t_atom,oterm)
+            
+            !call orbmag_mesh%accum_rmesh(adir,bra_mesh,dtset,gs_hamk,ket_mesh,.FALSE.,&
+            !  & mpi_enreg,npwsp,ph1d,ormesh_fac,t_atom,oterm)
+            ABI_MALLOC(fofr,(2,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6)))
+            call tatomfft(bra_mesh,dtset,fofr,gs_hamk,ket_mesh,.FALSE.,mpi_enreg,&
+              & dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),1,npw_k,ph1d,ormesh_fac,t_atom)
+            orbmag_mesh%rmesh(:,:,:,adir,oterm)=orbmag_mesh%rmesh(:,:,:,adir,oterm)+two*fofr(1,:,:,:)
+            ABI_SFREE(fofr)
 
           end if
           
@@ -2823,9 +2965,111 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_ij,pawrad,pawtab,psps)
 end subroutine make_d
 !!***
 
+!!****f* ABINIT/tatomfft
+!! NAME
+!! tatomfft
+!!
+!! FUNCTION
+!! compute realspace mesh anchored at target atom
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!! orbmag_mesh%rmesh updated
+!! 
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine tatomfft(bra,dtset,fofr,gs_hamk,ket,local_term,mpi_enreg,&
+    & n4,n5,n6,ndat,npw_k,ph1d,scalar_factor,t_atom)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: n4,n5,n6,ndat,npw_k,t_atom
+  complex(dp),intent(in) :: scalar_factor
+  logical,intent(in) :: local_term
+  type(dataset_type),intent(in) :: dtset
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+  type(MPI_type), intent(inout) :: mpi_enreg
+  !arrays
+  real(dp),intent(out) :: fofr(2,n4,n5,n6*ndat)
+  real(dp),intent(in),pointer :: bra(:,:),ket(:,:),ph1d(:,:)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: fourwf_cplex,fourwf_option,ig,kg1,kg2,kg3,n1,n2,n3
+  integer :: shift1,shift2,shift3,tim_fourwf
+  real(dp) :: weight_i,weight_r
+  complex(dp) :: cpw,ph1,ph2,ph3
+  !arrays
+  real(dp),allocatable :: denpot(:,:,:),fofgout(:,:),work(:,:)
+  complex(dp),allocatable :: phgr(:)
+
+!--------------------------------------------------------------------
+
+  n1=dtset%ngfft(1); n2=dtset%ngfft(2); n3=dtset%ngfft(3)
+
+  shift1=1+n1+(t_atom-1)*(2*n1+1)
+  shift2=1+n2+(t_atom-1)*(2*n2+1)+dtset%natom*(2*n1+1)
+  shift3=1+n3+(t_atom-1)*(2*n3+1)+dtset%natom*(2*n1+1+2*n2+1) 
+  ABI_MALLOC(phgr,(npw_k))
+  do ig=1,npw_k
+    kg1=gs_hamk%kg_k(1,ig)+shift1
+    kg2=gs_hamk%kg_k(2,ig)+shift2
+    kg3=gs_hamk%kg_k(3,ig)+shift3
+    ph1=CMPLX(ph1d(1,kg1),ph1d(2,kg1))
+    ph2=CMPLX(ph1d(1,kg2),ph1d(2,kg2))
+    ph3=CMPLX(ph1d(1,kg3),ph1d(2,kg3))
+    phgr(ig)=ph1*ph2*ph3
+  end do
+
+  if (local_term) then
+    ! if term of interest is local, compute exp(-iG.R)*conjg(bra)*scalar_factor*ket 
+    ! and then transform with fourwf. Here R is t_atom position; factor shifts from 
+    ! unit cell origin to dipole location
+    ABI_MALLOC(work,(2,npw_k))
+    do ig = 1, npw_k
+      cpw = CONJG(phgr(ig))*CONJG(CMPLX(bra(1,ig),bra(2,ig)))*scalar_factor*CMPLX(ket(1,ig),ket(2,ig))
+      work(1,ig) = REAL(cpw); work(2,ig) = AIMAG(cpw)
+    end do
+    fourwf_cplex = 1
+    fourwf_option = 0
+    tim_fourwf = 1
+    call fourwf(fourwf_cplex,denpot,work,fofgout,fofr,gs_hamk%gbound_k,&
+      & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
+      & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,npw_k,&
+      & n4,n5,n6,fourwf_option,tim_fourwf,weight_r,weight_i)
+    ABI_SFREE(work)
+  else
+    ! if nonlocal, transform ket with fourwf, then slow FT as scalar_factor*(sum_G exp(+iG.R)*conjg(bra))*fofr
+    ! here R is t_atom location; slow FT computes nonlocal field T(r',r) at r'=R: T(R,r)
+    fourwf_cplex = 1
+    fourwf_option = 0
+    tim_fourwf = 1
+    call fourwf(fourwf_cplex,denpot,ket,fofgout,fofr,gs_hamk%gbound_k,&
+      & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
+      & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,npw_k,&
+      & n4,n5,n6,fourwf_option,tim_fourwf,weight_r,weight_i)
+    cpw = czero
+    do ig = 1, npw_k
+      cpw = cpw + phgr(ig)*CONJG(CMPLX(bra(1,ig),bra(2,ig)))
+    end do
+    cpw = cpw*scalar_factor
+    fofr(1,:,:,:) = fofr(1,:,:,:)*REAL(cpw) - fofr(2,:,:,:)*AIMAG(cpw)
+  end if
+
+  ABI_SFREE(phgr)
+
+end subroutine tatomfft
+!!***
+
+
 !!****f* ABINIT/orbmag_rmesh_local
 !! NAME
-!! orbmag_rmesh
+!! orbmag_rmesh_local
 !!
 !! FUNCTION
 !! accumulate orbmag density local term on real mesh into orbmag structure
@@ -2912,7 +3156,6 @@ subroutine orbmag_rmesh_local(self,adir,bra,dtset,gs_hamk,ket,mpi_enreg,&
 
 end subroutine orbmag_rmesh_local
 !!***
-
 
 !!****f* ABINIT/orbmag_rmesh
 !! NAME
