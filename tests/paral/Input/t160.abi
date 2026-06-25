@@ -1,108 +1,174 @@
-##########################################################
-# Automatic test for ABINIT:                             #
-#    C 2 atoms, Diamond, LDA, PAW                        #
-#   DS1: GS calculation to create initial WFK            #
-#   DS2: RT-TDDFT with Impulsional TDEF                  #
-#   DS3: RT-TDDFT with Impulsional TDEF -- restart       #
-#   Test Impulse TD Electric field and restart           #
-#   without induced vector potential with paral_kgb 1    #
-##########################################################
+# Crystalline silicon. Calculation of the G0W0 corrections with the GWR code
+# Dataset 1: ground state calculation to get the density
+# Dataset 2: Direct diagonalization to produce the WFK file with empty states.
+# Dataset 3: one-shot G0W0 calculation in real-space and imaginary-time.
+# Dataset 4: same as dataset 3 but with convolution algorithms.
 
-ndtset 3
+ndtset 4
+timopt 1
+iomode 1
+istwfk *1
 
-# Parallelism
-paral_kgb 1
-npkpt 4
-npband 2
+# This to compute QP without symmetries for debugging purposes
+#nsym 1
+#kptopt 3
+#kptopt 2
 
-optdriver1 0 # Ground-state
-optdriver 9  # RT-TDDFT
+#useylm 1
+#useylm3 0
+#useylm4 0
 
-# RT-TDDFT section
-getwfk2 -1         # Read initial orbitals from the first dataset
-dtele  0.1         # Electronic time step
-ntime  50          # Maximum number or time step
-td_ef_type 1       # Impulse electric field
-td_ef_tzero 0.3    # applied at time tzero
-td_restart3 1      # DS3 restart trajectory from DS2
+####################
+# Dataset 1: SCF run
+####################
+nband1  6
+tolvrs1 1.e-8
 
-#Definition of the unit cell
-acell 3*3.53 angstrom  # Lengths of the primitive vectors (equilibrium volume)
-rprim                  # 3 orthogonal primitive vectors (FCC lattice)
-  0.0 1/2 1/2
-  1/2 0.0 1/2
-  1/2 1/2 0.0
-nsym 0                 # Automatic detection of symetries
+###########################################
+# Dataset 2: Direct diago with empty states
+###########################################
+optdriver2  6        # Activate GWR code
+gwr_task2 "HDIAGO"   # Direct diagonalization
+getden2       1
+nband2     40        # Number of (occ + empty) bands
 
-#Definition of the atom types and pseudopotentials
-ntypat 1          # There is only one type of atom
-znucl 6           # Atomic number of the possible type(s) of atom. Here carbon.
-pp_dirpath "$ABI_PSPDIR"        # Path to the directory where
-                                # pseudopotentials for tests are stored
-pseudos "Psdj_paw_pw_std/C.xml" # PAW atomic data for Carbon
 
-#Definition of the atoms
-natom 2           # There are two atoms
-typat 1 1         # They both are of type 1, that is, Carbon
-xred              # Location of the atoms: Diamond structure
-  0.0 0.0 0.0     #  Triplet giving the reduced coordinates of atom 1
-  1/4 1/4 1/4     #  Triplet giving the reduced coordinates of atom 2
+################################
+# Dataset 3: G0W0 with GWR code
+################################
+optdriver3  6        # Activate GWR code
+gwr_task3 "G0W0"     # One-shot calculation
+getden3 1
+getwfk3 2            # WFK file with empty states
 
-#Definition of bands and occupation numbers
-nband 8           # Compute 8 bands (4 occupied, 4 empty)
-nbdbuf 2          # No need to converge the last two empty bands
-occopt 1          # Automatic generation of occupation numbers, as a semiconductor
+prtvol3 1            # Write additional stuff to abo file for testing purposes.
+                     # DO NOT USE this option for production runs!
 
-#Numerical parameters of the calculation : planewave basis set and k point grid
-ecut 12           # Maximal plane-wave kinetic energy cut-off, in Hartree
-pawecutdg 24      # Max. plane-wave kinetic energy cut-off, in Ha, for the PAW double grid
-kptopt 3          # Automatic generation of k points, no taking symmetry into account
-ngkpt 2 2 2       # k-points grid based on the primitive vectors
-nshiftk 4         # of the reciprocal space, repeated four times,
-shiftk            # with different shifts:
-  0.5 0.5 0.5
-  0.5 0.0 0.0
-  0.0 0.5 0.0
-  0.0 0.0 0.5
-istwfk *1         # Wavefunctions are complex for all k-points
+gwr_ntau3   6        # Number of imaginary-time points
+gwr_chi_algo3 1      # Use supercell for chi
+gwr_sigma_algo3 1    # Use supercell for Sigma
+gwr_boxcutmin3  1.1  # This should be subject to convergence studies
+#mixprec3    1       # Mixed precision FFT.
+#gw_icutcoul3   16   # Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+#gw_icutcoul3   0    # Spherical cutoff
+#ecutwfn3 3.0
+gwr_ucsc_batch3 3 5
+gwr_np_kgts3 1 4 1 1
 
-#Parameters for the SCF procedure
-nstep 20          # Maximal number of SCF cycles
-tolvrs 1.0d-10    # Will stop when, twice in a row, the difference
-                  # between two consecutive evaluations of potential residual
-                  # differ by less than tolvrs
-tolwfr 1.0d-20    # Additional convergence criterion on the largest residual
-                  # to ensure that wavefunctions are also tighlty converged
-                  # as they will be used as initial conditions for the following
-                  # RT-TDDFT run
+nband3      30       # Bands to be used in the screening calculation
+ecuteps3    4        # Cut-off energy of the planewave set to represent the dielectric matrix.
+                     # It is important to adjust this parameter.
+ecutsigx3    4.0     # Dimension of the G sum in Sigma_x.
+                     # ecutsigx = ecut is usually a wise choice
+                     # (the dimension in Sigma_c is controlled by ecuteps)
 
-#Printing parameters
-prtwf1 1          # Print wavefunctions (required for following RT-TDDFT runs)
-prtwf 0           # Do not print wavefunctions at each step during RT-TDDFT
-prtden 0          # Do not print density
-prteig 0          # Do not print eigenvalues
-prtebands 0       # Do not print ebands
-prtgsr 0          # Do not print GSR
-prtcurrent 1      # Print current
+nkptgw3      2       # number of k-point where to calculate the GW correction
+kptgw3               # k-points in reduced coordinates
+   0.0    0.0    0.0
+   0.5    0.0    0.0
+
+bdgw3       # calculate GW corrections for bands from 4 to 5
+   4  5
+   4  5
+
+# Spectral function (very coarse grid to reduce txt file size)
+nfreqsp3 50
+freqspmax3 5 eV
+
+################################
+# Dataset 4: G0W0 with GWR code
+################################
+optdriver4  6        # Activate GWR code
+gwr_task4 "G0W0"     # One-shot calculation
+getden4 1
+getwfk4 2            # WFK file with empty states
+
+prtvol4 1            # Write additional stuff to abo file for testing purposes.
+                     # DO NOT USE this option for production runs!
+
+gwr_ntau4   6        # Number of imaginary-time points
+gwr_chi_algo4 2      # Use supercell for chi
+gwr_sigma_algo4 2    # Use supercell for Sigma
+gwr_boxcutmin4  1.1  # This should be subject to convergence studies
+#mixprec4    1       # Mixed precision FFT.
+#gw_icutcoul4   16   # Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+#gw_icutcoul4   0    # Spherical cutoff
+#ecutwfn4 3.0
+gwr_ucsc_batch4 3 5
+gwr_np_kgts4 1 4 1 1
+
+nband4      30       # Bands to be used in the screening calculation
+ecuteps4    4        # Cut-off energy of the planewave set to represent the dielectric matrix.
+                     # It is important to adjust this parameter.
+ecutsigx4    4.0     # Dimension of the G sum in Sigma_x.
+                     # ecutsigx = ecut is usually a wise choice
+                     # (the dimension in Sigma_c is controlled by ecuteps)
+
+nkptgw4      2       # number of k-point where to calculate the GW correction
+kptgw4               # k-points in reduced coordinates
+   0.0    0.0    0.0
+   0.5    0.0    0.0
+
+bdgw4       # calculate GW corrections for bands from 4 to 5
+   4  5
+   4  5
+
+# Spectral function (very coarse grid to reduce txt file size)
+nfreqsp4 50
+freqspmax4 5 eV
+
+# Definition of the k-point grid
+# IMPORTANT: GWR requires Gamma-centered k-meshes
+ngkpt   2 2 2
+#ngkpt   4 4 4
+nshiftk 1
+shiftk  0.0 0.0 0.0
+
+ecut 4.0          # Maximal kinetic energy cut-off, in Hartree
+
+# Definition of the SCF procedure
+nstep   20        # Maximal number of SCF cycles
+diemac  12.0      # Although this is not mandatory, it is worth to
+                  # precondition the SCF cycle. The model dielectric
+                  # function used as the standard preconditioner
+                  # is described in the "dielng" input variable section.
+                  # Here, we follow the prescription for bulk silicon.
+
+# Definition of the unit cell: fcc
+acell  3*10.26         # Experimental lattice constants in Bohr
+rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat  1
+znucl 14
+
+# Definition of the atoms
+natom  2
+typat  1 1
+xred
+      0.0  0.0  0.0
+      0.25 0.25 0.25
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Psdj_nc_sr_04_pbe_std_psp8/Si.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% [files]
-#%% [paral_info]
-#%% nprocs_to_test = 8
-#%% max_nprocs = 8
-#%% [NCPU_8]
+#%% exclude_builders = haicgu_*
+#%% need_cpp_vars = HAVE_LINALG_SCALAPACK
+#%% [NCPU_4]
 #%% files_to_test =
-#%%   t113_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
-#%%   t113_MPI8o_DS2_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
-#%%   t113_MPI8o_DS2_TDCURRENT, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
-#%%   t113_MPI8o_DS2_TDEFIELD, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
+#%%   t160_MPI4.abo, tolnlines = 25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
 #%% [extra_info]
-#%% authors = F. Brieuc
-#%% keywords = RTTDDFT
+#%% authors = M. Giantomassi
+#%% keywords = NC, GWR
 #%% description =
-#%%   Diamond, LDA, PAW
-#%%   Tests RT-TDDFT with time-dependent electric field
-#%% topics = RTTDDFT
+#%%  Crystalline silicon
+#%%  Calculation of the GW corrections with GWR code.
 #%%<END TEST_INFO>

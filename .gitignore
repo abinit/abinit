@@ -6,7 +6,7 @@ configure
 .tox
 .idea
 .cache
-*.sw[op]
+*.sw[opklmn]
 __pycache__
 .ipynb_checkpoints
 .version
@@ -204,9 +204,7 @@ mkdocs_plugins/dist
 /shared/common/src/18_timing/.deps
 /shared/common/src/*/*.lst
 /shared/libpaw/src/*.lst
-/src/.abilint
 /src/*/*.lst
-/src/abilint.log
 /src/abirules.log
 /src/error_make_abiauty
 /src/52_manage_cuda/.deps

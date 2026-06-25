@@ -115,10 +115,10 @@ module m_ddk
   ! Store arrays targetted by the hamiltonians.
 
   real(dp), allocatable :: gh1c(:,:,:)
-   !gh1c, (2, mpw*nspinor, 3))
+   !gh1c, (2, npw_k*nspinor, 3))
 
   real(dp), allocatable :: gs1c(:,:,:)
-   ! gs1c, (2, mpw*nspinor, 3*psps%usepaw))
+   ! gs1c, (2, npw_k*nspinor, 3*psps%usepaw))
 
  contains
 
@@ -133,6 +133,9 @@ module m_ddk
 
    procedure :: get_braket => ddkop_get_braket
     ! Compute matrix element (complex results) in cartesian coords.
+
+   procedure :: get_ihr_comm => ddkop_get_ihr_comm
+    ! Compute matrix elements of i[H,r] (complex results) in cartesian coords.
 
    procedure :: get_vdiag => ddkop_get_vdiag
     ! Compute diagonal matrix element (real) in cartesian coords.
@@ -672,7 +675,7 @@ end subroutine ddk_red2car
 !!  ddkop_init
 !!
 !! FUNCTION
-!!  Build new object. Use dtset%inclvkb to determine whether non-local part should be included.
+!!  Build new object. Use dtset%inclvkb to determine whether the non-local part should be included.
 !!
 !! INPUTS
 !! dtset<dataset_type>=All input variables for this dataset.
@@ -682,8 +685,6 @@ end subroutine ddk_red2car
 !! mpi_enreg=information about MPI parallelization
 !! mpw=Maximum number of plane-waves over k-points.
 !! ngfft(18)=contain all needed information about 3D FFT
-!!
-!! OUTPUT
 !!
 !! SOURCE
 
@@ -722,9 +723,6 @@ subroutine ddkop_init(new, dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft)
  nfft = product(ngfft(1:3))
  mgfft = maxval(ngfft(1:3))
 
- ABI_MALLOC(new%gh1c, (2, new%mpw*dtset%nspinor, 3))
- ABI_MALLOC(new%gs1c, (2, new%mpw*dtset%nspinor, 3))
-
  do idir=1,3
    ! ==== Initialize most of the Hamiltonian (and derivative) ====
    ! 1) Allocate all arrays and initialize quantities that do not depend on k and spin.
@@ -732,9 +730,10 @@ subroutine ddkop_init(new, dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft)
    ! * Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
    ! * PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
    call new%gs_hamkq(idir)%init(psps, pawtab, dtset%nspinor, dtset%nsppol, dtset%nspden, cryst%natom,&
-     cryst%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg)
+     cryst%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg, &
      !paw_ij=paw_ij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-     !usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
+     !usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,
+     gpu_option=dtset%gpu_option)
 
    ! Prepare application of the NL part.
    call new%rf_hamkq(idir)%init(cplex1, new%gs_hamkq(idir), new%ipert, has_e1kbsc=.true.)
@@ -796,6 +795,9 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
    useylmgr1 = 1; optder = 1
  end if
 
+ ABI_RECALLOC(self%gh1c, (2, npw_k*dtset%nspinor, 3))
+ ABI_RECALLOC(self%gs1c, (2, npw_k*dtset%nspinor, 3))
+
  ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
  ABI_MALLOC(ylmgr1_k, (npw_k, 3+6*(optder/2), psps%mpsang**2*psps%useylm*useylmgr1))
 
@@ -851,7 +853,7 @@ end subroutine ddkop_setup_spin_kpoint
 !!
 !! SIDE EFFECTS
 !! Stores:
-!!  gh1c(2,npw1*nspinor)= <G|H^(1)|C> or <G|H^(1)-lambda.S^(1)|C> on the k+q sphere
+!!  gh1c(2,npw_k*nspinor)= <G|H^(1)|C> or <G|H^(1)-lambda.S^(1)|C> on the k+q sphere
 !!                        (only kinetic+non-local parts if optlocal=0)
 !!
 !! SOURCE
@@ -860,7 +862,7 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
 
 !Arguments ------------------------------------
 !scalars
- class(ddkop_t),intent(inout) :: self
+ class(ddkop_t),target,intent(inout) :: self
  integer,intent(in) :: npw_k, nspinor
  real(dp),intent(in) :: eig0nk
 !arrays
@@ -874,16 +876,16 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
  real(dp) :: eshift
 !arrays
  real(dp) :: grad_berry(2,(berryopt0/4)), gvnlx1(2,usevnl0)
- real(dp),pointer :: dkinpw(:),kinpw1(:)
 !************************************************************************
 
  self%eig0nk = eig0nk
 
  if (self%inclvkb /= 0) then
+ !if (.True.) then
    ! optlocal0 = 0: local part of H^(1) is not computed in gh1c=<G|H^(1)|C>
    ! optnl = 2: non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
    ! opt_gvnlx1 = option controlling the use of gvnlx1 array:
-   optnl = 2 !; if (self%inclvkb == 0) optnl = 0
+   optnl = 2; if (self%inclvkb == 0) optnl = 0
 
    eshift = self%eig0nk - self%dfpt_sciss
    do idir=1,3
@@ -897,8 +899,7 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
    ! FIXME: optnl 0 with DDK does not work as expected.
    ! So I treat the kinetic term explicitly without calling getgh1c.
    do idir=1,3
-     kinpw1 => self%gs_hamkq(idir)%kinpw_kp
-     dkinpw => self%rf_hamkq(idir)%dkinpw_k
+     associate (kinpw1 => self%gs_hamkq(idir)%kinpw_kp, dkinpw => self%rf_hamkq(idir)%dkinpw_k)
      do ispinor=1,nspinor
        do ipw=1,npw_k
          ipws = ipw + npw_k*(ispinor-1)
@@ -909,7 +910,8 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
          end if
        end do
      end do
-   end do
+     end associate
+   end do ! idir
  end if
 
 end subroutine ddkop_apply
@@ -989,6 +991,88 @@ function ddkop_get_braket(self, eig0mk, istwf_k, npw_k, nspinor, brag, mode) res
  end select
 
 end function ddkop_get_braket
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddk/ddkop_get_ihr_comm
+!! NAME
+!!  ddkop_get_ihr_comm
+!!
+!! FUNCTION
+!!  Compute matrix element in Cartesian coordinates.
+!!
+!! INPUTS
+!!  eig0mk: Eigenvalue associated to the "bra" wavefunction
+!!  istwkf_k: defines storage of wavefunctions for this k-point
+!!  npw_k: Number of planewaves.
+!!  nspinor: Number of spinor components.
+!!  brag(2,npw_k*nspinor)=input wavefunction in reciprocal space
+!!
+!! SOURCE
+
+subroutine ddkop_get_ihr_comm(self, cryst, eig0mk, istwf_k, npw_k, nspinor, brag, new_rhotwx)
+
+!Arguments ------------------------------------
+!scalars
+ class(ddkop_t),intent(in) :: self
+ type(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: istwf_k, npw_k, nspinor
+ real(dp),intent(in) :: eig0mk
+!arrays
+ real(dp),intent(in) :: brag(2,npw_k*nspinor)
+ complex(gwp),intent(out) :: new_rhotwx(3, nspinor**2)
+
+!Local variables-------------------------------
+!scalars
+ integer :: idir, iab
+ real(dp) :: doti
+!arrays
+ integer :: spinor_pad(2,4), spad1, spad2 !, rtmp(2)
+ real(dp) :: dotarr(2)
+!  real(dp), allocatable :: cg2_dp(:,:),  ddk_ug1(:,:,:)
+!************************************************************************
+
+ spinor_pad = reshape([0, 0, npw_k, npw_k, 0, npw_k, npw_k, 0], [2, 4])
+
+ if (self%usepaw == 0) then
+   ! <u_(iband,k+q)^(0)|H_(k+q,k)^(1)|u_(jband,k)^(0)>  (NC psps)
+   do iab=1,nspinor**2
+     spad1 = spinor_pad(1,iab); spad2 = spinor_pad(2,iab)
+     do idir=1,3
+       dotarr = cg_zdotc(npw_k, brag(:,spad2+1), self%gh1c(:,spad1+1,idir))
+       if (istwf_k > 1) then
+         doti = two * dotarr(2)
+         if (istwf_k == 2 .and. self%mpi_enreg%me_g0 == 1) then
+           ! nspinor always 1
+           ! TODO: Recheck this part but it should be ok.
+           doti = doti - (brag(1,1) * self%gh1c(2,1,idir) - brag(2,1) * self%gh1c(1,1,idir))
+         end if
+         dotarr(2) = doti; dotarr(1) = zero
+       end if
+       new_rhotwx(idir, iab) = dotarr(1) + j_dpc * dotarr(2)
+     end do
+   end do ! iab
+ else
+   ABI_ERROR("PAW Not Implemented")
+   ! <u_(iband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(jband,k)^(0)> (PAW)
+   ! eshiftkq = half * (eig0mk - self%eig0nk)
+   ABI_UNUSED(eig0mk)
+ end if
+
+ ! HM: 24/07/2018
+ ! Transform dipoles to be consistent with results from DFPT
+ ! Perturbations with DFPT are along the reciprocal lattice vectors
+ ! Perturbations with commutator are along real space lattice vectors
+ ! dot(A, DFPT) = X
+ ! dot(B, COMM) = X
+ ! B = 2 pi (A^{-1})^T => dot(B^T B,COMM) = 2 pi DFPT
+
+ do iab=1,nspinor**2
+   new_rhotwx(:, iab) = matmul(cryst%rmet, new_rhotwx(:, iab)) / (two_pi ** 2)
+ end do
+
+end subroutine ddkop_get_ihr_comm
 !!***
 
 !----------------------------------------------------------------------
