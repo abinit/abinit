@@ -197,6 +197,7 @@ module m_orbmag
   private :: orbmag_nl_k
   private :: orbmag_nl1_k
   private :: nonlocal_me
+  private :: nonlocal_me_mesh
   private :: convolution_vv2
   private :: tatomfft
   private :: make_d
@@ -971,15 +972,19 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
      select case (nl1_option)
      case(1)
        call nonlocal_me(adir,atindx,cwavef,cwaveprj,dum_dnlbra,dum_dnlket,&
-         & dterm,dtset,eig_k(nn),fermie,gs_hamk,cwavef,mpi_enreg,tt,npw_k,&
-         & orbmag_mesh,inlr,ph1d,prefac_m,pawtab,trnrm(nn),&
-         & suppress_ormesh=my_suppress_ormesh)
+         & dterm,dtset,eig_k(nn),fermie,cwavef,tt,npw_k,inlr,prefac_m,pawtab)
+       !call nonlocal_me(adir,atindx,cwavef,cwaveprj,dum_dnlbra,dum_dnlket,&
+       !  & dterm,dtset,eig_k(nn),fermie,gs_hamk,cwavef,mpi_enreg,tt,npw_k,&
+       !  & orbmag_mesh,inlr,ph1d,prefac_m,pawtab,trnrm(nn),&
+       !  & suppress_ormesh=my_suppress_ormesh)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inlr) = real(tt)
      case(2)
        call nonlocal_me(adir,atindx,cwavef,cwaveprj,dum_dnlbra,dum_dnlket,&
-         & dterm,dtset,eig_k(nn),fermie,gs_hamk,cwavef,mpi_enreg,tt,npw_k,&
-         & orbmag_mesh,inbm,ph1d,prefac_m,pawtab,trnrm(nn),&
-         & suppress_ormesh=my_suppress_ormesh)
+         & dterm,dtset,eig_k(nn),fermie,cwavef,tt,npw_k,inbm,prefac_m,pawtab)
+       !call nonlocal_me(adir,atindx,cwavef,cwaveprj,dum_dnlbra,dum_dnlket,&
+       !  & dterm,dtset,eig_k(nn),fermie,gs_hamk,cwavef,mpi_enreg,tt,npw_k,&
+       !  & orbmag_mesh,inbm,ph1d,prefac_m,pawtab,trnrm(nn),&
+       !  & suppress_ormesh=my_suppress_ormesh)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inbm) = real(tt)
      case default
        tt = czero
@@ -1091,10 +1096,12 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
      bdir=modulo(adir,3)+1
      gdir=modulo(bdir,3)+1
    
-     call nonlocal_me(adir,atindx,unk,cwaveprj,bdir,gdir,&
-       & dterm,dtset,eig_k(nn),fermie,gs_hamk,unk,mpi_enreg,&
-       & txt,npw_k,orbmag_mesh,innl,ph1d,prefac_m,pawtab,trnrm(nn),&
-       & suppress_ormesh=my_suppress_ormesh)
+     call nonlocal_me(adir,atindx,unk,cwaveprj,bdir,gdir,dterm,dtset,&
+       & eig_k(nn),fermie,unk,txt,npw_k,innl,prefac_m,pawtab)
+     !call nonlocal_me(adir,atindx,unk,cwaveprj,bdir,gdir,&
+     !  & dterm,dtset,eig_k(nn),fermie,gs_hamk,unk,mpi_enreg,&
+     !  & txt,npw_k,orbmag_mesh,innl,ph1d,prefac_m,pawtab,trnrm(nn),&
+     !  & suppress_ormesh=my_suppress_ormesh)
      m1(adir) = m1(adir) + txt
   
    end do ! adir
@@ -1267,16 +1274,16 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
      m1(adir) = m1(adir) + prefac_m*CMPLX(mdot(1),mdot(2))
      b1(adir) = b1(adir) - two*prefac_b*CMPLX(bdot(1),bdot(2))
 
-     if (need_ormesh) then
-       ormesh_fac = trnrm(nn)*prefac_m
-       ! local part 
-       call orbmag_mesh%accum_rmesh_local(adir,du_dbeta,dtset,gs_hamk,ghc_local,mpi_enreg,&
-         & npwsp,ph1d,ormesh_fac,t_atom,incc)
-       ! nonlocal part
-       call nonlocal_me(adir,atindx,du_dbeta,cwaveprj1,dum_dnlbra,dum_dnlket,dterm,dtset,&
-         & eig_k(nn),fermie,gs_hamk,du_dgamma,mpi_enreg,nlme,npw_k,orbmag_mesh,incc,ph1d,&
-         & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
-     end if
+     !if (need_ormesh) then
+     !  ormesh_fac = trnrm(nn)*prefac_m
+     !  ! local part 
+     !  call orbmag_mesh%accum_rmesh_local(adir,du_dbeta,dtset,gs_hamk,ghc_local,mpi_enreg,&
+     !    & npwsp,ph1d,ormesh_fac,t_atom,incc)
+     !  ! nonlocal part
+     !  call nonlocal_me(adir,atindx,du_dbeta,cwaveprj1,dum_dnlbra,dum_dnlket,dterm,dtset,&
+     !    & eig_k(nn),fermie,gs_hamk,du_dgamma,mpi_enreg,nlme,npw_k,orbmag_mesh,incc,ph1d,&
+     !    & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
+     !end if
 
    end do ! adir
 
@@ -1461,27 +1468,27 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
      m1(adir) = m1(adir) + prefac_m*CONJG(bdotc)*eig_k(nn)
      m1_mu(adir) = m1_mu(adir) - prefac_m*CONJG(bdotc)*fermie
 
-     if (need_ormesh) then
-       ! <u|p>qij<d_beta p|Pc d_gamma u>
-       call nonlocal_me(adir,atindx,unk,cwaveprj,dum_dnlbra,bdir,dterm,dtset,&
-         & eig_k(nn),fermie,gs_hamk,du_dgamma,mpi_enreg,nlme,npw_k,orbmag_mesh,invv1,ph1d,&
-         & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
-       
-       ! <u|d_beta p>qij<p|Pc d_gamma u>
-       call nonlocal_me(adir,atindx,unk,cwaveprj,bdir,dum_dnlket,dterm,dtset,&
-         & eig_k(nn),fermie,gs_hamk,du_dgamma,mpi_enreg,nlme,npw_k,orbmag_mesh,invv1,ph1d,&
-         & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
-       
-       ! <Pc d_beta u|p>qij<d_gamma p|u>
-       call nonlocal_me(adir,atindx,du_dbeta,cwaveprj,dum_dnlbra,gdir,dterm,dtset,&
-         & eig_k(nn),fermie,gs_hamk,unk,mpi_enreg,nlme,npw_k,orbmag_mesh,invv1,ph1d,&
-         & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
-       
-       ! <Pc d_beta u|d_gamma p>qij<p|u>
-       call nonlocal_me(adir,atindx,du_dbeta,cwaveprj,gdir,dum_dnlket,dterm,dtset,&
-         & eig_k(nn),fermie,gs_hamk,unk,mpi_enreg,nlme,npw_k,orbmag_mesh,invv1,ph1d,&
-         & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
-     end if
+     !if (need_ormesh) then
+     !  ! <u|p>qij<d_beta p|Pc d_gamma u>
+     !  call nonlocal_me(adir,atindx,unk,cwaveprj,dum_dnlbra,bdir,dterm,dtset,&
+     !    & eig_k(nn),fermie,gs_hamk,du_dgamma,mpi_enreg,nlme,npw_k,orbmag_mesh,invv1,ph1d,&
+     !    & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
+     !  
+     !  ! <u|d_beta p>qij<p|Pc d_gamma u>
+     !  call nonlocal_me(adir,atindx,unk,cwaveprj,bdir,dum_dnlket,dterm,dtset,&
+     !    & eig_k(nn),fermie,gs_hamk,du_dgamma,mpi_enreg,nlme,npw_k,orbmag_mesh,invv1,ph1d,&
+     !    & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
+     !  
+     !  ! <Pc d_beta u|p>qij<d_gamma p|u>
+     !  call nonlocal_me(adir,atindx,du_dbeta,cwaveprj,dum_dnlbra,gdir,dterm,dtset,&
+     !    & eig_k(nn),fermie,gs_hamk,unk,mpi_enreg,nlme,npw_k,orbmag_mesh,invv1,ph1d,&
+     !    & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
+     !  
+     !  ! <Pc d_beta u|d_gamma p>qij<p|u>
+     !  call nonlocal_me(adir,atindx,du_dbeta,cwaveprj,gdir,dum_dnlket,dterm,dtset,&
+     !    & eig_k(nn),fermie,gs_hamk,unk,mpi_enreg,nlme,npw_k,orbmag_mesh,invv1,ph1d,&
+     !    & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
+     !end if
 
      ! compute VV2 contributions
      ! sum over n,n', but n=n' term vanishes and n,n' term = -n',n term. Thus
@@ -2082,17 +2089,17 @@ subroutine convolution_vv2(adir,atindx,bra,bdir,cwaveprj,dterm,dtset,&
 end subroutine convolution_vv2
 !!***
 
-!!****f* ABINIT/nonlocal_me
+!!****f* ABINIT/nonlocal_me_mesh
 !! NAME
-!! nonlocal_me
+!! nonlocal_me_mesh
 !!
 !! FUNCTION
-!! General application of <bra|p>dij<p|ket> 
+!! Return <bra|p>dij<p|ket> on real space mesh
 !!
 !! INPUTS
 !!
 !! OUTPUT
-!! complex(dp) nlme
+!! fofr()
 !!
 !! NOTES
 !! computes on-site prefac*\sum_{Rij}<bra|d_bra_dir p_i>aij<d_ket_dir p_j|ket>
@@ -2101,7 +2108,7 @@ end subroutine convolution_vv2
 !!
 !! SOURCE
 
-subroutine nonlocal_me(adir,atindx,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
+subroutine nonlocal_me_mesh(adir,atindx,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
     & eignk,fermie,gs_hamk,ket,mpi_enreg,nlme,npw_k,orbmag_mesh,oterm,ph1d,&
     & prefac,pawtab,trnrm,suppress_ormesh)
   !Arguments ------------------------------------
@@ -2265,6 +2272,138 @@ subroutine nonlocal_me(adir,atindx,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
   ABI_SFREE(dij_data)
   ABI_SFREE(bra_mesh)
   ABI_SFREE(ket_mesh)
+
+end subroutine nonlocal_me_mesh
+!!***
+
+!!****f* ABINIT/nonlocal_me
+!! NAME
+!! nonlocal_me
+!!
+!! FUNCTION
+!! General application of <bra|p>dij<p|ket> 
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!! complex(dp) nlme
+!!
+!! NOTES
+!! computes on-site prefac*\sum_{Rij}<bra|d_bra_dir p_i>aij<d_ket_dir p_j|ket>
+!! dnlbra = 0 if no derivative, dnlbra = adir,bdir,gdir for derivative in *dir direction
+!! dnlket = 0 if no derivative, dnlket = adir,bdir,gdir for derivative in *dir direction
+!!
+!! SOURCE
+
+subroutine nonlocal_me(adir,atindx,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
+    & eignk,fermie,ket,nlme,npw_k,oterm,prefac,pawtab)
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: adir,dnlbra,dnlket,npw_k,oterm
+  real(dp),intent(in) :: eignk,fermie
+  complex(dp),intent(in) :: prefac
+  complex(dp),intent(out) :: nlme
+  type(dataset_type),intent(in) :: dtset
+  type(dterm_type),intent(in) :: dterm
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(in),pointer :: bra(:,:),ket(:,:)
+  type(pawcprj_type),intent(in) :: cwaveprj(dtset%natom,dtset%nspinor)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: iat,iatom,ilmn,isp,itypat,jlmn,klmn,npwsp
+  complex(dp) :: cpi,cpj,dij
+  ! arrays
+  complex(dp),allocatable :: dij_data(:,:,:)
+!--------------------------------------------------------------------
+  
+  npwsp = npw_k*dtset%nspinor
+  
+  ABI_MALLOC(dij_data,(dtset%natom,dterm%lmn2max,dterm%ndij))
+  select case (oterm)
+  case (inlr)
+    dij_data = dterm%LR(:,:,:,adir)
+  case (inbm)
+    dij_data = dterm%BM(:,:,:,adir)
+  case (innl)
+    dij_data = dterm%aij - eignk*dterm%qij
+  case (incc) 
+    dij_data = dterm%aij + (eignk-two*fermie)*dterm%qij
+  case (invv1)
+    dij_data = (eignk-fermie)*dterm%qij
+  case (invv2)
+    dij_data = (eignk-fermie)*dterm%qij
+  case DEFAULT
+    dij_data = czero
+  end select
+
+  nlme = czero
+  do iat = 1, dtset%natom
+    iatom = atindx(iat)
+    itypat=dtset%typat(iat)
+    do isp = 1, dtset%nspinor
+      do jlmn = 1, pawtab(itypat)%lmn_size
+
+        do ilmn = 1, pawtab(itypat)%lmn_size
+          klmn=MATPACK(ilmn,jlmn)
+          if (dnlbra .NE. 0) then
+            cpi=CMPLX(cwaveprj(iatom,isp)%dcp(1,dnlbra,ilmn),cwaveprj(iatom,isp)%dcp(2,dnlbra,ilmn))
+          else
+            cpi=CMPLX(cwaveprj(iatom,isp)%cp(1,ilmn),cwaveprj(iatom,isp)%cp(2,ilmn))
+          end if
+          if (dnlket .NE. 0) then
+            cpj=CMPLX(cwaveprj(iatom,isp)%dcp(1,dnlket,jlmn),cwaveprj(iatom,isp)%dcp(2,dnlket,jlmn))
+          else
+            cpj=CMPLX(cwaveprj(iatom,isp)%cp(1,jlmn),cwaveprj(iatom,isp)%cp(2,jlmn))
+          end if
+          dij = dij_data(iatom,klmn,isp)
+          ! see note at top of file near definition of MATPACK macro
+          if (ilmn .GT. jlmn) dij = CONJG(dij)
+          
+          ! note use of CONJG(cpi), because cpi is from the bra side cprj
+          nlme = nlme + prefac*CONJG(cpi)*dij*cpj
+         
+          ! in ndij = 4 case, isp 1 delivers up-up, isp 2 delivers down-down
+          if (dterm%ndij == 4) then
+            if (isp == 1) then
+              dij = dij_data(iatom,klmn,3) ! up-down
+              ! D^ss'_ij=D^s's_ji^*
+              if (ilmn .GT. jlmn) dij = CONJG(dij_data(iatom,klmn,4))
+              if (dnlbra .NE. 0) then
+                cpi=CMPLX(cwaveprj(iatom,1)%dcp(1,dnlbra,ilmn),cwaveprj(iatom,1)%dcp(2,dnlbra,ilmn))
+              else
+                cpi=CMPLX(cwaveprj(iatom,1)%cp(1,ilmn),cwaveprj(iatom,1)%cp(2,ilmn))
+              end if
+              if (dnlket .NE. 0) then
+                cpj=CMPLX(cwaveprj(iatom,2)%dcp(1,dnlket,jlmn),cwaveprj(iatom,2)%dcp(2,dnlket,jlmn))
+              else
+                cpj=CMPLX(cwaveprj(iatom,2)%cp(1,jlmn),cwaveprj(iatom,2)%cp(2,jlmn))
+              end if
+            else
+              dij = dij_data(iatom,klmn,4) ! down-up
+              ! D^ss'_ij=D^s's_ji^*
+              if (ilmn .GT. jlmn) dij = CONJG(dij_data(iatom,klmn,3))
+              if (dnlbra .NE. 0) then
+                cpi=CMPLX(cwaveprj(iatom,2)%dcp(1,dnlbra,ilmn),cwaveprj(iatom,2)%dcp(2,dnlbra,ilmn))
+              else
+                cpi=CMPLX(cwaveprj(iatom,2)%cp(1,ilmn),cwaveprj(iatom,2)%cp(2,ilmn))
+              end if
+              if (dnlket .NE. 0) then
+                cpj=CMPLX(cwaveprj(iatom,1)%dcp(1,dnlket,jlmn),cwaveprj(iatom,1)%dcp(2,dnlket,jlmn))
+              else
+                cpj=CMPLX(cwaveprj(iatom,1)%cp(1,jlmn),cwaveprj(iatom,1)%cp(2,jlmn))
+              end if
+            end if
+            nlme = nlme + prefac*CONJG(cpi)*cpj*dij
+          end if
+        end do !ilmn
+      end do !jlmn
+    end do ! isp
+  end do !iat
+
+  ABI_SFREE(dij_data)
 
 end subroutine nonlocal_me
 !!***
