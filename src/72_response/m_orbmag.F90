@@ -1061,12 +1061,12 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,gdir,nn,npwsp
+  integer :: adir,bdir,gdir,n4,n5,n6,ndat,nn,npwsp
   complex(dp) :: prefac_m,txt
-  logical :: my_suppress_ormesh
+  logical :: my_suppress_ormesh,need_ormesh
   !arrays
+  real(dp),allocatable :: fofr(:,:,:,:)
   real(dp),pointer :: unk(:,:)
-  complex(dp) :: m1(3)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 !--------------------------------------------------------------------
@@ -1076,17 +1076,22 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
  else
    my_suppress_ormesh=.FALSE.
  end if
+ need_ormesh = ((dtset%orbmag .EQ. 4) .AND. (.NOT. my_suppress_ormesh))
+ if (need_ormesh) then
+   n4=dtset%ngfft(4); n5=dtset%ngfft(5); n6=dtset%ngfft(6); ndat=1
+   ABI_MALLOC(fofr,(2,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6)*ndat))
+ end if
  
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
  call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
 
+ npwsp = npw_k*dtset%nspinor
  do nn = 1, nband_k
 
    unk => cg_k(1:2,(nn-1)*npwsp+1:nn*npwsp)
    call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
      & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
 
-   m1(1:3) = czero
    prefac_m = -com*c2
    do adir = 1, 3
      
@@ -1098,23 +1103,25 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
    
      call nonlocal_me(adir,atindx,unk,cwaveprj,bdir,gdir,dterm,dtset,&
        & eig_k(nn),fermie,unk,txt,npw_k,innl,prefac_m,pawtab)
-     !call nonlocal_me(adir,atindx,unk,cwaveprj,bdir,gdir,&
-     !  & dterm,dtset,eig_k(nn),fermie,gs_hamk,unk,mpi_enreg,&
-     !  & txt,npw_k,orbmag_mesh,innl,ph1d,prefac_m,pawtab,trnrm(nn),&
-     !  & suppress_ormesh=my_suppress_ormesh)
-     m1(adir) = m1(adir) + txt
+
+     if (need_ormesh) then
+       call nonlocal_me_mesh(adir,atindx,unk,cwaveprj,bdir,gdir,&
+         & dterm,dtset,eig_k(nn),fermie,fofr,gs_hamk,unk,mpi_enreg,&
+         & n4,n5,n6,ndat,npw_k,innl,ph1d,prefac_m,pawtab,trnrm(nn))
+       orbmag_mesh%rmesh(:,:,:,adir,innl)=orbmag_mesh%rmesh(:,:,:,adir,innl)+two*fofr(1,:,:,:)
+     end if
+     ! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
+     ! double the original even term: this is the origin of the factor of two
+     orbmag_mesh%omesh(nn,ikpt,isppol,adir,innl) = two*real(txt)
   
    end do ! adir
-   
-   ! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
-   ! double the original even term: this is the origin of the factor of two
-   orbmag_mesh%omesh(nn,ikpt,isppol,1:3,innl) = two*real(m1(1:3))
 
  end do !nn
 
  call pawcprj_free(cwaveprj)
  ABI_SFREE(cwaveprj)
  IF(ASSOCIATED(unk)) NULLIFY(unk)
+ ABI_SFREE(fofr)
 
 end subroutine orbmag_nl_k
 !!***
@@ -2109,22 +2116,20 @@ end subroutine convolution_vv2
 !! SOURCE
 
 subroutine nonlocal_me_mesh(adir,atindx,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
-    & eignk,fermie,gs_hamk,ket,mpi_enreg,nlme,npw_k,orbmag_mesh,oterm,ph1d,&
-    & prefac,pawtab,trnrm,suppress_ormesh)
+    & eignk,fermie,fofr,gs_hamk,ket,mpi_enreg,n4,n5,n6,ndat,npw_k,oterm,ph1d,&
+    & prefac,pawtab,trnrm)
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: adir,dnlbra,dnlket,npw_k,oterm
+  integer,intent(in) :: adir,dnlbra,dnlket,n4,n5,n6,ndat,npw_k,oterm
   real(dp),intent(in) :: eignk,fermie,trnrm
   complex(dp),intent(in) :: prefac
-  complex(dp),intent(out) :: nlme
-  logical,intent(in),optional :: suppress_ormesh
   type(dataset_type),intent(in) :: dtset
   type(dterm_type),intent(in) :: dterm
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   type(MPI_type), intent(inout) :: mpi_enreg
-  type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(out) :: fofr(2,n4,n5,n6*ndat)
   real(dp),intent(in),pointer :: bra(:,:),ket(:,:),ph1d(:,:)
   type(pawcprj_type),intent(in) :: cwaveprj(dtset%natom,dtset%nspinor)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
@@ -2135,17 +2140,11 @@ subroutine nonlocal_me_mesh(adir,atindx,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
   complex(dp) :: cpi,cpj,dij,ormesh_fac
   logical :: my_suppress_ormesh,need_ormesh
   ! arrays
-  real(dp),allocatable :: fofr(:,:,:,:)
+  real(dp),allocatable :: work(:,:,:,:)
   real(dp),allocatable,target :: bra_mesh(:,:),ket_mesh(:,:)
   complex(dp),allocatable :: dij_data(:,:,:)
 !--------------------------------------------------------------------
   
-  if(present(suppress_ormesh)) then
-    my_suppress_ormesh=suppress_ormesh
-  else
-    my_suppress_ormesh=.FALSE.
-  end if
-  need_ormesh = ((dtset%orbmag .EQ. 4) .AND. (.NOT. my_suppress_ormesh))
   npwsp = npw_k*dtset%nspinor
   
   ABI_MALLOC(dij_data,(dtset%natom,dterm%lmn2max,dterm%ndij))
@@ -2166,34 +2165,29 @@ subroutine nonlocal_me_mesh(adir,atindx,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
     dij_data = czero
   end select
 
-  if (need_ormesh) then
-    ABI_CHECK(ASSOCIATED(ket),"nonlocal_me: input ket needed for ormesh is not associated")
-    ABI_CHECK(ASSOCIATED(bra),"nonlocal_me: input bra needed for ormesh is not associated")
-    ABI_CHECK(dtset%nspinor.EQ.1,"nonlocal_me: orbmag_rmesh not coded for spinors yet")
-    t_atom=0
-    do iat = 1, dtset%natom
-      if ( ANY(ABS(dtset%nucdipmom(1:3,iat))>tol8) ) then
-        t_atom = atindx(iat)
-        exit
-      end if
-    end do
-    ABI_MALLOC(bra_mesh,(2,npwsp))
-    ABI_MALLOC(ket_mesh,(2,npwsp))
-  end if
+  ABI_CHECK(ASSOCIATED(ket),"nonlocal_me_mesh: input ket needed for ormesh is not associated")
+  ABI_CHECK(ASSOCIATED(bra),"nonlocal_me_mesh: input bra needed for ormesh is not associated")
+  ABI_CHECK(dtset%nspinor.EQ.1,"nonlocal_me: orbmag_rmesh not coded for spinors yet")
+  t_atom=0
+  do iat = 1, dtset%natom
+    if ( ANY(ABS(dtset%nucdipmom(1:3,iat))>tol8) ) then
+      t_atom = atindx(iat)
+      exit
+    end if
+  end do
+  ABI_MALLOC(bra_mesh,(2,npwsp))
+  ABI_MALLOC(ket_mesh,(2,npwsp))
 
-  nlme = czero
+  fofr = zero
   do iat = 1, dtset%natom
     iatom = atindx(iat)
     itypat=dtset%typat(iat)
     do isp = 1, dtset%nspinor
       do jlmn = 1, pawtab(itypat)%lmn_size
 
-        !if (need_ormesh .AND. iatom.EQ.t_atom) then
-        if (need_ormesh) then
-          ! FFT ket-side to fofr, real space representation
-          ket_mesh(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+dnlket,jlmn,itypat)*ket(1,1:npwsp)
-          ket_mesh(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+dnlket,jlmn,itypat)*ket(2,1:npwsp)
-        end if
+        ! FFT ket-side to fofr, real space representation
+        ket_mesh(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+dnlket,jlmn,itypat)*ket(1,1:npwsp)
+        ket_mesh(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+dnlket,jlmn,itypat)*ket(2,1:npwsp)
 
         do ilmn = 1, pawtab(itypat)%lmn_size
           klmn=MATPACK(ilmn,jlmn)
@@ -2211,59 +2205,20 @@ subroutine nonlocal_me_mesh(adir,atindx,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
           ! see note at top of file near definition of MATPACK macro
           if (ilmn .GT. jlmn) dij = CONJG(dij)
           
-          ! note use of CONJG(cpi), because cpi is from the bra side cprj
-          nlme = nlme + prefac*CONJG(cpi)*dij*cpj
+          jl = pawtab(itypat)%indlmn(1,jlmn); il = pawtab(itypat)%indlmn(1,ilmn)
+          ormesh_fac = prefac*trnrm*dij*four_pi*CONJG(j_dpc**il)*four_pi*(j_dpc**jl)
+          bra_mesh(1,1:npwsp)=bra(1,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1+dnlbra,ilmn,itypat)
+          bra_mesh(2,1:npwsp)=bra(2,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1+dnlbra,ilmn,itypat)
          
-          if (need_ormesh) then
-            jl = pawtab(itypat)%indlmn(1,jlmn)
-            il = pawtab(itypat)%indlmn(1,ilmn)
-            ormesh_fac = prefac*trnrm*dij*four_pi*CONJG(j_dpc**il)*four_pi*(j_dpc**jl)
-            bra_mesh(1,1:npwsp)=bra(1,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1+dnlbra,ilmn,itypat)
-            bra_mesh(2,1:npwsp)=bra(2,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1+dnlbra,ilmn,itypat)
-            
-            ABI_MALLOC(fofr,(2,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6)))
-            call tatomfft(bra_mesh,dtset,fofr,gs_hamk,ket_mesh,.FALSE.,mpi_enreg,&
-              & dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),1,npw_k,ph1d,ormesh_fac,t_atom)
+          ABI_MALLOC(work,(2,n4,n5,n6*ndat))
+          call tatomfft(bra_mesh,dtset,work,gs_hamk,ket_mesh,.FALSE.,mpi_enreg,&
+            & n4,n5,n6,ndat,npw_k,ph1d,ormesh_fac,t_atom)
+          fofr = fofr + work
+          ABI_SFREE(work)
   
-            ! factor of two because we are skipping explicit sums over eps_alpha,beta,gamma and second
-            ! term appears from symmetry
-            orbmag_mesh%rmesh(:,:,:,adir,oterm)=orbmag_mesh%rmesh(:,:,:,adir,oterm)+two*fofr(1,:,:,:)
-            ABI_SFREE(fofr)
-          end if
-          
-          ! in ndij = 4 case, isp 1 delivers up-up, isp 2 delivers down-down
-          if (dterm%ndij == 4) then
-            if (isp == 1) then
-              dij = dij_data(iatom,klmn,3) ! up-down
-              ! D^ss'_ij=D^s's_ji^*
-              if (ilmn .GT. jlmn) dij = CONJG(dij_data(iatom,klmn,4))
-              if (dnlbra .NE. 0) then
-                cpi=CMPLX(cwaveprj(iatom,1)%dcp(1,dnlbra,ilmn),cwaveprj(iatom,1)%dcp(2,dnlbra,ilmn))
-              else
-                cpi=CMPLX(cwaveprj(iatom,1)%cp(1,ilmn),cwaveprj(iatom,1)%cp(2,ilmn))
-              end if
-              if (dnlket .NE. 0) then
-                cpj=CMPLX(cwaveprj(iatom,2)%dcp(1,dnlket,jlmn),cwaveprj(iatom,2)%dcp(2,dnlket,jlmn))
-              else
-                cpj=CMPLX(cwaveprj(iatom,2)%cp(1,jlmn),cwaveprj(iatom,2)%cp(2,jlmn))
-              end if
-            else
-              dij = dij_data(iatom,klmn,4) ! down-up
-              ! D^ss'_ij=D^s's_ji^*
-              if (ilmn .GT. jlmn) dij = CONJG(dij_data(iatom,klmn,3))
-              if (dnlbra .NE. 0) then
-                cpi=CMPLX(cwaveprj(iatom,2)%dcp(1,dnlbra,ilmn),cwaveprj(iatom,2)%dcp(2,dnlbra,ilmn))
-              else
-                cpi=CMPLX(cwaveprj(iatom,2)%cp(1,ilmn),cwaveprj(iatom,2)%cp(2,ilmn))
-              end if
-              if (dnlket .NE. 0) then
-                cpj=CMPLX(cwaveprj(iatom,1)%dcp(1,dnlket,jlmn),cwaveprj(iatom,1)%dcp(2,dnlket,jlmn))
-              else
-                cpj=CMPLX(cwaveprj(iatom,1)%cp(1,jlmn),cwaveprj(iatom,1)%cp(2,jlmn))
-              end if
-            end if
-            nlme = nlme + prefac*CONJG(cpi)*cpj*dij
-          end if
+          ! factor of two because we are skipping explicit sums over eps_alpha,beta,gamma and second
+          ! term appears from symmetry
+          ! orbmag_mesh%rmesh(:,:,:,adir,oterm)=orbmag_mesh%rmesh(:,:,:,adir,oterm)+two*fofr(1,:,:,:)
         end do !ilmn
       end do !jlmn
     end do ! isp
