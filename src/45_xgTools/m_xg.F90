@@ -1859,25 +1859,14 @@ contains
     integer,optional, intent(in)              :: comm
     logical,optional, intent(in)              :: timing
 
-    real(dp)       :: alpha_
-    complex(dp)   :: calpha
+    real(dp)      :: alpha_
+    complex(dp)   :: calpha,calpha_
     complex(dp)   :: cbeta
     character(kind=1) :: transa_,transb_
     integer           :: K
     double precision  :: tsec(2)
     logical :: timing_
 
-#if defined HAVE_OPENMP_OFFLOAD
-#if !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-    complex(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),xgBlockW__vecC(:,:)
-    real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),xgBlockW__vecR(:,:)
-#endif
-#if !defined HAVE_MPI2_INPLACE
-    complex(kind=c_double_complex), ABI_CONTIGUOUS pointer :: vecC_buf(:,:)
-    real(kind=c_double), ABI_CONTIGUOUS pointer :: vecR_buf(:,:)
-#endif
-#endif
 
     timing_ = .true.
     if (present(timing)) then
@@ -1944,117 +1933,41 @@ contains
       ! CALL GEMM
       select case(xgBlockA%space)
       case (SPACE_R)
-        if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-        call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
-          calpha, &
-          xgBlockA%vecR, xgBlockA%LDim, &
-          xgBlockB%vecR, xgBlockB%LDim, &
-          cbeta, &
-          xgBlockW%vecR, xgBlockW%LDim)
-#elif defined HAVE_OPENMP_OFFLOAD
-!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-        xgBlockA__vecR => xgBlockA%vecR
-        xgBlockB__vecR => xgBlockB%vecR
-        xgBlockW__vecR => xgBlockW%vecR
-        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
-        call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
-          calpha, &
-          c_loc(xgBlockA__vecR), xgBlockA%LDim, &
-          c_loc(xgBlockB__vecR), xgBlockB%LDim, &
-          cbeta, &
-          c_loc(xgBlockW__vecR), xgBlockW%LDim)
-        !$OMP END TARGET DATA
-#endif
-      else
-        call dgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
-          alpha, &
-          xgBlockA%vecR, xgBlockA%LDim, &
-          xgBlockB%vecR, xgBlockB%LDim, &
-          beta, &
-          xgBlockW%vecR, xgBlockW%LDim)
-      end if
+        call abi_xgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+        &    calpha, &
+        &    xgBlockA%vecR, xgBlockA%LDim, &
+        &    xgBlockB%vecR, xgBlockB%LDim, &
+        &    cbeta, &
+        &    xgBlockW%vecR, xgBlockW%LDim, &
+        &    x_cplx=1, gpu_option=xgBlockA%gpu_option)
 
       case (SPACE_CR)
         calpha = dcmplx(2*alpha,0.d0)
         alpha_ = 2.0d0 * alpha
-        if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-          call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, 2*K, &
-            calpha, &
-            xgBlockA%vecR, 2*xgBlockA%LDim, &
-            xgBlockB%vecR, 2*xgBlockB%LDim, &
-            cbeta, &
-            xgBlockW%vecR, xgBlockW%LDim)
-          if (xgBlockA%me_g0 == 1) then
-            calpha = dcmplx(-2*alpha,0.d0)
-            call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, 2, &
-              calpha, &
-              xgBlockA%vecR, 2*xgBlockA%LDim, &
-              xgBlockB%vecR, 2*xgBlockB%LDim, &
-              cone, &
-              xgBlockW%vecR, xgBlockW%LDim)
-            calpha = dcmplx(alpha,0.d0)
-            call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, 1, &
-              calpha, &
-              xgBlockA%vecR, 2*xgBlockA%LDim, &
-              xgBlockB%vecR, 2*xgBlockB%LDim, &
-              cone, &
-              xgBlockW%vecR, xgBlockW%LDim)
-          end if
-#elif defined HAVE_OPENMP_OFFLOAD
-!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-          xgBlockA__vecR => xgBlockA%vecR
-          xgBlockB__vecR => xgBlockB%vecR
-          xgBlockW__vecR => xgBlockW%vecR
-          !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
-          call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, 2*K, &
-            calpha, &
-            c_loc(xgBlockA__vecR), 2*xgBlockA%LDim, &
-            c_loc(xgBlockB__vecR), 2*xgBlockB%LDim, &
-            cbeta, &
-            c_loc(xgBlockW__vecR), xgBlockW%LDim)
-          if (xgBlockA%me_g0 == 1) then
-            calpha = dcmplx(-2*alpha,0.d0)
-            call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, 2, &
-              calpha, &
-              c_loc(xgBlockA__vecR), 2*xgBlockA%LDim, &
-              c_loc(xgBlockB__vecR), 2*xgBlockB%LDim, &
-              cone, &
-              c_loc(xgBlockW__vecR), xgBlockW%LDim)
-            calpha = dcmplx(alpha,0.d0)
-            call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, 1, &
-              calpha, &
-              c_loc(xgBlockA__vecR), 2*xgBlockA%LDim, &
-              c_loc(xgBlockB__vecR), 2*xgBlockB%LDim, &
-              cone, &
-              c_loc(xgBlockW__vecR), xgBlockW%LDim)
-          end if
-          !$OMP END TARGET DATA
-#endif
-        else
-          call dgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, 2*K, &
-            alpha_, &
-            xgBlockA%vecR, 2*xgBlockA%LDim, &
-            xgBlockB%vecR, 2*xgBlockB%LDim, &
-            beta, &
-            xgBlockW%vecR, xgBlockW%LDim)
-          if (xgBlockA%me_g0 == 1) then
-            alpha_ = - 2*alpha
-            call dgemm(transa,transb,xgBlockW%rows, xgBlockW%cols, 2, &
-              alpha_, &
-              xgBlockA%vecR, 2*xgBlockA%LDim, &
-              xgBlockB%vecR, 2*xgBlockB%LDim, &
-              one, &
-              xgBlockW%vecR,xgBlockW%LDim)
-            alpha_ = alpha
-            call dgemm(transa,transb,xgBlockW%rows, xgBlockW%cols, 1, &
-              alpha_, &
-              xgBlockA%vecR, 2*xgBlockA%LDim, &
-              xgBlockB%vecR, 2*xgBlockB%LDim, &
-              one, &
-              xgBlockW%vecR,xgBlockW%LDim)
-          end if
+        call abi_xgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, 2*K, &
+        &    calpha, &
+        &    xgBlockA%vecR, 2*xgBlockA%LDim, &
+        &    xgBlockB%vecR, 2*xgBlockB%LDim, &
+        &    cbeta, &
+        &    xgBlockW%vecR, xgBlockW%LDim, &
+        &    x_cplx=1, gpu_option=xgBlockA%gpu_option)
+        if (xgBlockA%me_g0 == 1) then
+          calpha = dcmplx(-2*alpha,0.d0)
+          call abi_xgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, 2, &
+          &    calpha, &
+          &    xgBlockA%vecR, 2*xgBlockA%LDim, &
+          &    xgBlockB%vecR, 2*xgBlockB%LDim, &
+          &    cone, &
+          &    xgBlockW%vecR, xgBlockW%LDim, &
+          &    x_cplx=1, gpu_option=xgBlockA%gpu_option)
+          calpha = dcmplx(alpha,0.d0)
+          call abi_xgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, 1, &
+          &    calpha, &
+          &    xgBlockA%vecR, 2*xgBlockA%LDim, &
+          &    xgBlockB%vecR, 2*xgBlockB%LDim, &
+          &    cone, &
+          &    xgBlockW%vecR, xgBlockW%LDim, &
+          &    x_cplx=1, gpu_option=xgBlockA%gpu_option)
         end if
 
       case(SPACE_C)
@@ -2064,36 +1977,13 @@ contains
         transb_=transb
         if (transb=='t') transb_ = 'c'
 
-        if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-          call abi_gpu_xgemm(2, transa_, transb_, xgBlockW%rows, xgBlockW%cols, K, &
-            calpha, &
-            xgBlockA%vecC, xgBlockA%LDim, &
-            xgBlockB%vecC, xgBlockB%LDim, &
-            cbeta, &
-            xgBlockW%vecC, xgBlockW%LDim)
-#elif defined HAVE_OPENMP_OFFLOAD
-!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-          xgBlockA__vecC => xgBlockA%vecC
-          xgBlockB__vecC => xgBlockB%vecC
-          xgBlockW__vecC => xgBlockW%vecC
-          !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecC,xgBlockB__vecC,xgBlockW__vecC)
-          call abi_gpu_xgemm(2, transa_, transb_, xgBlockW%rows, xgBlockW%cols, K, &
-            calpha, &
-            c_loc(xgBlockA__vecC), xgBlockA%LDim, &
-            c_loc(xgBlockB__vecC), xgBlockB%LDim, &
-            cbeta, &
-            c_loc(xgBlockW__vecC), xgBlockW%LDim)
-          !$OMP END TARGET DATA
-#endif
-        else
-          call zgemm(transa_, transb_, xgBlockW%rows, xgBlockW%cols, K, &
-            calpha, &
-            xgBlockA%vecC, xgBlockA%LDim, &
-            xgBlockB%vecC, xgBlockB%LDim, &
-            cbeta, &
-            xgBlockW%vecC, xgBlockW%LDim)
-        end if
+        call abi_xgemm(transa_, transb_, xgBlockW%rows, xgBlockW%cols, K, &
+        &    calpha, &
+        &    xgBlockA%vecC, xgBlockA%LDim, &
+        &    xgBlockB%vecC, xgBlockB%LDim, &
+        &    cbeta, &
+        &    xgBlockW%vecC, xgBlockW%LDim, &
+        &    gpu_option=xgBlockA%gpu_option)
 
       end select
 
@@ -2106,33 +1996,13 @@ contains
         if (xgBlockW%space/=SPACE_CR) then
           ABI_ERROR('space(W) should be SPACE_CR')
         end if
-        if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-          call abi_gpu_xgemm(1, transa, transb, 2*xgBlockW%rows, xgBlockW%cols, K, &
-            calpha, &
-            xgBlockA%vecR, 2*xgBlockA%LDim, &
-            xgBlockB%vecR, xgBlockB%LDim, &
-            cbeta, &
-            xgBlockW%vecR, 2*xgBlockW%LDim)
-#elif defined HAVE_OPENMP_OFFLOAD
-!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-          xgBlockA__vecR => xgBlockA%vecR
-          xgBlockB__vecR => xgBlockB%vecR
-          xgBlockW__vecR => xgBlockW%vecR
-          !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
-          call abi_gpu_xgemm(1, transa, transb, 2*xgBlockW%rows, xgBlockW%cols, K, &
-            calpha, &
-            c_loc(xgBlockA__vecR), 2*xgBlockA%LDim, &
-            c_loc(xgBlockB__vecR), xgBlockB%LDim, &
-            cbeta, &
-            c_loc(xgBlockW__vecR), 2*xgBlockW%LDim)
-          !$OMP END TARGET DATA
-#endif
-        else ! CPU
-          call dgemm(transa,transb,2*xgBlockW%rows, xgBlockW%cols,K, &
-            alpha,xgBlockA%vecR, 2*xgBlockA%LDim, &
-            xgBlockB%vecR, xgBlockB%LDim, beta,xgBlockW%vecR,2*xgBlockW%LDim)
-        end if
+        call abi_xgemm(transa, transb, 2*xgBlockW%rows, xgBlockW%cols,K, &
+        &    calpha, &
+        &    xgBlockA%vecR, 2*xgBlockA%LDim, &
+        &    xgBlockB%vecR, xgBlockB%LDim, &
+        &    cbeta, &
+        &    xgBlockW%vecR,2*xgBlockW%LDim, &
+        &    x_cplx=1, gpu_option=xgBlockA%gpu_option)
       else
         ABI_ERROR('Not implemented')
       end if
@@ -2209,21 +2079,13 @@ contains
     if (transb=='t') transb_ = 'c'
 
     ! CALL GEMM
-    if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
-      call abi_gpu_xgemm(2, transa_, transb_, xgBlockW%rows, xgBlockW%cols, K, &
-        alpha, &
-        xgBlockA%vecC, xgBlockA%LDim, &
-        xgBlockB%vecC, xgBlockB%LDim, &
-        beta, &
-        xgBlockW%vecC, xgBlockW%LDim)
-    else
-      call zgemm(transa_, transb_, xgBlockW%rows, xgBlockW%cols, K, &
-        alpha, &
-        xgBlockA%vecC, xgBlockA%LDim, &
-        xgBlockB%vecC, xgBlockB%LDim, &
-        beta, &
-        xgBlockW%vecC, xgBlockW%LDim)
-    end if
+    call abi_xgemm(transa_, transb_, xgBlockW%rows, xgBlockW%cols, K, &
+    &    alpha, &
+    &    xgBlockA%vecC, xgBlockA%LDim, &
+    &    xgBlockB%vecC, xgBlockB%LDim, &
+    &    beta, &
+    &    xgBlockW%vecC, xgBlockW%LDim, &
+    &    gpu_option=xgBlockA%gpu_option)
     ! END CALL GEMM
     if (timing_) call timab(tim_gemm_blas,2,tsec)
 
