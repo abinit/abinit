@@ -1,0 +1,79 @@
+#!/usr/bin/env python
+#
+# Copyright (C) 2005-2026 ABINIT Group
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+from __future__ import print_function, division, absolute_import
+
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
+
+import os
+import re
+import sys
+
+class MyConfigParser(ConfigParser):
+
+  def optionxform(self, option):
+    return str(option)
+
+# ---------------------------------------------------------------------------- #
+
+my_name   = "make-macros-fbversions"
+my_config = "config/specs/fbversion.conf"
+
+# M4 files to update and the fbversion.conf key for each version variable
+m4_targets = [
+  ("config/m4/sd_io_hdf5.m4",          "hdf5",           "abi_fb_hdf5_version"),
+  ("config/m4/sd_io_netcdf.m4",         "netcdf4",        "abi_fb_netcdf_version"),
+  ("config/m4/sd_io_netcdf_fortran.m4", "netcdf4_fortran","abi_fb_netcdf_fortran_version"),
+  ("config/m4/sd_libxc.m4",             "libxc",          "abi_fb_libxc_version"),
+]
+
+# Check we are at the top of the ABINIT source tree
+if not os.path.exists("configure.ac") or not os.path.exists("src/98_main/abinit.F90"):
+  sys.stderr.write("%s: must be run from the top of an ABINIT source tree.\n" % my_name)
+  sys.exit(1)
+
+# Read fbversion.conf and pick the most recent section (first listed)
+cnf = MyConfigParser()
+if not os.path.exists(my_config):
+  sys.stderr.write("%s: could not find config file (%s).\n" % (my_name, my_config))
+  sys.exit(2)
+cnf.read(my_config)
+if not cnf.sections():
+  sys.stderr.write("%s: no sections found in %s.\n" % (my_name, my_config))
+  sys.exit(3)
+current_section = cnf.sections()[0]
+versions = dict(cnf.items(current_section))
+
+# Update the default version string in each M4 file
+for (m4_file, conf_key, m4_var) in m4_targets:
+  if conf_key not in versions:
+    sys.stderr.write("%s: key '%s' not found in section [%s] of %s.\n" % (
+      my_name, conf_key, current_section, my_config))
+    sys.exit(4)
+  new_version = versions[conf_key]
+
+  with open(m4_file, "r") as fh:
+    content = fh.read()
+
+  # Match only the action-if-not-given line: [abi_fb_*_version="x.y.z"]
+  # The negative lookahead (?!\$) ensures we skip the action-if-given line,
+  # which uses "$withval" and must remain unchanged.
+  pattern = r'(\[%s=")(?!\$)[^"]*("\])' % re.escape(m4_var)
+  new_content, count = re.subn(pattern, r'\g<1>%s\2' % new_version, content)
+
+  if count == 0:
+    sys.stderr.write("%s: could not find default for %s in %s.\n" % (
+      my_name, m4_var, m4_file))
+    sys.exit(5)
+
+  if new_content != content:
+    with open(m4_file, "w") as fh:
+      fh.write(new_content)

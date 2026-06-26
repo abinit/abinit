@@ -530,6 +530,8 @@ if ( opts.run_buildsys ):
     "./config/scripts/make-macros-triggers")
   run_script(my_name, "Generating macros for configure output",
     "./config/scripts/make-macros-output")
+  run_script(my_name, "Generating macros for fallback versions",
+    "./config/scripts/make-macros-fbversions")
   run_script(my_name, "Generating source split symlink maker",
     "./config/scripts/make-symlink-maker")
 else:

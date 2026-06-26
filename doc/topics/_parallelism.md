@@ -1,6 +1,6 @@
 ---
 description: How to set parameters for a parallel calculation
-authors: MT,FJ
+authors: MT,FJ,MS
 ---
 <!--- This is the source file for this topics. Can be edited. -->
 
@@ -50,13 +50,9 @@ the [[help:abinit#control-of-output-in-the-parallel-case|abinit help file]] for 
   The workload for the different images has been distributed. This parallelization level can be combined
   with the parallelism described above, leading to speed-up beyond 5000.
 
-* For ground-state calculations, GPUs can be used. There are two available GPU programming models:
-  openMP offload (openMP v5+) compatible with Nvidia and AMD accelerators, Kokkos+cuda
-  compatible with Nvidia accelerators. See [[gpu_option]] keyword.
-  Obvioulsy, to benefit from GPU acceleration, ABINIT has to be compiled in a specific way,
-  using a GPU compatible compiler (`nvhpc`, `aocc`, `gcc`), activating the relevant compilation
-  options and linking to specific libraries (`cuda toolkit`, `ROCm`, ...).
-  This implementation is still EXPERIMENTAL (january 2024).
+* For ground-state calculations, GPUs can also be used to accelerate computation if ABINIT was compiled with GPU support.
+  GPU accelaration is enabled by setting [[gpu_option]] to `GPU_OPENMP` and works best by setting SCF solver to ChebFI (favoured) or LOBPCG (see [[wfoptalg]]).
+  You can learn more about how to compile ABINIT with support [here](../INSTALL_gpu.md).
 
 * For ground-state calculations, the wavelet part of ABINIT (BigDFT) is also very
   well parallelized: MPI band parallelism, combined with GPUs.
