@@ -1,3 +1,4 @@
+```
 # ================================================================
 # Configuration file for ABINIT 10.5 compilation
 #
@@ -59,3 +60,5 @@ with_libxc="${LIBXC_ROOT}"
 # ========================================
 enable_zdot_bugfix="no"
 enable_gw_dpc="yes"
+```
+

@@ -104,5 +104,5 @@ dmatpawu1 1.0 0.0 0.0 0.0 0.0 0.0 0.0
 #%% authors =  M. Sarraute, B. Amadon
 #%% keywords =  DMFT, PAW
 #%% description = (Apparently the documentation section of this test has been lost)
-#%% topics = DFT+U, DMFT
+#%% topics = GPU, DFT+U, DMFT
 #%%<END TEST_INFO>
