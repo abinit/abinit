@@ -6934,7 +6934,8 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  use m_matrix,  only : mati3inv
  use m_symtk,   only : littlegroup_q
  use m_common,  only : ebands_from_file
- use m_fftcore, only : sphere
+ use m_fftcore, only : sphere, get_kg
+ use m_cgtk,    only : cgtk_rotate, cgtk_change_gsphere
 
 !Arguments ------------------------------------
 !scalars
@@ -6951,30 +6952,32 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: iflag1 = 1, me_g0 = 1, ndat1 = 1
- integer :: spin, nsppol, nsym, nb, nkibz, mband, ik_ibz, i_m, i_n, isym, itime, otimrev_k, bstart, ib, ig, igsp
- integer :: ib1, ib2, band1, band2, n1, n2, n3, n4, n5, n6, nfft, nspinor, mpw, ii, ipw, ispinor
+ integer :: spin, nsppol, nsym, nb, nkibz, mband, ik_ibz, i_m, i_n, isym, itime, otimrev_k, bstart, ib, ig, igsp, trev_k
+ integer :: ib1, ib2, band1, band2, n1, n2, n3, n4, n5, n6, nfft, nspinor, mpw, ii, ipw, ispinor, npw_sk
  real(dp),parameter :: xnorm1 = one
  real(dp) :: e_b1, e_b2, cpu, wall, gflops
  type(ebands_t) :: ks_ebands
  type(wfd_t) :: wfd
  type(hdr_type) :: hdr
 !arrays
- integer :: symtab(4,2,cryst%nsym), g0(3), gmax(3), work_ngfft(18), shiftg(3), symrec(3,3), inv_symrec(3,3)
- integer,allocatable :: nband(:,:), wfd_istwfk(:)
- real(dp) :: kk_ibz(3), kk_bz(3), dot(2)
- real(dp),allocatable :: ug1_box(:,:), ug2_box(:,:), cg_ib(:,:,:), cg_work(:,:)
+ integer :: symtab(4,2,cryst%nsym), g0_k(3), gmax(3), work_ngfft(18), shiftg(3), symrec(3,3), inv_symrec(3,3), units(2)
+ integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_sk(:,:)
+ real(dp) :: kk_ibz(3), kk_sk(3), dot(2)
+ real(dp),allocatable :: ug1_box(:,:), ug2_box(:,:), cg_ib(:,:,:), cg_work(:,:), work(:,:,:,:)
+ real(dp),allocatable :: cg1_sk(:,:), cg2_sk(:,:)
  complex(dp) :: cval, cphase, ug
  complex(dp),allocatable :: cmat(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
 !----------------------------------------------------------------------
 
- ! Read KS energies from WFK file.
- call wrtout(std_out, " Computing dmats matrices...")
  call cwtime(cpu, wall, gflops, "start")
+ units = [std_out, ab_out]
+ call wrtout(units, sjoin(" Computing dmats with symsigma_de", ftoa(dtset%symsigma_de * Ha_meV), " meV"))
 
  ABI_CHECK_IEQ(dtset%usepaw, 0, "PAW not coded!")
  ABI_CHECK_IEQ(dtset%nspinor, 1, "nspinor 2 not coded!")
 
+ ! Read KS energies from WFK file.
  dmats%ks_ebands = ebands_from_file(wfk_path, comm)
  dmats%cryst => cryst
 
@@ -7037,7 +7040,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  gmax = 2*gmax + 1
  call ngfft_seq(work_ngfft, gmax)
  !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
- !ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
+ ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
 
  n1 = work_ngfft(1); n2 = work_ngfft(2); n3 = work_ngfft(3); n4 = work_ngfft(4); n5 = work_ngfft(5); n6 = work_ngfft(6)
  nfft = n1 * n2 * n3; mpw = maxval(wfd%npwarr)
@@ -7089,50 +7092,76 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
            do ib=1,nb
              cmat(ib, ib) = cone
            end do
+
          else
            ! The condition is: $q =  O S(q) - G$
-           g0 = symtab(1:3, itime, isym)
+           g0_k = symtab(1:3, itime, isym)
+           kk_sk = matmul(cryst%symrec(:,:, isym), kk_ibz) * (3-2*itime)
+
+           call get_kg(kk_sk, istwf_k, dtset%ecut, cryst%gmet, npw_sk, kg_sk) !, mpw=mpw, gmax=gmax)
+
+           ABI_MALLOC(cg1_sk, (2, npw_sk*nspinor))
+           ABI_MALLOC(cg2_sk, (2, npw_sk*nspinor))
+
            do ib2=1,nb
              band2 = ib2 + bstart - 1
              e_b2 = dmats%ks_ebands%eig(band2, ik_ibz, spin)
-             ! S^-1
-             symrec = cryst%symrec(:,:, isym) * (3-2*itime)
-             call mati3inv(symrec, inv_symrec)
-             inv_symrec = transpose(inv_symrec)
-             call sphere(cg_ib(:,:,ib2), nspinor, npw_k, ug2_box, n1, n2, n3, n4, n5, n6, &
-                         kg_k, istwf_k, iflag1, me_g0, [0,0,0], symrec, xnorm1)
+
+             ! Compute the periodic part of S |psi_mk>.
+             trev_k = itime - 1
+             call cgtk_rotate(cryst, kk_ibz, isym, trev_k, g0_k, nspinor, ndat1, &
+                              npw_k, kg_k, &
+                              npw_sk, kg_sk, istwf_k, istwf_k, cg_ib(:,:,ib2), cg2_sk, work_ngfft, work)
 
              do ib1=1,nb
                band1 = ib1 + bstart - 1
                e_b1 = dmats%ks_ebands%eig(band1, ik_ibz, spin)
+
                ! Only if e_b1 == e_b2.
                cval = zero
                if (abs(e_b2  - e_b1) <= dtset%symsigma_de)  then
-                 shiftg = 0 ! TODO
-                 cg_work = cg_ib(:,:,ib1)
-                 igsp = 0
-                 do ispinor=1,nspinor
-                   do ig=1,npw_k
-                     igsp = igsp + 1
-                     cphase = exp(-j_dpc * two_pi * dot_product((kk_ibz + kg_k(:, ig) + g0), cryst%tnons(:, isym)))
-                     ug = cg_work(1, igsp) + cg_work(2, igsp)
-                     ug = ug * cphase
-                     cg_work(1, igsp) = real(ug)
-                     cg_work(2, igsp) = aimag(ug)
-                   end do
-                 end do
+               !if (.True.) then
+                 !cg_work = cg_ib(:,:,ib1)
+                 !shiftg = 0 ! TODO
+                 !igsp = 0
+                 !do ispinor=1,nspinor
+                 !  do ig=1,npw_k
+                 !    igsp = igsp + 1
+                 !    cphase = exp(-j_dpc * two_pi * dot_product((kk_ibz + kg_k(:, ig) + g0_k), cryst%tnons(:, isym)))
+                 !    ug = cg_work(1, igsp) + cg_work(2, igsp)
+                 !    ug = ug * cphase
+                 !    cg_work(1, igsp) = real(ug)
+                 !    cg_work(2, igsp) = aimag(ug)
+                 !  end do
+                 !end do
 
-                 call sphere(cg_work, nspinor, npw_k, ug1_box, n1, n2, n3, n4, n5, n6, &
-                             kg_k, istwf_k, iflag1, me_g0, shiftg, identity_3d, xnorm1)
+                 !call sphere(cg_work, nspinor, npw_k, ug1_box, n1, n2, n3, n4, n5, n6, &
+                 !            kg_k, istwf_k, iflag1, me_g0, shiftg, identity_3d, xnorm1)
 
-                 dot = cg_zdotc(nfft * nspinor, ug1_box, ug2_box)
+                 !dot = cg_zdotc(nfft * nspinor, ug1_box, ug2_box)
+                 !cval = dot(1) + j_dpc * dot(2)
+
+                 ! Compute the periodic part of |psi_m Sk> with Sk = k + G0.
+
+                 call cgtk_change_gsphere(ndat1, npw_k, istwf_k, kg_k, cg_ib(:,:,ib1), &
+                                          npw_sk, istwf_k, kg_sk, cg1_sk, work_ngfft, work &
+                                          !)
+                                          !, shiftg1=g0_k)
+                                          , shiftg1=-g0_k)
+
+                 dot = cg_zdotc(npw_sk * nspinor, cg1_sk, cg2_sk)
                  cval = dot(1) + j_dpc * dot(2)
                end if
 
                cmat(ib1, ib2) = cval
              end do ! ib2
            end do ! ib1
+
+           ABI_FREE(cg1_sk)
+           ABI_FREE(cg2_sk)
          end if
+
+         ABI_SFREE(kg_sk)
 
          ! Save final matrix.
          dmats%for_spin(spin)%value(:, :, isym, itime, ik_ibz) = cmat
@@ -7148,6 +7177,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
 
  ABI_FREE(ug1_box)
  ABI_FREE(ug2_box)
+ ABI_FREE(work)
 
  call wfd%free()
  call cwtime_report(" dmats_init:", cpu, wall, gflops)
@@ -7200,6 +7230,7 @@ end subroutine dmats_free
 subroutine dmats_print(dmats, units, prtvol, header)
 
  use m_numeric_tools, only : print_arr
+ use m_symtk,   only : littlegroup_q
 
 !Arguments ------------------------------------
  class(dmats_t),intent(in) :: dmats
@@ -7207,32 +7238,80 @@ subroutine dmats_print(dmats, units, prtvol, header)
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
- integer :: spin, bstart, nb, ik_ibz, isym, itime
- character(len=500) :: msg
- real(dp) :: kk_ibz(3)
+ integer :: spin, bstart, nb, ik_ibz, isym, itime, ierr, otimrev_k
+ logical :: unitary
+ character(len=5000) :: msg
+ real(dp) :: kk_ibz(3), err
+ integer :: symtab(4,2,dmats%cryst%nsym)
 ! *************************************************************************
 
  msg = ' ==== Info on the dmats_t ==== '
  if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
  call wrtout(units, msg)
 
+ ierr = 0
  do spin=1,size(dmats%for_spin)
    bstart = dmats%brange_spin(1, spin)
    nb = dmats%brange_spin(2, spin) - dmats%brange_spin(1, spin) + 1
    do ik_ibz=1,dmats%ks_ebands%nkpt
      kk_ibz = dmats%ks_ebands%kptns(:, ik_ibz)
-     call wrtout(units, sjoin(" D(S,k) matrix for kpt:", ktoa(kk_ibz)))
+     call littlegroup_q(dmats%cryst%nsym, kk_ibz, symtab, dmats%cryst%symrec, dmats%cryst%symafm, otimrev_k, prtvol=0)
+
+     call wrtout(units, sjoin(" D(S,k) matrix for k-point:", ktoa(kk_ibz), "spin:", itoa(spin)))
      do itime=1,2
+     !do itime=1,1
        do isym=1,dmats%cryst%nsym
-         call wrtout(units, sjoin(" isym:", itoa(isym), ", itime:", itoa(itime)))
-         call print_arr(units, dmats%for_spin(spin)%value(:, :, isym, itime, ik_ibz), &
-                        max_r=nb, max_c=nb)
+         if (symtab(4, itime, isym) == 0) cycle
+         associate (cmat => dmats%for_spin(spin)%value(:, :, isym, itime, ik_ibz))
+         unitary = is_unitary(nb, cmat, tol3, err)
+         if (.not. unitary) ierr = ierr + 1
+         msg = sjoin(" isym:", itoa(isym), ", itime:", itoa(itime), ", tnon:", ltoa(dmats%cryst%tnons(:,isym)))
+         msg = sjoin(msg, ", unitary:", yesno(unitary), ", err:", ftoa(err))
+         call wrtout(units, msg)
+         call wrtout(units, sjoin("symtab:", ltoa(symtab(:, itime, isym))))
+         if (prtvol > 1) call print_arr(units, cmat, max_r=nb, max_c=nb)
+         end associate
        end do ! isym
      end do ! itime
    end do ! ik_ibz
  end do ! spin
 
+ if (ierr /= 0) then
+   nb = dmats%ks_ebands%nsppol * dmats%ks_ebands%nkpt * 2 * dmats%cryst%nsym
+   ABI_ERROR(sjoin("dmats are not unitary! ierr:", itoa(ierr), "/", itoa(nb)))
+ end if
+
 end subroutine dmats_print
+!!***
+
+logical function is_unitary(n, U, tol, err)
+
+!Arguments ------------------------------------
+ integer, intent(in) :: n
+ complex(dp), intent(in) :: U(n,n)
+ real(dp), intent(in) :: tol
+ real(dp), intent(out) :: err
+
+!Local variables-------------------------------
+!scalars
+ complex(dp) :: prod(n,n), identity(n,n)
+ integer :: ii
+
+
+ ! Compute U^\dagger U
+ prod = matmul(conjg(transpose(U)), U)
+
+ ! Build identity matrix
+ identity = czero
+ do ii=1,n
+    identity(ii,ii) = one
+ end do
+
+ ! Maximum deviation from identity
+ err = maxval(abs(prod - identity))
+ is_unitary = (err < tol)
+
+end function is_unitary
 !!***
 
 !----------------------------------------------------------------------

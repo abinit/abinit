@@ -573,7 +573,7 @@ subroutine crystal_compute_sym(Cryst)
    call getspinrot(Cryst%rprimd, Cryst%spinrot(:,isym), Cryst%symrel(:,:,isym))
  end do
 
-! Find list of irreducible atoms by using the indsym
+ ! Find list of irreducible atoms by using the indsym
  ABI_MALLOC(irredat_tmp, (Cryst%natom))
  irredat_tmp = .TRUE.
 

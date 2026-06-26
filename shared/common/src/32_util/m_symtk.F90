@@ -935,7 +935,8 @@ end subroutine symrelrot
 !!
 !! SOURCE
 
-subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
+subroutine littlegroup_q(nsym, qpt, symq, symrec, symafm, timrev, &
+                         prtvol, use_sym) ! optional
 
 !Arguments -------------------------------
 !scalars

@@ -402,7 +402,8 @@ end subroutine cgtk_rotate_symrec
 !!
 !! SOURCE
 
-subroutine cgtk_change_gsphere(ndat, npw1, istwf1, kg1, cg1, npw2, istwf2, kg2, cg2, work_ngfft, work)
+subroutine cgtk_change_gsphere(ndat, npw1, istwf1, kg1, cg1, npw2, istwf2, kg2, cg2, work_ngfft, work, &
+                               shiftg1) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -413,19 +414,23 @@ subroutine cgtk_change_gsphere(ndat, npw1, istwf1, kg1, cg1, npw2, istwf2, kg2, 
  real(dp),intent(inout) :: cg1(2,npw1,ndat)  ! TODO: Should be intent(in) but need to change sphere
  real(dp),intent(out) :: cg2(2,npw2,ndat)
  real(dp),intent(out) :: work(2,work_ngfft(4),work_ngfft(5),work_ngfft(6))
+ integer,optional,intent(in) :: shiftg1(3)
 
 !Local variables ------------------------------
  integer :: n1,n2,n3,n4,n5,n6,idat
+ integer :: shiftg1__(3)
 !************************************************************************
 
  n1 = work_ngfft(1); n2 = work_ngfft(2); n3 = work_ngfft(3)
  n4 = work_ngfft(4); n5 = work_ngfft(5); n6 = work_ngfft(6)
 
+ shiftg1__ = no_shift; if (present(shiftg1)) shiftg1__ = shiftg1
+
  !print *, "npw1", npw1, "npw2", npw2
 
  do idat=1,ndat
    ! Insert cg1 in work array taking into account istwf1 (intent in)
-   call sphere(cg1(:,:,idat),1,npw1,work,n1,n2,n3,n4,n5,n6,kg1,istwf1,to_box,me_g0,no_shift,identity_3d,one)
+   call sphere(cg1(:,:,idat),1,npw1,work,n1,n2,n3,n4,n5,n6,kg1,istwf1,to_box,me_g0,shiftg1__,identity_3d,one)
 
    ! Extract cg2 from work array taking into account istwf2
    call sphere(cg2(:,:,idat),1,npw2,work,n1,n2,n3,n4,n5,n6,kg2,istwf2,to_sph,me_g0,no_shift,identity_3d,one)
