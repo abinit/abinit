@@ -954,7 +954,7 @@ end if
    case ("G0W0")
      call gwr%run_g0w0()
    case ("G0V")
-     call gwr%build_sigxme()
+     call gwr%build_sigxme(compute_qp=.True.)
    case ("EGEW", "EGW0", "G0EW")
      call gwr%run_energy_scf()
    case default

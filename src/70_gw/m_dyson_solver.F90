@@ -61,6 +61,8 @@ module m_dyson_solver
 
     integer :: npts
     ! Number of points
+    integer :: nsig_ab
+    ! Number of spinor components
 
     real(dp) :: betar_pm(2), zcut_pm(2)
     complex(dp) :: alphac_pm(2)
@@ -69,12 +71,14 @@ module m_dyson_solver
     complex(dp),allocatable :: zmesh(:)
     ! input mesh
 
-    complex(dp),allocatable :: sigc_cvals(:)
+    complex(dp),allocatable :: sigc_cvals(:,:)
     ! values on mesh
 
  contains
 
-   procedure :: init => sigma_pade_init
+   procedure :: init_default => sigma_pade_init
+   procedure :: init_spinor => sigma_pade_init_spinor
+   generic   :: init => init_default, init_spinor
    ! Init object
 
    procedure :: free => sigma_pade_free
@@ -325,7 +329,7 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
    ! =============================
    ! === Analytic Continuation ===
    ! =============================
-   ABI_CHECK(Sr%nsig_ab == 1, "AC with spinor not implemented")
+  !  ABI_CHECK(Sr%nsig_ab == 1, "AC with spinor not implemented")
 
    ! Index of the KS or QP energy in sigme_tmp
    !ie0 = sr%nomega_r + Sr%nomega4sd/2+1
@@ -364,18 +368,29 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
 
        ! Note vxc[n_val] instead of vxc[n_val + n_nlcc] with the model core charge.
        vxc_val = ks_me%vxcval(jb, jb, ik_ibz, spin)
+       if (Sr%nsig_ab > 1) vxc_val = SUM(ks_me%vxcval(jb, jb, ik_ibz, :))
        vu = zero; if (dtset%usepawu /= 0) vu = ks_me%vu(jb, jb, ik_ibz, spin)
        v_meanf = vxc_val + vu
 
        ! qp_ene = e0 + z_e0 * (sigc_e0__ + sigx - v_meanf)
-       Sr%egw(jb,ik_ibz,spin) = Sr%e0(jb,ik_ibz,spin) + Sr%ze0(jb,ik_ibz,spin) * &
-         (Sr%sigcmee0(jb,ik_ibz,spin) + Sr%sigxme(jb,ik_ibz,spin) - v_meanf)
+       if (Sr%nsig_ab == 1) then
+          Sr%egw(jb,ik_ibz,spin) = Sr%e0(jb,ik_ibz,spin) + Sr%ze0(jb,ik_ibz,spin) * &
+            (Sr%sigcmee0(jb,ik_ibz,spin) + Sr%sigxme(jb,ik_ibz,spin) - v_meanf)
 
-       Sr%degw(jb,ik_ibz,spin) = Sr%egw(jb,ik_ibz,spin) - Sr%e0(jb,ik_ibz,spin)
+          Sr%degw(jb,ik_ibz,spin) = Sr%egw(jb,ik_ibz,spin) - Sr%e0(jb,ik_ibz,spin)
 
-       ! Estimate Sigma at the QP-energy: Sigma(E_qp)=Sigma(E0)+(E_qp-E0)*dSigma/dE
-       Sr%sigmee(jb,ik_ibz,spin) = &
-         Sr%sigxme(jb,ik_ibz,spin)+Sr%sigcmee0(jb,ik_ibz,spin)+Sr%degw(jb,ik_ibz,spin)*Sr%dsigmee0(jb,ik_ibz,spin)
+          ! Estimate Sigma at the QP-energy: Sigma(E_qp)=Sigma(E0)+(E_qp-E0)*dSigma/dE
+          Sr%sigmee(jb,ik_ibz,spin) = &
+            Sr%sigxme(jb,ik_ibz,spin)+Sr%sigcmee0(jb,ik_ibz,spin)+Sr%degw(jb,ik_ibz,spin)*Sr%dsigmee0(jb,ik_ibz,spin)
+       else
+          Sr%egw(jb,ik_ibz,1) = Sr%e0(jb,ik_ibz,1) + Sr%ze0(jb,ik_ibz,1) * &
+            (SUM(Sr%sigcmee0(jb,ik_ibz,:)+Sr%sigxme(jb,ik_ibz,:))-v_meanf)
+
+          Sr%degw(jb,ik_ibz,1) = Sr%egw(jb,ik_ibz,1) - Sr%e0(jb,ik_ibz,1)
+
+          Sr%sigmee(jb,ik_ibz,1) = &
+            SUM(Sr%sigxme(jb,ik_ibz,:)+Sr%sigcmee0(jb,ik_ibz,:))+Sr%degw(jb,ik_ibz,1)*SUM(Sr%dsigmee0(jb,ik_ibz,:))
+       end if
 
 #else
        ! MG FIXME: Here we are solving the non-linear QP equation using the Pade' continuation + root finding
@@ -393,13 +408,22 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
        ! Solve the QP equation with Newton-Rapson starting from e0
        ! Find root of E^0-V_xc-V_U+Sig_x+Sig_c(z)-z, i.e E^qp.
        alphac_pm = zero; betar_pm = zero; zcut_pm = zero
-       call spade%init(sr%nomega_i, sr%omega_i, sigcme(:,jb,jb,spin), alphac_pm, betar_pm, zcut_pm)
+       if (Sr%nsig_ab > 1) then
+        call spade%init(sr%nomega_i, sr%omega_i, Sr%nsig_ab, sigcme(:,jb,jb,:), alphac_pm, betar_pm, zcut_pm)
+       else
+        call spade%init(sr%nomega_i, sr%omega_i, sigcme(:,jb,jb,spin), alphac_pm, betar_pm, zcut_pm)
+       end if
 
        ! Note vxc[n_val] instead of vxc[n_val + n_nlcc] with the model core charge.
        vxc_val = ks_me%vxcval(jb, jb, ik_ibz, spin)
+       if (Sr%nsig_ab > 1) vxc_val = SUM(ks_me%vxcval(jb, jb, ik_ibz, :))
        vu = zero; if (dtset%usepawu /= 0) vu = ks_me%vu(jb, jb, ik_ibz, spin)
        v_meanf = vxc_val + vu
-       sigx = Sr%sigxme(jb,ik_ibz,spin)
+       if (Sr%nsig_ab == 1) then
+         sigx = Sr%sigxme(jb,ik_ibz,spin)
+       else
+         sigx = SUM(Sr%sigxme(jb,ik_ibz,:))
+       end if
 
        call spade%qp_solve(sr%e0(jb,ik_ibz,spin), v_meanf, sigx, zz, zsc, sigc_zsc, msg, ierr)
        call spade%free()
@@ -422,10 +446,10 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
        do io=1,Sr%nomega_r
          zz=Sr%omega_r(io)
          if (REAL(zz) > zero) then
-           tmpcdp(:) = sigcme(:,jb,jb,spin)
+           tmpcdp(:) = SUM(sigcme(:,jb,jb,:), DIM=2)
            Sr%sigcme(jb,ik_ibz,io,spin) = pade(Sr%nomega_i, Sr%omega_i, tmpcdp, zz)
          else
-           tmpcdp(:) = CONJG(sigcme(:,jb,jb,spin))
+           tmpcdp(:) = CONJG(SUM(sigcme(:,jb,jb,:), DIM=2))
            Sr%sigcme(jb,ik_ibz,io,spin) = pade(Sr%nomega_i, CONJG(Sr%omega_i), tmpcdp, zz)
          end if
          Sr%sigxcme(jb,ik_ibz,io,spin) = Sr%sigxme(jb,ik_ibz,spin) + Sr%sigcme(jb,ik_ibz,io,spin)
@@ -763,9 +787,10 @@ subroutine sigma_pade_init(self, npts, zmesh, sigc_cvals, alphac_pm, betar_pm, z
 
  self%npts = npts
  ABI_MALLOC(self%zmesh, (npts))
- ABI_MALLOC(self%sigc_cvals, (npts))
+ ABI_MALLOC(self%sigc_cvals, (npts,1))
  self%zmesh = zmesh
- self%sigc_cvals = sigc_cvals
+ self%sigc_cvals(:,1) = sigc_cvals
+ self%nsig_ab = 1
 
  self%alphac_pm = alphac_pm
  self%betar_pm = betar_pm
@@ -774,6 +799,41 @@ subroutine sigma_pade_init(self, npts, zmesh, sigc_cvals, alphac_pm, betar_pm, z
 
 end subroutine sigma_pade_init
 !!***
+!----------------------------------------------------------------------
+
+!!****f* m_dyson_solver/sigma_pade_init
+!! NAME
+!!  sigma_pade_init
+!!
+!! FUNCTION
+!!  Initialize the Pade' from the `npts` values of Sigma_c(iw) given on the mesh `zmesh`.
+!!
+!! SOURCE
+
+subroutine sigma_pade_init_spinor(self, npts, zmesh, nsig_ab, sigc_cvals, alphac_pm, betar_pm, zcut_pm)
+
+!Arguments ------------------------------------
+ class(sigma_pade_t),intent(out) :: self
+ integer,intent(in) :: npts, nsig_ab
+ complex(dp),target,intent(in) :: zmesh(npts), sigc_cvals(npts,nsig_ab), alphac_pm(2)
+ real(dp),intent(in) :: betar_pm(2), zcut_pm(2)
+! *************************************************************************
+
+ self%npts = npts
+ ABI_MALLOC(self%zmesh, (npts))
+ ABI_MALLOC(self%sigc_cvals, (npts,nsig_ab))
+ self%zmesh = zmesh
+ self%sigc_cvals = sigc_cvals
+ self%nsig_ab = nsig_ab
+
+ self%alphac_pm = alphac_pm
+ self%betar_pm = betar_pm
+ self%zcut_pm = zcut_pm
+ self%do_sigma_fit = .False.
+
+end subroutine sigma_pade_init_spinor
+!!***
+
 
 subroutine sigma_pade_free(self)
 !Arguments ------------------------------------
@@ -806,35 +866,38 @@ subroutine sigma_pade_eval(self, zz, val, &
  complex(dp),intent(in) :: zz
  complex(dp),intent(out) :: val
  complex(dp),optional,intent(out) :: dvdz
+ integer :: iab
 ! *************************************************************************
 
  ! if zz in 2 or 3 quadrant, avoid branch cut in the complex plane using Sigma(-iw) = Sigma(iw)*.
- if (real(zz) > zero) then
-   val = pade(self%npts, self%zmesh, self%sigc_cvals, zz)
+  val = czero
+  if (present(dvdz)) dvdz = czero
 
-   if (present(dvdz)) then
-     dvdz = dpade(self%npts, self%zmesh, self%sigc_cvals, zz)
-   end if
+  do iab = 1, self%nsig_ab
+    if (real(zz) > zero) then
+      val = val + pade(self%npts, self%zmesh, self%sigc_cvals(:,iab), zz)
+      if (present(dvdz)) then
+        dvdz = dvdz + dpade(self%npts, self%zmesh, self%sigc_cvals(:,iab), zz)
+      end if
+    else
+      val = val + pade(self%npts, -self%zmesh, conjg(self%sigc_cvals(:,iab)), zz)
+      if (present(dvdz)) then
+        dvdz = dvdz + dpade(self%npts, -self%zmesh, conjg(self%sigc_cvals(:,iab)), zz)
+      end if
+    end if
+  end do
 
- else
-   val = pade(self%npts, -self%zmesh, conjg(self%sigc_cvals), zz)
+  if (self%do_sigma_fit) then
+    ! Add analytic expression.
+    val = val + self%alphac_pm(1) / (self%betar_pm(1) + zz) &
+              + self%alphac_pm(2) / (self%betar_pm(2) - zz)
 
-   if (present(dvdz)) then
-     dvdz = dpade(self%npts, -self%zmesh, conjg(self%sigc_cvals), zz)
-   end if
- end if
-
- if (self%do_sigma_fit) then
-   ! Add analytic expression.
-   val = val + self%alphac_pm(1) / (self%betar_pm(1) + zz) &
-             + self%alphac_pm(2) / (self%betar_pm(2) - zz)
-
-   if (present(dvdz)) then
-     ! Add analytic expression.
-     dvdz = dvdz - self%alphac_pm(1) / ((self%betar_pm(1) + zz) ** 2)  &
-                 - self%alphac_pm(2) / ((self%betar_pm(2) - zz) ** 2)
-   end if
- end if
+    if (present(dvdz)) then
+      ! Add analytic expression.
+      dvdz = dvdz - self%alphac_pm(1) / ((self%betar_pm(1) + zz) ** 2)  &
+                  - self%alphac_pm(2) / ((self%betar_pm(2) - zz) ** 2)
+    end if
+  end if
 
 end subroutine sigma_pade_eval
 !!***

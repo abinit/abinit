@@ -1144,8 +1144,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        !  ABI_ERROR_NOSTOP("Self-energy with symsigma 1 and nspinor 2 not implemented", ierr)
        !end if
        if (optdriver == RUNL_SIGMA .and. &
-           any(mod(dt%gwcalctyp, 10) == [SIG_GW_AC, SIG_QPGW_PPM, SIG_QPGW_CD])) then
-         ABI_ERROR_NOSTOP("analytic-continuation, model GW with nspinor 2 are not implemented", ierr)
+           any(mod(dt%gwcalctyp, 10) == [SIG_QPGW_PPM, SIG_QPGW_CD])) then
+         ABI_ERROR_NOSTOP("model GW with nspinor 2 are not implemented", ierr)
        end if
        !if (optdriver == RUNL_SIGMA .and. mod(dt%gwcalctyp, 100) >= 10) then
        !  ABI_ERROR_NOSTOP("Self-consistent GW with nspinor == 2 not implemented", ierr)
@@ -4774,9 +4774,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%nshiftk /= 1 .or. any(abs(dt%shiftk(:,1)) > tol6)) then
        ABI_ERROR_NOSTOP('GWR requires Gamma-centered k-meshes', ierr)
      end if
-     if (dt%nspinor == 2 .and. .not. string_in(dt%gwr_task, "HDIAGO, HDIAGO_FULL")) then
-       ABI_ERROR_NOSTOP('GWR does not support nspinor == 2', ierr)
-     end if
+    !  if (dt%nspinor == 2 .and. .not. string_in(dt%gwr_task, "HDIAGO, HDIAGO_FULL")) then
+    !    ABI_ERROR_NOSTOP('GWR does not support nspinor == 2', ierr)
+    !  end if
    end if
 
    ! ===========================================================
