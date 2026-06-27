@@ -152,6 +152,7 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  integer, parameter :: tim_nonlop = 1753
  integer :: iband,shift,space,blockdim,total_spacedim,ierr
  integer :: me_g0,me_g0_fft
+ logical :: transfer_cg
  integer(kind=c_size_t) :: localMem
  type(chebfi_t) :: chebfi
  type(xgBlock_t) :: xgx0,xgeigen,xgocc,xgresidu
@@ -230,8 +231,11 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
    write(std_out,'(4x,A,F10.6,1x,A)') "Temporary memory in m_chebfi : ",real(chebfiMem(2))/1e9,"GB"
  end if
 
+ transfer_cg = .false.
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid,occ) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:eig,resid,occ) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ transfer_cg = .not. xomp_target_is_present(c_loc(cg))
+ !$OMP TARGET ENTER DATA MAP(to:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP .and. transfer_cg)
 #endif
 
  call xgBlock_map(xgx0,cg,space,npw*nspinor,nband,comm=l_mpi_enreg%comm_bandspinorfft,me_g0=me_g0,&
@@ -310,8 +314,9 @@ subroutine chebfiwf2(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  call chebfi_free(chebfi)
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET UPDATE FROM(cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
- !$OMP TARGET EXIT DATA MAP(delete:cg,eig,resid,occ) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET UPDATE FROM(eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:eig,resid,occ) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(from:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP .and. transfer_cg)
 #endif
 
  call timab(tim_chebfiwf2,2,tsec)
