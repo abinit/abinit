@@ -6723,7 +6723,10 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
  integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3)
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
- real(dp) :: weight_qq
+ real(dp) :: weight_qq, phase, tnon(3), q_base(3)
+ integer :: idir, ipert, idir_eq, ipert_eq, mu, mu_eq, iq_base_glob, ii
+ real(dp) :: symrec_inv(3,3), symrec_eq(3,3), l0(3)
+ complex(dp) :: cphase
  logical :: with_g2dw, q_is_gamma
  logical :: isirr_k, isirr_kq, isirr_q
  character(len=abi_slen) :: with_gmode, gtype, gvals_name
@@ -6736,9 +6739,9 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  real(dp),allocatable :: gwork_q(:,:,:,:,:)
  integer :: brange_k_spin(2, dtset%nsppol)
  integer,allocatable :: my_kqmap(:,:), kmesh_map(:,:), state_kq(:,:)
- real(dp),contiguous,pointer :: gkq_rot_ptr(:,:,:,:)
- complex(dp),allocatable :: dmat_k(:,:), dmat_kq(:,:), gkq_base(:,:,:)
- complex(dp),target,allocatable :: gkq_rot(:,:,:)
+ real(dp),contiguous,pointer :: gkq_rot_ptr(:,:,:,:), gkq_base_ptr(:,:,:,:)
+ complex(dp),allocatable :: dmat_k(:,:), dmat_kq(:,:)
+ complex(dp),target,allocatable :: gkq_rot(:,:,:), gkq_base(:,:,:)
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -6784,7 +6787,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  nqbz = gstore%nqbz; nqibz = gstore%nqbz
  nsym = cryst%nsym
 
- NCF_CHECK(nctk_open_read(ncid, gstore_path, xmpi_comm_self))
+ NCF_CHECK(nctk_open_modify(ncid, gstore_path, xmpi_comm_self))
 
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
@@ -6826,9 +6829,6 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
      ! Read q-slice of the e-ph matrix elements
      ! TODO: Remember to handle GWPT STORE
      gvals_name = "gvals"
-     ABI_MALLOC_OR_DIE(gwork_q, (2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%glob_nk), ierr)
-     ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
-     NCF_CHECK(ncerr)
 
      ! Loop over k-points in the IBZ.
      do my_ik=1,gqk%my_nk
@@ -6854,31 +6854,64 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        ! Get D matrices at k and k+q from the matrices computed in the IBZ.
        ! Note that the operation S is in the little group of k hence...
        !
-       dmat_k = dmats%for_spin(spin)%value(:,:, isym, itime_k, ik_ibz)
-       dmat_kq = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym, itime_kq, ikq_ibz)))
+       dmat_k = dmats%for_spin(spin)%value(:,:, isym_k, itime_k, ik_ibz)
+       dmat_kq = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_kq, itime_kq, ikq_ibz)))
 
-       ! Read gqk_base
-       !gqk_base = ??
-       !ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gqk_base, start=[1, 1, 1, 1, 1, iq_glob])
-       !NCF_CHECK(ncerr)
+       symrec_eq = cryst%symrec(:,:,isym_k)
+       symrec_inv = transpose(symrec_eq)
+       ! q_base = (S_k)^-1 q_BZ
+       q_base = tsign_k * matmul(symrec_inv, qpt)
+       ! Map q_base to global index in gstore%qbz
+       iq_base_glob = -1
+       do ii = 1, gstore%nqbz
+         if (sum((modulo(q_base - gstore%qbz(:, ii) + 0.5_dp, 1.0_dp) - 0.5_dp)**2) < tol12) then
+           iq_base_glob = ii
+           exit
+         end if
+       end do
+       if (iq_base_glob == -1) ABI_ERROR("q_base not found in BZ grid")
+
+       ! Read gkq_base from disk
+       call c_f_pointer(c_loc(gkq_base), gkq_base_ptr, [2, nb, nb, gqk%natom3])
+       ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gkq_base_ptr, &
+                            start=[1, 1, 1, 1, ik_ibz, iq_base_glob], &
+                            count=[2, nb, nb, gqk%natom3, 1, 1])
+       NCF_CHECK(ncerr)
+
+       if (trev_k == 1) gkq_base = conjg(gkq_base)
 
        ! Perform symmetrization.
-       do ip=1,gqk%natom3
-         gkq_rot(:,:,ip) = matmul(matmul(dmat_kq, gkq_base(:,:,ip)), dmat_k)
+       gkq_rot = zero
+       do mu=1,gqk%natom3
+         idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
+         l0 = cryst%indsym(1:3,isym_k,ipert)
+         tnon = l0 + matmul(symrec_inv, cryst%tnons(:,isym_k))
+         ipert_eq = cryst%indsym(4, isym_k, ipert)
+
+         ! phase = e^{-i q_base . tnon}
+         phase = -two_pi * sum(q_base * tnon)
+         cphase = cmplx(cos(phase), sin(phase), dp)
+
+         do idir_eq=1,3
+           if (symrec_eq(idir, idir_eq) == 0) cycle
+           mu_eq = idir_eq + (ipert_eq - 1) * 3
+           ! accumulate the rotated atomic potential matrix
+           gkq_rot(:,:,mu) = gkq_rot(:,:,mu) + real(symrec_eq(idir, idir_eq), dp) * cphase * &
+                             matmul(matmul(dmat_kq, gkq_base(:,:,mu_eq)), dmat_k)
+         end do
        end do
 
        ! Write the newly computed g_{mn, nu} back to the netcdf file (in-place modification).
        ! and update the entry in state_kq.
        call c_f_pointer(c_loc(gkq_rot), gkq_rot_ptr, [2, nb, nb, gqk%natom3])
-       !ncerr = nf90_put_var(spin_ncid, spin_vid(gvals_name), gkq_rot_ptr, &
-       !                     start=[1, 1, 1, 1, gqk%my_kstart, iq_glob], &
-       !                     count=[2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt])
-       !NCF_CHECK(ncerr)
+       ncerr = nf90_put_var(spin_ncid, spin_vid(gvals_name), gkq_rot_ptr, &
+                            start=[1, 1, 1, 1, ik_glob, iq_glob], &
+                            count=[2, nb, nb, gqk%natom3, 1, 1])
+       NCF_CHECK(ncerr)
        state_kq(ik_glob, iq_glob) = GSTORE_KQ_SYMMETRIZED
      end do ! my_ik
 
      ABI_FREE(my_kqmap)
-     ABI_FREE(gwork_q)
    end do ! my_iq
    end associate
 
