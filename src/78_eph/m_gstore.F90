@@ -7315,13 +7315,14 @@ subroutine dmats_print(dmats, units, prtvol, header)
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
- integer :: spin, bstart, nb, ik_ibz, isym, itime, ierr, otimrev_k, isym_inv, j, isym1, isym2, isym3
+ integer :: spin, bstart, nb, ik_ibz, isym, itime, ierr, otimrev_k, isym_inv, j, isym1, isym2, isym3, n
  logical :: unitary, identity_ok
  character(len=5000) :: msg
  real(dp),parameter :: DTOL = tol3
- real(dp) :: kk_ibz(3), err, L_red(3)
+ real(dp) :: kk_ibz(3), err, L_red(3), rel_n(3,3)
  complex(dp) :: phase_L
  integer :: symtab(4,2,dmats%cryst%nsym)
+ complex(dp),allocatable :: cmat_n(:,:)
 ! *************************************************************************
 
  msg = ' ==== Info on the dmats_t ==== '
@@ -7332,6 +7333,7 @@ subroutine dmats_print(dmats, units, prtvol, header)
  do spin=1,size(dmats%for_spin)
    bstart = dmats%brange_spin(1, spin)
    nb = dmats%brange_spin(2, spin) - dmats%brange_spin(1, spin) + 1
+   ABI_MALLOC(cmat_n, (nb, nb))
    do ik_ibz=1,dmats%ks_ebands%nkpt
      kk_ibz = dmats%ks_ebands%kptns(:, ik_ibz)
      call littlegroup_q(dmats%cryst%nsym, kk_ibz, symtab, dmats%cryst%symrec, dmats%cryst%symafm, otimrev_k, prtvol=0)
@@ -7416,10 +7418,18 @@ subroutine dmats_print(dmats, units, prtvol, header)
 
          ! Find isym3 = isym1 * isym2 (right homomorphism)
          ! In ABINIT, point-group operations are applied sequentially to coordinates such that
-         ! r' = S_1 S_2 r. When generating the irreducible representation matrices D(S),
-         ! this algebraic structure is maintained as D(S_1 S_2) \propto D(S_1) D(S_2).
-         ! Therefore, we search for the composite symmetry isym3 that perfectly
-         ! matches the matrix product of the rotation components symrel(isym1) * symrel(isym2).
+         ! r' = S_1 S_2 r. When generating the representation matrices D(S, k),
+         ! this algebraic structure is maintained according to the product rule:
+         !
+         !   D^{k}(S_1 S_2) = e^{-i k \cdot L} D^{S_2 k}(S_1) D^{k}(S_2)
+         !
+         ! Since we are operating strictly inside the little group of k, we have S_2 k \equiv k,
+         ! and the equation fundamentally simplifies to a proportionality:
+         !
+         !   D(S_3) = e^{i \phi} D(S_1) D(S_2)
+         !
+         ! We search for the composite symmetry isym3 that perfectly matches the spatial
+         ! rotation product: symrel(isym1) * symrel(isym2).
          isym3 = 0
          do j=1, dmats%cryst%nsym
            if (all(matmul(dmats%cryst%symrel(:,:,isym1), dmats%cryst%symrel(:,:,isym2)) == dmats%cryst%symrel(:,:,j))) then
@@ -7455,7 +7465,72 @@ subroutine dmats_print(dmats, units, prtvol, header)
          end if
        end do
      end do
+
+     ! =========================================================================
+     ! Eigenvalues & Closure Test (itime = 1)
+     ! =========================================================================
+     ! According to the theory of group representations, the representation matrix
+     ! D(S) must satisfy the closure conditions of the crystallographic point group.
+     ! If S = C_n is an n-fold symmetry operation, applying the spatial rotation
+     ! n times yields the identity (R^n = E).
+     ! However, for non-symmorphic operations (e.g. glide planes or screw axes),
+     ! applying the operation n times results in a pure fractional lattice translation:
+     !   S^n(r) = r + T
+     !
+     ! In reciprocal space, inside the little group of k, this translation introduces
+     ! a scalar Bloch phase shift. Furthermore, if spin-orbit coupling is included,
+     ! a full 2\pi rotation yields a -1 fermionic parity phase.
+     ! Thus, the eigenvalues of the representation matrix satisfy:
+     !
+     !   [ D(S) ]^n = e^{-i k \cdot T} (\pm I)
+     !
+     ! Rather than computing the analytic translation T and spinor parity, we dynamically
+     ! extract the overall scalar phase \phi = Tr(D^n) / N_{bands} and assert that
+     ! D(S)^n \equiv \phi I.
+     do isym = 1, dmats%cryst%nsym
+       if (symtab(4, 1, isym) == 0) cycle
+       associate (cmat => dmats%for_spin(spin)%value(:, :, isym, 1, ik_ibz))
+
+       ! Find the order of the point-group operation (n <= 6)
+       n = 1
+       rel_n = dmats%cryst%symrel(:,:,isym)
+       do while (any(rel_n /= reshape((/1,0,0, 0,1,0, 0,0,1/), (/3,3/))) .and. n < 10)
+         n = n + 1
+         rel_n = matmul(dmats%cryst%symrel(:,:,isym), rel_n)
+       end do
+
+       if (n > 1 .and. n <= 6) then
+         ! Compute cmat^n
+         cmat_n = cmat
+         do j = 2, n
+           cmat_n = matmul(cmat, cmat_n)
+         end do
+
+         ! Extract phase from Trace: phase = Tr(cmat^n) / nb
+         phase_L = zero
+         do j = 1, nb
+           phase_L = phase_L + cmat_n(j, j)
+         end do
+         phase_L = phase_L / nb
+
+         ! Normalize cmat_n with phase_L to check if it's proportional to identity
+         err = 0.0_dp
+         do j = 1, nb
+           cmat_n(j, j) = cmat_n(j, j) - phase_L
+         end do
+         err = maxval(abs(cmat_n))
+
+         if (err >= DTOL .or. abs(abs(phase_L) - 1.0_dp) > DTOL) then
+           ierr = ierr + 1
+           call wrtout(units, sjoin(" ERROR: Closure test failed! isym:", itoa(isym), " order:", itoa(n)))
+           call wrtout(units, sjoin("   MEASURED phase  : ", ftoa(real(phase_L)), " + i ", ftoa(aimag(phase_L))))
+           call wrtout(units, sjoin("   err: ", ftoa(err)))
+         end if
+       end if
+       end associate
+     end do
    end do ! ik_ibz
+   ABI_FREE(cmat_n)
  end do ! spin
 
  if (ierr /= 0) then
