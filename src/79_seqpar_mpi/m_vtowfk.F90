@@ -382,6 +382,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  call timab(39,1,tsec) ! "vtowfk (loop)"
 
  cg_k => cg(:,1+icg:npw_k*my_nspinor*nband_k+icg)
+ !$OMP TARGET ENTER DATA MAP(to:cg_k) IF(dtset%gpu_option==ABI_GPU_OPENMP .and. xg_diago .and. .not. use_rmm_diis)
 
  do inonsc=1,nnsclo_now
    ABI_NVTX_START_RANGE(NVTX_VTOWFK_EXTRA1)
@@ -514,44 +515,44 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    =========================================================================
 !    ============ MINIMIZATION OF BANDS: SPECTRUM SLICING == =================
 !    =========================================================================
-       else if (wfopta10 == 2) then
-         nstep_mixed = dtset%nstep_mixed ! below which perform chebfi
-         write(std_out,'(a,i0)') 'running vtowfk for nstep_mixed=', nstep_mixed
-         if ( xg_diago .and. dtset%cprj_in_memory == 0 ) then
-            if (istep > nstep_mixed) then
-                write(std_out,'(a,i0)') 'entering slicewf'
-                !ABI_NVTX_START_RANGE(NVTX_SPESLI)
-                call slicewf(cg_k,dtset,eig_k,enlx_k,gs_hamk,mpi_enreg,&
-&                             nband_k,npw_k,my_nspinor,prtvol,resid_k)
-                !ABI_NVTX_END_RANGE()
-            else
-                write(std_out,'(a,i0)') 'entering chebfiwf2'
-                ABI_NVTX_START_RANGE(NVTX_CHEBFI2)
-                call chebfiwf2(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,&
-&                              mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
-                ABI_NVTX_END_RANGE()
-            end if
-         else
-             if (istep > nstep_mixed) then
-                write(std_out,'(a,i0)') 'entering slicewf_cprj'
-                ! ITEST
-                write(901,*)
-                write(901,*) '**'
-                write(901,*) 'SCF iteration=', istep
-                write(901,*) '**'
-                write(901,*)
-                flush(901)
-                ! ITEST
-                !ABI_NVTX_START_RANGE(NVTX_SPESLI)
-                call slicewf_cprj(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,mpi_enreg,&
-&                             nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
-                !ABI_NVTX_END_RANGE()
-            else
-                write(std_out,'(a,i0)') 'entering chebfiwf2_cprj'
-                call chebfiwf2_cprj(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,&
-                    mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
-            end if
-         end if
+     else if (wfopta10 == 2) then
+       nstep_mixed = dtset%nstep_mixed ! below which perform chebfi
+       write(std_out,'(a,i0)') 'running vtowfk for nstep_mixed=', nstep_mixed
+       if ( xg_diago .and. dtset%cprj_in_memory == 0 ) then
+          if (istep > nstep_mixed) then
+              write(std_out,'(a,i0)') 'entering slicewf'
+              !ABI_NVTX_START_RANGE(NVTX_SPESLI)
+              call slicewf(cg_k,dtset,eig_k,enlx_k,gs_hamk,mpi_enreg,&
+&                          nband_k,npw_k,my_nspinor,prtvol,resid_k)
+              !ABI_NVTX_END_RANGE()
+          else
+              write(std_out,'(a,i0)') 'entering chebfiwf2'
+              ABI_NVTX_START_RANGE(NVTX_CHEBFI2)
+              call chebfiwf2(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,&
+&                            mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
+              ABI_NVTX_END_RANGE()
+          end if
+       else
+           if (istep > nstep_mixed) then
+              write(std_out,'(a,i0)') 'entering slicewf_cprj'
+              ! ITEST
+              write(901,*)
+              write(901,*) '**'
+              write(901,*) 'SCF iteration=', istep
+              write(901,*) '**'
+              write(901,*)
+              flush(901)
+              ! ITEST
+              !ABI_NVTX_START_RANGE(NVTX_SPESLI)
+              call slicewf_cprj(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,mpi_enreg,&
+&                               nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
+              !ABI_NVTX_END_RANGE()
+          else
+              write(std_out,'(a,i0)') 'entering chebfiwf2_cprj'
+              call chebfiwf2_cprj(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,&
+                   mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
+          end if
+       end if
 
 !      =========================================================================
 !      ======== MINIMIZATION OF BANDS: CONJUGATE GRADIENT (Teter et al.) =======
@@ -855,6 +856,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  !$OMP TARGET ENTER DATA MAP(alloc:cwavef) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 
+ !$OMP TARGET UPDATE FROM(cg_k) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP .and. xg_diago .and. .not. use_rmm_diis)
  ! Loop over bands or blocks of bands.
  ! Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
  do iblock=1,nblockbd
@@ -889,10 +891,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        ! Treat up and down components separately.
        ! Note filter 1. Also: this won't work if paral_kgb 1 and/or spinor parallelism
        filter = 1
-       call meanvalue_g(ar,gs_hamk%kinpw_k,filter,istwf_k,mpi_enreg,npw_k,1,&
-         cwavef_iband, cwavef_iband, 0, gpu_thread_limit=dtset%gpu_thread_limit)
+       call meanvalue_g(ar, gs_hamk%kinpw_k, filter,istwf_k,mpi_enreg,npw_k,1,&
+       &    cwavef_iband,             cwavef_iband,            0,&
+       &    gpu_thread_limit=dtset%gpu_thread_limit)
+
        call meanvalue_g(ar2,gs_hamk%kinpw_kp,filter,istwf_k,mpi_enreg,npw_k,1,&
-         cwavef_iband(:,npw_k+1:), cwavef_iband(:,npw_k+1:),0,gpu_thread_limit=dtset%gpu_thread_limit)
+       &    cwavef_iband(:,npw_k+1:), cwavef_iband(:,npw_k+1:),0,&
+       &    gpu_thread_limit=dtset%gpu_thread_limit)
+
        ek_k(iband) = ar + ar2
      end if
 
@@ -1491,6 +1497,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  if (dtset%cprj_in_memory==2) nullify(cprj_cwavef_bands)
 
+ !$OMP TARGET EXIT DATA MAP(from:cg_k) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP .and. xg_diago .and. .not. use_rmm_diis)
  if(wfopta10 /= 1 .and. .not. xg_diago) then
    ABI_FREE(evec)
    ABI_FREE(subham)
