@@ -7308,6 +7308,8 @@ subroutine dmats_print(dmats, units, prtvol, header)
 
  use m_numeric_tools, only : print_arr
  use m_symtk,   only : littlegroup_q
+ use m_yaml, only : yamldoc_t, yamldoc_open
+ use m_pair_list, only : pair_list
 
 !Arguments ------------------------------------
  class(dmats_t),intent(in) :: dmats
@@ -7315,7 +7317,7 @@ subroutine dmats_print(dmats, units, prtvol, header)
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
- integer :: spin, bstart, nb, ik_ibz, isym, itime, ierr, otimrev_k, isym_inv, j, isym1, isym2, isym3, n
+ integer :: spin, bstart, nb, ik_ibz, isym, itime, ierr, otimrev_k, isym_inv, j, isym1, isym2, isym3, n, isym_cnt
  logical :: unitary, identity_ok
  character(len=5000) :: msg
  real(dp),parameter :: DTOL = tol3
@@ -7323,11 +7325,13 @@ subroutine dmats_print(dmats, units, prtvol, header)
  complex(dp) :: phase_L
  integer :: symtab(4,2,dmats%cryst%nsym)
  complex(dp),allocatable :: cmat_n(:,:)
+ type(yamldoc_t) :: ydoc
+ type(pair_list), allocatable :: sym_dicts(:)
 ! *************************************************************************
 
- msg = ' ==== Info on the dmats_t ==== '
- if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
- call wrtout(units, msg)
+ msg = 'Info on the dmats_t'
+ if (present(header)) msg=trim(adjustl(header))
+ ydoc = yamldoc_open(tag="dmats", info=trim(msg))
 
  ierr = 0
  do spin=1,size(dmats%for_spin)
@@ -7338,25 +7342,41 @@ subroutine dmats_print(dmats, units, prtvol, header)
      kk_ibz = dmats%ks_ebands%kptns(:, ik_ibz)
      call littlegroup_q(dmats%cryst%nsym, kk_ibz, symtab, dmats%cryst%symrec, dmats%cryst%symafm, otimrev_k, prtvol=0)
 
-     call wrtout(units, sjoin(" D(S,k) matrix for k-point:", ktoa(kk_ibz), "spin:", itoa(spin)))
+     isym_cnt = 0
+     do itime=1,2
+       do isym=1,dmats%cryst%nsym
+         if (symtab(4, itime, isym) /= 0) isym_cnt = isym_cnt + 1
+       end do
+     end do
+     if (isym_cnt > 0) allocate(sym_dicts(isym_cnt))
+
+     isym_cnt = 0
      do itime=1,2
        do isym=1,dmats%cryst%nsym
          if (symtab(4, itime, isym) == 0) cycle
+         isym_cnt = isym_cnt + 1
+         call sym_dicts(isym_cnt)%set("isym", i=isym)
+         call sym_dicts(isym_cnt)%set("itime", i=itime)
+         msg = sjoin("[", ftoa(dmats%cryst%tnons(1,isym)), ", ", ftoa(dmats%cryst%tnons(2,isym)))
+         msg = sjoin(msg, ", ", ftoa(dmats%cryst%tnons(3,isym)), "]")
+         call sym_dicts(isym_cnt)%set("tnon", s=trim(msg))
+
+         msg = sjoin("[", itoa(symtab(1, itime, isym)), ", ", itoa(symtab(2, itime, isym)))
+         msg = sjoin(msg, ", ", itoa(symtab(3, itime, isym)), ", ", itoa(symtab(4, itime, isym)), "]")
+         call sym_dicts(isym_cnt)%set("symtab", s=trim(msg))
+
          associate (cmat => dmats%for_spin(spin)%value(:, :, isym, itime, ik_ibz))
          unitary = is_unitary(nb, cmat, DTOL, err)
          if (.not. unitary) ierr = ierr + 1
-         msg = sjoin(" isym:", itoa(isym), ", itime:", itoa(itime), ", tnon:", ltoa(dmats%cryst%tnons(:,isym)))
-         msg = sjoin(msg, ", unitary:", yesno(unitary), ", err:", ftoa(err))
-         call wrtout(units, msg)
-         call wrtout(units, sjoin("symtab:", ltoa(symtab(:, itime, isym))))
+         call sym_dicts(isym_cnt)%set("unitary", s=yesno(unitary))
+         call sym_dicts(isym_cnt)%set("unitary_err", r=err)
 
          ! Identity operator test
          if (isym == 1 .and. itime == 1) then
            identity_ok = is_identity(nb, cmat, DTOL, err)
-           if (.not. identity_ok) then
-             ierr = ierr + 1
-             call wrtout(units, sjoin(" ERROR: Identity operator test failed! err:", ftoa(err)))
-           end if
+           if (.not. identity_ok) ierr = ierr + 1
+           call sym_dicts(isym_cnt)%set("identity_ok", s=yesno(identity_ok))
+           call sym_dicts(isym_cnt)%set("identity_err", r=err)
          end if
 
          ! Inverse relation test
@@ -7397,12 +7417,10 @@ subroutine dmats_print(dmats, units, prtvol, header)
                phase_L = sum( conjg(cmat_inv) * transpose(cmat) ) / nb
                err = maxval(abs(cmat_inv * (phase_L / abs(phase_L)) - transpose(cmat)))
              end if
-             if (err >= DTOL .or. abs(abs(phase_L) - 1.0_dp) > DTOL) then
-               ierr = ierr + 1
-               call wrtout(units, sjoin(" ERROR: Inverse relation test failed! isym:", itoa(isym)))
-               call wrtout(units, sjoin("   L_red: ", ftoa(L_red(1)), ftoa(L_red(2)), ftoa(L_red(3))))
-               call wrtout(units, sjoin("   MEASURED phase  : ", ftoa(real(phase_L)), " + i ", ftoa(aimag(phase_L))))
-             end if
+             if (err >= DTOL .or. abs(abs(phase_L) - 1.0_dp) > DTOL) ierr = ierr + 1
+             call sym_dicts(isym_cnt)%set("inv_ok", s=yesno(err < DTOL .and. abs(abs(phase_L) - 1.0_dp) <= DTOL))
+             call sym_dicts(isym_cnt)%set("inv_err", r=err)
+             call sym_dicts(isym_cnt)%set("inv_phase", s=sjoin(ftoa(real(phase_L)), " + i ", ftoa(aimag(phase_L))))
            end associate
          end if
          if (prtvol > 1) call print_arr(units, cmat, max_r=nb, max_c=nb)
@@ -7439,10 +7457,6 @@ subroutine dmats_print(dmats, units, prtvol, header)
          end do
 
          if (isym3 /= 0 .and. symtab(4, 1, isym3) /= 0) then
-           L_red(1) = nint(sum(dmats%cryst%symrel(1,:,isym1) * dmats%cryst%tnons(:,isym2)) + dmats%cryst%tnons(1,isym1) - dmats%cryst%tnons(1,isym3))
-           L_red(2) = nint(sum(dmats%cryst%symrel(2,:,isym1) * dmats%cryst%tnons(:,isym2)) + dmats%cryst%tnons(2,isym1) - dmats%cryst%tnons(2,isym3))
-           L_red(3) = nint(sum(dmats%cryst%symrel(3,:,isym1) * dmats%cryst%tnons(:,isym2)) + dmats%cryst%tnons(3,isym1) - dmats%cryst%tnons(3,isym3))
-
            associate (cmat1 => dmats%for_spin(spin)%value(:, :, isym1, 1, ik_ibz), &
                       cmat2 => dmats%for_spin(spin)%value(:, :, isym2, 1, ik_ibz), &
                       cmat3 => dmats%for_spin(spin)%value(:, :, isym3, 1, ik_ibz))
@@ -7455,12 +7469,7 @@ subroutine dmats_print(dmats, units, prtvol, header)
              ! Normalize phase_L to 1.0 to check if it's actually proportional
              err = maxval(abs(cmat3 * (phase_L / abs(phase_L)) - matmul(cmat1, cmat2)))
 
-             if (err >= DTOL .or. abs(abs(phase_L) - 1.0_dp) > DTOL) then
-               ierr = ierr + 1
-               call wrtout(units, sjoin(" ERROR: Group mult failed! isym1:", itoa(isym1), " isym2:", itoa(isym2), " isym3:", itoa(isym3)))
-               call wrtout(units, sjoin("   L_red: ", ftoa(L_red(1)), ftoa(L_red(2)), ftoa(L_red(3))))
-               call wrtout(units, sjoin("   MEASURED phase  : ", ftoa(real(phase_L)), " + i ", ftoa(aimag(phase_L))))
-             end if
+             if (err >= DTOL .or. abs(abs(phase_L) - 1.0_dp) > DTOL) ierr = ierr + 1
            end associate
          end if
        end do
@@ -7487,55 +7496,71 @@ subroutine dmats_print(dmats, units, prtvol, header)
      ! Rather than computing the analytic translation T and spinor parity, we dynamically
      ! extract the overall scalar phase \phi = Tr(D^n) / N_{bands} and assert that
      ! D(S)^n \equiv \phi I.
-     do isym = 1, dmats%cryst%nsym
-       if (symtab(4, 1, isym) == 0) cycle
-       associate (cmat => dmats%for_spin(spin)%value(:, :, isym, 1, ik_ibz))
+     isym_cnt = 0
+     do itime=1,2
+       do isym=1,dmats%cryst%nsym
+         if (symtab(4, itime, isym) == 0) cycle
+         isym_cnt = isym_cnt + 1
+         if (itime == 1) then
+           associate (cmat => dmats%for_spin(spin)%value(:, :, isym, 1, ik_ibz))
 
-       ! Find the order of the point-group operation (n <= 6)
-       n = 1
-       rel_n = dmats%cryst%symrel(:,:,isym)
-       do while (any(rel_n /= reshape((/1,0,0, 0,1,0, 0,0,1/), (/3,3/))) .and. n < 10)
-         n = n + 1
-         rel_n = matmul(dmats%cryst%symrel(:,:,isym), rel_n)
-       end do
+           ! Find the order of the point-group operation (n <= 6)
+           n = 1
+           rel_n = dmats%cryst%symrel(:,:,isym)
+           do while (any(rel_n /= reshape((/1,0,0, 0,1,0, 0,0,1/), (/3,3/))) .and. n < 10)
+             n = n + 1
+             rel_n = matmul(dmats%cryst%symrel(:,:,isym), rel_n)
+           end do
 
-       if (n > 1 .and. n <= 6) then
-         ! Compute cmat^n
-         cmat_n = cmat
-         do j = 2, n
-           cmat_n = matmul(cmat, cmat_n)
-         end do
+           if (n > 1 .and. n <= 6) then
+             ! Compute cmat^n
+             cmat_n = cmat
+             do j = 2, n
+               cmat_n = matmul(cmat, cmat_n)
+             end do
 
-         ! Extract phase from Trace: phase = Tr(cmat^n) / nb
-         phase_L = zero
-         do j = 1, nb
-           phase_L = phase_L + cmat_n(j, j)
-         end do
-         phase_L = phase_L / nb
+             ! Extract phase from Trace: phase = Tr(cmat^n) / nb
+             phase_L = zero
+             do j = 1, nb
+               phase_L = phase_L + cmat_n(j, j)
+             end do
+             phase_L = phase_L / nb
 
-         ! Normalize cmat_n with phase_L to check if it's proportional to identity
-         err = 0.0_dp
-         do j = 1, nb
-           cmat_n(j, j) = cmat_n(j, j) - phase_L
-         end do
-         err = maxval(abs(cmat_n))
+             ! Normalize cmat_n with phase_L to check if it's proportional to identity
+             err = 0.0_dp
+             do j = 1, nb
+               cmat_n(j, j) = cmat_n(j, j) - phase_L
+             end do
+             err = maxval(abs(cmat_n))
 
-         if (err >= DTOL .or. abs(abs(phase_L) - 1.0_dp) > DTOL) then
-           ierr = ierr + 1
-           call wrtout(units, sjoin(" ERROR: Closure test failed! isym:", itoa(isym), " order:", itoa(n)))
-           call wrtout(units, sjoin("   MEASURED phase  : ", ftoa(real(phase_L)), " + i ", ftoa(aimag(phase_L))))
-           call wrtout(units, sjoin("   err: ", ftoa(err)))
+             if (err >= DTOL .or. abs(abs(phase_L) - 1.0_dp) > DTOL) ierr = ierr + 1
+             call sym_dicts(isym_cnt)%set("closure_ok", s=yesno(err < DTOL .and. abs(abs(phase_L) - 1.0_dp) <= DTOL))
+             call sym_dicts(isym_cnt)%set("closure_err", r=err)
+             call sym_dicts(isym_cnt)%set("closure_n", i=n)
+             call sym_dicts(isym_cnt)%set("closure_phase", s=sjoin(ftoa(real(phase_L)), " + i ", ftoa(aimag(phase_L))))
+           end if
+           end associate
          end if
-       end if
-       end associate
+       end do
      end do
+
+     if (allocated(sym_dicts)) then
+       call ydoc%add_dictlist(sjoin("kpt_", ktoa(kk_ibz), "_spin_", itoa(spin)), isym_cnt, sym_dicts)
+       do isym = 1, isym_cnt
+         call sym_dicts(isym)%free()
+       end do
+       deallocate(sym_dicts)
+     end if
+
    end do ! ik_ibz
    ABI_FREE(cmat_n)
  end do ! spin
 
+ call ydoc%write_units_and_free(units)
+
  if (ierr /= 0) then
    nb = dmats%ks_ebands%nsppol * dmats%ks_ebands%nkpt * 2 * dmats%cryst%nsym
-   ABI_ERROR(sjoin("dmats are not unitary! ierr:", itoa(ierr), "/", itoa(nb)))
+   ABI_ERROR(sjoin("dmats are not unitary or failed tests! ierr:", itoa(ierr), "/", itoa(nb)))
  end if
 
 end subroutine dmats_print
@@ -7551,8 +7576,9 @@ logical function is_unitary(n, U, tol, err)
 
 !Local variables-------------------------------
 !scalars
- complex(dp) :: prod(n,n), identity(n,n)
  integer :: ii
+ complex(dp) :: prod(n,n), identity(n,n)
+!----------------------------------------------------------------------
 
  ! Compute U^\dagger U
  prod = matmul(conjg(transpose(U)), U)
@@ -7560,7 +7586,7 @@ logical function is_unitary(n, U, tol, err)
  ! Build identity matrix
  identity = czero
  do ii=1,n
-    identity(ii,ii) = one
+   identity(ii,ii) = one
  end do
 
  ! Maximum deviation from identity
@@ -7580,13 +7606,14 @@ logical function is_identity(n, U, tol, err)
 
 !Local variables-------------------------------
 !scalars
- complex(dp) :: identity(n,n)
  integer :: ii
+ complex(dp) :: identity(n,n)
+!----------------------------------------------------------------------
 
  ! Build identity matrix
  identity = czero
  do ii=1,n
-    identity(ii,ii) = one
+   identity(ii,ii) = one
  end do
 
  ! Maximum deviation from identity
