@@ -30,6 +30,8 @@ module m_gstore_converters
  use m_io_tools,       only : open_file
  use m_dtset,          only : dataset_type
  use m_dtfil,          only : datafiles_type
+ use m_ddb_hdr,        only : ddb_hdr_type
+ use m_hdr,            only : hdr_type
  use m_fstrings,       only : sjoin, itoa, strcat
  use m_crystal,        only : crystal_t
  use m_ebands,         only : ebands_t, gaps_t
@@ -179,7 +181,7 @@ subroutine gstore_convert(gstore_path, dtset, dtfil, cryst, ebands, ifc, comm)
 
  ! Write the EPIQ input namelist (&Diff_Start_Param + KPOINTS), the analog of QE's
  ! print_ph_input2epiq called inside ep_matrix_element_wannier.
- call write_epiq_input(dtset, ebands, strcat(elphmat_dir, "/scf_dfpt.2epiq.in"))
+ call write_epiq_input(ebands, dtfil, strcat(elphmat_dir, "/scf_dfpt.2epiq.in"))
  call wrtout(units, sjoin(" EPIQ input namelist written to:", strcat(elphmat_dir, "/scf_dfpt.2epiq.in")))
 
  ! Write the dynq0 file: q-mesh, number of irreducible q-points and their positions
@@ -483,49 +485,65 @@ end subroutine gstore_convert
 !!  The SCF/DFPT parameters are taken from the ABINIT dataset and band structure.
 !!
 !! INPUTS
-!!  dtset<dataset_type>=input variables (occopt, tsmear, k-grid).
-!!  ebands<ebands_t>=band structure (Fermi level, nelect, k-points, gaps).
+!!  ebands<ebands_t>=band structure (only used for HOMO/LUMO of insulators).
+!!  dtfil<datafiles_type>=filenames; dtfil%fildvdbin (DVDB) and dtfil%filddbsin (DDB).
 !!  fname=name of the output file.
+!!
+!! NOTES
+!!  ALL exported parameters come from the calculation that produced the DDB/DVDB
+!!  (the ground-state/DFPT run), NOT from the (denser) gstore/eph run:
+!!   - efermi, nel_r, occopt (-> ngauss_ph), tsmear (-> sigma_ph) from the DVDB header
+!!     (a standard ABINIT header carrying the GS scalars including the Fermi level).
+!!   - the KPOINTS list from the DDB header (the GS/DFPT k-mesh).
+!!  Exception: HOMO/LUMO of insulators are not stored in either header (no GS
+!!  eigenvalues), so they are taken from ebands (gap edges, essentially mesh-independent).
 !!
 !! SOURCE
 
-subroutine write_epiq_input(dtset, ebands, fname)
+subroutine write_epiq_input(ebands, dtfil, fname)
 
 !Arguments ------------------------------------
- type(dataset_type),intent(in) :: dtset
  class(ebands_t),intent(in) :: ebands
+ type(datafiles_type),intent(in) :: dtfil
  character(len=*),intent(in) :: fname
 
 !Local variables-------------------------------
 !scalars
- integer :: unt, ik, ngauss, gap_err, nk1, nk2, nk3, k1, k2, k3
- logical :: is_metal, automatic
- real(dp) :: homo, lumo
+ integer :: unt, ik, ngauss, gap_err, fform
+ real(dp) :: homo, lumo, knorm
+ logical :: is_metal
  character(len=500) :: msg
  character(len=24) :: smear_label
  type(gaps_t) :: gaps
+ type(ddb_hdr_type) :: ddb_hdr
+ type(hdr_type) :: dfpt_hdr
 !----------------------------------------------------------------------
 
  if (open_file(fname, msg, newunit=unt, form="formatted", status="unknown", action="write") /= 0) then
    ABI_ERROR(msg)
  end if
 
+ ! Read the GS/DFPT header from the DVDB: it carries the Fermi level, nelect, occopt
+ ! and tsmear of the run that produced the DDB/DVDB (the DDB header has no Fermi level).
+ call dfpt_hdr%from_fname(dtfil%fildvdbin, fform, xmpi_comm_self)
+
  ! occopt >= 3 => metallic occupation with smearing; otherwise fixed occupations (insulator).
- is_metal = dtset%occopt >= 3
+ is_metal = dfpt_hdr%occopt >= 3
 
  write(unt, '(a)') "! parameter of the SCF DFPT calculation useful for EPIq"
  write(unt, '(a)') "&Diff_Start_Param"
- write(unt, '(3x,a,f12.6,a)') "efermi=", ebands%fermie * Ha_eV, ", ! in (eV)"
- write(unt, '(3x,a,f12.6,a)') "nel_r=", ebands%nelect, ","
+ write(unt, '(3x,a,f12.6,a)') "efermi=", dfpt_hdr%fermie * Ha_eV, ", ! in (eV)"
+ write(unt, '(3x,a,f12.6,a)') "nel_r=", dfpt_hdr%nelect, ","
 
  if (.not. is_metal) then
-   ! Insulator: report the HOMO and LUMO levels (in eV).
+   ! Insulator: report the HOMO and LUMO levels (in eV). Not in the DFPT header
+   ! (no GS eigenvalues), so taken from ebands (gap edges are mesh-independent).
    gaps = ebands%get_gaps(gap_err)
    if (gap_err == 0) then
      homo = gaps%vb_max(1); lumo = gaps%cb_min(1)
    else
      ! Could not determine a gap (semimetal?): fall back to the Fermi level.
-     homo = ebands%fermie; lumo = ebands%fermie
+     homo = dfpt_hdr%fermie; lumo = dfpt_hdr%fermie
    end if
    call gaps%free()
    write(unt, '(3x,a,f12.6,a)') "homo=", homo * Ha_eV, ", ! in (eV)"
@@ -534,40 +552,36 @@ subroutine write_epiq_input(dtset, ebands, fname)
    ! Metal: report the smearing width (Rydberg) and the QE ngauss code.
    ! Map ABINIT occopt onto QE ngauss (see Modules input conventions):
    !   3 -> -99 (Fermi-Dirac), 4/5 -> -1 (cold/Marzari), 6 -> 1 (Methfessel-Paxton), 7 -> 0 (Gaussian)
-   select case (dtset%occopt)
+   select case (dfpt_hdr%occopt)
    case (3);        ngauss = -99; smear_label = "fd"
    case (4, 5);     ngauss =  -1; smear_label = "cold"
    case (6);        ngauss =   1; smear_label = "mp"
    case (7);        ngauss =   0; smear_label = "gauss"
    case default;    ngauss = -66; smear_label = "unknown"
    end select
-   write(unt, '(3x,a,f12.6,a)') "sigma_ph=", dtset%tsmear * two, ", ! in (Rydberg)"
+   write(unt, '(3x,a,f12.6,a)') "sigma_ph=", dfpt_hdr%tsmear * two, ", ! in (Rydberg)"
    write(unt, '(3x,a,i3,a)') "ngauss_ph=", ngauss, ", ! "//trim(smear_label)
  end if
  write(unt, '(a)') "/"
 
- ! KPOINTS section. Use the "automatic" (Monkhorst-Pack) form when the k-mesh is a
- ! diagonal kptrlatt with a single shift; otherwise dump the explicit list.
- automatic = (dtset%nshiftk == 1) .and. &
-   all([dtset%kptrlatt(1,2), dtset%kptrlatt(1,3), dtset%kptrlatt(2,1), &
-        dtset%kptrlatt(2,3), dtset%kptrlatt(3,1), dtset%kptrlatt(3,2)] == 0) .and. &
-   dtset%kptrlatt(1,1) > 0 .and. dtset%kptrlatt(2,2) > 0 .and. dtset%kptrlatt(3,3) > 0
+ call dfpt_hdr%free()
+
+ ! KPOINTS section. Use the k-mesh that produced the DDB/DVDB (the ground-state/DFPT
+ ! mesh), read from the DDB header, NOT the gstore/eph k-mesh in dtset/ebands.
+ ! The DDB header stores the explicit k-point list (no kptrlatt), so we dump it.
+ call ddb_hdr%open_read(dtfil%filddbsin, xmpi_comm_self)
+ call ddb_hdr%close()   ! we only need the header data (k-points)
+
+ knorm = ddb_hdr%kptnrm; if (abs(knorm) < tol12) knorm = one
 
  write(unt, '(/,a)') "KPOINTS"
- !if (automatic) then ! compatibility problem with mesh generation abinit vs epiq
-   !nk1 = dtset%kptrlatt(1,1); nk2 = dtset%kptrlatt(2,2); nk3 = dtset%kptrlatt(3,3)
-   !! ABINIT shiftk are fractional shifts; a half-grid shift (0.5) maps to the QE flag 1.
-   !k1 = nint(two * dtset%shiftk(1,1)); k2 = nint(two * dtset%shiftk(2,1)); k3 = nint(two * dtset%shiftk(3,1))
-   !write(unt, '(a)') "automatic"
-   !write(unt, '(3(2x,i6),3x,3(2x,i3))') nk1, nk2, nk3, k1, k2, k3
- !else
-   ! Explicit list in reduced (crystal) coordinates.
    write(unt, '(a)') "crystal"
-   write(unt, '(6x,i9)') ebands%nkpt
-   do ik=1,ebands%nkpt
-     write(unt, '(3x,4(es20.10,2x))') ebands%kptns(:,ik), ebands%wtk(ik)
+ write(unt, '(6x,i9)') ddb_hdr%nkpt
+ do ik=1,ddb_hdr%nkpt
+   write(unt, '(3x,4(es20.10,2x))') ddb_hdr%kpt(:,ik) / knorm, ddb_hdr%wtk(ik)
    end do
- !end if
+
+ call ddb_hdr%free()
 
  close(unt)
 
