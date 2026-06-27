@@ -6955,8 +6955,10 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  integer,parameter :: iflag1 = 1, me_g0 = 1, ndat1 = 1
  integer :: spin, nsppol, nsym, nb, nkibz, mband, ik_ibz, i_m, i_n, isym, itime, otimrev_k, bstart, ib, ig, igsp, trev_k
  integer :: ib1, ib2, band1, band2, n1, n2, n3, n4, n5, n6, nfft, nspinor, mpw, ii, ipw, ispinor, npw_sk
+ integer :: isym_inv, j
  real(dp),parameter :: xnorm1 = one
  real(dp) :: e_b1, e_b2, cpu, wall, gflops
+ real(dp) :: tau_save(3)
  type(ebands_t) :: ks_ebands
  type(wfd_t) :: wfd
  type(hdr_type) :: hdr
@@ -7097,30 +7099,62 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
          else
            ! The condition is: $q =  O S(q) - G$
            g0_k = symtab(1:3, itime, isym)
-           kk_sk = matmul(cryst%symrec(:,:, isym), kk_ibz) * (3-2*itime)
 
-           call get_kg(kk_sk, istwf_k, dtset%ecut, cryst%gmet, npw_sk, kg_sk)
+           ABI_MALLOC(cg2_sk, (2, npw_k*nspinor))
 
-           ABI_MALLOC(cg1_sk, (2, npw_sk*nspinor, nb))
-           ABI_MALLOC(cg2_sk, (2, npw_sk*nspinor))
+           ! ----------------------------------------------------------------------------------
+           ! EXPLANATION OF SYMMETRY CONVENTIONS AND THE INVERSE SYMMETRY TRICK
+           ! ----------------------------------------------------------------------------------
+           ! ABINIT has two conventions for the action of a symmetry S on a k-point:
+           ! Convention 1 (e.g. littlegroup_k): S_{rec}^{-1} k_{in} = k_{out} - G_0
+           ! Convention 2 (e.g. littlegroup_q): S_{rec} k_{in} = k_{out} - G_0
+           !
+           ! This code (for e-ph matrices) uses Convention 2 (from symtab/g0_k).
+           ! When G_0 != 0, the standard cgtk_rotate(isym) routine evaluates the new
+           ! G-vectors using the mapping: j = S_{rec}(g_{out} + G_0).
+           !
+           ! Under Convention 2, this mapping sends the indices OUTSIDE the kinetic-energy
+           ! cutoff sphere (kg_k) unless the symmetry is self-inverse (S_{rec} = S_{rec}^{-1}).
+           ! When vectors go out of bounds, coefficients are lost, which destroys the
+           ! wavefunction norm and causes the degenerate block matrices to become non-unitary.
+           !
+           ! To strictly preserve the kinetic energy bounds for all symmetries, the mapping
+           ! MUST be evaluated using S_{rec}^{-1}(g_{out} - G_0).
+           ! We achieve this exact mathematical mapping by finding the inverse symmetry
+           ! (isym_inv) and passing it to cgtk_rotate along with -G_0.
+           !
+           ! However, passing isym_inv normally causes cgtk_rotate to apply the phase factor
+           ! of the inverse symmetry (\tau_{inv} = -S_{rel}^{-1} \tau_{isym}). This modified phase
+           ! no longer commutes with the Hamiltonian, mixing non-degenerate states!
+           ! To preserve the exact true operator phase required by ABINIT (e^{i(k+G_{old})\cdot \tau_{isym}}),
+           ! we temporarily override the translation vector of isym_inv with the original \tau_{isym}.
+           ! ----------------------------------------------------------------------------------
 
-           ! Compute the periodic part of |psi_m Sk> with Sk = k + G0.
-           ! Apply this to all bands at once using ndat=nb
-           call cgtk_change_gsphere(nb*nspinor, npw_k, istwf_k, kg_k, cg_ib, &
-                                    npw_sk, istwf_k, kg_sk, cg1_sk, work_ngfft, work &
-                                    !, shiftg1=-g0_k
-                                    !, shiftg1=g0_k
-                                    )
+           ! Find inverse symmetry to correctly apply S_rec^-1 in cgtk_rotate
+           isym_inv = 0
+           do j=1, dmats%cryst%nsym
+             if (all(matmul(dmats%cryst%symrel(:,:,j), dmats%cryst%symrel(:,:,isym)) == &
+                 reshape((/1,0,0, 0,1,0, 0,0,1/), (/3,3/)))) then
+               isym_inv = j
+               exit
+             end if
+           end do
 
            do ib2=1,nb
              band2 = ib2 + bstart - 1
              e_b2 = dmats%ks_ebands%eig(band2, ik_ibz, spin)
 
              ! Compute the periodic part of S |psi_nk>.
+             ! We pass isym_inv to apply S_rec^-1 to G-vectors, keeping them inside kg_k.
+             ! We temporarily replace the translation vector of isym_inv with that of isym
+             ! so that cgtk_rotate applies the exact true ABINIT phase factor.
              trev_k = itime - 1
-             call cgtk_rotate(cryst, kk_ibz, isym, trev_k, g0_k, nspinor, ndat1, &
+             tau_save = dmats%cryst%tnons(:, isym_inv)
+             dmats%cryst%tnons(:, isym_inv) = dmats%cryst%tnons(:, isym)
+             call cgtk_rotate(dmats%cryst, kk_ibz, isym_inv, trev_k, -g0_k, nspinor, ndat1, &
                               npw_k, kg_k, &
-                              npw_sk, kg_sk, istwf_k, istwf_k, cg_ib(:,:,ib2), cg2_sk, work_ngfft, work)
+                              npw_k, kg_k, istwf_k, istwf_k, cg_ib(:,:,ib2), cg2_sk, work_ngfft, work)
+             dmats%cryst%tnons(:, isym_inv) = tau_save ! restore
 
              do ib1=1,nb
                band1 = ib1 + bstart - 1
@@ -7129,7 +7163,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
                ! Only if e_b1 == e_b2.
                cval = zero
                if (abs(e_b2  - e_b1) <= dtset%symsigma_de)  then
-                 dot = cg_zdotc(npw_sk * nspinor, cg1_sk(:,:,ib1), cg2_sk)
+                 dot = cg_zdotc(npw_k * nspinor, cg_ib(:,:,ib1), cg2_sk)
                  cval = dot(1) + j_dpc * dot(2)
                end if
 
@@ -7137,7 +7171,6 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
              end do ! ib1
            end do ! ib2
 
-           ABI_FREE(cg1_sk)
            ABI_FREE(cg2_sk)
          end if
 
