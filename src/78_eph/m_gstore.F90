@@ -6921,11 +6921,12 @@ end subroutine gstore_symmetrize
 !! dmats_init
 !!
 !! FUNCTION
-!! Initialize the object
-!! Compute D_mn(S) = <psi_{mSk}| S | psi_{nk}>
+!! Initialize the object.
+!! Compute D_mn(S) = <psi_{mSk}| S | psi_{nk}> for all the k-points in the IBZ
+!! and the bands in brange_spin.
 !!
 !! INPUTS
-!! wfk_path=Filename of the output GSTORE.nc file
+!! wfk_path=Filename of the WFK file.
 !!
 !! SOURCE
 
@@ -6964,20 +6965,20 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_sk(:,:)
  real(dp) :: kk_ibz(3), kk_sk(3), dot(2)
  real(dp),allocatable :: ug1_box(:,:), ug2_box(:,:), cg_ib(:,:,:), cg_work(:,:), work(:,:,:,:)
- real(dp),allocatable :: cg1_sk(:,:), cg2_sk(:,:)
+ real(dp),allocatable :: cg1_sk(:,:,:), cg2_sk(:,:)
  complex(dp) :: cval, cphase, ug
  complex(dp),allocatable :: cmat(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
 !----------------------------------------------------------------------
 
- call cwtime(cpu, wall, gflops, "start")
  units = [std_out, ab_out]
+ call cwtime(cpu, wall, gflops, "start")
  call wrtout(units, sjoin(" Computing dmats with symsigma_de", ftoa(dtset%symsigma_de * Ha_meV), " meV"))
 
  ABI_CHECK_IEQ(dtset%usepaw, 0, "PAW not coded!")
  ABI_CHECK_IEQ(dtset%nspinor, 1, "nspinor 2 not coded!")
 
- ! Read KS energies from WFK file.
+ ! Read KS energies from the WFK file.
  dmats%ks_ebands = ebands_from_file(wfk_path, comm)
  dmats%cryst => cryst
 
@@ -7019,10 +7020,10 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  call wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path), out_hdr=hdr)
 
  call hdr%vs_dtset(dtset)
- ABI_CHECK(abs(dtset%ecut - hdr%ecut) < tol6, "input ecut should be equal to the value used in the WFK file.")
+ ABI_CHECK(abs(dtset%ecut - hdr%ecut) < tol6, "Input ecut should be equal to the value used in the WFK file.")
  call hdr%free()
 
- ! Compute max |G_i| to build box.
+ ! Compute max |G_i| to build the box.
  gmax = 0
  do ik_ibz=1,nkibz
     associate (npw_k => wfd%npwarr(ik_ibz), kg_k => wfd%kdata(ik_ibz)%kg_k)
@@ -7049,7 +7050,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  ABI_MALLOC(ug1_box, (2, nfft * nspinor))
  ABI_MALLOC(ug2_box, (2, nfft * nspinor))
 
- ! Allocate D(k, S) matrices for each spin.
+ ! Allocate matrices for each spin.
  ABI_MALLOC(dmats%for_spin, (nsppol))
  do spin=1,nsppol
    nb = brange_spin(2,spin) - brange_spin(1,spin) + 1
@@ -7084,9 +7085,9 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
      ! Loop over time-reversal and spatial symmetries.
      do itime=1,2
        do isym=1,cryst%nsym
-
          ! Compute cmat(b,b')
          cmat = zero
+
          if (symtab(4, itime, isym) == 0) then
            ! Sk /= k + G.
            do ib=1,nb
@@ -7098,16 +7099,24 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
            g0_k = symtab(1:3, itime, isym)
            kk_sk = matmul(cryst%symrec(:,:, isym), kk_ibz) * (3-2*itime)
 
-           call get_kg(kk_sk, istwf_k, dtset%ecut, cryst%gmet, npw_sk, kg_sk) !, mpw=mpw, gmax=gmax)
+           call get_kg(kk_sk, istwf_k, dtset%ecut, cryst%gmet, npw_sk, kg_sk)
 
-           ABI_MALLOC(cg1_sk, (2, npw_sk*nspinor))
+           ABI_MALLOC(cg1_sk, (2, npw_sk*nspinor, nb))
            ABI_MALLOC(cg2_sk, (2, npw_sk*nspinor))
+
+           ! Compute the periodic part of |psi_m Sk> with Sk = k + G0.
+           ! Apply this to all bands at once using ndat=nb
+           call cgtk_change_gsphere(nb*nspinor, npw_k, istwf_k, kg_k, cg_ib, &
+                                    npw_sk, istwf_k, kg_sk, cg1_sk, work_ngfft, work &
+                                    !, shiftg1=-g0_k
+                                    !, shiftg1=g0_k
+                                    )
 
            do ib2=1,nb
              band2 = ib2 + bstart - 1
              e_b2 = dmats%ks_ebands%eig(band2, ik_ibz, spin)
 
-             ! Compute the periodic part of S |psi_mk>.
+             ! Compute the periodic part of S |psi_nk>.
              trev_k = itime - 1
              call cgtk_rotate(cryst, kk_ibz, isym, trev_k, g0_k, nspinor, ndat1, &
                               npw_k, kg_k, &
@@ -7120,42 +7129,13 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
                ! Only if e_b1 == e_b2.
                cval = zero
                if (abs(e_b2  - e_b1) <= dtset%symsigma_de)  then
-               !if (.True.) then
-                 !cg_work = cg_ib(:,:,ib1)
-                 !shiftg = 0 ! TODO
-                 !igsp = 0
-                 !do ispinor=1,nspinor
-                 !  do ig=1,npw_k
-                 !    igsp = igsp + 1
-                 !    cphase = exp(-j_dpc * two_pi * dot_product((kk_ibz + kg_k(:, ig) + g0_k), cryst%tnons(:, isym)))
-                 !    ug = cg_work(1, igsp) + cg_work(2, igsp)
-                 !    ug = ug * cphase
-                 !    cg_work(1, igsp) = real(ug)
-                 !    cg_work(2, igsp) = aimag(ug)
-                 !  end do
-                 !end do
-
-                 !call sphere(cg_work, nspinor, npw_k, ug1_box, n1, n2, n3, n4, n5, n6, &
-                 !            kg_k, istwf_k, iflag1, me_g0, shiftg, identity_3d, xnorm1)
-
-                 !dot = cg_zdotc(nfft * nspinor, ug1_box, ug2_box)
-                 !cval = dot(1) + j_dpc * dot(2)
-
-                 ! Compute the periodic part of |psi_m Sk> with Sk = k + G0.
-
-                 call cgtk_change_gsphere(ndat1, npw_k, istwf_k, kg_k, cg_ib(:,:,ib1), &
-                                          npw_sk, istwf_k, kg_sk, cg1_sk, work_ngfft, work &
-                                          !)
-                                          !, shiftg1=g0_k)
-                                          , shiftg1=-g0_k)
-
-                 dot = cg_zdotc(npw_sk * nspinor, cg1_sk, cg2_sk)
+                 dot = cg_zdotc(npw_sk * nspinor, cg1_sk(:,:,ib1), cg2_sk)
                  cval = dot(1) + j_dpc * dot(2)
                end if
 
                cmat(ib1, ib2) = cval
-             end do ! ib2
-           end do ! ib1
+             end do ! ib1
+           end do ! ib2
 
            ABI_FREE(cg1_sk)
            ABI_FREE(cg2_sk)

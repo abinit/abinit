@@ -430,10 +430,11 @@ subroutine cgtk_change_gsphere(ndat, npw1, istwf1, kg1, cg1, npw2, istwf2, kg2, 
 
  do idat=1,ndat
    ! Insert cg1 in work array taking into account istwf1 (intent in)
-   call sphere(cg1(:,:,idat),1,npw1,work,n1,n2,n3,n4,n5,n6,kg1,istwf1,to_box,me_g0,shiftg1__,identity_3d,one)
+   ! Note: shiftg is only used by sphere when iflag=-1 (extraction).
+   call sphere(cg1(:,:,idat),1,npw1,work,n1,n2,n3,n4,n5,n6,kg1,istwf1,to_box,me_g0,no_shift,identity_3d,one)
 
    ! Extract cg2 from work array taking into account istwf2
-   call sphere(cg2(:,:,idat),1,npw2,work,n1,n2,n3,n4,n5,n6,kg2,istwf2,to_sph,me_g0,no_shift,identity_3d,one)
+   call sphere(cg2(:,:,idat),1,npw2,work,n1,n2,n3,n4,n5,n6,kg2,istwf2,to_sph,me_g0,shiftg1__,identity_3d,one)
  end do
 
 end subroutine cgtk_change_gsphere

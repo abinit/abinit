@@ -457,7 +457,7 @@ module m_wfd
    procedure :: sym_ug_kg => wfd_sym_ug_kg
    ! Symmetrize a wave function in G-space
    ! Used in phgamma only, use wfd_rotate_cg for a more efficient version (see m_sigmaph for usage)
-   !  This routine is deprecated and should be replaced by sym_ug_kg_npw in order to call getgh1c with ndat > 1, i
+   ! This routine is deprecated and should be replaced by sym_ug_kg_npw in order to call getgh1c with ndat > 1, i
 
    procedure :: sym_ug_kg_npw => wfd_sym_ug_kg_npw
    ! Symmetrize a wave function in G-space
