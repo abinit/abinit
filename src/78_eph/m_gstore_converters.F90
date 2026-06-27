@@ -509,7 +509,7 @@ subroutine write_epiq_input(ebands, dtfil, fname)
 
 !Local variables-------------------------------
 !scalars
- integer :: unt, ik, ngauss, gap_err, fform
+ integer :: unt, iunt, ik, ngauss, gap_err, fform
  real(dp) :: homo, lumo, knorm
  logical :: is_metal
  character(len=500) :: msg
@@ -525,7 +525,15 @@ subroutine write_epiq_input(ebands, dtfil, fname)
 
  ! Read the GS/DFPT header from the DVDB: it carries the Fermi level, nelect, occopt
  ! and tsmear of the run that produced the DDB/DVDB (the DDB header has no Fermi level).
- call dfpt_hdr%from_fname(dtfil%fildvdbin, fform, xmpi_comm_self)
+ ! The DVDB starts with two records (version, numv1) before the standard ABINIT header,
+ ! so we skip them and read the header in place (fort_read without rewind).
+ if (open_file(dtfil%fildvdbin, msg, newunit=iunt, form="unformatted", status="old", action="read") /= 0) then
+   ABI_ERROR(msg)
+ end if
+ read(iunt)   ! skip the DVDB version record
+ read(iunt)   ! skip the numv1 record
+ call dfpt_hdr%fort_read(iunt, fform)
+ close(iunt)
 
  ! occopt >= 3 => metallic occupation with smearing; otherwise fixed occupations (insulator).
  is_metal = dfpt_hdr%occopt >= 3
