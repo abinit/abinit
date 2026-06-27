@@ -607,19 +607,16 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
 !Loop over all symmetry operations
  do isym=1,nsym
 
-!DEBUG
-!write(std_out,'(a,a,i4)') ch10,' Check for isym=',isym
-!ENDDEBUG
-
-!  Compute symmetric of primitive vectors under point symmetry operations
+   !write(std_out,'(a,a,i4)') ch10,' Check for isym=',isym
+   !  Compute symmetric of primitive vectors under point symmetry operations
    do ii=1,3
      rprimd_sym(:,ii)=symrel(1,ii,isym)*rprimd(:,1)+&
                       symrel(2,ii,isym)*rprimd(:,2)+&
                       symrel(3,ii,isym)*rprimd(:,3)
    end do
 
-!  If the new lattice is the same as the original one,
-!  the lengths and angles are preserved
+   !  If the new lattice is the same as the original one,
+   !  the lengths and angles are preserved
    do ii=1,3
      rmet_sym(ii,:)=rprimd_sym(1,ii)*rprimd_sym(1,:)+&
                     rprimd_sym(2,ii)*rprimd_sym(2,:)+&
@@ -659,7 +656,7 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
         'The symmetry operation number ',isym,' does not preserve',ch10,&
         'vector lengths and angles.',ch10,&
         'The value of the square root of residual is: ',sqrt(residual),&
-&       '  that is greater than threshold:', four*tolsym*sqrt(rmet2),ch10,&
+        '  that is greater than threshold:', four*tolsym*sqrt(rmet2),ch10,&
         'Action: modify rprim, acell and/or symrel so that',ch10,&
         'vector lengths and angles are preserved.',ch10,&
         'Beware, the tolerance on symmetry operations is very small.'
@@ -669,7 +666,7 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
      end if
    end if
 
-!  Also, the scalar product of rprimd_sym and gprimd must give integer numbers
+   ! Also, the scalar product of rprimd_sym and gprimd must give integer numbers
    do ii=1,3
      prods(ii,:)=rprimd_sym(1,ii)*gprimd(1,:)+ &
                  rprimd_sym(2,ii)*gprimd(2,:)+ &
@@ -700,9 +697,7 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
 
  if(iexit==1)iexit=0
 
-!DEBUG
-!write(std_out,'(a)') ' chkorthsy : exit '
-!ENDDEBUG
+ !write(std_out,'(a)') ' chkorthsy : exit '
 
 end subroutine chkorthsy
 !!***
@@ -744,9 +739,7 @@ subroutine chkprimit(chkprim, multi, nsym, symafm, symrel, is_translation)
  character(len=500) :: msg
 !**************************************************************************
 
- if(present(is_translation))then
-   is_translation(:)=0
- endif
+ if(present(is_translation)) is_translation(:)=0
 
 !Loop over each symmetry operation of the Bravais lattice
 !Find whether it is the identity, or a pure translation,
@@ -754,12 +747,12 @@ subroutine chkprimit(chkprim, multi, nsym, symafm, symrel, is_translation)
  multi=0
  do isym=1,nsym
    if( abs(symrel(1,1,isym)-1)+&
-&   abs(symrel(2,2,isym)-1)+&
-&   abs(symrel(3,3,isym)-1)+&
-&   abs(symrel(1,2,isym))+abs(symrel(2,1,isym))+&
-&   abs(symrel(2,3,isym))+abs(symrel(3,2,isym))+&
-&   abs(symrel(3,1,isym))+abs(symrel(1,3,isym))+&
-&   abs(symafm(isym)-1) == 0 )then
+       abs(symrel(2,2,isym)-1)+&
+       abs(symrel(3,3,isym)-1)+&
+       abs(symrel(1,2,isym))+abs(symrel(2,1,isym))+&
+       abs(symrel(2,3,isym))+abs(symrel(3,2,isym))+&
+       abs(symrel(3,1,isym))+abs(symrel(1,3,isym))+&
+       abs(symafm(isym)-1) == 0 )then
      multi=multi+1
      if(present(is_translation))then
        is_translation(isym)=1
@@ -842,8 +835,8 @@ subroutine symrelrot(nsym, rprimd, rprimd_new, symrel, tolsym, ierr)
  call matr3inv(rprimd,rprimd_invt)
  do ii=1,3
    coord(:,ii)=rprimd_new(1,ii)*rprimd_invt(1,:)+ &
-&   rprimd_new(2,ii)*rprimd_invt(2,:)+ &
-&   rprimd_new(3,ii)*rprimd_invt(3,:)
+    rprimd_new(2,ii)*rprimd_invt(2,:)+ &
+    rprimd_new(3,ii)*rprimd_invt(3,:)
  end do
 
 !Transform symmetry matrices in the system defined by rprimd_new
@@ -851,25 +844,23 @@ subroutine symrelrot(nsym, rprimd, rprimd_new, symrel, tolsym, ierr)
  do isym=1,nsym
    do ii=1,3
      matr1(:,ii)=symrel(:,1,isym)*coord(1,ii)+&
-&     symrel(:,2,isym)*coord(2,ii)+&
-&     symrel(:,3,isym)*coord(3,ii)
+      symrel(:,2,isym)*coord(2,ii)+&
+      symrel(:,3,isym)*coord(3,ii)
    end do
    do ii=1,3
      matr2(:,ii)=coordinvt(1,:)*matr1(1,ii)+&
-&     coordinvt(2,:)*matr1(2,ii)+&
-&     coordinvt(3,:)*matr1(3,ii)
+      coordinvt(2,:)*matr1(2,ii)+&
+      coordinvt(3,:)*matr1(3,ii)
    end do
 
-!DEBUG
-!  write(std_out, '(a,10i4)')' symrelrot : isym, symrel=',isym,symrel(:,:,isym)
-!  write(std_out, '(a,9es16.6)')' transformed to ', matr2(:,:)
-!ENDDEBUG
+   !write(std_out, '(a,10i4)')' symrelrot : isym, symrel=',isym,symrel(:,:,isym)
+   !write(std_out, '(a,9es16.6)')' transformed to ', matr2(:,:)
 
-!  Check that the new symmetry matrices are made of integers, and store them
+   ! Check that the new symmetry matrices are made of integers, and store them
    do ii=1,3
      do jj=1,3
        val=matr2(ii,jj)
-!      Need to allow for ten times tolsym, in case of centered Bravais lattices (but do it for all lattices ...)
+       ! Need to allow for ten times tolsym, in case of centered Bravais lattices (but do it for all lattices ...)
        if(abs(val-nint(val))>ten*tolsym)then
          ierr_=1
          if(.not.(present(ierr))) then
@@ -888,13 +879,11 @@ subroutine symrelrot(nsym, rprimd, rprimd_new, symrel, tolsym, ierr)
  end do ! isym
 
  if(ierr_==0)then
-!  Upgrade symrel only if there is no error
+   ! Upgrade symrel only if there is no error
    symrel(:,:,:)=symrel_tmp(:,:,:)
  endif
 
- if(present(ierr))then
-   ierr=ierr_
- endif
+ if(present(ierr)) ierr=ierr_
 
 end subroutine symrelrot
 !!***
@@ -1444,9 +1433,7 @@ subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
 
  call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
 
-!DEBUG
-!write(std_out,'(a)') ' symmetrize_rprimd : exit '
-!ENDDEBUG
+ !write(std_out,'(a)') ' symmetrize_rprimd : exit '
 
 end subroutine symmetrize_rprimd
 !!***
@@ -1490,18 +1477,13 @@ subroutine symmetrize_tnons(nsym,symrel,tnons,tolsym)
  real(dp):: tnons_mult(3)
 ! *************************************************************************
 
-!DEBUG
-!write(std_out,'(a)') ' symmetrize_tnons : enter '
-!ENDDEBUG
+ !write(std_out,'(a)') ' symmetrize_tnons : enter '
 
  unitmat=0
  unitmat(1,1)=1 ; unitmat(2,2)=1 ; unitmat(3,3)=1
 
  do isym=1,nsym
-
-!DEBUG
-!write(std_out,'(a,i4,9i3,3es16.6)') ' isym,symrel,tnons=',isym,symrel(:,:,isym),tnons(:,isym)
-!ENDDEBUG
+   !write(std_out,'(a,i4,9i3,3es16.6)') ' isym,symrel,tnons=',isym,symrel(:,:,isym),tnons(:,isym)
 
    symrel_mult(:,:)=symrel(:,:,isym) ; tnons_mult(:)=tnons(:,isym)
    order=0
@@ -1511,8 +1493,8 @@ subroutine symmetrize_tnons(nsym,symrel,tnons,tolsym)
      tnons_mult(:)=matmul(symrel(:,:,isym),tnons_mult(:))+tnons(:,isym)
      if(sum(abs(symrel_mult-unitmat))==0)then
        if(abs(tnons_mult(1)-nint(tnons_mult(1)))<tolsym*iorder .and. &
-&         abs(tnons_mult(2)-nint(tnons_mult(2)))<tolsym*iorder .and. &
-&         abs(tnons_mult(3)-nint(tnons_mult(3)))<tolsym*iorder)then
+          abs(tnons_mult(2)-nint(tnons_mult(2)))<tolsym*iorder .and. &
+          abs(tnons_mult(3)-nint(tnons_mult(3)))<tolsym*iorder)then
          !The order has been found
          order=iorder+1
          !Now, adjust the tnons vector, in order to obtain the exact identity
@@ -1532,9 +1514,7 @@ subroutine symmetrize_tnons(nsym,symrel,tnons,tolsym)
    endif
  enddo
 
-!DEBUG
-!write(std_out,'(a)') ' symmetrize_tnons : exit '
-!ENDDEBUG
+ !write(std_out,'(a)') ' symmetrize_tnons : exit '
 
 end subroutine symmetrize_tnons
 !!***
@@ -1617,7 +1597,7 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
  real(dp),allocatable :: xredsym(:,:)
  real(dp) :: transl(3) ! translation vector
 ! *************************************************************************
-!
+
 !Check whether group contains more than identity;
 !if not then simply return after possible copying
  if(present(tnons_new))then
@@ -1628,18 +1608,16 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
 
  if (nsym>1) then
 
-!DEBUG
-! write(std_out,*)
-! write(std_out,'(a,i4)') 'symmetrize_xred: enter, nsym=',nsym
-! do iatom=1,natom
-!   write(std_out,'(a,i4,3es16.6)') 'iatom,xred=',iatom,xred(:,iatom)
-! enddo
-! do isym=1,nsym
-!   write(std_out,'(a,i4,9i3,3es16.6)') 'isym,symrel,tnons',isym,symrel(:,:,isym),tnons(:,isym)
-! enddo
-! write(std_out,*)' present(tnons_new),present(tolsym)=',present(tnons_new),present(tolsym)
-! write(std_out,*)
-!ENDDEBUG
+   ! write(std_out,*)
+   ! write(std_out,'(a,i4)') 'symmetrize_xred: enter, nsym=',nsym
+   ! do iatom=1,natom
+   !   write(std_out,'(a,i4,3es16.6)') 'iatom,xred=',iatom,xred(:,iatom)
+   ! enddo
+   ! do isym=1,nsym
+   !   write(std_out,'(a,i4,9i3,3es16.6)') 'isym,symrel,tnons',isym,symrel(:,:,isym),tnons(:,isym)
+   ! enddo
+   ! write(std_out,*)' present(tnons_new),present(tolsym)=',present(tnons_new),present(tolsym)
+   ! write(std_out,*)
 
    ABI_MALLOC(xredsym,(3,natom))
    xredsym(:,:)=xred(:,1:natom)
@@ -1659,8 +1637,8 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
          fc(:)=xred(:,ib)+dble(indsym(1:3,isym,iatom))
 !        Compute [S * (x(indsym)+transl) ] + tnonsymmorphic
          tt(:)=dble(symrel(:,1,isym))*fc(1)+&
-&         dble(symrel(:,2,isym))*fc(2)+&
-&         dble(symrel(:,3,isym))*fc(3)+ tnons(:,isym)
+               dble(symrel(:,2,isym))*fc(2)+&
+               dble(symrel(:,3,isym))*fc(3)+ tnons(:,isym)
 
 !        Average over nominally equivalent atomic positions
          tsum(:)=tsum(:)+tt(:)
@@ -1672,13 +1650,11 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
      end do ! iatom
    endif ! present(indsym)
 
-!DEBUG
-!do iatom=1,natom
-!  write(std_out,'(a,i4,3es20.10)') 'iatom,xredsym=',iatom,xredsym(:,iatom)
-!enddo
-!ENDDEBUG
+   !do iatom=1,natom
+   !  write(std_out,'(a,i4,3es20.10)') 'iatom,xredsym=',iatom,xredsym(:,iatom)
+   !enddo
 
-!  Loop over symmetry operations to determine possibly new tnons, as well as symmetrized positions.
+   ! Loop over symmetry operations to determine possibly new tnons, as well as symmetrized positions.
    if(present(tolsym) .and. present(tnons_new) .and. present(fixed_mismatch) .and. present(mismatch_fft_tnons))then
      fixed_mismatch=0
      mismatch_fft_tnons=0
@@ -1739,13 +1715,11 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
        endif
      endif
 
-!DEBUG
-!   write(std_out,*) ' '
-!   write(std_out,*) ' mismatch_fft_tnons, fixed_mismatch=',mismatch_fft_tnons, fixed_mismatch
-!   do iatom=1,natom
-!     write(std_out,'(a,i4,3es20.10)') ' iatom,xredsym=',iatom,xredsym(:,iatom)
-!   enddo
-!ENDDEBUG
+    ! write(std_out,*) ' '
+    ! write(std_out,*) ' mismatch_fft_tnons, fixed_mismatch=',mismatch_fft_tnons, fixed_mismatch
+    ! do iatom=1,natom
+    !   write(std_out,'(a,i4,3es20.10)') ' iatom,xredsym=',iatom,xredsym(:,iatom)
+    ! enddo
 
    endif ! present(tolsym) .and. present(tnons_new)
 
@@ -1790,7 +1764,6 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
 !  End condition of nsym/=1
  end if
 
-!DEBUG
 !write(std_out,*)
 !write(std_out,'(a)') 'symmetrize_xred : exit'
 !do iatom=1,natom
@@ -1802,7 +1775,6 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
 !  enddo
 !endif
 !write(std_out,*)
-!ENDDEBUG
 
 end subroutine symmetrize_xred
 !!***
@@ -1907,8 +1879,7 @@ subroutine symchk(difmin,eatom,natom,tratom,transl,trtypat,typat,xred)
      end if
    end if
 
-!  End loop over iatom. Note a "cycle" and an "exit" inside the loop
- end do
+ end do !  End loop over iatom. Note a "cycle" and an "exit" inside the loop
 
  eatom=jatom
 
@@ -2007,7 +1978,6 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
  real(dp) :: difmin(3),tratom(3)
 ! *************************************************************************
 
-!DEBUG
 !write(std_out,'(a,i4,es12.4)')' symatm : enter, nsym,tolsym=',nsym,tolsym
 !write(std_out,'(a,es12.4)')' symatm : xred='
 !do ii=1,natom
@@ -2017,7 +1987,6 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
 !do isym=1,nsym
 !  write(std_out,'(i6,9i4,3es18.10)')isym,symrec(:,:,isym),tnons(1:3,isym)
 !enddo
-!ENDDEBUG
 
  err=zero
  errout=0
@@ -2033,18 +2002,18 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
 &       +dble(symrec(2,mu,isym))*(xred(2,iatom)-tnons(2,isym))&
 &       +dble(symrec(3,mu,isym))*(xred(3,iatom)-tnons(3,isym))
      end do
-!
-!    Find symmetrically equivalent atom
+
+     ! Find symmetrically equivalent atom
      call symchk(difmin,eatom,natom,tratom,transl,typat(iatom),typat,xred)
-!
-!    Put information into array indsym: translations and label
+
+     ! Put information into array indsym: translations and label
      indsym(1,isym,iatom)=transl(1)
      indsym(2,isym,iatom)=transl(2)
      indsym(3,isym,iatom)=transl(3)
      indsym(4,isym,iatom)=eatom
-!
-!    Keep track of maximum difference between transformed coordinates and
-!    nearest "target" coordinate
+
+     ! Keep track of maximum difference between transformed coordinates and
+     ! nearest "target" coordinate
      difmax=max(abs(difmin(1)),abs(difmin(2)),abs(difmin(3)))
      err=max(err,difmax)
 
@@ -2075,8 +2044,8 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
         '  The nearest coordinate differs by',difmin(1:3),ch10,&
         '  for indsym(nearest atom)=',indsym(4,isym,iatom)
        call wrtout(std_out,msg)
-!
-!      Use errout to reduce volume of error diagnostic output
+
+       ! Use errout to reduce volume of error diagnostic output
        if (errout==0) then
          write(msg,'(6a)') ch10,&
           '  This indicates that when symatm attempts to find atoms symmetrically',ch10, &
@@ -2115,7 +2084,7 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
    ABI_WARNING(msg)
  end if
 
-!Stop execution if error is really big
+ ! Stop execution if error is really big
  if (err>0.01d0) then
    write(msg,'(5a)')&
     'Largest error (above) is so large (0.01) that either input atomic coordinates (xred)',ch10,&
@@ -2155,7 +2124,7 @@ subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons
 !scalars
  integer, intent(in) :: determinant, center, iholohedry, isym
  integer, intent(out) :: type_axis
- character(len = 128), intent(out) :: label
+ character(len=128), intent(out) :: label
  !arrays
  integer,intent(in) :: symrel(3,3)
  real(dp),intent(in) :: tnons(3)
@@ -2193,18 +2162,18 @@ subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons
    return
  end if
 
-!Determination of the characteristics of proper symmetries (rotations)
- if(determinant==1)then
+ ! Determination of the characteristics of proper symmetries (rotations)
+ if (determinant==1) then
 
-!  Determine the translation vector associated to the rotations
-!  and its order : apply the symmetry operation
-!  then analyse the resulting vector.
+   ! Determine the translation vector associated to the rotations
+   ! and its order: apply the symmetry operation
+   ! then analyse the resulting vector.
    identified=0
    trialt(:)=zero
    do ii=1,order
      trialt(:)=matmul(symrel(:,:),trialt(:))+tnons(:)
    end do
-!  Gives the associated translation, with components in the interval [-0.5,0.5] .
+   ! Gives the associated translation, with components in the interval [-0.5,0.5] .
    reduced(:)=trialt(:)-nint(trialt(:)-tol6)
 
    if(sum(abs(reduced(:)))<tol6)identified=1
@@ -2213,17 +2182,17 @@ subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons
    if( (center==3 .or. center==-3) .and. sum(abs(reduced(:)-(/half,half,zero/)))<tol6 )identified=4
    if(center==-1.and. sum(abs(reduced(:)-(/half,half,half/)))<tol6 )identified=5
 
-!  If the symmetry operation has not been identified, there is a problem ...
+   ! If the symmetry operation has not been identified, there is a problem ...
    if(identified==0) then
      type_axis = -1
      return
    end if
 
-!  Compute the translation vector associated with one rotation
+   ! Compute the translation vector associated with one rotation
    trialt(:)=trialt(:)/order
    trialt(:)=trialt(:)-nint(trialt(:)-tol6)
 
-!  Analyse the resulting vector.
+   ! Analyse the resulting vector.
    identified=0
    do ii=1,order
      reduced(:)=ii*trialt(:)-nint(ii*trialt(:)-tol6)
@@ -2239,8 +2208,8 @@ subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons
      end if
    end do ! ii
 
-!  Determinant (here=+1, as we are dealing with proper symmetry operations),
-!  order, tnons_order and identified are enough to determine the kind of symmetry operation
+   ! Determinant (here=+1, as we are dealing with proper symmetry operations),
+   ! order, tnons_order and identified are enough to determine the kind of symmetry operation
 
    select case(order)
    case (1)                       ! point symmetry 1
@@ -2941,7 +2910,6 @@ end subroutine symplanes
 !!
 !! SOURCE
 
-
 subroutine smallprim(metmin,minim,rprimd)
 
 !Arguments ------------------------------------
@@ -3203,18 +3171,14 @@ end subroutine smallprim
 !! FUNCTION
 !!  Helper function to print the set of symmetries.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
-subroutine print_symmetries(nsym, symrel, tnons, symafm, unit, mode_paral)
+subroutine print_symmetries(nsym, symrel, tnons, symafm, units, mode_paral)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
- integer,optional,intent(in) :: unit
+ integer,optional,intent(in) :: units
  character(len=4),optional,intent(in) :: mode_paral
 !arrays
  integer,intent(in) :: symrel(3,3,nsym),symafm(nsym)
@@ -3223,29 +3187,23 @@ subroutine print_symmetries(nsym, symrel, tnons, symafm, unit, mode_paral)
 !Local variables-------------------------------
  integer :: my_unt,isym,isymin,isymend,ii,jj
  character(len=500) :: msg
- character(len=4) :: my_mode
 ! *********************************************************************
 
- my_unt =std_out; if (PRESENT(unit      )) my_unt =unit
- my_mode='COLL' ; if (PRESENT(mode_paral)) my_mode=mode_paral
+ my_unt =std_out; if (PRESENT(units      )) my_unt =units
 
  !write(msg,'(2a)')ch10,' Rotations                           Translations     Symafm '
- !do isym=1,nsym
- ! write(msg,'(1x,3(3i3,1x),4x,3(f11.7,1x),6x,i2)')symrel(:,:,isym),tnons(:,isym),symafm(isym)
- ! call wrtout(my_unt,msg,my_mode)
- !end do
-
  write(msg,'(2a)')ch10,' Symmetry operations in real space (Rotation tnons AFM)'
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(my_unt, msg)
+
  do isymin=1,nsym,4
    isymend=isymin+3
    if (isymend>nsym) isymend=nsym
    do ii=1,3
      write(msg,'(4(3i3,f11.6,i3,3x))')((symrel(ii,jj,isym),jj=1,3),tnons(ii,isym),symafm(isym),isym=isymin,isymend)
-     call wrtout(my_unt,msg,my_mode)
+     call wrtout(my_unt,msg)
    end do
    write(msg,'(a)')ch10
-   call wrtout(my_unt,msg,my_mode)
+   call wrtout(my_unt, msg)
  end do
 
 end subroutine print_symmetries
