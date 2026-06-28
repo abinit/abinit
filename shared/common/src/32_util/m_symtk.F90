@@ -3173,13 +3173,12 @@ end subroutine smallprim
 !!
 !! SOURCE
 
-subroutine print_symmetries(nsym, symrel, tnons, symafm, units, mode_paral)
+subroutine print_symmetries(units, nsym, symrel, tnons, symafm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
- integer,optional,intent(in) :: units
- character(len=4),optional,intent(in) :: mode_paral
+ integer,optional,intent(in) :: units(:)
 !arrays
  integer,intent(in) :: symrel(3,3,nsym),symafm(nsym)
  real(dp),intent(in) :: tnons(3,nsym)
@@ -3189,21 +3188,19 @@ subroutine print_symmetries(nsym, symrel, tnons, symafm, units, mode_paral)
  character(len=500) :: msg
 ! *********************************************************************
 
- my_unt =std_out; if (PRESENT(units      )) my_unt =units
-
  !write(msg,'(2a)')ch10,' Rotations                           Translations     Symafm '
  write(msg,'(2a)')ch10,' Symmetry operations in real space (Rotation tnons AFM)'
- call wrtout(my_unt, msg)
+ call wrtout(units, msg)
 
  do isymin=1,nsym,4
    isymend=isymin+3
    if (isymend>nsym) isymend=nsym
    do ii=1,3
      write(msg,'(4(3i3,f11.6,i3,3x))')((symrel(ii,jj,isym),jj=1,3),tnons(ii,isym),symafm(isym),isym=isymin,isymend)
-     call wrtout(my_unt,msg)
+     call wrtout(units,msg)
    end do
    write(msg,'(a)')ch10
-   call wrtout(my_unt, msg)
+   call wrtout(units, msg)
  end do
 
 end subroutine print_symmetries

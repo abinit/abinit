@@ -1019,7 +1019,7 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
- integer :: my_unt,my_prtvol,nu,iatom, isym, ii, nsym
+ integer :: my_unt,my_prtvol,nu,iatom, isym, ii, nsym, units(1)
  character(len=4) :: my_mode
  character(len=500) :: msg
 ! *********************************************************************
@@ -1027,6 +1027,8 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
  my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
  my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
  my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
+
+ units = [my_unt]
 
  msg=' ==== Info on the Cryst% object ==== '
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
@@ -1058,7 +1060,7 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
  if (my_prtvol == -1) return
 
  if (my_prtvol > 0) then
-   call print_symmetries(Cryst%nsym, Cryst%symrel, Cryst%tnons, Cryst%symafm, unit=my_unt, mode_paral=my_mode)
+   call print_symmetries(units, Cryst%nsym, Cryst%symrel, Cryst%tnons, Cryst%symafm)
    if (Cryst%use_antiferro) call wrtout(my_unt,' System has magnetic symmetries ',my_mode)
 
    ! Print indsym using the same format as in symatm
