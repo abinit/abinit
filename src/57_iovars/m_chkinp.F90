@@ -3135,13 +3135,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_ne(1,2,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
    end if
 
-   if (dt%useylm == 1 .and. dt%usepaw == 0 .and. dt%nspinor == 2 .and. any(pspheads(:)%pspso /= 0)) then
-     if(dt%gpu_option/=ABI_GPU_DISABLED) then
-       ABI_ERROR_NOSTOP("spin-orbit (pspso /=0 ) with NC pseudos and GPU for nonlop (gpu_option != 0) not yet allowed.", ierr)
-     else
-       ABI_ERROR_NOSTOP("spin-orbit (pspso /=0 ) with NC pseudos and Ylm for nonlop (useylm = 1) not yet allowed.", ierr)
-     end if
-   end if
+!
 
 !  optforces
    call chkint_eq(0,0,cond_string,cond_values,ierr,'optforces',dt%optforces,3,(/0,1,2/),iout)
