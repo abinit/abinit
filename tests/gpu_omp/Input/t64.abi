@@ -1,8 +1,7 @@
 # AlAs zinc-blende: NC+SOC ground state (forces + stress) and Gamma-point phonons.
 # GPU version: uses GPU_OPENMP offload for the nonlocal operator.
 
-#gpu_option 2
-useylm 0
+gpu_option 2
 
 # NC+SOC: 2-component spinors
 nspinor  2
