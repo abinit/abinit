@@ -2641,6 +2641,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='nspinor' ; cond_values(1)=dt%nspinor
      call chkint_eq(0,1,cond_string,cond_values,ierr,'npspinor',dt%npspinor,1,(/1/),iout)
    end if
+!  When NC+SOC with useylm=1 (nonlop_ylm pathway), spinor parallelism (npspinor>1) is incompatible
+   if (dt%nspinor==2 .and. dt%usepaw==0 .and. dt%useylm==1 .and. dt%npspinor>1) then
+     write(msg,'(3a)') 'NC+SOC with useylm=1 (nonlop_ylm pathway) does not support spinor parallelism.',ch10,&
+&      'Action: set npspinor=1 (or use useylm=0, or use PAW pseudopotentials).'
+     ABI_ERROR_NOSTOP(msg, ierr)
+   end if
 
 !  npvel (must be positive)
    call chkint_ge(0,0,cond_string,cond_values,ierr,'npvel',dt%npvel,0,iout)
