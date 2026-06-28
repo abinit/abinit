@@ -3183,7 +3183,7 @@ subroutine print_symmetries(units, nsym, symrel, tnons, symafm)
  real(dp),intent(in) :: tnons(3,nsym)
 
 !Local variables-------------------------------
- integer :: my_unt,isym,isymin,isymend,ii,jj
+ integer :: isym, isymin, isymend, ii, jj
  character(len=500) :: msg
 ! *********************************************************************
 

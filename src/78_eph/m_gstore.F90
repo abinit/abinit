@@ -6689,8 +6689,8 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 !Local variables-------------------------------
 !scalars
  integer :: with_cplex, my_is, spin, my_ik, my_iq, ik_glob, iq_glob, units(2)
- integer :: ncid, spin_ncid, nprocs, my_rank, ierr, ncerr, this_state
- integer :: nb, nkbz, nkibz, nqbz, nqibz, nsym, itim, isym, ib, ik_bz, ip, itime_k, itime_kq
+ integer :: ncid, spin_ncid, nprocs, my_rank, ncerr, this_state ! ierr,
+ integer :: nb, nkbz, nkibz, nqbz, nqibz, nsym, itime_k, itime_kq ! ib, ik_bz,  ip,  itim, isym,
  integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
  integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3)
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
@@ -6702,14 +6702,13 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  logical :: isirr_k, isirr_kq, isirr_q
  character(len=abi_slen) :: with_gmode, gtype, gvals_name
  character(len=5000) :: msg
- type(wfd_t) :: wfd
  type(gstore_t) :: gstore
  type(dmats_t) :: dmats
 !arrays
  real(dp) :: qpt(3), kk_bz(3), kk_ibz(3), qq_ibz(3)
- real(dp),allocatable :: gwork_q(:,:,:,:,:)
+ !real(dp),allocatable :: gwork_q(:,:,:,:,:)
  integer :: brange_k_spin(2, dtset%nsppol)
- integer,allocatable :: my_kqmap(:,:), kmesh_map(:,:), state_kq(:,:)
+ integer,allocatable :: my_kqmap(:,:), state_kq(:,:) ! kmesh_map(:,:),
  real(dp),contiguous,pointer :: gkq_rot_ptr(:,:,:,:), gkq_base_ptr(:,:,:,:)
  complex(dp),allocatable :: dmat_k(:,:), dmat_kq(:,:)
  complex(dp),target,allocatable :: gkq_rot(:,:,:), gkq_base(:,:,:)

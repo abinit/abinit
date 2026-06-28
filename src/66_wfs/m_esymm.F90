@@ -34,9 +34,8 @@ module m_esymm
  use m_numeric_tools,  only : print_arr, set2unit, get_trace
  use m_hide_lapack,    only : xgeev, xginv
  use m_crystal,        only : crystal_t
- use m_defs_ptgroups,  only : point_group_t, irrep_t
- use m_ptgroups,       only : get_classes, point_group_init, point_group_free, irrep_free, &
-                              copy_irrep, init_irrep, mult_table, sum_irreps
+ use m_defs_ptgroups,  only : point_group_t, irrep_t, irrep_free, copy_irrep
+ use m_ptgroups,       only : get_classes, point_group_init, mult_table, sum_irreps
 
  implicit none
 
@@ -651,7 +650,7 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
        phase_mkt(isym_gk) = CMPLX(DCOS(mkt), DSIN(mkt))
      end do
 
-     call copy_irrep(Ptg%Irreps,esymm%Ref_irreps,phase_mkt)
+     call copy_irrep(Ptg%Irreps, esymm%Ref_irreps, phase_mkt)
      ABI_FREE(phase_mkt)
    end if
 
@@ -789,9 +788,9 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
 
    esymm%degs_dim(idg) = dim_degs
 
-   call init_irrep(esymm%Calc_irreps(idg),esymm%nsym_gk,dim_degs)
+   call esymm%Calc_irreps(idg)%init(esymm%nsym_gk, dim_degs)
    if (esymm%can_use_tr) then
-     call init_irrep(esymm%trCalc_irreps(idg),esymm%nsym_trgk,dim_degs)
+     call esymm%trCalc_irreps(idg)%init(esymm%nsym_trgk, dim_degs)
    end if
  end do ! idg
 
@@ -809,7 +808,7 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
  DBG_EXIT("COLL")
 
  ABI_FREE(dummy_symafm)
- if (used_ptg) call point_group_free(Ptg)
+ if (used_ptg) call Ptg%free()
 
 end subroutine esymm_init
 !!***

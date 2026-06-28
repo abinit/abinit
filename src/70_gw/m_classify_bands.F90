@@ -771,23 +771,22 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: iflag1 = 1, me_g0 = 1, ndat1 = 1
- integer :: spin, nsppol, nsym, nb, nkibz, mband, ik_ibz, i_m, i_n, isym, itime, otimrev_k, bstart, ib, ig, igsp, trev_k
- integer :: ib1, ib2, band1, band2, n1, n2, n3, n4, n5, n6, nfft, nspinor, mpw, my_mpw, ii, ipw, ispinor, npw_sk
+ integer :: spin, nsppol, nsym, nb, nkibz, mband, ik_ibz, isym, itime, otimrev_k, bstart, ib, trev_k ! i_m, i_n,
+ integer :: ib1, ib2, band1, band2, n1, n2, n3, n4, n5, n6, nfft, nspinor, mpw, my_mpw, ii, ipw !, ispinor, npw_sk
  integer :: isym_inv, j, nprocs, me, itot, ierr
- integer :: g0_passed(3)
+ !integer :: g0_passed(3)
  real(dp),parameter :: xnorm1 = one
  real(dp) :: e_b1, e_b2, cpu, wall, gflops
  real(dp) :: tau_save(3)
- type(ebands_t) :: ks_ebands
  type(wfd_t) :: wfd
  type(hdr_type) :: hdr
 !arrays
- integer :: symtab(4,2,cryst%nsym), g0_k(3), gmax(3), my_gmax(3), work_ngfft(18), shiftg(3), symrec(3,3), inv_symrec(3,3), units(2)
+ integer :: symtab(4,2,cryst%nsym), g0_k(3), gmax(3), my_gmax(3), work_ngfft(18), units(2) ! symrec(3,3), shiftg(3),
  integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_sk(:,:)
- real(dp) :: kk_ibz(3), kk_sk(3), dot(2)
+ real(dp) :: kk_ibz(3), dot(2) ! kk_sk(3),
  real(dp),allocatable :: ug1_box(:,:), ug2_box(:,:), cg_ib(:,:,:), cg_work(:,:), work(:,:,:,:)
- real(dp),allocatable :: cg1_sk(:,:,:), cg2_sk(:,:)
- complex(dp) :: cval, cphase, ug
+ real(dp),allocatable :: cg2_sk(:,:) ! cg1_sk(:,:,:),
+ complex(dp) :: cval !, cphase, ug
  complex(dp),allocatable :: cmat(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
 !----------------------------------------------------------------------

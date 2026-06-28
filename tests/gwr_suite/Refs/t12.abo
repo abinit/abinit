@@ -675,8 +675,8 @@ gwr_task   : G0W0
 QP_VBM_band: 4
 QP_CBM_band: 5
 KS_gap     :    3.497
-QP_gap     :    8.586
-Delta_QP_KS:    5.089
+QP_gap     :    8.587
+Delta_QP_KS:    5.090
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
         3   -1.736  -11.091  -13.756   -0.103    0.843   -2.335   -2.335   -4.071    2.000
