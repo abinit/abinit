@@ -3177,8 +3177,7 @@ subroutine print_symmetries(units, nsym, symrel, tnons, symafm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nsym
- integer,optional,intent(in) :: units(:)
+ integer,intent(in) :: nsym, units(:)
 !arrays
  integer,intent(in) :: symrel(3,3,nsym),symafm(nsym)
  real(dp),intent(in) :: tnons(3,nsym)
