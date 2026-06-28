@@ -4341,8 +4341,10 @@ subroutine dump_my_gbuf()
    if (my_iq == 0) then
      iscontiguous = .False.; exit
    end if
-   if (ii > 1 .and. my_iq /= iq_buf(1, ii-1) + 1) then
-     iscontiguous = .False.; exit
+   if (ii > 1) then
+     if (my_iq /= iq_buf(1, ii-1) + 1) then
+       iscontiguous = .False.; exit
+     end if
    end if
  end do
 
