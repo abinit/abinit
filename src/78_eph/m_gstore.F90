@@ -3706,7 +3706,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
 !arrays
  integer :: g0_k(3), g0_kq(3), g0_q(3), work_ngfft(18),gmax(3),indkk_kq(6,1), units(2), qbz2dvdb(6)
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qmap_symrec(:,:)
- integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:)
+ integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), state_kq(:,:)
  !integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
  real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3) !, v_nk(3)
  real(dp),allocatable :: displ_cart_qibz(:,:,:,:), lambda(:)
@@ -3976,6 +3976,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
      end do
    end if
 
+   ABI_MALLOC(state_kq, (gqk%my_nk, qbuf_size))
+   state_kq = GSTORE_KQ_MISSING
+
    ! Loop over my set of q-points
    do my_iq=1,gqk%my_nq
      print_time = my_rank == 0 .and. (my_iq <= LOG_MODQ .or. mod(my_iq, LOG_MODQ) == 0)
@@ -4059,12 +4062,18 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
 
        if (dtset%gstore_use_lgk /= 0) then
          ii = lg_myk(my_ik)%findq_ibzk(qq_bz)
-         if (ii == -1) cycle
+         if (ii == -1) then
+           state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING
+           cycle
+         end if
        end if
 
        if (dtset%gstore_use_lgq /= 0) then
          ii = lg_myq%findq_ibzk(kk_bz)
-         if (ii == -1) cycle
+         if (ii == -1) then
+           state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING
+           cycle
+         end if
        end if
 
        ! =========================================
@@ -4089,7 +4098,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
        if (gstore%kfilter == "fs_tetra") then
          ! Check tetra delta(e_{k+q}) and cycle if all the weights at k+q are zero.
          if (all(abs(gstore%delta_ef_kibz_spin(:, ikq_ibz, spin)) == zero)) then
-           nskip_tetra_kq = nskip_tetra_kq + 1; cycle
+           nskip_tetra_kq = nskip_tetra_kq + 1
+           state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING
+           cycle
          end if
        end if
 
@@ -4191,6 +4202,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
 
        ! Save e-ph matrix elements in the buffer.
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_atm
+       state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING
 
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET EXIT DATA MAP(delete:kpg_k, ffnl_k, kinpw_k, ph3d_k) IF (dtset%gpu_option == ABI_GPU_OPENMP)
@@ -4235,6 +4247,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
    ! Dump the remainder.
    if (iqbuf_cnt /= 0) call dump_my_gbuf()
 
+   ABI_FREE(state_kq)
    ABI_FREE(iq_buf)
    ABI_FREE(my_gbuf)
    ABI_FREE(lambda)
@@ -4311,7 +4324,6 @@ subroutine dump_my_gbuf()
  ! NOTE: A similar routine is used in m_gstore. The two implementations should be kept in synch.
 
  integer :: ii, iq_bz, iq_glob, my_iq
- !integer,allocatable :: itab_k(:)
 
  if (gqk%coords_qkpb_sumbp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
 
@@ -4330,26 +4342,25 @@ subroutine dump_my_gbuf()
                       count=[2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt])
  NCF_CHECK(ncerr)
 
- !ABI_ICALLOC(itab_k, (gqk%my_nk))
- !nctkarr_t("gstore_glob_state_kqs", "i", "gstore_max_nk, gstore_max_nq, number_of_spins"), &
-
  ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
  !if (all(gqk%coords_qkpb_sumbp(2:3) == [0, 0]))  then
    do ii=1,iqbuf_cnt
      iq_bz = iq_buf(2, ii)
      NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_done_qbz_spin"), 1, start=[iq_bz, spin]))
 
-     !itab_k = 1
-     !ncerr = nf90_put_var(root_ncid, root_vid("gstore_glob_state_kqs"), itab_k, &
+     ! Fill the entries in gstore_glob_state_kqs for all the q-points and the k-points that have been computed.
+     !nctkarr_t("gstore_glob_state_kqs", "i", "gstore_max_nk, gstore_max_nq, number_of_spins"), &
+     !ncerr = nf90_put_var(root_ncid, root_vid("gstore_glob_state_kqs"), state_kq, &
      !                     start=[gqk%my_kstart, iq_glob, spin], &
      !                     count=[gqk%my_nk, iqbuf_cnt, 1])
      !NCF_CHECK(ncerr)
    end do
-   !ABI_FREE(itab_k)
  !end if
 
  ! Zero the counter before returning
 10 iqbuf_cnt = 0
+
+ state_kq = GSTORE_KQ_MISSING
 
  NCF_CHECK(nf90_sync(spin_ncid))
  NCF_CHECK(nf90_sync(root_ncid))
