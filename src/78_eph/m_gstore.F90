@@ -3955,6 +3955,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
    nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
 
    ABI_MALLOC(iq_buf, (2, qbuf_size))
+   iq_buf = 0
    ABI_MALLOC(lambda, (nb_k))
    ABI_MALLOC(gkq_atm, (2, nb_kq, nb_k, natom3))
    ABI_MALLOC(gkq_atm_ipc, (2, nb_kq, nb_k))
@@ -4202,7 +4203,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
 
        ! Save e-ph matrix elements in the buffer.
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_atm
-       state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING
+       state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_COMPUTED
 
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET EXIT DATA MAP(delete:kpg_k, ffnl_k, kinpw_k, ph3d_k) IF (dtset%gpu_option == ABI_GPU_OPENMP)
@@ -4324,42 +4325,73 @@ subroutine dump_my_gbuf()
  ! NOTE: A similar routine is used in m_gstore. The two implementations should be kept in synch.
 
  integer :: ii, iq_bz, iq_glob, my_iq
+ logical :: iscontiguous
 
  if (gqk%coords_qkpb_sumbp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
-
- !iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
- my_iq = iq_buf(1, 1)
- iq_glob = my_iq + gqk%my_qstart - 1
 
  !if (dtset%prtvol > 5) then
  !print *, "in dump_my_gbuf with start: ", [1, 1, 1, 1, gqk%my_kstart, iq_glob]
  !print *, "                  count; ", [2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt]
  !end if
 
- ! NB: this is an individual IO operation
- ncerr = nf90_put_var(spin_ncid, spin_vid("gvals"), my_gbuf, &
-                      start=[1, 1, 1, 1, gqk%my_kstart, iq_glob], &
-                      count=[2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt])
- NCF_CHECK(ncerr)
+ ! Check if the q-points in the buffer are perfectly contiguous (no cycles/holes)
+ iscontiguous = .True.
+ do ii=1, iqbuf_cnt
+   my_iq = iq_buf(1, ii)
+   if (my_iq == 0) then
+     iscontiguous = .False.; exit
+   end if
+   if (ii > 1 .and. my_iq /= iq_buf(1, ii-1) + 1) then
+     iscontiguous = .False.; exit
+   end if
+ end do
+
+ if (iscontiguous) then
+   ! Fast path: Write slabs directly
+   my_iq = iq_buf(1, 1)
+   iq_glob = my_iq + gqk%my_qstart - 1
+
+   ncerr = nf90_put_var(spin_ncid, spin_vid("gvals"), my_gbuf(:,:,:,:,:, 1:iqbuf_cnt), &
+                        start=[1, 1, 1, 1, gqk%my_kstart, iq_glob], &
+                        count=[2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt])
+   NCF_CHECK(ncerr)
+
+   ncerr = nf90_put_var(root_ncid, root_vid("gstore_glob_state_kqs"), state_kq(:, 1:iqbuf_cnt), &
+                        start=[gqk%my_kstart, iq_glob, spin], &
+                        count=[gqk%my_nk, iqbuf_cnt, 1])
+   NCF_CHECK(ncerr)
+ else
+   ! Slow path: Q-points were filtered, write slice by slice avoiding holes
+   do ii=1, iqbuf_cnt
+     my_iq = iq_buf(1, ii)
+     if (my_iq == 0) cycle
+     iq_glob = my_iq + gqk%my_qstart - 1
+
+     ncerr = nf90_put_var(spin_ncid, spin_vid("gvals"), my_gbuf(:,:,:,:,:, ii), &
+                          start=[1, 1, 1, 1, gqk%my_kstart, iq_glob], &
+                          count=[2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, 1])
+     NCF_CHECK(ncerr)
+
+     ncerr = nf90_put_var(root_ncid, root_vid("gstore_glob_state_kqs"), state_kq(:, ii), &
+                          start=[gqk%my_kstart, iq_glob, spin], &
+                          count=[gqk%my_nk, 1, 1])
+     NCF_CHECK(ncerr)
+   end do
+ end if
 
  ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
  !if (all(gqk%coords_qkpb_sumbp(2:3) == [0, 0]))  then
    do ii=1,iqbuf_cnt
+     my_iq = iq_buf(1, ii)
+     if (my_iq == 0) cycle
      iq_bz = iq_buf(2, ii)
      NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_done_qbz_spin"), 1, start=[iq_bz, spin]))
-
-     ! Fill the entries in gstore_glob_state_kqs for all the q-points and the k-points that have been computed.
-     !nctkarr_t("gstore_glob_state_kqs", "i", "gstore_max_nk, gstore_max_nq, number_of_spins"), &
-     !ncerr = nf90_put_var(root_ncid, root_vid("gstore_glob_state_kqs"), state_kq, &
-     !                     start=[gqk%my_kstart, iq_glob, spin], &
-     !                     count=[gqk%my_nk, iqbuf_cnt, 1])
-     !NCF_CHECK(ncerr)
    end do
  !end if
 
  ! Zero the counter before returning
 10 iqbuf_cnt = 0
-
+ iq_buf = 0
  state_kq = GSTORE_KQ_MISSING
 
  NCF_CHECK(nf90_sync(spin_ncid))
