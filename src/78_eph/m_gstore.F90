@@ -184,9 +184,9 @@ module m_gstore
  character(len=abi_slen),public,parameter :: GSTORE_GMODE_PHONON = "phonon"
 
  ! Flags
- integer :: GSTORE_KQ_MISSING = 0        !  (k, q, spin) has not been computed.
- integer :: GSTORE_KQ_COMPUTED = 1       !  (k, q, spin) has been computed.
- integer :: GSTORE_KQ_SYMMETRIZED = 2    !  (k, q, spin) has been reconstructed by symmetry.
+ integer :: GSTORE_KQ_MISSING = 0        ! (k, q, spin) has not been computed.
+ integer :: GSTORE_KQ_COMPUTED = 1       ! (k, q, spin) has been computed.
+ integer :: GSTORE_KQ_SYMMETRIZED = 2    ! (k, q, spin) has been reconstructed by symmetry.
 
  ! Rank of the MPI Cartesian grid.
  integer,private,parameter :: ndims = 6
@@ -693,7 +693,8 @@ type, public :: dmats_t
  contains
    procedure :: init => dmats_init    ! Initialize object
    procedure :: free => dmats_free    ! Free memory.
-   procedure :: print => dmats_print  ! Print object.
+   procedure :: check => dmats_check  ! Check Dmats
+   procedure :: classify => dmats_classify ! Classify irreps
 end type dmats_t
 
 contains
@@ -5987,16 +5988,14 @@ subroutine gqk_get_erange_mask(gqk, gstore, erange, my_states, glob_states)
      if (abs(erange(1)) > tol12) then
        ! Filter valence states.
        if (eig <= vmax .and. vmax - eig <= abs(erange(1))) then
-         my_states(ib_k, my_ik) = 1
-         glob_states(ib_k, ik_glob) = 1
+         my_states(ib_k, my_ik) = 1; glob_states(ib_k, ik_glob) = 1
        end if
      end if
 
      if (abs(erange(2)) > tol12) then
        ! Filter conduction states.
        if (eig >= cmin .and. eig - cmin <= abs(erange(2))) then
-         my_states(ib_k, my_ik) = 1
-         glob_states(ib_k, ik_glob) = 1
+         my_states(ib_k, my_ik) = 1; glob_states(ib_k, ik_glob) = 1
        end if
      end if
 
@@ -6755,9 +6754,10 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
  ! Compute the mixing matrices D^{k}(S) from the wavefunctions stored in wfd_t.
  call dmats%init(wfk_path, dtset, dtfil, cryst, brange_k_spin, ngfft, pawtab, psps, comm)
- call dmats%print([std_out], dtset%prtvol)
-
  if (my_rank /= 0) goto 100
+
+ call dmats%check([std_out], dtset%prtvol)
+ call dmats%classify(dtset%prtvol)
 
  gvals_name = "gvals"
  ! TODO: Remember to handle GWPT STORE
@@ -7274,12 +7274,12 @@ end subroutine dmats_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_gstore/dmats_print
+!!****f* m_gstore/dmats_check
 !! NAME
-!! dmats_print
+!! dmats_check
 !!
 !! FUNCTION
-!!  Print the dmats object and verify the fundamental point-group algebraic properties
+!!  Verify the fundamental point-group algebraic properties
 !!  of the constructed electron-phonon symmetry reconstruction matrices:
 !!
 !!  D^{k}_{mn}(S) = < \psi_{m, Sk} | S | \psi_{n, k} >
@@ -7304,12 +7304,13 @@ end subroutine dmats_free
 !!
 !! SOURCE
 
-subroutine dmats_print(dmats, units, prtvol, header)
+subroutine dmats_check(dmats, units, prtvol, header)
 
  use m_numeric_tools, only : print_arr
  use m_symtk,   only : littlegroup_q
  use m_yaml, only : yamldoc_t, yamldoc_open
  use m_pair_list, only : pair_list
+ use m_matrix, only : is_unitary, is_identity
 
 !Arguments ------------------------------------
  class(dmats_t),intent(in) :: dmats
@@ -7330,7 +7331,7 @@ subroutine dmats_print(dmats, units, prtvol, header)
 ! *************************************************************************
 
  msg = 'Info on the dmats_t'
- if (present(header)) msg=trim(adjustl(header))
+ if (present(header)) msg = trim(adjustl(header))
  ydoc = yamldoc_open(tag="dmats", info=trim(msg))
 
  ierr = 0
@@ -7338,6 +7339,8 @@ subroutine dmats_print(dmats, units, prtvol, header)
    bstart = dmats%brange_spin(1, spin)
    nb = dmats%brange_spin(2, spin) - dmats%brange_spin(1, spin) + 1
    ABI_MALLOC(cmat_n, (nb, nb))
+
+   ! Loop over k-points in the IBZ.
    do ik_ibz=1,dmats%ks_ebands%nkpt
      kk_ibz = dmats%ks_ebands%kptns(:, ik_ibz)
      call littlegroup_q(dmats%cryst%nsym, kk_ibz, symtab, dmats%cryst%symrec, dmats%cryst%symafm, otimrev_k, prtvol=0)
@@ -7348,7 +7351,9 @@ subroutine dmats_print(dmats, units, prtvol, header)
          if (symtab(4, itime, isym) /= 0) isym_cnt = isym_cnt + 1
        end do
      end do
-     if (isym_cnt > 0) allocate(sym_dicts(isym_cnt))
+     if (isym_cnt > 0) then
+       ABI_MALLOC(sym_dicts, (isym_cnt))
+     end if
 
      isym_cnt = 0
      do itime=1,2
@@ -7549,7 +7554,7 @@ subroutine dmats_print(dmats, units, prtvol, header)
        do isym = 1, isym_cnt
          call sym_dicts(isym)%free()
        end do
-       deallocate(sym_dicts)
+       ABI_FREE(sym_dicts)
      end if
 
    end do ! ik_ibz
@@ -7563,64 +7568,86 @@ subroutine dmats_print(dmats, units, prtvol, header)
    ABI_ERROR(sjoin("dmats are not unitary or failed tests! ierr:", itoa(ierr), "/", itoa(nb)))
  end if
 
-end subroutine dmats_print
+end subroutine dmats_check
 !!***
 
-logical function is_unitary(n, U, tol, err)
+!!****f* m_gstore/dmats_classify
+!! NAME
+!! dmats_classify
+!!
+!! FUNCTION
+!!  Classify the KS states based on the computed representation matrices (dmats)
+!!  using the irreducible representations of the little group of k.
+!!
+!! SOURCE
+
+subroutine dmats_classify(dmats, prtvol)
+
+ use m_esymm, only : esymm_t, esymm_free
+ use m_numeric_tools, only : get_trace
 
 !Arguments ------------------------------------
- integer, intent(in) :: n
- complex(dp), intent(in) :: U(n,n)
- real(dp), intent(in) :: tol
- real(dp), intent(out) :: err
+ class(dmats_t), target, intent(in) :: dmats
+ integer,intent(in) :: prtvol
 
 !Local variables-------------------------------
-!scalars
- integer :: ii
- complex(dp) :: prod(n,n), identity(n,n)
-!----------------------------------------------------------------------
+ type(esymm_t) :: Bsym
+ integer :: spin, bstart, nb, ik_ibz, idg, iclass, isym_class, sym_idx, isym, tr_isym, ib_start, ib_stop
+ real(dp) :: EDIFF_TOL
+ real(dp), pointer :: ene_k(:)
+ real(dp) :: kk_ibz(3)
+! *************************************************************************
 
- ! Compute U^\dagger U
- prod = matmul(conjg(transpose(U)), U)
+ EDIFF_TOL = 0.005_dp / Ha_eV
 
- ! Build identity matrix
- identity = czero
- do ii=1,n
-   identity(ii,ii) = one
+ do spin=1, size(dmats%for_spin)
+   bstart = dmats%brange_spin(1, spin)
+   nb = dmats%brange_spin(2, spin) - bstart + 1
+
+   do ik_ibz=1, dmats%ks_ebands%nkpt
+     kk_ibz = dmats%ks_ebands%kptns(:, ik_ibz)
+     ene_k => dmats%ks_ebands%eig(bstart:dmats%brange_spin(2, spin), ik_ibz, spin)
+
+     !only_trace = .false.
+     call Bsym%init(kk_ibz, dmats%cryst, .false., dmats%ks_ebands%nspinor, &
+                    bstart, nb, EDIFF_TOL, ene_k, tol3)
+
+     if (Bsym%err_status /= 0) cycle
+
+     do idg=1, Bsym%ndegs
+       ib_start = Bsym%degs_bounds(1, idg) ! relative to bstart
+       ib_stop  = Bsym%degs_bounds(2, idg)
+
+       sym_idx = 0
+       do iclass=1, Bsym%nclass
+         do isym_class=1, Bsym%nelements(iclass)
+           sym_idx = sym_idx + 1
+           isym = Bsym%sgk2symrec(sym_idx)
+           associate(cmat => dmats%for_spin(spin)%value(:,:, isym, 1, ik_ibz))
+             Bsym%Calc_irreps(idg)%mat(:,:,sym_idx) = cmat(ib_start:ib_stop, ib_start:ib_stop)
+             Bsym%Calc_irreps(idg)%trace(sym_idx) = get_trace(Bsym%Calc_irreps(idg)%mat(:,:,sym_idx))
+           end associate
+         end do
+       end do
+
+       if (Bsym%can_use_tr) then
+         do tr_isym=1, Bsym%nsym_trgk
+           isym = Bsym%tr_sgk2symrec(tr_isym)
+           associate(cmat => dmats%for_spin(spin)%value(:,:, isym, 2, ik_ibz))
+             Bsym%trCalc_irreps(idg)%mat(:,:,tr_isym) = cmat(ib_start:ib_stop, ib_start:ib_stop)
+             Bsym%trCalc_irreps(idg)%trace(tr_isym) = get_trace(Bsym%trCalc_irreps(idg)%mat(:,:,tr_isym))
+           end associate
+         end do
+       end if
+     end do
+
+     call Bsym%finalize(prtvol)
+     call Bsym%print([std_out, ab_out], prtvol=prtvol)
+     call esymm_free(Bsym)
+   end do
  end do
 
- ! Maximum deviation from identity
- err = maxval(abs(prod - identity))
- is_unitary = (err < tol)
-
-end function is_unitary
-!!***
-
-logical function is_identity(n, U, tol, err)
-
-!Arguments ------------------------------------
- integer, intent(in) :: n
- complex(dp), intent(in) :: U(n,n)
- real(dp), intent(in) :: tol
- real(dp), intent(out) :: err
-
-!Local variables-------------------------------
-!scalars
- integer :: ii
- complex(dp) :: identity(n,n)
-!----------------------------------------------------------------------
-
- ! Build identity matrix
- identity = czero
- do ii=1,n
-   identity(ii,ii) = one
- end do
-
- ! Maximum deviation from identity
- err = maxval(abs(U - identity))
- is_identity = (err < tol)
-
-end function is_identity
+end subroutine dmats_classify
 !!***
 
 !----------------------------------------------------------------------

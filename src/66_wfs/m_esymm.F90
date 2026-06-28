@@ -35,7 +35,7 @@ module m_esymm
  use m_hide_lapack,    only : xgeev, xginv
  use m_crystal,        only : crystal_t
  use m_defs_ptgroups,  only : point_group_t, irrep_t
- use m_ptgroups,       only : get_classes, point_group_init, irrep_free, &
+ use m_ptgroups,       only : get_classes, point_group_init, point_group_free, irrep_free, &
                               copy_irrep, init_irrep, mult_table, sum_irreps
 
  implicit none
@@ -265,15 +265,15 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
  integer :: iel,icls,msym,iord !isym1,!iprod,dim_irrep,icls2, isym2,isym_tr,
  integer :: spgroup,chkprim !,ptgroupma
  real(dp) :: mkt
+ logical :: used_ptg = .FALSE.
  !complex(dp) :: phase_k
  character(len=5) :: ptgroup,ptgroup_name
  character(len=10) :: spgroup_str
  character(len=1000) :: msg
  character(len=fnlen) :: lgroup_fname
 !arrays
- integer :: inversion(3,3)
+ integer :: inversion(3,3), bravais(11),sym_axis(3)
  integer,allocatable :: degs_bounds(:,:),dim_irreps(:)
- integer :: bravais(11),sym_axis(3)
  real(dp) :: pmat1(3,3),pmat2(3,3),pmat3(3,3),pmat4(3,3),pmat5(3,3),pmat6(3,3)
  !real(dp) :: genafm(3)
  !integer :: rot2(3,3)
@@ -289,12 +289,9 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
  type(point_group_t) :: Ptg
 ! *************************************************************************
 
- DBG_ENTER("COLL")
-
- !@esymm_t
  esymm%err_status= ESYM_NOERROR
  inversion=RESHAPE((/-1,0,0,0,-1,0,0,0,-1/),(/3,3/))
- !
+
  ! ====================================
  ! ==== Initialize basic variables ====
  ! ====================================
@@ -472,12 +469,11 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
 
    !call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
 
-   call int2char10(spgroup,spgroup_str)
+   call int2char10(spgroup, spgroup_str)
    lgroup_fname = "lgroup_"//TRIM(spgroup_str)
 
    if (file_exists(lgroup_fname)) then
      ABI_ERROR("Not coded")
-
      ! Read little groups from the external database.
      !% call init_groupk_from_file(Lgrp,spgroup,lgroup_fname,ierr)
 
@@ -532,9 +528,10 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
 
    ! 1) Retrieve the rotation matrices and the irreducible representations (Bilbao setting).
    call point_group_init(Ptg,ptgroup)
+   used_ptg = .TRUE.
 
    esymm%has_chtabs = .TRUE.
-   ABI_CHECK(esymm%nclass==Ptg%nclass,"esymm%nclass/=Ptg%nclass!")
+   ABI_CHECK(esymm%nclass == Ptg%nclass,"esymm%nclass/=Ptg%nclass!")
 
    do icls=1,esymm%nclass ! FIXME this is awful, should be done in a cleaner way.
      esymm%nelements(icls)=Ptg%class_ids(2,icls) - Ptg%class_ids(1,icls) + 1
@@ -811,6 +808,9 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
 
  DBG_EXIT("COLL")
 
+ ABI_FREE(dummy_symafm)
+ if (used_ptg) call point_group_free(Ptg)
+
 end subroutine esymm_init
 !!***
 
@@ -825,45 +825,39 @@ end subroutine esymm_init
 !! INPUTS
 !!
 !! OUTPUT
+!! only printing
 !!
 !! SOURCE
 
-subroutine esymm_print(esymm, unit, mode_paral, prtvol)
+subroutine esymm_print(esymm, units, prtvol)
 
 !Arguments ------------------------------------
-!scalars
  class(esymm_t),intent(in) :: esymm
- integer,optional,intent(in) :: prtvol,unit
- character(len=4),optional,intent(in) :: mode_paral
+ integer,intent(in) :: units(:), prtvol
 
 !Local variables-------------------------------
 !scalars
- integer :: icl,idg,my_unt,my_prtvol, irr_idx,nstates,nunknown,istart,istop,ii
- character(len=4) :: my_mode
- character(len=1000) :: fmt,msg,msg0
+ integer :: icl, idg, irr_idx, nstates, nunknown, istart, istop, ii
+ character(len=1000) :: fmt, msg, msg0
 ! *********************************************************************
 
- my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
- my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
- my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
-
- write(fmt,*)'(2a,3f8.4,3a,i4,2a,i3,2a,i2,2a,i2,a,',esymm%nclass,'i2,a)'
- write(msg,fmt)ch10,&
+ write(fmt, *)'(2a,3f8.4,3a,i4,2a,i3,2a,i2,2a,i2,a,',esymm%nclass,'i2,a)'
+ write(msg, fmt) ch10,&
   ' ===== Character of bands at k-point: ',esymm%kpt,' ===== ',ch10,&
   '   Total number of bands analyzed .................. ',esymm%nbnds,ch10,&
   '   Number of degenerate sets detected .............. ',esymm%ndegs,ch10,&
   '   Number of operations in the little group of k ... ',esymm%nsym_gk,ch10,&
   '   Number of classes (irreps) in the group of k .... ',esymm%nclass,' (',(esymm%nelements(icl),icl=1,esymm%nclass),' )'
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
  if (esymm%nonsymmorphic_at_zoneborder) then
-   call wrtout(my_unt," Non-symmorphic small group at zone border. Character analysis not available ",my_mode)
+   call wrtout(units," Non-symmorphic small group at zone border. Character analysis not available ")
  end if
 
  if (esymm_failed(esymm)) then
    write(std_out,'(3a)')"Band classification algorithm failed with the error:",ch10,TRIM(esymm%err_msg)
    write(msg,'(3a)')"Band classification algorithm failed with the error:",ch10,TRIM(esymm%err_msg)
-   call wrtout(my_unt,msg,my_mode)
+   call wrtout(units, msg)
  end if
 
  !nunknown=0
@@ -877,7 +871,7 @@ subroutine esymm_print(esymm, unit, mode_paral, prtvol)
  !    nunknown = nunknown +1
  !  end if
  !  write(msg,'(a,i3,2a)')' Band ',iband,' belongs to irrep ',TRIM(irr_name)
- !  call wrtout(my_unt,msg,my_mode)
+ !  call wrtout(units, msg)
  !end do
 
  do irr_idx=1,esymm%nclass
@@ -892,7 +886,7 @@ subroutine esymm_print(esymm, unit, mode_paral, prtvol)
      write(msg,'(20(1x,i0))')(esymm%irrep2b(irr_idx)%value(ii), ii=istart,istop)
      if (istart==1) msg = TRIM(msg0)//TRIM(msg)
      if (istart/=1) msg = "   "//TRIM(msg)
-     call wrtout(my_unt,msg,my_mode)
+     call wrtout(units, msg)
    end do
  end do
 
@@ -904,19 +898,20 @@ subroutine esymm_print(esymm, unit, mode_paral, prtvol)
      write(msg,'(20(1x,i0))')(esymm%irrep2b(0)%value(ii), ii=istart,istop)
      if (istart==1) msg = TRIM(msg0)//TRIM(msg)
      if (istart/=1) msg = "   "//TRIM(msg)
-     call wrtout(my_unt,msg,my_mode)
+     call wrtout(units, msg)
    end do
  end if
 
- if (my_prtvol>0 .or. nunknown>0 .or. .not.esymm%has_chtabs) then ! print the calculated character table.
-   call wrtout(my_unt,ch10//" Calculated character table ",my_mode)
+ if (prtvol > 0 .or. nunknown > 0 .or. .not.esymm%has_chtabs) then
+   ! print the calculated character table.
+   call wrtout(units,ch10//" Calculated character table ")
    !write(fmt,*)'(i2,a,i2,1x,',esymm%nclass,'(a,2f6.3),a)'
    write(fmt,*)'(i2,a,i2,1x,',esymm%nclass,'(a,2f5.2),a)'
    do idg=1,esymm%ndegs
-     write(msg,fmt)&
+     write(msg, fmt) &
        esymm%degs_bounds(1,idg),'-',esymm%degs_bounds(2,idg),&
        ('|',esymm%Calc_irreps(idg)%trace(esymm%nelements(icl)), icl=1,esymm%nclass),'|'
-     call wrtout(my_unt,msg,my_mode)
+     call wrtout(units, msg)
    end do
  end if
 
@@ -960,9 +955,18 @@ subroutine esymm_free_0D(esymm)
    ABI_FREE(esymm%irrep2b)
  end if
 
- if (allocated(esymm%Calc_irreps)) call irrep_free(esymm%Calc_irreps)
- if (allocated(esymm%trCalc_irreps)) call irrep_free(esymm%trCalc_irreps)
- if (allocated(esymm%Ref_irreps)) call irrep_free(esymm%Ref_irreps)
+ if (allocated(esymm%Calc_irreps)) then
+   call irrep_free(esymm%Calc_irreps)
+   ABI_FREE(esymm%Calc_irreps)
+ end if
+ if (allocated(esymm%trCalc_irreps)) then
+   call irrep_free(esymm%trCalc_irreps)
+   ABI_FREE(esymm%trCalc_irreps)
+ end if
+ if (allocated(esymm%Ref_irreps)) then
+   call irrep_free(esymm%Ref_irreps)
+   ABI_FREE(esymm%Ref_irreps)
+ end if
 
 end subroutine esymm_free_0D
 !!***
@@ -1199,7 +1203,7 @@ subroutine esymm_finalize(esymm, prtvol)
    end if
 
    if (.not.esymm%only_trace) then
-     !call wrtout(std_out," **** Testing the unitary of the calculated irreps ****",my_mode)
+     !call wrtout(std_out," **** Testing the unitary of the calculated irreps ****")
      max_err=zero
      do idg1=1,esymm%ndegs
        ib1 = esymm%degs_bounds(1,idg1)
@@ -1253,7 +1257,7 @@ end subroutine esymm_finalize
 !!
 !! SOURCE
 
-integer function which_irrep(esymm, trace, tolerr)
+pure integer function which_irrep(esymm, trace, tolerr)
 
 !Arguments ------------------------------------
 !scalars
@@ -1379,7 +1383,7 @@ end subroutine esymm_symmetrize_mels
 !!
 !! SOURCE
 
-logical function esymm_failed(esymm)
+pure logical function esymm_failed(esymm)
 
 !Arguments ------------------------------------
  class(esymm_t),intent(in) :: esymm

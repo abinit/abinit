@@ -32,7 +32,7 @@ module m_ptgroups
  use m_matrix,         only : mati3inv
  use m_symtk,          only : sg_multable
 
-! Import group tables
+ ! Import group tables
  use m_ptg_C1
  use m_ptg_Ci
  use m_ptg_C2
@@ -116,17 +116,15 @@ subroutine get_point_group(ptg_name, nsym, nclass, sym, class_ids, class_names, 
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(out) :: nclass,nsym
  character(len=*),intent(in) :: ptg_name
+ integer,intent(out) :: nsym, nclass
 !arrays
  integer,allocatable,intent(out) :: sym(:,:,:),class_ids(:,:)
  character(len=5),allocatable,intent(out) :: class_names(:)
  type(irrep_t),allocatable,intent(out) :: Irreps(:)
 
 !Local variables-------------------------------
-!scalars
  integer :: irp,isym
- !character(len=500) :: msg
 ! *************************************************************************
 
  SELECT CASE (TRIM(ADJUSTL(ptg_name)))
@@ -268,10 +266,10 @@ subroutine get_classes(nsym, sym, nclass, nelements, elements_idx)
    end if
  end do
  if (.not.found_identity.or.identity_idx/=1) then
-  write(msg,'(3a)')&
+   write(msg,'(3a)')&
     'Either identity is not present or it is not the first operation ',ch10,&
     'check set of symmetry operations '
-  ABI_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  dummy_symafm=1
@@ -339,8 +337,8 @@ subroutine show_character_tables(unit)
 
  do igrp=1,SIZE(ptgroup_names)
    ptg_name = ptgroup_names(igrp)
-   call point_group_init(Ptg,ptg_name)
-   call point_group_print(Ptg,unit=my_unt)
+   call point_group_init(Ptg, ptg_name)
+   call point_group_print(Ptg, unit=my_unt)
    !allocate(nelements(Ptg%nsym),elements_idx(Ptg%nsym,Ptg%nsym))
    !call get_classes(Ptg%nsym,Ptg%sym,nclass,nelements,elements_idx)
    !deallocate(nelements,elements_idx)
@@ -367,7 +365,6 @@ subroutine point_group_free(Ptg)
  class(point_group_t),intent(inout) :: Ptg
 ! *********************************************************************
 
- !@point_group_t
  ABI_SFREE(Ptg%class_ids)
  ABI_SFREE(Ptg%sym)
  ABI_SFREE(Ptg%class_names)
@@ -403,9 +400,6 @@ subroutine point_group_init(Ptg, ptg_name)
  class(point_group_t),intent(inout) :: Ptg
  character(len=5),intent(in) :: ptg_name
 ! *********************************************************************
-
- !@point_group_t
- !call wrtout(std_out," Retrieving point group data for: "//TRIM(ptg_name),"COLL")
 
  Ptg%gname = ptg_name
  call get_point_group(Ptg%gname,Ptg%nsym,Ptg%nclass,Ptg%sym,Ptg%class_ids,Ptg%class_names,Ptg%Irreps)
@@ -519,7 +513,6 @@ subroutine locate_sym(Ptg,asym,sym_idx,cls_idx,ierr)
  integer,intent(in) :: asym(3,3)
 
 !Local variables-------------------------------
-!scalars
  integer :: isym,icls
  character(len=500) :: msg
 ! *********************************************************************
@@ -534,8 +527,7 @@ subroutine locate_sym(Ptg,asym,sym_idx,cls_idx,ierr)
 
  cls_idx = 0
  do icls=1,Ptg%nclass
-   if (sym_idx >= Ptg%class_ids(1,icls) .and. &
-       sym_idx <= Ptg%class_ids(2,icls) ) then
+   if (sym_idx >= Ptg%class_ids(1,icls) .and. sym_idx <= Ptg%class_ids(2,icls) ) then
      cls_idx = icls
      EXIT
    end if
