@@ -6987,8 +6987,8 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
 !scalars
  integer,parameter :: iflag1 = 1, me_g0 = 1, ndat1 = 1
  integer :: spin, nsppol, nsym, nb, nkibz, mband, ik_ibz, i_m, i_n, isym, itime, otimrev_k, bstart, ib, ig, igsp, trev_k
- integer :: ib1, ib2, band1, band2, n1, n2, n3, n4, n5, n6, nfft, nspinor, mpw, ii, ipw, ispinor, npw_sk
- integer :: isym_inv, j
+ integer :: ib1, ib2, band1, band2, n1, n2, n3, n4, n5, n6, nfft, nspinor, mpw, my_mpw, ii, ipw, ispinor, npw_sk
+ integer :: isym_inv, j, nprocs, me, itot, ierr
  integer :: g0_passed(3)
  real(dp),parameter :: xnorm1 = one
  real(dp) :: e_b1, e_b2, cpu, wall, gflops
@@ -6997,7 +6997,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  type(wfd_t) :: wfd
  type(hdr_type) :: hdr
 !arrays
- integer :: symtab(4,2,cryst%nsym), g0_k(3), gmax(3), work_ngfft(18), shiftg(3), symrec(3,3), inv_symrec(3,3), units(2)
+ integer :: symtab(4,2,cryst%nsym), g0_k(3), gmax(3), my_gmax(3), work_ngfft(18), shiftg(3), symrec(3,3), inv_symrec(3,3), units(2)
  integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_sk(:,:)
  real(dp) :: kk_ibz(3), kk_sk(3), dot(2)
  real(dp),allocatable :: ug1_box(:,:), ug2_box(:,:), cg_ib(:,:,:), cg_work(:,:), work(:,:,:,:)
@@ -7019,6 +7019,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  dmats%cryst => cryst
 
  nsppol = dmats%ks_ebands%nsppol; nsym = cryst%nsym; nkibz = dmats%ks_ebands%nkpt
+ nprocs = xmpi_comm_size(comm); me = xmpi_comm_rank(comm)
 
  ! Initialize the wave function descriptor.
  ! Only wavefunctions for the symmetrical image of the k/k+q wavevectors treated by this MPI rank are stored.
@@ -7031,9 +7032,14 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  ABI_MALLOC(dmats%brange_spin, (2, nsppol))
  dmats%brange_spin = brange_spin
 
- ! TODO: MPI distribution
+ ! MPI distribution over k-points and spins.
  do spin=1,nsppol
-   bks_mask(brange_spin(1,spin):brange_spin(2,spin), :, spin) = .True.
+   do ik_ibz=1,nkibz
+     itot = ik_ibz + (spin - 1)*nkibz
+     if (mod(itot - 1, nprocs) == me) then
+       bks_mask(brange_spin(1,spin):brange_spin(2,spin), ik_ibz, spin) = .True.
+     end if
+   end do
  end do
 
  ! Impose istwfk = 1 for all k-points. This is also done in respfn (see inkpts)
@@ -7061,8 +7067,11 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
 
  ! Compute max |G_i| to build the box.
  gmax = 0
+ mpw = 0
  do ik_ibz=1,nkibz
+    if (.not. allocated(wfd%kdata(ik_ibz)%kg_k)) cycle
     associate (npw_k => wfd%npwarr(ik_ibz), kg_k => wfd%kdata(ik_ibz)%kg_k)
+    mpw = max(mpw, npw_k)
     do ipw=1,npw_k
       do ii=1,3
         gmax(ii) = max(gmax(ii), abs(kg_k(ii,ipw)))
@@ -7070,7 +7079,8 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
     end do
     end associate
  end do
- !my_gmax = gmax; call xmpi_max(my_gmax, gmax, wfd%comm, ierr)
+ my_gmax = gmax; call xmpi_max(my_gmax, gmax, comm, ierr)
+ my_mpw = mpw; call xmpi_max(my_mpw, mpw, comm, ierr)
 
  ! Init work_ngfft
  gmax = gmax + 4 ! FIXME: this is to account for umklapp
@@ -7080,13 +7090,13 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
 
  n1 = work_ngfft(1); n2 = work_ngfft(2); n3 = work_ngfft(3); n4 = work_ngfft(4); n5 = work_ngfft(5); n6 = work_ngfft(6)
- nfft = n1 * n2 * n3; mpw = maxval(wfd%npwarr)
+ nfft = n1 * n2 * n3
  nspinor = wfd%nspinor
 
  ABI_MALLOC(ug1_box, (2, nfft * nspinor))
  ABI_MALLOC(ug2_box, (2, nfft * nspinor))
 
- ! Allocate matrices for each spin.
+ ! Allocate matrices for each spin on each proc and fill with zeros as we will MPI sum at the end.
  ABI_MALLOC(dmats%for_spin, (nsppol))
  do spin=1,nsppol
    nb = brange_spin(2,spin) - brange_spin(1,spin) + 1
@@ -7100,6 +7110,8 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
 
    ! Loop over k-points in the IBZ.
    do ik_ibz=1,nkibz
+     itot = ik_ibz + (spin - 1)*nkibz; if (mod(itot - 1, nprocs) /= me) cycle ! MPI parallelism.
+
      ! NB: istwf_k is always 1 here. See call to wfd%init.
      associate (npw_k => wfd%npwarr(ik_ibz), istwf_k => wfd%kdata(ik_ibz)%istwfk, kg_k => wfd%kdata(ik_ibz)%kg_k)
      kk_ibz = dmats%ks_ebands%kptns(:, ik_ibz)
@@ -7228,8 +7240,14 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
      ABI_FREE(cg_work)
      end associate
    end do ! ik_ibz
+
    ABI_FREE(cmat)
  end do ! spin
+
+ ! Collect results on each MPI proc.
+ do spin=1,nsppol
+   call xmpi_sum(dmats%for_spin(spin)%value, comm, ierr)
+ end do
 
  ABI_FREE(ug1_box)
  ABI_FREE(ug2_box)
