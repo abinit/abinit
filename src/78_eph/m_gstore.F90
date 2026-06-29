@@ -6746,8 +6746,16 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  integer :: ncid, spin_ncid, nprocs, my_rank, ncerr, this_state ! ierr,
  integer :: nb, nkbz, nkibz, nqbz, nqibz, nsym, itime_k, itime_kq ! ib, ik_bz,  ip,  itim, isym,
  integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
+ integer :: ik_ibz_ref, isym_k_ref, trev_k_ref, g0_k_ref(3), itime_k_ref
  integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3)
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
+ integer :: isym_tot, trev_tot, tsign_tot, ik_base_glob
+ integer :: isym_LG, trev_LG, itime_LG, isym, isym_kq_left, trev_kq_left, itime_kq_left
+ integer :: isym_kq_base, trev_kq_base, itime_kq_base, trev_temp, trev_LG_kq, itime_LG_kq, isym_LG_kq
+ integer :: isym_kq_ref, itime_kq_ref
+ real(dp) :: symrec_LG(3,3), symrec_kq_left(3,3), symrec_temp(3,3)
+ integer :: indkk_kq(6, 1)
+ real(dp) :: kk_base(3)
  real(dp) :: weight_qq, phase, tnon(3), q_base(3)
  integer :: idir, ipert, idir_eq, ipert_eq, mu, mu_eq, iq_base_glob, ii
  real(dp) :: symrec_inv(3,3), symrec_eq(3,3), l0(3)
@@ -6764,7 +6772,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  integer :: brange_k_spin(2, dtset%nsppol)
  integer,allocatable :: my_kqmap(:,:), state_kq(:,:) ! kmesh_map(:,:),
  real(dp),contiguous,pointer :: gkq_rot_ptr(:,:,:,:), gkq_base_ptr(:,:,:,:)
- complex(dp),allocatable :: dmat_k(:,:), dmat_star_kq(:,:)
+ complex(dp),allocatable :: dmat_k(:,:), dmat_star_kq(:,:), dmat_temp(:,:)
  complex(dp),target,allocatable :: gkq_rot(:,:,:), gkq_base(:,:,:)
 !----------------------------------------------------------------------
 
@@ -6825,6 +6833,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
    ABI_MALLOC(dmat_k, (nb, nb))
    ABI_MALLOC(dmat_star_kq, (nb, nb))
+   ABI_MALLOC(dmat_temp, (nb, nb))
    ABI_MALLOC(gkq_base, (nb, nb, gqk%natom3))
    ABI_MALLOC(gkq_rot, (nb, nb, gqk%natom3))
 
@@ -6833,8 +6842,8 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
    ! Read table with status of the (k, q) entry.
    ABI_MALLOC(state_kq, (gqk%glob_nk, gqk%glob_nq))
-   !ncerr = nf90_get_var(ncid, nctk_idname(ncid, "gstore_glob_state_kqs"), state_kq, start=[1,1,spin])
-   !NCF_CHECK(ncerr)
+   ncerr = nf90_get_var(ncid, nctk_idname(ncid, "gstore_glob_state_kqs"), state_kq, start=[1,1,spin])
+   NCF_CHECK(ncerr)
 
    ! Loop over q-points in the BZ.
    do my_iq=1, gqk%my_nq
@@ -6879,25 +6888,65 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        tsign_kq = 1; if (trev_kq == 1) tsign_kq = -1
        itime_kq = trev_kq + 1
 
-       ! Get D matrices at k and k+q from the matrices computed in the IBZ.
-       ! Note that the operation S is in the little group of k hence...
-       !
-       dmat_k = dmats%for_spin(spin)%value(:,:, isym_k, itime_k, ik_ibz)
+       ! Extract reference gauge for k from the compute step
+       ik_ibz_ref = gqk%my_k2ibz(1, my_ik); isym_k_ref = gqk%my_k2ibz(2, my_ik)
+       trev_k_ref = gqk%my_k2ibz(6, my_ik); g0_k_ref = gqk%my_k2ibz(3:5, my_ik)
+       itime_k_ref = trev_k_ref + 1
+
+       ik_ibz = -1
+       search_source: do trev_tot = 0, cryst%timrev
+         tsign_tot = 1; if (trev_tot == 1) tsign_tot = -1
+         do isym_tot = 1, cryst%nsym
+           ! We want S_tot * (k_base, q_base) = (k_glob, q_glob).
+           ! So (k_base, q_base) = S_tot^-1 * (k_glob, q_glob).
+           ! S_tot^-1 = tsign_tot * transpose(symrec).
+           symrec_inv = transpose(cryst%symrec(:,:,isym_tot))
+           kk_base = tsign_tot * matmul(symrec_inv, gstore%kbz(:, ik_glob))
+           q_base  = tsign_tot * matmul(symrec_inv, gstore%qbz(:, iq_glob))
+
+           ! Find q_base in global qbz
+           iq_base_glob = -1
+           do ii = 1, gstore%nqbz
+             if (sum((modulo(q_base - gstore%qbz(:, ii) + 0.5_dp, 1.0_dp) - 0.5_dp)**2) < tol12) then
+               iq_base_glob = ii; exit
+             end if
+           end do
+           if (iq_base_glob == -1) cycle
+
+           ! Find kk_base in global kbz
+           ik_base_glob = -1
+           do ii = 1, gstore%nkbz
+             if (sum((modulo(kk_base - gstore%kbz(:, ii) + 0.5_dp, 1.0_dp) - 0.5_dp)**2) < tol12) then
+               ik_base_glob = ii; exit
+             end if
+           end do
+           if (ik_base_glob == -1) cycle
+
+           if (state_kq(ik_base_glob, iq_base_glob) == GSTORE_KQ_COMPUTED) then
+             ik_ibz = -1
+             do ii = 1, gstore%nkibz
+               if (sum((modulo(kk_base - ebands%kptns(:, ii) + 0.5_dp, 1.0_dp) - 0.5_dp)**2) < tol12) then
+                 ik_ibz = ii; exit
+               end if
+             end do
+             if (ik_ibz /= -1) exit search_source
+           end if
+         end do
+       end do search_source
+
+       if (ik_ibz == -1) then
+         ABI_ERROR(sjoin("no source found for ik_glob:", itoa(ik_glob), ", iq_glob:", itoa(iq_glob)))
+       end if
+
+       ! Find mapping of base k+q to the IBZ
+       if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kk_base + q_base, indkk_kq) /= 0) then
+         ABI_ERROR("Cannot map k_base+q_base to IBZ")
+       end if
+
+       ! Revert to original straightforward matrix reconstruction
+       dmat_k = dmats%for_spin(spin)%value(:,:, isym_tot, trev_tot + 1, ik_ibz)
        dmat_star_kq = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_kq, itime_kq, ikq_ibz)))
 
-       symrec_eq = cryst%symrec(:,:,isym_k)
-       symrec_inv = transpose(symrec_eq)
-       ! q_base = (S_k)^-1 q_BZ
-       q_base = tsign_k * matmul(symrec_inv, qpt)
-       ! Map q_base to global index in gstore%qbz
-       iq_base_glob = -1
-       do ii = 1, gstore%nqbz
-         if (sum((modulo(q_base - gstore%qbz(:, ii) + 0.5_dp, 1.0_dp) - 0.5_dp)**2) < tol12) then
-           iq_base_glob = ii
-           exit
-         end if
-       end do
-       if (iq_base_glob == -1) ABI_ERROR("q_base not found in BZ grid")
 
        ! Read gkq_base from disk
        call c_f_pointer(c_loc(gkq_base), gkq_base_ptr, [2, nb, nb, gqk%natom3])
@@ -6906,15 +6955,15 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
                             count=[2, nb, nb, gqk%natom3, 1, 1])
        NCF_CHECK(ncerr)
 
-       if (trev_k == 1) gkq_base = conjg(gkq_base)
+       if (trev_tot == 1) gkq_base = conjg(gkq_base)
 
        ! Perform symmetrization.
        gkq_rot = zero
        do mu=1,gqk%natom3
          idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
-         l0 = cryst%indsym(1:3,isym_k,ipert)
-         tnon = l0 + matmul(symrec_inv, cryst%tnons(:,isym_k))
-         ipert_eq = cryst%indsym(4, isym_k, ipert)
+         l0 = cryst%indsym(1:3,isym_tot,ipert)
+         tnon = l0 + matmul(symrec_inv, cryst%tnons(:,isym_tot))
+         ipert_eq = cryst%indsym(4, isym_tot, ipert)
 
          ! phase = e^{-i q_base . tnon}
          phase = -two_pi * sum(q_base * tnon)
@@ -6944,11 +6993,12 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
    end associate
 
    ! Update state_kq for this spin.
-   !ncerr = nf90_put_var(ncid, vid("gstore_glob_state_kqs"), state_kq, start=[1,1,spin])
-   !NCF_CHECK(ncerr)
+   ncerr = nf90_put_var(ncid, vid("gstore_glob_state_kqs"), state_kq, start=[1,1,spin])
+   NCF_CHECK(ncerr)
 
    ABI_FREE(dmat_k)
    ABI_FREE(dmat_star_kq)
+   ABI_FREE(dmat_temp)
    ABI_FREE(gkq_base)
    ABI_FREE(gkq_rot)
    ABI_FREE(state_kq)
