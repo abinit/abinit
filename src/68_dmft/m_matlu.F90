@@ -3524,7 +3524,10 @@ end subroutine add_matlu
      tndim=2*(2*matlu(iatom)%lpawu+1)
      ABI_MALLOC(temp_mat,(tndim,tndim))
 
-     call zgemm('n','n',tndim,tndim,tndim,cone,gathermatlu(iatom)%value,tndim,muorb(iatom)%value,tndim,czero,temp_mat,tndim)
+     call abi_zgemm('n','n',tndim,tndim,tndim,cone,&
+     &    gathermatlu(iatom)%value,tndim,&
+     &    muorb(iatom)%value,tndim,czero,&
+     &    temp_mat,tndim)
 
      gathermatlu(iatom)%value=temp_mat
      ABI_FREE(temp_mat)
@@ -3779,7 +3782,10 @@ end subroutine add_matlu
      tndim=2*(2*matlu(iatom)%lpawu+1)
      ABI_MALLOC(temp_mat,(tndim,tndim))
 
-     call zgemm('n','n',tndim,tndim,tndim,cone,gathermatlu(iatom)%value,tndim,muspin(iatom)%value,tndim,czero,temp_mat,tndim)
+     call zgemm('n','n',tndim,tndim,tndim,cone,&
+     &    gathermatlu(iatom)%value,tndim,&
+     &    muspin(iatom)%value,tndim,czero,&
+     &    temp_mat,tndim)
 
      gathermatlu(iatom)%value=temp_mat
      ABI_FREE(temp_mat)
@@ -4073,7 +4079,10 @@ end subroutine add_matlu
      tndim=2*(2*matlu(iatom)%lpawu+1)
      ABI_MALLOC(temp_mat,(tndim,tndim))
 
-     call zgemm('n','n',tndim,tndim,tndim,cone,gathermatlu(iatom)%value,tndim,muzeeman(iatom)%value,tndim,czero,temp_mat,tndim)
+     call abi_zgemm('n','n',tndim,tndim,tndim,cone,&
+     &    gathermatlu(iatom)%value,tndim,&
+     &    muzeeman(iatom)%value,tndim,czero,&
+     &    temp_mat,tndim)
 
      gathermatlu(iatom)%value=temp_mat
      ABI_FREE(temp_mat)

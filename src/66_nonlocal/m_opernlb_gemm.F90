@@ -69,7 +69,7 @@ subroutine opernlb_gemm_distributed(rank,nprocs,npw,ndat,&
  real(dp), intent(out), target    :: vectout(cplex,npw,ndat)
 
  !Local variables
- integer :: iblock,ibeg,iend,req(2),ierr,nprojs_cur_blk,rank_prev,rank_next
+ integer :: iblock,ibeg,req(2),ierr,nprojs_cur_blk,rank_prev,rank_next
  complex(dp) :: beta
  real(dp), ABI_CONTIGUOUS pointer :: recv_buf(:,:,:), work_buf(:,:,:)
  real(dp), allocatable, target  :: projs_recv(:,:,:)

@@ -1860,7 +1860,7 @@ contains
     logical,optional, intent(in)              :: timing
 
     real(dp)      :: alpha_
-    complex(dp)   :: calpha,calpha_
+    complex(dp)   :: calpha
     complex(dp)   :: cbeta
     character(kind=1) :: transa_,transb_
     integer           :: K

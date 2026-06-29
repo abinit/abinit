@@ -149,11 +149,13 @@ module m_abi_linalg
 
  interface abi_xgemm
     module procedure abi_zgemm_2d
+    module procedure abi_zgemm_3d
     module procedure abi_zgemm_2dd
     module procedure abi_d2zgemm
+    module procedure abi_d2zgemm_2d
     module procedure abi_d2zgemm_313
     module procedure abi_d2zgemm_331
-    module procedure abi_d2zgemm_3d
+    module procedure abi_d2zgemm_333
  end interface abi_xgemm
 
  interface abi_gpu_xgemm
@@ -264,6 +266,7 @@ module m_abi_linalg
  public :: abi_zgemm_2r
  interface abi_zgemm  ! No x_cplx stuff here!
     module procedure abi_zgemm_2d
+    module procedure abi_zgemm_3d
     module procedure abi_zgemm_2r
  end interface abi_zgemm
 

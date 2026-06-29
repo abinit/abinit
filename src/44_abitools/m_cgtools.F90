@@ -781,17 +781,13 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta, gpu_op
 
  ! ZGEMM(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
 
- if(my_gpu_option==ABI_GPU_DISABLED) then
-   call ZGEMM(trans, "N", mm, nn, kk, my_alpha, cgmat, lda, vec, ldb, my_beta, matvec, ldc)
- else if(my_gpu_option==ABI_GPU_OPENMP) then
-   my_calpha = DCMPLX(my_alpha(1), my_alpha(2))
-   my_cbeta  = DCMPLX(my_beta(1), my_beta(2))
-#ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET DATA USE_DEVICE_ADDR(cgmat,vec(1:2,1:nn*kk),matvec(1:2,1:mm*nn))
-   call abi_gpu_xgemm(2, trans, "N", mm, nn, kk, my_calpha, c_loc(cgmat), lda, c_loc(vec), ldb, my_cbeta, c_loc(matvec), ldc)
-   !$OMP END TARGET DATA
-#endif
- end if
+ my_calpha = DCMPLX(my_alpha(1), my_alpha(2))
+ my_cbeta  = DCMPLX(my_beta(1), my_beta(2))
+ call abi_xgemm(trans, "N", mm, nn, kk, my_calpha,&
+ &              cgmat, lda, &
+ &              vec, ldb, my_cbeta, &
+ &              matvec, ldc, &
+ &              x_cplx=2, gpu_option=my_gpu_option)
 
 end subroutine cg_zgemv
 !!***

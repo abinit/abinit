@@ -1962,18 +1962,18 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat,gpu_option)
      ABI_MALLOC(mat,(2,nband_k,ndat))
      !$OMP TARGET ENTER DATA MAP(alloc:mat)
      !$OMP TARGET UPDATE TO(xi)
-     !$OMP TARGET DATA USE_DEVICE_ADDR(xi,cwavef,mat,ghc1)
-     call abi_gpu_xgemm(2, 'C', 'N', nband_k, ndat, npw, cone, &
-                       c_loc(xi), npw, &
-                       c_loc(cwavef), npw, &
-                       czero, &
-                       c_loc(mat), nband_k)
-     call abi_gpu_xgemm(2, 'N', 'N', npw, ndat, nband_k, cminusone, &
-                       c_loc(xi), npw, &
-                       c_loc(mat), nband_k, &
-                       czero, &
-                       c_loc(ghc1), npw)
-     !$OMP END TARGET DATA
+     call abi_zgemm_2r('C', 'N', nband_k, ndat, npw, cone, &
+     &              xi, npw, &
+     &              cwavef, npw, &
+     &              czero, &
+     &              mat, nband_k, &
+     &              gpu_option=gpu_option_)
+     call abi_zgemm_2r('N', 'N', npw, ndat, nband_k, cminusone, &
+     &              xi, npw, &
+     &              mat, nband_k, &
+     &              czero, &
+     &              ghc1, npw, &
+     &              gpu_option=gpu_option_)
 
      !$OMP TARGET EXIT DATA MAP(delete:mat)
      ABI_FREE(mat)
