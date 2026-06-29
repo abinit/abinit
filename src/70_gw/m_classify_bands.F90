@@ -25,15 +25,14 @@ module m_classify_bands
  use defs_basis
  use m_abicore
  use m_xmpi
- !use m_esymm
  use m_errors
 
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat, yesno
  use defs_datatypes,   only : pseudopotential_type
  use m_dtset,          only : dataset_type
  use m_dtfil,          only : datafiles_type
- use m_io_tools,       only : iomode_from_fname !, file_exists
- use m_time,           only : cwtime, cwtime_report !, sec2str
+ use m_io_tools,       only : iomode_from_fname
+ use m_time,           only : cwtime, cwtime_report
  use m_numeric_tools,  only : get_trace, print_arr
  use m_matrix,         only : is_unitary, is_identity, mati3inv
  use m_hdr,            only : hdr_type
@@ -79,19 +78,19 @@ type, public :: dmats_t
  type(ebands_t) :: ks_ebands
  ! KS bands.
 
+ type(crystal_t),pointer :: cryst => null()
+
  integer,allocatable :: brange_spin(:,:)
  ! (2, nsppol)
  ! start and end band index for each spin
 
- type(crystal_t),pointer :: cryst => null()
-
  type(coeff5c_type), allocatable :: for_spin(:)
 
  contains
-   procedure :: init => dmats_init    ! Initialize object
-   procedure :: free => dmats_free    ! Free memory.
-   procedure :: check => dmats_check  ! Check Dmats
-   procedure :: classify => dmats_classify ! Classify irreps
+   procedure :: init => dmats_init           ! Initialize object
+   procedure :: free => dmats_free           ! Free memory.
+   procedure :: check => dmats_check         ! Check Dmats
+   procedure :: classify => dmats_classify   ! Classify irreps
 end type dmats_t
 !!***
 

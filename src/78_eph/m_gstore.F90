@@ -3696,7 +3696,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
  integer :: ii, iq_ibz, isym_q, trev_q
  real(dp) :: cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all ! cpu, wall, gflops,
  real(dp) :: ecut, weight_q, weight_k ! eshift,
- logical :: gen_eigenpb, isirr_k, isirr_kq, isirr_q, print_time, need_ftinterp, qq_is_gamma
+ logical :: gen_eigenpb, isirr_k, isirr_kq, isirr_q, print_time, need_ftinterp, qq_is_gamma, symmetrize
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_ham_kq
  type(rf_hamiltonian_type) :: rf_ham_kq
@@ -3756,6 +3756,13 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
  call wrtout(std_out, sjoin(" Begin computation of e-ph matrix elements with qbuf_size:", itoa(qbuf_size)), pre_newlines=1)
  call pstat_proc%print(_PSTAT_ARGS_)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
+
+ ! If True, only k-points in the IBZ and q-points in the IBZ_k are computed.
+ ! Matrix elements in full BZs are then reconstructed by symmetry at the end of the run by calling
+ ! gstore_symmetrize.
+ symmetrize = (dtset%gstore_kzone == "bz" .and. dtset%gstore_qzone == "bz" .and. dtset%gstore_use_lgk /= 0 &
+     .and. dtset%userie == 789)
+ if (symmetrize) call wrtout(units, " Computing g(k, q) with k in the IBZ and q in the IBZ_k + final reconstruction")
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
@@ -4061,19 +4068,21 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
        ! and we don't want random numbers written to disk.
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
 
+       if (symmetrize .and. isirr_k) then
+         state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING; cycle
+       end if
+
        if (dtset%gstore_use_lgk /= 0) then
          ii = lg_myk(my_ik)%findq_ibzk(qq_bz)
          if (ii == -1) then
-           state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING
-           cycle
+           state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING; cycle
          end if
        end if
 
        if (dtset%gstore_use_lgq /= 0) then
          ii = lg_myq%findq_ibzk(kk_bz)
          if (ii == -1) then
-           state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING
-           cycle
+           state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING; cycle
          end if
        end if
 
@@ -4094,14 +4103,15 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
 
        ! If we have used the KERANGE trick, we may have k or k+q points with just one G component set to zero
        ! so we skip this transition immediately. This should happen only if fsewin > sigma_erange.
-       if (wfd%npwarr(ik_ibz) == 1 .or. wfd%npwarr(ikq_ibz) == 1) cycle
+       if (wfd%npwarr(ik_ibz) == 1 .or. wfd%npwarr(ikq_ibz) == 1) then
+         state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING; cycle
+       end if
 
        if (gstore%kfilter == "fs_tetra") then
          ! Check tetra delta(e_{k+q}) and cycle if all the weights at k+q are zero.
          if (all(abs(gstore%delta_ef_kibz_spin(:, ikq_ibz, spin)) == zero)) then
            nskip_tetra_kq = nskip_tetra_kq + 1
-           state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING
-           cycle
+           state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING; cycle
          end if
        end if
 
@@ -4293,8 +4303,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
  ABI_FREE(cwaveprj0)
 
  ! Reconstruct g(k,q) matrix elements in the full BZ by symmetry.
- if (dtset%gstore_kzone == "bz" .and. dtset%gstore_qzone == "bz" .and. dtset%gstore_use_lgk /= 0 &
-     .and. dtset%userie == 789) then
+ if (symmetrize) then
    call gstore_symmetrize(gstore%path, wfk0_path, ngfft, dtset, dtfil, cryst, psps, pawtab, ebands, ifc, comm)
  end if
 

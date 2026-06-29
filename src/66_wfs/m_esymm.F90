@@ -192,11 +192,12 @@ module m_esymm
   !   or from the external database downloaded from the Bilbao web site.
 
  contains
-   procedure :: init => esymm_init         ! Initialize the object
-   procedure :: print => esymm_print       ! Print info
-   procedure :: finalize => esymm_finalize ! Finalize the object
-   procedure :: failed => esymm_failed     ! True if symmetry analysis failed.
-   procedure :: symmetrize_mels => esymm_symmetrize_mels      ! Symmetrize given matrix elements
+   procedure :: init => esymm_init                         ! Initialize the object
+   procedure :: print => esymm_print                       ! Print info
+   procedure :: finalize => esymm_finalize                 ! Finalize the object
+   procedure :: failed => esymm_failed                     ! True if symmetry analysis failed.
+   procedure :: symmetrize_mels => esymm_symmetrize_mels   ! Symmetrize given matrix elements
+   procedure :: free => esymm_free_0D                      ! Free memory
 
  end type esymm_t
 
@@ -234,10 +235,6 @@ contains
 !!  nbnds=Number of bands for this k-point.
 !!  ene_k(nbnds)=energies for this k-point. ene_k(1) corresponds to band first_ib.
 !!  EDIFF_TOL=tolerance below which two states are considered to belong to the same irreducible representation
-!!
-!! OUTPUT
-!!  esymm<esymm_t>= Initialized data type gathering information of the small group
-!!     of the k-point as well as the irreducible representations.
 !!
 !! NOTES
 !!   The present implementation does NOT work at zone border if the little group of
@@ -835,7 +832,6 @@ subroutine esymm_print(esymm, units, prtvol)
  integer,intent(in) :: units(:), prtvol
 
 !Local variables-------------------------------
-!scalars
  integer :: icl, idg, irr_idx, nstates, nunknown, istart, istop, ii
  character(len=1000) :: fmt, msg, msg0
 ! *********************************************************************
