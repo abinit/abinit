@@ -325,10 +325,13 @@ module m_abi_linalg
     module procedure abi_zhpgv
  end interface
  !----------------------------------------------------------------------
+ public :: abi_xpotrf
  interface abi_xpotrf
-    !module procedure abi_dpotrf
+    module procedure abi_dpotrf
     module procedure abi_d2zpotrf
+    module procedure abi_d2zpotrf_3d
     module procedure abi_zpotrf_2d
+    module procedure abi_zpotrf
  end interface
  !----------------------------------------------------------------------
  public :: abi_xorthonormalize

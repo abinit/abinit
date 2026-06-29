@@ -2154,56 +2154,24 @@ contains
     integer        , intent(  out) :: info
     double precision :: tsec(2)
 
-#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-    complex(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
-    real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
-#endif
-
     call timab(tim_potrf,1,tsec)
 
     if ( xgBlock%rows /= xgBlock%cols ) then
       ABI_ERROR("Matrix should be a square matrixx")
     endif
 
-    if (xgBlock%gpu_option==ABI_GPU_KOKKOS .or. xgBlock%gpu_option==ABI_GPU_OPENMP) then
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-      select case(xgBlock%space)
-      case (SPACE_R)
-        call abi_gpu_xpotrf(1,uplo,xgBlock%rows,xgBlock%vecR,xgBlock%LDim,info)
-      case (SPACE_C)
-        call abi_gpu_xpotrf(2,uplo,xgBlock%rows,xgBlock%vecC,xgBlock%LDim,info)
-      case (SPACE_CR)
-        ABI_ERROR('Not implemented for SPACE_CR')
-      end select
-#elif defined HAVE_OPENMP_OFFLOAD
-!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-      select case(xgBlock%space)
-      case (SPACE_R)
-        xgBlock__vecR => xgBlock%vecR
-        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock__vecR)
-        call abi_gpu_xpotrf(1,uplo,xgBlock%rows,c_loc(xgBlock__vecR),xgBlock%LDim,info)
-        !$OMP END TARGET DATA
-      case (SPACE_C)
-        xgBlock__vecC => xgBlock%vecC
-        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock__vecC)
-        call abi_gpu_xpotrf(2,uplo,xgBlock%rows,c_loc(xgBlock__vecC),xgBlock%LDim,info)
-        !$OMP END TARGET DATA
-      case (SPACE_CR)
-        ABI_ERROR('Not implemented for SPACE_CR')
-      end select
-#endif
-      if(xgBlock%gpu_option==ABI_GPU_KOKKOS) call gpu_device_synchronize()
+    select case(xgBlock%space)
+    case (SPACE_R)
+      call abi_xpotrf(uplo,xgBlock%rows,xgBlock%vecR,xgBlock%LDim,info, &
+        x_cplx=1,gpu_option=xgBlock%gpu_option)
+    case (SPACE_C)
+      call abi_xpotrf(uplo,xgBlock%rows,xgBlock%vecC,xgBlock%LDim,info, &
+        gpu_option=xgBlock%gpu_option)
+    case (SPACE_CR)
+      ABI_ERROR('Not implemented for SPACE_CR')
+    end select
 
-    else
-      select case(xgBlock%space)
-      case (SPACE_R)
-        call dpotrf(uplo,xgBlock%rows,xgBlock%vecR,xgBlock%LDim,info)
-      case (SPACE_C)
-        call zpotrf(uplo,xgBlock%rows,xgBlock%vecC,xgBlock%LDim,info)
-      case (SPACE_CR)
-        ABI_ERROR('Not implemented for SPACE_CR')
-      end select
-    end if
+    if(xgBlock%gpu_option==ABI_GPU_KOKKOS) call gpu_device_synchronize()
 
     call timab(tim_potrf,2,tsec)
 

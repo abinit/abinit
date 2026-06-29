@@ -1758,7 +1758,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
      mkl=-mkl
 
 ! Cholesky factorisation of -mkl=Lx(trans(L)*. On output mkl=L
-     call zpotrf("L",nband_k,mkl,nband_k,info)
+     call abi_xpotrf("L",nband_k,mkl,nband_k,info,x_cplx=2)
 
 ! calculate trans(L-1)
      ABI_MALLOC(bb,(2,nband_k,nband_k))
