@@ -34,7 +34,7 @@
 !!
 !! SOURCE
 
-subroutine abi_ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
+subroutine abi_ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb,gpu_option)
 
 !Arguments-------------------------------------
  character(len=1), intent(in) :: side
@@ -45,8 +45,11 @@ subroutine abi_ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
  complex(dp), intent(in) :: alpha
  complex(dp),target,intent(in) :: a(lda,*)
  complex(dp),target,intent(inout) :: b(ldb,*)
+ !Optionals -----------------------------------
+ integer, intent(in), optional :: gpu_option
 
 !Local variables-------------------------------
+ integer :: gpu_option_
 #ifdef HAVE_LINALG_PLASMA
  integer :: info
 #endif
@@ -56,7 +59,18 @@ subroutine abi_ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
  call timab(TIMAB_XTRSM,1,tsec)
 #endif
 
- if (ABI_LINALG_PLASMA_ISON) then
+ gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
+
+ if(gpu_option_/=ABI_GPU_DISABLED) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET DATA USE_DEVICE_ADDR(a,b) IF(gpu_option_==ABI_GPU_OPENMP)
+#endif
+   call abi_gpu_xtrsm_cptr(2,side,uplo,transa,diag,m,n,alpha,&
+       c_loc(a),lda,c_loc(b),ldb)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP END TARGET DATA
+#endif
+ else if (ABI_LINALG_PLASMA_ISON) then
 #ifdef HAVE_LINALG_PLASMA
    info = PLASMA_ztrsm_c(side_plasma(side),uplo_plasma(uplo),trans_plasma(transa),diag_plasma(diag),&
 &     m,n,alpha,c_loc(a),lda,c_loc(b),ldb)
@@ -85,7 +99,7 @@ end subroutine abi_ztrsm
 !! SOURCE
 
   subroutine abi_dtrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb,&
-&       x_cplx)
+&       x_cplx,gpu_option)
 
  !Arguments-------------------------------------
  character(len=1), intent(in) :: side,uplo,transa,diag
@@ -93,11 +107,12 @@ end subroutine abi_ztrsm
  real(dp), intent(in) :: alpha
  real(dp),target, intent(in) :: a(lda,*)       ! FIXME should be lda * x_cplx
  real(dp),target, intent(inout) :: b(ldb,*)
- !Only for lobpcgwf
+ !Optionals -----------------------------------
  integer, intent(in), optional :: x_cplx
+ integer, intent(in), optional :: gpu_option
 
  !Local variables-------------------------------
- integer  :: cplx_
+ integer  :: cplx_, gpu_option_
 #ifdef HAVE_LINALG_PLASMA
  integer :: info
 #endif
@@ -108,8 +123,18 @@ end subroutine abi_ztrsm
 #endif
 
  cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
+ gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
 
- if (ABI_LINALG_PLASMA_ISON) then
+ if(gpu_option_/=ABI_GPU_DISABLED) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET DATA USE_DEVICE_ADDR(a,b) IF(gpu_option_==ABI_GPU_OPENMP)
+#endif
+   call abi_gpu_xtrsm_cptr(cplx_,side,uplo,transa,diag,m,n,cmplx(alpha,0.d0,dp),&
+       c_loc(a),lda,c_loc(b),ldb)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP END TARGET DATA
+#endif
+ else if (ABI_LINALG_PLASMA_ISON) then
 #ifdef HAVE_LINALG_PLASMA
    if(cplx_ == 2) then
       info = PLASMA_ztrsm_c(side_plasma(side),uplo_plasma(uplo),trans_plasma(TRANSA),diag_plasma(diag),&
@@ -147,7 +172,7 @@ end subroutine abi_dtrsm
 !! SOURCE
 
  subroutine abi_d2ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb,&
-&  x_cplx)
+&  x_cplx,gpu_option)
 
 !Arguments-------------------------------------
  character(len=1), intent(in) :: side,uplo,transa,diag
@@ -155,11 +180,12 @@ end subroutine abi_dtrsm
  complex(dp), intent(in) :: alpha
  real(dp),target, intent(in) :: a(lda,*)           ! FIXME should be lda * x_cplx
  real(dp),target, intent(inout) :: b(ldb,*)
- !Only for lobpcgwf
+ !Optionals -----------------------------------
  integer, intent(in), optional :: x_cplx
+ integer, intent(in), optional :: gpu_option
 
 !Local variables-------------------------------
- integer  :: cplx_
+ integer  :: cplx_, gpu_option_
 #ifdef HAVE_LINALG_PLASMA
  integer :: info
 #endif
@@ -170,8 +196,18 @@ end subroutine abi_dtrsm
 #endif
 
  cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
+ gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
 
- if (ABI_LINALG_PLASMA_ISON) then
+ if(gpu_option_/=ABI_GPU_DISABLED) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET DATA USE_DEVICE_ADDR(a,b) IF(gpu_option_==ABI_GPU_OPENMP)
+#endif
+   call abi_gpu_xtrsm_cptr(cplx_,side,uplo,transa,diag,m,n,alpha,&
+       c_loc(a),lda,c_loc(b),ldb)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP END TARGET DATA
+#endif
+ else if (ABI_LINALG_PLASMA_ISON) then
 #ifdef HAVE_LINALG_PLASMA
    if(cplx_ == 2) then
       info = PLASMA_ztrsm_c(side_plasma(side),uplo_plasma(uplo),trans_plasma(TRANSA),diag_plasma(diag),&
@@ -209,7 +245,7 @@ end subroutine abi_d2ztrsm
 !! SOURCE
 !!
 
-  subroutine abi_d2ztrsm_3d(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
+  subroutine abi_d2ztrsm_3d(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb,gpu_option)
 
 !Arguments-------------------------------------
  character(len=1), intent(in) :: side,uplo,transa,diag
@@ -217,8 +253,11 @@ end subroutine abi_d2ztrsm
  complex(dp), intent(in) :: alpha
  real(dp), target,intent(in) :: a(2,lda,*)
  real(dp), target,intent(inout) :: b(2,ldb,*)
+ !Optionals -----------------------------------
+ integer, intent(in), optional :: gpu_option
 
 !Local variables-------------------------------
+ integer :: gpu_option_
 #ifdef HAVE_LINALG_PLASMA
  integer :: info
 #endif
@@ -228,7 +267,18 @@ end subroutine abi_d2ztrsm
  call timab(TIMAB_XTRSM,1,tsec)
 #endif
 
- if (ABI_LINALG_PLASMA_ISON) then
+ gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
+
+ if(gpu_option_/=ABI_GPU_DISABLED) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET DATA USE_DEVICE_ADDR(a,b) IF(gpu_option_==ABI_GPU_OPENMP)
+#endif
+   call abi_gpu_xtrsm_cptr(2,side,uplo,transa,diag,m,n,alpha,&
+       c_loc(a),lda,c_loc(b),ldb)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP END TARGET DATA
+#endif
+ else if (ABI_LINALG_PLASMA_ISON) then
 #ifdef HAVE_LINALG_PLASMA
    info = PLASMA_ztrsm_c(side_plasma(side),uplo_plasma(uplo),trans_plasma(TRANSA),diag_plasma(diag),&
 &    m,n,alpha,c_loc(a),lda,c_loc(b),ldb)
