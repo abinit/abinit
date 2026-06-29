@@ -6764,7 +6764,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  integer :: brange_k_spin(2, dtset%nsppol)
  integer,allocatable :: my_kqmap(:,:), state_kq(:,:) ! kmesh_map(:,:),
  real(dp),contiguous,pointer :: gkq_rot_ptr(:,:,:,:), gkq_base_ptr(:,:,:,:)
- complex(dp),allocatable :: dmat_k(:,:), dmat_kq(:,:)
+ complex(dp),allocatable :: dmat_k(:,:), dmat_star_kq(:,:)
  complex(dp),target,allocatable :: gkq_rot(:,:,:), gkq_base(:,:,:)
 !----------------------------------------------------------------------
 
@@ -6779,6 +6779,9 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
  ! Compute the mixing matrices D^{k}(S) from the wavefunctions stored in wfd_t.
  call dmats%init(wfk_path, dtset, dtfil, cryst, brange_k_spin, ngfft, pawtab, psps, comm)
+
+ ! Only master processor performs the symmetrization of the e-ph matrix elements.
+ ! Performance is not crucial and the algorithm is IO-bound.
  if (my_rank /= 0) goto 100
 
  call dmats%check([std_out], dtset%prtvol)
@@ -6821,7 +6824,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
    nb = gqk%nb_k
 
    ABI_MALLOC(dmat_k, (nb, nb))
-   ABI_MALLOC(dmat_kq, (nb, nb))
+   ABI_MALLOC(dmat_star_kq, (nb, nb))
    ABI_MALLOC(gkq_base, (nb, nb, gqk%natom3))
    ABI_MALLOC(gkq_rot, (nb, nb, gqk%natom3))
 
@@ -6880,7 +6883,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        ! Note that the operation S is in the little group of k hence...
        !
        dmat_k = dmats%for_spin(spin)%value(:,:, isym_k, itime_k, ik_ibz)
-       dmat_kq = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_kq, itime_kq, ikq_ibz)))
+       dmat_star_kq = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_kq, itime_kq, ikq_ibz)))
 
        symrec_eq = cryst%symrec(:,:,isym_k)
        symrec_inv = transpose(symrec_eq)
@@ -6922,7 +6925,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
            mu_eq = idir_eq + (ipert_eq - 1) * 3
            ! accumulate the rotated atomic potential matrix
            gkq_rot(:,:,mu) = gkq_rot(:,:,mu) + real(symrec_eq(idir, idir_eq), dp) * cphase * &
-                             matmul(matmul(dmat_kq, gkq_base(:,:,mu_eq)), dmat_k)
+                             matmul(matmul(dmat_star_kq, gkq_base(:,:,mu_eq)), dmat_k)
          end do
        end do
 
@@ -6945,7 +6948,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
    !NCF_CHECK(ncerr)
 
    ABI_FREE(dmat_k)
-   ABI_FREE(dmat_kq)
+   ABI_FREE(dmat_star_kq)
    ABI_FREE(gkq_base)
    ABI_FREE(gkq_rot)
    ABI_FREE(state_kq)
