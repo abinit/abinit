@@ -304,11 +304,23 @@ module m_abi_linalg
     module procedure abi_zheev
  end interface
  !----------------------------------------------------------------------
+ public :: abi_xheevd
+ interface abi_xheevd
+    module procedure abi_d2zheevd
+    module procedure abi_zheevd_2d
+ end interface
+ !----------------------------------------------------------------------
  public :: abi_xhegv
  interface abi_xhegv
     module procedure abi_dhegv
     module procedure abi_chegv
     module procedure abi_zhegv
+ end interface
+ !----------------------------------------------------------------------
+ public :: abi_xhegvd
+ interface abi_xhegvd
+    module procedure abi_d2zhegvd
+    module procedure abi_zhegvd_2d
  end interface
  !----------------------------------------------------------------------
  public :: abi_xhpev

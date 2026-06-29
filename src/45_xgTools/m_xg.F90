@@ -2251,11 +2251,6 @@ contains
     integer         , intent(  out) :: info
     double precision :: tsec(2)
 
-#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-    complex(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:)
-    real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockW__vecR(:,:)
-#endif
-
     call timab(tim_heevd,1,tsec)
 
     call xgBlock_check_gpu_option(xgBlockA,xgBlockW)
@@ -2265,89 +2260,24 @@ contains
     end if
 
     if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       select case(xgBlockA%space)
 
       case (SPACE_R)
-        call abi_gpu_xheevd(1,jobz,uplo,xgBlockA%cols, &
-            xgBlockA%vecR,xgBlockA%LDim, &
-            xgBlockW%vecR,info)
+        call abi_xheevd(jobz, uplo, xgBlockA%cols, &
+            xgBlockA%vecR, xgBlockA%LDim, &
+            xgBlockW%vecR, info, &
+            x_cplx=1, gpu_option=xgBlockA%gpu_option)
 
       case (SPACE_C)
-        call abi_gpu_xheevd(2,jobz,uplo,xgBlockA%cols, &
-            xgBlockA%vecC,xgBlockA%LDim, &
-            xgBlockW%vecR,info)
+        call abi_xheevd(jobz, uplo, xgBlockA%cols, &
+            xgBlockA%vecC, xgBlockA%LDim, &
+            xgBlockW%vecR, info, &
+            gpu_option=xgBlockA%gpu_option)
 
       case (SPACE_CR)
         ABI_ERROR('Not implemented for SPACE_CR')
 
       end select
-#elif defined HAVE_OPENMP_OFFLOAD
-!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-      select case(xgBlockA%space)
-
-      case (SPACE_R)
-        xgBlockA__vecR => xgBlockA%vecR
-        xgBlockW__vecR => xgBlockW%vecR
-        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockW__vecR)
-        call abi_gpu_xheevd(1,jobz,uplo,xgBlockA%cols, &
-            c_loc(xgBlockA__vecR),xgBlockA%LDim, &
-            c_loc(xgBlockW__vecR),info)
-        !$OMP END TARGET DATA
-        !call checkResize(iwork,liwork,5*xgBlockA%rows+3)
-        !call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+6*xgBlockA%rows+1)
-        !!$OMP TARGET UPDATE FROM(xgBlockA__vecR)
-        !call dsyevd(jobz,uplo,xgBlockA%cols, &
-        !  xgBlockA%vecR,xgBlockA%LDim, &
-        !  xgBlockW%vecR, rwork, lrwork, &
-        !  iwork, liwork,info)
-        !!$OMP TARGET UPDATE TO(xgBlockA__vecR)
-        !!$OMP TARGET UPDATE TO(xgBlockW__vecR)
-        !if ( rwork(1) > lrwork ) then
-        !  !write(std_out,*) "Allocate work from", lrwork, "to", int(rwork(1))
-        !  call checkResize(rwork,lrwork,int(rwork(1)))
-        !end if
-        !if ( iwork(1) > liwork ) then
-        !  !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
-        !  call checkResize(iwork,liwork,int(iwork(1)))
-        !end if
-
-      case (SPACE_C)
-        xgBlockA__vecC => xgBlockA%vecC
-        xgBlockW__vecR => xgBlockW%vecR
-        !!$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecC,xgBlockW__vecR)
-        !call abi_gpu_xheevd(2,jobz,uplo,xgBlockA%cols, &
-        !    c_loc(xgBlockA__vecC),xgBlockA%LDim, &
-        !    c_loc(xgBlockW__vecR),info)
-        !!$OMP END TARGET DATA
-        call checkResize(iwork,liwork,5*xgBlockA%rows+3)
-        call checkResize(cwork,lcwork,xgBlockA%rows*xgBlockA%rows+2*xgBlockA%rows)
-        call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+5*xgBlockA%rows+1)
-        !$OMP TARGET UPDATE FROM(xgBlockA__vecC)
-        call zheevd(jobz,uplo,xgBlockA%cols, &
-          xgBlockA%vecC,xgBlockA%LDim, &
-        xgBlockW%vecR, &
-        cwork, lcwork, rwork, lrwork, iwork, liwork, info)
-        !$OMP TARGET UPDATE TO(xgBlockA__vecC)
-        !$OMP TARGET UPDATE TO(xgBlockW__vecR)
-        if ( int(cwork(1)) > lcwork ) then
-          !write(std_out,*) "Allocate work from", int(lcwork), "to", int(cwork(1))
-          call checkResize(cwork,lcwork,int(cwork(1)))
-        end if
-        if ( rwork(1) > lrwork ) then
-          !write(std_out,*) "Allocate work from", lrwork, "to", int(rwork(1))
-          call checkResize(rwork,lrwork,int(rwork(1)))
-        end if
-        if ( iwork(1) > liwork ) then
-          !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
-          call checkResize(iwork,liwork,int(iwork(1)))
-        end if
-
-      case (SPACE_CR)
-        ABI_ERROR('Not implemented for SPACE_CR')
-
-      end select
-#endif
 
       if(xgBlockA%gpu_option==ABI_GPU_KOKKOS) call gpu_device_synchronize()
 
@@ -2395,6 +2325,7 @@ contains
       end if
 
     end if
+
 
     call timab(tim_heevd,2,tsec)
 
@@ -2696,10 +2627,6 @@ contains
 
     double precision :: tsec(2)
 
-#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-    complex(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),xgBlockW__vecC(:,:)
-    real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),xgBlockW__vecR(:,:)
-#endif
 
     call timab(tim_hegvd,1,tsec)
 
@@ -2718,97 +2645,18 @@ contains
       select case(xgBlockA%space)
 
       case (SPACE_R)
-
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-        call abi_gpu_xhegvd(1, itype, jobz, uplo, &
-          &             xgBlockA%rows, &
-          &             xgBlockA%vecR, xgBlockA%ldim, &
-          &             xgBlockB%vecR, xgBlockB%ldim, &
-          &             xgBlockW%vecR, &
-          &             info)
-#elif defined HAVE_OPENMP_OFFLOAD
-!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-        xgBlockA__vecR => xgBlockA%vecR
-        xgBlockB__vecR => xgBlockB%vecR
-        xgBlockW__vecR => xgBlockW%vecR
-        !!$OMP TARGET UPDATE FROM(xgBlockA__vecR)
-        !!$OMP TARGET UPDATE FROM(xgBlockB__vecR)
-        !call checkResize(iwork,liwork,5*xgBlockA%rows+3)
-        !call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+6*xgBlockA%rows+1)
-        !call dsygvd(itype, jobz, uplo, xgBlockA%rows, xgBlockA%vecR, xgBlockA%ldim, &
-        !  xgBlockB%vecR, xgBlockB%ldim, xgBlockW%vecR, rwork, lrwork, iwork, liwork, info)
-        !!$OMP TARGET UPDATE TO(xgBlockA__vecR)
-        !!$OMP TARGET UPDATE TO(xgBlockB__vecR)
-        !!$OMP TARGET UPDATE TO(xgBlockW__vecR)
-        !if ( rwork(1) > lrwork ) then
-        !  !write(std_out,*) "Allocate work from", lrwork, "to", int(rwork(1))
-        !  call checkResize(rwork,lrwork,int(rwork(1)))
-        !end if
-        !if ( iwork(1) > liwork ) then
-        !  !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
-        !  call checkResize(iwork,liwork,int(iwork(1)))
-        !end if
-        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
-        call abi_gpu_xhegvd(1, itype, jobz, uplo, &
-          &             xgBlockA%rows, &
-          &             c_loc(xgBlockA__vecR), xgBlockA%ldim, &
-          &             c_loc(xgBlockB__vecR), xgBlockB%ldim, &
-          &             c_loc(xgBlockW__vecR), &
-          &             info)
-        !$OMP END TARGET DATA
-#endif
+        call abi_xhegvd(itype, jobz, uplo, xgBlockA%rows, &
+            xgBlockA%vecR, xgBlockA%ldim, &
+            xgBlockB%vecR, xgBlockB%ldim, &
+            xgBlockW%vecR, info, &
+            x_cplx=1, gpu_option=xgBlockA%gpu_option)
 
       case (SPACE_C)
-
-        !call xgBlock_prefetch_async(xgBlockA, 0)
-        !call xgBlock_prefetch_async(xgBlockB, 0)
-        !call xgBlock_prefetch_async(xgBlockW, 0)
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-        call abi_gpu_xhegvd(2, itype, jobz, uplo, &
-          &             xgBlockA%rows, &
-          &             xgBlockA%vecC, xgBlockA%ldim, &
-          &             xgBlockB%vecC, xgBlockB%ldim, &
-          &             xgBlockW%vecR, &
-          &             info)
-#elif defined HAVE_OPENMP_OFFLOAD
-!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-        xgBlockA__vecC => xgBlockA%vecC
-        xgBlockB__vecC => xgBlockB%vecC
-        xgBlockW__vecR => xgBlockW%vecR
-        !call checkResize(iwork,liwork,5*xgBlockA%rows+3)
-        !call checkResize(cwork,lcwork,xgBlockA%rows*xgBlockA%rows+2*xgBlockA%rows)
-        !call checkResize(rwork,lrwork,2*(xgBlockA%rows*xgBlockA%rows)+5*xgBlockA%rows+1)
-
-        !!$OMP TARGET UPDATE FROM(xgBlockA__vecC)
-        !!$OMP TARGET UPDATE FROM(xgBlockB__vecC)
-        !call zhegvd(itype, jobz, uplo, xgBlockA%rows, xgBlockA%vecC, xgBlockA%ldim,&
-        !  xgBlockB%vecC, xgBlockB%ldim, xgBlockW%vecR, cwork, lcwork, &
-        !  rwork, lrwork, iwork, liwork, info)
-        !!$OMP TARGET UPDATE TO(xgBlockA__vecC)
-        !!$OMP TARGET UPDATE TO(xgBlockB__vecC)
-        !!$OMP TARGET UPDATE TO(xgBlockW__vecR)
-
-        !if ( int(cwork(1)) > lcwork ) then
-        !  !write(std_out,*) "Allocate work from", lcwork, "to", int(cwork(1))
-        !  call checkResize(cwork,lcwork,int(cwork(1)))
-        !end if
-        !if ( rwork(1) > lrwork ) then
-        !  !write(std_out,*) "Allocate work from", lrwork, "to", int(rwork(1))
-        !  call checkResize(rwork,lrwork,int(rwork(1)))
-        !end if
-        !if ( iwork(1) > liwork ) then
-        !  !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
-        !  call checkResize(iwork,liwork,int(iwork(1)))
-        !end if
-        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecC,xgBlockB__vecC,xgBlockW__vecR)
-        call abi_gpu_xhegvd(2, itype, jobz, uplo, &
-          &             xgBlockA%rows, &
-          &             c_loc(xgBlockA__vecC), xgBlockA%ldim, &
-          &             c_loc(xgBlockB__vecC), xgBlockB%ldim, &
-          &             c_loc(xgBlockW__vecR), &
-          &             info)
-        !$OMP END TARGET DATA
-#endif
+        call abi_xhegvd(itype, jobz, uplo, xgBlockA%rows, &
+            xgBlockA%vecC, xgBlockA%ldim, &
+            xgBlockB%vecC, xgBlockB%ldim, &
+            xgBlockW%vecR, info, &
+            gpu_option=xgBlockA%gpu_option)
 
       case (SPACE_CR)
         ABI_ERROR('Not implemented for SPACE_CR')

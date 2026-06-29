@@ -282,3 +282,149 @@ subroutine abi_zheev(jobz,uplo,n,a,lda,w)
 
 end subroutine abi_zheev
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abi_linalg/abi_d2zheevd
+!! NAME
+!! abi_d2zheevd
+!!
+!! FUNCTION
+!!  Generic divide-and-conquer eigensolver (HEEVD/SYEVD) with GPU support.
+!!  Accepts real storage (real or complex-as-real via x_cplx).
+!!  On GPU, calls abi_gpu_xheevd_cptr. On CPU, self-manages work arrays.
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine abi_d2zheevd(jobz, uplo, n, a, lda, w, info, x_cplx, gpu_option)
+
+!Arguments ------------------------------------
+ character(len=1), intent(in) :: jobz
+ character(len=1), intent(in) :: uplo
+ integer, intent(in) :: n, lda
+ real(dp), target, intent(inout) :: a(:,:)
+ real(dp), target, intent(out) :: w(:,:)
+ integer, intent(out) :: info
+ !Optionals -----------------------------------
+ integer, intent(in), optional :: x_cplx
+ integer, intent(in), optional :: gpu_option
+
+!Local variables-------------------------------
+ integer :: cplx_, gpu_option_
+ integer :: lwork, lrwork, liwork
+ real(dp), pointer :: rwork(:)
+ complex(dp), pointer :: cwork(:)
+ integer, pointer :: iwork(:)
+ real(dp) :: rwork_query(1)
+ complex(dp) :: cwork_query(1)
+ integer :: iwork_query(1)
+
+! *********************************************************************
+
+ cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
+ gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
+
+ if(gpu_option_/=ABI_GPU_DISABLED) then
+   if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET DATA USE_DEVICE_ADDR(a,w)
+     call abi_gpu_xheevd_cptr(cplx_, jobz, uplo, n, c_loc(a), lda, c_loc(w), info)
+     !$OMP END TARGET DATA
+#endif
+   else
+     call abi_gpu_xheevd_cptr(cplx_, jobz, uplo, n, c_loc(a), lda, c_loc(w), info)
+   end if
+ else
+   if(cplx_ == 2) then
+     lwork=-1 ; lrwork=-1 ; liwork=-1
+     call zheevd(jobz, uplo, n, a, lda, w, cwork_query, lwork, rwork_query, lrwork, iwork_query, liwork, info)
+     lwork=int(cwork_query(1)) ; lrwork=int(rwork_query(1)) ; liwork=iwork_query(1)
+     ABI_MALLOC(cwork, (lwork))
+     ABI_MALLOC(rwork, (lrwork))
+     ABI_MALLOC(iwork, (liwork))
+     call zheevd(jobz, uplo, n, a, lda, w, cwork, lwork, rwork, lrwork, iwork, liwork, info)
+     ABI_FREE(cwork) ; ABI_FREE(rwork) ; ABI_FREE(iwork)
+   else
+     lwork=-1 ; liwork=-1
+     call dsyevd(jobz, uplo, n, a, lda, w, rwork_query, lwork, iwork_query, liwork, info)
+     lwork=int(rwork_query(1)) ; liwork=iwork_query(1)
+     ABI_MALLOC(rwork, (lwork))
+     ABI_MALLOC(iwork, (liwork))
+     call dsyevd(jobz, uplo, n, a, lda, w, rwork, lwork, iwork, liwork, info)
+     ABI_FREE(rwork) ; ABI_FREE(iwork)
+   end if
+ end if
+
+ ABI_CHECK(info==0,"abi_d2zheevd returned info!=0!")
+
+end subroutine abi_d2zheevd
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abi_linalg/abi_zheevd_2d
+!! NAME
+!! abi_zheevd_2d
+!!
+!! FUNCTION
+!!  Divide-and-conquer complex Hermitian eigensolver (ZHEEVD) with GPU support.
+!!  Accepts complex(dp) 2D matrix. On GPU, calls abi_gpu_xheevd_cptr.
+!!  On CPU, self-manages work arrays.
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine abi_zheevd_2d(jobz, uplo, n, a, lda, w, info, gpu_option)
+
+!Arguments ------------------------------------
+ character(len=1), intent(in) :: jobz
+ character(len=1), intent(in) :: uplo
+ integer, intent(in) :: n, lda
+ complex(dp), target, intent(inout) :: a(:,:)
+ real(dp), target, intent(out) :: w(:,:)
+ integer, intent(out) :: info
+ !Optionals -----------------------------------
+ integer, intent(in), optional :: gpu_option
+
+!Local variables-------------------------------
+ integer :: gpu_option_
+ integer :: lwork, lrwork, liwork
+ complex(dp), pointer :: cwork(:)
+ real(dp), pointer :: rwork(:)
+ integer, pointer :: iwork(:)
+ complex(dp) :: cwork_query(1)
+ real(dp) :: rwork_query(1)
+ integer :: iwork_query(1)
+
+! *********************************************************************
+
+ gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
+
+ if(gpu_option_/=ABI_GPU_DISABLED) then
+   if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET DATA USE_DEVICE_ADDR(a,w)
+     call abi_gpu_xheevd_cptr(2, jobz, uplo, n, c_loc(a), lda, c_loc(w), info)
+     !$OMP END TARGET DATA
+#endif
+   else
+     call abi_gpu_xheevd_cptr(2, jobz, uplo, n, c_loc(a), lda, c_loc(w), info)
+   end if
+ else
+   lwork=-1 ; lrwork=-1 ; liwork=-1
+   call zheevd(jobz, uplo, n, a, lda, w, cwork_query, lwork, rwork_query, lrwork, iwork_query, liwork, info)
+   lwork=int(cwork_query(1)) ; lrwork=int(rwork_query(1)) ; liwork=iwork_query(1)
+   ABI_MALLOC(cwork, (lwork))
+   ABI_MALLOC(rwork, (lrwork))
+   ABI_MALLOC(iwork, (liwork))
+   call zheevd(jobz, uplo, n, a, lda, w, cwork, lwork, rwork, lrwork, iwork, liwork, info)
+   ABI_FREE(cwork) ; ABI_FREE(rwork) ; ABI_FREE(iwork)
+ end if
+
+ ABI_CHECK(info==0,"abi_zheevd_2d returned info!=0!")
+
+end subroutine abi_zheevd_2d
+!!***
