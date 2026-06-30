@@ -24,7 +24,8 @@
 
 module m_vtowfk
 
-  use, intrinsic :: iso_fortran_env, only: int32, int64, real32, real64
+ use, intrinsic :: iso_fortran_env, only: int32, int64, real32, real64
+ use, intrinsic :: iso_c_binding, only: c_size_t
 
  use defs_basis
  use m_abicore
@@ -68,6 +69,7 @@ module m_vtowfk
  use m_cgtk,        only : cgtk_fixphase
  use m_common,      only : get_gemm_nonlop_ompgpu_blocksize
  use m_gemm_nonlop_projectors, only : gemm_nonlop_block_size, gemm_nonlop_is_distributed
+ use m_gputk, only : gpu_copy
 #if defined HAVE_YAKL
  use gator_mod
 #endif
@@ -878,14 +880,22 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    !cwavef(:,:)=cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
    if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cg_k,cwavef) PRIVATE(iblocksize)
-     do iblocksize=1,blocksize*my_nspinor
-       !$OMP PARALLEL DO PRIVATE(ipw)
-       do ipw=1,npw_k
-         cwavef(1,ipw+(iblocksize-1)*npw_k)=cg_k(1,ipw+(iblocksize-1)*npw_k+(iblock-1)*npw_k*blocksize*my_nspinor)
-         cwavef(2,ipw+(iblocksize-1)*npw_k)=cg_k(2,ipw+(iblocksize-1)*npw_k+(iblock-1)*npw_k*blocksize*my_nspinor)
+     ! cg is already on GPU, simply copy it in cwavef
+     if(xg_diago) then
+       call gpu_copy(cwavef, &
+       &             cg_k(:,1+(iblock-1)*npw_k*my_nspinor*blocksize:iblock*npw_k*my_nspinor*blocksize),&
+       &             int(2,c_size_t)*npw_k*my_nspinor*blocksize)
+     else
+       ! cg isn't on GPU, single transfer and copy it in cwavef
+       !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cg_k,cwavef) PRIVATE(iblocksize)
+       do iblocksize=1,blocksize*my_nspinor
+         !$OMP PARALLEL DO PRIVATE(ipw)
+         do ipw=1,npw_k
+           cwavef(1,ipw+(iblocksize-1)*npw_k)=cg_k(1,ipw+(iblocksize-1)*npw_k+(iblock-1)*npw_k*blocksize*my_nspinor)
+           cwavef(2,ipw+(iblocksize-1)*npw_k)=cg_k(2,ipw+(iblocksize-1)*npw_k+(iblock-1)*npw_k*blocksize*my_nspinor)
+         end do
        end do
-     end do
+     end if
 #endif
    else
      call DCOPY(2*npw_k*my_nspinor*blocksize, &
