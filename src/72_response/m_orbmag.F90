@@ -143,7 +143,6 @@ module m_orbmag
 
       procedure :: init => orbmag_init
       procedure :: free => orbmag_free
-      procedure :: accum_rmesh_local => orbmag_rmesh_local
       procedure :: mpisum => orbmag_mpisum
       procedure :: term_scale => orbmag_term_scale
       procedure :: output => orbmag_output
@@ -197,9 +196,9 @@ module m_orbmag
   private :: orbmag_nl_k
   private :: orbmag_nl1_k
   private :: nonlocal_me
+  private :: local_me_mesh
   private :: nonlocal_me_mesh
   private :: convolution_vv2
-  private :: tatomfft
   private :: make_d
   private :: dterm_aij
   private :: dterm_qij
@@ -215,7 +214,6 @@ module m_orbmag
   private :: orbmag_init
   private :: orbmag_free
   private :: orbmag_mpisum
-  private :: orbmag_rmesh_local
   private :: orbmag_term_scale
   private :: orbmag_output
   private :: orbmag_ncwrite   ! Write orbmag_mesh contributions to netcdf file.
@@ -1286,7 +1284,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
          & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
        ormesh_fac = trnrm(nn)*prefac_m
        ABI_MALLOC(local_work,(2,n4,n5,n6*ndat))
-       call tatomfft(du_dbeta,dtset,local_work,gs_hamk,ghc_local,.TRUE.,mpi_enreg,&
+       call local_me_mesh(du_dbeta,dtset,local_work,gs_hamk,ghc_local,mpi_enreg,&
          & n4,n5,n6,ndat,npw_k,ph1d,ormesh_fac,t_atom)
        orbmag_mesh%rmesh(:,:,:,adir,incc)=orbmag_mesh%rmesh(:,:,:,adir,incc)+two*local_work(1,:,:,:)
        ABI_SFREE(local_work)
@@ -2084,8 +2082,6 @@ subroutine convolution_vv2(adir,atindx,bra,bdir,cwaveprj,dterm,dtset,&
             ket_mesh(1,1:npwsp)= gs_hamk%ffnl_k(1:npwsp,1+gdir,jlmn,itypat)*bra(1,1:npwsp)
             ket_mesh(2,1:npwsp)= gs_hamk%ffnl_k(1:npwsp,1+gdir,jlmn,itypat)*bra(2,1:npwsp)
             
-            !call orbmag_mesh%accum_rmesh(adir,bra_mesh,dtset,gs_hamk,ket_mesh,.FALSE.,&
-            !  & mpi_enreg,npwsp,ph1d,ormesh_fac,t_atom,oterm)
 
           end if
           
@@ -3066,12 +3062,12 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_ij,pawrad,pawtab,psps)
 end subroutine make_d
 !!***
 
-!!****f* ABINIT/tatomfft
+!!****f* ABINIT/local_me_mesh
 !! NAME
-!! tatomfft
+!! local_me_mesh
 !!
 !! FUNCTION
-!! compute realspace mesh anchored at target atom
+!! compute realspace mesh for local term anchored at target atom
 !!
 !! INPUTS
 !!
@@ -3084,14 +3080,13 @@ end subroutine make_d
 !!
 !! SOURCE
 
-subroutine tatomfft(bra,dtset,fofr,gs_hamk,ket,local_term,mpi_enreg,&
+subroutine local_me_mesh(bra,dtset,fofr,gs_hamk,ket,mpi_enreg,&
     & n4,n5,n6,ndat,npw_k,ph1d,scalar_factor,t_atom)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: n4,n5,n6,ndat,npw_k,t_atom
   complex(dp),intent(in) :: scalar_factor
-  logical,intent(in) :: local_term
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   type(MPI_type), intent(inout) :: mpi_enreg
@@ -3105,7 +3100,7 @@ subroutine tatomfft(bra,dtset,fofr,gs_hamk,ket,local_term,mpi_enreg,&
   real(dp) :: weight_i,weight_r
   complex(dp) :: cpw
   !arrays
-  real(dp),allocatable :: denpot(:,:,:),fofgout(:,:),work(:,:)
+  real(dp),allocatable :: denpot(:,:),fofgout(:,:),work(:,:)
   complex(dp),allocatable :: phgr(:)
 
 !--------------------------------------------------------------------
@@ -3113,109 +3108,6 @@ subroutine tatomfft(bra,dtset,fofr,gs_hamk,ket,local_term,mpi_enreg,&
   ABI_MALLOC(phgr,(npw_k))
   call make_phgr(dtset,gs_hamk,npw_k,ph1d,phgr,t_atom)
   
-  if (local_term) then
-    ! if term of interest is local, compute exp(-iG.R)*conjg(bra)*scalar_factor*ket 
-    ! and then transform with fourwf. Here R is t_atom position; factor shifts from 
-    ! unit cell origin to dipole location
-    ABI_MALLOC(work,(2,npw_k))
-    do ig = 1, npw_k
-      cpw = CONJG(phgr(ig))*CONJG(CMPLX(bra(1,ig),bra(2,ig)))*scalar_factor*CMPLX(ket(1,ig),ket(2,ig))
-      work(1,ig) = REAL(cpw); work(2,ig) = AIMAG(cpw)
-    end do
-    fourwf_cplex = 1
-    fourwf_option = 0
-    tim_fourwf = 1
-    call fourwf(fourwf_cplex,denpot,work,fofgout,fofr,gs_hamk%gbound_k,&
-      & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
-      & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,npw_k,&
-      & n4,n5,n6,fourwf_option,tim_fourwf,weight_r,weight_i)
-    ABI_SFREE(work)
-  else
-    ! if nonlocal, transform ket with fourwf, then slow FT as scalar_factor*(sum_G exp(+iG.R)*conjg(bra))*fofr
-    ! here R is t_atom location; slow FT computes nonlocal field T(r',r) at r'=R: T(R,r)
-    fourwf_cplex = 1
-    fourwf_option = 0
-    tim_fourwf = 1
-    call fourwf(fourwf_cplex,denpot,ket,fofgout,fofr,gs_hamk%gbound_k,&
-      & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
-      & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,npw_k,&
-      & n4,n5,n6,fourwf_option,tim_fourwf,weight_r,weight_i)
-    cpw = czero
-    do ig = 1, npw_k
-      cpw = cpw + phgr(ig)*CONJG(CMPLX(bra(1,ig),bra(2,ig)))
-    end do
-    cpw = cpw*scalar_factor
-    fofr(1,:,:,:) = fofr(1,:,:,:)*REAL(cpw) - fofr(2,:,:,:)*AIMAG(cpw)
-  end if
-
-  ABI_SFREE(phgr)
-
-end subroutine tatomfft
-!!***
-
-!!****f* ABINIT/orbmag_rmesh_local
-!! NAME
-!! orbmag_rmesh_local
-!!
-!! FUNCTION
-!! accumulate orbmag density local term on real mesh into orbmag structure
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!! orbmag_mesh%rmesh updated
-!! 
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine orbmag_rmesh_local(self,adir,bra,dtset,gs_hamk,ket,mpi_enreg,&
-    & npw_k,ph1d,scalar_factor,t_atom,term_index)
-
-  !Arguments ------------------------------------
-  !scalars
-  class(orbmag_mesh_type),intent(inout),target :: self
-  integer,intent(in) :: adir,npw_k,t_atom,term_index
-  complex(dp),intent(in) :: scalar_factor
-  type(dataset_type),intent(in) :: dtset
-  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
-  type(MPI_type), intent(inout) :: mpi_enreg
-  !arrays
-  real(dp),intent(in),pointer :: bra(:,:),ket(:,:),ph1d(:,:)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: fourwf_cplex,fourwf_option,ig,kg1,kg2,kg3,n1,n2,n3,n4,n5,n6,ndat
-  integer :: shift1,shift2,shift3,tim_fourwf
-  real(dp) :: weight_i,weight_r
-  complex(dp) :: cpw,ph1,ph2,ph3
-  !arrays
-  real(dp),allocatable :: denpot(:,:,:),fofgout(:,:),fofr(:,:,:,:),work(:,:)
-  complex(dp),allocatable :: phgr(:)
-
-!--------------------------------------------------------------------
-
-  ndat=1
-  n1=dtset%ngfft(1); n2=dtset%ngfft(2); n3=dtset%ngfft(3)
-  n4=dtset%ngfft(4); n5=dtset%ngfft(5); n6=dtset%ngfft(6)
-  ABI_MALLOC(fofr,(2,n4,n5,n6*ndat))
-
-  shift1=1+n1+(t_atom-1)*(2*n1+1)
-  shift2=1+n2+(t_atom-1)*(2*n2+1)+dtset%natom*(2*n1+1)
-  shift3=1+n3+(t_atom-1)*(2*n3+1)+dtset%natom*(2*n1+1+2*n2+1) 
-  ABI_MALLOC(phgr,(npw_k))
-  do ig=1,npw_k
-    kg1=gs_hamk%kg_k(1,ig)+shift1
-    kg2=gs_hamk%kg_k(2,ig)+shift2
-    kg3=gs_hamk%kg_k(3,ig)+shift3
-    ph1=CMPLX(ph1d(1,kg1),ph1d(2,kg1))
-    ph2=CMPLX(ph1d(1,kg2),ph1d(2,kg2))
-    ph3=CMPLX(ph1d(1,kg3),ph1d(2,kg3))
-    phgr(ig)=ph1*ph2*ph3
-  end do
-
   ! if term of interest is local, compute exp(-iG.R)*conjg(bra)*scalar_factor*ket 
   ! and then transform with fourwf. Here R is t_atom position; factor shifts from 
   ! unit cell origin to dipole location
@@ -3233,14 +3125,9 @@ subroutine orbmag_rmesh_local(self,adir,bra,dtset,gs_hamk,ket,mpi_enreg,&
     & n4,n5,n6,fourwf_option,tim_fourwf,weight_r,weight_i)
   ABI_SFREE(work)
 
-  ! factor of two because we are skipping explicit sums over eps_alpha,beta,gamma and second
-  ! term appears from symmetry
-  self%rmesh(:,:,:,adir,term_index)=self%rmesh(:,:,:,adir,term_index)+two*fofr(1,:,:,:)
-  
-  ABI_SFREE(fofr)
   ABI_SFREE(phgr)
 
-end subroutine orbmag_rmesh_local
+end subroutine local_me_mesh
 !!***
 
 !!****f* ABINIT/make_phgr
