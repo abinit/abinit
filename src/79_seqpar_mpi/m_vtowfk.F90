@@ -25,7 +25,7 @@
 module m_vtowfk
 
  use, intrinsic :: iso_fortran_env, only: int32, int64, real32, real64
- use, intrinsic :: iso_c_binding, only: c_size_t
+ use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
 
  use defs_basis
  use m_abicore
@@ -229,6 +229,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: gpu_option_tmp,nblk_gemm_nonlop,blksize_gemm_nonlop_tmp,nfft_blocks_tmp
  integer :: chunk,residuchunk
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
+ logical :: transfer_cg
  real(dp) :: ar,ar2,ar_im,eshift,occblock,norm
  real(dp) :: max_resid,weight,cpu,wall,gflops
  character(len=50) :: iter_name
@@ -384,10 +385,17 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  call timab(39,1,tsec) ! "vtowfk (loop)"
 
  cg_k => cg(:,1+icg:npw_k*my_nspinor*nband_k+icg)
+
+ transfer_cg = .false.
 #ifdef HAVE_OPENMP_OFFLOAD
- if(xg_diago) then
-   !$OMP TARGET ENTER DATA MAP(alloc:cg_k) IF(dtset%gpu_option==ABI_GPU_OPENMP)
-   !$OMP TARGET UPDATE TO(cg_k) IF(dtset%gpu_option==ABI_GPU_OPENMP .and. .not. use_rmm_diis)
+ transfer_cg = .not. xomp_target_is_present(c_loc(cg))
+ if(transfer_cg) then
+   if(xg_diago) then
+     !$OMP TARGET ENTER DATA MAP(alloc:cg_k) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+     !$OMP TARGET UPDATE TO(cg_k) IF(dtset%gpu_option==ABI_GPU_OPENMP .and. .not. use_rmm_diis)
+   end if
+ else if(istep == 1) then
+   !$OMP TARGET UPDATE FROM(cg_k) IF(dtset%gpu_option==ABI_GPU_OPENMP .and. use_rmm_diis)
  end if
 #endif
 
@@ -1527,7 +1535,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  if (dtset%cprj_in_memory==2) nullify(cprj_cwavef_bands)
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(from:cg_k) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP .and. xg_diago)
+ if(transfer_cg) then
+   !$OMP TARGET EXIT DATA MAP(from:cg_k) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP .and. xg_diago)
+ end if
 #endif
  if(wfopta10 /= 1 .and. .not. xg_diago) then
    ABI_FREE(evec)

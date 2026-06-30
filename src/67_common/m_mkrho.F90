@@ -21,12 +21,13 @@
 
 module m_mkrho
 
- use, intrinsic :: iso_c_binding, only: c_size_t
+ use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
 
  use defs_basis
  use defs_wvltypes
  use m_abicore
  use m_xmpi
+ use m_xomp
  use m_errors
  use m_dtset
  use m_extfpmd
@@ -171,6 +172,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  integer :: ndat,nfftot,npw_k,spaceComm,tim_fourwf,gpu_option,l_nfft_blocks,nfft_blocks_occ,nband_fftblock_occ
  integer :: iband_me
  integer :: mband_mem
+ logical :: transfer_cg
  real(dp) :: kpt_cart,kg_k_cart,gp2pi1,gp2pi2,gp2pi3,cwftmp
  real(dp) :: weight,weight_i
  !character(len=500) :: message
@@ -296,6 +298,16 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  gpu_option=ABI_GPU_DISABLED
 #endif
  gpu_cwavef=(gpu_option==ABI_GPU_OPENMP .and. paw_dmft%use_sc_dmft/=1)
+ transfer_cg = .false.
+#ifdef HAVE_OPENMP_OFFLOAD
+ if(gpu_option==ABI_GPU_OPENMP) then
+   transfer_cg = .not. xomp_target_is_present(c_loc(cg))
+   if(mpi_enreg%paral_kgb==0) then
+     !FIXME If cg is on card, we need to rapatriate it on CPU when paral_kgb==0
+     !$OMP TARGET UPDATE FROM(cg) IF(.not. transfer_cg)
+   end if
+ end if
+#endif
 
  l_nfft_blocks=1; if(present(nfft_blocks) .and. gpu_option/=ABI_GPU_DISABLED) l_nfft_blocks=nfft_blocks
 
@@ -565,7 +577,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                    ! the kinetic energy density
                    ! Not yet parallelized on nspinor if paral_kgb/=1
                    ipwsp=(iband_me-1)*npw_k*my_nspinor +icg
-                   cwavef(:,1:npw_k,1) =                  cg(:,1+ipwsp      :ipwsp+npw_k)
+                 cwavef(:,1:npw_k,1) =                  cg(:,1+ipwsp      :ipwsp+npw_k)
                    if (my_nspinor==2) cwavef(:,1:npw_k,2)=cg(:,1+ipwsp+npw_k:ipwsp+2*npw_k)
                    if(ioption==1)then
                      ! Multiplication by 2pi i (k+G)_alpha
@@ -696,7 +708,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
            blocksize=nband_k/nbdblock
            cg_k => cg(:,1+icg:npw_k*my_nspinor*blocksize*nbdblock+icg)
 #ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET ENTER DATA MAP(to:cg_k) if(gpu_cwavef)
+           !$OMP TARGET ENTER DATA MAP(to:cg_k) if(gpu_cwavef .and. transfer_cg)
 #endif
 
            if(gpu_option == ABI_GPU_KOKKOS) then
@@ -955,7 +967,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
            ABI_FREE(occ_k)
 #ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET EXIT DATA MAP(delete:cg_k) if(gpu_cwavef)
+           !$OMP TARGET EXIT DATA MAP(delete:cg_k) if(gpu_cwavef .and. transfer_cg)
 #endif
          end if ! paral_kgb
 
