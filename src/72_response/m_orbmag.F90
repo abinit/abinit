@@ -1224,6 +1224,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
    dum_dnlbra = 0; dum_dnlket = 0
    n4=dtset%ngfft(4); n5=dtset%ngfft(5); n6=dtset%ngfft(6); ndat=1
    ABI_MALLOC(fofr,(n4,n5,n6*ndat))
+   ABI_MALLOC(local_work,(2,n4,n5,n6*ndat))
    ABI_MALLOC(ghc_local,(2,npwsp))
    ABI_MALLOC(gsc_local,(2,npwsp))
    ABI_MALLOC(gvnlxc_local,(2,npwsp))
@@ -1283,11 +1284,9 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
        call getghc(cpopt,du_dgamma,cwaveprj1,ghc_local,gsc_local,gs_hamk,gvnlxc_local,lams,mpi_enreg,&
          & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
        ormesh_fac = trnrm(nn)*prefac_m
-       ABI_MALLOC(local_work,(2,n4,n5,n6*ndat))
        call local_me_mesh(du_dbeta,dtset,local_work,gs_hamk,ghc_local,mpi_enreg,&
          & n4,n5,n6,ndat,npw_k,ph1d,ormesh_fac,t_atom)
        orbmag_mesh%rmesh(:,:,:,adir,incc)=orbmag_mesh%rmesh(:,:,:,adir,incc)+two*local_work(1,:,:,:)
-       ABI_SFREE(local_work)
        
        ! nonlocal part
        call nonlocal_me_mesh(adir,atindx,du_dbeta,cwaveprj1,dum_dnlbra,dum_dnlket,dterm,dtset,&
@@ -1312,6 +1311,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
  ABI_SFREE(gsc_local)
  ABI_SFREE(gvnlxc_local)
  ABI_SFREE(fofr)
+ ABI_SFREE(local_work)
 
 end subroutine orbmag_cc_k
 !!***
