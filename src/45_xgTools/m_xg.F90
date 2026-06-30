@@ -3954,10 +3954,6 @@ contains
 
     integer :: fact
     complex(dp) :: da_cplx
-#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-    complex(dp), ABI_CONTIGUOUS pointer :: xgBlock1__vecC(:,:),xgBlock2__vecC(:,:)
-    real(dp), ABI_CONTIGUOUS pointer :: xgBlock1__vecR(:,:),xgBlock2__vecR(:,:)
-#endif
     double precision :: tsec(2)
 
     call timab(tim_saxpy,1,tsec)
@@ -3978,41 +3974,14 @@ contains
 
     fact = 1 ; if (xgBlock1%space==SPACE_CR) fact = 2
 
-    if (xgBlock1%gpu_option==ABI_GPU_KOKKOS .or. xgBlock1%gpu_option==ABI_GPU_OPENMP) then
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-      select case(xgBlock1%space)
-      case (SPACE_R,SPACE_CR)
-        call abi_gpu_xaxpy(1, xgBlock1%cols*fact*xgBlock1%LDim, da_cplx, xgBlock2%vecR,1,xgBlock1%vecR,1)
-      case (SPACE_C)
-        call abi_gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da_cplx, xgBlock2%vecC,1,xgBlock1%vecC,1)
-      end select
-#elif defined HAVE_OPENMP_OFFLOAD
-!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-      select case(xgBlock1%space)
-      case (SPACE_R,SPACE_CR)
-        xgBlock1__vecR => xgBlock1%vecR
-        xgBlock2__vecR => xgBlock2%vecR
-        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock1__vecR,xgBlock2__vecR)
-        call abi_gpu_xaxpy(1, xgBlock1%cols*fact*xgBlock1%LDim, da_cplx, c_loc(xgBlock2__vecR),1,c_loc(xgBlock1__vecR),1)
-        !$OMP END TARGET DATA
-      case (SPACE_C)
-        xgBlock1__vecC => xgBlock1%vecC
-        xgBlock2__vecC => xgBlock2%vecC
-        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock1__vecC,xgBlock2__vecC)
-        call abi_gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da_cplx, c_loc(xgBlock2__vecC),1,c_loc(xgBlock1__vecC),1)
-        !$OMP END TARGET DATA
-      end select
-#endif
-
-    else
-      select case(xgBlock1%space)
-      case (SPACE_R,SPACE_CR)
-        call daxpy(xgBlock1%cols*fact*xgBlock1%LDim,da,xgBlock2%vecR,1,xgBlock1%vecR,1)
-      case (SPACE_C)
-        call zaxpy(xgBlock1%cols*xgBlock1%LDim,dcmplx(da,0.d0),xgBlock2%vecC,1,xgBlock1%vecC,1)
-      end select
-
-    end if
+    select case(xgBlock1%space)
+    case (SPACE_R,SPACE_CR)
+      call abi_xaxpy(xgBlock1%cols*fact*xgBlock1%LDim, da_cplx, xgBlock2%vecR, 1, xgBlock1%vecR, 1, &
+          x_cplx=1, gpu_option=xgBlock1%gpu_option)
+    case (SPACE_C)
+      call abi_xaxpy(xgBlock1%cols*xgBlock1%LDim, da_cplx, xgBlock2%vecC, 1, xgBlock1%vecC, 1, &
+          gpu_option=xgBlock1%gpu_option)
+    end select
 
     call timab(tim_saxpy,2,tsec)
 
@@ -4052,21 +4021,8 @@ contains
 
     call xgBlock_check_gpu_option(xgBlock1,xgBlock2)
 
-    if (xgBlock1%gpu_option==ABI_GPU_KOKKOS .or. xgBlock2%gpu_option==ABI_GPU_OPENMP) then
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-      call abi_gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da, xgBlock2%vecC, 1, xgBlock1%vecC, 1)
-#elif defined HAVE_OPENMP_OFFLOAD
-!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-      xgBlock1__vecC => xgBlock1%vecC
-      xgBlock2__vecC => xgBlock2%vecC
-      !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock1__vecC,xgBlock2__vecC)
-      call abi_gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da, c_loc(xgBlock2__vecC),1,c_loc(xgBlock1__vecC),1)
-      !$OMP END TARGET DATA
-#endif
-
-    else
-      call zaxpy(xgBlock1%cols*xgBlock1%LDim, da, xgBlock2%vecC, 1, xgBlock1%vecC, 1)
-    end if
+    call abi_xaxpy(xgBlock1%cols*xgBlock1%LDim, da, xgBlock2%vecC, 1, xgBlock1%vecC, 1, &
+        gpu_option=xgBlock1%gpu_option)
 
     call timab(tim_saxpy,2,tsec)
 
@@ -4995,10 +4951,6 @@ contains
     integer      :: i,fact
     complex(dp) :: valc
 
-#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-    complex(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
-    real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
-#endif
     double precision :: tsec(2)
 
     call timab(tim_scale,1,tsec)
@@ -5007,90 +4959,29 @@ contains
 
     fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
 
-    if (xgBlock%gpu_option==ABI_GPU_KOKKOS .or. xgBlock%gpu_option==ABI_GPU_OPENMP) then
-
-      if ( xgBlock%ldim .eq. xgBlock%rows ) then
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-        select case(xgBlock%space)
-        case (SPACE_R,SPACE_CR)
-          call abi_gpu_xscal(1, fact*xgBlock%ldim*xgBlock%cols/inc, valc, xgBlock%vecR, inc)
-        case (SPACE_C)
-          call abi_gpu_xscal(2, xgBlock%ldim*xgBlock%cols/inc, valc, xgBlock%vecC, inc)
-        end select
-#elif defined HAVE_OPENMP_OFFLOAD
-!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-        select case(xgBlock%space)
-        case (SPACE_R,SPACE_CR)
-          xgBlock__vecR => xgBlock%vecR
-          !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock__vecR)
-          call abi_gpu_xscal(1, fact*xgBlock%ldim*xgBlock%cols/inc, valc, c_loc(xgBlock__vecR), inc)
-          !$OMP END TARGET DATA
-        case (SPACE_C)
-          xgBlock__vecC => xgBlock%vecC
-          !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock__vecC)
-          call abi_gpu_xscal(2, xgBlock%ldim*xgBlock%cols/inc, valc, c_loc(xgBlock__vecC), inc)
-          !$OMP END TARGET DATA
-        end select
-#endif
-
-      else
-        !FIXME Do loop that calls scal on each column sequentially, might be improved
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-        select case(xgBlock%space)
-        case (SPACE_R,SPACE_CR)
-          do i=1,xgBlock%cols
-            call abi_gpu_xscal(1, fact*xgBlock%rows/inc, valc, xgBlock%vecR(:,i), inc)
-          end do
-        case (SPACE_C)
-          do i=1,xgBlock%cols
-            call abi_gpu_xscal(2, xgBlock%rows/inc, valc, xgBlock%vecC(:,i), inc)
-          end do
-        end select
-#elif defined HAVE_OPENMP_OFFLOAD
-!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-        select case(xgBlock%space)
-        case (SPACE_R,SPACE_CR)
-          xgBlock__vecR => xgBlock%vecR
-          do i=1,xgBlock%cols
-            !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock__vecR)
-            call abi_gpu_xscal(1, fact*xgBlock%rows/inc, valc, c_loc(xgBlock__vecR(1,i)), inc)
-            !$OMP END TARGET DATA
-          end do
-        case (SPACE_C)
-          xgBlock__vecC => xgBlock%vecC
-          do i=1,xgBlock%cols
-            !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock__vecC)
-            call abi_gpu_xscal(2, xgBlock%rows/inc, valc, c_loc(xgBlock__vecC(1,i)), inc)
-            !$OMP END TARGET DATA
-          end do
-        end select
-#endif
-      end if
-
+    if ( xgBlock%ldim .eq. xgBlock%rows ) then
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        call abi_xscal(fact*xgBlock%ldim*xgBlock%cols/inc, val, xgBlock%vecR, inc, &
+            gpu_option=xgBlock%gpu_option)
+      case (SPACE_C)
+        call abi_xscal(xgBlock%ldim*xgBlock%cols/inc, valc, xgBlock%vecC, inc, &
+            gpu_option=xgBlock%gpu_option)
+      end select
     else
-
-      if ( xgBlock%ldim .eq. xgBlock%rows ) then
-        select case(xgBlock%space)
-        case (SPACE_R,SPACE_CR)
-          call dscal(fact*xgBlock%ldim*xgBlock%cols/inc,val,xgBlock%vecR,inc)
-        case (SPACE_C)
-          call zdscal(xgBlock%ldim*xgBlock%cols/inc,val,xgBlock%vecC,inc)
-        end select
-      else
-        select case(xgBlock%space)
-        case (SPACE_R,SPACE_CR)
-          !$omp parallel do
-          do i=1,xgBlock%cols
-            call dscal(fact*xgBlock%rows/inc,val,xgBlock%vecR(:,i),inc)
-          end do
-        case (SPACE_C)
-          !$omp parallel do
-          do i=1,xgBlock%cols
-            call zdscal(xgBlock%rows/inc,val,xgBlock%vecC(:,i),inc)
-          end do
-        end select
-      end if
-
+      !FIXME Do loop that calls scal on each column sequentially, might be improved
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        do i=1,xgBlock%cols
+          call abi_xscal(fact*xgBlock%rows/inc, val, xgBlock%vecR(:,i), inc, &
+              gpu_option=xgBlock%gpu_option)
+        end do
+      case (SPACE_C)
+        do i=1,xgBlock%cols
+          call abi_xscal(xgBlock%rows/inc, valc, xgBlock%vecC(:,i), inc, &
+              gpu_option=xgBlock%gpu_option)
+        end do
+      end select
     end if
 
     call timab(tim_scale,2,tsec)
@@ -5114,61 +5005,27 @@ contains
 
     call timab(tim_scale,1,tsec)
 
-    if (xgBlock%gpu_option==ABI_GPU_KOKKOS) then
-
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
-      if ( xgBlock%ldim .eq. xgBlock%rows ) then
-        select case(xgBlock%space)
-        case (SPACE_R,SPACE_CR)
-          ABI_ERROR("Scaling real vector with a complex not possible")
-        case (SPACE_C)
-          call abi_gpu_xscal(2, xgBlock%ldim*xgBlock%cols/inc, val, xgBlock%vecC, inc)
-        end select
-      else
-
-        ! TODO (PK) : evaluate if it is really necessary to deal with this case
-        ABI_ERROR("Scaling a xgBlock when xgBlock%ldim != xgBlock%rows is not implemented for GPU. FIX ME if needed.")
-
-      end if
-#endif
-
-    else if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
-
-#if defined(HAVE_GPU) && defined(HAVE_OPENMP_OFFLOAD)
-      if ( xgBlock%ldim .eq. xgBlock%rows ) then
-        select case(xgBlock%space)
-        case (SPACE_R,SPACE_CR)
-          ABI_ERROR("Scaling real vector with a complex not possible")
-        case (SPACE_C)
-          call abi_gpu_xscal(2, xgBlock%ldim*xgBlock%cols/inc, val, xgBlock%vecC, inc)
-        end select
-      else
-
-        ! TODO (PK) : evaluate if it is really necessary to deal with this case
-        ABI_BUG("Scaling a xgBlock when xgBlock%ldim != xgBlock%rows is not implemented for GPU. FIX ME if needed.")
-
-      end if
-#endif
+    if ( xgBlock%ldim .eq. xgBlock%rows ) then
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        ABI_ERROR("Scaling real vector with a complex not possible")
+      case (SPACE_C)
+        call abi_xscal(xgBlock%ldim*xgBlock%cols/inc, val, xgBlock%vecC, inc, &
+            gpu_option=xgBlock%gpu_option)
+      end select
     else
-      if ( xgBlock%ldim .eq. xgBlock%rows ) then
-        select case(xgBlock%space)
-        case (SPACE_R,SPACE_CR)
-          ABI_ERROR("Scaling real vector with a complex not possible")
-        case (SPACE_C)
-          call zscal(xgBlock%ldim*xgBlock%cols/inc,val,xgBlock%vecC,inc)
-        end select
-      else
-        select case(xgBlock%space)
-        case (SPACE_R,SPACE_CR)
-          ABI_ERROR("Scaling real vector with a complex not possible")
-        case (SPACE_C)
-          !$omp parallel do
-          do i=1,xgBlock%cols
-            call zscal(xgBlock%rows/inc,val,xgBlock%vecC(:,i),inc)
-          end do
-        end select
+      ! TODO: evaluate if it is really necessary to deal with this case on GPU
+      if (xgBlock%gpu_option/=ABI_GPU_DISABLED) then
+        ABI_BUG("Scaling a xgBlock when xgBlock%ldim != xgBlock%rows is not implemented for GPU. FIX ME if needed.")
       end if
-
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        ABI_ERROR("Scaling real vector with a complex not possible")
+      case (SPACE_C)
+        do i=1,xgBlock%cols
+          call abi_xscal(xgBlock%rows/inc, val, xgBlock%vecC(:,i), inc)
+        end do
+      end select
     end if
 
     call timab(tim_scale,2,tsec)

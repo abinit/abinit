@@ -271,6 +271,32 @@ module m_abi_linalg
  end interface abi_zgemm
 
  !----------------------------------------------------------------------
+ public :: abi_xscal
+ interface abi_xscal
+    module procedure abi_d2zscal
+    module procedure abi_d2zscal_3d
+    module procedure abi_d2zscal_4d
+    module procedure abi_d2zscal_5d
+    module procedure abi_d2zscal_7d
+    module procedure abi_dscal
+    module procedure abi_dscal_2d
+    module procedure abi_zscal
+    module procedure abi_zscal_2d
+    module procedure abi_zscal_3d
+ end interface abi_xscal
+ !----------------------------------------------------------------------
+ public :: abi_xaxpy
+ interface abi_xaxpy
+    module procedure abi_daxpy
+    module procedure abi_daxpy_2d
+    module procedure abi_d2zaxpy
+    module procedure abi_d2zaxpy_2d
+    module procedure abi_d2zaxpy_5d
+    module procedure abi_zaxpy
+    module procedure abi_zaxpy_2d
+    module procedure abi_zaxpy_3d
+ end interface abi_xaxpy
+ !----------------------------------------------------------------------
  public :: abi_xcopy
  interface abi_xcopy
     module procedure abi_zcopy
@@ -1137,6 +1163,16 @@ end function jobz_plasma
 ! ******************* BLAS_XGEMM interface ****************************!
 ! *********************************************************************!
 #include "abi_xgemm.f90"
+
+! *********************************************************************!
+! ******************** BLAS_XSCAL interface ***************************!
+! *********************************************************************!
+#include "abi_xscal.f90"
+
+! *********************************************************************!
+! ******************** BLAS_XAXPY interface ***************************!
+! *********************************************************************!
+#include "abi_xaxpy.f90"
 
 ! *********************************************************************!
 ! ******************** BLAS_XCOPY interface ***************************!
