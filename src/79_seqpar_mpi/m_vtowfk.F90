@@ -58,7 +58,7 @@ module m_vtowfk
  use m_lobpcgwf_cprj,only : lobpcgwf2_cprj
  use m_slicewf,     only : slicewf
  use m_slicewf_cprj,  only : slicewf_cprj
- use m_spacepar,    only : meanvalue_g
+ use m_spacepar,    only : meanvalue_g, meanvalue_g_batch
  use m_chebfi,      only : chebfi
  use m_rmm_diis,    only : rmm_diis
  use m_nonlop,      only : nonlop !, nonlop_counter
@@ -382,7 +382,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  call timab(39,1,tsec) ! "vtowfk (loop)"
 
  cg_k => cg(:,1+icg:npw_k*my_nspinor*nband_k+icg)
- !$OMP TARGET ENTER DATA MAP(to:cg_k) IF(dtset%gpu_option==ABI_GPU_OPENMP .and. xg_diago .and. .not. use_rmm_diis)
+#ifdef HAVE_OPENMP_OFFLOAD
+ if(xg_diago) then
+   !$OMP TARGET ENTER DATA MAP(alloc:cg_k) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET UPDATE TO(cg_k) IF(dtset%gpu_option==ABI_GPU_OPENMP .and. .not. use_rmm_diis)
+ end if
+#endif
 
  do inonsc=1,nnsclo_now
    ABI_NVTX_START_RANGE(NVTX_VTOWFK_EXTRA1)
@@ -456,6 +461,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          if (use_rmm_diis) then
            call rmm_diis(istep, ikpt, isppol, cg_k, dtset, eig_k, occ_k, enlx_k, gs_hamk, kinpw, gsc, &
                          mpi_enreg, nband_k, npw_k, my_nspinor, resid_k, rmm_diis_status)
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$OMP TARGET UPDATE TO(cg_k) IF(dtset%gpu_option==ABI_GPU_OPENMP .and. xg_diago)
+#endif
          else
 
            if ( .not. xg_diago ) then
@@ -854,9 +862,15 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET ENTER DATA MAP(alloc:cwavef) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:kinpw) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 
- !$OMP TARGET UPDATE FROM(cg_k) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP .and. xg_diago .and. .not. use_rmm_diis)
+ ! Transferring cg back is only needed in case of DMFT case or if GBT is on
+ if (gs_hamk%use_gbt /= 0 .or. paw_dmft%use_dmft==1) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET UPDATE FROM(cg_k) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP .and. xg_diago)
+#endif
+ end if
  ! Loop over bands or blocks of bands.
  ! Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
  do iblock=1,nblockbd
@@ -878,16 +892,20 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        cg_k(:,1+(iblock-1)*npw_k*my_nspinor*blocksize:iblock*npw_k*my_nspinor*blocksize), 1, cwavef, 1)
    end if
 
+   ! Compute kinetic energies for all bands in this block (use_gbt==0).
+   ! meanvalue_g_batch handles both istwf_k==1 (phase 1) and istwf_k>=2 (phase 3).
+   if (gs_hamk%use_gbt == 0) then
+     call meanvalue_g_batch(ek_k(1+(iblock-1)*blocksize:iblock*blocksize), kinpw, &
+     &    0, istwf_k, mpi_enreg, npw_k, my_nspinor, blocksize, &
+     &    cwavef, cwavef, 0, gpu_option=gs_hamk%gpu_option)
+   end if
+
    do iblocksize=1,blocksize
      iband=(iblock-1)*blocksize+iblocksize
 
      cwavef_iband => cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg)
 
-     ! Compute kinetic energy for band iband.
-     if (gs_hamk%use_gbt == 0) then
-       call meanvalue_g(ek_k(iband),kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
-         cwavef_iband, cwavef_iband, 0, gpu_thread_limit=dtset%gpu_thread_limit)
-     else
+     if (gs_hamk%use_gbt /= 0) then
        ! Treat up and down components separately.
        ! Note filter 1. Also: this won't work if paral_kgb 1 and/or spinor parallelism
        filter = 1
@@ -1368,6 +1386,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET EXIT DATA MAP(delete:cwavef) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:kinpw) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 
  ! restore safe value related to GEMM nonlop slicing and GPU in case of forces compute
@@ -1497,7 +1516,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  if (dtset%cprj_in_memory==2) nullify(cprj_cwavef_bands)
 
- !$OMP TARGET EXIT DATA MAP(from:cg_k) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP .and. xg_diago .and. .not. use_rmm_diis)
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(from:cg_k) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP .and. xg_diago)
+#endif
  if(wfopta10 /= 1 .and. .not. xg_diago) then
    ABI_FREE(evec)
    ABI_FREE(subham)
