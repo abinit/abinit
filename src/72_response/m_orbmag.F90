@@ -206,6 +206,7 @@ module m_orbmag
   private :: dterm_LR
   private :: dterm_BM
   private :: local_fermie
+  private :: make_phgr
 
   private :: lamb_core
   private :: make_pcg1
@@ -2193,16 +2194,6 @@ subroutine nonlocal_me_mesh(adir,atindx,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
 
         do ilmn = 1, pawtab(itypat)%lmn_size
           klmn=MATPACK(ilmn,jlmn)
-          if (dnlbra .NE. 0) then
-            cpi=CMPLX(cwaveprj(iatom,isp)%dcp(1,dnlbra,ilmn),cwaveprj(iatom,isp)%dcp(2,dnlbra,ilmn))
-          else
-            cpi=CMPLX(cwaveprj(iatom,isp)%cp(1,ilmn),cwaveprj(iatom,isp)%cp(2,ilmn))
-          end if
-          if (dnlket .NE. 0) then
-            cpj=CMPLX(cwaveprj(iatom,isp)%dcp(1,dnlket,jlmn),cwaveprj(iatom,isp)%dcp(2,dnlket,jlmn))
-          else
-            cpj=CMPLX(cwaveprj(iatom,isp)%cp(1,jlmn),cwaveprj(iatom,isp)%cp(2,jlmn))
-          end if
           dij = dij_data(iatom,klmn,isp)
           ! see note at top of file near definition of MATPACK macro
           if (ilmn .GT. jlmn) dij = CONJG(dij)
@@ -3093,31 +3084,32 @@ subroutine tatomfft(bra,dtset,fofr,gs_hamk,ket,local_term,mpi_enreg,&
 
   !Local variables -------------------------
   !scalars
-  integer :: fourwf_cplex,fourwf_option,ig,kg1,kg2,kg3,n1,n2,n3
-  integer :: shift1,shift2,shift3,tim_fourwf
+  integer :: fourwf_cplex,fourwf_option,ig,tim_fourwf
   real(dp) :: weight_i,weight_r
-  complex(dp) :: cpw,ph1,ph2,ph3
+  complex(dp) :: cpw
   !arrays
   real(dp),allocatable :: denpot(:,:,:),fofgout(:,:),work(:,:)
   complex(dp),allocatable :: phgr(:)
 
 !--------------------------------------------------------------------
 
-  n1=dtset%ngfft(1); n2=dtset%ngfft(2); n3=dtset%ngfft(3)
-
-  shift1=1+n1+(t_atom-1)*(2*n1+1)
-  shift2=1+n2+(t_atom-1)*(2*n2+1)+dtset%natom*(2*n1+1)
-  shift3=1+n3+(t_atom-1)*(2*n3+1)+dtset%natom*(2*n1+1+2*n2+1) 
   ABI_MALLOC(phgr,(npw_k))
-  do ig=1,npw_k
-    kg1=gs_hamk%kg_k(1,ig)+shift1
-    kg2=gs_hamk%kg_k(2,ig)+shift2
-    kg3=gs_hamk%kg_k(3,ig)+shift3
-    ph1=CMPLX(ph1d(1,kg1),ph1d(2,kg1))
-    ph2=CMPLX(ph1d(1,kg2),ph1d(2,kg2))
-    ph3=CMPLX(ph1d(1,kg3),ph1d(2,kg3))
-    phgr(ig)=ph1*ph2*ph3
-  end do
+  call make_phgr(dtset,gs_hamk,npw_k,ph1d,phgr,t_atom)
+  
+  !n1=dtset%ngfft(1); n2=dtset%ngfft(2); n3=dtset%ngfft(3)
+
+  !shift1=1+n1+(t_atom-1)*(2*n1+1)
+  !shift2=1+n2+(t_atom-1)*(2*n2+1)+dtset%natom*(2*n1+1)
+  !shift3=1+n3+(t_atom-1)*(2*n3+1)+dtset%natom*(2*n1+1+2*n2+1) 
+  !do ig=1,npw_k
+  !  kg1=gs_hamk%kg_k(1,ig)+shift1
+  !  kg2=gs_hamk%kg_k(2,ig)+shift2
+  !  kg3=gs_hamk%kg_k(3,ig)+shift3
+  !  ph1=CMPLX(ph1d(1,kg1),ph1d(2,kg1))
+  !  ph2=CMPLX(ph1d(1,kg2),ph1d(2,kg2))
+  !  ph3=CMPLX(ph1d(1,kg3),ph1d(2,kg3))
+  !  phgr(ig)=ph1*ph2*ph3
+  !end do
 
   if (local_term) then
     ! if term of interest is local, compute exp(-iG.R)*conjg(bra)*scalar_factor*ket 
@@ -3248,6 +3240,59 @@ subroutine orbmag_rmesh_local(self,adir,bra,dtset,gs_hamk,ket,mpi_enreg,&
 
 end subroutine orbmag_rmesh_local
 !!***
+
+!!****f* ABINIT/make_phgr
+!! NAME
+!! make_phgr
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_phgr(dtset,gs_hamk,npw_k,ph1d,phgr,t_atom)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: npw_k,t_atom
+  type(dataset_type),intent(in) :: dtset
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+
+  !arrays
+  real(dp),intent(in),pointer :: ph1d(:,:)
+  complex(dp),intent(out) :: phgr(npw_k)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: ig,kg1,kg2,kg3,n1,n2,n3,shift1,shift2,shift3
+  complex(dp) :: ph1,ph2,ph3
+
+  !arrays
+
+!--------------------------------------------------------------------
+  n1=dtset%ngfft(1); n2=dtset%ngfft(2); n3=dtset%ngfft(3)
+
+  shift1=1+n1+(t_atom-1)*(2*n1+1)
+  shift2=1+n2+(t_atom-1)*(2*n2+1)+dtset%natom*(2*n1+1)
+  shift3=1+n3+(t_atom-1)*(2*n3+1)+dtset%natom*(2*n1+1+2*n2+1) 
+  do ig=1,npw_k
+    kg1=gs_hamk%kg_k(1,ig)+shift1
+    kg2=gs_hamk%kg_k(2,ig)+shift2
+    kg3=gs_hamk%kg_k(3,ig)+shift3
+    ph1=CMPLX(ph1d(1,kg1),ph1d(2,kg1))
+    ph2=CMPLX(ph1d(1,kg2),ph1d(2,kg2))
+    ph3=CMPLX(ph1d(1,kg3),ph1d(2,kg3))
+    phgr(ig)=ph1*ph2*ph3
+  end do
+
+end subroutine make_phgr
+!!***
+
 
 !!****f* ABINIT/local_fermie
 !! NAME
