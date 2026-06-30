@@ -2141,16 +2141,21 @@ subroutine nonlocal_me_mesh(adir,atindx,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
 
   !Local variables -------------------------
   !scalars
-  integer :: iat,iatom,il,ilmn,isp,itypat,jl,jlmn,klmn,npwsp,t_atom
-  complex(dp) :: cpi,cpj,dij,ormesh_fac
+  integer :: fourwf_cplex,fourwf_option,iat,iatom,ig,il,ilmn,isp,itypat
+  integer :: jl,jlmn,klmn,npwsp,t_atom,tim_fourwf
+  real(dp) :: weight_i,weight_r
+  complex(dp) :: cpw,dij,ormesh_fac
   logical :: my_suppress_ormesh,need_ormesh
   ! arrays
-  real(dp),allocatable :: work(:,:,:,:)
+  real(dp),allocatable :: denpot(:,:,:),fofgout(:,:),work(:,:,:,:)
   real(dp),allocatable,target :: bra_mesh(:,:),ket_mesh(:,:)
-  complex(dp),allocatable :: dij_data(:,:,:)
+  complex(dp),allocatable :: dij_data(:,:,:),phgr(:)
 !--------------------------------------------------------------------
   
   npwsp = npw_k*dtset%nspinor
+  fourwf_cplex = 1
+  fourwf_option = 0
+  tim_fourwf = 1
   
   ABI_MALLOC(dij_data,(dtset%natom,dterm%lmn2max,dterm%ndij))
   select case (oterm)
@@ -2183,6 +2188,8 @@ subroutine nonlocal_me_mesh(adir,atindx,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
   ABI_MALLOC(bra_mesh,(2,npwsp))
   ABI_MALLOC(ket_mesh,(2,npwsp))
   ABI_MALLOC(work,(2,n4,n5,n6*ndat))
+  ABI_MALLOC(phgr,(npw_k))
+  call make_phgr(dtset,gs_hamk,npw_k,ph1d,phgr,t_atom)
 
   fofr = zero
   do iat = 1, dtset%natom
@@ -2206,9 +2213,23 @@ subroutine nonlocal_me_mesh(adir,atindx,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
           bra_mesh(1,1:npwsp)=bra(1,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1+dnlbra,ilmn,itypat)
           bra_mesh(2,1:npwsp)=bra(2,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1+dnlbra,ilmn,itypat)
          
-          call tatomfft(bra_mesh,dtset,work,gs_hamk,ket_mesh,.FALSE.,mpi_enreg,&
-            & n4,n5,n6,ndat,npw_k,ph1d,ormesh_fac,t_atom)
-          fofr = fofr + work(1,:,:,:)
+          !call tatomfft(bra_mesh,dtset,work,gs_hamk,ket_mesh,.FALSE.,mpi_enreg,&
+          !  & n4,n5,n6,ndat,npw_k,ph1d,ormesh_fac,t_atom)
+          
+          ! if nonlocal, transform ket with fourwf, then slow FT as scalar_factor*(sum_G exp(+iG.R)*conjg(bra))*fofr
+          ! here R is t_atom location; slow FT computes nonlocal field T(r',r) at r'=R: T(R,r)
+          call fourwf(fourwf_cplex,denpot,ket_mesh,fofgout,work,gs_hamk%gbound_k,&
+            & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
+            & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,npw_k,&
+            & n4,n5,n6,fourwf_option,tim_fourwf,weight_r,weight_i)
+          cpw = czero
+          do ig = 1, npw_k
+            cpw = cpw + phgr(ig)*CONJG(CMPLX(bra_mesh(1,ig),bra_mesh(2,ig)))
+          end do
+          cpw = cpw*ormesh_fac
+          work(1,:,:,:) = work(1,:,:,:)*REAL(cpw) - work(2,:,:,:)*AIMAG(cpw)
+ 
+          fofr(:,:,:) = fofr(:,:,:) + work(1,:,:,:)
   
           ! factor of two because we are skipping explicit sums over eps_alpha,beta,gamma and second
           ! term appears from symmetry
@@ -2222,6 +2243,7 @@ subroutine nonlocal_me_mesh(adir,atindx,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
   ABI_SFREE(bra_mesh)
   ABI_SFREE(ket_mesh)
   ABI_SFREE(work)
+  ABI_SFREE(phgr)
 
 end subroutine nonlocal_me_mesh
 !!***
