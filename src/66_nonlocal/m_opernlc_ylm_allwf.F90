@@ -315,6 +315,9 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
        nlmso = (lmax_so+1)**2*((lmax_so+1)**2+1)/2
        ABI_MALLOC(ls_ylm_so,(2,nlmso,2))
        call ls_ylm(ls_ylm_so, lmax_so)
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(to:ls_ylm_so) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
      end if
    end if
  end if
@@ -924,6 +927,9 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
   end if ! NC+SO dgxdtfac
 
  if (lmax_so > 0) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:ls_ylm_so) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
    ABI_FREE(ls_ylm_so)
  end if
 

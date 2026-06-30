@@ -288,7 +288,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    ! Note that we use ndat__, since when nspinor 2 with nvloc 1, we can compute <g|vlocal1|u> for all ndat bands and the two spinor components
    ! with a single call to fourwf.
    ndat__ = ndat
-   !if (gs_hamkq%nvloc==1) ndat__ = ndat * gs_hamkq%nspinor ! TODO: Activate after testing
+   if (gs_hamkq%nvloc==1) ndat__ = ndat * gs_hamkq%nspinor
 
 !#ifdef _DEV_USE_WORK
    ABI_MALLOC(work,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6*ndat__))
@@ -309,9 +309,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,ndat__,gs_hamkq%ngfft,&
        npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight, gpu_option=gs_hamkq%gpu_option)
 
-     if(gs_hamkq%nspinor==2)then
+     if(gs_hamkq%nspinor==2 .and. ndat__ == ndat)then
+       ! Note: when ndat__ = ndat*nspinor (nvloc==1), fourwf above already handles both spinors — this block is skipped.
        ABI_CHECK_IEQ(ndat, 1, "ndat > 1 with nspinor 2 and nspden 1 is buggy")
-       ! MG TODO: This section is superflous: Calling fourwf above with ndat * nspinor instead of ndat should be enough.
        ABI_MALLOC(cwave_sp,(2,npw))
        ABI_MALLOC(gh1c_sp,(2,npw1))
 !$OMP PARALLEL DO
