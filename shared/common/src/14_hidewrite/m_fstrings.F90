@@ -111,6 +111,8 @@ MODULE m_fstrings
    module procedure sjoin_5
    module procedure sjoin_6
    module procedure sjoin_7
+   module procedure sjoin_8
+   module procedure sjoin_9
  end interface sjoin
 
  interface strcat
@@ -960,19 +962,63 @@ end function sjoin_6
 !! sjoin_7
 !!
 !! FUNCTION
-!!  Joins six strings with a space separator.
+!!  Joins seven strings with a space separator.
 !!
 
 pure function sjoin_7(str1,str2,str3,str4,str5,str6,str7) result(ostr)
 
  character(len=*),intent(in) :: str1,str2,str3,str4,str5,str6,str7
- character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+len_trim(str4)+len_trim(str5)+len_trim(str6)+len(str7)+6) &
+ character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+len_trim(str4)+len_trim(str5)+len_trim(str6)+len_trim(str7)+6) &
 &  :: ostr
 ! *********************************************************************
 
  ostr = sjoin_2(str1, sjoin_6(str2, str3, str4, str5, str6, str7))
 
 end function sjoin_7
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fstrings/sjoin_8
+!! NAME
+!! sjoin_8
+!!
+!! FUNCTION
+!!  Joins eight strings with a space separator.
+!!
+
+pure function sjoin_8(str1,str2,str3,str4,str5,str6,str7,str8) result(ostr)
+
+ character(len=*),intent(in) :: str1,str2,str3,str4,str5,str6,str7,str8
+ character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+len_trim(str4)+len_trim(str5)+len_trim(str6)+len_trim(str7)+len_trim(str8)+7) &
+&  :: ostr
+! *********************************************************************
+  
+ ostr = sjoin_2(str1, sjoin_7(str2, str3, str4, str5, str6, str7, str8))
+
+end function sjoin_8
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fstrings/sjoin_9
+!! NAME
+!! sjoin_9
+!!
+!! FUNCTION
+!!  Joins nine strings with a space separator.
+!!
+
+pure function sjoin_9(str1,str2,str3,str4,str5,str6,str7,str8,str9) result(ostr)
+
+ character(len=*),intent(in) :: str1,str2,str3,str4,str5,str6,str7,str8,str9
+ character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+len_trim(str4)+len_trim(str5)+len_trim(str6)+len_trim(str7)+len_trim(str8)+len_trim(str9)+8) &
+&  :: ostr
+! *********************************************************************
+
+ ostr = sjoin_2(str1, sjoin_8(str2, str3, str4, str5, str6, str7, str8, str9))
+
+end function sjoin_9
 !!***
 
 !----------------------------------------------------------------------

@@ -327,6 +327,7 @@ CONTAINS  !=====================================================================
 !! plowan_lcalc(sum_plowan_natom Plowan_nbl()) = index of l value for Wannier construction
 !! plowan_natom = nb of atoms for Wannier
 !! plowan_nbl(plowan_natom) = nb of l values for Wannier for each atoms.
+!! nl = nb of l values for Wannier for all atoms.
 !! plowan_nt = nb of atoms for real space calculation
 !! plowan_projcalc(sum_plowan_natom Plowan_nbl()) = index of projectors for Wannier construction
 !! acell_orig(3,nimage) = cell parameters
@@ -348,18 +349,18 @@ CONTAINS  !=====================================================================
 
 
 subroutine init_plowannier(plowan_bandf,plowan_bandi,plowan_compute,plowan_iatom,plowan_it,&
-&plowan_lcalc,plowan_natom,plowan_nbl,plowan_nt,plowan_projcalc,acell_orig,kpt,nimage,nkpt,&
+&plowan_lcalc,plowan_natom,plowan_nbl,plowan_nt,plowan_projcalc,acell_orig,kpt,nl,nimage,nkpt,&
 &nspinor,nsppol,wtk,t2g,wan)
 
 !Arguments ----------------------------------
 !scalars
 ! type(dataset_type), intent(in) :: dtset
  integer,intent(in) ::plowan_bandi,plowan_bandf,plowan_natom,plowan_nt,plowan_compute
- integer,intent(in) ::nkpt,nsppol,nspinor,nimage,t2g
+ integer,intent(in) ::nkpt,nsppol,nspinor,nimage,t2g,nl
  integer,intent(in) ::plowan_iatom(plowan_natom)
  integer,intent(in) ::plowan_nbl(plowan_natom)
- integer,intent(in) ::plowan_lcalc(sum(plowan_nbl(:)))
- integer,intent(in) ::plowan_projcalc(sum(plowan_nbl(:)))
+ integer,intent(in) ::plowan_lcalc(nl)
+ integer,intent(in) ::plowan_projcalc(nl)
  integer,intent(in) ::plowan_it(plowan_nt*3)
  real(dp),intent(in) :: kpt(3,nkpt)
  real(dp),intent(in) :: wtk(nkpt)
@@ -2451,7 +2452,7 @@ t2g=dtset%dmft_t2g
  call init_plowannier(bandf,bandi,dtset%plowan_compute,&
      &dtset%plowan_iatom,dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,&
      &dtset%plowan_nbl,dtset%plowan_nt,dtset%plowan_projcalc,dtset%acell_orig,&
-     &dtset%kptns,dtset%nimage,dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%wtk,dtset%dmft_t2g,wan_out)
+     &dtset%kptns,sum(dtset%plowan_nbl),dtset%nimage,dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%wtk,dtset%dmft_t2g,wan_out)
 
  call destroy_plowannier(wan_in)
 
@@ -2526,7 +2527,7 @@ end subroutine get_plowannier
    call init_plowannier(wanibz%bandf_wan,wanibz%bandi_wan,dtset%plowan_compute,&
      &dtset%plowan_iatom,dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,&
      &dtset%plowan_nbl,dtset%plowan_nt,dtset%plowan_projcalc,dtset%acell_orig,&
-     &kmesh%bz,dtset%nimage,kmesh%nbz,dtset%nspinor,dtset%nsppol,wtk,dtset%dmft_t2g,wanbz)
+     &kmesh%bz,sum(dtset%plowan_nbl),dtset%nimage,kmesh%nbz,dtset%nspinor,dtset%nsppol,wtk,dtset%dmft_t2g,wanbz)
 
    write(msg,'(a)')" Reconstruction of the full Brillouin Zone using data.plowann in the IBZ"
    call wrtout(std_out,msg,'COLL');call wrtout(ab_out,msg,'COLL')

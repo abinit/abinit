@@ -13,6 +13,7 @@ gstore_use_lgk 1   # IMPORTANT FOR PERFORMANCE
 ecuteps  2         # Cutoff energy for screening (cannot be larger than the one found in the SCR file)
 ecutsigx 25        # Cutoff energy for exchange part.
 boxcutmin 1.1
+#nbdbuf    10
 
 tolwfr 1e-8        # Tolerance for Sternheimer solver.
 nstep 150          # Max number of iterations in Sternheimer solver.

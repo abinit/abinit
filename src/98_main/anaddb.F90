@@ -195,6 +195,12 @@ program anaddb
    call ddb_lw_copy(ddb, ddb_lw, ddb_hdr)
  end if
 
+! Acoustic Sum Rule call 
+ if (dtset%flexoflag == 1 .and. dtset%asr == 6) then
+    call driver%get_dcdq(dtset, ddb, ddb_lw, ddb_hdr)
+    write(msg, '(a, a)' )' IFCs derivatives read',ch10
+   call wrtout(units, msg)
+ end if
  ! MR: Second- and third-order total energy derivatives calculated with the
  ! magnetic penalty (constrained DFPT) are converted to physically relevant ones here.
  if (abs(dtset%magpen) > tol8) then
@@ -230,8 +236,7 @@ program anaddb
 ! Acoustic Sum Rule
 ! In case the interatomic forces are not calculated, the
 ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
- call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal%xcart)
-
+ call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal, dtset%sys_dim, driver%dcdq, driver%dcdqdq)
 
 ! Open netcdf output and write basic quantities
  call driver%open_write_nc(ana_ncid, dtset, crystal, comm)
@@ -241,6 +246,11 @@ program anaddb
 ! Compute dielectric tensor, Born effective charges, and quadrupoles.
  if (driver%do_electric_tensors) then
    call driver%electric_tensors(dtset, crystal, ddb, ddb_lw, ddb_hdr, ana_ncid, comm)
+ end if
+
+ ! If low-dimensional systems, convert dielectric tensors if present
+ if (dtset%sys_dim>1 .and. dtset%dipdip>0) then
+   call driver%convertdim_dielt(crystal%rprimd, dtset%sys_dim,dtset%dielt_thick)
  end if
 
 ! Structural response at fixed polarization
@@ -257,6 +267,11 @@ program anaddb
 ! Interatomic force constants
  if (driver%do_ifc) then
    call driver%interatomic_force_constants(Ifc, dtset, crystal, ddb, ana_ncid, comm)
+   if (dtset%flexoflag /= 1 .and. dtset%asr == 6) then
+     write(msg, '(a, a)' )' IFCs derivatives computed from real-space moment',ch10
+     call wrtout(units, msg)
+     call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal, dtset%sys_dim, driver%dcdq, driver%dcdqdq)
+   end if
  end if
 
 ! Phonon density of states
@@ -421,3 +436,4 @@ program anaddb
 
  end program anaddb
 !!***
+

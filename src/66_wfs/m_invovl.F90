@@ -45,7 +45,12 @@ MODULE m_invovl
  use m_prep_kgb,    only : prep_nonlop
 
 #ifdef HAVE_FC_ISO_C_BINDING
+! FIXME Don't know what's wrong with GCC when OpenMP GPU Offload is enabled here...
+#ifdef FC_GNU
+ use, intrinsic :: iso_c_binding, only : c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc
+#else
  use, intrinsic :: iso_c_binding, only : c_ptr, c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc
+#endif
 #endif
 
 #if defined(HAVE_GPU_MARKERS)
@@ -180,6 +185,7 @@ end type invovl_kpt_type
  !Module variable keeping track of which K-point data is so=tored on GPU
  integer, save :: current_ikpt_in_gpu=-1
  integer, save :: gpu_initialized=0
+ integer, save :: mod__cplx=0, mod__nprojs=0
 #endif
 
 #if defined(HAVE_GPU_CUDA)
@@ -302,10 +308,19 @@ CONTAINS
  subroutine alloc_ompgpu_buffers(cplx,nprojs,nspinor,ndat)
   integer,intent(in) :: cplx,nprojs,nspinor,ndat
 
-  if(gpu_initialized == 0) then
+  if(gpu_initialized == 0 .or. mod__cplx/=cplx .or. mod__nprojs/=nprojs) then
+
+    if(gpu_initialized==1) then
+      ABI_FREE(proj_ompgpu)
+      ABI_FREE(sm1proj_ompgpu)
+      ABI_FREE(PtPsm1proj_ompgpu)
+    end if
+
     ABI_MALLOC(proj_ompgpu,       (cplx,nprojs,nspinor*ndat))
     ABI_MALLOC(sm1proj_ompgpu,    (cplx,nprojs,nspinor*ndat))
     ABI_MALLOC(PtPsm1proj_ompgpu, (cplx,nprojs,nspinor*ndat))
+
+    mod__cplx=cplx; mod__nprojs=nprojs
 
     !FIXME Smater buffer management ?
     !!$OMP TARGET ENTER DATA MAP(alloc:proj_ompgpu,sm1proj_ompgpu,PtPsm1proj_ompgpu)
@@ -1334,7 +1349,7 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
   else
     cplx = 1
   end if
-  if(gpu_initialized == 0) call alloc_ompgpu_buffers(cplx,nprojs,nspinor,ndat)
+  call alloc_ompgpu_buffers(cplx,nprojs,nspinor,ndat)
   proj => proj_ompgpu
   sm1proj => sm1proj_ompgpu
   PtPsm1proj => PtPsm1proj_ompgpu
