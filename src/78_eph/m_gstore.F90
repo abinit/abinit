@@ -4068,7 +4068,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
        ! and we don't want random numbers written to disk.
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
 
-       if (symmetrize .and. isirr_k) then
+       if (symmetrize .and. .not. isirr_k) then
          state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING; cycle
        end if
 
@@ -6902,7 +6902,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
            ! S_tot^-1 = tsign_tot * transpose(symrec).
            symrec_inv = transpose(cryst%symrec(:,:,isym_tot))
            kk_base = tsign_tot * matmul(symrec_inv, gstore%kbz(:, ik_glob))
-           q_base  = tsign_tot * matmul(symrec_inv, gstore%qbz(:, iq_glob))
+           q_base  = tsign_tot * matmul(real(cryst%symrel(:,:,isym_tot), dp), gstore%qbz(:, iq_glob))
 
            ! Find q_base in global qbz
            iq_base_glob = -1
@@ -6922,6 +6922,13 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
            end do
            if (ik_base_glob == -1) cycle
 
+           if (ik_glob == 22 .and. iq_glob == 1) then
+             print *, "DEBUG 22, 1: isym_tot=", isym_tot, "trev_tot=", trev_tot
+             print *, "DEBUG 22, 1: ik_base_glob=", ik_base_glob, "iq_base_glob=", iq_base_glob
+             if (ik_base_glob /= -1 .and. iq_base_glob /= -1) then
+               print *, "DEBUG 22, 1: state_kq=", state_kq(ik_base_glob, iq_base_glob)
+             end if
+           end if
            if (state_kq(ik_base_glob, iq_base_glob) == GSTORE_KQ_COMPUTED) then
              ik_ibz = -1
              do ii = 1, gstore%nkibz

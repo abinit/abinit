@@ -214,13 +214,12 @@ end subroutine get_point_group
 !! OUTPUT
 !! nclass=The number of classes
 !! nelements(1:nclass)=For each class, the number of elements
-!! elements_idx(ii,1:nclass)=For each class, this table gives the index
-!!   of its elements (ii=1,..,nelements(iclass))
+!! elements_idx(ii,1:nclass)=For each class, this table gives the index of its elements (ii=1,..,nelements(iclass))
 !!
 !! NOTES
 !!  * A class is defined as the set of distinct elements obtained by
 !!    considering for each element, S, of the group all its conjugate
-!!    elements X^-1 S X where X range over all the elements of the group.
+!!    elements X^-1 S X where X ranges over all the elements of the group.
 !!
 !!  * It does not work in case of non-collinear magnetism.
 !!
@@ -251,18 +250,18 @@ subroutine get_classes(nsym, sym, nclass, nelements, elements_idx)
  identity=RESHAPE((/1,0,0,0,1,0,0,0,1/),(/3,3/)); found_identity=.FALSE.
 
  do isym=1,nsym
-   if (ALL(sym(:,:,isym)==identity)) then
-     found_identity=.TRUE.; identity_idx=isym; EXIT
+   if (all(sym(:,:,isym) == identity)) then
+     found_identity=.TRUE.; identity_idx=isym; exit
    end if
  end do
- if (.not.found_identity.or.identity_idx/=1) then
-   write(msg,'(3a)')&
-    'Either identity is not present or it is not the first operation ',ch10,&
-    'check set of symmetry operations '
+
+ if (.not. found_identity .or. identity_idx /= 1) then
+   write(msg, '(3a)')&
+    'Either identity is not present or it is not the first operation ',ch10,'Check set of symmetry operations '
    ABI_ERROR(msg)
  end if
 
- dummy_symafm=1
+ dummy_symafm = 1
  call sg_multable(nsym, dummy_symafm, sym, ierr)
  ABI_CHECK(ierr == 0, "Error in group closure")
 

@@ -316,8 +316,7 @@ subroutine sg_multable(nsym, symafm, symrel, ierr, &
 
    if (.not. found_inv) then
      if(echo == 1) then
-       write(msg,'(a,i0,2a)')&
-        "Cannot find the inverse of symmetry operation ",sym1,ch10,"Input symmetries do not form a group "
+       write(msg,'(a,i0,2a)')"Cannot find the inverse of symmetry operation ",sym1,ch10,"Input symmetries do not form a group "
        ABI_WARNING(msg)
        echo = 0
      endif
@@ -389,8 +388,7 @@ subroutine sg_multable(nsym, symafm, symrel, ierr, &
 
  !write(std_out,*)' final value of nptsymm=',nptsymm
 
- ! 4)
- !Check closure under composition and construct multiplication table of ptsymrel
+ ! 4) Check closure under composition and construct multiplication table of ptsymrel
  echo = 1
  do ptsymm1=1,nptsymm
    sym1=list_symrel(1,ptsymm1)
@@ -455,10 +453,8 @@ subroutine sg_multable(nsym, symafm, symrel, ierr, &
        !for each point symmetries is indeed present in the table.
        !This is done to save CPU time when the number of symmetry operations is bigger than 384.
 
-       if (nsym>384 .and. .not.(present(multable))) then
-         if(ptsymm2/=1 .and. sym2/=list_symrel(1,ptsymm2))then
-           cycle
-         endif
+       if (nsym >384 .and. .not.(present(multable))) then
+         if(ptsymm2/=1 .and. sym2/=list_symrel(1,ptsymm2)) cycle
        end if
 
        !if(ptsymm2<1 .or. ptsymm2>48)then
@@ -532,8 +528,7 @@ subroutine sg_multable(nsym, symafm, symrel, ierr, &
  ABI_FREE(list_symrel)
  ABI_FREE(ptsymm)
  ABI_FREE(tnons_)
-
-!write(std_out,*)' m_symtk%sg_multable : exit '
+ !write(std_out,*)' m_symtk%sg_multable : exit '
 
  end subroutine sg_multable
 !!***
@@ -581,7 +576,6 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
  real(dp) :: prods(3,3),rmet_sym(3,3),rprimd_sym(3,3)
 ! *************************************************************************
 
-!DEBUG
 !write(std_out,'(a,i3)') ' chkorthsy : enter, iexit= ',iexit
 !write(std_out,'(a,i3)') ' nsym=',nsym
 !do isym=1,nsym
@@ -595,7 +589,6 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
 !do ii=1,3
 !  write(std_out, '(3es16.8)')rmet(:,ii)
 !enddo
-!ENDDEBUG
 
  rmet2=zero
  do ii=1,3
@@ -615,8 +608,8 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
                       symrel(3,ii,isym)*rprimd(:,3)
    end do
 
-   !  If the new lattice is the same as the original one,
-   !  the lengths and angles are preserved
+   ! If the new lattice is the same as the original one,
+   ! the lengths and angles are preserved.
    do ii=1,3
      rmet_sym(ii,:)=rprimd_sym(1,ii)*rprimd_sym(1,:)+&
                     rprimd_sym(2,ii)*rprimd_sym(2,:)+&
@@ -707,15 +700,13 @@ end subroutine chkorthsy
 !! chkprimit
 !!
 !! FUNCTION
-!! Check whether the cell is primitive or not.
-!! If chkprim/=0 and the cell is non-primitive, stops.
+!! Check whether the cell is primitive or not. If chkprim/=0 and the cell is non-primitive, stops.
 !!
 !! INPUTS
 !! chkprim= if non-zero, check that the unit cell is primitive.
-!! nsym=actual number of symmetries
-!! symafm(nsym)= (anti)ferromagnetic part of symmetry operations
-!! symrel(3,3,nsym)= nsym symmetry operations in real space in terms
-!!   of primitive translations
+!! nsym=actual number of symmetries.
+!! symafm(nsym)= (anti)ferromagnetic part of symmetry operations.
+!! symrel(3,3,nsym)= nsym symmetry operations in real space in terms of primitive translations.
 !!
 !! OUTPUT
 !!  multi=multiplicity of the unit cell
@@ -742,8 +733,7 @@ subroutine chkprimit(chkprim, multi, nsym, symafm, symrel, is_translation)
  if(present(is_translation)) is_translation(:)=0
 
 !Loop over each symmetry operation of the Bravais lattice
-!Find whether it is the identity, or a pure translation,
-!without change of sign of the spin
+!Find whether it is the identity, or a pure translation, without change of sign of the spin
  multi=0
  do isym=1,nsym
    if( abs(symrel(1,1,isym)-1)+&
@@ -795,9 +785,6 @@ end subroutine chkprimit
 !! nsym=number of symmetries
 !! rprimd(3,3)=dimensional primitive translations for real space (bohr)
 !! rprimd_new(3,3)=new dimensional primitive translations for real space (bohr)
-!!
-!! OUTPUT
-!!  (see side effects)
 !!
 !! SIDE EFFECTS
 !! Input/Output
@@ -893,7 +880,7 @@ end subroutine symrelrot
 !! littlegroup_q
 !!
 !! FUNCTION
-!! Determines the symmetry operations by which reciprocal vector q is preserved,
+!! Determines the symmetry operations by which the reciprocal vector qpt is preserved,
 !! modulo a primitive reciprocal lattice vector, and the time-reversal symmetry.
 !!
 !! INPUTS
@@ -901,26 +888,23 @@ end subroutine symrelrot
 !! qpt(3)= vector in reciprocal space
 !! symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal space)
 !! [prtvol]=integer flag defining the verbosity of output. =0 if no output is provided.
-!! prtgkk= integer flag. If 1 provide output of electron-phonon "gkk" matrix elements, for further
+!! use_sym= integer flag. If 1 provide output of electron-phonon "gkk" matrix elements, for further
 !!     treatment by mrggkk utility or anaddb utility. If 0 no output is provided.
 !!
 !! OUTPUT
 !! symq(4,2,nsym)= three first numbers define the G vector;
 !!     fourth number is zero if the q-vector is not preserved, 1 otherwise
 !!     second index is one without time-reversal symmetry, two with time-reversal symmetry
-!! timrev=1 if the time-reversal symmetry preserves the wavevector,
-!!   modulo a reciprocal lattice vector (in principle, see below).
+!! timrev=1 if the time-reversal symmetry preserves the wavevector, modulo a reciprocal lattice vector (in principle, see below).
 !!
 !! NOTES
 !! The condition is: $q =  O S(q) - G$
-!!
 !! with O being either the identity or the time reversal symmetry (= inversion in reciprocal space)
 !! and G being a primitive vector of the reciprocal lattice.
 !! If the time-reversal (alone) also preserves q, modulo a lattice vector, then timrev is set to 1, otherwise 0.
 !!
 !! TODO
-!! timrev is put to 1 only for Gamma.
-!! Better handling should be provided in further version.
+!! timrev is put to 1 only for Gamma. Better handling should be provided in further version.
 !!
 !! SOURCE
 
@@ -1042,8 +1026,6 @@ end subroutine littlegroup_q
 !! symrel(3,3,nsym)=symmetry operators in terms of action on primitive translations
 !! tnons(3,nsym) = nonsymmorphic translations
 !! xred(3,natom)=locations of atoms in reduced coordinates
-!!
-!! OUTPUT
 !!
 !! SIDE EFFECTS
 !! mat3(3,3) = matrix to be symmetrized, in cartesian frame
@@ -1379,9 +1361,7 @@ subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
  real(dp):: aa(3,3),ait(3,3),cell_base(3,3),gprimd(3,3),rmet(3,3),rprimd_new(3,3)
 ! *************************************************************************
 
-!DEBUG
 !write(std_out,'(a)') ' symmetrize_rprimd : enter '
-!ENDDEBUG
 
 !Build the conventional cell basis vectors in cartesian coordinates
  aa(:,1)=bravais(3:5)
@@ -1393,22 +1373,18 @@ subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
    cell_base(:,ii)=ait(ii,1)*rprimd(:,1)+ait(ii,2)*rprimd(:,2)+ait(ii,3)*rprimd(:,3)
  end do
 
-!DEBUG
 !write(std_out,'(a)') ' before holocell, cell_base ='
 !do ii=1,3
 !  write(std_out,'(3es16.8)') cell_base(:,ii)
 !enddo
-!ENDDEBUG
 
 !Enforce the proper holohedry on the conventional cell vectors.
  call holocell(cell_base,1,foundc,bravais(1),tolsym)
 
-!DEBUG
 !write(std_out,'(a)') ' after holocell, cell_base ='
 !do ii=1,3
 !  write(std_out,'(3es16.8)') cell_base(:,ii)
 !enddo
-!ENDDEBUG
 
 !Reconstruct the dimensional primitive vectors
  do ii=1,3
@@ -1567,7 +1543,6 @@ end subroutine symmetrize_tnons
 !! mismatch_fft_tnons=(optional) At input, needs to be present for tnons_new to be computed
 !!    Atd output : non-zero if there is a mismatch between the fft grid and the tnons, gives the number
 !!   of the first symmetry operation for which there is such a mismatch. Zero otherwise.
-
 !!
 !! SOURCE
 
@@ -1598,8 +1573,7 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
  real(dp) :: transl(3) ! translation vector
 ! *************************************************************************
 
-!Check whether group contains more than identity;
-!if not then simply return after possible copying
+!Check whether group contains more than identity, if not then simply return after possible copying.
  if(present(tnons_new))then
    tnons_new(:,1:nsym)=tnons(:,1:nsym)
  endif
@@ -1607,7 +1581,6 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
  if(present(mismatch_fft_tnons))mismatch_fft_tnons=0
 
  if (nsym>1) then
-
    ! write(std_out,*)
    ! write(std_out,'(a,i4)') 'symmetrize_xred: enter, nsym=',nsym
    ! do iatom=1,natom
@@ -1827,15 +1800,12 @@ subroutine symchk(difmin,eatom,natom,tratom,transl,trtypat,typat,xred)
  real(dp) :: test,test1,test2,test3,testmn
 ! *************************************************************************
 
-!DEBUG
 ! write(std_out,'(a,a,i4,3f18.12)') ch10,' symchk : enter, trtypat,tratom=',trtypat,tratom
-!ENDDEBUG
 
 !Start testmn out at large value
  testmn=1000000.d0
 
-!Loop through atoms--
-!when types agree, check for agreement after primitive translation
+!Loop through atoms. when types agree, check for agreement after primitive translation
  jatom=1
  do iatom=1,natom
    if (trtypat/=typat(iatom)) cycle
@@ -1924,13 +1894,6 @@ end subroutine symchk
 !! rotated by $inv(S)$.  Integer gives primitive translation coordinates to get
 !! back to original unit cell.
 !! Equivalent to $S*t(b)+tnons-x(a)=another$ $integer$ for $x(b)=x(inv(S))$.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !! natom=number of atoms in cell.
@@ -2302,17 +2265,13 @@ end subroutine symcharac
 !! For proper symmetries (rotations), the
 !! associated translation is determined.
 !!
-!! There is a subtlety with translations associated with rotations :
-!! all the rotations with axis
-!! parallel to the one analysed do not all have the
+!! There is a subtlety with translations associated with rotations:
+!! all the rotations with axis parallel to the one analysed do not all have the
 !! same translation characteristics. This is clearly seen
-!! in the extended Hermann-Mauguin symbols, see the international
-!! table for crystallography, chapter 4.
+!! in the extended Hermann-Mauguin symbols, see the internationa table for crystallography, chapter 4.
 !! In the treatment that we adopt, one will distinguish
-!! the cases of primitive Bravais lattices, and centered
-!! bravais lattices. In the latter case, in the present routine,
-!! at the exception of the trigonal axis for the
-!! cubic system, we explicitely generate the correct ratio of different
+!! the cases of primitive Bravais lattices, and centered bravais lattices. In the latter case, in the present routine,
+!! at the exception of the trigonal axis for the cubic system, we explicitely generate the correct ratio of different
 !! translations, so that their type can be explicitely assigned,
 !! without confusion. By contrast, for primitive lattices,
 !! the "tnons" that has been transmitted to the present routine

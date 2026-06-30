@@ -3,8 +3,7 @@
 !! m_esymm
 !!
 !! FUNCTION
-!! This module defines structures and provides procedures used to find
-!! the irreducible representations associated to electronic eigenstates.
+!! Objects and procedures to find the irreducible representations associated to electronic eigenstates.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2026 ABINIT group (MG)
@@ -68,7 +67,7 @@ module m_esymm
  type,public :: esymm_t
 
   integer :: nspinor
-  ! Number of spinorial components.
+  ! Number of spinor components.
 
   integer :: first_ib
   ! Index of the first treated band.
@@ -113,43 +112,44 @@ module m_esymm
   real(dp) :: kpt(3)
   ! The crystalline momentum of the wavefunctions in reduced coordinates.
 
-  character(len=500) :: err_msg="None"
+  character(len=500) :: err_msg = "None"
+  ! Error message:
 
   integer,allocatable :: g0(:,:)
-  ! g0(3,nsym_gk)
+  ! (3,nsym_gk)
   ! The umklapp g0 vector associated to each little group operation.
 
   integer,allocatable :: tr_g0(:,:)
-  ! tr_g0(3,nsym_trgk)
+  ! (3,nsym_trgk)
   ! The umklapp g0 vector associated to each little group operation.
 
   integer :: ndegs
   ! Number of degenerate states.
 
   integer,allocatable :: nelements(:)
-  ! nelements(nclass)
+  ! (nclass)
   ! Number of symmetry operations in each class.
 
   integer,allocatable :: sgk2symrec(:)
-  ! sgk2symrec(nsym_gk)
+  ! (nsym_gk)
   ! Mapping between the symmetries of the group of k and the symrec(l) array.
   ! The symmetries of the little group are always packed in classes to facilitate
   ! the calculation of the character of the irrep. Abinit symmetries are randomly ordered.
 
   integer,allocatable :: tr_sgk2symrec(:)
-  ! trsgk2symrec(nsym_trgk)
+  ! (nsym_trgk)
   ! Mapping between the symmetries of the group of k and the symrec(l) array.
   ! The symmetries of the little group are always packed in classes to facilitate
   ! the calculation of the character of the irrep. Abinit symmetries are randomly ordered.
 
   integer,allocatable :: herring_test(:)
-  ! herring_test(nclass)
+  ! (nclass)
   ! The result of Herring test for each irreducible representantion of the group of k.
   ! Possible values are: +1, 0, -1
 
   integer,allocatable :: b2irrep(:)
-  ! b2irrep(nbnds)
-  ! For each band, it gives the index of the irreducible representation in Ref_irreps.
+  ! (nbnds)
+  ! For each band, the index of the irreducible representation in Ref_irreps.
 
   type(coeffi1_type),allocatable :: irrep2b(:)
   ! irrep2b(0:nclass)%value(:)
@@ -164,7 +164,7 @@ module m_esymm
   !   degs_bounds(2,idg)= final band index of the degenerate set idg=1,ndegs
 
   integer,allocatable :: degs_dim(:)
-  ! degs_dim(ndegs)
+  ! (ndegs)
   ! Number of states in each degenerate subspace. Cannot be larger that nclass provided
   ! that no accidental degeneracy occurs.
 
@@ -175,21 +175,21 @@ module m_esymm
   ! Note that symmetries in sym are packed in classes.
 
   type(irrep_t),allocatable :: Calc_irreps(:)
-  ! Calc_irreps(ndegs)
-  !  The representations of the little group of k calculated from the wavefunctions. <\phi_nk|R_t|\phi_mk>
-  !  where R_t belong to the little group of k.
-  !  They represent an unitary irreducible representation provided that no accidental degeneracy occurs.
+  ! (ndegs)
+  ! The representations of the little group of k calculated from the wavefunctions. <\phi_nk|R_t|\phi_mk>
+  ! where R_t belong to the little group of k.
+  ! They represent an unitary irreducible representation provided that no accidental degeneracy occurs.
 
   type(irrep_t),allocatable :: trCalc_irreps(:)
-  ! trCalc_irreps(ndegs)
-  !  The representations of the little group of k calculated from the wavefunctions. <\phi_nk|R_t|\phi_mk>
-  !  where R_t belong to the little group of k.
-  !  They represent an unitary irreducible representation provided that no accidental degeneracy occurs.
+  ! (ndegs)
+  ! The representations of the little group of k calculated from the wavefunctions. <\phi_nk|R_t|\phi_mk>
+  ! where R_t belong to the little group of k.
+  ! They represent an unitary irreducible representation provided that no accidental degeneracy occurs.
 
   type(irrep_t),allocatable :: Ref_irreps(:)
-  ! Irreps(nclass)
-  !   Reference irreducible representations of the group of k derived from the point group
-  !   or from the external database downloaded from the Bilbao web site.
+  ! (nclass)
+  ! Reference irreducible representations of the group of k derived from the point group
+  ! or from the external database downloaded from the Bilbao web site.
 
  contains
    procedure :: init => esymm_init                         ! Initialize the object
@@ -238,7 +238,7 @@ contains
 !!
 !! NOTES
 !!   The present implementation does NOT work at zone border if the little group of
-!!   kpt_in is non-symmorphic namely thers is at lest a symmetry operation with non-zero tnons.
+!!   kpt_in is non-symmorphic namely there is at least a symmetry operation with non-zero tnons.
 !!
 !! SOURCE
 
@@ -261,7 +261,6 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
  integer :: iel,icls,msym,iord !isym1,!iprod,dim_irrep,icls2, isym2,isym_tr,
  integer :: spgroup,chkprim !,ptgroupma
  real(dp) :: mkt
- logical :: used_ptg = .FALSE.
  !complex(dp) :: phase_k
  character(len=5) :: ptgroup,ptgroup_name
  character(len=10) :: spgroup_str
@@ -273,12 +272,10 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
  real(dp) :: pmat1(3,3),pmat2(3,3),pmat3(3,3),pmat4(3,3),pmat5(3,3),pmat6(3,3)
  !real(dp) :: genafm(3)
  !integer :: rot2(3,3)
- !integer,allocatable :: mtab(:,:)
- integer,allocatable :: elements_idx(:,:),tmp_nelements(:)
- integer,allocatable :: found(:),symrec_fm(:,:,:),fm2symrec(:)
+ integer,allocatable :: elements_idx(:,:),tmp_nelements(:), found(:),symrec_fm(:,:,:),fm2symrec(:)
  integer,allocatable :: ksym_table(:,:,:),sgk(:,:,:),tr_sgk(:,:,:),dum_symafm(:)
  integer,allocatable :: new_idx(:),new_g0(:,:),tmp_symrec(:,:,:),conv_symrec(:,:,:) !,tr_conv_symrec(:,:,:)
- integer,allocatable :: dummy_symafm(:)
+ integer,allocatable :: dummy_symafm(:) !, mtab(:,:)
  real(dp) :: conv_gprimd(3,3),axes(3,3) !,tau2(3)
  !complex(dp),allocatable :: her_test(:) !,mat_test(:,:)
  complex(dp),allocatable :: phase_mkt(:)
@@ -288,9 +285,7 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
  esymm%err_status= ESYM_NOERROR
  inversion=RESHAPE((/-1,0,0,0,-1,0,0,0,-1/),(/3,3/))
 
- ! ====================================
- ! ==== Initialize basic variables ====
- ! ====================================
+ ! Initialize basic variables
  esymm%nspinor        = nspinor
  esymm%first_ib       = first_ib
  esymm%nbnds          = nbnds
@@ -301,12 +296,9 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
  esymm%has_chtabs     = .FALSE.
  esymm%kpt            = kpt_in(:)
  esymm%nonsymmorphic_at_zoneborder=.FALSE.
- !
- ! ===============================
- ! === Locate degenerate_bands ===
- ! ===============================
- esymm%ndegs=1
 
+ ! Locate degenerate_bands ===
+ esymm%ndegs=1
  ABI_MALLOC(degs_bounds,(2,nbnds))
  degs_bounds=0; degs_bounds(1,1)=1
 
@@ -327,9 +319,7 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
  ABI_MALLOC(esymm%b2irrep,(esymm%nbnds))
  esymm%b2irrep = 0
 
- ! ==================================
- ! ==== Find the group of kpt_in ====
- ! ==================================
+ ! Find the group of kpt_in.
  ! The small point group is the subset of symrec such that $ S q = q + g0 $
  ! Symmetries are packed in classes.
  ! For the time being, AFM symmetries are not treated.
@@ -410,15 +400,13 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
  ABI_FREE(symrec_fm)
  ABI_FREE(fm2symrec)
 
-! ==========================================
-! ==== Divide the operations in classes ====
-! ==========================================
+ ! Divide the operations into classes.
  ABI_MALLOC(dum_symafm, (esymm%nsym_gk))
  dum_symafm = 1
 
  ! Check group closure
- call sg_multable(esymm%nsym_gk,dum_symafm,sgk,grp_ierr)
- ABI_CHECK(grp_ierr == 0, "sg_multable failed")
+ call sg_multable(esymm%nsym_gk, dum_symafm, sgk, grp_ierr)
+ ABI_CHECK_IEQ(grp_ierr, 0, "sg_multable failed")
  ABI_FREE(dum_symafm)
 
  ABI_MALLOC(tmp_nelements, (esymm%nsym_gk))
@@ -524,7 +512,6 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
 
    ! 1) Retrieve the rotation matrices and the irreducible representations (Bilbao setting).
    call point_group_init(Ptg,ptgroup)
-   used_ptg = .TRUE.
 
    esymm%has_chtabs = .TRUE.
    ABI_CHECK(esymm%nclass == Ptg%nclass,"esymm%nclass/=Ptg%nclass!")
@@ -707,12 +694,12 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
        else if ( ABS(her_test(irp) + Ptg%nsym) < tol6 ) then
          esymm%herring_test(irp) = -1
        else
-         write(msg,'(a,i2,2a,i0,a,i2)')&
-&          "Herring test for the irreducible representation number ",irp,ch10,&
-&          "gave ",esymm%herring_test(irp),", while it should be 0 or +- ",Ptg%nsym
+         write(msg,'(a,i0,2a,i0,a,i0)')&
+           "Herring test for the irreducible representation number ",irp,ch10,&
+           "gave ",esymm%herring_test(irp),", while it should be 0 or +- ",Ptg%nsym
           ABI_WARNING(msg)
-          esymm%err_msg   =msg
-          esymm%err_status=esymm_HERRING_WRONG_TEST
+          esymm%err_msg = msg
+          esymm%err_status = ESYMM_HERRING_WRONG_TEST
        end if
      end do
 
@@ -786,9 +773,7 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
    esymm%degs_dim(idg) = dim_degs
 
    call esymm%Calc_irreps(idg)%init(esymm%nsym_gk, dim_degs)
-   if (esymm%can_use_tr) then
-     call esymm%trCalc_irreps(idg)%init(esymm%nsym_trgk, dim_degs)
-   end if
+   if (esymm%can_use_tr) call esymm%trCalc_irreps(idg)%init(esymm%nsym_trgk, dim_degs)
  end do ! idg
 
  if (esymm%has_chtabs) then
@@ -802,10 +787,11 @@ subroutine esymm_init(esymm, kpt_in, Cryst, only_trace, nspinor, first_ib, nbnds
    end if
  end if
 
- DBG_EXIT("COLL")
 
  ABI_FREE(dummy_symafm)
- if (used_ptg) call Ptg%free()
+ call Ptg%free()
+
+ DBG_EXIT("COLL")
 
 end subroutine esymm_init
 !!***
@@ -1027,13 +1013,9 @@ subroutine esymm_finalize(esymm, prtvol)
  character(len=500) :: msg
 !arrays
  integer,allocatable :: dims_seen(:)
- complex(dp),allocatable :: traces_seen(:,:)
- complex(dp),pointer :: trace(:)
- complex(dp),pointer :: calc_mat(:,:),trace1(:),trace2(:)
- complex(dp),allocatable :: cidentity(:,:)
+ complex(dp),allocatable :: traces_seen(:,:), cidentity(:,:)
+ complex(dp),pointer :: trace(:), calc_mat(:,:),trace1(:),trace2(:)
 ! *************************************************************************
-
- !@esymm_t
 
  ! Each band is initialized as "Unknown".
  esymm%b2irrep = 0
@@ -1041,14 +1023,14 @@ subroutine esymm_finalize(esymm, prtvol)
  ! Force the matrices to be unitary.
  call polish_irreps(esymm%Calc_irreps)
 
- if (.not.esymm%has_chtabs) then
+ if (.not. esymm%has_chtabs) then
 
    write(msg,'(5a)')&
     "Reference character table not available. ",ch10,&
     "Symmetry analysis not available. Using heuristic method to classify the states.",ch10,&
     "It might not work, especially if accidental degeneracies are present."
    ABI_WARNING(msg)
-   !
+
    ! The simplest thing we can do here is using the calculated matrices to get the
    ! character and comparing the results hoping everything is OK.
    ABI_MALLOC(traces_seen,(esymm%nsym_gk,esymm%ndegs))
@@ -1075,7 +1057,7 @@ subroutine esymm_finalize(esymm, prtvol)
      end if
    end do
 
-   if (nseen>esymm%nclass) then
+   if (nseen > esymm%nclass) then
      write(msg, '(3a)') &
       "The number of different calculated traces is found to be greater than nclasses!",ch10,&
       "Heuristic method clearly failed. Symmetry analysis cannot be performed."
@@ -1154,13 +1136,10 @@ subroutine esymm_finalize(esymm, prtvol)
    write(msg,'(a,i0,a)')" Band classification algorithm was not able to classify ",size(esymm%irrep2b(0)%value)," states."
    ABI_WARNING(msg)
    esymm%err_status = ESYM_CLASSIFICATION_ERROR
-   esymm%err_msg    = msg
+   esymm%err_msg = msg
  end if
- !
- ! ==============================================================
- ! ==== Test basic properties of irreducible representations ====
- ! ==============================================================
 
+ ! Test basic properties of irreducible representations.
  if (.not. esymm%failed()) then
    ! 1) \sum_R \chi^*_a(R)\chi_b(R)= N_R \delta_{ab}
    !call wrtout(std_out," \sum_R \chi^*_a(R)\chi_b(R) = N_R \delta_{ab} ")
@@ -1268,8 +1247,8 @@ pure integer function which_irrep(esymm, trace, tolerr)
  which_irrep = 0
  if (esymm%has_chtabs) then ! Symmetry analysis can be performed.
    do irp=1,esymm%nclass
-     if ( ALL( ABS(esymm%Ref_irreps(irp)%trace(:) - trace(:)) < tolerr)) then
-       which_irrep = irp; EXIT
+     if (ALL(ABS(esymm%Ref_irreps(irp)%trace(:) - trace(:)) < tolerr)) then
+       which_irrep = irp; exit
      end if
    end do
  end if
@@ -1301,12 +1280,10 @@ subroutine esymm_symmetrize_mels(esymm, lbnd, ubnd, in_me, out_me)
 
 !Local variables-------------------------------
 !scalars
- integer :: idg1,b1_start,b1_stop,irp1
- integer :: idg2,b2_start,b2_stop,irp2
+ integer :: idg1,b1_start,b1_stop,irp1, idg2,b2_start,b2_stop,irp2
  integer :: ii,jj,ib,jb,kk,kb,lb,ll
  complex(dp) :: tr_ofd,ofd,dsd,tr_dsd
- type(irrep_t),pointer :: Irrep1, Irrep2
- type(irrep_t),pointer :: tr_Irrep1, tr_Irrep2
+ type(irrep_t),pointer :: Irrep1, Irrep2, tr_Irrep1, tr_Irrep2
 ! *********************************************************************
 
  if (esymm_failed(esymm)) then
@@ -1408,7 +1385,7 @@ subroutine polish_irreps(Irreps)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: ldvl1=1,ldvr1=1
+ integer,parameter :: ldvl1=1, ldvr1=1
  integer :: irp,sym,dim,ldvr,ii,ivec,jvec,info
  !character(len=500) :: msg
 !arrays

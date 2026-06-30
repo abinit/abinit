@@ -316,21 +316,21 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
          [dtset%optdriver, dtset%ionmov, dtset%optcell, dtset%iscf, dtset%paral_kgb], &
          dict_key="meta")
 
-     case(RUNL_RESPFN)
+     case (RUNL_RESPFN)
        call ydoc%add_ints("optdriver, rfddk, rfelfd, rfmagn, rfphon, rfstrs", &
          [dtset%optdriver, dtset%rfddk, dtset%rfelfd, dtset%rfmagn, dtset%rfphon, dtset%rfstrs], &
          ignore=0, dict_key="meta")
          ! dtset%rfdir ??
 
-     case(RUNL_NONLINEAR)
+     case (RUNL_NONLINEAR)
        call ydoc%add_ints("optdriver", [dtset%optdriver], &
          dict_key="meta")
 
-     case(RUNL_GWLS)
+     case (RUNL_GWLS)
        call ydoc%add_ints("optdriver", [dtset%optdriver], &
          dict_key="meta")
 
-     case(RUNL_WFK)
+     case (RUNL_WFK)
        call ydoc%add_ints("optdriver, wfk_task", &
          [dtset%optdriver, dtset%wfk_task] , dict_key="meta")
 
@@ -348,10 +348,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      case (RUNL_EPH)
        call ydoc%add_ints("optdriver, eph_task", [dtset%optdriver, dtset%eph_task] , dict_key="meta")
 
-     case(RUNL_LONGWAVE)
+     case (RUNL_LONGWAVE)
        call ydoc%add_ints("optdriver", [dtset%optdriver], dict_key="meta")
 
-     case(RUNL_RTTDDFT)
+     case (RUNL_RTTDDFT)
        call ydoc%add_ints("optdriver", [dtset%optdriver], dict_key="meta")
 
      case default
