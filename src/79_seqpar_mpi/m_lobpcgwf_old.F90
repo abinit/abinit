@@ -144,7 +144,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  real(dp), allocatable, target :: coordx1(:,:),coordx2(:,:),coordx3(:,:),lambda(:,:),grama(:,:),gramb(:,:),gramyx(:,:)
  real(dp), allocatable :: tmpgramb(:,:),transf3(:,:,:),transf5(:,:,:)
  real(dp), allocatable :: tsubham(:,:)
- type(pawcprj_type) :: cprj_dum(gs_hamk%natom,1)
+ type(pawcprj_type), allocatable :: cprj_dum(:,:)
  character(len=500) :: message
  character, dimension(2) :: cparam
  type(c_ptr) :: A_gpu,C_gpu,coordx2_gpu,coordx3_gpu,bblockvector_gpu,gram_gpu
@@ -231,6 +231,8 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    call alloc_on_gpu(coordx2_gpu,       INT(cplx, c_size_t)*dp*blocksize*blocksize)
    call alloc_on_gpu(coordx3_gpu,       INT(cplx, c_size_t)*dp*blocksize*blocksize)
  end if
+
+ ABI_MALLOC(cprj_dum, (gs_hamk%natom, 1))
 
  ! Work arrays eventually mapped on GPU via OpenMP
  ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*blocksize))
@@ -1252,6 +1254,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  ABI_FREE(gwavef)
  ABI_FREE(gvnlxc)
  ABI_FREE(swavef)
+ ABI_FREE(cprj_dum)
 
  if(use_linalg_gpu==1) then
    call dealloc_on_gpu(blockvectorr_gpu)
