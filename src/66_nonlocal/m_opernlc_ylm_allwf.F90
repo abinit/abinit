@@ -43,6 +43,8 @@ module m_opernlc_ylm_allwf
  real(dp), allocatable, target :: d2gxdtfac_2ndphase(:,:,:,:,:)
  real(dp), allocatable, target :: dgxdtfac_2ndphase(:,:,:,:,:)
  real(dp), allocatable, target :: gxfac_2ndphase(:,:,:,:)
+! Work buffer for NC+SO L.S matrix (pointer pattern for compiler robustness)
+ real(dp), allocatable, target :: ls_ylm_so_data(:,:,:)
 
 !----------------------------------------------------------------------
 
@@ -266,8 +268,8 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
  real(dp) :: ekb_so,ls_uu_im,ls_ud_re,ls_ud_im
 !arrays
  real(dp) :: enl_(2),gxfi(2),gxi(cplex),gxj(cplex)
- real(dp), allocatable :: ls_ylm_so(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: d2gxdtfac_(:,:,:,:,:),dgxdtfac_(:,:,:,:,:),gxfac_(:,:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: ls_ylm_so_(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: enl_ptr(:,:,:),enl_ptr2(:,:,:,:)
 
 ! *************************************************************************
@@ -304,7 +306,7 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
   enl_ptr => enl(:,:,:,1,iphase)
   enl_ptr2 => enl(:,:,:,:,iphase)
 
-!NC+SO: precompute L.S matrix once (reused by gxfac and dgxdtfac blocks below)
+!NC+SO: precompute L.S matrix once
  lmax_so = 0
  if (paw_opt==0.and.nspinortot==2.and.nspinor==nspinortot) then
    if (any(indlmn(6,1:nlmn)==2)) then
@@ -313,11 +315,12 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
      end do
      if (lmax_so > 0) then
        nlmso = (lmax_so+1)**2*((lmax_so+1)**2+1)/2
-       ABI_MALLOC(ls_ylm_so,(2,nlmso,2))
-       call ls_ylm(ls_ylm_so, lmax_so)
+       ABI_MALLOC(ls_ylm_so_data,(2,nlmso,2))
+       call ls_ylm(ls_ylm_so_data, lmax_so)
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET ENTER DATA MAP(to:ls_ylm_so) IF(gpu_option==ABI_GPU_OPENMP)
+       !$OMP TARGET ENTER DATA MAP(to:ls_ylm_so_data) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
+       ls_ylm_so_ => ls_ylm_so_data
      end if
    end if
  end if
@@ -360,7 +363,7 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
   if (lmax_so > 0) then
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET TEAMS DISTRIBUTE &
-     !$OMP& MAP(to:gxfac_,gx,indlmn,enl_ptr2,ls_ylm_so) &
+     !$OMP& MAP(to:gxfac_,gx,indlmn,enl_ptr2,ls_ylm_so_) &
      !$OMP& PRIVATE(idat) &
      !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
@@ -387,9 +390,9 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
                klm_so  = ilm*(ilm-1)/2 + jlm
                sign_so = -1
              end if
-             ls_uu_im = sign_so * ls_ylm_so(2,klm_so,1)
-             ls_ud_re = sign_so * ls_ylm_so(1,klm_so,2)
-             ls_ud_im = sign_so * ls_ylm_so(2,klm_so,2)
+             ls_uu_im = sign_so * ls_ylm_so_(2,klm_so,1)
+             ls_ud_re = sign_so * ls_ylm_so_(1,klm_so,2)
+             ls_ud_im = sign_so * ls_ylm_so_(2,klm_so,2)
              ! up-up
              gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,1,idat)=gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,1,idat) &
 &              - ekb_so*ls_uu_im*gx(2,jlmn+(ia-1)*nlmn+ibeg,1,idat)
@@ -821,7 +824,7 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
 
 !    --- Parallelization over spinors ---
    else if (nspinortot==2.and.nspinor/=nspinortot) then
-     ABI_BUG("nspinor==2 not supported with OpenMP GPU")
+     ABI_BUG("npspinor==2 not supported with OpenMP GPU")
    end if
 
   end if !paw_opt
@@ -867,7 +870,7 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
   if (optder>=1.and.lmax_so > 0) then
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET TEAMS DISTRIBUTE &
-     !$OMP& MAP(to:dgxdtfac_,dgxdt,indlmn,enl_ptr2,ls_ylm_so) &
+     !$OMP& MAP(to:dgxdtfac_,dgxdt,indlmn,enl_ptr2,ls_ylm_so_) &
      !$OMP& PRIVATE(idat) &
      !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
@@ -894,9 +897,9 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
                klm_so  = ilm*(ilm-1)/2 + jlm
                sign_so = -1
              end if
-             ls_uu_im = sign_so * ls_ylm_so(2,klm_so,1)
-             ls_ud_re = sign_so * ls_ylm_so(1,klm_so,2)
-             ls_ud_im = sign_so * ls_ylm_so(2,klm_so,2)
+             ls_uu_im = sign_so * ls_ylm_so_(2,klm_so,1)
+             ls_ud_re = sign_so * ls_ylm_so_(1,klm_so,2)
+             ls_ud_im = sign_so * ls_ylm_so_(2,klm_so,2)
              do mu=1,ndgxdtfac
                ! up-up
                dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat)=dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat) &
@@ -928,9 +931,9 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
 
  if (lmax_so > 0) then
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete:ls_ylm_so) IF(gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(delete:ls_ylm_so_data) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-   ABI_FREE(ls_ylm_so)
+   ABI_FREE(ls_ylm_so_data)
  end if
 
 !Accumulate dgxdtfac related to nonlocal operator (PAW)
