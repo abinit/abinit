@@ -198,7 +198,7 @@ module m_esymm
    procedure :: failed => esymm_failed                     ! True if symmetry analysis failed.
    procedure :: symmetrize_mels => esymm_symmetrize_mels   ! Symmetrize given matrix elements
    procedure :: free => esymm_free_0D                      ! Free memory
-
+   !procedure :: which_irrep => which_irrep
  end type esymm_t
 
  public :: esymm_free             ! Free memory
@@ -237,8 +237,8 @@ contains
 !!  EDIFF_TOL=tolerance below which two states are considered to belong to the same irreducible representation
 !!
 !! NOTES
-!!   The present implementation does NOT work at zone border if the little group of
-!!   kpt_in is non-symmorphic namely there is at least a symmetry operation with non-zero tnons.
+!!  The present implementation does NOT work at zone border if the little group of
+!!  kpt_in is non-symmorphic namely there is at least a symmetry operation with non-zero tnons.
 !!
 !! SOURCE
 

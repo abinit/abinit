@@ -70,6 +70,8 @@ module m_classify_bands
 !! dmats_t
 !!
 !! FUNCTION
+!! Store D_mn(S) = <psi_{mSk}| S | psi_{nk}> for all the k-points in the IBZ
+!! and the bands in brange_spin.
 !!
 !! SOURCE
 
@@ -964,8 +966,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
            do j=1, dmats%cryst%nsym
              if (all(matmul(dmats%cryst%symrel(:,:,j), dmats%cryst%symrel(:,:,isym)) == &
                  reshape((/1,0,0, 0,1,0, 0,0,1/), (/3,3/)))) then
-               isym_inv = j
-               exit
+               isym_inv = j; exit
              end if
            end do
 
@@ -1027,16 +1028,17 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
    ABI_FREE(cmat)
  end do ! spin
 
- ! Collect results on each MPI proc.
- do spin=1,nsppol
-   call xmpi_sum(dmats%for_spin(spin)%value, comm, ierr)
- end do
-
  ABI_FREE(ug1_box)
  ABI_FREE(ug2_box)
  ABI_FREE(work)
 
  call wfd%free()
+
+ ! Collect results on each MPI proc.
+ do spin=1,nsppol
+   call xmpi_sum(dmats%for_spin(spin)%value, comm, ierr)
+ end do
+
  call cwtime_report(" dmats_init:", cpu, wall, gflops)
 
 end subroutine dmats_init
@@ -1184,8 +1186,7 @@ subroutine dmats_check(dmats, units, prtvol, header)
          do j=1, dmats%cryst%nsym
            if (all(matmul(dmats%cryst%symrel(:,:,j), dmats%cryst%symrel(:,:,isym)) == &
                reshape((/1,0,0, 0,1,0, 0,0,1/), (/3,3/)))) then
-             isym_inv = j
-             exit
+             isym_inv = j; exit
            end if
          end do
 
@@ -1200,27 +1201,28 @@ subroutine dmats_check(dmats, units, prtvol, header)
            ! We just use the exact formula for group mult: isym1 = isym_inv, isym2 = isym
            phase_L = exp(cmplx(0.0_dp, -two_pi * sum(kk_ibz * L_red) + &
                      two_pi * sum(matmul(dmats%cryst%symrec(:,:,isym_inv), symtab(1:3, itime, isym)) * dmats%cryst%tnons(:,isym_inv)), dp))
+
            associate (cmat_inv => dmats%for_spin(spin)%value(:, :, isym_inv, itime, ik_ibz))
-             ! Extract the structural phase between the independently constructed matrices directly.
-             ! In ABINIT, extracting the full analytical phase factor requires accounting for
-             ! fractional non-symmorphic translations, reciprocal G_0 vector mappings, and potentially
-             ! the origin shifts internally tracked by the wavefunctions.
-             ! Instead of hard-coding the phase analytically, we dynamically extract the phase
-             ! difference (e^{i\phi}) by taking the Frobenius inner product of the two matrices:
-             ! Phase = Tr(A^\dagger B) / nb = sum_{ij} A^*_{ij} B_{ij} / nb.
-             ! If the matrices are truly proportional, Phase will be a scalar of unit magnitude,
-             ! and dividing by it will yield a mathematically exact equality test.
-             if (itime == 1) then
-               phase_L = sum( conjg(cmat_inv) * conjg(transpose(cmat)) ) / nb
-               err = maxval(abs(cmat_inv * (phase_L / abs(phase_L)) - conjg(transpose(cmat))))
-             else
-               phase_L = sum( conjg(cmat_inv) * transpose(cmat) ) / nb
-               err = maxval(abs(cmat_inv * (phase_L / abs(phase_L)) - transpose(cmat)))
-             end if
-             if (err >= DTOL .or. abs(abs(phase_L) - 1.0_dp) > DTOL) ierr = ierr + 1
-             call sym_dicts(isym_cnt)%set("inv_ok", s=yesno(err < DTOL .and. abs(abs(phase_L) - 1.0_dp) <= DTOL))
-             call sym_dicts(isym_cnt)%set("inv_err", r=err)
-             call sym_dicts(isym_cnt)%set("inv_phase", s=sjoin(ftoa(real(phase_L)), " + i ", ftoa(aimag(phase_L))))
+           ! Extract the structural phase between the independently constructed matrices directly.
+           ! In ABINIT, extracting the full analytical phase factor requires accounting for
+           ! fractional non-symmorphic translations, reciprocal G_0 vector mappings, and potentially
+           ! the origin shifts internally tracked by the wavefunctions.
+           ! Instead of hard-coding the phase analytically, we dynamically extract the phase
+           ! difference (e^{i\phi}) by taking the Frobenius inner product of the two matrices:
+           ! Phase = Tr(A^\dagger B) / nb = sum_{ij} A^*_{ij} B_{ij} / nb.
+           ! If the matrices are truly proportional, Phase will be a scalar of unit magnitude,
+           ! and dividing by it will yield a mathematically exact equality test.
+           if (itime == 1) then
+             phase_L = sum( conjg(cmat_inv) * conjg(transpose(cmat)) ) / nb
+             err = maxval(abs(cmat_inv * (phase_L / abs(phase_L)) - conjg(transpose(cmat))))
+           else
+             phase_L = sum( conjg(cmat_inv) * transpose(cmat) ) / nb
+             err = maxval(abs(cmat_inv * (phase_L / abs(phase_L)) - transpose(cmat)))
+           end if
+           if (err >= DTOL .or. abs(abs(phase_L) - 1.0_dp) > DTOL) ierr = ierr + 1
+           call sym_dicts(isym_cnt)%set("inv_ok", s=yesno(err < DTOL .and. abs(abs(phase_L) - 1.0_dp) <= DTOL))
+           call sym_dicts(isym_cnt)%set("inv_err", r=err)
+           call sym_dicts(isym_cnt)%set("inv_phase", s=sjoin(ftoa(real(phase_L)), " + i ", ftoa(aimag(phase_L))))
            end associate
          end if
          if (prtvol > 1) call print_arr(units, cmat, max_r=nb, max_c=nb)
@@ -1251,8 +1253,7 @@ subroutine dmats_check(dmats, units, prtvol, header)
          isym3 = 0
          do j=1, dmats%cryst%nsym
            if (all(matmul(dmats%cryst%symrel(:,:,isym1), dmats%cryst%symrel(:,:,isym2)) == dmats%cryst%symrel(:,:,j))) then
-             isym3 = j
-             exit
+             isym3 = j; exit
            end if
          end do
 
@@ -1261,15 +1262,15 @@ subroutine dmats_check(dmats, units, prtvol, header)
                       cmat2 => dmats%for_spin(spin)%value(:, :, isym2, 1, ik_ibz), &
                       cmat3 => dmats%for_spin(spin)%value(:, :, isym3, 1, ik_ibz))
 
-             ! Instead of failing the test due to phase formula mismatch, we can just EXTRACT the phase!
-             ! ABINIT's exact phase might have extra factors due to how istwf_k and cgtk_rotate conjugate things.
-             ! The goal is to check if they are proportional (i.e. group structure is satisfied up to a phase).
-             phase_L = sum( conjg(cmat3) * matmul(cmat1, cmat2) ) / nb
+           ! Instead of failing the test due to phase formula mismatch, we can just EXTRACT the phase!
+           ! ABINIT's exact phase might have extra factors due to how istwf_k and cgtk_rotate conjugate things.
+           ! The goal is to check if they are proportional (i.e. group structure is satisfied up to a phase).
+           phase_L = sum( conjg(cmat3) * matmul(cmat1, cmat2) ) / nb
 
-             ! Normalize phase_L to 1.0 to check if it's actually proportional
-             err = maxval(abs(cmat3 * (phase_L / abs(phase_L)) - matmul(cmat1, cmat2)))
+           ! Normalize phase_L to 1.0 to check if it's actually proportional
+           err = maxval(abs(cmat3 * (phase_L / abs(phase_L)) - matmul(cmat1, cmat2)))
 
-             if (err >= DTOL .or. abs(abs(phase_L) - 1.0_dp) > DTOL) ierr = ierr + 1
+           if (err >= DTOL .or. abs(abs(phase_L) - 1.0_dp) > DTOL) ierr = ierr + 1
            end associate
          end if
        end do

@@ -53,6 +53,7 @@ module m_symtk
  public :: symcharac            ! Get the type of axis for the symmetry.
  public :: smallprim            ! Find the smallest possible primitive vectors for an input lattice
  public :: print_symmetries     ! Helper function to print symmetries in a nice format.
+ public :: rot2str              ! Return string with info on rotation.
 !!***
 
 contains
@@ -3163,6 +3164,203 @@ subroutine print_symmetries(units, nsym, symrel, tnons, symafm)
 
 end subroutine print_symmetries
 !!***
+
+!---------------------------------------------------------------
+! Main driver: analyze a rotation given in reduced coordinates.
+!
+! rred   : 3x3 rotation matrix in reduced coordinates (should have
+!          integer entries for a crystallographic symmetry operation
+! label  : output descriptive string
+! rprim  : OPTIONAL 3x3 matrix whose COLUMNS are the lattice vectors
+!          a1, a2, a3 in Cartesian coordinates. If present, a
+!          Cartesian axis and unit vector are also reported.
+!---------------------------------------------------------------
+! Given a rotation (point-symmetry) operation expressed as a 3x3 matrix
+! in REDUCED (fractional/lattice) coordinates, this module determines:
+!
+!   - whether the operation is proper (det = +1) or improper (det = -1)
+!   - the rotation order n and angle (in degrees)
+!   - the rotation axis, expressed in reduced coordinates (small integer
+!     triplet) and, optionally, in Cartesian coordinates if the lattice
+!     vectors are supplied
+!   - a crystallographic-style label: 1, 2, 3, 4, 6  (proper)
+!                                    -1, m, -3, -4, -6 (improper)
+!
+! Key fact used: trace and determinant are invariant under a similarity
+! transform (R_cart = A * R_red * A^-1), so det/trace/angle can be
+! obtained directly from the reduced-coordinate matrix without ever
+! forming the Cartesian matrix. Only the axis direction needs the
+! lattice vectors to be expressed in real space.
+
+subroutine rot2str(rred, label, rprim)
+  integer, intent(in)            :: rred(3,3)
+  character(len=*), intent(out)   :: label
+  real(dp), intent(in), optional  :: rprim(3,3)
+
+  real(dp), parameter :: TOL = 1.0e-4_dp
+  real(dp) :: trR, trP, costh, theta_deg
+  real(dp) :: P(3,3), axis_red(3)
+  integer  :: detR, order
+  logical  :: proper, is_mirror, is_inversion, is_identity
+  character(len=64) :: axisstr, anglestr, cartstr
+  character(len=8)  :: ordlab
+
+  call mati3det(rred, detR)
+  trR  = rred(1,1) + rred(2,2) + rred(3,3)
+
+  ! Proper part P of the operation: P = R if proper, P = -R if improper.
+  ! P always has det(P) = +1 and represents a pure rotation.
+  proper = (detR > zero)
+  if (proper) then
+    P = rred
+  else
+    P = -rred
+  end if
+  trP = P(1,1) + P(2,2) + P(3,3)
+
+  costh = (trP - 1.0_dp) * 0.5_dp
+  costh = max(-1.0_dp, min(1.0_dp, costh))
+  theta_deg = acos(costh) * 180.0_dp / pi
+
+  if (theta_deg < TOL) then
+    order = 1
+  else
+    order = nint(360.0_dp / theta_deg)
+  end if
+
+  is_identity  = (proper  .and. order == 1)
+  is_inversion = ((.not. proper) .and. order == 1)
+  is_mirror    = ((.not. proper) .and. order == 2)
+
+  ! --- rotation axis (reduced coordinates) ---
+  if (is_identity .or. is_inversion) then
+    axis_red = zero
+    axisstr  = "(none - no unique axis)"
+  else
+    call rotation_axis(P, axis_red)
+    write(axisstr, '(A,3(F7.3,1X),A)') "[ ", axis_red, "] (reduced coords)"
+  end if
+
+  ! --- optional Cartesian axis ---
+  cartstr = ""
+  if (present(rprim) .and. .not. (is_identity .or. is_inversion)) then
+    block
+      real(dp) :: axc(3), nrm
+      axc = matmul(rprim, axis_red)
+      nrm = sqrt(sum(axc**2))
+      if (nrm > TOL) axc = axc / nrm
+      write(cartstr, '(A,3(F7.4,1X),A)') ", cart axis [ ", axc, "]"
+    end block
+  end if
+
+  ! --- crystallographic label ---
+  write(ordlab,'(I0)') order
+  if (is_identity) then
+    label = "1 (identity, proper, angle=0.0 deg)"
+  else if (is_inversion) then
+    label = "-1 (inversion center, improper, angle=0.0 deg)"
+  else if (is_mirror) then
+    write(anglestr,'(F6.2)') theta_deg
+    label = "m (mirror plane, improper, normal "//trim(axisstr)//trim(cartstr)//")"
+  else if (proper) then
+    write(anglestr,'(F6.2)') theta_deg
+    label = trim(ordlab)//"-fold proper rotation, axis "//trim(axisstr)// &
+            trim(cartstr)//", angle = "//trim(adjustl(anglestr))//" deg"
+  else
+    write(anglestr,'(F6.2)') theta_deg
+    label = "-"//trim(ordlab)//" (roto-inversion, improper), axis "// &
+            trim(axisstr)//trim(cartstr)//", angle = "// trim(adjustl(anglestr))//" deg"
+  end if
+
+end subroutine rot2str
+
+!---------------------------------------------------------------
+! Extract the rotation axis of a proper rotation matrix P (det=+1)
+! by computing the adjugate of M = P - I. Since M is singular
+! (rank <= 2 for any rotation other than identity), every column
+! of adj(M) is proportional to the null vector of M, i.e. to the
+! rotation axis. We pick the column of largest norm for numerical
+! robustness, then reduce it to small integers via the GCD.
+!---------------------------------------------------------------
+subroutine rotation_axis(P, axis)
+  real(dp), intent(in)  :: P(3,3)
+  real(dp), intent(out) :: axis(3)
+  real(dp) :: M(3,3), adj(3,3), nrm(3)
+  integer  :: i, jbest
+  real(dp), parameter :: TOL = 1.0e-4_dp
+  real(dp) :: best
+
+  M = P
+  M(1,1) = M(1,1) - 1.0_dp
+  M(2,2) = M(2,2) - 1.0_dp
+  M(3,3) = M(3,3) - 1.0_dp
+
+  adj(1,1) = M(2,2)*M(3,3) - M(2,3)*M(3,2)
+  adj(1,2) = M(1,3)*M(3,2) - M(1,2)*M(3,3)
+  adj(1,3) = M(1,2)*M(2,3) - M(1,3)*M(2,2)
+  adj(2,1) = M(2,3)*M(3,1) - M(2,1)*M(3,3)
+  adj(2,2) = M(1,1)*M(3,3) - M(1,3)*M(3,1)
+  adj(2,3) = M(1,3)*M(2,1) - M(1,1)*M(2,3)
+  adj(3,1) = M(2,1)*M(3,2) - M(2,2)*M(3,1)
+  adj(3,2) = M(1,2)*M(3,1) - M(1,1)*M(3,2)
+  adj(3,3) = M(1,1)*M(2,2) - M(1,2)*M(2,1)
+
+  do i = 1, 3
+    nrm(i) = sqrt(adj(1,i)**2 + adj(2,i)**2 + adj(3,i)**2)
+  end do
+
+  jbest = maxloc(nrm, dim=1)
+  best  = nrm(jbest)
+
+  if (best < TOL) then
+    ! Degenerate fallback (M ~ 0, e.g. numerical issues): just
+    ! return a zero vector; caller already filters identity/inversion.
+    axis = zero
+    return
+  end if
+
+  axis = adj(:, jbest)
+  call reduce_to_small_integers(axis)
+
+end subroutine rotation_axis
+
+!---------------------------------------------------------------
+! Rescale a (near-)integer vector by the GCD of its rounded
+! components, and fix an overall sign convention (first nonzero
+! component positive) so the axis is reported in a canonical form.
+!---------------------------------------------------------------
+subroutine reduce_to_small_integers(v)
+  real(dp), intent(inout) :: v(3)
+  integer :: iv(3), g, i
+
+  iv = nint(v)
+  if (all(iv == 0)) return
+
+  g = 0
+  do i = 1, 3
+    g = igcd(g, abs(iv(i)))
+  end do
+  if (g > 0) iv = iv / g
+
+  do i = 1, 3
+    if (iv(i) /= 0) then
+      if (iv(i) < 0) iv = -iv
+      exit
+    end if
+  end do
+
+  v = real(iv, dp)
+end subroutine reduce_to_small_integers
+
+recursive function igcd(a, b) result(g)
+  integer, intent(in) :: a, b
+  integer :: g
+  if (b == 0) then
+    g = a
+  else
+    g = igcd(b, mod(a, b))
+  end if
+end function igcd
 
 end module m_symtk
 !!***
