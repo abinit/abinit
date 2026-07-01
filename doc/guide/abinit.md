@@ -1032,54 +1032,14 @@ iscf, and iscf=-3), and for non-metallic occupation numbers, the Fermi energy
 is set to the highest occupied eigenenergy. This might not correspond to the
 expected Fermi energy for a later non-self-consistent calculation (e.g. the band structure)_
 
-The header might differ for different versions of ABINIT. One pre-v5.3 format
-is described below. Note however, that the current version of ABINIT should be
+The header might differ for different versions of ABINIT. 
+Note however, that the current version of ABINIT should be
 able to read all the previous formats (not to write them), with the exception
-of wavefunction files for which the [[ecutsm]] value was non-zero (there has
-been a change of definition of the smearing function in v4.4).
+of wavefunction files for which the [[ecutsm]] value was non-zero.
 
-The format for ABINIT versions 8.0 to 8.11 was:
-
-```fortran
-     write(unit=header) codvsn,headform,fform
-     write(unit=header) bantot,date,intxc,ixc,natom,ngfft(1:3),&
-    & nkpt,nspden,nspinor,nsppol,nsym,npsp,ntypat,occopt,pertcase,usepaw,&
-    & ecut,ecutdg,ecutsm,ecut_eff,qptn(1:3),rprimd(1:3,1:3),stmbias,tphysel,tsmear,usewvl
-
-     write(unit=header) istwfk(1:nkpt),nband(1:nkpt*nsppol),&
-    & npwarr(1:nkpt),so_psp(1:npsp),symafm(1:nsym),symrel(1:3,1:3,1:nsym),typat(1:natom),&
-    & kpt(1:3,1:nkpt),occ(1:bantot),tnons(1:3,1:nsym),znucltypat(1:ntypat),wtk(1:nkpt)
-     do ipsp=1,npsp
-    ! (npsp lines, 1 for each pseudopotential; npsp=ntypat, except if alchemical pseudo-atoms)
-      write(unit=unit) title,znuclpsp,zionpsp,pspso,pspdat,pspcod,pspxc,lmn_size
-     enddo
-    !(in case of usepaw==0, final record: residm, coordinates, total energy, Fermi energy)
-     write(unit=unit) residm,xred(1:3,1:natom),etotal,fermie
-    !(in case of usepaw==1, there are some additional records)
-     if (usepaw==1)then
-      write(unit=unit)( pawrhoij(iatom)%nrhoijsel(1:nspden),iatom=1,natom), cplex, nspden
-      write(unit=unit)((pawrhoij(iatom)%rhoijselect(1:      nrhoijsel(ispden),ispden),ispden=1,nspden),iatom=1,natom),&
-    &                 ((pawrhoij(iatom)%rhoijp     (1:cplex*nrhoijsel(ispden),ispden),ispden=1,nspden),iatom=1,natom)
-     endif
-```
-
-where the type of the different variables was:
-
-```fortran
-    character*6 :: codvsn
-    integer :: headform,fform
-    integer :: bantot,date,intxc,ixc,natom,ngfft(3),nkpt,npsp,
-     nspden,nspinor,nsppol,nsym,ntypat,occopt,pertcase,usepaw
-     integer :: usewvl, cplex, nspden
-    double precision :: acell(3),ecut,ecutdg,ecutsm,ecut_eff,qptn(3),rprimd(3,3),stmbias,tphysel,tsmear
-    integer :: istwfk(nkpt),nband(nkpt*nsppol),npwarr(nkpt),so_psp(npsp),&
-    & symafm(nsym),symrel(3,3,nsym),typat(natom),nrhoijsel(nspden),rhoijselect(*,nspden)
-    double precision :: kpt(3,nkpt),occ(bantot),tnons(3,nsym),znucltypat(ntypat),wtk(nkpt)
-    character*132 :: title
-    double precision :: znuclpsp,zionpsp
-    integer :: pspso,pspdat,pspcod,pspxc,lmax,lloc,mmax=integers
-    double precision :: residm,xred(3,natom),etotal,fermie,rhoij(*,nspden)
-```
+The format for ABINIT versions 8.0 to 8.11 was the same as the current version,
+with the exception that the **codvsn** variable was defined as character\*6, while
+now it is character\*8.
 
 <a id="denfile"></a>
 ### 5.5 The density output file

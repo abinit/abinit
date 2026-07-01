@@ -7514,6 +7514,23 @@ allowed, despite the different coordinate system.
 ),
 
 Variable(
+    abivarname="ggtrcut",
+    varset="dfpt",
+    vartype="real",
+    topics=['printing_prngs', 'Output_useful'],
+    dimensions="scalar",
+    defaultval=0.001,
+    mnemonics="GauGe TRansform CUToff",
+    added_in_version="10.9.0",
+    text=r"""
+Cutoff value to use in computing gauge change from parallel transport to diagonal. 
+Expert use only, do not change unless you've studied the source code and know exactly
+what you are doing and expecting.
+""",
+),
+
+
+Variable(
     abivarname="goprecon",
     varset="rlx",
     vartype="integer",
@@ -15825,7 +15842,7 @@ unless a very specific ground state feature is also needed.
 
 * [[orbmag]] = 1: Compute orbital magnetization and Chern vector
 * [[orbmag]] = 2: Same as [[orbmag]] 1 but also print out values of each term making up total
-orbital magnetic moment and a band-by-band decomposition.
+orbital magnetic moment.
 """,
 ),
 
@@ -23845,6 +23862,9 @@ It can be used as a simple string flagging the desired outputs as follows:
  * "fsurf"     --> Activates the printing of the Fermi surface file. Refer to [[prtfsurf]] for further documentation.
  * "gden"      --> Activates the printing of the gradient of the electronic density file. Refer to [[prtgden]] for further documentation.
  * "geo"       --> Activates the printing of the geometry analysis. Refer to [[prtgeo]] for further documentation.
+ * "geo_1      --> Activates the printing of the geometry analysis under option 1 of the [[prtgeo]] variable.
+ * "geo_2      --> Activates the printing of the geometry analysis under option 2 of the [[prtgeo]] variable.
+ * "geo_3      --> Activates the printing of the geometry analysis under option 3 of the [[prtgeo]] variable.
  * "gkk"       --> Activates the printing of the GKK matrix file. Refer to [[prtgkk]] for further documentation.
  * "gsr"       --> Activates the printing of the GSR file. Refer to [[prtgsr]] for further documentation.
  * "hist"      --> Activates the printing of the HIST file. Refer to [[prthist]] for further documentation.
@@ -24366,9 +24386,9 @@ due to nuclear magnetic dipoles (see [[nucdipmom]]).
 [[zora]] 3 activates both kinetic energy and electron spin terms.
 
 Negative values of [[zora]] are present only for debugging purposes. [[zora]] -1 permits only
-spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits only
-the electron spin-nuclear dipole through space interaction, and [[zora]] -3 permits only the
-electron spin-nuclear dipole Fermi-contact-like interaction.
+spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits spin-orbit
+coupling and the electron spin-nuclear dipole through space interaction, while [[zora]] -3 permits 
+only spin-orbit coupling and the electron spin-nuclear dipole Fermi-contact-like interaction.
 """,
 ),
 
