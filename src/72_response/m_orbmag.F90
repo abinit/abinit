@@ -586,15 +586,15 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      ! ZTG23 Eq. 36 term 2 and Eq. 46 term 1
      call orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,ph1d,pawtab,trnrm,suppress_ormesh=.TRUE.)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,ph1d,pawtab,trnrm,suppress_ormesh=.FALSE.)
 
      ! ZTG23 Eq. 36 terms 3 and 4 and Eq. 46 term 2
      call orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh,ph1d,pawtab,trnrm,suppress_ormesh=.TRUE.)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh,ph1d,pawtab,trnrm,suppress_ormesh=.FALSE.)
 
      ! ZTG23 Eq. 36 term 1
      call orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,ph1d,trnrm,suppress_ormesh=.TRUE.)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,ph1d,trnrm,suppress_ormesh=.FALSE.)
 
      ! ZTG23 text after Eq. 42
      ! <L_R> contribution
@@ -606,7 +606,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      ! A0.An contribution
      call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_hamk,ikpt,inbm,isppol,&
        & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,&
-       & ph1d,trnrm,suppress_ormesh=.TRUE.)
+       & ph1d,trnrm,suppress_ormesh=.FALSE.)
 
      ! accumulate terms
      do nn = 1, nband_k
