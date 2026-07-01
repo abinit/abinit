@@ -102,14 +102,14 @@ def number_of_cpus() -> int:
 
 def number_of_gpus() -> int:
     """
-    Detect the number of GPUs using vendor-specific tools (`nvidia-smi` or `roc-smi`).
+    Detect the number of GPUs using vendor-specific tools (`nvidia-smi` or `amd-smi`).
 
     Returns:
         int: Number of GPUs detected, or 0 if none are available.
     """
     # Look for NVIDIA GPU first, then AMD GPU...
-    nvidia_cmd = ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"]
-    amdgpu_cmd = ["roc-smi", "--listgpu"]
+    nvidia_cmd = ["nvidia-smi", "--query-gpu=name", "--format=csv"]
+    amdgpu_cmd = ["amd-smi", "list", "--csv"]
 
     num_gpus = 0
     for gpu_cmd in [nvidia_cmd, amdgpu_cmd]:
@@ -126,9 +126,9 @@ def number_of_gpus() -> int:
                 print(f"Error while executing {gpu_cmd[1]}:\n{result.stderr}")
                 num_gpus = 0
 
-            # Command was successful, count the lines (one per GPU) and exit
+            # Command was successful, count the lines (one per GPU minus the header) and exit
             gpu_lines = result.stdout.strip().split("\n")
-            num_gpus = len(gpu_lines)
+            num_gpus = len(gpu_lines) - 1
             break
 
         except FileNotFoundError:
