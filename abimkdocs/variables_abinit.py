@@ -7521,6 +7521,7 @@ Variable(
     dimensions="scalar",
     defaultval=0.001,
     mnemonics="GauGe TRansform CUToff",
+    added_in_version="10.9.0",
     text=r"""
 Cutoff value to use in computing gauge change from parallel transport to diagonal. 
 Expert use only, do not change unless you've studied the source code and know exactly
