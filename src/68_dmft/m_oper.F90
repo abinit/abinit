@@ -1015,10 +1015,8 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
        else if(l_gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
          alpha = dcmplx(wtk(ik), 0.0_dp)
-         !$OMP TARGET DATA USE_DEVICE_ADDR(mat,mat_temp2)
-         call abi_gpu_xaxpy(2, ndim*ndim*ndat, alpha, &
-         &    c_loc(mat_temp2), 1, c_loc(mat(:,:,1+(isppol-1)*ndat:isppol*ndat)), 1)
-         !$OMP END TARGET DATA
+         call abi_xaxpy(ndim*ndim*ndat, alpha, &
+         &    mat_temp2, 1, mat(:,:,1+(isppol-1)*ndat:isppol*ndat), 1, gpu_option=l_gpu_option)
 #endif
        end if
 

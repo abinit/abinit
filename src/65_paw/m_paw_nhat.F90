@@ -1270,12 +1270,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
          end do
          end do
        case (ABI_GPU_OPENMP)
-#ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET DATA USE_DEVICE_ADDR(nhat12_atm,nhat12)
-         call abi_gpu_xaxpy(1, 2*nfft*ndat2*ndat1*nspinor*nspinor,&
-         &    cone,c_loc(nhat12_atm(:,:,:,:,:,ia)),1,c_loc(nhat12),1)
-         !$OMP END TARGET DATA
-#endif
+         call abi_xaxpy(2*nfft*ndat2*ndat1*nspinor*nspinor,&
+         &    cone,nhat12_atm(:,:,:,:,:,ia),1,nhat12,1,x_cplx=1,gpu_option=gpu_option_)
        case default
          ABI_BUG("Unsupported GPU option")
        end select

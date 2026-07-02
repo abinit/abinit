@@ -662,12 +662,8 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
      if(gpu_option == ABI_GPU_DISABLED) then
        svectout = svectout + vectin ! TODO understand this
      else if(gpu_option == ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET DATA USE_DEVICE_ADDR(vectin,svectout)
-       call abi_gpu_xaxpy(1, 2*npw*nspinor*ndat, cone, &
-       &    c_loc(vectin), 1, c_loc(svectout), 1)
-       !$OMP END TARGET DATA
-#endif
+       call abi_xaxpy( 2*npw*nspinor*ndat, cone, &
+       &    vectin, 1, svectout, 1, x_cplx=1, gpu_option=gpu_option)
      end if
    end if
  end if  ! (paw_opt == 3 .or. paw_opt == 4)

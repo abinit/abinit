@@ -1529,12 +1529,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
                  if(gpu_option==ABI_GPU_DISABLED) then
                    gvnlx1 = gvnlx1-gh1
                  else if(gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-                   !$OMP TARGET DATA USE_DEVICE_ADDR(gvnlx1,gh1)
-                   call abi_gpu_xaxpy(1, 2*npw1_k*nspinor*ndat, cminusone, &
-                   &    c_loc(gh1), 1, c_loc(gvnlx1), 1)
-                   !$OMP END TARGET DATA
-#endif
+                   call abi_xaxpy(2*npw1_k*nspinor*ndat, cminusone, &
+                   &    gh1, 1, gvnlx1, 1, gpu_option=gpu_option)
                  end if
                end if
                do_scprod=0
