@@ -133,6 +133,10 @@ module m_lgroup
    procedure :: find_ibzimage => lgroup_find_ibzimage
    ! Find the symmetrical image in the IBZ(k) of a qpoint in the BZ.
 
+   procedure :: find_ibzimage_sym => lgroup_find_ibzimage_sym
+   ! Like find_ibzimage, but also returns the little-group symmetry (in local
+   ! 1:nsym_lg indexing) relating the IBZ(k) representative to the input qpoint.
+
    procedure :: print => lgroup_print
    ! Print the object
 
@@ -399,6 +403,54 @@ integer function lgroup_find_ibzimage(self, qpt) result(iq_ibz)
  if (dksqmax > tol12) iq_ibz = -1
 
 end function lgroup_find_ibzimage
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_lgroup/lgroup_find_ibzimage_sym
+!! NAME
+!! lgroup_find_ibzimage_sym
+!!
+!! FUNCTION
+!!  Like find_ibzimage, but also returns the little-group symmetry (in local
+!!  1:nsym_lg indexing, translate via lgsym2glob to get the global isym/itime)
+!!  relating the IBZ(k) representative self%ibz(:,iq_ibz) to the input qpt, i.e.
+!!  qpt = symrec_lg(:,:,isym_lg) . self%ibz(:,iq_ibz) (up to a reciprocal lattice
+!!  vector). Returns iq_ibz=-1 (isym_lg, itime_lg undefined) if not found.
+!!
+!! INPUTS
+!!  qpt(3)=q-point in reduced coordinates.
+!!
+!! OUTPUT
+!!  isym_lg=Local index (1:nsym_lg) of the little-group symmetry relating
+!!   self%ibz(:,iq_ibz) to qpt.
+!!  itime_lg=1 if no time reversal is needed, 2 if it is (see lgsym2glob).
+!!
+!! SOURCE
+
+integer function lgroup_find_ibzimage_sym(self, qpt, isym_lg, itime_lg) result(iq_ibz)
+
+!Arguments ------------------------------------
+ class(lgroup_t),intent(in) :: self
+ real(dp),intent(in) :: qpt(3)
+ integer,intent(out) :: isym_lg, itime_lg
+
+!Local variables-------------------------------
+!scalars
+ integer, parameter :: timrev0 = 0
+ real(dp) :: dksqmax
+!arrays
+ integer :: indkk(6)
+! *************************************************************************
+
+ ! Note use_symrec and timrev0
+ call listkk(dksqmax, self%gmet, indkk, self%ibz, qpt, self%nibz, 1, self%nsym_lg, &
+    1, self%symafm_lg, self%symrec_lg, timrev0, xmpi_comm_self, use_symrec=.True.)
+
+ iq_ibz = indkk(1); isym_lg = indkk(2); itime_lg = indkk(6) + 1
+ if (dksqmax > tol12) iq_ibz = -1
+
+end function lgroup_find_ibzimage_sym
 !!***
 
 !----------------------------------------------------------------------
