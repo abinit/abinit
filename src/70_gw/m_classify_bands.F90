@@ -766,6 +766,47 @@ end function paw_phirotphj
 !! INPUTS
 !! wfk_path=Filename of the WFK file.
 !!
+!! NOTES
+!!  Little-group membership and the umklapp vector G_0 associated to each symmetry
+!!  are determined with the SAME k-point convention used by cgtk_rotate's own
+!!  bookkeeping (see its docstring in m_cgtk.F90), namely:
+!!
+!!    k2 = T symrel(:,:,isym)^t k1 + G_0   (transpose of symrel, NOT symrec)
+!!
+!!  where T=+1/-1 without/with time reversal. This is also the convention produced
+!!  by listkk (default, symrel-based) and consumed by cgtk_rotate elsewhere in the
+!!  code (e.g. m_wfd.F90), so it is safe to reuse directly here.
+!!
+!!  However, cgtk_rotate cannot simply be called with S=isym to obtain D(S_isym):
+!!  its actual G-sphere index map is cg2(G) = cg1(symrec(isym).(G+G_0)), with
+!!  symrec(isym) = mati3inv(symrel(isym)) = symrel(isym)^{-t} applied FORWARD
+!!  (no additional inversion). Deriving the Fourier-coefficient transform of
+!!  psi(r) -> psi(symrel(isym)^{-1}(r-tau)) shows that the coefficient at the
+!!  rotated G must instead be read at symrel(isym)^t . G. The two matrices,
+!!  symrel(isym)^{-t} and symrel(isym)^t, coincide only when symrel(isym) is an
+!!  involution (S^2 = E, e.g. the identity or spatial inversion). For any other
+!!  operation (3-, 4-, 6-fold rotations, screw axes, glide planes, ...) calling
+!!  cgtk_rotate(isym) therefore silently returns D_true(S_isym)^{-1} = D_true(S_isym^{-1})
+!!  instead of D_true(S_isym).
+!!
+!!  This was confirmed empirically: with cgtk_rotate called on isym directly, the
+!!  group-multiplication test in dmats_check (D(S_1 S_2) \propto D(S_1) D(S_2), see
+!!  below) failed for essentially every triple involving a non-involutory operation,
+!!  while unitarity and the D(S^{-1})=D(S)^dagger self-consistency test still passed
+!!  (an involution-blind bug: D_true(S)^{-1} is unitary and equals D_true(S)^{-1}
+!!  trivially, so those two checks cannot detect it). Concretely, for a triple
+!!  (S_1, S_2, S_3=S_1 S_2) with zero fractional translations, the stored matrices
+!!  satisfied D(S_3) = D(S_1) D(S_2)^t rather than D(S_3) = D(S_1) D(S_2).
+!!
+!!  The fix is to call cgtk_rotate with isym_inv, the group-theoretic inverse of
+!!  isym (found from the symrel multiplication table), while still filling the
+!!  storage slot for isym: D_computed(isym_inv) = D_true(isym_inv^{-1}) = D_true(isym).
+!!  isym_inv's own G_0 is recomputed with the formula above (using isym_inv instead
+!!  of isym); no ad-hoc override of its fractional translation is needed, since
+!!  cgtk_rotate is now called honestly for the operation it is actually asked to
+!!  apply. See the inline comments in the k-point/symmetry loop below for the
+!!  implementation.
+!!
 !! SOURCE
 
 subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, pawtab, psps, comm)
@@ -785,19 +826,18 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: iflag1 = 1, me_g0 = 1, ndat1 = 1
- integer :: spin, nsppol, nsym, nb, nkibz, mband, ik_ibz, isym, itime, otimrev_k, bstart, ib, trev_k ! i_m, i_n,
- integer :: ib1, ib2, band1, band2, n1, n2, n3, n4, n5, n6, nfft, nspinor, mpw, my_mpw, ii, ipw !, ispinor, npw_sk
- integer :: isym_inv, j, nprocs, me, itot, ierr
- !integer :: g0_passed(3)
+ integer :: spin, nsppol, nsym, nb, nkibz, mband, ik_ibz, isym, isym_inv, itime, bstart, ib, trev_k ! i_m, i_n,
+ integer :: ib1, ib2, band1, band2, n1, n2, n3, n4, n5, n6, nfft, nspinor, mpw, my_mpw, ii, ipw, j !, ispinor, npw_sk
+ integer :: nprocs, me, itot, ierr
+ logical :: is_little_group
  real(dp),parameter :: xnorm1 = one
- real(dp) :: e_b1, e_b2, cpu, wall, gflops
- real(dp) :: tau_save(3)
+ real(dp) :: e_b1, e_b2, cpu, wall, gflops, tsign
  type(wfd_t) :: wfd
  type(hdr_type) :: hdr
 !arrays
- integer :: symtab(4,2,cryst%nsym), g0_k(3), gmax(3), my_gmax(3), work_ngfft(18), units(2) ! symrec(3,3), shiftg(3),
- integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_sk(:,:)
- real(dp) :: kk_ibz(3), dot(2) ! kk_sk(3),
+ integer :: g0_k(3), g0_k_inv(3), gmax(3), my_gmax(3), work_ngfft(18), units(2)
+ integer,allocatable :: nband(:,:), wfd_istwfk(:)
+ real(dp) :: kk_ibz(3), kk_sk(3), kk_sk_inv(3), dot(2)
  real(dp),allocatable :: ug1_box(:,:), ug2_box(:,:), cg_ib(:,:,:), cg_work(:,:), work(:,:,:,:)
  real(dp),allocatable :: cg2_sk(:,:) ! cg1_sk(:,:,:),
  complex(dp) :: cval !, cphase, ug
@@ -921,12 +961,6 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
      associate (npw_k => wfd%npwarr(ik_ibz), istwf_k => wfd%kdata(ik_ibz)%istwfk, kg_k => wfd%kdata(ik_ibz)%kg_k)
      kk_ibz = dmats%ks_ebands%kptns(:, ik_ibz)
 
-     ! symtab(4,2,nsym)=
-     !  three first numbers define the G vector,
-     !  fourth number is zero if the q-vector is not preserved, 1 otherwise,
-     !  second index is one without time-reversal symmetry, two with time-reversal symmetry.
-     call littlegroup_q(cryst%nsym, kk_ibz, symtab, cryst%symrec, cryst%symafm, otimrev_k, prtvol=0)
-
      ! Copy wavefunctions for this k-point.
      ABI_MALLOC(cg_work, (2, npw_k*nspinor))
      ABI_MALLOC(cg_ib, (2, npw_k*nspinor, nb))
@@ -936,78 +970,53 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
      end do
 
      ! Loop over time-reversal and spatial symmetries.
+     ! g0_k is built with the SAME k-point convention assumed by cgtk_rotate's
+     ! bookkeeping: k2 = T symrel(:,:,isym)^t k1 + g0 (transpose of symrel, not symrec).
+     ! cgtk_rotate is then called with isym_inv rather than isym: see the detailed
+     ! explanation of why this is required (cgtk_rotate(isym) actually returns
+     ! D_true(S_isym)^{-1}, invisibly for involutions) in the NOTES of this subroutine's
+     ! SOURCE header above.
      do itime=1,2
+       tsign = merge(one, -one, itime == 1)
+       trev_k = itime - 1
        do isym=1,cryst%nsym
          ! Compute cmat(b,b')
          cmat = zero
 
-         if (symtab(4, itime, isym) == 0) then
+         kk_sk = tsign * matmul(transpose(real(cryst%symrel(:,:,isym), dp)), kk_ibz)
+         g0_k = nint(kk_ibz - kk_sk)
+         is_little_group = all(abs(kk_ibz - kk_sk - g0_k) < tol8)
+
+         if (.not. is_little_group) then
            ! Sk /= k + G.
            do ib=1,nb
              cmat(ib, ib) = cone
            end do
 
          else
-           ! The condition is: $q =  O S(q) - G$
-           g0_k = symtab(1:3, itime, isym)
-
-           ABI_MALLOC(cg2_sk, (2, npw_k*nspinor))
-
-           ! ----------------------------------------------------------------------------------
-           ! EXPLANATION OF SYMMETRY CONVENTIONS AND THE INVERSE SYMMETRY TRICK
-           ! ----------------------------------------------------------------------------------
-           ! ABINIT has two conventions for the action of a symmetry S on a k-point:
-           ! Convention 1 (e.g. littlegroup_k): S_{rec}^{-1} k_{in} = k_{out} - G_0
-           ! Convention 2 (e.g. littlegroup_q): S_{rec} k_{in} = k_{out} - G_0
-           !
-           ! This code (for e-ph matrices) uses Convention 2 (from symtab/g0_k).
-           ! When G_0 != 0, the standard cgtk_rotate(isym) routine evaluates the new
-           ! G-vectors using the mapping: j = S_{rec}(g_{out} + G_0).
-           !
-           ! Under Convention 2, this mapping sends the indices OUTSIDE the kinetic-energy
-           ! cutoff sphere (kg_k) unless the symmetry is self-inverse (S_{rec} = S_{rec}^{-1}).
-           ! When vectors go out of bounds, coefficients are lost, which destroys the
-           ! wavefunction norm and causes the degenerate block matrices to become non-unitary.
-           !
-           ! To strictly preserve the kinetic energy bounds for all symmetries, the mapping
-           ! MUST be evaluated using S_{rec}^{-1}(g_{out} - G_0).
-           ! We achieve this exact mathematical mapping by finding the inverse symmetry
-           ! (isym_inv) and passing it to cgtk_rotate along with -G_0.
-           !
-           ! However, passing isym_inv normally causes cgtk_rotate to apply the phase factor
-           ! of the inverse symmetry (\tau_{inv} = -S_{rel}^{-1} \tau_{isym}). This modified phase
-           ! no longer commutes with the Hamiltonian, mixing non-degenerate states!
-           ! To preserve the exact true operator phase required by ABINIT (e^{i(k+G_{old})\cdot \tau_{isym}}),
-           ! we temporarily override the translation vector of isym_inv with the original \tau_{isym}.
-           ! ----------------------------------------------------------------------------------
-
-           ! Find inverse symmetry to correctly apply S_rec^-1 in cgtk_rotate
+           ! Find the group-theoretic inverse of isym.
            isym_inv = 0
-           do j=1, dmats%cryst%nsym
-             if (all(matmul(dmats%cryst%symrel(:,:,j), dmats%cryst%symrel(:,:,isym)) == &
+           do j=1, cryst%nsym
+             if (all(matmul(cryst%symrel(:,:,j), cryst%symrel(:,:,isym)) == &
                  reshape((/1,0,0, 0,1,0, 0,0,1/), (/3,3/)))) then
                isym_inv = j; exit
              end if
            end do
+           ABI_CHECK(isym_inv /= 0, "Could not find inverse symmetry!")
+
+           kk_sk_inv = tsign * matmul(transpose(real(cryst%symrel(:,:,isym_inv), dp)), kk_ibz)
+           g0_k_inv = nint(kk_ibz - kk_sk_inv)
+
+           ABI_MALLOC(cg2_sk, (2, npw_k*nspinor))
 
            do ib2=1,nb
              band2 = ib2 + bstart - 1
              e_b2 = dmats%ks_ebands%eig(band2, ik_ibz, spin)
 
              ! Compute the periodic part of S |psi_nk>.
-             ! We pass isym_inv to apply S_rec^-1 to G-vectors, keeping them inside kg_k.
-             ! We temporarily replace the translation vector of isym_inv with that of isym
-             ! so that cgtk_rotate applies the exact true ABINIT phase factor.
-             trev_k = itime - 1
-             ! The inverse mapping must compute G_in = S_rec^{-1}(G_out - G_0)
-             ! cgtk_rotate's sphere routine computes S_rec_passed(kg + g0_passed)
-             ! So we pass g0_passed = -G_0.
-             tau_save = dmats%cryst%tnons(:, isym_inv)
-             dmats%cryst%tnons(:, isym_inv) = dmats%cryst%tnons(:, isym)
-             call cgtk_rotate(dmats%cryst, kk_ibz, isym_inv, trev_k, -g0_k, nspinor, ndat1, &
+             call cgtk_rotate(dmats%cryst, kk_ibz, isym_inv, trev_k, g0_k_inv, nspinor, ndat1, &
                               npw_k, kg_k, &
                               npw_k, kg_k, istwf_k, istwf_k, cg_ib(:,:,ib2), cg2_sk, work_ngfft, work)
-             dmats%cryst%tnons(:, isym_inv) = tau_save ! restore
 
              do ib1=1,nb
                band1 = ib1 + bstart - 1
@@ -1032,8 +1041,6 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
 
            ABI_FREE(cg2_sk)
          end if
-
-         ABI_SFREE(kg_sk)
 
          ! Save final matrix.
          dmats%for_spin(spin)%value(:, :, isym, itime, ik_ibz) = cmat
@@ -1127,6 +1134,18 @@ end subroutine dmats_free
 !!  phase dynamically using the Frobenius inner product Phase = Tr(A^\dagger B) / nb.
 !!  As long as the residual after phase-normalization is within DTOL, the matrices
 !!  strictly satisfy the projective representations of the space group.
+!!
+!!  Diagnostic value of test 4 (group multiplication): unitarity (test 1) and the
+!!  inverse relation (test 3) are, by construction, blind to a bug in which every
+!!  D(S) is silently replaced by D(S)^{-1} = D(S^{-1}): both tests only ever compare
+!!  a matrix against itself or its own inverse, so swapping S <-> S^{-1} consistently
+!!  leaves them satisfied. The group multiplication test does NOT have this blind
+!!  spot for non-involutory S (S^2 != E), since D(S)<->D(S)^{-1} breaks the
+!!  non-commutative composition D(S_1 S_2) \propto D(S_1) D(S_2) as soon as one of the
+!!  three operations involved has order > 2 (D(S_3) becomes proportional to
+!!  D(S_1) D(S_2)^t instead). This is exactly how a real S<->S^{-1} mislabeling bug in
+!!  dmats_init was caught during development; see the NOTES section of dmats_init's
+!!  SOURCE header for the full explanation and fix.
 !!
 !! SOURCE
 
