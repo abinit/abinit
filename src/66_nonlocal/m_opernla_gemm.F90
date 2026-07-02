@@ -671,11 +671,7 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
      if(gpu_option == ABI_GPU_DISABLED) then
        gx = gx * 2
      else if(gpu_option == ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET DATA USE_DEVICE_ADDR(gx)
-       call abi_gpu_xscal(cplex, nprojs*nspinor*ndat, ctwo, c_loc(gx), 1)
-       !$OMP END TARGET DATA
-#endif
+       call abi_xscal(nprojs*nspinor*ndat, ctwo, gx, 1, x_cplx=cplex, gpu_option=gpu_option)
      end if
    end if
 
@@ -684,11 +680,7 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
      if(gpu_option == ABI_GPU_DISABLED) then
        dgxdt = dgxdt * 2
      else if(gpu_option == ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET DATA USE_DEVICE_ADDR(dgxdt)
-       call abi_gpu_xscal(cplex, ndgxdt*nprojs*nspinor*ndat, ctwo, c_loc(dgxdt), 1)
-       !$OMP END TARGET DATA
-#endif
+       call abi_xscal(ndgxdt*nprojs*nspinor*ndat, ctwo, dgxdt, 1, x_cplx=cplex, gpu_option=gpu_option)
      end if
    end if
 

@@ -843,9 +843,7 @@ end subroutine print_matlu
          end do  ! m2
        end do ! isppol
 
-       !$OMP TARGET DATA USE_DEVICE_ADDR(glocsym_mat)
-       call abi_gpu_xscal(2, ndim*ndim*nsppol, ratio, c_loc(glocsym_mat), 1)
-       !$OMP END TARGET DATA
+       call abi_xscal(ndim*ndim*nsppol, ratio, glocsym_mat, 1, gpu_option=gpu_option)
 
 #endif
      end if
@@ -996,9 +994,7 @@ end subroutine print_matlu
        end do ! irot
 
     !  ==  Normalize sum
-       !$OMP TARGET DATA USE_DEVICE_ADDR(glocsym_mat)
-       call abi_gpu_xscal(2, ndim*ndim*4*nsppol, ratio, c_loc(glocsym_mat), 1)
-       !$OMP END TARGET DATA
+       call abi_xscal(ndim*ndim*4*nsppol, ratio, glocsym_mat, 1, gpu_option=gpu_option)
 
        !$OMP TARGET EXIT DATA MAP(delete:gloc_tmp3,gloc_tmp4)
 #endif

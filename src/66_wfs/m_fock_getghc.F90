@@ -399,11 +399,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  if(gpu_option==ABI_GPU_DISABLED) then
    cwavef_r=cwavef_r*invucvol
  else if(gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET DATA USE_DEVICE_ADDR(cwavef_r)
-   call abi_gpu_xscal(2,n4f*n5f*n6f*ndat,cinvucvol,c_loc(cwavef_r),1)
-   !$OMP END TARGET DATA
-#endif
+   call abi_xscal(n4f*n5f*n6f*ndat,cinvucvol,cwavef_r,1,x_cplx=2,gpu_option=gpu_option)
  end if
 
 ! =====================================================
@@ -595,11 +591,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        if(gpu_option==ABI_GPU_DISABLED) then
          cwaveocc_r=cwaveocc_r*invucvol
        else if(gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET DATA USE_DEVICE_ADDR(cwaveocc_r)
-         call abi_gpu_xscal(2,n4f*n5f*n6f*ndat_occ,cinvucvol,c_loc(cwaveocc_r),1)
-         !$OMP END TARGET DATA
-#endif
+         call abi_xscal(n4f*n5f*n6f*ndat_occ,cinvucvol,cwaveocc_r,1,x_cplx=2,gpu_option=gpu_option)
        end if
      end if
 
