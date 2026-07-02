@@ -40,7 +40,7 @@ module m_classify_bands
  use m_fft_mesh,       only : rotate_FFT_mesh, calc_ceigr
  use m_crystal,        only : crystal_t
  use m_cgtools,        only : cg_zdotc
- use m_symtk,          only : littlegroup_q
+ use m_symtk,          only : littlegroup_q, sg_multable
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type, pawtab_get_lsize
@@ -85,6 +85,19 @@ type, public :: dmats_t
  integer,allocatable :: brange_spin(:,:)
  ! (2, nsppol)
  ! start and end band index for each spin
+
+  integer,allocatable :: multable(:,:,:)
+!  (4,nsym,nsym)]= Optional output.
+!    multable(1,sym1,sym2) gives the index of the symmetry product S1 * S2 in the symrel array. 0 if not found.
+!    multable(2:4,sym1,sym2)= the lattice vector that has to added to the fractional translation
+!      of the operation of index multable(1,sym1,sym2) to obtain the fractional translation of the product S1 * S2.
+
+  integer,allocatable :: toinv(:,:)
+!  (4,nsym)
+!  toinv(1,sym1)=Gives the index of the inverse of the symmetry operation.
+!   S1 * S1^{-1} = {E, L} with E the identity and L a real-space lattice vector.
+!  toinv(2:4,sym1)=The lattice vector L
+!    Note that toinv can be easily obtained from multable but sometimes we do not need the full table.
 
  type(coeff5c_type), allocatable :: for_spin(:)
 
@@ -806,6 +819,14 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  nsppol = dmats%ks_ebands%nsppol; nsym = cryst%nsym; nkibz = dmats%ks_ebands%nkpt
  nprocs = xmpi_comm_size(comm); me = xmpi_comm_rank(comm)
 
+ ! Compute multiplication table.
+ ABI_MALLOC(dmats%multable, (4,nsym,nsym))
+ ABI_MALLOC(dmats%toinv, (4,nsym))
+
+ call sg_multable(nsym, cryst%symafm, cryst%symrel, ierr, &
+                  tnons=cryst%tnons, multable=dmats%multable, toinv=dmats%toinv)
+ ABI_CHECK_IEQ(ierr, 0, "sg_multable returned ierr !=0, see messages above")
+
  ! Initialize the wave function descriptor.
  ! Only wavefunctions for the symmetrical image of the k/k+q wavevectors treated by this MPI rank are stored.
  mband = maxval(brange_spin(2, :))
@@ -851,8 +872,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  call hdr%free()
 
  ! Compute max |G_i| to build the box.
- gmax = 0
- mpw = 0
+ gmax = 0; mpw = 0
  do ik_ibz=1,nkibz
     if (.not. allocated(wfd%kdata(ik_ibz)%kg_k)) cycle
     associate (npw_k => wfd%npwarr(ik_ibz), kg_k => wfd%kdata(ik_ibz)%kg_k)
@@ -1065,7 +1085,10 @@ subroutine dmats_free(dmats)
 !----------------------------------------------------------------------
 
  call dmats%ks_ebands%free()
+
  ABI_SFREE(dmats%brange_spin)
+ ABI_SFREE(dmats%multable)
+ ABI_SFREE(dmats%toinv)
 
  do spin=1,size(dmats%for_spin)
    ABI_SFREE(dmats%for_spin(spin)%value)
@@ -1119,8 +1142,8 @@ subroutine dmats_check(dmats, units, prtvol, header)
  logical :: unitary, identity_ok
  character(len=5000) :: msg
  real(dp),parameter :: DTOL = tol3
- real(dp) :: kk_ibz(3), err, L_red(3), rel_n(3,3)
- complex(dp) :: phase_L
+ real(dp) :: kk_ibz(3), err, L_red(3), rel_n(3,3), phase_err
+ complex(dp) :: phase_L, phase_analytic, phase_dyn
  integer :: symtab(4,2,dmats%cryst%nsym)
  complex(dp),allocatable :: cmat_n(:,:)
  type(yamldoc_t) :: ydoc
@@ -1196,33 +1219,39 @@ subroutine dmats_check(dmats, units, prtvol, header)
            L_red(2) = nint(sum(dmats%cryst%symrel(2,:,isym) * dmats%cryst%tnons(:,isym_inv)) + dmats%cryst%tnons(2,isym))
            L_red(3) = nint(sum(dmats%cryst%symrel(3,:,isym) * dmats%cryst%tnons(:,isym_inv)) + dmats%cryst%tnons(3,isym))
 
-           ! Phase factor = e^{-i 2pi k \cdot L} e^{i 2pi (S_{rec,inv} G_{0}) \cdot \tau_{S^{-1}}}
+           ! Analytic phase relating D(S^{-1}) to D(S)^\dagger, derived from the Seitz composition S.S^{-1} = E:
+           ! Phase = e^{-i 2pi k \cdot L} e^{i 2pi (S_{rec,inv} G_{0}) \cdot \tau_{S^{-1}}}
            ! Note: S_{inv} G_0 is -G_{0, inv}. And \tau_{S^{-1}} = -R_{inv} \tau_S.
            ! We just use the exact formula for group mult: isym1 = isym_inv, isym2 = isym
-           phase_L = exp(cmplx(0.0_dp, -two_pi * sum(kk_ibz * L_red) + &
+           phase_analytic = exp(cmplx(0.0_dp, -two_pi * sum(kk_ibz * L_red) + &
                      two_pi * sum(matmul(dmats%cryst%symrec(:,:,isym_inv), symtab(1:3, itime, isym)) * dmats%cryst%tnons(:,isym_inv)), dp))
 
            associate (cmat_inv => dmats%for_spin(spin)%value(:, :, isym_inv, itime, ik_ibz))
-           ! Extract the structural phase between the independently constructed matrices directly.
-           ! In ABINIT, extracting the full analytical phase factor requires accounting for
-           ! fractional non-symmorphic translations, reciprocal G_0 vector mappings, and potentially
-           ! the origin shifts internally tracked by the wavefunctions.
-           ! Instead of hard-coding the phase analytically, we dynamically extract the phase
-           ! difference (e^{i\phi}) by taking the Frobenius inner product of the two matrices:
+           ! Independently, dynamically extract the phase relating the two independently constructed
+           ! matrices by taking the Frobenius inner product of the two matrices:
            ! Phase = Tr(A^\dagger B) / nb = sum_{ij} A^*_{ij} B_{ij} / nb.
            ! If the matrices are truly proportional, Phase will be a scalar of unit magnitude,
            ! and dividing by it will yield a mathematically exact equality test.
            if (itime == 1) then
-             phase_L = sum( conjg(cmat_inv) * conjg(transpose(cmat)) ) / nb
-             err = maxval(abs(cmat_inv * (phase_L / abs(phase_L)) - conjg(transpose(cmat))))
+             phase_dyn = sum( conjg(cmat_inv) * conjg(transpose(cmat)) ) / nb
+             err = maxval(abs(cmat_inv * (phase_dyn / abs(phase_dyn)) - conjg(transpose(cmat))))
            else
-             phase_L = sum( conjg(cmat_inv) * transpose(cmat) ) / nb
-             err = maxval(abs(cmat_inv * (phase_L / abs(phase_L)) - transpose(cmat)))
+             phase_dyn = sum( conjg(cmat_inv) * transpose(cmat) ) / nb
+             err = maxval(abs(cmat_inv * (phase_dyn / abs(phase_dyn)) - transpose(cmat)))
            end if
-           if (err >= DTOL .or. abs(abs(phase_L) - 1.0_dp) > DTOL) ierr = ierr + 1
-           call sym_dicts(isym_cnt)%set("inv_ok", s=yesno(err < DTOL .and. abs(abs(phase_L) - 1.0_dp) <= DTOL))
+           ! phase_dyn, by construction of the Frobenius inner product above, should equal conjg(phase_analytic)
+           ! when the D-matrices carry the correct absolute phase, so phase_dyn * phase_analytic == 1.
+           ! NOTE: phase_analytic (L_red/G_0 formula above) is reported as a DIAGNOSTIC only and does NOT
+           ! feed into ierr/inv_ok yet: it currently disagrees with phase_dyn by a discrete 90/180 degree
+           ! offset on non-symmorphic operations, which looks like a bug in this analytic derivation itself
+           ! (still under investigation) rather than in the D-matrices (proportionality "err" is at machine
+           ! precision for the same entries). Once the formula is fixed, fold phase_err into the ierr test.
+           phase_err = abs(phase_dyn * phase_analytic - one)
+           if (err >= DTOL .or. abs(abs(phase_dyn) - 1.0_dp) > DTOL) ierr = ierr + 1
+           call sym_dicts(isym_cnt)%set("inv_ok", s=yesno(err < DTOL .and. abs(abs(phase_dyn) - 1.0_dp) <= DTOL))
            call sym_dicts(isym_cnt)%set("inv_err", r=err)
-           call sym_dicts(isym_cnt)%set("inv_phase", s=sjoin(ftoa(real(phase_L)), " + i ", ftoa(aimag(phase_L))))
+           call sym_dicts(isym_cnt)%set("inv_phase", s=sjoin(ftoa(real(phase_dyn)), " + i ", ftoa(aimag(phase_dyn))))
+           call sym_dicts(isym_cnt)%set("inv_phase_analytic_err", r=phase_err)
            end associate
          end if
          if (prtvol > 1) call print_arr(units, cmat, max_r=nb, max_c=nb)

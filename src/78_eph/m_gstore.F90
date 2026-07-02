@@ -6899,10 +6899,14 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
          do isym_tot = 1, cryst%nsym
            ! We want S_tot * (k_base, q_base) = (k_glob, q_glob).
            ! So (k_base, q_base) = S_tot^-1 * (k_glob, q_glob).
-           ! S_tot^-1 = tsign_tot * transpose(symrec).
-           symrec_inv = transpose(cryst%symrec(:,:,isym_tot))
-           kk_base = tsign_tot * matmul(symrec_inv, gstore%kbz(:, ik_glob))
-           q_base  = tsign_tot * matmul(real(cryst%symrel(:,:,isym_tot), dp), gstore%qbz(:, iq_glob))
+           ! gstore%kbz2ibz (mode "symrel" in kpts_map/krank_get_mapping) is built with:
+           !     k_bz = tsign * transpose(symrel(isym)) . k_ibz
+           ! so its inverse is: k_ibz = tsign * symrec(isym) . k_bz  (plain symrec, NOT transposed).
+           ! gstore%qbz2ibz (mode "symrec") is built with:
+           !     q_bz = tsign * symrec(isym) . q_ibz
+           ! so its inverse is: q_ibz = tsign * transpose(symrel(isym)) . q_bz.
+           kk_base = tsign_tot * matmul(cryst%symrec(:,:,isym_tot), gstore%kbz(:, ik_glob))
+           q_base  = tsign_tot * matmul(transpose(real(cryst%symrel(:,:,isym_tot), dp)), gstore%qbz(:, iq_glob))
 
            ! Find q_base in global qbz
            iq_base_glob = -1
@@ -6911,6 +6915,10 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
                iq_base_glob = ii; exit
              end if
            end do
+           if (ik_glob == 5 .and. iq_glob == 2) then
+             print *, "DEBUG-MG2 isym_tot=", isym_tot, "trev_tot=", trev_tot, "q_base=", q_base, &
+               "qbz(iq_glob)=", gstore%qbz(:, iq_glob), "iq_base_glob=", iq_base_glob
+           end if
            if (iq_base_glob == -1) cycle
 
            ! Find kk_base in global kbz
@@ -6929,6 +6937,11 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
                print *, "DEBUG 22, 1: state_kq=", state_kq(ik_base_glob, iq_base_glob)
              end if
            end if
+           if (ik_glob == 5 .and. iq_glob == 2) then
+             print *, "DEBUG-MG2b isym_tot=", isym_tot, "trev_tot=", trev_tot, &
+               "ik_base_glob=", ik_base_glob, "iq_base_glob=", iq_base_glob, &
+               "state_kq=", state_kq(ik_base_glob, iq_base_glob)
+           end if
            if (state_kq(ik_base_glob, iq_base_glob) == GSTORE_KQ_COMPUTED) then
              ik_ibz = -1
              do ii = 1, gstore%nkibz
@@ -6944,6 +6957,9 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        if (ik_ibz == -1) then
          ABI_ERROR(sjoin("no source found for ik_glob:", itoa(ik_glob), ", iq_glob:", itoa(iq_glob)))
        end if
+
+       ! Used below to rotate the fractional translation associated with the atomic perturbation.
+       symrec_inv = transpose(cryst%symrec(:,:,isym_tot))
 
        ! Find mapping of base k+q to the IBZ
        if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kk_base + q_base, indkk_kq) /= 0) then
