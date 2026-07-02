@@ -6748,14 +6748,13 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
  integer :: ik_ibz_ref, isym_k_ref, trev_k_ref, g0_k_ref(3), itime_k_ref
  integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3)
+ integer :: ikq_ibz_use, isym_kq_use, itime_kq_use
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
  integer :: isym_tot, trev_tot, tsign_tot, ik_base_glob
- integer :: isym_LG, trev_LG, itime_LG, isym, isym_kq_left, trev_kq_left, itime_kq_left
- integer :: isym_kq_base, trev_kq_base, itime_kq_base, trev_temp, trev_LG_kq, itime_LG_kq, isym_LG_kq
- integer :: isym_kq_ref, itime_kq_ref
- real(dp) :: symrec_LG(3,3), symrec_kq_left(3,3), symrec_temp(3,3)
  integer :: indkk_kq(6, 1)
- real(dp) :: kk_base(3)
+ real(dp) :: kk_base(3), kkq_bz(3), mq_bz(3)
+ integer :: ikq_glob_bz, imq_glob_bz
+ logical :: use_herm
  real(dp) :: weight_qq, phase, tnon(3), q_base(3)
  integer :: idir, ipert, idir_eq, ipert_eq, mu, mu_eq, iq_base_glob, ii
  real(dp) :: symrec_inv(3,3), symrec_eq(3,3), l0(3)
@@ -6893,8 +6892,9 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        trev_k_ref = gqk%my_k2ibz(6, my_ik); g0_k_ref = gqk%my_k2ibz(3:5, my_ik)
        itime_k_ref = trev_k_ref + 1
 
+       use_herm = .False.
        ik_ibz = -1
-       search_source: do trev_tot = 0, cryst%timrev
+       search_source: do trev_tot = 0, cryst%timrev - 1
          tsign_tot = 1; if (trev_tot == 1) tsign_tot = -1
          do isym_tot = 1, cryst%nsym
            ! We want S_tot * (k_base, q_base) = (k_glob, q_glob).
@@ -6915,10 +6915,6 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
                iq_base_glob = ii; exit
              end if
            end do
-           if (ik_glob == 5 .and. iq_glob == 2) then
-             print *, "DEBUG-MG2 isym_tot=", isym_tot, "trev_tot=", trev_tot, "q_base=", q_base, &
-               "qbz(iq_glob)=", gstore%qbz(:, iq_glob), "iq_base_glob=", iq_base_glob
-           end if
            if (iq_base_glob == -1) cycle
 
            ! Find kk_base in global kbz
@@ -6930,18 +6926,12 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
            end do
            if (ik_base_glob == -1) cycle
 
-           if (ik_glob == 22 .and. iq_glob == 1) then
-             print *, "DEBUG 22, 1: isym_tot=", isym_tot, "trev_tot=", trev_tot
-             print *, "DEBUG 22, 1: ik_base_glob=", ik_base_glob, "iq_base_glob=", iq_base_glob
-             if (ik_base_glob /= -1 .and. iq_base_glob /= -1) then
-               print *, "DEBUG 22, 1: state_kq=", state_kq(ik_base_glob, iq_base_glob)
-             end if
-           end if
-           if (ik_glob == 5 .and. iq_glob == 2) then
-             print *, "DEBUG-MG2b isym_tot=", isym_tot, "trev_tot=", trev_tot, &
+           if (ik_glob == 32 .and. iq_glob == 2) then
+             print *, "DEBUG-D32 isym_tot=", isym_tot, "trev_tot=", trev_tot, &
                "ik_base_glob=", ik_base_glob, "iq_base_glob=", iq_base_glob, &
-               "state_kq=", state_kq(ik_base_glob, iq_base_glob)
+               "state_kq=", state_kq(ik_base_glob, iq_base_glob), "kk_base=", kk_base, "q_base=", q_base
            end if
+
            if (state_kq(ik_base_glob, iq_base_glob) == GSTORE_KQ_COMPUTED) then
              ik_ibz = -1
              do ii = 1, gstore%nkibz
@@ -6955,20 +6945,104 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        end do search_source
 
        if (ik_ibz == -1) then
+         ! No direct source: the IBZ_k q-reduction (lgroup_init/m_lgroup.F90) is enlarged with
+         ! time-reversal-combined operations, so it can fold a q-point together with its OWN
+         ! time-reversed partner -q and only explicitly compute one of the two. When that happens,
+         ! q's own image is not directly reachable by any single (isym,trev) acting on the whole
+         ! (k,q) pair (that search is exactly what the loop above just exhausted).
+         !
+         ! Fall back on the standard e-ph "detailed-balance" relation, which follows from the
+         ! reality of the atomic-displacement perturbation (v_{-q} = v_q^*) combined with time
+         ! reversal on the electronic states:
+         !
+         !   g^a_{mn}(k,q) = [g^a_{nm}(k+q, -q)]^*
+         !
+         ! i.e. reconstruct at the Hermitian-conjugate target (k'=k+q, q'=-q) instead, then take
+         ! the conjugate-transpose (in band indices m,n) of the result. Note k'+q' = k, so the
+         ! "k'+q' in the IBZ" gauge needed below is just the ORIGINAL target k's own IBZ image
+         ! (ik_ibz_ref/isym_k_ref/itime_k_ref, already available from gqk%my_k2ibz).
+         kkq_bz = gstore%kbz(:, ik_glob) + gstore%qbz(:, iq_glob)
+         mq_bz  = -gstore%qbz(:, iq_glob)
+
+         ikq_glob_bz = -1
+         do ii = 1, gstore%nkbz
+           if (sum((modulo(kkq_bz - gstore%kbz(:, ii) + 0.5_dp, 1.0_dp) - 0.5_dp)**2) < tol12) then
+             ikq_glob_bz = ii; exit
+           end if
+         end do
+         ABI_CHECK(ikq_glob_bz /= -1, "Cannot find k+q in gstore%kbz for Hermitian-conjugate fallback")
+
+         imq_glob_bz = -1
+         do ii = 1, gstore%nqbz
+           if (sum((modulo(mq_bz - gstore%qbz(:, ii) + 0.5_dp, 1.0_dp) - 0.5_dp)**2) < tol12) then
+             imq_glob_bz = ii; exit
+           end if
+         end do
+         ABI_CHECK(imq_glob_bz /= -1, "Cannot find -q in gstore%qbz for Hermitian-conjugate fallback")
+
+         herm_search: do trev_tot = 0, cryst%timrev - 1
+           tsign_tot = 1; if (trev_tot == 1) tsign_tot = -1
+           do isym_tot = 1, cryst%nsym
+             kk_base = tsign_tot * matmul(cryst%symrec(:,:,isym_tot), gstore%kbz(:, ikq_glob_bz))
+             q_base  = tsign_tot * matmul(transpose(real(cryst%symrel(:,:,isym_tot), dp)), gstore%qbz(:, imq_glob_bz))
+
+             iq_base_glob = -1
+             do ii = 1, gstore%nqbz
+               if (sum((modulo(q_base - gstore%qbz(:, ii) + 0.5_dp, 1.0_dp) - 0.5_dp)**2) < tol12) then
+                 iq_base_glob = ii; exit
+               end if
+             end do
+             if (iq_base_glob == -1) cycle
+
+             ik_base_glob = -1
+             do ii = 1, gstore%nkbz
+               if (sum((modulo(kk_base - gstore%kbz(:, ii) + 0.5_dp, 1.0_dp) - 0.5_dp)**2) < tol12) then
+                 ik_base_glob = ii; exit
+               end if
+             end do
+             if (ik_base_glob == -1) cycle
+
+             if (ik_glob == 32 .and. iq_glob == 2) then
+               print *, "DEBUG-H32 isym_tot=", isym_tot, "trev_tot=", trev_tot, &
+                 "ik_base_glob=", ik_base_glob, "iq_base_glob=", iq_base_glob, &
+                 "state_kq=", state_kq(ik_base_glob, iq_base_glob)
+             end if
+
+             if (state_kq(ik_base_glob, iq_base_glob) == GSTORE_KQ_COMPUTED) then
+               ik_ibz = -1
+               do ii = 1, gstore%nkibz
+                 if (sum((modulo(kk_base - ebands%kptns(:, ii) + 0.5_dp, 1.0_dp) - 0.5_dp)**2) < tol12) then
+                   ik_ibz = ii; exit
+                 end if
+               end do
+               if (ik_ibz /= -1) then
+                 use_herm = .True.
+                 exit herm_search
+               end if
+             end if
+           end do
+         end do herm_search
+       end if
+
+       if (ik_ibz == -1) then
          ABI_ERROR(sjoin("no source found for ik_glob:", itoa(ik_glob), ", iq_glob:", itoa(iq_glob)))
        end if
 
        ! Used below to rotate the fractional translation associated with the atomic perturbation.
        symrec_inv = transpose(cryst%symrec(:,:,isym_tot))
+       ! Used below to rotate the reduced perturbation-direction index (atom representation).
+       symrec_eq = real(cryst%symrec(:,:,isym_tot), dp)
 
-       ! Find mapping of base k+q to the IBZ
-       if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kk_base + q_base, indkk_kq) /= 0) then
-         ABI_ERROR("Cannot map k_base+q_base to IBZ")
+       ! "P" gauge for the bra: the IBZ image of k_glob+q_glob (direct path) or, for the Hermitian
+       ! fallback, of k'+q' = k_glob (see NOTES above) -- already available as ik_ibz_ref/isym_k_ref.
+       if (use_herm) then
+         ikq_ibz_use = ik_ibz_ref; isym_kq_use = isym_k_ref; itime_kq_use = itime_k_ref
+       else
+         ikq_ibz_use = ikq_ibz; isym_kq_use = isym_kq; itime_kq_use = itime_kq
        end if
 
-       ! Revert to original straightforward matrix reconstruction
        dmat_k = dmats%for_spin(spin)%value(:,:, isym_tot, trev_tot + 1, ik_ibz)
-       dmat_star_kq = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_kq, itime_kq, ikq_ibz)))
+       dmat_star_kq = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_kq_use, itime_kq_use, ikq_ibz_use)))
 
 
        ! Read gkq_base from disk
@@ -7000,6 +7074,14 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
                              matmul(matmul(dmat_star_kq, gkq_base(:,:,mu_eq)), dmat_k)
          end do
        end do
+
+       if (use_herm) then
+         ! gkq_rot currently holds g^a(k', q') = g^a(k+q, -q); convert to the actual target
+         ! g^a(k,q) = [g^a_{nm}(k+q,-q)]^* via conjugation + band-index transpose (see NOTES above).
+         do mu=1,gqk%natom3
+           gkq_rot(:,:,mu) = conjg(transpose(gkq_rot(:,:,mu)))
+         end do
+       end if
 
        ! Write the newly computed g_{mn, nu} back to the netcdf file (in-place modification).
        ! and update the entry in state_kq.
