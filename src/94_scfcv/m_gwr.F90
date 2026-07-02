@@ -5103,7 +5103,7 @@ subroutine gwr_build_tchi(gwr)
    !gw_timrev = kpts_timrev_from_kptopt(gwr%ks_ebands%kptopt) + 1
    do iq_ibz=1,gwr%nqibz
      call ltg_qibz(iq_ibz)%init(gwr%qibz(:,iq_ibz), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, &
-                                npwe=gwr%tchi_desc_qibz(iq_ibz)%npw, timrev=1, gvec=gwr%tchi_desc_qibz(iq_ibz)%gvec)
+                                npwe=gwr%tchi_desc_qibz(iq_ibz)%npw, gvec=gwr%tchi_desc_qibz(iq_ibz)%gvec)
      !call ltg_qibz(iq_ibz)%init(gwr%qibz(:,iq_ibz), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0, timrev=1)
      if (gwr%comm%me == 0) call ltg_qibz(iq_ibz)%print([std_out], prtvol=gwr%dtset%prtvol)
    end do
@@ -5179,7 +5179,7 @@ subroutine gwr_build_tchi(gwr)
          !  !wtqp * gkq_rpr_pm(1)%buffer_cplx * conjg(gk_rpr_pm(2)%buffer_cplx)  ! This should be OK
          do iab=1,gwr%nsig_ab
            call cplx_mat_plus_bc(chiq_rpr(iq_ibz)%bufsize, chiq_rpr(iq_ibz)%buffer_cplx(:,1), &
-                               wtqp, "C", gkq_rpr_pm(2, iab)%buffer_cplx(:,1), gk_rpr_pm(1, iab)%buffer_cplx(:,1), gpu_option)
+                                 wtqp+wtqm, "C", gkq_rpr_pm(2, iab)%buffer_cplx(:,1), gk_rpr_pm(1, iab)%buffer_cplx(:,1), gpu_option)
          end do ! iab
 
        end do ! iq_ibz
@@ -5196,7 +5196,6 @@ subroutine gwr_build_tchi(gwr)
      ! From chi_q(r',r) to chi_q(g,g') for each q in the IBZ.
      do iq_ibz=1,gwr%nqibz
        call xmpi_sum(chiq_rpr(iq_ibz)%buffer_cplx, gwr%kpt_comm%value, ierr)
-       !call xmpi_sum(gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx, gwr%kpt_comm%value, ierr)
      end do
 
      tchi_rfact = one / gwr%cryst%ucvol
@@ -5210,15 +5209,20 @@ subroutine gwr_build_tchi(gwr)
        ! This section is needed only if symchi /= 0.
        ! TODO: Timrev should be tested. At present is disabled.
        associate(desc => gwr%tchi_desc_qibz(iq_ibz), ltg => ltg_qibz(iq_ibz))
+       call gwr%rpr_to_ggp(gwr%tchi_desc_qibz(iq_ibz), chiq_rpr(iq_ibz), tchi_rfact, chiq_ggp)
        do itim=1, ltg%timrev
          do isym=1, ltg%nsym_sg
            if (ltg%preserve(itim,isym) /= 1) cycle
-           associate(sglist => desc%rottbm1(ltg%igmG0(1:desc%npw, itim, isym), itim, isym))
-           associate(phase => conjg(desc%phmGt(sglist, isym)))
+           associate(sglist => desc%rottbm1(ltg%igmG0(1:desc%npw, itim, isym), itim, isym), &
+                     phase  => desc%phmGt(:, isym))
            call slk_array_set_zero(work1)
            ! (g,g') --> (Sg, g')
            do ig2=1,work1%size_local(2)
-             work1%buffer_cplx(:,ig2) = chiq_ggp%buffer_cplx(sglist, ig2) * phase
+             if (itim == 1) then
+               work1%buffer_cplx(:,ig2) = chiq_ggp%buffer_cplx(sglist, ig2) * phase
+             else
+               work1%buffer_cplx(:,ig2) = GWPC_CONJG(chiq_ggp%buffer_cplx(sglist, ig2)) * phase
+             end if
            end do
            ! (Sg, g') --> (g', Sg)
            call work1%ptrans("C", work2, free=.False.)
@@ -5230,12 +5234,12 @@ subroutine gwr_build_tchi(gwr)
            call work2%ptrans("C", work1, free=.True.)
            gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:) = gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:)+work1%buffer_cplx(:,:)
            end associate
-           end associate
          end do ! isym
        end do ! itim
 
        call work1%free()
-       gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:) = gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:) / real(ltg%nsym_ltg)
+       gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:) = gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:) &
+       & / ltg%nsym_ltg
 
        end associate
        call chiq_ggp%free()
