@@ -2824,6 +2824,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        dtset%dmft_triqs_time_invariance = 0
        dtset%dmft_triqs_move_double = 1
      end if
+     if (nspinor .eq. 1) then
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_chiloc',tread,'INT')           
+       if(tread==1) dtset%dmft_triqs_chiloc  =intarr(1)                                                    
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_chiloc_ins',tread,'INT')       
+       if(tread==1) dtset%dmft_triqs_chiloc_ins =intarr(1)                                                 
+     end if        
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_basis',tread,'INT')
      if(tread==1) dtset%dmft_triqs_basis=intarr(1)
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_compute_integral',tread,'INT')

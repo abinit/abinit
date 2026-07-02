@@ -2392,6 +2392,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
    dtsets(idtset)%dmft_triqs_basis=-1
+   dtsets(idtset)%dmft_triqs_chiloc=0
+   if (dtsets(idtset)%dmft_triqs_chiloc .eq. 1) dtsets(idtset)%dmft_triqs_chiloc_ins = 10
    dtsets(idtset)%dmft_triqs_compute_integral=1
    dtsets(idtset)%dmft_triqs_det_init_size=100
    dtsets(idtset)%dmft_triqs_det_n_operations_before_check=10000
