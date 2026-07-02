@@ -227,6 +227,17 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        cond_string(2)='chkparal' ; cond_values(2)=dt%chkparal
        call chkint_eq(2,2,cond_string,cond_values,ierr,'autoparal',dt%autoparal,1,(/0/),iout)
    end if
+   if (dt%gpu_option/=ABI_GPU_DISABLED) then ! At present (v10.8.1), autoparal is not available with GPU
+     cond_string(1)='gpu_option' ; cond_values(1)=dt%gpu_option
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'autoparal',dt%autoparal,1,(/0/),iout)
+     if(dt%autoparal/=0) then
+       write(msg,'(3a)')&
+        "autoparal is not supported with GPU enabled.",ch10,&
+        "Action: remove 'autoparal' from input and set 'np_spkpt' and 'npband' accordingly."
+       ABI_ERROR_NOSTOP(msg, ierr)
+     end if
+   end if
+
 
    ! auxc_scal
    call chkdpr(0,0,cond_string,cond_values,ierr,'auxc_scal',dt%auxc_scal,1,0.0_dp,iout)
@@ -1261,7 +1272,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
-       27, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 9, 10, 11, -12, 13, -13, 14, 15, -15, 16, 17, 18, 19, 24], iout)
+       28, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 9, 10, 11, -12, 13, -13, 14, 15, -15, 16, 17, 18, 19, 20, 24], iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        ABI_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)

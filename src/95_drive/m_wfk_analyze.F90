@@ -60,7 +60,7 @@ module m_wfk_analyze
  use m_paw_tools,       only : chkpawovlp
  use m_paw_correlations,only : pawpuxinit
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
- use m_classify_bands,  only : classify_bands
+ use m_classify_bands,  only : classify_bands, dmats_t
  use m_pspini,          only : pspini
  use m_sigtk,           only : sigtk_kpts_in_erange
  use m_iowf,            only : prtkbff
@@ -166,9 +166,10 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  type(wfd_t) :: wfd
  type(ddkstore_t) :: ds
  type(wfk_t) :: in_wfk, out_wfk
+ type(dmats_t) :: dmats
  !type(dataset_type) :: my_dtset
 !arrays
- integer :: ngfftc(18),ngfftf(18), units(2), band_block(2), bstart
+ integer :: ngfftc(18),ngfftf(18), units(2), band_block(2), bstart, brange_spin(2, dtset%nsppol)
  integer,allocatable :: l_size_atm(:), kg_k(:,:)
  real(dp),parameter :: k0(3)=zero
  real(dp),pointer :: gs_eigen(:,:,:)
@@ -382,6 +383,21 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
  case (WFK_TASK_CLASSIFY)
    ! Band classification.
+
+   ! New version
+   ! Compute the mixing matrices D^{k}(S) from the wavefunctions stored in wfd_t.
+   do spin=1,dtset%nsppol
+     brange_spin(:,spin) = [1, dtset%mband]
+   end do
+   call dmats%init(wfk0_path, dtset, dtfil, cryst, brange_spin, ngfftf, pawtab, psps, comm)
+
+   if (my_rank == master) then
+     call dmats%check([std_out], dtset%prtvol)
+     call dmats%classify(dtset%prtvol)
+   end if
+   call dmats%free()
+
+#if 0
    call read_wfd()
 
    ABI_MALLOC(esymm,(wfd%nkibz,wfd%nsppol))
@@ -398,6 +414,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
    call esymm_free(esymm)
    ABI_FREE(esymm)
+#endif
 
  !case (WFK_TASK_UR)
  !  ! plot KSS wavefunctions. Change bks_mask to select particular states.

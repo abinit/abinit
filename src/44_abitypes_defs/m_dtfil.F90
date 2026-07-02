@@ -1867,7 +1867,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      if (open_file(fillog,msg,unit=std_out,status='unknown',action="write") /= 0) then
        ABI_ERROR(msg)
      end if
-!    Print greetings for interactive user
+     ! Print greetings for interactive user
      write(std_out,*,err=10,iomsg=errmsg)' ABINIT ',trim(abinit_version)
      write(std_out,*,err=10,iomsg=errmsg)' '
      write(std_out,*,err=10,iomsg=errmsg)' I am not the master. Writing log in ',fillog

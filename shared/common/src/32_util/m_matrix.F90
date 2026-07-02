@@ -3,16 +3,13 @@
 !! m_matrix
 !!
 !! FUNCTION
-!! Module containing some function acting on a matrix
-!!  (sqrt root)
+!! Module containing some function acting on a matrix (sqrt root)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2026 ABINIT group (BA)
+!! Copyright (C) 2009-2026 ABINIT group (BA, XG, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -41,7 +38,8 @@ MODULE m_matrix
  public :: mati3inv             ! Invert and transpose orthogonal 3x3 matrix of INTEGER elements.
  public :: mati3det             ! Compute the determinant of a 3x3 matrix of INTEGER elements.
  public :: matr3inv             ! Invert and TRANSPOSE general 3x3 matrix of real*8 elements.
-
+ public :: is_unitary           ! Returns .TRUE. if the input matrix mat is unitary, i.e. mat^\dagger mat = I.
+ public :: is_identity          ! Returns .TRUE. if the input matrix mat is the identity matrix.
 
  ! the determinant of a 3*3 matrix
  interface mat33det
@@ -73,7 +71,6 @@ subroutine invsqrt_matrix(matrix,tndim,force_diag)
  integer,intent(in) :: tndim
  complex(dp),intent(inout) :: matrix(tndim,tndim)
  integer, intent(out) :: force_diag
-!arrays
 
 !Local variables-------------------------------
 !scalars
@@ -258,7 +255,6 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
  integer,allocatable :: nonnul(:)
  integer,allocatable :: nonnuldege(:)
  logical :: testdege,swap
-
 ! *************************************************************************
 
 !!!Do not remove this silly print instruction. Seems needed to avoid floating
@@ -337,8 +333,6 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
       write(std_out,'(2(1x,18(1x,f22.18,f22.18)))') (Apermutcol(im1,im2),im2=1,tndim)
    end do
  endif
-
-
 
  ABI_MALLOC(Permutline,(tndim,tndim))
  Permutline=zero
@@ -932,7 +926,6 @@ subroutine mati3inv(mm, mit)
  character(len=500) :: msg
 !arrays
  integer :: tt(3,3)
-
 ! *************************************************************************
 
  tt(1,1) = mm(2,2) * mm(3,3) - mm(3,2) * mm(2,3)
@@ -981,11 +974,10 @@ end subroutine mati3inv
 subroutine mati3det(mm, det)
 
 !Arguments ------------------------------------
-!arrays
  integer,intent(in) :: mm(3,3)
  integer,intent(out) :: det
-
 ! *************************************************************************
+
  det=mm(1,1)*(mm(2,2) * mm(3,3) - mm(3,2) * mm(2,3)) &
    + mm(2,1)*(mm(3,2) * mm(1,3) - mm(1,2) * mm(3,3)) &
    + mm(3,1)*(mm(1,2) * mm(2,3) - mm(2,2) * mm(1,3))
@@ -1022,7 +1014,6 @@ subroutine matr3inv(aa, ait)
 !scalars
  real(dp) :: dd,det,t1,t2,t3
  character(len=500) :: msg
-
 ! *************************************************************************
 
  t1 = aa(2,2) * aa(3,3) - aa(3,2) * aa(2,3)
@@ -1052,5 +1043,97 @@ subroutine matr3inv(aa, ait)
 end subroutine matr3inv
 !!***
 
+!!****f* m_matrix/is_unitary
+!! NAME
+!! is_unitary
+!!
+!! FUNCTION
+!!  Returns .TRUE. if the input complex matrix mat is unitary, i.e. mat^\dagger mat = I.
+!!  Also returns the maximum absolute deviation from the identity matrix.
+!!
+!! INPUTS
+!!  nn  = Dimension of the matrix.
+!!  mat = Complex matrix of size (nn,nn).
+!!  tol = Tolerance for the maximum deviation.
+!!
+!! OUTPUT
+!!  .TRUE. if err < tol, .FALSE. otherwise.
+!!  err = Maximum absolute deviation from the identity matrix.
+!!
+!! SOURCE
 
-END MODULE m_matrix
+logical function is_unitary(nn, mat, tol, err)
+
+!Arguments ------------------------------------
+ integer, intent(in) :: nn
+ complex(dp), intent(in) :: mat(nn,nn)
+ real(dp), intent(in) :: tol
+ real(dp), intent(out) :: err
+
+!Local variables-------------------------------
+ integer :: ii
+ complex(dp) :: prod(nn,nn), identity(nn,nn)
+!----------------------------------------------------------------------
+
+ ! Compute mat^\dagger mat
+ prod = matmul(conjg(transpose(mat)), mat)
+
+ ! Build identity matrix
+ identity = czero
+ do ii=1,nn
+   identity(ii,ii) = one
+ end do
+
+ ! Maximum deviation from identity
+ err = maxval(abs(prod - identity))
+ is_unitary = (err < tol)
+
+end function is_unitary
+!!***
+
+!!****f* m_matrix/is_identity
+!! NAME
+!! is_identity
+!!
+!! FUNCTION
+!!  Returns .TRUE. if the complex input matrix mat is the identity matrix.
+!!  Also returns the maximum absolute deviation from the identity matrix.
+!!
+!! INPUTS
+!!  nn  = Dimension of the matrix.
+!!  mat = Complex matrix of size (nn,nn).
+!!  tol = Tolerance for the maximum deviation.
+!!
+!! OUTPUT
+!!  .TRUE. if err < tol, .FALSE. otherwise.
+!!  err = Maximum absolute deviation from the identity matrix.
+!!
+!! SOURCE
+
+logical function is_identity(nn, mat, tol, err)
+
+!Arguments ------------------------------------
+ integer, intent(in) :: nn
+ complex(dp), intent(in) :: mat(nn,nn)
+ real(dp), intent(in) :: tol
+ real(dp), intent(out) :: err
+
+!Local variables-------------------------------
+ integer :: ii
+ complex(dp) :: identity(nn,nn)
+!----------------------------------------------------------------------
+
+ ! Build identity matrix
+ identity = czero
+ do ii=1,nn
+   identity(ii,ii) = one
+ end do
+
+ ! Maximum deviation from identity
+ err = maxval(abs(mat - identity))
+ is_identity = (err < tol)
+
+end function is_identity
+!!***
+
+end module m_matrix

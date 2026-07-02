@@ -270,7 +270,7 @@ module m_crystal
 
  end type crystal_t
 
- public :: symbols_crystal         ! Return an array with the atomic symbol:["Sr","Ru","O1","O2","O3"]
+ public :: symbols_crystal         ! Return an array with the atomic symbol: ["Sr","Ru","O1","O2","O3"]
  public :: prt_cif                 ! Print CIF file.
  public :: prtposcar               ! output VASP style POSCAR and FORCES files.
 !!***
@@ -573,7 +573,7 @@ subroutine crystal_compute_sym(Cryst)
    call getspinrot(Cryst%rprimd, Cryst%spinrot(:,isym), Cryst%symrel(:,:,isym))
  end do
 
-! Find list of irreducible atoms by using the indsym
+ ! Find list of irreducible atoms by using the indsym
  ABI_MALLOC(irredat_tmp, (Cryst%natom))
  irredat_tmp = .TRUE.
 
@@ -1019,7 +1019,7 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
- integer :: my_unt,my_prtvol,nu,iatom, isym, ii, nsym
+ integer :: my_unt,my_prtvol,nu,iatom, isym, ii, nsym, units(1)
  character(len=4) :: my_mode
  character(len=500) :: msg
 ! *********************************************************************
@@ -1027,6 +1027,8 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
  my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
  my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
  my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
+
+ units = [my_unt]
 
  msg=' ==== Info on the Cryst% object ==== '
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
@@ -1058,7 +1060,7 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
  if (my_prtvol == -1) return
 
  if (my_prtvol > 0) then
-   call print_symmetries(Cryst%nsym, Cryst%symrel, Cryst%tnons, Cryst%symafm, unit=my_unt, mode_paral=my_mode)
+   call print_symmetries(units, Cryst%nsym, Cryst%symrel, Cryst%tnons, Cryst%symafm)
    if (Cryst%use_antiferro) call wrtout(my_unt,' System has magnetic symmetries ',my_mode)
 
    ! Print indsym using the same format as in symatm
@@ -1325,9 +1327,9 @@ function symbol_type(crystal, itypat) result(symbol)
 
 !Arguments ------------------------------------
 !scalars
+ class(crystal_t),intent(in) :: crystal
  integer,intent(in) :: itypat
  character(len=2) :: symbol
- class(crystal_t),intent(in) :: crystal
 
 !Local variables-------------------------------
  type(atomdata_t) :: atom

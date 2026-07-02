@@ -64,9 +64,10 @@ module m_eph_driver
  use m_sigmaph,         only : sigmaph
  use m_pspini,          only : pspini
  use m_ephtk,           only : ephtk_update_ebands
- use m_gstore,          only : gstore_t
  use m_migdal_eliashberg, only : migdal_eliashberg_iso !, migdal_eliashberg_aniso
+ use m_gstore,          only : gstore_t, gstore_symmetrize
  use m_gstore_sigmaph,   only : gstore_sigmaph
+ use m_gstore_converters, only : gstore_convert
  use m_berry_curvature, only : berry_curvature
  use m_cumulant,        only : cumulant_driver
  use m_frohlich,        only : frohlich_t, frohlichmodel_zpr, frohlichmodel_polaronmass
@@ -743,11 +744,15 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, qp_ebands, ifc, comm)
    end if
 
-   call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, qp_ebands, dvdb, &
+   call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, qp_ebands, ifc, dvdb, &
                        pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+
+   !call gstore_symmetrize(dtfil%filgstorein, wfk0_path, ngfftf, dtset, dtfil, cryst, psps, pawtab, qp_ebands, ifc, comm)
 
    gstore_path = gstore%path
    call gstore%free()
+
+   if (len(trim(dtset%gstore_convert)) /= 0) call gstore_convert(gstore_path, dtset, dtfil, cryst, qp_ebands, ifc, comm)
 
    ! Wannierize the e-ph matrix elements if the ABIWAN.nc file is provided.
    if (dtfil%filabiwanin /= ABI_NOFILE) then
@@ -842,13 +847,22 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call gwpt_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, qp_ebands, dvdb, drhodb, ifc, wfk0_hdr, &
                  pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
+    if (len(trim(dtset%gstore_convert)) /= 0) then
+      gstore_path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+      call gstore_convert(gstore_path, dtset, dtfil, cryst, qp_ebands, ifc, comm)
+    end if
+
  case (18)
    ! Compute e-ph matrix elements along path in the BZ.
    call eph_path_run(dtfil, dtset, cryst, ks_ebands, dvdb, ifc, pawfgr, pawang, pawrad, pawtab, psps, comm)
 
  case (19)
    ! Compute matrix elements of W_kk'.
+
    call wkk_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, qp_ebands, wfk0_hdr, pawtab, psps, mpi_enreg, comm)
+
+ case (20)
+   call gstore_convert(dtfil%filgstorein, dtset, dtfil, cryst, qp_ebands, ifc, comm)
 
  case default
    ABI_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
@@ -859,8 +873,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !=====================
  call cryst%free(); call dvdb%free(); call drhodb%free(); call ddb_hdr%free()
  call ddb%free(); call ifc%free(); call wfk0_hdr%free()
- call ks_ebands%free(); call ks_ebands_kq%free()
- call qp_ebands%free()
+ call ks_ebands%free(); call ks_ebands_kq%free(); call qp_ebands%free()
  call pawfgr_destroy(pawfgr); call destroy_mpi_enreg(mpi_enreg)
 
  if (allocated(efmasdeg)) call efmasdeg_free_array(efmasdeg)

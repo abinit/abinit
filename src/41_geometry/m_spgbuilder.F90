@@ -97,7 +97,6 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
  integer :: intsym
  real(dp) :: inttn
  character(len=500) :: message
-
 ! *************************************************************************
 
 !List of the input parameters
@@ -543,9 +542,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
 !ENDDEBUG
 
  call sg_multable(nsym,symafm,symrel,ierr,tnons=tnons,tnons_tol=tol5)
- if (ierr/=0) then
-   call print_symmetries(nsym,symrel,tnons,symafm)
- end if
+ if (ierr/=0) call print_symmetries([std_out], nsym, symrel, tnons, symafm)
 
  ABI_CHECK(ierr==0,"Error in group closure")
 
@@ -590,7 +587,6 @@ subroutine gensymshub(genafm,spgroup,spgroupma,shubnikov)
 !scalars
  integer :: brvlttbw=0,spgrmatch=1
  character(len=500) :: message
-
 ! *************************************************************************
 
 !List of the input parameters
@@ -1296,13 +1292,12 @@ subroutine gensymshub4(genafm,msym,nsym,symafm,symrel,tnons)
 !scalars
  integer :: ii
  character(len=500) :: message
-
 ! *************************************************************************
 
  if(msym<2*nsym)then
    write(message, '(3a)' )&
-&   'The number of symmetries in the Shubnikov type IV space group',ch10,&
-&   'is larger than the maximal allowed number of symmetries.'
+   'The number of symmetries in the Shubnikov type IV space group',ch10,&
+   'is larger than the maximal allowed number of symmetries.'
    ABI_ERROR(message)
  end if
 

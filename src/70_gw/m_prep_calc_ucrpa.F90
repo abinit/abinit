@@ -53,7 +53,7 @@ MODULE m_prep_calc_ucrpa
  use m_paw_sym,       only : paw_symcprj
  use m_wfd,           only : wfd_t, wave_t
  use m_oscillators,   only : rho_tw_g
- use m_esymm,         only : esymm_t, esymm_failed
+ use m_esymm,         only : esymm_t
  use m_read_plowannier, only : read_plowannier
  use m_plowannier,     only : plowannier_type,operwan_realspace_type
  use m_ebands,         only : ebands_t
@@ -318,11 +318,11 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
    can_symmetrize = .TRUE.
    if (gwcalctyp >= 20) then
     do spin=1,Wfd%nsppol
-      can_symmetrize(spin) = .not.esymm_failed(QP_sym(spin))
+      can_symmetrize(spin) = .not. QP_sym(spin)%failed()
       if (.not.can_symmetrize(spin)) then
         write(msg,'(a,i0,4a)')&
-&         " Symmetrization cannot be performed for spin: ",spin,ch10,&
-&         " band classification encountered the following problem: ",ch10,TRIM(QP_sym(spin)%err_msg)
+         " Symmetrization cannot be performed for spin: ",spin,ch10,&
+         " band classification encountered the following problem: ",ch10,TRIM(QP_sym(spin)%err_msg)
         ABI_WARNING(msg)
       end if
     end do

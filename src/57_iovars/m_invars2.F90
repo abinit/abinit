@@ -2472,6 +2472,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_gname', tread, 'KEY', key_value=key_value)
  if (tread == 1) dtset%gstore_gname = tolower(key_value)
 
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_convert', tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%gstore_convert = tolower(key_value)
+
  narr = 2 * nsppol
  call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gstore_brange', tread_brange, 'INT')
  if (tread_brange == 1) then

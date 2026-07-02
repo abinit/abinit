@@ -622,9 +622,7 @@ contains
 
 !write(std_out,'(a)')' m_symfind%symfind : call print_symmetries, ierr_= ',ierr_; call flush(std_out)
 
- if (ierr_/=0) then
-   call print_symmetries(nsym,symrel,tnons,symafm)
- end if
+ if (ierr_/=0) call print_symmetries([std_out], nsym, symrel, tnons, symafm)
 
  if(.not.present(ierr))then
    ABI_CHECK(ierr_==0,"Error in group closure")

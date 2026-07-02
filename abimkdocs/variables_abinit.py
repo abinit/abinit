@@ -5662,7 +5662,8 @@ The choice is among:
 * 17 --> Compute e-ph matrix elements with the GWPT formalism  Produce GSTORE.nc file.
          Requires netcdf library with MPI-IO support.
 * 18 --> Compute e-ph matrix g(k,q) along a high-symmetry path. See [[eph_fix_wavevec]] and other related variables.
-* 19 --> Compute matrix elements of the screened interaction W between two Cooper pairs.
+* 19 --> Compute matrix elements of the screened interaction W between two Cooper pairs (UNDER DEVELOPMENT).
+* 20 --> Convert GSTORE.nc file to other formats. Requires [[gstore_convert]].
 * 24 --> Compute electron self-energy (Fan-Migdal + Debye-Waller) and QP corrections, also possibly the spectral function.
          Similar to [[eph_task]] 4 but requires GSTORE file specified via [[getgstore_filepath]]
 
@@ -24718,57 +24719,57 @@ Variable(
 This variable defines the quantity that should be computed starting from a previously generated WFK file.
 Possible values are:
 
-  * "wfk_fullbz" --> Read input WFK file and produce new WFK file with $\kk$-points in the full BZ.
-     Wavefunctions with [[istwfk]] > 2 are automatically converted into the full G-sphere representation.
-     This option can be used to interface Abinit with external tools (e.g. lobster) requiring $\kk$-points in the full BZ.
-     Use [[iomode]] = 3 and [[prtkbff]] = 1 to produce a WFK file in netcdf format with Kleynmann-Bylander form factors.
+* "wfk_fullbz" --> Read input WFK file and produce new WFK file with $\kk$-points in the full BZ.
+   Wavefunctions with [[istwfk]] > 2 are automatically converted into the full G-sphere representation.
+   This option can be used to interface Abinit with external tools (e.g. lobster) requiring $\kk$-points in the full BZ.
+   Use [[iomode]] = 3 and [[prtkbff]] = 1 to produce a WFK file in netcdf format with Kleynmann-Bylander form factors.
 
-  * "wfk_einterp" --> Read energies from WFK file and interpolate the band structure with the modified SKW method [[cite:Pickett1988]],
-     using the parameters specified by [[einterp]].
+* "wfk_einterp" --> Read energies from WFK file and interpolate the band structure with the modified SKW method [[cite:Pickett1988]],
+   using the parameters specified by [[einterp]].
 
-  * "wfk_ddk" --> Compute velocity matrix elements for all bands and $\kk$-points found the input WFK file.
-     The code generates three `_EVK.nc` netcdf files with the matrix element of the $\frac{d}{d{\kk_i}}$
-     operator using the same list of $\kk$-points found in the input WFK file i.e. the same value of [[kptopt]].
-     These files can then be passed to optics via the `ddkfile_1, ddkfile_2, ddkfile_3` variables
-     without having to call the DFPT part that is much more expensive at the level of memory.
+* "wfk_ddk" --> Compute velocity matrix elements for all bands and $\kk$-points found the input WFK file.
+   The code generates three `_EVK.nc` netcdf files with the matrix element of the $\frac{d}{d{\kk_i}}$
+   operator using the same list of $\kk$-points found in the input WFK file i.e. the same value of [[kptopt]].
+   These files can then be passed to optics via the `ddkfile_1, ddkfile_2, ddkfile_3` variables
+   without having to call the DFPT part that is much more expensive at the level of memory.
 
-     Please note that, at present, the computation of non-linear optical properties in optic requires
-     [[kptopt]] = 3 i.e. $\kk$-points in the full BZ whereas the computation of linear optical properties
-     can take advantage of spatial and time-reversal symmetries.
-     If you use **wfk_ddk** to generate input files for optics, please make sure that your input WFK file
-     has the correct value of [[kptopt]] according to the physical properties you want to compute.
+   Please note that, at present, the computation of non-linear optical properties in optic requires
+   [[kptopt]] = 3 i.e. $\kk$-points in the full BZ whereas the computation of linear optical properties
+   can take advantage of spatial and time-reversal symmetries.
+   If you use **wfk_ddk** to generate input files for optics, please make sure that your input WFK file
+   has the correct value of [[kptopt]] according to the physical properties you want to compute.
 
-     In other words, don't use a WFK with [[kptopt]] != 3 if you plan to compute non-linear optical properties.
-     To work around the limitation of the non-linear part of optics, one can use "wfk_optics_fullbz"
-     to generate WKF and EVK files in the full BZ starting from a WFK defined in the IBZ.
+   In other words, do not use a WFK with [[kptopt]] != 3 if you plan to compute non-linear optical properties.
+   To work around the limitation of the non-linear part of optics, one can use "wfk_optics_fullbz"
+   to generate WKF and EVK files in the full BZ starting from a WFK defined in the IBZ.
 
-  * "wfk_optics_fullbz" --> Similar to "wfk_ddk" but accepts a WFK with wavefunctions in the IBZ
-     and generates a new WFK and three `_EVK.nc` files with $\kk$-points in the full BZ.
-     This procedure is equivalent to performing a NSCF + DDK calculation with [[kptopt]] = 3 as documented
-     in the tutorial [[tutorial:optic]] for non-linear optical properties but it is much faster and, most importantly,
-     less memory demanding.
+* "wfk_optics_fullbz" --> Similar to "wfk_ddk" but accepts a WFK with wavefunctions in the IBZ
+   and generates a new WFK and three `_EVK.nc` files with $\kk$-points in the full BZ.
+   This procedure is equivalent to performing a NSCF + DDK calculation with [[kptopt]] = 3 as documented
+   in the tutorial [[tutorial:optic]] for non-linear optical properties but it is much faster and, most importantly,
+   less memory demanding.
 
-  * "wfk_kpts_erange" --> Read WFK file, use star-function and [[einterp]] parameters to interpolate
-     electron energies onto fine k-mesh defined by [[sigma_ngkpt]] and [[sigma_shiftk]].
-     Find k-points inside (electron/hole) pockets according to the values specified by [[sigma_erange]].
-     Write KERANGE.nc file with all the tables required by the code to automate NSCF band structure calculations
-     inside the pocket(s) and electron lifetime computation in the EPH code when [[eph_task]] = -4.
+* "wfk_kpts_erange" --> Read WFK file, use star-function and [[einterp]] parameters to interpolate
+   electron energies onto fine k-mesh defined by [[sigma_ngkpt]] and [[sigma_shiftk]].
+   Find k-points inside (electron/hole) pockets according to the values specified by [[sigma_erange]].
+   Write KERANGE.nc file with all the tables required by the code to automate NSCF band structure calculations
+   inside the pocket(s) and electron lifetime computation in the EPH code when [[eph_task]] = -4.
 
-  * "wannier" --> Read WFK file and run Wannierization. It has the similar effect of
-      [[prtwant]] = 2, which uses the **ABINIT- Wannier90** interface. The difference is that with wfk_task "wannier",
-      the $\kk$-points in the full BZ is not necessary. Instead, the wavefunctions with the $\kk$-points not in
-      the IBZ will be reconstructed by symmetry. This functionality does not yet work with PAW when the wavefunction
-      is not already in full BZ.
+* "wannier" --> Read WFK file and run Wannierization. It has the similar effect of
+    [[prtwant]] = 2, which uses the **ABINIT- Wannier90** interface. The difference is that with wfk_task "wannier",
+    the $\kk$-points in the full BZ is not necessary. Instead, the wavefunctions with the $\kk$-points not in
+    the IBZ will be reconstructed by symmetry. This functionality does not yet work with PAW when the wavefunction
+    is not already in full BZ.
 
-      ABINIT will produce the input files required by Wannier90 and it will run
-      Wannier90 to produce the Maximally-locallized Wannier functions (see [
-      http://www.wannier.org ](http://www.wannier.org) ).
-      !!! Notes
+    ABINIT will produce the input files required by Wannier90 and it will run
+    Wannier90 to produce Maximally-locallized Wannier functions (see [http://www.wannier.org](http://www.wannier.org)).
 
-          * The files that are created can also be used by Wannier90 in stand-alone mode.
-          * In order to use Wannier90 as a post-processing program for ABINIT you might have to
-            compile it with the appropriate flags (see ABINIT makefile). You might use ./configure --enable-wannier90
-          * There are some other variables related to the interface of Wannier90 and ABINIT. See [[varset:w90]].
+    !!! Notes
+
+        * The files that are created can also be used by Wannier90 in stand-alone mode.
+        * In order to use Wannier90 as a post-processing program for ABINIT you might have to
+          compile it with the appropriate flags (see ABINIT makefile). You might use ./configure --enable-wannier90
+        * There are some other variables related to the interface of Wannier90 and ABINIT. See [[varset:w90]].
 """,
 ),
 
@@ -26431,6 +26432,34 @@ Use "gvals_ks" if you wish to compute physical properties using KS matrix elemen
 for comparison purposes.
 """,
 ),
+
+Variable(
+    abivarname="gstore_convert",
+    varset="eph",
+    vartype="string",
+    topics=["ElPhonInt_expert"],
+    dimensions="scalar",
+    defaultval="''",
+    mnemonics=r"GSTORE CONVERT",
+    requires="[[optdriver]] == 7",
+    added_in_version="10.8.2",
+    text=r"""
+This variable activates the conversion of a GSTORE file to an external format that
+can be used to interface ABINIT with other codes.
+
+If gstore_convert is not an empty string, ABINIT automatically invokes the conversion routine
+after the GSTORE.nc file has been generated with [[eph_task]] 11 or 17.
+
+A dedicated eph_task can also be used to convert an existing GSTORE.nc file by using
+[[eph_task]] 20 and [[getgstore_filepath]].
+
+Currently, the following formats are supported:
+
+- "epiq" to interface gstore with [EPIq](https://the-epiq-team.gitlab.io/epiq-site/)
+
+""",
+),
+
 
 Variable(
     abivarname="gstore_brange",
