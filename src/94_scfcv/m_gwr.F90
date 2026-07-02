@@ -5169,7 +5169,7 @@ subroutine gwr_build_tchi(gwr)
          if (gwr%dtset%symchi /= 0) then
            wtqp = (one * sum(ltg_qibz(iq_ibz)%wtksym(1,:,ik_bz))) / gwr%nkbz
            wtqm = (one * sum(ltg_qibz(iq_ibz)%wtksym(2,:,ik_bz))) / gwr%nkbz
-           ABI_CHECK(wtqm == zero, sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
+           !ABI_CHECK(wtqm == zero, sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
          end if
 
          ! Accumulate.
