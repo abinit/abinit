@@ -2105,9 +2105,29 @@ end subroutine lamb_core
 !! Return <bra|p>dij<p|ket> on real space mesh
 !!
 !! INPUTS
-!!
+!! adir=fixed direction (Cartesian) of interaction
+!! atindx
+!! bra=pointer to input bra wavefunction
+!! dnlbra=direction of bra side derivative if wanted
+!! dnlket=direction of ket side derivative if wanted
+!! dterm=onsite interaction quantites
+!! dtset=variables concerning current dataset
+!! eignk=ground state energy at current band and k point
+!! fermie=Fermi energy or its estimate
+!! gs_hamk=ground state Hamiltonian 
+!! ket=pointer to input ket wavefunction
+!! mpi_enreg=data concerning MPI distribution
+!! n4,n5,n6=spatial dimensions of fofr
+!! ndat=band FT distribution parameter
+!! npw_k=planewaves at this k point
+!! oterm=index of orbital magnetism term concerned
+!! ph1d=pointer to 1d spatial phase factors
+!! prefac=orbital magnetism scale factor
+!! pawtab=table of variables for PAW structures
+!! trnrm=scaling at this band and k point
+
 !! OUTPUT
-!! fofr()
+!! fofr(n4,n5,n6)=Input matrix element represented as a density in real space 
 !!
 !! NOTES
 !! computes on-site prefac*\sum_{Rij}<bra|d_bra_dir p_i>aij<d_ket_dir p_j|ket>
