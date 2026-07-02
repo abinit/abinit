@@ -342,7 +342,7 @@ data: !SigmaeeData |
 
 For the meaning of the different columns, please consult the [GWR1 tutorial](../tutorial/gwr1.md).
 The experimental gap of MgO is 7.67 eV.
-A well converged G0W0 calculation should give 7.25 eV while our calculation gives 6.528.
+A well converged G0W0 calculation should give 7.25 eV while our calculation gives 6.528 eV.
 
 At this stage, one should perform convergence studies for [[nband]], [[ecuteps]], [[ecutsigx]],
 and [[ngkpt]] to ensure that the GW results are reasonably well converged.
@@ -361,7 +361,7 @@ mpirun -n 4 abinit teph4zpr_gwpt_7.abi > teph4zpr_7.log 2> err &
 
 !!! tip
 
-    Feel free to use more MPI processes here as GWPT are expensive.
+    Feel free to use more MPI processes here as GWPT calculations are expensive.
     The code will do its best to efficiently distribute the workload for the given number of MPI processes.
     If finer control is needed, please consult the documentation of [[gwpt_np_wpqbks]].
 
@@ -534,7 +534,7 @@ used in the previous section, the number of empty states ($n'$ index) and the di
 In order to perform convergence studies, one should go back to the previous step, increase the relevant parameters
 and monitor how the ZPR is affected by these settings.
 Let us stress again that the calculations in this tutorial are **severely underconverged** and there are several theoretical and
-technical and aspect that are still under investigation.
+technical aspects that are still under investigation.
 
 After this preamble, let us start the calculation by issuing:
 
