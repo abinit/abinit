@@ -4428,6 +4428,14 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
        end if ! leg_measure
 
+       if (myproc == 0 .and. paw_dmft%dmft_triqs_chiloc > 0) then
+         if (open_file(trim(paw_dmft%filapp)//"_LocalSusceptibility.dat",message,newunit=unt,status='unknown',form='formatted') /= 0) ABI_ERROR(message)
+         do itau=1,ntau
+           write(unt,*) beta * DBLE(itau-1) / DBLE(ntau), (chiloc_tmp(itau,1))
+         end do
+         close(unt)
+       end if
+
        if (myproc == 0 .and. off_diag) then
 
          if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_iatom"//tag_at//trim(adjustl(tag_lam2))//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
@@ -4517,6 +4525,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    ABI_SFREE(moments_self_1)
    ABI_SFREE(moments_self_2)
    ABI_SFREE(occ)
+
+   if (paw_dmft%dmft_triqs_chiloc > 0) then
+     ABI_FREE(chiloc_tmp)
+   end if
 
  end do ! iatom
 

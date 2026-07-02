@@ -231,7 +231,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     Spinz = init_SpinOp(num_orbitals/2,block_list,inner_list);
     paramCTQMC.measure_O_tau = {Spinz,Spinz};
     paramCTQMC.measure_O_tau_min_ins = chiloc_ins;
-    if(rank == 0 && verbo>0) std::cout <<"  == End Setting up local Spin-Spin correlation operator " << endl << endl;
+    if(rank == 0 && verbo>0) std::cout << endl <<"   == Setting up local Spin-Spin correlation operator " << endl << endl;
   }
 
   if (rank == 0 && verbo == 1) {
@@ -366,7 +366,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
       chiloc_tmp[compteur] = ((*solver.O_tau)[tau].real());                          
       compteur++;                                                                               
       }                                                                       
-   if(rank==0 && verbo>0) std::cout <<"Chiloctau reported" << endl;                     
+   if(rank==0 && verbo>0) std::cout << endl << "  == Debug Chiloc(tau) is reported" << endl;                     
   }
   auto h_loc_diag = solver.h_loc_diagonalization();
 
@@ -482,17 +482,12 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
 /********************************************************/
 /****************** Functions Used **********************/
 /********************************************************/
-many_body_op_t init_SpinOp( int nflavor, int *block_list, int *inner_list){
+many_body_op_t init_SpinOp(int ndim, int *block_list, int *inner_list){
     many_body_op_t Spinz;
-    int iblock,iblock1,o,oo;
-
-    for(int i : range(nflavor)) {
-	iblock = block_list[i]; o = inner_list[i];    
-        for(int  j : range(nflavor)) {
-          iblock1 = block_list[j]; oo = inner_list[j];         
-	  Spinz += (n(to_string(iblock),o) - n(to_string(iblock1),oo));
-        }
-    }	
+    for(int i : range(ndim)) {
+        Spinz += n(to_string(block_list[i]),        inner_list[i]);
+        Spinz -= n(to_string(block_list[i + ndim]), inner_list[i + ndim]);
+    }
     return Spinz;
 } 
 
