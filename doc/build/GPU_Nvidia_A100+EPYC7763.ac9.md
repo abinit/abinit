@@ -1,13 +1,16 @@
+```
 # ================================================================
 # Configuration file for ABINIT 10.5 compilation
 #
-# CPU: Nvidia Grace
-# GPU: Nvidia H100 SXM4 80 Go
-# Compilers: Nvidia HPC compilers 24.5
-# Libraries: NVPL, CUDA
+# CPU: AMD Milan EPYC 7763
+# GPU: Nvidia A100 SXM4 80 Go
+# Compilers: Nvidia HPC compilers 23.9
+# Libraries: MKL, Cuda
 # ================================================================
 
 #prefix=${ROOT}/install/${MY_ARCH}/abinit-gpu
+
+ CUDA_PREFIX=${CUDA_HOME}
 
 # Compilers and flags
 # ========================================
@@ -15,49 +18,48 @@
  CC=$CC_MPI
  CXX=$CXX_MPI
  with_optim_flavor="standard"
- fcflags_opt_80_tdep="-O1 -g -fPIC"  #  NVFORTRAN has difficulties to compile 80_tdep directory
+ fcflags_opt_80_tdep="-O1 -g"
 
 # Parallel compilation
 # ========================================
  with_mpi="yes"
  enable_mpi_io="yes"
+ enable_mpi_inplace="yes"
  enable_openmp="yes"
 
 # CUDA GPU
 # ========================================
- with_cuda="${CUDA_ROOT}"
- enable_openmp_offload="yes"
+ with_cuda="${CUDA_PREFIX}"
  enable_mpi_gpu_aware="yes"
- GPU_ARCH=90
+ enable_openmp_offload="yes"
+ GPU_ARCH=80
 
 # Debug
 # with_gpu_markers="yes"
 
 # Linear Algebra library
 # ========================================
- with_linalg_flavor="netlib"
- LINALG_LDFLAGS="-L${NVHPC_ROOT}/compilers/lib -lblas -llapack"
+ with_linalg_flavor="mkl"
+ LINALG_FCFLAGS="${MKL_FFLAGS}"
+ LINALG_LIBS="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64 -lmkl_core -lmkl_pgi_thread -lpthread -lm"
+ LINALG_LDFLAGS="${LINALG_LIBS}"
 
 # FFT
 # ========================================
- with_fft_flavor="fftw3"
- with_fftw3="${FFTW3_ROOT}"
- FFTW3_CFLAGS="-I${FFTW3_ROOT}/include"
- FFTW3_FCFLAGS="-I${FFTW3_ROOT}/include"
- FFTW3_CPPFLAGS="-I${FFTW3_ROOT}/include"
- FFTW3_LIBS="-L${FFTW3_ROOT}/lib -lfftw3 -lfftw3f -lfftw3_threads "
+ with_fft_flavor="dfti"
 
 # NetCDF library
 # ========================================
  with_hdf5="${HDF5_ROOT}"
- with_netcdf="${NETCDF_C_ROOT}"
- with_netcdf_fortran="${NETCDF_FORTRAN_ROOT}"
+ with_netcdf="${NETCDFC_ROOT}"
+ with_netcdf_fortran="${NETCDFFORTRAN_ROOT}"
 
 # Additional plugins & libs
 # ========================================
- with_libxc="${ROOT}/install/${MY_ARCH}/libxc"
+ with_libxc="${BENCH_ROOT}/install/${MY_ARCH}/libxc"
 
 # Miscellaneous options
 # ========================================
  enable_zdot_bugfix="no"
  enable_gw_dpc="yes"
+```

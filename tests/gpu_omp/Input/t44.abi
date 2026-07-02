@@ -52,5 +52,5 @@
 #%% authors = M. Sarraute
 #%% description =
 #%%    Chebyshev, local splitted GEMM nonlop, C-diamond, Bulk, 2 atoms, paral_kgb, mono-GPU, istwfk==1, with PAW.
-#%% topics = parallelism
+#%% topics = GPU
 #%%<END TEST_INFO>

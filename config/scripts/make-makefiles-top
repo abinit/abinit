@@ -159,8 +159,14 @@ xsubs = sorted([item for item in cnf.sections() \
 fbk_tgz = sorted([item for item in os.listdir("./fallbacks") \
         if item.startswith("abinit-fallbacks-") \
         and item.endswith(".tar.gz")])[-1]
-ext += "EXTRA_DIST += fallbacks/%s\n\n" % fbk_tgz
+ext += "EXTRA_DIST += fallbacks/%s\n" % fbk_tgz
+ext += "EXTRA_DIST += fallbacks/Makefile.am\n\n"
 ext += "DISTCLEANFILES = fallbacks/Makefile\n\n"
+
+fkiss_files = sorted([f for f in os.listdir("./fkiss") if f.endswith(".py")])
+for f in fkiss_files:
+  ext += "EXTRA_DIST += fkiss/%s\n" % f
+ext += "\n"
 
 # Write additional cmake information
 if ( os.path.exists("CMakeLists.txt") ):
