@@ -197,7 +197,7 @@ module m_orbmag
   private :: orbmag_nl1_k
   private :: nonlocal_me
   private :: local_me_mesh
-  private :: nonlocal_me_mesh
+  private :: nonlocal_me_rg
   !private :: convolution_vv2
   private :: make_d
   private :: dterm_aij
@@ -2097,6 +2097,153 @@ end subroutine lamb_core
 !end subroutine convolution_vv2
 !!!***
 
+!!****f* ABINIT/nonlocal_me_rg
+!! NAME
+!! nonlocal_me_mesh
+!!
+!! FUNCTION
+!! Return <bra|p>dij<p|ket> slow-transformed on the bra side to
+!! tatom location, otherwise still in G space
+!!
+!! INPUTS
+!! adir=fixed direction (Cartesian) of interaction
+!! atindx
+!! bra=pointer to input bra wavefunction
+!! dnlbra=direction of bra side derivative if wanted
+!! dnlket=direction of ket side derivative if wanted
+!! dterm=onsite interaction quantites
+!! dtset=variables concerning current dataset
+!! eignk=ground state energy at current band and k point
+!! fermie=Fermi energy or its estimate
+!! gs_hamk=ground state Hamiltonian 
+!! ket=pointer to input ket wavefunction
+!! mpi_enreg=data concerning MPI distribution
+!! npw_k=planewaves at this k point
+!! oterm=index of orbital magnetism term concerned
+!! ph1d=pointer to 1d spatial phase factors
+!! prefac=orbital magnetism scale factor
+!! pawtab=table of variables for PAW structures
+!! trnrm=scaling at this band and k point
+
+!! OUTPUT
+!! me_rg(2,npw_k)=input matrix element represented at R,G
+!!
+!! NOTES
+!! computes on-site prefac*\sum_{Rij}<bra|d_bra_dir p_i>aij<d_ket_dir p_j|ket>
+!! dnlbra = 0 if no derivative, dnlbra = adir,bdir,gdir for derivative in *dir direction
+!! dnlket = 0 if no derivative, dnlket = adir,bdir,gdir for derivative in *dir direction
+!!
+!! SOURCE
+
+subroutine nonlocal_me_rg(adir,atindx,bra,dnlbra,dnlket,dterm,dtset,&
+    & eignk,fermie,gs_hamk,ket,me_rg,mpi_enreg,npw_k,oterm,ph1d,&
+    & prefac,pawtab,trnrm)
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: adir,dnlbra,dnlket,npw_k,oterm
+  real(dp),intent(in) :: eignk,fermie,trnrm
+  complex(dp),intent(in) :: prefac
+  type(dataset_type),intent(in) :: dtset
+  type(dterm_type),intent(in) :: dterm
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+  type(MPI_type), intent(inout) :: mpi_enreg
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(out) :: me_rg(2,npw_k)
+  real(dp),intent(in),pointer :: bra(:,:),ket(:,:),ph1d(:,:)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: iat,iatom,ig,il,ilmn,isp,itypat
+  integer :: jl,jlmn,klmn,npwsp,t_atom
+  complex(dp) :: bra_fac,dij,ket_fac,me_fac,ormesh_fac
+  ! arrays
+  real(dp),allocatable :: denpot(:,:,:),fofgout(:,:),work(:,:,:,:)
+  real(dp),allocatable,target :: bra_mesh(:,:),ket_mesh(:,:)
+  complex(dp),allocatable :: dij_data(:,:,:),phgr(:)
+!--------------------------------------------------------------------
+  
+  npwsp = npw_k*dtset%nspinor
+  
+  ABI_MALLOC(dij_data,(dtset%natom,dterm%lmn2max,dterm%ndij))
+  select case (oterm)
+  case (inlr)
+    dij_data = dterm%LR(:,:,:,adir)
+  case (inbm)
+    dij_data = dterm%BM(:,:,:,adir)
+  case (innl)
+    dij_data = dterm%aij - eignk*dterm%qij
+  case (incc) 
+    dij_data = dterm%aij + (eignk-two*fermie)*dterm%qij
+  case (invv1)
+    dij_data = (eignk-fermie)*dterm%qij
+  case (invv2)
+    dij_data = (eignk-fermie)*dterm%qij
+  case DEFAULT
+    dij_data = czero
+  end select
+
+  ABI_CHECK(ASSOCIATED(ket),"nonlocal_me_mesh: input ket needed for ormesh is not associated")
+  ABI_CHECK(ASSOCIATED(bra),"nonlocal_me_mesh: input bra needed for ormesh is not associated")
+  ABI_CHECK(dtset%nspinor.EQ.1,"nonlocal_me: orbmag_rmesh not coded for spinors yet")
+  t_atom=0
+  do iat = 1, dtset%natom
+    if ( ANY(ABS(dtset%nucdipmom(1:3,iat))>tol8) ) then
+      t_atom = atindx(iat)
+      exit
+    end if
+  end do
+  ABI_MALLOC(bra_mesh,(2,npwsp))
+  ABI_MALLOC(ket_mesh,(2,npwsp))
+  ABI_MALLOC(phgr,(npw_k))
+  call make_phgr(dtset,gs_hamk,npw_k,ph1d,phgr,t_atom)
+
+  me_rg(1:2,1:npw_k) = zero
+  do iat = 1, dtset%natom
+    iatom = atindx(iat)
+    itypat=dtset%typat(iat)
+    do isp = 1, dtset%nspinor
+      do jlmn = 1, pawtab(itypat)%lmn_size
+
+        ! FFT ket-side to fofr, real space representation
+        ket_mesh(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+dnlket,jlmn,itypat)*ket(1,1:npwsp)
+        ket_mesh(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+dnlket,jlmn,itypat)*ket(2,1:npwsp)
+
+        do ilmn = 1, pawtab(itypat)%lmn_size
+          klmn=MATPACK(ilmn,jlmn)
+          dij = dij_data(iatom,klmn,isp)
+          ! see note at top of file near definition of MATPACK macro
+          if (ilmn .GT. jlmn) dij = CONJG(dij)
+          
+          jl = pawtab(itypat)%indlmn(1,jlmn); il = pawtab(itypat)%indlmn(1,ilmn)
+          ormesh_fac = prefac*trnrm*dij*four_pi*CONJG(j_dpc**il)*four_pi*(j_dpc**jl)
+          bra_mesh(1,1:npwsp)=bra(1,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1+dnlbra,ilmn,itypat)
+          bra_mesh(2,1:npwsp)=bra(2,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1+dnlbra,ilmn,itypat)
+         
+          ! here R is t_atom location; slow FT computes nonlocal field T(R,G) 
+          do ig = 1, npw_k
+            bra_fac = CONJG(CMPLX(bra_mesh(1,ig),bra_mesh(2,ig)))
+            ket_fac = CMPLX(ket_mesh(1,ig),ket_mesh(2,ig))
+            me_fac = ormesh_fac*phgr(ig)*bra_fac*ket_fac
+            me_rg(1,ig) = me_rg(1,ig) + REAL(me_fac)
+            me_rg(2,ig) = me_rg(2,ig) + AIMAG(me_fac)
+          end do
+
+        end do !ilmn
+      end do !jlmn
+    end do ! isp
+  end do !iat
+
+  ABI_SFREE(dij_data)
+  ABI_SFREE(bra_mesh)
+  ABI_SFREE(ket_mesh)
+  ABI_SFREE(phgr)
+
+end subroutine nonlocal_me_rg
+!!***
+
+
 !!****f* ABINIT/nonlocal_me_mesh
 !! NAME
 !! nonlocal_me_mesh
@@ -3152,10 +3299,17 @@ end subroutine local_me_mesh
 !! make_phgr
 !!
 !! FUNCTION
+!! construct exp(iG.R) 3d phase factors at atom point of interest at R
 !!
 !! INPUTS
+!! dtset=variables concerning current dataset
+!! gs_hamk=ground state Hamiltonian
+!! npw_k=number of planewaves at current k point
+!! ph1d=pointer to 1D phase factors
+!! t_atom=index of atom of interest
 !!
 !! OUTPUT
+!! phgr(npw_k)=complex phase factors exp(iG.R) at site R
 !!
 !! CHILDREN
 !!
