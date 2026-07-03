@@ -123,7 +123,7 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!  psinablapsi_out=contains the matrix elements
-!!   (The size of the psinablapsi_out decide wehter we compute the full matrix or
+!!   (The size of the psinablapsi_out decide whether we compute the full matrix or
 !!    only the diagonal part)
 !!   (if not present only writing in a file)
 !!
@@ -228,6 +228,7 @@ CONTAINS  !=====================================================================
 
 !Check wether we write in file or save the matrix elements in psinablapsi_out
 !and if we need to compute the full matrix or only the diagonal part
+ iomode=dtset%iomode
  diag_only = .false.
  store_half_dipoles = .false.
  if (present(psinablapsi_out)) then
@@ -255,7 +256,6 @@ CONTAINS  !=====================================================================
 !1- Opening of OPT file and header writing
 !----------------------------------------------------------------------------------
 
- iomode=dtset%iomode
  if (iomode /= NO_FILE_OUT) then
 !  I/O mode is netCDF or Fortran
    iomode=merge(IO_MODE_ETSF,IO_MODE_FORTRAN_MASTER,dtset%iomode==IO_MODE_ETSF)
