@@ -74,7 +74,7 @@ prteig           0            # do not print eigenvalues
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = t161.abo, tolnlines = 0, tolabs = 1.0, tolrel = 1.0e-03
+#%% files_to_test = t161.abo, tolnlines = 1, tolabs = 1.0e-10, tolrel = 1.0e-03
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
