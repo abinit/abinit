@@ -3695,6 +3695,39 @@ basis in which these off-diagonal components are weak.
 ),
 
 Variable(
+    abivarname="dmft_triqs_chiloc",
+    varset="dmft",
+    vartype="integer",
+    topics=["DmftTriqsCthyb_expert"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: TRIQS compute local susceptibility",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_density_matrix]] == 1"
+    text=r"""
+
+  * 1 --> Activate the calculation of the local spin susceptibility for the impurity. Only implemented for the case with [[nspinor]] == 1 .
+
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_chiloci_ins",
+    varset="dmft",
+    vartype="integer",
+    topics=["DmftTriqsCthyb_expert"],
+    dimensions="scalar",
+    defaultval=10,
+    mnemonics="Dynamical Mean Field Theory: TRIQS number of insertion operator for local susceptibility",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_density_matrix]] == 1"
+    text=r"""
+
+Define the minimal number of insertion operators for the calculation of the local spin susceptibility.
+
+""",
+),
+
+
+Variable(
     abivarname="dmft_triqs_compute_integral",
     varset="dmft",
     vartype="integer",
