@@ -5940,7 +5940,7 @@ subroutine gwr_build_sigmac(gwr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, my_ir, my_nr, iw, idat, max_ndat, ndat, ii, jj, irow, iab, iiab, jiab
+ integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, my_ir, my_nr, iw, idat, max_ndat, ndat, ii, jj, irow, iab, iiab, jiab, itim
  integer :: iq_ibz, iq_bz, itau, ierr, ibc, ib1, ib2, bmin, bmax, band, band1, ifft, gpu_option
  integer :: band2, band2_start, band2_stop, nbc
  integer :: my_ikf, ipm, ik_bz, ikcalc, uc_ir, ir, ncid, col_bsize, nr, sc_nfftsp, iter_ncid
@@ -6332,7 +6332,7 @@ else
  use_umklp = 1
  !gw_timrev = kpts_timrev_from_kptopt(gwr%ks_ebands%kptopt) + 1
  do ikcalc=1,gwr%nkcalc
-   call ltg_kcalc(ikcalc)%init(gwr%kcalc(:,ikcalc), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0, timrev=1)
+   call ltg_kcalc(ikcalc)%init(gwr%kcalc(:,ikcalc), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0)
    if (gwr%comm%me == 0 .and. gwr%dtset%symsigma /= 0) then
      call ltg_kcalc(ikcalc)%print([std_out], prtvol=gwr%dtset%prtvol)
    end if
@@ -6353,9 +6353,9 @@ else
    do iab=1,gwr%nsig_ab
      call gk_rpr_pm(ipm, iab)%init(nr, nr, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
      do ikcalc=1,gwr%nkcalc
-       call sigc_rpr(1,ipm,ikcalc, iab)%init(nr, nr, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
-       ! For sigma we have to decompose it in hermitian/anti-hermitian part.
-       !call sigc_rpr(2,ipm,ikcalc, iab)%init(nr, nr, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
+       do itim=1,2
+         call sigc_rpr(itim,ipm,ikcalc, iab)%init(nr, nr, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
+       end do
      end do
    end do
  end do
@@ -6474,17 +6474,13 @@ else
                                    wtqp, "N", gk_rpr_pm(ipm,iab)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
                                    gpu_option)
 
-             if (abs(wtqm) > tol12) then
-               ABI_ERROR(sjoin("TR is not yet implemented:, wtqm:", ftoa(wtqm)))
-
-               call cplx_mat_plus_bc(bufsize, sigc_rpr(2,ipm,ikcalc,iab)%buffer_cplx(:,1), &
-                                     wtqm, "C", gk_rpr_pm(ipm,iab)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
-                                     gpu_option)
+             call cplx_mat_plus_bc(bufsize, sigc_rpr(2,ipm,ikcalc,iab)%buffer_cplx(:,1), &
+                                   wtqm, "N", gk_rpr_pm(ipm,iab)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
+                                   gpu_option)
 
                !sigc_rpr(1, ipm, ikcalc)%buffer_cplx = sigc_rpr(1, ipm, ikcalc)%buffer_cplx + &
                !    (wtqp + wtqm) * real(gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx, kind=gwp) &
                !  + (wtqp - wtqm) * j_gw * aimag(gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx)
-             end if
            end do ! iab
          end do ! ipm
 
@@ -6508,7 +6504,9 @@ else
          iiab = spinor_idxs(1, iab); jiab = spinor_idxs(2, iab)
          if (gpu_option == ABI_GPU_OPENMP) then
            do ipm=1,2
-             call sigc_rpr(1,ipm,ikcalc,iab)%gpu_map("update_from")
+             do itim=1,2
+               call sigc_rpr(itim,ipm,ikcalc,iab)%gpu_map("update_from")
+             end do
            end do
          end if
          do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
@@ -7058,7 +7056,7 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_bra_glob, ur_ket_glob, sigm_pm, loc
  complex(gwp),intent(inout) :: loc_cwork(sig_rpr(1,1)%size_local(2))
 
  !Local variables-------------------------------
- integer :: ipm, ir1, il_r1, nrows, ncols
+ integer :: ipm, ir1, il_r1, nrows, ncols, itim
  !complex(gwp),allocatable :: loc_cwork(:)
 ! *************************************************************************
 
@@ -7066,23 +7064,29 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_bra_glob, ur_ket_glob, sigm_pm, loc
 
  ! (r',r) with r' local and r-index PBLAS-distributed.
  sigm_pm = czero_gw
- do ipm=1,2
-   associate (rp_r => sig_rpr(1,ipm))
-   ! Integrate over r'
-   !ABI_CHECK_IEQ(nfftsp, rp_r%size_local(1), "First dimension should be local to each MPI proc!")
-   !ABI_MALLOC(loc_cwork, (rp_r%size_local(2)))
-   !loc_cwork(:) = matmul(transpose(rp_r%buffer_cplx), ur_glob)
-
-   nrows = rp_r%size_local(1); ncols = rp_r%size_local(2)
-   call xgemv('T', nrows, ncols, cone_gw, rp_r%buffer_cplx, nrows, ur_ket_glob, 1, czero_gw, loc_cwork, 1)
-
-   ! Integrate over r. Note complex conjugate.
-   do il_r1=1,rp_r%size_local(2)
-     ir1 = rp_r%loc2gcol(il_r1)
-     sigm_pm(ipm) = sigm_pm(ipm) + conjg(ur_bra_glob(ir1)) * loc_cwork(il_r1)
+ do itim=1,2
+   do ipm=1,2
+     associate (rp_r => sig_rpr(itim,ipm))
+     ! Integrate over r'
+     !ABI_CHECK_IEQ(nfftsp, rp_r%size_local(1), "First dimension should be local to each MPI proc!")
+     !ABI_MALLOC(loc_cwork, (rp_r%size_local(2)))
+     !loc_cwork(:) = matmul(transpose(rp_r%buffer_cplx), ur_glob)
+    
+     nrows = rp_r%size_local(1); ncols = rp_r%size_local(2)
+     call xgemv('T', nrows, ncols, cone_gw, rp_r%buffer_cplx, nrows, ur_ket_glob, 1, czero_gw, loc_cwork, 1)
+    
+     ! Integrate over r. Note complex conjugate.
+     do il_r1=1,rp_r%size_local(2)
+       ir1 = rp_r%loc2gcol(il_r1)
+       if (itim == 1) then
+         sigm_pm(ipm) = sigm_pm(ipm) + conjg(ur_bra_glob(ir1)) * loc_cwork(il_r1)
+       else
+         sigm_pm(ipm) = sigm_pm(ipm) + ur_bra_glob(ir1) * conjg(loc_cwork(il_r1))
+       end if
+     end do
+     !ABI_FREE(loc_cwork)
+     end associate
    end do
-   !ABI_FREE(loc_cwork)
-   end associate
  end do
 
  ABI_NVTX_END_RANGE()
