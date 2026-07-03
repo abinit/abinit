@@ -63,4 +63,5 @@
 #%%   spurious degeneracy effects coupled to occupation numbers rapidly changing.
 #%%   GPU
 #%%   PAW : first PBE, then PBE0, then HSE06. Interatomic distance optimization.
+#%% topics = GPU
 #%%<END TEST_INFO>

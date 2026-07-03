@@ -1,5 +1,5 @@
 # NSCF computation of WFK file with empty states to prepare ZPR calculation in diamond.
-# IMPORTANT: the GWR driver implements a direct diago with Scalapack with is much faster for large systems,
+# IMPORTANT: the GWR driver implements a direct diago with Scalapack which is much faster for large systems,
 # especially if ELPA is used.
 
  nsym 1
