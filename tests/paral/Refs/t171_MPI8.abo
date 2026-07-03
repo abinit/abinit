@@ -1,8 +1,8 @@
 
-.Version 10.3.6.6 of ABINIT, released Feb 2025.
+.Version 10.7.0.2 of ABINIT. v10.8.1 released May 2026.
 .(MPI version, prepared for a x86_64_linux_gnu9.1 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 15 Apr 2025.
-- ( at 17h04 )
+.Starting date : Fri  3 Jul 2026.
+- ( at 16h40 )
   
-- input  file    -> /tmp/abinit/opt/Test_suite/paral_t103_MPI8/t103.abi
-- output file    -> t103_MPI8.abo
-- root for input  files -> t103_MPI8i
-- root for output files -> t103_MPI8o
+- input  file    -> /tmp/abinit/tddft/opt/Test_suite/paral_t171_MPI8/t171.abi
+- output file    -> t171_MPI8.abo
+- root for input  files -> t171_MPI8i
+- root for output files -> t171_MPI8o
 
  DATASET    1 : the unit cell is not primitive
 ================================================================================
@@ -82,7 +82,7 @@ _ WF disk file :      0.975 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 -
  -outvars: echo values of preprocessed input variables --------
 -          iomode           1
-            acell      7.5211100089E+00  7.5211100089E+00  7.5211100089E+00 Bohr
+            acell      7.5211099811E+00  7.5211099811E+00  7.5211099811E+00 Bohr
               amu      2.69815390E+01
            bandpp          12
           chkprim           0
@@ -338,7 +338,7 @@ P           mkmem           1
                        0.0000000  0.0000000  0.0000000     0.0000000  0.5000000  0.5000000
                        0.5000000  0.0000000  0.5000000     0.5000000  0.5000000  0.0000000
            tolvrs      1.00000000E-04
-           tsmear      9.50044626E-04 Hartree
+           tsmear      9.50043469E-04 Hartree
             typat      1  1  1  1
          wfoptalg1        114
          wfoptalg2          0
@@ -349,9 +349,9 @@ P           mkmem           1
                        1.9900000000E+00  0.0000000000E+00  1.9900000000E+00
                        1.9900000000E+00  1.9900000000E+00  0.0000000000E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  3.7605550044E+00  3.7605550044E+00
-                       3.7605550044E+00  0.0000000000E+00  3.7605550044E+00
-                       3.7605550044E+00  3.7605550044E+00  0.0000000000E+00
+                       0.0000000000E+00  3.7605549906E+00  3.7605549906E+00
+                       3.7605549906E+00  0.0000000000E+00  3.7605549906E+00
+                       3.7605549906E+00  3.7605549906E+00  0.0000000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
@@ -375,7 +375,7 @@ P           mkmem           1
 iteration_state: {dtset: 1, }
 dimensions: {natom: 4, nkpt: 4, mband: 24, nsppol: 1, nspinor: 1, nspden: 1, mpw: 664, }
 cutoff_energies: {ecut:  16.0, pawecutdg:  -1.0, }
-electrons: {nelect:   1.20000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   9.50044626E-04, }
+electrons: {nelect:   1.20000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   9.50043469E-04, }
 meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 1, }
 ...
 
@@ -402,8 +402,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 1, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
-- pspatm: opening atomic psp file    /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
+- pspini: atom type   1  psp file is /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/tddft/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
+- pspatm: opening atomic psp file    /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/tddft/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
 - Al    ONCVPSP-3.2.3.1  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -431,17 +431,17 @@ tolerances: {tolvrs: 1.00E-04, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -9.1911116089437    -9.191E+00 1.283E-02 2.635E+00
- ETOT  2  -9.1913632097900    -2.516E-04 1.782E-05 1.142E-01
- ETOT  3  -9.1913842877492    -2.108E-05 1.514E-06 9.591E-04
- ETOT  4  -9.1913845613752    -2.736E-07 3.274E-08 2.132E-06
+ ETOT  1  -9.1911116076299    -9.191E+00 1.283E-02 2.635E+00
+ ETOT  2  -9.1913632084721    -2.516E-04 1.782E-05 1.142E-01
+ ETOT  3  -9.1913842864309    -2.108E-05 1.514E-06 9.591E-04
+ ETOT  4  -9.1913845600558    -2.736E-07 3.274E-08 2.132E-06
 
  At SCF step    4       vres2   =  2.13E-06 < tolvrs=  1.00E-04 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -2.46212274E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -2.46212274E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -2.46212274E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -2.46212663E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -2.46212663E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -2.46212663E-05  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -457,11 +457,11 @@ lattice_volume:   4.2544735E+02
 convergence: {deltae: -2.736E-07, res2:  2.132E-06, residm:  3.274E-08, diffor: null, }
 etotal    :  -9.19138456E+00
 entropy   :   0.00000000E+00
-fermie    :   2.74173729E-01
+fermie    :   2.74173732E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -2.46212274E-05,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,  -2.46212274E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,  -2.46212274E-05, ]
+- [ -2.46212663E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -2.46212663E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -2.46212663E-05, ]
 pressure_GPa:   7.2438E-01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
@@ -518,7 +518,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     3     -0.00000000000000    -0.00000000000000    -0.00000000000000
     4     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
- length scales=  7.521110008885  7.521110008885  7.521110008885 bohr
+ length scales=  7.521109981113  7.521109981113  7.521109981113 bohr
               =  3.980000000000  3.980000000000  3.980000000000 angstroms
  Fermi (or HOMO) energy (hartree) =   0.27417   Average Vxc (hartree)=  -0.36988
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -536,30 +536,30 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.61199618508048E+00
-hartree             :  1.71077131756749E-02
-xc                  : -4.37704743480570E+00
-Ewald energy        : -1.09727842348479E+01
-psp_core            :  4.60474116797787E-01
-local_psp           :  6.33671794118512E-01
-non_local_psp       :  1.43618508023675E+00
-internal            : -9.19039678024444E+00
-'-kT*entropy'       : -9.87781130789759E-04
-total_energy        : -9.19138456137523E+00
-total_energy_eV     : -2.50110293504459E+02
-band_energy         :  1.31775412365707E+00
+kinetic             :  3.61199621046177E+00
+hartree             :  1.71077135548074E-02
+xc                  : -4.37704744701997E+00
+Ewald energy        : -1.09727842753652E+01
+psp_core            :  4.60474121898724E-01
+local_psp           :  6.33671809340882E-01
+non_local_psp       :  1.43618508700111E+00
+internal            : -9.19039678012789E+00
+'-kT*entropy'       : -9.87779927955892E-04
+total_energy        : -9.19138456005584E+00
+total_energy_eV     : -2.50110315399026E+02
+band_energy         :  1.31775415647004E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -2.46212274E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -2.46212274E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -2.46212274E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -2.46212663E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -2.46212663E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -2.46212663E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  7.2438E-01 GPa]
-- sigma(1 1)= -7.24381396E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -7.24381396E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -7.24381396E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -7.24382665E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -7.24382665E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -7.24382665E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -570,7 +570,7 @@ band_energy         :  1.31775412365707E+00
 iteration_state: {dtset: 2, }
 dimensions: {natom: 4, nkpt: 4, mband: 24, nsppol: 1, nspinor: 1, nspden: 1, mpw: 664, }
 cutoff_energies: {ecut:  16.0, pawecutdg:  -1.0, }
-electrons: {nelect:   1.20000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   9.50044626E-04, }
+electrons: {nelect:   1.20000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   9.50043469E-04, }
 meta: {optdriver: 9, }
 ...
 
@@ -610,7 +610,7 @@ meta: {optdriver: 9, }
 
 -------------------    Reading initial wavefunctions    -------------------
 
--inwffil : will read wavefunctions from disk file t103_MPI8o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t171_MPI8o_DS1_WFK
 
 -------------------------   Starting propagation   ------------------------
 
@@ -620,15 +620,7 @@ meta: {optdriver: 9, }
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.97    0.97
+- Time - cpu, wall (sec):    0.17    0.17
 
 
 --- Iteration 2
@@ -636,29 +628,13 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.07    0.07
+- Time - cpu, wall (sec):    0.06    0.06
 
 
 --- Iteration 3
 
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
-
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
 
 - Time - cpu, wall (sec):    0.06    0.06
 
@@ -668,29 +644,13 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.07    0.07
 
 
 --- Iteration 5
 
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
-
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
 
 - Time - cpu, wall (sec):    0.06    0.06
 
@@ -700,14 +660,6 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
 - Time - cpu, wall (sec):    0.06    0.06
 
 
@@ -715,14 +667,6 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
-
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
 
 - Time - cpu, wall (sec):    0.06    0.06
 
@@ -732,14 +676,6 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
 - Time - cpu, wall (sec):    0.06    0.06
 
 
@@ -748,29 +684,13 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.07    0.07
+- Time - cpu, wall (sec):    0.06    0.06
 
 
 --- Iteration 10
 
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
-
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
 
 - Time - cpu, wall (sec):    0.11    0.11
 
@@ -789,7 +709,7 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 iteration_state: {dtset: 3, }
 dimensions: {natom: 4, nkpt: 4, mband: 24, nsppol: 1, nspinor: 1, nspden: 1, mpw: 664, }
 cutoff_energies: {ecut:  16.0, pawecutdg:  -1.0, }
-electrons: {nelect:   1.20000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   9.50044626E-04, }
+electrons: {nelect:   1.20000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   9.50043469E-04, }
 meta: {optdriver: 9, }
 ...
 
@@ -827,11 +747,11 @@ meta: {optdriver: 9, }
 
 -------------------   Reading wavefunctions for restart  ------------------
 
--inwffil : will read wavefunctions from disk file t103_MPI8o_DS2_10_WFK
+-inwffil : will read wavefunctions from disk file t171_MPI8o_DS2_10_WFK
 
 -------------------    Reading initial wavefunctions    -------------------
 
--inwffil : will read wavefunctions from disk file t103_MPI8o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t171_MPI8o_DS1_WFK
 
 -------------------------   Starting propagation   ------------------------
 
@@ -841,29 +761,13 @@ meta: {optdriver: 9, }
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.97    0.97
+- Time - cpu, wall (sec):    0.16    0.16
 
 
 --- Iteration 12
 
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
-
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
 
 - Time - cpu, wall (sec):    0.06    0.06
 
@@ -873,14 +777,6 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
 - Time - cpu, wall (sec):    0.06    0.06
 
 
@@ -889,15 +785,7 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.06    0.07
+- Time - cpu, wall (sec):    0.06    0.06
 
 
 --- Iteration 15
@@ -905,29 +793,13 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.06    0.07
+- Time - cpu, wall (sec):    0.06    0.06
 
 
 --- Iteration 16
 
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
-
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
 
 - Time - cpu, wall (sec):    0.06    0.06
 
@@ -937,29 +809,13 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.07    0.07
+- Time - cpu, wall (sec):    0.06    0.06
 
 
 --- Iteration 18
 
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
-
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
 
 - Time - cpu, wall (sec):    0.06    0.06
 
@@ -969,29 +825,13 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.07    0.07
+- Time - cpu, wall (sec):    0.06    0.06
 
 
 --- Iteration 20
 
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
-
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61998    0.61998    0.61998    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
 
 - Time - cpu, wall (sec):    0.11    0.11
 
@@ -1006,14 +846,14 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
   
  -outvars: echo values of variables after computation  --------
 -          iomode           1
-            acell      7.5211100089E+00  7.5211100089E+00  7.5211100089E+00 Bohr
+            acell      7.5211099811E+00  7.5211099811E+00  7.5211099811E+00 Bohr
               amu      2.69815390E+01
            bandpp          12
           chkprim           0
      densfor_pred           6
             dtele      4.00000000E-02
              ecut      1.60000000E+01 Hartree
-           etotal1    -9.1913845614E+00
+           etotal1    -9.1913845601E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
@@ -1116,7 +956,7 @@ P           mkmem           1
             prtwf1          1
             prtwf2          0
             prtwf3          0
-           strten1    -2.4621227366E-05 -2.4621227366E-05 -2.4621227366E-05
+           strten1    -2.4621266348E-05 -2.4621266348E-05 -2.4621266348E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1315,7 +1155,7 @@ P           mkmem           1
                        0.0000000  0.0000000  0.0000000     0.0000000  0.5000000  0.5000000
                        0.5000000  0.0000000  0.5000000     0.5000000  0.5000000  0.0000000
            tolvrs      1.00000000E-04
-           tsmear      9.50044626E-04 Hartree
+           tsmear      9.50043469E-04 Hartree
             typat      1  1  1  1
          wfoptalg1        114
          wfoptalg2          0
@@ -1326,9 +1166,9 @@ P           mkmem           1
                        1.9900000000E+00  0.0000000000E+00  1.9900000000E+00
                        1.9900000000E+00  1.9900000000E+00  0.0000000000E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  3.7605550044E+00  3.7605550044E+00
-                       3.7605550044E+00  0.0000000000E+00  3.7605550044E+00
-                       3.7605550044E+00  3.7605550044E+00  0.0000000000E+00
+                       0.0000000000E+00  3.7605549906E+00  3.7605549906E+00
+                       3.7605549906E+00  0.0000000000E+00  3.7605549906E+00
+                       3.7605549906E+00  3.7605549906E+00  0.0000000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
@@ -1364,7 +1204,30 @@ P           mkmem           1
 - This paper is also available at http://www.arxiv.org/abs/0707.3405
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#bottin2008
 -
-- [2] The Abinit project: Impact, environment and recent developments.
+- [2] Abinit 2025: New Capabilities for the Predictive Modeling of Solids and Nanomaterials.
+- J. Chem. Phys. 163, 164126 (2025).
+- M.J. Verstraete, J. Abreu, G. Allemand, B. Amadon, G. Antonius,
+- M. Azizi, L. Baguet, C. Barat, L. Bastogne, R. Bejaud, J.-M. Beuken,
+- J. Bieder, A. Blanchet, F. Bottin, J. Bouchet, J. Bouquiaux, E. Bousquet,
+- J. Boust, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval,
+- A. Castellano, E. Castiel, J.-B. Charraud, J. Clerouin, M. Cote, C. Duval,
+- A. Gallo, F. Gendron, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras,
+- F. Gomez-Ortiz, X. Gonze, F. Goudreault, A. Gruneis, R. Gupta, B. Guster,
+- D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
+- I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
+- Comment: the sixth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#verstraete2025
+-
+- [3] Optimized norm-conserving Vanderbilt pseudopotentials.
+- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
+- Comment: Some pseudopotential generated using the ONCVPSP code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
+-
+- [4] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -1377,54 +1240,33 @@ P           mkmem           1
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [3] Optimized norm-conserving Vanderbilt pseudopotentials.
-- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
-- Comment: Some pseudopotential generated using the ONCVPSP code were used.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
--
-- [4] ABINIT: Overview, and focus on selected capabilities
-- J. Chem. Phys. 152, 124102 (2020).
-- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
-- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
-- G.Brunin, D.Caliste, M.Cote,
-- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
-- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
-- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
-- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
-- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- [5] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
-- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- is available at
+-  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [5] Recent developments in the ABINIT software package.
-- Computer Phys. Comm. 205, 106 (2016).
-- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
-- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
-- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
-- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
-- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
-- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
-- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
-- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
-- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
-- The licence allows the authors to put it on the Web.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
--
-- Proc.   0 individual time (sec): cpu=          6.5  wall=          6.6
+- Proc.   0 individual time (sec): cpu=          3.2  wall=          3.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         51.6  wall=         52.1
++Overall time at end (sec) : cpu=         24.9  wall=         25.0
