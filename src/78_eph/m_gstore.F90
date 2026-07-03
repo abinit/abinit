@@ -144,7 +144,7 @@ module m_gstore
  use m_dtfil,          only : datafiles_type
  use m_time,           only : cwtime, cwtime_report, sec2str
  use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0, yesno, string_in
- use m_numeric_tools,  only : arth, get_diag, isdiagmat, safe_div, r2c, print_arr
+ use m_numeric_tools,  only : arth, get_diag, isdiagmat, safe_div, r2c
  use m_krank,          only : krank_t, get_ibz2bz, star_from_ibz_idx
  use m_io_tools,       only : iomode_from_fname, file_exists
  use m_special_funcs,  only : gaussian
@@ -6742,7 +6742,6 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
 !Local variables-------------------------------
 !scalars
- logical,parameter :: STAGE_USE_DAGGER = .True., STAGE_USE_COMPOSITE = .True.
  integer :: with_cplex, my_is, spin, my_ik, my_iq, ik_glob, iq_glob, units(2)
  integer :: ncid, spin_ncid, nprocs, my_rank, ncerr, this_state ! ierr,
  integer :: nb, nkbz, nkibz, nqbz, nqibz, nsym, itime_k, itime_kq ! ib, ik_bz,  ip,  itim, isym,
@@ -6751,7 +6750,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
  integer :: isym_tot, trev_tot, tsign_tot, ik_base_glob
  integer :: timrev_k, isym_lg, itime_lg, isym_glob, itime_glob, iq_ibz_loc
- integer :: isym_combined, trev_combined, iq_computed_glob, jj
+ integer :: isym_combined, trev_combined, iq_computed_glob
  integer :: isym_p, itime_p, ikq_ibz_p, isym_rp, itime_rp, trev_rp, isym_at
  integer :: indkk_kq(6, 1)
  real(dp) :: kk_base(3)
@@ -6991,18 +6990,15 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
            if (state_kq(ik_base_glob, iq_computed_glob) /= GSTORE_KQ_COMPUTED) cycle
 
-           ! S_loc is applied FIRST (to q0_computed), then R_search=isym_tot (composition
-           ! order confirmed against dmats_check's group-multiplication test convention,
-           ! m_classify_bands.F90). search_source and listkk(use_symrec=.True.) both operate
-           ! in SYMREC space, so search for the composite isym directly in symrec space too
-           ! (do not assume symrel's multiplication structure carries over under the same
-           ! isym labeling).
-           isym_combined = 0
-           do jj = 1, cryst%nsym
-             if (all(matmul(cryst%symrec(:,:,isym_tot), cryst%symrec(:,:,isym_glob)) == cryst%symrec(:,:,jj))) then
-               isym_combined = jj; exit
-             end if
-           end do
+           ! S_loc is applied FIRST (to q0_computed), then R_search=isym_tot. Use the FULL
+           ! space-group multiplication table (dmats%multable, built by sg_multable from
+           ! symrel+tnons, already populated by dmats%init above) instead of a hand-rolled
+           ! point-group-only (rotation-matrix-only) search: multable(1,sym1,sym2) gives the
+           ! isym of the Seitz product {sym1}{sym2} (sym2 applied first, then sym1), matching
+           ! the composition convention documented in electron-phonon/main.tex (eq. ~611-621).
+           ! multable(2:4,sym1,sym2) is a lattice-vector correction (translation wraps mod the
+           ! primitive cell) -- normal/expected, not an error, and not needed downstream.
+           isym_combined = dmats%multable(1, isym_tot, isym_glob)
            ABI_CHECK(isym_combined /= 0, "Composite symmetry not found in space group (group closure violated?)")
            trev_combined = mod(trev_tot + (itime_glob - 1), 2)
 
@@ -7019,10 +7015,18 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
          ABI_ERROR(sjoin("no source found for ik_glob:", itoa(ik_glob), ", iq_glob:", itoa(iq_glob)))
        end if
 
+       ! T^{(q0)}_{ba}(R^-1) (electron-phonon/main.tex, eq:reconstruct-full) must be evaluated
+       ! at the GROUP-THEORETIC INVERSE of R=isym_combined, not at R itself: look it up
+       ! directly in dmats%toinv (full space-group inverse table, built by sg_multable from
+       ! symrel+tnons, already populated by dmats%init above).
+       isym_at = dmats%toinv(1, isym_combined)
+       ABI_CHECK(isym_at /= 0, "isym_at not found")
+
        ! Used below to rotate the fractional translation associated with the atomic perturbation.
-       symrec_inv = transpose(cryst%symrec(:,:,isym_combined))
-       ! Used below to rotate the reduced perturbation-direction index (atom representation).
-       symrec_eq = real(cryst%symrec(:,:,isym_combined), dp)
+       symrec_inv = transpose(cryst%symrec(:,:,isym_at))
+       ! Used below to rotate the reduced perturbation-direction index (atom representation):
+       ! T's rotation factor is S^-T evaluated at S=R^-1, i.e. symrec(isym_at).
+       symrec_eq = real(cryst%symrec(:,:,isym_at), dp)
 
        ! Rigorous reconstruction formula (see electron-phonon/main.tex, eq:reconstruct-full):
        !   g^a(k,q) = D^{(k+q)_IBZ}(R.P) . D^{(k+q)_IBZ}(P)^dagger . g^b(k0,q0) . D^{k0}(R)^dagger . T(R^-1)
@@ -7042,35 +7046,19 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        ! for the D-matrix lookups below (it is the gauge P and R.P are actually defined in).
        ikq_ibz_p = indkk_kq(1, 1); isym_p = indkk_kq(2, 1); itime_p = indkk_kq(6, 1) + 1
 
-       isym_rp = 0
-       do jj = 1, cryst%nsym
-         if (all(matmul(cryst%symrec(:,:,isym_combined), cryst%symrec(:,:,isym_p)) == cryst%symrec(:,:,jj))) then
-           isym_rp = jj; exit
-         end if
-       end do
+       ! Composite R.P: isym_combined (R) applied AFTER isym_p (P). Use dmats%multable
+       ! (full space-group multiplication table) instead of a rotation-only search.
+       isym_rp = dmats%multable(1, isym_combined, isym_p)
        ABI_CHECK(isym_rp /= 0, "Composite symmetry R.P not found in space group")
        trev_rp = mod(trev_combined + (itime_p - 1), 2)
        itime_rp = trev_rp + 1
 
-       ! TEMPORARY staged-testing toggles (bisecting the ket-dagger and bra-composite hypotheses
-       ! independently against fullbz_GSTORE.nc) -- set both .True. for the full proposed formula.
-       ! NOTE: empirically, toggling these makes almost no difference (all combinations show
-       ! comparably large errors against fullbz_GSTORE.nc, including the .False./.False. case
-       ! that matches the pre-existing code) -- the dominant bug is elsewhere. Kept .True./.True.
-       ! since it matches the rigorous eq:reconstruct-full derivation and is a strict improvement
-       ! in rigor even though it isn't yet sufficient on its own.
-       if (STAGE_USE_DAGGER) then
-         dmat_k = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_combined, trev_combined + 1, ik_ibz)))
-       else
-         dmat_k = dmats%for_spin(spin)%value(:,:, isym_combined, trev_combined + 1, ik_ibz)
-       end if
-       if (STAGE_USE_COMPOSITE) then
-         dmat_temp = dmats%for_spin(spin)%value(:,:, isym_rp, itime_rp, ikq_ibz_p)
-         dmat_star_kq = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_p, itime_p, ikq_ibz_p)))
-         dmat_star_kq = matmul(dmat_temp, dmat_star_kq)
-       else
-         dmat_star_kq = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_kq, itime_kq, ikq_ibz)))
-       end if
+       ! Rigorous reconstruction formula (see electron-phonon/main.tex, eq:reconstruct-full):
+       !   g^a(k,q) = D^{(k+q)_IBZ}(R.P) . D^{(k+q)_IBZ}(P)^dagger . g^b(k0,q0) . D^{k0}(R)^dagger . T(R^-1)
+       dmat_k = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_combined, trev_combined + 1, ik_ibz)))
+       dmat_temp = dmats%for_spin(spin)%value(:,:, isym_rp, itime_rp, ikq_ibz_p)
+       dmat_star_kq = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_p, itime_p, ikq_ibz_p)))
+       dmat_star_kq = matmul(dmat_temp, dmat_star_kq)
 
 
        ! Read gkq_base from disk. NB: gvals' k-dimension is glob_nk-sized (a BZ-like index,
@@ -7085,23 +7073,22 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
        if (trev_combined == 1) gkq_base = conjg(gkq_base)
 
-       ! TEMPORARY test: use isym_combined's inverse for the whole atom-representation block.
-       isym_at = 0
-       do jj = 1, cryst%nsym
-         if (all(matmul(cryst%symrel(:,:,jj), cryst%symrel(:,:,isym_combined)) == &
-             reshape((/1,0,0, 0,1,0, 0,0,1/), (/3,3/)))) then
-           isym_at = jj; exit
-         end if
-       end do
-       ABI_CHECK(isym_at /= 0, "isym_at not found")
-
        ! Perform symmetrization.
        gkq_rot = zero
        do mu=1,gqk%natom3
          idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
-         l0 = cryst%indsym(1:3,isym_at,ipert)
-         tnon = l0 + matmul(transpose(cryst%symrec(:,:,isym_at)), cryst%tnons(:,isym_at))
-         ipert_eq = cryst%indsym(4, isym_at, ipert)
+         ! symatm's convention: indsym(4,isym,iatom) = S^-1.iatom (the atom sent TO iatom
+         ! by S^-1), i.e. it is a PREIMAGE lookup, not a forward image. To get the forward
+         ! image kappa_S(kappa)=S.kappa directly, look it up at the symmetry index of S^-1:
+         ! indsym(4, isym_of(S^-1), kappa) = (S^-1)^-1.kappa = S.kappa. Since we want
+         ! kappa_{R^-1}(ipert) = R^-1.ipert, and S^-1=R^-1 means S=R, use isym_combined here.
+         ipert_eq = cryst%indsym(4, isym_combined, ipert)
+         ! L_kappa(hat R^-1) = -symrel(R^-1) . indsym(1:3, isym_at, ipert_eq): symatm's own
+         ! "transl" (indsym(1:3,isym,iatom)) is defined relative to the DESTINATION atom
+         ! (iatom=ipert_eq here), at the symmetry index of S itself (isym_at=R^-1), and
+         ! satisfies L_kappa(S) = -symrel(isym_of_S) . transl(isym_of_S, kappa_S(kappa)).
+         l0 = cryst%indsym(1:3,isym_at,ipert_eq)
+         tnon = -matmul(real(cryst%symrel(:,:,isym_at), dp), l0)
 
          ! phase = e^{-i q_base . tnon}
          phase = -two_pi * sum(q_base * tnon)
@@ -7115,32 +7102,6 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
                              matmul(matmul(dmat_star_kq, gkq_base(:,:,mu_eq)), dmat_k)
          end do
        end do
-
-       if (ik_glob == 21 .and. iq_glob == 1) then
-         write(std_out,*)"DEBUG-TRACE isym_tot=",isym_tot," trev_tot=",trev_tot
-         write(std_out,*)"DEBUG-TRACE isym_combined=",isym_combined," trev_combined=",trev_combined
-         write(std_out,*)"DEBUG-TRACE ik_ibz=",ik_ibz," ik_base_glob=",ik_base_glob
-         write(std_out,*)"DEBUG-TRACE iq_computed_glob=",iq_computed_glob," q_base=",q_base
-         write(std_out,*)"DEBUG-TRACE ikq_ibz=",ikq_ibz," isym_kq=",isym_kq," itime_kq=",itime_kq
-         write(std_out,*)"DEBUG-TRACE ikq_ibz_p=",ikq_ibz_p," isym_p=",isym_p," itime_p=",itime_p
-         write(std_out,*)"DEBUG-TRACE isym_rp=",isym_rp," itime_rp=",itime_rp
-         write(std_out,*)"DEBUG-TRACE dmat_k="
-         call print_arr(units, dmat_k, max_r=nb, max_c=nb)
-         write(std_out,*)"DEBUG-TRACE dmat_star_kq="
-         call print_arr(units, dmat_star_kq, max_r=nb, max_c=nb)
-         write(std_out,*)"DEBUG-TRACE gkq_base(:,:,1)="
-         call print_arr(units, gkq_base(:,:,1), max_r=nb, max_c=nb)
-         write(std_out,*)"DEBUG-TRACE gkq_base(:,:,3)="
-         call print_arr(units, gkq_base(:,:,3), max_r=nb, max_c=nb)
-         write(std_out,*)"DEBUG-TRACE gkq_base(:,:,4)="
-         call print_arr(units, gkq_base(:,:,4), max_r=nb, max_c=nb)
-         write(std_out,*)"DEBUG-TRACE gkq_rot(:,:,1)="
-         call print_arr(units, gkq_rot(:,:,1), max_r=nb, max_c=nb)
-         write(std_out,*)"DEBUG-TRACE symrec_eq="
-         write(std_out,*) symrec_eq
-         write(std_out,*)"DEBUG-TRACE indsym(:,isym_combined,1)=", cryst%indsym(:,isym_combined,1)
-         write(std_out,*)"DEBUG-TRACE indsym(:,isym_combined,2)=", cryst%indsym(:,isym_combined,2)
-       end if
 
        ! Write the newly computed g_{mn, nu} back to the netcdf file (in-place modification).
        ! and update the entry in state_kq.
