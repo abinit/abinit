@@ -45,7 +45,7 @@ chksymbreak      0            # do not check for symmetry breaking
 
 # Diagonalization
 wfoptalg         111          # wavefunction optimization algorithm
-mdeg_filter      8            
+mdeg_filter      16            
 
 # Occupations 
 occopt           3            # smearing option
