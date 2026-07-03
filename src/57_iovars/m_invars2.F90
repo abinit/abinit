@@ -889,6 +889,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecutsm',tread,'ENE')
  if(tread==1) dtset%ecutsm=dprarr(1)
+ 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ggtrcut',tread,'DPR')
+ if(tread==1) dtset%ggtrcut=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'exchmix',tread,'DPR')
  if(tread==1) dtset%exchmix=dprarr(1)
@@ -3563,7 +3566,13 @@ if (dtset%usekden==1) then
    else
       dtset%prtgden = 0
    end if
-   if (INDEX(dtset%write_files,'geo') .gt. 0) then
+   if (INDEX(dtset%write_files,'geo_1') .gt. 0) then
+      dtset%prtgeo = 1
+   else if (INDEX(dtset%write_files,'geo_2') .gt. 0) then
+      dtset%prtgeo = 2
+   else if (INDEX(dtset%write_files,'geo_3') .gt. 0) then
+      dtset%prtgeo = 3
+   else if (INDEX(dtset%write_files,'geo') .gt. 0) then
       dtset%prtgeo = 1
    else
       dtset%prtgeo = 0

@@ -50,6 +50,7 @@ inp_files = [
     "t46.abi" ,  # test imposition of rotational invariance implementation in abinit (phosphorene)
     "t47.abi" ,  # test electrostatics in 2D in abinit, vacuum as dielectric environment (phosphorene)
     "t48.abi" ,  # test electrostatics in 2D in abinit, varying dielectric environment and consecutive slabs (hBN)
+    "t49.abi" ,  # test prtbbb together with ggtrcut variable
     "t50.abi" ,  # test the projected SOC for GBT
     "t51.abi" ,  # test spin quantization axis
     "t52.abi",  # test linear-response calculation with 2D Coulomb cutoff in BN monolayer

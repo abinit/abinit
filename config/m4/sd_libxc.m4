@@ -41,12 +41,12 @@ AC_DEFUN([SD_LIBXC_INIT], [
   sd_libxc_policy=""
   sd_libxc_status=""
 
-
+# Default version will be updated by config/scripts/make-macros-fbversions from config/specs/fbversion.conf
 AC_ARG_WITH([fb-libxc-version],
   [AS_HELP_STRING([--with-fb-libxc-version=VERSION],
     [Specify the version of fb-libxc to use from the fallback directory])],
   [abi_fb_libxc_version="$withval"],
-  [abi_fb_libxc_version="6.2.2"]
+  [abi_fb_libxc_version="7.0.0"]
 )
 
 AC_SUBST([abi_fb_libxc_version])
@@ -292,11 +292,11 @@ AC_DEFUN([SD_LIBXC_DETECT], [
     else
         sd_libxc_ok="yes"
         sd_libxc_cppflags=""
-        sd_libxc_cflags="-I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_libxc_version}/include"
+        sd_libxc_cflags="-I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_fc_vendor}/${abi_fc_version}/libxc/${abi_fb_libxc_version}/include"
         sd_libxc_fcflags=""
         sd_libxc_ldflags=""
         sd_libxc_kxc_ok="no"
-        sd_libxc_libs="-L${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_libxc_version}/lib ${sd_libxc_libs_def}"
+        sd_libxc_libs="-L${ac_abs_top_builddir}/fallbacks/install_fb/${abi_fc_vendor}/${abi_fc_version}/libxc/${abi_fb_libxc_version}/lib ${sd_libxc_libs_def}"
       if test "${sd_libxc_status}" = "optional" -a \
               "${sd_libxc_init}" = "def"; then
 

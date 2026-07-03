@@ -7514,6 +7514,23 @@ allowed, despite the different coordinate system.
 ),
 
 Variable(
+    abivarname="ggtrcut",
+    varset="dfpt",
+    vartype="real",
+    topics=['printing_prngs', 'Output_useful'],
+    dimensions="scalar",
+    defaultval=0.001,
+    mnemonics="GauGe TRansform CUToff",
+    added_in_version="10.9.0",
+    text=r"""
+Cutoff value to use in computing gauge change from parallel transport to diagonal. 
+Expert use only, do not change unless you've studied the source code and know exactly
+what you are doing and expecting.
+""",
+),
+
+
+Variable(
     abivarname="goprecon",
     varset="rlx",
     vartype="integer",
@@ -7552,7 +7569,7 @@ Variable(
     abivarname="gpu_devices",
     varset="paral",
     vartype="integer",
-    topics=["parallelism_expert"],
+    topics=["GPU_expert"],
     dimensions=[12],
     defaultval=12*(-1),
     mnemonics="GPU: choice of DEVICES on one node",
@@ -7589,7 +7606,7 @@ Variable(
     abivarname="gpu_kokkos_nthrd",
     varset="paral",
     vartype="integer",
-    topics=["parallelism_expert"],
+    topics=["GPU_expert"],
     dimensions="scalar",
     defaultval="number of [[OPENMP]] threads",
     mnemonics="GPU KOKKOS implementation: Number of THReaDs",
@@ -7608,7 +7625,7 @@ Variable(
     abivarname="gpu_linalg_limit",
     varset="paral",
     vartype="integer",
-    topics=["parallelism_expert"],
+    topics=["GPU_expert"],
     dimensions="scalar",
     defaultval=2000000,
     mnemonics="GPU: LINear ALGebra LIMIT",
@@ -7633,7 +7650,7 @@ Variable(
     abivarname="gpu_nfft_blocks",
     varset="paral",
     vartype="integer",
-    topics=["parallelism_expert"],
+    topics=["GPU_expert"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="GPU: Number of Fast Fourier Transform Blocks",
@@ -7656,7 +7673,7 @@ Variable(
     abivarname="gpu_nl_distrib",
     varset="paral",
     vartype="integer",
-    topics=["parallelism_expert"],
+    topics=["GPU_expert"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="GPU: Non-Local operator, DISTRIBute projections",
@@ -7682,7 +7699,7 @@ Variable(
     abivarname="gpu_nl_splitsize",
     varset="paral",
     vartype="integer",
-    topics=["parallelism_expert"],
+    topics=["GPU_expert"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="GPU: Non-Local operator SPLITting SIZE",
@@ -7708,46 +7725,40 @@ Variable(
     abivarname="gpu_option",
     varset="paral",
     vartype="integer or string",
-    topics=["parallelism_useful"],
+    topics=["GPU_useful"],
     dimensions="scalar",
     defaultval=ValueWithConditions({"[[OPENMP_OFFLOAD]]": 2, "[[KOKKOS]]": 3, "[[CUDA]]": 1, "defaultval": 0}),
     mnemonics="GPU: OPTION to choose the implementation",
     added_in_version="v9.12",
     text=r"""
-Only relevant for Ground-State calculations ([[optdriver]] == 0).
-This option is only available if ABINIT executable has been compiled for the purpose
-of being used with GPU accelerators. It allows to choose between the different
-GPU programming models available in ABINIT:
+Only relevant for Ground-State ([[optdriver]] == 0) or Response-Function ([[optdriver]] == 1) calculations.
+
+This option is only available if ABINIT executable has been compiled with support for GPU accelerators enabled (see [here](../INSTALL_gpu.md)).
+
+It allows to choose between the different GPU programming models available in ABINIT:
 
 - [[gpu_option]]= "GPU_DISABLED" or [[gpu_option]] = 0: no use of GPU (even if compiled for GPU).
 
+- [[gpu_option]]= "GPU_OPENMP" or [[gpu_option]] = 2: use of the [[OPENMP_OFFLOAD]] GPU implementation.
+  This implementation works on NVIDIA and AMD GPU accelerators and is the only one being actively developped.
+  It offers the broadest support of GPU accelerated usecases (GS+Fock, DFPT, DMFT...).
+
 - [[gpu_option]]= "GPU_LEGACY" or [[gpu_option]] = 1: use the "legacy" 2013 implementation of GPU. This is a partial [[CUDA]]
-  implementation, using the `nvcc` [[CUDA]] compiler. The old LOBPCG algorithm is automatically
+  implementation, using [[CUDA]] kernels. The old LOBPCG algorithm is automatically
   used to compute the eigenstates ([[wfoptalg]]=14). The external linear algebra library
   `MAGMA can also be linked to ABINIT to improve performances on large systems
   (see [[gpu_linalg_limit]]).
 
-- [[gpu_option]]= "GPU_OPENMP" or [[gpu_option]] = 2: use of the [[OPENMP_OFFLOAD]] programming model to execute time consuming
-  parts of the code on GPU. This implementation works on NVidia accelerators, if ABINIT has been
-  compiled with a [[CUDA]] compatible compiler and linked with NVidia FFT/linear algebra
-  libraries ([cuFFT](https://docs.nvidia.com/cuda/cufft),
-  [cuBLAS](https://docs.nvidia.com/cuda/cublas) and
-  [cuSOLVER](https://docs.nvidia.com/cuda/cusolvermp)).
-  It also works on `AMD accelerators (EXPERIMENTAL),
-  if ABINIT has been compiled with a AMD compatible compiler and linked with NVidia
-  FFT/linear algebra libraries ([ROCm](https://www.amd.com/fr/graphics/servers-solutions-rocm)
-  or [HIP](https://github.com/ROCm/HIP)).
-
-- [[gpu_option]]= "GPU_KOKKOS" or [[gpu_option]] = 3: use of the [[KOKKOS]]+[[CUDA]] programming model to execute time consuming
-  parts of the code on GPU. This implementation -- at present -- is only compatible with
-  NVidia accelerators. It required that ABINIT has been linked to the
+- [[gpu_option]]= "GPU_KOKKOS" or [[gpu_option]] = 3: use of the [[KOKKOS]]+[[CUDA]] GPU implementation.
+  This implementation -- at present -- is only compatible with
+  NVIDIA accelerators and only works on Ground-State calculation with [[wfoptalg]]=111 (ChebFI).
+  It required that ABINIT has been linked to the
   [Kokkos](https://github.com/kokkos/kokkos) and [YAKL](https://github.com/mrnorman/YAKL)
-  performance libraries. It also uses NVidia FFT/linear algebra libraries
-  ([cuFFT](https://docs.nvidia.com/cuda/cufft), [cuBLAS](https://docs.nvidia.com/cuda/cublas)).
+  performance libraries, along with NVIDIA CUDA libraries.
   The [[KOKKOS]] GPU implementation can be used in conjunction with openMP threads
   on CPU (see [[gpu_kokkos_nthrd]]).
 
-For an expert use of ABINIT on [[GPU]], some additional keywords can be used. See [[gpu_nl_distrib]], [[gpu_nl_splitsize]].
+For an expert use of ABINIT on [[GPU]], some additional keywords can be used. See [[gpu_nl_distrib]], [[gpu_nl_splitsize]], [[gpu_nfft_blocks]], [[gpu_thread_limit]].
 """,
 ),
 
@@ -7755,7 +7766,7 @@ Variable(
     abivarname="gpu_thread_limit",
     varset="paral",
     vartype="integer",
-    topics=["parallelism_expert"],
+    topics=["GPU_expert"],
     dimensions="scalar",
     defaultval="Minimum between 4 and number of [[OPENMP]] threads, if GPU is enabled, 0 otherwise.",
     mnemonics="GPU: Thread Limit",
@@ -15831,7 +15842,7 @@ unless a very specific ground state feature is also needed.
 
 * [[orbmag]] = 1: Compute orbital magnetization and Chern vector
 * [[orbmag]] = 2: Same as [[orbmag]] 1 but also print out values of each term making up total
-orbital magnetic moment and a band-by-band decomposition.
+orbital magnetic moment.
 """,
 ),
 
@@ -23851,6 +23862,9 @@ It can be used as a simple string flagging the desired outputs as follows:
  * "fsurf"     --> Activates the printing of the Fermi surface file. Refer to [[prtfsurf]] for further documentation.
  * "gden"      --> Activates the printing of the gradient of the electronic density file. Refer to [[prtgden]] for further documentation.
  * "geo"       --> Activates the printing of the geometry analysis. Refer to [[prtgeo]] for further documentation.
+ * "geo_1      --> Activates the printing of the geometry analysis under option 1 of the [[prtgeo]] variable.
+ * "geo_2      --> Activates the printing of the geometry analysis under option 2 of the [[prtgeo]] variable.
+ * "geo_3      --> Activates the printing of the geometry analysis under option 3 of the [[prtgeo]] variable.
  * "gkk"       --> Activates the printing of the GKK matrix file. Refer to [[prtgkk]] for further documentation.
  * "gsr"       --> Activates the printing of the GSR file. Refer to [[prtgsr]] for further documentation.
  * "hist"      --> Activates the printing of the HIST file. Refer to [[prthist]] for further documentation.
@@ -24372,9 +24386,9 @@ due to nuclear magnetic dipoles (see [[nucdipmom]]).
 [[zora]] 3 activates both kinetic energy and electron spin terms.
 
 Negative values of [[zora]] are present only for debugging purposes. [[zora]] -1 permits only
-spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits only
-the electron spin-nuclear dipole through space interaction, and [[zora]] -3 permits only the
-electron spin-nuclear dipole Fermi-contact-like interaction.
+spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits spin-orbit
+coupling and the electron spin-nuclear dipole through space interaction, while [[zora]] -3 permits 
+only spin-orbit coupling and the electron spin-nuclear dipole Fermi-contact-like interaction.
 """,
 ),
 
