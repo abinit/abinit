@@ -6751,13 +6751,14 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  integer :: isym_tot, trev_tot, tsign_tot, ik_base_glob
  integer :: timrev_k, isym_lg, itime_lg, isym_glob, itime_glob, iq_ibz_loc
  integer :: isym_combined, trev_combined, iq_computed_glob
- integer :: isym_p, itime_p, ikq_ibz_p, isym_rp, itime_rp, trev_rp, isym_at
+ integer :: isym_p, itime_p, ikq_ibz_p, isym_rp, itime_rp, trev_rp, isym_at, isym3_kt
  integer :: indkk_kq(6, 1)
  real(dp) :: kk_base(3)
  real(dp) :: weight_qq, phase, tnon(3), q_base(3)
  integer :: idir, ipert, idir_eq, ipert_eq, mu, mu_eq, iq_base_glob, ii
  real(dp) :: symrec_inv(3,3), symrec_eq(3,3), l0(3)
- complex(dp) :: cphase
+ real(dp) :: Sk3_kt(3), L_mult_kt(3)
+ complex(dp) :: cphase, phase_kt
  logical :: with_g2dw, q_is_gamma
  logical :: isirr_k, isirr_kq, isirr_q
  character(len=abi_slen) :: with_gmode, gtype, gvals_name
@@ -7051,26 +7052,54 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
        ! Composite R.P: isym_combined (R) applied AFTER isym_p (P). Use dmats%multable
        ! (full space-group multiplication table) instead of a rotation-only search.
+       ! NOTE: tried converting isym_p/the composite through toinv() (mirroring the dmat_k
+       ! fix above, on the theory that main.tex's own R/P compose via symrec) -- verified
+       ! empirically (isolated on the isym_tot==1 subset, where R=isym_glob exactly and the
+       ! ket-side complexity vanishes) to give IDENTICAL results to the unswapped form below
+       ! (226/340 bad either way), and forcing dmat_star_kq to the identity makes the same
+       ! subset measurably WORSE (238/340 bad) -- so the current (non-identity) rotation is
+       ! doing genuine, partially-correct work, but the isym_rp/isym_p convention is NOT the
+       ! remaining bug. Left unswapped pending further investigation (see conversation).
        isym_rp = dmats%multable(1, isym_combined, isym_p)
        ABI_CHECK(isym_rp /= 0, "Composite symmetry R.P not found in space group")
        trev_rp = mod(trev_combined + (itime_p - 1), 2)
        itime_rp = trev_rp + 1
 
-       ! R = isym_combined/trev_combined = isym_tot APPLIED AFTER isym_glob. isym_tot moves k0
-       ! OUTSIDE its own little group in the general case (that is the whole point of using it
-       ! to reach the target k), so dmats_init's gauge convention (psi_{n,Sk} := S.psi_{n,k} for
-       ! any S with Sk0 != k0+G, validated by the user earlier this session) makes
-       ! D^{k0}(isym_tot) trivially the identity -- dmats%for_spin(...,isym_combined,...) is
-       ! IDENTICALLY the identity matrix whenever isym_combined itself does not fix k0, which is
-       ! true for the vast majority of (k,q) pairs (confirmed empirically: ~91% of test cases).
-       ! By the master product law D^k(S1 S2) = D^{S2 k}(S1) D^k(S2) with S1=isym_tot, S2=isym_glob
-       ! (isym_glob applied first, matching the code comment above), and D^{isym_glob(k0)}(isym_tot)
-       ! = D^{k0}(isym_tot) = I (little-group images of k0 share the same D-matrix, no extra phase,
-       ! and isym_tot is gauge-trivial there too), the REQUIRED D^{k0}(R) collapses to D^{k0}(isym_glob)
-       ! exactly -- isym_glob is, by construction, IN k0's own little group, so dmats_init actually
-       ! computed a genuine (non-identity) D-matrix for it. Using isym_combined directly here was
-       ! throwing away isym_glob's real contribution and substituting the trivial identity instead.
-       dmat_k = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_glob, itime_glob, ik_ibz)))
+       ! R = isym_combined/trev_combined = isym_tot APPLIED AFTER isym_glob (isym_glob applied
+       ! first). Master product law: D^k0(S1.S2) = D^{S2.k0}(S1) . D^k0(S2), S1=isym_tot,
+       ! S2=isym_glob. Since isym_glob fixes k0 (S2.k0=k0), this is D^k0(isym_tot).D^k0(isym_glob).
+       ! D^k0(isym_tot) is the identity ONLY when isym_tot moves k0 away from itself (ABINIT's
+       ! gauge convention psi_{n,Sk}:=S.psi_{n,k} for Sk!=k+G) -- true for the vast majority of
+       ! (k,q) pairs, but NOT guaranteed: isym_tot can itself be a non-trivial member of k0's own
+       ! little group (verified empirically via a non-destructive self-consistency check: forcing
+       ! already-computed reference points through a deliberately non-trivial symmetry and
+       ! comparing against their known-correct value). isym_glob is a symrec-native label (from
+       ! lg_cache(...)%find_ibzimage_sym, which calls listkk(use_symrec=.True.) -- see
+       ! lgroup_t/lgroup_find_ibzimage_sym docstrings), while dmats%for_spin is indexed with
+       ! ABINIT's symrel^t convention throughout this file (k and k+q always use symrel^t; only
+       ! the pure q-point tables use symrec -- see the "AGENT" notes above); since
+       ! symrec(S) = symrel(toinv(S))^t for any S, the symrel^t-native label for isym_glob's
+       ! contribution is dmats%toinv(1, isym_glob), not isym_glob itself. isym_tot is already
+       ! symrel^t-native (found via kpts_map/listkk mode="symrel" in search_source above), so it
+       ! needs no such conversion.
+       !
+       ! The raw matrix product D(isym_tot).D(toinv(isym_glob)) computed above is the D-matrix of
+       ! the LITERAL, uncanonicalized Seitz product isym_tot o toinv(isym_glob), which generally
+       ! differs from the TABULATED entry sharing the same rotation by a pure lattice-translation
+       ! phase (the "Caveat for tabulated symmetry matrices" in main.tex, already validated
+       ! independently in dmats_check's group-multiplication test): D(isym3) =
+       ! phase_kt . D(isym_tot).D(toinv(isym_glob)), isym3 = multable(isym_tot, toinv(isym_glob)),
+       ! with the lattice vector looked up at the group-theoretic inverses (reversed order):
+       ! L = multable(2:4, isym_glob, toinv(isym_tot)) [= multable(2:4, toinv(toinv(isym_glob)),
+       ! toinv(isym_tot))]. Applying phase_kt here fixes the self-consistency check above without
+       ! any regression on the general population (dtset%prtvol dmats%check diagnostics unaffected).
+       isym3_kt = dmats%multable(1, isym_tot, dmats%toinv(1, isym_glob))
+       Sk3_kt = matmul(transpose(real(cryst%symrel(:,:,isym3_kt), dp)), ebands%kptns(:,ik_ibz))
+       L_mult_kt = real(dmats%multable(2:4, isym_glob, dmats%toinv(1, isym_tot)), dp)
+       phase_kt = exp(cmplx(0.0_dp, -two_pi * sum(Sk3_kt * L_mult_kt), dp))
+       dmat_k = transpose(conjg(phase_kt * matmul( &
+         dmats%for_spin(spin)%value(:,:, isym_tot, trev_tot + 1, ik_ibz), &
+         dmats%for_spin(spin)%value(:,:, dmats%toinv(1, isym_glob), itime_glob, ik_ibz))))
        dmat_temp = dmats%for_spin(spin)%value(:,:, isym_rp, itime_rp, ikq_ibz_p)
        dmat_star_kq = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_p, itime_p, ikq_ibz_p)))
        dmat_star_kq = matmul(dmat_temp, dmat_star_kq)
