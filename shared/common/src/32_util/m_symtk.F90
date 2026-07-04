@@ -54,6 +54,7 @@ module m_symtk
  public :: smallprim            ! Find the smallest possible primitive vectors for an input lattice
  public :: print_symmetries     ! Helper function to print symmetries in a nice format.
  public :: rot2str              ! Return string with info on rotation.
+ public :: sym_order            ! Return the order n of a point-group operation (rot^n = identity).
 !!***
 
 contains
@@ -3351,6 +3352,7 @@ subroutine reduce_to_small_integers(v)
 
   v = real(iv, dp)
 end subroutine reduce_to_small_integers
+!!***
 
 recursive function igcd(a, b) result(g)
   integer, intent(in) :: a, b
@@ -3361,6 +3363,65 @@ recursive function igcd(a, b) result(g)
     g = igcd(b, mod(a, b))
   end if
 end function igcd
+
+!!****f* m_symtk/sym_order
+!! NAME
+!! sym_order
+!!
+!! FUNCTION
+!!  Return the order n of a point-group operation, i.e. the smallest integer
+!!  such that rot^n = identity. By the crystallographic restriction theorem,
+!!  n must be one of {1, 2, 3, 4, 6}: the routine aborts if none of these
+!!  values gives the identity, as this signals that rot is not a valid
+!!  crystallographic point-group operation.
+!!
+!! INPUTS
+!!  rot(3,3)=Rotation matrix in reduced coordinates (e.g. symrel(:,:,isym)).
+!!
+!! OUTPUT
+!!  n=Order of the operation, one of {1, 2, 3, 4, 6}.
+!!  isproper=.True. if rot is a proper rotation (det=+1), .False. if
+!!    improper (det=-1, e.g. mirror, inversion, rotoinversion).
+!!
+!! SOURCE
+
+integer function sym_order(rot, isproper) result(n)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: rot(3,3)
+ logical,intent(out) :: isproper
+
+!Local variables-------------------------------
+ integer,parameter :: norders = 5
+ integer,parameter :: allowed_orders(norders) = (/1, 2, 3, 4, 6/)
+ integer,parameter :: identity(3,3) = reshape((/1,0,0, 0,1,0, 0,0,1/), (/3,3/))
+ integer :: io, k, det
+ integer :: rot_k(3,3)
+ logical :: found
+! *********************************************************************
+
+ call mati3det(rot, det)
+ isproper = (det == 1)
+
+ found = .False.
+ do io=1,norders
+   n = allowed_orders(io)
+   rot_k = identity
+   do k=1,n
+     rot_k = matmul(rot, rot_k)
+   end do
+   if (all(rot_k == identity)) then
+     found = .True.
+     exit
+   end if
+ end do
+
+ if (.not. found) then
+   ABI_ERROR("Rotation order does not belong to {1, 2, 3, 4, 6}: this is not a valid crystallographic point-group operation!")
+ end if
+
+end function sym_order
+!!***
 
 end module m_symtk
 !!***

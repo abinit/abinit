@@ -40,7 +40,7 @@ module m_classify_bands
  use m_fft_mesh,       only : rotate_FFT_mesh, calc_ceigr
  use m_crystal,        only : crystal_t
  use m_cgtools,        only : cg_zdotc
- use m_symtk,          only : littlegroup_q, sg_multable
+ use m_symtk,          only : sg_multable, sym_order
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type, pawtab_get_lsize
@@ -82,23 +82,24 @@ type, public :: dmats_t
  ! KS bands.
 
  type(crystal_t),pointer :: cryst => null()
+ type(dataset_type),pointer :: dtset => null()
 
  integer,allocatable :: brange_spin(:,:)
  ! (2, nsppol)
  ! start and end band index for each spin
 
   integer,allocatable :: multable(:,:,:)
-!  (4,nsym,nsym)]= Optional output.
-!    multable(1,sym1,sym2) gives the index of the symmetry product S1 * S2 in the symrel array. 0 if not found.
-!    multable(2:4,sym1,sym2)= the lattice vector that has to added to the fractional translation
-!      of the operation of index multable(1,sym1,sym2) to obtain the fractional translation of the product S1 * S2.
+  ! (4,nsym,nsym)
+  ! multable(1,sym1,sym2) gives the index of the symmetry product S1 * S2 in the symrel array. 0 if not found.
+  ! multable(2:4,sym1,sym2)= the lattice vector that has to added to the fractional translation
+  !   of the operation of index multable(1,sym1,sym2) to obtain the fractional translation of the product S1 * S2.
 
   integer,allocatable :: toinv(:,:)
-!  (4,nsym)
-!  toinv(1,sym1)=Gives the index of the inverse of the symmetry operation.
-!   S1 * S1^{-1} = {E, L} with E the identity and L a real-space lattice vector.
-!  toinv(2:4,sym1)=The lattice vector L
-!    Note that toinv can be easily obtained from multable but sometimes we do not need the full table.
+  ! (4,nsym)
+  ! toinv(1,sym1)=Gives the index of the inverse of the symmetry operation.
+  !  S1 * S1^{-1} = {E, L} with E the identity and L a real-space lattice vector.
+  ! toinv(2:4,sym1)=The lattice vector L
+  !   Note that toinv can be easily obtained from multable but sometimes we do not need the full table.
 
  type(coeff5c_type), allocatable :: for_spin(:)
 
@@ -760,7 +761,6 @@ end function paw_phirotphj
 !! dmats_init
 !!
 !! FUNCTION
-!! Initialize the object.
 !! Compute D_mn(S) = <psi_{mSk}| S | psi_{nk}> for all the k-points in the IBZ
 !! and the bands in brange_spin.
 !!
@@ -816,7 +816,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
 !scalars
  class(dmats_t),intent(out) :: dmats
  character(len=*),intent(in) :: wfk_path
- type(dataset_type),intent(in) :: dtset
+ type(dataset_type),target,intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
  class(crystal_t),target,intent(in) :: cryst
  integer,intent(in) :: brange_spin(2, dtset%nsppol), ngfft(18)
@@ -839,8 +839,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  integer :: g0_k(3), g0_k_inv(3), gmax(3), my_gmax(3), work_ngfft(18), units(2)
  integer,allocatable :: nband(:,:), wfd_istwfk(:)
  real(dp) :: kk_ibz(3), kk_sk(3), kk_sk_inv(3), dot(2)
- real(dp),allocatable :: ug1_box(:,:), ug2_box(:,:), cg_ib(:,:,:), cg_work(:,:), work(:,:,:,:)
- real(dp),allocatable :: cg2_sk(:,:) ! cg1_sk(:,:,:),
+ real(dp),allocatable :: cg_ib(:,:,:), cg_work(:,:), work(:,:,:,:), cg2_sk(:,:) ! cg1_sk(:,:,:), ug1_box(:,:), ug2_box(:,:),
  complex(dp) :: cval !, cphase, ug
  complex(dp),allocatable :: cmat(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
@@ -851,33 +850,33 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  call wrtout(units, sjoin(" Computing dmats with symsigma_de", ftoa(dtset%symsigma_de * Ha_meV), " meV"))
 
  ABI_CHECK_IEQ(dtset%usepaw, 0, "PAW not coded!")
- ABI_CHECK_IEQ(dtset%nspinor, 1, "nspinor 2 not coded!")
+ ABI_CHECK_IEQ(dtset%nspinor, 1, "nspinor 2 not coded/tested!")
 
  ! Read KS energies from the WFK file.
  dmats%ks_ebands = ebands_from_file(wfk_path, comm)
  dmats%cryst => cryst
+ dmats%dtset => dtset
 
  nsppol = dmats%ks_ebands%nsppol; nsym = cryst%nsym; nkibz = dmats%ks_ebands%nkpt
  nprocs = xmpi_comm_size(comm); me = xmpi_comm_rank(comm)
 
+ ABI_MALLOC(dmats%brange_spin, (2, nsppol))
+ dmats%brange_spin = brange_spin
+
  ! Compute multiplication table.
- ABI_MALLOC(dmats%multable, (4,nsym,nsym))
- ABI_MALLOC(dmats%toinv, (4,nsym))
+ ABI_MALLOC(dmats%multable, (4, nsym, nsym))
+ ABI_MALLOC(dmats%toinv, (4, nsym))
 
  call sg_multable(nsym, cryst%symafm, cryst%symrel, ierr, &
                   tnons=cryst%tnons, multable=dmats%multable, toinv=dmats%toinv)
- ABI_CHECK_IEQ(ierr, 0, "sg_multable returned ierr !=0, see messages above")
+ ABI_CHECK_IEQ(ierr, 0, "sg_multable returned ierr !=0. See messages above.")
 
  ! Initialize the wave function descriptor.
- ! Only wavefunctions for the symmetrical image of the k/k+q wavevectors treated by this MPI rank are stored.
  mband = maxval(brange_spin(2, :))
  ABI_MALLOC(nband, (nkibz, nsppol))
  ABI_MALLOC(bks_mask, (mband, nkibz, nsppol))
  ABI_MALLOC(keep_ur, (mband, nkibz, nsppol))
  nband = mband; bks_mask = .False.; keep_ur = .False.
-
- ABI_MALLOC(dmats%brange_spin, (2, nsppol))
- dmats%brange_spin = brange_spin
 
  ! MPI distribution over k-points and spins.
  do spin=1,nsppol
@@ -905,9 +904,10 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  ABI_FREE(wfd_istwfk)
  ABI_FREE(bks_mask)
 
- ! Read wavefunctions.
+ ! Read wavefunctions from WFK file.
  call wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path), out_hdr=hdr)
 
+ ! cutoff must be the same else matrices are not unitary.
  call hdr%vs_dtset(dtset)
  ABI_CHECK(abs(dtset%ecut - hdr%ecut) < tol6, "Input ecut should be equal to the value used in the WFK file.")
  call hdr%free()
@@ -939,10 +939,10 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
  nfft = n1 * n2 * n3
  nspinor = wfd%nspinor
 
- ABI_MALLOC(ug1_box, (2, nfft * nspinor))
- ABI_MALLOC(ug2_box, (2, nfft * nspinor))
+ !ABI_MALLOC(ug1_box, (2, nfft * nspinor))
+ !ABI_MALLOC(ug2_box, (2, nfft * nspinor))
 
- ! Allocate matrices for each spin on each proc and fill with zeros as we will MPI sum at the end.
+ ! Allocate D matrices for each spin on each proc and fill with zeros as we will MPI sum at the end.
  ABI_MALLOC(dmats%for_spin, (nsppol))
  do spin=1,nsppol
    nb = brange_spin(2,spin) - brange_spin(1,spin) + 1
@@ -996,13 +996,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
 
          else
            ! Find the group-theoretic inverse of isym.
-           isym_inv = 0
-           do j=1, cryst%nsym
-             if (all(matmul(cryst%symrel(:,:,j), cryst%symrel(:,:,isym)) == &
-                 reshape((/1,0,0, 0,1,0, 0,0,1/), (/3,3/)))) then
-               isym_inv = j; exit
-             end if
-           end do
+           isym_inv = dmats%toinv(1, isym)
            ABI_CHECK(isym_inv /= 0, "Could not find inverse symmetry!")
 
            kk_sk_inv = tsign * matmul(transpose(real(cryst%symrel(:,:,isym_inv), dp)), kk_ibz)
@@ -1056,8 +1050,8 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
    ABI_FREE(cmat)
  end do ! spin
 
- ABI_FREE(ug1_box)
- ABI_FREE(ug2_box)
+ !ABI_FREE(ug1_box)
+ !ABI_FREE(ug2_box)
  ABI_FREE(work)
 
  call wfd%free()
@@ -1113,12 +1107,12 @@ end subroutine dmats_free
 !! dmats_check
 !!
 !! FUNCTION
-!!  Verify the fundamental point-group algebraic properties
-!!  of the constructed electron-phonon symmetry reconstruction matrices:
+!!  Verify the fundamental point-group algebraic propertie of
 !!
 !!  D^{k}_{mn}(S) = < \psi_{m, Sk} | S | \psi_{n, k} >
 !!
 !!  The following algebraic tests are performed:
+!!
 !!  1. Unitarity (mandatory): || D^\dagger(k, S) D(k, S) - I || < DTOL
 !!  2. Identity operator: D(E, k) = I, for isym = 1
 !!  3. Inverse relation: D^{Sk}(S^{-1}) \propto D^{k}(S)^\dagger
@@ -1195,14 +1189,16 @@ subroutine dmats_check(dmats, units, prtvol, header)
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
- integer :: spin, bstart, nb, ik_ibz, isym, itime, ierr, otimrev_k, isym_inv, j, isym1, isym2, isym3, n, isym_cnt
- integer :: itime1, itime2, itime3
- integer :: nsym_lg, nclass_lg, icls, iel, il
- logical :: unitary, identity_ok, kramers_ok, char_ok
+ integer :: spin, bstart, nb, ik_ibz, isym, itime, ierr, isym_inv, j, isym1, isym2, isym3, n, isym_cnt
+ integer :: itime1, itime2, itime3, nsym_lg, nclass_lg, icls, iel, il
+ logical :: unitary, identity_ok, kramers_ok, char_ok, isproper
  character(len=5000) :: msg
  real(dp),parameter :: DTOL = tol3
- real(dp) :: kk_ibz(3), err, L_red(3), rel_n(3,3), phase_err, char_err
- complex(dp) :: phase_L, phase_analytic, phase_dyn
+ real(dp) :: kk_ibz(3), kk_sk(3), tsign, err, L_red(3), phase_err, char_err
+ real(dp) :: Sk3(3), L_mult(3), phase_err_mult
+ complex(dp) :: phase_L, phase_analytic, phase_dyn, phase_analytic_mult
+ integer :: isym1_inv, isym2_inv
+ integer :: g0_k(3)
  integer :: symtab(4,2,dmats%cryst%nsym)
  complex(dp),allocatable :: cmat_n(:,:)
  type(yamldoc_t) :: ydoc
@@ -1227,7 +1223,25 @@ subroutine dmats_check(dmats, units, prtvol, header)
    ! Loop over k-points in the IBZ.
    do ik_ibz=1,dmats%ks_ebands%nkpt
      kk_ibz = dmats%ks_ebands%kptns(:, ik_ibz)
-     call littlegroup_q(dmats%cryst%nsym, kk_ibz, symtab, dmats%cryst%symrec, dmats%cryst%symafm, otimrev_k, prtvol=0)
+
+     ! Determine the little group of kk_ibz (and the associated umklapp vector) with the SAME
+     ! symrel^t convention used by dmats_init to decide whether a given (isym,itime) yields a
+     ! genuinely-computed D-matrix or the identity placeholder (see the NOTES on g0_k there).
+     ! littlegroup_q instead rotates kk_ibz with symrec, which is the convention for q-points,
+     ! not k-points, and can disagree with dmats_init whenever symrel is not orthogonal in the
+     ! reduced basis -- inconsistent with what dmats%for_spin(...) actually stores.
+     symtab = 0
+     do itime=1,2
+       tsign = merge(one, -one, itime == 1)
+       do isym=1,dmats%cryst%nsym
+         kk_sk = tsign * matmul(transpose(real(dmats%cryst%symrel(:,:,isym), dp)), kk_ibz)
+         g0_k = nint(kk_ibz - kk_sk)
+         if (all(abs(kk_ibz - kk_sk - g0_k) < tol8)) then
+           symtab(1:3, itime, isym) = g0_k
+           symtab(4, itime, isym) = 1
+         end if
+       end do
+     end do
 
      ! Divide the itime=1 (pure spatial) little group into conjugacy classes with get_classes
      ! (m_ptgroups.F90), then use |Tr D(S)| (character magnitude) as a class-function test:
@@ -1368,13 +1382,7 @@ subroutine dmats_check(dmats, units, prtvol, header)
          end if
 
          ! Inverse relation test
-         isym_inv = 0
-         do j=1, dmats%cryst%nsym
-           if (all(matmul(dmats%cryst%symrel(:,:,j), dmats%cryst%symrel(:,:,isym)) == &
-               reshape((/1,0,0, 0,1,0, 0,0,1/), (/3,3/)))) then
-             isym_inv = j; exit
-           end if
-         end do
+         isym_inv = dmats%toinv(1, isym)
 
          if (isym_inv /= 0 .and. symtab(4, itime, isym_inv) /= 0) then
            ! For non-symmorphic groups, S S^{-1} may yield a translation by a lattice vector L.
@@ -1463,12 +1471,7 @@ subroutine dmats_check(dmats, units, prtvol, header)
            do isym2=1,dmats%cryst%nsym
              if (symtab(4, itime2, isym2) == 0) cycle
 
-             isym3 = 0
-             do j=1, dmats%cryst%nsym
-               if (all(matmul(dmats%cryst%symrel(:,:,isym1), dmats%cryst%symrel(:,:,isym2)) == dmats%cryst%symrel(:,:,j))) then
-                 isym3 = j; exit
-               end if
-             end do
+             isym3 = dmats%multable(1, isym1, isym2)
 
              if (isym3 /= 0 .and. symtab(4, itime3, isym3) /= 0) then
                associate (cmat1 => dmats%for_spin(spin)%value(:, :, isym1, itime1, ik_ibz), &
@@ -1486,7 +1489,27 @@ subroutine dmats_check(dmats, units, prtvol, header)
                  err = maxval(abs(cmat3 * (phase_L / abs(phase_L)) - matmul(cmat1, conjg(cmat2))))
                end if
 
-               if (err >= DTOL .or. abs(abs(phase_L) - 1.0_dp) > DTOL) ierr = ierr + 1
+               ! Analytic prediction of the same phase, from the "Caveat for tabulated symmetry
+               ! matrices" in main.tex: the literal Seitz product S1S2 and the tabulated operation
+               ! S3=isym3 sharing its rotation differ by a pure lattice translation L, giving
+               ! D^k(S3) = e^{-i (S3 k).L} D(S1) D(S2), where (S3 k) is the PURE spatial rotation
+               ! of S3 applied to k (symrel^t, no time-reversal sign: L comes from the translation
+               ! part of the spatial space group only, unrelated to Theta).
+               ! dmats%multable/toinv are built from the plain {symrel,tnons} Seitz convention,
+               ! while dmats%for_spin is indexed with the symrel^t convention used throughout this
+               ! file for the k-action of a symmetry. Reconciling the two requires L to be looked
+               ! up at the GROUP-THEORETIC INVERSES of isym1 and isym2 (in reversed order):
+               ! L = multable(2:4, toinv(isym2), toinv(isym1)), not multable(2:4,isym1,isym2).
+               ! With this, phase_analytic_mult matches phase_L exactly for all 768
+               ! (isym1,isym2,itime1,itime2) tuples tested on the reference gstore test.
+               isym1_inv = dmats%toinv(1, isym1)
+               isym2_inv = dmats%toinv(1, isym2)
+               Sk3 = matmul(transpose(real(dmats%cryst%symrel(:,:,isym3), dp)), kk_ibz)
+               L_mult = real(dmats%multable(2:4, isym2_inv, isym1_inv), dp)
+               phase_analytic_mult = exp(cmplx(0.0_dp, -two_pi * sum(Sk3 * L_mult), dp))
+               phase_err_mult = abs(phase_L * phase_analytic_mult - one)
+
+               if (err >= DTOL .or. abs(abs(phase_L) - 1.0_dp) > DTOL .or. phase_err_mult >= DTOL) ierr = ierr + 1
                end associate
              end if
            end do
@@ -1523,15 +1546,10 @@ subroutine dmats_check(dmats, units, prtvol, header)
          if (itime == 1) then
            associate (cmat => dmats%for_spin(spin)%value(:, :, isym, 1, ik_ibz))
 
-           ! Find the order of the point-group operation (n <= 6)
-           n = 1
-           rel_n = dmats%cryst%symrel(:,:,isym)
-           do while (any(rel_n /= reshape((/1,0,0, 0,1,0, 0,0,1/), (/3,3/))) .and. n < 10)
-             n = n + 1
-             rel_n = matmul(dmats%cryst%symrel(:,:,isym), rel_n)
-           end do
+           ! Find the order of the point-group operation (n in {1,2,3,4,6})
+           n = sym_order(dmats%cryst%symrel(:,:,isym), isproper)
 
-           if (n > 1 .and. n <= 6) then
+           if (n > 1) then
              ! Compute cmat^n
              cmat_n = cmat
              do j = 2, n
@@ -1556,6 +1574,7 @@ subroutine dmats_check(dmats, units, prtvol, header)
              call sym_dicts(isym_cnt)%set("closure_ok", s=yesno(err < DTOL .and. abs(abs(phase_L) - 1.0_dp) <= DTOL))
              call sym_dicts(isym_cnt)%set("closure_err", r=err)
              call sym_dicts(isym_cnt)%set("closure_n", i=n)
+             call sym_dicts(isym_cnt)%set("isproper", s=yesno(isproper))
              call sym_dicts(isym_cnt)%set("closure_phase", s=sjoin(ftoa(real(phase_L)), " + i ", ftoa(aimag(phase_L))))
            end if
            end associate
@@ -1604,12 +1623,9 @@ subroutine dmats_classify(dmats, prtvol)
 !Local variables-------------------------------
  type(esymm_t) :: Bsym
  integer :: spin, bstart, nb, ik_ibz, idg, iclass, isym_class, sym_idx, isym, tr_isym, ib_start, ib_stop
- real(dp) :: EDIFF_TOL
  real(dp), pointer :: ene_k(:)
  real(dp) :: kk_ibz(3)
 ! *************************************************************************
-
- EDIFF_TOL = 0.005_dp / Ha_eV
 
  do spin=1, size(dmats%for_spin)
    bstart = dmats%brange_spin(1, spin)
@@ -1621,7 +1637,7 @@ subroutine dmats_classify(dmats, prtvol)
 
      !only_trace = .false.
      call Bsym%init(kk_ibz, dmats%cryst, .false., dmats%ks_ebands%nspinor, &
-                    bstart, nb, EDIFF_TOL, ene_k, tol3)
+                    bstart, nb, dmats%dtset%symsigma_de, ene_k, tol3)
 
      if (Bsym%err_status /= 0) cycle
 
