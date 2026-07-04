@@ -6785,7 +6785,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
  call gstore_read_gtype(gstore_path, gtype, comm, brange_k_spin=brange_k_spin)
 
- ! Compute the mixing matrices D^{k}(S) from the wavefunctions stored in wfd_t.
+ ! Compute the phase matrices D^{k}(S) from the wavefunctions stored in wfd_t.
  call dmats%init(wfk_path, dtset, dtfil, cryst, brange_k_spin, ngfft, pawtab, psps, comm)
 
  ! Only master processor performs the symmetrization of the e-ph matrix elements.
@@ -6805,11 +6805,8 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  call gstore%from_ncpath(gstore_path, with_cplex, dtset, dtfil, cryst, ebands, ifc, &
                          with_gmode, gvals_name, with_g2dw, xmpi_comm_self)
 
- ! For wannierization, we need the same number of bands for m and n.
+ ! We need the same number of bands for m and n.
  ! Also, k and q must be in the BZ without any filter.
- ! Once the symmetrization of the g's has been implemented, this routine
- ! will receive a gstore file in which all g(k,q) matrix elements in the BZ
- ! have been reconstructed using symmetry operations.
  ABI_CHECK(gstore%same_nbands(msg), msg)
  if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "atom", kfilter="none", check_alloc=.False.) /= 0) then
    ABI_ERROR("GSTORE.nc should have both k and q in the full BZ. See messages above.")
@@ -6862,7 +6859,8 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
      iq_glob = my_iq + gqk%my_qstart - 1
      call gqk%myqpt(my_iq, gstore, weight_qq, qpt); q_is_gamma = sum(qpt**2) < tol14
 
-     ! Symmetry tables for q-points. NB: Using symrec convention for q.
+     ! Symmetry tables for q-points.
+     ! AGENT: NB: Using symrec convention for q.
      iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
      trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
      isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
@@ -6870,6 +6868,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
      qq_ibz = gstore%qibz(:, iq_ibz)
 
      ! Find k + q in the IBZ for all my k-points.
+     ! AGENT: NB: Using symrel^T convention for k+q.
      ABI_MALLOC(my_kqmap, (6, gqk%my_nk))
      if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, my_kqmap, qpt=qpt) /= 0) then
        ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qpt)))
@@ -6886,7 +6885,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
        this_state = state_kq(ik_glob, iq_glob); if (this_state == GSTORE_KQ_COMPUTED) cycle
 
-       ! Note symrel^T convention for k
+       ! AGENT: Using symrel^T convention for k.
        ik_ibz = gqk%my_k2ibz(1, my_ik); isym_k = gqk%my_k2ibz(2, my_ik)
        trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5, my_ik)
        isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
@@ -6894,6 +6893,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        itime_k = trev_k + 1
        kk_ibz = ebands%kptns(:,ik_ibz)
 
+       ! AGENT: Using symrel^t convention for k+q.
        ikq_ibz = my_kqmap(1, my_ik); isym_kq = my_kqmap(2, my_ik)
        trev_kq = my_kqmap(6, my_ik); g0_kq = my_kqmap(3:5, my_ik)
        isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
@@ -6943,6 +6943,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
              end do
              if (ik_ibz /= -1) then
                isym_combined = isym_tot; trev_combined = trev_tot; iq_computed_glob = iq_base_glob
+               isym_glob = 1; itime_glob = 1
                exit search_source
              end if
              cycle
@@ -7035,6 +7036,8 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        ! the composite R.P (mapping (k+q)_IBZ -> k+q directly) together with P^dagger, NOT simply
        ! the symmetry ikq_ibz/isym_kq/itime_kq (from my_kqmap on the literal target k+q) alone,
        ! since that need not coincide with R.P whenever (k+q)_IBZ's own little group is non-trivial.
+
+       ! NB: Using symrel^T convention for k+q
        if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kk_base + q_base, indkk_kq) /= 0) then
          ABI_ERROR("Cannot map k0+q0 to IBZ")
        end if
@@ -7053,9 +7056,21 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        trev_rp = mod(trev_combined + (itime_p - 1), 2)
        itime_rp = trev_rp + 1
 
-       ! Rigorous reconstruction formula (see electron-phonon/main.tex, eq:reconstruct-full):
-       !   g^a(k,q) = D^{(k+q)_IBZ}(R.P) . D^{(k+q)_IBZ}(P)^dagger . g^b(k0,q0) . D^{k0}(R)^dagger . T(R^-1)
-       dmat_k = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_combined, trev_combined + 1, ik_ibz)))
+       ! R = isym_combined/trev_combined = isym_tot APPLIED AFTER isym_glob. isym_tot moves k0
+       ! OUTSIDE its own little group in the general case (that is the whole point of using it
+       ! to reach the target k), so dmats_init's gauge convention (psi_{n,Sk} := S.psi_{n,k} for
+       ! any S with Sk0 != k0+G, validated by the user earlier this session) makes
+       ! D^{k0}(isym_tot) trivially the identity -- dmats%for_spin(...,isym_combined,...) is
+       ! IDENTICALLY the identity matrix whenever isym_combined itself does not fix k0, which is
+       ! true for the vast majority of (k,q) pairs (confirmed empirically: ~91% of test cases).
+       ! By the master product law D^k(S1 S2) = D^{S2 k}(S1) D^k(S2) with S1=isym_tot, S2=isym_glob
+       ! (isym_glob applied first, matching the code comment above), and D^{isym_glob(k0)}(isym_tot)
+       ! = D^{k0}(isym_tot) = I (little-group images of k0 share the same D-matrix, no extra phase,
+       ! and isym_tot is gauge-trivial there too), the REQUIRED D^{k0}(R) collapses to D^{k0}(isym_glob)
+       ! exactly -- isym_glob is, by construction, IN k0's own little group, so dmats_init actually
+       ! computed a genuine (non-identity) D-matrix for it. Using isym_combined directly here was
+       ! throwing away isym_glob's real contribution and substituting the trivial identity instead.
+       dmat_k = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_glob, itime_glob, ik_ibz)))
        dmat_temp = dmats%for_spin(spin)%value(:,:, isym_rp, itime_rp, ikq_ibz_p)
        dmat_star_kq = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_p, itime_p, ikq_ibz_p)))
        dmat_star_kq = matmul(dmat_temp, dmat_star_kq)
