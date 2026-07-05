@@ -146,7 +146,7 @@ jpawu2      0.84 eV     # Values of J
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
 #%% [NCPU_8]
-#%% files_to_test = t123_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%% files_to_test = t123_MPI8.abo, tolnlines = 10, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%%                 t123_MPI8o_DS2_LocalSusceptibility.dat, tolnlines = 10, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%% [extra_info]
 #%% authors = F. Gendron

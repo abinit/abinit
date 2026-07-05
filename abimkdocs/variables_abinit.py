@@ -3702,7 +3702,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: TRIQS compute local susceptibility",
-    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_density_matrix]] == 1"
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_density_matrix]] == 1",
     text=r"""
 
   * 1 --> Activate the calculation of the local spin susceptibility for the impurity. Only implemented for the case with [[nspinor]] == 1 .
@@ -3718,7 +3718,7 @@ Variable(
     dimensions="scalar",
     defaultval=10,
     mnemonics="Dynamical Mean Field Theory: TRIQS number of insertion operator for local susceptibility",
-    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_density_matrix]] == 1"
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_density_matrix]] == 1",
     text=r"""
 
 Define the minimal number of insertion operators for the calculation of the local spin susceptibility.
