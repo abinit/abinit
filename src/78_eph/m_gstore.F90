@@ -6751,14 +6751,15 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  integer :: isym_tot, trev_tot, tsign_tot, ik_base_glob
  integer :: timrev_k, isym_lg, itime_lg, isym_glob, itime_glob, iq_ibz_loc
  integer :: isym_combined, trev_combined, iq_computed_glob
- integer :: isym_p, itime_p, ikq_ibz_p, isym_rp, itime_rp, trev_rp, isym_at, isym3_kt
+ integer :: isym_p, itime_p, ikq_ibz_p, isym_rp, itime_rp, trev_rp
+ integer :: isym_k_inv, isym_gk, itime_gk, isym_kq_inv, isym_gkq, itime_gkq
  integer :: indkk_kq(6, 1)
  real(dp) :: kk_base(3)
  real(dp) :: weight_qq, phase, tnon(3), q_base(3)
  integer :: idir, ipert, idir_eq, ipert_eq, mu, mu_eq, iq_base_glob, ii
- real(dp) :: symrec_inv(3,3), symrec_eq(3,3), l0(3)
- real(dp) :: Sk3_kt(3), L_mult_kt(3)
- complex(dp) :: cphase, phase_kt
+ real(dp) :: symrec_eq(3,3), l0(3)
+ real(dp) :: L_gk(3), L_gkq(3)
+ complex(dp) :: cphase, phase_gk, phase_gkq
  logical :: with_g2dw, q_is_gamma
  logical :: isirr_k, isirr_kq, isirr_q
  character(len=abi_slen) :: with_gmode, gtype, gvals_name
@@ -7033,18 +7034,15 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
          ABI_ERROR(sjoin("no source found for ik_glob:", itoa(ik_glob), ", iq_glob:", itoa(iq_glob)))
        end if
 
-       ! T^{(q0)}_{ba}(R^-1) (electron-phonon/main.tex, eq:reconstruct-full) must be evaluated
-       ! at the GROUP-THEORETIC INVERSE of R=isym_combined, not at R itself: look it up
-       ! directly in dmats%toinv (full space-group inverse table, built by sg_multable from
-       ! symrel+tnons, already populated by dmats%init above).
-       isym_at = dmats%toinv(1, isym_combined)
-       ABI_CHECK(isym_at /= 0, "isym_at not found")
-
-       ! Used below to rotate the fractional translation associated with the atomic perturbation.
-       symrec_inv = transpose(cryst%symrec(:,:,isym_at))
-       ! Used below to rotate the reduced perturbation-direction index (atom representation):
-       ! T's rotation factor is S^-T evaluated at S=R^-1, i.e. symrec(isym_at).
-       symrec_eq = real(cryst%symrec(:,:,isym_at), dp)
+       ! Phonon/atomic-perturbation rotation: R=isym_combined maps (k0,q0_computed) -> (k,q)
+       ! directly (forward), so it plays exactly the role of "isym" in the ALREADY-VALIDATED
+       ! v1phq_rotate_myperts (m_dvdb.F90), which rotates a DFPT potential from its IBZ
+       ! representative to a BZ q-point via the SAME symatm/indsym conventions. Mirror that
+       ! routine's formula exactly (same isym for both indsym lookups, tnon including the
+       ! symmetry's own tnons(isym) contribution, phase dotted with the SOURCE q -- not q_base,
+       ! which is only the intermediate point isym_glob maps q0_computed to, and generally
+       ! differs from the true source q0_computed itself unless isym_glob is the identity).
+       symrec_eq = real(cryst%symrec(:,:,isym_combined), dp)
 
        ! Rigorous reconstruction formula (see electron-phonon/main.tex, eq:reconstruct-full):
        !   g^a(k,q) = D^{(k+q)_IBZ}(R.P) . D^{(k+q)_IBZ}(P)^dagger . g^b(k0,q0) . D^{k0}(R)^dagger . T(R^-1)
@@ -7066,58 +7064,72 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        ! for the D-matrix lookups below (it is the gauge P and R.P are actually defined in).
        ikq_ibz_p = indkk_kq(1, 1); isym_p = indkk_kq(2, 1); itime_p = indkk_kq(6, 1) + 1
 
-       ! R = isym_combined/trev_combined = isym_tot APPLIED AFTER isym_glob (isym_glob applied
-       ! first). Master product law: D^k0(S1.S2) = D^{S2.k0}(S1) . D^k0(S2), S1=isym_tot,
-       ! S2=isym_glob. Since isym_glob fixes k0 (S2.k0=k0), this is D^k0(isym_tot).D^k0(isym_glob).
-       ! D^k0(isym_tot) is the identity ONLY when isym_tot moves k0 away from itself (ABINIT's
-       ! gauge convention psi_{n,Sk}:=S.psi_{n,k} for Sk!=k+G) -- true for the vast majority of
-       ! (k,q) pairs, but NOT guaranteed: isym_tot can itself be a non-trivial member of k0's own
-       ! little group (verified empirically via a non-destructive self-consistency check: forcing
-       ! already-computed reference points through a deliberately non-trivial symmetry and
-       ! comparing against their known-correct value). isym_glob is a symrec-native label (from
-       ! lg_cache(...)%find_ibzimage_sym, which calls listkk(use_symrec=.True.) -- see
-       ! lgroup_t/lgroup_find_ibzimage_sym docstrings), while dmats%for_spin is indexed with
-       ! ABINIT's symrel^t convention throughout this file (k and k+q always use symrel^t; only
-       ! the pure q-point tables use symrec -- see the "AGENT" notes above); since
-       ! symrec(S) = symrel(toinv(S))^t for any S, the symrel^t-native label for isym_glob's
-       ! contribution is dmats%toinv(1, isym_glob), not isym_glob itself. isym_tot is already
-       ! symrel^t-native (found via kpts_map/listkk mode="symrel" in search_source above), so it
-       ! needs no such conversion.
+       ! === Electron-side D-matrix for the k0 -> k_glob leg (dmat_k) ===
+       ! isym_tot (found by search_source above) maps k0 to k_glob, but is generally DIFFERENT
+       ! from the canonical (isym_k, trev_k) that gqk%my_k2ibz/kpts_map already computed for
+       ! k_glob alone (both map the SAME ik_ibz to the SAME k_glob -- unique IBZ representative
+       ! -- so they can only differ by a genuine little-group element of ik_ibz). Define
+       ! g_k := toinv(isym_k) o isym_tot (isym_tot applied first, then isym_k^{-1}): g_k
+       ! stabilizes ik_ibz exactly, so D_true(g_k) = dmats%for_spin(...,g_k,...,ik_ibz) is a
+       ! genuine (non-placeholder) representation matrix -- unlike D_true(isym_tot) itself,
+       ! which is just the identity placeholder since isym_tot does not stabilize ik_ibz. Using
+       ! D_true(isym_tot) directly (as a previous version of this code did, composing it with
+       ! D(toinv(isym_glob)) via the SAME phase formula as the SAME-k group-multiplication test)
+       ! was the bug: that phase formula is only valid when BOTH operands are genuine little-
+       ! group elements of the SAME k, which isym_tot never is here.
        !
-       ! The raw matrix product D(isym_tot).D(toinv(isym_glob)) computed above is the D-matrix of
-       ! the LITERAL, uncanonicalized Seitz product isym_tot o toinv(isym_glob), which generally
-       ! differs from the TABULATED entry sharing the same rotation by a pure lattice-translation
-       ! phase (the "Caveat for tabulated symmetry matrices" in main.tex, already validated
-       ! independently in dmats_check's group-multiplication test): D(isym3) =
-       ! phase_kt . D(isym_tot).D(toinv(isym_glob)), isym3 = multable(isym_tot, toinv(isym_glob)),
-       ! with the lattice vector looked up at the group-theoretic inverses (reversed order):
-       ! L = multable(2:4, isym_glob, toinv(isym_tot)) [= multable(2:4, toinv(toinv(isym_glob)),
-       ! toinv(isym_tot))]. Applying phase_kt here fixes the self-consistency check above without
-       ! any regression on the general population (dtset%prtvol dmats%check diagnostics unaffected).
-       isym3_kt = dmats%multable(1, isym_tot, dmats%toinv(1, isym_glob))
-       Sk3_kt = matmul(transpose(real(cryst%symrel(:,:,isym3_kt), dp)), ebands%kptns(:,ik_ibz))
-       L_mult_kt = real(dmats%multable(2:4, isym_glob, dmats%toinv(1, isym_tot)), dp)
-       phase_kt = exp(cmplx(0.0_dp, -two_pi * sum(Sk3_kt * L_mult_kt), dp))
-       dmat_k = transpose(conjg(phase_kt * matmul( &
-         dmats%for_spin(spin)%value(:,:, isym_tot, trev_tot + 1, ik_ibz), &
-         dmats%for_spin(spin)%value(:,:, dmats%toinv(1, isym_glob), itime_glob, ik_ibz))))
+       ! g_k, being the literal product toinv(isym_k) o isym_tot, is looked up as a TABULATED
+       ! multable(1,...) entry, which may differ from the literal product by a lattice vector
+       ! (same tabulated-vs-literal correction used throughout this module for sg_multable/toinv
+       ! composites): g_k_literal = T_{L_gk} o Tab(g_k), so
+       ! D_true(g_k_literal) = e^{-i 2pi k0.L_gk} . D_true(g_k_tabulated).
+       isym_k_inv = dmats%toinv(1, isym_k)
+       ABI_CHECK(isym_k_inv /= 0, "Could not find inverse of isym_k")
+       isym_gk = dmats%multable(1, isym_k_inv, isym_tot)
+       ABI_CHECK(isym_gk /= 0, "Composite symmetry g_k not found in space group")
+       itime_gk = 1 + mod((itime_k - 1) + trev_tot, 2)
+       L_gk = real(dmats%multable(2:4, isym_k_inv, isym_tot), dp) &
+            - matmul(real(cryst%symrel(:,:,isym_k_inv), dp), real(dmats%toinv(2:4, isym_k), dp))
+       phase_gk = exp(cmplx(zero, -two_pi * sum(kk_ibz * L_gk), dp))
 
-       ! Composite R.P: isym_combined (R, verified correct in the STANDARD/symrec-consistent
-       ! labeling via q_glob=symrec(isym_combined).q0_computed) applied AFTER isym_p (P). Several
-       ! alternative derivations were tried (swapped multable args; re-deriving R via
-       ! multable(toinv(isym_tot),isym_glob) under the assumption that main.tex's R acts uniformly
-       ! on k and q via symrec -- an assumption that CONTRADICTS the verified q_glob relation
-       ! above, since it would require isym_tot to be self-inverse in general) -- all converge to
-       ! the SAME 33/154 failing cases in the non-destructive self-consistency check (see
-       ! conversation), always exactly the isym_glob==1 ("fast path") subset, while isym_glob!=1
-       ! cases are reconstructed EXACTLY (0 error). The remaining bug is confirmed localized to
-       ! that fast-path branch but not yet identified; not a symmetry-composition/labeling issue
-       ! in this term, based on the above.
+       ! NB: Sigma_tot is applied AFTER the D(isym_glob)-linear expansion (isym_glob first,
+       ! then isym_tot); if Sigma_tot is antiunitary (trev_tot=1) it acts conjugate-linearly on
+       ! that expansion, so D(isym_glob) must be conjugated here -- same itime-dependent
+       ! conjugation rule as the group-multiplication test in dmats_check_one_k
+       ! (D(A.B)=D(A)D(B) if A unitary, D(A)D(B)^* if A antiunitary, A=Sigma_tot here).
+       if (trev_tot == 0) then
+         dmat_k = conjg(phase_gk) * transpose(conjg(matmul( &
+           dmats%for_spin(spin)%value(:,:, isym_gk, itime_gk, ik_ibz), &
+           dmats%for_spin(spin)%value(:,:, isym_glob, itime_glob, ik_ibz))))
+       else
+         dmat_k = conjg(phase_gk) * transpose(conjg(matmul( &
+           dmats%for_spin(spin)%value(:,:, isym_gk, itime_gk, ik_ibz), &
+           conjg(dmats%for_spin(spin)%value(:,:, isym_glob, itime_glob, ik_ibz)))))
+       end if
+
+       ! === Electron-side D-matrix for the (k+q)_IBZ -> k_glob+q_glob leg (dmat_star_kq) ===
+       ! Exactly the same issue one level up: R.P (isym_rp/itime_rp, R=isym_combined applied
+       ! after P=isym_p) maps ikq_ibz_p to k_glob+q_glob, but generally differs from the
+       ! canonical (isym_kq, trev_kq) that my_kqmap already computed for k_glob+q_glob alone.
+       ! ikq_ibz_p == ikq_ibz always (same unique-IBZ-representative argument), so define
+       ! g_kq := toinv(isym_kq) o isym_rp, a genuine little-group element of ikq_ibz. P itself
+       ! needs no such correction: it is the SAME canonical kpts_map("symrel",...) choice that
+       ! gstore_compute would have used to define the gauge at k0+q0 in the first place.
        isym_rp = dmats%multable(1, isym_combined, isym_p)
        ABI_CHECK(isym_rp /= 0, "Composite symmetry R.P not found in space group")
        trev_rp = mod(trev_combined + (itime_p - 1), 2)
        itime_rp = trev_rp + 1
-       dmat_temp = dmats%for_spin(spin)%value(:,:, isym_rp, itime_rp, ikq_ibz_p)
+
+       isym_kq_inv = dmats%toinv(1, isym_kq)
+       ABI_CHECK(isym_kq_inv /= 0, "Could not find inverse of isym_kq")
+       isym_gkq = dmats%multable(1, isym_kq_inv, isym_rp)
+       ABI_CHECK(isym_gkq /= 0, "Composite symmetry g_kq not found in space group")
+       itime_gkq = 1 + mod((itime_kq - 1) + (itime_rp - 1), 2)
+       L_gkq = real(dmats%multable(2:4, isym_kq_inv, isym_rp), dp) &
+             - matmul(real(cryst%symrel(:,:,isym_kq_inv), dp), real(dmats%toinv(2:4, isym_kq), dp))
+       phase_gkq = exp(cmplx(zero, -two_pi * sum(ebands%kptns(:,ikq_ibz_p) * L_gkq), dp))
+
+       dmat_temp = phase_gkq * dmats%for_spin(spin)%value(:,:, isym_gkq, itime_gkq, ikq_ibz_p)
        dmat_star_kq = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_p, itime_p, ikq_ibz_p)))
        dmat_star_kq = matmul(dmat_temp, dmat_star_kq)
 
@@ -7138,21 +7150,17 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        gkq_rot = zero
        do mu=1,gqk%natom3
          idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
-         ! symatm's convention: indsym(4,isym,iatom) = S^-1.iatom (the atom sent TO iatom
-         ! by S^-1), i.e. it is a PREIMAGE lookup, not a forward image. To get the forward
-         ! image kappa_S(kappa)=S.kappa directly, look it up at the symmetry index of S^-1:
-         ! indsym(4, isym_of(S^-1), kappa) = (S^-1)^-1.kappa = S.kappa. Since we want
-         ! kappa_{R^-1}(ipert) = R^-1.ipert, and S^-1=R^-1 means S=R, use isym_combined here.
+         ! Same convention as v1phq_rotate_myperts (m_dvdb.F90): both indsym lookups use the
+         ! SAME (forward) symmetry index isym_combined, and tnon includes the symmetry's own
+         ! fractional translation, rotated into the perturbed-atom frame.
+         l0 = cryst%indsym(1:3, isym_combined, ipert)
+         tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym_combined))
          ipert_eq = cryst%indsym(4, isym_combined, ipert)
-         ! L_kappa(hat R^-1) = -symrel(R^-1) . indsym(1:3, isym_at, ipert_eq): symatm's own
-         ! "transl" (indsym(1:3,isym,iatom)) is defined relative to the DESTINATION atom
-         ! (iatom=ipert_eq here), at the symmetry index of S itself (isym_at=R^-1), and
-         ! satisfies L_kappa(S) = -symrel(isym_of_S) . transl(isym_of_S, kappa_S(kappa)).
-         l0 = cryst%indsym(1:3,isym_at,ipert_eq)
-         tnon = -matmul(real(cryst%symrel(:,:,isym_at), dp), l0)
 
-         ! phase = e^{-i q_base . tnon}
-         phase = -two_pi * sum(q_base * tnon)
+         ! phase = e^{+i q0_computed . tnon}, q0_computed = SOURCE q of the stored gkq_base
+         ! (gstore%qbz(:,iq_computed_glob), NOT q_base -- q_base is only the intermediate point
+         ! isym_glob maps q0_computed to, and generally differs from q0_computed itself).
+         phase = -two_pi * sum(gstore%qbz(:, iq_computed_glob) * tnon)
          cphase = cmplx(cos(phase), sin(phase), dp)
 
          do idir_eq=1,3
