@@ -3448,7 +3448,7 @@ subroutine sym_order(rot, tnons, n, isproper, trans, msg, ierr)
  end do
 
  ! Make sure trans_dp is integer.
- trans = int(trans_dp)
+ trans = nint(trans_dp)
  if (.not. isinteger(trans_dp, tol=tol5)) then
    ierr = 2
    msg = sjoin("T = [I + rot + rot^2 + ... + rot^(n-1)] . tnons is not integer:", ltoa(trans_dp))

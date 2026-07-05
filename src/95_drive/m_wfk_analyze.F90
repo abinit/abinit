@@ -39,7 +39,7 @@ module m_wfk_analyze
  use defs_datatypes,    only : pseudopotential_type
  use defs_abitypes,     only : mpi_type
  use m_time,            only : timab
- use m_fstrings,        only : strcat, sjoin, itoa, ftoa, ltoa
+ use m_fstrings,        only : strcat, sjoin, itoa, ftoa, ltoa, ktoa
  use m_fftcore,         only : print_ngfft
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq, init_mpi_enreg
  use m_esymm,           only : esymm_t, esymm_free
@@ -61,6 +61,7 @@ module m_wfk_analyze
  use m_paw_correlations,only : pawpuxinit
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_classify_bands,  only : classify_bands, dmats_t
+ use m_kpts,            only : kpts_ibz_from_kptrlatt
  use m_pspini,          only : pspini
  use m_sigtk,           only : sigtk_kpts_in_erange
  use m_iowf,            only : prtkbff
@@ -170,7 +171,9 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  !type(dataset_type) :: my_dtset
 !arrays
  integer :: ngfftc(18),ngfftf(18), units(2), band_block(2), bstart, brange_spin(2, dtset%nsppol)
+ integer :: nkibz_full, nkbz_full, ikbz, nstar_fail
  integer,allocatable :: l_size_atm(:), kg_k(:,:)
+ real(dp),allocatable :: wtk_full(:), kibz_full(:,:), kbz_full(:,:)
  real(dp),parameter :: k0(3)=zero
  real(dp),pointer :: gs_eigen(:,:,:)
  real(dp),allocatable :: eig_k(:), occ_k(:), thetas(:) !, out_cg(:,:), work(:,:,:,:), allcg_k(:,:)
@@ -394,6 +397,32 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    if (my_rank == master) then
      call dmats%check([std_out], dtset%prtvol)
      call dmats%classify(dtset%prtvol)
+
+     ! Independently validate the group-conjugation D-matrix reconstruction (dmats%check_star)
+     ! by testing EVERY k-point in the full BZ mesh, not just the IBZ points dmats was built
+     ! from: each full-BZ k-point is the symmetry-star image of some IBZ k-point, so this
+     ! exercises dmats_get_star_dmats's multable/toinv composition logic (and, in particular,
+     ! its still-unverified two-step analytic phase formula) across the whole mesh.
+     call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ebands%kptopt, ebands%nshiftk, ebands%shiftk, &
+                                 nkibz_full, kibz_full, wtk_full, nkbz_full, kbz_full)
+
+     nstar_fail = 0
+     do spin=1,dtset%nsppol
+       do ikbz=1,nkbz_full
+         call dmats%check_star(spin, kbz_full(:,ikbz), [std_out], dtset%prtvol, ierr)
+         if (ierr /= 0) then
+           nstar_fail = nstar_fail + 1
+           call wrtout(units, sjoin("check_star FAILED for spin:", itoa(spin), &
+                       ", kbz:", ktoa(kbz_full(:,ikbz)), ", ierr:", itoa(ierr)))
+         end if
+       end do
+     end do
+     call wrtout(units, sjoin("check_star: tested", itoa(nkbz_full * dtset%nsppol), &
+                 "(k,spin) points in the full BZ, failures:", itoa(nstar_fail)))
+
+     ABI_FREE(kibz_full)
+     ABI_FREE(wtk_full)
+     ABI_FREE(kbz_full)
    end if
    call dmats%free()
 

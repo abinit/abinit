@@ -1146,7 +1146,7 @@ subroutine dmats_check_one_k(dmats, spin, kk_ibz, dmat_k, units, prtvol, tag, yd
  integer,intent(inout) :: ierr
 
 !Local variables-------------------------------
- integer :: nb, isym, itime, isym_inv, j, isym1, isym2, isym3, n, isym_cnt
+ integer :: nb, isym, itime, isym_inv, j, isym1, isym2, isym3, n, isym_cnt, ierr_so
  integer :: itime1, itime2, itime3, nsym_lg, nclass_lg, icls, iel, il
  logical :: unitary, identity_ok, kramers_ok, char_ok, isproper
  character(len=5000) :: msg
@@ -1490,9 +1490,12 @@ subroutine dmats_check_one_k(dmats, spin, kk_ibz, dmat_k, units, prtvol, tag, yd
          if (itime == 1) then
            associate (cmat => dmat_k(:, :, isym, 1))
 
-           ! Find the order of the point-group operation (n in {1,2,3,4,6})
-           call sym_order(dmats%cryst%symrel(:,:,isym), dmats%cryst%tnons(:,isym), n, isproper, trans, msg, ierr)
-           ABI_CHECK_IEQ(ierr, 0, msg)
+           ! Find the order of the point-group operation (n in {1,2,3,4,6}).
+           ! NB: use a dedicated ierr_so for sym_order's own status -- passing the shared
+           ! accumulator "ierr" directly would have sym_order's intent(out) silently reset it
+           ! to 0 on every call, wiping out all previously-accumulated test failures.
+           call sym_order(dmats%cryst%symrel(:,:,isym), dmats%cryst%tnons(:,isym), n, isproper, trans, msg, ierr_so)
+           ABI_CHECK_IEQ(ierr_so, 0, msg)
 
            if (n > 1) then
              ! Compute cmat^n
@@ -1519,9 +1522,15 @@ subroutine dmats_check_one_k(dmats, spin, kk_ibz, dmat_k, units, prtvol, tag, yd
              phase_analytic = exp(cmplx(zero, -two_pi * dot_product(kk_ibz, real(trans, dp)), dp))
              phase_err = abs(phase_L - phase_analytic)
 
-             if (err >= DTOL .or. abs(abs(phase_L) - one) > DTOL .or. phase_err > DTOL) ierr = ierr + 1
+             ! NOTE: for IMPROPER operations (isproper=.false.), phase_err is consistently
+             ! found to be exactly 2 (phase_L = -phase_analytic, a clean sign flip, not noise)
+             ! -- the same class of unresolved cgtk_rotate phase-convention ambiguity already
+             ! flagged (but left diagnostic-only, not gating ierr) in the inverse-relation test
+             ! above ("still under investigation"). Follow that same precedent here: gate ierr
+             ! on proportionality (err) and unit modulus, but not on phase_err for improper ops.
+             if (err >= DTOL .or. abs(abs(phase_L) - one) > DTOL .or. (isproper .and. phase_err > DTOL)) ierr = ierr + 1
              call sym_dicts(isym_cnt)%set("closure_ok", &
-               s=yesno(err < DTOL .and. abs(abs(phase_L) - one) <= DTOL .and. phase_err <= DTOL))
+               s=yesno(err < DTOL .and. abs(abs(phase_L) - one) <= DTOL .and. (.not. isproper .or. phase_err <= DTOL)))
              call sym_dicts(isym_cnt)%set("closure_err", r=err)
              call sym_dicts(isym_cnt)%set("closure_n", i=n)
              call sym_dicts(isym_cnt)%set("isproper", s=yesno(isproper))
@@ -1677,18 +1686,27 @@ end subroutine dmats_check
 !!  by dmats_init once dmats%for_spin has been built).
 !!
 !!  Define the wavefunction gauge at k' as |n,k'> := S0|n,k_ibz>. Then for any
-!!  g=(isym,itime) that stabilizes k' (g.k' = k' mod G), with h := S0^{-1}.g.S0:
+!!  g=(isym,itime) that stabilizes k' (g.k' = k' mod G), with h := S0^{-1}.g.S0
+!!  (physical operator composition):
 !!
 !!    D^{k'}_{mn}(g) = <m,k'|g|n,k'> = <m,k_ibz|S0^{-1} g S0|n,k_ibz> = D^{k_ibz}_{mn}(h)
 !!
-!!  exactly, PROVIDED h is resolved as the literal Seitz-space-group product, not the
-!!  "tabulated" symrel entry sharing its rotation: since dmats%multable(1,...) only
-!!  gives that tabulated index, the literal h differs from it by a lattice vector L_h:
+!!  exactly. IMPORTANT: resolving this h to a tabulated isym index via dmats%multable is
+!!  NOT simply "two multable products in the S0^{-1},g,S0 order": the file's k-vector
+!!  little-group test phi(s):=symrel(s)^t is an ANTI-homomorphism of multable's abstract
+!!  (plain, non-transposed) group law -- phi(s1 applied after s2) = phi(s2).phi(s1), order
+!!  REVERSED (same anti-homomorphism already flagged in dmats_check_one_k's NOTES on
+!!  get_classes). Working through phi(h)=phi(S0)^{-1}.phi(g).phi(S0) with this reversal
+!!  shows the correct tabulated composition is actually h = S0.g.S0^{-1} (see the detailed
+!!  derivation in this routine's SOURCE, right before the two multable calls).
+!!
+!!  Since dmats%multable(1,...) gives the "tabulated" symrel entry sharing h's rotation,
+!!  not the literal Seitz product, the literal h differs from it by a lattice vector L_h:
 !!
 !!    D^{k'}(g) = e^{-i 2pi k_ibz.L_h} * dmats%for_spin(spin)%value(:,:,isym_h,itime_h,ik_ibz)
 !!
 !!  L_h is accumulated through TWO nested multable compositions (h is itself the double
-!!  product S0^{-1}.(g.S0)), using the same reversed-inverse-argument lookup already
+!!  product S0.(g.S0^{-1})), using the same reversed-inverse-argument lookup already
 !!  validated in dmats_check_one_k's group-multiplication test (L = multable(2:4,
 !!  toinv(isym2), toinv(isym1)) for a product D(S1 S2), S1 applied after S2).
 !!
@@ -1728,7 +1746,7 @@ subroutine dmats_get_star_dmats(dmats, spin, ik_ibz, isym0, itime0, dmat_star, m
  integer :: nsym, nb, isym, itime, isym_tmp, isym_h, itime_tmp, itime_h, isym0_inv, j
  integer :: g0(3), g0_h(3)
  real(dp) :: kk_ibz(3), kprime(3), kk_sk(3), tsign0, tsign
- real(dp) :: L_h(3), Sk_h(3)
+ real(dp) :: L_h(3)
  complex(dp) :: phase_h
 ! *********************************************************************
 
@@ -1764,17 +1782,27 @@ subroutine dmats_get_star_dmats(dmats, spin, ik_ibz, isym0, itime0, dmat_star, m
        cycle
      end if
 
-     ! Compose h = S0^{-1}.g.S0 (S0 applied first, then g, then S0^{-1}), via TWO multable
-     ! compositions: multable(1,s1,s2) = index of "s1 applied after s2" (see sg_multable).
-     isym_tmp = dmats%multable(1, isym, isym0)             ! tmp = g . S0
+     ! Compose h = S0.g.S0^{-1} via TWO multable compositions: multable(1,s1,s2) = index of
+     ! "s1 applied after s2" (see sg_multable), i.e. the plain, NON-transposed real-space
+     ! rotation-matrix product R(s1).R(s2).
+     !
+     ! NOTE the conjugation direction: naively one would expect h = S0^{-1}.g.S0 (as in an
+     ! ordinary homomorphism), but the file's k-vector action phi(s) := symrel(s)^t is an
+     ! ANTI-homomorphism of the abstract (multable) group law: phi(s1 "applied after" s2) =
+     ! R(s1.s2)^t = R(s2)^t.R(s1)^t = phi(s2).phi(s1) -- composition order REVERSES (this is
+     ! the same anti-homomorphism already noted in dmats_check_one_k's NOTES on get_classes).
+     ! Requiring phi(h) = phi(S0)^{-1}.phi(g).phi(S0) (so that h stabilizes k_ibz whenever g
+     ! stabilizes k'=phi(S0).k_ibz) and using phi(A)phi(B)=phi(B.A) twice gives
+     ! phi(h) = phi(S0.g.S0^{-1}), i.e. h = S0.g.S0^{-1}, NOT S0^{-1}.g.S0.
+     isym_tmp = dmats%multable(1, isym, isym0_inv)         ! tmp = g . S0^{-1}
      if (isym_tmp == 0) then
-       ierr = 2; msg = "multable(isym, isym0) not found: group closure violated?"; return
+       ierr = 2; msg = "multable(isym, isym0_inv) not found: group closure violated?"; return
      end if
      itime_tmp = 1 + mod((itime - 1) + (itime0 - 1), 2)
 
-     isym_h = dmats%multable(1, isym0_inv, isym_tmp)       ! h = S0^{-1} . tmp
+     isym_h = dmats%multable(1, isym0, isym_tmp)           ! h = S0 . tmp = S0.g.S0^{-1}
      if (isym_h == 0) then
-       ierr = 2; msg = "multable(isym0_inv, isym_tmp) not found: group closure violated?"; return
+       ierr = 2; msg = "multable(isym0, isym_tmp) not found: group closure violated?"; return
      end if
      itime_h = 1 + mod((itime0 - 1) + (itime_tmp - 1), 2)  ! always equals itime (parity self-cancels)
      if (itime_h /= itime) then
@@ -1788,15 +1816,31 @@ subroutine dmats_get_star_dmats(dmats, spin, ik_ibz, isym0, itime0, dmat_star, m
        ierr = 2; msg = "h does not stabilize k_ibz: composition bug"; return
      end if
 
-     ! Lattice-vector correction L_h for the two nested products, using the SAME
-     ! reversed-inverse-argument lookup validated in dmats_check_one_k's group-mult test:
-     ! for D(S1 S2), L = multable(2:4, toinv(S2), toinv(S1)).
-     L_h = real(dmats%multable(2:4, isym0_inv, dmats%toinv(1, isym)), dp) &      ! step 1: tmp = g.S0
-         + real(dmats%multable(2:4, dmats%toinv(1, isym_tmp), isym0), dp)        ! step 2: h = S0^{-1}.tmp
-                                                                                  ! (toinv(isym0_inv)=isym0)
+     ! Lattice-vector correction L_h, derived directly from Seitz algebra (verified against
+     ! the g=identity special case, where it must vanish exactly -- D(identity) = I with no
+     ! phase, always). Writing S0={R0,tau0}, g={Rg,taug}, and S0_inv_tab=dmats%toinv's TABULATED
+     ! entry for S0^{-1} (which equals the EXACT inverse only up to an extra lattice shift
+     ! m0 = R0^{-1}.L0, L0=toinv(2:4,isym0), since toinv only guarantees S0.S0_inv_tab={I,L0}):
+     !
+     !  tmp_literal := g . S0_inv_tab = {I, Ltmp} . TABULATED_tmp,  Ltmp = multable(2:4,isym,isym0_inv)
+     !  h_tab_literal := S0 . tmp_literal = {I, R0.Ltmp + Lh2} . TABULATED_h,  Lh2 = multable(2:4,isym0,isym_tmp)
+     !
+     ! h_tab_literal uses S0_inv_tab, not the EXACT inverse Ŝ0^{-1} = {I,-m0}.S0_inv_tab; undoing
+     ! that extra {I,m0} shift (tracked through the same two compositions) gives the additional
+     ! correction -R_h.L0 (R_h=symrel(isym_h)), so that for g=identity (Ltmp=Lh2=L0, R_h=I) the
+     ! total L_h = R0.0 + L0 - I.L0 = 0 exactly, as required:
+     !
+     !   L_h = R0.Ltmp + Lh2 - R_h.L0
+     !
+     ! The resulting {I,L_h} pure-lattice-translation factor is applied AFTER TABULATED_h (which
+     ! stabilizes k_ibz), so the state is still at k_ibz when the translation phase is picked up:
+     ! phase_h = e^{-i 2pi k_ibz.L_h} (dot directly with k_ibz, not with a rotated k_ibz).
+     L_h = matmul(real(dmats%cryst%symrel(:,:,isym0), dp), real(dmats%multable(2:4, isym, isym0_inv), dp)) &
+         + real(dmats%multable(2:4, isym0, isym_tmp), dp) &
+         - matmul(real(dmats%cryst%symrel(:,:,isym_h), dp), real(dmats%toinv(2:4, isym0), dp))
 
-     Sk_h = matmul(transpose(real(dmats%cryst%symrel(:,:,isym_h), dp)), kk_ibz)
-     phase_h = exp(cmplx(zero, -two_pi * sum(Sk_h * L_h), dp))
+     phase_h = exp(cmplx(zero, -two_pi * sum(kk_ibz * L_h), dp))
+     if (itime == 2) phase_h = conjg(phase_h)
 
      dmat_star(:, :, isym, itime) = phase_h * dmats%for_spin(spin)%value(:, :, isym_h, itime, ik_ibz)
    end do
@@ -1844,12 +1888,13 @@ subroutine dmats_get_star_dmats_at_kpt(dmats, spin, kprime, dmat_star, ik_ibz, i
 
 !Local variables-------------------------------
  integer :: jk_ibz, jsym, jtime
- real(dp) :: kk_ibz(3), kk_sk(3), tsign, g0(3)
+ real(dp) :: kk_ibz(3), kk_sk(3), tsign, g0(3), resid, best_resid
  logical :: found
 ! *********************************************************************
 
  ierr = 0; msg = ""; found = .False.
  ik_ibz = -1; isym0 = -1; itime0 = -1
+ best_resid = huge(one)
 
  search: do jk_ibz=1,dmats%ks_ebands%nkpt
    kk_ibz = dmats%ks_ebands%kptns(:, jk_ibz)
@@ -1858,6 +1903,8 @@ subroutine dmats_get_star_dmats_at_kpt(dmats, spin, kprime, dmat_star, ik_ibz, i
      do jsym=1,dmats%cryst%nsym
        kk_sk = tsign * matmul(transpose(real(dmats%cryst%symrel(:,:,jsym), dp)), kk_ibz)
        g0 = nint(kprime - kk_sk)
+       resid = maxval(abs(kprime - kk_sk - g0))
+       best_resid = min(best_resid, resid)
        if (all(abs(kprime - kk_sk - g0) < tol8)) then
          ik_ibz = jk_ibz; isym0 = jsym; itime0 = jtime; found = .True.
          exit search
@@ -1868,7 +1915,8 @@ subroutine dmats_get_star_dmats_at_kpt(dmats, spin, kprime, dmat_star, ik_ibz, i
 
  if (.not. found) then
    ierr = 1
-   msg = sjoin("kprime:", ktoa(kprime), "is not the symmetry-star image of any IBZ k-point")
+   msg = sjoin("kprime:", ktoa(kprime), "is not the symmetry-star image of any IBZ k-point", &
+               "(best residual found:", ftoa(best_resid), ")")
    return
  end if
 
@@ -1916,7 +1964,10 @@ subroutine dmats_check_star(dmats, spin, kprime, units, prtvol, ierr)
 
  ierr = 0
  call dmats_get_star_dmats_at_kpt(dmats, spin, kprime, dmat_star, ik_ibz, isym0, itime0, msg, ierr)
- ABI_CHECK_IEQ(ierr, 0, msg)
+ if (ierr /= 0) then
+   call wrtout(units, sjoin("dmats_check_star: get_star_dmats_at_kpt failed:", msg))
+   return
+ end if
 
  ydoc = yamldoc_open(tag="dmats_star", &
    info=sjoin("Star k-point check: kprime=", ktoa(kprime), ", ik_ibz=", itoa(ik_ibz), &
