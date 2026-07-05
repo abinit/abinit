@@ -73,6 +73,7 @@ ndtset 3     jdtset 1 2 3
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% [files]
 #%% files_to_test =
 #%%   t64.abo, tolnlines = 30, tolabs = 1.0e-5, tolrel = 3.0e-4, fld_options = -easy
