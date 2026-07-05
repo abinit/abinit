@@ -265,7 +265,7 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
  integer :: cplex_,ia,ijlmn,ilm,ilmn,i0lmn,iln,index_enl,iphase,ispinor,ispinor_index,idat
  integer :: jlm,j0lmn,jjlmn,jlmn,jspinor,mu,shift,ii
  integer :: ll_so,klm_so,lmax_so,nlmso,sign_so
- real(dp) :: ekb_so,ls_uu_im,ls_ud_re,ls_ud_im
+ real(dp) :: ekb_so_1,ekb_so_2,ls_uu_im,ls_ud_re,ls_ud_im
 !arrays
  real(dp) :: enl_(2),gxfi(2),gxi(cplex),gxj(cplex)
  real(dp), ABI_CONTIGUOUS pointer :: d2gxdtfac_(:,:,:,:,:),dgxdtfac_(:,:,:,:,:),gxfac_(:,:,:,:)
@@ -274,13 +274,9 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
 
 ! *************************************************************************
 
- !if (nspinor==2) then
- !  ABI_ERROR('nspinor=2 not yet allowed with GPU !')
- !end if
-
- !if (nspinortot==2) then
- !  ABI_ERROR('nspinortot=2 not yet allowed with GPU !')
- !end if
+ if (gpu_option/=ABI_GPU_DISABLED.and.mpi_enreg%paral_spinor==1) then
+   ABI_ERROR('parallelization over spinors (npspinor=2) not allowed with GPU!')
+ end if
 
  ABI_UNUSED(iend)
  ABI_UNUSED(d2gxdt)
@@ -324,105 +320,130 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
      end if
    end if
  end if
+ if (paw_opt==0.and.mpi_enreg%paral_spinor==1.and.lmax_so>0) then
+   ABI_ERROR('parallelization over spinors, spin-orbit and norm-conserving psps not implemented!')
+ end if
 
 
 !Accumulate gxfac related to non-local operator (Norm-conserving)
 !-------------------------------------------------------------------
-  if (paw_opt==0) then
-   !Enl is E(Kleinman-Bylander)
+ if (paw_opt==0) then
+
+!Enl is E(Kleinman-Bylander)
    ABI_CHECK(cplex_enl/=2,"BUG: invalid cplex_enl=2!")
    ABI_CHECK(cplex_fac==cplex,"BUG: invalid cplex_fac/=cplex!")
+
+   if (lmax_so == 0) then
+
+!    NC+SR ---
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET TEAMS DISTRIBUTE &
-   !$OMP& MAP(to:gxfac_,gx,enl_ptr2,indlmn) &
-   !$OMP& PRIVATE(idat,ispinor) &
-   !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+     !$OMP TARGET TEAMS DISTRIBUTE &
+     !$OMP& MAP(to:gxfac_,gx,enl_ptr2,indlmn) &
+     !$OMP& PRIVATE(idat,ispinor) &
+     !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-   do idat=1,ndat
-   do ispinor=1,nspinor
-     !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(ia,ilmn,iln,ii)
-     do ia=1,nincat
-       do ilmn=1,nlmn
-         do ii=1,cplex
-           if (indlmn(6,ilmn)==2) then
-             ! NC+SO: zero SR entry; SO coupling added below
-             gxfac_(ii,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat) = zero
-           else
-             iln=indlmn(5,ilmn)
-             gxfac_(ii,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)=&
-             & enl_ptr2(iln,itypat,ispinor+shift,min(ndat_enl,idat))*gx(ii,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)
-           end if
+     do idat=1,ndat
+       do ispinor=1,nspinor
+         !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(ia,ilmn,iln,ii)
+         do ia=1,nincat
+           do ilmn=1,nlmn
+             do ii=1,cplex
+               if (indlmn(6,ilmn)==2) then
+                 gxfac_(ii,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat) = zero
+               else
+                 iln = indlmn(5,ilmn)
+                 gxfac_(ii,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)=&
+&                  enl_ptr2(iln,itypat,ispinor+shift,min(ndat_enl,idat))*gx(ii,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)
+               end if
+             end do
+           end do
          end do
        end do
      end do
-   end do
-   end do
-  end if
 
-! NC+SO: real-Ylm L.S coupling ---
-  if (lmax_so > 0) then
+   else
+
+!    NC+SR+SO: real-Ylm L.S coupling ---
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET TEAMS DISTRIBUTE &
-     !$OMP& MAP(to:gxfac_,gx,indlmn,enl_ptr2,ls_ylm_so_) &
+     !$OMP& MAP(to:gxfac_,gx,enl_ptr2,indlmn,ls_ylm_so_) &
      !$OMP& PRIVATE(idat) &
      !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
      do idat=1,ndat
        !$OMP PARALLEL DO COLLAPSE(2) &
-       !$OMP& PRIVATE(ia,ilmn,iln,ekb_so,ll_so,ilm,jlmn,jlm,klm_so,sign_so,ls_uu_im,ls_ud_re,ls_ud_im)
+       !$OMP& PRIVATE(ia,ilmn,iln,ekb_so_1,ekb_so_2,ll_so,ilm,jlmn,jlm,klm_so,sign_so,ls_uu_im,ls_ud_re,ls_ud_im)
        do ia=1,nincat
          do ilmn=1,nlmn
-           if (indlmn(6,ilmn)/=2) cycle
-           iln    = indlmn(5,ilmn)
-           ekb_so = enl_ptr2(iln,itypat,1,min(ndat_enl,idat))
-           if (abs(ekb_so)<tol16) cycle
-           ll_so = indlmn(1,ilmn)
-           ilm   = indlmn(4,ilmn)
-           do jlmn=1,nlmn
-             if (indlmn(6,jlmn)/=2)              cycle
-             if (indlmn(1,jlmn)/=ll_so)           cycle
-             if (indlmn(3,jlmn)/=indlmn(3,ilmn)) cycle
-             jlm = indlmn(4,jlmn)
-             if (ilm<=jlm) then
-               klm_so  = jlm*(jlm-1)/2 + ilm
-               sign_so = 1
-             else
-               klm_so  = ilm*(ilm-1)/2 + jlm
-               sign_so = -1
-             end if
-             ls_uu_im = sign_so * ls_ylm_so_(2,klm_so,1)
-             ls_ud_re = sign_so * ls_ylm_so_(1,klm_so,2)
-             ls_ud_im = sign_so * ls_ylm_so_(2,klm_so,2)
-             ! up-up
-             gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,1,idat)=gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,1,idat) &
-&              - ekb_so*ls_uu_im*gx(2,jlmn+(ia-1)*nlmn+ibeg,1,idat)
-             gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,1,idat)=gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,1,idat) &
-&              + ekb_so*ls_uu_im*gx(1,jlmn+(ia-1)*nlmn+ibeg,1,idat)
-             ! up-dn
-             gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,1,idat)=gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,1,idat) &
-&              + ekb_so*(ls_ud_re*gx(1,jlmn+(ia-1)*nlmn+ibeg,2,idat) - ls_ud_im*gx(2,jlmn+(ia-1)*nlmn+ibeg,2,idat))
-             gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,1,idat)=gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,1,idat) &
-&              + ekb_so*(ls_ud_re*gx(2,jlmn+(ia-1)*nlmn+ibeg,2,idat) + ls_ud_im*gx(1,jlmn+(ia-1)*nlmn+ibeg,2,idat))
-             ! dn-up
-             gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,2,idat)=gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,2,idat) &
-&              + ekb_so*(-ls_ud_re*gx(1,jlmn+(ia-1)*nlmn+ibeg,1,idat) - ls_ud_im*gx(2,jlmn+(ia-1)*nlmn+ibeg,1,idat))
-             gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,2,idat)=gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,2,idat) &
-&              + ekb_so*(-ls_ud_re*gx(2,jlmn+(ia-1)*nlmn+ibeg,1,idat) + ls_ud_im*gx(1,jlmn+(ia-1)*nlmn+ibeg,1,idat))
-             ! dn-dn
-             gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,2,idat)=gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,2,idat) &
-&              + ekb_so*ls_uu_im*gx(2,jlmn+(ia-1)*nlmn+ibeg,2,idat)
-             gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,2,idat)=gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,2,idat) &
-&              - ekb_so*ls_uu_im*gx(1,jlmn+(ia-1)*nlmn+ibeg,2,idat)
-           end do ! jlmn
+           iln = indlmn(5,ilmn)
+ 
+           if (indlmn(6,ilmn)/=2) then
+             ekb_so_1 = enl_ptr2(iln,itypat,1,min(ndat_enl,idat))
+             ekb_so_2 = enl_ptr2(iln,itypat,2,min(ndat_enl,idat))
+             gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,1,idat)=ekb_so_1*gx(1,ilmn+(ia-1)*nlmn+ibeg,1,idat)
+             gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,1,idat)=ekb_so_1*gx(2,ilmn+(ia-1)*nlmn+ibeg,1,idat)
+             gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,2,idat)=ekb_so_2*gx(1,ilmn+(ia-1)*nlmn+ibeg,2,idat)
+             gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,2,idat)=ekb_so_2*gx(2,ilmn+(ia-1)*nlmn+ibeg,2,idat)
+
+           else
+             gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,1,idat) = zero
+             gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,1,idat) = zero
+             gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,2,idat) = zero
+             gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,2,idat) = zero
+
+             ekb_so_1 = enl_ptr2(iln,itypat,1,min(ndat_enl,idat))
+             if (abs(ekb_so_1)<tol16) cycle
+             ll_so = indlmn(1,ilmn)
+             ilm   = indlmn(4,ilmn)
+             do jlmn=1,nlmn
+               if (indlmn(6,jlmn)/=2) cycle
+               if (indlmn(1,jlmn)/=ll_so) cycle
+               if (indlmn(3,jlmn)/=indlmn(3,ilmn)) cycle
+               jlm = indlmn(4,jlmn)
+               if (ilm<=jlm) then
+                 klm_so  = jlm*(jlm-1)/2 + ilm
+                 sign_so = 1
+               else
+                 klm_so  = ilm*(ilm-1)/2 + jlm
+                 sign_so = -1
+               end if
+               ls_uu_im = sign_so * ls_ylm_so_(2,klm_so,1)
+               ls_ud_re = sign_so * ls_ylm_so_(1,klm_so,2)
+               ls_ud_im = sign_so * ls_ylm_so_(2,klm_so,2)
+
+               ! up-up
+               gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,1,idat)=gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,1,idat) &
+&                 - ekb_so_1*ls_uu_im*gx(2,jlmn+(ia-1)*nlmn+ibeg,1,idat)
+               gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,1,idat)=gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,1,idat) &
+&                 + ekb_so_1*ls_uu_im*gx(1,jlmn+(ia-1)*nlmn+ibeg,1,idat)
+               ! up-dn
+               gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,1,idat)=gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,1,idat) &
+&                 + ekb_so_1*(ls_ud_re*gx(1,jlmn+(ia-1)*nlmn+ibeg,2,idat) - ls_ud_im*gx(2,jlmn+(ia-1)*nlmn+ibeg,2,idat))
+               gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,1,idat)=gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,1,idat) &
+&                 + ekb_so_1*(ls_ud_re*gx(2,jlmn+(ia-1)*nlmn+ibeg,2,idat) + ls_ud_im*gx(1,jlmn+(ia-1)*nlmn+ibeg,2,idat))
+               ! dn-up
+               gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,2,idat)=gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,2,idat) &
+&                 + ekb_so_1*(-ls_ud_re*gx(1,jlmn+(ia-1)*nlmn+ibeg,1,idat) - ls_ud_im*gx(2,jlmn+(ia-1)*nlmn+ibeg,1,idat))
+               gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,2,idat)=gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,2,idat) &
+&                 + ekb_so_1*(-ls_ud_re*gx(2,jlmn+(ia-1)*nlmn+ibeg,1,idat) + ls_ud_im*gx(1,jlmn+(ia-1)*nlmn+ibeg,1,idat))
+               ! dn-dn
+               gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,2,idat)=gxfac_(1,ilmn+(ia-1)*nlmn+ibeg,2,idat) &
+&                 + ekb_so_1*ls_uu_im*gx(2,jlmn+(ia-1)*nlmn+ibeg,2,idat)
+               gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,2,idat)=gxfac_(2,ilmn+(ia-1)*nlmn+ibeg,2,idat) &
+&                 - ekb_so_1*ls_uu_im*gx(1,jlmn+(ia-1)*nlmn+ibeg,2,idat)
+             end do ! jlmn
+           end if ! indlmn(:,6)==2
          end do ! ilmn
        end do ! ia
        !$OMP END PARALLEL DO
+
      end do ! idat
-  end if ! NC+SO gxfac
+   end if ! NC+SO
+ end if ! NC
 
 !Accumulate gxfac related to nonlocal operator (PAW)
 !-------------------------------------------------------------------
-  if (paw_opt==1.or.paw_opt==2.or.paw_opt==4) then
+ if (paw_opt==1.or.paw_opt==2.or.paw_opt==4) then
    !Enl is psp strength Dij or (Dij-lambda.Sij)
 
 !  === Diagonal term(s) (up-up, down-down)
@@ -832,102 +853,132 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
 
 !Accumulate dgxdtfac related to nonlocal operator (Norm-conserving)
 !-------------------------------------------------------------------
-  if (optder>=1.and.paw_opt==0) then
+ if (optder>=1.and.paw_opt==0) then
    !Enl is E(Kleinman-Bylander)
    ABI_CHECK(cplex_enl==1,"BUG: invalid cplex_enl/=1!")
    ABI_CHECK(cplex_fac==cplex,"BUG: invalid cplex_fac/=cplex!")
+
+   if (lmax_so == 0) then
+
+!    NC+SR ---
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-   !$OMP& MAP(to:dgxdtfac_,enl_ptr2,atindx1,dgxdt,indlmn) &
-   !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,ilmn,ijlmn) &
-   !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+     !$OMP TARGET TEAMS DISTRIBUTE &
+     !$OMP& MAP(to:dgxdtfac_,dgxdt,enl_ptr2,indlmn) &
+     !$OMP& PRIVATE(idat,ispinor,ispinor_index) &
+     !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-   do idat=1,ndat
-   do ispinor=1,nspinor
-     ispinor_index = ispinor + shift
-     !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(ia,ilmn,mu,ii)
-     do ia=1,nincat
-       do ilmn=1,nlmn
-         do mu=1,ndgxdtfac
-           do ii=1,cplex
-             if (indlmn(6,ilmn)==2) then
-               ! NC+SO: zero SR entry; SO coupling added below
-               dgxdtfac_(ii,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat) = zero
-             else
-               dgxdtfac_(ii,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)=&
-               &    enl_ptr2(indlmn(5,ilmn),itypat,ispinor_index,min(ndat_enl,idat))&
-               &    * dgxdt(ii,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)
-             end if
+     do idat=1,ndat
+       do ispinor=1,nspinor
+         ispinor_index = ispinor + shift
+         !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(ia,ilmn,mu,ii)
+         do ia=1,nincat
+           do ilmn=1,nlmn
+             do mu=1,ndgxdtfac
+               do ii=1,cplex
+                 if (indlmn(6,ilmn)==2) then
+                   dgxdtfac_(ii,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat) = zero
+                 else
+                   dgxdtfac_(ii,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)=&
+&                    enl_ptr2(indlmn(5,ilmn),itypat,ispinor_index,min(ndat_enl,idat)) &
+&                   *dgxdt(ii,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)
+                 end if
+               end do
+             end do
            end do
          end do
        end do
      end do
-   end do
-   end do
-  end if
 
-! NC+SO derivative: real-Ylm L.S coupling ---
-  if (optder>=1.and.lmax_so > 0) then
+   else
+
+!    NC+SR+SO: real-Ylm L.S coupling ---
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET TEAMS DISTRIBUTE &
-     !$OMP& MAP(to:dgxdtfac_,dgxdt,indlmn,enl_ptr2,ls_ylm_so_) &
+     !$OMP& MAP(to:dgxdtfac_,dgxdt,enl_ptr2,indlmn,ls_ylm_so_) &
      !$OMP& PRIVATE(idat) &
      !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
      do idat=1,ndat
        !$OMP PARALLEL DO COLLAPSE(2) &
-       !$OMP& PRIVATE(ia,ilmn,iln,ekb_so,ll_so,ilm,jlmn,jlm,klm_so,sign_so,ls_uu_im,ls_ud_re,ls_ud_im,mu)
+       !$OMP& PRIVATE(ia,ilmn,iln,ekb_so_1,ekb_so_2,ll_so,ilm,iln,jlmn,jlm,klm_so,sign_so,ls_uu_im,ls_ud_re,ls_ud_im,mu)
        do ia=1,nincat
          do ilmn=1,nlmn
-           if (indlmn(6,ilmn)/=2) cycle
-           iln    = indlmn(5,ilmn)
-           ekb_so = enl_ptr2(iln,itypat,1,min(ndat_enl,idat))
-           if (abs(ekb_so)<tol16) cycle
-           ll_so = indlmn(1,ilmn)
-           ilm   = indlmn(4,ilmn)
-           do jlmn=1,nlmn
-             if (indlmn(6,jlmn)/=2)              cycle
-             if (indlmn(1,jlmn)/=ll_so)           cycle
-             if (indlmn(3,jlmn)/=indlmn(3,ilmn)) cycle
-             jlm = indlmn(4,jlmn)
-             if (ilm<=jlm) then
-               klm_so  = jlm*(jlm-1)/2 + ilm
-               sign_so = 1
-             else
-               klm_so  = ilm*(ilm-1)/2 + jlm
-               sign_so = -1
-             end if
-             ls_uu_im = sign_so * ls_ylm_so_(2,klm_so,1)
-             ls_ud_re = sign_so * ls_ylm_so_(1,klm_so,2)
-             ls_ud_im = sign_so * ls_ylm_so_(2,klm_so,2)
+           iln = indlmn(5,ilmn)
+ 
+           if (indlmn(6,ilmn)/=2) then
+             ekb_so_1 = enl_ptr2(iln,itypat,1,min(ndat_enl,idat))
+             ekb_so_2 = enl_ptr2(iln,itypat,2,min(ndat_enl,idat))
              do mu=1,ndgxdtfac
-               ! up-up
-               dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat)=dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat) &
-&                - ekb_so*ls_uu_im*dgxdt(2,mu,jlmn+(ia-1)*nlmn+ibeg,1,idat)
-               dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat)=dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat) &
-&                + ekb_so*ls_uu_im*dgxdt(1,mu,jlmn+(ia-1)*nlmn+ibeg,1,idat)
-               ! up-dn
-               dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat)=dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat) &
-&                + ekb_so*(ls_ud_re*dgxdt(1,mu,jlmn+(ia-1)*nlmn+ibeg,2,idat) - ls_ud_im*dgxdt(2,mu,jlmn+(ia-1)*nlmn+ibeg,2,idat))
-               dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat)=dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat) &
-&                + ekb_so*(ls_ud_re*dgxdt(2,mu,jlmn+(ia-1)*nlmn+ibeg,2,idat) + ls_ud_im*dgxdt(1,mu,jlmn+(ia-1)*nlmn+ibeg,2,idat))
-               ! dn-up
-               dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat)=dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat) &
-&                + ekb_so*(-ls_ud_re*dgxdt(1,mu,jlmn+(ia-1)*nlmn+ibeg,1,idat) - ls_ud_im*dgxdt(2,mu,jlmn+(ia-1)*nlmn+ibeg,1,idat))
-               dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat)=dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat) &
-&                + ekb_so*(-ls_ud_re*dgxdt(2,mu,jlmn+(ia-1)*nlmn+ibeg,1,idat) + ls_ud_im*dgxdt(1,mu,jlmn+(ia-1)*nlmn+ibeg,1,idat))
-               ! dn-dn
-               dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat)=dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat) &
-&                + ekb_so*ls_uu_im*dgxdt(2,mu,jlmn+(ia-1)*nlmn+ibeg,2,idat)
-               dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat)=dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat) &
-&                - ekb_so*ls_uu_im*dgxdt(1,mu,jlmn+(ia-1)*nlmn+ibeg,2,idat)
-             end do ! mu
-           end do ! jlmn
+               dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat)= &
+&                    ekb_so_1*dgxdt(1,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat)
+               dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat)= &
+&                    ekb_so_1*dgxdt(2,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat)
+               dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat)= &
+&                    ekb_so_2*dgxdt(1,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat)
+               dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat)= &
+&                    ekb_so_2*dgxdt(2,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat)
+             end do
+
+           else
+
+             do mu=1,ndgxdtfac
+               dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat) = zero
+               dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat) = zero
+               dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat) = zero
+               dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat) = zero
+             end do
+
+             ekb_so_1 = enl_ptr2(iln,itypat,1,min(ndat_enl,idat))
+             if (abs(ekb_so_1)<tol16) cycle
+             ll_so = indlmn(1,ilmn)
+             ilm   = indlmn(4,ilmn)
+             do jlmn=1,nlmn
+               if (indlmn(6,jlmn)/=2) cycle
+               if (indlmn(1,jlmn)/=ll_so) cycle
+               if (indlmn(3,jlmn)/=indlmn(3,ilmn)) cycle
+               jlm = indlmn(4,jlmn)
+               if (ilm<=jlm) then
+                 klm_so  = jlm*(jlm-1)/2 + ilm
+                 sign_so = 1
+               else
+                 klm_so  = ilm*(ilm-1)/2 + jlm
+                 sign_so = -1
+               end if
+               ls_uu_im = sign_so * ls_ylm_so_(2,klm_so,1)
+               ls_ud_re = sign_so * ls_ylm_so_(1,klm_so,2)
+               ls_ud_im = sign_so * ls_ylm_so_(2,klm_so,2)
+
+               do mu=1,ndgxdtfac
+                 ! up-up
+                 dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat)=dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat) &
+&                  - ekb_so_1*ls_uu_im*dgxdt(2,mu,jlmn+(ia-1)*nlmn+ibeg,1,idat)
+                 dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat)=dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat) &
+&                  + ekb_so_1*ls_uu_im*dgxdt(1,mu,jlmn+(ia-1)*nlmn+ibeg,1,idat)
+                 ! up-dn
+                 dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat)=dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat) &
+&                  + ekb_so_1*(ls_ud_re*dgxdt(1,mu,jlmn+(ia-1)*nlmn+ibeg,2,idat) - ls_ud_im*dgxdt(2,mu,jlmn+(ia-1)*nlmn+ibeg,2,idat))
+                 dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat)=dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,1,idat) &
+&                  + ekb_so_1*(ls_ud_re*dgxdt(2,mu,jlmn+(ia-1)*nlmn+ibeg,2,idat) + ls_ud_im*dgxdt(1,mu,jlmn+(ia-1)*nlmn+ibeg,2,idat))
+                 ! dn-up
+                 dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat)=dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat) &
+&                  + ekb_so_1*(-ls_ud_re*dgxdt(1,mu,jlmn+(ia-1)*nlmn+ibeg,1,idat) - ls_ud_im*dgxdt(2,mu,jlmn+(ia-1)*nlmn+ibeg,1,idat))
+                 dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat)=dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat) &
+&                  + ekb_so_1*(-ls_ud_re*dgxdt(2,mu,jlmn+(ia-1)*nlmn+ibeg,1,idat) + ls_ud_im*dgxdt(1,mu,jlmn+(ia-1)*nlmn+ibeg,1,idat))
+                 ! dn-dn
+                 dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat)=dgxdtfac_(1,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat) &
+&                  + ekb_so_1*ls_uu_im*dgxdt(2,mu,jlmn+(ia-1)*nlmn+ibeg,2,idat)
+                 dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat)=dgxdtfac_(2,mu,ilmn+(ia-1)*nlmn+ibeg,2,idat) &
+&                  - ekb_so_1*ls_uu_im*dgxdt(1,mu,jlmn+(ia-1)*nlmn+ibeg,2,idat)
+               end do ! mu
+             end do ! jlmn
+           end if ! indlmn(:,6)==2
          end do ! ilmn
        end do ! ia
        !$OMP END PARALLEL DO
+
      end do ! idat
-  end if ! NC+SO dgxdtfac
+   end if ! NC+SO
+ end if ! NC
 
  if (lmax_so > 0) then
 #ifdef HAVE_OPENMP_OFFLOAD
