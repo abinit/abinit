@@ -31,6 +31,8 @@ extern "C"{
 
     many_body_op_t init_SpinOp( int nflavor, int *block_list, int *inner_list);
 
+    many_body_op_t init_MJzOp( int nflavor, int *block_list, int *inner_list);
+
     void build_dlr(int wdlr_size, int *ndlr, double *wdlr, double lam, double eps);
 }
 

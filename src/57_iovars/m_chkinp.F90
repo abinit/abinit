@@ -955,8 +955,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        cond_string(1)='dmft_triqs_basis' ; cond_values(1)=dt%dmft_triqs_basis
        call chkint_eq(0,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
      end if
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_chiloc',dt%dmft_triqs_chiloc,2,(/0,1/),iout)
-     if (dt%dmft_triqs_chiloc == 1) then
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_chiloc',dt%dmft_triqs_chiloc,3,(/0,1,2/),iout)
+     if (dt%dmft_triqs_chiloc > 0) then
        cond_string(1)='dmft_triqs_chiloc' ; cond_values(1)=dt%dmft_triqs_chiloc
        call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_chiloc_ins',dt%dmft_triqs_chiloc_ins,1,iout)
      end if        

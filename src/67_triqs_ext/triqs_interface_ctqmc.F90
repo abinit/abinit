@@ -26,7 +26,8 @@ MODULE TRIQS_CTQMC
 
       SUBROUTINE Ctqmc_triqs_run(rot_inv,leg_measure,move_shift,move_double,measure_density_matrix,time_invariance,use_norm_as_weight, &
                                & debug,integral,loc_n_min,loc_n_max,seed_a,seed_b,num_orbitals,n_tau,n_l,n_cycles,cycle_length,ntherm, &
-                               & ntherm_restart,det_init_size,det_n_operations_before_check,rank,nblocks,read_data,verbo,chiloc,chiloc_ins,beta, &
+                               & ntherm_restart,det_init_size,det_n_operations_before_check,rank,nblocks,read_data,verbo,chiloc,chiloc_ins, &
+                               & magmom,beta, &
                                & imag_threshold,det_precision_warning,det_precision_error,det_singular_threshold,lam_u,pauli_prob,chiloc_tmp, &
                                & block_list,flavor_list,inner_list,siz_list,ftau,gtau,gl,udens_cmplx,vee_cmplx,levels_cmplx,moments_self_1, &
                                & moments_self_2,occ,eu,fname_data,fname_dataw,fname_histo) bind(c)
@@ -39,7 +40,9 @@ MODULE TRIQS_CTQMC
 
       INTEGER, VALUE, INTENT(IN) :: det_init_size,det_n_operations_before_check,rank,nblocks,read_data,verbo,chiloc,chiloc_ins
 
-      REAL(KIND=8), VALUE, INTENT(IN) :: beta,imag_threshold,det_precision_warning,det_precision_error,det_singular_threshold,lam_u,pauli_prob
+      REAL(KIND=8), VALUE, INTENT(IN) :: beta,imag_threshold,det_precision_warning,det_precision_error,det_singular_threshold
+      
+      REAL(KIND=8), VALUE, INTENT(IN) :: lam_u,pauli_prob,magmom
 
       TYPE(C_PTR), VALUE, INTENT(IN) :: chiloc_tmp,block_list,flavor_list,inner_list,siz_list,ftau,gtau,gl,udens_cmplx,vee_cmplx,levels_cmplx
 

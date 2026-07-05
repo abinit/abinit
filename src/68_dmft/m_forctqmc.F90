@@ -3574,7 +3574,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  type(oper_type), target :: energy_level
  type(self_type) :: hybmwdhyb
  type(c_ptr) :: block_ptr,eu_ptr,flavor_ptr,fname_data_ptr,fname_dataw_ptr,fname_histo_ptr,ftau_ptr,gl_ptr,gtau_ptr
- type(c_ptr) :: inner_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,ndlr_ptr,occ_ptr,siz_ptr,udens_ptr,vee_ptr,wdlr_ptr,chiloc_ptr
+ type(c_ptr) :: inner_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,ndlr_ptr,occ_ptr,siz_ptr,udens_ptr,vee_ptr,wdlr_ptr
+ type(c_ptr) :: chiloc_ptr,magmom_ptr
  integer, allocatable :: flavor_list(:,:,:),nblocks(:)
  integer, target, allocatable :: block_list(:,:),flavor_tmp(:,:),inner_list(:,:),siz_block(:,:)
  real(dp), allocatable :: adlr(:,:),bdlr(:),elam_list(:),emig(:),gl_dlr_re(:),gl_dlr_im(:),jbes(:),lam_list(:)
@@ -3586,6 +3587,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  type(matlu_type), target, allocatable :: dmat_ctqmc(:),ftau(:),udens_rot(:)
  type(matlu_type), pointer :: matlu_pt(:) => null()
  type(vee_type), target, allocatable :: vee_rot(:)
+ type(coeff2c_type), allocatable :: magmom_tot(:)
+ type(matlu_type), allocatable :: matlumag_tot(:)
  character(len=1) :: tag_block4
  character(len=2) :: tag_block,tag_block3,tag_lam
  character(len=4) :: tag_at
@@ -3970,6 +3973,28 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    if (paw_dmft%dmft_triqs_chiloc > 0) then
      ABI_MALLOC(chiloc_tmp,(1:ntau,1:ntau))
      chiloc_ptr = C_LOC(chiloc_tmp)
+
+     !  == Mj values
+
+     if(basis .eq. 4) then
+     ABI_MALLOC(magmom_tot,(natom))
+     ABI_MALLOC(matlumag_tot,(natom))
+
+     !do iatom=1,natom
+     lpawu = paw_dmft%lpawu(iatom)
+     if (lpawu == -1) cycle
+       ABI_MALLOC(magmom_tot(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
+       magmom_tot(iatom)%value=czero
+    ! end do ! iatom
+
+     call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_tot)    
+     call zero_matlu(matlumag_tot,natom=1)                                                                                     
+     call magmomjmj_matlu(matlumag_tot,natom=1)                                                                                
+     call gather_matlu(matlumag_tot,magmom_tot,natom=1,option=1,prtopt=0)                                                      
+     call destroy_matlu(matlumag_tot,natom=1)                                                                                  
+     !
+     !magmom_ptr = matlumag_tot 
+     end if 
    end if
 
    write(tag_at,'(i4)') iatom
@@ -4167,7 +4192,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
                         & paw_dmft%dmft_triqs_n_cycles,paw_dmft%dmftctqmc_meas,paw_dmft%dmftqmc_therm, &
                         & paw_dmft%dmft_triqs_therm_restart,paw_dmft%dmft_triqs_det_init_size, &
                         & paw_dmft%dmft_triqs_det_n_operations_before_check,myproc,nblocks(iatom),read_data,verbo, &
-                        & paw_dmft%dmft_triqs_chiloc,paw_dmft%dmft_triqs_chiloc_ins,beta,paw_dmft%dmft_triqs_imag_threshold, &
+                        & paw_dmft%dmft_triqs_chiloc,paw_dmft%dmft_triqs_chiloc_ins,magmom_tot,beta,paw_dmft%dmft_triqs_imag_threshold, &
                         & paw_dmft%dmft_triqs_det_precision_warning, &
                         & paw_dmft%dmft_triqs_det_precision_error,paw_dmft%dmft_triqs_det_singular_threshold,lam_list(ilam), &
                         & paw_dmft%dmft_triqs_pauli_prob,chiloc_ptr,block_ptr,flavor_ptr,inner_ptr,siz_ptr,ftau_ptr,gtau_ptr,gl_ptr, &
@@ -4528,6 +4553,15 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
    if (paw_dmft%dmft_triqs_chiloc > 0) then
      ABI_FREE(chiloc_tmp)
+     
+     if (basis .eq. 4) then
+       !do iatom=1,natom                             
+       lpawu = paw_dmft%lpawu(iatom)              
+       if (lpawu == -1) cycle                     
+         ABI_FREE(magmom_tot(iatom)%value)          
+       !end do                                       
+       ABI_FREE(magmom_tot)                         
+     end if
    end if
 
  end do ! iatom
