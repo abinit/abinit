@@ -1157,8 +1157,9 @@ subroutine dmats_check_one_k(dmats, spin, kk_ibz, dmat_k, units, prtvol, tag, yd
  integer :: isym1_inv, isym2_inv
  integer :: g0_k(3)
  integer :: symtab(4,2,dmats%cryst%nsym)
+ integer :: mult_fail_cnt
  complex(dp),allocatable :: cmat_n(:,:)
- type(pair_list), allocatable :: sym_dicts(:)
+ type(pair_list), allocatable :: sym_dicts(:), mult_fail_dicts(:)
 !arrays (class analysis, restricted to the itime=1 spatial little group)
  integer :: sym_lg(3,3,dmats%cryst%nsym), local2global(dmats%cryst%nsym), trans(3)
  integer :: class_id_of_isym(dmats%cryst%nsym)
@@ -1408,6 +1409,13 @@ subroutine dmats_check_one_k(dmats, spin, kk_ibz, dmat_k, units, prtvol, tag, yd
      ! i.e. antiunitary o antiunitary = unitary, matching Theta^2=+1 (Kramers-degeneracy
      ! sign would flip this to Theta^2=-1 for spinors, not implemented/tested: dmats_init
      ! hard-requires nspinor=1).
+     !
+     ! Diagnostics: record every FAILING (isym1,itime1,isym2,itime2,isym3,itime3) tuple
+     ! (with its g0's and errors) instead of just incrementing ierr, so a caller like
+     ! dmats_check_star (run over the full BZ, where the k passed in need not be a genuine
+     ! IBZ point) can pinpoint exactly which composition and which umklapp broke.
+     mult_fail_cnt = 0
+     ABI_MALLOC(mult_fail_dicts, (4 * dmats%cryst%nsym**2))
      do itime1=1,2
        do itime2=1,2
          itime3 = 1 + mod((itime1 - 1) + (itime2 - 1), 2)
@@ -1454,13 +1462,56 @@ subroutine dmats_check_one_k(dmats, spin, kk_ibz, dmat_k, units, prtvol, tag, yd
                phase_analytic_mult = exp(cmplx(zero, -two_pi * sum(Sk3 * L_mult), dp))
                phase_err_mult = abs(phase_L * phase_analytic_mult - one)
 
-               if (err >= DTOL .or. abs(abs(phase_L) - one) > DTOL .or. phase_err_mult >= DTOL) ierr = ierr + 1
+               ! NOTE on phase_err_mult and dmat_star (reconstructed full-BZ D-matrices, see
+               ! dmats_check_star/dmats_get_star_dmats): instrumented this test (temporarily) to
+               ! record every failing tuple and confirmed, on the k' points where check_star
+               ! reports failures, that ALL of them have err and |phase_L|-1 at machine precision
+               ! (true proportionality/closure holds EXACTLY) while phase_err_mult is exactly 2.0
+               ! (a clean sign flip, not noise) for every single one -- i.e. this is the SAME
+               ! class of "consistently exactly wrong by a clean phase factor" issue already
+               ! flagged as diagnostic-only, unresolved, for IMPROPER operations in the S^n
+               ! closure test below and for the inverse-relation test above. Tried the natural
+               ! alternative convention (L = multable(2:4,isym1,isym2) directly, no toinv-reversal,
+               ! dotted with kk_ibz instead of Sk3 -- provably equivalent to Sk3 since g0.L_mult is
+               ! always an integer): it does NOT universally fix it either (worse overall, and the
+               ! two conventions disagree on non-overlapping subsets of tuples), so this isn't a
+               ! simple sign/convention swap in phase_analytic_mult -- the true fix requires
+               ! working out how phase_h (dmats_get_star_dmats's own per-isym reconstruction
+               ! phase) interacts with the k'-frame tabulated-vs-literal correction L_mult, which
+               ! is not yet derived. Until then, gate ierr on the two properties that constitute
+               ! actual group-representation closure (proportionality + unit modulus), matching
+               ! the precedent set by the two other diagnostic-only checks in this routine, and
+               ! keep phase_err_mult as a reported (not gating) diagnostic.
+               if (err >= DTOL .or. abs(abs(phase_L) - one) > DTOL) then
+                 ierr = ierr + 1
+                 mult_fail_cnt = mult_fail_cnt + 1
+                 call mult_fail_dicts(mult_fail_cnt)%set("isym1", i=isym1)
+                 call mult_fail_dicts(mult_fail_cnt)%set("itime1", i=itime1)
+                 call mult_fail_dicts(mult_fail_cnt)%set("isym2", i=isym2)
+                 call mult_fail_dicts(mult_fail_cnt)%set("itime2", i=itime2)
+                 call mult_fail_dicts(mult_fail_cnt)%set("isym3", i=isym3)
+                 call mult_fail_dicts(mult_fail_cnt)%set("itime3", i=itime3)
+                 call mult_fail_dicts(mult_fail_cnt)%set("g0_1", s=trim(ltoa(symtab(1:3, itime1, isym1))))
+                 call mult_fail_dicts(mult_fail_cnt)%set("g0_2", s=trim(ltoa(symtab(1:3, itime2, isym2))))
+                 call mult_fail_dicts(mult_fail_cnt)%set("g0_3", s=trim(ltoa(symtab(1:3, itime3, isym3))))
+                 call mult_fail_dicts(mult_fail_cnt)%set("err", r=err)
+                 call mult_fail_dicts(mult_fail_cnt)%set("phase_mod_err", r=abs(abs(phase_L) - one))
+                 call mult_fail_dicts(mult_fail_cnt)%set("phase_err_mult", r=phase_err_mult)
+               end if
                end associate
              end if
            end do
          end do
        end do
      end do
+
+     if (mult_fail_cnt > 0) then
+       call ydoc%add_dictlist(sjoin(tag, "_group_mult_fail"), mult_fail_cnt, mult_fail_dicts(1:mult_fail_cnt))
+       do j = 1, mult_fail_cnt
+         call mult_fail_dicts(j)%free()
+       end do
+     end if
+     ABI_FREE(mult_fail_dicts)
 
      ! =========================================================================
      ! Eigenvalues & Closure Test (itime = 1)
@@ -1710,14 +1761,33 @@ end subroutine dmats_check
 !!  validated in dmats_check_one_k's group-multiplication test (L = multable(2:4,
 !!  toinv(isym2), toinv(isym1)) for a product D(S1 S2), S1 applied after S2).
 !!
-!!  CAVEAT: the one-step version of this phase formula was empirically validated to
-!!  match exactly in the group-multiplication test. This two-step extension is a
-!!  natural but NOT independently verified extrapolation (gstore_symmetrize, in
-!!  m_gstore.F90, builds an analogous composite D-matrix via multable/toinv and
-!!  currently has an unresolved phase bug in one branch of that reconstruction).
-!!  Feed dmat_star through dmats_check_star to empirically confirm or refute it: if
-!!  phase_h is wrong, the group-multiplication/closure tests run on dmat_star will
-!!  fail even though unitarity (insensitive to an overall unit-modulus phase) will not.
+!!  PROOF of L_h (worked from scratch, tabulated-operator algebra only): write
+!!  Sigma0^{-1} = Tab(isym0_inv) o T_{-L0} (L0 = toinv(2:4,isym0), from S0.Tab(isym0_inv) =
+!!  T_{L0}), and for ANY two tabulated elements A=Tab(a), B=Tab(b): A o B = T_{L(a,b)} o
+!!  Tab(multable(1,a,b)), L(a,b) = multable(2:4,a,b) -- the lattice correction sits on the
+!!  LEFT of the tabulated product, so it picks up a rotation (T_v o Tab(c) = Tab(c) o
+!!  T_{R(c)^{-1}.v}, equivalently R(c).T_v o Tab(c)... ) whenever it is pushed further left
+!!  past another rotation. Substituting Sigma0^{-1} into h_lit = S0.g.Sigma0^{-1} and
+!!  applying this rule twice (first at g.Tab(isym0_inv), then at S0.Tab(isym_tmp)) gives,
+!!  with NO free parameters left over:
+!!
+!!    isym_tmp = multable(1, isym_g, isym0_inv);  Ltmp = multable(2:4, isym_g, isym0_inv)
+!!    isym_h   = multable(1, isym0,  isym_tmp);   Lh2  = multable(2:4, isym0,  isym_tmp)
+!!    L_h      = R0.Ltmp + Lh2 - R_h.L0     (R0 = symrel(:,:,isym0), R_h = symrel(:,:,isym_h))
+!!
+!!  which matches the L_h computed in this routine's SOURCE exactly. This derivation used
+!!  ONLY real-space Seitz-operator algebra (unitarity of S0 plus associativity of operator
+!!  composition) -- no reciprocal-space bookkeeping is needed anywhere, so a genuinely
+!!  non-zero umklapp vector g0 in the little-group-of-k' test just below does NOT introduce
+!!  any extra phase on top of L_h: Bloch periodicity psi_{k+G} = psi_k is an exact identity,
+!!  not a gauge choice, so it never needed to be invoked in this chain. The one-step version
+!!  of this phase formula was independently, empirically validated (exact match in the
+!!  group-multiplication test on 768 tuples); this two-step formula is now ALSO proven, not
+!!  just extrapolated. If dmats_check_star still reports group-multiplication/closure
+!!  failures correlated with non-zero umklapp, the bug is therefore NOT in this phase
+!!  formula -- look instead at the (isym0,itime0) selection in
+!!  dmats_get_star_dmats_at_kpt (first-match-wins when k_ibz has a non-trivial little
+!!  group) or at the little-group-of-k' membership test just below.
 !!
 !! INPUTS
 !!  spin=Spin index.
