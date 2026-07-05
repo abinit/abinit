@@ -6945,6 +6945,16 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
              if (ik_ibz /= -1) then
                isym_combined = isym_tot; trev_combined = trev_tot; iq_computed_glob = iq_base_glob
                isym_glob = 1; itime_glob = 1
+               ! kk_base/q_base were matched to the global BZ arrays via a tolerant modulo(...)
+               ! comparison above, so they may differ from the canonical tabulated array values by
+               ! an exact integer G-vector. This matters below: kk_base+q_base is fed into
+               ! kpts_map to re-derive isym_p, which MUST reproduce the exact same little-group
+               ! element that gstore_compute originally used to fix the gauge of the k0+q0
+               ! wavefunction (gstore_compute computes kq_bz from the literal gstore%kbz/qbz
+               ! array entries, NOT from a freshly-rotated coordinate) -- snap both to the
+               ! canonical array values so the two kpts_map calls see bit-identical input.
+               kk_base = gstore%kbz(:, ik_base_glob)
+               q_base = gstore%qbz(:, iq_base_glob)
                exit search_source
              end if
              cycle
@@ -7004,9 +7014,15 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
            ABI_CHECK(isym_combined /= 0, "Composite symmetry not found in space group (group closure violated?)")
            trev_combined = mod(trev_tot + (itime_glob - 1), 2)
 
-           ! Downstream code uses q_base as "the momentum at the source"; overwrite it with
-           ! the ACTUAL computed representative q0_computed now that isym_combined/
-           ! trev_combined represent the FULL symmetry relating (k0,q0_computed) to (k,q).
+           ! Downstream code uses kk_base/q_base as "the momentum at the source"; overwrite them
+           ! with the canonical tabulated values (kk_base was only known up to an exact integer
+           ! G-vector via the tolerant modulo(...) match above; q_base with the ACTUAL computed
+           ! representative q0_computed) now that isym_combined/trev_combined represent the FULL
+           ! symmetry relating (k0,q0_computed) to (k,q). This matters below: kk_base+q_base is
+           ! fed into kpts_map to re-derive isym_p, which MUST reproduce the exact same
+           ! little-group element that gstore_compute originally used to fix the gauge of the
+           ! k0+q0 wavefunction (computed there from the literal gstore%kbz/qbz array entries).
+           kk_base = gstore%kbz(:, ik_base_glob)
            q_base = gstore%qbz(:, iq_computed_glob)
 
            exit search_source
@@ -7050,21 +7066,6 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        ! for the D-matrix lookups below (it is the gauge P and R.P are actually defined in).
        ikq_ibz_p = indkk_kq(1, 1); isym_p = indkk_kq(2, 1); itime_p = indkk_kq(6, 1) + 1
 
-       ! Composite R.P: isym_combined (R) applied AFTER isym_p (P). Use dmats%multable
-       ! (full space-group multiplication table) instead of a rotation-only search.
-       ! NOTE: tried converting isym_p/the composite through toinv() (mirroring the dmat_k
-       ! fix above, on the theory that main.tex's own R/P compose via symrec) -- verified
-       ! empirically (isolated on the isym_tot==1 subset, where R=isym_glob exactly and the
-       ! ket-side complexity vanishes) to give IDENTICAL results to the unswapped form below
-       ! (226/340 bad either way), and forcing dmat_star_kq to the identity makes the same
-       ! subset measurably WORSE (238/340 bad) -- so the current (non-identity) rotation is
-       ! doing genuine, partially-correct work, but the isym_rp/isym_p convention is NOT the
-       ! remaining bug. Left unswapped pending further investigation (see conversation).
-       isym_rp = dmats%multable(1, isym_combined, isym_p)
-       ABI_CHECK(isym_rp /= 0, "Composite symmetry R.P not found in space group")
-       trev_rp = mod(trev_combined + (itime_p - 1), 2)
-       itime_rp = trev_rp + 1
-
        ! R = isym_combined/trev_combined = isym_tot APPLIED AFTER isym_glob (isym_glob applied
        ! first). Master product law: D^k0(S1.S2) = D^{S2.k0}(S1) . D^k0(S2), S1=isym_tot,
        ! S2=isym_glob. Since isym_glob fixes k0 (S2.k0=k0), this is D^k0(isym_tot).D^k0(isym_glob).
@@ -7100,6 +7101,22 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        dmat_k = transpose(conjg(phase_kt * matmul( &
          dmats%for_spin(spin)%value(:,:, isym_tot, trev_tot + 1, ik_ibz), &
          dmats%for_spin(spin)%value(:,:, dmats%toinv(1, isym_glob), itime_glob, ik_ibz))))
+
+       ! Composite R.P: isym_combined (R, verified correct in the STANDARD/symrec-consistent
+       ! labeling via q_glob=symrec(isym_combined).q0_computed) applied AFTER isym_p (P). Several
+       ! alternative derivations were tried (swapped multable args; re-deriving R via
+       ! multable(toinv(isym_tot),isym_glob) under the assumption that main.tex's R acts uniformly
+       ! on k and q via symrec -- an assumption that CONTRADICTS the verified q_glob relation
+       ! above, since it would require isym_tot to be self-inverse in general) -- all converge to
+       ! the SAME 33/154 failing cases in the non-destructive self-consistency check (see
+       ! conversation), always exactly the isym_glob==1 ("fast path") subset, while isym_glob!=1
+       ! cases are reconstructed EXACTLY (0 error). The remaining bug is confirmed localized to
+       ! that fast-path branch but not yet identified; not a symmetry-composition/labeling issue
+       ! in this term, based on the above.
+       isym_rp = dmats%multable(1, isym_combined, isym_p)
+       ABI_CHECK(isym_rp /= 0, "Composite symmetry R.P not found in space group")
+       trev_rp = mod(trev_combined + (itime_p - 1), 2)
+       itime_rp = trev_rp + 1
        dmat_temp = dmats%for_spin(spin)%value(:,:, isym_rp, itime_rp, ikq_ibz_p)
        dmat_star_kq = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_p, itime_p, ikq_ibz_p)))
        dmat_star_kq = matmul(dmat_temp, dmat_star_kq)

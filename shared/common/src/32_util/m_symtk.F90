@@ -25,6 +25,7 @@ module m_symtk
  use m_errors
  use m_abicore
 
+ use m_fstrings,       only : sjoin, ltoa
  use m_matrix,         only : mati3inv, mati3det, matr3inv
  use m_numeric_tools,  only : isinteger, wrap2_pmhalf
  use m_hide_lapack,    only : matrginv
@@ -54,7 +55,7 @@ module m_symtk
  public :: smallprim            ! Find the smallest possible primitive vectors for an input lattice
  public :: print_symmetries     ! Helper function to print symmetries in a nice format.
  public :: rot2str              ! Return string with info on rotation.
- public :: sym_order            ! Return the order n of a point-group operation (rot^n = identity).
+ public :: sym_order            ! Return the order n of a (possibly non-symmorphic) operation (rot^n = identity, S^n(r) = r + T).
 !!***
 
 contains
@@ -3369,27 +3370,42 @@ end function igcd
 !! sym_order
 !!
 !! FUNCTION
-!!  Return the order n of a point-group operation, i.e. the smallest integer
-!!  such that rot^n = identity. By the crystallographic restriction theorem,
-!!  n must be one of {1, 2, 3, 4, 6}: the routine aborts if none of these
-!!  values gives the identity, as this signals that rot is not a valid
+!!  Return the order n of a (possibly non-symmorphic) space-group operation {rot|tnons},
+!!  i.e. the smallest integer such that rot^n = identity. By the crystallographic
+!!  restriction theorem, n must be one of {1, 2, 3, 4, 6}: the routine aborts if none
+!!  of these values gives the identity, as this signals that rot is not a valid
 !!  crystallographic point-group operation.
+!!
+!!  If tnons is given, also compute the cumulative translation T such that
+!!  applying the operation n times gives:
+!!
+!!    S^n(r) = r + T,  with T = [I + rot + rot^2 + ... + rot^(n-1)] . tnons
+!!
+!!  For symmorphic operations (or when tnons is a lattice vector times a screw/glide
+!!  fraction that closes exactly), T reduces to a lattice vector.
 !!
 !! INPUTS
 !!  rot(3,3)=Rotation matrix in reduced coordinates (e.g. symrel(:,:,isym)).
+!!  tnons(3)=Optional non-symmorphic translation in reduced coordinates (e.g. tnons(:,isym)).
 !!
 !! OUTPUT
 !!  n=Order of the operation, one of {1, 2, 3, 4, 6}.
 !!  isproper=.True. if rot is a proper rotation (det=+1), .False. if
 !!    improper (det=-1, e.g. mirror, inversion, rotoinversion).
+!!  trans(3)=Cumulative translation T (see above).
+!!  msg and ierr= Error messate and exit status.
 !!
 !! SOURCE
 
-integer function sym_order(rot, isproper) result(n)
+subroutine sym_order(rot, tnons, n, isproper, trans, msg, ierr)
 
 !Arguments ------------------------------------
  integer,intent(in) :: rot(3,3)
+ real(dp),intent(in) :: tnons(3)
+ integer,intent(out) :: n
  logical,intent(out) :: isproper
+ integer,intent(out) :: trans(3), ierr
+ character(len=*),intent(out) :: msg
 
 !Local variables-------------------------------
  integer,parameter :: norders = 5
@@ -3397,8 +3413,11 @@ integer function sym_order(rot, isproper) result(n)
  integer,parameter :: identity(3,3) = reshape((/1,0,0, 0,1,0, 0,0,1/), (/3,3/))
  integer :: io, k, det
  integer :: rot_k(3,3)
+ real(dp) :: trans_dp(3)
  logical :: found
 ! *********************************************************************
+
+ ierr = 0; msg = ""
 
  call mati3det(rot, det)
  isproper = (det == 1)
@@ -3417,10 +3436,25 @@ integer function sym_order(rot, isproper) result(n)
  end do
 
  if (.not. found) then
-   ABI_ERROR("Rotation order does not belong to {1, 2, 3, 4, 6}: this is not a valid crystallographic point-group operation!")
+   msg = "Rotation order does not belong to {1, 2, 3, 4, 6}: this is not a valid crystallographic point-group operation!"
+   ierr = 1; return
  end if
 
-end function sym_order
+ trans_dp = zero
+ rot_k = identity
+ do k=1,n
+   trans_dp = trans_dp + matmul(rot_k, tnons)
+   rot_k = matmul(rot, rot_k)
+ end do
+
+ ! Make sure trans_dp is integer.
+ trans = int(trans_dp)
+ if (.not. isinteger(trans_dp, tol=tol5)) then
+   ierr = 2
+   msg = sjoin("T = [I + rot + rot^2 + ... + rot^(n-1)] . tnons is not integer:", ltoa(trans_dp))
+ end if
+
+end subroutine sym_order
 !!***
 
 end module m_symtk

@@ -1107,7 +1107,7 @@ end subroutine dmats_free
 !! dmats_check
 !!
 !! FUNCTION
-!!  Verify the fundamental point-group algebraic propertie of
+!!  Verify the fundamental point-group algebraic properties of
 !!
 !!  D^{k}_{mn}(S) = < \psi_{m, Sk} | S | \psi_{n, k} >
 !!
@@ -1204,7 +1204,7 @@ subroutine dmats_check(dmats, units, prtvol, header)
  type(yamldoc_t) :: ydoc
  type(pair_list), allocatable :: sym_dicts(:)
 !arrays (class analysis, restricted to the itime=1 spatial little group)
- integer :: sym_lg(3,3,dmats%cryst%nsym), local2global(dmats%cryst%nsym)
+ integer :: sym_lg(3,3,dmats%cryst%nsym), local2global(dmats%cryst%nsym), trans(3)
  integer :: class_id_of_isym(dmats%cryst%nsym)
  integer,allocatable :: nelements_lg(:), elements_idx_lg(:,:)
  real(dp) :: class_char_ref(dmats%cryst%nsym)
@@ -1394,7 +1394,7 @@ subroutine dmats_check(dmats, units, prtvol, header)
            ! Phase = e^{-i 2pi k \cdot L} e^{i 2pi (S_{rec,inv} G_{0}) \cdot \tau_{S^{-1}}}
            ! Note: S_{inv} G_0 is -G_{0, inv}. And \tau_{S^{-1}} = -R_{inv} \tau_S.
            ! We just use the exact formula for group mult: isym1 = isym_inv, isym2 = isym
-           phase_analytic = exp(cmplx(0.0_dp, -two_pi * sum(kk_ibz * L_red) + &
+           phase_analytic = exp(cmplx(zero, -two_pi * sum(kk_ibz * L_red) + &
                      two_pi * sum(matmul(dmats%cryst%symrec(:,:,isym_inv), symtab(1:3, itime, isym)) * dmats%cryst%tnons(:,isym_inv)), dp))
 
            associate (cmat_inv => dmats%for_spin(spin)%value(:, :, isym_inv, itime, ik_ibz))
@@ -1418,8 +1418,8 @@ subroutine dmats_check(dmats, units, prtvol, header)
            ! (still under investigation) rather than in the D-matrices (proportionality "err" is at machine
            ! precision for the same entries). Once the formula is fixed, fold phase_err into the ierr test.
            phase_err = abs(phase_dyn * phase_analytic - one)
-           if (err >= DTOL .or. abs(abs(phase_dyn) - 1.0_dp) > DTOL) ierr = ierr + 1
-           call sym_dicts(isym_cnt)%set("inv_ok", s=yesno(err < DTOL .and. abs(abs(phase_dyn) - 1.0_dp) <= DTOL))
+           if (err >= DTOL .or. abs(abs(phase_dyn) - one) > DTOL) ierr = ierr + 1
+           call sym_dicts(isym_cnt)%set("inv_ok", s=yesno(err < DTOL .and. abs(abs(phase_dyn) - one) <= DTOL))
            call sym_dicts(isym_cnt)%set("inv_err", r=err)
            call sym_dicts(isym_cnt)%set("inv_phase", s=sjoin(ftoa(real(phase_dyn)), " + i ", ftoa(aimag(phase_dyn))))
            call sym_dicts(isym_cnt)%set("inv_phase_analytic_err", r=phase_err)
@@ -1506,10 +1506,10 @@ subroutine dmats_check(dmats, units, prtvol, header)
                isym2_inv = dmats%toinv(1, isym2)
                Sk3 = matmul(transpose(real(dmats%cryst%symrel(:,:,isym3), dp)), kk_ibz)
                L_mult = real(dmats%multable(2:4, isym2_inv, isym1_inv), dp)
-               phase_analytic_mult = exp(cmplx(0.0_dp, -two_pi * sum(Sk3 * L_mult), dp))
+               phase_analytic_mult = exp(cmplx(zero, -two_pi * sum(Sk3 * L_mult), dp))
                phase_err_mult = abs(phase_L * phase_analytic_mult - one)
 
-               if (err >= DTOL .or. abs(abs(phase_L) - 1.0_dp) > DTOL .or. phase_err_mult >= DTOL) ierr = ierr + 1
+               if (err >= DTOL .or. abs(abs(phase_L) - one) > DTOL .or. phase_err_mult >= DTOL) ierr = ierr + 1
                end associate
              end if
            end do
@@ -1529,15 +1529,14 @@ subroutine dmats_check(dmats, units, prtvol, header)
      !   S^n(r) = r + T
      !
      ! In reciprocal space, inside the little group of k, this translation introduces
-     ! a scalar Bloch phase shift. Furthermore, if spin-orbit coupling is included,
-     ! a full 2\pi rotation yields a -1 fermionic parity phase.
-     ! Thus, the eigenvalues of the representation matrix satisfy:
+     ! a scalar Bloch phase shift. Thus, the eigenvalues of the representation matrix satisfy:
      !
-     !   [ D(S) ]^n = e^{-i k \cdot T} (\pm I)
+     !   [ D(S) ]^n = e^{-i k \cdot T} I
      !
-     ! Rather than computing the analytic translation T and spinor parity, we dynamically
-     ! extract the overall scalar phase \phi = Tr(D^n) / N_{bands} and assert that
-     ! D(S)^n \equiv \phi I.
+     ! (dmats hard-requires nspinor=1, see dmats_init NOTES, so there's no extra spinor parity).
+     ! We extract the overall scalar phase \phi = Tr(D^n) / N_{bands}, assert that
+     ! D(S)^n \equiv \phi I, and cross-check \phi against the analytic e^{-i k.T} computed
+     ! from the T returned by sym_order.
      isym_cnt = 0
      do itime=1,2
        do isym=1,dmats%cryst%nsym
@@ -1547,7 +1546,8 @@ subroutine dmats_check(dmats, units, prtvol, header)
            associate (cmat => dmats%for_spin(spin)%value(:, :, isym, 1, ik_ibz))
 
            ! Find the order of the point-group operation (n in {1,2,3,4,6})
-           n = sym_order(dmats%cryst%symrel(:,:,isym), isproper)
+           call sym_order(dmats%cryst%symrel(:,:,isym), dmats%cryst%tnons(:,isym), n, isproper, trans, msg, ierr)
+           ABI_CHECK_IEQ(ierr, 0, msg)
 
            if (n > 1) then
              ! Compute cmat^n
@@ -1564,18 +1564,26 @@ subroutine dmats_check(dmats, units, prtvol, header)
              phase_L = phase_L / nb
 
              ! Normalize cmat_n with phase_L to check if it's proportional to identity
-             err = 0.0_dp
+             err = zero
              do j = 1, nb
                cmat_n(j, j) = cmat_n(j, j) - phase_L
              end do
              err = maxval(abs(cmat_n))
 
-             if (err >= DTOL .or. abs(abs(phase_L) - 1.0_dp) > DTOL) ierr = ierr + 1
-             call sym_dicts(isym_cnt)%set("closure_ok", s=yesno(err < DTOL .and. abs(abs(phase_L) - 1.0_dp) <= DTOL))
+             ! Analytic Bloch phase from the cumulative lattice translation T: D(S)^n = e^{-i k.T} I
+             phase_analytic = exp(cmplx(zero, -two_pi * dot_product(kk_ibz, real(trans, dp)), dp))
+             phase_err = abs(phase_L - phase_analytic)
+
+             if (err >= DTOL .or. abs(abs(phase_L) - one) > DTOL .or. phase_err > DTOL) ierr = ierr + 1
+             call sym_dicts(isym_cnt)%set("closure_ok", &
+               s=yesno(err < DTOL .and. abs(abs(phase_L) - one) <= DTOL .and. phase_err <= DTOL))
              call sym_dicts(isym_cnt)%set("closure_err", r=err)
              call sym_dicts(isym_cnt)%set("closure_n", i=n)
              call sym_dicts(isym_cnt)%set("isproper", s=yesno(isproper))
              call sym_dicts(isym_cnt)%set("closure_phase", s=sjoin(ftoa(real(phase_L)), " + i ", ftoa(aimag(phase_L))))
+             call sym_dicts(isym_cnt)%set("closure_phase_analytic", &
+               s=sjoin(ftoa(real(phase_analytic)), " + i ", ftoa(aimag(phase_analytic))))
+             call sym_dicts(isym_cnt)%set("closure_phase_err", r=phase_err)
            end if
            end associate
          end if
@@ -1597,8 +1605,7 @@ subroutine dmats_check(dmats, units, prtvol, header)
  call ydoc%write_units_and_free(units)
 
  if (ierr /= 0) then
-   nb = dmats%ks_ebands%nsppol * dmats%ks_ebands%nkpt * 2 * dmats%cryst%nsym
-   ABI_ERROR(sjoin("dmats are not unitary or failed tests! ierr:", itoa(ierr), "/", itoa(nb)))
+   ABI_ERROR(sjoin("dmats are not unitary or failed tests! ierr:", itoa(ierr))
  end if
 
 end subroutine dmats_check
