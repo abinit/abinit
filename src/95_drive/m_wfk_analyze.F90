@@ -148,7 +148,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  integer :: comm,nprocs,my_rank,mgfftf,nfftf !,nfftf_tot
  integer :: optcut,optgr0,optgr1,optgr2,optrad,psp_gencond,ii
  !integer :: option,option_test,option_dij,optrhoij
- integer :: band,ik_ibz,spin,first_band,last_band, nband_k, islice, ib, mpw, mcg, nb, npw_k
+ integer :: band,ik_ibz,spin,nband_k, islice, ib, mpw, mcg, nb, npw_k ! first_band,last_band,
  integer :: ierr,usexcnhat, sc_mode, nspinor, nsto
  integer :: cplex,cplex_dij,cplex_rhoij,ndij,nspden_rhoij,gnt_option
  real(dp),parameter :: spinmagntarget=-99.99_dp
@@ -157,7 +157,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  !real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,nelect,norm,oldefermi
  character(len=500) :: msg
  character(len=fnlen) :: wfk0_path, outwfk_path
- logical :: call_pawinit, use_paw_aeur
+ logical :: call_pawinit !, use_paw_aeur
  type(hdr_type) :: wfk0_hdr, hdr_bz, out_hdr
  type(crystal_t) :: cryst, cryst_dtset
  type(ebands_t) :: ebands, ebands_bz
@@ -187,7 +187,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  type(pawfgrtab_type),allocatable :: pawfgrtab(:)
  !type(paw_ij_type),allocatable :: paw_ij(:)
  !type(paw_an_type),allocatable :: paw_an(:)
- type(esymm_t),allocatable :: esymm(:,:)
+ !type(esymm_t),allocatable :: esymm(:,:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
  type(psbands_t),allocatable :: psb_ks(:,:)
 !************************************************************************
@@ -392,7 +392,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    do spin=1,dtset%nsppol
      brange_spin(:,spin) = [1, dtset%mband]
    end do
-   call dmats%init(wfk0_path, dtset, dtfil, cryst, brange_spin, ngfftf, pawtab, psps, comm)
+   call dmats%init(wfk0_path, dtset, cryst, brange_spin, ngfftf, pawtab, psps, comm)
 
    if (my_rank == master) then
      call dmats%check([std_out], dtset%prtvol)

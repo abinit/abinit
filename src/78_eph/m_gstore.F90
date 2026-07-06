@@ -6788,7 +6788,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  call gstore_read_gtype(gstore_path, gtype, comm, brange_k_spin=brange_k_spin)
 
  ! Compute the phase matrices D^{k}(S) from the wavefunctions stored in wfd_t.
- call dmats%init(wfk_path, dtset, dtfil, cryst, brange_k_spin, ngfft, pawtab, psps, comm)
+ call dmats%init(wfk_path, dtset, cryst, brange_k_spin, ngfft, pawtab, psps, comm)
 
  ! Only master processor performs the symmetrization of the e-ph matrix elements.
  ! Performance is not crucial and the algorithm is IO-bound.
@@ -6819,7 +6819,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
  ! Useful dimensions.
  nkbz = gstore%nkbz; nkibz = gstore%nkibz
- nqbz = gstore%nqbz; nqibz = gstore%nqbz
+ nqbz = gstore%nqbz; nqibz = gstore%nqibz
  nsym = cryst%nsym
 
  ! Lazily-built cache of little groups of k0 IBZ points, one entry per nkibz, used as a

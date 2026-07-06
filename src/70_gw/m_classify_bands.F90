@@ -813,14 +813,13 @@ end function paw_phirotphj
 !!
 !! SOURCE
 
-subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, pawtab, psps, comm)
+subroutine dmats_init(dmats, wfk_path, dtset, cryst, brange_spin, ngfft, pawtab, psps, comm)
 
 !Arguments ------------------------------------
 !scalars
  class(dmats_t),intent(out) :: dmats
  character(len=*),intent(in) :: wfk_path
  type(dataset_type),target,intent(in) :: dtset
- type(datafiles_type),intent(in) :: dtfil
  class(crystal_t),target,intent(in) :: cryst
  integer,intent(in) :: brange_spin(2, dtset%nsppol), ngfft(18)
  integer,intent(in) :: comm
@@ -831,7 +830,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, dtfil, cryst, brange_spin, ngfft, 
 !scalars
  integer,parameter :: iflag1 = 1, me_g0 = 1, ndat1 = 1
  integer :: spin, nsppol, nsym, nb, nkibz, mband, ik_ibz, isym, isym_inv, itime, bstart, ib, trev_k ! i_m, i_n,
- integer :: ib1, ib2, band1, band2, n1, n2, n3, n4, n5, n6, nfft, nspinor, mpw, my_mpw, ii, ipw, j !, ispinor, npw_sk
+ integer :: ib1, ib2, band1, band2, n1, n2, n3, n4, n5, n6, nfft, nspinor, mpw, my_mpw, ii, ipw !, j !, ispinor, npw_sk
  integer :: nprocs, me, itot, ierr
  logical :: is_little_group
  real(dp),parameter :: xnorm1 = one
@@ -1167,441 +1166,443 @@ subroutine dmats_check_one_k(dmats, spin, kk_ibz, dmat_k, units, prtvol, tag, yd
  real(dp) :: class_char_ref(dmats%cryst%nsym)
 ! *************************************************************************
 
+ ABI_UNUSED((/spin/))
+
  nb = size(dmat_k, 1)
  ABI_MALLOC(cmat_n, (nb, nb))
 
-     ! Determine the little group of kk_ibz (and the associated umklapp vector) with the SAME
-     ! symrel^t convention used by dmats_init to decide whether a given (isym,itime) yields a
-     ! genuinely-computed D-matrix or the identity placeholder (see the NOTES on g0_k there).
-     ! littlegroup_q instead rotates kk_ibz with symrec, which is the convention for q-points,
-     ! not k-points, and can disagree with dmats_init whenever symrel is not orthogonal in the
-     ! reduced basis -- inconsistent with what dmats%for_spin(...) actually stores.
-     symtab = 0
-     do itime=1,2
-       tsign = merge(one, -one, itime == 1)
-       do isym=1,dmats%cryst%nsym
-         kk_sk = tsign * matmul(transpose(real(dmats%cryst%symrel(:,:,isym), dp)), kk_ibz)
-         g0_k = nint(kk_ibz - kk_sk)
-         if (all(abs(kk_ibz - kk_sk - g0_k) < tol8)) then
-           symtab(1:3, itime, isym) = g0_k
-           symtab(4, itime, isym) = 1
-         end if
-       end do
-     end do
+ ! Determine the little group of kk_ibz (and the associated umklapp vector) with the SAME
+ ! symrel^t convention used by dmats_init to decide whether a given (isym,itime) yields a
+ ! genuinely-computed D-matrix or the identity placeholder (see the NOTES on g0_k there).
+ ! littlegroup_q instead rotates kk_ibz with symrec, which is the convention for q-points,
+ ! not k-points, and can disagree with dmats_init whenever symrel is not orthogonal in the
+ ! reduced basis -- inconsistent with what dmats%for_spin(...) actually stores.
+ symtab = 0
+ do itime=1,2
+   tsign = merge(one, -one, itime == 1)
+   do isym=1,dmats%cryst%nsym
+     kk_sk = tsign * matmul(transpose(real(dmats%cryst%symrel(:,:,isym), dp)), kk_ibz)
+     g0_k = nint(kk_ibz - kk_sk)
+     if (all(abs(kk_ibz - kk_sk - g0_k) < tol8)) then
+       symtab(1:3, itime, isym) = g0_k
+       symtab(4, itime, isym) = 1
+     end if
+   end do
+ end do
 
-     ! Divide the itime=1 (pure spatial) little group into conjugacy classes with get_classes
-     ! (m_ptgroups.F90), then use |Tr D(S)| (character magnitude) as a class-function test:
-     ! conjugate elements S' = X S X^{-1} of a genuine (possibly projective) unitary
-     ! representation always satisfy |Tr D(S')| = |Tr D(S)| exactly, since
-     ! D(X S X^{-1}) equals D(X) D(S) D(X)^{-1} up to an overall SCALAR phase (the same
-     ! tabulated-vs-literal-composition phase ambiguity already handled in the group
-     ! multiplication test above), and a similarity transform composed with an overall
-     ! phase preserves |trace|. Comparing |trace| (not the raw complex trace) sidesteps
-     ! that phase ambiguity entirely, so no analytic phase tracking is needed here.
-     !
-     ! get_classes computes conjugacy X^{-1} S X with the plain (non-transposed) symrel
-     ! product, i.e. the SAME real-space composition convention already used everywhere
-     ! else in this routine (isym_inv search, isym3 = isym1*isym2 hunting). This is
-     ! convention-consistent with the D-matrices themselves: after the dmats_init fix
-     ! (see its NOTES), dmats%for_spin(...)(:,:,isym,...) genuinely stores D_true(S_isym)
-     ! indexed by the SAME isym used to index cryst%symrel, so no extra transpose or
-     ! symrec/symrel^t handling is required to match classes to D-matrix slots. (The
-     ! symrel^t convention only enters dmats_init's k-point/little-group bookkeeping;
-     ! little-group MEMBERSHIP and conjugacy-class PARTITIONING are both provably
-     ! independent of that choice: symrec = symrel^{-t} is a group isomorphism that maps
-     ! every isym to itself, so it preserves both the little-group isym set and the
-     ! class partition of that set exactly.)
-     !
-     ! Why NOT feed get_classes symrel(isym)^t either (transposed, but still indexed by
-     ! the SAME isym): unlike symrec = symrel^{-t}, plain transposition isym -> symrel(isym)^t
-     ! is only an ANTI-homomorphism of the isym-indexed abstract group law, because
-     ! (AB)^t = B^t A^t reverses multiplication order: symrel(a)^t symrel(b)^t = symrel(b.a)^t,
-     ! not symrel(a.b)^t, whenever the point group is non-abelian (as it generally is here).
-     ! Anti-homomorphisms still preserve conjugacy classes as an ABSTRACT structure, but not
-     ! with the SAME isym labeling used to index dmats%for_spin(...), so class_id_of_isym
-     ! built from transposed matrices would in general group the WRONG isym's together. Only
-     ! plain (non-transposed) symrel, matching how D(S1 S2) proportional-to D(S1) D(S2) was
-     ! validated to hold in the group-multiplication test above, gives isym-consistent classes.
-     nsym_lg = 0
-     do isym=1,dmats%cryst%nsym
-       if (symtab(4, 1, isym) == 0) cycle
-       nsym_lg = nsym_lg + 1
-       sym_lg(:,:,nsym_lg) = dmats%cryst%symrel(:,:,isym)
-       local2global(nsym_lg) = isym
-     end do
+ ! Divide the itime=1 (pure spatial) little group into conjugacy classes with get_classes
+ ! (m_ptgroups.F90), then use |Tr D(S)| (character magnitude) as a class-function test:
+ ! conjugate elements S' = X S X^{-1} of a genuine (possibly projective) unitary
+ ! representation always satisfy |Tr D(S')| = |Tr D(S)| exactly, since
+ ! D(X S X^{-1}) equals D(X) D(S) D(X)^{-1} up to an overall SCALAR phase (the same
+ ! tabulated-vs-literal-composition phase ambiguity already handled in the group
+ ! multiplication test above), and a similarity transform composed with an overall
+ ! phase preserves |trace|. Comparing |trace| (not the raw complex trace) sidesteps
+ ! that phase ambiguity entirely, so no analytic phase tracking is needed here.
+ !
+ ! get_classes computes conjugacy X^{-1} S X with the plain (non-transposed) symrel
+ ! product, i.e. the SAME real-space composition convention already used everywhere
+ ! else in this routine (isym_inv search, isym3 = isym1*isym2 hunting). This is
+ ! convention-consistent with the D-matrices themselves: after the dmats_init fix
+ ! (see its NOTES), dmats%for_spin(...)(:,:,isym,...) genuinely stores D_true(S_isym)
+ ! indexed by the SAME isym used to index cryst%symrel, so no extra transpose or
+ ! symrec/symrel^t handling is required to match classes to D-matrix slots. (The
+ ! symrel^t convention only enters dmats_init's k-point/little-group bookkeeping;
+ ! little-group MEMBERSHIP and conjugacy-class PARTITIONING are both provably
+ ! independent of that choice: symrec = symrel^{-t} is a group isomorphism that maps
+ ! every isym to itself, so it preserves both the little-group isym set and the
+ ! class partition of that set exactly.)
+ !
+ ! Why NOT feed get_classes symrel(isym)^t either (transposed, but still indexed by
+ ! the SAME isym): unlike symrec = symrel^{-t}, plain transposition isym -> symrel(isym)^t
+ ! is only an ANTI-homomorphism of the isym-indexed abstract group law, because
+ ! (AB)^t = B^t A^t reverses multiplication order: symrel(a)^t symrel(b)^t = symrel(b.a)^t,
+ ! not symrel(a.b)^t, whenever the point group is non-abelian (as it generally is here).
+ ! Anti-homomorphisms still preserve conjugacy classes as an ABSTRACT structure, but not
+ ! with the SAME isym labeling used to index dmats%for_spin(...), so class_id_of_isym
+ ! built from transposed matrices would in general group the WRONG isym's together. Only
+ ! plain (non-transposed) symrel, matching how D(S1 S2) proportional-to D(S1) D(S2) was
+ ! validated to hold in the group-multiplication test above, gives isym-consistent classes.
+ nsym_lg = 0
+ do isym=1,dmats%cryst%nsym
+   if (symtab(4, 1, isym) == 0) cycle
+   nsym_lg = nsym_lg + 1
+   sym_lg(:,:,nsym_lg) = dmats%cryst%symrel(:,:,isym)
+   local2global(nsym_lg) = isym
+ end do
 
-     class_id_of_isym = 0
-     if (nsym_lg > 0) then
-       ! get_classes takes explicit-shape dummies sized from its own nsym argument
-       ! (nsym_lg here): the actual arrays must be allocated to EXACTLY (nsym_lg,nsym_lg)
-       ! (not e.g. cryst%nsym), otherwise the callee writes using an nsym_lg-based
-       ! column-major stride while a differently-sized caller array would read back
-       ! with a mismatched stride (silent data corruption via sequence association).
-       ABI_MALLOC(nelements_lg, (nsym_lg))
-       ABI_MALLOC(elements_idx_lg, (nsym_lg, nsym_lg))
-       call get_classes(nsym_lg, sym_lg(:,:,1:nsym_lg), nclass_lg, nelements_lg, elements_idx_lg)
-       do icls=1,nclass_lg
-         do iel=1,nelements_lg(icls)
-           il = elements_idx_lg(iel, icls)
-           class_id_of_isym(local2global(il)) = icls
-         end do
-       end do
-       ! Reference character (magnitude) for each class: |Tr D(S)| for the class's first
-       ! element. All other elements of the same class are checked against this below.
-       do icls=1,nclass_lg
-         isym = local2global(elements_idx_lg(1, icls))
-         class_char_ref(icls) = abs(get_trace(dmat_k(:, :, isym, 1)))
-       end do
-       ABI_FREE(nelements_lg)
-       ABI_FREE(elements_idx_lg)
+ class_id_of_isym = 0
+ if (nsym_lg > 0) then
+   ! get_classes takes explicit-shape dummies sized from its own nsym argument
+   ! (nsym_lg here): the actual arrays must be allocated to EXACTLY (nsym_lg,nsym_lg)
+   ! (not e.g. cryst%nsym), otherwise the callee writes using an nsym_lg-based
+   ! column-major stride while a differently-sized caller array would read back
+   ! with a mismatched stride (silent data corruption via sequence association).
+   ABI_MALLOC(nelements_lg, (nsym_lg))
+   ABI_MALLOC(elements_idx_lg, (nsym_lg, nsym_lg))
+   call get_classes(nsym_lg, sym_lg(:,:,1:nsym_lg), nclass_lg, nelements_lg, elements_idx_lg)
+   do icls=1,nclass_lg
+     do iel=1,nelements_lg(icls)
+       il = elements_idx_lg(iel, icls)
+       class_id_of_isym(local2global(il)) = icls
+     end do
+   end do
+   ! Reference character (magnitude) for each class: |Tr D(S)| for the class's first
+   ! element. All other elements of the same class are checked against this below.
+   do icls=1,nclass_lg
+     isym = local2global(elements_idx_lg(1, icls))
+     class_char_ref(icls) = abs(get_trace(dmat_k(:, :, isym, 1)))
+   end do
+   ABI_FREE(nelements_lg)
+   ABI_FREE(elements_idx_lg)
+ end if
+
+ isym_cnt = 0
+ do itime=1,2
+   do isym=1,dmats%cryst%nsym
+     if (symtab(4, itime, isym) /= 0) isym_cnt = isym_cnt + 1
+   end do
+ end do
+ if (isym_cnt > 0) then
+   ABI_MALLOC(sym_dicts, (isym_cnt))
+ end if
+
+ isym_cnt = 0
+ do itime=1,2
+   do isym=1,dmats%cryst%nsym
+     if (symtab(4, itime, isym) == 0) cycle
+     isym_cnt = isym_cnt + 1
+     call sym_dicts(isym_cnt)%set("isym", i=isym)
+     call sym_dicts(isym_cnt)%set("itime", i=itime)
+     msg = sjoin("[", ftoa(dmats%cryst%tnons(1,isym)), ", ", ftoa(dmats%cryst%tnons(2,isym)))
+     msg = sjoin(msg, ", ", ftoa(dmats%cryst%tnons(3,isym)), "]")
+     call sym_dicts(isym_cnt)%set("tnon", s=trim(msg))
+
+     msg = sjoin("[", itoa(symtab(1, itime, isym)), ", ", itoa(symtab(2, itime, isym)))
+     msg = sjoin(msg, ", ", itoa(symtab(3, itime, isym)), ", ", itoa(symtab(4, itime, isym)), "]")
+     call sym_dicts(isym_cnt)%set("symtab", s=trim(msg))
+
+     associate (cmat => dmat_k(:, :, isym, itime))
+     unitary = is_unitary(nb, cmat, DTOL, err)
+     if (.not. unitary) ierr = ierr + 1
+     call sym_dicts(isym_cnt)%set("unitary", s=yesno(unitary))
+     call sym_dicts(isym_cnt)%set("unitary_err", r=err)
+
+     ! Identity operator test
+     if (isym == 1 .and. itime == 1) then
+       identity_ok = is_identity(nb, cmat, DTOL, err)
+       if (.not. identity_ok) ierr = ierr + 1
+       call sym_dicts(isym_cnt)%set("identity_ok", s=yesno(identity_ok))
+       call sym_dicts(isym_cnt)%set("identity_err", r=err)
      end if
 
-     isym_cnt = 0
-     do itime=1,2
-       do isym=1,dmats%cryst%nsym
-         if (symtab(4, itime, isym) /= 0) isym_cnt = isym_cnt + 1
-       end do
-     end do
-     if (isym_cnt > 0) then
-       ABI_MALLOC(sym_dicts, (isym_cnt))
+     ! Character class-function test (itime=1 only, see the NOTES on get_classes
+     ! above the class_id_of_isym computation): |Tr D(S)| must be the same for
+     ! every S in a given conjugacy class of the little group.
+     if (itime == 1 .and. class_id_of_isym(isym) /= 0) then
+       icls = class_id_of_isym(isym)
+       char_err = abs(abs(get_trace(cmat)) - class_char_ref(icls))
+       char_ok = (char_err < DTOL)
+       if (.not. char_ok) ierr = ierr + 1
+       call sym_dicts(isym_cnt)%set("class_id", i=icls)
+       call sym_dicts(isym_cnt)%set("char_ok", s=yesno(char_ok))
+       call sym_dicts(isym_cnt)%set("char_err", r=char_err)
      end if
 
-     isym_cnt = 0
-     do itime=1,2
-       do isym=1,dmats%cryst%nsym
-         if (symtab(4, itime, isym) == 0) cycle
-         isym_cnt = isym_cnt + 1
-         call sym_dicts(isym_cnt)%set("isym", i=isym)
-         call sym_dicts(isym_cnt)%set("itime", i=itime)
-         msg = sjoin("[", ftoa(dmats%cryst%tnons(1,isym)), ", ", ftoa(dmats%cryst%tnons(2,isym)))
-         msg = sjoin(msg, ", ", ftoa(dmats%cryst%tnons(3,isym)), "]")
-         call sym_dicts(isym_cnt)%set("tnon", s=trim(msg))
+     ! Kramers test: pure time reversal (isym=1, itime=2) is only present in this
+     ! slot at TR-invariant k-points (k = -k mod G, e.g. TRIM points), and must
+     ! satisfy \Theta^2 = D(\Theta) D(\Theta)^* = +I EXACTLY (not just up to a
+     ! phase) for scalar (nspinor=1, hard-required by dmats_init) wavefunctions.
+     ! Unlike the generic group-multiplication test, this is an exact identity
+     ! with no residual gauge/tabulation-phase freedom: rescaling each band by an
+     ! arbitrary phase e^{i\phi_n} transforms D(\Theta) -> \Phi^{-1} D(\Theta) \Phi^{-1}
+     ! (antiunitary => the KET phase also gets conjugated), so
+     ! D(\Theta)D(\Theta)^* -> \Phi^{-1} [D(\Theta)D(\Theta)^*] \Phi, which leaves
+     ! "= I" invariant. This differs from, and is NOT redundant with, the inverse-
+     ! relation test below (isym_inv=1=isym for itime=2), which only checks that
+     ! D(\Theta) is proportional to its own transpose, not that D(\Theta)D(\Theta)^*=I.
+     if (isym == 1 .and. itime == 2) then
+       kramers_ok = is_identity(nb, matmul(cmat, conjg(cmat)), DTOL, err)
+       if (.not. kramers_ok) ierr = ierr + 1
+       call sym_dicts(isym_cnt)%set("kramers_ok", s=yesno(kramers_ok))
+       call sym_dicts(isym_cnt)%set("kramers_err", r=err)
+     end if
 
-         msg = sjoin("[", itoa(symtab(1, itime, isym)), ", ", itoa(symtab(2, itime, isym)))
-         msg = sjoin(msg, ", ", itoa(symtab(3, itime, isym)), ", ", itoa(symtab(4, itime, isym)), "]")
-         call sym_dicts(isym_cnt)%set("symtab", s=trim(msg))
+     ! Inverse relation test
+     isym_inv = dmats%toinv(1, isym)
 
-         associate (cmat => dmat_k(:, :, isym, itime))
-         unitary = is_unitary(nb, cmat, DTOL, err)
-         if (.not. unitary) ierr = ierr + 1
-         call sym_dicts(isym_cnt)%set("unitary", s=yesno(unitary))
-         call sym_dicts(isym_cnt)%set("unitary_err", r=err)
+     if (isym_inv /= 0 .and. symtab(4, itime, isym_inv) /= 0) then
+       ! For non-symmorphic groups, S S^{-1} may yield a translation by a lattice vector L.
+       L_red(1) = nint(sum(dmats%cryst%symrel(1,:,isym) * dmats%cryst%tnons(:,isym_inv)) + dmats%cryst%tnons(1,isym))
+       L_red(2) = nint(sum(dmats%cryst%symrel(2,:,isym) * dmats%cryst%tnons(:,isym_inv)) + dmats%cryst%tnons(2,isym))
+       L_red(3) = nint(sum(dmats%cryst%symrel(3,:,isym) * dmats%cryst%tnons(:,isym_inv)) + dmats%cryst%tnons(3,isym))
 
-         ! Identity operator test
-         if (isym == 1 .and. itime == 1) then
-           identity_ok = is_identity(nb, cmat, DTOL, err)
-           if (.not. identity_ok) ierr = ierr + 1
-           call sym_dicts(isym_cnt)%set("identity_ok", s=yesno(identity_ok))
-           call sym_dicts(isym_cnt)%set("identity_err", r=err)
-         end if
+       ! Analytic phase relating D(S^{-1}) to D(S)^\dagger, derived from the Seitz composition S.S^{-1} = E:
+       ! Phase = e^{-i 2pi k \cdot L} e^{i 2pi (S_{rec,inv} G_{0}) \cdot \tau_{S^{-1}}}
+       ! Note: S_{inv} G_0 is -G_{0, inv}. And \tau_{S^{-1}} = -R_{inv} \tau_S.
+       ! We just use the exact formula for group mult: isym1 = isym_inv, isym2 = isym
+       phase_analytic = exp(cmplx(zero, -two_pi * sum(kk_ibz * L_red) + &
+                 two_pi * sum(matmul(dmats%cryst%symrec(:,:,isym_inv), symtab(1:3, itime, isym)) * dmats%cryst%tnons(:,isym_inv)), dp))
 
-         ! Character class-function test (itime=1 only, see the NOTES on get_classes
-         ! above the class_id_of_isym computation): |Tr D(S)| must be the same for
-         ! every S in a given conjugacy class of the little group.
-         if (itime == 1 .and. class_id_of_isym(isym) /= 0) then
-           icls = class_id_of_isym(isym)
-           char_err = abs(abs(get_trace(cmat)) - class_char_ref(icls))
-           char_ok = (char_err < DTOL)
-           if (.not. char_ok) ierr = ierr + 1
-           call sym_dicts(isym_cnt)%set("class_id", i=icls)
-           call sym_dicts(isym_cnt)%set("char_ok", s=yesno(char_ok))
-           call sym_dicts(isym_cnt)%set("char_err", r=char_err)
-         end if
+       associate (cmat_inv => dmat_k(:, :, isym_inv, itime))
+       ! Independently, dynamically extract the phase relating the two independently constructed
+       ! matrices by taking the Frobenius inner product of the two matrices:
+       ! Phase = Tr(A^\dagger B) / nb = sum_{ij} A^*_{ij} B_{ij} / nb.
+       ! If the matrices are truly proportional, Phase will be a scalar of unit magnitude,
+       ! and dividing by it will yield a mathematically exact equality test.
+       if (itime == 1) then
+         phase_dyn = sum( conjg(cmat_inv) * conjg(transpose(cmat)) ) / nb
+         err = maxval(abs(cmat_inv * (phase_dyn / abs(phase_dyn)) - conjg(transpose(cmat))))
+       else
+         phase_dyn = sum( conjg(cmat_inv) * transpose(cmat) ) / nb
+         err = maxval(abs(cmat_inv * (phase_dyn / abs(phase_dyn)) - transpose(cmat)))
+       end if
+       ! phase_dyn, by construction of the Frobenius inner product above, should equal conjg(phase_analytic)
+       ! when the D-matrices carry the correct absolute phase, so phase_dyn * phase_analytic == 1.
+       ! NOTE: phase_analytic (L_red/G_0 formula above) is reported as a DIAGNOSTIC only and does NOT
+       ! feed into ierr/inv_ok yet: it currently disagrees with phase_dyn by a discrete 90/180 degree
+       ! offset on non-symmorphic operations, which looks like a bug in this analytic derivation itself
+       ! (still under investigation) rather than in the D-matrices (proportionality "err" is at machine
+       ! precision for the same entries). Once the formula is fixed, fold phase_err into the ierr test.
+       phase_err = abs(phase_dyn * phase_analytic - one)
+       if (err >= DTOL .or. abs(abs(phase_dyn) - one) > DTOL) ierr = ierr + 1
+       call sym_dicts(isym_cnt)%set("inv_ok", s=yesno(err < DTOL .and. abs(abs(phase_dyn) - one) <= DTOL))
+       call sym_dicts(isym_cnt)%set("inv_err", r=err)
+       call sym_dicts(isym_cnt)%set("inv_phase", s=sjoin(ftoa(real(phase_dyn)), " + i ", ftoa(aimag(phase_dyn))))
+       call sym_dicts(isym_cnt)%set("inv_phase_analytic_err", r=phase_err)
+       end associate
+     end if
+     if (prtvol > 1) call print_arr(units, cmat, max_r=nb, max_c=nb)
+     end associate
+   end do ! isym
+ end do ! itime
 
-         ! Kramers test: pure time reversal (isym=1, itime=2) is only present in this
-         ! slot at TR-invariant k-points (k = -k mod G, e.g. TRIM points), and must
-         ! satisfy \Theta^2 = D(\Theta) D(\Theta)^* = +I EXACTLY (not just up to a
-         ! phase) for scalar (nspinor=1, hard-required by dmats_init) wavefunctions.
-         ! Unlike the generic group-multiplication test, this is an exact identity
-         ! with no residual gauge/tabulation-phase freedom: rescaling each band by an
-         ! arbitrary phase e^{i\phi_n} transforms D(\Theta) -> \Phi^{-1} D(\Theta) \Phi^{-1}
-         ! (antiunitary => the KET phase also gets conjugated), so
-         ! D(\Theta)D(\Theta)^* -> \Phi^{-1} [D(\Theta)D(\Theta)^*] \Phi, which leaves
-         ! "= I" invariant. This differs from, and is NOT redundant with, the inverse-
-         ! relation test below (isym_inv=1=isym for itime=2), which only checks that
-         ! D(\Theta) is proportional to its own transpose, not that D(\Theta)D(\Theta)^*=I.
-         if (isym == 1 .and. itime == 2) then
-           kramers_ok = is_identity(nb, matmul(cmat, conjg(cmat)), DTOL, err)
-           if (.not. kramers_ok) ierr = ierr + 1
-           call sym_dicts(isym_cnt)%set("kramers_ok", s=yesno(kramers_ok))
-           call sym_dicts(isym_cnt)%set("kramers_err", r=err)
-         end if
+ ! Group multiplication test, extended to time reversal (itime1, itime2 in {1,2}).
+ ! In ABINIT, point-group operations are applied sequentially to coordinates such that
+ ! r' = S_1 S_2 r. When generating the representation matrices D(S, k),
+ ! this algebraic structure is maintained according to the product rule:
+ !
+ !   D^{k}(S_1 S_2) = e^{-i k \cdot L} D^{S_2 k}(S_1) D^{k}(S_2)
+ !
+ ! Since we are operating strictly inside the little group of k, we have S_2 k \equiv k,
+ ! and the equation fundamentally simplifies to a proportionality:
+ !
+ !   D(S_3) = e^{i \phi} D(S_1) D(S_2)
+ !
+ ! We search for the composite symmetry isym3 that perfectly matches the spatial
+ ! rotation product: symrel(isym1) * symrel(isym2). The spatial rotation composition
+ ! rule is itime-independent because \hat\Theta commutes with any pure spatial
+ ! coordinate transformation acting on the full (not just periodic-part) wavefunction:
+ ! \hat\Theta \hat S \psi(r) = [\hat S\psi(r)]^* = \psi(S^{-1}r)^* = \hat S[\hat\Theta\psi](r).
+ !
+ ! What DOES depend on itime is the Wigner co-representation composition law itself
+ ! (Bradley & Cracknell, sec. 7.3): composing two operators A=(isym1,itime1) and
+ ! B=(isym2,itime2), with A applied after B,
+ !
+ !   D(A B) = D(A) D(B)          if A is unitary     (itime1 == 1)
+ !   D(A B) = D(A) D(B)^*        if A is antiunitary (itime1 == 2)
+ !
+ ! and itime3 (unitary/antiunitary character of A B) follows from Theta^2 = +1
+ ! for the scalar (nspinor=1) wavefunctions handled here:
+ !
+ !   itime3 = 1 + mod((itime1-1) + (itime2-1), 2)
+ !
+ ! i.e. antiunitary o antiunitary = unitary, matching Theta^2=+1 (Kramers-degeneracy
+ ! sign would flip this to Theta^2=-1 for spinors, not implemented/tested: dmats_init
+ ! hard-requires nspinor=1).
+ !
+ ! Diagnostics: record every FAILING (isym1,itime1,isym2,itime2,isym3,itime3) tuple
+ ! (with its g0's and errors) instead of just incrementing ierr, so a caller like
+ ! dmats_check_star (run over the full BZ, where the k passed in need not be a genuine
+ ! IBZ point) can pinpoint exactly which composition and which umklapp broke.
+ mult_fail_cnt = 0
+ ABI_MALLOC(mult_fail_dicts, (4 * dmats%cryst%nsym**2))
+ do itime1=1,2
+   do itime2=1,2
+     itime3 = 1 + mod((itime1 - 1) + (itime2 - 1), 2)
+     do isym1=1,dmats%cryst%nsym
+       if (symtab(4, itime1, isym1) == 0) cycle
+       do isym2=1,dmats%cryst%nsym
+         if (symtab(4, itime2, isym2) == 0) cycle
 
-         ! Inverse relation test
-         isym_inv = dmats%toinv(1, isym)
+         isym3 = dmats%multable(1, isym1, isym2)
 
-         if (isym_inv /= 0 .and. symtab(4, itime, isym_inv) /= 0) then
-           ! For non-symmorphic groups, S S^{-1} may yield a translation by a lattice vector L.
-           L_red(1) = nint(sum(dmats%cryst%symrel(1,:,isym) * dmats%cryst%tnons(:,isym_inv)) + dmats%cryst%tnons(1,isym))
-           L_red(2) = nint(sum(dmats%cryst%symrel(2,:,isym) * dmats%cryst%tnons(:,isym_inv)) + dmats%cryst%tnons(2,isym))
-           L_red(3) = nint(sum(dmats%cryst%symrel(3,:,isym) * dmats%cryst%tnons(:,isym_inv)) + dmats%cryst%tnons(3,isym))
+         if (isym3 /= 0 .and. symtab(4, itime3, isym3) /= 0) then
+           associate (cmat1 => dmat_k(:, :, isym1, itime1), &
+                      cmat2 => dmat_k(:, :, isym2, itime2), &
+                      cmat3 => dmat_k(:, :, isym3, itime3))
 
-           ! Analytic phase relating D(S^{-1}) to D(S)^\dagger, derived from the Seitz composition S.S^{-1} = E:
-           ! Phase = e^{-i 2pi k \cdot L} e^{i 2pi (S_{rec,inv} G_{0}) \cdot \tau_{S^{-1}}}
-           ! Note: S_{inv} G_0 is -G_{0, inv}. And \tau_{S^{-1}} = -R_{inv} \tau_S.
-           ! We just use the exact formula for group mult: isym1 = isym_inv, isym2 = isym
-           phase_analytic = exp(cmplx(zero, -two_pi * sum(kk_ibz * L_red) + &
-                     two_pi * sum(matmul(dmats%cryst%symrec(:,:,isym_inv), symtab(1:3, itime, isym)) * dmats%cryst%tnons(:,isym_inv)), dp))
-
-           associate (cmat_inv => dmat_k(:, :, isym_inv, itime))
-           ! Independently, dynamically extract the phase relating the two independently constructed
-           ! matrices by taking the Frobenius inner product of the two matrices:
-           ! Phase = Tr(A^\dagger B) / nb = sum_{ij} A^*_{ij} B_{ij} / nb.
-           ! If the matrices are truly proportional, Phase will be a scalar of unit magnitude,
-           ! and dividing by it will yield a mathematically exact equality test.
-           if (itime == 1) then
-             phase_dyn = sum( conjg(cmat_inv) * conjg(transpose(cmat)) ) / nb
-             err = maxval(abs(cmat_inv * (phase_dyn / abs(phase_dyn)) - conjg(transpose(cmat))))
+           ! Instead of failing the test due to phase formula mismatch, we can just EXTRACT the phase!
+           ! ABINIT's exact phase might have extra factors due to how istwf_k and cgtk_rotate conjugate things.
+           ! The goal is to check if they are proportional (i.e. group structure is satisfied up to a phase).
+           if (itime1 == 1) then
+             phase_L = sum( conjg(cmat3) * matmul(cmat1, cmat2) ) / nb
+             err = maxval(abs(cmat3 * (phase_L / abs(phase_L)) - matmul(cmat1, cmat2)))
            else
-             phase_dyn = sum( conjg(cmat_inv) * transpose(cmat) ) / nb
-             err = maxval(abs(cmat_inv * (phase_dyn / abs(phase_dyn)) - transpose(cmat)))
+             phase_L = sum( conjg(cmat3) * matmul(cmat1, conjg(cmat2)) ) / nb
+             err = maxval(abs(cmat3 * (phase_L / abs(phase_L)) - matmul(cmat1, conjg(cmat2))))
            end if
-           ! phase_dyn, by construction of the Frobenius inner product above, should equal conjg(phase_analytic)
-           ! when the D-matrices carry the correct absolute phase, so phase_dyn * phase_analytic == 1.
-           ! NOTE: phase_analytic (L_red/G_0 formula above) is reported as a DIAGNOSTIC only and does NOT
-           ! feed into ierr/inv_ok yet: it currently disagrees with phase_dyn by a discrete 90/180 degree
-           ! offset on non-symmorphic operations, which looks like a bug in this analytic derivation itself
-           ! (still under investigation) rather than in the D-matrices (proportionality "err" is at machine
-           ! precision for the same entries). Once the formula is fixed, fold phase_err into the ierr test.
-           phase_err = abs(phase_dyn * phase_analytic - one)
-           if (err >= DTOL .or. abs(abs(phase_dyn) - one) > DTOL) ierr = ierr + 1
-           call sym_dicts(isym_cnt)%set("inv_ok", s=yesno(err < DTOL .and. abs(abs(phase_dyn) - one) <= DTOL))
-           call sym_dicts(isym_cnt)%set("inv_err", r=err)
-           call sym_dicts(isym_cnt)%set("inv_phase", s=sjoin(ftoa(real(phase_dyn)), " + i ", ftoa(aimag(phase_dyn))))
-           call sym_dicts(isym_cnt)%set("inv_phase_analytic_err", r=phase_err)
+
+           ! Analytic prediction of the same phase, from the "Caveat for tabulated symmetry
+           ! matrices" in main.tex: the literal Seitz product S1S2 and the tabulated operation
+           ! S3=isym3 sharing its rotation differ by a pure lattice translation L, giving
+           ! D^k(S3) = e^{-i (S3 k).L} D(S1) D(S2), where (S3 k) is the PURE spatial rotation
+           ! of S3 applied to k (symrel^t, no time-reversal sign: L comes from the translation
+           ! part of the spatial space group only, unrelated to Theta).
+           ! dmats%multable/toinv are built from the plain {symrel,tnons} Seitz convention,
+           ! while dmats%for_spin is indexed with the symrel^t convention used throughout this
+           ! file for the k-action of a symmetry. Reconciling the two requires L to be looked
+           ! up at the GROUP-THEORETIC INVERSES of isym1 and isym2 (in reversed order):
+           ! L = multable(2:4, toinv(isym2), toinv(isym1)), not multable(2:4,isym1,isym2).
+           ! With this, phase_analytic_mult matches phase_L exactly for all 768
+           ! (isym1,isym2,itime1,itime2) tuples tested on the reference gstore test.
+           isym1_inv = dmats%toinv(1, isym1)
+           isym2_inv = dmats%toinv(1, isym2)
+           Sk3 = matmul(transpose(real(dmats%cryst%symrel(:,:,isym3), dp)), kk_ibz)
+           L_mult = real(dmats%multable(2:4, isym2_inv, isym1_inv), dp)
+           phase_analytic_mult = exp(cmplx(zero, -two_pi * sum(Sk3 * L_mult), dp))
+           phase_err_mult = abs(phase_L * phase_analytic_mult - one)
+
+           ! NOTE on phase_err_mult and dmat_star (reconstructed full-BZ D-matrices, see
+           ! dmats_check_star/dmats_get_star_dmats): instrumented this test (temporarily) to
+           ! record every failing tuple and confirmed, on the k' points where check_star
+           ! reports failures, that ALL of them have err and |phase_L|-1 at machine precision
+           ! (true proportionality/closure holds EXACTLY) while phase_err_mult is exactly 2.0
+           ! (a clean sign flip, not noise) for every single one -- i.e. this is the SAME
+           ! class of "consistently exactly wrong by a clean phase factor" issue already
+           ! flagged as diagnostic-only, unresolved, for IMPROPER operations in the S^n
+           ! closure test below and for the inverse-relation test above. Tried the natural
+           ! alternative convention (L = multable(2:4,isym1,isym2) directly, no toinv-reversal,
+           ! dotted with kk_ibz instead of Sk3 -- provably equivalent to Sk3 since g0.L_mult is
+           ! always an integer): it does NOT universally fix it either (worse overall, and the
+           ! two conventions disagree on non-overlapping subsets of tuples), so this isn't a
+           ! simple sign/convention swap in phase_analytic_mult -- the true fix requires
+           ! working out how phase_h (dmats_get_star_dmats's own per-isym reconstruction
+           ! phase) interacts with the k'-frame tabulated-vs-literal correction L_mult, which
+           ! is not yet derived. Until then, gate ierr on the two properties that constitute
+           ! actual group-representation closure (proportionality + unit modulus), matching
+           ! the precedent set by the two other diagnostic-only checks in this routine, and
+           ! keep phase_err_mult as a reported (not gating) diagnostic.
+           if (err >= DTOL .or. abs(abs(phase_L) - one) > DTOL) then
+             ierr = ierr + 1
+             mult_fail_cnt = mult_fail_cnt + 1
+             call mult_fail_dicts(mult_fail_cnt)%set("isym1", i=isym1)
+             call mult_fail_dicts(mult_fail_cnt)%set("itime1", i=itime1)
+             call mult_fail_dicts(mult_fail_cnt)%set("isym2", i=isym2)
+             call mult_fail_dicts(mult_fail_cnt)%set("itime2", i=itime2)
+             call mult_fail_dicts(mult_fail_cnt)%set("isym3", i=isym3)
+             call mult_fail_dicts(mult_fail_cnt)%set("itime3", i=itime3)
+             call mult_fail_dicts(mult_fail_cnt)%set("g0_1", s=trim(ltoa(symtab(1:3, itime1, isym1))))
+             call mult_fail_dicts(mult_fail_cnt)%set("g0_2", s=trim(ltoa(symtab(1:3, itime2, isym2))))
+             call mult_fail_dicts(mult_fail_cnt)%set("g0_3", s=trim(ltoa(symtab(1:3, itime3, isym3))))
+             call mult_fail_dicts(mult_fail_cnt)%set("err", r=err)
+             call mult_fail_dicts(mult_fail_cnt)%set("phase_mod_err", r=abs(abs(phase_L) - one))
+             call mult_fail_dicts(mult_fail_cnt)%set("phase_err_mult", r=phase_err_mult)
+           end if
            end associate
          end if
-         if (prtvol > 1) call print_arr(units, cmat, max_r=nb, max_c=nb)
-         end associate
-       end do ! isym
-     end do ! itime
+       end do
+     end do
+   end do
+ end do
 
-     ! Group multiplication test, extended to time reversal (itime1, itime2 in {1,2}).
-     ! In ABINIT, point-group operations are applied sequentially to coordinates such that
-     ! r' = S_1 S_2 r. When generating the representation matrices D(S, k),
-     ! this algebraic structure is maintained according to the product rule:
-     !
-     !   D^{k}(S_1 S_2) = e^{-i k \cdot L} D^{S_2 k}(S_1) D^{k}(S_2)
-     !
-     ! Since we are operating strictly inside the little group of k, we have S_2 k \equiv k,
-     ! and the equation fundamentally simplifies to a proportionality:
-     !
-     !   D(S_3) = e^{i \phi} D(S_1) D(S_2)
-     !
-     ! We search for the composite symmetry isym3 that perfectly matches the spatial
-     ! rotation product: symrel(isym1) * symrel(isym2). The spatial rotation composition
-     ! rule is itime-independent because \hat\Theta commutes with any pure spatial
-     ! coordinate transformation acting on the full (not just periodic-part) wavefunction:
-     ! \hat\Theta \hat S \psi(r) = [\hat S\psi(r)]^* = \psi(S^{-1}r)^* = \hat S[\hat\Theta\psi](r).
-     !
-     ! What DOES depend on itime is the Wigner co-representation composition law itself
-     ! (Bradley & Cracknell, sec. 7.3): composing two operators A=(isym1,itime1) and
-     ! B=(isym2,itime2), with A applied after B,
-     !
-     !   D(A B) = D(A) D(B)          if A is unitary     (itime1 == 1)
-     !   D(A B) = D(A) D(B)^*        if A is antiunitary (itime1 == 2)
-     !
-     ! and itime3 (unitary/antiunitary character of A B) follows from Theta^2 = +1
-     ! for the scalar (nspinor=1) wavefunctions handled here:
-     !
-     !   itime3 = 1 + mod((itime1-1) + (itime2-1), 2)
-     !
-     ! i.e. antiunitary o antiunitary = unitary, matching Theta^2=+1 (Kramers-degeneracy
-     ! sign would flip this to Theta^2=-1 for spinors, not implemented/tested: dmats_init
-     ! hard-requires nspinor=1).
-     !
-     ! Diagnostics: record every FAILING (isym1,itime1,isym2,itime2,isym3,itime3) tuple
-     ! (with its g0's and errors) instead of just incrementing ierr, so a caller like
-     ! dmats_check_star (run over the full BZ, where the k passed in need not be a genuine
-     ! IBZ point) can pinpoint exactly which composition and which umklapp broke.
-     mult_fail_cnt = 0
-     ABI_MALLOC(mult_fail_dicts, (4 * dmats%cryst%nsym**2))
-     do itime1=1,2
-       do itime2=1,2
-         itime3 = 1 + mod((itime1 - 1) + (itime2 - 1), 2)
-         do isym1=1,dmats%cryst%nsym
-           if (symtab(4, itime1, isym1) == 0) cycle
-           do isym2=1,dmats%cryst%nsym
-             if (symtab(4, itime2, isym2) == 0) cycle
+ if (mult_fail_cnt > 0) then
+   call ydoc%add_dictlist(sjoin(tag, "_group_mult_fail"), mult_fail_cnt, mult_fail_dicts(1:mult_fail_cnt))
+   do j = 1, mult_fail_cnt
+     call mult_fail_dicts(j)%free()
+   end do
+ end if
+ ABI_FREE(mult_fail_dicts)
 
-             isym3 = dmats%multable(1, isym1, isym2)
+ ! =========================================================================
+ ! Eigenvalues & Closure Test (itime = 1)
+ ! =========================================================================
+ ! According to the theory of group representations, the representation matrix
+ ! D(S) must satisfy the closure conditions of the crystallographic point group.
+ ! If S = C_n is an n-fold symmetry operation, applying the spatial rotation
+ ! n times yields the identity (R^n = E).
+ ! However, for non-symmorphic operations (e.g. glide planes or screw axes),
+ ! applying the operation n times results in a pure fractional lattice translation:
+ !   S^n(r) = r + T
+ !
+ ! In reciprocal space, inside the little group of k, this translation introduces
+ ! a scalar Bloch phase shift. Thus, the eigenvalues of the representation matrix satisfy:
+ !
+ !   [ D(S) ]^n = e^{-i k \cdot T} I
+ !
+ ! (dmats hard-requires nspinor=1, see dmats_init NOTES, so there's no extra spinor parity).
+ ! We extract the overall scalar phase \phi = Tr(D^n) / N_{bands}, assert that
+ ! D(S)^n \equiv \phi I, and cross-check \phi against the analytic e^{-i k.T} computed
+ ! from the T returned by sym_order.
+ isym_cnt = 0
+ do itime=1,2
+   do isym=1,dmats%cryst%nsym
+     if (symtab(4, itime, isym) == 0) cycle
+     isym_cnt = isym_cnt + 1
+     if (itime == 1) then
+       associate (cmat => dmat_k(:, :, isym, 1))
 
-             if (isym3 /= 0 .and. symtab(4, itime3, isym3) /= 0) then
-               associate (cmat1 => dmat_k(:, :, isym1, itime1), &
-                          cmat2 => dmat_k(:, :, isym2, itime2), &
-                          cmat3 => dmat_k(:, :, isym3, itime3))
+       ! Find the order of the point-group operation (n in {1,2,3,4,6}).
+       ! NB: use a dedicated ierr_so for sym_order's own status -- passing the shared
+       ! accumulator "ierr" directly would have sym_order's intent(out) silently reset it
+       ! to 0 on every call, wiping out all previously-accumulated test failures.
+       call sym_order(dmats%cryst%symrel(:,:,isym), dmats%cryst%tnons(:,isym), n, isproper, trans, msg, ierr_so)
+       ABI_CHECK_IEQ(ierr_so, 0, msg)
 
-               ! Instead of failing the test due to phase formula mismatch, we can just EXTRACT the phase!
-               ! ABINIT's exact phase might have extra factors due to how istwf_k and cgtk_rotate conjugate things.
-               ! The goal is to check if they are proportional (i.e. group structure is satisfied up to a phase).
-               if (itime1 == 1) then
-                 phase_L = sum( conjg(cmat3) * matmul(cmat1, cmat2) ) / nb
-                 err = maxval(abs(cmat3 * (phase_L / abs(phase_L)) - matmul(cmat1, cmat2)))
-               else
-                 phase_L = sum( conjg(cmat3) * matmul(cmat1, conjg(cmat2)) ) / nb
-                 err = maxval(abs(cmat3 * (phase_L / abs(phase_L)) - matmul(cmat1, conjg(cmat2))))
-               end if
-
-               ! Analytic prediction of the same phase, from the "Caveat for tabulated symmetry
-               ! matrices" in main.tex: the literal Seitz product S1S2 and the tabulated operation
-               ! S3=isym3 sharing its rotation differ by a pure lattice translation L, giving
-               ! D^k(S3) = e^{-i (S3 k).L} D(S1) D(S2), where (S3 k) is the PURE spatial rotation
-               ! of S3 applied to k (symrel^t, no time-reversal sign: L comes from the translation
-               ! part of the spatial space group only, unrelated to Theta).
-               ! dmats%multable/toinv are built from the plain {symrel,tnons} Seitz convention,
-               ! while dmats%for_spin is indexed with the symrel^t convention used throughout this
-               ! file for the k-action of a symmetry. Reconciling the two requires L to be looked
-               ! up at the GROUP-THEORETIC INVERSES of isym1 and isym2 (in reversed order):
-               ! L = multable(2:4, toinv(isym2), toinv(isym1)), not multable(2:4,isym1,isym2).
-               ! With this, phase_analytic_mult matches phase_L exactly for all 768
-               ! (isym1,isym2,itime1,itime2) tuples tested on the reference gstore test.
-               isym1_inv = dmats%toinv(1, isym1)
-               isym2_inv = dmats%toinv(1, isym2)
-               Sk3 = matmul(transpose(real(dmats%cryst%symrel(:,:,isym3), dp)), kk_ibz)
-               L_mult = real(dmats%multable(2:4, isym2_inv, isym1_inv), dp)
-               phase_analytic_mult = exp(cmplx(zero, -two_pi * sum(Sk3 * L_mult), dp))
-               phase_err_mult = abs(phase_L * phase_analytic_mult - one)
-
-               ! NOTE on phase_err_mult and dmat_star (reconstructed full-BZ D-matrices, see
-               ! dmats_check_star/dmats_get_star_dmats): instrumented this test (temporarily) to
-               ! record every failing tuple and confirmed, on the k' points where check_star
-               ! reports failures, that ALL of them have err and |phase_L|-1 at machine precision
-               ! (true proportionality/closure holds EXACTLY) while phase_err_mult is exactly 2.0
-               ! (a clean sign flip, not noise) for every single one -- i.e. this is the SAME
-               ! class of "consistently exactly wrong by a clean phase factor" issue already
-               ! flagged as diagnostic-only, unresolved, for IMPROPER operations in the S^n
-               ! closure test below and for the inverse-relation test above. Tried the natural
-               ! alternative convention (L = multable(2:4,isym1,isym2) directly, no toinv-reversal,
-               ! dotted with kk_ibz instead of Sk3 -- provably equivalent to Sk3 since g0.L_mult is
-               ! always an integer): it does NOT universally fix it either (worse overall, and the
-               ! two conventions disagree on non-overlapping subsets of tuples), so this isn't a
-               ! simple sign/convention swap in phase_analytic_mult -- the true fix requires
-               ! working out how phase_h (dmats_get_star_dmats's own per-isym reconstruction
-               ! phase) interacts with the k'-frame tabulated-vs-literal correction L_mult, which
-               ! is not yet derived. Until then, gate ierr on the two properties that constitute
-               ! actual group-representation closure (proportionality + unit modulus), matching
-               ! the precedent set by the two other diagnostic-only checks in this routine, and
-               ! keep phase_err_mult as a reported (not gating) diagnostic.
-               if (err >= DTOL .or. abs(abs(phase_L) - one) > DTOL) then
-                 ierr = ierr + 1
-                 mult_fail_cnt = mult_fail_cnt + 1
-                 call mult_fail_dicts(mult_fail_cnt)%set("isym1", i=isym1)
-                 call mult_fail_dicts(mult_fail_cnt)%set("itime1", i=itime1)
-                 call mult_fail_dicts(mult_fail_cnt)%set("isym2", i=isym2)
-                 call mult_fail_dicts(mult_fail_cnt)%set("itime2", i=itime2)
-                 call mult_fail_dicts(mult_fail_cnt)%set("isym3", i=isym3)
-                 call mult_fail_dicts(mult_fail_cnt)%set("itime3", i=itime3)
-                 call mult_fail_dicts(mult_fail_cnt)%set("g0_1", s=trim(ltoa(symtab(1:3, itime1, isym1))))
-                 call mult_fail_dicts(mult_fail_cnt)%set("g0_2", s=trim(ltoa(symtab(1:3, itime2, isym2))))
-                 call mult_fail_dicts(mult_fail_cnt)%set("g0_3", s=trim(ltoa(symtab(1:3, itime3, isym3))))
-                 call mult_fail_dicts(mult_fail_cnt)%set("err", r=err)
-                 call mult_fail_dicts(mult_fail_cnt)%set("phase_mod_err", r=abs(abs(phase_L) - one))
-                 call mult_fail_dicts(mult_fail_cnt)%set("phase_err_mult", r=phase_err_mult)
-               end if
-               end associate
-             end if
-           end do
+       if (n > 1) then
+         ! Compute cmat^n
+         cmat_n = cmat
+         do j = 2, n
+           cmat_n = matmul(cmat, cmat_n)
          end do
-       end do
-     end do
 
-     if (mult_fail_cnt > 0) then
-       call ydoc%add_dictlist(sjoin(tag, "_group_mult_fail"), mult_fail_cnt, mult_fail_dicts(1:mult_fail_cnt))
-       do j = 1, mult_fail_cnt
-         call mult_fail_dicts(j)%free()
-       end do
+         ! Extract phase from Trace: phase = Tr(cmat^n) / nb
+         phase_L = zero
+         do j = 1, nb
+           phase_L = phase_L + cmat_n(j, j)
+         end do
+         phase_L = phase_L / nb
+
+         ! Normalize cmat_n with phase_L to check if it's proportional to identity
+         err = zero
+         do j = 1, nb
+           cmat_n(j, j) = cmat_n(j, j) - phase_L
+         end do
+         err = maxval(abs(cmat_n))
+
+         ! Analytic Bloch phase from the cumulative lattice translation T: D(S)^n = e^{-i k.T} I
+         phase_analytic = exp(cmplx(zero, -two_pi * dot_product(kk_ibz, real(trans, dp)), dp))
+         phase_err = abs(phase_L - phase_analytic)
+
+         ! NOTE: for IMPROPER operations (isproper=.false.), phase_err is consistently
+         ! found to be exactly 2 (phase_L = -phase_analytic, a clean sign flip, not noise)
+         ! -- the same class of unresolved cgtk_rotate phase-convention ambiguity already
+         ! flagged (but left diagnostic-only, not gating ierr) in the inverse-relation test
+         ! above ("still under investigation"). Follow that same precedent here: gate ierr
+         ! on proportionality (err) and unit modulus, but not on phase_err for improper ops.
+         if (err >= DTOL .or. abs(abs(phase_L) - one) > DTOL .or. (isproper .and. phase_err > DTOL)) ierr = ierr + 1
+         call sym_dicts(isym_cnt)%set("closure_ok", &
+           s=yesno(err < DTOL .and. abs(abs(phase_L) - one) <= DTOL .and. (.not. isproper .or. phase_err <= DTOL)))
+         call sym_dicts(isym_cnt)%set("closure_err", r=err)
+         call sym_dicts(isym_cnt)%set("closure_n", i=n)
+         call sym_dicts(isym_cnt)%set("isproper", s=yesno(isproper))
+         call sym_dicts(isym_cnt)%set("closure_phase", s=sjoin(ftoa(real(phase_L)), " + i ", ftoa(aimag(phase_L))))
+         call sym_dicts(isym_cnt)%set("closure_phase_analytic", &
+           s=sjoin(ftoa(real(phase_analytic)), " + i ", ftoa(aimag(phase_analytic))))
+         call sym_dicts(isym_cnt)%set("closure_phase_err", r=phase_err)
+       end if
+       end associate
      end if
-     ABI_FREE(mult_fail_dicts)
+   end do
+ end do
 
-     ! =========================================================================
-     ! Eigenvalues & Closure Test (itime = 1)
-     ! =========================================================================
-     ! According to the theory of group representations, the representation matrix
-     ! D(S) must satisfy the closure conditions of the crystallographic point group.
-     ! If S = C_n is an n-fold symmetry operation, applying the spatial rotation
-     ! n times yields the identity (R^n = E).
-     ! However, for non-symmorphic operations (e.g. glide planes or screw axes),
-     ! applying the operation n times results in a pure fractional lattice translation:
-     !   S^n(r) = r + T
-     !
-     ! In reciprocal space, inside the little group of k, this translation introduces
-     ! a scalar Bloch phase shift. Thus, the eigenvalues of the representation matrix satisfy:
-     !
-     !   [ D(S) ]^n = e^{-i k \cdot T} I
-     !
-     ! (dmats hard-requires nspinor=1, see dmats_init NOTES, so there's no extra spinor parity).
-     ! We extract the overall scalar phase \phi = Tr(D^n) / N_{bands}, assert that
-     ! D(S)^n \equiv \phi I, and cross-check \phi against the analytic e^{-i k.T} computed
-     ! from the T returned by sym_order.
-     isym_cnt = 0
-     do itime=1,2
-       do isym=1,dmats%cryst%nsym
-         if (symtab(4, itime, isym) == 0) cycle
-         isym_cnt = isym_cnt + 1
-         if (itime == 1) then
-           associate (cmat => dmat_k(:, :, isym, 1))
-
-           ! Find the order of the point-group operation (n in {1,2,3,4,6}).
-           ! NB: use a dedicated ierr_so for sym_order's own status -- passing the shared
-           ! accumulator "ierr" directly would have sym_order's intent(out) silently reset it
-           ! to 0 on every call, wiping out all previously-accumulated test failures.
-           call sym_order(dmats%cryst%symrel(:,:,isym), dmats%cryst%tnons(:,isym), n, isproper, trans, msg, ierr_so)
-           ABI_CHECK_IEQ(ierr_so, 0, msg)
-
-           if (n > 1) then
-             ! Compute cmat^n
-             cmat_n = cmat
-             do j = 2, n
-               cmat_n = matmul(cmat, cmat_n)
-             end do
-
-             ! Extract phase from Trace: phase = Tr(cmat^n) / nb
-             phase_L = zero
-             do j = 1, nb
-               phase_L = phase_L + cmat_n(j, j)
-             end do
-             phase_L = phase_L / nb
-
-             ! Normalize cmat_n with phase_L to check if it's proportional to identity
-             err = zero
-             do j = 1, nb
-               cmat_n(j, j) = cmat_n(j, j) - phase_L
-             end do
-             err = maxval(abs(cmat_n))
-
-             ! Analytic Bloch phase from the cumulative lattice translation T: D(S)^n = e^{-i k.T} I
-             phase_analytic = exp(cmplx(zero, -two_pi * dot_product(kk_ibz, real(trans, dp)), dp))
-             phase_err = abs(phase_L - phase_analytic)
-
-             ! NOTE: for IMPROPER operations (isproper=.false.), phase_err is consistently
-             ! found to be exactly 2 (phase_L = -phase_analytic, a clean sign flip, not noise)
-             ! -- the same class of unresolved cgtk_rotate phase-convention ambiguity already
-             ! flagged (but left diagnostic-only, not gating ierr) in the inverse-relation test
-             ! above ("still under investigation"). Follow that same precedent here: gate ierr
-             ! on proportionality (err) and unit modulus, but not on phase_err for improper ops.
-             if (err >= DTOL .or. abs(abs(phase_L) - one) > DTOL .or. (isproper .and. phase_err > DTOL)) ierr = ierr + 1
-             call sym_dicts(isym_cnt)%set("closure_ok", &
-               s=yesno(err < DTOL .and. abs(abs(phase_L) - one) <= DTOL .and. (.not. isproper .or. phase_err <= DTOL)))
-             call sym_dicts(isym_cnt)%set("closure_err", r=err)
-             call sym_dicts(isym_cnt)%set("closure_n", i=n)
-             call sym_dicts(isym_cnt)%set("isproper", s=yesno(isproper))
-             call sym_dicts(isym_cnt)%set("closure_phase", s=sjoin(ftoa(real(phase_L)), " + i ", ftoa(aimag(phase_L))))
-             call sym_dicts(isym_cnt)%set("closure_phase_analytic", &
-               s=sjoin(ftoa(real(phase_analytic)), " + i ", ftoa(aimag(phase_analytic))))
-             call sym_dicts(isym_cnt)%set("closure_phase_err", r=phase_err)
-           end if
-           end associate
-         end if
-       end do
-     end do
-
-     if (allocated(sym_dicts)) then
-       call ydoc%add_dictlist(tag, isym_cnt, sym_dicts)
-       do isym = 1, isym_cnt
-         call sym_dicts(isym)%free()
-       end do
-       ABI_FREE(sym_dicts)
-     end if
+ if (allocated(sym_dicts)) then
+   call ydoc%add_dictlist(tag, isym_cnt, sym_dicts)
+   do isym = 1, isym_cnt
+     call sym_dicts(isym)%free()
+   end do
+   ABI_FREE(sym_dicts)
+ end if
 
  ABI_FREE(cmat_n)
 
@@ -1895,7 +1896,7 @@ subroutine dmats_get_star_dmats(dmats, spin, ik_ibz, isym0, itime0, dmat_star, m
      !  tmp_literal := g . S0_inv_tab = {I, Ltmp} . TABULATED_tmp,  Ltmp = multable(2:4,isym,isym0_inv)
      !  h_tab_literal := S0 . tmp_literal = {I, R0.Ltmp + Lh2} . TABULATED_h,  Lh2 = multable(2:4,isym0,isym_tmp)
      !
-     ! h_tab_literal uses S0_inv_tab, not the EXACT inverse Ŝ0^{-1} = {I,-m0}.S0_inv_tab; undoing
+     ! h_tab_literal uses S0_inv_tab, not the EXACT inverse \hat S0^{-1} = {I,-m0}.S0_inv_tab; undoing
      ! that extra {I,m0} shift (tracked through the same two compositions) gives the additional
      ! correction -R_h.L0 (R_h=symrel(isym_h)), so that for g=identity (Ltmp=Lh2=L0, R_h=I) the
      ! total L_h = R0.0 + L0 - I.L0 = 0 exactly, as required:

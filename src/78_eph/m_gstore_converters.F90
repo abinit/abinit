@@ -80,7 +80,7 @@ subroutine gstore_convert(gstore_path, dtset, dtfil, cryst, ebands, ifc, comm)
 !scalars
  integer :: nprocs, my_rank, nsppol, spin, nmodes, this_comm, unt, ib, nu, i, j, ierr
  integer :: with_cplex, ik_ibz, my_is, my_ik, my_iq, iq_glob, natom, itypat, lstr_j
- integer :: ibrav, idir, jdir, iat, jat, ipert, unt_ascii, ik_glob, band_kq, band_k, mu
+ integer :: ibrav, idir, jdir, iat, ipert, unt_ascii, ik_glob, band_kq, band_k, mu ! jat,
  logical :: with_g2dw, q_is_gamma, lborn, ascii_write
  real(dp),parameter :: Ha2Ry = two
  real(dp) :: weight_qq
