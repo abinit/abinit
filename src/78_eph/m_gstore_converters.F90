@@ -30,11 +30,13 @@ module m_gstore_converters
  use m_io_tools,       only : open_file
  use m_dtset,          only : dataset_type
  use m_dtfil,          only : datafiles_type
+ use m_ddb_hdr,        only : ddb_hdr_type
+ use m_hdr,            only : hdr_type
  use m_fstrings,       only : sjoin, itoa, strcat
  use m_crystal,        only : crystal_t
  use m_ebands,         only : ebands_t, gaps_t
  use m_ifc,            only : ifc_type
- use m_gstore,         only : gstore_t, GSTORE_GMODE_PHONON, gstore_read_gtype
+ use m_gstore,         only : gstore_t, GSTORE_GMODE_ATOM, gstore_read_gtype
 
  implicit none
 
@@ -78,7 +80,7 @@ subroutine gstore_convert(gstore_path, dtset, dtfil, cryst, ebands, ifc, comm)
 !scalars
  integer :: nprocs, my_rank, nsppol, spin, nmodes, this_comm, unt, ib, nu, i, j, ierr
  integer :: with_cplex, ik_ibz, my_is, my_ik, my_iq, iq_glob, natom, itypat, lstr_j
- integer :: ibrav, idir, iat, ipert, unt_ascii, ik_glob, band_kq, band_k, mu
+ integer :: ibrav, idir, jdir, iat, jat, ipert, unt_ascii, ik_glob, band_kq, band_k, mu
  logical :: with_g2dw, q_is_gamma, lborn, ascii_write
  real(dp),parameter :: Ha2Ry = two
  real(dp) :: weight_qq
@@ -90,7 +92,6 @@ subroutine gstore_convert(gstore_path, dtset, dtfil, cryst, ebands, ifc, comm)
 !arrays
  integer :: units(2)
  real(dp) :: qpt(3), kk_bz(3), kk_ibz(3), celldm(6)
- real(dp) :: wfact
  real(dp),allocatable :: tau_cart(:,:)
  complex(dp),allocatable :: dyn_qe(:,:), g_cart(:,:,:)
  character(len=3) :: atm(cryst%ntypat)
@@ -126,6 +127,7 @@ subroutine gstore_convert(gstore_path, dtset, dtfil, cryst, ebands, ifc, comm)
  ! also written, with the same content (record by record) and a ".ascii" suffix.
  ! Toggle this flag (or wire it to an input variable) to disable the extra files.
  ascii_write = .True.
+ ascii_write = .False.
 
  ! Preliminary consistency check.
  call wrtout(units, sjoin(" Begin conversion GSTORE --> ", dtset%gstore_convert))
@@ -152,7 +154,11 @@ subroutine gstore_convert(gstore_path, dtset, dtfil, cryst, ebands, ifc, comm)
  gvals_name = "gvals"
  if (gtype == "gwpt" .and. dtset%gstore_gname == "gvals_ks") gvals_name = "gvals_ks"
 
- with_cplex = 2; with_gmode = GSTORE_GMODE_PHONON; with_g2dw = .False.
+ ! Request the ATOM representation: gstore.nc stores g in this representation (the bare
+ ! deformation potential w.r.t. reduced atomic displacements), so no atom->phonon
+ ! conversion is performed. This avoids ephtk_gkknu_from_atm, which would otherwise zero
+ ! the acoustic/imaginary modes (phfrq < EPHTK_WTOL) and divide by sqrt(2*omega).
+ with_cplex = 2; with_gmode = GSTORE_GMODE_ATOM; with_g2dw = .False.
 
  call gstore%from_ncpath(gstore_path, with_cplex, dtset, dtfil, cryst, ebands, ifc, &
                          with_gmode, gvals_name, with_g2dw, this_comm)
@@ -166,7 +172,7 @@ subroutine gstore_convert(gstore_path, dtset, dtfil, cryst, ebands, ifc, comm)
  ! will receive a gstore file in which all g(k,q) matrix elements in the BZ
  ! have been reconstructed using symmetry operations.
  ABI_CHECK(gstore%same_nbands(msg), msg)
- if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "phonon", kfilter="none") /= 0) then
+ if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "atom", kfilter="none") /= 0) then
    ABI_ERROR("GSTORE.nc should have both k and q in the full BZ. See messages above.")
  end if
 
@@ -180,7 +186,7 @@ subroutine gstore_convert(gstore_path, dtset, dtfil, cryst, ebands, ifc, comm)
 
  ! Write the EPIQ input namelist (&Diff_Start_Param + KPOINTS), the analog of QE's
  ! print_ph_input2epiq called inside ep_matrix_element_wannier.
- call write_epiq_input(dtset, ebands, strcat(elphmat_dir, "/scf_dfpt.2epiq.in"))
+ call write_epiq_input(ebands, dtfil, strcat(elphmat_dir, "/scf_dfpt.2epiq.in"))
  call wrtout(units, sjoin(" EPIQ input namelist written to:", strcat(elphmat_dir, "/scf_dfpt.2epiq.in")))
 
  ! Write the dynq0 file: q-mesh, number of irreducible q-points and their positions
@@ -262,9 +268,11 @@ subroutine gstore_convert(gstore_path, dtset, dtfil, cryst, ebands, ifc, comm)
      ! - tau are atom positions in Cartesian coordinates, in units of alat (= xcart/alat).
      ! - nel_aux (ebands%nelect) is the (real) number of electrons including possible doping.
      ! - The e-ph matrix elements are written in the Cartesian atomic-displacement basis
-     !   (as in QE ep_matrix_element_wannier), obtained by rotating the ABINIT mode-basis
-     !   g with the phonon eigenvectors. Consequently zz (the QE pattern matrix) is the
-     !   identity, while dyn keeps the Cartesian phonon displacements (= my_displ_cart).
+     !   (as in QE ep_matrix_element_wannier). gstore provides g in the atom representation
+     !   w.r.t. *reduced* atomic displacements; we rotate it to Cartesian directions with
+     !   gprimd (a per-atom 3x3 map). No mode/frequency factors are involved, so no mode is
+     !   zeroed. Consequently zz (the QE pattern matrix) is the identity, while dyn keeps the
+     !   Cartesian phonon displacements (= my_displ_cart).
      lborn = .False.
 
      ! Record 1: q-point in reduced (crystal) coordinates.
@@ -337,6 +345,18 @@ subroutine gstore_convert(gstore_path, dtset, dtfil, cryst, ebands, ifc, comm)
      ! Cartesian direction fast, atom slow, matching the QE mode/perturbation ordering):
      !   dyn_qe = phonon displacements (eigenvectors divided by sqrt(mass)) = my_displ_cart.
      ! These are written as 'dyn' (record 10) and used below to rotate g to the Cartesian basis.
+     !do iat=1,natom
+       !do idir=1,3
+         !mu = (iat-1)*3+idir
+         !do jat=1,natom
+           !do jdir=1,3
+             !nu = (jat-1)*3+jdir
+             !dyn_qe(mu, nu) = cmplx(gstore%ifc_dynmat(1,idir,iat,jdir,jat),&
+               !gstore%ifc_dynmat(2,idir,iat,jdir,jat),kind=dp)
+           !end do
+         !end do
+       !end do
+     !end do
      do nu=1,nmodes
        do iat=1,natom
          do idir=1,3
@@ -389,25 +409,24 @@ subroutine gstore_convert(gstore_path, dtset, dtfil, cryst, ebands, ifc, comm)
          write(unt_ascii, '(*(es24.15,1x))') (ebands%eig(ib, ik_ibz, spin) * Ha2Ry, ib=gqk%bstart_k, gqk%bstop_k)
        end if
 
-       ! Build the Cartesian deformation potential expected by EPIQ:
-       !   d_cart(mu) = M_kappa * sum_nu [ g_mode(nu) * sqrt(2 w_nu) ] * conjg(displ_cart(mu,nu))
-       ! This inverts ABINIT's atom->mode transform g_mode(nu) = sum_mu d_cart(mu) e(mu,nu)/sqrt(2 w_nu)
-       ! (see m_ephtk/ephtk_gkknu_from_atm), recovering the bare <k+q,m| dV/du^cart_mu |k,n>:
-       ! the sqrt(2 w_nu) and mass factors exactly cancel ABINIT's normalization.
-       ! mu = idir + 3*(iat-1); M_kappa = amu(iat) * amu_emass (electron-mass units).
-       ! Modes with w_nu <= 0 (acoustic/imaginary) carry g_mode = 0 and are skipped.
+       ! Rotate g from the atom representation (reduced atomic-displacement directions, as
+       ! stored in gstore) to Cartesian directions, giving the bare Cartesian deformation
+       ! potential expected by EPIQ:
+       !   d_cart(beta,kappa) = sum_alpha gprimd(beta,alpha) * g_red(alpha,kappa)
+       ! with the composite index mu = idir + 3*(iat-1). This is a per-atom 3x3 map: it
+       ! involves no frequency or mass factors, so every mode is preserved (nothing is
+       ! zeroed, unlike the atom->phonon->Cartesian path). The Ha->Ry factor is applied
+       ! on output below, hence d_cart is in Ry/Bohr there.
        g_cart = (zero, zero)
-       do nu=1,nmodes
-         if (gqk%my_wnuq(nu, my_iq) <= tol6) cycle
-         wfact = sqrt(two * gqk%my_wnuq(nu, my_iq))
-         do mu=1,nmodes
-           g_cart(mu, :, :) = g_cart(mu, :, :) &
-             + (wfact * conjg(dyn_qe(mu, nu))) * gqk%my_g(nu, :, my_iq, :, my_ik)
+       do iat=1,natom
+         do idir=1,3                   ! Cartesian direction beta
+           mu = idir + 3 * (iat - 1)
+           do jdir=1,3                 ! reduced direction alpha
+             ipert = jdir + 3 * (iat - 1)
+             g_cart(mu, :, :) = g_cart(mu, :, :) &
+               + cryst%gprimd(idir, jdir) * gqk%my_g(ipert, :, my_iq, :, my_ik)
+           end do
          end do
-       end do
-       do mu=1,nmodes
-         iat = (mu - 1) / 3 + 1
-         g_cart(mu, :, :) = g_cart(mu, :, :) * (cryst%amu(cryst%typat(iat)) * amu_emass)
        end do
 
        do mu=1,nmodes
@@ -471,49 +490,73 @@ end subroutine gstore_convert
 !!  The SCF/DFPT parameters are taken from the ABINIT dataset and band structure.
 !!
 !! INPUTS
-!!  dtset<dataset_type>=input variables (occopt, tsmear, k-grid).
-!!  ebands<ebands_t>=band structure (Fermi level, nelect, k-points, gaps).
+!!  ebands<ebands_t>=band structure (only used for HOMO/LUMO of insulators).
+!!  dtfil<datafiles_type>=filenames; dtfil%fildvdbin (DVDB) and dtfil%filddbsin (DDB).
 !!  fname=name of the output file.
+!!
+!! NOTES
+!!  ALL exported parameters come from the calculation that produced the DDB/DVDB
+!!  (the ground-state/DFPT run), NOT from the (denser) gstore/eph run:
+!!   - efermi, nel_r, occopt (-> ngauss_ph), tsmear (-> sigma_ph) from the DVDB header
+!!     (a standard ABINIT header carrying the GS scalars including the Fermi level).
+!!   - the KPOINTS list from the DDB header (the GS/DFPT k-mesh).
+!!  Exception: HOMO/LUMO of insulators are not stored in either header (no GS
+!!  eigenvalues), so they are taken from ebands (gap edges, essentially mesh-independent).
 !!
 !! SOURCE
 
-subroutine write_epiq_input(dtset, ebands, fname)
+subroutine write_epiq_input(ebands, dtfil, fname)
 
 !Arguments ------------------------------------
- type(dataset_type),intent(in) :: dtset
  class(ebands_t),intent(in) :: ebands
+ type(datafiles_type),intent(in) :: dtfil
  character(len=*),intent(in) :: fname
 
 !Local variables-------------------------------
 !scalars
- integer :: unt, ik, ngauss, gap_err, nk1, nk2, nk3, k1, k2, k3
- logical :: is_metal, automatic
- real(dp) :: homo, lumo
+ integer :: unt, iunt, ik, ngauss, gap_err, fform
+ real(dp) :: homo, lumo, knorm
+ logical :: is_metal
  character(len=500) :: msg
  character(len=24) :: smear_label
  type(gaps_t) :: gaps
+ type(ddb_hdr_type) :: ddb_hdr
+ type(hdr_type) :: dfpt_hdr
 !----------------------------------------------------------------------
 
  if (open_file(fname, msg, newunit=unt, form="formatted", status="unknown", action="write") /= 0) then
    ABI_ERROR(msg)
  end if
 
+ ! Read the GS/DFPT header from the DVDB: it carries the Fermi level, nelect, occopt
+ ! and tsmear of the run that produced the DDB/DVDB (the DDB header has no Fermi level).
+ ! The DVDB starts with two records (version, numv1) before the standard ABINIT header,
+ ! so we skip them and read the header in place (fort_read without rewind).
+ if (open_file(dtfil%fildvdbin, msg, newunit=iunt, form="unformatted", status="old", action="read") /= 0) then
+   ABI_ERROR(msg)
+ end if
+ read(iunt)   ! skip the DVDB version record
+ read(iunt)   ! skip the numv1 record
+ call dfpt_hdr%fort_read(iunt, fform)
+ close(iunt)
+
  ! occopt >= 3 => metallic occupation with smearing; otherwise fixed occupations (insulator).
- is_metal = dtset%occopt >= 3
+ is_metal = dfpt_hdr%occopt >= 3
 
  write(unt, '(a)') "! parameter of the SCF DFPT calculation useful for EPIq"
  write(unt, '(a)') "&Diff_Start_Param"
- write(unt, '(3x,a,f12.6,a)') "efermi=", ebands%fermie * Ha_eV, ", ! in (eV)"
- write(unt, '(3x,a,f12.6,a)') "nel_r=", ebands%nelect, ","
+ write(unt, '(3x,a,f12.6,a)') "efermi=", dfpt_hdr%fermie * Ha_eV, ", ! in (eV)"
+ write(unt, '(3x,a,f12.6,a)') "nel_r=", dfpt_hdr%nelect, ","
 
  if (.not. is_metal) then
-   ! Insulator: report the HOMO and LUMO levels (in eV).
+   ! Insulator: report the HOMO and LUMO levels (in eV). Not in the DFPT header
+   ! (no GS eigenvalues), so taken from ebands (gap edges are mesh-independent).
    gaps = ebands%get_gaps(gap_err)
    if (gap_err == 0) then
      homo = gaps%vb_max(1); lumo = gaps%cb_min(1)
    else
      ! Could not determine a gap (semimetal?): fall back to the Fermi level.
-     homo = ebands%fermie; lumo = ebands%fermie
+     homo = dfpt_hdr%fermie; lumo = dfpt_hdr%fermie
    end if
    call gaps%free()
    write(unt, '(3x,a,f12.6,a)') "homo=", homo * Ha_eV, ", ! in (eV)"
@@ -522,40 +565,36 @@ subroutine write_epiq_input(dtset, ebands, fname)
    ! Metal: report the smearing width (Rydberg) and the QE ngauss code.
    ! Map ABINIT occopt onto QE ngauss (see Modules input conventions):
    !   3 -> -99 (Fermi-Dirac), 4/5 -> -1 (cold/Marzari), 6 -> 1 (Methfessel-Paxton), 7 -> 0 (Gaussian)
-   select case (dtset%occopt)
+   select case (dfpt_hdr%occopt)
    case (3);        ngauss = -99; smear_label = "fd"
    case (4, 5);     ngauss =  -1; smear_label = "cold"
    case (6);        ngauss =   1; smear_label = "mp"
    case (7);        ngauss =   0; smear_label = "gauss"
    case default;    ngauss = -66; smear_label = "unknown"
    end select
-   write(unt, '(3x,a,f12.6,a)') "sigma_ph=", dtset%tsmear * two, ", ! in (Rydberg)"
+   write(unt, '(3x,a,f12.6,a)') "sigma_ph=", dfpt_hdr%tsmear * two, ", ! in (Rydberg)"
    write(unt, '(3x,a,i3,a)') "ngauss_ph=", ngauss, ", ! "//trim(smear_label)
  end if
  write(unt, '(a)') "/"
 
- ! KPOINTS section. Use the "automatic" (Monkhorst-Pack) form when the k-mesh is a
- ! diagonal kptrlatt with a single shift; otherwise dump the explicit list.
- automatic = (dtset%nshiftk == 1) .and. &
-   all([dtset%kptrlatt(1,2), dtset%kptrlatt(1,3), dtset%kptrlatt(2,1), &
-        dtset%kptrlatt(2,3), dtset%kptrlatt(3,1), dtset%kptrlatt(3,2)] == 0) .and. &
-   dtset%kptrlatt(1,1) > 0 .and. dtset%kptrlatt(2,2) > 0 .and. dtset%kptrlatt(3,3) > 0
+ call dfpt_hdr%free()
+
+ ! KPOINTS section. Use the k-mesh that produced the DDB/DVDB (the ground-state/DFPT
+ ! mesh), read from the DDB header, NOT the gstore/eph k-mesh in dtset/ebands.
+ ! The DDB header stores the explicit k-point list (no kptrlatt), so we dump it.
+ call ddb_hdr%open_read(dtfil%filddbsin, xmpi_comm_self)
+ call ddb_hdr%close()   ! we only need the header data (k-points)
+
+ knorm = ddb_hdr%kptnrm; if (abs(knorm) < tol12) knorm = one
 
  write(unt, '(/,a)') "KPOINTS"
- if (automatic) then
-   nk1 = dtset%kptrlatt(1,1); nk2 = dtset%kptrlatt(2,2); nk3 = dtset%kptrlatt(3,3)
-   ! ABINIT shiftk are fractional shifts; a half-grid shift (0.5) maps to the QE flag 1.
-   k1 = nint(two * dtset%shiftk(1,1)); k2 = nint(two * dtset%shiftk(2,1)); k3 = nint(two * dtset%shiftk(3,1))
-   write(unt, '(a)') "automatic"
-   write(unt, '(3(2x,i6),3x,3(2x,i3))') nk1, nk2, nk3, k1, k2, k3
- else
-   ! Explicit list in reduced (crystal) coordinates.
    write(unt, '(a)') "crystal"
-   write(unt, '(6x,i9)') ebands%nkpt
-   do ik=1,ebands%nkpt
-     write(unt, '(3x,4(es20.10,2x))') ebands%kptns(:,ik), ebands%wtk(ik)
+ write(unt, '(6x,i9)') ddb_hdr%nkpt
+ do ik=1,ddb_hdr%nkpt
+   write(unt, '(3x,4(es20.10,2x))') ddb_hdr%kpt(:,ik) / knorm, ddb_hdr%wtk(ik)
    end do
- end if
+
+ call ddb_hdr%free()
 
  close(unt)
 
@@ -624,14 +663,17 @@ end subroutine write_dynq0
 !! write_dynq
 !!
 !! FUNCTION
-!!  Write a Quantum ESPRESSO dynamical-matrix file (dynq<iq>) for a single q-point,
-!!  reproducing the layout of QE's write_dyn_on_file + dyndiag: header (cell, atoms),
-!!  the dynamical matrix in Cartesian axes, and the diagonalization (frequencies and
-!!  eigenvectors).
+!!  Write a Quantum ESPRESSO dynamical-matrix file (dynq<iq>) for an irreducible q-point
+!!  AND all the q-points of its star, reproducing the layout of QE's write_dyn_on_file +
+!!  rotate_dvscf_star + dyndiag: a single header (cell, atoms), one "Dynamical Matrix in
+!!  cartesian axes" block per star member (representative q first), and a single
+!!  diagonalization block (frequencies and eigenvectors) for the representative q.
 !!
-!!  Frequencies, displacements and orthonormal eigenvectors are obtained from ifc%fourq
-!!  (the gauge is irrelevant here since the dynamical matrix is gauge-invariant). The
-!!  Cartesian dynamical matrix is rebuilt as
+!!  The star is generated from the ABINIT crystal symmetries (q' = symrec*q, deduplicated
+!!  modulo a reciprocal-lattice vector), and the dynamical matrix at each star member is
+!!  evaluated directly with ifc%fourq (equivalent to rotating D(q) by symmetry, since
+!!  D(Sq) = sum_R Phi(R) exp(i Sq.R); the gauge is irrelevant as D is gauge-invariant).
+!!  The Cartesian dynamical matrix is rebuilt as
 !!    phi(ka,k'b) = sqrt(M_k M_k') * sum_nu z(ka,nu) * w2(nu) * conjg(z(k'b,nu))
 !!  with z the orthonormal eigenvectors, w2 = signed omega^2 in Ry^2 and M the QE
 !!  Rydberg atomic masses (amu * amu_emass/2). This matches QE's convention.
@@ -657,14 +699,16 @@ subroutine write_dynq(cryst, ifc, qpt_red, alat, atm, fname)
 
 !Local variables-------------------------------
 !scalars
- integer :: natom, nmodes, ntypat, unt, na, nb, icar, jcar, nu, it
- real(dp),parameter :: Ha2Ry = two
+ integer :: natom, nmodes, ntypat, unt, na, nb, icar, jcar, nu, it, isym, iqs, nq_star
+ real(dp),parameter :: Ha2Ry = two, accep = 1.0e-5_dp
  real(dp) :: znorm, freq_cm, freq_thz
+ logical :: found
  complex(dp) :: zi, zj, cs
  character(len=500) :: msg
 !arrays
- real(dp) :: qcart(3), at(3,3), celldm(6)
+ real(dp) :: at(3,3), bg(3,3), celldm(6), aq(3), raq(3), dq(3)
  real(dp),allocatable :: phfrq(:), displ_cart(:,:,:,:), eigvec(:,:,:,:), w2(:), amass_qe(:), tau(:,:)
+ real(dp),allocatable :: saq(:,:), sxq(:,:), phfrq_rep(:), eigvec_rep(:,:,:,:)
  complex(dp),allocatable :: phi(:,:,:,:)
 !----------------------------------------------------------------------
 
@@ -677,52 +721,52 @@ subroutine write_dynq(cryst, ifc, qpt_red, alat, atm, fname)
  ABI_MALLOC(amass_qe, (ntypat))
  ABI_MALLOC(tau, (3, natom))
  ABI_MALLOC(phi, (3, 3, natom, natom))
-
- ! Phonon frequencies, displacements and orthonormal eigenvectors at this q.
- call ifc%fourq(cryst, qpt_red, phfrq, displ_cart, out_eigvec=eigvec)
+ ABI_MALLOC(saq, (3, cryst%nsym))
+ ABI_MALLOC(sxq, (3, cryst%nsym))
+ ABI_MALLOC(phfrq_rep, (nmodes))
+ ABI_MALLOC(eigvec_rep, (2, 3, natom, nmodes))
 
  ! QE masses in Rydberg atomic units (amu * amu_ry, amu_ry = amu_emass/2).
  do it=1,ntypat
    amass_qe(it) = cryst%amu(it) * amu_emass * half
  end do
 
- ! Signed squared phonon frequencies in Ry^2.
- do nu=1,nmodes
-   w2(nu) = phfrq(nu) * abs(phfrq(nu)) * Ha2Ry ** 2
+ ! Cartesian cell quantities (alat / tpiba units).
+ do nu=1,3
+   at(:,nu) = cryst%rprimd(:,nu) / alat
+   bg(:,nu) = cryst%gprimd(:,nu) * alat
  end do
-
- ! Cartesian quantities (alat / tpiba units).
- qcart = alat * matmul(cryst%gprimd, qpt_red)
  do na=1,natom
    tau(:,na) = matmul(cryst%rprimd, cryst%xred(:,na)) / alat
  end do
- do nu=1,3
-   at(:,nu) = cryst%rprimd(:,nu) / alat
- end do
  celldm = zero; celldm(1) = alat
 
- ! Dynamical matrix in Cartesian axes (QE convention, see header).
- do nb=1,natom
-   do na=1,natom
-     do jcar=1,3
-       do icar=1,3
-         cs = czero
-         do nu=1,nmodes
-           zi = cmplx(eigvec(1,icar,na,nu), eigvec(2,icar,na,nu), kind=dp)
-           zj = cmplx(eigvec(1,jcar,nb,nu), eigvec(2,jcar,nb,nu), kind=dp)
-           cs = cs + zi * w2(nu) * conjg(zj)
+ ! Build the star of qpt_red from the crystal symmetries (q' = symrec*q, deduplicated
+ ! modulo a reciprocal-lattice vector). The representative q is stored first (member 1).
+ aq(:) = qpt_red(:)
+ nq_star = 1; saq(:,1) = aq(:)
+ do isym=1,cryst%nsym
+   raq = matmul(real(cryst%symrec(:,:,isym), dp), aq)
+   found = .False.
+   do iqs=1,nq_star
+     dq = raq - saq(:,iqs)
+     if (all(abs(dq - nint(dq)) < accep)) then
+       found = .True.; exit
+     end if
          end do
-         phi(icar,jcar,na,nb) = sqrt(amass_qe(cryst%typat(na)) * amass_qe(cryst%typat(nb))) * cs
+   if (.not. found) then
+     nq_star = nq_star + 1; saq(:,nq_star) = raq(:)
+   end if
        end do
-     end do
-   end do
+ do iqs=1,nq_star
+   sxq(:,iqs) = matmul(bg, saq(:,iqs))   ! Cartesian (2pi/alat) coordinates
  end do
 
  if (open_file(fname, msg, newunit=unt, form="formatted", status="unknown", action="write") /= 0) then
    ABI_ERROR(msg)
  end if
 
- ! ---- Header ----
+ ! ---- Header (written once) ----
  write(unt, '(a)') "Dynamical matrix file"
  write(unt, '(a)') "Converted from ABINIT GSTORE"
  ! ntyp, nat, ibrav=0 (free lattice) followed by celldm; with ibrav=0 the basis vectors follow.
@@ -738,10 +782,39 @@ subroutine write_dynq(cryst, ifc, qpt_red, alat, atm, fname)
    write(unt, '(2i5,3f18.10)') na, cryst%typat(na), tau(1,na), tau(2,na), tau(3,na)
  end do
 
- ! ---- Dynamical matrix in Cartesian axes ----
+ ! ---- One dynamical-matrix block per q-point of the star ----
+ do iqs=1,nq_star
+   ! Frequencies, displacements and orthonormal eigenvectors at this star member.
+   call ifc%fourq(cryst, saq(:,iqs), phfrq, displ_cart, out_eigvec=eigvec)
+   if (iqs == 1) then
+     phfrq_rep = phfrq; eigvec_rep = eigvec   ! keep the representative for the diag block
+   end if
+
+   ! Signed squared phonon frequencies in Ry^2.
+   do nu=1,nmodes
+     w2(nu) = phfrq(nu) * abs(phfrq(nu)) * Ha2Ry ** 2
+   end do
+
+   ! Dynamical matrix in Cartesian axes (QE convention, see header).
+   do nb=1,natom
+     do na=1,natom
+       do jcar=1,3
+         do icar=1,3
+           cs = czero
+           do nu=1,nmodes
+             zi = cmplx(eigvec(1,icar,na,nu), eigvec(2,icar,na,nu), kind=dp)
+             zj = cmplx(eigvec(1,jcar,nb,nu), eigvec(2,jcar,nb,nu), kind=dp)
+             cs = cs + zi * w2(nu) * conjg(zj)
+           end do
+           phi(icar,jcar,na,nb) = sqrt(amass_qe(cryst%typat(na)) * amass_qe(cryst%typat(nb))) * cs
+         end do
+       end do
+     end do
+   end do
+
  write(unt, '(/,5x,a)') "Dynamical  Matrix in cartesian axes"
- write(unt, '(/,5x,a,3f14.9,a,/)') "q = ( ", qcart(1), qcart(2), qcart(3), " ) "
- do na=1,natom
+   write(unt, '(/,5x,a,3f14.9,a,/)') "q = ( ", sxq(1,iqs), sxq(2,iqs), sxq(3,iqs), " ) "
+   do na=1,natom
    do nb=1,natom
      write(unt, '(2i5)') na, nb
      do icar=1,3
@@ -749,25 +822,26 @@ subroutine write_dynq(cryst, ifc, qpt_red, alat, atm, fname)
      end do
    end do
  end do
+ end do ! iqs
 
- ! ---- Diagonalization: frequencies and eigenvectors ----
+ ! ---- Diagonalization block (once, for the representative q = member 1) ----
  write(unt, '(/,5x,a)') "Diagonalizing the dynamical matrix"
- write(unt, '(/,5x,a,3f14.9,a,/)') "q = ( ", qcart(1), qcart(2), qcart(3), " ) "
+ write(unt, '(/,5x,a,3f14.9,a,/)') "q = ( ", sxq(1,1), sxq(2,1), sxq(3,1), " ) "
  write(unt, '(1x,74("*"))')
  do nu=1,nmodes
-   freq_cm = phfrq(nu) * Ha_cmm1
-   freq_thz = phfrq(nu) * Ha_THz
+   freq_cm = phfrq_rep(nu) * Ha_cmm1
+   freq_thz = phfrq_rep(nu) * Ha_THz
    write(unt, '(5x,a,i5,a,f15.6,a,f15.6,a)') "freq (", nu, ") = ", freq_thz, " [THz] = ", freq_cm, " [cm-1]"
    znorm = zero
    do na=1,natom
      do icar=1,3
-       znorm = znorm + eigvec(1,icar,na,nu)**2 + eigvec(2,icar,na,nu)**2
+       znorm = znorm + eigvec_rep(1,icar,na,nu)**2 + eigvec_rep(2,icar,na,nu)**2
      end do
    end do
    znorm = sqrt(znorm); if (znorm < tol12) znorm = one
    do na=1,natom
      write(unt, '(1x,a,3(f10.6,1x,f10.6,3x),a)') "( ", &
-       (eigvec(1,icar,na,nu)/znorm, eigvec(2,icar,na,nu)/znorm, icar=1,3), ")"
+       (eigvec_rep(1,icar,na,nu)/znorm, eigvec_rep(2,icar,na,nu)/znorm, icar=1,3), ")"
    end do
  end do
  write(unt, '(1x,74("*"))')
@@ -781,6 +855,10 @@ subroutine write_dynq(cryst, ifc, qpt_red, alat, atm, fname)
  ABI_FREE(amass_qe)
  ABI_FREE(tau)
  ABI_FREE(phi)
+ ABI_FREE(saq)
+ ABI_FREE(sxq)
+ ABI_FREE(phfrq_rep)
+ ABI_FREE(eigvec_rep)
 
 end subroutine write_dynq
 !!***
@@ -1038,3 +1116,4 @@ subroutine define_band_string(index, string, lstr)
 end subroutine define_band_string
 
 end module m_gstore_converters
+
