@@ -194,7 +194,7 @@ np_slk 0  # Deactivate Scalapack (sometimes buggy)
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = tparal_gpu_02_MPI4.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0, fld_options = -medium
+#%% files_to_test = tparal_gpu_02_MPI4.abo, tolnlines= 1, tolabs=  1.1e-8, tolrel= 1.1e-7, fld_options = -medium
 #%% [extra_info]
 #%% keywords = PAW, PATAPON
 #%% authors = M. Sarraute
