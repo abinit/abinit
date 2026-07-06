@@ -281,6 +281,7 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
  ABI_UNUSED(iend)
  ABI_UNUSED(d2gxdt)
  ABI_UNUSED(cplex_d2gxdt)
+ ABI_UNUSED(d2gxdtfac_sij)
  DBG_ENTER("COLL")
 
 !Parallelization over spinors treatment
@@ -900,7 +901,7 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
 #endif
      do idat=1,ndat
        !$OMP PARALLEL DO COLLAPSE(2) &
-       !$OMP& PRIVATE(ia,ilmn,iln,ekb_so_1,ekb_so_2,ll_so,ilm,iln,jlmn,jlm,klm_so,sign_so,ls_uu_im,ls_ud_re,ls_ud_im,mu)
+       !$OMP& PRIVATE(ia,ilmn,iln,ekb_so_1,ekb_so_2,ll_so,ilm,jlmn,jlm,klm_so,sign_so,ls_uu_im,ls_ud_re,ls_ud_im,mu)
        do ia=1,nincat
          do ilmn=1,nlmn
            iln = indlmn(5,ilmn)
