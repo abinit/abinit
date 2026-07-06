@@ -310,7 +310,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight, gpu_option=gs_hamkq%gpu_option)
 
      if(gs_hamkq%nspinor==2 .and. ndat__ == ndat)then
-       ! Note: when ndat__ = ndat*nspinor (nvloc==1), fourwf above already handles both spinors — this block is skipped.
+     ! Note: when ndat__ = ndat*nspinor (nvloc==1), fourwf above already handles both spinors
+     ! This block is skipped.
        ABI_CHECK_IEQ(ndat, 1, "ndat > 1 with nspinor 2 and nspden 1 is buggy")
        ABI_MALLOC(cwave_sp,(2,npw))
        ABI_MALLOC(gh1c_sp,(2,npw1))
@@ -1725,11 +1726,11 @@ end subroutine getdc1
 !!
 !! NOTES
 !!  Currently two Hamiltonian gradients at (q=0) are implemented:
-!!     ipert<=natom -> 		    first q-derivative along reduced coordinates directions
-!!                     		    of the atomic displacement perturbation hamiltonian
+!!     ipert<=natom -> 	        first q-derivative along reduced coordinates directions
+!!                     	        of the atomic displacement perturbation hamiltonian
 !!     ipert==natom+3 or natom+4 -> second q-derivative along cartesian coordinates
 !!                                  of the metric perturbation hamiltonian.
-!! 				    Which is equivalent (except for an i factor) to the first
+!!     Which is equivalent (except for an i factor) to the first
 !!                                  q-derivative along cartesian coordinates of the strain
 !!                                  perturbation hamiltonian.
 !!
