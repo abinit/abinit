@@ -37,7 +37,7 @@ spinat
 0 0 4.0                       # initial spin moments (x y z per atom)
 
 # Planewave basis
-ecut             5
+ecut             10
 
 # k-point grid 
 ngkpt            2 2 2
@@ -45,7 +45,7 @@ chksymbreak      0            # do not check for symmetry breaking
 
 # Diagonalization
 wfoptalg         114          # wavefunction optimization algorithm
-nline            6   
+nline            8   
 nblock_lobpcg    1          
 
 # Occupations 
