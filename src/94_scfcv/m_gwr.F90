@@ -5103,7 +5103,7 @@ subroutine gwr_build_tchi(gwr)
    !gw_timrev = kpts_timrev_from_kptopt(gwr%ks_ebands%kptopt) + 1
    do iq_ibz=1,gwr%nqibz
      call ltg_qibz(iq_ibz)%init(gwr%qibz(:,iq_ibz), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, &
-                                npwe=gwr%tchi_desc_qibz(iq_ibz)%npw, timrev=1, gvec=gwr%tchi_desc_qibz(iq_ibz)%gvec)
+                                npwe=gwr%tchi_desc_qibz(iq_ibz)%npw, gvec=gwr%tchi_desc_qibz(iq_ibz)%gvec)
      !call ltg_qibz(iq_ibz)%init(gwr%qibz(:,iq_ibz), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0, timrev=1)
      if (gwr%comm%me == 0) call ltg_qibz(iq_ibz)%print([std_out], prtvol=gwr%dtset%prtvol)
    end do
@@ -5169,7 +5169,7 @@ subroutine gwr_build_tchi(gwr)
          if (gwr%dtset%symchi /= 0) then
            wtqp = (one * sum(ltg_qibz(iq_ibz)%wtksym(1,:,ik_bz))) / gwr%nkbz
            wtqm = (one * sum(ltg_qibz(iq_ibz)%wtksym(2,:,ik_bz))) / gwr%nkbz
-           ABI_CHECK(wtqm == zero, sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
+           !ABI_CHECK(wtqm == zero, sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
          end if
 
          ! Accumulate.
@@ -5179,7 +5179,7 @@ subroutine gwr_build_tchi(gwr)
          !  !wtqp * gkq_rpr_pm(1)%buffer_cplx * conjg(gk_rpr_pm(2)%buffer_cplx)  ! This should be OK
          do iab=1,gwr%nsig_ab
            call cplx_mat_plus_bc(chiq_rpr(iq_ibz)%bufsize, chiq_rpr(iq_ibz)%buffer_cplx(:,1), &
-                               wtqp, "C", gkq_rpr_pm(2, iab)%buffer_cplx(:,1), gk_rpr_pm(1, iab)%buffer_cplx(:,1), gpu_option)
+                                 wtqp+wtqm, "C", gkq_rpr_pm(2, iab)%buffer_cplx(:,1), gk_rpr_pm(1, iab)%buffer_cplx(:,1), gpu_option)
          end do ! iab
 
        end do ! iq_ibz
@@ -5196,7 +5196,6 @@ subroutine gwr_build_tchi(gwr)
      ! From chi_q(r',r) to chi_q(g,g') for each q in the IBZ.
      do iq_ibz=1,gwr%nqibz
        call xmpi_sum(chiq_rpr(iq_ibz)%buffer_cplx, gwr%kpt_comm%value, ierr)
-       !call xmpi_sum(gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx, gwr%kpt_comm%value, ierr)
      end do
 
      tchi_rfact = one / gwr%cryst%ucvol
@@ -5210,15 +5209,20 @@ subroutine gwr_build_tchi(gwr)
        ! This section is needed only if symchi /= 0.
        ! TODO: Timrev should be tested. At present is disabled.
        associate(desc => gwr%tchi_desc_qibz(iq_ibz), ltg => ltg_qibz(iq_ibz))
+       call gwr%rpr_to_ggp(gwr%tchi_desc_qibz(iq_ibz), chiq_rpr(iq_ibz), tchi_rfact, chiq_ggp)
        do itim=1, ltg%timrev
          do isym=1, ltg%nsym_sg
            if (ltg%preserve(itim,isym) /= 1) cycle
-           associate(sglist => desc%rottbm1(ltg%igmG0(1:desc%npw, itim, isym), itim, isym))
-           associate(phase => conjg(desc%phmGt(sglist, isym)))
+           associate(sglist => desc%rottbm1(ltg%igmG0(1:desc%npw, itim, isym), itim, isym), &
+                     phase  => desc%phmGt(:, isym))
            call slk_array_set_zero(work1)
            ! (g,g') --> (Sg, g')
            do ig2=1,work1%size_local(2)
-             work1%buffer_cplx(:,ig2) = chiq_ggp%buffer_cplx(sglist, ig2) * phase
+             if (itim == 1) then
+               work1%buffer_cplx(:,ig2) = chiq_ggp%buffer_cplx(sglist, ig2) * phase
+             else
+               work1%buffer_cplx(:,ig2) = GWPC_CONJG(chiq_ggp%buffer_cplx(sglist, ig2)) * phase
+             end if
            end do
            ! (Sg, g') --> (g', Sg)
            call work1%ptrans("C", work2, free=.False.)
@@ -5230,12 +5234,12 @@ subroutine gwr_build_tchi(gwr)
            call work2%ptrans("C", work1, free=.True.)
            gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:) = gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:)+work1%buffer_cplx(:,:)
            end associate
-           end associate
          end do ! isym
        end do ! itim
 
        call work1%free()
-       gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:) = gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:) / real(ltg%nsym_ltg)
+       gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:) = gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:,:) &
+       & / ltg%nsym_ltg
 
        end associate
        call chiq_ggp%free()
@@ -5936,7 +5940,7 @@ subroutine gwr_build_sigmac(gwr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, my_ir, my_nr, iw, idat, max_ndat, ndat, ii, jj, irow, iab, iiab, jiab
+ integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, my_ir, my_nr, iw, idat, max_ndat, ndat, ii, jj, irow, iab, iiab, jiab, itim
  integer :: iq_ibz, iq_bz, itau, ierr, ibc, ib1, ib2, bmin, bmax, band, band1, ifft, gpu_option
  integer :: band2, band2_start, band2_stop, nbc
  integer :: my_ikf, ipm, ik_bz, ikcalc, uc_ir, ir, ncid, col_bsize, nr, sc_nfftsp, iter_ncid
@@ -6328,7 +6332,7 @@ else
  use_umklp = 1
  !gw_timrev = kpts_timrev_from_kptopt(gwr%ks_ebands%kptopt) + 1
  do ikcalc=1,gwr%nkcalc
-   call ltg_kcalc(ikcalc)%init(gwr%kcalc(:,ikcalc), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0, timrev=1)
+   call ltg_kcalc(ikcalc)%init(gwr%kcalc(:,ikcalc), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0)
    if (gwr%comm%me == 0 .and. gwr%dtset%symsigma /= 0) then
      call ltg_kcalc(ikcalc)%print([std_out], prtvol=gwr%dtset%prtvol)
    end if
@@ -6349,9 +6353,9 @@ else
    do iab=1,gwr%nsig_ab
      call gk_rpr_pm(ipm, iab)%init(nr, nr, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
      do ikcalc=1,gwr%nkcalc
-       call sigc_rpr(1,ipm,ikcalc, iab)%init(nr, nr, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
-       ! For sigma we have to decompose it in hermitian/anti-hermitian part.
-       !call sigc_rpr(2,ipm,ikcalc, iab)%init(nr, nr, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
+       do itim=1,2
+         call sigc_rpr(itim,ipm,ikcalc, iab)%init(nr, nr, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
+       end do
      end do
    end do
  end do
@@ -6470,17 +6474,13 @@ else
                                    wtqp, "N", gk_rpr_pm(ipm,iab)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
                                    gpu_option)
 
-             if (abs(wtqm) > tol12) then
-               ABI_ERROR(sjoin("TR is not yet implemented:, wtqm:", ftoa(wtqm)))
-
-               call cplx_mat_plus_bc(bufsize, sigc_rpr(2,ipm,ikcalc,iab)%buffer_cplx(:,1), &
-                                     wtqm, "C", gk_rpr_pm(ipm,iab)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
-                                     gpu_option)
+             call cplx_mat_plus_bc(bufsize, sigc_rpr(2,ipm,ikcalc,iab)%buffer_cplx(:,1), &
+                                   wtqm, "N", gk_rpr_pm(ipm,iab)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
+                                   gpu_option)
 
                !sigc_rpr(1, ipm, ikcalc)%buffer_cplx = sigc_rpr(1, ipm, ikcalc)%buffer_cplx + &
                !    (wtqp + wtqm) * real(gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx, kind=gwp) &
                !  + (wtqp - wtqm) * j_gw * aimag(gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx)
-             end if
            end do ! iab
          end do ! ipm
 
@@ -6504,7 +6504,9 @@ else
          iiab = spinor_idxs(1, iab); jiab = spinor_idxs(2, iab)
          if (gpu_option == ABI_GPU_OPENMP) then
            do ipm=1,2
-             call sigc_rpr(1,ipm,ikcalc,iab)%gpu_map("update_from")
+             do itim=1,2
+               call sigc_rpr(itim,ipm,ikcalc,iab)%gpu_map("update_from")
+             end do
            end do
          end if
          do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
@@ -7054,7 +7056,7 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_bra_glob, ur_ket_glob, sigm_pm, loc
  complex(gwp),intent(inout) :: loc_cwork(sig_rpr(1,1)%size_local(2))
 
  !Local variables-------------------------------
- integer :: ipm, ir1, il_r1, nrows, ncols
+ integer :: ipm, ir1, il_r1, nrows, ncols, itim
  !complex(gwp),allocatable :: loc_cwork(:)
 ! *************************************************************************
 
@@ -7062,23 +7064,29 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_bra_glob, ur_ket_glob, sigm_pm, loc
 
  ! (r',r) with r' local and r-index PBLAS-distributed.
  sigm_pm = czero_gw
- do ipm=1,2
-   associate (rp_r => sig_rpr(1,ipm))
-   ! Integrate over r'
-   !ABI_CHECK_IEQ(nfftsp, rp_r%size_local(1), "First dimension should be local to each MPI proc!")
-   !ABI_MALLOC(loc_cwork, (rp_r%size_local(2)))
-   !loc_cwork(:) = matmul(transpose(rp_r%buffer_cplx), ur_glob)
-
-   nrows = rp_r%size_local(1); ncols = rp_r%size_local(2)
-   call xgemv('T', nrows, ncols, cone_gw, rp_r%buffer_cplx, nrows, ur_ket_glob, 1, czero_gw, loc_cwork, 1)
-
-   ! Integrate over r. Note complex conjugate.
-   do il_r1=1,rp_r%size_local(2)
-     ir1 = rp_r%loc2gcol(il_r1)
-     sigm_pm(ipm) = sigm_pm(ipm) + conjg(ur_bra_glob(ir1)) * loc_cwork(il_r1)
+ do itim=1,2
+   do ipm=1,2
+     associate (rp_r => sig_rpr(itim,ipm))
+     ! Integrate over r'
+     !ABI_CHECK_IEQ(nfftsp, rp_r%size_local(1), "First dimension should be local to each MPI proc!")
+     !ABI_MALLOC(loc_cwork, (rp_r%size_local(2)))
+     !loc_cwork(:) = matmul(transpose(rp_r%buffer_cplx), ur_glob)
+    
+     nrows = rp_r%size_local(1); ncols = rp_r%size_local(2)
+     call xgemv('T', nrows, ncols, cone_gw, rp_r%buffer_cplx, nrows, ur_ket_glob, 1, czero_gw, loc_cwork, 1)
+    
+     ! Integrate over r. Note complex conjugate.
+     do il_r1=1,rp_r%size_local(2)
+       ir1 = rp_r%loc2gcol(il_r1)
+       if (itim == 1) then
+         sigm_pm(ipm) = sigm_pm(ipm) + conjg(ur_bra_glob(ir1)) * loc_cwork(il_r1)
+       else
+         sigm_pm(ipm) = sigm_pm(ipm) + ur_bra_glob(ir1) * conjg(loc_cwork(il_r1))
+       end if
+     end do
+     !ABI_FREE(loc_cwork)
+     end associate
    end do
-   !ABI_FREE(loc_cwork)
-   end associate
  end do
 
  ABI_NVTX_END_RANGE()
@@ -7945,7 +7953,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  logical :: gradk_not_done(gwr%nkibz)
  logical,allocatable :: bbp_mask(:,:)
  complex(dp) :: chq(3)
- complex(gwp) :: rhotwx(3, gwr%nspinor**2), new_rhotwx(3, gwr%nspinor**2)
+ complex(gwp) :: rhotwx(3, gwr%nspinor**2)
  complex(gwp),allocatable :: ug2(:), ur1_kibz(:), ur2_kibz(:), ur_prod(:), rhotwg(:), ug1_block(:,:), ug1(:)
  complex(dp) :: green_w(gwr%ntau), omega(gwr%ntau)
  complex(dp),allocatable :: chi0_lwing(:,:,:), chi0_uwing(:,:,:), chi0_head(:,:,:), head_qvals(:)
@@ -8100,7 +8108,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  end if
 
  ABI_CHECK_IEQ(dtset%symchi, 1, "symchi 0 not implemented")
- if (dtset%nspinor == 2) then
+ if (dtset%nspinor == 2 .and. .not. use_ddk) then
    ABI_CHECK_IEQ(dtset%inclvkb, 0, "inclvkb must be 0 when nspinor == 2 as SOC term is not coded.")
  end if
 
@@ -8241,34 +8249,20 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
            ! if nspinor == 2, sum 11, 22 terms in spin space
            if (nspinor == 2) rhotwg(1:npwe) = rhotwg(1:npwe) + rhotwg(npwe+1:2*npwe)
 
-           if (gwr%usepaw == 0) then
-             ! Matrix elements of i[H,r] for NC pseudopotentials.
-             ! NB ug1 and ug2 are kind=gwp
-             rhotwx = nc_ihr_comm(vkbr(ik_ibz), cryst, gwr%psps, npw_ki, nspinor, istwf_ki, gwr%dtset%inclvkb, &
-                                  kk_ibz, ug1, ug2, kg_ki)
-           end if
-
-           ! Treat a possible degeneracy between v and c.
-           ! Adler-Wiser expression, to be consistent here we use the KS eigenvalues (?)
-           if (abs(deltaeKS_b1b2) > GW_TOL_W0) then
-             rhotwx = -rhotwx / deltaeKS_b1b2
+           if (.not. use_ddk)  then
+             if (gwr%usepaw == 0 ) then
+               ! Matrix elements of i[H,r] for NC pseudopotentials.
+               ! NB ug1 and ug2 are kind=gwp
+               rhotwx = nc_ihr_comm(vkbr(ik_ibz), cryst, gwr%psps, npw_ki, nspinor, istwf_ki, gwr%dtset%inclvkb, &
+                                    kk_ibz, ug1, ug2, kg_ki)
+             end if
            else
-             rhotwx = czero_gw
-           end if
-
-           if (use_ddk) then
              cg2_dp(1,:) = real(ug2)
              cg2_dp(2,:) = aimag(ug2)
 
              ! DH_DK operator is Hermitian.
-             call ddkop%get_ihr_comm(cryst, eig_mk, istwf_ki, npw_ki, nspinor, cg2_dp, new_rhotwx)
-             new_rhotwx = conjg(new_rhotwx)
-
-             if (abs(deltaeKS_b1b2) > GW_TOLQ0) then
-                new_rhotwx = -new_rhotwx / deltaeKS_b1b2
-             else
-                new_rhotwx = zero
-             end if
+             call ddkop%get_ihr_comm(cryst, eig_mk, istwf_ki, npw_ki, nspinor, cg2_dp, rhotwx)
+             rhotwx = conjg(rhotwx)
 
              ! debug section
              !do idir=1,3
@@ -8286,8 +8280,13 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
              !end do
            end if ! use_ddk
 
-           ! TODO: Activate this and get rid of vkbr
-           rhotwx = new_rhotwx
+           ! Treat a possible degeneracy between v and c.
+           ! Adler-Wiser expression, to be consistent here we use the KS eigenvalues (?)
+           if (abs(deltaeKS_b1b2) > GW_TOL_W0) then
+             rhotwx = -rhotwx / deltaeKS_b1b2
+           else
+             rhotwx = czero_gw
+           end if
 
            ! NB: Using symrec conventions here
            ik_ibz = gwr%kbz2ibz(1, ik_bz); isym_k = gwr%kbz2ibz(2, ik_bz)

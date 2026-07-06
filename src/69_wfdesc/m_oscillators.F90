@@ -728,34 +728,38 @@ subroutine rotate_spinor(itim_kbz, ktabr_kbz, ktabp_kbz, spinrot, nr, nspinor, n
  ABI_CHECK(ndat == 1, "ndat > 1 not coded")
  ABI_CHECK(nspinor == 2, "nspinor should be 1")
 
- ! Apply Time-reversal if required.
- ! \psi_{-k}^1 =  (\psi_k^2)^*
- ! \psi_{-k}^2 = -(\psi_k^1)^*
- if (itim_kbz == 1) then
-   cwork(:) = ug_ibz(:)
- else if (itim_kbz == 2) then
-   cwork(1:nr) = GWPC_CONJG(ug_ibz(nr+1:2*nr))
-   cwork(nr+1:2*nr) = -GWPC_CONJG(ug_ibz(1:nr))
- else
-   ABI_ERROR(sjoin('Wrong itim_kbz:', itoa(itim_kbz)))
- end if
-
+ ! Step 1: Real-space rotation per spinor component (apply ktabr + phase).
+ ! This is done BEFORE time-reversal, consistent with cgtk_rotate in m_cgtk.F90:
+ ! u_{Sk}(r) = e^{-2i\pi k_ibz.(R^{-1}\tau)} u_{k_ibz}(R^{-1}(r-\tau))
  do ispinor=1,nspinor
    spad0 = (ispinor-1) * nr
    do ir=1,nr
      ir1 = ktabr_kbz(ir)
-     oug_bz(ir+spad0) = cwork(ir1+spad0) * ktabp_kbz
+     oug_bz(ir+spad0) = ug_ibz(ir1+spad0) * ktabp_kbz
    end do
  end do
 
- ! Rotation in spinor space (same equations as in wfconv)
- spinrot_cmat1 = spinrot_cmat(spinrot)
- cwork = oug_bz
- do ir=1,nr
-   u1a = cwork(ir); u1b = cwork(ir+nr)
-   oug_bz(ir)    = spinrot_cmat1(1, 1) * u1a + spinrot_cmat1(1, 2) * u1b
-   oug_bz(ir+nr) = spinrot_cmat1(2, 1) * u1a + spinrot_cmat1(2, 2) * u1b
- end do
+ ! Step 2: Apply time-reversal AFTER spatial rotation (consistent with cgtk_rotate).
+ ! \psi_{-k}^1 =  (\psi_k^2)^*
+ ! \psi_{-k}^2 = -(\psi_k^1)^*
+ if (itim_kbz == 2) then
+   cwork(1:nr) = GWPC_CONJG(oug_bz(nr+1:2*nr))
+   cwork(nr+1:2*nr) = -GWPC_CONJG(oug_bz(1:nr))
+   oug_bz(:) = cwork(:)
+ end if
+
+  ! Step 3: Rotation in spinor space using the INVERSE spinor rotation matrix (S^\dagger)
+  ! since the mapping from IBZ to BZ uses the inverse symmetry operation in real space.
+  spinrot_cmat1(1,1) = spinrot(1) - j_dpc*spinrot(4)
+  spinrot_cmat1(1,2) =-spinrot(3) - j_dpc*spinrot(2)
+  spinrot_cmat1(2,1) = spinrot(3) - j_dpc*spinrot(2)
+  spinrot_cmat1(2,2) = spinrot(1) + j_dpc*spinrot(4)
+  cwork = oug_bz
+  do ir=1,nr
+    u1a = cwork(ir); u1b = cwork(ir+nr)
+    oug_bz(ir)    = spinrot_cmat1(1, 1) * u1a + spinrot_cmat1(1, 2) * u1b
+    oug_bz(ir+nr) = spinrot_cmat1(2, 1) * u1a + spinrot_cmat1(2, 2) * u1b
+  end do
 
 end subroutine rotate_spinor
 !!***

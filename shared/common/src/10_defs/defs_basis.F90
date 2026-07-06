@@ -479,13 +479,9 @@ module defs_basis
  integer,parameter :: inversion_3d(3,3) = reshape([-1,0,0,0,-1,0,0,0,-1], [3,3])
 
 !A collection of small datatypes for ragged arrays
-!A small datatype for ragged real 1D-arrays
- type coeff1_type
-  real(dp), allocatable :: value(:)
- end type coeff1_type
 !A small datatype for ragged integer 1D-arrays
  type coeffi1_type
-  !integer :: size
+  integer :: size
   integer, allocatable :: value(:)
  end type coeffi1_type
 !A small datatype for ragged integer 2D-arrays
@@ -493,18 +489,49 @@ module defs_basis
   integer :: size
   integer, allocatable :: value(:,:)
  end type coeffi2_type
-!A small datatype for ragged real 2D-arrays
- type coeff2_type
-  real(dp), allocatable :: value(:,:)
- end type coeff2_type
+!A small datatype for ragged integer 3D-arrays
+ type coeffi3_type
+  integer :: size
+  integer, allocatable :: value(:,:,:)
+ end type coeffi3_type
+!A small datatype for ragged integer 4D-arrays
+ type coeffi4_type
+  integer :: size
+  integer, allocatable :: value(:,:,:,:)
+ end type coeffi4_type
+!A small datatype for ragged integer 5D-arrays
+ type coeffi5_type
+  integer :: size
+  integer, allocatable :: value(:,:,:,:,:)
+ end type coeffi5_type
+!A small datatype for ragged complex 1D-arrays
+ type coeff1c_type
+  complex(dp), allocatable :: value(:)
+ end type coeff1c_type
 !A small datatype for ragged complex 2D-arrays
  type coeff2c_type
   complex(dp), allocatable :: value(:,:)
  end type coeff2c_type
-!A small datatype for ragged real 5D-arrays
+!A small datatype for ragged complex 3D-arrays
+ type coeff3c_type
+  complex(dp), allocatable :: value(:,:,:)
+ end type coeff3c_type
+!A small datatype for ragged complex 4D-arrays
+ type coeff4c_type
+  complex(dp), allocatable :: value(:,:,:,:)
+ end type coeff4c_type
+!A small datatype for ragged complex 5D-arrays
  type coeff5c_type
   complex(dp), allocatable :: value(:,:,:,:,:)
  end type coeff5c_type
+!A small datatype for ragged real 1D-arrays
+ type coeff1_type
+  real(dp), allocatable :: value(:)
+ end type coeff1_type
+!A small datatype for ragged real 2D-arrays
+ type coeff2_type
+  real(dp), allocatable :: value(:,:)
+ end type coeff2_type
 !A small datatype for ragged real 3D-arrays
  type coeff3_type
   real(dp), allocatable :: value(:,:,:)
