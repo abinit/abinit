@@ -24,6 +24,7 @@ module m_symtk
  use defs_basis
  use m_errors
  use m_abicore
+ use m_linalg_interfaces
 
  use m_fstrings,       only : sjoin, ltoa
  use m_matrix,         only : mati3inv, mati3det, matr3inv
@@ -232,8 +233,8 @@ end subroutine chkgrp
 !! nsym=number of symmetry operations
 !! symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !! symrel(3,3,nsym)=symmetry operations in real space.
-!! tnons(3,nsym) [optional]=Fractional translations.
-!! tnons_tol [optional]= tolerance on the match for tnons
+!! [tnons(3,nsym)]=Fractional translations.
+!! [tnons_tol]= tolerance on the match for tnons
 !!
 !! OUTPUT
 !!  ierr=Status error. A non-zero value signals failure.
@@ -282,17 +283,12 @@ subroutine sg_multable(nsym, symafm, symrel, ierr, &
  ierr = 0
 
  ABI_MALLOC(tnons_,(3,nsym))
- if(present(tnons))then
-   tnons_=tnons
- else
-   tnons_=zero
- endif
 
- if(present(tnons_tol))then
-   tnons_tol_=tnons_tol
- else
-   tnons_tol_=tol5
- endif
+ tnons_=zero
+ if(present(tnons)) tnons_=tnons
+
+ tnons_tol_=tol5
+ if(present(tnons_tol)) tnons_tol_=tnons_tol
 
  ! 1) Identity must be the first symmetry. Do not check if tnons_ == 0 as cell might not be primitive.
  if (any(symrel(:,:,1) /= identity_3d .or. symafm(1) /= 1)) then
@@ -308,7 +304,7 @@ subroutine sg_multable(nsym, symafm, symrel, ierr, &
      prd_symrel = matmul(symrel(:,:,sym1), symrel(:,:,sym2))
      prd_tnons = tnons_(:,sym1) + matmul(symrel(:,:,sym1), tnons_(:,sym2))
      prd_symafm = symafm(sym1)*symafm(sym2)
-     if ( all(prd_symrel == identity_3d) .and. isinteger(prd_tnons, tnons_tol_) .and. prd_symafm == 1 ) then
+     if (all(prd_symrel == identity_3d) .and. isinteger(prd_tnons, tnons_tol_) .and. prd_symafm == 1) then
        found_inv = .TRUE.
        if (present(toinv)) then
          toinv(1, sym1) = sym2; toinv(2:4, sym1) = nint(prd_tnons)
@@ -402,12 +398,12 @@ subroutine sg_multable(nsym, symafm, symrel, ierr, &
      ! Check that product array is one of the original point symmetries.
      iseq= .false.
      do ptsymm3=1,nptsymm
-       iseq=  all(prd_symrel == symrel(:,:,list_symrel(1,ptsymm3) ))
-       if(iseq)then
-         ptmultable(ptsymm1,ptsymm2) = ptsymm3
-         exit
+       iseq = all(prd_symrel == symrel(:,:,list_symrel(1,ptsymm3)))
+       if (iseq) then
+         ptmultable(ptsymm1,ptsymm2) = ptsymm3; exit
        endif
      end do
+
      if (.not. iseq .and. echo == 1) then
        if (echo == 1)then
          ! The test is negative
@@ -604,15 +600,14 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
  do isym=1,nsym
 
    !write(std_out,'(a,a,i4)') ch10,' Check for isym=',isym
-   !  Compute symmetric of primitive vectors under point symmetry operations
+   ! Compute symmetric of primitive vectors under point symmetry operations
    do ii=1,3
      rprimd_sym(:,ii)=symrel(1,ii,isym)*rprimd(:,1)+&
                       symrel(2,ii,isym)*rprimd(:,2)+&
                       symrel(3,ii,isym)*rprimd(:,3)
    end do
 
-   ! If the new lattice is the same as the original one,
-   ! the lengths and angles are preserved.
+   ! If the new lattice is the same as the original one, the lengths and angles are preserved.
    do ii=1,3
      rmet_sym(ii,:)=rprimd_sym(1,ii)*rprimd_sym(1,:)+&
                     rprimd_sym(2,ii)*rprimd_sym(2,:)+&
@@ -868,10 +863,8 @@ subroutine symrelrot(nsym, rprimd, rprimd_new, symrel, tolsym, ierr)
    end do
  end do ! isym
 
- if(ierr_==0)then
-   ! Upgrade symrel only if there is no error
-   symrel(:,:,:)=symrel_tmp(:,:,:)
- endif
+ ! Upgrade symrel only if there is no error
+ if(ierr_==0) symrel(:,:,:)=symrel_tmp(:,:,:)
 
  if(present(ierr)) ierr=ierr_
 
@@ -1036,8 +1029,6 @@ end subroutine littlegroup_q
 !! SOURCE
 
 subroutine matpointsym(iatom,mat3,natom,nsym,rprimd,symrel,tnons,xred)
-
- use m_linalg_interfaces
 
 !Arguments ------------------------------------
 !scalars
@@ -1226,9 +1217,7 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
 &   abs(2*metric(1,2)+metric(1,1))<tolsym*metric(1,1) )      foundc=1
  if(abs(iholohedry)==7 .and. orth==1 .and. allequal==1)      foundc=1
 
-!DEBUG
 !write(std_out, '(a,2i4)' )' holocell : foundc, enforce=',foundc,enforce
-!ENDDEBUG
 
 !-------------------------------------------------------------------------------------
 !Possibly enforce the holohedry (if it is to be enforced !)
@@ -1476,8 +1465,7 @@ subroutine symmetrize_tnons(nsym,symrel,tnons,tolsym)
           abs(tnons_mult(3)-nint(tnons_mult(3)))<tolsym*iorder)then
          !The order has been found
          order=iorder+1
-         !Now, adjust the tnons vector, in order to obtain the exact identity
-         !operation at order "order"
+         !Now, adjust the tnons vector, in order to obtain the exact identity operation at order "order"
          tnons_mult(:)=(tnons_mult(:)-nint(tnons_mult(:)))/(dble(order))
          if(abs(tnons_mult(1))>1.00001e-8) tnons(1,isym)=tnons(1,isym)-tnons_mult(1)
          if(abs(tnons_mult(2))>1.00001e-8) tnons(2,isym)=tnons(2,isym)-tnons_mult(2)
@@ -3149,7 +3137,6 @@ subroutine print_symmetries(units, nsym, symrel, tnons, symafm)
  character(len=500) :: msg
 ! *********************************************************************
 
- !write(msg,'(2a)')ch10,' Rotations                           Translations     Symafm '
  write(msg,'(2a)')ch10,' Symmetry operations in real space (Rotation tnons AFM)'
  call wrtout(units, msg)
 

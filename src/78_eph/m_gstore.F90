@@ -6750,9 +6750,9 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
  integer :: isym_tot, trev_tot, tsign_tot, ik_base_glob
  integer :: timrev_k, isym_lg, itime_lg, isym_glob, itime_glob, iq_ibz_loc
- integer :: isym_combined, trev_combined, iq_computed_glob
+ integer :: isym_combined, trev_combined, iq_computed_glob, isym_elec_combined
  integer :: isym_p, itime_p, ikq_ibz_p, isym_rp, itime_rp, trev_rp
- integer :: isym_k_inv, isym_gk, itime_gk, isym_kq_inv, isym_gkq, itime_gkq
+ integer :: isym_k_inv, isym_gk, itime_gk, isym_kq_inv, isym_gkq, itime_gkq, isym_tot_inv
  integer :: indkk_kq(6, 1)
  real(dp) :: kk_base(3)
  real(dp) :: weight_qq, phase, tnon(3), q_base(3)
@@ -6944,8 +6944,22 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
                end if
              end do
              if (ik_ibz /= -1) then
-               isym_combined = isym_tot; trev_combined = trev_tot; iq_computed_glob = iq_base_glob
+               ! isym_combined = toinv(isym_tot), used for BOTH the phonon leg (symrec_eq/tnon/phase)
+               ! and the electron kq-leg (isym_rp below). NOTE (session 3, 2026-07-05): a "principled"
+               ! split was tried -- isym_tot unmodified for the phonon leg (matching v1phq_rotate_myperts's
+               ! own docstring contract "qpt_bz=S(isym).q_ibz", which search_source's q_base formula
+               ! satisfies exactly for isym_tot as-is) combined with toinv(isym_tot) for the electron leg
+               ! only. Empirically this reproduces the pre-fix baseline exactly (loses all 44 gains, twice,
+               ! reproducibly) -- i.e. there is a SECOND, still-unidentified sign/convention issue in the
+               ! tnon/phase formula that happens to be cancelled by using toinv(isym_tot) there too. Do not
+               ! re-attempt the split without first finding that second issue; use toinv(isym_tot)
+               ! uniformly for now (measured strictly better than baseline, zero regressions, see
+               ! [[gstore-symm-validation-workflow]]).
+               isym_tot_inv = dmats%toinv(1, isym_tot)
+               ABI_CHECK(isym_tot_inv /= 0, "Could not find inverse of isym_tot")
+               isym_combined = isym_tot_inv; trev_combined = trev_tot; iq_computed_glob = iq_base_glob
                isym_glob = 1; itime_glob = 1
+               isym_elec_combined = isym_combined
                ! kk_base/q_base were matched to the global BZ arrays via a tolerant modulo(...)
                ! comparison above, so they may differ from the canonical tabulated array values by
                ! an exact integer G-vector. This matters below: kk_base+q_base is fed into
@@ -7011,9 +7025,12 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
            ! the composition convention documented in electron-phonon/main.tex (eq. ~611-621).
            ! multable(2:4,sym1,sym2) is a lattice-vector correction (translation wraps mod the
            ! primitive cell) -- normal/expected, not an error, and not needed downstream.
-           isym_combined = dmats%multable(1, isym_tot, isym_glob)
+           isym_tot_inv = dmats%toinv(1, isym_tot)
+           ABI_CHECK(isym_tot_inv /= 0, "Could not find inverse of isym_tot")
+           isym_combined = dmats%multable(1, isym_tot_inv, isym_glob)
            ABI_CHECK(isym_combined /= 0, "Composite symmetry not found in space group (group closure violated?)")
            trev_combined = mod(trev_tot + (itime_glob - 1), 2)
+           isym_elec_combined = isym_combined
 
            ! Downstream code uses kk_base/q_base as "the momentum at the source"; overwrite them
            ! with the canonical tabulated values (kk_base was only known up to an exact integer
@@ -7115,7 +7132,12 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        ! g_kq := toinv(isym_kq) o isym_rp, a genuine little-group element of ikq_ibz. P itself
        ! needs no such correction: it is the SAME canonical kpts_map("symrel",...) choice that
        ! gstore_compute would have used to define the gauge at k0+q0 in the first place.
-       isym_rp = dmats%multable(1, isym_combined, isym_p)
+       ! Use isym_elec_combined here, kept as a separate variable from isym_combined (currently
+       ! numerically identical -- see NOTE in search_source above) since the two legs' correct
+       ! index was NOT found to be the same by independent derivation, only by empirical A/B
+       ! testing; do not silently merge them back into one variable. trev is unaffected: toinv
+       ! (isym_tot) has the SAME trev as isym_tot, so trev_combined applies as-is.
+       isym_rp = dmats%multable(1, isym_elec_combined, isym_p)
        ABI_CHECK(isym_rp /= 0, "Composite symmetry R.P not found in space group")
        trev_rp = mod(trev_combined + (itime_p - 1), 2)
        itime_rp = trev_rp + 1
@@ -7125,6 +7147,12 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        isym_gkq = dmats%multable(1, isym_kq_inv, isym_rp)
        ABI_CHECK(isym_gkq /= 0, "Composite symmetry g_kq not found in space group")
        itime_gkq = 1 + mod((itime_kq - 1) + (itime_rp - 1), 2)
+       ! NOTE (session 3 continued): tried adding a candidate lattice-correction term here for
+       ! isym_rp's own multable-composition debt (both signs) -- empirically WORSE both ways
+       ! (857/3942 and 866/3942 vs the 1082/3942 two-term baseline below), and, tellingly, the
+       ! term is identically ZERO whenever isym_p=identity (multable(X,identity) has no lattice
+       ! part) -- yet the identified isym_p=identity failing cases were completely unaffected in
+       ! either direction, meaning this term is not where the remaining bug lives. Reverted.
        L_gkq = real(dmats%multable(2:4, isym_kq_inv, isym_rp), dp) &
              - matmul(real(cryst%symrel(:,:,isym_kq_inv), dp), real(dmats%toinv(2:4, isym_kq), dp))
        phase_gkq = exp(cmplx(zero, -two_pi * sum(ebands%kptns(:,ikq_ibz_p) * L_gkq), dp))
@@ -7132,7 +7160,6 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        dmat_temp = phase_gkq * dmats%for_spin(spin)%value(:,:, isym_gkq, itime_gkq, ikq_ibz_p)
        dmat_star_kq = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_p, itime_p, ikq_ibz_p)))
        dmat_star_kq = matmul(dmat_temp, dmat_star_kq)
-
 
        ! Read gkq_base from disk. NB: gvals' k-dimension is glob_nk-sized (a BZ-like index,
        ! see dump_my_gbuf's nf90_put_var(...,start=[...,gqk%my_kstart,...],...)), NOT the
@@ -7151,10 +7178,22 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        do mu=1,gqk%natom3
          idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
          ! Same convention as v1phq_rotate_myperts (m_dvdb.F90): both indsym lookups use the
-         ! SAME (forward) symmetry index isym_combined, and tnon includes the symmetry's own
-         ! fractional translation, rotated into the perturbed-atom frame.
+         ! SAME (forward) symmetry index isym_combined. NOTE (session 3, 2026-07-06): unlike
+         ! v1phq_rotate_myperts (which rotates the raw DFPT potential ALONE, with no wavefunctions
+         ! involved), here the wavefunction D-matrices (dmat_k, dmat_star_kq) already carry their
+         ! own fractional-translation phase from cgtk_rotate's rotation of the Bloch state -- so
+         ! including cryst%tnons(isym_combined) AGAIN here, as the borrowed formula literally does,
+         ! double-counts that phase. tnon = l0 only (drop the tnons(isym_combined) term). Verified
+         ! empirically (session 3): fixes a hand-traced isym_p=identity case exactly (~1e-9,
+         ! predicted and confirmed offline that ground truth = -gkq_base(mu_eq) with NO extra phase
+         ! for that case), and improves the overall symmetrized-point exact-match count from
+         ! 970/3942 (toinv-only fix) to 1273/3942 -- net +303, but with 70 points that regress
+         ! (373 newly fixed, 70 newly broken) -- so this is NOT yet a complete fix; something else
+         ! (likely bug #2, isym_p domain violation, or a residual isym_rp validity issue) still
+         ! causes wrong results for a subset, and may have been accidentally compensating for this
+         ! double-counting in those specific 70 cases. See [[gstore-symmetrize-status]] memory.
          l0 = cryst%indsym(1:3, isym_combined, ipert)
-         tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym_combined))
+         tnon = l0
          ipert_eq = cryst%indsym(4, isym_combined, ipert)
 
          ! phase = e^{+i q0_computed . tnon}, q0_computed = SOURCE q of the stored gkq_base
