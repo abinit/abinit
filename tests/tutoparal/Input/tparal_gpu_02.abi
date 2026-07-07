@@ -32,7 +32,6 @@ tsmear 1800. K
 
 #Activation/deactivation of I/O
 optforces 2
-optstress 1
 prtwf 0
 prtden 0
 prteig 0
@@ -185,6 +184,7 @@ xred
 
 #For testing purposes only
 np_slk 0  # Deactivate Scalapack (sometimes buggy)
+optstress 0 # Deactivate stress computation (draws too much memory)
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
