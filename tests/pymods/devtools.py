@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import time
 from functools import wraps
+from .termcolor import cprint
 
 
 def number_of_cpus() -> int:
@@ -110,8 +111,10 @@ def number_of_gpus() -> int:
     # Look for NVIDIA GPU first, then AMD GPU...
     nvidia_cmd = ["nvidia-smi", "--query-gpu=name", "--format=csv"]
     amdgpu_cmd = ["amd-smi", "list", "--csv"]
+    pci_cmd = ["lspci"]
 
     num_gpus = 0
+    try_lspci = False
     for gpu_cmd in [nvidia_cmd, amdgpu_cmd]:
         if shutil.which(gpu_cmd[0]) is None:
             continue
@@ -121,19 +124,47 @@ def number_of_gpus() -> int:
             # The text argument was introduced in Python 3.7 as an alias for universal_newlines=True.
             #result = subprocess.run(gpu_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-            # Check if command failed (meaning it exists)
             if result.returncode != 0:
-                print(f"Error while executing {gpu_cmd[1]}:\n{result.stderr}")
+                # Command failed
+                # If we tried a driver-provided command, warn user about it
+                #as it may outline something's wrong with their installation
+                #
+                # In a second try counting by using lspci
+                # Less reliable but should work on most non-exotic configurations
+                cprint(f"Error while executing {gpu_cmd[0]}:\n{result.stdout}\n{result.stderr}\nFalling back on lspci to count GPU.\nCheck your GPU driver installation !",
+                        color = "magenta", attrs=["blink", "bold"])
+                try_lspci = True
                 num_gpus = 0
 
-            # Command was successful, count the lines (one per GPU minus the header) and exit
-            gpu_lines = result.stdout.strip().split("\n")
-            num_gpus = len(gpu_lines) - 1
-            break
+            else:
+                # Command was successful, count the lines (one per GPU minus the header) and exit
+                gpu_lines = result.stdout.strip().split("\n")
+                num_gpus = len(gpu_lines) - 1
+                break
 
         except FileNotFoundError:
             # Command doesn't exist, continue the loop and try another
             continue
+
+    # Counting GPU using lspci only if a GPU driver command was tried and failed
+    if try_lspci:
+
+        if shutil.which(pci_cmd[0]) is None:
+            cprint("lspci is not present, setting GPU count to 0",
+                    color = "magenta", attrs=["blink", "bold"])
+        else:
+            result = subprocess.run(pci_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
+
+            if result.returncode != 0:
+                # Command failed, give up
+                cprint(f"Error while executing {pci_cmd[0]}:\n{result.stdout}\n{result.stderr}\nCannot count GPUs, setting to zero",
+                        color = "magenta", attrs=["blink", "bold"])
+            else:
+                # Command succeed, look for usual patterns hinting of a GPU
+                num_gpus = sum(1
+                        for line in result.stdout.splitlines()
+                        if "3D controller" in line or "Display controller" in line)
+
 
     return num_gpus
 
