@@ -475,25 +475,38 @@ module m_iterative_solvers
    implicit none
    integer,          intent(in)    :: m
    integer,          intent(in)    :: n
-   double precision, intent(inout) :: x(n)
-   double precision, intent(in)    :: b(n)
-   external                        :: matvec,psolve
-   double precision, external      :: dotprd
-   double precision, intent(inout) :: h(m+1,m)
-   double precision, intent(inout) :: v(n,m+1)
-   double precision, intent(inout) :: res
-   double precision, intent(inout) :: del
+   real(dp), intent(inout), target :: x(n)
+   real(dp), intent(in)            :: b(n)
+   interface
+      subroutine matvec(n_, x, y)
+         integer, intent(in) :: n_
+         double precision, intent(inout), target :: x(n_), y(n_)
+      end subroutine matvec
+      subroutine psolve(n_, x)
+         integer, intent(in) :: n_
+         double precision, intent(inout) :: x(n_)
+      end subroutine psolve
+      function dotprd(n_, a, b) result(c)
+         integer, intent(in) :: n_
+         double precision, intent(inout) :: a(n_), b(n_)
+         double precision :: c
+      end function dotprd
+   end interface
+   real(dp), intent(inout)         :: h(m+1,m)
+   real(dp), intent(inout)         :: v(n,m+1)
+   real(dp), intent(inout)         :: res
+   real(dp), intent(inout)         :: del
    integer,          intent(inout) :: its
    integer,          intent(inout) :: info
-   double precision :: tol,res_,stgn, w(n), z(n)
-   double precision :: h_(m+1,m), y(m+1), p(m+1), work(4*m+1)
+   real(dp) :: tol,res_,stgn
+   real(dp), target :: w(n), z(n)
+   real(dp) :: h_(m+1,m), y(m+1), p(m+1), work(4*m+1)
    integer :: imx, piv(m), rank, i
-   double precision, save :: beta
+   real(dp), save :: beta
    integer, save :: j
    logical :: done
    integer :: ierr  
    character(len=500) :: msg
-
 
    if(info==2) then
       call hookstep(j,h,m,beta,del, y)
@@ -567,7 +580,7 @@ module m_iterative_solvers
       res_ = res*stgn
 
    end do   
- 
+
  end subroutine gmresm
  
  
@@ -578,11 +591,11 @@ module m_iterative_solvers
  subroutine hookstep(j,h,m,beta,del, y)
    implicit none
    integer,          intent(in)    :: j, m
-   double precision, intent(in)    :: h(m+1,j), beta
-   double precision, intent(inout) :: del
-   double precision, intent(out)   :: y(j)
-   double precision :: a(j+1,j), s(j), u(j+1,j+1), vt(j,j), work(5*(j+1))
-   double precision :: p(j+1), q(j), mu, qn
+   real(dp), intent(in)            :: h(m+1,j), beta
+   real(dp), intent(inout)         :: del
+   real(dp), intent(out)           :: y(j)
+   real(dp) :: a(j+1,j), s(j), u(j+1,j+1), vt(j,j), work(5*(j+1))
+   real(dp) :: p(j+1), q(j), mu, qn
    integer :: info
    
    a = h(1:j+1,1:j)
