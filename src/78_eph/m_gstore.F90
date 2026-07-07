@@ -4068,9 +4068,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
        ! and we don't want random numbers written to disk.
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
 
-       if (symmetrize .and. .not. isirr_k) then
-         state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING; cycle
-       end if
+       !if (symmetrize .and. .not. isirr_k) then
+       !  state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING; cycle
+       !end if
 
        if (dtset%gstore_use_lgk /= 0) then
          ii = lg_myk(my_ik)%findq_ibzk(qq_bz)
@@ -6762,6 +6762,28 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  complex(dp) :: cphase, phase_gk, phase_gkq
  logical :: with_g2dw, q_is_gamma
  logical :: isirr_k, isirr_kq, isirr_q
+ ! DEBUG (self-consistency test, AGENT): if enabled, reconstruct COMPUTED points too and diff
+ ! against the actually-computed value instead of skipping them, without touching state_kq/netcdf
+ ! for them (touching them would flip valid GSTORE_KQ_COMPUTED sources to GSTORE_KQ_SYMMETRIZED
+ ! in-memory and break search_source for OTHER points still to be processed in the same pass).
+ ! Flip to .True. to activate; leave .False. for normal production runs.
+ logical,parameter :: DEBUG_SELFTEST_RECONSTRUCT = .False.
+ logical :: is_selftest
+ ! DEBUG (symmetry-index dump, AGENT): if enabled, dump the symmetry/time-reversal indices used
+ ! to reconstruct EVERY (k,q) point to a CSV file, so they can be correlated offline (in python)
+ ! against the pass/fail classification from compare_gvals_with_reconstruction. Flip to .True. to
+ ! activate; leave .False. for normal production runs.
+ logical,parameter :: DEBUG_DUMP_SYMINFO = .False.
+ integer :: syminfo_unit, muinfo_unit
+ integer :: tsign_p, g0_p(3)
+ logical :: p_stab
+ real(dp) :: kk_sk_p(3)
+ ! DEBUG (AGENT): if .True., restore the ORIGINAL (pre session-3 fix B) tnon formula, adding back
+ ! the rotation-weighted cryst%tnons(isym_combined) term, for A/B testing the phonon/atomic-
+ ! perturbation leg in isolation from the electron D-matrix bugs. Leave .False. in production.
+ logical,parameter :: DEBUG_TNON_FULL = .False.
+ integer :: selftest_count, selftest_count_ok
+ real(dp) :: selftest_diff, selftest_maxdiff
  character(len=abi_slen) :: with_gmode, gtype, gvals_name
  character(len=5000) :: msg
  type(gstore_t) :: gstore
@@ -6774,6 +6796,8 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  real(dp),contiguous,pointer :: gkq_rot_ptr(:,:,:,:), gkq_base_ptr(:,:,:,:)
  complex(dp),allocatable :: dmat_k(:,:), dmat_star_kq(:,:), dmat_temp(:,:)
  complex(dp),target,allocatable :: gkq_rot(:,:,:), gkq_base(:,:,:)
+ complex(dp),target,allocatable :: gkq_target(:,:,:) ! DEBUG selftest
+ real(dp),contiguous,pointer :: gkq_target_ptr(:,:,:,:) ! DEBUG selftest
  logical,allocatable :: lg_cache_done(:)
  type(lgroup_t),allocatable :: lg_cache(:)
 !----------------------------------------------------------------------
@@ -6796,6 +6820,19 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
  call dmats%check([std_out], dtset%prtvol)
  call dmats%classify(dtset%prtvol)
+
+ if (DEBUG_DUMP_SYMINFO) then
+   open(newunit=syminfo_unit, file="gstore_symmetrize_syminfo.csv", action="write", status="replace")
+   write(syminfo_unit, "(a)") &
+     "spin,ik_glob,iq_glob,isym_tot,trev_tot,isym_combined,trev_combined,isym_glob,itime_glob,"// &
+     "isym_k,trev_k,isym_kq,trev_kq,isym_p,itime_p,ikq_ibz_p,p_stab,"// &
+     "isym_gk,itime_gk,isym_gkq,itime_gkq,isym_rp,itime_rp,"// &
+     "re_phase_gk,im_phase_gk,re_phase_gkq,im_phase_gkq,re_dmatk11,im_dmatk11,re_dmatsq11,im_dmatsq11,"// &
+     "re_dmatk22,im_dmatk22,re_dmatsq22,im_dmatsq22"
+   open(newunit=muinfo_unit, file="gstore_symmetrize_muinfo.csv", action="write", status="replace")
+   write(muinfo_unit, "(a)") "ik_glob,iq_glob,isym_combined,mu,ipert,ipert_eq,l0_1,l0_2,l0_3,"// &
+     "iq_computed_glob,phase,re_cphase,im_cphase"
+ end if
 
  gvals_name = "gvals"
  ! TODO: Remember to handle GWPT STORE
@@ -6847,6 +6884,8 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
    ABI_MALLOC(dmat_temp, (nb, nb))
    ABI_MALLOC(gkq_base, (nb, nb, gqk%natom3))
    ABI_MALLOC(gkq_rot, (nb, nb, gqk%natom3))
+   ABI_MALLOC(gkq_target, (nb, nb, gqk%natom3)) ! DEBUG selftest
+   selftest_count = 0; selftest_count_ok = 0; selftest_maxdiff = zero ! DEBUG selftest
 
    ! Get the group id for this spin.
    NCF_CHECK(nf90_inq_ncid(ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
@@ -6885,7 +6924,9 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        ik_glob = my_ik + gqk%my_kstart - 1
        kk_bz = gqk%my_kpts(:, my_ik)
 
-       this_state = state_kq(ik_glob, iq_glob); if (this_state == GSTORE_KQ_COMPUTED) cycle
+       this_state = state_kq(ik_glob, iq_glob)
+       is_selftest = DEBUG_SELFTEST_RECONSTRUCT .and. (this_state == GSTORE_KQ_COMPUTED)
+       if (this_state == GSTORE_KQ_COMPUTED .and. .not. is_selftest) cycle
 
        ! AGENT: Using symrel^T convention for k.
        ik_ibz = gqk%my_k2ibz(1, my_ik); isym_k = gqk%my_k2ibz(2, my_ik)
@@ -7081,6 +7122,14 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        ! for the D-matrix lookups below (it is the gauge P and R.P are actually defined in).
        ikq_ibz_p = indkk_kq(1, 1); isym_p = indkk_kq(2, 1); itime_p = indkk_kq(6, 1) + 1
 
+       ! DEBUG (AGENT): does isym_p/itime_p genuinely stabilize ikq_ibz_p (Sk=k+G), i.e. is
+       ! dmats%for_spin(...,isym_p,...) below a REAL D-matrix or the identity placeholder
+       ! (m_classify_bands.F90's dmats_init, "if (.not. is_little_group) cmat=Identity")?
+       tsign_p = 1; if (itime_p == 2) tsign_p = -1
+       kk_sk_p = tsign_p * matmul(transpose(real(cryst%symrel(:,:,isym_p), dp)), ebands%kptns(:,ikq_ibz_p))
+       g0_p = nint(ebands%kptns(:,ikq_ibz_p) - kk_sk_p)
+       p_stab = all(abs(ebands%kptns(:,ikq_ibz_p) - kk_sk_p - g0_p) < tol8)
+
        ! === Electron-side D-matrix for the k0 -> k_glob leg (dmat_k) ===
        ! isym_tot (found by search_source above) maps k0 to k_glob, but is generally DIFFERENT
        ! from the canonical (isym_k, trev_k) that gqk%my_k2ibz/kpts_map already computed for
@@ -7161,6 +7210,15 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        dmat_star_kq = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_p, itime_p, ikq_ibz_p)))
        dmat_star_kq = matmul(dmat_temp, dmat_star_kq)
 
+       if (DEBUG_DUMP_SYMINFO .and. .not. is_selftest) then
+         write(syminfo_unit, "(22(i0,','),i0,12(',',es16.8))") spin, ik_glob, iq_glob, isym_tot, trev_tot, &
+           isym_combined, trev_combined, isym_glob, itime_glob, isym_k, trev_k, isym_kq, trev_kq, &
+           isym_p, itime_p, ikq_ibz_p, merge(1,0,p_stab), isym_gk, itime_gk, isym_gkq, itime_gkq, &
+           isym_rp, itime_rp, real(phase_gk,dp), aimag(phase_gk), real(phase_gkq,dp), aimag(phase_gkq), &
+           real(dmat_k(1,1),dp), aimag(dmat_k(1,1)), real(dmat_star_kq(1,1),dp), aimag(dmat_star_kq(1,1)), &
+           real(dmat_k(2,2),dp), aimag(dmat_k(2,2)), real(dmat_star_kq(2,2),dp), aimag(dmat_star_kq(2,2))
+       end if
+
        ! Read gkq_base from disk. NB: gvals' k-dimension is glob_nk-sized (a BZ-like index,
        ! see dump_my_gbuf's nf90_put_var(...,start=[...,gqk%my_kstart,...],...)), NOT the
        ! smaller electron-IBZ index used for dmats%for_spin lookups -- use ik_base_glob
@@ -7194,6 +7252,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
          ! double-counting in those specific 70 cases. See [[gstore-symmetrize-status]] memory.
          l0 = cryst%indsym(1:3, isym_combined, ipert)
          tnon = l0
+         if (DEBUG_TNON_FULL) tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym_combined))
          ipert_eq = cryst%indsym(4, isym_combined, ipert)
 
          ! phase = e^{+i q0_computed . tnon}, q0_computed = SOURCE q of the stored gkq_base
@@ -7201,6 +7260,12 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
          ! isym_glob maps q0_computed to, and generally differs from q0_computed itself).
          phase = -two_pi * sum(gstore%qbz(:, iq_computed_glob) * tnon)
          cphase = cmplx(cos(phase), sin(phase), dp)
+
+         if (DEBUG_DUMP_SYMINFO .and. .not. is_selftest) then
+           write(muinfo_unit, "(i0,',',i0,',',i0,',',i0,',',i0,',',i0,',',es16.8,',',es16.8,',',es16.8,',',i0,',',es16.8,',',es16.8,',',es16.8)") &
+             ik_glob, iq_glob, isym_combined, mu, ipert, ipert_eq, l0(1), l0(2), l0(3), &
+             iq_computed_glob, phase, real(cphase,dp), aimag(cphase)
+         end if
 
          do idir_eq=1,3
            if (symrec_eq(idir, idir_eq) == 0) cycle
@@ -7210,6 +7275,27 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
                              matmul(matmul(dmat_star_kq, gkq_base(:,:,mu_eq)), dmat_k)
          end do
        end do
+
+       if (is_selftest) then
+         ! DEBUG selftest: (ik_glob,iq_glob) was directly computed. Compare the reconstruction
+         ! against the true computed value already on disk at this SAME (ik_glob,iq_glob), then
+         ! skip the write-back/state update entirely so this point remains a valid
+         ! GSTORE_KQ_COMPUTED source for other points still to be processed in this same pass.
+         call c_f_pointer(c_loc(gkq_target), gkq_target_ptr, [2, nb, nb, gqk%natom3])
+         ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gkq_target_ptr, &
+                              start=[1, 1, 1, 1, ik_glob, iq_glob], &
+                              count=[2, nb, nb, gqk%natom3, 1, 1])
+         NCF_CHECK(ncerr)
+         selftest_diff = maxval(abs(gkq_rot - gkq_target))
+         selftest_count = selftest_count + 1
+         selftest_maxdiff = max(selftest_maxdiff, selftest_diff)
+         if (selftest_diff < tol6) selftest_count_ok = selftest_count_ok + 1
+         if (selftest_diff > tol6) then
+           call wrtout(units, sjoin(" DEBUG selftest MISMATCH ik_glob:", itoa(ik_glob), &
+                                     ", iq_glob:", itoa(iq_glob), ", diff:", ftoa(selftest_diff)))
+         end if
+         cycle
+       end if
 
        ! Write the newly computed g_{mn, nu} back to the netcdf file (in-place modification).
        ! and update the entry in state_kq.
@@ -7223,6 +7309,12 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
      ABI_FREE(my_kqmap)
    end do ! my_iq
+
+   ! DEBUG selftest summary for this spin.
+   if (DEBUG_SELFTEST_RECONSTRUCT) call wrtout(units, sjoin(" DEBUG selftest spin:", itoa(spin), &
+                             ", npoints:", itoa(selftest_count), &
+                             ", nOK(diff<tol6):", itoa(selftest_count_ok), &
+                             ", maxdiff:", ftoa(selftest_maxdiff)))
    end associate
 
    ! Update state_kq for this spin.
@@ -7234,6 +7326,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
    ABI_FREE(dmat_temp)
    ABI_FREE(gkq_base)
    ABI_FREE(gkq_rot)
+   ABI_FREE(gkq_target)
    ABI_FREE(state_kq)
  end do ! my_is
 
@@ -7245,6 +7338,9 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
  NCF_CHECK(nf90_close(ncid))
  call gstore%free()
+
+ if (DEBUG_DUMP_SYMINFO) close(syminfo_unit)
+ if (DEBUG_DUMP_SYMINFO) close(muinfo_unit)
 
  100 call xmpi_barrier(comm)
  call dmats%free()
