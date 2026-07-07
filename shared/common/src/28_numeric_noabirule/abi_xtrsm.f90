@@ -61,6 +61,13 @@ subroutine abi_ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb,gpu_option)
 
  gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
 
+#if defined(DEBUG_VERBOSE) && defined(HAVE_OPENMP_OFFLOAD)
+ if ( gpu_option_ == ABI_GPU_OPENMP ) then
+   ABI_CHECK(xomp_target_is_present(c_loc(a)), "Array isn't mapped on GPU")
+   ABI_CHECK(xomp_target_is_present(c_loc(b)), "Array isn't mapped on GPU")
+ end if
+#endif
+
  if(gpu_option_/=ABI_GPU_DISABLED) then
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b) IF(gpu_option_==ABI_GPU_OPENMP)
@@ -124,6 +131,13 @@ end subroutine abi_ztrsm
 
  cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
  gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
+
+#if defined(DEBUG_VERBOSE) && defined(HAVE_OPENMP_OFFLOAD)
+ if ( gpu_option_ == ABI_GPU_OPENMP ) then
+   ABI_CHECK(xomp_target_is_present(c_loc(a)), "Array isn't mapped on GPU")
+   ABI_CHECK(xomp_target_is_present(c_loc(b)), "Array isn't mapped on GPU")
+ end if
+#endif
 
  if(gpu_option_/=ABI_GPU_DISABLED) then
 #ifdef HAVE_OPENMP_OFFLOAD

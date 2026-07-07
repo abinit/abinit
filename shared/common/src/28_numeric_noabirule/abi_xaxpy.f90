@@ -207,6 +207,13 @@ subroutine abi_d2zaxpy(n, alpha, x, incx, y, incy, x_cplx, gpu_option)
  gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
  cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
 
+#if defined(DEBUG_VERBOSE) && defined(HAVE_OPENMP_OFFLOAD)
+ if ( gpu_option_ == ABI_GPU_OPENMP ) then
+   ABI_CHECK(xomp_target_is_present(c_loc(x)), "Array isn't mapped on GPU")
+   ABI_CHECK(xomp_target_is_present(c_loc(y)), "Array isn't mapped on GPU")
+ end if
+#endif
+
  if(gpu_option_/=ABI_GPU_DISABLED) then
    if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -260,6 +267,13 @@ subroutine abi_zaxpy(n, alpha, x, incx, y, incy, gpu_option)
 ! *********************************************************************
 
  gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
+
+#if defined(DEBUG_VERBOSE) && defined(HAVE_OPENMP_OFFLOAD)
+ if ( gpu_option_ == ABI_GPU_OPENMP ) then
+   ABI_CHECK(xomp_target_is_present(c_loc(x)), "Array isn't mapped on GPU")
+   ABI_CHECK(xomp_target_is_present(c_loc(y)), "Array isn't mapped on GPU")
+ end if
+#endif
 
  if(gpu_option_/=ABI_GPU_DISABLED) then
    if(gpu_option_==ABI_GPU_OPENMP) then

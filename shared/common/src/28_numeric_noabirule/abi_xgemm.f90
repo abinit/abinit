@@ -131,6 +131,14 @@ end subroutine abi_xgemm_gpu_cptr
 
  gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
 
+#if defined(DEBUG_VERBOSE) && defined(HAVE_OPENMP_OFFLOAD)
+ if ( gpu_option_ == ABI_GPU_OPENMP ) then
+   ABI_CHECK(xomp_target_is_present(c_loc(a)), "Array isn't mapped on GPU")
+   ABI_CHECK(xomp_target_is_present(c_loc(b)), "Array isn't mapped on GPU")
+   ABI_CHECK(xomp_target_is_present(c_loc(c)), "Array isn't mapped on GPU")
+ end if
+#endif
+
  if(gpu_option_/=ABI_GPU_DISABLED) then
    if(gpu_option == ABI_GPU_LEGACY .or. gpu_option == ABI_GPU_KOKKOS) then
      call abi_xgemm_gpu_cptr(2,transa,transb,m,n,k,alpha,&
@@ -295,6 +303,14 @@ subroutine abi_d2zgemm(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC,&
 
  cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
  gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
+
+#if defined(DEBUG_VERBOSE) && defined(HAVE_OPENMP_OFFLOAD)
+ if ( gpu_option_ == ABI_GPU_OPENMP ) then
+   ABI_CHECK(xomp_target_is_present(c_loc(a)), "Array isn't mapped on GPU")
+   ABI_CHECK(xomp_target_is_present(c_loc(b)), "Array isn't mapped on GPU")
+   ABI_CHECK(xomp_target_is_present(c_loc(c)), "Array isn't mapped on GPU")
+ end if
+#endif
 
  if(gpu_option_/=ABI_GPU_DISABLED) then
 #ifdef HAVE_OPENMP_OFFLOAD

@@ -238,6 +238,13 @@ subroutine abi_zheev(jobz,uplo,n,a,lda,w)
  ABI_CHECK(lapack_double_precision,"BUG(2) in abi_zheev (precision)!")
  ABI_CHECK(n<=eigen_z_maxsize,"BUG(3) in abi_zheev (maxsize)!")
 
+#if defined(DEBUG_VERBOSE) && defined(HAVE_OPENMP_OFFLOAD)
+ if ( gpu_option_ == ABI_GPU_OPENMP ) then
+   ABI_CHECK(xomp_target_is_present(c_loc(a)), "Array isn't mapped on GPU")
+   ABI_CHECK(xomp_target_is_present(c_loc(w)), "Array isn't mapped on GPU")
+ end if
+#endif
+
  work => eigen_z_work ; rwork => eigen_z_rwork
  lwork=eigen_z_lwork
 
@@ -325,6 +332,13 @@ subroutine abi_d2zheevd(jobz, uplo, n, a, lda, w, info, x_cplx, gpu_option)
 
  cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
  gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
+
+#if defined(DEBUG_VERBOSE) && defined(HAVE_OPENMP_OFFLOAD)
+ if ( gpu_option_ == ABI_GPU_OPENMP ) then
+   ABI_CHECK(xomp_target_is_present(c_loc(a)), "Array isn't mapped on GPU")
+   ABI_CHECK(xomp_target_is_present(c_loc(w)), "Array isn't mapped on GPU")
+ end if
+#endif
 
  if(gpu_option_/=ABI_GPU_DISABLED) then
    if(gpu_option_==ABI_GPU_OPENMP) then
