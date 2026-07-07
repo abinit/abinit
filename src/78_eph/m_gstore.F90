@@ -6782,18 +6782,49 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  ! the rotation-weighted cryst%tnons(isym_combined) term, for A/B testing the phonon/atomic-
  ! perturbation leg in isolation from the electron D-matrix bugs. Leave .False. in production.
  logical,parameter :: DEBUG_TNON_FULL = .False.
+ ! DEBUG (AGENT, session 6): drop the D(isym_glob) factor from dmat_k. Hypothesis: isym_glob is
+ ! a pure q-space little-group rotation of k0/ik_ibz (found by lg_cache to relate q0_computed to
+ ! q_base) and never touches k at all -- k0 always literally equals its own ik_ibz coordinate
+ ! (isym_k0=1 always, confirmed empirically this session by cross-referencing gstore%kbz2ibz), so
+ ! composing D(isym_glob) into the ELECTRON ket D-matrix may be spurious. Leave .False. in production.
+ logical,parameter :: DEBUG_DMATK_NO_GLOB = .False.
+ ! DEBUG (AGENT, session 6): alternate isym_combined for the general (isym_glob/=1) search_source
+ ! branch. Derivation: symrec is a genuine (non-anti-) homomorphism of the multable group law
+ ! (symrec(s):=symrel^T(toinv(s)), and phi(s):=symrel^T(s) is an anti-homomorphism, so the two
+ ! reversals cancel), so q_glob=symrec(isym_tot).q_base and q_base=symrec(isym_glob).q0_computed
+ ! (the latter from lgroup_find_ibzimage_sym's own docstring) combine EXACTLY to
+ ! q_glob=symrec(multable(1,isym_tot,isym_glob)).q0_computed, with NO toinv anywhere in the pure
+ ! coordinate algebra. Combined with the already-validated Fix A boundary condition (isym_glob=1
+ ! must reduce to toinv(isym_tot)), the natural candidate consistent with both is
+ ! isym_combined_new = toinv(multable(1,isym_tot,isym_glob)) -- differs from the current
+ ! multable(1,isym_tot_inv,isym_glob) whenever isym_glob/=1. Leave .False. in production.
+ logical,parameter :: DEBUG_ISYM_COMBINED_ALT = .False.
+ integer :: isym_tot_glob_tmp
+ ! DEBUG (AGENT, session 6): test whether the tnon/l0 formula for the atomic-perturbation leg is
+ ! missing a lattice-vector "debt" correction analogous to L_gk, arising because isym_combined
+ ! (in the general isym_glob/=1 branch) is a TABULATED multable(1,isym_tot_inv,isym_glob) product,
+ ! not necessarily the literal Seitz composition -- the debt is multable(2:4,isym_tot_inv,isym_glob)
+ ! (already computed for the CSV dump as Ltc_debug, but the code's own comment there calls it "not
+ ! needed downstream"). Session 5 tested a similar idea dotted with kk_ibz (wrong -- gave i, needed
+ ! -1); this variant adds it directly to l0 (so it enters exactly like l0 does, dotted with
+ ! q0_computed via the existing phase formula) instead. Leave .False. in production.
+ logical,parameter :: DEBUG_TNON_LTC = .False.
+ real(dp) :: Ltc_live(3)
  integer :: selftest_count, selftest_count_ok
  real(dp) :: selftest_diff, selftest_maxdiff
  character(len=abi_slen) :: with_gmode, gtype, gvals_name
  character(len=5000) :: msg
  type(gstore_t) :: gstore
- type(dmats_t) :: dmats
+ type(dmats_t),target :: dmats
 !arrays
  real(dp) :: qpt(3), kk_bz(3), kk_ibz(3), qq_ibz(3)
  !real(dp),allocatable :: gwork_q(:,:,:,:,:)
  integer :: brange_k_spin(2, dtset%nsppol)
+ integer :: dmats_spin_ncid, nb_dmat, target_ik_ibz
+ real(dp) :: Ltc_debug(3) ! DEBUG (AGENT): candidate multable(2:4,isym_tot_inv,isym_glob) lattice debt
  integer,allocatable :: my_kqmap(:,:), state_kq(:,:) ! kmesh_map(:,:),
  real(dp),contiguous,pointer :: gkq_rot_ptr(:,:,:,:), gkq_base_ptr(:,:,:,:)
+ real(dp),contiguous,pointer :: dmat_ptr(:,:,:,:,:,:)
  complex(dp),allocatable :: dmat_k(:,:), dmat_star_kq(:,:), dmat_temp(:,:)
  complex(dp),target,allocatable :: gkq_rot(:,:,:), gkq_base(:,:,:)
  complex(dp),target,allocatable :: gkq_target(:,:,:) ! DEBUG selftest
@@ -6828,7 +6859,10 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
      "isym_k,trev_k,isym_kq,trev_kq,isym_p,itime_p,ikq_ibz_p,p_stab,"// &
      "isym_gk,itime_gk,isym_gkq,itime_gkq,isym_rp,itime_rp,"// &
      "re_phase_gk,im_phase_gk,re_phase_gkq,im_phase_gkq,re_dmatk11,im_dmatk11,re_dmatsq11,im_dmatsq11,"// &
-     "re_dmatk22,im_dmatk22,re_dmatsq22,im_dmatsq22"
+     "re_dmatk22,im_dmatk22,re_dmatsq22,im_dmatsq22,ik_ibz,ik_base_glob,iq_computed_glob,"// &
+     "target_ik_ibz,kk_ibz_stale_1,kk_ibz_stale_2,kk_ibz_stale_3,"// &
+     "kk_ibz_correct_1,kk_ibz_correct_2,kk_ibz_correct_3,"// &
+     "isym_tot_inv_val,Ltc_1,Ltc_2,Ltc_3"
    open(newunit=muinfo_unit, file="gstore_symmetrize_muinfo.csv", action="write", status="replace")
    write(muinfo_unit, "(a)") "ik_glob,iq_glob,isym_combined,mu,ipert,ipert_eq,l0_1,l0_2,l0_3,"// &
      "iq_computed_glob,phase,re_cphase,im_cphase"
@@ -6872,6 +6906,31 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  lg_cache_done = .False.
 
  NCF_CHECK(nctk_open_modify(ncid, gstore_path, xmpi_comm_self))
+
+ ! Write the D-matrices D^k(S) = <psi_mSk|S|psi_nk> (dmats%for_spin, built above by dmats%init)
+ ! to the GSTORE file for post-processing/debugging. One group per spin, since the D-matrices
+ ! depend on spin (different band ranges/occupations); only the master node writes (this whole
+ ! routine, past the "if (my_rank /= 0) goto 100" gate above, already executes on my_rank==0 only,
+ ! and dmats%for_spin is fully populated on every rank -- dmats_init distributes the (ik_ibz,spin)
+ ! work across ranks internally and xmpi_sums the result over the full communicator).
+ do ii=1,dtset%nsppol
+   nb_dmat = brange_k_spin(2, ii) - brange_k_spin(1, ii) + 1
+   NCF_CHECK(nf90_def_grp(ncid, strcat("dmats", "_spin", itoa(ii)), dmats_spin_ncid))
+   ncerr = nctk_def_dims(dmats_spin_ncid, [ &
+      nctkdim_t("nb_dmat", nb_dmat), &
+      nctkdim_t("nsym_dmat", nsym), &
+      nctkdim_t("ntime_dmat", 2), &
+      nctkdim_t("nkibz_dmat", nkibz) &
+   ], defmode=.True.)
+   NCF_CHECK(ncerr)
+   ncerr = nctk_def_arrays(dmats_spin_ncid, [ &
+     nctkarr_t("dmat_values", "dp", "gstore_cplex, nb_dmat, nb_dmat, nsym_dmat, ntime_dmat, nkibz_dmat") &
+   ])
+   NCF_CHECK(ncerr)
+   NCF_CHECK(nctk_set_datamode(dmats_spin_ncid))
+   call c_f_pointer(c_loc(dmats%for_spin(ii)%value), dmat_ptr, [2, nb_dmat, nb_dmat, nsym, 2, nkibz])
+   NCF_CHECK(nf90_put_var(dmats_spin_ncid, nctk_idname(dmats_spin_ncid, "dmat_values"), dmat_ptr))
+ end do
 
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
@@ -6935,6 +6994,10 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        tsign_k = 1; if (trev_k == 1) tsign_k = -1
        itime_k = trev_k + 1
        kk_ibz = ebands%kptns(:,ik_ibz)
+       target_ik_ibz = ik_ibz ! DEBUG (AGENT): save pre-search_source value of ik_ibz (target's own
+                              ! IBZ index) to check whether it differs from the SOURCE's ik_ibz that
+                              ! search_source assigns below -- kk_ibz (used in phase_gk) is never
+                              ! refreshed after that reassignment.
 
        ! AGENT: Using symrel^t convention for k+q.
        ikq_ibz = my_kqmap(1, my_ik); isym_kq = my_kqmap(2, my_ik)
@@ -7068,8 +7131,15 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
            ! primitive cell) -- normal/expected, not an error, and not needed downstream.
            isym_tot_inv = dmats%toinv(1, isym_tot)
            ABI_CHECK(isym_tot_inv /= 0, "Could not find inverse of isym_tot")
-           isym_combined = dmats%multable(1, isym_tot_inv, isym_glob)
-           ABI_CHECK(isym_combined /= 0, "Composite symmetry not found in space group (group closure violated?)")
+           if (DEBUG_ISYM_COMBINED_ALT) then
+             isym_tot_glob_tmp = dmats%multable(1, isym_tot, isym_glob)
+             ABI_CHECK(isym_tot_glob_tmp /= 0, "Composite symmetry not found in space group (group closure violated?)")
+             isym_combined = dmats%toinv(1, isym_tot_glob_tmp)
+             ABI_CHECK(isym_combined /= 0, "Could not find inverse of isym_tot_glob_tmp")
+           else
+             isym_combined = dmats%multable(1, isym_tot_inv, isym_glob)
+             ABI_CHECK(isym_combined /= 0, "Composite symmetry not found in space group (group closure violated?)")
+           end if
            trev_combined = mod(trev_tot + (itime_glob - 1), 2)
            isym_elec_combined = isym_combined
 
@@ -7163,7 +7233,9 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        ! that expansion, so D(isym_glob) must be conjugated here -- same itime-dependent
        ! conjugation rule as the group-multiplication test in dmats_check_one_k
        ! (D(A.B)=D(A)D(B) if A unitary, D(A)D(B)^* if A antiunitary, A=Sigma_tot here).
-       if (trev_tot == 0) then
+       if (DEBUG_DMATK_NO_GLOB) then
+         dmat_k = conjg(phase_gk) * transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_gk, itime_gk, ik_ibz)))
+       else if (trev_tot == 0) then
          dmat_k = conjg(phase_gk) * transpose(conjg(matmul( &
            dmats%for_spin(spin)%value(:,:, isym_gk, itime_gk, ik_ibz), &
            dmats%for_spin(spin)%value(:,:, isym_glob, itime_glob, ik_ibz))))
@@ -7211,12 +7283,18 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        dmat_star_kq = matmul(dmat_temp, dmat_star_kq)
 
        if (DEBUG_DUMP_SYMINFO .and. .not. is_selftest) then
-         write(syminfo_unit, "(22(i0,','),i0,12(',',es16.8))") spin, ik_glob, iq_glob, isym_tot, trev_tot, &
+         Ltc_debug = real(dmats%multable(2:4, isym_tot_inv, isym_glob), dp)
+         write(syminfo_unit, "(22(i0,','),i0,12(',',es16.8),4(',',i0),6(',',es16.8),',',i0,3(',',es16.8))") &
+           spin, ik_glob, iq_glob, isym_tot, trev_tot, &
            isym_combined, trev_combined, isym_glob, itime_glob, isym_k, trev_k, isym_kq, trev_kq, &
            isym_p, itime_p, ikq_ibz_p, merge(1,0,p_stab), isym_gk, itime_gk, isym_gkq, itime_gkq, &
            isym_rp, itime_rp, real(phase_gk,dp), aimag(phase_gk), real(phase_gkq,dp), aimag(phase_gkq), &
            real(dmat_k(1,1),dp), aimag(dmat_k(1,1)), real(dmat_star_kq(1,1),dp), aimag(dmat_star_kq(1,1)), &
-           real(dmat_k(2,2),dp), aimag(dmat_k(2,2)), real(dmat_star_kq(2,2),dp), aimag(dmat_star_kq(2,2))
+           real(dmat_k(2,2),dp), aimag(dmat_k(2,2)), real(dmat_star_kq(2,2),dp), aimag(dmat_star_kq(2,2)), &
+           ik_ibz, ik_base_glob, iq_computed_glob, target_ik_ibz, &
+           kk_ibz(1), kk_ibz(2), kk_ibz(3), &
+           ebands%kptns(1,ik_ibz), ebands%kptns(2,ik_ibz), ebands%kptns(3,ik_ibz), &
+           isym_tot_inv, Ltc_debug(1), Ltc_debug(2), Ltc_debug(3)
        end if
 
        ! Read gkq_base from disk. NB: gvals' k-dimension is glob_nk-sized (a BZ-like index,
@@ -7253,6 +7331,10 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
          l0 = cryst%indsym(1:3, isym_combined, ipert)
          tnon = l0
          if (DEBUG_TNON_FULL) tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym_combined))
+         if (DEBUG_TNON_LTC) then
+           Ltc_live = real(dmats%multable(2:4, isym_tot_inv, isym_glob), dp)
+           tnon = l0 + matmul(transpose(symrec_eq), Ltc_live)
+         end if
          ipert_eq = cryst%indsym(4, isym_combined, ipert)
 
          ! phase = e^{+i q0_computed . tnon}, q0_computed = SOURCE q of the stored gkq_base
