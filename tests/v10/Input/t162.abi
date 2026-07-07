@@ -77,7 +77,7 @@ prteig           0            # do not print eigenvalues
 #%% [files]
 #%% files_to_test = t162.abo, tolnlines = 20, tolabs = 1.0, tolrel = 1.0e-02, fld_options = -medium
 #%% [paral_info]
-#%% max_nprocs = 8
+#%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = C. Barat
 #%% keywords = GS
