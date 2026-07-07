@@ -6820,11 +6820,10 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  real(dp) :: qpt(3), kk_bz(3), kk_ibz(3), qq_ibz(3)
  !real(dp),allocatable :: gwork_q(:,:,:,:,:)
  integer :: brange_k_spin(2, dtset%nsppol)
- integer :: dmats_spin_ncid, nb_dmat, target_ik_ibz
+ integer :: target_ik_ibz
  real(dp) :: Ltc_debug(3) ! DEBUG (AGENT): candidate multable(2:4,isym_tot_inv,isym_glob) lattice debt
  integer,allocatable :: my_kqmap(:,:), state_kq(:,:) ! kmesh_map(:,:),
  real(dp),contiguous,pointer :: gkq_rot_ptr(:,:,:,:), gkq_base_ptr(:,:,:,:)
- real(dp),contiguous,pointer :: dmat_ptr(:,:,:,:,:,:)
  complex(dp),allocatable :: dmat_k(:,:), dmat_star_kq(:,:), dmat_temp(:,:)
  complex(dp),target,allocatable :: gkq_rot(:,:,:), gkq_base(:,:,:)
  complex(dp),target,allocatable :: gkq_target(:,:,:) ! DEBUG selftest
@@ -6907,30 +6906,9 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
  NCF_CHECK(nctk_open_modify(ncid, gstore_path, xmpi_comm_self))
 
- ! Write the D-matrices D^k(S) = <psi_mSk|S|psi_nk> (dmats%for_spin, built above by dmats%init)
- ! to the GSTORE file for post-processing/debugging. One group per spin, since the D-matrices
- ! depend on spin (different band ranges/occupations); only the master node writes (this whole
- ! routine, past the "if (my_rank /= 0) goto 100" gate above, already executes on my_rank==0 only,
- ! and dmats%for_spin is fully populated on every rank -- dmats_init distributes the (ik_ibz,spin)
- ! work across ranks internally and xmpi_sums the result over the full communicator).
- do ii=1,dtset%nsppol
-   nb_dmat = brange_k_spin(2, ii) - brange_k_spin(1, ii) + 1
-   NCF_CHECK(nf90_def_grp(ncid, strcat("dmats", "_spin", itoa(ii)), dmats_spin_ncid))
-   ncerr = nctk_def_dims(dmats_spin_ncid, [ &
-      nctkdim_t("nb_dmat", nb_dmat), &
-      nctkdim_t("nsym_dmat", nsym), &
-      nctkdim_t("ntime_dmat", 2), &
-      nctkdim_t("nkibz_dmat", nkibz) &
-   ], defmode=.True.)
-   NCF_CHECK(ncerr)
-   ncerr = nctk_def_arrays(dmats_spin_ncid, [ &
-     nctkarr_t("dmat_values", "dp", "gstore_cplex, nb_dmat, nb_dmat, nsym_dmat, ntime_dmat, nkibz_dmat") &
-   ])
-   NCF_CHECK(ncerr)
-   NCF_CHECK(nctk_set_datamode(dmats_spin_ncid))
-   call c_f_pointer(c_loc(dmats%for_spin(ii)%value), dmat_ptr, [2, nb_dmat, nb_dmat, nsym, 2, nkibz])
-   NCF_CHECK(nf90_put_var(dmats_spin_ncid, nctk_idname(dmats_spin_ncid, "dmat_values"), dmat_ptr))
- end do
+ ! Write D^k(S) = <psi_mSk|S|psi_nk> for post-processing and reuse without the WFK file.
+ ! This code runs on the master rank and dmats%for_spin has already been collected on every rank.
+ call dmats%ncwrite(ncid)
 
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins

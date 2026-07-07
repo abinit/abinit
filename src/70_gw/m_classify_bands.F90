@@ -22,10 +22,13 @@
 
 module m_classify_bands
 
+ use, intrinsic :: iso_c_binding, only : c_f_pointer, c_loc
  use defs_basis
  use m_abicore
  use m_xmpi
  use m_errors
+ use netcdf
+ use m_nctk
 
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat, yesno
  use defs_datatypes,   only : pseudopotential_type
@@ -105,6 +108,8 @@ type, public :: dmats_t
 
  contains
    procedure :: init => dmats_init           ! Initialize object
+   procedure :: init_from_file => dmats_init_from_file ! Initialize object from a NetCDF file
+   procedure :: ncwrite => dmats_ncwrite     ! Write D-matrices to an open NetCDF file
    procedure :: free => dmats_free           ! Free memory.
    procedure :: check => dmats_check         ! Check Dmats
    procedure :: classify => dmats_classify   ! Classify irreps
@@ -1066,6 +1071,142 @@ subroutine dmats_init(dmats, wfk_path, dtset, cryst, brange_spin, ngfft, pawtab,
  call cwtime_report(" dmats_init:", cpu, wall, gflops)
 
 end subroutine dmats_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_classify_bands/dmats_ncwrite
+!! NAME
+!! dmats_ncwrite
+!!
+!! FUNCTION
+!! Write the D-matrices and their band ranges to an open NetCDF file.
+!! One NetCDF group is created for each spin channel.
+!!
+!! INPUTS
+!! ncid=NetCDF file identifier. The file must be in data mode on entry.
+!!
+!! SOURCE
+
+subroutine dmats_ncwrite(dmats, ncid)
+
+!Arguments ------------------------------------
+ class(dmats_t),target,intent(in) :: dmats
+ integer,intent(in) :: ncid
+
+!Local variables-------------------------------
+ integer :: spin, spin_ncid, ncerr, nb, nsym, nkibz
+ real(dp),contiguous,pointer :: dmat_ptr(:,:,:,:,:,:)
+!----------------------------------------------------------------------
+
+ nsym = dmats%cryst%nsym
+ nkibz = dmats%ks_ebands%nkpt
+
+ do spin=1,size(dmats%for_spin)
+   nb = dmats%brange_spin(2, spin) - dmats%brange_spin(1, spin) + 1
+   if (.not. all(shape(dmats%for_spin(spin)%value) == [nb, nb, nsym, 2, nkibz])) then
+     ABI_ERROR("Inconsistent dmats array shape")
+   end if
+
+   NCF_CHECK(nctk_set_defmode(ncid))
+   NCF_CHECK(nf90_def_grp(ncid, strcat("dmats", "_spin", itoa(spin)), spin_ncid))
+   ncerr = nctk_def_dims(spin_ncid, [ &
+     nctkdim_t("cplex_dmat", 2), &
+     nctkdim_t("two_dmat", 2), &
+     nctkdim_t("nb_dmat", nb), &
+     nctkdim_t("nsym_dmat", nsym), &
+     nctkdim_t("ntime_dmat", 2), &
+     nctkdim_t("nkibz_dmat", nkibz) &
+   ], defmode=.True.)
+   NCF_CHECK(ncerr)
+   ncerr = nctk_def_arrays(spin_ncid, [ &
+     nctkarr_t("band_range", "int", "two_dmat"), &
+     nctkarr_t("dmat_values", "dp", "cplex_dmat, nb_dmat, nb_dmat, nsym_dmat, ntime_dmat, nkibz_dmat") &
+   ])
+   NCF_CHECK(ncerr)
+   NCF_CHECK(nctk_set_datamode(spin_ncid))
+   NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "band_range"), dmats%brange_spin(:, spin)))
+   call c_f_pointer(c_loc(dmats%for_spin(spin)%value), dmat_ptr, [2, nb, nb, nsym, 2, nkibz])
+   NCF_CHECK(nf90_put_var(spin_ncid, nctk_idname(spin_ncid, "dmat_values"), dmat_ptr))
+ end do
+
+end subroutine dmats_ncwrite
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_classify_bands/dmats_init_from_file
+!! NAME
+!! dmats_init_from_file
+!!
+!! FUNCTION
+!! Initialize a dmats_t object from D-matrices stored by dmats_ncwrite.
+!! Crystal and dataset pointers are associated with the caller-owned objects.
+!!
+!! INPUTS
+!! path=Path to the NetCDF file containing dmats_spinN groups.
+!! dtset=Dataset used to validate the number of spin channels.
+!! cryst=Crystal used to rebuild the symmetry multiplication tables.
+!! comm=MPI communicator used to read the electronic band structure.
+!!
+!! SOURCE
+
+subroutine dmats_init_from_file(dmats, path, dtset, cryst, comm)
+
+!Arguments ------------------------------------
+ class(dmats_t),target,intent(out) :: dmats
+ character(len=*),intent(in) :: path
+ type(dataset_type),target,intent(in) :: dtset
+ class(crystal_t),target,intent(in) :: cryst
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+ integer :: ncid, spin_ncid, spin, nsppol, nsym, nkibz, nb, ncerr, ierr
+ integer :: nb_file, nsym_file, ntime_file, nkibz_file, cplex_file
+ real(dp),contiguous,pointer :: dmat_ptr(:,:,:,:,:,:)
+!----------------------------------------------------------------------
+
+ dmats%ks_ebands = ebands_from_file(path, comm)
+ dmats%cryst => cryst
+ dmats%dtset => dtset
+
+ nsppol = dmats%ks_ebands%nsppol
+ nsym = cryst%nsym
+ nkibz = dmats%ks_ebands%nkpt
+ ABI_CHECK_IEQ(nsppol, dtset%nsppol, "Inconsistent nsppol in dmats file")
+
+ ABI_MALLOC(dmats%brange_spin, (2, nsppol))
+ ABI_MALLOC(dmats%multable, (4, nsym, nsym))
+ ABI_MALLOC(dmats%toinv, (4, nsym))
+ call sg_multable(nsym, cryst%symafm, cryst%symrel, ierr, &
+                  tnons=cryst%tnons, multable=dmats%multable, toinv=dmats%toinv)
+ ABI_CHECK_IEQ(ierr, 0, "sg_multable returned ierr !=0. See messages above.")
+
+ ABI_MALLOC(dmats%for_spin, (nsppol))
+ NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
+ do spin=1,nsppol
+   NCF_CHECK(nf90_inq_ncid(ncid, strcat("dmats", "_spin", itoa(spin)), spin_ncid))
+   NCF_CHECK(nctk_get_dim(spin_ncid, "cplex_dmat", cplex_file))
+   NCF_CHECK(nctk_get_dim(spin_ncid, "nb_dmat", nb_file))
+   NCF_CHECK(nctk_get_dim(spin_ncid, "nsym_dmat", nsym_file))
+   NCF_CHECK(nctk_get_dim(spin_ncid, "ntime_dmat", ntime_file))
+   NCF_CHECK(nctk_get_dim(spin_ncid, "nkibz_dmat", nkibz_file))
+   ABI_CHECK_IEQ(cplex_file, 2, "dmats file should contain complex matrices")
+   ABI_CHECK_IEQ(nsym_file, nsym, "Inconsistent number of symmetries in dmats file")
+   ABI_CHECK_IEQ(ntime_file, 2, "Inconsistent time-reversal dimension in dmats file")
+   ABI_CHECK_IEQ(nkibz_file, nkibz, "Inconsistent number of IBZ k-points in dmats file")
+
+   NCF_CHECK(nf90_get_var(spin_ncid, nctk_idname(spin_ncid, "band_range"), dmats%brange_spin(:, spin)))
+   nb = dmats%brange_spin(2, spin) - dmats%brange_spin(1, spin) + 1
+   ABI_CHECK_IEQ(nb_file, nb, "Inconsistent band range in dmats file")
+   ABI_MALLOC(dmats%for_spin(spin)%value, (nb, nb, nsym, 2, nkibz))
+   call c_f_pointer(c_loc(dmats%for_spin(spin)%value), dmat_ptr, [2, nb, nb, nsym, 2, nkibz])
+   ncerr = nf90_get_var(spin_ncid, nctk_idname(spin_ncid, "dmat_values"), dmat_ptr)
+   NCF_CHECK(ncerr)
+ end do
+ NCF_CHECK(nf90_close(ncid))
+
+end subroutine dmats_init_from_file
 !!***
 
 !----------------------------------------------------------------------
