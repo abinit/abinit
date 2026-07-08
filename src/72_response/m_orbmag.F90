@@ -197,6 +197,7 @@ module m_orbmag
   private :: orbmag_nl1_k
   private :: nonlocal_me
   private :: local_me_mesh
+  private :: me_proj_mesh
   private :: nonlocal_me_rg
   !private :: convolution_vv2
   private :: make_d
@@ -590,23 +591,23 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      ! ZTG23 Eq. 36 terms 3 and 4 and Eq. 46 term 2
      call orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh,ph1d,pawtab,trnrm,suppress_ormesh=.FALSE.)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh,ph1d,pawtab,trnrm,suppress_ormesh=.TRUE.)
 
      ! ZTG23 Eq. 36 term 1
      call orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,ph1d,trnrm,suppress_ormesh=.FALSE.)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,ph1d,trnrm,suppress_ormesh=.TRUE.)
 
      ! ZTG23 text after Eq. 42
      ! <L_R> contribution
      call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_hamk,ikpt,inlr,isppol,&
        & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,&
-       & ph1d,trnrm,suppress_ormesh=.FALSE.)
+       & ph1d,trnrm,suppress_ormesh=.TRUE.)
 
      ! ZTG23 Eq. 43
      ! A0.An contribution
      call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_hamk,ikpt,inbm,isppol,&
        & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,&
-       & ph1d,trnrm,suppress_ormesh=.FALSE.)
+       & ph1d,trnrm,suppress_ormesh=.TRUE.)
 
      ! accumulate terms
      do nn = 1, nband_k
@@ -1195,8 +1196,8 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
   logical :: my_suppress_ormesh,need_ormesh
   !arrays
   real(dp) bdot(2),mdot(2)
-  real(dp),allocatable :: fofr(:,:,:),ghc(:,:),gsc(:,:),gvnlxc(:,:),local_work(:,:,:,:)
-  real(dp),allocatable,target :: ghc_local(:,:),gsc_local(:,:),gvnlxc_local(:,:)
+  real(dp),allocatable :: fofr(:,:,:),gsc(:,:),gvnlxc(:,:),local_work(:,:,:,:)
+  real(dp),allocatable,target :: ghc(:,:),ghc_local(:,:),gsc_local(:,:),gvnlxc_local(:,:)
   real(dp),pointer :: du_dbeta(:,:),du_dgamma(:,:)
   complex(dp) :: m1(3),b1(3)
   type(pawcprj_type),allocatable :: cwaveprj1(:,:)
@@ -1277,22 +1278,26 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
       orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibcc) = -four*real(prefac_b*CMPLX(bdot(1),bdot(2)))
 
      if (need_ormesh) then
-       
-       ! local part 
-       type_calc = 3 ! apply local and kinetic only
-       sij_opt = 0 ! compute ghc only
-       call getghc(cpopt,du_dgamma,cwaveprj1,ghc_local,gsc_local,gs_hamk,gvnlxc_local,lams,mpi_enreg,&
-         & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
        ormesh_fac = trnrm(nn)*prefac_m
-       call local_me_mesh(du_dbeta,dtset,local_work,gs_hamk,ghc_local,mpi_enreg,&
+       call me_proj_mesh(du_dbeta,dtset,local_work,gs_hamk,ghc,mpi_enreg,&
          & n4,n5,n6,ndat,npw_k,ph1d,ormesh_fac,t_atom)
        orbmag_mesh%rmesh(:,:,:,adir,incc)=orbmag_mesh%rmesh(:,:,:,adir,incc)+two*local_work(1,:,:,:)
-       
-       ! nonlocal part
-       call nonlocal_me_mesh(adir,atindx,du_dbeta,dum_dnlbra,dum_dnlket,dterm,dtset,&
-         & eig_k(nn),fermie,fofr,gs_hamk,du_dgamma,mpi_enreg,n4,n5,n6,ndat,npw_k,incc,ph1d,&
-         & prefac_m,pawtab,trnrm(nn))
-       orbmag_mesh%rmesh(:,:,:,adir,incc)=orbmag_mesh%rmesh(:,:,:,adir,incc)+two*fofr(:,:,:)
+       !
+       ! local part 
+       !type_calc = 3 ! apply local and kinetic only
+       !sij_opt = 0 ! compute ghc only
+       !call getghc(cpopt,du_dgamma,cwaveprj1,ghc_local,gsc_local,gs_hamk,gvnlxc_local,lams,mpi_enreg,&
+       !  & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
+       !ormesh_fac = trnrm(nn)*prefac_m
+       !call local_me_mesh(du_dbeta,dtset,local_work,gs_hamk,ghc_local,mpi_enreg,&
+       !  & n4,n5,n6,ndat,npw_k,ph1d,ormesh_fac,t_atom)
+       !orbmag_mesh%rmesh(:,:,:,adir,incc)=orbmag_mesh%rmesh(:,:,:,adir,incc)+two*local_work(1,:,:,:)
+       !
+       !! nonlocal part
+       !call nonlocal_me_mesh(adir,atindx,du_dbeta,dum_dnlbra,dum_dnlket,dterm,dtset,&
+       !  & eig_k(nn),fermie,fofr,gs_hamk,du_dgamma,mpi_enreg,n4,n5,n6,ndat,npw_k,incc,ph1d,&
+       !  & prefac_m,pawtab,trnrm(nn))
+       !orbmag_mesh%rmesh(:,:,:,adir,incc)=orbmag_mesh%rmesh(:,:,:,adir,incc)+two*fofr(:,:,:)
      end if
 
    end do ! adir
@@ -3288,6 +3293,86 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_ij,pawrad,pawtab,psps)
 
 end subroutine make_d
 !!***
+
+!!****f* ABINIT/me_proj_mesh
+!! NAME
+!! me_proj_mesh
+!!
+!! FUNCTION
+!! compute realspace mesh for matrix element
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!! 
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine me_proj_mesh(bra,dtset,fofr,gs_hamk,ket,mpi_enreg,&
+    & n4,n5,n6,ndat,npw_k,ph1d,scalar_factor,t_atom)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: n4,n5,n6,ndat,npw_k,t_atom
+  complex(dp),intent(in) :: scalar_factor
+  type(dataset_type),intent(in) :: dtset
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+  type(MPI_type), intent(inout) :: mpi_enreg
+  !arrays
+  real(dp),intent(out) :: fofr(2,n4,n5,n6*ndat)
+  real(dp),intent(in),pointer :: bra(:,:),ket(:,:),ph1d(:,:)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: fourwf_cplex,fourwf_option,ig,tim_fourwf
+  real(dp) :: weight_i,weight_r
+  complex(dp) :: cpw
+  !arrays
+  real(dp),allocatable :: fbra(:,:,:,:),fket(:,:,:,:),denpot(:,:),fofgout(:,:),work(:,:)
+  complex(dp),allocatable :: phgr(:)
+
+!--------------------------------------------------------------------
+
+  !ABI_MALLOC(phgr,(npw_k))
+  !call make_phgr(dtset,gs_hamk,npw_k,ph1d,phgr,t_atom)
+  
+  ! if term of interest is local, compute exp(-iG.R)*conjg(bra)*scalar_factor*ket 
+  ! and then transform with fourwf. Here R is t_atom position; factor shifts from 
+  ! unit cell origin to dipole location
+  ABI_MALLOC(work,(2,npw_k))
+  ABI_MALLOC(fket,(2,n4,n5,n6*ndat))
+  ABI_MALLOC(fbra,(2,n4,n5,n6*ndat))
+  fourwf_cplex = 1
+  fourwf_option = 0
+  tim_fourwf = 1
+  call fourwf(fourwf_cplex,denpot,ket,fofgout,fket,gs_hamk%gbound_k,&
+    & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
+    & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,npw_k,&
+    & n4,n5,n6,fourwf_option,tim_fourwf,weight_r,weight_i)
+  call fourwf(fourwf_cplex,denpot,bra,fofgout,fbra,gs_hamk%gbound_k,&
+    & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
+    & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,npw_k,&
+    & n4,n5,n6,fourwf_option,tim_fourwf,weight_r,weight_i)
+
+ ! now form scalar*conj(bra)*ket
+ fofr(1,:,:,:) =  &
+   &  REAL(scalar_factor)*( fbra(1,:,:,:)*fket(1,:,:,:)+fbra(2,:,:,:)*fket(2,:,:,:)) - &
+   & AIMAG(scalar_factor)*(-fbra(2,:,:,:)*fket(1,:,:,:)+fbra(1,:,:,:)*fket(2,:,:,:))
+ fofr(2,:,:,:) =  &
+   & AIMAG(scalar_factor)*( fbra(1,:,:,:)*fket(1,:,:,:)+fbra(2,:,:,:)*fket(2,:,:,:)) + &
+   &  REAL(scalar_factor)*(-fbra(2,:,:,:)*fket(1,:,:,:)+fbra(1,:,:,:)*fket(2,:,:,:))
+
+  !ABI_SFREE(phgr)
+  ABI_SFREE(work)
+  ABI_SFREE(fket)
+  ABI_SFREE(fbra)
+
+end subroutine me_proj_mesh
+!!***
+
 
 !!****f* ABINIT/local_me_mesh
 !! NAME
