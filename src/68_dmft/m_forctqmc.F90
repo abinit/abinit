@@ -3580,7 +3580,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  integer, target, allocatable :: block_list(:,:),flavor_tmp(:,:),inner_list(:,:),siz_block(:,:)
  real(dp), allocatable :: adlr(:,:),bdlr(:),elam_list(:),emig(:),gl_dlr_re(:),gl_dlr_im(:),jbes(:),lam_list(:)
  real(dp), allocatable :: leg_array(:,:),moment_fit(:),t_lp(:,:),tpoints(:),tweights(:),wdlr(:),wdlr_beta(:,:)
- real(dp), target, allocatable :: wdlr_tmp(:), chiloc_tmp(:,:)
+  real(dp), target, allocatable :: wdlr_tmp(:), chiloc_tmp(:,:), magmom_array(:)
  complex(dp), allocatable :: adlr_iw(:,:),gl_dlr(:,:,:,:),gl_tmp(:,:,:,:),gtau_dlr(:,:,:),gtau_leg(:,:,:),shift(:)
  complex(dp), target, allocatable :: gl(:,:,:),gtau(:,:,:),levels_ctqmc(:,:),moments_self_1(:),moments_self_2(:),occ(:)
  type(matlu_type), allocatable :: eigvectmatlu(:),matlu_tmp(:)
@@ -3971,31 +3971,35 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
    !Local Spin-Spin correlation function
    if (paw_dmft%dmft_triqs_chiloc > 0) then
+     ! == slm case : \hat{S_z} = n_up - n_down
      ABI_MALLOC(chiloc_tmp,(1:ntau,1:ntau))
      chiloc_ptr = C_LOC(chiloc_tmp)
 
-     !  == Mj values
+      !  == Mj case : \hat{J_z} = n_mj * \mu_mjz
 
-     if(basis .eq. 4) then
-     ABI_MALLOC(magmom_tot,(natom))
-     ABI_MALLOC(matlumag_tot,(natom))
+      magmom_ptr = C_NULL_PTR
 
-     !do iatom=1,natom
-     lpawu = paw_dmft%lpawu(iatom)
-     if (lpawu == -1) cycle
-       ABI_MALLOC(magmom_tot(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
-       magmom_tot(iatom)%value=czero
-    ! end do ! iatom
+      if(basis .eq. 4) then
+      ABI_MALLOC(magmom_tot,(natom))
+      ABI_MALLOC(matlumag_tot,(natom))
 
-     call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_tot)    
-     call zero_matlu(matlumag_tot,natom=1)                                                                                     
-     call magmomjmj_matlu(matlumag_tot,natom=1)                                                                                
-     call gather_matlu(matlumag_tot,magmom_tot,natom=1,option=1,prtopt=0)                                                      
-     call destroy_matlu(matlumag_tot,natom=1)                                                                                  
-     !
-     !magmom_ptr = matlumag_tot 
-     end if 
-   end if
+      lpawu = paw_dmft%lpawu(iatom)
+      if (lpawu == -1) cycle
+        ABI_MALLOC(magmom_tot(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
+        magmom_tot(iatom)%value=czero
+
+      call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_tot)    
+      call zero_matlu(matlumag_tot,natom=1)                                                                                     
+      call magmomjmj_matlu(matlumag_tot,natom=1)                                                                                
+      call gather_matlu(matlumag_tot,magmom_tot,natom=1,option=1,prtopt=0)                                                      
+      call destroy_matlu(matlumag_tot,natom=1)
+      !
+      ABI_MALLOC(magmom_array,(nflavor*nflavor))
+      magmom_array(:) = zero
+      magmom_array = reshape(real(magmom_tot(iatom)%value), (/nflavor*nflavor/))
+      magmom_ptr = C_LOC(magmom_array)
+      end if 
+   end if !end chiloc
 
    write(tag_at,'(i4)') iatom
    write(tag_block,'(i2)') nblocks(iatom)
@@ -4192,10 +4196,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
                         & paw_dmft%dmft_triqs_n_cycles,paw_dmft%dmftctqmc_meas,paw_dmft%dmftqmc_therm, &
                         & paw_dmft%dmft_triqs_therm_restart,paw_dmft%dmft_triqs_det_init_size, &
                         & paw_dmft%dmft_triqs_det_n_operations_before_check,myproc,nblocks(iatom),read_data,verbo, &
-                        & paw_dmft%dmft_triqs_chiloc,paw_dmft%dmft_triqs_chiloc_ins,magmom_tot,beta,paw_dmft%dmft_triqs_imag_threshold, &
+                          & paw_dmft%dmft_triqs_chiloc,paw_dmft%dmft_triqs_chiloc_ins,beta,paw_dmft%dmft_triqs_imag_threshold, &
                         & paw_dmft%dmft_triqs_det_precision_warning, &
                         & paw_dmft%dmft_triqs_det_precision_error,paw_dmft%dmft_triqs_det_singular_threshold,lam_list(ilam), &
-                        & paw_dmft%dmft_triqs_pauli_prob,chiloc_ptr,block_ptr,flavor_ptr,inner_ptr,siz_ptr,ftau_ptr,gtau_ptr,gl_ptr, &
+                         & paw_dmft%dmft_triqs_pauli_prob,chiloc_ptr,magmom_ptr,block_ptr,flavor_ptr,inner_ptr,siz_ptr,ftau_ptr,gtau_ptr,gl_ptr, &
                         & udens_ptr,vee_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,occ_ptr,eu_ptr,fname_data_ptr,fname_dataw_ptr, &
                         & fname_histo_ptr)
 #endif
@@ -4554,14 +4558,17 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    if (paw_dmft%dmft_triqs_chiloc > 0) then
      ABI_FREE(chiloc_tmp)
      
-     if (basis .eq. 4) then
-       !do iatom=1,natom                             
-       lpawu = paw_dmft%lpawu(iatom)              
-       if (lpawu == -1) cycle                     
-         ABI_FREE(magmom_tot(iatom)%value)          
-       !end do                                       
-       ABI_FREE(magmom_tot)                         
-     end if
+      if (basis .eq. 4) then
+        !do iatom=1,natom                             
+        lpawu = paw_dmft%lpawu(iatom)              
+        if (lpawu == -1) cycle                     
+          ABI_FREE(magmom_tot(iatom)%value)          
+        !end do                                       
+        ABI_FREE(magmom_tot)                         
+        ABI_FREE(magmom_array)                       
+        ABI_FREE(matlumag_tot)                       
+        magmom_ptr = C_NULL_PTR                      
+      end if
    end if
 
  end do ! iatom

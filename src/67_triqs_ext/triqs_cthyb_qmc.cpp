@@ -237,7 +237,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
 
   if (chiloc == 2 ) {
   many_body_op_t MJz;
-  MJz = init_MJzOp(num_orbitals/2,block_list,inner_list);
+  MJz = init_MJzOp(num_orbitals,block_list,inner_list,magmom_ptr);
   paramCTQMC.measure_O_tau = {MJz,MJz};
   paramCTQMC.measure_O_tau_min_ins = chiloc_ins;
   if(rank == 0 && verbo>0) std::cout << endl <<"   == Setting up local MJz-MJz correlation operator " << endl << endl;
@@ -370,7 +370,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   }
 
   // Report Spin-Spin correlation function
-  if (chiloc == 1) {
+  if (chiloc > 0) {
    int  compteur = 0;
    for(int tau = 0; tau < n_tau; ++tau){                                          
       chiloc_tmp[compteur] = ((*solver.O_tau)[tau].real());                          
@@ -503,11 +503,11 @@ many_body_op_t init_SpinOp(int ndim, int *block_list, int *inner_list){
 } 
 
 // MJz Operator
-many_body_op_t init_MJzOp(int ndim, int *block_list, int *inner_list){                              
+many_body_op_t init_MJzOp(int nflavor, int *block_list, int *inner_list, double *magmom_ptr){                              
     many_body_op_t MJz;                                                                            
-    for(int i : range(ndim)) {                                                                       
-        MJz += n(to_string(block_list[i]),        inner_list[i]);                                  
-        MJz -= n(to_string(block_list[i + ndim]), inner_list[i + ndim]);                           
+    for(int i : range(nflavor)) {                                                                       
+        double jz = magmom_ptr[i * nflavor + i];
+        MJz += jz * n(to_string(block_list[i]), inner_list[i]);
     }                                                                                                
     return MJz;                                                                                    
 }                                                                                                    
