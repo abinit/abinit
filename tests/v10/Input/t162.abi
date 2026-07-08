@@ -48,6 +48,8 @@ wfoptalg         114          # wavefunction optimization algorithm
 nline            8   
 nblock_lobpcg    1      
 
+fftalg           401
+
 # Occupations 
 occopt           3            # smearing option
 tsmear           0.005        # smearing temperature [Ha]
