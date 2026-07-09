@@ -3971,34 +3971,34 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
    !Local Spin-Spin correlation function
    if (paw_dmft%dmft_triqs_chiloc > 0) then
+
      ! == slm case : \hat{S_z} = n_up - n_down
      ABI_MALLOC(chiloc_tmp,(1:ntau,1:ntau))
      chiloc_ptr = C_LOC(chiloc_tmp)
 
-      !  == Mj case : \hat{J_z} = n_mj * \mu_mjz
+     !  == Mj case : \hat{J_z} = n_mj * \mu_mjz
+     if(nspinor .eq. 2 .and. basis .eq. 4) then
+       magmom_ptr = C_NULL_PTR
 
-      magmom_ptr = C_NULL_PTR
+       ABI_MALLOC(magmom_tot,(natom))
+       ABI_MALLOC(matlumag_tot,(natom))
 
-      if(basis .eq. 4) then
-      ABI_MALLOC(magmom_tot,(natom))
-      ABI_MALLOC(matlumag_tot,(natom))
+       lpawu = paw_dmft%lpawu(iatom)
+       if (lpawu == -1) cycle
+         ABI_MALLOC(magmom_tot(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
+         magmom_tot(iatom)%value=czero
 
-      lpawu = paw_dmft%lpawu(iatom)
-      if (lpawu == -1) cycle
-        ABI_MALLOC(magmom_tot(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
-        magmom_tot(iatom)%value=czero
-
-      call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_tot)    
-      call zero_matlu(matlumag_tot,natom=1)                                                                                     
-      call magmomjmj_matlu(matlumag_tot,natom=1)                                                                                
-      call gather_matlu(matlumag_tot,magmom_tot,natom=1,option=1,prtopt=0)                                                      
-      call destroy_matlu(matlumag_tot,natom=1)
-      !
-      ABI_MALLOC(magmom_array,(nflavor*nflavor))
-      magmom_array(:) = zero
-      magmom_array = reshape(real(magmom_tot(iatom)%value), (/nflavor*nflavor/))
-      magmom_ptr = C_LOC(magmom_array)
-      end if 
+       call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_tot)    
+       call zero_matlu(matlumag_tot,natom=1)                                                                                     
+       call magmomjmj_matlu(matlumag_tot,natom=1)                                                                                
+       call gather_matlu(matlumag_tot,magmom_tot,natom=1,option=1,prtopt=0)                                                      
+       call destroy_matlu(matlumag_tot,natom=1)
+       !
+       ABI_MALLOC(magmom_array,(nflavor*nflavor))
+       magmom_array(:) = zero
+       magmom_array = reshape(real(magmom_tot(iatom)%value), (/nflavor*nflavor/))
+       magmom_ptr = C_LOC(magmom_array)
+     end if  
    end if !end chiloc
 
    write(tag_at,'(i4)') iatom

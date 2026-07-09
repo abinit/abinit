@@ -2830,18 +2830,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_basis',tread,'INT')
      if(tread==1) dtset%dmft_triqs_basis=intarr(1)
-
-     if ((dtset%nspinor .eq. 1 .and. dtset%dmft_triqs_basis .eq. 0) .or. (dtset%nspinor .eq. 2 .and. dtset%dmft_triqs_basis .eq. 4)) then
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_chiloc',tread,'INT')           
-       if(tread==1) dtset%dmft_triqs_chiloc  =intarr(1)                                                    
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_chiloc_ins',tread,'INT')       
-       if(tread==1) dtset%dmft_triqs_chiloc_ins =intarr(1)    
-     else
-       write(msg, '(4a,i2,2a)' )&
-       ' dmft_triqs_loc is only available for npsinor = 1 with dmft_triqs_basis = 0 and for nspinor = 2 with dmft_triqs_basis = 4'
-       ABI_ERROR(msg)      
-     end if        
-
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_chiloc',tread,'INT')           
+     if(tread==1) dtset%dmft_triqs_chiloc  =intarr(1)                                                    
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_chiloc_ins',tread,'INT')       
+     if(tread==1) dtset%dmft_triqs_chiloc_ins =intarr(1)    
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_compute_integral',tread,'INT')
      if(tread==1) dtset%dmft_triqs_compute_integral=intarr(1)
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_init_size',tread,'INT')
