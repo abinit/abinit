@@ -255,26 +255,26 @@ end function fftalg_has_mpi
 !!
 !! INPUTS
 !!  nproc_fft=Number of processors used for MPI FFT
+!!  nthreads =Number of openMP threads
 !!
 !! OUTPUT
 !!  fftalg=Integer used to select the FFT library.
 !!
 !! SOURCE
 
-pure function fftalg_for_npfft(nproc_fft) result(fftalg)
+pure function fftalg_for_npfft(nproc_fft, nthreads) result(fftalg)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nproc_fft
+ integer,intent(in) :: nproc_fft, nthreads
  integer :: fftalg
 ! *************************************************************************
 
  ! Default  for the sequential case.
  fftalg = 112
 
- ! Use Goedecker2002 if fftalg does not support MPI (e.g 112)
- if (nproc_fft > 1) fftalg = 401
- !if (nproc_fft > 1) fftalg = 402
+ ! Use Goedecker2002 if fftalg does not support MPI or threads (e.g 112)
+ if (nproc_fft > 1 .or. nthreads > 1) fftalg = 401
 
 #ifdef HAVE_FFTW3
  fftalg = 312
