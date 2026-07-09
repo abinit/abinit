@@ -262,11 +262,12 @@ end function fftalg_has_mpi
 !!
 !! SOURCE
 
-pure function fftalg_for_npfft(nproc_fft, nthreads) result(fftalg)
+pure function fftalg_for_npfft(nproc_fft, forbid_threads) result(fftalg)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nproc_fft, nthreads
+ integer,intent(in) :: nproc_fft
+ logical,intent(in),optional :: forbid_threads
  integer :: fftalg
 ! *************************************************************************
 
@@ -274,7 +275,10 @@ pure function fftalg_for_npfft(nproc_fft, nthreads) result(fftalg)
  fftalg = 112
 
  ! Use Goedecker2002 if fftalg does not support MPI or threads (e.g 112)
- if (nproc_fft > 1 .or. nthreads > 1) fftalg = 401
+ if (nproc_fft > 1) fftalg = 401
+ if (present(forbid_threads)) then
+   if (forbid_threads) fftalg = 401
+ endif
 
 #ifdef HAVE_FFTW3
  fftalg = 312

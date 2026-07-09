@@ -2674,7 +2674,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 
 !  ngfft is a special case
    dtsets(idtset)%ngfft(1:8)=0
-   dtsets(idtset)%ngfft(7) = fftalg_for_npfft(1,1)
+   dtsets(idtset)%ngfft(7) = fftalg_for_npfft(1)
 !  fftcache=ngfft(8) is machine-dependent.
    dtsets(idtset)%ngfft(8) = get_cache_kb()
 
