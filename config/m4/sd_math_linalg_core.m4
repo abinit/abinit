@@ -479,9 +479,9 @@ AC_DEFUN([_SD_LINALG_EXPLORE], [
           test "${sd_linalg_vendor_ldflags}" != "" && \
             sd_linalg_ldflags="${sd_linalg_ldflags} ${sd_linalg_vendor_ldflags}"
           test "${sd_linalg_vendor_elpa_libs}" != "" && \
-              sd_linalg_libs="${sd_linalg_vendor_elpa_libs} ${sd_linalg_libs}"
+            sd_linalg_libs="${sd_linalg_vendor_elpa_libs} ${sd_linalg_libs}"
           test "${sd_linalg_vendor_elpa_fcflags}" != "" && \
-	     sd_linalg_fcflags="${sd_linalg_vendor_elpa_fcflags} ${sd_linalg_fcflags}"
+            sd_linalg_fcflags="${sd_linalg_vendor_elpa_fcflags} ${sd_linalg_fcflags}"
           break
         fi
       fi
@@ -698,17 +698,17 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
       sd_linalg_vendor_elpa_libs="-lelpa"
       AC_CHECK_PROG([PKG_CONFIG], [pkg-config], [pkg-config], [no])
       if test "$PKG_CONFIG" != "no"; then
-         AC_PATH_TOOL(PKG_CONFIG,pkg-config)
-         if "$PKG_CONFIG" --exists  elpa; then
-         	sd_linalg_vendor_elpa_fcflags=`$PKG_CONFIG --variable=fcflags elpa`
-                sd_linalg_vendor_elpa_libs=`$PKG_CONFIG --libs  --keep-system-libs elpa`
-         fi
-         if test "${abi_openmp_enable}" = "yes"; then
-	    if "$PKG_CONFIG" --exists  elpa-openmp; then
-         	sd_linalg_vendor_elpa_fcflags=`$PKG_CONFIG --variable=fcflags --keep-system-cflags elpa-openmp`
-                sd_linalg_vendor_elpa_libs=`$PKG_CONFIG --libs  --keep-system-libs elpa-openmp`
-            fi
-         fi
+        AC_PATH_TOOL(PKG_CONFIG,pkg-config)
+        if "$PKG_CONFIG" --exists  elpa; then
+          sd_linalg_vendor_elpa_fcflags=`$PKG_CONFIG --variable=fcflags elpa`
+          sd_linalg_vendor_elpa_libs=`$PKG_CONFIG --libs  --keep-system-libs elpa`
+        fi
+        if test "${abi_openmp_enable}" = "yes"; then
+          if "$PKG_CONFIG" --exists  elpa-openmp; then
+            sd_linalg_vendor_elpa_fcflags=`$PKG_CONFIG --variable=fcflags --keep-system-cflags elpa-openmp`
+            sd_linalg_vendor_elpa_libs=`$PKG_CONFIG --libs  --keep-system-libs elpa-openmp`
+          fi
+        fi
       fi
       ;;
 
