@@ -5516,41 +5516,12 @@ contains
     else if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
 
 #if defined HAVE_OPENMP_OFFLOAD
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
-        byte_count = int(fact, c_size_t) * xgBlock%ldim * xgBlock%cols * dp
-        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock%vecR)
-        call gpu_memset(c_loc(xgBlock%vecR), 0, byte_count)
-        !$OMP END TARGET DATA
+        call gpu_set_to_zero(xgBlock%vecR, int(fact, c_size_t) * xgBlock%ldim * xgBlock%cols)
       case (SPACE_C)
-        byte_count = int(xgBlock%ldim, c_size_t) * xgBlock%cols * 2 * dp ! Note the factor 2, needed here!
-        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock%vecC)
-        call gpu_memset(c_loc(xgBlock%vecC), 0, byte_count)
-        !$OMP END TARGET DATA
+        call gpu_set_to_zero_complex(xgBlock%vecC, int(xgBlock%ldim, c_size_t) * xgBlock%cols)
       end select
-#else
-!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-      rows = xgBlock%rows; cols = xgBlock%cols
-      select case(xgBlock%space)
-      case (SPACE_R,SPACE_CR)
-        xgBlock__vecR => xgBlock%vecR
-        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlock__vecR)
-        do iblock = 1, cols
-          do jblock = 1, fact * rows
-            xgBlock__vecR(jblock,iblock) = zero
-          end do
-        end do
-      case (SPACE_C)
-        xgBlock__vecC => xgBlock%vecC
-        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlock__vecC)
-        do iblock = 1, cols
-          do jblock = 1, fact * rows
-            xgBlock__vecC(jblock,iblock) = dcmplx(0,0)
-          end do
-        end do
-      end select
-#endif
 #endif
 
     else
