@@ -2850,7 +2850,9 @@ subroutine dterm_LR(atindx,dterm,dtset,gprimd,pawrad,pawtab)
   dterm%LR = czero
   dterm%ekb_LR = zero
 
-  do itypat=1,dtset%ntypat
+  do iat = 1, dtset%natom
+    iatom = atindx(iat)
+    itypat = dtset%typat(iat)
     mesh_size=pawtab(itypat)%mesh_size
     pwave_size=size(pawtab(itypat)%phiphj(:,1))
     ABI_MALLOC(ff,(mesh_size))
@@ -2882,23 +2884,18 @@ subroutine dterm_LR(atindx,dterm,dtset,gprimd,pawrad,pawtab)
       ! convert to crystal frame
       dij_red = MATMUL(TRANSPOSE(gprimd),dij_cart)
 
-      do iat=1,dtset%natom
-       iatom = atindx(iat)
-       if(dtset%typat(iat) .EQ. itypat) then
-         do adir = 1, 3
-           dterm%ekb_LR(2*klmn-1,iatom,1,adir) = REAL(dij_red(adir))
-           dterm%ekb_LR(2*klmn,iatom,1,adir) = AIMAG(dij_red(adir))
-           if (dterm%ndij > 1) then
-             dterm%ekb_LR(2*klmn-1,iatom,2,adir) = dterm%ekb_LR(2*klmn-1,iatom,1,adir)
-             dterm%ekb_LR(2*klmn,iatom,2,adir) = dterm%ekb_LR(2*klmn,iatom,1,adir)
-           end if
-         end do
-         dterm%LR(iatom,klmn,1,1:3) = dij_red(1:3)
-         if (dterm%ndij > 1) then
-           dterm%LR(iatom,klmn,2,1:3) = dij_red(1:3)
-         end if
+      do adir = 1, 3
+        dterm%ekb_LR(2*klmn-1,iatom,1,adir) = REAL(dij_red(adir))
+        dterm%ekb_LR(2*klmn,iatom,1,adir) = AIMAG(dij_red(adir))
+        if (dterm%ndij > 1) then
+          dterm%ekb_LR(2*klmn-1,iatom,2,adir) = dterm%ekb_LR(2*klmn-1,iatom,1,adir)
+          dterm%ekb_LR(2*klmn,iatom,2,adir) = dterm%ekb_LR(2*klmn,iatom,1,adir)
         end if
       end do
+      dterm%LR(iatom,klmn,1,1:3) = dij_red(1:3)
+      if (dterm%ndij > 1) then
+        dterm%LR(iatom,klmn,2,1:3) = dij_red(1:3)
+      end if
     end do ! end loop over klmn
     ABI_FREE(ff)
   end do ! end loop over itypat
