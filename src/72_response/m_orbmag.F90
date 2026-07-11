@@ -951,10 +951,10 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
   !scalars
   integer :: adir,choice,cpopt,dimekb1,dimekb2,dimekb3
   integer :: dum_dnlbra,dum_dnlket,n4,n5,n6,ndat,nn,nnlout,npwsp
-  integer :: paw_opt,signs,tim_nonlop
+  integer :: paw_opt,signs,tim_nonlop,i1,i2,i3
   complex(dp) :: prefac_m,tt
   logical :: my_suppress_ormesh,need_ormesh
-  type(gs_hamiltonian_type) :: gs_hamk_local
+  type(gs_hamiltonian_type),target :: gs_hamk_local
   !arrays
   real(dp) :: enlout(1),lambda(1)
   real(dp),allocatable :: fofr(:,:,:),svectout(:,:),vectout(:,:)
@@ -963,14 +963,17 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
 !--------------------------------------------------------------------
 
  call gs_hamk%copy(gs_hamk_local)
- gs_hamk_local%ekb_spin = zero
+ !gs_hamk_local%ekb_spin = zero
+ dimekb1=size(gs_hamk_local%ekb_spin,1)
+ dimekb2=size(gs_hamk_local%ekb_spin,2)
+ dimekb3=size(gs_hamk_local%ekb_spin,3)
 
- write(std_out,'(a,4i4)')'JWZ debug dterm ekb_LR sizes : ',&
- & size(dterm%ekb_LR,1),size(dterm%ekb_LR,2),size(dterm%ekb_LR,3),size(dterm%ekb_LR,4)
- write(std_out,'(a,5i4)')'JWZ debug dterm ekb_spin sizes : ',&
- & size(gs_hamk_local%ekb_spin,1),size(gs_hamk_local%ekb_spin,2),&
- & size(gs_hamk_local%ekb_spin,3),size(gs_hamk_local%ekb_spin,4),&
- & size(gs_hamk_local%ekb_spin,5)
+ !write(std_out,'(a,4i4)')'JWZ debug dterm ekb_LR sizes : ',&
+ !& size(dterm%ekb_LR,1),size(dterm%ekb_LR,2),size(dterm%ekb_LR,3),size(dterm%ekb_LR,4)
+ !write(std_out,'(a,5i4)')'JWZ debug dterm ekb_spin sizes : ',&
+ !& size(gs_hamk_local%ekb_spin,1),size(gs_hamk_local%ekb_spin,2),&
+ !& size(gs_hamk_local%ekb_spin,3),size(gs_hamk_local%ekb_spin,4),&
+ !& size(gs_hamk_local%ekb_spin,5)
 
  if(present(suppress_ormesh)) then
    my_suppress_ormesh=suppress_ormesh
@@ -999,9 +1002,6 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
      
      gs_hamk_local%ekb_spin = zero
      choice = 1; cpopt = 4; paw_opt = 1; signs = 1; nnlout = 1; ndat = 1
-     dimekb1=size(gs_hamk_local%ekb_spin,1)
-     dimekb2=size(gs_hamk_local%ekb_spin,2)
-     dimekb3=size(gs_hamk_local%ekb_spin,3)
      select case (oterm)
      case ( inlr )
        gs_hamk_local%ekb_spin(1:dimekb1,1:dimekb2,1:dimekb3,1,1) = &
@@ -1012,13 +1012,27 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
      case default
        gs_hamk_local%ekb_spin(1:dimekb1,1:dimekb2,1:dimekb3,1,1) = zero
      end select
+     do i2 = 1, dimekb2
+       do i1 = 1, dimekb1/2
+         write(std_out,'(a,2i4,4es16.8)')'JWZ debug atom klmn real imag ',&
+           & i2,i1,&
+           & dterm%ekb_LR(2*i1-1,i2,1,adir),&
+           & dterm%ekb_LR(2*i1,i2,1,adir),&
+           & REAL(dterm%LR(i2,i1,1,adir)),&
+           & AIMAG(dterm%LR(i2,i1,1,adir))
+       end do
+     end do
+
 
      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk_local,adir,lambda,mpi_enreg,ndat,nnlout,&
        & paw_opt,signs,svectout,tim_nonlop,cwavef,vectout)
      orbmag_mesh%omesh(nn,ikpt,isppol,adir,oterm) = enlout(1)
 
-     !call nonlocal_me(adir,atindx,cwaveprj,dum_dnlbra,dum_dnlket,&
-     !  & dterm,dtset,eig_k(nn),fermie,tt,npw_k,oterm,prefac_m,pawtab)
+     call nonlocal_me(adir,atindx,cwaveprj,dum_dnlbra,dum_dnlket,&
+       & dterm,dtset,eig_k(nn),fermie,tt,npw_k,oterm,prefac_m,pawtab)
+
+     !write(std_out,'(a,3i4,2es16.8)')'JWZ debug oterm nn adir enlout tt ',&
+     !  & oterm,nn,adir,enlout(1),REAL(tt)
      !orbmag_mesh%omesh(nn,ikpt,isppol,adir,oterm) = real(tt)
 
      !if (need_ormesh) then
@@ -2715,6 +2729,7 @@ subroutine dterm_BM(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,re
 !--------------------------------------------------------------------
 
   dterm%BM = czero
+  dterm%ekb_BM = zero
   a2 = FineStructureConstant2
 
   do iat = 1, dtset%natom
@@ -2765,11 +2780,11 @@ subroutine dterm_BM(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,re
         dterm%BM(iatom,klmn,2,1:3) = dij_red(1:3)
       end if
       do adir=1, 3
-        dterm%ekb_BM(2*klmn-1,iat,1,adir) = REAL(dij_red(adir))
-        dterm%ekb_BM(2*klmn,iat,1,adir) = AIMAG(dij_red(adir))
+        dterm%ekb_BM(2*klmn-1,iatom,1,adir) = REAL(dij_red(adir))
+        dterm%ekb_BM(2*klmn,iatom,1,adir) = AIMAG(dij_red(adir))
         if (dterm%ndij > 1) then
-          dterm%ekb_BM(2*klmn-1,iat,2,adir) = dterm%ekb_BM(2*klmn-1,iat,1,adir)
-          dterm%ekb_BM(2*klmn,iat,2,adir) = dterm%ekb_BM(2*klmn,iat,1,adir)
+          dterm%ekb_BM(2*klmn-1,iatom,2,adir) = dterm%ekb_BM(2*klmn-1,iatom,1,adir)
+          dterm%ekb_BM(2*klmn,iatom,2,adir) = dterm%ekb_BM(2*klmn,iatom,1,adir)
         end if
       end do
 
@@ -2833,6 +2848,7 @@ subroutine dterm_LR(atindx,dterm,dtset,gprimd,pawrad,pawtab)
 !--------------------------------------------------------------------
 
   dterm%LR = czero
+  dterm%ekb_LR = zero
 
   do itypat=1,dtset%ntypat
     mesh_size=pawtab(itypat)%mesh_size
