@@ -825,7 +825,7 @@ contains
                  if (choice==5.or.choice==51.or.choice==52) then ! ndgxdt=1
                    dgxdt(1:2,1,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,idir,1:nlmn)
                  else if (choice==53) then ! ndgxdt=2
-                   idir1 = modulo(idir,3)+1; idir2 = modulo(idir+1,3)+1
+                   idir1 = modulo(idir,3)+1; idir2 = modulo(idir1,3)+1
                    dgxdt(1:2,1,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,idir1,1:nlmn)
                    dgxdt(1:2,2,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,idir2,1:nlmn)
                  else if (choice==8) then ! ndgxdt=2

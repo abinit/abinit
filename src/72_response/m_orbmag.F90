@@ -1068,11 +1068,13 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,gdir,n4,n5,n6,ndat,nn,npwsp
+  integer :: adir,bdir,choice,cpopt,gdir,n4,n5,n6,ndat,nn,nnlout,npwsp
+  integer :: paw_opt,signs,tim_nonlop
   complex(dp) :: prefac_m,txt
   logical :: my_suppress_ormesh,need_ormesh
   !arrays
-  real(dp),allocatable :: fofr(:,:,:)
+  real(dp) :: enlout(3)
+  real(dp),allocatable :: fofr(:,:,:),svectout(:,:),vectout(:,:)
   real(dp),pointer :: unk(:,:)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
@@ -1108,11 +1110,18 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
      bdir=modulo(adir,3)+1
      gdir=modulo(bdir,3)+1
    
+     choice = 53; cpopt = 4; paw_opt = 2; signs = 1; nnlout = 3; ndat = 1
+     call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,adir,eig_k(nn),&
+       & mpi_enreg,ndat,nnlout,paw_opt,signs,svectout,tim_nonlop,unk,vectout)
+     
      call nonlocal_me(adir,atindx,cwaveprj,bdir,gdir,dterm,dtset,&
        & eig_k(nn),fermie,txt,npw_k,innl,prefac_m,pawtab)
      ! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
      ! double the original even term: this is the origin of the factor of two
      orbmag_mesh%omesh(nn,ikpt,isppol,adir,innl) = two*real(txt)
+
+     write(std_out,'(a,2i4,4es16.8)')'JWZ debug nn adir tt enlout ',&
+       & nn,adir,REAL(txt),enlout(1),enlout(2),enlout(3)
 
      !if (need_ormesh) then
      !  call nonlocal_me_mesh(adir,atindx,unk,bdir,gdir,&
