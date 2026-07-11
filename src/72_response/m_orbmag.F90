@@ -2886,17 +2886,17 @@ subroutine dterm_LR(atindx,dterm,dtset,gprimd,pawrad,pawtab)
        iatom = atindx(iat)
        if(dtset%typat(iat) .EQ. itypat) then
          do adir = 1, 3
-           dterm%ekb_LR(2*klmn-1,iat,1,adir) = REAL(dij_red(adir))
-           dterm%ekb_LR(2*klmn,iat,1,adir) = AIMAG(dij_red(adir))
+           dterm%ekb_LR(2*klmn-1,iatom,1,adir) = REAL(dij_red(adir))
+           dterm%ekb_LR(2*klmn,iatom,1,adir) = AIMAG(dij_red(adir))
            if (dterm%ndij > 1) then
-             dterm%ekb_LR(2*klmn-1,iat,2,adir) = dterm%ekb_LR(2*klmn-1,iat,1,adir)
-             dterm%ekb_LR(2*klmn,iat,2,adir) = dterm%ekb_LR(2*klmn,iat,1,adir)
+             dterm%ekb_LR(2*klmn-1,iatom,2,adir) = dterm%ekb_LR(2*klmn-1,iatom,1,adir)
+             dterm%ekb_LR(2*klmn,iatom,2,adir) = dterm%ekb_LR(2*klmn,iatom,1,adir)
            end if
          end do
          dterm%LR(iatom,klmn,1,1:3) = dij_red(1:3)
-          if (dterm%ndij > 1) then
-            dterm%LR(iatom,klmn,2,1:3) = dij_red(1:3)
-          end if
+         if (dterm%ndij > 1) then
+           dterm%LR(iatom,klmn,2,1:3) = dij_red(1:3)
+         end if
         end if
       end do
     end do ! end loop over klmn
