@@ -1084,13 +1084,17 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
   complex(dp) :: prefac_m,txt
   logical :: my_suppress_ormesh,need_ormesh
   !arrays
-  real(dp) :: enlout(6)
+  real(dp) :: enlout(1),udotu(2)
   real(dp),allocatable :: fofr(:,:,:),svectout(:,:),vectout(:,:)
   real(dp),pointer :: unk(:,:)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 !--------------------------------------------------------------------
 
+ npwsp = npw_k*dtset%nspinor
+ ABI_MALLOC(vectout,(2,npwsp))
+ ABI_MALLOC(svectout,(2,npwsp))
+ 
  if(present(suppress_ormesh)) then
    my_suppress_ormesh=suppress_ormesh
  else
@@ -1105,7 +1109,6 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
  call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
 
- npwsp = npw_k*dtset%nspinor
  do nn = 1, nband_k
 
    unk => cg_k(1:2,(nn-1)*npwsp+1:nn*npwsp)
@@ -1121,27 +1124,23 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
      bdir=modulo(adir,3)+1
      gdir=modulo(bdir,3)+1
    
-     choice = 53; cpopt = 4; paw_opt = 2; signs = 1; nnlout = 6; ndat = 1
+     choice = 53; cpopt = 4; paw_opt = 2; signs = 2; nnlout = 1; ndat = 1
      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,adir,eig_k(nn),&
        & mpi_enreg,ndat,nnlout,paw_opt,signs,svectout,tim_nonlop,unk,vectout)
+     udotu=cg_zdotc(npwsp,unk,vectout)
+     !orbmag_mesh%omesh(nn,ikpt,isppol,adir,innl) = &
+     !  & two*(udotu(1)*REAL(prefac_m) - udotu(2)*AIMAG(prefac_m))
      
      call nonlocal_me(adir,atindx,cwaveprj,bdir,gdir,dterm,dtset,&
        & eig_k(nn),fermie,txt,npw_k,innl,prefac_m,pawtab)
+     write(std_out,'(a,2i4,4es16.8)')'JWZ debug nn adir nonlop nonlocal ',nn,adir,&
+       &udotu(1)*REAL(prefac_m) - udotu(2)*AIMAG(prefac_m),&
+       &udotu(1)*AIMAG(prefac_m) + udotu(2)*REAL(prefac_m),&
+       &REAL(txt),AIMAG(txt)
      ! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
      ! double the original even term: this is the origin of the factor of two
      orbmag_mesh%omesh(nn,ikpt,isppol,adir,innl) = two*real(txt)
 
-     !write(std_out,'(a,2i4,8es16.8)')'JWZ debug nn adir tt enlout ',&
-     !  & nn,adir,REAL(txt),AIMAG(txt),enlout(1),enlout(2),enlout(3),&
-     !  & enlout(4),enlout(5),enlout(6)
-
-     !if (need_ormesh) then
-     !  call nonlocal_me_mesh(adir,atindx,unk,bdir,gdir,&
-     !    & dterm,dtset,eig_k(nn),fermie,fofr,gs_hamk,unk,mpi_enreg,&
-     !    & n4,n5,n6,ndat,npw_k,innl,ph1d,prefac_m,pawtab,trnrm(nn))
-     !  orbmag_mesh%rmesh(:,:,:,adir,innl)=orbmag_mesh%rmesh(:,:,:,adir,innl)+two*fofr(:,:,:)
-     !end if
-  
    end do ! adir
 
  end do !nn
@@ -1150,6 +1149,8 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
  ABI_SFREE(cwaveprj)
  IF(ASSOCIATED(unk)) NULLIFY(unk)
  ABI_SFREE(fofr)
+ ABI_SFREE(vectout)
+ ABI_SFREE(svectout)
 
 end subroutine orbmag_nl_k
 !!***
