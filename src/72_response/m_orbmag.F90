@@ -944,12 +944,18 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
   logical :: my_suppress_ormesh,need_ormesh
   type(gs_hamiltonian_type),target :: gs_hamk_local
   !arrays
-  real(dp) :: enlout(1),lambda(1)
+  real(dp) :: enlout(1),lambda(1),udotu(2)
   real(dp),allocatable :: fofr(:,:,:),svectout(:,:),vectout(:,:)
   real(dp),pointer :: cwavef(:,:)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
 !--------------------------------------------------------------------
 
+ npwsp = npw_k*dtset%nspinor
+ ABI_MALLOC(vectout,(2,npwsp))
+ ABI_MALLOC(svectout,(2,npwsp))
+
+ ! make a deep copy of gs_hamk so we can sub in the LR and BM 
+ ! Dij values without destroying gs_hamk
  call gs_hamk%copy(gs_hamk_local)
  dimekb1=size(gs_hamk_local%ekb_spin,1)
  dimekb2=size(gs_hamk_local%ekb_spin,2)
@@ -969,7 +975,6 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
  call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
  
- npwsp = npw_k*dtset%nspinor
  do nn = 1, nband_k
    cwavef => cg_k(1:2,(nn-1)*npwsp+1:nn*npwsp)
    call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
@@ -978,7 +983,6 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
    do adir = 1, 3
      
      gs_hamk_local%ekb_spin = zero
-     choice = 1; cpopt = 4; paw_opt = 1; signs = 1; nnlout = 1; ndat = 1
      select case (oterm)
      case ( inlr )
        gs_hamk_local%ekb_spin(1:dimekb1,1:dimekb2,1:dimekb3,1,1) = &
@@ -990,9 +994,14 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
        gs_hamk_local%ekb_spin(1:dimekb1,1:dimekb2,1:dimekb3,1,1) = zero
      end select
 
+     ! use nonlop to construct vectout = \sum_ij |p_i>D_ij<p_j|unk>
+     choice = 1; cpopt = 4; paw_opt = 1; signs = 2; nnlout = 1; ndat = 1
      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk_local,adir,lambda,mpi_enreg,ndat,nnlout,&
        & paw_opt,signs,svectout,tim_nonlop,cwavef,vectout)
-     orbmag_mesh%omesh(nn,ikpt,isppol,adir,oterm) = enlout(1)
+     ! get energy contribution from <u|vectout> . Could have done this in nonlop itself in 
+     ! this case but may need vectout anyway in the orbmag 4 real mesh case
+     udotu=cg_zdotc(npwsp,cwavef,vectout)
+     orbmag_mesh%omesh(nn,ikpt,isppol,adir,oterm) = udotu(1)
 
    end do !adir
  
@@ -1002,6 +1011,8 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
  ABI_SFREE(cwaveprj)
  IF(ASSOCIATED(cwavef)) NULLIFY(cwavef)
  ABI_SFREE(fofr)
+ ABI_SFREE(vectout)
+ ABI_SFREE(svectout)
  
  call gs_hamk_local%free()
 
@@ -1073,7 +1084,7 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
   complex(dp) :: prefac_m,txt
   logical :: my_suppress_ormesh,need_ormesh
   !arrays
-  real(dp) :: enlout(3)
+  real(dp) :: enlout(6)
   real(dp),allocatable :: fofr(:,:,:),svectout(:,:),vectout(:,:)
   real(dp),pointer :: unk(:,:)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
@@ -1110,7 +1121,7 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
      bdir=modulo(adir,3)+1
      gdir=modulo(bdir,3)+1
    
-     choice = 53; cpopt = 4; paw_opt = 2; signs = 1; nnlout = 3; ndat = 1
+     choice = 53; cpopt = 4; paw_opt = 2; signs = 1; nnlout = 6; ndat = 1
      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,adir,eig_k(nn),&
        & mpi_enreg,ndat,nnlout,paw_opt,signs,svectout,tim_nonlop,unk,vectout)
      
@@ -1120,8 +1131,9 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
      ! double the original even term: this is the origin of the factor of two
      orbmag_mesh%omesh(nn,ikpt,isppol,adir,innl) = two*real(txt)
 
-     write(std_out,'(a,2i4,4es16.8)')'JWZ debug nn adir tt enlout ',&
-       & nn,adir,REAL(txt),enlout(1),enlout(2),enlout(3)
+     !write(std_out,'(a,2i4,8es16.8)')'JWZ debug nn adir tt enlout ',&
+     !  & nn,adir,REAL(txt),AIMAG(txt),enlout(1),enlout(2),enlout(3),&
+     !  & enlout(4),enlout(5),enlout(6)
 
      !if (need_ormesh) then
      !  call nonlocal_me_mesh(adir,atindx,unk,bdir,gdir,&
@@ -1379,7 +1391,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
   logical :: my_suppress_ormesh,need_ormesh
   !arrays
   real(dp) :: bdot(2),bpdot(2),gdot(2),gpdot(2),enlout(1),lamv(1)
-  real(dp),allocatable :: fofr(:,:,:,:),vectout(:,:)
+  real(dp),allocatable :: fofr(:,:,:,:),vectout(:,:),dbg_svectoutb(:,:)
   real(dp),allocatable,target :: svectoutb(:,:),svectoutg(:,:)
   real(dp),pointer :: bra(:,:),du_dbeta(:,:),du_dgamma(:,:),unk(:,:)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
