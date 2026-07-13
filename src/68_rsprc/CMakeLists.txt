@@ -5,6 +5,7 @@ add_library(68_rsprc STATIC
   mod_prc_memory.F90
   m_newrho.F90
   m_newvtr.F90
+  m_precon.F90
   m_prcref.F90
   )
 

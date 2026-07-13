@@ -2013,7 +2013,7 @@ subroutine bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
 
 !Arguments -------------------------------
  integer,intent(in) :: ikpt
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !Local variables-------------------------------
 
 ! *********************************************************************
