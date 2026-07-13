@@ -46,6 +46,7 @@ EXTERNAL_MODS_DEPS = {
     "openacc": ["gpu"],
     "omp_lib": None,
     "mkl_dfti": ["fft"],
+    "mkl_rci": None,
     "netcdf": ["hdf5", "netcdf", "netcdf_fortran"],
     "etsf_io_low_level": ["hdf5", "netcdf", "netcdf_fortran"],
     "etsf_io": ["hdf5", "netcdf", "netcdf_fortran"],
