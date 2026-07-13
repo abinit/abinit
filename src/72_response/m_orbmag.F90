@@ -1132,14 +1132,14 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
      !  & two*(udotu(1)*REAL(prefac_m) - udotu(2)*AIMAG(prefac_m))
      
      call nonlocal_me(adir,atindx,cwaveprj,bdir,gdir,dterm,dtset,&
-       & eig_k(nn),fermie,txt,npw_k,innl,prefac_m,pawtab)
+       & eig_k(nn),fermie,gs_hamk,txt,npw_k,innl,prefac_m,pawtab,vectout)
+     udotu=cg_zdotc(npwsp,unk,vectout)
      write(std_out,'(a,2i4,4es16.8)')'JWZ debug nn adir nonlop nonlocal ',nn,adir,&
-       &udotu(1)*REAL(prefac_m) - udotu(2)*AIMAG(prefac_m),&
-       &udotu(1)*AIMAG(prefac_m) + udotu(2)*REAL(prefac_m),&
+       &udotu(1),udotu(2),&
        &REAL(txt),AIMAG(txt)
      ! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
      ! double the original even term: this is the origin of the factor of two
-     orbmag_mesh%omesh(nn,ikpt,isppol,adir,innl) = two*real(txt)
+     orbmag_mesh%omesh(nn,ikpt,isppol,adir,innl) = two*udotu(1)
 
    end do ! adir
 
@@ -2039,7 +2039,7 @@ end subroutine lamb_core
 !! SOURCE
 
 subroutine nonlocal_me(adir,atindx,cwaveprj,dnlbra,dnlket,dterm,dtset,&
-    & eignk,fermie,nlme,npw_k,oterm,prefac,pawtab)
+    & eignk,fermie,gs_hamk,nlme,npw_k,oterm,prefac,pawtab,vectout)
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: adir,dnlbra,dnlket,npw_k,oterm
@@ -2048,17 +2048,19 @@ subroutine nonlocal_me(adir,atindx,cwaveprj,dnlbra,dnlket,dterm,dtset,&
   complex(dp),intent(out) :: nlme
   type(dataset_type),intent(in) :: dtset
   type(dterm_type),intent(in) :: dterm
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(out) :: vectout(2,npw_k)
   type(pawcprj_type),intent(in) :: cwaveprj(dtset%natom,dtset%nspinor)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
-  integer :: iat,iatom,ilmn,isp,itypat,jlmn,klmn,npwsp
+  integer :: iat,iatom,il,ilmn,ipw,isp,itypat,jlmn,klmn,npwsp
   complex(dp) :: cpi,cpj,dij
   ! arrays
-  complex(dp),allocatable :: dij_data(:,:,:)
+  complex(dp),allocatable :: dij_data(:,:,:),ivec(:)
 !--------------------------------------------------------------------
   
   npwsp = npw_k*dtset%nspinor
@@ -2082,13 +2084,19 @@ subroutine nonlocal_me(adir,atindx,cwaveprj,dnlbra,dnlket,dterm,dtset,&
   end select
 
   nlme = czero
+  ABI_MALLOC(ivec,(npw_k))
+  vectout=zero
   do iat = 1, dtset%natom
     iatom = atindx(iat)
     itypat=dtset%typat(iat)
     do isp = 1, dtset%nspinor
-      do jlmn = 1, pawtab(itypat)%lmn_size
+      do ilmn = 1, pawtab(itypat)%lmn_size
 
-        do ilmn = 1, pawtab(itypat)%lmn_size
+        ivec=zero
+        il=pawtab(itypat)%indlmn(1,ilmn)
+        ivec(1:npw_k) = gs_hamk%ffnl_k(1:npw_k,1+dnlbra,ilmn,itypat)*CONJG(j_dpc**il)*four_pi
+        
+        do jlmn = 1, pawtab(itypat)%lmn_size
           klmn=MATPACK(ilmn,jlmn)
           if (dnlbra .NE. 0) then
             cpi=CMPLX(cwaveprj(iatom,isp)%dcp(1,dnlbra,ilmn),cwaveprj(iatom,isp)%dcp(2,dnlbra,ilmn))
@@ -2106,6 +2114,10 @@ subroutine nonlocal_me(adir,atindx,cwaveprj,dnlbra,dnlket,dterm,dtset,&
           
           ! note use of CONJG(cpi), because cpi is from the bra side cprj
           nlme = nlme + prefac*CONJG(cpi)*dij*cpj
+          do ipw = 1, npw_k
+            vectout(1,ipw) = vectout(1,ipw) +  REAL(ivec(ipw)*dij*cpj*prefac)
+            vectout(2,ipw) = vectout(2,ipw) + AIMAG(ivec(ipw)*dij*cpj*prefac)
+          end do
          
           ! in ndij = 4 case, isp 1 delivers up-up, isp 2 delivers down-down
           if (dterm%ndij == 4) then
@@ -2140,12 +2152,13 @@ subroutine nonlocal_me(adir,atindx,cwaveprj,dnlbra,dnlket,dterm,dtset,&
             end if
             nlme = nlme + prefac*CONJG(cpi)*cpj*dij
           end if
-        end do !ilmn
-      end do !jlmn
+        end do !jlmn
+      end do !ilmn
     end do ! isp
   end do !iat
 
   ABI_SFREE(dij_data)
+  ABI_SFREE(ivec)
 
 end subroutine nonlocal_me
 !!***
