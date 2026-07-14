@@ -330,6 +330,14 @@ mv LiF_eph_varpeq-master LiF_eph_varpeq
 The script used to precompute the files is available [here](https://github.com/abinit/LiF_eph_varpeq/blob/main/run.sh),
 with the necessary `*abi` files provided in the same repository.
 
+
+!!! important
+
+    The [[iomode]] = 3 keyword is used in the `*abi` input files to ensure portability of the tutorial by producing transferable NetCDF files. However, the behaviour of the NetCDF I/O is library-dependent, and can cause deadlock if large number of cores is used.
+
+    Therefore, in production runs on a single machine, when portability is not required, it is advised to use the default [[iomode]] = 1 value.
+
+
 Note that several parameters have been tuned to reach a reasonable **compromise between precision
 and computational cost** so do not expect the results obtained at the end of the lesson to be fully converged.
 More specifically, we use norm-conserving pseudopotentials with a cutoff energy [[ecut]]
@@ -337,6 +345,7 @@ of 30 Ha (too low, it should be ~45 Ha).
 The DFPT computations is done for the set of irreducible $\qq$-points corresponding
 to a $\Gamma$-centered 3x3x3 $\qq$ mesh (again, too coarse, it should be 6x6x6 for *ab initio* $\mathbf{k/q}$-meshes).
 $\bm{Z}^*$ and $\bm{\ee}^\infty$ are also computed with the same underconverged settings.
+
 
 !!! important
 
@@ -349,6 +358,9 @@ $\bm{Z}^*$ and $\bm{\ee}^\infty$ are also computed with the same underconverged 
         abistruct.py has_quad FILE
 
     where FILE is any file providing a structure in ABINIT format (e.g. netcdf output files or .abi files)
+
+    **Warning:** ( |today|) it was observed that the command has a bug, indicating no dynamical quadrupoles, even if a system must have them. **Trust your own judgment while it's being fixed.**
+
 
 ## How to extract useful info from the output files
 

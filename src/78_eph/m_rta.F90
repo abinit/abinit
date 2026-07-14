@@ -2472,7 +2472,7 @@ sig_p=sig_p*(siemens_SI / Bohr_meter / cryst%ucvol) / 100
    ! Creates the netcdf file used to store the results of the calculation.
    path = strcat(dtfil%filnam_ds(4), "_RTA.nc")
    call wrtout(units, ch10//sjoin("- Writing IBTE transport results to:", path))
-   NCF_CHECK(nctk_open_modify(ncid, path , xmpi_comm_self))
+   !NCF_CHECK(nctk_open_modify(ncid, path , xmpi_comm_self))
 
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t('ibte_sigma', "dp", "three, three, two, nsppol, ntemp"), &
