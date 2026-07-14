@@ -106,6 +106,8 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
  integer :: space, blockdim
 
+ logical :: transfer_cg
+
  integer, parameter :: tim_lobpcgwf2 = 1640
  integer, parameter :: tim_enl = 1657
  double precision :: tsec(2)
@@ -151,9 +153,12 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  ABI_MALLOC(pcon,(npw))
  call build_pcon(pcon,kinpw,npw)
 
+ transfer_cg = .false.
 #ifdef HAVE_OPENMP_OFFLOAD
  if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
-   !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid,occ,pcon)
+   !$OMP TARGET ENTER DATA MAP(to:eig,resid,occ,pcon)
+   transfer_cg = .not. xomp_target_is_present(c_loc(cg))
+   !$OMP TARGET ENTER DATA MAP(to:cg) IF(transfer_cg)
  end if
 #endif
 
@@ -244,7 +249,8 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
 #ifdef HAVE_OPENMP_OFFLOAD
  if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
-   !$OMP TARGET EXIT DATA MAP(from:cg,eig,resid,occ,pcon)
+   !$OMP TARGET EXIT DATA MAP(from:eig,resid,occ,pcon)
+   !$OMP TARGET EXIT DATA MAP(from:cg) IF(transfer_cg)
  end if
 #endif
 
