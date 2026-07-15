@@ -1364,7 +1364,7 @@ subroutine varpeq_print_hop_results(self)
 !scalars
  character(len=5000) :: msg
  integer, parameter :: master = 0
- integer :: my_rank, spin, ip, ii, ihop
+ integer :: my_rank, spin, ip, ihop
  integer :: hop_nstep2cv, scf_nstep2cv
 !arrays
  integer :: units(2)
@@ -1442,7 +1442,6 @@ subroutine varpeq_print_hop_results(self)
  subroutine report_(spin, state, step, hop_step)
    integer, intent(in) :: spin, state, step, hop_step
    character(len=5000) :: sep
-   logical :: is_conv
    real(dp) :: enpol, enel, enph, enelph, eps, grs
    !real(dp) :: min_epol, max_epol, ehop
 
@@ -1468,9 +1467,7 @@ subroutine varpeq_print_hop_results(self)
  subroutine hop_report_(spin, hop_step)
    integer, intent(in) :: spin, hop_step
    character(len=5000) :: sep
-   logical :: is_conv
    real(dp) :: ph_max_grs, hop_max_grs
-   !real(dp) :: min_epol, max_epol, ehop
 
    ph_max_grs = maxval(self%hop_hist_spin(1, :, hop_step, spin))
    hop_max_grs = maxval(self%hop_hist_spin(2, :, hop_step, spin))
@@ -2128,8 +2125,13 @@ subroutine varpeq_hop_setup(self, dtset)
    call polstate%load_b(b_spin_from(:,:,spin), ip=1, &
      trvec=(center(:) - dtset%vpq_hop_from_site(:)))
 
-   call polstate%load_b(b_spin_to(:,:,spin), ip=self%nstates, &
-     trvec=(center(:) - dtset%vpq_hop_to_site(:) + dtset%vpq_hop_vec(:)))
+   if (dtset%vpq_hop_to_filepath /= ABI_NOFILE) then
+     call polstate%load_b(b_spin_to(:,:,spin), ip=self%nstates, &
+       trvec=(center(:) - dtset%vpq_hop_to_site(:) + dtset%vpq_hop_vec(:)))
+   else
+     call polstate%load_b(b_spin_to(:,:,spin), ip=self%nstates, &
+       trvec=(center(:) - dtset%vpq_hop_from_site(:) + dtset%vpq_hop_vec(:)))
+   endif
 
    call polstate%linterp_b()
  enddo
@@ -2171,8 +2173,8 @@ subroutine varpeq_init(self, gstore, dtset)
  class(gqk_t), pointer :: gqk
  class(crystal_t), pointer :: cryst
  class(polstate_t), pointer :: polstate
- integer :: ierr, my_is, spin, bstart, bend, my_iq, my_pert
- real(dp) :: wqnu, wtq, cpu, wall, gflops
+ integer :: ierr, my_is, spin, bstart, bend, my_iq
+ real(dp) :: wtq, cpu, wall, gflops
 !----------------------------------------------------------------------
 
  call cwtime(cpu, wall, gflops, "start")
@@ -4107,7 +4109,7 @@ subroutine polstate_redistr_b(self, mesh_in, mesh_out, nimag)
 !Local variables-------------------------------
 !scalars
  class(gqk_t), pointer :: gqk
- integer :: ip, from_ip, to_ip
+ integer :: from_ip, to_ip
  integer :: my_iq, my_pert
  complex(dp) :: phgrad_qnu_from, phgrad_qnu_to
 !arrays
