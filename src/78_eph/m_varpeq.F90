@@ -2096,7 +2096,13 @@ subroutine varpeq_hop_setup(self, dtset)
 
  if (my_rank == master) then
    call vpq_from%ncread(dtset%vpq_hop_from_filepath, xmpi_comm_self)
-   call vpq_to%ncread(dtset%vpq_hop_to_filepath, xmpi_comm_self)
+
+   if (dtset%vpq_hop_to_filepath /= ABI_NOFILE) then
+      call vpq_to%ncread(dtset%vpq_hop_to_filepath, xmpi_comm_self)
+   else
+      call vpq_to%ncread(dtset%vpq_hop_from_filepath, xmpi_comm_self)
+   endif
+
 
    ! TODO: allow BZ mismatch by adding a BZ interpolation step?
    call self%compare(vpq_from, bz_mismatch=.false.)
