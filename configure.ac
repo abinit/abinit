@@ -1327,9 +1327,11 @@ AC_OUTPUT
 
 # Call CMake to generate Makefile for Kokkos sources directories
 if test "${sd_kokkos_enable}" = "yes"; then
+  test -z "${sd_kokkos_prefix}" && CMAKE_KOKKOS_ROOT="" || \
+       CMAKE_KOKKOS_ROOT="-DKokkos_ROOT=${sd_kokkos_prefix}"
   rm ${abinit_builddir}/src/16_kokkos_toolbox/Makefile
   cd ${abinit_builddir}/src/16_kokkos_toolbox && \
-    cmake ${abinit_srcdir}/shared/common/src/16_kokkos_toolbox/. -Wno-dev  \
+    cmake ${abinit_srcdir}/shared/common/src/16_kokkos_toolbox/. -Wno-dev ${CMAKE_KOKKOS_ROOT} \
     -DUSE_AUTOTOOLS_BUILD_COMPAT=ON -DABINIT_SRC_DIR=${abinit_srcdir} \
     -DCMAKE_C_FLAGS="${CFLAGS}" -DCMAKE_Fortran_FLAGS="${FCFLAGS}"  \
     -DCMAKE_CXX_FLAGS="-O2" -DCMAKE_C_COMPILER=${CC}  -DCMAKE_CXX_COMPILER=${CXX} \
@@ -1337,7 +1339,7 @@ if test "${sd_kokkos_enable}" = "yes"; then
     cd -
   rm ${abinit_builddir}/src/44_manage_kokkos/Makefile
   cd ${abinit_builddir}/src/44_manage_kokkos && \
-    cmake ${abinit_srcdir}/src/44_manage_kokkos/. -Wno-dev  \
+    cmake ${abinit_srcdir}/src/44_manage_kokkos/. -Wno-dev ${CMAKE_KOKKOS_ROOT} \
     -DUSE_AUTOTOOLS_BUILD_COMPAT=ON -DABINIT_SRC_DIR=${abinit_srcdir} \
     -DCMAKE_C_FLAGS="${CFLAGS}" -DCMAKE_Fortran_FLAGS="${FCFLAGS}"  \
     -DCMAKE_CXX_FLAGS="-O2" -DCMAKE_C_COMPILER=${CC}  -DCMAKE_CXX_COMPILER=${CXX} \

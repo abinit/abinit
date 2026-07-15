@@ -15,6 +15,7 @@
 
 AC_DEFUN([SD_KOKKOS_INIT], [
   # Init
+  sd_kokkos_prefix=""
   sd_kokkos_cppflags=""
   sd_kokkos_cxxflags=""
   sd_kokkos_ldflags=""
@@ -78,6 +79,7 @@ AC_DEFUN([SD_KOKKOS_INIT], [
       else
         sd_kokkos_enable="yes"
         sd_kokkos_init="dir"
+        sd_kokkos_prefix="${withval}"
         test -d "${withval}/lib" && sd_kokkos_libdir="${withval}/lib"
         test -d "${withval}/lib64" && sd_kokkos_libdir="${withval}/lib64"
       fi],
@@ -170,6 +172,7 @@ AC_DEFUN([SD_KOKKOS_INIT], [
   AC_SUBST(sd_kokkos_cxxflags)
   AC_SUBST(sd_kokkos_ldflags)
   AC_SUBST(sd_kokkos_libs)
+  AC_SUBST(sd_kokkos_prefix)
   AC_SUBST(with_kokkos)
 
   # Clean-up
