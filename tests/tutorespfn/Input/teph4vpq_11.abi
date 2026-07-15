@@ -1,0 +1,123 @@
+# LiF: computation of the minimum-energy path for small-hole-polaron hopping
+# on a 5x5x5 k/q-grid with long-range Frohlich correction.
+
+ optdriver  7       # Electron-phonon driver
+ eph_task   13      # Activate the Variational Polaron Equations solver
+
+ vpq_mode "hopping"  # Activate the energy-path calculation
+
+# Minimum-energy-path optimization between two polaronic states
+
+# Initial state
+ vpq_hop_from_filepath "teph4vpq_4o_DS3_VPQ.nc"  # File with one polaronic state
+ vpq_hop_from_ip 1        # Polaron index (relevant if the file contains several states)
+ vpq_hop_from_site 0 0 4  # Cell in which the polaron is localized. This can be
+                          # checked by plotting the polaron density with
+                          # eph_task -13 (see, e.g., teph4vpq_7.abi).
+
+# Final state
+# Before translation, select the same polaronic state and localization cell
+# as for the initial state.
+# In this case, when the states are the same, the next three variables are defaults
+# and can be omitted. However, they are required for non-equivalent states.
+ vpq_hop_to_filepath "teph4vpq_4o_DS3_VPQ.nc"
+ vpq_hop_to_ip 1
+ vpq_hop_to_site 0 0 4
+
+ vpq_hop_vec 1 0 0  # Translate the selected final state relative to the initial
+                    # state along [100] in the rprim basis. For this structure,
+                    # this corresponds to [011] in the conventional-cell basis.
+
+# String-method optimization parameters
+ vpq_nstates       9  # Number of polaronic images along the path,
+                      # including the initial and final states
+ vpq_hop_nstep    50  # Number of energy-path optimization steps
+ vpq_hop_tolgrs 5e-5  # Tolerance on the energy-path displacement
+ vpq_hop_ts      1e4  # Time step for the energy-path evolution
+
+# At each step of the energy-path optimization, optimize the vpq_nstates
+# polaronic images at fixed atomic displacements with the parameters below.
+
+# Variational Polaron Equations parameters
+ vpq_pkind  "hole"  # Hole polaron
+ vpq_tolgrs  1e-5   # Tolerance on the gradient norm
+
+ vpq_nstep     100  # Maximum number of optimization steps
+
+# Frohlich correction
+ eph_frohl_ntheta  32   # Number of divisions for the spherical integration of
+                        # the long-range part of electron-phonon energy.
+                        # Non-zero value activates the computation of Frohlich
+                        # corrections.
+                        # ntheta=32 gives the optimal number of divisions for the
+                        # spherical integration.
+
+ vpq_avg_g  1  # Apply Frohlich correction to the e-ph coupling. This must be
+               # consistent with the option used to produce the VPQ.nc file.
+
+
+# Electron-phonon matrix elements
+ getgstore_filepath "teph4vpq_3o_DS3_GSTORE.nc" # 5x5x5 k/q-mesh
+
+# Wavefunction
+# Read the WFK file from the preparatory run
+ getwfk_filepath "teph4vpq_2o_DS3_WFK"  # 5x5x5 k-mesh
+
+ ngkpt    5 5 5  # These parameters have to be consistent with the WFK file
+
+ kptopt   1
+ nshiftk  1
+ shiftk   0 0 0
+ nband    6
+ ecut     30
+
+# Phonons
+ ddb_ngqpt  3 3 3          # This has to be consistent with the DDB file
+ getddb_filepath
+ "LiF_eph_varpeq/out_DDB"  # Read the precomputed DDB stored in git submodule
+                           # NOTE: for the input parameters used to produce
+                           # the DDB file, consult the LiF_eph_varpeq/dfpt.abi
+
+# Pseudopotentials
+ pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_05_pbe_std_psp8"
+ pseudos "Li.psp8, F.psp8"
+
+# Structure
+ natom   2
+ ntypat  2
+ typat   1 2
+ znucl   3 9
+ xred    0.0  0.0  0.0
+         0.5  0.5  0.5
+
+ acell 3*7.675
+ rprim 0.0  0.5  0.5
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = haicgu_*
+#%% test_chain = teph4vpq_1.abi, teph4vpq_2.abi, teph4vpq_3.abi,
+#%%              teph4vpq_4.abi, teph4vpq_5.abi, teph4vpq_6.abi,
+#%%              teph4vpq_7.abi, teph4vpq_8.abi, teph4vpq_9.abi,
+#%%              teph4vpq_10.abi, teph4vpq_11.abi
+#%% [files]
+#%% use_git_submodule = LiF_eph_varpeq
+#%% files_to_test =
+#%%   teph4vpq_11.abo, tolnlines = 150, tolabs = 2.0e-4, tolrel = 2e-1
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = V. Vasilchenko
+#%% keywords = DFPT, EPH, POLARON
+#%% description =
+#%%   LiF, Fm-3m space group.
+#%%   Computation of the minimum-energy path for small-hole-polaron hopping
+#%%   on a 5x5x5 k/q-grid via Variational Polaron Equations with long-range
+#%%   Frohlich correction.
+#%%<END TEST_INFO>

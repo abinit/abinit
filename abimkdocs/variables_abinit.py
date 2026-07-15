@@ -27315,8 +27315,12 @@ Variable(
     text=r"""
 This variable specifies the number of polaronic states to be found by solving the
 variational polaron equations.
-Each new state is found by imposing the orthogonalization constraint to all
+
+If [[vpq_mode]] = "polaron", each new state is found by imposing the orthogonalization constraint to all
 previously found states during the optimization process.
+
+If [[vpq_mode]] = "hopping", it specifies the number of images, representing the energy
+path, connecting polaronic solutions.
 
 !!! important
 
