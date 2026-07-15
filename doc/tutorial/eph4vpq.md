@@ -1516,27 +1516,24 @@ Finally, we can visualize the large polaron via the following input
 abinit teph4vpq_10.abi > teph4vpq_10.log 2> err &
 ```
 
-This produces usual `*xsf` files that can be used for viauslization.
-If we open `teph4vpq_10o_pstate_1_POLARON.xsf` in VESTA, the following charge distribution can bee seen:
+This produces the usual `*xsf` files for visualization.
+Opening `teph4vpq_10o_pstate_1_POLARON.xsf` in VESTA shows the following charge distribution:
 
 ![](eph4vpq_assets/LiF_large.png)
 
 
-## Polaron hopping and minimal-energy paths
+## Polaron hopping and minimum-energy paths
 
-So far, we have observed how individual polaron solutions could be obtained.
-Now, we'll demonstrate how minimal-energy paths between different polaron solutions can be obtained.
-This, in turn, can be employed in polaron hopping transport calculations.
+So far, we have focused on obtaining individual polaron solutions.
+We will now compute a minimum-energy path between two such solutions and use it to estimate the barrier for polaron hopping.
 
-Internally, this is done by extension of the variational polaron equations with the simplified string method
-[[cite:Weinan2007]].
-Details of the implementation relevant to the present formalism and specific applications can be found in [[cite:Vasilchenko2026]].
+ABINIT combines the variational polaron equations with the simplified string method [[cite:Weinan2007]] for this purpose.
+Details of the implementation and its application to polaron hopping can be found in [[cite:Vasilchenko2026]].
 
-The idea is to find minimal-energy path between a known initial and final polaronic solutions.
-Previously, in the tutorial we have already obtained quite a few polarons, why not using some of them?
-For that purpose, we'll choose the hole polaron, computed on the $5\times5\times5$ $\mathbf{k/q}$-mesh with long-range corrections.
-All the metadata, relevant for this polaron, is stored in the `teph4vpq_4o_DS3_VPQ.nc` file.
-We'll also need the corresponding **DDB**, **WFK** and **GSTORE** files that we have also obtained.
+A minimum-energy path requires known initial and final polaron states.
+Here, we use the hole-polaron solution computed previously on the $5\times5\times5$ $\kk/\qq$-mesh with long-range corrections.
+The `teph4vpq_4o_DS3_VPQ.nc` file contains this solution and its metadata.
+We also need the corresponding **DDB**, **WFK**, and **GSTORE** files from the previous calculations.
 
 Our input file is as follows
 
@@ -1548,27 +1545,35 @@ Run this example with:
 abinit teph4vpq_11.abi > teph4vpq_11.log 2> err &
 ```
 
-Let's examine this input file. Note quite a few new keywords. First [[vpq_mode]] "hopping" activates the minimal-energy path optimization.
-The initial and final states are provided using the `vpq_hop_from*` and `vpq_hop_to*` variables.
-Ultimately, [[vpq_hop_vec]]  translation vector is applied to the final state to translate it relative to the initial one.
-Here, it corresponds to the hopping of the polaron to its nearest-neighbor in $[100]$ direction of the [[rprim]] basis.
-This correspond to the $[011]$ direction of the conventional cell.
+Let's examine the new variables in this input file.
+Setting [[vpq_mode]] to `"hopping"` activates the minimum-energy-path optimization.
+The initial state is selected with [[vpq_hop_from_filepath]], [[vpq_hop_from_ip]], and [[vpq_hop_from_site]].
+The final state is selected with [[vpq_hop_to_filepath]], [[vpq_hop_to_ip]], and [[vpq_hop_to_site]].
+The filepath variables identify the **VPQ** files, the `ip` variables select a state from each file, and the `site` variables
+specify the corresponding localization cells.
 
-The energy path is represented by a set of polaron images, connected by an artifical string, which we evolve to find the minimal-energy path.
-The number of images are controlled by the [[vpq_nstates]] variable, which now has a different meaning and here samples the path with 9 images.
-Our initial guess for the energy path is obtained as linearly-interpolated distribution of [[vpq_nstates]] images between the initial and final states we have specified.
+In this example, the same solution is used for both endpoints.
+The [[vpq_hop_vec]] translation is applied to the final state relative to the initial one, thereby defining the hopping event.
+The [[vpq_hop_vec]] vector describes a hop to a nearest-neighbor site along $[100]$ in the [[rprim]] basis.
+For this structure, it corresponds to the $[011]$ direction of the conventional cell.
 
-For each image, we have to solve the variational polaron equations with the fixed $\boldsymbol{B}$ coefficients for optimal charge
-distribution $\boldsymbol{A}$, and then evolve the path to find next set of $\boldsymbol{B}$.
-Evolution of the path is a new iterative process, which is controlled by related [[vpq_hop_nstep]], [[vpq_hop_tolgrs]] and [[vpq_hop_ts]]
-variables.
+The energy path between the two solution is represented by a string, which is a discrete sequence of polaron images that connects the two endpoints.
+In `"hopping"` mode, [[vpq_nstates]] specifies the number of images along this path, including the endpoints.
+Here, nine images sample the path, which initially is constructed by linear interpolation between the selected states.
 
-Let's now have a look at the main output file:
+For each image, ABINIT first optimizes the charge distribution $\boldsymbol{A}$ at fixed lattice-distortion coefficients
+$\boldsymbol{B}$.
+The string method then updates the set of $\boldsymbol{B}$ coefficients to evolve the path.
+The maximum number of string iterations is set by [[vpq_hop_nstep]], the convergence tolerance by
+[[vpq_hop_tolgrs]], and the evolution time step by [[vpq_hop_ts]].
+
+Let's now look at the main output file:
 
 {% dialog tests/tutorespfn/Refs/teph4vpq_11.abo %}
 
-It contains the log for the energy path evolution process, which shows maximum norm of the phonon gradient and path displacment,
-`max||ph_grad||` and `max||hop_grad||` over all images. When the latter reaches [[vpq_hop_ts]] tolerance, the optimisation stops
+The hopping-optimization log reports the maximum phonon-gradient norm and the maximum string displacement over all images as
+`max||ph_grad||` and `max||hop_grad||`, respectively.
+The optimization stops when `max||hop_grad||` falls below [[vpq_hop_tolgrs]]:
 
 ```md
  Printing the hopping optimization log
@@ -1594,8 +1599,9 @@ It contains the log for the energy path evolution process, which shows maximum n
    -------------------------------------------
 ```
 
-Also, results of the variational polaron equations, computed with fixed displacments, at the last iteration of the energy-path evolution
-are listed. $E_{\rm pol}$ values correspond to the minimal-energy path we were looking to obtain!
+The output also lists the results of the final variational-polaron optimization at fixed displacements.
+The $E_\mathrm{pol}$ values trace the optimized minimum-energy path:
+
 ```md
  Printing the minimal energy path
    --------------------------------------------------------------------------------------
@@ -1615,39 +1621,39 @@ are listed. $E_{\rm pol}$ values correspond to the minimal-energy path we were l
    --------------------------------------------------------------------------------------
 ```
 
-Converting these values to eV and plotting realtive to the energy of the initial state, we plot the minimal-energy path:
+Converting these energies to eV and referencing them to the initial-state energy gives the following path:
 
 ![](eph4vpq_assets/LiF_hop.png){: style="width:400px"}
 
-The blue line corresponds to our initial, linearly-interpolated path, which can be obtained by setting [[vpq_hop_nstep]] = 1.
-From the paths, we can extract the value of the hopping energy barrier (activation energy) $\Delta E_{\rm a}$.
-It's optimised value is $\Delta E^{\rm opt}_{\rm a} = 465$ meV, while linear interpolation gives $\Delta E^{\rm linear}_{a} = 553$ meV.
+The blue line is the initial, linearly interpolated path, which can be recovered by setting [[vpq_hop_nstep]] to 1.
+The maximum energy relative to the endpoints is the hopping barrier, or activation energy, $\Delta E_\mathrm{a}$.
+Optimization lowers the barrier from $\Delta E^\mathrm{linear}_\mathrm{a} = 553$ meV to
+$\Delta E^\mathrm{opt}_\mathrm{a} = 465$ meV.
 
-We then could use it to estimate the adiabatic polaron hopping mobility within the transition-state theory [[cite:Deskins2007]].
-Within the theory, the polaron transfer rate is given as
+We can use this barrier to estimate the adiabatic polaron-hopping mobility within transition-state theory
+[[cite:Deskins2007]].
+The polaron transfer rate is
 
 \begin{equation} \label{eq:k-adiab}
-    k^{\rm ad}_{\rm p} = \nu \exp \Bigl[ -\frac{\Delta E_{\rm a}}{k_{B} T} \Bigr],
+    k^\mathrm{ad}_\mathrm{p} = \nu \exp \left( -\frac{\Delta E_\mathrm{a}}{k_\mathrm{B} T} \right),
 \end{equation}
 
-where $\nu$ is attempt rate.
+where $\nu$ is the attempt frequency.
 
-Then, the diffusion coefficient associated with hopping between the initial and final polaron configurations is
+The diffusion coefficient associated with hopping between the initial and final polaron configurations is
+
 \begin{equation}
-    D = R^2 n k_{\rm p},
+    D = R^2 n k_\mathrm{p},
 \end{equation}
 
-where $n$ is the number of equivalent hopping sites.
+where $R$ is the hopping distance and $n$ is the number of equivalent destination sites included in the estimate.
 
-The hopping mobility can be obtained using the Einstein-Smoluchowski relation,
+The hopping mobility then follows from the Einstein--Smoluchowski relation:
+
 \begin{equation}\label{eq:mu}
-    \mu_{\rm p} = \frac{eD}{k_{B} T}.
+    \mu_\mathrm{p} = \frac{eD}{k_\mathrm{B} T}.
 \end{equation}
 
-
-Using $n=1$, $h\nu = 77$ meV (corresponding to LO phonon mode at $\Gamma$) and $R =
-2.872$ Angstrom (distance between the fluorine nearest-neighbors), we obtain $\mu_{\rm p} \sim 10^{-8}$ cm$^2$V$^{-1}$s$^{-1}$, a value typical for a strongly-bound polaron.
-
-
-<!--
--->
+For an illustrative estimate of mobility along this direction, we use $n=1$ and $h\nu=77$ meV (the LO phonon energy at $\Gamma$),
+and $R=2.872$ Angstrom (the distance between nearest-neighbor fluorine sites).
+This gives $\mu_\mathrm{p} \sim 10^{-8}\ \mathrm{cm^2\,V^{-1}\,s^{-1}}$ t $T=300$ K, a value typical of a strongly bound polaron.
