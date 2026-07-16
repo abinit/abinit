@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 15 Jul 2026.
-- ( at 22h25 )
+.Starting date : Thu 16 Jul 2026.
+- ( at 10h51 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_polhop_clean/tests/TestBot_MPI1/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10-teph4vpq_11/teph4vpq_11.abi
 - output file    -> teph4vpq_11.abo
@@ -373,21 +373,22 @@ P Number of CPUs for parallelism over k-points: 1
    * Translational invariance: no
 
  Solving for the polaron hopping...
-   * Hopping: step 1/50
+   * Hopping: step 1/15
      line minimiation step t = 1.00E+04
-   * Hopping: step 2/50
-   * Hopping: step 3/50
-   * Hopping: step 4/50
-   * Hopping: step 5/50
-   * Hopping: step 6/50
-   * Hopping: step 7/50
-   * Hopping: step 8/50
-   * Hopping: step 9/50
-   * Hopping: step 10/50
-   * Hopping: step 11/50
-   * Hopping: step 12/50
-   * Hopping: step 13/50
-   * Hopping: step 14/50
+   * Hopping: step 2/15
+   * Hopping: step 3/15
+   * Hopping: step 4/15
+   * Hopping: step 5/15
+   * Hopping: step 6/15
+   * Hopping: step 7/15
+   * Hopping: step 8/15
+   * Hopping: step 9/15
+   * Hopping: step 10/15
+   * Hopping: step 11/15
+   * Hopping: step 12/15
+   * Hopping: step 13/15
+   * Hopping: step 14/15
+   * Hopping: step 15/15
 
  Printing the hopping optimization log
    -------------------------------------------
@@ -409,6 +410,7 @@ P Number of CPUs for parallelism over k-points: 1
      12       6.4201E-04        6.3728E-05
      13       6.3898E-04        5.5188E-05
      14       6.3689E-04        4.9857E-05
+     15       6.3520E-04        4.4818E-05
    -------------------------------------------
 
  Printing the minimal energy path
@@ -417,15 +419,15 @@ P Number of CPUs for parallelism over k-points: 1
    * values are in (a.u.)
    --------------------------------------------------------------------------------------
    Imag        E_pol         E_el         E_ph       E_elph      epsilon  ||el_grad||
-      1  -7.6469E-02   2.9478E-02   1.0595E-01  -2.1189E-01   1.8242E-01   3.2243E-06
-      2  -7.5673E-02   2.9072E-02   1.0235E-01  -2.0709E-01   1.7802E-01   9.8276E-06
-      3  -7.2691E-02   2.7401E-02   9.1233E-02  -1.9132E-01   1.6392E-01   7.2663E-06
-      4  -6.5328E-02   2.4064E-02   8.2092E-02  -1.7148E-01   1.4742E-01   3.8265E-06
-      5  -5.9366E-02   2.0157E-02   7.8998E-02  -1.5852E-01   1.3836E-01   5.6464E-06
-      6  -6.5309E-02   2.4056E-02   8.2069E-02  -1.7143E-01   1.4738E-01   9.8535E-06
-      7  -7.2682E-02   2.7399E-02   9.1201E-02  -1.9128E-01   1.6388E-01   7.8218E-06
-      8  -7.5669E-02   2.9072E-02   1.0232E-01  -2.0706E-01   1.7799E-01   9.4859E-06
-      9  -7.6469E-02   2.9478E-02   1.0595E-01  -2.1189E-01   1.8242E-01   3.9885E-06
+      1  -7.6469E-02   2.9478E-02   1.0595E-01  -2.1189E-01   1.8242E-01   3.2375E-06
+      2  -7.5686E-02   2.9088E-02   1.0267E-01  -2.0744E-01   1.7836E-01   7.0036E-06
+      3  -7.2767E-02   2.7438E-02   9.1537E-02  -1.9174E-01   1.6430E-01   4.0929E-06
+      4  -6.5396E-02   2.4096E-02   8.2240E-02  -1.7173E-01   1.4764E-01   5.9329E-06
+      5  -5.9385E-02   2.0171E-02   7.9089E-02  -1.5865E-01   1.3847E-01   7.2766E-06
+      6  -6.5390E-02   2.4097E-02   8.2227E-02  -1.7171E-01   1.4762E-01   9.9873E-06
+      7  -7.2765E-02   2.7431E-02   9.1522E-02  -1.9172E-01   1.6429E-01   9.3303E-06
+      8  -7.5684E-02   2.9094E-02   1.0267E-01  -2.0744E-01   1.7835E-01   9.3752E-06
+      9  -7.6469E-02   2.9478E-02   1.0595E-01  -2.1189E-01   1.8242E-01   3.9849E-06
    --------------------------------------------------------------------------------------
 
  Saving results to: teph4vpq_11o_VPQ.nc
@@ -600,10 +602,10 @@ P           mkmem          10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         85.4  wall=         85.4
+- Proc.   0 individual time (sec): cpu=         86.0  wall=         86.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         85.4  wall=         85.4
++Overall time at end (sec) : cpu=         86.0  wall=         86.0
