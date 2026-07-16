@@ -68,12 +68,12 @@ contains
 !!***
 
 subroutine select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,nfftf,ngfft,&
-    n4,n5,n6,natom,nspinor,lmn2_size,usepaw,cprj,ieigen,need_ghc,optfor,optstr)
+    n4,n5,n6,natom,nspinor,lmn2_size,usepaw,cprj,ieigen,need_ghc,optfor,optstr,nfgd_max)
 
 !Arguments ------------------------------------
 ! Scalars
  integer,intent(in)     :: nband_k,ndat,npw,cplex_fock,nfftf,n4,n5,n6,ngfft(18)
- integer,intent(in)     :: natom,nspinor,lmn2_size,usepaw,ieigen
+ integer,intent(in)     :: natom,nspinor,lmn2_size,usepaw,ieigen,nfgd_max
  logical,intent(in)     :: optfor,optstr,need_ghc
  integer,intent(out)    :: ndat_occ
  type(pawcprj_type),intent(in) :: cprj(natom,nspinor*ndat)
@@ -166,7 +166,7 @@ subroutine select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,nfftf,ng
      sum_mem = sum_mem + INT(2,c_size_t)*nfftf*nspinor**2*ndat_occ*ndat
 
      ! nhat12_atm/nhat12_work (paw_psipsi internal work array)
-     sum_mem = sum_mem + INT(2,c_size_t)*nfftf*nspinor**2*ndat_occ*ndat*natom
+     sum_mem = sum_mem + INT(2,c_size_t)*nfgd_max*nspinor**2*ndat_occ*ndat*natom
      ! cprj1 (paw_psipsi internal work array)
      sum_mem = sum_mem + INT(2,c_size_t)*nprojs*nspinor*ndat
      ! cprj2 (paw_psipsi internal work array)
@@ -247,6 +247,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  integer :: iband_cprj,ider,idir,idir1,ier,ii,ind,ipw,ifft,itypat,izero,jband,jbg,jcg,jkg
  integer :: jkpt,my_jsppol,jstwfk,lmn2_size,mgfftf,mpw,n1,n2,n3,n4,n5,n6,ndat_occ
  integer :: n1f,n2f,n3f,n4f,n5f,n6f,natom,nband_k,ndij,nfft,nfftf,nfftotf,nhat12_grdim,nnlout
+ integer :: nfgd_max
  integer :: npw,npwj,nspden_fock,nspinor,nkpg,paw_opt,signs,tim_nonlop,gpu_option
  integer, save :: ncount=0
  logical :: need_ghc,qeq0
@@ -319,6 +320,13 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  n4=ngfft(4);n5=ngfft(5);n6=ngfft(6)
  n1f=ngfftf(1);n2f=ngfftf(2);n3f=ngfftf(3)
  n4f=ngfftf(4);n5f=ngfftf(5);n6f=ngfftf(6)
+
+!*Max number of fine-grid points in a PAW augmentation sphere (over all atoms).
+!*Used to size the small per-atom nhat12_work buffer instead of the full FFT grid.
+ nfgd_max=1
+ if (fockcommon%usepaw==1) then
+   nfgd_max=max(1,maxval(fockcommon%pawfgrtab(1:natom)%nfgd))
+ end if
 
 ! ===========================
 ! === Initialize arrays   ===
@@ -441,7 +449,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      if(fockcommon%usepaw==1) lmn2_size=fockcommon%pawtab(1)%lmn2_size
      call select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,&
 &        nfftf,ngfftf,n4f,n5f,n6f,natom,nspinor,lmn2_size,&
-&        fockcommon%usepaw,cwaveprj,fockcommon%ieigen,need_ghc,fockcommon%optfor,fockcommon%optstr)
+&        fockcommon%usepaw,cwaveprj,fockcommon%ieigen,need_ghc,fockcommon%optfor,fockcommon%optstr,nfgd_max)
    else
      ndat_occ=min(nband_k,4)
      do ii=1,nband_k
@@ -503,7 +511,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      ABI_MALLOC(gvnlxc,(2,npw*nspinor*ndat_occ))
      ABI_MALLOC(grnhat12,(2,nfftf,nspinor**2,3*nhat12_grdim,ndat_occ,ndat))
      ABI_MALLOC(rho12,(2,nfftf,nspinor**2,ndat_occ,ndat))
-     ABI_MALLOC(nhat12_work, (2,nfftf,nspinor**2,ndat_occ,ndat,maxval(gs_ham%nattyp)))
+    !*nhat12_work only needs to hold one PAW augmentation sphere (nfgd_max points),
+    !*not the full FFT grid: nhat is strictly localized inside PAW spheres.
+     ABI_MALLOC(nhat12_work, (2,nfgd_max,nspinor**2,ndat_occ,ndat,maxval(gs_ham%nattyp)))
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET ENTER DATA MAP(alloc:grnhat_12) IF(gpu_option==ABI_GPU_OPENMP .and. ider==3)
      !$OMP TARGET ENTER DATA MAP(alloc:gvnlxc) IF(gpu_option==ABI_GPU_OPENMP)

@@ -852,7 +852,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
        nhat12_atm=zero
      else if(gpu_option_==ABI_GPU_OPENMP) then
        do ia=1,nattyp(itypat)
-         call gpu_set_to_zero(nhat12_atm(:,:,:,:,:,ia),int(2,c_size_t)*nfft*(nspinor**2)*ndat2*ndat1)
+         ! nhat12_atm/nhat12_work is sized on nfgd_max (PAW sphere), not nfft
+         call gpu_set_to_zero(nhat12_atm(:,:,:,:,:,ia),int(2,c_size_t)*size(nhat12_atm,2)*(nspinor**2)*ndat2*ndat1)
        end do
      end if
    end if
@@ -998,7 +999,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      if (compute_nhat) then
        if(gpu_option_==ABI_GPU_DISABLED) then
          ang_gntselect => pawang%gntselect
-         !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat1,idat2,ic,jc,ils,mm,ilslm,klm,lmin,lmax,klmn)
+         !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat1,idat2,ic,ils,mm,ilslm,klm,lmin,lmax,klmn)
          do ia=1,nattyp(itypat)
            do idat1=1,ndat1
              do idat2=1,ndat2
@@ -1011,9 +1012,10 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
                      do mm=-ils,ils
                        ilslm=ils*ils+ils+mm+1
                        if (pawang%gntselect(ilslm,klm)>0) then
-                         jc=atom_ifftsph(ic,ia)
-                         nhat12_atm(1,jc,isploop,idat2,idat1,ia)=nhat12_atm(1,jc,isploop,idat2,idat1,ia)+atom_dltij(klmn)*half*cpf(1,klmn,idat2,idat1,ia)*qijl(ilslm,klmn)*atom_gylm(ic,ilslm,ia)
-                         nhat12_atm(2,jc,isploop,idat2,idat1,ia)=nhat12_atm(2,jc,isploop,idat2,idat1,ia)+atom_dltij(klmn)*half*cpf(2,klmn,idat2,idat1,ia)*qijl(ilslm,klmn)*atom_gylm(ic,ilslm,ia)
+                         ! nhat12_atm is indexed by the local sphere point ic (not the
+                         ! global FFT index jc): it is only nfgd_max points wide.
+                         nhat12_atm(1,ic,isploop,idat2,idat1,ia)=nhat12_atm(1,ic,isploop,idat2,idat1,ia)+atom_dltij(klmn)*half*cpf(1,klmn,idat2,idat1,ia)*qijl(ilslm,klmn)*atom_gylm(ic,ilslm,ia)
+                         nhat12_atm(2,ic,isploop,idat2,idat1,ia)=nhat12_atm(2,ic,isploop,idat2,idat1,ia)+atom_dltij(klmn)*half*cpf(2,klmn,idat2,idat1,ia)*qijl(ilslm,klmn)*atom_gylm(ic,ilslm,ia)
                        end if
                      end do
                    end do
@@ -1031,9 +1033,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
          do ia=1,nattyp(itypat)
            do idat1=1,ndat1
              do idat2=1,ndat2
-               !$OMP PARALLEL DO PRIVATE(ilslm,ils,mm,klm,lmin,lmax,klmn,ic,jc,sumr,sumi)
+               !$OMP PARALLEL DO PRIVATE(ilslm,ils,mm,klm,lmin,lmax,klmn,ic,sumr,sumi)
                do ic=1,atom_nfgd(ia)
-                 jc=atom_ifftsph(ic,ia)
                  sumr=zero; sumi=zero
                  do klmn=1,lmn2_size  ! Loop over ij channels of this atom type.
                    klm =atom_indklmn(1,klmn)
@@ -1047,8 +1048,10 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
                      end do
                    end do
                  end do
-                 nhat12_atm(1,jc,isploop,idat2,idat1,ia)=nhat12_atm(1,jc,isploop,idat2,idat1,ia)+sumr
-                 nhat12_atm(2,jc,isploop,idat2,idat1,ia)=nhat12_atm(2,jc,isploop,idat2,idat1,ia)+sumi
+                 ! nhat12_atm is indexed by the local sphere point ic (not the
+                 ! global FFT index jc): it is only nfgd_max points wide.
+                 nhat12_atm(1,ic,isploop,idat2,idat1,ia)=nhat12_atm(1,ic,isploop,idat2,idat1,ia)+sumr
+                 nhat12_atm(2,ic,isploop,idat2,idat1,ia)=nhat12_atm(2,ic,isploop,idat2,idat1,ia)+sumi
                end do
              end do
            end do
@@ -1153,16 +1156,15 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
   !    If needed, multiply eventually by exp(-i.q.r) phase
        if(compute_phonon.and.(.not.qeq0).and.pawfgrtab(iatom)%expiqr_allocated/=0) then
          if(gpu_option_==ABI_GPU_DISABLED) then
-           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ro,ro_ql,ic,jc)
+           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ro,ro_ql,ic)
            do ia=1,nattyp(itypat)
              do idat1=1,ndat1
                do idat2=1,ndat2
                  do ic=1,atom_nfgd(ia)
                    iatom=iatm+ia
-                   jc=atom_ifftsph(ic,ia)
-                   ro(1:2)=nhat12_atm(1:2,jc,isploop,idat2,idat1,ia)
-                   nhat12_atm(1,jc,isploop,idat2,idat1,ia)=ro(1)*atom_expiqr(1,ic,ia)-ro(2)*atom_expiqr(2,ic,ia)
-                   nhat12_atm(2,jc,isploop,idat2,idat1,ia)=ro(2)*atom_expiqr(1,ic,ia)+ro(1)*atom_expiqr(2,ic,ia)
+                   ro(1:2)=nhat12_atm(1:2,ic,isploop,idat2,idat1,ia)
+                   nhat12_atm(1,ic,isploop,idat2,idat1,ia)=ro(1)*atom_expiqr(1,ic,ia)-ro(2)*atom_expiqr(2,ic,ia)
+                   nhat12_atm(2,ic,isploop,idat2,idat1,ia)=ro(2)*atom_expiqr(1,ic,ia)+ro(1)*atom_expiqr(2,ic,ia)
                  end do
                end do
              end do
@@ -1173,14 +1175,13 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
            !$OMP& MAP(to:atom_ifftsph,atom_expiqr,atom_nfgd,nhat12_atm,nattyp)
            do ia=1,nattyp(itypat)
              do idat1=1,ndat1
-               !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ic,jc,ro)
+               !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ic,ro)
                do idat2=1,ndat2
                  do ic=1,atom_nfgd(ia)
-                   jc=atom_ifftsph(ic,ia)
-                   ro(1)=nhat12_atm(1,jc,isploop,idat2,idat1,ia)
-                   ro(2)=nhat12_atm(2,jc,isploop,idat2,idat1,ia)
-                   nhat12_atm(1,jc,isploop,idat2,idat1,ia)=ro(1)*atom_expiqr(1,ic,ia)-ro(2)*atom_expiqr(2,ic,ia)
-                   nhat12_atm(2,jc,isploop,idat2,idat1,ia)=ro(2)*atom_expiqr(1,ic,ia)+ro(1)*atom_expiqr(2,ic,ia)
+                   ro(1)=nhat12_atm(1,ic,isploop,idat2,idat1,ia)
+                   ro(2)=nhat12_atm(2,ic,isploop,idat2,idat1,ia)
+                   nhat12_atm(1,ic,isploop,idat2,idat1,ia)=ro(1)*atom_expiqr(1,ic,ia)-ro(2)*atom_expiqr(2,ic,ia)
+                   nhat12_atm(2,ic,isploop,idat2,idat1,ia)=ro(2)*atom_expiqr(1,ic,ia)+ro(1)*atom_expiqr(2,ic,ia)
                  end do
                end do
              end do
@@ -1252,26 +1253,46 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      end if
 
    end do ! isploop (density components of the compensation charge)
-! accumlate nhat12 for all the atoms
+! accumulate nhat12 for all the atoms
+! "scatter-add" the compact per-atom sphere buffer (nhat12_atm, indexed by local point ic)
+! into the full-grid nhat12 array (indexed by global FFT point jc=atom_ifftsph(ic,ia)).
+! Only atom_nfgd(ia) points are touched per atom, instead of the full nfft grid.
 !nhat12(2,nfft,nspinor**2,ndat2)
    if (compute_nhat) then
      do ia=1,nattyp(itypat)
        iatom=iatm+ia
        select case (gpu_option_)
        case (ABI_GPU_DISABLED)
-         !$OMP PARALLEL DO COLLAPSE(4)
+         !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(idat1,idat2,isp1,ic,jc)
          do idat1=1,ndat1
          do idat2=1,ndat2
            do isp1=1,nspinor**2
-             do ils=1,nfft
-               nhat12(:,ils,isp1,idat2,idat1)=nhat12(:,ils,isp1,idat2,idat1)+nhat12_atm(:,ils,isp1,idat2,idat1,ia)
+             do ic=1,atom_nfgd(ia)
+               jc=atom_ifftsph(ic,ia)
+               nhat12(:,jc,isp1,idat2,idat1)=nhat12(:,jc,isp1,idat2,idat1)+nhat12_atm(:,ic,isp1,idat2,idat1,ia)
              end do
            end do
          end do
          end do
        case (ABI_GPU_OPENMP)
-         call abi_xaxpy(2*nfft*ndat2*ndat1*nspinor*nspinor,&
-         &    cone,nhat12_atm(:,:,:,:,:,ia),1,nhat12,1,x_cplx=1,gpu_option=gpu_option_)
+#ifdef HAVE_OPENMP_OFFLOAD
+         !call abi_xaxpy(2*nfft*ndat2*ndat1*nspinor*nspinor,&
+         !&    cone,nhat12_atm(:,:,:,:,:,ia),1,nhat12,1,x_cplx=1,gpu_option=gpu_option_)
+         !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+         !$OMP& MAP(to:nhat12,nhat12_atm,atom_ifftsph,atom_nfgd,nattyp) PRIVATE(idat1,idat2)
+         do idat1=1,ndat1
+           do idat2=1,ndat2
+             !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(isp1,ic,jc)
+             do isp1=1,nspinor**2
+               do ic=1,atom_nfgd(ia)
+                 jc=atom_ifftsph(ic,ia)
+                 nhat12(1,jc,isp1,idat2,idat1)=nhat12(1,jc,isp1,idat2,idat1)+nhat12_atm(1,ic,isp1,idat2,idat1,ia)
+                 nhat12(2,jc,isp1,idat2,idat1)=nhat12(2,jc,isp1,idat2,idat1)+nhat12_atm(2,ic,isp1,idat2,idat1,ia)
+               end do
+             end do
+           end do
+         end do
+#endif
        case default
          ABI_BUG("Unsupported GPU option")
        end select
