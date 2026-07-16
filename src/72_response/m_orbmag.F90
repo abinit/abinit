@@ -1415,7 +1415,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
   !arrays
   real(dp) :: bdot(2),bpdot(2),gdot(2),gpdot(2),enlout(1),lamv(1)
   real(dp),allocatable :: fofr(:,:,:,:),proj_un(:,:),vectout(:,:)
-  real(dp),allocatable,target :: svectoutb(:,:),svectoutbp(:,:),svectoutg(:,:)
+  real(dp),allocatable,target :: svectout(:,:),svectoutb(:,:),svectoutbp(:,:),svectoutg(:,:)
   real(dp),pointer :: bra(:,:),du_dbeta(:,:),du_dgamma(:,:),unk(:,:)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
 !--------------------------------------------------------------------
@@ -1451,6 +1451,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
    n4=dtset%ngfft(4); n5=dtset%ngfft(5); n6=dtset%ngfft(6); ndat=1
    ABI_MALLOC(proj_un,(2,npwsp))
    ABI_MALLOC(svectoutbp,(2,npwsp))
+   ABI_MALLOC(svectout,(2,npwsp))
    ABI_MALLOC(fofr,(2,n4,n5,n6*ndat))
  end if
 
@@ -1499,23 +1500,23 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
          orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibvv1) = &
            & orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibvv1) + epsfac*real(b1)
 
-         !if (need_ormesh) then
-         !  
-         !  ormesh_fac = trnrm(nn)*prefac_m*(eig_k(nn) - fermie)
+         if (need_ormesh) then
+           
+           ormesh_fac = trnrm(nn)*prefac_m*(eig_k(nn) - fermie)
 
-         !  call me_proj_mesh(du_dbeta,fofr,gs_hamk,svectoutg,mpi_enreg,n4,n5,n6,ndat,npw_k,ormesh_fac)
-         !  orbmag_mesh%rmesh(:,:,:,adir,invv1)=&
-         !    &orbmag_mesh%rmesh(:,:,:,adir,invv1)+epsfac*fofr(1,:,:,:)
-         !  
-         !  call me_proj_mesh(svectoutb,fofr,gs_hamk,du_dgamma,mpi_enreg,n4,n5,n6,ndat,npw_k,ormesh_fac)
-         !  orbmag_mesh%rmesh(:,:,:,adir,invv1)=&
-         !    &orbmag_mesh%rmesh(:,:,:,adir,invv1)+epsfac*fofr(1,:,:,:)
-         ! 
-         !end if
+           call me_proj_mesh(du_dbeta,fofr,gs_hamk,svectoutg,mpi_enreg,n4,n5,n6,ndat,npw_k,ormesh_fac)
+           orbmag_mesh%rmesh(:,:,:,adir,invv1)=&
+             &orbmag_mesh%rmesh(:,:,:,adir,invv1)+epsfac*fofr(1,:,:,:)
+           
+           call me_proj_mesh(svectoutb,fofr,gs_hamk,du_dgamma,mpi_enreg,n4,n5,n6,ndat,npw_k,ormesh_fac)
+           orbmag_mesh%rmesh(:,:,:,adir,invv1)=&
+             &orbmag_mesh%rmesh(:,:,:,adir,invv1)+epsfac*fofr(1,:,:,:)
+          
+         end if
 
          mv2b = czero
          if (need_ormesh) then
-           proj_un(1:2,1:npwsp) = zero
+           proj_un = zero
          end if
          do np = 1, nband_k
            if (occ_k(np).LT.tol8) cycle
@@ -1533,19 +1534,20 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
            mv2b = mv2b - prefac_m*CONJG(bpdotc)*gpdotc*(eig_k(nn) - fermie)
 
          end do ! np
+         
+         ! note that mv2b was accumulated with the necessary - sign
+         orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv2) = &
+           & orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv2) + epsfac*real(mv2b)
 
          if (need_ormesh) then
-           ! apply dS/dk_b to projected u'
+           ormesh_fac = trnrm(nn)*prefac_m*(eig_k(nn) - fermie)
+           ! compute dS/dk_b \sum_' |u'><u'|dS/dk_g|u>
            call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,bdir,lamv,mpi_enreg,ndat,nnlout,&
              & paw_opt,signs,svectoutbp,tim_getghc,proj_un,vectout)
-           ormesh_fac = trnrm(nn)*prefac_m*(eig_k(nn) - fermie)
            call me_proj_mesh(unk,fofr,gs_hamk,svectoutbp,mpi_enreg,n4,n5,n6,ndat,npw_k,ormesh_fac)
            orbmag_mesh%rmesh(:,:,:,adir,invv2)=&
              &orbmag_mesh%rmesh(:,:,:,adir,invv2)-epsfac*fofr(1,:,:,:)
          end if
-
-         orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv2) = &
-           & orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv2) + epsfac*real(mv2b)
 
        end do ! gdir
      end do ! bdir
@@ -1567,6 +1569,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
  ABI_SFREE(fofr)
  ABI_SFREE(proj_un)
  ABI_SFREE(svectoutbp)
+ ABI_SFREE(svectout)
 
 end subroutine orbmag_vv_k
 !!***
