@@ -517,7 +517,9 @@ module m_gemm_nonlop_gpu
         end if
 
         ! Use the Kokkos implementation of opernlc if available
-        if (gpu_option == ABI_GPU_KOKKOS) then
+        ! NC+SO (paw_opt==0, nspinortot==2) falls back to CPU: opernlc_ylm_allwf_kokkos
+        ! does not implement the real-Ylm L.S coupling yet
+        if (gpu_option == ABI_GPU_KOKKOS .and. .not.(paw_opt==0.and.nspinortot==2)) then
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
           call opernlc_ylm_allwf_kokkos(cplex, cplex_enl, cplex_fac, &
             &                           dimenl1, dimenl2, dimekbq, &

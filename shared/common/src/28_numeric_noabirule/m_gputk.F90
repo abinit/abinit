@@ -26,6 +26,7 @@ module m_gputk
  use defs_basis
  use m_errors
  use m_abicore
+ use m_xomp
  !use m_xomp
 !#if defined HAVE_GPU
 ! use m_gpu_toolbox

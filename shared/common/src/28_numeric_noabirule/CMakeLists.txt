@@ -15,6 +15,7 @@ add_library(28_numeric_noabirule STATIC
   m_hide_blas.F90
   m_hide_lapack.F90
   m_hybrd.F90
+  m_iterative_solvers.F90
   m_lebedev.F90
   m_levenberg_marquardt.F90
   m_lib_four.F90

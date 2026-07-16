@@ -89,4 +89,5 @@ inp_files = [
 "t61.abi", # nstep 0
 "t62.abi", # ixc -645642 (metaGGA) - NC
 "t63.abi", # ixc -645642 (metaGGA) - PAW & npband 2 (2 MPI)
+"t64.abi", # NC+SOC GS (forces+stress) and Gamma phonons for AlAs
 ]

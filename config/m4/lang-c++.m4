@@ -12,7 +12,6 @@
 #
 
 
-
 # _ABI_CXX_CHECK_ARM(COMPILER)
 # ----------------------------
 #
@@ -44,7 +43,6 @@ AC_DEFUN([_ABI_CXX_CHECK_ARM],[
   fi
   dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CXX_CHECK_ARM
-
 
 
 # _ABI_CXX_CHECK_GNU(COMPILER)
@@ -79,7 +77,6 @@ AC_DEFUN([_ABI_CXX_CHECK_GNU],[
   fi
   dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CXX_CHECK_GNU
-
 
 
 # _ABI_CXX_CHECK_IBM(COMPILER)
@@ -130,38 +127,78 @@ AC_DEFUN([_ABI_CXX_CHECK_IBM],[
 ]) # _ABI_CXX_CHECK_IBM
 
 
-
 # _ABI_CXX_CHECK_INTEL(COMPILER)
 # ------------------------------
 #
-# Checks whether the specified C++ compiler is the Intel C++ compiler.
-# If yes, tries to determine its version number and sets the abi_cxx_vendor
-# and abi_cxx_version variables accordingly.
+# Checks whether the specified C++ compiler is an Intel C++ compiler
+# (either the classic "icpc" or the LLVM-based "icpx"/oneAPI compiler).
+# If yes, tries to determine its version number and sets the abi_cxx_vendor,
+# abi_cxx_version and abi_cxx_flavor variables accordingly.
 #
 AC_DEFUN([_ABI_CXX_CHECK_INTEL],[
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+  dnl AC_MSG_CHECKING([if we are using an Intel C++ compiler])
+  cxx_command="$1"
 
-  dnl AC_MSG_CHECKING([if we are using the Intel C++ compiler])
-  cxx_info_string=`$1 -v -V 2>&1 | head -n 1`
-  abi_result=`echo "${cxx_info_string}" | grep '^Intel(R) C++'`
-  if test "${abi_result}" = ""; then
+  # Capture the full output (a deprecation remark from icpc, e.g.
+  # "icpc: remark #10441: ...", may appear before the real version banner)
+  # and isolate the version banner line, wherever it is.
+  cxx_output=`$cxx_command -V 2>&1`
+  version_line=`echo "${cxx_output}" | grep -E '^Intel\(R\) C\+\+ Intel\(R\) 64 Compiler|^Intel\(R\) oneAPI DPC\+\+/C\+\+ Compiler' | head -n 1`
+  intel_check="${version_line}"
+
+  # If using mpiicpc/mpiicpx, it may crash with "usage: mpiicpc"/"usage: mpiicpx"
+  if test "${intel_check}" = ""; then
+    usage_line=`echo "${cxx_output}" | grep '^usage:' | head -n 1`
+    if test "${usage_line}" != ""; then
+      fallback_cxx=`echo "${usage_line}" | cut -d " " -f 2`
+      if command -v "${fallback_cxx}" >/dev/null 2>&1; then
+        cxx_output=`${fallback_cxx} -V 2>&1`
+        version_line=`echo "${cxx_output}" | grep -E '^Intel\(R\) C\+\+ Intel\(R\) 64 Compiler|^Intel\(R\) oneAPI DPC\+\+/C\+\+ Compiler' | head -n 1`
+        intel_check="${version_line}"
+        cxx_command="${fallback_cxx}"
+      fi
+    fi
+  fi
+
+  if test "${intel_check}" = ""; then
     abi_result="no"
     cxx_info_string=""
     abi_cxx_vendor="unknown"
     abi_cxx_version="unknown"
+    abi_cxx_flavor="unknown"
   else
-    AC_DEFINE([CXX_INTEL],1,[Define to 1 if you are using the Intel C++ compiler.])
+    cxx_info_string="${version_line}"
+    AC_DEFINE([CXX_INTEL],1,[Define to 1 if you are using an Intel C++ compiler.])
     abi_cxx_vendor="intel"
-    abi_cxx_version=`echo "${abi_result}" | sed -e 's/.*Version //; s/ .*//'`
-    if test "${abi_cxx_version}" = "${abi_result}"; then
+
+    # Extract the version number from the isolated banner line only,
+    # never from the full (possibly multi-line) cxx_output.
+    abi_cxx_version=`echo "${version_line}" | sed -e 's/.*Version //; s/ .*//'`
+    if test "${abi_cxx_version}" = ""; then
       abi_cxx_version="unknown"
     fi
-    abi_result="yes"
+
+    # Distinguish classic icpc from the LLVM-based icpx (oneAPI) driver.
+    # icpc (any version) repeats "Intel(R)" twice right at the start:
+    #   "Intel(R) C++ Intel(R) 64 Compiler [Classic ]for applications ..."
+    # icpx has a completely different banner:
+    #   "Intel(R) oneAPI DPC++/C++ Compiler for applications running on ..."
+    classic_check=`echo "${version_line}" | grep '^Intel(R) C++ Intel(R) 64 Compiler'`
+    if test "${classic_check}" != ""; then
+      abi_cxx_flavor="classic"
+    else
+      abi_cxx_flavor="oneapi"
+      AC_DEFINE([CXX_INTEL_ONEAPI], 1,
+        [Define to 1 if you are using the LLVM-based Intel C++ compiler (icpx).])
+    fi
+
+    abi_cxx_vendor="${abi_cxx_vendor} ${abi_cxx_flavor}"
+    abi_result="yes (${abi_cxx_flavor})"
   fi
   dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CXX_CHECK_INTEL
-
 
 
 # _ABI_CXX_CHECK_CRAY(COMPILER)
@@ -197,7 +234,6 @@ AC_DEFUN([_ABI_CXX_CHECK_CRAY],[
 ]) # _ABI_CXX_CHECK_CRAY
 
 
-
 # _ABI_CXX_CHECK_LLVM(COMPILER)
 # -----------------------------
 #
@@ -229,7 +265,6 @@ AC_DEFUN([_ABI_CXX_CHECK_LLVM],[
   fi
   dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CXX_CHECK_LLVM
-
 
 
 # _ABI_CXX_CHECK_NVHPC(COMPILER)
@@ -264,7 +299,6 @@ AC_DEFUN([_ABI_CXX_CHECK_NVHPC],[
 ]) # _ABI_CXX_CHECK_NVHPC
 
 
-
 # _ABI_CXX_CHECK_PGI(COMPILER)
 # ----------------------------
 #
@@ -297,7 +331,6 @@ AC_DEFUN([_ABI_CXX_CHECK_PGI],[
 ]) # _ABI_CXX_CHECK_PGI
 
 
-
 # ABI_PROG_CXX()
 # --------------
 #
@@ -322,7 +355,7 @@ AC_DEFUN([ABI_PROG_CXX],[
       fi
     fi
   fi
-  AC_PROG_CXX
+  AC_PROG_CXX([mpicxx mpiicpx cxx c++ icx icpx xlC CXX g++ nvc++ clang++])
 
   # Warn if no C++ compiler is available
   if test "${CXX}" = ""; then

@@ -138,6 +138,7 @@ inp_files = [
     "t130.abi",  # UPF2
     "t131.abi",  # UPF2 with SOC
     "t132.abi",  # Forces using Beigi 2D cut-off
+    "t133.abi",  # NC+SOC GS (forces+stress) and Gamma phonons for AlAs, useylm=0 and 1
 
     # more DFPT
     "t140.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid
