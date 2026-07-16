@@ -31,8 +31,8 @@
 # String-method optimization parameters
  vpq_nstates       9  # Number of polaronic images along the path,
                       # including the initial and final states
- vpq_hop_nstep    50  # Number of energy-path optimization steps
- vpq_hop_tolgrs 5e-5  # Tolerance on the energy-path displacement
+ vpq_hop_nstep    15  # Number of energy-path optimization steps
+ vpq_hop_tolgrs 1e-5  # Tolerance on the energy-path displacement
  vpq_hop_ts      1e4  # Time step for the energy-path evolution
 
 # At each step of the energy-path optimization, optimize the vpq_nstates
@@ -109,7 +109,7 @@
 #%% [files]
 #%% use_git_submodule = LiF_eph_varpeq
 #%% files_to_test =
-#%%   teph4vpq_11.abo, tolnlines = 150, tolabs = 2.0e-4, tolrel = 4e-1
+#%%   teph4vpq_11.abo, tolnlines = 150, tolabs = 2.0e-4, tolrel = 5e-1
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

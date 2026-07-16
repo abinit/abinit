@@ -1573,7 +1573,7 @@ Let's now look at the main output file:
 
 The hopping-optimization log reports the maximum phonon-gradient norm and the maximum string displacement over all images as
 `max||ph_grad||` and `max||hop_grad||`, respectively.
-The optimization stops when `max||hop_grad||` falls below [[vpq_hop_tolgrs]]:
+The optimization stops when `max||hop_grad||` falls below [[vpq_hop_tolgrs]].
 
 ```md
  Printing the hopping optimization log
@@ -1598,6 +1598,11 @@ The optimization stops when `max||hop_grad||` falls below [[vpq_hop_tolgrs]]:
      14       6.3684E-04        4.9679E-05
    -------------------------------------------
 ```
+
+
+!!! note
+
+    Try increasing [[vpq_hop_nstep]] to reach the convergence within the prescribed tolerance.
 
 The output also lists the results of the final variational-polaron optimization at fixed displacements.
 The $E_\mathrm{pol}$ values trace the optimized minimum-energy path:
