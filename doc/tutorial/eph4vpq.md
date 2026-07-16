@@ -1665,4 +1665,4 @@ The hopping mobility then follows from the Einstein--Smoluchowski relation:
 
 For an illustrative estimate of mobility along this direction, we use $n=1$ and $h\nu=77$ meV (the LO phonon energy at $\Gamma$),
 and $R=2.872$ Angstrom (the distance between nearest-neighbor fluorine sites).
-This gives $\mu_\mathrm{p} \sim 10^{-8}\ \mathrm{cm^2\,V^{-1}\,s^{-1}}$ t $T=300$ K, a value typical of a strongly bound polaron.
+This gives $\mu_\mathrm{p} \sim 10^{-8}\ \mathrm{cm^2\,V^{-1}\,s^{-1}}$ at room temperature, a value typical of a strongly bound polaron.
