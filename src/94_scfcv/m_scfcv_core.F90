@@ -32,6 +32,7 @@ module m_scfcv_core
  use m_wffile
  use m_rec
  use m_abi_mixing
+ use m_precon
  use m_errors
  use m_efield
  use mod_prc_memory
@@ -362,8 +363,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  character(len=fnlen) :: fildata
  type(MPI_type) :: mpi_enreg_diel
  type(xcdata_type) :: xcdata
- type(energies_type) :: energies
+ type(energies_type), target :: energies
  type(abi_mixing_object) :: mix,mix_mgga
+ type(precon_object) :: precon
  logical,parameter :: VERBOSE=.FALSE.
  logical :: dummy_nhatgr
  logical :: finite_efield_flag=.false.
@@ -864,6 +866,11 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    ABI_MALLOC(grhf,(0,0))
  end if ! iscf>0
 
+! Initializing precon-object for chi0 based preconditioning
+ call precon%init(dtset, atindx, atindx1, cg, cprj, dimcprj, dtfil, eigen, energies%e_fermie, gmet, gprimd, indsym,  &
+ &  irrzon, kg, mcprj, nattyp, nfftmix, ngfftmix, npwarr, occ, pawang, pawfgr, pawfgrtab,                &
+ &  pawtab, ph1d, phnons, psps, rhor, rmet, rprimd, symrec, ucvol, usecprj, vxc, xred, ylm)
+ 
 ! Here initialize the datastructure constrained_dft, for constrained DFT calculations
 ! as well as penalty function constrained magnetization
  if(any(dtset%constraint_kind(:)/=0).or.dtset%magconon/=0)then
@@ -1004,11 +1011,16 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    if (dtset%xclevel==2.and.dtset%nspden==1.and.dtset%densfor_pred<0) nkxc=7    ! This is not full kxc for mGGA
    if (dtset%xclevel==2.and.dtset%nspden==2.and.dtset%densfor_pred<0) nkxc=19   ! This is not full kxc for mGGA
  end if
+!Eventually need Kxc to precondition the SCF. 
+ if (precon%use_kxc) then
+   nkxc = precon%nkxc
+ end if
  if (nkxc>0) then
    call check_kxc(dtset%ixc,dtset%optdriver)
  end if
  ABI_MALLOC(kxc,(nfftf,nkxc))
-
+ call precon%init_kxc(kxc)
+ 
 !This flag will be set to 1 just before an eventual change of atomic
 !positions inside the iteration, and set to zero when the consequences
 !of this change are taken into account.
@@ -1873,7 +1885,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     gmet,grhf,gsqcut,initialized,ispmix,istep_mix,kg_diel,kxc,&
 &     mgfftf,mix,pawfgr%coatofin,moved_atm_inside,mpi_enreg,my_natom,nattyp,nfftf,&
 &     nfftmix,nfftmix_per_nfft,ngfftf,ngfftmix,nkxc,npawmix,npwdiel,nvresid,psps%ntypat,&
-&     n1xccc,pawrhoij,pawtab,ph1df,psps,rhog,rhor,&
+&     n1xccc,pawrhoij,pawtab,ph1df,precon,psps,rhog,rhor,&
 &     rprimd,susmat,psps%usepaw,vtrial,wvl%descr,wvl%den,xred,rcpaw,extfpmd,&
 &     mix_mgga=mix_mgga,taug=taug,taur=taur,tauresid=nvtauresid)
      ABI_NVTX_END_RANGE()
@@ -1912,6 +1924,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      if (modulo(dtset%iprcel,100)>=61.and.(dtset%iprcel<71.or.dtset%iprcel>79).and. &
 &     dtset%iscf<10.and. &
 &     (dtset%iprcel>=100.or.istep==1.or.istep==dielstrt)) optxc=2
+     if (precon%use_kxc) optxc=2 ! Kxc needed for (chi0-based) preconditioning.
      if (dtset%iscf>=10.and.dtset%densfor_pred/=0.and.abs(dtset%densfor_pred)/=5) optxc=2
      if (optxc==2.and.dtset%xclevel==2.and.nkxc==2*min(dtset%nspden,2)-1) optxc=12
    end if
@@ -2131,7 +2144,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     moved_atm_inside,mpi_enreg,my_natom,nattyp,nfftf,nfftmix,&
 &     ngfftf,ngfftmix,nkxc,npawmix,npwdiel,&
 &     nstep,psps%ntypat,n1xccc,&
-&     pawrhoij,ph1df,psps,rhor,rprimd,susmat,psps%usepaw,&
+&     pawrhoij,ph1df,precon,psps,rhor,rprimd,susmat,psps%usepaw,&
 &     vhartr,vnew_mean,vpsp,nvresid,vres_mean,vtrial,vxc,xred,&
 &     nfftf,pawtab,rhog,wvl,&
 &     mix_mgga=mix_mgga,vtau=vxctau,vtauresid=nvtauresid)
@@ -2469,6 +2482,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  ABI_FREE(nvtauresid)
  ABI_FREE(intgden)
  ABI_FREE(intgden0)
+
+!Deallocate precon-object 
+ !call precon%save(ngfft, 1)   !DEBUG
+ call precon%free()
 
  if(allocated(vectornd)) then
     ABI_FREE(vectornd)

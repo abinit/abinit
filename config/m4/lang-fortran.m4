@@ -158,29 +158,30 @@ AC_DEFUN([_ABI_FC_CHECK_IBM],[
 # _ABI_FC_CHECK_INTEL(COMPILER)
 # -----------------------------
 #
-# Checks whether the specified Fortran compiler is the Intel Fortran compiler.
-# If yes, tries to determine its version number and sets the abi_fc_vendor
-# and abi_fc_version variables accordingly.
+# Checks whether the specified Fortran compiler is an Intel Fortran compiler
+# (either the classic "ifort" or the LLVM-based "ifx"/oneAPI compiler).
+# If yes, tries to determine its version number and sets the abi_fc_vendor,
+# abi_fc_version and abi_fc_flavor variables accordingly.
 #
 AC_DEFUN([_ABI_FC_CHECK_INTEL], [
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-  AC_MSG_CHECKING([if we are using the Intel Fortran compiler])
-
+  dnl AC_MSG_CHECKING([if we are using an Intel Fortran compiler])
   fc_command="$1"
-  fc_output=`$fc_command -V 2>&1 | head -n 1`
-  intel_check=`echo "${fc_output}" | grep '^Intel(R) Fortran'`
-  # If using mpiifx, it may crash with "usage: mpiifort"
-  #
+  fc_output=`$fc_command -V 2>&1`
+  version_line=`echo "${fc_output}" | grep '^Intel(R) Fortran' | head -n 1`
+  intel_check="${version_line}"
+
+  # If using mpiifort/mpiifx, it may crash with "usage: mpiifort"/"usage: mpiifx"
   if test "${intel_check}" = ""; then
-    fc_output=`$fc_command -V 2>&1`
-    usage_line=`echo "${fc_output}" | grep '^usage:'`
+    usage_line=`echo "${fc_output}" | grep '^usage:' | head -n 1`
     if test "${usage_line}" != ""; then
       fallback_fc=`echo "${usage_line}" | cut -d " " -f 2`
       if command -v "${fallback_fc}" >/dev/null 2>&1; then
-        fc_output=`${fallback_fc} -V 2>&1 | head -n 1`
-        intel_check=`echo "${fc_output}" | grep '^Intel(R) Fortran'`
+        fc_output=`${fallback_fc} -V 2>&1`
+        version_line=`echo "${fc_output}" | grep '^Intel(R) Fortran' | head -n 1`
+        intel_check="${version_line}"
         fc_command="${fallback_fc}"
       fi
     fi
@@ -191,18 +192,34 @@ AC_DEFUN([_ABI_FC_CHECK_INTEL], [
     fc_output=""
     abi_fc_vendor="unknown"
     abi_fc_version="unknown"
+    abi_fc_flavor="unknown"
   else
     AC_DEFINE([FC_INTEL], 1,
-      [Define to 1 if you are using the Intel Fortran compiler.])
+      [Define to 1 if you are using an Intel Fortran compiler.])
     abi_fc_vendor="intel"
-    abi_fc_version=`echo "${fc_output}" | sed -e 's/.*Version //;s/ .*//'`
+    abi_fc_version=`echo "${version_line}" | sed -e 's/.*Version //;s/ .*//'`
     if test "${abi_fc_version}" = ""; then
       abi_fc_version="unknown"
     fi
-    abi_result="yes"
-  fi
 
-  AC_MSG_RESULT([${abi_result}])
+    # Distinguish classic ifort from the LLVM-based ifx (oneAPI) driver.
+    # ifort (any version) repeats "Intel(R)" twice right at the start:
+    #   "Intel(R) Fortran Intel(R) 64 Compiler [Classic ]for applications ..."
+    # ifx only has it once, straight after "Fortran":
+    #   "Intel(R) Fortran Compiler for applications running on Intel(R) 64, ..."
+    classic_check=`echo "${version_line}" | grep '^Intel(R) Fortran Intel(R) 64 Compiler'`
+    if test "${classic_check}" != ""; then
+      abi_fc_flavor="classic"
+    else
+      abi_fc_flavor="oneapi"
+      AC_DEFINE([FC_INTEL_ONEAPI], 1,
+        [Define to 1 if you are using the LLVM-based Intel Fortran compiler (ifx).])
+    fi
+
+    abi_fc_vendor="${abi_fc_vendor} ${abi_fc_flavor}"
+    abi_result="yes (${abi_fc_flavor})"
+  fi
+  dnl AC_MSG_RESULT([${abi_result}])
 ]) # _ABI_FC_CHECK_INTEL
 
 
@@ -1614,7 +1631,7 @@ AC_DEFUN([ABI_PROG_FC],[
       fi
     fi
   fi
-  AC_PROG_FC([ ftn mpiifx mpiifort mpifort mpif90 nagfor ifort gfortran ])
+  AC_PROG_FC([mpifort mpif90 mpiifx mpiifort ftn nagfor ifort ifx gfortran nvfortran flang flang-new xlf90])
 
   # Fail if no Fortran compiler is available
   if test "${FC}" = ""; then
@@ -1659,7 +1676,6 @@ AC_DEFUN([ABI_PROG_FC],[
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"
 
   if test "${abi_fc_vendor}" = "unknown"; then
-    echo "CHECK CRAY..."
     _AFB_CHECK_FC_CRAY(${FC})
   fi
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"
@@ -1674,7 +1690,7 @@ AC_DEFUN([ABI_PROG_FC],[
   fi
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"
 
- if test "${abi_fc_vendor}" = "unknown"; then
+  if test "${abi_fc_vendor}" = "unknown"; then
     _ABI_FC_CHECK_GNU(${FC})
   fi
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"

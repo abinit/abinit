@@ -203,6 +203,14 @@ MODULE m_paw_dmft
   integer :: dmft_t2g
   ! Only use t2g orbitals
 
+  integer :: dmft_triqs_chiloc
+  ! Activate measurements for local spin-spin correlation function with triqs cthyb
+  ! only relevant without spin-orbit coupling (nspinor = 1)
+
+  integer :: dmft_triqs_chiloc_ins
+  ! Option for local spin-spin correlation function measurements
+  ! default value is 10
+
   integer :: dmft_triqs_compute_integral
   ! Only relevant when dmft_triqs_entropy=1.
   ! =1: Compute the impurity entropy by thermodynamic integration over interaction strength.
@@ -1189,6 +1197,8 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_triqs_n_cycles                      = dtset%dmft_triqs_n_cycles
  paw_dmft%dmft_triqs_prt_entropy                   = (dtset%dmft_triqs_prt_entropy == 1)
  paw_dmft%dmft_triqs_shift_mu                      = dtset%dmft_triqs_shift_mu
+ paw_dmft%dmft_triqs_chiloc                        = dtset%dmft_triqs_chiloc
+ paw_dmft%dmft_triqs_chiloc_ins                    = dtset%dmft_triqs_chiloc_ins
 
 !==============================
 !==  Variables for DMFT itself

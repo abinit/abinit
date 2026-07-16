@@ -80,7 +80,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
 !Allocate and initialize, for each possible reference, the flag for citation,
 !the priority of the citation, the reference, and the comment.
- nrefs=49
+ nrefs=50
  ABI_MALLOC(cite,(nrefs))
  ABI_MALLOC(ref,(nrefs))
  ABI_MALLOC(comment,(nrefs))
@@ -528,6 +528,12 @@ ref(1)=trim(ref(1))//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2005'
  priority(49)=18
 
+ ref(50)=' Black-box inhomogeneous preconditioning for self-consistent field iterations in density functional theory.'//ch10//&
+  ' M.F. Herbst and A. Levitt, Journal of Physics: Condensed Matter, 33(8) 085503 (2020).'
+ comment(50)=' Comment: to be cited in case the LDOS-preconditioner is used (iprcel=202).'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#herbst2020'
+ priority(50)=20
+
 !---------------------------------------------------------------------------------------------
 !Determine the papers to be cited
 
@@ -556,8 +562,11 @@ ref(1)=trim(ref(1))//&
 !  If usepawu/=0, cite Amadon2008
    if(dtsets(idtset)%usepawu/=0.and.dtsets(idtset)%usedmft==0) cite(15)=1
 
-!  If iprcel/=0, cite Anglade2008
-   if(dtsets(idtset)%iprcel/=0)cite(16)=1
+!  If 21 <= iprcel <= 169, cite Anglade2008
+   if(dtsets(idtset)%iprcel>=21.and.dtsets(idtset)%iprcel<=169)cite(16)=1
+
+!  If iprcel=202, cite Herbst2020
+   if(dtsets(idtset)%iprcel==202)cite(50)=1
 
 !  If iomode==IO_MODE_ETSF, cite Gonze2008
    if(dtsets(idtset)%iomode==IO_MODE_ETSF)cite(17)=1

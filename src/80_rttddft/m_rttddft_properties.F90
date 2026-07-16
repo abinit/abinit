@@ -105,7 +105,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
  real(dp)                    :: qpt(3)
  real(dp),allocatable        :: rhowfg(:,:), rhowfr(:,:)
  type(pawrhoij_type),pointer :: pawrhoij_unsym(:)
- logical                     :: silence_please
+ logical                     :: printout
 
 ! ***********************************************************************
 
@@ -113,7 +113,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
 
  tim_mkrho=1
 
- silence_please = (dtset%prtvol == 0)
+ printout = (dtset%prtvol /= 0)
 
  if (psps%usepaw==1) then
 
@@ -124,7 +124,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
    call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg, &
             & tdks%npwarr,tdks%occ0,tdks%paw_dmft,tdks%phnons,rhowfg,rhowfr,    &
             & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs,       &
-            & silent=silence_please)
+            & printout=printout)
 
    ! 2-Compute cprj = <\psi_{n,k}|p_{i,j}>
    call ctocprj(tdks%atindx,tdks%cg,1,tdks%cprj,tdks%gmet,tdks%gprimd,0,0,0,           &

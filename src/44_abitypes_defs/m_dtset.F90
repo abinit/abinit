@@ -149,6 +149,8 @@ type, public :: dataset_type
  integer :: dmft_solv
  integer :: dmft_t2g
  integer :: dmft_triqs_basis
+ integer :: dmft_triqs_chiloc
+ integer :: dmft_triqs_chiloc_ins
  integer :: dmft_triqs_compute_integral
  integer :: dmft_triqs_det_init_size
  integer :: dmft_triqs_det_n_operations_before_check
@@ -585,6 +587,9 @@ type, public :: dataset_type
  integer :: positron
  integer :: posnstep
  integer :: ppmodel = 1
+ integer :: precon_in_memory = 1
+ integer :: precon_ls_maxite = 20
+ integer :: precon_verbose = 0
  integer :: prepalw
  integer :: prepanl
  integer :: prepgkk = 0
@@ -969,6 +974,8 @@ type, public :: dataset_type
  real(dp) :: postoldfe
  real(dp) :: postoldff
  real(dp) :: ppmfrq = zero
+ real(dp) :: precon_ls_rtol = tol6
+ real(dp) :: precon_tsmear = 0.01_dp
  real(dp) :: pw_unbal_thresh
  real(dp) :: ratsm
  real(dp) :: ratsph_extra
@@ -1640,6 +1647,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_tolfreq       = dtin%dmft_tolfreq
  dtout%dmft_tollc         = dtin%dmft_tollc
  dtout%dmft_triqs_basis   = dtin%dmft_triqs_basis
+ dtout%dmft_triqs_chiloc  = dtin%dmft_triqs_chiloc
+ dtout%dmft_triqs_chiloc_ins = dtin%dmft_triqs_chiloc_ins
  dtout%dmft_triqs_compute_integral = dtin%dmft_triqs_compute_integral
  dtout%dmft_triqs_det_init_size = dtin%dmft_triqs_det_init_size
  dtout%dmft_triqs_det_n_operations_before_check = dtin%dmft_triqs_det_n_operations_before_check
@@ -2153,6 +2162,11 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%positron           = dtin%positron
  dtout%posnstep           = dtin%posnstep
  dtout%ppmodel            = dtin%ppmodel
+ dtout%precon_in_memory   = dtin%precon_in_memory
+ dtout%precon_ls_maxite   = dtin%precon_ls_maxite
+ dtout%precon_ls_rtol     = dtin%precon_ls_rtol
+ dtout%precon_tsmear      = dtin%precon_tsmear
+ dtout%precon_verbose     = dtin%precon_verbose
  dtout%prepalw            = dtin%prepalw
  dtout%prepanl            = dtin%prepanl
  dtout%prepgkk            = dtin%prepgkk
@@ -3777,7 +3791,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_nlambda dmft_nominal dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_orbital dmft_orbital_filepath dmft_prt_maxent dmft_prtself dmft_prtwan dmft_read_occnd'
  list_vars=trim(list_vars)//' dmft_rslf dmft_shiftself dmft_solv dmft_t2g dmft_tolfreq dmft_tollc'
- list_vars=trim(list_vars)//' dmft_triqs_basis dmft_triqs_compute_integral dmft_triqs_det_init_size'
+ list_vars=trim(list_vars)//' dmft_triqs_basis dmft_triqs_chiloc dmft_triqs_chiloc_ins dmft_triqs_compute_integral dmft_triqs_det_init_size'
  list_vars=trim(list_vars)//' dmft_triqs_det_n_operations_before_check dmft_triqs_det_precision_error'
  list_vars=trim(list_vars)//' dmft_triqs_det_precision_warning dmft_triqs_det_singular_threshold dmft_triqs_dlr_epsilon dmft_triqs_dlr_wmax'
  list_vars=trim(list_vars)//' dmft_triqs_entropy dmft_triqs_gaussorder dmft_triqs_imag_threshold'
@@ -3943,6 +3957,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' plowan_natom plowan_nbl plowan_nt plowan_projcalc plowan_realspace'
  list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff'
  list_vars=trim(list_vars)//' ppmfrq ppmodel pp_dirpath'
+ list_vars=trim(list_vars)//' precon_in_memory precon_ls_maxite precon_ls_rtol precon_tsmear precon_verbose'
  list_vars=trim(list_vars)//' prepalw prepanl prepgkk'
  list_vars=trim(list_vars)//' printfiles prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtcurrent prtddb prtden'
  list_vars=trim(list_vars)//' prt1mag prtdensph prtdipole prtdos prtdosm'

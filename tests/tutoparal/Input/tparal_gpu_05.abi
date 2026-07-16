@@ -91,7 +91,7 @@ xred
 #%% [NCPU_16]
 #%% files_to_test = tparal_gpu_05_MPI16.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
 #%% [extra_info]
-#%% keywords = PAW, PATAPON
+#%% keywords = PAW
 #%% authors = M. Sarraute
 #%% description = 31 gold atoms (one vacancy) - many K-points per GPU
 #%%<END TEST_INFO>
