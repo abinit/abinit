@@ -1,0 +1,95 @@
+# AlAs zinc-blende: NC+SOC ground state (forces + stress) and Gamma-point phonons.
+# Tests both useylm=0 (Kleinman-Bylander plane-wave projectors) and
+# useylm=1 (real-Ylm projectors, nonlop_ylm pathway) with HGH pseudopotentials.
+# As is slightly displaced from ideal (0.25,0.25,0.25) to produce non-zero forces.
+# The two pathways must give identical energies, forces, stresses and phonon frequencies.
+
+ndtset 4
+
+#--- Dataset 1: GS with useylm=0
+  useylm1  0
+  kptopt1  1
+  tolvrs1  1.0d-14
+  prtwf1   1
+
+#--- Dataset 2: Gamma-point phonons, useylm=0
+  useylm2  0
+  getwfk2  1
+  kptopt2  2
+  rfphon2  1
+  rfatpol2 1 2
+  rfdir2   1 1 1
+  nqpt2    1
+  qpt2     0.0  0.0  0.0
+  tolvrs2  1.0d-10
+  prtwf2   0
+
+#--- Dataset 3: GS with useylm=1
+  useylm3  1
+  kptopt3  1
+  tolvrs3  1.0d-14
+  prtwf3   1
+
+#--- Dataset 4: Gamma-point phonons, useylm=1
+  useylm4  1
+  getwfk4  3
+  kptopt4  2
+  rfphon4  1
+  rfatpol4 1 2
+  rfdir4   1 1 1
+  nqpt4    1
+  qpt4     0.0  0.0  0.0
+  tolvrs4  1.0d-10
+  prtwf4   0
+
+# NC+SOC: 2-component spinors
+nspinor  2
+
+# AlAs zinc-blende (experimental a = 5.66 AA = 10.70 bohr, LDA)
+acell    3*10.70
+rprim    0.0  0.5  0.5
+         0.5  0.0  0.5
+         0.5  0.5  0.0
+natom    2
+ntypat   2
+znucl    13  33
+typat    1   2
+xred     0.00  0.00  0.00
+         0.26  0.25  0.25   # As slightly displaced along a1 to produce non-zero forces
+
+# 8 bands: 3 (Al) + 5 (As) valence electrons; occ=1 each with nspinor=2
+nband    8
+
+# Minimal cut-off and k-grid for speed
+ecut     3.0
+ngkpt    2  2  2
+nshiftk  1
+shiftk   0.5  0.5  0.5
+
+# SCF
+nstep   30
+diemac  9.0
+prtden  0
+prteig  0
+chksymbreak 0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/13al.3.hgh, PseudosHGH_pwteter/33as.5.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t133.abo, tolnlines = 30, tolabs = 1.0e-5, tolrel = 3.0e-4, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Torrent
+#%% keywords = NC, DFPT, SOC
+#%% description =
+#%%   AlAs zinc-blende, NC+SOC using HGH pseudopotentials.
+#%%   As slightly displaced from ideal site to produce non-zero forces.
+#%%   Ground state (forces + stresses) followed by Gamma-point phonons,
+#%%   for both useylm=0 (plane-wave KB) and useylm=1 (real-Ylm, nonlop_ylm pathway).
+#%%<END TEST_INFO>

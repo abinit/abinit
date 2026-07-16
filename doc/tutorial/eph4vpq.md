@@ -1161,7 +1161,7 @@ robot = VpqRobot.from_files(vpq_files)
 robot.plot_kconv(nfit=3)
 ```
 
-The robot is smart enough (but stupid nonetheless, so **trust your own judgemenet**) to detect 2 different kind
+The robot is smart enough (but stupid nonetheless, so **trust your own judgement**) to detect 2 different kind
 of calculations and perform separate extrapolation for each case.
 It produces the following figure:
 

@@ -3695,6 +3695,41 @@ basis in which these off-diagonal components are weak.
 ),
 
 Variable(
+    abivarname="dmft_triqs_chiloc",
+    varset="dmft",
+    vartype="integer",
+    topics=["DmftTriqsCthyb_expert"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: TRIQS compute local susceptibility",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_density_matrix]] == 1",
+    added_in_version="before_v10.9",
+    text=r"""
+
+  * 1 --> Activate the calculation of the local spin susceptibility for the impurity. Only implemented for the case with [[nspinor]] == 1 .
+
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_chiloci_ins",
+    varset="dmft",
+    vartype="integer",
+    topics=["DmftTriqsCthyb_expert"],
+    dimensions="scalar",
+    defaultval=10,
+    mnemonics="Dynamical Mean Field Theory: TRIQS number of insertion operator for local susceptibility",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_density_matrix]] == 1",
+    added_in_version="before_v10.9",
+    text=r"""
+
+Define the minimal number of insertion operators for the calculation of the local spin susceptibility.
+
+""",
+),
+
+
+Variable(
     abivarname="dmft_triqs_compute_integral",
     varset="dmft",
     vartype="integer",
@@ -7514,6 +7549,23 @@ allowed, despite the different coordinate system.
 ),
 
 Variable(
+    abivarname="ggtrcut",
+    varset="dfpt",
+    vartype="real",
+    topics=['printing_prngs', 'Output_useful'],
+    dimensions="scalar",
+    defaultval=0.001,
+    mnemonics="GauGe TRansform CUToff",
+    added_in_version="10.9.0",
+    text=r"""
+Cutoff value to use in computing gauge change from parallel transport to diagonal. 
+Expert use only, do not change unless you've studied the source code and know exactly
+what you are doing and expecting.
+""",
+),
+
+
+Variable(
     abivarname="goprecon",
     varset="rlx",
     vartype="integer",
@@ -7552,7 +7604,7 @@ Variable(
     abivarname="gpu_devices",
     varset="paral",
     vartype="integer",
-    topics=["parallelism_expert"],
+    topics=["GPU_expert"],
     dimensions=[12],
     defaultval=12*(-1),
     mnemonics="GPU: choice of DEVICES on one node",
@@ -7589,7 +7641,7 @@ Variable(
     abivarname="gpu_kokkos_nthrd",
     varset="paral",
     vartype="integer",
-    topics=["parallelism_expert"],
+    topics=["GPU_expert"],
     dimensions="scalar",
     defaultval="number of [[OPENMP]] threads",
     mnemonics="GPU KOKKOS implementation: Number of THReaDs",
@@ -7608,7 +7660,7 @@ Variable(
     abivarname="gpu_linalg_limit",
     varset="paral",
     vartype="integer",
-    topics=["parallelism_expert"],
+    topics=["GPU_expert"],
     dimensions="scalar",
     defaultval=2000000,
     mnemonics="GPU: LINear ALGebra LIMIT",
@@ -7633,7 +7685,7 @@ Variable(
     abivarname="gpu_nfft_blocks",
     varset="paral",
     vartype="integer",
-    topics=["parallelism_expert"],
+    topics=["GPU_expert"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="GPU: Number of Fast Fourier Transform Blocks",
@@ -7656,7 +7708,7 @@ Variable(
     abivarname="gpu_nl_distrib",
     varset="paral",
     vartype="integer",
-    topics=["parallelism_expert"],
+    topics=["GPU_expert"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="GPU: Non-Local operator, DISTRIBute projections",
@@ -7682,7 +7734,7 @@ Variable(
     abivarname="gpu_nl_splitsize",
     varset="paral",
     vartype="integer",
-    topics=["parallelism_expert"],
+    topics=["GPU_expert"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="GPU: Non-Local operator SPLITting SIZE",
@@ -7708,46 +7760,40 @@ Variable(
     abivarname="gpu_option",
     varset="paral",
     vartype="integer or string",
-    topics=["parallelism_useful"],
+    topics=["GPU_useful"],
     dimensions="scalar",
     defaultval=ValueWithConditions({"[[OPENMP_OFFLOAD]]": 2, "[[KOKKOS]]": 3, "[[CUDA]]": 1, "defaultval": 0}),
     mnemonics="GPU: OPTION to choose the implementation",
     added_in_version="v9.12",
     text=r"""
-Only relevant for Ground-State calculations ([[optdriver]] == 0).
-This option is only available if ABINIT executable has been compiled for the purpose
-of being used with GPU accelerators. It allows to choose between the different
-GPU programming models available in ABINIT:
+Only relevant for Ground-State ([[optdriver]] == 0) or Response-Function ([[optdriver]] == 1) calculations.
+
+This option is only available if ABINIT executable has been compiled with support for GPU accelerators enabled (see [here](../INSTALL_gpu.md)).
+
+It allows to choose between the different GPU programming models available in ABINIT:
 
 - [[gpu_option]]= "GPU_DISABLED" or [[gpu_option]] = 0: no use of GPU (even if compiled for GPU).
 
+- [[gpu_option]]= "GPU_OPENMP" or [[gpu_option]] = 2: use of the [[OPENMP_OFFLOAD]] GPU implementation.
+  This implementation works on NVIDIA and AMD GPU accelerators and is the only one being actively developped.
+  It offers the broadest support of GPU accelerated usecases (GS+Fock, DFPT, DMFT...).
+
 - [[gpu_option]]= "GPU_LEGACY" or [[gpu_option]] = 1: use the "legacy" 2013 implementation of GPU. This is a partial [[CUDA]]
-  implementation, using the `nvcc` [[CUDA]] compiler. The old LOBPCG algorithm is automatically
+  implementation, using [[CUDA]] kernels. The old LOBPCG algorithm is automatically
   used to compute the eigenstates ([[wfoptalg]]=14). The external linear algebra library
   `MAGMA can also be linked to ABINIT to improve performances on large systems
   (see [[gpu_linalg_limit]]).
 
-- [[gpu_option]]= "GPU_OPENMP" or [[gpu_option]] = 2: use of the [[OPENMP_OFFLOAD]] programming model to execute time consuming
-  parts of the code on GPU. This implementation works on NVidia accelerators, if ABINIT has been
-  compiled with a [[CUDA]] compatible compiler and linked with NVidia FFT/linear algebra
-  libraries ([cuFFT](https://docs.nvidia.com/cuda/cufft),
-  [cuBLAS](https://docs.nvidia.com/cuda/cublas) and
-  [cuSOLVER](https://docs.nvidia.com/cuda/cusolvermp)).
-  It also works on `AMD accelerators (EXPERIMENTAL),
-  if ABINIT has been compiled with a AMD compatible compiler and linked with NVidia
-  FFT/linear algebra libraries ([ROCm](https://www.amd.com/fr/graphics/servers-solutions-rocm)
-  or [HIP](https://github.com/ROCm/HIP)).
-
-- [[gpu_option]]= "GPU_KOKKOS" or [[gpu_option]] = 3: use of the [[KOKKOS]]+[[CUDA]] programming model to execute time consuming
-  parts of the code on GPU. This implementation -- at present -- is only compatible with
-  NVidia accelerators. It required that ABINIT has been linked to the
+- [[gpu_option]]= "GPU_KOKKOS" or [[gpu_option]] = 3: use of the [[KOKKOS]]+[[CUDA]] GPU implementation.
+  This implementation -- at present -- is only compatible with
+  NVIDIA accelerators and only works on Ground-State calculation with [[wfoptalg]]=111 (ChebFI).
+  It required that ABINIT has been linked to the
   [Kokkos](https://github.com/kokkos/kokkos) and [YAKL](https://github.com/mrnorman/YAKL)
-  performance libraries. It also uses NVidia FFT/linear algebra libraries
-  ([cuFFT](https://docs.nvidia.com/cuda/cufft), [cuBLAS](https://docs.nvidia.com/cuda/cublas)).
+  performance libraries, along with NVIDIA CUDA libraries.
   The [[KOKKOS]] GPU implementation can be used in conjunction with openMP threads
   on CPU (see [[gpu_kokkos_nthrd]]).
 
-For an expert use of ABINIT on [[GPU]], some additional keywords can be used. See [[gpu_nl_distrib]], [[gpu_nl_splitsize]].
+For an expert use of ABINIT on [[GPU]], some additional keywords can be used. See [[gpu_nl_distrib]], [[gpu_nl_splitsize]], [[gpu_nfft_blocks]], [[gpu_thread_limit]].
 """,
 ),
 
@@ -7755,7 +7801,7 @@ Variable(
     abivarname="gpu_thread_limit",
     varset="paral",
     vartype="integer",
-    topics=["parallelism_expert"],
+    topics=["GPU_expert"],
     dimensions="scalar",
     defaultval="Minimum between 4 and number of [[OPENMP]] threads, if GPU is enabled, 0 otherwise.",
     mnemonics="GPU: Thread Limit",
@@ -9719,38 +9765,46 @@ Variable(
     mnemonics="Integer for PReConditioning of ELectron response",
     added_in_version="before_v9",
     text=r"""
-Used when [[iscf]] > 0, to define the SCF preconditioning scheme. Potential-
-based preconditioning schemes for the SCF loop (electronic part) are still a
-subject of active research. The present parameter (electronic part) describes
-the way the change of potential is derived from the residual.
-The possible values of [[iprcel]] correspond to:
+Used when [[iscf]] > 0, to define the SCF preconditioning scheme. 
 
-  * 0 --> model dielectric function described by [[diemac]], [[dielng]] and [[diemix]].
-  * larger or equal to 21 --> will compute the dielectric matrix according to [[diecut]], [[dielam]], [[diegap]]. This methodology is described in [[cite:Anglade2008]].
-  * Between 21 and 29 --> for the first few steps uses the same as option 0 then compute RPA dielectric function, and use it as such.
-  * Between 31 and 39 --> for the first few steps uses the same as option 0 then compute RPA dielectric function, and use it, with the mixing factor [[diemix]].
-  * Between 41 and 49 --> compute the RPA dielectric matrix at the first step, and recompute it at a later step, and take into account the mixing factor [[diemix]].
-  * Between 51 and 59 --> same as between 41 and 49, but compute the RPA dielectric matrix by another mean
-  * Between 61 and 69 --> same as between 41 and 49, but compute the electronic dielectric matrix instead of the RPA one.
-  * Between 71 and 78 --> STILL UNDER DEVELOPMENT -- NOT USABLE; Use the modified Kerker preconditioner with a real-space formulation (basic formulation is shown at [[dielng]]). The dielectric matrix is approximated thanks to [[diemac]] and [[dielng]]. Note that [[diemix]] is also used.
-  * 79 --> STILL UNDER DEVELOPMENT -- NOT USABLE; same as previous but with an alternate algorithm.
-  * 141 to 169 --> same as Between 41 and 69 (but, the dielectric matrix is also recomputed every iprcel modulo 10 step).
+The preconditioner $P$ is used to compute the preconditioned density/potential residuals
+$$ r_n = P(x_n^\mathrm{in} - x_n^\mathrm{out}) $$
+that are then used in the mixing scheme. 
+When potential mixing ($x=\rho$) is used, the preconditioner is an approximation of the inverse dielectric matrix $\varepsilon$.
+When density mixing ($x=V$) is used, the preconditioner is an approximation of the inverse adjoint dielectric matrix $\varepsilon^\dagger$.
 
-The computation of the dielectric matrix (for 0 [100]< [[iprcel]] < 70 [100])
-is based on the **extrapolar** approximation, see [[cite:Anglade2008]]. This approximation can be tuned
-with [[diecut]], [[dielam]], and [[diegap]]. Yet its accuracy mainly depends
-on the number of conduction bands included in the system. Having 2 to 10 empty
-bands in the calculation is usually enough (use [[nband]]).
+The possible values of [[iprcel]] are:
 
-NOTES:
+  * 0 --> Model dielectric function described by [[diemac]], [[dielng]] and [[diemix]].
+  
+  * Between 21 and 169 --> Model dielectric matrix computed with the extrapolar approximation described in [[cite:Anglade2008]]. This approximation can be adjusted using the parameters [[diecut]], [[dielam]] and [[diegap]]. The accuracy of this model largely depends on the number of conduction bands included in the system. Having 2 to 10 empty bands in the calculation is usually enough (use [[nband]]).
+    * Between 21 and 29 --> Use the same as [[iprcel]] = 0 for the first few steps, then compute  the RPA dielectric matrix, and use it as such.
+    * Between 31 and 39 --> Use the same as [[iprcel]] = 0 for the first few steps, then compute  the RPA dielectric matrix, and use it with the mixing factor [[diemix]].
+    * Between 41 and 49 --> Compute the RPA dielectric matrix at the first step, and recompute it at a later step, taking into account the mixing factor [[diemix]].
+    * Between 51 and 59 --> Same as between 41 and 49, but compute the RPA dielectric matrix by another mean.
+    * Between 61 and 69 --> Same as between 41 and 49, but compute the electronic dielectric matrix instead of the RPA one.
+    * Between 141 and 169 --> Same as Between 41 and 69, but the dielectric matrix is also recomputed every mod([[iprcel]], 10) step.
+ 
+ > Notes :
+ > * The step at which the dielectric matrix is computed or recomputed is determined by modulo([[iprcel]],10). The recomputation happens just once in the calculation for [[iprcel]] < 100.
+ > * For non-homogeneous relatively large cells, [[iprcel]] = 45 will likely give a large improvement over [[iprcel]] = 0.
+ > * In case of PAW and [[iprcel]] > 0, see [[pawsushat]] input variable. By default, an approximation (which can be suppressed) is done for the computation of the susceptibility matrix.
+ > * For extremely large inhomogeneous cells where computation of the full dielectric matrix takes too many weeks, 70 < [[iprcel]] < 80 is advised.
+ > * For [[nsppol]] = 2 or [[nspinor]] = 2 with metallic [[occopt]], only mod([[iprcel]],10) < 50 is allowed.
+ > * No meaning for RF calculations yet.
+ > * The exchange term in the full dielectric matrix diverges for vanishing densities. Therefore the values of [[iprcel]] beyond 60 must not be used for cells containing vacuum, unless ones computes this matrix for every step ([[iprcel]] = 161).
 
-  * The step at which the dielectric matrix is computed or recomputed is determined by modulo([[iprcel]],10). The recomputation happens just once in the calculation for [[iprcel]]  < 100.
-  * For non-homogeneous relatively large cells [[iprcel]] = 45 will likely give a large improvement over [[iprcel]] = 0.
-  * In case of PAW and [[iprcel]] > 0, see [[pawsushat]] input variable. By default, an approximation (which can be suppressed) is done for the computation of susceptibility matrix.
-  * For extremely large inhomogeneous cells where computation of the full dielectric matrix takes too many weeks, 70 < [[iprcel]] < 80 is advised.
-  * For [[nsppol]] = 2 or [[nspinor]] = 2 with metallic [[occopt]], only **mod(iprcel,100)** <50 is allowed.
-  * No meaning for RF calculations yet.
-  * The exchange term in the full dielectric matrix diverges for vanishing densities. Therefore the values of [[iprcel]] beyond 60 must not be used for cells containing vacuum, unless ones computes this matrix for every step ([[iprcel]] = 161).
+  * Between 200 and 299 --> Model dielectric operator $\varepsilon^\mathrm{model}$ based of a model non-interacting susceptibility $\chi_0^\mathrm{model}$: $$ \varepsilon^\mathrm{model} = I - K \chi_0^\mathrm{model} $$ where $K$ is a potential kernel (the Coulomb kernel $K_H$ and/or the exchange-correlation kernel $K_\mathrm{XC}$).
+The preconditioner, $P = (\varepsilon^\mathrm{model})^{-1}$ for potential mixing or $P = ((\varepsilon^\mathrm{model})^\dagger)^{-1}$ for density mixing, is applied using an iterative linear solver (GMRES) to invert the model dielectric matrix or its adjoint.  
+Available models are :
+    * 200 --> LDOS-preconditioner [[cite:Herbst2020]]: $$ \varepsilon^\mathrm{LDOS} = I - K_H \chi_0^\mathrm{LDOS} .$$ This preconditioner is well suited for metallic system in large homogeneous or inhomogeneous systems. It requires a smooth smearing function ([[occopt]] = 3 to 7) and we suggest using it as a **default** for such cases.
+    * 201 --> DOS-preconditioner: $$\varepsilon^\mathrm{DOS} = I - DK_\mathrm{H}$$ with $D$ the (scalar) density of state at the Fermi-level. This is a parameter-free version of the Kerker preconditioner (suggested in [[cite:Herbst2020]]).
+    * 202 --> Hybrid preconditioner for ferromagnetism: $$\varepsilon^\mathrm{hybrid} = I - K_H \chi_0^\mathrm{LDOS} - K_\mathrm{XC}\chi_0^\mathrm{diag} .$$ This preconditioner is designed for ferromagnetic systems and we suggest trying it in ferromagnetic systems with convergence issues. The parameter [[precon_tsmear]] may need to be adjusted for this preconditioner to work properly.
+
+ > Notes :
+ > * The mixing factor [[diemix]] is used and [[diemixmag]] is ignored.
+ > * The preconditioner can be tuned with the parameters [[precon_ls_maxite]], [[precon_ls_rtol]], [[precon_verbose]], [[precon_tsmear]] and [[precon_in_memory]].  
+ > * In PAW, this is only compatible with [[pawmixdg]] = 1.
 """,
 ),
 
@@ -15831,7 +15885,7 @@ unless a very specific ground state feature is also needed.
 
 * [[orbmag]] = 1: Compute orbital magnetization and Chern vector
 * [[orbmag]] = 2: Same as [[orbmag]] 1 but also print out values of each term making up total
-orbital magnetic moment and a band-by-band decomposition.
+orbital magnetic moment.
 """,
 ),
 
@@ -17485,6 +17539,91 @@ energy vs q vector) is reported in the output file for the lowest 10 bands.
 """,
 ),
 
+Variable(
+    abivarname="precon_in_memory",
+    varset="gstate",
+    vartype="integer",
+    topics=["SCFAlgorithms_expert"],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="",
+    requires="[[iprcel]] == 202",
+    added_in_version="v10",
+    text=r"""
+This variable determines whether the FFTs are stored throughout the preconditioner's GMRES
+iterations (**precon_in_memory**=1) or recomputed at each GMRES step (**precon_in_memory**=0).
+
+This setting is only useful for $\chi_0$-based hybrid SCF preconditioning ([[iprcel]] = 202).
+""",
+),
+
+Variable(
+    abivarname="precon_ls_maxite",
+    varset="gstate",
+    vartype="integer",
+    topics=["SCFAlgorithms_expert"],
+    dimensions="scalar",
+    defaultval=20,
+    mnemonics="",
+    requires="[[iprcel]] in [200, 202]",
+    added_in_version="v10",
+    text=r"""
+This variable defines the maximum number of GMRES iterations in the application of the $\chi0$-based SCF preconditioner ([[iprcel]] = 2**).
+""",
+),
+
+Variable(
+    abivarname="precon_ls_rtol",
+    varset="gstate",
+    vartype="real",
+    topics=["SCFAlgorithms_expert"],
+    dimensions="scalar",
+    defaultval=1.0e-6,
+    mnemonics="PRECONnditioner Linear Solver MAXimumm number of ITErations",
+    requires="[[iprcel]] in [200, 202]",
+    added_in_version="v10",
+    text=r"""
+This variable defines the maximum number of GMRES iterations in the application of the $\chi0$-based SCF preconditioner ([[iprcel]] = 2**).
+""",
+),
+
+Variable(
+    abivarname="precon_tsmear",
+    varset="gstate",
+    vartype="real",
+    topics=["SCFAlgorithms_expert"],
+    dimensions="scalar",
+    defaultval=0.01,
+    mnemonics="PRECONnditioner Temperature of SMEARing",
+    requires="[[iprcel]] == 202",
+    added_in_version="v10",
+    text=r"""
+This variable defines the smearing temperature used in the $\chi_0^\mathrm{diag}$ of the Hybrid preconditioner.
+
+Increasing the smearing temperature in the preconditioner helps smooth out the preconditioner, 
+which can be more challenging to converge in k_points that other quantities. 
+Adjusting this parameter can significantly improve convergence.
+
+This setting is only useful for $\chi_0$-based hybrid SCF preconditioning ([[iprcel]] = 202).
+""",
+),
+
+Variable(
+    abivarname="precon_verbose",
+    varset="gstate",
+    vartype="integer",
+    topics=["SCFAlgorithms_expert"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="",
+    requires="[[iprcel]] in [200, 202]",
+    added_in_version="v10",
+    text=r"""
+This variable controls the verbosity level for logging during the application of the $\chi0$-based SCF preconditioner ([[iprcel]] = 2**).
+* **precon_verbose** = 0 --> No log output.
+* **precon_verbose** = 1 --> Logs the GMRES convergence.
+""",
+),
 
 Variable(
     abivarname="prepalw",
@@ -23851,6 +23990,9 @@ It can be used as a simple string flagging the desired outputs as follows:
  * "fsurf"     --> Activates the printing of the Fermi surface file. Refer to [[prtfsurf]] for further documentation.
  * "gden"      --> Activates the printing of the gradient of the electronic density file. Refer to [[prtgden]] for further documentation.
  * "geo"       --> Activates the printing of the geometry analysis. Refer to [[prtgeo]] for further documentation.
+ * "geo_1      --> Activates the printing of the geometry analysis under option 1 of the [[prtgeo]] variable.
+ * "geo_2      --> Activates the printing of the geometry analysis under option 2 of the [[prtgeo]] variable.
+ * "geo_3      --> Activates the printing of the geometry analysis under option 3 of the [[prtgeo]] variable.
  * "gkk"       --> Activates the printing of the GKK matrix file. Refer to [[prtgkk]] for further documentation.
  * "gsr"       --> Activates the printing of the GSR file. Refer to [[prtgsr]] for further documentation.
  * "hist"      --> Activates the printing of the HIST file. Refer to [[prthist]] for further documentation.
@@ -24372,9 +24514,9 @@ due to nuclear magnetic dipoles (see [[nucdipmom]]).
 [[zora]] 3 activates both kinetic energy and electron spin terms.
 
 Negative values of [[zora]] are present only for debugging purposes. [[zora]] -1 permits only
-spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits only
-the electron spin-nuclear dipole through space interaction, and [[zora]] -3 permits only the
-electron spin-nuclear dipole Fermi-contact-like interaction.
+spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits spin-orbit
+coupling and the electron spin-nuclear dipole through space interaction, while [[zora]] -3 permits 
+only spin-orbit coupling and the electron spin-nuclear dipole Fermi-contact-like interaction.
 """,
 ),
 

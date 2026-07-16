@@ -1,0 +1,88 @@
+# AlAs zinc-blende: NC+SOC ground state (forces + stress) and Gamma-point phonons.
+# GPU version: uses GPU_OPENMP offload for the nonlocal operator.
+
+gpu_option 2
+
+# NC+SOC: 2-component spinors
+nspinor  2
+nband 8
+
+ndtset 3     jdtset 1 2 3
+
+#DATASET1 : scf calculation: GS WF in the iBZ
+#*********************************************
+   prtden1   1
+   kptopt1   1
+   toldfe1   1.0d-12
+
+#DATASET2 : non scf calculation: GS WF in the whole BZ +
+#********   Berry phase calculation of the polarization and the ddk
+   getden2   1
+   getwfk2   1
+   kptopt2   2
+     iscf2  -2
+   tolwfr2   1.0d-22
+ berryopt2  -3
+
+#DATASET3 : Gamma-point phonons
+#*****************************************
+   getwfk3   2
+   getddk3   2
+   tolvrs3   1.0d-16
+    nstep3   10
+   rfphon3   1
+   kptopt3   2
+
+#Lattice parameters
+#******************
+    acell   3*1.0616530850E+01
+    rprim   0.0 0.5 0.5
+            0.5 0.0 0.5
+            0.5 0.5 0.0
+
+#Definition of the atoms
+#***********************
+    natom   2
+   ntypat   2
+    znucl   13 33
+    typat   1  2
+     xred   0    0    0
+            0.25 0.25 0.25
+      ixc   1
+
+#k-point grid, SCF cycles and plane wave basis set
+#*************************************************
+    nstep   9
+     ecut   3
+    ngkpt   2 2 2
+  nshiftk   4
+   shiftk   0.5 0.5 0.5
+            0.5 0.0 0.0
+            0.0 0.5 0.0
+            0.0 0.0 0.5
+
+#Backwards compatibility
+     asr   0
+  chneut   0
+  nbdbuf   0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/13al.3.hgh, PseudosHGH_pwteter/33as.5.hgh"
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa
+#%% [files]
+#%% files_to_test =
+#%%   t64.abo, tolnlines = 30, tolabs = 1.0e-5, tolrel = 3.0e-4, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Torrent
+#%% keywords = NC, DFPT, SOC, GPU
+#%% description =
+#%%   AlAs zinc-blende, NC+SOC using HGH pseudopotentials, GPU_OPENMP offload.
+#%%   Ground state (forces + stresses) followed by Gamma-point phonons.
+#%%<END TEST_INFO>

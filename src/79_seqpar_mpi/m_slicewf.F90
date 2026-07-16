@@ -162,6 +162,7 @@ subroutine slicewf(cg,dtset,eig,enl_out,gs_hamk,mpi_enreg,&
  integer :: iband,shift,space,blockdim
  integer :: spacedim,spacecom,gpu_option
  integer :: me_g0,me_g0_fft
+ logical :: transfer_cg
  !integer(kind=c_size_t) :: localMem
  type(slice_t) :: slice
  type(xgBlock_t) :: xgx0,xgeigen,xgresidu
@@ -222,8 +223,11 @@ subroutine slicewf(cg,dtset,eig,enl_out,gs_hamk,mpi_enreg,&
    end if
  end if
 
+ transfer_cg = .false.
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ transfer_cg = .not. xomp_target_is_present(c_loc(cg))
+ !$OMP TARGET ENTER DATA MAP(to:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP .and. transfer_cg)
 #endif
 
  call xgBlock_map(xgx0,cg,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=gpu_option)
@@ -321,8 +325,9 @@ subroutine slicewf(cg,dtset,eig,enl_out,gs_hamk,mpi_enreg,&
  call slice_free(slice)
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET UPDATE FROM(cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
- !$OMP TARGET EXIT DATA MAP(delete:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET UPDATE FROM(eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(from:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP .and. transfer_cg)
 #endif
 
  call timab(tim_slicewf,2,tsec)

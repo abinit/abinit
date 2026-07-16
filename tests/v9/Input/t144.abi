@@ -19,7 +19,7 @@ tolwfr 1.0D-12
 # berryopt needs to be told to do the calculation in all three directions
 rfdir 1 1 1
 berryopt -2 # triggers discretized DDK wavefunctions
-orbmag 2
+orbmag -2
 
 istwfk *1
 

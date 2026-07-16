@@ -1,9 +1,10 @@
+```
 # ================================================================
 # Configuration file for ABINIT 10.5 compilation
 #
 # CPU: AMD Trento EPYC 7453
 # GPU: AMD Instinct MI250X 64 GB
-# Compilers: Cray Compiling Environment 23.12
+# Compilers: Cray Compiling Environment 25.09
 # Libraries: FTTW3, libSCI, HIP+ROCm
 # ================================================================
 
@@ -59,3 +60,5 @@ with_libxc="${LIBXC_ROOT}"
 # ========================================
 enable_zdot_bugfix="no"
 enable_gw_dpc="yes"
+```
+

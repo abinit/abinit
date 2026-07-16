@@ -131,69 +131,75 @@ AC_DEFUN([_ABI_CC_CHECK_IBM],[
 ]) # _ABI_CC_CHECK_IBM
 
 
-# _ABI_CC_CHECK_INTEL_oneAPI(COMPILER)
-# ------------------------------------
-#
-# Checks whether the specified C compiler is the Intel oneAPI C compiler.
-# If yes, tries to determine its version number and sets the abi_cc_vendor
-# and abi_cc_version variables accordingly.
-#
-AC_DEFUN([_ABI_CC_CHECK_INTEL_ONEAPI],[
-  # Do some sanity checking of the arguments
-  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
-
-  dnl AC_MSG_CHECKING([if we are using the Intel C compiler])
-  cc_info_string=`$1 -V 2>&1 | head -n 1`
-  abi_result=`echo "${cc_info_string}" | grep '^Intel(R) oneAPI'`
-  if test "${abi_result}" = ""; then
-    abi_result="no"
-    cc_info_string=""
-    abi_cc_vendor="unknown"
-    abi_cc_version="unknown"
-  else
-    AC_DEFINE([CC_INTEL_ONEAPI],1,[Define to 1 if you are using the Intel oneAPI C compiler.])
-    abi_cc_vendor="intel"
-    abi_cc_version=`echo "${abi_result}" | sed -e 's/.*Version //; s/ .*//'`
-    if test "${abi_cc_version}" = "${abi_result}"; then
-      abi_cc_version="unknown"
-    fi
-    abi_result="yes"
-  fi
-  dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CC_CHECK_INTEL_oneAPI
-
-
 # _ABI_CC_CHECK_INTEL(COMPILER)
 # -----------------------------
 #
-# Checks whether the specified C compiler is the Intel C compiler.
-# If yes, tries to determine its version number and sets the abi_cc_vendor
-# and abi_cc_version variables accordingly.
+# Checks whether the specified C compiler is an Intel C compiler
+# (either the classic "icc" or the LLVM-based "icx"/oneAPI compiler).
+# If yes, tries to determine its version number and sets the abi_cc_vendor,
+# abi_cc_version and abi_cc_flavor variables accordingly.
 #
 AC_DEFUN([_ABI_CC_CHECK_INTEL],[
   # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+  dnl AC_MSG_CHECKING([if we are using an Intel C compiler])
+  cc_command="$1"
 
-  dnl AC_MSG_CHECKING([if we are using the Intel C compiler])
-  cc_info_string=`$1 -V 2>&1 | head -n 1`
-  abi_result=`echo "${cc_info_string}" | grep '^Intel(R) C'`
-  if test "${abi_result}" = ""; then
+  # Capture the full output (a deprecation remark from icc, e.g.
+  # "icc: remark #10441: ...", may appear before the real version banner)
+  # and isolate the version banner line, wherever it is.
+  cc_output=`$cc_command -V 2>&1`
+  version_line=`echo "${cc_output}" | grep -E '^Intel\(R\) C Intel\(R\) 64 Compiler|^Intel\(R\) oneAPI DPC\+\+/C\+\+ Compiler' | head -n 1`
+  intel_check="${version_line}"
+
+  # If using mpiicc/mpiicx, it may crash with "usage: mpiicc"/"usage: mpiicx"
+  if test "${intel_check}" = ""; then
+    usage_line=`echo "${cc_output}" | grep '^usage:' | head -n 1`
+    if test "${usage_line}" != ""; then
+      fallback_cc=`echo "${usage_line}" | cut -d " " -f 2`
+      if command -v "${fallback_cc}" >/dev/null 2>&1; then
+        cc_output=`${fallback_cc} -V 2>&1`
+        version_line=`echo "${cc_output}" | grep -E '^Intel\(R\) C Intel\(R\) 64 Compiler|^Intel\(R\) oneAPI DPC\+\+/C\+\+ Compiler' | head -n 1`
+        intel_check="${version_line}"
+        cc_command="${fallback_cc}"
+      fi
+    fi
+  fi
+
+  if test "${intel_check}" = ""; then
     abi_result="no"
     cc_info_string=""
     abi_cc_vendor="unknown"
     abi_cc_version="unknown"
+    abi_cc_flavor="unknown"
   else
-    AC_DEFINE([CC_INTEL],1,[Define to 1 if you are using the Intel C compiler.])
+    cc_info_string="${version_line}"
+    AC_DEFINE([CC_INTEL],1,[Define to 1 if you are using an Intel C compiler.])
     abi_cc_vendor="intel"
-    abi_cc_version=`echo "${abi_result}" | sed -e 's/.*Version //; s/ .*//'`
-    if test "${abi_cc_version}" = "${abi_result}"; then
+    abi_cc_version=`echo "${version_line}" | sed -e 's/.*Version //; s/ .*//'`
+    if test "${abi_cc_version}" = ""; then
       abi_cc_version="unknown"
     fi
-    abi_result="yes"
+
+    # Distinguish classic icc from the LLVM-based icx (oneAPI) driver.
+    # icc (any version) repeats "Intel(R)" twice right at the start:
+    #   "Intel(R) C Intel(R) 64 Compiler [Classic ]for applications ..."
+    # icx has a completely different banner:
+    #   "Intel(R) oneAPI DPC++/C++ Compiler for applications running on ..."
+    classic_check=`echo "${version_line}" | grep '^Intel(R) C Intel(R) 64 Compiler'`
+    if test "${classic_check}" != ""; then
+      abi_cc_flavor="classic"
+    else
+      abi_cc_flavor="oneapi"
+      AC_DEFINE([CC_INTEL_ONEAPI], 1,
+        [Define to 1 if you are using the LLVM-based Intel C compiler (icx).])
+    fi
+
+    abi_cc_vendor="${abi_cc_vendor} ${abi_cc_flavor}"
+    abi_result="yes (${abi_cc_flavor})"
   fi
   dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CC_CHECK_INTEL
-
 
 
 # _ABI_CC_CHECK_CRAY(COMPILER)
@@ -482,7 +488,7 @@ AC_DEFUN([ABI_PROG_CC],[
       fi
     fi
   fi
-  AC_PROG_CC([ cc mpiicx mpiicc mpicc icc icx xlc CC gcc ])
+  AC_PROG_CC([mpicc mpiicx mpiicc cc icc icx xlc CC gcc nvc nvcc clang clang-new])
 
   # Fail if no C compiler is available
   if test "${CC}" = ""; then
@@ -510,9 +516,6 @@ AC_DEFUN([ABI_PROG_CC],[
   fi
   if test "${abi_cc_vendor}" = "unknown"; then
     _ABI_CC_CHECK_ARM(${CC})
-  fi
-  if test "${abi_cc_vendor}" = "unknown"; then
-    _ABI_CC_CHECK_INTEL_ONEAPI(${CC})
   fi
   if test "${abi_cc_vendor}" = "unknown"; then
     _ABI_CC_CHECK_INTEL(${CC})
