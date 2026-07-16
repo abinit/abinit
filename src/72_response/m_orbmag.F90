@@ -1415,7 +1415,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
   !arrays
   real(dp) :: bdot(2),bpdot(2),gdot(2),gpdot(2),enlout(1),lamv(1)
   real(dp),allocatable :: fofr(:,:,:,:),proj_un(:,:),vectout(:,:)
-  real(dp),allocatable,target :: svectout(:,:),svectoutb(:,:),svectoutbp(:,:),svectoutg(:,:)
+  real(dp),allocatable,target :: svectoutb(:,:),svectoutbp(:,:),svectoutg(:,:)
   real(dp),pointer :: bra(:,:),du_dbeta(:,:),du_dgamma(:,:),unk(:,:)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
 !--------------------------------------------------------------------
@@ -1451,7 +1451,6 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
    n4=dtset%ngfft(4); n5=dtset%ngfft(5); n6=dtset%ngfft(6); ndat=1
    ABI_MALLOC(proj_un,(2,npwsp))
    ABI_MALLOC(svectoutbp,(2,npwsp))
-   ABI_MALLOC(svectout,(2,npwsp))
    ABI_MALLOC(fofr,(2,n4,n5,n6*ndat))
  end if
 
@@ -1569,7 +1568,6 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
  ABI_SFREE(fofr)
  ABI_SFREE(proj_un)
  ABI_SFREE(svectoutbp)
- ABI_SFREE(svectout)
 
 end subroutine orbmag_vv_k
 !!***
