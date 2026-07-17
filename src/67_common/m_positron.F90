@@ -1903,8 +1903,8 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 !arrays
  integer,allocatable :: gbound(:,:),gbound_pos(:,:),kg_k(:,:),kg_k_pos(:,:)
  integer,allocatable :: lmncmax(:),my_ffttab(:),my_gridtab(:),nphicor(:)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  logical,allocatable :: have_intc(:,:,:),have_rad(:,:)
  real(dp) :: buf(4),contrib(2),cp(2),cp_pos(2),expipr(2),pbn(3),pcart(3)
  real(dp) :: radsumnfftc(2),ylmgr(1,1,0),ylmr_nrm(1)
@@ -2503,7 +2503,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
        else
          call prep_fourwf(denpot_dum,blocksize,cwaveg_pos,cwaveaug_pos,&
 &         iblock_pos,istwf_k_pos,dtset%mgfft,mpi_enreg,nband_k_pos,&
-&         bandpp,ngfft,npw_k_pos,n4,n5,n6,occ_k_pos,option,Crystal%ucvol,wtk_k_pos,&
+&         bandpp,ngfft,npw_k_pos,n4,n5,n6,occ_k_pos,option,Crystal%ucvol,wtk_k_pos,1,&
 &         bandfft_kpt_tab=bandfft_kpt_pos,gpu_option=dtset%gpu_option)
        end if
 
@@ -2731,7 +2731,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
                      else
                        call prep_fourwf(denpot_dum,blocksize,cwaveg,cwaveaug,&
 &                       iblock,istwf_k,dtset%mgfft,mpi_enreg,nband_k,&
-&                       bandpp,ngfft,npw_k,n4,n5,n6,occ_k,option,Crystal%ucvol,wtk_k,&
+&                       bandpp,ngfft,npw_k,n4,n5,n6,occ_k,option,Crystal%ucvol,wtk_k,1,&
 &                       bandfft_kpt_tab=bandfft_kpt_el,gpu_option=dtset%gpu_option)
                      end if
 

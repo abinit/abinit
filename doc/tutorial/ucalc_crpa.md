@@ -10,16 +10,16 @@ This tutorial aims at showing how to perform a calculation of _U_ and _J_ in
 Abinit using cRPA. This method is well adapted in particular to determine _U_
 and _J_ as they can be used in DFT+DMFT. The implementation is described in [[cite:Amadon2014]].
 
-Note that there is another methodology to compute _U_ and _J_, see the 
-[Linear response U(J)](/tutorial/lruj) tutorial.
+Note that there is another methodology to compute _U_ and _J_, see the
+[Linear response U(J)](../tutorial/lruj.md) tutorial.
 
 It might be useful that you already know how to do PAW calculations using
 ABINIT but it is not mandatory (you can follow the two tutorials on PAW in
-ABINIT ([PAW1](/tutorial/paw1), [PAW2](/tutorial/paw2))).
-The DFT+_U_ tutorial in ABINIT ([DFT+U](/tutorial/dftu)) might be useful to know some
+ABINIT ([PAW1](../tutorial/paw1.md), [PAW2](../tutorial/paw2.md))).
+The DFT+_U_ tutorial in ABINIT ([DFT+U](../tutorial/dftu.md)) might be useful to know some
 basic variables related to correlated orbitals.
 
-The first GW tutorial in ABINIT ([GW](/tutorial/gw1)) is useful to learn how
+The first GW tutorial in ABINIT ([GW](../tutorial/gw1.md)) is useful to learn how
 to compute the screening, and how to converge the relevant parameters
 (energy cutoffs and number of bands for the polarizability).
 
@@ -47,8 +47,8 @@ of this method using Projected Local Orbitals Wannier orbitals in ABINIT (The
 implementation of cRPA in ABINIT is described in [[cite:Amadon2014]] and projected
 local orbitals Wannier functions are presented in [[cite:Amadon2008]]). The
 discussion about the localization of Wannier orbitals has some similarities
-with the beginning of the DMFT tutorial 
-(see [here](dmft.md#1-the-dftdmft-method-summary-and-key-parameters) 
+with the beginning of the DMFT tutorial
+(see [here](dmft.md#1-the-dftdmft-method-summary-and-key-parameters)
 and [there](dmft.md#2-electronic-structure-of-srvo3-in-lda)
 
 Several parameters (both physical and technical) are important for the cRPA calculation:
@@ -56,9 +56,9 @@ Several parameters (both physical and technical) are important for the cRPA calc
   * **The definition of correlated orbitals.** The first part of the tutorial is similar to the DMFT tutorial but uses
 	different keywords to calculate the correlated orbitals basis.
     It explains the electronic structure of SrVO<sub>3</sub> and will be used to understand the definition of
-    Wannier orbitals with various extensions. 
-	Wannier functions are unitarily related to a selected set of Kohn Sham (KS) wavefunctions, specified in ABINIT by 
-	band index [[plowan_bandi]], and [[plowan_bandf]]. 
+    Wannier orbitals with various extensions.
+	Wannier functions are unitarily related to a selected set of Kohn Sham (KS) wavefunctions, specified in ABINIT by
+	band index [[plowan_bandi]], and [[plowan_bandf]].
     As empty bands are necessary to build Wannier functions, it is required in DMFT or cRPA calculations
     that the KS Hamiltonian is correctly diagonalized: use high values for [[nnsclo]], and [[nline]]
     for cRPA and DMFT calculations and preceding DFT calculations. Another solution used in the present tutorial
@@ -227,8 +227,8 @@ important physical parameters relevant to this dataset.
 
   * Diagonalization of Kohn-Sham Hamiltonian: As in the case of DFT+DMFT or _GW_ calculation, a cRPA calculation requires that the LDA is perfectly converged and the Kohn Sham eigenstates are precisely determined, including the empty states. Indeed these empty states are necessary both to build Wannier functions and to compute the polarizability. For this reason we choose a very low value of [[tolwfr]] in the input file tucalc_crpa_1.abi.
 
-  * Wannier functions: Once the calculation is converged, we compute Wannier functions, triggered using the [[plowan_compute]] keyword. In addition to the KS bands (defined using [[plowan_bandi]] and [[plowan_bandf]]), we use the ([PLO-Wannier](/topics/Wannier)) keywords to define on which atom and on which orbital the Wannier functions are calculated.  
-	For this tutorial we will only look at cases with only one orbital for the Wannier functions and thus the cRPA, but note 
+  * Wannier functions: Once the calculation is converged, we compute Wannier functions, triggered using the [[plowan_compute]] keyword. In addition to the KS bands (defined using [[plowan_bandi]] and [[plowan_bandf]]), we use the ([PLO-Wannier](../topics/Wannier.md)) keywords to define on which atom and on which orbital the Wannier functions are calculated.
+	For this tutorial we will only look at cases with only one orbital for the Wannier functions and thus the cRPA, but note
 	that the implementation allow to use multiple orbitals. We emphasize that with respect to the discussion on models on section 3.1, [[plowan_bandi]] and [[plowan_bandf]] are used to define the so called A bands. We will see in dataset 2 how B bands are defined. In our case, as we are in the _d-d_ model, we choose only the _d_ -like bands as a starting point and [[plowan_bandi]] and [[plowan_bandf]] are thus equal to the first and last _d_ -like bands, namely 21 and 25.
 
 ```
@@ -257,7 +257,7 @@ peculiar to this dataset.
 We add some comments here on three most important topics
 
   * Definition of constrained polarizability: As in the discussion on models on section 3.1, the constrained polarizability is defined thanks to B-like bands. The keywords related to this definition is [[ucrpa_bands]]. According to the value of ucrpa, [[ucrpa_bands]] defined the bands for which the transitions are neglected, or (if ucrpa=2), it defined Wannier functions that are used in the weighting scheme (see Eq. (5) and (7) of section II of [[cite:Amadon2014]]). Alternatively and only if ucrpa=1, an energy windows can be defined (with variable [[ucrpa_window]]) to exclude the transition. In our case, as we are in the _d-d_ model, we neglect transitions inside the _d_ -like bands, so we choose [[ucrpa_bands]]= 21 25.
-  * Reading of the Wannier functions : [[plowan_compute]] defined to 10 reads the Wannier functions in file ''data.plowann''. 
+  * Reading of the Wannier functions : [[plowan_compute]] defined to 10 reads the Wannier functions in file ''data.plowann''.
   * Convergence of the polarizability: [[nband]] and [[ecuteps]] are the two main variables that should be converged. Note that one must study the role of these variables directly on the effective interaction parameters to determine their relevant values.
   * Frequency mesh  of the polarizability: Can be useful if one wants to plot the frequency dependence of the effective interactions (as in e.g. [[cite:Amadon2014]]).
 

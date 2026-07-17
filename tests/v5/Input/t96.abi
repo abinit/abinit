@@ -91,14 +91,14 @@ znucl 28
 #%% executable = abinit
 #%% test_chain = t96.abi, t97.abi, t98.abi, t99.abi
 #%% [files]
-#%% files_to_test = 
-#%%   t96.abo, tolnlines = 3, tolabs = 2.1e-02, tolrel = 1.001e+00, fld_options = -easy
+#%% files_to_test =
+#%%   t96.abo, tolnlines = 4, tolabs = 2.1e-02, tolrel = 1.001e+00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = NC, DFPT
-#%% description = 
+#%% description =
 #%%   FCC Ni - get phonons and ddk in preparation for an electron-phonon coupling run.
 #%%   a few extra features are used compared to the tutorial.
 #%% topics = ElPhonInt

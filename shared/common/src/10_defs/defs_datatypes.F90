@@ -466,6 +466,8 @@ module defs_datatypes
    !   ekb (norm-conserving) is now diagonal (one dimension lnmax);
    !   it would be easy to give it a second (symmetric) dimension by putting
    !   dimekb=lnmax*(lnmax+1)/2 in the place of dimekb=lmnmax.
+   ! MG: if SOC is activate, dimekb accounts for bot scalar relativistic KB energies and SOC energies.
+   ! psps%ekb will be transfered to gs_hamiltonian_type in gham_init (see m_hamiltonian)
 
   real(dp), allocatable :: epsatm(:)
    ! epsatm(ntypat)
@@ -615,9 +617,9 @@ module defs_datatypes
 ! declared in another part of ABINIT, that might need to take into account your modification.
 ! WARNING: Also pay attention to subroutine pspheads_comm, which broadcasts this datatype.
 
-  integer :: nproj(0:3) ! number of scalar projectors for each angular momentum
+  integer, allocatable :: nproj(:) ! number of scalar projectors for each angular momentum
 
-  integer :: nprojso(3) ! number of spin-orbit projectors for each angular momentum
+  integer, allocatable :: nprojso(:) ! number of spin-orbit projectors for each angular momentum
 
   integer :: lmax       ! maximum l quantum number (-1 if only local)
                         ! Example : s only       -> lmax=0

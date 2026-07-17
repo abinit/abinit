@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Abinit Post Process Application
@@ -7,23 +6,20 @@ author: Martin Alexandre
 last edited: May 2013
 """
 
-import sys,os,time,commands
-import string, math
 
-#GUI 
-import gui.graph as Graph
-import gui.conv  as Conv
-
+#GUI
 #Utility
-import utility.write as Write
 import utility.analysis as Analysis
 
+import gui.graph as Graph
+
 try:
-    from PyQt4 import Qt,QtGui,QtCore
+    from PyQt4 import QtCore, QtGui
 except:
-    pass;
+    pass
 
 from numpy import *
+
 
 #----------------------------------------------------------------#
 #---------------WINDOWS-MEAN SQUARED DEPLACEMENT-----------------#
@@ -32,7 +28,7 @@ class winMSD(QtGui.QWidget):
 
     PTOE = Analysis.PeriodicTableElement()
 
-    def __init__(self, file, parent = None,name =''):
+    def __init__(self, file, parent = None,name =""):
 
         self.file = file
         self.name = name
@@ -45,7 +41,7 @@ class winMSD(QtGui.QWidget):
         #-----------------Creation of the windows----------------------------#
         QtGui.QWidget.__init__(self, parent)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        self.setWindowTitle(self.name + ' MSD option')
+        self.setWindowTitle(self.name + " MSD option")
         self.setFixedSize(200, 150)
         self.center()
         self.layout = QtGui.QGridLayout()
@@ -56,15 +52,15 @@ class winMSD(QtGui.QWidget):
 
         self.CBox1 = QtGui.QComboBox()
         self.CBox1.setFixedWidth(70)
-        
+
         for i in range(len(self.file.getZnucl())):
             self.CBox1.addItem(str(self.PTOE.getName(self.file.getZnucl()[i])))
-        self.connect(self.CBox1,QtCore.SIGNAL('currentIndexChanged(const QString&)'),self.displayGraph)        
+        self.connect(self.CBox1,QtCore.SIGNAL("currentIndexChanged(const QString&)"),self.displayGraph)
 
 
         self.pbClose = QtGui.QPushButton("close")
         self.pbClose.setFixedSize(70,20)
-        self.connect(self.pbClose,QtCore.SIGNAL("clicked()"),QtCore.SLOT('close()'))
+        self.connect(self.pbClose,QtCore.SIGNAL("clicked()"),QtCore.SLOT("close()"))
 
 
         self.layout.addWidget(self.lbl1    , 1, 0, 1, 1, QtCore.Qt.AlignRight)
@@ -78,18 +74,18 @@ class winMSD(QtGui.QWidget):
     def displayGraph(self):
 
         atom = self.CBox1.currentIndex() + 1
-        
+
         self.MeanSquaredDeplacement = Analysis.MSD(self.file,atom)
 
         x = self.MeanSquaredDeplacement.getX()
         y = self.MeanSquaredDeplacement.getMSD()
-         
+
         try:
-            self.graphMSD.update(x,y,'step', "Mean squared deplacement",name = self.name)
+            self.graphMSD.update(x,y,"step", "Mean squared deplacement",name = self.name)
             self.graphMSD.addPlot(x,linspace(1,1,len(x)))
             self.graphMSD.show()
         except:
-            self.graphMSD = Graph.graphic(x,y,'step', "Mean squared deplacement", average=False,name = self.name)
+            self.graphMSD = Graph.graphic(x,y,"step", "Mean squared deplacement", average=False,name = self.name)
             self.connect(self.graphMSD, QtCore.SIGNAL("myCustomizedSignal()"), self.close)
             self.graphMSD.show()
 
@@ -101,7 +97,7 @@ class winMSD(QtGui.QWidget):
             self.MeanSquaredDeplacement = Analysis.MSD(self.file,atom)
             x = self.MeanSquaredDeplacement.getX()
             y = self.MeanSquaredDeplacement.getMSD()
-            self.graphMSD.update(x,y,'step', "Mean squared deplacement",name = self.name)
+            self.graphMSD.update(x,y,"step", "Mean squared deplacement",name = self.name)
             self.graphMSD.addPlot(x,linspace(1,1,len(x)))
         except:
             pass
@@ -109,7 +105,7 @@ class winMSD(QtGui.QWidget):
     def close(self):
         del self.graphMSD
         del self
-    
+
     def closeEvent(self, event):
         try:
             del self.graphMSD
@@ -118,8 +114,8 @@ class winMSD(QtGui.QWidget):
         try:
             del self
         except:
-            pass     
-        
+            pass
+
     def center(self):
         screen = QtGui.QDesktopWidget().screenGeometry()
         size =  self.geometry()

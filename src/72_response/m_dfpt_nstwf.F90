@@ -337,7 +337,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),allocatable,target :: ch1c_tmp(:,:)
  real(dp),allocatable :: cs1c_tmp(:,:)
  real(dp),allocatable :: dcwavef(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: cwave0(:,:),cwavef(:,:)!,dcwavef(:,:)
+ real(dp), contiguous, pointer :: cwave0(:,:),cwavef(:,:)!,dcwavef(:,:)
  real(dp),allocatable :: cg_ddk(:,:,:)
  real(dp),allocatable :: doccde_k(:),doccde_kq(:)
  real(dp),allocatable :: dnhat1(:,:),drhoaug1(:,:,:,:)
@@ -354,7 +354,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),allocatable :: ylm_k(:,:),ylm1_k(:,:),ylmgr1_k(:,:,:),vtmp1(:,:),vxc10(:,:)
  real(dp),allocatable,target :: work(:,:,:),e1kb_work(:,:,:,:)
  real(dp),pointer :: e1kbfr(:,:,:,:,:),e1kb_ptr(:,:,:,:)
- real(dp), ABI_CONTIGUOUS pointer :: ffnl1_idir1(:,:,:,:)
+ real(dp), contiguous, pointer :: ffnl1_idir1(:,:,:,:)
  real(dp),pointer :: vhartr01(:),vpsp1_idir1(:),xccc3d1_idir1(:)
  type(pawcprj_type),allocatable :: dcwaveprj(:,:)
  type(pawcprj_type),allocatable,target :: cwaveprj0(:,:)
@@ -494,7 +494,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      if (ipert1/=ipert) then
        if(dtset%usepaw==1) then
          if((ipert1<=dtset%natom.or.(ipert1==dtset%natom+2.and.has_ddk_file).or.&
-&            ((ipert>dtset%natom.and.ipert/=dtset%natom+5).and.(ipert1==dtset%natom+3.or.ipert1==dtset%natom+4)).or. &
+&            ((ipert>dtset%natom.and.ipert/=dtset%natom+5.and.ipert/=dtset%natom+6).and.(ipert1==dtset%natom+3.or.ipert1==dtset%natom+4)).or. &
 &            ((ipert1==dtset%natom+2).and.has_ddk_file))) then
            mpert1=mpert1+1;jpert1(mpert1)=ipert1
          end if
@@ -687,9 +687,10 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &             nattyp,nfftf,ngfftf,dtset%ntypat,ph1df,psps%qgrid_vl,ucvol,&
 &             psps%vlspl,vpsp1_idir1,g0term=g0term)
            else
-             call dfpt_vlocal(gs_hamkq%atindx,cplex,gmet,gsqcut,idir1,ipert1,mpi_enreg,psps%mqgrid_vl,&
-&             dtset%natom,nattyp,nfftf,ngfftf,dtset%ntypat,ngfftf(1),ngfftf(2),ngfftf(3),&
-&             ph1df,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_idir1,xred)
+             call dfpt_vlocal(gs_hamkq%atindx,cplex,gmet,gsqcut,dtset%icutcoul,idir1,ipert1,mpi_enreg,psps%mqgrid_vl,&
+&             dtset%natom,nattyp,nfftf,ngfftf,dtset%nkpt,dtset%ntypat,ngfftf(1),ngfftf(2),ngfftf(3),&
+&             ph1df,psps%qgrid_vl,dtset%qptn,dtset%rcut,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1_idir1,xred,&
+&             zion=dtset%ziontypat)
            end if
            if(psps%n1xccc/=0)then
              call dfpt_mkcore(cplex,idir1,ipert1,dtset%natom,dtset%ntypat,ngfftf(1),psps%n1xccc,&
@@ -1500,8 +1501,10 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 #ifdef HAVE_OPENMP_OFFLOAD
                      !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw) MAP(to:gvnlx1,gvnlx1_tmp)
                      do ipw=1,npw1_k*nspinor
-                       gvnlx1(:,(idat-1)*npw1_k*nspinor + ipw) = &
-                         gvnlx1_tmp(:,ipw) - (my_nproc_band-1)*gvnlx1(:,(idat-1)*npw1_k*nspinor + ipw)
+                       gvnlx1(1,(idat-1)*npw1_k*nspinor + ipw) = &
+                         gvnlx1_tmp(1,ipw) - (my_nproc_band-1)*gvnlx1(1,(idat-1)*npw1_k*nspinor + ipw)
+                       gvnlx1(2,(idat-1)*npw1_k*nspinor + ipw) = &
+                         gvnlx1_tmp(2,ipw) - (my_nproc_band-1)*gvnlx1(2,(idat-1)*npw1_k*nspinor + ipw)
                      end do
 #endif
                    end if
@@ -2574,8 +2577,9 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
          if (((ipert <= dtset%natom).or.(ipert == dtset%natom + 2)) &
 &         .and.(ipert1 == dtset%natom+2).and. dtset%prtbbb==1) then
-           call gaugetransfo(cg_k,cwavef,cwavef_db,mpi_enreg%comm_band,distrb_cycle,eig_k,eig1_k,iband,nband_k, &
-&            dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,nsppol,mpi_enreg%nproc_band,occ_k)
+           call gaugetransfo(cg_k,cwavef,cwavef_db,mpi_enreg%comm_band,distrb_cycle,eig_k,eig1_k,&
+             & dtset%ggtrcut,iband,nband_k,dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,&
+             & nsppol,mpi_enreg%nproc_band,occ_k)
            cwavef(:,:) = cwavef_db(:,:)
          end if
 
@@ -2614,8 +2618,9 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !              In case of band-by-band,
 !              construct the first-order wavefunctions in the diagonal gauge
                if (((ipert <= dtset%natom).or.(ipert == dtset%natom + 2)).and.(dtset%prtbbb==1)) then
-                 call gaugetransfo(cg_k,gvnlx1,cwavef_da,mpi_enreg%comm_band,distrb_cycle,eig_k,eig2_k,iband,nband_k, &
-&                  dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,nsppol,mpi_enreg%nproc_band,occ_k)
+                 call gaugetransfo(cg_k,gvnlx1,cwavef_da,mpi_enreg%comm_band,distrb_cycle,eig_k,eig2_k,&
+                   & dtset%ggtrcut,iband,nband_k,dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,&
+                   & nsppol,mpi_enreg%nproc_band,occ_k)
                  gvnlx1(:,:) = cwavef_da(:,:)
                end if
 !              Multiplication by -i
@@ -2624,6 +2629,12 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
                  gvnlx1(1,ipw)=gvnlx1(2,ipw)
                  gvnlx1(2,ipw)=-aa
                end do
+
+!              MRoyo 030925 :
+!              3) Case ipert1=natom+2 and ipert=natom+5 or ipert=natom+12:2*natom+11
+!              the computation of mixed derivatives wrt to Zeeman and electric fields needs $i \frac{d}{dk}.
+               if (ipert==dtset%natom+5.or.(ipert>=dtset%natom+12.and.ipert<=2*dtset%natom+11)) gvnlx1(:,:) = -gvnlx1(:,:)
+
              end if
 
 ! at this stage if iband is not mine I can cycle
@@ -2640,6 +2651,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !            the computation of the Born effective charge tensor uses
 !            the operator $-i \frac{d}{dk}.
              if (ipert==dtset%natom+2) gvnlx1(:,:) = -gvnlx1(:,:)
+
 
 !            <G|Vnl1|Cnk> is contained in gvnlx1
 !            construct the matrix element (<uj2|vj1|u0>)complex conjug and add it to the 2nd-order matrix
@@ -2668,8 +2680,9 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
      ipert1=dtset%natom+1
      if(dtset%prtbbb==1)then
-       call gaugetransfo(cg_k,cwavef,cwavef_db,mpi_enreg%comm_band,distrb_cycle,eig_k,eig1_k,iband,nband_k, &
-&       dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,nsppol,mpi_enreg%nproc_band,occ_k)
+       call gaugetransfo(cg_k,cwavef,cwavef_db,mpi_enreg%comm_band,distrb_cycle,eig_k,eig1_k,&
+         & dtset%ggtrcut,iband,nband_k,dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,&
+         & nsppol,mpi_enreg%nproc_band,occ_k)
        cwavef(:,:) = cwavef_db(:,:)
      end if
 
@@ -2691,8 +2704,9 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
            !write(778,*)gvnlx1
 
            if(dtset%prtbbb==1)then
-             call gaugetransfo(cg_k,gvnlx1,cwavef_da,mpi_enreg%comm_band,distrb_cycle,eig_k,eig2_k,iband,nband_k, &
-&             dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,nsppol,mpi_enreg%nproc_band,occ_k)
+             call gaugetransfo(cg_k,gvnlx1,cwavef_da,mpi_enreg%comm_band,distrb_cycle,eig_k,eig2_k,&
+               & dtset%ggtrcut,iband,nband_k,dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,&
+               & nsppol,mpi_enreg%nproc_band,occ_k)
 
              gvnlx1(:,:) = cwavef_da(:,:)
            end if
@@ -2813,6 +2827,7 @@ end subroutine dfpt_nstwf
 !!  distrb_cycle=array of logical flags to skip certain bands in parallelization scheme
 !!  eig_k(mband*nsppol)=GS eigenvalues at k (hartree)
 !!  eig1_k(2*nsppol*mband**2)=matrix of first-order eigenvalues (hartree)
+!!  ggtrcut=cutoff to reject unstable band pairs
 !!  iband=band index of the 1WF for which the transformation has to be applied
 !!  mband=maximum number of bands
 !!  mband_mem_rbz=maximum number of bands on this cpu
@@ -2829,13 +2844,14 @@ end subroutine dfpt_nstwf
 !!
 !! SOURCE
 
-subroutine gaugetransfo(cg_k,cwavef,cwavef_d,comm,distrb_cycle,eig_k,eig1_k,iband,nband_k, &
+subroutine gaugetransfo(cg_k,cwavef,cwavef_d,comm,distrb_cycle,eig_k,eig1_k,ggtrcut,iband,nband_k, &
 &                      mband,mband_mem_rbz,npw_k,npw1_k,nspinor,nsppol,nproc_band,occ_k)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iband,mband,mband_mem_rbz,nband_k,npw1_k,npw_k,nspinor,nsppol
  integer,intent(in) :: comm, nproc_band
+ real(dp),intent(in) :: ggtrcut
 !arrays
  logical, intent(in) :: distrb_cycle(nband_k)
  real(dp),intent(in) :: cg_k(2,npw_k*nspinor*mband_mem_rbz),cwavef(2,npw1_k*nspinor)
@@ -2847,7 +2863,6 @@ subroutine gaugetransfo(cg_k,cwavef,cwavef_d,comm,distrb_cycle,eig_k,eig1_k,iban
 !tolerance for non degenerated levels
 !scalars
  integer :: ierr, jband,jband_me
- real(dp),parameter :: etol=1.0d-3
 !arrays
  real(dp) :: cwave0(2,npw1_k*nspinor),eig1(2)
 
@@ -2860,7 +2875,9 @@ subroutine gaugetransfo(cg_k,cwavef,cwavef_d,comm,distrb_cycle,eig_k,eig1_k,iban
      if (distrb_cycle(jband)) cycle
      jband_me = jband_me + 1
 
-     if ((abs(eig_k(iband)-eig_k(jband)) > etol).and.(abs(occ_k(jband)) > tol8 )) then
+     ! the default value of ggtrcut is 0.001, was formerly a parameter in this routine 
+     ! called etol=0.001_dp
+     if ((abs(eig_k(iband)-eig_k(jband)) > ggtrcut).and.(abs(occ_k(jband)) > tol8 )) then
 
        cwave0(:,:) = cg_k(:,1+(jband_me-1)*npw_k*nspinor:jband_me*npw_k*nspinor)
 

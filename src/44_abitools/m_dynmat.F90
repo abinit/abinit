@@ -36,7 +36,8 @@ module m_dynmat
  use m_matrix,          only : mati3inv, matr3inv
  use m_symtk,           only : littlegroup_q
  use m_cgtools,         only : fxphas_seq
- use m_ewald,           only : ewald9
+ use m_crystal,        only : crystal_t
+ use m_ewald,           only : ewald9, ewald9_2D
  use m_time,            only : timab
 
  implicit none
@@ -76,7 +77,7 @@ module m_dynmat
                                 ! inputs) are consistent with the rprim used in the routine generating  the Big Box
  public :: dist9                ! Compute the distance between atoms in the big box
  public :: ftifc_q2r            ! Fourier transform of the dynamical matrices to obtain interatomic forces (real space).
- private :: ftifc_r2q            ! Fourier transform of the interatomic forces to obtain dynamical matrices (reciprocal space).
+ public :: ftifc_r2q            ! Fourier transform of the interatomic forces to obtain dynamical matrices (reciprocal space).
  public :: dynmat_dq            ! Compute the derivative D(q)/dq via Fourier transform of the interatomic forces
  public :: ifclo9               ! Convert from cartesian coordinates to local coordinates
  public :: wght9                ! Generates a weight to each R points of the Big Box and for each pair of atoms
@@ -102,6 +103,12 @@ module m_dynmat
  ! TODO: Change name,
  public :: ftgam
  public :: ftgam_init
+
+ public :: msria_calc          ! Calculate the correction for the Acoustic sum rule 
+                               ! + rotational invariance on the IFCs in reciprocal space
+ public :: msria_apply         ! Apply the correction for the Acoustic sum rule + rotational invariance 
+                               ! If IFCs derivatives calculated both from LW driver and Fourier, correct the interpolation 
+
 ! *************************************************************************
 
 contains
@@ -704,6 +711,7 @@ subroutine cart29(blkflg,blkval,carflg,d2cart,&
  integer :: idir1,idir2,ii,ipert1,ipert2
 !arrays
  integer :: flg1(3),flg2(3)
+ integer :: mflg(3,mpert,3,mpert)
  real(dp) :: vec1(3),vec2(3)
 ! *********************************************************************
 
@@ -793,6 +801,73 @@ subroutine cart29(blkflg,blkval,carflg,d2cart,&
          d2cart(ii,idir2,ipert2,idir1,natom+2)=&
 &         (1.0_dp/ucvol)*d2cart(ii,idir2,ipert2,idir1,natom+2)
        end do
+     end do
+   end do
+ end do
+
+!MRoyo: For magnetic Zeeman perturbations, apply a negative sign to get induced magnetic moments.
+!Macroscopic Zeeman
+ mflg= 0
+ ipert1=natom+5
+ do idir1=1,3
+   do ipert2= 1, natom+6 !exclude local Zeemans, to be done below
+     do idir2=1,3
+       if (mflg(idir1,ipert1,idir2,ipert2)==0) then
+         do ii=1,2
+           d2cart(ii,idir1,ipert1,idir2,ipert2)=&
+&          -one*d2cart(ii,idir1,ipert1,idir2,ipert2)
+           mflg(idir1,ipert1,idir2,ipert2)=1
+         end do
+       end if
+       if (mflg(idir2,ipert2,idir1,ipert1)==0) then
+         do ii=1,2
+           d2cart(ii,idir2,ipert2,idir1,ipert1)=&
+&          -one*d2cart(ii,idir2,ipert2,idir1,ipert1)
+           mflg(idir2,ipert2,idir1,ipert1)=1
+         end do
+       end if
+     end do
+   end do
+ end do
+
+!Local Zeemans
+ if (mpert>natom+MPERT_MAX) then
+   do ipert1= natom+12,2*natom+11
+     do idir1=1,3
+       do ipert2= 1, mpert
+         do idir2=1,3
+           if (mflg(idir1,ipert1,idir2,ipert2)==0) then
+             do ii=1,2
+               d2cart(ii,idir1,ipert1,idir2,ipert2)=&
+&              -one*d2cart(ii,idir1,ipert1,idir2,ipert2)
+               mflg(idir1,ipert1,idir2,ipert2)=1
+             end do
+           end if
+           if (mflg(idir2,ipert2,idir1,ipert1)==0) then
+             do ii=1,2
+               d2cart(ii,idir2,ipert2,idir1,ipert1)=&
+&              -one*d2cart(ii,idir2,ipert2,idir1,ipert1)
+               mflg(idir2,ipert2,idir1,ipert1)=1
+             end do
+           end if
+         end do
+       end do
+     end do
+   end do
+ end if
+
+ !For magnetoelectric and magnetic susceptibility apply a 1/ucvol factor
+ ipert1= natom + 2
+ ipert2= natom + 5
+ do idir1= 1, 3
+   do idir2= 1, 3
+     do ii=1,2
+       d2cart(ii,idir1,ipert1,idir2,ipert2)=&
+&      d2cart(ii,idir1,ipert1,idir2,ipert2)/ucvol
+       d2cart(ii,idir2,ipert2,idir1,ipert1)=&
+&      d2cart(ii,idir2,ipert2,idir1,ipert1)/ucvol
+       d2cart(ii,idir1,ipert2,idir2,ipert2)=&
+&      d2cart(ii,idir1,ipert2,idir2,ipert2)/ucvol
      end do
    end do
  end do
@@ -1410,7 +1485,7 @@ end subroutine chneu9
 !!
 !! SOURCE
 
-subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,zero_by_symm)
+subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,zero_by_symm,eta)
 
 !Arguments -------------------------------
 !scalars
@@ -1421,6 +1496,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  integer,intent(inout) :: blkflg(3,mpert,3,mpert)
  real(dp),intent(in) :: qpt(3)
  real(dp),intent(inout) :: d2(2,3,mpert,3,mpert)
+ real(dp),optional,intent(in) :: eta
 
 !Local variables -------------------------
 !scalars
@@ -1428,7 +1504,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  logical :: qzero
  integer :: exch12,found,idir1,idir2,idisy1,idisy2,ipert1,ipert2
  integer :: ipesy1,ipesy2,isgn,isym,ithree,itirev,nblkflg_is_one,noccur,nsym_used,quit,quit1
- real(dp) :: arg1,arg2,im,norm,re,sumi,sumr,xi,xr
+ real(dp) :: arg1,arg2,im,norm,eta_,re,sumi,sumr,xi,xr
 !arrays
  integer,pointer :: sym1_(:,:,:),sym2_(:,:,:)
  real(dp),allocatable :: d2tmp1(:,:,:),d2tmp2(:,:,:),d2work(:,:,:,:,:)
@@ -1456,21 +1532,21 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
    end do
  end if
 
-!Exchange of perturbations
+ eta_=zero; if(present(eta)) eta_=eta
 
 !Consider two cases : either time-reversal symmetry
 !conserves the wavevector, or not
- if(timrev==0)then
+ if(timrev==0.and.abs(eta_)<tol8)then
 
-!  do ipert1=1,mpert  See notes
-   do ipert1=1,min(natom+2,mpert)
+  do ipert1=1,mpert !See notes
+!   do ipert1=1,min(natom+2,mpert)
      do idir1=1,3
 
 !      Since the matrix is hermitian, the diagonal elements are real
        d2(2,idir1,ipert1,idir1,ipert1)=zero
 
-!      do ipert2=1,mpert See notes
-       do ipert2=1,min(natom+2,mpert)
+      do ipert2=1,mpert !See notes
+!       do ipert2=1,min(natom+2,mpert)
          do idir2=1,3
 
            ! FIXME use is_type functions
@@ -1507,11 +1583,11 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
 !  Here, case with time-reversal symmetry
  else
 
-!  do ipert1=1,mpert See notes
-   do ipert1=1,min(natom+2,mpert)
+  do ipert1=1,mpert !See notes
+!   do ipert1=1,min(natom+2,mpert)
      do idir1=1,3
-!      do ipert2=1,mpert See notes
-       do ipert2=1,min(natom+2,mpert)
+      do ipert2=1,mpert !See notes
+!       do ipert2=1,min(natom+2,mpert)
          do idir2=1,3
            d2(2,idir1,ipert1,idir2,ipert2)=zero
 
@@ -1546,8 +1622,8 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  do ithree=1,3
 
 !  Big loop on all elements
-!  do ipert1=1,mpert See notes
-   do ipert1=1,min(natom+2,mpert)
+  do ipert1=1,mpert !See notes
+!   do ipert1=1,min(natom+2,mpert)
 
 !    Select the symmetries according to pertubation 1
      if (ipert1<=natom)then
@@ -1557,8 +1633,8 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
      end if
 
      do idir1=1,3
-!      do ipert2=1,mpert See notes
-       do ipert2=1,min(natom+2,mpert)
+      do ipert2=1,mpert !See notes
+!       do ipert2=1,min(natom+2,mpert)
 
     !    Select the symmetries according to pertubation 2
          if (ipert2<=natom)then
@@ -1668,7 +1744,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
                      end do
                    end if
 
-!                  In case zero_by_symm==0, the computed materix element must be associated to at least one really computed matrix element
+!                  In case zero_by_symm==0, the computed matrix element must be associated to at least one really computed matrix element
                    if(zero_by_symm==0 .and. nblkflg_is_one==0)then
                      found=0
                    endif
@@ -1756,14 +1832,16 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
    ABI_MALLOC(d2tmp2,(2,3,3))
    ABI_MALLOC(d2work,(2,3,mpert,3,mpert))
    d2work(:,:,:,:,:)=d2(:,:,:,:,:)
-   do ipert1=1,min(natom+2,mpert)
+   do ipert1=1,mpert
+   !do ipert1=1,min(natom+2,mpert)
      if ((ipert1==natom+1.or.ipert1==natom+10.or.ipert1==natom+11).or.(ipert1==natom+2.and.(.not.qzero))) cycle
      if (ipert1<=natom)then
        sym1_ => symrec
      else
        sym1_ => symrel
      end if
-     do ipert2=1,min(natom+2,mpert)
+     do ipert2=1,mpert
+     !do ipert2=1,min(natom+2,mpert)
 !      if (any(blkflg(:,ipert1,:,ipert2)==0)) cycle
        if ((ipert2==natom+1.or.ipert2==natom+10.or.ipert2==natom+11).or.(ipert2==natom+2.and.(.not.qzero))) cycle
        if (ipert2<=natom)then
@@ -1949,7 +2027,7 @@ subroutine q0dy3_calc(natom,dyewq0,dyew,option)
  character(len=500) :: msg
 ! *********************************************************************
 
- if(option==1.or.option==2)then
+ if(option==1.or.option==2.or.option==6)then
    do mu=1,3
      do nu=1,3
        do ia=1,natom
@@ -1962,7 +2040,7 @@ subroutine q0dy3_calc(natom,dyewq0,dyew,option)
    end do
  else
    write (msg, '(3a)')&
-&   'option should be 1 or 2.',ch10,&
+&   'option should be 1 or 2 or 6.',ch10,&
 &   'action: correct calling routine'
    ABI_BUG(msg)
  end if
@@ -3670,7 +3748,7 @@ end subroutine ftifc_r2q
 !!
 !! OUTPUT
 !! dddq(2,3,natom,3,natom,3)= Derivate of the dynamical matrix in cartesian coordinates.
-!!  The tree directions are stored in the last dimension.
+!!  The three directions are stored in the last dimension.
 !!  These coordinates are normalized (=> * acell(3)!!)
 !!
 !! SOURCE
@@ -3695,7 +3773,6 @@ subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
 ! *********************************************************************
 
  dddq = zero
-
  do irpt=1,nrpt
    ! Calculation of the k coordinates in Normalized Reciprocal coordinates
    kk(:) = matmul(gprim, qpt)
@@ -3727,7 +3804,6 @@ subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
      end do
    end do
  end do
-
 end subroutine dynmat_dq
 !!***
 
@@ -3825,6 +3901,7 @@ end subroutine ifclo9
 !! OUTPUT
 !! wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
 !!  The vector r(atom2)-r(atom1)+rpt should be inside the moving box
+!! r_inscribed_sphere= The radius of the sphere inscribed inside the big box.
 !! ngqpt(6)= can be modified
 !!
 !! SOURCE
@@ -4613,6 +4690,7 @@ subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 end subroutine sytens
 !!***
 
+
 !----------------------------------------------------------------------
 
 !!****f* m_dynmat/axial9
@@ -4886,14 +4964,16 @@ end subroutine nanal9
 
 subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom,&
                   nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,qdrp_cart,ewald_option,eta,comm,&
-                  dipquad,quadquad)  ! optional
+                  sys_dim,dipquad,quadquad,dielt_env,dielt_thick)  ! optional
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: dipdip,mpert,natom,nrpt,ewald_option,comm
+ integer,intent(in) :: dipdip,mpert,natom,nrpt,ewald_option,comm,sys_dim
  real(dp),intent(in) :: qphnrm,ucvol
+ real(dp),optional,intent(in) :: dielt_env
  integer,optional,intent(in) :: dipquad, quadquad
 !arrays
+ real(dp), optional,intent(in):: dielt_thick(2)
  real(dp),intent(in) :: acell(3),dielt(3,3),gmet(3,3),gprim(3,3),qpt(3)
  real(dp),intent(in) :: rmet(3,3),rprim(3,3),rpt(3,nrpt)
  real(dp),intent(in) :: trans(3,natom),wghatm(natom,natom,nrpt),xred(3,natom)
@@ -4941,9 +5021,12 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
    ! Compute dyew(2,3,natom,3,natom)= Ewald part of the dynamical matrix,
    ! second energy derivative wrt xred(3,natom) in Hartrees (Denoted A-bar in the notes)
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
-
-   call ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff,&
-      qdrp_cart,eta,option=ewald_option,dipquad=dipquad_,quadquad=quadquad_)
+   if (sys_dim==1) then ! 3D case
+     call ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff,&
+        qdrp_cart,eta,option=ewald_option,dipquad=dipquad_,quadquad=quadquad_)
+   elseif (sys_dim<5) then
+     call ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qpt,zeff,qdrp_cart,dielt_env,dielt_thick,sys_dim)      
+   end if       
 
    call q0dy3_apply(natom,dyewq0,dyew)
    call nanal9(dyew,dq,iqpt1,natom,nqpt1,plus1)
@@ -5029,6 +5112,8 @@ end subroutine gtdyn9
 !! NOTES
 !!   1) One makes the dynamical matrix hermitian...
 !!   2) In case of q=Gamma, only the real part is used.
+!!      (MR: Modified since at finite omega imaginary components may arise
+!!      also at Gamma in broken time-reversal symmetry crystals)
 !!
 !! SOURCE
 
@@ -5095,7 +5180,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    do i1=1,3*natom
      do i2=1,3*natom
        index=i1+3*natom*(i2-1)
-       displ(2*index)=zero
+       if (abs(displ(2*index)) < tol14) displ(2*index)=zero
      end do
    end do
  end if
@@ -5139,7 +5224,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
            i2=i2+1
            index=i1+3*natom*(i2-1)
            displ(2*index-1)=displ(2*index-1)+four_pi/ucvol*zeff(idir1,ipert1)*zeff(idir2,ipert2)/epsq
-           displ(2*index  )=zero
+           if (abs(displ(2*index)) < tol14) displ(2*index)=zero
          end do
        end do
      end do
@@ -5828,9 +5913,7 @@ subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
                ip= jdir + (jatom-1)*3 + (idir-1)*3*natom + (iatom-1)*9*natom
                ! Real and imaginary part of the interatomic forces
                gam_qpt(1,ip,iqpt) = gam_qpt(1,ip,iqpt) + re*gam_rpt(1,ip,irpt) - im*gam_rpt(2,ip,irpt)
-               !DEBUG
                gam_qpt(2,ip,iqpt) = gam_qpt(2,ip,iqpt) + im*gam_rpt(1,ip,irpt) + re*gam_rpt(2,ip,irpt)
-               !ENDDEBUG
              end do ! end jdir
            end do ! end idir
          end do
@@ -5902,4 +5985,557 @@ subroutine ftgam_init (gprim,nqpt,nrpt,qpt_full,rpt,coskr, sinkr)
 end subroutine ftgam_init
 !!***
 
+!----------------------------------------------------------------------
+
+!!****f* m_dynmat/msria_calc
+!! NAME
+!! msria_calc
+!!
+!! FUNCTION
+!! Calculate the corrections on the zone-center IFCs and their derivatives with respect to the phonon
+!! wavevector q to achieve both translational (acoustic sum rule) and rotational invariances,
+!! i.e. there is not remanent forces on the atoms if they are moved or rotated globablly.
+!! This function needs the dimensionality of the system (0D, 1D, 2D, ...) to work properly, as well 
+!! as the moment of the IFCs, i.e. Phi^(1). It can be obtained by a long wave calculation
+!! or with the Fourier transform. Be careful for the second option that the non-analytical part
+!! is not (yet) treated for the 1D and 2D cases; ideally this routine should only impacts the
+!! short-range IFCs (and the long-range subtracted before entering this routine)
+!!
+!! INPUTS
+!!  asr=(6 Impose accoustic sum rules + rotational invariance)
+!!  crystal<type(crystal_t)>=Crystal structure parameters
+!!  d2cart(2,3,natom,3,natom)= Dynamical matrices coming from the Derivative Data Base at Gamma
+!!  d2dq (3,natom,3,natom,3): moment of IFCs (Phi^(1)) in cartesian coordinates 
+!!  sys_dim=System dimensionality (0D, 1D, ...) used for rotational invariance
+!!  mpert =maximum number of ipert
+!!  natom=number of atom
+!!
+!! OUTPUT
+!! d2asr= (2,3,natom,3,natom) matrix used to store the correction needed to fulfill
+!! the acoustic + rotational sum rule on IFCs.
+!! d2dqmsr= (3,natom,3,natom,3) matrix used to store the correction on IFCs moments
+!!
+!! SOURCE
+
+!!***
+!
+subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,sys_dim,mpert,natom)
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: sys_dim,asr,mpert,natom
+ type(crystal_t),intent(in) :: crystal
+!arrays
+ real(dp),intent(in) :: d2cart(2,3,mpert,3,mpert)
+ real(dp),intent(in) :: d2dq(3,natom,3,natom,3)
+ real(dp),intent(in) :: d2dqdq(3,natom,3,3,3)
+ real(dp),intent(out) :: d2asr(2,3,natom,3,natom)
+ real(dp),intent(out) :: d2dqmsr(3,natom,3,natom,3)        
+ real(dp),intent(out) :: d2dqdqmsr(3,natom,3,natom,3,3)        
+!Local variables-------------------------------
+!scalars
+ integer :: idir1,idir2,idir3,idir4,idir5,info,ipert1,ipert2,col,ncol,nrow,row
+ character(len=500) :: msg,msg2
+ integer :: bool_kdir(3), bool_ldir(3)
+!arrays
+ real(dp) :: tmp,tmp2,Levi_Civita(3,3,3), d2dqdqcart(3,natom,3,natom,3,3)
+ real(dp) :: d2dqred(3,natom,3,natom,3),d2dqdqred(3,natom,3,natom,3,3)
+ real(dp),allocatable :: msr(:,:,:),msr_init(:,:,:)
+ real(dp),allocatable :: d2cart_vec(:),rcond(:,:),cond(:)
+ real(dp),allocatable :: mat_tmp(:,:),mat_tmp2(:,:),mat_tmp3(:,:),d2cart_sol(:),umat(:,:),vtmat(:,:)
+ real(dp),allocatable :: vmat(:,:),sing(:),work(:),sing1(:,:),sing2(:,:)
+
+! *********************************************************************
+ if(asr/=6)then
+   write(msg,'(3a,i0)')&
+   'The argument asr should be 6,',ch10, 'however, asr = ',asr
+   ABI_BUG(msg)
+ end if
+
+ if (asr==6)then
+   write(msg, '(a,a,a,a,a,a,a,a)' ) ch10, &
+   ' Imposition of the ASR + rotational invariance for the interatomic forces (AMSR)', ch10, &
+   ' Rotational invariance impose conditions on the IFCs moments and their derivatives',ch10,&
+   ' At the moment, because of missing long-range contributions to the second IFCs derivatives',ch10,&
+   ' rotational invariance is only imposed on the first-derivatives (first-order condition)'
+   call wrtout(std_out,msg)
+ end if
+ bool_kdir = 0
+ bool_ldir = 0
+ ! When periodic, additional variable spaces coming from dynamical matrices derivatives
+ if (sys_dim == 1) then ! 3D
+    bool_kdir = 0 ; bool_ldir = 1
+    msg2=' 3D treatment'
+ elseif (sys_dim == 2) then ! 2D yz
+    bool_kdir(1) = 1 ; bool_ldir(2) = 1 ; bool_ldir(3) = 1
+    msg2=' 2D with x as out-of-plane direction'
+ elseif (sys_dim == 3) then ! 2D xz
+    bool_kdir(2) = 1 ; bool_ldir(1) = 1 ; bool_ldir(3) = 1
+    msg2=' 2D with y as out-of-plane direction'
+ elseif (sys_dim == 4) then ! 2D xy
+    bool_kdir(3) = 1 ; bool_ldir(1) = 1 ; bool_ldir(2) = 1
+    msg2=' 2D with z as out-of-plane direction'
+ elseif (sys_dim == 5) then ! 1D x
+    bool_kdir(2) = 1 ; bool_kdir(3) = 1 ; bool_ldir(1) = 1
+    msg2=' 1D with x as periodic direction'
+ elseif (sys_dim == 6) then ! 1D y
+    bool_kdir(1) = 1 ; bool_kdir(2) = 1 ; bool_ldir(2) = 1
+    msg2=' 1D with y as periodic direction'
+ elseif (sys_dim == 7) then ! 1D z
+    bool_kdir(1) = 1 ;  bool_kdir(2) = 1 ; bool_ldir(3) = 1
+    msg2=' 1D with z as periodic direction'
+ elseif (sys_dim == 8) then ! Molecule
+    bool_kdir = 1 ; bool_ldir = 0
+    msg2=' 0D treatment (molecules)'
+ else
+    write(msg,'(3a,i0)')&
+   'The argument sys_dim should be between 1 and 8,',ch10, 'however, sys_dim = ',sys_dim
+   ABI_BUG(msg)
+ end if
+
+ write(msg, '(a,a)' ) ch10, trim(msg2)
+ call wrtout(std_out,msg)
+
+ ! Matrix sizing for pseudoinverse and alocation of corresponding matrix
+ nrow = 3+2*3*3*natom ! 9*natom conditions for ASR, 9*natom+3 conditions for MSR
+ nrow = nrow +4*(3*natom)**2 ! + Hermiticity
+
+ ncol = (3*natom)**2 ! 9*natom**2 variable workspace (for dynamical matrices, initial)
+ ncol = ncol + 3*(3*natom)**2 ! Aditional variable space coming from dD/dq (only for periodic systems)
+ ncol = ncol + 9*(3*natom)**2 ! d2D/dqdq
+ ABI_MALLOC(msr,(1:3,1:natom,1:3))
+ ABI_MALLOC(msr_init,(1:3,1:natom,1:3))
+ ABI_MALLOC(d2cart_vec,(1:ncol))
+ ABI_MALLOC(d2cart_sol,(1:ncol))
+ ABI_MALLOC(cond,(1:nrow))
+ ABI_MALLOC(rcond,(1:nrow,1:ncol))
+ d2cart_vec=0d0
+ d2cart_sol=0d0
+ cond = 0d0
+ rcond = 0d0
+
+ Levi_Civita(:,:,:)=zero
+ Levi_Civita(1,2,3)=+1 ; Levi_Civita(2,3,1)=+1 ; Levi_Civita(3,1,2)=+1
+ Levi_Civita(3,2,1)=-1 ; Levi_Civita(1,3,2)=-1 ; Levi_Civita(2,1,3)=-1
+
+ ! We only have access to \sum d^2 Phi(kappa alpha, kappa' beta)/dqdq through the
+ ! long-wavelength driver, we need to construct the full tensor. Here we split 
+ ! an equal contribution on all atoms
+ d2dqdqcart(:,:,:,:,:,:)=zero
+ do ipert1=1,natom
+   do idir1=1,3
+     do idir2=1,3
+       do ipert2=1,natom
+         do idir3=1,3
+             d2dqdqcart(idir1,ipert1,idir2,ipert1,idir3,idir3)=&
+                     -two*d2dqdq(idir1,ipert1,idir2,idir3,idir3)/dble(natom)
+         end do
+       end do
+     end do
+   end do
+ end do
+ ! Convert d2dq and d2dqdq in relative coordinates with respect to q
+ d2dqred = zero
+ d2dqdqred = zero
+ do idir1=1,3
+   do idir2=1,3
+     d2dqred(:,:,:,:,idir1)=d2dqred(:,:,:,:,idir1)+d2dq(:,:,:,:,idir2)*crystal%gprimd(idir2,idir1)
+     do idir3=1,3
+       do idir4=1,3
+         d2dqdqred(:,:,:,:,idir2,idir4)=d2dqdqred(:,:,:,:,idir2,idir4)+&
+         d2dqdqcart(:,:,:,:,idir1,idir3)*crystal%gprimd(idir1,idir2)*crystal%gprimd(idir3,idir4)
+       end do
+     end do  
+   end do
+ end do
+ ! Now building the condition matrix
+ do idir1=1,3
+  do ipert1=1,natom
+    do idir2=1,3
+      do ipert2=1,natom
+        col= ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+        d2cart_vec(col) = d2cart(1,idir1,ipert1,idir2,ipert2)
+        row= idir2+3*(ipert1-1)+3*natom*(idir1-1) ! Acoustic sum rule
+        rcond(row,col) = one ! Sum of IFCs along ipert2 = 0
+        ! Rotational invariance
+        do idir3=1,3
+          ! Treat separately confined and periodic directions
+          if ( bool_kdir(idir3) == 1) then ! confined direction
+            do idir4 = 1,3
+                col= ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+                row = 9*natom+idir4+3*(ipert1-1)+3*natom*(idir1-1) 
+                rcond(row,col) = rcond(row,col)+ & ! first moment of IFCs
+                (crystal%xcart(idir3,ipert2)-crystal%xcart(idir3,ipert1))*Levi_Civita(idir2,idir3,idir4)
+            end do
+            ! Conditions on the second moments of IFCs
+            ! In molecules, already fulfilled with rotational invariance
+            ! For 1D systems, should only consider pair of direction when 1 is
+            ! periodic, the other is not. Currently desactivated 
+            if (idir1 == idir2 .and. bool_ldir(idir1) ==1) then !  
+              col= ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+              row = 2*9*natom+idir2 ! second moment of IFCs
+              ! Currently desactivated because long-range electrostatics, only need to uncomment
+              ! when it will be available.
+              !rcond(row,col) = -(crystal%xcart(idir3,ipert2)-crystal%xcart(idir3,ipert1))**2
+              col= ipert1+natom*(idir1-1)+3*natom*(ipert2-1)+3*natom**2*(idir2-1)
+              !rcond(row,col) = -(crystal%xcart(idir3,ipert2)-crystal%xcart(idir3,ipert1))**2
+            end if
+          end if
+          if ( bool_ldir(idir3) == 1 ) then ! periodic direction
+            ! Initialize the IFCs derivatives      
+            col= (3*natom)**2*idir3+ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+            d2cart_vec(col) = d2dqred(idir1,ipert1,idir2,ipert2,idir3)
+            do idir5 = 1,3
+              do idir4 = 1,3
+                row = 9*natom+idir4+3*(ipert1-1)+3*natom*(idir1-1) 
+                rcond(row,col) = rcond(row,col)+ Levi_Civita(idir2,idir5,idir4)*crystal%rprimd(idir5,idir3)!/two_pi
+              end do
+            end do
+            do idir4=1,3
+              if ( bool_ldir(idir4) == 1 ) then ! periodic direction
+                col= 4*(3*natom)**2+(3*natom)**2*3*(idir4-1)+&
+                (3*natom)**2*(idir3-1)+ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+                !d2cart_vec(col) = d2dqdqred(idir1,ipert1,idir2,ipert2,idir3,idir4)
+              end if
+            end do
+            if (idir2 == idir1 .and. bool_kdir(idir1)==1) then
+              do idir4=1,3
+                col= 4*(3*natom)**2+(3*natom)**2*3*(idir4-1)+&
+                (3*natom)**2*(idir4-1)+ipert2+natom*(idir1-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+                row = 2*9*natom+idir3 ! second moment of IFCs
+                !rcond(row,col) =  crystal%rprimd(idir4,idir3)**2!/two_pi
+                col= 4*(3*natom)**2+(3*natom)**2*3*(idir4-1)+&
+                (3*natom)**2*(idir4-1)+ipert1+natom*(idir1-1)+3*natom*(ipert2-1)+3*natom**2*(idir1-1)
+                !rcond(row,col) =  crystal%rprimd(idir4,idir3)**2!/two_pi
+              end do
+            end if
+          end if
+        end do
+        ! Additionally, add the condition of matrix Hermiticity, both on IFCs and their derivatives
+        col= ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+        row= 3+2*(9*natom)+ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+        rcond(row,col) = rcond(row,col)+ one ! Hermicity
+        col= ipert1+natom*(idir1-1)+3*natom*(ipert2-1)+3*natom**2*(idir2-1)
+        rcond(row,col) = rcond(row,col)- one ! Hermicity
+         do idir3=1,3
+            row= 3+2*(9*natom)+ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)+9*natom**2*(idir3)
+            col= (3*natom)**2*idir3+ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+            rcond(row,col) = rcond(row,col)+ one
+            col= (3*natom)**2*idir3+ipert1+natom*(idir1-1)+3*natom*(ipert2-1)+3*natom**2*(idir2-1)
+            rcond(row,col) = rcond(row,col)+ one
+         end do
+       end do
+     end do
+   end do
+ end do          
+
+
+! Use LAPACK singular value decomposition
+ ABI_MALLOC(sing,(1:nrow))
+ ABI_MALLOC(umat,(1:nrow,1:nrow))
+ ABI_MALLOC(vtmat,(1:ncol,1:ncol))
+ ABI_MALLOC(work,(1:5*max(nrow,ncol)))
+ call dgesvd('A','A',nrow,ncol,rcond,nrow,sing,umat,nrow, &
+         vtmat, ncol, work,5*max(nrow,ncol),info)
+ ABI_CHECK(info == 0, sjoin('dgesvd returned:', itoa(info)))
+ ABI_FREE(umat)
+ ABI_FREE(work)
+
+ write(msg, '(a,es16.8,es16.8)' )' Largest and smallest values from Singular Value Decomposition', sing(1), sing(nrow)
+ call wrtout([std_out], msg)
+
+ ABI_MALLOC(vmat,(1:ncol,1:ncol))
+ ABI_MALLOC(sing1,(1:nrow,1:ncol))
+ ABI_MALLOC(sing2,(1:ncol,1:nrow))
+ vmat = zero
+ sing1 = zero
+ sing2 = zero
+ do ipert1=1,ncol
+   do ipert2 =1,ncol
+     vmat(ipert1,ipert2) = vtmat(ipert2,ipert1)
+   end do
+ end do
+ ! To compute the pseudoinverse, product of the singular matrix with its inverse
+ do ipert1=1,min(nrow,ncol)
+   sing1(ipert1,ipert1) = sing(ipert1)
+   if (sing(ipert1)>tol12) then ! Avoids numerical problems
+     sing2(ipert1,ipert1) = 1_dp/sing(ipert1)
+   end if
+ end do
+
+ ABI_MALLOC(mat_tmp,(1:ncol,1:ncol))
+ ABI_MALLOC(mat_tmp2,(1:ncol,1:ncol))
+ ABI_MALLOC(mat_tmp3,(1:ncol,1:ncol))
+
+ mat_tmp = matmul(sing2,sing1)
+ mat_tmp2 = matmul(vmat,mat_tmp)
+ mat_tmp3 = matmul(mat_tmp2,vtmat)
+
+ ! Change of IFCs and its derivatives
+ d2cart_sol = matmul(mat_tmp3,d2cart_vec)
+ ABI_FREE(sing)
+ ABI_FREE(sing1)
+ ABI_FREE(vmat)
+ ABI_FREE(sing2)
+ ABI_FREE(mat_tmp)
+ ABI_FREE(mat_tmp2)
+ ABI_FREE(mat_tmp3)
+
+ ! Now unravel the IFCs and derivatives in arrays
+
+ d2asr = zero
+ d2dqmsr = zero
+ d2dqdqmsr = zero
+ do idir1=1,3
+   do ipert1=1, natom
+     do idir2=1,3
+       do ipert2=1, natom
+         col = ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+         d2asr(1,idir1,ipert1,idir2,ipert2) = d2cart_sol(col)
+         do idir3=1,3
+           col = (3*natom)**2*idir3+ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+           d2dqmsr(idir1,ipert1,idir2,ipert2,idir3) = d2cart_sol(col)
+           do idir4=1,3
+             col = 4*(3*natom)**2+3*(3*natom)**2*(idir4-1)+&
+             (3*natom)**2*(idir3-1)+ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
+             !d2dqdqmsr(idir1,ipert1,idir2,ipert2,idir3,idir4) = d2cart_sol(col)
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+
+ msr = zero
+ msr_init = zero
+ do ipert1=1, natom
+   do idir1=1,3
+     do idir2=1,3
+       do ipert2=1, natom
+         do idir3=1,3
+           if ( bool_kdir(idir3) == 1) then ! Contribution from zone-center 
+             tmp = d2cart(1,idir1,ipert1,idir2,ipert2)
+             tmp2 = tmp-d2asr(1,idir1,ipert1,idir2,ipert2)      
+             do idir4 = 1,3
+               msr_init(idir1,ipert1,idir4)=msr_init(idir1,ipert1,idir4)+&
+               tmp*(crystal%xcart(idir3,ipert2)-crystal%xcart(idir3,ipert1))*Levi_Civita(idir2,idir3,idir4)
+               msr(idir1,ipert1,idir4)=msr(idir1,ipert1,idir4)+&
+               tmp2*(crystal%xcart(idir3,ipert2)-crystal%xcart(idir3,ipert1))*Levi_Civita(idir2,idir3,idir4)
+             end do
+           end if
+           if ( bool_ldir(idir3) == 1 ) then ! Contribution from dC/dq 
+             tmp =d2dqred(idir1,ipert1,idir2,ipert2,idir3) 
+             tmp2=tmp-d2dqmsr(idir1,ipert1,idir2,ipert2,idir3)
+             do idir4 = 1,3
+              do idir5 = 1,3
+                msr_init(idir1,ipert1,idir4)=msr_init(idir1,ipert1,idir4)+&
+                        tmp*crystal%rprimd(idir5,idir3)*Levi_Civita(idir2,idir5,idir4)
+                msr(idir1,ipert1,idir4)=msr(idir1,ipert1,idir4)+&
+                        tmp2*crystal%rprimd(idir5,idir3)*Levi_Civita(idir2,idir5,idir4)
+              end do
+            end do
+           end if
+         end do
+       end do
+     end do
+   end do
+ end do
+ write(msg, '(a,a,a,a)' ) ch10, &
+   ' Rotational invariance breaking, before and after imposition', ch10, &
+   '    ipert1   idir1   idir2   torque initial  [Ha/Bohr]  torque final [Ha/Bohr]'
+   call wrtout([std_out, ab_out],msg)
+ do ipert1=1,natom
+   do idir1=1,3
+     do idir4=1,3
+       write(msg, '(a,i0,a,i0,a,i0,a, es16.8,a,es16.8)') '     ', ipert1,'        ', idir1, &
+              '        ', idir4 , '    ', msr_init(idir1,ipert1,idir4),'           ', msr(idir1,ipert1,idir4)
+       call wrtout([std_out, ab_out],msg)
+     end do
+   end do
+ end do
+ 
+ ABI_FREE(msr)
+ ABI_FREE(msr_init)
+ ABI_FREE(d2cart_vec)
+ ABI_FREE(d2cart_sol)
+ ABI_FREE(vtmat)
+ ABI_FREE(cond)
+ ABI_FREE(rcond)
+
+end subroutine msria_calc
+
+!----------------------------------------------------------------------
+
+!!****f* m_dynmat/msria_apply
+!! NAME
+!! msria_corr
+!!
+!! FUNCTION
+!! Imposition of the Accoustic sum rule and rotational invariance on the InterAtomic Forces
+!! respecting crystal symmetries. Note that when IFCs derivatives are estimated previously
+!! based on the Fourier transforms, they do not strictly respect them; this is only solved
+!! when using the IFCs derivatives from the LW driver. Eventually, if the latter are available,
+!! correct the IFCs to match the ones from the LW driver close to the zone-center
+!!
+!! INPUTS
+!! asr=(0 => no ASR, 1 or 2=> the diagonal element is modified to give the ASR,
+!!      5 => impose hermitian solution using lapack call, 6 => rotational invariance)
+!! d2asr=matrix used to store the correction needed to fulfill the acoustic sum rule.
+!! d2dqmsr = same, but for the first IFCs moment for rotational invariance
+!! d2dqdqmsr = same, but for the second IFCs moment for rotational invariance
+!! mpert =maximum number of ipert
+!! natom=number of atom
+!! qphon(3,3)=wavevectors for the three possible phonons
+!! crystal<type(crystal_t)>=Crystal structure parameters
+!!
+!! OUTPUT
+!! Input/Output:
+!! d2cart=matrix of second derivatives of total energy, in cartesian coordinates
+!!
+!! SOURCE
+
+subroutine msria_apply(asr,d2asr,d2dqmsr,d2cart,mpert,natom,qphon,crystal)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: asr,mpert,natom
+ type(crystal_t),intent(in) :: crystal
+!arrays
+ real(dp),intent(in) :: d2dqmsr(3,natom,3,natom,3)!, d2dqdqmsr(3,natom,3,natom,3,3)
+ real(dp),intent(in) :: d2asr(2,3,natom,3,natom), qphon(3,3)
+ real(dp),intent(inout) :: d2cart(2,3,mpert,3,mpert)
+!Local variables-------------------------------
+!scalars
+ integer :: idir1,idir2,ipert1,ipert2,idir3,ii,jj
+ integer :: tiat,tjat,isym,indij(natom,natom),indij2(natom,natom,3)
+ integer :: isgn, itirev,acc,acc2 
+ real(dp) :: qsym(3), qsym2(3), symcart(3,3,crystal%nsym),arg1,arg2
+ real(dp) :: re,im,re2,im2,sumr,sumi,valr,vali,carttmp
+ real(dp), allocatable :: pert(:,:,:,:,:,:), pert2(:,:,:,:,:,:,:)
+ real(dp) :: Levi_Civita(3,3,3)
+! *********************************************************************
+ ABI_MALLOC(pert,(1:2,1:3,1:natom,1:3,1:natom,1:2*crystal%nsym))
+ ABI_MALLOC(pert2,(1:2,1:3,1:natom,1:3,1:natom,1:2*crystal%nsym,1:3))
+ if (asr/=6) return
+ Levi_Civita(:,:,:)=zero
+ Levi_Civita(1,2,3)=+1 ; Levi_Civita(2,3,1)=+1 ; Levi_Civita(3,1,2)=+1
+ Levi_Civita(3,2,1)=-1 ; Levi_Civita(1,3,2)=-1 ; Levi_Civita(2,1,3)=-1
+ ! By convention, Fourier transform in ABINIT is only using the cell
+ ! coordinates, not the reduced coordinates of the atoms
+ ! The code that follows already take this into account
+ ! for sake of legibility
+ ! Define symmetry tensor for IFCs
+ do isym=1,crystal%nsym
+   do idir1=1,3
+     symcart(:,idir1,isym)=zero
+     do idir2=1,3
+       do idir3=1,3
+         symcart(:,idir1,isym)=symcart(:,idir1,isym)+crystal%rprimd(:,idir2)&
+                 *crystal%gprimd(idir1,idir3)*crystal%symrel(idir2,idir3,isym)
+       end do
+     end do
+   end do
+ end do
+ pert = zero;  pert2 = zero
+ indij = 0 ; indij2 = 0
+ ! Need to loop over symmetries to properly impose rotational invariance
+ do isym=1,crystal%nsym
+   do itirev=1,2  ! loop over the time-reversal symmetry
+     isgn=3-2*itirev
+     do ipert1=1,natom
+       do ipert2=1,natom
+         tiat = crystal%indsym(4,isym,ipert1) ! symmetric atom of i
+         tjat = crystal%indsym(4,isym,ipert2) ! symmetric atom of j
+         qsym(:) = crystal%indsym(1:3,isym,ipert2)-crystal%indsym(1:3,isym,ipert1)
+         qsym= -isgn*qsym
+         arg1 = two_pi*DOT_PRODUCT(qsym,qphon(:,1))
+         acc=indij(tiat,tjat)+1
+         indij(tiat,tjat)=acc
+         do idir1=1,3
+           do idir2=1,3
+             sumr=zero
+             re = cos(arg1)
+             im = sin(arg1)
+             do ii=1,3
+               do jj=1,3
+!                Correction from on-site and first-neighbors in the same cells (or images)
+                  sumr=sumr+symcart(idir1,ii,isym)*symcart(idir2,jj,isym)*d2asr(1,ii,tiat,jj,tjat)
+                  ! Second order desactivated because of missing contribution from electrostatics
+                  ! simply uncomment when available
+                  !do idir3=1,3
+                  !  sumr=sumr-symcart(idir1,ii,isym)*symcart(idir2,jj,isym)*&
+                  !          d2dqdqmsr(ii,tiat,jj,tjat,idir3,idir3)/four
+                  !end do
+               end do
+             end do
+             valr = re*sumr
+             vali = im*sumr
+             pert(1,idir1,ipert1,idir2,ipert2,crystal%nsym*(itirev-1)+isym) = valr
+             pert(2,idir1,ipert1,idir2,ipert2,crystal%nsym*(itirev-1)+isym) = vali
+           end do
+         end do
+         do idir3=1,3
+           acc2=indij2(tiat,tjat,idir3)+1
+           indij2(tiat,tjat,idir3)=acc2
+           qsym2(:) = crystal%symrel(:,idir3,isym)
+           qsym2(:)=-isgn*(qsym2(:))
+           arg2 = two_pi*DOT_PRODUCT(qsym2,qphon(:,1))
+           do idir1=1,3
+             do idir2=1,3
+               sumi=zero
+               sumr=zero
+               do ii=1,3
+                 do jj=1,3
+                   ! second order desactivated
+                   !sumr=sumr+symcart(idir1,ii,isym)*symcart(idir2,jj,isym)*&
+                   !     d2dqdqmsr(ii,tiat,jj,tjat,idir3,idir3)/four
+                   sumi=sumi+isgn*symcart(idir1,ii,isym)*symcart(idir2,jj,isym)*&
+                        d2dqmsr(ii,tiat,jj,tjat,idir3)
+                 end do
+               end do
+               im = -cos(arg1)*sin(arg2)
+               re = sin(arg1)*sin(arg2)
+               re2 = cos(arg1)*cos(two*arg2)
+               im2 = sin(arg1)*cos(two*arg2)
+               valr = re*sumi+re2*sumr
+               vali = im*sumi+im2*sumr
+               pert2(1,idir1,ipert1,idir2,ipert2,crystal%nsym*(itirev-1)+isym,idir3)= valr
+               pert2(2,idir1,ipert1,idir2,ipert2,crystal%nsym*(itirev-1)+isym,idir3)= vali
+             end do !idir1
+           end do !idir2
+         end do !idir3
+       end do !ipert2
+     end do !ipert1
+   end do !itirev
+ end do !isym  
+ do ipert1=1,natom
+   do idir1 =1,3
+     do idir2=1,3
+       do ipert2=1,natom
+         do isym=1,crystal%nsym
+           do itirev=1,2  ! loop over the time-reversal symmetry
+             isgn=3-2*itirev
+             carttmp = d2cart(1,idir1,ipert1,idir2,ipert2)- &
+             pert(1,idir1,ipert1,idir2,ipert2,crystal%nsym*(itirev-1)+isym)/dble(indij(ipert1,ipert2))
+             d2cart(1,idir1,ipert1,idir2,ipert2) = carttmp
+             carttmp = d2cart(2,idir1,ipert1,idir2,ipert2)- &
+             pert(2,idir1,ipert1,idir2,ipert2,crystal%nsym*(itirev-1)+isym)/dble(indij(ipert1,ipert2))
+             d2cart(2,idir1,ipert1,idir2,ipert2) = carttmp
+             do idir3=1,3
+               carttmp = d2cart(1,idir1,ipert1,idir2,ipert2)- &
+               pert2(1,idir1,ipert1,idir2,ipert2,crystal%nsym*(itirev-1)+isym,idir3)/dble(indij2(ipert1,ipert2,idir3))
+               d2cart(1,idir1,ipert1,idir2,ipert2) = carttmp
+               carttmp = d2cart(2,idir1,ipert1,idir2,ipert2)- &
+               pert2(2,idir1,ipert1,idir2,ipert2,crystal%nsym*(itirev-1)+isym,idir3)/dble(indij2(ipert1,ipert2,idir3))
+               d2cart(2,idir1,ipert1,idir2,ipert2) = carttmp
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+ ABI_FREE(pert)
+ ABI_FREE(pert2)
+end subroutine msria_apply
 end module m_dynmat

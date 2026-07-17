@@ -47,6 +47,7 @@ module m_gstate
  use m_dtfil
  use m_extfpmd
  use m_rcpaw
+ use m_alloc_hamilt_gpu
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -105,10 +106,6 @@ module m_gstate
  use m_nonlop_ylm,       only : nonlop_ylm_init_counters,nonlop_ylm_output_counters
  use m_fft,              only : fft_init_counters,fft_output_counters
  use m_pstat,            only : pstat_proc
-
-#if defined HAVE_GPU
- use m_alloc_hamilt_gpu
-#endif
 
 #if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
@@ -284,7 +281,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: cnt,spin,band,ikpt,usecg,usecprj,ylm_option
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie,fermih
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
- logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
+ logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk,inv_sij
  logical :: is_dfpt=.false.,wvlbigdft=.false.
  character(len=500) :: msg
  character(len=fnlen) :: dscrpt,filnam,wfkfull_path
@@ -317,14 +314,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  real(dp),allocatable :: ph1d(:,:),ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
  real(dp),allocatable :: rhowfr(:,:),spinat_dum(:,:),start(:,:),work(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
- real(dp),ABI_CONTIGUOUS pointer :: cg(:,:) => null()
+ real(dp),contiguous, pointer :: cg(:,:) => null()
  real(dp),pointer :: eigen(:),pwnsfac(:,:),rhog(:,:),rhor(:,:)
  real(dp),pointer :: taug(:,:),taur(:,:),xred_old(:,:)
  type(pawrhoij_type),pointer :: pawrhoij(:)
  type(coulomb_operator) :: kernel_dummy
  type(pawcprj_type),allocatable :: cprj(:,:)
  type(xg_nonlop_t) :: xg_nonlop
-
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -445,6 +441,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    gemm_nonlop_use_gemm = .true.
    call init_gemm_nonlop(dtset%gpu_option)
  end if
+
+ ! Handle GPU FFT slicing
+ hamilt_gpu_nfft_blocks = dtset%gpu_nfft_blocks
 
 !Set up the Ylm for each k point
  if ( dtset%tfkinfunc /= 2) then
@@ -878,7 +877,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ABI_MALLOC(extfpmd,)
      call extfpmd%init(dtset%mband,hdr%extfpmd_eshift,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
 &     nfftf,dtset%nspden,dtset%nsppol,dtset%nkpt,dtset%occopt,rprimd,dtset%tphysel,&
-&     dtset%tsmear,dtset%useextfpmd,mpi_enreg,dtset%extfpmd_nband,dtset%extfpmd_pawsph==1)
+&     dtset%tsmear,dtset%useextfpmd,mpi_enreg,dtset%extfpmd_nband,dtset%extfpmd_pawsph)
    end if
  end if
 
@@ -1057,7 +1056,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !###########################################################
 ! Initialisation of cprj
 
- ! xg_nonlop available only for cprj_in_memory=1 and (LOBPCG or Chebfi)
+ ! xg_nonlop available only for cprj_in_memory=1 and (LOBPCG or Chebfi or Slicing)
  ! cprj_in_memory=2 is used for Congugate Gradient
  if (dtset%cprj_in_memory==1) then
    if (dtset%useylm/=1) then
@@ -1068,7 +1067,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
                      mpi_enreg%me_band,mpi_enreg%comm_band,mpi_enreg%comm_atom,&
                      mpi_atmtab=mpi_enreg%my_atmtab)
    if (xg_nonlop%paw) then
-     call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=dtset%wfoptalg==111)
+     inv_sij=dtset%wfoptalg==111.or.dtset%wfoptalg==112
+     call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=inv_sij)
    else
      call xg_nonlop_make_ekb(xg_nonlop,psps%ekb)
    end if
@@ -1855,7 +1855,6 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
  integer :: ikpt,npw
  real(dp) :: arith,geom,wtknrm
  character(len=500) :: msg
-
 ! *************************************************************************
 
    if (dtset%iscf>=0) then
@@ -2086,7 +2085,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gre
  end if
 
 !If needed, print DOS (unitdos is closed in getnel, occ is not changed if option == 2
- if (dtset%prtdos==1 .and. me == master) then
+ if ((dtset%prtdos==1.or.dtset%prtdos==4) .and. me == master) then
    if (open_file(fnameabo_dos,msg, newunit=unitdos, status='unknown', action="write", form='formatted') /= 0) then
      ABI_ERROR(msg)
    end if
@@ -2319,7 +2318,6 @@ subroutine clnup2(n1xccc,gred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ng
  real(dp) :: devsqr,grchempot2
  character(len=500) :: msg
  integer :: units(2)
-
 ! *************************************************************************
 
 !write(std_out,*)' clnup2 : enter '

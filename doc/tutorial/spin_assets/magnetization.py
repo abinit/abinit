@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-from __future__ import print_function, division
 
-import os,string,sys,math
+import math
+import os
 from locale import atof
 
 #CUT3D="../../../../src/98_main/cut3d"
@@ -9,7 +9,7 @@ CUT3D="cut3d"
 
 
 #First find the coordinates of atoms
-f=open('first_round','w')
+f=open("first_round","w")
 f.write("tspin_2o_DEN\n")
 f.write("1\n3\n0\n0\n")
 f.close()
@@ -38,14 +38,14 @@ npts=int(cube_side/cube_step)
 print("number of integration points:",npts)
 
 #Loop on atoms
-g=open('data','w')
+g=open("data","w")
 integral=[]
 for iatom in range(num_atoms):
         npts_integral=0
         sum=0.0
 
         #Build input file for cut3d
-        f=open('sphere','w')
+        f=open("sphere","w")
         f.write("tspin_2o_DEN\n")
         #f.write("1\n3\n1\n1\n")
         f.write("3\n1\n1\n")
@@ -62,9 +62,9 @@ for iatom in range(num_atoms):
                                 y=y0+j*cube_step
                                 z=z0+k*cube_step
                                 #if((x-x0)**2+(y-y0)**2+(z-z0)**2<radius**2):
-                                f.write('1'+"\n"+'1'+'\n'+'1'+'\n')
-                                f.write(repr(x)+' '+repr(y)+' '+repr(z)+'\n')
-        f.write('0\n')
+                                f.write("1"+"\n"+"1"+"\n"+"1"+"\n")
+                                f.write(repr(x)+" "+repr(y)+" "+repr(z)+"\n")
+        f.write("0\n")
         f.close()
 
         #Execute cut3d
@@ -72,7 +72,7 @@ for iatom in range(num_atoms):
                 #if string.find(line,"Spin difference")!=-1:
                 if line.find("Spin difference") != -1:
                         npts_integral=npts_integral+1
-                        g.write(line.split()[4]+'\n')
+                        g.write(line.split()[4]+"\n")
                         sum=sum+atof(line.split()[4])
         integral.append(sum/npts_integral)
 

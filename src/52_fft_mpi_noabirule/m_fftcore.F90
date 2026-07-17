@@ -255,26 +255,30 @@ end function fftalg_has_mpi
 !!
 !! INPUTS
 !!  nproc_fft=Number of processors used for MPI FFT
+!!  nthreads =Number of openMP threads
 !!
 !! OUTPUT
 !!  fftalg=Integer used to select the FFT library.
 !!
 !! SOURCE
 
-pure function fftalg_for_npfft(nproc_fft) result(fftalg)
+pure function fftalg_for_npfft(nproc_fft, forbid_threads) result(fftalg)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nproc_fft
+ logical,intent(in),optional :: forbid_threads
  integer :: fftalg
 ! *************************************************************************
 
  ! Default  for the sequential case.
  fftalg = 112
 
- ! Use Goedecker2002 if fftalg does not support MPI (e.g 112)
+ ! Use Goedecker2002 if fftalg does not support MPI or threads (e.g 112)
  if (nproc_fft > 1) fftalg = 401
- !if (nproc_fft > 1) fftalg = 402
+ if (present(forbid_threads)) then
+   if (forbid_threads) fftalg = 401
+ endif
 
 #ifdef HAVE_FFTW3
  fftalg = 312
@@ -4483,8 +4487,8 @@ subroutine kgindex(indpw_k, kg_k, mask, mpi_enreg, ngfft, npw_k)
  integer :: ig,ig1,ig2,ig3,me_fft,n1,n2,n3,nd2
  character(len=500) :: msg
  !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- !integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ !integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
 ! *************************************************************************
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)

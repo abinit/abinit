@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Abinit Post Process Application
@@ -7,24 +6,22 @@ author: Martin Alexandre
 last edited: May 2013
 """
 
-import sys,os
-import string, math
 
 #gui
-import gui.graph as Graph
-
 #Utility
 import utility.analysis as Analysis
+
+import gui.graph as Graph
+
 try:
-    from PyQt4 import Qt,QtGui,QtCore
+    from PyQt4 import QtCore, QtGui
 except:
     pass
-from numpy import sqrt,zeros,conjugate,arange,linspace,exp,log,sin
 
 
 class winVDOS(QtGui.QWidget):
 
-    def __init__(self, pVACF,  pDtion, parent = None,name =''):
+    def __init__(self, pVACF,  pDtion, parent = None,name =""):
 
         self.VACF = pVACF
         self.name = name
@@ -37,7 +34,7 @@ class winVDOS(QtGui.QWidget):
 
         #-----------------Creation of the windows----------------------------#
         QtGui.QWidget.__init__(self, parent)
-        self.setWindowTitle(self.name + ' option')
+        self.setWindowTitle(self.name + " option")
         self.setFixedSize(200, 150)
         self.center()
         self.layout = QtGui.QGridLayout()
@@ -52,15 +49,15 @@ class winVDOS(QtGui.QWidget):
         self.sbres.setMinimum(1)
         self.sbres.setValue(8)
         self.sbres.setFixedSize(70,20)
-        self.connect(self.sbres,QtCore.SIGNAL('valueChanged(int )'),self.displayGraph)
+        self.connect(self.sbres,QtCore.SIGNAL("valueChanged(int )"),self.displayGraph)
 
 
         self.pbok = QtGui.QPushButton("close")
         self.pbok.setFixedSize(70,20)
-        self.connect(self.pbok,QtCore.SIGNAL("clicked()"),QtCore.SLOT('close()'))
+        self.connect(self.pbok,QtCore.SIGNAL("clicked()"),QtCore.SLOT("close()"))
 
         self.checkbox =QtGui.QCheckBox("Show discret spectrum")
-        self.connect(self.checkbox, QtCore.SIGNAL('clicked()'), self.showSprectrum)
+        self.connect(self.checkbox, QtCore.SIGNAL("clicked()"), self.showSprectrum)
 
         self.layout.addWidget(self.lbl   , 1, 0, 1, 1, QtCore.Qt.AlignCenter)
         self.layout.addWidget(self.sbres , 1, 1, 1, 1, QtCore.Qt.AlignCenter)
@@ -77,11 +74,11 @@ class winVDOS(QtGui.QWidget):
 
         y = pdos.getDOS()
         x = pdos.getFrequencies()
-        
+
         try:
-            self.GraphDOS.update(x,y,'E (meV)', "Phonons DOS (1/meV)",name = self.name, adjust=True)
+            self.GraphDOS.update(x,y,"E (meV)", "Phonons DOS (1/meV)",name = self.name, adjust=True)
         except:
-            self.GraphDOS = Graph.graphic(x,y,'E (meV)', "Phonons DOS (1/meV)", average=False, adjust=True,name = self.name)
+            self.GraphDOS = Graph.graphic(x,y,"E (meV)", "Phonons DOS (1/meV)", average=False, adjust=True,name = self.name)
             self.connect(self.GraphDOS, QtCore.SIGNAL("myCustomizedSignal()"), self.close)
             self.GraphDOS.show()
 
@@ -115,7 +112,7 @@ class winVDOS(QtGui.QWidget):
     def close(self):
         del self.GraphDOS
         del self
-    
+
     def closeEvent(self, event):
         try:
             del self.GraphDOS
@@ -124,7 +121,7 @@ class winVDOS(QtGui.QWidget):
         try:
             del self
         except:
-            pass     
+            pass
 
 
 

@@ -259,6 +259,7 @@ This corresponds to making a Taylor expansion of the self-energy matrix element 
 
 ![](mbt_assets/self_energy_taylor.png)
 
+<a id="5-the-rpa-polarizability-in-fourier-space"></a>
 <a id="RPA_Fourier_space"></a>
 ## The RPA polarizability in Fourier space
 
@@ -333,6 +334,8 @@ due to the so called local-field effects introduced by the presence of the cryst
 These spectra, if calculated, are typically output as ... **_LF** and ... **_NLF**
 files during the course of a calculation.
 
+<a id="oscillator_notes"></a>
+<a id="6-notes-on-the-calculation-of-the-oscillator-matrix-elements"></a>
 ## Notes on the calculation of the oscillator matrix elements
 
 Many body calculations require the evaluation of integrals involving the
@@ -440,7 +443,7 @@ such as for the evaluation of optical spectra, or accurate contour deformation
 integrations, or even mapping full grids in the complex plane, the Hilbert
 transform method can be significantly faster, and its use is well worth considering.
 
-<a if="evaluation_gw_sigma"></a>
+<a id="evaluation_gw_sigma"></a>
 ## Evaluation of the GW self-energy
 
 Following the standard approach, we separate the screened interaction into the

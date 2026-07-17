@@ -1,16 +1,21 @@
-Information on the format 3 for pseudopotentials.
+Information on the format 3 for pseudopotentials (also useful for format 2).
 
 (Note: the implementation of format 3 was done by Fr. Detraux).
 
 The format 3 for ABINIT pseudopotentials allows to use pseudopotentials
 from the table I in the Phys. Rev. B 58, 3641 (1998) paper
-by C. Hartwigsen, S. Goedecker and J. Hutter (HGH). This paper
+by C. Hartwigsen, S. Goedecker and J. Hutter (HGH [[cite:Hartwigsen1998]]). This paper
 presents LDA pseudopotentials for all elements from H to Rn. Some of them
 are even presented twice, because of the possibility to include semi-core
 states. Their accuracy has been demonstrated in the HGH paper, but note
 that the energy cut-off needed to get this high accuracy might be
 larger than the one usually needed for Troullier-Martins or other
 pseudopotentials. So, convergence studies are very important !
+
+The format 2 for ABINIT pseudopotentials corresponds to the earlier
+paper S. Goedecker, M. Teter, and J. Hutter (GTH [[cite:Goedecker1996]]), Phys; Rev. B 54, 1703 (1996),
+that presents pseudopotentials without spin-orbit.
+The "k**p" information mentioned in the format 3 is missing in the format 2.
 
 A few lines must be added to the data mentioned in that table,
 and are described in the present file. ABINITv1.5 is able to

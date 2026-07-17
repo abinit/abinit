@@ -76,6 +76,7 @@ module m_anaddb_dataset
   integer:: elphflag
   integer:: enunit
   integer:: flexoflag
+  integer:: freqflag
   integer:: gkk2write
   integer:: gkk_rptwrite
   integer:: gkqwrite
@@ -89,6 +90,7 @@ module m_anaddb_dataset
   integer:: lwf_disentangle
   integer:: lwf_nwann
   integer:: lwfflag
+  integer:: mpopt
   integer:: natfix
   integer:: natifc
   integer:: natprj_bs
@@ -123,6 +125,7 @@ module m_anaddb_dataset
   integer:: rfmeth
   integer:: selectz
   integer:: symdynmat
+  integer:: sys_dim
   integer:: telphint
   integer:: thmflag
   integer:: qgrid_type
@@ -135,6 +138,7 @@ module m_anaddb_dataset
   integer:: ep_nspline
   integer:: ep_prt_yambo
   integer:: symgkq
+  integer:: timdisp
   integer:: use_k_fine
   integer:: prtbltztrp
 
@@ -151,16 +155,21 @@ module m_anaddb_dataset
   integer:: kptrlatt(3, 3)
   integer:: kptrlatt_fine(3, 3)
   integer:: thermal_supercell(3, 3)
+  integer:: mpatpol(2)
+  integer:: mpdir(3)
 
 ! Real(dp)
   real(dp):: a2fsmear
   real(dp):: band_gap
+  real(dp):: dielt_env
+  real(dp):: dielt_thick(2)
   real(dp):: dosdeltae
   real(dp):: dossmear
   real(dp):: dostol
   real(dp):: elphsmear
   real(dp):: elph_fermie
   real(dp):: ep_extrael
+  real(dp):: eta
   real(dp):: freeze_displ
   real(dp):: frmax
   real(dp):: frmin
@@ -168,10 +177,11 @@ module m_anaddb_dataset
   real(dp):: lwf_anchor_qpt(3)
   real(dp):: lwf_mu
   real(dp):: lwf_sigma
+  real(dp):: magpen
+  real(dp):: mustar
   real(dp):: temperinc
   real(dp):: tempermin
   real(dp):: thmtol
-  real(dp):: mustar
   real(dp):: rifcsph
 
   real(dp):: q1shft(3, 4)
@@ -374,10 +384,10 @@ subroutine invars9(dtset, lenstr, natom, string)
  dtset%asr = 1
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'asr',tread, 'INT')
  if(tread == 1) dtset%asr = intarr(1)
- if(dtset%asr < -2 .or. dtset%asr > 5)then
+ if(dtset%asr < -2 .or. dtset%asr > 6)then
    write(message, '(a, i0, 5a)' )&
    'asr is ',dtset%asr, ', but the only allowed values',ch10, &
-   'are 0, 1, 2, 3, 4, 5, -1 or-2 .',ch10, 'Action: correct asr in your input file.'
+   'are 0, 1, 2, 3, 4, 5, 6, -1 or-2 .',ch10, 'Action: correct asr in your input file.'
 !  Note : negative values are allowed when the acoustic sum rule
 !  is to be applied after the analysis of IFCs
 !  3, 4 are for rotational invariance (under development)
@@ -424,6 +434,20 @@ subroutine invars9(dtset, lenstr, natom, string)
    write(message, '(a, i0, 5a)' )&
    'dieflag is ',dtset%dieflag, ', but the only allowed values',ch10, &
    'are 0, 1, 2, 3 or 4.',ch10, 'Action: correct dieflag in your input file.'
+   ABI_ERROR(message)
+ end if
+
+ dtset%dielt_env = one
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'dielt_env',tread, 'DPR')
+ if(tread == 1) dtset%dielt_env = dprarr(1)
+
+ dtset%dielt_thick(:) = 0
+ call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'dielt_thick',tread, 'DPR')
+ if(tread == 1) dtset%dielt_thick(:) = dprarr(1:2)
+ if(dtset%dielt_thick(1) < zero)then
+   write(message, '(a, es14.4, 3a)' )&
+   'dielt_thick is ',dtset%dielt_thick(1), ', which is lower than 0 .',ch10, &
+   'Action: correct dielt_thick in your input file.'
    ABI_ERROR(message)
  end if
 
@@ -657,6 +681,9 @@ subroutine invars9(dtset, lenstr, natom, string)
    end if
  end if
 
+ dtset%eta = 0.00000_dp
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'eta',tread, 'DPR')
+ if(tread == 1) dtset%eta = dprarr(1)
 
 !F
 
@@ -674,26 +701,35 @@ subroutine invars9(dtset, lenstr, natom, string)
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'freeze_displ',tread, 'DPR')
  if(tread == 1) dtset%freeze_displ = dprarr(1)
 
+ dtset%freqflag = 0
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'freqflag',tread, 'INT')
+ if(tread == 1) dtset%freqflag = intarr(1)
+ if(dtset%freqflag < 0 .or. dtset%freqflag > 3)then
+   write(message, '(a, i0, 5a)' )&
+   'freqflag is ',dtset%freqflag, ', but the only allowed values',ch10, &
+   'are between 0 to 3 (included).',ch10, 'Action: correct freqflag in your input file.'
+   ABI_ERROR(message)
+ end if
 
  dtset%frmax = ten
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'frmax',tread, 'DPR')
  if(tread == 1) dtset%frmax = dprarr(1)
- if (dtset%frmax < 0) then
-   write(message, '(a, f10.3, 5a)' )&
-   'frmax is ',dtset%frmax, '. Only values > 0 ',ch10, &
-   'are allowed',ch10, 'Action: correct frmax in your input file.'
-   ABI_ERROR(message)
- end if
+! if (dtset%frmax < 0) then
+!   write(message, '(a, f10.3, 5a)' )&
+!   'frmax is ',dtset%frmax, '. Only values > 0 ',ch10, &
+!   'are allowed',ch10, 'Action: correct frmax in your input file.'
+!   ABI_ERROR(message)
+! end if
 
  dtset%frmin = zero
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'frmin',tread, 'DPR')
  if(tread == 1) dtset%frmin = dprarr(1)
- if (dtset%frmin < 0) then
-   write(message, '(a, f10.3, 5a)' )&
-   'frmin is ',dtset%frmin, '. Only values > 0 ',ch10, &
-   'are allowed',ch10, 'Action: correct frmin in your input file.'
-   ABI_ERROR(message)
- end if
+! if (dtset%frmin < 0) then
+!   write(message, '(a, f10.3, 5a)' )&
+!   'frmin is ',dtset%frmin, '. Only values > 0 ',ch10, &
+!   'are allowed',ch10, 'Action: correct frmin in your input file.'
+!   ABI_ERROR(message)
+! end if
 
 !G
 
@@ -909,6 +945,40 @@ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'lwf_sigma',tread
 if(tread == 1) dtset%lwf_sigma = dprarr(1)
 
 !M
+
+ dtset%magpen = 0.0_dp
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'magpen',tread, 'DPR')
+ if(tread == 1) dtset%magpen = dprarr(1)
+
+ dtset%mpdir(:)=0
+ call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'mpdir',tread, 'INT')
+ if(tread == 1) dtset%mpdir(:)=intarr(1:3)
+ do ii = 1, 3
+   if(dtset%mpdir(ii)<0.or.dtset%mpdir(ii)>1)then
+     write(message, '(a, i0, a, i0, 3a, i0, a)' )&
+     'mpdir(',ii, ') is ',dtset%mpdir(ii), &
+     ', whereas it can only be 0 or 1.',ch10, &
+     'Action: correct mpdir(',ii, ') in your input file.'
+     ABI_ERROR(message)
+   end if
+ end do
+
+ dtset%mpatpol(:)=0
+ call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'mpatpol',tread, 'INT')
+ if(tread == 1) dtset%mpatpol(:)=intarr(1:2)
+ do ii = 1, 2
+   if(dtset%mpatpol(ii)<0.or.dtset%mpatpol(ii)>natom)then
+     write(message, '(a, i0, a, i0, 3a, i0, a)' )&
+     'mpatpol(',ii, ') is ',dtset%mpatpol(ii), &
+     ', which is lower than 0 or larget than the number of atoms in the cell.',ch10, &
+     'Action: correct mpatpol(',ii, ') in your input file.'
+     ABI_ERROR(message)
+   end if
+ end do
+
+ dtset%mpopt=2
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'mpopt',tread, 'INT')
+ if(tread == 1) dtset%mpopt=intarr(1)
 
 !typical value for mustar, but can vary sensibly with the metal
  dtset%mustar = 0.1_dp
@@ -1376,6 +1446,15 @@ if(tread == 1) dtset%lwf_sigma = dprarr(1)
    ABI_ERROR(message)
  end if
 
+ dtset%sys_dim=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'sys_dim',tread,'INT')
+ if(tread==1) dtset%sys_dim=intarr(1)
+ if(dtset%sys_dim<1.or.dtset%sys_dim>9)then
+   write(message, '(a,i0,5a)' )&
+   'sys_dim is ',dtset%sys_dim,', but the only allowed values',ch10,&
+   'are 1, 2, 3, 4, 5, 6, 7 or 8.',ch10,'Action: correct sys_dim in your input file.'
+   ABI_ERROR(message)
+ end if
 !T
 
  dtset%targetpol(:) = 0._dp
@@ -1449,6 +1528,10 @@ if(tread == 1) dtset%lwf_sigma = dprarr(1)
    'Action: correct thmtol in your input file.'
    ABI_ERROR(message)
  end if
+
+ dtset%timdisp = 0
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'timdisp',tread, 'INT')
+ if(tread == 1) dtset%timdisp = intarr(1)
 
  dtset%ep_prt_yambo = 0
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'ep_prt_yambo',tread, 'INT')
@@ -1952,7 +2035,7 @@ subroutine outvars_anaddb(dtset, nunit)
      dtset%nlflag /= 0 .or. dtset%thmflag /= 0 .or. &
      dtset%elaflag /= 0 .or. dtset%elphflag /= 0 .or. &
      dtset%polflag /= 0 .or. dtset%instrflag /= 0 .or. &
-     dtset%piezoflag /= 0) then
+     dtset%piezoflag /= 0 .or. dtset%freqflag /= 0) then
    write(nunit, '(a)')' Flags :'
    if(dtset%dieflag /= 0)write(nunit, '(3x, a9, 3i10)')'  dieflag',dtset%dieflag
    if(dtset%flexoflag /= 0)write(nunit, '(3x, a9, 3i10)')'flexoflag',dtset%flexoflag
@@ -1965,6 +2048,7 @@ subroutine outvars_anaddb(dtset, nunit)
    if(dtset%instrflag /= 0)write(nunit, '(3x, a9, 3i10)')'instrflag',dtset%instrflag
    if(dtset%piezoflag /= 0)write(nunit, '(3x, a9, 3i10)')'piezoflag',dtset%piezoflag
    if(dtset%lwfflag /= 0)write(nunit, '(3x, a9, 3i10)')'lwfflag',dtset%lwfflag
+   if(dtset%freqflag /= 0)write(nunit, '(3x, a9, 3i10)')'lwfflag',dtset%freqflag
  end if
 
 !Write the general information
@@ -2226,7 +2310,29 @@ subroutine outvars_anaddb(dtset, nunit)
    write(nunit, '(10I6)') dtset%iatprj_bs
  end if
 
+!magnetic penalty (constrained DFPT)
+ if (abs(dtset%magpen) > tol8) then
+   write(nunit, '(a)') ' Second-order quantities calculated with constrained DFPT will be transformed'
+   write(nunit, '(3x, a9, 7x, 1es16.8)')'   magpen',dtset%magpen
+   write(nunit, '(3x, a9, 2i3)')        '  mpatpol',dtset%mpatpol(1:2)
+   write(nunit, '(3x, a9, 3i3)')        '    mpdir',dtset%mpdir(1:3)
+   write(nunit, '(3x, a9,  i3)')        '    mpopt',dtset%mpopt
+   if (dtset%timdisp == 1) then
+     write(nunit, '(a)') ' Third-order frequency derivatives calculated with constrained DFPT response functions will be transformed'
+   write(nunit, '(3x, a9,  i3)') '   timdisp',dtset%timdisp
+   end if
+ end if
  write(nunit, '(a, 80a, a)') ch10, ('=',ii = 1, 80), ch10
+
+!Frequency interpolation
+ if (abs(dtset%magpen) > tol8 .and. dtset%freqflag/=0) then
+   write(nunit, '(a)') ' Frequency interpolation of second-order quantities calculated with constrained DFPT '
+   write(nunit, '(3x, a9, i10)')       '   nfreq',dtset%nfreq
+   write(nunit, '(3x, a9, 7x, es16.8)')' frmin',dtset%frmin
+   write(nunit, '(3x, a9, 7x, es16.8)')' frmax',dtset%frmax
+   write(nunit, '(3x, a9, 7x, es16.8)')'      eta',dtset%eta
+ end if
+
 
 end subroutine outvars_anaddb
 !!***
@@ -2462,13 +2568,13 @@ subroutine anaddb_chkvars(string)
 !C
  list_vars = trim(list_vars)//' chneut'
 !D
- list_vars = trim(list_vars)//' dieflag dipdip dipquad dossum dosdeltae dossmear dostol dos_maxmode'
+ list_vars = trim(list_vars)//' dieflag dielt_env dielt_thick dipdip dipquad dossum dosdeltae dossmear dostol dos_maxmode'
 !E
  list_vars = trim(list_vars)//' ep_scalprod eivec elaflag elphflag enunit'
  list_vars = trim(list_vars)//' ep_b_min ep_b_max ep_int_gkk ep_keepbands ep_nqpt ep_nspline ep_prt_yambo'
- list_vars = trim(list_vars)//' elphsmear elph_fermie ep_extrael ep_qptlist'
+ list_vars = trim(list_vars)//' elphsmear elph_fermie ep_extrael ep_qptlist eta'
 !F
- list_vars = trim(list_vars)//' flexoflag freeze_displ frmax frmin'
+ list_vars = trim(list_vars)//' flexoflag freeze_displ freqflag frmax frmin'
 !G
  list_vars = trim(list_vars)//' gkk2write gkk_rptwrite gkqwrite gruns_nddbs'
 !H
@@ -2483,7 +2589,7 @@ subroutine anaddb_chkvars(string)
  list_vars = trim(list_vars)//' lwf_disentangle lwf_mu lwf_ngqpt lwf_nwann lwf_projector lwf_sigma'
  list_vars = trim(list_vars)//' lwfflag'
 !M
- list_vars = trim(list_vars)//' mustar'
+ list_vars = trim(list_vars)//' magpen mpatpol mpdir mpopt mustar'
 !N
  list_vars = trim(list_vars)//' natfix natifc natom natprj_bs nchan ndivsm nfreq ngrids nlflag nph1l nph2l'
  list_vars = trim(list_vars)//' nqpath nqshft nsphere nstrfix ntemper nwchan ngqpt ng2qpt'
@@ -2497,9 +2603,9 @@ subroutine anaddb_chkvars(string)
 !R
  list_vars = trim(list_vars)//' ramansr relaxat relaxstr rfmeth rifcsph'
 !S
- list_vars = trim(list_vars)//' selectz symdynmat symgkq'
+ list_vars = trim(list_vars)//' selectz symdynmat symgkq sys_dim'
 !T
- list_vars = trim(list_vars)//' targetpol telphint thmflag temperinc tempermin thermal_supercell thmtol'
+ list_vars = trim(list_vars)//' targetpol telphint thmflag temperinc tempermin thermal_supercell thmtol timdisp'
 !U
  list_vars = trim(list_vars)//' use_k_fine'
 !V

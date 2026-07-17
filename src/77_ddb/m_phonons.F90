@@ -227,7 +227,7 @@ module m_phonons
    ! (0:%nprocs-1))
    ! Initial and final index of the IBZ qpoint treated by this MPI proc inside comm.
 
-   real(dp), ABI_CONTIGUOUS pointer :: qibz(:,:)
+   real(dp), contiguous, pointer :: qibz(:,:)
    ! q-points in the IBZ.
 
    real(dp),allocatable :: phfreqs_qibz(:,:)
@@ -1841,7 +1841,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
  type(anaddb_dataset_type),target,intent(in) :: inp
  type(ddb_type),intent(in) :: ddb
  type(asrq0_t),intent(inout) :: asrq0
-
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
@@ -1927,10 +1926,14 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
-     call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,ddb%mpert,natom, &
-      Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff,&
-      ifc%qdrp_cart,ifc%ewald_option,eta,xmpi_comm_self,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
-
+     call gtdyn9(Ifc%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,Ifc%gprim,Ifc%mpert,natom, &
+      Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff,&
+      ifc%qdrp_cart,ifc%ewald_option,eta,xmpi_comm_self,Ifc%sys_dim,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad,&
+      dielt_env=Ifc%dielt_env,dielt_thick=Ifc%dielt_thick)
+     if (asrq0%asr==6) then
+       qphon_padded = zero; qphon_padded(:,1) = qphon(:)
+       call asrq0%apply(natom, ddb%mpert, ddb%msize, qphon_padded, Crystal, d2cart)
+     end if
    else if (ifcflag == 0) then
 
      !call ddb_diagoq(ddb, crystal, save_qpoints(:,iphl1), asrq0, ifc%symdynmat, rftyp, phfrq, displ, &
@@ -1946,7 +1949,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
      d2cart(:,1:ddb%msize)=ddb%val(:,:,iblok)
 
      ! Eventually impose the acoustic sum rule based on previously calculated d2asr
-     call asrq0%apply(natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
+     call asrq0%apply(natom, ddb%mpert, ddb%msize, qphon_padded, Crystal, d2cart)
    end if
 
    ! Use inp%symdynmat instead of ifc because of ifcflag
@@ -2027,11 +2030,9 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
  if (my_rank == master) then
    ABI_MALLOC(weights, (nfineqpath))
    weights = one
-
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
    NCF_CHECK(crystal%ncwrite(ncid))
    call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart,save_phangmom)
-
    ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
    if (inp%nph2l /= 0 .and. inp%ifcflag == 1) then
      call ifc%calcnwrite_nana_terms(crystal, inp%nph2l, inp%qph2l, inp%qnrml2, ncid)

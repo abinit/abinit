@@ -2,7 +2,7 @@
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -256,12 +256,6 @@ meta: {optdriver: 9, }
 
 Total energy =     -11.527561 Ha
 Integrated density (ie. total nb of electrons) =       8.0000035485
-
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=  28  k points:
- kpt#   1, nband=  8, wtk=  0.02778, kpt= -0.0833 -0.1667  0.0000 (reduced coord)
-  -0.38952    0.27506    0.31786    0.34829    0.59404    0.67310    0.67501    0.90388
- prteigrs : prtvol=0 or 1, do not print more k-points.
 
 - Time - cpu, wall (sec):    0.15    0.15
 

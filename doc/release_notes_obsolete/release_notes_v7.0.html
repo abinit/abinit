@@ -20,7 +20,7 @@ The list of contributors includes :
 F. Abreu, B. Amadon, G. Antonius, T. Applencourt, A. Berger,
 J.M. Beuken, J. Bieder, E. Bousquet, F. Bruneval, D. Caliste, R. Cohen, F. Dahm, M. Delaveau,
 G. Franco, G. Geneste, M. Giantomassi, Y. Gillet, Jiawang Hong, A. Jacques, F. Jollet,
-M. Mancini, M. Marques, C. Martins, L. Nguyen, S. Poncé, Y. Pouillon, T. Rangel, A.H. Romero, 
+M. Mancini, M. Marques, C. Martins, L. Nguyen, S. Poncé, Y. Pouillon, T. Rangel, A.H. Romero,
 M. Stankovski, M. Stengel, M. Torrent, D. Vanderbilt, M. Verstraete,  D. Waroquiers,
 Bin Xu, J. Zwanziger.
 
@@ -66,25 +66,25 @@ __________________________________________________________________
 
 B.  Most noticeable achievements
 
-B.1. Fixed electric field calculations : other flavours than simply fixing the electric field 
-     are now available, and the geometry can be relaxed (non-zero optcell) in these calculations, 
-     following M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009). 
-     One can do e.g. calculations with fixed E/D-field or fixed reduced ebar/d field 
-     or mixed electric boundary condition (such as fixed D/d in one direction and fixed E/ebar 
-     in other directions which is useful for the calculation of sandwiched capacitor).  
-     The implementation supports fixed three-dimensional E/ebar or D/d. 
-     The variables to be used in finite field calculations have been 
+B.1. Fixed electric field calculations : other flavours than simply fixing the electric field
+     are now available, and the geometry can be relaxed (non-zero optcell) in these calculations,
+     following M. Stengel, N.A. Spaldin and D. Vanderbilt, Nat. Phys. 5,304 (2009).
+     One can do e.g. calculations with fixed E/D-field or fixed reduced ebar/d field
+     or mixed electric boundary condition (such as fixed D/d in one direction and fixed E/ebar
+     in other directions which is useful for the calculation of sandwiched capacitor).
+     The implementation supports fixed three-dimensional E/ebar or D/d.
+     The variables to be used in finite field calculations have been
      gathered in a new html file doc/input_variables/varrf.html.
      New input variables : dfield, red_efieldbar, red_dfield, red_efield,
      as well as jfielddir, ddamp, polcen, and maxestep
      See the new options in berryopt input variable.
      New test cases : seq/v6_121, v6_122, v6_123, v6_124, v6_125, v6_126
 
-     More implementation notes can be found in doc/theory/fixd_theory.pdf, 
+     More implementation notes can be found in doc/theory/fixd_theory.pdf,
      tests of the current ABINIT implementation were presented in J Hong and D Vanderbilt, Phys. Rev. B 84, 115107 (2011).
 
      Other improvements for finite electric field calculations include the possibility to keep the same "branch"
-     from one iteration to the next one, thanks to the input variable berrysav, 
+     from one iteration to the next one, thanks to the input variable berrysav,
      and for finite electric field calculations
      starting from a centrosymmetric geometry with non-zero polarization (like AlAs), the
      non-zero polarization should be specified thanks to the input variable polcen.
@@ -94,7 +94,7 @@ B.2. Hybrid functional calculations can now be performed, at fixed geometry.
      This is implemented in the GW part of ABINIT : either perturbatively (like a G0_W0) calculation,
      or with self-consistency (like scQPGW).
      Three functionals are available : HSE06, PBE0, and B3LYP.
-     However, with the current production version of libxc (as of Sept 30, 2012, libxc 1.1.0), only the 
+     However, with the current production version of libxc (as of Sept 30, 2012, libxc 1.1.0), only the
      B3LYP functional is available. HSE06 and PBE0 are available with the development version of libxc, not yet
      delivered on the Web, but only from the repository.
      Related input variable : gwcalctyp=105, 125, 205, 225, 305 and 325 , but also icutcoul and rcut.
@@ -113,23 +113,23 @@ B.3. For DFT+DMFT calculations, the combined parallelization over k-point, plane
      using the input variable dmft_tollc.
      See also the new input variables f4of2_sla and f6of2_sla.
      Related test case : mpiio#AG , paral#AF , v7#21.
-     Contributed by B. Amadon 
+     Contributed by B. Amadon
 
-B.4. Parallelisation of the response-function part over different perturbations is now available.   
+B.4. Parallelisation of the response-function part over different perturbations is now available.
      A good balancing scheme is however not yet worked out.
      Related input variables : paral_rf, nppert
      Related test case : mpiio#AI .
      Contributed by F. Jollet (with help of M. Torrent).
 
 B.5  The GW part of ABINIT is able to start from _WFK files instead of _KSS files (except the EET).
-     Such _WFK files can be generated in parallel, and written/read using MPIIO. Thus there is no 
+     Such _WFK files can be generated in parallel, and written/read using MPIIO. Thus there is no
      more such a sequential bottleneck for GW calculations.
      Work by M. Giantomassi.
 
 B.6. New integration methods and grid options for the integral
      along the imaginary axis in GW contour deformation calculations are available.
      This is especially useful for very accurate convergence studies.
-     See the input variable cd_frqim_method : histogram method, trapezoid method, 
+     See the input variable cd_frqim_method : histogram method, trapezoid method,
      natural spline, Gauss-Kronrod with different orders.
      See also the input variables freqim_alpha, gw_frqim_inzgrid, gw_frqre_inzgrid,
      gw_freqre_tangrid. gw_customnfreqsp, nfreqsp, gw_freqsp.
@@ -149,7 +149,7 @@ B.8 The U value for DFT+U calculations can now be computed in the cRPA method,
 B.9 The nudged-elastic band (NEB) method to find path between local minima has been coded.
     This include also the "Climbing-image nudged elastic nband" method.
     Different solvers are available for the solution for the corresponding ordinary differential equation.
-    Local and (highly experimental) global BFGS for NEB Variable spring constants for the NEB. 
+    Local and (highly experimental) global BFGS for NEB Variable spring constants for the NEB.
     Related work on the string method. Runge-Kutta 4 available for both NEB and string method.
     The string methods with equal arc length, and with energy-weighted arc lengths
     are available, thanks to the input variable string_algo, with values 1 and 2.
@@ -161,14 +161,14 @@ B.9 The nudged-elastic band (NEB) method to find path between local minima has b
 
 B.10 The genetic algorithm to find global optima thanks to a search based on a population
     of images, has been implemented.
-    Call the genetic algorithm with imgmov=4 . 
+    Call the genetic algorithm with imgmov=4 .
     Related input variables : ga_rules, ga_n_rules, ga_opt_percent, ga_fitness.  Also,
     random_atpos.
     Contributed by A.H. Romero and X. Gonze
 
 B.11 The vdW-DFT-D2 (Grimme) semi-empirical potential to mimick the Van De Waals interaction is available.
     See Tvdwxc#04, and input variable vdw_xc (that must be equal to 5) and vdw_tol.
-    From M. Torrent 
+    From M. Torrent
     The Ambrosetti and Silvestrelli http://arxiv.org/abs/1111.6737  van der waals functional
     is available, see Tv7#11 .
     From C. Espejo, Y. Pouillon and A. Romero.
@@ -192,7 +192,7 @@ B.14 Mixalch and amu are now evolving variables . This means that
      be combined with such possibility.
 
 B.15 The new input variable paral_atom has been introduced, to control
-     the parallel distribution of memory of PAW on-site data over atomic sites. 
+     the parallel distribution of memory of PAW on-site data over atomic sites.
      It is now activated by default.  Calculations are
      also distributed using the "kpt-band" communicator.
      Only compatible for the time being with ground-state calculations.
@@ -273,7 +273,7 @@ D.5 Calculation of quasi-particle energies  using the effective energy technique
     Creation of Tv67mbpt#28, for aluminum.
     Test contributed by A. Berger.
 
-D.6 Printing the geometry in the POSCAR format. 
+D.6 Printing the geometry in the POSCAR format.
     Input variable prtposcar. Test v7#01.
     From M. Verstraete.
 
@@ -296,7 +296,7 @@ D.10 The distance (in configuration space) used is the String Method has been
      Contributed by A. Romero
 
 D.11 Added Entropy record in MOLDYN and HIST files.
-     Work by M. Mancini. 
+     Work by M. Mancini.
 
 D.12 One can have a finer control on the conjugate-gradient algorithm used to minimize the residual
      of the wavefunction, thanks to the input variable tolrde. Previously, it was implicitly
@@ -304,7 +304,7 @@ D.12 One can have a finer control on the conjugate-gradient algorithm used to mi
      See test atompaw#04.
 
 D.13 Implementation of the path-integral molecular dynamics with the (N,P,T) ensemble
-     is going on. Velocities of the cell parameters can be specified with vel_cell (evolving variables).. 
+     is going on. Velocities of the cell parameters can be specified with vel_cell (evolving variables)..
      From G. Geneste and M. Torrent.
 
 D.14 The c parameter in the meta-GGA TB09 functional can be fixed, instead of adjusted, like in the original
@@ -370,7 +370,7 @@ D.29 Further work on the ABINIT GUI. Drag and drop graphics utility,
      more windows, correction of bugs. Not committed though.
      Work by F. Abreu and Y. Gillet.
 
-D.30 With prtfsurf=1 in ANADDB, an additional output of eigen energies and velocities is written in the VTK format, 
+D.30 With prtfsurf=1 in ANADDB, an additional output of eigen energies and velocities is written in the VTK format,
      which allows the visualization of Fermi velocities on the Fermi surface
      Work by Bin Xu
 
@@ -379,7 +379,7 @@ D.31 The capability to compute M-resolved partial DOS with prtdosm=2 is now avai
 
 D.32 Numerous miscellaneous additional bug fixes (to the sources, as well as to the build system, including patches for the fallbacks),
      and improvements of documentation by
-     G. Antonius, J.M. Beuken, E. Bousquet, F. Bruneval, D. Caliste, M. Delaveau, 
+     G. Antonius, J.M. Beuken, E. Bousquet, F. Bruneval, D. Caliste, M. Delaveau,
      G. Franco, M. Giantomassi, Y. Gillet, A. Jacques, F. Jollet,
      S. Poncé, T. Rangel, A.H. Romero, M. Stankovski, M. Torrent, M. Verstraete, Bin Xu, J. Zwanziger, D. Waroquiers.
 </pre>

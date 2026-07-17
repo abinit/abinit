@@ -1,5 +1,6 @@
-import matplotlib.pyplot as plt
 import tkinter as tk
+
+import matplotlib.pyplot as plt
 
 HA_EV = 27.211386245981
 
@@ -21,7 +22,7 @@ class Figure:
         root.withdraw()
         screen_w = root.winfo_screenwidth()
         screen_h = root.winfo_screenheight()
-        dpi      = root.winfo_fpixels('1i')
+        dpi      = root.winfo_fpixels("1i")
         root.destroy()
 
         self.screen_w, self.screen_h = screen_w, screen_h
@@ -73,15 +74,14 @@ class Figure:
 
         if "yerr" in params:
             ax.errorbar(x, y, params["yerr"], lw=2*font_ratio, color="black", ecolor="#c1272d", elinewidth=5*font_ratio)
+        elif z is not None:
+            self.cont = ax.contourf(x,y,z)
         else:
-            if not(z is None):
-                self.cont = ax.contourf(x,y,z)
+            if "label" in params:
+                label = params["label"]
             else:
-                if "label" in params:
-                    label = params["label"]
-                else:
-                    label = ""
-                ax.plot(x, y, lw=5*font_ratio, color=next(self.color), label=label)
+                label = ""
+            ax.plot(x, y, lw=5*font_ratio, color=next(self.color), label=label)
 
         if "xlabel" in params:
             ax.set_xlabel(params["xlabel"], fontsize=50*font_ratio)
@@ -107,7 +107,7 @@ class Figure:
 
         if legend:
             legend = self.ax.legend(fontsize=50*font_ratio,framealpha=1.0)
-            legend.get_frame().set_edgecolor('black')
+            legend.get_frame().set_edgecolor("black")
 
         if colorbar:
             cbar = self.fig.colorbar(self.cont, ax=self.ax)

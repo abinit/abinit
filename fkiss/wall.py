@@ -1,18 +1,18 @@
 #!/usr/bin/env python
-# coding: utf-8
 """
 Parser for warning messages emitted by Fortran compilers.
 """
-from __future__ import print_function, division, unicode_literals
 
-import sys
-import os
-import io
-import re
+from __future__ import annotations
+
 import abc
+import os
+import re
+import sys
+from collections import Counter
 
-from collections import Counter, OrderedDict
-from tools import pprint_table, lazy_property
+from tools import lazy_property, pprint_table
+
 #from termcolor import cprint
 
 # From https://gcc.gnu.org/onlinedocs/gfortran/Error-and-Warning-Options.html#Error-and-Warning-Options
@@ -158,23 +158,24 @@ this includes scalars and derived types.""",
 "-Wunused-variable": "FIXME",
 "-Wunused-function":  "FIXME",
 
-#
 "GnuExtension": "FIXME",
 "Obsolescent": "Obsolescent Feature",
-#
 "Miscellaneous": "Miscellaneous Warnings",   # Used to classify warnings that are not documented
 }
 
 class Message:
     """
-    .. attributes:
+    Representation of a diagnostic message (warning/error) from a compiler.
 
-        filepath:
-        lineno:
-        colno:
-        text:
+    Attributes:
+        filepath: Path to the source file that triggered the message.
+        kind: The category or flag of the warning (e.g., "-Wconversion").
+        text: The full raw text of the message.
+        lineno: Line number in the source file.
+        colno: Column number in the source file.
+        info: Descriptive information about this specific warning kind.
     """
-    def __init__(self, filepath, kind, text, lineno, colno, info):
+    def __init__(self, filepath: str | None, kind: str, text: str, lineno: int | str | None, colno: int | str | None, info: str):
         self.filepath = filepath if filepath is not None else "Unknown"
         self.kind = kind
         self.text = text
@@ -183,11 +184,11 @@ class Message:
         self.info = info
 
     @lazy_property
-    def filename(self):
+    def filename(self) -> str:
         return os.path.basename(self.filepath)
 
     @lazy_property
-    def dirname(self):
+    def dirname(self) -> str:
         return os.path.basename(os.path.dirname(self.filepath))
 
     def __repr__(self):
@@ -199,30 +200,13 @@ class Message:
 
 class GFortranWarning(Message):
     """
-../../../src/98_main/mrgscr.F90:1852:25:
+    Parser and container for GFortran-style warning messages.
 
-        omega_new = CMPLX(-one,-one)
-                         1
-Warning: Conversion from REAL(8) to default-kind COMPLEX(4) at (1) ... [-Wconversion]
-
-../../../src/53_ffts/m_fft.F90:1606:47: Warning: Possible change of ... at (1) [-Wconversion]
-
-../../../src/01_linalg_ext/m_linalg_interfaces.F90:84:14:
-
-    character*1 :: TRANS
-              1
-Warning: Obsolescent feature: Old-style character length at (1)
-
-../../../src/28_numeric_noabirule/interfaces_28_numeric_noabirule.F90:705:8:
-
-real*8, intent(inout) :: a(mesh)
-1
-Warning: GNU Extension: Nonstandard type declaration REAL*8 at (1)
-
-../../../src/95_drive/eph.F90:320:54: Warning: Possible change of value in ... at (1) [-Wconversion]
+    Args:
+        lines: List of strings comprising the full GFortran warning output block.
     """
-    def __init__(self, lines):
-        text = "\n".join(lines) #.encode("utf8")
+    def __init__(self, lines: list[str]):
+        text = "\n".join(lines)
 
         if len(lines) > 1:
             #print(lines[0].split(":"))
@@ -262,22 +246,43 @@ class WarningsParser:
         self.filepaths = "Unknown"
 
     @classmethod
-    def from_compiler(cls, compiler):
+    def from_compiler(cls, compiler: str) -> WarningsParser:
+        """
+        Factory method to create a parser instance based on the compiler name.
+
+        Args:
+            compiler: Name of the compiler (e.g., "gfortran", "ifort").
+
+        Returns:
+            WarningsParser: An instance of the appropriate subclass.
+
+        Raises:
+            ValueError: If no parser is found for the given compiler.
+        """
         for c in cls.__subclasses__():
             if c.compiler == compiler: return c()
         raise ValueError("No Parser associated to compiler `%s`" % compiler)
 
     @abc.abstractmethod
-    def parse_lines(self, lines, filepath="Unknown"):
+    def parse_lines(self, lines: list[str], filepath: str = "Unknown") -> WarningsParser:
         """Parse the file. Returns self."""
 
-    def parse_file(self, filename):
+    def parse_file(self, filename: str) -> WarningsParser:
+        """
+        Read and parse a file containing compiler warnings.
+
+        Args:
+            filename: Path to the file to parse.
+
+        Returns:
+            WarningsParser: The instance itself (self).
+        """
         self.filepath = os.path.abspath(filename)
-        with io.open(filename, "rt", encoding="utf8") as fh:
+        with open(filename, encoding="utf8") as fh:
             return self.parse_lines(fh.readlines(), filepath=self.filepath)
 
     @property
-    def num_warns(self):
+    def num_warns(self) -> int:
         return len(self.warns)
 
     def __repr__(self):
@@ -286,12 +291,12 @@ class WarningsParser:
     def __str__(self):
         return self.to_string()
 
-    def to_string(self, verbose=0):
+    def to_string(self, verbose: int = 0) -> str:
         lines = ["<%s %s: num_warns: %s>" % (self.__class__.__name__, self.filepath, self.num_warns), ""]
         lines.append(self.summarize())
         return "\n".join(lines)
 
-    def summarize(self):
+    def summarize(self) -> str:
         """Return string with data in tabular form."""
         counter = Counter(warn.kind for warn in self.warns)
         table = [["Kind", "Count"]]
@@ -320,12 +325,13 @@ class WarningsParser:
     #        od[w.kind].append(w)
     #    return od
 
-    def fix(self):
-        from tools import Editor, user_wants_to_exit
+    def fix(self) -> None:
         import json
+
+        from tools import Editor, user_wants_to_exit
         fixed = set()
         if os.path.exists("fixed.json"):
-            with open("fixed.json", "rt") as fh:
+            with open("fixed.json") as fh:
                 fixed = set(json.load(fh)["fixed"])
 
         editor = Editor()
@@ -340,14 +346,14 @@ class WarningsParser:
             fixed.add(repr(warn))
             if user_wants_to_exit(): break
 
-        with open("fixed.json", "wt") as fh:
+        with open("fixed.json", "w") as fh:
             json.dump(list(fixed), fh)
 
 
 class GfortranParser(WarningsParser):
     compiler = "gfortran"
 
-    def parse_lines(self, lines, filepath="Unknown"):
+    def parse_lines(self, lines: list[str], filepath: str = "Unknown") -> WarningsParser:
         buff = []
         for line in lines:
             line = line.strip()
@@ -377,7 +383,7 @@ class IfortRemark(Message):
     # icc: command line remark #10010: option
     RE_IFORT_REMARK = re.compile(r".+command line remark\s+#(?P<kind>\d+):\s*(?P<info>\w*)")
 
-    def __init__(self, line):
+    def __init__(self, line: str):
         m = self.RE_IFORT_REMARK.match(line)
         if not m:
             raise ValueError("String does not match regex: %s" % line)
@@ -391,7 +397,7 @@ class IfortWarning(Message):
     # ../../../src/17_libtetra_ext/m_tetrahedron.F90(1119): warning #6843: A dummy argument ... explicit value.   [TWEIGHT]
     RE_IFORT_WARN = re.compile(r"(?P<filepath>.+)\((?P<lineno>\d+)\):\s+warning\s+#(?P<kind>\d+):\s*(?P<info>\w*)")
 
-    def __init__(self, lines):
+    def __init__(self, lines: list[str]):
         m = self.RE_IFORT_WARN.match(lines[0])
         if not m:
             raise ValueError("String does not match regex: %s" % lines[0])
@@ -404,7 +410,7 @@ class IfortWarning(Message):
 class IfortParser(WarningsParser):
     compiler = "ifort"
 
-    def parse_lines(self, lines, filepath="Unknown"):
+    def parse_lines(self, lines: list[str], filepath: str = "Unknown") -> WarningsParser:
         """
         icc: command line remark #10010: option '-vec-report0' is deprecated and will be removed ...
         """
@@ -431,17 +437,17 @@ class IfortParser(WarningsParser):
         return self
 
 
-def main():
+def main() -> int:
     import argparse
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter)
 
-    parser.add_argument('-v', '--verbose', default=0, action='count', # -vv --> verbose=2
-        help='verbose, can be supplied multiple times to increase verbosity.')
+    parser.add_argument("-v", "--verbose", default=0, action="count", # -vv --> verbose=2
+        help="verbose, can be supplied multiple times to increase verbosity.")
 
     parser.add_argument("filepath", type=str, help="File to parse.")
     parser.add_argument("-c", "--compiler", type=str, default="gfortran",
         help="Fortran Compiler. Allowed values in ['gfortran', 'ifort'], Default: gfortran")
-    parser.add_argument("-f", "--fix", action='store_true', default=False, help="Fix warnings in $EDITOR")
+    parser.add_argument("-f", "--fix", action="store_true", default=False, help="Fix warnings in $EDITOR")
 
     options = parser.parse_args()
 

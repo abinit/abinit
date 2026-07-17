@@ -4,16 +4,16 @@
 #include "abi_common.h"
 
 #define MALLOC(ARR,SIZE)     ABI_MALLOC(ARR,SIZE)
-#define FREE(ARR)            ABI_FREE(ARR) 
+#define FREE(ARR)            ABI_FREE(ARR)
 #define FREEIF(ARR)          IF(ALLOCATED(ARR)) THEN NEWLINE ABI_FREE(ARR) NEWLINE END IF
 
 #define DT_MALLOC(ARR,SIZE)  ABI_MALLOC(ARR,SIZE)
-#define DT_FREE(ARR)         ABI_FREE(ARR) 
+#define DT_FREE(ARR)         ABI_FREE(ARR)
 #define DT_FREEIF(ARR)       IF(ALLOCATED(ARR)) THEN NEWLINE ABI_FREE(ARR) NEWLINE END IF
 
 #define myWARNALL(msg)       ABI_WARNING(msg)
 #define myWARN(msg)          call msg_hndl(msg,"WARNING","PERS")
-#define myERROR(msg)         ABI_ERROR(msg) 
+#define myERROR(msg)         ABI_ERROR(msg)
 #define MY_WORLD             xmpi_world
 
 #define _PRIVATE              ABI_PRIVATE
@@ -24,8 +24,8 @@
 #define MALLOC(ARR,SIZE)     ALLOCATE(ARR SIZE)
 #define FREE(ARR)            DEALLOCATE(ARR)
 #define FREEIF(ARR)          IF(ALLOCATED(ARR)) DEALLOCATE(ARR)
-#define DT_MALLOC(ARR,SIZE)  ALLOCATE(ARR SIZE) 
-#define DT_FREE(ARR)         DEALLOCATE(ARR) 
+#define DT_MALLOC(ARR,SIZE)  ALLOCATE(ARR SIZE)
+#define DT_FREE(ARR)         DEALLOCATE(ARR)
 #define DT_FREEIF(ARR)       IF(ALLOCATED(ARR)) DEALLOCATE(ARR)
 
 #define std_err                6
@@ -40,13 +40,14 @@
 #ifdef HAVE_MPI
 #define HAVE_MPI2
 #endif
-  
+
 #endif
 
 
 #define Global_SIZE 100
 #define MODCYCLE(a,b,c) c=a; IF(c .GT. b) c = c-b;
 #define Vector_QuickResize(a,b) IF( b .GT. a%size ) CALL Vector_enlarge(a,MAX(b-a%size,Global_SIZE)); a%tail = b
+#define VectorComplex_QuickResize(a,b) IF( b .GT. a%size ) CALL Vectorcomplex_enlarge(a,MAX(b-a%size,Global_SIZE)); a%tail = b
 #define VectorInt_QuickResize(a,b) IF( b .GT. a%size ) CALL VectorInt_enlarge(a,MAX(b-a%size,Global_SIZE)); a%tail = b
 #define ImpurityOperator_QuickActivation(a,b) a%activeFlavor = b
 #define BathOperator_QuickActivation(a,b) a%activeFlavor = b; a%MAddFlag = .FALSE.;a%MRemoveFlag = .FALSE.

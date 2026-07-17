@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Abinit Post Process Application
@@ -7,11 +6,9 @@ author: Martin Alexandre
 last edited: May 2013
 """
 
-import os, sys, time
-import string, math, re
 
 try:
-    from PyQt4 import Qt,QtGui,QtCore
+    from PyQt4 import QtCore, QtGui
 except:
     pass
 
@@ -24,14 +21,14 @@ class loading(QtGui.QWidget):
 
     def __init__(self, parent = None, message = "please wait"):
             self.message = message
-            self.initUI(parent)           
+            self.initUI(parent)
             self.raise_()
-            
+
     def initUI(self, parent):
 
 	#-----------------Creation of the windows----------------------------#
         QtGui.QWidget.__init__(self, parent)
-        self.setWindowTitle('Please wait')
+        self.setWindowTitle("Please wait")
         self.setFixedSize(160, 60)
         self.center()
 
@@ -39,7 +36,7 @@ class loading(QtGui.QWidget):
         self.setLayout(self.layout)
 
         self.lblload = QtGui.QLabel(self.message)
-        
+
         self.progressbar = QtGui.QProgressBar(self)
         self.progressbar.setMinimum(0)
         self.progressbar.setMaximum(0)
@@ -47,12 +44,11 @@ class loading(QtGui.QWidget):
 
         self.layout.addWidget(self.lblload    , 1, 0, 1, 1, QtCore.Qt.AlignCenter)
         self.layout.addWidget(self.progressbar, 2, 0, 1, 1, QtCore.Qt.AlignCenter)
-        
+
         self.show()
 
     def cancel(self):
         self.thread.stop()
-        return
 
     def update(self,pmessage):
         self.lblload.setText(pmessage)
@@ -64,8 +60,8 @@ class loading(QtGui.QWidget):
         self.move((screen.width()-size.width())/2, (screen.height()-size.height())/2)
 
     def __del__(self):
-        pass;
- 
+        pass
+
 
     def closeEvent(self, event):
         self.raise_()

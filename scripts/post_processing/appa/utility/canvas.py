@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Abinit Post Process Application
@@ -7,15 +6,15 @@ author: Martin Alexandre
 last edited: May 2013
 """
 
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvasQT
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvasQT
 from matplotlib.figure import Figure
-from matplotlib.ticker import FormatStrFormatter,ScalarFormatter
+from matplotlib.ticker import ScalarFormatter
+
 try:
-    from PyQt4 import Qt,QtGui,QtCore
+    from PyQt4 import QtGui
 except:
-    pass;
+    pass
 
 #---------------------------------------------------#
 #---------------------------------------------------#
@@ -45,7 +44,7 @@ class Canvas(FigureCanvas):
         self.axes.clear()
 
         if point :
-            self.axes.plot(x,y,'.',markersize=15)
+            self.axes.plot(x,y,".",markersize=15)
         else :
             self.axes.plot(x,y)
 
@@ -53,12 +52,12 @@ class Canvas(FigureCanvas):
             if (max(y)-min(y)) <10**-10:
                 self.axes.set_ylim(min(y)-1,max(y)+1)
         except:
-            pass;
-        
+            pass
+
         self.axes.set_xlabel(xlbl)
         self.axes.set_ylabel(ylbl)
-        self.axes.figure.set_facecolor('white')
-        self.axes.grid('on')
+        self.axes.figure.set_facecolor("white")
+        self.axes.grid("on")
 
         self.axes.yaxis.set_major_formatter(self.formater)
         self.axes.xaxis.set_major_formatter(self.formater)
@@ -72,7 +71,7 @@ class Canvas(FigureCanvas):
         self.axes.legend(plegend,loc=1,markerscale=markerscale)
         self.draw()
 
-    def addPlot(self,x,y,bar = False, point = False,marker='.',marker_size=25 ):
+    def addPlot(self,x,y,bar = False, point = False,marker=".",marker_size=25 ):
         if bar == True:
             self.axes.bar(x, y, width=0.01)
         elif point == True :
@@ -107,7 +106,7 @@ class Canvas(FigureCanvas):
 
 class CanvasQT(FigureCanvasQT):
 
-    def __init__(self, parent=None, width=6, height=4, dpi=100,x=0,y=0,pxlbl="",pylbl="",point = False,adjust=False,marker='.',marker_size=25):
+    def __init__(self, parent=None, width=6, height=4, dpi=100,x=0,y=0,pxlbl="",pylbl="",point = False,adjust=False,marker=".",marker_size=25):
 
         self.fig = Figure(figsize=(width, height), dpi=dpi,)
 
@@ -119,7 +118,7 @@ class CanvasQT(FigureCanvasQT):
         self.setPlot(x,y,pxlbl,pylbl,point =point,adjust=adjust,marker=marker,marker_size=marker_size)
 
 
-    def setPlot(self,x,y,xlbl,ylbl,point =False, adjust=False,marker='.', marker_size=25):
+    def setPlot(self,x,y,xlbl,ylbl,point =False, adjust=False,marker=".", marker_size=25):
         try :
             self.formater = ScalarFormatter(useOffset=True, useMathText=False, useLocale=None)
             self.formater.set_useOffset(0)
@@ -141,9 +140,9 @@ class CanvasQT(FigureCanvasQT):
             if (max(y)-min(y)) <10**-10:
                 self.axes.set_ylim(min(y)-1,max(y)+1)
         except :
-            pass;
-        self.axes.figure.set_facecolor('white')
-        self.axes.grid('on')
+            pass
+        self.axes.figure.set_facecolor("white")
+        self.axes.grid("on")
 
         self.axes.yaxis.set_major_formatter(self.formater)
         self.axes.xaxis.set_major_formatter(self.formater)
@@ -157,7 +156,7 @@ class CanvasQT(FigureCanvasQT):
         self.axes.legend(plegend,loc=1,markerscale=markerscale)
         self.draw()
 
-    def addPlot(self,x,y,bar = False, point = False,marker='k+',marker_size=25):
+    def addPlot(self,x,y,bar = False, point = False,marker="k+",marker_size=25):
         if bar == True:
             self.axes.bar(x, y, width=0.01)
         elif point == True :

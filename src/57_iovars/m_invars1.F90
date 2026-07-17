@@ -39,10 +39,10 @@ module m_invars1
 #endif
 
  use m_fstrings, only : inupper, itoa, endswith, strcat, sjoin, startswith
- use m_geometry, only : mkrdim
+ use m_geometry, only : mkrdim, cart2spinaxis
  use m_parser,   only : intagm, intagm_img, chkint_ge, ab_dimensions, geo_t, geo_from_abivar_string
  use m_inkpts,   only : inkpts, inqpt
- use m_ingeo,    only : ingeo, invacuum
+ use m_ingeo,    only : ingeo, invacuum, checkspvec
  use m_matrix,   only : mati3det
  use m_mep,      only : MEP_SOLVER_STEEPEST,NEB_ALGO_IMPROVED_TAN,NEB_CELL_ALGO_NONE,STRING_ALGO_SIMPLIFIED_EQUAL
  use m_fftcore,      only : get_cache_kb, fftalg_for_npfft
@@ -241,7 +241,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  dtsets(:)%ntypat=1 ; dtsets(0)%ntypat=0    ! Will always echo ntypat
  dtsets(:)%macro_uj=0
  dtsets(:)%maxnsym=384
- dtsets(:)%use_gbt=0
  dtsets(:)%useria=0
  dtsets(:)%userib=0
  dtsets(:)%useric=0
@@ -371,10 +370,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ! Read extfpmd calculations
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useextfpmd',tread,'INT')
    if(tread==1) dtsets(idtset)%useextfpmd=intarr(1)
-
-   ! Read use_gbt
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gbt',tread,'INT')
-   if (tread==1) dtsets(idtset)%use_gbt=intarr(1)
 
    ! Read user* variables
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useria',tread,'INT')
@@ -685,6 +680,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%rprimd_orig,(3,3,mxnimage))
    ABI_MALLOC(dtsets(idtset)%so_psp,(npsp))
    ABI_MALLOC(dtsets(idtset)%spinat,(3,mxnatom))
+   ABI_MALLOC(dtsets(idtset)%spinat_cart,(3,mxnatom))
+   ABI_MALLOC(dtsets(idtset)%spinat_in,(3,mxnatom))
    ABI_MALLOC(dtsets(idtset)%shiftk,(3,MAX_NSHIFTK))
    ABI_MALLOC(dtsets(idtset)%typat,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%upawu,(mxntypat,mxnimage))
@@ -1001,6 +998,8 @@ subroutine indefo1(dtset)
  dtset%gwls_n_proj_freq=0
 !H
  dtset%hspinfield(:)=zero
+ dtset%hspinfield_cart(:)=zero
+ dtset%hspinfield_in(:)=zero
 !I
  dtset%iatfix(:,:)=0
  dtset%iatnd(:)=0
@@ -1046,6 +1045,8 @@ subroutine indefo1(dtset)
  dtset%npspalch=0
  dtset%npspinor=1
  dtset%np_slk=1000000
+ dtset%nslice=2
+ dtset%nstep_mixed=0
  dtset%nqptdm=0
  dtset%nspden=1
  dtset%nspinor=1
@@ -1060,6 +1061,7 @@ subroutine indefo1(dtset)
  dtset%optdriver=0
 !P
  dtset%paral_rf=0
+ dtset%paral_slice=0
 !dtset%paral_kgb ! Is even initialized earlier.
  dtset%pawspnorb=0  ! will be changed to 1 as soon as usepaw==1 and nspinor==2
  dtset%pimass(:)=-one
@@ -1078,10 +1080,15 @@ subroutine indefo1(dtset)
  dtset%slabzend=zero
  dtset%so_psp(:)=1
  dtset%spinat(:,:)=zero
+ dtset%spinat_cart(:,:)=zero
+ dtset%spinat_in(:,:)=zero
+ dtset%spinaxis(1:2)=zero
+ dtset%spinaxis(3)=1
 !T
  dtset%tfkinfunc=0
  dtset%typat(:)=0  ! This init is important because dimension of typat is mx%natom (and not natom).
 !U
+ dtset%use_gbt=0
  dtset%usedmatpu=0
  dtset%usedmft=0
  dtset%useexexch=0
@@ -1185,7 +1192,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer :: natnd,natom,nkpt,nkpthf,npsp,npspalch, ncid
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
  integer :: rfddk,rfelfd,rfphon,rfstrs,rf2_dkdk,rf2_dkde,rfmagn
- integer :: tfband,tnband,tread,tread_alt, my_rank, nprocs
+ integer :: tfband,tnband,tread,tread_alt,tread_cart, my_rank, nprocs
  real(dp) :: cellcharge,cellcharge_min, fband,kptnrm,kptrlen,sum_spinat,zelect,zval
  character(len=1) :: blank=' ',string1
  character(len=2) :: string2,symbol
@@ -1194,9 +1201,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !arrays
  integer :: cond_values(4),vacuum(3), units(2)
  integer,allocatable :: iatfix(:,:),iatnd(:),intarr(:),istwfk(:),nband(:),typat(:)
- real(dp) :: acell(3),rprim(3,3)
+ real(dp) :: acell(3),rprim(3,3),field_loc(3),field_cart(3),hloc(3,1),hcart(3,1)
  real(dp),allocatable :: amu(:),atndlist(:,:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:)
- real(dp),allocatable :: nucdipmom(:,:),ratsph(:),reaalloc(:),spinat(:,:)
+ real(dp),allocatable :: nucdipmom(:,:),ratsph(:),reaalloc(:),spinat(:,:),spinat_cart(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
  character(len=32) :: cond_string(4)
  character(len=fnlen) :: key_value
@@ -1427,6 +1434,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  end if
  dtset%nsppol=nsppol
 
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spinaxis',tread,'DPR')
+ if (tread==1) dtset%spinaxis(1:3) = dprarr(1:3)
+
 ! here are ZORA, nspinor, pawspnorb flags
 ! flag for ZORA (zeroth order regularized approximation for relativistic terms)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'zora',tread,'INT')
@@ -1502,6 +1512,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  end if
 
 !Read the hspinfield
+ field_loc(:) = zero; field_cart(:) = zero
+ hloc(:,1) = zero; hcart(:,1) = zero
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'hspinfield',tread,'BFI')
  if(tread==0) then
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'zeemanfield',tread,'BFI')
@@ -1513,7 +1525,24 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
  end if
 
- if(tread==1) then
+ if (tread == 1) then
+   field_loc(1:3) = dprarr(1:3)
+   dtset%hspinfield_in(1:3)=field_loc(1:3)
+ end if
+
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'hspinfield_cart',tread_cart,'BFI')
+ if (tread_cart==1) then
+   field_cart(1:3) = dprarr(1:3)
+   dtset%hspinfield_cart(1:3) = field_cart(1:3)
+ end if
+
+ hloc(:,1)  = field_loc(:); hcart(:,1) = field_cart(:)
+ call checkspvec('hspinfield',1,dtset%spinaxis,tread,tread_cart,hloc,hcart)
+ dtset%hspinfield(1:3) = hloc(:,1)
+ if (tread == 0 .and. tread_cart == 1) dtset%hspinfield_in(1:3) = hloc(:,1)
+ if (tread == 1 .and. tread_cart == 0) dtset%hspinfield_cart(1:3) = hcart(:,1)
+
+ if(tread==1 .or. tread_cart==1) then
    if(dtset%nspden == 2)then
      write(msg,'(7a)')&
       'A spin magnetic field (hspinfield) has been specified without noncollinear spins.',ch10,&
@@ -1525,8 +1554,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
       'Action: check the input file.'
      ABI_ERROR(msg)
    end if
-
-   dtset%hspinfield(1:3) = dprarr(1:3)
  end if
 
 !Initialize geometry of the system, for different images. Also initialize cellcharge_min to be used later for estimating mband_upper..
@@ -1573,11 +1600,13 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    ABI_MALLOC(iatfix,(3,natom))
    ABI_MALLOC(nucdipmom,(3,natom))
    ABI_MALLOC(spinat,(3,natom))
+   ABI_MALLOC(spinat_cart,(3,natom))
    ABI_MALLOC(typat,(natom))
    ABI_MALLOC(znucl,(dtset%npsp))
    chrgat(1:natom)=dtset%chrgat(1:natom)
    nucdipmom(1:3,1:natom)=dtset%nucdipmom(1:3,1:natom)
    spinat(1:3,1:natom)=dtset%spinat(1:3,1:natom)
+   spinat_cart(1:3,1:natom)=dtset%spinat_cart(1:3,1:natom)
    znucl(1:dtset%npsp)=dtset%znucl(1:dtset%npsp)
 
    !write(std_out,'(a)')' m_invars1%invars1 : before ingeo '; call flush(std_out)
@@ -1585,10 +1614,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    call ingeo(acell,amu,atndlist,bravais,chrgat,dtset,dtset%field_red(1:3),&
     dtset%field_red_axial(1:3),dtset%genafm(1:3),iatfix,&
     iatnd,dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
-    msym,natnd,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
+    msym,natnd,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,&
     dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
     dtset%pawspnorb,dtset%ptgroupma,ratsph,&
-    rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
+    rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,spinat_cart,&
     string,dtset%supercell_latt,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,&
     typat,vel,vel_cell,xred,znucl, comm)
 
@@ -1598,11 +1627,13 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    dtset%iatfix(1:3,1:natom)=iatfix(1:3,1:natom)
    dtset%nucdipmom(1:3,1:natom)=nucdipmom(1:3,1:natom)
    dtset%spinat(1:3,1:natom)=spinat(1:3,1:natom)
+   dtset%spinat_cart(1:3,1:natom)=spinat_cart(1:3,1:natom)
    dtset%typat(1:natom)=typat(1:natom)
    ABI_FREE(chrgat)
    ABI_FREE(iatfix)
    ABI_FREE(nucdipmom)
    ABI_FREE(spinat)
+   ABI_FREE(spinat_cart)
    ABI_FREE(typat)
    ABI_FREE(znucl)
    dtset%acell_orig(1:3,iimage)=acell
@@ -2049,6 +2080,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
  end if
 
+ ! Read use_gbt
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gbt',tread,'INT')
+ if (tread==1) dtset%use_gbt=intarr(1)
+
 !---------------------------------------------------------------------------
 !Some PAW+DMFT keywords
  dtset%usedmft=0
@@ -2143,9 +2178,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !Some special cases are not compatible with GPU implementation
 !Warn user if value is changed at runtime.
 !We don't stop the code because we may want to run the test suite in GPU mode.
- if (all(dtset%optdriver /= [RUNL_GSTATE, RUNL_RESPFN, RUNL_GWR])) then
+ if (all(dtset%optdriver /= [RUNL_GSTATE, RUNL_RESPFN, RUNL_GWR, RUNL_EPH])) then
    if (dtset%gpu_option /= ABI_GPU_DISABLED) then
-     call wrtout(units, "- WARNING: GPU only compatible with GS, RESPFN and GWR. gpu_option has been set to 0!")
+     call wrtout(units, "- WARNING: GPU only compatible with GS, RESPFN, GWR, EPH. gpu_option has been set to 0!")
    end if
    dtset%gpu_option=ABI_GPU_DISABLED
  end if
@@ -2333,6 +2368,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_dc=1
    dtsets(idtset)%dmft_entropy=0
    dtsets(idtset)%dmft_fermi_step=0.02_dp
+   dtsets(idtset)%dmft_hybri_limit=0
    dtsets(idtset)%dmft_iter=10
    dtsets(idtset)%dmft_kspectralfunc=0
    dtsets(idtset)%dmft_magnfield=0
@@ -2356,6 +2392,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
    dtsets(idtset)%dmft_triqs_basis=-1
+   dtsets(idtset)%dmft_triqs_chiloc=0
+   if (dtsets(idtset)%dmft_triqs_chiloc > 0 ) dtsets(idtset)%dmft_triqs_chiloc_ins = 10
    dtsets(idtset)%dmft_triqs_compute_integral=1
    dtsets(idtset)%dmft_triqs_det_init_size=100
    dtsets(idtset)%dmft_triqs_det_n_operations_before_check=10000
@@ -2391,6 +2429,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_triqs_time_invariance=1
    dtsets(idtset)%dmft_triqs_tol_block=tol12
    dtsets(idtset)%dmft_triqs_use_norm_as_weight=1
+   dtsets(idtset)%dmft_full_chipsi=0
    dtsets(idtset)%dmft_wanorthnorm=3
    dtsets(idtset)%dmft_wanrad=-1.0_dp
    dtsets(idtset)%dmft_x2my2d=0
@@ -2421,10 +2460,16 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%d3e_pert1_atpol(1:2)=-1
    dtsets(idtset)%d3e_pert1_dir(1:3)=1
    dtsets(idtset)%d3e_pert1_elfd=0
+   dtsets(idtset)%d3e_pert1_magat(1:2)=-1
+   dtsets(idtset)%d3e_pert1_magdir(1:3)=1
+   dtsets(idtset)%d3e_pert1_magn=0
    dtsets(idtset)%d3e_pert1_phon=0
    dtsets(idtset)%d3e_pert2_atpol(1:2)=-1
    dtsets(idtset)%d3e_pert2_dir(1:3)=1
    dtsets(idtset)%d3e_pert2_elfd=0
+   dtsets(idtset)%d3e_pert2_magat(1:2)=-1
+   dtsets(idtset)%d3e_pert2_magdir(1:3)=1
+   dtsets(idtset)%d3e_pert2_magn=0
    dtsets(idtset)%d3e_pert2_phon=0
    dtsets(idtset)%d3e_pert2_strs=0
    dtsets(idtset)%d3e_pert3_atpol(1:2)=-1
@@ -2470,13 +2515,15 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%ga_opt_percent =0.2_dp
    dtsets(idtset)%ga_rules(:) =1
    dtsets(idtset)%geoopt = "none"
+   dtsets(idtset)%ggtrcut=0.001_dp
    dtsets(idtset)%goprecon =0
    dtsets(idtset)%goprecprm(:)=0
    dtsets(idtset)%gpu_devices=(/-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1/)
+   dtsets(idtset)%gpu_nfft_blocks=0
    dtsets(idtset)%gpu_kokkos_nthrd=xomp_get_max_threads()
    dtsets(idtset)%gpu_linalg_limit=2000000
    dtsets(idtset)%gpu_nl_distrib=0
-   dtsets(idtset)%gpu_nl_splitsize=1
+   dtsets(idtset)%gpu_nl_splitsize=0
    dtsets(idtset)%gpu_thread_limit=0
    if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) then
      dtsets(idtset)%gpu_thread_limit=min(4,xomp_get_max_threads())
@@ -2588,6 +2635,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !  M
    dtsets(idtset)%magconon = 0
    dtsets(idtset)%magcon_lambda = 0.01_dp
+   dtsets(idtset)%magpen = zero
    dtsets(idtset)%mband = -1
    dtsets(idtset)%mdtemp(:)=300.0_dp
    dtsets(idtset)%mdeg_filter = 6
@@ -2598,6 +2646,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%mgfft = -1
    dtsets(idtset)%mgfftdg = -1
    dtsets(idtset)%mixesimgf(:)=zero
+   dtsets(idtset)%mpatpol(1:2)=-1
+   dtsets(idtset)%mpdir(1:3)=0
    dtsets(idtset)%moldyn = "none"
    dtsets(idtset)%mpw = -1
    dtsets(idtset)%mqgrid=0
@@ -2739,6 +2789,11 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%posocc=one
    dtsets(idtset)%postoldfe=0.000001_dp
    dtsets(idtset)%postoldff=zero
+   dtsets(idtset)%precon_in_memory=1
+   dtsets(idtset)%precon_ls_maxite=20
+   dtsets(idtset)%precon_ls_rtol=tol6
+   dtsets(idtset)%precon_tsmear=0.01_dp
+   dtsets(idtset)%precon_verbose=0
    dtsets(idtset)%prepalw=0
    dtsets(idtset)%prepanl=0
    dtsets(idtset)%prtcurrent=0
@@ -2748,12 +2803,14 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%prtevk=0
    dtsets(idtset)%prtgsr=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtgsr=0
    dtsets(idtset)%prtkpt = -1
+   dtsets(idtset)%prt1mag = 0
    dtsets(idtset)%prtocc=0
    dtsets(idtset)%prtwf=1     ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtwf=0
    !if (dtsets%(idtset)%optdriver == RUNL_RESPFN and all(dtsets(:)%optdriver /= RUNL_NONLINEAR) dtsets(idtset)%prtwf = -1
    do ii=1,dtsets(idtset)%natom,1
      dtsets(idtset)%prtatlist(ii)=ii
    end do
+   dtsets(idtset)%pulayhiststore=0
    dtsets(idtset)%pvelmax(:)=one
    dtsets(idtset)%pw_unbal_thresh=40._dp
 !  Q
@@ -2765,6 +2822,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%quadmom(:) = zero
 !  R
    dtsets(idtset)%random_atpos=0
+   dtsets(idtset)%ratopt=1
    dtsets(idtset)%ratsm=zero
    if (any(dtsets(idtset)%constraint_kind(1:dtsets(idtset)%ntypat)>0)) dtsets(idtset)%ratsm=0.05_dp
    dtsets(idtset)%ratsph_extra=two
@@ -2785,8 +2843,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%rfddk=0
    dtsets(idtset)%rfdir(1:3)=1
    dtsets(idtset)%rfelfd=0
+   dtsets(idtset)%rfeta=zero
    dtsets(idtset)%rfmagn=0
    dtsets(idtset)%rfmeth=1
+   dtsets(idtset)%rfomega=zero
    dtsets(idtset)%rfphon=0
    dtsets(idtset)%rfstrs=0
    dtsets(idtset)%rfstrs_ref=0
@@ -2823,11 +2883,12 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%td_ef_type=0
    dtsets(idtset)%td_ef_induced_vecpot=0
    dtsets(idtset)%td_ef_tzero=zero
-   dtsets(idtset)%td_ef_tau=1000.0_dp
+   dtsets(idtset)%td_ef_tau=1.0_dp
    dtsets(idtset)%td_ef_pol=[1.0_dp,0.0_dp,0.0_dp]
    dtsets(idtset)%td_ef_lambda=10000.0_dp
    dtsets(idtset)%td_ef_ezero=0.1_dp
    dtsets(idtset)%tfw_toldfe=0.000001_dp
+   dtsets(idtset)%timdisp=0
    dtsets(idtset)%tim1rev = 1
    dtsets(idtset)%tl_nprccg = 30
    dtsets(idtset)%tl_radius = zero
@@ -2921,11 +2982,20 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 
    dtsets(idtset)%bs_loband=0
 
+   !dtsets(idtset)%eph_restart = 0
+   !print *, dtsets(idtset)%optdriver
+   !print *, dtsets(idtset)%eph_task
    !if (dtsets(idtset)%optdriver == RUNL_EPH) then
-   !  dtsets(idtset)%mixprec = 1
-   !  dtsets(idtset)%boxcutmin = 1.1_dp
+   !  if (any(dtsets(idtset)%eph_task == [13, -13])) then
+   !    ! In VARPEQ, restart must be activated explicitly.
+   !    dtsets(idtset)%eph_restart = 0
+   !    stop "hello"
+   !  end if
+   !  !dtsets(idtset)%mixprec = 1
+   !  !dtsets(idtset)%boxcutmin = 1.1_dp
    !end if
  end do
+ !stop
 
  DBG_EXIT("COLL")
 

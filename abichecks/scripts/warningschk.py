@@ -1,11 +1,12 @@
 #!/usr/bin/env python
-from __future__ import division, print_function, absolute_import #unicode_literals,
+from __future__ import absolute_import, division, print_function  #unicode_literals,
 
-import sys
+import glob
 import os
+
 #import re
 import os.path
-import glob
+import sys
 
 pack_dir, x = os.path.split(os.path.abspath(__file__))
 pack_dir, x = os.path.split(pack_dir)
@@ -17,20 +18,20 @@ from tests.pymods.termcolor import cprint
 
 gnu_warnings = { # ( warning_string, warno, src_excluded )
     #3  : ( 'Unused variable', ['12_hide_mpi','64_psp','68_dmft'] ),
-    3  : ( 'Unused variable', [] ),
-    4  : ( 'Unused dummy argument',  [] ),
-    5  : ( 'Nonstandard type declaration',  ['interfaces','28_numeric_noabirule','01_macroavnew_ext','01_linalg_ext','11_memory_mpi'] ),
-    6  : ( 'Same actual argument associated with INTENT', []),
-    7  : ( 'CHARACTER expression will be truncated in assignment',  [] ),
-    8  : ( 'Limit of 39 continuations exceeded',  [] ),
-    9  : ( 'DOUBLE COMPLEX at (1) does not conform to the Fortran 95 standard',  ['interfaces','01_linalg_ext'] ),
-    10 : ( 'at (1) defined but not used', [] ),
-    11 : ( 'Character length of actual argument shorter than of dummy argument', [] ),
+    3  : ( "Unused variable", [] ),
+    4  : ( "Unused dummy argument",  [] ),
+    5  : ( "Nonstandard type declaration",  ["interfaces","28_numeric_noabirule","01_macroavnew_ext","01_linalg_ext","11_memory_mpi"] ),
+    6  : ( "Same actual argument associated with INTENT", []),
+    7  : ( "CHARACTER expression will be truncated in assignment",  [] ),
+    8  : ( "Limit of 39 continuations exceeded",  [] ),
+    9  : ( "DOUBLE COMPLEX at (1) does not conform to the Fortran 95 standard",  ["interfaces","01_linalg_ext"] ),
+    10 : ( "at (1) defined but not used", [] ),
+    11 : ( "Character length of actual argument shorter than of dummy argument", [] ),
     #12 : ( 'may be used uninitialized',  [] ), FIXME Disabled cause it segfaults
-    13 : ( 'Obsolescent', [] ),
-    14 : ( 'Type specified for intrinsic function', [] ),
-    15 : ( 'Nonconforming tab character', [] ),
-    20 : ( 'Wunused-value', [] ),
+    13 : ( "Obsolescent", [] ),
+    14 : ( "Type specified for intrinsic function", [] ),
+    15 : ( "Nonconforming tab character", [] ),
+    20 : ( "Wunused-value", [] ),
 }
 
 def usage():
@@ -65,7 +66,9 @@ def main(warno, home_dir=""):
 
   makelog = os.path.join(home_dir, "make.log")
   if not os.path.exists(makelog):
-      raise RuntimeError("Cannot find `make.log` file in `%s`.\nUse `make -O multi -j8 > make.log 2>&1`" % home_dir)
+      makelog = os.path.join(home_dir, "make.stderr")
+      if not os.path.exists(makelog):
+          raise RuntimeError("Cannot find `make.log` or `make.stderr` file in `%s`.\nUse `make -O multi -j8 > make.log 2>&1`" % home_dir)
   # make.log contains utf-8 characters
   #import io
   #logfile = io.open(makelog, "r", encoding="utf-8")
@@ -84,8 +87,7 @@ def main(warno, home_dir=""):
           # Examine the make.log file, starting with the section where the directory 10_defs was treated.
           if line.find("Making all in 10_defs") == -1 :
               continue
-          else:
-              start = True
+          start = True
       if line.find(Warning) != -1 :
           if debug:
               print("[DEBUG] Buffer[0]:", Buffer[0])  # source.F90:line.pos:
@@ -96,7 +98,7 @@ def main(warno, home_dir=""):
               if debug: print("[DEBUG] len of Buffer[0]:", len(Buffer[0].strip()))
               if len(Buffer[0].strip()) != 0:
                   source = Buffer[0].split(":")[0]
-                  if source.find('Included at'): source = source.split(" ")[-1]
+                  if source.find("Included at"): source = source.split(" ")[-1]
                   sourceline = Buffer[0].split(":")[1]
                   try:
                       sourceline = sourceline.split(".")[0]
@@ -106,7 +108,7 @@ def main(warno, home_dir=""):
                   path = glob.glob(pattern)
                   assert len(path) < 2
                   try:
-                      source_dir = path[0].split('/')
+                      source_dir = path[0].split("/")
                       if debug: print ("[DEBUG] source_dir :" + source_dir[-2])
                       if src_excluded.index(source_dir[-2]) :
                           pass
@@ -117,26 +119,26 @@ def main(warno, home_dir=""):
                       try:
                           if warno in [3,4]:
                              warn_msg=Buffer[4].split(" ")[Warning_len+1]
-                             print(source + ' = line: ' + sourceline + ', var: ' + warn_msg +' ['+source_dir[-2]+']')
+                             print(source + " = line: " + sourceline + ", var: " + warn_msg +" ["+source_dir[-2]+"]")
                           elif warno in [6,10]:
                              warn_msg=Buffer[4].split(":")[1].rstrip()
                              warn_code=Buffer[2].rstrip()
                              warn_pos=Buffer[3].rstrip()
-                             print("%s = line: %s, " % (source,sourceline),end='')
+                             print("%s = line: %s, " % (source,sourceline),end="")
                              cprint("warn: %s" % (warn_msg),"red")
                              cprint("  ->%s\n  ->%s" % (warn_code,warn_pos),"red")
                           elif warno in [7]:
                              warn_code=Buffer[2].rstrip().lstrip()
-                             print("%s = line: %s, " % (source,sourceline),end='')
+                             print("%s = line: %s, " % (source,sourceline),end="")
                              cprint("code: %s" % (warn_code),"red")
                           elif warno in [20]:
                              a = Buffer[4].split(":")[1].split(" declared")[0]
-                             print(source + ' = line: ' + sourceline + ', warn:' + a + ' ['+source_dir[-2]+']')
+                             print(source + " = line: " + sourceline + ", warn:" + a + " ["+source_dir[-2]+"]")
                           else:
-                             print(source + ' = line: ' + sourceline +' ['+source_dir[-2]+']')
+                             print(source + " = line: " + sourceline +" ["+source_dir[-2]+"]")
 
                       except IndexError:
-                          print(source + ' = line: ' + sourceline +' ['+source_dir[-2]+']')
+                          print(source + " = line: " + sourceline +" ["+source_dir[-2]+"]")
               else:
                   print (" ***** Can't determine source but warning exists...")
               if debug: break
@@ -145,12 +147,12 @@ def main(warno, home_dir=""):
               sourceline = Buffer[4].split(":")[1]
               pattern = os.path.join(home_dir, "src") + "/*/"+source
               path = glob.glob(pattern)
-              source_dir = path[0].split('/')
+              source_dir = path[0].split("/")
               if debug: print ("[DEBUG] source_dir :" + source_dir[-2])
               try:
                   if src_excluded.index(source_dir[-2]) :
                       warning_count += 1
-                      print(Buffer[4].strip(), ' ['+source_dir[-2]+']')
+                      print(Buffer[4].strip(), " ["+source_dir[-2]+"]")
               except ValueError:
                   pass
 

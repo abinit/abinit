@@ -12,11 +12,11 @@ to compute the dielectric function of Diamond here.
     RT-TDDFT is under active development and should thus be used with caution!
 
 If you have not yet done any of the basic tutorials it might be useful to do
-at least the first three: [basic1](/tutorial/base1), [basic2](/tutorial/base2) and
-[basic3](/tutorial/base3).
+at least the first three: [basic1](../tutorial/base1.md), [basic2](../tutorial/base2.md) and
+[basic3](../tutorial/base3.md).
 It could also be useful that you know a little bit about PAW calculations using Abinit.
 If you are interested you can follow the first tutorial on PAW:
-[PAW1](/tutorial/paw1).
+[PAW1](../tutorial/paw1.md).
 
 This tutorial should take about two hours to complete, depending on the amount of
 computing power you have access to and how much of the convergence study you decide to do.
@@ -98,7 +98,7 @@ The first thing that a real-time TDDFT (RT-TDDFT) calculation needs is a set of 
 In the following we will start our calculations from the ground state KS orbitals.
 Thus let us start by computing the ground state orbitals of diamond.
 This system was actually treated in details in the first PAW tutorial.
-If you have not done this tutorial [PAW1](/tutorial/paw1) it might be a good idea to do it first.
+If you have not done this tutorial [PAW1](../tutorial/paw1.md) it might be a good idea to do it first.
 
 The input file *trttddft_1.abi* can be used to compute the ground state of diamond in PAW
 with a description that is similar to what was used in the first PAW tutorial.

@@ -179,6 +179,9 @@ program abinit
  character(len=10) :: strtime
  character(len=13) :: warn_fmt
  integer :: gpu_devices(12)
+#ifdef HAVE_GPU
+ integer :: lib_vers(2)
+#endif
 !******************************************************************
 
 !0) Change communicator for I/O (mandatory!)
@@ -248,8 +251,7 @@ program abinit
     '- root for output files -> ',trim(filnam(4)),ch10
    call wrtout([std_out, ab_out], msg)
  end if
-
- call wrtout(std_out, ' abinit : after writing the name of files ','PERS')
+ !call wrtout(std_out, ' abinit : after writing the name of files ','PERS')
 
  ! Test if the netcdf library supports MPI-IO
  call nctk_test_mpiio()
@@ -369,6 +371,17 @@ program abinit
  end do
 #ifdef HAVE_GPU
  call setdevice_cuda(gpu_devices,gpu_option)
+ lib_vers(1) = gpu_get_lib_version_major()
+ lib_vers(2) = gpu_get_lib_version_minor()
+ if(gpu_option/=ABI_GPU_DISABLED) then
+#ifdef HAVE_GPU_CUDA
+   write(std_out,'(a,i2,a,i1)') ' Using CUDA version: ',lib_vers(1),'.',lib_vers(2)
+#endif
+#ifdef HAVE_GPU_HIP
+   write(std_out,'(a,i1,a,i1)') ' Using ROCm/HIP version: ',lib_vers(1),'.',lib_vers(2)
+#endif
+  end if
+
 #else
  if (gpu_option/=ABI_GPU_DISABLED) then
    write(msg,'(a)')ch10,'Use of GPU is requested but ABINIT was not built with GPU support.'
@@ -611,6 +624,10 @@ program abinit
    call dtsets(ii)%free()
  end do
  ABI_FREE(dtsets)
+ do ii=1,size(pspheads)
+   ABI_SFREE(pspheads(ii)%nproj)
+   ABI_SFREE(pspheads(ii)%nprojso)
+ enddo
  ABI_FREE(pspheads)
 
 #if defined HAVE_GPU_CUDA

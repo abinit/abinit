@@ -1,9 +1,10 @@
-import numpy as np
 import os
-import triqs.utility.mpi as mpi
-from triqs.gf import *
-from som import Som, fill_refreq, reconstruct
+
+import numpy as np
 from plot_utils import *
+from som import Som, fill_refreq, reconstruct
+from triqs.gf import *
+from triqs.utility import mpi
 
 # Count number of Maxent files to get the number of orbitals
 listdir = os.listdir()
@@ -29,7 +30,7 @@ for i in range(n_orb):
 
     data = []
 
-    with open(filename, "r") as f:
+    with open(filename) as f:
 
         for line in f:
 
@@ -39,7 +40,7 @@ for i in range(n_orb):
                 i_mom = int(line_split[0].split("_")[-1])
                 moments[i_mom-1] = float(line_split[1]) + 1j*float(line_split[2])
 
-            if not("#" in line):
+            if "#" not in line:
                 data.append(float(line_split[1])+1j*float(line_split[2]))
 
     # Fill up negative frequencies by taking the conjugate of the positive frequencies
@@ -56,13 +57,13 @@ acc_params = {}
 energy_window = (-4.0, 4.0)
 
 # Support of the spectral function
-acc_params['energy_window'] = energy_window
+acc_params["energy_window"] = energy_window
 # Number of particular solutions to accumulate
-acc_params['l'] = 10
+acc_params["l"] = 10
 # Number of global updates
-acc_params['f'] = 100
+acc_params["f"] = 100
 # Number of local updates per global update
-acc_params['t'] = 50
+acc_params["t"] = 50
 
 # Assume constant error bars for every frequency (only relative weights matter)
 error_bars = self_iw.copy()
@@ -97,8 +98,7 @@ if mpi.is_master_node():
     with open(filename, "w") as f:
 
         f.write(str(len(w_mesh))+"\n")
-        for w in w_mesh:
-            f.write(str(w)+"\n")
+        f.writelines(str(w)+"\n" for w in w_mesh)
 
     # Write spectral function on file
     filename = "tdmft_triqs_3i_DS3_Self_ra-omega_iatom0001_isppol1"
@@ -106,8 +106,7 @@ if mpi.is_master_node():
     with open(filename, "w") as f:
 
         for i in range(n_orb):
-            for j in range(len(w_mesh)):
-                f.write(str(w_mesh[j])+"\t"+str(data_spectral[j, i+1])+"\n")
+            f.writelines(str(w_mesh[j])+"\t"+str(data_spectral[j, i+1])+"\n" for j in range(len(w_mesh)))
 
     # Reconstruct Sigma(iw_n) from spectral function and compare with input
     self_rec = self_iw.copy()

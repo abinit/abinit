@@ -45,7 +45,12 @@ MODULE m_invovl
  use m_prep_kgb,    only : prep_nonlop
 
 #ifdef HAVE_FC_ISO_C_BINDING
+! FIXME Don't know what's wrong with GCC when OpenMP GPU Offload is enabled here...
+#ifdef FC_GNU
+ use, intrinsic :: iso_c_binding, only : c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc
+#else
  use, intrinsic :: iso_c_binding, only : c_ptr, c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc
+#endif
 #endif
 
 #if defined(HAVE_GPU_MARKERS)
@@ -180,6 +185,7 @@ end type invovl_kpt_type
  !Module variable keeping track of which K-point data is so=tored on GPU
  integer, save :: current_ikpt_in_gpu=-1
  integer, save :: gpu_initialized=0
+ integer, save :: mod__cplx=0, mod__nprojs=0
 #endif
 
 #if defined(HAVE_GPU_CUDA)
@@ -302,10 +308,19 @@ CONTAINS
  subroutine alloc_ompgpu_buffers(cplx,nprojs,nspinor,ndat)
   integer,intent(in) :: cplx,nprojs,nspinor,ndat
 
-  if(gpu_initialized == 0) then
+  if(gpu_initialized == 0 .or. mod__cplx/=cplx .or. mod__nprojs/=nprojs) then
+
+    if(gpu_initialized==1) then
+      ABI_FREE(proj_ompgpu)
+      ABI_FREE(sm1proj_ompgpu)
+      ABI_FREE(PtPsm1proj_ompgpu)
+    end if
+
     ABI_MALLOC(proj_ompgpu,       (cplx,nprojs,nspinor*ndat))
     ABI_MALLOC(sm1proj_ompgpu,    (cplx,nprojs,nspinor*ndat))
     ABI_MALLOC(PtPsm1proj_ompgpu, (cplx,nprojs,nspinor*ndat))
+
+    mod__cplx=cplx; mod__nprojs=nprojs
 
     !FIXME Smater buffer management ?
     !!$OMP TARGET ENTER DATA MAP(alloc:proj_ompgpu,sm1proj_ompgpu,PtPsm1proj_ompgpu)
@@ -1334,7 +1349,7 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
   else
     cplx = 1
   end if
-  if(gpu_initialized == 0) call alloc_ompgpu_buffers(cplx,nprojs,nspinor,ndat)
+  call alloc_ompgpu_buffers(cplx,nprojs,nspinor,ndat)
   proj => proj_ompgpu
   sm1proj => sm1proj_ompgpu
   PtPsm1proj => PtPsm1proj_ompgpu
@@ -1428,7 +1443,9 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
     ABI_FREE(cwaveprj_in)
   end if
 
-  call abi_gpu_xaxpy(1, 2*npw*nspinor*ndat, cone, cwavef, 1, sm1cwavef, 1)
+  !$OMP TARGET DATA USE_DEVICE_ADDR(cwavef,sm1cwavef)
+  call abi_gpu_xaxpy(1, 2*npw*nspinor*ndat, cone, c_loc(cwavef), 1, c_loc(sm1cwavef), 1)
+  !$OMP END TARGET DATA
 
   if(transfer_omp_args) then
     !$OMP TARGET UPDATE FROM(sm1cwavef,cwavef)
@@ -1474,9 +1491,6 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  real(dp) :: convergence_rate,sum_tmp
  integer :: additional_steps_to_take,idat,iproj,icplx
  integer :: Ptsize(3)
-#ifdef HAVE_GPU_HIP
- type(c_ptr) :: sm1proj_amdcopy,PtPsm1proj_amdcopy
-#endif
 
 ! *************************************************************************
 
@@ -1484,11 +1498,6 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  Ptsize(2) = invovl%nprojs
  Ptsize(3) = ndat
  nprojs = invovl%nprojs
-#if defined HAVE_GPU_HIP  && defined FC_LLVM
- !FIXME Work-around for AOMP v15.0.3 (AMD Flang fork)
- sm1proj_amdref => sm1proj
- PtPsm1proj_amdref => PtPsm1proj
-#endif
 
  !$OMP TARGET ENTER DATA MAP(alloc:errs,precondresid,resid,normprojs)
 
@@ -1534,21 +1543,12 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
 
    ! compute matrix multiplication : PtPsm1proj(:,:,1) = invovl%gram * sm1proj(:,:,1)
    ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER_GEMM)
-#if defined HAVE_GPU_HIP && defined FC_LLVM
-   !$OMP TARGET DATA USE_DEVICE_ADDR(current_gram_projs, sm1proj_amdref, PtPsm1proj_amdref)
-   call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
-                c_loc(current_gram_projs), nprojs,&
-                c_loc(sm1proj_amdref), nlmntot_this_proc, czero, &
-                c_loc(PtPsm1proj_amdref), nprojs)
-   !$OMP END TARGET DATA
-#else
    !$OMP TARGET DATA USE_DEVICE_ADDR(current_gram_projs, sm1proj, PtPsm1proj)
    call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
                 c_loc(current_gram_projs), nprojs,&
                 c_loc(sm1proj), nlmntot_this_proc, czero, &
                 c_loc(PtPsm1proj), nprojs)
    !$OMP END TARGET DATA
-#endif
 
    !$OMP TARGET TEAMS DISTRIBUTE &
    !$OMP& PRIVATE(idat) MAP(to:proj,resid,PtPsm1proj)

@@ -24,61 +24,59 @@ but it is recommended to import it as a module:
 
 """
 
-from __future__ import print_function
-import numpy as np
 import netCDF4 as nc
+import numpy as np
 
-__version__ = '1.0.0'
+__version__ = "1.0.0"
 
 def merge_gkk_nc(out_fname, fnames):
     """
     Merge a list of GKK<i>.nc files containing different elements of the same qpoint.
 
-    Arguments
+    Arguments:
     ---------
-
     out_fname: Name for the merged file (will overwrite any existing file).
     fnames: List of GKK<i>.nc files.
 
     """
     if not fnames:
-        raise Exception('Empty list of files given for merge')
+        raise Exception("Empty list of files given for merge")
 
     fname0 = fnames[0]
 
-    with nc.Dataset(out_fname, 'w') as dsout:
-        with nc.Dataset(fname0, 'r') as dsin:
+    with nc.Dataset(out_fname, "w") as dsout:
+        with nc.Dataset(fname0, "r") as dsin:
 
             nc_copy(dsin, dsout,
-                except_dimensions=['number_of_atoms_for_gkk', 'number_of_cartesian_directions_for_gkk'],
-                except_variables=['second_derivative_eigenenergies_actif'],
+                except_dimensions=["number_of_atoms_for_gkk", "number_of_cartesian_directions_for_gkk"],
+                except_variables=["second_derivative_eigenenergies_actif"],
                 )
 
-            q0 = dsin.variables['current_q_point'][...]
-            natom = len(dsin.dimensions[u'number_of_atoms'])
-            ncart = len(dsin.dimensions[u'number_of_cartesian_directions'])
+            q0 = dsin.variables["current_q_point"][...]
+            natom = len(dsin.dimensions["number_of_atoms"])
+            ncart = len(dsin.dimensions["number_of_cartesian_directions"])
 
-        dsout.createDimension('number_of_atoms_for_gkk', natom)
-        dsout.createDimension('number_of_cartesian_directions_for_gkk', ncart)
+        dsout.createDimension("number_of_atoms_for_gkk", natom)
+        dsout.createDimension("number_of_cartesian_directions_for_gkk", ncart)
 
-        gkk = dsout.createVariable('second_derivative_eigenenergies_actif', np.dtype('float64'),
-                                    ('max_number_of_states', 'number_of_atoms_for_gkk',
-                                     'number_of_cartesian_directions_for_gkk', 'number_of_kpoints',
-                                     'product_mband_nsppol2'))
+        gkk = dsout.createVariable("second_derivative_eigenenergies_actif", np.dtype("float64"),
+                                    ("max_number_of_states", "number_of_atoms_for_gkk",
+                                     "number_of_cartesian_directions_for_gkk", "number_of_kpoints",
+                                     "product_mband_nsppol2"))
 
         for i, fname in enumerate(fnames):
 
             iatom = i // ncart
             icart = i % ncart
 
-            with nc.Dataset(fname, 'r') as dsin:
+            with nc.Dataset(fname, "r") as dsin:
 
                 # Check that the qpoints are the same
-                q = dsin.variables['current_q_point'][...]
+                q = dsin.variables["current_q_point"][...]
                 if not all(np.isclose(q0, q)):
-                    raise Exception('Cannot merge GKK.nc at different q-points.')
+                    raise Exception("Cannot merge GKK.nc at different q-points.")
 
-                gkki = dsin.variables[u'second_derivative_eigenenergies_actif'][:,0,0,...]
+                gkki = dsin.variables["second_derivative_eigenenergies_actif"][:,0,0,...]
                 gkk[:,iatom,icart,...] = gkki
 
 
@@ -86,7 +84,6 @@ def nc_copy(dsin, dsout, except_dimensions=None, except_variables=None):
     """
     Copy all dimensions and variable of one nc.Dataset instance into another.
     """
-
     #Copy dimensions
     for dname, dim in dsin.dimensions.iteritems():
         if except_dimensions and dname in except_dimensions:
@@ -103,41 +100,40 @@ def nc_copy(dsin, dsout, except_dimensions=None, except_variables=None):
 
 def interactive_merge_gkk_nc():
     """Get inputs from the user and run merge_gkk_nc."""
-
-    program_name = 'merge_gkk_nc'
+    program_name = "merge_gkk_nc"
     description = """Merge several GKK<i>.nc files, belonging to the same q-point."""
 
     def get_user(s):
-        return raw_input(s.rstrip() + '\n').split('#')[0]
+        return raw_input(s.rstrip() + "\n").split("#")[0]
 
 
     print(program_name)
-    print(len(program_name) * '-')
-    print(description + '\n')
+    print(len(program_name) * "-")
+    print(description + "\n")
 
-    ui = get_user('Enter a name for the output file in which to merge (will overwrite any existing file):')
+    ui = get_user("Enter a name for the output file in which to merge (will overwrite any existing file):")
     out_fname = str(ui)
 
-    ui = get_user('Enter the number of files to merge:')
+    ui = get_user("Enter the number of files to merge:")
     nfiles = int(ui)
 
     fnames = list()
     for i in range(nfiles):
-        ui = get_user('Enter the name of file {}:'.format(i+1))
+        ui = get_user(f"Enter the name of file {i+1}:")
         fname = str(ui)
         fnames.append(fname)
 
     # Main execution
-    print('Executing...')
+    print("Executing...")
     merge_gkk_nc(out_fname, fnames)
 
-    print('All done.')
+    print("All done.")
 
 
 # =========================================================================== #
 # Run interactive program
 # =========================================================================== #
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     interactive_merge_gkk_nc()
 

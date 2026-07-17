@@ -1,14 +1,13 @@
 #!/usr/bin/env python
-from __future__ import unicode_literals, division, print_function, absolute_import
 
-import re
 import os
+import re
 import sys
 
 from abirules_tools import find_src_dirs
 
 # Init
-re_srcfile = re.compile("\.([Ff]|[Ff]90|finc)$")
+re_srcfile = re.compile(r"\.([Ff]|[Ff]90|finc)$")
 len_limit = 132
 
 black_list = {
@@ -27,7 +26,7 @@ def main():
                 if re_srcfile.search(item) and item not in black_list:
                     lineno = 1
                     path = os.path.join(root, item)
-                    with open(path, "rt") as fh:
+                    with open(path) as fh:
                         for line in fh:
                             line = re.sub("!.*", "", line)
                             line = re.sub("\n", "", line)

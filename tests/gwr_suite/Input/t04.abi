@@ -27,6 +27,7 @@ getden2       1
 # GWR variables common to dataset 3 and 4
 #########################################
 gwr_ntau   6        # Number of imaginary-time points
+gwr_chi_algo 1      # Use supercell for chi
 gwr_sigma_algo 1    # Use supercell for Sigma
 gwr_boxcutmin  1.1  # This should be subject to convergence studies
 #mixprec    1       # Mixed precision FFT.
@@ -123,7 +124,7 @@ pseudos "Psdj_nc_sr_04_pbe_std_psp8/Si.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi, haicgu_*
+#%% exclude_builders = haicgu_*
 #%% [files]
 #%% files_to_test =
 #%%   t04.abo, tolnlines = 70, tolabs = 8e-3, tolrel = 3.0e-3, fld_options = -medium;

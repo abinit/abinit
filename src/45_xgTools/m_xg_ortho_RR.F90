@@ -612,9 +612,11 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,info,prtvol,tim
     integer :: subdim
     integer :: spacecom
     integer :: eigenSolver
+    integer :: nrows_B, ncols_B
     integer :: nspinor,cprjdim,ncols_cprj
     !integer :: neigen
     double precision :: abstol
+    double precision :: cond
 #ifdef HAVE_LINALG_SCALAPACK
     logical :: use_slk
 #endif
@@ -832,6 +834,22 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,info,prtvol,tim
         call xgBlock_hegvx(1,'v','i','u',subA%self,subB%self,0.d0,0.d0,1,blockdim,abstol,&
           eigenvalues,vec%self,info)
       case (EIGENVD)
+        !ITEST
+        if (prtvol == 15015015) then
+            write(902,*) 'eigenSolver', eigenSolver
+            write(902,*) 'Using hegvd'
+            nrows_B = rows(subB%self)
+            ncols_B = cols(subB%self)
+            write(902,*) 'computing cond for Hermitian pd matrix', nrows_B, ncols_B
+            !# Validation
+            !nrows_B = 2
+            !#
+            call xgBlock_hermitian_pd_cond(subB%self, nrows_B, cond)
+            write(902,*) 'cond(B)=', cond
+            !# Validation: should be 2.076578056
+            flush(902)
+        end if
+        !ITEST
         if ( prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hegvd"
         call xgBlock_hegvd(1,'v','u',subA%self,subB%self,eigenvalues,info)
       case (EIGENV)

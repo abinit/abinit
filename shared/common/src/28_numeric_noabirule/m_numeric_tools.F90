@@ -55,6 +55,7 @@ MODULE m_numeric_tools
  public :: linfit                ! Perform a linear fit, y = ax + b, of data
  public :: llsfit_svd            ! Linear least squares fit with SVD of an user-defined set of functions
  public :: polyn_interp          ! Polynomial interpolation with Nevilles"s algorithms, error estimate is reported
+ public :: polcoe                ! Extract coefficients of polynomial interpolation (Numerical Recipes)
  public :: quadrature            ! Driver routine for performing quadratures in finite domains using different algorithms
  public :: cspint                ! Estimates the integral of a tabulated function.
  public :: ctrap                 ! Corrected trapezoidal integral on uniform grid of spacing hh.
@@ -101,6 +102,7 @@ MODULE m_numeric_tools
  public :: bool2index            ! Allocate and return array with the indices in the input boolean array that evaluates to .True.
  public :: polynomial_regression ! Perform a polynomial regression on incoming data points
  public :: blocked_loop          ! Helper function to implement blocked algorithms inside do loops.
+ public :: geteuler            ! Compute the Euler angles corresponding to the spin quantization axis
 
  !MG FIXME: deprecated: just to avoid updating refs while refactoring.
  public :: dotproduct
@@ -2386,6 +2388,73 @@ subroutine polyn_interp(xa,ya,x,y,dy)
  end do
 
 end subroutine polyn_interp
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/polcoe
+!! NAME
+!!  polcoe
+!!
+!! FUNCTION
+!!  Given arrays x(1:n) and y(1:n) containing a tabulated function yi = f (xi ), this routine
+!!  returns an array with the coefficients cof(1:n) of a polynomial interpolation.
+!!
+!! INPUTS
+!!  x(n)=abscissas in ascending order
+!!  y(n)=ordinates
+!!  n=number of points given to start the interpolation
+!!
+!! OUTPUT
+!!  cof(n)= coefficients array
+!!
+!! NOTES
+!!  Based on the polcoe routine reported in Numerical Recipies
+!!
+!! SOURCE
+
+ subroutine polcoe(x,y,n,cof)
+
+!Arguments ------------------------------------
+!scalars
+  integer, intent(in) :: n
+!arrays
+  real(dp), intent(in) :: x(n),y(n)
+  real(dp), intent(out) :: cof(n)
+!Local variables ------------------------------
+!scalars
+  integer, parameter :: NMAX=15
+  integer :: i,j,k
+  real(dp) :: b,ff,phi
+!arrays
+  real(dp) :: s(NMAX)
+! *************************************************************************
+
+  do 11 i=1,n
+    s(i)=0.
+    cof(i)=0.
+ 11 continue
+  s(n)=-x(1)
+  do 13 i=2,n
+    do 12 j=n+1-i,n-1
+      s(j)=s(j)-x(i)*s(j+1)
+ 12  continue
+    s(n)=s(n)-x(i)
+ 13 continue
+  do 16 j=1,n
+    phi=n
+    do 14 k=n-1,1,-1
+      phi=k*s(k+1)+x(j)*phi
+ 14  continue
+    ff=y(j)/phi
+    b=1.
+    do 15 k=n,1,-1
+      cof(k)=cof(k)+b*ff
+      b=s(k)+x(j)*b
+ 15  continue
+ 16 continue
+
+end subroutine polcoe
 !!***
 
 !----------------------------------------------------------------------
@@ -6677,6 +6746,48 @@ integer pure function blocked_loop(loop_index, loop_stop, batch_size) result(nda
  ndat = merge(batch_size, loop_stop - loop_index + 1, loop_index + batch_size - 1 <= loop_stop)
 
 end function blocked_loop
+!!***
+
+!!****f* m_euler/geteuler
+!! NAME
+!! geteuler
+!!
+!! FUNCTION
+!! Compute the Euler angles (alpha, beta) corresponding to the spin quantization axis given in Cartesian coordinates.
+!!
+!! INPUTS
+!! spinaxis(3)=spin quantization axis
+!!
+!! OUTPUT
+!! alpha=Euler angle for rotation around z-axis
+!! beta =Euler angle for rotation around y-axis
+!!
+!! SOURCE
+
+subroutine geteuler(spinaxis, alpha, beta)
+
+!Arguments -------------------------------
+!scalars
+ real(dp),intent(out) :: alpha, beta
+!arrays
+ real(dp),intent(in) :: spinaxis(3)
+
+!Local variables -------------------------
+!scalars
+ real(dp) :: sx, sy, sz, norm, rxy
+!***********************************************************************
+
+ alpha = zero; beta = zero
+ norm = DOT_PRODUCT(spinaxis, spinaxis)
+
+ if (norm <= tol8*tol8) return
+
+ sx = spinaxis(1); sy = spinaxis(2); sz = spinaxis(3)
+ rxy = sqrt(sx*sx + sy*sy)
+ if (rxy > tol8) alpha = atan2(sy, sx)
+ beta  = atan2(rxy, sz)
+
+end subroutine geteuler
 !!***
 
 !====================================================================

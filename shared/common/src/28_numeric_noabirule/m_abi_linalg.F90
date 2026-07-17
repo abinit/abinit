@@ -52,6 +52,7 @@ module m_abi_linalg
 #endif
 
  use m_time,  only : timab
+ use m_fstrings, only : sjoin, itoa
 
  implicit none
 
@@ -160,6 +161,8 @@ module m_abi_linalg
     module procedure abi_gpu_xgemm_2z
  end interface abi_gpu_xgemm
 
+ public :: abi_gpu_xgemm_d
+
  interface abi_gpu_xgemm_strided
     module procedure abi_gpu_xgemm_strided_cptr
     module procedure abi_gpu_xgemm_strided_d
@@ -191,6 +194,12 @@ module m_abi_linalg
     module procedure abi_gpu_xscal_2d
     module procedure abi_gpu_xscal_2z
  end interface abi_gpu_xscal
+
+ interface abi_gpu_xdot
+    module procedure abi_gpu_xdot_cptr
+    module procedure abi_gpu_xdot_d
+    module procedure abi_gpu_xdot_z
+ end interface abi_gpu_xdot
 
  interface abi_gpu_xaxpy
     module procedure abi_gpu_xaxpy_cptr
@@ -336,6 +345,7 @@ module m_abi_linalg
  public :: gpu_xaxpy
  public :: gpu_xcopy
  public :: gpu_xscal
+ public :: gpu_xdot
  public :: gpu_xsygvd
  public :: gpu_xsygvd_bufferSize
 #endif
@@ -347,6 +357,7 @@ module m_abi_linalg
  public :: abi_gpu_xsymm
  public :: abi_gpu_zhemm
  public :: abi_gpu_xscal
+ public :: abi_gpu_xdot
  public :: abi_gpu_xaxpy
  public :: abi_gpu_xcopy
  public :: abi_gpu_xtrsm
@@ -440,7 +451,9 @@ CONTAINS  !===========================================================
 !******************************************************************
 
 !Use only abi_linalg in case of GS calculations
- abi_linalg_in_use=(optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS.or.optdriver==RUNL_RESPFN)
+ !abi_linalg_in_use=(optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS.or.optdriver==RUNL_RESPFN)
+ !abi_linalg_in_use= any(optdriver == [RUNL_GSTATE, RUNL_GWLS, RUNL_RESPFN, RUNL_GWR, RUNL_EPH])
+ abi_linalg_in_use= any(optdriver == [RUNL_GSTATE, RUNL_GWLS, RUNL_RESPFN, RUNL_EPH])
 
  max_eigen_pb_size_eff=0
  lapack_single_precision=.false.

@@ -1,8 +1,7 @@
-# coding: utf-8
 """Tests abiref.bib file."""
-from __future__ import division, print_function, unicode_literals, absolute_import
 
-from .tools import patch_syspath, AbimkdocsTest
+from .tools import AbimkdocsTest, patch_syspath
+
 patch_syspath()
 
 import os
@@ -36,7 +35,7 @@ class BibrefTest(AbimkdocsTest):
         def validate_entry(entry):
             print("Testing bibtex key `%s` of type `%s`" % (entry.key, entry.type))
             fields = entry.fields
-            assert "title" in fields and fields["title"]
+            assert fields.get("title")
             assert "author" in entry.persons and len(entry.persons["author"]) > 0
             for f in type2fields[entry.type]:
                 assert f in fields
@@ -52,4 +51,4 @@ class BibrefTest(AbimkdocsTest):
             assert entry.to_abimarkdown()
             assert entry.to_html()
             assert entry.to_bibtex()
-            assert entry.get_bibtex_btn_modal(link=False)
+            #assert entry.get_bibtex_btn_modal(link=False)

@@ -39,6 +39,63 @@ static hipfftType select_hipfft_type(const int fftType_int)
 
 /*=========================================================================*/
 /* NAME
+ *  gpu_fft_estimate_work_size_cpp
+ *
+ * FUNCTION
+ *  Estimate GPU memory size required for hipFFT internal work area, for
+ *  given FFT plan parameters.
+ *
+ * INPUTS
+ *   rank      Dimensionality of the transform (1, 2, or 3).
+ *   n         Array of size rank, describing the size of each dimension,
+ *             n[0] being the size of the outermost and n[rank-1] innermost
+ *             (contiguous) dimension of a transform.
+ *   type      The transform data type
+ *             (e.g., FFT_R2C for single precision real to complex)
+ *   batch     Batch size for this transform
+ * OUTPUT
+ *   work_size Estimated size of internal work area
+ */
+/*=========================================================================*/
+
+extern "C"
+void gpu_fft_get_estimate_work_size_cpp(int *rank, int **n, int *fft_type, int *batch, size_t *work_size){
+
+  assert(HIPFFT_Z2Z==0x69 && "cuFFT_Type enum value mismatch !(HIP update?)");
+  assert(HIPFFT_FORWARD==-1 && "cuFFT direction enum value mismatch (HIP update?)");
+  assert(HIPFFT_BACKWARD== 1 && "cuFFT direction enum value mismatch (HIP update?)");
+
+  hipfftResult rc;
+
+  hipfftType type = select_hipfft_type(*fft_type);
+  rc = hipfftEstimateMany(
+      *rank,
+      *n,
+      NULL,
+      1,
+      1,
+      NULL,
+      1,
+      1,
+      type,
+      *batch,
+      work_size);
+  // hipFFT seems to perform an actual allocation and may fail doing so.
+  // In such case, array usually match FFT array size so return that size instead
+  if(rc==HIPFFT_ALLOC_FAILED) {
+    // Only use case for this call now, fail otherwise
+    if(*rank==3 && type==HIPFFT_Z2Z)
+      *work_size = ((size_t) *batch) * (*n)[0] * (*n)[1] * (*n)[2] * sizeof(hipfftDoubleComplex);
+    else
+      HIP_API_CHECK(rc);
+  } else {
+    HIP_API_CHECK(rc);
+  }
+}
+
+
+/*=========================================================================*/
+/* NAME
  *  gpu_fft_plan_many_cpp
  *
  * FUNCTION

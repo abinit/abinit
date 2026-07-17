@@ -14,7 +14,7 @@ params["ylabel"] = "Energy (eV)"
 bi = 5    # Initial band
 bf = 20   # Last band
 
-with open(filename, "r") as f:
+with open(filename) as f:
 
     b_ind = -1
 

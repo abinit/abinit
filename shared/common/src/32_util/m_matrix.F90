@@ -601,7 +601,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
  integer :: im1,im2,im3,info,lwork
  character(len=500) :: message
  complex(dp):: tmpx
- integer(dp):: tmpi
+ integer(dp):: tmpi,prtopt
 !arrays
  real(dp),allocatable :: rwork(:)
  complex(dp),allocatable :: work(:)
@@ -621,6 +621,9 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
 !!#endif
  DBG_ENTER("COLL")
 
+ !printing option for debug
+ prtopt = 0
+
  lwork=10*tndim
  ABI_MALLOC(work,(lwork))
  ABI_MALLOC(rwork,(3*tndim-2))
@@ -634,10 +637,13 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
  do im1=1,tndim
    Permutcol(im1,im1)=1.d0
  end do
- write(std_out,*) "MATRIX"
- do im1=1,tndim
-    write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (matrix_save(im1,im2),im2=1,tndim)
- end do
+
+ if(prtopt == 1) then
+   write(std_out,*) "MATRIX"
+   do im1=1,tndim
+      write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (matrix_save(im1,im2),im2=1,tndim)
+   end do
+ endif
 
  ABI_MALLOC(nonnul,(tndim))
  do im1=1,tndim
@@ -661,17 +667,19 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
      endif
    enddo
  enddo
- write(std_out,*) "MATRIX AFTER COLUMN PERMUT"
- do im1=1,tndim
-    write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (matrix(im1,im2),im2=1,tndim)
- end do
- write(std_out,*) "Permutcol MATRIX AFTER"
- do im1=1,tndim
-    write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (Permutcol(im1,im2),im2=1,tndim)
- end do
+
+ if (prtopt == 1) then
+   write(std_out,*) "MATRIX AFTER COLUMN PERMUT"
+   do im1=1,tndim
+      write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (matrix(im1,im2),im2=1,tndim)
+   end do
+   write(std_out,*) "Permutcol MATRIX AFTER"
+   do im1=1,tndim
+      write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (Permutcol(im1,im2),im2=1,tndim)
+   end do
+ endif
 
  ABI_MALLOC(Apermutcol,(tndim,tndim))
- write(std_out,*) "Check product of original matrix by permutation matrix "
  Apermutcol=czero
  do im1=1,tndim
   do im2=1,tndim
@@ -682,11 +690,14 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
    end do
   end do
  end do
- write(std_out,*) "Asave*Permutcol"
- do im1=1,tndim
-    write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (Apermutcol(im1,im2),im2=1,tndim)
- end do
 
+ if(prtopt == 1) then
+   write(std_out,*) "Check product of original matrix by permutation matrix "
+   write(std_out,*) "Asave*Permutcol"
+   do im1=1,tndim
+      write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (Apermutcol(im1,im2),im2=1,tndim)
+   end do
+ endif
 
 
  ABI_MALLOC(Permutline,(tndim,tndim))
@@ -718,16 +729,18 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
      endif
    enddo
  enddo
- write(std_out,*) "matrix AFTER"
- do im1=1,tndim
-    write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (matrix(im1,im2),im2=1,tndim)
- end do
- write(std_out,*) "Permutline MATRIX AFTER"
- do im1=1,tndim
-    write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (Permutline(im1,im2),im2=1,tndim)
- end do
 
- write(std_out,*) "Check product of Apermutcol matrix by permutation matrix of the line "
+ if(prtopt == 1) then
+   write(std_out,*) "matrix AFTER"
+   do im1=1,tndim
+      write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (matrix(im1,im2),im2=1,tndim)
+   end do
+   write(std_out,*) "Permutline MATRIX AFTER"
+   do im1=1,tndim
+      write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (Permutline(im1,im2),im2=1,tndim)
+   end do
+ endif
+
  ABI_MALLOC(Apermutline,(tndim,tndim))
  Apermutline=czero
  do im1=1,tndim
@@ -739,24 +752,31 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
    end do
   end do
  end do
- write(std_out,*) "Permutline*Apermutcol"
- do im1=1,tndim
-    write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (Apermutline(im1,im2),im2=1,tndim)
- end do
+
+ if(prtopt == 1) then
+   write(std_out,*) "Check product of Apermutcol matrix by permutation matrix of the line "
+   write(std_out,*) "Permutline*Apermutcol"
+   do im1=1,tndim
+      write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (Apermutline(im1,im2),im2=1,tndim)
+   end do
+ endif
+
  work=czero
  call zheev('v','u',tndim,matrix_save,tndim,eig,work,lwork,rwork,info)
  if(info/=0) then
   message = 'Error in diagonalization of matrix (zheev) ! - '
   ABI_ERROR(message)
  end if
- write(std_out,*) 'output',INFO
- write(std_out,*) "Eigenvalues"
- write(std_out,'(2x,20f20.15) ') (eig(im1),im1=1,tndim)
- write(std_out,*) "Eigenvectors"
- do im1=1,tndim
-    write(std_out,'(2(1x,30(1x,f20.15,f20.15)))') (matrix_save(im1,im2),im2=1,tndim)
- end do
 
+ if(prtopt == 1) then
+   write(std_out,*) 'output',INFO
+   write(std_out,*) "Eigenvalues"
+   write(std_out,'(2x,20f20.15) ') (eig(im1),im1=1,tndim)
+   write(std_out,*) "Eigenvectors"
+   do im1=1,tndim
+     write(std_out,'(2(1x,30(1x,f20.15,f20.15)))') (matrix_save(im1,im2),im2=1,tndim)
+   end do
+ endif
 
 ! call dsyev('v','u',tndim,A,LDA,W,WORKTMP,LWORK,INFO)
 ! write(std_out,*) "optimal lwork",worktmp(1)
@@ -767,15 +787,17 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
   message = 'Error in diagonalization of matrix (zheev) ! - '
   ABI_ERROR(message)
  end if
- write(std_out,*) 'output',INFO
- write(std_out,*) "Eigenvalues"
- write(std_out,'(2x,20f20.15) ') (eig(im1),im1=1,tndim)
- write(std_out,*) "Eigenvectors"
- do im1=1,tndim
-    write(std_out,'(2(1x,30(1x,f20.15,f20.15)))') (matrix(im1,im2),im2=1,tndim)
- end do
 
- write(std_out,*) "inverse operation: reconstitute original matrix: first the line"
+ if(prtopt == 1) then
+   write(std_out,*) 'output',INFO
+   write(std_out,*) "Eigenvalues"
+   write(std_out,'(2x,20f20.15) ') (eig(im1),im1=1,tndim)
+   write(std_out,*) "Eigenvectors"
+   do im1=1,tndim
+     write(std_out,'(2(1x,30(1x,f20.15,f20.15)))') (matrix(im1,im2),im2=1,tndim)
+   end do
+ endif
+
  ABI_MALLOC(Apermutlineback,(tndim,tndim))
  Apermutlineback=czero
  do im1=1,tndim
@@ -788,10 +810,14 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
   end do
  end do
  matrix=Apermutlineback
- write(std_out,*) "t(Permutline)*Apermutcol"
- do im1=1,tndim
-    write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (matrix(im1,im2),im2=1,tndim)
- end do
+
+ if(prtopt == 1) then
+   write(std_out,*) "inverse operation: reconstitute original matrix: first the line"
+   write(std_out,*) "t(Permutline)*Apermutcol"
+   do im1=1,tndim
+     write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (matrix(im1,im2),im2=1,tndim)
+   end do
+ endif
 
 ! write(std_out,*) "inverse operation: reconstitute original matrix: then the column"
 ! Apermutcolback=zero

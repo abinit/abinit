@@ -4,14 +4,17 @@
 add_library(80_tdep STATIC
   m_tdep_abitypes.F90
   m_tdep_constraints.F90
+  m_tdep_dataset.F90
   m_tdep_latt.F90
+  m_tdep_model.F90
   m_tdep_phdos.F90
   m_tdep_phi2.F90
   m_tdep_phi3.F90
   m_tdep_phi4.F90
   m_tdep_qpt.F90
-  m_tdep_readwrite.F90
+  m_tdep_sampling.F90
   m_tdep_shell.F90
+  m_tdep_solver.F90
   m_tdep_sym.F90
   m_tdep_utils.F90
   )

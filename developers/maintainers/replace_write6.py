@@ -15,7 +15,6 @@
 # ==                                                                  ==
 # ==                                           M. Torrent - June 2011 ==
 # ======================================================================
-from __future__ import print_function
 
 import os
 import re
@@ -85,10 +84,10 @@ write0_correct = [
 #(case insensitive, eventual whitespaces between characters)
 pattern_write6_wrong=[]
 for i in range(len(write6_wrong)):
-  strg=re.sub(r'(?<!^)x*','\s*',write6_wrong[i])
-  strg=re.sub(r'\*\*','*\*',strg)
-  strg=re.sub(r'\(','\\\(',strg)
-  strg='(?i)'+strg
+  strg=re.sub(r"(?<!^)x*",r"\s*",write6_wrong[i])
+  strg=re.sub(r"\*\*",r"*\*",strg)
+  strg=re.sub(r"\(","\\\\(",strg)
+  strg="(?i)"+strg
   re.compile(strg)
   pattern_write6_wrong.append(strg)
 
@@ -96,10 +95,10 @@ for i in range(len(write6_wrong)):
 #(case insensitive, eventual whitespaces between characters)
 pattern_write7_wrong=[]
 for i in range(len(write7_wrong)):
-  strg=re.sub(r'(?<!^)x*','\s*',write7_wrong[i])
-  strg=re.sub(r'\*\*','*\*',strg)
-  strg=re.sub(r'\(','\\\(',strg)
-  strg='(?i)'+strg
+  strg=re.sub(r"(?<!^)x*",r"\s*",write7_wrong[i])
+  strg=re.sub(r"\*\*",r"*\*",strg)
+  strg=re.sub(r"\(","\\\\(",strg)
+  strg="(?i)"+strg
   re.compile(strg)
   pattern_write7_wrong.append(strg)
 
@@ -107,20 +106,20 @@ for i in range(len(write7_wrong)):
 #(case insensitive, eventual whitespaces between characters)
 pattern_write0_wrong=[]
 for i in range(len(write0_wrong)):
-  strg=re.sub(r'(?<!^)x*','\s*',write0_wrong[i])
-  strg=re.sub(r'\*\*','*\*',strg)
-  strg=re.sub(r'\(','\\\(',strg)
-  strg='(?i)'+strg
+  strg=re.sub(r"(?<!^)x*",r"\s*",write0_wrong[i])
+  strg=re.sub(r"\*\*",r"*\*",strg)
+  strg=re.sub(r"\(","\\\\(",strg)
+  strg="(?i)"+strg
   re.compile(strg)
   pattern_write0_wrong.append(strg)
 
-re_srcfile = re.compile("\.([Ff]|[Ff]90|h)$")
+re_srcfile = re.compile(r"\.([Ff]|[Ff]90|h)$")
 
 print( )
-print( '---------------------------------------------------')
-print( 'Replacing forbidden access to standard output/error')
-print( 'in ABINIT src files')
-print( '---------------------------------------------------')
+print( "---------------------------------------------------")
+print( "Replacing forbidden access to standard output/error")
+print( "in ABINIT src files")
+print( "---------------------------------------------------")
 
 #Initialize counters
 file_total_count=0
@@ -133,7 +132,7 @@ for (root, dirs, files) in os.walk("src"):
     if ( re_srcfile.search(src) ):
       file_total_count +=1
       filename=os.path.join(root,src)
-      with open(filename, "r") as fh: 
+      with open(filename) as fh:
         src_data = fh.readlines()
 
 #     1- look for wrong write6/7/0 statements in the file
@@ -168,13 +167,13 @@ for (root, dirs, files) in os.walk("src"):
       if found_write6_wrong or found_write7_wrong or found_write0_wrong:
         ErrorEncountered=False
 #       Write message
-        print ('File %s: found wrong statements !' % (filename))
+        print ("File %s: found wrong statements !" % (filename))
 #       Open a temporary file for writing
-        filenametmp=filename+'.tmp'
+        filenametmp=filename+".tmp"
         try:
-          filout=open(filenametmp,'w')
+          filout=open(filenametmp,"w")
         except:
-          print ('File %s, error: could not open tmp file !' % (filename))
+          print ("File %s, error: could not open tmp file !" % (filename))
           ErrorEncountered=True
         if not ErrorEncountered:
 #         Loop over lines in the file
@@ -191,7 +190,7 @@ for (root, dirs, files) in os.walk("src"):
             try:
               filout.write(newline)
             except:
-              print ('File %s, error: could not write into tmp file !' % (filename))
+              print ("File %s, error: could not write into tmp file !" % (filename))
               ErrorEncountered=True
               break
 #         Close the temporary file
@@ -199,15 +198,15 @@ for (root, dirs, files) in os.walk("src"):
 #       Replace current file by temporary file
         if not ErrorEncountered:
           try:
-            os.system('mv -f '+filenametmp+' '+filename)
+            os.system("mv -f "+filenametmp+" "+filename)
             file_write_wrong_count +=1
           except:
-            print ('File %s, error: could not move tmp file !' % (filename))
+            print ("File %s, error: could not move tmp file !" % (filename))
 
 #Print final message
 #-------------------
 if file_write_wrong_count==0:
-  print ('No file modified !')
+  print ("No file modified !")
 else:
-  print ('---------------------------------------------------')
-  print ('%d/%d file(s) modified !' %  (file_write_wrong_count,file_total_count))
+  print ("---------------------------------------------------")
+  print ("%d/%d file(s) modified !" %  (file_write_wrong_count,file_total_count))

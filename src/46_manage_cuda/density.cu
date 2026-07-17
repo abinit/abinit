@@ -197,7 +197,7 @@ void density_cuda_(int* npitch,       //- Pitch for the an and bn2 on gpu */
 				    an_d,bn2_d,
 				    rho_d);
  CUDA_KERNEL_CHECK("density_kernel");
- 
+
  CHECK_CUDA_ERROR( cudaMemcpy(rho_h,rho_d,height*sizeof(cureal),cudaMemcpyDeviceToHost) );
 
 // for(int ii=0;ii<height;ii++) printf("%f ",rho_h[ii]);printf("\n");

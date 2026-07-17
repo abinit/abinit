@@ -1,8 +1,6 @@
-from __future__ import division, print_function, unicode_literals, absolute_import
 
-import sys
 import os
-
+import sys
 from unittest import TestCase
 
 _PATCH_DONE = False
@@ -29,7 +27,7 @@ class AbimkdocsTest(TestCase):
 
         in_block = False
         words = []
-        with open(path, "rt") as fh:
+        with open(path) as fh:
             for line in fh:
                 if line.find("admitted variable names") > 0: in_block = True
                 if line.find("Extra token") > 0: in_block = False
@@ -52,14 +50,14 @@ class AbimkdocsTest(TestCase):
         # and extract the name of the variable. The prototype of intagm is:
         #    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'brav',tread,'INT')
         import re
-        re_call = re.compile(r'\s*call\s+intagm\((.+)\)\w*', re.I)
+        re_call = re.compile(r"\s*call\s+intagm\((.+)\)\w*", re.IGNORECASE)
 
         # construct list of key words appearing in anaddb input
         home_dir = os.path.join(os.path.dirname(__file__) , "..")
         path = os.path.join(home_dir, "src/77_ddb/m_anaddb_dataset.F90")
 
         words = []
-        with open(path, "rt") as fh:
+        with open(path) as fh:
             for line in fh:
                 m = re_call.match(line)
                 if m:
@@ -71,6 +69,6 @@ class AbimkdocsTest(TestCase):
                 print("Found empty list of words in file %s" % path)
                 print("Perhaps someone changed the format of the file?")
                 print("Please modify the code in " + __file__)
-                raise RuntimeError()
+                raise RuntimeError
 
         return set(words)

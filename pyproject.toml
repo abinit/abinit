@@ -1,0 +1,85 @@
+
+[tool.ruff]
+line-length = 100
+output-format = "concise"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    # Rule families
+    "ANN", # flake8-annotations (not ready, require types for ALL args)
+    "ARG", # Check for unused function arguments
+    "BLE", # General catch of Exception
+    "C90", # Check for functions with a high McCabe complexity
+    "COM", # flake8-commas (conflict with line wrapper)
+    "CPY", # Missing copyright notice at top of file (need preview mode)
+    "EM", # Format nice error messages
+    "ERA", # Check for commented-out code
+    "FIX", # Check for FIXME, TODO and other developer notes
+    "G", # Validate logging format strings
+    "INP", # Ban PEP-420 implicit namespace packages
+    "N", # PEP8-naming (many var/arg names are intended)
+    "PTH", # Prefer pathlib over os.path
+    "SLF", # Access "private" class members
+    "T20", # Check for print/pprint
+    "TD", # TODO tags related
+    # Single rules
+    "B023", # Function definition does not bind loop variable
+    "B904", # Within an except clause, raise exceptions with ...
+    "C408", # unnecessary-collection-call
+    "D105", # Missing docstring in magic method
+    "D205", # One blank line required between summary line and description
+    "D212", # Multi-line docstring summary should start at the first line
+    "FBT001", # Boolean-typed positional argument in function definition
+    "FBT002", # Boolean default positional argument in function
+    "PD011", # (A lot of false positive on non-Pandas objects)
+    "PERF203", # Use of try-except in for/while loop
+    "PLC0415",  # `import` should be at the top-level of a file
+    "PLR0911", # Too many return statements
+    "PLR0912", # Too many branches
+    "PLR0913", # Too many arguments
+    "PLR0915", # Too many statements
+    "PLR1702", # Too many nested blocks
+    "PLR2004", # Magic-value-comparison TODO: fix this
+    "PLW1641", # eq-without-hash TODO: fix this
+    "PLW2901", # Outer for loop variable overwritten by inner assignment target
+    "PT013", # Incorrect import of pytest
+    "RUF043", # Pattern passed to `match=` contains metacharacters but is neither escaped nor raw
+    "S101", # Use of `assert` detected
+    "S110", # Log for try-except-pass
+    "S112", # Log for try-except-continue
+    "S311", # Use random module for cryptographic purposes
+    "S314", # Replace xml with defusedxml to avoid XML attacks
+    "S603", # Check source for use of "subprocess" call
+    "S607", # Start process with relative path
+    "SIM105", # Use contextlib.suppress() instead of try-except-pass
+    "SIM905", # Split static strings
+    "TRY003", # Avoid specifying long messages outside the exception class
+    "TRY300", # Check for return statements in try blocks
+    "TRY301", # Check for raise statements within try blocks
+]
+pydocstyle.convention = "google"
+#isort.required-imports = ["from __future__ import annotations"]
+isort.split-on-trailing-comma = false
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.vulture]
+#exclude = ["*file*.py", "dir/"]
+ignore_decorators = ["@app.route", "@require_*"]
+#ignore_names = ["visit_*", "do_*"]
+make_whitelist = true
+min_confidence = 80
+#paths = ["myscript.py", "mydir", "whitelist.py"]
+sort_by_size = true
+verbose = true
+
+[tool.pyright]
+include = ["abibuildbot"]
+exclude = ["**/__pycache__", ".venv", "build", "dist"]
+pythonVersion = "3.14"
+typeCheckingMode = "basic"
+reportUnusedImport = true
+reportMissingTypeStubs = false
+reportGeneralTypeIssues = true

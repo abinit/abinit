@@ -38,6 +38,7 @@ module m_forstr
  use m_ompgpu_utils
  use m_xg
  use m_xg_nonlop
+ use m_xgTransposer
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -79,6 +80,7 @@ module m_forstr
  use m_psolver,          only : psolver_hartree
  use m_wvl_psi,          only : wvl_nl_gradient
  use m_fft,              only : fourdp,fourwf
+ use m_alloc_hamilt_gpu, only : hamilt_gpu_nfft_blocks
  use, intrinsic :: iso_c_binding,      only : c_loc,c_f_pointer,c_double,c_size_t
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
@@ -331,8 +333,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  real(dp) :: kinstr(6),mggastr(6),nlstr(6),tsec(2),strdum(6),gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp) :: dummy(0)
  real(dp),allocatable :: grnl(:),vlocal(:,:),vxc_hf(:,:),xcart(:,:),ylmbz(:,:),ylmgrbz(:,:,:)
- real(dp), ABI_CONTIGUOUS pointer :: resid(:,:)
-
+ real(dp), contiguous, pointer :: resid(:,:)
 ! *************************************************************************
 
  call timab(910,1,tsec)
@@ -424,7 +425,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%nsym,ntypat,&
 &   dtset%nucdipmom,occ,optfor,paw_ij,pawfgr,pawtab,ph1d,psps,dtset%qgbt,rprimd,stress_needed,symrec,dtset%typat,&
 &   dtset%use_gbt,usecprj,dtset%usefock,usevxctau,vxctau,usexg,dtset%gpu_option,dtset%gpu_nl_distrib,&
-&   dtset%gpu_nl_splitsize,dtset%wtk,xred,ylm,ylmgr,xg_nonlop)
+&   dtset%gpu_nl_splitsize,dtset%gpu_nfft_blocks,dtset%wtk,xred,ylm,ylmgr,xg_nonlop)
  else if (optfor>0) then !WVL
    ABI_MALLOC(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
@@ -635,13 +636,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 &  mpw,my_natom,natom,nband,nfft,nfftf,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
 &  ntypat,nucdipmom,occ,optfor,paw_ij,pawfgr,pawtab,ph1d,psps,qgbt,rprimd,&
 &  stress_needed,symrec,typat,use_gbt,usecprj,usefock,usevxctau,vxctau,usexg,&
-&  gpu_option,gpu_nl_distrib,gpu_nl_splitsize,wtk,xred,ylm,ylmgr,xg_nonlop)
+&  gpu_option,gpu_nl_distrib,gpu_nl_splitsize,gpu_nfft_blocks,wtk,xred,ylm,ylmgr,xg_nonlop)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,nfft,nfftf,nkpt
  integer,intent(in) :: nspden,nsppol,nspinor,nsym,ntypat,optfor,stress_needed
- integer,intent(in) :: use_gbt,usecprj,usefock,usevxctau,usexg,gpu_option,gpu_nl_distrib,gpu_nl_splitsize
+ integer,intent(in) :: use_gbt,usecprj,usefock,usevxctau,usexg,gpu_option
+ integer,intent(in) :: gpu_nl_distrib,gpu_nl_splitsize,gpu_nfft_blocks
  real(dp),intent(in) :: ecut,ecutsm,effmass_free
  type(electronpositron_type),pointer :: electronpositron
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -668,24 +670,27 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !scalars
  integer,parameter :: tim_rwwf=7
  integer :: bandpp,bdtot_index,choice,cpopt,dimffnl,dimffnl_str,iband,iband_cprj,iband_last,ibg,icg,ider,ider_str
- integer :: idir,idir_str,ierr,ii,ikg,ikpt,ilm,ipositron,ipw,ishift,isppol,istwf_k
+ integer :: idir,idir_str,ierr,ii,ikg,ikpt,ilm,ipositron,ipw,ishift,isppol,istwf_k,npw_k_
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: nnlout,npw_k,paw_opt,signs,spaceComm
  integer :: tim_nonlop,tim_nonlop_prep,usecprj_local,use_ACE_old
  integer :: blocksize,iblock,iblocksize,ibs,nblockbd,nblk_gemm_nonlop
- integer :: space,me_g0,ncols_cprj
+ integer :: space,me_g0,ncols_cprj,me_g0_fft
  real(dp) :: ar,ar2,renorm_factor,dfsm,ecutsm_inv,fact_kin,fsm,htpisq
  real(dp) :: kin,kin_kphq,xx
- type(gs_hamiltonian_type) :: gs_hamk
+ type(gs_hamiltonian_type),target :: gs_hamk
  logical :: compute_gbound,usefock_loc
  character(len=500) :: msg
  type(fock_common_type),pointer :: fockcommon
+ type(xgBlock_t) :: xgx0_tr
+ type(xgTransposer_t) :: xgTransposer
 !arrays
- integer,allocatable :: kg_k(:,:)
+ integer,allocatable,target :: kg_k(:,:)
+ integer,pointer :: gbound_k(:,:),kg_k_(:,:)
  real(dp) :: kpoint(3),kphq(3),nonlop_dum(1,1),rmet(3,3),tsec(2)
  real(dp) :: kgr(3),kgr_kphq(3),kgc(3),kgc_kphq(3)
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(c_double), ABI_CONTIGUOUS pointer :: cwavef(:,:) => null()
+ real(c_double), contiguous, pointer :: cwavef(:,:) => null()
 #else
  real(dp),allocatable,target :: cwavef(:,:)
 #endif
@@ -705,7 +710,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  type(xg_t) :: cprj_xgx0,cprj_work
  real(dp),allocatable :: enlout_2d(:,:),enlout_2d_stress(:,:)
  real(dp),allocatable :: cwavef_spin(:,:),enlout_spin(:)
-
+ real(dp),pointer :: cwavef_tr(:,:)
 !*************************************************************************
 
  ABI_NVTX_START_RANGE(NVTX_FORSTRNPS)
@@ -779,7 +784,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj_local,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
-& nucdipmom=nucdipmom,gpu_option=gpu_option)
+& nucdipmom=nucdipmom,gpu_option=gpu_option,nfft_blocks=gpu_nfft_blocks)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
 
  if (usevxctau>0) then
@@ -1102,7 +1107,8 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          call get_gemm_nonlop_ompgpu_blocksize(my_ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
          &                        nspinor,1,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
          &                        optfor,stress_needed,-1,gs_hamk%gpu_option,(gpu_nl_distrib/=0),&
-         &                        gemm_nonlop_block_size,nblk_gemm_nonlop,warn_on_fail=.true.)
+         &                        gemm_nonlop_block_size,nblk_gemm_nonlop,gs_hamk%nfft_blocks,&
+         &                        warn_on_fail=.true.,disable_output=(ikpt>1))
          gemm_nonlop_is_distributed = (gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
          if(nblk_gemm_nonlop==-1) then
            gs_hamk%gpu_option=ABI_GPU_DISABLED
@@ -1190,10 +1196,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              ABI_MALLOC(cwavef_spin, (2, npw_k*blocksize))
              ABI_MALLOC(enlout_spin,(nnlout*blocksize))
              enlout_spin(:) = zero
+             gs_hamk%ispin_gbt = 1
              call cg_copy_spin(1,npw_k,my_nspinor,blocksize,cwavef,cwavef_spin)
              call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef_spin,cwavef_spin,select_k=K_H_K)
 
+             gs_hamk%ispin_gbt = 2
              call cg_copy_spin(2,npw_k,my_nspinor,blocksize,cwavef,cwavef_spin)
              call nonlop(choice,cpopt,cwaveprj,enlout_spin,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef_spin,cwavef_spin,select_k=KPRIME_H_KPRIME)
@@ -1203,11 +1211,22 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              ABI_FREE(cwavef_spin)
              ABI_FREE(enlout_spin)
            end if ! GBT
+           if((stress_needed==1).and.(usevxctau==1)) then
+             cwavef_tr=>cwavef
+           endif
          else if (usexg/=1) then ! paral_kgb = 1
            ! here we MUST pass option gpu_option=ABI_GPU_DISABLED, as cwavef here is a host memory buffer
+          if((stress_needed==1).and.(usevxctau==1).and.mpi_enreg%nproc_band>1) then
+            ABI_MALLOC(cwavef_tr,(2,my_bandfft_kpt%ndatarecv*my_nspinor*mpi_enreg%bandpp))
+            call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,blocksize,&
+&           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef,&
+&           already_transposed=.False.,gpu_option=ABI_GPU_DISABLED,cwavef_tr=cwavef_tr)
+          else
            call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,blocksize,&
 &           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef,&
 &           already_transposed=.False.,gpu_option=ABI_GPU_DISABLED)
+            if((stress_needed==1).and.(usevxctau==1)) cwavef_tr=>cwavef
+          endif
          else ! usexg==1
            if ( istwf_k > 1 ) then ! Real only
              space = SPACE_CR
@@ -1215,14 +1234,31 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              space = SPACE_C
            end if
            me_g0 = -1
+           me_g0_fft = -1
            if (space==SPACE_CR) then
              me_g0 = 0
+             me_g0_fft = 0
              if (istwf_k == 2) then
                if (mpi_enreg%me_g0 == 1) me_g0 = 1
+               if (mpi_enreg%me_g0_fft == 1) me_g0_fft = 1
              end if
            end if
+
            call xgBlock_map(xgx0,cwavef,space,npw_k*my_nspinor,blocksize,comm=mpi_enreg%comm_band,me_g0=me_g0,&
  &         gpu_option=gpu_option)
+
+          if ((stress_needed==1).and.(usevxctau==1)) then 
+             if(mpi_enreg%nproc_band>1) then
+               call xgTransposer_constructor(xgTransposer,xgx0,xgx0_tr,my_nspinor,&
+                   STATE_LINALG,TRANS_ALL2ALL,mpi_enreg%comm_spinorfft,mpi_enreg%comm_band,0,0,me_g0_fft)
+               call xgTransposer_transpose(xgTransposer,STATE_COLSROWS)
+               call xgBlock_reverseMap(xgx0_tr,cwavef_tr,rows=1,cols=my_nspinor*mpi_enreg%bandpp*my_bandfft_kpt%ndatarecv) !,rows=1,cols=spacedim*blockdim)
+             else
+               cwavef_tr=>cwavef  
+             endif      
+          endif
+
+
            call xgBlock_map_1d(xgeigen,lambda,SPACE_R,blocksize)
 
            if (psps%usepaw==1.and.usecprj_local==1) then
@@ -1372,10 +1408,28 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
 !        Accumulate stress tensor in case meta-GGA using v_tau
          if ((stress_needed==1).and.(usevxctau==1)) then
-           call stress_mGGA(mggastr,cwavef,effmass_free,gs_hamk%gbound_k,gs_hamk%gprimd,istwf_k, &
-&               kg_k,kpoint,mgfft,mpi_enreg,my_nspinor,blocksize,ngfft,npw_k,gs_hamk%nvloc, &
-&               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occblock,gs_hamk%ucvol,vxctaulocal, &
+           if(mpi_enreg%paral_kgb==1) then
+             gbound_k => my_bandfft_kpt%gbound
+             kg_k_ => my_bandfft_kpt%kg_k_gather
+             npw_k_=my_bandfft_kpt%ndatarecv
+           else
+             gbound_k => gs_hamk%gbound_k
+             kg_k_ => kg_k
+             npw_k_=npw_k
+           endif
+           call stress_mGGA(mggastr,cwavef_tr,effmass_free,gbound_k,gs_hamk%gprimd,istwf_k, &
+&               kg_k_,kpoint,mgfft,mpi_enreg,my_nspinor,mpi_enreg%bandpp,ngfft,npw_k_,gs_hamk%nvloc, &
+&               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occblock(1+mpi_enreg%me_band*mpi_enreg%bandpp:(mpi_enreg%me_band+1)*mpi_enreg%bandpp),gs_hamk%ucvol,vxctaulocal, &
 &               wtk(ikpt),gpu_option=gpu_option)
+           if(mpi_enreg%paral_kgb==1.and.mpi_enreg%nproc_band>1) then
+             if(usexg==1) then
+               call xgTransposer_free(xgTransposer)
+             else
+               ABI_FREE(cwavef_tr)
+             endif
+           else
+             nullify(cwavef_tr)
+           endif
          end if
 
 !        Accumulate stress tensor and forces for the Fock part
@@ -1670,7 +1724,6 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  real(dp) :: gmet(3,3),gprimd(3,3),qq(3),rmet(3,3)
  real(dp),allocatable :: dummy(:),kxc_cur(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: nresg(:,:),rhor0(:,:),vhres(:)
-
 ! *************************************************************************
 
 !Compatibility tests:

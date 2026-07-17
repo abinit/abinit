@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-from __future__ import unicode_literals, division, print_function, absolute_import
 
-import re
 import os
+import re
 import sys
-from subprocess import PIPE, run
+from subprocess import run
 
 from abirules_tools import find_src_dirs
 
@@ -34,8 +33,8 @@ def main():
                     cmd_list.append(f"-I{top}/incs")
                     cmd_list.append(f"-I{top}/../shared/common/src/incs")
                     cmd_list.append(f"-I{top}/../shared/libpaw/incs")
-                    p = run(cmd_list, stdin=None, timeout=5, capture_output=True, encoding="utf-8")
-                    output = p.stdout.split('\n')
+                    p = run(cmd_list, stdin=None, timeout=5, capture_output=True, encoding="utf-8", check=False)
+                    output = p.stdout.split("\n")
                     for line in output:
                         line = re.sub("!!.*", "", line)
                         line = re.sub("\n", "", line)

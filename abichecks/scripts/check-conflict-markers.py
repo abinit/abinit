@@ -1,8 +1,14 @@
 #!/usr/bin/env python
-from __future__ import unicode_literals, division, print_function, absolute_import
+"""
+Check for unresolved git conflict markers.
 
-import re
+This script recursively scans the ABINIT source tree to identify any files
+that still contain unresolved git conflict markers (e.g., `<<<<<<< TREE`,
+`=======`, `>>>>>>> MERGE-SOURCE`).
+"""
+
 import os
+import re
 import sys
 
 from abirules_tools import find_abinit_toplevel_directory
@@ -28,8 +34,16 @@ exclude_bins = set([
   "macroave", "optic", "vdw_kernelgen", "vdw_kernelgen", "mrgscr", "multibinit",
 ])
 
-def check_item(item):
-  "True if item has to be analyzed."
+def check_item(item: str) -> bool:
+  """
+  Determine whether a file should be analyzed for conflict markers.
+
+  Args:
+      item: The name of the file to check.
+
+  Returns:
+      True if the file should be analyzed, False if it matches an ignore pattern.
+  """
   if re_tmpfile.search(item): return False
   if re_rstfile.search(item): return False
   if item in exclude_bins: return False
@@ -40,7 +54,13 @@ def check_item(item):
   return True
 
 
-def main():
+def main() -> int:
+  """
+  Main logic for validating conflict markers.
+
+  Returns:
+      Number of files found containing conflict markers (0 if OK).
+  """
   retval = 0
   top = find_abinit_toplevel_directory()
   assert os.path.exists(top)
@@ -53,6 +73,10 @@ def main():
 
     # Ignore Autotools subdirs
     if "autom4te.cache" in dirs: dirs.remove("autom4te.cache")
+
+    # Ignore hidden directories
+    hidden_dirs = [d for d in dirs if d.startswith('.')]
+    for d in hidden_dirs: dirs.remove(d)
 
     # Ignore temporary dirs
     garb_dirs = [item for item in dirs if re_tmpdir.match(item)]
@@ -71,10 +95,10 @@ def main():
 
       try:
           if sys.version_info >= (3, 0):
-            with open(path, "rt", encoding="ISO-8859-1") as fh:
+            with open(path, encoding="ISO-8859-1") as fh:
               chk_data = fh.readlines()
           else:
-            with open(path, "r") as fh:
+            with open(path) as fh:
               chk_data = fh.readlines()
 
           chk_stat = False

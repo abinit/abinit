@@ -27,8 +27,8 @@ There are three ways to compute the temperature dependence with Abinit:
 
   * **Using a post-processing python scripts**: This route provides more options and is more efficient (i.e., requires less disk space and less memory), but it **requires Netcdf** (both in Abinit and python). The current tutorial focuses on this approach.
 
-  * **Using an interpolation of the perturbed potential**: This new method is covered 
-   in the [ZPR and T-dependent band structures](/tutorial/eph4zpr) tutorial.
+  * **Using an interpolation of the perturbed potential**: This new method is covered
+   in the [ZPR and T-dependent band structures](../tutorial/eph4zpr.md) tutorial.
 
 !!! important
 
@@ -57,7 +57,7 @@ There are three ways to compute the temperature dependence with Abinit:
     to get the list of libraries/options activated in the build.
     You should see netcdf in the `TRIO flavor` section:
 
-         === Connectors / Fallbacks === 
+         === Connectors / Fallbacks ===
           LINALG flavor  : netlib
           FFT flavor     : goedecker
           HDF5           : yes
@@ -114,8 +114,8 @@ Finally, issue
 
     abinit teph_tdep_legacy_1.abi > teph_tdep_legacy_1.log
 
-The calculation will produce several _EIG.nc, _DDB, EIGR2D.nc and EIGI2D.nc files, 
-that contain respectively the eigenvalues (GS or perturbed), 
+The calculation will produce several _EIG.nc, _DDB, EIGR2D.nc and EIGI2D.nc files,
+that contain respectively the eigenvalues (GS or perturbed),
 the second-order derivative of the total energy with respect to
 two atomic displacements, the electron-phonon matrix elements used to compute
 the renormalization of the eigenenergies and the electron-phonon matrix
@@ -185,18 +185,18 @@ Alternatively, copy this example file in the Work directory if not yet done, and
 You should see on the screen an output similar to:
 
 ```shell
-Start on 21/12/2020 at 15h21 
+Start on 21/12/2020 at 15h21
 
-    ____  ____       _                                      _                   
-   |  _ \|  _ \     | |_ ___ _ __ ___  _ __   ___ _ __ __ _| |_ _   _ _ __ ___  
-   | |_) | |_) |____| __/ _ \ '_ ` _ \| '_ \ / _ \ '__/ _` | __| | | | '__/ _ \ 
-   |  __/|  __/_____| ||  __/ | | | | | |_) |  __/ | | (_| | |_| |_| | | |  __/ 
-   |_|   |_|         \__\___|_| |_| |_| .__/ \___|_|  \__,_|\__|\__,_|_|  \___| 
-                                      |_|                              Version 1.5         
-  
-This script compute the static/dynamic zero-point motion 
+    ____  ____       _                                      _
+   |  _ \|  _ \     | |_ ___ _ __ ___  _ __   ___ _ __ __ _| |_ _   _ _ __ ___
+   | |_) | |_) |____| __/ _ \ '_ ` _ \| '_ \ / _ \ '__/ _` | __| | | | '__/ _ \
+   |  __/|  __/_____| ||  __/ | | | | | |_) |  __/ | | (_| | |_| |_| | | |  __/
+   |_|   |_|         \__\___|_| |_| |_| .__/ \___|_|  \__,_|\__|\__,_|_|  \___|
+                                      |_|                              Version 1.5
+
+This script compute the static/dynamic zero-point motion
   and the temperature dependence of eigenenergies due to electron-phonon interaction.
-  The electronic lifetime can also be computed. 
+  The electronic lifetime can also be computed.
 
   WARNING: The first Q-point MUST be the Gamma point.
 
@@ -209,7 +209,7 @@ Define the type of calculation you want to perform. Type:
 Enter name of the output file
 Enter value of the smearing parameter for AHC (in eV)
 Enter value of the Gaussian broadening for the Eliashberg function and PDOS (in eV)
-Enter the energy range for the PDOS and Eliashberg calculations (in eV): [e.g. 0 0.5] 
+Enter the energy range for the PDOS and Eliashberg calculations (in eV): [e.g. 0 0.5]
 Introduce the min temperature, the max temperature and the temperature steps. e.g. 0 200 50 for (0,50,100,150)
 Enter the number of Q-points you have
 Enter the name of the 0 DDB file
@@ -222,7 +222,7 @@ Q-point:  0  with wtq = 1.0  and reduced coord. [0. 0. 0.]
 WARNING: An eigenvalue is negative with value:  -2.8630004909173537e-10  ... but proceed with value 0.0
 Now compute active space ...
 Now compute generalized g2F Eliashberg electron-phonon spectral function ...
-End on 21/12/2020 at 15 h 21 
+End on 21/12/2020 at 15 h 21
 Runtime: 0 seconds (or 0.0 minutes)
 ```
 
@@ -250,8 +250,8 @@ with the contribution of only q=$\Gamma$.
 
 ![](eph_tdep_legacy_assets/plot1.png)
 
-As you can see, the LUMO correction goes down with temperature. 
-If the calculations were converged, the HOMO eigenenergies correction should go up with temperature. 
+As you can see, the LUMO correction goes down with temperature.
+If the calculations were converged, the HOMO eigenenergies correction should go up with temperature.
 In general, the ZPR correction as well as their temperature dependence usually closes the gap
 of semiconductors.
 
@@ -295,7 +295,7 @@ As concern the anaddb input file, note that the electron-phonon analysis is trig
 
 Launch anaddb by the command
 
-    anaddb teph_tdep_legacy_2.abi 
+    anaddb teph_tdep_legacy_2.abi
 
 (where `anaddb` might have to be replaced by the proper location of the anaddb executable).
 
@@ -345,7 +345,7 @@ and perform the integration accordingly.
 The random integration converges slowly but in a smooth manner.
 
 However, since this method is a little bit less user-friendly than the one based on homogeneous grids,
-we will focus on this homogenous integration. 
+we will focus on this homogenous integration.
 In this case, the user must specify in the ABINIT input file the homogeneous q-point grid,
 using input variables like
 [[ngqpt]], [[qptopt]], [[shiftq]], [[nshiftq]], ..., i.e. variables whose names
@@ -398,7 +398,7 @@ grid. The use of symmetries has been reenabled thanks to [[nsym]]=0.
 
 To run it, issue:
 
-    abinit  teph_tdep_legacy_2.abi  
+    abinit  teph_tdep_legacy_2.abi
 
 Now, the number of points can be seen in the output file :
 
@@ -471,16 +471,16 @@ working directory (if not yet done) and launch the python script with:
 {% dialog tests/tutorespfn/Input/teph_tdep_legacy_3_temperature.in %}
 
 Examination of the same HOMO and LUMO bands at k=$\Gamma$ for a 4x4x4 q-point grid gives a very different result
-than previously. 
+than previously.
 The zero-point renormalization (ZPR) is the change of the bandgap at 0 K and was (band 5 - band 4):
-   
+
     -0.012507 - 0.017727 = -0.030234 eV
 
 and is now:
 
     -0.351528 - 0.095900 = -0.447428 eV
 
-This means that the bandgap was closing by 30 meV at 0 K and is now closing by 447 meV at 0 K. 
+This means that the bandgap was closing by 30 meV at 0 K and is now closing by 447 meV at 0 K.
 For comparison, the converged direct bandgap ZPR of diamond is 438.6 meV from Ref. [[cite:Ponce2015]].
 
 As a matter of fact, diamond requires an extremely dense q-point grid (40x40x40) to be converged.

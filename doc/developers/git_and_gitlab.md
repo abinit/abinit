@@ -271,7 +271,7 @@ then, if the develop branch is to be updated, supposing it is checked out,
 to merge *trunk/develop* in your develop branch:
 
     git checkout develop
-    git merge trunk develop
+    git merge trunk/develop
     git pull -t trunk develop
     git push --tags
 

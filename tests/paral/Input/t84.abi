@@ -62,6 +62,7 @@ dmftcheck 0
 dmft_rslf 0
 dmft_mxsf 0.7
 dmft_dc 1
+dmft_wanorthnorm 2
 
 # == CTQMC
 dmft_solv 8 # CTQMC
@@ -107,7 +108,8 @@ iomode 1
 #%% max_nprocs = 10
 #%% [NCPU_10]
 #%% files_to_test =
-#%%   t84_MPI10.abo, tolnlines =  3, tolabs =5.0e-1, tolrel = 5.0e-1, fld_options=-medium ;
+#%%   t84_MPI10.abo, tolnlines =  3, tolabs =5.0e-1, tolrel = 5.0e-1, fld_options=-easy ;
+#%%   t84_MPI10o_DS2_atom_01_Gtau_full_CTQMC_02.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 2.e-3, fld_options=-ridiculous;
 #%% [extra_info]
 #%% authors = B. Amadon, T. Cavignac
 #%% keywords = DMFT, CTQMC, FAILS_IFMPI

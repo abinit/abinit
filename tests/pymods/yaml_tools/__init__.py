@@ -1,19 +1,19 @@
 """
 This package gathers all tools used by the Abinit test suite for manipulating YAML formatted data.
 """
-from __future__ import print_function, division, unicode_literals
 
 import warnings
-from .errors import NoYAMLSupportError, UntaggedDocumentError, TagMismatchError
+
+from .errors import NoYAMLSupportError, TagMismatchError, UntaggedDocumentError
 
 try:
-    import yaml
     import numpy  # numpy is also required
+    import yaml
     is_available = True
 
 except ImportError:
-    warnings.warn('\nCannot import numpy or yaml package.\nUse `pip install numpy pyyaml --user`'
-                  '\nto install the packages in user mode.')
+    warnings.warn("\nCannot import numpy or yaml package.\nUse `pip install numpy pyyaml --user`"
+                  "\nto install the packages in user mode.")
     is_available = False
 
 try:
@@ -21,13 +21,13 @@ try:
     has_pandas = True
 except ImportError:
     has_pandas = False
-    warnings.warn('\nCannot import pandas package. Use `pip install pandas --user`'
-                  '\nto install the package in user mode.')
+    warnings.warn("\nCannot import pandas package. Use `pip install pandas --user`"
+                  "\nto install the package in user mode.")
 
 
 if is_available:
     # use the Yaml C binding (faster) if possible
-    if hasattr(yaml, 'CSafeLoader'):
+    if hasattr(yaml, "CSafeLoader"):
         Loader = yaml.CSafeLoader
     else:
         warnings.warn("The libyaml binding is not available, tests will take"
@@ -35,7 +35,7 @@ if is_available:
                       " doesn't, you may have to install libyaml yourself.")
         Loader = yaml.SafeLoader
 
-    from .common import string, get_yaml_tag
+    from .common import get_yaml_tag, string
 
     def yaml_parse(content, *args, **kwargs):
         from . import structures
@@ -44,17 +44,19 @@ if is_available:
     yaml_print = yaml.dump
 
 
-class Document(object):
+class Document:
     """
     A document with all its metadata extracted from the original file.
     """
     def __init__(self, iterators, start, lines, tag=None):
         """
+        Initialize the Document object.
+
         Args:
-            iterators:
-            start:
-            lines:
-            tag:
+            iterators (dict): State of the iterators for this document.
+            start (int): Starting line number in the original file.
+            lines (list): List of lines belonging to the document.
+            tag (str, optional): YAML tag of the document.
         """
         self.iterators = iterators
         self.start = start
@@ -71,31 +73,30 @@ class Document(object):
         Raise an error if the document is untagged.
         """
         if is_available:
-            content = '\n'.join(self.lines)
+            content = "\n".join(self.lines)
             try:
                 self._obj = yaml_parse(content)
             except yaml.YAMLError as e:
                 print("Exception in Document._parse()\ncontent:\n", content, "\nException:\n", e)
                 self._obj = e
                 self._corrupted = True
-                self._tag = 'Corrupted'
+                self._tag = "Corrupted"
 
             # use type in instead of isinstance because inheritance is fine
             if type(self._obj) in {dict, list, tuple, string}:
                 raise UntaggedDocumentError(self.start)
+            tag = get_yaml_tag(type(self._obj))
+            if self._tag is not None and tag != self._tag:
+                self._corrupted = True
+                self._obj = TagMismatchError(self.start, tag, self._tag)
             else:
-                tag = get_yaml_tag(type(self._obj))
-                if self._tag is not None and tag != self._tag:
-                    self._corrupted = True
-                    self._obj = TagMismatchError(self.start, tag, self._tag)
-                else:
-                    self._tag = tag
+                self._tag = tag
 
             # MG: Get iterators at this level.
             #self.iterators = self._obj["iterator_state"]
         else:
-            raise NoYAMLSupportError('Try to access YAML document but YAML is'
-                                     ' not available in this environment.')
+            raise NoYAMLSupportError("Try to access YAML document but YAML is"
+                                     " not available in this environment.")
 
     @property
     def id(self):
@@ -106,9 +107,9 @@ class Document(object):
         if self._id is None:
             state = []
             for key, val in self.iterators.items():
-                state.append('{}={}'.format(key, val))
+                state.append(f"{key}={val}")
 
-            self._id = ','.join(state) + ' ' + self.tag
+            self._id = ",".join(state) + " " + self.tag
         return self._id
 
     @property

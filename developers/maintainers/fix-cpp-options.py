@@ -23,13 +23,13 @@ renamed_cppopts = {
 renamed_keys = renamed_cppopts.keys()
 renamed_keys.sort()
 
-m4 = re.compile("\.m4$")
-chdr = re.compile("\.[ch]$")
-fortran = re.compile("\.([Ff]|[Ff]90|finc)$")
+m4 = re.compile(r"\.m4$")
+chdr = re.compile(r"\.[ch]$")
+fortran = re.compile(r"\.([Ff]|[Ff]90|finc)$")
 pynit = re.compile("__init__.py$")
-tinp = re.compile("\.in$")
+tinp = re.compile(r"\.in$")
 cppline = re.compile("^#")
-cppkeys = ("define .*","include.*","ifdef","ifndef","elif","^if ","else","endif","defined","undef","!","&&","\|\|","\(","\)")
+cppkeys = ("define .*","include.*","ifdef","ifndef","elif","^if ","else","endif","defined","undef","!","&&",r"\|\|",r"\(",r"\)")
 m4line = re.compile("AC_DEFINE")
 tline = re.compile("need_cpp_vars")
 
@@ -66,10 +66,10 @@ def fix_cppopts(top):
             line = re.sub(".*AC_DEFINE","", line)
             line = re.sub("AC_DEFINE","", line)
             line = re.sub(",.*","",line)
-            line = re.sub("[\(\[\]\)]","",line)
+            line = re.sub(r"[\(\[\]\)]","",line)
             lmod = True
           elif ( is_pynit ):
-            line = re.sub("[ \",]","",line)
+            line = re.sub('[ ",]',"",line)
             lmod = True
           elif ( is_tinp and tline.search(line) ):
             line = re.sub(".*need_cpp_vars.*=[ ]*","",line)
@@ -90,10 +90,10 @@ def fix_cppopts(top):
 
 if __name__ == "__main__":
 
-  if len(sys.argv) == 1: 
+  if len(sys.argv) == 1:
     top = "src"
   else:
-    top = sys.argv[1] 
+    top = sys.argv[1]
 
   exit_status = fix_cppopts(top)
   sys.exit(exit_status)

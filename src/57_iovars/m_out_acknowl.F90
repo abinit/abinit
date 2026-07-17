@@ -80,7 +80,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
 !Allocate and initialize, for each possible reference, the flag for citation,
 !the priority of the citation, the reference, and the comment.
- nrefs=49
+ nrefs=50
  ABI_MALLOC(cite,(nrefs))
  ABI_MALLOC(ref,(nrefs))
  ABI_MALLOC(comment,(nrefs))
@@ -102,7 +102,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 ref(1)=' Abinit 2025: New Capabilities for the Predictive Modeling of Solids and Nanomaterials.'//ch10//&
    ' J. Chem. Phys. 163, 164126 (2025).'//ch10//&
    ' M.J. Verstraete, J. Abreu, G. Allemand, B. Amadon, G. Antonius,'//ch10//&
-   ' M. Azizi, L. Baguet, C. Barat, L. Bastogne, R. Bejaud, J.-M. Beuken,'//ch10//& 
+   ' M. Azizi, L. Baguet, C. Barat, L. Bastogne, R. Bejaud, J.-M. Beuken,'//ch10//&
    ' J. Bieder, A. Blanchet, F. Bottin, J. Bouchet, J. Bouquiaux, E. Bousquet,'//ch10//&
    ' J. Boust, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval,'//ch10
 ref(1)=trim(ref(1))//&
@@ -113,7 +113,7 @@ ref(1)=trim(ref(1))//&
    ' I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Marazzi, M. Mignolet,'//ch10
 ref(1)=trim(ref(1))//&
    " D.D. O'Regan, R. Outerovitch, Ch. Paillard, G. Petretto, S. Ponce,"//ch10//&
-   ' F. Ricci, G.-M. Rignanese, M. Rodriguez-Mayorga, A.H. Romero, S. Rostami,'//ch10//& 
+   ' F. Ricci, G.-M. Rignanese, M. Rodriguez-Mayorga, A.H. Romero, S. Rostami,'//ch10//&
    ' M. Royo, M. Sarraute, A. Sasani, F. Soubiran, M. Stengel, Ch. Tantardini,'//ch10//&
    ' M. Torrent, V. Trinquet, V. Vasilchencko, D. Waroquiers, A. Zabalo,'//ch10//&
    ' A. Zadoks, Huazhang Zhang, J.W. Zwanziger.'
@@ -196,7 +196,7 @@ ref(1)=trim(ref(1))//&
    ' M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger'
  comment(5)=' Comment: the third generic paper describing the ABINIT project.'//ch10//&
    ' Note that a version of this paper, that is not formatted for Computer Phys. Comm. '//ch10//&
-   ' is available at'//ch10//& 
+   ' is available at'//ch10//&
    ' https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT_CPC_v10.pdf .'//ch10//&
    ' The licence allows the authors to put it on the Web.'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009'
@@ -514,19 +514,25 @@ ref(1)=trim(ref(1))//&
  comment(47)=' Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.'//ch10//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997'
  priority(47)=3
- 
+
  ref(48)=' Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,'//ch10//&
   ' interatomic force constants from density-functional perturbation theory,'//ch10//&
   ' X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).'
  comment(48)=' Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.'//ch10//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a'
  priority(48)=3
-  
+
  ref(49)=' Metric tensor formulation of strain in density-functional perturbation theory, '//ch10//&
   ' D. R. Hamann, X. Wu, K. M. Rabe, and D. Vanderbilt, Phys. Rev. B71, 035117 (2005).'
  comment(49)=' Comment: Non-vanishing rfstrs. Strong suggestion to cite this paper in your publications.'//ch10//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2005'
  priority(49)=18
+
+ ref(50)=' Black-box inhomogeneous preconditioning for self-consistent field iterations in density functional theory.'//ch10//&
+  ' M.F. Herbst and A. Levitt, Journal of Physics: Condensed Matter, 33(8) 085503 (2020).'
+ comment(50)=' Comment: to be cited in case the LDOS-preconditioner is used (iprcel=202).'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#herbst2020'
+ priority(50)=20
 
 !---------------------------------------------------------------------------------------------
 !Determine the papers to be cited
@@ -556,8 +562,11 @@ ref(1)=trim(ref(1))//&
 !  If usepawu/=0, cite Amadon2008
    if(dtsets(idtset)%usepawu/=0.and.dtsets(idtset)%usedmft==0) cite(15)=1
 
-!  If iprcel/=0, cite Anglade2008
-   if(dtsets(idtset)%iprcel/=0)cite(16)=1
+!  If 21 <= iprcel <= 169, cite Anglade2008
+   if(dtsets(idtset)%iprcel>=21.and.dtsets(idtset)%iprcel<=169)cite(16)=1
+
+!  If iprcel=202, cite Herbst2020
+   if(dtsets(idtset)%iprcel==202)cite(50)=1
 
 !  If iomode==IO_MODE_ETSF, cite Gonze2008
    if(dtsets(idtset)%iomode==IO_MODE_ETSF)cite(17)=1

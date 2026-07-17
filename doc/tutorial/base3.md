@@ -172,7 +172,7 @@ From the output file, here is the evolution of total energy for the different k-
 
 The difference between dataset 3 and dataset 4 is rather small.
 Even the dataset 2 gives a precision of about 0.0001 Ha. So, our converged value for the total energy,
-at fixed [[acell]], fixed [[ecut]], is -8.8251 Ha.
+at fixed [[acell]], fixed [[ecut]], is -8.5251 Ha.
 
 !!! note
     ABINIT never outputs the value of input variable [[ngkpt]], but instead uses [[kptrlatt]], a 3x3 matrix of integers.
@@ -344,7 +344,7 @@ with a band-gap of about 0.585 eV (this is quantitatively quite wrong: the exper
 The minimum of the conduction band is slightly displaced with respect to X, see kpt # 21 (this is correct).
 This underestimation of the band gap is well-known (the famous DFT band-gap problem).
 In order to obtain correct band gaps, you need to go beyond the Kohn-Sham Density Functional
-Theory: use the GW approximation. This is described in [the first GW tutorial](/tutorial/gw1).
+Theory: use the GW approximation. This is described in [the first GW tutorial](../tutorial/gw1.md).
 
 For experimental data and band structure representation, see the book by M.L. Cohen and J.R. Chelikowski [[cite:Cohen1988]].
 

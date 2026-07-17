@@ -401,7 +401,6 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,mpw,kg_k,vkbsign,vkb,vkbd)
  real(dp) :: effmass_free,ecutsm,ecut
 !arrays
  real(dp),allocatable :: ffnl(:,:,:,:),kpg_dum(:,:),modkplusg(:),ylm_gr(:,:,:),ylm_k(:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -562,7 +561,7 @@ function nc_ihr_comm(vkbr, cryst, psps, npw, nspinor, istwfk, inclvkb, kpoint, u
  ! hence k+G can be replaced by G.
  ! HM 03/08/2018: we need band velocities so we don't assume c/=v anymore and we use k+G.
 
- spinorwf_pad = RESHAPE([0, 0, npw, npw, 0, npw, npw, 0], [2, 4])
+ spinorwf_pad = reshape([0, 0, npw, npw, 0, npw, npw, 0], [2, 4])
  ihr_comm = czero
 
  ! -i <c,k|\nabla_r|v,k> in reduced coordinates.

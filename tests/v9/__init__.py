@@ -138,6 +138,7 @@ inp_files = [
     "t130.abi",  # UPF2
     "t131.abi",  # UPF2 with SOC
     "t132.abi",  # Forces using Beigi 2D cut-off
+    "t133.abi",  # NC+SOC GS (forces+stress) and Gamma phonons for AlAs, useylm=0 and 1
 
     # more DFPT
     "t140.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid
@@ -191,13 +192,13 @@ inp_files = [
 
     # Multibinit efield
     "t210.abi",  # t210-t215 check the implemenation of te efield in multibinit.
-    "t211.abi", 
-    "t212.abi", 
-    "t213.abi", 
-    "t214.abi", 
-    "t215.abi",   
+    "t211.abi",
+    "t212.abi",
+    "t213.abi",
+    "t214.abi",
+    "t215.abi",
     # Multibinit fit_weight_T
-    "t216.abi", 
+    "t216.abi",
 
 
 ]

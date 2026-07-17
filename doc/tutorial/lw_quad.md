@@ -7,7 +7,7 @@ authors: SP, MR, MS
 This tutorial describes the computation of dynamical quadrupoles using
 density functional perturbation theory (DFPT), using AlAs as an example.
 
-It is assumed the user has already completed the two tutorials [RF1](/tutorial/rf1) and [RF2](/tutorial/rf2),
+It is assumed the user has already completed the two tutorials [RF1](../tutorial/rf1.md) and [RF2](../tutorial/rf2.md),
 and is comfortable with the concepts of ground-state and response properties,
 including phonons, Born effective charges and dielectric tensor.
 

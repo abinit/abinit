@@ -11,7 +11,7 @@ This page gives hints on how to perform a Bader analysis with the ABINIT package
 The postprocessor of ABINIT, called AIM (Atom-In-Molecule), performs the Bader
 analysis on the basis of the charge density, norm-conserving pseudopotential
 cases only, complemented by the core charge densities provided in
-[[https://www.abinit.org/downloads/core_electron]]. There is a specific
+[[https://www.abinit.org/atomic_data/atomic_densities/core_electron.html]]. There is a specific
 [[help:aim]] for this ABINIT postprocessor.
 
 

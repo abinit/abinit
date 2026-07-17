@@ -3,7 +3,7 @@
 !! m_spmat_base
 !!
 !! FUNCTION
-!! This module contains the base type for sparse matrix. 
+!! This module contains the base type for sparse matrix.
 !!
 !! Datatypes:
 !!  base_mat_t: base sparse matrix.

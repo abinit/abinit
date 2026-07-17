@@ -9,6 +9,8 @@ add_library(79_seqpar_mpi STATIC
   m_lobpcgwf.F90
   m_lobpcgwf_cprj.F90
   m_lobpcgwf_old.F90
+  m_slicewf.F90
+  m_slicewf_cprj.F90
   m_tddft.F90
   m_vtowfk.F90
   m_vtorho.F90
@@ -74,6 +76,13 @@ if (ABINIT_YAKL_WANTED)
   target_include_directories(79_seqpar_mpi
     PUBLIC
     ${YAKL_BINARY_DIR})
+endif()
+
+if(ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
+  target_link_libraries(79_seqpar_mpi
+    PUBLIC
+    abinit::28_numeric_noabirule
+    )
 endif()
 
 add_library(abinit::79_seqpar_mpi ALIAS 79_seqpar_mpi)

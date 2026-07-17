@@ -29,6 +29,7 @@ module m_dfpt_cgwf
  use defs_basis
  use m_abicore
  use m_errors
+ use m_xomp
  use m_xmpi
  use m_cgtools
  use m_rf2
@@ -193,6 +194,7 @@ contains
 !!  npw=number of planewaves in basis sphere at given k.
 !!  npw1=number of planewaves in basis sphere at k+Q
 !!  nspinor=number of spinorial components of the wavefunctions
+!!  omega= frequency of the perturbation
 !!  opt_gvnlx1=option controlling the use of gvnlx1 array:
 !!            0: used as an output
 !!            1: used as an input: - used only for ipert=natom+2
@@ -250,7 +252,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 & mcgq,mgscq,mpi_enreg,mpw1,natom,nband,nband_me,nbdbuf,nline_in,npw,npw1,nspinor,&
 & opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dfpt_sciss,tolrde,tolwfr,&
 & usedcwavef,wfoptalg,nlines_done, &
-  usetolrde) ! optional
+  eta,omega,usetolrde) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -262,6 +264,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  integer,intent(inout) :: nlines_done
  integer,optional,intent(in) :: usetolrde
  real(dp),intent(in) :: dfpt_sciss,tolrde,tolwfr
+ real(dp),optional,intent(in) :: eta,omega
  real(dp),intent(out) :: resid
  type(MPI_type),intent(in) :: mpi_enreg
  type(rf2_t), intent(in) :: rf2
@@ -292,7 +295,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  integer :: ipws,ispinor,istwf_k,jband,nline,optlocal,optnl,dc_shift_band,sij_opt
  integer :: test_is_ok,useoverlap,usepaw,usevnl,usetolrde__
  real(dp) :: d2edt2,d2te,d2teold,dedt,deltae,deold,dotgg
- real(dp) :: dotgp,doti,dotr,eshift,eshiftkq,gamma,optekin,prod1,prod2
+ real(dp) :: dotgp,doti,dotr,eta_,eshift,eshiftkq,gamma,omega_,optekin,prod1,prod2
  real(dp) :: theta,tol_restart,u1h0me0u1
  logical :: gen_eigenpb
  integer :: skipme, bands_skipped_now(nband)
@@ -360,6 +363,11 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
  ! Use scissor shift on 0-order eigenvalue
  eshift=eig0_k(u1_band)-dfpt_sciss
+
+ ! Remove omega for a finite-frequency calculation
+ omega_=zero ; if (present(omega)) omega_=omega
+ eta_=zero ; if (present(eta)) eta_=eta
+ eshift=eshift+omega_
 
  ! Additional initializations
  istwf_k=gs_hamkq%istwf_k
@@ -845,9 +853,9 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
  ! ghc also includes the eigenvalue shift
  if (gen_eigenpb) then
-   call cg_zaxpy(npw1*nspinor, [-eshift, zero], gsc,ghc)
+   call cg_zaxpy(npw1*nspinor, [-eshift, -eta_], gsc,ghc)
  else
-   call cg_zaxpy(npw1*nspinor, [-eshift, zero], cwavef,ghc)
+   call cg_zaxpy(npw1*nspinor, [-eshift, -eta_], cwavef,ghc)
  end if
 
  ! Initialize resid, in case of nline==0
@@ -1084,7 +1092,6 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      end if
    end do
 
-
    !DEBUG Keep this debugging feature !
    !call sqnorm_g(dotr,istwf_k,npw1*nspinor,direc,me_g0,comm_fft)
    !write(std_out,*)' dfpt_cgwf: after projbd, direc**2=',dotr
@@ -1151,7 +1158,9 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    else
 !$OMP PARALLEL DO
      do ipw=1,npw1*nspinor
-       gh_direc(1:2,ipw)=gh_direc(1:2,ipw)-eshift*conjgr(1:2,ipw)
+!       gh_direc(1:2,ipw)=gh_direc(1:2,ipw)-eshift*conjgr(1:2,ipw)
+       gh_direc(1,ipw)=gh_direc(1,ipw)-eshift*conjgr(1,ipw)+eta_*conjgr(2,ipw)
+       gh_direc(2,ipw)=gh_direc(2,ipw)-eshift*conjgr(2,ipw)-eta_*conjgr(1,ipw)
      end do
    end if
 
@@ -1811,7 +1820,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
                        full_cg1, full_ur1, init_mode) ! optional
 
 !Arguments ------------------------------------
- class(stern_t),intent(inout) :: stern
+ class(stern_t),target,intent(inout) :: stern
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(rf_hamiltonian_type),intent(inout) :: rf_hamkq
  integer,intent(in) :: u1_band, band_me, idir, ipert
@@ -1828,13 +1837,15 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, ibgq0 = 0, nbdbuf0 = 0, quit0 = 0, istwfk1 = 1, ndat1 = 1, timcount0 = 0
- integer :: opt_gvnlx1, grad_berry_size_mpw1, iband
+ integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, ibgq0 = 0, quit0 = 0, istwfk1 = 1, ndat1 = 1, timcount0 = 0
+ integer :: opt_gvnlx1, grad_berry_size_mpw1, iband, gpu_option
  real(dp) :: out_resid, fermie1, eig0nk !, dotr
+ logical :: map_cgq, map_vlocal
  character(len=500) :: init_mode__
  type(rf2_t) :: rf2
 !arrays
  real(dp),allocatable :: grad_berry(:,:)
+ real(dp), contiguous, pointer :: cgq_ptr(:,:,:), vlocal_ptr(:,:,:,:) !, work_ptr(:,:,:,:), gscq_ptr(:,:,:)
  complex(gwp),allocatable :: cwork_sp(:)
  logical :: cycle_bands(stern%nband)
 #ifdef HAVE_GW_DPC
@@ -1865,6 +1876,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 
  !if (psps%usepaw==1) mcprjq = stern%nspinor*mband_mem*mkqmem*nsppol*usecprj
 
+ gpu_option = stern%dtset%gpu_option
  init_mode__ = "None"; if (present(init_mode)) init_mode__ = init_mode
 
  select case (init_mode__)
@@ -1896,6 +1908,20 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    ABI_ERROR(sjoin("Invalid init_mode:", init_mode__))
  end select
 
+ cgq_ptr => stern%cgq
+ vlocal_ptr => gs_hamkq%vlocal
+
+ if (gpu_option == ABI_GPU_OPENMP) then
+   ! Upload cgq array to GPU
+   map_cgq  =  .not. (xomp_target_is_present(c_loc(cgq_ptr)))
+   map_vlocal = .not. (xomp_target_is_present(c_loc(vlocal_ptr)))
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:cgq_ptr) IF (map_cgq)
+   !$OMP TARGET ENTER DATA MAP(to:vlocal_ptr) IF (map_vlocal)
+#endif
+ end if
+
+ !print *, "before dfpt_cgwf
  call dfpt_cgwf(u1_band, band_me, stern%rank_band, stern%bands_treated_now, berryopt0, &
    stern%cgq, ug1_nkq, ug0_nk, &  ! Important stuff
    cprj1_nkq, cprj0_nk, rf2, stern%dcwavef, &
@@ -1903,11 +1929,20 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    stern%ghc, stern%gh1c_n, grad_berry, stern%gsc, stern%gscq, &
    gs_hamkq, stern%gvnlxc, stern%gvnlx1, icgq0, idir, ipert, igscq0, &
    stern%mcgq, stern%mgscq, stern%mpi_enreg, grad_berry_size_mpw1, stern%dtset%natom, stern%nband, stern%nband_me, &
-   nbdbuf0, stern%nline_in, stern%npw_k, stern%npw_kq, stern%nspinor, &
+   stern%dtset%nbdbuf, stern%nline_in, stern%npw_k, stern%npw_kq, stern%nspinor, &
    opt_gvnlx1, stern%dtset%prtvol, quit0, out_resid, rf_hamkq, stern%dtset%dfpt_sciss, -one, stern%dtset%tolwfr, &
    stern%usedcwavef, stern%dtset%wfoptalg, stern%nlines_done, usetolrde=0)
+ !print *, "after dfpt_cgwf
 
  ABI_FREE(grad_berry)
+
+ if (gpu_option == ABI_GPU_OPENMP) then
+   if (map_vlocal) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:vlocal_ptr)
+#endif
+   end if
+ end if
 
  if (stern%use_cache) then
    ! Store |Psi_1> to init Sternheimer solver for the next q-point.
@@ -2007,7 +2042,10 @@ end subroutine stern_solve
 subroutine stern_free(stern)
 
 !Arguments ------------------------------------
- class(stern_t),intent(inout) :: stern
+ class(stern_t),target,intent(inout) :: stern
+
+!Local variables ------------------------------
+ real(dp), contiguous, pointer :: cgq_ptr(:,:,:) !, work_ptr(:,:,:,:), gscq_ptr(:,:,:)
 !************************************************************************
 
  ! integer
@@ -2022,7 +2060,7 @@ subroutine stern_free(stern)
  ABI_SFREE(stern%ghc)
  ABI_SFREE(stern%gsc)
  ABI_SFREE(stern%gvnlxc)
- ABI_SFREE(stern%cgq)
+
  ABI_SFREE(stern%gscq)
  ABI_SFREE(stern%gvnlx1)
  ABI_SFREE(stern%work)
@@ -2037,6 +2075,15 @@ subroutine stern_free(stern)
  !end if
  ABI_SFREE(stern%cprjq)
  ABI_SFREE(stern%cwaveprj1)
+
+ cgq_ptr => stern%cgq
+#ifdef HAVE_OPENMP_OFFLOAD
+ ! Free array on the GPU
+ if (xomp_target_is_present(c_loc(cgq_ptr))) then
+   !$OMP TARGET EXIT DATA MAP(delete:cgq_ptr)
+ end if
+#endif
+ ABI_SFREE(stern%cgq)
 
 end subroutine stern_free
 !!***

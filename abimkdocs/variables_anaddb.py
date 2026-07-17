@@ -1,11 +1,9 @@
-# coding: utf-8
-from __future__ import print_function, division, unicode_literals, absolute_import
 
 try:
-    from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+    from abimkdocs.variables import MultipleValue, Range, ValueWithUnit
 except ImportError:
     # This is needed for importing this module within Abipy.
-    from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range
+    pass
 
 executable = "anaddb"
 
@@ -18,11 +16,11 @@ variables = [
         abivarname="a2fsmear@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['ElPhonTransport_useful'],
+        topics=["ElPhonTransport_useful"],
         dimensions="scalar",
         defaultval=2e-05,
         mnemonics="Alpha2F SMEARing factor",
-        characteristics=['[[ENERGY]]'],
+        characteristics=["[[ENERGY]]"],
         added_in_version="before_v9",
         text=r"""
 Smearing width for the Eliashberg $\alpha^2$F function (similar to a phonon DOS),
@@ -35,7 +33,7 @@ are replaced by Gaussians of width **a2fsmear** (by default in Hartree).
         abivarname="alphon@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['nonlinear_basic'],
+        topics=["nonlinear_basic"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="ALign PHONon mode eigendisplacements",
@@ -54,7 +52,7 @@ of uniaxial crystals, the z-axis should be chosen along the optical axis.
         abivarname="asr@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['Phonons_basic', 'PhononBands_basic'],
+        topics=["Phonons_basic", "PhononBands_basic"],
         dimensions="scalar",
         defaultval=1,
         mnemonics="Acoustic Sum Rule",
@@ -68,6 +66,12 @@ Note that there is a similar input variable [[asr]] for ABINIT.
   * 1 or 2 --> the ASR for interatomic force constants is imposed by modifying
   the on-site interatomic force constants, in a symmetric way ( **asr** =2),
   or in the more general case, unconstrained way ( **asr** =1).
+  * 6 --> impose ASR and rotational invariance on the interatomic force constants. 
+  This requires the knowledge of the IFCS derivatives, estimated based on real-space
+  IFCs moments (requires [[anaddb:ifcflag]]=1) or reading them from flexoddb
+  (requires [[anaddb:flexoflag]]=1). Right now, scaling is not optimum with
+  the number of atoms, but it could be in principle improved using sparse matrix
+  algorithms. Additional information are provided at the end of this description.
 
 More detailed explanations: the total energy should be invariant under
 translation of the crystal as a whole. This would guarantee that the three
@@ -75,7 +79,10 @@ lowest phonon modes at Gamma have zero frequency (Acoustic Sum Rule - ASR).
 Unfortunately, the way the DDB is generated (presence of a discrete grid of
 points for the evaluation of the exchange-correlation potential and energy)
 slightly breaks the translational invariance. Well, in some pathological
-cases, the breaking can be rather important.
+cases, the breaking can be rather important. Meanwhile, rotational invariance,
+i.e. the total energy should be invariant under rotation and leaves no torque
+on the atoms. Its imposition has different impacts depending on the dimensionality
+of the problem, see [[anaddb:sys_dim]]. 
 
 Two quantities are affected: the interatomic forces (or dynamical matrices),
 and the effective charges. The ASR for the effective charges is called the
@@ -116,6 +123,17 @@ generated from IFCs coming from dynamical matrices none of which are Gamma,
 the breaking of the ASR is rather severe. In order to clear the situation, one
 should use a diagonalisation routine for non-hermitian matrices.
 ).
+
+For rotational infariance [[anaddb:asr]]==6, invariance is imposed on the zone-center
+IFCs and/or their derivatives thanks to a Moore-Penrose pseudo-inverse,
+correcting on-site and first-neigbhors interactions. In principle, rotational 
+invariance also propagates to the second derivatives of the IFCs, but this requires a
+rotational-invariant long-range electrostatics treatments of the IFCs, which is now
+missing both in 3D or in low-dimmensional materials. It is therefore desactivated. 
+As an extension, be very prudent when IFCs moments are used in combination to the
+long-range electrostatic treatments of IFCs ([[anaddb:dipdip]]): they have been 
+tested on a limited amount of systems.
+
 """,
     ),
 
@@ -123,8 +141,8 @@ should use a diagonalisation routine for non-hermitian matrices.
         abivarname="atifc@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_basic'],
-        dimensions=['[[anaddb:natifc]]'],
+        topics=["PhononBands_basic"],
+        dimensions=["[[anaddb:natifc]]"],
         defaultval=0,
         mnemonics="AToms for IFC analysis",
         added_in_version="before_v9",
@@ -140,11 +158,11 @@ to be written and eventually analysed.
         abivarname="band_gap@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['ElPhonTransport_expert'],
+        topics=["ElPhonTransport_expert"],
         dimensions="scalar",
         defaultval=999.0,
         mnemonics="BAND GAP",
-        characteristics=['[[ENERGY]]'],
+        characteristics=["[[ENERGY]]"],
         added_in_version="before_v9",
         text=r"""
 Allow setting the target band gap, in eV. ([[anaddb:elphflag]]=1).
@@ -155,7 +173,7 @@ Allow setting the target band gap, in eV. ([[anaddb:elphflag]]=1).
         abivarname="brav@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions="scalar",
         defaultval=1,
         mnemonics="BRAVais",
@@ -193,7 +211,7 @@ based on Wigner-Seitz cells (new as v8.7). The default algorithm has a correct t
         abivarname="chneut@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['Phonons_useful'],
+        topics=["Phonons_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="CHarge NEUTrality treatment",
@@ -222,7 +240,7 @@ See also [[asr@anaddb]] and [[asr]].
         abivarname="dieflag@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['Phonons_basic'],
+        topics=["Phonons_basic"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="DIElectric FLAG",
@@ -265,10 +283,57 @@ Frequency-dependent dielectric tensor flag.
     ),
 
     Variable(
+        abivarname="dielt_env@anaddb",
+        varset="anaddb",
+        vartype="real",
+        topics=['PhononBands_basic'],
+        dimensions="scalar",
+        defaultval=1,
+        mnemonics="DIELecTric constant ENVironment",
+        added_in_version="v10",
+        text=r"""
+  Dielectric constant of embedding dielectric materials when considering a bi-dimensional material.
+  Dipoles and dynamical quadrupoles generate an electrostatic potential that is reflected at the
+  dielectric interfaces with the environment (in ab initio calculations, typically vacuum). The sign
+  and amplitude of the reflection entirely depends on the dielectric mismatch. This variable fixes
+  such dielectric environment constant, allowing to compute the phonon band structure of a material
+  in different dielectric environment. The dielectric constant can be positive or negative (corresponding
+  to a metal where the plasmon frequency has been tuned by doping).
+
+""",
+    ),
+        Variable(
+        abivarname="dielt_thick@anaddb",
+        varset="anaddb",
+        vartype="real",
+        topics=['PhononBands_basic'],
+        dimensions="scalar",
+        defaultval=2,
+        mnemonics="dielectric thickness of 2D materials",
+        added_in_version="v10",
+        text=r"""
+  In low-dimensional materials, the electronic density doesn't extend infinitively in space, and it is 
+  necessary to define a dielectric thickness when considering electrostatics in such a system (simple)
+  or several ones (more advanced electrostatic model) to add the potential variation along the z direction.
+  The embedding dielectric constant is controlled by [[anaddb:dielt_env]]. Right now two cases are possible: 
+
+  * If only the first value of [[anaddb:dielt_thick]] is non-zero, consider one dielectric constant for
+  the whole 2D (dielectric slab). Both in-plane and out-of-plane dipole responses are estimated using this 
+  thickness. The dielectric constants of the 2D are then computed based on DFPT dielectric tensors with 
+  vacuum considering capacitors in parallel or in series, respectively.
+
+  * If two values are input, the first one corresponds to the total (outer) dielectric thickness 
+  (beyond that value, the dielectric constant is fixed by [[anaddb:dielt_env]]), while the second gives
+   the inner dielectric thickness with the dielectric constant fixed to 1. The outer dielectric constant
+   is then computed based on DFPT dielectric tensors.
+""",
+    ),
+
+    Variable(
         abivarname="dipdip@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_basic'],
+        topics=["PhononBands_basic"],
         dimensions="scalar",
         defaultval=1,
         mnemonics="DIPole-DIPole interaction",
@@ -295,6 +360,10 @@ Frequency-dependent dielectric tensor flag.
     [[anaddb:dipquad]] or [[anaddb:quadquad]] are set to 1.
     It is recommended to check that calculations with dipdip = 1 and -1 (both with dipquad = 0 and quadquad = 0)
     lead to identical results. Otherwise increase the resolution of the q-point grid and repeat this test.
+
+    Note that when [[anaddb:sys_dim]] =2-4 (2D materials), a specific correction is applied to account to
+    the reduction of dimensionality and the appearance of potential reflections at the dielectric interfaces.
+    See [[anaddb:dielt_thick]] and [[anaddb:dielt_env]] for more information.
 """,
     ),
 
@@ -302,11 +371,11 @@ Frequency-dependent dielectric tensor flag.
         abivarname="dipquad@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['longwave_basic'],
+        topics=["longwave_basic"],
         dimensions="scalar",
         defaultval=1,
         mnemonics="DIPole-QUADdrupole interaction",
-        characteristics=['[[DEVELOP]]'],
+        characteristics=["[[DEVELOP]]"],
         added_in_version="v9",
         text=r"""
 * 0 --> the dipole-quadrupole interaction is not handled separately in the treatment of the interatomic forces.
@@ -328,11 +397,11 @@ Frequency-dependent dielectric tensor flag.
         abivarname="quadquad@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['longwave_basic'],
+        topics=["longwave_basic"],
         dimensions="scalar",
         defaultval=1,
         mnemonics="QUADdrupole-QUADdrupole interaction",
-        characteristics=['[[DEVELOP]]'],
+        characteristics=["[[DEVELOP]]"],
         added_in_version="v9",
         text=r"""
 * 0 --> the quadrupole-quadrupole interaction is not handled separately in the treatment of the interatomic forces.
@@ -354,7 +423,7 @@ Frequency-dependent dielectric tensor flag.
         abivarname="dosdeltae@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions="scalar",
         defaultval="0.2 cm$^{-1}$ (about 0.9E-06 Hartree)",
         mnemonics="DOS DELTA in Energy",
@@ -371,11 +440,11 @@ Prior to v9.10, the default was 1 cm$^{-1}$.
         abivarname="dossmear@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions="scalar",
         defaultval="1 cm$^{-1}$ (about 4.5E-06 Hartree)",
         mnemonics="DOS SMEARing value",
-        characteristics=['[[ENERGY]]'],
+        characteristics=["[[ENERGY]]"],
         added_in_version="before_v9",
         text=r"""
 **dossmear** defines the gaussian broadening used to calculate the phonon
@@ -389,7 +458,7 @@ Prior to v9.10, the default was 5 cm$^{-1}$.
         abivarname="dossum@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_basic'],
+        topics=["PhononBands_basic"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="DOS SUM",
@@ -405,7 +474,7 @@ sum and difference are reported in the output file.
         abivarname="dostol@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions="scalar",
         defaultval=0.25,
         mnemonics="DOS TOLerance",
@@ -422,7 +491,7 @@ bigger is smaller than **dostol**.
         abivarname="eivec@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['Phonons_useful', 'PhononBands_useful'],
+        topics=["Phonons_useful", "PhononBands_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="EIgenVECtors",
@@ -438,7 +507,7 @@ bigger is smaller than **dostol**.
         abivarname="elaflag@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['Elastic_basic'],
+        topics=["Elastic_basic"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="ELAstic tensor FLAG",
@@ -477,11 +546,11 @@ Flag for calculation of elastic and compliance tensors
         abivarname="elph_fermie@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['ElPhonTransport_useful'],
+        topics=["ElPhonTransport_useful"],
         dimensions="scalar",
         defaultval=0.0,
         mnemonics="ELectron-PHonon FERMI Energy",
-        characteristics=['[[ENERGY]]'],
+        characteristics=["[[ENERGY]]"],
         added_in_version="before_v9",
         text=r"""
 If non-zero, will fix artificially the value of the Fermi energy (e.g. for semiconductors),
@@ -494,7 +563,7 @@ in the electron-phonon case. Note that [[anaddb:elph_fermie]] and [[anaddb:ep_ex
         abivarname="elphflag@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononWidth_compulsory', 'ElPhonTransport_compulsory'],
+        topics=["PhononWidth_compulsory", "ElPhonTransport_compulsory"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="ELectron-PHonon FLAG",
@@ -508,11 +577,11 @@ If **elphflag** is 1, anaddb performs an analysis of the electron-phonon couplin
         abivarname="elphsmear@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['ElPhonTransport_useful'],
+        topics=["ElPhonTransport_useful"],
         dimensions="scalar",
         defaultval="0.01 Hartree",
         mnemonics="ELectron-PHonon SMEARing factor",
-        characteristics=['[[ENERGY]]'],
+        characteristics=["[[ENERGY]]"],
         added_in_version="before_v9",
         text=r"""
 Smearing width for the Fermi surface integration (in Hartree by default).
@@ -523,7 +592,7 @@ Smearing width for the Fermi surface integration (in Hartree by default).
         abivarname="enunit@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['Phonons_useful', 'PhononBands_useful'],
+        topics=["Phonons_useful", "PhononBands_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="ENergy UNITs",
@@ -542,7 +611,7 @@ the console log file, for which Hartree units are used).
         abivarname="ep_b_max@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ElPhonTransport_useful'],
+        topics=["ElPhonTransport_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="Electron Phonon integration Band MAXimum",
@@ -560,7 +629,7 @@ equal weight is given to all k-points, for all bands between
         abivarname="ep_b_min@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ElPhonTransport_useful'],
+        topics=["ElPhonTransport_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="Electron Phonon integration Band MINimum",
@@ -575,7 +644,7 @@ integration, instead of the upper bound. See also [[anaddb:telphint]].
         abivarname="ep_extrael@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['ElPhonTransport_useful'],
+        topics=["ElPhonTransport_useful"],
         dimensions="scalar",
         defaultval=0.0,
         mnemonics="Electron-Phonon EXTRA ELectrons",
@@ -594,7 +663,7 @@ used at the same time. ([[anaddb:elphflag]]=1).
         abivarname="ep_int_gkk@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononWidth_useful'],
+        topics=["PhononWidth_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="Electron-Phonon INTerpolation of GKK",
@@ -611,7 +680,7 @@ weights are treated symmetrically.
         abivarname="ep_keepbands@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ElPhonTransport_basic'],
+        topics=["ElPhonTransport_basic"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="Electron-Phonon KEEP dependence on electron BANDS",
@@ -628,7 +697,7 @@ transport calculations **ep_keepbands** must be set to 1.
         abivarname="ep_nqpt@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ElPhonTransport_expert'],
+        topics=["ElPhonTransport_expert"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="Electron Phonon Number of Q PoinTs",
@@ -644,7 +713,7 @@ number of q-points to be found in the GKK file, independently of the normal anad
         abivarname="ep_nspline@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ElPhonTransport_useful'],
+        topics=["ElPhonTransport_useful"],
         dimensions="scalar",
         defaultval=20,
         mnemonics="Electron Phonon Number for SPLINE interpolation",
@@ -659,7 +728,7 @@ time approximation ([[anaddb:ifltransport]]=3).
         abivarname="ep_prt_yambo@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ElPhonInt_expert'],
+        topics=["ElPhonInt_expert"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="Electron Phonon PRinTout YAMBO data",
@@ -673,8 +742,8 @@ For electron-phonon calculations, print out matrix elements for use by the yambo
         abivarname="ep_qptlist@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['PhononWidth_useful'],
-        dimensions=[3, '[[anaddb:ep_nqpt]]'],
+        topics=["PhononWidth_useful"],
+        dimensions=[3, "[[anaddb:ep_nqpt]]"],
         defaultval="(3*[[anaddb:ep_nqpt]])*0",
         mnemonics="Electron Phonon Q PoinT LIST",
         added_in_version="before_v9",
@@ -690,7 +759,7 @@ q-points to be found in the GKK file, independently of the normal anaddb input
         abivarname="ep_scalprod@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononWidth_useful'],
+        topics=["PhononWidth_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="DO SCALar PRODuct for gkk matrix elements",
@@ -707,15 +776,31 @@ or high symmetry points. I do not know why...
 """,
     ),
 
+
+    Variable(
+        abivarname="eta@anaddb",
+        varset="anaddb",
+        vartype="real",
+        topics=["DFPT_expert", "ConstrainedDFPT_expert"],
+        dimensions="scalar",
+        defaultval=0.0,
+        mnemonics="causality ETA parameter",
+        characteristics=["[[DEVELOP]]"],
+        added_in_version="10.4",
+        text=r"""
+This variable specifies the amplitude of the infinitesimal imaginary part used in the frequency interpolation of second-order quantities computed in a constrained DFPT ABINIT run, in order to account for causality and dissipation effects.
+""",
+    ),
+
     Variable(
         abivarname="flexoflag@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['longwave_basic'],
+        topics=["longwave_basic"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="FLEXOelectric tensor FLAG",
-        characteristics=['[[DEVELOP]]'],
+        characteristics=["[[DEVELOP]]"],
         added_in_version="v9",
         text=r"""
 Flag for calculation of bulk flexoelectrics tensors
@@ -734,11 +819,32 @@ Flag for calculation of bulk flexoelectrics tensors
 """,
     ),
 
+
+    Variable(
+        abivarname="freqflag@anaddb",
+        varset="anaddb",
+        vartype="integer",
+        topics=["DFPT_expert","ConstrainedDFPT_expert"],
+        dimensions="scalar",
+        defaultval=3,
+        mnemonics="FREQuency interpolation FLAG",
+        characteristics=["[[DEVELOP]]"],
+        added_in_version="10.4",
+        text=r"""
+
+This variable selects the type of frequency interpolation applied to the second-order quantities computed in a constrained DFPT ABINIT run.
+
+  * 1 --> Adiabatic (beyond-Born-Oppenheimer) dynamics. Equivalent to a linear-in-frequency interpolation. The zeroth-order terms are taken from the static ([[rfomega]] = 0.0) second-order DDB entries, while the first-order frequency terms are given by the Berry curvatures stored in the DDB file. This option requires [[timdisp@anaddb]] = 1 and allows to include dissipation via [[eta@anaddb]] /= 0.0.
+  * 2 --> Nonadiabatic polynomial interpolation. Uses DDB blocks computed at different [[rfomega]] values to perform a polynomial interpolation (using the polint routine). This option does not allow [[eta@anaddb]] /= 0.0.
+  * 3 --> Nonadiabatic polynomial interpolation with dissipation. Extracts the polynomial coefficients from the DDB blocks at different [[rfomega]] values using the polcoe routine, and then performs an analytical continuation to complex frequencies, where [[eta@anaddb]] enters as an infinitesimal imaginary part.
+""",
+    ),
+
     Variable(
         abivarname="freeze_displ@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['PhononBands_expert'],
+        topics=["PhononBands_expert"],
         dimensions="scalar",
         defaultval=0.0,
         mnemonics="FREEZE DISPLacement of phonons into supercells",
@@ -770,13 +876,16 @@ be used with a small number [[anaddb:nph1l]] of q-points for interpolation.
         abivarname="frmax@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['Phonons_useful'],
+        topics=["Phonons_useful", "ConstrainedDFPT_useful"],
         dimensions="scalar",
         defaultval=10.0,
         mnemonics="FRequency MAXimum",
         added_in_version="before_v9",
         text=r"""
 Value of the largest frequency for the frequency-dependent dielectric tensor, in Hartree.
+
+Starting from version 10.4, this variable specifies the largest frequency used for the
+frequency interpolation of second-order quantities computed in a constrained DFPT ABINIT run.
 """,
     ),
 
@@ -784,13 +893,16 @@ Value of the largest frequency for the frequency-dependent dielectric tensor, in
         abivarname="frmin@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['Phonons_useful'],
+        topics=["Phonons_useful", "ConstrainedDFPT_useful"],
         dimensions="scalar",
         defaultval=0.0,
         mnemonics="FRequency MINimum",
         added_in_version="before_v9",
         text=r"""
 Value of the lowest frequency for the frequency-dependent dielectric tensor, in Hartree.
+
+Starting from version 10.4, this variable specifies the lowest frequency used for the
+frequency interpolation of second-order quantities computed in a constrained DFPT ABINIT run.
 """,
     ),
 
@@ -798,7 +910,7 @@ Value of the lowest frequency for the frequency-dependent dielectric tensor, in 
         abivarname="gkqwrite@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ElPhonInt_useful'],
+        topics=["ElPhonInt_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="GKk for input Q grid to be WRITtEn to disk",
@@ -813,8 +925,8 @@ gkqfile. This reduces strongly the memory needed for an electron-phonon run.
         abivarname="gruns_ddbs@anaddb",
         varset="anaddb",
         vartype="string",
-        topics=['Temperature_useful'],
-        dimensions=['[[anaddb:gruns_nddbs]]'],
+        topics=["Temperature_useful"],
+        dimensions=["[[anaddb:gruns_nddbs]]"],
         defaultval="Empty",
         mnemonics="GRUNeiSen DDBS",
         added_in_version="before_v9",
@@ -835,7 +947,7 @@ computes the derivative of the dynamical matrix wrt the volume using central fin
         abivarname="gruns_nddbs@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['Temperature_basic'],
+        topics=["Temperature_basic"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="GRUNeiSen Number of DDB files",
@@ -853,8 +965,8 @@ possible responses.
         abivarname="iatfix@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ConstrainedPol_useful'],
-        dimensions=['[[anaddb:natfix]]'],
+        topics=["ConstrainedPol_useful"],
+        dimensions=["[[anaddb:natfix]]"],
         defaultval=0,
         mnemonics="Indices of the AToms that are FIXed",
         added_in_version="before_v9",
@@ -868,8 +980,8 @@ constrained polarization. See [[anaddb:polflag]].
         abivarname="iatprj_bs@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_useful'],
-        dimensions=['[[anaddb:natprj_bs]]'],
+        topics=["PhononBands_useful"],
+        dimensions=["[[anaddb:natprj_bs]]"],
         defaultval="0*'[[anaddb:natprj_bs]]'",
         mnemonics="Indices of the AToms for the PRoJection of the phonon Band Structure",
         added_in_version="before_v9",
@@ -883,7 +995,7 @@ eigenvectors, giving a weighted phonon band structure file.
         abivarname="ifcana@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="IFC ANAlysis",
@@ -910,7 +1022,7 @@ the matrix in local coordinates).
         abivarname="ifcflag@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_compulsory'],
+        topics=["PhononBands_compulsory"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="Interatomic Force Constants FLAG",
@@ -942,7 +1054,7 @@ for checking purpose, and if there is not enough information in the DDB.
         abivarname="ifcout@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="IFC OUTput",
@@ -959,7 +1071,7 @@ distance with respect to the generic atom.
         abivarname="ifltransport@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ElPhonTransport_basic'],
+        topics=["ElPhonTransport_basic"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="IFLag for TRANSPORT",
@@ -976,7 +1088,7 @@ calculates the k-dependent relaxation time. (needs [[anaddb:elphflag]] = 1)
         abivarname="instrflag@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['Elastic_basic'],
+        topics=["Elastic_basic"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="INternal STRain FLAG",
@@ -995,8 +1107,8 @@ Internal strain tensor flag.
         abivarname="istrfix@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ConstrainedPol_useful'],
-        dimensions=['[[anaddb:nstrfix]]'],
+        topics=["ConstrainedPol_useful"],
+        dimensions=["[[anaddb:nstrfix]]"],
         defaultval=0,
         mnemonics="Index of STRain FIXed",
         added_in_version="before_v9",
@@ -1035,7 +1147,7 @@ See [[anaddb:polflag]].
         abivarname="kptrlatt@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ElPhonTransport_basic', 'PhononWidth_basic'],
+        topics=["ElPhonTransport_basic", "PhononWidth_basic"],
         dimensions=[3, 3],
         defaultval="9*0",
         mnemonics="K PoinT Reciprocal LATTice",
@@ -1051,7 +1163,7 @@ calculations using nesting functions or tetrahedron integration.
         abivarname="kptrlatt_fine@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ElPhonTransport_expert'],
+        topics=["ElPhonTransport_expert"],
         dimensions=[3, 3],
         defaultval="9*0",
         mnemonics="K PoinT Reciprocal LATTice for FINE grid",
@@ -1066,9 +1178,9 @@ Does not work yet, as of |today|.
         abivarname="lwf_anchor_ibands@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['LatticeWannier_basic'],
-        dimensions=['[[anaddb:lwf_nwann]]'],
-        defaultval=['[0]*[[anaddb:lwf_nwann]]'],
+        topics=["LatticeWannier_basic"],
+        dimensions=["[[anaddb:lwf_nwann]]"],
+        defaultval=["[0]*[[anaddb:lwf_nwann]]"],
         mnemonics="Lattice Wannier Function: the ANCHOR Indices of BANDS",
         added_in_version="9.8.0",
         text=r"""
@@ -1082,8 +1194,8 @@ The indices of bands of the anchor points. Together with the [[anaddb:lwf_anchor
         abivarname="lwf_anchor_proj@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['LatticeWannier_basic'],
-        dimensions='scalar',
+        topics=["LatticeWannier_basic"],
+        dimensions="scalar",
         defaultval="0",
         mnemonics="Lattice Wannier Function ANCHOR point PROJection",
         added_in_version="9.8.0",
@@ -1103,7 +1215,7 @@ Whether to multiply the projection to the anchor points when calculating the wei
         abivarname="lwf_anchor_qpt@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['LatticeWannier_basic'],
+        topics=["LatticeWannier_basic"],
         dimensions=[3],
         defaultval=[0, 0, 0],
         mnemonics="Lattice Wannier Function: the ANCHOR QPoinTs",
@@ -1118,8 +1230,8 @@ The q-point of the anchor points. Together with the [[anaddb:lwf_anchor_ibands]]
         abivarname="lwf_disentangle@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['LatticeWannier_basic'],
-        dimensions='scalar',
+        topics=["LatticeWannier_basic"],
+        dimensions="scalar",
         defaultval=0,
         mnemonics="Lattice Wannier Function DISENTANGLE function",
         added_in_version="9.8.0",
@@ -1142,8 +1254,8 @@ The value of $\mu$ and $\sigma$ are defined with [[anaddb:lwf_mu]] and [[anaddb:
         abivarname="lwf_mu@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['LatticeWannier_basic'],
-        dimensions='scalar',
+        topics=["LatticeWannier_basic"],
+        dimensions="scalar",
         defaultval=0.0,
         mnemonics="Lattice Wannier Function: the MU value",
         added_in_version="9.8.0",
@@ -1157,8 +1269,8 @@ See [[anaddb:lwf_disentangle]] for more details.
         abivarname="lwf_sigma@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['LatticeWannier_basic'],
-        dimensions='scalar',
+        topics=["LatticeWannier_basic"],
+        dimensions="scalar",
         defaultval=0.0,
         mnemonics="Lattice Wannier Function: the sigma value",
         added_in_version="9.8.0",
@@ -1174,7 +1286,7 @@ See [[anaddb:lwf_disentangle]] for more details.
         abivarname="lwf_ngqpt@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['LatticeWannier_basic'],
+        topics=["LatticeWannier_basic"],
         dimensions=[3],
         defaultval=[0, 0, 0],
         mnemonics="Lattice Wannier Function: the Number of Grid of Q-PoinTs",
@@ -1191,8 +1303,8 @@ The Monkhorst-Pack grid used for construction Lattice Wannier functions.
         abivarname="lwf_nwann@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['LatticeWannier_basic'],
-        dimensions='scalar',
+        topics=["LatticeWannier_basic"],
+        dimensions="scalar",
         defaultval=0,
         mnemonics="Lattice Wannier Function: Number of WANNier functions",
         added_in_version="9.8.0",
@@ -1206,9 +1318,9 @@ The number of Lattice Wannier functions to be constructed.
         abivarname="lwf_projector@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['LatticeWannier_basic'],
-        dimensions=['[[anaddb:lwf_nwann]]'],
-        defaultval=['[0]*[[anaddb:lwf_nwann]]'],
+        topics=["LatticeWannier_basic"],
+        dimensions=["[[anaddb:lwf_nwann]]"],
+        defaultval=["[0]*[[anaddb:lwf_nwann]]"],
         mnemonics="Lattice Wannier Function: the PROJECTORs",
         added_in_version="9.8.0",
         text=r"""
@@ -1225,8 +1337,8 @@ For each atom, there are three displacements along x, y, and z in the cartesian 
         abivarname="lwfflag@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['LatticeWannier_basic'],
-        dimensions='scalar',
+        topics=["LatticeWannier_basic"],
+        dimensions="scalar",
         defaultval=0,
         mnemonics="Lattice Wannier Function Flag",
         added_in_version="9.8.0",
@@ -1241,14 +1353,80 @@ Lattice Wannier function flag.
     ),
 
 
+    Variable(
+        abivarname="magpen@anaddb",
+        varset="anaddb",
+        vartype="real",
+        topics=["DFPT_expert", "ConstrainedDFPT_expert"],
+        dimensions="scalar",
+        defaultval=0.0,
+        mnemonics="MAGnetic PENalty DFPT parameter",
+        characteristics=["[[DEVELOP]]"],
+        added_in_version="10.4",
+        text=r"""
+This variable specifies the amplitude of the penalty function applied to the first-order local magnetic moments in a constrained DFPT calculation (see [[magpen]]). A nonzero value in an anaddb input activates the transformation of the second-order total-energy derivatives to the magnetic functional specified by [[mpopt@anaddb]].
+
+The Legendre transformations between magnetic functionals require that the DDB file contain second-order data obtained from a set of local Zeeman-field linear-response calculations (see the [[rfmagn]] = 2 option), combined with a geometrically equivalent magnetic penalty.
+
+The penalized ions and directions are specified by [[mpatpol@anaddb]] and [[mpdir@anaddb]], respectively.
+        """,
+    ),
 
 
+    Variable(
+        abivarname="mpatpol@anaddb",
+        varset="anaddb",
+        vartype="integer",
+        topics=["DFPT_expert", "ConstrainedDFPT_expert"],
+        dimensions=[2],
+        defaultval=[1, "[[natom]]" ],
+        mnemonics="Magnetic Penalty: ATomic POLarisation",
+        characteristics=["[[DEVELOP]]"],
+        added_in_version="10.4",
+        text=r"""
+This variable specifies the range of atoms to which a magnetic penalty has been applied in a constrained DFPT calculation on the first-order local magnetic moments. It may take values between 1 to [[natom]], with [[mpatpol]](1)<=[[mpatpol]](2).
+In practice, the penalty is typically applied only to the magnetic ions.
+""",
+    ),
+
+    Variable(
+        abivarname="mpdir@anaddb",
+        varset="anaddb",
+        vartype="integer",
+        topics=["DFPT_expert", "ConstrainedDFPT_expert"],
+        dimensions=[3],
+        defaultval=[1, 1, 1],
+        mnemonics="Magnetic Penalty: DIRections",
+        characteristics=["[[DEVELOP]]"],
+        added_in_version="10.4",
+        text=r"""
+Gives the Cartesian directions along which the first-order magnetic moments
+have been constrained during a linear-response calculatiuon when [[magpen]]/= 0.0.
+""",
+    ),
+
+    Variable(
+        abivarname="mpopt@anaddb",
+        varset="anaddb",
+        vartype="integer",
+        topics=["DFPT_expert", "ConstrainedDFPT_expert"],
+        dimensions="scalar",
+        defaultval=2,
+        mnemonics="Magnetic Penalty: OPTion",
+        characteristics=["[[DEVELOP]]"],
+        added_in_version="10.4",
+        text=r"""
+This variable sets the type of magnetic functional (see Ref. [[cite:Royo2019]]) to which the second-order total-energy derivatives computed with a magnetic penalty are transformed.
+  * 1 --> Fully constrained magnetic moments (spins fixed to the ground-state configuration)
+  * 2 --> Constrained Zeeman fields (spins allowed to relax)
+""",
+    ),
 
     Variable(
         abivarname="mustar@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['ElPhonTransport_useful'],
+        topics=["ElPhonTransport_useful"],
         dimensions="scalar",
         defaultval=0.1,
         mnemonics="MU STAR",
@@ -1263,7 +1441,7 @@ superconducting Tc using Mc-Millan's formula.
         abivarname="natfix@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ConstrainedPol_useful'],
+        topics=["ConstrainedPol_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="Number of AToms FIXed",
@@ -1278,7 +1456,7 @@ polarization. See [[anaddb:polflag]].
         abivarname="natifc@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="Number of AToms for IFC analysis",
@@ -1293,7 +1471,7 @@ The list of these atoms is provided by [[anaddb:atifc]].
         abivarname="natprj_bs@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="Number of AToms for PRoJection of the Band Structure",
@@ -1308,7 +1486,7 @@ will be output. The list of these atoms is provided by [[anaddb:iatprj_bs]].
         abivarname="nchan@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_expert'],
+        topics=["PhononBands_expert"],
         dimensions="scalar",
         defaultval=800,
         mnemonics="Number of CHANnels",
@@ -1324,7 +1502,7 @@ frequency sampled. The first channel begins at 0.
         abivarname="ndivsm@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_basic', 'PhononWidth_useful'],
+        topics=["PhononBands_basic", "PhononWidth_useful"],
         dimensions="scalar",
         defaultval=20,
         mnemonics="Number of DIVisions for the SMallest segment",
@@ -1341,7 +1519,7 @@ along the path using the coordinates given in the array [[anaddb:qpath]].
         abivarname="nfreq@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['Phonons_useful'],
+        topics=["Phonons_useful", "ConstrainedDFPT_useful"],
         dimensions="scalar",
         defaultval=1,
         mnemonics="Number of FREQuencies",
@@ -1350,6 +1528,8 @@ along the path using the coordinates given in the array [[anaddb:qpath]].
 Number of frequencies wanted for the frequency-dependent dielectric tensor.
 Should be positive. See [[anaddb:dieflag]]. The code will take **nfreq**
 equidistant values from [[anaddb:frmin]] to [[anaddb:frmax]].
+
+Starting from version 10.4, this variable specifies the number of frequencies used for the frequency interpolation of second-order quantities computed in a constrained DFPT ABINIT run.
 """,
     ),
 
@@ -1357,7 +1537,7 @@ equidistant values from [[anaddb:frmin]] to [[anaddb:frmax]].
         abivarname="ng2qpt@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions=[3],
         defaultval="3*0",
         mnemonics="Number of Grids points for Q PoinTs (grid 2)",
@@ -1372,7 +1552,7 @@ Used for the integration of thermodynamical functions (Bose-Einstein distributio
         abivarname="ngqpt@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['Phonons_basic', 'PhononBands_basic'],
+        topics=["Phonons_basic", "PhononBands_basic"],
         dimensions=[3],
         defaultval="3*0",
         mnemonics="Number of Grids points for Q PoinTs",
@@ -1387,7 +1567,7 @@ Should correspond to the grid of points available in the DDB or to a sub-grid.
         abivarname="ngrids@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_expert'],
+        topics=["PhononBands_expert"],
         dimensions="scalar",
         defaultval=4,
         mnemonics="Number of GRIDS",
@@ -1405,7 +1585,7 @@ ngqpt_igrid(ii)=(igrid ng2qpt(ii))/[[anaddb:ngrids]]s
         abivarname="nlflag@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['nonlinear_compulsory'],
+        topics=["nonlinear_compulsory"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="Non-Linear FLAG",
@@ -1425,7 +1605,7 @@ Non-linear properties flag.
         abivarname="nph1l@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_basic'],
+        topics=["PhononBands_basic"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="Number of PHonons in List 1",
@@ -1444,7 +1624,7 @@ the corresponding eigenfrequencies will be printed.
         abivarname="nph2l@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_basic'],
+        topics=["PhononBands_basic"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="Number of PHonons in List 2",
@@ -1471,7 +1651,7 @@ The wavevectors in list 2 will be used to:
         abivarname="nqpath@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_basic', 'PhononWidth_basic'],
+        topics=["PhononBands_basic", "PhononWidth_basic"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="Number of Q wavevectors defining a PATH",
@@ -1486,7 +1666,7 @@ the phonon band structure and phonon linewidths are interpolated.
         abivarname="nqshft@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions="scalar",
         defaultval=1,
         mnemonics="Number of Q SHiFTs",
@@ -1504,7 +1684,7 @@ sampling (Warning: not BCC lattice, BCC *sampling*), and 4 for FCC sampling
         abivarname="nsphere@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="Number of atoms in SPHERe",
@@ -1532,7 +1712,7 @@ will be violated if some atoms are no more included in the inverse Fourier Trans
         abivarname="nstrfix@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ConstrainedPol_useful'],
+        topics=["ConstrainedPol_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="Number of STRain components FIXed",
@@ -1547,7 +1727,7 @@ constrained polarization. See [[anaddb:polflag]].
         abivarname="ntemper@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['Temperature_basic'],
+        topics=["Temperature_basic"],
         dimensions="scalar",
         defaultval=10,
         mnemonics="Number of TEMPERatures",
@@ -1568,7 +1748,7 @@ solids), such anharmonic effects might be important already at room temperature.
         abivarname="nwchan@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions="scalar",
         defaultval=10,
         mnemonics="Number of Widths of CHANnels",
@@ -1586,7 +1766,7 @@ converged when the convergence criterion based on [[anaddb:dostol]] and
         abivarname="outboltztrap@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_expert'],
+        topics=["PhononBands_expert"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="OUTput files for BOLTZTRAP code",
@@ -1602,7 +1782,7 @@ velocities. The output file will be appended _BTRAP
         abivarname="outscphon@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_expert'],
+        topics=["PhononBands_expert"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="OUTput files for Self Consistent PHONons",
@@ -1619,7 +1799,7 @@ for Primitive Cell INFOrmation.
         abivarname="piezoflag@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['Elastic_basic'],
+        topics=["Elastic_basic"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="PIEZOelectric tensor FLAG",
@@ -1668,7 +1848,7 @@ Flag for calculation of piezoelectric tensors
         abivarname="polflag@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ConstrainedPol_compulsory'],
+        topics=["ConstrainedPol_compulsory"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="POLarization FLAG",
@@ -1706,7 +1886,7 @@ calculation of the effective charges and the piezoelectric tensor.
         abivarname="prt_ifc@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="PRinT the Interatomic Force Constants",
@@ -1724,7 +1904,7 @@ The available options are:
         abivarname="prtbltztrp@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_expert'],
+        topics=["PhononBands_expert"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="PRinT input files for BoLTZTRaP code.",
@@ -1739,7 +1919,7 @@ The available options are:
         abivarname="prtddb@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="PRinT the Derivative DataBase files",
@@ -1758,7 +1938,7 @@ The available options are:
         abivarname="prtdos@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_basic'],
+        topics=["PhononBands_basic"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="PRinT the phonon Density Of States",
@@ -1784,7 +1964,7 @@ through the input variable [[anaddb:dosdeltae]].
         abivarname="prtfsurf@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ElPhonTransport_useful'],
+        topics=["ElPhonTransport_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="PRinT the Fermi SURFace",
@@ -1813,7 +1993,7 @@ this array must be zero.
         abivarname="prtmbm@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['nonlinear_useful'],
+        topics=["nonlinear_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="PRinT Mode-By-Mode decomposition of the electrooptic tensor",
@@ -1828,7 +2008,7 @@ this array must be zero.
         abivarname="prtnest@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononWidth_useful'],
+        topics=["PhononWidth_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="PRinT the NESTing function",
@@ -1864,7 +2044,7 @@ reciprocal space, moreover off-diagonal elements are not allowed, i.e. [[kptrlat
         abivarname="prtphbands@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions="scalar",
         defaultval=1,
         mnemonics="PRinT PHonon BANDS",
@@ -1884,7 +2064,7 @@ phonon band structure. Possible values:
         abivarname="prtsrlr@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="PRinT the Short-Range/Long-Range decomposition of phonon FREQuencies",
@@ -1904,8 +2084,8 @@ See also [[anaddb:ifcflag]] and [[anaddb:dipdip]].
         abivarname="prtvol@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['Phonons_useful', 'PhononBands_useful', 'Temperature_useful',
-                'PhononWidth_useful', 'ElPhonTransport_useful'],
+        topics=["Phonons_useful", "PhononBands_useful", "Temperature_useful",
+                "PhononWidth_useful", "ElPhonTransport_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="PRinT VOLume",
@@ -1919,8 +2099,8 @@ Control the volume of printed output.
         abivarname="q1shft@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['Phonons_useful', 'PhononBands_useful'],
-        dimensions=['[[anaddb:nqshft]]'],
+        topics=["Phonons_useful", "PhononBands_useful"],
+        dimensions=["[[anaddb:nqshft]]"],
         defaultval=0,
         mnemonics="Q shifts for the grid number 1",
         added_in_version="before_v9",
@@ -1974,7 +2154,7 @@ For a FCC lattice, it is possible to sample only the Gamma point by using a
         abivarname="q2shft@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions=[3],
         defaultval="3* 0",
         mnemonics="Q points SHiFTs for the grids 2",
@@ -1990,7 +2170,7 @@ Note that [[anaddb:nqshft]] for this series of grids corresponds to 1.
         abivarname="qgrid_type@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononWidth_expert'],
+        topics=["PhononWidth_expert"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="Q GRID TYPE",
@@ -2007,8 +2187,8 @@ to a regular grid as in the rest of anaddb (using [[anaddb:ngqpt]]).
         abivarname="qpath@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['PhononBands_basic', 'PhononWidth_basic'],
-        dimensions=[3, '[[anaddb:nqpath]]'],
+        topics=["PhononBands_basic", "PhononWidth_basic"],
+        dimensions=[3, "[[anaddb:nqpath]]"],
         defaultval=0.0,
         mnemonics="Q wavevectors defining a PATH",
         added_in_version="before_v9",
@@ -2026,8 +2206,8 @@ for the output of the nesting function if [[anaddb:prtnest]]=1.
         abivarname="qph1l@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['PhononBands_basic'],
-        dimensions=[4, '[[anaddb:nph1l]]'],
+        topics=["PhononBands_basic"],
+        dimensions=[4, "[[anaddb:nph1l]]"],
         defaultval=0,
         mnemonics="Q for PHonon List 1",
         added_in_version="before_v9",
@@ -2049,8 +2229,8 @@ fourth is stored in the array qnrml1(nph1l).
         abivarname="qph2l@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['PhononBands_basic'],
-        dimensions=[4, '[[anaddb:nph2l]]'],
+        topics=["PhononBands_basic"],
+        dimensions=[4, "[[anaddb:nph2l]]"],
         defaultval=0,
         mnemonics="PHonon List 2",
         added_in_version="before_v9",
@@ -2080,7 +2260,7 @@ fourth is stored in the array qnrml2(nph2l).
         abivarname="qrefine@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_expert'],
+        topics=["PhononBands_expert"],
         dimensions=[3],
         defaultval=0,
         mnemonics="Q-point REFINEment order (experimental)",
@@ -2100,7 +2280,7 @@ Should implement Gaal-Nagy's algorithm in [[cite:GaalNagy2006]].
         abivarname="ramansr@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['nonlinear_basic'],
+        topics=["nonlinear_basic"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="RAMAN Sum-Rule",
@@ -2126,7 +2306,7 @@ For the time being, **ramansr** =1 is the preferred choice.
         abivarname="relaxat@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ConstrainedPol_useful'],
+        topics=["ConstrainedPol_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="RELAXation of AToms",
@@ -2141,7 +2321,7 @@ constrained polarization. See [[anaddb:polflag]].
         abivarname="relaxstr@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ConstrainedPol_useful'],
+        topics=["ConstrainedPol_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="RELAXation of STRain",
@@ -2156,7 +2336,7 @@ structural relaxation at constrained polarization. See [[anaddb:polflag]].
         abivarname="rfmeth@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['Phonons_expert'],
+        topics=["Phonons_expert"],
         dimensions="scalar",
         defaultval=1,
         mnemonics="Response-Function METHod",
@@ -2176,7 +2356,7 @@ DDB is available, always use the option 2. If not, you can try option 1, which i
         abivarname="rifcsph@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions="scalar",
         defaultval="zero",
         mnemonics="Radius of the Interatomic Force Constant SPHere",
@@ -2195,7 +2375,7 @@ not be put to zero.
         abivarname="selectz@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['Phonons_expert'],
+        topics=["Phonons_expert"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="SeLECT Z",
@@ -2220,7 +2400,7 @@ The result with non-zero **selectz** are unphysical.
         abivarname="symdynmat@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['Phonons_useful', 'PhononBands_useful'],
+        topics=["Phonons_useful", "PhononBands_useful"],
         dimensions="scalar",
         defaultval=1,
         mnemonics="SYMmetrize the DYNamical MATrix",
@@ -2238,10 +2418,48 @@ some slight symmetry breaking effects. The latter can be bypassed by this additi
     ),
 
     Variable(
+        abivarname="sys_dim@anaddb",
+        varset="anaddb",
+        vartype="integer",
+        topics=['PhononBands_basic'],
+        dimensions="scalar",
+        defaultval=1,
+        mnemonics="SYStem DIMensionality",
+        added_in_version="v10",
+        text=r"""
+  Control the dimensionaility of the problem when rotational invariance is imposed on the interatomic force constants
+  [[anaddb:asr]]==6 AND/OR when long-range electrostatics IFCs of 2D materials are considered (in this case,
+  only available with [[anaddb:sys_dim]]<5, but both for [[anaddb:dipdip]] and [[anaddb:quadquad]]). Currently, only
+  possible to consider [[anaddb:dipquad]] and [[anaddb:quadquad]] interactions at the same time.
+
+  For rotational invariance: along periodic lattices, rotational invariance imposes conditions on the IFCs derivative,
+  while along non-periodic ones, only the zone-center IFCs are impacted. The code doesn't automatically detect it based
+  on the input structure and this variable allows to identify the periodic directions. Similar principles for long-range
+  electrotatics.
+
+  * 1 --> consider a 3D problem (IFCs derivatives used everywhere).
+
+  * 2 --> consider a 2D problem with non-periodic lattice along x
+
+  * 3 --> consider a 2D problem with non-periodic lattice along y
+
+  * 4 --> consider a 2D problem with non-periodic lattice along z
+
+  * 5 --> consider a 1D problem with periodic lattice along x
+
+  * 6 --> consider a 2D problem with periodic lattice along y
+
+  * 7 --> consider a 2D problem with periodic lattice along z
+
+  * 8 --> consider a 0D problem (molecule)
+""",
+    ),
+
+    Variable(
         abivarname="symgkq@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ElPhonInt_expert'],
+        topics=["ElPhonInt_expert"],
         dimensions="scalar",
         defaultval=1,
         mnemonics="SYMmetrize the GKk matrix elements for each Q",
@@ -2257,7 +2475,7 @@ should always be used, except for debugging or test purposes.
         abivarname="targetpol@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['ConstrainedPol_useful'],
+        topics=["ConstrainedPol_useful"],
         dimensions=[3],
         defaultval=0.0,
         mnemonics="TARGET POLarization",
@@ -2271,7 +2489,7 @@ Target value of the polarization in cartesian coordinates and in C/m$^2$. See [[
         abivarname="telphint@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['ElPhonTransport_basic', 'PhononWidth_basic'],
+        topics=["ElPhonTransport_basic", "PhononWidth_basic"],
         dimensions="scalar",
         defaultval=1,
         mnemonics="Technique for ELectron-PHonon INTegration",
@@ -2289,7 +2507,7 @@ Flag controlling the Fermi surface integration technique used for electron-phono
         abivarname="temperinc@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['Temperature_basic'],
+        topics=["Temperature_basic"],
         dimensions="scalar",
         defaultval=100.0,
         mnemonics="TEMPERature INCrease",
@@ -2309,7 +2527,7 @@ solids), such anharmonic effects might be important already at room temperature.
         abivarname="tempermin@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['Temperature_basic'],
+        topics=["Temperature_basic"],
         dimensions="scalar",
         defaultval=100.0,
         mnemonics="TEMPERature MINimum",
@@ -2331,11 +2549,11 @@ anharmonic effects might be important already at room temperature.
         abivarname="thermal_supercell@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['Phonons_expert'],
+        topics=["Phonons_expert"],
         dimensions=[3, 3],
         defaultval="(/(/0,0,0/),  (/0,0,0/),  (/0,0,0/)/)",
         mnemonics="THERMALized SUPERCELL lattice vectors",
-        characteristics=['[[DEVELOP]]'],
+        characteristics=["[[DEVELOP]]"],
         commentdefault="do not calculate any thermalized supercells",
         added_in_version="before_v9",
         text=r"""
@@ -2362,7 +2580,7 @@ relative phases of the displacements are not fixed properly yet... (Aug 2017)
         abivarname="thmflag@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['Temperature_compulsory'],
+        topics=["Temperature_compulsory"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="THerMal FLAG",
@@ -2396,7 +2614,7 @@ Input variables that may be needed if this flag is activated:
         abivarname="thmtol@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['Temperature_useful'],
+        topics=["Temperature_useful"],
         dimensions="scalar",
         defaultval=0.05,
         mnemonics="THerModynamic TOLerance",
@@ -2409,11 +2627,29 @@ the next bigger is smaller than **thmtol**.
 """,
     ),
 
+
+    Variable(
+        abivarname="timdisp@anaddb",
+        varset="anaddb",
+        vartype="integer",
+        topics=["longwave_expert", "ConstrainedDFPT_expert"],
+        dimensions="scalar",
+        defaultval=0,
+        mnemonics="TIMe DISpersion",
+        characteristics=["[[DEVELOP]]"],
+        added_in_version="10.4",
+        text=r"""
+    If [[timdisp@anaddb]] = 1 and [[magpen@anaddb]] /= 0.0, the Berry curvatures calculated with the magnetic penalty are transformed to the fully fixed-spin functional and can be used in adiabatic (beyond–Born–Oppenheimer) dynamics calculations.
+
+    This requires that the DDB file contain a third-order block with the frequency derivatives of the required second-order quantities.
+""",
+    ),
+
     Variable(
         abivarname="use_k_fine@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononWidth_expert'],
+        topics=["PhononWidth_expert"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="USE K-grid FINEr than the coarse k-grid",
@@ -2430,7 +2666,7 @@ needed. Note that the coarse k-grid must be a subset of the fine k-grid.
         abivarname="vs_qrad_tolkms@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions=[2],
         defaultval="2*0.0d0",
         mnemonics="Speed of Sound Q-radius, TOLerance KiloMeter/Second",
@@ -2454,7 +2690,7 @@ The default values will not work.
         abivarname="ddb_filepath@anaddb",
         varset="anaddb",
         vartype="string",
-        topics=['Control_useful'],
+        topics=["Control_useful"],
         dimensions="scalar",
         defaultval="",
         mnemonics="DDB PATH",
@@ -2478,7 +2714,7 @@ instead of the legacy mode based on the files file. Example:
         abivarname="output_file@anaddb",
         varset="anaddb",
         vartype="string",
-        topics=['Control_useful'],
+        topics=["Control_useful"],
         dimensions="scalar",
         defaultval="",
         mnemonics="OUTPUT FILE",
@@ -2516,7 +2752,7 @@ instead of the legacy mode based on the files file. Example:
         abivarname="gkk_filepath@anaddb",
         varset="anaddb",
         vartype="string",
-        topics=['Control_useful'],
+        topics=["Control_useful"],
         dimensions="scalar",
         defaultval="",
         mnemonics="GKK PATH",
@@ -2535,7 +2771,7 @@ This variable is optional and used for performing EPH calculation with [[elphfla
         abivarname="eph_prefix@anaddb",
         varset="anaddb",
         vartype="string",
-        topics=['Control_useful'],
+        topics=["Control_useful"],
         dimensions="scalar",
         defaultval="",
         mnemonics="EPH PREFIX",
@@ -2554,7 +2790,7 @@ This variable is optional and used for performing EPH calculation with [[elphfla
         abivarname="ddk_filepath@anaddb",
         varset="anaddb",
         vartype="string",
-        topics=['Control_useful'],
+        topics=["Control_useful"],
         dimensions="scalar",
         defaultval="",
         mnemonics="DDK PATH",
@@ -2586,7 +2822,7 @@ where t94.ddk contains the list of file names.
         abivarname="outdata_prefix@anaddb",
         varset="anaddb",
         vartype="string",
-        topics=['Control_useful'],
+        topics=["Control_useful"],
         dimensions="string",
         defaultval="",
         mnemonics="OUTput DATA PREFIX",
@@ -2608,7 +2844,7 @@ See also [[outdata_prefix@abinit]]
         abivarname="dos_maxmode@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_useful'],
+        topics=["PhononBands_useful"],
         dimensions="scalar",
         defaultval=0,
         mnemonics="Phonon DOS MAX MODE included",

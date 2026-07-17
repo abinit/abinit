@@ -700,12 +700,12 @@ module m_lobpcg2_cprj
 
     skip = .false.
     if ( ierr /= 0 ) then
-      ABI_COMMENT("But before that, I want to recalculate H|Psi> and S|Psi>")
+      ABI_COMMENT("Some errors happened, so H|Psi> and S|Psi> are computed before leaving")
       if ( lobpcg%paral_kgb == 1 ) then
         call xgTransposer_constructor(lobpcg%xgTransposerAllX0,lobpcg%AllX0,lobpcg%AllX0ColsRows,nspinor,&
           STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0,lobpcg%me_g0_fft)
         call xgTransposer_copyConstructor(lobpcg%xgTransposerAllAX0,lobpcg%xgTransposerAllX0,&
-          lobpcg%AX,lobpcg%AXColsRows,STATE_LINALG)
+          lobpcg%AllAX0%self,lobpcg%AllAX0ColsRows,STATE_LINALG)
       else
         call xgBlock_setBlock(lobpcg%AllX0      , lobpcg%AllX0ColsRows , spacedim, lobpcg%neigenpairs)
         call xgBlock_setBlock(lobpcg%AllAX0%self, lobpcg%AllAX0ColsRows, spacedim, lobpcg%neigenpairs)
@@ -717,12 +717,12 @@ module m_lobpcg2_cprj
         call timab(tim_transpose,2,tsec)
       end if
       call timab(tim_ax_v,1,tsec)
-      call getAX(lobpcg%AllX0,lobpcg%AllAX0%self)
-      call xgBlock_zero_im_g0(lobpcg%AllAX0%self)
+      call getAX(lobpcg%AllX0ColsRows,lobpcg%AllAX0ColsRows)
+      call xgBlock_zero_im_g0(lobpcg%AllAX0ColsRows)
       call timab(tim_ax_v,2,tsec)
       if (lobpcg%paral_kgb == 1) then
         call timab(tim_transpose,1,tsec)
-        lobpcg%xgTransposerAllX0%state=STATE_LINALG
+        call xgTransposer_transpose(lobpcg%xgTransposerAllX0,STATE_LINALG)
         call xgTransposer_transpose(lobpcg%xgTransposerAllAX0,STATE_LINALG)
         call timab(tim_transpose,2,tsec)
       end if

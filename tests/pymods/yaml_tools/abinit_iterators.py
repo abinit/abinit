@@ -3,112 +3,115 @@ Define classes and contants to represent the state of iteration of a document
 as well as the operations possible on this state. This is used in filter
 applications by the configuration handler.
 """
-from __future__ import print_function, division, unicode_literals
 
 from .errors import EmptySetError, NotOrderedOverlappingSetError
 
 ITERATORS = [  # order matters
-    'dtset',
-    'timimage',
-    'image',
-    'time',
-    'step',
+    "dtset",
+    "timimage",
+    "image",
+    "time",
+    "step",
 ]
 
 # associate an iterator with its deepness in the global computation
 ITERATOR_RANKS = {key: i for i, key in enumerate(ITERATORS)}
 
 
-class IntSet(object):
+class IntSet:
     """
     Represent a subset of the natural integers.
     """
     def __init__(self, obj):
+        """
+        Initialize the IntSet.
+
+        Args:
+            obj (int, list, dict, or str): The integer set definition.
+                Can be a singleton (int), finite set (list), bounded or
+                half-bounded range (dict), or "all" (str).
+
+        Raises:
+            EmptySetError: If the range is empty.
+            TypeError: If the input type is not supported.
+        """
         if isinstance(obj, int):
-            self._type = 'singleton'
+            self._type = "singleton"
             self.value = obj
 
             def test(v):
                 if isinstance(v, IntSet):
-                    if v._type == 'singleton':
+                    if v._type == "singleton":
                         return v.value == self.value
-                    else:
-                        return False
-                else:
-                    return v == obj
+                    return False
+                return v == obj
         elif isinstance(obj, list):
-            self._type = 'finite'
+            self._type = "finite"
             self.values = frozenset(obj)
 
             def test(v):
                 if isinstance(v, IntSet):
-                    if v._type == 'singleton':
+                    if v._type == "singleton":
                         return v.value in self
-                    elif v._type == 'finite':
+                    if v._type == "finite":
                         for val in v.values:
                             if val not in self:
                                 return False
                         return True
-                    elif v._type == 'bounded':
+                    if v._type == "bounded":
                         return set(range(v.min, v.max + 1)).issubset(self.values)
-                    else:
-                        return False
-                else:
-                    return v in self.values
+                    return False
+                return v in self.values
 
         elif isinstance(obj, dict):
-            fr = obj.get('from', 1)
-            to = obj.get('to', -1)
+            fr = obj.get("from", 1)
+            to = obj.get("to", -1)
             if to == -1:
-                self._type = 'half-bounded'
+                self._type = "half-bounded"
                 self.min = fr
 
                 def test(v):
                     if isinstance(v, IntSet):
-                        if v._type == 'singleton':
+                        if v._type == "singleton":
                             return v.value in self
-                        elif v._type == 'finite':
+                        if v._type == "finite":
                             for val in v.values:
                                 if val not in self:
                                     return False
                             return True
-                        elif v._type == 'half-bounded' or v._type == 'bounded':
+                        if v._type == "half-bounded" or v._type == "bounded":
                             return v.min >= self.min
-                        else:
-                            return False
-                    else:
-                        return v >= fr
+                        return False
+                    return v >= fr
             elif to <= fr:
                 raise EmptySetError(obj)
             else:
-                self._type = 'bounded'
+                self._type = "bounded"
                 self.min = fr
                 self.max = to
 
                 def test(v):
                     if isinstance(v, IntSet):
-                        if v._type == 'singleton':
+                        if v._type == "singleton":
                             return v.value in self
-                        elif v._type == 'finite':
+                        if v._type == "finite":
                             for val in v.values:
                                 if val not in self:
                                     return False
                             return True
-                        elif v._type == 'bounded':
+                        if v._type == "bounded":
                             return v.min >= self.min and v.max <= self.max
-                        else:
-                            return False
-                    else:
-                        return v >= fr and v <= to
+                        return False
+                    return v >= fr and v <= to
 
-        elif obj == 'all':
-            self._type = 'natural'
+        elif obj == "all":
+            self._type = "natural"
 
             def test(v):
                 return True
 
         else:
-            raise TypeError('Unknown input for IntSet: {}'.format(obj))
+            raise TypeError(f"Unknown input for IntSet: {obj}")
 
         self._test = test
 
@@ -122,22 +125,20 @@ class IntSet(object):
         return not (self == other)
 
     def __repr__(self):
-        if self._type == 'singleton':
-            return 'IntSet({})'.format(self.value)
-        elif self._type == 'finite':
-            return 'IntSet([{}])'.format(
-                ', '.join(str(i) for i in self.values)
+        if self._type == "singleton":
+            return f"IntSet({self.value})"
+        if self._type == "finite":
+            return "IntSet([{}])".format(
+                ", ".join(str(i) for i in self.values)
             )
-        elif self._type == 'bounded':
-            return 'IntSet({{"from": {}, "to": {} }})'.format(self.min,
-                                                              self.max)
-        elif self._type == 'half-bounded':
-            return 'IntSet({{"from": {} }})'.format(self.min)
-        else:
-            return 'IntSet("all")'
+        if self._type == "bounded":
+            return f'IntSet({{"from": {self.min}, "to": {self.max} }})'
+        if self._type == "half-bounded":
+            return f'IntSet({{"from": {self.min} }})'
+        return 'IntSet("all")'
 
 
-class IterStateFilter(object):
+class IterStateFilter:
     """
     Represent a set of conditions on the iterator state of a document.
     Alternatively it can be seen as a cartesian product of subsets of
@@ -147,6 +148,12 @@ class IterStateFilter(object):
     {4} x N* x {1, 2, 3, 4, 5} x N* x N*
     """
     def __init__(self, d):
+        """
+        Initialize the IterStateFilter.
+
+        Args:
+            d (dict): Dictionary mapping iterator names to their allowed values.
+        """
         self.filters = {}
         for it in ITERATORS:
             if it in d:
@@ -154,8 +161,13 @@ class IterStateFilter(object):
 
     def match(self, state):
         """
-        Does a given state match this filter?
-        Is a given tuple in this set?
+        Check if a given state matches the filter.
+
+        Args:
+            state (dict): The iterator state to check.
+
+        Returns:
+            bool: True if the state matches all filters, False otherwise.
         """
         for it, int_set in self.filters.items():
             if it in state and state[it] not in int_set:
@@ -172,18 +184,16 @@ class IterStateFilter(object):
                 if it not in filt.filters:
                     # this means that filt.filters['filt'] = all
                     return False
-                else:
-                    if filt.filters[it] in self.filters[it]:
-                        continue
-                    else:
-                        return False
+                if filt.filters[it] in self.filters[it]:
+                    continue
+                return False
         return True
 
     def __repr__(self):
-        return ('IterStateFilter({'
-                + ', '.join('"{}": {}'.format(n, s)
+        return ("IterStateFilter({"
+                + ", ".join(f'"{n}": {s}'
                             for n, s in self.filters.items())
-                + '})')
+                + "})")
 
     def cmp(self, other):
         """
@@ -191,17 +201,15 @@ class IterStateFilter(object):
         members else raise an error.
         """
         assert isinstance(other, IterStateFilter), (
-            "IterStateFilter cannot be compared with {}".format(other)
+            f"IterStateFilter cannot be compared with {other}"
         )
         if self.include(other):
             if other.include(self):  # A c B & B c A => A = B
                 return 0
-            else:
-                return -1
-        elif other.include(self):
+            return -1
+        if other.include(self):
             return 1
-        else:
-            raise NotOrderedOverlappingSetError(self, other)
+        raise NotOrderedOverlappingSetError(self, other)
 
     def __eq__(self, other):
         if not isinstance(other, IterStateFilter):
@@ -213,9 +221,8 @@ class IterStateFilter(object):
                         return False
                 else:
                     return False
-            else:
-                if it in other.filters:
-                    return False
+            elif it in other.filters:
+                return False
 
         return True
 

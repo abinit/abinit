@@ -88,7 +88,7 @@ contains
 !!  td_ef_ezero = Amplitude (E_0 = |E_0|*polarization)
 !!  td_ef_tzero = time at which the pulse is switched on
 !!  td_ef_lambda = wavelength (for sin^2 pulse)
-!!  td_ef_tau = time width of the pulse (for sin^2 pulse)
+!!  td_ef_tau = time width of the pulse (for finite-width delta kick or sin^2 pulse)
 !!  time = propagation time
 !!  nkpt = number of kpoints
 !!  kpts = kpoints array
@@ -191,7 +191,7 @@ subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,
  character(len=500) :: msg
  integer            :: i
  logical            :: lvecpot_ind
- real(dp)           :: tmp(3)
+ real(dp)           :: tmp(3), expt
 
 ! ***********************************************************************
 
@@ -209,9 +209,14 @@ subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,
       if (time >= tdef%ef_tzero) then
          tdef%vecpot_ext(:) = -tdef%ef_ezero(:)
       end if
+   !"Finite" delta-kick pulse: Vector potential is a finite width sigmoid function
+   case (2)
+      expt = exp(-(time-tdef%ef_tzero)/tdef%ef_tau)
+      tdef%efield(:) = tdef%ef_ezero(:)/tdef%ef_tau * expt/(1+expt)**2
+      tdef%vecpot_ext(:) = -tdef%ef_ezero(:)/(1+expt)**2
    !Pulse with sin^2 shape:
    !E(t) = E0*cos(w*(t-t0))*sin^2(pi*(t-t0)/tau)
-   !A(t) = -(E0/2w)*sin(w*(t-t0))+E0/(4*(2pi/tau+w))*sin((2pi/tau+w)*(t-t0))+E0/(4(2pi/taur-w))*sin((2pi/tau-w)*(t-t0))
+   !A(t) = -(E0/2w)*sin(w*(t-t0))+E0/(4*(2pi/tau+w))*sin((2pi/tau+w)*(t-t0))+E0/(4(2pi/tau-w))*sin((2pi/tau-w)*(t-t0))
 !  case(2)
 !     if (time >= tdef%ef_tzero+tdef%ef_tau) then
 !        tdef%efield(:) = zero

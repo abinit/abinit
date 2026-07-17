@@ -3,7 +3,7 @@
 !! m_lattice_harmonic_potential
 !!
 !! FUNCTION
-!! This module contains an harmonic lattice potential. 
+!! This module contains an harmonic lattice potential.
 !!
 !! Datatypes:
 !!

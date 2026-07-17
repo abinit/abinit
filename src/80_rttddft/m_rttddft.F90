@@ -194,6 +194,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
  integer                   :: usecprj_local
  logical                   :: calc_ewald
  logical                   :: tfw_activated
+ logical                   :: silence_please
  real(dp)                  :: compch_sph
  real(dp)                  :: vxcavg,el_temp
  !arrays
@@ -207,6 +208,8 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
 ! ***********************************************************************
 
  my_natom=mpi_enreg%my_natom
+
+ silence_please = (dtset%prtvol == 0)
 
  !** Set up the potential (calls setvtr)
  !**  The following steps have been gathered in the setvtr routine:
@@ -280,17 +283,20 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
                 & tdks%pawang,dtset%pawprtvol,tdks%pawrad,tdks%pawrhoij,    &
                 & dtset%pawspnorb,tdks%pawtab,dtset%pawxcdev,               &
                 & dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,            &
-                & dtset%xc_taupos,tdks%xred,tdks%ucvol,psps%znuclpsp,       &
+                & dtset%xc_taupos,tdks%xred,tdks%ucvol,                     &
+                & psps%znuclpsp,dtset%spinaxis,                             &
                 & comm_atom=mpi_enreg%comm_atom,                            &
                 & mpi_atmtab=mpi_enreg%my_atmtab,vpotzero=vpotzero)
    !Correct the average potential with the calculated constant vpotzero
    !Correct the total energies accordingly
    !vpotzero(1) = -beta/ucvol
    !vpotzero(2) = -1/ucvol sum_ij rho_ij gamma_ij
-   write(msg,'(a,f14.6,2x,f14.6)') &
-   & ' average electrostatic smooth potential [Ha] , [eV]', &
-   & SUM(vpotzero(:)),SUM(vpotzero(:))*Ha_eV
-   call wrtout(std_out,msg,'COLL')
+   if (.not.silence_please) then
+      write(msg,'(a,f14.6,2x,f14.6)') &
+      & ' average electrostatic smooth potential [Ha] , [eV]', &
+      & SUM(vpotzero(:)),SUM(vpotzero(:))*Ha_eV
+      call wrtout(std_out,msg,'COLL')
+   end if
    tdks%vtrial(:,:)=tdks%vtrial(:,:)+SUM(vpotzero(:))
    if(option/=1)then
       !Fix the direct total energy (non-zero only for charged systems)
@@ -313,7 +319,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
              & atvshift=dtset%atvshift, &
              & fatvshift=one,comm_atom=mpi_enreg%comm_atom,                          &
              & mpi_atmtab=mpi_enreg%my_atmtab,mpi_comm_grid=mpi_enreg%comm_fft,      &
-             & nucdipmom=dtset%nucdipmom)
+             & nucdipmom=dtset%nucdipmom,spinaxis=dtset%spinaxis)
 
    !Symetrize Dij
    call symdij(tdks%gprimd,tdks%indsym,ipert,my_natom,dtset%natom,dtset%nsym, &

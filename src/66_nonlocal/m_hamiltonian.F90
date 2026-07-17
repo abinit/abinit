@@ -54,6 +54,7 @@ module m_hamiltonian
  use m_fock,              only : fock_common_type, fock_BZ_type, fock_ACE_type, fock_type
  use m_mkffnl,            only : mkffnl_objs
  use m_initylmg,          only : initylmg_k
+ use m_ompgpu_fourwf,     only : free_ompgpu_fourwf
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -119,6 +120,10 @@ module m_hamiltonian
    ! Fourth dimension of Ekb
    ! 2 if Ekb factors contain a exp(-iqR) phase, 1 otherwise
 
+  integer :: ispin_gbt = -1
+   ! 1, GBT spin up channel (uses k - q/2)
+   ! 2, GBT spin down channel (uses k + q/2)
+
   integer :: istwf_k = -1
    ! option parameter that describes the storage of wfs at k
 
@@ -155,6 +160,9 @@ module m_hamiltonian
 
   integer :: nfft = -1
    ! number of FFT grid points same as dtset%nfft
+
+  integer :: nfft_blocks = 1
+  ! number of blocks fourwf computation is divided into
 
   integer :: npw_k = -1
    ! number of plane waves at k
@@ -210,6 +218,7 @@ module m_hamiltonian
   integer :: use_gbt = 0
    ! 0, use normal non-collinear calculation
    ! 1, use spin spiral calculation
+   ! 2, use spin spiral with z-component SOC
 
   integer :: zora = 0
    ! zora=0: no zora terms. zora=1: use available zora terms
@@ -335,6 +344,9 @@ module m_hamiltonian
   real(dp) :: kpt_kp(3)
    ! dimensionless k^prime point coordinates wrt reciprocal lattice vectors
 
+  real(dp) :: spinaxis(3)
+   ! spin quantization axis
+
   real(dp), allocatable :: nucdipmom(:,:)
    ! nucdipmom(3,natom)
    ! nuclear dipole moments at each atomic position
@@ -427,6 +439,12 @@ module m_hamiltonian
    ! xred(3,natom)
    ! reduced coordinates of atoms (dimensionless)
 
+  real(dp), allocatable :: fofr_work(:,:,:,:)
+  !  (2,n4,n5,n6,ndat)
+  ! Buffer used in getgh1c when calling fourwf to compute <r|vlocal1|u_nk> for n =1, ndat.
+  ! It is automatically allocated/reallocated by alloc_fofr according on the input ndat.
+  ! In the case of gpu_option = 2, this is the buffer that is mapped to the GPU but only when ndat changes.
+
 ! ===== Structured datatype pointers
 
   type(fock_common_type), pointer :: fockcommon => null()
@@ -463,6 +481,9 @@ module m_hamiltonian
 
    procedure :: print => gsham_print
     ! Print the object
+
+   procedure :: alloc_fofr_work => gsham_alloc_fofr_work
+    ! Allocate work space array before calling fourwf for ndat bands and map it to GPU
 
  end type gs_hamiltonian_type
 !!***
@@ -606,7 +627,10 @@ contains  !===========================================================
 subroutine gsham_free(Ham)
 
 !Arguments ------------------------------------
- class(gs_hamiltonian_type),intent(inout),target :: Ham
+ class(gs_hamiltonian_type),target,intent(inout) :: Ham
+
+!Local variables-------------------------------
+ real(dp), contiguous, pointer :: fofr_work_ptr(:,:,:,:)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -638,7 +662,6 @@ subroutine gsham_free(Ham)
  end if
  ABI_SFREE(Ham%gbound_k)
  ABI_SFREE(Ham%pspso)
-
  ABI_SFREE(Ham%dimcprj)
 
 ! Real Pointers
@@ -677,6 +700,10 @@ subroutine gsham_free(Ham)
    ABI_FREE(Ham%ph1d)
  end if
 
+ if(Ham%gpu_option==ABI_GPU_OPENMP) then
+   call free_ompgpu_fourwf()
+ end if
+
 ! Structured datatype pointers
  if (associated(Ham%fockcommon)) nullify(Ham%fockcommon)
  if (associated(Ham%fockACE_k)) nullify(Ham%fockACE_k)
@@ -686,6 +713,14 @@ subroutine gsham_free(Ham)
    call gpu_finalize_ham_data()
  end if
 #endif
+
+ if (Ham%gpu_option==ABI_GPU_OPENMP) then
+   fofr_work_ptr => Ham%fofr_work
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:fofr_work_ptr) IF (Ham%gpu_option==ABI_GPU_OPENMP)
+#endif
+ end if
+ ABI_SFREE(Ham%fofr_work)
 
  DBG_EXIT("COLL")
 
@@ -742,13 +777,14 @@ end subroutine gsham_free
 subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
                      xred,nfft,mgfft,ngfft,rprimd,nloalg,&
                      ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&   ! optional
-                     electronpositron,fock,nucdipmom,gpu_option,use_gbt,zora) ! optional
+                     electronpositron,fock,nucdipmom,gpu_option,spinaxis,&    ! optional
+                     use_gbt,zora,nfft_blocks)    ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(gs_hamiltonian_type),intent(inout),target :: ham
  integer,intent(in) :: nfft,natom,nspinor,nsppol,nspden,mgfft
- integer,optional,intent(in) :: comm_atom,usecprj,gpu_option,use_gbt,zora
+ integer,optional,intent(in) :: comm_atom,usecprj,gpu_option,use_gbt,zora,nfft_blocks
  type(electronpositron_type),optional,pointer :: electronpositron
  type(fock_type),optional,pointer :: fock
  type(pseudopotential_type),intent(in) :: psps
@@ -757,7 +793,7 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  integer,optional,intent(in)  :: mpi_atmtab(:),mpi_spintab(2)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(in),target :: xred(3,natom)
- real(dp),optional,intent(in) :: nucdipmom(3,natom),ph1d(2,3*(2*mgfft+1)*natom)
+ real(dp),optional,intent(in) :: nucdipmom(3,natom),ph1d(2,3*(2*mgfft+1)*natom),spinaxis(3)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_ij_type),optional,intent(in) :: paw_ij(:)
 
@@ -767,7 +803,7 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  integer :: cplex_dij,jsp,l_gpu_option
  real(dp) :: ucvol
 !arrays
- integer :: my_spintab(2)
+ integer :: my_spintab(2),ispin_gbt
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable,target :: ekb_tmp(:,:,:,:)
 ! *************************************************************************
@@ -783,7 +819,12 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
  my_zora=0; if (present(zora)) my_zora=zora
 
+ ham%nfft_blocks=1;
+ if (present(nfft_blocks) .and. l_gpu_option==ABI_GPU_OPENMP) then
+   ham%nfft_blocks=nfft_blocks
+ end if
  ham%use_gbt = 0; if (present(use_gbt)) ham%use_gbt = use_gbt
+ ham%spinaxis = zero; if (present(spinaxis)) ham%spinaxis = spinaxis
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -828,6 +869,7 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  ham%gmet(:,:)  =gmet(:,:)
  ham%gprimd(:,:)=gprimd(:,:)
  ham%indlmn(:,:,:)=psps%indlmn(:,:,:)
+ ham%ispin_gbt  =ispin_gbt
  ham%lmnmax     =psps%lmnmax
  ham%mgfft      =mgfft
  ham%mpsang     =psps%mpsang
@@ -893,8 +935,12 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 ! ==== Non-local factors ====
 ! ===========================
 
-
- if (ham%usepaw==0) then ! Norm-conserving: use constant Kleimann-Bylander energies.
+ if (ham%usepaw==0) then
+   ! Norm-conserving: use constant Kleimann-Bylander energies.
+   ! nspinor ** 2 is a fake dimension here in the sense that
+   ! the KB energies for the scalar part and the SOC part are packed in the firs dimension (dimekb).
+   ! In nonlop_pl, ekb are accessed using ekb(iln,itypat,ispinor) where iln runs over all projects (scalar + SOC)
+   ! The ispinor index is irrelevant as ekb(:,:,1) = ekb(:,:,2). See nonlop_pl
    ham%dimekb1=psps%dimekb
    ham%dimekb2=psps%ntypat
    ham%dimekbq=1
@@ -920,7 +966,8 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
    end if
 #endif
 
- else ! PAW: store overlap coefficients (spin non dependent) and Dij coefficients (spin dependent)
+ else
+   ! PAW: store overlap coefficients (spin non dependent) and Dij coefficients (spin dependent)
    cplex_dij=1
    if (present(paw_ij)) then
      if (size(paw_ij)>0) cplex_dij=paw_ij(1)%cplex_dij
@@ -946,7 +993,7 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
        ham%sij(cplex_dij*pawtab(itypat)%lmn2_size+1:ham%dimekb1,itypat)=zero
      end if
    end do
-   !We preload here PAW non-local factors in order to avoid a communication over atoms
+   ! We preload here PAW non-local factors in order to avoid a communication over atoms
    ! inside the loop over spins.
    ABI_MALLOC(ham%ekb_spin,(ham%dimekb1,ham%dimekb2,nspinor**2,ham%dimekbq,my_nsppol))
    ham%ekb_spin=zero
@@ -1403,6 +1450,7 @@ subroutine gsham_copy(gs_hamk_in, gs_hamk_out)
  gs_hamk_out%mpssoang = gs_hamk_in%mpssoang
  gs_hamk_out%natom = gs_hamk_in%natom
  gs_hamk_out%nfft = gs_hamk_in%nfft
+ gs_hamk_out%nfft_blocks = gs_hamk_in%nfft_blocks
  gs_hamk_out%npw_k = gs_hamk_in%npw_k
  gs_hamk_out%npw_kp = gs_hamk_in%npw_kp
  gs_hamk_out%npw_fft_k = gs_hamk_in%npw_fft_k
@@ -1415,6 +1463,7 @@ subroutine gsham_copy(gs_hamk_in, gs_hamk_out)
  gs_hamk_out%n5 = gs_hamk_in%n5
  gs_hamk_out%n6 = gs_hamk_in%n6
  gs_hamk_out%gpu_option = gs_hamk_in%gpu_option
+ gs_hamk_out%spinaxis = gs_hamk_in%spinaxis
  gs_hamk_out%usecprj = gs_hamk_in%usecprj
  gs_hamk_out%usepaw = gs_hamk_in%usepaw
  gs_hamk_out%useylm = gs_hamk_in%useylm
@@ -1425,6 +1474,7 @@ subroutine gsham_copy(gs_hamk_in, gs_hamk_out)
  gs_hamk_out%ucvol = gs_hamk_in%ucvol
  gs_hamk_out%gmet = gs_hamk_in%gmet
  gs_hamk_out%gprimd = gs_hamk_in%gprimd
+ gs_hamk_out%ispin_gbt = gs_hamk_in%ispin_gbt
  gs_hamk_out%kpt_k = gs_hamk_in%kpt_k
  gs_hamk_out%kpt_kp = gs_hamk_in%kpt_kp
 
@@ -1601,6 +1651,55 @@ subroutine gsham_load_spin(Ham,isppol,vectornd,vlocal,vxctaulocal,with_nonlocal)
 end subroutine gsham_load_spin
 !!***
 
+!!****f* m_hamiltonian/gsham_alloc_fofr_work
+!! NAME
+!!  gsham_alloc_fofr_work
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine gsham_alloc_fofr_work(gs_ham, ndat)
+
+!Arguments ------------------------------------
+ class(gs_hamiltonian_type),target,intent(inout) :: gs_ham
+ integer,intent(in) :: ndat
+
+!Local variables-------------------------------
+ real(dp), contiguous, pointer :: fofr_work_ptr(:,:,:,:)
+! *************************************************************************
+
+ if (.not. allocated(gs_ham%fofr_work)) then
+   !print *, "first allocation"
+   ! First allocation on CPU and GPU.
+   ABI_MALLOC(gs_ham%fofr_work, (2, gs_ham%n4, gs_ham%n5, gs_ham%n6*ndat))
+   fofr_work_ptr => gs_ham%fofr_work
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:fofr_work_ptr) IF (gs_ham%gpu_option==ABI_GPU_OPENMP)
+#endif
+ end if
+
+ ! Realloc and remap if the buffer is not large enough.
+ !if (gs_ham%n6*ndat > size(gs_ham%fofr_work, dim=4)) then
+ ! Realloc and remap if buffer size changed.
+ if (gs_ham%n6*ndat /= size(gs_ham%fofr_work, dim=4)) then
+   !print *, "reallocating:", gs_ham%n6*ndat, size(gs_ham%fofr_work, dim=4)
+   fofr_work_ptr => gs_ham%fofr_work
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:fofr_work_ptr) IF (gs_ham%gpu_option==ABI_GPU_OPENMP)
+#endif
+   ABI_REMALLOC(gs_ham%fofr_work, (2, gs_ham%n4, gs_ham%n5, gs_ham%n6*ndat))
+   fofr_work_ptr => gs_ham%fofr_work
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:fofr_work_ptr) IF (gs_ham%gpu_option==ABI_GPU_OPENMP)
+#endif
+ end if ! realloc condition.
+
+end subroutine gsham_alloc_fofr_work
+!!***
+
 !!****f* m_hamiltonian/gsham_print
 !! NAME
 !!  gsham_print
@@ -1767,9 +1866,9 @@ subroutine rfham_init(rf_ham, cplex, gs_Ham, ipert,&
    rf_Ham%dime1kb1=cplex_dij1*(gs_Ham%lmnmax*(gs_Ham%lmnmax+1))/2
  end if
 
-  ! Allocate the arrays of the 1st-order Hamiltonian
-  ! We preload here 1st-order non-local factors in order to avoid
-  ! a communication over atoms inside the loop over spins.
+ ! Allocate the arrays of the 1st-order Hamiltonian
+ ! We preload here 1st-order non-local factors in order to avoid
+ ! a communication over atoms inside the loop over spins.
  if (gs_Ham%usepaw==1.and.rf_Ham%dime1kb1>0) then
    if ((ipert>=1.and.ipert<=gs_Ham%natom).or.ipert==gs_Ham%natom+2.or.&
         ipert==gs_Ham%natom+3.or.ipert==gs_Ham%natom+4.or.ipert==gs_Ham%natom+11) then
@@ -1787,7 +1886,7 @@ subroutine rfham_init(rf_ham, cplex, gs_Ham, ipert,&
          ABI_MALLOC(e1kb_tmp,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,cplex))
        end if
 
-!      === Frozen term
+       ! === Frozen term
        jsp=0
        do isp=1,rf_Ham%nsppol
          if (my_spintab(isp)==1) then
@@ -1802,7 +1901,7 @@ subroutine rfham_init(rf_ham, cplex, gs_Ham, ipert,&
          end if
        end do
 
-!      === Self-consistent term
+       ! === Self-consistent term
        if (has_e1kbsc_) then
          jsp=0
          do isp=1,rf_Ham%nsppol
@@ -2039,10 +2138,10 @@ subroutine pawdij2ekb(ekb,paw_ij,isppol,comm_atom,mpi_atmtab)
    end if
  end if
 
-!Communication in case of distribution over atomic sites
+ ! Communication in case of distribution over atomic sites
  if (paral_atom) call xmpi_sum(ekb,comm_atom,ierr)
 
-!Destroy atom table used for parallelism
+ ! Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
  DBG_EXIT("COLL")
@@ -2095,12 +2194,12 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
    e1kbsc=zero ; natom=size(e1kbsc,2)
  end if
 
-!Set up parallelism over atoms
+ ! Set up parallelism over atoms
  my_natom=size(paw_ij1) ; paral_atom=(xmpi_comm_size(comm_atom)>1)
  nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
  call get_my_atmtab(comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
-!Retrieve 1st-order PAW Dij coefficients for this spin component (frozen)
+ ! Retrieve 1st-order PAW Dij coefficients for this spin component (frozen)
  if (my_natom>0.and.present(e1kbfr)) then
    if (allocated(paw_ij1(1)%dijfr)) then
      dime1kb1=size(e1kbfr,1) ; dime1kb3=size(e1kbfr,3) ; dime1kb4=size(e1kbfr,4)
@@ -2119,7 +2218,7 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
    end if
  end if
 
-!Retrieve 1st-order PAW Dij coefficients for this spin component (self-consistent)
+ ! Retrieve 1st-order PAW Dij coefficients for this spin component (self-consistent)
  if (my_natom>0.and.present(e1kbsc)) then
    if (allocated(paw_ij1(1)%dijfr).and.allocated(paw_ij1(1)%dij)) then
      dime1kb1=size(e1kbsc,1) ; dime1kb3=size(e1kbsc,3) ; dime1kb4=size(e1kbsc,4)
@@ -2146,7 +2245,7 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
    if (present(e1kbsc)) call xmpi_sum(e1kbsc,comm_atom,ierr)
  end if
 
-!Destroy atom table used for parallelism
+ ! Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
  DBG_EXIT("COLL")

@@ -87,6 +87,7 @@ nav:
     - topics/GeoConstraints.md
     - topics/GeoOpt.md
     - topics/Git.md
+    - topics/GPU.md
     - topics/GSintroduction.md
     - topics/GW.md
     - topics/GWR.md
@@ -238,6 +239,7 @@ nav:
         - lwf_model: tutorial/lwf_model.md
     - Advanced parallelism:
         - paral_band_PW: tutorial/paral_bandpw.md
+        - paral_GPU: tutorial/paral_gpu.md
         - paral_wavelets: tutorial/paral_gswvl.md
         - paral_MD: tutorial/paral_moldyn.md
         - paral_images: tutorial/paral_images.md

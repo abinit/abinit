@@ -117,6 +117,7 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  integer :: natnd,natom,nimfrqs,nimage
  integer :: ntypalch,ntypat,print_constraint,size1,size2,test_write,tmpimg0
  logical :: compute_static_images
+ logical :: nontrivial_spinaxis
  real(dp) :: cpus
  character(len=1) :: firstchar_fftalg,firstchar_gpu
  character(len=14) :: str_hyb
@@ -182,6 +183,7 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  end do
  call prttagm_images(dprarr_images,iout,jdtset_,2,marr,narrm,ncid,ndtset_alloc,'acell','LEN',&
    mxvals%nimage,nimagem,ndtset,prtimg,strimg)
+
 
 !adpimd and adpimd_gamma
  intarr(1,:)=dtsets(:)%adpimd
@@ -816,6 +818,9 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%dmft_triqs_tol_block
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_tol_b','DPR',0)
 
+ intarr(1,:)=dtsets(:)%dmft_full_chipsi
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_full_chipsi','INT',0)
+
  intarr(1,:)=dtsets(:)%dmft_wanorthnorm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_wanorthnorm','INT',0)
 
@@ -872,7 +877,6 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
    call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert1_atpol','INT',0)
  endif
 
-
  intarr(1,:)=dtsets(:)%d3e_pert1_dir(1)
  intarr(2,:)=dtsets(:)%d3e_pert1_dir(2)
  intarr(3,:)=dtsets(:)%d3e_pert1_dir(3)
@@ -880,6 +884,24 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%d3e_pert1_elfd
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert1_elfd','INT',0)
+
+ test_write=0
+ do idtset=1,ndtset_alloc
+   if(dtsets(idtset)%d3e_pert1_magat(1)/=1 .or. dtsets(idtset)%d3e_pert1_magat(2)/=dtsets(idtset)%natom)test_write=1
+ enddo
+ if(test_write==1)then
+   intarr(1,:)=dtsets(:)%d3e_pert1_magat(1)
+   intarr(2,:)=dtsets(:)%d3e_pert1_magat(2)
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert1_magat','INT',0)
+ endif
+
+ intarr(1,:)=dtsets(:)%d3e_pert1_magdir(1)
+ intarr(2,:)=dtsets(:)%d3e_pert1_magdir(2)
+ intarr(3,:)=dtsets(:)%d3e_pert1_magdir(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'d3e_pert1_magdir','INT',0)
+
+ intarr(1,:)=dtsets(:)%d3e_pert1_magn
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert1_magn','INT',0)
 
  intarr(1,:)=dtsets(:)%d3e_pert1_phon
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert1_phon','INT',0)
@@ -901,6 +923,24 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%d3e_pert2_elfd
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert2_elfd','INT',0)
+
+ test_write=0
+ do idtset=1,ndtset_alloc
+   if(dtsets(idtset)%d3e_pert2_magat(1)/=1 .or. dtsets(idtset)%d3e_pert2_magat(2)/=dtsets(idtset)%natom)test_write=1
+ enddo
+ if(test_write==1)then
+   intarr(1,:)=dtsets(:)%d3e_pert2_magat(1)
+   intarr(2,:)=dtsets(:)%d3e_pert2_magat(2)
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert2_magat','INT',0)
+ endif
+
+ intarr(1,:)=dtsets(:)%d3e_pert2_magdir(1)
+ intarr(2,:)=dtsets(:)%d3e_pert2_magdir(2)
+ intarr(3,:)=dtsets(:)%d3e_pert2_magdir(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'d3e_pert2_magdir','INT',0)
+
+ intarr(1,:)=dtsets(:)%d3e_pert2_magn
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert2_magn','INT',0)
 
  intarr(1,:)=dtsets(:)%d3e_pert2_phon
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert2_phon','INT',0)
@@ -1336,6 +1376,9 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%getwfkfine
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getwfkfine','INT',0)
 
+ intarr(1,:)=dtsets(:)%getwfmq
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getwfmq','INT',0)
+
  intarr(1,:)=dtsets(:)%getwfq
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getwfq','INT',0)
 
@@ -1350,6 +1393,9 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%get1wf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'get1wf','INT',0)
+ 
+ dprarr(1,:)=dtsets(:)%ggtrcut
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ggtrcut','DPR',0)
 
  intarr(1,:)=dtsets(:)%goprecon
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'goprecon','INT',0)
@@ -1363,6 +1409,9 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
 
    do ii=1,12; intarr(ii,:)=dtsets(:)%gpu_devices(ii); end do
    call prttagm(dprarr,intarr,iout,jdtset_,1,marr,12,narrm,ncid,ndtset_alloc,'gpu_devices','INT',0,firstchar=firstchar_gpu)
+
+   intarr(1,:)=dtsets(:)%gpu_nfft_blocks
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_nfft_blocks','INT',0,firstchar=firstchar_gpu)
 
    intarr(1,:)=dtsets(:)%gpu_linalg_limit
    call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_linalg_limit','INT',0)
@@ -1388,6 +1437,9 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)  =dtsets(:)%gstore_with_vk
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gstore_with_vk','INT',0)
+
+ intarr(1,:)  =dtsets(:)%gstore_iv1p_comm
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gstore_iv1p_comm','INT',0)
 
  intarr(1,:)  =dtsets(:)%gstore_use_lgk
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gstore_use_lgk','INT',0)
@@ -1538,6 +1590,12 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%gwgamma
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwgamma','INT',0)
 
+ intarr(1,:)=dtsets(:)%gwpt_wmode
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwpt_wmode','INT',0)
+
+ intarr(1,:)=dtsets(:)%gwpt_g2mode
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwpt_g2mode','INT',0)
+
  intarr(1,:)=dtsets(:)%gwmem
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwmem','INT',0)
 
@@ -1637,12 +1695,26 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hmctt','INT',0)
 
 !hspinfield
- dprarr(1,:)=dtsets(:)%hspinfield(1)
- dprarr(2,:)=dtsets(:)%hspinfield(2)
- dprarr(3,:)=dtsets(:)%hspinfield(3)
+ dprarr(1,:)=dtsets(:)%hspinfield_in(1)
+ dprarr(2,:)=dtsets(:)%hspinfield_in(2)
+ dprarr(3,:)=dtsets(:)%hspinfield_in(3)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'hspinfield','BFI',0)
 
-
+!hspinfield_cart
+ nontrivial_spinaxis=.false.
+ do idtset=1,ndtset_alloc
+   if (any(abs(dtsets(idtset)%spinaxis(1:2)) > tol8) .or. &
+       abs(dtsets(idtset)%spinaxis(3) - 1.0_dp) > tol8) then
+     nontrivial_spinaxis=.true.
+     exit
+   end if
+ end do
+ if (nontrivial_spinaxis) then
+   dprarr(1,:) = dtsets(:)%hspinfield_cart(1)
+   dprarr(2,:) = dtsets(:)%hspinfield_cart(2)
+   dprarr(3,:) = dtsets(:)%hspinfield_cart(3)
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'hspinfield_cart','BFI',0)
+ end if
 
  intarr(1,:)=dtsets(:)%extfpmd_nbcut
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'extfpmd_nbcut','INT',0)

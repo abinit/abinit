@@ -840,7 +840,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call pawdenpot(compch_sph,el_temp,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
      Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_energies%paw,KS_paw_ij,&
      Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
-     Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%xred,Cryst%ucvol,Psps%znuclpsp)
+     Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%xred,Cryst%ucvol,Psps%znuclpsp,Dtset%spinaxis)
 
  else
    ABI_MALLOC(ks_nhatgr, (0, 0, 0))
@@ -913,7 +913,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
                Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
                k0,Dtset%spnorbscl,Cryst%ucvol,dtset%cellcharge(1),&
                ks_vtrial,ks_vxc,Cryst%xred,Dtset%znucl,&
-               nucdipmom=Dtset%nucdipmom)
+               nucdipmom=Dtset%nucdipmom,spinaxis=Dtset%spinaxis)
 
    ! Symmetrize KS Dij
    call symdij_all(Cryst%gprimd,Cryst%indsym,ipert0,&
@@ -1281,7 +1281,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
                  Dtset%pawprtvol,Pawrad,QP_pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
                  k0,Dtset%spnorbscl,Cryst%ucvol,dtset%cellcharge(1),&
                  qp_vtrial,qp_vxc,Cryst%xred,Dtset%znucl,&
-                 nucdipmom=Dtset%nucdipmom)
+                 nucdipmom=Dtset%nucdipmom,spinaxis=Dtset%spinaxis)
 
      ! Symmetrize total Dij
      option_dij=0
@@ -2129,7 +2129,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      call wrtout(units, " cRPA calculations using wannier weights from data.plowann")
      call init_plowannier(dtset%plowan_bandf,dtset%plowan_bandi,dtset%plowan_compute,dtset%plowan_iatom,&
        dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,dtset%plowan_nbl,dtset%plowan_nt,&
-       dtset%plowan_projcalc,dtset%acell_orig,dtset%kptns,dtset%nimage,dtset%nkpt,dtset%nspinor,&
+       dtset%plowan_projcalc,dtset%acell_orig,dtset%kptns,sum(dtset%plowan_nbl),dtset%nimage,dtset%nkpt,dtset%nspinor,&
        dtset%nsppol,dtset%wtk,dtset%dmft_t2g,wanibz_in)
      call get_plowannier(wanibz_in,wanibz,dtset)
      call fullbz_plowannier(dtset,kmesh,cryst,pawang,wanibz,wanbz)
@@ -2403,7 +2403,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
        if (any(mod10 == [SIG_SEX, SIG_COHSEX])) then
          ! Calculate static COHSEX or SEX using the coarse gwc_ngfft mesh.
-         call cohsex_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Cryst,qp_ebands,Sigp,Sr,epsm1,Gsph_c,Vcp,Kmesh,Qmesh,&
+         call cohsex_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,dtset, Cryst,qp_ebands,Sigp,Sr,epsm1,Gsph_c,Vcp,Kmesh,Qmesh,&
                         Ltg_k(ikcalc),Pawtab,Pawang,Paw_pwff,Psps,Wfd,QP_sym,&
                         gwc_ngfft,Dtset%iomode,Dtset%prtvol,sigcme_k)
        else
@@ -2790,6 +2790,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      !ncerr = nctk_write_datar("qp_rhor",path,ngfft,cplex,nfft,nspden,&
      !                          comm_fft,fftn3_distrib,ffti3_local,datar,action)
      NCF_CHECK(nf90_close(ncid))
+
+     !if (Sigp%nkptgw==Wfd%nkibz) then
+     !  call write_qpdata(dtset, sr)
+     !end if
    end if
   end if ! MRM skipped if GW density matrix update
  end if ! ucrpa
@@ -2952,7 +2956,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  integer :: mod10,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng, nsppol
  integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev,usefock_ixc
  integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange,ivcoul_init,nvcoul_init,xclevel_ixc
- real(dp),parameter :: OMEGASIMIN=0.01d0, tol_enediff=0.001_dp*eV_Ha
+ real(dp),parameter :: OMEGASIMIN=0.01d0
  real(dp) :: domegas,domegasi,ucvol,rcut, drude_plasmon_freq, wmax
  logical :: ltest,remove_inv,changed,found
  character(len=500) :: msg, iw_mesh_type
@@ -3357,7 +3361,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
        if (kmesh%has_IBZ_item(Sigp%kptgw(:,ikcalc), ikibz, G0)) then
          call ks_ebands%enclose_degbands(ikibz,isppol, &
-               Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enediff)
+               Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,dtset%symsigma_de)
 
          if (changed) then
            write(msg,'(2(a,i0),2a,2(1x,i0))')&
@@ -4275,7 +4279,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,qp_ebands, &
  call pawdenpot(qp_compch_sph,el_temp,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
    Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,QP_paw_an,QP_paw_an,QP_energies%paw,&
    QP_paw_ij,Pawang,Dtset%pawprtvol,Pawrad,QP_pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
-   Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%xred,Cryst%ucvol,Psps%znuclpsp)
+   Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%xred,Cryst%ucvol,Psps%znuclpsp,Dtset%spinaxis)
 
 end subroutine paw_qpscgw
 !!***

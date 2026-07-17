@@ -104,7 +104,7 @@ CONTAINS !===========================================================
  integer :: ii,regist,lenname,ncores,nprocs,nprocs_per_gpu
  real(sp) :: globalmem,clockRate
  integer  :: uuid(4)
- character(20)  :: name
+ character(256) :: name
  character(20)  :: formatdev
  character(60)  :: gflops_stg
  character(500) :: msg
@@ -130,7 +130,7 @@ CONTAINS !===========================================================
  write (msg,formatdev)&
        & '  Device             ',device,' : ',name(1:lenname)
  call wrtout(std_out,msg,'PERS')
- write (msg,'(a,2(i1,a),a,i9,a,a,a,f7.1,a,a,a,i9,a,i9,4a,2(a,i9,2a),a,i9,a,a,4(z8,a1),a)')&
+ write (msg,'(a,2(i1,a),a,i9,a,a,a,f7.1,a,a,a,i9,a,i9,4a,2(a,i9,2a),a,i9,a,a,4(z8.8,a1),a)')&
        & ' Revision number:                   ',vers(0),'.',vers(1),ch10, &
        & ' Total amount of global memory: ',nint(globalmem),' Mbytes',ch10, &
        & ' Clock rate:                    ',clockRate,' GHz',ch10, &

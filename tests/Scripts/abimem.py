@@ -3,17 +3,16 @@
 This script analyzes the `abimem_rank.mocc` files produced by Abinit when
 the code is executed in memory-profiling mode.
 """
-from __future__ import print_function, division, unicode_literals
 
 __version__ = "0.1.0"
 __author__ = "Matteo Giantomassi"
 
-import sys
+import argparse
+import logging
 import os
 import re
-import argparse
+import sys
 
-import logging
 logger = logging.getLogger(__name__)
 
 from pprint import pprint
@@ -167,16 +166,16 @@ def get_parser(with_epilog=False):
     # Parent parser for common options.
     copts_parser = argparse.ArgumentParser(add_help=False)
     #copts_parser.add_argument('paths', nargs="+", help="List of ABIMEM files.")
-    copts_parser.add_argument('paths', nargs="+", help="List of ABIMEM files or directory containing ABIMEM files.")
-    copts_parser.add_argument('-v', '--verbose', default=0, action='count', # -vv --> verbose=2
-        help='Verbose, can be supplied multiple times to increase verbosity.')
-    copts_parser.add_argument('-sns', "--seaborn", const="paper", default=None, action='store', nargs='?', type=str,
+    copts_parser.add_argument("paths", nargs="+", help="List of ABIMEM files or directory containing ABIMEM files.")
+    copts_parser.add_argument("-v", "--verbose", default=0, action="count", # -vv --> verbose=2
+        help="Verbose, can be supplied multiple times to increase verbosity.")
+    copts_parser.add_argument("-sns", "--seaborn", const="paper", default=None, action="store", nargs="?", type=str,
         help='Use seaborn settings. Accept value defining context in ("paper", "notebook", "talk", "poster"). Default: paper')
-    copts_parser.add_argument('-mpl', "--mpl-backend", default=None,
+    copts_parser.add_argument("-mpl", "--mpl-backend", default=None,
         help=("Set matplotlib interactive backend. "
               "Possible values: GTKAgg, GTK3Agg, GTK, GTKCairo, GTK3Cairo, WXAgg, WX, TkAgg, Qt4Agg, Qt5Agg, macosx."
               "See also: https://matplotlib.org/faq/usage_faq.html#what-is-a-backend."))
-    copts_parser.add_argument('--loglevel', default="ERROR", type=str,
+    copts_parser.add_argument("--loglevel", default="ERROR", type=str,
         help="Set the loglevel. Possible values: CRITICAL, ERROR (default), WARNING, INFO, DEBUG.")
 
     # Parent parser for commands supporting (ipython/jupyter)
@@ -197,40 +196,40 @@ def get_parser(with_epilog=False):
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
 
     # Create the parsers for the sub-commands
-    subparsers = parser.add_subparsers(dest='command', help='sub-command help', description="Valid subcommands")
+    subparsers = parser.add_subparsers(dest="command", help="sub-command help", description="Valid subcommands")
 
     # Build Subparsers for commands
-    p_summarize = subparsers.add_parser('summarize', parents=[copts_parser], help=summarize.__doc__)
+    p_summarize = subparsers.add_parser("summarize", parents=[copts_parser], help=summarize.__doc__)
 
     # Build Subparsers for commands
-    p_leaks = subparsers.add_parser('leaks', parents=[copts_parser], help=leaks.__doc__)
+    p_leaks = subparsers.add_parser("leaks", parents=[copts_parser], help=leaks.__doc__)
 
     # Subparser for small
-    p_small = subparsers.add_parser('small', parents=[copts_parser], help=small.__doc__)
+    p_small = subparsers.add_parser("small", parents=[copts_parser], help=small.__doc__)
 
     # Subparser for large
-    p_large = subparsers.add_parser('large', parents=[copts_parser], help=large.__doc__)
+    p_large = subparsers.add_parser("large", parents=[copts_parser], help=large.__doc__)
 
     # Subparser for intense
-    p_intense = subparsers.add_parser('intense', parents=[copts_parser], help=intense.__doc__)
+    p_intense = subparsers.add_parser("intense", parents=[copts_parser], help=intense.__doc__)
 
     # Subparser for peaks command.
-    p_peaks = subparsers.add_parser('peaks', parents=[copts_parser], help=peaks.__doc__)
+    p_peaks = subparsers.add_parser("peaks", parents=[copts_parser], help=peaks.__doc__)
 
     # Subparser for weird command.
-    p_weird = subparsers.add_parser('weird', parents=[copts_parser], help=weird.__doc__)
+    p_weird = subparsers.add_parser("weird", parents=[copts_parser], help=weird.__doc__)
 
     # Subparser for zerosized command.
-    p_zerosized = subparsers.add_parser('zerosized', parents=[copts_parser], help=zerosized.__doc__)
+    p_zerosized = subparsers.add_parser("zerosized", parents=[copts_parser], help=zerosized.__doc__)
 
     # Subparser for plot command.
-    p_plot = subparsers.add_parser('plot', parents=[copts_parser], help=plot.__doc__)
+    p_plot = subparsers.add_parser("plot", parents=[copts_parser], help=plot.__doc__)
 
     # Subparser for panel command.
-    p_panel = subparsers.add_parser('panel', parents=[copts_parser], help=panel.__doc__)
+    p_panel = subparsers.add_parser("panel", parents=[copts_parser], help=panel.__doc__)
 
     # Subparser for ipython command.
-    p_ipython = subparsers.add_parser('ipython', parents=[copts_parser], help=ipython.__doc__)
+    p_ipython = subparsers.add_parser("ipython", parents=[copts_parser], help=ipython.__doc__)
 
     return parser
 
@@ -274,7 +273,7 @@ def main():
     # Parse command line.
     try:
         options = parser.parse_args()
-    except Exception as exc:
+    except Exception:
         show_examples_and_exit(error_code=1)
 
     # loglevel is bound to the string value obtained from the command line argument.
@@ -287,8 +286,8 @@ def main():
     if options.seaborn:
         # Use seaborn settings.
         import seaborn as sns
-        sns.set(context=options.seaborn, style='darkgrid', palette='deep',
-                font='sans-serif', font_scale=1, color_codes=False, rc=None)
+        sns.set(context=options.seaborn, style="darkgrid", palette="deep",
+                font="sans-serif", font_scale=1, color_codes=False, rc=None)
 
     if os.path.isfile(options.paths[0]):
         options.memfiles = [AbimemFile(path) for path in options.paths]
@@ -328,7 +327,8 @@ if __name__ == "__main__":
     if not do_prof:
         sys.exit(main())
     else:
-        import pstats, cProfile
+        import cProfile
+        import pstats
         cProfile.runctx("main()", globals(), locals(), "Profile.prof")
         s = pstats.Stats("Profile.prof")
         s.strip_dirs().sort_stats("time").print_stats()

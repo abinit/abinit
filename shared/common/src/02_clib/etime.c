@@ -5,8 +5,7 @@
 #include <sys/resource.h>
 #endif
 
-double etime(tt)
-float tt[2];
+double etime(float tt[2])
 {
 #if defined HAVE_SYS_TIME_H && defined HAVE_SYS_RESOURCE_H
   int who;

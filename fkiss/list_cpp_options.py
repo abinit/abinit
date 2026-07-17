@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-from __future__ import print_function
+from __future__ import annotations
 
 import os
 import re
@@ -10,12 +9,12 @@ cppline = re.compile("^#")
 cppkeys = ("define .*", "include.*", "ifdef", "ifndef", "elif", "^if ", "else", "endif", "defined", "undef",
            "!", "&&", r"\|\|", r"\(", r"\)")
 
-def list_cpp_options(top):
+def list_cpp_options(top: str) -> int:
   cppopts = dict()
   for root,dirs,files in os.walk(top):
     for src in files:
       if ( fortran.search(src) ):
-        with open(os.path.join(root,src), "r") as fh:
+        with open(os.path.join(root,src)) as fh:
             code = fh.readlines()
 
         for line in code:
@@ -36,7 +35,7 @@ def list_cpp_options(top):
   names = sorted(cppopts.keys())
   for opt in names:
     print ("%-32s   %10d" % (opt,cppopts[opt]))
-  print ("")
+  print()
 
   return 0
 

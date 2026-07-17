@@ -472,9 +472,7 @@ contains
 !protect special case choice==7
  check=(choice/=7.or.paw_opt==3)
  ABI_CHECK(check,'BUG: when choice=7, paw_opt must be 3')
-!spin-orbit not yet allowed
- check=(maxval(indlmn(6,:,:))<=1)
- ABI_CHECK(check,'BUG: spin-orbit with Yml for nonlop not yet allowed')
+!
 
 !Test: size of blocks of atoms
  mincat=min(NLO_MINCAT,maxval(nattyp))

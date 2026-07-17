@@ -1,8 +1,8 @@
 
-.Version 7.9.0 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu4.4 computer) 
+.Version 7.9.0 of ABINIT
+.(sequential version, prepared for a x86_64_linux_gnu4.4 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Mon  6 Oct 2014.
 - ( at 17h34 )
-  
+
 - input  file    -> t90.in
 - output file    -> t90.out
 - root for input  files -> t90i
@@ -194,10 +194,10 @@ _ WF disk file :      0.432 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   accesswff0 =  0 , fftalg0 =112 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -1946,7 +1946,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.234      49.131
 - newkpt : prtvol=0 or 1, do not print more k-points.
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2318,57 +2318,57 @@ P newkpt: treating      8 bands with npw=      38 for ikpt=  13 by node    0
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         0.0000004416         0.0000000000
    1    1   2    1        -0.0000001472         0.0000000000
    1    1   3    1        -0.0000001472         0.0000000000
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
-  
+
    2    1   1    1        -0.0000001472         0.0000000000
    2    1   2    1         0.0000004416         0.0000000000
    2    1   3    1        -0.0000001472         0.0000000000
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
-  
+
    3    1   1    1        -0.0000001472         0.0000000000
    3    1   2    1        -0.0000001472         0.0000000000
    3    1   3    1         0.0000004415         0.0000000000
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
-  
+
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
-  
+
    2    3   1    1         0.0000000000         0.0000000000
    2    3   3    1         0.0000000000         0.0000000000
-  
+
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0000000144         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-  
+
    2    1   1    1        -0.0000000000         0.0000000000
    2    1   2    1         0.0000000144         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0000000144         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    1.068449E-06  1.068549E-06  1.068559E-06
@@ -2469,7 +2469,7 @@ P newkpt: treating      8 bands with npw=      38 for ikpt=  13 by node    0
 - newkpt : prtvol=0 or 1, do not print more k-points.
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -3362,42 +3362,42 @@ P newkpt: treating      8 bands with npw=      49 for ikpt=  50 by node    0
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        -0.5969365298         0.0000000000
    1    1   2    1         0.8254746768        -0.0000000001
    1    1   3    1         0.8254746771         0.0000000001
-  
+
    2    1   1    1         0.8254753947         0.0000000000
    2    1   2    1        -1.7950500857         0.0000000000
    2    1   3    1         0.1440937509        -0.0000000001
-  
+
    3    1   1    1         0.8254753947         0.0000000000
    3    1   2    1         0.1440937509         0.0000000001
    3    1   3    1        -1.7950500858         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1        -0.0810152554         0.0000000000
    1    1   2    1        -0.0000001361        -0.0000000000
    1    1   3    1        -0.0000001361         0.0000000000
-  
+
    2    1   1    1        -0.0000001713         0.0000000000
    2    1   2    1        -0.0181819663         0.0000000000
    2    1   3    1         0.0293965886         0.0000000000
-  
+
    3    1   1    1        -0.0000001713        -0.0000000000
    3    1   2    1         0.0293965886        -0.0000000000
    3    1   3    1        -0.0181819663        -0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
   -2.530418E-03 -1.939164E-03  9.414587E-04
@@ -3498,7 +3498,7 @@ P newkpt: treating      8 bands with npw=      49 for ikpt=  50 by node    0
 - newkpt : prtvol=0 or 1, do not print more k-points.
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -4278,42 +4278,42 @@ P newkpt: treating      8 bands with npw=      44 for ikpt=  40 by node    0
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         0.8830754191         0.0000000000
    1    1   2    1        -0.2943602681        -0.0000000000
    1    1   3    1        -0.2943602681         0.0000000000
-  
+
    2    1   1    1        -0.2943602688        -0.0000000000
    2    1   2    1         0.8830754190         0.0000000000
    2    1   3    1        -0.2943602681         0.0000000000
-  
+
    3    1   1    1        -0.2943602688        -0.0000000000
    3    1   2    1        -0.2943602681        -0.0000000000
    3    1   3    1         0.8830754184         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0288892609         0.0000000000
    1    1   2    1        -0.0000001322         0.0000000000
    1    1   3    1        -0.0000001322        -0.0000000000
-  
+
    2    1   1    1        -0.0000001321        -0.0000000000
    2    1   2    1         0.0288892609         0.0000000000
    2    1   3    1        -0.0000001321        -0.0000000000
-  
+
    3    1   1    1        -0.0000001321         0.0000000000
    3    1   2    1        -0.0000001321         0.0000000000
    3    1   3    1         0.0288892609        -0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
  Phonon energies in Hartree :
    1.511037E-03  1.511048E-03  1.511048E-03
@@ -4414,7 +4414,7 @@ P newkpt: treating      8 bands with npw=      44 for ikpt=  40 by node    0
 - newkpt : prtvol=0 or 1, do not print more k-points.
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   2
@@ -6195,7 +6195,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.234      49.131
 - newkpt : prtvol=0 or 1, do not print more k-points.
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -6902,42 +6902,42 @@ P newkpt: treating      8 bands with npw=      38 for ikpt=  36 by node    0
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        -0.0274681153         0.0000000000
    1    1   2    1         0.0091560380         0.0000000000
    1    1   3    1         0.0091560392         0.0000000000
-  
+
    2    1   1    1         0.0091560381         0.0000000000
    2    1   2    1        -0.0274681162         0.0000000000
    2    1   3    1         0.0091560399         0.0000000000
-  
+
    3    1   1    1         0.0091560391         0.0000000000
    3    1   2    1         0.0091560395         0.0000000000
    3    1   3    1        -0.0274681189         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1        -0.0008986050         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-  
+
    2    1   1    1        -0.0000000001         0.0000000000
    2    1   2    1        -0.0008986050         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1        -0.0008986050         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
   -2.664976E-04 -2.664976E-04 -2.664976E-04
@@ -7040,7 +7040,7 @@ P newkpt: treating      8 bands with npw=      38 for ikpt=  36 by node    0
 - newkpt : prtvol=0 or 1, do not print more k-points.
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -7969,42 +7969,42 @@ P newkpt: treating      8 bands with npw=      49 for ikpt=  50 by node    0
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        -0.6177726058         0.0000000000
    1    1   2    1         0.8402842591         0.0000000007
    1    1   3    1         0.8402842609         0.0000000008
-  
+
    2    1   1    1         0.8257931236         0.0000000000
    2    1   2    1        -1.8226100192         0.0000000000
    2    1   3    1         0.1420306676        -0.0000000002
-  
+
    3    1   1    1         0.8257931229         0.0000000011
    3    1   2    1         0.1420306683        -0.0000000009
    3    1   3    1        -1.8226100176         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1        -0.0824689075        -0.0000000000
    1    1   2    1        -0.0007113706         0.0000000000
    1    1   3    1        -0.0007113706         0.0000000000
-  
+
    2    1   1    1        -0.0000002657         0.0000000000
    2    1   2    1        -0.0189982422         0.0000000000
    2    1   3    1         0.0292058996         0.0000000000
-  
+
    3    1   1    1        -0.0000002658         0.0000000000
    3    1   2    1         0.0292058997         0.0000000000
    3    1   3    1        -0.0189982423         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
   -2.553061E-03 -1.951871E-03  8.983180E-04
@@ -8107,7 +8107,7 @@ P newkpt: treating      8 bands with npw=      49 for ikpt=  50 by node    0
 - newkpt : prtvol=0 or 1, do not print more k-points.
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -9036,42 +9036,42 @@ P newkpt: treating      8 bands with npw=      46 for ikpt=  50 by node    0
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         0.8582219787         0.0000000000
    1    1   2    1        -0.2858536700        -0.0000000000
    1    1   3    1        -0.2862828334         0.0000000000
-  
+
    2    1   1    1        -0.2858716724        -0.0000000000
    2    1   2    1         0.8580981332         0.0000000000
    2    1   3    1        -0.2860670615         0.0000000000
-  
+
    3    1   1    1        -0.2861836955         0.0000000000
    3    1   2    1        -0.2861276097        -0.0000000000
    3    1   3    1         0.8581488752         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0280703040         0.0000000000
    1    1   2    1         0.0000006489         0.0000000000
    1    1   3    1        -0.0000020817        -0.0000000000
-  
+
    2    1   1    1        -0.0000028275        -0.0000000000
    2    1   2    1         0.0280666724         0.0000000000
    2    1   3    1         0.0000013986        -0.0000000000
-  
+
    3    1   1    1        -0.0000025869         0.0000000000
    3    1   2    1         0.0000000101         0.0000000000
    3    1   3    1         0.0280836130        -0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
  Phonon energies in Hartree :
    1.489368E-03  1.489469E-03  1.489837E-03
@@ -9174,7 +9174,7 @@ P newkpt: treating      8 bands with npw=      46 for ikpt=  50 by node    0
 - newkpt : prtvol=0 or 1, do not print more k-points.
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   2
@@ -10415,7 +10415,7 @@ P newkpt: treating      8 bands with npw=      52 for ikpt=  50 by node    0
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      6.3840956994E+00  6.3840956994E+00  6.3840956994E+00 Bohr
               amu      6.94100000E+00
@@ -11917,56 +11917,56 @@ P          mk1mem10        64
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
 - cpu_time =           13.6, wall_time =           13.6
 -
-- routine                        cpu     %       wall     %      number of calls  Gflops 
+- routine                        cpu     %       wall     %      number of calls  Gflops
 -                                                                  (-1=no count)
-- fourwf%(pot)                   3.651  26.9      3.805  28.0          95258      -1.00    
-- cgwf3-O(npw)                   1.662  12.3      1.564  11.5             -1      -1.00    
-- invars2                        1.096   8.1      1.096   8.1             10      -1.00    
-- projbd                         0.842   6.2      0.857   6.3         168006      -1.00    
-- getghc-other                   0.818   6.0      0.800   5.9             -1      -1.00    
-- nonlop(apply)                  0.713   5.3      0.630   4.6          74274      -1.00    
-- pspini                         0.590   4.4      0.590   4.3             10      -1.00    
-- nonlop(forces)                 0.480   3.5      0.496   3.6          40640      -1.00    
-- inwffil(excl. calls)           0.336   2.5      0.339   2.5             82      -1.00    
-- vtowfk3(contrib)               0.294   2.2      0.350   2.6             -1      -1.00    
-- abinit(2)                      0.251   1.9      0.251   1.8              1      -1.00    
-- vtorho3-kpt loop               0.190   1.4      0.193   1.4             94      -1.00    
-- newkpt(excl. rwwf   )          0.170   1.3      0.171   1.3             -1      -1.00    
-- vtowfk3 (1)                    0.160   1.2      0.125   0.9           4159      -1.00    
-- fourwf%(G->r)                  0.129   1.0      0.142   1.0           5595      -1.00    
-- timing timab                   0.120   0.9      0.120   0.9              9      -1.00    
-- status                         0.101   0.7      0.076   0.6           6439      -1.00    
-- others (87)                    0.420   3.1      0.426   3.1             -1      -1.00    
+- fourwf%(pot)                   3.651  26.9      3.805  28.0          95258      -1.00
+- cgwf3-O(npw)                   1.662  12.3      1.564  11.5             -1      -1.00
+- invars2                        1.096   8.1      1.096   8.1             10      -1.00
+- projbd                         0.842   6.2      0.857   6.3         168006      -1.00
+- getghc-other                   0.818   6.0      0.800   5.9             -1      -1.00
+- nonlop(apply)                  0.713   5.3      0.630   4.6          74274      -1.00
+- pspini                         0.590   4.4      0.590   4.3             10      -1.00
+- nonlop(forces)                 0.480   3.5      0.496   3.6          40640      -1.00
+- inwffil(excl. calls)           0.336   2.5      0.339   2.5             82      -1.00
+- vtowfk3(contrib)               0.294   2.2      0.350   2.6             -1      -1.00
+- abinit(2)                      0.251   1.9      0.251   1.8              1      -1.00
+- vtorho3-kpt loop               0.190   1.4      0.193   1.4             94      -1.00
+- newkpt(excl. rwwf   )          0.170   1.3      0.171   1.3             -1      -1.00
+- vtowfk3 (1)                    0.160   1.2      0.125   0.9           4159      -1.00
+- fourwf%(G->r)                  0.129   1.0      0.142   1.0           5595      -1.00
+- timing timab                   0.120   0.9      0.120   0.9              9      -1.00
+- status                         0.101   0.7      0.076   0.6           6439      -1.00
+- others (87)                    0.420   3.1      0.426   3.1             -1      -1.00
 -<END_TIMER>
 -
 - subtotal                      12.022  88.7     12.031  88.5
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
 - cpu_time =          13.6, wall_time =          13.6
 -
-- routine                         cpu     %       wall     %      number of calls Gflops 
+- routine                         cpu     %       wall     %      number of calls Gflops
 -                                                                  (-1=no count)
-- fourwf%(pot)                   3.651  26.9      3.805  28.0          95258      -1.00    
-- cgwf3-O(npw)                   1.662  12.3      1.564  11.5             -1      -1.00    
-- invars2                        1.096   8.1      1.096   8.1             10      -1.00    
-- projbd                         0.842   6.2      0.857   6.3         168006      -1.00    
-- getghc-other                   0.818   6.0      0.800   5.9             -1      -1.00    
-- nonlop(apply)                  0.713   5.3      0.630   4.6          74274      -1.00    
-- pspini                         0.590   4.4      0.590   4.3             10      -1.00    
-- nonlop(forces)                 0.480   3.5      0.496   3.6          40640      -1.00    
-- inwffil(excl. calls)           0.336   2.5      0.339   2.5             82      -1.00    
-- vtowfk3(contrib)               0.294   2.2      0.350   2.6             -1      -1.00    
-- abinit(2)                      0.251   1.9      0.251   1.8              1      -1.00    
-- vtorho3-kpt loop               0.190   1.4      0.193   1.4             94      -1.00    
-- newkpt(excl. rwwf   )          0.170   1.3      0.171   1.3             -1      -1.00    
-- vtowfk3 (1)                    0.160   1.2      0.125   0.9           4159      -1.00    
-- fourwf%(G->r)                  0.129   1.0      0.142   1.0           5595      -1.00    
-- timing timab                   0.120   0.9      0.120   0.9              9      -1.00    
-- status                         0.101   0.7      0.076   0.6           6439      -1.00    
-- others (87)                    0.420   3.1      0.426   3.1             -1      -1.00    
+- fourwf%(pot)                   3.651  26.9      3.805  28.0          95258      -1.00
+- cgwf3-O(npw)                   1.662  12.3      1.564  11.5             -1      -1.00
+- invars2                        1.096   8.1      1.096   8.1             10      -1.00
+- projbd                         0.842   6.2      0.857   6.3         168006      -1.00
+- getghc-other                   0.818   6.0      0.800   5.9             -1      -1.00
+- nonlop(apply)                  0.713   5.3      0.630   4.6          74274      -1.00
+- pspini                         0.590   4.4      0.590   4.3             10      -1.00
+- nonlop(forces)                 0.480   3.5      0.496   3.6          40640      -1.00
+- inwffil(excl. calls)           0.336   2.5      0.339   2.5             82      -1.00
+- vtowfk3(contrib)               0.294   2.2      0.350   2.6             -1      -1.00
+- abinit(2)                      0.251   1.9      0.251   1.8              1      -1.00
+- vtorho3-kpt loop               0.190   1.4      0.193   1.4             94      -1.00
+- newkpt(excl. rwwf   )          0.170   1.3      0.171   1.3             -1      -1.00
+- vtowfk3 (1)                    0.160   1.2      0.125   0.9           4159      -1.00
+- fourwf%(G->r)                  0.129   1.0      0.142   1.0           5595      -1.00
+- timing timab                   0.120   0.9      0.120   0.9              9      -1.00
+- status                         0.101   0.7      0.076   0.6           6439      -1.00
+- others (87)                    0.420   3.1      0.426   3.1             -1      -1.00
 -<END_TIMER>
 
 - subtotal                      12.022  88.7     12.031  88.5
@@ -12003,7 +12003,7 @@ P          mk1mem10        64
  M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
  Computer Phys. Comm. 180, 2582-2615 (2009).
  Comment : the third generic paper describing the ABINIT project.
- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+ Note that a version of this paper, that is not formatted for Computer Phys. Comm.
  is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
  The licence allows the authors to put it on the Web.
 
@@ -12022,7 +12022,7 @@ P          mk1mem10        64
 
  And optionally :
 
- [5] First-principles computation of material properties : the ABINIT software project. 
+ [5] First-principles computation of material properties : the ABINIT software project.
  X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
  M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
  Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7

@@ -6,6 +6,7 @@ authors: GG
 
 This page gives hints on how to perform a PIMD calculation with the ABINIT package.
 
+<a id="1"></a>
 ## Introduction
 
 Path-Integral Molecular Dynamics (PIMD) is a technique allowing to simulate

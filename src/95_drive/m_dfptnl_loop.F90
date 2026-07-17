@@ -605,18 +605,19 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 &                       n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d2,xred)
                      end if ! psps%n1xccc/=0
 
-                     call dfpt_vlocal(atindx,cplex,gmet,gsqcut,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
-&                     nattyp,nfftf,ngfftf,psps%ntypat,n1,n2,n3,ph1df,psps%qgrid_vl,&
-&                     dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
+                     call dfpt_vlocal(atindx,cplex,gmet,gsqcut,dtset%icutcoul,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
+&                     nattyp,nfftf,ngfftf,nkpt,psps%ntypat,n1,n2,n3,ph1df,psps%qgrid_vl,&
+&                     dtset%qptn,dtset%rcut,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1,xred)
 
                    end if ! usepaw
 
                    option=1;optene=0
-                   call dfpt_rhotov(cplex,dummy_real,dummy_real,dummy_real,dummy_real,dummy_real,&
-&                   gsqcut,i2dir,i2pert,dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,&
-&                   nhat1_i2pert,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,non_magnetic_xc,optene,option,&
-&                   dtset%qptn,rhog,rho2g1,rhor,rho2r1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_i2pert,&
-&                   vpsp1,vresid_dum,dummy_real,vtrial1_i2pert,vxc,vxc1_i2pert,xccc3d2,dtset%ixcrot)
+                   call dfpt_rhotov(cplex,dummy_real,dummy_real,dummy_real,dummy_real,dummy_real,dummy_real,&
+&                   gsqcut,dtset%icutcoul,i2dir,i2pert,dtset%ixc,kxc,dtset%magpen,dtset%mpatpol,dtset%mpdir,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,&
+&                   nhat1_i2pert,nhat1gr,nhat1grdim,nkxc,nspden,dtset%ntypat,n3xccc,non_magnetic_xc,optene,option,&
+&                   dtset%qptn,dtset%ratsm,dtset%ratsph,rhog,rho2g1,rhor,rho2r1,rprimd,dtset%typat,ucvol,psps%usepaw,&
+&                   usexcnhat,dtset%vcutgeo,vhartr1_i2pert,&
+&                   vpsp1,vresid_dum,dummy_real,vtrial1_i2pert,vxc,vxc1_i2pert,xccc3d2,dtset%ixcrot,xred,dtset%qgbt,dtset%use_gbt)
 
                    if (psps%usepaw==1.and.usexcnhat==0) then
                      rho2r1(:,:) = rho2r1(:,:) - nhat1_i2pert(:,:)
@@ -637,7 +638,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 &                     nspden,psps%ntypat,dtset%nucdipmom,0,option,paw_an1_i2pert,paw_an0,&
 &                     paw_energies_dum,paw_ij1_i2pert,pawang,dtset%pawprtvol,pawrad,&
 &                     pawrhoij1_i2pert,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,&
-&                     dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp, &
+&                     dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp,dtset%spinaxis, &
 &                     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
                 !    First-order Dij computation
 !                     call timab(561,1,tsec)
@@ -656,7 +657,8 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 &                     pawfgrtab,dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,&
 &                     dtset%pawxcdev,qphon,dtset%spnorbscl,ucvol,dtset%cellcharge(1),&
 &                     vtrial1_tmp,vxc1_i2pert,xred,dtset%znucl,&
-&                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+&                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,&
+&                     spinaxis=dtset%spinaxis)
                      if (has_dijfr>0) then
                        ABI_FREE(vtrial1_tmp)
                      end if

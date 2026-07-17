@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 """Search for non-ASCII characters in the ABINIT src files"""
-from __future__ import unicode_literals, division, print_function, absolute_import
 
 import os
 import re
@@ -33,7 +32,7 @@ def main():
             for src in files:
                 if is_srcfile(dirpath, src):
                     fpath = os.path.join(dirpath, src)
-                    with open(fpath, "rt") as fh:
+                    with open(fpath) as fh:
                         lines = fh.readlines()
                     for lno, line in enumerate(lines):
                         if not isascii(line):

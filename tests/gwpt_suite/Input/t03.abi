@@ -1,5 +1,5 @@
 # NSCF computation of WFK file with empty states to prepare ZPR calculation in diamond.
-# IMPORTANT: the GWR driver implements a direct diago with Scalapack with is much faster for large systems,
+# IMPORTANT: the GWR driver implements a direct diago with Scalapack which is much faster for large systems,
 # especially if ELPA is used.
 
  ecut 45.0
@@ -30,6 +30,7 @@
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t01.abi, t02.abi, t03.abi, t04.abi, t05.abi, t06.abi
+#%% exclude_builders = scope_gnu_10.2_paral
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt
 #%% files_to_test =

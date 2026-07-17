@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Abinit Post Process Application
@@ -7,10 +6,9 @@ authors: Martin Alexandre, Vincent Stutzmann
 last edited: May 2014
 """
 
-from numpy import array,reshape,ones
-
 #Fortran Code
 import fortran.positions as posit
+from numpy import ones
 
 #----------------------------------------------------------------#
 #-------------------CONVERSION POSITIONS-------------------------#
@@ -21,16 +19,16 @@ class convert_position:
     def __init__(self,pfile,indexAtom,option=0,reduced=False):
 
         # Option:
-        #       0 return the positions of each atom (Default)  
-        #       1 return the average positions 
-        #       2 return the positions of each atom using periodic boundary condistions 
+        #       0 return the positions of each atom (Default)
+        #       1 return the average positions
+        #       2 return the positions of each atom using periodic boundary condistions
         # Reduced :
         #       True  return the result in reduced coordinates
         #       False return the result in cartesian coordinates
 
         self.file = pfile
         natom  = len(indexAtom)    # Number particule
-        
+
         if (reduced):
             self.pos = self.file.getXRed()   # position of atom (cartesian)
 
@@ -48,13 +46,13 @@ class convert_position:
             a = acell[:,0]
             b = acell[:,1]
             c = acell[:,2]
-    
 
-        self.result = [[],[],[]]        
+
+        self.result = [[],[],[]]
 
         if option==0:
             self.result = posit.atom_std(nbtime,self.pos,indexAtom+1)
-        
+
         if option==1:
             self.result = posit.atom_ave(nbtime,self.pos,indexAtom+1)
 

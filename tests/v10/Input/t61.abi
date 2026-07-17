@@ -69,5 +69,8 @@
 #%% description =
 #%%   Test to compute the electron-phonon contribution to total energy.
 #%%   Consider diamond with low ecut and number of k points.
+#%%   These are underconverged calculations, and e.g. the IFC matrix at q=(0.5 0 0) is not perfectly hermitian,
+#%%   with complex elements, while they should be real. Modifying the tolerances as indicated above
+#%%   get rid off the imaginary contributions.
 #%%<END TEST_INFO>
 

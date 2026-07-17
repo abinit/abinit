@@ -2,7 +2,6 @@
 """
 Change libtetrabz source file so that they are compatible with the Abinit build system.
 """
-from __future__ import unicode_literals, division, print_function, absolute_import
 
 import os
 
@@ -28,9 +27,9 @@ for path in paths:
 """]
     lines = []
 
-    with open(path, "rt") as fh:
+    with open(path) as fh:
         lines += [abi_sanitize(l) for l in fh]
 
     print(lines)
-    with open(path, "wt") as fh:
+    with open(path, "w") as fh:
         fh.writelines(lines)

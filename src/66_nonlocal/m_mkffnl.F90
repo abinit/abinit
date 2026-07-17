@@ -287,12 +287,12 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
  end if
 
  ! Compatibility tests
- if (mpsang>4) then
-   write(msg,'(a,i0,a,a)')&
-   'Called with mpsang > 4, =',mpsang,ch10,&
-   'This subroutine will not accept lmax+1 > 4.'
-   ABI_BUG(msg)
- end if
+ !if (mpsang>4) then
+ !  write(msg,'(a,i0,a,a)')&
+ !  'Called with mpsang > 4, =',mpsang,ch10,&
+ !  'This subroutine will not accept lmax+1 > 4.'
+ !  ABI_BUG(msg)
+ !end if
  if (idir<-7.or.idir>4) then
    ABI_BUG('Called with idir<-6 or idir>4 !')
  end if

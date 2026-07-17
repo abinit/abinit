@@ -176,7 +176,7 @@ contains
 
 subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
-& effective_potential,filename_ddb,itimimage_gstate,verbose,writeHIST,scup_dtset,sc_size,multibinit_dtset)
+& effective_potential,filename_ddb,itimimage_gstate,verbose,verbose_cycle,writeHIST,scup_dtset,sc_size,multibinit_dtset)
 
 !Arguments ------------------------------------
 !scalars
@@ -187,6 +187,7 @@ type(electronpositron_type),pointer :: electronpositron
 type(ab_xfh_type),intent(inout) :: ab_xfh
 type(effective_potential_type),optional,intent(inout) :: effective_potential
 logical,optional,intent(in) :: verbose
+logical,optional,intent(in) :: verbose_cycle
 logical,optional,intent(in) :: writeHIST
 character(len=fnlen),optional,intent(in) :: filename_ddb
 !arrays
@@ -211,7 +212,7 @@ type(pawfgr_type) :: pawfgr
 type(mttk_type) :: mttk_vars
 type(pimd_type) :: pimd_param
 integer :: itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
-integer :: ntime,option,comm,mgfftf,nfftf
+integer :: nmpi,ntime,option,comm,mgfftf,nfftf
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
 integer ABI_ASYNC :: quitsum_async
 character(len=500) :: msg
@@ -221,7 +222,7 @@ character(len=35) :: fmt
 character(len=fnlen) :: filename,fname_ddb,name_file
 character(len=500) :: MY_NAME = "mover"
 real(dp) :: gr_avg,ecut_eff,ecutdg_eff,ucvol,boxcut,gsqcut_eff
-logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
+logical :: DEBUG=.FALSE., effective_potential_verbose, need_verbose=.TRUE.,need_verbose_cycle=.TRUE.,need_writeHIST=.TRUE.
 logical :: need_scfcv_cycle = .TRUE., need_elec_eval = .FALSE.
 logical :: changed,useprtxfase
 logical :: skipcycle,force_hist_copy=.FALSE.
@@ -236,14 +237,17 @@ real(dp) :: minE,wtime_step,now,prev
 !arrays
 integer :: itimes(2),ngfft(18),ngfftf(18)
 real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3),gmet(3,3),rmet(3,3)
-real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:),ph1df(:,:)
+real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:),ph1df(:,:),tmp(:,:),tmp_1d(:)
 real(dp) :: k0(3)
 ! ***************************************************************
  need_verbose=.TRUE.
  if(present(verbose)) need_verbose = verbose
 
- need_writeHIST=.TRUE.
- if(present(writeHIST)) need_writeHIST = writeHIST
+  need_verbose_cycle=.TRUE.
+  if(present(verbose_cycle)) need_verbose_cycle = verbose_cycle
+
+  need_writeHIST=.TRUE.
+  if(present(writeHIST)) need_writeHIST = writeHIST
 
  ! enable time limit handler if not done in callers.
  if (enable_timelimit_in(MY_NAME) == MY_NAME) then
@@ -476,7 +480,27 @@ real(dp) :: k0(3)
 !Copy the number of degrees of freedom in hist structure
  hist%ndof=ab_mover%ndof
 
- ABI_MALLOC(xred_prev,(3,scfcv_args%dtset%natom))
+  ABI_MALLOC(xred_prev,(3,scfcv_args%dtset%natom))
+
+  if (present(effective_potential) .and. need_verbose .and. .not.need_verbose_cycle .and. ab_mover%ionmov==25) then
+    write(msg,'(3a,80a)') ch10,'--- Initial state',ch10,('-',kk=1,80)
+    call wrtout([std_out, ab_out], msg)
+    if(present(multibinit_dtset))then
+      call effective_potential_evaluate( &
+&     effective_potential,scfcv_args%results_gs%etotal,scfcv_args%results_gs%fcart,scfcv_args%results_gs%gred,&
+&     scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,&
+&     elec_eval=need_elec_eval,efield_type=multibinit_dtset%efield_type,efield=multibinit_dtset%efield,&
+&     efield_lambda=multibinit_dtset%efield_lambda,nefield=multibinit_dtset%nefield,&
+&     efield_period=multibinit_dtset%efield_period,efield_phase=multibinit_dtset%efield_phase,&
+&     efield_gmean=multibinit_dtset%efield_gmean,efield_gvel=multibinit_dtset%efield_gvel,efield_sigma=multibinit_dtset%efield_sigma,&
+&     efield_background=multibinit_dtset%efield_background,time=zero)
+    else
+      call effective_potential_evaluate( &
+&     effective_potential,scfcv_args%results_gs%etotal,scfcv_args%results_gs%fcart,scfcv_args%results_gs%gred,&
+&     scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,&
+&     elec_eval=need_elec_eval,time=zero)
+    end if
+  end if
 
 !###########################################################
 !### 08. Loop for itime (From 1 to ntime)
@@ -521,11 +545,16 @@ real(dp) :: k0(3)
    ! so setting rmm_diis = 1 gives:
    !    4 NSCF iterations for itime == 1
    !    1 NSCF iterations for itime >= 2.
-   if (scfcv_args%dtset%rmm_diis /= 0 .and. itime == 2) then
-     scfcv_args%dtset%rmm_diis = scfcv_args%dtset%rmm_diis - 3
-     if (scfcv_args%dtset%rmm_diis == 0) scfcv_args%dtset%rmm_diis = 1
-     call wrtout(std_out, sjoin(" itime == 2 with RMM-DIIS --> setting rmm_diis to:", itoa(scfcv_args%dtset%rmm_diis)))
-   end if
+    if (scfcv_args%dtset%rmm_diis /= 0 .and. itime == 2) then
+      scfcv_args%dtset%rmm_diis = scfcv_args%dtset%rmm_diis - 3
+      if (scfcv_args%dtset%rmm_diis == 0) scfcv_args%dtset%rmm_diis = 1
+      call wrtout(std_out, sjoin(" itime == 2 with RMM-DIIS --> setting rmm_diis to:", itoa(scfcv_args%dtset%rmm_diis)))
+    end if
+
+    if (need_verbose .and. .not.need_verbose_cycle) then
+      write(msg,'(2a,i0,a,i0,2a,80a)') ch10,'--- Iteration: (',itime,'/',ntime,')',ch10,('-',kk=1,80)
+      call wrtout([std_out, ab_out], msg)
+    end if
 
 !  ###########################################################
 !  ### 09. Loop for icycle (From 1 to ncycle)
@@ -537,11 +566,11 @@ real(dp) :: k0(3)
 
 !    ###########################################################
 !    ### 10. Output for each icycle (and itime)
-     if(need_verbose)then
-       write(msg,fmt)&
-        ch10,'--- Iteration: (',itime,'/',ntime,') Internal Cycle: (',icycle,'/',ncycle,')',ch10,('-',kk=1,80)
+      if(need_verbose.and.need_verbose_cycle)then
+        write(msg,fmt)&
+         ch10,'--- Iteration: (',itime,'/',ntime,') Internal Cycle: (',icycle,'/',ncycle,')',ch10,('-',kk=1,80)
         call wrtout([std_out, ab_out], msg)
-     end if
+      end if
      if (useprtxfase) call prtxfase(ab_mover,hist,itime_hist,std_out,mover_BEFORE)
 
      xred_prev(:,:)=xred(:,:)
@@ -568,10 +597,10 @@ real(dp) :: k0(3)
 
 !    ###########################################################
 !    ### 12. => Call to SCFCV routine and fill history with forces
-     if (need_verbose) then
-       if (need_scfcv_cycle) then
-         write(msg,'(a,3a,33a,44a)')&
-          ch10,('-',kk=1,3),'SELF-CONSISTENT-FIELD CONVERGENCE',('-',kk=1,44)
+      if (need_verbose.and.need_verbose_cycle) then
+        if (need_scfcv_cycle) then
+          write(msg,'(a,3a,33a,44a)')&
+           ch10,('-',kk=1,3),'SELF-CONSISTENT-FIELD CONVERGENCE',('-',kk=1,44)
        else
          write(msg,'(a,3a,33a,44a)')&
           ch10,('-',kk=1,3),'EFFECTIVE POTENTIAL CALCULATION',('-',kk=1,44)
@@ -660,8 +689,8 @@ real(dp) :: k0(3)
 !          For monte carlo don't need to recompute energy here (done in pred_montecarlo)
            name_file='MD_anharmonic_terms_energy.dat'
              if(itime == 1 .and. ab_mover%restartxf==-3)then
-               if(icycle==1)call effective_potential_file_mapHistToRef(effective_potential,hist,comm,scfcv_args%dtset%iatfix,&
-&                                                                      need_verbose,sc_size=sc_size)!Map Hist to Ref to order atoms
+                if(icycle==1)call effective_potential_file_mapHistToRef(effective_potential,hist,comm,scfcv_args%dtset%iatfix,&
+&                                                                      need_verbose.and.need_verbose_cycle,sc_size=sc_size)!Map Hist to Ref to order atoms
                xred(:,:) = hist%xred(:,:,1) ! Fill xred with new ordering
                hist%ihist = 1
              end if
@@ -680,20 +709,21 @@ real(dp) :: k0(3)
            end if
 #endif
 
+            effective_potential_verbose = need_verbose .and. (need_verbose_cycle .or. icycle == ncycle)
             if(present(multibinit_dtset))then
-                !TODO: use multibinit_dtset to set the parameters of the effective potential
-                call effective_potential_evaluate( &
+                 !TODO: use multibinit_dtset to set the parameters of the effective potential
+                 call effective_potential_evaluate( &
 &               effective_potential,scfcv_args%results_gs%etotal,scfcv_args%results_gs%fcart,scfcv_args%results_gs%gred,&
-&               scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,&
+&               scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=effective_potential_verbose,&
 &               filename=name_file,elec_eval=need_elec_eval,efield_type=multibinit_dtset%efield_type,efield=multibinit_dtset%efield,&
 &               efield_lambda=multibinit_dtset%efield_lambda,nefield=multibinit_dtset%nefield,&
 &               efield_period=multibinit_dtset%efield_period,efield_phase=multibinit_dtset%efield_phase,&
 &               efield_gmean=multibinit_dtset%efield_gmean,efield_gvel=multibinit_dtset%efield_gvel,efield_sigma=multibinit_dtset%efield_sigma,&
 &               efield_background=multibinit_dtset%efield_background,time=itime*ab_mover%dtion)
             else
-                call effective_potential_evaluate( &
+                 call effective_potential_evaluate( &
 &               effective_potential,scfcv_args%results_gs%etotal,scfcv_args%results_gs%fcart,scfcv_args%results_gs%gred,&
-&               scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,&
+&               scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=effective_potential_verbose,&
 &               filename=name_file,elec_eval=need_elec_eval,time=itime*ab_mover%dtion)
             end if
 
@@ -805,10 +835,10 @@ real(dp) :: k0(3)
 
 !    ###########################################################
 !    ### 14. Output after SCFCV
-     if(need_verbose.and.need_scfcv_cycle)then
-       write(msg,'(a,3a,a,72a)')ch10,('-',kk=1,3),'OUTPUT',('-',kk=1,71)
-       call wrtout([std_out, ab_out], msg)
-     end if
+      if(need_verbose.and.need_verbose_cycle.and.need_scfcv_cycle)then
+        write(msg,'(a,3a,a,72a)')ch10,('-',kk=1,3),'OUTPUT',('-',kk=1,71)
+        call wrtout([std_out, ab_out], msg)
+      end if
      if (useprtxfase.and..not.ab_mover%use_pimd_routine) then
        call prtxfase(ab_mover,hist,itime_hist,ab_out,mover_AFTER)
        call prtxfase(ab_mover,hist,itime_hist,std_out,mover_AFTER)
@@ -887,6 +917,44 @@ real(dp) :: k0(3)
 !    ### 18. Use the history  to extract the new values of acell, rprimd and xred
 
      call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
+     ! /!\ ---- DO NOT CHANGE THESE LINES WITHOUT CORE DEVELOPERS PERMISSION ---- /!\
+     ! LB-03/2026:
+     ! A noise can accumulate in acell,rprimd and xred after each iterations,
+     ! resulting in different results for different MPI processes.
+     ! This has been observed using threads, but could happen in other contexts.
+     ! This slowly worsens the ionic dynamics, leading to wrong results after many iterations.
+     ! So here we compute the mean over all MPI processes to reduce the noise.
+     ! This error is difficult to test as it is observed in long runs only, so BE VERY CAREFUL.
+     ! Note : the cost of these MPI communications is negligible.
+     ! comm = comm_cell
+     nmpi = xmpi_comm_size(comm)
+     if (nmpi>1) then
+       ABI_MALLOC(tmp,(size(xred,1),size(xred,2)))
+       tmp(:,:) = xred(:,:) / nmpi
+       call xmpi_sum(tmp,comm,ierr)
+       if (ierr/=0) then
+         ABI_ERROR("Error in mpi sum (tmp)")
+       end if
+       xred(:,:) = tmp(:,:)
+       ABI_FREE(tmp)
+       ABI_MALLOC(tmp,(size(rprimd,1),size(rprimd,2)))
+       tmp(:,:) = rprimd(:,:) / nmpi
+       call xmpi_sum(tmp,comm,ierr)
+       if (ierr/=0) then
+         ABI_ERROR("Error in mpi sum (tmp)")
+       end if
+       rprimd(:,:) = tmp(:,:)
+       ABI_FREE(tmp)
+       ABI_MALLOC(tmp_1d,(size(acell)))
+       tmp_1d(:) = acell(:) / nmpi
+       call xmpi_sum(tmp_1d,comm,ierr)
+       if (ierr/=0) then
+         ABI_ERROR("Error in mpi sum (tmp)")
+       end if
+       acell(:) = tmp_1d(:)
+       ABI_FREE(tmp_1d)
+     end if
+     ! /!\--------------------/!\
 
      if (ab_mover%optcell/=0) then
        ! Cell may change
@@ -938,16 +1006,16 @@ real(dp) :: k0(3)
 !    pathscale, g95, xlf that do not exit
 !    from a loop if you change the upper limit
 !    inside
-     if (icycle>=ncycle .and. scfcv_args%mpi_enreg%me == 0) then
-       if(need_verbose)write(std_out,*) 'EXIT:',icycle,ncycle
-       exit
-     end if
+      if (icycle>=ncycle .and. scfcv_args%mpi_enreg%me == 0) then
+        if(need_verbose.and.need_verbose_cycle)write(std_out,*) 'EXIT:',icycle,ncycle
+        exit
+      end if
 
 
-     if (need_verbose) then
-       write(msg,*) 'ICYCLE',icycle,skipcycle
-       call wrtout(std_out,msg)
-       write(msg,*) 'NCYCLE',ncycle
+      if (need_verbose.and.need_verbose_cycle) then
+        write(msg,*) 'ICYCLE',icycle,skipcycle
+        call wrtout(std_out,msg)
+        write(msg,*) 'NCYCLE',ncycle
        call wrtout(std_out,msg)
      end if
      if (skipcycle) exit
@@ -1052,9 +1120,9 @@ contains
 !! If optcell=1, takes only the trace into account
 !!    optcell=2, takes all components into account
 !!    optcell=3, takes traceless stress into account
-!!    optcell=4, takes sigma(1 1) into account
-!!    optcell=5, takes sigma(2 2) into account
-!!    optcell=6, takes sigma(3 3) into account
+!!    optcell=4, takes sigma(1,1), sigma(2,1) and sigma(3,1) into account
+!!    optcell=5, takes sigma(1,2), sigma(2,2) and sigma(3,2) into account
+!!    optcell=6, takes sigma(1,3), sigma(2,3) and sigma(3,3) into account
 !!    optcell=7, takes sigma(2,2),(2,3) and (3 3) into account
 !!    optcell=8, takes sigma(1,1),(1,3) and (3 3) into account
 !!    optcell=9, takes sigma(1,1),(1,2) and (2 2) into account
@@ -1097,7 +1165,7 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
 !Local variables-------------------------------
 !scalars
  integer :: iatom,idir,istr
- real(dp) :: fmax,strdiag!,fcell
+ real(dp) :: fmax,strdiag,fcell
  character(len=500) :: msg
 !arrays
  real(dp) :: dstr(6)
@@ -1138,30 +1206,18 @@ ABI_UNUSED(rprim)
 !  else if(optcell==4 .or. optcell==5 .or. optcell==6)then
 !    if(abs(dstr(optcell-3))*strfact >= fmax ) fmax=abs(dstr(optcell-3))*strfact
  else if(optcell==4) then
-   ! only dstr 1 5 6 are in xfpack_f2vout. The other component shouldn't be checked.
-   !fcell = dstr(1) * rprim(1,1) + dstr(6) * rprim(2,1) + dstr(5) * rprim(3,1)
-   !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-   !fcell = dstr(6) * rprim(1,1)
-   !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-   !fcell = dstr(5) * rprim(1,1)
-   !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-   fmax = maxval(abs(dstr([1, 5, 6])))*strfact
- else if(optcell==5) then ! 2 4 6
-    !fcell = dstr(5) * rprim(3,3)
-    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-    !fcell = dstr(6) * rprim(1,2) + dstr(2) * rprim(2,2) + dstr(4) * rprim(3,2)
-    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-    !fcell = dstr(4) * rprim(2,2)
-    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-   fmax = maxval(abs(dstr([2, 4, 6])))*strfact
+!  Only the first lattice vector is relaxed. Check the three stress components
+!  conjugate to its generalized coordinates, consistently with xfpack_f2vout.
+   fcell = maxval(abs(dstr([1,5,6]))) * strfact
+   if (fcell >= fmax) fmax=fcell
+ else if(optcell==5) then
+!  Only the second lattice vector is relaxed.
+   fcell = maxval(abs(dstr([2,4,6]))) * strfact
+   if (fcell >= fmax) fmax=fcell
  else if(optcell==6) then
-    !fcell =  dstr(5) * rprim(3,3)
-    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-    !fcell =  dstr(4) * rprim(3,3)
-    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-    !fcell = dstr(5) * rprim(1,3) + dstr(4) * rprim(2,3) + dstr(3) * rprim(3,3)
-    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-    fmax = maxval(abs(dstr([3, 4, 5])))*strfact
+!  Only the third lattice vector is relaxed.
+   fcell = maxval(abs(dstr([3,4,5]))) * strfact
+   if (fcell >= fmax) fmax=fcell
  else if(optcell==7)then
    if(abs(dstr(2))*strfact >= fmax ) fmax=abs(dstr(2))*strfact
    if(abs(dstr(3))*strfact >= fmax ) fmax=abs(dstr(3))*strfact

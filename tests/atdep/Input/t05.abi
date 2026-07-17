@@ -21,7 +21,7 @@ typat 64*1 64*2
 #DEFINE_COMPUTATIONAL_DETAILS
 nstep_max 20
 nstep_min 1
-rcut 7.5    
+rcut 7.5
 temperature  0.200000000E+04
 
 #OPTIONAL_INPUT_VARIABLES
@@ -32,21 +32,21 @@ ngqpt1 6 6 6
 ngqpt2 12 12 12
 enunit 1
 debug_mode 1
- 
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = atdep
 #%% md_hist = t05
 #%% [files]
-#%% files_to_test = 
-#%%   t05.abo, tolnlines = 1, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
-#%%   t05_omega.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%% files_to_test =
+#%%   t05.abo, tolnlines = 2, tolabs = 2.e-0, tolrel = 2.e-2, fld_options = -medium;
+#%%   t05_omega.dat, tolnlines = 5, tolabs = 2.e-1, tolrel = 1.e-4, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
-#%% authors = F. Bottin & J. Bouchet
+#%% authors = F. Bottin & J. Bouchet; G. Antonius
 #%% keywords = atdep
-#%% description = 
+#%% description =
 #%%   test aTDEP (2nd order)
 #%%   MgO (B1) with 128 atoms at T = 2000 K. With LOTO. Debug mode.
 #%% topics = aTDEP

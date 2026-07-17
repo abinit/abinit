@@ -660,7 +660,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, dtset,
 
  do spin=1,nsppol
    if (.not. can_symmetrize(spin)) cycle
-   call sigx_symmetrize(jk_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab, qp_ene, sigx, sigxme_tmp)
+   call sigx_symmetrize(jk_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab, dtset%symsigma_de, qp_ene, sigx, sigxme_tmp)
  end do
 
  if (gwcalctyp >= 20) then
@@ -746,10 +746,10 @@ end subroutine calc_sigx_me
 !!  Symmetrize Sig_x matrix elements
 !!
 
-subroutine sigx_symmetrize(jk_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab, qp_ene, sigx, sigxme_tmp)
+subroutine sigx_symmetrize(jk_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab, symsigma_de, qp_ene, sigx, sigxme_tmp)
 
  integer,intent(in) :: jk_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab
- real(dp),intent(in) :: qp_ene(:,:,:)
+ real(dp),intent(in) :: symsigma_de, qp_ene(:,:,:)
  complex(dp),intent(in) :: sigx(2, bmin:bmax, bmin:bmax, nsppol * nsig_ab)
  complex(dp),intent(inout) :: sigxme_tmp(bmin:bmax, bmin:bmax, nsppol * nsig_ab)
 
@@ -766,12 +766,11 @@ subroutine sigx_symmetrize(jk_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab, q
  ABI_ICALLOC(degtab, (bmin:bmax, bmin:bmax))
  do ib=bmin,bmax
    do jb=bmin,bmax
-    if (abs(qp_ene(ib, jk_ibz, spin) - qp_ene(jb, jk_ibz, spin)) < 0.001 / Ha_ev) degtab(ib, jb) = 1
+    if (abs(qp_ene(ib, jk_ibz, spin) - qp_ene(jb, jk_ibz, spin)) < symsigma_de) degtab(ib, jb) = 1
    end do
  end do
 
- ABI_MALLOC(sym_sigx, (bmin:bmax, bmin:bmax, nsig_ab))
- sym_sigx = czero
+ ABI_CALLOC(sym_sigx, (bmin:bmax, bmin:bmax, nsig_ab))
 
  ! Average over degenerate diagonal elements.
  do ib=bmin,bmax

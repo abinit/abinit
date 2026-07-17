@@ -639,10 +639,10 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
  complex(gwp) :: dd
  !character(len=500) :: msg
 !arrays
- integer,ABI_CONTIGUOUS pointer :: Sm1G(:)
+ integer,contiguous, pointer :: Sm1G(:)
  complex(dp) :: mir_kbz(3)
  complex(gwp),allocatable :: rhotwg_sym(:,:)
- complex(gwp), ABI_CONTIGUOUS pointer :: phmGt(:)
+ complex(gwp), contiguous, pointer :: phmGt(:)
 !************************************************************************
 
  ABI_UNUSED(deltaf_b1b2)
@@ -836,10 +836,10 @@ subroutine accumulate_head_wings_imagw( &
  integer :: itim,io,isym,idir,jdir,isymop,nsymop
  !character(len=500) :: msg
 !arrays
- integer,ABI_CONTIGUOUS pointer :: Sm1G(:)
+ integer,contiguous, pointer :: Sm1G(:)
  complex(dp) :: mir_kbz(3)
  complex(gwp),allocatable :: rhotwg_sym(:,:)
- complex(gwp), ABI_CONTIGUOUS pointer :: phmGt(:)
+ complex(gwp), contiguous, pointer :: phmGt(:)
 !************************************************************************
 
  ABI_UNUSED([is_metallic])
@@ -1030,9 +1030,9 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
  complex(gwp) :: num
  character(len=500) :: msg
 !arrays
- integer, ABI_CONTIGUOUS pointer :: Sm1G(:)
+ integer, contiguous, pointer :: Sm1G(:)
  complex(dp) :: mir_kbz(3)
- complex(gwp), ABI_CONTIGUOUS pointer :: phmGt(:)
+ complex(gwp), contiguous, pointer :: phmGt(:)
  complex(gwp),allocatable :: rhotwg_sym(:)
 !************************************************************************
 
@@ -2109,7 +2109,7 @@ subroutine accumulate_chi0sumrule(ik_bz,symchi,npwe,factor,delta_ene,&
  !character(len=500) :: msg
 !arrays
  integer,allocatable :: Sm1_gmG0(:)
- integer, ABI_CONTIGUOUS pointer :: gmG0(:)
+ integer, contiguous, pointer :: gmG0(:)
  complex(gwp),allocatable :: rhotwg_sym(:)
 !************************************************************************
 
@@ -2203,7 +2203,6 @@ subroutine make_transitions(Wfd,chi0alg,nbnds,nbvw,nsppol,symchi,timrev,TOL_DELT
 !arrays
  integer :: G0(3)
  real(dp) :: kmq(3)
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -2341,8 +2340,7 @@ subroutine chi0_bbp_mask(ikmq_ibz, ik_ibz, spin, spin_fact, use_tr, &
  integer :: ib1, ib2
  real(dp) :: deltaeGW_b1kmq_b2k,deltaf_b1kmq_b2k,e_b1_kmq,f_b1_kmq
 !arrays
- real(dp), ABI_CONTIGUOUS pointer :: qp_eig(:,:,:),qp_occ(:,:,:)
-
+ real(dp), contiguous, pointer :: qp_eig(:,:,:),qp_occ(:,:,:)
 !************************************************************************
 
  qp_eig => ebands%eig; qp_occ => ebands%occ

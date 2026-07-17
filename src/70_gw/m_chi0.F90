@@ -31,6 +31,7 @@ module m_chi0
  use m_dtset
 
  use defs_datatypes,    only : pseudopotential_type
+ use defs_abitypes,     only : MPI_type
  use m_fstrings,        only : ftoa, sjoin, itoa
  use m_gwdefs,          only : GW_TOL_DOCC, GW_TOL_W0, czero_gw, em1params_t, g0g0w
  use m_numeric_tools,   only : imin_loc, print_arr
@@ -43,6 +44,7 @@ module m_chi0
  use m_gsphere,         only : gsphere_t
  use m_io_tools,        only : flush_unit
  use m_oscillators,     only : rho_tw_g, calc_wfwfg
+ !use m_ddk,             only : ddkop_t
  use m_vkbr,            only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
  use m_chi0tk,          only : hilbert_transform, setup_spectral, assemblychi0_sym, assemblychi0sf, symmetrize_afm_chi0, &
                                approxdelta, completechi0_deltapart, accumulate_chi0sumrule, make_transitions, &
@@ -168,7 +170,7 @@ contains
 
 subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_epsG0,&
                   Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,&
-                  nfftot_gw,ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q,chi0_sumrule,Wfd,Wfdf,wan)
+                  nfftot_gw,ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q,chi0_sumrule,Wfd,Wfdf,wan) !,mpi_enreg
 
 !Arguments ------------------------------------
 !scalars
@@ -184,6 +186,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  type(Pseudopotential_type),intent(in) :: Psps
  type(Pawang_type),intent(in) :: Pawang
  type(wfdgw_t),target,intent(inout) :: Wfd,Wfdf
+!  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ktabr(nfftot_gw,Kmesh%nbz),ktabrf(nfftf_tot*Dtset%pawcross,Kmesh%nbz)
  integer,intent(in) :: ngfft_gw(18),ngfftf(18)
@@ -203,7 +206,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_fourdp=1, enough=10, two_poles=2, one_pole=1, ndat1=1
- integer :: bandinf,bandsup,lcor,nspinor,npw_k,istwf_k,mband,nfft,band1c,band2c
+ integer :: bandinf,bandsup,lcor,nspinor,npw_k,istwf_k,mband,nfft,band1c,band2c, mpw
  integer :: band1,band2,iat1,iat2,iat,ig,ig1,ig2,itim_k,ik_bz,ik_ibz,io,iqlwl,ispinor1,ispinor2,isym_k,il1,il2
  integer :: itypatcor,m1,m2,nkpt_summed,dim_rtwg,use_padfft,gw_fftalga,use_padfftf,mgfftf
  integer :: my_nbbp,my_nbbpks,spin,nsppol,iq,nq
@@ -213,18 +216,19 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  real(dp) :: max_rest,min_rest,my_max_rest,my_min_rest, qlen
  real(dp) :: en_high,deltaeGW_enhigh_b2,wl,wr,numerator,deltaeGW_b1b2,gw_gsq,memreq
  complex(dp) :: deltaeKS_b1b2
- logical :: qzero, luwindow, is_metallic, print_time
+ logical :: qzero, luwindow, is_metallic, print_time !, use_ddk
  character(len=500) :: msg_tmp,msg,allup
  type(gsphere_t) :: Gsph_FFT
  type(wave_t),pointer :: wave1, wave2
+ !type(ddkop_t) :: ddkop
 !arrays
- integer,ABI_CONTIGUOUS pointer :: kg_k(:,:)
+ integer,contiguous, pointer :: kg_k(:,:)
  integer :: ucrpa_bands(2), got(Wfd%nproc)
  integer :: wtk_ltg(Kmesh%nbz)
  integer,allocatable :: tabr_k(:),tabrf_k(:), igffteps0(:),gspfft_igfft(:),igfftepsG0f(:)
  integer,allocatable :: gw_gfft(:,:),gw_gbound(:,:),dummy_gbound(:,:),gboundf(:,:), bbp_ks_distrb(:,:,:,:)
  real(dp) :: kbz(3),spinrot_kbz(4),q0(3)
- real(dp),ABI_CONTIGUOUS pointer :: ks_eig(:,:,:),qp_eig(:,:,:),qp_occ(:,:,:)
+ real(dp),contiguous, pointer :: ks_eig(:,:,:),qp_eig(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: omegasf(:), qdirs(:,:)
  complex(gwp) :: rhotwx(3,Wfd%nspinor**2)
  complex(gwp),allocatable :: rhotwg(:)
@@ -236,7 +240,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  complex(gwp),allocatable :: ur1_kibz(:),ur2_kibz(:), usr1_k(:),ur2_k(:), wfwfg(:), sf_chi0(:,:,:)
  complex(gwp),allocatable :: ur_ae1(:),ur_ae_onsite1(:),ur_ps_onsite1(:)
  complex(gwp),allocatable :: ur_ae2(:),ur_ae_onsite2(:),ur_ps_onsite2(:)
- complex(gwp),ABI_CONTIGUOUS pointer :: ug1(:),ug2(:)
+ complex(gwp),contiguous, pointer :: ug1(:),ug2(:)
  complex(dp), allocatable :: coeffW_BZ(:,:,:,:,:,:), head_qvals(:)
  logical :: gradk_not_done(Kmesh%nibz)
  logical,allocatable :: bbp_mask(:,:)
@@ -259,6 +263,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  ! Copy important variables.
  comm = Wfd%comm; nsppol = Wfd%nsppol; nspinor = Wfd%nspinor; mband = Wfd%mband; nfft = Wfd%nfft
  ABI_CHECK(Wfd%nfftot == nfftot_gw, "Wrong nfftot_gw")
+ mpw = maxval(wfd%npwarr)
  dim_rtwg = 1 !; if (nspinor==2) dim_rtwg=2 ! Can reduce size depending on Ep%nI and Ep%nj
 
  is_metallic = qp_ebands%has_metal_scheme()
@@ -293,6 +298,16 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
      call pawhur_init(hur,nsppol,Dtset%pawprtvol,Cryst,Pawtab,Pawang,Pawrad,Paw_ij)
    end if
  end if
+
+ ! TODO: use ddkop instead of commutator so that we can handle SOC terms.
+ ! Unfortunately, PAW is not supported yet. Also m_ddk should be relocated below 72_response
+ !use_ddk = .False.
+ !!use_ddk = .True.
+ !use_ddk = dtset%userie == 432
+ !if (use_ddk) then
+ !  call wrtout(std_out, " Using DDK to compute the commutator matrix elements.")
+ !  call ddkop%init(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft_gw)
+ !end if
 
  ! Initialize the completeness correction.
  ABI_MALLOC(green_enhigh_w, (Ep%nomega))
@@ -545,6 +560,11 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
        gradk_not_done(ik_ibz) = .FALSE.
      end if
 
+     !if (use_ddk) then
+     !  call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, Kmesh%ibz(:,ik_ibz), istwf_k, npw_k, kg_k)
+     !  ABI_CHECK(istwf_k == 1, "istwfk_k1 not coded")
+     !end if
+
      ! Loop over "conduction" states.
      do band1=1,Ep%nbnds
        if (ALL(bbp_ks_distrb(band1,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
@@ -552,6 +572,14 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
        ABI_CHECK(wfd%get_wave_ptr(band1, ik_ibz, spin, wave1, msg) == 0, msg)
        ug1 => wave1%ug
        call wfd%get_ur(band1,ik_ibz,spin,ur1_kibz)
+
+       !if (use_ddk) then
+       !  ! Compute DH_DK |psi_k,bi>, store results in ddk_ug1
+       !  ddk_ug1(1,:,1) = real(ug1)
+       !  ddk_ug1(2,:,1) = aimag(ug1)
+       !  call ddkop%apply(eig_nk, npw_k, nspinor, ddk_ug1(:,:,1), cwaveprj)
+       !  ddk_ug1(:,:,:) = ddkop%gh1c
+       !end if
 
        if (Psps%usepaw==1) then
          call wfd%get_cprj(band1,ik_ibz,spin,Cryst,Cprj1_ibz,sorted=.FALSE.)
@@ -565,10 +593,6 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
        ! Loop over "valence" states.
        do band2=1,Ep%nbnds
 
-         !        write(std_out,*) "ik,band1,band2",ik_bz,band1,band2
-         !         -----------------  cRPA for U
-         !debug         if (.not.luwindow.AND.dtset%ucrpa==1.AND.band1<=ucrpa_bands(2).AND.band1>=ucrpa_bands(1)&
-         !debug&                                            .AND.band2<=ucrpa_bands(2).AND.band2>=ucrpa_bands(1)) CYCLE
          if (luwindow.AND.dtset%ucrpa==1 &
              .AND.((ks_ebands%eig(band1,ik_ibz,spin)-ks_ebands%fermie)<=dtset%ucrpa_window(2)) &
              .AND.((ks_ebands%eig(band1,ik_ibz,spin)-ks_ebands%fermie)>=dtset%ucrpa_window(1)) &
@@ -716,6 +740,28 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
          else
            rhotwx = czero_gw
          end if
+
+         !if (use_ddk) then
+         !  cg2_dp(1,:) = real(ug2)
+         !  cg2_dp(2,:) = aimag(ug2)
+         !  do iab=1,gwr%nspinor**2
+         !    do idir=1,3
+         !      ! DH_DK operator is Hermitian.
+         !      spad1 = spinor_pad(1,iab); spad2 = spinor_pad(2,iab)
+         !      rtmp = cg_zdotc(npw_ki, ddk_ug1(:,spad1+1,idir), cg2_dp(:,spad2+1))
+         !      new_rhotwx(idir, iab) = rtmp(1) + j_dpc * rtmp(2)
+         !    end do ! iab
+         !  end do ! idir
+
+         !  if (abs(deltaeKS_b1b2) > GW_TOLQ0) then
+         !     new_rhotwx = -new_rhotwx / deltaeKS_b1b2
+         !     do iab=1,gwr%nspinor**2
+         !       new_rhotwx(:, iab) = matmul(cryst%rmet, new_rhotwx(:, iab)) / (two_pi ** 2)
+         !     end do
+         !  else
+         !     new_rhotwx = zero
+         !  end if
+         !end if
 
          SELECT CASE (Ep%spmeth)
          CASE (0)
@@ -876,6 +922,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
 
  call vkbr_free(vkbr)
  ABI_FREE(vkbr)
+ !call ddkop%free()
 
  ! === After big fat loop over transitions, now MPI ===
  ! * Master took care of the contribution in case of (metallic|spin) polarized systems.
@@ -1194,7 +1241,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
  integer,allocatable :: gw_gfft(:,:),gw_gbound(:,:),dummy_gbound(:,:),gboundf(:,:)
  integer,allocatable :: bbp_ks_distrb(:,:,:,:)
  real(dp) :: kbz(3),kmq_bz(3),spinrot_k(4),spinrot_kmq(4),q0(3),tsec(2)
- real(dp),ABI_CONTIGUOUS pointer :: qp_eig(:,:,:),qp_occ(:,:,:)
+ real(dp),contiguous, pointer :: qp_eig(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: omegasf(:)
  complex(dp),allocatable :: green_enhigh_w(:),green_w(:),kkweight(:,:)
  complex(gwp),allocatable :: sf_chi0(:,:,:),rhotwg(:)
@@ -2033,13 +2080,13 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  type(wave_t),pointer :: wave
 !arrays
  integer :: my_band_list(Wfd%mband)
- integer,ABI_CONTIGUOUS pointer :: kg_k(:,:)
+ integer,contiguous, pointer :: kg_k(:,:)
  integer,allocatable :: ktabr(:,:),irottb(:,:)
  !integer :: got(Wfd%nproc)
  integer,allocatable :: tabr_k(:),igffteps0(:),gw_gbound(:,:)
  real(dp),parameter :: q0(3)=(/zero,zero,zero/)
  real(dp) :: kpt(3),dedk(3),kbz(3),spinrot_kbz(4)
- !real(dp),ABI_CONTIGUOUS pointer :: ks_eig(:,:,:),qp_eig(:,:,:),qp_occ(:,:,:)
+ !real(dp),contiguous, pointer :: ks_eig(:,:,:),qp_eig(:,:,:),qp_occ(:,:,:)
  real(dp) :: shift_ene(BSt%mband,BSt%nkpt,BSt%nsppol)
  real(dp) :: delta_occ(BSt%mband,BSt%nkpt,BSt%nsppol)
  !real(dp) :: eigen_vec(BSt%bantot)
@@ -2054,7 +2101,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  complex(gwp),allocatable :: rhotwg(:)
  complex(dp) :: green_w(Ep%nomega)
  complex(gwp),allocatable :: ur1(:)
- complex(gwp),ABI_CONTIGUOUS pointer :: ug(:)
+ complex(gwp),contiguous, pointer :: ug(:)
  logical :: bmask(Wfd%mband)
  type(pawcprj_type),allocatable :: Cprj1_bz(:,:),Cprj1_ibz(:,:),Cp_bks(:,:)
  type(pawpwij_t),allocatable :: Pwij(:)

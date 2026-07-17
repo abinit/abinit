@@ -32,6 +32,7 @@ module m_scfcv_core
  use m_wffile
  use m_rec
  use m_abi_mixing
+ use m_precon
  use m_errors
  use m_efield
  use mod_prc_memory
@@ -362,8 +363,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  character(len=fnlen) :: fildata
  type(MPI_type) :: mpi_enreg_diel
  type(xcdata_type) :: xcdata
- type(energies_type) :: energies
+ type(energies_type), target :: energies
  type(abi_mixing_object) :: mix,mix_mgga
+ type(precon_object) :: precon
  logical,parameter :: VERBOSE=.FALSE.
  logical :: dummy_nhatgr
  logical :: finite_efield_flag=.false.
@@ -390,7 +392,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  real(dp) :: efield_old_cart(3), ptot_cart(3)
  real(dp) :: red_efield2(3),red_efield2_old(3)
  real(dp) :: vpotzero(2)
- real(dp) :: maxmag , difmag  
+ real(dp) :: maxmag , difmag
  real(dp) :: dmatdum(0,0,0,0)
  real(dp) :: orb_mom_atom(10,3,dtset%natom)
 ! red_efield1(3),red_efield2(3) is reduced electric field, defined by Eq.(25) of Nat. Phys. suppl. (2009) [[cite:Stengel2009]]
@@ -500,8 +502,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !Fock: be sure that the pointer is initialized to Null.
  nullify(fock)
 
-!If Chebishev Filtering algo is used, init invovl routine structure
- if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. psps%usepaw == 1 .and. dtset%cprj_in_memory==0) then
+!If Chebishev Filtering or Slicing algo is used, init invovl routine structure
+ if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111 .or. dtset%wfoptalg == 112) .and. psps%usepaw == 1 &
+&   .and. dtset%cprj_in_memory==0) then
    call init_invovl(dtset%nkpt)
  end if
 
@@ -831,15 +834,18 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      end if
      !TRangel: added to avoid segfaults with Wavelets
      nfftmix_per_nfft=0;if(nfftf>0) nfftmix_per_nfft=(1-nfftmix/nfftf)
-     call abi_mixing_new(mix, iscf10, denpot, ispmix, nfftmix, dtset%nspden, npawmix, errid, msg, dtset%npulayit)
+     call abi_mixing_new(mix, iscf10, denpot, ispmix, nfftmix, dtset%nspden, npawmix, errid, msg, &
+&      dtset%npulayit, pulayhist_storage=dtset%pulayhiststore)
      if (errid /= AB7_NO_ERROR) then
        ABI_ERROR(msg)
      end if
      if (dtset%usekden/=0) then
        if (dtset%useria==12345) then  ! This is temporary
-         call abi_mixing_new(mix_mgga, iscf10, denpot, ispmix, nfftmix, dtset%nspden, 0, errid, msg, dtset%npulayit)
+         call abi_mixing_new(mix_mgga, iscf10, denpot, ispmix, nfftmix, dtset%nspden, 0, errid, msg, &
+&          dtset%npulayit, pulayhist_storage=dtset%pulayhiststore)
        else
-         call abi_mixing_new(mix_mgga, 0, denpot, ispmix, nfftmix, dtset%nspden, 0, errid, msg, dtset%npulayit)
+         call abi_mixing_new(mix_mgga, 0, denpot, ispmix, nfftmix, dtset%nspden, 0, errid, msg, &
+&          dtset%npulayit, pulayhist_storage=dtset%pulayhiststore)
        end if
        if (errid /= AB7_NO_ERROR) then
          ABI_ERROR(msg)
@@ -860,12 +866,17 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    ABI_MALLOC(grhf,(0,0))
  end if ! iscf>0
 
+! Initializing precon-object for chi0 based preconditioning
+ call precon%init(dtset, atindx, atindx1, cg, cprj, dimcprj, dtfil, eigen, energies%e_fermie, gmet, gprimd, indsym,  &
+ &  irrzon, kg, mcprj, nattyp, nfftmix, ngfftmix, npwarr, occ, pawang, pawfgr, pawfgrtab,                &
+ &  pawtab, ph1d, phnons, psps, rhor, rmet, rprimd, symrec, ucvol, usecprj, vxc, xred, ylm)
+ 
 ! Here initialize the datastructure constrained_dft, for constrained DFT calculations
 ! as well as penalty function constrained magnetization
  if(any(dtset%constraint_kind(:)/=0).or.dtset%magconon/=0)then
    call constrained_dft_ini(dtset%chrgat,constrained_dft,dtset%constraint_kind,dtset%magconon,dtset%magcon_lambda,&
 &    mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,dtset%ntypat,&
-&    dtset%ratsm,dtset%ratsph,rprimd,dtset%spinat,dtset%typat,xred,dtset%ziontypat,dtset%znucl,dtset%qgbt,dtset%use_gbt)
+&    dtset%ratsm,dtset%ratsph,rprimd,dtset%spinat,dtset%typat,xred,dtset%ziontypat,dtset%znucl,dtset%qgbt,dtset%use_gbt,dtset%spinaxis)
  endif
 
 !Here, allocate arrays for computation of susceptibility and dielectric matrix or for TDDFT
@@ -1000,11 +1011,16 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    if (dtset%xclevel==2.and.dtset%nspden==1.and.dtset%densfor_pred<0) nkxc=7    ! This is not full kxc for mGGA
    if (dtset%xclevel==2.and.dtset%nspden==2.and.dtset%densfor_pred<0) nkxc=19   ! This is not full kxc for mGGA
  end if
+!Eventually need Kxc to precondition the SCF. 
+ if (precon%use_kxc) then
+   nkxc = precon%nkxc
+ end if
  if (nkxc>0) then
    call check_kxc(dtset%ixc,dtset%optdriver)
  end if
  ABI_MALLOC(kxc,(nfftf,nkxc))
-
+ call precon%init_kxc(kxc)
+ 
 !This flag will be set to 1 just before an eventual change of atomic
 !positions inside the iteration, and set to zero when the consequences
 !of this change are taken into account.
@@ -1495,7 +1511,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     gprimd,ipert,dtset%ixc,my_natom,dtset%natom,dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,&
 &     option,paw_an,paw_an,energies%paw,paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
 &     pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,&
-&     dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp,&
+&     dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp,dtset%spinaxis,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 &     hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
 &     electronpositron=electronpositron,vpotzero=vpotzero,rcpaw=rcpaw,extfpmd=extfpmd)
@@ -1558,7 +1574,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     electronpositron_calctype=ipositron,&
 &     electronpositron_pawrhoij=pawrhoij_ep,&
 &     electronpositron_lmselect=lmselect_ep,&
-&     nucdipmom=dtset%nucdipmom,eijkl_is_sym=eijkl_is_sym)
+&     nucdipmom=dtset%nucdipmom,eijkl_is_sym=eijkl_is_sym,spinaxis=dtset%spinaxis)
 
 !    Symetrize Dij
      call symdij(gprimd,indsym,ipert,my_natom,dtset%natom,dtset%nsym,&
@@ -1869,7 +1885,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     gmet,grhf,gsqcut,initialized,ispmix,istep_mix,kg_diel,kxc,&
 &     mgfftf,mix,pawfgr%coatofin,moved_atm_inside,mpi_enreg,my_natom,nattyp,nfftf,&
 &     nfftmix,nfftmix_per_nfft,ngfftf,ngfftmix,nkxc,npawmix,npwdiel,nvresid,psps%ntypat,&
-&     n1xccc,pawrhoij,pawtab,ph1df,psps,rhog,rhor,&
+&     n1xccc,pawrhoij,pawtab,ph1df,precon,psps,rhog,rhor,&
 &     rprimd,susmat,psps%usepaw,vtrial,wvl%descr,wvl%den,xred,rcpaw,extfpmd,&
 &     mix_mgga=mix_mgga,taug=taug,taur=taur,tauresid=nvtauresid)
      ABI_NVTX_END_RANGE()
@@ -1908,6 +1924,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      if (modulo(dtset%iprcel,100)>=61.and.(dtset%iprcel<71.or.dtset%iprcel>79).and. &
 &     dtset%iscf<10.and. &
 &     (dtset%iprcel>=100.or.istep==1.or.istep==dielstrt)) optxc=2
+     if (precon%use_kxc) optxc=2 ! Kxc needed for (chi0-based) preconditioning.
      if (dtset%iscf>=10.and.dtset%densfor_pred/=0.and.abs(dtset%densfor_pred)/=5) optxc=2
      if (optxc==2.and.dtset%xclevel==2.and.nkxc==2*min(dtset%nspden,2)-1) optxc=12
    end if
@@ -1956,7 +1973,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,extfpmd=extfpmd)
        if(istep>=rcpaw%updatepaw(1).and.istep<=rcpaw%updatepaw(2).and.dtset%cprj_in_memory==1)then
          call xg_nonlop_destroy_Sij(xg_nonlop)
-         call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=dtset%wfoptalg==111) 
+         call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=dtset%wfoptalg==111)
        endif
        if(.not.rcpaw%all_atoms_relaxed.and.any(rcpaw%atm(:)%zcore_orig>0)) then
          optn=n3xccc/nfftf
@@ -2022,7 +2039,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &       psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,&
 &       energies%paw,paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
 &       pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,&
-&       dtset%xc_taupos,xred,ucvol,psps%znuclpsp,&
+&       dtset%xc_taupos,xred,ucvol,psps%znuclpsp,dtset%spinaxis,&
 &       hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,comm_atom=mpi_enreg%comm_atom,&
 &       mpi_atmtab=mpi_enreg%my_atmtab,electronpositron=electronpositron)
        ABI_NVTX_END_RANGE()
@@ -2127,7 +2144,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     moved_atm_inside,mpi_enreg,my_natom,nattyp,nfftf,nfftmix,&
 &     ngfftf,ngfftmix,nkxc,npawmix,npwdiel,&
 &     nstep,psps%ntypat,n1xccc,&
-&     pawrhoij,ph1df,psps,rhor,rprimd,susmat,psps%usepaw,&
+&     pawrhoij,ph1df,precon,psps,rhor,rprimd,susmat,psps%usepaw,&
 &     vhartr,vnew_mean,vpsp,nvresid,vres_mean,vtrial,vxc,xred,&
 &     nfftf,pawtab,rhog,wvl,&
 &     mix_mgga=mix_mgga,vtau=vxctau,vtauresid=nvtauresid)
@@ -2203,7 +2220,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  ABI_FREE(rmm_diis_status)
  ABI_SFREE(nhatgr)
 
- if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111)  .and. psps%usepaw == 1 .and. dtset%cprj_in_memory==0) then
+ if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111 .or. dtset%wfoptalg == 112)  .and. psps%usepaw == 1 &
+&     .and. dtset%cprj_in_memory==0) then
    call destroy_invovl(dtset%nkpt,dtset%gpu_option)
  end if
 
@@ -2364,7 +2382,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  call timab(1459,2,tsec)
  call timab(1460,1,tsec)
 
- !write(ab_out,*)"HHHHHHHHHHHH1"
 
 !SHOULD CLEAN THE ARGS OF THIS ROUTINE
  call afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
@@ -2381,7 +2398,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 & taur,tollist,usecprj,usevxctau,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
 & xccc3d,xcctau3d,xred,ylm,ylmgr,dtset%cellcharge(1)*SUM(vpotzero(:)),conv_retcode,xg_nonlop)
 
-! write(ab_out,*)"HHHHHHHHHHHH2"
 !Before leaving the present routine, save the current value of xred.
  xred_old(:,:)=xred(:,:)
 
@@ -2466,6 +2482,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  ABI_FREE(nvtauresid)
  ABI_FREE(intgden)
  ABI_FREE(intgden0)
+
+!Deallocate precon-object 
+ !call precon%save(ngfft, 1)   !DEBUG
+ call precon%free()
 
  if(allocated(vectornd)) then
     ABI_FREE(vectornd)

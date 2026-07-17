@@ -70,10 +70,10 @@ module m_lattice_mover
      !> TODO: hist
      !type(lattice_hist_t) :: hist
 
-     real(dp) :: mass_total 
+     real(dp) :: mass_total
      type(lattice_ncfile_t) :: ncfile
    contains
-     procedure:: initialize       ! perhaps each effpot type should have own 
+     procedure:: initialize       ! perhaps each effpot type should have own
      procedure :: finalize
      procedure :: set_params
      procedure :: prepare_ncfile
@@ -151,10 +151,10 @@ contains
     class(lattice_mover_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
     self%temperature = params%temperature !TODO: to Hartree ??
-    self%dt =params%dtion 
+    self%dt =params%dtion
     self%masses(:)=self%supercell%lattice%masses(:)
     self%mass_total = sum(self%masses)
-    self%total_time = self%dt * params%ntime 
+    self%total_time = self%dt * params%ntime
     self%latt_dynamics = params%dynamics
   end subroutine set_params
 
@@ -183,7 +183,7 @@ contains
     integer :: i
 
 
-    if(mode==1) then ! using a boltzmann distribution. 
+    if(mode==1) then ! using a boltzmann distribution.
        ! Should only be used for a constant Temperature mover
        ! which includes:
        !   102:    Langevin
@@ -222,7 +222,7 @@ contains
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
     ABI_UNUSED_A(params)
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
     if(iam_master) then
        call self%ncfile%initialize( trim(fname), 1)
        call self%ncfile%write_cell(self%supercell)
@@ -374,7 +374,7 @@ contains
             & "Epot(Ha/uc)", "ETOT(Ha/uc)"
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
-    
+
     nstep=floor(self%thermal_time/self%dt)
     do i =1, nstep
        call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf, energy_table=energy_table)
@@ -416,7 +416,7 @@ contains
 
   !-------------------------------------------------------------------!
   !Calc_observables
-  ! 
+  !
   !-------------------------------------------------------------------!
   subroutine calc_observables(self)
     ! call functions to calculate observables.
@@ -489,7 +489,7 @@ contains
 
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     ABI_UNUSED_A(displacement)
     ABI_UNUSED_A(strain)
@@ -506,7 +506,7 @@ contains
        else
           T_step=(T_end-T_start)/(T_nstep-1)
        endif
-       write(msg, "(A52, ES13.5, A11, ES13.5, A1)") & 
+       write(msg, "(A52, ES13.5, A11, ES13.5, A1)") &
             & "Starting temperature dependent calculations. T from ", &
             & T_start*Ha_K, "K to ", T_end*Ha_K, " K."
        call wrtout(std_out, msg, "COLL")

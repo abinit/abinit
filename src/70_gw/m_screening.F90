@@ -1506,7 +1506,7 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
  real(dp) :: conv_err, alpha, Zr, qpg2(3), qpg2_nrm, cpu, wall, gflops
  real(gwp) :: chi00_head, fxc_head
  complex(gwp),allocatable :: vfxc_boot(:,:), vfxc_boot0(:,:), vfxc_lr(:,:), vfxc_tmp(:,:), chi0_tmp(:,:), chi0_save(:,:,:)
- complex(gwp), ABI_CONTIGUOUS pointer :: vc_sqrt(:)
+ complex(gwp), contiguous, pointer :: vc_sqrt(:)
 ! *************************************************************************
 
  if (nI/=1.or.nJ/=1) then
@@ -2087,7 +2087,7 @@ subroutine rpa_symepsm1(iq_ibz,Vcp,npwe,nI,nJ,chi0,my_nqlwl,dim_wing,chi0_head,c
  !character(len=500) :: msg
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
- complex(gwp), ABI_CONTIGUOUS pointer :: vc_sqrt(:)
+ complex(gwp), contiguous, pointer :: vc_sqrt(:)
  complex(gwp),allocatable :: chi0_save(:,:)
 ! *************************************************************************
 
@@ -2239,7 +2239,7 @@ subroutine atddft_symepsm1(iq_ibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nq
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  complex(gwp),allocatable :: chitmp(:,:)
- complex(gwp), ABI_CONTIGUOUS pointer :: vc_sqrt(:)
+ complex(gwp), contiguous, pointer :: vc_sqrt(:)
 ! *************************************************************************
 
  ABI_UNUSED(chi0_head(1,1))
@@ -2413,7 +2413,7 @@ subroutine atddft_hyb_symepsm1(iq_ibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,kxcg_mat_sr,o
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  complex(gwp),allocatable :: chitmp(:,:)
- complex(gwp), ABI_CONTIGUOUS pointer :: vc_sqrt(:)
+ complex(gwp), contiguous, pointer :: vc_sqrt(:)
 ! *************************************************************************
 
  ABI_UNUSED(chi0_head(1,1))
@@ -3020,7 +3020,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
  integer,allocatable :: igfft(:),g1mg2(:,:)
  real(dp) :: qpg2(3),qpt_bz(3)
  real(dp),allocatable :: em1_qpg2r(:),fofg(:,:)
- complex(gwp),ABI_CONTIGUOUS pointer :: vc_sqrt_ibz(:)
+ complex(gwp),contiguous, pointer :: vc_sqrt_ibz(:)
  complex(gwp),allocatable :: vc_qbz(:),ctmp(:,:)
  logical,allocatable :: mask(:)
 ! *************************************************************************

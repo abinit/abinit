@@ -4,7 +4,7 @@ from plot_utils import *
 # --- Load data and extract Fermi energy ---
 filename = "tdmft_triqs_1o_DS1_DOS_AT0001"
 
-with open(filename, "r") as f:
+with open(filename) as f:
     for line in f:
         if "Fermi energy" in line:
             fermi = float(line.split()[-1])

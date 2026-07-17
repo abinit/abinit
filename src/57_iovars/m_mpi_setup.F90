@@ -100,12 +100,12 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
  integer :: me_fft,mgfft,mgfftdg,mkmem,mpw,mpw_k,max_mpw,optdriver
  integer :: mband_mem
  integer :: nfft,nfftdg,nkpt,nkpt_me,npert,nproc,nproc_fft,nqpt
- integer :: nspink,nsppol,nsym,paral_fft,response,tnband,tread0,usepaw,vectsize
+ integer :: nspink,nsppol,nsym,nthreads,paral_fft,response,tnband,tread0,usepaw,vectsize
  integer :: fftalg,fftalga,fftalgc
 #ifdef HAVE_LINALG_ELPA
  integer :: icol,irow,np
 #endif
- logical :: fftalg_read,ortalg_read,paral_kgb_read,wfoptalg_read,do_check
+ logical :: fftalg_read,forbid_threads,ortalg_read,paral_kgb_read,wfoptalg_read,do_check
  real(dp) :: dilatmx,ecut,ecut_eff,ecutdg_eff,ucvol
  character(len=500) :: msg
 !arrays
@@ -127,6 +127,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
  call init_mpi_enreg(mpi_enregs(0))
  call initmpi_img(dtsets(0),mpi_enregs(0),-1)
+ nthreads=xomp_get_num_threads(open_parallel=.True.)
 
  do idtset=1,ndtset_alloc
    call init_mpi_enreg(mpi_enregs(idtset))
@@ -203,6 +204,9 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
    call intagm(dprarr,intarr,jdtset,marr,12,string(1:lenstr),'gpu_devices',tread0,'INT')
    if(tread0==1) dtsets(idtset)%gpu_devices(1:12)=intarr(1:12)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_nfft_blocks',tread0,'INT')
+   if(tread0==1) dtsets(idtset)%gpu_nfft_blocks=intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_kokkos_nthrd',tread0,'INT')
    if(tread0==1) dtsets(idtset)%gpu_kokkos_nthrd=intarr(1)
@@ -561,7 +565,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    end if ! Fock
 
    !When using chebfi, the number of blocks is equal to the number of processors
-   if((dtsets(idtset)%wfoptalg == 1) .or. (dtsets(idtset)%wfoptalg == 111)) then
+   if((dtsets(idtset)%wfoptalg == 1) .or. (dtsets(idtset)%wfoptalg == 111) .or. &
+  &   (dtsets(idtset)%wfoptalg == 2) .or. (dtsets(idtset)%wfoptalg == 112)) then
      !Nband might have different values for different kpoint, but not bandpp.
      !In this case, we just use the largest nband (mband_upper), and the input will probably fail
      !at the bandpp check later on
@@ -569,7 +574,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      if(tread(8)==1) then
        write(msg, '(a,i8,3a)' ) &
        'bandpp has been internally set to ',dtsets(idtset)%bandpp,'.',ch10,&
-       'Indeed, there is no need to specify bandpp in the input when using chebfi (wfoptalg=1,111).'
+       'Indeed, there is no need to specify bandpp in the input when using chebfi (wfoptalg=1,111)&
+       or spectrum slicing (wfoptalg=2,112).'
        ABI_COMMENT(msg)
      end if
    end if
@@ -947,13 +953,14 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
    ! Set the default value of fftalg for given npfft but allow the user to override it.
    ! Warning: If you need to change npfft, **DO IT** before this point so that here we get the correct fftalg
-   dtsets(idtset)%ngfft(7) = fftalg_for_npfft(dtsets(idtset)%npfft)
-   dtsets(idtset)%ngfftdg(7) = fftalg_for_npfft(dtsets(idtset)%npfft)
+   forbid_threads=(nthreads>1.and.dtsets(idtset)%bandpp>1)
+   dtsets(idtset)%ngfft(7) = fftalg_for_npfft(dtsets(idtset)%npfft,forbid_threads=forbid_threads)
+   dtsets(idtset)%ngfftdg(7) = fftalg_for_npfft(dtsets(idtset)%npfft,forbid_threads=forbid_threads)
 
    ! For RT-TDDFT make sure that we use the thread-safe version of FFT
    ! in case of Goedecker's FFT with more than one thread
    if (optdriver==RUNL_RTTDDFT) then
-      if (dtsets(idtset)%ngfft(7)/100==FFT_SG .and. xomp_get_num_threads(open_parallel=.True. )>1) then
+      if (dtsets(idtset)%ngfft(7)/100==FFT_SG .and. nthreads>1) then
          write(msg,'(3a)') 'fftalg=1XX is not thread-safe, so it cannot be used with nthreads>1',ch10,&
          'thus switching fftalg to a thread-safe version.'
          ABI_WARNING(msg)
@@ -1103,8 +1110,9 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
              dtsets(idtset)%bandpp=mband_upper/(dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)
            end if
            if (.not.fftalg_read) then
-             dtsets(idtset)%ngfft(7) = fftalg_for_npfft(dtsets(idtset)%npfft)
-             if (usepaw==1) dtsets(idtset)%ngfftdg(7) = fftalg_for_npfft(dtsets(idtset)%npfft)
+             forbid_threads=(nthreads>1.and.dtsets(idtset)%bandpp>1)
+             dtsets(idtset)%ngfft(7) = fftalg_for_npfft(dtsets(idtset)%npfft,forbid_threads=forbid_threads)
+             if (usepaw==1) dtsets(idtset)%ngfftdg(7) = fftalg_for_npfft(dtsets(idtset)%npfft,forbid_threads=forbid_threads)
            end if
            if (.not.ortalg_read) dtsets(idtset)%ortalg=-abs(dtsets(idtset)%ortalg)
          end if

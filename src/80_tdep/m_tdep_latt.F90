@@ -14,7 +14,7 @@ module m_tdep_latt
 
  use m_matrix,           only : matr3inv, mat33det
  use m_geometry,         only : metric
- use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
+ use m_tdep_dataset,     only : atdep_dataset_type, MPI_enreg_type
 
  implicit none
 
@@ -55,7 +55,6 @@ module m_tdep_latt
 
   public :: tdep_make_inbox
   public :: tdep_make_latt
-  public :: tdep_shift_xred
 
 contains
 
@@ -67,6 +66,8 @@ subroutine tdep_make_inbox(tab,natom,tol,&
   double precision :: tol
   double precision :: tab(3,natom) !Input (and ouput if temp is not present)
   double precision,optional :: temp(3,natom) !Input/Output (if present)
+
+  !GA: One could make use of function wrap2_pmhalf
 
   do iatom=1,natom
     do ii=1,3
@@ -86,7 +87,11 @@ subroutine tdep_make_inbox(tab,natom,tol,&
 end subroutine tdep_make_inbox
 
 !=====================================================================================================
- subroutine tdep_make_latt(Invar,Lattice)
+ subroutine tdep_make_latt(Invar,Lattice,rotation_cart)
+
+  type(Lattice_type),intent(out) :: Lattice
+  type(atdep_dataset_type),intent(inout) :: Invar
+  double precision, intent(out) :: rotation_cart(3,3)
 
   integer :: brav,ii,jj,line
   double precision :: acell_unitcell(3),multiplicity(3,3),multiplicitym1(3,3)
@@ -95,11 +100,9 @@ end subroutine tdep_make_inbox
   double precision :: rprimd_unitcell(3,3)
   double precision :: rprimd_tmp(3,3), rprimdm1_tmp(3,3)
   double precision :: RAmat(3,3),Amat2(3,3),Rmat(3,3)
-  double precision :: rotation(3,3), rotation_cart(3,3)
+  double precision :: rotation(3,3)
   double precision :: xi,hh
   character(len=500) :: msg
-  type(Input_type),intent(inout) :: Invar
-  type(Lattice_type),intent(out) :: Lattice
 
 ! For bravais(1):
 ! The holohedral groups are numbered as follows
@@ -249,6 +252,8 @@ end subroutine tdep_make_inbox
 ! Compute gprim and (transpose of gprim) gprimt
   call matr3inv(rprim, Lattice%gprimt)
   Lattice%gprim = TRANSPOSE(Lattice%gprimt)
+! GA: This is a weird convention, and is different from the rest of abinit.
+!     See for example how the DDB has to be initialized with Lattice.
 
 ! Define transpose and inverse of rprim
   rprimt = TRANSPOSE(rprim)
@@ -298,13 +303,6 @@ end subroutine tdep_make_inbox
 
 ! Apply rotation to rprim_md
   Invar%rprimd_md = MATMUL(rotation, Invar%rprimd_md)
-
-! Apply rotation to fcart
-  do jj=1,Invar%my_nstep
-    do ii=1,Invar%natom
-      Invar%fcart(:,ii,jj) = MATMUL(rotation_cart, Invar%fcart(:,ii,jj))
-    end do
-  end do
 
 ! ---------------------------------------------------------------------------- !
 
@@ -437,52 +435,6 @@ end subroutine tdep_make_inbox
   Lattice%rprimd_md     (:,:)=rprimd_md     (:,:)
 
  end subroutine tdep_make_latt
-
-!=====================================================================================================
-
-! Shift xred to keep atoms in the same unit cell at each step.
-subroutine tdep_shift_xred(Invar,MPIdata)
-
-  type(Input_type), intent(inout) :: Invar
-  type(MPI_enreg_type), intent(in) :: MPIdata
-  integer :: natom,ii,iatom,istep,ierr
-  integer :: shift,shift_max,shift_best
-  double precision :: xi, dist, best_dist
-  double precision, allocatable :: x0(:,:)
-
-  natom = Invar%natom
-  ABI_MALLOC(x0,(3,natom))
-
-  ! Communicate xred at the first step
-  x0(:,:) = zero
-  if (MPIdata%my_step(1)) then
-    x0(:,:) = Invar%xred(:,:,1)
-  end if
-  call xmpi_sum(x0,MPIdata%comm_step,ierr)
-
-  ! Shift xred from all steps in the same unitcell as the first step
-  shift_max = 1
-  do istep=1, Invar%my_nstep
-    do iatom=1,natom
-      do ii=1,3
-        best_dist = abs(Invar%xred(ii,iatom,istep) - x0(ii,iatom))
-        shift_best = 0
-        do shift=-shift_max,shift_max
-          xi = Invar%xred(ii,iatom,istep) + shift
-          dist = abs(xi - x0(ii,iatom))
-          if (dist < best_dist) then
-            best_dist = dist
-            shift_best = shift
-          end if
-        end do
-        Invar%xred(ii,iatom,istep) = Invar%xred(ii,iatom,istep) + shift_best
-      end do
-    end do
-  end do
-
-  ABI_FREE(x0)
-
-end subroutine tdep_shift_xred
 
 !=====================================================================================================
 

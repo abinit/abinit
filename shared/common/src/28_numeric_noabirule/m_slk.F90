@@ -339,7 +339,7 @@ module m_slk
    procedure :: set_head_and_wings => slkmat_sp_set_head_and_wings
     ! Set head and the wings of the matrix starting from global arrays.
 
-   !procedure :: cut => slkmat_cut
+   procedure :: cut => slkmat_sp_cut
     ! Extract submatrix and create new matrix with `size_blocs` and `processor`
 
    procedure :: collect_cplx => slkmat_sp_collect_cplx
@@ -403,6 +403,7 @@ module m_slk
    module procedure slk_array2_free
    module procedure slk_array3_free
    module procedure slk_array4_free
+   module procedure slk_array5_free
  end interface slk_array_free
 
  public :: slk_array_set_zero                  ! Elemental routine to zero the value of the local buffer.
@@ -411,7 +412,10 @@ module m_slk
  public :: slk_array_gpu_set_zero              ! Zero the value of the local buffer on the GPU
  interface slk_array_gpu_set_zero
    module procedure slk_array1_gpu_set_zero
+   module procedure slk_array2_gpu_set_zero
    module procedure slk_array3_gpu_set_zero
+   module procedure slk_array4_gpu_set_zero
+   module procedure slk_array5_gpu_set_zero
  end interface slk_array_gpu_set_zero
 
  ! External functions.
@@ -1320,6 +1324,34 @@ end subroutine slk_array4_free
 
 !----------------------------------------------------------------------
 
+!!****f* m_slk/slk_array5_free
+!! NAME
+!!  slk_array5_free
+!!
+!! FUNCTION
+!!  Deallocate 5d array of slkmat_dp_t elements
+!!
+!! SOURCE
+
+subroutine slk_array5_free(slk_arr5)
+  class(basemat_t),intent(inout) :: slk_arr5(:,:,:,:,:)
+  integer :: i1, i2, i3, i4, i5
+  do i5=1,size(slk_arr5, dim=5)
+    do i4=1,size(slk_arr5, dim=4)
+      do i3=1,size(slk_arr5, dim=3)
+        do i2=1,size(slk_arr5, dim=2)
+          do i1=1,size(slk_arr5, dim=1)
+            call slk_arr5(i1, i2, i3, i4, i5)%free()
+          end do
+        end do
+      end do
+    end do
+  end do
+end subroutine slk_array5_free
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_slk/slk_array_set_zero
 !! NAME
 !!  slk_array_set_zero
@@ -1423,6 +1455,32 @@ subroutine slk_array1_gpu_set_zero(mat1d)
 end subroutine slk_array1_gpu_set_zero
 !!***
 
+!!****f* m_slk/slk_array2_gpu_set_zero
+!! NAME
+!!  slk_array2_gpu_set_zero
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine slk_array2_gpu_set_zero(mat2d)
+
+!Arguments ------------------------------------
+ class(basemat_t),intent(inout) :: mat2d(:,:)
+
+!Local variables-------------------------------
+ integer :: i1, i2
+! *********************************************************************
+
+ do i2=1,size(mat2d, dim=2)
+   do i1=1,size(mat2d, dim=1)
+     call mat2d(i1, i2)%gpu_set_zero()
+   end do
+ end do
+
+end subroutine slk_array2_gpu_set_zero
+!!***
+
 !!****f* m_slk/slk_array3_gpu_set_zero
 !! NAME
 !!  slk_array3_gpu_set_zero
@@ -1449,6 +1507,68 @@ subroutine slk_array3_gpu_set_zero(mat3d)
  end do
 
 end subroutine slk_array3_gpu_set_zero
+!!***
+
+!!****f* m_slk/slk_array4_gpu_set_zero
+!! NAME
+!!  slk_array4_gpu_set_zero
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine slk_array4_gpu_set_zero(mat4d)
+
+!Arguments ------------------------------------
+ class(basemat_t),intent(inout) :: mat4d(:,:,:,:)
+
+!Local variables-------------------------------
+ integer :: i1, i2, i3, i4
+! *********************************************************************
+
+ do i4=1,size(mat4d, dim=4)
+   do i3=1,size(mat4d, dim=3)
+     do i2=1,size(mat4d, dim=2)
+       do i1=1,size(mat4d, dim=1)
+         call mat4d(i1, i2, i3, i4)%gpu_set_zero()
+       end do
+     end do
+   end do
+ end do
+
+end subroutine slk_array4_gpu_set_zero
+!!***
+
+!!****f* m_slk/slk_array5_gpu_set_zero
+!! NAME
+!!  slk_array5_gpu_set_zero
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine slk_array5_gpu_set_zero(mat5d)
+
+!Arguments ------------------------------------
+ class(basemat_t),intent(inout) :: mat5d(:,:,:,:,:)
+
+!Local variables-------------------------------
+ integer :: i1,i2,i3,i4,i5
+! *********************************************************************
+
+ do i5=1,size(mat5d, dim=5)
+   do i4=1,size(mat5d, dim=4)
+     do i3=1,size(mat5d, dim=3)
+       do i2=1,size(mat5d, dim=2)
+         do i1=1,size(mat5d, dim=1)
+           call mat5d(i1,i2,i3,i4,i5)%gpu_set_zero()
+         end do
+       end do
+     end do
+   end do
+ end do
+
+end subroutine slk_array5_gpu_set_zero
 !!***
 
 !----------------------------------------------------------------------
@@ -1525,7 +1645,7 @@ end function basemat_is_gpu_mapped
 subroutine basemat_gpu_map(mat, gpu_action)
 
 !Arguments ------------------------------------
- class(basemat_t),target,intent(in) :: mat
+ class(basemat_t),target,intent(inout) :: mat
  character(len=*), intent(in) :: gpu_action
 
 !Local variables-------------------------------
@@ -5203,6 +5323,80 @@ subroutine slkmat_dp_cut(in_mat, glob_nrows, glob_ncols, out_mat, &
  end if
 
 end subroutine slkmat_dp_cut
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slkmat_sp_cut
+!! NAME
+!!  slkmat_sp_cut
+!!
+!! FUNCTION
+!!  Extract submatrix of shape (glob_nrows, glob_ncols) starting at `ija` from `in_mat`
+!!  and create new matrix with `size_blocs` and `processor`
+!!
+!! INPUTS
+!!  [free]: True if `in_mat` should be deallocated. Default: False
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine slkmat_sp_cut(in_mat, glob_nrows, glob_ncols, out_mat, &
+                         size_blocs, processor, ija, ijb, free)  ! Optional
+
+!Arguments ------------------------------------
+ class(slkmat_sp_t),target,intent(inout) :: in_mat
+ integer,intent(in) :: glob_nrows, glob_ncols
+ class(slkmat_sp_t),intent(out) :: out_mat
+ integer,optional,intent(in) :: size_blocs(2)
+ class(slk_processor_t), target, optional,intent(in) :: processor
+ integer,optional,intent(in) :: ija(2), ijb(2)
+ logical,optional,intent(in) :: free
+
+!Local variables-------------------------------
+ type(slk_processor_t), pointer :: processor__
+ integer :: ija__(2), ijb__(2)
+! *************************************************************************
+
+ ija__ = [1, 1]; if (present(ija)) ija__ = ija
+ ijb__ = [1, 1]; if (present(ijb)) ijb__ = ijb
+
+ processor__ => in_mat%processor; if (present(processor)) processor__ => processor
+
+ if (present(size_blocs)) then
+   call out_mat%init(glob_nrows, glob_ncols, processor__, in_mat%istwf_k, size_blocs=size_blocs)
+ else
+   call out_mat%init(glob_nrows, glob_ncols, processor__, in_mat%istwf_k)
+ end if
+ !call out_mat%print(header="output matrix generated by slkmat_dp_cut")
+
+ ! p?gemr2d: Copies a submatrix from one general rectangular matrix to another.
+ ! prototype
+ !call pzgemr2d(m, n, a, ia, ja, desca, b, ib, jb, descb, comm)
+
+ if (allocated(in_mat%buffer_cplx)) then
+#ifdef HAVE_LINALG_SCALAPACK
+   call pcgemr2d(glob_nrows, glob_ncols, &
+                 in_mat%buffer_cplx, ija__(1), ija__(2), in_mat%desc,   &
+                 out_mat%buffer_cplx, ijb__(1), ijb__(2), out_mat%desc, &
+                 processor__%grid%comm)
+
+ else if (allocated(in_mat%buffer_real)) then
+   call psgemr2d(glob_nrows, glob_ncols, &
+                 in_mat%buffer_real, ija__(1), ija__(2), in_mat%desc,   &
+                 out_mat%buffer_real, ijb__(1), ijb__(2), out_mat%desc, &
+                 processor__%grid%comm)
+#endif
+ else
+   ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
+ end if
+
+ if (present(free)) then
+   if (free) call in_mat%free()
+ end if
+
+end subroutine slkmat_sp_cut
 !!***
 
 !----------------------------------------------------------------------
