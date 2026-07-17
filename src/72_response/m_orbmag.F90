@@ -196,17 +196,14 @@ module m_orbmag
   private :: orbmag_nl_k
   private :: nonlop_orbmag_nl
   private :: orbmag_nl1_k
-  private :: nonlocal_me
-  private :: local_me_mesh
   private :: me_proj_mesh
-  private :: cprj_test
+!  private :: cprj_test
   private :: make_d
   private :: dterm_aij
   private :: dterm_qij
   private :: dterm_LR
   private :: dterm_BM
   private :: local_fermie
-  private :: make_phgr
 
   private :: lamb_core
   private :: make_pcg1
@@ -948,7 +945,7 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
   logical :: my_suppress_ormesh,need_ormesh
   type(gs_hamiltonian_type),target :: gs_hamk_local
   !arrays
-  real(dp) :: cprj_test_udotu(2),enlout(1),lambda(1),udotu(2)
+  real(dp) :: enlout(1),lambda(1),udotu(2)
   real(dp),allocatable :: fofr(:,:,:,:),svectout(:,:)
   real(dp),allocatable,target :: vectout(:,:)
   real(dp),pointer :: cwavef(:,:)
@@ -1023,7 +1020,6 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
 
 end subroutine orbmag_nl1_k
 !!***
-
 
 !!****f* ABINIT/orbmag_nl_k
 !! NAME
@@ -2093,284 +2089,151 @@ subroutine nonlop_orbmag_nl(atindx,cwaveprj,dnlbra,dnlket,dterm,dtset,eignk,gs_h
 end subroutine nonlop_orbmag_nl
 !!***
 
-
-!!****f* ABINIT/cprj_test
-!! NAME
-!! cprj_test
-!!
-!! FUNCTION
-!! General application of <bra|p>dij<p|ket> 
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!! complex(dp) nlme
-!!
-!! NOTES
-!! computes on-site prefac*\sum_{Rij}<bra|d_bra_dir p_i>aij<d_ket_dir p_j|ket>
-!! dnlbra = 0 if no derivative, dnlbra = adir,bdir,gdir for derivative in *dir direction
-!! dnlket = 0 if no derivative, dnlket = adir,bdir,gdir for derivative in *dir direction
-!!
-!! SOURCE
-
-subroutine cprj_test(adir,atindx,cwaveprj,dnlbra,dnlket,dterm,dtset,&
-    & eignk,fermie,gs_hamk,npw_k,oterm,prefac,pawtab,vectin,vectout)
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: adir,dnlbra,dnlket,npw_k,oterm
-  real(dp),intent(in) :: eignk,fermie
-  complex(dp),intent(in) :: prefac
-  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
-  type(dataset_type),intent(in) :: dtset
-  type(dterm_type),intent(in) :: dterm
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom)
-  real(dp),intent(in),pointer :: vectin(:,:)
-  real(dp),intent(out) :: vectout(2,npw_k)
-  type(pawcprj_type),intent(in) :: cwaveprj(dtset%natom,dtset%nspinor)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: iat,iatom,il,ilmn,ipw,isp,itypat,jlmn,klmn,npwsp
-  real(dp) :: wt
-  logical :: il_parity
-  complex(dp) :: cgfac,my_cpi,cpi,cpj,dij,dij_cpj,phfac,proj_i,scale_fac
-  ! arrays
-  complex(dp),dimension(0:3) :: iexpl=(/cone,j_dpc,-cone,-j_dpc/)
-  complex(dp),allocatable :: dij_data(:,:,:)
-!--------------------------------------------------------------------
-  
-  npwsp = npw_k*dtset%nspinor
-  wt = four_pi/SQRT(gs_hamk%ucvol)
-  
-  ABI_MALLOC(dij_data,(dtset%natom,dterm%lmn2max,dterm%ndij))
-  select case (oterm)
-  !case (inlr)
-  !  dij_data = dterm%LR(:,:,:,adir)
-  !case (inbm)
-  !  dij_data = dterm%BM(:,:,:,adir)
-  case (innl)
-    dij_data = dterm%aij - eignk*dterm%qij
-  case (incc) 
-    dij_data = dterm%aij + (eignk-two*fermie)*dterm%qij
-  case (invv1)
-    dij_data = (eignk-fermie)*dterm%qij
-  case (invv2)
-    dij_data = (eignk-fermie)*dterm%qij
-  case DEFAULT
-    dij_data = czero
-  end select
-
-  !nlme = czero
-  vectout = zero
-  do iat = 1, dtset%natom
-    iatom = atindx(iat)
-    itypat=dtset%typat(iat)
-    do isp = 1, dtset%nspinor
-      do ilmn = 1, pawtab(itypat)%lmn_size
-
-        if (dnlbra .NE. 0) then
-          cpi=CMPLX(cwaveprj(iatom,isp)%dcp(1,dnlbra,ilmn),cwaveprj(iatom,isp)%dcp(2,dnlbra,ilmn))
-        else
-          cpi=CMPLX(cwaveprj(iatom,isp)%cp(1,ilmn),cwaveprj(iatom,isp)%cp(2,ilmn))
-        end if
-
-        ! this loop reconstructs cpi and dcpi correctly
-        !il = MOD(pawtab(itypat)%indlmn(1,ilmn),4)
-        !my_cpi = czero
-        !do ipw = 1,npw_k
-        !  cgfac=CMPLX(vectin(1,ipw),vectin(2,ipw))
-        !  phfac=CMPLX(gs_hamk%ph3d_k(1,ipw,iatom),gs_hamk%ph3d_k(2,ipw,iatom))
-        !  my_cpi = my_cpi + cgfac*phfac*gs_hamk%ffnl_k(ipw,1+dnlbra,ilmn,itypat)
-        !end do
-        !my_cpi = my_cpi*four_pi*iexpl(il)/SQRT(gs_hamk%ucvol)
-        !write(std_out,'(a,4es16.8)')'JWZ debug cpi, mycpi : ',&
-        !  & REAL(cpi),AIMAG(cpi),REAL(my_cpi),AIMAG(my_cpi)
-
-        ! |p_i> in recip space
-        !proj_i = czero
-        !il = pawtab(itypat)%indlmn(1,ilmn)
-        !do ipw = 1, npw_k
-        !  phfac=CMPLX(gs_hamk%ph3d_k(1,ipw,iatom),gs_hamk%ph3d_k(2,ipw,iatom))
-        !  proj_i(ipw) = CMPLX(gs_hamk%ffnl_k(ipw,1+dnlbra,ilmn,itypat),0.0)*&
-        !    &(j_dpc**il)*four_pi*CONJG(phfac)/SQRT(gs_hamk%ucvol)
-        !end do
-
-        dij_cpj = czero
-        do jlmn = 1, pawtab(itypat)%lmn_size
-        
-          if (dnlket .NE. 0) then
-            cpj=CMPLX(cwaveprj(iatom,isp)%dcp(1,dnlket,jlmn),cwaveprj(iatom,isp)%dcp(2,dnlket,jlmn))
-          else
-            cpj=CMPLX(cwaveprj(iatom,isp)%cp(1,jlmn),cwaveprj(iatom,isp)%cp(2,jlmn))
-          end if
-
-          klmn=MATPACK(ilmn,jlmn)
-          if ( oterm == inlr ) then
-            dij = CMPLX(dterm%ekb_LR(2*klmn-1,iatom,1,adir),dterm%ekb_LR(2*klmn,iatom,1,adir))
-          else if ( oterm == inbm ) then
-            dij = CMPLX(dterm%ekb_BM(2*klmn-1,iatom,1,adir),dterm%ekb_BM(2*klmn,iatom,1,adir))
-          else 
-            dij = dij_data(iatom,klmn,1)
-          end if
-          ! see note at top of file near definition of MATPACK macro
-          if (ilmn .GT. jlmn) dij = CONJG(dij)
-
-          dij_cpj = dij_cpj + dij*cpj
-
-        end do !jlmn
-
-        il = MOD(pawtab(itypat)%indlmn(1,ilmn),4)
-        do ipw = 1, npw_k
-          proj_i = CMPLX(gs_hamk%ffnl_k(ipw,1+dnlbra,ilmn,itypat),0.0)*wt*CONJG(iexpl(il))*dij_cpj*&
-            & CMPLX(gs_hamk%ph3d_k(1,ipw,iatom),-gs_hamk%ph3d_k(2,ipw,iatom))
-
-          vectout(1,ipw) = vectout(1,ipw) + REAL(proj_i)
-          vectout(2,ipw) = vectout(2,ipw) + AIMAG(proj_i)
-
-        end do
-
-      end do !ilmn
-    end do ! isp
-  end do !iat
-
-  ABI_SFREE(dij_data)
-
-end subroutine cprj_test
-!!***
-
-
-!!****f* ABINIT/nonlocal_me
-!! NAME
-!! nonlocal_me
-!!
-!! FUNCTION
-!! General application of <bra|p>dij<p|ket> 
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!! complex(dp) nlme
-!!
-!! NOTES
-!! computes on-site prefac*\sum_{Rij}<bra|d_bra_dir p_i>aij<d_ket_dir p_j|ket>
-!! dnlbra = 0 if no derivative, dnlbra = adir,bdir,gdir for derivative in *dir direction
-!! dnlket = 0 if no derivative, dnlket = adir,bdir,gdir for derivative in *dir direction
-!!
-!! SOURCE
-
-subroutine nonlocal_me(adir,atindx,cwaveprj,dnlbra,dnlket,dterm,dtset,&
-    & eignk,fermie,nlme,npw_k,oterm,prefac,pawtab)
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: adir,dnlbra,dnlket,npw_k,oterm
-  real(dp),intent(in) :: eignk,fermie
-  complex(dp),intent(in) :: prefac
-  complex(dp),intent(out) :: nlme
-  type(dataset_type),intent(in) :: dtset
-  type(dterm_type),intent(in) :: dterm
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom)
-  type(pawcprj_type),intent(in) :: cwaveprj(dtset%natom,dtset%nspinor)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: iat,iatom,ilmn,isp,itypat,jlmn,klmn,npwsp
-  complex(dp) :: cpi,cpj,dij
-  ! arrays
-  complex(dp),allocatable :: dij_data(:,:,:)
-!--------------------------------------------------------------------
-  
-  npwsp = npw_k*dtset%nspinor
-  
-  ABI_MALLOC(dij_data,(dtset%natom,dterm%lmn2max,dterm%ndij))
-  select case (oterm)
-  !case (inlr)
-  !  dij_data = dterm%LR(:,:,:,adir)
-  !case (inbm)
-  !  dij_data = dterm%BM(:,:,:,adir)
-  case (innl)
-    dij_data = dterm%aij - eignk*dterm%qij
-  case (incc) 
-    dij_data = dterm%aij + (eignk-two*fermie)*dterm%qij
-  case (invv1)
-    dij_data = (eignk-fermie)*dterm%qij
-  case (invv2)
-    dij_data = (eignk-fermie)*dterm%qij
-  case DEFAULT
-    dij_data = czero
-  end select
-
-  nlme = czero
-  do iat = 1, dtset%natom
-    iatom = atindx(iat)
-    itypat=dtset%typat(iat)
-    do isp = 1, dtset%nspinor
-      do ilmn = 1, pawtab(itypat)%lmn_size
-
-        do jlmn = 1, pawtab(itypat)%lmn_size
-          klmn=MATPACK(ilmn,jlmn)
-          if (dnlbra .NE. 0) then
-            cpi=CMPLX(cwaveprj(iatom,isp)%dcp(1,dnlbra,ilmn),cwaveprj(iatom,isp)%dcp(2,dnlbra,ilmn))
-          else
-            cpi=CMPLX(cwaveprj(iatom,isp)%cp(1,ilmn),cwaveprj(iatom,isp)%cp(2,ilmn))
-          end if
-          if (dnlket .NE. 0) then
-            cpj=CMPLX(cwaveprj(iatom,isp)%dcp(1,dnlket,jlmn),cwaveprj(iatom,isp)%dcp(2,dnlket,jlmn))
-          else
-            cpj=CMPLX(cwaveprj(iatom,isp)%cp(1,jlmn),cwaveprj(iatom,isp)%cp(2,jlmn))
-          end if
-          dij = dij_data(iatom,klmn,isp)
-          ! see note at top of file near definition of MATPACK macro
-          if (ilmn .GT. jlmn) dij = CONJG(dij)
-          
-          ! note use of CONJG(cpi), because cpi is from the bra side cprj
-          nlme = nlme + prefac*CONJG(cpi)*dij*cpj
-         
-          ! in ndij = 4 case, isp 1 delivers up-up, isp 2 delivers down-down
-          if (dterm%ndij == 4) then
-            if (isp == 1) then
-              dij = dij_data(iatom,klmn,3) ! up-down
-              ! D^ss'_ij=D^s's_ji^*
-              if (ilmn .GT. jlmn) dij = CONJG(dij_data(iatom,klmn,4))
-              if (dnlbra .NE. 0) then
-                cpi=CMPLX(cwaveprj(iatom,1)%dcp(1,dnlbra,ilmn),cwaveprj(iatom,1)%dcp(2,dnlbra,ilmn))
-              else
-                cpi=CMPLX(cwaveprj(iatom,1)%cp(1,ilmn),cwaveprj(iatom,1)%cp(2,ilmn))
-              end if
-              if (dnlket .NE. 0) then
-                cpj=CMPLX(cwaveprj(iatom,2)%dcp(1,dnlket,jlmn),cwaveprj(iatom,2)%dcp(2,dnlket,jlmn))
-              else
-                cpj=CMPLX(cwaveprj(iatom,2)%cp(1,jlmn),cwaveprj(iatom,2)%cp(2,jlmn))
-              end if
-            else
-              dij = dij_data(iatom,klmn,4) ! down-up
-              ! D^ss'_ij=D^s's_ji^*
-              if (ilmn .GT. jlmn) dij = CONJG(dij_data(iatom,klmn,3))
-              if (dnlbra .NE. 0) then
-                cpi=CMPLX(cwaveprj(iatom,2)%dcp(1,dnlbra,ilmn),cwaveprj(iatom,2)%dcp(2,dnlbra,ilmn))
-              else
-                cpi=CMPLX(cwaveprj(iatom,2)%cp(1,ilmn),cwaveprj(iatom,2)%cp(2,ilmn))
-              end if
-              if (dnlket .NE. 0) then
-                cpj=CMPLX(cwaveprj(iatom,1)%dcp(1,dnlket,jlmn),cwaveprj(iatom,1)%dcp(2,dnlket,jlmn))
-              else
-                cpj=CMPLX(cwaveprj(iatom,1)%cp(1,jlmn),cwaveprj(iatom,1)%cp(2,jlmn))
-              end if
-            end if
-            nlme = nlme + prefac*CONJG(cpi)*cpj*dij
-          end if
-        end do !jlmn
-      end do !ilmn
-    end do ! isp
-  end do !iat
-
-  ABI_SFREE(dij_data)
-
-end subroutine nonlocal_me
-!!***
+!!!****f* ABINIT/cprj_test
+!!! NAME
+!!! cprj_test
+!!!
+!!! FUNCTION
+!!! General application of <bra|p>dij<p|ket> 
+!!!
+!!! INPUTS
+!!!
+!!! OUTPUT
+!!! complex(dp) nlme
+!!!
+!!! NOTES
+!!! computes on-site prefac*\sum_{Rij}<bra|d_bra_dir p_i>aij<d_ket_dir p_j|ket>
+!!! dnlbra = 0 if no derivative, dnlbra = adir,bdir,gdir for derivative in *dir direction
+!!! dnlket = 0 if no derivative, dnlket = adir,bdir,gdir for derivative in *dir direction
+!!!
+!!! SOURCE
+!
+!subroutine cprj_test(adir,atindx,cwaveprj,dnlbra,dnlket,dterm,dtset,&
+!    & eignk,fermie,gs_hamk,npw_k,oterm,prefac,pawtab,vectin,vectout)
+!  !Arguments ------------------------------------
+!  !scalars
+!  integer,intent(in) :: adir,dnlbra,dnlket,npw_k,oterm
+!  real(dp),intent(in) :: eignk,fermie
+!  complex(dp),intent(in) :: prefac
+!  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+!  type(dataset_type),intent(in) :: dtset
+!  type(dterm_type),intent(in) :: dterm
+!  !arrays
+!  integer,intent(in) :: atindx(dtset%natom)
+!  real(dp),intent(in),pointer :: vectin(:,:)
+!  real(dp),intent(out) :: vectout(2,npw_k)
+!  type(pawcprj_type),intent(in) :: cwaveprj(dtset%natom,dtset%nspinor)
+!  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+!
+!  !Local variables -------------------------
+!  !scalars
+!  integer :: iat,iatom,il,ilmn,ipw,isp,itypat,jlmn,klmn,npwsp
+!  real(dp) :: wt
+!  logical :: il_parity
+!  complex(dp) :: cgfac,my_cpi,cpi,cpj,dij,dij_cpj,phfac,proj_i,scale_fac
+!  ! arrays
+!  complex(dp),dimension(0:3) :: iexpl=(/cone,j_dpc,-cone,-j_dpc/)
+!  complex(dp),allocatable :: dij_data(:,:,:)
+!!--------------------------------------------------------------------
+!  
+!  npwsp = npw_k*dtset%nspinor
+!  wt = four_pi/SQRT(gs_hamk%ucvol)
+!  
+!  ABI_MALLOC(dij_data,(dtset%natom,dterm%lmn2max,dterm%ndij))
+!  select case (oterm)
+!  !case (inlr)
+!  !  dij_data = dterm%LR(:,:,:,adir)
+!  !case (inbm)
+!  !  dij_data = dterm%BM(:,:,:,adir)
+!  case (innl)
+!    dij_data = dterm%aij - eignk*dterm%qij
+!  case (incc) 
+!    dij_data = dterm%aij + (eignk-two*fermie)*dterm%qij
+!  case (invv1)
+!    dij_data = (eignk-fermie)*dterm%qij
+!  case (invv2)
+!    dij_data = (eignk-fermie)*dterm%qij
+!  case DEFAULT
+!    dij_data = czero
+!  end select
+!
+!  !nlme = czero
+!  vectout = zero
+!  do iat = 1, dtset%natom
+!    iatom = atindx(iat)
+!    itypat=dtset%typat(iat)
+!    do isp = 1, dtset%nspinor
+!      do ilmn = 1, pawtab(itypat)%lmn_size
+!
+!        if (dnlbra .NE. 0) then
+!          cpi=CMPLX(cwaveprj(iatom,isp)%dcp(1,dnlbra,ilmn),cwaveprj(iatom,isp)%dcp(2,dnlbra,ilmn))
+!        else
+!          cpi=CMPLX(cwaveprj(iatom,isp)%cp(1,ilmn),cwaveprj(iatom,isp)%cp(2,ilmn))
+!        end if
+!
+!        ! this loop reconstructs cpi and dcpi correctly
+!        !il = MOD(pawtab(itypat)%indlmn(1,ilmn),4)
+!        !my_cpi = czero
+!        !do ipw = 1,npw_k
+!        !  cgfac=CMPLX(vectin(1,ipw),vectin(2,ipw))
+!        !  phfac=CMPLX(gs_hamk%ph3d_k(1,ipw,iatom),gs_hamk%ph3d_k(2,ipw,iatom))
+!        !  my_cpi = my_cpi + cgfac*phfac*gs_hamk%ffnl_k(ipw,1+dnlbra,ilmn,itypat)
+!        !end do
+!        !my_cpi = my_cpi*four_pi*iexpl(il)/SQRT(gs_hamk%ucvol)
+!        !write(std_out,'(a,4es16.8)')'JWZ debug cpi, mycpi : ',&
+!        !  & REAL(cpi),AIMAG(cpi),REAL(my_cpi),AIMAG(my_cpi)
+!
+!        ! |p_i> in recip space
+!        !proj_i = czero
+!        !il = pawtab(itypat)%indlmn(1,ilmn)
+!        !do ipw = 1, npw_k
+!        !  phfac=CMPLX(gs_hamk%ph3d_k(1,ipw,iatom),gs_hamk%ph3d_k(2,ipw,iatom))
+!        !  proj_i(ipw) = CMPLX(gs_hamk%ffnl_k(ipw,1+dnlbra,ilmn,itypat),0.0)*&
+!        !    &(j_dpc**il)*four_pi*CONJG(phfac)/SQRT(gs_hamk%ucvol)
+!        !end do
+!
+!        dij_cpj = czero
+!        do jlmn = 1, pawtab(itypat)%lmn_size
+!        
+!          if (dnlket .NE. 0) then
+!            cpj=CMPLX(cwaveprj(iatom,isp)%dcp(1,dnlket,jlmn),cwaveprj(iatom,isp)%dcp(2,dnlket,jlmn))
+!          else
+!            cpj=CMPLX(cwaveprj(iatom,isp)%cp(1,jlmn),cwaveprj(iatom,isp)%cp(2,jlmn))
+!          end if
+!
+!          klmn=MATPACK(ilmn,jlmn)
+!          if ( oterm == inlr ) then
+!            dij = CMPLX(dterm%ekb_LR(2*klmn-1,iatom,1,adir),dterm%ekb_LR(2*klmn,iatom,1,adir))
+!          else if ( oterm == inbm ) then
+!            dij = CMPLX(dterm%ekb_BM(2*klmn-1,iatom,1,adir),dterm%ekb_BM(2*klmn,iatom,1,adir))
+!          else 
+!            dij = dij_data(iatom,klmn,1)
+!          end if
+!          ! see note at top of file near definition of MATPACK macro
+!          if (ilmn .GT. jlmn) dij = CONJG(dij)
+!
+!          dij_cpj = dij_cpj + dij*cpj
+!
+!        end do !jlmn
+!
+!        il = MOD(pawtab(itypat)%indlmn(1,ilmn),4)
+!        do ipw = 1, npw_k
+!          proj_i = CMPLX(gs_hamk%ffnl_k(ipw,1+dnlbra,ilmn,itypat),0.0)*wt*CONJG(iexpl(il))*dij_cpj*&
+!            & CMPLX(gs_hamk%ph3d_k(1,ipw,iatom),-gs_hamk%ph3d_k(2,ipw,iatom))
+!
+!          vectout(1,ipw) = vectout(1,ipw) + REAL(proj_i)
+!          vectout(2,ipw) = vectout(2,ipw) + AIMAG(proj_i)
+!
+!        end do
+!
+!      end do !ilmn
+!    end do ! isp
+!  end do !iat
+!
+!  ABI_SFREE(dij_data)
+!
+!end subroutine cprj_test
+!!!***
 
 !!****f* ABINIT/dterm_qij
 !! NAME
@@ -3135,135 +2998,6 @@ subroutine me_proj_mesh(bra,fofr,gs_hamk,ket,mpi_enreg,n4,n5,n6,ndat,npw_k,scala
 
 end subroutine me_proj_mesh
 !!***
-
-
-!!****f* ABINIT/local_me_mesh
-!! NAME
-!! local_me_mesh
-!!
-!! FUNCTION
-!! compute realspace mesh for local term anchored at target atom
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!! orbmag_mesh%rmesh updated
-!! 
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine local_me_mesh(bra,dtset,fofr,gs_hamk,ket,mpi_enreg,&
-    & n4,n5,n6,ndat,npw_k,ph1d,scalar_factor,t_atom)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: n4,n5,n6,ndat,npw_k,t_atom
-  complex(dp),intent(in) :: scalar_factor
-  type(dataset_type),intent(in) :: dtset
-  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
-  type(MPI_type), intent(inout) :: mpi_enreg
-  !arrays
-  real(dp),intent(out) :: fofr(2,n4,n5,n6*ndat)
-  real(dp),intent(in),pointer :: bra(:,:),ket(:,:),ph1d(:,:)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: fourwf_cplex,fourwf_option,ig,tim_fourwf
-  real(dp) :: weight_i,weight_r
-  complex(dp) :: cpw
-  !arrays
-  real(dp),allocatable :: denpot(:,:),fofgout(:,:),work(:,:)
-  complex(dp),allocatable :: phgr(:)
-
-!--------------------------------------------------------------------
-
-  ABI_MALLOC(phgr,(npw_k))
-  call make_phgr(dtset,gs_hamk,npw_k,ph1d,phgr,t_atom)
-  
-  ! if term of interest is local, compute exp(-iG.R)*conjg(bra)*scalar_factor*ket 
-  ! and then transform with fourwf. Here R is t_atom position; factor shifts from 
-  ! unit cell origin to dipole location
-  ABI_MALLOC(work,(2,npw_k))
-  do ig = 1, npw_k
-    cpw = CONJG(phgr(ig))*CONJG(CMPLX(bra(1,ig),bra(2,ig)))*scalar_factor*CMPLX(ket(1,ig),ket(2,ig))
-    work(1,ig) = REAL(cpw); work(2,ig) = AIMAG(cpw)
-  end do
-  fourwf_cplex = 1
-  fourwf_option = 0
-  tim_fourwf = 1
-  call fourwf(fourwf_cplex,denpot,work,fofgout,fofr,gs_hamk%gbound_k,&
-    & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
-    & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,npw_k,&
-    & n4,n5,n6,fourwf_option,tim_fourwf,weight_r,weight_i)
-  ABI_SFREE(work)
-
-  ABI_SFREE(phgr)
-
-end subroutine local_me_mesh
-!!***
-
-!!****f* ABINIT/make_phgr
-!! NAME
-!! make_phgr
-!!
-!! FUNCTION
-!! construct exp(iG.R) 3d phase factors at atom point of interest at R
-!!
-!! INPUTS
-!! dtset=variables concerning current dataset
-!! gs_hamk=ground state Hamiltonian
-!! npw_k=number of planewaves at current k point
-!! ph1d=pointer to 1D phase factors
-!! t_atom=index of atom of interest
-!!
-!! OUTPUT
-!! phgr(npw_k)=complex phase factors exp(iG.R) at site R
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine make_phgr(dtset,gs_hamk,npw_k,ph1d,phgr,t_atom)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: npw_k,t_atom
-  type(dataset_type),intent(in) :: dtset
-  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
-
-  !arrays
-  real(dp),intent(in),pointer :: ph1d(:,:)
-  complex(dp),intent(out) :: phgr(npw_k)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: ig,kg1,kg2,kg3,n1,n2,n3,shift1,shift2,shift3
-  complex(dp) :: ph1,ph2,ph3
-
-  !arrays
-
-!--------------------------------------------------------------------
-  n1=dtset%ngfft(1); n2=dtset%ngfft(2); n3=dtset%ngfft(3)
-
-  shift1=1+n1+(t_atom-1)*(2*n1+1)
-  shift2=1+n2+(t_atom-1)*(2*n2+1)+dtset%natom*(2*n1+1)
-  shift3=1+n3+(t_atom-1)*(2*n3+1)+dtset%natom*(2*n1+1+2*n2+1) 
-  do ig=1,npw_k
-    kg1=gs_hamk%kg_k(1,ig)+shift1
-    kg2=gs_hamk%kg_k(2,ig)+shift2
-    kg3=gs_hamk%kg_k(3,ig)+shift3
-    ph1=CMPLX(ph1d(1,kg1),ph1d(2,kg1))
-    ph2=CMPLX(ph1d(1,kg2),ph1d(2,kg2))
-    ph3=CMPLX(ph1d(1,kg3),ph1d(2,kg3))
-    phgr(ig)=ph1*ph2*ph3
-  end do
-
-end subroutine make_phgr
-!!***
-
 
 !!****f* ABINIT/local_fermie
 !! NAME
