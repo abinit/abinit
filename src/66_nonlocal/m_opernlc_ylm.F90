@@ -27,13 +27,13 @@ module m_opernlc_ylm
  use m_xomp
 
  use defs_abitypes, only : MPI_type
-
  implicit none
 
  private
 !!***
 
  public :: opernlc_ylm
+ public :: ls_ylm
 !!***
 
 contains
@@ -154,7 +154,10 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !scalars
  integer :: cplex_,ia,ierr,ijlmn,ijspin,ilm,ilmn,i0lmn,iln,index_enl,iphase,ispinor,ispinor_index
  integer :: j0lmn,jilmn,jispin,jjlmn,jlm,jlmn,jspinor,jspinor_index,mu,shift
+ integer :: ll_so, klm_so, lmax_so, nlmso, sign_so
  real(dp) :: sijr
+ real(dp) :: ekb_so, ls_uu_im, ls_ud_re, ls_ud_im
+ real(dp), allocatable :: ls_ylm_so(:,:,:)
 !arrays
  real(dp) :: enl_(2),gxfi(2),gxi(cplex),gxj(cplex)
  real(dp),allocatable :: d2gxdtfac_offdiag(:,:,:,:,:),dgxdtfac_offdiag(:,:,:,:,:)
@@ -191,6 +194,20 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
   if (optder>=2) d2gxdtfac_=zero
   enl_ptr => enl(:,:,:,iphase)
 
+!NC+SO: precompute L.S matrix once (reused by gxfac, dgxdtfac, d2gxdtfac blocks below)
+ lmax_so = 0
+ if (paw_opt==0.and.nspinortot==2.and.nspinor==nspinortot) then
+   if (any(indlmn(6,1:nlmn)==2)) then
+     do ilmn=1,nlmn
+       if (indlmn(6,ilmn)==2) lmax_so = max(lmax_so, indlmn(1,ilmn))
+     end do
+     if (lmax_so > 0) then
+       nlmso = (lmax_so+1)**2*((lmax_so+1)**2+1)/2
+       ABI_MALLOC(ls_ylm_so,(2,nlmso,2))
+       call ls_ylm(ls_ylm_so, lmax_so)
+     end if
+   end if
+ end if
 
 !Accumulate gxfac related to non-local operator (Norm-conserving)
 !-------------------------------------------------------------------
@@ -209,6 +226,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
    do ispinor=1,nspinor
      do ia=1,nincat
        do ilmn=1,nlmn
+         if (indlmn(6,ilmn)==2) cycle   ! NC+SO: SO projectors handled separately below
          ispinor_index=ispinor+shift
          iln=indlmn(5,ilmn)
          enl_(1)=enl_ptr(iln,itypat,ispinor_index)
@@ -219,6 +237,52 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP END DO
 !$OMP END PARALLEL
   end if
+
+! NC+SO: real-Ylm L.S coupling ---
+  if (lmax_so > 0) then
+   do ia=1,nincat
+       do ilmn=1,nlmn
+         if (indlmn(6,ilmn)/=2) cycle
+         iln    = indlmn(5,ilmn)
+         ekb_so = enl_ptr(iln,itypat,1)
+         if (abs(ekb_so)<tol16) cycle
+         ll_so = indlmn(1,ilmn)
+         ilm   = indlmn(4,ilmn)
+         do jlmn=1,nlmn
+           if (indlmn(6,jlmn)/=2)              cycle
+           if (indlmn(1,jlmn)/=ll_so)          cycle
+           if (indlmn(3,jlmn)/=indlmn(3,ilmn)) cycle
+           jlm = indlmn(4,jlmn)
+           if (ilm<=jlm) then
+             klm_so  = jlm*(jlm-1)/2 + ilm
+             sign_so = 1
+           else
+             klm_so  = ilm*(ilm-1)/2 + jlm
+             sign_so = -1
+           end if
+           ls_uu_im = sign_so * ls_ylm_so(2,klm_so,1)
+           ls_ud_re = sign_so * ls_ylm_so(1,klm_so,2)
+           ls_ud_im = sign_so * ls_ylm_so(2,klm_so,2)
+           ! up-up: Re(<up|LS|up>)=0, only Im contributes
+           gxfac_(1,ilmn,ia,1)=gxfac_(1,ilmn,ia,1) - ekb_so*ls_uu_im*gx(2,jlmn,ia,1)
+           gxfac_(2,ilmn,ia,1)=gxfac_(2,ilmn,ia,1) + ekb_so*ls_uu_im*gx(1,jlmn,ia,1)
+           ! up-dn
+           gxfac_(1,ilmn,ia,1)=gxfac_(1,ilmn,ia,1) &
+&            + ekb_so*(ls_ud_re*gx(1,jlmn,ia,2) - ls_ud_im*gx(2,jlmn,ia,2))
+           gxfac_(2,ilmn,ia,1)=gxfac_(2,ilmn,ia,1) &
+&            + ekb_so*(ls_ud_re*gx(2,jlmn,ia,2) + ls_ud_im*gx(1,jlmn,ia,2))
+           ! dn-up: Re=-ls_ud_re, Im=+ls_ud_im
+           gxfac_(1,ilmn,ia,2)=gxfac_(1,ilmn,ia,2) &
+&            + ekb_so*(-ls_ud_re*gx(1,jlmn,ia,1) - ls_ud_im*gx(2,jlmn,ia,1))
+           gxfac_(2,ilmn,ia,2)=gxfac_(2,ilmn,ia,2) &
+&            + ekb_so*(-ls_ud_re*gx(2,jlmn,ia,1) + ls_ud_im*gx(1,jlmn,ia,1))
+           ! dn-dn: Im=-ls_uu_im
+           gxfac_(1,ilmn,ia,2)=gxfac_(1,ilmn,ia,2) + ekb_so*ls_uu_im*gx(2,jlmn,ia,2)
+           gxfac_(2,ilmn,ia,2)=gxfac_(2,ilmn,ia,2) - ekb_so*ls_uu_im*gx(1,jlmn,ia,2)
+         end do ! jlmn
+       end do ! ilmn
+     end do ! ia
+  end if ! NC+SO
 
 !Accumulate gxfac related to nonlocal operator (PAW)
 !-------------------------------------------------------------------
@@ -536,6 +600,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
      do ia=1,nincat
 !$OMP DO
        do ilmn=1,nlmn
+         if (indlmn(6,ilmn)==2) cycle   ! NC+SO: SO projectors handled separately below
          iln=indlmn(5,ilmn)
          enl_(1)=enl_ptr(iln,itypat,ispinor_index)
          do mu=1,ndgxdtfac
@@ -547,6 +612,50 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
    end do
 !$OMP END PARALLEL
   end if
+
+!--- NC+SO: real-Ylm L.S coupling for first derivatives ---
+  if (optder>=1.and.lmax_so > 0) then
+   do ia=1,nincat
+       do ilmn=1,nlmn
+         if (indlmn(6,ilmn)/=2) cycle
+         iln    = indlmn(5,ilmn)
+         ekb_so = enl_ptr(iln,itypat,1)
+         if (abs(ekb_so)<tol16) cycle
+         ll_so = indlmn(1,ilmn)
+         ilm   = indlmn(4,ilmn)
+         do jlmn=1,nlmn
+           if (indlmn(6,jlmn)/=2)              cycle
+           if (indlmn(1,jlmn)/=ll_so)           cycle
+           if (indlmn(3,jlmn)/=indlmn(3,ilmn)) cycle
+           jlm = indlmn(4,jlmn)
+           if (ilm<=jlm) then
+             klm_so  = jlm*(jlm-1)/2 + ilm
+             sign_so = 1
+           else
+             klm_so  = ilm*(ilm-1)/2 + jlm
+             sign_so = -1
+           end if
+           ls_uu_im = sign_so * ls_ylm_so(2,klm_so,1)
+           ls_ud_re = sign_so * ls_ylm_so(1,klm_so,2)
+           ls_ud_im = sign_so * ls_ylm_so(2,klm_so,2)
+           do mu=1,ndgxdtfac
+             dgxdtfac_(1,mu,ilmn,ia,1)=dgxdtfac_(1,mu,ilmn,ia,1) - ekb_so*ls_uu_im*dgxdt(2,mu,jlmn,ia,1)
+             dgxdtfac_(2,mu,ilmn,ia,1)=dgxdtfac_(2,mu,ilmn,ia,1) + ekb_so*ls_uu_im*dgxdt(1,mu,jlmn,ia,1)
+             dgxdtfac_(1,mu,ilmn,ia,1)=dgxdtfac_(1,mu,ilmn,ia,1) &
+&              + ekb_so*(ls_ud_re*dgxdt(1,mu,jlmn,ia,2) - ls_ud_im*dgxdt(2,mu,jlmn,ia,2))
+             dgxdtfac_(2,mu,ilmn,ia,1)=dgxdtfac_(2,mu,ilmn,ia,1) &
+&              + ekb_so*(ls_ud_re*dgxdt(2,mu,jlmn,ia,2) + ls_ud_im*dgxdt(1,mu,jlmn,ia,2))
+             dgxdtfac_(1,mu,ilmn,ia,2)=dgxdtfac_(1,mu,ilmn,ia,2) &
+&              + ekb_so*(-ls_ud_re*dgxdt(1,mu,jlmn,ia,1) - ls_ud_im*dgxdt(2,mu,jlmn,ia,1))
+             dgxdtfac_(2,mu,ilmn,ia,2)=dgxdtfac_(2,mu,ilmn,ia,2) &
+&              + ekb_so*(-ls_ud_re*dgxdt(2,mu,jlmn,ia,1) + ls_ud_im*dgxdt(1,mu,jlmn,ia,1))
+             dgxdtfac_(1,mu,ilmn,ia,2)=dgxdtfac_(1,mu,ilmn,ia,2) + ekb_so*ls_uu_im*dgxdt(2,mu,jlmn,ia,2)
+             dgxdtfac_(2,mu,ilmn,ia,2)=dgxdtfac_(2,mu,ilmn,ia,2) - ekb_so*ls_uu_im*dgxdt(1,mu,jlmn,ia,2)
+           end do ! mu
+         end do ! jlmn
+       end do ! ilmn
+     end do ! ia
+  end if ! NC+SO dgxdtfac_
 
 !Accumulate dgxdtfac related to nonlocal operator (PAW)
 !-------------------------------------------------------------------
@@ -943,6 +1052,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
      do ia=1,nincat
 !$OMP DO
        do ilmn=1,nlmn
+         if (indlmn(6,ilmn)==2) cycle   ! NC+SO: SO projectors handled separately below
          iln=indlmn(5,ilmn)
          enl_(1)=enl_ptr(iln,itypat,ispinor_index)
          do mu=1,nd2gxdtfac
@@ -953,6 +1063,58 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
      end do
    end do
 !$OMP END PARALLEL
+ end if
+
+!  NC+SO: real-Ylm L.S coupling for second derivatives (elastic tensor) ---
+  if (optder==2.and.lmax_so > 0) then
+   do ia=1,nincat
+       do ilmn=1,nlmn
+         if (indlmn(6,ilmn)/=2) cycle
+         iln    = indlmn(5,ilmn)
+         ekb_so = enl_ptr(iln,itypat,1)
+         if (abs(ekb_so)<tol16) cycle
+         ll_so = indlmn(1,ilmn)
+         ilm   = indlmn(4,ilmn)
+         do jlmn=1,nlmn
+           if (indlmn(6,jlmn)/=2)              cycle
+           if (indlmn(1,jlmn)/=ll_so)           cycle
+           if (indlmn(3,jlmn)/=indlmn(3,ilmn)) cycle
+           jlm = indlmn(4,jlmn)
+           if (ilm<=jlm) then
+             klm_so  = jlm*(jlm-1)/2 + ilm
+             sign_so = 1
+           else
+             klm_so  = ilm*(ilm-1)/2 + jlm
+             sign_so = -1
+           end if
+           ls_uu_im = sign_so * ls_ylm_so(2,klm_so,1)
+           ls_ud_re = sign_so * ls_ylm_so(1,klm_so,2)
+           ls_ud_im = sign_so * ls_ylm_so(2,klm_so,2)
+           do mu=1,nd2gxdtfac
+             ! up-up
+             d2gxdtfac_(1,mu,ilmn,ia,1)=d2gxdtfac_(1,mu,ilmn,ia,1) - ekb_so*ls_uu_im*d2gxdt(2,mu,jlmn,ia,1)
+             d2gxdtfac_(2,mu,ilmn,ia,1)=d2gxdtfac_(2,mu,ilmn,ia,1) + ekb_so*ls_uu_im*d2gxdt(1,mu,jlmn,ia,1)
+             ! up-dn
+             d2gxdtfac_(1,mu,ilmn,ia,1)=d2gxdtfac_(1,mu,ilmn,ia,1) &
+&              + ekb_so*(ls_ud_re*d2gxdt(1,mu,jlmn,ia,2) - ls_ud_im*d2gxdt(2,mu,jlmn,ia,2))
+             d2gxdtfac_(2,mu,ilmn,ia,1)=d2gxdtfac_(2,mu,ilmn,ia,1) &
+&              + ekb_so*(ls_ud_re*d2gxdt(2,mu,jlmn,ia,2) + ls_ud_im*d2gxdt(1,mu,jlmn,ia,2))
+             ! dn-up
+             d2gxdtfac_(1,mu,ilmn,ia,2)=d2gxdtfac_(1,mu,ilmn,ia,2) &
+&              + ekb_so*(-ls_ud_re*d2gxdt(1,mu,jlmn,ia,1) - ls_ud_im*d2gxdt(2,mu,jlmn,ia,1))
+             d2gxdtfac_(2,mu,ilmn,ia,2)=d2gxdtfac_(2,mu,ilmn,ia,2) &
+&              + ekb_so*(-ls_ud_re*d2gxdt(2,mu,jlmn,ia,1) + ls_ud_im*d2gxdt(1,mu,jlmn,ia,1))
+             ! dn-dn
+             d2gxdtfac_(1,mu,ilmn,ia,2)=d2gxdtfac_(1,mu,ilmn,ia,2) + ekb_so*ls_uu_im*d2gxdt(2,mu,jlmn,ia,2)
+             d2gxdtfac_(2,mu,ilmn,ia,2)=d2gxdtfac_(2,mu,ilmn,ia,2) - ekb_so*ls_uu_im*d2gxdt(1,mu,jlmn,ia,2)
+           end do ! mu
+         end do ! jlmn
+       end do ! ilmn
+     end do ! ia
+  end if ! NC+SO d2gxdtfac
+
+ if (lmax_so > 0) then
+   ABI_FREE(ls_ylm_so)
  end if
 
  DBG_EXIT("COLL")
@@ -1561,6 +1723,77 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
  end if
 
 end subroutine opernlc_ylm
+!!***
+
+! ---------------------------------------------------------------------------------------
+
+!!****f* m_opernlc_ylm/ls_ylm
+!! NAME
+!! ls_ylm
+!!
+!! FUNCTION
+!! Compute L.S operator matrix elements in real spherical harmonics basis.
+!! Upper triangle only (ilm<=jlm), packed as klm=jlm*(jlm-1)/2+ilm.
+!! ls_ylm(1,:,:)=Re, ls_ylm(2,:,:)=Im; ispin=1: up-up, ispin=2: up-dn.
+!! Adapted from m_paw_sphharm; tso debug blocks removed.
+!!
+!! SOURCE
+
+subroutine ls_ylm(ls_mat, lmax)
+
+!Arguments ---------------------------------------------
+ integer, intent(in) :: lmax
+ real(dp), allocatable, intent(inout) :: ls_mat(:,:,:)
+
+!Local variables ---------------------------------------
+ integer :: im, jm, jlm, is, ll, lm0, mm
+ real(dp), parameter :: isq2 = one/sqrt2
+ complex(dp), allocatable :: U(:,:), LS(:,:,:), W(:,:)
+! *************************************************************************
+
+ ls_mat = zero
+ if (lmax <= 0) return
+
+ do ll = 1, lmax
+   lm0 = ll**2
+   ABI_MALLOC(U,  (2*ll+1, 2*ll+1))
+   ABI_MALLOC(LS, (2*ll+1, 2*ll+1, 2))
+   ABI_MALLOC(W,  (2*ll+1, 2*ll+1))
+   U = czero; LS = czero
+
+!  Build U (real->complex Ylm transform) and LS (L.S in complex Ylm basis) in one pass
+   do im = 1, 2*ll+1
+     mm = im-ll-1
+     if (mm > 0) then
+       U(im,im) = (-1)**mm * isq2;  U(-mm+ll+1,im) = isq2
+     else if (mm == 0) then
+       U(im,im) = cone
+     else
+       U(im,im) = cmplx(zero, isq2, dp);  U(-mm+ll+1,im) = cmplx(zero, -(-1)**(-mm)*isq2, dp)
+     end if
+     LS(im,im,1) = half*mm
+     if (mm+1 <=  ll) LS(im,im+1,2) = half*sqrt(real((ll-mm)*(ll+mm+1), dp))
+     if (mm-1 >= -ll) LS(im-1,im,2) = half*sqrt(real((ll+mm)*(ll-mm+1), dp))
+   end do
+
+!  Transform to real Ylm basis via W = U^H * LS * U, store upper triangle
+   do is = 1, 2
+     W = matmul(conjg(transpose(U)), matmul(LS(:,:,is), U))
+     do jm = 1, 2*ll+1
+       jlm = lm0+jm
+       do im = 1, jm
+         ls_mat(1, jlm*(jlm-1)/2+lm0+im, is) = real(W(im,jm), dp)
+         ls_mat(2, jlm*(jlm-1)/2+lm0+im, is) = aimag(W(im,jm))
+       end do
+     end do
+   end do
+
+   ABI_FREE(U)
+   ABI_FREE(LS)
+   ABI_FREE(W)
+ end do
+
+end subroutine ls_ylm
 !!***
 
 end module m_opernlc_ylm

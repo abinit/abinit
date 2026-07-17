@@ -692,6 +692,9 @@ contains
  intarr(1,:)=dtsets(:)%ptgroupma
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ptgroupma','INT',0)
 
+ intarr(1,:)=dtsets(:)%pulayhiststore
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'pulayhiststore','INT',0)
+
  dprarr(1,:)=dtsets(:)%pvelmax(1)
  dprarr(2,:)=dtsets(:)%pvelmax(2)
  dprarr(3,:)=dtsets(:)%pvelmax(3)

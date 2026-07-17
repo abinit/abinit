@@ -6,8 +6,7 @@
 # Dataset 3: one-shot G0W0 calculation in real-space and imaginary-time.
 # Dataset 4: RPA energy calculation within ACFDT
 
-ndtset      2
-#ndtset      3  # TODO
+ndtset 3
 #ndtset      4  # TODO
 timopt 1
 nspinor 2 nspden 4
@@ -51,7 +50,8 @@ prtvol3 1            # Write additional stuff to abo file for testing purposes.
 #                     # DO NOT USE this option for production runs unless you really need a TCHI file.
 
 gwr_ntau3   6        # Number of imaginary-time points
-#gwr_sigma_algo3 2    # Use supercell for Sigma
+gwr_chi_algo3 1      # Use supercell for chi
+gwr_sigma_algo3 1    # Use supercell for Sigma
 
 gwr_boxcutmin3  1.1  # This should be subject to convergence studies
 #mixprec3    1        # Mixed precision FFT.
@@ -69,10 +69,8 @@ kptgw3               # k-points in reduced coordinates
    0.5    0.0    0.0
 
 bdgw3       # calculate GW corrections for bands from 4 to 5
-   4  5
-   4  5
-   4  5
-   4  5
+   8  9
+   8  9
 
 # Spectral function (very coarse grid to reduce txt file size)
 nfreqsp3 50
@@ -134,9 +132,9 @@ pseudos "Si_r.psp8"
 #%% [files]
 #%% files_to_test =
 #%%   t03.abo, tolnlines = 25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
-####%%   t03o_DS3_SIGCIT, tolnlines=100, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
-####%%   t03o_DS3_SIGCIW, tolnlines=100, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
-####%%   t03o_DS3_SIGCIW, tolnlines=100, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%%   t03o_DS3_SIGC_IT, tolnlines=100, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%%   t03o_DS3_SIGXC_IW, tolnlines=150, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%%   t03o_DS3_SIGXC_RW, tolnlines=1000, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [extra_info]

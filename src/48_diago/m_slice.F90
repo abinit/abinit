@@ -17,8 +17,8 @@
 !! NOTES
 !! Dependence with other modules and hierarchy in this directory:
 !!   m_slice uses:
-!!      |- m_polynomial_filter | various computational routines
-!!      |- m_trace_estimation  | various computational routines
+!!      |- m_polynomial_filter | various math compute routines
+!!      |- m_trace_estimation  | various math compute routines
 !!      |- m_chebfi2           ! the Chebyshev recursion
 !!      |- m_slice_task        | Low-level
 !!

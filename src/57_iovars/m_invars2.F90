@@ -889,6 +889,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecutsm',tread,'ENE')
  if(tread==1) dtset%ecutsm=dprarr(1)
+ 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ggtrcut',tread,'DPR')
+ if(tread==1) dtset%ggtrcut=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'exchmix',tread,'DPR')
  if(tread==1) dtset%exchmix=dprarr(1)
@@ -2576,6 +2579,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%ptcharge(1:ntypat)=dprarr(1:ntypat)
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pulayhiststore',tread,'INT')
+ if(tread==1) dtset%pulayhiststore=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'quadmom',tread,'DPR')
  if(tread==1)then
    dtset%quadmom(1:ntypat)=dprarr(1:ntypat)
@@ -2837,8 +2843,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        dtset%dmft_triqs_time_invariance = 0
        dtset%dmft_triqs_move_double = 1
      end if
+
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_basis',tread,'INT')
      if(tread==1) dtset%dmft_triqs_basis=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_chiloc',tread,'INT')           
+     if(tread==1) dtset%dmft_triqs_chiloc  =intarr(1)                                                    
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_chiloc_ins',tread,'INT')       
+     if(tread==1) dtset%dmft_triqs_chiloc_ins =intarr(1)    
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_compute_integral',tread,'INT')
      if(tread==1) dtset%dmft_triqs_compute_integral=intarr(1)
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_init_size',tread,'INT')
@@ -3576,7 +3587,13 @@ if (dtset%usekden==1) then
    else
       dtset%prtgden = 0
    end if
-   if (INDEX(dtset%write_files,'geo') .gt. 0) then
+   if (INDEX(dtset%write_files,'geo_1') .gt. 0) then
+      dtset%prtgeo = 1
+   else if (INDEX(dtset%write_files,'geo_2') .gt. 0) then
+      dtset%prtgeo = 2
+   else if (INDEX(dtset%write_files,'geo_3') .gt. 0) then
+      dtset%prtgeo = 3
+   else if (INDEX(dtset%write_files,'geo') .gt. 0) then
       dtset%prtgeo = 1
    else
       dtset%prtgeo = 0

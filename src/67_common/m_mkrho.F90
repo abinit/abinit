@@ -585,7 +585,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                    ! the kinetic energy density
                    ! Not yet parallelized on nspinor if paral_kgb/=1
                    ipwsp=(iband_me-1)*npw_k*my_nspinor +icg
-                 cwavef(:,1:npw_k,1) =                  cg(:,1+ipwsp      :ipwsp+npw_k)
+                   cwavef(:,1:npw_k,1) =                  cg(:,1+ipwsp      :ipwsp+npw_k)
                    if (my_nspinor==2) cwavef(:,1:npw_k,2)=cg(:,1+ipwsp+npw_k:ipwsp+2*npw_k)
                    if(ioption==1)then
                      ! Multiplication by 2pi i (k+G)_alpha

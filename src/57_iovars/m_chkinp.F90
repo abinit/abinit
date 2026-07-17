@@ -955,6 +955,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        cond_string(1)='dmft_triqs_basis' ; cond_values(1)=dt%dmft_triqs_basis
        call chkint_eq(0,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
      end if
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_chiloc',dt%dmft_triqs_chiloc,3,(/0,1,2/),iout)
+     if (dt%dmft_triqs_chiloc > 0) then
+       cond_string(1)='dmft_triqs_chiloc' ; cond_values(1)=dt%dmft_triqs_chiloc
+       call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_chiloc_ins',dt%dmft_triqs_chiloc_ins,1,iout)
+     end if        
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_n_warmup_cycles_init',dt%dmft_triqs_n_warmup_cycles_init,0,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -1144,8 +1149,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        !  ABI_ERROR_NOSTOP("Self-energy with symsigma 1 and nspinor 2 not implemented", ierr)
        !end if
        if (optdriver == RUNL_SIGMA .and. &
-           any(mod(dt%gwcalctyp, 10) == [SIG_GW_AC, SIG_QPGW_PPM, SIG_QPGW_CD])) then
-         ABI_ERROR_NOSTOP("analytic-continuation, model GW with nspinor 2 are not implemented", ierr)
+           any(mod(dt%gwcalctyp, 10) == [SIG_QPGW_PPM, SIG_QPGW_CD])) then
+         ABI_ERROR_NOSTOP("model GW with nspinor 2 are not implemented", ierr)
        end if
        !if (optdriver == RUNL_SIGMA .and. mod(dt%gwcalctyp, 100) >= 10) then
        !  ABI_ERROR_NOSTOP("Self-consistent GW with nspinor == 2 not implemented", ierr)
@@ -2685,6 +2690,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='nspinor' ; cond_values(1)=dt%nspinor
      call chkint_eq(0,1,cond_string,cond_values,ierr,'npspinor',dt%npspinor,1,(/1/),iout)
    end if
+!  When NC+SOC with useylm=1 (nonlop_ylm pathway), spinor parallelism (npspinor>1) is incompatible
+   if (dt%nspinor==2 .and. dt%usepaw==0 .and. dt%useylm==1 .and. dt%npspinor>1) then
+     write(msg,'(3a)') 'NC+SOC with useylm=1 (nonlop_ylm pathway) does not support spinor parallelism.',ch10,&
+&      'Action: set npspinor=1 (or use useylm=0, or use PAW pseudopotentials).'
+     ABI_ERROR_NOSTOP(msg, ierr)
+   end if
 
 !  npvel (must be positive)
    call chkint_ge(0,0,cond_string,cond_values,ierr,'npvel',dt%npvel,0,iout)
@@ -3179,13 +3190,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_ne(1,2,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
    end if
 
-   if (dt%useylm == 1 .and. dt%usepaw == 0 .and. dt%nspinor == 2 .and. any(pspheads(:)%pspso /= 0)) then
-     if(dt%gpu_option/=ABI_GPU_DISABLED) then
-       ABI_ERROR_NOSTOP("spin-orbit (pspso /=0 ) with NC pseudos and GPU for nonlop (gpu_option != 0) not yet allowed.", ierr)
-     else
-       ABI_ERROR_NOSTOP("spin-orbit (pspso /=0 ) with NC pseudos and Ylm for nonlop (useylm = 1) not yet allowed.", ierr)
-     end if
-   end if
+!
 
 !  optforces
    call chkint_eq(0,0,cond_string,cond_values,ierr,'optforces',dt%optforces,3,(/0,1,2/),iout)
@@ -3232,13 +3237,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
   end if
 
   !  orbmag
-  ! only values of 0,1,2 are allowed. 0 is the default.
-  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,3,(/0,1,2/),iout)
+  ! only values of -3..4 are allowed. 0 is the default.
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,8,(/-3,-2,-1,0,1,2,3,4/),iout)
   if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
   !  only kptopt 3 or 0 are allowed, because ddk cannot use spatial symmetries and
   !  nucdipmom breaks time reversal symmetry
-  ! TODO: generalize in the berryopt -2 case to kptopt 4 allowed
      call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,2,(/0,3/),iout)
   !  only kpt parallelism is allowed at present
      call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
@@ -3247,6 +3251,16 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usexcnhat',dt%usexcnhat_orig,1,(/0/),iout)
   !  require PAW
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/1/),iout)
+  end if
+  if(dt%orbmag .LT. 0) then
+    ! berryopt -2 ddk is required
+    call chkint_eq(1,1,cond_string,cond_values,ierr,'berryopt',dt%berryopt,1,(/-2/),iout)
+  end if
+  if((dt%orbmag.GT.0).AND.(dt%rfddk.NE.1).AND.(dt%rfelfd.LT.2)) then
+    write(msg, '(3a)' )&
+      'Positive values of orbmag require DFPT DDK wavefunctions',ch10,&
+      'Action: rerun calculation using rfddk 1 or rfelfd 2.'
+    ABI_ERROR_NOSTOP(msg, ierr)
   end if
 
 !  paral_atom
@@ -3879,6 +3893,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='prtwf' ; cond_values(1)=dt%prtwf
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtwf_full',dt%prtwf_full,1,(/0/),iout)
    end if
+
+!  pulayhiststore
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'pulayhiststore', &
+&    dt%pulayhiststore,2,(/0,1/),iout)
 
 !  random_atpos
    call chkint_eq(0,0,cond_string,cond_values,ierr,'random_atpos',dt%random_atpos,5,(/0,1,2,3,4/),iout)
@@ -4523,10 +4541,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  wfoptalg
 !  Must be greater or equal to 0
    call chkint_ge(0,0,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,0,iout)
-!  wfoptalg==0,1,2,4,10,12,14 or 114 if PAW
+!  wfoptalg==0,1,4,10,14,111,112 or 114 if PAW
    if (usepaw==1) then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,10,(/0,1,2,4,10,12,14,111,112,114/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,8,(/0,1,4,10,14,111,112,114/),iout)
    end if
 !  wfoptalg/=114 if PAW+Fock
    if (usepaw==1 .and. dt%usefock==1) then
@@ -4643,8 +4661,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end do
 
   ! ZORA
-  ! only values of -4,-3,-2,-1,0,1,2,3 are allowed. 0 is the default.
-  call chkint_eq(0,0,cond_string,cond_values,ierr,'zora',dt%zora,8,(/-4,-3,-2,-1,0,1,2,3/),iout)
+  ! only values of -3,-2,-1,0,1,2,3 are allowed. 0 is the default.
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'zora',dt%zora,7,(/-3,-2,-1,0,1,2,3/),iout)
   if(dt%zora .NE. 0) then
      cond_string(1)='zora';cond_values(1)=dt%zora
   !  require PAW
@@ -4814,9 +4832,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%nshiftk /= 1 .or. any(abs(dt%shiftk(:,1)) > tol6)) then
        ABI_ERROR_NOSTOP('GWR requires Gamma-centered k-meshes', ierr)
      end if
-     if (dt%nspinor == 2 .and. .not. string_in(dt%gwr_task, "HDIAGO, HDIAGO_FULL")) then
-       ABI_ERROR_NOSTOP('GWR does not support nspinor == 2', ierr)
-     end if
+    !  if (dt%nspinor == 2 .and. .not. string_in(dt%gwr_task, "HDIAGO, HDIAGO_FULL")) then
+    !    ABI_ERROR_NOSTOP('GWR does not support nspinor == 2', ierr)
+    !  end if
    end if
 
    ! ===========================================================

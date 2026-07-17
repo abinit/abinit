@@ -3695,6 +3695,41 @@ basis in which these off-diagonal components are weak.
 ),
 
 Variable(
+    abivarname="dmft_triqs_chiloc",
+    varset="dmft",
+    vartype="integer",
+    topics=["DmftTriqsCthyb_expert"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: TRIQS compute local susceptibility",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_density_matrix]] == 1",
+    added_in_version="before_v10.9",
+    text=r"""
+
+  * 1 --> Activate the calculation of the local spin susceptibility for the impurity. Only implemented for the case with [[nspinor]] == 1 .
+
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_chiloci_ins",
+    varset="dmft",
+    vartype="integer",
+    topics=["DmftTriqsCthyb_expert"],
+    dimensions="scalar",
+    defaultval=10,
+    mnemonics="Dynamical Mean Field Theory: TRIQS number of insertion operator for local susceptibility",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_density_matrix]] == 1",
+    added_in_version="before_v10.9",
+    text=r"""
+
+Define the minimal number of insertion operators for the calculation of the local spin susceptibility.
+
+""",
+),
+
+
+Variable(
     abivarname="dmft_triqs_compute_integral",
     varset="dmft",
     vartype="integer",
@@ -7512,6 +7547,23 @@ same dataset. On the other hand the use of [[getvel]] with [[getxred]] is
 allowed, despite the different coordinate system.
 """,
 ),
+
+Variable(
+    abivarname="ggtrcut",
+    varset="dfpt",
+    vartype="real",
+    topics=['printing_prngs', 'Output_useful'],
+    dimensions="scalar",
+    defaultval=0.001,
+    mnemonics="GauGe TRansform CUToff",
+    added_in_version="10.9.0",
+    text=r"""
+Cutoff value to use in computing gauge change from parallel transport to diagonal. 
+Expert use only, do not change unless you've studied the source code and know exactly
+what you are doing and expecting.
+""",
+),
+
 
 Variable(
     abivarname="goprecon",
@@ -15833,7 +15885,7 @@ unless a very specific ground state feature is also needed.
 
 * [[orbmag]] = 1: Compute orbital magnetization and Chern vector
 * [[orbmag]] = 2: Same as [[orbmag]] 1 but also print out values of each term making up total
-orbital magnetic moment and a band-by-band decomposition.
+orbital magnetic moment.
 """,
 ),
 
@@ -19143,6 +19195,32 @@ Note that the definition of a spin flip is different for the [[nspden]]=2 and th
 see the description of [[symafm]].
 
 Related input variables: [[spgroup]], [[spgroupma]], [[genafm]], [[symafm]].
+""",
+),
+
+Variable(
+    abivarname="pulayhiststore",
+    varset="dev",
+    vartype="integer",
+    topics=["SCFAlgorithms_expert"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PULAY HISTory STORAGE mode",
+    characteristics=["[[DEVELOP]]"],
+    requires="[[iscf]] in [7,17]",
+    added_in_version="v10.5",
+    text=r"""
+Selects the storage mode used for the FFT-grid part of the Pulay mixing history.
+Mode `1` can reduce the memory footprint of Pulay mixing history, but convergence
+should be validated for the target system, especially for very tight tolerances.
+Use the default full-precision storage for calculations that must converge close
+to the double-precision limit, e.g. residual tolerances around `1.0d-16` or
+tighter.
+
+Possible values are:
+
+  * 0: use the historical full double-precision Pulay history storage. This is the default and stable mode.
+  * 1: use experimental compact storage. Historical preconditioned residuals are stored in single precision, the most recent trial vector is stored in single precision, and older trial vectors are reconstructed from it using quantized 16-bit adjacent differences with per-slot scale factors.
 """,
 ),
 
@@ -23862,9 +23940,6 @@ The different possibilities are:
 
 * [[wfoptalg]] = 111: A **modern and highly efficient version** of [[wfoptalg]] = 1, a spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](../theory/howto_chebfi.pdf) and [[cite:Levitt2015]].
 
-* [[wfoptalg]] = 112: A **highly** experimental version of Spectrum Slicing algorithm. A spectral filtering
-algorithm by spectral slices based on lowpass and bandpass Chebyshev polynomials. The polynomial degree is tuned
-using [[mdeg_filter]] (formerly [[nline]]). The number of slices is tuned with [[nslice]] variable.
 > **Notes**:
 >
 > * For more performance, try enabling [[use_gemm_nonlop]] (default on [[GPU]]).
@@ -23872,6 +23947,9 @@ using [[mdeg_filter]] (formerly [[nline]]). The number of slices is tuned with [
 > * This algorithm struggles to converge the last bands, so it is advisable to use slightly more bands than required. When using [[tolwfr_diago]], it is mandatory to set [[nbdbuf]].
 >
 > * By design, this algorithm cannot use preconditioning and, therefore, cannot handle [[ecutsm]]. Consequently, _Pulay stresses_ are not corrected. If stresses are important for the calculation (e.g., when pressure is required), it is necessary to slightly increase the plane-wave cutoff ([[ecut]]).
+
+* [[wfoptalg]] = 112: A **highly** experimental Spectrum Slicing algorithm. A spectral filtering
+algorithm by spectral slices based on lowpass and bandpass Chebyshev polynomials. The polynomial degree is tuned using [[mdeg_filter]] (formerly [[nline]]). The number of slices is tuned with [[nslice]] variable.
 """,
 ),
 
@@ -23912,6 +23990,9 @@ It can be used as a simple string flagging the desired outputs as follows:
  * "fsurf"     --> Activates the printing of the Fermi surface file. Refer to [[prtfsurf]] for further documentation.
  * "gden"      --> Activates the printing of the gradient of the electronic density file. Refer to [[prtgden]] for further documentation.
  * "geo"       --> Activates the printing of the geometry analysis. Refer to [[prtgeo]] for further documentation.
+ * "geo_1      --> Activates the printing of the geometry analysis under option 1 of the [[prtgeo]] variable.
+ * "geo_2      --> Activates the printing of the geometry analysis under option 2 of the [[prtgeo]] variable.
+ * "geo_3      --> Activates the printing of the geometry analysis under option 3 of the [[prtgeo]] variable.
  * "gkk"       --> Activates the printing of the GKK matrix file. Refer to [[prtgkk]] for further documentation.
  * "gsr"       --> Activates the printing of the GSR file. Refer to [[prtgsr]] for further documentation.
  * "hist"      --> Activates the printing of the HIST file. Refer to [[prthist]] for further documentation.
@@ -24433,9 +24514,9 @@ due to nuclear magnetic dipoles (see [[nucdipmom]]).
 [[zora]] 3 activates both kinetic energy and electron spin terms.
 
 Negative values of [[zora]] are present only for debugging purposes. [[zora]] -1 permits only
-spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits only
-the electron spin-nuclear dipole through space interaction, and [[zora]] -3 permits only the
-electron spin-nuclear dipole Fermi-contact-like interaction.
+spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits spin-orbit
+coupling and the electron spin-nuclear dipole through space interaction, while [[zora]] -3 permits 
+only spin-orbit coupling and the electron spin-nuclear dipole Fermi-contact-like interaction.
 """,
 ),
 

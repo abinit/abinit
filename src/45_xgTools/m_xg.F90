@@ -44,6 +44,7 @@ module m_xg
   use m_xomp
   use m_gputk
   use m_abi_linalg
+  use m_hide_blas, only : xdotc
 
 #if defined(HAVE_GPU)
   use m_gpu_toolbox
@@ -4461,8 +4462,8 @@ contains
     type(xgBlock_t), intent(in  ) :: xgBlock1
     type(xgBlock_t), intent(in  ) :: xgBlock2
     type(xgBlock_t),  intent(inout ) :: xgBlock_out
+    double complex,external :: zdotc !conjugated dot product, not working on macos
 
-    double complex,external :: zdotc !conjugated dot product
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dp), ABI_CONTIGUOUS pointer :: xgBlock1__vecC(:,:),xgBlock2__vecC(:,:)
 #endif
@@ -4852,7 +4853,7 @@ contains
     integer          , intent(  out), optional :: min_elt
     integer :: icol,fact,comm_
     double precision,external :: ddot
-    double complex,external :: zdotc !conjugated dot product
+    !double complex,external :: zdotc !conjugated dot product, not working on macos
 
 #if (defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD) || defined(FC_NVHPC) || defined(FC_CRAY)
     integer :: rows,cols,ii,me_g0
@@ -5110,7 +5111,7 @@ contains
 #else
         !$omp parallel do shared(dot,xgBlockA,xgBlockB)
         do icol = 1, xgBlockA%cols
-          dot%vecC(icol,1) = zdotc(xgBlockA%rows,xgBlockA%vecC(:,icol),1,xgBlockB%vecC(:,icol),1)
+          dot%vecC(icol,1) = xdotc(xgBlockA%rows,xgBlockA%vecC(:,icol),1,xgBlockB%vecC(:,icol),1)
         end do
         !$omp end parallel do
 #endif

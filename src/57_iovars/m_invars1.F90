@@ -2392,6 +2392,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
    dtsets(idtset)%dmft_triqs_basis=-1
+   dtsets(idtset)%dmft_triqs_chiloc=0
+   if (dtsets(idtset)%dmft_triqs_chiloc > 0 ) dtsets(idtset)%dmft_triqs_chiloc_ins = 10
    dtsets(idtset)%dmft_triqs_compute_integral=1
    dtsets(idtset)%dmft_triqs_det_init_size=100
    dtsets(idtset)%dmft_triqs_det_n_operations_before_check=10000
@@ -2513,6 +2515,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%ga_opt_percent =0.2_dp
    dtsets(idtset)%ga_rules(:) =1
    dtsets(idtset)%geoopt = "none"
+   dtsets(idtset)%ggtrcut=0.001_dp
    dtsets(idtset)%goprecon =0
    dtsets(idtset)%goprecprm(:)=0
    dtsets(idtset)%gpu_devices=(/-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1/)
@@ -2807,6 +2810,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    do ii=1,dtsets(idtset)%natom,1
      dtsets(idtset)%prtatlist(ii)=ii
    end do
+   dtsets(idtset)%pulayhiststore=0
    dtsets(idtset)%pvelmax(:)=one
    dtsets(idtset)%pw_unbal_thresh=40._dp
 !  Q
@@ -2879,7 +2883,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%td_ef_type=0
    dtsets(idtset)%td_ef_induced_vecpot=0
    dtsets(idtset)%td_ef_tzero=zero
-   dtsets(idtset)%td_ef_tau=1000.0_dp
+   dtsets(idtset)%td_ef_tau=1.0_dp
    dtsets(idtset)%td_ef_pol=[1.0_dp,0.0_dp,0.0_dp]
    dtsets(idtset)%td_ef_lambda=10000.0_dp
    dtsets(idtset)%td_ef_ezero=0.1_dp
