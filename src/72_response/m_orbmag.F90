@@ -1392,11 +1392,11 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
   complex(dp) :: b1,bdotc,bpdotc,gdotc,gpdotc,m1,mv2b,ormesh_fac,prefac_b,prefac_m
   logical :: need_ormesh
   !arrays
-  real(dp) :: bdot(2),bpdot(2),gdot(2),gpdot(2),enlout(1),lamv(1)
+  real(dp) :: bdot(2),bpdot(2),gdot(2),gpdot(2),enlout(1),lamv(1),tdot(2)
   real(dp),allocatable :: fofr(:,:,:,:),proj_un(:,:),vectout(:,:)
   real(dp),allocatable,target :: svectoutb(:,:),svectoutbp(:,:),svectoutg(:,:)
   real(dp),pointer :: bra(:,:),du_dbeta(:,:),du_dgamma(:,:),unk(:,:)
-  type(pawcprj_type),allocatable :: cwaveprj(:,:)
+  type(pawcprj_type),allocatable :: cwaveprj(:,:),vv2_cwaveprj(:,:)
 !--------------------------------------------------------------------
 
  npwsp = npw_k*dtset%nspinor
@@ -1409,16 +1409,18 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
  ABI_MALLOC(svectoutb,(2,npwsp))
  ABI_MALLOC(svectoutg,(2,npwsp))
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
+ ABI_MALLOC(vv2_cwaveprj,(dtset%natom,dtset%nspinor))
  call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
+ call pawcprj_alloc(vv2_cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
 
  tim_getghc = 0
  lamv = zero
  ndat = 1
+ nnlout = 1
  cpopt = 4 ! cprj and derivs in memory
  choice = 5 ! apply dS/dk
  paw_opt = 3 ! retain dS/dk|u>
  signs = 2
- nnlout = 1
 
  if (need_ormesh) then
    dnl_dum=0
@@ -1492,7 +1494,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
            proj_un = zero
          end if
          do np = 1, nband_k
-           if (occ_k(np).LT.tol8) cycle
+           if (np .EQ. nn) cycle
            bra => cg_k(1:2,(np-1)*npwsp+1:np*npwsp)
            gpdot=cg_zdotc(npwsp,bra,svectoutg); gpdotc=CMPLX(gpdot(1),gpdot(2))
            bpdot=cg_zdotc(npwsp,bra,svectoutb); bpdotc=CMPLX(bpdot(1),bpdot(2))
@@ -1504,22 +1506,27 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
                & bra(1,1:npwsp)*gpdot(2) + bra(2,1:npwsp)*gpdot(1)
            end if
 
-           mv2b = mv2b - prefac_m*CONJG(bpdotc)*gpdotc*(eig_k(nn) - fermie)
+           mv2b = mv2b + prefac_m*CONJG(bpdotc)*gpdotc*(eig_k(nn) - fermie)
 
          end do ! np
-         
-         ! note that mv2b was accumulated with the necessary - sign
+        
+         ! Note that term VV2 has a minus sign in contrast to VV1 (see ZTG Eq. 36)
          orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv2) = &
-           & orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv2) + epsfac*real(mv2b)
+           & orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv2) - epsfac*real(mv2b)
 
          if (need_ormesh) then
+
            ormesh_fac = trnrm(nn)*prefac_m*(eig_k(nn) - fermie)
            ! compute dS/dk_b \sum_' |u'><u'|dS/dk_g|u>
+           cpopt = -1 ! cprj and derivs computed and not saved
            call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,bdir,lamv,mpi_enreg,ndat,nnlout,&
              & paw_opt,signs,svectoutbp,tim_getghc,proj_un,vectout)
+           cpopt = 4 ! change cpopt back to its usual value in this routine
+           
            call me_proj_mesh(unk,fofr,gs_hamk,svectoutbp,mpi_enreg,n4,n5,n6,ndat,npw_k,ormesh_fac)
            orbmag_mesh%rmesh(:,:,:,adir,invv2)=&
              &orbmag_mesh%rmesh(:,:,:,adir,invv2)-epsfac*fofr(1,:,:,:)
+
          end if
 
        end do ! gdir
@@ -1538,7 +1545,9 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
  ABI_SFREE(svectoutbp)
  ABI_SFREE(svectoutg)
  call pawcprj_free(cwaveprj)
+ call pawcprj_free(vv2_cwaveprj)
  ABI_SFREE(cwaveprj)
+ ABI_SFREE(vv2_cwaveprj)
  ABI_SFREE(fofr)
  ABI_SFREE(proj_un)
  ABI_SFREE(svectoutbp)
