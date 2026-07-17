@@ -1480,24 +1480,11 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
      end if
 
      mv2b = czero
-     if (need_ormesh) then
-       proj_un = zero
-     end if
-     do np = 1, nband_k
-       if (np .EQ. nn) cycle
+     do np = nn+1, nband_k
        bra => cg_k(1:2,(np-1)*npwsp+1:np*npwsp)
        gpdot=cg_zdotc(npwsp,bra,svectoutg); gpdotc=CMPLX(gpdot(1),gpdot(2))
        bpdot=cg_zdotc(npwsp,bra,svectoutb); bpdotc=CMPLX(bpdot(1),bpdot(2))
-
-       if (need_ormesh) then ! accumulate |u'><u'|dS/dk_g|u>
-         proj_un(1,1:npwsp) = proj_un(1,1:npwsp) + &
-           & bra(1,1:npwsp)*gpdot(1) - bra(2,1:npwsp)*gpdot(2)
-         proj_un(2,1:npwsp) = proj_un(2,1:npwsp) + &
-           & bra(1,1:npwsp)*gpdot(2) + bra(2,1:npwsp)*gpdot(1)
-       end if
-
-       mv2b = mv2b + prefac_m*CONJG(bpdotc)*gpdotc*(eig_k(nn) - fermie)
-
+       mv2b = mv2b + prefac_m*CONJG(bpdotc)*gpdotc*(eig_k(nn) - eig_k(np))
      end do ! np
     
      ! Note that term VV2 has a minus sign in contrast to VV1 (see ZTG Eq. 36)
@@ -1506,18 +1493,28 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
 
      if (need_ormesh) then
 
-       ormesh_fac = trnrm(nn)*prefac_m*(eig_k(nn) - fermie)
+       ! project dS/dk_g|u> onto valence space
+       proj_un = zero
+       do np=1,nband_k
+         bra => cg_k(1:2,(np-1)*npwsp+1:np*npwsp)
+         gpdot=cg_zdotc(npwsp,bra,svectoutg)
+         proj_un(1,1:npwsp) = proj_un(1,1:npwsp) + &
+           & bra(1,1:npwsp)*gpdot(1) - bra(2,1:npwsp)*gpdot(2)
+         proj_un(2,1:npwsp) = proj_un(2,1:npwsp) + &
+           & bra(1,1:npwsp)*gpdot(2) + bra(2,1:npwsp)*gpdot(1)
+       end do
+
        ! compute dS/dk_b \sum_' |u'><u'|dS/dk_g|u>
        cpopt = -1 ! cprj and derivs computed and not saved
-       call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,bdir,lamv,mpi_enreg,ndat,nnlout,&
+       call nonlop(choice,cpopt,vv2_cwaveprj,enlout,gs_hamk,bdir,lamv,mpi_enreg,ndat,nnlout,&
          & paw_opt,signs,svectoutbp,tim_getghc,proj_un,vectout)
        cpopt = 4 ! change cpopt back to its usual value in this routine
-       
+       ormesh_fac = trnrm(nn)*prefac_m*(eig_k(nn) - fermie)
        call me_proj_mesh(unk,fofr,gs_hamk,svectoutbp,mpi_enreg,n4,n5,n6,ndat,npw_k,ormesh_fac)
        orbmag_mesh%rmesh(:,:,:,adir,invv2)=&
          &orbmag_mesh%rmesh(:,:,:,adir,invv2)-two*fofr(1,:,:,:)
 
-     end if
+     end if ! computation of vv2 for rmesh
 
    end do ! adir
 
