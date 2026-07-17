@@ -1087,7 +1087,7 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
   complex(dp) :: prefac_m,ormesh_fac,txt
   logical :: need_ormesh
   !arrays
-  real(dp) :: enlout(1),nonlop_udotu(2),cprj_test_udotu(2)
+  real(dp) :: enlout(1),nonlop_udotu(2)
   real(dp),allocatable :: fofr(:,:,:,:),svectout(:,:)
   real(dp),allocatable,target :: vectout(:,:)
   real(dp),pointer :: unk(:,:)
@@ -1116,29 +1116,28 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
 
    prefac_m = -com*c2
    do adir = 1, 3
-     do bdir = 1, 3
-       do gdir = 1, 3
-         epsfac=EPSABG(adir,bdir,gdir)
-         if (epsfac .EQ. 0) cycle
+     ! even permutation of adir,bdir,gdir
+     ! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
+     ! double the original even term
+     bdir=modulo(adir,3)+1
+     gdir=modulo(bdir,3)+1
      
-         call nonlop_orbmag_nl(atindx,cwaveprj,bdir,gdir,dterm,dtset,eig_k(nn),gs_hamk,npw_k,&
-          & pawtab,unk,vectout)
-         
-         cprj_test_udotu(1:2)=cg_zdotc(npwsp,unk,vectout)
-         txt=prefac_m*CMPLX(cprj_test_udotu(1),cprj_test_udotu(2))
+     call nonlop_orbmag_nl(atindx,cwaveprj,bdir,gdir,dterm,dtset,eig_k(nn),gs_hamk,npw_k,&
+      & pawtab,unk,vectout)
+     
+     nonlop_udotu(1:2)=cg_zdotc(npwsp,unk,vectout)
+     txt=prefac_m*CMPLX(nonlop_udotu(1),nonlop_udotu(2))
 
-         orbmag_mesh%omesh(nn,ikpt,isppol,adir,innl) = &
-           &orbmag_mesh%omesh(nn,ikpt,isppol,adir,innl) + epsfac*REAL(txt)
+     orbmag_mesh%omesh(nn,ikpt,isppol,adir,innl) = &
+       &orbmag_mesh%omesh(nn,ikpt,isppol,adir,innl) + two*REAL(txt)
 
-         if (need_ormesh) then
-           ormesh_fac = trnrm(nn)*prefac_m
-           call me_proj_mesh(unk,fofr,gs_hamk,vectout,mpi_enreg,n4,n5,n6,ndat,npw_k,ormesh_fac)
-           orbmag_mesh%rmesh(:,:,:,adir,innl)=&
-             &orbmag_mesh%rmesh(:,:,:,adir,innl)+epsfac*fofr(1,:,:,:)
-         end if
+     if (need_ormesh) then
+       ormesh_fac = trnrm(nn)*prefac_m
+       call me_proj_mesh(unk,fofr,gs_hamk,vectout,mpi_enreg,n4,n5,n6,ndat,npw_k,ormesh_fac)
+       orbmag_mesh%rmesh(:,:,:,adir,innl)=&
+         &orbmag_mesh%rmesh(:,:,:,adir,innl)+two*fofr(1,:,:,:)
+     end if
 
-       end do !gdir
-     end do ! bdir
    end do ! adir
 
  end do !nn
@@ -1257,54 +1256,48 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
    b1 = czero
 
    do adir = 1, 3
-     do bdir = 1, 3
-       do gdir = 1, 3
-         epsfac = EPSABG(adir,bdir,gdir)
-         if (epsfac .EQ. 0) cycle
 
-         !! even permutation of adir,bdir,gdir
-         !! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
-         !! double the original even term
-         !bdir=modulo(adir,3)+1
-         !gdir=modulo(bdir,3)+1
-         
-         cpopt = 2
-         du_dgamma => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
+     ! even permutation of adir,bdir,gdir
+     ! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
+     ! double the original even term
+     bdir=modulo(adir,3)+1
+     gdir=modulo(bdir,3)+1
+     
+     cpopt = 2
+     du_dgamma => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
 
-         call pawcprj_get(atindx,cwaveprj1,cprj1_k(:,:,gdir),dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
-           & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
+     call pawcprj_get(atindx,cwaveprj1,cprj1_k(:,:,gdir),dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
+       & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
 
-         ! compute H|Pc d_\gamma u> and S|Pc d_\gamma u>
-         ! [H+E*S - 2\mu*S]|ket> is needed for orbmag
-         ! -2*S|ket> needed for Chern
-         type_calc = 0 ! apply local and non-local Hamiltonian
-         sij_opt = 1 ! compute gsc in addition to ghc
-         call getghc(cpopt,du_dgamma,cwaveprj1,ghc,gsc,gs_hamk,gvnlxc,lams,mpi_enreg,&
-           & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
+     ! compute H|Pc d_\gamma u> and S|Pc d_\gamma u>
+     ! [H+E*S - 2\mu*S]|ket> is needed for orbmag
+     ! -2*S|ket> needed for Chern
+     type_calc = 0 ! apply local and non-local Hamiltonian
+     sij_opt = 1 ! compute gsc in addition to ghc
+     call getghc(cpopt,du_dgamma,cwaveprj1,ghc,gsc,gs_hamk,gvnlxc,lams,mpi_enreg,&
+       & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
 
-         ghc(1:2,1:npwsp) = ghc(1:2,1:npwsp) + gsc(1:2,1:npwsp)*(eig_k(nn) - two*fermie)
+     ghc(1:2,1:npwsp) = ghc(1:2,1:npwsp) + gsc(1:2,1:npwsp)*(eig_k(nn) - two*fermie)
 
-         du_dbeta => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
-         mdot = cg_zdotc(npwsp,du_dbeta,ghc); bdot = cg_zdotc(npwsp,du_dbeta,gsc)
+     du_dbeta => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
+     mdot = cg_zdotc(npwsp,du_dbeta,ghc); bdot = cg_zdotc(npwsp,du_dbeta,gsc)
 
-         ! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
-         ! double the original even term: this is the origin of the factor of two
-          orbmag_mesh%omesh(nn,ikpt,isppol,adir,incc) =  &
-           & orbmag_mesh%omesh(nn,ikpt,isppol,adir,incc) + &
-           & epsfac*real(prefac_m*CMPLX(mdot(1),mdot(2)))
-          orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibcc) = &
-           & orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibcc) - &
-           & epsfac*two*real(prefac_b*CMPLX(bdot(1),bdot(2)))
+     ! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
+     ! double the original even term: this is the origin of the factor of two
+      orbmag_mesh%omesh(nn,ikpt,isppol,adir,incc) =  &
+       & orbmag_mesh%omesh(nn,ikpt,isppol,adir,incc) + &
+       & two*real(prefac_m*CMPLX(mdot(1),mdot(2)))
+      orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibcc) = &
+       & orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibcc) - &
+       & four*real(prefac_b*CMPLX(bdot(1),bdot(2)))
 
-         if (need_ormesh) then
-           ormesh_fac = trnrm(nn)*prefac_m
-           call me_proj_mesh(du_dbeta,fofr,gs_hamk,ghc,mpi_enreg,n4,n5,n6,ndat,npw_k,ormesh_fac)
-           orbmag_mesh%rmesh(:,:,:,adir,incc)=&
-             &orbmag_mesh%rmesh(:,:,:,adir,incc)+epsfac*fofr(1,:,:,:)
-         end if
+     if (need_ormesh) then
+       ormesh_fac = trnrm(nn)*prefac_m
+       call me_proj_mesh(du_dbeta,fofr,gs_hamk,ghc,mpi_enreg,n4,n5,n6,ndat,npw_k,ormesh_fac)
+       orbmag_mesh%rmesh(:,:,:,adir,incc)=&
+         &orbmag_mesh%rmesh(:,:,:,adir,incc)+two*fofr(1,:,:,:)
+     end if
 
-       end do ! gdir
-     end do ! bdir
    end do ! adir
 
  end do !nn
@@ -1440,97 +1433,96 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
      & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
 
    do adir=1,3
-     do bdir=1,3
-       do gdir=1,3
-         epsfac=EPSABG(adir,bdir,gdir)
-         if (epsfac.EQ.0) cycle
+     ! even permutation of adir,bdir,gdir
+     ! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
+     ! double the original even term
+     bdir=modulo(adir,3)+1
+     gdir=modulo(bdir,3)+1
 
-         ! compute dS/dk_b|u_nk>
-         call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,bdir,lamv,mpi_enreg,ndat,nnlout,&
-           & paw_opt,signs,svectoutb,tim_getghc,unk,vectout)
+     ! compute dS/dk_b|u_nk>
+     call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,bdir,lamv,mpi_enreg,ndat,nnlout,&
+       & paw_opt,signs,svectoutb,tim_getghc,unk,vectout)
 
-         ! compute dS/dk_g |u_nk>
-         call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,gdir,lamv,mpi_enreg,ndat,nnlout,&
-           & paw_opt,signs,svectoutg,tim_getghc,unk,vectout)
+     ! compute dS/dk_g |u_nk>
+     call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,gdir,lamv,mpi_enreg,ndat,nnlout,&
+       & paw_opt,signs,svectoutg,tim_getghc,unk,vectout)
 
-         ! extract |Pc du/dk_b>
-         du_dbeta => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
-         gdot=cg_zdotc(npwsp,du_dbeta,svectoutg); gdotc=CMPLX(gdot(1),gdot(2))
+     ! extract |Pc du/dk_b>
+     du_dbeta => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
+     gdot=cg_zdotc(npwsp,du_dbeta,svectoutg); gdotc=CMPLX(gdot(1),gdot(2))
 
-         ! extract |Pc du/dk_g>
-         du_dgamma => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
-         bdot=cg_zdotc(npwsp,du_dgamma,svectoutb); bdotc=CMPLX(bdot(1),bdot(2))
+     ! extract |Pc du/dk_g>
+     du_dgamma => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
+     bdot=cg_zdotc(npwsp,du_dgamma,svectoutb); bdotc=CMPLX(bdot(1),bdot(2))
 
-         ! here is <Pc du/dk_b|dS/dk_g|u_nk>*E_nk
-         b1    = -prefac_b*gdotc
-         m1    =  prefac_m*gdotc*(eig_k(nn) - fermie)
+     ! here is <Pc du/dk_b|dS/dk_g|u_nk>*E_nk
+     b1    = -prefac_b*gdotc
+     m1    =  prefac_m*gdotc*(eig_k(nn) - fermie)
 
-         ! add CONJG(<Pc du/dk_b|dS/dk_g|u_nk>)*E_nk
-         b1    = b1    - prefac_b*CONJG(bdotc)
-         m1    = m1    + prefac_m*CONJG(bdotc)*(eig_k(nn) - fermie)
+     ! add CONJG(<Pc du/dk_b|dS/dk_g|u_nk>)*E_nk
+     b1    = b1    - prefac_b*CONJG(bdotc)
+     m1    = m1    + prefac_m*CONJG(bdotc)*(eig_k(nn) - fermie)
    
-         orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv1) = &
-           & orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv1) + epsfac*real(m1)
-         
-         orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibvv1) = &
-           & orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibvv1) + epsfac*real(b1)
+     orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv1) = &
+       & orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv1) + two*real(m1)
+     
+     orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibvv1) = &
+       & orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibvv1) + two*real(b1)
 
-         if (need_ormesh) then
-           
-           ormesh_fac = trnrm(nn)*prefac_m*(eig_k(nn) - fermie)
+     if (need_ormesh) then
+       
+       ormesh_fac = trnrm(nn)*prefac_m*(eig_k(nn) - fermie)
 
-           call me_proj_mesh(du_dbeta,fofr,gs_hamk,svectoutg,mpi_enreg,n4,n5,n6,ndat,npw_k,ormesh_fac)
-           orbmag_mesh%rmesh(:,:,:,adir,invv1)=&
-             &orbmag_mesh%rmesh(:,:,:,adir,invv1)+epsfac*fofr(1,:,:,:)
-           
-           call me_proj_mesh(svectoutb,fofr,gs_hamk,du_dgamma,mpi_enreg,n4,n5,n6,ndat,npw_k,ormesh_fac)
-           orbmag_mesh%rmesh(:,:,:,adir,invv1)=&
-             &orbmag_mesh%rmesh(:,:,:,adir,invv1)+epsfac*fofr(1,:,:,:)
-          
-         end if
+       call me_proj_mesh(du_dbeta,fofr,gs_hamk,svectoutg,mpi_enreg,n4,n5,n6,ndat,npw_k,ormesh_fac)
+       orbmag_mesh%rmesh(:,:,:,adir,invv1)=&
+         &orbmag_mesh%rmesh(:,:,:,adir,invv1)+two*fofr(1,:,:,:)
+       
+       call me_proj_mesh(svectoutb,fofr,gs_hamk,du_dgamma,mpi_enreg,n4,n5,n6,ndat,npw_k,ormesh_fac)
+       orbmag_mesh%rmesh(:,:,:,adir,invv1)=&
+         &orbmag_mesh%rmesh(:,:,:,adir,invv1)+two*fofr(1,:,:,:)
+      
+     end if
 
-         mv2b = czero
-         if (need_ormesh) then
-           proj_un = zero
-         end if
-         do np = 1, nband_k
-           if (np .EQ. nn) cycle
-           bra => cg_k(1:2,(np-1)*npwsp+1:np*npwsp)
-           gpdot=cg_zdotc(npwsp,bra,svectoutg); gpdotc=CMPLX(gpdot(1),gpdot(2))
-           bpdot=cg_zdotc(npwsp,bra,svectoutb); bpdotc=CMPLX(bpdot(1),bpdot(2))
+     mv2b = czero
+     if (need_ormesh) then
+       proj_un = zero
+     end if
+     do np = 1, nband_k
+       if (np .EQ. nn) cycle
+       bra => cg_k(1:2,(np-1)*npwsp+1:np*npwsp)
+       gpdot=cg_zdotc(npwsp,bra,svectoutg); gpdotc=CMPLX(gpdot(1),gpdot(2))
+       bpdot=cg_zdotc(npwsp,bra,svectoutb); bpdotc=CMPLX(bpdot(1),bpdot(2))
 
-           if (need_ormesh) then ! accumulate |u'><u'|dS/dk_g|u>
-             proj_un(1,1:npwsp) = proj_un(1,1:npwsp) + &
-               & bra(1,1:npwsp)*gpdot(1) - bra(2,1:npwsp)*gpdot(2)
-             proj_un(2,1:npwsp) = proj_un(2,1:npwsp) + &
-               & bra(1,1:npwsp)*gpdot(2) + bra(2,1:npwsp)*gpdot(1)
-           end if
+       if (need_ormesh) then ! accumulate |u'><u'|dS/dk_g|u>
+         proj_un(1,1:npwsp) = proj_un(1,1:npwsp) + &
+           & bra(1,1:npwsp)*gpdot(1) - bra(2,1:npwsp)*gpdot(2)
+         proj_un(2,1:npwsp) = proj_un(2,1:npwsp) + &
+           & bra(1,1:npwsp)*gpdot(2) + bra(2,1:npwsp)*gpdot(1)
+       end if
 
-           mv2b = mv2b + prefac_m*CONJG(bpdotc)*gpdotc*(eig_k(nn) - fermie)
+       mv2b = mv2b + prefac_m*CONJG(bpdotc)*gpdotc*(eig_k(nn) - fermie)
 
-         end do ! np
-        
-         ! Note that term VV2 has a minus sign in contrast to VV1 (see ZTG Eq. 36)
-         orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv2) = &
-           & orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv2) - epsfac*real(mv2b)
+     end do ! np
+    
+     ! Note that term VV2 has a minus sign in contrast to VV1 (see ZTG Eq. 36)
+     orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv2) = &
+       & orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv2) - two*real(mv2b)
 
-         if (need_ormesh) then
+     if (need_ormesh) then
 
-           ormesh_fac = trnrm(nn)*prefac_m*(eig_k(nn) - fermie)
-           ! compute dS/dk_b \sum_' |u'><u'|dS/dk_g|u>
-           cpopt = -1 ! cprj and derivs computed and not saved
-           call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,bdir,lamv,mpi_enreg,ndat,nnlout,&
-             & paw_opt,signs,svectoutbp,tim_getghc,proj_un,vectout)
-           cpopt = 4 ! change cpopt back to its usual value in this routine
-           
-           call me_proj_mesh(unk,fofr,gs_hamk,svectoutbp,mpi_enreg,n4,n5,n6,ndat,npw_k,ormesh_fac)
-           orbmag_mesh%rmesh(:,:,:,adir,invv2)=&
-             &orbmag_mesh%rmesh(:,:,:,adir,invv2)-epsfac*fofr(1,:,:,:)
+       ormesh_fac = trnrm(nn)*prefac_m*(eig_k(nn) - fermie)
+       ! compute dS/dk_b \sum_' |u'><u'|dS/dk_g|u>
+       cpopt = -1 ! cprj and derivs computed and not saved
+       call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,bdir,lamv,mpi_enreg,ndat,nnlout,&
+         & paw_opt,signs,svectoutbp,tim_getghc,proj_un,vectout)
+       cpopt = 4 ! change cpopt back to its usual value in this routine
+       
+       call me_proj_mesh(unk,fofr,gs_hamk,svectoutbp,mpi_enreg,n4,n5,n6,ndat,npw_k,ormesh_fac)
+       orbmag_mesh%rmesh(:,:,:,adir,invv2)=&
+         &orbmag_mesh%rmesh(:,:,:,adir,invv2)-two*fofr(1,:,:,:)
 
-         end if
+     end if
 
-       end do ! gdir
-     end do ! bdir
    end do ! adir
 
  end do !nn
@@ -1542,7 +1534,6 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
 
  ABI_SFREE(vectout) 
  ABI_SFREE(svectoutb)
- ABI_SFREE(svectoutbp)
  ABI_SFREE(svectoutg)
  call pawcprj_free(cwaveprj)
  call pawcprj_free(vv2_cwaveprj)
