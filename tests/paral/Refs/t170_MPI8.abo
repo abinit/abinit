@@ -15,12 +15,12 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Fri  3 Jul 2026.
-- ( at 14h07 )
+- ( at 16h41 )
   
-- input  file    -> /tmp/abinit/tddft/opt/Test_suite/rttddft_suite_t06/t06.abi
-- output file    -> t06.abo
-- root for input  files -> t06i
-- root for output files -> t06o
+- input  file    -> /tmp/abinit/tddft/opt/Test_suite/paral_t170_MPI8/t170.abi
+- output file    -> t170_MPI8.abo
+- root for input  files -> t170_MPI8i
+- root for output files -> t170_MPI8o
 
 - inpspheads : Reading pseudopotential header in XML form from 
 -   /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/tddft/tests/Pspdir/Psdj_paw_pw_std/C.xml
@@ -33,14 +33,14 @@
     nsppol =       1      nsym =      48    n1xccc =       1    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           8
-       mpw =         150          nfft =        4096          nkpt =          32
+       mpw =          75          nfft =        4096          nkpt =          32
 Pmy_natom=         1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       4.000 Mbytes of memory.
+P This job should need less than                       4.275 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.588 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
+_ WF disk file :      0.295 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -52,13 +52,13 @@ _ WF disk file :      0.588 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
     nsppol =       1      nsym =      48    n1xccc =       1    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           8
-       mpw =         150          nfft =        4096          nkpt =          32
+       mpw =          75          nfft =        4096          nkpt =          32
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       4.130 Mbytes of memory.
+P This job should need less than                       4.406 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.588 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
+_ WF disk file :      0.295 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -70,13 +70,13 @@ _ WF disk file :      0.588 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
     nsppol =       1      nsym =      48    n1xccc =       1    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           8
-       mpw =         150          nfft =        4096          nkpt =          32
+       mpw =          75          nfft =        4096          nkpt =          32
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       4.130 Mbytes of memory.
+P This job should need less than                       4.406 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.588 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
+_ WF disk file :      0.295 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -90,11 +90,11 @@ _ WF disk file :      0.588 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
+-          iomode           1
             acell      6.6707332245E+00  6.6707332245E+00  6.6707332245E+00 Bohr
               amu      1.20110000E+01
-           bandpp1          1
-           bandpp2          8
-           bandpp3          8
+           bandpp           4
+     densfor_pred           6
              ecut      1.20000000E+01 Hartree
 -          fftalg         512
            getwfk1          0
@@ -145,6 +145,8 @@ P           mkmem           8
             ngfft          16      16      16
           ngfftdg          24      24      24
              nkpt          32
+-          npband           2
+-        np_spkpt           4
             nstep          20
              nsym          48
             ntime          50
@@ -157,6 +159,7 @@ P           mkmem           8
 -      paral_atom1          1
 -      paral_atom2          0
 -      paral_atom3          0
+        paral_kgb           1
         pawecutdg      2.40000000E+01 Hartree
        prtcurrent           1
            prtden           0
@@ -223,6 +226,9 @@ P           mkmem           8
            tolwfr      1.00000000E-20
             typat      1  1
            useylm           1
+         wfoptalg1        114
+         wfoptalg2         10
+         wfoptalg3         10
               wtk        0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
                          0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
                          0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
@@ -247,15 +253,15 @@ P           mkmem           8
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 4, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 8, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
-dimensions: {natom: 2, nkpt: 32, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 150, }
+dimensions: {natom: 2, nkpt: 32, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 75, }
 cutoff_energies: {ecut:  12.0, pawecutdg:  24.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
-meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
 ...
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -306,38 +312,33 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
    7.04281371E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
-_setup2: Arith. and geom. avg. npw (full set) are     146.250     146.234
+_setup2: Arith. and geom. avg. npw (full set) are      73.500      73.495
 
 ================================================================================
 
 --- !BeginCycle
 iteration_state: {dtset: 1, }
-solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 10, }
+solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 114, }
 tolerances: {tolwfr: 1.00E-20, tolvrs: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -11.490480752543    -1.149E+01 4.113E-01 6.256E+00
- ETOT  2  -11.520637934952    -3.016E-02 4.462E-05 7.609E-01
- ETOT  3  -11.517322548455     3.315E-03 6.328E-05 1.269E-02
- ETOT  4  -11.517344189900    -2.164E-05 6.390E-07 1.309E-03
- ETOT  5  -11.517343130861     1.059E-06 1.885E-08 6.078E-05
- ETOT  6  -11.517342994053     1.368E-07 4.283E-09 3.124E-06
- ETOT  7  -11.517343000600    -6.547E-09 7.762E-12 5.895E-08
- ETOT  8  -11.517343000509     9.060E-11 1.120E-12 1.181E-09
- ETOT  9  -11.517343000505     4.604E-12 8.506E-14 1.058E-11
- ETOT 10  -11.517343000504     4.796E-14 6.397E-16 5.579E-13
- ETOT 11  -11.517343000504     5.329E-15 7.986E-18 5.034E-15
- ETOT 12  -11.517343000505    -8.704E-14 3.211E-19 8.511E-16
- ETOT 13  -11.517343000504     1.013E-13 3.737E-20 2.351E-17
- ETOT 14  -11.517343000505    -6.217E-14 9.694E-21 2.746E-19
+ ETOT  1  -11.544383712010    -1.154E+01 4.952E-08 6.837E+00
+ ETOT  2  -11.519815886587     2.457E-02 1.166E-12 6.379E-01
+ ETOT  3  -11.517333510604     2.482E-03 2.278E-09 1.064E-02
+ ETOT  4  -11.517342994774    -9.484E-06 1.388E-11 5.664E-05
+ ETOT  5  -11.517343006555    -1.178E-08 2.517E-13 1.737E-06
+ ETOT  6  -11.517343000554     6.000E-09 7.735E-15 2.354E-09
+ ETOT  7  -11.517343000505     4.893E-11 6.088E-18 1.031E-11
+ ETOT  8  -11.517343000505     7.070E-13 1.475E-19 1.714E-12
+ ETOT  9  -11.517343000505     1.776E-14 9.047E-21 4.637E-14
 
- At SCF step   14  max residual=  9.69E-21 < tolwfr=  1.00E-20 AND nres2   =  2.75E-19 < tolvrs=  1.00E-10 =>converged.
+ At SCF step    9  max residual=  9.05E-21 < tolwfr=  1.00E-20 AND nres2   =  4.64E-14 < tolvrs=  1.00E-10 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  5.45323288E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  5.45323288E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  5.45323288E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  5.45323502E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  5.45323502E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  5.45323502E-04  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -350,22 +351,22 @@ lattice_vectors:
 lattice_lengths: [   4.71692,    4.71692,    4.71692, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.4209709E+01
-convergence: {deltae: -6.217E-14, res2:  2.746E-19, residm:  9.694E-21, diffor: null, }
+convergence: {deltae:  1.776E-14, res2:  4.637E-14, residm:  9.047E-21, diffor: null, }
 etotal    :  -1.15173430E+01
 entropy   :   0.00000000E+00
-fermie    :   3.18049364E-01
+fermie    :   3.18049362E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  5.45323288E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   5.45323288E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   5.45323288E-04, ]
+- [  5.45323502E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   5.45323502E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   5.45323502E-04, ]
 pressure_GPa:  -1.6044E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01,  C]
 cartesian_forces: # hartree/bohr
-- [  7.88380006E-32,  -7.88380006E-32,   7.88380006E-32, ]
-- [ -7.88380006E-32,   7.88380006E-32,  -7.88380006E-32, ]
-force_length_stats: {min:   1.36551423E-31, max:   1.36551423E-31, mean:   1.36551423E-31, }
+- [ -5.55019524E-29,   5.55019524E-29,   3.53194243E-29, ]
+- [  5.55019524E-29,  -5.55019524E-29,  -3.53194243E-29, ]
+force_length_stats: {min:   8.60720348E-29, max:   8.60720348E-29, mean:   8.60720348E-29, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -377,8 +378,8 @@ force_length_stats: {min:   1.36551423E-31, max:   1.36551423E-31, mean:   1.365
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.264987791430341
- Compensation charge over fine fft grid    =      0.264992674836236
+ Compensation charge over spherical meshes =      0.264987757193726
+ Compensation charge over fine fft grid    =      0.264992675937776
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -428,27 +429,27 @@ force_length_stats: {min:   1.36551423E-31, max:   1.36551423E-31, mean:   1.365
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   41.399E-22; max=  96.942E-22
+ Mean square residual over all n,k,spin=   13.289E-22; max=  90.469E-22
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  4.2940E-31; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1       0.000000000000     -0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  4.9391E-28; max dE/dt=  8.7511E-28; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000     -0.000000000000
+    2       0.000000000000      0.000000000000     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.88250000000000     0.88250000000000     0.88250000000000
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
-    2     -0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 7.8838001E-32 7.8838001E-32   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 4.9693712E-29 5.5501952E-29   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
-    2     -0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 4.0540130E-30 4.0540130E-30   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 2.5553534E-27 2.8540251E-27   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.670733224454  6.670733224454  6.670733224454 bohr
               =  3.530000000000  3.530000000000  3.530000000000 angstroms
  Fermi (or HOMO) energy (hartree) =   0.31805   Average Vxc (hartree)=  -0.50685
@@ -461,59 +462,59 @@ force_length_stats: {min:   1.36551423E-31, max:   1.36551423E-31, mean:   1.365
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  7.01772178303529E+00
-hartree             :  9.49630519698800E-01
-xc                  : -4.32199443747908E+00
+kinetic             :  7.01772179110445E+00
+hartree             :  9.49630504963710E-01
+xc                  : -4.32199445932119E+00
 Ewald energy        : -1.29204340521829E+01
 psp_core            :  9.49042090308736E-01
-local_psp           : -4.60322382663592E+00
-PAW spherical_terms :  1.41191492261458E+00
-total_energy        : -1.15173430006405E+01
-total_energy_eV     : -3.13402868917874E+02
+local_psp           : -4.60322378911204E+00
+PAW spherical_terms :  1.41191501100370E+00
+total_energy        : -1.15173429032355E+01
+total_energy_eV     : -3.13402866267350E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  4.00599426281145E-01
+band_energy         :  4.00599411468072E-01
 Ewald energy        : -1.29204340521829E+01
 psp_core            :  9.49042090308736E-01
-xc_dc               : -7.17067005694070E-01
-PAW spherical_terms :  7.70516540782531E-01
+xc_dc               : -7.17066987094841E-01
+PAW spherical_terms :  7.70516536996396E-01
 total_energy_dc     : -1.15173430005045E+01
-total_energy_dc_eV  : -3.13402868914175E+02
+total_energy_dc_eV  : -3.13402868914174E+02
 ...
 
 
 --- !EnergyTermsWithPAWCore
 iteration_state     : {dtset: 1, }
 comment             : 'Components of total free energy, including PAW core contributions'
-Total energy        : -7.56170350940214E+01
+Total energy        : -7.56170349966165E+01
 Total energy DC     : -7.56170350938855E+01
-Total energy (eV)   : -2.05764434871932E+03
+Total energy (eV)   : -2.05764434606879E+03
 Total energy DC (eV): -2.05764434871562E+03
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  5.45323288E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  5.45323288E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  5.45323288E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  5.45323502E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  5.45323502E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  5.45323502E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.6044E+01 GPa]
-- sigma(1 1)=  1.60439650E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.60439650E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.60439650E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.60439714E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.60439714E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.60439714E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 4, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 8, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
-dimensions: {natom: 2, nkpt: 32, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 150, }
+dimensions: {natom: 2, nkpt: 32, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 75, }
 cutoff_energies: {ecut:  12.0, pawecutdg:  24.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 9, }
@@ -557,7 +558,7 @@ meta: {optdriver: 9, }
 
 -------------------    Reading initial wavefunctions    -------------------
 
--inwffil : will read wavefunctions from disk file t06o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t170_MPI8o_DS1_WFK
 
 -------------------------   Starting propagation   ------------------------
 
@@ -567,7 +568,7 @@ meta: {optdriver: 9, }
 Total energy =     -11.517343 Ha
 Integrated density (ie. total nb of electrons) =       8.0000048834
 
-- Time - cpu, wall (sec):    0.07    0.08
+- Time - cpu, wall (sec):    0.06    0.06
 
 
 --- Iteration 2
@@ -575,7 +576,7 @@ Integrated density (ie. total nb of electrons) =       8.0000048834
 Total energy =     -11.517343 Ha
 Integrated density (ie. total nb of electrons) =       8.0000048834
 
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 3
@@ -583,383 +584,383 @@ Integrated density (ie. total nb of electrons) =       8.0000048834
 Total energy =     -11.517343 Ha
 Integrated density (ie. total nb of electrons) =       8.0004963100
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 4
 
 Total energy =     -11.478290 Ha
-Integrated density (ie. total nb of electrons) =       8.0004835099
+Integrated density (ie. total nb of electrons) =       8.0004960705
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 5
 
-Total energy =     -11.479272 Ha
-Integrated density (ie. total nb of electrons) =       8.0004580995
+Total energy =     -11.478292 Ha
+Integrated density (ie. total nb of electrons) =       8.0004958310
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 6
 
-Total energy =     -11.481121 Ha
-Integrated density (ie. total nb of electrons) =       8.0004197411
+Total energy =     -11.478294 Ha
+Integrated density (ie. total nb of electrons) =       8.0004955949
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 7
 
-Total energy =     -11.483635 Ha
-Integrated density (ie. total nb of electrons) =       8.0003678281
+Total energy =     -11.478296 Ha
+Integrated density (ie. total nb of electrons) =       8.0004953638
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 8
 
-Total energy =     -11.486575 Ha
-Integrated density (ie. total nb of electrons) =       8.0003023873
+Total energy =     -11.478298 Ha
+Integrated density (ie. total nb of electrons) =       8.0004951366
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 9
 
-Total energy =     -11.489701 Ha
-Integrated density (ie. total nb of electrons) =       8.0002253545
+Total energy =     -11.478300 Ha
+Integrated density (ie. total nb of electrons) =       8.0004949105
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 10
 
-Total energy =     -11.492786 Ha
-Integrated density (ie. total nb of electrons) =       8.0001410822
+Total energy =     -11.478301 Ha
+Integrated density (ie. total nb of electrons) =       8.0004946839
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 11
 
-Total energy =     -11.495622 Ha
-Integrated density (ie. total nb of electrons) =       8.0000554346
+Total energy =     -11.478303 Ha
+Integrated density (ie. total nb of electrons) =       8.0004944573
 
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 12
 
-Total energy =     -11.498026 Ha
-Integrated density (ie. total nb of electrons) =       7.9999740232
+Total energy =     -11.478305 Ha
+Integrated density (ie. total nb of electrons) =       8.0004942323
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 13
 
-Total energy =     -11.499849 Ha
-Integrated density (ie. total nb of electrons) =       7.9999008539
+Total energy =     -11.478307 Ha
+Integrated density (ie. total nb of electrons) =       8.0004940092
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 14
 
-Total energy =     -11.500992 Ha
-Integrated density (ie. total nb of electrons) =       7.9998381995
+Total energy =     -11.478309 Ha
+Integrated density (ie. total nb of electrons) =       8.0004937868
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 15
 
-Total energy =     -11.501409 Ha
-Integrated density (ie. total nb of electrons) =       7.9997873878
+Total energy =     -11.478310 Ha
+Integrated density (ie. total nb of electrons) =       8.0004935640
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 16
 
-Total energy =     -11.501101 Ha
-Integrated density (ie. total nb of electrons) =       7.9997495342
+Total energy =     -11.478312 Ha
+Integrated density (ie. total nb of electrons) =       8.0004933408
 
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 17
 
-Total energy =     -11.500113 Ha
-Integrated density (ie. total nb of electrons) =       7.9997255796
+Total energy =     -11.478314 Ha
+Integrated density (ie. total nb of electrons) =       8.0004931186
 
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 18
 
-Total energy =     -11.498529 Ha
-Integrated density (ie. total nb of electrons) =       7.9997157955
+Total energy =     -11.478316 Ha
+Integrated density (ie. total nb of electrons) =       8.0004928982
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 19
 
-Total energy =     -11.496462 Ha
-Integrated density (ie. total nb of electrons) =       7.9997193460
+Total energy =     -11.478317 Ha
+Integrated density (ie. total nb of electrons) =       8.0004926793
 
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 20
 
-Total energy =     -11.494048 Ha
-Integrated density (ie. total nb of electrons) =       7.9997342877
+Total energy =     -11.478319 Ha
+Integrated density (ie. total nb of electrons) =       8.0004924607
 
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 21
 
-Total energy =     -11.491434 Ha
-Integrated density (ie. total nb of electrons) =       7.9997579375
+Total energy =     -11.478321 Ha
+Integrated density (ie. total nb of electrons) =       8.0004922421
 
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 22
 
-Total energy =     -11.488766 Ha
-Integrated density (ie. total nb of electrons) =       7.9997873032
+Total energy =     -11.478322 Ha
+Integrated density (ie. total nb of electrons) =       8.0004920244
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 23
 
-Total energy =     -11.486184 Ha
-Integrated density (ie. total nb of electrons) =       7.9998193593
+Total energy =     -11.478324 Ha
+Integrated density (ie. total nb of electrons) =       8.0004918088
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 24
 
-Total energy =     -11.483813 Ha
-Integrated density (ie. total nb of electrons) =       7.9998511568
+Total energy =     -11.478326 Ha
+Integrated density (ie. total nb of electrons) =       8.0004915955
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 25
 
-Total energy =     -11.481762 Ha
-Integrated density (ie. total nb of electrons) =       7.9998798834
+Total energy =     -11.478327 Ha
+Integrated density (ie. total nb of electrons) =       8.0004913839
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 26
 
-Total energy =     -11.480111 Ha
-Integrated density (ie. total nb of electrons) =       7.9999029794
+Total energy =     -11.478329 Ha
+Integrated density (ie. total nb of electrons) =       8.0004911733
 
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 27
 
-Total energy =     -11.478911 Ha
-Integrated density (ie. total nb of electrons) =       7.9999183128
+Total energy =     -11.478330 Ha
+Integrated density (ie. total nb of electrons) =       8.0004909642
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 28
 
-Total energy =     -11.478182 Ha
-Integrated density (ie. total nb of electrons) =       7.9999243159
+Total energy =     -11.478332 Ha
+Integrated density (ie. total nb of electrons) =       8.0004907574
 
-- Time - cpu, wall (sec):    0.05    0.06
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 29
 
-Total energy =     -11.477917 Ha
-Integrated density (ie. total nb of electrons) =       7.9999199965
+Total energy =     -11.478334 Ha
+Integrated density (ie. total nb of electrons) =       8.0004905531
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 30
 
-Total energy =     -11.478080 Ha
-Integrated density (ie. total nb of electrons) =       7.9999048566
+Total energy =     -11.478335 Ha
+Integrated density (ie. total nb of electrons) =       8.0004903502
 
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 31
 
-Total energy =     -11.478614 Ha
-Integrated density (ie. total nb of electrons) =       7.9998788623
+Total energy =     -11.478337 Ha
+Integrated density (ie. total nb of electrons) =       8.0004901474
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 32
 
-Total energy =     -11.479447 Ha
-Integrated density (ie. total nb of electrons) =       7.9998425654
+Total energy =     -11.478338 Ha
+Integrated density (ie. total nb of electrons) =       8.0004899451
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 33
 
-Total energy =     -11.480493 Ha
-Integrated density (ie. total nb of electrons) =       7.9997972890
+Total energy =     -11.478340 Ha
+Integrated density (ie. total nb of electrons) =       8.0004897452
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 34
 
-Total energy =     -11.481664 Ha
-Integrated density (ie. total nb of electrons) =       7.9997451464
+Total energy =     -11.478341 Ha
+Integrated density (ie. total nb of electrons) =       8.0004895499
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 35
 
-Total energy =     -11.482874 Ha
-Integrated density (ie. total nb of electrons) =       7.9996887556
+Total energy =     -11.478343 Ha
+Integrated density (ie. total nb of electrons) =       8.0004893591
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 36
 
-Total energy =     -11.484040 Ha
-Integrated density (ie. total nb of electrons) =       7.9996307631
+Total energy =     -11.478344 Ha
+Integrated density (ie. total nb of electrons) =       8.0004891702
 
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 37
 
-Total energy =     -11.485090 Ha
-Integrated density (ie. total nb of electrons) =       7.9995734754
+Total energy =     -11.478346 Ha
+Integrated density (ie. total nb of electrons) =       8.0004889801
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 38
 
-Total energy =     -11.485965 Ha
-Integrated density (ie. total nb of electrons) =       7.9995187978
+Total energy =     -11.478347 Ha
+Integrated density (ie. total nb of electrons) =       8.0004887876
 
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 39
 
-Total energy =     -11.486617 Ha
-Integrated density (ie. total nb of electrons) =       7.9994683951
+Total energy =     -11.478349 Ha
+Integrated density (ie. total nb of electrons) =       8.0004885949
 
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 40
 
-Total energy =     -11.487017 Ha
-Integrated density (ie. total nb of electrons) =       7.9994237887
+Total energy =     -11.478351 Ha
+Integrated density (ie. total nb of electrons) =       8.0004884050
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 41
 
-Total energy =     -11.487150 Ha
-Integrated density (ie. total nb of electrons) =       7.9993861916
+Total energy =     -11.478352 Ha
+Integrated density (ie. total nb of electrons) =       8.0004882192
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 42
 
-Total energy =     -11.487015 Ha
-Integrated density (ie. total nb of electrons) =       7.9993561707
+Total energy =     -11.478354 Ha
+Integrated density (ie. total nb of electrons) =       8.0004880354
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 43
 
-Total energy =     -11.486624 Ha
-Integrated density (ie. total nb of electrons) =       7.9993334347
+Total energy =     -11.478355 Ha
+Integrated density (ie. total nb of electrons) =       8.0004878494
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 44
 
-Total energy =     -11.486006 Ha
-Integrated density (ie. total nb of electrons) =       7.9993169797
+Total energy =     -11.478356 Ha
+Integrated density (ie. total nb of electrons) =       8.0004876581
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 45
 
-Total energy =     -11.485203 Ha
-Integrated density (ie. total nb of electrons) =       7.9993055486
+Total energy =     -11.478358 Ha
+Integrated density (ie. total nb of electrons) =       8.0004874618
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 46
 
-Total energy =     -11.484271 Ha
-Integrated density (ie. total nb of electrons) =       7.9992981165
+Total energy =     -11.478359 Ha
+Integrated density (ie. total nb of electrons) =       8.0004872642
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 47
 
-Total energy =     -11.483268 Ha
-Integrated density (ie. total nb of electrons) =       7.9992941081
+Total energy =     -11.478361 Ha
+Integrated density (ie. total nb of electrons) =       8.0004870702
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 48
 
-Total energy =     -11.482253 Ha
-Integrated density (ie. total nb of electrons) =       7.9992932549
+Total energy =     -11.478362 Ha
+Integrated density (ie. total nb of electrons) =       8.0004868832
 
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 49
 
-Total energy =     -11.481279 Ha
-Integrated density (ie. total nb of electrons) =       7.9992952424
+Total energy =     -11.478364 Ha
+Integrated density (ie. total nb of electrons) =       8.0004867040
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 50
 
-Total energy =     -11.480388 Ha
-Integrated density (ie. total nb of electrons) =       7.9992994076
+Total energy =     -11.478365 Ha
+Integrated density (ie. total nb of electrons) =       8.0004865309
 
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.08    0.08
 
 
 ---------------------------------------------------------------------------
@@ -969,12 +970,12 @@ Integrated density (ie. total nb of electrons) =       7.9992994076
 
 ================================================================================
 == DATASET  3 ==================================================================
--   mpi_nproc: 4, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 8, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
-dimensions: {natom: 2, nkpt: 32, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 150, }
+dimensions: {natom: 2, nkpt: 32, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 75, }
 cutoff_energies: {ecut:  12.0, pawecutdg:  24.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 9, }
@@ -1016,413 +1017,413 @@ meta: {optdriver: 9, }
 
 -------------------   Reading wavefunctions for restart  ------------------
 
--inwffil : will read wavefunctions from disk file t06o_DS2_50_WFK
+-inwffil : will read wavefunctions from disk file t170_MPI8o_DS2_50_WFK
 
 -------------------    Reading initial wavefunctions    -------------------
 
--inwffil : will read wavefunctions from disk file t06o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t170_MPI8o_DS1_WFK
 
 -------------------------   Starting propagation   ------------------------
 
 
 --- Iteration 51
 
-Total energy =     -11.479618 Ha
-Integrated density (ie. total nb of electrons) =       7.9993046780
+Total energy =     -11.478366 Ha
+Integrated density (ie. total nb of electrons) =       8.0004863612
 
-- Time - cpu, wall (sec):    0.07    0.07
+- Time - cpu, wall (sec):    0.06    0.06
 
 
 --- Iteration 52
 
-Total energy =     -11.478995 Ha
-Integrated density (ie. total nb of electrons) =       7.9993097719
+Total energy =     -11.478368 Ha
+Integrated density (ie. total nb of electrons) =       8.0004861920
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 53
 
-Total energy =     -11.478541 Ha
-Integrated density (ie. total nb of electrons) =       7.9993135013
+Total energy =     -11.478369 Ha
+Integrated density (ie. total nb of electrons) =       8.0004860211
 
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 54
 
-Total energy =     -11.478266 Ha
-Integrated density (ie. total nb of electrons) =       7.9993149713
+Total energy =     -11.478370 Ha
+Integrated density (ie. total nb of electrons) =       8.0004858472
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 55
 
-Total energy =     -11.478168 Ha
-Integrated density (ie. total nb of electrons) =       7.9993135724
+Total energy =     -11.478372 Ha
+Integrated density (ie. total nb of electrons) =       8.0004856709
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 56
 
-Total energy =     -11.478232 Ha
-Integrated density (ie. total nb of electrons) =       7.9993088541
+Total energy =     -11.478373 Ha
+Integrated density (ie. total nb of electrons) =       8.0004854937
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 57
 
-Total energy =     -11.478436 Ha
-Integrated density (ie. total nb of electrons) =       7.9993004711
+Total energy =     -11.478374 Ha
+Integrated density (ie. total nb of electrons) =       8.0004853174
 
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 58
 
-Total energy =     -11.478747 Ha
-Integrated density (ie. total nb of electrons) =       7.9992883037
+Total energy =     -11.478376 Ha
+Integrated density (ie. total nb of electrons) =       8.0004851433
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 59
 
-Total energy =     -11.479132 Ha
-Integrated density (ie. total nb of electrons) =       7.9992726515
+Total energy =     -11.478377 Ha
+Integrated density (ie. total nb of electrons) =       8.0004849712
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 60
 
-Total energy =     -11.479554 Ha
-Integrated density (ie. total nb of electrons) =       7.9992542818
+Total energy =     -11.478378 Ha
+Integrated density (ie. total nb of electrons) =       8.0004848000
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 61
 
-Total energy =     -11.479976 Ha
-Integrated density (ie. total nb of electrons) =       7.9992342206
+Total energy =     -11.478380 Ha
+Integrated density (ie. total nb of electrons) =       8.0004846287
 
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 62
 
-Total energy =     -11.480364 Ha
-Integrated density (ie. total nb of electrons) =       7.9992134081
+Total energy =     -11.478381 Ha
+Integrated density (ie. total nb of electrons) =       8.0004844571
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 63
 
-Total energy =     -11.480691 Ha
-Integrated density (ie. total nb of electrons) =       7.9991924699
+Total energy =     -11.478382 Ha
+Integrated density (ie. total nb of electrons) =       8.0004842855
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 64
 
-Total energy =     -11.480935 Ha
-Integrated density (ie. total nb of electrons) =       7.9991717522
+Total energy =     -11.478383 Ha
+Integrated density (ie. total nb of electrons) =       8.0004841143
 
 - Time - cpu, wall (sec):    0.05    0.05
 
 
 --- Iteration 65
 
-Total energy =     -11.481082 Ha
-Integrated density (ie. total nb of electrons) =       7.9991515342
+Total energy =     -11.478385 Ha
+Integrated density (ie. total nb of electrons) =       8.0004839437
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 66
 
-Total energy =     -11.481127 Ha
-Integrated density (ie. total nb of electrons) =       7.9991322005
+Total energy =     -11.478386 Ha
+Integrated density (ie. total nb of electrons) =       8.0004837740
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 67
 
-Total energy =     -11.481070 Ha
-Integrated density (ie. total nb of electrons) =       7.9991142468
+Total energy =     -11.478387 Ha
+Integrated density (ie. total nb of electrons) =       8.0004836063
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 68
 
-Total energy =     -11.480918 Ha
-Integrated density (ie. total nb of electrons) =       7.9990981769
+Total energy =     -11.478388 Ha
+Integrated density (ie. total nb of electrons) =       8.0004834419
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 69
 
-Total energy =     -11.480685 Ha
-Integrated density (ie. total nb of electrons) =       7.9990844236
+Total energy =     -11.478389 Ha
+Integrated density (ie. total nb of electrons) =       8.0004832812
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 70
 
-Total energy =     -11.480387 Ha
-Integrated density (ie. total nb of electrons) =       7.9990733367
+Total energy =     -11.478391 Ha
+Integrated density (ie. total nb of electrons) =       8.0004831222
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 71
 
-Total energy =     -11.480046 Ha
-Integrated density (ie. total nb of electrons) =       7.9990651605
+Total energy =     -11.478392 Ha
+Integrated density (ie. total nb of electrons) =       8.0004829609
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 72
 
-Total energy =     -11.479686 Ha
-Integrated density (ie. total nb of electrons) =       7.9990599290
+Total energy =     -11.478393 Ha
+Integrated density (ie. total nb of electrons) =       8.0004827933
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 73
 
-Total energy =     -11.479330 Ha
-Integrated density (ie. total nb of electrons) =       7.9990573386
+Total energy =     -11.478394 Ha
+Integrated density (ie. total nb of electrons) =       8.0004826182
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 74
 
-Total energy =     -11.478999 Ha
-Integrated density (ie. total nb of electrons) =       7.9990567378
+Total energy =     -11.478395 Ha
+Integrated density (ie. total nb of electrons) =       8.0004824383
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 75
 
-Total energy =     -11.478712 Ha
-Integrated density (ie. total nb of electrons) =       7.9990572932
+Total energy =     -11.478397 Ha
+Integrated density (ie. total nb of electrons) =       8.0004822593
 
-- Time - cpu, wall (sec):    0.06    0.06
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 76
 
-Total energy =     -11.478483 Ha
-Integrated density (ie. total nb of electrons) =       7.9990582265
+Total energy =     -11.478398 Ha
+Integrated density (ie. total nb of electrons) =       8.0004820863
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 77
 
-Total energy =     -11.478323 Ha
-Integrated density (ie. total nb of electrons) =       7.9990589399
+Total energy =     -11.478399 Ha
+Integrated density (ie. total nb of electrons) =       8.0004819208
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 78
 
-Total energy =     -11.478236 Ha
-Integrated density (ie. total nb of electrons) =       7.9990589484
+Total energy =     -11.478400 Ha
+Integrated density (ie. total nb of electrons) =       8.0004817602
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 79
 
-Total energy =     -11.478224 Ha
-Integrated density (ie. total nb of electrons) =       7.9990577203
+Total energy =     -11.478402 Ha
+Integrated density (ie. total nb of electrons) =       8.0004816001
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 80
 
-Total energy =     -11.478283 Ha
-Integrated density (ie. total nb of electrons) =       7.9990546133
+Total energy =     -11.478403 Ha
+Integrated density (ie. total nb of electrons) =       8.0004814372
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 81
 
-Total energy =     -11.478401 Ha
-Integrated density (ie. total nb of electrons) =       7.9990489996
+Total energy =     -11.478404 Ha
+Integrated density (ie. total nb of electrons) =       8.0004812709
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 82
 
-Total energy =     -11.478565 Ha
-Integrated density (ie. total nb of electrons) =       7.9990405054
+Total energy =     -11.478405 Ha
+Integrated density (ie. total nb of electrons) =       8.0004811033
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 83
 
-Total energy =     -11.478761 Ha
-Integrated density (ie. total nb of electrons) =       7.9990291900
+Total energy =     -11.478406 Ha
+Integrated density (ie. total nb of electrons) =       8.0004809364
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 84
 
-Total energy =     -11.478973 Ha
-Integrated density (ie. total nb of electrons) =       7.9990155494
+Total energy =     -11.478407 Ha
+Integrated density (ie. total nb of electrons) =       8.0004807716
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 85
 
-Total energy =     -11.479188 Ha
-Integrated density (ie. total nb of electrons) =       7.9990003522
+Total energy =     -11.478407 Ha
+Integrated density (ie. total nb of electrons) =       8.0004806082
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 86
 
-Total energy =     -11.479392 Ha
-Integrated density (ie. total nb of electrons) =       7.9989844184
+Total energy =     -11.478407 Ha
+Integrated density (ie. total nb of electrons) =       8.0004804454
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 87
 
-Total energy =     -11.479575 Ha
-Integrated density (ie. total nb of electrons) =       7.9989684582
+Total energy =     -11.478407 Ha
+Integrated density (ie. total nb of electrons) =       8.0004802830
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 88
 
-Total energy =     -11.479728 Ha
-Integrated density (ie. total nb of electrons) =       7.9989530343
+Total energy =     -11.478408 Ha
+Integrated density (ie. total nb of electrons) =       8.0004801217
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 89
 
-Total energy =     -11.479846 Ha
-Integrated density (ie. total nb of electrons) =       7.9989386239
+Total energy =     -11.478408 Ha
+Integrated density (ie. total nb of electrons) =       8.0004799628
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 90
 
-Total energy =     -11.479923 Ha
-Integrated density (ie. total nb of electrons) =       7.9989256939
+Total energy =     -11.478409 Ha
+Integrated density (ie. total nb of electrons) =       8.0004798072
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 91
 
-Total energy =     -11.479959 Ha
-Integrated density (ie. total nb of electrons) =       7.9989146994
+Total energy =     -11.478410 Ha
+Integrated density (ie. total nb of electrons) =       8.0004796551
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 92
 
-Total energy =     -11.479954 Ha
-Integrated density (ie. total nb of electrons) =       7.9989059829
+Total energy =     -11.478411 Ha
+Integrated density (ie. total nb of electrons) =       8.0004795060
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 93
 
-Total energy =     -11.479910 Ha
-Integrated density (ie. total nb of electrons) =       7.9988996436
+Total energy =     -11.478412 Ha
+Integrated density (ie. total nb of electrons) =       8.0004793587
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 94
 
-Total energy =     -11.479831 Ha
-Integrated density (ie. total nb of electrons) =       7.9988954896
+Total energy =     -11.478413 Ha
+Integrated density (ie. total nb of electrons) =       8.0004792120
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 95
 
-Total energy =     -11.479724 Ha
-Integrated density (ie. total nb of electrons) =       7.9988931298
+Total energy =     -11.478414 Ha
+Integrated density (ie. total nb of electrons) =       8.0004790650
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 96
 
-Total energy =     -11.479593 Ha
-Integrated density (ie. total nb of electrons) =       7.9988921496
+Total energy =     -11.478415 Ha
+Integrated density (ie. total nb of electrons) =       8.0004789168
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 97
 
-Total energy =     -11.479448 Ha
-Integrated density (ie. total nb of electrons) =       7.9988922450
+Total energy =     -11.478416 Ha
+Integrated density (ie. total nb of electrons) =       8.0004787676
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 98
 
-Total energy =     -11.479293 Ha
-Integrated density (ie. total nb of electrons) =       7.9988932235
+Total energy =     -11.478417 Ha
+Integrated density (ie. total nb of electrons) =       8.0004786180
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 99
 
-Total energy =     -11.479135 Ha
-Integrated density (ie. total nb of electrons) =       7.9988949002
+Total energy =     -11.478418 Ha
+Integrated density (ie. total nb of electrons) =       8.0004784690
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.04    0.04
 
 
 --- Iteration 100
 
-Total energy =     -11.478979 Ha
-Integrated density (ie. total nb of electrons) =       7.9988970026
+Total energy =     -11.478419 Ha
+Integrated density (ie. total nb of electrons) =       8.0004783221
 
-- Time - cpu, wall (sec):    0.05    0.05
+- Time - cpu, wall (sec):    0.08    0.08
 
 
 ---------------------------------------------------------------------------
@@ -1434,17 +1435,17 @@ Integrated density (ie. total nb of electrons) =       7.9988970026
 ================================================================================
   
  -outvars: echo values of variables after computation  --------
+-          iomode           1
             acell      6.6707332245E+00  6.6707332245E+00  6.6707332245E+00 Bohr
               amu      1.20110000E+01
-           bandpp1          1
-           bandpp2          8
-           bandpp3          8
+           bandpp           4
+     densfor_pred           6
              ecut      1.20000000E+01 Hartree
            etotal1    -1.1517343001E+01
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
-            fcart1     7.8838000629E-32 -7.8838000629E-32  7.8838000629E-32
-                      -7.8838000629E-32  7.8838000629E-32 -7.8838000629E-32
+            fcart1    -5.5501952443E-29  5.5501952443E-29  3.5319424282E-29
+                       5.5501952443E-29 -5.5501952443E-29 -3.5319424282E-29
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1498,6 +1499,8 @@ P           mkmem           8
             ngfft          16      16      16
           ngfftdg          24      24      24
              nkpt          32
+-          npband           2
+-        np_spkpt           4
             nstep          20
              nsym          48
             ntime          50
@@ -1510,6 +1513,7 @@ P           mkmem           8
 -      paral_atom1          1
 -      paral_atom2          0
 -      paral_atom3          0
+        paral_kgb           1
         pawecutdg      2.40000000E+01 Hartree
        prtcurrent           1
            prtden           0
@@ -1524,7 +1528,7 @@ P           mkmem           8
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         227
-           strten1     5.4532328784E-04  5.4532328784E-04  5.4532328784E-04
+           strten1     5.4532350219E-04  5.4532350219E-04  5.4532350219E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1582,6 +1586,9 @@ P           mkmem           8
            tolwfr      1.00000000E-20
             typat      1  1
            useylm           1
+         wfoptalg1        114
+         wfoptalg2         10
+         wfoptalg3         10
               wtk        0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
                          0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
                          0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
@@ -1629,7 +1636,14 @@ P           mkmem           8
 - Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#marques2012
 -
-- [3] Abinit 2025: New Capabilities for the Predictive Modeling of Solids and Nanomaterials.
+- [3] Large scale ab initio calculations based on three levels of parallelization
+- F. Bottin, S. Leroux, A. Knyazev, G. Zerah, Comput. Mat. Science 42, 329, (2008).
+- Comment: in case LOBPCG algorithm is used (wfoptalg=4/14/114).
+- Strong suggestion to cite this paper in your publications.
+- This paper is also available at http://www.arxiv.org/abs/0707.3405
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#bottin2008
+-
+- [4] Abinit 2025: New Capabilities for the Predictive Modeling of Solids and Nanomaterials.
 - J. Chem. Phys. 163, 164126 (2025).
 - M.J. Verstraete, J. Abreu, G. Allemand, B. Amadon, G. Antonius,
 - M. Azizi, L. Baguet, C. Barat, L. Bastogne, R. Bejaud, J.-M. Beuken,
@@ -1647,7 +1661,7 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#verstraete2025
 -
-- [4] The Abinit project: Impact, environment and recent developments.
+- [5] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -1665,7 +1679,7 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [5] The Abinit project: Impact, environment and recent developments.
+- [6] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -1683,10 +1697,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- Proc.   0 individual time (sec): cpu=          7.2  wall=          7.3
+- Proc.   0 individual time (sec): cpu=          5.6  wall=          5.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         28.7  wall=         29.3
++Overall time at end (sec) : cpu=         44.7  wall=         44.9

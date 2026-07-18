@@ -1327,6 +1327,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        if (.not. string_in(dt%vpq_pkind, msg)) then
          ABI_ERROR_NOSTOP(sjoin("Invalid vpq_pkind: `", dt%vpq_pkind, "`, must be among:", msg), ierr)
        end if
+       msg = "polaron, hopping, debug_dw"
+       if (.not. string_in(dt%vpq_mode, msg)) then
+         ABI_ERROR_NOSTOP(sjoin("Invalid vpq_mode: `", dt%vpq_mode, "`, must be among:", msg), ierr)
+       end if
+       if (dt%vpq_aseed == "localize" .and. (dt%vpq_atloc < 1 .or. dt%vpq_atloc > dt%natom)) then
+         ABI_ERROR_NOSTOP(sjoin("vpq_atloc must be from 1 to natom if vpq_aseed = `", dt%vpq_aseed, "`"), ierr)
+       end if
      end if
      !if (dt%eph_task == -4 .and. dt%occopt /= 3) then
      !  ABI_ERROR_NOSTOP("eph_task -4 requires occopt 3 in the input file (Fermi-Dirac with physical Temperature!", ierr)

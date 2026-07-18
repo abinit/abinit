@@ -126,4 +126,6 @@ inp_files = [
 "t161.abi",
 "t162.abi",
 "t163.abi",
+"t170.abi", # Test RT-TDDFT with 8 MPI paral_kgb, npkpt>1, npband>1, LDA, PAW
+"t171.abi", # Test RT-TDDFT with 8 MPI paral_kgb, npkpt>1, npband>1, GGA, NC
 ]
