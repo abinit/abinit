@@ -107,12 +107,12 @@ type, public :: dmats_t
  type(coeff5c_type), allocatable :: for_spin(:)
 
  contains
-   procedure :: init => dmats_init           ! Initialize object
-   procedure :: init_from_file => dmats_init_from_file ! Initialize object from a NetCDF file
-   procedure :: ncwrite => dmats_ncwrite     ! Write D-matrices to an open NetCDF file
-   procedure :: free => dmats_free           ! Free memory.
-   procedure :: check => dmats_check         ! Check Dmats
-   procedure :: classify => dmats_classify   ! Classify irreps
+   procedure :: init => dmats_init                                   ! Initialize object
+   procedure :: init_from_file => dmats_init_from_file               ! Initialize object from a NetCDF file
+   procedure :: ncwrite => dmats_ncwrite                             ! Write D-matrices to an open NetCDF file
+   procedure :: free => dmats_free                                   ! Free memory.
+   procedure :: check => dmats_check                                 ! Check Dmats
+   procedure :: classify => dmats_classify                           ! Classify irreps
    procedure :: get_star_dmats => dmats_get_star_dmats               ! D-matrices at k'=S0.k_ibz
    procedure :: get_star_dmats_at_kpt => dmats_get_star_dmats_at_kpt ! Same, locating S0 from a raw kpt
    procedure :: check_star => dmats_check_star                       ! Run dmats_check_one_k at a star kpt
@@ -904,7 +904,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, cryst, brange_spin, ngfft, pawtab,
                dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, dmats%ks_ebands%kptns, ngfft,&
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
- call wfd%print([std_out], header="Wavefunctions for DMATS calculation")
+ !call wfd%print([std_out], header="Wavefunctions for DMATS calculation")
 
  ABI_FREE(nband)
  ABI_FREE(keep_ur)

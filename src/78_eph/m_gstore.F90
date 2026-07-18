@@ -1292,7 +1292,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      call wan%from_abiwan(dtfil%filabiwanin, spin, ebands%nsppol, keep_umats, "", gqk%comm%value)
      wan%my_pert_start = gqk%my_pert_start; wan%my_npert = gqk%my_npert; wan%pert_comm => gqk%pert_comm
 
-     ! Now load g(R_e, R_p) for this spin from GWAN.nc
+     ! Load g(R_e, R_p) for this spin from GWAN.nc
      call wan%load_gwan(dtfil%filgwanin, gstore%cryst, spin, ebands%nsppol, gqk%comm) ! gqk%pert_comm,
 
      ! Interpolate my e-ph matrix elements.
@@ -6810,6 +6810,54 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  ! q0_computed via the existing phase formula) instead. Leave .False. in production.
  logical,parameter :: DEBUG_TNON_LTC = .False.
  real(dp) :: Ltc_live(3)
+ ! DEBUG (AGENT, session 8): rigorous two-step composition of the atomic-perturbation lattice
+ ! debt l0, derived from scratch via real-space Seitz algebra (mirroring dmats_get_star_dmats's
+ ! L_h derivation): for g1=isym_glob applied first (ib0->ib1) then g2=isym_tot (ib1->ipert),
+ ! R(g1).xred(ib0)+tau(g1) = xred(ib1)+l0_1 and R(g2).xred(ib1)+tau(g2) = xred(ipert)+l0_2 combine
+ ! EXACTLY (substitution, no approximation) to l0_comb = l0_2 + R(g2).l0_1 for the LITERAL
+ ! composite g2.g1 -- proven algebraically to differ from the current single-step tabulated
+ ! l0(isym_combined,ipert) in ~42% of (point,mu) pairs (checked empirically against the CSV dump),
+ ! by an exact integer lattice vector each time (as expected for two valid lattice debts). The
+ ! atom index itself (ipert_eq) was verified to ALWAYS agree between the two-step and single-step
+ ! lookups (0 mismatches out of 14166), so only l0 changes here, not ipert_eq/mu_eq downstream.
+ ! Leave .False. in production.
+ logical,parameter :: DEBUG_TWOSTEP_L0 = .False.
+ integer :: ib1_twostep
+ real(dp) :: l0_1_twostep(3), l0_2_twostep(3), q_base_twostep(3)
+ ! DEBUG (AGENT, session 8): extend DEBUG_TWOSTEP_L0 to ALSO include each step's own tau/tnons
+ ! term (the FULL v1phq_rotate_myperts tnon formula, l0+R^T.tau, applied at EACH of the two steps
+ ! separately, not dropped per session 3's single-step "double-counting" simplification) to test
+ ! whether that simplification was a misdiagnosis once the l0 two-step composition is done right.
+ logical,parameter :: DEBUG_TWOSTEP_FULL = .False.
+ real(dp) :: tnon_1_twostep(3), tnon_2_twostep(3), symrec_glob(3,3), symrec_toti(3,3)
+ ! DEBUG (AGENT, session 9): isym_gk (electron k-leg, rigorously proven correct session 6) is built
+ ! DIRECTLY from isym_tot (forward, never inverted): isym_gk=multable(1,isym_k_inv,isym_tot). But
+ ! isym_rp/isym_gkq (electron kq-leg) are built from isym_elec_combined, currently PINNED equal to
+ ! isym_combined=multable(1,isym_tot_inv,isym_glob) -- i.e. isym_tot INVERTED. This asymmetry is
+ ! invisible whenever isym_tot is its own inverse (order<=2) and only shows up otherwise. Empirical
+ ! motivation (session 9): pass rate splits sharply by whether isym_tot is an involution (43.6% vs
+ ! 2.8% overall; 60.9% vs EXACTLY 0/55 in the isym_glob==1 & p_stab==1 clean subset) -- a far cleaner
+ ! discriminator than anything found in 8 prior sessions, and one never tested before (all prior
+ ! correlation searches used isym_glob's own trace/det/order, never isym_tot's). This flag tests the
+ ! UNTRIED direction: keep isym_combined (tnon/l0, proven correct session 8) exactly as production,
+ ! but make isym_elec_combined use the FORWARD isym_tot composition (matching isym_gk's own
+ ! convention) instead of pinning it to isym_combined. NOTE: session 3's "principled split" tried the
+ ! OPPOSITE direction (phonon leg forward, electron leg inverted) and failed -- this is a genuinely
+ ! different, untested combination. Leave .False. in production.
+ logical,parameter :: DEBUG_ISYM_ELEC_FORWARD = .False.
+ integer :: isym_tot_glob_fwd
+ ! DEBUG (AGENT, session 9): tests a NEW lattice-debt term, never tried before -- the debt from
+ ! tabulating isym_tot_inv=toinv(1,isym_tot) itself: dmats%toinv(2:4,isym_tot). Distinct from every
+ ! prior "Ltc" candidate (sessions 6-8), which only ever used multable(2:4,isym_tot_inv,isym_glob)
+ ! (the debt of the isym_tot_inv-isym_glob COMPOSITION), never this one (the debt of computing
+ ! isym_tot_inv in the first place). Found via a fully clean hand-derivation (session 9): filtering
+ ! to isym_gk=1 AND isym_p=1 AND isym_glob=1 AND isym_tot NOT an involution (order>2) -- i.e. BOTH
+ ! dmat_k and dmat_star_kq are exactly Identity, zero D-matrix ambiguity anywhere -- gives an EXACT,
+ ! deterministic 0/55 (0.0%) pass rate in production; hand-solving one such point
+ ! (ik_glob=36,iq_glob=16,isym_tot=16,isym_combined=12) for what tnon SHOULD be to match ground
+ ! truth (checked all 6 mu) gives EXACTLY tnon=l0-toinv(2:4,isym_tot), zero residual. Leave .False.
+ ! in production until validated on the full aggregate.
+ logical,parameter :: DEBUG_TNON_TOINV = .False.
  integer :: selftest_count, selftest_count_ok
  real(dp) :: selftest_diff, selftest_maxdiff
  character(len=abi_slen) :: with_gmode, gtype, gvals_name
@@ -7041,7 +7089,11 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
                ABI_CHECK(isym_tot_inv /= 0, "Could not find inverse of isym_tot")
                isym_combined = isym_tot_inv; trev_combined = trev_tot; iq_computed_glob = iq_base_glob
                isym_glob = 1; itime_glob = 1
-               isym_elec_combined = isym_combined
+               if (DEBUG_ISYM_ELEC_FORWARD) then
+                 isym_elec_combined = isym_tot
+               else
+                 isym_elec_combined = isym_combined
+               end if
                ! kk_base/q_base were matched to the global BZ arrays via a tolerant modulo(...)
                ! comparison above, so they may differ from the canonical tabulated array values by
                ! an exact integer G-vector. This matters below: kk_base+q_base is fed into
@@ -7119,7 +7171,13 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
              ABI_CHECK(isym_combined /= 0, "Composite symmetry not found in space group (group closure violated?)")
            end if
            trev_combined = mod(trev_tot + (itime_glob - 1), 2)
-           isym_elec_combined = isym_combined
+           if (DEBUG_ISYM_ELEC_FORWARD) then
+             isym_tot_glob_fwd = dmats%multable(1, isym_tot, isym_glob)
+             ABI_CHECK(isym_tot_glob_fwd /= 0, "Composite symmetry isym_tot.isym_glob not found in space group")
+             isym_elec_combined = isym_tot_glob_fwd
+           else
+             isym_elec_combined = isym_combined
+           end if
 
            ! Downstream code uses kk_base/q_base as "the momentum at the source"; overwrite them
            ! with the canonical tabulated values (kk_base was only known up to an exact integer
@@ -7311,14 +7369,37 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
          if (DEBUG_TNON_FULL) tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym_combined))
          if (DEBUG_TNON_LTC) then
            Ltc_live = real(dmats%multable(2:4, isym_tot_inv, isym_glob), dp)
-           tnon = l0 + matmul(transpose(symrec_eq), Ltc_live)
+           tnon = l0 - matmul(transpose(symrec_eq), Ltc_live)
          end if
+         if (DEBUG_TWOSTEP_L0) then
+           ib1_twostep = cryst%indsym(4, isym_tot_inv, ipert)
+           l0_2_twostep = real(cryst%indsym(1:3, isym_tot_inv, ipert), dp)
+           l0_1_twostep = real(cryst%indsym(1:3, isym_glob, ib1_twostep), dp)
+           tnon = l0_2_twostep + matmul(real(cryst%symrel(:,:,isym_tot_inv), dp), l0_1_twostep)
+         end if
+         if (DEBUG_TNON_TOINV) tnon = l0 - real(dmats%toinv(2:4, isym_tot), dp)
          ipert_eq = cryst%indsym(4, isym_combined, ipert)
 
          ! phase = e^{+i q0_computed . tnon}, q0_computed = SOURCE q of the stored gkq_base
          ! (gstore%qbz(:,iq_computed_glob), NOT q_base -- q_base is only the intermediate point
          ! isym_glob maps q0_computed to, and generally differs from q0_computed itself).
          phase = -two_pi * sum(gstore%qbz(:, iq_computed_glob) * tnon)
+         if (DEBUG_TWOSTEP_L0) then
+           ! Two genuinely SEPARATE rotation steps accumulate phase against their OWN source q
+           ! each: step 1 (isym_glob) against q0_computed, step 2 (isym_tot_inv) against the
+           ! INTERMEDIATE q_base_twostep = symrec(isym_glob).q0_computed (forward relation,
+           ! established earlier this investigation) -- NOT both terms dotted with q0_computed.
+           q_base_twostep = matmul(real(cryst%symrec(:,:,isym_glob), dp), gstore%qbz(:, iq_computed_glob))
+           tnon_1_twostep = l0_1_twostep
+           tnon_2_twostep = l0_2_twostep
+           if (DEBUG_TWOSTEP_FULL) then
+             symrec_glob = real(cryst%symrec(:,:,isym_glob), dp)
+             symrec_toti = real(cryst%symrec(:,:,isym_tot_inv), dp)
+             tnon_1_twostep = l0_1_twostep + matmul(transpose(symrec_glob), cryst%tnons(:,isym_glob))
+             tnon_2_twostep = l0_2_twostep + matmul(transpose(symrec_toti), cryst%tnons(:,isym_tot_inv))
+           end if
+           phase = -two_pi * (sum(gstore%qbz(:, iq_computed_glob) * tnon_1_twostep) + sum(q_base_twostep * tnon_2_twostep))
+         end if
          cphase = cmplx(cos(phase), sin(phase), dp)
 
          if (DEBUG_DUMP_SYMINFO .and. .not. is_selftest) then

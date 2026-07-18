@@ -52,6 +52,7 @@ module m_eph_path
  use m_wfd,            only : u0_cache_t
  use m_ifc,            only : ifc_type
  use m_dvdb,           only : dvdb_t
+ use m_mlwfovlp,       only : wan_t
 
  implicit none
 
@@ -124,13 +125,14 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  integer :: nfft,nfftf,mgfft,mgfftf, my_npert, my_ip, idir, ipert, ipc, ncerr, ncid, my_nkpath, my_nqpath
  integer :: in_k, im_kq, my_is, my_ik, my_iq, nband, nb_in_g, ii, band_n, band_m, bstart, bstop, my_nspins, np, tot_nscf_ierr
  real(dp) :: cpu_all,wall_all,gflops_all, eig0nk, eshift
- logical :: qq_is_gamma, need_ftinterp, gen_eigenpb, use_cg_k, use_cg_kq, use_cache
+ logical :: qq_is_gamma, need_ftinterp, gen_eigenpb, use_cg_k, use_cg_kq, use_cache, has_gwan
  type(gs_hamiltonian_type) :: gs_ham_k, gs_ham_kq
  type(rf_hamiltonian_type) :: rf_ham_kq
  type(nscf_t) :: nscf
  type(kpath_t) :: qpath, kpath
  type(xcomm_t) :: kpt_comm, qpt_comm, pert_comm
  type(u0_cache_t) :: ucache_kq, ucache_k
+ !type(wan_t) :: wan
  character(len=fnlen) :: gpath_path
  character(len=5000) :: msg
  character(len=10) :: priority
@@ -306,6 +308,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    call wrtout(units, " DVDB file contains all q-points along the path --> Reading DFPT potentials from file.")
  end if
 
+ has_gwan = (dtfil%filgwanin /= ABI_NOFILE)
+
  ! Prepare call to getgh1c
  usevnl = 0
  optlocal = 1    ! local part of H^(1) is computed in gh1c=<G|H^(1)|C>
@@ -415,6 +419,15 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  ! Loop over spins (MPI parallelized)
  do my_is=1,my_nspins
    spin = my_spins(my_is)
+
+   if (has_gwan) then
+     ! Load g(R_e, R_p) for this spin from GWAN.nc
+     call wan%load_gwan(dtfil%filgwanin, cryst, spin, dtset%nsppol, comm_my_is(my_is)%value)
+     !call wan%print()
+     ! TODO
+     !complex(dp),intent(out) :: g_atm(wan%nwan, wan%nwan, wan%my_npert, nq)
+     !call wan%interp_eph_manyq(1, qpt, kpt, g_atm)
+   end if
 
    ! Loop over k-points in k-path (MPI parallelized).
    do my_ik=1,my_nkpath
@@ -611,6 +624,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ABI_FREE(gsc_k)
      call gs_ham_k%free()
    end do ! my_ik
+
+   if (has_gwan) call wan%free()
  end do ! my_is
 
  NCF_CHECK(nf90_close(ncid))

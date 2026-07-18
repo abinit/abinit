@@ -427,6 +427,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    call dmats%free()
 
 #if 0
+   ! old implementation
    call read_wfd()
 
    ABI_MALLOC(esymm,(wfd%nkibz,wfd%nsppol))
