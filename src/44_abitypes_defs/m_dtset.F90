@@ -743,8 +743,13 @@ type, public :: dataset_type
  integer :: vacnum
 
  character(len=abi_slen) :: vpq_aseed = "gau_energy"
+ character(len=abi_slen) :: vpq_mode = "polaron"
  character(len=abi_slen) :: vpq_pkind = "none"
+ integer :: vpq_atloc = 0
  integer :: vpq_avg_g = 0
+ integer :: vpq_hop_from_ip = 1
+ integer :: vpq_hop_nstep = 1
+ integer :: vpq_hop_to_ip = 1
  integer :: vpq_interp = 0
  integer :: vpq_mesh_fact = 1
  integer :: vpq_nstates = 1
@@ -752,8 +757,14 @@ type, public :: dataset_type
  integer :: vpq_nstep_ort = 50
  integer :: vpq_select = -1
  integer :: vpq_translate = 0
+ real(dp) :: vpq_hop_tolgrs = tol6
+ real(dp) :: vpq_hop_ts = zero
  real(dp) :: vpq_mix_fact = zero
  real(dp) :: vpq_tolgrs = tol6
+ real(dp) :: vpq_efilter = zero
+ integer :: vpq_hop_from_site(3) = [0, 0, 0]
+ integer :: vpq_hop_to_site(3) = [0, 0, 0]
+ integer :: vpq_hop_vec(3) = [0, 0, 0]
  integer :: vpq_trvec(3) = [0, 0, 0]
  real(dp) :: vpq_gpr_energy(2) = [zero, one]
  real(dp) :: vpq_gpr_length(3) = [one, one, one]
@@ -1183,6 +1194,8 @@ type, public :: dataset_type
  character(len=fnlen) :: geoopt = ABI_NOFILE
  character(len=fnlen) :: moldyn = ABI_NOFILE
  character(len=fnlen) :: dmft_orbital_filepath = ABI_NOFILE
+ character(len=fnlen) :: vpq_hop_from_filepath = ABI_NOFILE
+ character(len=fnlen) :: vpq_hop_to_filepath = ABI_NOFILE
 
  contains
 
@@ -2320,21 +2333,34 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%useylm             = dtin%useylm
  dtout%vacnum             = dtin%vacnum
 
- dtout%vpq_aseed       = dtin%vpq_aseed
- dtout%vpq_pkind       = dtin%vpq_pkind
- dtout%vpq_avg_g       = dtin%vpq_avg_g
- dtout%vpq_translate   = dtin%vpq_translate
- dtout%vpq_interp      = dtin%vpq_interp
- dtout%vpq_nstates     = dtin%vpq_nstates
- dtout%vpq_nstep       = dtin%vpq_nstep
- dtout%vpq_nstep_ort   = dtin%vpq_nstep_ort
- dtout%vpq_select      = dtin%vpq_select
- dtout%vpq_mesh_fact   = dtin%vpq_mesh_fact
- dtout%vpq_mix_fact    = dtin%vpq_mix_fact
- dtout%vpq_tolgrs      = dtin%vpq_tolgrs
- dtout%vpq_trvec       = dtin%vpq_trvec
- dtout%vpq_gpr_energy  = dtin%vpq_gpr_energy
- dtout%vpq_gpr_length  = dtin%vpq_gpr_length
+ dtout%vpq_aseed             = dtin%vpq_aseed
+ dtout%vpq_mode              = dtin%vpq_mode
+ dtout%vpq_pkind             = dtin%vpq_pkind
+ dtout%vpq_atloc             = dtin%vpq_atloc
+ dtout%vpq_avg_g             = dtin%vpq_avg_g
+ dtout%vpq_hop_from_ip       = dtin%vpq_hop_from_ip
+ dtout%vpq_hop_nstep         = dtin%vpq_hop_nstep
+ dtout%vpq_hop_to_ip         = dtin%vpq_hop_to_ip
+ dtout%vpq_translate         = dtin%vpq_translate
+ dtout%vpq_interp            = dtin%vpq_interp
+ dtout%vpq_nstates           = dtin%vpq_nstates
+ dtout%vpq_nstep             = dtin%vpq_nstep
+ dtout%vpq_nstep_ort         = dtin%vpq_nstep_ort
+ dtout%vpq_select            = dtin%vpq_select
+ dtout%vpq_mesh_fact         = dtin%vpq_mesh_fact
+ dtout%vpq_hop_tolgrs        = dtin%vpq_hop_tolgrs
+ dtout%vpq_hop_ts            = dtin%vpq_hop_ts
+ dtout%vpq_mix_fact          = dtin%vpq_mix_fact
+ dtout%vpq_tolgrs            = dtin%vpq_tolgrs
+ dtout%vpq_trvec             = dtin%vpq_trvec
+ dtout%vpq_gpr_energy        = dtin%vpq_gpr_energy
+ dtout%vpq_gpr_length        = dtin%vpq_gpr_length
+ dtout%vpq_hop_from_site     = dtin%vpq_hop_from_site
+ dtout%vpq_hop_to_site       = dtin%vpq_hop_to_site
+ dtout%vpq_hop_vec           = dtin%vpq_hop_vec
+ dtout%vpq_hop_from_filepath = dtin%vpq_hop_from_filepath
+ dtout%vpq_hop_to_filepath   = dtin%vpq_hop_to_filepath
+ dtout%vpq_efilter           = dtin%vpq_efilter
 
  dtout%vdw_df_acutmin     = dtin%vdw_df_acutmin
  dtout%vdw_df_aratio      = dtin%vdw_df_aratio
@@ -4038,10 +4064,12 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' use_oldchi'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
- list_vars=trim(list_vars)//' vpq_avg_g vpq_aseed vpq_gpr_energy vpq_gpr_length'
- list_vars=trim(list_vars)//' vpq_interp vpq_mix_fact vpq_mesh_fact vpq_nstates'
- list_vars=trim(list_vars)//' vpq_nstep vpq_nstep_ort vpq_select vpq_pkind'
- list_vars=trim(list_vars)//' vpq_tolgrs vpq_translate vpq_trvec'
+ list_vars=trim(list_vars)//' vpq_atloc vpq_avg_g vpq_aseed vpq_efilter vpq_gpr_energy vpq_gpr_length'
+ list_vars=trim(list_vars)//' vpq_hop_from_ip vpq_hop_from_filepath vpq_hop_from_site'
+ list_vars=trim(list_vars)//' vpq_hop_to_ip vpq_hop_to_filepath vpq_hop_to_site vpq_hop_nstep'
+ list_vars=trim(list_vars)//' vpq_hop_tolgrs vpq_hop_ts vpq_hop_vec vpq_interp vpq_mix_fact'
+ list_vars=trim(list_vars)//' vpq_mesh_fact vpq_mode vpq_nstates vpq_nstep vpq_nstep_ort vpq_select'
+ list_vars=trim(list_vars)//' vpq_pkind vpq_tolgrs vpq_translate vpq_trvec'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'
  list_vars=trim(list_vars)//' vdw_tol vdw_tol_3bt vdw_typfrag vdw_xc'
  list_vars=trim(list_vars)//' vdw_df_acutmin vdw_df_aratio vdw_df_damax'

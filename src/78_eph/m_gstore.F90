@@ -1067,7 +1067,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
       nctkdim_t("ifc_nqbz", size(ifc%dynmat, dim=6)), &
       nctkdim_t("natom", gstore%cryst%natom), &
       nctkdim_t("natom3", 3 * gstore%cryst%natom), &
-      nctkdim_t("gstore_cplex", 2) &
+      nctkdim_t("gstore_cplex", 2), &
+      nctkdim_t("ifc_nqbz", ifc%nqbz) &
    ], defmode=.True.)
    NCF_CHECK(ncerr)
 
@@ -5445,7 +5446,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
              if ((ipc /= 4 .and. ipc /= natom3) .and. .not. all_gs) cycle
              do idir=1,3
                rtmp = iv1p_comm(:, im_kq, in_k, idir, ipc)
-               write(ab_out, "(a1,5(i5,1x),es16.6)")"-", ik_glob, ipc, m_kq, n_k, idir, rtmp(1), rtmp(2)
+               write(ab_out, "(a1,5(i5,1x),2es16.6)") "-", ik_glob, ipc, m_kq, n_k, idir, rtmp(1), rtmp(2)
              end do ! idir
            end do ! ipc
          end do ! in_k
