@@ -16,7 +16,7 @@ TBD
 *compulsory:*
 
 - [[abinit:vpq_pkind]]  Variational Polaron eQuations: Polaron KIND
-
+ 
 *basic:*
 
 - [[abinit:getvpq]]  GET the VPQ.nc from dataset
@@ -34,11 +34,11 @@ TBD
 - [[abinit:vpq_tolgrs]]  Variational Polaron eQuations: TOLerance on the Gradient ReSidual
 - [[abinit:vpq_translate]]  Variational Polaron eQuations: TRANSLATE solutions
 - [[abinit:vpq_trvec]]  Variational Polaron eQuations: TRanslation VECtor
-
+ 
 *expert:*
 
 - [[abinit:vpq_mix_fact]]  Variational Polaron eQuations: MIXing FACTor
-
+ 
 
 ## Selected Input Files
 
