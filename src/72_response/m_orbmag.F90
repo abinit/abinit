@@ -956,11 +956,10 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
   !Local variables -------------------------
   !scalars
   integer :: adir,choice,cpopt,dimekb1,dimekb2,dimekb3
-  integer :: dum_dnlbra,dum_dnlket,n4,n5,n6,ndat,nn,nnlout,npwsp
-  integer :: paw_opt,signs,tim_nonlop,i1,i2,i3
-  real(dp) :: eignn
-  complex(dp) :: prefac_m,ormesh_fac,tt
-  logical :: my_suppress_ormesh,need_ormesh
+  integer :: n4,n5,n6,ndat,nn,nnlout,npwsp
+  integer :: paw_opt,signs,tim_nonlop
+  complex(dp) :: prefac_m,ormesh_fac
+  logical :: need_ormesh
   type(gs_hamiltonian_type),target :: gs_hamk_local
   !arrays
   real(dp) :: enlout(1),lambda(1),udotu(2)
@@ -1096,12 +1095,11 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,choice,cpopt,epsfac,gdir,n4,n5,n6,ndat,nn,nnlout,npwsp
-  integer :: paw_opt,signs,tim_nonlop
+  integer :: adir,bdir,gdir,n4,n5,n6,ndat,nn,npwsp
   complex(dp) :: prefac_m,ormesh_fac,txt
   logical :: need_ormesh
   !arrays
-  real(dp) :: enlout(1),nonlop_udotu(2)
+  real(dp) :: nonlop_udotu(2)
   real(dp),allocatable :: fofr(:,:,:,:),svectout(:,:)
   real(dp),allocatable,target :: vectout(:,:)
   real(dp),pointer :: unk(:,:)
@@ -1229,11 +1227,11 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,cpopt,dum_dnlbra,dum_dnlket,epsfac,gdir,iatom
-  integer :: ndat,n4,n5,n6,nn,npwsp,sij_opt,t_atom,tim_getghc,type_calc
+  integer :: adir,bdir,cpopt,dum_dnlbra,dum_dnlket,gdir
+  integer :: ndat,n4,n5,n6,nn,npwsp,sij_opt,tim_getghc,type_calc
   real(dp) :: lams
   complex(dp) :: ormesh_fac,prefac_b,prefac_m
-  logical :: my_suppress_ormesh,need_ormesh
+  logical :: need_ormesh
   !arrays
   real(dp) bdot(2),mdot(2)
   real(dp),allocatable :: fofr(:,:,:,:),gsc(:,:),gvnlxc(:,:)
@@ -1393,13 +1391,12 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,choice,cpopt,dnl_dum,epsfac,fourwf_cplex,fourwf_option,gdir,iatom,ig
-  integer :: n4,n5,n6,ndat,nn,nnlout,np,npwsp,paw_opt,signs,t_atom,tim_fourwf,tim_getghc
-  real(dp) :: eignk_1,fermie_0,weight_i,weight_r
+  integer :: adir,bdir,choice,cpopt,dnl_dum,fourwf_cplex,fourwf_option,gdir
+  integer :: n4,n5,n6,ndat,nn,nnlout,np,npwsp,paw_opt,signs,tim_fourwf,tim_getghc
   complex(dp) :: b1,bdotc,bpdotc,gdotc,gpdotc,m1,mv2b,ormesh_fac,prefac_b,prefac_m
   logical :: need_ormesh
   !arrays
-  real(dp) :: bdot(2),bpdot(2),gdot(2),gpdot(2),enlout(1),lamv(1),tdot(2)
+  real(dp) :: bdot(2),bpdot(2),gdot(2),gpdot(2),enlout(1),lamv(1)
   real(dp),allocatable :: fofr(:,:,:,:),proj_un(:,:),vectout(:,:)
   real(dp),allocatable,target :: svectoutb(:,:),svectoutbp(:,:),svectoutg(:,:)
   real(dp),pointer :: bra(:,:),du_dbeta(:,:),du_dgamma(:,:),unk(:,:)
@@ -2023,7 +2020,6 @@ subroutine nonlop_orbmag_nl(atindx,cwaveprj,dnlbra,dnlket,dterm,dtset,eignk,gs_h
   !scalars
   integer :: iat,iatom,il,ilmn,ipw,isp,itypat,jlmn,klmn,npwsp
   real(dp) :: wt
-  logical :: il_parity
   complex(dp) :: cpj,dij,dij_cpj,proj_i
   ! arrays
   complex(dp),dimension(0:3) :: iexpl=(/cone,j_dpc,-cone,-j_dpc/)
