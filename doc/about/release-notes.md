@@ -2,19 +2,20 @@
 
 Version 10.8, released on August DD, 2026.
 
-<!-- Release notes updated on YYMMDD, 2026. -->
+<!-- Release notes updated on July 20, 2026. -->
 
 These release notes
 are relative to modifications/improvements of ABINIT v10.8 with respect to v10.6.
 <!-- Initially, v10.8.3: 
 includes MR1276, 1277, 1278, 1280, 1288, 1293, 1295, 1296, 1298, 1302, 1204, 1305 ;
-includes 1311 to 1337, 
+includes MR1311 to MR1337, 
 EXCEPT MR1315, 1317, 1321, 1324, 1326, 1329 that had already been included in v10.6,
+also EXCEPT MR1323, that will be included in a version released later than 10.8,
 also EXCEPT MR1328 and 1330 that have been closed;
-then also v10.8.3 includes MR1342, 1343, 1346, 1348, 1349, 1350, 1352, 1354, 156, 1358, 1362.
+then v10.8.3 also includes MR1342, 1343, 1346, 1348, 1349, 1350, 1352, 1354, 156, 1358, 1362.
 
 Will be included in a version released later than 10.8 :
-MR1339, 1340, 1341, 1344, 1345, 1347, 1351, 1353, 1355, 1357, 1360, 1361 as well as MR 1261, 1263, 1317, 1326, 1318 if they are not draft anymore.
+MR1323, 1339, 1340, 1341, 1344, 1345, 1347, 1351, 1353, 1355, 1357, 1360, 1361 as well as MR 1261, 1263, 1317, 1326, 1318 if they are not draft anymore.
 
 For release v10.8.5, also includes MR XXXX, ...  
 -->
@@ -447,6 +448,7 @@ New functionalities with Born effective charges (BEC)
 
 By G. Antonius (MR1316)
 
+<!--   WARNING : This is not present in v10.8, but in v10.9 - see my mail to He Xu on 20 July
 **D.9** Optimization of memory in Pulay mixing 
 
 Pulay Mixing is one of the most memory demanding part during SCF.
@@ -462,14 +464,15 @@ Autotest  v10/t120 added.
 ACTUALLY, pulayhiststore SEEM NOT TO BE PRESENT IN THE MERGED TRUNK/RELEASE-10.8 ?!
 
 By He Xu. (MR1323)
+-->
 
-**D.10**  EPH subdrivers are now compatible with [[useylm]]= 1.  By M. Giantomassi. (MR1331)
+**D.9**  EPH subdrivers are now compatible with [[useylm]]= 1.  By M. Giantomassi. (MR1331)
 
-**D.11**  RMMS-DIIS is now compatible with GPU. By M. Giantomassi. (MR1331)
+**D.10**  RMMS-DIIS is now compatible with GPU. By M. Giantomassi. (MR1331)
 
-**D.12** Forbid use of [[fftalg]]=1xx when threads and bands>1.  By M. Torrent. (MR1358)
+**D.11** Forbid use of [[fftalg]]=1xx when threads and bands>1.  By M. Torrent. (MR1358)
 
-**D.13** Introduce new input variable [[gstore_iv1p_comm]], to store the matrix elements of the commutator of V(1) and p . By M. Giantomassi (commit 6f8d2d5b721)
+**D.12** Introduce new input variable [[gstore_iv1p_comm]], to store the matrix elements of the commutator of V(1) and p . NOT TESTED. By M. Giantomassi (commit 6f8d2d5b721)
 
 
 * * *
