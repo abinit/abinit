@@ -3003,7 +3003,7 @@ subroutine me_proj_mesh(bra,fofr,gs_hamk,ket,mpi_enreg,n4,n5,n6,ndat,npw_k,scala
   !Local variables -------------------------
   !scalars
   integer :: fourwf_cplex,fourwf_option,tim_fourwf
-  real(dp) :: weight_i,weight_r
+  real(dp) :: density_norm,weight_i,weight_r
   !arrays
   real(dp),allocatable :: fbra(:,:,:,:),fket(:,:,:,:),denpot(:,:),fofgout(:,:)
 
@@ -3030,6 +3030,9 @@ subroutine me_proj_mesh(bra,fofr,gs_hamk,ket,mpi_enreg,n4,n5,n6,ndat,npw_k,scala
  fofr(2,:,:,:) =  &
    & AIMAG(scalar_factor)*( fbra(1,:,:,:)*fket(1,:,:,:)+fbra(2,:,:,:)*fket(2,:,:,:)) + &
    &  REAL(scalar_factor)*(-fbra(2,:,:,:)*fket(1,:,:,:)+fbra(1,:,:,:)*fket(2,:,:,:))
+
+  density_norm=gs_hamk%ucvol/gs_hamk%nfft
+  fofr = fofr*density_norm
 
   ABI_SFREE(fket)
   ABI_SFREE(fbra)
