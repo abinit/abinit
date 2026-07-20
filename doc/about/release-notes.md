@@ -36,7 +36,11 @@ Xavier
 
 ### **A.** Remarks and warnings.
 
-**A.1** The script band2eps is not supported anymore. Please use AbiPy. As a consequence, the [[tutorial:rf2]]
+**A.1** The [ABINIT2026 developer workshop](https://abidev2026.abinit.org/) has taken place at Sant Feliu de Guixols, 8-11 June 2026.
+The [slides of the scientific presentations](https://github.com/abinit/abidev2026/tree/main/docs) are available and might
+be a useful complement to the present release notes.
+
+**A.2** The script band2eps is not supported anymore. Please use AbiPy. As a consequence, the [[tutorial:rf2]]
 has been modified, with the section on band2eps suppressed.
 
 
