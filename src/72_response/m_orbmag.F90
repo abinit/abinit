@@ -140,6 +140,11 @@ module m_orbmag
     ! total orbmag on real mesh
     ! 3 for the 3 directions
     ! rmesh(n4,n5,n6,3,orbmag_nterms)
+    
+    real(dp),allocatable :: rmesh_int(:,:)
+    ! integrated orbmag on real mesh, useful for checking
+    ! 3 for the 3 directions
+    ! rmesh_int(3,orbmag_nterms)
 
     contains
 
@@ -2755,7 +2760,9 @@ subroutine orbmag_init(self,dtset)
   self%orbmag_trace=zero
   if (dtset%orbmag .EQ. 4) then
     ABI_REMALLOC(self%rmesh,(self%n4,self%n5,self%n6,3,orbmag_nterms))
-    self%omesh=zero
+    self%rmesh=zero
+    ABI_REMALLOC(self%rmesh_int,(3,orbmag_nterms))
+    self%rmesh_int=zero
   end if
 
 end subroutine orbmag_init
@@ -2789,6 +2796,7 @@ subroutine orbmag_free(self)
     ABI_SFREE(self%orbmag_terms)
     ABI_SFREE(self%orbmag_trace)
     ABI_SFREE(self%rmesh)
+    ABI_SFREE(self%rmesh_int)
 
 end subroutine orbmag_free
 !!***
@@ -3160,7 +3168,8 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
  !! orbmag_rmesh dimensions, only if output
  if (has_ormesh) then
    ncerr = nctk_def_arrays(ncid, [&
-     nctkarr_t("orbmag_rmesh", "dp", "n4,n5,n6,ndir,orbmag_nterms")])
+     nctkarr_t("orbmag_rmesh", "dp", "n4,n5,n6,ndir,orbmag_nterms"),&
+     nctkarr_t("orbmag_rmesh_int","dp","ndir,orbmag_nterms")])
    NCF_CHECK(ncerr)
  endif
 
@@ -3173,6 +3182,7 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
  NCF_CHECK(nf90_put_var(ncid, vid("lambsig"), orbmag_mesh%lambsig))
  if ( has_ormesh ) then
    NCF_CHECK(nf90_put_var(ncid, vid("orbmag_rmesh"), orbmag_mesh%rmesh))
+   NCF_CHECK(nf90_put_var(ncid, vid("orbmag_rmesh_int"), orbmag_mesh%rmesh_int))
  end if
 
  call cwtime(cpu,wall,gflops,"stop")
