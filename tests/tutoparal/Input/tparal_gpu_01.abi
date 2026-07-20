@@ -193,7 +193,7 @@ np_slk 0  # Deactivate Scalapack (sometimes buggy)
 #%% [NCPU_32]
 #%% files_to_test = tparal_gpu_01_MPI32.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
 #%% [extra_info]
-#%% keywords = PAW, PATAPON
+#%% keywords = PAW
 #%% authors = M. Sarraute
 #%% description = 128 titane atoms - CPU
 #%%<END TEST_INFO>

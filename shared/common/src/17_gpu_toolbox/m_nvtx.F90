@@ -93,12 +93,21 @@ module m_nvtx
   end interface nvtxRangePop
 
   interface
+#if defined HAVE_GPU_MARKERS_NVTX
     ! start profiling
     subroutine nvtxProfilerStart() bind(C, name='cudaProfilerStart')
     end subroutine nvtxProfilerStart
     ! stop profiling
     subroutine nvtxProfilerStop() bind(C, name='cudaProfilerStop')
     end subroutine nvtxProfilerStop
+#elif defined HAVE_GPU_MARKERS_ROCTX
+    ! start profiling
+    subroutine nvtxProfilerStart() bind(C, name='roctxProfilerResume')
+    end subroutine nvtxProfilerStart
+    ! stop profiling
+    subroutine nvtxProfilerStop() bind(C, name='roctxProfilerPause')
+    end subroutine nvtxProfilerStop
+#endif
 
   end interface
 

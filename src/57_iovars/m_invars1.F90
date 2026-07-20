@@ -2392,6 +2392,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
    dtsets(idtset)%dmft_triqs_basis=-1
+   dtsets(idtset)%dmft_triqs_chiloc=0
+   if (dtsets(idtset)%dmft_triqs_chiloc > 0 ) dtsets(idtset)%dmft_triqs_chiloc_ins = 10
    dtsets(idtset)%dmft_triqs_compute_integral=1
    dtsets(idtset)%dmft_triqs_det_init_size=100
    dtsets(idtset)%dmft_triqs_det_n_operations_before_check=10000
@@ -2787,6 +2789,11 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%posocc=one
    dtsets(idtset)%postoldfe=0.000001_dp
    dtsets(idtset)%postoldff=zero
+   dtsets(idtset)%precon_in_memory=1
+   dtsets(idtset)%precon_ls_maxite=20
+   dtsets(idtset)%precon_ls_rtol=tol6
+   dtsets(idtset)%precon_tsmear=0.01_dp
+   dtsets(idtset)%precon_verbose=0
    dtsets(idtset)%prepalw=0
    dtsets(idtset)%prepanl=0
    dtsets(idtset)%prtcurrent=0
@@ -2876,7 +2883,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%td_ef_type=0
    dtsets(idtset)%td_ef_induced_vecpot=0
    dtsets(idtset)%td_ef_tzero=zero
-   dtsets(idtset)%td_ef_tau=1000.0_dp
+   dtsets(idtset)%td_ef_tau=1.0_dp
    dtsets(idtset)%td_ef_pol=[1.0_dp,0.0_dp,0.0_dp]
    dtsets(idtset)%td_ef_lambda=10000.0_dp
    dtsets(idtset)%td_ef_ezero=0.1_dp

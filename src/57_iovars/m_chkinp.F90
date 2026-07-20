@@ -955,6 +955,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        cond_string(1)='dmft_triqs_basis' ; cond_values(1)=dt%dmft_triqs_basis
        call chkint_eq(0,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
      end if
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_chiloc',dt%dmft_triqs_chiloc,3,(/0,1,2/),iout)
+     if (dt%dmft_triqs_chiloc > 0) then
+       cond_string(1)='dmft_triqs_chiloc' ; cond_values(1)=dt%dmft_triqs_chiloc
+       call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_chiloc_ins',dt%dmft_triqs_chiloc_ins,1,iout)
+     end if        
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_n_warmup_cycles_init',dt%dmft_triqs_n_warmup_cycles_init,0,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -1317,6 +1322,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        msg = "electron, hole"
        if (.not. string_in(dt%vpq_pkind, msg)) then
          ABI_ERROR_NOSTOP(sjoin("Invalid vpq_pkind: `", dt%vpq_pkind, "`, must be among:", msg), ierr)
+       end if
+       msg = "polaron, hopping, debug_dw"
+       if (.not. string_in(dt%vpq_mode, msg)) then
+         ABI_ERROR_NOSTOP(sjoin("Invalid vpq_mode: `", dt%vpq_mode, "`, must be among:", msg), ierr)
+       end if
+       if (dt%vpq_aseed == "localize" .and. (dt%vpq_atloc < 1 .or. dt%vpq_atloc > dt%natom)) then
+         ABI_ERROR_NOSTOP(sjoin("vpq_atloc must be from 1 to natom if vpq_aseed = `", dt%vpq_aseed, "`"), ierr)
        end if
      end if
      !if (dt%eph_task == -4 .and. dt%occopt /= 3) then
@@ -1849,6 +1861,50 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      'only model dielectric function is allowed (iprcel=0) !',ch10,&
      'Action: change iprcel value in input file !'
      ABI_ERROR_NOSTOP(msg, ierr)
+   end if
+   if(dt%iprcel>=200 .and. dt%iprcel<300) then
+
+     cond_string(1)='iprcel' ; cond_values(1)=dt%iprcel
+     !Implemented models for chi0-based preconditioning are 200, 201, 202, [203, 210, 211, 212, 299]
+     call chkint_eq(1, 1, cond_string, cond_values(1), ierr, 'iprcel', dt%iprcel, 8, [200, 201, 202, 203, 210, 211, 212, 299], iout)
+     !chi0-based preconditioning (iprcel=2**) incompatible with fft-grid parallelization.
+     call chkint_eq(1, 1, cond_string, cond_values, ierr, 'npfft', dt%npfft, 1, [1], iout)
+     !chi0-based preconditioning (iprcel=2**) needs a smooth smearing.
+     call chkint_eq(1, 1, cond_string, cond_values, ierr, 'occopt', dt%occopt, 5, [3, 4, 5, 6, 7], iout) 
+     !chi0-based preconditioning (iprcel=2**) only implemented on the fine grid (PAW).
+     if (usepaw==1) then
+       call chkint_eq(1, 1, cond_string, cond_values, ierr, 'pawmixdg', dt%pawmixdg, 1, [1], iout)
+     end if
+     !chi0-based preconditioning without RPA (iprcel=201/2/3) incompatible with non-collinear magnetism and non-LDA functionals.
+     if (dt%iprcel>=201 .and. dt%iprcel<=203) then
+       if (.not. xc_is_lda) then
+         cond_string(2)='ixc' ; cond_values(2)=dt%ixc
+         call chkint_ne(1, 2, cond_string, cond_values, ierr, 'nspden', dt%nspden, 1, [4], iout)
+       end if
+     end if
+     !Hybrid preconditioning (iprcel=202/3)
+     if (dt%iprcel>=202 .and. dt%iprcel<=203) then
+       !Hybrid preconditioning (iprcel=202/3) not (yet) implemented with band parallelisation and non-collinear magnetism.
+       if (dt%nspden>2) then
+         cond_string(2)='nspden' ; cond_values(2)=dt%nspden
+         call chkint_eq(1, 2, cond_string, cond_values, ierr, 'npband', dt%npband, 1, [1], iout)
+       end if
+       !Hybrid preconditioning (iprcel=202/3) needs nsppol=2 => nspden=2 and nspinor=2 => nspden=4
+       if (dt%nsppol==2) then
+         cond_string(2)='nsppol' ; cond_values(2)=dt%nsppol
+         call chkint_eq(1, 2, cond_string, cond_values, ierr, 'nspden', dt%nspden, 1, [2], iout)
+       end if
+       if (dt%nspinor==2) then
+         cond_string(2)='nspinor' ; cond_values(2)=dt%nspinor
+         call chkint_eq(1, 2, cond_string, cond_values, ierr, 'nspden', dt%nspden, 1, [4], iout)
+       end if
+       !Hybrid preconditioning (iprcel=202/3) needs precon_in_memory=1 with band parallelization.
+       if (dt%npband>1) then
+        cond_string(2)='npband' ; cond_values(2)=dt%npband
+        call chkint_eq(1, 2, cond_string, cond_values, ierr, 'precon_in_memory', dt%precon_in_memory, 1, [1], iout)
+      end if
+     end if
+     
    end if
 
    ! irandom
@@ -2641,6 +2697,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='nspinor' ; cond_values(1)=dt%nspinor
      call chkint_eq(0,1,cond_string,cond_values,ierr,'npspinor',dt%npspinor,1,(/1/),iout)
    end if
+!  When NC+SOC with useylm=1 (nonlop_ylm pathway), spinor parallelism (npspinor>1) is incompatible
+   if (dt%nspinor==2 .and. dt%usepaw==0 .and. dt%useylm==1 .and. dt%npspinor>1) then
+     write(msg,'(3a)') 'NC+SOC with useylm=1 (nonlop_ylm pathway) does not support spinor parallelism.',ch10,&
+&      'Action: set npspinor=1 (or use useylm=0, or use PAW pseudopotentials).'
+     ABI_ERROR_NOSTOP(msg, ierr)
+   end if
 
 !  npvel (must be positive)
    call chkint_ge(0,0,cond_string,cond_values,ierr,'npvel',dt%npvel,0,iout)
@@ -3135,13 +3197,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_ne(1,2,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
    end if
 
-   if (dt%useylm == 1 .and. dt%usepaw == 0 .and. dt%nspinor == 2 .and. any(pspheads(:)%pspso /= 0)) then
-     if(dt%gpu_option/=ABI_GPU_DISABLED) then
-       ABI_ERROR_NOSTOP("spin-orbit (pspso /=0 ) with NC pseudos and GPU for nonlop (gpu_option != 0) not yet allowed.", ierr)
-     else
-       ABI_ERROR_NOSTOP("spin-orbit (pspso /=0 ) with NC pseudos and Ylm for nonlop (useylm = 1) not yet allowed.", ierr)
-     end if
-   end if
+!
 
 !  optforces
    call chkint_eq(0,0,cond_string,cond_values,ierr,'optforces',dt%optforces,3,(/0,1,2/),iout)

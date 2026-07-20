@@ -29,6 +29,7 @@ module m_newvtr
  use m_abi_mixing
  use m_cgtools
  use m_dtset
+ use m_precon
 
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes,     only : MPI_type
@@ -193,6 +194,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
      &  nstep,ntypat,n1xccc,&
      &  pawrhoij,&
      &  ph1d,&
+     &  precon,&
      &  psps,rhor,rprimd,susmat,usepaw,&
      &  vhartr,vnew_mean,vpsp,vresid,vres_mean,&
      &  vtrial,vxc,xred,&
@@ -243,6 +245,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  real(dp),intent(inout),optional :: vtauresid(:,:) !vtauresid(nfft,dtset%nspden*usevxctau)
  type(pawrhoij_type),intent(inout) :: pawrhoij(my_natom*usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
+ type(precon_object), intent(inout) :: precon
 
 !Local variables-------------------------------
 !scalars
@@ -463,7 +466,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
    call prcref_PMA(atindx,dielar,dielinv,dielstrt,dtn_pc,dtset,fcart,ffttomix,gmet,gsqcut,&
 &   istep,kg_diel,kxc,mgfft,moved_atm_inside,mpi_enreg,my_natom,&
 &   nattyp,nfft,nfftmix,ngfft,ngfftmix,nkxc,npawmix,npwdiel,ntypat,n1xccc,&
-&   ispmix,0,pawrhoij,ph1d,psps,rhog,rhoijrespc,rhor,rprimd,susmat,&
+&   ispmix,0,pawrhoij,ph1d, precon,psps,rhog,rhoijrespc,rhor,rprimd,susmat,&
 &   vhartr,vpsp,vresid0,vrespc,vxc,xred,&
 &   etotal,pawtab,wvl)
  else

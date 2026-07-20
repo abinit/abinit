@@ -946,6 +946,22 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%d3e_pert2_magat(2)=dtset%natom
  endif
 
+ ! SCF-Preconditioning input variables
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'precon_in_memory',tread,'INT')
+ if(tread==1) dtset%precon_in_memory=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'precon_ls_maxite',tread,'INT')
+ if(tread==1) dtset%precon_ls_maxite=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'precon_ls_rtol',tread,'DPR')
+ if(tread==1) dtset%precon_ls_rtol=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'precon_tsmear',tread,'ENE')
+ if(tread==1) dtset%precon_tsmear=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'precon_verbose',tread,'INT')
+ if(tread==1) dtset%precon_verbose=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prepalw',tread,'INT')
  if(tread==1) dtset%prepalw=intarr(1)
 
@@ -2499,8 +2515,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_aseed', tread, 'KEY', key_value=key_value)
  if (tread == 1) dtset%vpq_aseed = tolower(trim(key_value))
 
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_mode', tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%vpq_mode = tolower(trim(key_value))
+
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_pkind', tread, 'KEY', key_value=key_value)
  if (tread == 1) dtset%vpq_pkind = tolower(trim(key_value))
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_atloc', tread, 'INT')
+ if (tread == 1) dtset%vpq_atloc = intarr(1)
 
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_avg_g', tread, 'INT')
  if (tread == 1) dtset%vpq_avg_g = intarr(1)
@@ -2514,6 +2536,15 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_nstates', tread, 'INT')
  if (tread == 1) dtset%vpq_nstates = intarr(1)
 
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_hop_nstep', tread, 'INT')
+ if (tread == 1) dtset%vpq_hop_nstep = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_hop_from_ip', tread, 'INT')
+ if (tread == 1) dtset%vpq_hop_from_ip = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_hop_to_ip', tread, 'INT')
+ if (tread == 1) dtset%vpq_hop_to_ip = intarr(1)
+
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_nstep', tread, 'INT')
  if (tread == 1) dtset%vpq_nstep = intarr(1)
 
@@ -2526,6 +2557,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_mesh_fact', tread, 'INT')
  if (tread == 1) dtset%vpq_mesh_fact = intarr(1)
 
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_hop_tolgrs', tread, 'DPR')
+ if(tread==1) dtset%vpq_hop_tolgrs = dprarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_hop_ts', tread, 'DPR')
+ if(tread==1) dtset%vpq_hop_ts = dprarr(1)
+
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_mix_fact', tread, 'DPR')
  if(tread==1) dtset%vpq_mix_fact = dprarr(1)
 
@@ -2535,11 +2572,29 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'vpq_trvec', tread, 'INT')
  if (tread == 1) dtset%vpq_trvec = intarr(1:3)
 
+ call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'vpq_hop_from_site', tread, 'INT')
+ if (tread == 1) dtset%vpq_hop_from_site = intarr(1:3)
+
+ call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'vpq_hop_to_site', tread, 'INT')
+ if (tread == 1) dtset%vpq_hop_to_site = intarr(1:3)
+
+ call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'vpq_hop_vec', tread, 'INT')
+ if (tread == 1) dtset%vpq_hop_vec = intarr(1:3)
+
  call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'vpq_gpr_energy', tread, 'DPR')
  if (tread == 1) dtset%vpq_gpr_energy = dprarr(1:2)
 
  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'vpq_gpr_length', tread, 'DPR')
  if (tread == 1) dtset%vpq_gpr_length = dprarr(1:3)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'vpq_hop_from_filepath',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%vpq_hop_from_filepath = key_value
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'vpq_hop_to_filepath',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%vpq_hop_to_filepath = key_value
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'vpq_efilter', tread, 'ENE')
+ if(tread==1) dtset%vpq_efilter = dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'lambsig',tread,'DPR')
  if(tread==1) dtset%lambsig(1:ntypat)=dprarr(1:ntypat)
@@ -2827,8 +2882,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        dtset%dmft_triqs_time_invariance = 0
        dtset%dmft_triqs_move_double = 1
      end if
+
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_basis',tread,'INT')
      if(tread==1) dtset%dmft_triqs_basis=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_chiloc',tread,'INT')           
+     if(tread==1) dtset%dmft_triqs_chiloc  =intarr(1)                                                    
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_chiloc_ins',tread,'INT')       
+     if(tread==1) dtset%dmft_triqs_chiloc_ins =intarr(1)    
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_compute_integral',tread,'INT')
      if(tread==1) dtset%dmft_triqs_compute_integral=intarr(1)
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_init_size',tread,'INT')

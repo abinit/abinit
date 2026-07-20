@@ -116,12 +116,16 @@ inp_files = [
 "t118.abi", # DMFT dmftctqmc_basis = 4 + ctqmc_localprop soc
 "t119.abi", # DMFT dmft_solv=10 and dmft_hybri_limit=1
 "t120.abi", # Test meta-GGA + PAW + paral_kgb + cprj_in_memory + istwfk
-"t121.abi", #DMFT magnfield=1, with 4 chains per MPI (demonstrate dmftctqmc_chains)
+"t121.abi", # DMFT magnfield=1, with 4 chains per MPI (demonstrate dmftctqmc_chains)
 "t122.abi", # meta-GGA with npband>1
+"t123.abi", # DMFT+TRIQS dmft_triqs_chiloc = 1 and dmft_triqs_chiloc_ins for dmft_solv = 6
+"t124.abi", # DMFT+TRIQS dmft_triqs_chiloc = 2 and dmft_triqs_chiloc_ins for dmft_solv = 7
 "t150.abi",  # Test sequential slice execution in spectrum slicing diagonalization with 4 MPI
 "t151.abi",  # Test parallel slice execution in spectrum slicing diagonalization with 4 MPI
 "t160.abi",
 "t161.abi",
 "t162.abi",
 "t163.abi",
+"t170.abi", # Test RT-TDDFT with 8 MPI paral_kgb, npkpt>1, npband>1, LDA, PAW
+"t171.abi", # Test RT-TDDFT with 8 MPI paral_kgb, npkpt>1, npband>1, GGA, NC
 ]

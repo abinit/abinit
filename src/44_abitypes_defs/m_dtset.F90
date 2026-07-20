@@ -149,6 +149,8 @@ type, public :: dataset_type
  integer :: dmft_solv
  integer :: dmft_t2g
  integer :: dmft_triqs_basis
+ integer :: dmft_triqs_chiloc
+ integer :: dmft_triqs_chiloc_ins
  integer :: dmft_triqs_compute_integral
  integer :: dmft_triqs_det_init_size
  integer :: dmft_triqs_det_n_operations_before_check
@@ -585,6 +587,9 @@ type, public :: dataset_type
  integer :: positron
  integer :: posnstep
  integer :: ppmodel = 1
+ integer :: precon_in_memory = 1
+ integer :: precon_ls_maxite = 20
+ integer :: precon_verbose = 0
  integer :: prepalw
  integer :: prepanl
  integer :: prepgkk = 0
@@ -738,8 +743,13 @@ type, public :: dataset_type
  integer :: vacnum
 
  character(len=abi_slen) :: vpq_aseed = "gau_energy"
+ character(len=abi_slen) :: vpq_mode = "polaron"
  character(len=abi_slen) :: vpq_pkind = "none"
+ integer :: vpq_atloc = 0
  integer :: vpq_avg_g = 0
+ integer :: vpq_hop_from_ip = 1
+ integer :: vpq_hop_nstep = 1
+ integer :: vpq_hop_to_ip = 1
  integer :: vpq_interp = 0
  integer :: vpq_mesh_fact = 1
  integer :: vpq_nstates = 1
@@ -747,8 +757,14 @@ type, public :: dataset_type
  integer :: vpq_nstep_ort = 50
  integer :: vpq_select = -1
  integer :: vpq_translate = 0
+ real(dp) :: vpq_hop_tolgrs = tol6
+ real(dp) :: vpq_hop_ts = zero
  real(dp) :: vpq_mix_fact = zero
  real(dp) :: vpq_tolgrs = tol6
+ real(dp) :: vpq_efilter = zero
+ integer :: vpq_hop_from_site(3) = [0, 0, 0]
+ integer :: vpq_hop_to_site(3) = [0, 0, 0]
+ integer :: vpq_hop_vec(3) = [0, 0, 0]
  integer :: vpq_trvec(3) = [0, 0, 0]
  real(dp) :: vpq_gpr_energy(2) = [zero, one]
  real(dp) :: vpq_gpr_length(3) = [one, one, one]
@@ -969,6 +985,8 @@ type, public :: dataset_type
  real(dp) :: postoldfe
  real(dp) :: postoldff
  real(dp) :: ppmfrq = zero
+ real(dp) :: precon_ls_rtol = tol6
+ real(dp) :: precon_tsmear = 0.01_dp
  real(dp) :: pw_unbal_thresh
  real(dp) :: ratsm
  real(dp) :: ratsph_extra
@@ -1176,6 +1194,8 @@ type, public :: dataset_type
  character(len=fnlen) :: geoopt = ABI_NOFILE
  character(len=fnlen) :: moldyn = ABI_NOFILE
  character(len=fnlen) :: dmft_orbital_filepath = ABI_NOFILE
+ character(len=fnlen) :: vpq_hop_from_filepath = ABI_NOFILE
+ character(len=fnlen) :: vpq_hop_to_filepath = ABI_NOFILE
 
  contains
 
@@ -1640,6 +1660,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_tolfreq       = dtin%dmft_tolfreq
  dtout%dmft_tollc         = dtin%dmft_tollc
  dtout%dmft_triqs_basis   = dtin%dmft_triqs_basis
+ dtout%dmft_triqs_chiloc  = dtin%dmft_triqs_chiloc
+ dtout%dmft_triqs_chiloc_ins = dtin%dmft_triqs_chiloc_ins
  dtout%dmft_triqs_compute_integral = dtin%dmft_triqs_compute_integral
  dtout%dmft_triqs_det_init_size = dtin%dmft_triqs_det_init_size
  dtout%dmft_triqs_det_n_operations_before_check = dtin%dmft_triqs_det_n_operations_before_check
@@ -2153,6 +2175,11 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%positron           = dtin%positron
  dtout%posnstep           = dtin%posnstep
  dtout%ppmodel            = dtin%ppmodel
+ dtout%precon_in_memory   = dtin%precon_in_memory
+ dtout%precon_ls_maxite   = dtin%precon_ls_maxite
+ dtout%precon_ls_rtol     = dtin%precon_ls_rtol
+ dtout%precon_tsmear      = dtin%precon_tsmear
+ dtout%precon_verbose     = dtin%precon_verbose
  dtout%prepalw            = dtin%prepalw
  dtout%prepanl            = dtin%prepanl
  dtout%prepgkk            = dtin%prepgkk
@@ -2306,21 +2333,34 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%useylm             = dtin%useylm
  dtout%vacnum             = dtin%vacnum
 
- dtout%vpq_aseed       = dtin%vpq_aseed
- dtout%vpq_pkind       = dtin%vpq_pkind
- dtout%vpq_avg_g       = dtin%vpq_avg_g
- dtout%vpq_translate   = dtin%vpq_translate
- dtout%vpq_interp      = dtin%vpq_interp
- dtout%vpq_nstates     = dtin%vpq_nstates
- dtout%vpq_nstep       = dtin%vpq_nstep
- dtout%vpq_nstep_ort   = dtin%vpq_nstep_ort
- dtout%vpq_select      = dtin%vpq_select
- dtout%vpq_mesh_fact   = dtin%vpq_mesh_fact
- dtout%vpq_mix_fact    = dtin%vpq_mix_fact
- dtout%vpq_tolgrs      = dtin%vpq_tolgrs
- dtout%vpq_trvec       = dtin%vpq_trvec
- dtout%vpq_gpr_energy  = dtin%vpq_gpr_energy
- dtout%vpq_gpr_length  = dtin%vpq_gpr_length
+ dtout%vpq_aseed             = dtin%vpq_aseed
+ dtout%vpq_mode              = dtin%vpq_mode
+ dtout%vpq_pkind             = dtin%vpq_pkind
+ dtout%vpq_atloc             = dtin%vpq_atloc
+ dtout%vpq_avg_g             = dtin%vpq_avg_g
+ dtout%vpq_hop_from_ip       = dtin%vpq_hop_from_ip
+ dtout%vpq_hop_nstep         = dtin%vpq_hop_nstep
+ dtout%vpq_hop_to_ip         = dtin%vpq_hop_to_ip
+ dtout%vpq_translate         = dtin%vpq_translate
+ dtout%vpq_interp            = dtin%vpq_interp
+ dtout%vpq_nstates           = dtin%vpq_nstates
+ dtout%vpq_nstep             = dtin%vpq_nstep
+ dtout%vpq_nstep_ort         = dtin%vpq_nstep_ort
+ dtout%vpq_select            = dtin%vpq_select
+ dtout%vpq_mesh_fact         = dtin%vpq_mesh_fact
+ dtout%vpq_hop_tolgrs        = dtin%vpq_hop_tolgrs
+ dtout%vpq_hop_ts            = dtin%vpq_hop_ts
+ dtout%vpq_mix_fact          = dtin%vpq_mix_fact
+ dtout%vpq_tolgrs            = dtin%vpq_tolgrs
+ dtout%vpq_trvec             = dtin%vpq_trvec
+ dtout%vpq_gpr_energy        = dtin%vpq_gpr_energy
+ dtout%vpq_gpr_length        = dtin%vpq_gpr_length
+ dtout%vpq_hop_from_site     = dtin%vpq_hop_from_site
+ dtout%vpq_hop_to_site       = dtin%vpq_hop_to_site
+ dtout%vpq_hop_vec           = dtin%vpq_hop_vec
+ dtout%vpq_hop_from_filepath = dtin%vpq_hop_from_filepath
+ dtout%vpq_hop_to_filepath   = dtin%vpq_hop_to_filepath
+ dtout%vpq_efilter           = dtin%vpq_efilter
 
  dtout%vdw_df_acutmin     = dtin%vdw_df_acutmin
  dtout%vdw_df_aratio      = dtin%vdw_df_aratio
@@ -3777,7 +3817,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_nlambda dmft_nominal dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_orbital dmft_orbital_filepath dmft_prt_maxent dmft_prtself dmft_prtwan dmft_read_occnd'
  list_vars=trim(list_vars)//' dmft_rslf dmft_shiftself dmft_solv dmft_t2g dmft_tolfreq dmft_tollc'
- list_vars=trim(list_vars)//' dmft_triqs_basis dmft_triqs_compute_integral dmft_triqs_det_init_size'
+ list_vars=trim(list_vars)//' dmft_triqs_basis dmft_triqs_chiloc dmft_triqs_chiloc_ins dmft_triqs_compute_integral dmft_triqs_det_init_size'
  list_vars=trim(list_vars)//' dmft_triqs_det_n_operations_before_check dmft_triqs_det_precision_error'
  list_vars=trim(list_vars)//' dmft_triqs_det_precision_warning dmft_triqs_det_singular_threshold dmft_triqs_dlr_epsilon dmft_triqs_dlr_wmax'
  list_vars=trim(list_vars)//' dmft_triqs_entropy dmft_triqs_gaussorder dmft_triqs_imag_threshold'
@@ -3943,6 +3983,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' plowan_natom plowan_nbl plowan_nt plowan_projcalc plowan_realspace'
  list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff'
  list_vars=trim(list_vars)//' ppmfrq ppmodel pp_dirpath'
+ list_vars=trim(list_vars)//' precon_in_memory precon_ls_maxite precon_ls_rtol precon_tsmear precon_verbose'
  list_vars=trim(list_vars)//' prepalw prepanl prepgkk'
  list_vars=trim(list_vars)//' printfiles prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtcurrent prtddb prtden'
  list_vars=trim(list_vars)//' prt1mag prtdensph prtdipole prtdos prtdosm'
@@ -4023,10 +4064,12 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' use_oldchi'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
- list_vars=trim(list_vars)//' vpq_avg_g vpq_aseed vpq_gpr_energy vpq_gpr_length'
- list_vars=trim(list_vars)//' vpq_interp vpq_mix_fact vpq_mesh_fact vpq_nstates'
- list_vars=trim(list_vars)//' vpq_nstep vpq_nstep_ort vpq_select vpq_pkind'
- list_vars=trim(list_vars)//' vpq_tolgrs vpq_translate vpq_trvec'
+ list_vars=trim(list_vars)//' vpq_atloc vpq_avg_g vpq_aseed vpq_efilter vpq_gpr_energy vpq_gpr_length'
+ list_vars=trim(list_vars)//' vpq_hop_from_ip vpq_hop_from_filepath vpq_hop_from_site'
+ list_vars=trim(list_vars)//' vpq_hop_to_ip vpq_hop_to_filepath vpq_hop_to_site vpq_hop_nstep'
+ list_vars=trim(list_vars)//' vpq_hop_tolgrs vpq_hop_ts vpq_hop_vec vpq_interp vpq_mix_fact'
+ list_vars=trim(list_vars)//' vpq_mesh_fact vpq_mode vpq_nstates vpq_nstep vpq_nstep_ort vpq_select'
+ list_vars=trim(list_vars)//' vpq_pkind vpq_tolgrs vpq_translate vpq_trvec'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'
  list_vars=trim(list_vars)//' vdw_tol vdw_tol_3bt vdw_typfrag vdw_xc'
  list_vars=trim(list_vars)//' vdw_df_acutmin vdw_df_aratio vdw_df_damax'
