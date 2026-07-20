@@ -2639,7 +2639,7 @@ subroutine orbmag_output(self,dtset,omlamb)
  if(abs(dtset%orbmag) .EQ. 4) then
    write(message,'(a)')ch10
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a)')' Integration of real space mesh values, should equal values above : '
+   write(message,'(a)')' Integrals of densities on real space mesh, should be close to values above : '
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '      rho(1) CC : ',(self%rmesh_int(adir,incc),adir=1,3)
    call wrtout(ab_out,message,'COLL')
