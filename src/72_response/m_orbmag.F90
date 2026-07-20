@@ -588,28 +588,26 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      !--------------------------------------------------------------------------------
 
      ! ZTG23 Eq. 36 term 2 and Eq. 46 term 1
-     call orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,ph1d,pawtab,trnrm)
+     call orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm)
 
      ! ZTG23 Eq. 36 terms 3 and 4 and Eq. 46 term 2
-     call orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh,ph1d,pawtab,trnrm)
+     call orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm)
 
      ! ZTG23 Eq. 36 term 1
-     call orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,ph1d,trnrm)
+     call orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,isppol,&
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,trnrm)
 
      ! ZTG23 text after Eq. 42
      ! <L_R> contribution
-     call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_hamk,ikpt,inlr,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,&
-       & ph1d,trnrm)
+     call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,inlr,isppol,&
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm)
 
      ! ZTG23 Eq. 43
      ! A0.An contribution
-     call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_hamk,ikpt,inbm,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,&
-       & ph1d,trnrm)
+     call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,inbm,isppol,&
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm)
 
      ! accumulate terms
      do nn = 1, nband_k
@@ -931,14 +929,12 @@ end subroutine orbmag_term_scale
 !!
 !! SOURCE
 
-subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_hamk,&
-    & ikpt,oterm,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,&
-    & pawtab,ph1d,trnrm)
+subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,&
+    & oterm,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,nband_k,npw_k,oterm
-  real(dp),intent(in) :: fermie
   type(dterm_type),intent(in) :: dterm
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
@@ -947,11 +943,9 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp),intent(in),pointer,dimension(:,:) :: ph1d
-  real(dp),intent(in) :: eig_k(nband_k),trnrm(nband_k)
+  real(dp),intent(in) :: trnrm(nband_k)
   real(dp),intent(in),target :: cg_k(2,mcgk)
   type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,mcprjk)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
@@ -1072,13 +1066,12 @@ end subroutine orbmag_nl1_k
 !!
 !! SOURCE
 
-subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_hamk,ikpt,isppol,&
-    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,ph1d,trnrm)
+subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,isppol,&
+    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,trnrm)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,nband_k,npw_k
-  real(dp),intent(in) :: fermie
   type(dterm_type),intent(in) :: dterm
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
@@ -1089,7 +1082,6 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
   real(dp),intent(in),target :: cg_k(2,mcgk)
   real(dp),intent(in) :: eig_k(nband_k),trnrm(nband_k)
-  real(dp),intent(in),pointer,dimension(:,:) :: ph1d
   type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,mcprjk)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -1135,7 +1127,7 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
      gdir=modulo(bdir,3)+1
      
      call nonlop_orbmag_nl(atindx,cwaveprj,bdir,gdir,dterm,dtset,eig_k(nn),gs_hamk,npw_k,&
-      & pawtab,unk,vectout)
+      & pawtab,vectout)
      
      nonlop_udotu(1:2)=cg_zdotc(npwsp,unk,vectout)
      txt=prefac_m*CMPLX(nonlop_udotu(1),nonlop_udotu(2))
@@ -1203,15 +1195,14 @@ end subroutine orbmag_nl_k
 !!
 !! SOURCE
 
-subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
+subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,&
     & gcg1_k,gs_hamk,ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,&
-    & npw_k,orbmag_mesh,ph1d,pawtab,trnrm)
+    & npw_k,orbmag_mesh,trnrm)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,nband_k,npw_k
   real(dp),intent(in) :: fermie
-  type(dterm_type),intent(in) :: dterm
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   type(MPI_type), intent(inout) :: mpi_enreg
@@ -1221,9 +1212,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
   real(dp),intent(in) :: eig_k(nband_k),trnrm(nband_k)
   real(dp),intent(in),target :: gcg1_k(2,mcgk,3)
-  real(dp),intent(in),pointer,dimension(:,:) :: ph1d
   type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,mcprjk,3)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
@@ -1367,15 +1356,13 @@ end subroutine orbmag_cc_k
 !!
 !! SOURCE
 
-subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k,gs_hamk,&
-    & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh,&
-    & ph1d,pawtab,trnrm)
+subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,&
+    & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,nband_k,npw_k
   real(dp),intent(in) :: fermie
-  type(dterm_type),intent(in) :: dterm
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   type(MPI_type), intent(inout) :: mpi_enreg
@@ -1383,11 +1370,9 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp),intent(in) :: eig_k(nband_k),occ_k(nband_k),trnrm(nband_k)
+  real(dp),intent(in) :: eig_k(nband_k),trnrm(nband_k)
   real(dp),intent(in),target :: cg_k(2,mcgk),gcg1_k(2,mcgk,3)
-  real(dp),intent(in),pointer,dimension(:,:) :: ph1d
   type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,mcprjk)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
@@ -2001,7 +1986,7 @@ end subroutine lamb_core
 !! SOURCE
 
 subroutine nonlop_orbmag_nl(atindx,cwaveprj,dnlbra,dnlket,dterm,dtset,eignk,gs_hamk,npw_k,&
-    & pawtab,vectin,vectout)
+    & pawtab,vectout)
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: dnlbra,dnlket,npw_k
@@ -2011,7 +1996,6 @@ subroutine nonlop_orbmag_nl(atindx,cwaveprj,dnlbra,dnlket,dterm,dtset,eignk,gs_h
   type(dterm_type),intent(in) :: dterm
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
-  real(dp),intent(in),pointer :: vectin(:,:)
   real(dp),intent(out) :: vectout(2,npw_k*dtset%nspinor)
   type(pawcprj_type),intent(in) :: cwaveprj(dtset%natom,dtset%nspinor)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
