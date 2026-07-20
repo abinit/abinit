@@ -22,6 +22,7 @@ module m_alloc_hamilt_gpu
 
  use defs_basis
  use m_abicore
+ use m_errors
  use m_xmpi
  use m_dtset
  use m_ompgpu_fourwf

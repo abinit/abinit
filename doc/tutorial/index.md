@@ -18,8 +18,10 @@ Dependencies between tutorials are present.
 To start with, four tutorials cover the basics of using ABINIT, and one tutorial explains in detail the build of ABINIT
 (as a complement to the easier user guide type documentation).
 Six tutorials are intermediate level ones, that might be prerequisite for some more advanced tutorials.
-The following schema should help to understand these dependencies.
-To access the tutorials, see the menu on the left...
+The following schema should help to understand these dependencies 
+(NB: it should be upgraded to include two new tutorials,
+[eph4zpr_gwpt](eph4zpr_gwpt.md) and [paral_gpu](paral_gpu.md)).
+To access the tutorials, see the menu on the left, or click on the adequate tutorial in the schema...
 
 <!-- edit the svg file ./index_assets/drawing.svg with inkscape, take the svg
 code and insert it in index.md. Pay attention to the path-to-links in
@@ -1477,8 +1479,15 @@ interaction, elastic response, Raman coefficients, piezoelectricity ...)**
     explains how to obtain the electron self-energy due to phonons, compute the zero-point renormalization (ZPR) of the band gap
     as well as temperature-dependent band gaps (or the whole electronic structure).
 
+  * [The tutorial on zero-point renormalization and temperature-dependence of electronic structure base on GW Perturbation Theory - GWPT](eph4zpr_gwpt.md)
+    is similar to the previous one, but relies on GWPT to obtain the electron-phonon couplings, with better temperature-dependence of the band gap.
+
   * [The tutorial on self-trapped polarons](eph4vpq.md)
     explains how to use Variational Polaron Equations framework to compute self-trapped polarons in semiconductors and insulators.
+
+  * [The tutorial on the GSTORE format](gstore.md)
+    explains the storage for the electron-phonon coupling elements, used by all previous tutorials.
+
 
 
 **Two legacy tutorials on electron-phonon interaction are still present.
