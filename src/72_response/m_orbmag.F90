@@ -851,6 +851,19 @@ subroutine orbmag_term_scale(self,crystal,dtset)
    end do
  end if
 
+ if (dtset%orbmag .EQ. 4) then
+   do iterm = 1, orbmag_nterms
+     self%rmesh_int(1:3,iterm) = zero
+     do i4=1,self%n4
+       do i5=1,self%n5
+         do i6=1,self%n6
+           self%rmesh_int(1:3,iterm) = self%rmesh_int(1:3,iterm) + &
+             & self%rmesh(i4,i5,i6,1:3,iterm)
+         end do
+       end do
+     end do
+   end do
+ end if
 
  do iterm = 1, chern_nterms
    do isppol = 1, dtset%nsppol
@@ -2622,6 +2635,26 @@ subroutine orbmag_output(self,dtset,omlamb)
    write(message,'(a,3es16.8)') '      Chern VV1 : ',(self%chern_trace(adir,ibvv1),adir=1,3)
    call wrtout(ab_out,message,'COLL')
  end if
+
+ if(abs(dtset%orbmag) .EQ. 4) then
+   write(message,'(a)')ch10
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a)')' Integration of real space mesh values, should equal values above : '
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '      rho(1) CC : ',(self%rmesh_int(adir,incc),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '     rho(1) VV1 : ',(self%rmesh_int(adir,invv1),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '     rho(1) VV2 : ',(self%rmesh_int(adir,invv2),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '      rho(0) NL : ',(self%rmesh_int(adir,innl),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '          <L_R> : ',(self%rmesh_int(adir,inlr),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '        <A0.An> : ',(self%rmesh_int(adir,inbm),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+ end if
+
 
  write(message,'(a,a,a)')ch10,'====================================================',ch10
  call wrtout(ab_out,message,'COLL')
