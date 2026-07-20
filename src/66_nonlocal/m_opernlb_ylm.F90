@@ -941,7 +941,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
 !      Compute <g|Vnl|c> (or derivatives) for each plane wave:
        if (paw_opt/=3) then
-!$OMP PARALLEL PRIVATE(ipw,ilmn,fdf,fdb,ffnl_dir1)
+!$OMP PARALLEL PRIVATE(ipw,ilmn,ffnl_dir1)
 
 !        ------
          if (choice==1) then ! <g|Vnl|c>
@@ -1195,7 +1195,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
 !      Compute <g|S|c> (or derivatives) for each plane wave:
        if (paw_opt>=3) then
-!$OMP PARALLEL PRIVATE(ilmn,ipw,fdf,fdb,ffnl_dir1)
+!$OMP PARALLEL PRIVATE(ilmn,ipw,ffnl_dir1)
 
 !        ------
          if (choice==1) then ! <g|S|c>
