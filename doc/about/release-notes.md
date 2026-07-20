@@ -96,7 +96,7 @@ See also the new tests [[test:gwpt_suite_06]] to [[test:gwpt_suite_12]].
 An auxiliary [[tutorial:gstore]] is also available, to describe the GSTORE file format.
 
 New input variables (see also previous releases of ABINIT) : 
-getqpdata_filepath NOT DOCUMENTED, [[gwpt_wmode]], [[gwpt_g2mode]], [[symsigma_de]].
+getqpdata_filepath NOT TESTED, [[gwpt_wmode]], [[gwpt_g2mode]], [[symsigma_de]].
 
 By M. Giantomassi helped by S. Chen (testing and debugging), with involvement of S. Ponc&eacute; , J.-M. Lihm, G. Antonius and X. Gonze 
 (MR1277, 1331, 1335, 1342)
@@ -181,7 +181,7 @@ See [[test:v10_52]] and [[test:v10_53]].
 
 DFPT with a finite q monochromatic spatial perturbation (scalar potential as well as vector potential - the latter is for a magnetic field 
 coupling with the orbital motion) is also available.
-See [[test:v10_54]] for the scalar potentiel response (test numbers SHOULD BE PROVIDED for vector potentials).
+See [[test:v10_54]] for the scalar potential response (test numbers SHOULD BE PROVIDED for vector potentials).
 
 By M. Royo, M. Stengel, with S. Rostami for integration in the trunk.
 (MR 1319)
