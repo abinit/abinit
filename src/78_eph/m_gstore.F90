@@ -3761,9 +3761,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
  ! If True, only k-points in the IBZ and q-points in the IBZ_k are computed.
  ! Matrix elements in full BZs are then reconstructed by symmetry at the end of the run by calling
  ! gstore_symmetrize.
- symmetrize = (dtset%gstore_kzone == "bz" .and. dtset%gstore_qzone == "bz" .and. dtset%gstore_use_lgk /= 0 &
+ symmetrize = (dtset%gstore_kzone == "bz" .and. dtset%gstore_qzone == "bz" &
+     !.and. dtset%gstore_use_lgk /= 0 &
      .and. dtset%userie == 789)
- if (symmetrize) call wrtout(units, " Computing g(k, q) with k in the IBZ and q in the IBZ_k + final reconstruction")
+ if (symmetrize) call wrtout(units, " Computing g(k, q) with k in the IBZ and q in the BZ + final reconstruction")
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
@@ -4069,9 +4070,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
        ! and we don't want random numbers written to disk.
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
 
-       !if (symmetrize .and. .not. isirr_k) then
-       !  state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING; cycle
-       !end if
+       if (symmetrize .and. .not. isirr_k) then
+         state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING; cycle
+       end if
 
        if (dtset%gstore_use_lgk /= 0) then
          ii = lg_myk(my_ik)%findq_ibzk(qq_bz)
@@ -6756,129 +6757,24 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  integer :: isym_k_inv, isym_gk, itime_gk, isym_kq_inv, isym_gkq, itime_gkq, isym_tot_inv
  integer :: indkk_kq(6, 1)
  real(dp) :: kk_base(3)
- real(dp) :: weight_qq, phase, tnon(3), q_base(3)
+ real(dp) :: weight_qq, phase, q_base(3)
  integer :: idir, ipert, idir_eq, ipert_eq, mu, mu_eq, iq_base_glob, ii
- real(dp) :: symrec_eq(3,3), l0(3)
+ integer :: symrec_eq(3,3), l0(3)
  real(dp) :: L_gk(3), L_gkq(3)
  complex(dp) :: cphase, phase_gk, phase_gkq
  logical :: with_g2dw, q_is_gamma
  logical :: isirr_k, isirr_kq, isirr_q
- ! DEBUG (self-consistency test, AGENT): if enabled, reconstruct COMPUTED points too and diff
- ! against the actually-computed value instead of skipping them, without touching state_kq/netcdf
- ! for them (touching them would flip valid GSTORE_KQ_COMPUTED sources to GSTORE_KQ_SYMMETRIZED
- ! in-memory and break search_source for OTHER points still to be processed in the same pass).
- ! Flip to .True. to activate; leave .False. for normal production runs.
- logical,parameter :: DEBUG_SELFTEST_RECONSTRUCT = .False.
- logical :: is_selftest
- ! DEBUG (symmetry-index dump, AGENT): if enabled, dump the symmetry/time-reversal indices used
- ! to reconstruct EVERY (k,q) point to a CSV file, so they can be correlated offline (in python)
- ! against the pass/fail classification from compare_gvals_with_reconstruction. Flip to .True. to
- ! activate; leave .False. for normal production runs.
- logical,parameter :: DEBUG_DUMP_SYMINFO = .False.
- integer :: syminfo_unit, muinfo_unit
- integer :: tsign_p, g0_p(3)
- logical :: p_stab
- real(dp) :: kk_sk_p(3)
- ! DEBUG (AGENT): if .True., restore the ORIGINAL (pre session-3 fix B) tnon formula, adding back
- ! the rotation-weighted cryst%tnons(isym_combined) term, for A/B testing the phonon/atomic-
- ! perturbation leg in isolation from the electron D-matrix bugs. Leave .False. in production.
- logical,parameter :: DEBUG_TNON_FULL = .False.
- ! DEBUG (AGENT, session 6): drop the D(isym_glob) factor from dmat_k. Hypothesis: isym_glob is
- ! a pure q-space little-group rotation of k0/ik_ibz (found by lg_cache to relate q0_computed to
- ! q_base) and never touches k at all -- k0 always literally equals its own ik_ibz coordinate
- ! (isym_k0=1 always, confirmed empirically this session by cross-referencing gstore%kbz2ibz), so
- ! composing D(isym_glob) into the ELECTRON ket D-matrix may be spurious. Leave .False. in production.
- logical,parameter :: DEBUG_DMATK_NO_GLOB = .False.
- ! DEBUG (AGENT, session 6): alternate isym_combined for the general (isym_glob/=1) search_source
- ! branch. Derivation: symrec is a genuine (non-anti-) homomorphism of the multable group law
- ! (symrec(s):=symrel^T(toinv(s)), and phi(s):=symrel^T(s) is an anti-homomorphism, so the two
- ! reversals cancel), so q_glob=symrec(isym_tot).q_base and q_base=symrec(isym_glob).q0_computed
- ! (the latter from lgroup_find_ibzimage_sym's own docstring) combine EXACTLY to
- ! q_glob=symrec(multable(1,isym_tot,isym_glob)).q0_computed, with NO toinv anywhere in the pure
- ! coordinate algebra. Combined with the already-validated Fix A boundary condition (isym_glob=1
- ! must reduce to toinv(isym_tot)), the natural candidate consistent with both is
- ! isym_combined_new = toinv(multable(1,isym_tot,isym_glob)) -- differs from the current
- ! multable(1,isym_tot_inv,isym_glob) whenever isym_glob/=1. Leave .False. in production.
- logical,parameter :: DEBUG_ISYM_COMBINED_ALT = .False.
- integer :: isym_tot_glob_tmp
- ! DEBUG (AGENT, session 6): test whether the tnon/l0 formula for the atomic-perturbation leg is
- ! missing a lattice-vector "debt" correction analogous to L_gk, arising because isym_combined
- ! (in the general isym_glob/=1 branch) is a TABULATED multable(1,isym_tot_inv,isym_glob) product,
- ! not necessarily the literal Seitz composition -- the debt is multable(2:4,isym_tot_inv,isym_glob)
- ! (already computed for the CSV dump as Ltc_debug, but the code's own comment there calls it "not
- ! needed downstream"). Session 5 tested a similar idea dotted with kk_ibz (wrong -- gave i, needed
- ! -1); this variant adds it directly to l0 (so it enters exactly like l0 does, dotted with
- ! q0_computed via the existing phase formula) instead. Leave .False. in production.
- logical,parameter :: DEBUG_TNON_LTC = .False.
- real(dp) :: Ltc_live(3)
- ! DEBUG (AGENT, session 8): rigorous two-step composition of the atomic-perturbation lattice
- ! debt l0, derived from scratch via real-space Seitz algebra (mirroring dmats_get_star_dmats's
- ! L_h derivation): for g1=isym_glob applied first (ib0->ib1) then g2=isym_tot (ib1->ipert),
- ! R(g1).xred(ib0)+tau(g1) = xred(ib1)+l0_1 and R(g2).xred(ib1)+tau(g2) = xred(ipert)+l0_2 combine
- ! EXACTLY (substitution, no approximation) to l0_comb = l0_2 + R(g2).l0_1 for the LITERAL
- ! composite g2.g1 -- proven algebraically to differ from the current single-step tabulated
- ! l0(isym_combined,ipert) in ~42% of (point,mu) pairs (checked empirically against the CSV dump),
- ! by an exact integer lattice vector each time (as expected for two valid lattice debts). The
- ! atom index itself (ipert_eq) was verified to ALWAYS agree between the two-step and single-step
- ! lookups (0 mismatches out of 14166), so only l0 changes here, not ipert_eq/mu_eq downstream.
- ! Leave .False. in production.
- logical,parameter :: DEBUG_TWOSTEP_L0 = .False.
- integer :: ib1_twostep
- real(dp) :: l0_1_twostep(3), l0_2_twostep(3), q_base_twostep(3)
- ! DEBUG (AGENT, session 8): extend DEBUG_TWOSTEP_L0 to ALSO include each step's own tau/tnons
- ! term (the FULL v1phq_rotate_myperts tnon formula, l0+R^T.tau, applied at EACH of the two steps
- ! separately, not dropped per session 3's single-step "double-counting" simplification) to test
- ! whether that simplification was a misdiagnosis once the l0 two-step composition is done right.
- logical,parameter :: DEBUG_TWOSTEP_FULL = .False.
- real(dp) :: tnon_1_twostep(3), tnon_2_twostep(3), symrec_glob(3,3), symrec_toti(3,3)
- ! DEBUG (AGENT, session 9): isym_gk (electron k-leg, rigorously proven correct session 6) is built
- ! DIRECTLY from isym_tot (forward, never inverted): isym_gk=multable(1,isym_k_inv,isym_tot). But
- ! isym_rp/isym_gkq (electron kq-leg) are built from isym_elec_combined, currently PINNED equal to
- ! isym_combined=multable(1,isym_tot_inv,isym_glob) -- i.e. isym_tot INVERTED. This asymmetry is
- ! invisible whenever isym_tot is its own inverse (order<=2) and only shows up otherwise. Empirical
- ! motivation (session 9): pass rate splits sharply by whether isym_tot is an involution (43.6% vs
- ! 2.8% overall; 60.9% vs EXACTLY 0/55 in the isym_glob==1 & p_stab==1 clean subset) -- a far cleaner
- ! discriminator than anything found in 8 prior sessions, and one never tested before (all prior
- ! correlation searches used isym_glob's own trace/det/order, never isym_tot's). This flag tests the
- ! UNTRIED direction: keep isym_combined (tnon/l0, proven correct session 8) exactly as production,
- ! but make isym_elec_combined use the FORWARD isym_tot composition (matching isym_gk's own
- ! convention) instead of pinning it to isym_combined. NOTE: session 3's "principled split" tried the
- ! OPPOSITE direction (phonon leg forward, electron leg inverted) and failed -- this is a genuinely
- ! different, untested combination. Leave .False. in production.
- logical,parameter :: DEBUG_ISYM_ELEC_FORWARD = .False.
- integer :: isym_tot_glob_fwd
- ! DEBUG (AGENT, session 9): tests a NEW lattice-debt term, never tried before -- the debt from
- ! tabulating isym_tot_inv=toinv(1,isym_tot) itself: dmats%toinv(2:4,isym_tot). Distinct from every
- ! prior "Ltc" candidate (sessions 6-8), which only ever used multable(2:4,isym_tot_inv,isym_glob)
- ! (the debt of the isym_tot_inv-isym_glob COMPOSITION), never this one (the debt of computing
- ! isym_tot_inv in the first place). Found via a fully clean hand-derivation (session 9): filtering
- ! to isym_gk=1 AND isym_p=1 AND isym_glob=1 AND isym_tot NOT an involution (order>2) -- i.e. BOTH
- ! dmat_k and dmat_star_kq are exactly Identity, zero D-matrix ambiguity anywhere -- gives an EXACT,
- ! deterministic 0/55 (0.0%) pass rate in production; hand-solving one such point
- ! (ik_glob=36,iq_glob=16,isym_tot=16,isym_combined=12) for what tnon SHOULD be to match ground
- ! truth (checked all 6 mu) gives EXACTLY tnon=l0-toinv(2:4,isym_tot), zero residual. Leave .False.
- ! in production until validated on the full aggregate.
- logical,parameter :: DEBUG_TNON_TOINV = .False.
- integer :: selftest_count, selftest_count_ok
- real(dp) :: selftest_diff, selftest_maxdiff
+ !logical :: is_selftest
  character(len=abi_slen) :: with_gmode, gtype, gvals_name
  character(len=5000) :: msg
  type(gstore_t) :: gstore
- type(dmats_t),target :: dmats
-!arrays
+!!arrays
  real(dp) :: qpt(3), kk_bz(3), kk_ibz(3), qq_ibz(3)
- !real(dp),allocatable :: gwork_q(:,:,:,:,:)
+ !!real(dp),allocatable :: gwork_q(:,:,:,:,:)
  integer :: brange_k_spin(2, dtset%nsppol)
- integer :: target_ik_ibz
- real(dp) :: Ltc_debug(3) ! DEBUG (AGENT): candidate multable(2:4,isym_tot_inv,isym_glob) lattice debt
  integer,allocatable :: my_kqmap(:,:), state_kq(:,:) ! kmesh_map(:,:),
  real(dp),contiguous,pointer :: gkq_rot_ptr(:,:,:,:), gkq_base_ptr(:,:,:,:)
- complex(dp),allocatable :: dmat_k(:,:), dmat_star_kq(:,:), dmat_temp(:,:)
  complex(dp),target,allocatable :: gkq_rot(:,:,:), gkq_base(:,:,:)
- complex(dp),target,allocatable :: gkq_target(:,:,:) ! DEBUG selftest
- real(dp),contiguous,pointer :: gkq_target_ptr(:,:,:,:) ! DEBUG selftest
- logical,allocatable :: lg_cache_done(:)
- type(lgroup_t),allocatable :: lg_cache(:)
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -6886,35 +6782,12 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  units = [std_out, ab_out]
  call wrtout(units, " Entering gstore_symmetrize...")
  call wrtout(units, sjoin(" GSTORE file: ", gstore_path))
- call wrtout(units, sjoin(" WFK file: ", wfk_path))
 
  call gstore_read_gtype(gstore_path, gtype, comm, brange_k_spin=brange_k_spin)
-
- ! Compute the phase matrices D^{k}(S) from the wavefunctions stored in wfd_t.
- call dmats%init(wfk_path, dtset, cryst, brange_k_spin, ngfft, pawtab, psps, comm)
 
  ! Only master processor performs the symmetrization of the e-ph matrix elements.
  ! Performance is not crucial and the algorithm is IO-bound.
  if (my_rank /= 0) goto 100
-
- call dmats%check([std_out], dtset%prtvol)
- call dmats%classify(dtset%prtvol)
-
- if (DEBUG_DUMP_SYMINFO) then
-   open(newunit=syminfo_unit, file="gstore_symmetrize_syminfo.csv", action="write", status="replace")
-   write(syminfo_unit, "(a)") &
-     "spin,ik_glob,iq_glob,isym_tot,trev_tot,isym_combined,trev_combined,isym_glob,itime_glob,"// &
-     "isym_k,trev_k,isym_kq,trev_kq,isym_p,itime_p,ikq_ibz_p,p_stab,"// &
-     "isym_gk,itime_gk,isym_gkq,itime_gkq,isym_rp,itime_rp,"// &
-     "re_phase_gk,im_phase_gk,re_phase_gkq,im_phase_gkq,re_dmatk11,im_dmatk11,re_dmatsq11,im_dmatsq11,"// &
-     "re_dmatk22,im_dmatk22,re_dmatsq22,im_dmatsq22,ik_ibz,ik_base_glob,iq_computed_glob,"// &
-     "target_ik_ibz,kk_ibz_stale_1,kk_ibz_stale_2,kk_ibz_stale_3,"// &
-     "kk_ibz_correct_1,kk_ibz_correct_2,kk_ibz_correct_3,"// &
-     "isym_tot_inv_val,Ltc_1,Ltc_2,Ltc_3"
-   open(newunit=muinfo_unit, file="gstore_symmetrize_muinfo.csv", action="write", status="replace")
-   write(muinfo_unit, "(a)") "ik_glob,iq_glob,isym_combined,mu,ipert,ipert_eq,l0_1,l0_2,l0_3,"// &
-     "iq_computed_glob,phase,re_cphase,im_cphase"
- end if
 
  gvals_name = "gvals"
  ! TODO: Remember to handle GWPT STORE
@@ -6934,30 +6807,16 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  end if
 
  ABI_CHECK_IEQ(gstore%has_used_lgq, 0, "Symmetrization of g(k,q) with use_lgq /= 0 is not coded")
- ABI_CHECK_IEQ(gstore%has_used_lgk, 1, "Symmetrization of g(k,q) with use_lgk /= 1 is not coded")
+ !ABI_CHECK_IEQ(gstore%has_used_lgk, 1, "Symmetrization of g(k,q) with use_lgk /= 1 is not coded")
 
  ! Useful dimensions.
  nkbz = gstore%nkbz; nkibz = gstore%nkibz
  nqbz = gstore%nqbz; nqibz = gstore%nqibz
  nsym = cryst%nsym
 
- ! Lazily-built cache of little groups of k0 IBZ points, one entry per nkibz, used as a
- ! fallback in search_source below when a candidate q_base does not literally match a
- ! computed point: q_base may still be reachable from the ACTUAL computed IBZ_k0
- ! representative via an additional rotation in k0's own little group (the same
- ! reduction gstore_compute used, via lgroup_t, to decide what to compute). Built lazily
- ! (not eagerly for all nkibz) and cached by ik_ibz, not rebuilt per (isym_tot,trev_tot)
- ! trial, since lgroup_init internally calls symkpt_new over the full q-BZ mesh.
- timrev_k = kpts_timrev_from_kptopt(ebands%kptopt)
- ABI_MALLOC(lg_cache, (nkibz))
- ABI_MALLOC(lg_cache_done, (nkibz))
- lg_cache_done = .False.
+ !timrev_k = kpts_timrev_from_kptopt(ebands%kptopt)
 
  NCF_CHECK(nctk_open_modify(ncid, gstore_path, xmpi_comm_self))
-
- ! Write D^k(S) = <psi_mSk|S|psi_nk> for post-processing and reuse without the WFK file.
- ! This code runs on the master rank and dmats%for_spin has already been collected on every rank.
- call dmats%ncwrite(ncid)
 
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
@@ -6965,13 +6824,8 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
    associate (gqk => gstore%gqk(my_is))
    nb = gqk%nb_k
 
-   ABI_MALLOC(dmat_k, (nb, nb))
-   ABI_MALLOC(dmat_star_kq, (nb, nb))
-   ABI_MALLOC(dmat_temp, (nb, nb))
    ABI_MALLOC(gkq_base, (nb, nb, gqk%natom3))
    ABI_MALLOC(gkq_rot, (nb, nb, gqk%natom3))
-   ABI_MALLOC(gkq_target, (nb, nb, gqk%natom3)) ! DEBUG selftest
-   selftest_count = 0; selftest_count_ok = 0; selftest_maxdiff = zero ! DEBUG selftest
 
    ! Get the group id for this spin.
    NCF_CHECK(nf90_inq_ncid(ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
@@ -6994,12 +6848,14 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
      tsign_q = 1; if (trev_q == 1) tsign_q = -1
      qq_ibz = gstore%qibz(:, iq_ibz)
 
+     !gqk%my_q2glob(my_iq)
+
      ! Find k + q in the IBZ for all my k-points.
      ! AGENT: NB: Using symrel^T convention for k+q.
-     ABI_MALLOC(my_kqmap, (6, gqk%my_nk))
-     if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, my_kqmap, qpt=qpt) /= 0) then
-       ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qpt)))
-     end if
+     !ABI_MALLOC(my_kqmap, (6, gqk%my_nk))
+     !if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, my_kqmap, qpt=qpt) /= 0) then
+     !  ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qpt)))
+     !end if
 
      ! Read q-slice of the e-ph matrix elements
      ! TODO: Remember to handle GWPT STORE
@@ -7010,9 +6866,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        ik_glob = my_ik + gqk%my_kstart - 1
        kk_bz = gqk%my_kpts(:, my_ik)
 
-       this_state = state_kq(ik_glob, iq_glob)
-       is_selftest = DEBUG_SELFTEST_RECONSTRUCT .and. (this_state == GSTORE_KQ_COMPUTED)
-       if (this_state == GSTORE_KQ_COMPUTED .and. .not. is_selftest) cycle
+       this_state = state_kq(ik_glob, iq_glob); if (this_state == GSTORE_KQ_COMPUTED) cycle
 
        ! AGENT: Using symrel^T convention for k.
        ik_ibz = gqk%my_k2ibz(1, my_ik); isym_k = gqk%my_k2ibz(2, my_ik)
@@ -7021,423 +6875,48 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        tsign_k = 1; if (trev_k == 1) tsign_k = -1
        itime_k = trev_k + 1
        kk_ibz = ebands%kptns(:,ik_ibz)
-       target_ik_ibz = ik_ibz ! DEBUG (AGENT): save pre-search_source value of ik_ibz (target's own
-                              ! IBZ index) to check whether it differs from the SOURCE's ik_ibz that
-                              ! search_source assigns below -- kk_ibz (used in phase_gk) is never
-                              ! refreshed after that reassignment.
 
        ! AGENT: Using symrel^t convention for k+q.
-       ikq_ibz = my_kqmap(1, my_ik); isym_kq = my_kqmap(2, my_ik)
-       trev_kq = my_kqmap(6, my_ik); g0_kq = my_kqmap(3:5, my_ik)
-       isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
-       tsign_kq = 1; if (trev_kq == 1) tsign_kq = -1
-       itime_kq = trev_kq + 1
-
-       ik_ibz = -1
-       search_source: do trev_tot = 0, cryst%timrev - 1
-         tsign_tot = 1; if (trev_tot == 1) tsign_tot = -1
-         do isym_tot = 1, cryst%nsym
-           ! We want S_tot * (k_base, q_base) = (k_glob, q_glob).
-           ! So (k_base, q_base) = S_tot^-1 * (k_glob, q_glob).
-           ! gstore%kbz2ibz (mode "symrel" in kpts_map/krank_get_mapping) is built with:
-           !     k_bz = tsign * transpose(symrel(isym)) . k_ibz
-           ! so its inverse is: k_ibz = tsign * symrec(isym) . k_bz  (plain symrec, NOT transposed).
-           ! gstore%qbz2ibz (mode "symrec") is built with:
-           !     q_bz = tsign * symrec(isym) . q_ibz
-           ! so its inverse is: q_ibz = tsign * transpose(symrel(isym)) . q_bz.
-           kk_base = tsign_tot * matmul(cryst%symrec(:,:,isym_tot), gstore%kbz(:, ik_glob))
-           q_base  = tsign_tot * matmul(transpose(real(cryst%symrel(:,:,isym_tot), dp)), gstore%qbz(:, iq_glob))
-
-           ! Find q_base in global qbz
-           iq_base_glob = -1
-           do ii = 1, gstore%nqbz
-             if (sum((modulo(q_base - gstore%qbz(:, ii) + 0.5_dp, 1.0_dp) - 0.5_dp)**2) < tol12) then
-               iq_base_glob = ii; exit
-             end if
-           end do
-           if (iq_base_glob == -1) cycle
-
-           ! Find kk_base in global kbz
-           ik_base_glob = -1
-           do ii = 1, gstore%nkbz
-             if (sum((modulo(kk_base - gstore%kbz(:, ii) + 0.5_dp, 1.0_dp) - 0.5_dp)**2) < tol12) then
-               ik_base_glob = ii; exit
-             end if
-           end do
-           if (ik_base_glob == -1) cycle
-
-           ! Fast path: q_base is itself the literal computed IBZ_k0 representative.
-           if (state_kq(ik_base_glob, iq_base_glob) == GSTORE_KQ_COMPUTED) then
-             ik_ibz = -1
-             do ii = 1, gstore%nkibz
-               if (sum((modulo(kk_base - ebands%kptns(:, ii) + 0.5_dp, 1.0_dp) - 0.5_dp)**2) < tol12) then
-                 ik_ibz = ii; exit
-               end if
-             end do
-             if (ik_ibz /= -1) then
-               ! isym_combined = toinv(isym_tot), used for BOTH the phonon leg (symrec_eq/tnon/phase)
-               ! and the electron kq-leg (isym_rp below). NOTE (session 3, 2026-07-05): a "principled"
-               ! split was tried -- isym_tot unmodified for the phonon leg (matching v1phq_rotate_myperts's
-               ! own docstring contract "qpt_bz=S(isym).q_ibz", which search_source's q_base formula
-               ! satisfies exactly for isym_tot as-is) combined with toinv(isym_tot) for the electron leg
-               ! only. Empirically this reproduces the pre-fix baseline exactly (loses all 44 gains, twice,
-               ! reproducibly) -- i.e. there is a SECOND, still-unidentified sign/convention issue in the
-               ! tnon/phase formula that happens to be cancelled by using toinv(isym_tot) there too. Do not
-               ! re-attempt the split without first finding that second issue; use toinv(isym_tot)
-               ! uniformly for now (measured strictly better than baseline, zero regressions, see
-               ! [[gstore-symm-validation-workflow]]).
-               isym_tot_inv = dmats%toinv(1, isym_tot)
-               ABI_CHECK(isym_tot_inv /= 0, "Could not find inverse of isym_tot")
-               isym_combined = isym_tot_inv; trev_combined = trev_tot; iq_computed_glob = iq_base_glob
-               isym_glob = 1; itime_glob = 1
-               if (DEBUG_ISYM_ELEC_FORWARD) then
-                 isym_elec_combined = isym_tot
-               else
-                 isym_elec_combined = isym_combined
-               end if
-               ! kk_base/q_base were matched to the global BZ arrays via a tolerant modulo(...)
-               ! comparison above, so they may differ from the canonical tabulated array values by
-               ! an exact integer G-vector. This matters below: kk_base+q_base is fed into
-               ! kpts_map to re-derive isym_p, which MUST reproduce the exact same little-group
-               ! element that gstore_compute originally used to fix the gauge of the k0+q0
-               ! wavefunction (gstore_compute computes kq_bz from the literal gstore%kbz/qbz
-               ! array entries, NOT from a freshly-rotated coordinate) -- snap both to the
-               ! canonical array values so the two kpts_map calls see bit-identical input.
-               kk_base = gstore%kbz(:, ik_base_glob)
-               q_base = gstore%qbz(:, iq_base_glob)
-               exit search_source
-             end if
-             cycle
-           end if
-
-           ! q_base itself was not computed. But IBZ_k0's own q-reduction (built with the
-           ! SAME little-group machinery gstore_compute used, via lgroup_t) generally has
-           ! q-orbits of size > 1 under Stab(k0): q_base may still be reachable from the
-           ! ACTUAL computed representative via an additional rotation within k0's own
-           ! little group, one that search_source's plain literal-match check can never
-           ! find on its own. Resolve k0's IBZ index first (kk_base must be a literal IBZ
-           ! representative BZ-coordinate for this to be meaningful at all), then use the
-           ! cached little group of that k0 to look for q_base's actual representative.
-           ik_ibz = -1
-           do ii = 1, gstore%nkibz
-             if (sum((modulo(kk_base - ebands%kptns(:, ii) + 0.5_dp, 1.0_dp) - 0.5_dp)**2) < tol12) then
-               ik_ibz = ii; exit
-             end if
-           end do
-           if (ik_ibz == -1) cycle
-
-           if (.not. lg_cache_done(ik_ibz)) then
-             call lg_cache(ik_ibz)%init(cryst, kk_base, timrev_k, gstore%nqbz, gstore%qbz, &
-                                         gstore%nqibz, gstore%qibz, xmpi_comm_self)
-             lg_cache_done(ik_ibz) = .True.
-           end if
-
-           iq_ibz_loc = lg_cache(ik_ibz)%find_ibzimage_sym(q_base, isym_lg, itime_lg)
-           if (iq_ibz_loc == -1) cycle
-           ABI_CHECK(any(itime_lg == [1, 2]), "itime_lg out of range")
-
-           ! q0_computed = lg_cache(ik_ibz)%ibz(:,iq_ibz_loc) --S_loc--> q_base --R_search--> q_glob
-           isym_glob = lg_cache(ik_ibz)%lgsym2glob(1, isym_lg)
-           itime_glob = lg_cache(ik_ibz)%lgsym2glob(2, isym_lg)
-
-           ! Find the global bz-index of the actual computed representative.
-           iq_computed_glob = -1
-           do ii = 1, gstore%nqbz
-             if (sum((modulo(lg_cache(ik_ibz)%ibz(:, iq_ibz_loc) - gstore%qbz(:, ii) &
-                              + 0.5_dp, 1.0_dp) - 0.5_dp)**2) < tol12) then
-               iq_computed_glob = ii; exit
-             end if
-           end do
-           ABI_CHECK(iq_computed_glob /= -1, "Cannot find IBZ_k0 representative in gstore%qbz")
-
-           if (state_kq(ik_base_glob, iq_computed_glob) /= GSTORE_KQ_COMPUTED) cycle
-
-           ! S_loc is applied FIRST (to q0_computed), then R_search=isym_tot. Use the FULL
-           ! space-group multiplication table (dmats%multable, built by sg_multable from
-           ! symrel+tnons, already populated by dmats%init above) instead of a hand-rolled
-           ! point-group-only (rotation-matrix-only) search: multable(1,sym1,sym2) gives the
-           ! isym of the Seitz product {sym1}{sym2} (sym2 applied first, then sym1), matching
-           ! the composition convention documented in electron-phonon/main.tex (eq. ~611-621).
-           ! multable(2:4,sym1,sym2) is a lattice-vector correction (translation wraps mod the
-           ! primitive cell) -- normal/expected, not an error, and not needed downstream.
-           isym_tot_inv = dmats%toinv(1, isym_tot)
-           ABI_CHECK(isym_tot_inv /= 0, "Could not find inverse of isym_tot")
-           if (DEBUG_ISYM_COMBINED_ALT) then
-             isym_tot_glob_tmp = dmats%multable(1, isym_tot, isym_glob)
-             ABI_CHECK(isym_tot_glob_tmp /= 0, "Composite symmetry not found in space group (group closure violated?)")
-             isym_combined = dmats%toinv(1, isym_tot_glob_tmp)
-             ABI_CHECK(isym_combined /= 0, "Could not find inverse of isym_tot_glob_tmp")
-           else
-             isym_combined = dmats%multable(1, isym_tot_inv, isym_glob)
-             ABI_CHECK(isym_combined /= 0, "Composite symmetry not found in space group (group closure violated?)")
-           end if
-           trev_combined = mod(trev_tot + (itime_glob - 1), 2)
-           if (DEBUG_ISYM_ELEC_FORWARD) then
-             isym_tot_glob_fwd = dmats%multable(1, isym_tot, isym_glob)
-             ABI_CHECK(isym_tot_glob_fwd /= 0, "Composite symmetry isym_tot.isym_glob not found in space group")
-             isym_elec_combined = isym_tot_glob_fwd
-           else
-             isym_elec_combined = isym_combined
-           end if
-
-           ! Downstream code uses kk_base/q_base as "the momentum at the source"; overwrite them
-           ! with the canonical tabulated values (kk_base was only known up to an exact integer
-           ! G-vector via the tolerant modulo(...) match above; q_base with the ACTUAL computed
-           ! representative q0_computed) now that isym_combined/trev_combined represent the FULL
-           ! symmetry relating (k0,q0_computed) to (k,q). This matters below: kk_base+q_base is
-           ! fed into kpts_map to re-derive isym_p, which MUST reproduce the exact same
-           ! little-group element that gstore_compute originally used to fix the gauge of the
-           ! k0+q0 wavefunction (computed there from the literal gstore%kbz/qbz array entries).
-           kk_base = gstore%kbz(:, ik_base_glob)
-           q_base = gstore%qbz(:, iq_computed_glob)
-
-           exit search_source
-         end do
-       end do search_source
-
-       if (ik_ibz == -1) then
-         ABI_ERROR(sjoin("no source found for ik_glob:", itoa(ik_glob), ", iq_glob:", itoa(iq_glob)))
-       end if
-
-       ! Phonon/atomic-perturbation rotation: R=isym_combined maps (k0,q0_computed) -> (k,q)
-       ! directly (forward), so it plays exactly the role of "isym" in the ALREADY-VALIDATED
-       ! v1phq_rotate_myperts (m_dvdb.F90), which rotates a DFPT potential from its IBZ
-       ! representative to a BZ q-point via the SAME symatm/indsym conventions. Mirror that
-       ! routine's formula exactly (same isym for both indsym lookups, tnon including the
-       ! symmetry's own tnons(isym) contribution, phase dotted with the SOURCE q -- not q_base,
-       ! which is only the intermediate point isym_glob maps q0_computed to, and generally
-       ! differs from the true source q0_computed itself unless isym_glob is the identity).
-       symrec_eq = real(cryst%symrec(:,:,isym_combined), dp)
-
-       ! Rigorous reconstruction formula (see electron-phonon/main.tex, eq:reconstruct-full):
-       !   g^a(k,q) = D^{(k+q)_IBZ}(R.P) . D^{(k+q)_IBZ}(P)^dagger . g^b(k0,q0) . D^{k0}(R)^dagger . T(R^-1)
-       ! where R=isym_combined/trev_combined (found above: maps (k0,q0_computed) -> (k,q)), and
-       ! P maps (k+q)_IBZ -> k0+q0 (an INDEPENDENT full-BZ lookup, unrelated to R): the bra needs
-       ! the composite R.P (mapping (k+q)_IBZ -> k+q directly) together with P^dagger, NOT simply
-       ! the symmetry ikq_ibz/isym_kq/itime_kq (from my_kqmap on the literal target k+q) alone,
-       ! since that need not coincide with R.P whenever (k+q)_IBZ's own little group is non-trivial.
+       !ikq_ibz = my_kqmap(1, my_ik); isym_kq = my_kqmap(2, my_ik)
+       !trev_kq = my_kqmap(6, my_ik); g0_kq = my_kqmap(3:5, my_ik)
+       !isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
+       !tsign_kq = 1; if (trev_kq == 1) tsign_kq = -1
+       !itime_kq = trev_kq + 1
 
        ! NB: Using symrel^T convention for k+q
-       if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kk_base + q_base, indkk_kq) /= 0) then
-         ABI_ERROR("Cannot map k0+q0 to IBZ")
-       end if
-       ! NB: ikq_ibz_p (from kk_base+q_base, K's own "symrel" convention) need NOT equal ikq_ibz
-       ! (from my_kqmap on the literal target k_glob+qpt): k and q are mapped to their respective
-       ! IBZs via DIFFERENT conventions in this codebase (k: symrel^t: q: symrec, see the NOTES
-       ! in search_source above), so "k0+q0" and "k+q" are not guaranteed to reduce to the same
-       ! electron-IBZ representative under a single uniform rotation. Use ikq_ibz_p consistently
-       ! for the D-matrix lookups below (it is the gauge P and R.P are actually defined in).
-       ikq_ibz_p = indkk_kq(1, 1); isym_p = indkk_kq(2, 1); itime_p = indkk_kq(6, 1) + 1
+       !if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kk_base + q_base, indkk_kq) /= 0) then
+       !  ABI_ERROR("Cannot map k0+q0 to IBZ")
+       !end if
+       !ikq_ibz_p = indkk_kq(1, 1); isym_p = indkk_kq(2, 1); itime_p = indkk_kq(6, 1) + 1
 
-       ! DEBUG (AGENT): does isym_p/itime_p genuinely stabilize ikq_ibz_p (Sk=k+G), i.e. is
-       ! dmats%for_spin(...,isym_p,...) below a REAL D-matrix or the identity placeholder
-       ! (m_classify_bands.F90's dmats_init, "if (.not. is_little_group) cmat=Identity")?
-       tsign_p = 1; if (itime_p == 2) tsign_p = -1
-       kk_sk_p = tsign_p * matmul(transpose(real(cryst%symrel(:,:,isym_p), dp)), ebands%kptns(:,ikq_ibz_p))
-       g0_p = nint(ebands%kptns(:,ikq_ibz_p) - kk_sk_p)
-       p_stab = all(abs(ebands%kptns(:,ikq_ibz_p) - kk_sk_p - g0_p) < tol8)
+       ! Read g(k_base, q_base)
 
-       ! === Electron-side D-matrix for the k0 -> k_glob leg (dmat_k) ===
-       ! isym_tot (found by search_source above) maps k0 to k_glob, but is generally DIFFERENT
-       ! from the canonical (isym_k, trev_k) that gqk%my_k2ibz/kpts_map already computed for
-       ! k_glob alone (both map the SAME ik_ibz to the SAME k_glob -- unique IBZ representative
-       ! -- so they can only differ by a genuine little-group element of ik_ibz). Define
-       ! g_k := toinv(isym_k) o isym_tot (isym_tot applied first, then isym_k^{-1}): g_k
-       ! stabilizes ik_ibz exactly, so D_true(g_k) = dmats%for_spin(...,g_k,...,ik_ibz) is a
-       ! genuine (non-placeholder) representation matrix -- unlike D_true(isym_tot) itself,
-       ! which is just the identity placeholder since isym_tot does not stabilize ik_ibz. Using
-       ! D_true(isym_tot) directly (as a previous version of this code did, composing it with
-       ! D(toinv(isym_glob)) via the SAME phase formula as the SAME-k group-multiplication test)
-       ! was the bug: that phase formula is only valid when BOTH operands are genuine little-
-       ! group elements of the SAME k, which isym_tot never is here.
-       !
-       ! g_k, being the literal product toinv(isym_k) o isym_tot, is looked up as a TABULATED
-       ! multable(1,...) entry, which may differ from the literal product by a lattice vector
-       ! (same tabulated-vs-literal correction used throughout this module for sg_multable/toinv
-       ! composites): g_k_literal = T_{L_gk} o Tab(g_k), so
-       ! D_true(g_k_literal) = e^{-i 2pi k0.L_gk} . D_true(g_k_tabulated).
-       isym_k_inv = dmats%toinv(1, isym_k)
-       ABI_CHECK(isym_k_inv /= 0, "Could not find inverse of isym_k")
-       isym_gk = dmats%multable(1, isym_k_inv, isym_tot)
-       ABI_CHECK(isym_gk /= 0, "Composite symmetry g_k not found in space group")
-       itime_gk = 1 + mod((itime_k - 1) + trev_tot, 2)
-       L_gk = real(dmats%multable(2:4, isym_k_inv, isym_tot), dp) &
-            - matmul(real(cryst%symrel(:,:,isym_k_inv), dp), real(dmats%toinv(2:4, isym_k), dp))
-       phase_gk = exp(cmplx(zero, -two_pi * sum(kk_ibz * L_gk), dp))
-
-       ! NB: Sigma_tot is applied AFTER the D(isym_glob)-linear expansion (isym_glob first,
-       ! then isym_tot); if Sigma_tot is antiunitary (trev_tot=1) it acts conjugate-linearly on
-       ! that expansion, so D(isym_glob) must be conjugated here -- same itime-dependent
-       ! conjugation rule as the group-multiplication test in dmats_check_one_k
-       ! (D(A.B)=D(A)D(B) if A unitary, D(A)D(B)^* if A antiunitary, A=Sigma_tot here).
-       if (DEBUG_DMATK_NO_GLOB) then
-         dmat_k = conjg(phase_gk) * transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_gk, itime_gk, ik_ibz)))
-       else if (trev_tot == 0) then
-         dmat_k = conjg(phase_gk) * transpose(conjg(matmul( &
-           dmats%for_spin(spin)%value(:,:, isym_gk, itime_gk, ik_ibz), &
-           dmats%for_spin(spin)%value(:,:, isym_glob, itime_glob, ik_ibz))))
-       else
-         dmat_k = conjg(phase_gk) * transpose(conjg(matmul( &
-           dmats%for_spin(spin)%value(:,:, isym_gk, itime_gk, ik_ibz), &
-           conjg(dmats%for_spin(spin)%value(:,:, isym_glob, itime_glob, ik_ibz)))))
-       end if
-
-       ! === Electron-side D-matrix for the (k+q)_IBZ -> k_glob+q_glob leg (dmat_star_kq) ===
-       ! Exactly the same issue one level up: R.P (isym_rp/itime_rp, R=isym_combined applied
-       ! after P=isym_p) maps ikq_ibz_p to k_glob+q_glob, but generally differs from the
-       ! canonical (isym_kq, trev_kq) that my_kqmap already computed for k_glob+q_glob alone.
-       ! ikq_ibz_p == ikq_ibz always (same unique-IBZ-representative argument), so define
-       ! g_kq := toinv(isym_kq) o isym_rp, a genuine little-group element of ikq_ibz. P itself
-       ! needs no such correction: it is the SAME canonical kpts_map("symrel",...) choice that
-       ! gstore_compute would have used to define the gauge at k0+q0 in the first place.
-       ! Use isym_elec_combined here, kept as a separate variable from isym_combined (currently
-       ! numerically identical -- see NOTE in search_source above) since the two legs' correct
-       ! index was NOT found to be the same by independent derivation, only by empirical A/B
-       ! testing; do not silently merge them back into one variable. trev is unaffected: toinv
-       ! (isym_tot) has the SAME trev as isym_tot, so trev_combined applies as-is.
-       isym_rp = dmats%multable(1, isym_elec_combined, isym_p)
-       ABI_CHECK(isym_rp /= 0, "Composite symmetry R.P not found in space group")
-       trev_rp = mod(trev_combined + (itime_p - 1), 2)
-       itime_rp = trev_rp + 1
-
-       isym_kq_inv = dmats%toinv(1, isym_kq)
-       ABI_CHECK(isym_kq_inv /= 0, "Could not find inverse of isym_kq")
-       isym_gkq = dmats%multable(1, isym_kq_inv, isym_rp)
-       ABI_CHECK(isym_gkq /= 0, "Composite symmetry g_kq not found in space group")
-       itime_gkq = 1 + mod((itime_kq - 1) + (itime_rp - 1), 2)
-       ! NOTE (session 3 continued): tried adding a candidate lattice-correction term here for
-       ! isym_rp's own multable-composition debt (both signs) -- empirically WORSE both ways
-       ! (857/3942 and 866/3942 vs the 1082/3942 two-term baseline below), and, tellingly, the
-       ! term is identically ZERO whenever isym_p=identity (multable(X,identity) has no lattice
-       ! part) -- yet the identified isym_p=identity failing cases were completely unaffected in
-       ! either direction, meaning this term is not where the remaining bug lives. Reverted.
-       L_gkq = real(dmats%multable(2:4, isym_kq_inv, isym_rp), dp) &
-             - matmul(real(cryst%symrel(:,:,isym_kq_inv), dp), real(dmats%toinv(2:4, isym_kq), dp))
-       phase_gkq = exp(cmplx(zero, -two_pi * sum(ebands%kptns(:,ikq_ibz_p) * L_gkq), dp))
-
-       dmat_temp = phase_gkq * dmats%for_spin(spin)%value(:,:, isym_gkq, itime_gkq, ikq_ibz_p)
-       dmat_star_kq = transpose(conjg(dmats%for_spin(spin)%value(:,:, isym_p, itime_p, ikq_ibz_p)))
-       dmat_star_kq = matmul(dmat_temp, dmat_star_kq)
-
-       if (DEBUG_DUMP_SYMINFO .and. .not. is_selftest) then
-         Ltc_debug = real(dmats%multable(2:4, isym_tot_inv, isym_glob), dp)
-         write(syminfo_unit, "(22(i0,','),i0,12(',',es16.8),4(',',i0),6(',',es16.8),',',i0,3(',',es16.8))") &
-           spin, ik_glob, iq_glob, isym_tot, trev_tot, &
-           isym_combined, trev_combined, isym_glob, itime_glob, isym_k, trev_k, isym_kq, trev_kq, &
-           isym_p, itime_p, ikq_ibz_p, merge(1,0,p_stab), isym_gk, itime_gk, isym_gkq, itime_gkq, &
-           isym_rp, itime_rp, real(phase_gk,dp), aimag(phase_gk), real(phase_gkq,dp), aimag(phase_gkq), &
-           real(dmat_k(1,1),dp), aimag(dmat_k(1,1)), real(dmat_star_kq(1,1),dp), aimag(dmat_star_kq(1,1)), &
-           real(dmat_k(2,2),dp), aimag(dmat_k(2,2)), real(dmat_star_kq(2,2),dp), aimag(dmat_star_kq(2,2)), &
-           ik_ibz, ik_base_glob, iq_computed_glob, target_ik_ibz, &
-           kk_ibz(1), kk_ibz(2), kk_ibz(3), &
-           ebands%kptns(1,ik_ibz), ebands%kptns(2,ik_ibz), ebands%kptns(3,ik_ibz), &
-           isym_tot_inv, Ltc_debug(1), Ltc_debug(2), Ltc_debug(3)
-       end if
-
-       ! Read gkq_base from disk. NB: gvals' k-dimension is glob_nk-sized (a BZ-like index,
-       ! see dump_my_gbuf's nf90_put_var(...,start=[...,gqk%my_kstart,...],...)), NOT the
-       ! smaller electron-IBZ index used for dmats%for_spin lookups -- use ik_base_glob
-       ! (the source k0's own BZ index, already resolved above), not ik_ibz.
        call c_f_pointer(c_loc(gkq_base), gkq_base_ptr, [2, nb, nb, gqk%natom3])
        ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gkq_base_ptr, &
-                            start=[1, 1, 1, 1, ik_base_glob, iq_computed_glob], &
+                            start=[1, 1, 1, 1, ik_glob, iq_glob], &
                             count=[2, nb, nb, gqk%natom3, 1, 1])
        NCF_CHECK(ncerr)
-
-       if (trev_combined == 1) gkq_base = conjg(gkq_base)
+       !if (trev_combined == 1) gkq_base = conjg(gkq_base)
 
        ! Perform symmetrization.
+       isym_combined = 1
+       symrec_eq = cryst%symrec(:,:,isym_combined)
+
        gkq_rot = zero
        do mu=1,gqk%natom3
          idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
-         ! Same convention as v1phq_rotate_myperts (m_dvdb.F90): both indsym lookups use the
-         ! SAME (forward) symmetry index isym_combined. NOTE (session 3, 2026-07-06): unlike
-         ! v1phq_rotate_myperts (which rotates the raw DFPT potential ALONE, with no wavefunctions
-         ! involved), here the wavefunction D-matrices (dmat_k, dmat_star_kq) already carry their
-         ! own fractional-translation phase from cgtk_rotate's rotation of the Bloch state -- so
-         ! including cryst%tnons(isym_combined) AGAIN here, as the borrowed formula literally does,
-         ! double-counts that phase. tnon = l0 only (drop the tnons(isym_combined) term). Verified
-         ! empirically (session 3): fixes a hand-traced isym_p=identity case exactly (~1e-9,
-         ! predicted and confirmed offline that ground truth = -gkq_base(mu_eq) with NO extra phase
-         ! for that case), and improves the overall symmetrized-point exact-match count from
-         ! 970/3942 (toinv-only fix) to 1273/3942 -- net +303, but with 70 points that regress
-         ! (373 newly fixed, 70 newly broken) -- so this is NOT yet a complete fix; something else
-         ! (likely bug #2, isym_p domain violation, or a residual isym_rp validity issue) still
-         ! causes wrong results for a subset, and may have been accidentally compensating for this
-         ! double-counting in those specific 70 cases. See [[gstore-symmetrize-status]] memory.
          l0 = cryst%indsym(1:3, isym_combined, ipert)
-         tnon = l0
-         if (DEBUG_TNON_FULL) tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym_combined))
-         if (DEBUG_TNON_LTC) then
-           Ltc_live = real(dmats%multable(2:4, isym_tot_inv, isym_glob), dp)
-           tnon = l0 - matmul(transpose(symrec_eq), Ltc_live)
-         end if
-         if (DEBUG_TWOSTEP_L0) then
-           ib1_twostep = cryst%indsym(4, isym_tot_inv, ipert)
-           l0_2_twostep = real(cryst%indsym(1:3, isym_tot_inv, ipert), dp)
-           l0_1_twostep = real(cryst%indsym(1:3, isym_glob, ib1_twostep), dp)
-           tnon = l0_2_twostep + matmul(real(cryst%symrel(:,:,isym_tot_inv), dp), l0_1_twostep)
-         end if
-         if (DEBUG_TNON_TOINV) tnon = l0 - real(dmats%toinv(2:4, isym_tot), dp)
-         ipert_eq = cryst%indsym(4, isym_combined, ipert)
-
-         ! phase = e^{+i q0_computed . tnon}, q0_computed = SOURCE q of the stored gkq_base
-         ! (gstore%qbz(:,iq_computed_glob), NOT q_base -- q_base is only the intermediate point
-         ! isym_glob maps q0_computed to, and generally differs from q0_computed itself).
-         phase = -two_pi * sum(gstore%qbz(:, iq_computed_glob) * tnon)
-         if (DEBUG_TWOSTEP_L0) then
-           ! Two genuinely SEPARATE rotation steps accumulate phase against their OWN source q
-           ! each: step 1 (isym_glob) against q0_computed, step 2 (isym_tot_inv) against the
-           ! INTERMEDIATE q_base_twostep = symrec(isym_glob).q0_computed (forward relation,
-           ! established earlier this investigation) -- NOT both terms dotted with q0_computed.
-           q_base_twostep = matmul(real(cryst%symrec(:,:,isym_glob), dp), gstore%qbz(:, iq_computed_glob))
-           tnon_1_twostep = l0_1_twostep
-           tnon_2_twostep = l0_2_twostep
-           if (DEBUG_TWOSTEP_FULL) then
-             symrec_glob = real(cryst%symrec(:,:,isym_glob), dp)
-             symrec_toti = real(cryst%symrec(:,:,isym_tot_inv), dp)
-             tnon_1_twostep = l0_1_twostep + matmul(transpose(symrec_glob), cryst%tnons(:,isym_glob))
-             tnon_2_twostep = l0_2_twostep + matmul(transpose(symrec_toti), cryst%tnons(:,isym_tot_inv))
-           end if
-           phase = -two_pi * (sum(gstore%qbz(:, iq_computed_glob) * tnon_1_twostep) + sum(q_base_twostep * tnon_2_twostep))
-         end if
+         phase = -two_pi * sum(gstore%qbz(:, iq_computed_glob) * l0)
          cphase = cmplx(cos(phase), sin(phase), dp)
 
-         if (DEBUG_DUMP_SYMINFO .and. .not. is_selftest) then
-           write(muinfo_unit, "(i0,',',i0,',',i0,',',i0,',',i0,',',i0,',',es16.8,',',es16.8,',',es16.8,',',i0,',',es16.8,',',es16.8,',',es16.8)") &
-             ik_glob, iq_glob, isym_combined, mu, ipert, ipert_eq, l0(1), l0(2), l0(3), &
-             iq_computed_glob, phase, real(cphase,dp), aimag(cphase)
-         end if
-
          do idir_eq=1,3
-           if (symrec_eq(idir, idir_eq) == 0) cycle
+           !if (symrec_eq(idir, idir_eq) == 0) cycle
            mu_eq = idir_eq + (ipert_eq - 1) * 3
            ! accumulate the rotated atomic potential matrix
-           gkq_rot(:,:,mu) = gkq_rot(:,:,mu) + real(symrec_eq(idir, idir_eq), dp) * cphase * &
-                             matmul(matmul(dmat_star_kq, gkq_base(:,:,mu_eq)), dmat_k)
+           !gkq_rot(:,:,mu) = gkq_rot(:,:,mu) + real(symrec_eq(idir, idir_eq), dp) * cphase * &
+           !                  matmul(matmul(dmat_star_kq, gkq_base(:,:,mu_eq)), dmat_k)
          end do
        end do
-
-       if (is_selftest) then
-         ! DEBUG selftest: (ik_glob,iq_glob) was directly computed. Compare the reconstruction
-         ! against the true computed value already on disk at this SAME (ik_glob,iq_glob), then
-         ! skip the write-back/state update entirely so this point remains a valid
-         ! GSTORE_KQ_COMPUTED source for other points still to be processed in this same pass.
-         call c_f_pointer(c_loc(gkq_target), gkq_target_ptr, [2, nb, nb, gqk%natom3])
-         ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gkq_target_ptr, &
-                              start=[1, 1, 1, 1, ik_glob, iq_glob], &
-                              count=[2, nb, nb, gqk%natom3, 1, 1])
-         NCF_CHECK(ncerr)
-         selftest_diff = maxval(abs(gkq_rot - gkq_target))
-         selftest_count = selftest_count + 1
-         selftest_maxdiff = max(selftest_maxdiff, selftest_diff)
-         if (selftest_diff < tol6) selftest_count_ok = selftest_count_ok + 1
-         if (selftest_diff > tol6) then
-           call wrtout(units, sjoin(" DEBUG selftest MISMATCH ik_glob:", itoa(ik_glob), &
-                                     ", iq_glob:", itoa(iq_glob), ", diff:", ftoa(selftest_diff)))
-         end if
-         cycle
-       end if
 
        ! Write the newly computed g_{mn, nu} back to the netcdf file (in-place modification).
        ! and update the entry in state_kq.
@@ -7449,43 +6928,24 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        state_kq(ik_glob, iq_glob) = GSTORE_KQ_SYMMETRIZED
      end do ! my_ik
 
-     ABI_FREE(my_kqmap)
+     !ABI_FREE(my_kqmap)
    end do ! my_iq
 
-   ! DEBUG selftest summary for this spin.
-   if (DEBUG_SELFTEST_RECONSTRUCT) call wrtout(units, sjoin(" DEBUG selftest spin:", itoa(spin), &
-                             ", npoints:", itoa(selftest_count), &
-                             ", nOK(diff<tol6):", itoa(selftest_count_ok), &
-                             ", maxdiff:", ftoa(selftest_maxdiff)))
    end associate
 
    ! Update state_kq for this spin.
    ncerr = nf90_put_var(ncid, vid("gstore_glob_state_kqs"), state_kq, start=[1,1,spin])
    NCF_CHECK(ncerr)
 
-   ABI_FREE(dmat_k)
-   ABI_FREE(dmat_star_kq)
-   ABI_FREE(dmat_temp)
    ABI_FREE(gkq_base)
    ABI_FREE(gkq_rot)
-   ABI_FREE(gkq_target)
    ABI_FREE(state_kq)
  end do ! my_is
-
- do ii=1,nkibz
-   if (lg_cache_done(ii)) call lg_cache(ii)%free()
- end do
- ABI_FREE(lg_cache)
- ABI_FREE(lg_cache_done)
 
  NCF_CHECK(nf90_close(ncid))
  call gstore%free()
 
- if (DEBUG_DUMP_SYMINFO) close(syminfo_unit)
- if (DEBUG_DUMP_SYMINFO) close(muinfo_unit)
-
  100 call xmpi_barrier(comm)
- call dmats%free()
  call wrtout(units, " Symmetrization completed successfully.")
 
 contains

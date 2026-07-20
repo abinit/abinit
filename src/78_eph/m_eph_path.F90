@@ -132,7 +132,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  type(kpath_t) :: qpath, kpath
  type(xcomm_t) :: kpt_comm, qpt_comm, pert_comm
  type(u0_cache_t) :: ucache_kq, ucache_k
- !type(wan_t) :: wan
+ type(wan_t) :: wan
  character(len=fnlen) :: gpath_path
  character(len=5000) :: msg
  character(len=10) :: priority
@@ -422,7 +422,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
    if (has_gwan) then
      ! Load g(R_e, R_p) for this spin from GWAN.nc
-     call wan%load_gwan(dtfil%filgwanin, cryst, spin, dtset%nsppol, comm_my_is(my_is)%value)
+     call wan%load_gwan(dtfil%filgwanin, cryst, spin, dtset%nsppol, comm_my_is(my_is))
      !call wan%print()
      ! TODO
      !complex(dp),intent(out) :: g_atm(wan%nwan, wan%nwan, wan%my_npert, nq)
