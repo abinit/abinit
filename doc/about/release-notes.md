@@ -36,7 +36,7 @@ Xavier
 
 ### **A.** Remarks and warnings.
 
-**A.1** The script band2eps is not supported anymore. Please use abipy. As a consequence, the [[tutorial:tutorespfn]]
+**A.1** The script band2eps is not supported anymore. Please use AbiPy. As a consequence, the [[tutorial:rf2]]
 has been modified, with the section on band2eps suppressed.
 
 
