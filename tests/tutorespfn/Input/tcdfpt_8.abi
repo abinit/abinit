@@ -37,7 +37,7 @@
 # Finite omega parameters
   rfomega  0.0      # Frequency of the perturbations
   tim1rev  0        # Krammer's degeneracy deactivated for finite q calculation
-  ixcrot   3         # Algorithm to rotate the noncolinear XC (must be 3 if rfomega or qpt are different form zero)
+  ixcrot   3         # Algorithm to rotate the noncolinear XC (must be 3 if rfomega or qpt are different from zero)
 
 ### 2) LINEAR RESPONSE TO PHONONS AND ZEEMAN FIELD (hw=0)
   rfphon2   1
