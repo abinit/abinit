@@ -36,6 +36,7 @@ use defs_basis
 use m_abicore
 use m_xmpi
 
+use m_abi_linalg
 use m_io_tools, only : get_unit
 
 implicit none
@@ -199,7 +200,7 @@ integer      :: info
 
 
 ! First, peform a decomposition
-call zpotrf( 'U', ldim,matrix, ldim, info )
+call abi_xpotrf( 'U', ldim, matrix, ldim, info )
 
 ! Second, inverse the matrix in the new format
 call zpotri( 'U', ldim,matrix, ldim, info )
