@@ -149,8 +149,13 @@ module m_abi_linalg
 
  interface abi_xgemm
     module procedure abi_zgemm_2d
+    module procedure abi_zgemm_3d
     module procedure abi_zgemm_2dd
     module procedure abi_d2zgemm
+    module procedure abi_d2zgemm_2d
+    module procedure abi_d2zgemm_313
+    module procedure abi_d2zgemm_331
+    module procedure abi_d2zgemm_333
  end interface abi_xgemm
 
  interface abi_gpu_xgemm
@@ -261,9 +266,36 @@ module m_abi_linalg
  public :: abi_zgemm_2r
  interface abi_zgemm  ! No x_cplx stuff here!
     module procedure abi_zgemm_2d
+    module procedure abi_zgemm_3d
     module procedure abi_zgemm_2r
  end interface abi_zgemm
 
+ !----------------------------------------------------------------------
+ public :: abi_xscal
+ interface abi_xscal
+    module procedure abi_d2zscal
+    module procedure abi_d2zscal_3d
+    module procedure abi_d2zscal_4d
+    module procedure abi_d2zscal_5d
+    module procedure abi_d2zscal_7d
+    module procedure abi_dscal
+    module procedure abi_dscal_2d
+    module procedure abi_zscal
+    module procedure abi_zscal_2d
+    module procedure abi_zscal_3d
+ end interface abi_xscal
+ !----------------------------------------------------------------------
+ public :: abi_xaxpy
+ interface abi_xaxpy
+    module procedure abi_daxpy
+    module procedure abi_daxpy_2d
+    module procedure abi_d2zaxpy
+    module procedure abi_d2zaxpy_2d
+    module procedure abi_d2zaxpy_5d
+    module procedure abi_zaxpy
+    module procedure abi_zaxpy_2d
+    module procedure abi_zaxpy_3d
+ end interface abi_xaxpy
  !----------------------------------------------------------------------
  public :: abi_xcopy
  interface abi_xcopy
@@ -298,11 +330,23 @@ module m_abi_linalg
     module procedure abi_zheev
  end interface
  !----------------------------------------------------------------------
+ public :: abi_xheevd
+ interface abi_xheevd
+    module procedure abi_d2zheevd
+    module procedure abi_zheevd_2d
+ end interface
+ !----------------------------------------------------------------------
  public :: abi_xhegv
  interface abi_xhegv
     module procedure abi_dhegv
     module procedure abi_chegv
     module procedure abi_zhegv
+ end interface
+ !----------------------------------------------------------------------
+ public :: abi_xhegvd
+ interface abi_xhegvd
+    module procedure abi_d2zhegvd
+    module procedure abi_zhegvd_2d
  end interface
  !----------------------------------------------------------------------
  public :: abi_xhpev
@@ -319,10 +363,13 @@ module m_abi_linalg
     module procedure abi_zhpgv
  end interface
  !----------------------------------------------------------------------
+ public :: abi_xpotrf
  interface abi_xpotrf
-    !module procedure abi_dpotrf
+    module procedure abi_dpotrf
     module procedure abi_d2zpotrf
+    module procedure abi_d2zpotrf_3d
     module procedure abi_zpotrf_2d
+    module procedure abi_zpotrf
  end interface
  !----------------------------------------------------------------------
  public :: abi_xorthonormalize
@@ -1116,6 +1163,16 @@ end function jobz_plasma
 ! ******************* BLAS_XGEMM interface ****************************!
 ! *********************************************************************!
 #include "abi_xgemm.f90"
+
+! *********************************************************************!
+! ******************** BLAS_XSCAL interface ***************************!
+! *********************************************************************!
+#include "abi_xscal.f90"
+
+! *********************************************************************!
+! ******************** BLAS_XAXPY interface ***************************!
+! *********************************************************************!
+#include "abi_xaxpy.f90"
 
 ! *********************************************************************!
 ! ******************** BLAS_XCOPY interface ***************************!

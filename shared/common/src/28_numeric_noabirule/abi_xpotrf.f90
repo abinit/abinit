@@ -32,25 +32,46 @@
 !!
 !! SOURCE
 
-subroutine abi_dpotrf(uplo,n,a,lda,info)
+subroutine abi_dpotrf(uplo,n,a,lda,info,gpu_option)
 
  !Arguments ------------------------------------
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n,lda
  integer, intent(out) :: info
- real(dp), intent(inout) :: a(*)
+ real(dp), target, intent(inout) :: a(*)
+ !Optionals -----------------------------------
+ integer, intent(in), optional :: gpu_option
+
+ !Local variables ------------------------------
+ integer :: gpu_option_
 
 ! *********************************************************************
 
-#ifdef HAVE_LINALG_PLASMA
- if (ABI_LINALG_PLASMA_ISON) then
-   ! write(std_out,*) "  abi_dpotrf => PLASMA dpotrf will be called "
-   call PLASMA_dpotrf(uplo_plasma(uplo),n,a,lda,info)
-   return
+ gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
+
+#if defined(DEBUG_VERBOSE) && defined(HAVE_OPENMP_OFFLOAD)
+ if ( gpu_option_ == ABI_GPU_OPENMP ) then
+   ABI_CHECK(xomp_target_is_present(c_loc(a)), "Array isn't mapped on GPU")
  end if
 #endif
 
- call dpotrf(uplo,n,a,lda,info)
+ if(gpu_option_/=ABI_GPU_DISABLED) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET DATA USE_DEVICE_ADDR(a) IF(gpu_option_==ABI_GPU_OPENMP)
+#endif
+   call abi_gpu_xpotrf_cptr(1, uplo, n, c_loc(a), lda, info)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP END TARGET DATA
+#endif
+ else
+#ifdef HAVE_LINALG_PLASMA
+   if (ABI_LINALG_PLASMA_ISON) then
+     call PLASMA_dpotrf(uplo_plasma(uplo),n,a,lda,info)
+     return
+   end if
+#endif
+   call dpotrf(uplo,n,a,lda,info)
+ end if
 
 end subroutine abi_dpotrf
 !!***
@@ -65,18 +86,54 @@ end subroutine abi_dpotrf
 !!
 !! SOURCE
 
-subroutine abi_zpotrf_2d(uplo,n,a,lda,info)
+subroutine abi_zpotrf_2d(uplo,n,a,lda,info,gpu_option)
 
  !Arguments ------------------------------------
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: lda,n
  integer, intent(out) :: info
- complex(dp), intent(inout) :: a(lda,*)
+ complex(dp), target, intent(inout) :: a(lda,*)
+ !Optionals -----------------------------------
+ integer, intent(in), optional :: gpu_option
+
 ! *********************************************************************
 
- call abi_zpotrf(uplo,n,a(1,1),lda,info)
+ call abi_zpotrf(uplo,n,a(1,1),lda,info,gpu_option=gpu_option)
 
 end subroutine abi_zpotrf_2d
+!!***
+
+!!****f* m_abi_linalg/abi_d2zpotrf_3d
+!! NAME
+!! abi_d2zpotrf
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine abi_d2zpotrf_3d(uplo,n,a,lda,info,x_cplx,gpu_option)
+
+!Arguments ------------------------------------
+ character(len=1), intent(in) :: uplo
+ integer, intent(in) :: n,lda
+ integer, intent(out) :: info
+ integer, intent(in), optional :: x_cplx
+ integer, intent(in), optional :: gpu_option
+ real(dp),target, intent(inout) :: a(:,:,:)
+
+ !Local Variables -----------------------------
+ integer  :: cplx_, gpu_option_
+
+! *********************************************************************
+
+ cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
+ gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
+
+ call abi_d2zpotrf(uplo,n,a,lda,info,x_cplx=cplx_,gpu_option=gpu_option_)
+
+end subroutine abi_d2zpotrf_3d
 !!***
 
 !!****f* m_abi_linalg/abi_d2zpotrf
@@ -89,37 +146,54 @@ end subroutine abi_zpotrf_2d
 !!
 !! SOURCE
 
-subroutine abi_d2zpotrf(uplo,n,a,lda,info,x_cplx)
+subroutine abi_d2zpotrf(uplo,n,a,lda,info,x_cplx,gpu_option)
 
 !Arguments ------------------------------------
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n,lda
  integer, intent(out) :: info
  integer, intent(in), optional :: x_cplx
+ integer, intent(in), optional :: gpu_option
  real(dp),target, intent(inout) :: a(lda,*)  ! FIXME should be x_cplx * lda
 
  !Local Variables -----------------------------
- integer  :: cplx_
+ integer  :: cplx_, gpu_option_
 
 ! *********************************************************************
 
  cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
+ gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
 
-#ifdef HAVE_LINALG_PLASMA
- if (ABI_LINALG_PLASMA_ISON) then
-   if(cplx_ == 2) then
-      info = PLASMA_zpotrf_c(uplo_plasma(uplo),n,c_loc(a),lda)
-   else
-      info = PLASMA_dpotrf_c(uplo_plasma(uplo),n,c_loc(a),lda)
-   end if
-   return
+#if defined(DEBUG_VERBOSE) && defined(HAVE_OPENMP_OFFLOAD)
+ if ( gpu_option_ == ABI_GPU_OPENMP ) then
+   ABI_CHECK(xomp_target_is_present(c_loc(a)), "Array isn't mapped on GPU")
  end if
 #endif
 
- if(cplx_ == 2) then
-    call zpotrf(uplo,n,a,lda,info)
+ if(gpu_option_/=ABI_GPU_DISABLED) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET DATA USE_DEVICE_ADDR(a) IF(gpu_option_==ABI_GPU_OPENMP)
+#endif
+   call abi_gpu_xpotrf_cptr(cplx_, uplo, n, c_loc(a), lda, info)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP END TARGET DATA
+#endif
  else
-    call dpotrf(uplo,n,a,lda,info)
+#ifdef HAVE_LINALG_PLASMA
+   if (ABI_LINALG_PLASMA_ISON) then
+     if(cplx_ == 2) then
+        info = PLASMA_zpotrf_c(uplo_plasma(uplo),n,c_loc(a),lda)
+     else
+        info = PLASMA_dpotrf_c(uplo_plasma(uplo),n,c_loc(a),lda)
+     end if
+     return
+   end if
+#endif
+   if(cplx_ == 2) then
+      call zpotrf(uplo,n,a,lda,info)
+   else
+      call dpotrf(uplo,n,a,lda,info)
+   end if
  end if
 
 end subroutine abi_d2zpotrf
@@ -135,24 +209,46 @@ end subroutine abi_d2zpotrf
 !!
 !! SOURCE
 
-subroutine abi_zpotrf(uplo,n,a,lda,info)
+subroutine abi_zpotrf(uplo,n,a,lda,info,gpu_option)
 
  !Arguments ------------------------------------
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: lda,n
  integer, intent(out) :: info
- complex(dp), intent(inout) :: a(*)
+ complex(dp), target, intent(inout) :: a(*)
+ !Optionals -----------------------------------
+ integer, intent(in), optional :: gpu_option
+
+ !Local variables ------------------------------
+ integer :: gpu_option_
+
 ! *********************************************************************
 
-#ifdef HAVE_LINALG_PLASMA
- if (ABI_LINALG_PLASMA_ISON) then
-   ! write(*,*) "  abi_zpotrf => PLASMA zpotrf will be called "
-   call PLASMA_zpotrf(uplo_plasma(uplo),n,a,lda,info)
-   return
+ gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
+
+#if defined(DEBUG_VERBOSE) && defined(HAVE_OPENMP_OFFLOAD)
+ if ( gpu_option_ == ABI_GPU_OPENMP ) then
+   ABI_CHECK(xomp_target_is_present(c_loc(a)), "Array isn't mapped on GPU")
  end if
 #endif
 
- call zpotrf(uplo,n,a,lda,info)
+ if(gpu_option_/=ABI_GPU_DISABLED) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET DATA USE_DEVICE_ADDR(a) IF(gpu_option_==ABI_GPU_OPENMP)
+#endif
+   call abi_gpu_xpotrf_cptr(2, uplo, n, c_loc(a), lda, info)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP END TARGET DATA
+#endif
+ else
+#ifdef HAVE_LINALG_PLASMA
+   if (ABI_LINALG_PLASMA_ISON) then
+     call PLASMA_zpotrf(uplo_plasma(uplo),n,a,lda,info)
+     return
+   end if
+#endif
+   call zpotrf(uplo,n,a,lda,info)
+ end if
 
 end subroutine abi_zpotrf
 !!***

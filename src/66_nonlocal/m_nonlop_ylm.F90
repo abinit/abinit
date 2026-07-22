@@ -267,15 +267,15 @@ contains
 !!      if (choice=81) <G|d[d(right)V_nonlocal/d(k)]/d(k)|vect_in>
 !! --if (paw_opt=2)
 !!    vectout(2,npwout*my_nspinor*ndat)=final vector in reciprocal space:
-!!      if (choice=1)  <G|V_nonlocal-lamdba.(I+S)|vect_in>
-!!      if (choice=2)  <G|d[V_nonlocal-lamdba.(I+S)]/d(atm. pos)|vect_in>
-!!      if (choice=3)  <G|d[V_nonlocal-lamdba.(I+S)]/d(strain)|vect_in>
-!!      if (choice=5)  <G|d[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
-!!      if (choice=51) <G|d(right)[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
-!!      if (choice=52) <G|d(left)[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
-!!      if (choice=53) <G|d(twist)[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
-!!      if (choice=8)  <G|d2[V_nonlocal-lamdba.(I+S)]/d(k)d(k)|vect_in>
-!!      if (choice=81) <G|d[d(right[V_nonlocal-lamdba.(I+S)]/d(k)]/d(k)|vect_in>
+!!      if (choice=1)  <G|V_nonlocal-lambda.(I+S)|vect_in>
+!!      if (choice=2)  <G|d[V_nonlocal-lambda.(I+S)]/d(atm. pos)|vect_in>
+!!      if (choice=3)  <G|d[V_nonlocal-lambda.(I+S)]/d(strain)|vect_in>
+!!      if (choice=5)  <G|d[V_nonlocal-lambda.(I+S)]/d(k)|vect_in>
+!!      if (choice=51) <G|d(right)[V_nonlocal-lambda.(I+S)]/d(k)|vect_in>
+!!      if (choice=52) <G|d(left)[V_nonlocal-lambda.(I+S)]/d(k)|vect_in>
+!!      if (choice=53) <G|d(twist)[V_nonlocal-lambda.(I+S)]/d(k)|vect_in>
+!!      if (choice=8)  <G|d2[V_nonlocal-lambda.(I+S)]/d(k)d(k)|vect_in>
+!!      if (choice=81) <G|d[d(right[V_nonlocal-lambda.(I+S)]/d(k)]/d(k)|vect_in>
 !! --if (paw_opt=3 or 4)
 !!    svectout(2,npwout*my_nspinor*ndat)=result of the aplication of Sij (overlap matrix)
 !!                  or one of its derivatives to the input vect.:
@@ -286,7 +286,7 @@ contains
 !!      if (choice=51) <G|d(right)S/d(k)|vect_in>
 !!      if (choice=52) <G|d(left)S/d(k)|vect_in>
 !!      if (choice=53) <G|d(twist)S/d(k)|vect_in>
-!!      if (choice=3)  <G|d[V_nonlocal-lamdba.(I+S)]/d(strain)|vect_in>
+!!      if (choice=3)  <G|d[V_nonlocal-lambda.(I+S)]/d(strain)|vect_in>
 !!      if (choice=7)  <G|sum_i[p_i><p_i]|vect_in>
 !!      if (choice=8)  <G|d2S/d(k)d(k)|vect_in>
 !!      if (choice=81) <G|d[d(right)S/d(k)]/d(k)|vect_in>
@@ -549,16 +549,16 @@ contains
    if(signs==1) ndgxdtfac=3
    if(signs==1) nd2gxdt=6
  end if
- if (choice==5) then
-   if(signs==1) ndgxdt=3
-   if(signs==2) ndgxdt=1
-   if(signs==2) ndgxdtfac=1
- end if
  if (choice==33) then
    if(signs==2) ndgxdt=2
    if(signs==2) ndgxdtfac=2
    if(signs==2) nd2gxdt=3
    if(signs==2) nd2gxdtfac=3
+ end if
+ if (choice==5) then
+   if(signs==1) ndgxdt=3
+   if(signs==2) ndgxdt=1
+   if(signs==2) ndgxdtfac=1
  end if
  if (choice==51) then
    if(signs==1) ndgxdt=3
@@ -573,8 +573,8 @@ contains
  if (choice==53) then
    if(signs==1) ndgxdt=3
    if(signs==1) ndgxdtfac=3
-   if(signs==2) ndgxdt=2
-   if(signs==2) ndgxdtfac=2
+   if(signs==2) ndgxdt=1
+   if(signs==2) ndgxdtfac=1
  end if
  if (choice==54) then
    if(signs==1) ndgxdt=6
@@ -822,10 +822,9 @@ contains
                else if (signs==2.and.ndgxdt_stored==3) then
                  if (choice==5.or.choice==51.or.choice==52) then ! ndgxdt=1
                    dgxdt(1:2,1,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,idir,1:nlmn)
-                 else if (choice==53) then ! ndgxdt=2
-                   idir1 = modulo(idir,3)+1; idir2 = modulo(idir+1,3)+1
+                 else if (choice==53) then ! ndgxdt=1
+                   idir1 = mod(idir+1,3)+1
                    dgxdt(1:2,1,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,idir1,1:nlmn)
-                   dgxdt(1:2,2,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,idir2,1:nlmn)
                  else if (choice==8) then ! ndgxdt=2
                    idir1=(idir-1)/3+1; idir2=mod((idir-1),3)+1
                    dgxdt(1:2,1,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,idir1,1:nlmn)
@@ -849,10 +848,9 @@ contains
                  else if (signs==2.and.ndgxdt_stored==3) then
                    if (choice==5.or.choice==51.or.choice==52) then ! ndgxdt=1
                      dgxdt(1,1,ilmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(cplex_dgxdt(1),idir,ilmn)
-                   else if (choice==53) then ! ndgxdt=2
-                     idir1 = modulo(idir,3)+1; idir2 = modulo(idir+1,3)+1
+                   else if (choice==53) then ! ndgxdt=1
+                     idir1 = mod(idir+1,3)+1
                      dgxdt(1,1,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(cplex_dgxdt(1),idir1,1:nlmn)
-                     dgxdt(1,2,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(cplex_dgxdt(2),idir2,1:nlmn)
                    else if (choice==8) then ! ndgxdt=2
                      idir1=(idir-1)/3+1; idir2=mod((idir-1),3)+1
                      dgxdt(1,1,ilmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(cplex_dgxdt(1),idir1,ilmn)

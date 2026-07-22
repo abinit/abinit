@@ -1270,12 +1270,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
          end do
          end do
        case (ABI_GPU_OPENMP)
-#ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET DATA USE_DEVICE_ADDR(nhat12_atm,nhat12)
-         call abi_gpu_xaxpy(1, 2*nfft*ndat2*ndat1*nspinor*nspinor,&
-         &    cone,c_loc(nhat12_atm(:,:,:,:,:,ia)),1,c_loc(nhat12),1)
-         !$OMP END TARGET DATA
-#endif
+         call abi_xaxpy(2*nfft*ndat2*ndat1*nspinor*nspinor,&
+         &    cone,nhat12_atm(:,:,:,:,:,ia),1,nhat12,1,x_cplx=1,gpu_option=gpu_option_)
        case default
          ABI_BUG("Unsupported GPU option")
        end select
@@ -1336,11 +1332,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    case (ABI_GPU_DISABLED)
      grnhat_12=-grnhat_12
    case (ABI_GPU_OPENMP)
-#ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET DATA USE_DEVICE_ADDR(grnhat_12)
-     call abi_gpu_xscal(1, size(grnhat_12),cminusone,c_loc(grnhat_12),1)
-     !$OMP END TARGET DATA
-#endif
+     call abi_xscal(size(grnhat_12),cminusone,grnhat_12,1,x_cplx=1,gpu_option=gpu_option_)
    case default
      ABI_BUG("Unsupported GPU option")
    end select
@@ -2443,11 +2435,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
        if(gpu_option_==ABI_GPU_DISABLED) then
          prod=prod*ucvol/dble(ngridtot)
        else if(gpu_option_==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET DATA USE_DEVICE_ADDR(prod)
-         call abi_gpu_xscal(1,qphase*lm_size*ndat*nattyp,scal,c_loc(prod),1)
-         !$OMP END TARGET DATA
-#endif
+         call abi_xscal(qphase*lm_size*ndat*nattyp,scal,prod,1,x_cplx=1,gpu_option=gpu_option_)
        end if
 
 !      ----------------------------------------------------------

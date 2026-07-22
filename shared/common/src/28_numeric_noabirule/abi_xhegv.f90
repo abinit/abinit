@@ -297,3 +297,169 @@ subroutine abi_zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
 
 end subroutine abi_zhegv
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abi_linalg/abi_d2zhegvd
+!! NAME
+!! abi_d2zhegvd
+!!
+!! FUNCTION
+!!  Generic divide-and-conquer generalized Hermitian eigensolver (HEGVD/SYGVD)
+!!  with GPU support. Accepts real storage (real or complex-as-real via x_cplx).
+!!  On GPU, calls abi_gpu_xhegvd_cptr. On CPU, self-manages work arrays.
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine abi_d2zhegvd(itype, jobz, uplo, n, a, lda, b, ldb, w, info, x_cplx, gpu_option)
+
+!Arguments ------------------------------------
+ integer, intent(in) :: itype
+ character(len=1), intent(in) :: jobz
+ character(len=1), intent(in) :: uplo
+ integer, intent(in) :: n, lda, ldb
+ real(dp), target, intent(inout) :: a(:,:)
+ real(dp), target, intent(inout) :: b(:,:)
+ real(dp), target, intent(out) :: w(:,:)
+ integer, intent(out) :: info
+ !Optionals -----------------------------------
+ integer, intent(in), optional :: x_cplx
+ integer, intent(in), optional :: gpu_option
+
+!Local variables-------------------------------
+ integer :: cplx_, gpu_option_
+ integer :: lwork, lrwork, liwork
+ real(dp), pointer :: rwork(:)
+ complex(dp), pointer :: cwork(:)
+ integer, pointer :: iwork(:)
+ real(dp) :: rwork_query(1)
+ complex(dp) :: cwork_query(1)
+ integer :: iwork_query(1)
+
+! *********************************************************************
+
+ cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
+ gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
+
+#if defined(DEBUG_VERBOSE) && defined(HAVE_OPENMP_OFFLOAD)
+ if ( gpu_option_ == ABI_GPU_OPENMP ) then
+   ABI_CHECK(xomp_target_is_present(c_loc(a)), "Array isn't mapped on GPU")
+   ABI_CHECK(xomp_target_is_present(c_loc(b)), "Array isn't mapped on GPU")
+   ABI_CHECK(xomp_target_is_present(c_loc(w)), "Array isn't mapped on GPU")
+ end if
+#endif
+
+ if(gpu_option_/=ABI_GPU_DISABLED) then
+   if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,w)
+     call abi_gpu_xhegvd_cptr(cplx_, itype, jobz, uplo, n, c_loc(a), lda, c_loc(b), ldb, c_loc(w), info)
+     !$OMP END TARGET DATA
+#endif
+   else
+     call abi_gpu_xhegvd_cptr(cplx_, itype, jobz, uplo, n, c_loc(a), lda, c_loc(b), ldb, c_loc(w), info)
+   end if
+ else
+   if(cplx_ == 2) then
+     lwork=-1 ; lrwork=-1 ; liwork=-1
+     call zhegvd(itype, jobz, uplo, n, a, lda, b, ldb, w, cwork_query, lwork, rwork_query, lrwork, iwork_query, liwork, info)
+     lwork=int(cwork_query(1)) ; lrwork=int(rwork_query(1)) ; liwork=iwork_query(1)
+     ABI_MALLOC(cwork, (lwork))
+     ABI_MALLOC(rwork, (lrwork))
+     ABI_MALLOC(iwork, (liwork))
+     call zhegvd(itype, jobz, uplo, n, a, lda, b, ldb, w, cwork, lwork, rwork, lrwork, iwork, liwork, info)
+     ABI_FREE(cwork) ; ABI_FREE(rwork) ; ABI_FREE(iwork)
+   else
+     lwork=-1 ; liwork=-1
+     call dsygvd(itype, jobz, uplo, n, a, lda, b, ldb, w, rwork_query, lwork, iwork_query, liwork, info)
+     lwork=int(rwork_query(1)) ; liwork=iwork_query(1)
+     ABI_MALLOC(rwork, (lwork))
+     ABI_MALLOC(iwork, (liwork))
+     call dsygvd(itype, jobz, uplo, n, a, lda, b, ldb, w, rwork, lwork, iwork, liwork, info)
+     ABI_FREE(rwork) ; ABI_FREE(iwork)
+   end if
+ end if
+
+ ABI_CHECK(info==0,"abi_d2zhegvd returned info!=0!")
+
+end subroutine abi_d2zhegvd
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abi_linalg/abi_zhegvd_2d
+!! NAME
+!! abi_zhegvd_2d
+!!
+!! FUNCTION
+!!  Divide-and-conquer generalized complex Hermitian eigensolver (ZHEGVD) with
+!!  GPU support. Accepts complex(dp) 2D matrices. On GPU, calls
+!!  abi_gpu_xhegvd_cptr. On CPU, self-manages work arrays.
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine abi_zhegvd_2d(itype, jobz, uplo, n, a, lda, b, ldb, w, info, gpu_option)
+
+!Arguments ------------------------------------
+ integer, intent(in) :: itype
+ character(len=1), intent(in) :: jobz
+ character(len=1), intent(in) :: uplo
+ integer, intent(in) :: n, lda, ldb
+ complex(dp), target, intent(inout) :: a(:,:)
+ complex(dp), target, intent(inout) :: b(:,:)
+ real(dp), target, intent(out) :: w(:,:)
+ integer, intent(out) :: info
+ !Optionals -----------------------------------
+ integer, intent(in), optional :: gpu_option
+
+!Local variables-------------------------------
+ integer :: gpu_option_
+ integer :: lwork, lrwork, liwork
+ complex(dp), pointer :: cwork(:)
+ real(dp), pointer :: rwork(:)
+ integer, pointer :: iwork(:)
+ complex(dp) :: cwork_query(1)
+ real(dp) :: rwork_query(1)
+ integer :: iwork_query(1)
+
+! *********************************************************************
+
+ gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
+
+#if defined(DEBUG_VERBOSE) && defined(HAVE_OPENMP_OFFLOAD)
+ if ( gpu_option_ == ABI_GPU_OPENMP ) then
+   ABI_CHECK(xomp_target_is_present(c_loc(a)), "Array isn't mapped on GPU")
+   ABI_CHECK(xomp_target_is_present(c_loc(b)), "Array isn't mapped on GPU")
+   ABI_CHECK(xomp_target_is_present(c_loc(w)), "Array isn't mapped on GPU")
+ end if
+#endif
+
+ if(gpu_option_/=ABI_GPU_DISABLED) then
+   if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,w)
+     call abi_gpu_xhegvd_cptr(2, itype, jobz, uplo, n, c_loc(a), lda, c_loc(b), ldb, c_loc(w), info)
+     !$OMP END TARGET DATA
+#endif
+   else
+     call abi_gpu_xhegvd_cptr(2, itype, jobz, uplo, n, c_loc(a), lda, c_loc(b), ldb, c_loc(w), info)
+   end if
+ else
+   lwork=-1 ; lrwork=-1 ; liwork=-1
+   call zhegvd(itype, jobz, uplo, n, a, lda, b, ldb, w, cwork_query, lwork, rwork_query, lrwork, iwork_query, liwork, info)
+   lwork=int(cwork_query(1)) ; lrwork=int(rwork_query(1)) ; liwork=iwork_query(1)
+   ABI_MALLOC(cwork, (lwork))
+   ABI_MALLOC(rwork, (lrwork))
+   ABI_MALLOC(iwork, (liwork))
+   call zhegvd(itype, jobz, uplo, n, a, lda, b, ldb, w, cwork, lwork, rwork, lrwork, iwork, liwork, info)
+   ABI_FREE(cwork) ; ABI_FREE(rwork) ; ABI_FREE(iwork)
+ end if
+
+ ABI_CHECK(info==0,"abi_zhegvd_2d returned info!=0!")
+
+end subroutine abi_zhegvd_2d
+!!***
