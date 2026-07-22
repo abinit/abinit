@@ -25,6 +25,7 @@ module m_alloc_hamilt_gpu
  use m_errors
  use m_xmpi
  use m_dtset
+ use m_errors
  use m_ompgpu_fourwf
 #if defined HAVE_GPU
  use m_gpu_toolbox
