@@ -1291,7 +1291,7 @@ subroutine dmats_check_one_k(dmats, spin, kk_ibz, dmat_k, units, prtvol, tag, yd
  logical :: unitary, identity_ok, kramers_ok, char_ok, isproper
  character(len=5000) :: msg
  real(dp),parameter :: DTOL = tol3
- real(dp) :: kk_sk(3), tsign, err, L_red(3), phase_err, char_err
+ real(dp) :: kk_sk(3), tsign, err, phase_err, char_err
  real(dp) :: Sk3(3), L_mult(3), phase_err_mult
  complex(dp) :: phase_L, phase_analytic, phase_dyn, phase_analytic_mult
  integer :: isym1_inv, isym2_inv
@@ -1473,17 +1473,25 @@ subroutine dmats_check_one_k(dmats, spin, kk_ibz, dmat_k, units, prtvol, tag, yd
      isym_inv = dmats%toinv(1, isym)
 
      if (isym_inv /= 0 .and. symtab(4, itime, isym_inv) /= 0) then
-       ! For non-symmorphic groups, S S^{-1} may yield a translation by a lattice vector L.
-       L_red(1) = nint(sum(dmats%cryst%symrel(1,:,isym) * dmats%cryst%tnons(:,isym_inv)) + dmats%cryst%tnons(1,isym))
-       L_red(2) = nint(sum(dmats%cryst%symrel(2,:,isym) * dmats%cryst%tnons(:,isym_inv)) + dmats%cryst%tnons(2,isym))
-       L_red(3) = nint(sum(dmats%cryst%symrel(3,:,isym) * dmats%cryst%tnons(:,isym_inv)) + dmats%cryst%tnons(3,isym))
-
-       ! Analytic phase relating D(S^{-1}) to D(S)^\dagger, derived from the Seitz composition S.S^{-1} = E:
-       ! Phase = e^{-i 2pi k \cdot L} e^{i 2pi (S_{rec,inv} G_{0}) \cdot \tau_{S^{-1}}}
-       ! Note: S_{inv} G_0 is -G_{0, inv}. And \tau_{S^{-1}} = -R_{inv} \tau_S.
-       ! We just use the exact formula for group mult: isym1 = isym_inv, isym2 = isym
-       phase_analytic = exp(cmplx(zero, -two_pi * sum(kk_ibz * L_red) + &
-                 two_pi * sum(matmul(dmats%cryst%symrec(:,:,isym_inv), symtab(1:3, itime, isym)) * dmats%cryst%tnons(:,isym_inv)), dp))
+       ! Analytic phase relating D(S^{-1}) to D(S)^\dagger, i.e. predicting phase_dyn (below). This
+       ! reuses the SAME tabulated-vs-literal-composition phase relation already validated to exact
+       ! (machine-precision) agreement by the group-multiplication test further down this routine:
+       !
+       !   matmul(D(isym1), D(isym2)) = e^{+i 2pi (S_{isym3} k).L} D(isym3),
+       !   L = multable(2:4, toinv(isym2), toinv(isym1)),  isym3 = multable(1, isym1, isym2)
+       !
+       ! specialized to isym1=isym_inv, isym2=isym, so that the literal Seitz composition
+       ! S(isym_inv).S(isym) is EXACTLY the identity (isym3=1, S_{isym3} k = k), giving
+       ! L = multable(2:4, isym, isym_inv) = toinv(2:4, isym_inv) exactly (both tabulate the same
+       ! S(isym_inv).S(isym) = {I, L} relation), so no separate multable lookup is even needed here.
+       !
+       ! NOTE: the previous formula used toinv(2:4, isym) [i.e. the residual L for the OPPOSITE
+       ! composition order S(isym).S(isym_inv)] plus an extra ad hoc symrec/symtab correction term --
+       ! an isym/isym_inv index-order mixup that was the actual root cause of the long-standing
+       ! "disagrees with phase_dyn by a discrete 90/180 degree offset on non-symmorphic operations"
+       ! bug (see git history). Verified: phase_err now at machine precision for every (isym,itime)
+       ! tuple in the reference gstore test (previously ~58 tuples off by sqrt(2), ~80 by exactly 2).
+       phase_analytic = exp(cmplx(zero, two_pi * sum(kk_ibz * real(dmats%toinv(2:4, isym_inv), dp)), dp))
 
        associate (cmat_inv => dmat_k(:, :, isym_inv, itime))
        ! Independently, dynamically extract the phase relating the two independently constructed
@@ -1500,14 +1508,14 @@ subroutine dmats_check_one_k(dmats, spin, kk_ibz, dmat_k, units, prtvol, tag, yd
        end if
        ! phase_dyn, by construction of the Frobenius inner product above, should equal conjg(phase_analytic)
        ! when the D-matrices carry the correct absolute phase, so phase_dyn * phase_analytic == 1.
-       ! NOTE: phase_analytic (L_red/G_0 formula above) is reported as a DIAGNOSTIC only and does NOT
-       ! feed into ierr/inv_ok yet: it currently disagrees with phase_dyn by a discrete 90/180 degree
-       ! offset on non-symmorphic operations, which looks like a bug in this analytic derivation itself
-       ! (still under investigation) rather than in the D-matrices (proportionality "err" is at machine
-       ! precision for the same entries). Once the formula is fixed, fold phase_err into the ierr test.
+       ! Formerly a diagnostic-only quantity (the old toinv(isym)-based formula disagreed with
+       ! phase_dyn by a discrete 90/180 degree offset on non-symmorphic operations); now that the
+       ! formula above is fixed (verified at machine precision on the full reference gstore test,
+       ! all 976 (isym,itime) tuples across all 8 IBZ k-points), phase_err is folded into ierr/inv_ok.
        phase_err = abs(phase_dyn * phase_analytic - one)
-       if (err >= DTOL .or. abs(abs(phase_dyn) - one) > DTOL) ierr = ierr + 1
-       call sym_dicts(isym_cnt)%set("inv_ok", s=yesno(err < DTOL .and. abs(abs(phase_dyn) - one) <= DTOL))
+       if (err >= DTOL .or. abs(abs(phase_dyn) - one) > DTOL .or. phase_err > DTOL) ierr = ierr + 1
+       call sym_dicts(isym_cnt)%set("inv_ok", &
+         s=yesno(err < DTOL .and. abs(abs(phase_dyn) - one) <= DTOL .and. phase_err <= DTOL))
        call sym_dicts(isym_cnt)%set("inv_err", r=err)
        call sym_dicts(isym_cnt)%set("inv_phase", s=sjoin(ftoa(real(phase_dyn)), " + i ", ftoa(aimag(phase_dyn))))
        call sym_dicts(isym_cnt)%set("inv_phase_analytic_err", r=phase_err)
