@@ -3187,6 +3187,22 @@ See [[dmft_charge_prec]] for further tuning of the root-finding algorithm.
 ),
 
 Variable(
+    abivarname="dmft_full_chipsi",
+    varset="dmft",
+    vartype="integer",
+    topics=["DMFT_expert"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: compute full chi psi",
+    requires="[[usedmft]] == 1 and [[dmft_prtwan]] == 1",
+    added_in_version="before_v10.8",
+    text=r"""
+Required in order to build the full Wannier function outside the paw sphere. This is relevant 
+only when using [[dmft_solv]] $\in$ [5,8,10].
+""",
+),
+
+Variable(
     abivarname="dmft_hybri_limit",
     varset="dmft",
     vartype="integer",
