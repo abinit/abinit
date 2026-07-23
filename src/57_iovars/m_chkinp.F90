@@ -324,10 +324,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !       ABI_ERROR_NOSTOP(msg, ierr)
 !     end if
    end if
-!  Non-zero berryopt and usepaw==1 and kpt // requires nproc to be a divisor of nkpt
-   if (usepaw==1.and.dt%berryopt/=0.and.nproc>1.and.mod(dt%nkpt,nproc)/=0) then
+!  berryopt.GE.4 and usepaw==1 and kpt // requires nproc to be a divisor of nkpt
+   if (usepaw==1 .and. dt%berryopt.GE.4 .and. nproc>1 .and. mod(dt%nkpt,nproc)/=0) then
      write(msg, '(3a)' )&
-      'For berryopt /= 0 with PAW in parallel, nproc must be a divisor of nkpt ',ch10,&
+      'For berryopt >= 4 with PAW in parallel, nproc must be a divisor of nkpt ',ch10,&
       'Action: change number of processes or kpts such that nproc divides nkpt evenly'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
