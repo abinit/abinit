@@ -6755,7 +6755,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  integer :: isym_combined
  real(dp) :: weight_qq, weight_qq_eq,phase, q_base(3)
  integer :: idir, iat, idir_eq, iat_eq, mu, mu_eq, iq_base_glob, iq_sym
- integer :: symrec_eq(3,3), l0(3), sm1(3,3)
+ integer :: symrec_eq(3,3), l0(3), mat_tmp(3,3)
  real(dp) :: L_gk(3), L_gkq(3)
  complex(dp) :: cphase, phase_gk, phase_gkq
  logical :: with_g2dw, q_is_gamma
@@ -6763,13 +6763,19 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  character(len=abi_slen) :: with_gmode, gtype, gvals_name
  character(len=5000) :: msg
  type(gstore_t) :: gstore
+ type(dmats_t) :: dmats
+ integer :: isym_kqS, isym_kqT, ikq_ibz_s, ikq_ibz_t, h_isym, itime_h
+ integer :: indkk_s(6,1), indkk_t(6,1)
+ logical,parameter :: DEBUG_DUMP_DH = .False.
 !!arrays
  integer :: brange_k_spin(2, dtset%nsppol)
  integer,allocatable :: state_kq(:,:), qbz2ibz(:,:), kibz2bz(:) !, qibz2bz(:), qglob2bz(:,:), ! kmesh_map(:,:), my_kqmap(:,:),
- real(dp) :: kk_bz(3), kk_ibz(3), qq_ibz(3), qpt(3), qq_eq(3), qpt_tmp(3), tnon(3)
+ real(dp) :: kk_bz(3), kk_ibz(3), qq_ibz(3), qpt(3), qq_eq(3), qpt_tmp(3)
+ real(dp) :: kq_bz_source(3), kq_bz_target(3)
  real(dp),allocatable :: qbz(:,:)
  real(dp),contiguous,pointer :: gkq_rot_ptr(:,:,:,:,:), gkq_base_ptr(:,:,:,:,:)
  complex(dp),target,allocatable :: gkq_rot(:,:,:,:), gkq_base(:,:,:,:)
+ complex(dp),allocatable :: gtmp(:,:), dh_mat(:,:)
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -6779,6 +6785,13 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  call wrtout(units, sjoin(" GSTORE file: ", gstore_path))
 
  call gstore_read_gtype(gstore_path, gtype, comm, brange_k_spin=brange_k_spin)
+
+ ! Compute the little-group D-matrices D_mn(S) = <psi_m,k_ibz|S|psi_n,k_ibz>.
+ ! These are used below to correct the extra rotation the bra (electron state at k+q)
+ ! picks up when its own already-computed BZ representative differs from the one obtained
+ ! by applying isym_k directly (see the "Bug A" fix in the q-loop below). All MPI ranks
+ ! participate here since dmats%init distributes the work internally over comm.
+ call dmats%init(wfk_path, dtset, cryst, brange_k_spin, ngfft, pawtab, psps, comm)
 
  ! Only master processor performs the symmetrization of the e-ph matrix elements.
  ! Performance is not crucial and the algorithm is IO-bound.
@@ -6820,6 +6833,8 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
  NCF_CHECK(nctk_open_modify(ncid, gstore_path, xmpi_comm_self))
 
+ if (DEBUG_DUMP_DH) open(unit=789, file="dh_debug.csv", status="replace", action="write")
+
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
@@ -6836,6 +6851,8 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
    ABI_MALLOC(gkq_base, (nb, nb, gqk%natom3, gqk%my_nq))
    ABI_MALLOC(gkq_rot, (nb, nb, gqk%natom3, gqk%my_nq))
+   ABI_MALLOC(gtmp, (nb, nb))
+   ABI_MALLOC(dh_mat, (nb, nb))
 
    ! Build q-points in the BZ.
    ABI_MALLOC(qbz, (3, gqk%my_nq))
@@ -6868,12 +6885,8 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
      symrec_eq = transpose(cryst%symrel(:,:,isym_k))
      ABI_CHECK(isamek(kk_bz, matmul(symrec_eq, kk_ibz), g0_q), "kk_bz != symrec_eq kk_ibz")
 
-     ! Compute sm1 = symrec_eq^{-1}
-     call mati3inv(symrec_eq, sm1); sm1 = transpose(sm1)
-
      do isym_combined=1,nsym
-       !if (all(cryst%symrec(:,:,isym_combined) == symrec_eq)) exit
-       if (all(cryst%symrec(:,:,isym_combined) == sm1)) exit
+       if (all(cryst%symrec(:,:,isym_combined) == symrec_eq)) exit
      end do
      ABI_CHECK(isym_combined /= nsym + 1, "Cannot find symrec_eq")
 
@@ -6908,38 +6921,61 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        end do
        ABI_CHECK(iq_sym /= gqk%my_nq + 1, sjoin("Cannot find:", ktoa(qpt)))
 
+       ! -----------------------------------------------------------------
+       ! Bug A fix: the bra (electron state at k+q) reaches its target BZ
+       ! point via two composed rotations (isym_k applied to the SOURCE
+       ! bra's own rotation from kq_ibz), while the "true" bra is obtained
+       ! by a single direct rotation from kq_ibz. The two differ by Û(h),
+       ! h being the residual element of the little group (stabilizer) of
+       ! kq_ibz. h always stabilizes kq_ibz by construction (never an
+       ! out-of-domain little-group lookup), so the D-matrices already
+       ! tabulated by dmats are valid here. See gstore_symmetrize_status
+       ! memory (session 10) for the full derivation.
+       kq_bz_source = kk_ibz + qbz(:, iq_sym)
+       kq_bz_target = kk_bz + qpt
+       ierr = kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kq_bz_source, indkk_s)
+       ABI_CHECK(ierr == 0, "Cannot find symmetric image of k+q (source)")
+       ierr = kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kq_bz_target, indkk_t)
+       ABI_CHECK(ierr == 0, "Cannot find symmetric image of k+q (target)")
+       ikq_ibz_s = indkk_s(1,1); isym_kqS = indkk_s(2,1)
+       ikq_ibz_t = indkk_t(1,1); isym_kqT = indkk_t(2,1)
+       ABI_CHECK(indkk_s(6,1) == 0 .and. indkk_t(6,1) == 0, "Time-reversal for k+q not coded in gstore_symmetrize")
+       ABI_CHECK(ikq_ibz_s == ikq_ibz_t, "Source and target k+q map to different IBZ points!")
+
+       ! mat_tmp = Srel(toinv(isym_kqT)) . Srel(isym_k) . Srel(isym_kqS), with Srel(S) := symrel(S)^T
+       ! (same k/kq convention as symrec_eq above, i.e. NOT cryst%symrec). h_isym is the isym s.t.
+       ! Srel(h_isym) == mat_tmp.
+       mat_tmp = matmul(transpose(cryst%symrel(:,:,dmats%toinv(1,isym_kqT))), &
+                        matmul(symrec_eq, transpose(cryst%symrel(:,:,isym_kqS))))
+       do h_isym=1,nsym
+         if (all(transpose(cryst%symrel(:,:,h_isym)) == mat_tmp)) exit
+       end do
+       ABI_CHECK(h_isym /= nsym + 1, "Cannot find little-group element h for the k+q leg")
+
+       itime_h = 1
+       dh_mat = dmats%for_spin(spin)%value(:,:,h_isym,itime_h,ikq_ibz_t)
+       if (DEBUG_DUMP_DH) then
+         write(789,'(5(i0,1x),2(es16.8,1x),6(i0,1x))') ik_glob, iq_glob, isym_k, h_isym, ikq_ibz_t, &
+           real(dh_mat(1,1)), aimag(dh_mat(1,1)), indkk_s(3:5,1), indkk_t(3:5,1)
+       end if
+       ! -----------------------------------------------------------------
+
        ! Perform symmetrization.
-       gkq_rot(:,:,:,iq_glob) = zero
        do mu=1,gqk%natom3
          idir = mod(mu-1, 3) + 1; iat = (mu - idir) / 3 + 1
 
-         !isym_combined = isym_k
          iat_eq = cryst%indsym(4, isym_combined, iat)
          l0 = cryst%indsym(1:3, isym_combined, iat)
-         tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym_combined))
-         phase = -two_pi * dot_product(qpt_tmp, l0)
+         phase = -two_pi * dot_product(qbz(:, iq_sym), l0)
          cphase = cmplx(cos(phase), sin(phase), dp)
-         !cphase = one
 
-         !if (any(g0_q /= 0)) cycle
-         !if (any(abs(tnon) > tol16)) cycle
-
+         gtmp = zero
          do idir_eq=1,3
-           !if (symrec_eq(idir, idir_eq) == 0) cycle
            mu_eq = idir_eq + (iat_eq - 1) * 3
-           ! accumulate the rotated atomic potential matrix
-           !gkq_rot(:,:,mu,iq_glob) = gkq_rot(:,:,mu,iq_glob) + &
-           !  cphase * symrec_eq(idir, idir_eq) * gkq_base(:,:,mu_eq,iq_sym)
-
-           !gkq_rot(:,:,mu,iq_glob) = gkq_rot(:,:,mu,iq_glob) + &
-           !  cphase * symrec_eq(idir_eq, idir) * gkq_base(:,:,mu_eq,iq_sym)
-
-           gkq_rot(:,:,mu,iq_glob) = gkq_rot(:,:,mu,iq_glob) + &
-             cphase * sm1(idir, idir_eq) * gkq_base(:,:,mu_eq,iq_sym)
-
-           !gkq_rot(:,:,mu,iq_glob) = gkq_rot(:,:,mu,iq_glob) + &
-           !  cphase * sm1(idir_eq, idir) * gkq_base(:,:,mu_eq,iq_sym)
+           gtmp = gtmp + cphase * symrec_eq(idir, idir_eq) * gkq_base(:,:,mu_eq,iq_sym)
          end do
+         ! Apply the Bug A correction: left-multiply by D(h) on the bra (m) index.
+         gkq_rot(:,:,mu,iq_glob) = matmul(dh_mat, gtmp)
        end do
 
      end do ! my_iq
@@ -6963,15 +6999,19 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
    ABI_FREE(gkq_base)
    ABI_FREE(gkq_rot)
    ABI_FREE(state_kq)
+   ABI_FREE(gtmp)
+   ABI_FREE(dh_mat)
  end do ! my_is
 
  NCF_CHECK(nf90_close(ncid))
+ if (DEBUG_DUMP_DH) close(789)
 
 
  ABI_FREE(kibz2bz)
  call gstore%free()
 
- 100 call xmpi_barrier(comm)
+ 100 call dmats%free()
+ call xmpi_barrier(comm)
  call wrtout(units, " Symmetrization completed successfully.")
 
 contains
