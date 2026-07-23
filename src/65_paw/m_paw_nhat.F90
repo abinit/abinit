@@ -709,11 +709,17 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  type(mpi_type) :: mpi_enreg_fft
  real(dp) :: sumr,sumi,sumr2,sumi2,sumr3,sumi3
  real(dp) :: wgt,wgt1,wgt2,wgt3,cr,ci
+#ifdef HAVE_OPENMP_OFFLOAD
+ complex(dp) :: gemm_alpha,gemm_beta
+ integer :: gemm_n,gemm_batch
+#endif
 !arrays
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
  integer,pointer :: my_atmtab(:)
  real(dp) :: rdum(1),tsec(2),ro(2),ro_ql(2)
- real(dp),allocatable :: work(:,:), qijl(:,:),projs1(:,:,:),projs2(:,:,:),cpf(:,:,:,:,:),gnt_scal(:,:)
+ real(dp),allocatable :: work(:,:), qijl(:,:),projs1(:,:,:),projs2(:,:,:),gnt_scal(:,:)
+ real(dp),allocatable, target :: cpf_re(:,:,:,:),cpf_im(:,:,:,:)
+ real(dp),allocatable, target :: gemm_re(:,:,:,:),gemm_im(:,:,:,:)
  real(dp),allocatable :: atom_wgylm(:,:,:),atom_wgylmgr(:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: nhat12_atm(:,:,:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: atom_expiqr(:,:,:),atom_gylm(:,:,:),atom_dltij(:),atom_gylmgr(:,:,:,:)
@@ -857,9 +863,11 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      end if
    end if
 
-   ABI_MALLOC(cpf,(2,lmn2_size,ndat2,ndat1,nattyp(itypat)))
+   ! Separate real and imaginary parts to perform a batched GEMM later.
+   ABI_MALLOC(cpf_re,(lmn2_size,ndat2,ndat1,nattyp(itypat)))
+   ABI_MALLOC(cpf_im,(lmn2_size,ndat2,ndat1,nattyp(itypat)))
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(alloc:cpf) IF(gpu_option_==ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(alloc:cpf_re,cpf_im) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif
 
 !------------------------------------------------------------------------
@@ -906,6 +914,15 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      pawfgrtab(iatom)%expiqr_allocated=2
    end if
  end do
+
+ if (compute_nhat.and.gpu_option_==ABI_GPU_OPENMP) then
+   ! GEMM output buffers: C(ic,idat2,idat1) per atom, batched over ia.
+   ABI_MALLOC(gemm_re,(nfgd_max,ndat2,ndat1,nattyp(itypat)))
+   ABI_MALLOC(gemm_im,(nfgd_max,ndat2,ndat1,nattyp(itypat)))
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:gemm_re,gemm_im)
+#endif
+ end if
 
  ABI_MALLOC(atom_nfgd,   (nfgd_max))
  ABI_MALLOC(atom_gylm,   (  nfgd_max,lm_size,nattyp(itypat)))
@@ -970,6 +987,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
        end do
      else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
+       ! Init to zero to avoid random uninitialised values
+       call gpu_set_to_zero(atom_wgylm, int(nfgd_max,c_size_t)*lmn2_size*nattyp(itypat))
        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:atom_gylm,atom_indklmn,atom_dltij,qijl,gnt_scal,atom_nfgd,nattyp,atom_wgylm)&
        !$OMP& PRIVATE(ia)
        do ia=1,nattyp(itypat)
@@ -1064,13 +1083,13 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
            do klmn=1,lmn2_size  ! Loop over ij channels of this atom type.
            ilmn=atom_indklmn(7,klmn)
            jlmn=atom_indklmn(8,klmn)
-           cpf(1,klmn,idat2,idat1,ia) = &
+           cpf_re(klmn,idat2,idat1,ia) = &
   &           (projs1(1,shift+ilmn,isp1+(idat1-1)*nspinor) * projs2(1,shift+jlmn,isp2+(idat2-1)*nspinor)&
   &           +projs1(2,shift+ilmn,isp1+(idat1-1)*nspinor) * projs2(2,shift+jlmn,isp2+(idat2-1)*nspinor)&
   &           +projs1(1,shift+jlmn,isp1+(idat1-1)*nspinor) * projs2(1,shift+ilmn,isp2+(idat2-1)*nspinor)&
   &           +projs1(2,shift+jlmn,isp1+(idat1-1)*nspinor) * projs2(2,shift+ilmn,isp2+(idat2-1)*nspinor))
 
-           cpf(2,klmn,idat2,idat1,ia) = &
+           cpf_im(klmn,idat2,idat1,ia) = &
   &           (projs1(1,shift+ilmn,isp1+(idat1-1)*nspinor) * projs2(2,shift+jlmn,isp2+(idat2-1)*nspinor)&
   &           -projs1(2,shift+ilmn,isp1+(idat1-1)*nspinor) * projs2(1,shift+jlmn,isp2+(idat2-1)*nspinor)&
   &           +projs1(1,shift+jlmn,isp1+(idat1-1)*nspinor) * projs2(2,shift+ilmn,isp2+(idat2-1)*nspinor)&
@@ -1081,20 +1100,20 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-       !$OMP& PRIVATE(idat1,idat2) MAP(to:cpf,projs1,projs2,atom_indklmn,atom_nfgd)
+       !$OMP& PRIVATE(idat1,idat2) MAP(to:cpf_re,cpf_im,projs1,projs2,atom_indklmn,atom_nfgd)
        do idat1=1,ndat1
          do idat2=1,ndat2
            !$OMP PARALLEL DO PRIVATE(ilmn,jlmn,klmn)
            do klmn=1,lmn2_size  ! Loop over ij channels of this atom type.
            ilmn=atom_indklmn(7,klmn)
            jlmn=atom_indklmn(8,klmn)
-           cpf(1,klmn,idat2,idat1,ia) = &
+           cpf_re(klmn,idat2,idat1,ia) = &
   &           (projs1(1,shift+ilmn,isp1+(idat1-1)*nspinor) * projs2(1,shift+jlmn,isp2+(idat2-1)*nspinor)&
   &           +projs1(2,shift+ilmn,isp1+(idat1-1)*nspinor) * projs2(2,shift+jlmn,isp2+(idat2-1)*nspinor)&
   &           +projs1(1,shift+jlmn,isp1+(idat1-1)*nspinor) * projs2(1,shift+ilmn,isp2+(idat2-1)*nspinor)&
   &           +projs1(2,shift+jlmn,isp1+(idat1-1)*nspinor) * projs2(2,shift+ilmn,isp2+(idat2-1)*nspinor))
 
-           cpf(2,klmn,idat2,idat1,ia) = &
+           cpf_im(klmn,idat2,idat1,ia) = &
   &           (projs1(1,shift+ilmn,isp1+(idat1-1)*nspinor) * projs2(2,shift+jlmn,isp2+(idat2-1)*nspinor)&
   &           -projs1(2,shift+ilmn,isp1+(idat1-1)*nspinor) * projs2(1,shift+jlmn,isp2+(idat2-1)*nspinor)&
   &           +projs1(1,shift+jlmn,isp1+(idat1-1)*nspinor) * projs2(2,shift+ilmn,isp2+(idat2-1)*nspinor)&
@@ -1116,8 +1135,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
                do ic=1,atom_nfgd(ia)
                  cr=zero; ci=zero
                  do klmn=1,lmn2_size  ! Loop over ij channels of this atom type.
-                   cr=cr+cpf(1,klmn,idat2,idat1,ia)*atom_wgylm(ic,klmn,ia)
-                   ci=ci+cpf(2,klmn,idat2,idat1,ia)*atom_wgylm(ic,klmn,ia)
+                   cr=cr+cpf_re(klmn,idat2,idat1,ia)*atom_wgylm(ic,klmn,ia)
+                   ci=ci+cpf_im(klmn,idat2,idat1,ia)*atom_wgylm(ic,klmn,ia)
                  end do
                  ! nhat12_atm is indexed by the local sphere point ic (not the
                  ! global FFT index jc): it is only nfgd_max points wide.
@@ -1129,23 +1148,31 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
          end do
        else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
+         gemm_n = ndat2*ndat1
+         gemm_batch = nattyp(itypat)
+         gemm_alpha = cone
+         gemm_beta  = czero
+         !$OMP TARGET DATA USE_DEVICE_ADDR(atom_wgylm,cpf_re,cpf_im,gemm_re,gemm_im)
+         call abi_gpu_xgemm_strided(1,'n','n',nfgd_max,gemm_n,lmn2_size,gemm_alpha,&
+&          c_loc(atom_wgylm),nfgd_max,nfgd_max*lmn2_size,&
+&          c_loc(cpf_re),lmn2_size,lmn2_size*gemm_n,gemm_beta,&
+&          c_loc(gemm_re),nfgd_max,nfgd_max*gemm_n,gemm_batch)
+         call abi_gpu_xgemm_strided(1,'n','n',nfgd_max,gemm_n,lmn2_size,gemm_alpha,&
+&          c_loc(atom_wgylm),nfgd_max,nfgd_max*lmn2_size,&
+&          c_loc(cpf_im),lmn2_size,lmn2_size*gemm_n,gemm_beta,&
+&          c_loc(gemm_im),nfgd_max,nfgd_max*gemm_n,gemm_batch)
+         !$OMP END TARGET DATA
+
          !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(3) &
-         !$OMP& MAP(to:nhat12_atm,atom_wgylm,cpf,atom_nfgd,nattyp)&
+         !$OMP& MAP(to:nhat12_atm,gemm_re,gemm_im,atom_nfgd,nattyp)&
          !$OMP& PRIVATE(idat1,idat2,ia)
          do ia=1,nattyp(itypat)
            do idat1=1,ndat1
              do idat2=1,ndat2
-               !$OMP PARALLEL DO PRIVATE(klmn,ic,sumr,sumi)
+               !$OMP PARALLEL DO PRIVATE(ic)
                do ic=1,atom_nfgd(ia)
-                 sumr=zero; sumi=zero
-                 do klmn=1,lmn2_size  ! Loop over ij channels of this atom type.
-                   sumr=sumr+cpf(1,klmn,idat2,idat1,ia)*atom_wgylm(ic,klmn,ia)
-                   sumi=sumi+cpf(2,klmn,idat2,idat1,ia)*atom_wgylm(ic,klmn,ia)
-                 end do
-                 ! nhat12_atm is indexed by the local sphere point ic (not the
-                 ! global FFT index jc): it is only nfgd_max points wide.
-                 nhat12_atm(1,ic,isploop,idat2,idat1,ia)=nhat12_atm(1,ic,isploop,idat2,idat1,ia)+sumr
-                 nhat12_atm(2,ic,isploop,idat2,idat1,ia)=nhat12_atm(2,ic,isploop,idat2,idat1,ia)+sumi
+                 nhat12_atm(1,ic,isploop,idat2,idat1,ia)=nhat12_atm(1,ic,isploop,idat2,idat1,ia)+gemm_re(ic,idat2,idat1,ia)
+                 nhat12_atm(2,ic,isploop,idat2,idat1,ia)=nhat12_atm(2,ic,isploop,idat2,idat1,ia)+gemm_im(ic,idat2,idat1,ia)
                end do
              end do
            end do
@@ -1165,12 +1192,12 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
                  jc=atom_ifftsph(ic,ia)
                  sumr=zero; sumi=zero; sumr2=zero; sumi2=zero; sumr3=zero; sumi3=zero
                  do klmn=1,lmn2_size  ! Loop over ij channels of this atom type.
-                   sumr =sumr +cpf(1,klmn,idat2,idat1,ia)*atom_wgylmgr(1,ic,klmn,ia)
-                   sumr2=sumr2+cpf(1,klmn,idat2,idat1,ia)*atom_wgylmgr(2,ic,klmn,ia)
-                   sumr3=sumr3+cpf(1,klmn,idat2,idat1,ia)*atom_wgylmgr(3,ic,klmn,ia)
-                   sumi =sumi +cpf(2,klmn,idat2,idat1,ia)*atom_wgylmgr(1,ic,klmn,ia)
-                   sumi2=sumi2+cpf(2,klmn,idat2,idat1,ia)*atom_wgylmgr(2,ic,klmn,ia)
-                   sumi3=sumi3+cpf(2,klmn,idat2,idat1,ia)*atom_wgylmgr(3,ic,klmn,ia)
+                   sumr =sumr +cpf_re(klmn,idat2,idat1,ia)*atom_wgylmgr(1,ic,klmn,ia)
+                   sumr2=sumr2+cpf_re(klmn,idat2,idat1,ia)*atom_wgylmgr(2,ic,klmn,ia)
+                   sumr3=sumr3+cpf_re(klmn,idat2,idat1,ia)*atom_wgylmgr(3,ic,klmn,ia)
+                   sumi =sumi +cpf_im(klmn,idat2,idat1,ia)*atom_wgylmgr(1,ic,klmn,ia)
+                   sumi2=sumi2+cpf_im(klmn,idat2,idat1,ia)*atom_wgylmgr(2,ic,klmn,ia)
+                   sumi3=sumi3+cpf_im(klmn,idat2,idat1,ia)*atom_wgylmgr(3,ic,klmn,ia)
                  end do
                  grnhat_12(1,jc,isploop,1,iatom,idat2,idat1)=grnhat_12(1,jc,isploop,1,iatom,idat2,idat1)+sumr
                  grnhat_12(1,jc,isploop,2,iatom,idat2,idat1)=grnhat_12(1,jc,isploop,2,iatom,idat2,idat1)+sumr2
@@ -1185,7 +1212,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
        else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(3) &
-         !$OMP& MAP(to:grnhat_12,atom_wgylmgr,cpf,atom_ifftsph,atom_nfgd,nattyp)&
+         !$OMP& MAP(to:grnhat_12,atom_wgylmgr,cpf_re,cpf_im,atom_ifftsph,atom_nfgd,nattyp)&
          !$OMP& PRIVATE(idat1,idat2,sumr,sumi,sumr2,sumi2,sumr3,sumi3)
          do ia=1,nattyp(itypat)
            do idat1=1,ndat1
@@ -1200,12 +1227,12 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
                  do klmn=1,lmn2_size  ! Loop over ij channels of this atom type.
                    iatom=iatm+ia
                    jc=atom_ifftsph(ic,ia)
-                   sumr =sumr +cpf(1,klmn,idat2,idat1,ia)*atom_wgylmgr(1,ic,klmn,ia)
-                   sumr2=sumr2+cpf(1,klmn,idat2,idat1,ia)*atom_wgylmgr(2,ic,klmn,ia)
-                   sumr3=sumr3+cpf(1,klmn,idat2,idat1,ia)*atom_wgylmgr(3,ic,klmn,ia)
-                   sumi =sumi +cpf(2,klmn,idat2,idat1,ia)*atom_wgylmgr(1,ic,klmn,ia)
-                   sumi2=sumi2+cpf(2,klmn,idat2,idat1,ia)*atom_wgylmgr(2,ic,klmn,ia)
-                   sumi3=sumi3+cpf(2,klmn,idat2,idat1,ia)*atom_wgylmgr(3,ic,klmn,ia)
+                   sumr =sumr +cpf_re(klmn,idat2,idat1,ia)*atom_wgylmgr(1,ic,klmn,ia)
+                   sumr2=sumr2+cpf_re(klmn,idat2,idat1,ia)*atom_wgylmgr(2,ic,klmn,ia)
+                   sumr3=sumr3+cpf_re(klmn,idat2,idat1,ia)*atom_wgylmgr(3,ic,klmn,ia)
+                   sumi =sumi +cpf_im(klmn,idat2,idat1,ia)*atom_wgylmgr(1,ic,klmn,ia)
+                   sumi2=sumi2+cpf_im(klmn,idat2,idat1,ia)*atom_wgylmgr(2,ic,klmn,ia)
+                   sumi3=sumi3+cpf_im(klmn,idat2,idat1,ia)*atom_wgylmgr(3,ic,klmn,ia)
                  end do
                  grnhat_12(1,jc,isploop,1,iatom,idat2,idat1)=grnhat_12(1,jc,isploop,1,iatom,idat2,idat1)+sumr
                  grnhat_12(1,jc,isploop,2,iatom,idat2,idat1)=grnhat_12(1,jc,isploop,2,iatom,idat2,idat1)+sumr2
@@ -1412,9 +1439,15 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    ABI_FREE(atom_wgylmgr)
  end if
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(delete:cpf) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:cpf_re,cpf_im) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:gemm_re,gemm_im) IF(compute_nhat.and.gpu_option_==ABI_GPU_OPENMP)
 #endif
- ABI_FREE(cpf)
+ ABI_FREE(cpf_re)
+ ABI_FREE(cpf_im)
+ if (compute_nhat.and.gpu_option_==ABI_GPU_OPENMP) then
+   ABI_FREE(gemm_re)
+   ABI_FREE(gemm_im)
+ end if
  nullify(nhat12_atm)
  end do ! itypat
 
