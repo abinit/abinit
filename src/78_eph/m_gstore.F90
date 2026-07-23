@@ -155,12 +155,12 @@ module m_gstore
  use m_kg,             only : getph
  use m_crystal,        only : crystal_t
  use m_hdr,            only : hdr_type, fform_from_ext
- use m_matrix,         only : matr3inv
+ use m_matrix,         only : mati3inv, matr3inv
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars, &
                               kptrlatt_from_ngkpt
  use m_ebands,         only : ebands_t, gaps_t
  use m_lgroup,         only : lgroup_t
- use m_bz_mesh,        only : kmesh_t
+ use m_bz_mesh,        only : kmesh_t, isamek
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack
  use m_ifc,            only : ifc_type
  use m_phonons,        only : pheigvec_rotate
@@ -6745,36 +6745,31 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 !Local variables-------------------------------
 !scalars
  integer :: with_cplex, my_is, spin, my_ik, my_iq, ik_glob, iq_glob, units(2)
- integer :: ncid, spin_ncid, nprocs, my_rank, ncerr, this_state ! ierr,
- integer :: nb, nkbz, nkibz, nqbz, nqibz, nsym, itime_k, itime_kq ! ib, ik_bz,  ip,  itim, isym,
+ integer :: ncid, spin_ncid, nprocs, my_rank, ncerr, this_state, ierr
+ integer :: nb, nkbz, nkibz, nqbz, nqibz, nsym, itime_k, itime_kq
  integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
  integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3)
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
- integer :: isym_tot, trev_tot, tsign_tot, ik_base_glob
+ integer :: isym_tot, trev_tot, tsign_tot, ik_base_glob, ik_ibz_file
  integer :: timrev_k, isym_lg, itime_lg, isym_glob, itime_glob, iq_ibz_loc
- integer :: isym_combined, trev_combined, iq_computed_glob, isym_elec_combined
- integer :: isym_p, itime_p, ikq_ibz_p, isym_rp, itime_rp, trev_rp
- integer :: isym_k_inv, isym_gk, itime_gk, isym_kq_inv, isym_gkq, itime_gkq, isym_tot_inv
- integer :: indkk_kq(6, 1)
- real(dp) :: kk_base(3)
- real(dp) :: weight_qq, phase, q_base(3)
- integer :: idir, ipert, idir_eq, ipert_eq, mu, mu_eq, iq_base_glob, ii
- integer :: symrec_eq(3,3), l0(3)
+ integer :: isym_combined
+ real(dp) :: weight_qq, weight_qq_eq,phase, q_base(3)
+ integer :: idir, iat, idir_eq, iat_eq, mu, mu_eq, iq_base_glob, iq_sym
+ integer :: symrec_eq(3,3), l0(3), sm1(3,3)
  real(dp) :: L_gk(3), L_gkq(3)
  complex(dp) :: cphase, phase_gk, phase_gkq
  logical :: with_g2dw, q_is_gamma
  logical :: isirr_k, isirr_kq, isirr_q
- !logical :: is_selftest
  character(len=abi_slen) :: with_gmode, gtype, gvals_name
  character(len=5000) :: msg
  type(gstore_t) :: gstore
 !!arrays
- real(dp) :: qpt(3), kk_bz(3), kk_ibz(3), qq_ibz(3)
- !!real(dp),allocatable :: gwork_q(:,:,:,:,:)
  integer :: brange_k_spin(2, dtset%nsppol)
- integer,allocatable :: my_kqmap(:,:), state_kq(:,:) ! kmesh_map(:,:),
- real(dp),contiguous,pointer :: gkq_rot_ptr(:,:,:,:), gkq_base_ptr(:,:,:,:)
- complex(dp),target,allocatable :: gkq_rot(:,:,:), gkq_base(:,:,:)
+ integer,allocatable :: state_kq(:,:), qbz2ibz(:,:), kibz2bz(:) !, qibz2bz(:), qglob2bz(:,:), ! kmesh_map(:,:), my_kqmap(:,:),
+ real(dp) :: kk_bz(3), kk_ibz(3), qq_ibz(3), qpt(3), qq_eq(3), qpt_tmp(3), tnon(3)
+ real(dp),allocatable :: qbz(:,:)
+ real(dp),contiguous,pointer :: gkq_rot_ptr(:,:,:,:,:), gkq_base_ptr(:,:,:,:,:)
+ complex(dp),target,allocatable :: gkq_rot(:,:,:,:), gkq_base(:,:,:,:)
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -6807,7 +6802,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  end if
 
  ABI_CHECK_IEQ(gstore%has_used_lgq, 0, "Symmetrization of g(k,q) with use_lgq /= 0 is not coded")
- !ABI_CHECK_IEQ(gstore%has_used_lgk, 1, "Symmetrization of g(k,q) with use_lgk /= 1 is not coded")
+ ABI_CHECK_IEQ(gstore%has_used_lgk, 0, "Symmetrization of g(k,q) with use_lgk /= 0 is not coded")
 
  ! Useful dimensions.
  nkbz = gstore%nkbz; nkibz = gstore%nkibz
@@ -6815,6 +6810,13 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  nsym = cryst%nsym
 
  !timrev_k = kpts_timrev_from_kptopt(ebands%kptopt)
+
+ call get_ibz2bz(gstore%nkibz, gstore%nkbz, gstore%kbz2ibz, kibz2bz, msg, ierr)
+ ABI_CHECK(ierr == 0, sjoin("Something wrong in symmetry tables for k-points", ch10, msg))
+
+ !call get_ibz2bz(gstore%nqibz, gstore%nqbz, qbz2ibz, qibz2bz, msg, ierr)
+ !ABI_CHECK(ierr == 0, sjoin("Something wrong in symmetry tables for q-points!", ch10, msg))
+ !ABI_FREE(qibz2bz)
 
  NCF_CHECK(nctk_open_modify(ncid, gstore_path, xmpi_comm_self))
 
@@ -6824,9 +6826,6 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
    associate (gqk => gstore%gqk(my_is))
    nb = gqk%nb_k
 
-   ABI_MALLOC(gkq_base, (nb, nb, gqk%natom3))
-   ABI_MALLOC(gkq_rot, (nb, nb, gqk%natom3))
-
    ! Get the group id for this spin.
    NCF_CHECK(nf90_inq_ncid(ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
 
@@ -6835,114 +6834,141 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
    ncerr = nf90_get_var(ncid, nctk_idname(ncid, "gstore_glob_state_kqs"), state_kq, start=[1,1,spin])
    NCF_CHECK(ncerr)
 
-   ! Loop over q-points in the BZ.
+   ABI_MALLOC(gkq_base, (nb, nb, gqk%natom3, gqk%my_nq))
+   ABI_MALLOC(gkq_rot, (nb, nb, gqk%natom3, gqk%my_nq))
+
+   ! Build q-points in the BZ.
+   ABI_MALLOC(qbz, (3, gqk%my_nq))
    do my_iq=1, gqk%my_nq
-     iq_glob = my_iq + gqk%my_qstart - 1
-     call gqk%myqpt(my_iq, gstore, weight_qq, qpt); q_is_gamma = sum(qpt**2) < tol14
+     call gqk%myqpt(my_iq, gstore, weight_qq, qbz(:,my_iq))
+   end do
 
-     ! Symmetry tables for q-points.
-     ! AGENT: NB: Using symrec convention for q.
-     iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
-     trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
-     isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
-     tsign_q = 1; if (trev_q == 1) tsign_q = -1
-     qq_ibz = gstore%qibz(:, iq_ibz)
+   ! Loop over k-points in the IBZ.
+   do my_ik=1,gqk%my_nk
+     ik_glob = my_ik + gqk%my_kstart - 1
+     kk_bz = gqk%my_kpts(:, my_ik)
 
-     !gqk%my_q2glob(my_iq)
+     if (state_kq(ik_glob, 1) == GSTORE_KQ_COMPUTED) then
+       ABI_CHECK(all(state_kq(ik_glob, :) == GSTORE_KQ_COMPUTED), "all state")
+       !print *, "my_ik", my_ik, "has been computed and won't be reconstructed"
+       cycle
+     end if
 
-     ! Find k + q in the IBZ for all my k-points.
-     ! AGENT: NB: Using symrel^T convention for k+q.
-     !ABI_MALLOC(my_kqmap, (6, gqk%my_nk))
-     !if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, my_kqmap, qpt=qpt) /= 0) then
-     !  ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qpt)))
-     !end if
+     ! Symmetry tables for k-point. Using symrel^T convention for k..
+     ik_ibz = gqk%my_k2ibz(1, my_ik); isym_k = gqk%my_k2ibz(2, my_ik)
+     trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5, my_ik)
+     isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+     tsign_k = 1; if (trev_k == 1) tsign_k = -1
+     itime_k = trev_k + 1
+     kk_ibz = ebands%kptns(:,ik_ibz)
 
-     ! Read q-slice of the e-ph matrix elements
+     ! Index of the ibz k-point on disk.
+     ik_ibz_file = kibz2bz(ik_ibz)
+
+     symrec_eq = transpose(cryst%symrel(:,:,isym_k))
+     ABI_CHECK(isamek(kk_bz, matmul(symrec_eq, kk_ibz), g0_q), "kk_bz != symrec_eq kk_ibz")
+
+     ! Compute sm1 = symrec_eq^{-1}
+     call mati3inv(symrec_eq, sm1); sm1 = transpose(sm1)
+
+     do isym_combined=1,nsym
+       !if (all(cryst%symrec(:,:,isym_combined) == symrec_eq)) exit
+       if (all(cryst%symrec(:,:,isym_combined) == sm1)) exit
+     end do
+     ABI_CHECK(isym_combined /= nsym + 1, "Cannot find symrec_eq")
+
      ! TODO: Remember to handle GWPT STORE
+     ! Read g(k_ibz, q) for all q-point in the BZ.
      gvals_name = "gvals"
+     call c_f_pointer(c_loc(gkq_base), gkq_base_ptr, [2, nb, nb, gqk%natom3, gqk%my_nq])
+     ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gkq_base_ptr, &
+                          start=[1, 1, 1, 1, ik_ibz_file, 1], &
+                          count=[2, nb, nb, gqk%natom3, 1, gqk%my_nq])
+     NCF_CHECK(ncerr)
 
-     ! Loop over k-points in the IBZ.
-     do my_ik=1,gqk%my_nk
-       ik_glob = my_ik + gqk%my_kstart - 1
-       kk_bz = gqk%my_kpts(:, my_ik)
+     ! Loop over q-points in the BZ.
+     do my_iq=1, gqk%my_nq
+       iq_glob = my_iq + gqk%my_qstart - 1
+       this_state = state_kq(ik_glob, iq_glob)
+       ABI_CHECK_IEQ(this_state, GSTORE_KQ_MISSING, "wrong state for (k, q) entry!")
 
-       this_state = state_kq(ik_glob, iq_glob); if (this_state == GSTORE_KQ_COMPUTED) cycle
+       ! Symmetry tables for q-point. NB: Using symrec convention for q.
+       !iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
+       !trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
+       !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
+       !tsign_q = 1; if (trev_q == 1) tsign_q = -1
+       !qq_ibz = gstore%qibz(:, iq_ibz)
+       qpt = qbz(:, my_iq)
 
-       ! AGENT: Using symrel^T convention for k.
-       ik_ibz = gqk%my_k2ibz(1, my_ik); isym_k = gqk%my_k2ibz(2, my_ik)
-       trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5, my_ik)
-       isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
-       tsign_k = 1; if (trev_k == 1) tsign_k = -1
-       itime_k = trev_k + 1
-       kk_ibz = ebands%kptns(:,ik_ibz)
-
-       ! AGENT: Using symrel^t convention for k+q.
-       !ikq_ibz = my_kqmap(1, my_ik); isym_kq = my_kqmap(2, my_ik)
-       !trev_kq = my_kqmap(6, my_ik); g0_kq = my_kqmap(3:5, my_ik)
-       !isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
-       !tsign_kq = 1; if (trev_kq == 1) tsign_kq = -1
-       !itime_kq = trev_kq + 1
-
-       ! NB: Using symrel^T convention for k+q
-       !if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kk_base + q_base, indkk_kq) /= 0) then
-       !  ABI_ERROR("Cannot map k0+q0 to IBZ")
-       !end if
-       !ikq_ibz_p = indkk_kq(1, 1); isym_p = indkk_kq(2, 1); itime_p = indkk_kq(6, 1) + 1
-
-       ! Read g(k_base, q_base)
-
-       call c_f_pointer(c_loc(gkq_base), gkq_base_ptr, [2, nb, nb, gqk%natom3])
-       ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gkq_base_ptr, &
-                            start=[1, 1, 1, 1, ik_glob, iq_glob], &
-                            count=[2, nb, nb, gqk%natom3, 1, 1])
-       NCF_CHECK(ncerr)
-       !if (trev_combined == 1) gkq_base = conjg(gkq_base)
+       ! Find q
+       do iq_sym=1, gqk%my_nq
+         ! qpt = qpt_tmp + G0_q
+         qpt_tmp = matmul(symrec_eq, qbz(:, iq_sym))
+         if (isamek(qpt, qpt_tmp, g0_q)) exit
+       end do
+       ABI_CHECK(iq_sym /= gqk%my_nq + 1, sjoin("Cannot find:", ktoa(qpt)))
 
        ! Perform symmetrization.
-       isym_combined = 1
-       symrec_eq = cryst%symrec(:,:,isym_combined)
-
-       gkq_rot = zero
+       gkq_rot(:,:,:,iq_glob) = zero
        do mu=1,gqk%natom3
-         idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
-         l0 = cryst%indsym(1:3, isym_combined, ipert)
-         phase = -two_pi * sum(gstore%qbz(:, iq_computed_glob) * l0)
+         idir = mod(mu-1, 3) + 1; iat = (mu - idir) / 3 + 1
+
+         !isym_combined = isym_k
+         iat_eq = cryst%indsym(4, isym_combined, iat)
+         l0 = cryst%indsym(1:3, isym_combined, iat)
+         tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym_combined))
+         phase = -two_pi * dot_product(qpt_tmp, l0)
          cphase = cmplx(cos(phase), sin(phase), dp)
+         !cphase = one
+
+         !if (any(g0_q /= 0)) cycle
+         !if (any(abs(tnon) > tol16)) cycle
 
          do idir_eq=1,3
            !if (symrec_eq(idir, idir_eq) == 0) cycle
-           mu_eq = idir_eq + (ipert_eq - 1) * 3
+           mu_eq = idir_eq + (iat_eq - 1) * 3
            ! accumulate the rotated atomic potential matrix
-           !gkq_rot(:,:,mu) = gkq_rot(:,:,mu) + real(symrec_eq(idir, idir_eq), dp) * cphase * &
-           !                  matmul(matmul(dmat_star_kq, gkq_base(:,:,mu_eq)), dmat_k)
+           !gkq_rot(:,:,mu,iq_glob) = gkq_rot(:,:,mu,iq_glob) + &
+           !  cphase * symrec_eq(idir, idir_eq) * gkq_base(:,:,mu_eq,iq_sym)
+
+           !gkq_rot(:,:,mu,iq_glob) = gkq_rot(:,:,mu,iq_glob) + &
+           !  cphase * symrec_eq(idir_eq, idir) * gkq_base(:,:,mu_eq,iq_sym)
+
+           gkq_rot(:,:,mu,iq_glob) = gkq_rot(:,:,mu,iq_glob) + &
+             cphase * sm1(idir, idir_eq) * gkq_base(:,:,mu_eq,iq_sym)
+
+           !gkq_rot(:,:,mu,iq_glob) = gkq_rot(:,:,mu,iq_glob) + &
+           !  cphase * sm1(idir_eq, idir) * gkq_base(:,:,mu_eq,iq_sym)
          end do
        end do
 
-       ! Write the newly computed g_{mn, nu} back to the netcdf file (in-place modification).
-       ! and update the entry in state_kq.
-       call c_f_pointer(c_loc(gkq_rot), gkq_rot_ptr, [2, nb, nb, gqk%natom3])
-       ncerr = nf90_put_var(spin_ncid, spin_vid(gvals_name), gkq_rot_ptr, &
-                            start=[1, 1, 1, 1, ik_glob, iq_glob], &
-                            count=[2, nb, nb, gqk%natom3, 1, 1])
-       NCF_CHECK(ncerr)
-       state_kq(ik_glob, iq_glob) = GSTORE_KQ_SYMMETRIZED
-     end do ! my_ik
+     end do ! my_iq
 
-     !ABI_FREE(my_kqmap)
-   end do ! my_iq
-
+     ! Write the newly computed g_{mn, nu} back to the netcdf file (in-place modification).
+     ! and update the entry in state_kq.
+     call c_f_pointer(c_loc(gkq_rot), gkq_rot_ptr, [2, nb, nb, gqk%natom3, gqk%my_nq])
+     ncerr = nf90_put_var(spin_ncid, spin_vid(gvals_name), gkq_rot_ptr, &
+                          start=[1, 1, 1, 1, ik_glob, 1], &
+                          count=[2, nb, nb, gqk%natom3, 1, gqk%my_nq])
+     NCF_CHECK(ncerr)
+     state_kq(ik_glob, :) = GSTORE_KQ_SYMMETRIZED
+   end do ! my_ik
    end associate
 
    ! Update state_kq for this spin.
    ncerr = nf90_put_var(ncid, vid("gstore_glob_state_kqs"), state_kq, start=[1,1,spin])
    NCF_CHECK(ncerr)
 
+   ABI_FREE(qbz)
    ABI_FREE(gkq_base)
    ABI_FREE(gkq_rot)
    ABI_FREE(state_kq)
  end do ! my_is
 
  NCF_CHECK(nf90_close(ncid))
+
+
+ ABI_FREE(kibz2bz)
  call gstore%free()
 
  100 call xmpi_barrier(comm)

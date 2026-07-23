@@ -118,6 +118,9 @@ module m_crystal
   integer,allocatable :: indsym(:,:,:)
   ! indsym(4,nsym,natom)
   ! indirect indexing array for atoms, see symatm.F90.
+  ! $ R^{-1} (xred(:,iat)-\tau) = xred(:,iat_sym) + R_0 $
+  ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
+  ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
 
   integer,allocatable :: symafm(:)
   ! symafm(nsym)
