@@ -407,15 +407,9 @@ Add a new tag [[dmft_solv]]=10 that allows to take into account the imaginary pa
 Add a test [[test:paral_119]] for the abinit QMC solver when [[dmft_solv]]=10. 
 See also the input variable [[dmft_hybri_limit]].
 
-Also restored the dmft_full_chipsi input variable TO BE DOCUMENTED AND TESTED to generate or not the wannier functions in the DMFT loop.
+Also restored the dmft_full_chipsi input variable TO BE TESTED to generate or not the wannier functions in the DMFT loop.
 
 Add the input variable [[dmftcheck]], see e.g. [[test:v6_07]].
-
-Other new input variables, NOT TESTED, NOT DOCUMENTED : dmft_triqs_epsilon, dmft_triqs_leg_measure, dmft_triqs_nleg,
-dmft_triqs_seed_a, dmft_triqs_seed_b, dmft_triqs_therm_restart, dmft_triqs_wmax.
-
-Other new input variables, NOT TESTED, NOT DOCUMENTED, and likely incorrect : dmft_epsilon_yukawa and dmft_lambda_yukawa.
-They are likely incorrect because similar input variables dmft_yukawa_epsilon and dmft_yukawa_lambda exist !
 
 By F. Gendron. (MR1304, 1311)
 
