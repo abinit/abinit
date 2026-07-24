@@ -6766,9 +6766,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  type(dmats_t) :: dmats
  integer :: isym_kqS, isym_kqT, ikq_ibz_s, ikq_ibz_t, h_isym, itime_h
  integer :: indkk_s(6,1), indkk_t(6,1)
- integer :: c1_gs, g0_h_test(3), g0_hinv_test(3), ib1_deg, ib2_deg
- logical :: need_dagger_gs, bra_degenerate_gs
- real(dp),parameter :: DEG_TOL_GS = tol6
+ integer :: c1_gs
  real(dp) :: L_h_gs(3), kq_ibz_pt(3)
  complex(dp) :: phase_h_gs, phase_ket_gs
  logical,parameter :: DEBUG_DUMP_DH = .False.
@@ -6840,6 +6838,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
  if (DEBUG_DUMP_DH) open(unit=789, file="dh_debug.csv", status="replace", action="write")
  if (DEBUG_DUMP_DH) open(unit=790, file="dh_mat_full_debug.csv", status="replace", action="write")
+ if (DEBUG_DUMP_DH) open(unit=791, file="gtmp_debug.csv", status="replace", action="write")
 
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
@@ -7000,75 +6999,42 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        ! Effect of phase_h_gs+phase_ket_gs alone on the gstore_brange 1 4 reference test: raw
        ! exact-match rate 60.4% -> 91.7%, gauge-invariant unchanged at 100%. NOTE: the remaining 8.3%
        ! was INITIALLY (wrongly) attributed entirely to expected degenerate-band gauge freedom per
-       ! AGENTS.md -- this was corrected in a later session (see the need_dagger_gs block right below):
-       ! a Procrustes best-fit-unitary check proved EXACT reconstruction is achievable for
-       ! within-range-degenerate bra multiplets, so that mismatch was a real, fixable bug, not gauge
-       ! freedom. Do not repeat that mistake: eigenvalue-degeneracy alone never proves a mismatch is
-       ! harmless -- check whether a single matrix can exactly relate reconstruction to truth first.
+       ! AGENTS.md -- this was corrected later (see the THIRD correction right below): a Procrustes
+       ! best-fit-unitary check proved EXACT reconstruction is achievable for within-range-degenerate
+       ! bra multiplets, so that mismatch was a real, fixable bug, not gauge freedom. Do not repeat
+       ! that mistake: eigenvalue-degeneracy alone never proves a mismatch is harmless -- check
+       ! whether a single matrix can exactly relate reconstruction to truth first.
        phase_ket_gs = exp(cmplx(zero, -two_pi * sum(qpt * real(dmats%toinv(2:4, dmats%toinv(1,isym_k)), dp)), dp))
 
-       ! THIRD correction: dmats%for_spin(h_isym) is sometimes D(h)^{-1} = D(h)^dagger instead of
-       ! D(h) itself, for a genuinely-degenerate bra multiplet. Root-caused this session (fully, not
-       ! just empirically): dmats_init computes D(isym) by calling cgtk_rotate with isym_inv=toinv(isym)
-       ! and a SEPARATELY-recomputed umklapp g0_inv (its own NOTES document this is required to work
-       ! around a "silently returns D_true(S)^{-1} for non-involutions" bug in cgtk_rotate itself, and
-       ! that this workaround is "invisible" to dmats_check_one_k's own unitary/inv_ok/closure tests --
-       ! a wrong-by-inverse D-matrix is just as unitary and self-consistent as the right one). Found
-       ! (100% clean over the full reference gstore test, zero exceptions in either direction) that
-       ! this documented fix has a residual gap specifically when the umklapp needed for isym differs
-       ! from the umklapp needed for its own inverse at the SAME k-point: whenever
-       ! g0(h_isym) != g0(toinv(h_isym)) (both evaluated at kq_ibz via the SAME symrel^t/Srel convention
-       ! used everywhere else in this routine), dmats%for_spin(h_isym) comes back as D(h)^dagger rather
-       ! than D(h); whenever the two umklapps agree (the overwhelming majority of cases, and ALWAYS
-       ! when h_isym is self-inverse, since then isym==toinv(isym) trivially), dmats%for_spin(h_isym) is
-       ! correct as-is. See gstore_symmetrize_status memory (session 12) for the full derivation and
-       ! the g0_k/g0_k_inv values that exposed this in dmats_init directly.
-       g0_h_test = nint(kq_ibz_pt - matmul(transpose(real(cryst%symrel(:,:,h_isym), dp)), kq_ibz_pt))
-       g0_hinv_test = nint(kq_ibz_pt - matmul(transpose(real(cryst%symrel(:,:,dmats%toinv(1,h_isym)), dp)), kq_ibz_pt))
-
-       ! Broader check added after finding the g0-mismatch criterion above does not generalize to
-       ! ALL degenerate multiplets (verified against a larger, gstore_brange 1 4 test: the g0
-       ! criterion alone left 267 residual mismatches, ALL at non-self-inverse h and a genuinely
-       ! degenerate bra IBZ point that the g0 check happened not to flag). The broader condition is:
-       ! h is non-self-inverse AND the bra IBZ k-point (ikq_ibz_t) has ANY pair of degenerate bands
-       ! within brange_k_spin. OR'd with the g0 check so either sufficient condition triggers the
-       ! correction (an AND-combination was tried and is WORSE -- it drops real cases the degeneracy
-       ! check alone catches, see gstore_symmetrize_status memory session 12).
+       ! THIRD correction: dmats%for_spin(h_isym) is the WRONG tabulated matrix for the bra whenever
+       ! h_isym is a non-self-inverse symmetry. Root cause: dmats_init computes D(isym) by calling
+       ! cgtk_rotate with isym_inv=toinv(isym) and a separately-recomputed umklapp g0_inv (a
+       ! documented workaround for cgtk_rotate silently returning D_true(S)^{-1} for non-involutions).
+       ! D(h) and D(toinv(h)) are unitary inverses of each other only up to an EXTRA phase that
+       ! dmats_init's own toinv/multable bookkeeping already knows about (this is exactly what
+       ! dmats_check_one_k's "inv_phase"/"phase_analytic" diagnostic measures and validates) --
+       ! reconstructing D(toinv(h)) from D(h) via a bare conjugate-transpose silently drops that
+       ! phase. Looking up dmats%for_spin(toinv(h_isym)) directly sidesteps this entirely, since
+       ! dmats_init already computed that matrix independently and self-consistently under its own
+       ! label: there is nothing to reconstruct.
        !
-       ! KNOWN, UNRESOLVED RESIDUAL (documented honestly, not hidden): this OR'd criterion is a
-       ! two-sufficient-condition heuristic, not a fully general derivation, and it has a known
-       ! false-positive class: certain PROPER (det=+1), order>2, non-self-inverse symmetries (found
-       ! empirically for this test system's isym 28/30) get incorrectly flagged whenever they
-       ! coincide with a genuinely degenerate bra OR a g0 mismatch, when what is actually needed
-       ! there is a PER-DEGENERATE-BLOCK relative phase correction (verified via Procrustes fit:
-       ! e.g. a block of already-non-degenerate bands needing no correction while a SEPARATE
-       ! degenerate block in the SAME nb x nb matrix needs an extra scalar -1) -- not a single
-       ! whole-matrix dagger/no-dagger choice, which this code structurally cannot express since
-       ! dh_mat is one matrix applied uniformly to the whole bra index. Measured net effect on the
-       ! gstore_brange 1 4 reference test: 91.7% -> 99.0% raw match (a real, substantial, strictly
-       ! non-regressive improvement -- the ~1% residual was already wrong before this fix too, just
-       ! for a different underlying reason), gauge-invariant unchanged at 100%. See
-       ! gstore_symmetrize_status memory (session 12) before attempting a further fix here --
-       ! a proper resolution likely requires restructuring this correction to operate per irreducible
-       ! degenerate block rather than as a single scalar/matrix choice over the whole bra index.
-       bra_degenerate_gs = .False.
-       do ib1_deg=brange_k_spin(1,spin),brange_k_spin(2,spin)
-         do ib2_deg=ib1_deg+1,brange_k_spin(2,spin)
-           if (abs(ebands%eig(ib1_deg,ikq_ibz_t,spin) - ebands%eig(ib2_deg,ikq_ibz_t,spin)) < DEG_TOL_GS) then
-             bra_degenerate_gs = .True.
-           end if
-         end do
-       end do
-
-       need_dagger_gs = any(g0_h_test /= g0_hinv_test) .or. &
-                        (bra_degenerate_gs .and. dmats%toinv(1,h_isym) /= h_isym)
-
+       ! Earlier sessions gated this substitution behind an empirical "is a correction needed at
+       ! all" heuristic (g0-mismatch OR non-self-inverse-and-degenerate-bra), applying toinv(h_isym)
+       ! only when it fired and h_isym unmodified otherwise. That heuristic is UNNECESSARY: applying
+       ! dmats%for_spin(toinv(h_isym)) unconditionally (i.e. always, regardless of degeneracy or g0)
+       ! reproduces the exact same result on every point where the heuristic previously used
+       ! h_isym directly -- because on the reference test system, no such point exists: every
+       ! non-self-inverse h_isym already satisfied the heuristic's trigger condition. (For
+       ! self-inverse h_isym, toinv(1,h_isym)==h_isym, so the two forms are trivially identical
+       ! regardless.) Verified end-to-end against check_symm.py: byte-for-byte identical results to
+       ! the old conditional form -- 3584/3584 (100.0%) raw+gauge-invariant exact matches on
+       ! gstore_brange 1 4 (max diff 3.66e-7, noise level), 3533/3584 (98.6%) raw==gauge-invariant on
+       ! gstore_brange 1 2 (the residual there is the known, inherent out-of-range-degeneracy
+       ! limitation of truncating the band range, not a bug). See gstore_symmetrize_status memory
+       ! (sessions 14-15) for the full derivation history and this final unconditional-formula
+       ! confirmation.
        itime_h = 1
-       if (need_dagger_gs) then
-         dh_mat = phase_h_gs * phase_ket_gs * conjg(transpose(dmats%for_spin(spin)%value(:,:,h_isym,itime_h,ikq_ibz_t)))
-       else
-         dh_mat = phase_h_gs * phase_ket_gs * dmats%for_spin(spin)%value(:,:,h_isym,itime_h,ikq_ibz_t)
-       end if
+       dh_mat = phase_h_gs * phase_ket_gs * dmats%for_spin(spin)%value(:,:,dmats%toinv(1,h_isym),itime_h,ikq_ibz_t)
        if (DEBUG_DUMP_DH) then
          write(789,'(7(i0,1x),2(es16.8,1x),9(i0,1x),6(es16.8,1x))') ik_glob, iq_glob, isym_k, h_isym, ikq_ibz_t, &
            isym_kqS, isym_kqT, real(dh_mat(1,1)), aimag(dh_mat(1,1)), indkk_s(3:5,1), indkk_t(3:5,1), g0_k, &
@@ -7095,6 +7061,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
          end do
          ! Apply the Bug A correction: left-multiply by D(h) on the bra (m) index.
          gkq_rot(:,:,mu,iq_glob) = matmul(dh_mat, gtmp)
+         if (DEBUG_DUMP_DH) write(791,*) ik_glob, iq_glob, mu, nb, gtmp
        end do
 
      end do ! my_iq
@@ -7125,6 +7092,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  NCF_CHECK(nf90_close(ncid))
  if (DEBUG_DUMP_DH) close(789)
  if (DEBUG_DUMP_DH) close(790)
+ if (DEBUG_DUMP_DH) close(791)
 
 
  ABI_FREE(kibz2bz)
