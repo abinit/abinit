@@ -6755,7 +6755,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  integer :: isym_combined
  real(dp) :: weight_qq, weight_qq_eq,phase, q_base(3)
  integer :: idir, iat, idir_eq, iat_eq, mu, mu_eq, iq_base_glob, iq_sym
- integer :: symrec_eq(3,3), l0(3), mat_tmp(3,3)
+ integer :: symrec_eq(3,3), symrec_eq_kspace(3,3), l0(3), mat_tmp(3,3)
  real(dp) :: L_gk(3), L_gkq(3)
  complex(dp) :: cphase, phase_gk, phase_gkq
  logical :: with_g2dw, q_is_gamma
@@ -6765,6 +6765,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  type(gstore_t) :: gstore
  type(dmats_t) :: dmats
  integer :: isym_kqS, isym_kqT, ikq_ibz_s, ikq_ibz_t, h_isym, itime_h
+ integer :: trev_kqS, trev_kqT
  integer :: indkk_s(6,1), indkk_t(6,1)
  integer :: c1_gs
  real(dp) :: L_h_gs(3), kq_ibz_pt(3)
@@ -6887,8 +6888,16 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
      ! Index of the ibz k-point on disk.
      ik_ibz_file = kibz2bz(ik_ibz)
 
+     ! symrec_eq is the PURELY SPATIAL rotation (used for atomic-perturbation-direction
+     ! bookkeeping below, which is TR-blind: time reversal does not move atoms, and for a real
+     ! local potential Theta.V(r).Theta^{-1} = V(r)). symrec_eq_kspace additionally carries the
+     ! TR sign and is the one that actually relates k-space vectors (kk_bz, q) to their IBZ
+     ! images -- same tsign_k-weighted formula already used elsewhere in this file for exactly
+     ! this purpose (see gqk%my_kpts(:,my_ik) construction earlier in this module, and the
+     ! analogous tsign_q-weighted q formula).
      symrec_eq = transpose(cryst%symrel(:,:,isym_k))
-     ABI_CHECK(isamek(kk_bz, matmul(symrec_eq, kk_ibz), g0_q), "kk_bz != symrec_eq kk_ibz")
+     symrec_eq_kspace = tsign_k * symrec_eq
+     ABI_CHECK(isamek(kk_bz, matmul(symrec_eq_kspace, kk_ibz), g0_q), "kk_bz != symrec_eq_kspace kk_ibz")
 
      do isym_combined=1,nsym
        if (all(cryst%symrec(:,:,isym_combined) == symrec_eq)) exit
@@ -6918,10 +6927,11 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        !qq_ibz = gstore%qibz(:, iq_ibz)
        qpt = qbz(:, my_iq)
 
-       ! Find q
+       ! Find q. Uses symrec_eq_kspace (not symrec_eq): q, like k, is a genuine k-space vector
+       ! that picks up the TR sign under the same combined operation mapping kk_ibz -> kk_bz.
        do iq_sym=1, gqk%my_nq
          ! qpt = qpt_tmp + G0_q
-         qpt_tmp = matmul(symrec_eq, qbz(:, iq_sym))
+         qpt_tmp = matmul(symrec_eq_kspace, qbz(:, iq_sym))
          if (isamek(qpt, qpt_tmp, g0_q)) exit
        end do
        ABI_CHECK(iq_sym /= gqk%my_nq + 1, sjoin("Cannot find:", ktoa(qpt)))
@@ -6944,7 +6954,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        ABI_CHECK(ierr == 0, "Cannot find symmetric image of k+q (target)")
        ikq_ibz_s = indkk_s(1,1); isym_kqS = indkk_s(2,1)
        ikq_ibz_t = indkk_t(1,1); isym_kqT = indkk_t(2,1)
-       ABI_CHECK(indkk_s(6,1) == 0 .and. indkk_t(6,1) == 0, "Time-reversal for k+q not coded in gstore_symmetrize")
+       trev_kqS = indkk_s(6,1); trev_kqT = indkk_t(6,1)
        ABI_CHECK(ikq_ibz_s == ikq_ibz_t, "Source and target k+q map to different IBZ points!")
 
        ! mat_tmp = Srel(toinv(isym_kqT)) . Srel(isym_k) . Srel(isym_kqS), with Srel(S) := symrel(S)^T
@@ -7033,13 +7043,41 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        ! limitation of truncating the band range, not a bug). See gstore_symmetrize_status memory
        ! (sessions 14-15) for the full derivation history and this final unconditional-formula
        ! confirmation.
-       itime_h = 1
-       dh_mat = phase_h_gs * phase_ket_gs * dmats%for_spin(spin)%value(:,:,dmats%toinv(1,h_isym),itime_h,ikq_ibz_t)
+       ! TIME-REVERSAL generalization of itime_h (was hardcoded to 1, i.e. always the pure-spatial
+       ! D-matrix slice). The unitary/antiunitary character of a composed operator is a Z2
+       ! homomorphism (same rule dmats_check_one_k's group-multiplication test uses:
+       ! itime3 = 1 + mod((itime1-1)+(itime2-1), 2), Bradley & Cracknell sec. 7.3), extended here
+       ! by associativity to h's three-fold composition toinv(isym_kqT).isym_k.isym_kqS
+       ! (itime(A^{-1}) = itime(A), so toinv(isym_kqT) contributes trev_kqT unchanged). High
+       ! confidence, not yet empirically validated on a TR-nonzero system.
+       itime_h = 1 + mod(trev_k + trev_kqS + trev_kqT, 2)
+
+       ! HYPOTHESIS (open question, validate empirically -- see gstore_symmetrize_status memory):
+       ! phase_h_gs's lattice-vector phase is built from dmats%multable/toinv, which are
+       ! itime-independent by construction, so its formula should carry over unchanged. But the
+       ! closest validated analogue, dmats_get_star_dmats (m_classify_bands.F90), needs an EXTRA
+       ! conjugation on its own analogous phase whenever itime==2. Applying the same pattern here
+       ! as a first hypothesis; h's composition shape differs from that routine's, so this is not
+       ! a proof, only a well-motivated starting point.
+       if (itime_h == 2) then
+         dh_mat = conjg(phase_h_gs) * phase_ket_gs * dmats%for_spin(spin)%value(:,:,dmats%toinv(1,h_isym),itime_h,ikq_ibz_t)
+       else
+         dh_mat = phase_h_gs * phase_ket_gs * dmats%for_spin(spin)%value(:,:,dmats%toinv(1,h_isym),itime_h,ikq_ibz_t)
+       end if
+
+       ! HYPOTHESIS (open question, validate empirically): pulling D(h) through the outer operator
+       ! that maps ikq_ibz -> kq_bz_target picks up a conjugate exactly when that operator
+       ! (governed by isym_kqT/trev_kqT) is antiunitary -- a flag logically independent of trev_k
+       ! (see 2.4's gtmp conjugation below) and of itime_h (which only selects WHICH tabulated
+       ! matrix to read, not whether the whole assembled dh_mat needs conjugating on top).
+       if (trev_kqT == 1) dh_mat = conjg(dh_mat)
+
        if (DEBUG_DUMP_DH) then
          write(789,'(7(i0,1x),2(es16.8,1x),9(i0,1x),6(es16.8,1x))') ik_glob, iq_glob, isym_k, h_isym, ikq_ibz_t, &
            isym_kqS, isym_kqT, real(dh_mat(1,1)), aimag(dh_mat(1,1)), indkk_s(3:5,1), indkk_t(3:5,1), g0_k, &
            qpt, kk_ibz
          write(790,*) ik_glob, iq_glob, nb, isym_k, h_isym, ikq_ibz_t, isym_kqS, isym_kqT, g0_q, &
+           trev_k, trev_kqS, trev_kqT, itime_h, &
            real(phase_h_gs), aimag(phase_h_gs), real(phase_ket_gs), aimag(phase_ket_gs), &
            dmats%for_spin(spin)%value(:,:,h_isym,itime_h,ikq_ibz_t)
        end if
@@ -7059,9 +7097,15 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
            mu_eq = idir_eq + (iat_eq - 1) * 3
            gtmp = gtmp + cphase * symrec_eq(idir, idir_eq) * gkq_base(:,:,mu_eq,iq_sym)
          end do
+         ! HYPOTHESIS (open question, validate empirically): conjugate gtmp before the dh_mat
+         ! multiply whenever the ket leg's own operation (isym_k, trev_k) is antiunitary. Matches
+         ! the "rotate spatially first, conjugate as the last step" pattern used identically by
+         ! cgtk_rotate, pheigvec_rotate, rotate_fqg and dmats_init elsewhere in this codebase.
+         ! Order matters: conjugate gtmp itself, not matmul(dh_mat,gtmp), since dh_mat is complex.
+         if (trev_k == 1) gtmp = conjg(gtmp)
          ! Apply the Bug A correction: left-multiply by D(h) on the bra (m) index.
          gkq_rot(:,:,mu,iq_glob) = matmul(dh_mat, gtmp)
-         if (DEBUG_DUMP_DH) write(791,*) ik_glob, iq_glob, mu, nb, gtmp
+         if (DEBUG_DUMP_DH) write(791,*) ik_glob, iq_glob, mu, nb, trev_k, gtmp
        end do
 
      end do ! my_iq
