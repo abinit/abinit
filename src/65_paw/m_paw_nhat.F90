@@ -720,6 +720,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  real(dp),allocatable :: work(:,:), qijl(:,:),projs1(:,:,:),projs2(:,:,:),gnt_scal(:,:)
  real(dp),allocatable, target :: cpf_re(:,:,:,:),cpf_im(:,:,:,:)
  real(dp),allocatable, target :: gemm_re(:,:,:,:),gemm_im(:,:,:,:)
+ real(dp),allocatable, target :: gemm_gr_re(:,:,:,:,:),gemm_gr_im(:,:,:,:,:)
  real(dp),allocatable :: atom_wgylm(:,:,:),atom_wgylmgr(:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: nhat12_atm(:,:,:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: atom_expiqr(:,:,:),atom_gylm(:,:,:),atom_dltij(:),atom_gylmgr(:,:,:,:)
@@ -923,6 +924,15 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    !$OMP TARGET ENTER DATA MAP(alloc:gemm_re,gemm_im)
 #endif
  end if
+if (compute_grad1.and.gpu_option_==ABI_GPU_OPENMP) then
+ ! GEMM output buffers for the gradient path: C(dir,ic,idat2,idat1) per
+ ! atom, batched over ia.
+ ABI_MALLOC(gemm_gr_re,(3,nfgd_max,ndat2,ndat1,nattyp(itypat)))
+ ABI_MALLOC(gemm_gr_im,(3,nfgd_max,ndat2,ndat1,nattyp(itypat)))
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET ENTER DATA MAP(alloc:gemm_gr_re,gemm_gr_im)
+#endif
+end if
 
  ABI_MALLOC(atom_nfgd,   (nfgd_max))
  ABI_MALLOC(atom_gylm,   (  nfgd_max,lm_size,nattyp(itypat)))
@@ -1040,6 +1050,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
          end do
        end do
      else if(gpu_option_==ABI_GPU_OPENMP) then
+       ! Init to zero to avoid random uninitialised values
+       call gpu_set_to_zero(atom_wgylmgr, int(3,c_size_t)*nfgd_max*lmn2_size*nattyp(itypat))
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:atom_gylmgr,atom_indklmn,atom_dltij,qijl,gnt_scal,atom_nfgd,nattyp,atom_wgylmgr)&
        !$OMP& PRIVATE(ia)
@@ -1211,35 +1223,39 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
          end do
        else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
+         gemm_n = ndat2*ndat1
+         gemm_batch = nattyp(itypat)
+         gemm_alpha = cone
+         gemm_beta  = czero
+         !$OMP TARGET DATA USE_DEVICE_ADDR(atom_wgylmgr,cpf_re,cpf_im,gemm_gr_re,gemm_gr_im)
+         call abi_gpu_xgemm_strided(1,'n','n',3*nfgd_max,gemm_n,lmn2_size,gemm_alpha,&
+&          c_loc(atom_wgylmgr),3*nfgd_max,3*nfgd_max*lmn2_size,&
+&          c_loc(cpf_re),lmn2_size,lmn2_size*gemm_n,gemm_beta,&
+&          c_loc(gemm_gr_re),3*nfgd_max,3*nfgd_max*gemm_n,gemm_batch)
+         call abi_gpu_xgemm_strided(1,'n','n',3*nfgd_max,gemm_n,lmn2_size,gemm_alpha,&
+&          c_loc(atom_wgylmgr),3*nfgd_max,3*nfgd_max*lmn2_size,&
+&          c_loc(cpf_im),lmn2_size,lmn2_size*gemm_n,gemm_beta,&
+&          c_loc(gemm_gr_im),3*nfgd_max,3*nfgd_max*gemm_n,gemm_batch)
+         !$OMP END TARGET DATA
+         ! Scatter the dense (nfgd_max-wide) GEMM output back into
+         ! grnhat_12, honoring the real per-atom sphere size atom_nfgd(ia)
+         ! and mapping the local sphere point ic to the global FFT index jc.
          !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(3) &
-         !$OMP& MAP(to:grnhat_12,atom_wgylmgr,cpf_re,cpf_im,atom_ifftsph,atom_nfgd,nattyp)&
-         !$OMP& PRIVATE(idat1,idat2,sumr,sumi,sumr2,sumi2,sumr3,sumi3)
+         !$OMP& MAP(to:grnhat_12,gemm_gr_re,gemm_gr_im,atom_ifftsph,atom_nfgd,nattyp)&
+         !$OMP& PRIVATE(idat1,idat2,ia,iatom,jc)
          do ia=1,nattyp(itypat)
            do idat1=1,ndat1
              do idat2=1,ndat2
-               !$OMP  PARALLEL DO &
-               !$OMP& REDUCTION(+:sumr)  REDUCTION(+:sumi)  &
-               !$OMP& REDUCTION(+:sumr2) REDUCTION(+:sumi2) &
-               !$OMP& REDUCTION(+:sumr3) REDUCTION(+:sumi3) &
-               !$OMP& PRIVATE(iatom,klmn,ic,jc)
+               !$OMP PARALLEL DO PRIVATE(ic,jc,iatom)
                do ic=1,atom_nfgd(ia)
-                 sumr=zero; sumi=zero; sumr2=zero; sumi2=zero; sumr3=zero; sumi3=zero;
-                 do klmn=1,lmn2_size  ! Loop over ij channels of this atom type.
-                   iatom=iatm+ia
-                   jc=atom_ifftsph(ic,ia)
-                   sumr =sumr +cpf_re(klmn,idat2,idat1,ia)*atom_wgylmgr(1,ic,klmn,ia)
-                   sumr2=sumr2+cpf_re(klmn,idat2,idat1,ia)*atom_wgylmgr(2,ic,klmn,ia)
-                   sumr3=sumr3+cpf_re(klmn,idat2,idat1,ia)*atom_wgylmgr(3,ic,klmn,ia)
-                   sumi =sumi +cpf_im(klmn,idat2,idat1,ia)*atom_wgylmgr(1,ic,klmn,ia)
-                   sumi2=sumi2+cpf_im(klmn,idat2,idat1,ia)*atom_wgylmgr(2,ic,klmn,ia)
-                   sumi3=sumi3+cpf_im(klmn,idat2,idat1,ia)*atom_wgylmgr(3,ic,klmn,ia)
-                 end do
-                 grnhat_12(1,jc,isploop,1,iatom,idat2,idat1)=grnhat_12(1,jc,isploop,1,iatom,idat2,idat1)+sumr
-                 grnhat_12(1,jc,isploop,2,iatom,idat2,idat1)=grnhat_12(1,jc,isploop,2,iatom,idat2,idat1)+sumr2
-                 grnhat_12(1,jc,isploop,3,iatom,idat2,idat1)=grnhat_12(1,jc,isploop,3,iatom,idat2,idat1)+sumr3
-                 grnhat_12(2,jc,isploop,1,iatom,idat2,idat1)=grnhat_12(2,jc,isploop,1,iatom,idat2,idat1)+sumi
-                 grnhat_12(2,jc,isploop,2,iatom,idat2,idat1)=grnhat_12(2,jc,isploop,2,iatom,idat2,idat1)+sumi2
-                 grnhat_12(2,jc,isploop,3,iatom,idat2,idat1)=grnhat_12(2,jc,isploop,3,iatom,idat2,idat1)+sumi3
+                 iatom=iatm+ia
+                 jc=atom_ifftsph(ic,ia)
+                 grnhat_12(1,jc,isploop,1,iatom,idat2,idat1)=grnhat_12(1,jc,isploop,1,iatom,idat2,idat1)+gemm_gr_re(1,ic,idat2,idat1,ia)
+                 grnhat_12(1,jc,isploop,2,iatom,idat2,idat1)=grnhat_12(1,jc,isploop,2,iatom,idat2,idat1)+gemm_gr_re(2,ic,idat2,idat1,ia)
+                 grnhat_12(1,jc,isploop,3,iatom,idat2,idat1)=grnhat_12(1,jc,isploop,3,iatom,idat2,idat1)+gemm_gr_re(3,ic,idat2,idat1,ia)
+                 grnhat_12(2,jc,isploop,1,iatom,idat2,idat1)=grnhat_12(2,jc,isploop,1,iatom,idat2,idat1)+gemm_gr_im(1,ic,idat2,idat1,ia)
+                 grnhat_12(2,jc,isploop,2,iatom,idat2,idat1)=grnhat_12(2,jc,isploop,2,iatom,idat2,idat1)+gemm_gr_im(2,ic,idat2,idat1,ia)
+                 grnhat_12(2,jc,isploop,3,iatom,idat2,idat1)=grnhat_12(2,jc,isploop,3,iatom,idat2,idat1)+gemm_gr_im(3,ic,idat2,idat1,ia)
                end do
              end do
            end do
@@ -1441,12 +1457,17 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET EXIT DATA MAP(delete:cpf_re,cpf_im) IF(gpu_option_==ABI_GPU_OPENMP)
  !$OMP TARGET EXIT DATA MAP(delete:gemm_re,gemm_im) IF(compute_nhat.and.gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:gemm_gr_re,gemm_gr_im) IF(compute_grad1.and.gpu_option_==ABI_GPU_OPENMP)
 #endif
  ABI_FREE(cpf_re)
  ABI_FREE(cpf_im)
  if (compute_nhat.and.gpu_option_==ABI_GPU_OPENMP) then
    ABI_FREE(gemm_re)
    ABI_FREE(gemm_im)
+ end if
+ if (compute_grad1.and.gpu_option_==ABI_GPU_OPENMP) then
+   ABI_FREE(gemm_gr_re)
+   ABI_FREE(gemm_gr_im)
  end if
  nullify(nhat12_atm)
  end do ! itypat
