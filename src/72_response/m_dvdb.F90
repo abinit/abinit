@@ -440,6 +440,7 @@ module m_dvdb
  public :: dvdb_test_v1rsym        ! Check symmetries in real-space of the DFPT potentials.
  public :: dvdb_test_v1complete    ! Test the symmetrization of the DFPT potentials.
  public :: dvdb_test_ftinterp      ! Test the Fourier interpolation of DFPT potentials.
+ public :: dvdb_test_symcheck      ! Test cross-q-point symmetry consistency of the FT interpolation.
 
 !----------------------------------------------------------------------
 
@@ -5507,6 +5508,136 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
  call ddb%free()
 
 end subroutine dvdb_test_ftinterp
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_test_symcheck
+!! NAME
+!!  dvdb_test_symcheck
+!!
+!! FUNCTION
+!!  Debugging tool: checks whether Fourier-interpolating the DFPT potential independently
+!!  at q_source and at q_target = I(itimrev) S(isym) q_source (for every symmetry of the
+!!  crystal) gives results consistent with each other via the exact rotation formula
+!!  implemented in v1phq_rotate. This isolates the Fourier-interpolation machinery
+!!  (dvdb_ftinterp_qpt) from gstore_symmetrize: no e-ph coupling / m_gstore.F90 code is
+!!  involved at all. q_source need not be on the native ab-initio q-mesh.
+!!
+!! INPUTS
+!!  dvdb_filepath=Filename
+!!  dvdb_ngqpt(3)=Divisions of the Q-mesh reported in the DVDB file (usually equal to ddb_ngqpt)
+!!  dvdb_add_lr=0 to disable treatment of long-range part in Fourier interpolation.
+!!  qdamp=Defines exponential damping in LR potential
+!!  ddb_filepath=Path to DDB file. Used to treat LR part.
+!!  prtvol=Verbosity level.
+!!  qpt_source(3)=Source q-point (reduced coordinates, arbitrary, need not be on the ab-initio mesh).
+!!  comm=MPI communicator.
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! SOURCE
+
+subroutine dvdb_test_symcheck(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvdb_add_lr, dvdb_qdamp, &
+                               ddb_filepath, prtvol, qpt_source, comm)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: dvdb_filepath, ddb_filepath
+ integer,intent(in) :: comm, prtvol, dvdb_add_lr, rspace_cell, symv1
+ real(dp),intent(in) :: dvdb_qdamp
+ integer,intent(in) :: dvdb_ngqpt(3)
+ real(dp),intent(in) :: qpt_source(3)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: chneut2 = 2, qptopt1 = 1, gpu_option0 = 0, cplex2 = 2
+ integer :: nfft, isym, itimrev, tsign, mu, ispden, comm_rpt
+ type(dvdb_t) :: dvdb
+ type(vdiff_t) :: vd_max, vd
+!arrays
+ integer :: ngfft(18), g0q(3)
+ real(dp) :: qpt_target(3)
+ real(dp),allocatable :: v1r_source(:,:,:,:), v1r_target(:,:,:,:), v1r_predicted(:,:,:,:)
+! *************************************************************************
+
+ write(std_out,"(2a)")" Testing cross-q-point symmetry consistency of the FT interpolation of V1(r)", ch10
+ write(std_out,"(a)")sjoin(" q_source: ", ktoa(qpt_source))
+
+ call dvdb%init(dvdb_filepath, gpu_option0, comm)
+ dvdb%debug = .False.
+ ABI_CHECK(any(symv1 == [0, 1, 2]), sjoin("invalid value of symv1:", itoa(symv1)))
+ dvdb%symv1 = symv1
+ dvdb%add_lr = dvdb_add_lr
+ dvdb%qdamp = dvdb_qdamp
+ dvdb%rspace_cell = rspace_cell
+
+ if (len_trim(ddb_filepath) > 0) then
+   call dvdb%load_ddb(prtvol, chneut2, comm, ddb_filepath=ddb_filepath)
+ else
+   dvdb%add_lr = 0
+   ABI_WARNING("ddb_filepath was not provided --> Setting dvdb_add_lr to zero")
+ end if
+
+ call dvdb%print([std_out], "", 0)
+
+ call ngfft_seq(ngfft, dvdb%ngfft3_v1(:,1))
+ nfft = product(ngfft(1:3))
+ call dvdb%open_read(ngfft, comm)
+
+ comm_rpt = xmpi_comm_self
+ call dvdb%ftinterp_setup(dvdb_ngqpt, qptopt1, 1, [zero, zero, zero], nfft, ngfft, comm_rpt)
+
+ ABI_MALLOC(v1r_source, (2, nfft, dvdb%nspden, dvdb%natom3))
+ ABI_MALLOC(v1r_target, (2, nfft, dvdb%nspden, dvdb%natom3))
+ ABI_MALLOC(v1r_predicted, (2, nfft, dvdb%nspden, dvdb%natom3))
+
+ ! Interpolate once at q_source (this itself is a genuine off-grid interpolation if q_source
+ ! is not on the coarse ab-initio mesh).
+ call dvdb%ftinterp_qpt(qpt_source, nfft, ngfft, v1r_source, dvdb%comm_rpt)
+
+ g0q = 0
+ do isym=1,dvdb%cryst%nsym
+   do itimrev=1,2
+     tsign = 3 - 2*itimrev
+     qpt_target = tsign * matmul(dvdb%cryst%symrec(:,:,isym), qpt_source)
+
+     ! Independent, direct interpolation at the target q (no symmetry involved at all).
+     call dvdb%ftinterp_qpt(qpt_target, nfft, ngfft, v1r_target, dvdb%comm_rpt)
+
+     ! Predicted potential at q_target obtained by ROTATING the q_source interpolation
+     ! with the exact same formula gstore_symmetrize/v1phq_rotate uses to expand IBZ->BZ.
+     call v1phq_rotate(dvdb%cryst, qpt_source, isym, itimrev, g0q, ngfft, cplex2, nfft, dvdb%nspden, &
+                        dvdb%mpi_enreg, v1r_source, v1r_predicted, xmpi_comm_self)
+
+#if defined FC_LLVM || defined FC_ARM || defined FC_NVHPC
+     vd_max = vdiff_t(zero,zero,zero,zero,zero,zero)
+#else
+     vd_max = vdiff_t()
+#endif
+     do mu=1,dvdb%natom3
+       do ispden=1,dvdb%nspden
+         vd = vdiff_eval(cplex2, nfft, v1r_predicted(:,:,ispden,mu), v1r_target(:,:,ispden,mu), &
+                         dvdb%cryst%ucvol, vd_max=vd_max)
+       end do
+     end do
+
+     write(std_out,"(a)")"--- !DVDB_SYMCHECK"
+     write(std_out,"(a,i0,a)")"  isym: ", isym, ","
+     write(std_out,"(a,i0,a)")"  itimrev: ", itimrev, ","
+     write(std_out,"(3a)")"  qpt_target: ", trim(ktoa(qpt_target)), ","
+     call vdiff_print(vd_max)
+     write(std_out,"(a)")"..."
+   end do ! itimrev
+ end do ! isym
+
+ ABI_FREE(v1r_source)
+ ABI_FREE(v1r_target)
+ ABI_FREE(v1r_predicted)
+
+ call dvdb%free()
+
+end subroutine dvdb_test_symcheck
 !!***
 
 !----------------------------------------------------------------------

@@ -6842,6 +6842,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  if (DEBUG_DUMP_DH) open(unit=789, file="dh_debug.csv", status="replace", action="write")
  if (DEBUG_DUMP_DH) open(unit=790, file="dh_mat_full_debug.csv", status="replace", action="write")
  if (DEBUG_DUMP_DH) open(unit=791, file="gtmp_debug.csv", status="replace", action="write")
+ if (DEBUG_DUMP_DH) open(unit=792, file="mu_debug.csv", status="replace", action="write")
 
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
@@ -7091,6 +7092,15 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
          phase = -two_pi * dot_product(qbz(:, iq_sym), l0)
          cphase = cmplx(cos(phase), sin(phase), dp)
 
+         ! Per-mu atomic-mapping/phase diagnostic (iat_eq, l0, symrec_eq row, cphase, iq_sym):
+         ! reusable general-purpose dump, not tied to any specific (ik_glob,iq_glob) -- add a
+         ! filter here (e.g. "if (ik_glob==... .and. iq_glob==...)") when tracing one point on a
+         ! large system, to keep mu_debug.csv a manageable size.
+         if (DEBUG_DUMP_DH) then
+           write(792,*) ik_glob, iq_glob, mu, iat, iat_eq, isym_combined, isym_k, ik_ibz, iq_sym, &
+             l0, symrec_eq(idir,1), symrec_eq(idir,2), symrec_eq(idir,3), idir, ik_ibz_file, cphase
+         end if
+
          ! Apply the same geometric rotation (cphase/symrec_eq/dh_mat, all independent of which
          ! gvals stream is being processed) to each stream separately, since gtmp's accumulation
          ! reads actual matrix-element values from gkq_base.
@@ -7143,6 +7153,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  if (DEBUG_DUMP_DH) close(789)
  if (DEBUG_DUMP_DH) close(790)
  if (DEBUG_DUMP_DH) close(791)
+ if (DEBUG_DUMP_DH) close(792)
 
 
  ABI_FREE(kibz2bz)

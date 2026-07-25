@@ -42,7 +42,8 @@ program mrgdv
  use m_io_tools,        only : file_exists, prompt
  use m_argparse,        only : get_arg, get_arg_list
  use m_fftcore,         only : ngfft_seq
- use m_dvdb,            only : dvdb_t, dvdb_merge_files, dvdb_test_v1complete, dvdb_test_ftinterp, dvdb_test_v1rsym
+ use m_dvdb,            only : dvdb_t, dvdb_merge_files, dvdb_test_v1complete, dvdb_test_ftinterp, dvdb_test_v1rsym, &
+                                dvdb_test_symcheck
 
  implicit none
 
@@ -57,6 +58,7 @@ program mrgdv
  type(dvdb_t) :: dvdb
 !arrays
  integer :: ngqpt(3), coarse_ngqpt(3), ngfftf(18), qptopt
+ real(dp) :: qpt_source(3)
  character(len=fnlen),allocatable :: v1files(:)
 ! *************************************************************************
 
@@ -121,6 +123,11 @@ program mrgdv
        write(std_out,*)"test_ftinterp in_DVDB --ngqpt 4 4 4 [--ddb-path] [--dvdb-add-lr 0] [--qdamp -1]"
        write(std_out,*)"                                    [--symv1scf] [--coarse-ngqpt 2 2 2]"
        write(std_out,*)"                           Test Fourier interpolation of DFPT potentials."
+       write(std_out,*)"test_symcheck in_DVDB --ngqpt 4 4 4 --qpt 0.1 0.2 0.3 [--ddb-path]"
+       write(std_out,*)"                                    [--dvdb-add-lr 0] [--qdamp -1] [--symv1scf] [--rspace_cell 1]"
+       write(std_out,*)"                           Test cross-q-point symmetry consistency of the FT interpolation:"
+       write(std_out,*)"                           interpolate at --qpt and at S.qpt for every symmetry S, compare"
+       write(std_out,*)"                           against v1phq_rotate's own prediction from --qpt alone."
        write(std_out,*)"downsample in_DVDB out_DVDB [n1, n2, n3] Produce new DVDB with q-subsmesh"
        goto 100
      end if
@@ -181,6 +188,18 @@ program mrgdv
      ABI_CHECK(get_arg_list("coarse-ngqpt", coarse_ngqpt, lenr, msg, default=0, want_len=3) == 0, msg)
      call dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1scf, ngqpt, dvdb_add_lr, dvdb_qdamp, &
                              ddb_filepath, prtvol, coarse_ngqpt, comm)
+
+   case ("test_symcheck")
+     call get_command_argument(2, dvdb_filepath)
+     ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, want_len=3) == 0, msg)
+     ABI_CHECK(get_arg_list("qpt", qpt_source, lenr, msg, want_len=3) == 0, msg)
+     ABI_CHECK(get_arg("ddb-path", ddb_filepath, msg, default="") == 0, msg)
+     ABI_CHECK(get_arg("rspace_cell", rspace_cell, msg, default=0) == 0, msg)
+     ABI_CHECK(get_arg("symv1scf", symv1scf, msg, default=0) == 0, msg)
+     ABI_CHECK(get_arg("dvdb-add-lr", dvdb_add_lr, msg, default=1) == 0, msg)
+     ABI_CHECK(get_arg("qdamp", dvdb_qdamp, msg, default=0.1_dp) == 0, msg)
+     call dvdb_test_symcheck(dvdb_filepath, rspace_cell, symv1scf, ngqpt, dvdb_add_lr, dvdb_qdamp, &
+                             ddb_filepath, prtvol, qpt_source, comm)
 
    case ("downsample")
      call get_command_argument(2, dvdb_filepath)
