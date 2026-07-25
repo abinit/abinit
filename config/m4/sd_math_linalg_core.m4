@@ -26,6 +26,7 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
   sd_linalg_has_blacs="unknown"
   sd_linalg_has_scalapack="unknown"
   sd_linalg_has_buggy_zdot="unknown"
+  sd_linalg_has_slate="unknown"
   sd_linalg_has_elpa="unknown"
   sd_linalg_has_elpa_2013="unknown"
   sd_linalg_has_elpa_2014="unknown"
@@ -104,6 +105,9 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
     # ELPA
     _SD_LINALG_CHECK_ELPA
 
+    # SLATE
+    _SD_LINALG_CHECK_SLATE
+
   else
     sd_linalg_has_scalapack="no"
   fi
@@ -112,7 +116,8 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
   # Validate the MPI linear algebra support
   if test "${sd_mpi_enable}" = "yes"; then
       sd_linalg_mpi_ok="yes"
-    if test "${sd_linalg_has_elpa}" = "yes"; then
+    if test "${sd_linalg_has_elpa}" = "yes" -o \
+            "${sd_linalg_has_slate}" = "yes"; then
       sd_linalg_mpiacc_ok="yes"
     else
       sd_linalg_mpiacc_ok="no"
@@ -153,6 +158,9 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
       if test "${sd_linalg_mpiacc_ok}" = "yes"; then
         if test "${sd_linalg_has_elpa}" = "yes"; then
           sd_linalg_flavor="${sd_linalg_flavor}+elpa"
+        fi
+        if test "${sd_linalg_has_slate}" = "yes"; then
+          sd_linalg_flavor="${sd_linalg_flavor}+slate"
         fi
       fi
       if test "${sd_linalg_gpu_ok}" = "yes"; then
@@ -448,11 +456,11 @@ AC_DEFUN([_SD_LINALG_EXPLORE], [
         else
           AC_MSG_RESULT([${sd_linalg_vendor_elpa_libs}])
           LIBS="${sd_linalg_vendor_elpa_libs} ${LIBS}"
-	  FCFLAGS="${sd_linalg_vendor_elpa_fcflags} ${FCFLAGS}"
-	  CFLAGS="${sd_linalg_vendor_elpa_fcflags} ${CFLAGS}"
-	  CXXFLAGS="${sd_linalg_vendor_elpa_fcflags} ${CXXFLAGS}"
-	  CPPFLAGS="${sd_linalg_vendor_elpa_fcflags} ${CPPFLAGS}"
-	  FFLAGS="${sd_linalg_vendor_elpa_fcflags} ${FFLAGS}"
+          FCFLAGS="${sd_linalg_vendor_elpa_fcflags} ${FCFLAGS}"
+          CFLAGS="${sd_linalg_vendor_elpa_fcflags} ${CFLAGS}"
+          CXXFLAGS="${sd_linalg_vendor_elpa_fcflags} ${CXXFLAGS}"
+          CPPFLAGS="${sd_linalg_vendor_elpa_fcflags} ${CPPFLAGS}"
+          FFLAGS="${sd_linalg_vendor_elpa_fcflags} ${FFLAGS}"
 
         fi
         _SD_LINALG_CHECK_ELPA
@@ -471,12 +479,44 @@ AC_DEFUN([_SD_LINALG_EXPLORE], [
           test "${sd_linalg_vendor_ldflags}" != "" && \
             sd_linalg_ldflags="${sd_linalg_ldflags} ${sd_linalg_vendor_ldflags}"
           test "${sd_linalg_vendor_elpa_libs}" != "" && \
-              sd_linalg_libs="${sd_linalg_vendor_elpa_libs} ${sd_linalg_libs}"
+            sd_linalg_libs="${sd_linalg_vendor_elpa_libs} ${sd_linalg_libs}"
           test "${sd_linalg_vendor_elpa_fcflags}" != "" && \
-	     sd_linalg_fcflags="${sd_linalg_vendor_elpa_fcflags} ${sd_linalg_fcflags}"
+            sd_linalg_fcflags="${sd_linalg_vendor_elpa_fcflags} ${sd_linalg_fcflags}"
           break
         fi
       fi
+
+      # Look for SLATE
+      tmp_linalg_slate_proceed=`echo "${sd_linalg_vendor_provided}" | grep "slate"`
+      if test "${tmp_linalg_slate_proceed}" != "" -a \
+              "${sd_linalg_serial_ok}" = "yes" -a \
+              "${sd_linalg_has_slate}" != "yes"; then
+
+        AC_MSG_CHECKING([${tmp_linalg_vendor} libraries for SLATE])
+        if test "${sd_linalg_vendor_slate_libs}" = ""; then
+          AC_MSG_RESULT([none required])
+        else
+          AC_MSG_RESULT([${sd_linalg_vendor_slate_libs}])
+          LIBS="${sd_linalg_vendor_slate_libs} ${LIBS}"
+          CXXFLAGS="${sd_linalg_vendor_slate_cxxflags} ${CXXFLAGS}"
+        fi
+        _SD_LINALG_CHECK_SLATE
+        if test "${sd_linalg_has_slate}" = "yes"; then
+          sd_linalg_flavor="${sd_linalg_flavor}+${tmp_linalg_vendor}"
+          sd_linalg_slate_vendor="${tmp_linalg_vendor}"
+          sd_linalg_provided="${sd_linalg_provided} slate"
+          test "${sd_linalg_vendor_cxxflags}" != "" && \
+            sd_linalg_cxxflags="${sd_linalg_cxxflags} ${sd_linalg_vendor_cxxflags}"
+          test "${sd_linalg_vendor_ldflags}" != "" && \
+            sd_linalg_ldflags="${sd_linalg_ldflags} ${sd_linalg_vendor_ldflags}"
+          test "${sd_linalg_vendor_slate_libs}" != "" && \
+            sd_linalg_libs="${sd_linalg_vendor_slate_libs} ${sd_linalg_libs}"
+          test "${sd_linalg_vendor_slate_cxxflags}" != "" && \
+            sd_linalg_fcflags="${sd_linalg_vendor_slate_cxxflags} ${sd_linalg_cxxflags}"
+          break
+        fi
+      fi
+
 
     done
   fi   # sd_linalg_mpi_ok = yes
@@ -591,6 +631,8 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
   sd_linalg_vendor_lapacke_prqs=""
   sd_linalg_vendor_scalapack_libs=""
   sd_linalg_vendor_scalapack_prqs=""
+  sd_linalg_vendor_slate_libs=""
+  sd_linalg_vendor_slate_cxxflags=""
   sd_linalg_vendor_elpa_libs=""
   sd_linalg_vendor_elpa_prqs=""
   sd_linalg_vendor_elpa_fcflags=""
@@ -656,17 +698,17 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
       sd_linalg_vendor_elpa_libs="-lelpa"
       AC_CHECK_PROG([PKG_CONFIG], [pkg-config], [pkg-config], [no])
       if test "$PKG_CONFIG" != "no"; then
-         AC_PATH_TOOL(PKG_CONFIG,pkg-config)
-         if "$PKG_CONFIG" --exists  elpa; then
-         	sd_linalg_vendor_elpa_fcflags=`$PKG_CONFIG --variable=fcflags elpa`
-                sd_linalg_vendor_elpa_libs=`$PKG_CONFIG --libs  --keep-system-libs elpa`
-         fi
-         if test "${abi_openmp_enable}" = "yes"; then
-	    if "$PKG_CONFIG" --exists  elpa-openmp; then
-         	sd_linalg_vendor_elpa_fcflags=`$PKG_CONFIG --variable=fcflags --keep-system-cflags elpa-openmp`
-                sd_linalg_vendor_elpa_libs=`$PKG_CONFIG --libs  --keep-system-libs elpa-openmp`
-            fi
-         fi
+        AC_PATH_TOOL(PKG_CONFIG,pkg-config)
+        if "$PKG_CONFIG" --exists  elpa; then
+          sd_linalg_vendor_elpa_fcflags=`$PKG_CONFIG --variable=fcflags elpa`
+          sd_linalg_vendor_elpa_libs=`$PKG_CONFIG --libs  --keep-system-libs elpa`
+        fi
+        if test "${abi_openmp_enable}" = "yes"; then
+          if "$PKG_CONFIG" --exists  elpa-openmp; then
+            sd_linalg_vendor_elpa_fcflags=`$PKG_CONFIG --variable=fcflags --keep-system-cflags elpa-openmp`
+            sd_linalg_vendor_elpa_libs=`$PKG_CONFIG --libs  --keep-system-libs elpa-openmp`
+          fi
+        fi
       fi
       ;;
 
@@ -767,6 +809,19 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
     plasma)
       sd_linalg_vendor_provided="plasma"
       sd_linalg_vendor_plasma_libs="-lplasma -lcorelapack -lcoreblas"
+      ;;
+
+    slate)
+      sd_linalg_vendor_provided="slate"
+      sd_linalg_vendor_slate_libs="-lslate"
+      AC_CHECK_PROG([PKG_CONFIG], [pkg-config], [pkg-config], [no])
+      if test "$PKG_CONFIG" != "no"; then
+        AC_PATH_TOOL(PKG_CONFIG,pkg-config)
+        if "$PKG_CONFIG" --exists  slate; then
+          sd_linalg_vendor_slate_cxxflags=-I`$PKG_CONFIG --variable=includedir slate`
+          sd_linalg_vendor_slate_libs="-L`$PKG_CONFIG --variable=libdir slate` -lslate -lblaspp -llapackpp `pkg-config --variable=scalapack slate`"
+        fi
+      fi
       ;;
 
     *)

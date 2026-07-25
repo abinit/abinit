@@ -148,7 +148,7 @@ subroutine ompgpu_fourdp(cplex,ngfft,ldx,ldy,ldz,ndat,isign,fofg,fofr)
      !$OMP END TARGET DATA
      call gpu_fft_stream_synchronize(FOURDP_ID)
      ! Normalize here
-     call abi_gpu_xscal(2,ldx*ldy*ldz*ndat,norm,fofg,1)
+     call abi_xscal(ldx*ldy*ldz*ndat,norm,fofg,1,x_cplx=2,gpu_option=ABI_GPU_OPENMP)
    case default
      ABI_BUG("Wrong isign")
    end select
