@@ -6751,7 +6751,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3)
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
  integer :: isym_tot, trev_tot, tsign_tot, ik_base_glob, ik_ibz_file
- integer :: timrev_k, isym_lg, itime_lg, isym_glob, itime_glob, iq_ibz_loc
+ integer :: isym_lg, itime_lg, isym_glob, itime_glob, iq_ibz_loc
  integer :: isym_combined
  real(dp) :: weight_qq, weight_qq_eq,phase, q_base(3)
  integer :: idir, iat, idir_eq, iat_eq, mu, mu_eq, iq_base_glob, iq_sym
@@ -6761,6 +6761,8 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  logical :: with_g2dw, q_is_gamma
  logical :: isirr_k, isirr_kq, isirr_q
  character(len=abi_slen) :: with_gmode, gtype, gvals_name
+ character(len=abi_slen) :: gv_names(2)
+ integer :: n_gv, igv
  character(len=5000) :: msg
  type(gstore_t) :: gstore
  type(dmats_t) :: dmats
@@ -6778,7 +6780,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  real(dp) :: kq_bz_source(3), kq_bz_target(3)
  real(dp),allocatable :: qbz(:,:)
  real(dp),contiguous,pointer :: gkq_rot_ptr(:,:,:,:,:), gkq_base_ptr(:,:,:,:,:)
- complex(dp),target,allocatable :: gkq_rot(:,:,:,:), gkq_base(:,:,:,:)
+ complex(dp),target,allocatable :: gkq_rot(:,:,:,:,:), gkq_base(:,:,:,:,:)
  complex(dp),allocatable :: gtmp(:,:), dh_mat(:,:)
 !----------------------------------------------------------------------
 
@@ -6790,11 +6792,11 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
  call gstore_read_gtype(gstore_path, gtype, comm, brange_k_spin=brange_k_spin)
 
- ! Compute the little-group D-matrices D_mn(S) = <psi_m,k_ibz|S|psi_n,k_ibz>.
+ ! Compute the little-group D-matrices D_mn(S) = <psi_m,S k_ibz|S|psi_n,k_ibz>.
  ! These are used below to correct the extra rotation the bra (electron state at k+q)
  ! picks up when its own already-computed BZ representative differs from the one obtained
- ! by applying isym_k directly (see the "Bug A" fix in the q-loop below). All MPI ranks
- ! participate here since dmats%init distributes the work internally over comm.
+ ! by applying isym_k directly.
+ ! All MPI ranks participate here since dmats%init distributes the work internally over comm.
  call dmats%init(wfk_path, dtset, cryst, brange_k_spin, ngfft, pawtab, psps, comm)
 
  ! Only master processor performs the symmetrization of the e-ph matrix elements.
@@ -6802,10 +6804,15 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  if (my_rank /= 0) goto 100
 
  gvals_name = "gvals"
- ! TODO: Remember to handle GWPT STORE
- !if (gtype == "gwpt" .and. dtset%gstore_gname == "gvals_ks") gvals_name = "gvals_ks"
 
- ! Read GSTORE.nc dimensions and metadata, without allocating gvals buffer.
+ ! GWPT files store two sets of e-ph matrix elements: "gvals" (g^Sigma) and "gvals_ks" (g^KS),
+ ! written at the same (k,q) grid positions (see m_gwpt.F90's dump_my_gbuf). Symmetrize both.
+ n_gv = 1; gv_names(1) = "gvals"
+ if (gtype == "gwpt") then
+   n_gv = 2; gv_names(2) = "gvals_ks"
+ end if
+
+ ! Read GSTORE.nc dimensions and metadata from file, without allocating gvals buffer.
  with_cplex = 0; with_gmode = GSTORE_GMODE_ATOM; with_g2dw = .False.
 
  call gstore%from_ncpath(gstore_path, with_cplex, dtset, dtfil, cryst, ebands, ifc, &
@@ -6826,14 +6833,9 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  nqbz = gstore%nqbz; nqibz = gstore%nqibz
  nsym = cryst%nsym
 
- !timrev_k = kpts_timrev_from_kptopt(ebands%kptopt)
-
+ ! Need to know the position of the IBZ k-points in the nc file.
  call get_ibz2bz(gstore%nkibz, gstore%nkbz, gstore%kbz2ibz, kibz2bz, msg, ierr)
  ABI_CHECK(ierr == 0, sjoin("Something wrong in symmetry tables for k-points", ch10, msg))
-
- !call get_ibz2bz(gstore%nqibz, gstore%nqbz, qbz2ibz, qibz2bz, msg, ierr)
- !ABI_CHECK(ierr == 0, sjoin("Something wrong in symmetry tables for q-points!", ch10, msg))
- !ABI_FREE(qibz2bz)
 
  NCF_CHECK(nctk_open_modify(ncid, gstore_path, xmpi_comm_self))
 
@@ -6855,8 +6857,8 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
    ncerr = nf90_get_var(ncid, nctk_idname(ncid, "gstore_glob_state_kqs"), state_kq, start=[1,1,spin])
    NCF_CHECK(ncerr)
 
-   ABI_MALLOC(gkq_base, (nb, nb, gqk%natom3, gqk%my_nq))
-   ABI_MALLOC(gkq_rot, (nb, nb, gqk%natom3, gqk%my_nq))
+   ABI_MALLOC(gkq_base, (nb, nb, gqk%natom3, gqk%my_nq, n_gv))
+   ABI_MALLOC(gkq_rot, (nb, nb, gqk%natom3, gqk%my_nq, n_gv))
    ABI_MALLOC(gtmp, (nb, nb))
    ABI_MALLOC(dh_mat, (nb, nb))
 
@@ -6873,7 +6875,6 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
      if (state_kq(ik_glob, 1) == GSTORE_KQ_COMPUTED) then
        ABI_CHECK(all(state_kq(ik_glob, :) == GSTORE_KQ_COMPUTED), "all state")
-       !print *, "my_ik", my_ik, "has been computed and won't be reconstructed"
        cycle
      end if
 
@@ -6889,12 +6890,9 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
      ik_ibz_file = kibz2bz(ik_ibz)
 
      ! symrec_eq is the PURELY SPATIAL rotation (used for atomic-perturbation-direction
-     ! bookkeeping below, which is TR-blind: time reversal does not move atoms, and for a real
-     ! local potential Theta.V(r).Theta^{-1} = V(r)). symrec_eq_kspace additionally carries the
-     ! TR sign and is the one that actually relates k-space vectors (kk_bz, q) to their IBZ
-     ! images -- same tsign_k-weighted formula already used elsewhere in this file for exactly
-     ! this purpose (see gqk%my_kpts(:,my_ik) construction earlier in this module, and the
-     ! analogous tsign_q-weighted q formula).
+     ! bookkeeping below, which is TR-blind: time reversal does not move atoms.
+     ! symrec_eq_kspace additionally carries the TR sign and is the one that actually relates k-space
+     ! vectors (kk_bz, q) to their IBZ images
      symrec_eq = transpose(cryst%symrel(:,:,isym_k))
      symrec_eq_kspace = tsign_k * symrec_eq
      ABI_CHECK(isamek(kk_bz, matmul(symrec_eq_kspace, kk_ibz), g0_q), "kk_bz != symrec_eq_kspace kk_ibz")
@@ -6904,14 +6902,15 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
      end do
      ABI_CHECK(isym_combined /= nsym + 1, "Cannot find symrec_eq")
 
-     ! TODO: Remember to handle GWPT STORE
-     ! Read g(k_ibz, q) for all q-point in the BZ.
-     gvals_name = "gvals"
-     call c_f_pointer(c_loc(gkq_base), gkq_base_ptr, [2, nb, nb, gqk%natom3, gqk%my_nq])
-     ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gkq_base_ptr, &
-                          start=[1, 1, 1, 1, ik_ibz_file, 1], &
-                          count=[2, nb, nb, gqk%natom3, 1, gqk%my_nq])
-     NCF_CHECK(ncerr)
+     ! Read g(k_ibz, q) for all q-point in the BZ, for each gvals stream ("gvals", and
+     ! "gvals_ks" too when gtype == "gwpt").
+     do igv=1,n_gv
+       call c_f_pointer(c_loc(gkq_base(1,1,1,1,igv)), gkq_base_ptr, [2, nb, nb, gqk%natom3, gqk%my_nq])
+       ncerr = nf90_get_var(spin_ncid, spin_vid(gv_names(igv)), gkq_base_ptr, &
+                            start=[1, 1, 1, 1, ik_ibz_file, 1], &
+                            count=[2, nb, nb, gqk%natom3, 1, gqk%my_nq])
+       NCF_CHECK(ncerr)
+     end do
 
      ! Loop over q-points in the BZ.
      do my_iq=1, gqk%my_nq
@@ -7092,31 +7091,38 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
          phase = -two_pi * dot_product(qbz(:, iq_sym), l0)
          cphase = cmplx(cos(phase), sin(phase), dp)
 
-         gtmp = zero
-         do idir_eq=1,3
-           mu_eq = idir_eq + (iat_eq - 1) * 3
-           gtmp = gtmp + cphase * symrec_eq(idir, idir_eq) * gkq_base(:,:,mu_eq,iq_sym)
+         ! Apply the same geometric rotation (cphase/symrec_eq/dh_mat, all independent of which
+         ! gvals stream is being processed) to each stream separately, since gtmp's accumulation
+         ! reads actual matrix-element values from gkq_base.
+         do igv=1,n_gv
+           gtmp = zero
+           do idir_eq=1,3
+             mu_eq = idir_eq + (iat_eq - 1) * 3
+             gtmp = gtmp + cphase * symrec_eq(idir, idir_eq) * gkq_base(:,:,mu_eq,iq_sym,igv)
+           end do
+           ! HYPOTHESIS (open question, validate empirically): conjugate gtmp before the dh_mat
+           ! multiply whenever the ket leg's own operation (isym_k, trev_k) is antiunitary. Matches
+           ! the "rotate spatially first, conjugate as the last step" pattern used identically by
+           ! cgtk_rotate, pheigvec_rotate, rotate_fqg and dmats_init elsewhere in this codebase.
+           ! Order matters: conjugate gtmp itself, not matmul(dh_mat,gtmp), since dh_mat is complex.
+           if (trev_k == 1) gtmp = conjg(gtmp)
+           ! Apply the Bug A correction: left-multiply by D(h) on the bra (m) index.
+           gkq_rot(:,:,mu,iq_glob,igv) = matmul(dh_mat, gtmp)
+           if (DEBUG_DUMP_DH) write(791,*) ik_glob, iq_glob, mu, nb, trev_k, trim(gv_names(igv)), gtmp
          end do
-         ! HYPOTHESIS (open question, validate empirically): conjugate gtmp before the dh_mat
-         ! multiply whenever the ket leg's own operation (isym_k, trev_k) is antiunitary. Matches
-         ! the "rotate spatially first, conjugate as the last step" pattern used identically by
-         ! cgtk_rotate, pheigvec_rotate, rotate_fqg and dmats_init elsewhere in this codebase.
-         ! Order matters: conjugate gtmp itself, not matmul(dh_mat,gtmp), since dh_mat is complex.
-         if (trev_k == 1) gtmp = conjg(gtmp)
-         ! Apply the Bug A correction: left-multiply by D(h) on the bra (m) index.
-         gkq_rot(:,:,mu,iq_glob) = matmul(dh_mat, gtmp)
-         if (DEBUG_DUMP_DH) write(791,*) ik_glob, iq_glob, mu, nb, trev_k, gtmp
        end do
 
      end do ! my_iq
 
-     ! Write the newly computed g_{mn, nu} back to the netcdf file (in-place modification).
-     ! and update the entry in state_kq.
-     call c_f_pointer(c_loc(gkq_rot), gkq_rot_ptr, [2, nb, nb, gqk%natom3, gqk%my_nq])
-     ncerr = nf90_put_var(spin_ncid, spin_vid(gvals_name), gkq_rot_ptr, &
-                          start=[1, 1, 1, 1, ik_glob, 1], &
-                          count=[2, nb, nb, gqk%natom3, 1, gqk%my_nq])
-     NCF_CHECK(ncerr)
+     ! Write the newly computed g_{mn, nu} back to the netcdf file (in-place modification),
+     ! for each gvals stream, and update the entry in state_kq.
+     do igv=1,n_gv
+       call c_f_pointer(c_loc(gkq_rot(1,1,1,1,igv)), gkq_rot_ptr, [2, nb, nb, gqk%natom3, gqk%my_nq])
+       ncerr = nf90_put_var(spin_ncid, spin_vid(gv_names(igv)), gkq_rot_ptr, &
+                            start=[1, 1, 1, 1, ik_glob, 1], &
+                            count=[2, nb, nb, gqk%natom3, 1, gqk%my_nq])
+       NCF_CHECK(ncerr)
+     end do
      state_kq(ik_glob, :) = GSTORE_KQ_SYMMETRIZED
    end do ! my_ik
    end associate
