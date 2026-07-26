@@ -1369,7 +1369,7 @@ This variable specifies the amplitude of the penalty function applied to the fir
 The Legendre transformations between magnetic functionals require that the DDB file contain second-order data obtained from a set of local Zeeman-field linear-response calculations (see the [[rfmagn]] = 2 option), combined with a geometrically equivalent magnetic penalty.
 
 The penalized ions and directions are specified by [[mpatpol@anaddb]] and [[mpdir@anaddb]], respectively.
-        """,
+""",
     ),
 
 

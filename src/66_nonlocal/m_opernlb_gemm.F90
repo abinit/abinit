@@ -32,7 +32,7 @@ module m_opernlb_gemm
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
 
- use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_size_t
+ use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_size_t,c_f_pointer
 
  implicit none
 
@@ -58,19 +58,23 @@ contains
 !!
 !! SOURCE
 subroutine opernlb_gemm_distributed(rank,nprocs,npw,ndat,&
+&                                   transa,transb,&
 &                                   nprojs,nprojs_blk,nprojs_last_blk,cplex,&
 &                                   projs_local,projections,vectout,gpu_option)
  integer,  intent(in)     :: rank,nprocs,npw,ndat,gpu_option
  integer,  intent(in)     :: nprojs,nprojs_blk,nprojs_last_blk,cplex
+ character(len=1),intent(in) :: transa,transb
  real(dp), intent(in),  target    :: projs_local(cplex,npw,nprojs_last_blk)
  real(dp), intent(in),  target    :: projections(cplex,nprojs,ndat)
- real(dp), intent(out), target    :: vectout(cplex,npw*ndat)
+ real(dp), intent(out), target    :: vectout(cplex,npw,ndat)
 
  !Local variables
- integer :: iblock,ibeg,iend,req(2),ierr,nprojs_cur_blk,rank_prev,rank_next
+ integer :: iblock,ibeg,req(2),ierr,nprojs_cur_blk,rank_prev,rank_next
  complex(dp) :: beta
  real(dp), ABI_CONTIGUOUS pointer :: recv_buf(:,:,:), work_buf(:,:,:)
  real(dp), allocatable, target  :: projs_recv(:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: projections_1d(:)
+ type(c_ptr) :: projections_cptr
 ! *************************************************************************
 
  ABI_MALLOC(projs_recv, (cplex, npw, nprojs_last_blk))
@@ -130,34 +134,27 @@ subroutine opernlb_gemm_distributed(rank,nprocs,npw,ndat,&
    end if
 
    ibeg = 1 + modulo(rank+iblock-1,nprocs)*nprojs_blk
-   iend = ibeg+nprojs_cur_blk-1
 
-   if(gpu_option == ABI_GPU_DISABLED) then
-     if(cplex==2) then
-       call abi_zgemm_2r('N', 'N', npw, ndat, nprojs_cur_blk, cone, &
-       &                 work_buf, npw, &
-       &                 projections(:,ibeg:iend,:), nprojs_cur_blk,&
-       &                 beta, &
-       &                 vectout, npw)
-     else
-       call DGEMM('N', 'N', npw, ndat, nprojs_cur_blk, one, &
-       &          work_buf, npw, &
-       &          projections(:,ibeg:iend,:), nprojs_cur_blk, &
-       &          real(beta), &
-       &          vectout, npw)
-     end if
-   else if(gpu_option == ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET DATA USE_DEVICE_ADDR(work_buf,vectout,projections)
-     call abi_gpu_xgemm(cplex, 'N','N', &
-     &                  npw, ndat, nprojs_cur_blk, cone, &
-     &                  c_loc(work_buf), npw, &
-     &                  c_loc(projections(1,ibeg,1)), nprojs, &
-     &                  beta, &
-     &                  c_loc(vectout), npw)
-     !$OMP END TARGET DATA
-#endif
-   end if
+   ! Small trickery here:
+   ! The multiplication is performed over a slice of projectors in 'work_buf' matrix.
+   ! In that case, 'projections' matrix is still sized by all projectors but only
+   ! a slice of the projectors present in work_buf is used.
+   !
+   ! Therefore, we need to provide GEMM with the start of the slice
+   ! with 'projections' rather than the start of 'projections' as usual.
+   !
+   ! For that reason, we turn 'projections' matrix into single-rank in order
+   ! to pass the right starting row.
+   projections_cptr = c_loc(projections)
+   call c_f_pointer(projections_cptr, projections_1d, [cplex * nprojs * ndat])
+
+   call abi_xgemm(transa,transb,&
+   &              npw, ndat, nprojs_cur_blk, cone, &
+   &              work_buf, npw,&
+   &              projections_1d(cplex*ibeg-(cplex-1):cplex*nprojs*ndat),nprojs,&
+   &              beta, &
+   &              vectout, npw, &
+   &              x_cplx=cplex,gpu_option=gpu_option)
 
    beta = cone
 
@@ -213,12 +210,18 @@ subroutine opernlb_xgemm(cplex,transa,transb,npw,ndat,nprojs,alpha,a,lda,b,ldb,b
  real(dp),target,intent(inout) :: c(cplex,ldc,ndat)
 
  integer :: ibeg
+ real(dp), ABI_CONTIGUOUS pointer :: b_1d(:)
+ type(c_ptr) :: b_cptr
 ! *********************************************************************
- ibeg = 1
- if(use_sliced_gemms) ibeg = 1 + (iblock-1)*nprojs_blk
+
+#ifdef FC_NVHPC
+   ! Silly fix for NVHPC
+   if(cplex == -42) write(100,*) cplex
+#endif
 
  if(use_distrib) then
    call opernlb_gemm_distributed(rank,nprocs,npw,ndat,&
+   &                             transa,transb,&
    &                             nprojs,&
    &                             nprojs_blk,&
    &                             nprojs_last_blk,&
@@ -226,22 +229,27 @@ subroutine opernlb_xgemm(cplex,transa,transb,npw,ndat,nprojs,alpha,a,lda,b,ldb,b
    &                             a,&
    &                             b,c,gpu_option)
  else
-   if (gpu_option == ABI_GPU_DISABLED) then
-     if(cplex==2) then
-       call abi_zgemm_2r(transa,transb,npw,ndat,nprojs,alpha,&
-       &    a,lda,b,ldb,beta,c,ldc)
-     else ! cplex==1
-       call DGEMM(transa,transb,npw,ndat,nprojs,real(alpha),&
-       &    a,lda,b,ldb,real(beta),c,ldc)
-     end if
-   else if (gpu_option == ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
-     call abi_gpu_xgemm(cplex,transa,transb,npw,ndat,nprojs,alpha,&
-     &    c_loc(a),lda,c_loc(b(1,ibeg,1)),ldb,beta,c_loc(c),ldc)
-     !$OMP END TARGET DATA
-#endif
-   end if
+   ! Small trickery here:
+   ! When use_sliced_gemm is on, the multiplication is performed over
+   ! a slice of projectors in A matrix.
+   ! In that case, B matrix is still sized by all projectors but only
+   ! a slice matching the projectors present in A is used.
+   !
+   ! Therefore, we need to provide GEMM with the start of the slice
+   ! of relevant projectors within  B rather than the start of B as usual.
+   !
+   ! For that reason, we turn B matrix into single-rank in order
+   ! to pass the right starting row.
+   ibeg = 1
+   if(use_sliced_gemms) ibeg = 1 + (iblock-1)*nprojs_blk
+   b_cptr = c_loc(b)
+   call c_f_pointer(b_cptr, b_1d, [cplex * ldb * ndat])
+
+   call abi_xgemm(transa,transb,npw,ndat,nprojs,alpha,&
+   &    a,lda,&
+   &    b_1d(cplex*ibeg-(cplex-1):cplex*ldb*ndat),ldb,beta,&
+   &    c,ldc,&
+   &    x_cplx=cplex,gpu_option=gpu_option)
  end if
 
  end subroutine opernlb_xgemm
@@ -654,12 +662,8 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
      if(gpu_option == ABI_GPU_DISABLED) then
        svectout = svectout + vectin ! TODO understand this
      else if(gpu_option == ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET DATA USE_DEVICE_ADDR(vectin,svectout)
-       call abi_gpu_xaxpy(1, 2*npw*nspinor*ndat, cone, &
-       &    c_loc(vectin), 1, c_loc(svectout), 1)
-       !$OMP END TARGET DATA
-#endif
+       call abi_xaxpy( 2*npw*nspinor*ndat, cone, &
+       &    vectin, 1, svectout, 1, x_cplx=1, gpu_option=gpu_option)
      end if
    end if
  end if  ! (paw_opt == 3 .or. paw_opt == 4)

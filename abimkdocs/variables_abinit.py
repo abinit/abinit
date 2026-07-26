@@ -3187,6 +3187,22 @@ See [[dmft_charge_prec]] for further tuning of the root-finding algorithm.
 ),
 
 Variable(
+    abivarname="dmft_full_chipsi",
+    varset="dmft",
+    vartype="integer",
+    topics=["DMFT_expert"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: compute full chi psi",
+    requires="[[usedmft]] == 1 and [[dmft_prtwan]] == 1",
+    added_in_version="before_v10.8",
+    text=r"""
+Required in order to build the full Wannier function outside the paw sphere. This is relevant 
+only when using [[dmft_solv]] $\in$ [5,8,10].
+""",
+),
+
+Variable(
     abivarname="dmft_hybri_limit",
     varset="dmft",
     vartype="integer",
@@ -17621,8 +17637,9 @@ Variable(
     added_in_version="v10",
     text=r"""
 This variable controls the verbosity level for logging during the application of the $\chi0$-based SCF preconditioner ([[iprcel]] = 2**).
-* **precon_verbose** = 0 --> No log output.
-* **precon_verbose** = 1 --> Logs the GMRES convergence.
+
+  * **precon_verbose** = 0 --> No log output.
+  * **precon_verbose** = 1 --> Logs the GMRES convergence.
 """,
 ),
 
@@ -26418,8 +26435,9 @@ Variable(
     text=r"""
 If set to 1, the EPH code computes and stores on file the matrix elements
 
-i <psi_mk[V1_q0ka, p]|psi_nk> in the full BZ in reduced coordinates.
+$$ i \left\langle \psi_{mk}\big| \middle[ V^{(1)}_{q0,ka}, p \middle] \big| \psi_{nk} \right\rangle $$
 
+in the full BZ in reduced coordinates,
 when computing the GSTORE.nc. See [[cite:Lihm2020]].
 """,
 ),
@@ -28126,10 +28144,10 @@ Variable(
     text=r"""
 Cartesian coordinates of the global spin-quantization axis.
 By default, the spin-quantization axis is aligned with the Cartesian z axis.
-The variable [[spinaxis]] defined the orientation of spinor space spanned by the Pauli matrices \{\sigma_1,\sigma_2,\sigma_3\}
+The variable [[spinaxis]] defines the orientation of spinor space spanned by the Pauli matrices \{\sigma_1,\sigma_2,\sigma_3\}
 with respect to the Cartesian reference frame; in particular, it sets the \sigma_3 axis along the direction specified by [[spinaxis]].
 When [[spinaxis]] differs from its default value, it is recommended to specify magnetic vectors in Cartesian coordinates
-using [[spinat_cart]] and [[hspinfield_cart]] rather than [[spinat]] and [[hspinfield]].
+using [[spinat_cart]] and [[hspinfield_cart]] rather than [[spinat]] and [[hspinfield]] who give the same quantities in the spinaxis coordinates..
 """,
 ),
 
