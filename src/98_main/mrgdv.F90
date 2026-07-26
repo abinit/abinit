@@ -121,13 +121,16 @@ program mrgdv
        write(std_out,*)"                           Assume DVDB with all 3*natom perturbations for each q (use prep_gkk)."
        write(std_out,*)"test_v1rsym [--symv1scf]   Test symmetries of DFPT potentials in real space."
        write(std_out,*)"test_ftinterp in_DVDB --ngqpt 4 4 4 [--ddb-path] [--dvdb-add-lr 0] [--qdamp -1]"
-       write(std_out,*)"                                    [--symv1scf] [--coarse-ngqpt 2 2 2]"
+       write(std_out,*)"                                    [--symv1scf] [--coarse-ngqpt 2 2 2] [--potfile foo.nc]"
        write(std_out,*)"                           Test Fourier interpolation of DFPT potentials."
+       write(std_out,*)"                           --potfile: dump ab-initio and interpolated V1(r) to netcdf for plotting."
        write(std_out,*)"test_symcheck in_DVDB --ngqpt 4 4 4 --qpt 0.1 0.2 0.3 [--ddb-path]"
        write(std_out,*)"                                    [--dvdb-add-lr 0] [--qdamp -1] [--symv1scf] [--rspace_cell 1]"
+       write(std_out,*)"                                    [--potfile foo.nc]"
        write(std_out,*)"                           Test cross-q-point symmetry consistency of the FT interpolation:"
        write(std_out,*)"                           interpolate at --qpt and at S.qpt for every symmetry S, compare"
        write(std_out,*)"                           against v1phq_rotate's own prediction from --qpt alone."
+       write(std_out,*)"                           --potfile: dump target/predicted V1(r) to netcdf for plotting."
        write(std_out,*)"test_symcheck_native in_DVDB --sym-dvdb other_DVDB --qpt_source 0.25 0 0"
        write(std_out,*)"                                    --qpt_target -0.25 0 0 [--isym 2] [--itimrev 1] [--g0q 0 0 0]"
        write(std_out,*)"                           Like test_symcheck but on TWO LITERAL, already-present q-points"
@@ -193,8 +196,9 @@ program mrgdv
      ABI_CHECK(get_arg("dvdb-add-lr", dvdb_add_lr, msg, default=1) == 0, msg)
      ABI_CHECK(get_arg("qdamp", dvdb_qdamp, msg, default=0.1_dp) == 0, msg)
      ABI_CHECK(get_arg_list("coarse-ngqpt", coarse_ngqpt, lenr, msg, default=0, want_len=3) == 0, msg)
+     ABI_CHECK(get_arg("potfile", dump_file, msg, default="") == 0, msg)
      call dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1scf, ngqpt, dvdb_add_lr, dvdb_qdamp, &
-                             ddb_filepath, prtvol, coarse_ngqpt, comm)
+                             ddb_filepath, prtvol, coarse_ngqpt, dump_file, comm)
 
    case ("test_symcheck")
      call get_command_argument(2, dvdb_filepath)
@@ -205,8 +209,9 @@ program mrgdv
      ABI_CHECK(get_arg("symv1scf", symv1scf, msg, default=0) == 0, msg)
      ABI_CHECK(get_arg("dvdb-add-lr", dvdb_add_lr, msg, default=1) == 0, msg)
      ABI_CHECK(get_arg("qdamp", dvdb_qdamp, msg, default=0.1_dp) == 0, msg)
+     ABI_CHECK(get_arg("potfile", dump_file, msg, default="") == 0, msg)
      call dvdb_test_symcheck(dvdb_filepath, rspace_cell, symv1scf, ngqpt, dvdb_add_lr, dvdb_qdamp, &
-                             ddb_filepath, prtvol, qpt_source, comm)
+                             ddb_filepath, prtvol, qpt_source, dump_file, comm)
 
    case ("test_symcheck_native")
      call get_command_argument(2, dvdb_filepath)
