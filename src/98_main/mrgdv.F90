@@ -38,12 +38,11 @@ program mrgdv
  use m_build_info,      only : abinit_version
  use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : sjoin, itoa, ltoa
- use m_numeric_tools,   only : vdiff_eval, vdiff_print
  use m_io_tools,        only : file_exists, prompt
  use m_argparse,        only : get_arg, get_arg_list
  use m_fftcore,         only : ngfft_seq
  use m_dvdb,            only : dvdb_t, dvdb_merge_files, dvdb_test_v1complete, dvdb_test_ftinterp, dvdb_test_v1rsym, &
-                                dvdb_test_symcheck
+                                dvdb_test_symcheck, dvdb_test_symcheck_native
 
  implicit none
 
@@ -51,14 +50,15 @@ program mrgdv
 !scalars
  integer,parameter :: gpu_option0 = 0
  integer :: ii, nargs, nfiles, comm, prtvol, my_rank, lenr, dvdb_add_lr, rspace_cell, symv1scf, npert_miss, abimem_level
+ integer :: isym, itimrev
  real(dp) :: dvdb_qdamp, abimem_limit_mb
  character(len=24) :: codename
  character(len=500) :: command, arg, msg
  character(len=fnlen) :: dvdb_filepath, dump_file, ddb_filepath
  type(dvdb_t) :: dvdb
 !arrays
- integer :: ngqpt(3), coarse_ngqpt(3), ngfftf(18), qptopt
- real(dp) :: qpt_source(3)
+ integer :: ngqpt(3), coarse_ngqpt(3), ngfftf(18), qptopt, g0q(3)
+ real(dp) :: qpt_source(3), qpt_target(3)
  character(len=fnlen),allocatable :: v1files(:)
 ! *************************************************************************
 
@@ -128,6 +128,13 @@ program mrgdv
        write(std_out,*)"                           Test cross-q-point symmetry consistency of the FT interpolation:"
        write(std_out,*)"                           interpolate at --qpt and at S.qpt for every symmetry S, compare"
        write(std_out,*)"                           against v1phq_rotate's own prediction from --qpt alone."
+       write(std_out,*)"test_symcheck_native in_DVDB --sym-dvdb other_DVDB --qpt_source 0.25 0 0"
+       write(std_out,*)"                                    --qpt_target -0.25 0 0 [--isym 2] [--itimrev 1] [--g0q 0 0 0]"
+       write(std_out,*)"                           Like test_symcheck but on TWO LITERAL, already-present q-points"
+       write(std_out,*)"                           (no Fourier interpolation at all): tests v1phq_rotate alone."
+       write(std_out,*)"                           --sym-dvdb supplies the crystal's TRUE symmetry table (in_DVDB's"
+       write(std_out,*)"                           own is typically nsym=1, e.g. if built to force literal, per-q"
+       write(std_out,*)"                           independent computation of every perturbation)."
        write(std_out,*)"downsample in_DVDB out_DVDB [n1, n2, n3] Produce new DVDB with q-subsmesh"
        goto 100
      end if
@@ -200,6 +207,16 @@ program mrgdv
      ABI_CHECK(get_arg("qdamp", dvdb_qdamp, msg, default=0.1_dp) == 0, msg)
      call dvdb_test_symcheck(dvdb_filepath, rspace_cell, symv1scf, ngqpt, dvdb_add_lr, dvdb_qdamp, &
                              ddb_filepath, prtvol, qpt_source, comm)
+
+   case ("test_symcheck_native")
+     call get_command_argument(2, dvdb_filepath)
+     ABI_CHECK(get_arg("sym-dvdb", ddb_filepath, msg, default="") == 0, msg)
+     ABI_CHECK(get_arg_list("qpt_source", qpt_source, lenr, msg, want_len=3) == 0, msg)
+     ABI_CHECK(get_arg_list("qpt_target", qpt_target, lenr, msg, want_len=3) == 0, msg)
+     ABI_CHECK(get_arg("isym", isym, msg, default=1) == 0, msg)
+     ABI_CHECK(get_arg("itimrev", itimrev, msg, default=1) == 0, msg)
+     ABI_CHECK(get_arg_list("g0q", g0q, lenr, msg, default=0, want_len=3) == 0, msg)
+     call dvdb_test_symcheck_native(dvdb_filepath, ddb_filepath, qpt_source, qpt_target, isym, itimrev, g0q, comm)
 
    case ("downsample")
      call get_command_argument(2, dvdb_filepath)
