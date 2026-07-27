@@ -616,12 +616,6 @@ contains
   procedure :: compute => gstore_compute
   ! Compute e-ph matrix elements.
 
-  procedure :: get_lambda_iso_iw => gstore_get_lambda_iso_iw
-  ! Compute isotropic lambda(iw) along the imaginary axis.
-
-  procedure :: get_a2fw => gstore_get_a2fw
-  ! Compute Eliashberg function a^2F(w).
-
   procedure :: from_ncpath => gstore_from_ncpath
   ! Reconstruct object from netcdf file.
 
@@ -658,14 +652,9 @@ contains
 end type gstore_t
 !!***
 
-public :: gstore_check_restart
- ! Check whether restart is possible.
-
-public :: gstore_read_gtype
- !  Read the value of "gstore_gtype" from the NetCDF file.
-
-public :: gstore_symmetrize
- ! Reconstruct the electron-phonon matrix elements g(k,q) in the full BZ
+public :: gstore_check_restart ! Check whether restart is possible.
+public :: gstore_read_gtype    ! Read the value of "gstore_gtype" from the NetCDF file.
+public :: gstore_symmetrize    ! Reconstruct the electron-phonon matrix elements g(k,q) in the full BZ.
 
 !----------------------------------------------------------------------
 
@@ -1350,8 +1339,7 @@ logical function gstore_same_nbands(gstore, msg) result(same)
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is))
    if (gqk%nb_k /= gqk%nb_kq) then
-     same = .False.
-     msg = sjoin("gstore has different nb_kq, nb_k", itoa(gqk%nb_kq), itoa(gqk%nb_k))
+     same = .False.; msg = sjoin("gstore has different nb_kq, nb_k", itoa(gqk%nb_kq), itoa(gqk%nb_k))
    end if
    end associate
  end do
@@ -1381,7 +1369,7 @@ end function gstore_same_nbands
 !!    Manual specification of bands (nb_k) and k-points also works by setting gstore_kfilter = "none" (default)
 !!    and providing the values via kptgw and bdgw.
 !!
-!!  What does nott work:
+!!  What does not work:
 !!
 !!  - There is currently no effective way to control nb_kq directly.
 !!    The only workaround is using gstore_brange. For example, gstore_brange = '1, 8' sets nb_k = nb_kq = 8.
@@ -2958,216 +2946,6 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax, pp_max)
  call cwtime_report(" gstore_get_mpw_gmax", cpu, wall, gflops)
 
 end subroutine gstore_get_mpw_gmax
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_gstore/gstore_get_lambda_iso_iw
-!! NAME
-!! gstore_get_lambda_iso_iw
-!!
-!! FUNCTION
-!!  Compute isotropic lambda along the imaginary axis
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SOURCE
-
-subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
-
-!Arguments ------------------------------------
- class(gstore_t),intent(inout) :: gstore
- integer,intent(in) :: nw
- real(dp),intent(in) :: imag_w(nw)
- real(dp),intent(out) :: lambda(nw)
-
-!Local variables-------------------------------
- integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, nb_k, nb_kq
- real(dp) :: g2, wqnu, weight_k, weight_q
-!arrays
- real(dp) :: qpt(3)
- real(dp),allocatable :: dbl_delta_q(:,:,:), g2_pmnk(:,:,:,:)
-!----------------------------------------------------------------------
-
- ABI_CHECK(gstore%qzone == "bz", "gstore_get_lambda_iso_iw assumes qzone == `bz`")
- !if (gstore%check_cplex_qkzone_gmode(cplex1, "bz", kzone, gmode, kfilter) result(ierr)
-
- lambda = zero
- do my_is=1,gstore%my_nspins
-   associate (gqk => gstore%gqk(my_is))
-   ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
-   ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
-
-   nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
-   ABI_CHECK_IEQ(nb_k, nb_kq, "gqk_dbldelta_qpt does not support nb_k != nb_kq")
-
-   ! Weights for delta(e_{m k+q}) delta(e_{n k}) for my list of k-points.
-   ABI_MALLOC(dbl_delta_q, (nb_kq, nb_k, gqk%my_nk))
-   ABI_MALLOC(g2_pmnk, (gqk%my_npert, nb_kq, nb_k, gqk%my_nk))
-
-   do my_iq=1,gqk%my_nq
-     ! Compute integration weights for the double delta.
-     call gqk%dbldelta_qpt(my_iq, gstore, gstore%dtset%eph_intmeth, gstore%dtset%eph_fsmear, qpt, weight_q, dbl_delta_q)
-
-     ! Copy data to improve memory access in the loops below.
-     g2_pmnk = gqk%my_g2(:,:,my_iq,:,:)
-
-     do my_ik=1,gqk%my_nk
-       weight_k = gqk%my_wtk(my_ik)
-       do in_k=1,nb_k
-         do im_kq=1,nb_kq
-           do my_ip=1,gqk%my_npert
-             g2 = g2_pmnk(my_ip, im_kq, in_k, my_ik)
-             ! TODO: handle wqnu ~ 0
-             wqnu = gqk%my_wnuq(my_ip, my_iq)
-             lambda(:) = lambda(:) + &
-               two * wqnu / (imag_w(:) ** 2 + wqnu ** 2) * g2 * weight_k * weight_q * dbl_delta_q(im_kq, in_k, my_ik)
-           end do
-         end do
-       end do
-     end do
-   end do ! my_iq
-
-   ABI_FREE(dbl_delta_q)
-   ABI_FREE(g2_pmnk)
-   end associate
- end do ! my_is
-
- ! Take into account collinear spin
- lambda = lambda * (two / (gstore%nsppol * gstore%dtset%nspinor))
- call xmpi_sum(lambda, gstore%comm, ierr)
-
-end subroutine gstore_get_lambda_iso_iw
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_gstore/gstore_get_a2fw
-!! NAME
-!! gstore_get_a2fw
-!!
-!! FUNCTION
-!!  Compute Eliashberg function a^2F(omega).
-!!
-!! INPUTS
-!!  nw: Number of frequencies.
-!!  wmesh: Frequency mesh.
-!!
-!! OUTPUT
-!! a2fw(nw): Eliashberg function.
-!!
-!! SOURCE
-
-subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
-
-!Arguments ------------------------------------
- class(gstore_t),intent(inout) :: gstore
- type(dataset_type),intent(in) :: dtset
- integer,intent(in) :: nw
- real(dp),intent(in) :: wmesh(nw)
- real(dp),intent(out) :: a2fw(nw)
-
-!Local variables-------------------------------
- integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, timrev_q, ii, ik_ibz, nb_k, nb_kq
- real(dp) :: g2_qnu, wqnu, weight_k, weight_q, cpu, wall, gflops
- type(lgroup_t) :: lg_myq
- character(len=500) :: msg !, kk_string !, qq_bz_string
-!arrays
- integer :: units(2)
- real(dp) :: qpt(3), kk(3)
- real(dp),allocatable :: dbl_delta_q(:,:,:), g2_mnkp(:,:,:,:), deltaw_nuq(:)
-!----------------------------------------------------------------------
-
- units = [std_out, ab_out]
-
- call cwtime(cpu, wall, gflops, "start")
- call wrtout(units, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(gstore%dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
-
- !if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "phonon") /= 0) then
- !  ABI_ERROR("The gstore object is inconsistent with gstore_wannierize_and_write_gwan. See messages above.")
- !end if
-
- ABI_CHECK(gstore%qzone == "bz", "gstore_get_a2fw assumes qzone == `bz`")
- ! Check consistency of little group options.
- ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
-
- ABI_MALLOC(deltaw_nuq, (nw))
-
- a2fw = zero
-
- ! Loop over collinear spins.
- do my_is=1,gstore%my_nspins
-   associate (gqk => gstore%gqk(my_is), cryst => gstore%cryst)
-   ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
-   ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
-
-   nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
-   ABI_CHECK_IEQ(nb_k, nb_kq, "gqk_dbldelta_qpt does not support nb_k != nb_kq")
-
-   ! Weights for delta(e_{m k+q}) delta(e_{n k}) for my list of k-points.
-   ABI_MALLOC(dbl_delta_q, (nb_kq, nb_k, gqk%my_nk))
-   ABI_MALLOC(g2_mnkp, (nb_kq, nb_k, gqk%my_nk, gqk%my_npert))
-
-   ! Loop over my q-points.
-   do my_iq=1,gqk%my_nq
-     ! Compute all integration weights for the double delta.
-     call gqk%dbldelta_qpt(my_iq, gstore, gstore%dtset%eph_intmeth, gstore%dtset%eph_fsmear, qpt, weight_q, dbl_delta_q)
-
-     ! Copy data to improve memory access in the loops below.
-     do my_ip=1,gqk%my_npert
-       g2_mnkp(:,:,:,my_ip) = gqk%my_g2(my_ip,:,my_iq,:,:)
-     end do
-
-     ! Compute the little group of the q-point so that we only need to sum g(k,q) for k in the IBZ_q
-     if (dtset%gstore_use_lgq /= 0) then
-       timrev_q = kpts_timrev_from_kptopt(gstore%qptopt)
-       call lg_myq%init(cryst, qpt, timrev_q, gstore%nkbz, gstore%kbz, gstore%nkibz, gstore%kibz, xmpi_comm_self)
-     end if
-
-     ! Loop over my phonon modes.
-     do my_ip=1,gqk%my_npert
-       wqnu = gqk%my_wnuq(my_ip, my_iq)
-       ! delta(w - omega_qnu)
-       deltaw_nuq = gaussian(wmesh - wqnu, gstore%dtset%ph_smear)
-
-       ! Loop over my k-points.
-       do my_ik=1,gqk%my_nk
-         kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik); weight_k = gqk%my_wtk(my_ik)
-
-         ! Handle little group and integration weight.
-         if (dtset%gstore_use_lgq /= 0) then
-           ii = lg_myq%findq_ibzk(kk); if (ii == -1) cycle; weight_k = lg_myq%weights(ii)
-         end if
-
-         ! Sum over m_kq and n_k and accumulate.
-         do in_k=1,nb_k
-           do im_kq=1,nb_kq
-             g2_qnu = g2_mnkp(im_kq, in_k, my_ik, my_ip)
-             a2fw(:) = a2fw(:) + deltaw_nuq(:) * g2_qnu * weight_k * weight_q * dbl_delta_q(im_kq, in_k, my_ik)
-           end do
-         end do
-       end do
-     end do
-
-     call lg_myq%free()
-   end do ! my_iq
-
-   ABI_FREE(dbl_delta_q)
-   ABI_FREE(g2_mnkp)
-   end associate
- end do ! my_is
-
- ABI_FREE(deltaw_nuq)
-
- ! Take into account collinear spin and N(eF) TODO
- a2fw = a2fw * (two / (gstore%nsppol * gstore%dtset%nspinor))
- call xmpi_sum(a2fw, gstore%comm, ierr)
-
- call cwtime_report(" gstore_get_a2fw", cpu, wall, gflops)
-
-end subroutine gstore_get_a2fw
 !!***
 
 !----------------------------------------------------------------------
@@ -6726,7 +6504,7 @@ end subroutine gstore_read_gtype
 !!
 !! FUNCTION
 !! Reconstruct the electron-phonon matrix elements g(k,q) in the full
-!! Brillouin Zone (BZ) using the values stored in the IBZ for k and IBZ_k for q.
+!! Brillouin Zone (BZ) using the values stored in the IBZ for k and the IBZ_k for q.
 !! Uses the NetCDF API for in-place modification of the GSTORE file
 !! and wfd_t to fetch wavefunctions and compute unitary matrices.
 !!
@@ -6798,7 +6576,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 
  call gstore_read_gtype(gstore_path, gtype, comm, brange_k_spin=brange_k_spin)
 
- ! Compute the little-group D-matrices D_mn(S) = <psi_m,S k_ibz|S|psi_n,k_ibz>.
+ ! Compute the D-matrices D_mn(S) = <psi_m,S k_ibz|S|psi_n,k_ibz>.
  ! These are used below to correct the extra rotation the bra (electron state at k+q)
  ! picks up when its own already-computed BZ representative differs from the one obtained
  ! by applying isym_k directly.
@@ -6809,8 +6587,6 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  ! Performance is not crucial and the algorithm is IO-bound.
  if (my_rank /= 0) goto 100
 
- gvals_name = "gvals"
-
  ! GWPT files store two sets of e-ph matrix elements: "gvals" (g^Sigma) and "gvals_ks" (g^KS),
  ! written at the same (k,q) grid positions (see m_gwpt.F90's dump_my_gbuf). Symmetrize both.
  n_gv = 1; gv_names(1) = "gvals"
@@ -6819,18 +6595,17 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  end if
 
  ! Read GSTORE.nc dimensions and metadata from file, without allocating gvals buffer.
- with_cplex = 0; with_gmode = GSTORE_GMODE_ATOM; with_g2dw = .False.
-
+ with_cplex = 0; with_gmode = GSTORE_GMODE_ATOM; with_g2dw = .False.; gvals_name = "gvals"
  call gstore%from_ncpath(gstore_path, with_cplex, dtset, dtfil, cryst, ebands, ifc, &
                          with_gmode, gvals_name, with_g2dw, xmpi_comm_self)
 
- ! We need the same number of bands for m and n.
- ! Also, k and q must be in the BZ without any filter.
+ ! We need the same number of bands for m and n. Also, k and q must be in the BZ without any filter.
  ABI_CHECK(gstore%same_nbands(msg), msg)
  if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "atom", kfilter="none", check_alloc=.False.) /= 0) then
    ABI_ERROR("GSTORE.nc should have both k and q in the full BZ. See messages above.")
  end if
 
+ ! TODO: In principle, we can support has_used_lgk
  ABI_CHECK_IEQ(gstore%has_used_lgq, 0, "Symmetrization of g(k,q) with use_lgq /= 0 is not coded")
  ABI_CHECK_IEQ(gstore%has_used_lgk, 0, "Symmetrization of g(k,q) with use_lgk /= 0 is not coded")
 
@@ -6839,7 +6614,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  nqbz = gstore%nqbz; nqibz = gstore%nqibz
  nsym = cryst%nsym
 
- ! Need to know the position of the IBZ k-points in the nc file.
+ ! Need to know the position of the IBZ k-points in the netcdf array..
  call get_ibz2bz(gstore%nkibz, gstore%nkbz, gstore%kbz2ibz, kibz2bz, msg, ierr)
  ABI_CHECK(ierr == 0, sjoin("Something wrong in symmetry tables for k-points", ch10, msg))
 
@@ -6893,10 +6668,10 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
      itime_k = trev_k + 1
      kk_ibz = ebands%kptns(:,ik_ibz)
 
-     ! Index of the ibz k-point on disk.
+     ! Index of the IBZ k-point on disk.
      ik_ibz_file = kibz2bz(ik_ibz)
 
-     ! symrec_eq is the PURELY SPATIAL rotation (used for atomic-perturbation-direction
+     ! symrec_eq is the SPATIAL rotation (used for atomic-perturbation-direction
      ! bookkeeping below, which is TR-blind: time reversal does not move atoms.
      ! symrec_eq_kspace additionally carries the TR sign and is the one that actually relates k-space
      ! vectors (kk_bz, q) to their IBZ images
@@ -6909,8 +6684,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
      end do
      ABI_CHECK(isym_combined /= nsym + 1, "Cannot find symrec_eq")
 
-     ! Read g(k_ibz, q) for all q-point in the BZ, for each gvals stream ("gvals", and
-     ! "gvals_ks" too when gtype == "gwpt").
+     ! Read g(k_ibz, q) for all q-point in the BZ, for each gvals stream ("gvals", and "gvals_ks" too when gtype == "gwpt").
      do igv=1,n_gv
        call c_f_pointer(c_loc(gkq_base(1,1,1,1,igv)), gkq_base_ptr, [2, nb, nb, gqk%natom3, gqk%my_nq])
        ncerr = nf90_get_var(spin_ncid, spin_vid(gv_names(igv)), gkq_base_ptr, &
@@ -6937,8 +6711,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        ! that picks up the TR sign under the same combined operation mapping kk_ibz -> kk_bz.
        do iq_sym=1, gqk%my_nq
          ! qpt = qpt_tmp + G0_q
-         qpt_tmp = matmul(symrec_eq_kspace, qbz(:, iq_sym))
-         if (isamek(qpt, qpt_tmp, g0_q)) exit
+         qpt_tmp = matmul(symrec_eq_kspace, qbz(:, iq_sym)); if (isamek(qpt, qpt_tmp, g0_q)) exit
        end do
        ABI_CHECK(iq_sym /= gqk%my_nq + 1, sjoin("Cannot find:", ktoa(qpt)))
 
@@ -6946,7 +6719,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        ! Bug A fix: the bra (electron state at k+q) reaches its target BZ
        ! point via two composed rotations (isym_k applied to the SOURCE
        ! bra's own rotation from kq_ibz), while the "true" bra is obtained
-       ! by a single direct rotation from kq_ibz. The two differ by Û(h),
+       ! by a single direct rotation from kq_ibz. The two differ by U(h),
        ! h being the residual element of the little group (stabilizer) of
        ! kq_ibz. h always stabilizes kq_ibz by construction (never an
        ! out-of-domain little-group lookup), so the D-matrices already
@@ -7160,7 +6933,6 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  if (DEBUG_DUMP_DH) close(790)
  if (DEBUG_DUMP_DH) close(791)
  if (DEBUG_DUMP_DH) close(792)
-
 
  ABI_FREE(kibz2bz)
  call gstore%free()

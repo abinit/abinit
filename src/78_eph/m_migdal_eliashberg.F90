@@ -33,9 +33,12 @@ module m_migdal_eliashberg
  use m_dtfil
 
  use m_time,            only : cwtime, cwtime_report, sec2str
- use m_fstrings,        only : strcat, sjoin !, tolower, itoa, ftoa, ktoa, ltoa, strcat
+ use m_fstrings,        only : strcat, sjoin, itoa, ftoa, ktoa, ltoa
  use m_copy,            only : alloc_copy
+ use m_special_funcs,   only : gaussian
  use m_ebands,          only : ebands_t, edos_t
+ use m_kpts,            only : kpts_timrev_from_kptopt
+ use m_lgroup,          only : lgroup_t
  use m_gstore,          only : gstore_t
 
  implicit none
@@ -290,7 +293,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
 
  ! Compute Eliashberg function a2F(w)
  ABI_MALLOC(a2fw, (phmesh_size))
- call gstore%get_a2fw(dtset, phmesh_size, phmesh, a2fw)
+ call get_a2fw(gstore, dtset, phmesh_size, phmesh, a2fw)
 
  ncid = nctk_noid
  if (my_rank == master) then
@@ -330,7 +333,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
    ABI_MALLOC(imag_2w, (2 * niw))
 
    !call wrtout(std_out, " Computing lambda_iso_iw...")
-   !call gstore%get_lambda_iso_iw(2 * niw, imag_2w, lambda_ij)
+   !call get_lambda_iso_iw(gstore, 2 * niw, imag_2w, lambda_ij)
    ABI_FREE(imag_2w)
 
    !call iso%solve(itemp, kt, niw, imag_w, lambda_ij)
@@ -399,6 +402,216 @@ subroutine matsubara_mesh(bosons_or_fermions, kt, wmax, niw, imag_w)
  end select
 
 end subroutine matsubara_mesh
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_migdal_eliashberg/get_lambda_iso_iw
+!! NAME
+!! get_lambda_iso_iw
+!!
+!! FUNCTION
+!!  Compute isotropic lambda along the imaginary axis
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine get_lambda_iso_iw(gstore, nw, imag_w, lambda)
+
+!Arguments ------------------------------------
+ class(gstore_t),intent(inout) :: gstore
+ integer,intent(in) :: nw
+ real(dp),intent(in) :: imag_w(nw)
+ real(dp),intent(out) :: lambda(nw)
+
+!Local variables-------------------------------
+ integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, nb_k, nb_kq
+ real(dp) :: g2, wqnu, weight_k, weight_q
+!arrays
+ real(dp) :: qpt(3)
+ real(dp),allocatable :: dbl_delta_q(:,:,:), g2_pmnk(:,:,:,:)
+!----------------------------------------------------------------------
+
+ ABI_CHECK(gstore%qzone == "bz", "get_lambda_iso_iw assumes qzone == `bz`")
+ !if (gstore%check_cplex_qkzone_gmode(cplex1, "bz", kzone, gmode, kfilter) result(ierr)
+
+ lambda = zero
+ do my_is=1,gstore%my_nspins
+   associate (gqk => gstore%gqk(my_is))
+   ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
+   ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
+
+   nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
+   ABI_CHECK_IEQ(nb_k, nb_kq, "gqk_dbldelta_qpt does not support nb_k != nb_kq")
+
+   ! Weights for delta(e_{m k+q}) delta(e_{n k}) for my list of k-points.
+   ABI_MALLOC(dbl_delta_q, (nb_kq, nb_k, gqk%my_nk))
+   ABI_MALLOC(g2_pmnk, (gqk%my_npert, nb_kq, nb_k, gqk%my_nk))
+
+   do my_iq=1,gqk%my_nq
+     ! Compute integration weights for the double delta.
+     call gqk%dbldelta_qpt(my_iq, gstore, gstore%dtset%eph_intmeth, gstore%dtset%eph_fsmear, qpt, weight_q, dbl_delta_q)
+
+     ! Copy data to improve memory access in the loops below.
+     g2_pmnk = gqk%my_g2(:,:,my_iq,:,:)
+
+     do my_ik=1,gqk%my_nk
+       weight_k = gqk%my_wtk(my_ik)
+       do in_k=1,nb_k
+         do im_kq=1,nb_kq
+           do my_ip=1,gqk%my_npert
+             g2 = g2_pmnk(my_ip, im_kq, in_k, my_ik)
+             ! TODO: handle wqnu ~ 0
+             wqnu = gqk%my_wnuq(my_ip, my_iq)
+             lambda(:) = lambda(:) + &
+               two * wqnu / (imag_w(:) ** 2 + wqnu ** 2) * g2 * weight_k * weight_q * dbl_delta_q(im_kq, in_k, my_ik)
+           end do
+         end do
+       end do
+     end do
+   end do ! my_iq
+
+   ABI_FREE(dbl_delta_q)
+   ABI_FREE(g2_pmnk)
+   end associate
+ end do ! my_is
+
+ ! Take into account collinear spin
+ lambda = lambda * (two / (gstore%nsppol * gstore%dtset%nspinor))
+ call xmpi_sum(lambda, gstore%comm, ierr)
+
+end subroutine get_lambda_iso_iw
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_migdal_eliashberg/get_a2fw
+!! NAME
+!! get_a2fw
+!!
+!! FUNCTION
+!!  Compute Eliashberg function a^2F(omega).
+!!
+!! INPUTS
+!!  nw: Number of frequencies.
+!!  wmesh: Frequency mesh.
+!!
+!! OUTPUT
+!! a2fw(nw): Eliashberg function.
+!!
+!! SOURCE
+
+subroutine get_a2fw(gstore, dtset, nw, wmesh, a2fw)
+
+!Arguments ------------------------------------
+ class(gstore_t),intent(inout) :: gstore
+ type(dataset_type),intent(in) :: dtset
+ integer,intent(in) :: nw
+ real(dp),intent(in) :: wmesh(nw)
+ real(dp),intent(out) :: a2fw(nw)
+
+!Local variables-------------------------------
+ integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, timrev_q, ii, ik_ibz, nb_k, nb_kq
+ real(dp) :: g2_qnu, wqnu, weight_k, weight_q, cpu, wall, gflops
+ type(lgroup_t) :: lg_myq
+ character(len=500) :: msg !, kk_string !, qq_bz_string
+!arrays
+ integer :: units(2)
+ real(dp) :: qpt(3), kk(3)
+ real(dp),allocatable :: dbl_delta_q(:,:,:), g2_mnkp(:,:,:,:), deltaw_nuq(:)
+!----------------------------------------------------------------------
+
+ units = [std_out, ab_out]
+
+ call cwtime(cpu, wall, gflops, "start")
+ call wrtout(units, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(gstore%dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
+
+ !if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "phonon") /= 0) then
+ !  ABI_ERROR("The gstore object is inconsistent with gstore_wannierize_and_write_gwan. See messages above.")
+ !end if
+
+ ABI_CHECK(gstore%qzone == "bz", "get_a2fw assumes qzone == `bz`")
+ ! Check consistency of little group options.
+ ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
+
+ ABI_MALLOC(deltaw_nuq, (nw))
+
+ a2fw = zero
+
+ ! Loop over collinear spins.
+ do my_is=1,gstore%my_nspins
+   associate (gqk => gstore%gqk(my_is), cryst => gstore%cryst)
+   ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
+   ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
+
+   nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
+   ABI_CHECK_IEQ(nb_k, nb_kq, "gqk_dbldelta_qpt does not support nb_k != nb_kq")
+
+   ! Weights for delta(e_{m k+q}) delta(e_{n k}) for my list of k-points.
+   ABI_MALLOC(dbl_delta_q, (nb_kq, nb_k, gqk%my_nk))
+   ABI_MALLOC(g2_mnkp, (nb_kq, nb_k, gqk%my_nk, gqk%my_npert))
+
+   ! Loop over my q-points.
+   do my_iq=1,gqk%my_nq
+     ! Compute all integration weights for the double delta.
+     call gqk%dbldelta_qpt(my_iq, gstore, gstore%dtset%eph_intmeth, gstore%dtset%eph_fsmear, qpt, weight_q, dbl_delta_q)
+
+     ! Copy data to improve memory access in the loops below.
+     do my_ip=1,gqk%my_npert
+       g2_mnkp(:,:,:,my_ip) = gqk%my_g2(my_ip,:,my_iq,:,:)
+     end do
+
+     ! Compute the little group of the q-point so that we only need to sum g(k,q) for k in the IBZ_q
+     if (dtset%gstore_use_lgq /= 0) then
+       timrev_q = kpts_timrev_from_kptopt(gstore%qptopt)
+       call lg_myq%init(cryst, qpt, timrev_q, gstore%nkbz, gstore%kbz, gstore%nkibz, gstore%kibz, xmpi_comm_self)
+     end if
+
+     ! Loop over my phonon modes.
+     do my_ip=1,gqk%my_npert
+       wqnu = gqk%my_wnuq(my_ip, my_iq)
+       ! delta(w - omega_qnu)
+       deltaw_nuq = gaussian(wmesh - wqnu, gstore%dtset%ph_smear)
+
+       ! Loop over my k-points.
+       do my_ik=1,gqk%my_nk
+         kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik); weight_k = gqk%my_wtk(my_ik)
+
+         ! Handle little group and integration weight.
+         if (dtset%gstore_use_lgq /= 0) then
+           ii = lg_myq%findq_ibzk(kk); if (ii == -1) cycle; weight_k = lg_myq%weights(ii)
+         end if
+
+         ! Sum over m_kq and n_k and accumulate.
+         do in_k=1,nb_k
+           do im_kq=1,nb_kq
+             g2_qnu = g2_mnkp(im_kq, in_k, my_ik, my_ip)
+             a2fw(:) = a2fw(:) + deltaw_nuq(:) * g2_qnu * weight_k * weight_q * dbl_delta_q(im_kq, in_k, my_ik)
+           end do
+         end do
+       end do
+     end do
+
+     call lg_myq%free()
+   end do ! my_iq
+
+   ABI_FREE(dbl_delta_q)
+   ABI_FREE(g2_mnkp)
+   end associate
+ end do ! my_is
+
+ ABI_FREE(deltaw_nuq)
+
+ ! Take into account collinear spin and N(eF) TODO
+ a2fw = a2fw * (two / (gstore%nsppol * gstore%dtset%nspinor))
+ call xmpi_sum(a2fw, gstore%comm, ierr)
+
+ call cwtime_report(" get_a2fw", cpu, wall, gflops)
+
+end subroutine get_a2fw
 !!***
 
 end module m_migdal_eliashberg
