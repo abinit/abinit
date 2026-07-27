@@ -7435,6 +7435,25 @@ For further information about the naming of files in ABINIT, consult the [[help:
 """,
 ),
 
+
+Variable(
+    abivarname="getwfmq",
+    varset="files",
+    vartype="integer",
+    topics=["multidtset_useful"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GET the wavefunctions from _WFQ file at k-q",
+    added_in_version="10.4",
+    text=r"""
+Eventually used when [[ndtset]] > 0 (in the multi-dataset mode) and [[tim1rev]]=0, to indicate
+starting k-q wavefunctions, as an alternative to [[irdwfmq]].
+Note also that, starting Abinit v9, one can also use [[getwfmq_filepath]] to specify the path of the file directly.
+
+Similar to [[getwfk]] input variable, but will be used to initialize the wavefunctions at k-q.
+""",
+),
+
 Variable(
     abivarname="getwfq",
     varset="files",
@@ -10317,6 +10336,21 @@ For further information about the naming of files in ABINIT, consult the [[help:
 ),
 
 Variable(
+    abivarname="irdwfmq",
+    varset="files",
+    vartype="integer",
+    topics=["DFPT_useful"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Integer that governs the ReaDing of k-q _WFQ files",
+    added_in_version="10.4",
+    text=r"""
+See detailed description at [[irdwfk]].
+As alternative, one can use the input variable [[getwfmq]].
+""",
+),
+
+Variable(
     abivarname="irdwfq",
     varset="files",
     vartype="integer",
@@ -10326,7 +10360,7 @@ Variable(
     mnemonics="Integer that governs the ReaDing of _WFQ files",
     added_in_version="before_v9",
     text=r"""
-See detailed description at [[irdwfq]].
+See detailed description at [[irdwfk]].
 As alternative, one can use the
 input variable [[getwfq]].
 """,
@@ -18402,6 +18436,30 @@ The file structure of this unformatted output file is described in [[help:abinit
 ),
 
 Variable(
+    abivarname="prt1mag",
+    varset="files",
+    vartype="integer",
+    topics=["'DFPT_expert', 'ConstrainedDFPT_expert'"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PRinT the 1st-order MAGnetic moments",
+    added_in_version="10.4",
+    text=r"""
+
+When this flag is activated, integrals of the first-order particle and magnetization densities inside the atomic spheres are printed in the output file: 
+
+  * **prt1mag** = 1 --> print the integrals of the densities for the last
+    iteration only.
+  * **prt1mag** = 2 --> print the integrals of the densities at each
+    iteration.
+
+In both cases, the total and local (i.e. integrated inside the atomic spheres) magnetic moments are also written to the DDB file, as second-order derivatives of the total energy with respect to a macroscopic or local
+Zeeman field and to another arbitrary perturbation.
+
+""",
+)
+
+Variable(
     abivarname="prtnabla",
     varset="paw",
     vartype="integer",
@@ -20081,6 +20139,7 @@ This variable enables response-function calculations with respect to external Ze
   * 2 --> local magnetic-field perturbations (possibly at finite q) applied to the atoms specified by [[rfatpol]] and along the
           Cartesian directions specified by [[rfdir]]. The size and boundary shape of the atomic spheres wherein the field is applied
           are specified by [[ratsph]] and [[ratsm]].
+  * 3 --> Uniform non-magnetic scalar potential $e^{i {\bf q \cdot r}}$ perturbation applied along the direction of the wave-vector **q**. 
 
 Note for constrained DFPT calculations:
 A set of local magnetic-field response calculations, combined with a geometrically equivalent magnetic penalty
@@ -25428,6 +25487,23 @@ Alternative to [[getwfkfine]] and [[irdwfkfine]]. The string must be enclosed be
 """
 ),
 
+
+Variable(
+    abivarname="getwfmq_filepath",
+    varset="files",
+    vartype="string",
+    topics=["multidtset_useful"],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the k-q wavefunctions from WFQ PATH",
+    added_in_version="10.4",
+    text=r"""
+Eventually used when [[tim1rev]]=0 to specify the path of the k-q WFQ file using a string instead of the dataset index.
+Alternative to [[getwfmq]] and [[irdwfmq]]. The string must be enclosed between quotation marks:
+
+    getwfmq_filepath "../outdata/out_WFQ"
+"""
+),
 
 Variable(
     abivarname="getwfq_filepath",

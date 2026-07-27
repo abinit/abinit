@@ -1128,15 +1128,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     dtset%qgbt,dtset%use_gbt)
    end if
 
-   ! if (ipert/=dtset%natom+1.and.dtset%prt1mag==2) then
-   !   prtopt=1
-   !   call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
-   ! & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
-   ! & prtopt,cplex,dtset%qgbt,dtset%use_gbt,intgden=intgden,dentot=dentot,rhomag=rhomag,&
-   ! & qphon=qphon)
-   !   call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,&
-   ! & ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
-   ! end if
+   if (ipert/=dtset%natom+1.and.dtset%prt1mag==2) then
+     prtopt=1
+     call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+   & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
+   & prtopt,cplex,dtset%qgbt,dtset%use_gbt,intgden=intgden,dentot=dentot,rhomag=rhomag,&
+   & qphon=qphon)
+   end if
 
 !  ######################################################################
 !  In case of potential mixing , compute the total 2nd-order energy,
@@ -1530,7 +1528,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !- core charge is excluded from the charge density;
 !- the potential is the INPUT vtrial.
 
-if (ipert/=dtset%natom+1.and.dtset%prt1mag/=0) then
+ if (ipert/=dtset%natom+1.and.dtset%prt1mag/=0) then
    prtopt=1
 !     if(ipert==dtset%natom+5 .or. ipert==dtset%natom+6 .or. ipert>dtset%natom+11 ) then
    !  prtopt=idir+1;
@@ -1541,7 +1539,7 @@ if (ipert/=dtset%natom+1.and.dtset%prt1mag/=0) then
 
      call magmom_to_d2(blkflg,cplex,d2lo,idir,intgden,ipert,mpert,&
  &    dtset%natom,nspden,rhomag)
-    end if
+ end if
 ! end if
  if((iscf_mod>0).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
    call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],1,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl,dtset%spinaxis)
