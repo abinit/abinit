@@ -3475,7 +3475,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
  integer :: ii, iq_ibz, isym_q, trev_q
  real(dp) :: cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all ! cpu, wall, gflops,
  real(dp) :: ecut, weight_q, weight_k ! eshift,
- logical :: gen_eigenpb, isirr_k, isirr_kq, isirr_q, print_time, need_ftinterp, qq_is_gamma, symmetrize
+ logical :: gen_eigenpb, isirr_k, isirr_kq, isirr_q, print_time, need_ftinterp, qq_is_gamma, symmetrize, use_lgk
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_ham_kq
  type(rf_hamiltonian_type) :: rf_ham_kq
@@ -3540,8 +3540,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
  ! Matrix elements in full BZs are then reconstructed by symmetry at the end of the run by calling
  ! gstore_symmetrize.
  symmetrize = (dtset%gstore_kzone == "bz" .and. dtset%gstore_qzone == "bz" &
-     !.and. dtset%gstore_use_lgk /= 0 &
-     .and. dtset%userie == 789 &
+     .and. dtset%gstore_sym > 0 &
      )
  !if (symmetrize) call wrtout(units, " Computing g(k, q) with k in the IBZ and q in the BZ + final reconstruction")
 
@@ -3727,7 +3726,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
  ! Alternatively, one cah have two versions that will be invoked depending on my_nk, my_nq
 
  ! Here we decide if the q-points can be reduced to the IBZ(k)
- if (dtset%gstore_use_lgk /= 0) then
+ use_lgk = (dtset%gstore_use_lgk /= 0 .or. dtset%gstore_sym == 2)
+ if (use_lgk) then
    call wrtout(units, " Only q-points in the IBZ_k will be computed.")
  else if (dtset%gstore_use_lgq /= 0) then
    call wrtout(units, " Only k-points in the IBZ_q will be computed.")
@@ -3762,7 +3762,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
    call pstat_proc%print(_PSTAT_ARGS_)
 
    ! Compute the little group of the k-point so that we can compute g(k,q) only for q in the IBZ_k
-   if (dtset%gstore_use_lgk /= 0) then
+   if (use_lgk) then
      timrev_k = kpts_timrev_from_kptopt(ebands%kptopt)
      ABI_MALLOC(lg_myk, (gqk%my_nk))
      do my_ik=1,gqk%my_nk
@@ -3859,7 +3859,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
          state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING; cycle
        end if
 
-       if (dtset%gstore_use_lgk /= 0) then
+       if (use_lgk) then
          ii = lg_myk(my_ik)%findq_ibzk(qq_bz)
          if (ii == -1) then
            state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING; cycle
@@ -4055,7 +4055,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
 #endif
    ABI_FREE(gkq_atm_ipc)
 
-   if (dtset%gstore_use_lgk /= 0) then
+   if (use_lgk) then
      do my_ik=1,gqk%my_nk
        call lg_myk(my_ik)%free()
      end do
@@ -6556,22 +6556,27 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  character(len=5000) :: msg
  type(gstore_t) :: gstore
  type(dmats_t) :: dmats
- integer :: isym_kqS, isym_kqT, ikq_ibz_s, ikq_ibz_t, h_isym, itime_h
+ integer :: isym_kqS, isym_kqT, ikq_ibz_s, ikq_ibz_t, h_isym, itime_h, h_isym_inv
  integer :: trev_kqS, trev_kqT
  integer :: indkk_s(6,1), indkk_t(6,1)
  integer :: c1_gs
  real(dp) :: L_h_gs(3), kq_ibz_pt(3)
  complex(dp) :: phase_h_gs, phase_ket_gs
  logical,parameter :: DEBUG_DUMP_DH = .False.
+ ! Pass A (gstore_sym == 2): little-group-of-kk_ibz cache and q-source search.
+ integer :: n_lg, ii_lg, tsign_lg !, isym_lg, itime_lg,
+ real(dp) :: kk_lg_test(3)
+ logical :: found_lg
 !!arrays
  integer :: brange_kq_spin(2, dtset%nsppol)
  integer,allocatable :: state_kq(:,:), qbz2ibz(:,:), kibz2bz(:) !, qibz2bz(:), qglob2bz(:,:), ! kmesh_map(:,:), my_kqmap(:,:),
+ integer,allocatable :: lg_isym(:), lg_itime(:)
  real(dp) :: kk_bz(3), kk_ibz(3), qq_ibz(3), qpt(3), qq_eq(3), qpt_tmp(3)
  real(dp) :: kq_bz_source(3), kq_bz_target(3)
  real(dp),allocatable :: qbz(:,:)
  real(dp),contiguous,pointer :: gkq_rot_ptr(:,:,:,:,:), gkq_base_ptr(:,:,:,:,:)
  complex(dp),target,allocatable :: gkq_rot(:,:,:,:,:), gkq_base(:,:,:,:,:)
- complex(dp),allocatable :: gtmp(:,:), dh_mat(:,:)
+ complex(dp),allocatable :: gtmp(:,:), dh_mat(:,:), ket_mat(:,:)
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -6615,9 +6620,10 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
    ABI_ERROR("GSTORE.nc should have both k and q in the full BZ. See messages above.")
  end if
 
- ! TODO: In principle, we can support has_used_lgk
+ ! has_used_lgk is supported via the gstore_sym == 2 "Pass A" reconstruction below.
+ ! has_used_lgq remains unsupported: it is a structurally different restriction
+ ! (k filtered by the little group of q), out of scope for gstore_sym.
  ABI_CHECK_IEQ(gstore%has_used_lgq, 0, "Symmetrization of g(k,q) with use_lgq /= 0 is not coded")
- ABI_CHECK_IEQ(gstore%has_used_lgk, 0, "Symmetrization of g(k,q) with use_lgk /= 0 is not coded")
 
  ! Useful dimensions.
  nkbz = gstore%nkbz; nkibz = gstore%nkibz
@@ -6658,6 +6664,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
    ABI_MALLOC(gkq_rot, (nb, nb, gqk%natom3, gqk%my_nq, n_gv))
    ABI_MALLOC(gtmp, (nb, nb))
    ABI_MALLOC(dh_mat, (nb, nb))
+   ABI_MALLOC(ket_mat, (nb, nb))
 
    ! Build q-points in the BZ.
    ABI_MALLOC(qbz, (3, gqk%my_nq))
@@ -6665,13 +6672,228 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
      call gqk%myqpt(my_iq, gstore, weight_qq, qbz(:,my_iq))
    end do
 
+   ! =====================================================================
+   ! Pass A (gstore_sym == 2 only): if gstore_use_lgk restricted the q's
+   ! actually computed directly for k in the IBZ, an IBZ row may have some
+   ! q entries GSTORE_KQ_COMPUTED (q in IBZ_k) and others GSTORE_KQ_MISSING
+   ! (q outside IBZ_k). Fill the MISSING ones here, using ONLY the little
+   ! group of kk_ibz itself (k never moves in this pass -- the degenerate
+   ! case of the k-star formula below, kk_bz := kk_ibz). Once every IBZ row
+   ! is fully populated, the k-star loop below runs completely unchanged
+   ! for the non-IBZ rows, exactly as it always has when gstore_use_lgk == 0.
+   ! =====================================================================
+   if (dtset%gstore_sym == 2) then
+     do ik_ibz=1,nkibz
+       ik_glob = kibz2bz(ik_ibz)
+       if (all(state_kq(ik_glob, :) /= GSTORE_KQ_MISSING)) cycle
+
+       kk_ibz = ebands%kptns(:, ik_ibz)
+       ik_ibz_file = ik_glob
+       kk_bz = kk_ibz   ! degenerate case: k never moves in Pass A
+
+       ! Enumerate the little group of kk_ibz once per row: symrel^T membership
+       ! test, mirroring dmats_get_star_dmats (m_classify_bands.F90:2048-2061).
+       ! Deliberately NOT lgroup_t/littlegroup_q here: those use the symrec
+       ! convention, which can disagree with the symrel^T convention used
+       ! throughout dmats/gstore_symmetrize for non-orthogonal symrel.
+       ABI_MALLOC(lg_isym, (2*nsym))
+       ABI_MALLOC(lg_itime, (2*nsym))
+       n_lg = 0
+       do itime_lg=1,2
+         do isym_lg=1,nsym
+           tsign_lg = 1; if (itime_lg == 2) tsign_lg = -1
+           kk_lg_test = tsign_lg * matmul(transpose(cryst%symrel(:,:,isym_lg)), kk_ibz)
+           if (isamek(kk_ibz, kk_lg_test, g0_q)) then
+             n_lg = n_lg + 1
+             lg_isym(n_lg) = isym_lg; lg_itime(n_lg) = itime_lg
+           end if
+         end do
+       end do
+       ABI_CHECK(n_lg > 0, "Little group of kk_ibz is empty (should at least contain the identity)")
+
+       ! Read g(k_ibz, q) for all q already available (same read pattern as below).
+       do igv=1,n_gv
+         call c_f_pointer(c_loc(gkq_base(1,1,1,1,igv)), gkq_base_ptr, [2, nb, nb, gqk%natom3, gqk%my_nq])
+         ncerr = nf90_get_var(spin_ncid, spin_vid(gv_names(igv)), gkq_base_ptr, &
+                              start=[1, 1, 1, 1, ik_ibz_file, 1], &
+                              count=[2, nb, nb, gqk%natom3, 1, gqk%my_nq])
+         NCF_CHECK(ncerr)
+       end do
+
+       do my_iq=1, gqk%my_nq
+         iq_glob = my_iq + gqk%my_qstart - 1
+
+         if (state_kq(ik_glob, iq_glob) /= GSTORE_KQ_MISSING) then
+           ! Already GSTORE_KQ_COMPUTED (q in IBZ_k): keep the on-disk value unchanged.
+           gkq_rot(:,:,:,iq_glob,:) = gkq_base(:,:,:,iq_glob,:)
+           cycle
+         end if
+
+         qpt = qbz(:, my_iq)
+
+         ! Search the little group x the row's own COMPUTED q entries for a source match.
+         found_lg = .False.
+         do ii_lg=1,n_lg
+           isym_k = lg_isym(ii_lg); trev_k = lg_itime(ii_lg) - 1
+           tsign_k = 1; if (trev_k == 1) tsign_k = -1
+           symrec_eq = transpose(cryst%symrel(:,:,isym_k))
+           symrec_eq_kspace = tsign_k * symrec_eq
+           do iq_sym=1, gqk%my_nq
+             if (state_kq(ik_glob, iq_sym + gqk%my_qstart - 1) /= GSTORE_KQ_COMPUTED) cycle
+             qpt_tmp = matmul(symrec_eq_kspace, qbz(:, iq_sym))
+             if (isamek(qpt, qpt_tmp, g0_q)) then
+               found_lg = .True.; exit
+             end if
+           end do
+           if (found_lg) exit
+         end do
+
+         msg = sjoin("Pass A: no little-group image of q found among GSTORE_KQ_COMPUTED", &
+           " entries for ik_ibz=", itoa(ik_ibz), " -- IBZ_k does not cover this q's star")
+         ABI_CHECK(found_lg, msg)
+
+         do isym_combined=1,nsym
+           if (all(cryst%symrec(:,:,isym_combined) == symrec_eq)) exit
+         end do
+         ABI_CHECK(isym_combined /= nsym + 1, "Cannot find symrec_eq")
+
+         ! -----------------------------------------------------------------
+         ! From here on, reused VERBATIM from the k-star loop below (Bug A /
+         ! h_isym / phase_h_gs / phase_ket_gs / itime_h / dh_mat / mu-rotation
+         ! -- kk_bz == kk_ibz here, the degenerate case, so the formula
+         ! derived for the general k-star case applies unchanged). See the
+         ! k-star loop's own comments for the full derivation.
+         kq_bz_source = kk_ibz + qbz(:, iq_sym)
+         kq_bz_target = kk_bz + qpt
+         ierr = kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kq_bz_source, indkk_s)
+         ABI_CHECK(ierr == 0, "Cannot find symmetric image of k+q (source)")
+         ierr = kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kq_bz_target, indkk_t)
+         ABI_CHECK(ierr == 0, "Cannot find symmetric image of k+q (target)")
+         ikq_ibz_s = indkk_s(1,1); isym_kqS = indkk_s(2,1)
+         ikq_ibz_t = indkk_t(1,1); isym_kqT = indkk_t(2,1)
+         trev_kqS = indkk_s(6,1); trev_kqT = indkk_t(6,1)
+         ABI_CHECK(ikq_ibz_s == ikq_ibz_t, "Source and target k+q map to different IBZ points!")
+
+         mat_tmp = matmul(transpose(cryst%symrel(:,:,dmats%toinv(1,isym_kqT))), &
+                          matmul(symrec_eq, transpose(cryst%symrel(:,:,isym_kqS))))
+         do h_isym=1,nsym
+           if (all(transpose(cryst%symrel(:,:,h_isym)) == mat_tmp)) exit
+         end do
+         ABI_CHECK(h_isym /= nsym + 1, "Cannot find little-group element h for the k+q leg")
+
+         c1_gs = dmats%multable(1, isym_kqS, isym_k)
+         L_h_gs = real(dmats%multable(2:4, isym_kqS, isym_k), dp) &
+                + real(dmats%multable(2:4, c1_gs, dmats%toinv(1,isym_kqT)), dp) &
+                - matmul(real(cryst%symrel(:,:,h_isym), dp), real(dmats%toinv(2:4,isym_kqT), dp))
+         kq_ibz_pt = ebands%kptns(:, ikq_ibz_t)
+         phase_h_gs = exp(cmplx(zero, two_pi * sum(kq_ibz_pt * L_h_gs), dp))
+
+         ! Pass-A-only companion to phase_ket_gs. The k-star formula below (kk_bz generally
+         ! != kk_ibz) was validated to 100% exact match WITHOUT this extra term. In Pass A,
+         ! kk_bz == kk_ibz identically (the degenerate case), and an extra residual survived
+         ! even after the ket_mat fix: isolated (h_isym==1, scalar-only residual, i.e. exactly
+         ! reproducible by a single global phase -- see gstore_symmetrize_status memory) to be
+         ! a clean function of isym_k and kk_ibz alone: exp(-i*2pi*kk_ibz.w(isym_k)) for an
+         ! integer vector w. Empirically fit w(isym_k) exactly (32/32 points, zero exceptions,
+         ! all 3 distinct ik_ibz/isym_k combinations in the reference test) to
+         ! toinv(2:4,isym_k) -- the SAME single-inverse convention used for L_h_gs's own
+         ! toinv(1,isym_kqT) term, and notably NOT the double-inverse toinv(2:4,toinv(1,isym_k))
+         ! used by the qpt term just above. Plausible reading: the qpt-term's
+         ! toinv(2:4,toinv(1,isym_k)) is the companion to kk_bz = symrec_eq.kk_ibz (the k-star's
+         ! moved k), which in Pass A degenerates to kk_ibz itself, making this term newly
+         ! separate and nonzero instead of staying absorbed into the k-star's single term.
+         phase_ket_gs = exp(cmplx(zero, -two_pi * sum(qpt * real(dmats%toinv(2:4, dmats%toinv(1,isym_k)), dp)), dp)) &
+                      * exp(cmplx(zero, -two_pi * sum(kk_ibz * real(dmats%toinv(2:4, isym_k), dp)), dp))
+
+         itime_h = 1 + mod(trev_k + trev_kqS + trev_kqT, 2)
+
+         h_isym_inv = dmats%toinv(1, h_isym)
+         if (itime_h == 2) then
+           dh_mat = conjg(phase_h_gs) * phase_ket_gs * dmats%for_spin(spin)%value(:,:,h_isym_inv,itime_h,ikq_ibz_t)
+         else
+           dh_mat = phase_h_gs * phase_ket_gs * dmats%for_spin(spin)%value(:,:,h_isym_inv,itime_h,ikq_ibz_t)
+         end if
+
+         if (trev_kqT == 1) dh_mat = conjg(dh_mat)
+
+         ! Ket-leg correction (Pass A only -- k-star never needs this, see below). Unlike k-star
+         ! reconstruction, whose ket is always *derived* via cgtk_rotate from the IBZ wavefunction
+         ! (so ground truth and reconstruction structurally share the same gauge for any degenerate
+         ! ket subspace), Pass A's ket lives AT kk_ibz itself and is read directly from the WFK for
+         ! every q processed there. Ground truth's own independent direct e-ph calculations at
+         ! different q (same k) do not share a common internal gauge for a degenerate ket subspace.
+         ! isym_k stabilizes kk_ibz (drawn from its own little group, by construction), so
+         ! dmats%for_spin(...)(isym_k,...) is a genuine, tabulated (non-placeholder) D-matrix here
+         ! -- unlike the general k-star case, where isym_k need not stabilize anything.
+         !
+         ! Convention: read dmats%for_spin(...)(isym_k,...) DIRECTLY, not the toinv(1,isym_k) slot.
+         ! isym_k here is found purely via the symrel^T convention (little-group membership test),
+         ! and dmats's own array is indexed the same way (symrel^T, per dmats_init's own little-group
+         ! check), so isym_k already names the exact tabulated operation that rotates the ket -- no
+         ! inversion is needed or correct. (Contrast with the BRA correction above, dh_mat: h_isym
+         ! there is defined as a genuine COMPOSITE/residual little-group element of kq_ibz whose
+         ! natural tabulated slot -- per dmats_init's own toinv/multable bookkeeping around
+         ! cgtk_rotate's isym_inv=toinv(isym) workaround -- is toinv(1,h_isym), not h_isym itself;
+         ! that is a property of how h_isym's OWN definition composes with dmats_init's internal
+         ! convention, not a general rule that every dmats lookup needs a toinv step.) The original
+         ! implementation used toinv(1,isym_k) "by analogy" with dh_mat and was validated only on an
+         ! involutory isym_k (toinv(1,isym_k)==isym_k), which cannot distinguish the two conventions.
+         ! Diagnosed by finding a 100%/0% clean split: EVERY point with non-involutory isym_k was
+         ! wrong (needing a genuine unitary matrix fix, not a scalar) while every involutory-isym_k
+         ! point was already exact -- direct, decisive evidence the toinv(1,.) step was the bug.
+         itime_k = trev_k + 1
+         ket_mat = dmats%for_spin(spin)%value(:,:,isym_k,itime_k,ik_ibz)
+         if (trev_k == 1) ket_mat = conjg(ket_mat)
+         ! -----------------------------------------------------------------
+
+         ! Perform symmetrization.
+         do mu=1,gqk%natom3
+           idir = mod(mu-1, 3) + 1; iat = (mu - idir) / 3 + 1
+
+           iat_eq = cryst%indsym(4, isym_combined, iat)
+           l0 = cryst%indsym(1:3, isym_combined, iat)
+           phase = -two_pi * dot_product(qbz(:, iq_sym), l0)
+           cphase = cmplx(cos(phase), sin(phase), dp)
+
+           do igv=1,n_gv
+             gtmp = zero
+             do idir_eq=1,3
+               mu_eq = idir_eq + (iat_eq - 1) * 3
+               gtmp = gtmp + cphase * symrec_eq(idir, idir_eq) * gkq_base(:,:,mu_eq,iq_sym,igv)
+             end do
+             if (trev_k == 1) gtmp = conjg(gtmp)
+             gkq_rot(:,:,mu,iq_glob,igv) = matmul(matmul(dh_mat, gtmp), ket_mat)
+           end do
+         end do
+
+       end do ! my_iq
+
+       ! Write the newly reconstructed + copied-through rows back to the netcdf file.
+       do igv=1,n_gv
+         call c_f_pointer(c_loc(gkq_rot(1,1,1,1,igv)), gkq_rot_ptr, [2, nb, nb, gqk%natom3, gqk%my_nq])
+         ncerr = nf90_put_var(spin_ncid, spin_vid(gv_names(igv)), gkq_rot_ptr, &
+                              start=[1, 1, 1, 1, ik_glob, 1], &
+                              count=[2, nb, nb, gqk%natom3, 1, gqk%my_nq])
+         NCF_CHECK(ncerr)
+       end do
+       where (state_kq(ik_glob, :) == GSTORE_KQ_MISSING) state_kq(ik_glob, :) = GSTORE_KQ_SYMMETRIZED
+
+       ABI_FREE(lg_isym)
+       ABI_FREE(lg_itime)
+     end do ! ik_ibz
+   end if ! gstore_sym == 2
+
+   NCF_CHECK(nf90_sync(spin_ncid))
+
    ! Loop over k-points in the IBZ.
    do my_ik=1,gqk%my_nk
      ik_glob = my_ik + gqk%my_kstart - 1
      kk_bz = gqk%my_kpts(:, my_ik)
 
-     if (state_kq(ik_glob, 1) == GSTORE_KQ_COMPUTED) then
-       ABI_CHECK(all(state_kq(ik_glob, :) == GSTORE_KQ_COMPUTED), "all state")
+     if (state_kq(ik_glob, 1) /= GSTORE_KQ_MISSING) then
+       ! Row already fully resolved: either directly COMPUTED (gstore_use_lgk == 0), or
+       ! filled by Pass A above (gstore_sym == 2, mix of COMPUTED and SYMMETRIZED).
+       ABI_CHECK(all(state_kq(ik_glob, :) /= GSTORE_KQ_MISSING), "all state")
        cycle
      end if
 
@@ -6712,7 +6934,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
      do my_iq=1, gqk%my_nq
        iq_glob = my_iq + gqk%my_qstart - 1
        this_state = state_kq(ik_glob, iq_glob)
-       ABI_CHECK_IEQ(this_state, GSTORE_KQ_MISSING, "wrong state for (k, q) entry!")
+       if (this_state /= GSTORE_KQ_MISSING) cycle
 
        ! Symmetry tables for q-point. NB: Using symrec convention for q.
        !iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
@@ -6853,10 +7075,11 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
        ! conjugation on its own analogous phase whenever itime==2. Applying the same pattern here
        ! as a first hypothesis; h's composition shape differs from that routine's, so this is not
        ! a proof, only a well-motivated starting point.
+       h_isym_inv = dmats%toinv(1, h_isym)
        if (itime_h == 2) then
-         dh_mat = conjg(phase_h_gs) * phase_ket_gs * dmats%for_spin(spin)%value(:,:,dmats%toinv(1,h_isym),itime_h,ikq_ibz_t)
+         dh_mat = conjg(phase_h_gs) * phase_ket_gs * dmats%for_spin(spin)%value(:,:,h_isym_inv,itime_h,ikq_ibz_t)
        else
-         dh_mat = phase_h_gs * phase_ket_gs * dmats%for_spin(spin)%value(:,:,dmats%toinv(1,h_isym),itime_h,ikq_ibz_t)
+         dh_mat = phase_h_gs * phase_ket_gs * dmats%for_spin(spin)%value(:,:,h_isym_inv,itime_h,ikq_ibz_t)
        end if
 
        ! HYPOTHESIS (open question, validate empirically): pulling D(h) through the outer operator
@@ -6941,6 +7164,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
    ABI_FREE(state_kq)
    ABI_FREE(gtmp)
    ABI_FREE(dh_mat)
+   ABI_FREE(ket_mat)
  end do ! my_is
 
  NCF_CHECK(nf90_close(ncid))

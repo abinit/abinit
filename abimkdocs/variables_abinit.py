@@ -26496,6 +26496,39 @@ By default, little group symmetries are not used.
 ),
 
 Variable(
+    abivarname="gstore_sym",
+    varset="eph",
+    vartype="integer",
+    topics=["ElPhonInt_basic"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics=r"GSTORE use SYMmetries to reconstruct g(k,q)",
+    requires="[[optdriver]] == 7 and [[gstore_kzone]] == 'bz' and [[gstore_qzone]] == 'bz'",
+    added_in_version="10.9.1",
+    text=r"""
+Activates the reconstruction of the electron-phonon matrix elements g(k,q) by symmetry when
+[[gstore_kzone]] == "bz" and [[gstore_qzone]] == "bz". Only meaningful in that combination;
+setting it to a nonzero value otherwise is a fatal error.
+
+* 0 --> No reconstruction. g(k,q) is computed directly for every $\kk$ and $\qq$ in the full BZ.
+  This is the most expensive but always-safe option and the default.
+
+* 1 --> g(k,q) is computed directly only for $\kk$ in the IBZ (with $\qq$ still spanning the full
+  BZ) and then reconstructed by symmetry for $\kk$ outside the IBZ. Requires [[gstore_use_lgk]] == 0.
+
+* 2 --> Like 1, but $\qq$ is also restricted to IBZ_k (the irreducible zone defined by the little
+  group of $\kk$) at the direct-computation stage, and reconstructed by symmetry for both
+  $\kk$ outside the IBZ and $\qq$ outside IBZ_k. Requires [[gstore_use_lgk]] == 1.
+
+!!! important
+
+    [[gstore_sym]] != 0 is not yet supported for [[nspinor]] == 2 (spin-orbit coupling): the
+    reconstruction formula has a known, still-open bug for spinor wavefunctions. Use
+    [[gstore_sym]] 0 for spin-orbit calculations.
+""",
+),
+
+Variable(
     abivarname="gstore_kzone",
     varset="eph",
     vartype="string",

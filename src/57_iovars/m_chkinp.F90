@@ -959,7 +959,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%dmft_triqs_chiloc > 0) then
        cond_string(1)='dmft_triqs_chiloc' ; cond_values(1)=dt%dmft_triqs_chiloc
        call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_chiloc_ins',dt%dmft_triqs_chiloc_ins,1,iout)
-     end if        
+     end if
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_n_warmup_cycles_init',dt%dmft_triqs_n_warmup_cycles_init,0,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -1874,7 +1874,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      !chi0-based preconditioning (iprcel=2**) incompatible with fft-grid parallelization.
      call chkint_eq(1, 1, cond_string, cond_values, ierr, 'npfft', dt%npfft, 1, [1], iout)
      !chi0-based preconditioning (iprcel=2**) needs a smooth smearing.
-     call chkint_eq(1, 1, cond_string, cond_values, ierr, 'occopt', dt%occopt, 5, [3, 4, 5, 6, 7], iout) 
+     call chkint_eq(1, 1, cond_string, cond_values, ierr, 'occopt', dt%occopt, 5, [3, 4, 5, 6, 7], iout)
      !chi0-based preconditioning (iprcel=2**) only implemented on the fine grid (PAW).
      if (usepaw==1) then
        call chkint_eq(1, 1, cond_string, cond_values, ierr, 'pawmixdg', dt%pawmixdg, 1, [1], iout)
@@ -1908,7 +1908,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
         call chkint_eq(1, 2, cond_string, cond_values, ierr, 'precon_in_memory', dt%precon_in_memory, 1, [1], iout)
       end if
      end if
-     
+
    end if
 
    ! irandom
@@ -4902,6 +4902,21 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
    if (dt%gstore_use_lgq /= 0 .and. dt%gstore_kzone /= "bz") then
      ABI_CHECK_NOSTOP(.False., "when gstore_use_lgq /= 0, gstore_kzone must be 'bz' ", ierr)
+   end if
+   if (dt%gstore_sym /= 0 .and. dt%gstore_sym /= 1 .and. dt%gstore_sym /= 2) then
+     ABI_CHECK_NOSTOP(.False., "gstore_sym must be 0, 1, or 2 ", ierr)
+   end if
+   if (dt%gstore_sym /= 0 .and. .not. (dt%gstore_kzone == "bz" .and. dt%gstore_qzone == "bz")) then
+     ABI_CHECK_NOSTOP(.False., "gstore_sym /= 0 requires gstore_kzone == 'bz' and gstore_qzone == 'bz' ", ierr)
+   end if
+   if (dt%gstore_sym == 2 .and. dt%gstore_use_lgk == 0) then
+     ABI_CHECK_NOSTOP(.False., "gstore_sym == 2 requires gstore_use_lgk == 1 ", ierr)
+   end if
+   if (dt%gstore_sym <= 1 .and. dt%gstore_use_lgk /= 0) then
+     ABI_CHECK_NOSTOP(.False., "gstore_use_lgk /= 0 requires gstore_sym == 2 ", ierr)
+   end if
+   if (dt%gstore_sym /= 0 .and. dt%nspinor == 2) then
+     ABI_CHECK_NOSTOP(.False., "gstore_sym /= 0 is not yet supported for nspinor == 2", ierr)
    end if
 
 !  If molecular dynamics or structural optimization is being done

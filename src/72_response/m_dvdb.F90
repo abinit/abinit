@@ -4644,8 +4644,6 @@ subroutine dvdb_test_v1rsym(db_path, symv1scf, comm)
  nfft = product(ngfft(1:3))
  call db%open_read(ngfft, comm)
 
- ABI_CHECK(db%nspinor==1, "nspinor == 2 not coded")
-
  cryst => db%cryst
  ABI_MALLOC(symafm1, (cryst%nsym))
  ABI_MALLOC(symrel1, (3,3,cryst%nsym))

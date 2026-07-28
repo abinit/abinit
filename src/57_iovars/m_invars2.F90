@@ -2479,6 +2479,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_use_lgq', tread, 'INT')
  if (tread == 1) dtset%gstore_use_lgq = intarr(1)
 
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_sym', tread, 'INT')
+ if (tread == 1) dtset%gstore_sym = intarr(1)
+
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_kzone', tread, 'KEY', key_value=key_value)
  if (tread == 1) dtset%gstore_kzone = tolower(key_value)
 
