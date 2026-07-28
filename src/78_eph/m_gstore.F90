@@ -3541,8 +3541,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
  ! gstore_symmetrize.
  symmetrize = (dtset%gstore_kzone == "bz" .and. dtset%gstore_qzone == "bz" &
      !.and. dtset%gstore_use_lgk /= 0 &
-     .and. dtset%userie == 789)
- if (symmetrize) call wrtout(units, " Computing g(k, q) with k in the IBZ and q in the BZ + final reconstruction")
+     .and. dtset%userie == 789 &
+     )
+ !if (symmetrize) call wrtout(units, " Computing g(k, q) with k in the IBZ and q in the BZ + final reconstruction")
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
@@ -6452,13 +6453,14 @@ end function gstore_nc_has_iv1p_comm
 !! SOURCE
 
 subroutine gstore_read_gtype(path, gtype, comm, &
-                             brange_k_spin) ! optional
+                             brange_k_spin, brange_kq_spin) ! optional
 
 !Arguments ------------------------------------
  character(len=*), intent(in) :: path
  character(len=abi_slen), intent(out) :: gtype
  integer, intent(in) :: comm
  integer,optional,intent(out) :: brange_k_spin(:,:)
+ integer,optional,intent(out) :: brange_kq_spin(:,:)
 
 !Local variables-------------------------------
  integer, parameter :: master = 0
@@ -6478,12 +6480,16 @@ subroutine gstore_read_gtype(path, gtype, comm, &
    if (present(brange_k_spin)) then
      NCF_CHECK(nf90_get_var(ncid, vid("gstore_brange_k_spin"), brange_k_spin))
    end if
+   if (present(brange_kq_spin)) then
+     NCF_CHECK(nf90_get_var(ncid, vid("gstore_brange_kq_spin"), brange_kq_spin))
+   end if
    NCF_CHECK(nf90_close(ncid))
  end if
 
  if (nproc > 1) then
    call xmpi_bcast(gtype, master, comm, ierr)
    if (present(brange_k_spin)) call xmpi_bcast(brange_k_spin, master, comm, ierr)
+   if (present(brange_kq_spin)) call xmpi_bcast(brange_kq_spin, master, comm, ierr)
  end if
 
  contains
@@ -6558,7 +6564,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  complex(dp) :: phase_h_gs, phase_ket_gs
  logical,parameter :: DEBUG_DUMP_DH = .False.
 !!arrays
- integer :: brange_k_spin(2, dtset%nsppol)
+ integer :: brange_kq_spin(2, dtset%nsppol)
  integer,allocatable :: state_kq(:,:), qbz2ibz(:,:), kibz2bz(:) !, qibz2bz(:), qglob2bz(:,:), ! kmesh_map(:,:), my_kqmap(:,:),
  real(dp) :: kk_bz(3), kk_ibz(3), qq_ibz(3), qpt(3), qq_eq(3), qpt_tmp(3)
  real(dp) :: kq_bz_source(3), kq_bz_target(3)
@@ -6574,14 +6580,18 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  call wrtout(units, " Entering gstore_symmetrize...")
  call wrtout(units, sjoin(" GSTORE file: ", gstore_path))
 
- call gstore_read_gtype(gstore_path, gtype, comm, brange_k_spin=brange_k_spin)
+ call gstore_read_gtype(gstore_path, gtype, comm, brange_kq_spin=brange_kq_spin)
 
- ! Compute the D-matrices D_mn(S) = <psi_m,S k_ibz|S|psi_n,k_ibz>.
- ! These are used below to correct the extra rotation the bra (electron state at k+q)
- ! picks up when its own already-computed BZ representative differs from the one obtained
- ! by applying isym_k directly.
+ ! Compute the D-matrices D_mn(S) = <psi_m,S kq_ibz|S|psi_n,kq_ibz>.
+ ! These are used below (as dh_mat) to correct the extra rotation the bra (electron state
+ ! at k+q) picks up when its own already-computed BZ representative differs from the one
+ ! obtained by applying isym_k directly. dh_mat is applied to the (k+q)/bra band index only
+ ! (gvals' first band dimension, nb_kq) -- never to the k/ket index (nb_k) -- so dmats must be
+ ! built with brange_kq_spin (bstart_kq:bstop_kq), NOT brange_k_spin: the two band windows are
+ ! only required to have the SAME COUNT (gstore%same_nbands, checked below) but may start at a
+ ! different absolute band (bstart_k need not equal bstart_kq, and neither needs to start at 1).
  ! All MPI ranks participate here since dmats%init distributes the work internally over comm.
- call dmats%init(wfk_path, dtset, cryst, brange_k_spin, ngfft, pawtab, psps, comm)
+ call dmats%init(wfk_path, dtset, cryst, brange_kq_spin, ngfft, pawtab, psps, comm)
 
  ! Only master processor performs the symmetrization of the e-ph matrix elements.
  ! Performance is not crucial and the algorithm is IO-bound.
@@ -6629,7 +6639,12 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
    associate (gqk => gstore%gqk(my_is))
+   ! nb_k == nb_kq is enforced by gstore%same_nbands above, so either count can be used here for
+   ! sizing; the absolute band offsets (bstart_k vs bstart_kq, handled via brange_kq_spin passed
+   ! to dmats%init above) are what actually differ and matter for correctness.
    nb = gqk%nb_k
+   ABI_CHECK_IEQ(gqk%bstart_kq, brange_kq_spin(1, spin), "gqk%bstart_kq != brange_kq_spin(1, spin)")
+   ABI_CHECK_IEQ(gqk%bstop_kq, brange_kq_spin(2, spin), "gqk%bstop_kq != brange_kq_spin(2, spin)")
 
    ! Get the group id for this spin.
    NCF_CHECK(nf90_inq_ncid(ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))

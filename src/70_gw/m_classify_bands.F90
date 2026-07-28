@@ -770,8 +770,7 @@ end function paw_phirotphj
 !! dmats_init
 !!
 !! FUNCTION
-!! Compute D_mn(S) = <psi_{mSk}| S | psi_{nk}> for all the k-points in the IBZ
-!! and the bands in brange_spin.
+!! Compute D_mn(S) = <psi_{mSk}| S | psi_{nk}> for all the k-points in the IBZ and the bands in brange_spin.
 !!
 !! INPUTS
 !! wfk_path=Filename of the WFK file.
@@ -835,10 +834,10 @@ subroutine dmats_init(dmats, wfk_path, dtset, cryst, brange_spin, ngfft, pawtab,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: iflag1 = 1, me_g0 = 1, ndat1 = 1
- integer :: spin, nsppol, nsym, nb, nkibz, mband, ik_ibz, isym, isym_inv, itime, bstart, ib, trev_k ! i_m, i_n,
+ integer :: spin, nsppol, nsym, nb, nkibz, mband, ik_ibz, isym, isym_inv, itime, bstart, ib, trev_k
  logical,parameter :: DEBUG_DUMP_SPINROT = .False.
  real(dp) :: spinrot_dbg(4)
- integer :: ib1, ib2, band1, band2, n1, n2, n3, n4, n5, n6, nfft, nspinor, mpw, my_mpw, ii, ipw !, j !, ispinor, npw_sk
+ integer :: ib1, ib2, band1, band2, n1, n2, n3, n4, n5, n6, nfft, nspinor, mpw, my_mpw, ii, ipw
  integer :: nprocs, me, itot, ierr
  logical :: is_little_group
  real(dp),parameter :: xnorm1 = one
@@ -849,8 +848,8 @@ subroutine dmats_init(dmats, wfk_path, dtset, cryst, brange_spin, ngfft, pawtab,
  integer :: g0_k(3), g0_k_inv(3), gmax(3), my_gmax(3), work_ngfft(18), units(2)
  integer,allocatable :: nband(:,:), wfd_istwfk(:)
  real(dp) :: kk_ibz(3), kk_sk(3), kk_sk_inv(3), dot(2)
- real(dp),allocatable :: cg_ib(:,:,:), cg_work(:,:), work(:,:,:,:), cg2_sk(:,:) ! cg1_sk(:,:,:), ug1_box(:,:), ug2_box(:,:),
- complex(dp) :: cval !, cphase, ug
+ real(dp),allocatable :: cg_ib(:,:,:), cg_work(:,:), work(:,:,:,:), cg2_sk(:,:)
+ complex(dp) :: cval
  complex(dp),allocatable :: cmat(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
 !----------------------------------------------------------------------
@@ -869,7 +868,6 @@ subroutine dmats_init(dmats, wfk_path, dtset, cryst, brange_spin, ngfft, pawtab,
  ! never via gstore_symmetrize) are a separate matter and remain scalar-only for now: they encode
  ! an analytic phase formula derived assuming Theta^2=+1, which flips to Theta^2=-1 for spinors
  ! and has not been re-derived/verified yet -- see the explicit nspinor==1 guard added there.
- ABI_CHECK(dtset%nspinor == 1 .or. dtset%nspinor == 2, "nspinor > 2 not coded!")
 
  ! Read KS energies from the WFK file.
  dmats%ks_ebands = ebands_from_file(wfk_path, comm)
@@ -897,7 +895,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, cryst, brange_spin, ngfft, pawtab,
 
  call sg_multable(nsym, cryst%symafm, cryst%symrel, ierr, &
                   tnons=cryst%tnons, multable=dmats%multable, toinv=dmats%toinv)
- ABI_CHECK_IEQ(ierr, 0, "sg_multable returned ierr !=0. See messages above.")
+ ABI_CHECK_IEQ(ierr, 0, "sg_multable returned ierr != 0. See messages above.")
 
  ! Initialize the wave function descriptor.
  mband = maxval(brange_spin(2, :))
@@ -916,7 +914,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, cryst, brange_spin, ngfft, pawtab,
    end do
  end do
 
- ! Impose istwfk = 1 for all k-points. This is also done in respfn (see inkpts)
+ ! Impose istwfk = 1 for all k-points.
  ! wfd_read_wfk will handle a possible conversion if WFK contains istwfk /= 1.
  ABI_MALLOC(wfd_istwfk, (nkibz))
  wfd_istwfk = 1
@@ -924,7 +922,6 @@ subroutine dmats_init(dmats, wfk_path, dtset, cryst, brange_spin, ngfft, pawtab,
  call wfd%init(cryst, pawtab, psps, keep_ur, mband, nband, nkibz, nsppol, bks_mask,&
                dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, dmats%ks_ebands%kptns, ngfft,&
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
-
  !call wfd%print([std_out], header="Wavefunctions for DMATS calculation")
 
  ABI_FREE(nband)
@@ -935,7 +932,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, cryst, brange_spin, ngfft, pawtab,
  ! Read wavefunctions from WFK file.
  call wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path), out_hdr=hdr)
 
- ! cutoff must be the same else matrices are not unitary.
+ ! Energy cutoff must be the same else matrices are not unitary.
  call hdr%vs_dtset(dtset)
  ABI_CHECK(abs(dtset%ecut - hdr%ecut) < tol6, "Input ecut should be equal to the value used in the WFK file.")
  call hdr%free()
@@ -966,9 +963,6 @@ subroutine dmats_init(dmats, wfk_path, dtset, cryst, brange_spin, ngfft, pawtab,
  n1 = work_ngfft(1); n2 = work_ngfft(2); n3 = work_ngfft(3); n4 = work_ngfft(4); n5 = work_ngfft(5); n6 = work_ngfft(6)
  nfft = n1 * n2 * n3
  nspinor = wfd%nspinor
-
- !ABI_MALLOC(ug1_box, (2, nfft * nspinor))
- !ABI_MALLOC(ug2_box, (2, nfft * nspinor))
 
  ! Allocate D matrices for each spin on each proc and fill with zeros as we will MPI sum at the end.
  ABI_MALLOC(dmats%for_spin, (nsppol))
@@ -1078,10 +1072,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, cryst, brange_spin, ngfft, pawtab,
    ABI_FREE(cmat)
  end do ! spin
 
- !ABI_FREE(ug1_box)
- !ABI_FREE(ug2_box)
  ABI_FREE(work)
-
  call wfd%free()
 
  ! Collect results on each MPI proc.
@@ -1321,7 +1312,6 @@ subroutine dmats_check_one_k(dmats, spin, kk_ibz, dmat_k, units, prtvol, tag, yd
  integer :: mult_fail_cnt
  complex(dp),allocatable :: cmat_n(:,:)
  type(pair_list), allocatable :: sym_dicts(:), mult_fail_dicts(:)
-!arrays (class analysis, restricted to the itime=1 spatial little group)
  integer :: sym_lg(3,3,dmats%cryst%nsym), local2global(dmats%cryst%nsym), trans(3)
  integer :: class_id_of_isym(dmats%cryst%nsym)
  integer,allocatable :: nelements_lg(:), elements_idx_lg(:,:)
@@ -1335,10 +1325,6 @@ subroutine dmats_check_one_k(dmats, spin, kk_ibz, dmat_k, units, prtvol, tag, yd
  ! computed, every OTHER test in this routine (unitarity, identity, inverse relation,
  ! group multiplication, character class, closure) is Theta^2-agnostic and safe to run
  ! for nspinor==2 as a self-consistency diagnostic of dmats_init's spinor D-matrices.
- ! TEMPORARY (session diagnostic, not yet a permanent decision): the old blanket
- ! ABI_CHECK_IEQ(dmats%dtset%nspinor, 1, ...) that used to sit here has been removed so
- ! wfk_task "classify" can be run on nspinor==2 systems to check whether dmats_init's
- ! D-matrices satisfy D(S1 S2) \propto D(S1) D(S2) for spinors.
 
  nb = size(dmat_k, 1)
  ABI_MALLOC(cmat_n, (nb, nb))
