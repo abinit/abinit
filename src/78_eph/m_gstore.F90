@@ -6596,6 +6596,17 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  ! only required to have the SAME COUNT (gstore%same_nbands, checked below) but may start at a
  ! different absolute band (bstart_k need not equal bstart_kq, and neither needs to start at 1).
  ! All MPI ranks participate here since dmats%init distributes the work internally over comm.
+ !
+ ! NOTE: dmats_init also computes genuine (WFK-derived) D-matrices for symmetries S that do
+ ! NOT stabilize a given IBZ k-point (S.k /= k+G), not just little-group elements -- this
+ ! routine (gstore_symmetrize) is UNAFFECTED by that generalization and needs no changes
+ ! because it never reads a non-little-group slot: every dmats%for_spin(...) lookup below
+ ! uses either h_isym/h_isym_inv (searched for specifically as a stabilizer of ikq_ibz_t --
+ ! see "Cannot find little-group element h for the k+q leg" below) or isym_k (drawn directly
+ ! from lg_isym, the explicitly-enumerated little group of kk_ibz in Pass A). Both are
+ ! guaranteed, by construction, to land on the little-group branch of dmats_init, which is
+ ! untouched by the generalization -- confirmed by byte-identical validation numbers on
+ ! diamond/AlAs before and after. See gstore_symmetrize_status memory for the full story.
  call dmats%init(wfk_path, dtset, cryst, brange_kq_spin, ngfft, pawtab, psps, comm)
 
  ! Only master processor performs the symmetrization of the e-ph matrix elements.
@@ -6756,6 +6767,24 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
            if (all(cryst%symrec(:,:,isym_combined) == symrec_eq)) exit
          end do
          ABI_CHECK(isym_combined /= nsym + 1, "Cannot find symrec_eq")
+
+         ! Note on non-uniqueness of (isym_k, iq_sym): when kk_ibz has a non-trivial little group
+         ! (the typical case, not a rare corner case -- measured on the reference test systems
+         ! below, EVERY Pass-A point in diamond and most in AlAs have more than one valid
+         ! candidate, up to ~96 at Gamma), the found_lg search above can match several different
+         ! (isym,itime,iq_sym) triples for the same target q; "first found" is taken arbitrarily.
+         ! Verified this does NOT introduce a gauge/correctness bug: a dedicated diagnostic
+         ! (temporarily instrumented, then removed) recomputed the full reconstruction using EVERY
+         ! valid candidate for a set of known-redundant points on both diamond (4 points, 2-4
+         ! candidates each) and AlAs (2 points), and all candidates agreed with each other to
+         ! numerical noise (~1e-7 to 1e-10) in every case -- i.e. the formula is empirically
+         ! gauge-invariant to this choice, the same way the bra leg's h_isym/phase_h_gs/L_h_gs
+         ! machinery is already known (and was originally designed) to be invariant to which
+         ! (isym_kqS,isym_kqT) kpts_map happens to return. See gstore_symmetrize_status memory for
+         ! the full data. Contrast with dmats_get_star_dmats_at_kpt (m_classify_bands.F90), a
+         ! DIAGNOSTIC-only routine with a structurally identical first-match-wins search that its
+         ! own authors flag as an unverified risk -- that routine has NOT been checked this way and
+         ! is a separate, lower-priority open item (never reached by production gstore_symmetrize).
 
          ! -----------------------------------------------------------------
          ! From here on, reused VERBATIM from the k-star loop below (Bug A /

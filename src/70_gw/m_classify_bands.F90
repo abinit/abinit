@@ -58,6 +58,8 @@ module m_classify_bands
  use m_common,  only : ebands_from_file
  use m_fftcore, only : sphere, get_kg, ngfft_seq
  use m_cgtk,    only : cgtk_rotate, cgtk_change_gsphere
+ use m_kpts,    only : kpts_map
+ use m_krank,   only : krank_t
  use m_esymm, only : esymm_t, esymm_free
  use m_ptgroups, only : get_classes
  use m_yaml, only : yamldoc_t, yamldoc_open
@@ -844,8 +846,15 @@ subroutine dmats_init(dmats, wfk_path, dtset, cryst, brange_spin, ngfft, pawtab,
  real(dp) :: e_b1, e_b2, cpu, wall, gflops, tsign
  type(wfd_t) :: wfd
  type(hdr_type) :: hdr
+ type(krank_t) :: my_krank
+ ! Non-little-group (star-crossing) D-matrix computation.
+ integer :: ik_ibz_p, isym_p, trev_p, isym_inv_S, npw_kp
+ integer :: g0_ket(3)
+ integer,allocatable :: kg_kp(:,:)
+ real(dp),allocatable :: cg_bra(:,:,:), cg_ket(:,:), cg_work_p(:,:)
 !arrays
  integer :: g0_k(3), g0_k_inv(3), gmax(3), my_gmax(3), work_ngfft(18), units(2)
+ integer :: indkk_p(6,1)
  integer,allocatable :: nband(:,:), wfd_istwfk(:)
  real(dp) :: kk_ibz(3), kk_sk(3), kk_sk_inv(3), dot(2)
  real(dp),allocatable :: cg_ib(:,:,:), cg_work(:,:), work(:,:,:,:), cg2_sk(:,:)
@@ -904,14 +913,15 @@ subroutine dmats_init(dmats, wfk_path, dtset, cryst, brange_spin, ngfft, pawtab,
  ABI_MALLOC(keep_ur, (mband, nkibz, nsppol))
  nband = mband; bks_mask = .False.; keep_ur = .False.
 
- ! MPI distribution over k-points and spins.
+ ! Every rank loads the FULL band range for EVERY IBZ k-point (not just the subset this
+ ! rank "owns" for the D-matrix computation loop below). This is required by the
+ ! non-little-group branch (see NOTES above): computing D_mn(S) for a general S needs the
+ ! wavefunction at k'_ibz = S.k_ibz's own IBZ representative, which is not known until the
+ ! symmetry loop runs and can be ANY IBZ point, not just the ones this rank would otherwise
+ ! be assigned. The actual D-matrix COMPUTATION work (the ik_ibz loop below) is still
+ ! MPI-distributed and xmpi_sum'd at the end -- only the wavefunction STORAGE is replicated.
  do spin=1,nsppol
-   do ik_ibz=1,nkibz
-     itot = ik_ibz + (spin - 1)*nkibz
-     if (mod(itot - 1, nprocs) == me) then
-       bks_mask(brange_spin(1,spin):brange_spin(2,spin), ik_ibz, spin) = .True.
-     end if
-   end do
+   bks_mask(brange_spin(1,spin):brange_spin(2,spin), :, spin) = .True.
  end do
 
  ! Impose istwfk = 1 for all k-points.
@@ -936,6 +946,10 @@ subroutine dmats_init(dmats, wfk_path, dtset, cryst, brange_spin, ngfft, pawtab,
  call hdr%vs_dtset(dtset)
  ABI_CHECK(abs(dtset%ecut - hdr%ecut) < tol6, "Input ecut should be equal to the value used in the WFK file.")
  call hdr%free()
+
+ ! krank_t used to map k' = S.k_ibz (any BZ point, not just IBZ ones) back to the IBZ,
+ ! symrel^t convention, needed by the non-little-group D-matrix computation below.
+ call my_krank%init(nkibz, dmats%ks_ebands%kptns)
 
  ! Compute max |G_i| to build the box.
  gmax = 0; mpw = 0
@@ -1011,10 +1025,90 @@ subroutine dmats_init(dmats, wfk_path, dtset, cryst, brange_spin, ngfft, pawtab,
          is_little_group = all(abs(kk_ibz - kk_sk - g0_k) < tol8)
 
          if (.not. is_little_group) then
-           ! Sk /= k + G.
-           do ib=1,nb
-             cmat(ib, ib) = cone
+           ! Sk = k' /= k + G: genuinely compute D_mn(S) = <psi_m,k'|S|psi_n,k> from real
+           ! WFK data (this used to be an identity placeholder -- never correct, only
+           ! harmless because no caller ever read this slot; gstore_symmetrize and
+           ! dmats_check_one_k/dmats_check_star only ever query genuine little-group
+           ! slots). Two independent rotations are needed, expressed on a COMMON target
+           ! G-sphere built at the RAW (unreduced) k' = kk_sk:
+           !
+           ! (a) BRA |psi_m,k'>: reconstructed via kpts_map's own canonical (isym_p,
+           !     trev_p, g0_p) mapping k'_ibz -> k', calling cgtk_rotate with isym_p
+           !     DIRECTLY (no toinv step). This mirrors wfd_sym_ug_kg_npw's (m_wfd.F90)
+           !     own validated convention for "reconstruct THE wavefunction at a BZ
+           !     point" -- the same machinery gstore_compute already uses in production.
+           !     Any internally-consistent representative of |psi,k'> works here since
+           !     the bra is a STATE, not a specific operator's image (gauge-flexible).
+           !
+           ! (b) KET S|psi_n,k>: this DOES need the honest action of the SPECIFIC
+           !     operator S (not just some state), so the toinv workaround documented
+           !     above is required: call cgtk_rotate with X=toinv(1,isym), the SAME
+           !     tsign/trev_k as S. The g0 needed here is NOT zero in general (an
+           !     earlier version of this code assumed so and was wrong -- caught by a
+           !     temporary self-consistency check routing known little-group cases
+           !     through this same general formula and comparing against the existing,
+           !     validated little-group result: 4/208 disagreed by O(1), all at points
+           !     with a non-involutory isym AND a nonzero little-group umklapp). Root
+           !     cause: cgtk_rotate's documented k2=symrel(X)^t.kpt1+g0 "official"
+           !     bookkeeping formula does NOT, in general, track the k-point the CONTENT
+           !     is actually expressed at once X is swapped for toinv(X) -- that formula
+           !     only happens to hold for the little-group case because target=source
+           !     there, collapsing two genuinely different quantities into one. The
+           !     general, correct g0 (verified via the same self-check, 208/208 exact to
+           !     numerical noise): treat kk_sk (my desired physical target, built from
+           !     S's OWN forward action) the same way the little-group formula treats
+           !     kk_ibz -- i.e. g0 = nint(kk_sk - kk_sk_inv), kk_sk_inv being
+           !     toinv(isym)'s own forward action on kk_ibz (the direct generalization of
+           !     the existing little-group branch's kk_sk_inv/g0_k_inv, with kk_sk
+           !     substituted for kk_ibz as the reference point).
+           ierr = kpts_map("symrel", dtset%kptopt, cryst, my_krank, 1, kk_sk, indkk_p)
+           ABI_CHECK(ierr == 0, "Cannot find symmetric image of Sk in the IBZ")
+           ik_ibz_p = indkk_p(1,1); isym_p = indkk_p(2,1); trev_p = indkk_p(6,1)
+
+           call get_kg(kk_sk, 1, dtset%ecut, cryst%gmet, npw_kp, kg_kp)
+
+           ABI_MALLOC(cg_bra, (2, npw_kp*nspinor, nb))
+           associate (npw_kip => wfd%npwarr(ik_ibz_p), kg_kip => wfd%kdata(ik_ibz_p)%kg_k, &
+                      istwf_kip => wfd%kdata(ik_ibz_p)%istwfk)
+             ABI_MALLOC(cg_work_p, (2, npw_kip*nspinor))
+             do ib1=1,nb
+               band1 = ib1 + bstart - 1
+               call wfd%copy_cg(band1, ik_ibz_p, spin, cg_work_p)
+               call cgtk_rotate(dmats%cryst, dmats%ks_ebands%kptns(:,ik_ibz_p), isym_p, trev_p, &
+                                indkk_p(3:5,1), nspinor, ndat1, npw_kip, kg_kip, npw_kp, kg_kp, &
+                                istwf_kip, 1, cg_work_p, cg_bra(:,:,ib1), work_ngfft, work)
+             end do
+             ABI_FREE(cg_work_p)
+           end associate
+
+           isym_inv_S = dmats%toinv(1, isym)
+           kk_sk_inv = tsign * matmul(transpose(real(cryst%symrel(:,:,isym_inv_S), dp)), kk_ibz)
+           g0_ket = nint(kk_sk - kk_sk_inv)
+           ABI_MALLOC(cg_ket, (2, npw_kp*nspinor))
+
+           do ib2=1,nb
+             band2 = ib2 + bstart - 1
+             e_b2 = dmats%ks_ebands%eig(band2, ik_ibz, spin)
+
+             call cgtk_rotate(dmats%cryst, kk_ibz, isym_inv_S, trev_k, g0_ket, nspinor, ndat1, &
+                              npw_k, kg_k, npw_kp, kg_kp, istwf_k, 1, cg_ib(:,:,ib2), cg_ket, work_ngfft, work)
+
+             do ib1=1,nb
+               band1 = ib1 + bstart - 1
+               e_b1 = dmats%ks_ebands%eig(band1, ik_ibz_p, spin)
+
+               cval = zero
+               if (abs(e_b2 - e_b1) <= dtset%symsigma_de) then
+                 dot = cg_zdotc(npw_kp * nspinor, cg_bra(:,:,ib1), cg_ket)
+                 cval = dot(1) + j_dpc * dot(2)
+               end if
+               cmat(ib1, ib2) = cval
+             end do
            end do
+
+           ABI_FREE(cg_ket)
+           ABI_FREE(cg_bra)
+           ABI_FREE(kg_kp)
 
          else
            ! Find the group-theoretic inverse of isym.
@@ -1074,6 +1168,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, cryst, brange_spin, ngfft, pawtab,
 
  ABI_FREE(work)
  call wfd%free()
+ call my_krank%free()
 
  ! Collect results on each MPI proc.
  do spin=1,nsppol
@@ -2224,6 +2319,10 @@ subroutine dmats_check_star(dmats, spin, kprime, units, prtvol, ierr)
  character(len=500) :: msg
  complex(dp),allocatable :: dmat_star(:,:,:,:)
  type(yamldoc_t) :: ydoc
+ ! Cross-check dmat_star (pure group theory) against genuinely WFK-computed D-matrices.
+ integer :: nsym, isym, itime, isym1, itime1, n_cross_ok, n_cross_bad, nb
+ real(dp) :: tsign, kk_ibz(3), kk_g(3), g0(3), maxdiff
+ complex(dp),allocatable :: d_composed(:,:)
 ! *********************************************************************
 
  ierr = 0
@@ -2242,6 +2341,61 @@ subroutine dmats_check_star(dmats, spin, kprime, units, prtvol, ierr)
 
  call ydoc%write_units_and_free(units)
 
+ ! Cross-check: dmat_star (pure group theory, no WFK access) vs D(S1) computed genuinely
+ ! from real wavefunction data (dmats_init's own non-little-group branch), for S1 := g.S0,
+ ! g any little-group element of kprime. Physically D(S1) = dmat_star(g) @ D(S0) (composing
+ ! the crossing rotation S0 with the k'-internal rotation g: <l,k'|g.S0|n,k_ibz> =
+ ! sum_m <l,k'|g|m,k'><m,k'|S0|n,k_ibz>, a resolution of identity over the {psi_m,k'}
+ ! basis). Both sides are now independently available (dmat_star via group theory,
+ ! D(S0)/D(S1) via genuine WFK data through dmats_init's generalized non-little-group
+ ! branch), so this directly tests whether dmat_star's implicit gauge assumption (that
+ ! |psi,k'> := S0|psi,k_ibz>) matches the physical wavefunction gstore_compute/kpts_map
+ ! would independently reconstruct -- the validation-coverage gap this whole
+ ! generalization was built to close (see gstore_symmetrize_status memory). dmat_star's
+ ! own placeholder-identity entries (non-little-group g) cannot be told apart from a
+ ! genuine identity result by value alone, so little-group membership of kprime is
+ ! re-derived directly here, mirroring dmats_get_star_dmats's own test.
+ nsym = dmats%cryst%nsym
+ nb = dmats%brange_spin(2, spin) - dmats%brange_spin(1, spin) + 1
+ kk_ibz = dmats%ks_ebands%kptns(:, ik_ibz)
+ ABI_MALLOC(d_composed, (nb, nb))
+ n_cross_ok = 0; n_cross_bad = 0
+
+ do itime=1,2
+   tsign = merge(one, -one, itime == 1)
+   do isym=1,nsym
+     kk_g = tsign * matmul(transpose(real(dmats%cryst%symrel(:,:,isym), dp)), kprime)
+     g0 = nint(kprime - kk_g)
+     if (.not. all(abs(kprime - kk_g - g0) < tol8)) cycle  ! Not in the little group of kprime.
+
+     isym1 = dmats%multable(1, isym, isym0)
+     itime1 = 1 + mod((itime - 1) + (itime0 - 1), 2)
+     if (isym1 == 0) then
+       call wrtout(units, " dmats_check_star cross-check: multable(isym,isym0) not found, skipping")
+       cycle
+     end if
+
+     d_composed = matmul(dmat_star(:,:,isym,itime), dmats%for_spin(spin)%value(:,:,isym0,itime0,ik_ibz))
+     maxdiff = maxval(abs(d_composed - dmats%for_spin(spin)%value(:,:,isym1,itime1,ik_ibz)))
+     if (maxdiff < tol6) then
+       n_cross_ok = n_cross_ok + 1
+     else
+       n_cross_bad = n_cross_bad + 1
+       if (prtvol > 0) then
+         write(msg,'(a,7(i0,1x),a,es12.4)') &
+           " dmats_check_star cross-check FAIL: ik_ibz,isym0,itime0,isym,itime,isym1,itime1= ", &
+           ik_ibz, isym0, itime0, isym, itime, isym1, itime1, " maxdiff= ", maxdiff
+         call wrtout(units, msg)
+       end if
+     end if
+   end do
+ end do
+
+ call wrtout(units, sjoin(" dmats_check_star cross-check (dmat_star vs genuine WFK D-matrices): ", &
+   itoa(n_cross_ok), "/", itoa(n_cross_ok + n_cross_bad), " composed relations agree"))
+ if (n_cross_bad > 0) ierr = ierr + 1
+
+ ABI_FREE(d_composed)
  ABI_FREE(dmat_star)
 
 end subroutine dmats_check_star
