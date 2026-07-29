@@ -75,7 +75,8 @@ module m_gwpt
  use m_dfpt_cgwf,      only : stern_t
  use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph, read_screening
  use m_vcoul,          only : vcoul_t
- use m_gstore,         only : gstore_t, gqk_t, gstore_check_restart
+ use m_gstore,         only : gstore_t, gqk_t, gstore_check_restart, &
+                               GSTORE_KQ_MISSING, GSTORE_KQ_COMPUTED, gstore_symmetrize
  use m_rhotoxc,        only : rhotoxc
  use m_drivexc,        only : check_kxc
  use m_occ,            only : get_fact_spin_tol_empty
@@ -248,7 +249,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
  real(dp) :: weight_q,bigexc,bigsxc,vxcavg ! ediff, eshift, q0rad, bz_vol
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma, isirr_q
- logical :: stern_use_cache, need_ftinterp
+ logical :: stern_use_cache, need_ftinterp, symmetrize, use_lgk
  logical :: print_time_qq, print_time_kk, print_time_pp, non_magnetic_xc, need_x_kmp, need_x_kqmp, test_sigma
  complex(dp) :: ieta !, idelta_sum
  type(wfd_t) :: wfd
@@ -278,7 +279,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), kg_kmp(:,:), kg_kqmp(:,:), my_pp_inds(:)
  integer,allocatable :: gbound_k(:,:), gbound_kq(:,:), gbound_kmp(:,:), gbound_kqmp(:,:), gbound_c(:,:), gbound_x(:,:)
  integer,allocatable :: nband(:,:), wfd_istwfk(:), qibz2dvdb(:) ! count_bk(:,:),
- integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:)
+ integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), state_kq(:,:)
  integer(i1b),allocatable :: itreat_qibz(:)
  integer, contiguous, pointer :: kg_c(:,:), kg_x(:,:)
  !real(dp) :: eig0nk !, cpu, wall, gflops !, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
@@ -838,6 +839,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !qbuf_size = 16
  call wrtout(std_out, sjoin(" Begin computation of GWPT e-ph matrix elements with qbuf_size:", itoa(qbuf_size)), pre_newlines=1)
 
+ ! If True, only k-points in the IBZ and q-points in the IBZ_k are computed.
+ ! Matrix elements in full BZs are then reconstructed by symmetry at the end of the run by calling
+ ! gstore_symmetrize.
+ symmetrize = (dtset%gstore_kzone == "bz" .and. dtset%gstore_qzone == "bz" .and. dtset%gstore_sym > 0)
+
  ! Compute kxc needed for vxc1.
  ! A similar piece of code is used in m_respfn_driver.
  ! option 2 for xc and kxc (no paramagnetic part if xcdata%nspden=1).
@@ -856,7 +862,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
               cryst%rprimd, usexcnhat, vxc, vxcavg, dum_xccc3d, xcdata)
 
  ! Here we decide if the q-points can be reduced to the IBZ(k)
- if (dtset%gstore_use_lgk /= 0) then
+ use_lgk = (dtset%gstore_use_lgk /= 0 .or. dtset%gstore_sym == 2)
+ if (use_lgk) then
    call wrtout(units, " Only q-points in the IBZ_k will be computed.")
  else if (dtset%gstore_use_lgq /= 0) then
    call wrtout(units, " Only k-points in the IBZ_q will be computed.")
@@ -887,6 +894,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    nb_kq = gqk%nb_kq; bstart_kq = gqk%bstart_kq; bstop_kq = gqk%bstop_kq
 
    ABI_MALLOC(iq_buf, (2, qbuf_size))
+   ABI_MALLOC(state_kq, (gqk%my_nk, qbuf_size))
+   state_kq = GSTORE_KQ_MISSING
    ABI_MALLOC(gsig_atm, (2, nb_kq, nb_k, natom3))
    ABI_MALLOC(gks_atm, (2, nb_kq, nb_k, natom3))
    ABI_MALLOC(gks_atm2, (2, nb_kq, nb_k, natom3))
@@ -943,7 +952,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    end if
 
    ! Compute the little group of the k-point so that we can compute g(k,q) only for q in the IBZ_k
-   if (dtset%gstore_use_lgk /= 0) then
+   if (use_lgk) then
      timrev_k = kpts_timrev_from_kptopt(ebands%kptopt)
      ABI_MALLOC(lg_myk, (gqk%my_nk))
      do my_ik=1,gqk%my_nk
@@ -1047,18 +1056,38 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
        my_gbuf_ks(:,:,:,:, my_ik, iqbuf_cnt) = zero
 
+       ! The k-point and the symmetries relating the BZ k-point to the IBZ.
+       ik_ibz = gqk%my_k2ibz(1, my_ik) ; isym_k = gqk%my_k2ibz(2, my_ik)
+       trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5,my_ik)
+       isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+       mapl_k = gqk%my_k2ibz(:, my_ik)
+
+       kk_ibz = ebands%kptns(:,ik_ibz)
+
+       ! If we are going to reconstruct g(k,q) in the full BZ by symmetry at the end of the run,
+       ! only k-points in the IBZ need to be computed here.
+       if (symmetrize .and. .not. isirr_k) then
+         state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING; cycle
+       end if
+
        if (dtset%userib /= 0) then
          if (any(abs(gqk%my_kpts(:, my_ik) - [0.25, 0.0, 0.0]) > tol14) .and. &
-             any(abs(gqk%my_kpts(:, my_ik) - [-0.25, 0.0, 0.0]) > tol14)) cycle
+             any(abs(gqk%my_kpts(:, my_ik) - [-0.25, 0.0, 0.0]) > tol14)) then
+           state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING; cycle
+         end if
        end if
 
        ! Here we skip points if little group tricks are activated.
-       if (dtset%gstore_use_lgk /= 0) then
-         if (lg_myk(my_ik)%findq_ibzk(qq_bz) == -1) cycle
+       if (use_lgk) then
+         if (lg_myk(my_ik)%findq_ibzk(qq_bz) == -1) then
+           state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING; cycle
+         end if
        end if
 
        if (dtset%gstore_use_lgq /= 0) then
-         if (lg_myq%findq_ibzk(kk) == -1) cycle
+         if (lg_myq%findq_ibzk(kk) == -1) then
+           state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_MISSING; cycle
+         end if
        end if
 
        gks_atm = zero
@@ -1068,13 +1097,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        call wrtout(std_out, sjoin(msg, ", for spin:", itoa(spin)), pre_newlines=1)
        call timab(1940, 1, tsec)
 
-       ! The k-point and the symmetries relating the BZ k-point to the IBZ.
-       ik_ibz = gqk%my_k2ibz(1, my_ik) ; isym_k = gqk%my_k2ibz(2, my_ik)
-       trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5,my_ik)
-       isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
-       mapl_k = gqk%my_k2ibz(:, my_ik)
-
-       kk_ibz = ebands%kptns(:,ik_ibz)
        istwf_k_ibz = wfd%istwfk(ik_ibz); npw_k_ibz = wfd%npwarr(ik_ibz)
 
        print_time_kk = my_rank == 0 .and. (my_ik <= LOG_MODK .or. mod(my_ik, LOG_MODK) == 0)
@@ -1886,6 +1908,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! Save e-ph matrix elements in the buffer.
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gsig_atm
        my_gbuf_ks(:,:,:,:, my_ik, iqbuf_cnt) = gks_atm
+       state_kq(my_ik, iqbuf_cnt) = GSTORE_KQ_COMPUTED
 
        if (print_time_kk) then
          call inds2str(3, "My k-point", my_ik, gqk%my_nk, gqk%glob_nk, msg)
@@ -1914,6 +1937,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_FREE(ur_nk)
    ABI_FREE(ur_mkq)
    ABI_FREE(iq_buf)
+   ABI_FREE(state_kq)
    ABI_FREE(my_gbuf)
    ABI_FREE(my_gbuf_ks)
    ABI_FREE(gsig_atm)
@@ -1963,7 +1987,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ABI_SFREE(sigce0_nk)
    end if ! test_sigma
 
-   if (dtset%gstore_use_lgk /= 0) then
+   if (use_lgk) then
      do my_ik=1,gqk%my_nk
        call lg_myk(my_ik)%free()
      end do
@@ -1986,6 +2010,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !NCF_CHECK(nf90_sync(root_ncid))
  NCF_CHECK(nf90_close(root_ncid))
  call xmpi_barrier(comm)
+
+ ! Reconstruct g(k,q) and g_KS(k,q) matrix elements in the full BZ by symmetry.
+ if (symmetrize) then
+   call gstore_symmetrize(gstore%path, wfk0_path, ngfft, dtset, dtfil, cryst, psps, pawtab, ebands, ifc, comm)
+ end if
 
  ! Output some of the results to ab_out for testing purposes
  call gstore%print_for_abitests(dtset, ebands, .True., with_ks=.True.)
@@ -2070,7 +2099,6 @@ subroutine dump_my_gbuf()
  ! NOTE: A similar routine is used in m_gstore. The two implementations should be kept in synch.
 
  integer :: ii, iq_bz, iq_glob, my_iq
- !integer,allocatable :: itab_k(:)
 
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  ! FIXME: Recheck this part as we have way more levels of parallelism in GWPT
@@ -2101,25 +2129,22 @@ subroutine dump_my_gbuf()
                       count=[2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt])
  NCF_CHECK(ncerr)
 
- !ABI_ICALLOC(itab_k, (gqk%my_nk))
- ! nctkarr_t("gstore_state_kqs", "i", "gstore_max_nk, gstore_max_nq, number_of_spins"), &
+ ncerr = nf90_put_var(root_ncid, root_vid("gstore_glob_state_kqs"), state_kq(:, 1:iqbuf_cnt), &
+                      start=[gqk%my_kstart, iq_glob, spin], &
+                      count=[gqk%my_nk, iqbuf_cnt, 1])
+ NCF_CHECK(ncerr)
 
  ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
  !if (all(gqk%coords_qkpb_sumbp(2:3) == [0, 0]))  then
    do ii=1,iqbuf_cnt
      iq_bz = iq_buf(2, ii)
      NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_done_qbz_spin"), 1, start=[iq_bz, spin]))
-     !itab_k = 1
-     !ncerr = nf90_put_var(root_ncid, root_vid("gstore_state_kqb"), itab_k, &
-     !                     start=[gqk%my_kstart, iq_glob, spin], &
-     !                     count=[gqk%my_nk, iqbuf_cnt, 1])
-     !NCF_CHECK(ncerr)
    end do
-   !ABI_FREE(itab_k)
  !end if
 
  ! Zero the counter before returning
 !10 iqbuf_cnt = 0
+ state_kq = GSTORE_KQ_MISSING
 
  !NCF_CHECK(nf90_sync(spin_ncid))
  !NCF_CHECK(nf90_sync(root_ncid))
