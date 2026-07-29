@@ -53,7 +53,7 @@ has been modified, with the section on band2eps suppressed.
 **B.1** Constrained Density Functional Perturbation Theory
 
 Constrained Density Functional Perturbation Theory, as described in [[cite:Royo2026]], is available.
-Also, (linear-response) time-dependent Functional Perturbation Theory is available, by the same token.
+Also, (linear-response) time-dependent Density Functional Perturbation Theory is available, by the same token.
 
 It is a general methodological framework to achieve parametric control
 over the local spin moments at the linear-response level. The strategy builds on the concept of Legendre
@@ -65,14 +65,14 @@ See tests [[test:cdfpt_1]] to [[test:cdfpt_11]].
 
 New input variables :
 
-* [[magpen]], [[mpatpol]], [[mpdir]] for the magnetic penalty, also [[magpen@anaddb]], [[mpatpol@anaddb]], [[mpdir@anaddb]]
+* [[magpen]], [[mpatpol]], [[mpdir]] for the magnetic penalty, also [[magpen@anaddb]], [[mpatpol@anaddb]], [[mpdir@anaddb]], [[mpopt@anaddb]]
 * [[rfomega]] to define the frequency of the perturbation
-* [[timdisp]] and [[timdisp@anaddb]] THE LATTER INPUT VARIABLE EXISTS IN variables_anaddb.py, BUT NOTHING IS EXPLAINED
-* prt1mag TO BE DOCUMENTED
-* getwfmq, getwfmq_filepath, irdwfmq TO BE DOCUMENTED for the handling of first-order perturbation wavefunction files at -q
+* [[timdisp]] and [[timdisp@anaddb]] to activate the calculation of the frequency-derivatives (Berry curvatures).
+* [[prt1mag]] to print first-order magnetic moments in the output and DDB files.
+* [[getwfmq]], [[getwfmq_filepath]], [[irdwfmq]] for the handling of wavefunction files at k-q
 * [[d3e_pert1_magn]],  [[d3e_pert1_magat]], [[d3e_pert1_magdir]] for the definition of perturbation 1 of atomic magnetic type, for use e.g. with [[timdisp]]
 * [[d3e_pert2_magn]],  [[d3e_pert2_magat]], [[d3e_pert2_magdir]] for the definition of perturbation 2 of atomic magnetic type, for use e.g. with [[timdisp]]
-* [[eta@anaddb]], [[freqflag@anaddb]], [[mpopt@anaddb]]
+* [[eta@anaddb]], [[freqflag@anaddb]] for the frequency interpolation of second-order quantities computed with the constrained DFPT formalism
 
 By M. Royo, M. Stengel, with S. Rostami for integration in the trunk.
 (MR 1319)
@@ -177,12 +177,12 @@ By M. Sarraute, I.-M. Lygatsika, L. Baguet, P. Kestener and M. Torrent.
 
 **B.5** DFPT with 2D Coulomb cutoff and other DFPT developments
 
-DFPT with a 2D Coulomb cut-off, as described in TO BE PROVIDED is available.
+DFPT with a 2D Coulomb cut-off and short-range 2D Coulomb kernel, as described in Royo and Stengel PRX 11, 041027 (2021) is available.
 See [[test:v10_52]] and [[test:v10_53]].
 
-DFPT with a finite q monochromatic spatial perturbation (scalar potential as well as vector potential - the latter is for a magnetic field 
-coupling with the orbital motion) is also available.
-See [[test:v10_54]] for the scalar potential response (test numbers SHOULD BE PROVIDED for vector potentials).
+DFPT with a finite q monochromatic scalar potential perturbation is also available (activated via [[rfmagn]]=3).
+See [[test:v10_54]] for the scalar potential response combined with the PCM 3D short-circuit electrical boundary conditions, 
+as described in Royo and Stengel PRX 11, 041027 (2021).
 
 By M. Royo, M. Stengel, with S. Rostami for integration in the trunk.
 (MR 1319)
