@@ -100,13 +100,13 @@ module m_mlwfovlp
    !integer :: nbndskip,       ! Number of bands to be skipped in Wannierization step, leading to
                                ! the exclusion from the original Hamiltonian
    integer :: nkbz = -1
-   ! Number of k-points in the full BZ
+   ! Number of k-points in the full BZ.
 
    integer :: nr_h = -1, nr_e = -1, nr_p = -1
-   ! Number of lattice points for H, electrons, phonons
+   ! Number of lattice points for H, electrons, phonons.
 
    integer :: ngkpt(3) = -1
-   ! K-mesh divisions
+   ! K-mesh divisions.
 
    !integer :: nshiftk
    ! Number of shifts. At present only 1 shift is supported.
@@ -121,7 +121,7 @@ module m_mlwfovlp
    ! Used to find the index of the kpoint from its coordinates.
 
    integer,allocatable :: exclude_bands(:)
-   ! FIXME: Is this still needed.
+   ! FIXME: Is this still needed?
 
    integer,allocatable :: dimwin(:), winstart(:)
    ! (nkbz)
@@ -186,7 +186,7 @@ module m_mlwfovlp
    complex(dp),allocatable :: grpe_wwp(:,:,:,:,:)
    ! (nr_p, nr_e, nwan, nwan, my_npert))
    ! e-ph matrix elements in the Wannier representation.
-   ! NB: These matrix elements are in the atomic represention and distributed inside pert_comm
+   ! NB: These matrix elements are in the atomic represention and distributed inside pert_comm.
 
  contains
    procedure :: from_abiwan => wan_from_abiwan
@@ -196,10 +196,10 @@ module m_mlwfovlp
    ! Read g(R_p, R_e) in the Wannier representation from the GWAN.nc file.
 
    procedure :: print => wan_print
-   ! print info on the object.
+   ! Print info on the object.
 
    procedure :: interp_ham => wan_interp_ham
-   ! Interpolate Hamiltonian at an arbitray k-point
+   ! Interpolate Hamiltonian at an arbitray k-point.
 
    procedure :: setup_eph_ws_kq => wan_setup_eph_ws_kq
    ! Prepare interpolation of e-ph matrix elements.

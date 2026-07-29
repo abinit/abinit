@@ -5486,7 +5486,7 @@ end subroutine gqk_gather
 !! gstore_wannierize_and_write_gwan
 !!
 !! FUNCTION
-!!  Compute g(R_e,R_ph) from g(k,q) and save results to GWAN.nc file
+!!  Compute g(R_e,R_ph) from g(k,q). Save results to GWAN.nc file
 !!
 !! INPUTS
 !!
@@ -5515,7 +5515,7 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
 ! *************************************************************************
 
  units = [std_out, ab_out]
- call wrtout(units, " Computing e-ph matrix elements in the Wannier representation...", pre_newlines=1)
+ call wrtout(units, " Computing g(R_e,R_ph) in the Wannier representation...", pre_newlines=1)
  call cwtime(cpu, wall, gflops, "start")
 
  if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "atom", kfilter="none") /= 0) then
@@ -5536,7 +5536,7 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
    call gqk%wan%from_abiwan(dtfil%filabiwanin, spin, gstore%nsppol, keep_umats, dtfil%filnam_ds(4), gqk%comm%value)
    wan => gqk%wan
 
-   ! Compute WS lattice vectors. Also allocate grpe_wwp with shape: (nr_p, nr_e, nwan, nwan, my_npert)
+   ! Compute Wigner-Seitz lattice vectors and llocate grpe_wwp with shape: (nr_p, nr_e, nwan, nwan, my_npert).
    call kptrlatt_from_ngkpt(gstore%ngqpt, qptrlatt_)
    call wan%setup_eph_ws_kq(gstore%cryst, gstore%ebands%shiftk(:,1), gstore%ebands%kptrlatt, qptrlatt_, &
                             gqk%my_pert_start, my_npert, gqk%pert_comm)
@@ -5550,14 +5550,14 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
    ! Intermediate buffer to store the sum over k-points. Note my_nq.
    ABI_CALLOC(gww_epq, (nwan, nwan, nr_e, my_npert, my_nq))
 
-   ! Loop over my q-points (partial sum over q)
+   ! Loop over my q-points (partial sum over q).
    do my_iq=1,my_nq
      call gqk%myqpt(my_iq, gstore, weight_qq, qpt)
 
      !call get_kg(qpt, 1, ecut_lr, gstore%cryst%gmet, ng_q, gvec_q)
      !ABI_FREE(gvec_q)
 
-     ! Loop over my k-points (partial sum over k)
+     ! Loop over my k-points (partial sum over k).
      do my_ik=1,my_nk
        kpt = gqk%my_kpts(:,my_ik); kq = kpt + qpt
        ik = wan%krank%get_index(kpt); ikq = wan%krank%get_index(kq)
@@ -5566,7 +5566,6 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
 
        ! Get rotation matrices at k and k+q.
        nwin_k = wan%dimwin(ik); nwin_kq = wan%dimwin(ikq)
-
        ABI_MALLOC(g_bb, (nwin_kq, nwin_k))
        ABI_MALLOC(u_k, (1:nwin_k, 1:nwan))
        ABI_MALLOC(u_kq, (1:nwin_kq, 1:nwan))
@@ -5640,13 +5639,13 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
 
    call xmpi_sum(gww_epq, gqk%kpt_comm%value, ierr)
 
-   !----------------------------------------------------------
-   !  Fourier transform to go into Wannier basis
-   !----------------------------------------------------------
+   !------------------------------------------
+   !  Fourier transform to go to Wannier basis
+   !------------------------------------------
    ! [Eqn. 24 of PRB 76, 165108 (2007)]
    ! g(R_e,R_p) = (1/nq) sum_q e^{-iqR_p} g(R_e,q)
 
-   ! Loop over my q-points (partial sum over q)
+   ! Loop over my q-points (partial sum over q).
    do my_iq=1,my_nq
      call gqk%myqpt(my_iq, gstore, weight_qq, qpt)
      do ir=1,nr_p
@@ -5654,14 +5653,14 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
      end do
 
       do my_ip=1,my_npert
-      do jwan=1,nwan
-      do iwan=1,nwan
-      do ir=1,nr_e
-         wan%grpe_wwp(:, ir, iwan, jwan, my_ip) = wan%grpe_wwp(:, ir, iwan, jwan, my_ip) + &
-           gww_epq(iwan, jwan, :, my_ip, my_iq) * emiqr(:)
-      end do
-      end do
-      end do
+        do jwan=1,nwan
+          do iwan=1,nwan
+            do ir=1,nr_e
+               wan%grpe_wwp(:, ir, iwan, jwan, my_ip) = wan%grpe_wwp(:, ir, iwan, jwan, my_ip) + &
+                 gww_epq(iwan, jwan, :, my_ip, my_iq) * emiqr(:)
+            end do
+          end do
+        end do
       end do ! my_ip
    end do ! my_iq
 
