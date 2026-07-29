@@ -907,7 +907,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_MALLOC(my_gbuf_ks, (gqk%cplex, nb_kq, nb_k, natom3, gqk%my_nk, qbuf_size))
 
    ! Allocate memory to deal with frequencies in Sigma(w).
-   ! TODO: Recheck gwpt_wmode 1 as the results for m=n and q = 0 do not agree with gwpt_wmode 2
+
    select case (dtset%gwpt_wmode)
    case (1)
      ! Prepare list of omegas: first e_nk then e_mkq for all m indices.
@@ -955,6 +955,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ! ============================================================
    ! Loop over MPI distributed q-points in Sigma_q (gqk%qpt_comm)
    ! ============================================================
+   ! the loop of my_iq can be cycled, so it is good to set iqbuf_cnt to 0 before entering the loop
+   iqbuf_cnt = 0
    do my_iq=1,gqk%my_nq
      call gqk%myqpt(my_iq, gstore, weight_q, qq_bz)
 
@@ -1037,6 +1039,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      do my_ik=1,gqk%my_nk
        kk = gqk%my_kpts(:, my_ik); kk_string = ktoa(kk); ik_glob = gqk%my_k2glob(my_ik)
 
+       ! NB: All procs in gqk%pert_comm and gqk%bsum_comm and gqk%pp_sum_comm enter this section.
+       ! Set entry to zero BEFORE the cycle instructions below, otherwise cycled (filtered)
+       ! k-points may keep stale data in my_gbuf and write them to disk.
+       iqbuf_cnt = 1 + mod(my_iq - 1, qbuf_size)
+       iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
+       my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
+       my_gbuf_ks(:,:,:,:, my_ik, iqbuf_cnt) = zero
+
        if (dtset%userib /= 0) then
          if (any(abs(gqk%my_kpts(:, my_ik) - [0.25, 0.0, 0.0]) > tol14) .and. &
              any(abs(gqk%my_kpts(:, my_ik) - [-0.25, 0.0, 0.0]) > tol14)) cycle
@@ -1051,14 +1061,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          if (lg_myq%findq_ibzk(kk) == -1) cycle
        end if
 
-       ! NB: All procs in gqk%pert_comm and gqk%bsum_comm and gqk%pp_sum_comm enter this section.
-       ! Set entry to zero. Important as there are cycle instructions inside these loops
-       ! and we don't want random numbers written to disk.
-       iqbuf_cnt = 1 + mod(my_iq - 1, qbuf_size)
-       iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
-
-       my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
-       my_gbuf_ks(:,:,:,:, my_ik, iqbuf_cnt) = zero
        gks_atm = zero
        gks_atm2 = zero
 
@@ -1424,6 +1426,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
              ! Prepare list of omegas: first e_nk then e_mkq for all m indices.
              omegas_nk(1) = qp_ene(n_k, ik_ibz, spin); cnt = 1
+
              if (dtset%gwpt_wmode == 1) then
                do m_kq=bstart_kq, bstop_kq
                  cnt = cnt + 1; omegas_nk(cnt) = qp_ene(m_kq, ikq_ibz, spin)
@@ -1648,8 +1651,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                  in_k = n_k - bstart_k + 1
 
                  if (dtset%gwpt_wmode == 1) then
+                   ! +2 because omegas_nk(1) = e_nk and omegas_nk(2:cnt) = e_mkq for all m_kq bands
+                   iw_mkq = m_kq - bstart_kq + 2
                    ! Take the average at e_nk and e_mkq
-                   iw_mkq = m_kq - bstart_kq + 1
                    ctmp_gwpc = half * sum(rhotwg_c(:) * (vec_gwc_nk(:,1,n_k) + vec_gwc_nk(:,iw_mkq,n_k)))
                  else
                    ! Use the value at e_nk
@@ -1681,7 +1685,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                end do ! n_k
              end do ! m_kq
 
-!if (.not. qq_is_gamma) then
+             !if (.not. qq_is_gamma) then
              ! ==========================
              ! Same operations but for -q
              ! ==========================
@@ -1778,8 +1782,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                  im_kq = m_kq - bstart_kq + 1
 
                  if (dtset%gwpt_wmode == 1) then
+                   ! +2 because omegas_mkq(1) = e_mkq and omegas_mkq(2:cnt) = e_nk for all n_k bands
+                   iw_nk = n_k - bstart_k + 2
                    ! Take the average at e_nk and e_mkq
-                   iw_nk = n_k - bstart_k + 1
                    ctmp_gwpc = half * sum(rhotwg_c(:) * (vec_gwc_mkq(:,1,m_kq) + vec_gwc_mkq(:,iw_nk,m_kq)))
                  else
                    ! Use the value at e_nk. Note in_k index
@@ -1882,14 +1887,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gsig_atm
        my_gbuf_ks(:,:,:,:, my_ik, iqbuf_cnt) = gks_atm
 
-       ! Dump buffer
-       if (iqbuf_cnt == qbuf_size) call dump_my_gbuf()
-
        if (print_time_kk) then
          call inds2str(3, "My k-point", my_ik, gqk%my_nk, gqk%glob_nk, msg)
          call cwtime_report(msg, cpu_kk, wall_kk, gflops_kk); if (my_ik == LOG_MODK) call wrtout(std_out, "...", do_flush=.True.)
        end if
      end do ! my_ik
+
+     ! Dump buffer inside the loop over my_iq (and outside of my_ik) otherwise when restarting GWPT some my_ik points will be missing
+     if (iqbuf_cnt == qbuf_size) call dump_my_gbuf()
 
      ABI_FREE(v1scf_qq)
      ABI_FREE(vlocal1_qq)
@@ -1977,7 +1982,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !if (my_rank == master) then
    NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_completed"), 1))
  !end if
- NCF_CHECK(nf90_sync(root_ncid))
+ ! SC: not sure why, but nf90_sync sometimes can cause a deadlock, observed on lemaitre4
+ !NCF_CHECK(nf90_sync(root_ncid))
  NCF_CHECK(nf90_close(root_ncid))
  call xmpi_barrier(comm)
 
@@ -2071,7 +2077,7 @@ subroutine dump_my_gbuf()
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !if (gqk%coords_qkpb_sumbp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
  !if (gqk%pert_ppsum_bsum_comm%me /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
- !SC: I comment out the above two GOTOs to avoid the deadlock issue on my desktop, lemaitre4 and lucia
+ ! SC: I comment out the above two GOTOs to avoid the deadlock issue on my desktop, lemaitre4 and lucia
   !return
 
  !iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]

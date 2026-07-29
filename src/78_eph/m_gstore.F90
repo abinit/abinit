@@ -184,9 +184,9 @@ module m_gstore
  character(len=abi_slen),public,parameter :: GSTORE_GMODE_PHONON = "phonon"
 
  ! Flags
- integer :: GSTORE_KQ_MISSING = 0        ! (k, q, spin) has not been computed.
- integer :: GSTORE_KQ_COMPUTED = 1       ! (k, q, spin) has been computed.
- integer :: GSTORE_KQ_SYMMETRIZED = 2    ! (k, q, spin) has been reconstructed by symmetry.
+ integer, public :: GSTORE_KQ_MISSING = 0        ! (k, q, spin) has not been computed.
+ integer, public :: GSTORE_KQ_COMPUTED = 1       ! (k, q, spin) has been computed.
+ integer, public :: GSTORE_KQ_SYMMETRIZED = 2    ! (k, q, spin) has been reconstructed by symmetry.
 
  ! Rank of the MPI Cartesian grid.
  integer,private,parameter :: ndims = 6

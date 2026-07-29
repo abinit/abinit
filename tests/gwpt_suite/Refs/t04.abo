@@ -405,7 +405,7 @@ force_plsmf:   0.00000000E+00
  Total number of failures in Sternheimer solvers at -q: 48
 
  gstore_completed: 1
- gstore_done_qbz_spin: 4
+ gstore_done_qbz_spin: 8
  nb_k: 6
  bstart_k: 2
  nb_kq: 12
