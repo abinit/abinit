@@ -228,7 +228,7 @@ contains
 !!
 !! SOURCE
 
-subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_ebands, qp_ebands, dvdb, ifc, &
+subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_ebands, qp_ebands, wfk0_hdr, dvdb, ifc, &
                           pawfgr, pawtab, psps, mpi_enreg, comm)
 
 !Arguments ------------------------------------
@@ -238,6 +238,7 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
  type(datafiles_type),intent(in) :: dtfil
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),target,intent(in) :: ks_ebands, qp_ebands
+ type(hdr_type),intent(in) :: wfk0_hdr
  type(dvdb_t),intent(inout) :: dvdb
  type(ifc_type),target,intent(in) :: ifc
  type(pseudopotential_type),intent(in) :: psps
@@ -260,7 +261,7 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
  real(dp) :: wqnu, gkq2, weight_q, eig0nk, eig0mk, eig0mkq, ediff, gmod2, hmod2, gdw2, rfact, gdw2_stern !, rtmp !,nqnu,gkq2,gkq2_pf,
  real(dp) :: cpu_kk, wall_kk, gflops_kk, cpu_qq, wall_qq, gflops_qq, cpu_all, wall_all, gflops_all
  real(dp) :: estep
- logical :: q_is_gamma, intra_band, same_band, isirr_k, isirr_kq, stern_use_cache, print_time_kk, print_time_qq
+ logical :: q_is_gamma, intra_band, same_band, isirr_k, isirr_kq, stern_use_cache, print_time_kk, print_time_qq, gstore_from_file
  complex(dp) :: cfact !, sig_cplx
  character(len=5000) :: msg, qq_bz_string !, kk_string
  character(len=fnlen) :: path
@@ -307,7 +308,12 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call wrtout(units, " Computing Fan-Migdal + DW self-energy from GSTORE.nc", pre_newlines=1)
 
- call gstore_read_gtype(dtfil%filgstorein, gtype, comm)
+ ! gtype is only meaningful when reading a pre-existent GSTORE.nc file (gstore_read_gtype
+ ! opens dtfil%filgstorein). When building gstore on the fly from ABIWAN.nc + GWAN.nc
+ ! (see gstore%init_or_from_ncpath below), there is no file to read gtype from, and the
+ ! interpolated construction always produces a single "atom"-representation g, never "gwpt".
+ gtype = "KS"
+ if (dtfil%filgstorein /= ABI_NOFILE) call gstore_read_gtype(dtfil%filgstorein, gtype, comm)
 
  with_cplex = 1
  if (gtype == "gwpt") then
@@ -327,10 +333,17 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
    call wrtout(units, " Using e-ph self-energy expression with |g|^2")
  end if
 
- ! Init gstore and MPI grid from file and dtset.
+ ! Init gstore and MPI grid from file and dtset (or, alternatively, via Wannier
+ ! interpolation from ABIWAN.nc + GWAN.nc, see gstore_init_or_from_ncpath).
  ! The Fan-Migdal SE requires |g(k,q)|^2 as well as g2DW in the phonon representation.
- call gstore%from_ncpath(dtfil%filgstorein, with_cplex, dtset, dtfil, cryst, ebands, ifc, &
-                         "phonon", dtset%gstore_gname, .True., comm)
+ call gstore%init_or_from_ncpath(with_cplex, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, &
+                                 "phonon", dtset%gstore_gname, .True., comm, gstore_from_file)
+ if (gstore_from_file) then
+   call wrtout(units, " Gstore built by reading a pre-existent GSTORE.nc file")
+ else
+   call wrtout(units, " Gstore built on the fly via Wannier interpolation (ABIWAN.nc + GWAN.nc)")
+ end if
+
  ! Consistency check.
  ierr = 0
  if (gstore%qzone /= "bz") then

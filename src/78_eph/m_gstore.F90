@@ -622,6 +622,11 @@ contains
   procedure :: init => gstore_init
   ! Build object from scratch
 
+  procedure :: init_or_from_ncpath => gstore_init_or_from_ncpath
+  ! Build object either from a pre-existent GSTORE.nc file (getgstore_filepath) or,
+  ! alternatively, via on-the-fly Wannier interpolation from ABIWAN.nc + GWAN.nc
+  ! (getabiwan_filepath + getgwan_filepath), possibly on a denser k/q-mesh.
+
   procedure :: same_nbands => gstore_same_nbands
   ! Returns True if nb_k == nb_kq
 
@@ -672,11 +677,14 @@ contains
 !!
 !! INPUTS
 !! path=Filename of the output GSTORE.nc file
+!! with_cplex=Optional, only relevant when e-ph matrix elements are interpolated on the fly via
+!!   Wannier (i.e. getabiwan_filepath + getgwan_filepath are used): 1 to store |g|^2, 2 to store
+!!   the complex g. Default: 2. Ignored otherwise.
 !!
 !! SOURCE
 
 subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm, &
-                       gtype) ! optional
+                       gtype, with_cplex) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -690,15 +698,16 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  class(ifc_type),target,intent(in) :: ifc
  integer,intent(in) :: comm
  character(len=*),optional,intent(in) :: gtype
+ integer,optional,intent(in) :: with_cplex
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0, gstore_has_ifcs = 1
- integer :: all_nproc, my_rank, ierr, my_nshiftq, nsppol, spin, natom3, cnt, timrev_q, with_cplex
+ integer :: all_nproc, my_rank, ierr, my_nshiftq, nsppol, spin, natom3, cnt, timrev_q, gqk_cplex
  integer :: ik_ibz, ik_bz, iq_bz, iq_ibz, max_nq, max_nk, ncid, spin_ncid, ncerr, gstore_fform
- integer :: my_is, my_ik, my_iq, nq, gap_err, nkcalc
+ integer :: gap_err, nkcalc
  logical :: keep_umats, has_abiwan, has_gwan, write_gstore, has_both_g
- real(dp) :: cpu, wall, gflops, weight_qq, gstore_fill_dp
+ real(dp) :: cpu, wall, gflops, gstore_fill_dp
  character(len=5000) :: msg
  type(gaps_t) :: gaps
 !arrays
@@ -707,10 +716,9 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  integer,allocatable :: qbz2ibz(:,:), kibz2bz(:), qibz2bz(:), qglob2bz(:,:)
  integer,allocatable :: bstart_ks(:,:), nbcalc_ks(:,:), select_qbz_spin(:,:), select_kbz_spin(:,:)
  real(dp),allocatable :: kcalc(:,:)
- real(dp):: my_shiftq(3,1), kpt(3), kq(3), qpt(3)
+ real(dp):: my_shiftq(3,1)
  real(dp),allocatable :: wtk(:), kibz(:,:)
  type(wan_t),target :: wan_spin(ebands%nsppol)
- complex(dp),allocatable :: intp_gatm(:,:,:,:)
 !----------------------------------------------------------------------
 
  call cwtime(cpu, wall, gflops, "start")
@@ -845,7 +853,20 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
  call gstore%distribute_spins__(dtset%mband, gstore_brange_kq, gstore_brange_k, nproc_spin, comm_spin, comm)
 
- if (has_abiwan) then
+ if (has_gwan) then
+   ! Interpolated e-ph matrix elements are Wannier-gauge quantities (nwan x nwan,
+   ! obtained by diagonalizing the interpolated H(k)), not literal DFT band indices,
+   ! so nb_k/nb_kq must be set to nwan exactly -- NOT to the (possibly larger)
+   ! disentanglement outer window [bmin, bmax] -- so that the results returned by
+   ! wan%interp_eph_manyq (shape (nwan, nwan, my_npert, nq)) fit gqk%my_g exactly,
+   ! for both the disentangled and disentanglement-free cases.
+   do spin=1,gstore%nsppol
+     gstore%brange_k_spin(1, spin) = 1
+     gstore%brange_k_spin(2, spin) = wan_spin(spin)%nwan
+     gstore%brange_kq_spin(1, spin) = 1
+     gstore%brange_kq_spin(2, spin) = wan_spin(spin)%nwan
+   end do
+ else if (has_abiwan) then
    ! Here we set brange_k_spin to be consistent with the wannierization step.
    do spin=1,gstore%nsppol
      gstore%brange_k_spin(1, spin) = wan_spin(spin)%bmin
@@ -1033,9 +1054,13 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
  ! At this point, we have the Cartesian grid (one per spin if any),
  ! and we can finally allocate and distribute other arrays.
- ! Note with_cplex = 0 --> matrix elements are not allocated here.
- with_cplex = 0; if (has_gwan) with_cplex = 2
- call gstore%malloc__(with_cplex, has_both_g, max_nq, qglob2bz, max_nk, gstore%kglob2bz, qbz2ibz, gstore%kbz2ibz)
+ ! Note gqk_cplex = 0 --> matrix elements are not allocated here.
+ gqk_cplex = 0
+ if (has_gwan) then
+   gqk_cplex = 2
+   if (present(with_cplex)) gqk_cplex = with_cplex
+ end if
+ call gstore%malloc__(gqk_cplex, has_both_g, max_nq, qglob2bz, max_nk, gstore%kglob2bz, qbz2ibz, gstore%kbz2ibz)
 
  ! Initialize GSTORE.nc file i.e. define dimensions and arrays
  ! Entries such as the e-ph matrix elements will be filled afterwards in gstore_compute.
@@ -1270,37 +1295,9 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  call cwtime_report(" gstore_init:", cpu, wall, gflops)
  call pstat_proc%print(_PSTAT_ARGS_)
 
- if (has_gwan .and. with_cplex /= 0) then
-   call wrtout(units, " Using Wannier interpolation to compute and store e-ph matrix elements ...", pre_newlines=1)
-
-   do my_is=1,gstore%my_nspins
-     spin = gstore%my_spins(my_is)
-     associate (gqk => gstore%gqk(my_is), wan => gstore%gqk(my_is)%wan)
-
-     ! Here we build gqk%wan for this spin from the ABIWAN.nc file
-     ! and set the communicator for perturbations from gstore.
-     call wan%from_abiwan(dtfil%filabiwanin, spin, ebands%nsppol, keep_umats, "", gqk%comm%value)
-     wan%my_pert_start = gqk%my_pert_start; wan%my_npert = gqk%my_npert; wan%pert_comm => gqk%pert_comm
-
-     ! Load g(R_e, R_p) for this spin from GWAN.nc
-     call wan%load_gwan(dtfil%filgwanin, gstore%cryst, spin, ebands%nsppol, gqk%comm) ! gqk%pert_comm,
-
-     ! Interpolate my e-ph matrix elements.
-     ! NOTE: the interpolated values are in the atomic representation and distributed over perts.
-     ! Then one should take into account the change from atom and phonon representation.
-     nq = 1
-     ABI_MALLOC(intp_gatm, (wan%nwan, wan%nwan, wan%my_npert, nq))
-     do my_iq=1,gqk%my_nq
-       call gqk%myqpt(my_iq, gstore, weight_qq, qpt)
-       do my_ik=1,gqk%my_nk
-         kpt = gqk%my_kpts(:,my_ik); kq = kpt + qpt
-         call wan%interp_eph_manyq(1, qpt, kpt, intp_gatm)
-       end do ! my_ik
-     end do ! my_iq
-     ABI_FREE(intp_gatm)
-     end associate
-   end do ! my_is
- end if
+ ! NOTE: When has_gwan is True, gqk%my_g/my_g2 have been allocated above (gqk_cplex) but are not
+ ! filled here. The actual Wannier interpolation of the e-ph matrix elements is performed by the
+ ! caller, gstore_init_or_from_ncpath, where with_gmode/gvals_name/with_g2dw are available.
 
 contains
  integer function vid(var_name)
@@ -1313,6 +1310,187 @@ contains
  end function spin_vid
 
 end subroutine gstore_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gstore/gstore_init_or_from_ncpath
+!! NAME
+!! gstore_init_or_from_ncpath
+!!
+!! FUNCTION
+!! Build a gstore_t object either by reading a pre-existent GSTORE.nc file
+!! (getgstore_filepath) or, alternatively, by interpolating e-ph matrix elements
+!! on the fly from ABIWAN.nc + GWAN.nc (getabiwan_filepath + getgwan_filepath),
+!! e.g. on a k/q-mesh denser than the one used to compute the GWAN.nc file.
+!! In the latter case, no GSTORE.nc file is read or written: gqk%my_g is filled
+!! entirely in memory (see the has_gwan branch in gstore_init).
+!!
+!! from_file (output): set to .True. if gstore was built from a
+!! pre-existent GSTORE.nc file, .False. if built on the fly via Wannier
+!! interpolation. Callers can use this to report which path was taken.
+!!
+!! SOURCE
+
+subroutine gstore_init_or_from_ncpath(gstore, with_cplex, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, &
+                                      with_gmode, gvals_name, with_g2dw, comm, from_file)
+
+!Arguments ------------------------------------
+!scalars
+ class(gstore_t),target,intent(out) :: gstore
+ integer,intent(in) :: with_cplex
+ type(dataset_type),target,intent(in) :: dtset
+ type(datafiles_type),intent(in) :: dtfil
+ type(hdr_type),intent(in) :: wfk0_hdr
+ class(crystal_t),target,intent(in) :: cryst
+ class(ebands_t),target,intent(in) :: ebands
+ class(ifc_type),target,intent(in) :: ifc
+ character(len=*),intent(in) :: with_gmode, gvals_name
+ logical,intent(in) :: with_g2dw
+ integer,intent(in) :: comm
+ logical,intent(out) :: from_file
+
+!Local variables-------------------------------
+!scalars
+ integer :: natom, natom3, spin, my_is, my_ik, my_iq, iq_ibz, isym_q, trev_q, ipc, nu, nwan, ierr
+ real(dp) :: weight_q
+ character(len=500) :: msg
+ character(len=fnlen) :: gstore_path
+ type(gqk_t),pointer :: gqk
+!arrays
+ real(dp) :: qpt(3)
+ real(dp),allocatable :: phfrq_ibz(:,:), displ_cart_dum(:,:,:,:), gatm_real(:,:,:,:), gnu_real(:,:,:,:)
+ real(dp),allocatable :: eigvec_ibz(:,:,:,:,:), eigvec_qbz(:,:,:,:), displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:)
+ complex(dp),allocatable :: intp_gatm(:,:,:,:), gatm_full(:,:,:)
+!----------------------------------------------------------------------
+
+ if (dtfil%filgstorein /= ABI_NOFILE) then
+   call gstore%from_ncpath(dtfil%filgstorein, with_cplex, dtset, dtfil, cryst, ebands, ifc, &
+                           with_gmode, gvals_name, with_g2dw, comm)
+   from_file = .True.
+
+ else if (dtfil%filabiwanin /= ABI_NOFILE .and. dtfil%filgwanin /= ABI_NOFILE) then
+   ! Build gstore on the fly via Wannier interpolation from ABIWAN.nc + GWAN.nc.
+   ! First version: only |g|^2 (with_cplex=1) or complex g (with_cplex=2), phonon representation,
+   ! no Debye-Waller, no gvals_ks (this option is only meaningful when reading gstore produced by GWPT).
+   msg = sjoin("Invalid with_cplex:", itoa(with_cplex), "only 1 or 2 are supported when building gstore via Wannier interpolation")
+   ABI_CHECK(with_cplex == 1 .or. with_cplex == 2, msg)
+   if (with_g2dw) then
+     ABI_ERROR("with_g2dw = .True. is not yet supported when building gstore via Wannier interpolation (ABIWAN.nc + GWAN.nc)")
+   end if
+   if (gvals_name == "gvals_ks") then
+     ABI_ERROR("gvals_name = 'gvals_ks' is not supported when building gstore via Wannier interpolation (ABIWAN.nc + GWAN.nc)")
+   end if
+   if (with_gmode /= GSTORE_GMODE_PHONON) then
+     ABI_ERROR(sjoin("with_gmode:", with_gmode, "is not yet supported when building gstore via Wannier"))
+   end if
+
+   gstore_path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+   call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm, with_cplex=with_cplex)
+
+   call wrtout([std_out, ab_out], " Using Wannier interpolation to compute and store e-ph matrix elements ...", pre_newlines=1)
+   from_file = .False.
+   natom = cryst%natom; natom3 = 3 * natom
+
+   ! Precompute phonon frequencies/eigenvectors in the IBZ once (spin-independent).
+   ! NB: The phonon eigenvector gauge must be fixed from a single IBZ representative + symmetry
+   ! rotation (pheigvec_rotate), exactly as done when g(k,q) is read from a pre-existent GSTORE.nc
+   ! file (see gstore_from_ncpath). Calling ifc%fourq directly at each interpolated BZ q would give
+   ! an independently-diagonalized (and hence potentially differently gauged) eigenbasis for
+   ! degenerate modes and would break the e(-q) = e(q)^* convention used elsewhere in the code.
+   ABI_MALLOC(phfrq_ibz, (natom3, gstore%nqibz))
+   ABI_MALLOC(eigvec_ibz, (2, 3, natom, natom3, gstore%nqibz))
+   ABI_MALLOC(displ_cart_dum, (2, 3, natom, natom3))
+   do iq_ibz=1,gstore%nqibz
+     call ifc%fourq(cryst, gstore%qibz(:,iq_ibz), phfrq_ibz(:,iq_ibz), displ_cart_dum, &
+                    out_eigvec=eigvec_ibz(:,:,:,:,iq_ibz))
+   end do
+   ABI_FREE(displ_cart_dum)
+
+   ABI_MALLOC(eigvec_qbz, (2, 3, natom, natom3))
+   ABI_MALLOC(displ_cart_qbz, (2, 3, natom, natom3))
+   ABI_MALLOC(displ_red_qbz, (2, 3, natom, natom3))
+
+   do my_is=1,gstore%my_nspins
+     spin = gstore%my_spins(my_is)
+     gqk => gstore%gqk(my_is)
+     nwan = gqk%nb_k
+
+     ! Build gqk%wan for this spin from the ABIWAN.nc file and load g(R_e, R_p) from GWAN.nc.
+     call gqk%wan%from_abiwan(dtfil%filabiwanin, spin, gstore%nsppol, .False., "", gqk%comm%value)
+     gqk%wan%my_pert_start = gqk%my_pert_start; gqk%wan%my_npert = gqk%my_npert; gqk%wan%pert_comm => gqk%pert_comm
+     call gqk%wan%load_gwan(dtfil%filgwanin, cryst, spin, gstore%nsppol, gqk%comm)
+
+     ABI_MALLOC(gqk%my_wnuq, (gqk%my_npert, gqk%my_nq))
+     ABI_MALLOC(gqk%my_displ_cart, (2, 3, natom, gqk%my_npert, gqk%my_nq))
+
+     ABI_MALLOC(intp_gatm, (nwan, nwan, gqk%my_npert, 1))
+     ABI_MALLOC(gatm_full, (nwan, nwan, natom3))
+     ABI_MALLOC(gatm_real, (2, nwan, nwan, natom3))
+     ABI_MALLOC(gnu_real, (2, nwan, nwan, natom3))
+
+     do my_iq=1,gqk%my_nq
+       call gqk%myqpt(my_iq, gstore, weight_q, qpt)
+       iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq); trev_q = gqk%my_q2ibz(6, my_iq)
+
+       ! Rotate the phonon eigenvector from the IBZ to this BZ q-point (fixes the gauge).
+       call pheigvec_rotate(cryst, gstore%qibz(:,iq_ibz), isym_q, trev_q, eigvec_ibz(:,:,:,:,iq_ibz), &
+                            eigvec_qbz, displ_cart_qbz, displ_red_qbz=displ_red_qbz)
+
+       ! Fill my arrays with ph data.
+       gqk%my_wnuq(:,my_iq) = phfrq_ibz(gqk%my_pertcases(:), iq_ibz)
+       gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart_qbz(:,:,:,gqk%my_pertcases(:))
+
+       do my_ik=1,gqk%my_nk
+         ! Interpolate e-ph matrix elements in the atomic representation for this rank's slice
+         ! of the natom3 atomic perturbations (gqk%my_pertcases).
+         call gqk%wan%interp_eph_manyq(1, qpt, gqk%my_kpts(:,my_ik), intp_gatm)
+
+         ! Scatter into the full natom3 array and reduce over pert_comm: the atom -> phonon-mode
+         ! transform mixes all natom3 atomic perturbations, so every rank needs the complete array.
+         gatm_full = czero
+         do ipc=1,gqk%my_npert
+           gatm_full(:,:, gqk%my_pertcases(ipc)) = intp_gatm(:,:,ipc,1)
+         end do
+         if (gqk%pert_comm%nproc > 1) call xmpi_sum(gatm_full, gqk%pert_comm%value, ierr)
+
+         gatm_real(1,:,:,:) = real(gatm_full, kind=dp); gatm_real(2,:,:,:) = aimag(gatm_full)
+         call ephtk_gkknu_from_atm(nwan, nwan, 1, natom, gatm_real, phfrq_ibz(:,iq_ibz), displ_red_qbz, gnu_real)
+
+         do ipc=1,gqk%my_npert
+           nu = gqk%my_pertcases(ipc)
+           if (with_cplex == 2) then
+             gqk%my_g(ipc,:,my_iq,:,my_ik) = gnu_real(1,:,:,nu) + j_dpc * gnu_real(2,:,:,nu)
+           else
+             gqk%my_g2(ipc,:,my_iq,:,my_ik) = gnu_real(1,:,:,nu)**2 + gnu_real(2,:,:,nu)**2
+           end if
+         end do
+       end do ! my_ik
+     end do ! my_iq
+
+     ABI_FREE(intp_gatm)
+     ABI_FREE(gatm_full)
+     ABI_FREE(gatm_real)
+     ABI_FREE(gnu_real)
+   end do ! my_is
+
+   ABI_FREE(phfrq_ibz)
+   ABI_FREE(eigvec_ibz)
+   ABI_FREE(eigvec_qbz)
+   ABI_FREE(displ_cart_qbz)
+   ABI_FREE(displ_red_qbz)
+
+   ! We interpolated (and converted to) the phonon representation.
+   gstore%gmode = GSTORE_GMODE_PHONON
+
+ else
+   write(msg, "(3a)") &
+     "Cannot build gstore object: either getgstore_filepath or both ", &
+     "getabiwan_filepath and getgwan_filepath must be provided in the input file.", ch10
+   ABI_ERROR(msg)
+ end if
+
+end subroutine gstore_init_or_from_ncpath
 !!***
 
 !----------------------------------------------------------------------
@@ -5569,7 +5747,7 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
        ABI_MALLOC(g_bb, (nwin_kq, nwin_k))
        ABI_MALLOC(u_k, (1:nwin_k, 1:nwan))
        ABI_MALLOC(u_kq, (1:nwin_kq, 1:nwan))
-       ABI_MALLOC(tmp_mat, (nwan, nwin_k))
+       ABI_MALLOC(tmp_mat, (nwin_kq, nwan))
 
        u_k = wan%u_k(1:nwin_k, 1:nwan, ik)
        u_kq = wan%u_k(1:nwin_kq, 1:nwan, ikq)
@@ -5604,9 +5782,11 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
          ! [here we have a size-reduction from nbnd*nbnd to nwan*nwan]
          ! output stored in gww_pk(:,:, my_ip, my_ik)
 
-         !gww_pk(:,:, my_ip, my_ik) = MATMUL(CONJG(TRANSPOSE(u_kq)), MATMUL(g_bb, u_k))
-         call ZGEMM('N', 'N', nwan, nwin_k, nwin_kq, cone, g_bb, nwin_kq, u_k, nwin_k, czero, tmp_mat, nwan)
-         call ZGEMM('C', 'N', nwin_kq, nwan, nwin_k, cone, u_kq, nwan, tmp_mat, nwan, czero, gww_pk(:,:, my_ip, my_ik), nwin_kq)
+         ! gww_pk(:,:, my_ip, my_ik) = MATMUL(CONJG(TRANSPOSE(u_kq)), MATMUL(g_bb, u_k))
+         ! tmp_mat (nwin_kq x nwan) = g_bb (nwin_kq x nwin_k) . u_k (nwin_k x nwan)
+         call ZGEMM('N', 'N', nwin_kq, nwan, nwin_k, cone, g_bb, nwin_kq, u_k, nwin_k, czero, tmp_mat, nwin_kq)
+         ! gww_pk (nwan x nwan) = u_kq^dagger (nwan x nwin_kq) . tmp_mat (nwin_kq x nwan)
+         call ZGEMM('C', 'N', nwan, nwan, nwin_kq, cone, u_kq, nwin_kq, tmp_mat, nwin_kq, czero, gww_pk(:,:, my_ip, my_ik), nwan)
 
          !call ZGEMM('C', 'N', nwan, nbnd, nbnd, cone, u_kq, nbnd, epmatk(:, :, ik, imode), nbnd, czero, eptmp, nwan)
          !call ZGEMM('N', 'N', nwan, nwan, nbnd, cone, eptmp, nwan, u_k, nbnd, czero, epmats(:, :, ik, imode), nwan)

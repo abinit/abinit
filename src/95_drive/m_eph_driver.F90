@@ -155,9 +155,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
- logical :: use_wfk, use_wfq, use_dvdb, use_sigeph, use_drhodb, use_gstore
+ logical :: use_wfk, use_wfq, use_dvdb, use_sigeph, use_drhodb, use_gstore, gstore_from_file
  character(len=500) :: msg
- character(len=fnlen) :: wfk0_path, wfq_path, ddb_filepath, dvdb_filepath, sigeph_filepath, path, drhodb_filepath, gstore_filepath, gstore_path
+ character(len=fnlen) :: wfk0_path, wfq_path, ddb_filepath, dvdb_filepath, sigeph_filepath, path, drhodb_filepath, gstore_path
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst, cryst_ddb
  type(ebands_t) :: ks_ebands, ks_ebands_kq, qp_ebands
@@ -234,7 +234,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    drhodb_filepath = dtfil%filddbsin; ii = len_trim(drhodb_filepath); drhodb_filepath(ii-2:ii+1) = "DRHODB"
  end if
 
- gstore_filepath = dtfil%filgstorein
  sigeph_filepath = dtfil%filsigephin
 
  use_wfk = all(dtset%eph_task /= [0, 5, -5, 6, +15, -15, -16, 16])
@@ -704,7 +703,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (24)
    ! Compute e-ph self-energy from GSTORE.nc file.
-   call gstore_sigmaph(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, ks_ebands, qp_ebands, dvdb, ifc, &
+   call gstore_sigmaph(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, ks_ebands, qp_ebands, wfk0_hdr, dvdb, ifc, &
                        pawfgr, pawtab, psps, mpi_enreg, comm)
 
  case (5, -5)
@@ -786,8 +785,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (12, -12)
    ! Migdal-Eliashberg equations (isotropic or anisotropic case).
    ! Need|g(k,q)|^2 in the phonon representation but
-   call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, dtfil, cryst, qp_ebands, ifc, &
-                           "phonon", dtset%gstore_gname, .False., comm)
+   call gstore%init_or_from_ncpath(with_cplex1, dtset, dtfil, wfk0_hdr, cryst, qp_ebands, ifc, &
+                                   "phonon", dtset%gstore_gname, .False., comm, gstore_from_file)
+   if (gstore_from_file) then
+     call wrtout(units, " Gstore built by reading a pre-existent GSTORE.nc file")
+   else
+     call wrtout(units, " Gstore built on the fly via Wannier interpolation (ABIWAN.nc + GWAN.nc)")
+   end if
 
    if (dtset%eph_task == -12) call migdal_eliashberg_iso(gstore, dtset, dtfil)
    !if (dtset%eph_task == +12) call migdal_eliashberg_aniso(gstore, dtset, dtfil)
@@ -795,9 +799,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (13)
    ! Variational polaron equations.
-   call wrtout(units, sjoin(" Computing variational polaron equations from pre-existent GSTORE file:", gstore_filepath))
-   call gstore%from_ncpath(gstore_filepath, with_cplex2, dtset, dtfil, cryst, qp_ebands, ifc, &
-                           "phonon", dtset%gstore_gname, .False., comm)
+   call gstore%init_or_from_ncpath(with_cplex2, dtset, dtfil, wfk0_hdr, cryst, qp_ebands, ifc, &
+                                   "phonon", dtset%gstore_gname, .False., comm, gstore_from_file)
+   if (gstore_from_file) then
+     call wrtout(units, sjoin(" Computing variational polaron equations from pre-existent GSTORE file:", dtfil%filgstorein))
+   else
+     call wrtout(units, " Gstore built on the fly via Wannier interpolation (ABIWAN.nc + GWAN.nc)")
+   end if
    call varpeq_run(gstore, dtset, dtfil)
    call gstore%free()
 
@@ -807,9 +815,14 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (14)
    ! Molecular Berry Curvature.
-   call wrtout(units, sjoin(" Computing Berry curvature from pre-existent GSTORE file:", dtfil%filgstorein))
-   call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, dtfil, cryst, qp_ebands, ifc, &
-                           "atom", dtset%gstore_gname, .False., comm)
+   call wrtout(units, " Computing Berry curvature")
+   call gstore%init_or_from_ncpath(with_cplex2, dtset, dtfil, wfk0_hdr, cryst, qp_ebands, ifc, &
+                                   "atom", dtset%gstore_gname, .False., comm, gstore_from_file)
+   if (gstore_from_file) then
+     call wrtout(units, " Gstore built by reading a pre-existent GSTORE.nc file")
+   else
+     call wrtout(units, " Gstore built on the fly via Wannier interpolation (ABIWAN.nc + GWAN.nc)")
+   end if
 
    call berry_curvature(gstore, dtset, dtfil)
    call gstore%free()

@@ -478,6 +478,8 @@ P Number of CPUs for parallelism over k-points: 1
 11 : [ 4.4444E-01,  1.1111E-01,  0.0000E+00]
  Max 10  k-points will be written. Use prtvol > 0 to print all of them.
 
+ Gstore built by reading a pre-existent GSTORE.nc file
+
 
  Linear tetrahedron method.
  Mesh step:  10.0 (meV) with npts: 2749
