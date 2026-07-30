@@ -3514,7 +3514,7 @@ subroutine wan_interp_ham(wan, kpt, uk_wan, eigens)
 
  ! Hermitianize and diagonalize.
  uk_wan = half * (uk_wan + transpose(conjg(uk_wan)))
- call xheev("N", "U", wan%nwan, uk_wan, eigens)
+ call xheev("V", "U", wan%nwan, uk_wan, eigens)
 
 end subroutine wan_interp_ham
 !!***

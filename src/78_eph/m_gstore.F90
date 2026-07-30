@@ -5680,16 +5680,23 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: nr_e, nr_p, nwan, iwan, jwan, spin, my_is, my_ip, ir, my_ik, my_iq, nb_k, nb_kq
+ integer,parameter :: wan_ntest = 4
+ real(dp),parameter :: WAN_CLOSURE_TOL = tol8
+ integer :: nr_e, nr_p, nwan, iwan, jwan, spin, my_is, my_ip, ir, irp, my_ik, my_iq, nb_k, nb_kq
  integer :: my_nk, my_nq, ierr, ik, ikq, my_npert, nwin_k, nwin_kq, ii, jj, band_kq, band_k, ib_k, ib_kq
+ integer :: itest, ip_loc
+ real(dp) :: max_err, ref_scale
  !character(len=500) :: msg
  logical :: keep_umats
  type(wan_t),pointer :: wan
  type(gqk_t),pointer :: gqk
 !arrays
  integer :: qptrlatt_(3,3), units(2)
+ integer :: test_ik(wan_ntest), test_iq(wan_ntest)
  real(dp) :: weight_qq, qpt(3), kpt(3), kq(3), cpu, wall, gflops
+ real(dp),allocatable :: eigens_k_test(:), eigens_kq_test(:)
  complex(dp),allocatable :: emikr(:), emiqr(:), u_k(:,:), u_kq(:,:), gww_epq(:,:,:,:,:), gww_pk(:,:,:,:), g_bb(:,:), tmp_mat(:,:)
+ complex(dp),allocatable :: test_gref(:,:,:,:), u_k_test(:,:), u_kq_test(:,:), cmat_test(:,:), g_expected(:,:), g_atm_test(:,:,:,:)
 ! *************************************************************************
 
  units = [std_out, ab_out]
@@ -5721,6 +5728,12 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
 
    nr_p = wan%nr_p; nr_e = wan%nr_e; nwan = wan%nwan
    !if (gqk%comm%me == master) call wan%print(units)
+
+   ! Cache the pre-FT ground truth at a few coarse (k,q) points for the on-mesh closure
+   ! self-check performed after wan%grpe_wwp has been built (see the "Wannier on-mesh closure
+   ! self-check" block below).
+   test_ik = [1, my_nk, 1, my_nk]; test_iq = [1, 1, my_nq, my_nq]
+   ABI_MALLOC(test_gref, (nwan, nwan, my_npert, wan_ntest))
 
    ABI_MALLOC(emikr, (nr_e))
    ABI_MALLOC(emiqr, (nr_p))
@@ -5792,6 +5805,12 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
          !call ZGEMM('N', 'N', nwan, nwan, nbnd, cone, eptmp, nwan, u_k, nbnd, czero, epmats(:, :, ik, imode), nwan)
        end do ! my_ip
 
+       ! Cache gww_pk(:,:,:,my_ik) for the on-mesh closure self-check below, while it is still
+       ! valid for THIS my_iq (it gets overwritten by the next my_iq iteration).
+       do itest=1,wan_ntest
+         if (test_ik(itest) == my_ik .and. test_iq(itest) == my_iq) test_gref(:,:,:,itest) = gww_pk(:,:,:,my_ik)
+       end do
+
        ABI_FREE(g_bb)
        ABI_FREE(tmp_mat)
 
@@ -5828,16 +5847,17 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
    ! Loop over my q-points (partial sum over q).
    do my_iq=1,my_nq
      call gqk%myqpt(my_iq, gstore, weight_qq, qpt)
-     do ir=1,nr_p
-       emiqr(ir) = exp(-j_dpc * two_pi * dot_product(qpt, wan%r_p(:, ir))) / dble(gstore%nqbz)
+     do irp=1,nr_p
+       emiqr(irp) = exp(-j_dpc * two_pi * dot_product(qpt, wan%r_p(:, irp))) / dble(gstore%nqbz)
      end do
 
       do my_ip=1,my_npert
         do jwan=1,nwan
           do iwan=1,nwan
             do ir=1,nr_e
+               ! Fixed R_e (index ir), all R_p (colon): g(R_e,R_p) = g(R_e,R_p) + g(R_e,q) * e^{-iq.R_p}
                wan%grpe_wwp(:, ir, iwan, jwan, my_ip) = wan%grpe_wwp(:, ir, iwan, jwan, my_ip) + &
-                 gww_epq(iwan, jwan, :, my_ip, my_iq) * emiqr(:)
+                 gww_epq(iwan, jwan, ir, my_ip, my_iq) * emiqr(:)
             end do
           end do
         end do
@@ -5852,6 +5872,44 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
        write(std_out, *) wan%rmod_e(ir), maxval(abs(wan%grpe_wwp(:,ir,:,:,:))), sum(abs(wan%grpe_wwp(:,ir,:,:,:))) / size(wan%grpe_wwp(:,ir,:,:,:))
      end do
    end if
+
+   !--------------------------------------------------------------------------------
+   ! Wannier on-mesh closure self-check: interpolating g(k,q) back at a handful of
+   ! the SAME coarse (k,q) points used to build wan%grpe_wwp must reproduce the pre-FT
+   ! gww_pk cached above, once rotated by the SAME wan%interp_ham-derived u_k/u_kq
+   ! (interp_ham's gauge is generically different from the ABIWAN gauge used for gww_pk,
+   ! even on-mesh, so we apply the identical rotation to both sides rather than comparing
+   ! against raw gww_pk). This isolates the WS/ndegen bookkeeping and forward/backward FT
+   ! consistency. Cheap (wan_ntest points only) and deterministic: a hard ABI_CHECK, not a
+   ! Refs-compared print, since it is a precision-only mathematical identity.
+   !--------------------------------------------------------------------------------
+   ABI_MALLOC(u_k_test, (nwan,nwan)); ABI_MALLOC(u_kq_test, (nwan,nwan))
+   ABI_MALLOC(eigens_k_test, (nwan)); ABI_MALLOC(eigens_kq_test, (nwan))
+   ABI_MALLOC(cmat_test, (nwan,nwan)); ABI_MALLOC(g_expected, (nwan,nwan))
+   ABI_MALLOC(g_atm_test, (nwan, nwan, my_npert, 1))
+
+   max_err = zero; ref_scale = max(maxval(abs(test_gref)), tol12)
+   do itest=1,wan_ntest
+     kpt = gqk%my_kpts(:, test_ik(itest))
+     call gqk%myqpt(test_iq(itest), gstore, weight_qq, qpt)
+     call wan%interp_ham(kpt, u_k_test, eigens_k_test)
+     call wan%interp_ham(kpt + qpt, u_kq_test, eigens_kq_test)
+     call wan%interp_eph_manyq(1, qpt, kpt, g_atm_test)
+     do ip_loc=1,my_npert
+       ! Same order/dagger convention as wan_interp_eph_manyq (m_mlwfovlp.F90).
+       call ZGEMM('N', 'N', nwan, nwan, nwan, cone, u_kq_test, nwan, test_gref(:,:,ip_loc,itest), nwan, czero, cmat_test, nwan)
+       call ZGEMM('N', 'C', nwan, nwan, nwan, cone, cmat_test, nwan, u_k_test, nwan, czero, g_expected, nwan)
+       max_err = max(max_err, maxval(abs(g_expected - g_atm_test(:,:,ip_loc,1))))
+     end do
+   end do
+
+   if (gqk%comm%me == master) then
+     write(std_out,'(a,es10.2,a,es10.2)') " Wannier on-mesh closure self-check: max_err=", max_err, "  ref_scale=", ref_scale
+   end if
+   ABI_CHECK(max_err < WAN_CLOSURE_TOL * ref_scale, "Wannier on-mesh closure self-check failed: interpolating g(k,q) back at a coarse-mesh point does not reproduce the pre-FT value (up to the shared interp_ham gauge). Suspect the WS/ndegen bookkeeping, the forward/backward FTs, or the dagger convention in wan_interp_eph_manyq vs gstore_wannierize_and_write_gwan.")
+
+   ABI_FREE(u_k_test); ABI_FREE(u_kq_test); ABI_FREE(eigens_k_test); ABI_FREE(eigens_kq_test)
+   ABI_FREE(cmat_test); ABI_FREE(g_expected); ABI_FREE(g_atm_test); ABI_FREE(test_gref)
 
    ! Free memory for this spin.
    ABI_FREE(emikr)
