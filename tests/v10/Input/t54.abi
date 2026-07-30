@@ -30,7 +30,7 @@
     prtwf3  1
 
 ### 4) LINEAR RESPONSE TO FINITE-q SCALAR POTENTIAL
-  rfmagn4   3         #This is to be modified after merging with Samare's branch
+  rfmagn4   3         
     nqpt4   1
      qpt4   0.01 0.0 0.0
   getwfq4   2
