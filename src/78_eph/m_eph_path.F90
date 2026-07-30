@@ -209,7 +209,9 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    else
      if (bstart <= 0) bstart = 1
      if (bstop <= 0) bstop = nband
-     ABI_CHECK(bstart == wan%bmin .and. bstop == wan%bmax, sjoin("eph_path_brange:", ltoa([bstart,bstop]), "must equal [wan%bmin, wan%bmax]:", ltoa([wan%bmin, wan%bmax]), "when getgwan_filepath is given (the gauge-invariant trace comparison needs the same electronic subspace)."))
+     msg = sjoin("eph_path_brange:", ltoa([bstart,bstop]), "must equal [wan%bmin, wan%bmax]:", ltoa([wan%bmin, wan%bmax]), &
+                  "when getgwan_filepath is given (the gauge-invariant trace comparison needs the same electronic subspace).")
+     ABI_CHECK(bstart == wan%bmin .and. bstop == wan%bmax, msg)
    end if
    nwan_glob = wan%nwan
    call wan%free()

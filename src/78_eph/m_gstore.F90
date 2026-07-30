@@ -5681,25 +5681,30 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
 !scalars
  integer,parameter :: master = 0
  integer,parameter :: wan_ntest = 4
+ integer,parameter :: wan_nperiod = 3
  real(dp),parameter :: WAN_CLOSURE_TOL = tol8
  integer :: nr_e, nr_p, nwan, iwan, jwan, spin, my_is, my_ip, ir, irp, my_ik, my_iq, nb_k, nb_kq
  integer :: my_nk, my_nq, ierr, ik, ikq, my_npert, nwin_k, nwin_kq, ii, jj, band_kq, band_k, ib_k, ib_kq
- integer :: itest, ip_loc
- real(dp) :: max_err, ref_scale
+ integer :: itest, ip_loc, ik_glob, iq_glob, ntest_found, iperiod
+ real(dp) :: max_err, ref_scale, max_period_eig_err, period_eig_scale, max_period_g2_err, period_g2_scale
  !character(len=500) :: msg
- logical :: keep_umats
+ logical :: keep_umats, test_found(wan_ntest)
  type(wan_t),pointer :: wan
  type(gqk_t),pointer :: gqk
 !arrays
  integer :: qptrlatt_(3,3), units(2)
  integer :: test_ik(wan_ntest), test_iq(wan_ntest)
+ integer :: period_gk(3,wan_nperiod), period_gq(3,wan_nperiod)
  real(dp) :: weight_qq, qpt(3), kpt(3), kq(3), cpu, wall, gflops
- real(dp),allocatable :: eigens_k_test(:), eigens_kq_test(:)
+ real(dp),allocatable :: eigens_k_test(:), eigens_kq_test(:), eigens_k_period(:), eigens_kq_period(:)
  complex(dp),allocatable :: emikr(:), emiqr(:), u_k(:,:), u_kq(:,:), gww_epq(:,:,:,:,:), gww_pk(:,:,:,:), g_bb(:,:), tmp_mat(:,:)
- complex(dp),allocatable :: test_gref(:,:,:,:), u_k_test(:,:), u_kq_test(:,:), cmat_test(:,:), g_expected(:,:), g_atm_test(:,:,:,:)
+ complex(dp),allocatable :: test_gref(:,:,:,:), u_k_test(:,:), u_kq_test(:,:), cmat_test(:,:), g_expected(:,:)
+ complex(dp),allocatable :: g_atm_test(:,:,:,:), g_atm_period(:,:,:,:)
 ! *************************************************************************
 
  units = [std_out, ab_out]
+ period_gk = reshape([1,0,0,  0,0,0, -1,1,0], shape(period_gk))
+ period_gq = reshape([0,0,0,  0,1,0,  0,0,1], shape(period_gq))
  call wrtout(units, " Computing g(R_e,R_ph) in the Wannier representation...", pre_newlines=1)
  call cwtime(cpu, wall, gflops, "start")
 
@@ -5729,11 +5734,12 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
    nr_p = wan%nr_p; nr_e = wan%nr_e; nwan = wan%nwan
    !if (gqk%comm%me == master) call wan%print(units)
 
-   ! Cache the pre-FT ground truth at a few coarse (k,q) points for the on-mesh closure
-   ! self-check performed after wan%grpe_wwp has been built (see the "Wannier on-mesh closure
-   ! self-check" block below).
-   test_ik = [1, my_nk, 1, my_nk]; test_iq = [1, 1, my_nq, my_nq]
-   ABI_MALLOC(test_gref, (nwan, nwan, my_npert, wan_ntest))
+   ! Cache the pre-FT ground truth at four fixed GLOBAL coarse-mesh points.  Using
+   ! local first/last indices would make the test points depend on the MPI grid.
+   test_ik = [1, gqk%glob_nk, 1, gqk%glob_nk]
+   test_iq = [1, 1, gqk%glob_nq, gqk%glob_nq]
+   test_found = .False.
+   ABI_CALLOC(test_gref, (nwan, nwan, my_npert, wan_ntest))
 
    ABI_MALLOC(emikr, (nr_e))
    ABI_MALLOC(emiqr, (nr_p))
@@ -5807,8 +5813,13 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
 
        ! Cache gww_pk(:,:,:,my_ik) for the on-mesh closure self-check below, while it is still
        ! valid for THIS my_iq (it gets overwritten by the next my_iq iteration).
+       ik_glob = my_ik + gqk%my_kstart - 1
+       iq_glob = my_iq + gqk%my_qstart - 1
        do itest=1,wan_ntest
-         if (test_ik(itest) == my_ik .and. test_iq(itest) == my_iq) test_gref(:,:,:,itest) = gww_pk(:,:,:,my_ik)
+         if (test_ik(itest) == ik_glob .and. test_iq(itest) == iq_glob) then
+           test_gref(:,:,:,itest) = gww_pk(:,:,:,my_ik)
+           test_found(itest) = .True.
+         end if
        end do
 
        ABI_FREE(g_bb)
@@ -5883,33 +5894,96 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
    ! consistency. Cheap (wan_ntest points only) and deterministic: a hard ABI_CHECK, not a
    ! Refs-compared print, since it is a precision-only mathematical identity.
    !--------------------------------------------------------------------------------
-   ABI_MALLOC(u_k_test, (nwan,nwan)); ABI_MALLOC(u_kq_test, (nwan,nwan))
-   ABI_MALLOC(eigens_k_test, (nwan)); ABI_MALLOC(eigens_kq_test, (nwan))
-   ABI_MALLOC(cmat_test, (nwan,nwan)); ABI_MALLOC(g_expected, (nwan,nwan))
+   ABI_MALLOC(u_k_test, (nwan,nwan))
+   ABI_MALLOC(u_kq_test, (nwan,nwan))
+   ABI_MALLOC(eigens_k_test, (nwan))
+   ABI_MALLOC(eigens_kq_test, (nwan))
+   ABI_MALLOC(eigens_k_period, (nwan))
+   ABI_MALLOC(eigens_kq_period, (nwan))
+   ABI_MALLOC(cmat_test, (nwan,nwan))
+   ABI_MALLOC(g_expected, (nwan,nwan))
    ABI_MALLOC(g_atm_test, (nwan, nwan, my_npert, 1))
+   ABI_MALLOC(g_atm_period, (nwan, nwan, my_npert, 1))
 
-   max_err = zero; ref_scale = max(maxval(abs(test_gref)), tol12)
+   max_err = zero; ref_scale = zero
+   max_period_eig_err = zero; period_eig_scale = zero
+   max_period_g2_err = zero; period_g2_scale = zero
    do itest=1,wan_ntest
-     kpt = gqk%my_kpts(:, test_ik(itest))
-     call gqk%myqpt(test_iq(itest), gstore, weight_qq, qpt)
+     if (.not. test_found(itest)) cycle
+     my_ik = test_ik(itest) - gqk%my_kstart + 1
+     my_iq = test_iq(itest) - gqk%my_qstart + 1
+     kpt = gqk%my_kpts(:,my_ik)
+     call gqk%myqpt(my_iq, gstore, weight_qq, qpt)
      call wan%interp_ham(kpt, u_k_test, eigens_k_test)
      call wan%interp_ham(kpt + qpt, u_kq_test, eigens_kq_test)
      call wan%interp_eph_manyq(1, qpt, kpt, g_atm_test)
+     ref_scale = max(ref_scale, maxval(abs(test_gref(:,:,:,itest))))
      do ip_loc=1,my_npert
        ! Same order/dagger convention as wan_interp_eph_manyq (m_mlwfovlp.F90).
        call ZGEMM('N', 'N', nwan, nwan, nwan, cone, u_kq_test, nwan, test_gref(:,:,ip_loc,itest), nwan, czero, cmat_test, nwan)
        call ZGEMM('N', 'C', nwan, nwan, nwan, cone, cmat_test, nwan, u_k_test, nwan, czero, g_expected, nwan)
        max_err = max(max_err, maxval(abs(g_expected - g_atm_test(:,:,ip_loc,1))))
      end do
+
+     ! Reciprocal-periodicity self-check. Integer shifts leave the real-space
+     ! Fourier sums invariant. Compare eigenvalues and per-perturbation
+     ! Frobenius norms, which remain well defined even if a tiny roundoff
+     ! difference rotates eigenvectors inside a degenerate subspace.
+     period_eig_scale = max(period_eig_scale, maxval(abs(eigens_k_test)), maxval(abs(eigens_kq_test)))
+     do ip_loc=1,my_npert
+       period_g2_scale = max(period_g2_scale, sum(abs(g_atm_test(:,:,ip_loc,1))**2))
+     end do
+     do iperiod=1,wan_nperiod
+       call wan%interp_ham(kpt + period_gk(:,iperiod), u_k_test, eigens_k_period)
+       call wan%interp_ham(kpt + qpt + period_gk(:,iperiod) + period_gq(:,iperiod), &
+                           u_kq_test, eigens_kq_period)
+       call wan%interp_eph_manyq(1, qpt + period_gq(:,iperiod), &
+                                 kpt + period_gk(:,iperiod), g_atm_period)
+       max_period_eig_err = max(max_period_eig_err, maxval(abs(eigens_k_period - eigens_k_test)), &
+                               maxval(abs(eigens_kq_period - eigens_kq_test)))
+       do ip_loc=1,my_npert
+         max_period_g2_err = max(max_period_g2_err, abs( &
+           sum(abs(g_atm_period(:,:,ip_loc,1))**2) - sum(abs(g_atm_test(:,:,ip_loc,1))**2)))
+       end do
+     end do
    end do
+
+   ! Each fixed (k,q) pair must be owned exactly once within each perturbation
+   ! slice. Reduce diagnostics over the complete spin communicator so every rank
+   ! applies the same check and the printed result is MPI-decomposition invariant.
+   ntest_found = count(test_found)
+   call xmpi_sum(ntest_found, gqk%qpt_kpt_comm%value, ierr)
+   ABI_CHECK_IEQ(ntest_found, wan_ntest, "Wannier closure test did not find each fixed global (k,q) point exactly once")
+   call xmpi_max(max_err, gqk%comm%value, ierr)
+   call xmpi_max(ref_scale, gqk%comm%value, ierr)
+   call xmpi_max(max_period_eig_err, gqk%comm%value, ierr)
+   call xmpi_max(period_eig_scale, gqk%comm%value, ierr)
+   call xmpi_max(max_period_g2_err, gqk%comm%value, ierr)
+   call xmpi_max(period_g2_scale, gqk%comm%value, ierr)
+   ref_scale = max(ref_scale, tol12)
+   period_eig_scale = max(period_eig_scale, tol12)
+   period_g2_scale = max(period_g2_scale, tol12)
 
    if (gqk%comm%me == master) then
      write(std_out,'(a,es10.2,a,es10.2)') " Wannier on-mesh closure self-check: max_err=", max_err, "  ref_scale=", ref_scale
+     write(std_out,'(a,es10.2,a,es10.2)') " Wannier reciprocal-periodicity self-check: max_eig_err=", &
+       max_period_eig_err, "  max_g2_err=", max_period_g2_err
    end if
    ABI_CHECK(max_err < WAN_CLOSURE_TOL * ref_scale, "Wannier on-mesh closure self-check failed: interpolating g(k,q) back at a coarse-mesh point does not reproduce the pre-FT value (up to the shared interp_ham gauge). Suspect the WS/ndegen bookkeeping, the forward/backward FTs, or the dagger convention in wan_interp_eph_manyq vs gstore_wannierize_and_write_gwan.")
+   ABI_CHECK(max_period_eig_err < WAN_CLOSURE_TOL * period_eig_scale, "Wannier reciprocal-periodicity self-check failed for interpolated electronic eigenvalues.")
+   ABI_CHECK(max_period_g2_err < WAN_CLOSURE_TOL * period_g2_scale, "Wannier reciprocal-periodicity self-check failed for gauge-invariant e-ph Frobenius norms.")
 
-   ABI_FREE(u_k_test); ABI_FREE(u_kq_test); ABI_FREE(eigens_k_test); ABI_FREE(eigens_kq_test)
-   ABI_FREE(cmat_test); ABI_FREE(g_expected); ABI_FREE(g_atm_test); ABI_FREE(test_gref)
+   ABI_FREE(u_k_test)
+   ABI_FREE(u_kq_test)
+   ABI_FREE(eigens_k_test)
+   ABI_FREE(eigens_kq_test)
+   ABI_FREE(eigens_k_period)
+   ABI_FREE(eigens_kq_period)
+   ABI_FREE(cmat_test)
+   ABI_FREE(g_expected)
+   ABI_FREE(g_atm_test)
+   ABI_FREE(g_atm_period)
+   ABI_FREE(test_gref)
 
    ! Free memory for this spin.
    ABI_FREE(emikr)
@@ -5925,9 +5999,13 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
    my_is = gstore%spin2my_is(spin)
    if (my_is /= 0) then
      gqk => gstore%gqk(my_is)
-     ! TODO: and I'm the in the first slice of gqk%comm ...
-     !gqk%coords_qkpb_sumbp(ndims)
-     call gqk%wan%ncwrite_gwan(dtfil, gstore%cryst, gstore%ebands, gqk%pert_comm)
+     ! grpe_wwp has already been reduced over qpt_kpt_comm and is replicated
+     ! across the q/k (and auxiliary sum/band) grid. Exactly one such slice
+     ! must enter the writer; all ranks along its perturbation axis participate
+     ! collectively because grpe_wwp remains distributed over perturbations.
+     if (all(gqk%coords_qkpb_sumbp([1,2,4,5,6]) == 0)) then
+       call gqk%wan%ncwrite_gwan(dtfil, gstore%cryst, gstore%ebands, gqk%pert_comm)
+     end if
    end if
    call xmpi_barrier(gstore%comm)
  end do ! spin

@@ -264,7 +264,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  nproc = xmpi_comm_size(gstore%comm); my_rank = xmpi_comm_rank(gstore%comm)
  units = [std_out, ab_out]
 
- call wrtout(std_out, " Solving isotropic Migdal-Eliashberg equations on the imaginary axis", pre_newlines=2)
+ call wrtout(units, " Solving isotropic Migdal-Eliashberg equations on the imaginary axis", pre_newlines=2)
  call cwtime(cpu, wall, gflops, "start")
 
  cryst => gstore%cryst; ebands => gstore%ebands
@@ -538,7 +538,6 @@ subroutine get_a2fw(gstore, dtset, nw, wmesh, a2fw)
  ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
 
  ABI_MALLOC(deltaw_nuq, (nw))
-
  a2fw = zero
 
  ! Loop over collinear spins.

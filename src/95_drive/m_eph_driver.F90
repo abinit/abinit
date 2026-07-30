@@ -784,7 +784,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (12, -12)
    ! Migdal-Eliashberg equations (isotropic or anisotropic case).
-   ! Need|g(k,q)|^2 in the phonon representation but
+   ! Need|g(k,q)|^2 in the phonon representation.
    call gstore%init_or_from_ncpath(with_cplex1, dtset, dtfil, wfk0_hdr, cryst, qp_ebands, ifc, &
                                    "phonon", dtset%gstore_gname, .False., comm, gstore_from_file)
    if (gstore_from_file) then
