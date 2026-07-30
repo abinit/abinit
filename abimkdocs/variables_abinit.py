@@ -18439,7 +18439,7 @@ Variable(
     abivarname="prt1mag",
     varset="files",
     vartype="integer",
-    topics=["'DFPT_expert', 'ConstrainedDFPT_expert'"],
+    topics=["DFPT_expert", "ConstrainedDFPT_expert"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT the 1st-order MAGnetic moments",
