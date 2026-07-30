@@ -18457,7 +18457,7 @@ In both cases, the total and local (i.e. integrated inside the atomic spheres) m
 Zeeman field and to another arbitrary perturbation.
 
 """,
-)
+),
 
 Variable(
     abivarname="prtnabla",
