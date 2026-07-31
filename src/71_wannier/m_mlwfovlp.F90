@@ -3974,8 +3974,8 @@ end subroutine wan_load_gwan
 !!  out_ebands: object with interpolated energies.
 !!
 !! NOTES
-!!  Fermi level and occupation factors of the interpolated bands are not recomputed by this routine.
-!!  Values are compied from in_ebands.
+!!  Fermi level of the interpolated bands is not recomputed by this routine
+!!  but copied from in_ebands.
 !!
 !! SOURCE
 
@@ -3992,6 +3992,7 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
 !Local variables-------------------------------
 !scalars
  integer :: spin, ik, nwan, ierr, cnt, my_rank, nproc
+ character(len=500) :: msg
 !arrays
  integer :: band_block(2)
  real(dp) :: params(4)
@@ -4000,6 +4001,7 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
+ cnt = 0
 
  ! Build new ebands object with memory to be filled.
  band_block(:) = [1, wan_spin(1)%max_nwan]
@@ -4013,7 +4015,7 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
    ABI_MALLOC(u_k, (nwan, nwan))
    ABI_MALLOC(eigens_k, (nwan))
    do ik=1,out_ebands%nkpt
-     cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism inside comm.
+     cnt = cnt + 1; if (mod(cnt - 1, nproc) /= my_rank) cycle ! MPI parallelism inside comm.
      call wan%interp_ham(out_ebands%kptns(:,ik), u_k, eigens_k)
      out_ebands%eig(1:nwan, ik, spin) = eigens_k
    end do ! ik
@@ -4023,6 +4025,8 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
  end do ! spin
 
  call xmpi_sum(out_ebands%eig, comm, ierr)
+
+ out_ebands%fermie = in_ebands%fermie
 
 end subroutine wan_interp_ebands
 !!***

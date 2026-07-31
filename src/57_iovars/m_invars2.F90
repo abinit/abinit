@@ -1677,8 +1677,27 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_phwinfact',tread,'DPR')
  if(tread==1) dtset%eph_phwinfact = dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'eph_ngkpt_fine',tread,'INT')
+ if(tread==1) dtset%eph_ngkpt_fine=intarr(1:3)
+
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'eph_ngqpt_fine',tread,'INT')
  if(tread==1) dtset%eph_ngqpt_fine=intarr(1:3)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_nshiftk_fine',tread,'INT')
+ if(tread==1) dtset%eph_nshiftk_fine=intarr(1)
+ if (dtset%eph_nshiftk_fine < 1 .or. dtset%eph_nshiftk_fine > MAX_NSHIFTK) then
+   write(msg, '(a,i0,2a,i0,3a)') &
+     'The only allowed values of eph_nshiftk_fine are between 1 and ', MAX_NSHIFTK, ch10, &
+     'while it is found to be ', dtset%eph_nshiftk_fine, '.', ch10, &
+     'Action: change the value of eph_nshiftk_fine in your input file.'
+   ABI_ERROR(msg)
+ end if
+
+ ABI_CHECK(3 * dtset%eph_nshiftk_fine <= marr, "3 * eph_nshiftk_fine > marr")
+ call intagm(dprarr,intarr,jdtset,marr,3*dtset%eph_nshiftk_fine,string(1:lenstr),'eph_shiftk_fine',tread,'DPR')
+ ABI_SFREE(dtset%eph_shiftk_fine)
+ ABI_CALLOC(dtset%eph_shiftk_fine, (3, dtset%eph_nshiftk_fine))
+ if(tread==1) dtset%eph_shiftk_fine = reshape(dprarr(1:3*dtset%eph_nshiftk_fine), [3, dtset%eph_nshiftk_fine])
 
  narr = size(dtset%eph_np_pqbks)
  call intagm(dprarr,intarr,jdtset,marr,narr,string(1:lenstr),'eph_np_pqbks',tread,'INT')

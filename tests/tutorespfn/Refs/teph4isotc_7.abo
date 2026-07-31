@@ -481,6 +481,9 @@ P Number of CPUs for parallelism over k-points: 1
  Gstore built by reading a pre-existent GSTORE.nc file
 
 
+ Solving isotropic Migdal-Eliashberg equations on the imaginary axis
+
+
  Linear tetrahedron method.
  Mesh step:  10.0 (meV) with npts: 2749
  From emin:  -5.1 to emax:  22.4 (eV)
@@ -491,6 +494,8 @@ P Number of CPUs for parallelism over k-points: 1
 
 
  Computing a^2F(w) with ph_smear: 5.442277E-01 (meV)
+ Isotropic lambda from a2F(w):   4.99907149E-01
+ Isotropic omega_log from a2F(w):   2.28638086E-03 (Ha),   7.21981972E+02 (K)
 
 == END DATASET(S) ==============================================================
 ================================================================================

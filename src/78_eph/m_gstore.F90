@@ -169,7 +169,7 @@ module m_gstore
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
- use m_mlwfovlp,       only : wan_t
+ use m_mlwfovlp,       only : wan_t, wan_interp_ebands
  use m_pstat,          only : pstat_proc
  use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph
  use m_gsphere,        only : gsphere_t
@@ -711,7 +711,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  character(len=5000) :: msg
  type(gaps_t) :: gaps
 !arrays
- integer :: ngqpt(3), qptrlatt(3,3), comm_spin(ebands%nsppol), nproc_spin(ebands%nsppol), units(2)
+ integer :: ngqpt(3), qptrlatt(3,3), intp_kptrlatt(3,3)
+ integer :: comm_spin(ebands%nsppol), nproc_spin(ebands%nsppol), units(2)
  integer :: gstore_brange_kq(2, 2), gstore_brange_k(2, 2)
  integer,allocatable :: qbz2ibz(:,:), kibz2bz(:), qibz2bz(:), qglob2bz(:,:)
  integer,allocatable :: bstart_ks(:,:), nbcalc_ks(:,:), select_qbz_spin(:,:), select_kbz_spin(:,:)
@@ -750,9 +751,16 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    end do
    if (dtfil%filgwanin /= ABI_NOFILE) then
      has_gwan = .True.
-     ! TODO: Use Wannier to interpolate band energies on the dense k-mesh
-     !call wan_interp_ebands(wan_spin, cryst, ebands, intp_kptrlatt, intp_nshiftk, intp_shiftk, dense_ebands, comm)
-     !gstore%ebands => dense_ebands; gstore%ebands_owns_memory = .True.
+     ABI_CHECK(all(dtset%eph_ngkpt_fine > 0), "eph_ngkpt_fine must contain three positive integers when GWAN is used")
+     ABI_CHECK(allocated(dtset%eph_shiftk_fine), "eph_shiftk_fine is not allocated")
+     ABI_CHECK(size(dtset%eph_shiftk_fine, dim=2) == dtset%eph_nshiftk_fine, "Inconsistent eph_nshiftk_fine and eph_shiftk_fine")
+     call kptrlatt_from_ngkpt(dtset%eph_ngkpt_fine, intp_kptrlatt)
+
+     nullify(gstore%ebands)
+     allocate(gstore%ebands)
+     call wan_interp_ebands(wan_spin, cryst, ebands, intp_kptrlatt, dtset%eph_nshiftk_fine, &
+                            dtset%eph_shiftk_fine, gstore%ebands, comm)
+     gstore%ebands_owns_memory = .True.
    end if
  end if
 
@@ -778,7 +786,9 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
  ! Distribute spins, create indirect mapping to spin index and init %brange_k_spin from dtset
  ! TODO Should I introduce dtset%gstore_brange_kq or compute it automatically
- ABI_CHECK_ILEQ(dtset%mband, ebands%mband, "dtset%mband > ebands%mband")
+ if (.not. has_gwan) then
+   ABI_CHECK_ILEQ(dtset%mband, gstore%ebands%mband, "dtset%mband > ebands%mband")
+ end if
 
  gstore_brange_k = dtset%gstore_brange
  gstore_brange_kq = dtset%gstore_brange
@@ -792,16 +802,16 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
    ! The same set of calls is found in gstore_filter_gw_qprange__
    ! The main difference is that here we set the bands while gstore_filter_gw_qprange__ sets the the k-points.
-   gaps = ebands%get_gaps(gap_err)
+   gaps = gstore%ebands%get_gaps(gap_err)
 
    ! Compute nkcalc, kcalc, bstart_ks, nbcalc_ks
    if (dtset%gw_qprange /= 0) then
-     call sigtk_kcalc_from_qprange(dtset, gstore%cryst, ebands, dtset%gw_qprange, nkcalc, kcalc, bstart_ks, nbcalc_ks)
+     call sigtk_kcalc_from_qprange(dtset, gstore%cryst, gstore%ebands, dtset%gw_qprange, nkcalc, kcalc, bstart_ks, nbcalc_ks)
 
    else
      ! gw_qprange is not specified in the input.
      ! Include direct and fundamental KS gap or include states depending on the position wrt band edges.
-     call sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, nbcalc_ks)
+     call sigtk_kcalc_from_gaps(dtset, gstore%ebands, gaps, nkcalc, kcalc, bstart_ks, nbcalc_ks)
    end if
 
    ! Convert to stop values
@@ -851,8 +861,6 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    ABI_FREE(nbcalc_ks)
  end if
 
- call gstore%distribute_spins__(dtset%mband, gstore_brange_kq, gstore_brange_k, nproc_spin, comm_spin, comm)
-
  if (has_gwan) then
    ! Interpolated e-ph matrix elements are Wannier-gauge quantities (nwan x nwan,
    ! obtained by diagonalizing the interpolated H(k)), not literal DFT band indices,
@@ -861,20 +869,18 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    ! wan%interp_eph_manyq (shape (nwan, nwan, my_npert, nq)) fit gqk%my_g exactly,
    ! for both the disentangled and disentanglement-free cases.
    do spin=1,gstore%nsppol
-     gstore%brange_k_spin(1, spin) = 1
-     gstore%brange_k_spin(2, spin) = wan_spin(spin)%nwan
-     gstore%brange_kq_spin(1, spin) = 1
-     gstore%brange_kq_spin(2, spin) = wan_spin(spin)%nwan
+     gstore_brange_k(:, spin) = [1, wan_spin(spin)%nwan]
+     gstore_brange_kq(:, spin) = [1, wan_spin(spin)%nwan]
    end do
  else if (has_abiwan) then
    ! Here we set brange_k_spin to be consistent with the wannierization step.
    do spin=1,gstore%nsppol
-     gstore%brange_k_spin(1, spin) = wan_spin(spin)%bmin
-     gstore%brange_k_spin(2, spin) = wan_spin(spin)%bmax
-     gstore%brange_kq_spin(1, spin) = wan_spin(spin)%bmin
-     gstore%brange_kq_spin(2, spin) = wan_spin(spin)%bmax
+     gstore_brange_k(:, spin) = [wan_spin(spin)%bmin, wan_spin(spin)%bmax]
+     gstore_brange_kq(:, spin) = [wan_spin(spin)%bmin, wan_spin(spin)%bmax]
    end do
  end if
+
+ call gstore%distribute_spins__(gstore%ebands%mband, gstore_brange_kq, gstore_brange_k, nproc_spin, comm_spin, comm)
 
  ! Free wan_spin
  do spin=1,ebands%nsppol
@@ -895,7 +901,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ! Setup qIBZ, weights and BZ.
  ! Assume qptopt == kptopt unless value is specified in input
  qptrlatt = 0; qptrlatt(1, 1) = ngqpt(1); qptrlatt(2, 2) = ngqpt(2); qptrlatt(3, 3) = ngqpt(3)
- gstore%qptopt = ebands%kptopt; if (dtset%qptopt /= 0) gstore%qptopt = dtset%qptopt
+ gstore%qptopt = gstore%ebands%kptopt; if (dtset%qptopt /= 0) gstore%qptopt = dtset%qptopt
  timrev_q = kpts_timrev_from_kptopt(gstore%qptopt)
 
  call wrtout(std_out, sjoin(" Generating q-mesh with ngqpt:", ltoa(ngqpt), " and qptopt:", itoa(gstore%qptopt)))
@@ -924,14 +930,14 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ABI_CHECK(ierr == 0, sjoin("Something wrong in symmetry tables for q-points!", ch10, msg))
 
  ! Get full BZ associated to ebands
- call wrtout(std_out, sjoin(" Generating k-mesh with ngkpt:", ltoa(get_diag(ebands%kptrlatt)), " and kptopt:", itoa(ebands%kptopt)))
- call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ebands%kptopt, ebands%nshiftk, ebands%shiftk, &
+ call wrtout(std_out, sjoin(" Generating k-mesh with ngkpt:", ltoa(get_diag(gstore%ebands%kptrlatt)), " and kptopt:", itoa(gstore%ebands%kptopt)))
+ call kpts_ibz_from_kptrlatt(cryst, gstore%ebands%kptrlatt, gstore%ebands%kptopt, gstore%ebands%nshiftk, gstore%ebands%shiftk, &
                              gstore%nkibz, kibz, wtk, gstore%nkbz, gstore%kbz) !, bz2ibz=bz2ibz)
                              !new_kptrlatt=gstore%kptrlatt, new_shiftk=gstore%kshift,
                              !bz2ibz=new%ind_qbz2ibz)  # FIXME
 
  ! In principle kibz should be equal to ebands%kptns
- ABI_CHECK(gstore%nkibz == ebands%nkpt, "nkibz != ebands%nkpt")
+ ABI_CHECK(gstore%nkibz == gstore%ebands%nkpt, "nkibz != ebands%nkpt")
  ABI_CHECK(all(abs(gstore%kibz - kibz) < tol12), "ebands%kibz != kibz")
  ABI_FREE(kibz)
 
@@ -940,8 +946,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ! TODO This ambiguity should be removed. Change cgtk_rotate so that we can use the symrec convention.
 
  ABI_MALLOC(gstore%kbz2ibz, (6, gstore%nkbz))
- call gstore%krank_ibz%from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
- if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, gstore%nkbz, gstore%kbz, gstore%kbz2ibz) /= 0) then
+ call gstore%krank_ibz%from_kptrlatt(gstore%nkibz, gstore%kibz, gstore%ebands%kptrlatt, compute_invrank=.False.)
+ if (kpts_map("symrel", gstore%ebands%kptopt, cryst, gstore%krank_ibz, gstore%nkbz, gstore%kbz, gstore%kbz2ibz) /= 0) then
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
 
@@ -3165,7 +3171,11 @@ subroutine gstore_free(gstore)
  ABI_SFREE(gstore%qbz)
  ABI_SFREE(gstore%kbz)
 
- if (gstore%ebands_owns_memory) call gstore%ebands%free()
+ if (gstore%ebands_owns_memory) then
+   call gstore%ebands%free()
+   deallocate(gstore%ebands)
+   nullify(gstore%ebands)
+ end if
 
  call gstore%krank_ibz%free()
  call gstore%qrank_ibz%free()

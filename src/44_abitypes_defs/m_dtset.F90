@@ -228,6 +228,7 @@ type, public :: dataset_type
  integer :: eph_task = 1
  integer :: eph_transport = 0
  integer :: eph_use_ftinterp = 0
+ integer :: eph_nshiftk_fine = 1
  integer :: exchn2n3d
  integer :: extfpmd_nbcut = 25
  integer :: extfpmd_nbdbuf = 0
@@ -810,6 +811,7 @@ type, public :: dataset_type
  integer :: d3e_pert2_magdir(3)
  integer :: d3e_pert3_atpol(2)
  integer :: d3e_pert3_dir(3)
+ integer :: eph_ngkpt_fine(3) = 0
  integer :: eph_ngqpt_fine(3) = 0
  integer :: eph_np_pqbks(5) = 0
  integer :: gwpt_np_wpqbks(6) = 0
@@ -1155,6 +1157,7 @@ type, public :: dataset_type
  real(dp), allocatable :: rprim_orig(:,:,:)   ! rprim_orig(3,3,nimage)
  real(dp), allocatable :: rprimd_orig(:,:,:)  ! rprimd_orig(3,3,nimage)
  real(dp), allocatable :: sigma_shiftk(:,:)   ! sigma_shiftk(3, sigma_nshiftk)    ! shifts in k-mesh for Sigma_{nk}.
+ real(dp), allocatable :: eph_shiftk_fine(:,:) ! eph_shiftk_fine(3, eph_nshiftk_fine)
 
  real(dp), allocatable :: shiftk(:,:)         ! shiftk(3,nshiftk)
  real(dp) :: shiftk_orig(3,MAX_NSHIFTK)       ! original shifts given in input (changed in inkpts).
@@ -1762,7 +1765,10 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%eph_fsewin         = dtin%eph_fsewin
  dtout%eph_ecutosc        = dtin%eph_ecutosc
  dtout%eph_phwinfact      = dtin%eph_phwinfact
+ dtout%eph_ngkpt_fine     = dtin%eph_ngkpt_fine
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
+ dtout%eph_nshiftk_fine   = dtin%eph_nshiftk_fine
+ if (allocated(dtin%eph_shiftk_fine)) call alloc_copy(dtin%eph_shiftk_fine, dtout%eph_shiftk_fine)
  dtout%eph_np_pqbks       = dtin%eph_np_pqbks
  dtout%gwpt_np_wpqbks     = dtin%gwpt_np_wpqbks
 
@@ -2755,6 +2761,7 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%densty)
  ABI_SFREE(dtset%dmatpawu)
  ABI_SFREE(dtset%dmft_shiftself)
+ ABI_SFREE(dtset%eph_shiftk_fine)
  ABI_SFREE(dtset%efmas_dirs)
  ABI_SFREE(dtset%gw_qlwl)
  ABI_SFREE(dtset%gw_freqsp)
@@ -3850,7 +3857,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' efield_phase efield_sigma efield_type einterp elph2_imagden energy_reference enunit'
  list_vars=trim(list_vars)//' eph_frohl_ntheta'
  list_vars=trim(list_vars)//' eph_doping eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_frohlichm eph_fsewin eph_fsmear '
- list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine eph_ahc_type eph_path_brange'
+ list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngkpt_fine eph_ngqpt_fine eph_nshiftk_fine eph_shiftk_fine eph_ahc_type eph_path_brange'
  ! XG20200321, please provide testing for eph_np_pqbks
  ! MG: Well, eph_np_pqbks and gwpt_np_wpqbks cannot be tested with the present infrastructure because it's a MPI-related variable
  ! and all the tests in the paral and mpiio directory are done with a single input file

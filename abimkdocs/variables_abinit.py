@@ -5633,6 +5633,30 @@ superconducting Tc using Mc-Millan's formula.
 ),
 
 Variable(
+    abivarname="eph_ngkpt_fine",
+    varset="eph",
+    vartype="integer",
+    topics=["ElPhonInt_useful"],
+    dimensions=[3],
+    defaultval=[0, 0, 0],
+    requires="[[optdriver]] == 7",
+    mnemonics="Electron-PHonon: Number of Grid K-PoinTs in FINE grid",
+    added_in_version="10.9.1",
+    text=r"""
+Defines the divisions of the dense homogeneous k-mesh used to interpolate
+electronic eigenvalues and electron-phonon matrix elements with Wannier
+functions in the EPH code.
+
+The shifts of the dense mesh are specified by [[eph_nshiftk_fine]] and
+[[eph_shiftk_fine]]. The default value, `[0, 0, 0]`, disables the dense
+Wannier k-mesh and preserves the k-mesh associated with the input WFK file.
+
+This variable is intended for calculations that read both `ABIWAN.nc` and
+`GWAN.nc`. It does not change the k-mesh stored in the input WFK file.
+""",
+),
+
+Variable(
     abivarname="eph_ngqpt_fine",
     varset="eph",
     vartype="integer",
@@ -5659,6 +5683,47 @@ DDB file i.e. [[ddb_ngqpt]] (default behavior).
     compatible with the one given in *eph_ngqpt_fine*.
     The code can interpolate DFPT potentials but is not able to interpolate KS wavefunctions,
     and will stop if ${\bf k + q}$ is not found in the WFK file.
+""",
+),
+
+Variable(
+    abivarname="eph_nshiftk_fine",
+    varset="eph",
+    vartype="integer",
+    topics=["ElPhonInt_useful"],
+    dimensions="scalar",
+    defaultval=1,
+    requires="[[optdriver]] == 7",
+    mnemonics="Electron-PHonon: Number of SHIFTs for the FINE K grid",
+    added_in_version="10.9.1",
+    text=r"""
+Gives the number of shifted grids used to construct the dense Wannier
+k-mesh defined by [[eph_ngkpt_fine]]. The shift vectors are specified by
+[[eph_shiftk_fine]].
+
+The allowed range is from 1 to `MAX_NSHIFTK`.
+""",
+),
+
+Variable(
+    abivarname="eph_shiftk_fine",
+    varset="eph",
+    vartype="real",
+    topics=["ElPhonInt_useful"],
+    dimensions=[3, "[[eph_nshiftk_fine]]"],
+    defaultval=[0.0, 0.0, 0.0],
+    requires="[[optdriver]] == 7",
+    mnemonics="Electron-PHonon: SHIFTs for the FINE K grid",
+    added_in_version="10.9.1",
+    text=r"""
+Defines the shifts of the dense homogeneous k-mesh used for Wannier
+interpolation in the EPH code. The number of vectors is given by
+[[eph_nshiftk_fine]], and the mesh divisions are specified by
+[[eph_ngkpt_fine]].
+
+The convention is the same as for [[shiftk]]: each vector is expressed in
+the reduced coordinates of the reciprocal-space sampling lattice. The
+default is a single unshifted grid.
 """,
 ),
 
