@@ -35,8 +35,11 @@ module m_migdal_eliashberg
  use m_time,            only : cwtime, cwtime_report, sec2str
  use m_fstrings,        only : strcat, sjoin, itoa, ftoa, ktoa, ltoa
  use m_copy,            only : alloc_copy
+ use m_numeric_tools,   only : simpson_int
  use m_special_funcs,   only : gaussian
  use m_ebands,          only : ebands_t, edos_t
+ use m_bz_mesh,         only : kpath_t
+ use m_ephtk,           only : ephtk_gkknu_from_atm, EPHTK_WTOL
  use m_kpts,            only : kpts_timrev_from_kptopt
  use m_lgroup,          only : lgroup_t
  use m_gstore,          only : gstore_t
@@ -47,6 +50,12 @@ module m_migdal_eliashberg
 
  public :: migdal_eliashberg_iso
  !public :: migdal_eliashberg_aniso
+
+ ! Internal policy for mode-resolved lambda on a q-path. When enabled, all
+ ! modes in a degenerate phonon subspace are assigned the subspace-averaged
+ ! lambda. The sum over the subspace is therefore preserved.
+ logical,parameter :: average_lambda_qpath_degenerate = .True.
+ real(dp),parameter :: lambda_qpath_degen_tol = tol6
 !!***
 
 !----------------------------------------------------------------------
@@ -245,20 +254,22 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: nproc, my_rank, ierr, itemp, ntemp, niw, ncid
+ integer :: nproc, my_rank, ierr, itemp, ntemp, niw, ncid, iw
  integer :: edos_intmeth
  !integer :: spin, natom3, cnt !, band, ib, nb, my_ik, my_iq, my_is
  !integer :: ik_ibz, ik_bz, ebands_timrev, iq_bz, iq_ibz !, ikq_ibz, ikq_bz
  !integer :: ncid, spin_ncid, ncerr, gstore_fform
  integer :: phmesh_size, units(2) !, iw
- real(dp) :: kt, wmax, cpu, wall, gflops, edos_step, edos_broad !, sigma, ecut, eshift, eig0nk
- !character(len=5000) :: msg
+ real(dp) :: kt, wmax, cpu, wall, gflops, edos_step, edos_broad, lambda_iso, omega_log !, sigma, ecut, eshift, eig0nk
+ character(len=500) :: msg
  class(crystal_t),pointer :: cryst
  class(ebands_t),pointer :: ebands
  type(iso_solver_t) :: iso
  type(edos_t) :: edos
 !arrays
- real(dp),allocatable :: ktmesh(:), lambda_ij(:), imag_w(:), imag_2w(:), phmesh(:), a2fw(:)
+ real(dp),allocatable :: ktmesh(:), lambda_ij(:), imag_w(:), imag_2w(:), phmesh(:), a2fw(:), a2fw_raw(:)
+ real(dp),allocatable :: a2f_1mom(:), a2f_1mom_int(:)
+ real(dp),allocatable :: qpath(:,:), phfreq_qpath(:,:), phdispl_cart_qpath(:,:,:,:), phlambda_qpath(:,:,:)
 !----------------------------------------------------------------------
 
  nproc = xmpi_comm_size(gstore%comm); my_rank = xmpi_comm_rank(gstore%comm)
@@ -295,16 +306,53 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  ABI_MALLOC(a2fw, (phmesh_size))
  call get_a2fw(gstore, dtset, phmesh_size, phmesh, a2fw)
 
+ ! Compute mode-resolved lambda on the phonon q-path when the matrix
+ ! elements can be evaluated at arbitrary q with Wannier interpolation.
+ call get_lambda_qpath_wan(gstore, dtset, edos%gef(0), qpath, phfreq_qpath, phdispl_cart_qpath, phlambda_qpath)
+
  ncid = nctk_noid
  if (my_rank == master) then
+   call alloc_copy(a2fw, a2fw_raw)
+   ABI_CHECK(edos%gef(0) > zero, "The electronic DOS at the Fermi level must be positive")
+   a2fw = a2fw / (edos%gef(0) / two)
+
+   ABI_MALLOC(a2f_1mom, (phmesh_size))
+   ABI_MALLOC(a2f_1mom_int, (phmesh_size))
+   a2f_1mom = zero
+   where (phmesh > tol12) a2f_1mom = a2fw / phmesh
+   call simpson_int(phmesh_size, dtset%ph_wstep, a2f_1mom, a2f_1mom_int)
+   lambda_iso = a2f_1mom_int(phmesh_size)
+   write(msg, "(a,es16.8)")" Isotropic lambda from a2F(w): ", lambda_iso
+   call wrtout(units, msg)
+
+   ABI_CHECK(lambda_iso > zero, "Cannot compute omega_log because the isotropic lambda is not positive")
+   a2f_1mom = zero
+   do iw=1,phmesh_size
+     if (phmesh(iw) > tol12) a2f_1mom(iw) = a2fw(iw) * log(phmesh(iw)) / phmesh(iw)
+   end do
+   call simpson_int(phmesh_size, dtset%ph_wstep, a2f_1mom, a2f_1mom_int)
+   omega_log = exp(a2f_1mom_int(phmesh_size) / lambda_iso)
+   write(msg, "(a,es16.8,a,es16.8,a)")" Isotropic omega_log from a2F(w): ", omega_log, &
+     " (Ha), ", omega_log * Ha_K, " (K)"
+   call wrtout(units, msg)
+   ABI_FREE(a2f_1mom)
+   ABI_FREE(a2f_1mom_int)
+
    NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), "_ISOME.nc") , xmpi_comm_self))
-   !write(777, *)"# phmesh (meV), a2fw"
-   !do iw=1, phmesh_size
-   !  write(777, *) phmesh(iw) * Ha_meV, a2fw(iw) / (edos%gef(0) / two)
-   !end do
-   !close(777)
+   NCF_CHECK(cryst%ncwrite(ncid))
+   NCF_CHECK(ebands%ncwrite(ncid))
+   NCF_CHECK(edos%ncwrite(ncid))
+   call isome_ncwrite_spectral(ncid, dtset, gstore, phmesh_size, phmesh, a2fw_raw, a2fw, edos%gef(0))
+   if (allocated(qpath)) then
+     call isome_ncwrite_qpath(ncid, qpath, phfreq_qpath, phdispl_cart_qpath, phlambda_qpath)
+   end if
+   ABI_FREE(a2fw_raw)
  end if
 
+ ABI_SFREE(qpath)
+ ABI_SFREE(phfreq_qpath)
+ ABI_SFREE(phdispl_cart_qpath)
+ ABI_SFREE(phlambda_qpath)
  ABI_FREE(a2fw)
  ABI_FREE(phmesh)
  call edos%free()
@@ -351,6 +399,407 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  call cwtime_report(" migdal_eliashberg_iso:", cpu, wall, gflops)
 
 end subroutine migdal_eliashberg_iso
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_migdal_eliashberg/isome_ncwrite_spectral
+!! NAME
+!! isome_ncwrite_spectral
+!!
+!! FUNCTION
+!!  Write the first revision of the spectral section of the ISOME.nc file.
+!!  The raw matrix-element spectral sum is stored together with the
+!!  provisionally DOS-normalized Eliashberg function so that the normalization
+!!  can be audited without recomputing the electron-phonon matrix elements.
+!!
+!! INPUTS
+!!  ncid=NetCDF file identifier, opened on xmpi_comm_self by the master rank.
+!!  dtset<dataset_type>=Input variables.
+!!  gstore<gstore_t>=Electron-phonon matrix-element container.
+!!  nomega=Number of points in the phonon-frequency mesh.
+!!  omega(nomega)=Phonon-frequency mesh in Hartree.
+!!  a2f_raw(nomega)=Raw matrix-element spectral sum.
+!!  a2f(nomega)=DOS-normalized Eliashberg function.
+!!  edos_fermie=Total electronic DOS at the Fermi level.
+!!
+!! SOURCE
+
+subroutine isome_ncwrite_spectral(ncid, dtset, gstore, nomega, omega, a2f_raw, a2f, edos_fermie)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid, nomega
+ real(dp),intent(in) :: edos_fermie
+ type(dataset_type),intent(in) :: dtset
+ type(gstore_t),intent(in) :: gstore
+!arrays
+ real(dp),intent(in) :: omega(nomega), a2f_raw(nomega), a2f(nomega)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ncerr
+!----------------------------------------------------------------------
+
+ ncerr = nctk_def_dims(ncid, nctkdim_t("a2f_nomega", nomega), defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+   "isome_schema_version", "eph_intmeth", "ph_intmeth"])
+ NCF_CHECK(ncerr)
+ ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
+   "eph_fsmear", "ph_smear", "ph_wstep", "a2f_edos_fermie", "a2f_dos_normalization"])
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(ncid, [ &
+   nctkarr_t("gstore_ngqpt", "int", "three"), &
+   nctkarr_t("eph_ngqpt_fine", "int", "three"), &
+   nctkarr_t("ddb_ngqpt", "int", "three"), &
+   nctkarr_t("a2f_mesh", "dp", "a2f_nomega"), &
+   nctkarr_t("a2f_values_raw", "dp", "a2f_nomega"), &
+   nctkarr_t("a2f_values", "dp", "a2f_nomega")])
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nctk_set_atomic_units(ncid, "a2f_mesh"))
+ NCF_CHECK(nctk_set_atomic_units(ncid, "eph_fsmear"))
+ NCF_CHECK(nctk_set_atomic_units(ncid, "ph_smear"))
+ NCF_CHECK(nctk_set_atomic_units(ncid, "ph_wstep"))
+ NCF_CHECK(nctk_set_atomic_units(ncid, "a2f_edos_fermie"))
+ NCF_CHECK(nctk_set_atomic_units(ncid, "a2f_dos_normalization"))
+
+ ncerr = nf90_put_att(ncid, nf90_global, "isome_section", "spectral")
+ NCF_CHECK(ncerr)
+ ncerr = nf90_put_att(ncid, nf90_global, "isome_status", "experimental")
+ NCF_CHECK(ncerr)
+ ncerr = nf90_put_att(ncid, nctk_idname(ncid, "a2f_values_raw"), "long_name", &
+   "raw matrix-element spectral sum before division by the electronic DOS")
+ NCF_CHECK(ncerr)
+ ncerr = nf90_put_att(ncid, nctk_idname(ncid, "a2f_values"), "long_name", &
+   "isotropic Eliashberg spectral function")
+ NCF_CHECK(ncerr)
+ ncerr = nf90_put_att(ncid, nctk_idname(ncid, "a2f_values"), "normalization", &
+   "a2f_values_raw divided by a2f_edos_fermie / 2")
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nctk_set_datamode(ncid))
+ ncerr = nctk_write_iscalars(ncid, &
+   [character(len=nctk_slen) :: "isome_schema_version", "eph_intmeth", "ph_intmeth"], &
+   [2, dtset%eph_intmeth, dtset%ph_intmeth])
+ NCF_CHECK(ncerr)
+ ncerr = nctk_write_dpscalars(ncid, &
+   [character(len=nctk_slen) :: &
+     "eph_fsmear", "ph_smear", "ph_wstep", "a2f_edos_fermie", "a2f_dos_normalization"], &
+   [dtset%eph_fsmear, dtset%ph_smear, dtset%ph_wstep, edos_fermie, edos_fermie / two])
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gstore_ngqpt"), gstore%ngqpt))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_ngqpt_fine"), dtset%eph_ngqpt_fine))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ddb_ngqpt"), dtset%ddb_ngqpt))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "a2f_mesh"), omega))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "a2f_values_raw"), a2f_raw))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "a2f_values"), a2f))
+
+end subroutine isome_ncwrite_spectral
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_migdal_eliashberg/isome_ncwrite_qpath
+!! NAME
+!! isome_ncwrite_qpath
+!!
+!! FUNCTION
+!!  Write phonon frequencies, displacements, and mode-resolved
+!!  electron-phonon coupling lambda(q,nu) along the input phonon path.
+!!
+!! SOURCE
+
+subroutine isome_ncwrite_qpath(ncid, qpath, phfreq, phdispl_cart, phlambda)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid
+!arrays
+ real(dp),intent(in) :: qpath(:,:), phfreq(:,:), phdispl_cart(:,:,:,:), phlambda(:,:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ncerr, nqpath, natom3, nsppol
+!----------------------------------------------------------------------
+
+ nqpath = size(qpath, dim=2)
+ natom3 = size(phfreq, dim=1)
+ nsppol = size(phlambda, dim=3)
+
+ ncerr = nctk_def_dims(ncid, [ &
+   nctkdim_t("isome_nqpath", nqpath), &
+   nctkdim_t("number_of_phonon_modes", natom3), &
+   nctkdim_t("isome_nsppol", nsppol)], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "phlambda_qpath_average_degenerate"])
+ NCF_CHECK(ncerr)
+ ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "phlambda_qpath_degen_tol"])
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(ncid, [ &
+   nctkarr_t("qpath", "dp", "number_of_reduced_dimensions, isome_nqpath"), &
+   nctkarr_t("phfreq_qpath", "dp", "number_of_phonon_modes, isome_nqpath"), &
+   nctkarr_t("phdispl_cart_qpath", "dp", "two, number_of_phonon_modes, number_of_phonon_modes, isome_nqpath"), &
+   nctkarr_t("phlambda_qpath", "dp", "number_of_phonon_modes, isome_nqpath, isome_nsppol")])
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nctk_set_atomic_units(ncid, "phfreq_qpath"))
+ NCF_CHECK(nctk_set_atomic_units(ncid, "phlambda_qpath_degen_tol"))
+ ncerr = nf90_put_att(ncid, nctk_idname(ncid, "qpath"), "long_name", &
+   "q-point path in reduced coordinates")
+ NCF_CHECK(ncerr)
+ ncerr = nf90_put_att(ncid, nctk_idname(ncid, "phlambda_qpath"), "long_name", &
+   "mode-resolved electron-phonon coupling lambda(q,nu)")
+ NCF_CHECK(ncerr)
+ ncerr = nf90_put_att(ncid, nctk_idname(ncid, "phlambda_qpath"), "fermi_surface_integration", &
+   "Gaussian double delta with width eph_fsmear")
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nctk_set_datamode(ncid))
+ NCF_CHECK(nctk_write_iscalars(ncid, [character(len=nctk_slen) :: "phlambda_qpath_average_degenerate"], [merge(1, 0, average_lambda_qpath_degenerate)]))
+ NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "phlambda_qpath_degen_tol"], [lambda_qpath_degen_tol]))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpath"), qpath))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phfreq_qpath"), phfreq))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phdispl_cart_qpath"), phdispl_cart))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phlambda_qpath"), phlambda))
+
+end subroutine isome_ncwrite_qpath
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_migdal_eliashberg/get_lambda_qpath_wan
+!! NAME
+!! get_lambda_qpath_wan
+!!
+!! FUNCTION
+!!  Compute lambda(q,nu) on the path defined by ph_qpath and ph_ndivsm.
+!!  The path construction is the same as in ifc_mkphbs. Arbitrary-q
+!!  electronic energies and matrix elements are obtained from the Wannier
+!!  Hamiltonian and GWAN interpolation, respectively.
+!!
+!! SOURCE
+
+subroutine get_lambda_qpath_wan(gstore, dtset, edos_fermie, qpoints, phfreq, phdispl_cart, phlambda)
+
+!Arguments ------------------------------------
+!scalars
+ class(gstore_t),intent(inout) :: gstore
+ type(dataset_type),intent(in) :: dtset
+ real(dp),intent(in) :: edos_fermie
+!arrays
+ real(dp),allocatable,intent(out) :: qpoints(:,:), phfreq(:,:), phdispl_cart(:,:,:,:), phlambda(:,:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master = 0
+ integer :: my_is, my_ik, my_ip, iq, ipc, nu, in_k, im_kq, ierr, my_rank
+ integer :: natom, natom3, nwan, nqpath, spin
+ real(dp) :: weight_k, g2, fs_weight, spin_factor
+ logical :: has_gwan
+ type(kpath_t) :: qpath
+ character(len=500) :: msg
+!arrays
+ integer :: units(2)
+ real(dp) :: kpt(3)
+ real(dp),allocatable :: displ_cart4(:,:,:,:), displ_red4(:,:,:,:), displ_red(:,:,:)
+ real(dp),allocatable :: gatm_real(:,:,:,:,:), gnu_real(:,:,:,:,:)
+ real(dp),allocatable :: eig_k(:), eig_kq(:)
+ complex(dp),allocatable :: intp_gatm(:,:,:,:), gatm_full(:,:,:), u_k(:,:), u_kq(:,:)
+!----------------------------------------------------------------------
+
+ units = [std_out, ab_out]
+
+ if (dtset%ph_nqpath <= 0 .or. dtset%ph_ndivsm <= 0) return
+
+ has_gwan = gstore%my_nspins > 0
+ if (has_gwan) has_gwan = allocated(gstore%gqk(1)%wan%grpe_wwp)
+ if (.not. has_gwan) then
+   call wrtout([std_out, ab_out], &
+     " Skipping lambda(q,nu): GWAN interpolation is not available for this GSTORE.")
+   return
+ end if
+
+ ABI_CHECK(dtset%eph_fsmear > zero, "lambda(q,nu) along a path requires a positive eph_fsmear for Gaussian Fermi-surface integration")
+ ABI_CHECK(edos_fermie > zero, "The electronic DOS at the Fermi level must be positive")
+
+ natom = gstore%cryst%natom; natom3 = 3 * natom
+ call qpath%init(dtset%ph_qpath(:,1:dtset%ph_nqpath), gstore%cryst%gprimd, dtset%ph_ndivsm)
+ nqpath = qpath%npts
+
+ ABI_MALLOC(qpoints, (3, nqpath))
+ ABI_MALLOC(phfreq, (natom3, nqpath))
+ ABI_MALLOC(phdispl_cart, (2, natom3, natom3, nqpath))
+ ABI_CALLOC(phlambda, (natom3, nqpath, gstore%nsppol))
+ ABI_MALLOC(displ_cart4, (2, 3, natom, natom3))
+ ABI_MALLOC(displ_red4, (2, 3, natom, natom3))
+ ABI_MALLOC(displ_red, (2, natom3, natom3))
+
+ qpoints = qpath%points
+ do iq=1,nqpath
+   call gstore%ifc%fourq(gstore%cryst, qpoints(:,iq), phfreq(:,iq), displ_cart4, out_displ_red=displ_red4)
+   phdispl_cart(:,:,:,iq) = reshape(displ_cart4, [2, natom3, natom3])
+ end do
+
+ write(msg, "(a,i0,a,es12.4,a)")" Computing lambda(q,nu) at ", nqpath, &
+   " path points with eph_fsmear: ", dtset%eph_fsmear * Ha_meV, " meV"
+ call wrtout(units, msg, pre_newlines=1)
+
+ do my_is=1,gstore%my_nspins
+   associate (gqk => gstore%gqk(my_is))
+   spin = gqk%spin; nwan = gqk%wan%nwan
+   ABI_CHECK_IEQ(nwan, gqk%nb_k, "Wannier and GSTORE band dimensions differ")
+   ABI_CHECK_IEQ(nwan, gqk%nb_kq, "Wannier and GSTORE band dimensions differ")
+
+   ABI_MALLOC(intp_gatm, (nwan, nwan, gqk%my_npert, 1))
+   ABI_MALLOC(gatm_full, (nwan, nwan, natom3))
+   ABI_MALLOC(gatm_real, (2, nwan, nwan, 1, natom3))
+   ABI_MALLOC(gnu_real, (2, nwan, nwan, 1, natom3))
+   ABI_MALLOC(eig_k, (nwan))
+   ABI_MALLOC(eig_kq, (nwan))
+   ABI_MALLOC(u_k, (nwan, nwan))
+   ABI_MALLOC(u_kq, (nwan, nwan))
+
+   do iq=1,nqpath
+     if (gqk%qpt_comm%skip(iq)) cycle
+     call gstore%ifc%fourq(gstore%cryst, qpoints(:,iq), phfreq(:,iq), displ_cart4, out_displ_red=displ_red4)
+     displ_red = reshape(displ_red4, [2, natom3, natom3])
+
+     do my_ik=1,gqk%my_nk
+       kpt = gqk%my_kpts(:,my_ik)
+       weight_k = gqk%my_wtk(my_ik)
+       call gqk%wan%interp_ham(kpt, u_k, eig_k)
+       call gqk%wan%interp_ham(kpt + qpoints(:,iq), u_kq, eig_kq)
+       call gqk%wan%interp_eph_manyq(1, qpoints(:,iq), kpt, intp_gatm)
+
+       gatm_full = czero
+       do ipc=1,gqk%my_npert
+         gatm_full(:,:,gqk%my_pertcases(ipc)) = intp_gatm(:,:,ipc,1)
+       end do
+       if (gqk%pert_comm%nproc > 1) call xmpi_sum(gatm_full, gqk%pert_comm%value, ierr)
+
+       gatm_real(1,:,:,1,:) = real(gatm_full, kind=dp)
+       gatm_real(2,:,:,1,:) = aimag(gatm_full)
+       call ephtk_gkknu_from_atm(nwan, nwan, 1, natom, gatm_real, phfreq(:,iq), displ_red, gnu_real)
+
+       do my_ip=1,gqk%my_npert
+         nu = gqk%my_pertcases(my_ip)
+         if (phfreq(nu,iq) < EPHTK_WTOL) cycle
+         do in_k=1,nwan
+           do im_kq=1,nwan
+             g2 = gnu_real(1,im_kq,in_k,1,nu)**2 + gnu_real(2,im_kq,in_k,1,nu)**2
+             fs_weight = gaussian(eig_k(in_k) - gstore%ebands%fermie, dtset%eph_fsmear) * &
+                         gaussian(eig_kq(im_kq) - gstore%ebands%fermie, dtset%eph_fsmear)
+             phlambda(nu,iq,spin) = phlambda(nu,iq,spin) + two * g2 * weight_k * fs_weight / phfreq(nu,iq)
+           end do
+         end do
+       end do
+     end do
+   end do
+
+   ABI_FREE(intp_gatm)
+   ABI_FREE(gatm_full)
+   ABI_FREE(gatm_real)
+   ABI_FREE(gnu_real)
+   ABI_FREE(eig_k)
+   ABI_FREE(eig_kq)
+   ABI_FREE(u_k)
+   ABI_FREE(u_kq)
+   end associate
+ end do
+
+ spin_factor = two / (gstore%nsppol * dtset%nspinor)
+ phlambda = phlambda * spin_factor / (edos_fermie / two)
+ call xmpi_sum(phlambda, gstore%comm, ierr)
+ if (average_lambda_qpath_degenerate) call average_lambda_degenerate_modes(nqpath, natom3, gstore%nsppol, phfreq, phlambda)
+ my_rank = xmpi_comm_rank(gstore%comm)
+ if (my_rank == master) then
+   call wrtout(ab_out, " Phonon frequencies and lambda(q,nu) along the q-path:", pre_newlines=1)
+   do iq=1,nqpath
+     write(msg, "(a,i0,a,3es16.8)")" q-path point ", iq, ": ", qpoints(:,iq)
+     call wrtout(ab_out, msg)
+     select case (gstore%nsppol)
+     case (1)
+       call wrtout(ab_out, "   nu       omega (meV)          lambda")
+       do nu=1,natom3
+         write(msg, "(i5,2x,es16.8,2x,es16.8)")nu, phfreq(nu,iq) * Ha_meV, phlambda(nu,iq,1)
+         call wrtout(ab_out, msg)
+       end do
+     case (2)
+       call wrtout(ab_out, "   nu       omega (meV)         lambda_spin1        lambda_spin2")
+       do nu=1,natom3
+         write(msg, "(i5,2x,es16.8,2x,es16.8,2x,es16.8)")nu, phfreq(nu,iq) * Ha_meV, phlambda(nu,iq,1:2)
+         call wrtout(ab_out, msg)
+       end do
+     case default
+       ABI_ERROR("Printing lambda(q,nu) supports only nsppol = 1 or 2")
+     end select
+   end do
+ end if
+
+ ABI_FREE(displ_cart4)
+ ABI_FREE(displ_red4)
+ ABI_FREE(displ_red)
+ call qpath%free()
+
+end subroutine get_lambda_qpath_wan
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_migdal_eliashberg/average_lambda_degenerate_modes
+!! NAME
+!! average_lambda_degenerate_modes
+!!
+!! FUNCTION
+!!  Replace lambda(q,nu) inside each degenerate phonon subspace with its
+!!  arithmetic average. Frequencies are assumed to be ordered by branch,
+!!  as returned by ifc%fourq. The sum over every subspace is preserved.
+!!
+!! SOURCE
+
+subroutine average_lambda_degenerate_modes(nqpath, nmode, nsppol, phfreq, phlambda)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nqpath, nmode, nsppol
+!arrays
+ real(dp),intent(in) :: phfreq(nmode,nqpath)
+ real(dp),intent(inout) :: phlambda(nmode,nqpath,nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iq, spin, first_mode, last_mode, ndeg
+ real(dp) :: lambda_avg
+!----------------------------------------------------------------------
+
+ do iq=1,nqpath
+   first_mode = 1
+   do while (first_mode <= nmode)
+     last_mode = first_mode
+     do while (last_mode < nmode)
+       if (abs(phfreq(last_mode + 1,iq) - phfreq(first_mode,iq)) > lambda_qpath_degen_tol) exit
+       last_mode = last_mode + 1
+     end do
+
+     ndeg = last_mode - first_mode + 1
+     if (ndeg > 1) then
+       do spin=1,nsppol
+         lambda_avg = sum(phlambda(first_mode:last_mode,iq,spin)) / ndeg
+         phlambda(first_mode:last_mode,iq,spin) = lambda_avg
+       end do
+     end if
+     first_mode = last_mode + 1
+   end do
+ end do
+
+end subroutine average_lambda_degenerate_modes
 !!***
 
 !----------------------------------------------------------------------
