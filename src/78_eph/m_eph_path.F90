@@ -144,6 +144,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  real(dp) :: kk(3), qq(3), kq(3), phfreqs(3*cryst%natom), phfreqs_ev(3*cryst%natom), fake_path(3,2)
  real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:)
  real(dp),allocatable :: cg_k(:,:,:), cg_kq(:,:,:), gsc_k(:,:,:), gsc_kq(:,:,:),eig_k(:), eig_kq(:)
+ real(dp),allocatable :: eig_k_wan(:), eig_kq_wan(:,:)
  real(dp),allocatable :: v1scf(:,:,:,:), vlocal1(:,:,:,:), vlocal(:,:,:,:), gkq_atm(:,:,:,:), gkq_nu(:,:,:,:), gkq2_nu(:,:,:)
  real(dp),allocatable :: gkq_atm_wan(:,:,:,:), gkq_nu_wan(:,:,:,:), gkq2_nu_wan(:,:,:)
  complex(dp),allocatable :: g_atm_wan_local(:,:,:,:)
@@ -359,6 +360,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    ABI_MALLOC(gkq_atm_wan, (2, nwan_glob, nwan_glob, natom3))
    ABI_MALLOC(gkq_nu_wan, (2, nwan_glob, nwan_glob, natom3))
    ABI_MALLOC(gkq2_nu_wan, (nwan_glob, nwan_glob, natom3))
+   ABI_MALLOC(eig_k_wan, (nwan_glob))
+   ABI_MALLOC(eig_kq_wan, (nwan_glob, 1))
  end if
 
  ! Master writes metadata to GPATH file.
@@ -410,7 +413,13 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    if (has_gwan) then
      ncerr = nctk_def_dims(ncid, [nctkdim_t("nwan", nwan_glob)], defmode=.True.)
      NCF_CHECK(ncerr)
-     ncerr = nctk_def_arrays(ncid, [nctkarr_t("gkq2_nu_wan", "dp", "nwan, nwan, natom3, nq_path, nk_path, nsppol")])
+     ncerr = nctk_def_arrays(ncid, [ &
+       ! Use the same path convention as the ab-initio eigenvalues: k varies when q
+       ! is fixed, whereas k+q varies with q when k is fixed.
+       nctkarr_t("all_eigens_wan_k", "dp", "nwan, nk_path, nsppol"), &
+       nctkarr_t("all_eigens_wan_kq", "dp", "nwan, nq_path, nsppol"), &
+       nctkarr_t("gkq2_nu_wan", "dp", "nwan, nwan, natom3, nq_path, nk_path, nsppol") &
+     ])
      NCF_CHECK(ncerr)
      NCF_CHECK(nf90_def_var_fill(ncid, vid("gkq2_nu_wan"), NF90_FILL, -one))
    end if
@@ -549,8 +558,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        call ifc%fourq(cryst, qq, phfreqs, displ_cart, out_displ_red=displ_red_qq)
        phfreqs_eV = phfreqs * Ha_eV
 
-       !if (my_ik == 1 .and. pert_comm%me == master) then
-       if (my_ik == 1) then
+       ! Only the global first k-point contributes to q-path-only variables.
+       if (ik == 1) then
          NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_kq"), eig_kq, start=[1,iq,spin]))
          ! Write phonons for this qpt.
          if (spin == 1) then
@@ -642,7 +651,16 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        if (has_gwan) then
          ! Interpolate e-ph matrix elements from GWAN.nc at this same (k,q) for comparison.
          ABI_MALLOC(g_atm_wan_local, (nwan_glob, nwan_glob, my_npert, 1))
-         call wan%interp_eph_manyq(1, qq, kk, g_atm_wan_local)
+         ! The routine already diagonalizes H^W(k) and H^W(k+q) to rotate g to the
+         ! interpolated eigenstate basis, hence it also returns these eigenvalues.
+         call wan%interp_eph_manyq(1, qq, kk, g_atm_wan_local, &
+                                   out_eigens_k=eig_k_wan, out_eigens_kq=eig_kq_wan)
+         if (iq == 1) then
+           NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_wan_k"), eig_k_wan, start=[1,ik,spin]))
+         end if
+         if (ik == 1) then
+           NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_wan_kq"), eig_kq_wan(:,1), start=[1,iq,spin]))
+         end if
 
          gkq_atm_wan = zero
          do my_ip=1,my_npert
@@ -815,6 +833,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
    ABI_FREE(gkq_atm_wan)
    ABI_FREE(gkq_nu_wan)
    ABI_FREE(gkq2_nu_wan)
+   ABI_FREE(eig_k_wan)
+   ABI_FREE(eig_kq_wan)
  end if
  ABI_FREE(displ_cart)
  ABI_FREE(displ_red_qq)

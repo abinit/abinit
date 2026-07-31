@@ -108,126 +108,6 @@ end type iso_solver_t
 contains
 !!***
 
-!----------------------------------------------------------------------
-
-!!****f* m_migdal_eliashberg/iso_solver_free
-!! NAME
-!! iso_solver_free
-!!
-!! FUNCTION
-!!  Free dynamic memory
-!!
-!! SOURCE
-
-subroutine iso_solver_free(iso)
-
-!Arguments ------------------------------------
- class(iso_solver_t),intent(inout) :: iso
-!----------------------------------------------------------------------
-
- ABI_SFREE(iso%delta_iw)
- ABI_SFREE(iso%zeta_iw)
- ABI_SFREE(iso%prev_delta_iw)
- ABI_SFREE(iso%prev_zeta_iw)
- ABI_SFREE(iso%delta_iw_mix)
-
-end subroutine iso_solver_free
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_migdal_eliashberg/iso_solver_solve
-!! NAME
-!! iso_solver_solve
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SOURCE
-
-subroutine iso_solver_solve(iso, itemp, kt, niw, imag_w, lambda_ij)
-
-!Arguments ------------------------------------
-!scalars
- class(iso_solver_t),intent(inout) :: iso
- integer,intent(in) :: itemp, niw
- real(dp),intent(in) :: kt
-!arrays
- real(dp),intent(in) :: imag_w(niw), lambda_ij(2 * niw)
-
-!Local variables-------------------------------
-!scalars
- integer,parameter :: master = 0
- integer :: nproc, my_rank, iter, ii, jj, converged
- real(dp) :: rr
-!arrays
- real(dp),allocatable :: prev_vals(:)
-
-!----------------------------------------------------------------------
-
- ABI_UNUSED(lambda_ij)
-
- nproc = xmpi_comm_size(iso%comm); my_rank = xmpi_comm_rank(iso%comm)
-
- ABI_REMALLOC(iso%delta_iw_mix, (niw, iso%max_nmix))
-
- if (itemp == 1) then
-   ! Init values from scratch
-   ABI_CALLOC(iso%zeta_iw, (niw))
-   ABI_CALLOC(iso%prev_zeta_iw, (niw))
-   ABI_CALLOC(iso%delta_iw, (niw))
-   ABI_CALLOC(iso%prev_delta_iw, (niw))
- else
-   ! Init values from previous temperature. TODO: May use spline
-   call alloc_copy(iso%zeta_iw, prev_vals)
-   ABI_RECALLOC(iso%zeta_iw, (niw))
-   ABI_MOVE_ALLOC(prev_vals, iso%prev_zeta_iw)
-   call alloc_copy(iso%delta_iw, prev_vals)
-   ABI_RECALLOC(iso%delta_iw, (niw))
-   ABI_MOVE_ALLOC(prev_vals, iso%prev_delta_iw)
- end if
-
- converged = 0
-iter_loop: do iter=1,iso%max_niter
-
-   do ii=1,niw
-     !if (mod(ii, nproc) /= my_rank) cycle ! MPI parallelism inside comm
-     do jj=1,niw
-       rr = one / sqrt(imag_w(jj) ** 2 + iso%prev_delta_iw(jj) ** 2)
-       iso%zeta_iw(ii) = iso%zeta_iw(ii) + imag_w(jj) * rr  !* lambda(ii - jj)
-       iso%delta_iw(ii) = iso%delta_iw(ii) + rr * iso%prev_delta_iw(jj) !* (lambda(ii - jj) - mustar)
-     end do
-      iso%zeta_iw(ii) = one + pi * kt / imag_w(ii) * iso%zeta_iw(ii)
-      iso%delta_iw(ii) = pi * kt * iso%delta_iw(ii) / iso%zeta_iw(ii)
-   end do ! ii
-
-   if (my_rank == master) then
-     ! Write SCF cycle to stdout.
-     ! Check for convergence.
-     converged = 0
-   end if
-
-   if (converged == 2) exit iter_loop
-
-   ! TODO: Mixing
-   iso%prev_zeta_iw = iso%zeta_iw
-   iso%prev_delta_iw = iso%delta_iw
-
- end do iter_loop
-
- ! Pade' to go to real axis
- ! Compute Delta F
- ! Compute QP DOS
-
- ! Write results to netcdf file
- if (my_rank == master) then
- end if
-
-end subroutine iso_solver_solve
-!!***
 
 !----------------------------------------------------------------------
 
@@ -254,13 +134,13 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: nproc, my_rank, ierr, itemp, ntemp, niw, ncid, iw
+ integer :: nproc, my_rank, ierr, itemp, ntemp, niw, ncid, iw, spin
  integer :: edos_intmeth
  !integer :: spin, natom3, cnt !, band, ib, nb, my_ik, my_iq, my_is
  !integer :: ik_ibz, ik_bz, ebands_timrev, iq_bz, iq_ibz !, ikq_ibz, ikq_bz
  !integer :: ncid, spin_ncid, ncerr, gstore_fform
  integer :: phmesh_size, units(2) !, iw
- real(dp) :: kt, wmax, cpu, wall, gflops, edos_step, edos_broad, lambda_iso, omega_log !, sigma, ecut, eshift, eig0nk
+ real(dp) :: kt, wmax, cpu, wall, gflops, edos_step, edos_broad, lambda_iso, omega_log, alpha !, sigma, ecut, eshift, eig0nk
  character(len=500) :: msg
  class(crystal_t),pointer :: cryst
  class(ebands_t),pointer :: ebands
@@ -275,8 +155,8 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  nproc = xmpi_comm_size(gstore%comm); my_rank = xmpi_comm_rank(gstore%comm)
  units = [std_out, ab_out]
 
- call wrtout(units, " Solving isotropic Migdal-Eliashberg equations on the imaginary axis", pre_newlines=2)
  call cwtime(cpu, wall, gflops, "start")
+ call wrtout(units, " Solving isotropic Migdal-Eliashberg equations on the imaginary axis", pre_newlines=2)
 
  cryst => gstore%cryst; ebands => gstore%ebands
  !natom3 = 3 * cryst%natom; nsppol = ebands%nsppol
@@ -289,6 +169,25 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  ! Compute electron DOS.
  call dtset%get_edos_params(edos_intmeth, edos_step, edos_broad)
  edos = ebands%get_edos(cryst, edos_intmeth, edos_step, edos_broad, gstore%comm)
+
+ ! A disentangled Wannier Hamiltonian generally spans only a subspace of the
+ ! original bands. In this case ebands%nelect still describes the complete
+ ! ab-initio manifold, so locating eF by integrating the DOS can fail (e.g. a
+ ! four-band model with nelect = 8 appears completely filled). The electronic
+ ! delta functions used below are centered at ebands%fermie, copied from the
+ ! ab-initio bands, hence evaluate N(eF) at the same chemical potential.
+ if (edos%ief == 0 .and. gstore%ebands_owns_memory) then
+   iw = int((ebands%fermie - edos%mesh(1)) / edos%step) + 1
+   ABI_CHECK(iw >= 1 .and. iw < edos%nw, "The ab-initio Fermi level lies outside the energy range of the Wannier-interpolated bands")
+   alpha = (ebands%fermie - edos%mesh(iw)) / edos%step
+   do spin=0,edos%nsppol
+     edos%gef(spin) = (one - alpha) * edos%dos(iw,spin) + alpha * edos%dos(iw+1,spin)
+     edos%ghf(spin) = edos%gef(spin)
+   end do
+   edos%ief = iw
+   edos%ihf = iw
+   call wrtout(units, " Using the ab-initio Fermi level to evaluate the DOS of the Wannier band subspace.")
+ end if
 
  !! Store DOS per spin channel
  !n0(:) = edos%gef(1:edos%nsppol)
@@ -310,6 +209,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  ! elements can be evaluated at arbitrary q with Wannier interpolation.
  call get_lambda_qpath_wan(gstore, dtset, edos%gef(0), qpath, phfreq_qpath, phdispl_cart_qpath, phlambda_qpath)
 
+ ! Save results.
  ncid = nctk_noid
  if (my_rank == master) then
    call alloc_copy(a2fw, a2fw_raw)
@@ -389,12 +289,12 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
    ABI_FREE(imag_w)
  end do ! itemp
 
- ABI_FREE(ktmesh)
- call iso%free()
-
  if (my_rank == master) then
    NCF_CHECK(nf90_close(ncid))
  end if
+
+ ABI_FREE(ktmesh)
+ call iso%free()
 
  call cwtime_report(" migdal_eliashberg_iso:", cpu, wall, gflops)
 
@@ -601,7 +501,7 @@ subroutine get_lambda_qpath_wan(gstore, dtset, edos_fermie, qpoints, phfreq, phd
  integer,parameter :: master = 0
  integer :: my_is, my_ik, my_ip, iq, ipc, nu, in_k, im_kq, ierr, my_rank
  integer :: natom, natom3, nwan, nqpath, spin
- real(dp) :: weight_k, g2, fs_weight, spin_factor
+ real(dp) :: weight_k, g2, fs_weight, spin_factor, cpu, wall, gflops
  logical :: has_gwan
  type(kpath_t) :: qpath
  character(len=500) :: msg
@@ -628,6 +528,7 @@ subroutine get_lambda_qpath_wan(gstore, dtset, edos_fermie, qpoints, phfreq, phd
 
  ABI_CHECK(dtset%eph_fsmear > zero, "lambda(q,nu) along a path requires a positive eph_fsmear for Gaussian Fermi-surface integration")
  ABI_CHECK(edos_fermie > zero, "The electronic DOS at the Fermi level must be positive")
+ call cwtime(cpu, wall, gflops, "start")
 
  natom = gstore%cryst%natom; natom3 = 3 * natom
  call qpath%init(dtset%ph_qpath(:,1:dtset%ph_nqpath), gstore%cryst%gprimd, dtset%ph_ndivsm)
@@ -747,6 +648,7 @@ subroutine get_lambda_qpath_wan(gstore, dtset, edos_fermie, qpoints, phfreq, phd
  ABI_FREE(displ_red4)
  ABI_FREE(displ_red)
  call qpath%free()
+ call cwtime_report(" Wannier interpolation of lambda(q,nu) along q-path", cpu, wall, gflops)
 
 end subroutine get_lambda_qpath_wan
 !!***
@@ -800,6 +702,254 @@ subroutine average_lambda_degenerate_modes(nqpath, nmode, nsppol, phfreq, phlamb
  end do
 
 end subroutine average_lambda_degenerate_modes
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_migdal_eliashberg/get_a2fw
+!! NAME
+!! get_a2fw
+!!
+!! FUNCTION
+!!  Compute Eliashberg function a^2F(omega).
+!!
+!! INPUTS
+!!  nw: Number of frequencies.
+!!  wmesh: Frequency mesh.
+!!
+!! OUTPUT
+!! a2fw(nw): Eliashberg function.
+!!
+!! SOURCE
+
+subroutine get_a2fw(gstore, dtset, nw, wmesh, a2fw)
+
+!Arguments ------------------------------------
+ class(gstore_t),intent(inout) :: gstore
+ type(dataset_type),intent(in) :: dtset
+ integer,intent(in) :: nw
+ real(dp),intent(in) :: wmesh(nw)
+ real(dp),intent(out) :: a2fw(nw)
+
+!Local variables-------------------------------
+ integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, timrev_q, ii, ik_ibz, nb_k, nb_kq
+ real(dp) :: g2_qnu, wqnu, weight_k, weight_q, cpu, wall, gflops
+ type(lgroup_t) :: lg_myq
+ character(len=500) :: msg !, kk_string !, qq_bz_string
+!arrays
+ integer :: units(2)
+ real(dp) :: qpt(3), kk(3)
+ real(dp),allocatable :: dbl_delta_q(:,:,:), g2_mnkp(:,:,:,:), deltaw_nuq(:)
+!----------------------------------------------------------------------
+
+ units = [std_out, ab_out]
+
+ call cwtime(cpu, wall, gflops, "start")
+ call wrtout(units, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(gstore%dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
+
+ !if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "phonon") /= 0) then
+ !  ABI_ERROR("The gstore object is inconsistent with gstore_wannierize_and_write_gwan. See messages above.")
+ !end if
+
+ ABI_CHECK(gstore%qzone == "bz", "get_a2fw assumes qzone == `bz`")
+ ! Check consistency of little group options.
+ ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
+
+ ABI_MALLOC(deltaw_nuq, (nw))
+ a2fw = zero
+
+ ! Loop over collinear spins.
+ do my_is=1,gstore%my_nspins
+   associate (gqk => gstore%gqk(my_is), cryst => gstore%cryst)
+   ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
+   ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
+
+   nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
+   ABI_CHECK_IEQ(nb_k, nb_kq, "gqk_dbldelta_qpt does not support nb_k != nb_kq")
+
+   ! Weights for delta(e_{m k+q}) delta(e_{n k}) for my list of k-points.
+   ABI_MALLOC(dbl_delta_q, (nb_kq, nb_k, gqk%my_nk))
+   ABI_MALLOC(g2_mnkp, (nb_kq, nb_k, gqk%my_nk, gqk%my_npert))
+
+   ! Loop over my q-points.
+   do my_iq=1,gqk%my_nq
+     ! Compute all integration weights for the double delta.
+     call gqk%dbldelta_qpt(my_iq, gstore, gstore%dtset%eph_intmeth, gstore%dtset%eph_fsmear, qpt, weight_q, dbl_delta_q)
+
+     ! Copy data to improve memory access in the loops below.
+     do my_ip=1,gqk%my_npert
+       g2_mnkp(:,:,:,my_ip) = gqk%my_g2(my_ip,:,my_iq,:,:)
+     end do
+
+     ! Compute the little group of the q-point so that we only need to sum g(k,q) for k in the IBZ_q
+     if (dtset%gstore_use_lgq /= 0) then
+       timrev_q = kpts_timrev_from_kptopt(gstore%qptopt)
+       call lg_myq%init(cryst, qpt, timrev_q, gstore%nkbz, gstore%kbz, gstore%nkibz, gstore%kibz, xmpi_comm_self)
+     end if
+
+     ! Loop over my phonon modes.
+     do my_ip=1,gqk%my_npert
+       wqnu = gqk%my_wnuq(my_ip, my_iq)
+       ! delta(w - omega_qnu)
+       deltaw_nuq = gaussian(wmesh - wqnu, gstore%dtset%ph_smear)
+
+       ! Loop over my k-points.
+       do my_ik=1,gqk%my_nk
+         kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik); weight_k = gqk%my_wtk(my_ik)
+
+         ! Handle little group and integration weight.
+         if (dtset%gstore_use_lgq /= 0) then
+           ii = lg_myq%findq_ibzk(kk); if (ii == -1) cycle; weight_k = lg_myq%weights(ii)
+         end if
+
+         ! Sum over m_kq and n_k and accumulate.
+         do in_k=1,nb_k
+           do im_kq=1,nb_kq
+             g2_qnu = g2_mnkp(im_kq, in_k, my_ik, my_ip)
+             a2fw(:) = a2fw(:) + deltaw_nuq(:) * g2_qnu * weight_k * weight_q * dbl_delta_q(im_kq, in_k, my_ik)
+           end do
+         end do
+       end do
+     end do
+
+     call lg_myq%free()
+   end do ! my_iq
+
+   ABI_FREE(dbl_delta_q)
+   ABI_FREE(g2_mnkp)
+   end associate
+ end do ! my_is
+
+ ABI_FREE(deltaw_nuq)
+
+ ! Take into account collinear spin and N(eF) TODO
+ a2fw = a2fw * (two / (gstore%nsppol * gstore%dtset%nspinor))
+ call xmpi_sum(a2fw, gstore%comm, ierr)
+
+ call cwtime_report(" get_a2fw", cpu, wall, gflops)
+
+end subroutine get_a2fw
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_migdal_eliashberg/iso_solver_free
+!! NAME
+!! iso_solver_free
+!!
+!! FUNCTION
+!!  Free dynamic memory
+!!
+!! SOURCE
+
+subroutine iso_solver_free(iso)
+
+!Arguments ------------------------------------
+ class(iso_solver_t),intent(inout) :: iso
+!----------------------------------------------------------------------
+
+ ABI_SFREE(iso%delta_iw)
+ ABI_SFREE(iso%zeta_iw)
+ ABI_SFREE(iso%prev_delta_iw)
+ ABI_SFREE(iso%prev_zeta_iw)
+ ABI_SFREE(iso%delta_iw_mix)
+
+end subroutine iso_solver_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_migdal_eliashberg/iso_solver_solve
+!! NAME
+!! iso_solver_solve
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine iso_solver_solve(iso, itemp, kt, niw, imag_w, lambda_ij)
+
+!Arguments ------------------------------------
+!scalars
+ class(iso_solver_t),intent(inout) :: iso
+ integer,intent(in) :: itemp, niw
+ real(dp),intent(in) :: kt
+!arrays
+ real(dp),intent(in) :: imag_w(niw), lambda_ij(2 * niw)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master = 0
+ integer :: nproc, my_rank, iter, ii, jj, converged
+ real(dp) :: rr
+!arrays
+ real(dp),allocatable :: prev_vals(:)
+
+!----------------------------------------------------------------------
+
+ ABI_UNUSED(lambda_ij)
+
+ nproc = xmpi_comm_size(iso%comm); my_rank = xmpi_comm_rank(iso%comm)
+
+ ABI_REMALLOC(iso%delta_iw_mix, (niw, iso%max_nmix))
+
+ if (itemp == 1) then
+   ! Init values from scratch
+   ABI_CALLOC(iso%zeta_iw, (niw))
+   ABI_CALLOC(iso%prev_zeta_iw, (niw))
+   ABI_CALLOC(iso%delta_iw, (niw))
+   ABI_CALLOC(iso%prev_delta_iw, (niw))
+ else
+   ! Init values from previous temperature. TODO: May use spline
+   call alloc_copy(iso%zeta_iw, prev_vals)
+   ABI_RECALLOC(iso%zeta_iw, (niw))
+   ABI_MOVE_ALLOC(prev_vals, iso%prev_zeta_iw)
+   call alloc_copy(iso%delta_iw, prev_vals)
+   ABI_RECALLOC(iso%delta_iw, (niw))
+   ABI_MOVE_ALLOC(prev_vals, iso%prev_delta_iw)
+ end if
+
+ converged = 0
+iter_loop: do iter=1,iso%max_niter
+
+   do ii=1,niw
+     !if (mod(ii, nproc) /= my_rank) cycle ! MPI parallelism inside comm
+     do jj=1,niw
+       rr = one / sqrt(imag_w(jj) ** 2 + iso%prev_delta_iw(jj) ** 2)
+       iso%zeta_iw(ii) = iso%zeta_iw(ii) + imag_w(jj) * rr  !* lambda(ii - jj)
+       iso%delta_iw(ii) = iso%delta_iw(ii) + rr * iso%prev_delta_iw(jj) !* (lambda(ii - jj) - mustar)
+     end do
+      iso%zeta_iw(ii) = one + pi * kt / imag_w(ii) * iso%zeta_iw(ii)
+      iso%delta_iw(ii) = pi * kt * iso%delta_iw(ii) / iso%zeta_iw(ii)
+   end do ! ii
+
+   if (my_rank == master) then
+     ! Write SCF cycle to stdout.
+     ! Check for convergence.
+     converged = 0
+   end if
+
+   if (converged == 2) exit iter_loop
+
+   ! TODO: Mixing
+   iso%prev_zeta_iw = iso%zeta_iw
+   iso%prev_delta_iw = iso%delta_iw
+
+ end do iter_loop
+
+ ! Pade' to go to real axis
+ ! Compute Delta F
+ ! Compute QP DOS
+
+ ! Write results to netcdf file
+ if (my_rank == master) then
+ end if
+
+end subroutine iso_solver_solve
 !!***
 
 !----------------------------------------------------------------------
@@ -933,133 +1083,6 @@ subroutine get_lambda_iso_iw(gstore, nw, imag_w, lambda)
  call xmpi_sum(lambda, gstore%comm, ierr)
 
 end subroutine get_lambda_iso_iw
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_migdal_eliashberg/get_a2fw
-!! NAME
-!! get_a2fw
-!!
-!! FUNCTION
-!!  Compute Eliashberg function a^2F(omega).
-!!
-!! INPUTS
-!!  nw: Number of frequencies.
-!!  wmesh: Frequency mesh.
-!!
-!! OUTPUT
-!! a2fw(nw): Eliashberg function.
-!!
-!! SOURCE
-
-subroutine get_a2fw(gstore, dtset, nw, wmesh, a2fw)
-
-!Arguments ------------------------------------
- class(gstore_t),intent(inout) :: gstore
- type(dataset_type),intent(in) :: dtset
- integer,intent(in) :: nw
- real(dp),intent(in) :: wmesh(nw)
- real(dp),intent(out) :: a2fw(nw)
-
-!Local variables-------------------------------
- integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, timrev_q, ii, ik_ibz, nb_k, nb_kq
- real(dp) :: g2_qnu, wqnu, weight_k, weight_q, cpu, wall, gflops
- type(lgroup_t) :: lg_myq
- character(len=500) :: msg !, kk_string !, qq_bz_string
-!arrays
- integer :: units(2)
- real(dp) :: qpt(3), kk(3)
- real(dp),allocatable :: dbl_delta_q(:,:,:), g2_mnkp(:,:,:,:), deltaw_nuq(:)
-!----------------------------------------------------------------------
-
- units = [std_out, ab_out]
-
- call cwtime(cpu, wall, gflops, "start")
- call wrtout(units, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(gstore%dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
-
- !if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "phonon") /= 0) then
- !  ABI_ERROR("The gstore object is inconsistent with gstore_wannierize_and_write_gwan. See messages above.")
- !end if
-
- ABI_CHECK(gstore%qzone == "bz", "get_a2fw assumes qzone == `bz`")
- ! Check consistency of little group options.
- ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
-
- ABI_MALLOC(deltaw_nuq, (nw))
- a2fw = zero
-
- ! Loop over collinear spins.
- do my_is=1,gstore%my_nspins
-   associate (gqk => gstore%gqk(my_is), cryst => gstore%cryst)
-   ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
-   ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
-
-   nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
-   ABI_CHECK_IEQ(nb_k, nb_kq, "gqk_dbldelta_qpt does not support nb_k != nb_kq")
-
-   ! Weights for delta(e_{m k+q}) delta(e_{n k}) for my list of k-points.
-   ABI_MALLOC(dbl_delta_q, (nb_kq, nb_k, gqk%my_nk))
-   ABI_MALLOC(g2_mnkp, (nb_kq, nb_k, gqk%my_nk, gqk%my_npert))
-
-   ! Loop over my q-points.
-   do my_iq=1,gqk%my_nq
-     ! Compute all integration weights for the double delta.
-     call gqk%dbldelta_qpt(my_iq, gstore, gstore%dtset%eph_intmeth, gstore%dtset%eph_fsmear, qpt, weight_q, dbl_delta_q)
-
-     ! Copy data to improve memory access in the loops below.
-     do my_ip=1,gqk%my_npert
-       g2_mnkp(:,:,:,my_ip) = gqk%my_g2(my_ip,:,my_iq,:,:)
-     end do
-
-     ! Compute the little group of the q-point so that we only need to sum g(k,q) for k in the IBZ_q
-     if (dtset%gstore_use_lgq /= 0) then
-       timrev_q = kpts_timrev_from_kptopt(gstore%qptopt)
-       call lg_myq%init(cryst, qpt, timrev_q, gstore%nkbz, gstore%kbz, gstore%nkibz, gstore%kibz, xmpi_comm_self)
-     end if
-
-     ! Loop over my phonon modes.
-     do my_ip=1,gqk%my_npert
-       wqnu = gqk%my_wnuq(my_ip, my_iq)
-       ! delta(w - omega_qnu)
-       deltaw_nuq = gaussian(wmesh - wqnu, gstore%dtset%ph_smear)
-
-       ! Loop over my k-points.
-       do my_ik=1,gqk%my_nk
-         kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik); weight_k = gqk%my_wtk(my_ik)
-
-         ! Handle little group and integration weight.
-         if (dtset%gstore_use_lgq /= 0) then
-           ii = lg_myq%findq_ibzk(kk); if (ii == -1) cycle; weight_k = lg_myq%weights(ii)
-         end if
-
-         ! Sum over m_kq and n_k and accumulate.
-         do in_k=1,nb_k
-           do im_kq=1,nb_kq
-             g2_qnu = g2_mnkp(im_kq, in_k, my_ik, my_ip)
-             a2fw(:) = a2fw(:) + deltaw_nuq(:) * g2_qnu * weight_k * weight_q * dbl_delta_q(im_kq, in_k, my_ik)
-           end do
-         end do
-       end do
-     end do
-
-     call lg_myq%free()
-   end do ! my_iq
-
-   ABI_FREE(dbl_delta_q)
-   ABI_FREE(g2_mnkp)
-   end associate
- end do ! my_is
-
- ABI_FREE(deltaw_nuq)
-
- ! Take into account collinear spin and N(eF) TODO
- a2fw = a2fw * (two / (gstore%nsppol * gstore%dtset%nspinor))
- call xmpi_sum(a2fw, gstore%comm, ierr)
-
- call cwtime_report(" get_a2fw", cpu, wall, gflops)
-
-end subroutine get_a2fw
 !!***
 
 end module m_migdal_eliashberg

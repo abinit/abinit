@@ -815,9 +815,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (14)
    ! Molecular Berry Curvature.
-   call wrtout(units, " Computing Berry curvature")
    call gstore%init_or_from_ncpath(with_cplex2, dtset, dtfil, wfk0_hdr, cryst, qp_ebands, ifc, &
                                    "atom", dtset%gstore_gname, .False., comm, gstore_from_file)
+   call wrtout(units, " Computing Berry curvature")
    if (gstore_from_file) then
      call wrtout(units, " Gstore built by reading a pre-existent GSTORE.nc file")
    else

@@ -1359,7 +1359,7 @@ subroutine gstore_init_or_from_ncpath(gstore, with_cplex, dtset, dtfil, wfk0_hdr
 !Local variables-------------------------------
 !scalars
  integer :: natom, natom3, spin, my_is, my_ik, my_iq, iq_ibz, isym_q, trev_q, ipc, nu, nwan, ierr
- real(dp) :: weight_q
+ real(dp) :: weight_q, cpu, wall, gflops
  character(len=500) :: msg
  character(len=fnlen) :: gstore_path
  type(gqk_t),pointer :: gqk
@@ -1377,6 +1377,7 @@ subroutine gstore_init_or_from_ncpath(gstore, with_cplex, dtset, dtfil, wfk0_hdr
 
  else if (dtfil%filabiwanin /= ABI_NOFILE .and. dtfil%filgwanin /= ABI_NOFILE) then
    ! Build gstore on the fly via Wannier interpolation from ABIWAN.nc + GWAN.nc.
+   call cwtime(cpu, wall, gflops, "start")
    ! First version: only |g|^2 (with_cplex=1) or complex g (with_cplex=2), phonon representation,
    ! no Debye-Waller, no gvals_ks (this option is only meaningful when reading gstore produced by GWPT).
    msg = sjoin("Invalid with_cplex:", itoa(with_cplex), "only 1 or 2 are supported when building gstore via Wannier interpolation")
@@ -1488,6 +1489,7 @@ subroutine gstore_init_or_from_ncpath(gstore, with_cplex, dtset, dtfil, wfk0_hdr
 
    ! We interpolated (and converted to) the phonon representation.
    gstore%gmode = GSTORE_GMODE_PHONON
+   call cwtime_report(" Wannier interpolation of GSTORE matrix elements", cpu, wall, gflops)
 
  else
    write(msg, "(3a)") &
@@ -2199,7 +2201,7 @@ subroutine gstore_malloc__(gstore, with_cplex, has_both_g, max_nq, qglob2bz, max
 
    ! Allocate storage for MPI-distributed e-ph matrix elements.
    if (with_cplex > 0) then
-     mem_mb = with_cplex * gqk%my_npert * nb_kq * nb_k * gqk%my_nq * gqk%my_nk * eight * b2Mb
+     mem_mb = (one * with_cplex * gqk%my_npert) * gqk%my_nq * gqk%my_nk * nb_kq * nb_k * eight * b2Mb
      call wrtout(std_out, sjoin(" Local memory for e-ph matrix elements:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
 
      ! The initialization with zero is important as not all the g are computed when we filter in k-space.

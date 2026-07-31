@@ -42,6 +42,7 @@ module m_mlwfovlp
 
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
+ use m_time, only : cwtime, cwtime_report
  use m_io_tools, only : delete_file, get_unit, open_file
  use m_hide_lapack,     only : matrginv, xheev
  use m_fstrings,      only : strcat, sjoin, itoa
@@ -3627,17 +3628,19 @@ end subroutine wan_setup_eph_ws_kq
 !!
 !! FUNCTION
 !! Interpolate the e-ph matrix elements for one k-point and nq q-points.
-!! Returns matrix elements in the atomic-representation.
+!! Returns matrix elements in the atomic-representation and, optionally, the
+!! eigenvalues obtained while diagonalizing the interpolated Hamiltonians.
 !!
 !! SOURCE
 
-subroutine wan_interp_eph_manyq(wan, nq, qpts, kpt, g_atm)
+subroutine wan_interp_eph_manyq(wan, nq, qpts, kpt, g_atm, out_eigens_k, out_eigens_kq)
 
 !Arguments ------------------------------------
  class(wan_t),intent(in) :: wan
  integer,intent(in) :: nq
  real(dp),intent(in) :: qpts(3,nq), kpt(3)
  complex(dp),intent(out) :: g_atm(wan%nwan, wan%nwan, wan%my_npert, nq)
+ real(dp),optional,intent(out) :: out_eigens_k(wan%nwan), out_eigens_kq(wan%nwan,nq)
 
 !Local variables-------------------------------
  integer :: ir, nr_e, nr_p, nwan, iq, my_npert, ipc, ncols_e, ncols_w
@@ -3663,6 +3666,7 @@ subroutine wan_interp_eph_manyq(wan, nq, qpts, kpt, g_atm)
    eikr(ir) = exp(+j_dpc * two_pi * dot_product(kpt, wan%r_e(:, ir))) / wan%ndegen_e(ir)
  end do
  call wan%interp_ham(kpt, u_k, eigens_k)
+ if (present(out_eigens_k)) out_eigens_k = eigens_k
 
  ! grpe_wwp has shape: (nr_p, nr_e, nwan, nwan, my_npert))
  ncols_e = nr_e * nwan **2 * my_npert
@@ -3675,6 +3679,7 @@ subroutine wan_interp_eph_manyq(wan, nq, qpts, kpt, g_atm)
  do iq=1,nq
    kq = kpt + qpts(:,iq)
    call wan%interp_ham(kq, u_kq, eigens_kq)
+   if (present(out_eigens_kq)) out_eigens_kq(:,iq) = eigens_kq
    do ir=1,nr_p
      eiqr(ir) = exp(+j_dpc * two_pi * dot_product(qpts(:,iq), wan%r_p(:, ir))) / wan%ndegen_p(ir)
    end do
@@ -3890,12 +3895,14 @@ subroutine wan_load_gwan(wan, gwan_filepath, cryst, spin, nsppol, all_comm)
 !Local variables-------------------------------
 !scalars
  integer :: root_ncid, spin_ncid, ncerr, units(2)
+ real(dp) :: cpu, wall, gflops
  logical,parameter :: keep_umats = .False.
  type(crystal_t) :: gwan_cryst
  real(dp), contiguous, pointer :: rpt_d6(:,:,:,:,:,:) !, rpt_d4(:,:,:,:)
 !************************************************************************
 
  units = [std_out, ab_out]
+ call cwtime(cpu, wall, gflops, "start")
  if (nsppol == 2) then
    call wrtout(units, sjoin(" Reading g(R_e, R_p) for spin:", itoa(spin), " from GWAN file:", gwan_filepath))
  else
@@ -3947,6 +3954,7 @@ subroutine wan_load_gwan(wan, gwan_filepath, cryst, spin, nsppol, all_comm)
 
  NCF_CHECK(nf90_close(root_ncid))
  call wrtout(units, " Reading of GWAN.nc file completed.")
+ call cwtime_report(" Reading Wannier e-ph matrix elements from GWAN.nc", cpu, wall, gflops)
 
 contains
  integer function vid_spin(var_name)
@@ -3992,6 +4000,7 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
 !Local variables-------------------------------
 !scalars
  integer :: spin, ik, nwan, ierr, cnt, my_rank, nproc
+ real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
 !arrays
  integer :: band_block(2)
@@ -4002,6 +4011,7 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
  cnt = 0
+ call cwtime(cpu, wall, gflops, "start")
 
  ! Build new ebands object with memory to be filled.
  band_block(:) = [1, wan_spin(1)%max_nwan]
@@ -4027,6 +4037,8 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
  call xmpi_sum(out_ebands%eig, comm, ierr)
 
  out_ebands%fermie = in_ebands%fermie
+
+ call cwtime_report(" Wannier interpolation of electronic bands", cpu, wall, gflops)
 
 end subroutine wan_interp_ebands
 !!***
