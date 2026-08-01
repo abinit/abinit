@@ -1419,9 +1419,7 @@ subroutine gstore_init_or_from_ncpath(gstore, with_cplex, dtset, dtfil, wfk0_hdr
 
    ! Interpolate g(k,q) and store data in memory.
    do my_is=1,gstore%my_nspins
-     spin = gstore%my_spins(my_is)
-     gqk => gstore%gqk(my_is)
-     nwan = gqk%nb_k
+     spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is); nwan = gqk%nb_k
 
      ! Build gqk%wan for this spin from the ABIWAN.nc file and load g(R_e, R_p) from GWAN.nc.
      call gqk%wan%from_abiwan(dtfil%filabiwanin, spin, gstore%nsppol, .False., "", gqk%comm%value)
@@ -1451,7 +1449,7 @@ subroutine gstore_init_or_from_ncpath(gstore, with_cplex, dtset, dtfil, wfk0_hdr
        do my_ik=1,gqk%my_nk
          ! Interpolate e-ph matrix elements in the atomic representation for this rank's slice
          ! of the natom3 atomic perturbations (gqk%my_pertcases).
-         call gqk%wan%interp_eph_manyq(1, qpt, gqk%my_kpts(:,my_ik), intp_gatm)
+         call gqk%wan%interp_eph_manyq(cryst, 1, qpt, gqk%my_kpts(:,my_ik), intp_gatm)
 
          ! Scatter into the full natom3 array and reduce over pert_comm: the atom -> phonon-mode
          ! transform mixes all natom3 atomic perturbations, so every rank needs the complete array.
@@ -5695,10 +5693,14 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
  integer,parameter :: wan_ntest = 4
  integer,parameter :: wan_nperiod = 3
  real(dp),parameter :: WAN_CLOSURE_TOL = tol8
+ real(dp),parameter :: WAN_VELOCITY_FD_STEP = 1.0d-5
+ real(dp),parameter :: WAN_VELOCITY_DEGEN_TOL = 1.0d-5
+ real(dp),parameter :: WAN_VELOCITY_TOL = tol6
  integer :: nr_e, nr_p, nwan, iwan, jwan, spin, my_is, my_ip, ir, irp, my_ik, my_iq, nb_k, nb_kq
  integer :: my_nk, my_nq, ierr, ik, ikq, my_npert, nwin_k, nwin_kq, ii, jj, band_kq, band_k, ib_k, ib_kq
- integer :: itest, ip_loc, ik_glob, iq_glob, ntest_found, iperiod
+ integer :: itest, ip_loc, ik_glob, iq_glob, ntest_found, iperiod, idir, ib, nvelocity_tested
  real(dp) :: max_err, ref_scale, max_period_eig_err, period_eig_scale, max_period_g2_err, period_g2_scale
+ real(dp) :: max_velocity_err, velocity_scale, band_gap, velocity_fd
  !character(len=500) :: msg
  logical :: keep_umats, test_found(wan_ntest)
  type(wan_t),pointer :: wan
@@ -5707,8 +5709,9 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
  integer :: qptrlatt_(3,3), units(2)
  integer :: test_ik(wan_ntest), test_iq(wan_ntest)
  integer :: period_gk(3,wan_nperiod), period_gq(3,wan_nperiod)
- real(dp) :: weight_qq, qpt(3), kpt(3), kq(3), cpu, wall, gflops
+ real(dp) :: weight_qq, qpt(3), kpt(3), kq(3), dkred(3), cpu, wall, gflops
  real(dp),allocatable :: eigens_k_test(:), eigens_kq_test(:), eigens_k_period(:), eigens_kq_period(:)
+ real(dp),allocatable :: eigens_k_plus(:), eigens_k_minus(:), vcart_test(:,:)
  complex(dp),allocatable :: emikr(:), emiqr(:), u_k(:,:), u_kq(:,:), gww_epq(:,:,:,:,:), gww_pk(:,:,:,:), g_bb(:,:), tmp_mat(:,:)
  complex(dp),allocatable :: test_gref(:,:,:,:), u_k_test(:,:), u_kq_test(:,:), cmat_test(:,:), g_expected(:,:)
  complex(dp),allocatable :: g_atm_test(:,:,:,:), g_atm_period(:,:,:,:)
@@ -5912,6 +5915,9 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
    ABI_MALLOC(eigens_kq_test, (nwan))
    ABI_MALLOC(eigens_k_period, (nwan))
    ABI_MALLOC(eigens_kq_period, (nwan))
+   ABI_MALLOC(eigens_k_plus, (nwan))
+   ABI_MALLOC(eigens_k_minus, (nwan))
+   ABI_MALLOC(vcart_test, (3,nwan))
    ABI_MALLOC(cmat_test, (nwan,nwan))
    ABI_MALLOC(g_expected, (nwan,nwan))
    ABI_MALLOC(g_atm_test, (nwan, nwan, my_npert, 1))
@@ -5920,21 +5926,43 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
    max_err = zero; ref_scale = zero
    max_period_eig_err = zero; period_eig_scale = zero
    max_period_g2_err = zero; period_g2_scale = zero
+   max_velocity_err = zero; velocity_scale = zero; nvelocity_tested = 0
    do itest=1,wan_ntest
      if (.not. test_found(itest)) cycle
      my_ik = test_ik(itest) - gqk%my_kstart + 1
      my_iq = test_iq(itest) - gqk%my_qstart + 1
      kpt = gqk%my_kpts(:,my_ik)
      call gqk%myqpt(my_iq, gstore, weight_qq, qpt)
-     call wan%interp_ham(kpt, u_k_test, eigens_k_test)
-     call wan%interp_ham(kpt + qpt, u_kq_test, eigens_kq_test)
-     call wan%interp_eph_manyq(1, qpt, kpt, g_atm_test)
+     call wan%interp_ham(gstore%cryst, kpt, u_k_test, eigens_k_test, vcart_test)
+     call wan%interp_ham(gstore%cryst, kpt + qpt, u_kq_test, eigens_kq_test)
+     call wan%interp_eph_manyq(gstore%cryst, 1, qpt, kpt, g_atm_test)
      ref_scale = max(ref_scale, maxval(abs(test_gref(:,:,:,itest))))
      do ip_loc=1,my_npert
        ! Same order/dagger convention as wan_interp_eph_manyq (m_mlwfovlp.F90).
        call ZGEMM('N', 'N', nwan, nwan, nwan, cone, u_kq_test, nwan, test_gref(:,:,ip_loc,itest), nwan, czero, cmat_test, nwan)
        call ZGEMM('N', 'C', nwan, nwan, nwan, cone, cmat_test, nwan, u_k_test, nwan, czero, g_expected, nwan)
        max_err = max(max_err, maxval(abs(g_expected - g_atm_test(:,:,ip_loc,1))))
+     end do
+
+     ! Validate analytic Cartesian group velocities against centered finite
+     ! differences of the interpolated eigenvalues. Skip degenerate bands,
+     ! whose individual diagonal velocities depend on the chosen subspace basis.
+     ! These calls intentionally follow the closure comparison because the
+     ! finite-difference diagonalizations reuse the u_kq_test work buffer.
+     do idir=1,3
+       dkred = WAN_VELOCITY_FD_STEP * gstore%cryst%rprimd(idir,:) / two_pi
+       call wan%interp_ham(gstore%cryst, kpt + dkred, u_kq_test, eigens_k_plus)
+       call wan%interp_ham(gstore%cryst, kpt - dkred, u_kq_test, eigens_k_minus)
+       do ib=1,nwan
+         band_gap = huge(one)
+         if (ib > 1) band_gap = min(band_gap, abs(eigens_k_test(ib) - eigens_k_test(ib-1)))
+         if (ib < nwan) band_gap = min(band_gap, abs(eigens_k_test(ib+1) - eigens_k_test(ib)))
+         if (band_gap < WAN_VELOCITY_DEGEN_TOL) cycle
+         velocity_fd = (eigens_k_plus(ib) - eigens_k_minus(ib)) / (two * WAN_VELOCITY_FD_STEP)
+         max_velocity_err = max(max_velocity_err, abs(vcart_test(idir,ib) - velocity_fd))
+         velocity_scale = max(velocity_scale, abs(vcart_test(idir,ib)), abs(velocity_fd))
+         nvelocity_tested = nvelocity_tested + 1
+       end do
      end do
 
      ! Reciprocal-periodicity self-check. Integer shifts leave the real-space
@@ -5946,10 +5974,10 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
        period_g2_scale = max(period_g2_scale, sum(abs(g_atm_test(:,:,ip_loc,1))**2))
      end do
      do iperiod=1,wan_nperiod
-       call wan%interp_ham(kpt + period_gk(:,iperiod), u_k_test, eigens_k_period)
-       call wan%interp_ham(kpt + qpt + period_gk(:,iperiod) + period_gq(:,iperiod), &
+       call wan%interp_ham(gstore%cryst, kpt + period_gk(:,iperiod), u_k_test, eigens_k_period)
+       call wan%interp_ham(gstore%cryst, kpt + qpt + period_gk(:,iperiod) + period_gq(:,iperiod), &
                            u_kq_test, eigens_kq_period)
-       call wan%interp_eph_manyq(1, qpt + period_gq(:,iperiod), &
+       call wan%interp_eph_manyq(gstore%cryst, 1, qpt + period_gq(:,iperiod), &
                                  kpt + period_gk(:,iperiod), g_atm_period)
        max_period_eig_err = max(max_period_eig_err, maxval(abs(eigens_k_period - eigens_k_test)), &
                                maxval(abs(eigens_kq_period - eigens_kq_test)))
@@ -5972,18 +6000,26 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
    call xmpi_max(period_eig_scale, gqk%comm%value, ierr)
    call xmpi_max(max_period_g2_err, gqk%comm%value, ierr)
    call xmpi_max(period_g2_scale, gqk%comm%value, ierr)
+   call xmpi_max(max_velocity_err, gqk%comm%value, ierr)
+   call xmpi_max(velocity_scale, gqk%comm%value, ierr)
+   call xmpi_sum(nvelocity_tested, gqk%qpt_kpt_comm%value, ierr)
    ref_scale = max(ref_scale, tol12)
    period_eig_scale = max(period_eig_scale, tol12)
    period_g2_scale = max(period_g2_scale, tol12)
+   velocity_scale = max(velocity_scale, one)
 
    if (gqk%comm%me == master) then
      write(std_out,'(a,es10.2,a,es10.2)') " Wannier on-mesh closure self-check: max_err=", max_err, "  ref_scale=", ref_scale
      write(std_out,'(a,es10.2,a,es10.2)') " Wannier reciprocal-periodicity self-check: max_eig_err=", &
        max_period_eig_err, "  max_g2_err=", max_period_g2_err
+     write(std_out,'(a,i0,a,es10.2)') " Wannier group-velocity self-check: nvalues=", &
+       nvelocity_tested, "  max_err=", max_velocity_err
    end if
    ABI_CHECK(max_err < WAN_CLOSURE_TOL * ref_scale, "Wannier on-mesh closure self-check failed: interpolating g(k,q) back at a coarse-mesh point does not reproduce the pre-FT value (up to the shared interp_ham gauge). Suspect the WS/ndegen bookkeeping, the forward/backward FTs, or the dagger convention in wan_interp_eph_manyq vs gstore_wannierize_and_write_gwan.")
    ABI_CHECK(max_period_eig_err < WAN_CLOSURE_TOL * period_eig_scale, "Wannier reciprocal-periodicity self-check failed for interpolated electronic eigenvalues.")
    ABI_CHECK(max_period_g2_err < WAN_CLOSURE_TOL * period_g2_scale, "Wannier reciprocal-periodicity self-check failed for gauge-invariant e-ph Frobenius norms.")
+   ABI_CHECK(nvelocity_tested > 0, "Wannier group-velocity self-check did not find a nondegenerate band")
+   ABI_CHECK(max_velocity_err < WAN_VELOCITY_TOL * velocity_scale, "Analytic Wannier group velocities do not agree with finite differences of the interpolated eigenvalues.")
 
    ABI_FREE(u_k_test)
    ABI_FREE(u_kq_test)
@@ -5991,6 +6027,9 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
    ABI_FREE(eigens_kq_test)
    ABI_FREE(eigens_k_period)
    ABI_FREE(eigens_kq_period)
+   ABI_FREE(eigens_k_plus)
+   ABI_FREE(eigens_k_minus)
+   ABI_FREE(vcart_test)
    ABI_FREE(cmat_test)
    ABI_FREE(g_expected)
    ABI_FREE(g_atm_test)

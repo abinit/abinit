@@ -13,8 +13,8 @@ ddb_ngqpt 4 4 4
 eph_ngqpt_fine 6 6 6
 dipdip 0         # No treatment of the dipole-dipole part. OK for metals
 
-gstore_kzone "ibz"; gstore_qzone "bz"
-#gstore_kzone "bz"; gstore_qzone "ibz"
+#gstore_kzone "ibz"; gstore_qzone "bz"
+gstore_kzone "bz"; gstore_qzone "ibz"
 gstore_kfilter "fs_tetra"
 #gstore_brange 3 4
 #gstore_erange -0.5 -0.5 eV

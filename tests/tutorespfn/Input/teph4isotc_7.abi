@@ -14,6 +14,8 @@ ddb_ngqpt 4 4 4
 dipdip 0         # No treatment of the dipole-dipole part. OK for metals
 
 getgstore_filepath "teph4isotc_6o_GSTORE.nc"
+gstore_qzone "ibz"
+gstore_kzone "bz"
 
 #eph_intmeth 2   # Tetrahedron method
 #eph_intmeth 1

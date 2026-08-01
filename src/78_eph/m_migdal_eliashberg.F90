@@ -40,8 +40,6 @@ module m_migdal_eliashberg
  use m_ebands,          only : ebands_t, edos_t
  use m_bz_mesh,         only : kpath_t
  use m_ephtk,           only : ephtk_gkknu_from_atm, EPHTK_WTOL
- use m_kpts,            only : kpts_timrev_from_kptopt
- use m_lgroup,          only : lgroup_t
  use m_gstore,          only : gstore_t
 
  implicit none
@@ -140,7 +138,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  !integer :: ik_ibz, ik_bz, ebands_timrev, iq_bz, iq_ibz !, ikq_ibz, ikq_bz
  !integer :: ncid, spin_ncid, ncerr, gstore_fform
  integer :: phmesh_size, units(2) !, iw
- real(dp) :: kt, wmax, cpu, wall, gflops, edos_step, edos_broad, lambda_iso, omega_log, alpha !, sigma, ecut, eshift, eig0nk
+ real(dp) :: kt, wmax, cpu, wall, gflops, edos_step, edos_broad, lambda_iso, omega_log, omega_2, alpha !, sigma, ecut, eshift, eig0nk
  character(len=500) :: msg
  class(crystal_t),pointer :: cryst
  class(ebands_t),pointer :: ebands
@@ -149,6 +147,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
 !arrays
  real(dp),allocatable :: ktmesh(:), lambda_ij(:), imag_w(:), imag_2w(:), phmesh(:), a2fw(:), a2fw_raw(:)
  real(dp),allocatable :: a2f_1mom(:), a2f_1mom_int(:)
+ real(dp),allocatable :: phfreq_qibz(:,:), phlambda_qibz(:,:,:)
  real(dp),allocatable :: qpath(:,:), phfreq_qpath(:,:), phdispl_cart_qpath(:,:,:,:), phlambda_qpath(:,:,:)
 !----------------------------------------------------------------------
 
@@ -164,7 +163,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  ! Consistency check
  ierr = 0
  ABI_CHECK_NOSTOP(gstore%kzone == "bz", "gstore_kzone == 'bz' is required", ierr)
- ABI_CHECK_NOSTOP(gstore%qzone == "bz", "gstore_qzone == 'bz' is required", ierr)
+ ABI_CHECK_NOSTOP(any(gstore%qzone == ["bz ", "ibz"]), "gstore_qzone must be 'bz' or 'ibz'", ierr)
  ABI_CHECK(ierr == 0, "Wrong gstore object for migdal_eliashberg_iso. See messages above")
 
  ! Compute electron DOS.
@@ -204,7 +203,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
 
  ! Compute Eliashberg function a2F(w)
  ABI_MALLOC(a2fw, (phmesh_size))
- call get_a2fw(gstore, dtset, phmesh_size, phmesh, a2fw)
+ call get_a2fw(gstore, edos%gef(0), phmesh_size, phmesh, a2fw, phfreq_qibz, phlambda_qibz)
 
  ! Compute mode-resolved lambda on the phonon q-path when the matrix
  ! elements can be evaluated at arbitrary q with Wannier interpolation.
@@ -222,7 +221,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
    a2f_1mom = zero
    where (phmesh > tol12) a2f_1mom = a2fw / phmesh
    call simpson_int(phmesh_size, dtset%ph_wstep, a2f_1mom, a2f_1mom_int)
-   lambda_iso = a2f_1mom_int(phmesh_size)
+   lambda_iso = two * a2f_1mom_int(phmesh_size)
    write(msg, "(a,es16.8)")" Isotropic lambda from a2F(w): ", lambda_iso
    call wrtout(units, msg)
 
@@ -232,9 +231,18 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
      if (phmesh(iw) > tol12) a2f_1mom(iw) = a2fw(iw) * log(phmesh(iw)) / phmesh(iw)
    end do
    call simpson_int(phmesh_size, dtset%ph_wstep, a2f_1mom, a2f_1mom_int)
-   omega_log = exp(a2f_1mom_int(phmesh_size) / lambda_iso)
+   omega_log = exp(two * a2f_1mom_int(phmesh_size) / lambda_iso)
    write(msg, "(a,es16.8,a,es16.8,a)")" Isotropic omega_log from a2F(w): ", omega_log, &
      " (Ha), ", omega_log * Ha_K, " (K)"
+   call wrtout(units, msg)
+
+   ! Allen-Dynes square-root second moment:
+   ! omega_2^2 = (2 / lambda) integral dw w a2F(w).
+   a2f_1mom = phmesh * a2fw
+   call simpson_int(phmesh_size, dtset%ph_wstep, a2f_1mom, a2f_1mom_int)
+   omega_2 = sqrt(two * a2f_1mom_int(phmesh_size) / lambda_iso)
+   write(msg, "(a,es16.8,a,es16.8,a)")" Isotropic omega_2 from a2F(w): ", omega_2, &
+     " (Ha), ", omega_2 * Ha_K, " (K)"
    call wrtout(units, msg)
    ABI_FREE(a2f_1mom)
    ABI_FREE(a2f_1mom_int)
@@ -243,7 +251,8 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands%ncwrite(ncid))
    NCF_CHECK(edos%ncwrite(ncid))
-   call isome_ncwrite_spectral(ncid, dtset, gstore, phmesh_size, phmesh, a2fw_raw, a2fw, edos%gef(0))
+   call isome_ncwrite_spectral(ncid, dtset, gstore, phmesh_size, phmesh, a2fw_raw, a2fw, edos%gef(0), omega_2)
+   call isome_ncwrite_qibz(ncid, gstore, phfreq_qibz, phlambda_qibz)
    if (allocated(qpath)) then
      call isome_ncwrite_qpath(ncid, qpath, phfreq_qpath, phdispl_cart_qpath, phlambda_qpath)
    end if
@@ -254,6 +263,8 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  ABI_SFREE(phfreq_qpath)
  ABI_SFREE(phdispl_cart_qpath)
  ABI_SFREE(phlambda_qpath)
+ ABI_FREE(phfreq_qibz)
+ ABI_FREE(phlambda_qibz)
  ABI_FREE(a2fw)
  ABI_FREE(phmesh)
  call edos%free()
@@ -323,15 +334,16 @@ end subroutine migdal_eliashberg_iso
 !!  a2f_raw(nomega)=Raw matrix-element spectral sum.
 !!  a2f(nomega)=DOS-normalized Eliashberg function.
 !!  edos_fermie=Total electronic DOS at the Fermi level.
+!!  omega_2=Allen-Dynes square-root second moment in Hartree.
 !!
 !! SOURCE
 
-subroutine isome_ncwrite_spectral(ncid, dtset, gstore, nomega, omega, a2f_raw, a2f, edos_fermie)
+subroutine isome_ncwrite_spectral(ncid, dtset, gstore, nomega, omega, a2f_raw, a2f, edos_fermie, omega_2)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid, nomega
- real(dp),intent(in) :: edos_fermie
+ real(dp),intent(in) :: edos_fermie, omega_2
  type(dataset_type),intent(in) :: dtset
  type(gstore_t),intent(in) :: gstore
 !arrays
@@ -349,7 +361,7 @@ subroutine isome_ncwrite_spectral(ncid, dtset, gstore, nomega, omega, a2f_raw, a
    "isome_schema_version", "eph_intmeth", "ph_intmeth"])
  NCF_CHECK(ncerr)
  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-   "eph_fsmear", "ph_smear", "ph_wstep", "a2f_edos_fermie", "a2f_dos_normalization"])
+   "eph_fsmear", "ph_smear", "ph_wstep", "a2f_edos_fermie", "a2f_dos_normalization", "omega_2"])
  NCF_CHECK(ncerr)
 
  ncerr = nctk_def_arrays(ncid, [ &
@@ -367,8 +379,12 @@ subroutine isome_ncwrite_spectral(ncid, dtset, gstore, nomega, omega, a2f_raw, a
  NCF_CHECK(nctk_set_atomic_units(ncid, "ph_wstep"))
  NCF_CHECK(nctk_set_atomic_units(ncid, "a2f_edos_fermie"))
  NCF_CHECK(nctk_set_atomic_units(ncid, "a2f_dos_normalization"))
+ NCF_CHECK(nctk_set_atomic_units(ncid, "omega_2"))
 
  ncerr = nf90_put_att(ncid, nf90_global, "isome_section", "spectral")
+ NCF_CHECK(ncerr)
+ ncerr = nf90_put_att(ncid, nctk_idname(ncid, "omega_2"), "long_name", &
+   "Allen-Dynes square-root second moment of the isotropic Eliashberg function")
  NCF_CHECK(ncerr)
  ncerr = nf90_put_att(ncid, nf90_global, "isome_status", "experimental")
  NCF_CHECK(ncerr)
@@ -385,12 +401,12 @@ subroutine isome_ncwrite_spectral(ncid, dtset, gstore, nomega, omega, a2f_raw, a
  NCF_CHECK(nctk_set_datamode(ncid))
  ncerr = nctk_write_iscalars(ncid, &
    [character(len=nctk_slen) :: "isome_schema_version", "eph_intmeth", "ph_intmeth"], &
-   [2, dtset%eph_intmeth, dtset%ph_intmeth])
+   [3, dtset%eph_intmeth, dtset%ph_intmeth])
  NCF_CHECK(ncerr)
  ncerr = nctk_write_dpscalars(ncid, &
    [character(len=nctk_slen) :: &
-     "eph_fsmear", "ph_smear", "ph_wstep", "a2f_edos_fermie", "a2f_dos_normalization"], &
-   [dtset%eph_fsmear, dtset%ph_smear, dtset%ph_wstep, edos_fermie, edos_fermie / two])
+     "eph_fsmear", "ph_smear", "ph_wstep", "a2f_edos_fermie", "a2f_dos_normalization", "omega_2"], &
+   [dtset%eph_fsmear, dtset%ph_smear, dtset%ph_wstep, edos_fermie, edos_fermie / two, omega_2])
  NCF_CHECK(ncerr)
 
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gstore_ngqpt"), gstore%ngqpt))
@@ -401,6 +417,61 @@ subroutine isome_ncwrite_spectral(ncid, dtset, gstore, nomega, omega, a2f_raw, a
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "a2f_values"), a2f))
 
 end subroutine isome_ncwrite_spectral
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_migdal_eliashberg/isome_ncwrite_qibz
+!! NAME
+!! isome_ncwrite_qibz
+!!
+!! FUNCTION
+!!  Write phonon frequencies and the raw mode-resolved lambda(q,nu) on
+!!  the phonon IBZ. No averaging is applied inside degenerate subspaces;
+!!  their gauge-invariant contribution enters a2F through the mode sum.
+!!
+!! SOURCE
+
+subroutine isome_ncwrite_qibz(ncid, gstore, phfreq, phlambda)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ncid
+ type(gstore_t),intent(in) :: gstore
+ real(dp),intent(in) :: phfreq(:,:), phlambda(:,:,:)
+
+!Local variables-------------------------------
+ integer :: ncerr, natom3
+!----------------------------------------------------------------------
+
+ natom3 = size(phfreq, dim=1)
+ ABI_CHECK_IEQ(size(phfreq, dim=2), gstore%nqibz, "Invalid phfreq q-IBZ dimension")
+ ABI_CHECK_IEQ(size(phlambda, dim=1), natom3, "Invalid phlambda mode dimension")
+ ABI_CHECK_IEQ(size(phlambda, dim=2), gstore%nqibz, "Invalid phlambda q-IBZ dimension")
+ ABI_CHECK_IEQ(size(phlambda, dim=3), gstore%nsppol, "Invalid phlambda spin dimension")
+
+ ncerr = nctk_def_dims(ncid, [nctkdim_t("isome_nqibz", gstore%nqibz), &
+   nctkdim_t("isome_natom3", natom3)], defmode=.True.)
+ NCF_CHECK(ncerr)
+ ncerr = nctk_def_arrays(ncid, [ &
+   nctkarr_t("qibz", "dp", "number_of_reduced_dimensions, isome_nqibz"), &
+   nctkarr_t("wtq", "dp", "isome_nqibz"), &
+   nctkarr_t("phfreq_qibz", "dp", "isome_natom3, isome_nqibz"), &
+   nctkarr_t("phlambda_qibz", "dp", "isome_natom3, isome_nqibz, number_of_spins")])
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nctk_set_atomic_units(ncid, "phfreq_qibz"))
+ NCF_CHECK(nf90_put_att(ncid, nctk_idname(ncid, "qibz"), "long_name", "phonon q-points in the irreducible Brillouin zone"))
+ NCF_CHECK(nf90_put_att(ncid, nctk_idname(ncid, "wtq"), "long_name", "phonon IBZ integration weights"))
+ NCF_CHECK(nf90_put_att(ncid, nctk_idname(ncid, "phlambda_qibz"), "long_name", "raw mode-resolved electron-phonon coupling lambda(q,nu)"))
+ NCF_CHECK(nf90_put_att(ncid, nctk_idname(ncid, "phlambda_qibz"), "degenerate_mode_averaging", "none"))
+
+ NCF_CHECK(nctk_set_datamode(ncid))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qibz"), gstore%qibz))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "wtq"), gstore%wtq))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phfreq_qibz"), phfreq))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phlambda_qibz"), phlambda))
+
+end subroutine isome_ncwrite_qibz
 !!***
 
 !----------------------------------------------------------------------
@@ -529,7 +600,7 @@ subroutine get_lambda_qpath_wan(gstore, dtset, edos_fermie, qpoints, phfreq, phd
 
  ABI_CHECK(dtset%eph_fsmear > zero, "lambda(q,nu) along a path requires a positive eph_fsmear for Gaussian Fermi-surface integration")
  ABI_CHECK(edos_fermie > zero, "The electronic DOS at the Fermi level must be positive")
- ABI_CHECK(gstore%kzone == "bz" .and. gstore%qzone == "bz", "get_lambda_qpath_wan requires gstore_kzone = 'bz' and gstore_qzone = 'bz'")
+ ABI_CHECK(gstore%kzone == "bz", "get_lambda_qpath_wan requires gstore_kzone = 'bz'")
  call cwtime(cpu, wall, gflops, "start")
 
  natom = gstore%cryst%natom; natom3 = 3 * natom
@@ -577,9 +648,9 @@ subroutine get_lambda_qpath_wan(gstore, dtset, edos_fermie, qpoints, phfreq, phd
      do my_ik=1,gqk%my_nk
        kpt = gqk%my_kpts(:,my_ik)
        weight_k = gqk%my_wtk(my_ik)
-       call gqk%wan%interp_ham(kpt, u_k, eig_k)
-       call gqk%wan%interp_ham(kpt + qpoints(:,iq), u_kq, eig_kq)
-       call gqk%wan%interp_eph_manyq(1, qpoints(:,iq), kpt, intp_gatm)
+       call gqk%wan%interp_ham(gstore%cryst, kpt, u_k, eig_k)
+       call gqk%wan%interp_ham(gstore%cryst, kpt + qpoints(:,iq), u_kq, eig_kq)
+       call gqk%wan%interp_eph_manyq(gstore%cryst, 1, qpoints(:,iq), kpt, intp_gatm)
 
        gatm_full = czero
        do ipc=1,gqk%my_npert
@@ -713,35 +784,43 @@ end subroutine average_lambda_degenerate_modes
 !! get_a2fw
 !!
 !! FUNCTION
-!!  Compute Eliashberg function a^2F(omega).
+!!  Compute the raw, mode-resolved lambda(q,nu) on the phonon IBZ and
+!!  construct a^2F(omega) from its weighted sum. Phonon modes are not
+!!  averaged when they are degenerate.
 !!
 !! INPUTS
+!!  gstore: Electron-phonon matrix elements. Electronic k-points must cover
+!!    the full BZ; phonon q-points may cover either the BZ or the IBZ.
+!!  edos_fermie: Electronic DOS at the Fermi level.
 !!  nw: Number of frequencies.
 !!  wmesh: Frequency mesh.
 !!
 !! OUTPUT
-!! a2fw(nw): Eliashberg function.
+!!  a2fw(nw): Eliashberg function in the historical raw normalization.
+!!  phfreq_qibz: Phonon frequencies on the q-point IBZ.
+!!  phlambda_qibz: Raw mode- and spin-resolved lambda(q,nu).
 !!
 !! SOURCE
 
-subroutine get_a2fw(gstore, dtset, nw, wmesh, a2fw)
+subroutine get_a2fw(gstore, edos_fermie, nw, wmesh, a2fw, phfreq_qibz, phlambda_qibz)
 
 !Arguments ------------------------------------
  class(gstore_t),intent(inout) :: gstore
- type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: nw
+ real(dp),intent(in) :: edos_fermie
  real(dp),intent(in) :: wmesh(nw)
  real(dp),intent(out) :: a2fw(nw)
+ real(dp),allocatable,intent(out) :: phfreq_qibz(:,:), phlambda_qibz(:,:,:)
 
 !Local variables-------------------------------
- integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, timrev_q, ii, ik_ibz, nb_k, nb_kq
- real(dp) :: g2_qnu, wqnu, weight_k, weight_q, cpu, wall, gflops
- type(lgroup_t) :: lg_myq
- character(len=500) :: msg !, kk_string !, qq_bz_string
+ integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, iq_ibz, isym_q, trev_q, nb_k, nb_kq, spin
+ integer :: natom3, g0_q(3)
+ real(dp) :: g2_qnu, wqnu, weight_k, weight_q, cpu, wall, gflops, spin_factor
+ logical :: isirr_q
 !arrays
  integer :: units(2)
- real(dp) :: qpt(3), kk(3)
- real(dp),allocatable :: dbl_delta_q(:,:,:), g2_mnkp(:,:,:,:), deltaw_nuq(:)
+ real(dp) :: qpt(3)
+ real(dp),allocatable :: dbl_delta_q(:,:,:), g2_mnkp(:,:,:,:), deltaw_nuq(:), displ_cart_dum(:,:,:,:)
 !----------------------------------------------------------------------
 
  units = [std_out, ab_out]
@@ -749,16 +828,19 @@ subroutine get_a2fw(gstore, dtset, nw, wmesh, a2fw)
  call cwtime(cpu, wall, gflops, "start")
  call wrtout(units, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(gstore%dtset%ph_smear * Ha_meV), "(meV)"), pre_newlines=1)
 
- !if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "phonon") /= 0) then
- !  ABI_ERROR("The gstore object is inconsistent with gstore_wannierize_and_write_gwan. See messages above.")
- !end if
-
- ABI_CHECK(gstore%qzone == "bz", "get_a2fw assumes qzone == `bz`")
- ABI_CHECK(gstore%kzone == "bz", "get_a2fw assumes kzone == `bz`")
- ! Check consistency of little group options.
- ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
+ ABI_CHECK(gstore%kzone == "bz", "get_a2fw requires kzone == `bz`")
+ ABI_CHECK(any(gstore%qzone == ["bz ", "ibz"]), "get_a2fw requires qzone == `bz` or `ibz`")
+ ABI_CHECK(edos_fermie > zero, "The electronic DOS at the Fermi level must be positive")
 
  ABI_MALLOC(deltaw_nuq, (nw))
+ natom3 = 3 * gstore%cryst%natom
+ ABI_MALLOC(phfreq_qibz, (natom3, gstore%nqibz))
+ ABI_CALLOC(phlambda_qibz, (natom3, gstore%nqibz, gstore%nsppol))
+ ABI_MALLOC(displ_cart_dum, (2, 3, gstore%cryst%natom, natom3))
+ do iq_ibz=1,gstore%nqibz
+   call gstore%ifc%fourq(gstore%cryst, gstore%qibz(:,iq_ibz), phfreq_qibz(:,iq_ibz), displ_cart_dum)
+ end do
+ ABI_FREE(displ_cart_dum)
  a2fw = zero
 
  ! Loop over collinear spins.
@@ -776,6 +858,13 @@ subroutine get_a2fw(gstore, dtset, nw, wmesh, a2fw)
 
    ! Loop over my q-points.
    do my_iq=1,gqk%my_nq
+     iq_ibz = gqk%my_q2ibz(1,my_iq)
+     isym_q = gqk%my_q2ibz(2,my_iq)
+     trev_q = gqk%my_q2ibz(6,my_iq)
+     g0_q = gqk%my_q2ibz(3:5,my_iq)
+     isirr_q = isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0)
+     if (gstore%qzone == "bz" .and. .not. isirr_q) cycle
+
      ! Compute all integration weights for the double delta.
      call gqk%dbldelta_qpt(my_iq, gstore, gstore%dtset%eph_intmeth, gstore%dtset%eph_fsmear, qpt, weight_q, dbl_delta_q)
 
@@ -784,38 +873,25 @@ subroutine get_a2fw(gstore, dtset, nw, wmesh, a2fw)
        g2_mnkp(:,:,:,my_ip) = gqk%my_g2(my_ip,:,my_iq,:,:)
      end do
 
-     ! Compute the little group of the q-point so that we only need to sum g(k,q) for k in the IBZ_q
-     if (dtset%gstore_use_lgq /= 0) then
-       timrev_q = kpts_timrev_from_kptopt(gstore%qptopt)
-       call lg_myq%init(cryst, qpt, timrev_q, gstore%nkbz, gstore%kbz, gstore%nkibz, gstore%kibz, xmpi_comm_self)
-     end if
-
      ! Loop over my phonon modes.
      do my_ip=1,gqk%my_npert
        wqnu = gqk%my_wnuq(my_ip, my_iq)
-       ! delta(w - omega_qnu)
-       deltaw_nuq = gaussian(wmesh - wqnu, gstore%dtset%ph_smear)
-
+       if (wqnu < EPHTK_WTOL) cycle
        ! Loop over my k-points.
        do my_ik=1,gqk%my_nk
-         kk = gqk%my_kpts(:, my_ik); ik_ibz = gqk%my_k2ibz(1, my_ik); weight_k = gqk%my_wtk(my_ik)
-
-         ! Handle little group and integration weight.
-         if (dtset%gstore_use_lgq /= 0) then
-           ii = lg_myq%findq_ibzk(kk); if (ii == -1) cycle; weight_k = lg_myq%weights(ii)
-         end if
+         weight_k = gqk%my_wtk(my_ik)
 
          ! Sum over m_kq and n_k and accumulate.
          do in_k=1,nb_k
            do im_kq=1,nb_kq
              g2_qnu = g2_mnkp(im_kq, in_k, my_ik, my_ip)
-             a2fw(:) = a2fw(:) + deltaw_nuq(:) * g2_qnu * weight_k * weight_q * dbl_delta_q(im_kq, in_k, my_ik)
+             phlambda_qibz(gqk%my_pertcases(my_ip),iq_ibz,gqk%spin) = &
+               phlambda_qibz(gqk%my_pertcases(my_ip),iq_ibz,gqk%spin) + two * g2_qnu * weight_k * &
+               dbl_delta_q(im_kq, in_k, my_ik) / wqnu
            end do
          end do
        end do
      end do
-
-     call lg_myq%free()
    end do ! my_iq
 
    ABI_FREE(dbl_delta_q)
@@ -825,9 +901,22 @@ subroutine get_a2fw(gstore, dtset, nw, wmesh, a2fw)
 
  ABI_FREE(deltaw_nuq)
 
- ! Take into account collinear spin and N(eF) TODO
- a2fw = a2fw * (two / (gstore%nsppol * gstore%dtset%nspinor))
- call xmpi_sum(a2fw, gstore%comm, ierr)
+ ! Normalize lambda(q,nu), then construct the normalized Eliashberg function
+ ! with the phonon-IBZ weights. The factor edos_fermie / 2 at the end restores
+ ! the historical raw a2F convention expected by the caller.
+ spin_factor = two / (gstore%nsppol * gstore%dtset%nspinor)
+ phlambda_qibz = phlambda_qibz * spin_factor / (edos_fermie / two)
+ call xmpi_sum(phlambda_qibz, gstore%comm, ierr)
+ a2fw = zero
+ do iq_ibz=1,gstore%nqibz
+   do my_ip=1,natom3
+     wqnu = phfreq_qibz(my_ip,iq_ibz)
+     if (wqnu < EPHTK_WTOL) cycle
+     deltaw_nuq = gaussian(wmesh - wqnu, gstore%dtset%ph_smear)
+     a2fw = a2fw + half * gstore%wtq(iq_ibz) * wqnu * sum(phlambda_qibz(my_ip,iq_ibz,:)) * deltaw_nuq
+   end do
+ end do
+ a2fw = a2fw * (edos_fermie / two)
 
  call cwtime_report(" get_a2fw", cpu, wall, gflops)
 

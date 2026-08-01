@@ -201,6 +201,7 @@ module m_mlwfovlp
 
    procedure :: interp_ham => wan_interp_ham
    ! Interpolate Hamiltonian at an arbitray k-point.
+   ! energies, and optionally diagonal velocities.
 
    procedure :: setup_eph_ws_kq => wan_setup_eph_ws_kq
    ! Prepare interpolation of e-ph matrix elements.
@@ -3488,22 +3489,38 @@ end subroutine wan_print
 !! wan_interp_ham
 !!
 !! FUNCTION
-!! Interpolate the Hamiltonian at an arbitray k-point
-!! and return the rotation matrix.
+!! Interpolate the Hamiltonian at an arbitrary k-point and return the rotation
+!! matrix. If vcart is present, also return diagonal Cartesian group velocities
+!! obtained from the analytic derivative of the real-space Hamiltonian.
+!! Velocities are in atomic units.
+!!
+!! INPUTS
+!!  cryst: Crystal structure providing the dimensional primitive vectors.
+!!  kpt: Reduced coordinates of the interpolation point.
+!!
+!! OUTPUTS
+!!  uk_wan: Eigenvectors of the interpolated Hamiltonian, stored by columns.
+!!  eigens: Interpolated eigenvalues in Hartree.
+!!  vcart: Optional diagonal Cartesian group velocities in atomic units.
+!!    Individual values inside an exactly degenerate subspace depend on the
+!!    eigenvectors selected by the diagonalization.
 !!
 !! SOURCE
 
-subroutine wan_interp_ham(wan, kpt, uk_wan, eigens)
+subroutine wan_interp_ham(wan, cryst, kpt, uk_wan, eigens, vcart)
 
 !Arguments ------------------------------------
  class(wan_t),intent(in) :: wan
+ class(crystal_t),intent(in) :: cryst
  real(dp),intent(in) :: kpt(3)
  real(dp),intent(out) :: eigens(wan%nwan)
  complex(dp),intent(out) :: uk_wan(wan%nwan, wan%nwan)
+ real(dp),optional,intent(out) :: vcart(3, wan%nwan)
 
 !Local variables-------------------------------
- integer :: ir
- complex(dp) :: eikr(wan%nr_h)
+ integer :: ir, idir, ib
+ real(dp) :: rcart(3,wan%nr_h)
+ complex(dp) :: eikr(wan%nr_h),deikr(wan%nr_h), dham(wan%nwan, wan%nwan), vmat(wan%nwan, wan%nwan)
 !************************************************************************
 
  do ir=1,wan%nr_h
@@ -3513,9 +3530,26 @@ subroutine wan_interp_ham(wan, kpt, uk_wan, eigens)
  ! H_ij(k) = sum_R e^{+ik.R} * H_ij(R)
  call ZGEMV("T", wan%nr_h, wan%nwan**2, cone, wan%hwan_r, wan%nr_h, eikr, 1, czero, uk_wan, 1)
 
- ! Hermitianize and diagonalize.
+ ! Hermitianize and diagonalize. xheev returns eigenvectors as columns.
  uk_wan = half * (uk_wan + transpose(conjg(uk_wan)))
  call xheev("V", "U", wan%nwan, uk_wan, eigens)
+
+ if (present(vcart)) then
+   do ir=1,wan%nr_h
+     rcart(:,ir) = matmul(cryst%rprimd, real(wan%r_h(:,ir), kind=dp))
+   end do
+   do idir=1,3
+     do ir=1,wan%nr_h
+       deikr(ir) = j_dpc * rcart(idir,ir) * eikr(ir)
+     end do
+     call ZGEMV("T", wan%nr_h, wan%nwan**2, cone, wan%hwan_r, wan%nr_h, deikr, 1, czero, dham, 1)
+     dham = half * (dham + transpose(conjg(dham)))
+     vmat = matmul(transpose(conjg(uk_wan)), matmul(dham, uk_wan))
+     do ib=1,wan%nwan
+       vcart(idir,ib) = real(vmat(ib,ib), kind=dp)
+     end do
+   end do
+ end if
 
 end subroutine wan_interp_ham
 !!***
@@ -3633,10 +3667,11 @@ end subroutine wan_setup_eph_ws_kq
 !!
 !! SOURCE
 
-subroutine wan_interp_eph_manyq(wan, nq, qpts, kpt, g_atm, out_eigens_k, out_eigens_kq)
+subroutine wan_interp_eph_manyq(wan, cryst, nq, qpts, kpt, g_atm, out_eigens_k, out_eigens_kq)
 
 !Arguments ------------------------------------
  class(wan_t),intent(in) :: wan
+ class(crystal_t),intent(in) :: cryst
  integer,intent(in) :: nq
  real(dp),intent(in) :: qpts(3,nq), kpt(3)
  complex(dp),intent(out) :: g_atm(wan%nwan, wan%nwan, wan%my_npert, nq)
@@ -3658,14 +3693,10 @@ subroutine wan_interp_eph_manyq(wan, nq, qpts, kpt, g_atm, out_eigens_k, out_eig
  ABI_MALLOC(u_kq, (nwan, nwan))
  ABI_MALLOC(cmat_w, (nwan, nwan))
 
- !ABI_CHECK(allocated(wan%r_e), "wan%r_e is not allocated!")
- !ABI_CHECK(allocated(wan%ndegen_e), "wan%ndegen_e is not allocated!")
- !ABI_CHECK(allocated(wan%grpe_wwp), "wan%grpe_wwp is not allocated!")
-
  do ir=1,nr_e
    eikr(ir) = exp(+j_dpc * two_pi * dot_product(kpt, wan%r_e(:, ir))) / wan%ndegen_e(ir)
  end do
- call wan%interp_ham(kpt, u_k, eigens_k)
+ call wan%interp_ham(cryst, kpt, u_k, eigens_k)
  if (present(out_eigens_k)) out_eigens_k = eigens_k
 
  ! grpe_wwp has shape: (nr_p, nr_e, nwan, nwan, my_npert))
@@ -3675,10 +3706,9 @@ subroutine wan_interp_eph_manyq(wan, nq, qpts, kpt, g_atm, out_eigens_k, out_eig
  ncols_w = nwan ** 2 * my_npert
  ABI_MALLOC(cbuf_w, (nwan, nwan, my_npert))
 
- ! TODO: Recheck this part.
  do iq=1,nq
    kq = kpt + qpts(:,iq)
-   call wan%interp_ham(kq, u_kq, eigens_kq)
+   call wan%interp_ham(cryst, kq, u_kq, eigens_kq)
    if (present(out_eigens_kq)) out_eigens_kq(:,iq) = eigens_kq
    do ir=1,nr_p
      eiqr(ir) = exp(+j_dpc * two_pi * dot_product(qpts(:,iq), wan%r_p(:, ir))) / wan%ndegen_p(ir)
@@ -4026,7 +4056,7 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
    ABI_MALLOC(eigens_k, (nwan))
    do ik=1,out_ebands%nkpt
      cnt = cnt + 1; if (mod(cnt - 1, nproc) /= my_rank) cycle ! MPI parallelism inside comm.
-     call wan%interp_ham(out_ebands%kptns(:,ik), u_k, eigens_k)
+     call wan%interp_ham(cryst, out_ebands%kptns(:,ik), u_k, eigens_k)
      out_ebands%eig(1:nwan, ik, spin) = eigens_k
    end do ! ik
    ABI_FREE(u_k)

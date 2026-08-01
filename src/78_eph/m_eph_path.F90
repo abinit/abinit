@@ -653,7 +653,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
          ABI_MALLOC(g_atm_wan_local, (nwan_glob, nwan_glob, my_npert, 1))
          ! The routine already diagonalizes H^W(k) and H^W(k+q) to rotate g to the
          ! interpolated eigenstate basis, hence it also returns these eigenvalues.
-         call wan%interp_eph_manyq(1, qq, kk, g_atm_wan_local, &
+         call wan%interp_eph_manyq(cryst, 1, qq, kk, g_atm_wan_local, &
                                    out_eigens_k=eig_k_wan, out_eigens_kq=eig_kq_wan)
          if (iq == 1) then
            NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_wan_k"), eig_k_wan, start=[1,ik,spin]))
