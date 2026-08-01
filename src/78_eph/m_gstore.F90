@@ -484,10 +484,9 @@ type, public :: gstore_t
   type(ebands_t), pointer :: ebands => null()
   ! Electron bands
 
-  logical :: ebands_owns_memory = .False.
-  ! True if ebands pointer owns memory and should therefore be deallocated in gstore_free
-  ! TODO: To my future Matteo, here we have to be very careful if we try to update the energies with GW
-  ! or dope the system or change manually the Fermi level.
+  logical :: has_wannier = .False.
+  ! True when electronic bands and e-ph matrix elements are obtained with
+  ! Wannier interpolation from ABIWAN.nc and GWAN.nc.
 
   type(ifc_type), pointer :: ifc => null()
   ! interatomic force constants.
@@ -738,7 +737,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
  ! Get references to other data structures.
  gstore%dtset => dtset; gstore%cryst => cryst; gstore%ebands => ebands; gstore%ifc => ifc
- gstore%ebands_owns_memory = .False.
+ gstore%has_wannier = .False.
 
  ! Handle possible wannierization.
  has_abiwan = .False.; has_gwan = .False.; keep_umats = .False.
@@ -760,7 +759,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      allocate(gstore%ebands)
      call wan_interp_ebands(wan_spin, cryst, ebands, intp_kptrlatt, dtset%eph_nshiftk_fine, &
                             dtset%eph_shiftk_fine, gstore%ebands, comm)
-     gstore%ebands_owns_memory = .True.
+     gstore%has_wannier = .True.
    end if
  end if
 
@@ -1418,6 +1417,7 @@ subroutine gstore_init_or_from_ncpath(gstore, with_cplex, dtset, dtfil, wfk0_hdr
    ABI_MALLOC(displ_cart_qbz, (2, 3, natom, natom3))
    ABI_MALLOC(displ_red_qbz, (2, 3, natom, natom3))
 
+   ! Interpolate g(k,q) and store data in memory.
    do my_is=1,gstore%my_nspins
      spin = gstore%my_spins(my_is)
      gqk => gstore%gqk(my_is)
@@ -3173,7 +3173,7 @@ subroutine gstore_free(gstore)
  ABI_SFREE(gstore%qbz)
  ABI_SFREE(gstore%kbz)
 
- if (gstore%ebands_owns_memory) then
+ if (gstore%has_wannier) then
    call gstore%ebands%free()
    deallocate(gstore%ebands)
    nullify(gstore%ebands)

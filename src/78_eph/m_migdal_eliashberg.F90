@@ -163,7 +163,8 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
 
  ! Consistency check
  ierr = 0
- ABI_CHECK_NOSTOP(gstore%qzone == "bz", "qzone == 'bz' is required", ierr)
+ ABI_CHECK_NOSTOP(gstore%kzone == "bz", "gstore_kzone == 'bz' is required", ierr)
+ ABI_CHECK_NOSTOP(gstore%qzone == "bz", "gstore_qzone == 'bz' is required", ierr)
  ABI_CHECK(ierr == 0, "Wrong gstore object for migdal_eliashberg_iso. See messages above")
 
  ! Compute electron DOS.
@@ -176,7 +177,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  ! four-band model with nelect = 8 appears completely filled). The electronic
  ! delta functions used below are centered at ebands%fermie, copied from the
  ! ab-initio bands, hence evaluate N(eF) at the same chemical potential.
- if (edos%ief == 0 .and. gstore%ebands_owns_memory) then
+ if (edos%ief == 0 .and. gstore%has_wannier) then
    iw = int((ebands%fermie - edos%mesh(1)) / edos%step) + 1
    ABI_CHECK(iw >= 1 .and. iw < edos%nw, "The ab-initio Fermi level lies outside the energy range of the Wannier-interpolated bands")
    alpha = (ebands%fermie - edos%mesh(iw)) / edos%step
@@ -528,6 +529,7 @@ subroutine get_lambda_qpath_wan(gstore, dtset, edos_fermie, qpoints, phfreq, phd
 
  ABI_CHECK(dtset%eph_fsmear > zero, "lambda(q,nu) along a path requires a positive eph_fsmear for Gaussian Fermi-surface integration")
  ABI_CHECK(edos_fermie > zero, "The electronic DOS at the Fermi level must be positive")
+ ABI_CHECK(gstore%kzone == "bz" .and. gstore%qzone == "bz", "get_lambda_qpath_wan requires gstore_kzone = 'bz' and gstore_qzone = 'bz'")
  call cwtime(cpu, wall, gflops, "start")
 
  natom = gstore%cryst%natom; natom3 = 3 * natom
@@ -752,6 +754,7 @@ subroutine get_a2fw(gstore, dtset, nw, wmesh, a2fw)
  !end if
 
  ABI_CHECK(gstore%qzone == "bz", "get_a2fw assumes qzone == `bz`")
+ ABI_CHECK(gstore%kzone == "bz", "get_a2fw assumes kzone == `bz`")
  ! Check consistency of little group options.
  ABI_CHECK(gstore%check_little_group(dtset, msg) == 0, msg)
 
