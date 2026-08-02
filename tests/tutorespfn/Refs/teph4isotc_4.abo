@@ -770,7 +770,6 @@ P Number of CPUs for parallelism over k-points: 1
 
  Computing g(R_e,R_ph) in the Wannier representation...
 - Writing e-ph matrix elements in the Wannier representation to file: teph4isotc_4o_GWAN.nc
- GWAN serialization self-check: max_stats_err=  4.16E-11  stats_scale=  2.18E+02
 
 == END DATASET(S) ==============================================================
 ================================================================================

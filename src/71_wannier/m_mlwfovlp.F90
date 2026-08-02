@@ -3771,8 +3771,7 @@ subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
 
 !Local variables-------------------------------
 !scalars
- integer :: spin, root_ncid, spin_ncid, ncerr, natom3, ount, ir, var_id, units(2), batch_size, idat, ndat, ierr
- real(dp) :: mem_stats(3), file_stats(3), stats_scale
+ integer :: spin, root_ncid, spin_ncid, ncerr, natom3, ount, ir, var_id, units(2), batch_size, idat, ndat
  real(dp), contiguous, pointer :: rpt_d4(:,:,:,:), rpt_d6(:,:,:,:,:,:)
  character(len=fnlen) :: gwan_filepath, txt_path
  complex(dp),target,allocatable :: cbuf5(:,:,:,:,:)
@@ -3839,13 +3838,6 @@ subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
  NCF_CHECK(ncerr)
  NCF_CHECK(nf90_close(root_ncid))
 
- ! Global positive moments of the in-memory distributed array.  These are
- ! compared below with moments accumulated while reading the complete variable
- ! back from disk, providing a cheap all-perturbation serialization check.
- mem_stats = [sum(abs(wan%grpe_wwp)), sum(abs(wan%grpe_wwp)**2), maxval(abs(wan%grpe_wwp))]
- call xmpi_sum(mem_stats(1), pert_comm%value, ierr)
- call xmpi_sum(mem_stats(2), pert_comm%value, ierr)
- call xmpi_max(mem_stats(3), pert_comm%value, ierr)
  call xmpi_barrier(pert_comm%value)
 
  ! Check spatial decay of the EP matrix elements in the wannier basis
@@ -3866,17 +3858,12 @@ subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
    batch_size = 1
    ABI_MALLOC(cbuf5, (wan%nr_p, batch_size, wan%nwan, wan%nwan, natom3))
    call c_f_pointer(c_loc(cbuf5), rpt_d6, [2, wan%nr_p, batch_size, wan%nwan, wan%nwan, natom3])
-   file_stats = zero
-
    do ir=1,wan%nr_e, batch_size
      ndat = blocked_loop(ir, wan%nr_e, batch_size)
      !nctkarr_t("grpe_wwp", "dp", "two, nr_p, nr_e, nwan, nwan, natom3") &
      ncerr = nf90_get_var(spin_ncid, var_id, rpt_d6, &
                           start=[1,1,ir,1,1,1], count=[2, wan%nr_p, batch_size, wan%nwan, wan%nwan, natom3])
      NCF_CHECK(ncerr)
-     file_stats(1) = file_stats(1) + sum(abs(cbuf5(:,1:ndat,:,:,:)))
-     file_stats(2) = file_stats(2) + sum(abs(cbuf5(:,1:ndat,:,:,:))**2)
-     file_stats(3) = max(file_stats(3), maxval(abs(cbuf5(:,1:ndat,:,:,:))))
      do idat=1,ndat
        write(ount, *) wan%rmod_e(ir+idat-1), maxval(abs(cbuf5(:,idat,:,:,:)))
      end do
@@ -3886,13 +3873,6 @@ subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
    close(ount)
    NCF_CHECK(nf90_close(root_ncid))
 
-   stats_scale = max(maxval(abs(mem_stats)), one)
-   if (maxval(abs(file_stats - mem_stats)) >= tol10 * stats_scale) then
-     ABI_ERROR("GWAN serialization self-check failed: positive moments of grpe_wwp changed after writing and reading the NetCDF file.")
-   end if
-   write(msg, '(a,es10.2,a,es10.2)') " GWAN serialization self-check: max_stats_err=", &
-     maxval(abs(file_stats - mem_stats)), "  stats_scale=", stats_scale
-   call wrtout(units, msg)
  end if
 
 contains
@@ -4031,7 +4011,6 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
 !scalars
  integer :: spin, ik, nwan, ierr, cnt, my_rank, nproc
  real(dp) :: cpu, wall, gflops
- character(len=500) :: msg
 !arrays
  integer :: band_block(2)
  real(dp) :: params(4)

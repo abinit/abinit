@@ -836,7 +836,7 @@ subroutine dmats_init(dmats, wfk_path, dtset, cryst, brange_spin, ngfft, pawtab,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: iflag1 = 1, me_g0 = 1, ndat1 = 1
- integer :: spin, nsppol, nsym, nb, nkibz, mband, ik_ibz, isym, isym_inv, itime, bstart, ib, trev_k
+ integer :: spin, nsppol, nsym, nb, nkibz, mband, ik_ibz, isym, isym_inv, itime, bstart, trev_k
  logical,parameter :: DEBUG_DUMP_SPINROT = .False.
  real(dp) :: spinrot_dbg(4)
  integer :: ib1, ib2, band1, band2, n1, n2, n3, n4, n5, n6, nfft, nspinor, mpw, my_mpw, ii, ipw

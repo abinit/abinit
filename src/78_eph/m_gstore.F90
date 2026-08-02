@@ -5701,7 +5701,7 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
  integer :: itest, ip_loc, ik_glob, iq_glob, ntest_found, iperiod, idir, ib, nvelocity_tested
  real(dp) :: max_err, ref_scale, max_period_eig_err, period_eig_scale, max_period_g2_err, period_g2_scale
  real(dp) :: max_velocity_err, velocity_scale, band_gap, velocity_fd
- !character(len=500) :: msg
+ character(len=500) :: msg
  logical :: keep_umats, test_found(wan_ntest)
  type(wan_t),pointer :: wan
  type(gqk_t),pointer :: gqk
@@ -6015,11 +6015,15 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
      write(std_out,'(a,i0,a,es10.2)') " Wannier group-velocity self-check: nvalues=", &
        nvelocity_tested, "  max_err=", max_velocity_err
    end if
-   ABI_CHECK(max_err < WAN_CLOSURE_TOL * ref_scale, "Wannier on-mesh closure self-check failed: interpolating g(k,q) back at a coarse-mesh point does not reproduce the pre-FT value (up to the shared interp_ham gauge). Suspect the WS/ndegen bookkeeping, the forward/backward FTs, or the dagger convention in wan_interp_eph_manyq vs gstore_wannierize_and_write_gwan.")
-   ABI_CHECK(max_period_eig_err < WAN_CLOSURE_TOL * period_eig_scale, "Wannier reciprocal-periodicity self-check failed for interpolated electronic eigenvalues.")
-   ABI_CHECK(max_period_g2_err < WAN_CLOSURE_TOL * period_g2_scale, "Wannier reciprocal-periodicity self-check failed for gauge-invariant e-ph Frobenius norms.")
+
+   ABI_CHECK(max_err < WAN_CLOSURE_TOL * ref_scale, "Wannier on-mesh closure self-check failed")
+   msg = "Wannier reciprocal-periodicity self-check failed for interpolated electronic eigenvalues."
+   ABI_CHECK(max_period_eig_err < WAN_CLOSURE_TOL * period_eig_scale, msg)
+   msg = "Wannier reciprocal-periodicity self-check failed for gauge-invariant e-ph Frobenius norms."
+   ABI_CHECK(max_period_g2_err < WAN_CLOSURE_TOL * period_g2_scale, msg)
    ABI_CHECK(nvelocity_tested > 0, "Wannier group-velocity self-check did not find a nondegenerate band")
-   ABI_CHECK(max_velocity_err < WAN_VELOCITY_TOL * velocity_scale, "Analytic Wannier group velocities do not agree with finite differences of the interpolated eigenvalues.")
+   msg = "Analytic Wannier group velocities do not agree with finite differences of the interpolated eigenvalues."
+   ABI_CHECK(max_velocity_err < WAN_VELOCITY_TOL * velocity_scale, msg)
 
    ABI_FREE(u_k_test)
    ABI_FREE(u_kq_test)
@@ -6902,20 +6906,18 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
 !scalars
  integer :: with_cplex, my_is, spin, my_ik, my_iq, ik_glob, iq_glob, units(2)
  integer :: ncid, spin_ncid, nprocs, my_rank, ncerr, this_state, ierr
- integer :: nb, nkbz, nkibz, nqbz, nqibz, nsym, itime_k, itime_kq
+ integer :: nb, nkbz, nkibz, nqbz, nqibz, nsym, itime_k
  integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
- integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3)
- integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
- integer :: isym_tot, trev_tot, tsign_tot, ik_base_glob, ik_ibz_file
- integer :: isym_lg, itime_lg, isym_glob, itime_glob, iq_ibz_loc
+ integer :: g0_q(3)
+ integer :: ik_ibz_file
+ integer :: isym_lg, itime_lg
  integer :: isym_combined
- real(dp) :: weight_qq, weight_qq_eq,phase, q_base(3)
- integer :: idir, iat, idir_eq, iat_eq, mu, mu_eq, iq_base_glob, iq_sym
+ real(dp) :: weight_qq, phase
+ integer :: idir, iat, idir_eq, iat_eq, mu, mu_eq, iq_sym
  integer :: symrec_eq(3,3), symrec_eq_kspace(3,3), l0(3), mat_tmp(3,3)
- real(dp) :: L_gk(3), L_gkq(3)
- complex(dp) :: cphase, phase_gk, phase_gkq
- logical :: with_g2dw, q_is_gamma
- logical :: isirr_k, isirr_kq, isirr_q
+ complex(dp) :: cphase
+ logical :: with_g2dw
+ logical :: isirr_k
  character(len=abi_slen) :: with_gmode, gtype, gvals_name
  character(len=abi_slen) :: gv_names(2)
  integer :: n_gv, igv
@@ -6935,9 +6937,9 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  logical :: found_lg
 !!arrays
  integer :: brange_kq_spin(2, dtset%nsppol)
- integer,allocatable :: state_kq(:,:), qbz2ibz(:,:), kibz2bz(:) !, qibz2bz(:), qglob2bz(:,:), ! kmesh_map(:,:), my_kqmap(:,:),
+ integer,allocatable :: state_kq(:,:), kibz2bz(:) !, qibz2bz(:), qglob2bz(:,:), ! kmesh_map(:,:), my_kqmap(:,:),
  integer,allocatable :: lg_isym(:), lg_itime(:)
- real(dp) :: kk_bz(3), kk_ibz(3), qq_ibz(3), qpt(3), qq_eq(3), qpt_tmp(3)
+ real(dp) :: kk_bz(3), kk_ibz(3), qpt(3), qpt_tmp(3)
  real(dp) :: kq_bz_source(3), kq_bz_target(3)
  real(dp),allocatable :: qbz(:,:)
  real(dp),contiguous,pointer :: gkq_rot_ptr(:,:,:,:,:), gkq_base_ptr(:,:,:,:,:)

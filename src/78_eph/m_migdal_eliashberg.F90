@@ -813,7 +813,7 @@ subroutine get_a2fw(gstore, edos_fermie, nw, wmesh, a2fw, phfreq_qibz, phlambda_
  real(dp),allocatable,intent(out) :: phfreq_qibz(:,:), phlambda_qibz(:,:,:)
 
 !Local variables-------------------------------
- integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, iq_ibz, isym_q, trev_q, nb_k, nb_kq, spin
+ integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, iq_ibz, isym_q, trev_q, nb_k, nb_kq
  integer :: natom3, g0_q(3)
  real(dp) :: g2_qnu, wqnu, weight_k, weight_q, cpu, wall, gflops, spin_factor
  logical :: isirr_q
