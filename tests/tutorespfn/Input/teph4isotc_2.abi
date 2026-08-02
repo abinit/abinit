@@ -8,7 +8,7 @@ getden_filepath "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
 structure "abifile:MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
 
 # Dataset 1: complete uniform mesh required by Wannier90.
-kptopt1 1
+#kptopt1 1
 ngkpt1 6 6 4
 nshiftk1 1
 shiftk1 0.0 0.0 0.0

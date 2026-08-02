@@ -392,19 +392,22 @@ class(abstract_wf), pointer :: mywfc
  !Generate seed names for wannier90 files, and file names
  call mlwfovlp_seedname(dtfil%fnameabo_w90,filew90_win,filew90_wout,filew90_amn,&
                         filew90_ramn,filew90_mmn,filew90_eig,nsppol,seed_name)
- !Check the validity of input variables
- !FIXME: this is not a check, and prints a warning even if the input is fine!
- !must be changed to not print anything if kptopt 3 and istwfk 1 (the latter is easier to check)
- if (rank==master) then
-   if(.not. (all(dtset%istwfk(1:nkpt) == 1) .and. all(dtset%wtk(1:nkpt) == dtset%wtk(1))) ) then
-     write(msg, '(a,a,a,a)' ) ch10,&
-     '   mlwfovlp:  you should give k-point in the full brillouin zone ',ch10,&
-     '   with explicit k-points (or kptopt=3) and istwfk 1'
+
+ call hdr%vs_dtset(dtset)
+
+ ! Check that the WFK contains the full Brillouin-zone mesh required by Wannier90.
+ ! Use the arrays stored in the WFK header: dtset%istwfk and dtset%wtk may only
+ ! contain the compact input representation and therefore need not have nkpt entries.
+ if (rank == master) then
+   if (.not. (all(hdr%istwfk(1:nkpt) == 1) .and. all(hdr%wtk(1:nkpt) == hdr%wtk(1)))) then
+     write(msg, '(4a)') ch10, &
+       '   mlwfovlp: you should provide k-points in the full Brillouin zone ', ch10, &
+       '   with explicit k-points (or kptopt=3) and istwfk 1'
      call wrtout(units, msg)
-     !ABI_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
-!
+
  if(MPI_enreg%paral_spinor==1) then
    ABI_ERROR('Parallelization over spinorial components not yet available !')
  end if
@@ -449,12 +452,11 @@ class(abstract_wf), pointer :: mywfc
 !
  nullify(A_matrix)
 
- !
  call mlwfovlp_setup(atom_symbols,band_in,dtset,filew90_win,gamma_only,&
-&  g1,lwanniersetup,mband,natom,nband_inc,nkpt,&
-&  nntot,num_bands,num_nnmax,nsppol,nwan,ovikp,&
-&  proj_l,proj_m,proj_radial,proj_site,proj_s_loc, proj_s_qaxis_loc, proj_x,proj_z,proj_zona,&
-&  real_lattice,recip_lattice,rprimd,seed_name,spinors,xcart,xred,exclude_bands)
+  g1,lwanniersetup,mband,natom,nband_inc,nkpt,&
+  nntot,num_bands,num_nnmax,nsppol,nwan,ovikp,&
+  proj_l,proj_m,proj_radial,proj_site,proj_s_loc, proj_s_qaxis_loc, proj_x,proj_z,proj_zona,&
+  real_lattice,recip_lattice,rprimd,seed_name,spinors,xcart,xred,exclude_bands)
 
  do isppol=1, nsppol
    write(msg, '(6a)' ) ch10,&
@@ -493,8 +495,6 @@ class(abstract_wf), pointer :: mywfc
  !call mywfc%init(cg, cprj, dtset, dtfil, hdr, &
  !     & MPI_enreg, nprocs, psps, pawtab, rank)
 
-
-
  !TODO uncomment
 ! call mywfc%kset%set_ovikp( ovikp=ovikp, nntot=nntot, num_nnmax=num_nnmax)
 !
@@ -515,11 +515,8 @@ class(abstract_wf), pointer :: mywfc
 !
    ABI_MALLOC(cm1,(2,mband,mband,nntot,nkpt,nsppol))
    ! this loops over spin internally
-!   call mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,&
-!&   mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
-!&   npwarr,dtset%nspinor,nsppol,ovikp,dtfil%fnametmp_cg)
-      call mlwfovlp_pw(mywfc,cm1,g1,kg,mband, mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
-                       npwarr,hdr%nspinor,nsppol,ovikp)
+   call mlwfovlp_pw(mywfc,cm1,g1,kg,mband, mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
+                    npwarr,hdr%nspinor,nsppol,ovikp)
 
    !mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
    !     &  npwarr,nspinor,nsppol,ovikp,seed_name)
@@ -573,9 +570,7 @@ class(abstract_wf), pointer :: mywfc
    call write_Mmn(filew90_mmn, band_in, cm1, ovikp, g1, M_matrix,  nkpt, nsppol, nntot, mband, num_bands, msg, iam_master=(rank==master))
    ABI_FREE(cm1)
 
-   !
    !  erase temporary files created for parallel runs
-   !
    !if (nprocs > 1) call mywfc%remove_tmpfile(prtvol)
    !end if !MPI nprocs>1
  end if !lmmn
@@ -588,7 +583,7 @@ class(abstract_wf), pointer :: mywfc
 !5) Calculate initial projections
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
- if(dtset%w90iniprj/=0 )  then
+ if (dtset%w90iniprj/=0)  then
 
    !  Set value for lproj (type of projections to be computed)
    !  In PAW, options 5 and 6 are not in use.
@@ -695,11 +690,10 @@ class(abstract_wf), pointer :: mywfc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  if( dtset%w90prtunk>0) then
     call compute_and_write_unk(wfnname, psps%usepaw, dtset%w90prtunk, &
-         & mpi_enreg, ngfft, nsppol, dtset%nspinor,  &
-         & nkpt, mband,  mpw, mgfftc, mkmem,  nprocs, rank, npwarr, &
-         & band_in,  dtset, kg, mywfc)
- end if !dtset%w90prtunk
-!
+      mpi_enreg, ngfft, nsppol, dtset%nspinor,  &
+      nkpt, mband,  mpw, mgfftc, mkmem,  nprocs, rank, npwarr, &
+      band_in,  dtset, kg, mywfc)
+ end if
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !7) Call to  Wannier90
@@ -860,8 +854,8 @@ class(abstract_wf), pointer :: mywfc
      ABI_FREE(rmods_r_h)
    end if
 
-!  CALL SILVESTRELLI'S APPROACH TO EVALUATE vdW INTERACTION ENERGY USING MLWF!!
-!  ----------------------------------------------------------------------------------------------
+   ! CALL SILVESTRELLI'S APPROACH TO EVALUATE vdW INTERACTION ENERGY USING MLWF!!
+   ! ----------------------------------------------------------------------------------------------
    if (dtset%vdw_xc==10.or.dtset%vdw_xc==11.or.dtset%vdw_xc==12.or.dtset%vdw_xc==14.and.rank==master) then
      ! vdw_xc==10,11,12,14 starts the vdW interaction using MLWFs
      call evaluate_vdw_with_mlwf()
@@ -870,7 +864,6 @@ class(abstract_wf), pointer :: mywfc
 #else
    ABI_UNUSED(occ)
 #endif
-   !  FIXME: looks like there is no automatic test which goes through here: g95 bot did not catch the missing deallocations
    ABI_FREE(wann_centres)
    ABI_FREE(wann_spreads)
    ABI_FREE(U_matrix)
@@ -884,7 +877,7 @@ class(abstract_wf), pointer :: mywfc
  ABI_FREE(eigenvalues_w)
  ABI_FREE(M_matrix)
  ABI_FREE(A_matrix)
- ! ABI_FREE(exclude_bands)
+ !ABI_FREE(exclude_bands)
 
  call mywfc%free()
  ABI_FREE_SCALAR(mywfc)
@@ -975,7 +968,7 @@ contains
      ABI_MALLOC(csix,(mwan,mwan,nsppol,nsppol))
 
      call evdw_wannier(csix,corrvdw,mwan,natom,nsppol,nwan,tdocc_wan,dtset%vdw_nfrag,&
-&     dtset%vdw_supercell,dtset%vdw_typfrag,dtset%vdw_xc,rprimd,wann_centres,wann_spreads,xcart)
+       dtset%vdw_supercell,dtset%vdw_typfrag,dtset%vdw_xc,rprimd,wann_centres,wann_spreads,xcart)
 
      ABI_FREE(csix)
      ABI_FREE(occ_arr)

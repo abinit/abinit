@@ -1,0 +1,60 @@
+# Silicon: Wannierize the first four bands starting from an IBZ WFK.
+
+ndtset 2
+
+# Results should not depend on kptopt
+#kptopt 1
+#kptopt 2
+#kptopt 3
+
+# Dataset 1: compute and store wavefunctions only in the IBZ.
+tolvrs1 1.0d-10
+
+# Dataset 2: expand the IBZ WFK internally and call Wannier90.
+optdriver2 8
+wfk_task2 "wannier"
+getwfk2 -1
+w90iniprj2 2
+
+# Common variables.
+acell 3*10.263
+rprim
+  0.0 0.5 0.5
+  0.5 0.0 0.5
+  0.5 0.5 0.0
+natom 2
+ntypat 1
+typat 2*1
+xred
+  0.00 0.00 0.00
+  0.25 0.25 0.25
+znucl 14
+
+ecut 8.0
+nband 8
+nstep 50
+ngkpt 4 4 4
+nshiftk 1
+shiftk 0.0 0.0 0.0
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Psdj_nc_sr_04_pw_std_psp8/Si.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% extra_inputs = t15o_DS2_w90.win
+#%% files_to_test =
+#%%   t15.abo, tolnlines= 15, tolabs= 2.0e-4, tolrel= 1.0e-1
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC
+#%% description =
+#%%   Silicon with eight bands; Wannierize the first four bands.
+#%%   Dataset 1 stores a compact IBZ WFK. Dataset 2 uses wfk_task "wannier"
+#%%   to expand it to the full Brillouin zone before calling Wannier90.
+#%% topics = Wannier
+#%%<END TEST_INFO>
