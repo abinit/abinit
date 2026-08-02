@@ -1,0 +1,80 @@
+# MgB2: compare ab-initio and Wannier-interpolated g(k,q) along paths.
+
+ndtset 2
+optdriver 7
+eph_task 18
+
+# The WFK supplies the Fermi level and the POT initializes the path NSCF solves.
+getwfk_filepath "teph4isotc_2o_DS1_WFK"
+getpot_filepath "teph4isotc_2o_DS1_POT"
+
+getddb_filepath "MgB2_eph4isotc/flow_mgb2_phonons/w1/outdata/out_DDB"
+getdvdb_filepath "teph4isotc_1_DVDB"
+getabiwan_filepath "teph4isotc_3o_ABIWAN.nc"
+getgwan_filepath "teph4isotc_4o_GWAN.nc"
+structure "abifile:MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
+
+ddb_ngqpt 4 4 4
+dipdip 0
+
+# Options for the ab-initio NSCF wavefunctions evaluated along the paths.
+nband 16
+nbdbuf 6
+tolwfr 1.0d-18
+nstep 80
+
+# Dataset 1: fixed k=Gamma and q varying along Gamma-M-K-Gamma.
+eph_fix_korq1 "k"
+eph_fix_wavevec1 0.0 0.0 0.0
+ph_ndivsm1 2
+ph_nqpath1 4
+ph_qpath1
+  0.0 0.0 0.0       # Gamma
+  0.5 0.0 0.0       # M
+  1/3 1/3 0.0       # K
+  0.0 0.0 0.0       # Gamma
+
+# Dataset 2: fixed q=Gamma and k varying along Gamma-K-M-Gamma-A.
+eph_fix_korq2 "q"
+eph_fix_wavevec2 0.0 0.0 0.0
+nkpath2 5
+ndivsm2 2
+kptbounds2
+  0.0 0.0 0.0       # Gamma
+  1/3 1/3 0.0       # K
+  0.5 0.0 0.0       # M
+  0.0 0.0 0.0       # Gamma
+  0.0 0.0 0.5       # A
+
+ngkpt 6 6 4
+nshiftk 1
+shiftk 0.0 0.0 0.0
+
+ecut 38.0
+occopt 4
+tsmear 0.02
+
+prtphbands 0
+prtphdos 0
+
+pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_04_pw_std_psp8/"
+pseudos "Mg-low.psp8, B.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = HAVE_WANNIER90
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi, atlas_gnu_14.2_triqs
+#%% test_chain = teph4isotc_1.abi, teph4isotc_2.abi, teph4isotc_3.abi, teph4isotc_4.abi, teph4isotc_5.abi,
+#%%              teph4isotc_6.abi
+#%% [files]
+#%% use_git_submodule = MgB2_eph4isotc
+#%% files_to_test =
+#%%   teph4isotc_6.abo, tolnlines= 60, tolabs= 3.0e-2, tolrel= 5.0e-2
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH, GPATH, GSTORE, WANNIER90
+#%% description = Compare ab-initio and Wannier-interpolated MgB2 e-ph matrix elements along k/q paths
+#%%<END TEST_INFO>
