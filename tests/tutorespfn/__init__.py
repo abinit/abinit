@@ -71,7 +71,6 @@ inp_files = [
 "teph4isotc_4.abi",
 "teph4isotc_5.abi",
 "teph4isotc_6.abi",
-"teph4isotc_7.abi",
 "teph4zpr_1.abi",
 "teph4zpr_2.abi",
 "teph4zpr_3.abi",

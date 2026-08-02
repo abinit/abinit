@@ -629,7 +629,213 @@ In real life one should perform a careful convergence study...
     For this reason, we continue using the 4x4x4 DDB file but we should take
     this into account when comparing our results with previous works.
 
-## Our first computation of the isotropic Tc
+## Wannier interpolation workflow
+
+The input files used in this tutorial implement the following five-step workflow:
+
+1. Merge the DFPT potentials and produce a DVDB file.
+2. Compute Bloch states on a coarse uniform mesh and an independent band structure along a high-symmetry path.
+3. Wannierize the coarse-mesh wavefunctions and write the electronic Hamiltonian to an `ABIWAN.nc` file.
+4. Compute a symmetry-reduced GSTORE and transform the electron-phonon vertex to the Wannier representation.
+5. Interpolate the electronic energies and electron-phonon matrix elements on denser meshes and compute $\alpha^2F(\ww)$.
+6. Compare ab-initio and Wannier-interpolated electron-phonon matrix elements along k- and q-point paths.
+
+Wannier90 support is required to run these examples.
+The 6x6x4 coarse electronic and GSTORE q meshes, 4x4x4 DFPT mesh, and 8x8x8 evaluation meshes used below are appropriate
+for a tutorial and regression test.
+They are not sufficiently dense for converged MgB$_2$ superconducting properties.
+
+### Coarse-mesh wavefunctions and ab-initio bands
+
+Copy and run the second input file with:
+
+```sh
+cp $ABI_TESTS/tutorespfn/Input/teph4isotc_2.abi .
+abinit teph4isotc_2.abi > teph4isotc_2.log 2> teph4isotc_2.err
+```
+
+{% dialog tests/tutorespfn/Input/teph4isotc_2.abi %}
+
+The input contains two NSCF datasets.
+Dataset 1 computes 16 bands on a complete Gamma-centered 6x6x4 mesh and writes `teph4isotc_2o_DS1_WFK`.
+The complete uniform mesh is required by the Wannier90 interface.
+It also writes `teph4isotc_2o_DS1_POT`, which initializes the NSCF wavefunctions used by the path calculation.
+
+Dataset 2 computes the ab-initio bands along the path
+$\Gamma$--K--M--$\Gamma$--A--H--L--A and writes `teph4isotc_2o_DS2_GSR.nc`.
+This second dataset is not needed to construct the Wannier functions.
+It provides an independent reference for assessing the quality of the Wannier interpolation.
+
+### Wannierization and the ABIWAN file
+
+Copy the Wannier input and the associated Wannier90 file with:
+
+```sh
+cp $ABI_TESTS/tutorespfn/Input/teph4isotc_3.abi .
+cp $ABI_TESTS/tutorespfn/Input/teph4isotc_3o_w90.win .
+abinit teph4isotc_3.abi > teph4isotc_3.log 2> teph4isotc_3.err
+```
+
+{% dialog tests/tutorespfn/Input/teph4isotc_3.abi %}
+
+The combination
+
+```text
+optdriver 8
+wfk_task "wannier"
+getwfk_filepath "teph4isotc_2o_DS1_WFK"
+prtwant 2
+w90iniprj 2
+```
+
+invokes Wannier90 in library mode and writes `teph4isotc_3o_ABIWAN.nc`.
+The ABIWAN file contains the electronic Hamiltonian in the Wannier representation together with the information
+needed to interpolate the band energies.
+
+The Wannier90 input defines four deterministic trial orbitals:
+
+```text
+begin projections
+Mg:s
+Mg:pz
+B:pz
+end projections
+```
+
+Deterministic projectors are important in a regression test because random trial orbitals can lead to different
+local minima of the spread functional in separate runs.
+The localization and the interpolated bands should nevertheless be inspected whenever the mesh or projection set is
+changed: deterministic initialization guarantees reproducibility, not convergence to the best minimum of the spread
+functional.
+
+### Comparing ab-initio and Wannier-interpolated bands with AbiPy
+
+The band interpolation and comparison do not require another Fortran calculation.
+The |AbiPy| `AbiwanFile` object reads `ABIWAN.nc`, interpolates the Hamiltonian at the k-points stored in the
+ab-initio path file, and plots both sets of bands with `plot_with_ebands`:
+
+```python
+from abipy import abilab
+
+with abilab.abiopen("teph4isotc_3o_ABIWAN.nc") as abiwan:
+    fig = abiwan.plot_with_ebands(
+        "teph4isotc_2o_DS2_GSR.nc",
+        ebands_kmesh="teph4isotc_2o_DS1_GSR.nc",
+        title="MgB2: ab-initio and Wannier-interpolated bands",
+    )
+```
+
+The optional `ebands_kmesh` argument adds the ab-initio and Wannier-interpolated electronic densities of states.
+It may be omitted if only the band path is of interest.
+The same file can be opened interactively with:
+
+```sh
+abiopen.py teph4isotc_3o_ABIWAN.nc -e
+```
+
+The comparison should focus on the four-band Wannier subspace and on the energy region relevant for the Fermi surface.
+Differences outside the frozen window are not necessarily meaningful because the bands are disentangled.
+
+### Symmetry-reduced GSTORE and the GWAN file
+
+The fourth input interpolates the 4x4x4 DFPT potentials and computes the electron-phonon matrix elements on
+commensurate 6x6x4 k and q meshes:
+
+```sh
+cp $ABI_TESTS/tutorespfn/Input/teph4isotc_4.abi .
+abinit teph4isotc_4.abi > teph4isotc_4.log 2> teph4isotc_4.err
+```
+
+{% dialog tests/tutorespfn/Input/teph4isotc_4.abi %}
+
+The full coarse k and q meshes are required before the discrete Fourier transform to real space.
+The following options compute only symmetry-inequivalent matrix elements and reconstruct the complete meshes:
+
+```text
+gstore_kzone "bz"
+gstore_qzone "bz"
+gstore_kfilter "none"
+gstore_sym 2
+gstore_use_lgk 1
+```
+
+The input ABIWAN file selects the electronic subspace and activates the transformation of the electron-phonon vertex.
+The main products are `teph4isotc_4o_GSTORE.nc` and `teph4isotc_4o_GWAN.nc`.
+The latter stores $g(\RR_e,\RR_{ph})$ in the Wannier and atomic-displacement representations.
+
+!!! note
+
+    Symmetry reconstruction assumes that complete degenerate electronic subspaces are available.
+    A disentanglement window may cut through a degenerate manifold, producing visible differences between individual
+    reconstructed and directly computed matrix elements.
+    The physically relevant validation is the effect on gauge-invariant and Brillouin-zone-integrated quantities.
+    For this example, direct and symmetry-reconstructed calculations agree in the total $\lambda$ and the moments of
+    $\alpha^2F$ to a few parts in $10^6$.
+
+### Eliashberg function on the dense meshes
+
+The final input reads ABIWAN and GWAN and evaluates the Wannier representation on 8x8x8 k and q meshes:
+
+```sh
+cp $ABI_TESTS/tutorespfn/Input/teph4isotc_5.abi .
+abinit teph4isotc_5.abi > teph4isotc_5.log 2> teph4isotc_5.err
+```
+
+{% dialog tests/tutorespfn/Input/teph4isotc_5.abi %}
+
+The dense meshes are specified independently of the coarse WFK mesh:
+
+```text
+eph_ngkpt_fine 8 8 8
+eph_ngqpt_fine 8 8 8
+eph_nshiftk_fine 1
+eph_shiftk_fine 0.0 0.0 0.0
+```
+
+The calculation writes `teph4isotc_5o_ISOME.nc`, a single NetCDF file containing $\alpha^2F$, the cumulative coupling,
+$\lambda(\qq,\nu)$ in the q-point IBZ and along the requested q-path, $\ww_{log}$, and $\ww_2$.
+The file can be inspected with |AbiPy| using:
+
+```sh
+abiopen.py teph4isotc_5o_ISOME.nc -e
+```
+
+For the tutorial parameters, the calculation gives approximately $\lambda=0.89$, $\ww_{log}=671$ K, and
+$\ww_2=782$ K.
+These values illustrate the workflow and should not be interpreted as converged predictions.
+
+### Electron-phonon matrix elements along paths
+
+The sixth input exercises `eph_path_run` and compares the ab-initio and Wannier-interpolated matrix elements:
+
+```sh
+cp $ABI_TESTS/tutorespfn/Input/teph4isotc_6.abi .
+abinit teph4isotc_6.abi > teph4isotc_6.log 2> teph4isotc_6.err
+```
+
+{% dialog tests/tutorespfn/Input/teph4isotc_6.abi %}
+
+The first dataset fixes $\kk=\Gamma$ and varies $\qq$ along $\Gamma$--M--K--$\Gamma$.
+The second dataset fixes $\qq=\Gamma$ and varies $\kk$ along $\Gamma$--K--M--$\Gamma$--A.
+This tests both path conventions and keeps the k- and k+q eigenvalue arrays separate in the output files.
+
+For each path point, ABINIT computes the matrix elements explicitly from the NSCF wavefunctions and the interpolated
+DFPT potential, and also obtains them from ABIWAN and GWAN.
+The comparison printed to the main output uses the gauge-invariant trace over the selected electronic subspace.
+
+The two datasets write `teph4isotc_6o_DS1_GPATH.nc` and `teph4isotc_6o_DS2_GPATH.nc`.
+These files contain the ab-initio and Wannier-interpolated band energies and electron-phonon matrix elements and can be
+analyzed with the |AbiPy| GPATH post-processing tools.
+
+## Historical direct-interpolation workflow
+
+!!! warning
+
+    The remaining discussion describes the older direct-EPH and KERANGE workflow.
+    It is retained temporarily for background, but the corresponding `teph4isotc_2`--`teph4isotc_5` inputs have been
+    replaced by the Wannier workflow documented above.
+
+### Our first computation of the isotropic Tc
 
 For our first example, we use a relatively simple input file that allows us to introduce
 the most important variables and the organization of the results.
@@ -650,7 +856,7 @@ abinit teph4isotc_2.abi > log 2> err
     without having to introduce any input variable for the MPI parallelization
     as the EPH code can automatically distribute the workload over k-points and spins.
     Further details concerning the MPI version are given in the
-    [last section of the tutorial](#notes-on-the-mpi-parallelism)
+    [legacy notes on MPI parallelism](#legacy-notes-on-mpi-parallelism)
 
 We now discuss the meaning of the different variables in more detail.
 
@@ -912,7 +1118,7 @@ our results are not that bad considering that the calculation took less than XXX
 
 -->
 
-## Using the tetrahedron method
+### Legacy: using the tetrahedron method
 
 In this section, we repeat the calculation done in **teph4isotc_2.abi**
 but now with the **optimized tetrahedron** scheme by [[cite:Kawamura2014]].
@@ -943,7 +1149,7 @@ abicomp.py a2f teph4isotc_2o_DS*_A2F.nc -e
 ![](eph4isotc_assets/abicomp_phbands.png)
 
 
-## Preparing the convergence study wrt the k-mesh
+### Legacy: preparing the convergence study with respect to the k-mesh
 
 <!--
 Our goal is to perform calculations of $\gamma_\qnu$ and $\lambda_\qnu$ with different $\kk/\qq$-meshes
@@ -1130,7 +1336,7 @@ with the [[getkerange_filepath]]:
 
 TODO: Discussion about energy range and integration scheme.
 
-## Convergence study wrt to the k/q-mesh
+### Legacy: convergence study with respect to the k/q meshes
 
 At this point, we can use the WFK file to perform EPH calculations with denser $\kk$-meshes.
 We will be using settings similar to the ones used in **teph4isotc_2.abi** except for
@@ -1151,7 +1357,7 @@ You should get:
 The EPH calculation on 48 CPUs takes ~ minutes and less than XXX Gb of memory.
 -->
 
-## Notes on the MPI parallelism
+### Legacy: notes on MPI parallelism
 
 EPH calculations performed with [[eph_task]] = 1 support 4 different levels of MPI parallelism and
 the number of MPI processes for each level can be specified via the [[eph_np_pqbks]] input variable.

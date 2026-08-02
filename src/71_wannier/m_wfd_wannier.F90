@@ -197,6 +197,5 @@ contains
     end if
     nullify(ptr_kg)
   end subroutine wfd_run_wannier
- !
 
 end module m_wfd_wannier

@@ -756,7 +756,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      call kptrlatt_from_ngkpt(dtset%eph_ngkpt_fine, intp_kptrlatt)
 
      nullify(gstore%ebands)
-     allocate(gstore%ebands)
+     ABI_MALLOC_SCALAR(gstore%ebands)
      call wan_interp_ebands(wan_spin, cryst, ebands, intp_kptrlatt, dtset%eph_nshiftk_fine, &
                             dtset%eph_shiftk_fine, gstore%ebands, comm)
      gstore%has_wannier = .True.
@@ -3173,7 +3173,7 @@ subroutine gstore_free(gstore)
 
  if (gstore%has_wannier) then
    call gstore%ebands%free()
-   deallocate(gstore%ebands)
+   ABI_FREE_SCALAR(gstore%ebands)
    nullify(gstore%ebands)
  end if
 
