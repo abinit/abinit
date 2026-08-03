@@ -69,5 +69,5 @@ pseudos "C.psp8"
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH, GWPT, GSTORE
 #%% description = Read only the first 11 k+q bands from a 12-band GWPT GSTORE file.
-#%% Similar to t05.abi but uses 11 bands instead of 12.
+#%%   Similar to t05.abi but uses 11 bands instead of 12.
 #%%<END TEST_INFO>

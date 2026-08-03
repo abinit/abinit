@@ -4577,6 +4577,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: gstore_cryst
  type(gqk_t),pointer :: gqk
+ character(len=500) :: msg
 !arrays
  integer :: units(2), ibuffer(9), nproc_spin(ebands%nsppol), comm_spin(ebands%nsppol)
  integer :: brange_k_spin(2, ebands%nsppol), brange_kq_spin(2, ebands%nsppol), file_brange_kq_spin(2, ebands%nsppol), g0_q(3)
@@ -6618,8 +6619,7 @@ end subroutine gstore_compute_and_write_vk
 !!
 !! SOURCE
 
-subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf, dtset, cryst, &
-                                               pawfgr, psps, &
+subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf, dtset, cryst, pawfgr, psps, &
                                                wfd, mpi_enreg, kg_k, ebands, dvdb, gs_ham_kq, root_ncid)
 
 !Arguments ------------------------------------
@@ -7001,40 +7001,29 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  integer :: with_cplex, my_is, spin, my_ik, my_iq, ik_glob, iq_glob, units(2)
  integer :: ncid, spin_ncid, nprocs, my_rank, ncerr, this_state, ierr
  integer :: nb, nkbz, nkibz, nqbz, nqibz, nsym, itime_k
- integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
- integer :: g0_q(3)
- integer :: ik_ibz_file
- integer :: isym_lg, itime_lg
- integer :: isym_combined
- real(dp) :: weight_qq, phase
+ integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3), g0_q(3)
+ integer :: ik_ibz_file, isym_lg, itime_lg, isym_combined, c1_gs, n_gv, igv
+ integer :: n_lg, ii_lg, tsign_lg !, isym_lg, itime_lg,
  integer :: idir, iat, idir_eq, iat_eq, mu, mu_eq, iq_sym
  integer :: symrec_eq(3,3), symrec_eq_kspace(3,3), l0(3), mat_tmp(3,3)
+ real(dp) :: weight_qq, phase
  complex(dp) :: cphase
- logical :: with_g2dw
- logical :: isirr_k
- character(len=abi_slen) :: with_gmode, gtype, gvals_name
- character(len=abi_slen) :: gv_names(2)
- integer :: n_gv, igv
+ logical :: with_g2dw, isirr_k, found_lg
+ character(len=abi_slen) :: with_gmode, gtype, gvals_name, gv_names(2)
  character(len=5000) :: msg
  type(gstore_t) :: gstore
  type(dmats_t) :: dmats
- integer :: isym_kqS, isym_kqT, ikq_ibz_s, ikq_ibz_t, h_isym, itime_h, h_isym_inv
- integer :: trev_kqS, trev_kqT
+ integer :: isym_kqS, isym_kqT, ikq_ibz_s, ikq_ibz_t, h_isym, itime_h, h_isym_inv, trev_kqS, trev_kqT
  integer :: indkk_s(6,1), indkk_t(6,1)
- integer :: c1_gs
  real(dp) :: L_h_gs(3), kq_ibz_pt(3)
  complex(dp) :: phase_h_gs, phase_ket_gs
  logical,parameter :: DEBUG_DUMP_DH = .False.
- ! Pass A (gstore_sym == 2): little-group-of-kk_ibz cache and q-source search.
- integer :: n_lg, ii_lg, tsign_lg !, isym_lg, itime_lg,
  real(dp) :: kk_lg_test(3)
- logical :: found_lg
 !!arrays
  integer :: brange_kq_spin(2, dtset%nsppol)
  integer,allocatable :: state_kq(:,:), kibz2bz(:) !, qibz2bz(:), qglob2bz(:,:), ! kmesh_map(:,:), my_kqmap(:,:),
  integer,allocatable :: lg_isym(:), lg_itime(:)
- real(dp) :: kk_bz(3), kk_ibz(3), qpt(3), qpt_tmp(3)
- real(dp) :: kq_bz_source(3), kq_bz_target(3)
+ real(dp) :: kk_bz(3), kk_ibz(3), qpt(3), qpt_tmp(3), kq_bz_source(3), kq_bz_target(3)
  real(dp),allocatable :: qbz(:,:)
  real(dp),contiguous,pointer :: gkq_rot_ptr(:,:,:,:,:), gkq_base_ptr(:,:,:,:,:)
  complex(dp),target,allocatable :: gkq_rot(:,:,:,:,:), gkq_base(:,:,:,:,:)
