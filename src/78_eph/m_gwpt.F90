@@ -76,7 +76,7 @@ module m_gwpt
  use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph, read_screening
  use m_vcoul,          only : vcoul_t
  use m_gstore,         only : gstore_t, gqk_t, gstore_check_restart, &
-                               GSTORE_KQ_MISSING, GSTORE_KQ_COMPUTED, gstore_symmetrize
+                               GSTORE_KQ_MISSING, GSTORE_KQ_COMPUTED, GSTORE_GTYPE_GWPT, gstore_symmetrize
  use m_rhotoxc,        only : rhotoxc
  use m_drivexc,        only : check_kxc
  use m_occ,            only : get_fact_spin_tol_empty
@@ -353,7 +353,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  if (restart == 0) then
    ! Build new gstore object from dtset input variables.
-   call gstore%init(gstore_filepath, dtset, dtfil, wfk_hdr, cryst, ebands, ifc, comm, gtype="gwpt")
+   call gstore%init(gstore_filepath, dtset, dtfil, wfk_hdr, cryst, ebands, ifc, comm, gtype=GSTORE_GTYPE_GWPT)
    ABI_REMALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
    done_qbz_spin = 0
  else

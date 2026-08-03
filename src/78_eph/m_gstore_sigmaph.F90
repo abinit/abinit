@@ -66,7 +66,7 @@ module m_gstore_sigmaph
  use m_dtset,          only : dataset_type
  use m_dtfil,          only : datafiles_type
  use m_wfd,            only : wfd_t
- use m_gstore,         only : gstore_t, gqk_t, gstore_read_gtype
+ use m_gstore,         only : gstore_t, gqk_t, GSTORE_GTYPE_KS, GSTORE_GTYPE_GWPT, gstore_read_gtype
 
  implicit none
 
@@ -312,11 +312,11 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
  ! opens dtfil%filgstorein). When building gstore on the fly from ABIWAN.nc + GWAN.nc
  ! (see gstore%init_or_from_ncpath below), there is no file to read gtype from, and the
  ! interpolated construction always produces a single "atom"-representation g, never "gwpt".
- gtype = "KS"
+ gtype = GSTORE_GTYPE_KS
  if (dtfil%filgstorein /= ABI_NOFILE) call gstore_read_gtype(dtfil%filgstorein, gtype, comm)
 
  with_cplex = 1
- if (gtype == "gwpt") then
+ if (gtype == GSTORE_GTYPE_GWPT) then
    ! Decide if self-energies should be computed with |g|^2 or g^KS g^GWPT.
    select case (dtset%gwpt_g2mode)
    case (g2mode_AA)
@@ -1220,8 +1220,8 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
  iwrite = gqk%comm%me == 0; if (.not. iwrite) return
 
  this_gtype = "KS"
- if (gstore%gtype == "gwpt" .and. dtset%gstore_gname == "gvals") this_gtype = "GWPT"
- if (gstore%gtype == "gwpt" .and. dtset%gstore_gname == "gvals_ks") this_gtype = "KS"
+ if (gstore%gtype == GSTORE_GTYPE_GWPT .and. dtset%gstore_gname == "gvals") this_gtype = "GWPT"
+ if (gstore%gtype == GSTORE_GTYPE_GWPT .and. dtset%gstore_gname == "gvals_ks") this_gtype = "KS"
 
  ! Write self-energy matrix elements for this spin
  ! NB: Only master writes

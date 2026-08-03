@@ -26738,6 +26738,12 @@ two different spin channels when [[nsppol]] == 2.
 
 If not specified in input, ABINIT will use all the bands from 1 up to [[nband]]
 unless additional filters are activated, see also [[gstore_kfilter]] and [[gstore_erange]].
+
+When reading an existing GSTORE.nc file with [[getgstore_filepath]], this variable can be used
+to reduce the number of intermediate states at k+q kept in memory. In this case the requested
+range must be contained in the k+q band range stored in the file and `gstore_brange(2)` must be
+equal to [[nband]]. When [[eph_stern]] is enabled, `gstore_brange(1)` must be 1. The band range
+for the external states at k is not modified.
 """,
 ),
 

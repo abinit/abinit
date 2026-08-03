@@ -18,6 +18,7 @@ inp_files = [
 "t04.abi",
 "t05.abi",
 "t06.abi",
+"t13.abi",
 # Diamond without symmetries
 "t07.abi",
 "t08.abi",

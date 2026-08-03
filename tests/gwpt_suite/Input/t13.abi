@@ -1,11 +1,12 @@
-# ZPR computation for Diamond with GWPT e-ph matrix elements.
+# ZPR computation for Diamond using a reduced k+q band range from GSTORE.nc.
+# Similar to t05.abi but uses 11 bands instead of 12.
 
 optdriver 7    # Enter EPH driver.
 eph_task 24    # ZPR computation from GSTORE file
 
-nband 12
+nband 11
+gstore_brange 1 11  # Read only the first 11 of the 12 k+q bands stored in GSTORE.nc.
 ecut 45.0
-#prtvol 10
 
 # K-mesh (must be equal to the one of the WFK file).
 ngkpt 2 2 2
@@ -18,7 +19,7 @@ getwfk_filepath "t03o_WFK"
 getden_filepath "diamond_eph_gwpt/gso_DEN.nc"
 getpot_filepath "diamond_eph_gwpt/gso_POT.nc"
 
-# Read DDB file with dynamical matrix.
+# Read DDB file with dynamical matrix and the 12-band GSTORE produced by t04.
 getddb_filepath "diamond_eph_gwpt/out_DDB"
 getgstore_filepath "t04o_GSTORE.nc"
 
@@ -61,11 +62,12 @@ pseudos "C.psp8"
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt
 #%% files_to_test =
-#%%   t05.abo, tolnlines= 25, tolabs= 5.000e-02, tolrel= 0.2
+#%%   t13.abo, tolnlines= 25, tolabs= 5.000e-02, tolrel= 0.2
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH, GWPT, GSTORE
-#%% description = ZPR computation for Diamond with GWPT e-ph matrix elements.
+#%% description = Read only the first 11 k+q bands from a 12-band GWPT GSTORE file.
+#%% Similar to t05.abi but uses 11 bands instead of 12.
 #%%<END TEST_INFO>

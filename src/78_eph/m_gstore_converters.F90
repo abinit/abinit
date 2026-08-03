@@ -36,7 +36,7 @@ module m_gstore_converters
  use m_crystal,        only : crystal_t
  use m_ebands,         only : ebands_t, gaps_t
  use m_ifc,            only : ifc_type
- use m_gstore,         only : gstore_t, GSTORE_GMODE_ATOM, gstore_read_gtype
+ use m_gstore,         only : gstore_t, GSTORE_GMODE_ATOM, GSTORE_GTYPE_GWPT, gstore_read_gtype
 
  implicit none
 
@@ -152,7 +152,7 @@ subroutine gstore_convert(gstore_path, dtset, dtfil, cryst, ebands, ifc, comm)
 
  call gstore_read_gtype(gstore_path, gtype, this_comm)
  gvals_name = "gvals"
- if (gtype == "gwpt" .and. dtset%gstore_gname == "gvals_ks") gvals_name = "gvals_ks"
+ if (gtype == GSTORE_GTYPE_GWPT .and. dtset%gstore_gname == "gvals_ks") gvals_name = "gvals_ks"
 
  ! Request the ATOM representation: gstore.nc stores g in this representation (the bare
  ! deformation potential w.r.t. reduced atomic displacements), so no atom->phonon
@@ -1116,4 +1116,3 @@ subroutine define_band_string(index, string, lstr)
 end subroutine define_band_string
 
 end module m_gstore_converters
-

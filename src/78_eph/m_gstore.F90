@@ -182,6 +182,8 @@ module m_gstore
 
  character(len=abi_slen),public,parameter :: GSTORE_GMODE_ATOM   = "atom"
  character(len=abi_slen),public,parameter :: GSTORE_GMODE_PHONON = "phonon"
+ character(len=abi_slen),public,parameter :: GSTORE_GTYPE_KS     = "KS"
+ character(len=abi_slen),public,parameter :: GSTORE_GTYPE_GWPT   = "gwpt"
 
  ! Flags
  integer, public :: GSTORE_KQ_MISSING = 0        ! (k, q, spin) has not been computed.
@@ -471,7 +473,7 @@ type, public :: gstore_t
   character(len=abi_slen) :: gmode = "atom"
   ! "phonon" or "atom"
 
-  character(len=abi_slen) :: gtype = "KS"
+  character(len=abi_slen) :: gtype = GSTORE_GTYPE_KS
   ! Formalism used to compute g(k,q). Either KS or GWPT
 
   real(dp),allocatable :: erange_spin(:, :)
@@ -743,8 +745,9 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ! Set basic parameters.
  gstore%comm = comm; gstore%nsppol = nsppol; gstore%path = path
  if (present(gtype)) gstore%gtype = gtype
+ ABI_CHECK(gstore%gtype == GSTORE_GTYPE_KS .or. gstore%gtype == GSTORE_GTYPE_GWPT, sjoin("Invalid gstore gtype:", gstore%gtype))
 
- has_both_g = gstore%gtype == "gwpt"
+ has_both_g = gstore%gtype == GSTORE_GTYPE_GWPT
 
  ! Get references to other data structures.
  gstore%dtset => dtset; gstore%cryst => cryst; gstore%ebands => ebands; gstore%ifc => ifc
@@ -4566,7 +4569,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
  integer,parameter :: master = 0
  integer :: my_rank, ncid, spin, spin_ncid, nproc, ierr, fform, max_nb, ib, natom, natom3, ib_m, ib_n !, varid
  integer :: max_nq, max_nk, ncerr, my_is, my_iq, iq_glob, my_ik, ik_glob
- integer :: nb_k, nb_kq, nb_k_file, nb_kq_file, gstore_cplex !, ip1, ip2
+ integer :: nb_k, nb_kq, nb_k_file, nb_kq_file, gstore_cplex, ib_kq_start !, ip1, ip2
  integer :: my_ip, ipert, iq_ibz, iq_bz, isym_q, trev_q, tsign_q, ii !, im_kq
  real(dp),parameter :: G_SMALL = tol8
  real(dp) :: cpu, wall, gflops, wqnu
@@ -4576,7 +4579,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
  type(gqk_t),pointer :: gqk
 !arrays
  integer :: units(2), ibuffer(9), nproc_spin(ebands%nsppol), comm_spin(ebands%nsppol)
- integer :: brange_k_spin(2, ebands%nsppol), brange_kq_spin(2, ebands%nsppol), g0_q(3)
+ integer :: brange_k_spin(2, ebands%nsppol), brange_kq_spin(2, ebands%nsppol), file_brange_kq_spin(2, ebands%nsppol), g0_q(3)
  integer,allocatable :: qglob2bz(:,:), qbz2ibz(:,:)
  real(dp) :: qq_ibz(3)
  real(dp) :: displ_nu_red(2, 3, cryst%natom)
@@ -4654,7 +4657,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
    if (gvals_name == "gvals_ks") then
      call wrtout(units, " Reading KS e-ph matrix elements")
    else if (gvals_name == "gvals") then
-     if (gstore%gtype == "gwpt") then
+     if (gstore%gtype == GSTORE_GTYPE_GWPT) then
        call wrtout(units, " Reading GWPT e-ph matrix elements")
      else
        call wrtout(units, " Reading KS e-ph matrix elements")
@@ -4772,12 +4775,29 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
  ! Consistency check
  call wfk0_hdr%vs_dtset(dtset); call wfk0_hdr%free()
 
+ ! When reading an existing GSTORE file, gstore_brange selects a smaller window of
+ ! intermediate states at k+q. The external-state window at k is always the one on disk.
+ ! Keep the file range to compute the offset in the NetCDF nb_kq dimension below.
+ file_brange_kq_spin = brange_kq_spin
+ do spin=1,gstore%nsppol
+   if (any(dtset%gstore_brange(:, spin) /= 0)) then
+     ABI_CHECK(all(dtset%gstore_brange(:, spin) /= 0), "Both entries of gstore_brange must be specified")
+     ABI_CHECK_IEQ(dtset%gstore_brange(2, spin), dtset%mband, "gstore_brange(2, spin) must be equal to nband")
+     if (dtset%eph_stern /= 0) then
+       ABI_CHECK_IEQ(dtset%gstore_brange(1, spin), 1, "gstore_brange(1, spin) must be 1 when eph_stern is enabled")
+     end if
+     msg = sjoin("Requested gstore_brange:", ltoa(dtset%gstore_brange(:, spin)), "is not contained in the k+q band range stored in GSTORE.nc:", &
+       ltoa(file_brange_kq_spin(:, spin)))
+     ABI_CHECK(dtset%gstore_brange(1, spin) >= file_brange_kq_spin(1, spin) .and. dtset%gstore_brange(2, spin) <= file_brange_kq_spin(2, spin), msg)
+     brange_kq_spin(:, spin) = dtset%gstore_brange(:, spin)
+     call wrtout(units, sjoin(" Restricting k+q states for spin", itoa(spin), "to gstore_brange:", &
+                 ltoa(brange_kq_spin(:, spin))))
+   end if
+ end do
+
  ! If has_both_g is true, we allocate and read both the KS and the GWPT matrix elements.
- read_ks = gstore%gtype == "gwpt"
- has_both_g = gstore%gtype == "gwpt"
- !print *, "gstore%gtype:", trim(gstore%gtype)
- !print *, "read_ks:", read_ks
- !print *, "has_both_g:", has_both_g
+ read_ks = gstore%gtype == GSTORE_GTYPE_GWPT
+ has_both_g = gstore%gtype == GSTORE_GTYPE_GWPT
 
  ! Distribute spins, create indirect mapping to spin index and init gstore%brange_k_spin
  call gstore%distribute_spins__(ebands%mband, brange_kq_spin, brange_k_spin, nproc_spin, comm_spin, comm)
@@ -4872,7 +4892,10 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
      ! Note that these dimensions should be compatible with what is stored on disk.
      nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
      ABI_CHECK_IEQ(nb_k, nb_k_file, "nb_k !/ nb_k_file")
-     ABI_CHECK_IEQ(nb_kq, nb_kq_file, "nb_kq !/ nb_kq_file")
+     ABI_CHECK_ILEQ(nb_kq, nb_kq_file, "nb_kq > nb_kq_file")
+     ib_kq_start = gqk%bstart_kq - file_brange_kq_spin(1, spin) + 1
+     ABI_CHECK_IRANGE(ib_kq_start, 1, nb_kq_file, "Invalid k+q band offset in GSTORE.nc")
+     ABI_CHECK_ILEQ(ib_kq_start + nb_kq - 1, nb_kq_file, "Requested k+q band window exceeds GSTORE.nc")
 
      ! gstore_cplex defines the data on disk while cplex defines what we want to store in memory
      ABI_MALLOC_OR_DIE(gwork_q, (gstore_cplex, nb_kq, nb_k, gqk%natom3, gqk%glob_nk), ierr)
@@ -4896,11 +4919,11 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
 
        ! Read q-slice of the e-ph matrix elements (individual IO).
        ! Note gvals_name so that we can read either g^KS or g^Sigma.
-       ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
+       ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gwork_q, start=[1, ib_kq_start, 1, 1, 1, iq_glob])
        NCF_CHECK(ncerr)
 
        if (read_ks) then
-         ncerr = nf90_get_var(spin_ncid, spin_vid("gvals_ks"), ks_gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
+         ncerr = nf90_get_var(spin_ncid, spin_vid("gvals_ks"), ks_gwork_q, start=[1, ib_kq_start, 1, 1, 1, iq_glob])
          NCF_CHECK(ncerr)
          ! Here we set g_GWPT g to g_KS if g_KS is smaller than a certain threshold as GWPT breaks symmetries.
          where (abs(ks_gwork_q) < G_SMALL)
@@ -4999,11 +5022,11 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
        end if
 
        ! Read q-slice of g(k,q) in the atom representation. (individual IO).
-       ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
+       ncerr = nf90_get_var(spin_ncid, spin_vid(gvals_name), gwork_q, start=[1, ib_kq_start, 1, 1, 1, iq_glob])
        NCF_CHECK(ncerr)
 
        if (read_ks) then
-         ncerr = nf90_get_var(spin_ncid, spin_vid("gvals_ks"), ks_gwork_q, start=[1, 1, 1, 1, 1, iq_glob])
+         ncerr = nf90_get_var(spin_ncid, spin_vid("gvals_ks"), ks_gwork_q, start=[1, ib_kq_start, 1, 1, 1, iq_glob])
          NCF_CHECK(ncerr)
          ! Here we set g_GWPT g to g_KS if g_KS is smaller than a certain threshold as GWPT breaks symmetries.
          where (abs(ks_gwork_q) < G_SMALL)
@@ -6912,7 +6935,7 @@ subroutine gstore_read_gtype(path, gtype, comm, &
 
  if (my_rank == master) then
    NCF_CHECK(nf90_open(path, nf90_nowrite, ncid))
-   gtype = "KS"
+   gtype = GSTORE_GTYPE_KS
    ncerr = nf90_inq_varid(ncid, "gstore_gtype", varid)
    if (ncerr == nf90_noerr) then
      NCF_CHECK(nf90_get_var(ncid, varid, gtype))
@@ -7055,7 +7078,7 @@ subroutine gstore_symmetrize(gstore_path, wfk_path, ngfft, dtset, dtfil, cryst, 
  ! GWPT files store two sets of e-ph matrix elements: "gvals" (g^Sigma) and "gvals_ks" (g^KS),
  ! written at the same (k,q) grid positions (see m_gwpt.F90's dump_my_gbuf). Symmetrize both.
  n_gv = 1; gv_names(1) = "gvals"
- if (gtype == "gwpt") then
+ if (gtype == GSTORE_GTYPE_GWPT) then
    n_gv = 2; gv_names(2) = "gvals_ks"
  end if
 
