@@ -52,7 +52,7 @@ nband 12
 nstep 50
 occopt 4
 tsmear 0.02
-ngkpt 4 4 4
+ngkpt 6 6 6
 nshiftk 1
 shiftk 0.0 0.0 0.0
 

@@ -3512,6 +3512,19 @@ end subroutine wan_print
 !! obtained from the analytic derivative of the real-space Hamiltonian.
 !! Velocities are in atomic units.
 !!
+!! TODO: This routine presently implements the legacy Wannier90 interpolation
+!! obtained with use_ws_distance=.false. Modern Wannier90 versions enable
+!! use_ws_distance by default and use pair-dependent translated lattice vectors
+!! and degeneracies from w90_ws_distance:ws_translate_dist (irdist_ws and
+!! wdist_ndeg). For an Al test, the legacy and default Wannier90 interpolations
+!! differed by about 0.05 eV on average and up to 0.26 eV along a k-path.
+!!
+!! The current Wannier90 library interface does not return these arrays and
+!! deallocates its internal parameters before wannier_run returns. A possible
+!! implementation is to request write_hr=.true., read the resulting *_hr.dat
+!! and *_wsvec.dat files after wannier_run, and store the Hamiltonian and
+!! pair-dependent WS data in ABIWAN.nc for use here and by AbiPy.
+!!
 !! INPUTS
 !!  cryst: Crystal structure providing the dimensional primitive vectors.
 !!  kpt: Reduced coordinates of the interpolation point.
