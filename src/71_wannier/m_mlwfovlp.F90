@@ -209,6 +209,18 @@ module m_mlwfovlp
    procedure :: interp_eph_manyq => wan_interp_eph_manyq
    ! Interpolate e-ph matrix elements.
 
+   procedure :: interp_eph_manyk => wan_interp_eph_manyk
+   ! Interpolate e-ph matrix elements for many k points at fixed q.
+
+   procedure :: prepare_eph_q => wan_prepare_eph_q
+   ! Fourier transform the e-ph vertex from R_p to one q point.
+
+   procedure :: interp_eph_manyk_from_q => wan_interp_eph_manyk_from_q
+   ! Interpolate a k batch from a q-prepared e-ph vertex.
+
+   procedure :: eph_kbatch_size => wan_eph_kbatch_size
+   ! Select a k-batch size from a configurable workspace limit.
+
    procedure :: ncwrite_gwan => wan_ncwrite_gwan
    ! Write g in the Wannier representation to netcdf file.
 
@@ -3785,6 +3797,205 @@ subroutine wan_interp_eph_manyq(wan, cryst, nq, qpts, kpt, g_atm, out_eigens_k, 
  ABI_FREE(cmat_w)
 
 end subroutine wan_interp_eph_manyq
+!!***
+
+!!****f* m_mlwfovlp/wan_interp_eph_manyk
+!! NAME
+!! wan_interp_eph_manyk
+!!
+!! FUNCTION
+!! Interpolate the e-ph matrix elements for one q-point and nk k-points.
+!! The q-dependent R_p -> q Fourier transform is performed only once, then
+!! reused for all k-points. Work arrays are allocated once per k batch.
+!! Results are returned in the atomic-perturbation representation.
+!!
+!! SOURCE
+
+subroutine wan_interp_eph_manyk(wan, cryst, nk, kpts, qpt, g_atm, out_eigens_k, out_eigens_kq)
+
+!Arguments ------------------------------------
+ class(wan_t),intent(in) :: wan
+ class(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: nk
+ real(dp),intent(in) :: kpts(3,nk), qpt(3)
+ complex(dp),intent(out) :: g_atm(wan%nwan, wan%nwan, wan%my_npert, nk)
+ real(dp),optional,intent(out) :: out_eigens_k(wan%nwan,nk), out_eigens_kq(wan%nwan,nk)
+
+!Local variables-------------------------------
+ integer :: ir, ik, ipc, nr_e, nr_p, nwan, my_npert, ncols_e, ncols_w
+ real(dp) :: kq(3), eigens_k(wan%nwan), eigens_kq(wan%nwan)
+ complex(dp),allocatable :: eikr(:), eiqr(:), u_k(:,:), u_kq(:,:), cbuf_e(:,:,:,:), cbuf_w(:,:,:), cmat_w(:,:)
+!************************************************************************
+
+ nr_p = wan%nr_p; nr_e = wan%nr_e; nwan = wan%nwan; my_npert = wan%my_npert
+
+ ABI_MALLOC(eikr, (nr_e))
+ ABI_MALLOC(eiqr, (nr_p))
+ ABI_MALLOC(u_k, (nwan, nwan))
+ ABI_MALLOC(u_kq, (nwan, nwan))
+ ABI_MALLOC(cmat_w, (nwan, nwan))
+ ABI_MALLOC(cbuf_e, (nr_e, nwan, nwan, my_npert))
+ ABI_MALLOC(cbuf_w, (nwan, nwan, my_npert))
+
+ ! Prepare the q-dependent vertex once for the entire k batch:
+ ! g(R_e,q) = sum_R_p exp(i q.R_p) g(R_e,R_p) / ndegen(R_p).
+ do ir=1,nr_p
+   eiqr(ir) = exp(+j_dpc * two_pi * dot_product(qpt, wan%r_p(:,ir))) / wan%ndegen_p(ir)
+ end do
+ ncols_e = nr_e * nwan ** 2 * my_npert
+ call ZGEMV("T", nr_p, ncols_e, cone, wan%grpe_wwp, nr_p, eiqr, 1, czero, cbuf_e, 1)
+
+ ncols_w = nwan ** 2 * my_npert
+ do ik=1,nk
+   do ir=1,nr_e
+     eikr(ir) = exp(+j_dpc * two_pi * dot_product(kpts(:,ik), wan%r_e(:,ir))) / wan%ndegen_e(ir)
+   end do
+
+   call wan%interp_ham(cryst, kpts(:,ik), u_k, eigens_k)
+   kq = kpts(:,ik) + qpt
+   call wan%interp_ham(cryst, kq, u_kq, eigens_kq)
+   if (present(out_eigens_k)) out_eigens_k(:,ik) = eigens_k
+   if (present(out_eigens_kq)) out_eigens_kq(:,ik) = eigens_kq
+
+   ! g(k,q) in the Wannier gauge.
+   call ZGEMV("T", nr_e, ncols_w, cone, cbuf_e, nr_e, eikr, 1, czero, cbuf_w, 1)
+
+   ! Rotate from the Wannier gauge to the interpolated electronic eigenstates.
+   do ipc=1,my_npert
+     call ZGEMM('N', 'N', nwan, nwan, nwan, cone, u_kq, nwan, cbuf_w(:,:,ipc), nwan, czero, cmat_w, nwan)
+     call ZGEMM('N', 'C', nwan, nwan, nwan, cone, cmat_w, nwan, u_k, nwan, czero, g_atm(:,:,ipc,ik), nwan)
+   end do
+ end do
+
+ ABI_FREE(eikr)
+ ABI_FREE(eiqr)
+ ABI_FREE(u_k)
+ ABI_FREE(u_kq)
+ ABI_FREE(cmat_w)
+ ABI_FREE(cbuf_e)
+ ABI_FREE(cbuf_w)
+
+end subroutine wan_interp_eph_manyk
+!!***
+
+!!****f* m_mlwfovlp/wan_prepare_eph_q
+!! NAME
+!! wan_prepare_eph_q
+!!
+!! FUNCTION
+!! Fourier transform g(R_e,R_p) along R_p for one q-point. The result can be
+!! reused by multiple calls to wan_interp_eph_manyk_from_q with bounded k
+!! batches.
+!!
+!! SOURCE
+
+subroutine wan_prepare_eph_q(wan, qpt, g_req)
+
+ class(wan_t),intent(in) :: wan
+ real(dp),intent(in) :: qpt(3)
+ complex(dp),intent(out) :: g_req(wan%nr_e, wan%nwan, wan%nwan, wan%my_npert)
+
+ integer :: ir, ncols_e
+ complex(dp) :: eiqr(wan%nr_p)
+!************************************************************************
+
+ do ir=1,wan%nr_p
+   eiqr(ir) = exp(+j_dpc * two_pi * dot_product(qpt, wan%r_p(:,ir))) / wan%ndegen_p(ir)
+ end do
+ ncols_e = wan%nr_e * wan%nwan ** 2 * wan%my_npert
+ call ZGEMV("T", wan%nr_p, ncols_e, cone, wan%grpe_wwp, wan%nr_p, eiqr, 1, czero, g_req, 1)
+
+end subroutine wan_prepare_eph_q
+!!***
+
+!!****f* m_mlwfovlp/wan_interp_eph_manyk_from_q
+!! NAME
+!! wan_interp_eph_manyk_from_q
+!!
+!! FUNCTION
+!! Interpolate the e-ph matrix elements for a k-point batch from a vertex
+!! previously transformed to q by wan_prepare_eph_q.
+!!
+!! SOURCE
+
+subroutine wan_interp_eph_manyk_from_q(wan, cryst, nk, kpts, qpt, g_req, g_atm, out_eigens_k, out_eigens_kq)
+
+ class(wan_t),intent(in) :: wan
+ class(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: nk
+ real(dp),intent(in) :: kpts(3,nk), qpt(3)
+ complex(dp),intent(in) :: g_req(wan%nr_e, wan%nwan, wan%nwan, wan%my_npert)
+ complex(dp),intent(out) :: g_atm(wan%nwan, wan%nwan, wan%my_npert, nk)
+ real(dp),optional,intent(out) :: out_eigens_k(wan%nwan,nk), out_eigens_kq(wan%nwan,nk)
+
+ integer :: ir, ik, ipc, ncols_w
+ real(dp) :: kq(3), eigens_k(wan%nwan), eigens_kq(wan%nwan)
+ complex(dp),allocatable :: eikr(:), u_k(:,:), u_kq(:,:), g_wan(:,:,:), cmat_w(:,:)
+!************************************************************************
+
+ ABI_MALLOC(eikr, (wan%nr_e))
+ ABI_MALLOC(u_k, (wan%nwan, wan%nwan))
+ ABI_MALLOC(u_kq, (wan%nwan, wan%nwan))
+ ABI_MALLOC(g_wan, (wan%nwan, wan%nwan, wan%my_npert))
+ ABI_MALLOC(cmat_w, (wan%nwan, wan%nwan))
+
+ ncols_w = wan%nwan ** 2 * wan%my_npert
+ do ik=1,nk
+   do ir=1,wan%nr_e
+     eikr(ir) = exp(+j_dpc * two_pi * dot_product(kpts(:,ik), wan%r_e(:,ir))) / wan%ndegen_e(ir)
+   end do
+
+   call wan%interp_ham(cryst, kpts(:,ik), u_k, eigens_k)
+   kq = kpts(:,ik) + qpt
+   call wan%interp_ham(cryst, kq, u_kq, eigens_kq)
+   if (present(out_eigens_k)) out_eigens_k(:,ik) = eigens_k
+   if (present(out_eigens_kq)) out_eigens_kq(:,ik) = eigens_kq
+
+   call ZGEMV("T", wan%nr_e, ncols_w, cone, g_req, wan%nr_e, eikr, 1, czero, g_wan, 1)
+   do ipc=1,wan%my_npert
+     call ZGEMM('N', 'N', wan%nwan, wan%nwan, wan%nwan, cone, u_kq, wan%nwan, &
+                g_wan(:,:,ipc), wan%nwan, czero, cmat_w, wan%nwan)
+     call ZGEMM('N', 'C', wan%nwan, wan%nwan, wan%nwan, cone, cmat_w, wan%nwan, &
+                u_k, wan%nwan, czero, g_atm(:,:,ipc,ik), wan%nwan)
+   end do
+ end do
+
+ ABI_FREE(eikr)
+ ABI_FREE(u_k)
+ ABI_FREE(u_kq)
+ ABI_FREE(g_wan)
+ ABI_FREE(cmat_w)
+
+end subroutine wan_interp_eph_manyk_from_q
+!!***
+
+!!****f* m_mlwfovlp/wan_eph_kbatch_size
+!! NAME
+!! wan_eph_kbatch_size
+!!
+!! FUNCTION
+!! Return a k-batch size that bounds the combined complex local-perturbation
+!! and complete atomic-perturbation buffers. memory_mb defaults to 64 MiB.
+!!
+!! SOURCE
+
+integer function wan_eph_kbatch_size(wan, nk, natom3, memory_mb) result(nk_batch)
+
+ class(wan_t),intent(in) :: wan
+ integer,intent(in) :: nk, natom3
+ real(dp),optional,intent(in) :: memory_mb
+
+ real(dp) :: limit_mb
+!************************************************************************
+
+ limit_mb = 64.0_dp
+ if (present(memory_mb)) limit_mb = memory_mb
+ ABI_CHECK(limit_mb > zero, "The Wannier e-ph k-batch memory limit must be positive")
+ nk_batch = int(limit_mb * 1024.0_dp ** 2 / &
+                (16.0_dp * wan%nwan ** 2 * (wan%my_npert + natom3)))
+ nk_batch = max(1, min(nk, nk_batch))
+
+end function wan_eph_kbatch_size
 !!***
 
 !!****f* m_mlwfovlp/wan_ncwrite_gwan

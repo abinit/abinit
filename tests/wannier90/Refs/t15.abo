@@ -1,6 +1,6 @@
 
 .Version 10.9.0.8 of ABINIT. v10.8.2 released Jul 2026.
-.(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer) 
+.(sequential version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  2 Aug 2026.
-- ( at 17h49 )
+.Starting date : Mon  3 Aug 2026.
+- ( at 15h39 )
   
-- input  file    -> /Users/giantomassi/git_repos/abinit/tests/Test_suite/wannier90_t15/t15.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/gmatteo_gwr/tests/TestBot_MPI1/wannier90_t15/t15.abi
 - output file    -> t15.abo
 - root for input  files -> t15i
 - root for output files -> t15o
@@ -91,16 +91,16 @@ _ WF disk file :      0.298 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file
--  max_nthreads =    1
+-  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      1.0263000000E+01  1.0263000000E+01  1.0263000000E+01 Bohr
               amu      2.80855000E+01
              ecut      8.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -324,7 +324,7 @@ P           mkmem4          8
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -346,8 +346,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.16451
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/giantomassi/git_repos/abinit/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Si.psp8
-- pspatm: opening atomic psp file    /Users/giantomassi/git_repos/abinit/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Si.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/gmatteo_gwr/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/gmatteo_gwr/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Si.psp8
 - Si    ONCVPSP-3.3.0  r_core=   1.60303   1.72197   1.91712
 - 14.00000   4.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -378,10 +378,10 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  1  -8.5088072458517    -8.509E+00 6.488E-03 3.439E+00
  ETOT  2  -8.5134119199707    -4.605E-03 8.329E-03 1.369E-01
  ETOT  3  -8.5134958518261    -8.393E-05 4.621E-04 1.784E-03
- ETOT  4  -8.5134963768146    -5.250E-07 1.875E-04 7.219E-06
+ ETOT  4  -8.5134963768148    -5.250E-07 1.875E-04 7.219E-06
  ETOT  5  -8.5134963799928    -3.178E-09 1.811E-05 3.708E-08
- ETOT  6  -8.5134963800091    -1.628E-11 5.022E-06 1.662E-10
- ETOT  7  -8.5134963800091     3.730E-14 2.373E-06 3.348E-13
+ ETOT  6  -8.5134963800091    -1.630E-11 5.022E-06 1.662E-10
+ ETOT  7  -8.5134963800091     5.329E-14 2.373E-06 3.348E-13
 
  At SCF step    7       vres2   =  3.35E-13 < tolvrs=  1.00E-10 =>converged.
 
@@ -401,7 +401,7 @@ lattice_vectors:
 lattice_lengths: [   7.25704,    7.25704,    7.25704, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7024832E+02
-convergence: {deltae:  3.730E-14, res2:  3.348E-13, residm:  2.373E-06, diffor: null, }
+convergence: {deltae:  5.329E-14, res2:  3.348E-13, residm:  2.373E-06, diffor: null, }
 etotal    :  -8.51349638E+00
 entropy   :   0.00000000E+00
 fermie    :   1.74477588E-01
@@ -463,15 +463,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.09022952502840E+00
-hartree             :  5.57703463377273E-01
+hartree             :  5.57703463377277E-01
 xc                  : -3.10258106453893E+00
-Ewald energy        : -8.39800922793230E+00
+Ewald energy        : -8.39800922793231E+00
 psp_core            :  3.94898511693256E-01
-local_psp           : -2.36672660733608E+00
-non_local_psp       :  1.31098901969932E+00
-total_energy        : -8.51349638000906E+00
+local_psp           : -2.36672660733609E+00
+non_local_psp       :  1.31098901969933E+00
+total_energy        : -8.51349638000907E+00
 total_energy_eV     : -2.31664038300188E+02
-band_energy         : -9.20098761454214E-02
+band_energy         : -9.20098761454132E-02
 ...
 
 
@@ -487,7 +487,7 @@ band_energy         : -9.20098761454214E-02
 
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -755,7 +755,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 ================================================================================
 == DATASET  3 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -841,7 +841,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 ================================================================================
 == DATASET  4 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -879,29 +879,29 @@ meta: {optdriver: 8, wfk_task: 10, }
    m=n=1:3, ikb=1, ik=1
 
 ;   (   0.994673  -0.006566 ,   0.051430  -0.059123 ,   0.000000   0.000000 ,    )
-;   (   0.007172  -0.000047 ,  -0.102254   0.117550 ,   0.441373   0.736362 ,    )
-;   (  -0.010537   0.000070 ,   0.150219  -0.172690 ,  -0.013366  -0.002916 ,    )
+;   (   0.007171  -0.000047 ,  -0.102239   0.117533 ,   0.441367   0.736364 ,    )
+;   (  -0.010536   0.000070 ,   0.150214  -0.172684 ,  -0.013467  -0.002954 ,    )
 
    Writing bottom of the overlap matrix: M_mn(ikb,ik)
    m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt
 
 ;   (  -0.367722   0.738159 ,  -0.000000  -0.000000 ,   0.000000   0.000000 ,    )
-;   (  -0.000000   0.000000 ,   0.144493  -0.958272 ,   0.005681  -0.116001 ,    )
-;   (   0.000000   0.000000 ,  -0.028457   0.112600 ,   0.141776  -0.958678 ,    )
+;   (  -0.000000   0.000000 ,   0.144502  -0.958276 ,   0.005597  -0.115963 ,    )
+;   (   0.000000   0.000000 ,  -0.028527   0.112539 ,   0.141769  -0.958684 ,    )
 
    Writing top of the initial projections matrix: A_mn(ik)
    m=1:3, n=1:3, ik=1
 
-;   (   0.562166   0.000000 ,   0.562166   0.000000 ,   0.562166  -0.000000 ,    )
-;   (  -0.484108  -0.000000 ,  -0.162850  -0.000000 ,  -0.083685  -0.000000 ,    )
-;   (   0.340065  -0.000000 ,   0.239239   0.000000 ,  -0.769780  -0.000000 ,    )
+;   (   0.562166   0.000000 ,   0.562166  -0.000000 ,   0.562166  -0.000000 ,    )
+;   (  -0.484114  -0.000000 ,  -0.162826  -0.000000 ,  -0.083702  -0.000000 ,    )
+;   (   0.340084   0.000000 ,   0.239231   0.000000 ,  -0.769778   0.000000 ,    )
 
    Writing bottom of the initial projections matrix: A_mn(ik)
    m=num_bands-2:num_bands, n=nwan-2:nwan, ik=nkpt
 
 ;   (   0.150813  -0.194914 ,   0.150813  -0.194914 ,   0.150813  -0.194914 ,    )
-;   (  -0.511554  -0.188693 ,   0.586438   0.207063 ,  -0.074884  -0.018370 ,    )
-;   (   0.377437   0.142349 ,   0.257104   0.084426 ,  -0.634541  -0.226775 ,    )
+;   (  -0.511571  -0.188733 ,   0.586425   0.207035 ,  -0.074854  -0.018302 ,    )
+;   (   0.377383   0.142376 ,   0.257165   0.084395 ,  -0.634548  -0.226771 ,    )
 
 ** mlwfovlp:   calling wannier90 library subroutine wannier_run 
    Calculation is running         
@@ -939,7 +939,7 @@ meta: {optdriver: 8, wfk_task: 10, }
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          1
@@ -1157,10 +1157,56 @@ P           mkmem4          8
 
 ================================================================================
 
+- Total cpu        time (s,m,h):          4.9        0.08      0.001
+- Total wall clock time (s,m,h):          4.9        0.08      0.001
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0
+-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =            4.9, wall_time =            4.9
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- fourwf%(pot)                              0.912  18.8         0.927  18.9          10517      -1.00        0.98       0.98
+- nonlop(apply)                             0.267   5.5         0.264   5.4          10517      -1.00        1.01       1.01
+- pspini                                    0.194   4.0         0.194   4.0              4      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.149   3.1         0.149   3.0              1      -1.00        1.00       1.00
+- timing timab                              0.117   2.4         0.117   2.4             10      -1.00        1.00       1.00
+- getghc(/=fourXX,nonlop,fock_XX)           0.113   2.3         0.113   2.3             -1      -1.00        1.00       1.00
+- projbd                                    0.094   1.9         0.091   1.9          16586      -1.00        1.03       1.03
+- vtowfk(ssdiag)                            0.055   1.1         0.055   1.1             -1      -1.00        1.00       1.00
+- abinit(outvars)                           0.048   1.0         0.048   1.0              1      -1.00        1.00       1.00
+- abinit(after driver)                      0.043   0.9         0.043   0.9              1      -1.00        1.00       1.00
+- ewald                                     0.028   0.6         0.027   0.6              3      -1.00        1.03       1.03
+- others (206)                              0.126   2.6         0.185   3.8             -1      -1.00        0.68       0.68
+-<END_TIMER>
+-
+- subtotal                                  2.146  44.2         2.213  45.1                                  0.97       0.97
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =           4.9, wall_time =           4.9
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- fourwf%(pot)                              0.912  18.8         0.927  18.9          10517      -1.00        0.98       0.98
+- nonlop(apply)                             0.267   5.5         0.264   5.4          10517      -1.00        1.01       1.01
+- pspini                                    0.194   4.0         0.194   4.0              4      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.149   3.1         0.149   3.0              1      -1.00        1.00       1.00
+- timing timab                              0.117   2.4         0.117   2.4             10      -1.00        1.00       1.00
+- getghc(/=fourXX,nonlop,fock_XX)           0.113   2.3         0.113   2.3             -1      -1.00        1.00       1.00
+- projbd                                    0.094   1.9         0.091   1.9          16586      -1.00        1.03       1.03
+- vtowfk(ssdiag)                            0.055   1.1         0.055   1.1             -1      -1.00        1.00       1.00
+- abinit(outvars)                           0.048   1.0         0.048   1.0              1      -1.00        1.00       1.00
+- abinit(after driver)                      0.043   0.9         0.043   0.9              1      -1.00        1.00       1.00
+- ewald                                     0.028   0.6         0.027   0.6              3      -1.00        1.03       1.03
+- others (206)                              0.126   2.6         0.185   3.8             -1      -1.00        0.68       0.68
+-<END_TIMER>
 
+- subtotal                                  2.146  44.2         2.213  45.1                                  0.97       0.97
 
 ================================================================================
 
@@ -1242,15 +1288,10 @@ P           mkmem4          8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- Proc.   0 individual time (sec): cpu=          2.0  wall=          2.1
+- Proc.   0 individual time (sec): cpu=          4.9  wall=          4.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.0  wall=          2.1
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 214 allocations and 214 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 1471742 allocations and 1471742 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0
+.Delivered   3 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.9  wall=          4.9

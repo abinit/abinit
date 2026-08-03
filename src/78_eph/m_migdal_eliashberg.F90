@@ -572,18 +572,17 @@ subroutine get_lambda_qpath_wan(gstore, dtset, edos_fermie, qpoints, phfreq, phd
 !scalars
  integer,parameter :: master = 0
  integer :: my_is, my_ik, my_ip, iq, ipc, nu, in_k, im_kq, ierr, my_rank
- integer :: natom, natom3, nwan, nqpath, spin
+ integer :: natom, natom3, nwan, nqpath, spin, ik_start, ik_stop, ikb, nkb, nk_batch
  real(dp) :: weight_k, g2, fs_weight, spin_factor, cpu, wall, gflops
  logical :: has_gwan
  type(kpath_t) :: qpath
  character(len=500) :: msg
 !arrays
  integer :: units(2)
- real(dp) :: kpt(3)
  real(dp),allocatable :: displ_cart4(:,:,:,:), displ_red4(:,:,:,:), displ_red(:,:,:)
  real(dp),allocatable :: gatm_real(:,:,:,:,:), gnu_real(:,:,:,:,:)
- real(dp),allocatable :: eig_k(:), eig_kq(:)
- complex(dp),allocatable :: intp_gatm(:,:,:,:), gatm_full(:,:,:), u_k(:,:), u_kq(:,:)
+ real(dp),allocatable :: eig_k(:,:), eig_kq(:,:)
+ complex(dp),allocatable :: intp_gatm(:,:,:,:), gatm_full(:,:,:,:), g_req(:,:,:,:)
 !----------------------------------------------------------------------
 
  units = [std_out, ab_out]
@@ -631,60 +630,68 @@ subroutine get_lambda_qpath_wan(gstore, dtset, edos_fermie, qpoints, phfreq, phd
    ABI_CHECK_IEQ(nwan, gqk%nb_k, "Wannier and GSTORE band dimensions differ")
    ABI_CHECK_IEQ(nwan, gqk%nb_kq, "Wannier and GSTORE band dimensions differ")
 
-   ABI_MALLOC(intp_gatm, (nwan, nwan, gqk%my_npert, 1))
-   ABI_MALLOC(gatm_full, (nwan, nwan, natom3))
+   nk_batch = gqk%wan%eph_kbatch_size(gqk%my_nk, natom3)
+   ABI_MALLOC(intp_gatm, (nwan, nwan, gqk%my_npert, nk_batch))
+   ABI_MALLOC(gatm_full, (nwan, nwan, natom3, nk_batch))
+   ABI_MALLOC(g_req, (gqk%wan%nr_e, nwan, nwan, gqk%my_npert))
    ABI_MALLOC(gatm_real, (2, nwan, nwan, 1, natom3))
    ABI_MALLOC(gnu_real, (2, nwan, nwan, 1, natom3))
-   ABI_MALLOC(eig_k, (nwan))
-   ABI_MALLOC(eig_kq, (nwan))
-   ABI_MALLOC(u_k, (nwan, nwan))
-   ABI_MALLOC(u_kq, (nwan, nwan))
+   ABI_MALLOC(eig_k, (nwan, nk_batch))
+   ABI_MALLOC(eig_kq, (nwan, nk_batch))
 
    do iq=1,nqpath
      if (gqk%qpt_comm%skip(iq)) cycle
      call gstore%ifc%fourq(gstore%cryst, qpoints(:,iq), phfreq(:,iq), displ_cart4, out_displ_red=displ_red4)
      displ_red = reshape(displ_red4, [2, natom3, natom3])
+     call gqk%wan%prepare_eph_q(qpoints(:,iq), g_req)
 
-     do my_ik=1,gqk%my_nk
-       kpt = gqk%my_kpts(:,my_ik)
-       weight_k = gqk%my_wtk(my_ik)
-       call gqk%wan%interp_ham(gstore%cryst, kpt, u_k, eig_k)
-       call gqk%wan%interp_ham(gstore%cryst, kpt + qpoints(:,iq), u_kq, eig_kq)
-       call gqk%wan%interp_eph_manyq(gstore%cryst, 1, qpoints(:,iq), kpt, intp_gatm)
+     do ik_start=1,gqk%my_nk,nk_batch
+       ik_stop = min(gqk%my_nk, ik_start + nk_batch - 1); nkb = ik_stop - ik_start + 1
 
-       gatm_full = czero
-       do ipc=1,gqk%my_npert
-         gatm_full(:,:,gqk%my_pertcases(ipc)) = intp_gatm(:,:,ipc,1)
-       end do
-       if (gqk%pert_comm%nproc > 1) call xmpi_sum(gatm_full, gqk%pert_comm%value, ierr)
+       ! Interpolate one bounded k block and reuse the returned electronic
+       ! energies in the Fermi-surface weights.
+       call gqk%wan%interp_eph_manyk_from_q(gstore%cryst, nkb, gqk%my_kpts(:,ik_start:ik_stop), &
+                                            qpoints(:,iq), g_req, intp_gatm(:,:,:,1:nkb), &
+                                            out_eigens_k=eig_k(:,1:nkb), out_eigens_kq=eig_kq(:,1:nkb))
 
-       gatm_real(1,:,:,1,:) = real(gatm_full, kind=dp)
-       gatm_real(2,:,:,1,:) = aimag(gatm_full)
-       call ephtk_gkknu_from_atm(nwan, nwan, 1, natom, gatm_real, phfreq(:,iq), displ_red, gnu_real)
-
-       do my_ip=1,gqk%my_npert
-         nu = gqk%my_pertcases(my_ip)
-         if (phfreq(nu,iq) < EPHTK_WTOL) cycle
-         do in_k=1,nwan
-           do im_kq=1,nwan
-             g2 = gnu_real(1,im_kq,in_k,1,nu)**2 + gnu_real(2,im_kq,in_k,1,nu)**2
-             fs_weight = gaussian(eig_k(in_k) - gstore%ebands%fermie, dtset%eph_fsmear) * &
-                         gaussian(eig_kq(im_kq) - gstore%ebands%fermie, dtset%eph_fsmear)
-             phlambda(nu,iq,spin) = phlambda(nu,iq,spin) + two * g2 * weight_k * fs_weight / phfreq(nu,iq)
-           end do
+       gatm_full(:,:,:,1:nkb) = czero
+       do ikb=1,nkb
+         do ipc=1,gqk%my_npert
+           gatm_full(:,:,gqk%my_pertcases(ipc),ikb) = intp_gatm(:,:,ipc,ikb)
          end do
        end do
-     end do
+       if (gqk%pert_comm%nproc > 1) call xmpi_sum(gatm_full(:,:,:,1:nkb), gqk%pert_comm%value, ierr)
+
+       do ikb=1,nkb
+         my_ik = ik_start + ikb - 1
+         weight_k = gqk%my_wtk(my_ik)
+         gatm_real(1,:,:,1,:) = real(gatm_full(:,:,:,ikb), kind=dp)
+         gatm_real(2,:,:,1,:) = aimag(gatm_full(:,:,:,ikb))
+         call ephtk_gkknu_from_atm(nwan, nwan, 1, natom, gatm_real, phfreq(:,iq), displ_red, gnu_real)
+
+         do my_ip=1,gqk%my_npert
+           nu = gqk%my_pertcases(my_ip)
+           if (phfreq(nu,iq) < EPHTK_WTOL) cycle
+           do in_k=1,nwan
+             do im_kq=1,nwan
+               g2 = gnu_real(1,im_kq,in_k,1,nu)**2 + gnu_real(2,im_kq,in_k,1,nu)**2
+               fs_weight = gaussian(eig_k(in_k,ikb) - gstore%ebands%fermie, dtset%eph_fsmear) * &
+                           gaussian(eig_kq(im_kq,ikb) - gstore%ebands%fermie, dtset%eph_fsmear)
+               phlambda(nu,iq,spin) = phlambda(nu,iq,spin) + two * g2 * weight_k * fs_weight / phfreq(nu,iq)
+             end do
+           end do
+         end do
+       end do ! ikb
+     end do ! ik_start
    end do
 
    ABI_FREE(intp_gatm)
    ABI_FREE(gatm_full)
+   ABI_FREE(g_req)
    ABI_FREE(gatm_real)
    ABI_FREE(gnu_real)
    ABI_FREE(eig_k)
    ABI_FREE(eig_kq)
-   ABI_FREE(u_k)
-   ABI_FREE(u_kq)
    end associate
  end do
 

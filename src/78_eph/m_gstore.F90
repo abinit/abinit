@@ -1358,6 +1358,7 @@ subroutine gstore_init_or_from_ncpath(gstore, with_cplex, dtset, dtfil, wfk0_hdr
 !Local variables-------------------------------
 !scalars
  integer :: natom, natom3, spin, my_is, my_ik, my_iq, iq_ibz, isym_q, trev_q, ipc, nu, nwan, ierr
+ integer :: ik_start, ik_stop, ikb, nkb, nk_batch
  real(dp) :: weight_q, cpu, wall, gflops
  character(len=500) :: msg
  character(len=fnlen) :: gstore_path
@@ -1366,7 +1367,7 @@ subroutine gstore_init_or_from_ncpath(gstore, with_cplex, dtset, dtfil, wfk0_hdr
  real(dp) :: qpt(3)
  real(dp),allocatable :: phfrq_ibz(:,:), displ_cart_dum(:,:,:,:), gatm_real(:,:,:,:), gnu_real(:,:,:,:)
  real(dp),allocatable :: eigvec_ibz(:,:,:,:,:), eigvec_qbz(:,:,:,:), displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:)
- complex(dp),allocatable :: intp_gatm(:,:,:,:), gatm_full(:,:,:)
+ complex(dp),allocatable :: intp_gatm(:,:,:,:), gatm_full(:,:,:,:), g_req(:,:,:,:)
 !----------------------------------------------------------------------
 
  if (dtfil%filgstorein /= ABI_NOFILE) then
@@ -1429,8 +1430,12 @@ subroutine gstore_init_or_from_ncpath(gstore, with_cplex, dtset, dtfil, wfk0_hdr
      ABI_MALLOC(gqk%my_wnuq, (gqk%my_npert, gqk%my_nq))
      ABI_MALLOC(gqk%my_displ_cart, (2, 3, natom, gqk%my_npert, gqk%my_nq))
 
-     ABI_MALLOC(intp_gatm, (nwan, nwan, gqk%my_npert, 1))
-     ABI_MALLOC(gatm_full, (nwan, nwan, natom3))
+     ! Bound the two temporary complex atomic-vertex arrays to the default
+     ! 64 MiB workspace. The low-level selector also accepts a custom limit.
+     nk_batch = gqk%wan%eph_kbatch_size(gqk%my_nk, natom3)
+     ABI_MALLOC(intp_gatm, (nwan, nwan, gqk%my_npert, nk_batch))
+     ABI_MALLOC(gatm_full, (nwan, nwan, natom3, nk_batch))
+     ABI_MALLOC(g_req, (gqk%wan%nr_e, nwan, nwan, gqk%my_npert))
      ABI_MALLOC(gatm_real, (2, nwan, nwan, natom3))
      ABI_MALLOC(gnu_real, (2, nwan, nwan, natom3))
 
@@ -1446,35 +1451,47 @@ subroutine gstore_init_or_from_ncpath(gstore, with_cplex, dtset, dtfil, wfk0_hdr
        gqk%my_wnuq(:,my_iq) = phfrq_ibz(gqk%my_pertcases(:), iq_ibz)
        gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart_qbz(:,:,:,gqk%my_pertcases(:))
 
-       do my_ik=1,gqk%my_nk
-         ! Interpolate e-ph matrix elements in the atomic representation for this rank's slice
-         ! of the natom3 atomic perturbations (gqk%my_pertcases).
-         call gqk%wan%interp_eph_manyq(cryst, 1, qpt, gqk%my_kpts(:,my_ik), intp_gatm)
+       ! The R_p -> q transform is independent of k and is reused by every
+       ! bounded k block below.
+       call gqk%wan%prepare_eph_q(qpt, g_req)
 
-         ! Scatter into the full natom3 array and reduce over pert_comm: the atom -> phonon-mode
-         ! transform mixes all natom3 atomic perturbations, so every rank needs the complete array.
-         gatm_full = czero
-         do ipc=1,gqk%my_npert
-           gatm_full(:,:, gqk%my_pertcases(ipc)) = intp_gatm(:,:,ipc,1)
+       do ik_start=1,gqk%my_nk,nk_batch
+         ik_stop = min(gqk%my_nk, ik_start + nk_batch - 1); nkb = ik_stop - ik_start + 1
+
+         call gqk%wan%interp_eph_manyk_from_q(cryst, nkb, gqk%my_kpts(:,ik_start:ik_stop), qpt, &
+                                              g_req, intp_gatm(:,:,:,1:nkb))
+
+         ! Complete all atomic perturbations for the block with one collective
+         ! instead of one pert_comm reduction per k point.
+         gatm_full(:,:,:,1:nkb) = czero
+         do ikb=1,nkb
+           do ipc=1,gqk%my_npert
+             gatm_full(:,:,gqk%my_pertcases(ipc),ikb) = intp_gatm(:,:,ipc,ikb)
+           end do
          end do
-         if (gqk%pert_comm%nproc > 1) call xmpi_sum(gatm_full, gqk%pert_comm%value, ierr)
+         if (gqk%pert_comm%nproc > 1) call xmpi_sum(gatm_full(:,:,:,1:nkb), gqk%pert_comm%value, ierr)
 
-         gatm_real(1,:,:,:) = real(gatm_full, kind=dp); gatm_real(2,:,:,:) = aimag(gatm_full)
-         call ephtk_gkknu_from_atm(nwan, nwan, 1, natom, gatm_real, phfrq_ibz(:,iq_ibz), displ_red_qbz, gnu_real)
+         do ikb=1,nkb
+           my_ik = ik_start + ikb - 1
+           gatm_real(1,:,:,:) = real(gatm_full(:,:,:,ikb), kind=dp)
+           gatm_real(2,:,:,:) = aimag(gatm_full(:,:,:,ikb))
+           call ephtk_gkknu_from_atm(nwan, nwan, 1, natom, gatm_real, phfrq_ibz(:,iq_ibz), displ_red_qbz, gnu_real)
 
-         do ipc=1,gqk%my_npert
-           nu = gqk%my_pertcases(ipc)
-           if (with_cplex == 2) then
-             gqk%my_g(ipc,:,my_iq,:,my_ik) = gnu_real(1,:,:,nu) + j_dpc * gnu_real(2,:,:,nu)
-           else
-             gqk%my_g2(ipc,:,my_iq,:,my_ik) = gnu_real(1,:,:,nu)**2 + gnu_real(2,:,:,nu)**2
-           end if
-         end do
-       end do ! my_ik
+           do ipc=1,gqk%my_npert
+             nu = gqk%my_pertcases(ipc)
+             if (with_cplex == 2) then
+               gqk%my_g(ipc,:,my_iq,:,my_ik) = gnu_real(1,:,:,nu) + j_dpc * gnu_real(2,:,:,nu)
+             else
+               gqk%my_g2(ipc,:,my_iq,:,my_ik) = gnu_real(1,:,:,nu)**2 + gnu_real(2,:,:,nu)**2
+             end if
+           end do
+         end do ! ikb
+       end do ! ik_start
      end do ! my_iq
 
      ABI_FREE(intp_gatm)
      ABI_FREE(gatm_full)
+     ABI_FREE(g_req)
      ABI_FREE(gatm_real)
      ABI_FREE(gnu_real)
    end do ! my_is

@@ -287,6 +287,25 @@ meta: {optdriver: 8, wfk_task: 10, }
 ;   (  -0.000003   0.025141 ,   0.025335   0.006778 ,   0.025262   0.006759 ,    )
 ;   (   0.001504  -0.132780 ,   0.219479   0.039765 ,   0.236858   0.087330 ,    )
 
+** mlwfovlp:   calling wannier90 library subroutine wannier_run 
+   Calculation is running         
+-  see teph4isotc_3o_w90.wout for details.
+   Spin channel: 1
+   Uniform k-mesh: 6 6 4
+   Number of k-points: 144
+   Number of input bands: 16
+   Number of Wannier functions: 4
+   Number of k-point neighbours: 8
+   Fermi energy [eV]:   0.00000000E+00
+   Eigenvalue range (min, max) [eV]:  -4.59642653E+00   3.14869906E+01
+   Wannier90 physical results:
+-   Spreads (Omega_total, Omega_I, Omega_tilde) [Ang^2]:   7.98088006E+00   5.44233032E+00   2.53854974E+00
+   Wannier function centres [Ang] and spreads [Ang^2]:
+-     WF 1: centre =    -0.00004911    -1.54142238     1.77859133  spread =     1.23234075
+-     WF 2: centre =     1.33349234     0.77165551    -1.75812465  spread =     1.23318558
+-     WF 3: centre =    -1.35610185     0.77468851     2.16021720  spread =     2.74265828
+-     WF 4: centre =     1.31374189     2.31759593     1.34061537  spread =     2.77269545
+
    mlwfovlp :  mlwfovlp_run completed -
 -  see teph4isotc_3o_w90.wout for details.
 
