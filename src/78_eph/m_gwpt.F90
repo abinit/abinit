@@ -182,8 +182,9 @@ contains  !=====================================================
 !!
 !! Debugging options:
 !! useria =  1 # write gvals=gxc to GSTORE.nc
-!! useria =  0 (default) # write gvals=gks-gxc+gsigx+gsigc to GSTORE.n
+!! useria =  0 (default) # write gvals=gks-gxc+gsigx+gsigc to GSTORE.nc
 !! useria = -1 # write gvals=gsigx (when userid=0) + gsigc (when useric=0) to GSTORE.nc
+!! useria = 888 # use xmpi_comm_self when reopening GSTORE.nc to avoid parallel NetCDF deadlocks
 !!
 !! userib = 0 (default) # calculate all k and q
 !! userib = 1 # filter k and q, only calculate k=Lambda, and q=L (for comparesion with finite difference GW)
@@ -367,11 +368,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    nqbz = gstore%nqbz
  end if
 
- ! FIXME: Fix problem with IO (some q-points are not written)
  ! Open GSTORE.nc file and go to data mode.
- !NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, comm))
- ! use xmpi_comm_self otherwise there will be a deadlock on lemaitre4
- NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, xmpi_comm_self))
+ ! On some systems, parallel NetCDF access can deadlock when restarting GWPT.
+ ! useria == 888 activates independent I/O as a temporary portability workaround.
+ if (dtset%useria == 888) then
+   NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, xmpi_comm_self))
+ else
+   NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, comm))
+ end if
  NCF_CHECK(nctk_set_datamode(root_ncid))
 
  call gstore%get_missing_qbz_spin(done_qbz_spin, ndone, nmiss)
@@ -2006,8 +2010,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !if (my_rank == master) then
    NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_completed"), 1))
  !end if
- ! SC: not sure why, but nf90_sync sometimes can cause a deadlock, observed on lemaitre4
- !NCF_CHECK(nf90_sync(root_ncid))
+ ! nf90_sync can deadlock on lemaitre4 for some MPI decompositions.
+ if (dtset%useria /= 888) then
+   NCF_CHECK(nf90_sync(root_ncid))
+ end if
  NCF_CHECK(nf90_close(root_ncid))
  call xmpi_barrier(comm)
 
@@ -2146,8 +2152,11 @@ subroutine dump_my_gbuf()
 !10 iqbuf_cnt = 0
  state_kq = GSTORE_KQ_MISSING
 
- !NCF_CHECK(nf90_sync(spin_ncid))
- !NCF_CHECK(nf90_sync(root_ncid))
+ ! These syncs can deadlock on lemaitre4 for some MPI decompositions.
+ if (dtset%useria /= 888) then
+   NCF_CHECK(nf90_sync(spin_ncid))
+   NCF_CHECK(nf90_sync(root_ncid))
+ end if
 
 end subroutine dump_my_gbuf
 
@@ -2166,4 +2175,3 @@ end subroutine gwpt_run
 
 end module m_gwpt
 !!***
-

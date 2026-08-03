@@ -3923,8 +3923,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
    NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, gstore%comm))
  end if
 
-
-
  ! integer scalars
  ncerr = nctk_def_iscalars(root_ncid, [character(len=nctk_slen) :: &
    "used_ftinterp" &
@@ -4322,7 +4320,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst,
  !if (my_rank == master) then
    NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_completed"), 1))
  !end if
- NCF_CHECK(nf90_sync(root_ncid))
+ ! nf90_sync can deadlock on lemaitre4 for some MPI decompositions.
+ if (dtset%useria /= 888) then
+   NCF_CHECK(nf90_sync(root_ncid))
+ end if
  NCF_CHECK(nf90_close(root_ncid))
  call xmpi_barrier(gstore%comm)
 
@@ -4444,8 +4445,11 @@ subroutine dump_my_gbuf()
  iq_buf = 0
  state_kq = GSTORE_KQ_MISSING
 
- NCF_CHECK(nf90_sync(spin_ncid))
- NCF_CHECK(nf90_sync(root_ncid))
+ ! These syncs can deadlock on lemaitre4 for some MPI decompositions.
+ if (dtset%useria /= 888) then
+   NCF_CHECK(nf90_sync(spin_ncid))
+   NCF_CHECK(nf90_sync(root_ncid))
+ end if
 
 end subroutine dump_my_gbuf
 
