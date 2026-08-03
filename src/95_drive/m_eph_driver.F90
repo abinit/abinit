@@ -148,7 +148,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0, with_cplex1 = 1, with_cplex2 = 2
+ integer,parameter :: master = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0
+ integer,parameter :: with_cplex0 = 0, with_cplex1 = 1, with_cplex2 = 2
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
  integer :: omp_ncpus, work_size, nks_per_proc, lwsym, qptopt, ncid
@@ -784,8 +785,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (12, -12)
    ! Migdal-Eliashberg equations (isotropic or anisotropic case).
-   ! Need|g(k,q)|^2 in the phonon representation.
-   call gstore%init_or_from_ncpath(with_cplex1, dtset, dtfil, wfk0_hdr, cryst, qp_ebands, ifc, &
+   ! Read |g(k,q)|^2 from GSTORE when present. With Wannier input, prepare
+   ! the compact real-space vertex and interpolate it on demand in get_a2fw.
+   call gstore%init_or_from_ncpath(merge(with_cplex1, with_cplex0, dtfil%filgstorein /= ABI_NOFILE), &
+                                   dtset, dtfil, wfk0_hdr, cryst, qp_ebands, ifc, &
                                    "phonon", dtset%gstore_gname, .False., comm, gstore_from_file)
    if (gstore_from_file) then
      call wrtout(units, " Gstore built by reading a pre-existent GSTORE.nc file")

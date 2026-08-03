@@ -554,6 +554,11 @@ type, public :: gstore_t
   ! k-points in the BZ.
   ! TODO: Use MPI shared memory?
 
+  integer :: with_cplex = -1
+  ! Representation of the e-ph matrix elements materialized in memory:
+  ! 0: no matrix elements, 1: squared moduli in gqk%my_g2, 2: complex values in gqk%my_g.
+  ! This state is independent of the representation stored in a GSTORE.nc file.
+
   !integer :: qptrlatt(3, 3) = -1  ! kptrlatt(3, 3) = -1,
    ! k-mesh and q-mesh
 
@@ -629,6 +634,12 @@ contains
   procedure :: same_nbands => gstore_same_nbands
   ! Returns True if nb_k == nb_kq
 
+  procedure :: has_matrix_elements => gstore_has_matrix_elements
+  ! True if e-ph matrix elements have been materialized in memory.
+
+  procedure :: has_complex_matrix_elements => gstore_has_complex_matrix_elements
+  ! True if complex e-ph matrix elements have been materialized in memory.
+
   procedure :: get_missing_qbz_spin => gstore_get_missing_qbz_spin
   ! Return the number of (q-points, spin) entries that have been computed
 
@@ -677,8 +688,8 @@ contains
 !! INPUTS
 !! path=Filename of the output GSTORE.nc file
 !! with_cplex=Optional, only relevant when e-ph matrix elements are interpolated on the fly via
-!!   Wannier (i.e. getabiwan_filepath + getgwan_filepath are used): 1 to store |g|^2, 2 to store
-!!   the complex g. Default: 2. Ignored otherwise.
+!!   Wannier (i.e. getabiwan_filepath + getgwan_filepath are used): 0 to allocate no matrix
+!!   elements, 1 to store |g|^2, 2 to store the complex g. Default: 2. Ignored otherwise.
 !!
 !! SOURCE
 
@@ -1065,6 +1076,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    gqk_cplex = 2
    if (present(with_cplex)) gqk_cplex = with_cplex
  end if
+ ABI_CHECK(gqk_cplex >= 0 .and. gqk_cplex <= 2, sjoin("Invalid with_cplex:", itoa(gqk_cplex)))
+ gstore%with_cplex = gqk_cplex
  call gstore%malloc__(gqk_cplex, has_both_g, max_nq, qglob2bz, max_nk, gstore%kglob2bz, qbz2ibz, gstore%kbz2ibz)
 
  ! Initialize GSTORE.nc file i.e. define dimensions and arrays
@@ -1378,10 +1391,10 @@ subroutine gstore_init_or_from_ncpath(gstore, with_cplex, dtset, dtfil, wfk0_hdr
  else if (dtfil%filabiwanin /= ABI_NOFILE .and. dtfil%filgwanin /= ABI_NOFILE) then
    ! Build gstore on the fly via Wannier interpolation from ABIWAN.nc + GWAN.nc.
    call cwtime(cpu, wall, gflops, "start")
-   ! First version: only |g|^2 (with_cplex=1) or complex g (with_cplex=2), phonon representation,
-   ! no Debye-Waller, no gvals_ks (this option is only meaningful when reading gstore produced by GWPT).
-   msg = sjoin("Invalid with_cplex:", itoa(with_cplex), "only 1 or 2 are supported when building gstore via Wannier interpolation")
-   ABI_CHECK(with_cplex == 1 .or. with_cplex == 2, msg)
+   ! with_cplex=0 prepares the Wannier interpolator and gstore metadata without materializing g(k,q).
+   ! with_cplex=1/2 stores |g|^2/complex g, respectively. Debye-Waller and gvals_ks are unsupported.
+   msg = sjoin("Invalid with_cplex:", itoa(with_cplex), "only 0, 1 or 2 are supported")
+   ABI_CHECK(with_cplex >= 0 .and. with_cplex <= 2, msg)
    if (with_g2dw) then
      ABI_ERROR("with_g2dw = .True. is not yet supported when building gstore via Wannier interpolation (ABIWAN.nc + GWAN.nc)")
    end if
@@ -1395,7 +1408,11 @@ subroutine gstore_init_or_from_ncpath(gstore, with_cplex, dtset, dtfil, wfk0_hdr
    gstore_path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
    call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm, with_cplex=with_cplex)
 
-   call wrtout([std_out, ab_out], " Using Wannier interpolation to compute and store e-ph matrix elements ...", pre_newlines=1)
+   if (with_cplex == 0) then
+     call wrtout([std_out, ab_out], " Preparing on-demand Wannier interpolation of e-ph matrix elements ...", pre_newlines=1)
+   else
+     call wrtout([std_out, ab_out], " Using Wannier interpolation to compute and store e-ph matrix elements ...", pre_newlines=1)
+   end if
    from_file = .False.
    natom = cryst%natom; natom3 = 3 * natom
 
@@ -1430,14 +1447,16 @@ subroutine gstore_init_or_from_ncpath(gstore, with_cplex, dtset, dtfil, wfk0_hdr
      ABI_MALLOC(gqk%my_wnuq, (gqk%my_npert, gqk%my_nq))
      ABI_MALLOC(gqk%my_displ_cart, (2, 3, natom, gqk%my_npert, gqk%my_nq))
 
-     ! Bound the two temporary complex atomic-vertex arrays to the default
-     ! 64 MiB workspace. The low-level selector also accepts a custom limit.
-     nk_batch = gqk%wan%eph_kbatch_size(gqk%my_nk, natom3)
-     ABI_MALLOC(intp_gatm, (nwan, nwan, gqk%my_npert, nk_batch))
-     ABI_MALLOC(gatm_full, (nwan, nwan, natom3, nk_batch))
-     ABI_MALLOC(g_req, (gqk%wan%nr_e, nwan, nwan, gqk%my_npert))
-     ABI_MALLOC(gatm_real, (2, nwan, nwan, natom3))
-     ABI_MALLOC(gnu_real, (2, nwan, nwan, natom3))
+     if (with_cplex > 0) then
+       ! Bound the two temporary complex atomic-vertex arrays to the default
+       ! 64 MiB workspace. The low-level selector also accepts a custom limit.
+       nk_batch = gqk%wan%eph_kbatch_size(gqk%my_nk, natom3)
+       ABI_MALLOC(intp_gatm, (nwan, nwan, gqk%my_npert, nk_batch))
+       ABI_MALLOC(gatm_full, (nwan, nwan, natom3, nk_batch))
+       ABI_MALLOC(g_req, (gqk%wan%nr_e, nwan, nwan, gqk%my_npert))
+       ABI_MALLOC(gatm_real, (2, nwan, nwan, natom3))
+       ABI_MALLOC(gnu_real, (2, nwan, nwan, natom3))
+     end if
 
      do my_iq=1,gqk%my_nq
        call gqk%myqpt(my_iq, gstore, weight_q, qpt)
@@ -1450,6 +1469,8 @@ subroutine gstore_init_or_from_ncpath(gstore, with_cplex, dtset, dtfil, wfk0_hdr
        ! Fill my arrays with ph data.
        gqk%my_wnuq(:,my_iq) = phfrq_ibz(gqk%my_pertcases(:), iq_ibz)
        gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart_qbz(:,:,:,gqk%my_pertcases(:))
+
+       if (with_cplex == 0) cycle
 
        ! The R_p -> q transform is independent of k and is reused by every
        ! bounded k block below.
@@ -1489,11 +1510,13 @@ subroutine gstore_init_or_from_ncpath(gstore, with_cplex, dtset, dtfil, wfk0_hdr
        end do ! ik_start
      end do ! my_iq
 
-     ABI_FREE(intp_gatm)
-     ABI_FREE(gatm_full)
-     ABI_FREE(g_req)
-     ABI_FREE(gatm_real)
-     ABI_FREE(gnu_real)
+     if (with_cplex > 0) then
+       ABI_FREE(intp_gatm)
+       ABI_FREE(gatm_full)
+       ABI_FREE(g_req)
+       ABI_FREE(gatm_real)
+       ABI_FREE(gnu_real)
+     end if
    end do ! my_is
 
    ABI_FREE(phfrq_ibz)
@@ -1515,6 +1538,26 @@ subroutine gstore_init_or_from_ncpath(gstore, with_cplex, dtset, dtfil, wfk0_hdr
 
 end subroutine gstore_init_or_from_ncpath
 !!***
+
+!----------------------------------------------------------------------
+
+logical function gstore_has_matrix_elements(gstore) result(has_g)
+
+ class(gstore_t),intent(in) :: gstore
+
+ has_g = gstore%with_cplex > 0
+
+end function gstore_has_matrix_elements
+
+!----------------------------------------------------------------------
+
+logical function gstore_has_complex_matrix_elements(gstore) result(has_complex_g)
+
+ class(gstore_t),intent(in) :: gstore
+
+ has_complex_g = gstore%with_cplex == 2
+
+end function gstore_has_complex_matrix_elements
 
 !----------------------------------------------------------------------
 
@@ -2157,6 +2200,9 @@ subroutine gstore_malloc__(gstore, with_cplex, has_both_g, max_nq, qglob2bz, max
  real(dp) :: mem_mb
  type(gqk_t), pointer :: gqk
 !----------------------------------------------------------------------
+
+ ABI_CHECK(with_cplex >= 0 .and. with_cplex <= 2, sjoin("Invalid with_cplex:", itoa(with_cplex)))
+ gstore%with_cplex = with_cplex
 
  do my_is=1,gstore%my_nspins
    associate (spin => gstore%my_spins(my_is))
@@ -3196,6 +3242,7 @@ subroutine gstore_free(gstore)
 
  call gstore%krank_ibz%free()
  call gstore%qrank_ibz%free()
+ gstore%with_cplex = -1
 
 end subroutine gstore_free
 !!***
@@ -4480,7 +4527,8 @@ end function gstore_check_cplex_qkzone_gmode
 !!
 !! INPUTS
 !!  path: Path to the GSTORE file.
-!!  with_cplex: 1 for |g|^2, 2 for complex g. with_gmode defines the representation.
+!!  with_cplex: 0 to read no matrix elements, 1 for |g|^2, 2 for complex g.
+!!    with_gmode defines the representation.
 !!  dtset: Input variables
 !!  cryst: crystalline structure
 !!  ebands: KS energies
@@ -4536,6 +4584,8 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
+
+ ABI_CHECK(with_cplex >= 0 .and. with_cplex <= 2, sjoin("Invalid with_cplex:", itoa(with_cplex)))
 
  units = [std_out, ab_out]
  call wrtout(units, sjoin("- Reading e-ph matrix elements from: ", path), pre_newlines=1)

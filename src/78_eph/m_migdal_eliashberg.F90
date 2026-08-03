@@ -39,6 +39,7 @@ module m_migdal_eliashberg
  use m_special_funcs,   only : gaussian
  use m_ebands,          only : ebands_t, edos_t
  use m_bz_mesh,         only : kpath_t
+ use m_geometry,        only : phdispl_cart2red_nmodes
  use m_ephtk,           only : ephtk_gkknu_from_atm, EPHTK_WTOL
  use m_gstore,          only : gstore_t
 
@@ -821,13 +822,15 @@ subroutine get_a2fw(gstore, edos_fermie, nw, wmesh, a2fw, phfreq_qibz, phlambda_
 
 !Local variables-------------------------------
  integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, iq_ibz, isym_q, trev_q, nb_k, nb_kq
- integer :: natom3, g0_q(3)
+ integer :: natom, natom3, g0_q(3), nk_batch, ik_start, ik_stop, ikb, nkb, ipc, nwan
  real(dp) :: g2_qnu, wqnu, weight_k, weight_q, cpu, wall, gflops, spin_factor
  logical :: isirr_q
 !arrays
  integer :: units(2)
  real(dp) :: qpt(3)
  real(dp),allocatable :: dbl_delta_q(:,:,:), g2_mnkp(:,:,:,:), deltaw_nuq(:), displ_cart_dum(:,:,:,:)
+ real(dp),allocatable :: displ_red_local(:,:,:)
+ complex(dp),allocatable :: intp_gatm(:,:,:,:), gatm_full(:,:,:,:), g_req(:,:,:,:), gnu(:,:)
 !----------------------------------------------------------------------
 
  units = [std_out, ab_out]
@@ -837,10 +840,15 @@ subroutine get_a2fw(gstore, edos_fermie, nw, wmesh, a2fw, phfreq_qibz, phlambda_
 
  ABI_CHECK(gstore%kzone == "bz", "get_a2fw requires kzone == `bz`")
  ABI_CHECK(any(gstore%qzone == ["bz ", "ibz"]), "get_a2fw requires qzone == `bz` or `ibz`")
+ ABI_CHECK(any(gstore%with_cplex == [0, 1]), "get_a2fw requires with_cplex=0 or 1")
+ if (gstore%with_cplex == 0) then
+   ABI_CHECK(gstore%has_wannier, "get_a2fw with_cplex=0 requires a Wannier interpolator")
+ end if
  ABI_CHECK(edos_fermie > zero, "The electronic DOS at the Fermi level must be positive")
 
  ABI_MALLOC(deltaw_nuq, (nw))
- natom3 = 3 * gstore%cryst%natom
+ natom = gstore%cryst%natom
+ natom3 = 3 * natom
  ABI_MALLOC(phfreq_qibz, (natom3, gstore%nqibz))
  ABI_CALLOC(phlambda_qibz, (natom3, gstore%nqibz, gstore%nsppol))
  ABI_MALLOC(displ_cart_dum, (2, 3, gstore%cryst%natom, natom3))
@@ -853,7 +861,9 @@ subroutine get_a2fw(gstore, edos_fermie, nw, wmesh, a2fw, phfreq_qibz, phlambda_
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is), cryst => gstore%cryst)
-   ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
+   if (gstore%with_cplex == 1) then
+     ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
+   end if
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
    nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
@@ -862,6 +872,17 @@ subroutine get_a2fw(gstore, edos_fermie, nw, wmesh, a2fw, phfreq_qibz, phlambda_
    ! Weights for delta(e_{m k+q}) delta(e_{n k}) for my list of k-points.
    ABI_MALLOC(dbl_delta_q, (nb_kq, nb_k, gqk%my_nk))
    ABI_MALLOC(g2_mnkp, (nb_kq, nb_k, gqk%my_nk, gqk%my_npert))
+
+   if (gstore%with_cplex == 0) then
+     nwan = gqk%wan%nwan
+     ABI_CHECK_IEQ(nwan, nb_k, "Wannier nwan must agree with the gstore band range")
+     nk_batch = gqk%wan%eph_kbatch_size(gqk%my_nk, natom3)
+     ABI_MALLOC(intp_gatm, (nwan, nwan, gqk%my_npert, nk_batch))
+     ABI_MALLOC(gatm_full, (nwan, nwan, natom3, nk_batch))
+     ABI_MALLOC(g_req, (gqk%wan%nr_e, nwan, nwan, gqk%my_npert))
+     ABI_MALLOC(gnu, (nwan, nwan))
+     ABI_MALLOC(displ_red_local, (2, natom3, gqk%my_npert))
+   end if
 
    ! Loop over my q-points.
    do my_iq=1,gqk%my_nq
@@ -875,10 +896,55 @@ subroutine get_a2fw(gstore, edos_fermie, nw, wmesh, a2fw, phfreq_qibz, phlambda_
      ! Compute all integration weights for the double delta.
      call gqk%dbldelta_qpt(my_iq, gstore, gstore%dtset%eph_intmeth, gstore%dtset%eph_fsmear, qpt, weight_q, dbl_delta_q)
 
-     ! Copy data to improve memory access in the loops below.
-     do my_ip=1,gqk%my_npert
-       g2_mnkp(:,:,:,my_ip) = gqk%my_g2(my_ip,:,my_iq,:,:)
-     end do
+     if (gstore%with_cplex == 1) then
+       ! Copy data to improve memory access in the loops below.
+       do my_ip=1,gqk%my_npert
+         g2_mnkp(:,:,:,my_ip) = gqk%my_g2(my_ip,:,my_iq,:,:)
+       end do
+     else
+       ! Convert the symmetry-consistent phonon eigenvectors already stored
+       ! in gstore to reduced coordinates for the locally owned modes.
+       do my_ip=1,gqk%my_npert
+         call phdispl_cart2red_nmodes(natom, 1, cryst%gprimd, &
+                                      gqk%my_displ_cart(:,:,:,my_ip,my_iq), &
+                                      displ_red_local(:,:,my_ip:my_ip))
+       end do
+
+       ! Interpolate bounded k blocks and immediately form |g_mnnu(k,q)|^2.
+       call gqk%wan%prepare_eph_q(qpt, g_req)
+       do ik_start=1,gqk%my_nk,nk_batch
+         ik_stop = min(gqk%my_nk, ik_start + nk_batch - 1)
+         nkb = ik_stop - ik_start + 1
+         call gqk%wan%interp_eph_manyk_from_q(cryst, nkb, gqk%my_kpts(:,ik_start:ik_stop), qpt, &
+                                              g_req, intp_gatm(:,:,:,1:nkb))
+
+         gatm_full(:,:,:,1:nkb) = czero
+         do ikb=1,nkb
+           do ipc=1,gqk%my_npert
+             gatm_full(:,:,gqk%my_pertcases(ipc),ikb) = intp_gatm(:,:,ipc,ikb)
+           end do
+         end do
+         if (gqk%pert_comm%nproc > 1) call xmpi_sum(gatm_full(:,:,:,1:nkb), gqk%pert_comm%value, ierr)
+
+         do ikb=1,nkb
+           my_ik = ik_start + ikb - 1
+           do my_ip=1,gqk%my_npert
+             wqnu = gqk%my_wnuq(my_ip,my_iq)
+             if (wqnu < EPHTK_WTOL) then
+               g2_mnkp(:,:,my_ik,my_ip) = zero
+               cycle
+             end if
+             gnu = czero
+             do ipc=1,natom3
+               gnu = gnu + gatm_full(:,:,ipc,ikb) * &
+                 (displ_red_local(1,ipc,my_ip) + j_dpc * displ_red_local(2,ipc,my_ip))
+             end do
+             gnu = gnu / sqrt(two * wqnu)
+             g2_mnkp(:,:,my_ik,my_ip) = real(gnu * conjg(gnu), kind=dp)
+           end do
+         end do
+       end do
+     end if
 
      ! Loop over my phonon modes.
      do my_ip=1,gqk%my_npert
@@ -903,6 +969,13 @@ subroutine get_a2fw(gstore, edos_fermie, nw, wmesh, a2fw, phfreq_qibz, phlambda_
 
    ABI_FREE(dbl_delta_q)
    ABI_FREE(g2_mnkp)
+   if (gstore%with_cplex == 0) then
+     ABI_FREE(intp_gatm)
+     ABI_FREE(gatm_full)
+     ABI_FREE(g_req)
+     ABI_FREE(gnu)
+     ABI_FREE(displ_red_local)
+   end if
    end associate
  end do ! my_is
 
@@ -1111,6 +1184,11 @@ end subroutine matsubara_mesh
 !! FUNCTION
 !!  Compute isotropic lambda along the imaginary axis
 !!
+!! NOTES
+!!  This routine currently requires with_cplex=1, i.e. squared e-ph matrix
+!!  elements precomputed and stored in gqk%my_g2. The with_cplex=0 on-demand
+!!  Wannier backend implemented in get_a2fw is not yet supported here.
+!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -1134,6 +1212,7 @@ subroutine get_lambda_iso_iw(gstore, nw, imag_w, lambda)
 !----------------------------------------------------------------------
 
  ABI_CHECK(gstore%qzone == "bz", "get_lambda_iso_iw assumes qzone == `bz`")
+ ABI_CHECK(gstore%with_cplex == 1, "get_lambda_iso_iw requires squared e-ph matrix elements in memory (with_cplex=1)")
  !if (gstore%check_cplex_qkzone_gmode(cplex1, "bz", kzone, gmode, kfilter) result(ierr)
 
  lambda = zero
