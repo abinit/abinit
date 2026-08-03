@@ -1,4 +1,4 @@
-# Silicon: band structure and Wannierization of the first four bands from an IBZ WFK.
+# Aluminium: band structure and disentangled Wannier functions from an IBZ WFK.
 
 ndtset 4
 kptopt 1
@@ -29,52 +29,51 @@ getden3 1
 tolwfr3 1.0d-12
 nbdbuf3 4
 
-# Dataset 4: expand dataset 3's IBZ WFK internally and call Wannier90.
+# Dataset 4: expand dataset 3's WFK and call Wannier90.
 optdriver4 8
 wfk_task4 "wannier"
 getwfk4 -1
 w90iniprj4 2
 
 # Common variables.
-acell 3*10.263
+acell 3*7.60
 rprim
   0.0 0.5 0.5
   0.5 0.0 0.5
   0.5 0.5 0.0
-natom 2
+natom 1
 ntypat 1
-typat 2*1
-xred
-  0.00 0.00 0.00
-  0.25 0.25 0.25
-znucl 14
+typat 1
+xred 0.0 0.0 0.0
+znucl 13
 
 ecut 8.0
-nband 8
+nband 12
 nstep 50
+occopt 4
+tsmear 0.02
 ngkpt 4 4 4
 nshiftk 1
 shiftk 0.0 0.0 0.0
 
 pp_dirpath "$ABI_PSPDIR"
-pseudos "Psdj_nc_sr_04_pw_std_psp8/Si.psp8"
+pseudos "Psdj_nc_sr_04_pw_std_psp8/Al.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% extra_inputs = t15o_DS4_w90.win
+#%% extra_inputs = t16o_DS4_w90.win
 #%% files_to_test =
-#%%   t15.abo, tolnlines= 15, tolabs= 3.0e-2, tolrel= 2.0e-1
+#%%   t16.abo, tolnlines= 15, tolabs= 2.0e-4, tolrel= 1.0e-1
 #%% [paral_info]
-#%% max_nprocs = 8
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC
 #%% description =
-#%%   Silicon with eight bands. Dataset 1 computes the ground state, dataset 2
-#%%   computes an NSCF band path, and dataset 3 stores an accurately converged
-#%%   IBZ WFK. Dataset 4 expands it to the full Brillouin zone and uses
-#%%   wfk_task "wannier" to Wannierize the first four bands.
+#%%   FCC aluminium. Dataset 1 computes the ground state, dataset 2 computes
+#%%   an NSCF band path, and dataset 3 produces an accurately converged IBZ
+#%%   WFK. Dataset 4 expands this WFK and disentangles four Wannier functions.
 #%% topics = Wannier
 #%%<END TEST_INFO>

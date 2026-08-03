@@ -750,7 +750,20 @@ class(abstract_wf), pointer :: mywfc
        '** mlwfovlp:   calling wannier90 library subroutine wannier_run ',ch10,&
        '   Calculation is running         ',ch10,&
        '-  see ',trim(filew90_wout(isppol)),' for details.'
-     call wrtout(std_out, msg)
+     call wrtout(units, msg)
+
+     write(msg, '(a,i0)') '   Spin channel: ', isppol
+     call wrtout(units, msg)
+     write(msg, '(a,3(i0,1x))') '   Uniform k-mesh: ', ngkpt
+     call wrtout(units, msg)
+     write(msg, '(a,i0)') '   Number of k-points: ', nkpt
+     call wrtout(units, msg)
+     write(msg, '(a,i0)') '   Number of input bands: ', num_bands(isppol)
+     call wrtout(units, msg)
+     write(msg, '(a,i0)') '   Number of Wannier functions: ', nwan(isppol)
+     call wrtout(units, msg)
+     write(msg, '(a,i0)') '   Number of k-point neighbours: ', nntot
+     call wrtout(units, msg)
 
      call wannier_run(trim(seed_name(isppol)),ngkpt,nkpt,&                                                    ! input
        real_lattice,recip_lattice,hdr%kptns,num_bands(isppol),&                                               ! input
@@ -762,9 +775,21 @@ class(abstract_wf), pointer :: mywfc
        wann_centres_loc=wann_centres(:,1:nwan(isppol),isppol),&                                               ! output
        wann_spreads_loc=wann_spreads(1:nwan(isppol),isppol),spread_loc=spreadw(:,isppol))                     ! output
 
+     write(msg, '(a)') '   Wannier90 physical results:'
+     call wrtout(units, msg)
+     write(msg, '(a,3(es16.8,1x))') '-   Spreads (Omega_total, Omega_I, Omega_tilde) [Ang^2]: ', &
+       spreadw(:,isppol)
+     call wrtout(units, msg)
+     write(msg, '(a)') '   Wannier function centres [Ang] and spreads [Ang^2]:'
+     call wrtout(units, msg)
+     do iwan=1,nwan(isppol)
+       write(msg, '(a,i0,a,3(f14.8,1x),a,f14.8)') '-     WF ', iwan, ': centre = ', &
+         wann_centres(:,iwan,isppol), ' spread = ', wann_spreads(iwan,isppol)
+       call wrtout(units, msg)
+     end do
+
      write(msg, '(7a)' ) ch10,&
-       '   mlwfovlp :  mlwfovlp_run completed -',ch10,&
-       '-  see ',trim(filew90_wout(isppol)),' for details.',ch10
+       '   mlwfovlp :  mlwfovlp_run completed -',ch10,'-  see ',trim(filew90_wout(isppol)),' for details.',ch10
      call wrtout(units, msg)
    end do !isppol
 

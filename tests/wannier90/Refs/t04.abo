@@ -766,9 +766,53 @@ are mandatory secondary input
 ;   (  -0.000000   0.000000 ,  -0.000000  -0.000000 ,   0.000000   0.000000 ,    )
 ;   (   0.008447   0.000000 ,  -0.000000   0.000000 ,  -0.000000  -0.000000 ,    )
 
+** mlwfovlp:   calling wannier90 library subroutine wannier_run 
+   Calculation is running         
+-  see t04o_w90_up.wout for details.
+   Spin channel: 1
+   Uniform k-mesh: 4 4 4
+   Number of k-points: 64
+   Number of input bands: 12
+   Number of Wannier functions: 9
+   Number of k-point neighbours: 12
+   Wannier90 physical results:
+-   Spreads (Omega_total, Omega_I, Omega_tilde) [Ang^2]:   7.27675370E+00   3.88335592E+00   3.39339778E+00
+   Wannier function centres [Ang] and spreads [Ang^2]:
+-     WF 1: centre =     0.00368762     0.01267470    -0.00068355  spread =     0.43282010
+-     WF 2: centre =     0.00018259     0.00044478    -0.01335425  spread =     0.24354193
+-     WF 3: centre =     0.08831905     0.00877524    -0.00037851  spread =     0.40837506
+-     WF 4: centre =    -0.00066192     0.01544733     0.00016489  spread =     0.25753561
+-     WF 5: centre =     0.01886910     0.06379579     0.02725483  spread =     2.09124332
+-     WF 6: centre =    -0.00035161    -0.00372200    -0.00023692  spread =     0.64475822
+-     WF 7: centre =     0.00001874    -0.00111358    -0.00011172  spread =     0.64817281
+-     WF 8: centre =    -0.13771982     0.17888298    -0.00585466  spread =     1.90967508
+-     WF 9: centre =     0.00344032     0.00222683    -0.00063886  spread =     0.64063158
+
    mlwfovlp :  mlwfovlp_run completed -
 -  see t04o_w90_up.wout for details.
 
+
+** mlwfovlp:   calling wannier90 library subroutine wannier_run 
+   Calculation is running         
+-  see t04o_w90_down.wout for details.
+   Spin channel: 2
+   Uniform k-mesh: 4 4 4
+   Number of k-points: 64
+   Number of input bands: 12
+   Number of Wannier functions: 9
+   Number of k-point neighbours: 12
+   Wannier90 physical results:
+-   Spreads (Omega_total, Omega_I, Omega_tilde) [Ang^2]:   3.95382967E+00   3.19441821E+00   7.59411464E-01
+   Wannier function centres [Ang] and spreads [Ang^2]:
+-     WF 1: centre =    -0.10552724    -0.23687332     0.19821641  spread =     0.27492360
+-     WF 2: centre =    -0.12894987    -0.22448523    -0.19994410  spread =     0.26663038
+-     WF 3: centre =     0.25388422    -0.01403196    -0.20724383  spread =     0.27288416
+-     WF 4: centre =    -0.07423432     0.24589254     0.19758548  spread =     0.29085803
+-     WF 5: centre =     0.00155230    -0.00051202     1.40937803  spread =     1.48759460
+-     WF 6: centre =     0.25784928     0.00118644     0.20012750  spread =     0.28714187
+-     WF 7: centre =    -0.09143058     0.24043727    -0.20132951  spread =     0.27753642
+-     WF 8: centre =    -0.27885081     0.02455070     0.02090996  spread =     0.43124450
+-     WF 9: centre =     0.16088053    -0.03522264    -0.00697193  spread =     0.36501612
 
    mlwfovlp :  mlwfovlp_run completed -
 -  see t04o_w90_down.wout for details.

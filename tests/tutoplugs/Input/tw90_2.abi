@@ -67,6 +67,6 @@ w90prtunk2 1   #Prints UNK files (for plotting the Wannier functions)
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = PAW
+#%% keywords = PAW, wannier90
 #%% description = Test interface with Wannier90 (PAW calculation)
 #%%<END TEST_INFO>

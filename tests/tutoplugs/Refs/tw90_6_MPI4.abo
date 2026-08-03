@@ -1979,8 +1979,25 @@ force_length_stats: {min: null, max: null, mean: null, }
 ;   (   0.000000   0.000000 ,    )
 ;   (  -0.437800   0.000000 ,    )
 
+** mlwfovlp:   calling wannier90 library subroutine wannier_run 
+   Calculation is running         
+-  see tw90_6_MPI4o_DS3_w90.wout for details.
+   Spin channel: 1
+   Uniform k-mesh: 8 8 8
+   Number of k-points: 512
+   Number of input bands: 5
+   Number of Wannier functions: 1
+   Number of k-point neighbours: 10
+   Wannier90 physical results:
+-   Spreads (Omega_total, Omega_I, Omega_tilde) [Ang^2]:   5.00770041E+00   5.00770041E+00   2.88583960E-11
+   Wannier function centres [Ang] and spreads [Ang^2]:
+-     WF 1: centre =    -0.00000015     0.00000000     0.00000002  spread =     5.00770041
+
    mlwfovlp :  mlwfovlp_run completed -
 -  see tw90_6_MPI4o_DS3_w90.wout for details.
+
+
+   mlwfovlp :  Removing temporary files with cg and cprj (PAW)
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------

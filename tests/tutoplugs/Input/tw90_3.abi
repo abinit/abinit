@@ -94,6 +94,6 @@ ecut  8       # Maximal kinetic energy cut-off, in Hartree
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = NC
+#%% keywords = NC, wannier90
 #%% description = Silane SiH4. Generation of Wannier functions via Wannier90 code.
 #%%<END TEST_INFO>

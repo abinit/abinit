@@ -83,6 +83,6 @@ w90iniprj3 2
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = NC
+#%% keywords = NC, wannier90
 #%% description = Test Wannier90 interface with NC pseudopotentials
 #%%<END TEST_INFO>
