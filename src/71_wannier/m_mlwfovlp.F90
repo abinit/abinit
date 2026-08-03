@@ -280,12 +280,12 @@ contains
 !!
 !! SOURCE
 
-   subroutine mlwfovlp(mywfc, crystal, ebands, hdr, atindx1, &
-     !&cg,cprj, &
-     &dtset,dtfil,eigen,gprimd,kg,&
-& mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
-& nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
-& pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred, exclude_bands)
+subroutine mlwfovlp(mywfc, crystal, ebands, hdr, atindx1, &
+                    !&cg,cprj, &
+                    dtset,dtfil,eigen,gprimd,kg,&
+                    mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
+                    nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
+                    pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred, exclude_bands)
 
 !Arguments ------------------------------------
 !scalars
@@ -763,6 +763,11 @@ class(abstract_wf), pointer :: mywfc
      write(msg, '(a,i0)') '   Number of Wannier functions: ', nwan(isppol)
      call wrtout(units, msg)
      write(msg, '(a,i0)') '   Number of k-point neighbours: ', nntot
+     call wrtout(units, msg)
+     write(msg, '(a,es16.8)') '   Fermi energy [eV]: ', ebands%fermie * Ha_eV
+     call wrtout(units, msg)
+     write(msg, '(a,2(es16.8,1x))') '   Eigenvalue range (min, max) [eV]: ', &
+       minval(ebands%eig(:,:,isppol)) * Ha_eV, maxval(ebands%eig(:,:,isppol)) * Ha_eV
      call wrtout(units, msg)
 
      call wannier_run(trim(seed_name(isppol)),ngkpt,nkpt,&                                                    ! input

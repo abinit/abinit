@@ -284,6 +284,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    Number of input bands: 4
    Number of Wannier functions: 4
    Number of k-point neighbours: 8
+   Fermi energy [eV]:   7.19143470E-02
+   Eigenvalue range (min, max) [eV]:  -1.25266285E+01   1.02140549E+01
    Wannier90 physical results:
 -   Spreads (Omega_total, Omega_I, Omega_tilde) [Ang^2]:   1.48096121E+01   3.90661119E+00   1.09030009E+01
    Wannier function centres [Ang] and spreads [Ang^2]:
