@@ -242,6 +242,8 @@ void gpu_data_prefetch_async_cpp(const void* devPtr, size_t count, int deviceId)
 
 #if CUDA_VERSION >= 13000
   cudaMemLocation location = {.type = cudaMemLocationTypeDevice, .id = deviceId};
+  if(deviceId < 0)
+    location.type = cudaMemLocationTypeHost;
   CHECK_CUDA_ERROR( cudaMemPrefetchAsync(devPtr, count, location, 0) );
 #else
   CHECK_CUDA_ERROR( cudaMemPrefetchAsync(devPtr, count, deviceId) );
