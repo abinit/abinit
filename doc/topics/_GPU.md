@@ -74,7 +74,7 @@ See the installation procedure for [enabling GPU in ABINIT](../INSTALL_gpu.md#ho
 
 Like CPUs, GPUs are assigned numerical identifiers and are addressed using those identifiers.. When using ABINIT, each MPI task will select a GPU to work with for the entirety of the computation. In a simple configuration, each MPI task selects the GPU whose ID satisfies `modulo(mpi_rank/gpu_count)`.
 
-WWhile explicit MPI task binding is often beneficial on CPU-only workloads, it becomes non-trivial on some GPU configurations, such as AMD Instinct MI250X nodes where GPU numbering does not match CPU topology.
+While explicit MPI task binding is often beneficial on CPU-only workloads, it becomes non-trivial on some GPU configurations, such as AMD Instinct MI250X nodes where GPU numbering does not match CPU topology.
 
 Running multiple MPI tasks per GPU may also require a dedicated binding strategy to achieve good performance.
 
