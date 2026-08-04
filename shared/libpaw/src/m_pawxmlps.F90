@@ -2967,7 +2967,6 @@ end subroutine paw_setup_copy
  Atm%ixc=0
  Atm%method=0
  Atm%l_size=0
- Atm%ln_size=0
  Atm%ln2_size=0
  Atm%lmn_size=0
  Atm%lmn2_size=0
@@ -3078,7 +3077,7 @@ end subroutine paw_setup_copy
  atm%nresid_c=one
 
  if(Atm%ln_size==0)then
-   LIBPAW_ALLOCATE(Atm%mode,(1,1))
+   LIBPAW_ALLOCATE(Atm%mode,(1,1,2))
    Atm%mode = ORB_FROZEN
  else
    LIBPAW_ALLOCATE(Atm%eig,(Atm%ln_size,Atm%nsppol))
@@ -3190,7 +3189,7 @@ end subroutine paw_setup_copy
    end do
 
    Atm%l_size =2*Atm%l_max-1
-   LIBPAW_ALLOCATE(Atm%mode,(Atm%ln_size,Atm%nsppol))
+   LIBPAW_ALLOCATE(Atm%mode,(Atm%ln_size,Atm%nsppol,2))
    Atm%mode = ORB_FROZEN
    LIBPAW_ALLOCATE(Atm%max_occ,(Atm%ln_size,Atm%nsppol))
    Atm%max_occ=Atm%occ

@@ -154,7 +154,7 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,fermih,maxocc,mband,nban
 !scalars
  integer,parameter :: prtdos1=1
  integer :: iband,iene,ikpt,index,index_tot,index_start,isppol,nene,nptsdiv2
- integer :: low_band_index, high_band_index, number_of_bands,itypat,iln
+ integer :: low_band_index, high_band_index,number_of_bands,itypat,iln,isppol_cor
  real(dp) :: buffer,deltaene,dosdbletot,doshalftot,dostot, wk
  real(dp) :: enemax,enemin,enex,intdostot,limit,tsmearinv,tsmear_eff
  !real(dp) :: cpu, wall, gflops
@@ -163,6 +163,7 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,fermih,maxocc,mband,nban
  real(dp),allocatable :: entfun(:,:),occfun(:,:), smdfun(:,:),xgrid(:)
  real(dp),allocatable :: arg(:),derfun(:),dos(:),dosdble(:),doshalf(:),ent(:), intdos(:)
  real(dp),allocatable :: occ_tmp(:),ent_tmp(:),doccde_tmp(:)
+ real(dp),allocatable :: dos_core(:),dosdble_core(:),doshalf_core(:),intdos_core(:)
  real(dp),allocatable :: occ_tmp_core(:),doccde_tmp_core(:),arg_core(:)
  real(dp),allocatable :: ent_core(:), derfun_core(:)
 ! *************************************************************************
@@ -286,12 +287,12 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,fermih,maxocc,mband,nban
          do itypat=1,rcpaw%ntypat
            if(rcpaw%atm(itypat)%zcore_orig>zero) then
              rcpaw%atm(itypat)%zcore=zero
-             ABI_MALLOC(occ_tmp_core,(rcpaw%atm(itypat)%ln_size))
-             ABI_MALLOC(doccde_tmp_core,(rcpaw%atm(itypat)%ln_size))
-             ABI_MALLOC(arg_core,(rcpaw%atm(itypat)%ln_size))
-             ABI_MALLOC(derfun_core,(rcpaw%atm(itypat)%ln_size))
-             ABI_MALLOC(ent_core,(rcpaw%atm(itypat)%ln_size))
              do isppol=1,rcpaw%atm(itypat)%nsppol
+               ABI_MALLOC(occ_tmp_core,(rcpaw%atm(itypat)%ln_size))
+               ABI_MALLOC(doccde_tmp_core,(rcpaw%atm(itypat)%ln_size))
+               ABI_MALLOC(arg_core,(rcpaw%atm(itypat)%ln_size))
+               ABI_MALLOC(derfun_core,(rcpaw%atm(itypat)%ln_size))
+               ABI_MALLOC(ent_core,(rcpaw%atm(itypat)%ln_size))
                do iln=1,rcpaw%atm(itypat)%ln_size
                  if (tsmear==0) then
                    arg_core(iln)=sign(huge_tsmearinv,fermie-rcpaw%atm(itypat)%eig(iln,isppol))
@@ -306,12 +307,12 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,fermih,maxocc,mband,nban
                  rcpaw%atm(itypat)%zcore=rcpaw%atm(itypat)%zcore+rcpaw%atm(itypat)%occ(iln,isppol)
                  rcpaw%entropy=rcpaw%entropy+ ent_core(iln)*rcpaw%atm(itypat)%max_occ(iln,isppol)*rcpaw%atm(itypat)%mult
                enddo
+               ABI_FREE(occ_tmp_core)
+               ABI_FREE(doccde_tmp_core)
+               ABI_FREE(arg_core)
+               ABI_FREE(derfun_core)
+               ABI_FREE(ent_core)
              enddo
-             ABI_FREE(occ_tmp_core)
-             ABI_FREE(doccde_tmp_core)
-             ABI_FREE(arg_core)
-             ABI_FREE(derfun_core)
-             ABI_FREE(ent_core)
              rcpaw%nelect_core=rcpaw%nelect_core+rcpaw%atm(itypat)%zcore*rcpaw%atm(itypat)%mult
            endif
          end do
@@ -345,6 +346,13 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,fermih,maxocc,mband,nban
    ! Choose the lower and upper energies
    enemax=maxval(eigen(1:number_of_bands))+buffer
    enemin=minval(eigen(1:number_of_bands))-buffer
+   if(present(rcpaw)) then
+     if(associated(rcpaw)) then
+       do itypat=1,rcpaw%ntypat
+         enemin=min(enemin,rcpaw%atm(itypat)%eig(1,1)-buffer)
+       enddo
+     endif
+   endif
 
    ! Extend the range to a nicer value
    enemax=0.1_dp*ceiling(enemax*10._dp)
@@ -420,6 +428,46 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,fermih,maxocc,mband,nban
              dosdbletot=dosdbletot+wtk(ikpt)*maxocc*dosdble(index)*tsmearinv*0.5_dp
           end do
        end do
+
+       if(present(rcpaw)) then
+         if(associated(rcpaw)) then
+           do itypat=1,rcpaw%ntypat
+             if(rcpaw%atm(itypat)%zcore_orig>zero) then
+               do isppol_cor=1,rcpaw%atm(itypat)%nsppol
+                 ABI_MALLOC(arg_core,(rcpaw%atm(itypat)%ln_size))
+                 ABI_MALLOC(dos_core,(rcpaw%atm(itypat)%ln_size))
+                 ABI_MALLOC(intdos_core,(rcpaw%atm(itypat)%ln_size))
+                 ABI_MALLOC(doshalf_core,(rcpaw%atm(itypat)%ln_size))
+                 ABI_MALLOC(dosdble_core,(rcpaw%atm(itypat)%ln_size))
+                 do iln=1,rcpaw%atm(itypat)%ln_size
+                    arg_core(iln)=(enex-rcpaw%atm(itypat)%eig(iln,isppol_cor))*tsmearinv
+                 enddo
+                 call splfit(xgrid, derfun_core, smdfun, 0, arg_core,dos_core,(2*nptsdiv2+1),rcpaw%atm(itypat)%ln_size)
+                 call splfit(xgrid, derfun_core, occfun, 0, arg_core,intdos_core,(2*nptsdiv2+1),rcpaw%atm(itypat)%ln_size)
+                 arg_core=arg_core*2.0_dp
+                 call splfit(xgrid, derfun_core, smdfun,0, arg_core,doshalf_core,(2*nptsdiv2+1),rcpaw%atm(itypat)%ln_size)
+                 arg_core=arg_core*0.25_dp
+                 call splfit(xgrid, derfun_core, smdfun,0,arg_core,dosdble_core,(2*nptsdiv2+1),rcpaw%atm(itypat)%ln_size)
+                 do iln=1,rcpaw%atm(itypat)%ln_size
+                   dostot=dostot+rcpaw%atm(itypat)%max_occ(iln,isppol_cor)*dos_core(iln)*tsmearinv*rcpaw%atm(itypat)%mult/&
+                                 nsppol
+                   intdostot=intdostot+rcpaw%atm(itypat)%max_occ(iln,isppol_cor)*intdos_core(iln)*rcpaw%atm(itypat)%mult/&
+                                       nsppol
+                   doshalftot=doshalftot+rcpaw%atm(itypat)%max_occ(iln,isppol_cor)*doshalf_core(iln)*tsmearinv*2.0_dp*&
+                                         rcpaw%atm(itypat)%mult/nsppol
+                   dosdbletot=dosdbletot+rcpaw%atm(itypat)%max_occ(iln,isppol_cor)*dosdble_core(iln)*tsmearinv*0.5_dp*&
+                                         rcpaw%atm(itypat)%mult/nsppol
+                 enddo
+                 ABI_FREE(arg_core)
+                 ABI_FREE(dos_core)
+                 ABI_FREE(intdos_core)
+                 ABI_FREE(doshalf_core)
+                 ABI_FREE(dosdble_core)
+               enddo
+             endif
+           enddo
+         endif
+       endif
 
        ! Print the data for this energy
        write(unitdos, '(f8.3,2f14.6,2f14.3)' )enex,dostot,intdostot,doshalftot,dosdbletot

@@ -230,7 +230,8 @@ subroutine rcpaw_reinit(rcpaw)
  do itypat=1,size(rcpaw%atm)
    rcpaw%atm(itypat)%nresid_c=one
    rcpaw%atm(itypat)%nc_conv=.false.
-   if(rcpaw%atm(itypat)%mode(1,1)==orb_relaxed_core) then
+   rcpaw%atm(itypat)%mode(1,1,1)=rcpaw%atm(itypat)%mode(1,1,2)
+   if(rcpaw%atm(itypat)%mode(1,1,1)==orb_relaxed_core) then
      rcpaw%all_atoms_relaxed=.false.
    else
      rcpaw%atm(itypat)%nc_conv=.true.
@@ -259,11 +260,12 @@ end subroutine rcpaw_reinit
 !!
 !! SOURCE
 
-subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,cplex,my_natom,comm_atom,mpi_atmtab)
+subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,cplex,dirac,my_natom,comm_atom,mpi_atmtab)
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: ntypat,my_natom,cplex
  integer,optional,intent(in) :: comm_atom
+ logical, intent(in) :: dirac
  type(rcpaw_type), pointer, intent(inout) :: rcpaw
  type(dataset_type), intent(in) :: dtset
 !arrays
@@ -313,31 +315,26 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,cplex,my_natom,com
    ABI_MALLOC(rcpaw%atp,(ntypat))
  endif
 
- ! Init atm
+ ! Init atm and atp
  rcpaw%all_atoms_relaxed=.true.
- do itypat=1,ntypat
-   call pawpsp_init_core(rcpaw%atm(itypat),psp_filename=filpsp(itypat))
-   ABI_MALLOC(rcpaw%atm(itypat)%vhtnzc_orig,(size(pawtab(itypat)%vhtnzc)))
-   rcpaw%atm(itypat)%mode=dtset%rcpaw_rctypat(itypat)
-   rcpaw%atm(itypat)%vhtnzc_orig=pawtab(itypat)%vhtnzc
-   rcpaw%atm(itypat)%mult=mult(itypat)
-   rcpaw%atm(itypat)%nspden=dtset%nspden
-   rcpaw%atm(itypat)%eigshift=zero
-   if(rcpaw%atm(itypat)%mode(1,1)==orb_relaxed_core) then
-     rcpaw%all_atoms_relaxed=.false.
-   else
-     rcpaw%atm(itypat)%nc_conv=.true.
-   endif
- enddo
-
- ! Init atp
  do itypat=1,ntypat
      rcpaw%atp(itypat)%ixc=dtset%ixc
      rcpaw%atp(itypat)%xclevel=dtset%xclevel
      rcpaw%atp(itypat)%electrons=dtset%nelect
      call atompaw_init(pawtab(itypat),pawrad(itypat),rcpaw%atp(itypat),&
-&    int(rcpaw%atm(itypat)%znucl),rcpaw%atm(itypat),dtset%rcpaw_sc(itypat),&
-&    dtset%rcpaw_elin,dtset%rcpaw_vhtnzc,dtset%rcpaw_tpaw)
+&    rcpaw%atm(itypat),dtset%rcpaw_sc(itypat),&
+&    dtset%rcpaw_elin,dtset%rcpaw_vhtnzc,dtset%rcpaw_tpaw,dirac,filpsp(itypat),dtset%rcpaw_prtpaw)
+     ABI_MALLOC(rcpaw%atm(itypat)%vhtnzc_orig,(size(pawtab(itypat)%vhtnzc)))
+     rcpaw%atm(itypat)%mode=dtset%rcpaw_rctypat(itypat)
+     rcpaw%atm(itypat)%vhtnzc_orig=pawtab(itypat)%vhtnzc
+     rcpaw%atm(itypat)%mult=mult(itypat)
+     rcpaw%atm(itypat)%nspden=dtset%nspden
+     rcpaw%atm(itypat)%eigshift=zero
+     if(rcpaw%atm(itypat)%mode(1,1,1)==orb_relaxed_core) then
+       rcpaw%all_atoms_relaxed=.false.
+     else
+       rcpaw%atm(itypat)%nc_conv=.true.
+     endif
  enddo
 
  ! Init val
@@ -372,6 +369,7 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,cplex,my_natom,com
  rcpaw%nelect_core_orig=rcpaw%nelect_core
 
  if(dtset%rcpaw_frocc==1) then
+   ABI_ERROR('rcpaw_frocc=1 is work in progress')
    rcpaw%frocc=.true.
  else
    rcpaw%frocc=.false.
@@ -598,7 +596,7 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
  rcpaw%all_atoms_relaxed=.true.
  do itypat=1,dtset%ntypat
    if(rcpaw%atm(itypat)%zcore_conv.and.rcpaw%atm(itypat)%nc_conv) then
-     rcpaw%atm(itypat)%mode(:,:)=ORB_FROZEN
+     rcpaw%atm(itypat)%mode(:,:,1)=ORB_FROZEN
    else
      rcpaw%all_atoms_relaxed=.false.
    endif

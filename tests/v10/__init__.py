@@ -69,5 +69,7 @@ inp_files = [
     "t110.abi",  # Test for toldmag
     "t121.abi",  # Test for hybrid function using fock_icutcoul, fock_rcut
     "t122.abi",  # Test meta-GGA NC pseudopotential reading: compare PSML vs UPF for bulk Si
+    "t130.abi",  # Test RCPAW+SOC, prepare for t131
+    "t131.abi",  # Test XANES SOC+RCPAW
     "t150.abi",  # Test sequential slice execution in spectrum slicing diagonalization with 1 MPI
 ]

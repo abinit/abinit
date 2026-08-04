@@ -38,7 +38,7 @@ MODULE m_paw_optics
  use m_time,         only : timab
  use m_io_tools,     only : open_file,get_unit,close_unit
  use m_pawpsp,       only : pawpsp_init_core
- use m_paw_atomorb,  only : atomorb_type,destroy_atomorb
+ use m_paw_atomorb,  only : atomorb_type,destroy_atomorb,copy_atomorb
  use m_pawrad,       only : pawrad_type,pawrad_deducer0,simp_gen,nderiv_gen,poisson
  use m_pawtab,       only : pawtab_type
  use m_pawcprj,      only : pawcprj_type,pawcprj_alloc,pawcprj_get, &
@@ -80,7 +80,7 @@ MODULE m_paw_optics
 !    and seems to impact performances negatively...
 !    Not compatible with compute_half_dipoles=.true.
  logical,parameter :: use_netcdf_unlimited=.false.
-
+   
 CONTAINS  !========================================================================================
 !!***
 
@@ -908,8 +908,8 @@ end if
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: bdtot_index,cplex,etiq,iatom,ic,ibg,idir
- integer :: ierr,ikpt,ilmn,iln,ount,is,my_jb
+ integer :: bdtot_index,cplex,etiq,iatom,ic,ibg,idir,ilmn2
+ integer :: ierr,ikpt,ilmn,iln,ount,is,my_jb,nphicor_lm
  integer :: iorder_cprj,ispinor,isppol,istwf_k,itypat,itypat2
  integer :: jb,jbsp,jlmn,lmn_size,lmncmax,mband_cprj,ncid,varid
  integer :: me,my_nspinor,nband_cprj_k,option_core,pnp_size
@@ -922,17 +922,17 @@ end if
  real(dp) :: cpnm1,cpnm2,el_temp
  character(len=500) :: msg
 !arrays
- integer :: nc_count(7),nc_start(7),nc_stride(7),tmp_shape(3)
- integer,allocatable :: lcor(:,:),ncor(:,:),kappacor(:,:),nphicor_arr(:)
+ integer :: nc_count(6),nc_start(6),nc_stride(6),tmp_shape(3)
+ integer,allocatable :: lcor(:,:),ncor(:,:),kappacor(:,:),nphicor_arr(:),lmn2ln(:,:)
  real(dp) :: tsec(2)
- real(dp),allocatable :: energy_cor(:,:),occ_cor(:,:)
- real(dp),allocatable :: psinablapsi(:,:,:,:,:),psinablapsi_soc(:,:,:,:,:)
+ real(dp),allocatable :: energy_cor(:,:),occ_cor(:,:),maxocc_cor(:,:)
+ real(dp),allocatable :: psinablapsi(:,:,:,:,:),psinablapsi_soc(:,:,:,:,:),psinablapsi2(:,:,:,:)
  real(dp),pointer :: soc_ij(:,:,:)
  type(coeff5_type),allocatable,target :: phisocphj(:)
  type(pawcprj_type),pointer :: cprj_k(:,:),cprj_k_loc(:,:)
  type(nctkdim_t) :: ncdims(3)
- type(nctkarr_t) :: nctk_arrays(8)
- type(atomorb_type), allocatable :: atm(:)
+ type(nctkarr_t) :: nctk_arrays(9)
+ type(atomorb_type),allocatable :: atm(:)
 
 ! ************************************************************************
 
@@ -988,7 +988,7 @@ end if
      if(associated(rcpaw)) then
        if(allocated(rcpaw%atm)) then
          if(dtset%ntypat==size(rcpaw%atm)) then
-           atm(itypat)=rcpaw%atm(itypat)
+           call copy_atomorb(rcpaw%atm(itypat),atm(itypat))
            use_rcpaw_data=.true.
          endif
        endif
@@ -1020,12 +1020,35 @@ end if
 
  nphicor=0
  ncorespinor=0
+ nphicor_lm=0
  do itypat=1,dtset%ntypat
    nphicor=max(nphicor,atm(itypat)%ln_size)
+   nphicor_lm=max(nphicor,atm(itypat)%lmn_size)
    if(atm(itypat)%nsppol>1) ABI_ERROR("nsppol>1 is work in progress for optics_paw_core")
    if(atm(itypat)%nspinor/=dtset%nspinor) ABI_ERROR("Core and valence not same number of spinors")
    ncorespinor=max(ncorespinor,atm(itypat)%nspinor)
  enddo
+ if(dtset%nspinor==2) nphicor_lm=nphicor_lm/2
+
+ ABI_MALLOC(lmn2ln,(nphicor_lm,dtset%ntypat))
+ lmn2ln=0
+ do itypat=1,dtset%ntypat
+   lmncmax=atm(itypat)%lmn_size
+   if(dtset%nspinor==2) lmncmax=lmncmax/2
+   do ilmn=1,lmncmax
+     if(dtset%nspinor==1) then
+       lmn2ln(ilmn,itypat)=atm(itypat)%indlmn(5,ilmn)
+     else
+       do ilmn2=1,atm(itypat)%lmn_size
+         if(atm(itypat)%indlmn(9,ilmn2)==ilmn) then
+           lmn2ln(ilmn,itypat)=atm(itypat)%indlmn(5,ilmn2)
+           exit
+         endif
+       enddo
+     endif
+   enddo
+ enddo
+
 !----------------------------------------------------------------------------------
 !2- Computation of phipphj=<phi_i|nabla|phi_core>
 !----------------------------------------------------------------------------------
@@ -1061,17 +1084,20 @@ end if
  ABI_MALLOC(lcor,(nphicor,dtset%ntypat))
  ABI_MALLOC(kappacor,(nphicor,dtset%ntypat))
  ABI_MALLOC(occ_cor,(nphicor,dtset%ntypat))
+ ABI_MALLOC(maxocc_cor,(nphicor,dtset%ntypat))
  energy_cor=zero
  ncor=0
  lcor=0
  kappacor=0
- occ_cor=one
+ occ_cor=zero 
+ maxocc_cor=zero
  do itypat=1,dtset%ntypat
    do iln=1,atm(itypat)%ln_size
      energy_cor(iln,itypat)=atm(itypat)%eig(iln,1)
      ncor(iln,itypat)=atm(itypat)%indln(2,iln)
      lcor(iln,itypat)=atm(itypat)%indln(1,iln)
-     occ_cor(iln,itypat)=(two/dble(dtset%nsppol*dtset%nspinor))*atm(itypat)%occ(iln,1)/atm(itypat)%max_occ(iln,1)
+     occ_cor(iln,itypat)=atm(itypat)%occ(iln,1)
+     maxocc_cor(iln,itypat)=atm(itypat)%max_occ(iln,1)
      if(atm(itypat)%dirac) then
        kappacor(iln,itypat)=atm(itypat)%kappa(iln)
      else
@@ -1110,7 +1136,7 @@ end if
      nctk_arrays(3)%name="dipole_core_valence"
      nctk_arrays(3)%dtype="dp"
      nctk_arrays(3)%shape_str=&
-&     "complex, number_of_cartesian_directions,max_number_of_core_states,"// &
+&     "number_of_cartesian_directions,max_number_of_core_states,"// &
 &     "number_of_atoms,max_number_of_states,number_of_kpoints,number_of_spins"
      nctk_arrays(4)%name="n_quantum_number_core"
      nctk_arrays(4)%dtype="int"
@@ -1127,6 +1153,9 @@ end if
      nctk_arrays(8)%name="occupation_core"
      nctk_arrays(8)%dtype="dp"
      nctk_arrays(8)%shape_str="max_number_of_core_states,number_of_atom_types"
+     nctk_arrays(9)%name="max_occupation_core"
+     nctk_arrays(9)%dtype="dp"
+     nctk_arrays(9)%shape_str="max_number_of_core_states,number_of_atom_types"
      NCF_CHECK(nctk_def_arrays(ncid, nctk_arrays))
      NCF_CHECK(nctk_set_atomic_units(ncid, "eigenvalues_core"))
      NCF_CHECK(nctk_set_atomic_units(ncid, "dipole_core_valence"))
@@ -1142,6 +1171,8 @@ end if
      NCF_CHECK(nf90_put_var(ncid,varid,kappacor))
      varid=nctk_idname(ncid,"occupation_core")
      NCF_CHECK(nf90_put_var(ncid,varid,occ_cor))
+     varid=nctk_idname(ncid,"max_occupation_core")
+     NCF_CHECK(nf90_put_var(ncid,varid,maxocc_cor))
      varid=nctk_idname(ncid,"number_of_core_states")
      NCF_CHECK(nf90_put_var(ncid,varid,nphicor_arr))
 !    Write eigenvalues
@@ -1163,7 +1194,8 @@ end if
      do itypat=1,dtset%ntypat
        write(ount) atm(itypat)%ln_size
        do iln=1,nphicor
-         write(ount) ncor(iln,itypat),lcor(iln,itypat),kappacor(iln,itypat),occ_cor(iln,itypat),energy_cor(iln,itypat)
+         write(ount) ncor(iln,itypat),lcor(iln,itypat),kappacor(iln,itypat),occ_cor(iln,itypat),maxocc_cor(iln,itypat),&
+                     energy_cor(iln,itypat)
        end do
      enddo
    else
@@ -1179,6 +1211,7 @@ end if
  ABI_FREE(lcor)
  ABI_FREE(kappacor)
  ABI_FREE(occ_cor)
+ ABI_FREE(maxocc_cor)
  ABI_FREE(energy_cor)
 
 !----------------------------------------------------------------------------------
@@ -1208,18 +1241,20 @@ end if
  end if
  if (iomode_etsf_mpiio) then
    !If MPI-IO, store only elements for one band
-   ABI_MALLOC(psinablapsi,(2,3,nphicor,natom,1))
+   ABI_MALLOC(psinablapsi,(2,3,nphicor_lm,natom,1))
+   ABI_MALLOC(psinablapsi2,(3,nphicor,natom,1))
    if (use_spinorbit) then
-     ABI_MALLOC(psinablapsi_soc,(2,3,nphicor,natom,1))
+     ABI_MALLOC(psinablapsi_soc,(2,3,nphicor_lm,natom,1))
    end if
  else
    !If not, store the elements for all bands
-   ABI_MALLOC(psinablapsi,(2,3,nphicor,natom,mband))
+   ABI_MALLOC(psinablapsi,(2,3,nphicor_lm,natom,mband))
+   ABI_MALLOC(psinablapsi2,(3,nphicor,natom,mband))
    if (use_spinorbit) then
-     ABI_MALLOC(psinablapsi_soc,(2,3,nphicor,natom,mband))
+     ABI_MALLOC(psinablapsi_soc,(2,3,nphicor_lm,natom,mband))
    end if
  end if
- pnp_size=size(psinablapsi)
+ pnp_size=size(psinablapsi2)
 
 !Determine if cprj datastructure is distributed over bands
  mband_cprj=mcprj/(my_nspinor*mkmem*nsppol)
@@ -1275,6 +1310,7 @@ end if
          my_jb=merge(1,jb,iomode_etsf_mpiio)
 
          psinablapsi(:,:,:,:,my_jb)=zero
+         psinablapsi2(:,:,:,my_jb)=zero
          if (use_spinorbit) psinablapsi_soc(:,:,:,:,my_jb)=zero
 
 !        Computation of <psi_n|p_i><phi_i|-i.nabla|phi_core>
@@ -1301,7 +1337,7 @@ end if
                  lmncmax=atm(itypat)%lmn_size
                  do jlmn=1,lmn_size
                    do ilmn=1,lmncmax
-                     ic=atm(itypat)%indlmn(5,ilmn)
+                     ic=ilmn !atm(itypat)%indlmn(5,ilmn)
                      cpnm1=cprj_k(iatom,jbsp)%cp(1,jlmn)
                      psinablapsi(2,:,ic,iatom,my_jb)=psinablapsi(2,:,ic,iatom,my_jb) &
 &                        -cpnm1*pawtab(itypat)%nabla_ij(:,jlmn,ilmn)
@@ -1315,7 +1351,7 @@ end if
                  lmncmax=atm(itypat)%lmn_size
                  do jlmn=1,lmn_size
                    do ilmn=1,lmncmax
-                     ic=atm(itypat)%indlmn(5,ilmn)
+                     ic=ilmn !atm(itypat)%indlmn(5,ilmn)
                      cpnm1=cprj_k(iatom,jbsp)%cp(1,jlmn)
                      cpnm2=cprj_k(iatom,jbsp)%cp(2,jlmn)
                      psinablapsi(1,:,ic,iatom,my_jb)=psinablapsi(1,:,ic,iatom,my_jb) &
@@ -1339,7 +1375,7 @@ end if
                    do ilmn=1,lmncmax
                      is=atm(itypat)%indlmn(6,ilmn)
                      if (modulo(jbsp,2)==modulo(is,2)) then ! Nabla is a spin-diagonal operator
-                       ic=atm(itypat)%indlmn(5,ilmn)
+                       ic=atm(itypat)%indlmn(9,ilmn)
                        if (ic>0) then
                          cpnm1=cprj_k(iatom,jbsp)%cp(1,jlmn)
                          cpnm2=cprj_k(iatom,jbsp)%cp(2,jlmn)
@@ -1394,7 +1430,11 @@ end if
                lmncmax=atm(itypat)%lmn_size
                do jlmn=1,lmn_size
                  do ilmn=1,lmncmax
-                   ic=atm(itypat)%indlmn(5,ilmn)
+                   if(dtset%nspinor==1) then
+                     ic=ilmn !atm(itypat)%indlmn(5,ilmn)
+                   else
+                     ic=atm(itypat)%indlmn(9,ilmn)
+                   endif
                    if (ic>0) then
                      soc_ij => phisocphj(iatom)%value(:,:,:,jlmn,ilmn)
                      !Contribution from real part of <Psi^s_n|p_i>
@@ -1429,16 +1469,28 @@ end if
 
          end if ! myband
 
+
 !        Write to OPT2 file in case of MPI-IO
          if (iomode_etsf_mpiio.and.i_am_master_spfft) then
-           nc_start=[1,1,1,1,jb,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
+           nc_start=[1,1,1,jb,ikpt,isppol];nc_stride=[1,1,1,1,1,1]
            if (myband) then
              if (use_spinorbit) psinablapsi=psinablapsi+psinablapsi_soc
-             nc_count=[2,3,nphicor,natom,1,1,1]
+             ! Take the square and sum over m 
+             do iatom=1,natom
+               itypat=dtset%typat(iatom)
+               lmncmax=atm(itypat)%lmn_size
+               if(dtset%nspinor==2)lmncmax=lmncmax/2
+               do ilmn=1,lmncmax
+                  ic=lmn2ln(ilmn,itypat)
+                  psinablapsi2(:,ic,iatom,my_jb)=psinablapsi2(:,ic,iatom,my_jb)+psinablapsi(1,:,ilmn,iatom,my_jb)**2+&
+&                                                psinablapsi(2,:,ilmn,iatom,my_jb)**2
+                enddo
+             enddo
+             nc_count=[3,nphicor,natom,1,1,1]
            else
-             nc_count=[0,0,0,0,0,0,0]
+             nc_count=[0,0,0,0,0,0]
            end if
-           NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start,stride=nc_stride,count=nc_count))
+           NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi2,start=nc_start,stride=nc_stride,count=nc_count))
          end if
 
        end do ! jb
@@ -1467,32 +1519,46 @@ end if
            call xmpi_sum_master(psinablapsi_soc,master,spaceComm_band,ierr)
            psinablapsi=psinablapsi+psinablapsi_soc
          end if
+         ! Take the square and sum over m 
+         do jb=1,nband_k
+           my_jb=merge(1,jb,iomode_etsf_mpiio)
+           do iatom=1,natom
+             itypat=dtset%typat(iatom)
+             lmncmax=atm(itypat)%lmn_size
+             if(dtset%nspinor==2)lmncmax=lmncmax/2
+             do ilmn=1,lmncmax
+                ic=lmn2ln(ilmn,itypat)
+                psinablapsi2(:,ic,iatom,my_jb)=psinablapsi2(:,ic,iatom,my_jb)+psinablapsi(1,:,ilmn,iatom,my_jb)**2+&
+&                                              psinablapsi(2,:,ilmn,iatom,my_jb)**2
+              enddo
+           enddo
+         enddo
        end if
 
 !      >>> This my kpt and I am the master node: I write the data
        if (.not.iomode_etsf_mpiio) then
          if (i_am_master) then
            if (iomode==IO_MODE_ETSF) then
-             nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
-             nc_count=[2,3,nphicor,natom,mband,1,1]
-             NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start,stride=nc_stride,count=nc_count))
+             nc_start=[1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1]
+             nc_count=[3,nphicor,natom,mband,1,1]
+             NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi2,start=nc_start,stride=nc_stride,count=nc_count))
            else
              if (fformopt==612) then ! New OPT2 file format
-               write(ount) (((psinablapsi(1:2,1,ic,iatom,jb),ic=1,nphicor),iatom=1,natom),jb=1,nband_k)
-               write(ount) (((psinablapsi(1:2,2,ic,iatom,jb),ic=1,nphicor),iatom=1,natom),jb=1,nband_k)
-               write(ount) (((psinablapsi(1:2,3,ic,iatom,jb),ic=1,nphicor),iatom=1,natom),jb=1,nband_k)
+               write(ount) (((psinablapsi2(1,ic,iatom,jb),ic=1,nphicor),iatom=1,natom),jb=1,nband_k)
+               write(ount) (((psinablapsi2(2,ic,iatom,jb),ic=1,nphicor),iatom=1,natom),jb=1,nband_k)
+               write(ount) (((psinablapsi2(3,ic,iatom,jb),ic=1,nphicor),iatom=1,natom),jb=1,nband_k)
              else if (fformopt==613) then ! Large OPT2 file format
                do jb=1,nband_k
-                 write(ount) ((psinablapsi(1:2,1,ic,iatom,jb),ic=1,nphicor),iatom=1,natom)
-                 write(ount) ((psinablapsi(1:2,2,ic,iatom,jb),ic=1,nphicor),iatom=1,natom)
-                 write(ount) ((psinablapsi(1:2,3,ic,iatom,jb),ic=1,nphicor),iatom=1,natom)
+                 write(ount) ((psinablapsi2(1,ic,iatom,jb),ic=1,nphicor),iatom=1,natom)
+                 write(ount) ((psinablapsi2(2,ic,iatom,jb),ic=1,nphicor),iatom=1,natom)
+                 write(ount) ((psinablapsi2(3,ic,iatom,jb),ic=1,nphicor),iatom=1,natom)
                end do
              else ! Old OPT2 file format
                !The old writing was not efficient (indexes order is bad)
                do iatom=1,natom
-                 write(ount) ((psinablapsi(1:2,1,ic,iatom,jb),jb=1,nband_k),ic=1,nphicor)
-                 write(ount) ((psinablapsi(1:2,2,ic,iatom,jb),jb=1,nband_k),ic=1,nphicor)
-                 write(ount) ((psinablapsi(1:2,3,ic,iatom,jb),jb=1,nband_k),ic=1,nphicor)
+                 write(ount) ((psinablapsi2(1,ic,iatom,jb),jb=1,nband_k),ic=1,nphicor)
+                 write(ount) ((psinablapsi2(2,ic,iatom,jb),jb=1,nband_k),ic=1,nphicor)
+                 write(ount) ((psinablapsi2(3,ic,iatom,jb),jb=1,nband_k),ic=1,nphicor)
                end do
              end if
            end if
@@ -1502,35 +1568,35 @@ end if
            if (mpi_enreg%me_kpt/=master_spfftband) then
              ABI_BUG('Problem with band communicator!')
            end if
-           call xmpi_exch(psinablapsi,pnp_size,mpi_enreg%me_kpt,psinablapsi,master,spaceComm_kpt,etiq,ierr)
+           call xmpi_exch(psinablapsi2,pnp_size,mpi_enreg%me_kpt,psinablapsi2,master,spaceComm_kpt,etiq,ierr)
          end if
        end if
 
 !    >>> This is not my kpt and I am the master node: I receive the data and I write
      elseif ((.not.iomode_etsf_mpiio).and.i_am_master) then ! mykpt
        sender=master_spfftband
-       call xmpi_exch(psinablapsi,pnp_size,sender,psinablapsi,master,spaceComm_kpt,etiq,ierr)
+       call xmpi_exch(psinablapsi2,pnp_size,sender,psinablapsi2,master,spaceComm_kpt,etiq,ierr)
        if (iomode==IO_MODE_ETSF) then
-         nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
-         nc_count=[2,3,nphicor,natom,mband,1,1]
-         NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start,stride=nc_stride,count=nc_count))
+         nc_start=[1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1]
+         nc_count=[3,nphicor,natom,mband,1,1]
+         NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi2,start=nc_start,stride=nc_stride,count=nc_count))
        else
          if (fformopt==612) then ! New OPT2 file format
-           write(ount) (((psinablapsi(1:2,1,ic,iatom,jb),ic=1,nphicor),iatom=1,natom),jb=1,nband_k)
-           write(ount) (((psinablapsi(1:2,2,ic,iatom,jb),ic=1,nphicor),iatom=1,natom),jb=1,nband_k)
-           write(ount) (((psinablapsi(1:2,3,ic,iatom,jb),ic=1,nphicor),iatom=1,natom),jb=1,nband_k)
+           write(ount) (((psinablapsi2(1,ic,iatom,jb),ic=1,nphicor),iatom=1,natom),jb=1,nband_k)
+           write(ount) (((psinablapsi2(2,ic,iatom,jb),ic=1,nphicor),iatom=1,natom),jb=1,nband_k)
+           write(ount) (((psinablapsi2(3,ic,iatom,jb),ic=1,nphicor),iatom=1,natom),jb=1,nband_k)
          else if (fformopt==613) then ! Large OPT2 file format
            do jb=1,nband_k
-             write(ount) ((psinablapsi(1:2,1,ic,iatom,jb),ic=1,nphicor),iatom=1,natom)
-             write(ount) ((psinablapsi(1:2,2,ic,iatom,jb),ic=1,nphicor),iatom=1,natom)
-             write(ount) ((psinablapsi(1:2,3,ic,iatom,jb),ic=1,nphicor),iatom=1,natom)
+             write(ount) ((psinablapsi2(1,ic,iatom,jb),ic=1,nphicor),iatom=1,natom)
+             write(ount) ((psinablapsi2(2,ic,iatom,jb),ic=1,nphicor),iatom=1,natom)
+             write(ount) ((psinablapsi2(3,ic,iatom,jb),ic=1,nphicor),iatom=1,natom)
            end do
          else ! Old OPT2 file format
            !The old writing was not efficient (indexes order is bad)
            do iatom=1,natom
-             write(ount) ((psinablapsi(1:2,1,ic,iatom,jb),jb=1,nband_k),ic=1,nphicor)
-             write(ount) ((psinablapsi(1:2,2,ic,iatom,jb),jb=1,nband_k),ic=1,nphicor)
-             write(ount) ((psinablapsi(1:2,3,ic,iatom,jb),jb=1,nband_k),ic=1,nphicor)
+             write(ount) ((psinablapsi2(1,ic,iatom,jb),jb=1,nband_k),ic=1,nphicor)
+             write(ount) ((psinablapsi2(2,ic,iatom,jb),jb=1,nband_k),ic=1,nphicor)
+             write(ount) ((psinablapsi2(3,ic,iatom,jb),jb=1,nband_k),ic=1,nphicor)
            end do
          end if
        end if
@@ -1558,6 +1624,7 @@ end if
  enddo
  ABI_FREE(atm)
  ABI_FREE(psinablapsi)
+ ABI_FREE(psinablapsi2)
  if (use_spinorbit) then
    ABI_FREE(psinablapsi_soc)
    do iatom=1,natom

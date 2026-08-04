@@ -1040,7 +1040,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (dtset%use_rcpaw==1) then
    ABI_WARNING("Untested Mode RCPAW")
    ABI_MALLOC(rcpaw,)
-   call rcpaw_init(rcpaw,dtset,psps%filpsp,pawrad,pawtab,psps%ntypat,1,my_natom,mpi_enreg%comm_atom,mpi_enreg%my_atmtab)
+   call rcpaw_init(rcpaw,dtset,psps%filpsp,pawrad,pawtab,psps%ntypat,1,.false.,my_natom,mpi_enreg%comm_atom,mpi_enreg%my_atmtab)
  end if
 
 !###########################################################
@@ -1523,7 +1523,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  call clnup1(acell,dtset,eigen,results_gs%energies%e_fermie,results_gs%energies%e_fermih,&
 & dtfil%fnameabo_dos,dtfil%fnameabo_eig,results_gs%gred,&
 & mpi_enreg,nfftf,ngfftf,occ,dtset%optforces,&
-& resid,rhor,rprimd,results_gs%vxcavg,xred)
+& resid,rhor,rprimd,results_gs%vxcavg,xred,rcpaw)
 
  if ( (dtset%iscf>=0 .or. dtset%iscf==-3) .and. dtset%prtstm==0) then
    call prtene(dtset,results_gs%energies,ab_out,psps%usepaw)
@@ -1960,7 +1960,7 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !!
 !! SOURCE
 subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gred,&
-                  mpi_enreg,nfft,ngfft,occ,prtfor, resid,rhor,rprimd,vxcavg,xred)
+                  mpi_enreg,nfft,ngfft,occ,prtfor, resid,rhor,rprimd,vxcavg,xred,rcpaw)
 
 !Arguments ------------------------------------
 !scalars
@@ -1969,6 +1969,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gre
  character(len=*),intent(in) :: fnameabo_dos,fnameabo_eig
  type(dataset_type),intent(in) :: dtset
  type(MPI_type),intent(in) :: mpi_enreg
+ type(rcpaw_type),pointer,intent(inout) :: rcpaw
 !arrays
  integer,intent(in)  :: ngfft(18)
  real(dp),intent(in) :: acell(3)
@@ -2096,7 +2097,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gre
    call getnel(doccde,dtset%dosdeltae,eigen,entropy,fermie,fermih,&
 &   maxocc,dtset%mband,dtset%nband,nelect,dtset%nkpt,&
 &   dtset%nsppol,occ,dtset%occopt,option,dtset%tphysel,&
-&   dtset%tsmear,unitdos,dtset%wtk,1,dtset%nband(1))!CP: added 1, nband(1) to fit new definition of getnel; parameters only used if
+&   dtset%tsmear,unitdos,dtset%wtk,1,dtset%nband(1),rcpaw=rcpaw)!CP: added 1, nband(1) to fit new definition of getnel; parameters only used if
    ABI_FREE(doccde)
  end if
 

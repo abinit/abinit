@@ -25,7 +25,7 @@ MODULE m_paw_atomorb
 
  use m_paw_numeric
  use m_libpaw_tools,  only : libpaw_basename, libpaw_get_free_unit
- use m_pawrad,        only : pawrad_type, pawrad_init, bound_deriv, &
+ use m_pawrad,        only : pawrad_type, pawrad_init, bound_deriv,pawrad_copy, &
 &                            pawrad_free, pawrad_print, pawrad_isame, pawrad_ifromr, simp_gen,pawrad_deducer0
 
  implicit none
@@ -198,14 +198,15 @@ MODULE m_paw_atomorb
   integer, allocatable :: kappa(:)
   ! Kappa for dirac relativism
 
-  integer, allocatable :: mode(:,:)
-  ! mode(ln_size,nsppol)
+  integer, allocatable :: mode(:,:,:)
+  ! mode(ln_size,nsppol,2)
   ! Flag defining how the orbital is treated.
   ! During the pseudopotential generation we can have: ORB_FROZEN or ORB_VALENCE
   ! For calculations in extended systems we can have:  ORB_FROZEN or ORB_RELAXED_CORE
   ! Namely different treatment depending of the degree of localization.
   ! For example the 1s in plutonium might be treated as ORB_FROZEN during
   ! a relaxed core calculation.
+  ! Last index: 1 for current status, 2 for input status
   ! TODO define function to test the type, much safer!
 
   real(dp), allocatable :: eig(:,:)
@@ -246,6 +247,7 @@ MODULE m_paw_atomorb
 
 ! public procedures.
  public :: destroy_atomorb
+ public :: copy_atomorb
  public :: print_atomorb
  public :: get_overlap
 !!***
@@ -336,6 +338,167 @@ if (allocated(Atm%occ_respc)) then
 
 end subroutine destroy_atomorb
 !!***
+
+
+!!****f* m_paw_atomorb/copy_atomorb
+!! NAME
+!!  copy_atomorb
+!!
+!! FUNCTION
+!!
+!! SIDE EFFECTS
+!!
+!! SOURCE
+
+subroutine copy_atomorb(Atm_in,Atm_out)
+
+!Arguments ------------------------------------
+!scalars
+ type(atomorb_type),intent(in) :: Atm_in
+ type(atomorb_type),intent(inout) :: Atm_out
+!Local ------------------------------------
+!scalars
+ integer :: s1,s2,s3
+
+!************************************************************************
+   Atm_out%ixc=Atm_in%ixc
+   Atm_out%method=Atm_in%method
+   Atm_out%nspden=Atm_in%nspden
+   Atm_out%nsppol=Atm_in%nsppol
+   Atm_out%nspinor=Atm_in%nspinor
+   Atm_out%l_max=Atm_in%l_max
+   Atm_out%l_size=Atm_in%l_size
+   Atm_out%ln_size=Atm_in%ln_size
+   Atm_out%ln2_size=Atm_in%ln2_size
+   Atm_out%lmn_size=Atm_in%lmn_size
+   Atm_out%lmn2_size=Atm_in%lmn2_size
+   Atm_out%mesh_size=Atm_in%mesh_size
+   Atm_out%mult=Atm_in%mult
+   Atm_out%dirac=Atm_in%dirac
+   Atm_out%nc_conv=Atm_in%nc_conv
+   Atm_out%zcore_conv=Atm_in%zcore_conv
+   Atm_out%edcc=Atm_in%edcc
+   Atm_out%eeigc=Atm_in%eeigc
+   Atm_out%ehnzc=Atm_in%ehnzc
+   Atm_out%ekinc=Atm_in%ekinc
+   Atm_out%eigshift=Atm_in%eigshift
+   Atm_out%min_eigv=Atm_in%min_eigv
+   Atm_out%nresid_c=Atm_in%nresid_c
+   Atm_out%rcore=Atm_in%rcore
+   Atm_out%zion=Atm_in%zion
+   Atm_out%zcore=Atm_in%zcore
+   Atm_out%zcore_orig=Atm_in%zcore_orig
+   Atm_out%znucl=Atm_in%znucl
+   Atm_out%fname=Atm_in%fname
+   call pawrad_copy(Atm_in%radmesh,Atm_out%radmesh)
+
+
+   if(allocated(Atm_in%indlmn)) then 
+     s1=size(Atm_in%indlmn(1,:))
+     s2=size(Atm_in%indlmn(:,1))
+     LIBPAW_ALLOCATE(Atm_out%indlmn,(s2,s1))
+     Atm_out%indlmn=Atm_in%indlmn
+   endif
+
+   if(allocated(Atm_in%indln)) then
+     s1=size(Atm_in%indln(1,:))
+     s2=size(Atm_in%indln(:,1))
+     LIBPAW_ALLOCATE(Atm_out%indln,(s2,s1))
+     Atm_out%indln=Atm_in%indln
+   endif
+
+   if(allocated(Atm_in%indklmn)) then
+     s1=size(Atm_in%indklmn(1,:))
+     s2=size(Atm_in%indklmn(:,1)) 
+     LIBPAW_ALLOCATE(Atm_out%indklmn,(s2,s1))
+     Atm_out%indklmn=Atm_in%indklmn
+   endif
+
+   if(allocated(Atm_in%klm_diag)) then
+     s1=size(Atm_in%klm_diag(:))
+     LIBPAW_ALLOCATE(Atm_out%klm_diag,(s1))
+     Atm_out%klm_diag=Atm_in%klm_diag
+   endif
+
+   if(allocated(Atm_in%klmntomn)) then
+     s1=size(Atm_in%klmntomn(1,:))
+     s2=size(Atm_in%klmntomn(:,1))
+     LIBPAW_ALLOCATE(Atm_out%klmntomn,(s2,s1))
+     Atm_out%klmntomn=Atm_in%klmntomn
+   endif
+
+   if(allocated(Atm_in%kln2ln)) then
+     s1=size(Atm_in%kln2ln(1,:))
+     s2=size(Atm_in%kln2ln(:,1))
+     LIBPAW_ALLOCATE(Atm_out%kln2ln,(s2,s1))
+     Atm_out%kln2ln=Atm_in%kln2ln
+   endif
+ 
+   if(allocated(Atm_in%kappa)) then
+     s1=size(Atm_in%kappa(:))
+     LIBPAW_ALLOCATE(Atm_out%kappa,(s1))
+     Atm_out%kappa=Atm_in%kappa
+   endif
+
+   if(allocated(Atm_in%mode)) then
+     s1=size(Atm_in%mode(1,1,:))
+     s2=size(Atm_in%mode(1,:,1))
+     s3=size(Atm_in%mode(:,1,1))
+     LIBPAW_ALLOCATE(Atm_out%mode,(s3,s2,s1))
+     Atm_out%mode=Atm_in%mode
+   endif
+
+   if(allocated(Atm_in%eig)) then
+     s1=size(Atm_in%eig(1,:))
+     s2=size(Atm_in%eig(:,1))
+     LIBPAW_ALLOCATE(Atm_out%eig,(s2,s1))
+     Atm_out%eig=Atm_in%eig
+   endif
+
+   if(allocated(Atm_in%max_occ)) then
+     s1=size(Atm_in%max_occ(1,:))
+     s2=size(Atm_in%max_occ(:,1))
+     LIBPAW_ALLOCATE(Atm_out%max_occ,(s2,s1))
+     Atm_out%max_occ=Atm_in%max_occ
+   endif
+
+   if(allocated(Atm_in%occ)) then
+     s1=size(Atm_in%occ(1,:))
+     s2=size(Atm_in%occ(:,1))
+     LIBPAW_ALLOCATE(Atm_out%occ,(s2,s1))
+     Atm_out%occ=Atm_in%occ
+   endif
+
+   if(allocated(Atm_in%occ_res)) then
+     s1=size(Atm_in%occ_res(1,:))
+     s2=size(Atm_in%occ_res(:,1))
+     LIBPAW_ALLOCATE(Atm_out%occ_res,(s2,s1))
+     Atm_out%occ_res=Atm_in%occ_res
+   endif
+
+   if(allocated(Atm_in%occ_respc)) then
+     s1=size(Atm_in%occ_respc(1,:))
+     s2=size(Atm_in%occ_respc(:,1))
+     LIBPAW_ALLOCATE(Atm_out%occ_respc,(s2,s1))
+     Atm_out%occ_respc=Atm_in%occ_respc
+   endif
+
+   if(allocated(Atm_in%phi)) then
+     s1=size(Atm_in%phi(1,1,:))
+     s2=size(Atm_in%phi(1,:,1))
+     s3=size(Atm_in%phi(:,1,1))
+     LIBPAW_ALLOCATE(Atm_out%phi,(s3,s2,s1))
+     Atm_out%phi=Atm_in%phi
+   endif
+
+   if(allocated(atm_in%vhtnzc_orig)) then
+     s1=size(Atm_in%vhtnzc_orig(:))
+     LIBPAW_ALLOCATE(atm_out%vhtnzc_orig,(s1))
+     atm_out%vhtnzc_orig=atm_in%vhtnzc_orig
+   endif
+end subroutine copy_atomorb
+!!***
+
 
 !----------------------------------------------------------------------
 
@@ -585,7 +748,7 @@ subroutine print_atomorb(Atm,header,unit,prtvol,mode_paral)
      ll = Atm%indln(1,iln)
      nn = Atm%indln(2,iln)
      write(msg,'(" n=",i2,", l=",i2,", spin=",i2,", nocc=",f15.7,", energy=",f15.7,2x,"(",a,")")')&
-&      nn,ll,isppol,Atm%occ(iln,isppol),Atm%eig(iln,isppol),TRIM(my_mode2str(Atm%mode(iln,isppol)))
+&      nn,ll,isppol,Atm%occ(iln,isppol),Atm%eig(iln,isppol),TRIM(my_mode2str(Atm%mode(iln,isppol,1)))
      call wrtout(my_unt,msg,my_mode)
    end do
  end do
