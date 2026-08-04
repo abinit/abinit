@@ -7659,7 +7659,7 @@ Variable(
     mnemonics="GauGe TRansform CUToff",
     added_in_version="10.9.0",
     text=r"""
-Cutoff value to use in computing gauge change from parallel transport to diagonal. 
+Cutoff value to use in computing gauge change from parallel transport to diagonal.
 Expert use only, do not change unless you've studied the source code and know exactly
 what you are doing and expecting.
 """,
@@ -24657,7 +24657,7 @@ due to nuclear magnetic dipoles (see [[nucdipmom]]).
 
 Negative values of [[zora]] are present only for debugging purposes. [[zora]] -1 permits only
 spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits spin-orbit
-coupling and the electron spin-nuclear dipole through space interaction, while [[zora]] -3 permits 
+coupling and the electron spin-nuclear dipole through space interaction, while [[zora]] -3 permits
 only spin-orbit coupling and the electron spin-nuclear dipole Fermi-contact-like interaction.
 """,
 ),
@@ -26563,25 +26563,25 @@ Possible values are:
 """,
 ),
 
-#Variable(
-#    abivarname="gstore_iv1p_comm",
-#    varset="eph",
-#    vartype="integer",
-#    topics=['ElPhonInt_basic'],
-#    dimensions="scalar",
-#    defaultval=0,
-#    mnemonics=r"GSTORE write matrix elements of i[V1_ka, p] commutator",
-#    requires="[[optdriver]] == 7",
-#    added_in_version="10.9.0",
-#    text=r"""
-#If set to 1, the EPH code computes and stores on file the matrix elements
-#
-#$$ i \left\langle \psi_{mk}\big| \middle[ V^{(1)}_{q0,ka}, p \middle] \big| \psi_{nk} \right\rangle $$
-#
-#in the full BZ in reduced coordinates,
-#when computing the GSTORE.nc. See [[cite:Lihm2020]].
-#""",
-#),
+Variable(
+    abivarname="gstore_iv1p_comm",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics=r"GSTORE write matrix elements of i[V1_ka, p] commutator",
+    requires="[[optdriver]] == 7",
+    added_in_version="10.9.0",
+    text=r"""
+If set to 1, the EPH code computes and stores on file the matrix elements
+
+$$ i \left\langle \psi_{mk}\big| \middle[ V^{(1)}_{q0,ka}, p \middle] \big| \psi_{nk} \right\rangle $$
+
+in the full BZ in reduced coordinates,
+when computing the GSTORE.nc. See [[cite:Lihm2020]].
+""",
+),
 
 Variable(
     abivarname="gstore_use_lgk",
@@ -26845,21 +26845,21 @@ that should be used as input for further analysis.
 
 ),
 
-#Variable(
-#    abivarname="getqpdata_filepath",
-#    varset="eph",
-#    vartype="string",
-#    topics=['ElPhonInt_basic'],
-#    dimensions="scalar",
-#    defaultval="None",
-#    mnemonics="GET the QPDATA.nc from FILEPATH",
-#    added_in_version="10.9.0",
-#    text=r"""
-#This variable defines the path of the QPDATA file with the quasi-particle energies.
-#to be used to update the initial KS band structure.
-#To generate a QPDATA file, one can use AbiPy to extract the results from a SIGRES.nc file.
-#""",
-#),
+Variable(
+    abivarname="getqpdata_filepath",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="GET the QPDATA.nc from FILEPATH",
+    added_in_version="10.9.0",
+    text=r"""
+This variable defines the path of the QPDATA file with the quasi-particle energies.
+to be used to update the initial KS band structure.
+To generate a QPDATA file, one can use AbiPy to extract the results from a SIGRES.nc file.
+""",
+),
 
 
 Variable(

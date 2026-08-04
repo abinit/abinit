@@ -349,7 +349,7 @@ mrgdv < teph4isotc_1.abi
 The first line in *teph4isotc_1.abi* specifies the name of the output DVDB file, followed by the
 number of partial DFPT POT files and the full list of files we want to merge:
 
-{% dialog tests/tutorespfn/Input/teph4isotc_1.abi %}
+% dialog tests/tutorespfn/Input/teph4isotc_1.abi %}
 
 This step produces the **teph4isotc_1_DVDB** file that will be used in the next examples.
 Executing:
@@ -654,7 +654,7 @@ cp $ABI_TESTS/tutorespfn/Input/teph4isotc_2.abi .
 abinit teph4isotc_2.abi > teph4isotc_2.log 2> teph4isotc_2.err
 ```
 
-{% dialog tests/tutorespfn/Input/teph4isotc_2.abi %}
+% dialog tests/tutorespfn/Input/teph4isotc_2.abi %}
 
 The input contains two NSCF datasets.
 Dataset 1 computes 16 bands on a complete Gamma-centered 6x6x4 mesh and writes `teph4isotc_2o_DS1_WFK`.
@@ -676,7 +676,7 @@ cp $ABI_TESTS/tutorespfn/Input/teph4isotc_3o_w90.win .
 abinit teph4isotc_3.abi > teph4isotc_3.log 2> teph4isotc_3.err
 ```
 
-{% dialog tests/tutorespfn/Input/teph4isotc_3.abi %}
+% dialog tests/tutorespfn/Input/teph4isotc_3.abi %}
 
 The combination
 
@@ -754,7 +754,7 @@ cp $ABI_TESTS/tutorespfn/Input/teph4isotc_4.abi .
 abinit teph4isotc_4.abi > teph4isotc_4.log 2> teph4isotc_4.err
 ```
 
-{% dialog tests/tutorespfn/Input/teph4isotc_4.abi %}
+% dialog tests/tutorespfn/Input/teph4isotc_4.abi %}
 
 The full coarse k and q meshes are required before the discrete Fourier transform to real space.
 The following options compute only symmetry-inequivalent matrix elements and reconstruct the complete meshes:
@@ -789,7 +789,7 @@ cp $ABI_TESTS/tutorespfn/Input/teph4isotc_5.abi .
 abinit teph4isotc_5.abi > teph4isotc_5.log 2> teph4isotc_5.err
 ```
 
-{% dialog tests/tutorespfn/Input/teph4isotc_5.abi %}
+% dialog tests/tutorespfn/Input/teph4isotc_5.abi %}
 
 The dense meshes are specified independently of the coarse WFK mesh:
 
@@ -821,7 +821,7 @@ cp $ABI_TESTS/tutorespfn/Input/teph4isotc_6.abi .
 abinit teph4isotc_6.abi > teph4isotc_6.log 2> teph4isotc_6.err
 ```
 
-{% dialog tests/tutorespfn/Input/teph4isotc_6.abi %}
+% dialog tests/tutorespfn/Input/teph4isotc_6.abi %}
 
 The first dataset fixes $\kk=\Gamma$ and varies $\qq$ along $\Gamma$--M--K--$\Gamma$.
 The second dataset fixes $\qq=\Gamma$ and varies $\kk$ along $\Gamma$--K--M--$\Gamma$--A.
@@ -868,7 +868,7 @@ abinit teph4isotc_2.abi > log 2> err
 
 We now discuss the meaning of the different variables in more detail.
 
-{% dialog tests/tutorespfn/Input/teph4isotc_2.abi %}
+% dialog tests/tutorespfn/Input/teph4isotc_2.abi %}
 
 To activate the computation of $\gamma_{\qq\nu}$ in metals, we use [[optdriver]] = 7 and [[eph_task]] = 1.
 The location of the external DDB, DVDB and WFK files is specified via
@@ -999,7 +999,7 @@ Remember to discuss k-mesh and [[tsmear]] at the DFPT level.
 
 We now discuss in more detail the main output file produced by the EPH run.
 
-{% dialog tests/tutorespfn/Refs/teph4isotc_2.abo %}
+% dialog tests/tutorespfn/Refs/teph4isotc_2.abo %}
 
 After the standard section with info on the unit cell and the pseudopotentials,
 we find info on the electronic DOS:
@@ -1272,7 +1272,7 @@ the $\kk$-wavevectors of a much denser $\kk$-mesh whose energy is inside the [[s
 around the Fermi level.
 This is done in the *teph4isotc_4.abi* input file:
 
-{% dialog tests/tutorespfn/Input/teph4isotc_3.abi %}
+% dialog tests/tutorespfn/Input/teph4isotc_3.abi %}
 
 The most important section of the input file is reproduced below:
 
@@ -1306,14 +1306,14 @@ when using `abitk skw_compare`.
     Remember to use a value for the window that is reasonably large in order to account
     for possible oscillations and/or inaccuracies of the SKW interpolation around $\ee_F$.
 
-{% dialog tests/tutorespfn/Refs/teph4isotc_3.abo %}
-{% dialog tests/tutorespfn/Refs/teph4isotc_4.abo %}
+% dialog tests/tutorespfn/Refs/teph4isotc_3.abo %}
+% dialog tests/tutorespfn/Refs/teph4isotc_4.abo %}
 
 Once we have the *KERANGE.nc* file, we can use it to perform a NSCF calculation to generate
 a customized WFK file on the dense $\kk$-mesh:
 This is done in the *teph4isotc_4.abi* input file:
 
-{% dialog tests/tutorespfn/Input/teph4isotc_4.abi %}
+% dialog tests/tutorespfn/Input/teph4isotc_4.abi %}
 
 to perform a NSCF calculation with [[kptopt]] 0 to produce a new WFK file on the dense $\kk$-mesh.
 
@@ -1350,7 +1350,7 @@ At this point, we can use the WFK file to perform EPH calculations with denser $
 We will be using settings similar to the ones used in **teph4isotc_2.abi** except for
 the use of [[eph_ngqpt_fine]], [[getwfk_filepath]] and [[ngkpt]]:
 
-{% dialog tests/tutorespfn/Input/teph4isotc_5.abi %}
+% dialog tests/tutorespfn/Input/teph4isotc_5.abi %}
 
 <!--
 ## A more precise calculation
