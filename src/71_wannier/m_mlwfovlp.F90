@@ -342,7 +342,7 @@ class(abstract_wf), pointer :: mywfc
  integer :: nntot,num_nnmax
  integer :: max_num_bands,nprocs,comm,rank
  integer :: nwan(nsppol),nband_inc(nsppol),num_bands(nsppol)
- logical :: gamma_only,leig,lmmn,lwannierrun,spinors !,have_disentangled
+ logical :: gamma_only,leig,lmmn,lwannierrun,spinors,test_matrix_output !,have_disentangled
  character(len=fnlen) :: wfnname
  character(len=1000) :: msg
  character(len=fnlen) :: seed_name(nsppol)
@@ -394,6 +394,9 @@ class(abstract_wf), pointer :: mywfc
  gamma_only=.false.   !not yet implemented
  spinors=.false.
  if (dtset%nspinor == 2) spinors = .true.
+ ! Raw A_mn and M_mn entries are suitable regression quantities only for
+ ! scalar wavefunctions. Spinor eigenvectors have additional gauge freedom.
+ test_matrix_output = dtset%nspinor == 1
 
  !mpi initialization
  comm=MPI_enreg%comm_cell
@@ -579,7 +582,8 @@ class(abstract_wf), pointer :: mywfc
 
    call xmpi_sum(cm1,comm,ierr)
 
-   call write_Mmn(filew90_mmn, band_in, cm1, ovikp, g1, M_matrix,  nkpt, nsppol, nntot, mband, num_bands, msg, iam_master=(rank==master))
+   call write_Mmn(filew90_mmn, band_in, cm1, ovikp, g1, M_matrix, nkpt, nsppol, nntot, mband, num_bands, msg, &
+                  iam_master=(rank==master), test_matrix_output=test_matrix_output)
    ABI_FREE(cm1)
 
    !  erase temporary files created for parallel runs
@@ -678,9 +682,9 @@ class(abstract_wf), pointer :: mywfc
    ! write projections to file
    if (rank==master) then
      if(dtset%w90iniprj==1) then
-       call write_Amn(A_matrix, filew90_ramn, nsppol, mband, nkpt, num_bands, nwan, band_in)
+       call write_Amn(A_matrix, filew90_ramn, nsppol, mband, nkpt, num_bands, nwan, band_in, test_matrix_output)
      else
-       call write_Amn(A_matrix, filew90_amn, nsppol, mband, nkpt, num_bands, nwan, band_in)
+       call write_Amn(A_matrix, filew90_amn, nsppol, mband, nkpt, num_bands, nwan, band_in, test_matrix_output)
      end if
    end if
  end if !dtset%w90iniprj/=0

@@ -799,34 +799,6 @@ meta: {optdriver: 8, wfk_task: 10, }
    mlwfovlp :  mlwfovlp_setup done -
 -  see t17o_DS3_w90.wout for details.
 
-   Writing top of the overlap matrix: M_mn(ikb,ik)
-   m=n=1:3, ikb=1, ik=1
-
-;   (   0.359061   0.272371 ,   0.576817  -0.311161 ,   0.132669  -0.100054 ,    )
-;   (  -0.439831   0.485888 ,  -0.178808  -0.413689 ,  -0.361653  -0.423603 ,    )
-;   (  -0.044899   0.069274 ,   0.211133  -0.108161 ,  -0.078358   0.207794 ,    )
-
-   Writing bottom of the overlap matrix: M_mn(ikb,ik)
-   m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt
-
-;   (   0.190676   0.128657 ,   0.293478   0.231590 ,   0.004160   0.087018 ,    )
-;   (  -0.200284   0.043851 ,  -0.036824   0.248903 ,  -0.171248  -0.351371 ,    )
-;   (   0.126177  -0.228451 ,   0.271376   0.195071 ,   0.272446   0.091199 ,    )
-
-   Writing top of the initial projections matrix: A_mn(ik)
-   m=1:3, n=1:3, ik=1
-
-;   (   0.594636   0.003200 ,  -0.036223   0.052532 ,   0.000000   0.000000 ,    )
-;   (   0.036223   0.052532 ,   0.594636  -0.003200 ,   0.000000   0.000000 ,    )
-;   (  -0.000001  -0.000001 ,   0.000001   0.000000 ,   0.011096   0.000257 ,    )
-
-   Writing bottom of the initial projections matrix: A_mn(ik)
-   m=num_bands-2:num_bands, n=nwan-2:nwan, ik=nkpt
-
-;   (   0.126326   0.129112 ,  -0.228296  -0.206470 ,  -0.194702  -0.035261 ,    )
-;   (   0.115672   0.019191 ,   0.304805  -0.001886 ,   0.169941   0.094595 ,    )
-;   (   0.283734   0.191020 ,   0.169941  -0.094595 ,  -0.304805  -0.001886 ,    )
-
 ** mlwfovlp:   calling wannier90 library subroutine wannier_run 
    Calculation is running         
 -  see t17o_DS3_w90.wout for details.

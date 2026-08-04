@@ -55,11 +55,11 @@ module m_wannier_io
 contains
 
   ! Write amn file
-  subroutine write_Amn(A_matrix, fname, nsppol, mband, nkpt, num_bands, nwan, band_in)
+  subroutine write_Amn(A_matrix, fname, nsppol, mband, nkpt, num_bands, nwan, band_in, test_matrix_output)
     ! TODO use the A_matrix sizes instead of the nsppol, mband, nkpt, nwan
     complex(dp),pointer :: A_matrix(:,:,:,:)
     !type(dataset_type),intent(in) :: dtset
-    logical, intent(in) :: band_in(:, :)
+    logical, intent(in) :: band_in(:, :), test_matrix_output
     integer, intent(in) :: nsppol, num_bands(nsppol), nwan(nsppol), mband, nkpt
     character(len=fnlen), intent(in) :: fname(nsppol)
 
@@ -100,6 +100,11 @@ contains
        write(msg, '(3a)' )'   ',trim(fname(isppol)),' written'
        call wrtout(std_out,msg)
     end do
+
+    ! Individual matrix elements are gauge-dependent for spinor wavefunctions,
+    ! especially inside degenerate subspaces. The caller disables this test-only
+    ! output for nspinor == 2, while the complete .amn file is still written.
+    if (.not. test_matrix_output) return
     !
     !  Write down part of the matrix to the output file
     !  This is for the automatic tests
@@ -385,7 +390,7 @@ contains
 !-----------------------------------------------------------------------
 ! TODO: this routine is doing much more than writing Mmn!! It also calculates etc. The io module should be segregated and cleaned
   subroutine write_Mmn(filew90_mmn, band_in, cm1, ovikp, g1, M_matrix, &
-       &  nkpt, nsppol,  nntot, mband, num_bands,  msg, iam_master)
+       &  nkpt, nsppol,  nntot, mband, num_bands,  msg, iam_master, test_matrix_output)
 
     integer, intent(in) :: nsppol,  nntot, nkpt
     integer, intent(in) :: mband, num_bands(:)
@@ -394,7 +399,7 @@ contains
     integer,intent(in):: ovikp(:,:)
     integer, intent(in) :: g1(:, :, :)
     real(dp), intent(in) :: cm1(:,:,:,:,:,:)
-    logical, intent(in) :: iam_master
+    logical, intent(in) :: iam_master, test_matrix_output
     complex(dp),intent(inout) :: M_matrix(:,:,:,:,:)
 
 !Local variables-------------------------------
@@ -447,7 +452,9 @@ contains
    end do !isppol
 
 
-   if(iam_master) then
+   ! Individual spinor overlap elements depend on the arbitrary gauge selected
+   ! in degenerate subspaces. The complete .mmn file above is always written.
+   if(iam_master .and. test_matrix_output) then
      write(msg, '(4a)' ) ch10,&
       '   Writing top of the overlap matrix: M_mn(ikb,ik)',ch10,&
       '   m=n=1:3, ikb=1, ik=1'
