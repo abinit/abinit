@@ -22,6 +22,10 @@ gstore_use_lgk 1
 gstore_with_vk 0
 eph_restart 0
 
+gstore_convert "epiq"  # Produce the files required by the EPIQ code.
+                       # IMPORTANT:
+                       # This generates many files; enable it only if you plan to use EPIQ.
+
 mixprec 1
 boxcutmin 1.1
 

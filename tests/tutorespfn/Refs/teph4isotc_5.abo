@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  2 Aug 2026.
-- ( at 12h19 )
+.Starting date : Tue  4 Aug 2026.
+- ( at 16h11 )
   
 - input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/tutorespfn_teph4isotc_1-teph4isotc_2-teph4isotc_3-teph4isotc_4-teph4isotc_5-teph4isotc_6/teph4isotc_5.abi
 - output file    -> teph4isotc_5.abo
@@ -355,10 +355,10 @@ meta: {optdriver: 7, eph_task: -12, }
 --- !WANNIER_PARAMS
 iteration_state: {dtset: 1, }
 spin: 1
-nwan: 4
+nwan: 6
 num_bands: 16
 bmin: 1
-bmax: 5
+bmax: 8
 nkbz: 144
 nr_h: 215
 nr_e: -1
@@ -389,10 +389,10 @@ P pp_sum_comm can use shmem: yes
  gqk_cplex: 2
  gqk_bstart_k: 1
  gqk_bstart_kq: 1
- gqk_bstop_k: 4
- gqk_bstop_kq: 4
- gqk_nb_k: 4
- gqk_nb_kq: 4
+ gqk_bstop_k: 6
+ gqk_bstop_kq: 6
+ gqk_nb_k: 6
+ gqk_nb_kq: 6
  gqk_my_npert: 9
 P gqk_my_nk: -1
 P gqk_my_nq: -1
@@ -417,23 +417,22 @@ P Number of CPUs for parallelism over k-points: 1
  Max 10  k-points will be written. Use prtvol > 0 to print all of them.
 
 
- Using Wannier interpolation to compute and store e-ph matrix elements ...
+ Preparing on-demand Wannier interpolation of e-ph matrix elements ...
  Reading g(R_e, R_p) from GWAN file: teph4isotc_4o_GWAN.nc
  Reading of GWAN.nc file completed.
  Gstore built on the fly via Wannier interpolation (ABIWAN.nc + GWAN.nc)
 
 
  Solving isotropic Migdal-Eliashberg equations on the imaginary axis
- Using the ab-initio Fermi level to evaluate the DOS of the Wannier band subspace.
 
 
  Linear tetrahedron method.
- Mesh step:  10.0 (meV) with npts: 1502
- From emin:  -5.1 to emax:  10.0 (eV)
+ Mesh step:  10.0 (meV) with npts: 2243
+ From emin:  -6.4 to emax:  16.0 (eV)
  Number of k-points in the IBZ: 50
- Fermi level:   7.71393053E+00 (eV)
- Total electron DOS at Fermi level in states/eV:   4.49909888E-01
- Total number of electrons at eF:    7.8
+ Fermi level:   7.76369169E+00 (eV)
+ Total electron DOS at Fermi level in states/eV:   7.16695247E-01
+ Total number of electrons at eF:    8.0
 
 
  Computing a^2F(w) with ph_smear: 5.000000E-01 (meV)
@@ -446,70 +445,70 @@ P Number of CPUs for parallelism over k-points: 1
     1    0.00000000E+00    0.00000000E+00
     2    0.00000000E+00    0.00000000E+00
     3    0.00000000E+00    0.00000000E+00
-    4    3.93041811E+01    1.30151498E-01
-    5    3.93041811E+01    1.30151498E-01
-    6    4.55691799E+01    1.98758134E+00
-    7    6.60315845E+01    2.28255363E+00
-    8    6.60315845E+01    2.28255363E+00
-    9    8.50911661E+01    3.30704246E-03
+    4    3.93041811E+01    8.26277883E-01
+    5    3.93041811E+01    8.26277883E-01
+    6    4.55691799E+01    9.17054198E-01
+    7    6.60315845E+01    1.98055346E+00
+    8    6.60315845E+01    1.98055346E+00
+    9    8.50911661E+01    1.59342546E-01
  q-path point 2:   1.66666667E-01  0.00000000E+00  0.00000000E+00
    nu       omega (meV)          lambda
-    1    1.34508030E+01    6.26930220E-01
-    2    1.93136030E+01    1.62831503E-02
-    3    2.62965758E+01    1.38987803E-01
-    4    4.40457333E+01    2.09655942E-02
-    5    4.45219260E+01    2.80740258E-01
-    6    5.00662550E+01    5.52938719E-02
-    7    7.42047532E+01    4.28816402E-01
-    8    7.47956676E+01    2.33557706E-01
-    9    8.39055616E+01    1.45887208E-02
+    1    1.34508030E+01    6.70221874E-01
+    2    1.93136030E+01    4.13590307E-02
+    3    2.62965758E+01    8.59037651E-02
+    4    4.40457333E+01    3.44344717E-02
+    5    4.45219260E+01    1.83089689E-01
+    6    5.00662550E+01    2.26019616E-01
+    7    7.42047532E+01    1.55758611E-01
+    8    7.47956676E+01    1.74870766E-01
+    9    8.39055616E+01    3.07749016E-02
  q-path point 3:   3.33333333E-01  0.00000000E+00  0.00000000E+00
    nu       omega (meV)          lambda
-    1    2.54245975E+01    3.46884750E-02
-    2    2.75353471E+01    1.73325648E-03
-    3    3.63002597E+01    4.40179574E-02
-    4    4.33308940E+01    1.93279622E-01
-    5    5.14970561E+01    1.98800025E-02
-    6    7.20604230E+01    3.40038640E-02
-    7    7.49317820E+01    5.02737808E-02
-    8    8.44066061E+01    1.11718544E-01
-    9    8.98621527E+01    3.68010455E-02
+    1    2.54245975E+01    1.08318772E-01
+    2    2.75353471E+01    3.96612840E-03
+    3    3.63002597E+01    2.23472249E-02
+    4    4.33308940E+01    1.87718473E-01
+    5    5.14970561E+01    2.24370125E-02
+    6    7.20604230E+01    2.17794212E-02
+    7    7.49317820E+01    7.34943083E-02
+    8    8.44066061E+01    5.33007911E-02
+    9    8.98621527E+01    3.39183538E-02
  q-path point 4:   5.00000000E-01  0.00000000E+00  0.00000000E+00
    nu       omega (meV)          lambda
-    1    2.99044571E+01    1.32181481E-03
-    2    2.99789981E+01    2.15673000E-02
-    3    3.91504057E+01    1.49361237E-02
-    4    5.11708882E+01    9.52206712E-02
-    5    5.65146036E+01    3.40631290E-03
-    6    6.05872516E+01    1.34092814E-01
-    7    8.51309099E+01    1.59828125E-01
-    8    8.64126098E+01    2.31749450E-01
-    9    9.21480976E+01    3.03567044E-02
+    1    2.99044571E+01    1.15603159E-02
+    2    2.99789981E+01    3.37775655E-03
+    3    3.91504057E+01    9.75101819E-02
+    4    5.11708882E+01    4.56527186E-01
+    5    5.65146036E+01    1.79824056E-02
+    6    6.05872516E+01    8.36718925E-02
+    7    8.51309099E+01    5.70512416E-02
+    8    8.64126098E+01    5.21231904E-02
+    9    9.21480976E+01    3.51070143E-02
  q-path point 5:   4.16666667E-01  1.66666667E-01  0.00000000E+00
    nu       omega (meV)          lambda
-    1    3.02127713E+01    2.72375903E-03
-    2    3.15813863E+01    1.15771981E-02
-    3    3.78605600E+01    2.42263101E-02
-    4    5.16339952E+01    9.49523839E-02
-    5    6.05470423E+01    1.62247001E-02
-    6    6.66003785E+01    2.85350592E-02
-    7    8.71026035E+01    6.58421707E-02
-    8    8.93276315E+01    1.87912879E-01
-    9    9.18542482E+01    7.73898449E-02
+    1    3.02127713E+01    1.12779209E-02
+    2    3.15813863E+01    7.63739898E-03
+    3    3.78605600E+01    9.57012252E-03
+    4    5.16339952E+01    1.35565843E-01
+    5    6.05470423E+01    7.00064051E-02
+    6    6.66003785E+01    2.56939322E-02
+    7    8.71026035E+01    5.15331251E-02
+    8    8.93276315E+01    7.29347032E-02
+    9    9.18542482E+01    2.57865846E-02
  q-path point 6:   3.33333333E-01  3.33333333E-01  0.00000000E+00
    nu       omega (meV)          lambda
-    1    3.04565806E+01    7.62180557E-03
-    2    3.50518105E+01    5.97721047E-03
-    3    3.50518105E+01    5.97721047E-03
-    4    5.61049652E+01    2.49658735E-02
-    5    5.61049652E+01    2.49658735E-02
-    6    8.35518362E+01    8.58620701E-03
-    7    8.66557170E+01    2.11292279E-02
-    8    8.66557170E+01    2.11292279E-02
-    9    9.20932095E+01    4.38724424E-02
- Isotropic lambda from a2F(w):   8.88607852E-01
- Isotropic omega_log from a2F(w):   2.12477696E-03 (Ha),   6.70951496E+02 (K)
- Isotropic omega_2 from a2F(w):   2.47576601E-03 (Ha),   7.81785073E+02 (K)
+    1    3.04565806E+01    8.99812218E-03
+    2    3.50518105E+01    1.45031312E-02
+    3    3.50518105E+01    1.45031312E-02
+    4    5.61049652E+01    1.01788444E-01
+    5    5.61049652E+01    1.01788444E-01
+    6    8.35518362E+01    3.11493332E-02
+    7    8.66557170E+01    3.30343920E-02
+    8    8.66557170E+01    3.30343920E-02
+    9    9.20932095E+01    8.39455522E-02
+ Isotropic lambda from a2F(w):   8.05205255E-01
+ Isotropic omega_log from a2F(w):   1.47788472E-03 (Ha),   4.66679083E+02 (K)
+ Isotropic omega_2 from a2F(w):   2.08129985E-03 (Ha),   6.57222511E+02 (K)
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -728,15 +727,15 @@ P           mkmem          21
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- Proc.   0 individual time (sec): cpu=        100.3  wall=        100.7
+- Proc.   0 individual time (sec): cpu=          3.1  wall=          3.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        100.3  wall=        100.7
+.Delivered   1 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.1  wall=          3.2
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
 -   There were 34 allocations and 34 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 2553072 allocations and 2553072 deallocations in Fortran
+-   There were 2340359 allocations and 2340359 deallocations in Fortran
 -   Remaining memory at the end of the calculation is 0

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  2 Aug 2026.
-- ( at 12h17 )
+.Starting date : Tue  4 Aug 2026.
+- ( at 16h09 )
   
 - input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/tutorespfn_teph4isotc_1-teph4isotc_2-teph4isotc_3-teph4isotc_4-teph4isotc_5-teph4isotc_6/teph4isotc_3.abi
 - output file    -> teph4isotc_3.abo
@@ -276,16 +276,16 @@ meta: {optdriver: 8, wfk_task: 10, }
    Writing top of the initial projections matrix: A_mn(ik)
    m=1:3, n=1:3, ik=1
 
-;   (   0.277180  -0.000000 ,   0.000000  -0.000000 ,  -0.000000   0.000000 ,    )
-;   (   0.000000   0.000000 ,   0.258820  -0.000000 ,  -0.502977  -0.000000 ,    )
-;   (   0.000000  -0.000000 ,   0.000000   0.000000 ,   0.000000   0.000000 ,    )
+;   (  -0.000000   0.000000 ,   0.000000  -0.000000 ,  -0.000000  -0.000000 ,    )
+;   (  -0.502977  -0.000000 ,  -0.000000   0.000000 ,   0.000000  -0.000000 ,    )
+;   (   0.000000   0.000000 ,   0.278727  -0.000000 ,  -0.493292  -0.000000 ,    )
 
    Writing bottom of the initial projections matrix: A_mn(ik)
    m=num_bands-2:num_bands, n=nwan-2:nwan, ik=nkpt
 
-;   (   0.000000  -0.000000 ,   0.012073  -0.045057 ,  -0.012073   0.045057 ,    )
-;   (  -0.000003   0.025141 ,   0.025335   0.006778 ,   0.025262   0.006759 ,    )
-;   (   0.001504  -0.132780 ,   0.219479   0.039765 ,   0.236858   0.087330 ,    )
+;   (  -0.012073   0.045057 ,   0.035444   0.009497 ,  -0.018021   0.067256 ,    )
+;   (   0.025262   0.006759 ,   0.008678  -0.032396 ,   0.050423   0.013510 ,    )
+;   (   0.236858   0.087330 ,  -0.023296  -0.028862 ,   0.045780   0.012721 ,    )
 
 ** mlwfovlp:   calling wannier90 library subroutine wannier_run 
    Calculation is running         
@@ -294,17 +294,19 @@ meta: {optdriver: 8, wfk_task: 10, }
    Uniform k-mesh: 6 6 4
    Number of k-points: 144
    Number of input bands: 16
-   Number of Wannier functions: 4
+   Number of Wannier functions: 6
    Number of k-point neighbours: 8
    Fermi energy [eV]:   7.68033526E+00
    Eigenvalue range (min, max) [eV]:  -4.59642653E+00   3.14869906E+01
    Wannier90 physical results:
--   Spreads (Omega_total, Omega_I, Omega_tilde) [Ang^2]:   7.98088006E+00   5.44233032E+00   2.53854974E+00
+-   Spreads (Omega_total, Omega_I, Omega_tilde) [Ang^2]:   2.48137196E+01   1.34167271E+01   1.13969926E+01
    Wannier function centres [Ang] and spreads [Ang^2]:
--     WF 1: centre =    -0.00004911    -1.54142238     1.77859133  spread =     1.23234075
--     WF 2: centre =     1.33349234     0.77165551    -1.75812465  spread =     1.23318558
--     WF 3: centre =    -1.35610185     0.77468851     2.16021720  spread =     2.74265828
--     WF 4: centre =     1.31374189     2.31759593     1.34061537  spread =     2.77269545
+-     WF 1: centre =    -0.90783396     1.60190356     2.18531727  spread =     3.01075271
+-     WF 2: centre =    -0.31898429     2.24629145     1.75433324  spread =     7.07411069
+-     WF 3: centre =    -1.29681559     0.67092178     1.91206385  spread =     2.95341194
+-     WF 4: centre =     0.94242607     1.58094719     1.30378301  spread =     2.94518784
+-     WF 5: centre =     0.05145692     1.72574000     1.68114402  spread =     4.81042201
+-     WF 6: centre =     1.45920163     1.02155569     1.70316812  spread =     4.01983441
 
    mlwfovlp :  mlwfovlp_run completed -
 -  see teph4isotc_3o_w90.wout for details.
@@ -546,15 +548,15 @@ P           mkmem          21
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- Proc.   0 individual time (sec): cpu=         54.9  wall=         55.5
+- Proc.   0 individual time (sec): cpu=         63.4  wall=         63.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         54.9  wall=         55.5
++Overall time at end (sec) : cpu=         63.4  wall=         63.7
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
 -   There were 32 allocations and 32 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 11080873 allocations and 11080873 deallocations in Fortran
+-   There were 15502889 allocations and 15502889 deallocations in Fortran
 -   Remaining memory at the end of the calculation is 0

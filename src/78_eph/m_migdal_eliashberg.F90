@@ -374,31 +374,6 @@ subroutine isome_ncwrite_spectral(ncid, dtset, gstore, nomega, omega, a2f_raw, a
    nctkarr_t("a2f_values", "dp", "a2f_nomega")])
  NCF_CHECK(ncerr)
 
- NCF_CHECK(nctk_set_atomic_units(ncid, "a2f_mesh"))
- NCF_CHECK(nctk_set_atomic_units(ncid, "eph_fsmear"))
- NCF_CHECK(nctk_set_atomic_units(ncid, "ph_smear"))
- NCF_CHECK(nctk_set_atomic_units(ncid, "ph_wstep"))
- NCF_CHECK(nctk_set_atomic_units(ncid, "a2f_edos_fermie"))
- NCF_CHECK(nctk_set_atomic_units(ncid, "a2f_dos_normalization"))
- NCF_CHECK(nctk_set_atomic_units(ncid, "omega_2"))
-
- ncerr = nf90_put_att(ncid, nf90_global, "isome_section", "spectral")
- NCF_CHECK(ncerr)
- ncerr = nf90_put_att(ncid, nctk_idname(ncid, "omega_2"), "long_name", &
-   "Allen-Dynes square-root second moment of the isotropic Eliashberg function")
- NCF_CHECK(ncerr)
- ncerr = nf90_put_att(ncid, nf90_global, "isome_status", "experimental")
- NCF_CHECK(ncerr)
- ncerr = nf90_put_att(ncid, nctk_idname(ncid, "a2f_values_raw"), "long_name", &
-   "raw matrix-element spectral sum before division by the electronic DOS")
- NCF_CHECK(ncerr)
- ncerr = nf90_put_att(ncid, nctk_idname(ncid, "a2f_values"), "long_name", &
-   "isotropic Eliashberg spectral function")
- NCF_CHECK(ncerr)
- ncerr = nf90_put_att(ncid, nctk_idname(ncid, "a2f_values"), "normalization", &
-   "a2f_values_raw divided by a2f_edos_fermie / 2")
- NCF_CHECK(ncerr)
-
  NCF_CHECK(nctk_set_datamode(ncid))
  ncerr = nctk_write_iscalars(ncid, &
    [character(len=nctk_slen) :: "isome_schema_version", "eph_intmeth", "ph_intmeth"], &
@@ -427,7 +402,7 @@ end subroutine isome_ncwrite_spectral
 !! isome_ncwrite_qibz
 !!
 !! FUNCTION
-!!  Write phonon frequencies and the raw mode-resolved lambda(q,nu) on
+!!  Write phonon frequencies and the normalized mode-resolved lambda(q,nu) on
 !!  the phonon IBZ. No averaging is applied inside degenerate subspaces;
 !!  their gauge-invariant contribution enters a2F through the mode sum.
 !!
@@ -459,12 +434,6 @@ subroutine isome_ncwrite_qibz(ncid, gstore, phfreq, phlambda)
    nctkarr_t("phfreq_qibz", "dp", "isome_natom3, isome_nqibz"), &
    nctkarr_t("phlambda_qibz", "dp", "isome_natom3, isome_nqibz, number_of_spins")])
  NCF_CHECK(ncerr)
-
- NCF_CHECK(nctk_set_atomic_units(ncid, "phfreq_qibz"))
- NCF_CHECK(nf90_put_att(ncid, nctk_idname(ncid, "qibz"), "long_name", "phonon q-points in the irreducible Brillouin zone"))
- NCF_CHECK(nf90_put_att(ncid, nctk_idname(ncid, "wtq"), "long_name", "phonon IBZ integration weights"))
- NCF_CHECK(nf90_put_att(ncid, nctk_idname(ncid, "phlambda_qibz"), "long_name", "raw mode-resolved electron-phonon coupling lambda(q,nu)"))
- NCF_CHECK(nf90_put_att(ncid, nctk_idname(ncid, "phlambda_qibz"), "degenerate_mode_averaging", "none"))
 
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qibz"), gstore%qibz))
@@ -522,20 +491,11 @@ subroutine isome_ncwrite_qpath(ncid, qpath, phfreq, phdispl_cart, phlambda)
    nctkarr_t("phlambda_qpath", "dp", "number_of_phonon_modes, isome_nqpath, isome_nsppol")])
  NCF_CHECK(ncerr)
 
- NCF_CHECK(nctk_set_atomic_units(ncid, "phfreq_qpath"))
- NCF_CHECK(nctk_set_atomic_units(ncid, "phlambda_qpath_degen_tol"))
- ncerr = nf90_put_att(ncid, nctk_idname(ncid, "qpath"), "long_name", &
-   "q-point path in reduced coordinates")
- NCF_CHECK(ncerr)
- ncerr = nf90_put_att(ncid, nctk_idname(ncid, "phlambda_qpath"), "long_name", &
-   "mode-resolved electron-phonon coupling lambda(q,nu)")
- NCF_CHECK(ncerr)
- ncerr = nf90_put_att(ncid, nctk_idname(ncid, "phlambda_qpath"), "fermi_surface_integration", &
-   "Gaussian double delta with width eph_fsmear")
- NCF_CHECK(ncerr)
-
  NCF_CHECK(nctk_set_datamode(ncid))
- NCF_CHECK(nctk_write_iscalars(ncid, [character(len=nctk_slen) :: "phlambda_qpath_average_degenerate"], [merge(1, 0, average_lambda_qpath_degenerate)]))
+ ncerr = nctk_write_iscalars(ncid, &
+   [character(len=nctk_slen) :: "phlambda_qpath_average_degenerate"], &
+   [merge(1, 0, average_lambda_qpath_degenerate)])
+ NCF_CHECK(ncerr)
  NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "phlambda_qpath_degen_tol"], [lambda_qpath_degen_tol]))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpath"), qpath))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phfreq_qpath"), phfreq))
@@ -697,7 +657,7 @@ subroutine get_lambda_qpath_wan(gstore, dtset, edos_fermie, qpoints, phfreq, phd
  end do
 
  spin_factor = two / (gstore%nsppol * dtset%nspinor)
- phlambda = phlambda * spin_factor / (edos_fermie / two)
+ phlambda = phlambda * spin_factor / edos_fermie
  call xmpi_sum(phlambda, gstore%comm, ierr)
  if (average_lambda_qpath_degenerate) call average_lambda_degenerate_modes(nqpath, natom3, gstore%nsppol, phfreq, phlambda)
  my_rank = xmpi_comm_rank(gstore%comm)
@@ -806,7 +766,7 @@ end subroutine average_lambda_degenerate_modes
 !! OUTPUT
 !!  a2fw(nw): Eliashberg function in the historical raw normalization.
 !!  phfreq_qibz: Phonon frequencies on the q-point IBZ.
-!!  phlambda_qibz: Raw mode- and spin-resolved lambda(q,nu).
+!!  phlambda_qibz: DOS-normalized mode- and spin-resolved lambda(q,nu).
 !!
 !! SOURCE
 
@@ -1041,10 +1001,12 @@ subroutine get_a2fw(gstore, edos_fermie, nw, wmesh, a2fw, phfreq_qibz, phlambda_
  ABI_FREE(deltaw_nuq)
 
  ! Normalize lambda(q,nu), then construct the normalized Eliashberg function
- ! with the phonon-IBZ weights. The factor edos_fermie / 2 at the end restores
- ! the historical raw a2F convention expected by the caller.
+ ! with the phonon-IBZ weights. edos_fermie is the total DOS, including spin
+ ! degeneracy. The factor two already present in the mode-resolved accumulator
+ ! is the conventional prefactor in lambda(q,nu), so do not divide the DOS by
+ ! two here.
  spin_factor = two / (gstore%nsppol * gstore%dtset%nspinor)
- phlambda_qibz = phlambda_qibz * spin_factor / (edos_fermie / two)
+ phlambda_qibz = phlambda_qibz * spin_factor / edos_fermie
  call xmpi_sum(phlambda_qibz, gstore%comm, ierr)
  a2fw = zero
  do iq_ibz=1,gstore%nqibz

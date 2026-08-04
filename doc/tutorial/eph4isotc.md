@@ -692,15 +692,23 @@ invokes Wannier90 in library mode and writes `teph4isotc_3o_ABIWAN.nc`.
 The ABIWAN file contains the electronic Hamiltonian in the Wannier representation together with the information
 needed to interpolate the band energies.
 
-The Wannier90 input defines four deterministic trial orbitals:
+The Wannier90 input defines six deterministic trial orbitals, namely the three
+$p$ orbitals on each of the two boron atoms:
 
 ```text
+num_wann = 6
+
 begin projections
-Mg:s
-Mg:pz
-B:pz
+B:p
 end projections
 ```
+
+These orbitals span both the boron $p_x/p_y$ sigma bands and the $p_z$ pi
+bands relevant near the Fermi surface. Wannier90 interprets the
+disentanglement windows on the absolute KS energy scale. Here the Fermi energy
+is approximately 7.7 eV, so the frozen window from 1.5 to 13.5 eV includes the
+complete six-band manifold around the Fermi level. The outer window extends
+from -6 to 15 eV.
 
 Deterministic projectors are important in a regression test because random trial orbitals can lead to different
 local minima of the spread functional in separate runs.
@@ -733,7 +741,7 @@ The same file can be opened interactively with:
 abiopen.py teph4isotc_3o_ABIWAN.nc -e
 ```
 
-The comparison should focus on the four-band Wannier subspace and on the energy region relevant for the Fermi surface.
+The comparison should focus on the six-band Wannier subspace and on the energy region relevant for the Fermi surface.
 Differences outside the frozen window are not necessarily meaningful because the bands are disentangled.
 
 ### Symmetry-reduced GSTORE and the GWAN file
