@@ -3197,7 +3197,7 @@ Variable(
     requires="[[usedmft]] == 1 and [[dmft_prtwan]] == 1",
     added_in_version="before_v10.8",
     text=r"""
-Required in order to build the full Wannier function outside the paw sphere. This is relevant 
+Required in order to build the full Wannier function outside the paw sphere. This is relevant
 only when using [[dmft_solv]] $\in$ [5,8,10].
 """,
 ),
@@ -9748,18 +9748,18 @@ Variable(
     mnemonics="Integer for PReConditioning of ELectron response",
     added_in_version="before_v9",
     text=r"""
-Used when [[iscf]] > 0, to define the SCF preconditioning scheme. 
+Used when [[iscf]] > 0, to define the SCF preconditioning scheme.
 
 The preconditioner $P$ is used to compute the preconditioned density/potential residuals
 $$ r_n = P(x_n^\mathrm{in} - x_n^\mathrm{out}) $$
-that are then used in the mixing scheme. 
+that are then used in the mixing scheme.
 When potential mixing ($x=\rho$) is used, the preconditioner is an approximation of the inverse dielectric matrix $\varepsilon$.
 When density mixing ($x=V$) is used, the preconditioner is an approximation of the inverse adjoint dielectric matrix $\varepsilon^\dagger$.
 
 The possible values of [[iprcel]] are:
 
   * 0 --> Model dielectric function described by [[diemac]], [[dielng]] and [[diemix]].
-  
+
   * Between 21 and 169 --> Model dielectric matrix computed with the extrapolar approximation described in [[cite:Anglade2008]]. This approximation can be adjusted using the parameters [[diecut]], [[dielam]] and [[diegap]]. The accuracy of this model largely depends on the number of conduction bands included in the system. Having 2 to 10 empty bands in the calculation is usually enough (use [[nband]]).
     * Between 21 and 29 --> Use the same as [[iprcel]] = 0 for the first few steps, then compute  the RPA dielectric matrix, and use it as such.
     * Between 31 and 39 --> Use the same as [[iprcel]] = 0 for the first few steps, then compute  the RPA dielectric matrix, and use it with the mixing factor [[diemix]].
@@ -9767,7 +9767,7 @@ The possible values of [[iprcel]] are:
     * Between 51 and 59 --> Same as between 41 and 49, but compute the RPA dielectric matrix by another mean.
     * Between 61 and 69 --> Same as between 41 and 49, but compute the electronic dielectric matrix instead of the RPA one.
     * Between 141 and 169 --> Same as Between 41 and 69, but the dielectric matrix is also recomputed every mod([[iprcel]], 10) step.
- 
+
  > Notes :
  > * The step at which the dielectric matrix is computed or recomputed is determined by modulo([[iprcel]],10). The recomputation happens just once in the calculation for [[iprcel]] < 100.
  > * For non-homogeneous relatively large cells, [[iprcel]] = 45 will likely give a large improvement over [[iprcel]] = 0.
@@ -9778,7 +9778,7 @@ The possible values of [[iprcel]] are:
  > * The exchange term in the full dielectric matrix diverges for vanishing densities. Therefore the values of [[iprcel]] beyond 60 must not be used for cells containing vacuum, unless ones computes this matrix for every step ([[iprcel]] = 161).
 
   * Between 200 and 299 --> Model dielectric operator $\varepsilon^\mathrm{model}$ based of a model non-interacting susceptibility $\chi_0^\mathrm{model}$: $$ \varepsilon^\mathrm{model} = I - K \chi_0^\mathrm{model} $$ where $K$ is a potential kernel (the Coulomb kernel $K_H$ and/or the exchange-correlation kernel $K_\mathrm{XC}$).
-The preconditioner, $P = (\varepsilon^\mathrm{model})^{-1}$ for potential mixing or $P = ((\varepsilon^\mathrm{model})^\dagger)^{-1}$ for density mixing, is applied using an iterative linear solver (GMRES) to invert the model dielectric matrix or its adjoint.  
+The preconditioner, $P = (\varepsilon^\mathrm{model})^{-1}$ for potential mixing or $P = ((\varepsilon^\mathrm{model})^\dagger)^{-1}$ for density mixing, is applied using an iterative linear solver (GMRES) to invert the model dielectric matrix or its adjoint.
 Available models are :
     * 200 --> LDOS-preconditioner [[cite:Herbst2020]]: $$ \varepsilon^\mathrm{LDOS} = I - K_H \chi_0^\mathrm{LDOS} .$$ This preconditioner is well suited for metallic system in large homogeneous or inhomogeneous systems. It requires a smooth smearing function ([[occopt]] = 3 to 7) and we suggest using it as a **default** for such cases.
     * 201 --> DOS-preconditioner: $$\varepsilon^\mathrm{DOS} = I - DK_\mathrm{H}$$ with $D$ the (scalar) density of state at the Fermi-level. This is a parameter-free version of the Kerker preconditioner (suggested in [[cite:Herbst2020]]).
@@ -9786,7 +9786,7 @@ Available models are :
 
  > Notes :
  > * The mixing factor [[diemix]] is used and [[diemixmag]] is ignored.
- > * The preconditioner can be tuned with the parameters [[precon_ls_maxite]], [[precon_ls_rtol]], [[precon_verbose]], [[precon_tsmear]] and [[precon_in_memory]].  
+ > * The preconditioner can be tuned with the parameters [[precon_ls_maxite]], [[precon_ls_rtol]], [[precon_verbose]], [[precon_tsmear]] and [[precon_in_memory]].
  > * In PAW, this is only compatible with [[pawmixdg]] = 1.
 """,
 ),
@@ -17598,8 +17598,8 @@ Variable(
     text=r"""
 This variable defines the smearing temperature used in the $\chi_0^\mathrm{diag}$ of the Hybrid preconditioner.
 
-Increasing the smearing temperature in the preconditioner helps smooth out the preconditioner, 
-which can be more challenging to converge in k_points that other quantities. 
+Increasing the smearing temperature in the preconditioner helps smooth out the preconditioner,
+which can be more challenging to converge in k_points that other quantities.
 Adjusting this parameter can significantly improve convergence.
 
 This setting is only useful for $\chi_0$-based hybrid SCF preconditioning ([[iprcel]] = 202).
@@ -18446,7 +18446,7 @@ Variable(
     added_in_version="10.4",
     text=r"""
 
-When this flag is activated, integrals of the first-order particle and magnetization densities inside the atomic spheres are printed in the output file: 
+When this flag is activated, integrals of the first-order particle and magnetization densities inside the atomic spheres are printed in the output file:
 
   * **prt1mag** = 1 --> print the integrals of the densities for the last
     iteration only.
@@ -20139,7 +20139,7 @@ This variable enables response-function calculations with respect to external Ze
   * 2 --> local magnetic-field perturbations (possibly at finite q) applied to the atoms specified by [[rfatpol]] and along the
           Cartesian directions specified by [[rfdir]]. The size and boundary shape of the atomic spheres wherein the field is applied
           are specified by [[ratsph]] and [[ratsm]].
-  * 3 --> Uniform non-magnetic scalar potential $e^{i {\bf q \cdot r}}$ perturbation applied along the direction of the wave-vector **q**. 
+  * 3 --> Uniform non-magnetic scalar potential $e^{i {\bf q \cdot r}}$ perturbation applied along the direction of the wave-vector **q**.
 
 Note for constrained DFPT calculations:
 A set of local magnetic-field response calculations, combined with a geometrically equivalent magnetic penalty
@@ -26416,25 +26416,25 @@ Possible values are:
 """,
 ),
 
-Variable(
-    abivarname="gstore_iv1p_comm",
-    varset="eph",
-    vartype="integer",
-    topics=['ElPhonInt_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics=r"GSTORE write matrix elements of i[V1_ka, p] commutator",
-    requires="[[optdriver]] == 7",
-    added_in_version="10.7.0",
-    text=r"""
-If set to 1, the EPH code computes and stores on file the matrix elements
-
-$$ i \left\langle \psi_{mk}\big| \middle[ V^{(1)}_{q0,ka}, p \middle] \big| \psi_{nk} \right\rangle $$
-
-in the full BZ in reduced coordinates,
-when computing the GSTORE.nc. See [[cite:Lihm2020]].
-""",
-),
+#Variable(
+#    abivarname="gstore_iv1p_comm",
+#    varset="eph",
+#    vartype="integer",
+#    topics=['ElPhonInt_basic'],
+#    dimensions="scalar",
+#    defaultval=0,
+#    mnemonics=r"GSTORE write matrix elements of i[V1_ka, p] commutator",
+#    requires="[[optdriver]] == 7",
+#    added_in_version="10.9.0",
+#    text=r"""
+#If set to 1, the EPH code computes and stores on file the matrix elements
+#
+#$$ i \left\langle \psi_{mk}\big| \middle[ V^{(1)}_{q0,ka}, p \middle] \big| \psi_{nk} \right\rangle $$
+#
+#in the full BZ in reduced coordinates,
+#when computing the GSTORE.nc. See [[cite:Lihm2020]].
+#""",
+#),
 
 Variable(
     abivarname="gstore_use_lgk",
@@ -26631,21 +26631,21 @@ that should be used as input for further analysis.
 
 ),
 
-Variable(
-    abivarname="getqpdata_filepath",
-    varset="eph",
-    vartype="string",
-    topics=['ElPhonInt_basic'],
-    dimensions="scalar",
-    defaultval="None",
-    mnemonics="GET the QPDATA.nc from FILEPATH",
-    added_in_version="10.7.0",
-    text=r"""
-This variable defines the path of the QPDATA file with the quasi-particle energies.
-to be used to update the initial KS band structure.
-To generate a QPDATA file, one can use AbiPy to extract the results from a SIGRES.nc file.
-""",
-),
+#Variable(
+#    abivarname="getqpdata_filepath",
+#    varset="eph",
+#    vartype="string",
+#    topics=['ElPhonInt_basic'],
+#    dimensions="scalar",
+#    defaultval="None",
+#    mnemonics="GET the QPDATA.nc from FILEPATH",
+#    added_in_version="10.9.0",
+#    text=r"""
+#This variable defines the path of the QPDATA file with the quasi-particle energies.
+#to be used to update the initial KS band structure.
+#To generate a QPDATA file, one can use AbiPy to extract the results from a SIGRES.nc file.
+#""",
+#),
 
 
 Variable(
