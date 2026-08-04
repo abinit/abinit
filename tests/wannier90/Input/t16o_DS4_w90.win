@@ -8,7 +8,7 @@ dis_conv_window = 3
 dis_conv_tol = 1.0e-12
 
 dis_win_min = -20.0
-dis_win_max = 40.0
+dis_win_max = 21.0
 dis_froz_min = -20.0
 dis_froz_max = 10.0
 

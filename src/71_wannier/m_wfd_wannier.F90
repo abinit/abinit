@@ -77,8 +77,7 @@ contains
 !> @param[in] cprj: complex(dp),   wavefunction coefficients, shouldn't be used
 !-----------------------------------------------------------------------------
   subroutine wfd_run_wannier(cryst, ebands, hdr, mpi_enreg, &
-       & ngfftc, ngfftf,  wfd, dtset, dtfil,  &
-       & pawang,  pawrad, pawtab, psps , kg, cg, cprj)
+        ngfftc, ngfftf,  wfd, dtset, dtfil,  pawang,  pawrad, pawtab, psps , kg, cg, cprj)
 
     type(crystal_t), intent(in) :: cryst
     type(ebands_t), intent(in) :: ebands
@@ -117,7 +116,6 @@ contains
     ! TODO: mcg
     ! TODO: mcprj
     integer :: exclude_bands(hdr%mband, hdr%nsppol)
-
     integer :: spaceComm, nprocs, rank, master
 
      ABI_UNUSED(ngfftf(1))
@@ -167,12 +165,12 @@ contains
            mpw=maxval(mywfc%hdr%npwarr)
            mcg=mpw*nspinor*mband* mkmem *nsppol
            mcprj = nspinor*mband* mkmem*nsppol
-           ! block
-           !   integer :: ik
-           !   do ik =1, mkmem
-           !     print *, ik, ":", mywfc%ebands%kptns(:, ik)
-           !   end do
-           ! end block
+           !block
+           !  integer :: ik
+           !  do ik =1, mkmem
+           !    print *, ik, ":", mywfc%ebands%kptns(:, ik)
+           !  end do
+           !end block
 
            if (present(kg)) then
              ptr_kg=> kg

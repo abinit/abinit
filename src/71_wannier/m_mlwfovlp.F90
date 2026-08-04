@@ -1823,10 +1823,10 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
 !! SOURCE
 
  subroutine mlwfovlp_proj(A_matrix,band_in,mywfc, dtset,gprimd,just_augmentation,kg,&
-&lproj,max_num_bands,mband,mkmem,mpi_enreg,mpw,mwan,natom,nattyp,&
-&nkpt,npwarr,nspinor,&
-&nsppol,ntypat,num_bands,nwan,pawtab,proj_l,proj_m,proj_radial,&
-&proj_site,proj_x,proj_z,proj_zona,psps,ucvol)
+                          lproj,max_num_bands,mband,mkmem,mpi_enreg,mpw,mwan,natom,nattyp,&
+                          nkpt,npwarr,nspinor,&
+                          nsppol,ntypat,num_bands,nwan,pawtab,proj_l,proj_m,proj_radial,&
+                          proj_site,proj_x,proj_z,proj_zona,psps,ucvol)
 
 !Arguments ------------------------------------
 !scalars
@@ -2775,8 +2775,6 @@ end subroutine mlwfovlp_radial
 !!
 !! SIDE EFFECTS
 !!  (only writing, printing)
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -4119,7 +4117,6 @@ subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
 
    close(ount)
    NCF_CHECK(nf90_close(root_ncid))
-
  end if
 
 contains
@@ -4266,7 +4263,7 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
- cnt = 0
+
  call cwtime(cpu, wall, gflops, "start")
 
  ! Build new ebands object with memory to be filled.
@@ -4275,6 +4272,7 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
                                      band_block, comm, malloc_only=.True.)
  out_ebands%eig = zero
 
+ cnt = 0
  do spin=1,in_ebands%nsppol
    associate (wan => wan_spin(spin))
    nwan = wan%nwan
@@ -4292,7 +4290,9 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
 
  call xmpi_sum(out_ebands%eig, comm, ierr)
 
+ ! Copy Fermi energies.
  out_ebands%fermie = in_ebands%fermie
+ out_ebands%fermih = in_ebands%fermih
 
  call cwtime_report(" Wannier interpolation of electronic bands", cpu, wall, gflops)
 

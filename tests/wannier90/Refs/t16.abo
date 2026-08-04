@@ -999,15 +999,15 @@ meta: {optdriver: 8, wfk_task: 10, }
    Number of input bands: 8
    Number of Wannier functions: 4
    Number of k-point neighbours: 8
-   Fermi energy [eV]:   0.00000000E+00
+   Fermi energy [eV]:   7.97427140E+00
    Eigenvalue range (min, max) [eV]:  -3.48500324E+00   4.27305815E+01
    Wannier90 physical results:
--   Spreads (Omega_total, Omega_I, Omega_tilde) [Ang^2]:   7.20826394E+00   5.28832471E+00   1.91993923E+00
+-   Spreads (Omega_total, Omega_I, Omega_tilde) [Ang^2]:   1.04660183E+01   6.95702193E+00   3.50899637E+00
    Wannier function centres [Ang] and spreads [Ang^2]:
--     WF 1: centre =     0.38444032     0.38433091     0.38484632  spread =     1.80171373
--     WF 2: centre =     0.38444714    -0.38464276    -0.38451136  spread =     1.80172723
--     WF 3: centre =    -0.38482393     0.38501450    -0.38524998  spread =     1.80310534
--     WF 4: centre =    -0.38413232    -0.38463351     0.38484643  spread =     1.80171763
+-     WF 1: centre =     0.51708311     0.51707833     0.51709034  spread =     2.61650458
+-     WF 2: centre =     0.51708475    -0.51707858    -0.51708846  spread =     2.61650457
+-     WF 3: centre =    -0.51708287     0.51708952    -0.51707939  spread =     2.61650457
+-     WF 4: centre =    -0.51708498    -0.51708928     0.51707752  spread =     2.61650457
 
    mlwfovlp :  mlwfovlp_run completed -
 -  see t16o_DS4_w90.wout for details.

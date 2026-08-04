@@ -4071,6 +4071,12 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
    nband, nkfull, npwarr, nsppol, inb%nspinor, inb%tphysel, inb%tsmear, inb%occopt, occ, wtk, &
    inb%cellcharge, kptopt3, inb%kptrlatt_orig, inb%nshiftk_orig, inb%shiftk_orig, inb%kptrlatt, inb%nshiftk, inb%shiftk)
 
+ ! The expansion changes only the k-point representation. Preserve the Fermi
+ ! energies stored in the input band structure instead of keeping the zero
+ ! values assigned by ebands_init.
+ outb%fermie = inb%fermie
+ outb%fermih = inb%fermih
+
  ABI_FREE(istwfk)
  ABI_FREE(nband)
  ABI_FREE(npwarr)
