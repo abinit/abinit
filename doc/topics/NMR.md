@@ -88,7 +88,6 @@ and hence shielding at the end of the DDK calculation.
 - [[tests/v10/Input/t41.abi]]
 - [[tests/v10/Input/t42.abi]]
 - [[tests/v10/Input/t44.abi]]
-- [[tests/v10/Input/t55.abi]]
 - [[tests/v10/Input/t84.abi]]
  
 *v7:*
