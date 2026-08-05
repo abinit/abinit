@@ -1625,6 +1625,7 @@ end if
  ABI_FREE(atm)
  ABI_FREE(psinablapsi)
  ABI_FREE(psinablapsi2)
+ ABI_FREE(lmn2ln)
  if (use_spinorbit) then
    ABI_FREE(psinablapsi_soc)
    do iatom=1,natom

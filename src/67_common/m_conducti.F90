@@ -986,7 +986,7 @@ end subroutine conducti_paw
  type(MPI_type) :: mpi_enreg
 !arrays
  integer :: nc_count(6),nc_start(6),nc_stride(6)
- integer,allocatable :: nband(:),ncor(:,:),lcor(:,:),kappacor(:,:),typat(:),num_tasks(:),ln2lmn(:)
+ integer,allocatable :: nband(:),ncor(:,:),lcor(:,:),kappacor(:,:),typat(:),num_tasks(:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),dummy(0,0,0,0,0)
  real(dp),allocatable :: dom_var1(:,:),dhdk2_g(:)
  real(dp),allocatable :: eig0_k(:),eigen0(:),eig0nc(:,:,:)

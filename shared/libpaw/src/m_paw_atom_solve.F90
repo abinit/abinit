@@ -937,7 +937,6 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
          atp%SCF%corekin=atp%SCF%corekin+ekin*atp%Orbit%occ(io)
        endif
      enddo
-!     atp%SCF%corekin=two*atm%ekinc
      atp%PAW%abinitnohat(1:size(pawtab%vhtnzc))=atm%vhtnzc_orig(1:size(pawtab%vhtnzc))*two
      do io=1,pawtab%basis_size
        irc=FindGridIndex(atp%Grid,atp%basis_func_rc(io))
@@ -950,6 +949,7 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
  &    atp%PAW%otp,2,atp%input_string,"","",-1,atm%zcore_orig,atp)
      file_xml=TRIM(atp%pot%sym)//'-rcpaw.corewf.xml'
      call xmlprtcore(trim(file_xml),atp,atm%zcore_orig,mesh_data,atp%input_string)
+     call destroy_mesh_data(mesh_data) 
    endif
 
    ! update tcoretau : TODO : tau
@@ -1005,7 +1005,7 @@ subroutine atompaw_init(pawtab,pawrad,atp,atm,sctol,elin_mode,vhtnzc_mode,tpaw_m
  character*(132) :: file_xml_core
  logical :: rcpaw_core_file,ex
  REAL(dp)    :: a1,a2,a3,hval,r0,zcore
- INTEGER :: ii,jj,icor,ir,io,fnln,ios,irc
+ INTEGER :: ii,jj,icor,ir,io,fnln,ios
  logical :: fmt_xml
  real(dp) :: ekin,insph,norm
  type(pawrad_type) :: radmesh
@@ -1058,10 +1058,8 @@ subroutine atompaw_init(pawtab,pawrad,atp,atm,sctol,elin_mode,vhtnzc_mode,tpaw_m
  atp%vhtnzc_mode=vhtnzc_mode
  atp%tpaw_mode=tpaw_mode
  atp%prtpaw=(prtpaw>0)
-   write(*,*) 'I WAS HERE 0'
 
  call input_dataset_read(atp,input_file,dirac,.true.)
-    write(*,*) 'I WAS HERE 0'
 
  rcpaw_core_file=.false.
  if((.not.dirac).and.atp%diracrelativistic) then
@@ -1124,11 +1122,11 @@ subroutine atompaw_init(pawtab,pawrad,atp,atm,sctol,elin_mode,vhtnzc_mode,tpaw_m
  IF(atp%np(4)>0) jj=jj+atp%np(4)-3
  IF(atp%np(5)>0) jj=jj+atp%np(5)-4
  If (atp%diracrelativistic) jj=jj+jj   !  need more orbitals
- CALL InitOrbit(atp%Orbit,jj,atp%Grid%n,atp%exctype,atp%diracrelativistic,atp%scalarrelativistic,&
+ CALL InitOrbit(atp%Orbit,atp%norbit,atp%Grid%n,atp%exctype,atp%diracrelativistic,atp%scalarrelativistic,&
 &     atp%frozencorecalculation,atp%frozenvalecalculation)
  atp%Orbit%nps=atp%np(1);atp%Orbit%npp=atp%np(2);atp%Orbit%npd=atp%np(3)
  atp%Orbit%npf=atp%np(4);atp%Orbit%npg=atp%np(5)
- CALL Prepare_Orbit(atp,ii,jj)
+ CALL Prepare_Orbit(atp,ii,atp%norbit)
  atp%Orbit%npsc=atp%npsc;atp%Orbit%nppc=atp%nppc;atp%Orbit%npdc=atp%npdc
  atp%Orbit%npfc=atp%npfc;atp%Orbit%npgc=atp%npgc
  atp%Pot%q=atp%electrons
@@ -8813,11 +8811,11 @@ END SUBROUTINE eliminate_comment
 !!  stripchar - Eliminate blanks
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  FUNCTION stripchar(inputchar)
-  CHARACTER(132) :: stripchar
+  CHARACTER(20) :: stripchar
   CHARACTER*(*), INTENT(IN) :: inputchar
   INTEGER :: i,j,n
   n=LEN(inputchar)
-  DO i=1,132
+  DO i=1,20
     stripchar(i:i)=''
   ENDDO
   j=0
@@ -10978,13 +10976,12 @@ END SUBROUTINE input_dataset_read
 !---- Local variables
 !------------------------------------------------------------------
 
- integer :: core_size,corewf_meshsz,ib,icor,ii,ir,isppol,nmesh,nsppol,OK
+ integer :: core_size,corewf_meshsz,ib,icor,ii,ir,nmesh,nsppol
  integer :: unit_xml_core
  real(dp) :: radstp0,logstp0
- character(len=3) :: spstrg,gridt(mesh_data%nmesh)
+ character(len=3) :: gridt(mesh_data%nmesh)
  character(len=4) :: char4
- character(len=5) :: char5a,xc_type
- character(len=132) :: xc_name,xcname_short
+ character(len=5) :: char5a
  character(len=20) :: char20,char21
  character(len=1) :: char_orb(4)
  integer,allocatable :: irwf(:)
@@ -10993,7 +10990,6 @@ END SUBROUTINE input_dataset_read
 !------------------------------------------------------------------
 !---- Executable code
 !------------------------------------------------------------------
- write(*,*) 'TEST',TRIM(fname)
  unit_xml_core=1113
 !Hard-coded values, spin unrestricted
 !Spinors or collinear magnetism not yet supported
@@ -11216,10 +11212,10 @@ subroutine build_mesh_data(mesh_data,Grid,irc,ivion,ivale,coretailpoints,itau)
 !---- Executable code
 !------------------------------------------------------------------
 
- allocate(mesh_data%meshtp(nmesh_max))
- allocate(mesh_data%meshsz(nmesh_max))
- allocate(mesh_data%radstp(nmesh_max))
- allocate(mesh_data%logstp(nmesh_max))
+ LIBPAW_ALLOCATE(mesh_data%meshtp,(nmesh_max))
+ LIBPAW_ALLOCATE(mesh_data%meshsz,(nmesh_max))
+ LIBPAW_ALLOCATE(mesh_data%radstp,(nmesh_max))
+ LIBPAW_ALLOCATE(mesh_data%logstp,(nmesh_max))
 
 !Mesh definition
  if (Grid%type==loggrid) then
@@ -11463,6 +11459,30 @@ subroutine build_mesh_data(mesh_data,Grid,irc,ivion,ivale,coretailpoints,itau)
  end subroutine build_mesh_data
 
 
+subroutine destroy_mesh_data(mesh_data)
+
+ type(mesh_data_type),intent(inout) :: mesh_data
+
+!------------------------------------------------------------------
+!---- Executable code
+!------------------------------------------------------------------
+
+ if (allocated(mesh_data%meshtp)) then 
+   LIBPAW_DEALLOCATE(mesh_data%meshtp)
+ endif
+ if (allocated(mesh_data%meshsz)) then 
+   LIBPAW_DEALLOCATE(mesh_data%meshsz)
+ endif
+ if (allocated(mesh_data%radstp)) then 
+   LIBPAW_DEALLOCATE(mesh_data%radstp)
+ endif
+ if (allocated(mesh_data%logstp)) then 
+   LIBPAW_DEALLOCATE(mesh_data%logstp)
+ endif
+
+ end subroutine destroy_mesh_data
+
+
 
 !!=================================================================
 !! NAME
@@ -11526,9 +11546,9 @@ subroutine build_mesh_data(mesh_data,Grid,irc,ivion,ivale,coretailpoints,itau)
  character(len=5) :: char5a,char5b,xc_type
  character(len=20) :: char20
  character(len=132) :: xc_name,xcname_short,code_name
- real(dp) :: sqr4pi,rad,radstp0,logstp0,radstp_spl,logstp_spl
+ real(dp) :: sqr4pi,radstp0,logstp0,radstp_spl,logstp_spl
  character(len=3) :: gridt(mesh_data%nmesh)
- real(dp),allocatable :: dum(:),dum_aux(:),rad_aux(:),dudr(:),rveff_aux(:)
+ real(dp),allocatable :: dum(:),dum_aux(:),rad_aux(:),dudr(:)
  real(dp),allocatable :: phi_aux(:,:),tphi_aux(:,:),proj_aux(:,:)
  TYPE(Gridinfo) :: Grid1
 !------------------------------------------------------------------
@@ -11536,7 +11556,8 @@ subroutine build_mesh_data(mesh_data,Grid,irc,ivion,ivale,coretailpoints,itau)
 !------------------------------------------------------------------
 !Some defs
  sqr4pi=sqrt(4*pi)
- n=Grid%n ; allocate(dum(n))
+ n=Grid%n
+ LIBPAW_ALLOCATE(dum,(n))
  extra1=.false.
 
 !In a change of grid has been requested, determine new grid data
@@ -11557,11 +11578,13 @@ subroutine build_mesh_data(mesh_data,Grid,irc,ivion,ivale,coretailpoints,itau)
      irc_aux=int(tol8+log(1.d0+PAW%rc/radstp_spl)/logstp_spl)+1
      radstp_spl= PAW%rc/(exp(logstp_spl*(irc_aux-1))-1.d0)
    end if
-   allocate(rad_aux(n_aux),dum_aux(n_aux))
+   LIBPAW_ALLOCATE(rad_aux,(n_aux))
+   LIBPAW_ALLOCATE(dum_aux,(n_aux))
    call InitGrid(Grid1,logstp_spl,Grid%range,r0=radstp_spl,do_not_print=.true.)
    rad_aux(1:nsplgrid)=Grid1%r(1:nsplgrid)
  else
-   allocate(rad_aux(n),dum_aux(n))
+   LIBPAW_ALLOCATE(rad_aux,(n))
+   LIBPAW_ALLOCATE(dum_aux,(n))
    rad_aux(1:n)=Grid%r(1:n)
    irc_aux=PAW%irc
  end if
@@ -11674,7 +11697,7 @@ subroutine build_mesh_data(mesh_data,Grid,irc,ivion,ivale,coretailpoints,itau)
  if (nmesh>1.and.nsplgrid>0) stop '  Bug (1) in xmlinterface: nmesh>1 and nsplgrid>0!'
 
  do ii=1,nmesh
-  allocate(dudr(mesh_data%meshsz(ii)),stat=OK)
+  LIBPAW_ALLOCATE(dudr,(mesh_data%meshsz(ii)))
   select case(mesh_data%meshtp(ii))
    case(1)
     char20='r=d*i'
@@ -11714,7 +11737,7 @@ subroutine build_mesh_data(mesh_data,Grid,irc,ivion,ivale,coretailpoints,itau)
   WRITE(unit_xml,'(3(1x,es23.16))') (dudr(ir),ir=mesh_start(ii),mesh_size(ii))
   WRITE(unit_xml,'("  </derivatives>")')
   WRITE(unit_xml,'("</radial_grid>")')
-  deallocate(dudr)
+  LIBPAW_DEALLOCATE(dudr)
 
  end do
 
@@ -11845,8 +11868,8 @@ subroutine build_mesh_data(mesh_data,Grid,irc,ivion,ivale,coretailpoints,itau)
  meshsz=mesh_data%meshsz(mesh_data%iwavmesh)
  meshsz_aux=merge(nsplgrid,mesh_size(mesh_data%iwavmesh),extra1)
  meshst_aux=mesh_start(mesh_data%iwavmesh)
- allocate(phi_aux(meshsz_aux-meshst_aux+1,PAW%nbase))
- allocate(tphi_aux(meshsz_aux-meshst_aux+1,PAW%nbase))
+ LIBPAW_ALLOCATE(phi_aux,(meshsz_aux-meshst_aux+1,PAW%nbase))
+ LIBPAW_ALLOCATE(tphi_aux,(meshsz_aux-meshst_aux+1,PAW%nbase))
  Do ib=1,PAW%nbase
    dum(2:meshsz)=PAW%ophi(2:meshsz,ib)/Grid%r(2:meshsz)
    call extrapolate(dum(1:meshsz))
@@ -11862,9 +11885,8 @@ subroutine build_mesh_data(mesh_data,Grid,irc,ivion,ivale,coretailpoints,itau)
  meshsz=mesh_data%meshsz(mesh_data%iprjmesh)
  meshsz_aux=merge(nsplgrid,mesh_size(mesh_data%iprjmesh),extra1)
  meshst_aux=mesh_start(mesh_data%iprjmesh)
- allocate(proj_aux(meshsz_aux-meshst_aux+1,PAW%nbase))
+ LIBPAW_ALLOCATE(proj_aux,(meshsz_aux-meshst_aux+1,PAW%nbase))
  Do ib=1,PAW%nbase
-   if(ib==12) write(*,*) '12',tproj(900,ib)/Grid%r(900),Grid%r(900)
    dum(2:meshsz)=tproj(2:meshsz,ib)/Grid%r(2:meshsz)
    call extrapolate(dum(1:meshsz))
    call interp_and_filter(dum(1:meshsz),dum_aux(1:meshsz_aux))
@@ -11910,9 +11932,9 @@ subroutine build_mesh_data(mesh_data,Grid,irc,ivion,ivale,coretailpoints,itau)
    !end do
  Enddo
 !-- Release memory
- deallocate(phi_aux)
- deallocate(proj_aux)
- deallocate(tphi_aux)
+ LIBPAW_DEALLOCATE(phi_aux)
+ LIBPAW_DEALLOCATE(proj_aux)
+ LIBPAW_DEALLOCATE(tphi_aux)
 
 !Kinetic terms
  WRITE(unit_xml,'("<kinetic_energy_differences>")')
@@ -11944,9 +11966,9 @@ subroutine build_mesh_data(mesh_data,Grid,irc,ivion,ivale,coretailpoints,itau)
  WRITE(STD_OUT,'(/,2x,a)') 'XML atomic dataset created.'
 
  if(nsplgrid>0) call destroygrid(Grid1)
- deallocate(rad_aux)
- deallocate(dum_aux)
- deallocate(dum)
+ LIBPAW_DEALLOCATE(rad_aux)
+ LIBPAW_DEALLOCATE(dum_aux)
+ LIBPAW_DEALLOCATE(dum)
  
  CONTAINS
  !**************************************************
@@ -11998,7 +12020,6 @@ subroutine build_mesh_data(mesh_data,Grid,irc,ivion,ivale,coretailpoints,itau)
   real(dp),intent(in) :: func_in(:)
   real(dp),intent(out) :: func_out(:)
   integer :: jj,msz_in,msz_out,msz_spl
-  real(dp) :: l1,l2,l3,x1,x2,x3,xx
   logical :: extra
   msz_in=size(func_in) ; msz_out=size(func_out)
   func_out=zero
