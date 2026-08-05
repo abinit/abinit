@@ -11012,7 +11012,7 @@ END SUBROUTINE input_dataset_read
 
 !Write atom definition
  WRITE(unit=char5a,fmt='(f5.2)') atp%Pot%zz
- WRITE(unit_xml_core,'("<atom symbol=""",a,""" Z=""",a,$)') &
+ WRITE(unit_xml_core,'("<atom symbol=""",a,""" Z=""",a)',ADVANCE='NO') &
 &      trim(ADJUSTL(atp%Pot%sym)),trim(ADJUSTL(char5a))
  WRITE(unit=char5a,fmt='(f5.2)') zcore
  WRITE(unit_xml_core,'(""" core=""",a,"""/>")')trim(ADJUSTL(char5a))
@@ -11069,10 +11069,10 @@ END SUBROUTINE input_dataset_read
      call mkname(icor,char4)
      char20=stripchar('"'//atp%Pot%sym//'_core'//char4//'"')
      if(atp%diracrelativistic) then
-       WRITE(unit_xml_core,'("  <state n=""",i2,""" l=""",i1,""" kappa=""",i2,""" f=""",1pe14.7,$)')&
+       WRITE(unit_xml_core,'("  <state n=""",i2,""" l=""",i1,""" kappa=""",i2,""" f=""",1pe14.7)',ADVANCE='NO')&
 &          atp%Orbit%np(ib),atp%Orbit%l(ib),atp%Orbit%kappa(ib),atp%Orbit%occ(ib)
      else
-       WRITE(unit_xml_core,'("  <state n=""",i2,""" l=""",i1,""" f=""",1pe14.7,$)')&
+       WRITE(unit_xml_core,'("  <state n=""",i2,""" l=""",i1,""" f=""",1pe14.7)',ADVANCE='NO')&
 &          atp%Orbit%np(ib),atp%Orbit%l(ib),atp%Orbit%occ(ib)
      endif
      WRITE(unit_xml_core,'("""  e=""",1pe14.7,""" id=",a11,"/>")')&
@@ -11101,8 +11101,8 @@ END SUBROUTINE input_dataset_read
    case default
     stop '  Bug (2) in xmlprtcore: mesh type not implemented in Atompaw!'
   end select
-  WRITE(unit_xml_core,'("<radial_grid eq=""",a,""" a=""",es23.16,$)')trim(char21),radstp0
-  WRITE(unit_xml_core,'(""" d=""",es23.16,""" istart=""0"" iend=""",i5,$)') &
+  WRITE(unit_xml_core,'("<radial_grid eq=""",a,""" a=""",es23.16)',ADVANCE='NO')trim(char21),radstp0
+  WRITE(unit_xml_core,'(""" d=""",es23.16,""" istart=""0"" iend=""",i5)',ADVANCE='NO') &
 &  logstp0,corewf_meshsz-1
   WRITE(unit_xml_core,'(""" id=""",a,i1,"""/>")') gridt(ii),ii
   WRITE(unit_xml_core,'("  <values>")')
@@ -11612,7 +11612,7 @@ subroutine destroy_mesh_data(mesh_data)
 
 !Write atom definition
  WRITE(unit=char5a,fmt='(f5.2)') AEPot%zz
- WRITE(unit_xml,'("<atom symbol=""",a,""" Z=""",a,$)') &
+ WRITE(unit_xml,'("<atom symbol=""",a,""" Z=""",a)',ADVANCE='NO') &
 &   trim(ADJUSTL(AEPot%sym)),trim(ADJUSTL(char5a))
  WRITE(unit=char5a,fmt='(f5.2)') zcore
  WRITE(unit=char5b,fmt='(f5.2)') AEPot%nz-zcore
@@ -11660,19 +11660,19 @@ subroutine destroy_mesh_data(mesh_data)
    ii=min(ABS(PAW%np(ib)),100)
    if (ii<100) then
 !     if(diracrelativistic) then
-!       WRITE(unit_xml,'("  <state n=""",i2,""" l=""",i1,""" kappa=""",i2,""" f=""",1pe14.7,$)')&
+!       WRITE(unit_xml,'("  <state n=""",i2,""" l=""",i1,""" kappa=""",i2,""" f=""",1pe14.7)',ADVANCE='NO')&
 !&          ii,PAW%l(ib),PAW%kappa(ib),Orb%occ(ib)
 !     else
-       WRITE(unit_xml,'("  <state n=""",i2,""" l=""",i1,""" f=""",1pe14.7,$)')&
+       WRITE(unit_xml,'("  <state n=""",i2,""" l=""",i1,""" f=""",1pe14.7)',ADVANCE='NO')&
 &          ii,PAW%l(ib),PAW%occ(ib)
 !     end if
      WRITE(unit_xml,'(""" rc=""",f13.10,""" e=""",1pe14.7,""" id=",a6,"/>")')&
 &        match_on_splgrid(PAW%rcio(ib)),PAW%eig(ib)*0.5d0,TRIM(char20)
    else
 !     if(diracrelativistic) then
-!       WRITE(unit_xml,'("  <state        l=""",i1,""" kappa=""",i2,$)')PAW%l(ib),PAW%kappa(ib)
+!       WRITE(unit_xml,'("  <state        l=""",i1,""" kappa=""",i2)',ADVANCE='NO')PAW%l(ib),PAW%kappa(ib)
 !     else
-       WRITE(unit_xml,'("  <state        l=""",i1,$)') PAW%l(ib)
+       WRITE(unit_xml,'("  <state        l=""",i1)',ADVANCE='NO') PAW%l(ib)
 !     end if
      WRITE(unit_xml,'("""                    rc=""",f13.10,""" e=""",1pe14.7,""" id=",a6,"/>")')&
 &        match_on_splgrid(PAW%rcio(ib)),PAW%eig(ib)*0.5d0,TRIM(char20)
@@ -11727,8 +11727,8 @@ subroutine destroy_mesh_data(mesh_data)
     stop '  Bug (2) in xmlinterface: mesh type not implemented in Atompaw!'
   end select
 
-  WRITE(unit_xml,'("<radial_grid eq=""",a,""" a=""",es23.16,$)')trim(char20),radstp0
-  WRITE(unit_xml,'(""" d=""",es23.16,""" istart=""0"" iend=""",i5,$)')logstp0,mesh_size(ii)-mesh_start(ii)
+  WRITE(unit_xml,'("<radial_grid eq=""",a,""" a=""",es23.16)',ADVANCE='NO')trim(char20),radstp0
+  WRITE(unit_xml,'(""" d=""",es23.16,""" istart=""0"" iend=""",i5)',ADVANCE='NO')logstp0,mesh_size(ii)-mesh_start(ii)
   WRITE(unit_xml,'(""" id=""",a,i1,""">")') gridt(ii),ii
   WRITE(unit_xml,'("  <values>")')
   WRITE(unit_xml,'(3(1x,es23.16))') (rad_aux(ir),ir=mesh_start(ii),mesh_size(ii))
