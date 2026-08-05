@@ -85,16 +85,16 @@ In this example, we sandwich a critical part of the code that is computationally
 procedure. This is possible by using the 
 
 first adding a line at the beginning of *src/98_main/abinit.F90* to switch off the 
-profiler as soon as possible 
+profiler as early as possible 
 
-    392-!Enable GPU markers (NVTX/ROCTX) if required
-    393-#if defined(HAVE_GPU_MARKERS)
-    394- NVTX_INIT()
-    395: NVTX_PROFILER_STOP()
-    396-#endif
+    #if defined(HAVE_GPU_MARKERS)
+        NVTX_INIT()
+        NVTX_PROFILER_STOP()
+    #endif
+    ! .. rest of the code ..
 
-    NVTX_PROFILER_STOP()
-    !.. rest of the code ...
+Note that NVTX init simply fills the internal nvtx_names and nvtx_ids arrays used to label regions so putting the
+stopped before or after essentially makes no difference.
 
 then switch on the profiler in the interesting part in *src/48_diago/m_chebfi2.F90*: 
 
@@ -145,3 +145,7 @@ The kernels of interest are then diagnosed using the roofline: GEMM operation by
 HEGV eigensolver of rocSOLVER is memory-bound.
 
 ![roofline_screenshot](roofline.png)
+
+Note that for the moment we cannot use *-selected-regions* option as ROCm in the Adastra toolchain is version 6.4.3 while
+the option is available > 7.2.0. For now we used the fallback described in the official ROCm documentation
+[here](https://rocm.docs.amd.com/projects/rocprofiler-sdk/en/develop/how-to/using-rocprofiler-sdk-roctx.html#profiler-control-with-selected-regions). AMD explicitly states that counter collection for selected ROCTx regions was added in ROCm 7.14. ROCm 7.14 release notes. Citing the documentation, "Counter collection for selected regions is available in ROCm 7.14.0." see more [here](https://rocm.docs.amd.com/en/docs-7.14.0/about/release-notes.html#selective-roctx-region-profiling-with-counter-collection).
