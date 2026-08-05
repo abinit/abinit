@@ -339,7 +339,7 @@ module m_slk
    procedure :: set_head_and_wings => slkmat_sp_set_head_and_wings
     ! Set head and the wings of the matrix starting from global arrays.
 
-   !procedure :: cut => slkmat_cut
+   procedure :: cut => slkmat_sp_cut
     ! Extract submatrix and create new matrix with `size_blocs` and `processor`
 
    procedure :: collect_cplx => slkmat_sp_collect_cplx
@@ -403,6 +403,7 @@ module m_slk
    module procedure slk_array2_free
    module procedure slk_array3_free
    module procedure slk_array4_free
+   module procedure slk_array5_free
  end interface slk_array_free
 
  public :: slk_array_set_zero                  ! Elemental routine to zero the value of the local buffer.
@@ -411,7 +412,10 @@ module m_slk
  public :: slk_array_gpu_set_zero              ! Zero the value of the local buffer on the GPU
  interface slk_array_gpu_set_zero
    module procedure slk_array1_gpu_set_zero
+   module procedure slk_array2_gpu_set_zero
    module procedure slk_array3_gpu_set_zero
+   module procedure slk_array4_gpu_set_zero
+   module procedure slk_array5_gpu_set_zero
  end interface slk_array_gpu_set_zero
 
  ! External functions.
@@ -424,6 +428,64 @@ module m_slk
  complex(dp),external :: PZLATRA
 #endif
 
+#ifdef HAVE_LINALG_SLATE
+
+interface
+  ! Standard complex Hermitian: A * Z = Z * diag(w)
+  subroutine slate_zheev_c(n, nb, nprow, npcol, comm_f, &
+                            lda, a_data, ldz, z_data, w, nev, use_gpu, info) &
+      bind(C, name="slate_zheev_c")
+    use, intrinsic :: iso_c_binding
+    integer(c_int), value :: n, nb, nprow, npcol, comm_f, lda, ldz, nev, use_gpu
+    complex(c_double_complex), intent(inout) :: a_data(*)
+    complex(c_double_complex), intent(out)   :: z_data(*)
+    real(c_double),            intent(out)   :: w(*)
+    integer(c_int),            intent(out)   :: info
+  end subroutine slate_zheev_c
+
+  ! Standard real symmetric: A * Z = Z * diag(w)
+  subroutine slate_dsyev_c(n, nb, nprow, npcol, comm_f, &
+                            lda, a_data, ldz, z_data, w, nev, use_gpu, info) &
+      bind(C, name="slate_dsyev_c")
+    use, intrinsic :: iso_c_binding
+    integer(c_int), value :: n, nb, nprow, npcol, comm_f, lda, ldz, nev, use_gpu
+    real(c_double), intent(inout) :: a_data(*)
+    real(c_double), intent(out)   :: z_data(*)
+    real(c_double), intent(out)   :: w(*)
+    integer(c_int), intent(out)   :: info
+  end subroutine slate_dsyev_c
+
+  ! Generalised complex Hermitian: A * Z = B * Z * diag(w)
+  subroutine slate_zhegv_c(n, nb, nprow, npcol, comm_f, &
+                            lda, a_data, ldb, b_data, ldz, z_data, &
+                            w, nev, use_gpu, info) &
+      bind(C, name="slate_zhegv_c")
+    use, intrinsic :: iso_c_binding
+    integer(c_int), value :: n, nb, nprow, npcol, comm_f
+    integer(c_int), value :: lda, ldb, ldz, nev, use_gpu
+    complex(c_double_complex), intent(inout) :: a_data(*), b_data(*)
+    complex(c_double_complex), intent(out)   :: z_data(*)
+    real(c_double),            intent(out)   :: w(*)
+    integer(c_int),            intent(out)   :: info
+  end subroutine slate_zhegv_c
+
+  ! Generalised real symmetric: A * Z = B * Z * diag(w)
+  subroutine slate_dsygv_c(n, nb, nprow, npcol, comm_f, &
+                            lda, a_data, ldb, b_data, ldz, z_data, &
+                            w, nev, use_gpu, info) &
+      bind(C, name="slate_dsygv_c")
+    use, intrinsic :: iso_c_binding
+    integer(c_int), value :: n, nb, nprow, npcol, comm_f
+    integer(c_int), value :: lda, ldb, ldz, nev, use_gpu
+    real(c_double), intent(inout) :: a_data(*), b_data(*)
+    real(c_double), intent(out)   :: z_data(*)
+    real(c_double), intent(out)   :: w(*)
+    integer(c_int), intent(out)   :: info
+  end subroutine slate_dsygv_c
+
+end interface
+
+#endif
 
 contains  !==============================================================================
 !!***
@@ -660,7 +722,7 @@ subroutine basemat_init(matrix, nbli_global, nbco_global, processor, istwf_k, &
  matrix%size_blocs(1) = MIN(sizeb, nbli_global)
  matrix%size_blocs(2) = MIN(sizeb, nbco_global)
 
-#ifdef HAVE_LINALG_ELPA
+#if defined(HAVE_LINALG_ELPA) || defined(HAVE_LINALG_SLATE)
  if(matrix%size_blocs(1) .ne. matrix%size_blocs(2)) then
     matrix%size_blocs(1) = MIN(matrix%size_blocs(1), matrix%size_blocs(2))
     matrix%size_blocs(2) = matrix%size_blocs(1)
@@ -1320,6 +1382,34 @@ end subroutine slk_array4_free
 
 !----------------------------------------------------------------------
 
+!!****f* m_slk/slk_array5_free
+!! NAME
+!!  slk_array5_free
+!!
+!! FUNCTION
+!!  Deallocate 5d array of slkmat_dp_t elements
+!!
+!! SOURCE
+
+subroutine slk_array5_free(slk_arr5)
+  class(basemat_t),intent(inout) :: slk_arr5(:,:,:,:,:)
+  integer :: i1, i2, i3, i4, i5
+  do i5=1,size(slk_arr5, dim=5)
+    do i4=1,size(slk_arr5, dim=4)
+      do i3=1,size(slk_arr5, dim=3)
+        do i2=1,size(slk_arr5, dim=2)
+          do i1=1,size(slk_arr5, dim=1)
+            call slk_arr5(i1, i2, i3, i4, i5)%free()
+          end do
+        end do
+      end do
+    end do
+  end do
+end subroutine slk_array5_free
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_slk/slk_array_set_zero
 !! NAME
 !!  slk_array_set_zero
@@ -1423,6 +1513,32 @@ subroutine slk_array1_gpu_set_zero(mat1d)
 end subroutine slk_array1_gpu_set_zero
 !!***
 
+!!****f* m_slk/slk_array2_gpu_set_zero
+!! NAME
+!!  slk_array2_gpu_set_zero
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine slk_array2_gpu_set_zero(mat2d)
+
+!Arguments ------------------------------------
+ class(basemat_t),intent(inout) :: mat2d(:,:)
+
+!Local variables-------------------------------
+ integer :: i1, i2
+! *********************************************************************
+
+ do i2=1,size(mat2d, dim=2)
+   do i1=1,size(mat2d, dim=1)
+     call mat2d(i1, i2)%gpu_set_zero()
+   end do
+ end do
+
+end subroutine slk_array2_gpu_set_zero
+!!***
+
 !!****f* m_slk/slk_array3_gpu_set_zero
 !! NAME
 !!  slk_array3_gpu_set_zero
@@ -1449,6 +1565,68 @@ subroutine slk_array3_gpu_set_zero(mat3d)
  end do
 
 end subroutine slk_array3_gpu_set_zero
+!!***
+
+!!****f* m_slk/slk_array4_gpu_set_zero
+!! NAME
+!!  slk_array4_gpu_set_zero
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine slk_array4_gpu_set_zero(mat4d)
+
+!Arguments ------------------------------------
+ class(basemat_t),intent(inout) :: mat4d(:,:,:,:)
+
+!Local variables-------------------------------
+ integer :: i1, i2, i3, i4
+! *********************************************************************
+
+ do i4=1,size(mat4d, dim=4)
+   do i3=1,size(mat4d, dim=3)
+     do i2=1,size(mat4d, dim=2)
+       do i1=1,size(mat4d, dim=1)
+         call mat4d(i1, i2, i3, i4)%gpu_set_zero()
+       end do
+     end do
+   end do
+ end do
+
+end subroutine slk_array4_gpu_set_zero
+!!***
+
+!!****f* m_slk/slk_array5_gpu_set_zero
+!! NAME
+!!  slk_array5_gpu_set_zero
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine slk_array5_gpu_set_zero(mat5d)
+
+!Arguments ------------------------------------
+ class(basemat_t),intent(inout) :: mat5d(:,:,:,:,:)
+
+!Local variables-------------------------------
+ integer :: i1,i2,i3,i4,i5
+! *********************************************************************
+
+ do i5=1,size(mat5d, dim=5)
+   do i4=1,size(mat5d, dim=4)
+     do i3=1,size(mat5d, dim=3)
+       do i2=1,size(mat5d, dim=2)
+         do i1=1,size(mat5d, dim=1)
+           call mat5d(i1,i2,i3,i4,i5)%gpu_set_zero()
+         end do
+       end do
+     end do
+   end do
+ end do
+
+end subroutine slk_array5_gpu_set_zero
 !!***
 
 !----------------------------------------------------------------------
@@ -1525,7 +1703,7 @@ end function basemat_is_gpu_mapped
 subroutine basemat_gpu_map(mat, gpu_action)
 
 !Arguments ------------------------------------
- class(basemat_t),target,intent(in) :: mat
+ class(basemat_t),target,intent(inout) :: mat
  character(len=*), intent(in) :: gpu_action
 
 !Local variables-------------------------------
@@ -2950,7 +3128,6 @@ end subroutine slk_pgemm_sp
 subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_k, &
                                  nev, use_gpu_elpa) ! Optional arguments
 
-#ifdef HAVE_LINALG_ELPA
 !Arguments ------------------------------------
  class(slk_processor_t),intent(in) :: processor
  class(slkmat_dp_t),intent(inout) :: matrix
@@ -2960,16 +3137,14 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
  integer,optional,intent(in) :: nev
  integer,optional,intent(in) :: use_gpu_elpa
 
+#if defined(HAVE_LINALG_ELPA)
  !Local variables ------------------------------
  type(elpa_hdl_t) :: elpa_hdl
  integer :: nev__,use_gpu_elpa_
 !************************************************************************
 
   nev__ = matrix%size_global(1); if (present(nev)) nev__ = nev
-  use_gpu_elpa_=0
-#ifdef HAVE_LINALG_ELPA
-  if (present(use_gpu_elpa)) use_gpu_elpa_=use_gpu_elpa
-#endif
+  use_gpu_elpa_=0; if (present(use_gpu_elpa)) use_gpu_elpa_=use_gpu_elpa
 
   call elpa_func_allocate(elpa_hdl,gpu=use_gpu_elpa_)
   call elpa_func_set_matrix(elpa_hdl,matrix%size_global(1),matrix%size_blocs(1),nev__,&
@@ -2984,16 +3159,48 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
 
   call elpa_func_deallocate(elpa_hdl)
 
-#else
- !Arguments ------------------------------------
- class(slk_processor_t),intent(in)       :: processor
- class(slkmat_dp_t),intent(in)          :: matrix
- class(slkmat_dp_t),intent(inout)       :: results
- DOUBLE PRECISION,intent(inout) :: eigen(:)
- integer,intent(in)  :: comm,istwf_k
- integer,optional,intent(in) :: nev, use_gpu_elpa
 
-#ifdef HAVE_LINALG_SCALAPACK
+#elif defined(HAVE_LINALG_SLATE)
+ !Local variables-------------------------------
+ integer :: nev__,use_gpu_elpa_, info_slate
+! *************************************************************************
+
+  if (istwf_k /= 2) then
+    call slate_zheev_c(                        &
+      matrix%size_global(1),                   &  ! n
+      matrix%size_blocs(1),                    &  ! nb  (mb==nb required)
+      processor%grid%dims(1),                  &  ! nprow
+      processor%grid%dims(2),                  &  ! npcol
+      processor%comm,                          &  ! Fortran MPI comm handle
+      matrix%size_local(1),                    &  ! lda
+      matrix%buffer_cplx,                      &  ! a_data (destroyed on exit)
+      results%size_local(1),                   &  ! ldz
+      results%buffer_cplx,                     &  ! z_data (eigenvectors out)
+      eigen,                                   &  ! w (eigenvalues out)
+      nev__,                                   &  ! nev
+      use_gpu_elpa_,                           &  ! use_gpu (reuse existing flag)
+      info_slate)
+    ABI_CHECK(info_slate == 0, "slate_zheev_c failed")
+  else
+    call slate_dsyev_c(                        &
+      matrix%size_global(1),                   &  ! n
+      matrix%size_blocs(1),                    &  ! nb  (mb==nb required)
+      processor%grid%dims(1),                  &  ! nprow
+      processor%grid%dims(2),                  &  ! npcol
+      processor%comm,                          &  ! Fortran MPI comm handle
+      matrix%size_local(1),                    &  ! lda
+      matrix%buffer_real,                      &  ! a_data (destroyed on exit)
+      results%size_local(1),                   &  ! ldz
+      results%buffer_real,                     &  ! z_data (eigenvectors out)
+      eigen,                                   &  ! w (eigenvalues out)
+      nev__,                                   &  ! nev
+      use_gpu_elpa_,                           &  ! use_gpu (reuse existing flag)
+      info_slate)
+    ABI_CHECK(info_slate == 0, "slate_dsyev_c failed")
+  end if
+
+
+#elif defined(HAVE_LINALG_SCALAPACK)
  !Local variables-------------------------------
  integer            :: LRWORK,LIWORK,LCWORK,INFO
  !character(len=500) :: msg
@@ -3009,11 +3216,12 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
  DOUBLE PRECISION            :: ABSTOL,ORFAC
  integer,          parameter :: IZERO=0
  integer ::  M,NZ,ierr,TWORK_tmp(3),TWORK(3) ! IA,JA,IZ,JZ,
- integer :: nev__, il, iu
+ integer :: nev__, il, iu, use_gpu_elpa_
  character(len=1) :: range
 ! *************************************************************************
 
   ABI_UNUSED(use_gpu_elpa) ! No GPU implementation if using scaLAPACK
+  use_gpu_elpa_=0; if (present(use_gpu_elpa)) use_gpu_elpa_=use_gpu_elpa
   nev__ = matrix%size_global(1); range = "A"; il = 0; iu = 0
   if (present(nev)) then
     nev__ = nev; range = "I"; il = 1; iu = nev
@@ -3128,7 +3336,6 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   ABI_SFREE(IWORK)
   ABI_SFREE(RWORK)
   ABI_SFREE(CWORK)
-#endif
 #endif
   return
 
@@ -3303,24 +3510,21 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,eigen,comm,istwf_k,&
                                              nev,use_gpu_elpa) ! Optional arguments
 
-#ifdef HAVE_LINALG_ELPA
 !Arguments ------------------------------------
   class(slk_processor_t),intent(in)       :: processor
-  class(slkmat_dp_t),intent(in)          :: matrix1,matrix2
+  class(slkmat_dp_t),intent(inout)        :: matrix1,matrix2
   class(slkmat_dp_t),intent(inout)       :: results
   DOUBLE PRECISION,intent(inout) :: eigen(:)
   integer,intent(in)  :: comm,istwf_k
   integer,optional,intent(in) :: nev
   integer,optional,intent(in) :: use_gpu_elpa
+#ifdef HAVE_LINALG_ELPA
 !Local
   type(slkmat_dp_t) :: tmp1, tmp2
   integer :: i,n_col, n_row, nev__,use_gpu_elpa__
 
   nev__ = matrix1%size_global(2); if (present(nev)) nev__ = nev
-  use_gpu_elpa__ = 0
-#ifdef HAVE_LINALG_ELPA
-  if (present(use_gpu_elpa)) use_gpu_elpa__ = use_gpu_elpa
-#endif
+  use_gpu_elpa__ = 0; if (present(use_gpu_elpa)) use_gpu_elpa__ = use_gpu_elpa
 
   call tmp1%init(matrix1%size_global(1),matrix1%size_global(2),processor,istwf_k)
   call tmp2%init(matrix1%size_global(1),matrix1%size_global(2),processor,istwf_k)
@@ -3345,17 +3549,56 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   call tmp1%free()
   call tmp2%free()
 
-#else
-!Arguments ------------------------------------
-  class(slk_processor_t),intent(in)       :: processor
-  class(slkmat_dp_t),intent(in)          :: matrix1,matrix2
-  class(slkmat_dp_t),intent(inout)       :: results
-  DOUBLE PRECISION,intent(inout) :: eigen(:)
-  integer,intent(in)  :: comm,istwf_k
-  integer,optional,intent(in) :: nev
-  integer,optional,intent(in) :: use_gpu_elpa
 
-#ifdef HAVE_LINALG_SCALAPACK
+!#elif defined HAVE_LINALG_SLATE
+!!FIXME Doesn't work. slate_zheev/syev is fine though so we fall back to scaLAPACK instead
+!!Local variables-------------------------------
+!  integer :: nev__, use_gpu_elpa_, info_slate
+!! *************************************************************************
+!
+!  nev__ = matrix1%size_global(2); if (present(nev)) nev__ = nev
+!  use_gpu_elpa__ = 0; if (present(use_gpu_elpa)) use_gpu_elpa__ = use_gpu_elpa
+!
+!  if (istwf_k /= 2) then
+!    call slate_zhegv_c(                        &
+!      matrix1%size_global(1),                  &  ! n
+!      matrix1%size_blocs(1),                   &  ! nb  (mb==nb required)
+!      processor%grid%dims(1),                  &  ! nprow
+!      processor%grid%dims(2),                  &  ! npcol
+!      processor%comm,                          &  ! Fortran MPI comm handle
+!      matrix1%size_local(1),                   &  ! lda
+!      matrix1%buffer_cplx,                     &  ! a_data (destroyed on exit)
+!      matrix2%size_local(1),                   &  ! ldb
+!      matrix2%buffer_cplx,                     &  ! b_data (destroyed on exit)
+!      results%size_local(1),                   &  ! ldz
+!      results%buffer_cplx,                     &  ! z_data (eigenvectors out)
+!      eigen,                                   &  ! w (eigenvalues out)
+!      nev__,                                   &  ! nev
+!      use_gpu_elpa_,                           &  ! use_gpu (reuse existing flag)
+!      info_slate)
+!    ABI_CHECK(info_slate == 0, "slate_zhgev_c failed")
+!  else
+!    call slate_dsygv_c(                        &
+!      matrix1%size_global(1),                  &  ! n
+!      matrix1%size_blocs(1),                   &  ! nb  (mb==nb required)
+!      processor%grid%dims(1),                  &  ! nprow
+!      processor%grid%dims(2),                  &  ! npcol
+!      processor%comm,                          &  ! Fortran MPI comm handle
+!      matrix1%size_local(1),                   &  ! lda
+!      matrix1%buffer_real,                     &  ! a_data (destroyed on exit)
+!      matrix2%size_local(1),                   &  ! ldb
+!      matrix2%buffer_real,                     &  ! b_data (destroyed on exit)
+!      results%size_local(1),                   &  ! ldz
+!      results%buffer_real,                     &  ! z_data (eigenvectors out)
+!      eigen,                                   &  ! w (eigenvalues out)
+!      nev__,                                   &  ! nev
+!      use_gpu_elpa_,                           &  ! use_gpu (reuse existing flag)
+!      info_slate)
+!    ABI_CHECK(info_slate == 0, "slate_dsygv_c failed")
+!  end if
+
+
+#elif defined(HAVE_LINALG_SCALAPACK)
 !Local variables-------------------------------
   integer            :: LRWORK,LIWORK,LCWORK,INFO
   !character(len=500) :: msg
@@ -3488,7 +3731,6 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   ABI_SFREE(RWORK)
   ABI_SFREE(CWORK)
 #endif
-#endif
   return
 
 end subroutine compute_generalized_eigen_problem
@@ -3537,7 +3779,7 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  real(dp),intent(inout) :: vector(:)
 
 !Local variables-------------------------------
-#ifdef HAVE_LINALG_ELPA
+#if defined(HAVE_LINALG_ELPA) || defined(HAVE_LINALG_SLATE)
  integer :: i,j
 #endif
  integer :: ierr,use_gpu_elpa_
@@ -3548,7 +3790,7 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
 ! *************************************************************************
 
  use_gpu_elpa_=0
-#ifdef HAVE_LINALG_ELPA
+#if defined(HAVE_LINALG_ELPA) || defined(HAVE_LINALG_SLATE)
  if (present(use_gpu_elpa)) use_gpu_elpa_=use_gpu_elpa
 #endif
 
@@ -3565,7 +3807,7 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
    ABI_CHECK_IEQ(cplex, 2, "cplex != 2")
    ABI_MALLOC(z_tmp_evec,(nbli_global,nbco_global))
    z_tmp_evec=cmplx(0._DP,0._DP)
-#ifdef HAVE_LINALG_ELPA
+#if defined(HAVE_LINALG_ELPA) || defined(HAVE_LINALG_SLATE)
    ! The full matrix must be set (not only one half like in scalapack).
    do j=1,nbco_global
       do i=j+1,nbli_global
@@ -3579,7 +3821,7 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
    ABI_CHECK_IEQ(cplex, 1, "cplex != 2")
    ABI_MALLOC(r_tmp_evec,(nbli_global,nbco_global))
    r_tmp_evec(:,:)=0._DP
-#ifdef HAVE_LINALG_ELPA
+#if defined(HAVE_LINALG_ELPA) || defined(HAVE_LINALG_SLATE)
    ! The full matrix must be set (not only one half like in scalapack).
    do j=1,nbco_global
       do i=j+1,nbli_global
@@ -3668,7 +3910,7 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  real(dp),intent(inout) :: vector(:)
 
 !Local variables-------------------------------
-#ifdef HAVE_LINALG_ELPA
+#if defined(HAVE_LINALG_ELPA) || defined(HAVE_LINALG_SLATE)
  integer :: i,j
 #endif
  integer :: ierr,use_gpu_elpa_
@@ -3696,7 +3938,7 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
    ABI_CHECK_IEQ(cplex, 2, "cplex != 2")
    ABI_MALLOC(z_tmp_evec,(nbli_global,nbco_global))
    z_tmp_evec=cmplx(0._DP,0._DP)
-#ifdef HAVE_LINALG_ELPA
+#if defined(HAVE_LINALG_ELPA) || defined(HAVE_LINALG_SLATE)
    ! The full matrix must be set (not only one half like in scalapack).
    do j=1,nbco_global
       do i=j+1,nbli_global
@@ -3713,7 +3955,7 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
    ABI_CHECK_IEQ(cplex, 1, "cplex != 1")
    ABI_MALLOC(r_tmp_evec,(nbli_global,nbco_global))
    r_tmp_evec(:,:)=0._DP
-#ifdef HAVE_LINALG_ELPA
+#if defined(HAVE_LINALG_ELPA) || defined(HAVE_LINALG_SLATE)
    ! The full matrix must be set (not only one half like in scalapack).
    do j=1,nbco_global
       do i=j+1,nbli_global
@@ -5203,6 +5445,80 @@ subroutine slkmat_dp_cut(in_mat, glob_nrows, glob_ncols, out_mat, &
  end if
 
 end subroutine slkmat_dp_cut
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slkmat_sp_cut
+!! NAME
+!!  slkmat_sp_cut
+!!
+!! FUNCTION
+!!  Extract submatrix of shape (glob_nrows, glob_ncols) starting at `ija` from `in_mat`
+!!  and create new matrix with `size_blocs` and `processor`
+!!
+!! INPUTS
+!!  [free]: True if `in_mat` should be deallocated. Default: False
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine slkmat_sp_cut(in_mat, glob_nrows, glob_ncols, out_mat, &
+                         size_blocs, processor, ija, ijb, free)  ! Optional
+
+!Arguments ------------------------------------
+ class(slkmat_sp_t),target,intent(inout) :: in_mat
+ integer,intent(in) :: glob_nrows, glob_ncols
+ class(slkmat_sp_t),intent(out) :: out_mat
+ integer,optional,intent(in) :: size_blocs(2)
+ class(slk_processor_t), target, optional,intent(in) :: processor
+ integer,optional,intent(in) :: ija(2), ijb(2)
+ logical,optional,intent(in) :: free
+
+!Local variables-------------------------------
+ type(slk_processor_t), pointer :: processor__
+ integer :: ija__(2), ijb__(2)
+! *************************************************************************
+
+ ija__ = [1, 1]; if (present(ija)) ija__ = ija
+ ijb__ = [1, 1]; if (present(ijb)) ijb__ = ijb
+
+ processor__ => in_mat%processor; if (present(processor)) processor__ => processor
+
+ if (present(size_blocs)) then
+   call out_mat%init(glob_nrows, glob_ncols, processor__, in_mat%istwf_k, size_blocs=size_blocs)
+ else
+   call out_mat%init(glob_nrows, glob_ncols, processor__, in_mat%istwf_k)
+ end if
+ !call out_mat%print(header="output matrix generated by slkmat_dp_cut")
+
+ ! p?gemr2d: Copies a submatrix from one general rectangular matrix to another.
+ ! prototype
+ !call pzgemr2d(m, n, a, ia, ja, desca, b, ib, jb, descb, comm)
+
+ if (allocated(in_mat%buffer_cplx)) then
+#ifdef HAVE_LINALG_SCALAPACK
+   call pcgemr2d(glob_nrows, glob_ncols, &
+                 in_mat%buffer_cplx, ija__(1), ija__(2), in_mat%desc,   &
+                 out_mat%buffer_cplx, ijb__(1), ijb__(2), out_mat%desc, &
+                 processor__%grid%comm)
+
+ else if (allocated(in_mat%buffer_real)) then
+   call psgemr2d(glob_nrows, glob_ncols, &
+                 in_mat%buffer_real, ija__(1), ija__(2), in_mat%desc,   &
+                 out_mat%buffer_real, ijb__(1), ijb__(2), out_mat%desc, &
+                 processor__%grid%comm)
+#endif
+ else
+   ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
+ end if
+
+ if (present(free)) then
+   if (free) call in_mat%free()
+ end if
+
+end subroutine slkmat_sp_cut
 !!***
 
 !----------------------------------------------------------------------

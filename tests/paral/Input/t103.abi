@@ -132,4 +132,3 @@ jpawu2      0.9 eV  # Values of J
 #%% description =  Test apply magnetic field in KS states for DMFT. Not realistic
 #%% topics = DMFT
 #%%<END TEST_INFO>
-

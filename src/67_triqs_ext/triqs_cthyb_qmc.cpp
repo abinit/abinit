@@ -30,8 +30,9 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
                      bool time_invariance, bool use_norm_as_weight, bool debug, int integral, int loc_n_min, int loc_n_max,
                      int seed_a, int seed_b, int num_orbitals, int n_tau, int n_l, int n_cycles, int cycle_length,
                      int ntherm, int ntherm_restart, int det_init_size, int det_n_operations_before_check, int rank,
-                     int nblocks, int read_data, int verbo, double beta, double imag_threshold, double det_precision_warning,
-                     double det_precision_error, double det_singular_threshold, double lam_u, double pauli_prob, int *block_list,
+                     int nblocks, int read_data, int verbo, int chiloc, int chiloc_ins, double beta, double imag_threshold, double det_precision_warning,
+                     double det_precision_error, double det_singular_threshold, double lam_u, double pauli_prob, double *chiloc_tmp, 
+		     double *magmom_ptr, int *block_list,
                      int *flavor_list, int *inner_list, int *siz_list, complex<double> *ftau, complex<double> *gtau,
                      complex<double> *gl, complex<double> *udens_cmplx, complex<double> *vee_cmplx, complex<double> *levels_cmplx,
                      complex<double> *moments_self_1, complex<double> *moments_self_2, complex<double> *occ, complex<double> *eu,
@@ -226,6 +227,23 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     paramCTQMC.measure_G_tau = false;
   }
 
+  if (chiloc == 1 ) {
+    many_body_op_t Spinz;
+    Spinz = init_SpinOp(num_orbitals/2,block_list,inner_list);
+    paramCTQMC.measure_O_tau = {Spinz,Spinz};
+    paramCTQMC.measure_O_tau_min_ins = chiloc_ins;
+    if(rank == 0 && verbo>0) std::cout << endl <<"   == Setting up local Spin-Spin correlation operator " << endl << endl;
+  }
+
+  if (chiloc == 2 ) {
+  many_body_op_t MJz;
+  MJz = init_MJzOp(num_orbitals,block_list,inner_list,magmom_ptr);
+  paramCTQMC.measure_O_tau = {MJz,MJz};
+  paramCTQMC.measure_O_tau_min_ins = chiloc_ins;
+  if(rank == 0 && verbo>0) std::cout << endl <<"   == Setting up local MJz-MJz correlation operator " << endl << endl;
+  }
+
+
   if (rank == 0 && verbo == 1) {
 
     cout << endl << "   == Key Input Parameters for the TRIQS CTHYB solver ==" << endl << endl;
@@ -351,6 +369,15 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
           }
   }
 
+  // Report Spin-Spin correlation function
+  if (chiloc > 0) {
+   int  compteur = 0;
+   for(int tau = 0; tau < n_tau; ++tau){                                          
+      chiloc_tmp[compteur] = ((*solver.O_tau)[tau].real());                          
+      compteur++;                                                                               
+      }                                                                       
+   if(rank==0 && verbo>0) std::cout << endl << "  == Debug Chiloc(tau) is reported" << endl;                     
+  }
   auto h_loc_diag = solver.h_loc_diagonalization();
 
   if (measure_density_matrix) {
@@ -465,6 +492,25 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
 /********************************************************/
 /****************** Functions Used **********************/
 /********************************************************/
+// SpinZ Operator
+many_body_op_t init_SpinOp(int ndim, int *block_list, int *inner_list){
+    many_body_op_t Spinz;
+    for(int i : range(ndim)) {
+        Spinz += n(to_string(block_list[i]),        inner_list[i]);
+        Spinz -= n(to_string(block_list[i + ndim]), inner_list[i + ndim]);
+    }
+    return Spinz;
+} 
+
+// MJz Operator
+many_body_op_t init_MJzOp(int nflavor, int *block_list, int *inner_list, double *magmom_ptr){                              
+    many_body_op_t MJz;                                                                            
+    for(int i : range(nflavor)) {                                                                       
+        double jz = magmom_ptr[i * nflavor + i];
+        MJz += jz * n(to_string(block_list[i]), inner_list[i]);
+    }                                                                                                
+    return MJz;                                                                                    
+}                                                                                                    
 
 // Build density-density Hamiltonian
 many_body_op_t init_Hamiltonian(h_scalar_t *eps, int nflavor, h_scalar_t *udens,

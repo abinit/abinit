@@ -37,11 +37,11 @@ https://github.com/abinit/abiconfig.
 ])
 
 # Initialize Autoconf
-AC_PREREQ(2.59)
+AC_PREREQ([2.59])
 AC_INIT([ABINIT],
-    [m4_esyscmd([config/scripts/git-version-gen .tarball-version])],
-    [https://bugs.launchpad.net/abinit/],
-    [abinit])
+        [m4_esyscmd([config/scripts/git-version-gen .tarball-version])],
+        [https://bugs.launchpad.net/abinit/],
+        [abinit])
 AC_REVISION([Autotools support for ABINIT 10])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -1040,9 +1040,9 @@ fi
 if test "${sd_hdf5_enable}" = "no" -o "${sd_hdf5_init}" = "fb"; then
       ABI_MSG_NOTICE_L([hdf5-mandatory],[__CAUTION__ : HDF5 is __MANDATORY__ !])
       mandatory="#"
-      fb_path="--with-hdf5=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}/ "
-      fb_path+="--with-netcdf=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4/${abi_fb_netcdf_version}/ "
-      fb_path+="--with-netcdf-fortran=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/ "
+      fb_path="--with-hdf5=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_fc_vendor}/${abi_fc_version}/hdf5/${abi_fb_hdf5_version}/ "
+      fb_path+="--with-netcdf=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_fc_vendor}/${abi_fc_version}/netcdf4/${abi_fb_netcdf_version}/ "
+      fb_path+="--with-netcdf-fortran=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_fc_vendor}/${abi_fc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/ "
 else
   if test "${sd_hdf5_ok}" != "yes";then
       ABI_MSG_NOTICE_L([hdf5-nw],[__WARNING__ : HDF5 is not __WORKING__ !])
@@ -1055,9 +1055,9 @@ if test "${sd_hdf5_ok}" = "yes" -o "${sd_hdf5_init}" = "fb";then
   if test "${sd_netcdf_enable}" = "no" -o "${sd_netcdf_init}" = "fb"; then
       ABI_MSG_NOTICE_L([netcdf-mandatory],[__CAUTION__ : NetCDF is __MANDATORY__ !])
       mandatory="#"
-      fb_path="--with-hdf5=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}/ "
-      fb_path+="--with-netcdf=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4/${abi_fb_netcdf_version}/ "
-      fb_path+="--with-netcdf-fortran=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/ "
+      fb_path="--with-hdf5=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_fc_vendor}/${abi_fc_version}/hdf5/${abi_fb_hdf5_version}/ "
+      fb_path+="--with-netcdf=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_fc_vendor}/${abi_fc_version}/netcdf4/${abi_fb_netcdf_version}/ "
+      fb_path+="--with-netcdf-fortran=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_fc_vendor}/${abi_fc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/ "
   else
      if test "${sd_netcdf_ok}" != "yes";then
         ABI_MSG_NOTICE_L([netcdf-nw],[__WARNING__ : NetCDF is not __WORKING__ !])
@@ -1069,9 +1069,9 @@ if test "${sd_hdf5_ok}" = "yes" -o "${sd_hdf5_init}" = "fb";then
   if test "${sd_netcdf_fortran_enable}" = "no" -o "${sd_netcdf_fortran_init}" = "fb"; then
       ABI_MSG_NOTICE_L([netcdf_fortran-mandatory],[__CAUTION__ : NetCDF Fortran is __MANDATORY__ !])
       mandatory="#"
-      fb_path="--with-hdf5=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}/ "
-      fb_path+="--with-netcdf=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4/${abi_fb_netcdf_version}/ "
-      fb_path+="--with-netcdf-fortran=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/ "
+      fb_path="--with-hdf5=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_fc_vendor}/${abi_fc_version}/hdf5/${abi_fb_hdf5_version}/ "
+      fb_path+="--with-netcdf=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_fc_vendor}/${abi_fc_version}/netcdf4/${abi_fb_netcdf_version}/ "
+      fb_path+="--with-netcdf-fortran=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_fc_vendor}/${abi_fc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/ "
   else
     if test "${sd_netcdf_fortran_ok}" != "yes";then
       ABI_MSG_NOTICE_L([netcdf_fortran-nw],[__WARNING__ : NetCDF Fortran is not __WORKING__ !])
@@ -1084,7 +1084,7 @@ fi
 if test "${sd_libxc_enable}" = "no" -o "${sd_libxc_init}" = "fb"; then
       ABI_MSG_NOTICE_L([libxc-mandatory],[__CAUTION__ : LibXC is __MANDATORY__ !])
       mandatory="#"
-      fb_path+=" --with-libxc=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_libxc_version} "
+      fb_path+=" --with-libxc=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_fc_vendor}/${abi_fc_version}/libxc/${abi_fb_libxc_version} "
 else
   if test "${sd_libxc_ok}" != "yes";then
       ABI_MSG_NOTICE_L([libxc-nw],[__WARNING__ : LibXC is not __WORKING__ !])
@@ -1299,30 +1299,6 @@ ${INSTALL} -m 644 "${abinit_srcdir}/fallbacks/Makefile.am" \
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
 
-ABI_MSG_SECTION([Final remarks])
-
-# The end
-if test "${sd_linalg_flavor}" = "netlib-fallback"; then
-  ABI_MSG_NOTICE([linalg-abinit],
-    [Suboptimal linear algebra configuration])
-fi
-if test "${sd_libxc_kxc_ok}" = "no"; then
-  ABI_MSG_NOTICE([libxc-kxc],
-    [Suboptimal libxc configuration])
-fi
-if test "${sd_fft_flavor}" = "fftw3" -a "${abi_openmp_enable}" = "yes"; then
-  ABI_MSG_NOTICE([fftw3-openmp],
-    [WARNING: OpenMP enabled but FFTW3 Threads disabled])
-fi
-# GPU 2024 implementation : deactivate this warning
-#if test "${abi_gpu_enable}" = "yes" -a "${sd_linalg_chk_gpu}" != "magma"; then
-#  ABI_MSG_NOTICE([gpu-without-magma],
-#    [Suboptimal GPU configuration])
-#fi
-ABI_MSG_FC_BUGGY(${abi_fc_vendor})
-ABI_MSG_END
-
-
 
 FALLBACKS_SUBDIRS=""
 AC_ARG_ENABLE([create_reconfigure_for_fb],
@@ -1351,9 +1327,11 @@ AC_OUTPUT
 
 # Call CMake to generate Makefile for Kokkos sources directories
 if test "${sd_kokkos_enable}" = "yes"; then
+  test -z "${sd_kokkos_prefix}" && CMAKE_KOKKOS_ROOT="" || \
+       CMAKE_KOKKOS_ROOT="-DKokkos_ROOT=${sd_kokkos_prefix}"
   rm ${abinit_builddir}/src/16_kokkos_toolbox/Makefile
   cd ${abinit_builddir}/src/16_kokkos_toolbox && \
-    cmake ${abinit_srcdir}/shared/common/src/16_kokkos_toolbox/. -Wno-dev  \
+    cmake ${abinit_srcdir}/shared/common/src/16_kokkos_toolbox/. -Wno-dev ${CMAKE_KOKKOS_ROOT} \
     -DUSE_AUTOTOOLS_BUILD_COMPAT=ON -DABINIT_SRC_DIR=${abinit_srcdir} \
     -DCMAKE_C_FLAGS="${CFLAGS}" -DCMAKE_Fortran_FLAGS="${FCFLAGS}"  \
     -DCMAKE_CXX_FLAGS="-O2" -DCMAKE_C_COMPILER=${CC}  -DCMAKE_CXX_COMPILER=${CXX} \
@@ -1361,7 +1339,7 @@ if test "${sd_kokkos_enable}" = "yes"; then
     cd -
   rm ${abinit_builddir}/src/44_manage_kokkos/Makefile
   cd ${abinit_builddir}/src/44_manage_kokkos && \
-    cmake ${abinit_srcdir}/src/44_manage_kokkos/. -Wno-dev  \
+    cmake ${abinit_srcdir}/src/44_manage_kokkos/. -Wno-dev ${CMAKE_KOKKOS_ROOT} \
     -DUSE_AUTOTOOLS_BUILD_COMPAT=ON -DABINIT_SRC_DIR=${abinit_srcdir} \
     -DCMAKE_C_FLAGS="${CFLAGS}" -DCMAKE_Fortran_FLAGS="${FCFLAGS}"  \
     -DCMAKE_CXX_FLAGS="-O2" -DCMAKE_C_COMPILER=${CC}  -DCMAKE_CXX_COMPILER=${CXX} \
@@ -1374,3 +1352,40 @@ if test "x${mandatory}" = "x#"; then
   ABI_TRIGGERS_SUMMARY
   ABI_MSG_NOTICE_L([help-fb], [Missing Mandatory library!])
 fi
+
+
+# ---------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+
+ABI_MSG_SECTION([Final remarks])
+
+# The end
+if test "${sd_linalg_flavor}" = "netlib-fallback"; then
+  ABI_MSG_NOTICE([linalg-abinit],
+    [Suboptimal linear algebra configuration])
+fi
+if test "${sd_libxc_kxc_ok}" = "no"; then
+  ABI_MSG_NOTICE([libxc-kxc],
+    [Suboptimal libxc configuration])
+fi
+if test "${sd_fft_flavor}" = "fftw3" -a "${abi_openmp_enable}" = "yes"; then
+  ABI_MSG_NOTICE([fftw3-openmp],
+    [WARNING: OpenMP enabled but FFTW3 Threads disabled])
+fi
+if test "${abi_openmp_offload_enable}" = "yes"; then
+  if test "${abi_fc_vendor}" != "nvhpc" -a  "${abi_fc_vendor}" != "cray"; then
+    ABI_MSG_NOTICE([omp-offload-compiler],
+      [WARNING: GPU support with non-validated compiler.])
+  fi
+fi
+if test "${abi_gpu_hip_old}" = "yes"; then
+  ABI_MSG_NOTICE([old-rocm],
+    [WARNING: Suboptimal ROCm/HIP version])
+fi
+# GPU 2024 implementation : deactivate this warning
+#if test "${abi_gpu_enable}" = "yes" -a "${sd_linalg_chk_gpu}" != "magma"; then
+#  ABI_MSG_NOTICE([gpu-without-magma],
+#    [Suboptimal GPU configuration])
+#fi
+ABI_MSG_FC_BUGGY(${abi_fc_vendor})
+ABI_MSG_END

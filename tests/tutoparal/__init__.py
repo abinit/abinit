@@ -16,6 +16,7 @@ subsuites = [
 "dfpt",
 "dmft",
 "paral_bandpw",
+"paral_gpu",
 "gswvl",
 "images",
 "mbt",
@@ -39,6 +40,11 @@ inp_files = [
 "tparal_bandpw_03.abi",    # OK
 "tparal_bandpw_04.abi",   # Unstable because nstep=5 and bandpp: 2d iteration oscillates and fldiff does not handle it!
 #"tparal_bandpw_05.abi",
+"tparal_gpu_01.abi",
+"tparal_gpu_02.abi",
+"tparal_gpu_03.abi",
+"tparal_gpu_04.abi",
+"tparal_gpu_05.abi",
 "tgswvl_1.abi",
 "tgswvl_2.abi",
 "timages_01.abi",

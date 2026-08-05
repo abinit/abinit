@@ -19,8 +19,14 @@
 
 #include "abi_common.h"
 
+!Include and generate MKL_RCI module
+!#if defined HAVE_LINALG_MKL_OMATCOPY
+!#include "mkl_rci.f90"
+!#endif
+
 module m_prcref
 
+ use iso_c_binding
  use defs_basis
  use defs_wvltypes
  use m_errors
@@ -31,6 +37,7 @@ module m_prcref
  use m_frskerker2
  use mod_prc_memory
  use m_dtset
+ use m_precon
 
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
@@ -52,6 +59,7 @@ module m_prcref
  use m_rhotoxc,    only : rhotoxc
  use m_mklocl,     only : mklocl
  use m_mkcore,     only : mkcore
+ !use m_iterative_solvers, only : linsolve
 
  implicit none
 
@@ -60,7 +68,9 @@ module m_prcref
 
  public :: prcref
  public :: prcref_PMA
- public :: moddiel           ! Precondition the residual, using a model dielectric function.
+ public :: moddiel      ! Precondition the residual, using a model dielectric function.
+ private :: chi0diel    ! Precondition the residual, using a model chi0 operator defined in the object precon.
+
 !!***
 
 contains
@@ -183,7 +193,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 &  istep,kg_diel,kxc,&
 &  mgfft,moved_atm_inside,mpi_enreg,my_natom,&
 &  nattyp,nfft,nfftprc,ngfft,ngfftprc,nkxc,npawmix,npwdiel,ntypat,n1xccc,&
-&  optreal,optres,pawrhoij,pawtab,ph1d,psps,rhog,rhoijrespc,rhor,rprimd,&
+&  optreal,optres,pawrhoij,pawtab,ph1d,precon,psps,rhog,rhoijrespc,rhor,rprimd,&
 &  susmat,vhartr,vpsp,vresid,vrespc,vxc,wvl,wvl_den,xred,rcpaw,extfpmd)
 
 !Arguments-------------------------------
@@ -198,6 +208,7 @@ subroutine prcref(atindx,dielar,dielinv,&
  type(wvl_denspot_type), intent(inout) :: wvl_den
  type(rcpaw_type),intent(inout),pointer :: rcpaw
  type(extfpmd_type),intent(inout),pointer :: extfpmd
+ type(precon_object), intent(inout) :: precon
 
 !arrays
  integer,intent(in) :: atindx(dtset%natom),ffttomix(nfft*(1-nfftprc/nfft))
@@ -242,7 +253,7 @@ subroutine prcref(atindx,dielar,dielinv,&
  logical,allocatable :: mask(:)
 ! *************************************************************************
 
-!Compute different geometric tensor, as well as ucvol, from rprimd
+ !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !1) Eventually take care of the forces
@@ -328,7 +339,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      call moddiel(cplex,dielar,mpi_enreg,nfftprc,ngfftprc,dtset%nspden,optreal,optres,qphon,rprimd,vresid,vrespc)
 
 !    Use the inverse dielectric matrix in a small G sphere
-   else if( (istep>=dielstrt .and. dtset%iprcel>=21) .or. modulo(dtset%iprcel,100)>=41 )then
+   else if( (istep>=dielstrt .and. dtset%iprcel>=21 .and. dtset%iprcel<200) .or. modulo(dtset%iprcel,100)>=41 )then
 
 !    With dielop=1, the matrices will be computed when istep=dielstrt
 !    With dielop=2, the matrices will be computed when istep=dielstrt and 1
@@ -444,7 +455,10 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_FREE(work1)
      ABI_FREE(work2)
 
+   else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
+      call chi0diel(precon, dtset, mpi_enreg, optreal, optres, vresid, vrespc)
 !    Other choice ?
+ 
    else
      write(message, '(a,i3,a,a,a,a)' )&
 &     'From the calling routine, iprcel=',dtset%iprcel,ch10,&
@@ -838,7 +852,7 @@ end subroutine prcref
 &  istep,kg_diel,kxc,&
 &  mgfft,moved_atm_inside,mpi_enreg,my_natom,&
 &  nattyp,nfft,nfftprc,ngfft,ngfftprc,nkxc,npawmix,npwdiel,ntypat,n1xccc,&
-&  optreal,optres,pawrhoij,ph1d,psps,rhog, rhoijrespc,rhor,rprimd,&
+&  optreal,optres,pawrhoij,ph1d,precon,psps,rhog, rhoijrespc,rhor,rprimd,&
 &  susmat,vhartr,vpsp,vresid,vrespc,vxc,xred,&
 &  etotal,pawtab,wvl)
 
@@ -853,6 +867,8 @@ end subroutine prcref
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_data), intent(inout) :: wvl
+ type(precon_object), intent(inout) :: precon
+
 !arrays
  integer,intent(in) :: atindx(dtset%natom),ffttomix(nfft*(1-nfftprc/nfft))
  integer,intent(in) :: kg_diel(3,npwdiel),nattyp(ntypat),ngfft(18),ngfftprc(18)
@@ -988,7 +1004,7 @@ end subroutine prcref
      call moddiel(cplex,dielar,mpi_enreg,nfftprc,ngfftprc,dtset%nspden,optreal,optres,qphon,rprimd,vresid,vrespc)
 
 !    Use the inverse dielectric matrix in a small G sphere
-   else if( (istep>=dielstrt .and. dtset%iprcel>=21) .or. modulo(dtset%iprcel,100)>=41 )then
+   else if( (istep>=dielstrt .and. dtset%iprcel>=21 .and. dtset%iprcel<200) .or. modulo(dtset%iprcel,100)>=41 )then
 
 !    Wnith dielop=1, the matrices will be computed when istep=dielstrt
 !    With dielop=2, the matrices will be computed when istep=dielstrt and 1
@@ -1091,6 +1107,9 @@ end subroutine prcref
      ABI_FREE(work1)
      ABI_FREE(work2)
 
+   else if (dtset%iprcel>=200 .and. dtset%iprcel<300) then
+     call chi0diel(precon, dtset, mpi_enreg, optreal, optres, vresid, vrespc)
+ 
 !    Other choice ?
    else
      write(message, '(a,i0,a,a,a,a)' )&
@@ -2361,6 +2380,55 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
  call timab(96,2,tsec)
 
 end subroutine dieltcel
+!!***
+
+!!****f* ABINIT/chi0diel
+!! NAME
+!! chi0diel
+!!
+!! FUNCTION
+!!  Computes the preconditioned residual vrespc = P^-1 vresid where P is an approximation of the 
+!!  dielectric matrix (if 'optres'=0) or its adjoint (if 'optres'=1) based of a model of the 
+!!  non-interacting susceptibility chi0. The approximation is described by the object 'precon'
+!!  (see the abinit documentation of the input variable 'iprcel').
+!!
+!! INPUTS
+!!  precon        = precon_object that contain the model chi0 operator.
+!!  dtset         = All input variables for this dataset.
+!!  mpi_enreg     = Information about MPI parallelization.
+!!  optreal       = 1: vresid is given in the REAL space.
+!!                  2: vresid is given in the RECIPROCAL space.
+!!  optres        = 0: the array vresid contains a potential residual.
+!!                  1: the array vresid contains a density residual.
+!!  vresid (:, nspden) = residual density/potential in REAL space       (if optreal==1)
+!!                       residual density/potential in RECIPROCAL space (if optreal==2)
+!!
+!! OUTPUT
+!!  vrespc (:, nspden) = preconditioned residual of the density/potential in REAL space
+!!                       in REAL space (optreal==1) or RECIPROCAL space (optreal==2)
+!!
+!! SOURCE
+
+subroutine chi0diel(precon, dtset, mpi_enreg, optreal, optres, vresid, vrespc)
+
+!Arguments ------------------------------------
+ type(precon_object) :: precon
+!scalars
+ integer,intent(in) :: optreal, optres
+ type(MPI_type),intent(in) :: mpi_enreg
+ type(dataset_type),intent(in) :: dtset
+!arrays
+ real(dp),intent(in) :: vresid(optreal*precon%nfftprc, dtset%nspden)
+ real(dp),intent(out) :: vrespc(optreal*precon%nfftprc, dtset%nspden)
+
+! *************************************************************************
+
+ call precon%apply_precon(dtset, mpi_enreg, optreal, optres, vresid, vrespc)
+
+ !Simple mixing
+ vrespc = precon%diemix * vrespc
+
+end subroutine chi0diel
 !!***
 
 !!****f* ABINIT/prcrskerker1

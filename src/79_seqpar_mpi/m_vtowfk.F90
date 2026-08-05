@@ -24,7 +24,8 @@
 
 module m_vtowfk
 
-  use, intrinsic :: iso_fortran_env, only: int32, int64, real32, real64
+ use, intrinsic :: iso_fortran_env, only: int32, int64, real32, real64
+ use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
 
  use defs_basis
  use m_abicore
@@ -58,7 +59,7 @@ module m_vtowfk
  use m_lobpcgwf_cprj,only : lobpcgwf2_cprj
  use m_slicewf,     only : slicewf
  use m_slicewf_cprj,  only : slicewf_cprj
- use m_spacepar,    only : meanvalue_g
+ use m_spacepar,    only : meanvalue_g, meanvalue_g_batch
  use m_chebfi,      only : chebfi
  use m_rmm_diis,    only : rmm_diis
  use m_nonlop,      only : nonlop !, nonlop_counter
@@ -68,6 +69,7 @@ module m_vtowfk
  use m_cgtk,        only : cgtk_fixphase
  use m_common,      only : get_gemm_nonlop_ompgpu_blocksize
  use m_gemm_nonlop_projectors, only : gemm_nonlop_block_size, gemm_nonlop_is_distributed
+ use m_gputk, only : gpu_copy
 #if defined HAVE_YAKL
  use gator_mod
 #endif
@@ -227,6 +229,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: gpu_option_tmp,nblk_gemm_nonlop,blksize_gemm_nonlop_tmp,nfft_blocks_tmp
  integer :: chunk,residuchunk
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
+ logical :: transfer_cg
  real(dp) :: ar,ar2,ar_im,eshift,occblock,norm
  real(dp) :: max_resid,weight,cpu,wall,gflops
  character(len=50) :: iter_name
@@ -383,6 +386,19 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  cg_k => cg(:,1+icg:npw_k*my_nspinor*nband_k+icg)
 
+ transfer_cg = .false.
+#ifdef HAVE_OPENMP_OFFLOAD
+ transfer_cg = .not. xomp_target_is_present(c_loc(cg))
+ if(transfer_cg) then
+   if(xg_diago) then
+     !$OMP TARGET ENTER DATA MAP(alloc:cg_k) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+     !$OMP TARGET UPDATE TO(cg_k) IF(dtset%gpu_option==ABI_GPU_OPENMP .and. .not. use_rmm_diis)
+   end if
+ else if(istep == 1) then
+   !$OMP TARGET UPDATE FROM(cg_k) IF(dtset%gpu_option==ABI_GPU_OPENMP .and. use_rmm_diis)
+ end if
+#endif
+
  do inonsc=1,nnsclo_now
    ABI_NVTX_START_RANGE(NVTX_VTOWFK_EXTRA1)
    if (iscf < 0 .and. (inonsc <= enough .or. mod(inonsc, 10) == 0)) call cwtime(cpu, wall, gflops, "start")
@@ -455,6 +471,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          if (use_rmm_diis) then
            call rmm_diis(istep, ikpt, isppol, cg_k, dtset, eig_k, occ_k, enlx_k, gs_hamk, kinpw, gsc, &
                          mpi_enreg, nband_k, npw_k, my_nspinor, resid_k, rmm_diis_status)
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$OMP TARGET UPDATE TO(cg_k) IF(dtset%gpu_option==ABI_GPU_OPENMP .and. xg_diago)
+#endif
          else
 
            if ( .not. xg_diago ) then
@@ -514,44 +533,44 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    =========================================================================
 !    ============ MINIMIZATION OF BANDS: SPECTRUM SLICING == =================
 !    =========================================================================
-       else if (wfopta10 == 2) then
-         nstep_mixed = dtset%nstep_mixed ! below which perform chebfi
-         write(std_out,'(a,i0)') 'running vtowfk for nstep_mixed=', nstep_mixed
-         if ( xg_diago .and. dtset%cprj_in_memory == 0 ) then
-            if (istep > nstep_mixed) then
-                write(std_out,'(a,i0)') 'entering slicewf'
-                !ABI_NVTX_START_RANGE(NVTX_SPESLI)
-                call slicewf(cg_k,dtset,eig_k,enlx_k,gs_hamk,mpi_enreg,&
-&                             nband_k,npw_k,my_nspinor,prtvol,resid_k)
-                !ABI_NVTX_END_RANGE()
-            else
-                write(std_out,'(a,i0)') 'entering chebfiwf2'
-                ABI_NVTX_START_RANGE(NVTX_CHEBFI2)
-                call chebfiwf2(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,&
-&                              mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
-                ABI_NVTX_END_RANGE()
-            end if
-         else
-             if (istep > nstep_mixed) then
-                write(std_out,'(a,i0)') 'entering slicewf_cprj'
-                ! ITEST
-                write(901,*)
-                write(901,*) '**'
-                write(901,*) 'SCF iteration=', istep
-                write(901,*) '**'
-                write(901,*)
-                flush(901)
-                ! ITEST
-                !ABI_NVTX_START_RANGE(NVTX_SPESLI)
-                call slicewf_cprj(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,mpi_enreg,&
-&                             nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
-                !ABI_NVTX_END_RANGE()
-            else
-                write(std_out,'(a,i0)') 'entering chebfiwf2_cprj'
-                call chebfiwf2_cprj(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,&
-                    mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
-            end if
-         end if
+     else if (wfopta10 == 2) then
+       nstep_mixed = dtset%nstep_mixed ! below which perform chebfi
+       write(std_out,'(a,i0)') 'running vtowfk for nstep_mixed=', nstep_mixed
+       if ( xg_diago .and. dtset%cprj_in_memory == 0 ) then
+          if (istep > nstep_mixed) then
+              write(std_out,'(a,i0)') 'entering slicewf'
+              !ABI_NVTX_START_RANGE(NVTX_SPESLI)
+              call slicewf(cg_k,dtset,eig_k,enlx_k,gs_hamk,mpi_enreg,&
+&                          nband_k,npw_k,my_nspinor,prtvol,resid_k)
+              !ABI_NVTX_END_RANGE()
+          else
+              write(std_out,'(a,i0)') 'entering chebfiwf2'
+              ABI_NVTX_START_RANGE(NVTX_CHEBFI2)
+              call chebfiwf2(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,&
+&                            mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
+              ABI_NVTX_END_RANGE()
+          end if
+       else
+           if (istep > nstep_mixed) then
+              write(std_out,'(a,i0)') 'entering slicewf_cprj'
+              ! ITEST
+              write(901,*)
+              write(901,*) '**'
+              write(901,*) 'SCF iteration=', istep
+              write(901,*) '**'
+              write(901,*)
+              flush(901)
+              ! ITEST
+              !ABI_NVTX_START_RANGE(NVTX_SPESLI)
+              call slicewf_cprj(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,mpi_enreg,&
+&                               nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
+              !ABI_NVTX_END_RANGE()
+          else
+              write(std_out,'(a,i0)') 'entering chebfiwf2_cprj'
+              call chebfiwf2_cprj(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,&
+                   mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
+          end if
+       end if
 
 !      =========================================================================
 !      ======== MINIMIZATION OF BANDS: CONJUGATE GRADIENT (Teter et al.) =======
@@ -842,7 +861,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
    &                        dtset%nspinor,dtset%nspden,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
    &                        optforces,0,-1,gs_hamk%gpu_option,(dtset%gpu_nl_distrib/=0),&
-   &                        gemm_nonlop_block_size,nblk_gemm_nonlop,gs_hamk%nfft_blocks,warn_on_fail=.true.)
+   &                        gemm_nonlop_block_size,nblk_gemm_nonlop,gs_hamk%nfft_blocks,&
+   &                        warn_on_fail=.true.,disable_output=(istep>1.and.ikpt>1))
    gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
    if(nblk_gemm_nonlop==-1) then
      gs_hamk%gpu_option=ABI_GPU_DISABLED
@@ -852,8 +872,15 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET ENTER DATA MAP(alloc:cwavef) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:kinpw) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 
+ ! Transferring cg back is only needed in case of DMFT case or if GBT is on
+ if (gs_hamk%use_gbt /= 0 .or. paw_dmft%use_dmft==1) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET UPDATE FROM(cg_k) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP .and. xg_diago)
+#endif
+ end if
  ! Loop over bands or blocks of bands.
  ! Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
  do iblock=1,nblockbd
@@ -861,18 +888,34 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    !cwavef(:,:)=cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
    if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cg_k,cwavef) PRIVATE(iblocksize)
-     do iblocksize=1,blocksize*my_nspinor
-       !$OMP PARALLEL DO PRIVATE(ipw)
-       do ipw=1,npw_k
-         cwavef(1,ipw+(iblocksize-1)*npw_k)=cg_k(1,ipw+(iblocksize-1)*npw_k+(iblock-1)*npw_k*blocksize*my_nspinor)
-         cwavef(2,ipw+(iblocksize-1)*npw_k)=cg_k(2,ipw+(iblocksize-1)*npw_k+(iblock-1)*npw_k*blocksize*my_nspinor)
+     ! cg is already on GPU, simply copy it in cwavef
+     if(xg_diago) then
+       call gpu_copy(cwavef, &
+       &             cg_k(:,1+(iblock-1)*npw_k*my_nspinor*blocksize:iblock*npw_k*my_nspinor*blocksize),&
+       &             int(2,c_size_t)*npw_k*my_nspinor*blocksize)
+     else
+       ! cg isn't on GPU, single transfer and copy it in cwavef
+       !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cg_k,cwavef) PRIVATE(iblocksize)
+       do iblocksize=1,blocksize*my_nspinor
+         !$OMP PARALLEL DO PRIVATE(ipw)
+         do ipw=1,npw_k
+           cwavef(1,ipw+(iblocksize-1)*npw_k)=cg_k(1,ipw+(iblocksize-1)*npw_k+(iblock-1)*npw_k*blocksize*my_nspinor)
+           cwavef(2,ipw+(iblocksize-1)*npw_k)=cg_k(2,ipw+(iblocksize-1)*npw_k+(iblock-1)*npw_k*blocksize*my_nspinor)
+         end do
        end do
-     end do
+     end if
 #endif
    else
      call DCOPY(2*npw_k*my_nspinor*blocksize, &
        cg_k(:,1+(iblock-1)*npw_k*my_nspinor*blocksize:iblock*npw_k*my_nspinor*blocksize), 1, cwavef, 1)
+   end if
+
+   ! Compute kinetic energies for all bands in this block (use_gbt==0).
+   ! meanvalue_g_batch handles both istwf_k==1 (phase 1) and istwf_k>=2 (phase 3).
+   if (gs_hamk%use_gbt == 0) then
+     call meanvalue_g_batch(ek_k(1+(iblock-1)*blocksize:iblock*blocksize), kinpw, &
+     &    0, istwf_k, mpi_enreg, npw_k, my_nspinor, blocksize, &
+     &    cwavef, cwavef, 0, gpu_option=gs_hamk%gpu_option)
    end if
 
    do iblocksize=1,blocksize
@@ -880,18 +923,18 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
      cwavef_iband => cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg)
 
-     ! Compute kinetic energy for band iband.
-     if (gs_hamk%use_gbt == 0) then
-       call meanvalue_g(ek_k(iband),kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
-         cwavef_iband, cwavef_iband, 0, gpu_thread_limit=dtset%gpu_thread_limit)
-     else
+     if (gs_hamk%use_gbt /= 0) then
        ! Treat up and down components separately.
        ! Note filter 1. Also: this won't work if paral_kgb 1 and/or spinor parallelism
        filter = 1
-       call meanvalue_g(ar,gs_hamk%kinpw_k,filter,istwf_k,mpi_enreg,npw_k,1,&
-         cwavef_iband, cwavef_iband, 0, gpu_thread_limit=dtset%gpu_thread_limit)
+       call meanvalue_g(ar, gs_hamk%kinpw_k, filter,istwf_k,mpi_enreg,npw_k,1,&
+       &    cwavef_iband,             cwavef_iband,            0,&
+       &    gpu_thread_limit=dtset%gpu_thread_limit)
+
        call meanvalue_g(ar2,gs_hamk%kinpw_kp,filter,istwf_k,mpi_enreg,npw_k,1,&
-         cwavef_iband(:,npw_k+1:), cwavef_iband(:,npw_k+1:),0,gpu_thread_limit=dtset%gpu_thread_limit)
+       &    cwavef_iband(:,npw_k+1:), cwavef_iband(:,npw_k+1:),0,&
+       &    gpu_thread_limit=dtset%gpu_thread_limit)
+
        ek_k(iband) = ar + ar2
      end if
 
@@ -1361,6 +1404,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET EXIT DATA MAP(delete:cwavef) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:kinpw) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 
  ! restore safe value related to GEMM nonlop slicing and GPU in case of forces compute
@@ -1490,6 +1534,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  if (dtset%cprj_in_memory==2) nullify(cprj_cwavef_bands)
 
+#ifdef HAVE_OPENMP_OFFLOAD
+ if(transfer_cg) then
+   !$OMP TARGET EXIT DATA MAP(from:cg_k) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP .and. xg_diago)
+ end if
+#endif
  if(wfopta10 /= 1 .and. .not. xg_diago) then
    ABI_FREE(evec)
    ABI_FREE(subham)

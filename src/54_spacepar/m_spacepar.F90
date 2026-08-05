@@ -22,6 +22,8 @@
 
 module m_spacepar
 
+ use, intrinsic :: iso_c_binding, only: c_loc, c_associated
+
  use defs_basis
  use m_abicore
  use m_errors
@@ -48,6 +50,7 @@ public :: mkunitpawspherepot  ! compute effective potential due to PAW sphere of
                               ! paw projector completeness
 public :: make_vectornd     ! compute vector potential due to nuclear magnetic dipoles, in real space
 public :: meanvalue_g       ! Compute <wf|op|wf> where op is real and diagonal in G-space.
+public :: meanvalue_g_batch ! Batched GPU-accelerated variant of meanvalue_g (istwf_k==1, filter==0, use_ndo==0).
 public :: laplacian         ! Compute the laplacian of a function defined in real space
 public :: redgr             ! Compute reduced gradients of a real function on the usual unshifted FFT grid.
 public :: hartrestr         ! FFT of (rho(G)/pi)*[d(1/G**2)/d(strain) - delta(diagonal strain)*(1/G**2)]
@@ -342,8 +345,7 @@ subroutine mkunitpawspherepot(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,&
  ! Check that cplex has an allowed value
  if(cplex/=1 .and. cplex/=2)then
    write(message, '(a,i0,a,a)' )&
-   'From the calling routine, cplex=',cplex,ch10,&
-   'but the only value allowed are 1 and 2.'
+   'From the calling routine, cplex=',cplex,ch10, 'but the only value allowed are 1 and 2.'
    ABI_BUG(message)
  end if
 
@@ -583,10 +585,9 @@ subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
  call timab(10,1,tsec)
 
  ! Check that cplex has an allowed value
- if(cplex/=1 .and. cplex/=2)then
+ if (cplex/=1 .and. cplex/=2) then
    write(message, '(a,i0,a,a)' )&
-   'From the calling routine, cplex=',cplex,ch10,&
-   'but the only value allowed are 1 and 2.'
+   'From the calling routine, cplex=',cplex,ch10,'but the only value allowed are 1 and 2.'
    ABI_BUG(message)
  end if
 
@@ -789,6 +790,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 !scalars
  integer :: i1,ierr,ipw,jpw,me_g0,nthreads_bak,l_gpu_thread_limit
  character(len=500) :: message
+ real(dp), parameter  :: hugevalue = huge(zero)*1.d-11
 ! *************************************************************************
 
  DBG_CHECK(ANY(filter==(/0,1/)),"Wrong filter")
@@ -796,9 +798,8 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
  DBG_CHECK(ANY(istwf_k==(/(ipw,ipw=1,9)/)),"Wrong istwf_k")
 
  if(nspinor==2 .and. istwf_k/=1)then
-   write(message,'(a,a,a,i6,a,i6)')&
-   'When istwf_k/=1, nspinor must be 1,',ch10,&
-   'however, nspinor=',nspinor,', and istwf_k=',istwf_k
+   write(message,'(3a,i0,a,i0)')&
+   'When istwf_k/=1, nspinor must be 1,',ch10, 'however, nspinor=',nspinor,', and istwf_k=',istwf_k
    ABI_BUG(message)
  end if
 
@@ -853,7 +854,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 
      !$OMP PARALLEL DO REDUCTION(+:ar)
      do ipw=1,npw
-       if(diag(ipw)<huge(zero)*1.d-11)then
+       if(diag(ipw)<hugevalue)then
          ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
        end if
      end do
@@ -861,7 +862,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
        !$OMP PARALLEL DO REDUCTION(+:ar) PRIVATE(jpw)
        do ipw=1+npw,2*npw
          jpw=ipw-npw
-         if(diag(jpw)<huge(zero)*1.d-11)then
+         if(diag(jpw)<hugevalue)then
            ar=ar+diag(jpw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
          end if
        end do
@@ -872,7 +873,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
        end if
        !$OMP PARALLEL DO REDUCTION(+:ar_im)
        do ipw=1,npw
-         if(diag(ipw)<huge(zero)*1.d-11)then
+         if(diag(ipw)<hugevalue)then
            ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
          end if
        end do
@@ -880,7 +881,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
          !$OMP PARALLEL DO REDUCTION(+:ar_im) PRIVATE(jpw)
          do ipw=1+npw,2*npw
            jpw=ipw-npw
-           if(diag(jpw)<huge(zero)*1.d-11)then
+           if(diag(jpw)<hugevalue)then
              ar_im=ar_im+diag(jpw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
            end if
          end do
@@ -902,17 +903,18 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
        ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
      end do
 
+
    else ! filter/=0
      i1=1
      if(istwf_k==2 .and. me_g0==1)then
-       if(diag(1)<huge(zero)*1.d-11)then
+       if(diag(1)<hugevalue)then
          ar=half*diag(1)*vect(1,1)*vect1(1,1) ; i1=2
        end if
      end if
 
      !$OMP PARALLEL DO REDUCTION(+:ar)
      do ipw=i1,npw
-       if(diag(ipw)<huge(zero)*1.d-11)then
+       if(diag(ipw)<hugevalue)then
          ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
        end if
      end do
@@ -931,6 +933,148 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
  if (l_gpu_thread_limit /= 0) call xomp_set_num_threads(nthreads_bak)
 
 end subroutine meanvalue_g
+!!***
+
+!!****f* m_spacepar/meanvalue_g_batch
+!! NAME
+!! meanvalue_g_batch
+!!
+!! FUNCTION
+!!  Batched version of meanvalue_g: computes ndat mean values <psi_i|op|psi_i>
+!!  for wavefunctions packed contiguously in a single array, where op is real
+!!  and diagonal in G-space.
+!!
+!!  Note: nspinor must be 1 when istwf_k/=1 (same constraint as meanvalue_g).
+!!  Other combinations fall back to scalar meanvalue_g calls.
+!!
+!! INPUTS
+!!  diag(npw)=diagonal operator (real, spin-independent)
+!!  filter= if 1, filter on diag < huge*1.d-11; otherwise 0
+!!  istwf_k=storage mode of the vectors
+!!  npw=number of planewaves per wavefunction
+!!  nspinor=number of spinor components
+!!  ndat=number of wavefunctions (batch size)
+!!  vect(2,npw*nspinor*ndat)=packed input wavefunctions; band idat occupies
+!!    columns 1+(idat-1)*npw*nspinor : idat*npw*nspinor
+!!  vect1(2,npw*nspinor*ndat)=second set of wavefunctions (equals vect when use_ndo==0)
+!!  use_ndo=1 if vect /= vect1 (non-diagonal operator); 0 otherwise
+!!  gpu_option= (optional) GPU acceleration flag (ABI_GPU_OPENMP, etc.)
+!!
+!! OUTPUT
+!!  ar(ndat)=mean values, one per wavefunction
+!!
+!! SOURCE
+
+subroutine meanvalue_g_batch(ar, diag, filter, istwf_k, mpi_enreg, npw, nspinor, ndat, &
+                              vect, vect1, use_ndo,&
+                              gpu_option, gpu_thread_limit) ! optional
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: filter, istwf_k, npw, nspinor, ndat, use_ndo
+ integer, intent(in), optional :: gpu_option, gpu_thread_limit
+ type(MPI_type), intent(in) :: mpi_enreg
+!arrays
+ real(dp), intent(out) :: ar(ndat)
+ real(dp), target, intent(in) :: diag(npw)
+ real(dp), target, intent(in) :: vect(2, npw*nspinor*ndat)
+ real(dp), target, intent(in) :: vect1(2, npw*nspinor*ndat)
+
+!Local variables-------------------------------
+!scalars
+ integer :: idat, ipw, jpw, ierr, l_gpu_option, l_gpu_thread_limit, nthreads_bak, i1, me_g0
+ real(dp) :: local_ar
+ character(len=500) :: message
+! *************************************************************************
+
+ if(nspinor==2 .and. istwf_k/=1)then
+   write(message,'(a,a,a,i6,a,i6)')&
+   'When istwf_k/=1, nspinor must be 1,',ch10,&
+   'however, nspinor=',nspinor,', and istwf_k=',istwf_k
+   ABI_BUG(message)
+ end if
+
+ l_gpu_option = ABI_GPU_DISABLED; if (present(gpu_option)) l_gpu_option = gpu_option
+ l_gpu_thread_limit=0; if(present(gpu_thread_limit)) l_gpu_thread_limit=gpu_thread_limit
+ if(l_gpu_option==ABI_GPU_OPENMP) l_gpu_thread_limit=0
+
+ ar(:) = zero
+
+ if (istwf_k == 1 .and. filter == 0 .and. use_ndo == 0) then
+
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET TEAMS DISTRIBUTE MAP(to:diag,vect) MAP(tofrom:ar) &
+   !$OMP& IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   do idat = 1, ndat
+     local_ar = zero
+     !$OMP PARALLEL DO REDUCTION(+:local_ar) PRIVATE(jpw)
+     do ipw = 1, npw*nspinor
+       jpw = mod(ipw-1, npw) + 1
+       local_ar = local_ar + diag(jpw) * ( vect(1, ipw+(idat-1)*npw*nspinor)**2 &
+                                          +vect(2, ipw+(idat-1)*npw*nspinor)**2)
+     end do
+     ar(idat) = local_ar
+   end do
+
+   if (mpi_enreg%paral_kgb == 1) then
+     call xmpi_sum(ar, ndat, mpi_enreg%comm_bandspinorfft, ierr)
+   end if
+
+ else if (istwf_k >= 2 .and. filter == 0 .and. use_ndo == 0) then
+
+   me_g0 = mpi_enreg%me_g0
+   i1 = 1
+   if (istwf_k == 2 .and. me_g0 == 1) i1 = 2
+
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET TEAMS DISTRIBUTE MAP(to:diag,vect) MAP(tofrom:ar) &
+   !$OMP& IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
+   do idat = 1, ndat
+     local_ar = zero
+     if (i1 == 2) then
+       local_ar = half * diag(1) * vect(1, 1+(idat-1)*npw)**2
+     end if
+     !$OMP PARALLEL DO REDUCTION(+:local_ar)
+     do ipw = i1, npw
+       local_ar = local_ar + diag(ipw) * (vect(1, ipw+(idat-1)*npw)**2 &
+                                          +vect(2, ipw+(idat-1)*npw)**2)
+     end do
+     ar(idat) = two * local_ar
+   end do
+
+   if (mpi_enreg%paral_kgb == 1) then
+     call xmpi_sum(ar, ndat, mpi_enreg%comm_bandspinorfft, ierr)
+   end if
+
+ else
+   ! Fallback: scalar loop for cases not yet GPU-ported (filter==1, use_ndo==1).
+   ! Each call does its own MPI reduction.
+#ifdef HAVE_OPENMP_OFFLOAD
+   if(l_gpu_option==ABI_GPU_OPENMP) then
+     if(xomp_target_is_present(c_loc(diag))) then
+       !$OMP TARGET UPDATE FROM(diag)
+     end if
+     if(xomp_target_is_present(c_loc(vect))) then
+       !$OMP TARGET UPDATE FROM(vect)
+     end if
+     if(xomp_target_is_present(c_loc(vect1)) .and. .not. c_associated(c_loc(vect1), c_loc(vect))) then
+       !$OMP TARGET UPDATE FROM(vect1)
+     end if
+   end if
+#endif
+   do idat = 1, ndat
+     call meanvalue_g(ar(idat), diag, filter, istwf_k, mpi_enreg, npw, nspinor, &
+                      vect (:, 1+(idat-1)*npw*nspinor:idat*npw*nspinor), &
+                      vect1(:, 1+(idat-1)*npw*nspinor:idat*npw*nspinor), &
+                      use_ndo)
+   end do
+
+ end if
+ if (l_gpu_thread_limit /= 0) call xomp_set_num_threads(nthreads_bak)
+
+end subroutine meanvalue_g_batch
 !!***
 
 !!****f* m_spacepar/laplacian
@@ -963,7 +1107,7 @@ end subroutine meanvalue_g
 !! SOURCE
 
 subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,rdfuncr,&
-&  laplacerdfuncr,rdfuncg_out,laplacerdfuncg_out,g2cart_out,rdfuncg_in,g2cart_in)
+                     laplacerdfuncr,rdfuncg_out,laplacerdfuncg_out,g2cart_out,rdfuncg_in,g2cart_in)
 
 !Arguments ------------------------------------
 !scalars
@@ -1149,7 +1293,6 @@ subroutine redgr(frin,frredgr,mpi_enreg,nfft,ngfft)
  integer :: cplex_tmp,i1,i2,i3,id,idir,ifft,ig,ii,ing,n1,n2,n3
 !arrays
  real(dp),allocatable :: gg(:,:),wkcmpx(:,:),work(:),workgr(:,:)
-
 ! *************************************************************************
 
 !Only real arrays are treated
@@ -1308,8 +1451,8 @@ subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,rhog,rprimd,vh
 
  if( .not. (ipert==natom+3 .or. ipert==natom+4))then
    write(message, '(a,i0,a,a)' )&
-&   'From the calling routine, ipert=',ipert,ch10,&
-&   'so this routine for the strain perturbation should not be called.'
+    'From the calling routine, ipert=',ipert,ch10,&
+    'so this routine for the strain perturbation should not be called.'
    ABI_BUG(message)
  end if
 
@@ -1923,11 +2066,10 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 
  contains
 
-   function map_symrhg(j1,n1)
+   integer function map_symrhg(j1, n1)
 
-   integer :: map_symrhg
-   integer,intent(in) :: j1,n1
-!  Map into [0,n-1]
+   integer,intent(in) :: j1, n1
+   ! Map into [0,n-1]
    map_symrhg=mod(n1+mod(j1,n1),n1)
  end function map_symrhg
 
@@ -2010,7 +2152,6 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
  integer,allocatable :: class(:),iperm(:),symafm_used(:),symrel_used(:,:,:)
  integer,allocatable :: work1(:)
  real(dp),allocatable :: tnons_used(:,:),work2(:,:)
-
 ! *************************************************************************
 
  ABI_MALLOC(class,(nsym))
@@ -2393,7 +2534,6 @@ subroutine rotate_rho(cplex, itirev, mpi_enreg, nfft, ngfft, nspden, &
  real(dp) :: phnon1(2)
  real(dp), allocatable :: workg(:,:), workg_eq(:,:)
  character(len=500) :: message
-
 ! *************************************************************************
 
  n1=ngfft(1);n2=ngfft(2);n3=ngfft(3);nproc_fft=ngfft(10);me_fft=ngfft(11);nd2=n2/nproc_fft
@@ -2558,12 +2698,7 @@ subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,
 !arrays
  integer,allocatable :: determinant(:)
  real(dp) :: tsec(2)
-
 ! *************************************************************************
-
-!DEBUG
-!write(std_out,*)' m_spacepar%setsym : enter '
-!ENDDEBUG
 
  call timab(6,1,tsec)
 

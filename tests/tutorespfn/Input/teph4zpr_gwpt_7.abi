@@ -3,7 +3,6 @@
 
 optdriver 7              # Enter EPH driver.
 eph_task 17              # GWPT computation.
-#gwpt_wmode 2
 #gwpt_np_wpqbks 1 1 8 1 1 1
 
 # Additional filter in k-space: only k-points corresponding to the band edges are considered
@@ -14,15 +13,13 @@ gstore_use_lgk 1   # IMPORTANT FOR PERFORMANCE
 ecuteps  2         # Cutoff energy for screening (cannot be larger than the one found in the SCR file)
 ecutsigx 25        # Cutoff energy for exchange part.
 boxcutmin 1.1
+#nbdbuf    10
 
 tolwfr 1e-8        # Tolerance for Sternheimer solver.
 nstep 150          # Max number of iterations in Sternheimer solver.
 
-# TODO: elph2_imagden Should have a default value
-elph2_imagden 0.1 eV
-#gw_icutcoul 16      # Monte-carlo integration
-
 nband 10    # Number of bands in sum (n' index)
+elph2_imagden 0.1 eV  # Imaginary shisft in sum over states for full first-order wavefunction.
 
 getwfk_filepath "teph4zpr_gwpt_4o_WFK"    # 4x4x4 k-mesh
 getscr_filepath "teph4zpr_gwpt_5o_SCR"

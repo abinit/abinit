@@ -946,6 +946,9 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      ABI_CHECK_IEQ(size(gs_ham%vxctaulocal), gs_ham%n4*gs_ham%n5*gs_ham%n6*gs_ham%nvloc*4, 'wrong sizes for vxctaulocal!')
 
      ABI_MALLOC(ghc_mGGA,(2,npw_k1*my_nspinor*ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(cwavef) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
+#endif
      if (double_rfft_trick) then
        ABI_MALLOC(kg_k_fft,(3,npw_fft))
        ABI_MALLOC(cwavef_fft,(2,npw_fft*ndat_))
@@ -989,6 +992,9 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      end if
      ABI_MALLOC(ghc_vectornd,(2,npw_k1*my_nspinor*ndat))
      ghc_vectornd=zero
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(cwavef) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
+#endif
      call getghc_nucdip(cwavef,ghc_vectornd,gbound_k1,istwf_k_,kg_k1,kpt_k1,&
        gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
        gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vectornd,gs_ham%vlocal,gs_ham%zora,gs_ham%gpu_option)
@@ -1418,9 +1424,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    if (gs_ham%usepaw==1 .and. has_fock) then
      if(gs_ham%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET DATA USE_DEVICE_ADDR(gvnlc,gvnlxc_)
-       call abi_gpu_xaxpy(1, 2*npw_k2*my_nspinor*ndat, cminusone, c_loc(gvnlc), 1, c_loc(gvnlxc_), 1)
-       !$OMP END TARGET DATA
+       call abi_xaxpy(2*npw_k2*my_nspinor*ndat, cminusone, gvnlc, 1, gvnlxc_, 1, x_cplx=1, gpu_option=gs_ham%gpu_option)
        !$OMP TARGET EXIT DATA MAP(delete:gvnlc) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
      else

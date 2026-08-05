@@ -288,7 +288,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    ! Note that we use ndat__, since when nspinor 2 with nvloc 1, we can compute <g|vlocal1|u> for all ndat bands and the two spinor components
    ! with a single call to fourwf.
    ndat__ = ndat
-   !if (gs_hamkq%nvloc==1) ndat__ = ndat * gs_hamkq%nspinor ! TODO: Activate after testing
+   if (gs_hamkq%nvloc==1) ndat__ = ndat * gs_hamkq%nspinor
 
 !#ifdef _DEV_USE_WORK
    ABI_MALLOC(work,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6*ndat__))
@@ -309,9 +309,10 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,ndat__,gs_hamkq%ngfft,&
        npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight, gpu_option=gs_hamkq%gpu_option)
 
-     if(gs_hamkq%nspinor==2)then
+     if(gs_hamkq%nspinor==2 .and. ndat__ == ndat)then
+     ! Note: when ndat__ = ndat*nspinor (nvloc==1), fourwf above already handles both spinors
+     ! This block is skipped.
        ABI_CHECK_IEQ(ndat, 1, "ndat > 1 with nspinor 2 and nspden 1 is buggy")
-       ! MG TODO: This section is superflous: Calling fourwf above with ndat * nspinor instead of ndat should be enough.
        ABI_MALLOC(cwave_sp,(2,npw))
        ABI_MALLOC(gh1c_sp,(2,npw1))
 !$OMP PARALLEL DO
@@ -520,11 +521,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
            gvnlx1_(:,ipw)=gvnlx1_(:,ipw)+nonlop_out(:,ipw)
          end do
        else
-#ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET DATA USE_DEVICE_ADDR(gvnlx1_,nonlop_out)
-         call abi_gpu_xaxpy(1, 2*npw1*my_nspinor*ndat, cone, c_loc(nonlop_out), 1, c_loc(gvnlx1_), 1)
-         !$OMP END TARGET DATA
-#endif
+         call abi_xaxpy(2*npw1*my_nspinor*ndat, cone, nonlop_out, 1, gvnlx1_, 1, x_cplx=1, gpu_option=gs_hamkq%gpu_option)
        end if
 #ifdef HAVE_OPENMP_OFFLOAD
        if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(nonlop_out,2*npw1*my_nspinor*ndat)
@@ -699,12 +696,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
            gvnlx1_(:,ipw)=gvnlx1_(:,ipw)+nonlop_out(:,ipw)
          end do
        else
-#ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET DATA USE_DEVICE_ADDR(gvnlx1_,nonlop_out)
-         call abi_gpu_xaxpy(1, 2*npw1*my_nspinor*ndat, cone, &
-         &    c_loc(nonlop_out), 1, c_loc(gvnlx1_), 1)
-         !$OMP END TARGET DATA
-#endif
+         call abi_xaxpy(2*npw1*my_nspinor*ndat, cone, &
+         &    nonlop_out, 1, gvnlx1_, 1, x_cplx=1, gpu_option=gs_hamkq%gpu_option)
        end if
 #ifdef HAVE_OPENMP_OFFLOAD
        if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(nonlop_out,2*npw1*my_nspinor*ndat)
@@ -807,11 +800,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
            gvnlx1_(:,ipw)=gvnlx1_(:,ipw)+nonlop_out(:,ipw)
          end do
        else
-#ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET DATA USE_DEVICE_ADDR(gvnlx1_,nonlop_out)
-         call abi_gpu_xaxpy(1, 2*npw1*my_nspinor*ndat, cone, c_loc(nonlop_out), 1, c_loc(gvnlx1_), 1)
-         !$OMP END TARGET DATA
-#endif
+         call abi_xaxpy(2*npw1*my_nspinor*ndat, cone, nonlop_out, 1, gvnlx1_, 1, x_cplx=1, gpu_option=gs_hamkq%gpu_option)
        end if
 #ifdef HAVE_OPENMP_OFFLOAD
        if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(nonlop_out,2*npw1*my_nspinor*ndat)
@@ -1725,11 +1714,11 @@ end subroutine getdc1
 !!
 !! NOTES
 !!  Currently two Hamiltonian gradients at (q=0) are implemented:
-!!     ipert<=natom -> 		    first q-derivative along reduced coordinates directions
-!!                     		    of the atomic displacement perturbation hamiltonian
+!!     ipert<=natom -> 	        first q-derivative along reduced coordinates directions
+!!                     	        of the atomic displacement perturbation hamiltonian
 !!     ipert==natom+3 or natom+4 -> second q-derivative along cartesian coordinates
 !!                                  of the metric perturbation hamiltonian.
-!! 				    Which is equivalent (except for an i factor) to the first
+!!     Which is equivalent (except for an i factor) to the first
 !!                                  q-derivative along cartesian coordinates of the strain
 !!                                  perturbation hamiltonian.
 !!

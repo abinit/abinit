@@ -48,6 +48,7 @@ AC_DEFUN([SD_LINALG_INIT], [
   sd_linalg_has_blacs="unknown"
   sd_linalg_has_scalapack="unknown"
   sd_linalg_has_buggy_zdot="unknown"
+  sd_linalg_has_slate="unknown"
   sd_linalg_has_elpa="unknown"
   sd_linalg_has_elpa_2013="unknown"
   sd_linalg_has_elpa_2014="unknown"
@@ -132,6 +133,17 @@ AC_DEFUN([SD_LINALG_INIT], [
       done],
     [ sd_linalg_elpa_enable="${sd_linalg_elpa_enable_def}"; sd_linalg_init="def"])
 
+  AC_ARG_WITH([slate],
+    [AS_HELP_STRING([--with-slate],
+      [Install prefix of the SLATE library (e.g. /usr/local).])],
+    [ sd_linalg_slate_enable="yes"
+      sd_linalg_slate_init="dir"
+      test -d "${withval}/lib" && sd_linalg_slate_libs="${withval}/lib"
+      test -d "${withval}/lib64" && sd_linalg_slate_libs="${withval}/lib64"
+      test -d "${withval}/include" && sd_linalg_slate_incs="${withval}/include"
+      ],
+    [ sd_linalg_slate_enable="${sd_linalg_slate_enable_def}"; sd_linalg_init="def"])
+
   # Declare environment variables
   AC_ARG_VAR([LINALG_CPPFLAGS], [C preprocessing flags for linear algebra.])
   AC_ARG_VAR([LINALG_CFLAGS], [C flags for linear algebra.])
@@ -207,6 +219,12 @@ AC_DEFUN([SD_LINALG_INIT], [
       sd_linalg_fcflags="${sd_linalg_fcflags} -I${sd_linalg_elpa_mods}"
       sd_linalg_libs="${sd_linalg_elpa_libs}/libelpa.a ${sd_linalg_libs}"
     fi
+
+    if test "${sd_linalg_slate_enable}" = "yes"; then
+      sd_linalg_cxxflags="${sd_linalg_fcflags} -I${sd_linalg_slate_incs}"
+      sd_linalg_libs="-L/${sd_linalg_slate_libs} ${sd_linalg_ldflags}"
+      sd_linalg_libs="-lslate ${sd_linalg_libs}"
+    fi
   fi
 
   # Export configuration
@@ -225,7 +243,7 @@ AC_DEFUN([SD_LINALG_INIT], [
 
 AC_DEFUN([SD_LINALG_INIT_FLAVOR], [
   # Init internal parameters
-  sd_linalg_valid_flavors="auto acml aocl asl atlas easybuild elpa essl magma mkl netlib none openblas plasma"
+  sd_linalg_valid_flavors="auto acml aocl asl atlas easybuild elpa essl magma mkl netlib none openblas plasma slate"
   sd_linalg_flavor=""
   sd_linalg_flavor_init="unknown"
   sd_linalg_flavor_gpu=""
@@ -534,6 +552,16 @@ AC_DEFUN([_SD_LINALG_CHECK_FLAVOR], [
           fi
           ;;
         elpa)
+          if test "${sd_mpi_enable}" = "yes"; then
+            if test "${sd_linalg_chk_mpiacc}" != ""; then
+              AC_MSG_ERROR([only one MPI acceleration linear algebra flavor is permitted])
+            fi
+            sd_linalg_chk_mpiacc="${tmp_linalg_flavor}"
+          else
+            AC_MSG_NOTICE([ignoring '${tmp_linalg_flavor}', since MPI is disabled])
+          fi
+          ;;
+        slate)
           if test "${sd_mpi_enable}" = "yes"; then
             if test "${sd_linalg_chk_mpiacc}" != ""; then
               AC_MSG_ERROR([only one MPI acceleration linear algebra flavor is permitted])

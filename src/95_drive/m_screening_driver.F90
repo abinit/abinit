@@ -1142,7 +1142,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call init_plowannier(Dtset%plowan_bandf,Dtset%plowan_bandi,Dtset%plowan_compute,&
                         Dtset%plowan_iatom,Dtset%plowan_it,Dtset%plowan_lcalc,Dtset%plowan_natom,&
                         Dtset%plowan_nbl,Dtset%plowan_nt,Dtset%plowan_projcalc,Dtset%acell_orig,&
-                        Dtset%kptns,Dtset%nimage,Dtset%nkpt,Dtset%nspinor,Dtset%nsppol,Dtset%wtk,Dtset%dmft_t2g,wanibz_in)
+                        Dtset%kptns,sum(Dtset%plowan_nbl),Dtset%nimage,Dtset%nkpt,Dtset%nspinor,&
+                        Dtset%nsppol,Dtset%wtk,Dtset%dmft_t2g,wanibz_in)
    call get_plowannier(wanibz_in,wanibz,Dtset)
    call fullbz_plowannier(Dtset,Kmesh,Cryst,Pawang,wanibz,wanbz)
  end if
@@ -1186,7 +1187,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
      call cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_epsG0,&
       Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,nfftgw,&
-      ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf,wanbz)
+      ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf,wanbz) !,mpi_enreg_seq
 
      !chihw = chi_new(ep%npwe, ep%nomega)
      !chihw%head = chi0_head

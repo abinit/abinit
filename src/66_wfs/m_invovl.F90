@@ -45,7 +45,12 @@ MODULE m_invovl
  use m_prep_kgb,    only : prep_nonlop
 
 #ifdef HAVE_FC_ISO_C_BINDING
+! FIXME Don't know what's wrong with GCC when OpenMP GPU Offload is enabled here...
+#ifdef FC_GNU
+ use, intrinsic :: iso_c_binding, only : c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc
+#else
  use, intrinsic :: iso_c_binding, only : c_ptr, c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc
+#endif
 #endif
 
 #if defined(HAVE_GPU_MARKERS)
@@ -180,6 +185,7 @@ end type invovl_kpt_type
  !Module variable keeping track of which K-point data is so=tored on GPU
  integer, save :: current_ikpt_in_gpu=-1
  integer, save :: gpu_initialized=0
+ integer, save :: mod__cplx=0, mod__nprojs=0
 #endif
 
 #if defined(HAVE_GPU_CUDA)
@@ -302,10 +308,19 @@ CONTAINS
  subroutine alloc_ompgpu_buffers(cplx,nprojs,nspinor,ndat)
   integer,intent(in) :: cplx,nprojs,nspinor,ndat
 
-  if(gpu_initialized == 0) then
+  if(gpu_initialized == 0 .or. mod__cplx/=cplx .or. mod__nprojs/=nprojs) then
+
+    if(gpu_initialized==1) then
+      ABI_FREE(proj_ompgpu)
+      ABI_FREE(sm1proj_ompgpu)
+      ABI_FREE(PtPsm1proj_ompgpu)
+    end if
+
     ABI_MALLOC(proj_ompgpu,       (cplx,nprojs,nspinor*ndat))
     ABI_MALLOC(sm1proj_ompgpu,    (cplx,nprojs,nspinor*ndat))
     ABI_MALLOC(PtPsm1proj_ompgpu, (cplx,nprojs,nspinor*ndat))
+
+    mod__cplx=cplx; mod__nprojs=nprojs
 
     !FIXME Smater buffer management ?
     !!$OMP TARGET ENTER DATA MAP(alloc:proj_ompgpu,sm1proj_ompgpu,PtPsm1proj_ompgpu)
@@ -707,11 +722,11 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
    !$OMP TARGET ENTER DATA MAP(alloc:invovl_gram_projs)
    !$OMP TARGET ENTER DATA MAP(to:projs)
 
-   !$OMP TARGET DATA USE_DEVICE_ADDR(invovl_gram_projs,projs)
-   call abi_gpu_xgemm(cplx, blas_transpose,'N', invovl%nprojs, slice_size, (3-cplx)*ham%npw_k, cone, &
-   &                  c_loc(projs), (3-cplx)*ham%npw_k, &
-   &                  c_loc(projs), (3-cplx)*ham%npw_k, czero, c_loc(invovl_gram_projs), invovl%nprojs)
-   !$OMP END TARGET DATA
+   call abi_xgemm(blas_transpose,'N', invovl%nprojs, slice_size, (3-cplx)*ham%npw_k, cone, &
+   &              projs, (3-cplx)*ham%npw_k, &
+   &              projs, (3-cplx)*ham%npw_k, czero, &
+   &              invovl_gram_projs, invovl%nprojs, &
+   &              x_cplx=cplx, gpu_option=ham%gpu_option)
    call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr,use_omp_map=.true.)
    !$OMP TARGET EXIT DATA MAP(from:invovl_gram_projs)
    !$OMP TARGET EXIT DATA MAP(delete:projs)
@@ -721,8 +736,11 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
      ! compute local contribution to slice iproc of gram_projs
      slice_size = array_nprojs_pp(iproc)
      ABI_MALLOC(gramwork, (cplx,invovl%nprojs,slice_size))
-     call abi_xgemm(blas_transpose,'N', invovl%nprojs, slice_size, (3-cplx)*ham%npw_k, cone, projs(:,:,1), (3-cplx)*ham%npw_k, &
-     &                   projs(:, :, shift+1), (3-cplx)*ham%npw_k, czero, gramwork(:,:,1), invovl%nprojs,x_cplx=cplx)
+     call abi_xgemm(blas_transpose,'N', invovl%nprojs, slice_size, (3-cplx)*ham%npw_k, cone,&
+     &              projs(:,:,1), (3-cplx)*ham%npw_k, &
+     &              projs(:, :, shift+1), (3-cplx)*ham%npw_k, czero, &
+     &              gramwork(:,:,1), invovl%nprojs,&
+     &              x_cplx=cplx)
      shift = shift + slice_size
      ! reduce on proc i
      call xmpi_sum_master(gramwork, iproc-1, mpi_enreg%comm_fft, ierr)
@@ -1334,7 +1352,7 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
   else
     cplx = 1
   end if
-  if(gpu_initialized == 0) call alloc_ompgpu_buffers(cplx,nprojs,nspinor,ndat)
+  call alloc_ompgpu_buffers(cplx,nprojs,nspinor,ndat)
   proj => proj_ompgpu
   sm1proj => sm1proj_ompgpu
   PtPsm1proj => PtPsm1proj_ompgpu
@@ -1428,9 +1446,7 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
     ABI_FREE(cwaveprj_in)
   end if
 
-  !$OMP TARGET DATA USE_DEVICE_ADDR(cwavef,sm1cwavef)
-  call abi_gpu_xaxpy(1, 2*npw*nspinor*ndat, cone, c_loc(cwavef), 1, c_loc(sm1cwavef), 1)
-  !$OMP END TARGET DATA
+  call abi_xaxpy(2*npw*nspinor*ndat, cone, cwavef, 1, sm1cwavef, 1, gpu_option=ABI_GPU_OPENMP)
 
   if(transfer_omp_args) then
     !$OMP TARGET UPDATE FROM(sm1cwavef,cwavef)
@@ -1528,12 +1544,11 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
 
    ! compute matrix multiplication : PtPsm1proj(:,:,1) = invovl%gram * sm1proj(:,:,1)
    ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER_GEMM)
-   !$OMP TARGET DATA USE_DEVICE_ADDR(current_gram_projs, sm1proj, PtPsm1proj)
-   call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
-                c_loc(current_gram_projs), nprojs,&
-                c_loc(sm1proj), nlmntot_this_proc, czero, &
-                c_loc(PtPsm1proj), nprojs)
-   !$OMP END TARGET DATA
+   call abi_xgemm('N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
+   &              current_gram_projs, nprojs,&
+   &              sm1proj, nlmntot_this_proc, czero, &
+   &              PtPsm1proj, nprojs, &
+   &              x_cplx=cplx, gpu_option=ABI_GPU_OPENMP)
 
    !$OMP TARGET TEAMS DISTRIBUTE &
    !$OMP& PRIVATE(idat) MAP(to:proj,resid,PtPsm1proj)

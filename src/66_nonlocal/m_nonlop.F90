@@ -278,15 +278,15 @@ contains
 !!      if (choice=81) <G|d[d(right)V_nonlocal/d(k)]/d(k)|vect_in>
 !! --if (paw_opt=2)
 !!    vectout(2,npwout*my_nspinor*ndat)=final vector in reciprocal space:
-!!      if (choice=1)  <G|V_nonlocal-lamdba.(I+S)|vect_in>
-!!      if (choice=2)  <G|d[V_nonlocal-lamdba.(I+S)]/d(atm. pos)|vect_in>
-!!      if (choice=3)  <G|d[V_nonlocal-lamdba.(I+S)]/d(strain)|vect_in>
-!!      if (choice=5)  <G|d[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
-!!      if (choice=51) <G|d(right)[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
-!!      if (choice=52) <G|d(left)[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
-!!      if (choice=53) <G|d(twist)[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
-!!      if (choice=8)  <G|d2[V_nonlocal-lamdba.(I+S)]/d(k)d(k)|vect_in>
-!!      if (choice=81) <G|d[d(right[V_nonlocal-lamdba.(I+S)]/d(k)]/d(k)|vect_in>
+!!      if (choice=1)  <G|V_nonlocal-lambda.(I+S)|vect_in>
+!!      if (choice=2)  <G|d[V_nonlocal-lambda.(I+S)]/d(atm. pos)|vect_in>
+!!      if (choice=3)  <G|d[V_nonlocal-lambda.(I+S)]/d(strain)|vect_in>
+!!      if (choice=5)  <G|d[V_nonlocal-lambda.(I+S)]/d(k)|vect_in>
+!!      if (choice=51) <G|d(right)[V_nonlocal-lambda.(I+S)]/d(k)|vect_in>
+!!      if (choice=52) <G|d(left)[V_nonlocal-lambda.(I+S)]/d(k)|vect_in>
+!!      if (choice=53) <G|d(twist)[V_nonlocal-lambda.(I+S)]/d(k)|vect_in>
+!!      if (choice=8)  <G|d2[V_nonlocal-lambda.(I+S)]/d(k)d(k)|vect_in>
+!!      if (choice=81) <G|d[d(right[V_nonlocal-lambda.(I+S)]/d(k)]/d(k)|vect_in>
 !! --if (paw_opt=3 or 4)
 !!    svectout(2,npwout*my_nspinor*ndat)=result of the application of Sij (overlap matrix)
 !!                  or one of its derivatives to the input vect.:
@@ -297,7 +297,7 @@ contains
 !!      if (choice=51) <G|d(right)S/d(k)|vect_in>
 !!      if (choice=52) <G|d(left)S/d(k)|vect_in>
 !!      if (choice=53) <G|d(twist)S/d(k)|vect_in>
-!!      if (choice=3)  <G|d[V_nonlocal-lamdba.(I+S)]/d(strain)|vect_in>
+!!      if (choice=3)  <G|d[V_nonlocal-lambda.(I+S)]/d(strain)|vect_in>
 !!      if (choice=7)  <G|sum_i[p_i><p_i]|vect_in>
 !!      if (choice=8)  <G|d2S/d(k)d(k)|vect_in>
 !!      if (choice=81) <G|d[d(right)S/d(k)]/d(k)|vect_in>
@@ -1123,9 +1123,9 @@ end subroutine nonlop
 !!      if (choice=3) <G|dV_nonlocal/d(strain)|vect_start>
 !!  if (paw_opt=2)
 !!    vectout(2,npwout*nspinor)=final vector in reciprocal space:
-!!      if (choice=1) <G|V_nonlocal-lamdba.(I+S)|vect_start>
-!!      if (choice=2) <G|d[V_nonlocal-lamdba.(I+S)]/d(atm coord)|vect_start>
-!!      if (choice=3) <G|d[V_nonlocal-lamdba.(I+S)]/d(strain)|vect_start>
+!!      if (choice=1) <G|V_nonlocal-lambda.(I+S)|vect_start>
+!!      if (choice=2) <G|d[V_nonlocal-lambda.(I+S)]/d(atm coord)|vect_start>
+!!      if (choice=3) <G|d[V_nonlocal-lambda.(I+S)]/d(strain)|vect_start>
 !! --if (paw_opt=3 or 4)
 !!    svectout(2,npwout*nspinor)=result of the application of Sij (overlap matrix)
 !!                  or one of its derivatives to the input vect.:

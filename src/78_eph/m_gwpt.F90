@@ -249,7 +249,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: weight_q,bigexc,bigsxc,vxcavg ! ediff, eshift, q0rad, bz_vol
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma, isirr_q
  logical :: stern_use_cache, need_ftinterp
- logical :: print_time_qq, print_time_kk, print_time_pp, non_magnetic_xc, need_x_kmp, need_x_kqmp
+ logical :: print_time_qq, print_time_kk, print_time_pp, non_magnetic_xc, need_x_kmp, need_x_kqmp, test_sigma
  complex(dp) :: ieta !, idelta_sum
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_ham_kqmp, gs_ham_kmp
@@ -319,6 +319,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ABI_CHECK_IEQ(dtset%nspinor, 1, "GWPT with nspinor 2 not coded")
  ABI_CHECK_IEQ(dtset%nsppol, 1, "GWPT with nsppol 2 not tested")
+
+ test_sigma = .False.
+ !test_sigma = my_rank == 2
 
  !dtset%useric = 1 ! exclude the correlation part of Sigma
  !dtset%userid = 1 ! exclude the exchange part of Sigma
@@ -890,9 +893,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_MALLOC(gxc_atm, (2, nb_kq, nb_k, natom3))
 
    ! Arrays used to compare gwpt with gw
-   ABI_CALLOC(vxc_nk, (nb_k, gqk%glob_nk))
-   ABI_CALLOC(sigx_nk, (nb_k, gqk%glob_nk))
-   ABI_CALLOC(sigce0_nk, (nb_k, gqk%glob_nk))
+   if (test_sigma) then
+     ABI_CALLOC(vxc_nk, (nb_k, gqk%glob_nk))
+     ABI_CALLOC(sigx_nk, (nb_k, gqk%glob_nk))
+     ABI_CALLOC(sigce0_nk, (nb_k, gqk%glob_nk))
+   end if
 
    ABI_MALLOC(ur_nk,  (nfft*nspinor, bstart_k:bstop_k))
    ABI_MALLOC(ur_mkq, (nfft*nspinor, bstart_kq:bstop_kq))
@@ -959,7 +964,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
      ! Handle possible restart.
      if (done_qbz_spin(iq_bz, spin) == 1) then
-       call wrtout(std_out, sjoin(" iq_bz:", itoa(iq_bz), ", spin: ", itoa(spin), " already computed --> skipping iteration"))
+       call wrtout(std_out, sjoin(" iq_bz:", itoa(iq_bz), ", spin: ", itoa(spin), " already computed --> skipping iteration"), do_flush=.True.)
        cycle
      end if
 
@@ -1109,7 +1114,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          in_k = n_k - bstart_k + 1 !; if (gqk%pert_ppsum_comm%skip(in_k)) cycle ! MPI parallelism inside pert_comm
          call wfd%rotate_cg(n_k, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
                             cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_nk(:,n_k))
-         vxc_nk(in_k, ik_glob) = dot_product(ur_nk(:,n_k), vxc(:, spin) * ur_nk(:,n_k)) / nfftf
+         if (test_sigma) vxc_nk(in_k, ik_glob) = dot_product(ur_nk(:,n_k), vxc(:, spin) * ur_nk(:,n_k)) / nfftf
        end do
        !call xmpi_sum(ur_nk, gqk%pert_ppsum_comm%value, ierr)
 
@@ -1405,7 +1410,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                ! FIXME: This is wrong if nspinor == 2
                rhotwg_c(:) = rhotwg_x(1:npw_c*nspinor)
 
-               if (qq_is_gamma) then
+               if (qq_is_gamma .and. test_sigma) then
                  sigx_nk(in_k, ik_glob) = sigx_nk(in_k, ik_glob) + dot_product(rhotwg_x, rhotwg_x)
                end if
 
@@ -1437,7 +1442,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                !call xgemv("N", npw_c, npw_c, cone_gw, wc0_pbz, npw_c, rhotwg_c, 1, czero_gw, vec_coh_nk(:, n_k), 1)
              end if
 
-             if (qq_is_gamma) then
+             if (qq_is_gamma .and. test_sigma) then
                sigce0_nk(in_k, ik_glob) = sigce0_nk(in_k, ik_glob) + dot_product(rhotwg_c, vec_gwc_nk(:,1,n_k))
              end if
 
@@ -1924,32 +1929,34 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_SFREE(vec_coh_mkq)
 
    ! Collect self-energy matrix elements.
-   call xmpi_sum(vxc_nk, gqk%kpt_comm%value, ierr)
-   call xmpi_sum(sigx_nk, gqk%kpt_comm%value, ierr)
-   call xmpi_sum(sigce0_nk, gqk%kpt_comm%value, ierr)
-   sigx_nk = -sigx_nk * (one / (cryst%ucvol * pp_mesh%nbz))
-   sigce0_nk =  sigce0_nk * (one / (cryst%ucvol * pp_mesh%nbz))
+   if (test_sigma) then
+     call xmpi_sum(vxc_nk, gqk%kpt_comm%value, ierr)
+     call xmpi_sum(sigx_nk, gqk%kpt_comm%value, ierr)
+     call xmpi_sum(sigce0_nk, gqk%kpt_comm%value, ierr)
+     sigx_nk = -sigx_nk * (one / (cryst%ucvol * pp_mesh%nbz))
+     sigce0_nk =  sigce0_nk * (one / (cryst%ucvol * pp_mesh%nbz))
 
-   if (gqk%comm%me == master) then
-     write(ab_out, "(2a)") ch10, " Sigma^x_nk and Sigma^c_nk(E0) in eV:"
-     do ik_glob=1, gqk%glob_nk
-       ik_bz = gstore%kglob2bz(ik_glob, spin)
-       ik_ibz = gstore%kbz2ibz(1, ik_bz)
-       write(ab_out, "(2a)") "Band     E0    <VxcDFT>   SigX SigC(E0)  for k-point:", trim(ktoa(gstore%kbz(:, ik_bz)))
-       do band=gqk%bstart_k, gqk%bstop_k
-         in_k = band - gqk%bstart_k + 1
-         write(ab_out, "(i5, 4(f8.3))") &
-           band, ebands%eig(band, ik_ibz, spin) * Ha_eV, &
-           vxc_nk(in_k, ik_glob) * Ha_eV,  &
-           real(sigx_nk(in_k, ik_glob)) * Ha_eV, &
-           real(sigce0_nk(in_k, ik_glob)) * Ha_eV
+     if (gqk%comm%me == master) then
+       write(ab_out, "(2a)") ch10, " Sigma^x_nk and Sigma^c_nk(E0) in eV:"
+       do ik_glob=1, gqk%glob_nk
+         ik_bz = gstore%kglob2bz(ik_glob, spin)
+         ik_ibz = gstore%kbz2ibz(1, ik_bz)
+         write(ab_out, "(2a)") "Band     E0    <VxcDFT>   SigX SigC(E0)  for k-point:", trim(ktoa(gstore%kbz(:, ik_bz)))
+         do band=gqk%bstart_k, gqk%bstop_k
+           in_k = band - gqk%bstart_k + 1
+           write(ab_out, "(i5, 4(f8.3))") &
+             band, ebands%eig(band, ik_ibz, spin) * Ha_eV, &
+             vxc_nk(in_k, ik_glob) * Ha_eV,  &
+             real(sigx_nk(in_k, ik_glob)) * Ha_eV, &
+             real(sigce0_nk(in_k, ik_glob)) * Ha_eV
+         end do
        end do
-     end do
-   end if
+     end if
 
-   ABI_SFREE(vxc_nk)
-   ABI_SFREE(sigx_nk)
-   ABI_SFREE(sigce0_nk)
+     ABI_SFREE(vxc_nk)
+     ABI_SFREE(sigx_nk)
+     ABI_SFREE(sigce0_nk)
+   end if ! test_sigma
 
    if (dtset%gstore_use_lgk /= 0) then
      do my_ik=1,gqk%my_nk

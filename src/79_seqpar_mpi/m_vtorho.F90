@@ -406,7 +406,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: nthreads,nmpi,mpicomm
 
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd,step_cond
- logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
+ logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau,transfer_cg_once
  logical :: do_last_ortho,wvlbigdft=.false.,do_invS,calc_ffnl_ph3d,gpu_mem_estimated
  integer :: dmft_dftocc
  real(dp) :: nelect,min_eigv
@@ -631,6 +631,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  end if
 
  if(dtset%wfoptalg==2)nnsclo_now=40  ! UNDER DEVELOPMENT
+
+ transfer_cg_once = dtset%gpu_option==ABI_GPU_OPENMP &
+ &    .and. (dtset%wfoptalg == 114 .or. dtset%wfoptalg == 112 .or. dtset%wfoptalg == 111) &
+ &    .and. dtset%mkmem == 1 .and. dtset%nsppol == 1
+#ifdef HAVE_OPENMP_OFFLOAD
+ ! cg is allocated once on GPU if we're using "XG" algos 
+ ! and only one k-point and spin are in use
+ !$OMP TARGET ENTER DATA MAP(alloc:cg) IF(transfer_cg_once)
+#endif
 
  if (dtset%prtvol > 0) then
    write(msg, '(a,i0,a,3(i0,1x))' ) ' vtorho: nnsclo_now = ',nnsclo_now,&
@@ -1086,12 +1095,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        end if
 
-       if(gemm_nonlop_use_gemm .and. istep <= 1 .and. dtset%gpu_option==ABI_GPU_OPENMP .and. .not. gpu_mem_estimated) then
+       if(gemm_nonlop_use_gemm .and. istep <= 1 .and. dtset%gpu_option==ABI_GPU_OPENMP) then
          gemm_nonlop_block_size = dtset%gpu_nl_splitsize
          call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
          &                        dtset%nspinor,dtset%nspden,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
          &                        0,0,dtset%wfoptalg,gs_hamk%gpu_option,(dtset%gpu_nl_distrib/=0),&
-         &                        gemm_nonlop_block_size,nblk_gemm_nonlop,hamilt_gpu_nfft_blocks)
+         &                        gemm_nonlop_block_size,nblk_gemm_nonlop,hamilt_gpu_nfft_blocks,&
+         &                        disable_output=gpu_mem_estimated)
          gs_hamk%nfft_blocks = hamilt_gpu_nfft_blocks
          gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
          gpu_mem_estimated=.true.
@@ -1158,6 +1168,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg(:,icg+1:), dtset, psps, eig_k, gs_hamk, &
                             mpi_enreg, nband_k, npw_k, my_nspinor)
        end if
+
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET UPDATE TO(cg) IF(transfer_cg_once)
+#endif
 
        ABI_NVTX_START_RANGE(NVTX_VTOWFK)
        ! Compute the eigenvalues, wavefunction, residuals,
@@ -2425,6 +2439,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ABI_FREE(cprj_local)
    end if
  end if
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(from:cg) IF(transfer_cg_once)
+#endif
 
  if(dtset%usewvl==0) then
    ABI_FREE(EigMin)

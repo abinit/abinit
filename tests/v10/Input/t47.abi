@@ -1,0 +1,87 @@
+! ddb file
+ddb_filepath = "t46.ddb.abo"
+
+! output file
+output_file = "t47.abo"
+outdata_prefix = "t47o"
+
+!Flags
+ ifcflag   1     ! Interatomic force constant flag
+ dipquad 1
+ quadquad 1 
+!Wavevector grid number 1 (coarse grid, from DDB)
+  brav    1      ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
+  ngqpt   2*16 1   ! Monkhorst-Pack indices
+  nqshft  1         ! number of q-points in repeated basic q-cell
+  q1shft  3*0.0
+  symdynmat 0
+!Effective charges
+  asr  1     
+  sys_dim 4  ! 2D material with non-periodic axis along z
+!Interatomic force constant info
+  dipdip 1      ! Desactivate the long-range electrostatics here
+  dielt_env 1.00000   ! Dielectric constant of the embedding dielectric
+  dielt_thick 10.05939 0 ! Consider a dielectric thickness of 10.05939 Bohr
+                         ! No outer dielectric 
+!Phonon band structure output for band2eps - See note near end for
+! dealing with gamma LO-TO splitting issue.
+   eivec  4
+nph1l 33
+qph1l 
+0.0 0.5 0.0 1
+0.0 0.484375 0.0 1
+0.0 0.46875 0.0 1
+0.0 0.453125 0.0 1
+0.0 0.4375 0.0 1
+0.0 0.421875 0.0 1
+0.0 0.40625 0.0 1
+0.0 0.390625 0.0 1
+0.0 0.375 0.0 1
+0.0 0.359375 0.0 1
+0.0 0.34375 0.0 1
+0.0 0.328125 0.0 1
+0.0 0.3125 0.0 1
+0.0 0.296875 0.0 1
+0.0 0.28125 0.0 1
+0.0 0.265625 0.0 1
+0.0 0.25 0.0 1
+0.0 0.234375 0.0 1
+0.0 0.21875 0.0 1
+0.0 0.203125 0.0 1
+0.0 0.1875 0.0 1
+0.0 0.171875 0.0 1
+0.0 0.15625 0.0 1
+0.0 0.140625 0.0 1
+0.0 0.125 0.0 1
+0.0 0.109375 0.0 1
+0.0 0.09375 0.0 1
+0.0 0.078125 0.0 1
+0.0 0.0625 0.0 1
+0.0 0.046875 0.0 1
+0.0 0.03125 0.0 1
+0.0 0.015625 0.0 1
+0.0 0.0 0.0 1
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%%  executable = anaddb
+#%%  test_chain = t47.abi
+#%% exclude_builders = alps_nag_7.2_serial
+#%% [shell]
+#%% pre_commands =
+#%%   iw_cp t46.ddb.abo t46.ddb.abo
+#%% [files]
+#%% files_to_test =
+#%%  t47.abo, tolnlines = 0,  tolabs=  1e-02, tolrel= 1.1
+#%% [paral_info]
+#%%  max_nprocs = 1
+#%% [extra_info]
+#%%  authors = B. Van Troeye
+#%%  keywords = Phonons, Electrostatics
+#%%  description = Separate treatment of long-range electrostatics in 2D materials
+#%%  topics = Phonons
+#%%<END TEST_INFO>
+

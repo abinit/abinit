@@ -887,8 +887,9 @@ subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_sp
        iln=indlmn(5,ilmn)
 
        klmn=k0lmn+ilmn
-       klm =k0lm +ilm
-       kln =k0ln +iln
+       klm = Pawtab(itypat)%indklmn(1,klmn) !SF klm =k0lm +ilm is incorrect,
+       ! because ilm can be larger than jlm if more than 1 proj per angular momentum
+       kln =k0ln +iln ! This problem does not occur for kln, because always jln>=iln
 
        ! === Summing over allowed (L,M), taking into account Gaunt selection rules ===
        do ll_G=ABS(jl-il),jl+il,2
@@ -947,7 +948,7 @@ subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_sp
        iln=indlmn(5,ilmn)
 
        klmn=k0lmn+ilmn
-       klm =k0lm +ilm
+!       klm =k0lm +ilm !SF klm incorrect, see AA, but not used in SK
        kln =k0ln +iln
        !
        ! === Summing over allowed (l,m), taking into account Gaunt selection rules ===

@@ -173,12 +173,11 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 !Local variables-------------------------------
 !Arrays
 !scalars
- integer :: fdb,fdf,ia,ialpha,iaph3d,ibeta,ic,idelta,idelgam,igamma
+ integer :: ia,ialpha,iaph3d,ibeta,ic,idelta,idelgam,igamma
  integer :: ii,il,ilmn,ipw,ipwshft,ispinor,jc,nthreads,ffnl_dir1,ffnl_dir(3)
  real(dp) :: scale,two_piinv,wt
  logical :: parity
 !arrays
- integer,parameter :: ffnl_dir_dat(6)=(/3,4,4,2,2,3/)
  integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
  integer,parameter :: idir1(9)=(/1,1,1,2,2,2,3,3,3/),idir2(9)=(/1,2,3,1,2,3,1,2,3/)
  integer,parameter :: nalpha(9)=(/1,2,3,3,3,2,2,1,1/),nbeta(9)=(/1,2,3,2,1,1,3,3,2/)
@@ -559,11 +558,11 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
 !        ------
          if (choice==53) then ! twist derivative: <G|dp_i/dk_(idir+1)>V_ij<dp_j/dk_(idir+2)|psi>
-           fdf = ffnl_dir_dat(2*idir-1)
-           fdb = ffnl_dir_dat(2*idir)
+           ffnl_dir1=2; if(dimffnl>2) ffnl_dir1=(mod(idir,3)+1)+1
            do ilmn=1,nlmn
+             il=indlmn(1,ilmn)
              ztab(:)=ztab(:) + &
-&             ffnl(:,fdf,ilmn)*cmplx(dgxdtfac_(1,2,ilmn),dgxdtfac_(2,2,ilmn),kind=dp)
+&             ffnl(:,ffnl_dir1,ilmn)*cmplx(dgxdtfac_(1,2,ilmn),dgxdtfac_(2,2,ilmn),kind=dp)*CONJG(j_dpc**il)*four_pi
            end do
          end if
 
@@ -680,11 +679,11 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
 !        ------
          if (choice==53) then ! twist derivative: <G|dp_i/dk_(idir+1)>S_ij<dp_j/dk_(idir+2)|psi>
-           fdf = ffnl_dir_dat(2*idir-1)
-           fdb = ffnl_dir_dat(2*idir)
+           ffnl_dir1=2; if(dimffnl>2) ffnl_dir1=(mod(idir,3)+1)+1
            do ilmn=1,nlmn
+             il=indlmn(1,ilmn)
              ztab(:)=ztab(:) + &
-&             ffnl(:,fdf,ilmn)*cmplx(dgxdtfacs_(1,2,ilmn),dgxdtfacs_(2,2,ilmn),kind=dp)
+&             ffnl(:,ffnl_dir1,ilmn)*cmplx(dgxdtfacs_(1,2,ilmn),dgxdtfacs_(2,2,ilmn),kind=dp)*CONJG(j_dpc**il)*four_pi
            end do
          end if
 
@@ -942,7 +941,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
 !      Compute <g|Vnl|c> (or derivatives) for each plane wave:
        if (paw_opt/=3) then
-!$OMP PARALLEL PRIVATE(ipw,ilmn,fdf,fdb,ffnl_dir1)
+!$OMP PARALLEL PRIVATE(ipw,ilmn,ffnl_dir1)
 
 !        ------
          if (choice==1) then ! <g|Vnl|c>
@@ -1112,14 +1111,14 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
 !        ------
          else if (choice==53) then ! twist derivative: <G|dp/dk_(idir+1)>V<dp/dk_(idir+2)|psi>
-           fdf = ffnl_dir_dat(2*idir-1)
-           fdb = ffnl_dir_dat(2*idir)
+           ffnl_dir1=2; if(dimffnl>2) ffnl_dir1=(mod(idir,3)+1)+1
 !$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
              do ilmn=1,nlmn
+               il=indlmn(1,ilmn)
                ztab(ipw)=ztab(ipw) &
-&               +ffnl(ipw,fdf,ilmn)*cmplx(dgxdtfac_(1,2,ilmn),dgxdtfac_(2,2,ilmn),kind=dp)
+&               +ffnl(ipw,ffnl_dir1,ilmn)*cmplx(dgxdtfac_(1,2,ilmn),dgxdtfac_(2,2,ilmn),kind=dp)*CONJG(j_dpc**il)*four_pi
              end do
            end do
 !$OMP END DO
@@ -1196,7 +1195,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
 !      Compute <g|S|c> (or derivatives) for each plane wave:
        if (paw_opt>=3) then
-!$OMP PARALLEL PRIVATE(ilmn,ipw,fdf,fdb,ffnl_dir1)
+!$OMP PARALLEL PRIVATE(ilmn,ipw,ffnl_dir1)
 
 !        ------
          if (choice==1) then ! <g|S|c>
@@ -1288,14 +1287,14 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
 !        ------
          else if (choice==53) then ! twist derivative: <G|dp/dk_(idir+1)>S<dp/dk_(idir+2)|psi>
-           fdf = ffnl_dir_dat(2*idir-1)
-           fdb = ffnl_dir_dat(2*idir)
+           ffnl_dir1=2; if(dimffnl>2) ffnl_dir1=(mod(idir,3)+1)+1
 !$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
              do ilmn=1,nlmn
+               il=indlmn(1,ilmn)
                ztab(ipw)=ztab(ipw) &
-&               +ffnl(ipw,fdf,ilmn)*cmplx(dgxdtfacs_(1,2,ilmn),dgxdtfacs_(2,2,ilmn),kind=dp)
+&               +ffnl(ipw,ffnl_dir1,ilmn)*cmplx(dgxdtfacs_(1,2,ilmn),dgxdtfacs_(2,2,ilmn),kind=dp)*CONJG(j_dpc**il)*four_pi
              end do
            end do
 !$OMP END DO

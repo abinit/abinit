@@ -330,6 +330,14 @@ mv LiF_eph_varpeq-master LiF_eph_varpeq
 The script used to precompute the files is available [here](https://github.com/abinit/LiF_eph_varpeq/blob/main/run.sh),
 with the necessary `*abi` files provided in the same repository.
 
+
+!!! important
+
+    The [[iomode]] = 3 keyword is used in the `*abi` input files to ensure portability of the tutorial by producing transferable NetCDF files. However, the behaviour of the NetCDF I/O is library-dependent, and can cause deadlock if large number of cores is used.
+
+    Therefore, in production runs on a single machine, when portability is not required, it is advised to use the default [[iomode]] = 1 value.
+
+
 Note that several parameters have been tuned to reach a reasonable **compromise between precision
 and computational cost** so do not expect the results obtained at the end of the lesson to be fully converged.
 More specifically, we use norm-conserving pseudopotentials with a cutoff energy [[ecut]]
@@ -337,6 +345,7 @@ of 30 Ha (too low, it should be ~45 Ha).
 The DFPT computations is done for the set of irreducible $\qq$-points corresponding
 to a $\Gamma$-centered 3x3x3 $\qq$ mesh (again, too coarse, it should be 6x6x6 for *ab initio* $\mathbf{k/q}$-meshes).
 $\bm{Z}^*$ and $\bm{\ee}^\infty$ are also computed with the same underconverged settings.
+
 
 !!! important
 
@@ -349,6 +358,9 @@ $\bm{Z}^*$ and $\bm{\ee}^\infty$ are also computed with the same underconverged 
         abistruct.py has_quad FILE
 
     where FILE is any file providing a structure in ABINIT format (e.g. netcdf output files or .abi files)
+
+    **Warning:** ( |today|) it was observed that the command has a bug, indicating no dynamical quadrupoles, even if a system must have them. **Trust your own judgment while it's being fixed.**
+
 
 ## How to extract useful info from the output files
 
@@ -1149,7 +1161,7 @@ robot = VpqRobot.from_files(vpq_files)
 robot.plot_kconv(nfit=3)
 ```
 
-The robot is smart enough (but stupid nonetheless, so **trust your own judgemenet**) to detect 2 different kind
+The robot is smart enough (but stupid nonetheless, so **trust your own judgement**) to detect 2 different kind
 of calculations and perform separate extrapolation for each case.
 It produces the following figure:
 
@@ -1504,10 +1516,153 @@ Finally, we can visualize the large polaron via the following input
 abinit teph4vpq_10.abi > teph4vpq_10.log 2> err &
 ```
 
-This produces usual `*xsf` files that can be used for viauslization.
-If we open `teph4vpq_10o_pstate_1_POLARON.xsf` in VESTA, the following charge distribution can bee seen:
+This produces the usual `*xsf` files for visualization.
+Opening `teph4vpq_10o_pstate_1_POLARON.xsf` in VESTA shows the following charge distribution:
 
 ![](eph4vpq_assets/LiF_large.png)
 
-<!--
--->
+
+## Polaron hopping and minimum-energy paths
+
+So far, we have focused on obtaining individual polaron solutions.
+We will now compute a minimum-energy path between two such solutions and use it to estimate the barrier for polaron hopping.
+
+ABINIT combines the variational polaron equations with the simplified string method [[cite:Weinan2007]] for this purpose.
+Details of the implementation and its application to polaron hopping can be found in [[cite:Vasilchenko2026]].
+
+A minimum-energy path requires known initial and final polaron states.
+Here, we use the hole-polaron solution computed previously on the $5\times5\times5$ $\kk/\qq$-mesh with long-range corrections.
+The `teph4vpq_4o_DS3_VPQ.nc` file contains this solution and its metadata.
+We also need the corresponding **DDB**, **WFK**, and **GSTORE** files from the previous calculations.
+
+Our input file is as follows
+
+{% dialog tests/tutorespfn/Input/teph4vpq_11.abi %}
+
+Run this example with:
+
+```sh
+abinit teph4vpq_11.abi > teph4vpq_11.log 2> err &
+```
+
+Let's examine the new variables in this input file.
+Setting [[vpq_mode]] to `"hopping"` activates the minimum-energy-path optimization.
+The initial state is selected with [[vpq_hop_from_filepath]], [[vpq_hop_from_ip]], and [[vpq_hop_from_site]].
+The final state is selected with [[vpq_hop_to_filepath]], [[vpq_hop_to_ip]], and [[vpq_hop_to_site]].
+The filepath variables identify the **VPQ** files, the `ip` variables select a state from each file, and the `site` variables
+specify the corresponding localization cells.
+
+In this example, the same solution is used for both endpoints.
+The [[vpq_hop_vec]] translation is applied to the final state relative to the initial one, thereby defining the hopping event.
+The [[vpq_hop_vec]] vector describes a hop to a nearest-neighbor site along $[100]$ in the [[rprim]] basis.
+For this structure, it corresponds to the $[011]$ direction of the conventional cell.
+
+The energy path between the two solution is represented by a string, which is a discrete sequence of polaron images that connects the two endpoints.
+In `"hopping"` mode, [[vpq_nstates]] specifies the number of images along this path, including the endpoints.
+Here, nine images sample the path, which initially is constructed by linear interpolation between the selected states.
+
+For each image, ABINIT first optimizes the charge distribution $\boldsymbol{A}$ at fixed lattice-distortion coefficients
+$\boldsymbol{B}$.
+The string method then updates the set of $\boldsymbol{B}$ coefficients to evolve the path.
+The maximum number of string iterations is set by [[vpq_hop_nstep]], the convergence tolerance by
+[[vpq_hop_tolgrs]], and the evolution time step by [[vpq_hop_ts]].
+
+Let's now look at the main output file:
+
+{% dialog tests/tutorespfn/Refs/teph4vpq_11.abo %}
+
+The hopping-optimization log reports the maximum phonon-gradient norm and the maximum string displacement over all images as
+`max||ph_grad||` and `max||hop_grad||`, respectively.
+The optimization stops when `max||hop_grad||` falls below [[vpq_hop_tolgrs]].
+
+```md
+ Printing the hopping optimization log
+   -------------------------------------------
+   * spin 1/1
+   * values are in (a.u.)
+   -------------------------------------------
+   Step   max||ph_grad||   max||hop_grad||
+      1       8.2373E-04        8.4897E-03
+      2       7.7682E-04        2.7829E-04
+      3       7.4094E-04        2.4133E-04
+      4       7.1361E-04        2.1266E-04
+      5       6.9495E-04        1.8194E-04
+      6       6.8182E-04        1.5334E-04
+      7       6.7085E-04        1.2908E-04
+      8       6.6240E-04        1.1063E-04
+      9       6.5590E-04        9.6033E-05
+     10       6.5044E-04        8.1724E-05
+     11       6.4634E-04        7.1807E-05
+     12       6.4201E-04        6.3728E-05
+     13       6.3898E-04        5.5188E-05
+     14       6.3689E-04        4.9857E-05
+     15       6.3520E-04        4.4818E-05
+   -------------------------------------------
+```
+
+
+!!! note
+
+    Try increasing [[vpq_hop_nstep]] to reach the convergence within the prescribed tolerance.
+
+    Note also, the values of the gradient norms may differ slightly across different machines due to the floating point imprecision. It's OK if you get similar, but not ecaxtly the same values.
+
+
+The output also lists the results of the final variational-polaron optimization at fixed displacements.
+The $E_\mathrm{pol}$ values trace the optimized minimum-energy path:
+
+```md
+ Printing the minimal energy path
+   --------------------------------------------------------------------------------------
+   * spin 1/1
+   * values are in (a.u.)
+   --------------------------------------------------------------------------------------
+   Imag        E_pol         E_el         E_ph       E_elph      epsilon  ||el_grad||
+      1  -7.6469E-02   2.9478E-02   1.0595E-01  -2.1189E-01   1.8242E-01   3.2375E-06
+      2  -7.5686E-02   2.9088E-02   1.0267E-01  -2.0744E-01   1.7836E-01   7.0036E-06
+      3  -7.2767E-02   2.7438E-02   9.1537E-02  -1.9174E-01   1.6430E-01   4.0929E-06
+      4  -6.5396E-02   2.4096E-02   8.2240E-02  -1.7173E-01   1.4764E-01   5.9329E-06
+      5  -5.9385E-02   2.0171E-02   7.9089E-02  -1.5865E-01   1.3847E-01   7.2766E-06
+      6  -6.5390E-02   2.4097E-02   8.2227E-02  -1.7171E-01   1.4762E-01   9.9873E-06
+      7  -7.2765E-02   2.7431E-02   9.1522E-02  -1.9172E-01   1.6429E-01   9.3303E-06
+      8  -7.5684E-02   2.9094E-02   1.0267E-01  -2.0744E-01   1.7835E-01   9.3752E-06
+      9  -7.6469E-02   2.9478E-02   1.0595E-01  -2.1189E-01   1.8242E-01   3.9849E-06
+   --------------------------------------------------------------------------------------
+```
+
+Converting these energies to eV and referencing them to the initial-state energy gives the following path:
+
+![](eph4vpq_assets/LiF_hop.png){: style="width:400px"}
+
+The blue line is the initial, linearly interpolated path, which can be recovered by setting [[vpq_hop_nstep]] to 1.
+The maximum energy relative to the endpoints is the hopping barrier, or activation energy, $\Delta E_\mathrm{a}$.
+Optimization lowers the barrier from $\Delta E^\mathrm{linear}_\mathrm{a} = 553$ meV to
+$\Delta E^\mathrm{opt}_\mathrm{a} = 465$ meV.
+
+We can use this barrier to estimate the adiabatic polaron-hopping mobility within transition-state theory
+[[cite:Deskins2007]].
+The polaron transfer rate is
+
+\begin{equation} \label{eq:k-adiab}
+    k^\mathrm{ad}_\mathrm{p} = \nu \exp \left( -\frac{\Delta E_\mathrm{a}}{k_\mathrm{B} T} \right),
+\end{equation}
+
+where $\nu$ is the attempt frequency.
+
+The diffusion coefficient associated with hopping between the initial and final polaron configurations is
+
+\begin{equation}
+    D = R^2 n k_\mathrm{p},
+\end{equation}
+
+where $R$ is the hopping distance and $n$ is the number of equivalent destination sites included in the estimate.
+
+The hopping mobility then follows from the Einstein--Smoluchowski relation:
+
+\begin{equation}\label{eq:mu}
+    \mu_\mathrm{p} = \frac{eD}{k_\mathrm{B} T}.
+\end{equation}
+
+For an illustrative estimate of mobility along this direction, we use $n=1$ and $h\nu=77$ meV (the LO phonon energy at $\Gamma$),
+and $R=2.872$ Angstrom (the distance between nearest-neighbor fluorine sites).
+This gives $\mu_\mathrm{p} \sim 10^{-8}\ \mathrm{cm^2\,V^{-1}\,s^{-1}}$ at room temperature, a value typical of a strongly bound polaron.

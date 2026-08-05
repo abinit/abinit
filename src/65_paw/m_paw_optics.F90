@@ -123,7 +123,7 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!  psinablapsi_out=contains the matrix elements
-!!   (The size of the psinablapsi_out decide wehter we compute the full matrix or
+!!   (The size of the psinablapsi_out decide whether we compute the full matrix or
 !!    only the diagonal part)
 !!   (if not present only writing in a file)
 !!
@@ -228,6 +228,7 @@ CONTAINS  !=====================================================================
 
 !Check wether we write in file or save the matrix elements in psinablapsi_out
 !and if we need to compute the full matrix or only the diagonal part
+ iomode=dtset%iomode
  diag_only = .false.
  store_half_dipoles = .false.
  if (present(psinablapsi_out)) then
@@ -255,7 +256,6 @@ CONTAINS  !=====================================================================
 !1- Opening of OPT file and header writing
 !----------------------------------------------------------------------------------
 
- iomode=dtset%iomode
  if (iomode /= NO_FILE_OUT) then
 !  I/O mode is netCDF or Fortran
    iomode=merge(IO_MODE_ETSF,IO_MODE_FORTRAN_MASTER,dtset%iomode==IO_MODE_ETSF)
@@ -497,7 +497,11 @@ CONTAINS  !=====================================================================
            myband=(abs(mpi_enreg%proc_distrb(ikpt,jb,isppol)-mpi_enreg%me_kpt)==0)
          end if
          if (myband) then
-
+           
+           !$OMP PARALLEL DO DEFAULT(NONE) PRIVATE(ib,iwavef,ipw,cgnm1,cgnm2,ibshift) &
+           !$OMP SHARED(ibmin,ibmax,cg,kpg_k,jwavef,jbshift,npw_k,my_nspinor,icg,istwf_k,psinablapsi, &
+           !$OMP        jb,store_half_dipoles,iomode_etsf_mpiio,mband) &
+           !$OMP SCHEDULE(STATIC)
            do ib=ibmin,ibmax
              iwavef=(ib-1)*npw_k*my_nspinor+icg
 
@@ -526,6 +530,7 @@ CONTAINS  !=====================================================================
              end if
 
            end do ! ib
+           !$OMP END PARALLEL DO
 
 !          Reduction in case of parallelism
            if (iomode_etsf_mpiio) then
@@ -556,7 +561,12 @@ CONTAINS  !=====================================================================
            myband=(abs(mpi_enreg%proc_distrb(ikpt,jb,isppol)-mpi_enreg%me_kpt)==0)
          end if
          if (myband) then
-
+           !$OMP PARALLEL DO DEFAULT(NONE) SCHEDULE(STATIC) &
+           !$OMP PRIVATE(ib,ibsp,jbsp,ispinor,iatom,itypat,lmn_size,jlmn,ilmn,idir, &
+           !$OMP         cpnm1,cpnm2,cpnm11,cpnm22,cpnm12,cpnm21,cpnm_11m22,cpnm_21p12,cpnm_21m12, &
+           !$OMP         nabla_ij,soc_ij,ibshift) &
+           !$OMP SHARED(ibmin,ibmax,jb,jbshift,my_nspinor,cplex,natom,dtset,pawtab,cprj_k, &
+           !$OMP        phisocphj,psinablapsi_paw,psinablapsi_soc,store_half_dipoles,iomode_etsf_mpiio,mband)
            do ib=ibmin,ibmax
 
              ibsp=(ib-1)*my_nspinor ; jbsp=(jb-1)*my_nspinor
@@ -669,6 +679,7 @@ CONTAINS  !=====================================================================
              end if
 
            end do ! ib loop
+           !$OMP END PARALLEL DO
 
            if (iomode_etsf_mpiio.and.mpi_enreg%paral_spinor==1) then
              call timab(48,1,tsec)

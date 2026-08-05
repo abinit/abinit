@@ -54,5 +54,4 @@
 #%% authors = M. Sarraute
 #%% description =
 #%%    Chebyshev with MPI GEMM nonlop splitting, C-diamond, Bulk, 2 atoms, paral_kgb, mono-GPU, istwfk==1, with PAW.
-#%% topics = parallelism
 #%%<END TEST_INFO>

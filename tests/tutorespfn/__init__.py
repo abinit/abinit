@@ -19,6 +19,7 @@ subsuites = [
 "eph4zpr_gwpt",
 "eph4vpq",
 "lw",
+"quad",
 "nlo",
 "optic",
 "polarization",
@@ -101,12 +102,15 @@ inp_files = [
 "teph4vpq_8.abi",
 "teph4vpq_9.abi",
 "teph4vpq_10.abi",
+"teph4vpq_11.abi",
+#
 "tpolarization_1.abi",
 "tpolarization_2.abi",
 "tpolarization_3.abi",
 "tpolarization_4.abi",
 "tpolarization_5.abi",
 "tpolarization_6.abi",
+#
 "tlw_1.abi",
 "tlw_2.abi",
 "tlw_3.abi",
@@ -115,6 +119,8 @@ inp_files = [
 "tlw_6.abi",
 "tlw_7.abi",
 "tlw_8.abi",
+"tquad_1.abi",
+#
 "tnlo_1.abi",
 "tnlo_2.abi",
 "tnlo_3.abi",
@@ -126,6 +132,7 @@ inp_files = [
 "toptic_3.abi",
 "toptic_4.abi",
 "toptic_5.abi",
+#
 "trf1_1.abi",
 "trf1_2.abi",
 "trf1_3.abi",

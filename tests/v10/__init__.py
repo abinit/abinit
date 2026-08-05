@@ -46,11 +46,17 @@ inp_files = [
     "t42.abi" ,  # test orbmag calculation using R2SCAN mGGA, nspinor 2, zora
     "t43.abi" ,  # test quadrupoles calculation with xcnlcc
     "t44.abi" ,  # test all zora input values on orbmag calculation
+    "t45.abi" ,  # test imposition of rotational invariance implementation in abinit (H2O molecule)
+    "t46.abi" ,  # test imposition of rotational invariance implementation in abinit (phosphorene)
+    "t47.abi" ,  # test electrostatics in 2D in abinit, vacuum as dielectric environment (phosphorene)
+    "t48.abi" ,  # test electrostatics in 2D in abinit, varying dielectric environment and consecutive slabs (hBN)
+    "t49.abi" ,  # test prtbbb together with ggtrcut variable
     "t50.abi" ,  # test the projected SOC for GBT
     "t51.abi" ,  # test spin quantization axis
     "t52.abi",  # test linear-response calculation with 2D Coulomb cutoff in BN monolayer
     "t53.abi",  # test linear-response calculation with 2D short-range Coulomb kernel in BN monolayer
     "t54.abi",  # test finite-q scalar potential linear-response calculation with PCM short-circuit conditions
+    "t55.abi",  # test orbmag option 4, real space density output
     "t61.abi" ,  # test total energy due to electron-phonon interaction: step 1 DFT+DFPT
     "t62.abi" ,  # test total energy due to electron-phonon interaction: step 2 quadrupole
     "t63.abi" ,  # test total energy due to electron-phonon interaction: step 3 merge DDB
@@ -67,9 +73,12 @@ inp_files = [
     "t108.abi",  # Test for rcpaw
     "t109.abi",  # Test paw_add_core variable
     "t110.abi",  # Test for toldmag
+    "t120.abi",  # Test delta-encoded Pulay history with PAW
     "t121.abi",  # Test for hybrid function using fock_icutcoul, fock_rcut
     "t122.abi",  # Test meta-GGA NC pseudopotential reading: compare PSML vs UPF for bulk Si
     "t130.abi",  # Test RCPAW+SOC, prepare for t131
     "t131.abi",  # Test XANES SOC+RCPAW
     "t150.abi",  # Test sequential slice execution in spectrum slicing diagonalization with 1 MPI
+    "t161.abi",  # Test LDOS SCF preconditioner
+    "t162.abi",  # Test Hybrid SCF preconditioner
 ]

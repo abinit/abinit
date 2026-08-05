@@ -1529,12 +1529,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
                  if(gpu_option==ABI_GPU_DISABLED) then
                    gvnlx1 = gvnlx1-gh1
                  else if(gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-                   !$OMP TARGET DATA USE_DEVICE_ADDR(gvnlx1,gh1)
-                   call abi_gpu_xaxpy(1, 2*npw1_k*nspinor*ndat, cminusone, &
-                   &    c_loc(gh1), 1, c_loc(gvnlx1), 1)
-                   !$OMP END TARGET DATA
-#endif
+                   call abi_xaxpy(2*npw1_k*nspinor*ndat, cminusone, &
+                   &    gh1, 1, gvnlx1, 1, gpu_option=gpu_option)
                  end if
                end if
                do_scprod=0
@@ -2577,8 +2573,9 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
          if (((ipert <= dtset%natom).or.(ipert == dtset%natom + 2)) &
 &         .and.(ipert1 == dtset%natom+2).and. dtset%prtbbb==1) then
-           call gaugetransfo(cg_k,cwavef,cwavef_db,mpi_enreg%comm_band,distrb_cycle,eig_k,eig1_k,iband,nband_k, &
-&            dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,nsppol,mpi_enreg%nproc_band,occ_k)
+           call gaugetransfo(cg_k,cwavef,cwavef_db,mpi_enreg%comm_band,distrb_cycle,eig_k,eig1_k,&
+             & dtset%ggtrcut,iband,nband_k,dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,&
+             & nsppol,mpi_enreg%nproc_band,occ_k)
            cwavef(:,:) = cwavef_db(:,:)
          end if
 
@@ -2617,8 +2614,9 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !              In case of band-by-band,
 !              construct the first-order wavefunctions in the diagonal gauge
                if (((ipert <= dtset%natom).or.(ipert == dtset%natom + 2)).and.(dtset%prtbbb==1)) then
-                 call gaugetransfo(cg_k,gvnlx1,cwavef_da,mpi_enreg%comm_band,distrb_cycle,eig_k,eig2_k,iband,nband_k, &
-&                  dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,nsppol,mpi_enreg%nproc_band,occ_k)
+                 call gaugetransfo(cg_k,gvnlx1,cwavef_da,mpi_enreg%comm_band,distrb_cycle,eig_k,eig2_k,&
+                   & dtset%ggtrcut,iband,nband_k,dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,&
+                   & nsppol,mpi_enreg%nproc_band,occ_k)
                  gvnlx1(:,:) = cwavef_da(:,:)
                end if
 !              Multiplication by -i
@@ -2678,8 +2676,9 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
      ipert1=dtset%natom+1
      if(dtset%prtbbb==1)then
-       call gaugetransfo(cg_k,cwavef,cwavef_db,mpi_enreg%comm_band,distrb_cycle,eig_k,eig1_k,iband,nband_k, &
-&       dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,nsppol,mpi_enreg%nproc_band,occ_k)
+       call gaugetransfo(cg_k,cwavef,cwavef_db,mpi_enreg%comm_band,distrb_cycle,eig_k,eig1_k,&
+         & dtset%ggtrcut,iband,nband_k,dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,&
+         & nsppol,mpi_enreg%nproc_band,occ_k)
        cwavef(:,:) = cwavef_db(:,:)
      end if
 
@@ -2701,8 +2700,9 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
            !write(778,*)gvnlx1
 
            if(dtset%prtbbb==1)then
-             call gaugetransfo(cg_k,gvnlx1,cwavef_da,mpi_enreg%comm_band,distrb_cycle,eig_k,eig2_k,iband,nband_k, &
-&             dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,nsppol,mpi_enreg%nproc_band,occ_k)
+             call gaugetransfo(cg_k,gvnlx1,cwavef_da,mpi_enreg%comm_band,distrb_cycle,eig_k,eig2_k,&
+               & dtset%ggtrcut,iband,nband_k,dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,&
+               & nsppol,mpi_enreg%nproc_band,occ_k)
 
              gvnlx1(:,:) = cwavef_da(:,:)
            end if
@@ -2823,6 +2823,7 @@ end subroutine dfpt_nstwf
 !!  distrb_cycle=array of logical flags to skip certain bands in parallelization scheme
 !!  eig_k(mband*nsppol)=GS eigenvalues at k (hartree)
 !!  eig1_k(2*nsppol*mband**2)=matrix of first-order eigenvalues (hartree)
+!!  ggtrcut=cutoff to reject unstable band pairs
 !!  iband=band index of the 1WF for which the transformation has to be applied
 !!  mband=maximum number of bands
 !!  mband_mem_rbz=maximum number of bands on this cpu
@@ -2839,13 +2840,14 @@ end subroutine dfpt_nstwf
 !!
 !! SOURCE
 
-subroutine gaugetransfo(cg_k,cwavef,cwavef_d,comm,distrb_cycle,eig_k,eig1_k,iband,nband_k, &
+subroutine gaugetransfo(cg_k,cwavef,cwavef_d,comm,distrb_cycle,eig_k,eig1_k,ggtrcut,iband,nband_k, &
 &                      mband,mband_mem_rbz,npw_k,npw1_k,nspinor,nsppol,nproc_band,occ_k)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iband,mband,mband_mem_rbz,nband_k,npw1_k,npw_k,nspinor,nsppol
  integer,intent(in) :: comm, nproc_band
+ real(dp),intent(in) :: ggtrcut
 !arrays
  logical, intent(in) :: distrb_cycle(nband_k)
  real(dp),intent(in) :: cg_k(2,npw_k*nspinor*mband_mem_rbz),cwavef(2,npw1_k*nspinor)
@@ -2857,7 +2859,6 @@ subroutine gaugetransfo(cg_k,cwavef,cwavef_d,comm,distrb_cycle,eig_k,eig1_k,iban
 !tolerance for non degenerated levels
 !scalars
  integer :: ierr, jband,jband_me
- real(dp),parameter :: etol=1.0d-3
 !arrays
  real(dp) :: cwave0(2,npw1_k*nspinor),eig1(2)
 
@@ -2870,7 +2871,9 @@ subroutine gaugetransfo(cg_k,cwavef,cwavef_d,comm,distrb_cycle,eig_k,eig1_k,iban
      if (distrb_cycle(jband)) cycle
      jband_me = jband_me + 1
 
-     if ((abs(eig_k(iband)-eig_k(jband)) > etol).and.(abs(occ_k(jband)) > tol8 )) then
+     ! the default value of ggtrcut is 0.001, was formerly a parameter in this routine 
+     ! called etol=0.001_dp
+     if ((abs(eig_k(iband)-eig_k(jband)) > ggtrcut).and.(abs(occ_k(jband)) > tol8 )) then
 
        cwave0(:,:) = cg_k(:,1+(jband_me-1)*npw_k*nspinor:jband_me*npw_k*nspinor)
 

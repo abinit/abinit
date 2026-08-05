@@ -146,4 +146,3 @@ kptbounds3               # The four segments of the band structure are
 #%% keywords = dmft_kspectralfunc, DMFT
 #%% description = Test for the k-resolved spectral function with self-energy in real frequency
 #%%<END TEST_INFO>
-

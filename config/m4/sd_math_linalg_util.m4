@@ -337,6 +337,40 @@ AC_DEFUN([_SD_LINALG_CHECK_SCALAPACK], [
                     # ------------------------------------ #
 
 
+# _SD_LINALG_CHECK_SLATE()
+# ----------------------------
+#
+# Check whether the build environment provides SLATE.
+#
+AC_DEFUN([_SD_LINALG_CHECK_SLATE], [
+  sd_linalg_has_slate="unknown"
+
+  AC_MSG_CHECKING([for SLATE support in the specified libraries])
+  AC_LANG_PUSH([C++])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM(
+    [[
+#include <slate/slate.hh>
+#include <blas.hh>
+    ]],
+    [[
+    slate::Options opts;
+    ]])],
+    [sd_linalg_has_slate="yes"; sd_linalg_provided="${sd_linalg_provided} slate"],
+    [sd_linalg_has_slate="no"])
+  AC_LANG_POP([C++])
+  AC_MSG_RESULT([${sd_linalg_has_slate}])
+
+  if test "${sd_linalg_has_slate}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_SLATE], 1,
+      [Define to 1 if you have the SLATE linear algebra library.])
+  fi
+]) # _SD_LINALG_CHECK_SLATE
+
+
+                    # ------------------------------------ #
+                    # ------------------------------------ #
+
+
 # _SD_LINALG_CHECK_PLASMA()
 # -------------------------
 #
