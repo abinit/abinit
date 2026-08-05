@@ -11538,7 +11538,7 @@ subroutine destroy_mesh_data(mesh_data)
 !---- Local variables
 !------------------------------------------------------------------
  real(dp), parameter :: tol_zero=1.d-50 ! Threshold below which quantities are zero
- integer :: ib,ic,ii,n,n_aux,ir,irc_aux,meshsz,meshsz_aux,meshst_aux,nmesh,OK
+ integer :: ib,ic,ii,n,n_aux,ir,irc_aux,meshsz,meshsz_aux,meshst_aux,nmesh
  integer :: mesh_start(mesh_data%nmesh),mesh_size(mesh_data%nmesh)
  integer :: unit_xml=1234
  logical :: extra1
