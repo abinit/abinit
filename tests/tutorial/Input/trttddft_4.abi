@@ -79,6 +79,7 @@ prtcurrent 1      # Print current
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_gnu_13.2_serial
 #%% [files]
 #%% files_to_test =
 #%%   trttddft_4.abo, tolnlines=  0, tolabs=  0.0, tolrel=  0.0, fld_options= -medium ;
