@@ -3879,7 +3879,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getddb getddb_filepath getden_filepath getddk'
  list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getkden getdvdb getdrhodb getdvdb_filepath getdrhodb_filepath'
  list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
- list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getsigeph_filepath getgstore_filepath getqpdata_filepath'
+ list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getsigeph_filepath getgstore_filepath' !getqpdata_filepath
  list_vars=trim(list_vars)//' getabiwan getabiwan_filepath getgwan getgwan_filepath'
  list_vars=trim(list_vars)//' getqps getscr getscr_filepath getself'
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
@@ -3890,7 +3890,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gpu_nfft_blocks gpu_nl_splitsize gpu_option'
  list_vars=trim(list_vars)//' gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwpt_wmode gwpt_g2mode gwmem'
  list_vars=trim(list_vars)//' gstore_brange gstore_erange gstore_kfilter gstore_gname'
- list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk gstore_iv1p_comm gstore_use_lgk gstore_use_lgq'
+ list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk gstore_use_lgk gstore_use_lgq' ! gstore_iv1p_comm
  list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
  list_vars=trim(list_vars)//' gw_icutcoul gw_invalid_freq'
