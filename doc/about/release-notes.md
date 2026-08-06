@@ -12,10 +12,12 @@ includes MR1311 to MR1337,
 EXCEPT MR1315, 1317, 1321, 1324, 1326, 1329 that had already been included in v10.6,
 also EXCEPT MR1323, that will be included in a version released later than 10.8,
 also EXCEPT MR1328 and 1330 that have been closed;
-then v10.8.3 also includes MR1342, 1343, 1346, 1348, 1349, 1350, 1352, 1354, 156, 1358, 1362.
+then v10.8.3 also includes 
+MR1342, 1343, 1346, 1348, 1349, 1350, 1352, 1354, 156, 1358, 1362, 1366, 1367, 1369, 1370, 1371.
 
 Will be included in a version released later than 10.8 :
-MR1323, 1339, 1340, 1341, 1344, 1345, 1347, 1351, 1353, 1355, 1357, 1360, 1361 as well as MR 1261, 1263, 1317, 1326, 1318 if they are not draft anymore.
+MR1323, 1339, 1340, 1341, 1344, 1345, 1347, 1351, 1353, 1355, 1357, 1360, 1361, 1363, 1364, 1365, 1368 
+as well as MR 1261, 1263, 1317, 1326, 1318 if they are not draft anymore.
 
 For release v10.8.5, also includes MR XXXX, ...
 -->
