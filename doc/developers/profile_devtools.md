@@ -1,10 +1,12 @@
 ## How to profile code
 
 Profiling is useful for identifying potential code optimizations in general and becomes an important diagnostic tool 
-when porting ABINIT to GPUs in particular. An internal timer is implemented in ABINIT and its report is enabled using 
-the keyword [*timopt*](https://docs.abinit.org/variables/gstate/#timopt). Moreover, memory profiling on CPU is 
-activated internally using the *enable_memory_profiling* compilation flag. In order to profile memory on GPU or to 
-perform a more advanced analysis, we need to use a dedicated tool. Here we focus on the ones provided by GPU manifacturers NVIDIA and AMD.
+when porting ABINIT to GPUs in particular. To this end, several options are available to the ABINIT developer. 
+An internal timer is implemented in ABINIT and its report is enabled using 
+the keyword [*timopt*](https://docs.abinit.org/variables/gstate/#timopt). Memory profiling on CPU is 
+activated internally using the *enable_memory_profiling* build option. In order to profile memory on GPU or to 
+perform a more advanced analysis, we sometimes need to use a dedicated tool. Here, we focus on those provided by GPU 
+manufacturers NVIDIA and AMD and present how developers can use them through the dedicated macros in ABINIT.
 
 ### How to profile MPI jobs using NVTX/Nsight
 
@@ -12,11 +14,14 @@ The first tool is not limited to GPU and presents an interest for timeline trace
 We make a general presentation for CPU while an analogous procedure applies to GPU.
 
 Among tools that analyze MPI usage and performance, it is possible to annotate source code using 
-[NVTX](https://nvidia.github.io/NVTX/) (NVIDIA Tools Extension Library) and trace an MPI job execution as a timeline of 
-API events per process using the profiler [NVIDIA Nsight Systems](https://developer.nvidia.com/nsight-systems). Code 
-annotation libraries are activated by default in ABINIT when compiled on GPU, since NVIDIA CUDA Toolkit includes NVTX 
-(and AMD includes ROCTX). As of ABINIT version 10.3.6, NVTX annotation is also supported on CPU (see *with_gpu_markers* 
-input variable). A guide for minimal installation of selected NVIDIA developer tools required to use NVTX on CPUs is 
+[NVTX](https://nvidia.github.io/NVTX/) (NVIDIA Tools Extension Library) and use these annotations to trace an MPI job 
+execution as a timeline of API events per process using the 
+profiler [NVIDIA Nsight Systems](https://developer.nvidia.com/nsight-systems). ABINIT
+implements functions for code annotation named *ABI_NVTX_START/END_RANGE(id)* enabled via the *HAVE_GPU_MARKERS* 
+macro. Code annotation libraries are linked by default when ABINIT is compiled on GPU, as NVIDIA CUDA Toolkit 
+includes NVTX (and AMD includes ROCTX). As of ABINIT version 10.3.6, NVTX annotation is also supported on CPU. The 
+macros are enabled via the *with_gpu_markers* build option. 
+A guide for minimal installation of selected NVIDIA developer tools required to use NVTX on CPUs is 
 provided here. Note that we don't need to install the entire NVIDIA CUDA Toolkit to profile code on CPU.
 
 The NVIDIA Tools Extensions (NVTX) API can be installed on Linux with:
@@ -60,7 +65,7 @@ An output example of tracing NVTX/MPI API events on a single MPI process using N
 ### How to profile GPU kernels using the roofline model
 
 The roofline model can be used to visualize the achieved performance and arithmetic intensity of a GPU kernel. This 
-information allows to assess whether a GPU kernel execution makes effective use of the available compute capabilities 
+information allows to assess whether a GPU kernel execution makes efficient use of the available compute capabilities 
 of a GPU architecture, or whether it underutilizes the resources and may benefit from optimization. For instance, for
 CUDA kernels, the roofline can reveal if Tensor cores are used or not. 
 
@@ -73,19 +78,19 @@ provided by the Adastra supercomputing center of [GENCI](https://www.genci.fr/en
 demonstrate how to produce rooflines for GPU kernels in ABINIT. For more information, we refer to the extensive Adastra 
 user documentation on [GPU roofline](https://dci.dci-gitlab.cines.fr/webextranet/software_stack/tools/index.html#id1).
 
-A production build can be used to generate roofline metrics, there is no need for debug build. 
-An example of configuration file can be found in *abinit/doc/build
-/GPU_InstinctMI250X+EPYC7453.ac9*. ABINIT implements ROCm annotations and markers that are included in the profiler reports for the ease of analysis per
-separated code parts. It also implements useful macros for profiler start/stop calls, for both NVTX and ROCm. These allow 
-to limit the profiler execution to specific parts of the code and to reduce overhead. We use them for readability of the
-roofline in order to avoid overlapping points. Do not forget the compilation option *with_gpu_markers="yes"* in order to be able to use 
-annotations and profiler switches for ROCm.
+Compiling ABINIT to use with the profiler is straightforward. A production build can be used to generate roofline 
+metrics, there is no need for debug build. We refer to *abinit/doc/build/GPU_InstinctMI250X+EPYC7453.ac9* for a 
+recommended build configuration. ABINIT implements ROCm annotations and markers that are included in the 
+profiler reports for the ease of analysis per code regions. It also implements useful macros for profiler start/stop 
+calls, for both NVTX and ROCm (since version 10.8). These allow to limit the profiler execution to specific parts of 
+the code and to reduce overhead. We use them for readability of the roofline in order to avoid overlapping points. 
+Do not forget to set the build option *with_gpu_markers="yes"* in order to activate the macros for code annotations 
+and profiler switches.
 
-In this example, we sandwich a critical part of the code that is computationally demanding, namely the Rayleigh-Ritz 
-procedure. This is possible by using the 
-
-first adding a line at the beginning of *src/98_main/abinit.F90* to switch off the 
-profiler as early as possible 
+In this example, we sandwich the three GEMM operations that update the wavefunction subspace (as well as the 
+Hamiltonian application and the PAW overlap application) with the computed Ritz vectors during the Rayleigh-Ritz
+procedure for the Hamiltonian diagonalization. First, we add a line at the beginning 
+of *src/98_main/abinit.F90* to switch off the profiler as early as possible: 
 
     #if defined(HAVE_GPU_MARKERS)
         NVTX_INIT()
@@ -93,45 +98,52 @@ profiler as early as possible
     #endif
     ! .. rest of the code ..
 
-Note that NVTX init simply fills the internal nvtx_names and nvtx_ids arrays used to label regions so putting the
-stopped before or after essentially makes no difference.
+Note that *NVTX_INIT* simply fills the internal NVTX names and id arrays used to label regions, therefore putting the
+stop call before or after essentially makes no difference. Next, we switch on the profiler in the region of interest in 
+*src/45_xgTools/m_xg_ortho_RR.F90*: 
 
-then switch on the profiler in the interesting part in *src/48_diago/m_chebfi2.F90*: 
-
+    #ifdef HAVE_GPU_MARKERS
     NVTX_PROFILER_START()                     ! start profiler
+    #endif 
 
-    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)     ! start annotation
-    call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,eigen,ierr,0,tim_RR,& 
-        chebfi%gpu_option,solve_ax_bx=.true.)
-    ABI_NVTX_END_RANGE()                      ! end annotation
+    ABI_NVTX_START_RANGE(NVTX_RR_GEMM_2)      ! start region RR_GEMM
+    ! .. gemm calls ..
+    ABI_NVTX_END_RANGE()                      ! end region
 
-    NVTX_PROFILER_STOP()                      ! end profiler
+    #ifdef HAVE_GPU_MARKERS
+    NVTX_PROFILER_STOP()                      ! stop profiler
+    #endif
 
-For this test we run a ground-state calculation for 320 atoms of Ga2O3 with 1536 bands, a cutoff of 18 Hartree and 
-1 k-point. We allocate an entire compute node (8 GPUs for Adastra MI25OX), deploy 8 parallel tasks with 8 logical cores
-each and make sure to export multi-threaded *OMP_NUM_THREADS=8* so that the used solver is rocSOLVER and not ScaLAPACK. 
-We use a wrapper to call rocPROFv3 for the rank 0 process only and avoid overhead: 
+We recommend to allocate an entire compute node (8 GPUs for Adastra MI250X) and run a fast test case, such as a 
+ground-state calculation (single SCF step) for 320 atoms of Ga2O3 with 1536 bands, a cutoff of 18 Hartree and 1 
+k-point. We use a wrapper to call rocPROFv3 for the rank 0 process only and reduce profiling overhead: 
 
     $ cat rocprofv3_wrapper.sh
     #!/bin/bash
 
     if [ "${SLURM_PROCID}" == "0" ]; then
-	    exec -- rocprofv3 --stats --kernel-trace --marker-trace \
+	    exec -- rocprofv3 --stats --marker-trace --kernel-trace --kernel-rename \
 		    --input=counters.txt --output-format=csv -o "${OUTPUT_FILE}" \
 		    -- "${@}"
     else
 	    exec -- "${@}"
     fi
 
-where the *counters.txt* file contains the counters for binary64 profiling recommended in the Adastra
+The *-kernel-rename* option uses the region annotation names instead of the original kernel names for readability. Note
+that from ROCm version 7.14 and later, the available option *-selected-regions* allows to apply counter collection for
+selected ROCTx regions, as described in the release notes 
+[here](https://rocm.docs.amd.com/en/docs-7.14.0/about/release-notes.html#selective-roctx-region-profiling-with-counter-collection).
+Using that option the profiler is switched off by default. In older versions, the profiler is switched on by 
+default and we use the workaround described in the documentation 
+[here](https://rocm.docs.amd.com/projects/rocprofiler-sdk/en/develop/how-to/using-rocprofiler-sdk-roctx.html#profiler-control-with-selected-regions). 
+
+We create the *counters.txt* file containing the counters for binary64 profiling recommended in the Adastra
 documentation (see [Performance
 counters](https://dci.dci-gitlab.cines.fr/webextranet/software_stack/tools/index.html#performance-counters) section),
 that we copy here for self-consistency:
 
     $ cat counters.txt
     pmc: TCC_EA_RDREQ_32B_sum TCC_EA_RDREQ_sum TCC_EA_WRREQ_sum TCC_EA_WRREQ_64B_sum SQ_INSTS_VALU_ADD_F64 SQ_INSTS_VALU_MUL_F64 SQ_INSTS_VALU_FMA_F64 SQ_INSTS_VALU_TRANS_F64 SQ_INSTS_VALU_MFMA_MOPS_F64
-
-Note that without *--selected-regions*, rocprofv3 starts profiling immediately.
 
 We then make the profiler call in our SLURM job as
 
@@ -141,11 +153,10 @@ The output is a counter collection stored in CSV. We post-process it in order to
 Python scripts provided in the Adastra documentation 
 (see [Roofline](https://dci.dci-gitlab.cines.fr/webextranet/software_stack/tools/index.html#roofline) section).
 
-The kernels of interest are then diagnosed using the roofline: GEMM operation by rocBLAS is compute-bound, while the 
-HEGV eigensolver of rocSOLVER is memory-bound.
+The kernels of interest are then detected by the profiler: 3 DGEMMs with nonzero FP64 FLOPs,
+3 copy kernels with zero counted FLOPs and 1 zero-initialization kernel with zero counted FLOPs. 
+The three DGEMMs share the same *Kernel_Id=3320* that produces a single point in the roofline. 
+The roofline shows that the GEMM call is compute-bound.
 
 ![roofline_screenshot](roofline.png)
 
-Note that for the moment we cannot use *-selected-regions* option as ROCm in the Adastra toolchain is version 6.4.3 while
-the option is available > 7.2.0. For now we used the fallback described in the official ROCm documentation
-[here](https://rocm.docs.amd.com/projects/rocprofiler-sdk/en/develop/how-to/using-rocprofiler-sdk-roctx.html#profiler-control-with-selected-regions). AMD explicitly states that counter collection for selected ROCTx regions was added in ROCm 7.14. ROCm 7.14 release notes. Citing the documentation, "Counter collection for selected regions is available in ROCm 7.14.0." see more [here](https://rocm.docs.amd.com/en/docs-7.14.0/about/release-notes.html#selective-roctx-region-profiling-with-counter-collection).
