@@ -1,6 +1,6 @@
 ## v10.8
 
-Version 10.8, released on August DD, 2026.
+Version 10.8, released on August 7, 2026.
 
 <!-- Release notes updated on July 20, 2026. -->
 
@@ -359,7 +359,7 @@ By Le Shu (with X. Gonze). (MR1293)
 **D.4** PAW DFT l>3
 
 PAW DFT can now go to quantum number l larger than 3 within spheres. This is relevant for relaxed core PAW.
-IS THERE A TEST ?
+See [[test:v10_132]].
 
 Also, there has been a small relaxed core PAW bug fix.
 
