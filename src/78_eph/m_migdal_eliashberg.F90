@@ -553,8 +553,7 @@ subroutine get_lambda_qpath_wan(gstore, dtset, edos_fermie, qpoints, phfreq, phd
  has_gwan = gstore%my_nspins > 0
  if (has_gwan) has_gwan = allocated(gstore%gqk(1)%wan%grpe_wwp)
  if (.not. has_gwan) then
-   call wrtout([std_out, ab_out], &
-     " Skipping lambda(q,nu): GWAN interpolation is not available for this GSTORE.")
+   call wrtout([std_out, ab_out], " Skipping lambda(q,nu): GWAN interpolation is not available for this GSTORE.")
    return
  end if
 
@@ -660,6 +659,7 @@ subroutine get_lambda_qpath_wan(gstore, dtset, edos_fermie, qpoints, phfreq, phd
  phlambda = phlambda * spin_factor / edos_fermie
  call xmpi_sum(phlambda, gstore%comm, ierr)
  if (average_lambda_qpath_degenerate) call average_lambda_degenerate_modes(nqpath, natom3, gstore%nsppol, phfreq, phlambda)
+
  my_rank = xmpi_comm_rank(gstore%comm)
  if (my_rank == master) then
    call wrtout(ab_out, " Phonon frequencies and lambda(q,nu) along the q-path:", pre_newlines=1)
@@ -784,7 +784,7 @@ subroutine get_a2fw(gstore, edos_fermie, nw, wmesh, a2fw, phfreq_qibz, phlambda_
  integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr, iq_ibz, isym_q, trev_q, nb_k, nb_kq
  integer :: natom, natom3, g0_q(3), nk_batch, ik_start, ik_stop, ikb, nkb, ipc, nwan
  real(dp) :: g2_qnu, wqnu, weight_k, weight_q, cpu, wall, gflops, spin_factor
- logical :: isirr_q, shape_ok
+ logical :: isirr_q
 !arrays
  integer :: units(2)
  real(dp) :: qpt(3)
@@ -831,29 +831,9 @@ subroutine get_a2fw(gstore, edos_fermie, nw, wmesh, a2fw, phfreq_qibz, phlambda_
 
    nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
    ABI_CHECK_IEQ(nb_k, nb_kq, "gqk_dbldelta_qpt does not support nb_k != nb_kq")
-   ABI_CHECK(gqk%my_nk > 0, "get_a2fw requires at least one local k-point")
-   ABI_CHECK(gqk%my_nq > 0, "get_a2fw requires at least one local q-point")
-   ABI_CHECK(gqk%my_npert > 0, "get_a2fw requires at least one local phonon perturbation")
-   ABI_CHECK(allocated(gqk%my_kpts), "gqk%my_kpts is not allocated")
-   ABI_CHECK(size(gqk%my_kpts, dim=1) == 3 .and. size(gqk%my_kpts, dim=2) == gqk%my_nk, "Wrong shape for gqk%my_kpts")
-   ABI_CHECK(allocated(gqk%my_wtk), "gqk%my_wtk is not allocated")
-   ABI_CHECK(size(gqk%my_wtk) == gqk%my_nk, "Wrong size for gqk%my_wtk")
-   ABI_CHECK(allocated(gqk%my_q2ibz), "gqk%my_q2ibz is not allocated")
-   ABI_CHECK(size(gqk%my_q2ibz, dim=1) == 6 .and. size(gqk%my_q2ibz, dim=2) == gqk%my_nq, "Wrong shape for gqk%my_q2ibz")
-   ABI_CHECK(allocated(gqk%my_pertcases), "gqk%my_pertcases is not allocated")
-   ABI_CHECK(size(gqk%my_pertcases) == gqk%my_npert, "Wrong size for gqk%my_pertcases")
-   ABI_CHECK(all(gqk%my_pertcases >= 1 .and. gqk%my_pertcases <= natom3), "Invalid entries in gqk%my_pertcases")
    do ipc=1,gqk%my_npert
      ABI_CHECK(gqk%my_pertcases(ipc) == gqk%my_pert_start + ipc - 1, "gqk%my_pertcases is inconsistent with my_pert_start")
    end do
-   shape_ok = size(gqk%my_wnuq, dim=1) == gqk%my_npert .and. size(gqk%my_wnuq, dim=2) == gqk%my_nq
-   ABI_CHECK(shape_ok, "Wrong shape for gqk%my_wnuq")
-   if (gstore%with_cplex == 1) then
-     shape_ok = size(gqk%my_g2, dim=1) == gqk%my_npert .and. size(gqk%my_g2, dim=2) == nb_kq .and. &
-                size(gqk%my_g2, dim=3) == gqk%my_nq .and. size(gqk%my_g2, dim=4) == nb_k .and. &
-                size(gqk%my_g2, dim=5) == gqk%my_nk
-     ABI_CHECK(shape_ok, "Wrong shape for gqk%my_g2")
-   end if
 
    ! Weights for delta(e_{m k+q}) delta(e_{n k}) for my list of k-points.
    ABI_MALLOC(dbl_delta_q, (nb_kq, nb_k, gqk%my_nk))
@@ -861,40 +841,10 @@ subroutine get_a2fw(gstore, edos_fermie, nw, wmesh, a2fw, phfreq_qibz, phlambda_
 
    if (gstore%with_cplex == 0) then
      nwan = gqk%wan%nwan
-     ABI_CHECK_IEQ(nwan, nb_k, "Wannier nwan must agree with the gstore band range")
-     ABI_CHECK_IEQ(nwan, nb_kq, "Wannier nwan must agree with the gstore k+q band range")
-     ABI_CHECK(gqk%wan%nr_e > 0, "Wannier electron real-space grid is empty")
-     ABI_CHECK(gqk%wan%nr_p > 0, "Wannier phonon real-space grid is empty")
-     ABI_CHECK_IEQ(gqk%wan%my_npert, gqk%my_npert, "Inconsistent Wannier/gstore perturbation counts")
-     ABI_CHECK_IEQ(gqk%wan%my_pert_start, gqk%my_pert_start, "Inconsistent Wannier/gstore perturbation starts")
-     ABI_CHECK(associated(gqk%wan%pert_comm), "Wannier perturbation communicator is not associated")
-     ABI_CHECK(allocated(gqk%wan%hwan_r), "Wannier Hamiltonian hwan_r is not allocated")
-     shape_ok = size(gqk%wan%hwan_r, dim=1) == gqk%wan%nr_h .and. &
-                size(gqk%wan%hwan_r, dim=2) == nwan .and. size(gqk%wan%hwan_r, dim=3) == nwan
-     ABI_CHECK(shape_ok, "Wrong shape for Wannier hwan_r")
-     ABI_CHECK(allocated(gqk%wan%r_e), "Wannier electron lattice vectors are not allocated")
-     ABI_CHECK(size(gqk%wan%r_e, dim=1) == 3 .and. size(gqk%wan%r_e, dim=2) == gqk%wan%nr_e, "Wrong shape for Wannier r_e")
-     ABI_CHECK(allocated(gqk%wan%r_p), "Wannier phonon lattice vectors are not allocated")
-     ABI_CHECK(size(gqk%wan%r_p, dim=1) == 3 .and. size(gqk%wan%r_p, dim=2) == gqk%wan%nr_p, "Wrong shape for Wannier r_p")
-     ABI_CHECK(allocated(gqk%wan%ndegen_e), "Wannier electron degeneracies are not allocated")
-     ABI_CHECK(size(gqk%wan%ndegen_e) == gqk%wan%nr_e, "Wrong size for Wannier ndegen_e")
-     ABI_CHECK(allocated(gqk%wan%ndegen_p), "Wannier phonon degeneracies are not allocated")
-     ABI_CHECK(size(gqk%wan%ndegen_p) == gqk%wan%nr_p, "Wrong size for Wannier ndegen_p")
-     ABI_CHECK(all(gqk%wan%ndegen_e > 0), "Wannier electron degeneracies must be positive")
-     ABI_CHECK(all(gqk%wan%ndegen_p > 0), "Wannier phonon degeneracies must be positive")
-     ABI_CHECK(allocated(gqk%wan%grpe_wwp), "Wannier e-ph vertex grpe_wwp is not allocated")
-     shape_ok = size(gqk%wan%grpe_wwp, dim=1) == gqk%wan%nr_p .and. &
-                size(gqk%wan%grpe_wwp, dim=2) == gqk%wan%nr_e .and. &
-                size(gqk%wan%grpe_wwp, dim=3) == nwan .and. size(gqk%wan%grpe_wwp, dim=4) == nwan .and. &
-                size(gqk%wan%grpe_wwp, dim=5) == gqk%my_npert
-     ABI_CHECK(shape_ok, "Wrong shape for Wannier grpe_wwp")
-     ABI_CHECK(allocated(gqk%my_displ_cart), "gqk%my_displ_cart is not allocated")
-     shape_ok = size(gqk%my_displ_cart, dim=1) == 2 .and. size(gqk%my_displ_cart, dim=2) == 3 .and. &
-                size(gqk%my_displ_cart, dim=3) == natom .and. size(gqk%my_displ_cart, dim=4) == gqk%my_npert .and. &
-                size(gqk%my_displ_cart, dim=5) == gqk%my_nq
-     ABI_CHECK(shape_ok, "Wrong shape for gqk%my_displ_cart")
+
      nk_batch = gqk%wan%eph_kbatch_size(gqk%my_nk, natom3)
      ABI_CHECK(nk_batch >= 1 .and. nk_batch <= gqk%my_nk, "Invalid Wannier e-ph k-batch size")
+
      ABI_MALLOC(intp_gatm, (nwan, nwan, gqk%my_npert, nk_batch))
      ABI_MALLOC(gatm_full, (nwan, nwan, natom3, nk_batch))
      ABI_MALLOC(g_req, (gqk%wan%nr_e, nwan, nwan, gqk%my_npert))
@@ -905,7 +855,6 @@ subroutine get_a2fw(gstore, edos_fermie, nw, wmesh, a2fw, phfreq_qibz, phlambda_
    ! Loop over my q-points.
    do my_iq=1,gqk%my_nq
      iq_ibz = gqk%my_q2ibz(1,my_iq)
-     ABI_CHECK(iq_ibz >= 1 .and. iq_ibz <= gstore%nqibz, "Invalid IBZ q-point index in gqk%my_q2ibz")
      isym_q = gqk%my_q2ibz(2,my_iq)
      trev_q = gqk%my_q2ibz(6,my_iq)
      g0_q = gqk%my_q2ibz(3:5,my_iq)
@@ -950,8 +899,7 @@ subroutine get_a2fw(gstore, edos_fermie, nw, wmesh, a2fw, phfreq_qibz, phlambda_
            do my_ip=1,gqk%my_npert
              wqnu = gqk%my_wnuq(my_ip,my_iq)
              if (wqnu < EPHTK_WTOL) then
-               g2_mnkp(:,:,my_ik,my_ip) = zero
-               cycle
+               g2_mnkp(:,:,my_ik,my_ip) = zero; cycle
              end if
              gnu = czero
              do ipc=1,natom3
