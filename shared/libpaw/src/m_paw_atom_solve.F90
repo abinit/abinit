@@ -1164,6 +1164,7 @@ subroutine atompaw_init(pawtab,pawrad,atp,atm,sctol,elin_mode,vhtnzc_mode,tpaw_m
    file_xml_core=TRIM(atp%pot%sym)//'-tmp.corewf.xml'
    call xmlprtcore(trim(file_xml_core),atp,zcore,mesh_data,input_string)
    file_xml_core=trim(atp%pot%sym)//'-tmp.xml'
+   call destroy_mesh_data(mesh_data)
  else
   file_xml_core=filename
  endif 
