@@ -680,8 +680,6 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
      delta_zcore=delta_zcore+atp%Orbit%occ(io)
    endif
  enddo
- call pawrad_init(radmesh,atp%Grid%n,pawrad%mesh_type,pawrad%rstep,pawrad%lstep)
- LIBPAW_ALLOCATE(ff,(atp%grid%n))
 
 ! ! Solve atomic problem
  if(.not.atm%nc_conv) then
@@ -703,6 +701,8 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
  enddo
 
  if(.not.atp%diracrelativistic) then
+   call pawrad_init(radmesh,atp%Grid%n,pawrad%mesh_type,pawrad%rstep,pawrad%lstep)
+   LIBPAW_ALLOCATE(ff,(atp%grid%n))
    ! Compute new core density
    write(msg,'(a)') 'atompaw_solve: orbital,%out sphere'
    call wrtout(std_out,msg,'COLL')
@@ -916,7 +916,6 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
    ! update dij0
    call atompaw_dij0(pawtab%indlmn,pawtab%kij,pawtab%lmn_size,coredens,0,pawtab,pawrad,radmesh,&
 &                        pawrad,pawtab%vhtnzc,atp%Pot%zz)
-   LIBPAW_DEALLOCATE(coredens)
 
    ! Write the new paw data
    if(update_paw.and.atp%prtpaw.and..not.atp%diracrelativistic) then
@@ -962,6 +961,7 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
      atp%Pot%v0=atp%Pot%v0+potshift
    endif
  endif
+ LIBPAW_DEALLOCATE(coredens)
  call pawrad_free(radmesh)
 end subroutine atompaw_solve
 !!***
