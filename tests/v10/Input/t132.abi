@@ -1,0 +1,66 @@
+# ----------------------------------------
+# -          Input file for abinit       -
+# -                                      -
+# -         Cu                           -
+# ----------------------------------------
+
+# 2-Options for output:
+# ---------------------
+  prtvol 0
+  prtden 0
+
+# 3-Parameters governing the convergence:
+# ---------------------------------------
+  ecut 10.
+  pawecutdg 50.
+  nband 20
+  nstep 7
+  toldfe 1.d-5
+
+# 4-Options for the choice of calculation:
+# ----------------------------------------
+  occopt 3
+  tsmear 0.0036749
+  nspinor 2
+
+# 5-Definition of the unit cell:
+# ------------------------------
+  acell    3*6.7
+  rprim  0.0  0.5  0.5 
+         0.5  0.0  0.5
+         0.5  0.5  0.0
+  natom 1
+  ntypat 1
+  typat 1
+  znucl 29
+  xred    0.0000000000    0.0000000000    0.0000000000
+
+# 6-Definition of special K-points:
+# ---------------------------------
+  kptopt 0
+  nkpt 1
+  kpt 0. 0. 0.
+  wtk  1.0
+  istwfk 1
+
+  pp_dirpath "$ABI_PSPDIR"
+  pseudos "Cu.LDA_X+LDA_C_PW-paw_l4.xml"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t132.abo, tolnlines = 36, tolabs = 9.000e-02, tolrel = 5.000e-02, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = J. Boust
+#%% keywords =
+#%% description =
+#%%   Ground state calculation for Cu
+#%%   The number of bands is unrealistic.
+#%%   It tests the following parts of the code:
+#%%     PAW l>=4
+#%%<END TEST_INFO>
+
