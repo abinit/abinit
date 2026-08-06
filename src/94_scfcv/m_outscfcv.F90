@@ -1090,7 +1090,7 @@ if (dtset%prt_lorbmag==1) then
 &         mband,mcprj,mkmem,mpi_enreg,mpsang,natom,nkpt,nsppol,pawang,pawrad,pawrhoij,pawtab,&
 &         psps%znuclpsp,rcpaw=rcpaw_dirac)
           call rcpaw_destroy(rcpaw_dirac)
-          nullify(rcpaw_dirac)
+          call ABI_FREE(rcpaw_dirac)
        else
          call optics_paw_core(atindx1,cprj,dimcprj,dtfil,dtset,eigen,psps%filpsp,hdr,&
 &         mband,mcprj,mkmem,mpi_enreg,mpsang,natom,nkpt,nsppol,pawang,pawrad,pawrhoij,pawtab,&
