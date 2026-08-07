@@ -123,7 +123,7 @@ subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn,kappa)
 
 !Local variables ------------------------------
 !scalars
- integer :: ilmn,ib,il,iln,ilm,kappa_sign,spinor,i2j,i2mj,im
+ integer :: ilmn,ib,il,iln,ilm,kappa_sign,spinor,i2j,i2mj,im,ilmn_ws
 !arrays
  integer,allocatable :: nprj(:)
 
@@ -150,8 +150,8 @@ subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn,kappa)
    end do
    LIBPAW_DEALLOCATE(nprj)
  else
-   LIBPAW_ALLOCATE(indlmn,(8,lmn_size))
-   indlmn=0;ilmn=0;iln=0
+   LIBPAW_ALLOCATE(indlmn,(9,lmn_size))
+   indlmn=0;ilmn=0;iln=0;ilmn_ws=0
    do ib=1,2*ln_size
      iln=iln+modulo(ib,2)
      il=orbitals(iln)
@@ -159,6 +159,7 @@ subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn,kappa)
      spinor=2-modulo(ib,2)       ! spinor= 1 or 2
      i2j=2*il-kappa_sign              ! j=l-sgn(kappa)/2 = l-1/2 or l+1/2
      do ilm=1,i2j+1
+       ilmn_ws=ilmn_ws+1
        !mj= -j,...,j
        i2mj=-i2j+2*(ilm-1)       ! 2m_j= -jc ... +jc
        im=(i2mj-3+2*spinor)/2    ! m=m_j-1/2 (spinor=1) or m_j+1/2 (spinor=2)
@@ -168,17 +169,19 @@ subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn,kappa)
          indlmn(2,ilmn+ilm)=im !m
          indlmn(3,ilmn+ilm)=kappa_sign !sign of kappa
          indlmn(4,ilmn+ilm)=il*il+im+il+1 !lm
-         indlmn(5,ilmn+ilm)=iln !ln also includes the two kappa values here
+         indlmn(5,ilmn+ilm)=iln !ln also includes the two spinor values here
          indlmn(6,ilmn+ilm)=spinor !spinor index (1 up, 2 down)
          indlmn(7,ilmn+ilm)=i2j !2*j (times 2 to make it an integer)
          indlmn(8,ilmn+ilm)=i2mj !2*m_j (times 2 to make it an integer)
+         indlmn(9,ilmn+ilm)=ilmn_ws ! ilmn without spinor
        else
          !Invalid value for sph. harm. ; will be multiplied by zero later
          indlmn(1,ilmn+ilm)=-1 !Invalid value that should be checked later
-         indlmn(2:8,ilmn+ilm)=-1 ; indlmn(3,ilmn+ilm)=0
+         indlmn(2:9,ilmn+ilm)=-1 ; indlmn(3,ilmn+ilm)=0
        endif
      end do
      ilmn=ilmn+i2j+1
+     if(modulo(ib,2)==1) ilmn_ws=ilmn_ws-i2j-1
    end do
  endif
 

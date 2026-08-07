@@ -2658,7 +2658,7 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
    endif
    nval=nval/rcpaw%atm(itypat)%mult ! Average over atoms of same typat
    tnval=tnval/rcpaw%atm(itypat)%mult ! Average over atoms of same typat
-   if(rcpaw%atm(itypat)%mode(1,1)==orb_relaxed_core) then ! Relax the core
+   if(rcpaw%atm(itypat)%mode(1,1,1)==orb_relaxed_core) then ! Relax the core
      write(std_out,*) 'RCPAW: core relaxation for typat',itypat,psps%ziontypat(itypat)
      if((rcpaw%istep==rcpaw%updatetnc+1.and.rcpaw%updatetnc>0).and.rcpaw%atm(itypat)%zcore_orig>0) then
        write(std_out,*) 'RCPAW: freezing tnc at istep = ',rcpaw%istep

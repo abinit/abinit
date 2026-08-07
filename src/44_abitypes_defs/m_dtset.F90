@@ -682,6 +682,7 @@ type, public :: dataset_type
  integer :: rcpaw_frocc = 0
  integer :: rcpaw_updatetnc
  integer :: rcpaw_elin = 1
+ integer :: rcpaw_prtpaw = 0
  integer :: rcpaw_tpaw = 1
  integer :: rcpaw_vhtnzc = 1
 !S
@@ -994,7 +995,7 @@ type, public :: dataset_type
  real(dp) :: pw_unbal_thresh
  real(dp) :: ratsm
  real(dp) :: ratsph_extra
- real(dp) :: rcpaw_tolnc = tol5
+ real(dp) :: rcpaw_tolnc = tol30
  real(dp) :: recrcut
  real(dp) :: recefermi
  real(dp) :: rectolden
@@ -2256,10 +2257,9 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%random_atpos       = dtin%random_atpos
  dtout%ratopt             = dtin%ratopt
  dtout%rcpaw_frocc        = dtin%rcpaw_frocc
-! dtout%rcpaw_nfrpaw       = dtin%rcpaw_nfrpaw
-! dtout%rcpaw_nfrtnc       = dtin%rcpaw_nfrtnc
  dtout%rcpaw_updatetnc    = dtin%rcpaw_updatetnc
  dtout%rcpaw_elin         = dtin%rcpaw_elin
+ dtout%rcpaw_prtpaw       = dtin%rcpaw_prtpaw
  dtout%rcpaw_tpaw         = dtin%rcpaw_tpaw
  dtout%rcpaw_vhtnzc       = dtin%rcpaw_vhtnzc
  dtout%recgratio          = dtin%recgratio
@@ -4018,7 +4018,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' rf2atpol rf2dir rf2elfd rf2phon rf2strs rf2magat'
  list_vars=trim(list_vars)//' rf3atpol rf3dir rf3elfd rf3phon'
  list_vars=trim(list_vars)//' rmm_diis rmm_diis_savemem'
- list_vars=trim(list_vars)//' rcpaw_frocc rcpaw_elin rcpaw_tpaw rcpaw_vhtnzc rcpaw_rctypat'
+ list_vars=trim(list_vars)//' rcpaw_frocc rcpaw_elin rcpaw_prtpaw rcpaw_tpaw rcpaw_vhtnzc rcpaw_rctypat'
  list_vars=trim(list_vars)//' rcpaw_sc rcpaw_tolnc rcpaw_updatepaw rcpaw_updatetnc'
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'

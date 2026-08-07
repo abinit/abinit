@@ -3499,6 +3499,9 @@ if (dtset%usekden==1) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_elin',tread,'INT')
    if(tread==1) dtset%rcpaw_elin = intarr(1)
 
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_prtpaw',tread,'INT')
+   if(tread==1) dtset%rcpaw_prtpaw = intarr(1)
+
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_tpaw',tread,'INT')
    if(tread==1) dtset%rcpaw_tpaw = intarr(1)
 
