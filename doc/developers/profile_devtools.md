@@ -17,7 +17,7 @@ Among tools that analyze MPI usage and performance, it is possible to annotate s
 [NVTX](https://nvidia.github.io/NVTX/) (NVIDIA Tools Extension Library) and use these annotations to trace an MPI job 
 execution as a timeline of API events per process using the 
 profiler [NVIDIA Nsight Systems](https://developer.nvidia.com/nsight-systems). ABINIT
-implements functions for code annotation named *ABI_NVTX_START/END_RANGE(id)* enabled via the *HAVE_GPU_MARKERS* 
+implements functions for code annotation named `ABI_NVTX_START/END_RANGE(id)` and enabled via the *HAVE_GPU_MARKERS* 
 macro. Code annotation libraries are linked by default when ABINIT is compiled on GPU, as NVIDIA CUDA Toolkit 
 includes NVTX (and AMD includes ROCTX). As of ABINIT version 10.3.6, NVTX annotation is also supported on CPU. The 
 macros are enabled via the *with_gpu_markers* build option. 
@@ -81,10 +81,10 @@ user documentation on [GPU roofline](https://dci.dci-gitlab.cines.fr/webextranet
 Compiling ABINIT to use with the profiler is straightforward. A production build can be used to generate roofline 
 metrics, there is no need for debug build. We refer to *abinit/doc/build/GPU_InstinctMI250X+EPYC7453.ac9* for a 
 recommended build configuration. ABINIT implements ROCm annotations and markers that are included in the 
-profiler reports for the ease of analysis per code regions. It also implements useful macros for profiler start/stop 
+profiler reports for the ease of analysis per code regions. It also implements useful bindings for profiler start/stop 
 calls, for both NVTX and ROCm (since version 10.8). These allow to limit the profiler execution to specific parts of 
 the code and to reduce overhead. We use them for readability of the roofline in order to avoid overlapping points. 
-Do not forget to set the build option *with_gpu_markers="yes"* in order to activate the macros for code annotations 
+Do not forget to set the build option `with_gpu_markers="yes"` in order to activate the macros for code annotations 
 and profiler switches.
 
 In this example, we sandwich the three GEMM operations that update the wavefunction subspace (as well as the 
@@ -155,8 +155,9 @@ Python scripts provided in the Adastra documentation
 
 The kernels of interest are then detected by the profiler: 3 DGEMMs with nonzero FP64 FLOPs,
 3 copy kernels with zero counted FLOPs and 1 zero-initialization kernel with zero counted FLOPs. 
-The three DGEMMs share the same *Kernel_Id=3320* that produces a single point in the roofline. 
-The roofline shows that the GEMM call is compute-bound.
+The three DGEMMs share the same *Kernel_Id=3320* that produces a single aggregated point in the roofline. The zero FLOP
+kernels are not shown in the roofline. The aggregated GEMM call (circle marker) is compute-bound:
 
 ![roofline_screenshot](roofline.png)
 
+In order to interpret the roofline, we combine it with the *timeopt* reports found in the .abo to diagnose time-consuming parts of the code. From the timers and the roofline, *RR_GEMM* is a computationally intensive part of the code that is negligeable overall with less than 0.1% simulation time. Thus *RR_GEMM* is efficient and optimizing it further will have no impact on the simulation time. Another code range named *RR_HEVG* has about 1.5% simulation time. In this range, the most time-consuming single kernel dispatch is shown in the roofline by a triangle marker and is memory-bound. The profiler's report allows to discover that this kernel is `rocsolver::stedc_mergeValues_kernel`. Note that many small kernel dispatches with the same launch configuration (grid and workgroup size) having a large cumulative time are also interesting to include in the roofline by aggregating them, see point in diamond (`rocblas_trsv_device` kernel). The circle and the diamond kernels do not saturate GPU memory bandwidth, as shown by the very low peak percentage. This was an example of understanding GPU performance using the roofline.
