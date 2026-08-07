@@ -2,7 +2,7 @@
 
 Version 10.8, released on August 7, 2026.
 
-<!-- Release notes updated on July 20, 2026. -->
+<!-- Release notes updated on August 7, 2026. -->
 
 These release notes
 are relative to modifications/improvements of ABINIT v10.8 with respect to v10.6.
@@ -19,7 +19,7 @@ Will be included in a version released later than 10.8 :
 MR1323, 1339, 1340, 1341, 1344, 1345, 1347, 1351, 1353, 1355, 1357, 1360, 1361, 1363, 1364, 1365, 1368 
 as well as MR 1261, 1263, 1317, 1326, 1318 if they are not draft anymore.
 
-For release v10.8.5, also includes MR XXXX, ...
+For release v10.X.Y, also includes MR XXXX, ...
 -->
 
 Many thanks to the contributors to the ABINIT project between January 2026 and August 2026 !
