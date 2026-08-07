@@ -2229,6 +2229,25 @@ force_length_stats: {min: null, max: null, mean: null, }
 ;   (  -0.772685   0.178620 ,   0.393740  -0.116101 ,   0.377435  -0.061421 ,    )
 ;   (   0.023659   0.023064 ,   0.649249  -0.197581 ,  -0.672046   0.174234 ,    )
 
+** mlwfovlp:   calling wannier90 library subroutine wannier_run 
+   Calculation is running         
+-  see t03o_DS7_w90.wout for details.
+   Spin channel: 1
+   Uniform k-mesh: 4 4 4
+   Number of k-points: 64
+   Number of input bands: 4
+   Number of Wannier functions: 4
+   Number of k-point neighbours: 8
+   Fermi energy [eV]:   5.84955922E+00
+   Eigenvalue range (min, max) [eV]:  -6.16233220E+00   1.70735979E+01
+   Wannier90 physical results:
+-   Spreads (Omega_total, Omega_I, Omega_tilde) [Ang^2]:   6.37522938E+00   5.80386747E+00   5.71361918E-01
+   Wannier function centres [Ang] and spreads [Ang^2]:
+-     WF 1: centre =     0.67888562     0.67888685     0.67887824  spread =     1.59371125
+-     WF 2: centre =     0.67888588     2.03658539     2.03659472  spread =     1.59390775
+-     WF 3: centre =     2.03658715     0.67888751     2.03659362  spread =     1.59370697
+-     WF 4: centre =     2.03658754     2.03658537     0.67887909  spread =     1.59390341
+
    mlwfovlp :  mlwfovlp_run completed -
 -  see t03o_DS7_w90.wout for details.
 

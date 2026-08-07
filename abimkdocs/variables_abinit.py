@@ -5633,6 +5633,30 @@ superconducting Tc using Mc-Millan's formula.
 ),
 
 Variable(
+    abivarname="eph_ngkpt_fine",
+    varset="eph",
+    vartype="integer",
+    topics=["ElPhonInt_useful"],
+    dimensions=[3],
+    defaultval=[0, 0, 0],
+    requires="[[optdriver]] == 7",
+    mnemonics="Electron-PHonon: Number of Grid K-PoinTs in FINE grid",
+    added_in_version="10.9.1",
+    text=r"""
+Defines the divisions of the dense homogeneous k-mesh used to interpolate
+electronic eigenvalues and electron-phonon matrix elements with Wannier
+functions in the EPH code.
+
+The shifts of the dense mesh are specified by [[eph_nshiftk_fine]] and
+[[eph_shiftk_fine]]. The default value, `[0, 0, 0]`, disables the dense
+Wannier k-mesh and preserves the k-mesh associated with the input WFK file.
+
+This variable is intended for calculations that read both `ABIWAN.nc` and
+`GWAN.nc`. It does not change the k-mesh stored in the input WFK file.
+""",
+),
+
+Variable(
     abivarname="eph_ngqpt_fine",
     varset="eph",
     vartype="integer",
@@ -5659,6 +5683,47 @@ DDB file i.e. [[ddb_ngqpt]] (default behavior).
     compatible with the one given in *eph_ngqpt_fine*.
     The code can interpolate DFPT potentials but is not able to interpolate KS wavefunctions,
     and will stop if ${\bf k + q}$ is not found in the WFK file.
+""",
+),
+
+Variable(
+    abivarname="eph_nshiftk_fine",
+    varset="eph",
+    vartype="integer",
+    topics=["ElPhonInt_useful"],
+    dimensions="scalar",
+    defaultval=1,
+    requires="[[optdriver]] == 7",
+    mnemonics="Electron-PHonon: Number of SHIFTs for the FINE K grid",
+    added_in_version="10.9.1",
+    text=r"""
+Gives the number of shifted grids used to construct the dense Wannier
+k-mesh defined by [[eph_ngkpt_fine]]. The shift vectors are specified by
+[[eph_shiftk_fine]].
+
+The allowed range is from 1 to `MAX_NSHIFTK`.
+""",
+),
+
+Variable(
+    abivarname="eph_shiftk_fine",
+    varset="eph",
+    vartype="real",
+    topics=["ElPhonInt_useful"],
+    dimensions=[3, "[[eph_nshiftk_fine]]"],
+    defaultval=[0.0, 0.0, 0.0],
+    requires="[[optdriver]] == 7",
+    mnemonics="Electron-PHonon: SHIFTs for the FINE K grid",
+    added_in_version="10.9.1",
+    text=r"""
+Defines the shifts of the dense homogeneous k-mesh used for Wannier
+interpolation in the EPH code. The number of vectors is given by
+[[eph_nshiftk_fine]], and the mesh divisions are specified by
+[[eph_ngkpt_fine]].
+
+The convention is the same as for [[shiftk]]: each vector is expressed in
+the reduced coordinates of the reciprocal-space sampling lattice. The
+default is a single unshifted grid.
 """,
 ),
 
@@ -5713,7 +5778,8 @@ The choice is among:
 * 17 --> Compute e-ph matrix elements with the GWPT formalism  Produce GSTORE.nc file.
          Requires netcdf library with MPI-IO support.
 * 18 --> Compute e-ph matrix g(k,q) along a high-symmetry path. See [[eph_fix_wavevec]] and other related variables.
-* 19 --> Compute matrix elements of the screened interaction W between two Cooper pairs.
+* 19 --> Compute matrix elements of the screened interaction W between two Cooper pairs (UNDER DEVELOPMENT).
+* 20 --> Convert GSTORE.nc file to other formats. Requires [[gstore_convert]].
 * 24 --> Compute electron self-energy (Fan-Migdal + Debye-Waller) and QP corrections, also possibly the spectral function.
          Similar to [[eph_task]] 4 but requires GSTORE file specified via [[getgstore_filepath]]
 
@@ -7593,7 +7659,7 @@ Variable(
     mnemonics="GauGe TRansform CUToff",
     added_in_version="10.9.0",
     text=r"""
-Cutoff value to use in computing gauge change from parallel transport to diagonal. 
+Cutoff value to use in computing gauge change from parallel transport to diagonal.
 Expert use only, do not change unless you've studied the source code and know exactly
 what you are doing and expecting.
 """,
@@ -24591,7 +24657,7 @@ due to nuclear magnetic dipoles (see [[nucdipmom]]).
 
 Negative values of [[zora]] are present only for debugging purposes. [[zora]] -1 permits only
 spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits spin-orbit
-coupling and the electron spin-nuclear dipole through space interaction, while [[zora]] -3 permits 
+coupling and the electron spin-nuclear dipole through space interaction, while [[zora]] -3 permits
 only spin-orbit coupling and the electron spin-nuclear dipole Fermi-contact-like interaction.
 """,
 ),
@@ -24936,57 +25002,57 @@ Variable(
 This variable defines the quantity that should be computed starting from a previously generated WFK file.
 Possible values are:
 
-  * "wfk_fullbz" --> Read input WFK file and produce new WFK file with $\kk$-points in the full BZ.
-     Wavefunctions with [[istwfk]] > 2 are automatically converted into the full G-sphere representation.
-     This option can be used to interface Abinit with external tools (e.g. lobster) requiring $\kk$-points in the full BZ.
-     Use [[iomode]] = 3 and [[prtkbff]] = 1 to produce a WFK file in netcdf format with Kleynmann-Bylander form factors.
+* "wfk_fullbz" --> Read input WFK file and produce new WFK file with $\kk$-points in the full BZ.
+   Wavefunctions with [[istwfk]] > 2 are automatically converted into the full G-sphere representation.
+   This option can be used to interface Abinit with external tools (e.g. lobster) requiring $\kk$-points in the full BZ.
+   Use [[iomode]] = 3 and [[prtkbff]] = 1 to produce a WFK file in netcdf format with Kleynmann-Bylander form factors.
 
-  * "wfk_einterp" --> Read energies from WFK file and interpolate the band structure with the modified SKW method [[cite:Pickett1988]],
-     using the parameters specified by [[einterp]].
+* "wfk_einterp" --> Read energies from WFK file and interpolate the band structure with the modified SKW method [[cite:Pickett1988]],
+   using the parameters specified by [[einterp]].
 
-  * "wfk_ddk" --> Compute velocity matrix elements for all bands and $\kk$-points found the input WFK file.
-     The code generates three `_EVK.nc` netcdf files with the matrix element of the $\frac{d}{d{\kk_i}}$
-     operator using the same list of $\kk$-points found in the input WFK file i.e. the same value of [[kptopt]].
-     These files can then be passed to optics via the `ddkfile_1, ddkfile_2, ddkfile_3` variables
-     without having to call the DFPT part that is much more expensive at the level of memory.
+* "wfk_ddk" --> Compute velocity matrix elements for all bands and $\kk$-points found the input WFK file.
+   The code generates three `_EVK.nc` netcdf files with the matrix element of the $\frac{d}{d{\kk_i}}$
+   operator using the same list of $\kk$-points found in the input WFK file i.e. the same value of [[kptopt]].
+   These files can then be passed to optics via the `ddkfile_1, ddkfile_2, ddkfile_3` variables
+   without having to call the DFPT part that is much more expensive at the level of memory.
 
-     Please note that, at present, the computation of non-linear optical properties in optic requires
-     [[kptopt]] = 3 i.e. $\kk$-points in the full BZ whereas the computation of linear optical properties
-     can take advantage of spatial and time-reversal symmetries.
-     If you use **wfk_ddk** to generate input files for optics, please make sure that your input WFK file
-     has the correct value of [[kptopt]] according to the physical properties you want to compute.
+   Please note that, at present, the computation of non-linear optical properties in optic requires
+   [[kptopt]] = 3 i.e. $\kk$-points in the full BZ whereas the computation of linear optical properties
+   can take advantage of spatial and time-reversal symmetries.
+   If you use **wfk_ddk** to generate input files for optics, please make sure that your input WFK file
+   has the correct value of [[kptopt]] according to the physical properties you want to compute.
 
-     In other words, don't use a WFK with [[kptopt]] != 3 if you plan to compute non-linear optical properties.
-     To work around the limitation of the non-linear part of optics, one can use "wfk_optics_fullbz"
-     to generate WKF and EVK files in the full BZ starting from a WFK defined in the IBZ.
+   In other words, do not use a WFK with [[kptopt]] != 3 if you plan to compute non-linear optical properties.
+   To work around the limitation of the non-linear part of optics, one can use "wfk_optics_fullbz"
+   to generate WKF and EVK files in the full BZ starting from a WFK defined in the IBZ.
 
-  * "wfk_optics_fullbz" --> Similar to "wfk_ddk" but accepts a WFK with wavefunctions in the IBZ
-     and generates a new WFK and three `_EVK.nc` files with $\kk$-points in the full BZ.
-     This procedure is equivalent to performing a NSCF + DDK calculation with [[kptopt]] = 3 as documented
-     in the tutorial [[tutorial:optic]] for non-linear optical properties but it is much faster and, most importantly,
-     less memory demanding.
+* "wfk_optics_fullbz" --> Similar to "wfk_ddk" but accepts a WFK with wavefunctions in the IBZ
+   and generates a new WFK and three `_EVK.nc` files with $\kk$-points in the full BZ.
+   This procedure is equivalent to performing a NSCF + DDK calculation with [[kptopt]] = 3 as documented
+   in the tutorial [[tutorial:optic]] for non-linear optical properties but it is much faster and, most importantly,
+   less memory demanding.
 
-  * "wfk_kpts_erange" --> Read WFK file, use star-function and [[einterp]] parameters to interpolate
-     electron energies onto fine k-mesh defined by [[sigma_ngkpt]] and [[sigma_shiftk]].
-     Find k-points inside (electron/hole) pockets according to the values specified by [[sigma_erange]].
-     Write KERANGE.nc file with all the tables required by the code to automate NSCF band structure calculations
-     inside the pocket(s) and electron lifetime computation in the EPH code when [[eph_task]] = -4.
+* "wfk_kpts_erange" --> Read WFK file, use star-function and [[einterp]] parameters to interpolate
+   electron energies onto fine k-mesh defined by [[sigma_ngkpt]] and [[sigma_shiftk]].
+   Find k-points inside (electron/hole) pockets according to the values specified by [[sigma_erange]].
+   Write KERANGE.nc file with all the tables required by the code to automate NSCF band structure calculations
+   inside the pocket(s) and electron lifetime computation in the EPH code when [[eph_task]] = -4.
 
-  * "wannier" --> Read WFK file and run Wannierization. It has the similar effect of
-      [[prtwant]] = 2, which uses the **ABINIT- Wannier90** interface. The difference is that with wfk_task "wannier",
-      the $\kk$-points in the full BZ is not necessary. Instead, the wavefunctions with the $\kk$-points not in
-      the IBZ will be reconstructed by symmetry. This functionality does not yet work with PAW when the wavefunction
-      is not already in full BZ.
+* "wannier" --> Read WFK file and run Wannierization. It has the similar effect of
+    [[prtwant]] = 2, which uses the **ABINIT- Wannier90** interface. The difference is that with wfk_task "wannier",
+    the $\kk$-points in the full BZ is not necessary. Instead, the wavefunctions with the $\kk$-points not in
+    the IBZ will be reconstructed by symmetry. This functionality does not yet work with PAW when the wavefunction
+    is not already in full BZ.
 
-      ABINIT will produce the input files required by Wannier90 and it will run
-      Wannier90 to produce the Maximally-locallized Wannier functions (see [
-      http://www.wannier.org ](http://www.wannier.org) ).
-      !!! Notes
+    ABINIT will produce the input files required by Wannier90 and it will run
+    Wannier90 to produce Maximally-locallized Wannier functions (see [http://www.wannier.org](http://www.wannier.org)).
 
-          * The files that are created can also be used by Wannier90 in stand-alone mode.
-          * In order to use Wannier90 as a post-processing program for ABINIT you might have to
-            compile it with the appropriate flags (see ABINIT makefile). You might use ./configure --enable-wannier90
-          * There are some other variables related to the interface of Wannier90 and ABINIT. See [[varset:w90]].
+    !!! Notes
+
+        * The files that are created can also be used by Wannier90 in stand-alone mode.
+        * In order to use Wannier90 as a post-processing program for ABINIT you might have to
+          compile it with the appropriate flags (see ABINIT makefile). You might use ./configure --enable-wannier90
+        * There are some other variables related to the interface of Wannier90 and ABINIT. See [[varset:w90]].
 """,
 ),
 
@@ -26497,25 +26563,25 @@ Possible values are:
 """,
 ),
 
-#Variable(
-#    abivarname="gstore_iv1p_comm",
-#    varset="eph",
-#    vartype="integer",
-#    topics=['ElPhonInt_basic'],
-#    dimensions="scalar",
-#    defaultval=0,
-#    mnemonics=r"GSTORE write matrix elements of i[V1_ka, p] commutator",
-#    requires="[[optdriver]] == 7",
-#    added_in_version="10.9.0",
-#    text=r"""
-#If set to 1, the EPH code computes and stores on file the matrix elements
-#
-#$$ i \left\langle \psi_{mk}\big| \middle[ V^{(1)}_{q0,ka}, p \middle] \big| \psi_{nk} \right\rangle $$
-#
-#in the full BZ in reduced coordinates,
-#when computing the GSTORE.nc. See [[cite:Lihm2020]].
-#""",
-#),
+Variable(
+    abivarname="gstore_iv1p_comm",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics=r"GSTORE write matrix elements of i[V1_ka, p] commutator",
+    requires="[[optdriver]] == 7",
+    added_in_version="10.9.0",
+    text=r"""
+If set to 1, the EPH code computes and stores on file the matrix elements
+
+$$ i \left\langle \psi_{mk}\big| \middle[ V^{(1)}_{q0,ka}, p \middle] \big| \psi_{nk} \right\rangle $$
+
+in the full BZ in reduced coordinates,
+when computing the GSTORE.nc. See [[cite:Lihm2020]].
+""",
+),
 
 Variable(
     abivarname="gstore_use_lgk",
@@ -26568,6 +26634,39 @@ By default, little group symmetries are not used.
 """,
 
 
+),
+
+Variable(
+    abivarname="gstore_sym",
+    varset="eph",
+    vartype="integer",
+    topics=["ElPhonInt_basic"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics=r"GSTORE use SYMmetries to reconstruct g(k,q)",
+    requires="[[optdriver]] == 7 and [[gstore_kzone]] == 'bz' and [[gstore_qzone]] == 'bz'",
+    added_in_version="10.9.1",
+    text=r"""
+Activates the reconstruction of the electron-phonon matrix elements g(k,q) by symmetry when
+[[gstore_kzone]] == "bz" and [[gstore_qzone]] == "bz". Only meaningful in that combination;
+setting it to a nonzero value otherwise is a fatal error.
+
+* 0 --> No reconstruction. g(k,q) is computed directly for every $\kk$ and $\qq$ in the full BZ.
+  This is the most expensive but always-safe option and the default.
+
+* 1 --> g(k,q) is computed directly only for $\kk$ in the IBZ (with $\qq$ still spanning the full
+  BZ) and then reconstructed by symmetry for $\kk$ outside the IBZ. Requires [[gstore_use_lgk]] == 0.
+
+* 2 --> Like 1, but $\qq$ is also restricted to IBZ_k (the irreducible zone defined by the little
+  group of $\kk$) at the direct-computation stage, and reconstructed by symmetry for both
+  $\kk$ outside the IBZ and $\qq$ outside IBZ_k. Requires [[gstore_use_lgk]] == 1.
+
+!!! important
+
+    [[gstore_sym]] != 0 is not yet supported for [[nspinor]] == 2 (spin-orbit coupling): the
+    reconstruction formula has a known, still-open bug for spinor wavefunctions. Use
+    [[gstore_sym]] 0 for spin-orbit calculations.
+""",
 ),
 
 Variable(
@@ -26669,6 +26768,34 @@ for comparison purposes.
 ),
 
 Variable(
+    abivarname="gstore_convert",
+    varset="eph",
+    vartype="string",
+    topics=["ElPhonInt_expert"],
+    dimensions="scalar",
+    defaultval="''",
+    mnemonics=r"GSTORE CONVERT",
+    requires="[[optdriver]] == 7",
+    added_in_version="10.8.2",
+    text=r"""
+This variable activates the conversion of a GSTORE file to an external format that
+can be used to interface ABINIT with other codes.
+
+If gstore_convert is not an empty string, ABINIT automatically invokes the conversion routine
+after the GSTORE.nc file has been generated with [[eph_task]] 11 or 17.
+
+A dedicated eph_task can also be used to convert an existing GSTORE.nc file by using
+[[eph_task]] 20 and [[getgstore_filepath]].
+
+Currently, the following formats are supported:
+
+- "epiq" to interface gstore with [EPIq](https://the-epiq-team.gitlab.io/epiq-site/)
+
+""",
+),
+
+
+Variable(
     abivarname="gstore_brange",
     varset="eph",
     vartype="integer",
@@ -26687,6 +26814,12 @@ two different spin channels when [[nsppol]] == 2.
 
 If not specified in input, ABINIT will use all the bands from 1 up to [[nband]]
 unless additional filters are activated, see also [[gstore_kfilter]] and [[gstore_erange]].
+
+When reading an existing GSTORE.nc file with [[getgstore_filepath]], this variable can be used
+to reduce the number of intermediate states at k+q kept in memory. In this case the requested
+range must be contained in the k+q band range stored in the file and `gstore_brange(2)` must be
+equal to [[nband]]. When [[eph_stern]] is enabled, `gstore_brange(1)` must be 1. The band range
+for the external states at k is not modified.
 """,
 ),
 
@@ -26712,21 +26845,21 @@ that should be used as input for further analysis.
 
 ),
 
-#Variable(
-#    abivarname="getqpdata_filepath",
-#    varset="eph",
-#    vartype="string",
-#    topics=['ElPhonInt_basic'],
-#    dimensions="scalar",
-#    defaultval="None",
-#    mnemonics="GET the QPDATA.nc from FILEPATH",
-#    added_in_version="10.9.0",
-#    text=r"""
-#This variable defines the path of the QPDATA file with the quasi-particle energies.
-#to be used to update the initial KS band structure.
-#To generate a QPDATA file, one can use AbiPy to extract the results from a SIGRES.nc file.
-#""",
-#),
+Variable(
+    abivarname="getqpdata_filepath",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="GET the QPDATA.nc from FILEPATH",
+    added_in_version="10.9.0",
+    text=r"""
+This variable defines the path of the QPDATA file with the quasi-particle energies.
+to be used to update the initial KS band structure.
+To generate a QPDATA file, one can use AbiPy to extract the results from a SIGRES.nc file.
+""",
+),
 
 
 Variable(

@@ -1,0 +1,80 @@
+# Silicon: band structure and Wannierization of the first four bands from an IBZ WFK.
+
+ndtset 4
+kptopt 1
+
+# Dataset 1: ground state on a symmetry-reduced uniform mesh.
+tolvrs1 1.0d-10
+
+# Dataset 2: NSCF band structure along L-Gamma-X-W-K-Gamma.
+iscf2 -2
+getden2 1
+kptopt2 -5
+ndivsm2 3
+kptbounds2
+  0.5   0.5   0.5
+  0.0   0.0   0.0
+  0.5   0.0   0.5
+  0.5   0.25  0.75
+  0.375 0.375 0.75
+  0.0   0.0   0.0
+tolwfr2 1.0d-12
+nbdbuf2 4
+prtebands2 1
+prtwf2 0
+
+# Dataset 3: accurately converged NSCF wavefunctions on the IBZ mesh.
+iscf3 -2
+getden3 1
+tolwfr3 1.0d-12
+nbdbuf3 4
+
+# Dataset 4: expand dataset 3's IBZ WFK internally and call Wannier90.
+optdriver4 8
+wfk_task4 "wannier"
+getwfk4 -1
+w90iniprj4 2
+
+# Common variables.
+acell 3*10.263
+rprim
+  0.0 0.5 0.5
+  0.5 0.0 0.5
+  0.5 0.5 0.0
+natom 2
+ntypat 1
+typat 2*1
+xred
+  0.00 0.00 0.00
+  0.25 0.25 0.25
+znucl 14
+
+ecut 8.0
+nband 8
+nstep 50
+ngkpt 4 4 4
+nshiftk 1
+shiftk 0.0 0.0 0.0
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Psdj_nc_sr_04_pw_std_psp8/Si.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% extra_inputs = t15o_DS4_w90.win
+#%% files_to_test =
+#%%   t15.abo, tolnlines= 15, tolabs= 3.0e-2, tolrel= 2.0e-1
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC
+#%% description =
+#%%   Silicon with eight bands. Dataset 1 computes the ground state, dataset 2
+#%%   computes an NSCF band path, and dataset 3 stores an accurately converged
+#%%   IBZ WFK. Dataset 4 expands it to the full Brillouin zone and uses
+#%%   wfk_task "wannier" to Wannierize the first four bands.
+#%% topics = Wannier
+#%%<END TEST_INFO>

@@ -30,7 +30,7 @@ and compute these two ingredients. Then, Wannier90 is run. Wannier90 is
 included as a library and ABINIT and the process is automatic, so that in a
 single run you can do both the ground state calculation and the computation of
 MLWFs. The input variables [[prtwant]], [[w90iniprj]] and [[w90prtunk]] are
-related to the use of the wannier90 librairy.
+related to the use of the wannier90 library.
 
 
 

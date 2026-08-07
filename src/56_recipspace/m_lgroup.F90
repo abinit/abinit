@@ -133,6 +133,10 @@ module m_lgroup
    procedure :: find_ibzimage => lgroup_find_ibzimage
    ! Find the symmetrical image in the IBZ(k) of a qpoint in the BZ.
 
+   procedure :: find_ibzimage_sym => lgroup_find_ibzimage_sym
+   ! Like find_ibzimage, but also returns the little-group symmetry (in local
+   ! 1:nsym_lg indexing) relating the IBZ(k) representative to the input qpoint.
+
    procedure :: print => lgroup_print
    ! Print the object
 
@@ -403,6 +407,54 @@ end function lgroup_find_ibzimage
 
 !----------------------------------------------------------------------
 
+!!****f* m_lgroup/lgroup_find_ibzimage_sym
+!! NAME
+!! lgroup_find_ibzimage_sym
+!!
+!! FUNCTION
+!!  Like find_ibzimage, but also returns the little-group symmetry (in local
+!!  1:nsym_lg indexing, translate via lgsym2glob to get the global isym/itime)
+!!  relating the IBZ(k) representative self%ibz(:,iq_ibz) to the input qpt, i.e.
+!!  qpt = symrec_lg(:,:,isym_lg) . self%ibz(:,iq_ibz) (up to a reciprocal lattice
+!!  vector). Returns iq_ibz=-1 (isym_lg, itime_lg undefined) if not found.
+!!
+!! INPUTS
+!!  qpt(3)=q-point in reduced coordinates.
+!!
+!! OUTPUT
+!!  isym_lg=Local index (1:nsym_lg) of the little-group symmetry relating
+!!   self%ibz(:,iq_ibz) to qpt.
+!!  itime_lg=1 if no time reversal is needed, 2 if it is (see lgsym2glob).
+!!
+!! SOURCE
+
+integer function lgroup_find_ibzimage_sym(self, qpt, isym_lg, itime_lg) result(iq_ibz)
+
+!Arguments ------------------------------------
+ class(lgroup_t),intent(in) :: self
+ real(dp),intent(in) :: qpt(3)
+ integer,intent(out) :: isym_lg, itime_lg
+
+!Local variables-------------------------------
+!scalars
+ integer, parameter :: timrev0 = 0
+ real(dp) :: dksqmax
+!arrays
+ integer :: indkk(6)
+! *************************************************************************
+
+ ! Note use_symrec and timrev0
+ call listkk(dksqmax, self%gmet, indkk, self%ibz, qpt, self%nibz, 1, self%nsym_lg, &
+    1, self%symafm_lg, self%symrec_lg, timrev0, xmpi_comm_self, use_symrec=.True.)
+
+ iq_ibz = indkk(1); isym_lg = indkk(2); itime_lg = indkk(6) + 1
+ if (dksqmax > tol12) iq_ibz = -1
+
+end function lgroup_find_ibzimage_sym
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_lgroup/lgroup_print
 !! NAME
 !! lgroup_print
@@ -411,8 +463,8 @@ end function lgroup_find_ibzimage
 !!  Print the object
 !!
 !! INPUTS
+!!  units=Unit numbers
 !!  [title]=String to be printed as header for additional info.
-!!  [unit]=Unit number for output
 !!  [prtvol]=Verbosity level
 !!
 !! OUTPUT
@@ -420,38 +472,38 @@ end function lgroup_find_ibzimage
 !!
 !! SOURCE
 
-subroutine lgroup_print(self, title, unit, prtvol)
+subroutine lgroup_print(self, units, title, prtvol)
 
 !Arguments ------------------------------------
  class(lgroup_t),intent(in) :: self
- integer,optional,intent(in) :: unit, prtvol
+ integer,intent(in) :: units(:)
  character(len=*),optional,intent(in) :: title
+ integer,optional,intent(in) :: prtvol
 
 !Local variables-------------------------------
 !scalars
- integer :: my_prtvol, my_unt, ik, ii
+ integer :: my_prtvol, ik, ii
  character(len=500) :: msg
 ! *************************************************************************
 
- my_unt = std_out; if (present(unit)) my_unt = unit
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
  msg = ' ==== Info on the <lgroup_t> object ==== '
  if (present(title)) msg = ' ==== '//trim(adjustl(title))//' ==== '
- call wrtout(my_unt, msg)
+ call wrtout(units, msg)
 
  write(msg, '(3a, 2(a, i0, a))') &
   ' Little group point: ................... ', trim(ktoa(self%point)), ch10, &
   ' Number of points in IBZ(p) ............ ', self%nibz, ch10, &
   ' Time-reversal flag (0: No, 1: Yes) .... ', self%input_timrev, ch10
- call wrtout(my_unt, msg)
+ call wrtout(units, msg)
 
  if (my_prtvol > 1) then
    do ii=1,self%nsym_lg
-     call wrtout(std_out, sjoin("lgsym2glob:", ltoa(self%lgsym2glob(:, ii))))
+     call wrtout(units, sjoin("lgsym2glob:", ltoa(self%lgsym2glob(:, ii))))
    end do
    do ik=1,self%nibz
-      call wrtout(my_unt, sjoin(ktoa(self%ibz(:,ik)), ftoa(self%weights(ik))))
+      call wrtout(units, sjoin(ktoa(self%ibz(:,ik)), ftoa(self%weights(ik))))
    end do
  end if
 

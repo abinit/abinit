@@ -161,9 +161,7 @@ contains  !============================================================
 integer pure function kpts_timrev_from_kptopt(kptopt) result(timrev)
 
 !Arguments ------------------------------------
-!scalars
  integer,intent(in) :: kptopt
-
 ! *********************************************************************
 
  timrev = 1; if (any(kptopt == [3, 4])) timrev = 0
@@ -227,7 +225,6 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, &  !
  integer :: my_kptrlatt(3,3)
  integer,allocatable :: indkpt(:),bz2ibz_smap(:,:)
  real(dp) :: my_shiftk(3,MAX_NSHIFTK)
-
 ! *********************************************************************
 
  ! Copy kptrlatt and shifts because getkgrid can change them
@@ -414,8 +411,8 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
  character(len=500) :: msg
 !arrays
  real(dp) :: ksym(3)
-
 ! *********************************************************************
+
  ierr = 0
 
  if(timrev/=1 .and. timrev/=0)then
@@ -1857,7 +1854,6 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,nkpt_fullbz,nshift
 !arrays
  integer :: inv_symrel(3,3,nsym)
  real(dp) :: k2(3)
-
 ! *********************************************************************
 
 !Invert symrels => gives symrels for kpoints
@@ -3471,6 +3467,7 @@ subroutine bzlint_free(self)
 !Arguments ------------------------------------
  class(bzlint_t),intent(inout) :: self
 ! *********************************************************************
+
  ABI_SFREE(self%vals_grid)
 
 end subroutine bzlint_free

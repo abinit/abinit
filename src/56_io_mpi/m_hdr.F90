@@ -33,13 +33,13 @@
 module m_hdr
 
  use defs_basis
+ USE_MPI
  use m_xmpi
  use m_abicore
  use m_errors
  use m_crystal
  use m_wffile
  use m_sort
- USE_MPI
  use netcdf
  use m_nctk
  use m_dtset
@@ -4786,10 +4786,10 @@ subroutine hdr_vs_dtset(hdr, dtset)
  if (.not. (tsymrel.and.ttnons.and.tsymafm)) then
    write(msg,'(a)')' Header '
    call wrtout(std_out,msg)
-   call print_symmetries(Hdr%nsym,Hdr%symrel,Hdr%tnons,Hdr%symafm)
+   call print_symmetries([std_out], Hdr%nsym,Hdr%symrel,Hdr%tnons,Hdr%symafm)
    write(msg,'(a)')' Dtset  '
    call wrtout(std_out,msg)
-   call print_symmetries(Dtset%nsym,Dtset%symrel,Dtset%tnons,Dtset%symafm)
+   call print_symmetries([std_out], Dtset%nsym,Dtset%symrel,Dtset%tnons,Dtset%symafm)
    ABI_ERROR('Check symmetry operations')
  end if
 

@@ -10,7 +10,8 @@ keywords = [
 ]
 
 subsuites = [
-"w90", "z2",
+"w90",
+"z2",
 ]
 
 #: List of input files

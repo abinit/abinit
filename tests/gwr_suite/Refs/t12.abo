@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  3 Jun 2026.
-- ( at 18h14 )
+.Starting date : Tue  9 Jun 2026.
+- ( at 11h50 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr_soc_dim/tests/TestBot_MPI1/gwr_suite_t12/t12.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr/tests/TestBot_MPI1/gwr_suite_t12/t12.abi
 - output file    -> t12.abo
 - root for input  files -> t12i
 - root for output files -> t12o
@@ -260,8 +260,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.15429
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr_soc_dim/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr_soc_dim/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/tsaih_gwr/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
 - Si    ONCVPSP-3.2.3.1  r_core=   1.60303   1.72197   1.91712
 - 14.00000   4.00000    170510                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -595,7 +595,7 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
  === Info on Coulomb term used in epsilon and W ===
 
- cutoff-mode = MINIBZ
+ cutoff-mode = AUXILIARY_FUNCTION
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
@@ -653,16 +653,16 @@ gwr_task   : G0W0
 QP_VBM_band: 4
 QP_CBM_band: 5
 KS_gap     :    2.454
-QP_gap     :    7.649
-Delta_QP_KS:    5.194
+QP_gap     :    7.685
+Delta_QP_KS:    5.231
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
-        2   -0.451  -11.382  -13.885   -0.272    0.862   -2.393   -2.393   -2.844    2.000
-        3   -0.451  -11.382  -13.885   -0.272    0.862   -2.393   -2.393   -2.844    2.000
-        4   -0.451  -11.382  -13.885   -0.272    0.862   -2.393   -2.393   -2.844    2.000
-        5    2.003   -9.974   -5.148   -1.577    0.862    2.801    2.801    4.804    0.000
-        6    2.003   -9.974   -5.148   -1.577    0.862    2.801    2.801    4.804    0.000
-        7    2.003   -9.974   -5.148   -1.577    0.862    2.801    2.801    4.804    0.000
+        2   -0.451  -11.382  -13.885   -0.277    0.863   -2.400   -2.400   -2.851    2.000
+        3   -0.451  -11.382  -13.885   -0.277    0.863   -2.400   -2.400   -2.851    2.000
+        4   -0.451  -11.382  -13.885   -0.277    0.863   -2.400   -2.400   -2.851    2.000
+        5    2.003   -9.974   -5.148   -1.545    0.863    2.831    2.831    4.834    0.000
+        6    2.003   -9.974   -5.148   -1.545    0.863    2.831    2.831    4.834    0.000
+        7    2.003   -9.974   -5.148   -1.545    0.863    2.831    2.831    4.834    0.000
 ...
 
 
@@ -675,13 +675,13 @@ gwr_task   : G0W0
 QP_VBM_band: 4
 QP_CBM_band: 5
 KS_gap     :    3.497
-QP_gap     :    8.546
-Delta_QP_KS:    5.049
+QP_gap     :    8.587
+Delta_QP_KS:    5.090
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
-        3   -1.736  -11.091  -13.756   -0.097    0.842   -2.326   -2.326   -4.062    2.000
-        4   -1.736  -11.091  -13.756   -0.097    0.842   -2.326   -2.326   -4.062    2.000
-        5    1.761   -9.965   -5.157   -1.657    0.864    2.723    2.723    4.484    0.000
+        3   -1.736  -11.091  -13.756   -0.103    0.843   -2.335   -2.335   -4.071    2.000
+        4   -1.736  -11.091  -13.756   -0.103    0.843   -2.335   -2.335   -4.071    2.000
+        5    1.761   -9.965   -5.157   -1.623    0.865    2.755    2.755    4.515    0.000
 ...
 
 
@@ -695,8 +695,8 @@ data: !Tabular |
 
  === QP gaps and band edges taking into account Sigma_nk corrections for 2 k-points ===
  Indirect band gap semiconductor
- Fundamental gap:     3.295 (eV)
-   VBM:    -2.844 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     3.302 (eV)
+   VBM:    -2.851 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     0.451 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
  Direct gap:         3.887 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
 
@@ -962,10 +962,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          6.9  wall=          7.0
+- Proc.   0 individual time (sec): cpu=          7.0  wall=          7.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.9  wall=          7.0
++Overall time at end (sec) : cpu=          7.0  wall=          7.1

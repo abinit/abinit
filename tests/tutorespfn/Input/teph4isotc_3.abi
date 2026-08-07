@@ -1,53 +1,43 @@
-#
-ndtset  1
+# MgB2: Wannierize the coarse-mesh wavefunctions and write ABIWAN.nc.
 
 optdriver 8
-wfk_task "wfk_kpts_erange"
-getwfk_filepath  "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_WFK.nc"
+wfk_task "wannier"
+getwfk_filepath "teph4isotc_2o_DS1_WFK"
 
-# Define fine k-mesh for the SKW interpolation
-sigma_ngkpt   18 18 18
-#sigma_ngkpt   24 24 24
-sigma_nshiftk 1
-sigma_shiftk  0 0 0
+prtwant 2
+w90iniprj 2
 
-sigma_erange -0.2 -0.2 eV  # Select kpts in the fine mesh within this energy window.
-einterp 1 5 0 0            # Parameters for star-function interpolation (default values)
-
-ngkpt   12 12 12
-nshiftk 1
-shiftk  0.0 0.0 0.0
-
-# COMMON INPUT DATA
-ecut 38
-nband   8
-occopt  4              # Marzari smearing
-tsmear 0.02
-
-# MgB2 structure
 structure "abifile:MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
+
+#kptopt 1
+ngkpt 6 6 4
+nshiftk 1
+shiftk 0.0 0.0 0.0
+
+ecut 38.0
+nband 16
+occopt 4
+tsmear 0.02
 
 pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_04_pw_std_psp8/"
 pseudos "Mg-low.psp8, B.psp8"
 
-##############################################################
-# This section is used only for regression testing of ABINIT #
-###############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% need_cpp_vars = HAVE_WANNIER90
 #%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi, atlas_gnu_14.2_triqs
-#%% test_chain = teph4isotc_1.abi, teph4isotc_2.abi, teph4isotc_3.abi, teph4isotc_4.abi,
-#%%              teph4isotc_5.abi, teph4isotc_6.abi, teph4isotc_7.abi,
+#%% test_chain = teph4isotc_1.abi, teph4isotc_2.abi, teph4isotc_3.abi, teph4isotc_4.abi, teph4isotc_5.abi,
+#%%              teph4isotc_6.abi
 #%% [files]
 #%% use_git_submodule = MgB2_eph4isotc
+#%% extra_inputs = teph4isotc_3o_w90.win
 #%% files_to_test =
-#%%   teph4isotc_3.abo, tolnlines= 10, tolabs=  3.000e-02, tolrel=  6.000e-03;
-#%%   teph4isotc_3o_DS1_KERANGE, tolnlines= 10, tolabs=0.0, tolrel= 0.0;
+#%%   teph4isotc_3.abo, tolnlines= 30, tolabs= 3.0e-2, tolrel= 6.0e-3
 #%% [paral_info]
-#%% max_nprocs = 10
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = NC, DFPT, EPH
-#%% description = Computation of isotropic Migdal-Eliashberg Tc
+#%% keywords = NC, DFPT, EPH, WANNIER90
+#%% description = Build the Wannier representation of the MgB2 Hamiltonian
 #%%<END TEST_INFO>

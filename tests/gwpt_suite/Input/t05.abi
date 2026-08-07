@@ -22,11 +22,11 @@ getpot_filepath "diamond_eph_gwpt/gso_POT.nc"
 getddb_filepath "diamond_eph_gwpt/out_DDB"
 getgstore_filepath "t04o_GSTORE.nc"
 
-gwpt_g2mode 1              # Use |g|^2
+gwpt_g2mode 1             # Use |g|^2
 gstore_gname "gvals"      # Use GWPT e-ph matrix elements from GSTORE (default)
 eph_stern 1               # Activate Sternheimer to compute contribution given by states above nband
 
-tmesh 300 100 1         # Temperature mesh.
+tmesh 300 100 1          # Temperature mesh.
 
 ddb_ngqpt 2 2 2          # The code expects to find in the DDB
                          # all the IBZ q-points corresponding to a 2x2x2 q-mesh
@@ -56,7 +56,7 @@ pseudos "C.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t01.abi, t02.abi, t03.abi, t04.abi, t05.abi, t06.abi
+#%% test_chain = t01.abi, t02.abi, t03.abi, t04.abi, t05.abi, t06.abi, t13.abi
 #%% exclude_builders = scope_gnu_10.2_paral
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt

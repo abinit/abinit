@@ -1,74 +1,58 @@
-# MgB2: Computation of the isotropic Migdal-Eliashberg Tc
-optdriver 7
-eph_task  1
+# MgB2: generate coarse-mesh wavefunctions and an ab-initio band structure.
 
-getddb_filepath  "MgB2_eph4isotc/flow_mgb2_phonons/w1/outdata/out_DDB"
-getwfk_filepath  "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_WFK.nc"
-getdvdb_filepath "teph4isotc_1_DVDB"
+ndtset 2
 
+iscf -2
+tolwfr 1.0d-12
+getden_filepath "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
 structure "abifile:MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
 
-ddb_ngqpt 4 4 4        # The ab-initio q-mesh (DDB, DVDB)
-eph_ngqpt_fine 6 6 6   # Activate interpolation of DFPT potentials
-                       # gamma_{q,nu} are computed of this fine grid.
-dipdip 0               # No treatment of the dipole-dipole part. OK for metals
+# Dataset 1: complete uniform mesh required by Wannier90.
+#kptopt1 1
+ngkpt1 6 6 4
+nshiftk1 1
+shiftk1 0.0 0.0 0.0
+prtebands1 0
+prtpot1 1
 
-#eph_intmeth 2   # Tetrahedron method
-#eph_fsewin 0.3 eV
-#eph_fsmear -1.0
-eph_intmeth 1       # Gaussian method for double-delta integration.
-eph_fsmear 0.1 eV   # Constant broadening in Gaussian function.
-eph_fsewin 0.3 eV   # Energy window for wavefunctions.
+# Dataset 2: ab-initio bands along Gamma-K-M-Gamma-A-H-L-A.
+kptopt2 -7
+ndivsm2 4
+kptbounds2
+  0.0 0.0 0.0       # Gamma
+  1/3 1/3 0.0       # K
+  0.5 0.0 0.0       # M
+  0.0 0.0 0.0       # Gamma
+  0.0 0.0 0.5       # A
+  1/3 1/3 0.5       # H
+  0.5 0.0 0.5       # L
+  0.0 0.0 0.5       # A
+prtebands2 1
+prtwf2 0
 
-# Tricks to make EPH calculations faster.
-mixprec 1
-boxcutmin 1.1
-
-# K-mesh: must be consistent with the one used to generate the WFK file
-ngkpt   12 12 12
-nshiftk 1
-shiftk  0.0 0.0 0.0
-
-# Compute phonon bands along this q-path.
-#prtnest   1
-ph_nqpath 8
-ph_qpath
-    0.0 0.0 0.0   # Gamma
-    1/3 1/3 0.0   # K
-    0.5 0.0 0.0   # M
-    0.0 0.0 0.0   # Gamma
-    0.0 0.0 0.5   # A
-    1/3 1/3 0.5   # H
-    0.5 0.0 0.5   # L
-    0.0 0.0 0.5   # A
-
-
-# COMMON INPUT DATA###########################################################
-ecut    38.0
-nband   8
-occopt  4              # Marzari smearing
+ecut 38.0
+nband 16
+occopt 4
 tsmear 0.02
 
 pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_04_pw_std_psp8/"
 pseudos "Mg-low.psp8, B.psp8"
 
-##############################################################
-# This section is used only for regression testing of ABINIT #
-##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% need_cpp_vars = HAVE_WANNIER90
 #%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi, atlas_gnu_14.2_triqs
-#%% test_chain = teph4isotc_1.abi, teph4isotc_2.abi, teph4isotc_3.abi, teph4isotc_4.abi,
-#%%              teph4isotc_5.abi, teph4isotc_6.abi, teph4isotc_7.abi,
+#%% test_chain = teph4isotc_1.abi, teph4isotc_2.abi, teph4isotc_3.abi, teph4isotc_4.abi, teph4isotc_5.abi,
+#%%              teph4isotc_6.abi
 #%% [files]
 #%% use_git_submodule = MgB2_eph4isotc
 #%% files_to_test =
-#%%   teph4isotc_2.abo, tolnlines= 173, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%%   teph4isotc_2.abo, tolnlines= 20, tolabs= 3.0e-2, tolrel= 6.0e-3
 #%% [paral_info]
-#%% max_nprocs = 10
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = NC, DFPT, EPH
-#%% description = Computation of the isotropic Migdal-Eliashberg Tc
+#%% keywords = NC, DFPT, EPH, WANNIER90
+#%% description = Generate coarse-mesh MgB2 wavefunctions and ab-initio bands along a high-symmetry path
 #%%<END TEST_INFO>

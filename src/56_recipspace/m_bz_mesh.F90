@@ -2356,8 +2356,8 @@ subroutine littlegroup_init(Ltg, ext_pt, nbz, bz, Cryst, use_umklp, npwe, gvec, 
 
  do ik=1,nbz
    if (Ltg%ibzq(ik) /= 1) CYCLE
-   ! * Loop over symmetry operations S and time-reversal.
-   ! * Use spatial inversion instead of time reversal whenever possible.
+   ! Loop over symmetry operations S and time-reversal.
+   ! Use spatial inversion instead of time reversal whenever possible.
    do itim=1,my_timrev
      do isym=1,nsym
 
@@ -2395,10 +2395,9 @@ subroutine littlegroup_init(Ltg, ext_pt, nbz, bz, Cryst, use_umklp, npwe, gvec, 
         end if
       end if
 
-     end do !isym
-   end do !itim
-
- end do !nbz
+     end do ! isym
+   end do ! itim
+ end do ! nbz
 
  ABI_FREE(ktest)
 

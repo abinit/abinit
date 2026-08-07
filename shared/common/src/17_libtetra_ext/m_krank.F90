@@ -669,7 +669,6 @@ subroutine get_ibz2bz(nibz, nbz, bz2ibz, ibz2bz, err_msg, ierr)
 !scalars
  integer :: iq_bz, iq_ibz, isym_q, trev_q, cnt, g0_q(3)
  logical :: isirr_q
-
 !----------------------------------------------------------------------
 
  ABI_MALLOC(ibz2bz, (nibz))

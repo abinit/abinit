@@ -3112,10 +3112,6 @@ From M. Giantomassi (MR821)
 
 Miscellaneous improvement of the electron-phonon part of ABINIT (documentation, bug fixes, improved parallelism)
 
-Work in progress: a new tutorial [[tutorial:eph4isotc]]
-to demonstrate the computation of superconducting properties within the isotropic Eliashberg formalism.
-See tests in the [[tutorial:eph4isotc]].
-
 By M. Giantomassi (MR870)
 
 **D.9** Improvements of the cRPA determination of the U and J parameters (default keywords, tests and tutos).
@@ -3506,9 +3502,6 @@ In particular:
 - the input files have been cleaned when adequate, and many have been restructured using a template;
 with populations of electrons (in the conduction bands) and holes (in the valence bands)
 
-<!--
-Also, a new tutorial, [[tutorial:eph4isotc]], is available (with tests [[test:eph4isotc_1]] to [[test:eph4isotc_4]],
--->
 Also, [[tutorial:nlo]] and [[tutorial:eph4zpr]] have been enlarged to new developments
 (see [[test:eph4zpr_8]] and [[test:nlo_6]]).
 
