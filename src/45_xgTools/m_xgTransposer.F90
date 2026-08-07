@@ -1302,7 +1302,12 @@ module m_xgTransposer
     integer :: me_rows,ncpu_cols,ncpu_rows
     integer :: nPair,ispinor,nspinor
     integer :: nrowsLinalgMe,nrowsLinalgMeSum
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+    integer :: irow
+    integer, ABI_CONTIGUOUS pointer :: nrowsLinalg(:)
+#else
     integer, pointer :: nrowsLinalg(:)
+#endif
     double precision :: tsec(2)
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
     integer(c_size_t) :: buffer_size
@@ -1356,48 +1361,91 @@ module m_xgTransposer
 
     select case (xgTransposer%state)
     case (STATE_LINALG)
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      !$OMP TARGET UPDATE FROM(bufferMess) if(xgTransposer%gpu_option == ABI_GPU_OPENMP)
-#endif
       ! We are going to STATE_COLSROWS so we are after all2all
-      !$omp parallel do private(nrowsLinalgMe,nrowsLinalgMeSum,toe,tos,frome,froms), collapse(3)
-      do col = 1, ncolsColsRows
-        do icpu = 0, ncpu_cols-1
-          do ispinor = 1, nspinor
-            nrowsLinalgMe = nrowsLinalg(1+me_rows+icpu*ncpu_rows)
-            nrowsLinalgMeSum = sum(nrowsLinalg(1+me_rows:1+me_rows+(icpu-1)*ncpu_rows:ncpu_rows))
-            froms=1+(ispinor-1)*nrowsLinalgMe/nspinor+(col-1)*nrowsLinalgMe+nrowsLinalgMeSum*ncolsColsRows
-            frome=froms-1+nrowsLinalgMe/nspinor
-            tos=1+nrowsLinalgMeSum/nspinor+(ispinor-1)*nrowsColsRows/nspinor+(col-1)*nrowsColsRows
-            toe=tos-1+nrowsLinalgMe/nspinor
-            bufferOrdered(:,tos:toe) = bufferMess(:,froms:frome)
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      if (xgTransposer%gpu_option == ABI_GPU_OPENMP) then
+        ! bufferMess and bufferOrdered already live on the device: reorganize them there directly,
+        ! no CPU<->GPU round trip needed. nrowsLinalg is small and mapped just for this kernel.
+        ! Array-section assignment is not usable in device kernel bodies: loop explicitly instead.
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+        !$OMP& PRIVATE(nrowsLinalgMe,nrowsLinalgMeSum,toe,tos,frome,froms,irow) &
+        !$OMP& MAP(to:bufferMess) MAP(to:bufferOrdered) MAP(to:nrowsLinalg)
+        do col = 1, ncolsColsRows
+          do icpu = 0, ncpu_cols-1
+            do ispinor = 1, nspinor
+              nrowsLinalgMe = nrowsLinalg(1+me_rows+icpu*ncpu_rows)
+              nrowsLinalgMeSum = sum(nrowsLinalg(1+me_rows:1+me_rows+(icpu-1)*ncpu_rows:ncpu_rows))
+              froms=1+(ispinor-1)*nrowsLinalgMe/nspinor+(col-1)*nrowsLinalgMe+nrowsLinalgMeSum*ncolsColsRows
+              frome=froms-1+nrowsLinalgMe/nspinor
+              tos=1+nrowsLinalgMeSum/nspinor+(ispinor-1)*nrowsColsRows/nspinor+(col-1)*nrowsColsRows
+              toe=tos-1+nrowsLinalgMe/nspinor
+              do irow = 0, toe-tos
+                bufferOrdered(1,tos+irow) = bufferMess(1,froms+irow)
+                bufferOrdered(2,tos+irow) = bufferMess(2,froms+irow)
+              end do
+            end do
           end do
         end do
-      end do
+      else
+#endif
+        !$omp parallel do private(nrowsLinalgMe,nrowsLinalgMeSum,toe,tos,frome,froms), collapse(3)
+        do col = 1, ncolsColsRows
+          do icpu = 0, ncpu_cols-1
+            do ispinor = 1, nspinor
+              nrowsLinalgMe = nrowsLinalg(1+me_rows+icpu*ncpu_rows)
+              nrowsLinalgMeSum = sum(nrowsLinalg(1+me_rows:1+me_rows+(icpu-1)*ncpu_rows:ncpu_rows))
+              froms=1+(ispinor-1)*nrowsLinalgMe/nspinor+(col-1)*nrowsLinalgMe+nrowsLinalgMeSum*ncolsColsRows
+              frome=froms-1+nrowsLinalgMe/nspinor
+              tos=1+nrowsLinalgMeSum/nspinor+(ispinor-1)*nrowsColsRows/nspinor+(col-1)*nrowsColsRows
+              toe=tos-1+nrowsLinalgMe/nspinor
+              bufferOrdered(:,tos:toe) = bufferMess(:,froms:frome)
+            end do
+          end do
+        end do
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      !$OMP TARGET UPDATE TO(bufferOrdered) if(xgTransposer%gpu_option == ABI_GPU_OPENMP)
+      end if
 #endif
     case (STATE_COLSROWS)
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      !$OMP TARGET UPDATE FROM(bufferOrdered) if(xgTransposer%gpu_option == ABI_GPU_OPENMP)
-#endif
       ! We are going to STATE_LINALG so we are before all2all
-      !$omp parallel do private(nrowsLinalgMe,nrowsLinalgMeSum,toe,tos,frome,froms), collapse(3)
-      do col = 1, ncolsColsRows
-        do icpu = 0, ncpu_cols-1
-          do ispinor = 1, nspinor
-            nrowsLinalgMe = nrowsLinalg(1+me_rows+icpu*ncpu_rows)
-            nrowsLinalgMeSum = sum(nrowsLinalg(1+me_rows:1+me_rows+(icpu-1)*ncpu_rows:ncpu_rows))
-            froms=1+(ispinor-1)*nrowsLinalgMe/nspinor+(col-1)*nrowsLinalgMe+nrowsLinalgMeSum*ncolsColsRows
-            frome=froms-1+nrowsLinalgMe/nspinor
-            tos=1+nrowsLinalgMeSum/nspinor+(ispinor-1)*nrowsColsRows/nspinor+(col-1)*nrowsColsRows
-            toe=tos-1+nrowsLinalgMe/nspinor
-            bufferMess(:,froms:frome) = bufferOrdered(:,tos:toe)
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      if (xgTransposer%gpu_option == ABI_GPU_OPENMP) then
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+        !$OMP& PRIVATE(nrowsLinalgMe,nrowsLinalgMeSum,toe,tos,frome,froms,irow) &
+        !$OMP& MAP(to:bufferMess) MAP(to:bufferOrdered) MAP(to:nrowsLinalg)
+        do col = 1, ncolsColsRows
+          do icpu = 0, ncpu_cols-1
+            do ispinor = 1, nspinor
+              nrowsLinalgMe = nrowsLinalg(1+me_rows+icpu*ncpu_rows)
+              nrowsLinalgMeSum = sum(nrowsLinalg(1+me_rows:1+me_rows+(icpu-1)*ncpu_rows:ncpu_rows))
+              froms=1+(ispinor-1)*nrowsLinalgMe/nspinor+(col-1)*nrowsLinalgMe+nrowsLinalgMeSum*ncolsColsRows
+              frome=froms-1+nrowsLinalgMe/nspinor
+              tos=1+nrowsLinalgMeSum/nspinor+(ispinor-1)*nrowsColsRows/nspinor+(col-1)*nrowsColsRows
+              toe=tos-1+nrowsLinalgMe/nspinor
+              do irow = 0, toe-tos
+                bufferMess(1,froms+irow) = bufferOrdered(1,tos+irow)
+                bufferMess(2,froms+irow) = bufferOrdered(2,tos+irow)
+              end do
+            end do
           end do
         end do
-      end do
+      else
+#endif
+        !$omp parallel do private(nrowsLinalgMe,nrowsLinalgMeSum,toe,tos,frome,froms), collapse(3)
+        do col = 1, ncolsColsRows
+          do icpu = 0, ncpu_cols-1
+            do ispinor = 1, nspinor
+              nrowsLinalgMe = nrowsLinalg(1+me_rows+icpu*ncpu_rows)
+              nrowsLinalgMeSum = sum(nrowsLinalg(1+me_rows:1+me_rows+(icpu-1)*ncpu_rows:ncpu_rows))
+              froms=1+(ispinor-1)*nrowsLinalgMe/nspinor+(col-1)*nrowsLinalgMe+nrowsLinalgMeSum*ncolsColsRows
+              frome=froms-1+nrowsLinalgMe/nspinor
+              tos=1+nrowsLinalgMeSum/nspinor+(ispinor-1)*nrowsColsRows/nspinor+(col-1)*nrowsColsRows
+              toe=tos-1+nrowsLinalgMe/nspinor
+              bufferMess(:,froms:frome) = bufferOrdered(:,tos:toe)
+            end do
+          end do
+        end do
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      !$OMP TARGET UPDATE TO(bufferMess) if(xgTransposer%gpu_option == ABI_GPU_OPENMP)
+      end if
 #endif
     end select
 
