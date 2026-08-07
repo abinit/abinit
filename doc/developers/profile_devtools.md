@@ -159,5 +159,8 @@ The three DGEMMs share the same *Kernel_Id=3320* that produces a single aggregat
 kernels are not shown in the roofline. The aggregated GEMM call (circle marker) is compute-bound:
 
 ![roofline_screenshot](roofline.png)
+*Roofline plot produced using the scripts
+[here](https://dci.dci-gitlab.cines.fr/webextranet/_downloads/da1778d1728f02f019ebdd3100a4f790/rocprofv3.reformat.py)
+and [here](https://dci.dci-gitlab.cines.fr/webextranet/_downloads/1cdca254e1302b73fa16980ab1398702/roofline.py). Script credits: CINES.*
 
 In order to interpret the roofline, we combine it with the *timeopt* reports found in the .abo to diagnose time-consuming parts of the code. From the timers and the roofline, *RR_GEMM* is a computationally intensive part of the code that is negligeable overall with less than 0.1% simulation time. Thus *RR_GEMM* is efficient and optimizing it further will have no impact on the simulation time. Another code range named *RR_HEVG* has about 1.5% simulation time. In this range, the most time-consuming single kernel dispatch is shown in the roofline by a triangle marker and is memory-bound. The profiler's report allows to discover that this kernel is `rocsolver::stedc_mergeValues_kernel`. Note that many small kernel dispatches with the same launch configuration (grid and workgroup size) having a large cumulative time are also interesting to include in the roofline by aggregating them, see point in diamond (`rocblas_trsv_device` kernel). The circle and the diamond kernels do not saturate GPU memory bandwidth, as shown by the very low peak percentage. This was an example of understanding GPU performance using the roofline.
