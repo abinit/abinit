@@ -784,7 +784,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    if(hamk%gpu_option==ABI_GPU_DISABLED .or. hamk%gpu_option==ABI_GPU_OPENMP) then
 
      ! If forces and stresses are both asked, compute them separately if set to (choice=={2,3})
-     if(choice==23 .and. signs==1 .and. gemm_nonlop_split_choice23) then
+     if(choice==23 .and. signs==1 .and. (gemm_nonlop_split_choice23 .or. hamk%gpu_option==ABI_GPU_DISABLED)) then
        nnlout_forces = 3*hamk%natom
        nnlout_stress = 6
        ABI_MALLOC(enlout_forces,(nnlout_forces*ndat))
