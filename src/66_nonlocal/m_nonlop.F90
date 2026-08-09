@@ -812,11 +812,11 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
            iatom_only_,hamk%typat,hamk%usepaw,&
            vectproj=vectproj,gpu_option=hamk%gpu_option)
        do idat=1,ndat
-         shift=(idat-1)*nnlout
-         shift_forces=(idat-1)*nnlout_forces
-         shift_stress=(idat-1)*nnlout_stress
-         enlout(shift+1:shift+6)=enlout_stress(shift_stress+1:shift_stress+6)
-         enlout(shift+7:shift+7+3*hamk%natom)=enlout_forces(shift_forces+1:shift_forces+3*hamk%natom)
+         shift = (idat-1)*nnlout
+         shift_forces = (idat-1)*nnlout_forces
+         shift_stress = (idat-1)*nnlout_stress
+         enlout(shift+1:shift+nnlout_stress) = enlout_stress(shift_stress+1:shift_stress+nnlout_stress)
+         enlout(shift+nnlout_stress+1:shift+nnlout_stress+nnlout_forces) = enlout_forces(shift_forces+1:shift_forces+nnlout_forces)
        end do
        ABI_FREE(enlout_forces)
        ABI_FREE(enlout_stress)
