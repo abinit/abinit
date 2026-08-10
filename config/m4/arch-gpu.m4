@@ -345,9 +345,6 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
       abi_result="none"
     fi
     AC_MSG_RESULT([${abi_result}])
-    if test "${GPU_LIBS}" = "" -a "${CUDA_LIBS}" = ""; then
-      abi_gpu_cuda_libs="${abi_gpu_cuda_libs} -lcuda"
-    fi
     if test "${abi_gpu_cuda_has_common}" = "no"; then
       AC_MSG_WARN([could not find libcuda.${abi_so_ext}])
     fi
