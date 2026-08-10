@@ -159,7 +159,7 @@ subroutine select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,nfftf,ng
      end if
      ! grnhat_12
      ider=ider*2 ! Overestimate this buffer to ensure it fits as we don't manage OpenMP pool of GPU memory
-     sum_mem = sum_mem + INT(2,c_size_t)*nfftf*nspinor**2*3*natom*(ider/3)*ndat_occ*ndat
+     sum_mem = sum_mem + INT(2,c_size_t)*nfgd_max*nspinor**2*3*natom*(ider/3)*ndat_occ*ndat
      ! gvnlxc
      sum_mem = sum_mem + INT(2,c_size_t)*npw*nspinor*ndat_occ
      ! rho12
@@ -507,7 +507,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        !$OMP TARGET ENTER DATA MAP(alloc:strout) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
      end if
-     ABI_MALLOC(grnhat_12,(2,nfftf,nspinor**2,3,natom*(ider/3),ndat_occ,ndat))
+     ABI_MALLOC(grnhat_12,(2,nfgd_max,nspinor**2,3,natom*(ider/3),ndat_occ,ndat))
      ABI_MALLOC(gvnlxc,(2,npw*nspinor*ndat_occ))
      ABI_MALLOC(grnhat12,(2,nfftf,nspinor**2,3*nhat12_grdim,ndat_occ,ndat))
      ABI_MALLOC(rho12,(2,nfftf,nspinor**2,ndat_occ,ndat))
@@ -908,9 +908,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
                    esum=0
                    do ifft=1,atom_nfgd(iatom)
                      ind=atom_ifftsph(ifft,iatom)
-                     esum=esum &
-    &                + vfock(2*ind-1,idat_occ,idat)*grnhat_12(1,ind,1,idir,iatom,idat_occ,idat) &
-    &                - vfock(2*ind,idat_occ,idat)*grnhat_12(2,ind,1,idir,iatom,idat_occ,idat)
+                     esum = esum &
+                     &      + vfock(2*ind-1,idat_occ,idat)*grnhat_12(1,ifft,1,idir,iatom,idat_occ,idat) &
+                     &      - vfock(2*ind,idat_occ,idat)*grnhat_12(2,ifft,1,idir,iatom,idat_occ,idat)
                    end do
                    for1(idat_occ,idir,iatom,idat)=esum
                  end do ! idat_occ
@@ -930,9 +930,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
                    esum=0
                    do ifft=1,atom_nfgd(iatom)
                      ind=atom_ifftsph(ifft,iatom)
-                     esum=esum &
-    &                + vfock(2*ind-1,idat_occ,idat)*grnhat_12(1,ind,1,idir,iatom,idat_occ,idat) &
-    &                - vfock(2*ind,idat_occ,idat)*grnhat_12(2,ind,1,idir,iatom,idat_occ,idat)
+                     esum = esum &
+                     &      + vfock(2*ind-1,idat_occ,idat)*grnhat_12(1,ifft,1,idir,iatom,idat_occ,idat) &
+                     &      - vfock(2*ind,idat_occ,idat)*grnhat_12(2,ifft,1,idir,iatom,idat_occ,idat)
                    end do
                    for1(idat_occ,idir,iatom,idat)=esum
                  end do ! idat_occ
@@ -1036,14 +1036,10 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
                    esum=0
                    do iatom=1,natom
                      do ifft=1,atom_nfgd(iatom)
-                       !ind=fockcommon%pawfgrtab(iatom)%ifftsph(ifft)
-                       ind=atom_ifftsph(ifft,iatom)
-                       !strdat(idir,idir1,idat_occ,idat)=strdat(idir,idir1,idat_occ,idat)+(vfock(2*ind-1,idat_occ,idat)*grnhat_12(1,ind,1,idir,iatom,idat_occ,idat)-&
-                       esum=esum+(vfock(2*ind-1,idat_occ,idat)*grnhat_12(1,ind,1,idir,iatom,idat_occ,idat)-&
-                          vfock(2*ind,idat_occ,idat)*grnhat_12(2,ind,1,idir,iatom,idat_occ,idat))*&
-                          atom_rfgd(idir1,ifft,iatom)
-                          !fockcommon%pawfgrtab(iatom)%rfgd(idir1,ifft)
-                      !   vfock(2*ind,idat_occ,idat)*grnhat_12(2,ind,1,idir,iatom,idat_occ,idat))*atom_rfgd(idir1,ifft,iatom)
+                       ind = atom_ifftsph(ifft,iatom)
+                       esum = esum + (vfock(2*ind-1,idat_occ,idat)*grnhat_12(1,ifft,1,idir,iatom,idat_occ,idat)&
+                       &      - vfock(2*ind,idat_occ,idat)*grnhat_12(2,ifft,1,idir,iatom,idat_occ,idat))&
+                       &      * atom_rfgd(idir1,ifft,iatom)
                      end do
                    end do
                    strdat(idir,idir1,idat_occ,idat)=esum
@@ -1082,8 +1078,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
                      !$OMP PARALLEL DO PRIVATE(ifft,ind) REDUCTION(+:esum)
                      do ifft=1,atom_nfgd(iatom)
                        ind=atom_ifftsph(ifft,iatom)
-                       esum=esum+(vfock(2*ind-1,idat_occ,idat)*grnhat_12(1,ind,1,idir,iatom,idat_occ,idat)-&
-      &                   vfock(2*ind,idat_occ,idat)*grnhat_12(2,ind,1,idir,iatom,idat_occ,idat))*atom_rfgd(idir1,ifft,iatom)
+                       esum = esum + (vfock(2*ind-1,idat_occ,idat)*grnhat_12(1,ifft,1,idir,iatom,idat_occ,idat)&
+                       &      - vfock(2*ind,idat_occ,idat)*grnhat_12(2,ifft,1,idir,iatom,idat_occ,idat))&
+                       &      * atom_rfgd(idir1,ifft,iatom)
                      end do
                      strdat(idir,idir1,idat_occ,idat)=strdat(idir,idir1,idat_occ,idat)+esum
                    end do
