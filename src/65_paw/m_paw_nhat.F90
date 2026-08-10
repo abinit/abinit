@@ -2343,18 +2343,18 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
 
 !Local variables ---------------------------------------
 !scalars
- integer :: ic,idij,idijend,ils,ilslm,ilslm1,isel,ispden,iatom,idat,ia
- integer :: jc,klm,klmn,klmn1,klmn2,nfgd_max,iatom_tot
- integer :: lm0,lm_size,lmax,lmin,lmn2_size,mm,nfgd,nsploop,optgr0,gpu_option_
+ integer :: ic,idij,idijend,icpq,ispden,iatom,idat,ia,ilslm,klm
+ integer :: jc,klmn,klmn1,nfgd_max,iatom_tot
+ integer :: l_size_full,lm_size,lmn2_size,nfgd,nsploop,optgr0,gpu_option_
  logical :: has_qphase,qne0
- real(dp) :: vi,vr
- complex(dp) :: scal
+ real(dp) :: vi,vr,scal_r
+ complex(dp) :: gemm_alpha,gemm_beta
  character(len=500) :: msg
 !arrays
- real(dp) :: rdum1(1),rdum2(2), sum_r, sum_i
- real(dp),allocatable,target :: dijhat_idij(:,:,:),prod(:,:,:),gnt_scal(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: atom_expiqr(:,:,:),atom_gylm(:,:,:),atom_qijl(:,:)
- integer,  ABI_CONTIGUOUS pointer :: atom_ifftsph(:,:),atom_indklmn(:,:),atom_nfgd(:)
+ real(dp) :: rdum1(1),rdum2(2)
+ real(dp),allocatable,target :: dijhat_idij(:,:,:,:),prod(:,:,:,:),atom_potg(:,:,:,:),gnt_scal(:,:)
+ real(dp),allocatable,target :: atom_expiqr(:,:,:),atom_gylm(:,:,:),atom_qijl(:,:)
+ integer,allocatable,target :: atom_ifftsph(:,:),atom_nfgd(:)
 
 ! *************************************************************************
 
@@ -2363,20 +2363,21 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
  lmn2_size    =  pawtab%lmn2_size
  qne0=(qphon(1)**2+qphon(2)**2+qphon(3)**2>=1.d-15)
  has_qphase=(qne0.and.qphase==2)
- scal=dcmplx(ucvol/dble(ngridtot), 0.0_dp)
+ scal_r=ucvol/dble(ngridtot)
+ gemm_beta=czero
  gpu_option_=ABI_GPU_DISABLED; if (present(gpu_option)) gpu_option_=gpu_option
 
  ABI_MALLOC(gnt_scal,(size(pawang%gntselect,1),size(pawang%gntselect,2)))
  gnt_scal=0
  do klm=1,size(pawang%gntselect,2)
    do ilslm=1,size(pawang%gntselect,1)
-     if(pawang%gntselect(ilslm,klm)>0) gnt_scal=1
+     if(pawang%gntselect(ilslm,klm)>0) gnt_scal(ilslm,klm)=1
    end do
  end do
 
-
- atom_indklmn => pawtab%indklmn
- atom_qijl    => pawtab%qijl
+ l_size_full  =  size(pawtab%qijl,1)
+ ABI_MALLOC(atom_qijl,(l_size_full,lmn2_size))
+ atom_qijl    =  pawtab%qijl
 !Init memory
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET ENTER DATA MAP(alloc:dijhat) IF(gpu_option_==ABI_GPU_OPENMP)
@@ -2430,6 +2431,9 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
    ABI_MALLOC(atom_expiqr, (2,nfgd_max,nattyp))
  end if
 
+!Zero-pad atom_gylm beyond each atom's actual nfgd as GEMMs covers
+!nfgd max value among atoms.
+ atom_gylm=zero
  do ia=1,nattyp
    iatom=iatm+ia
    nfgd=pawfgrtab(iatom)%nfgd
@@ -2442,12 +2446,17 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
    end if
  end do ! ia
 
- ABI_MALLOC(prod,(qphase*lm_size,ndat,nattyp))
- ABI_MALLOC(dijhat_idij,(qphase*lmn2_size,ndat,nattyp))
+!prod/dijhat_idij/atom_potg store the "phase" (qphase) index as the outermost
+!(4th) array dimension so that, for a fixed phase component, the (idat,ia)
+![or (idat,ia,ic)] sub-block is contiguous and can be passed directly to
+!GEMM as a single dense (or strided-batched) matrix, with no repacking.
+ ABI_MALLOC(prod,(lm_size,ndat,nattyp,qphase))
+ ABI_MALLOC(dijhat_idij,(lmn2_size,ndat,nattyp,qphase))
+ ABI_MALLOC(atom_potg,(nfgd_max,ndat,nattyp,qphase))
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(alloc:prod,dijhat_idij) IF(gpu_option_==ABI_GPU_OPENMP)
- !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_ifftsph,gnt_scal,atom_qijl,atom_indklmn,atom_nfgd) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(alloc:prod,dijhat_idij,atom_potg) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_ifftsph,atom_qijl,atom_nfgd) IF(gpu_option_==ABI_GPU_OPENMP)
  !$OMP TARGET ENTER DATA MAP(to:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. has_qphase)
 #endif
 !----------------------------------------------------------
@@ -2461,223 +2470,162 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
      do ispden=idij,idijend
 
 !      ------------------------------------------------------
-!      Compute Int[V(r).g_l(r).Y_lm(r)]
+!      Gather V(r) on the atom's fine-grid points (and apply the
+!      exp(-i.q.r) phase rotation when relevant), zero-padded up
+!      to nfgd_max so the GEMMs below can use a common K=nfgd_max.
 !      ------------------------------------------------------
 !       Note for non-collinear magnetism:
 !          We compute Int[V^(alpha,beta)(r).g_l(r).Y_lm(r)]
 !          Remember: if nspden=4, V is stored as : V^11, V^22, V^12, i.V^21
+!       Note: has_qphase implies qphase==2 (has_qphase=qne0.and.qphase==2),
+!       so the qphase==1 & has_qphase combination can never occur.
 
        if(gpu_option_==ABI_GPU_DISABLED) then
-         prod=zero
+         atom_potg=zero
        else if(gpu_option_==ABI_GPU_OPENMP) then
-         call gpu_set_to_zero(prod,int(qphase,c_size_t)*lm_size*ndat*nattyp)
-       end if
-
-!      ===== Standard case ============================
-       if (.not.has_qphase) then
-         if (qphase==1) then
-           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ilslm,ic,idat)
-           do ia=1,nattyp
-             do idat=1,ndat
-               do ilslm=1,lm_size
-                 do ic=1,atom_nfgd(ia)
-                   prod(ilslm,idat,ia)=prod(ilslm,idat,ia)+Pot(atom_ifftsph(ic,ia),ispden,idat)*atom_gylm(ic,ilslm,ia)
-                 end do
-               end do
-             end do
-           end do ! ia
-         else
-           if(gpu_option_==ABI_GPU_DISABLED) then
-             !$OMP PARALLEL DO PRIVATE(vr,vi,ilslm1,ilslm,ic,jc,idat)
-             do ia=1,nattyp
-               do idat=1,ndat
-                 do ilslm=1,lm_size
-                   do ic=1,atom_nfgd(ia)
-                     ilslm1=1+(ilslm-1)*qphase
-                     jc=2*atom_ifftsph(ic,ia)
-                     vr=Pot(jc-1,ispden,idat);vi=Pot(jc,ispden,idat)
-                     prod(ilslm1  ,idat,ia)=prod(ilslm1  ,idat,ia)+vr*atom_gylm(ic,ilslm,ia)
-                     prod(ilslm1+1,idat,ia)=prod(ilslm1+1,idat,ia)+vi*atom_gylm(ic,ilslm,ia)
-                   end do
-                 end do
-               end do
-             end do ! ia
-           else if(gpu_option_==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-             !$OMP TARGET TEAMS DISTRIBUTE &
-             !$OMP& PRIVATE(ia) &
-             !$OMP& MAP(to:prod,Pot,atom_ifftsph,atom_gylm,atom_nfgd)
-             do ia=1,nattyp
-               !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat,sum_r,sum_i,ilslm,ic,jc)
-               do idat=1,ndat
-                 do ilslm=1,lm_size
-                   sum_r=0; sum_i=0
-                   do ic=1,atom_nfgd(ia)
-                     jc=2*atom_ifftsph(ic,ia)
-                     sum_r=sum_r+Pot(jc-1,ispden,idat)*atom_gylm(ic,ilslm,ia)
-                     sum_i=sum_i+Pot(jc  ,ispden,idat)*atom_gylm(ic,ilslm,ia)
-                   end do
-                   prod(1+(ilslm-1)*qphase  ,idat,ia)=sum_r
-                   prod(1+(ilslm-1)*qphase+1,idat,ia)=sum_i
-                 end do
-               end do
-             end do ! ia
-#endif
-           end if
-         end if
-
-!      ===== Including Exp(iqr) phase (DFPT only) =====
-       else
-         if (qphase==1) then
-           !$OMP PARALLEL DO PRIVATE(vr,ilslm,ic,idat)
-           do ia=1,nattyp
-             do idat=1,ndat
-               do ilslm=1,lm_size
-                 do ic=1,atom_nfgd(ia)
-                   vr=Pot(atom_ifftsph(ic,ia),ispden,idat)
-                   prod(ilslm,idat,ia)=prod(ilslm,idat,ia)+vr*atom_gylm(ic,ilslm,ia)&
-    &                                        *atom_expiqr(1,ic,ia)
-                 end do
-               end do
-             end do
-           end do ! ia
-         else
-           if(gpu_option_==ABI_GPU_DISABLED) then
-             !$OMP PARALLEL DO PRIVATE(vr,vi,ilslm1,ilslm,ic,jc,idat)
-             do ia=1,nattyp
-               do idat=1,ndat
-                 do ilslm=1,lm_size
-                   do ic=1,atom_nfgd(ia)
-                     ilslm1=1+(ilslm-1)*qphase
-                     jc=2*atom_ifftsph(ic,ia)
-                     vr=Pot(jc-1,ispden,idat);vi=Pot(jc,ispden,idat)
-                     prod(ilslm1  ,idat,ia)=prod(ilslm1  ,idat,ia)+atom_gylm(ic,ilslm,ia)&
-  &                    *(vr*atom_expiqr(1,ic,ia)-vi*atom_expiqr(2,ic,ia))
-                     prod(ilslm1+1,idat,ia)=prod(ilslm1+1,idat,ia)+atom_gylm(ic,ilslm,ia)&
-  &                    *(vr*atom_expiqr(2,ic,ia)+vi*atom_expiqr(1,ic,ia))
-                   end do
-                 end do
-               end do
-             end do ! ia
-           else if(gpu_option_==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-             !$OMP TARGET TEAMS DISTRIBUTE &
-             !$OMP& PRIVATE(ia) &
-             !$OMP& MAP(to:prod) MAP(to:Pot,atom_ifftsph,atom_expiqr,atom_gylm,atom_nfgd)
-             do ia=1,nattyp
-               !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ic,jc,ilslm,idat,sum_r,sum_i)
-               do idat=1,ndat
-                 do ilslm=1,lm_size
-                   sum_r=0; sum_i=0
-                   do ic=1,atom_nfgd(ia)
-                     jc=2*atom_ifftsph(ic,ia)
-                     sum_r=sum_r+atom_gylm(ic,ilslm,ia)&
-  &                    *(Pot(jc-1,ispden,idat)*atom_expiqr(1,ic,ia)-Pot(jc,ispden,idat)*atom_expiqr(2,ic,ia))
-                     sum_i=sum_i+atom_gylm(ic,ilslm,ia)&
-  &                    *(Pot(jc-1,ispden,idat)*atom_expiqr(2,ic,ia)+Pot(jc,ispden,idat)*atom_expiqr(1,ic,ia))
-                   end do
-                   prod(1+(ilslm-1)*qphase  ,idat,ia)=sum_r
-                   prod(1+(ilslm-1)*qphase+1,idat,ia)=sum_i
-                 end do
-               end do
-             end do ! ia
-#endif
-           end if
-         end if
-       end if
-
-!      Scaling factor (unit volume)
-       if(gpu_option_==ABI_GPU_DISABLED) then
-         prod=prod*ucvol/dble(ngridtot)
-       else if(gpu_option_==ABI_GPU_OPENMP) then
-         call abi_xscal(qphase*lm_size*ndat*nattyp,scal,prod,1,x_cplx=1,gpu_option=gpu_option_)
-       end if
-
-!      ----------------------------------------------------------
-!      Compute Sum_(i,j)_LM { q_ij^L Int[V(r).g_l(r).Y_lm(r)] }
-!      ----------------------------------------------------------
-!        Note for non-collinear magnetism:
-!          We compute Sum_(i,j)_LM { q_ij^L Int[V^(alpha,beta)(r).g_l(r).Y_lm(r)] }
-
-       if(gpu_option_==ABI_GPU_DISABLED) then
-         dijhat_idij=zero
-       else if(gpu_option_==ABI_GPU_OPENMP) then
-         call gpu_set_to_zero(dijhat_idij,int(qphase,c_size_t)*lmn2_size*ndat*nattyp)
+         call gpu_set_to_zero(atom_potg,int(nfgd_max,c_size_t)*ndat*nattyp*qphase)
        end if
 
        if (qphase==1) then
-         !$OMP PARALLEL DO PRIVATE(ilslm,idat,klmn,ils,mm,lm0,klm,lmin,lmax,isel)
-         do ia=1,nattyp
-           do idat=1,ndat
-             do klmn=1,lmn2_size
-               klm =atom_indklmn(1,klmn)
-               lmin=atom_indklmn(3,klmn)
-               lmax=atom_indklmn(4,klmn)
-               do ils=lmin,lmax,2
-                 lm0=ils**2+ils+1
-                 do mm=-ils,ils
-                   ilslm=lm0+mm;isel=pawang%gntselect(ilslm,klm)
-                   if (isel>0) dijhat_idij(klmn,idat,ia)=dijhat_idij(klmn,idat,ia) &
-    &                  +prod(ilslm,idat,ia)*pawtab%qijl(ilslm,klmn)
-                 end do
-               end do
-             end do
-           end do
-         end do ! ia
-       else
+!        ===== Standard case, real Pot/dijhat ============================
          if(gpu_option_==ABI_GPU_DISABLED) then
-           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ilslm,ilslm1,idat,klmn,ils,mm,lm0,klm,klmn1,lmin,lmax,isel,sum_r,sum_i)
+           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ic,idat)
            do ia=1,nattyp
              do idat=1,ndat
-               do klmn=1,lmn2_size
-                 sum_r=0; sum_i=0
-                 klmn1=2*klmn-1
-                 klm =atom_indklmn(1,klmn)
-                 lmin=atom_indklmn(3,klmn)
-                 lmax=atom_indklmn(4,klmn)
-                 do ils=lmin,lmax,2
-                   do mm=-ils,ils
-                     lm0=ils**2+ils+1
-                     ilslm=lm0+mm;ilslm1=2*ilslm
-                     sum_r=sum_r+prod(ilslm1-1,idat,ia)*atom_qijl(ilslm,klmn)*gnt_scal(ilslm,klm)
-                     sum_i=sum_i+prod(ilslm1  ,idat,ia)*atom_qijl(ilslm,klmn)*gnt_scal(ilslm,klm)
-                   end do
-                 end do
-                 dijhat_idij(klmn1  ,idat,ia)=sum_r
-                 dijhat_idij(klmn1+1,idat,ia)=sum_i
+               do ic=1,atom_nfgd(ia)
+                 atom_potg(ic,idat,ia,1)=Pot(atom_ifftsph(ic,ia),ispden,idat)
                end do
              end do
            end do ! ia
          else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
            !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-           !$OMP& PRIVATE(idat) &
-           !$OMP& MAP(to:dijhat_idij,prod,atom_indklmn,atom_qijl,gnt_scal)
+           !$OMP& PRIVATE(ia,idat) MAP(to:atom_potg,Pot,atom_ifftsph,atom_nfgd)
            do ia=1,nattyp
              do idat=1,ndat
-               !$OMP PARALLEL DO PRIVATE(klmn,sum_r,sum_i,klmn1,klm,lmin,lmax,ilslm,lm0,ils,mm)
-               do klmn=1,lmn2_size
-                 sum_r=0; sum_i=0
-                 klmn1=2*klmn-1
-                 klm =atom_indklmn(1,klmn)
-                 lmin=atom_indklmn(3,klmn)
-                 lmax=atom_indklmn(4,klmn)
-                 do ils=lmin,lmax,2
-                   do mm=-ils,ils
-                     lm0=ils**2+ils+1
-                     ilslm=lm0+mm;ilslm1=2*ilslm
-                     sum_r=sum_r+prod(ilslm1-1,idat,ia)*atom_qijl(ilslm,klmn)*gnt_scal(ilslm,klm)
-                     sum_i=sum_i+prod(ilslm1  ,idat,ia)*atom_qijl(ilslm,klmn)*gnt_scal(ilslm,klm)
-                   end do
-                 end do
-                 dijhat_idij(klmn1  ,idat,ia)=sum_r
-                 dijhat_idij(klmn1+1,idat,ia)=sum_i
+               !$OMP PARALLEL DO PRIVATE(ic)
+               do ic=1,atom_nfgd(ia)
+                 atom_potg(ic,idat,ia,1)=Pot(atom_ifftsph(ic,ia),ispden,idat)
+               end do
+             end do
+           end do ! ia
+#endif
+         end if
+       else if (.not.has_qphase) then
+!        ===== qphase==2, no exp(iqr) phase ================================
+         if(gpu_option_==ABI_GPU_DISABLED) then
+           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ic,idat,jc)
+           do ia=1,nattyp
+             do idat=1,ndat
+               do ic=1,atom_nfgd(ia)
+                 jc=2*atom_ifftsph(ic,ia)
+                 atom_potg(ic,idat,ia,1)=Pot(jc-1,ispden,idat)
+                 atom_potg(ic,idat,ia,2)=Pot(jc  ,ispden,idat)
+               end do
+             end do
+           end do ! ia
+         else if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+           !$OMP& PRIVATE(ia,idat) MAP(to:atom_potg,Pot,atom_ifftsph,atom_nfgd)
+           do ia=1,nattyp
+             do idat=1,ndat
+               !$OMP PARALLEL DO PRIVATE(ic,jc)
+               do ic=1,atom_nfgd(ia)
+                 jc=2*atom_ifftsph(ic,ia)
+                 atom_potg(ic,idat,ia,1)=Pot(jc-1,ispden,idat)
+                 atom_potg(ic,idat,ia,2)=Pot(jc  ,ispden,idat)
+               end do
+             end do
+           end do ! ia
+#endif
+         end if
+       else
+!        ===== qphase==2, including exp(iqr) phase (DFPT only) =============
+!        The exp(-i.q.r) rotation is folded directly into the gather, so
+!        it disappears from the later GEMM-based reduction entirely.
+         if(gpu_option_==ABI_GPU_DISABLED) then
+           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ic,idat,jc,vr,vi)
+           do ia=1,nattyp
+             do idat=1,ndat
+               do ic=1,atom_nfgd(ia)
+                 jc=2*atom_ifftsph(ic,ia)
+                 vr=Pot(jc-1,ispden,idat);vi=Pot(jc,ispden,idat)
+                 atom_potg(ic,idat,ia,1)=vr*atom_expiqr(1,ic,ia)-vi*atom_expiqr(2,ic,ia)
+                 atom_potg(ic,idat,ia,2)=vr*atom_expiqr(2,ic,ia)+vi*atom_expiqr(1,ic,ia)
+               end do
+             end do
+           end do ! ia
+         else if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+           !$OMP& PRIVATE(ia,idat) MAP(to:atom_potg,Pot,atom_ifftsph,atom_expiqr,atom_nfgd)
+           do ia=1,nattyp
+             do idat=1,ndat
+               !$OMP PARALLEL DO PRIVATE(ic,jc,vr,vi)
+               do ic=1,atom_nfgd(ia)
+                 jc=2*atom_ifftsph(ic,ia)
+                 vr=Pot(jc-1,ispden,idat);vi=Pot(jc,ispden,idat)
+                 atom_potg(ic,idat,ia,1)=vr*atom_expiqr(1,ic,ia)-vi*atom_expiqr(2,ic,ia)
+                 atom_potg(ic,idat,ia,2)=vr*atom_expiqr(2,ic,ia)+vi*atom_expiqr(1,ic,ia)
                end do
              end do
            end do ! ia
 #endif
          end if
        end if
+
+!      ----------------------------------------------------------
+!      Compute Int[V(r).g_l(r).Y_lm(r)] = gylm^T . atom_potg
+!      as one GEMM per atom (CPU) or one batched-strided GEMM
+!      covering all atoms of the type (GPU).
+!      The ucvol/ngridtot scaling factor is folded in as GEMM alpha.
+!      ----------------------------------------------------------
+       gemm_alpha=dcmplx(scal_r,zero)
+       if(gpu_option_==ABI_GPU_DISABLED) then
+         do icpq=1,qphase
+           do ia=1,nattyp
+             call dgemm('T','N',lm_size,ndat,nfgd_max,scal_r,&
+&              atom_gylm(1,1,ia),nfgd_max,atom_potg(1,1,ia,icpq),nfgd_max,zero,&
+&              prod(1,1,ia,icpq),lm_size)
+           end do
+         end do
+       else if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET DATA USE_DEVICE_ADDR(atom_gylm,atom_potg,prod)
+         do icpq=1,qphase
+           call abi_gpu_xgemm_strided(1,'T','N',lm_size,ndat,nfgd_max,gemm_alpha,&
+&            c_loc(atom_gylm),nfgd_max,nfgd_max*lm_size,&
+&            c_loc(atom_potg(1,1,1,icpq)),nfgd_max,nfgd_max*ndat,gemm_beta,&
+&            c_loc(prod(1,1,1,icpq)),lm_size,lm_size*ndat,nattyp)
+         end do
+         !$OMP END TARGET DATA
+#endif
+       end if
+
+!      ----------------------------------------------------------
+!      Compute Sum_(i,j)_LM { q_ij^L Int[V(r).g_l(r).Y_lm(r)] } = qijl^T . prod
+!      This reduction does not depend on the atom index (qijl is a
+!      per-atom-type quantity), so the whole (ndat,nattyp) batch is
+!      handled by a SINGLE dense GEMM call (no atom loop, no per-klmn
+!      Gaunt-selection loop needed: qijl is already zero wherever the
+!      Gaunt selection rule forbids a given (ilslm,klmn) pair).
+!      ----------------------------------------------------------
+       do icpq=1,qphase
+         if(gpu_option_==ABI_GPU_DISABLED) then
+           call dgemm('T','N',lmn2_size,ndat*nattyp,lm_size,one,&
+&            atom_qijl(1,1),l_size_full,prod(1,1,1,icpq),lm_size,zero,&
+&            dijhat_idij(1,1,1,icpq),lmn2_size)
+         else if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$OMP TARGET DATA USE_DEVICE_ADDR(atom_qijl,prod,dijhat_idij)
+           call abi_gpu_xgemm(1,'T','N',lmn2_size,ndat*nattyp,lm_size,cone,&
+&            c_loc(atom_qijl),l_size_full,c_loc(prod(1,1,1,icpq)),lm_size,gemm_beta,&
+&            c_loc(dijhat_idij(1,1,1,icpq)),lmn2_size)
+           !$OMP END TARGET DATA
+#endif
+         end if
+       end do
 
 !      ----------------------------------------------------------
 !      Deduce some part of Dij according to symmetries
@@ -2687,63 +2635,35 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
        !if ispden=2 => real part of D^22_ij
        !if ispden=3 => real part of D^12_ij
        !if ispden=4 => imaginary part of D^12_ij
-       if(gpu_option_==ABI_GPU_DISABLED) then
-         !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat,klmn,klmn1,klmn2)
-         do ia=1,nattyp
-           do idat=1,ndat
-             do klmn=1,lmn2_size
-               klmn1=max(1,ispden-2)+(klmn-1)*cplex_dij
-               klmn2=1+(klmn-1)*qphase
-               dijhat(klmn1,idij+(idat-1)*ndij,ia)=dijhat_idij(klmn2,idat,ia)
-             end do
-           end do
-         end do ! ia
-       else if(gpu_option_==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-         !$OMP& MAP(to:dijhat) MAP(to:dijhat_idij) PRIVATE(idat,ia)
-         do ia=1,nattyp
-           do idat=1,ndat
-             !$OMP PARALLEL DO PRIVATE(klmn,klmn1,klmn2)
-             do klmn=1,lmn2_size
-               klmn1=max(1,ispden-2)+(klmn-1)*cplex_dij
-               klmn2=1+(klmn-1)*qphase
-               dijhat(klmn1,idij+(idat-1)*ndij,ia)=dijhat_idij(klmn2,idat,ia)
-             end do
-           end do
-         end do ! ia
-#endif
-       end if
-       if (qphase==2) then
-         !Same storage with exp^(-i.q.r) phase
+       !icpq=1 => real part of the exp(-i.q.r) phase (or the only part if qphase==1)
+       !icpq=2 => imaginary part of the exp(-i.q.r) phase (qphase==2 only)
+       do icpq=1,qphase
          if(gpu_option_==ABI_GPU_DISABLED) then
-           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat,klmn,klmn1,klmn2)
+           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat,klmn,klmn1)
            do ia=1,nattyp
              do idat=1,ndat
                do klmn=1,lmn2_size
-                 klmn1=max(1,ispden-2)+(klmn-1+lmn2_size)*cplex_dij
-                 klmn2=2+(klmn-1)*qphase
-                 dijhat(klmn1,idij+(idat-1)*ndij,ia)=dijhat_idij(klmn2,idat,ia)
+                 klmn1=max(1,ispden-2)+(klmn-1+(icpq-1)*lmn2_size)*cplex_dij
+                 dijhat(klmn1,idij+(idat-1)*ndij,ia)=dijhat_idij(klmn,idat,ia,icpq)
                end do
              end do
            end do ! ia
          else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
            !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-           !$OMP& MAP(to:dijhat) MAP(to:dijhat_idij) PRIVATE(idat,ia)
+           !$OMP& MAP(to:dijhat,dijhat_idij) PRIVATE(idat,ia)
            do ia=1,nattyp
              do idat=1,ndat
-               !$OMP PARALLEL DO PRIVATE(klmn1,klmn2,klmn)
+               !$OMP PARALLEL DO PRIVATE(klmn,klmn1)
                do klmn=1,lmn2_size
-                 klmn1=max(1,ispden-2)+(klmn-1+lmn2_size)*cplex_dij
-                 klmn2=2+(klmn-1)*qphase
-                 dijhat(klmn1,idij+(idat-1)*ndij,ia)=dijhat_idij(klmn2,idat,ia)
+                 klmn1=max(1,ispden-2)+(klmn-1+(icpq-1)*lmn2_size)*cplex_dij
+                 dijhat(klmn1,idij+(idat-1)*ndij,ia)=dijhat_idij(klmn,idat,ia,icpq)
                end do
              end do
            end do ! ia
 #endif
          end if
-       endif
+       end do ! icpq
 
      end do !ispden
 
@@ -2787,8 +2707,8 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
  end do
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(delete:prod,dijhat_idij) IF(gpu_option_==ABI_GPU_OPENMP)
- !$OMP TARGET EXIT DATA MAP(delete:atom_gylm,atom_ifftsph,gnt_scal,atom_qijl,atom_indklmn,atom_nfgd) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:prod,dijhat_idij,atom_potg) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:atom_gylm,atom_ifftsph,atom_qijl,atom_nfgd) IF(gpu_option_==ABI_GPU_OPENMP)
  !$OMP TARGET EXIT DATA MAP(delete:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. has_qphase)
  !$OMP TARGET EXIT DATA MAP(from:dijhat) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif
@@ -2800,8 +2720,10 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
  end if
 !Free temporary memory spaces
  ABI_FREE(gnt_scal)
+ ABI_FREE(atom_qijl)
  ABI_FREE(prod)
  ABI_FREE(dijhat_idij)
+ ABI_FREE(atom_potg)
 
  do ia=1,nattyp
    iatom=iatm+ia
