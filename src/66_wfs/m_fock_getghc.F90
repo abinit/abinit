@@ -241,7 +241,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 ! Scalars
  integer,parameter :: tim_fourwf_fock_getghc=10,tim_fourdp_fock_getghc=10
  integer :: bdtot_jindex,choice,cplex_fock,cplex_dij,cpopt,i1,i2,i3,ia,iatom,idat,idat_occ,idat_tot,iatm
- integer :: iband_cprj,ider,idir,idir1,ier,ii,ind,ipw,ifft,itypat,izero,jband,jbg,jcg,jkg
+ integer :: iband_cprj,ider,idir,idir1,ier,ii,ind,ipw,ieigen,ifft,itypat,izero,jband,jbg,jcg,jkg
  integer :: jkpt,my_jsppol,jstwfk,lmn2_size,mgfftf,mpw,n1,n2,n3,n4,n5,n6,ndat_occ,ndat_tot
  integer :: n1f,n2f,n3f,n4f,n5f,n6f,natom,nband_k,ndij,nfft,nfftf,nfftotf,nhat12_grdim,nnlout
  integer :: nfgd_max
@@ -249,7 +249,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  integer, save :: ncount=0
  logical :: need_ghc,qeq0
  real(dp),parameter :: weight1=one
- real(dp) :: doti,eigen,imcwf,imcwocc,imvloc,invucvol,recwf,recwocc,revloc,wtk
+ real(dp) :: doti,eigen,imcwf,imcwocc,imvloc,invucvol,recwf,recwocc,revloc,wtk,esum,esumi
  complex(dp) :: cinvucvol,cucvol
  type(fock_common_type),pointer :: fockcommon
  type(fock_BZ_type),pointer :: fockbz
@@ -267,10 +267,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  type(pawcprj_type),pointer :: cwaveocc_prj(:,:)
  type(pawcprj_type),pointer :: cwaveocc_prj_rep(:,:)
 
- real(dp) :: rprimd(3,3),for12(3),esum
+ real(dp) :: rprimd(3,3),for12(3)
  integer,  ABI_CONTIGUOUS pointer :: atom_ifftsph(:,:),atom_nfgd(:)
  real(dp), ABI_CONTIGUOUS pointer :: stress_ikpt(:,:),atom_rfgd(:,:,:)
- integer   :: ieigen
 
 
 ! *************************************************************************
@@ -1238,31 +1237,11 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 ! =============================================================
      call timab(1527,-1,tsec)
      if(gpu_option==ABI_GPU_DISABLED) then
+       ABI_UNUSED(esumi)
        !$OMP PARALLEL DO &
        !$OMP& PRIVATE(ind,recwocc,imcwocc,revloc,imvloc)
        do idat=1,ndat
-       do idat_occ=1,ndat_occ
-       do i3=1,ngfftf(3)
-         do i2=1,ngfftf(2)
-           do i1=1,ngfftf(1)
-             ind=i1+(i2-1)*ngfftf(1)+(i3-1)*ngfftf(2)*ngfftf(1)
-             revloc=vfock(2*ind-1,idat_occ,idat) ; imvloc=vfock(2*ind,idat_occ,idat)
-             recwocc=cwaveocc_r(1,i1,i2,i3,idat_occ)
-             imcwocc=cwaveocc_r(2,i1,i2,i3,idat_occ)
-             vlocpsi_r(2*ind-1,idat)=vlocpsi_r(2*ind-1,idat)-(revloc*recwocc-imvloc*imcwocc)*occ(idat_occ)*wtk
-             vlocpsi_r(2*ind  ,idat)=vlocpsi_r(2*ind  ,idat)-(revloc*imcwocc+imvloc*recwocc)*occ(idat_occ)*wtk
-           end do
-         end do
-       end do
-       end do ! idat_occ
-       end do ! idat
-     else if(gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-       do idat_occ=1,ndat_occ
-         !$OMP TARGET TEAMS DISTRIBUTE &
-         !$OMP& MAP(to:vlocpsi_r,ngfftf) MAP(to:cwaveocc_r,occ,vfock) PRIVATE(idat)
-         do idat=1,ndat
-           !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(ind,recwocc,imcwocc,revloc,imvloc,i3,i2,i1)
+         do idat_occ=1,ndat_occ
            do i3=1,ngfftf(3)
              do i2=1,ngfftf(2)
                do i1=1,ngfftf(1)
@@ -1275,8 +1254,32 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
                end do
              end do
            end do
-         end do ! idat
-       end do ! idat_occ
+         end do ! idat_occ
+       end do ! idat
+     else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(3) &
+       !$OMP& MAP(to:vlocpsi_r,cwaveocc_r,occ,vfock) PRIVATE(idat,i3,i2)
+       do idat=1,ndat
+         do i3=1,ngfftf(3)
+           do i2=1,ngfftf(2)
+             !$OMP PARALLEL DO PRIVATE(ind,i1,idat_occ,recwocc,imcwocc,revloc,imvloc,esum,esumi)
+             do i1=1,ngfftf(1)
+               ind=i1+(i2-1)*ngfftf(1)+(i3-1)*ngfftf(2)*ngfftf(1)
+               esum=zero ; esumi=zero
+               do idat_occ=1,ndat_occ
+                 revloc=vfock(2*ind-1,idat_occ,idat) ; imvloc=vfock(2*ind,idat_occ,idat)
+                 recwocc=cwaveocc_r(1,i1,i2,i3,idat_occ)
+                 imcwocc=cwaveocc_r(2,i1,i2,i3,idat_occ)
+                 esum=esum+(revloc*recwocc-imvloc*imcwocc)*occ(idat_occ)
+                 esumi=esumi+(revloc*imcwocc+imvloc*recwocc)*occ(idat_occ)
+               end do
+               vlocpsi_r(2*ind-1,idat)=vlocpsi_r(2*ind-1,idat)-esum*wtk
+               vlocpsi_r(2*ind  ,idat)=vlocpsi_r(2*ind  ,idat)-esumi*wtk
+             end do
+           end do
+         end do
+       end do ! idat
 #endif
      end if
      if (allocated(fockbz%cgocc)) then
