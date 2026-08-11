@@ -1568,7 +1568,7 @@ subroutine orbmag_cc_k_ncpp(dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
   real(dp) :: lams
   complex(dp) :: ormesh_fac,prefac_b,prefac_m
   !arrays
-  real(dp) bdot(2),mdot(2)
+  real(dp) bdot(2),mdot(2),enk(2)
   real(dp),allocatable :: gec(:,:),gvnlxc(:,:)
   real(dp),allocatable,target :: ghc(:,:)
   real(dp),pointer :: du_dbeta(:,:),du_dgamma(:,:)
@@ -1590,6 +1590,8 @@ subroutine orbmag_cc_k_ncpp(dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
  prefac_b = cbc*c2
  prefac_m = com*c2
  do nn = 1, nband_k
+   cpopt = -1; sij_opt = 0
+   type_calc = 0 ! apply local and non-local Hamiltonian
 
    m1 = czero
    b1 = czero
@@ -1607,8 +1609,6 @@ subroutine orbmag_cc_k_ncpp(dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
      ! compute H|Pc d_\gamma u>
      ! [H+(E - 2\mu)]|ket> is needed for orbmag
      ! -2|ket> needed for chern
-     cpopt = -1; sij_opt = 0
-     type_calc = 0 ! apply local and non-local Hamiltonian
      call getghc(cpopt,du_dgamma,cwaveprj1,ghc,gec,gs_hamk,gvnlxc,lams,mpi_enreg,&
        & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
 
