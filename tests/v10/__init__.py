@@ -57,6 +57,7 @@ inp_files = [
     "t53.abi",  # test linear-response calculation with 2D short-range Coulomb kernel in BN monolayer
     "t54.abi",  # test finite-q scalar potential linear-response calculation with PCM short-circuit conditions
     "t55.abi",  # test orbmag option 4, real space density output
+    "t56.abi",  # test orbmag for norm conserving pseudopotentials
     "t61.abi" ,  # test total energy due to electron-phonon interaction: step 1 DFT+DFPT
     "t62.abi" ,  # test total energy due to electron-phonon interaction: step 2 quadrupole
     "t63.abi" ,  # test total energy due to electron-phonon interaction: step 3 merge DDB
