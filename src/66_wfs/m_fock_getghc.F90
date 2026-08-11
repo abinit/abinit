@@ -38,7 +38,7 @@ module m_fock_getghc
  use m_fft,          only : fftpac, fourwf, fourdp
  use m_fstrings,     only : sjoin, itoa
  use m_hamiltonian,  only : gs_hamiltonian_type, K_H_KPRIME
- use m_paw_nhat,     only : pawmknhat_psipsi, pawdijhat_ndat
+ use m_paw_nhat,     only : pawmknhat_psipsi_ndat, pawdijhat_ndat
  use m_spacepar,     only : hartre
  use m_nonlop,       only : nonlop
  use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, bandfft_kpt_savetabs,bandfft_kpt_restoretabs, &
@@ -162,10 +162,7 @@ subroutine select_ndat_occ_for_gpu(ndat_occ,nband_k,ndat,npw,cplex_fock,nfftf,ng
      sum_mem = sum_mem + INT(2,c_size_t)*nfgd_max*nspinor**2*3*natom*(ider/3)*ndat_occ*ndat
      ! gvnlxc
      sum_mem = sum_mem + INT(2,c_size_t)*npw*nspinor*ndat_occ*ndat
-     ! rho12
-     sum_mem = sum_mem + INT(2,c_size_t)*nfftf*nspinor**2*ndat_occ*ndat
-
-     ! nhat12_atm/nhat12_work (paw_psipsi internal work array)
+     ! rho12 (=nhat12 output of pawmknhat_psipsi_ndat)
      sum_mem = sum_mem + INT(2,c_size_t)*nfgd_max*nspinor**2*ndat_occ*ndat*natom
      ! cprj1 (paw_psipsi internal work array)
      sum_mem = sum_mem + INT(2,c_size_t)*nprojs*nspinor*ndat
@@ -263,10 +260,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  real(dp) :: rhodum0(0,1,1)
  real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:,:,:),dijhat_tmp(:,:,:),ffnl_kp_dum(:,:,:,:),kpg_kp(:,:),occ(:)
  real(dp), allocatable, target :: gvnlxc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:,:,:),grnhat_12(:,:,:,:,:,:,:),forikpt(:,:,:)
- real(dp), allocatable :: rho12(:,:,:,:,:),rhog_munu(:,:,:,:),rhor_munu(:,:,:,:),vlocpsi_r(:,:),strdat(:,:,:,:)
+ real(dp), allocatable :: rho12(:,:,:,:,:,:),rhog_munu(:,:,:,:),rhor_munu(:,:,:,:),vlocpsi_r(:,:),strdat(:,:,:,:)
  real(dp), allocatable :: vfock(:,:,:),psilocal(:,:,:),enlout_dum(:),vectin_dum(:,:),vqg(:),forout(:,:),strout(:,:),for1(:,:,:,:)
  real(dp), allocatable,target ::cwavef_r(:,:,:,:),cwavef_rep(:,:),vdotr(:,:,:,:),vdoti(:),vfockstr(:,:,:)
- real(dp), allocatable,target :: nhat12_work(:,:,:,:,:,:)
  real(dp), ABI_CONTIGUOUS  pointer :: cwaveocc_r(:,:,:,:,:)
  type(pawcprj_type),pointer :: cwaveocc_prj(:,:)
  type(pawcprj_type),pointer :: cwaveocc_prj_rep(:,:)
@@ -323,7 +319,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  n4f=ngfftf(4);n5f=ngfftf(5);n6f=ngfftf(6)
 
 !*Max number of fine-grid points in a PAW augmentation sphere (over all atoms).
-!*Used to size the small per-atom nhat12_work buffer instead of the full FFT grid.
+!*Used to size the small per-atom rho12/grnhat_12 sphere buffers instead of the full FFT grid.
  nfgd_max=1
  if (fockcommon%usepaw==1) then
    nfgd_max=max(1,maxval(fockcommon%pawfgrtab(1:natom)%nfgd))
@@ -513,15 +509,25 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      ABI_MALLOC(grnhat_12,(2,nfgd_max,nspinor**2,3,natom*(ider/3),ndat_occ,ndat))
      ABI_MALLOC(gvnlxc,(2,npw*nspinor*ndat_tot))
      ABI_MALLOC(grnhat12,(2,nfftf,nspinor**2,3*nhat12_grdim,ndat_occ,ndat))
-     ABI_MALLOC(rho12,(2,nfftf,nspinor**2,ndat_occ,ndat))
-    !*nhat12_work only needs to hold one PAW augmentation sphere (nfgd_max points),
-    !*not the full FFT grid: nhat is strictly localized inside PAW spheres.
-     ABI_MALLOC(nhat12_work, (2,nfgd_max,nspinor**2,ndat_occ,ndat,maxval(gs_ham%nattyp)))
+     ABI_MALLOC(rho12,(2,nfgd_max,nspinor**2,ndat_occ,ndat,natom))
+
+     ABI_MALLOC(atom_nfgd,    (natom))
+     do iatom=1,natom
+       atom_nfgd(iatom) = fockcommon%pawfgrtab(iatom)%nfgd
+     end do
+     ABI_MALLOC(atom_ifftsph, (nfgd_max, natom))
+     ABI_MALLOC(atom_rfgd,    (3, nfgd_max, natom))
+     do iatom=1,natom
+       atom_ifftsph(1:atom_nfgd(iatom),iatom) = fockcommon%pawfgrtab(iatom)%ifftsph(1:atom_nfgd(iatom))
+       atom_rfgd(:,1:atom_nfgd(iatom),iatom) =  fockcommon%pawfgrtab(iatom)%rfgd(:,1:atom_nfgd(iatom))
+     end do
+
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET ENTER DATA MAP(alloc:grnhat_12) IF(gpu_option==ABI_GPU_OPENMP .and. ider==3)
      !$OMP TARGET ENTER DATA MAP(alloc:gvnlxc) IF(gpu_option==ABI_GPU_OPENMP)
      !$OMP TARGET ENTER DATA MAP(alloc:rho12) IF(gpu_option==ABI_GPU_OPENMP)
-     !$OMP TARGET ENTER DATA MAP(alloc:nhat12_work) IF(gpu_option==ABI_GPU_OPENMP)
+     !$OMP TARGET ENTER DATA MAP(alloc:atom_ifftsph,atom_nfgd,atom_rfgd) IF(gpu_option==ABI_GPU_OPENMP)
+     !$OMP TARGET UPDATE TO(atom_ifftsph,atom_nfgd,atom_rfgd) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    end if
 
@@ -673,35 +679,42 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        iband_cprj=(my_jsppol-1)*fockbz%mkptband+jbg+jband
        cwaveocc_prj=>fockbz%cwaveocc_prj(:,iband_cprj:iband_cprj+ndat_occ*nspinor-1)
 
-       call pawmknhat_psipsi(cwaveprj(:,:),cwaveocc_prj(:,:),&
-&       ider,izero,natom,natom,nfftf,ngfftf,&
-&       nhat12_grdim,nspinor,fockcommon%ntypat,ndat,ndat_occ,fockbz%pawang,fockcommon%pawfgrtab,grnhat12,&
-&       rho12,&
-&       fockcommon%pawtab,gprimd=gs_ham%gprimd,grnhat_12=grnhat_12,qphon=qvec_j,&
-&       xred=gs_ham%xred,atindx=gs_ham%atindx,gpu_option=gpu_option,nattyp=gs_ham%nattyp,&
-&       nhat12_work=nhat12_work)
+       call pawmknhat_psipsi_ndat(cwaveprj(:,:),cwaveocc_prj(:,:),&
+       &    ider,izero,natom,natom,nfftf,ngfftf,&
+       &    nhat12_grdim,nspinor,fockcommon%ntypat,ndat,ndat_occ,fockbz%pawang,fockcommon%pawfgrtab,grnhat12,&
+       &    rho12,gs_ham%nattyp,&
+       &    fockcommon%pawtab,gprimd=gs_ham%gprimd,grnhat_12=grnhat_12,qphon=qvec_j,&
+       &    xred=gs_ham%xred,atindx=gs_ham%atindx,gpu_option=gpu_option)
 
        if(gpu_option==ABI_GPU_DISABLED) then
          !$OMP PARALLEL DO COLLAPSE(2) &
-         !$OMP& PRIVATE(idat,idat_occ)
+         !$OMP& PRIVATE(idat,idat_occ,iatom,ifft,ind)
          do idat=1,ndat
-         do idat_occ=1,ndat_occ
-           rhor_munu(1,:,idat_occ,idat)=rhor_munu(1,:,idat_occ,idat)+rho12(1,:,nspinor,idat_occ,idat)
-           rhor_munu(2,:,idat_occ,idat)=rhor_munu(2,:,idat_occ,idat)-rho12(2,:,nspinor,idat_occ,idat)
-         end do ! idat_occ
+           do idat_occ=1,ndat_occ
+             do iatom=1,natom
+               do ifft=1,atom_nfgd(iatom)
+                 ind = atom_ifftsph(ifft,iatom)
+                 rhor_munu(1,ind,idat_occ,idat) = rhor_munu(1,ind,idat_occ,idat) + rho12(1,ifft,nspinor,idat_occ,idat,iatom)
+                 rhor_munu(2,ind,idat_occ,idat) = rhor_munu(2,ind,idat_occ,idat) - rho12(2,ifft,nspinor,idat_occ,idat,iatom)
+               end do ! ifft
+             end do ! iatom
+           end do ! idat_occ
          end do ! idat
        else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-         !$OMP& MAP(to:rhor_munu,rho12) PRIVATE(idat,idat_occ)
+         !$OMP& MAP(to:rhor_munu,rho12,atom_nfgd,atom_ifftsph) PRIVATE(idat,idat_occ)
          do idat=1,ndat
-         do idat_occ=1,ndat_occ
-         !$OMP PARALLEL DO PRIVATE(ifft)
-         do ifft=1,nfftf
-           rhor_munu(1,ifft,idat_occ,idat)=rhor_munu(1,ifft,idat_occ,idat)+rho12(1,ifft,nspinor,idat_occ,idat)
-           rhor_munu(2,ifft,idat_occ,idat)=rhor_munu(2,ifft,idat_occ,idat)-rho12(2,ifft,nspinor,idat_occ,idat)
-         end do ! ifft
-         end do ! idat_occ
+           do idat_occ=1,ndat_occ
+             !$OMP PARALLEL DO PRIVATE(iatom,ifft,ind)
+             do iatom=1,natom
+               do ifft=1,atom_nfgd(iatom)
+                 ind = atom_ifftsph(ifft,iatom)
+                 rhor_munu(1,ind,idat_occ,idat) = rhor_munu(1,ind,idat_occ,idat) + rho12(1,ifft,nspinor,idat_occ,idat,iatom)
+                 rhor_munu(2,ind,idat_occ,idat) = rhor_munu(2,ind,idat_occ,idat) - rho12(2,ifft,nspinor,idat_occ,idat,iatom)
+               end do ! ifft
+             end do ! iatom
+           end do ! idat_occ
          end do ! idat
 #endif
        end if
@@ -890,19 +903,8 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
          ABI_MALLOC(vdotr,(ndat_occ,ndat,3,natom))
          ABI_MALLOC(vdoti,(ndat_tot))
          ABI_MALLOC(for1,(ndat_occ,3,natom,ndat))
-         ABI_MALLOC(atom_nfgd,    (natom))
-         do iatom=1,natom
-           atom_nfgd(iatom) =      fockcommon%pawfgrtab(iatom)%nfgd
-         end do
-         ABI_MALLOC(atom_ifftsph, (maxval(atom_nfgd), natom))
-         ABI_MALLOC(atom_rfgd,    (3, maxval(atom_nfgd), natom))
-         do iatom=1,natom
-           atom_ifftsph(1:atom_nfgd(iatom),iatom) = fockcommon%pawfgrtab(iatom)%ifftsph(1:atom_nfgd(iatom))
-           atom_rfgd(:,1:atom_nfgd(iatom),iatom) =  fockcommon%pawfgrtab(iatom)%rfgd(:,1:atom_nfgd(iatom))
-         end do
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET ENTER DATA MAP(alloc:vdotr,vdoti,for1,atom_ifftsph,atom_nfgd,atom_rfgd) IF(gpu_option==ABI_GPU_OPENMP)
-         !$OMP TARGET UPDATE TO(atom_ifftsph,atom_nfgd,atom_rfgd) IF(gpu_option==ABI_GPU_OPENMP)
+         !$OMP TARGET ENTER DATA MAP(alloc:vdotr,vdoti,for1) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
          !*NOTE:cwavef_rep replicates cwavef ndat_occ times (per idat block) so that single
          !*nonlop and dotprod_g_batch_full call can process the whole ndat*ndat_occ batch at once.
@@ -1015,14 +1017,11 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
            end do ! idat
          end if
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET EXIT DATA MAP(delete:vdotr,vdoti,for1,atom_ifftsph,atom_nfgd,atom_rfgd) IF(gpu_option==ABI_GPU_OPENMP)
+         !$OMP TARGET EXIT DATA MAP(delete:vdotr,vdoti,for1) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
          ABI_FREE(vdotr)
          ABI_FREE(vdoti)
          ABI_FREE(for1)
-         ABI_FREE(atom_ifftsph)
-         ABI_FREE(atom_nfgd)
-         ABI_FREE(atom_rfgd)
        end if
 
 ! Stresses calculation
@@ -1091,16 +1090,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
          ABI_FREE(vdoti)
          ABI_FREE(cwavef_rep)
 
-         ABI_MALLOC(atom_nfgd,    (natom))
-         do iatom=1,natom
-           atom_nfgd(iatom) =      fockcommon%pawfgrtab(iatom)%nfgd
-         end do
-         ABI_MALLOC(atom_ifftsph, (maxval(atom_nfgd), natom))
-         ABI_MALLOC(atom_rfgd,    (3, maxval(atom_nfgd), natom))
-         do iatom=1,natom
-           atom_ifftsph(1:atom_nfgd(iatom),iatom) = fockcommon%pawfgrtab(iatom)%ifftsph(1:atom_nfgd(iatom))
-           atom_rfgd(:,1:atom_nfgd(iatom),iatom) =  fockcommon%pawfgrtab(iatom)%rfgd(:,1:atom_nfgd(iatom))
-         end do
          stress_ikpt =>  fockcommon%stress_ikpt
          ieigen = fockcommon%ieigen
 
@@ -1188,17 +1177,19 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
            ABI_FREE(strdat)
 #endif
          end if
-         ABI_FREE(atom_ifftsph)
-         ABI_FREE(atom_nfgd)
-         ABI_FREE(atom_rfgd)
 
        ! third contribution
          if(gpu_option==ABI_GPU_DISABLED) then
            do idat=1,ndat
              do idat_occ=1,ndat_occ
                doti=zero
-               do ifft=1,nfftf
-                 doti=doti+vfock(2*ifft-1,idat_occ,idat)*rho12(1,ifft,nspinor,idat_occ,idat)-vfock(2*ifft,idat_occ,idat)*rho12(2,ifft,nspinor,idat_occ,idat)
+               do iatom=1,natom
+                 do ifft=1,atom_nfgd(iatom)
+                   ind = atom_ifftsph(ifft,iatom)
+                   doti = doti &
+                   &      + vfock(2*ind-1,idat_occ,idat) * rho12(1,ifft,nspinor,idat_occ,idat,iatom)&
+                   &      - vfock(2*ind,idat_occ,idat)   * rho12(2,ifft,nspinor,idat_occ,idat,iatom)
+                 end do
                end do
                fockcommon%stress_ikpt(1:3,fockcommon%ieigen+idat-1)=fockcommon%stress_ikpt(1:3,fockcommon%ieigen+idat-1)-doti/nfftf*occ(idat_occ)*wtk
              end do ! idat_occ
@@ -1208,15 +1199,19 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
            ABI_MALLOC(strdat, (1,1,ndat_occ,ndat))
            strdat=zero
            !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-           !$OMP& MAP(tofrom:strdat) MAP(to:vfock,rho12) &
+           !$OMP& MAP(tofrom:strdat) MAP(to:vfock,rho12,atom_nfgd,atom_ifftsph) &
            !$OMP& PRIVATE(idat,idat_occ,idir,idir1,doti)
            do idat=1,ndat
              do idat_occ=1,ndat_occ
                doti=zero
-               !$OMP PARALLEL DO PRIVATE(ifft,ind,iatom) REDUCTION(+:doti)
-               do ifft=1,nfftf
-                 doti=doti+vfock(2*ifft-1,idat_occ,idat)*rho12(1,ifft,nspinor,idat_occ,idat)&
-                          -vfock(2*ifft,idat_occ,idat)  *rho12(2,ifft,nspinor,idat_occ,idat)
+               !$OMP PARALLEL DO PRIVATE(iatom,ifft,ind) REDUCTION(+:doti)
+               do iatom=1,natom
+                 do ifft=1,atom_nfgd(iatom)
+                   ind = atom_ifftsph(ifft,iatom)
+                   doti = doti &
+                   &      + vfock(2*ind-1,idat_occ,idat) * rho12(1,ifft,nspinor,idat_occ,idat,iatom)&
+                   &      - vfock(2*ind,idat_occ,idat)   * rho12(2,ifft,nspinor,idat_occ,idat,iatom)
+                 end do
                end do
                strdat(1,1,idat_occ,idat)=doti
              end do ! idat_occ
@@ -1334,13 +1329,16 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      end if
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET EXIT DATA MAP(delete:grnhat_12) IF(gpu_option==ABI_GPU_OPENMP .and. ider==3)
-     !$OMP TARGET EXIT DATA MAP(delete:rho12,gvnlxc,nhat12_work) IF(gpu_option==ABI_GPU_OPENMP)
+     !$OMP TARGET EXIT DATA MAP(delete:rho12,gvnlxc) IF(gpu_option==ABI_GPU_OPENMP)
+     !$OMP TARGET EXIT DATA MAP(delete:atom_ifftsph,atom_nfgd,atom_rfgd) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
      ABI_FREE(grnhat_12)
      ABI_FREE(gvnlxc)
      ABI_FREE(grnhat12)
      ABI_FREE(rho12)
-     ABI_FREE(nhat12_work)
+     ABI_FREE(atom_ifftsph)
+     ABI_FREE(atom_nfgd)
+     ABI_FREE(atom_rfgd)
    end if
 
    call timab(1528,2,tsec)

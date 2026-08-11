@@ -54,6 +54,7 @@ MODULE m_paw_nhat
 !public procedures.
  public :: pawmknhat        ! Compute compensation charge density on the real space (fine) grid
  public :: pawmknhat_psipsi ! Compute compensation charge density associated to the product of two WF
+ public :: pawmknhat_psipsi_ndat ! Batched variant, assumes compact nhat12 storage
  public :: pawnhatfr        ! Compute frozen part of 1st-order compensation charge density nhat^(1) (DFPT)
  public :: pawdijhat_ndat   ! Compute compensation charge contribution
  public :: pawsushat        ! Compute contrib. to the product of two WF from compensation charge density
@@ -652,17 +653,14 @@ end subroutine pawmknhat
 !!        3: nhat(r) and gradients of nhat  wrt atomic coordinates are computed
 !!        Note: ider>0 not compatible with ipert>0
 !!  izero=if 1, unbalanced components of nhat(g) have to be set to zero
-!!  me_g0=--optional-- 1 if the current process treat the g=0 plane-wave (only needed when comm_fft is present)
 !!  mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
 !!  comm_atom=--optional-- MPI communicator over atoms
-!!  comm_fft=--optional-- MPI communicator over FFT components
 !!  my_natom=number of atoms treated by current processor
 !!  natom=total number of atoms in cell
 !!  nfft=number of point on the rectangular fft grid
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nhat12_grdim= 0 if grnhat12 array is not used ; 1 otherwise
 !!  ntypat=number of types of atoms in unit cell.
-!!  paral_kgb=--optional-- 1 if "band-FFT" parallelism is activated (only needed when comm_fft is present)
 !!  pawang <type(pawang_type)>=paw angular mesh and related data
 !!  pawfgrtab(my_natom) <type(pawfgrtab_type)>=atomic data given on fine rectangular grid
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
@@ -672,26 +670,31 @@ end subroutine pawmknhat
 !!
 !! OUTPUT
 !!  === if ider=0 or 2
-!!    nhat12(2,nfft,nspinor**2,ndat1,dat2)=nhat on fine rectangular grid*exp(iqr)
+!!    nhat12(2,nfgd_max,nspinor**2,ndat2,ndat1,natom)=nhat on fine rectangular grid*exp(iqr),
 !!  === if ider=1 or 2 (not tested)
 !!    grnhat12(nfft,nspinor**2,3)=gradient of (nhat*exp(iqr)) on fine rectangular grid (derivative versus r)
 !!  === if ider=3
-!!    grnhat_12(2,nfgd_max,nspinor**2,3,natom*(ider/3),ndat1,ndat2)=derivatives of nhat on fine rectangular grid versus R*exp(iqr).
-!!      grnhat_12 is expected to be sized after each atom's PAW augmentation sphere (nfgd_max points) and indexed by the local in-sphere point index.
-!!      (see pawfgrtab(iatom)%ifftsph for the mapping to the full FFT grid).
+!!    grnhat_12(2,nfgd_max,nspinor**2,3,natom*(ider/3),ndat2,ndat1)=derivatives of nhat on fine rectangular grid versus R*exp(iqr).
+!!
+!! NOTES
+!!  izero=1 is not supported by this routine: it would require a full-grid FFT smoothing of nhat12,
+!!  which is incompatible with the compact (nfgd_max-sized) storage used here.
+!!
+!!  nhat12 and grnhat_12 are expected to be sized after each atom's PAW augmentation sphere (nfgd_max points)
+!!  and indexed by the local in-sphere point index.
+!!  (see pawfgrtab(iatom)%ifftsph for the mapping to the full FFT grid).
 !!
 !! SOURCE
 
 subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
-&          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,nhat12_work,nattyp,pawtab, &
-&          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft,gpu_option) ! optional arguments
+&          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,nattyp,pawtab, &
+&          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,gpu_option) ! optional arguments
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ider,izero,my_natom,natom,nfft,nhat12_grdim,ntypat,nspinor,ndat1,ndat2
- integer,optional,intent(in) :: me_g0,comm_fft,paral_kgb,gpu_option
+ integer,optional,intent(in) :: gpu_option
  integer,optional,intent(in) :: comm_atom
- type(distribfft_type),optional,intent(in),target :: distribfft
  type(pawang_type),intent(in),target :: pawang
 !arrays
  integer,intent(in) :: ngfft(18),nattyp(ntypat)
@@ -700,8 +703,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  real(dp),optional, intent(in) ::gprimd(3,3),qphon(3),xred(3,natom)
  real(dp),intent(out) :: grnhat12(2,nfft,nspinor**2,3*nhat12_grdim,ndat2,ndat1)
  real(dp),optional,target,intent(out) :: grnhat_12(:,:,:,:,:,:,:)
- real(dp),target,intent(out) :: nhat12(2,nfft,nspinor**2,ndat2,ndat1)
- real(dp),target, intent(in) ::nhat12_work(:,:,:,:,:,:)
+ real(dp),target,intent(out) :: nhat12(:,:,:,:,:,:)
  type(pawfgrtab_type),intent(inout),target :: pawfgrtab(my_natom)
  type(pawtab_type),intent(in),target :: pawtab(ntypat)
  type(pawcprj_type),intent(in) :: cprj1(natom,nspinor*ndat1),cprj2(natom,nspinor*ndat2)
@@ -709,12 +711,10 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 !Local variables ---------------------------------------
 !scalars
  complex(dp), parameter :: cminusone  = (-1._dp,0._dp)
- integer :: iatm,iatom,iatom_tot,ic,ierr,ils,ilslm,isp1,isp2,isploop,itypat,jc,klm,klmn,idat1,idat2,ia,nfgd_max
- integer :: lmax,lmin,lm_size,mm,my_comm_atom,my_comm_fft,optgr0,optgr1,paral_kgb_fft
- integer :: cplex,ilmn,jlmn,lmn_size,lmn2_size,gpu_option_,nprojs,shift,nlmn,nfgd
+ integer :: iatm,iatom,iatom_tot,ic,ierr,ils,ilslm,isp1,isp2,isploop,itypat,klm,klmn,idat1,idat2,ia,nfgd_max
+ integer :: lmax,lmin,lm_size,mm,my_comm_atom,optgr0,optgr1
+ integer :: ilmn,jlmn,lmn_size,lmn2_size,gpu_option_,nprojs,shift,nlmn,nfgd
  logical :: compute_grad,compute_grad1,compute_nhat,my_atmtab_allocated,paral_atom,qeq0,compute_phonon,order
- type(distribfft_type),pointer :: my_distribfft
- type(mpi_type) :: mpi_enreg_fft
  real(dp) :: wgt,wgt1,wgt2,wgt3
  integer :: gemm_n
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -725,30 +725,22 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
  integer,pointer :: my_atmtab(:)
  real(dp) :: rdum(1),tsec(2),ro(2),ro_ql(2)
- real(dp),allocatable :: work(:,:), qijl(:,:),projs1(:,:,:),projs2(:,:,:),gnt_scal(:,:)
+ real(dp),allocatable :: qijl(:,:),projs1(:,:,:),projs2(:,:,:),gnt_scal(:,:)
  real(dp),allocatable, target :: cpf_re(:,:,:,:),cpf_im(:,:,:,:)
  real(dp),allocatable, target :: gemm_re(:,:,:,:),gemm_im(:,:,:,:)
  real(dp),allocatable, target :: gemm_gr_re(:,:,:,:,:),gemm_gr_im(:,:,:,:,:)
  real(dp),allocatable, target :: atom_wgylm(:,:,:),atom_wgylmgr(:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: nhat12_atm(:,:,:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: atom_expiqr(:,:,:),atom_gylm(:,:,:),atom_dltij(:),atom_gylmgr(:,:,:,:)
- integer,  ABI_CONTIGUOUS pointer :: atom_nfgd(:),atom_ifftsph(:,:),atom_indklmn(:,:)
+ integer,  ABI_CONTIGUOUS pointer :: atom_nfgd(:),atom_indklmn(:,:)
 
 ! *************************************************************************
 
  DBG_ENTER("COLL")
 
+ ABI_UNUSED(nfft)
+ ABI_UNUSED(ngfft)
 !Compatibility tests
- if (present(comm_fft)) then
-   if ((.not.present(paral_kgb)).or.(.not.present(me_g0))) then
-     ABI_BUG('Need paral_kgb and me_g0 with comm_fft!')
-   end if
-   if (present(paral_kgb)) then
-     if (paral_kgb/=0) then
-       ABI_BUG('paral_kgb/=0 not coded!')
-     end if
-   end if
- end if
  if (ider>0.and.nhat12_grdim==0) then
 !   ABI_BUG('Gradients of nhat required but not allocated !')
  end if
@@ -761,6 +753,11 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    if(ider==1 .or. ider==2) then
      ABI_BUG('ider=={1,2} not coded with GPU!')
    end if
+ end if
+ if (izero==1.and.(ider==0.or.ider==2.or.ider==3)) then
+   ! nhat12 is stored compactly (nfgd_max-sized, per atom): the full-grid FFT/zerosym
+   ! smoothing of unbalanced g-components cannot be performed on this compact storage.
+   ABI_BUG('izero=1 not supported by pawmknhat_psipsi_ndat (compact nhat12 storage)!')
  end if
 
  compute_phonon=.false.;qeq0=.false.
@@ -779,22 +776,13 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  compute_grad1=(ider==3)
  if ((.not.compute_nhat).and.(.not.compute_grad)) return
 
- if (compute_nhat) then
-   select case(gpu_option_)
-   case (ABI_GPU_DISABLED)
-     nhat12=zero
-   case (ABI_GPU_OPENMP)
-     !FIXME nhat12 assumed to be mapped on GPU
-     call gpu_set_to_zero(nhat12,int(2,c_size_t)*nfft*(nspinor**2)*ndat2*ndat1)
-   case default
-     ABI_BUG("Unsupported GPU option")
-   end select
- end if
  if (compute_grad) grnhat12=zero
  if (compute_grad1) then
    select case(gpu_option_)
    case (ABI_GPU_DISABLED)
-     grnhat_12=zero
+     do idat1=1,ndat1
+       grnhat_12(:,:,:,:,:,:,idat1) = zero
+     end do
    case (ABI_GPU_OPENMP)
      !FIXME grnhat_12 assumed to be mapped on GPU
      do idat1=1,ndat1
@@ -859,14 +847,15 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    qijl=pawtab(itypat)%qijl
    nlmn = cprj1(iatm+1, 1)%nlmn
 
-   nhat12_atm => nhat12_work
+   nhat12_atm => nhat12(:,:,:,:,:,iatm+1:iatm+nattyp(itypat))
 
    if (compute_nhat) then
      if(gpu_option_==ABI_GPU_DISABLED) then
-       nhat12_atm=zero
+       do ia=1,nattyp(itypat)
+         nhat12_atm(:,:,:,:,:,ia) = zero
+       end do
      else if(gpu_option_==ABI_GPU_OPENMP) then
        do ia=1,nattyp(itypat)
-         ! nhat12_atm/nhat12_work is sized on nfgd_max (PAW sphere), not nfft
          call gpu_set_to_zero(nhat12_atm(:,:,:,:,:,ia),int(2,c_size_t)*size(nhat12_atm,2)*(nspinor**2)*ndat2*ndat1)
        end do
      end if
@@ -944,7 +933,6 @@ end if
 
  ABI_MALLOC(atom_nfgd,   (nfgd_max))
  ABI_MALLOC(atom_gylm,   (  nfgd_max,lm_size,nattyp(itypat)))
- ABI_MALLOC(atom_ifftsph,(nfgd_max,nattyp(itypat)))
  if (compute_nhat) then
    ABI_MALLOC(atom_wgylm,(nfgd_max,lmn2_size,nattyp(itypat)))
  end if
@@ -962,7 +950,6 @@ end if
 
    atom_nfgd(ia) = pawfgrtab(iatom)%nfgd
    atom_gylm(1:nfgd,1:lm_size,ia)      = pawfgrtab(iatom)%gylm(1:nfgd,1:lm_size)
-   atom_ifftsph(1:nfgd,ia)             = pawfgrtab(iatom)%ifftsph(1:nfgd)
    if(compute_phonon.and.(.not.qeq0)) then
      atom_expiqr(1:2,1:nfgd,ia)          = pawfgrtab(iatom)%expiqr(1:2,1:nfgd)
    end if
@@ -972,7 +959,7 @@ end if
  end do
 
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_indklmn,atom_nfgd,atom_ifftsph,atom_dltij,qijl,gnt_scal) IF(gpu_option_==ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_indklmn,atom_nfgd,atom_dltij,qijl,gnt_scal) IF(gpu_option_==ABI_GPU_OPENMP)
    !$OMP TARGET ENTER DATA MAP(to:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_phonon .and. (.not.qeq0))
    !$OMP TARGET ENTER DATA MAP(to:atom_gylmgr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_grad1)
    !$OMP TARGET ENTER DATA MAP(alloc:atom_wgylm) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_nhat)
@@ -1293,7 +1280,7 @@ end if
          else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
            !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-           !$OMP& MAP(to:atom_ifftsph,atom_expiqr,atom_nfgd,nhat12_atm,nattyp)
+           !$OMP& MAP(to:atom_expiqr,atom_nfgd,nhat12_atm,nattyp)
            do ia=1,nattyp(itypat)
              do idat1=1,ndat1
                !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ic,ro)
@@ -1372,51 +1359,6 @@ end if
      end if
 
    end do ! isploop (density components of the compensation charge)
-! accumulate nhat12 for all the atoms
-! "scatter-add" the compact per-atom sphere buffer (nhat12_atm, indexed by local point ic)
-! into the full-grid nhat12 array (indexed by global FFT point jc=atom_ifftsph(ic,ia)).
-! Only atom_nfgd(ia) points are touched per atom, instead of the full nfft grid.
-!nhat12(2,nfft,nspinor**2,ndat2)
-   if (compute_nhat) then
-     do ia=1,nattyp(itypat)
-       iatom=iatm+ia
-       select case (gpu_option_)
-       case (ABI_GPU_DISABLED)
-         !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(idat1,idat2,isp1,ic,jc)
-         do idat1=1,ndat1
-         do idat2=1,ndat2
-           do isp1=1,nspinor**2
-             do ic=1,atom_nfgd(ia)
-               jc=atom_ifftsph(ic,ia)
-               nhat12(:,jc,isp1,idat2,idat1)=nhat12(:,jc,isp1,idat2,idat1)+nhat12_atm(:,ic,isp1,idat2,idat1,ia)
-             end do
-           end do
-         end do
-         end do
-       case (ABI_GPU_OPENMP)
-#ifdef HAVE_OPENMP_OFFLOAD
-         !call abi_xaxpy(2*nfft*ndat2*ndat1*nspinor*nspinor,&
-         !&    cone,nhat12_atm(:,:,:,:,:,ia),1,nhat12,1,x_cplx=1,gpu_option=gpu_option_)
-         !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-         !$OMP& MAP(to:nhat12,nhat12_atm,atom_ifftsph,atom_nfgd,nattyp) PRIVATE(idat1,idat2)
-         do idat1=1,ndat1
-           do idat2=1,ndat2
-             !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(isp1,ic,jc)
-             do isp1=1,nspinor**2
-               do ic=1,atom_nfgd(ia)
-                 jc=atom_ifftsph(ic,ia)
-                 nhat12(1,jc,isp1,idat2,idat1)=nhat12(1,jc,isp1,idat2,idat1)+nhat12_atm(1,ic,isp1,idat2,idat1,ia)
-                 nhat12(2,jc,isp1,idat2,idat1)=nhat12(2,jc,isp1,idat2,idat1)+nhat12_atm(2,ic,isp1,idat2,idat1,ia)
-               end do
-             end do
-           end do
-         end do
-#endif
-       case default
-         ABI_BUG("Unsupported GPU option")
-       end select
-     end do ! ia
-   end if
 
    do ia=1,nattyp(itypat)
      iatom=iatm+ia
@@ -1439,7 +1381,7 @@ end if
 
  iatm=iatm+nattyp(itypat)
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(delete:atom_nfgd,atom_indklmn,atom_gylm,atom_ifftsph,atom_dltij,qijl,gnt_scal) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:atom_nfgd,atom_indklmn,atom_gylm,atom_dltij,qijl,gnt_scal) IF(gpu_option_==ABI_GPU_OPENMP)
  !$OMP TARGET EXIT DATA MAP(delete:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_phonon .and. (.not.qeq0))
  !$OMP TARGET EXIT DATA MAP(delete:atom_gylmgr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_grad1)
  !$OMP TARGET EXIT DATA MAP(delete:atom_wgylm) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_nhat)
@@ -1453,7 +1395,6 @@ end if
  if (compute_phonon.and.(.not.qeq0)) then
    ABI_FREE(atom_expiqr)
  end if
- ABI_FREE(atom_ifftsph)
  ABI_FREE(qijl)
  if (compute_nhat) then
    ABI_FREE(atom_wgylm)
@@ -1512,46 +1453,6 @@ end if
    call timab(48,2,tsec)
  end if
 
-!----- Avoid unbalanced g-components numerical errors -----!
-
- if (izero==1.and.compute_nhat) then
-!  Create fake mpi_enreg to wrap fourdp
-   if (present(distribfft)) then
-     my_distribfft => distribfft
-   else
-     ABI_MALLOC(my_distribfft,)
-     call my_distribfft%init_seq('f',ngfft(2),ngfft(3),'fourdp')
-   end if
-   call initmpi_seq(mpi_enreg_fft)
-   ABI_FREE(mpi_enreg_fft%distribfft)
-   if (present(comm_fft)) then
-     call set_mpi_enreg_fft(mpi_enreg_fft,comm_fft,my_distribfft,me_g0,paral_kgb)
-     my_comm_fft=comm_fft;paral_kgb_fft=paral_kgb
-   else
-     my_comm_fft=xmpi_comm_self;paral_kgb_fft=0;
-     mpi_enreg_fft%distribfft => my_distribfft
-   end if
-!  Do FFT
-   ABI_MALLOC(work,(2,nfft))
-   cplex=2
-   do idat1=1,ndat1
-   do idat2=1,ndat2
-   do isp1=1,MIN(2,nspinor**2)
-     call fourdp(cplex,work,nhat12(:,:,isp1,idat2,idat1),-1,mpi_enreg_fft,nfft,1,ngfft,0)
-     call zerosym(work,cplex,ngfft(1),ngfft(2),ngfft(3),comm_fft=my_comm_fft,distribfft=my_distribfft)
-     call fourdp(cplex,work,nhat12(:,:,isp1,idat2,idat1),+1,mpi_enreg_fft,nfft,1,ngfft,0)
-   end do
-   end do ! idat2
-   end do ! idat1
-   ABI_FREE(work)
-!  Destroy fake mpi_enreg
-   call unset_mpi_enreg_fft(mpi_enreg_fft)
-   if (.not.present(distribfft)) then
-     call my_distribfft%free()
-     ABI_FREE(my_distribfft)
-   end if
- end if
-
 !Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
@@ -1563,22 +1464,20 @@ end subroutine pawmknhat_psipsi_ndat
 subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
 &          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,pawtab, &
 &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,&
-&          distribfft,gpu_option,nattyp,nhat12_work) ! optional arguments
+&          distribfft) ! optional arguments
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ider,izero,my_natom,natom,nfft,nhat12_grdim,ntypat,nspinor,ndat1,ndat2
- integer,optional,intent(in) :: me_g0,comm_fft,paral_kgb,gpu_option
+ integer,optional,intent(in) :: me_g0,comm_fft,paral_kgb
  integer,optional,intent(in) :: comm_atom
  type(distribfft_type),optional,intent(in),target :: distribfft
  type(pawang_type),intent(in) :: pawang
 !arrays
  integer,intent(in) :: ngfft(18)
- integer,optional,intent(in) :: nattyp(ntypat)
  integer,optional,intent(in) ::atindx(natom)
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),optional, intent(in) ::gprimd(3,3),qphon(3),xred(3,natom)
- real(dp),optional,target, intent(in) ::nhat12_work(:,:,:,:,:,:)
  real(dp),intent(out) :: grnhat12(2,nfft,nspinor**2,3*nhat12_grdim,ndat2,ndat1)
  real(dp),optional,intent(out) :: grnhat_12(:,:,:,:,:,:,:)
  real(dp),intent(out) :: nhat12(2,nfft,nspinor**2,ndat2,ndat1)
@@ -1590,7 +1489,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !scalars
  integer :: iatm,iatom,iatom_tot,ic,ierr,ils,ilslm,isp1,isp2,isploop,itypat,jc,klm,klmn,idat1,idat2
  integer :: lmax,lmin,lm_size,mm,my_comm_atom,my_comm_fft,optgr0,optgr1,paral_kgb_fft
- integer :: cplex,ilmn,jlmn,lmn_size,lmn2_size,gpu_option_
+ integer :: cplex,ilmn,jlmn,lmn_size,lmn2_size
  real(dp) :: re_p,im_p
  logical :: compute_grad,compute_grad1,compute_nhat,my_atmtab_allocated,paral_atom,qeq0,compute_phonon,order
  type(distribfft_type),pointer :: my_distribfft
@@ -1621,16 +1520,6 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
  end if
  if (nspinor==2) then
    ABI_BUG('nspinor==2 not coded!')
- end if
- gpu_option_=ABI_GPU_DISABLED; if (present(gpu_option)) gpu_option_=gpu_option
- if(gpu_option_==ABI_GPU_OPENMP) then
-   ABI_CHECK(present(nattyp), "nattyp must be present when using GPU pawmknhat !")
-   ABI_CHECK(present(nhat12_work), "nhat12_work must be present when using GPU pawmknhat !")
-   call pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
-   &          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,nhat12_work,nattyp,pawtab, &
-   &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0, &
-   &          paral_kgb,distribfft,gpu_option)
-   return
  end if
 
  compute_phonon=.false.;qeq0=.false.
