@@ -351,8 +351,10 @@ subroutine orbmag_ncpp(cg,cg1,dtfil,dtset,crystal,ebands_k,kg,gsqcut,hdr,&
  if ( any ( abs(dtset%lambsig).GT.tol8 ) ) then
    orbmag_mesh%lambsig=dtset%lambsig
  ! else use the value read in to pawtab structure (which might well be zero)
- else
+ else if (psps%usepaw .EQ. 1) then
    orbmag_mesh%lambsig=pawtab(1:dtset%ntypat)%lamb_shielding
+ else
+   orbmag_mesh%lambsig=zero
  end if
 
 
