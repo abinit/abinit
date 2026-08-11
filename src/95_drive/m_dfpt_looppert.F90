@@ -2295,8 +2295,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          & mcprj,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,paw_ij,pawfgr,pawrad,pawtab,psps,&
          & usevxctau,vtrial_local,vxctau,ylm,ylmgr)
      else
-       call orbmag_ncpp(dtset,crystal,ebands_k,gsqcut,mpi_enreg,nfftf,ngfftf,&
-         & pawfgr,pawtab,psps,usevxctau,vtrial_local,vxctau)
+       call orbmag_ncpp(cg,cg1_3,dtfil,dtset,crystal,ebands_k,kg,gsqcut,hdr0,&
+         & mcg,mcg1,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,pawfgr,pawtab,psps,&
+         & usevxctau,vtrial_local,vxctau)
      end if
      ABI_SFREE(vtrial_local)
      ABI_SFREE(cg1_3)
