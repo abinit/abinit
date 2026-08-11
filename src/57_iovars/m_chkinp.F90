@@ -2861,19 +2861,19 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
    if (any(abs(dt%nucdipmom)>tol8)) then
 
-!    nucdipmom requires PAW
-     if(usepaw/=1)then
-       write(msg, '(3a)' )&
-        'Nuclear dipole moments (variable nucdipmom or atndlist) input as nonzero but PAW not activated => stop',ch10,&
-        'Action: re-run with PAW '
-       ABI_ERROR_NOSTOP(msg, ierr)
-     end if
+!    !nucdipmom requires PAW
+     !if(usepaw/=1)then
+     !  write(msg, '(3a)' )&
+     !   'Nuclear dipole moments (variable nucdipmom or atndlist) input as nonzero but PAW not activated => stop',ch10,&
+     !   'Action: re-run with PAW '
+     !  ABI_ERROR_NOSTOP(msg, ierr)
+     !end if
 
      !  paral_atom not allowed at present
      call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
 
-!    nucdipmom requires complex rhoij
-     if(dt%pawcpxocc/=2)then
+!    nucdipmom with PAW requires complex rhoij
+     if((usepaw.EQ.1).AND.(dt%pawcpxocc.NE.2))then
        write(msg, '(3a)' )&
        'Nuclear dipole moments (variable nucdipmom or atndlist) require complex rhoij => stop',ch10,&
        'Action: re-run with pawcpxocc = 2 '

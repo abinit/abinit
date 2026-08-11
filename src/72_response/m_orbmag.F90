@@ -280,25 +280,42 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine orbmag_ncpp(dtset,ebands_k,mpi_enreg,pawtab,psps)
+subroutine orbmag_ncpp(dtset,crystal,ebands_k,gsqcut,mpi_enreg,nfftf,ngfftf,&
+    & pawfgr,pawtab,psps,usevxctau,vtrial,vxctau)
 
  !Arguments ------------------------------------
  !scalars
+ integer,intent(in) :: nfftf,usevxctau
+ real(dp),intent(in) :: gsqcut
+ type(crystal_t),intent(in) :: crystal
  type(dataset_type),intent(in) :: dtset
  type(ebands_t),intent(in) :: ebands_k
  type(MPI_type), intent(inout) :: mpi_enreg
+ type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type), intent(in) :: psps
 
  !arrays
+ integer,intent(in) :: ngfftf(18)
+ real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
+ real(dp),intent(inout) :: vxctau(nfftf,dtset%nspden,4*usevxctau)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
  !Local
  !scalars
- integer :: exchn2n3d,ikg1,istwf_k,me,my_nspinor,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6
- integer :: nproc,spaceComm
+ integer :: bdtot_index,exchn2n3d,iatom,icg,ikg1,indx,isppol,istwf_k,itypat
+ integer :: me,my_nspinor,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6
+ integer :: nproc,nucdip_dirs,spaceComm,usecprj_local=0
  real(dp) :: ecut_eff,fermie
+ logical :: has_nucdip
+ type(gs_hamiltonian_type) :: gs_hamk
+ type(orbmag_mesh_type) :: orbmag_mesh
 
  !arrays
+ integer,allocatable :: atindx(:),atindx1(:),nattyp(:)
+ real(dp),allocatable :: ph1d(:,:)
+ real(dp),allocatable :: vlocal(:,:,:,:),vectornd(:,:,:),vectornd_pac(:,:,:,:,:)
+ real(dp),allocatable :: vxctaulocal(:,:,:,:,:)
+ type(paw_ij_type),allocatable :: ncpp_paw_ij(:)
 
  !----------------------------------------------
 
@@ -316,53 +333,86 @@ subroutine orbmag_ncpp(dtset,ebands_k,mpi_enreg,pawtab,psps)
  ! Fermi energy
  call local_fermie(dtset,ebands_k,fermie,mpi_enreg)
 
+ ! initialize orbmag_mesh datatype
+ call orbmag_mesh%init(dtset)
+ orbmag_mesh%nucdipmom=dtset%nucdipmom
+ ! if user input lambsig specifically in the input file, use it
+ if ( any ( abs(dtset%lambsig).GT.tol8 ) ) then
+   orbmag_mesh%lambsig=dtset%lambsig
+ ! else use the value read in to pawtab structure (which might well be zero)
+ else
+   orbmag_mesh%lambsig=pawtab(1:dtset%ntypat)%lamb_shielding
+ end if
+
  !ABI_MALLOC(kg_k,(3,mpw))
  !ABI_MALLOC(kinpw,(mpw))
 
- !!==== Initialize most of the Hamiltonian ====
- !!Allocate all arrays and initialize quantities that do not depend on k and spin.
- !!gs_hamk is the normal hamiltonian at k
- !call gs_hamk%init(psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
- !     & dtset%typat,crystal%xred,dtset%nfft,dtset%mgfft,dtset%ngfft,crystal%rprimd,&
- !     & dtset%nloalg,nucdipmom=dtset%nucdipmom)
+ !Definition of atindx array
+ !Generate an index table of atoms, in order for them to be used type after type.
+ ABI_MALLOC(atindx,(dtset%natom))
+ ABI_MALLOC(atindx1,(dtset%natom))
+ ABI_MALLOC(nattyp,(psps%ntypat))
+ indx=1
+ do itypat=1,psps%ntypat
+   nattyp(itypat)=0
+   do iatom=1,dtset%natom
+     if(dtset%typat(iatom)==itypat)then
+       atindx(iatom)=indx
+       atindx1(indx)=iatom
+       indx=indx+1
+       nattyp(itypat)=nattyp(itypat)+1
+     end if
+   end do
+ end do
 
- !! iterate over spin channels
- !bdtot_index=0
- !icg = 0
- !icprj = 0
- !do isppol = 1, dtset%nsppol
+ ABI_MALLOC(ncpp_paw_ij,(0))
+ ABI_MALLOC(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
+ call getph(atindx,dtset%natom,ngfft1,ngfft2,ngfft3,ph1d,crystal%xred)
 
- !  !========= construct local potential ==================
- !  ABI_MALLOC(vlocal,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc))
- !  call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
- !    & dtset%nspden, gs_hamk%nvloc, 1, pawfgr, mpi_enreg, vtrial, vlocal)
- !  call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
+ !==== Initialize most of the Hamiltonian ====
+ !Allocate all arrays and initialize quantities that do not depend on k and spin.
+ !gs_hamk is the normal hamiltonian at k
+ call gs_hamk%init(psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
+      & dtset%typat,crystal%xred,dtset%nfft,dtset%mgfft,dtset%ngfft,crystal%rprimd,&
+      & dtset%nloalg,paw_ij=ncpp_paw_ij,ph1d=ph1d,usecprj=usecprj_local,&
+      & nucdipmom=dtset%nucdipmom)
 
- !  !========  compute nuclear dipole vector potential (may be zero) ==========
- !  has_nucdip = ANY( ABS(dtset%nucdipmom) .GT. tol8 )
- !  if(has_nucdip) then
- !    nucdip_dirs=3
- !    ABI_MALLOC(vectornd,(nfftf,dtset%nspden,nucdip_dirs))
- !    vectornd = zero
- !    call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,&
- !      & dtset%nspden,dtset%nucdipmom,crystal%rprimd,vectornd,crystal%xred)
- !    ABI_MALLOC(vectornd_pac,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,nucdip_dirs))
- !    call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
- !         & dtset%nspden, gs_hamk%nvloc, nucdip_dirs, pawfgr, mpi_enreg, vectornd,vectornd_pac)
- !    ABI_FREE(vectornd)
- !    call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
- !  else
- !    nucdip_dirs=0
- !  end if
+ ! iterate over spin channels
+ bdtot_index=0
+ icg = 0
+ do isppol = 1, dtset%nsppol
+
+   !========= construct local potential ==================
+   ABI_MALLOC(vlocal,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc))
+   call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+     & dtset%nspden, gs_hamk%nvloc, 1, pawfgr, mpi_enreg, vtrial, vlocal)
+   call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
+
+   !========  compute nuclear dipole vector potential (may be zero) ==========
+   has_nucdip = ANY( ABS(dtset%nucdipmom) .GT. tol8 )
+   if(has_nucdip) then
+     nucdip_dirs=3
+     ABI_MALLOC(vectornd,(nfftf,dtset%nspden,nucdip_dirs))
+     vectornd = zero
+     call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,&
+       & dtset%nspden,dtset%nucdipmom,crystal%rprimd,vectornd,crystal%xred)
+     ABI_MALLOC(vectornd_pac,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,nucdip_dirs))
+     call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+          & dtset%nspden, gs_hamk%nvloc, nucdip_dirs, pawfgr, mpi_enreg, vectornd,vectornd_pac)
+     ABI_FREE(vectornd)
+     call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
+   else
+     nucdip_dirs=0
+   end if
 
  !  !========  compute vxctaulocal if vxctau present =====================
 
- !  if (usevxctau==1) then
- !    ABI_MALLOC(vxctaulocal,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,4))
- !    call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
- !      & dtset%nspden, gs_hamk%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
- !    call gs_hamk%load_spin(isppol, vxctaulocal=vxctaulocal)
- !  end if
+   if (usevxctau==1) then
+     ABI_MALLOC(vxctaulocal,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,4))
+     call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+       & dtset%nspden, gs_hamk%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
+     call gs_hamk%load_spin(isppol, vxctaulocal=vxctaulocal)
+   end if
 
  !  ikg = 0
  !  !============= BIG FAT KPT LOOP :) ===========================
@@ -489,7 +539,6 @@ subroutine orbmag_ncpp(dtset,ebands_k,mpi_enreg,pawtab,psps)
  !    end do ! loop on bands
 
  !    icg = icg + mcgk
- !    icprj = icprj + mcprjk
  !    ikg = ikg + npw_k
  !    bdtot_index=bdtot_index+nband_k
 
@@ -501,21 +550,15 @@ subroutine orbmag_ncpp(dtset,ebands_k,mpi_enreg,pawtab,psps)
  !    ABI_SFREE(gcg1_k)
  !    ABI_SFREE(eig_k)
  !    ABI_SFREE(occ_k)
- !    call pawcprj_free(cprj_k)
- !    ABI_SFREE(cprj_k)
- !    do adir = 1, 3
- !      call pawcprj_free(cprj1_k(:,:,adir))
- !    end do
- !    ABI_SFREE(cprj1_k)
  !    ABI_SFREE(trnrm)
 
  !  end do ! end loop over kpts
 
- !  ABI_SFREE(vlocal)
- !  ABI_SFREE(vectornd_pac)
- !  ABI_SFREE(vxctaulocal)
+   ABI_SFREE(vlocal)
+   ABI_SFREE(vectornd_pac)
+   ABI_SFREE(vxctaulocal)
 
- !end do ! end loop over isppol
+ end do ! end loop over isppol
 
  !! accumulate data over processors
  !call orbmag_mesh%mpisum(nproc,spaceComm)
@@ -541,23 +584,23 @@ subroutine orbmag_ncpp(dtset,ebands_k,mpi_enreg,pawtab,psps)
 !! deallocate memory
 !!---------------------------------------------------
 
- !call gs_hamk%free()
+ call gs_hamk%free()
+ call orbmag_mesh%free()
+ ABI_SFREE(ncpp_paw_ij)
+ ABI_SFREE(ph1d)
+ ABI_SFREE(atindx)
+ ABI_SFREE(atindx1)
+ ABI_SFREE(nattyp)
 
  !ABI_SFREE(kg_k)
  !ABI_SFREE(kinpw)
  !ABI_SFREE(dkinpw)
- !ABI_SFREE(ph1d)
-
- !ABI_SFREE(atindx)
- !ABI_SFREE(atindx1)
- !ABI_SFREE(nattyp)
 
  !ABI_FREE(dimlmn)
  !call pawcprj_free(cwaveprj)
  !ABI_FREE(cwaveprj)
 
  !call dterm%free()
- !call orbmag_mesh%free()
 
 end subroutine orbmag_ncpp
 !!***
@@ -706,7 +749,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
    end do
  end do
 
- ABI_MALLOC(ph1d,(2,dtset%natom*(2*(ngfft1+ngfft2+ngfft3)+3)))
+ ABI_MALLOC(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
  call getph(atindx,dtset%natom,ngfft1,ngfft2,ngfft3,ph1d,crystal%xred)
 
  ABI_MALLOC(kg_k,(3,mpw))

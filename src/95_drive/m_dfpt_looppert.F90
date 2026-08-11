@@ -2291,11 +2291,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end if
      vtrial_local = vtrial
      if (psps%usepaw .EQ. 1) then
-       call orbmag(cg,cg1_3,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr0,kg,mcg,mcg1,mcprj,mkmem_rbz,&
-         & mpi_enreg,mpw,nfftf,ngfftf,paw_ij,pawfgr,pawrad,pawtab,psps,usevxctau,&
-         & vtrial_local,vxctau,ylm,ylmgr)
+       call orbmag(cg,cg1_3,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr0,kg,mcg,mcg1,&
+         & mcprj,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,paw_ij,pawfgr,pawrad,pawtab,psps,&
+         & usevxctau,vtrial_local,vxctau,ylm,ylmgr)
      else
-       call orbmag_ncpp(dtset,ebands_k,mpi_enreg,pawtab,psps)
+       call orbmag_ncpp(dtset,crystal,ebands_k,gsqcut,mpi_enreg,nfftf,ngfftf,&
+         & pawfgr,pawtab,psps,usevxctau,vtrial_local,vxctau)
      end if
      ABI_SFREE(vtrial_local)
      ABI_SFREE(cg1_3)
