@@ -816,16 +816,17 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 &           gs_ham%nattyp(itypat),fockbz%pawang,fockcommon%pawfgrtab,&
 &           fockcommon%pawtab(itypat),vfock,qphon,gs_ham%ucvol,gs_ham%xred,&
 &           gpu_option=gpu_option)
+         !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ia,idat,idat_occ,idat_tot,ii,iatom,ind)
          do ia=1,gs_ham%nattyp(itypat)
            do idat=1,ndat
              do idat_occ=1,ndat_occ
                idat_tot=(idat-1)*ndat_occ+idat_occ
+               iatom=iatm+ia
                do ii=1,cplex_fock
-                 iatom=iatm+ia
                  ind=(ii-1)*lmn2_size*cplex_dij
                  dijhat(1:cplex_dij*lmn2_size,iatom,:,idat_tot,ii)=&
   &                dijhat_tmp(ind+1:ind+cplex_dij*lmn2_size,&
-                              1+(idat_occ-1)*ndij+(idat-1)*ndat_occ*ndij:idat_occ*ndij+(idat-1)*ndat_occ*ndij,ia)
+                             1+(idat_occ-1)*ndij+(idat-1)*ndat_occ*ndij:idat_occ*ndij+(idat-1)*ndat_occ*ndij,ia)
                end do
              end do ! idat_occ
            end do ! idat
