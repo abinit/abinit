@@ -729,7 +729,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  real(dp),allocatable, target :: cpf_re(:,:,:,:),cpf_im(:,:,:,:)
  real(dp),allocatable, target :: gemm_re(:,:,:,:),gemm_im(:,:,:,:)
  real(dp),allocatable, target :: gemm_gr_re(:,:,:,:,:),gemm_gr_im(:,:,:,:,:)
- real(dp),allocatable :: atom_wgylm(:,:,:),atom_wgylmgr(:,:,:,:)
+ real(dp),allocatable, target :: atom_wgylm(:,:,:),atom_wgylmgr(:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: nhat12_atm(:,:,:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: atom_expiqr(:,:,:),atom_gylm(:,:,:),atom_dltij(:),atom_gylmgr(:,:,:,:)
  integer,  ABI_CONTIGUOUS pointer :: atom_nfgd(:),atom_ifftsph(:,:),atom_indklmn(:,:)
