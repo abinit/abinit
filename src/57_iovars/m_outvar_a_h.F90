@@ -1046,9 +1046,27 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_mustar','DPR',0)
 
  do idtset=0,ndtset_alloc
+   intarr(1:3,idtset)=dtsets(idtset)%eph_ngkpt_fine
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'eph_ngkpt_fine','INT',0)
+
+ do idtset=0,ndtset_alloc
    intarr(1:3,idtset)=dtsets(idtset)%eph_ngqpt_fine
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'eph_ngqpt_fine','INT',0)
+
+ intarr(1,:)=dtsets(:)%eph_nshiftk_fine
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_nshiftk_fine','INT',0)
+
+ narr = 3 * maxval(dtsets(:)%eph_nshiftk_fine)
+ dprarr(1:narr,:) = zero
+ do idtset=0,ndtset_alloc
+   if (allocated(dtsets(idtset)%eph_shiftk_fine)) then
+     dprarr(1:3*dtsets(idtset)%eph_nshiftk_fine,idtset) = reshape(dtsets(idtset)%eph_shiftk_fine, &
+       [3*dtsets(idtset)%eph_nshiftk_fine])
+   end if
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'eph_shiftk_fine','DPR',0)
 
  narr = size(dtsets(0)%eph_np_pqbks)
  do idtset=0,ndtset_alloc

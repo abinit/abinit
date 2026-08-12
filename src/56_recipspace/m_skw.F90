@@ -33,7 +33,7 @@ module m_skw
  use m_fstrings,       only : itoa, sjoin, ktoa, yesno, ftoa
  use m_special_funcs,  only : abi_derfc
  use m_time,           only : cwtime, cwtime_report
- use m_numeric_tools,  only : imax_loc, vdiff_t, vdiff_eval, vdiff_print
+ use m_numeric_tools,  only : imax_loc
  use m_bz_mesh,        only : isamek
  use m_gsphere,        only : get_irredg
 
@@ -365,7 +365,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
          " (meV), kpt: ", sjoin(ktoa(kpts(:,ik)), "band:",itoa(bstart+ib-1),", spin: ", itoa(spin))
        !write(std_out,fmt)"-- ref ", eig(bstart:bstop,ik,spin) * Ha_meV
        !write(std_out,fmt)"-- int ", oeig * Ha_meV
-       !call vdiff_print(vdiff_eval(1, bcount, eig(bstart:bstop,ik,spin), oeig, one))
+       !call vdiff%eval(1, bcount, eig(bstart:bstop,ik,spin), oeig, one, unit=std_out))
      end if
    end do
  end do

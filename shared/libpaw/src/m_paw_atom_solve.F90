@@ -3,10 +3,10 @@
 !!  m_paw_atom_solve
 !!
 !! FUNCTION
-!! This module provides a modified version of atompaw (created by NAWH, MT, FJ) that is needed to implement relaxed core paw.
+!! This module provides routines of the ATOMPAW code (created by NAWH, MT, FJ), modified for relaxed core paw purposes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2026 ABINIT group (MT,NBrouwer, JBoust)
+!! Copyright (C) 2013-2026 ABINIT group (MT, NBrouwer, JBoust)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,6 +34,7 @@ module m_paw_atom_solve
  use m_pawtab
  use m_pawrad
  use m_paw_atomorb
+ use m_pawpsp
  use m_paw_atom,     only : atompaw_ehnzc,atompaw_dij0,atompaw_kij,atompaw_vhnzc
  use m_paw_numeric
  use m_pawpsp
@@ -66,6 +67,7 @@ module m_paw_atom_solve
  real(dp), PARAMETER, PRIVATE ::linrange=50._dp,linh=0.0025_dp,mxgridlin=20001
  real(dp), PARAMETER, PRIVATE ::logrange=80._dp,logh=0.020_dp,mxgridlog=2001
  real(dp), PARAMETER, PRIVATE :: v4logrange=100._dp,lor00=tol5
+ real(dp), PARAMETER, PRIVATE :: rmax_vloc=10._dp
  ! Constants
  real(dp), parameter :: ifsalpha2=InvFineStruct**2
  real(dp), parameter :: fsalpha2=1._dp/InvFineStruct**2
@@ -178,6 +180,39 @@ module m_paw_atom_solve
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! PRIVATE DATA TYPES IMPORTED FROM ATOMPAW
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!  mesh_data
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ type mesh_data_type
+  integer :: mesh_type           ! Default type of meshes (lin. or log.)
+  integer :: nmesh               ! Number of meshes
+  integer :: iwavmesh            ! Index of mesh for partial waves
+  integer :: iprjmesh            ! Index of mesh for projectors
+  integer :: icoremesh           ! Index of mesh for core density
+  integer :: itaumesh            ! Index of mesh for kinetic energy core density
+  integer :: ivionmesh           ! Index of mesh for vion potential
+  integer :: ivbaremesh          ! Index of mesh for vbare potential
+  integer :: ivlda12mesh         ! Index of mesh for LDA-1/2 potential
+  integer :: ivalemesh           ! Index of mesh for valence density
+  integer :: wav_meshsz          ! Size of mesh for partial waves
+  integer :: sph_meshsz          ! Size of mesh for partial waves
+  integer :: prj_meshsz          ! Size of mesh for projectors
+  integer :: core_meshsz         ! Size of mesh for core density
+  integer :: tau_meshsz          ! Size of mesh for kinetic energy core density
+  integer :: vion_meshsz         ! Size of mesh for vion potential
+  integer :: vbare_meshsz        ! Size of mesh for vbare potential
+  integer :: vlda12_meshsz       ! Size of mesh for LDA-1/2 potential
+  integer :: vale_meshsz         ! Size of mesh for valence density
+  integer :: prj_msz_max         ! Maximum size for projector (used for RSO)
+  real(dp) :: rad_step           ! Default value for radial step
+  real(dp) :: log_step           ! Default value for log step
+  integer,allocatable :: meshtp(:)  ! Array storing mesh type for all meshes
+  integer,allocatable :: meshsz(:)  ! Array storing mesh size for all meshes
+  real(dp),allocatable :: radstp(:) ! Array storing radial step for all meshes
+  real(dp),allocatable :: logstp(:) ! Array storing log step for all meshes
+ end type mesh_data_type
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -540,7 +575,9 @@ END  TYPE splinesolvinfo
   TYPE(SCFInfo) :: SCF
   TYPE(Pseudoinfo) :: PAW
   type(splinesolvinfo) :: spline
- end type atompaw_type
+  character*(10000) :: input_string
+  logical :: prtpaw
+end type atompaw_type
 !!***
 
 
@@ -602,11 +639,13 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
  real(dp),intent(out) :: vlspl(mqgrid_vl,2)
 !Local variables-------------------------------
 !scalars
- integer :: io,ir,icor,io2,irc_max
+ character*(132) :: file_xml
+ integer :: io,ir,icor,io2,irc_max,vlocopt,irc
  logical :: success,paw_proj
  character(len=500) :: msg
  real(dp) :: insph,norm,potshift,ovl,f1,fp1,dx,c4,c2
  real(dp) :: yp1,ypn,ekin,delta_zcore,int_pot
+ type(mesh_data_type) :: mesh_data
 !arrays
  real(dp),ALLOCATABLE:: coredens(:),tcoredens(:),vhnzc_tmp(:)
  real(dp),ALLOCATABLE:: ff(:)
@@ -641,75 +680,13 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
      delta_zcore=delta_zcore+atp%Orbit%occ(io)
    endif
  enddo
- call pawrad_init(radmesh,atp%Grid%n,pawrad%mesh_type,pawrad%rstep,pawrad%lstep)
- LIBPAW_ALLOCATE(ff,(atp%grid%n))
 
 ! ! Solve atomic problem
  if(.not.atm%nc_conv) then
    call SCFatom(atp,.false.)
  endif
 
- ! Compute new core density
- write(msg,'(a)') 'atompaw_solve: orbital,%out sphere'
- call wrtout(std_out,msg,'COLL')
- atp%Orbit%coreden=zero
- icor=0
- do io=1,atp%Orbit%norbit
-   if(atp%Orbit%iscore(io)) then
-     icor=icor+1
-     norm=overlap(atp%Grid,atp%Orbit%wfn(1:atp%Grid%n,io),atp%Orbit%wfn(1:atp%Grid%n,io),1,atp%Grid%n)
-     insph=overlap(atp%Grid,atp%Orbit%wfn(1:atp%PAW%irc,io),atp%Orbit%wfn(1:atp%PAW%irc,io),1,atp%PAW%irc)
-     write(msg,*)io,(one -insph/norm)*100.0_dp
-     call wrtout(std_out,msg,'COLL')
-     atp%Orbit%coreden=atp%Orbit%coreden+atp%Orbit%occ(io)*(atp%Orbit%wfn(:,io))**2
-   endif
- enddo
-
- ! Compute residue
- if(.not.atm%nc_conv) then
-   ff(1:atp%Grid%n)=(atp%Orbit%coreden(1:atp%Grid%n)-coredens(1:atp%Grid%n))**2
-   atm%nresid_c=sqrt(integrator(atp%Grid,ff)/atp%grid%r(atp%grid%n))
-   ff(1:atp%Grid%n)=atp%Orbit%coreden(1:atp%Grid%n)
-   if(integrator(atp%Grid,ff)/=zero) then
-     atm%nresid_c=atm%nresid_c/integrator(atp%Grid,ff)
-   else
-     atm%nresid_c=one
-   endif
-   write(msg,*) 'atompaw_solve: nc residue',atm%nresid_c
-   call wrtout(std_out,msg,'COLL')
- endif
-
- ! Update core dens
- do ir=2,atp%Grid%n
-    coredens(ir)=atp%Orbit%coreden(ir)/(four*pi*atp%Grid%r(ir)**2)
- enddo
- call extrapolate(coredens)
- do ir=1,size(pawtab%coredens)
-   pawtab%coredens(ir)=coredens(ir)
- enddo
-
- ! Update vhnzc
- LIBPAW_ALLOCATE(vhnzc_tmp,(radmesh%mesh_size))
- vhnzc_tmp=zero
- call atompaw_vhnzc(coredens,radmesh,vhnzc_tmp,atm%znucl)
- do ir=1,size(pawtab%vhnzc)
-   pawtab%vhnzc(ir)=vhnzc_tmp(ir)
- enddo
- LIBPAW_DEALLOCATE(vhnzc_tmp)
-
- ! Update edcc
- ff=zero
- ff(2:atp%Grid%n)=atp%Pot%rv(2:atp%Grid%n)*coredens(2:atp%Grid%n)*atp%Grid%r(2:atp%Grid%n)*four_pi
- CALL extrapolate(ff)
- atm%edcc=integrator(atp%Grid,ff)/two
- LIBPAW_DEALLOCATE(ff)
-
- ! Update ehnzc
- call atompaw_ehnzc(coredens,radmesh,atm%ehnzc,atm%znucl)
-
- ! update core wfs, kinetic energy and eigen energies
- atm%ekinc=zero
- atm%eeigc=zero
+  ! update core wfs and eigen energies
  icor=0
  do io=1,atp%Orbit%norbit
    if(atp%Orbit%iscore(io)) then
@@ -720,162 +697,271 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
      do ir=1,pawtab%mesh_size
        atm%phi(ir,icor,1)=atp%Orbit%wfn(ir,io)
      enddo
-     CALL altkinetic(atp%Grid,atp%Orbit%wfn(:,io),atp%Orbit%eig(io),atp%Pot%rv,ekin)
-     !CALL kinetic(atp%Grid,atp%Orbit%wfn(:,io),atp%Orbit%l(io),ekin)
-     atm%ekinc=atm%ekinc+ekin/two*atp%Orbit%occ(io)
-     atm%eeigc=atm%eeigc+atp%Orbit%eig(io)*half*atp%Orbit%occ(io)
    endif
  enddo
 
- ! Update tnc
- if(update_tnc) then
-   ! Compute new tnc
-   call setcoretail(atp%Grid,atp%Orbit%coreden,atp%PAW,atp%needvtau)
-   LIBPAW_ALLOCATE(tcoredens,(atp%Grid%n))
-   do ir=2,atp%Grid%n
-     tcoredens(ir)=atp%PAW%tcore(ir)/(four*pi*atp%Grid%r(ir)**2)
+ if(.not.atp%diracrelativistic) then
+   call pawrad_init(radmesh,atp%Grid%n,pawrad%mesh_type,pawrad%rstep,pawrad%lstep)
+   LIBPAW_ALLOCATE(ff,(atp%grid%n))
+   ! Compute new core density
+   write(msg,'(a)') 'atompaw_solve: orbital,%out sphere'
+   call wrtout(std_out,msg,'COLL')
+   atp%Orbit%coreden=zero
+   icor=0
+   do io=1,atp%Orbit%norbit
+     if(atp%Orbit%iscore(io)) then
+       icor=icor+1
+       norm=overlap(atp%Grid,atp%Orbit%wfn(1:atp%Grid%n,io),atp%Orbit%wfn(1:atp%Grid%n,io),1,atp%Grid%n)
+       insph=overlap(atp%Grid,atp%Orbit%wfn(1:atp%PAW%irc,io),atp%Orbit%wfn(1:atp%PAW%irc,io),1,atp%PAW%irc)
+       write(msg,*)io,(one -insph/norm)*100.0_dp
+       call wrtout(std_out,msg,'COLL')
+       atp%Orbit%coreden=atp%Orbit%coreden+atp%Orbit%occ(io)*(atp%Orbit%wfn(:,io))**2
+     endif
    enddo
-   call extrapolate(tcoredens)
-   ! Update tnc
-   do ir=1,pawtab%mesh_size
-     pawtab%tcoredens(ir,1)=tcoredens(ir)
-   enddo
-   call pawpsp_cg(pawtab%dncdq0,pawtab%d2ncdq0,mqgrid_vl,qgrid_vl,pawtab%tcorespl(:,1),radmesh,tcoredens,yp1,ypn)
-   call paw_spline(qgrid_vl,pawtab%tcorespl(:,1),mqgrid_vl,yp1,ypn,pawtab%tcorespl(:,2))
-   LIBPAW_DEALLOCATE(tcoredens)
- endif
 
- ! Update PAW stuff
- if(update_paw.or.atp%vhtnzc_mode==2) then
-   ! Compute potential shift
-   if(atp%elin_mode==1) then
-     call simp_gen(int_pot,atp%Pot%rv(1:pawtab%mesh_size)*pawrad%rad(1:pawtab%mesh_size)*pawtab%shapefunc(1:pawtab%mesh_size,1),pawrad)
-     potshift=int_pot-atp%pot_ref
-   else
-     LIBPAW_ERROR('NOT ready yet')
+   ! Compute residue
+   if(.not.atm%nc_conv) then
+     ff(1:atp%Grid%n)=(atp%Orbit%coreden(1:atp%Grid%n)-coredens(1:atp%Grid%n))**2
+     atm%nresid_c=sqrt(integrator(atp%Grid,ff)/atp%grid%r(atp%grid%n))
+     ff(1:atp%Grid%n)=atp%Orbit%coreden(1:atp%Grid%n)
+     if(integrator(atp%Grid,ff)/=zero) then
+       atm%nresid_c=atm%nresid_c/integrator(atp%Grid,ff)
+     else
+       atm%nresid_c=one
+     endif
+     write(msg,*) 'atompaw_solve: nc residue',atm%nresid_c
+     call wrtout(std_out,msg,'COLL')
    endif
-   do io=1,atp%Grid%n
-     atp%Pot%rvh(io)=atp%Pot%rvh(io)-potshift*atp%Grid%r(io)
-     atp%Pot%rv(io)=atp%Pot%rv(io)-potshift*atp%Grid%r(io)
+
+   ! Update core dens
+   do ir=2,atp%Grid%n
+      coredens(ir)=atp%Orbit%coreden(ir)/(four*pi*atp%Grid%r(ir)**2)
    enddo
-   atp%Pot%v0=atp%Pot%v0-potshift
-   call setbasis(atp%Grid,atp%Pot,atp%Orbit,atp%PAW,atp,potshift)
-   call SetPAWOptions2(atp,success)
-   ! Update PAW transform
-   if(update_paw) then
-     if(atp%tpaw_mode>1) then
-       LIBPAW_ALLOCATE(ff,(atp%PAW%irc))
-       do io=1,pawtab%basis_size
-         paw_proj=.true.
-         do io2=1,atp%Orbit%norbit
-           if(atp%PAW%valencemap(io2)==io) then
-             if(atp%orbit%issemicore(io2).and.atp%tpaw_mode==2) then
-               paw_proj=.false.
+   call extrapolate(coredens)
+   do ir=1,size(pawtab%coredens)
+     pawtab%coredens(ir)=coredens(ir)
+   enddo
+
+   ! Update vhnzc
+   LIBPAW_ALLOCATE(vhnzc_tmp,(radmesh%mesh_size))
+   vhnzc_tmp=zero
+   call atompaw_vhnzc(coredens,radmesh,vhnzc_tmp,atm%znucl)
+   do ir=1,size(pawtab%vhnzc)
+     pawtab%vhnzc(ir)=vhnzc_tmp(ir)
+   enddo
+   LIBPAW_DEALLOCATE(vhnzc_tmp)
+
+   ! Update edcc
+   ff=zero
+   ff(2:atp%Grid%n)=atp%Pot%rv(2:atp%Grid%n)*coredens(2:atp%Grid%n)*atp%Grid%r(2:atp%Grid%n)*four_pi
+   CALL extrapolate(ff)
+   atm%edcc=integrator(atp%Grid,ff)/two
+   LIBPAW_DEALLOCATE(ff)
+
+   ! Update ehnzc
+   call atompaw_ehnzc(coredens,radmesh,atm%ehnzc,atm%znucl)
+
+   ! update core kinetic energy 
+   atm%ekinc=zero
+   atm%eeigc=zero
+   icor=0
+   do io=1,atp%Orbit%norbit
+     if(atp%Orbit%iscore(io)) then
+       icor=icor+1
+       CALL altkinetic(atp%Grid,atp%Orbit%wfn(:,io),atp%Orbit%eig(io),atp%Pot%rv,ekin)
+       atm%ekinc=atm%ekinc+ekin/two*atp%Orbit%occ(io)
+       atm%eeigc=atm%eeigc+atp%Orbit%eig(io)*half*atp%Orbit%occ(io)
+     endif
+   enddo
+
+   ! Update tnc
+   if(update_tnc) then
+     ! Compute new tnc
+     call setcoretail(atp%Grid,atp%Orbit%coreden,atp%PAW,atp%needvtau)
+     LIBPAW_ALLOCATE(tcoredens,(atp%Grid%n))
+     do ir=2,atp%Grid%n
+       tcoredens(ir)=atp%PAW%tcore(ir)/(four*pi*atp%Grid%r(ir)**2)
+     enddo
+     call extrapolate(tcoredens)
+     ! Update tnc
+     do ir=1,pawtab%mesh_size
+       pawtab%tcoredens(ir,1)=tcoredens(ir)
+     enddo
+     call pawpsp_cg(pawtab%dncdq0,pawtab%d2ncdq0,mqgrid_vl,qgrid_vl,pawtab%tcorespl(:,1),radmesh,tcoredens,yp1,ypn)
+     call paw_spline(qgrid_vl,pawtab%tcorespl(:,1),mqgrid_vl,yp1,ypn,pawtab%tcorespl(:,2))
+     LIBPAW_DEALLOCATE(tcoredens)
+   endif
+
+   ! Update PAW stuff
+   if(update_paw.or.atp%vhtnzc_mode==2) then
+     ! Compute potential shift
+     if(atp%elin_mode==1) then
+       call simp_gen(int_pot,atp%Pot%rv(1:pawtab%mesh_size)*pawrad%rad(1:pawtab%mesh_size)*pawtab%shapefunc(1:pawtab%mesh_size,1),pawrad)
+       potshift=int_pot-atp%pot_ref
+     else
+       LIBPAW_ERROR('NOT ready yet')
+     endif
+     do io=1,atp%Grid%n
+       atp%Pot%rvh(io)=atp%Pot%rvh(io)-potshift*atp%Grid%r(io)
+       atp%Pot%rv(io)=atp%Pot%rv(io)-potshift*atp%Grid%r(io)
+     enddo
+     atp%Pot%v0=atp%Pot%v0-potshift
+     call setbasis(atp%Grid,atp%Pot,atp%Orbit,atp%PAW,atp,potshift)
+     call SetPAWOptions2(atp,success)
+     ! Update PAW transform
+     if(update_paw) then
+       if(atp%tpaw_mode>1) then
+         if(atp%scalarrelativistic.or.atp%diracrelativistic) then
+           LIBPAW_ERROR('tpaw>1 not compatible with relativstic calculation.')
+         endif
+         LIBPAW_ALLOCATE(ff,(atp%PAW%irc))
+         do io=1,pawtab%basis_size
+           paw_proj=.true.
+           do io2=1,atp%Orbit%norbit
+             if(atp%PAW%valencemap(io2)==io) then
+               if(atp%orbit%issemicore(io2).and.atp%tpaw_mode==2) then
+                 paw_proj=.false.
+               endif
              endif
+           enddo
+           if(paw_proj) then
+             atp%PAW%ophi(:,io)=zero
+             atp%PAW%otphi(:,io)=zero
+             do ir=1,pawtab%mesh_size
+               atp%PAW%ophi(ir,io)=pawtab%phi(ir,io)
+               atp%PAW%otphi(ir,io)=pawtab%tphi(ir,io)
+             enddo
+             do io2=1,atp%Orbit%norbit
+               if(atp%Orbit%iscore(io2).and.atp%orbit%l(io2)==atp%PAW%l(io)) then
+                 irc_max=atp%PAW%irc-5
+                 ff=zero
+                 ff(1:irc_max)=atp%orbit%wfn(1:irc_max,io2)
+                 f1=atp%orbit%wfn(irc_max,io2)
+                 fp1=Gfirstderiv(atp%Grid,irc_max,atp%orbit%wfn(:,io2))
+                 dx=-(atp%grid%r(atp%PAW%irc)-atp%grid%r(irc_max))
+                 c4=(-two*dx*f1+dx**2*fp1)/(two*dx**5)
+                 c2=(four*dx**3*f1-dx**4*fp1)/(two*dx**5)
+                 do ir=irc_max+1,atp%PAW%irc
+                   ff(ir)=c4*(atp%grid%r(ir)-atp%grid%r(atp%PAW%irc))**4+c2*(atp%grid%r(ir)-&
+&                         atp%grid%r(atp%PAW%irc))**2
+                 enddo
+                 ovl=overlap(atp%grid,atp%PAW%ophi(1:atp%PAW%irc,io),ff(1:atp%PAW%irc),1,atp%PAW%irc)
+                 atp%PAW%ophi(1:atp%PAW%irc,io)=atp%PAW%ophi(1:atp%PAW%irc,io)-&
+&                                                 ovl*ff(1:atp%PAW%irc)
+               endif
+             enddo
            endif
          enddo
-         if(paw_proj) then
-           atp%PAW%ophi(:,io)=zero
-           atp%PAW%otphi(:,io)=zero
-           do ir=1,pawtab%mesh_size
-             atp%PAW%ophi(ir,io)=pawtab%phi(ir,io)
-             atp%PAW%otphi(ir,io)=pawtab%tphi(ir,io)
-           enddo
-           do io2=1,atp%Orbit%norbit
-             if(atp%Orbit%iscore(io2).and.atp%orbit%l(io2)==atp%PAW%l(io)) then
-               irc_max=atp%PAW%irc-5
-               ff=zero
-               ff(1:irc_max)=atp%orbit%wfn(1:irc_max,io2)
-               f1=atp%orbit%wfn(irc_max,io2)
-               fp1=Gfirstderiv(atp%Grid,irc_max,atp%orbit%wfn(:,io2))
-               dx=-(atp%grid%r(atp%PAW%irc)-atp%grid%r(irc_max))
-               c4=(-two*dx*f1+dx**2*fp1)/(two*dx**5)
-               c2=(four*dx**3*f1-dx**4*fp1)/(two*dx**5)
-               do ir=irc_max+1,atp%PAW%irc
-                 ff(ir)=c4*(atp%grid%r(ir)-atp%grid%r(atp%PAW%irc))**4+c2*(atp%grid%r(ir)-&
-&                       atp%grid%r(atp%PAW%irc))**2
-               enddo
-               ovl=overlap(atp%grid,atp%PAW%ophi(1:atp%PAW%irc,io),ff(1:atp%PAW%irc),1,atp%PAW%irc)
-               atp%PAW%ophi(1:atp%PAW%irc,io)=atp%PAW%ophi(1:atp%PAW%irc,io)-&
-&                                               ovl*ff(1:atp%PAW%irc)
-             endif
-           enddo
-         endif
+         LIBPAW_DEALLOCATE(ff)
+       endif
+       do io=1,pawtab%basis_size
+         do ir=1,pawtab%mesh_size
+           pawtab%phi(ir,io)=atp%PAW%ophi(ir,io)
+           pawtab%tphi(ir,io)=atp%PAW%otphi(ir,io)
+        enddo
        enddo
-       LIBPAW_DEALLOCATE(ff)
+       ! Update Kij
+       if(.not.allocated(pawtab%kij)) then
+         LIBPAW_ALLOCATE(pawtab%kij,(pawtab%lmn2_size))
+       endif
+       call calc_kij(atp%PAW,atp%Grid,pawtab%kij,pawtab,&
+&       atp%scalarrelativistic,atp%needvtau)
      endif
-     do io=1,pawtab%basis_size
-       do ir=1,pawtab%mesh_size
-         pawtab%phi(ir,io)=atp%PAW%ophi(ir,io)
-         pawtab%tphi(ir,io)=atp%PAW%otphi(ir,io)
-      enddo
-     enddo
-     ! Update Kij
-     if(.not.allocated(pawtab%kij)) then
-       LIBPAW_ALLOCATE(pawtab%kij,(pawtab%lmn2_size))
-     endif
-     call calc_kij(atp%PAW,atp%Grid,pawtab%kij,pawtab,&
-&     atp%scalarrelativistic,atp%needvtau)
    endif
- endif
 
- ! Update vhtnzc, zion and epsatm
- if(abs(delta_zcore)<tol15*atm%zcore) atm%zcore_conv=.true.
- if(.not.atm%zcore_conv) then
-   zion=atm%znucl-atm%zcore
-   delta_zcore=atm%zcore-atm%zcore_orig
-   write(msg,*) 'atompaw_solve: delta_zcore',delta_zcore
-   call wrtout(std_out,msg,'COLL')
-   call pawrad_init(vloc_mesh,mesh_size=size(pawtab%vhtnzc),mesh_type=pawrad%mesh_type,&
-&   rstep=pawrad%rstep,lstep=pawrad%lstep)
-   if(atp%vhtnzc_mode==2) then
-     call FindVlocfromVeff(atp%Grid,atp%PAW,atp,potshift)
-     if(pawtab%usexcnhat==1) then
-       pawtab%vhtnzc(1:size(pawtab%vhtnzc))=half*atp%PAW%abinitvloc(1:size(pawtab%vhtnzc))
+   ! Update vhtnzc, zion and epsatm
+   if(abs(delta_zcore)<tol15*atm%zcore) atm%zcore_conv=.true.
+   if(.not.atm%zcore_conv) then
+     zion=atm%znucl-atm%zcore
+     delta_zcore=atm%zcore-atm%zcore_orig
+     write(msg,*) 'atompaw_solve: delta_zcore',delta_zcore
+     call wrtout(std_out,msg,'COLL')
+     call pawrad_init(vloc_mesh,mesh_size=size(pawtab%vhtnzc),mesh_type=pawrad%mesh_type,&
+&     rstep=pawrad%rstep,lstep=pawrad%lstep)
+     if(atp%vhtnzc_mode==2) then
+       LIBPAW_ERROR('Vhtnzc_mode>1 is work in progress')
+       call FindVlocfromVeff(atp%Grid,atp%PAW,atp,potshift)
+       if(pawtab%usexcnhat==1) then
+         pawtab%vhtnzc(1:size(pawtab%vhtnzc))=half*atp%PAW%abinitvloc(1:size(pawtab%vhtnzc))
+       else
+         pawtab%vhtnzc(1:size(pawtab%vhtnzc))=half*atp%PAW%abinitnohat(1:size(pawtab%vhtnzc))
+       endif
+     elseif(atp%vhtnzc_mode==1) then
+       ! Compute nhatc=shapefunction*delta_zcore
+       LIBPAW_ALLOCATE(nhatc,(size(pawtab%vhtnzc)))
+       nhatc=zero
+       do ir=1,size(pawtab%shapefunc(:,1))
+         nhatc(ir)=delta_zcore*pawtab%shapefunc(ir,1)*vloc_mesh%rad(ir)**2
+       enddo
+       LIBPAW_ALLOCATE(vhatc,(size(pawtab%vhtnzc)))
+       call poisson(nhatc,0,vloc_mesh,vhatc)
+       do ir=2,vloc_mesh%mesh_size
+         vhatc(ir)=vhatc(ir)/vloc_mesh%rad(ir)
+       enddo
+       call pawrad_deducer0(vhatc,vloc_mesh%mesh_size,vloc_mesh)
+       LIBPAW_DEALLOCATE(nhatc)
+       ! Add it to original vhtnzc
+       pawtab%vhtnzc=atm%vhtnzc_orig+vhatc
+       LIBPAW_DEALLOCATE(vhatc)
+     endif
+     call pawpsp_lo(epsatm,mqgrid_vl,qgrid_vl,vlspl(:,1),&
+&                       vloc_mesh,pawtab%vhtnzc,yp1,ypn,&
+&                       zion)
+     call  paw_spline(qgrid_vl,vlspl(:,1),mqgrid_vl,yp1,ypn,vlspl(:,2))
+     write(msg,*) 'atompaw_solve: nc epsatm',epsatm
+     call wrtout(std_out,msg,'COLL')
+     call pawrad_free(vloc_mesh)
+   endif
+
+   ! update dij0
+   call atompaw_dij0(pawtab%indlmn,pawtab%kij,pawtab%lmn_size,coredens,0,pawtab,pawrad,radmesh,&
+&                        pawrad,pawtab%vhtnzc,atp%Pot%zz)
+
+   ! Write the new paw data
+   if(update_paw.and.atp%prtpaw.and..not.atp%diracrelativistic) then
+     if (pawtab%usexcnhat==1) then
+       vlocopt=1
      else
-       pawtab%vhtnzc(1:size(pawtab%vhtnzc))=half*atp%PAW%abinitnohat(1:size(pawtab%vhtnzc))
-     endif
-   elseif(atp%vhtnzc_mode==1) then
-     ! Compute nhatc=shapefunction*delta_zcore
-     LIBPAW_ALLOCATE(nhatc,(size(pawtab%vhtnzc)))
-     nhatc=zero
-     do ir=1,size(pawtab%shapefunc(:,1))
-       nhatc(ir)=delta_zcore*pawtab%shapefunc(ir,1)*vloc_mesh%rad(ir)**2
+       vlocopt=2
+     end if
+     atp%Orbit%coreden=zero
+     atp%SCF%corekin=zero
+     icor=0
+     do io=1,atp%Orbit%norbit
+       if(atp%Orbit%iscore(io)) then
+         icor=icor+1
+         atp%Orbit%occ(io)=atm%max_occ(icor,1)
+         atp%Orbit%coreden=atp%Orbit%coreden+atp%Orbit%occ(io)*(atp%Orbit%wfn(:,io))**2
+         CALL altkinetic(atp%Grid,atp%Orbit%wfn(:,io),atp%Orbit%eig(io),atp%Pot%rv,ekin)
+         atp%SCF%corekin=atp%SCF%corekin+ekin*atp%Orbit%occ(io)
+       endif
      enddo
-     LIBPAW_ALLOCATE(vhatc,(size(pawtab%vhtnzc)))
-     call poisson(nhatc,0,vloc_mesh,vhatc)
-     do ir=2,vloc_mesh%mesh_size
-       vhatc(ir)=vhatc(ir)/vloc_mesh%rad(ir)
+     atp%PAW%abinitnohat(1:size(pawtab%vhtnzc))=atm%vhtnzc_orig(1:size(pawtab%vhtnzc))*two
+     do io=1,pawtab%basis_size
+       irc=FindGridIndex(atp%Grid,atp%basis_func_rc(io))
+       irc=min(atp%PAW%irc,irc)
+       atp%PAW%rcio(io)=atp%grid%r(irc)
      enddo
-     call pawrad_deducer0(vhatc,vloc_mesh%mesh_size,vloc_mesh)
-     LIBPAW_DEALLOCATE(nhatc)
-     ! Add it to original vhtnzc
-     pawtab%vhtnzc=atm%vhtnzc_orig+vhatc
-     LIBPAW_DEALLOCATE(vhatc)
+     call build_mesh_data(mesh_data,atp%Grid,atp%PAW%irc,0,0,0,0)
+     file_xml=trim(atp%pot%sym)//'-rcpaw.xml'
+     call xmloutput(trim(file_xml),atp%Grid,atp%SCF,atp%Pot,atp%Orbit,atp%PAW,mesh_data,&
+ &    atp%PAW%otp,2,atp%input_string,"","",-1,atm%zcore_orig,atp)
+     file_xml=TRIM(atp%pot%sym)//'-rcpaw.corewf.xml'
+     call xmlprtcore(trim(file_xml),atp,atm%zcore_orig,mesh_data,atp%input_string)
+     call destroy_mesh_data(mesh_data) 
    endif
-   call pawpsp_lo(epsatm,mqgrid_vl,qgrid_vl,vlspl(:,1),&
-&                     vloc_mesh,pawtab%vhtnzc,yp1,ypn,&
-&                     zion)
-   call  paw_spline(qgrid_vl,vlspl(:,1),mqgrid_vl,yp1,ypn,vlspl(:,2))
-   write(msg,*) 'atompaw_solve: nc epsatm',epsatm
-   call wrtout(std_out,msg,'COLL')
-   call pawrad_free(vloc_mesh)
- endif
 
- ! update dij0
- call atompaw_dij0(pawtab%indlmn,pawtab%kij,pawtab%lmn_size,coredens,0,pawtab,pawrad,radmesh,&
-&                      pawrad,pawtab%vhtnzc,atp%Pot%zz)
+   ! update tcoretau : TODO : tau
+   ! Clean up
+   if(update_paw.or.atp%vhtnzc_mode==2) then
+     do io=1,atp%Grid%n
+       atp%Pot%rvh(io)=atp%Pot%rvh(io)+potshift*atp%Grid%r(io)
+       atp%Pot%rv(io)=atp%Pot%rv(io)+potshift*atp%Grid%r(io)
+     enddo
+     atp%Pot%v0=atp%Pot%v0+potshift
+   endif
+ endif
  LIBPAW_DEALLOCATE(coredens)
-
- ! update tcoretau : TODO : tau
- ! Clean up
- if(update_paw.or.atp%vhtnzc_mode==2) then
-   do io=1,atp%Grid%n
-     atp%Pot%rvh(io)=atp%Pot%rvh(io)+potshift*atp%Grid%r(io)
-     atp%Pot%rv(io)=atp%Pot%rv(io)+potshift*atp%Grid%r(io)
-   enddo
-   atp%Pot%v0=atp%Pot%v0+potshift
- endif
  call pawrad_free(radmesh)
 end subroutine atompaw_solve
 !!***
@@ -898,13 +984,15 @@ end subroutine atompaw_solve
 !! SOURCE
 !! Inspired from SCFatom_init in atompaw
 
-subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,sctol,elin_mode,vhtnzc_mode,tpaw_mode)
+subroutine atompaw_init(pawtab,pawrad,atp,atm,sctol,elin_mode,vhtnzc_mode,tpaw_mode,dirac,filename,prtpaw)
  ! TODO : BDsolve
  implicit none
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: znucl,elin_mode,vhtnzc_mode,tpaw_mode
+ integer, intent(in) :: elin_mode,vhtnzc_mode,tpaw_mode,prtpaw
  real(dp), intent(in) :: sctol
+ logical,intent(in) :: dirac
+ CHARACTER(len=*),intent(in) :: filename
  type(pawtab_type), intent(inout) :: pawtab
  type(pawrad_type), intent(in) :: pawrad
  type(atompaw_type), intent(inout) :: atp
@@ -914,19 +1002,22 @@ subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,sctol,elin_mode,vhtnzc_mode,
 !scalars
  CHARACTER(len=500) :: input_file
  character(len=500) :: msg
- REAL(dp)    :: a1,a2,a3,hval,r0
- INTEGER :: ii,jj,icor,ir,io,fnln
+ character*(132) :: file_xml_core
+ logical :: rcpaw_core_file,ex
+ REAL(dp)    :: a1,a2,a3,hval,r0,zcore
+ INTEGER :: ii,jj,icor,ir,io,fnln,ios
  logical :: fmt_xml
  real(dp) :: ekin,insph,norm
  type(pawrad_type) :: radmesh
+ type(mesh_data_type) :: mesh_data
 !arrays
  real(dp), allocatable :: ff(:)
 
 ! *************************************************************************
 
  ! File to read
- input_file=trim(atm%fname)
- fnln=len(trim(atm%fname))
+ input_file=trim(filename)
+ fnln=len(trim(filename))
  fmt_xml=.false.
  if (fnln>3) then
     fmt_xml=(input_file(fnln-3:fnln)=='.xml')
@@ -934,7 +1025,17 @@ subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,sctol,elin_mode,vhtnzc_mode,
  if(.not.fmt_xml) then
    LIBPAW_ERROR('RCPAW ONLY COMPATIBLE WITH XML COREWF FILE')
  endif
-
+ input_file=input_file(1:fnln-3)//'corewf.xml'
+ inquire(file=trim(input_file),iostat=ios,exist=ex)
+ if (ios/=0) then
+   write(msg,'(2a)') 'INQUIRE returns an error for file ',trim(input_file)
+   LIBPAW_ERROR(msg)
+ end if
+ if (.not.ex) then
+   write(msg,'(3a)') 'This file does not exist: ',trim(input_file),'!'
+   LIBPAW_ERROR(msg)
+ end if
+ 
 ! Initialize global constants
  machine_precision = zero
  a1 = 4._dp/3._dp
@@ -956,7 +1057,16 @@ subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,sctol,elin_mode,vhtnzc_mode,
  atp%elin_mode=elin_mode
  atp%vhtnzc_mode=vhtnzc_mode
  atp%tpaw_mode=tpaw_mode
- call input_dataset_read(atp,input_file)
+ atp%prtpaw=(prtpaw>0)
+
+ call input_dataset_read(atp,input_file,dirac,.true.)
+
+ rcpaw_core_file=.false.
+ if((.not.dirac).and.atp%diracrelativistic) then
+   atp%scalarrelativistic=.true.
+   atp%diracrelativistic=.false.
+   rcpaw_core_file=.true.
+ endif
  atp%npsc=0
  atp%nppc=1
  atp%npdc=2
@@ -982,6 +1092,7 @@ subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,sctol,elin_mode,vhtnzc_mode,
     CALL InitGrid(atp%Grid,hval,atp%gridrange,r0=lor00/atp%atomic_charge)
  ENDIF
  call print_check_atompaw_params(atp)
+ call read_inputstring(atp%input_string)
 
  ! Init potentials
  CALL InitPot(atp%Pot,atp%Grid%n)
@@ -992,7 +1103,7 @@ subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,sctol,elin_mode,vhtnzc_mode,
  atp%Pot%v0p=0._dp
  atp%Pot%Nv0=0
  atp%Pot%Nv0p=0
- atp%Pot%nz=znucl
+ atp%Pot%nz=atp%atomic_charge
  atp%Pot%zz=atp%Pot%nz
  atp%Pot%needvtau=atp%needvtau
  atp%Pot%finitenucleus=atp%finitenucleus
@@ -1011,11 +1122,11 @@ subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,sctol,elin_mode,vhtnzc_mode,
  IF(atp%np(4)>0) jj=jj+atp%np(4)-3
  IF(atp%np(5)>0) jj=jj+atp%np(5)-4
  If (atp%diracrelativistic) jj=jj+jj   !  need more orbitals
- CALL InitOrbit(atp%Orbit,jj,atp%Grid%n,atp%exctype,atp%diracrelativistic,atp%scalarrelativistic,&
+ CALL InitOrbit(atp%Orbit,atp%norbit,atp%Grid%n,atp%exctype,atp%diracrelativistic,atp%scalarrelativistic,&
 &     atp%frozencorecalculation,atp%frozenvalecalculation)
  atp%Orbit%nps=atp%np(1);atp%Orbit%npp=atp%np(2);atp%Orbit%npd=atp%np(3)
  atp%Orbit%npf=atp%np(4);atp%Orbit%npg=atp%np(5)
- CALL Prepare_Orbit(atp,ii,jj)
+ CALL Prepare_Orbit(atp,ii,atp%norbit)
  atp%Orbit%npsc=atp%npsc;atp%Orbit%nppc=atp%nppc;atp%Orbit%npdc=atp%npdc
  atp%Orbit%npfc=atp%npfc;atp%Orbit%npgc=atp%npgc
  atp%Pot%q=atp%electrons
@@ -1041,6 +1152,24 @@ subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,sctol,elin_mode,vhtnzc_mode,
 
  ! Re-solve (temporary, this should be added to atompaw)
  call SCFatom(atp,.true.)
+
+ if(rcpaw_core_file) then
+   call build_mesh_data(mesh_data,atp%Grid,atp%PAW%irc,0,0,0,0)
+   zcore=zero
+   do io=1,atp%norbit
+     if(atp%orbit%iscore(io)) then
+       zcore=zcore+atp%orbit%occ(io)
+     endif
+   enddo
+   file_xml_core=TRIM(atp%pot%sym)//'-tmp.corewf.xml'
+   call xmlprtcore(trim(file_xml_core),atp,zcore,mesh_data,atp%input_string)
+   file_xml_core=trim(atp%pot%sym)//'-tmp.xml'
+   call destroy_mesh_data(mesh_data)
+ else
+  file_xml_core=filename
+ endif 
+ ! define atom
+ call pawpsp_init_core(atm,psp_filename=trim(file_xml_core))
  call simp_gen(atp%pot_ref,atp%Pot%rv(1:pawtab%mesh_size)*pawrad%rad(1:pawtab%mesh_size)*pawtab%shapefunc(1:pawtab%mesh_size,1),pawrad)
  write(msg,'(a)') 'atompaw_init: orbital, %out of sphere, core, semicore'
  call wrtout(std_out,msg,'COLL')
@@ -1080,14 +1209,7 @@ subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,sctol,elin_mode,vhtnzc_mode,
  do io=1,atp%Orbit%norbit
    if(atp%Orbit%iscore(io)) then
      icor=icor+1
-     !CALL kinetic(atp%Grid,atp%Orbit%wfn(:,io),atp%Orbit%l(io),ekin)
      CALL altkinetic(atp%Grid,atp%Orbit%wfn(:,io),atp%Orbit%eig(io),atp%Pot%rv,ekin)
-     if(abs(atp%Orbit%eig(io)/two-atm%eig(icor,1))>tol1) then
-       LIBPAW_ERROR('Inconsistent RCPAW core files')
-     endif
-     if(abs(atp%Orbit%occ(io)-atm%occ(icor,1))>tol1) then
-       LIBPAW_ERROR('Inconsistent RCPAW core files')
-     endif
      atm%ekinc=atm%ekinc+ekin/two*atp%Orbit%occ(io)
      atm%eeigc=atm%eeigc+atp%Orbit%eig(io)*atp%Orbit%occ(io)/two
    endif
@@ -1116,6 +1238,35 @@ subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,sctol,elin_mode,vhtnzc_mode,
      atp%PAW%otp(ir,io)=pawtab%tproj(ir,io)
    enddo
  enddo
+
+! atp%SCF%corekin=two*atm%ekinc
+! call setcoretail(atp%Grid,atp%Orbit%coreden,atp%PAW,atp%needvtau)
+! call setbasis(atp%Grid,atp%Pot,atp%Orbit,atp%PAW,atp,0.0_dp)
+! call SetPAWOptions2(atp,fmt_xml)
+! atp%PAW%abinitnohat(1:size(pawtab%vhtnzc))=pawtab%vhtnzc(1:size(pawtab%vhtnzc))*two
+! atp%PAW%otp=zero
+! do io=1,pawtab%basis_size
+!   do ir=1,atp%PAW%irc
+!     atp%PAW%otp(ir,io)=pawtab%tproj(ir,io)
+!   enddo
+! enddo
+! do io=1,pawtab%basis_size
+!   irc=FindGridIndex(atp%Grid,atp%basis_func_rc(io))
+!   irc=min(atp%PAW%irc,irc)
+!   atp%PAW%rcio(io)=atp%grid%r(irc)
+! enddo
+!  atp%PAW%abinitnohat(1:size(pawtab%vhtnzc))=pawtab%vhtnzc(1:size(pawtab%vhtnzc))*two
+!  call build_mesh_data(mesh_data,atp%Grid,atp%PAW%irc,0,0,0,0)
+!  if(.not.allocated(pawtab%kij)) then
+!    LIBPAW_ALLOCATE(pawtab%kij,(pawtab%lmn2_size))
+!  endif
+!  call calc_kij(atp%PAW,atp%Grid,pawtab%kij,pawtab,&
+!&       atp%scalarrelativistic,atp%needvtau)
+!  file_xml_core=trim(atp%pot%sym)//'-rcpaw.xml'
+!  call xmloutput(trim(file_xml_core),atp%Grid,atp%SCF,atp%Pot,atp%Orbit,atp%PAW,mesh_data,&
+!&    atp%PAW%otp,2,atp%input_string,"","",-1,atm%zcore,atp)
+!  file_xml_core=TRIM(atp%pot%sym)//'-rcpaw.corewf.xml'
+!  call xmlprtcore(trim(file_xml_core),atp,atm%zcore,mesh_data,atp%input_string)
 
 end subroutine atompaw_init
 !!***
@@ -1436,9 +1587,7 @@ subroutine calc_kij(PAW,grid,kij,pawtab,scalarrelativistic,needvtau)
  integer :: nbase,l,ib,jb
  integer :: jlmn,j0lmn,jlm,jln,ilmn,klmn,ilm,iln
  real(dp) :: x, y
- real(dp), allocatable :: kij_atp(:,:)
  nbase=PAW%nbase
- LIBPAW_ALLOCATE(kij_atp,(nbase,nbase))
  DO ib=1,nbase
    l=PAW%l(ib)
    DO jb=1,nbase
@@ -1450,7 +1599,7 @@ subroutine calc_kij(PAW,grid,kij,pawtab,scalarrelativistic,needvtau)
 &              PAW%otphi(:,ib),PAW%otphi(:,jb),l,x,PAW%irc)
        Endif
        if(has_to_print) WRITE(STD_OUT,'(" Kinetic ", 3i5, 1p,3e15.7)') ib,jb,l,x
-       Kij_atp(ib,jb)=x
+       PAW%Kij(ib,jb)=x
      ENDIF
    ENDDO
  ENDDO
@@ -1458,9 +1607,9 @@ subroutine calc_kij(PAW,grid,kij,pawtab,scalarrelativistic,needvtau)
  DO ib=1,nbase
    DO jb=ib,nbase
      IF(jb>ib) THEN
-       x=Kij_atp(ib,jb); y=Kij_atp(jb,ib)
+       x=PAW%Kij(ib,jb); y=PAW%Kij(jb,ib)
        x=0.5_dp*(x+y)
-       Kij_atp(ib,jb)=x; Kij_atp(jb,ib)=x
+       PAW%Kij(ib,jb)=x; PAW%Kij(jb,ib)=x
      ENDIF
    ENDDO
  ENDDO
@@ -1472,10 +1621,9 @@ subroutine calc_kij(PAW,grid,kij,pawtab,scalarrelativistic,needvtau)
    do ilmn=1,jlmn
      klmn=j0lmn+ilmn
      ilm=pawtab%indlmn(4,ilmn);iln=pawtab%indlmn(5,ilmn)
-     if (ilm==jlm) kij(klmn)=half*Kij_atp(iln,jln) ! Conversion Ry->Ha
+     if (ilm==jlm) kij(klmn)=half*PAW%Kij(iln,jln) ! Conversion Ry->Ha
    enddo
  enddo
- LIBPAW_DEALLOCATE(kij_atp)
 end subroutine calc_kij
 
 
@@ -2003,7 +2151,7 @@ SUBROUTINE Orbit_Init(Orbit,Pot,atp)
      l=Orbit%l(io)
      xocc=Orbit%occ(io)
      if(.not.Orbit%frozenvalecalculation) Orbit%eig(io)=-(zeff/(np))**2!/2.0!Hartree
-     if(has_to_print) WRITE(std_out,*) io,np,l,xocc,Orbit%eig(io)
+     if(has_to_print) WRITE(std_out,*) io,np,l,xocc,Orbit%eig(io),zeff
      DO ir=1,atp%Grid%n
        Orbit%wfn(ir,io)=hwfn(zeff,np,l,atp%Grid%r(ir))
        IF (ABS(Orbit%wfn(ir,io))<machine_zero) Orbit%wfn(ir,io)=0._dp
@@ -3458,11 +3606,13 @@ SUBROUTINE Updatewfn(Grid,Pot,Orbit,rvin,success,BDsolve,usespline,spline,itype)
        kappa=1
        Call BoundD(Grid,Pot,Orbit%eig(s1:s2),Orbit%wfn(:,s1:s2),&
 &             Orbit%lwfn(:,s1:s2),kappa,nroot,emin,ierr,OK)
-       s1=s2+1;s2=s1+nroot-1
+       s1=s2t+1;s2=s1+nroot-1
        kappa=-2
        emin=-nz*nz/4._dp-0.5_dp
        Call BoundD(Grid,Pot,Orbit%eig(s1:s2),Orbit%wfn(:,s1:s2),&
 &          Orbit%lwfn(:,s1:s2),kappa,nroot,emin,ierr,OK)
+       nroot=Orbit%npp-1
+       s2t=s1+nroot-1
      ELSE IF (Pot%needvtau) THEN
        Call Boundsplinesolver(Grid,l,nroot, &
 &         Orbit%eig(s1:s2),Orbit%wfn(:,s1:s2),Orbit%otau(:,s1:s2),OK,spline)
@@ -3504,10 +3654,12 @@ SUBROUTINE Updatewfn(Grid,Pot,Orbit,rvin,success,BDsolve,usespline,spline,itype)
        Call BoundD(Grid,Pot,Orbit%eig(s1:s2),Orbit%wfn(:,s1:s2),&
 &          Orbit%lwfn(:,s1:s2),kappa,nroot,emin,ierr,OK)
        kappa=-3
-       s1=s2+1;s2=s1+nroot-1
+       s1=s2t+1;s2=s1+nroot-1
        emin=-nz*nz/9._dp-0.5_dp
        Call BoundD(Grid,Pot,Orbit%eig(s1:s2),Orbit%wfn(:,s1:s2),&
 &          Orbit%lwfn(:,s1:s2),kappa,nroot,emin,ierr,OK)
+       nroot=Orbit%npd-1
+       s2t=s1+nroot-1
      ELSE IF (Pot%needvtau) THEN
        Call Boundsplinesolver(Grid,l,nroot, &
 &          Orbit%eig(s1:s2),Orbit%wfn(:,s1:s2),Orbit%otau(:,s1:s2),OK,spline)
@@ -3549,10 +3701,12 @@ SUBROUTINE Updatewfn(Grid,Pot,Orbit,rvin,success,BDsolve,usespline,spline,itype)
        Call BoundD(Grid,Pot,Orbit%eig(s1:s2),Orbit%wfn(:,s1:s2),&
 &             Orbit%lwfn(:,s1:s2),kappa,nroot,emin,ierr,OK)
        kappa=-4
-       s1=s2+1;s2=s1+nroot-1
+       s1=s2t+1;s2=s1+nroot-1
        emin=-nz*nz/16._dp-0.5_dp
        Call BoundD(Grid,Pot,Orbit%eig(s1:s2),Orbit%wfn(:,s1:s2),&
 &             Orbit%lwfn(:,s1:s2),kappa,nroot,emin,ierr,OK)
+       nroot=Orbit%npf-1
+       s2t=s1+nroot-1
      ELSE IF (Pot%needvtau) THEN
        Call Boundsplinesolver(Grid,l,nroot, &
 &            Orbit%eig(s1:s2),Orbit%wfn(:,s1:s2),Orbit%otau(:,s1:s2),OK,spline)
@@ -3594,10 +3748,12 @@ SUBROUTINE Updatewfn(Grid,Pot,Orbit,rvin,success,BDsolve,usespline,spline,itype)
        Call BoundD(Grid,Pot,Orbit%eig(s1:s2),Orbit%wfn(:,s1:s2),&
 &             Orbit%lwfn(:,s1:s2),kappa,nroot,emin,ierr,OK)
           kappa=-5
-       s1=s2+1;s2=s1+nroot-1
+       s1=s2t+1;s2=s1+nroot-1
        emin=-nz*nz/25._dp-0.5_dp
        Call BoundD(Grid,Pot,Orbit%eig(s1:s2),Orbit%wfn(:,s1:s2),&
 &             Orbit%lwfn(:,s1:s2),kappa,nroot,emin,ierr,OK)
+       nroot=Orbit%npg-1
+       s2t=s1+nroot-1
      ELSE IF (Pot%needvtau) THEN
        Call Boundsplinesolver(Grid,l,nroot, &
 &         Orbit%eig(s1:s2),Orbit%wfn(:,s1:s2),Orbit%otau(:,s1:s2),OK,spline)
@@ -5919,6 +6075,21 @@ FUNCTION FindGridIndex(Grid,rpoint)
 &         FindGridIndex=FindGridIndex+1
  ENDIF
 END FUNCTION FindGridIndex
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! function gridindex(Grid,r)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ FUNCTION gridindex(Grid,r)
+   INTEGER :: gridindex
+   TYPE (GridInfo), INTENT(IN) :: Grid
+   REAL(dp), INTENT(IN) :: r
+   gridindex=0
+   IF (Grid%type==lineargrid) THEN
+     gridindex=r/Grid%h +0.1d0 +1
+   ELSEIF (Grid%type==loggrid) THEN
+     gridindex=LOG(1.d0+r/Grid%drdu(1))/Grid%h +0.1d0 +1
+   ENDIF
+ END FUNCTION gridindex
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -8637,7 +8808,54 @@ SUBROUTINE eliminate_comment(line)
  IF (i0==1) line=""
 END SUBROUTINE eliminate_comment
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!  stripchar - Eliminate blanks
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ FUNCTION stripchar(inputchar)
+  CHARACTER(20) :: stripchar
+  CHARACTER*(*), INTENT(IN) :: inputchar
+  INTEGER :: i,j,n
+  n=LEN(inputchar)
+  DO i=1,20
+    stripchar(i:i)=''
+  ENDDO
+  j=0
+  DO i=1,n
+    IF (inputchar(i:i) /= '') THEN
+      j=j+1
+      stripchar(j:j)=inputchar(i:i)
+    ENDIF
+  ENDDO
+ END FUNCTION stripchar
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!  mkname - Subroutine to take an integer (.le. 4 digits) and return it
+!!           in the form of a character string
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ SUBROUTINE mkname(i,stuff)
+  CHARACTER(4) stuff
+  INTEGER i,i1,i10,i100,i1000
+  stuff='?'
+  IF (i.GT.9999) i=MOD(i,10000)
+  i1000=i/1000
+  i100=(i-1000*i1000)/100
+  i10=(i-1000*i1000-100*i100)/10
+  i1=(i-1000*i1000-100*i100-10*i10)
+  IF (i.GE.1000) THEN
+    stuff=CHAR(i1000+48)//CHAR(i100+48)//CHAR(i10+48)//CHAR(i1+48)
+    RETURN
+  ENDIF
+  IF (i.GE.100) THEN
+    stuff=CHAR(i100+48)//CHAR(i10+48)//CHAR(i1+48)
+    RETURN
+  ENDIF
+  IF (i.GE.10) THEN
+    stuff=CHAR(i10+48)//CHAR(i1+48)
+    RETURN
+  ENDIF
+  IF (i.GE.0) stuff=CHAR(i1+48)
+  RETURN
+ END SUBROUTINE mkname
 
 
 
@@ -9141,6 +9359,7 @@ SUBROUTINE boundD(Grid,Pot,eig,wfn,lwfn,kappa,nroot,emin,ierr,success)
   n=Grid%n
   h=Grid%h
   if (kappa<0)  l=-kappa-1
+  if (kappa>0)  l=kappa
   LIBPAW_ALLOCATE(p1,(n))
   LIBPAW_ALLOCATE(lp1,(n))
   LIBPAW_ALLOCATE(p2,(n))
@@ -9268,8 +9487,9 @@ SUBROUTINE boundD(Grid,Pot,eig,wfn,lwfn,kappa,nroot,emin,ierr,success)
         IF (ABS(dele).GT.convrez) THEN
           energy=energy+dele
           ! if energy is out of range, pick random energy in correct range
-          IF (emin-energy.GT.convrez.OR.energy-emax.GT.convrez)         &
-&              energy=emin+(emax-emin)*ranx()
+          IF (emin-energy.GT.convrez.OR.energy-emax.GT.convrez)   then
+             energy=emin+(emax-emin)*ranx()
+          endif
           ifac=2
         ENDIF
       ENDIF
@@ -9790,24 +10010,26 @@ END SUBROUTINE Real_InsSort
 !!              is used.
 !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
+SUBROUTINE input_dataset_read(atp,inputfile,dirac,has_to_echo,&
 &read_global_data,read_elec_data,read_coreval_data,read_basis_data)
 !---- Arguments
  CHARACTER*(*),INTENT(IN) :: inputfile
- CHARACTER*(*),INTENT(IN),OPTIONAL :: echofile
+ logical,intent(in) :: has_to_echo
+ logical,intent(in) :: dirac
  LOGICAL,INTENT(IN),OPTIONAL :: read_global_data,read_elec_data,&
 &                               read_coreval_data,read_basis_data
  TYPE(atompaw_type),INTENT(INOUT) :: atp
 !---- Local variables
+ CHARACTER(132) :: echofile
  INTEGER :: ifunit
  INTEGER,PARAMETER :: ecunit=222
  INTEGER,PARAMETER :: nkappa(5)=(/1,2,2,2,2/)
  INTEGER :: input_unit
- INTEGER :: ii,io,nadd,norb,nval,nbl,nn,ik,kk
+ integer ::  i_usexcnhat,i_logspline,i_rsoptim,i_lda12
+ INTEGER :: ii,io,nadd,norb,nval,nbl,nn,ik,kk,jdirac
  INTEGER :: ilin,ilog,inrl,iscl,ipnt,ifin,iend,ihfpp,ilcex,itau
  INTEGER :: igrid,irelat,ilogder,ilogv4,ibd,idirac,ifixz,ll,nstart
  INTEGER :: ispline,isplr0,isplns
- LOGICAL :: has_to_echo
  LOGICAL :: read_global_data_,read_elec_data_,read_coreval_data_,read_basis_data_
  CHARACTER(200) :: inputline,inputword
  !CHARACTER(128) :: exchangecorrelationandgridline
@@ -9825,11 +10047,6 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
  ifunit=libpaw_get_free_unit()
  input_unit=ifunit
  OPEN(ifunit,file=trim(inputfile),form='formatted',action="read")
-!Do we echo input file content?
- has_to_echo=PRESENT(echofile)
- IF (has_to_echo) THEN
-   OPEN(ecunit,file=trim(echofile),form='formatted')
- END IF
 !Select which components have to be read
  read_global_data_=.true.;if (PRESENT(read_global_data))read_global_data_=read_global_data
  read_elec_data_=.true.;if (PRESENT(read_elec_data))read_elec_data_=read_elec_data
@@ -9844,7 +10061,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
  do while (.not.found)
    read(input_unit,'(a)',err=10,end=10) readline
    line=adjustl(readline);goto 20
-   10 stop
+   10 write(std_out,*) 'ERROR in reading atp file' ; stop
    20 continue
    if (line(1:22)=='<!-- Program:  atompaw') then
      found=.true.
@@ -9860,9 +10077,13 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
 !------------------------------------------------------------------
 !=== 1st line: read atomic symbol, atomic number
    READ(input_unit,'(a)') inputline
-   IF (has_to_echo) WRITE(ecunit,'(a)') TRIM(inputline)
    CALL eliminate_comment(inputline)
    READ(inputline,*) atp%atomic_symbol,atp%atomic_charge
+   echofile=trim(atp%atomic_symbol)//'_atp_echofile'
+   IF (has_to_echo) THEN
+     OPEN(ecunit,file=trim(echofile),form='formatted')
+   END IF
+   IF (has_to_echo) WRITE(ecunit,'(a)') TRIM(inputline)
    !Print read data
    IF (has_to_print) THEN
      WRITE(STD_OUT,'(3x,a,a2)') "Atomic symbol : ",atp%atomic_symbol
@@ -10051,7 +10272,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
    END DO
    atp%norbit=atp%np(1)+max(atp%np(2)-1,0)+max(atp%np(3)-2,0) &
 &                              +max(atp%np(4)-3,0)+max(atp%np(5)-4,0)
-   IF (atp%diracrelativistic) atp%norbit=2*atp%norbit-atp%np(1)
+   IF (atp%diracrelativistic.and.dirac) atp%norbit=2*atp%norbit-atp%np(1)
    !Print read data
    IF (has_to_print) THEN
      WRITE(STD_OUT,'(3x,a,5(1x,i0))') "Max. quantum numbers(s,p,d,f,g):",atp%np(1:5)
@@ -10076,11 +10297,19 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
        LIBPAW_ERROR('input_dataset: error in occupations')
      END IF
      atp%norbit_mod=atp%norbit_mod+1
+    if(atp%diracrelativistic.and.(.not.dirac).and.atp%norbit_mod>1) then
+       if(ll==tmp_l(atp%norbit_mod-1)) then
+         atp%norbit_mod=atp%norbit_mod-1
+         tmp_occ(atp%norbit_mod)=tmp_occ(atp%norbit_mod)+xocc
+         go to 30
+       endif
+     endif
      if (atp%norbit_mod>norbit_max) stop 'input_dataset_occ: error -- to many occupation lines!'
      tmp_l(atp%norbit_mod)=ll
      tmp_n(atp%norbit_mod)=nn
      tmp_k(atp%norbit_mod)=kk
      tmp_occ(atp%norbit_mod)=xocc
+30   continue
    END DO
    IF(ALLOCATED(atp%orbit_mod_l)) then
      LIBPAW_DEALLOCATE(atp%orbit_mod_l)
@@ -10113,9 +10342,32 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
      LIBPAW_DEALLOCATE(atp%orbit_iscore)
    endif
    LIBPAW_ALLOCATE(atp%orbit_iscore,(atp%norbit))
+   jdirac=1
    DO io=1,atp%norbit
      DO
+       if(atp%diracrelativistic.and.(.not.dirac)) then
+          if(jdirac==atp%np(1)+max(atp%np(2)-1,0)) then
+           do ii=1,max(atp%np(2)-1,0)
+             READ(input_unit,'(a)') inputline
+             jdirac=jdirac+1
+           enddo
+         endif
+         if(jdirac==atp%np(1)+2*max(atp%np(2)-1,0)+max(atp%np(3)-2,0)) then
+           do ii=1,max(atp%np(3)-2,0)
+             READ(input_unit,'(a)') inputline
+             jdirac=jdirac+1
+           enddo
+         endif
+         if(jdirac==atp%np(1)+2*max(atp%np(2)-1,0)+2*max(atp%np(3)-2,0) &
+&                              +max(atp%np(4)-3,0)) then
+           do ii=1,max(atp%np(4)-3,0)
+             READ(input_unit,'(a)') inputline
+             jdirac=jdirac+1
+           enddo
+         endif
+       endif
        READ(input_unit,'(a)') inputline
+       jdirac=jdirac+1
        CALL eliminate_comment(inputline)
        READ(inputline,*) CHR
        IF (CHR=='c'.OR.CHR=='C'.OR.&
@@ -10147,9 +10399,9 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
    DO ll=0,4
      nn=atp%np(ll+1)
      IF (nn>0) THEN
-       DO ik=1,MERGE(nkappa(ll+1),1,atp%diracrelativistic)
+       DO ik=1,MERGE(nkappa(ll+1),1,atp%diracrelativistic.and.dirac)
          kk=MERGE(ll,-(ll+1),ik==1);IF (ll==0) kk=-1
-         IF (.NOT.atp%diracrelativistic) kk=0
+         IF ((.NOT.atp%diracrelativistic).or.(.not.dirac)) kk=0
          DO ii=1+ll,nn
            io=io+1
            IF (.NOT.atp%orbit_iscore(io)) THEN
@@ -10166,13 +10418,13 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
    !Print read data
    IF (has_to_print) THEN
      WRITE(STD_OUT,'(3x,a)') "Core and valence orbitals:"
-     IF (.NOT.atp%diracrelativistic) WRITE(STD_OUT,'(7x,a)') "n l : type"
-     IF (atp%diracrelativistic)      WRITE(STD_OUT,'(7x,a)') "n l kappa :type"
+     IF ((.NOT.atp%diracrelativistic).or.(.not.dirac)) WRITE(STD_OUT,'(7x,a)') "n l : type"
+     IF (atp%diracrelativistic.and.dirac)      WRITE(STD_OUT,'(7x,a)') "n l kappa :type"
      io=0
      DO ll=0,4
        nn=atp%np(ll+1)
        IF (nn>0) THEN
-         IF (.NOT.atp%diracrelativistic) THEN
+         IF ((.NOT.atp%diracrelativistic).or.(.not.dirac)) THEN
            DO ii=1+ll,nn
              io=io+1
              WRITE(STD_OUT,'(7x,i1,1x,i1,2a)') ii,ll," : ", &
@@ -10249,12 +10501,13 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
      WRITE(STD_OUT,'(3x,a,f7.4)') "Local pot. matching radius : ",atp%rc_vloc
      WRITE(STD_OUT,'(3x,a,f7.4)') "Compens. shape func radius : ",atp%rc_shap
    END IF
+
    !------------------------------------------------------------------
    !=== Additional basis functions
    nstart=0 ; atp%nbasis_add=0 ; basis_add_k(:)=0
    DO ll=0,atp%lmax
      nbl=0
-     nadd = MERGE(nkappa(ll+1),1,atp%diracrelativistic)
+     nadd = MERGE(nkappa(ll+1),1,atp%diracrelativistic.and.dirac)
      IF (atp%np(ll+1)>0) THEN
        nbl=COUNT(.NOT.atp%orbit_iscore(nstart+1:nstart+atp%np(ll+1)-ll))
        nstart=nstart+atp%np(ll+1)-ll
@@ -10271,7 +10524,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
        atp%nbasis_add=atp%nbasis_add+nadd
        IF (atp%nbasis_add>nbasis_add_max) STOP 'Too many additional basis functions!'
        basis_add_l(atp%nbasis_add-nadd+1:atp%nbasis_add)=ll
-       IF (atp%diracrelativistic) THEN
+       IF (atp%diracrelativistic.and.dirac) THEN
          basis_add_k(atp%nbasis_add)=-1
          IF (ll/=0) THEN
            basis_add_k(atp%nbasis_add-1)=ll
@@ -10308,7 +10561,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
      WRITE(STD_OUT,'(3x,a,i0)') "Number of additional basis functions:",atp%nbasis_add
      WRITE(STD_OUT,'(3x,a,i0)') "Total number of basis functions:",atp%nbasis
      WRITE(STD_OUT,'(3x,a)') "Additional basis functions:"
-     IF (.NOT.atp%diracrelativistic) THEN
+     IF ((.NOT.atp%diracrelativistic).or.(.not.dirac)) THEN
        WRITE(STD_OUT,'(7x,a)') "l : energy"
        DO io=1,atp%nbasis_add
          WRITE(STD_OUT,'(7x,i1,a,f7.4)') atp%basis_add_l(io)," :",atp%basis_add_energy(io)
@@ -10554,6 +10807,13 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
      WRITE(STD_OUT,'(7x,a)') "Local pseudopotential type : VPS MATCHNC"
    END IF
  END IF
+
+
+
+
+
+
+
  !------------------------------------------------------------------
  !=== Matching radii for the basis functions
  !Not for all choice of projectors
@@ -10568,11 +10828,12 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
    norb=0
    DO ll=0,atp%lmax
      DO ik=1,MERGE(nkappa(ll+1),1,atp%diracrelativistic)
+       if((.not.dirac).and.(ik>1)) cycle
        kk=MERGE(ll,-(ll+1),ik==1);IF (ll==0) kk=-1
-       IF (.NOT.atp%diracrelativistic) kk=0
+       IF ((.NOT.atp%diracrelativistic).or.(.not.dirac)) kk=0
        DO io=1,atp%norbit_val
          IF (atp%orbit_val_l(io)==ll.AND. &
-&           ((.NOT.atp%diracrelativistic).OR.atp%orbit_val_k(io)==kk)) THEN
+&           (((.NOT.atp%diracrelativistic).or.(.not.dirac)).OR.atp%orbit_val_k(io)==kk)) THEN
            norb=norb+1
            READ(input_unit,'(a)') inputline
            IF (has_to_echo) WRITE(ecunit,'(a)') TRIM(inputline)
@@ -10583,7 +10844,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
        IF (atp%nbasis_add>0) THEN
          DO io=1,atp%nbasis_add
            IF (atp%basis_add_l(io)==ll.AND. &
-&             ((.NOT.atp%diracrelativistic).OR.atp%basis_add_k(io)==kk)) THEN
+&             (((.NOT.atp%diracrelativistic).or.(.not.dirac)).OR.atp%basis_add_k(io)==kk)) THEN
              norb=norb+1
              READ(input_unit,'(a)') inputline
              IF (has_to_echo) WRITE(ecunit,'(a)') TRIM(inputline)
@@ -10598,21 +10859,21 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
    !  Print read data
    IF (has_to_print) THEN
      WRITE(STD_OUT,'(3x,a)') "Matching radius for basis functions:"
-     IF (.NOT.atp%diracrelativistic) WRITE(STD_OUT,'(7x,a)') " # - n l : radius"
-     IF (atp%diracrelativistic) WRITE(STD_OUT,'(7x,a)') " # - n l kappa : radius"
+     IF ((.NOT.atp%diracrelativistic).or.(.not.dirac)) WRITE(STD_OUT,'(7x,a)') " # - n l : radius"
+     IF (atp%diracrelativistic.and.dirac) WRITE(STD_OUT,'(7x,a)') " # - n l kappa : radius"
      norb=0
      DO ll=0,atp%lmax
-       DO ik=1,MERGE(nkappa(ll+1),1,atp%diracrelativistic)
+       DO ik=1,MERGE(nkappa(ll+1),1,atp%diracrelativistic.and.dirac)
          kk=MERGE(ll,-(ll+1),ik==1);IF (ll==0) kk=-1
-         IF (.NOT.atp%diracrelativistic) kk=0
+         IF ((.NOT.atp%diracrelativistic).or.(.not.dirac)) kk=0
          DO io=1,atp%norbit_val
            IF (atp%orbit_val_l(io)==ll.AND. &
-   &          ((.NOT.atp%diracrelativistic).OR.atp%orbit_val_k(io)==kk))THEN
+   &          (((.NOT.atp%diracrelativistic).or.(.not.dirac)).OR.atp%orbit_val_k(io)==kk))THEN
              norb=norb+1
-           IF (.NOT.atp%diracrelativistic) &
+           IF ((.NOT.atp%diracrelativistic).or.(.not.dirac)) &
    &           WRITE(STD_OUT,'(7x,i2,a,i1,1x,i1,a,f7.4)') &
    &         norb," - ",atp%orbit_val_n(io),ll," :",atp%basis_func_rc(norb)
-           IF (atp%diracrelativistic) &
+           IF (atp%diracrelativistic.and.dirac) &
    &          WRITE(STD_OUT,'(7x,i2,a,i1,1x,i1,2x,i2,2x,a,f7.4)') &
    &          norb," - ",atp%orbit_val_n(io),ll,kk," :",atp%basis_func_rc(norb)
            END IF
@@ -10620,12 +10881,12 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
          IF (atp%nbasis_add>0) THEN
            DO io=1,atp%nbasis_add
              IF (atp%basis_add_l(io)==ll.AND. &
-   &          ((.NOT.atp%diracrelativistic).OR.atp%basis_add_k(io)==kk))THEN
+   &          (((.NOT.atp%diracrelativistic).or.(.not.dirac)).OR.atp%basis_add_k(io)==kk))THEN
                norb=norb+1
-               IF (.NOT.atp%diracrelativistic) &
+               IF ((.NOT.atp%diracrelativistic).or.(.not.dirac)) &
    &             WRITE(STD_OUT,'(7x,i2,a,a1,1x,i1,a,f7.4)') &
    &             norb," - ",".",ll," : ",atp%basis_func_rc(norb)
-               IF (atp%diracrelativistic) &
+               IF (atp%diracrelativistic.and.dirac) &
    &             WRITE(STD_OUT,'(7x,i2,a,a1,1x,i1,2x,i2,2x,a,f7.4)') &
    &             norb," - ",".",ll,kk," : ",atp%basis_func_rc(norb)
              END IF
@@ -10649,12 +10910,1349 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
  END IF
  if(has_to_print) WRITE(STD_OUT,'(2/)')
  !------------------------------------------------------------------
+ ! Checks
+ READ(input_unit,'(a)') inputline
+ READ(input_unit,'(a)') inputline
+ CALL Uppercase(inputline)
+ i_usexcnhat=INDEX(inputline,'USEXCNHAT')
+ i_logspline=INDEX(inputline,'WITHSPLGRID')
+ i_rsoptim  =INDEX(inputline,'RSOPTIM')
+ i_lda12    =INDEX(inputline,'LDA12')
+ if(i_usexcnhat>0.or.i_logspline>0.or.i_rsoptim>0.or.i_lda12>0) then
+   LIBPAW_ERROR('RCPAW not compatible with usexcnhat, logspline, rsoptim, lda12')
+ endif
  !Close files
  CLOSE(ifunit)
  IF (has_to_echo) THEN
    CLOSE(ecunit)
  END IF
 END SUBROUTINE input_dataset_read
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! xmlinterface !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!!=================================================================
+!! NAME
+!! xmlprtcore
+!!
+!! FUNCTION
+!! Write the core wave functions in XML format
+!!
+!! INPUTS
+!! fname=file name (with .xml suffixe)
+!! mesh_data= datatructure containing the definition of
+!!            all the radial meshes used in the XML file
+!!
+!! PARENTS
+!! atompaw2xml
+!!
+!! CHILDREN
+!!
+!!=================================================================
+
+ SUBROUTINE xmlprtcore(fname,atp,zcore,mesh_data,input_string)
+
+ character(len=*),intent(in) :: fname
+ type(atompaw_type),intent(in) :: atp
+ real(dp) ,intent(in) :: zcore
+ TYPE(mesh_data_type),intent(in) :: mesh_data
+ character(len=*), intent(in) :: input_string
+
+!------------------------------------------------------------------
+!---- Local variables
+!------------------------------------------------------------------
+
+ integer :: core_size,corewf_meshsz,ib,icor,ii,ir,nmesh,nsppol
+ integer :: unit_xml_core
+ real(dp) :: radstp0,logstp0
+ character(len=3) :: gridt(mesh_data%nmesh)
+ character(len=4) :: char4
+ character(len=5) :: char5a
+ character(len=20) :: char20,char21
+ character(len=1) :: char_orb(4)
+ integer,allocatable :: irwf(:)
+ real(dp),allocatable :: dum(:)
+
+!------------------------------------------------------------------
+!---- Executable code
+!------------------------------------------------------------------
+ unit_xml_core=1113
+!Hard-coded values, spin unrestricted
+!Spinors or collinear magnetism not yet supported
+ nsppol=1
+ char_orb(1)="s";char_orb(2)="p";char_orb(3)="d";char_orb(4)="f"
+!Open file for writing
+ OPEN(unit_xml_core,file=TRIM(fname),form='formatted')
+
+!Write XML header
+ WRITE(unit_xml_core,'("<?xml  version=""1.0""?>")')
+ WRITE(unit_xml_core,'("<paw_setup version=""0.7"">")')
+
+!Write title
+ WRITE(unit_xml_core,'(/,"<!-- All-electron core wavefunctions for ",a," -->")')trim(ADJUSTL(atp%Pot%sym))
+
+!Write Atompaw information
+ WRITE(unit_xml_core,'("<!-- ",a)') trim('GENERATED by RC-PAW')
+ WRITE(unit_xml_core,'("  Energy units=Hartree, length units=bohr")')
+ WRITE(unit_xml_core,'("-->",/)')
+
+!Write atom definition
+ WRITE(unit=char5a,fmt='(f5.2)') atp%Pot%zz
+ WRITE(unit_xml_core,'("<atom symbol=""",a,""" Z=""",a)',ADVANCE='NO') &
+&      trim(ADJUSTL(atp%Pot%sym)),trim(ADJUSTL(char5a))
+ WRITE(unit=char5a,fmt='(f5.2)') zcore
+ WRITE(unit_xml_core,'(""" core=""",a,"""/>")')trim(ADJUSTL(char5a))
+
+ 
+!!Write XC definition
+! call get_xc_data(xc_type,xc_name)
+! if (have_libxc.and.xc_type/="UNKNOWN") then
+!   call libxc_getshortname(xc_name,xcname_short)
+!   call get_xc_alias(xcname_short,xc_name)
+! endif
+! WRITE(unit_xml_core,'("<xc_functional type=""",a,""" name=""",a,"""/>")') &
+!&      TRIM(xc_type),TRIM(xc_name)
+
+
+!Generator data
+ if (atp%scalarrelativistic) then
+   WRITE(unit_xml_core,'("<generator type=""scalar-relativistic"" name=""atompaw"">")')
+ else if (atp%diracrelativistic) then
+   WRITE(unit_xml_core,'("<generator type=""dirac-relativistic"" name=""atompaw"">")')
+ else
+   WRITE(unit_xml_core,'("<generator type=""non-relativistic"" name=""atompaw"">")')
+ endif
+ WRITE(unit_xml_core,'("</generator>)")')
+
+!Number of core orbitals (not needed)
+ core_size=count(atp%Orbit%iscore(1:atp%Orbit%norbit))
+!WRITE(unit_xml_core,'("<orbitals norbs=""",i2,"""/>")') core_size
+
+!Read mesh size 
+ ii=0
+ LIBPAW_ALLOCATE(irwf,(core_size))
+ irwf(:)=mesh_data%meshsz(mesh_data%iwavmesh)
+ do ib=1,atp%Orbit%norbit
+  if (atp%Orbit%iscore(ib)) then
+   ii=ii+1;ir=mesh_data%meshsz(mesh_data%iwavmesh)+1
+   do while (ir>1)
+    ir=ir-1
+    if (abs(atp%Orbit%wfn(ir,ib))>tol10) then
+     irwf(ii)=min(ir+1,mesh_data%meshsz(mesh_data%iwavmesh));ir=1
+    end if
+   end do
+  end if
+ end do
+ corewf_meshsz=maxval(irwf(1:core_size))
+ LIBPAW_DEALLOCATE(irwf)
+ corewf_meshsz=maxval(mesh_data%meshsz(1:mesh_data%nmesh))
+!Electronic configuration
+ WRITE(unit_xml_core,'("<core_states>")')
+ icor=0
+ do ib=1,atp%Orbit%norbit
+   if (atp%Orbit%iscore(ib)) then
+     icor=icor+1;if (icor>core_size) stop '  Bug (1) in xmlprtcore!'
+     call mkname(icor,char4)
+     char20=stripchar('"'//atp%Pot%sym//'_core'//char4//'"')
+     if(atp%diracrelativistic) then
+       WRITE(unit_xml_core,'("  <state n=""",i2,""" l=""",i1,""" kappa=""",i2,""" f=""",1pe14.7)',ADVANCE='NO')&
+&          atp%Orbit%np(ib),atp%Orbit%l(ib),atp%Orbit%kappa(ib),atp%Orbit%occ(ib)
+     else
+       WRITE(unit_xml_core,'("  <state n=""",i2,""" l=""",i1,""" f=""",1pe14.7)',ADVANCE='NO')&
+&          atp%Orbit%np(ib),atp%Orbit%l(ib),atp%Orbit%occ(ib)
+     endif
+     WRITE(unit_xml_core,'("""  e=""",1pe14.7,""" id=",a11,"/>")')&
+&        atp%Orbit%eig(ib)*0.5d0,TRIM(char20)
+   end if
+ enddo
+ WRITE(unit_xml_core,'("</core_states>")')
+
+!Radial meshes definitions
+ nmesh=1
+ do ii=1,nmesh
+  LIBPAW_ALLOCATE(dum,(corewf_meshsz))
+  select case(mesh_data%meshtp(ii))
+   case(1)
+    char21='r=d*i'
+    gridt(ii)="lin"
+    radstp0=zero
+    logstp0=mesh_data%radstp(ii)
+    dum(:)=logstp0
+   case(2)
+    char21='r=a*(exp(d*i)-1)'
+    gridt(ii)="log"
+    radstp0=mesh_data%radstp(ii)
+    logstp0=mesh_data%logstp(ii)
+    dum(1:corewf_meshsz)=logstp0*(radstp0+atp%Grid%r(1:corewf_meshsz)) 
+   case default
+    stop '  Bug (2) in xmlprtcore: mesh type not implemented in Atompaw!'
+  end select
+  WRITE(unit_xml_core,'("<radial_grid eq=""",a,""" a=""",es23.16)',ADVANCE='NO')trim(char21),radstp0
+  WRITE(unit_xml_core,'(""" d=""",es23.16,""" istart=""0"" iend=""",i5)',ADVANCE='NO') &
+&  logstp0,corewf_meshsz-1
+  WRITE(unit_xml_core,'(""" id=""",a,i1,"""/>")') gridt(ii),ii
+  WRITE(unit_xml_core,'("  <values>")')
+  WRITE(unit_xml_core,'(3(1x,es23.16))') (atp%Grid%r(ir),ir=1,corewf_meshsz)
+  WRITE(unit_xml_core,'("  </values>")')
+  WRITE(unit_xml_core,'("  <derivatives>")')
+  WRITE(unit_xml_core,'(3(1x,es23.16))') (dum(ir),ir=1,corewf_meshsz)
+  WRITE(unit_xml_core,'("  </derivatives>")')
+  LIBPAW_DEALLOCATE(dum)
+ end do
+
+!Write the core wave functions
+ icor=0
+ do ib=1,atp%Orbit%norbit
+  if (atp%Orbit%iscore(ib)) then
+    icor=icor+1;if (icor>core_size) stop 'Bug (3) in xmlprtcore!'
+    call mkname(atp%Orbit%np(ib),char4)
+    char20=stripchar('"'//atp%Pot%sym//char4//char_orb(atp%Orbit%l(ib)+1)//'"')
+    WRITE(unit_xml_core,'("<ae_core_wavefunction state=",a6," grid=""",a,i1,""">")') &
+&     TRIM(char20),gridt(mesh_data%iwavmesh),mesh_data%iwavmesh
+    LIBPAW_ALLOCATE(dum,(mesh_data%meshsz(mesh_data%iwavmesh)))
+    dum=zero
+    dum(2:mesh_data%meshsz(mesh_data%iwavmesh))= &
+&               atp%Orbit%wfn(2:mesh_data%meshsz(mesh_data%iwavmesh),ib) &
+&              /atp%Grid%r(2:mesh_data%meshsz(mesh_data%iwavmesh))
+    call extrapolate(dum)
+    WRITE(unit_xml_core,'(3(1x,es23.16))') (dum(ir),ir=1,corewf_meshsz)
+    LIBPAW_DEALLOCATE(dum)
+    WRITE(unit_xml_core,'("</ae_core_wavefunction>")')
+  end if ! if icore
+ end do   !ib
+
+!Write the core lwave functions
+ if(atp%diracrelativistic) then
+   icor=0
+   do ib=1,atp%Orbit%norbit
+    if (atp%Orbit%iscore(ib)) then
+      icor=icor+1;if (icor>core_size) stop '  Bug (4) in xmlprtcore!'
+      call mkname(atp%Orbit%np(ib),char4)
+      char20=stripchar('"'//atp%Pot%sym//char4//char_orb(atp%Orbit%l(ib)+1)//'"')
+      WRITE(unit_xml_core,'("<ae_core_lwavefunction state=",a6," grid=""",a,i1,""">")') &
+&       TRIM(char20),gridt(mesh_data%iwavmesh),mesh_data%iwavmesh
+      LIBPAW_ALLOCATE(dum,(mesh_data%meshsz(mesh_data%iwavmesh)))
+      dum=zero
+      dum(2:mesh_data%meshsz(mesh_data%iwavmesh))= &
+&                 atp%Orbit%lwfn(2:mesh_data%meshsz(mesh_data%iwavmesh),ib) &
+&                /atp%Grid%r(2:mesh_data%meshsz(mesh_data%iwavmesh))
+      call extrapolate(dum)
+      WRITE(unit_xml_core,'(3(1x,es23.16))') (dum(ir),ir=1,corewf_meshsz)
+      LIBPAW_DEALLOCATE(dum)
+      WRITE(unit_xml_core,'("</ae_core_lwavefunction>")')
+    end if ! if icore
+   end do   !ib
+ end if ! diracrelativistic
+
+ !Echi input file content
+ WRITE(unit_xml_core,'("<!-- Program:  atompaw - input data follows: ")')
+ WRITE(unit_xml_core,'(a)') trim(input_string)
+ WRITE(unit_xml_core,'(a)') "XMLOUT"
+ WRITE(unit_xml_core,'(a)') "prtcorewf"
+ WRITE(unit_xml_core,'(a)') "END"
+ WRITE(unit_xml_core,'(" Program:  atompaw - input end -->")')
+ WRITE(unit_xml_core,'("</paw_setup>")')
+
+!Close the file
+ close(unit_xml_core)
+ WRITE(STD_OUT,'(/,2x,a)') 'XML core orbitals file created.'
+
+ end subroutine xmlprtcore
+
+
+ !!=================================================================
+!! NAME
+!! build_mesh_data
+!!
+!! FUNCTION
+!! Determine meshes definitions
+!! (if necessary define a logarithmic radial grid)
+!!
+!! INPUTS
+!!  Grid=grid datastructure in AtomPAW format
+!!  irc=index of rc in Grid
+!!
+!! OUTPUT
+!!  mesh_data
+!!   Data defining various meshes
+!!
+!! PARENTS
+!!
+!!=================================================================
+
+subroutine build_mesh_data(mesh_data,Grid,irc,ivion,ivale,coretailpoints,itau)
+
+ type(mesh_data_type),intent(out) :: mesh_data
+ type(GridInfo),intent(in) :: Grid
+ integer, optional, intent(in) :: irc,ivion,ivale,coretailpoints,itau
+
+!------------------------------------------------------------------
+!---- Local variables
+!------------------------------------------------------------------
+
+ integer, parameter :: nmesh_max=10
+ integer :: ii1
+ logical :: aeonly=.true.
+
+!------------------------------------------------------------------
+!---- Executable code
+!------------------------------------------------------------------
+
+ LIBPAW_ALLOCATE(mesh_data%meshtp,(nmesh_max))
+ LIBPAW_ALLOCATE(mesh_data%meshsz,(nmesh_max))
+ LIBPAW_ALLOCATE(mesh_data%radstp,(nmesh_max))
+ LIBPAW_ALLOCATE(mesh_data%logstp,(nmesh_max))
+
+!Mesh definition
+ if (Grid%type==loggrid) then
+  mesh_data%mesh_type=2
+  mesh_data%rad_step=Grid%drdu(1)
+  mesh_data%log_step=Grid%h
+ else
+  mesh_data%mesh_type=1
+  mesh_data%rad_step=Grid%h
+  mesh_data%log_step=zero
+ end if
+
+ if (PRESENT(irc).and.PRESENT(ivion).and.PRESENT(ivale).and.PRESENT(coretailpoints).and.PRESENT(itau)) then
+    aeonly=.false.
+ endif    
+
+!Various mesh sizes
+ if (Grid%type==loggrid) then
+  mesh_data%wav_meshsz=Grid%n
+  if (.not.aeonly) then
+   mesh_data%sph_meshsz=min(1+nint(log(one+Grid%r(irc)/mesh_data%rad_step)/mesh_data%log_step),mesh_data%wav_meshsz)
+  else  
+   mesh_data%sph_meshsz=Grid%n
+  endif        
+ else
+  if (.not.aeonly) then      
+   mesh_data%wav_meshsz=irc+Grid%ishift
+   mesh_data%sph_meshsz=min(1+nint(Grid%r(irc)/mesh_data%rad_step),mesh_data%wav_meshsz)
+  else 
+   mesh_data%wav_meshsz=Grid%n
+   mesh_data%sph_meshsz=Grid%n
+  endif 
+ endif
+ mesh_data%prj_meshsz=mesh_data%sph_meshsz  ! To be modified by RSO
+ 
+ if (.not.aeonly) then
+   mesh_data%core_meshsz=coretailpoints
+   mesh_data%vale_meshsz=ivale
+   mesh_data%tau_meshsz=itau
+   mesh_data%vion_meshsz=ivion
+ else
+   mesh_data%core_meshsz=Grid%n
+   mesh_data%vale_meshsz=Grid%n
+   mesh_data%tau_meshsz=Grid%n
+   mesh_data%vion_meshsz=Grid%n
+ endif
+
+ if (mesh_data%vion_meshsz<=0) then
+  if (mesh_data%mesh_type==1) then
+   ii1=int(one+rmax_vloc/mesh_data%rad_step)
+  else
+   ii1=int(log(one+rmax_vloc/mesh_data%rad_step)/mesh_data%log_step)+1
+  endif
+  mesh_data%vion_meshsz=max(mesh_data%sph_meshsz,mesh_data%core_meshsz,ii1)
+ endif
+
+ mesh_data%vlda12_meshsz=max(mesh_data%vale_meshsz,mesh_data%vion_meshsz)
+
+!Mesh for vbare should be inside augmentation region
+!For compatibility with other codes, could put it to the same mesh
+!as ionic potential
+!mesh_data%vbare_meshsz=mesh_data%vion_meshsz
+ mesh_data%vbare_meshsz=mesh_data%sph_meshsz
+
+ mesh_data%prj_msz_max=four*mesh_data%sph_meshsz
+
+!=== Build mesh definitions ===
+
+ mesh_data%meshtp=-1;mesh_data%meshsz=0
+ mesh_data%radstp=zero;mesh_data%logstp=zero
+
+!Partial waves
+ mesh_data%nmesh=1
+ mesh_data%iwavmesh=1
+ mesh_data%meshtp(1)=mesh_data%mesh_type
+ mesh_data%meshsz(1)=mesh_data%wav_meshsz
+ mesh_data%radstp(1)=mesh_data%rad_step
+ mesh_data%logstp(1)=mesh_data%log_step
+!Projectors
+ if (mesh_data%wav_meshsz/=mesh_data%prj_meshsz) then
+  mesh_data%nmesh=mesh_data%nmesh+1
+  mesh_data%iprjmesh=mesh_data%nmesh
+  mesh_data%meshtp(mesh_data%nmesh)=mesh_data%mesh_type
+  mesh_data%meshsz(mesh_data%nmesh)=mesh_data%prj_meshsz
+  mesh_data%radstp(mesh_data%nmesh)=mesh_data%rad_step
+  mesh_data%logstp(mesh_data%nmesh)=mesh_data%log_step
+ else
+  mesh_data%iprjmesh=mesh_data%iwavmesh
+ endif
+!Core density
+ if (mesh_data%wav_meshsz/=mesh_data%core_meshsz) then
+  if (mesh_data%prj_meshsz/=mesh_data%core_meshsz) then
+   mesh_data%nmesh=mesh_data%nmesh+1
+   mesh_data%icoremesh=mesh_data%nmesh
+   mesh_data%meshtp(mesh_data%nmesh)=mesh_data%mesh_type
+   mesh_data%meshsz(mesh_data%nmesh)=mesh_data%core_meshsz
+   mesh_data%radstp(mesh_data%nmesh)=mesh_data%rad_step
+   mesh_data%logstp(mesh_data%nmesh)=mesh_data%log_step
+  else
+   mesh_data%icoremesh=mesh_data%iprjmesh
+  endif
+ else
+  mesh_data%icoremesh=mesh_data%iwavmesh
+ endif
+!Local ionic potential
+ if (mesh_data%wav_meshsz/=mesh_data%vion_meshsz) then
+  if(mesh_data%prj_meshsz/=mesh_data%vion_meshsz) then
+   if(mesh_data%core_meshsz/=mesh_data%vion_meshsz) then
+    mesh_data%nmesh=mesh_data%nmesh+1
+    mesh_data%ivionmesh=mesh_data%nmesh
+    mesh_data%meshtp(mesh_data%nmesh)=mesh_data%mesh_type
+    mesh_data%meshsz(mesh_data%nmesh)=mesh_data%vion_meshsz
+    mesh_data%radstp(mesh_data%nmesh)=mesh_data%rad_step
+    mesh_data%logstp(mesh_data%nmesh)=mesh_data%log_step
+   else
+    mesh_data%ivionmesh=mesh_data%icoremesh
+   endif
+  else
+   mesh_data%ivionmesh=mesh_data%iprjmesh
+  endif
+ else
+  mesh_data%ivionmesh=mesh_data%iwavmesh
+ endif
+!Local vbare potential
+ if (mesh_data%wav_meshsz/=mesh_data%vbare_meshsz) then
+  if(mesh_data%prj_meshsz/=mesh_data%vbare_meshsz) then
+   if(mesh_data%core_meshsz/=mesh_data%vbare_meshsz) then
+    if(mesh_data%vion_meshsz/=mesh_data%vbare_meshsz) then
+     mesh_data%nmesh=mesh_data%nmesh+1
+     mesh_data%ivbaremesh=mesh_data%nmesh
+     mesh_data%meshtp(mesh_data%nmesh)=mesh_data%mesh_type
+     mesh_data%meshsz(mesh_data%nmesh)=mesh_data%vbare_meshsz
+     mesh_data%radstp(mesh_data%nmesh)=mesh_data%rad_step
+     mesh_data%logstp(mesh_data%nmesh)=mesh_data%log_step
+    else
+     mesh_data%ivbaremesh=mesh_data%ivionmesh
+    endif
+   else
+    mesh_data%ivbaremesh=mesh_data%icoremesh
+   endif
+  else
+   mesh_data%ivbaremesh=mesh_data%iprjmesh
+  endif
+ else
+  mesh_data%ivbaremesh=mesh_data%iwavmesh
+ endif
+!Valence density
+ if (mesh_data%wav_meshsz/=mesh_data%vale_meshsz) then
+  if(mesh_data%prj_meshsz/=mesh_data%vale_meshsz) then
+   if(mesh_data%core_meshsz/=mesh_data%vale_meshsz) then
+    if(mesh_data%vion_meshsz/=mesh_data%vale_meshsz) then
+     if(mesh_data%vbare_meshsz/=mesh_data%vale_meshsz) then
+      mesh_data%nmesh=mesh_data%nmesh+1
+      mesh_data%ivalemesh=mesh_data%nmesh
+      mesh_data%meshtp(mesh_data%nmesh)=mesh_data%mesh_type
+      mesh_data%meshsz(mesh_data%nmesh)=mesh_data%vale_meshsz
+      mesh_data%radstp(mesh_data%nmesh)=mesh_data%rad_step
+      mesh_data%logstp(mesh_data%nmesh)=mesh_data%log_step
+     else
+      mesh_data%ivalemesh=mesh_data%ivbaremesh
+     endif
+    else
+     mesh_data%ivalemesh=mesh_data%ivionmesh
+    endif
+   else
+    mesh_data%ivalemesh=mesh_data%icoremesh
+   endif
+  else
+   mesh_data%ivalemesh=mesh_data%iprjmesh
+  endif
+ else
+  mesh_data%ivalemesh=mesh_data%iwavmesh
+ endif
+!Kinetic energy density
+ if (mesh_data%wav_meshsz/=mesh_data%tau_meshsz) then
+  if(mesh_data%prj_meshsz/=mesh_data%tau_meshsz) then
+   if(mesh_data%core_meshsz/=mesh_data%tau_meshsz) then
+    if(mesh_data%vion_meshsz/=mesh_data%tau_meshsz) then
+     if(mesh_data%vbare_meshsz/=mesh_data%tau_meshsz) then
+      if(mesh_data%vale_meshsz/=mesh_data%tau_meshsz) then
+       mesh_data%nmesh=mesh_data%nmesh+1
+       mesh_data%itaumesh=mesh_data%nmesh
+       mesh_data%meshtp(mesh_data%nmesh)=mesh_data%mesh_type
+       mesh_data%meshsz(mesh_data%nmesh)=mesh_data%tau_meshsz
+       mesh_data%radstp(mesh_data%nmesh)=mesh_data%rad_step
+       mesh_data%logstp(mesh_data%nmesh)=mesh_data%log_step
+      else
+       mesh_data%itaumesh=mesh_data%ivalemesh
+      endif
+     else
+      mesh_data%itaumesh=mesh_data%ivbaremesh
+     endif
+    else
+     mesh_data%itaumesh=mesh_data%ivionmesh
+    endif
+   else
+    mesh_data%itaumesh=mesh_data%icoremesh
+   endif
+  else
+   mesh_data%itaumesh=mesh_data%iprjmesh
+  endif
+ else
+  mesh_data%itaumesh=mesh_data%iwavmesh
+ endif
+!LDA-1/2 potential
+ if (mesh_data%wav_meshsz/=mesh_data%vlda12_meshsz) then
+  if(mesh_data%prj_meshsz/=mesh_data%vlda12_meshsz) then
+   if(mesh_data%core_meshsz/=mesh_data%vlda12_meshsz) then
+    if(mesh_data%vion_meshsz/=mesh_data%vlda12_meshsz) then
+     if(mesh_data%vbare_meshsz/=mesh_data%vlda12_meshsz) then
+      if(mesh_data%vale_meshsz/=mesh_data%vlda12_meshsz) then
+       if(mesh_data%tau_meshsz/=mesh_data%vlda12_meshsz) then 
+        mesh_data%nmesh=mesh_data%nmesh+1
+        mesh_data%ivlda12mesh=mesh_data%nmesh
+        mesh_data%meshtp(mesh_data%nmesh)=mesh_data%mesh_type
+        mesh_data%meshsz(mesh_data%nmesh)=mesh_data%vlda12_meshsz
+        mesh_data%radstp(mesh_data%nmesh)=mesh_data%rad_step
+        mesh_data%logstp(mesh_data%nmesh)=mesh_data%log_step
+       else
+        mesh_data%ivlda12mesh=mesh_data%itaumesh
+       endif
+      else
+       mesh_data%ivlda12mesh=mesh_data%ivalemesh
+      endif
+     else
+      mesh_data%ivlda12mesh=mesh_data%ivbaremesh
+     endif
+    else
+     mesh_data%ivlda12mesh=mesh_data%ivionmesh
+    endif
+   else
+    mesh_data%ivlda12mesh=mesh_data%icoremesh
+   endif
+  else
+   mesh_data%ivlda12mesh=mesh_data%iprjmesh
+  endif
+ else
+  mesh_data%ivlda12mesh=mesh_data%iwavmesh
+ endif
+
+ end subroutine build_mesh_data
+
+
+subroutine destroy_mesh_data(mesh_data)
+
+ type(mesh_data_type),intent(inout) :: mesh_data
+
+!------------------------------------------------------------------
+!---- Executable code
+!------------------------------------------------------------------
+
+ if (allocated(mesh_data%meshtp)) then 
+   LIBPAW_DEALLOCATE(mesh_data%meshtp)
+ endif
+ if (allocated(mesh_data%meshsz)) then 
+   LIBPAW_DEALLOCATE(mesh_data%meshsz)
+ endif
+ if (allocated(mesh_data%radstp)) then 
+   LIBPAW_DEALLOCATE(mesh_data%radstp)
+ endif
+ if (allocated(mesh_data%logstp)) then 
+   LIBPAW_DEALLOCATE(mesh_data%logstp)
+ endif
+
+ end subroutine destroy_mesh_data
+
+
+
+!!=================================================================
+!! NAME
+!! xmloutput
+!!
+!! FUNCTION
+!! Write the PAW data file in XML format
+!!
+!! INPUTS
+!! fname=file name (with .xml suffixe)
+!! Grid= Grid datastructure from atompaw
+!! AESCF= AESCF datastructure from atompaw
+!! AEPOT= AEPOT datastructure from atompaw
+!! PAW= PAW datastructure from atompaw
+!! ORB= ORB datastructure from atompaw
+!! mesh_data= datatructure containing the definition of
+!!            all the radial meshes used in the XML file
+!! tproj(prj_msz_max,nbase)= PAW projectors
+!!       (might be modified by real space optimization)
+!! vlocopt= option for local potential (1=Blochl, 2=Kresse)
+!! input_string= string containing a copy of atompaw input file
+!! author= string containing the author(s) name
+!! comment= additional comment line to be printed in the header (usually table
+!version)
+!! nsplgrid=if >0, size of a (reduced) grid on which interpolate all data in XML
+!file
+!! pawlda12
+!!    %uselda12=TRUE if LDA-1/2 potential calculation is required
+!!    %rcut=LDA-1/2 parameter: cut-off radius (in bohr)
+!!    %pot(:)=LDA-1/2 parameter: local potential used to apply LDA-1/2 method
+!!
+!! PARENTS
+!! atompaw2xml
+!!
+!! CHILDREN
+!!
+!!=================================================================
+ subroutine xmloutput(fname,Grid,AESCF,AEPot,Orb,PAW,mesh_data,tproj,&
+&                     vlocopt,input_string,author,comment,nsplgrid,zcore,atp)
+ integer,intent(in) :: vlocopt,nsplgrid
+ character(len=*),intent(in) :: input_string,author,comment,fname
+ real(dp), intent(in) :: zcore
+ TYPE(Gridinfo),intent(in) :: Grid
+ TYPE (SCFInfo),intent(in) :: AESCF
+ TYPE(Potentialinfo),intent(in) :: AEPot
+ TYPE (OrbitInfo),intent(in) :: Orb
+ TYPE(Pseudoinfo),intent(in) :: PAW
+ type(atompaw_type),intent(in) :: atp
+! TYPE(pawlda12_type),intent(in)  :: pawlda12
+ TYPE(mesh_data_type),intent(inout) :: mesh_data
+ real(dp),intent(in) :: tproj(:,:)
+!------------------------------------------------------------------
+!---- Local variables
+!------------------------------------------------------------------
+ real(dp), parameter :: tol_zero=1.d-50 ! Threshold below which quantities are zero
+ integer :: ib,ic,ii,n,n_aux,ir,irc_aux,meshsz,meshsz_aux,meshst_aux,nmesh
+ integer :: mesh_start(mesh_data%nmesh),mesh_size(mesh_data%nmesh)
+ integer :: unit_xml=1234
+ logical :: extra1
+ character(len=4) :: char4
+ character(len=5) :: char5a,char5b,xc_type
+ character(len=20) :: char20
+ character(len=132) :: xc_name,xcname_short,code_name
+ real(dp) :: sqr4pi,radstp0,logstp0,radstp_spl,logstp_spl
+ character(len=3) :: gridt(mesh_data%nmesh)
+ real(dp),allocatable :: dum(:),dum_aux(:),rad_aux(:),dudr(:)
+ real(dp),allocatable :: phi_aux(:,:),tphi_aux(:,:),proj_aux(:,:)
+ TYPE(Gridinfo) :: Grid1
+!------------------------------------------------------------------
+!---- Executable code
+!------------------------------------------------------------------
+!Some defs
+ sqr4pi=sqrt(4*pi)
+ n=Grid%n
+ LIBPAW_ALLOCATE(dum,(n))
+ extra1=.false.
+
+!In a change of grid has been requested, determine new grid data
+ radstp_spl=-1.d0 ; logstp_spl=-1.d0
+ if (nsplgrid>0) then
+   write(std_out,'(/,2x,a,/,2x,a,i5,a)') 'Atompaw2XML info:',&
+&   '  All quantities will be interpolated on a ',nsplgrid,'-point log. grid.'
+   n_aux=nsplgrid
+   logstp_spl=0.02d0
+   call findh(AEPot%zz,Grid%r(mesh_data%meshsz(1)-1),nsplgrid,logstp_spl,radstp_spl)
+   irc_aux=int(tol8+log(1.d0+PAW%rc/radstp_spl)/logstp_spl)+1
+   radstp_spl= PAW%rc/(exp(logstp_spl*(irc_aux-1))-1.d0)
+   extra1=(Grid%r(mesh_data%meshsz(1))<radstp_spl*(exp(logstp_spl*(nsplgrid-1))-1.d0))
+   if (extra1) then
+     n_aux=n_aux+1
+     logstp_spl=0.02d0
+     call findh(AEPot%zz,Grid%r(mesh_data%meshsz(1)-1),nsplgrid+1,logstp_spl,radstp_spl)
+     irc_aux=int(tol8+log(1.d0+PAW%rc/radstp_spl)/logstp_spl)+1
+     radstp_spl= PAW%rc/(exp(logstp_spl*(irc_aux-1))-1.d0)
+   end if
+   LIBPAW_ALLOCATE(rad_aux,(n_aux))
+   LIBPAW_ALLOCATE(dum_aux,(n_aux))
+   call InitGrid(Grid1,logstp_spl,Grid%range,r0=radstp_spl,do_not_print=.true.)
+   rad_aux(1:nsplgrid)=Grid1%r(1:nsplgrid)
+ else
+   LIBPAW_ALLOCATE(rad_aux,(n))
+   LIBPAW_ALLOCATE(dum_aux,(n))
+   rad_aux(1:n)=Grid%r(1:n)
+   irc_aux=PAW%irc
+ end if
+
+!Open file for writing
+ OPEN(unit_xml,file=TRIM(fname),form='formatted')
+
+!Write XML header
+ WRITE(unit_xml,'("<?xml  version=""1.0""?>")')
+ WRITE(unit_xml,'("<paw_dataset version=""0.7"">")')
+ WRITE(unit_xml,'("<!-- PAW-XML specification: http://esl.cecam.org/Paw-xml-->")')
+
+!Write title
+ WRITE(unit_xml,'(/,"<!-- PAW atomic dataset for ",a," -->")')trim(ADJUSTL(AEPot%sym))
+
+!Write additional comment line (usually table version)
+ if (trim(comment)/="") WRITE(unit_xml,'("<!-- ",a," -->")') trim(comment)
+
+!Write Atompaw information
+ WRITE(unit_xml,'(/,"<!-- ",a)')
+ WRITE(unit_xml,'("  Energy units=Hartree, length units=bohr")')
+ if (trim(author)/="") WRITE(unit_xml,'(a,a)') '  by ',trim(author)
+ WRITE(unit_xml,'("  The input file is available at the end of this file")')
+ WRITE(unit_xml,'("-->",/)')
+
+!Write atom definition
+ WRITE(unit=char5a,fmt='(f5.2)') AEPot%zz
+ WRITE(unit_xml,'("<atom symbol=""",a,""" Z=""",a)',ADVANCE='NO') &
+&   trim(ADJUSTL(AEPot%sym)),trim(ADJUSTL(char5a))
+ WRITE(unit=char5a,fmt='(f5.2)') zcore
+ WRITE(unit=char5b,fmt='(f5.2)') AEPot%nz-zcore
+ WRITE(unit_xml,'(""" core=""",a,""" valence=""",a,"""/>")') &
+&   trim(ADJUSTL(char5a)),trim(ADJUSTL(char5b))
+
+!Write XC definition
+ call get_xc_data(atp,xc_type,xc_name)
+ if (atp%itype==LIBXC.and.xc_type/="UNKNOWN") then
+   xcname_short= libxc_functionals_fullname(atp%xc_functionals)
+   call uppercase(xcname_short)
+   call get_xc_alias(xcname_short,xc_name)
+ endif
+ WRITE(unit_xml,'("<xc_functional type=""",a,""" name=""",a,"""/>")') &
+&      TRIM(xc_type),TRIM(xc_name)
+ code_name="rcpaw"
+
+!Generator data
+ if (atp%scalarrelativistic) then
+   WRITE(unit_xml,'("<generator type=""scalar-relativistic"" name=""",a,""" orthogonalisation=""", a,"""/>")')&
+&               TRIM(code_name),"marsman"
+! else if (diracrelativistic) then
+!   WRITE(unit_xml,'("<generator type=""dirac-relativistic"" name=""",a,""" orthogonalisation=""", a,"""/>")')&
+!&               TRIM(code_name),trim(PAW%orthogonalization_scheme)
+ else
+   WRITE(unit_xml,'("<generator type=""non-relativistic"" name=""",a,""" orthogonalisation=""", a,"""/>")')&
+&               TRIM(code_name),"marsman"
+ endif
+
+!Energies
+ WRITE(unit_xml,'("<ae_energy kinetic=""",1pe25.17,""" xc=""",1pe25.17,"""")') &
+&      AESCF%ekin/2,AESCF%eexc/2
+ WRITE(unit_xml,'("  electrostatic=""",1pe25.17,""" total=""",1pe25.17,"""/>")')&
+&      AESCF%estatic/2,AESCF%etot/2
+ WRITE(unit_xml,'("<core_energy kinetic=""",1pe25.17,"""/>")') AESCF%corekin*0.5d0
+
+!PAW radius
+ WRITE(unit_xml,'("<paw_radius rc=""",f17.14,"""/>")') match_on_splgrid(PAW%rc)
+
+!Electronic configuration
+ WRITE(unit_xml,'("<valence_states>")')
+ do ib=1,PAW%nbase
+   call mkname(ib,char4)
+   char20=stripchar('"'//AEPot%sym//char4//'"')
+   ii=min(ABS(PAW%np(ib)),100)
+   if (ii<100) then
+!     if(diracrelativistic) then
+!       WRITE(unit_xml,'("  <state n=""",i2,""" l=""",i1,""" kappa=""",i2,""" f=""",1pe14.7)',ADVANCE='NO')&
+!&          ii,PAW%l(ib),PAW%kappa(ib),Orb%occ(ib)
+!     else
+       WRITE(unit_xml,'("  <state n=""",i2,""" l=""",i1,""" f=""",1pe14.7)',ADVANCE='NO')&
+&          ii,PAW%l(ib),PAW%occ(ib)
+!     end if
+     WRITE(unit_xml,'(""" rc=""",f13.10,""" e=""",1pe14.7,""" id=",a6,"/>")')&
+&        match_on_splgrid(PAW%rcio(ib)),PAW%eig(ib)*0.5d0,TRIM(char20)
+   else
+!     if(diracrelativistic) then
+!       WRITE(unit_xml,'("  <state        l=""",i1,""" kappa=""",i2)',ADVANCE='NO')PAW%l(ib),PAW%kappa(ib)
+!     else
+       WRITE(unit_xml,'("  <state        l=""",i1)',ADVANCE='NO') PAW%l(ib)
+!     end if
+     WRITE(unit_xml,'("""                    rc=""",f13.10,""" e=""",1pe14.7,""" id=",a6,"/>")')&
+&        match_on_splgrid(PAW%rcio(ib)),PAW%eig(ib)*0.5d0,TRIM(char20)
+   end if
+ enddo
+ WRITE(unit_xml,'("</valence_states>")')
+
+!Radial meshes definitions
+ nmesh=mesh_data%nmesh
+ if(maxval(mesh_data%meshtp(1:mesh_data%nmesh))==minval(mesh_data%meshtp(1:mesh_data%nmesh)))then
+   mesh_data%meshsz(1:mesh_data%nmesh)=maxval(mesh_data%meshsz(1:mesh_data%nmesh))
+   nmesh=1
+   mesh_data%icoremesh=1
+   mesh_data%itaumesh=1
+   mesh_data%iprjmesh=1
+   mesh_data%iwavmesh=1
+   mesh_data%ivionmesh=1
+   mesh_data%ivalemesh=1
+   mesh_data%ivbaremesh=1
+   mesh_data%ivlda12mesh=1
+ endif
+ if (nmesh>1.and.nsplgrid>0) stop '  Bug (1) in xmlinterface: nmesh>1 and nsplgrid>0!'
+
+ do ii=1,nmesh
+  LIBPAW_ALLOCATE(dudr,(mesh_data%meshsz(ii)))
+  select case(mesh_data%meshtp(ii))
+   case(1)
+    char20='r=d*i'
+    gridt(ii)="lin"
+    mesh_start(ii)=1
+    mesh_size(ii)=mesh_data%meshsz(ii)
+    radstp0=zero
+    logstp0=mesh_data%radstp(ii)
+    dudr(1:mesh_data%meshsz(ii))=logstp0
+
+   case(2)
+    char20='r=a*(exp(d*i)-1)'
+    gridt(ii)="log"
+    mesh_start(ii)=1
+    if (nsplgrid<=0) then
+      mesh_size(ii)=mesh_data%meshsz(ii)
+      radstp0=mesh_data%radstp(ii)
+      logstp0=mesh_data%logstp(ii)
+    else
+      mesh_size(ii)=nsplgrid
+      radstp0=radstp_spl
+      logstp0=logstp_spl
+    end if
+    dudr(1:mesh_size(ii))=logstp0*(radstp0+rad_aux(1:mesh_size(ii)))
+
+   case default
+    stop '  Bug (2) in xmlinterface: mesh type not implemented in Atompaw!'
+  end select
+
+  WRITE(unit_xml,'("<radial_grid eq=""",a,""" a=""",es23.16)',ADVANCE='NO')trim(char20),radstp0
+  WRITE(unit_xml,'(""" d=""",es23.16,""" istart=""0"" iend=""",i5)',ADVANCE='NO')logstp0,mesh_size(ii)-mesh_start(ii)
+  WRITE(unit_xml,'(""" id=""",a,i1,""">")') gridt(ii),ii
+  WRITE(unit_xml,'("  <values>")')
+  WRITE(unit_xml,'(3(1x,es23.16))') (rad_aux(ir),ir=mesh_start(ii),mesh_size(ii))
+  WRITE(unit_xml,'("  </values>")')
+  WRITE(unit_xml,'("  <derivatives>")')
+  WRITE(unit_xml,'(3(1x,es23.16))') (dudr(ir),ir=mesh_start(ii),mesh_size(ii))
+  WRITE(unit_xml,'("  </derivatives>")')
+  WRITE(unit_xml,'("</radial_grid>")')
+  LIBPAW_DEALLOCATE(dudr)
+
+ end do
+
+!Compensation charge shape function
+ if (atp%gaussianshapefunction) then
+   WRITE(unit_xml,'("<shape_function type=""gauss"" rc=""",f19.16,"""/>")')match_on_splgrid(PAW%gausslength)
+ else if (atp%besselshapefunction) then
+   WRITE(unit_xml,'("<shape_function type=""bessel"" rc=""",f19.16,"""/>")')match_on_splgrid(PAW%rc_shap)
+ else
+   WRITE(unit_xml,'("<shape_function type=""sinc"" rc=""",f19.16,"""/>")')match_on_splgrid(PAW%rc_shap)
+ endif
+
+!Core densities
+ meshsz=mesh_data%meshsz(mesh_data%icoremesh)
+ meshsz_aux=merge(nsplgrid,mesh_size(mesh_data%icoremesh),extra1)
+ meshst_aux=mesh_start(mesh_data%icoremesh)
+ dum(2:meshsz)=sqr4pi*Orb%coreden(2:meshsz)/(4*pi*Grid%r(2:meshsz)**2)
+ call extrapolate(dum(1:meshsz))
+ call interp_and_filter(dum(1:meshsz),dum_aux(1:meshsz_aux))
+ WRITE(unit_xml,'("<ae_core_density grid=""",a,i1,""">")') &
+& gridt(mesh_data%icoremesh),mesh_data%icoremesh
+ WRITE(unit_xml,'(3(1x,es23.16))') (dum_aux(ii),ii=meshst_aux,meshsz_aux)
+ WRITE(unit_xml,'("</ae_core_density>")')
+ dum(2:meshsz)=sqr4pi*PAW%tcore(2:meshsz)/(4*pi*Grid%r(2:meshsz)**2)
+ call extrapolate(dum(1:meshsz))
+ call interp_and_filter(dum(1:meshsz),dum_aux(1:meshsz_aux))
+ WRITE(unit_xml,'("<pseudo_core_density grid=""",a,i1,""" rc=""",f19.16,""">")')&
+& gridt(mesh_data%icoremesh),mesh_data%icoremesh,match_on_splgrid(PAW%rc_core)
+ WRITE(unit_xml,'(3(1x,es23.16))') (dum_aux(ii),ii=meshst_aux,meshsz_aux)
+ WRITE(unit_xml,'("</pseudo_core_density>")')
+
+!!Kinetic energy core densities
+!!Available in scalar relativistic (although approximate)
+! if (.true.) then
+!  meshsz=mesh_data%meshsz(mesh_data%itaumesh)
+!  meshsz_aux=merge(nsplgrid,mesh_size(mesh_data%itaumesh),extra1)
+!  meshst_aux=mesh_start(mesh_data%itaumesh)
+!  dum(2:meshsz)= half*sqr4pi*FC%coretau(2:meshsz)/(4*pi*Grid%r(2:meshsz)**2)
+!  call extrapolate(Grid,dum(1:meshsz))
+!  call interp_and_filter(dum(1:meshsz),dum_aux(1:meshsz_aux))
+!  WRITE(unit_xml,'("<ae_core_kinetic_energy_density grid=""",a,i1,""" rc=""",f19.16,""">")') &
+!&  gridt(mesh_data%itaumesh),mesh_data%itaumesh,match_on_splgrid(PAW%rc_core)
+!  WRITE(unit_xml,'(3(1x,es23.16))') (dum_aux(ii),ii=meshst_aux,meshsz_aux)
+!  WRITE(unit_xml,'("</ae_core_kinetic_energy_density>")')
+!  dum(2:meshsz)= half*sqr4pi*PAW%tcoretau(2:meshsz)/(4*pi*Grid%r(2:meshsz)**2)
+!  call extrapolate(Grid,dum(1:meshsz))
+!  call interp_and_filter(dum(1:meshsz),dum_aux(1:meshsz_aux))
+!  WRITE(unit_xml,'("<pseudo_core_kinetic_energy_density grid=""",a,i1,""" rc=""",f19.16,""">")') &
+!&  gridt(mesh_data%itaumesh),mesh_data%itaumesh,match_on_splgrid(PAW%rc_core)
+!  WRITE(unit_xml,'(3(1x,es23.16))') (dum_aux(ii),ii=meshst_aux,meshsz_aux)
+!  WRITE(unit_xml,'("</pseudo_core_kinetic_energy_density>")')
+! else
+!  write(std_out,'(5(/,2x,a))') 'Atompaw2XML WARNING!!!!!',&
+!&   '  Kinetic energy core density is not available',&
+!&   '    within scalar relativistic scheme!',&
+!&   '  Will not be present in the XML dataset.',&
+!&   '  This is temporary, sorry!'
+! end if
+
+!!Valence density
+! meshsz=mesh_data%meshsz(mesh_data%ivalemesh)
+! meshsz_aux=merge(nsplgrid,mesh_size(mesh_data%ivalemesh),extra1)
+! meshst_aux=mesh_start(mesh_data%ivalemesh)
+! dum(2:meshsz)=sqr4pi*PAW%tden(2:meshsz)/(4*pi*Grid%r(2:meshsz)**2)
+! call extrapolate(dum(1:meshsz))
+! call interp_and_filter(dum(1:meshsz),dum_aux(1:meshsz_aux))
+! rad=maxval(PAW%rcio(1:PAW%nbase))
+! WRITE(unit_xml,'("<pseudo_valence_density grid=""",a,i1,""" rc=""",f19.16,""">")') &
+!& gridt(mesh_data%ivalemesh),mesh_data%ivalemesh,match_on_splgrid(rad)
+! WRITE(unit_xml,'(3(1x,es23.16))') (dum_aux(ii),ii=meshst_aux,meshsz_aux)
+! WRITE(unit_xml,'("</pseudo_valence_density>")')
+
+!Vbare potential
+ meshsz=mesh_data%meshsz(mesh_data%ivbaremesh)
+ meshsz_aux=merge(nsplgrid,mesh_size(mesh_data%ivbaremesh),extra1)
+ meshst_aux=mesh_start(mesh_data%ivbaremesh)
+ dum(1:meshsz)=sqr4pi*half*PAW%vloc(1:meshsz)
+ call interp_and_filter(dum(1:meshsz),dum_aux(1:meshsz_aux))
+ dum_aux(irc_aux:meshsz_aux)=0.d0 ! Vbare has to be zero at rc
+ WRITE(unit_xml,'("<zero_potential grid=""",a,i1,""" rc=""",f19.16,""">")') &
+& gridt(mesh_data%ivbaremesh),mesh_data%ivbaremesh,match_on_splgrid(PAW%rc)
+ WRITE(unit_xml,'(3(1x,es23.16))') (dum_aux(ii),ii=meshst_aux,meshsz_aux)
+ WRITE(unit_xml,'("</zero_potential>")')
+
+!Local ionic potential
+ if (vlocopt==1) then
+  meshsz=mesh_data%meshsz(mesh_data%ivionmesh)
+  meshsz_aux=merge(nsplgrid,mesh_size(mesh_data%ivionmesh),extra1)
+  meshst_aux=mesh_start(mesh_data%ivionmesh)
+  dum(1:meshsz)=sqr4pi*half*PAW%abinitvloc(1:meshsz)
+  call interp_and_filter(dum(1:meshsz),dum_aux(1:meshsz_aux))
+   WRITE(unit_xml,'("<kresse_joubert_local_ionic_potential grid=""",a,i1,""" rc=""",f19.16,""">")') &
+&   gridt(mesh_data%ivionmesh),mesh_data%ivionmesh,match_on_splgrid(PAW%rc)
+   WRITE(unit_xml,'(3(1x,es23.16))') (dum_aux(ii),ii=meshst_aux,meshsz_aux)
+   WRITE(unit_xml,'("</kresse_joubert_local_ionic_potential>")')
+  end if
+
+!Local Blochl''s potential
+ if(vlocopt==2) then
+  meshsz=mesh_data%meshsz(mesh_data%ivionmesh)
+  meshsz_aux=merge(nsplgrid,mesh_size(mesh_data%ivionmesh),extra1)
+  meshst_aux=mesh_start(mesh_data%ivionmesh)
+  dum(1:meshsz)=sqr4pi*half*PAW%abinitnohat(1:meshsz)
+  call interp_and_filter(dum(1:meshsz),dum_aux(1:meshsz_aux))
+  WRITE(unit_xml,'("<blochl_local_ionic_potential grid=""",a,i1,""" rc=""",f19.16,""">")') &
+&  gridt(mesh_data%ivionmesh),mesh_data%ivionmesh,match_on_splgrid(PAW%rc)
+  WRITE(unit_xml,'(3(1x,es23.16))') (dum_aux(ii),ii=meshst_aux,meshsz_aux)
+  WRITE(unit_xml,'("</blochl_local_ionic_potential>")')
+ endif
+
+!Local LDA-1/2 potential
+! if (pawlda12%uselda12) then
+!  meshsz=mesh_data%meshsz(mesh_data%ivlda12mesh)
+!  meshsz_aux=merge(nsplgrid,mesh_size(mesh_data%ivlda12mesh),extra1)
+!  meshst_aux=mesh_start(mesh_data%ivlda12mesh)
+!  dum(1:meshsz)=pawlda12%pot(1:meshsz)
+!  call interp_and_filter(dum(1:meshsz),dum_aux(1:meshsz_aux))
+!  ir=index_on_splgrid(pawlda12%rcut)
+!  dum_aux(ir+1:meshsz_aux)=0.d0 ! V_lda12 has to be zero for r>rc
+!  WRITE(unit_xml,'("<LDA_minus_half_potential grid=""",a,i1,""" rc=""",f19.16,""">")') &
+!& gridt(mesh_data%ivlda12mesh),mesh_data%ivlda12mesh,match_on_splgrid(pawlda12%rcut)
+!  WRITE(unit_xml,'(3(1x,es23.16))') (dum_aux(ii),ii=meshst_aux,meshsz_aux)
+!  WRITE(unit_xml,'("</LDA_minus_half_potential>")')
+! end if
+
+!Partial waves and projectors
+!-- Partial waves
+ meshsz=mesh_data%meshsz(mesh_data%iwavmesh)
+ meshsz_aux=merge(nsplgrid,mesh_size(mesh_data%iwavmesh),extra1)
+ meshst_aux=mesh_start(mesh_data%iwavmesh)
+ LIBPAW_ALLOCATE(phi_aux,(meshsz_aux-meshst_aux+1,PAW%nbase))
+ LIBPAW_ALLOCATE(tphi_aux,(meshsz_aux-meshst_aux+1,PAW%nbase))
+ Do ib=1,PAW%nbase
+   dum(2:meshsz)=PAW%ophi(2:meshsz,ib)/Grid%r(2:meshsz)
+   call extrapolate(dum(1:meshsz))
+   call interp_and_filter(dum(1:meshsz),dum_aux(1:meshsz_aux))
+   phi_aux(1:meshsz_aux,ib)=dum_aux(1:meshsz_aux)
+   dum(2:meshsz)=PAW%otphi(2:meshsz,ib)/Grid%r(2:meshsz)
+   call extrapolate(dum(1:meshsz))
+   call interp_and_filter(dum(1:meshsz),dum_aux(1:meshsz_aux))
+   if(nsplgrid>0) dum_aux(irc_aux:meshsz_aux)=phi_aux(irc_aux:meshsz_aux,ib)
+   tphi_aux(meshst_aux:meshsz_aux,ib)=dum_aux(meshst_aux:meshsz_aux)
+ Enddo
+!-- Projectors
+ meshsz=mesh_data%meshsz(mesh_data%iprjmesh)
+ meshsz_aux=merge(nsplgrid,mesh_size(mesh_data%iprjmesh),extra1)
+ meshst_aux=mesh_start(mesh_data%iprjmesh)
+ LIBPAW_ALLOCATE(proj_aux,(meshsz_aux-meshst_aux+1,PAW%nbase))
+ Do ib=1,PAW%nbase
+   dum(2:meshsz)=tproj(2:meshsz,ib)/Grid%r(2:meshsz)
+   call extrapolate(dum(1:meshsz))
+   call interp_and_filter(dum(1:meshsz),dum_aux(1:meshsz_aux))
+   if(nsplgrid>0) dum_aux(irc_aux:meshsz_aux)=zero
+   proj_aux(meshst_aux:meshsz_aux,ib)=dum_aux(meshst_aux:meshsz_aux)
+ Enddo
+!-- In case of a spline, re-orthogonalize projectors
+! if (nsplgrid >0) then
+!   Do ib=1,PAW%nbase
+!     tphi_aux(1:meshsz_aux,ib)=tphi_aux(1:meshsz_aux,ib)*Grid1%r(1:meshsz_aux)
+!     proj_aux(1:meshsz_aux,ib)=proj_aux(1:meshsz_aux,ib)*Grid1%r(1:meshsz_aux)
+!   Enddo
+!   call vdborth(irc_aux,tphi_aux,proj_aux)
+!   Do ib=1,PAW%nbase
+!     tphi_aux(2:meshsz_aux,ib)=tphi_aux(2:meshsz_aux,ib)/Grid1%r(2:meshsz_aux)
+!     call extrapolate(tphi_aux(1:meshsz_aux,ib))
+!     proj_aux(2:meshsz_aux,ib)=proj_aux(2:meshsz_aux,ib)/Grid1%r(2:meshsz_aux)
+!     call extrapolate(proj_aux(1:meshsz_aux,ib))
+!   Enddo
+! end if
+!-- Writing
+ Do ib=1,PAW%nbase
+   call mkname(ib,char4)
+   char20=stripchar('"'//AEPot%sym//char4//'"')
+   WRITE(unit_xml,'("<ae_partial_wave state=",a6," grid=""",a,i1,""">")') &
+&   TRIM(char20),gridt(mesh_data%iwavmesh),mesh_data%iwavmesh
+   WRITE(unit_xml,'(3(1x,es23.16))') (phi_aux(ii,ib),ii=meshst_aux,meshsz_aux)
+   WRITE(unit_xml,'("</ae_partial_wave>")')
+   WRITE(unit_xml,'("<pseudo_partial_wave state=",a6," grid=""",a,i1,""">")')&
+&   TRIM(char20),gridt(mesh_data%iwavmesh),mesh_data%iwavmesh
+   WRITE(unit_xml,'(3(1x,es23.16))') (tphi_aux(ii,ib),ii=meshst_aux,meshsz_aux)
+   WRITE(unit_xml,'("</pseudo_partial_wave>")')
+   WRITE(unit_xml,'("<projector_function state=",a6," grid=""",a,i1,""">")') &
+&   TRIM(char20),gridt(mesh_data%iprjmesh),mesh_data%iprjmesh
+   WRITE(unit_xml,'(3(1x,es23.16))') (proj_aux(ii,ib),ii=meshst_aux,meshsz_aux)
+   WRITE(unit_xml,'("</projector_function>")')
+   !do ic=1,PAW%nbase
+   !  write(std_out,*) "splined", ib,ic
+   !  dum(meshst_aux:meshsz_aux)=tphi_aux(meshst_aux:meshsz_aux,ib)*proj_aux(meshst_aux:meshsz_aux,ic)*dudr(meshst_aux:meshsz_aux)
+   !  dum(meshst_aux:meshsz_aux)=dum(meshst_aux:meshsz_aux)*rad_aux(meshst_aux:meshsz_aux)*rad_aux(meshst_aux:meshsz_aux)
+   !  xx=overint(meshsz_aux-meshst_aux+1,logstp0,dum(meshst_aux:meshsz_aux),-1)
+   !  write(std_out,*) "ORTHO", ib,xx/logstp0
+   !end do
+ Enddo
+!-- Release memory
+ LIBPAW_DEALLOCATE(phi_aux)
+ LIBPAW_DEALLOCATE(proj_aux)
+ LIBPAW_DEALLOCATE(tphi_aux)
+
+!Kinetic terms
+ WRITE(unit_xml,'("<kinetic_energy_differences>")')
+ WRITE(unit_xml,'(3(1x,es23.16))')((PAW%kij(ib,ic)/2,ic=1,PAW%nbase),ib=1,PAW%nbase)
+ WRITE(unit_xml,'("</kinetic_energy_differences>")')
+
+!!Core-valence exchange terms
+! WRITE(unit_xml,'("<exact_exchange_X_matrix>")')
+! WRITE(unit_xml,'(3(1x,es23.16))')((PAW%TXVC(ib,ic)/2,ic=1,PAW%nbase),ib=1,PAW%nbase)
+! WRITE(unit_xml,'("</exact_exchange_X_matrix>")')
+!
+!!Core-core exchange terms
+! WRITE(unit_xml,'("<exact_exchange core-core=""", 1x,es23.16,"""/>")') &
+!&     PAW%XCORECORE/2 
+!
+!!Lamb shielding
+! WRITE(unit_xml,'("<lamb_shielding shielding=""", 1x,es23.16,"""/>")') &
+!&     PAW%lambshielding
+!
+!! Input file
+ WRITE(unit_xml,'("<!-- Program:  atompaw - input data follows: ")')
+ WRITE(unit_xml,'(a)') trim(input_string)
+ WRITE(unit_xml,'(a)') "END"
+ WRITE(unit_xml,'(" Program:  atompaw - input end -->")')
+ WRITE(unit_xml,'("</paw_dataset>")')
+
+!Close file and end
+ CLOSE(unit_xml)
+ WRITE(STD_OUT,'(/,2x,a)') 'XML atomic dataset created.'
+
+ if(nsplgrid>0) call destroygrid(Grid1)
+ LIBPAW_DEALLOCATE(rad_aux)
+ LIBPAW_DEALLOCATE(dum_aux)
+ LIBPAW_DEALLOCATE(dum)
+ 
+ CONTAINS
+ !**************************************************
+ ! If an interpolation on an auxiliary grid is
+ !   requested, give index of input radius
+ !  on this auxiliary grid
+ !**************************************************
+  integer function index_on_splgrid(input_radius)
+    real(dp),intent(in) :: input_radius
+    if (nsplgrid>0) then
+      if (logstp_spl>0.d0) then
+        index_on_splgrid=int(tol8+log(1.d0+input_radius/radstp_spl)/logstp_spl)+1
+      else if (radstp_spl>0.d0) then
+        index_on_splgrid=int(tol8+input_radius/radstp_spl)+1
+      end if
+    else
+      index_on_splgrid=FindGridIndex(Grid,input_radius)
+    end if
+  end function index_on_splgrid
+
+ !**************************************************
+ ! If an interpolation on an auxiliary grid is
+ !   requested, match input radius on this auxiliary
+ !   grid (defined by radstp_spl, logstp_spl)
+ !**************************************************
+  real(dp) function match_on_splgrid(input_radius)
+    real(dp),intent(in) :: input_radius
+    integer :: indx
+    match_on_splgrid=input_radius
+    if (nsplgrid>0) then
+      if (logstp_spl>0.d0) then
+        indx=int(tol8+log(1.d0+input_radius/radstp_spl)/logstp_spl)+1
+        match_on_splgrid=radstp_spl*(exp(logstp_spl*(indx-1))-1.d0)
+      else if (radstp_spl>0.d0) then
+        indx=int(tol8+input_radius/radstp_spl)+1
+        match_on_splgrid=radstp_spl*(indx-1)
+      end if
+    end if
+  end function match_on_splgrid
+
+ !**************************************************
+ ! If an interpolation on an auxiliary grid is
+ !   requested, inerpolate an input function on
+ !   this auxiliary grid.
+ ! Also filter the input function (put zero below
+ !   a given threshold)
+ !**************************************************
+  subroutine interp_and_filter(func_in,func_out)
+  real(dp),intent(in) :: func_in(:)
+  real(dp),intent(out) :: func_out(:)
+  integer :: jj,msz_in,msz_out,msz_spl
+  logical :: extra
+  msz_in=size(func_in) ; msz_out=size(func_out)
+  func_out=zero
+  if (nsplgrid>0) then
+    if (msz_out/=nsplgrid) stop '  Bug (1) in interp_and_filter: msz_out/=nsplgrid!'
+    extra=(Grid%r(msz_in)<Grid1%r(msz_out))
+    msz_spl=merge(msz_out-1,msz_out,extra)
+    call interpfunc(msz_in,Grid%r,func_in,msz_spl,Grid1%r,func_out)
+  else
+    if (msz_out>msz_in) stop '  Bug (2) in interp_and_filter: msz_out>msz_in!'
+    func_out(1:msz_out)=func_in(1:msz_out)
+  end if
+  do jj=1,msz_out
+    if (abs(func_out(jj))<tol_zero) func_out(jj)=0.d0
+  end do
+
+  end subroutine interp_and_filter 
+
+!***********************************************************************
+!* In case of interpolation on an auxiliary grid, a
+!* reorthonomalisation of projector and pseudo wavefunctions
+!* is necessary. This is done thanks to a Vanderbilt orthonormalisation
+!************************************************************************
+!  subroutine vdborth(irc_aux,tphi_aux,proj_aux)
+!
+!  real(dp),intent(in) :: tphi_aux(:,:)
+!  real(dp),intent(inout) :: proj_aux(:,:)
+!  integer :: irc_aux
+!
+!  integer :: i,icount,io,irc,j,jo,l,lmax,nbase
+!  real(dp), allocatable :: aa(:,:),ai(:,:),omap(:),proj_aux1(:,:)
+!
+!  allocate(proj_aux1(size(proj_aux,1),PAW%nbase))
+!  lmax=PAW%lmax
+!  nbase=PAW%nbase
+!  irc=irc_aux
+!     do l=0,lmax
+!       icount=0
+!       do io=1,nbase
+!        if (PAW%l(io)==l) icount=icount+1
+!       enddo
+!       if (icount==0) cycle
+!       allocate(aa(icount,icount),ai(icount,icount),omap(icount))
+!       aa=0;icount=0
+!       do io=1,nbase
+!        if (PAW%l(io)==l) then
+!          icount=icount+1
+!          omap(icount)=io
+!        endif
+!       enddo
+!       do i=1,icount
+!         io=omap(i)
+!         do j=1,icount
+!           jo=omap(j)
+!           aa(i,j)=overlap(Grid1,tphi_aux(:,io),proj_aux(:,jo),1,irc)
+!         enddo
+!       enddo
+!       ai=aa;call minverse(ai,icount,icount,icount)
+!
+!       do i=1,icount
+!         io=omap(i)
+!         proj_aux1(:,io)=0
+!         do j=1,icount
+!           jo=omap(j)
+!           proj_aux1(:,io)=proj_aux1(:,io)+proj_aux(:,jo)*ai(j,i)
+!         enddo
+!       enddo
+!       deallocate(aa,ai,omap)
+!     enddo
+!     proj_aux=proj_aux1
+!     deallocate(proj_aux1)
+!  end subroutine vdborth 
+
+ END SUBROUTINE xmloutput
+
+
+!!=================================================================
+!! NAME
+!! get_xc_data
+!!
+!! FUNCTION
+!! Get XC data in a suitable form for XML printing
+!!
+!! INPUTS
+!!  exctype= string containing XC type
+!!
+!! OUTPUT
+!!  xc_name= name of XC functional
+!!  xc_type= LDA or GGA
+!!
+!! PARENTS
+!!  xmlout,xmlprtcore
+!!
+!!=================================================================
+
+subroutine get_xc_data(atp,xctype,xcname)
+ type(atompaw_type),intent(in) :: atp
+ character(len=*),intent(out) :: xctype,xcname
+
+!------------------------------------------------------------------
+!---- Executable code
+!------------------------------------------------------------------
+
+ if (trim(ADJUSTL(atp%exctype))=="LDA-PW") then
+   xctype="LDA"
+   xcname="PW"
+ elseif (trim(ADJUSTL(atp%exctype))=="GGA-PBE") then
+   xctype="GGA"
+   xcname="PBE"
+ elseif (trim(ADJUSTL(atp%exctype))=="GGA-PBESOL") then
+   xctype="GGA"
+   xcname="PBESOL"
+ else if(atp%itype==LIBXC) then
+   if (libxc_functionals_ismgga(atp%xc_functionals)) then
+     xctype="MGGA"
+   else if (libxc_functionals_isgga(atp%xc_functionals)) then
+     xctype="GGA"
+   else
+     xctype="LDA"
+   end if
+   xcname=trim(atp%exctype)
+ else
+   LIBPAW_ERROR("Unknown XC type")
+ end if
+
+ end subroutine get_xc_data
+
+
+
+!!=================================================================
+!! NAME
+!! get_xc_alias
+!!
+!! FUNCTION
+!! Get XC name alias (following PAW-XML specification)
+!!   from a libXC functional name
+!!
+!! INPUTS
+!!  xc_name= string containing long XC name
+!!
+!! OUTPUT
+!!  xc_alias= alias of XC functional
+!!
+!! PARENTS
+!!  xmlout,xmlprtcore
+!!
+!!=================================================================
+
+subroutine get_xc_alias(xc_name,xc_alias)
+
+ character(len=*),intent(in) :: xc_name
+ character(len=*),intent(out) :: xc_alias
+
+!------------------------------------------------------------------
+!---- Executable code
+!------------------------------------------------------------------
+
+ select case(trim(xc_name))
+   case('LDA_X+LDA_C_PW')
+         xc_alias='PW'
+   case('GGA_X_PBE+GGA_C_PBE')
+         xc_alias='PBE'
+   case('LDA_X+LDA_C_PZ')
+         xc_alias='PZ'
+   case('LDA_X+LDA_C_WIGNER')
+         xc_alias='W'
+   case('LDA_X+LDA_C_HL')
+         xc_alias='HL'
+   case('LDA_X+LDA_C_GL')
+         xc_alias='GL'
+   case('LDA_X+LDA_C_VWN')
+         xc_alias='VWN'
+   case('GGA_X_PBE_R+GGA_C_PBE')
+         xc_alias='revPBE'
+   case('GGA_X_RPBE+GGA_C_PBE')
+         xc_alias='RPBE'
+   case('GGA_X_PW91+GGA_C_PW91')
+         xc_alias='PW91'
+   case('GGA_X_B88+GGA_C_LYP')
+         xc_alias='BLYP'
+   case DEFAULT
+         xc_alias=xc_name
+ end select
+
+end subroutine get_xc_alias
+
+
+
+!!=================================================================
+!! NAME
+!! read_inputstring
+!!
+!! FUNCTION
+!! Read the file echoing the atompaw input file
+!! and transfer it into a character string
+!!
+!! OUTPUT
+!!  input_string=character string containing the file
+!!
+!! PARENTS
+!  xml2abinit
+!!=================================================================
+
+ subroutine read_inputstring(input_string)
+
+ character(len=*) :: input_string
+
+!------------------------------------------------------------------
+!---- Local variables
+!------------------------------------------------------------------
+
+ integer :: OK,input_unit
+ character(len=132) :: inputline
+
+!------------------------------------------------------------------
+!---- Executable code
+!------------------------------------------------------------------
+
+ open(input_unit,file='dummy',form='formatted')
+ read(input_unit,'(a)',iostat=OK,end=10) inputline
+ if (OK/=0) return
+ input_string=trim(inputline)
+ do
+   read(input_unit,'(a)',iostat=OK,end=10) inputline
+   if (OK/=0) exit
+   write(unit=input_string,fmt='(3a)') trim(input_string),char(10),trim(inputline)
+ enddo
+ return
+10 continue
+ close(input_unit)
+
+ end subroutine read_inputstring
 
 
 end module m_paw_atom_solve

@@ -144,9 +144,8 @@ type(crystal_t) function crystal_from_ptgroup(ptgroup, use_symmetries) result(cr
 
 !Local variables -------------------------
  type(irrep_t),allocatable :: irr(:)
-
  integer,parameter :: npsp1 = 1, space_group0 = 0, timrev2 = 2
- integer :: natom,nclass,ntypat,nsym
+ integer :: ii, natom,nclass,ntypat,nsym
  integer :: typat(1)
  real(dp) :: rprimd(3,3)
  real(dp) :: amu(1),xred(3,1),znucl(1),zion(1)
@@ -162,7 +161,9 @@ type(crystal_t) function crystal_from_ptgroup(ptgroup, use_symmetries) result(cr
    call get_point_group(ptgroup, nsym, nclass, symrel, class_ids, class_names, irr)
    ABI_FREE(class_ids)
    ABI_FREE(class_names)
-   call irrep_free(irr)
+   do ii=1,size(irr)
+     call irr(ii)%free()
+   end do
    ABI_FREE(irr)
  else
    ! Only identity operator.

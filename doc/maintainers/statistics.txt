@@ -9,9 +9,12 @@ Number of tests     : ls tests/*/Input/t*abi tests/*/Input/t*in | wc
 
 WARNING : the last three should be done BEFORE */*/makemake and ./configure, immediately after git clone.
 
-Note : the sudden increase of size of tar.gz file in v7.0 is due to the school
+Notes : the sudden increase of size of tar.gz file in v7.0 is due to the school
 in Bruyeres-le-Chatel, in Nov 2011, whose new files have been included in the
-package at the end of v6.
+package at the end of v6. The size peak for v10.6 was due to the inclusion of some large reference 
+files. The corresponding tests have been modified in v10.8 with much smaller size but
+similar non-regression capabilities. The explanation for the similar peak for the number
+of F90 lines and number of F90 files is still to be given ...
 
 =====================================================================
 Version  Date       Size         Number        Number        Number
@@ -59,3 +62,4 @@ Version  Date       Size         Number        Number        Number
 10.2     2024 Oct  131.3          802         1026056       1556
 10.4     2025 May  144.2          811         1063959       1657
 10.6     2026 Feb  179.1          970         1340383       1690
+10.8     2026 Aug  166.7          868         1187009       1751

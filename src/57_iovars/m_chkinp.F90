@@ -959,7 +959,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%dmft_triqs_chiloc > 0) then
        cond_string(1)='dmft_triqs_chiloc' ; cond_values(1)=dt%dmft_triqs_chiloc
        call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_chiloc_ins',dt%dmft_triqs_chiloc_ins,1,iout)
-     end if        
+     end if
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_n_warmup_cycles_init',dt%dmft_triqs_n_warmup_cycles_init,0,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -1094,7 +1094,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 
 !  ecuteps
-   if( ANY(optdriver == [RUNL_SCREENING]) )then
+   if (any(optdriver == [RUNL_SCREENING]) )then
      call chkdpr(0,0,cond_string,cond_values,ierr,'ecuteps',dt%ecuteps,1,0.0_dp,iout)
      if (dt%ecuteps <= 0) then
        ABI_ERROR_NOSTOP("ecuteps must be > 0 if optdriver == 3", ierr)
@@ -1108,6 +1108,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
           'Action: use another value of fftgw (e.g. 21), or adjust ecutwfn with ecuteps.'
          ABI_ERROR_NOSTOP(msg, ierr)
        end if
+     end if
+     if (any(dt%gw_icutcoul == [14, 15, 16])) then
+       msg = "Monte-carlo integration method should not be used when computing the screening. Please change gw_icutcoul."
+       ABI_ERROR_NOSTOP(msg, ierr)
      end if
    end if
 
@@ -1273,7 +1277,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
-       27, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 9, 10, 11, -12, 13, -13, 14, 15, -15, 16, 17, 18, 19, 24], iout)
+       28, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 9, 10, 11, -12, 13, -13, 14, 15, -15, 16, 17, 18, 19, 20, 24], iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        ABI_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
@@ -1870,7 +1874,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      !chi0-based preconditioning (iprcel=2**) incompatible with fft-grid parallelization.
      call chkint_eq(1, 1, cond_string, cond_values, ierr, 'npfft', dt%npfft, 1, [1], iout)
      !chi0-based preconditioning (iprcel=2**) needs a smooth smearing.
-     call chkint_eq(1, 1, cond_string, cond_values, ierr, 'occopt', dt%occopt, 5, [3, 4, 5, 6, 7], iout) 
+     call chkint_eq(1, 1, cond_string, cond_values, ierr, 'occopt', dt%occopt, 5, [3, 4, 5, 6, 7], iout)
      !chi0-based preconditioning (iprcel=2**) only implemented on the fine grid (PAW).
      if (usepaw==1) then
        call chkint_eq(1, 1, cond_string, cond_values, ierr, 'pawmixdg', dt%pawmixdg, 1, [1], iout)
@@ -1904,7 +1908,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
         call chkint_eq(1, 2, cond_string, cond_values, ierr, 'precon_in_memory', dt%precon_in_memory, 1, [1], iout)
       end if
      end if
-     
+
    end if
 
    ! irandom
@@ -4443,7 +4447,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    call chkint_eq(0,0,cond_string,cond_values,ierr,'use_rcpaw',dt%use_rcpaw,2,(/0,1/),iout)
    if(dt%use_rcpaw==1) then
      if((dt%npfft/=1).or.(dt%occopt<3).or.(dt%occopt>8).or.&
-        (dt%stmbias/=zero).or.(dt%spinmagntarget/=-99.99_dp).or.(dt%nspinor==2).or.&
+        (dt%stmbias/=zero).or.(dt%spinmagntarget/=-99.99_dp).or.&
         (dt%usewvl==1).or.(dt%positron/=0).or.(dt%icoulomb/=0).or.(dt%iscf<12).or.&
         (dt%usepaw/=1).or.(dt%usepawu==1).or.(dt%usedmft==1)) then
        ABI_ERROR('RCPAW: work in progress')
@@ -4836,12 +4840,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%usepaw == 1 .and. .not. string_in(dt%gwr_task, "HDIAGO, HDIAGO_FULL, CC4S, CC4S_FULL, CC4S_FROM_WFK")) then
        ABI_ERROR_NOSTOP("GWR with PAW not yet implemented", ierr)
      end if
-     if (dt%nshiftk /= 1 .or. any(abs(dt%shiftk(:,1)) > tol6)) then
-       ABI_ERROR_NOSTOP('GWR requires Gamma-centered k-meshes', ierr)
-     end if
-    !  if (dt%nspinor == 2 .and. .not. string_in(dt%gwr_task, "HDIAGO, HDIAGO_FULL")) then
-    !    ABI_ERROR_NOSTOP('GWR does not support nspinor == 2', ierr)
-    !  end if
+     !if (dt%nshiftk /= 1 .or. any(abs(dt%shiftk(:,1)) > tol6)) then
+     !  ABI_ERROR_NOSTOP('GWR requires Gamma-centered k-meshes', ierr)
+     !end if
+     !if (dt%nspinor == 2 .and. .not. string_in(dt%gwr_task, "HDIAGO, HDIAGO_FULL")) then
+     !  ABI_ERROR_NOSTOP('GWR does not support nspinor == 2', ierr)
+     !end if
    end if
 
    ! ===========================================================
@@ -4898,6 +4902,18 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
    if (dt%gstore_use_lgq /= 0 .and. dt%gstore_kzone /= "bz") then
      ABI_CHECK_NOSTOP(.False., "when gstore_use_lgq /= 0, gstore_kzone must be 'bz' ", ierr)
+   end if
+   if (dt%gstore_sym /= 0 .and. dt%gstore_sym /= 1 .and. dt%gstore_sym /= 2) then
+     ABI_CHECK_NOSTOP(.False., "gstore_sym must be 0, 1, or 2 ", ierr)
+   end if
+   if (dt%gstore_sym /= 0 .and. .not. (dt%gstore_kzone == "bz" .and. dt%gstore_qzone == "bz")) then
+     ABI_CHECK_NOSTOP(.False., "gstore_sym /= 0 requires gstore_kzone == 'bz' and gstore_qzone == 'bz' ", ierr)
+   end if
+   !if (dt%gstore_sym == 2 .and. dt%gstore_use_lgk == 0) then
+   !  ABI_CHECK_NOSTOP(.False., "gstore_sym == 2 requires gstore_use_lgk == 1 ", ierr)
+   !end if
+   if (dt%gstore_sym /= 0 .and. nspinor == 2) then
+     ABI_CHECK_NOSTOP(.False., "gstore_sym /= 0 is not compatible with nspinor 2 ", ierr)
    end if
 
 !  If molecular dynamics or structural optimization is being done

@@ -287,10 +287,13 @@ MODULE m_numeric_tools
    real(dp) :: max_adiff = zero     ! Max {|f1-f2|}
    real(dp) :: l1_rerr = zero       ! (\int |f1-f2| dr) / (\int |f2| dr)
 
+ contains
+
+   procedure :: eval => vdiff_eval      ! Estimate the "distance" between two functions tabulated on a homogeneous grid.
+   procedure :: print => vdiff_print    ! Print vdiff_t to formatted file.
+
  end type vdiff_t
 
- public :: vdiff_eval         ! Estimate the "distance" between two functions tabulated on a homogeneous grid.
- public :: vdiff_print        ! Print vdiff_t to formatted file.
 !!***
 
  !===========================================================
@@ -5672,13 +5675,15 @@ end subroutine rhophi
 !!
 !! SOURCE
 
-type(vdiff_t) function vdiff_eval(cplex, nr, f1, f2, volume, vd_max) result(vd)
+subroutine vdiff_eval(vd, cplex, nr, f1, f2, volume, vd_max, unit)
 
 !Arguments ------------------------------------
 !scalars
+ class(vdiff_t),intent(out) :: vd
  integer,intent(in) :: cplex,nr
  real(dp),intent(in) :: volume
  type(vdiff_t),optional,intent(inout) :: vd_max
+ integer,optional,intent(in) :: unit
 !arrays
  real(dp),intent(in) :: f1(cplex,nr),f2(cplex,nr)
 
@@ -5727,7 +5732,9 @@ type(vdiff_t) function vdiff_eval(cplex, nr, f1, f2, volume, vd_max) result(vd)
    vd_max%l1_rerr =     max(vd_max%l1_rerr, vd%L1_rerr)
  end if
 
-end function vdiff_eval
+ if (present(unit)) call vd%print(unit=unit)
+
+end subroutine vdiff_eval
 !!***
 
 !----------------------------------------------------------------------
@@ -5745,8 +5752,8 @@ subroutine vdiff_print(vd, unit)
 
 !Arguments ------------------------------------
 !scalars
+ class(vdiff_t),intent(in) :: vd
  integer,optional,intent(in) :: unit
- type(vdiff_t),intent(in) :: vd
 
 !Local variables-------------------------------
  integer :: unt

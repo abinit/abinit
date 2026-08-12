@@ -22,4 +22,7 @@ inp_files = [
 "t12.abi",
 "t13.abi",
 "t14.abi",  # test wfd wannier interface
+"t15.abi",  # silicon: first four bands from an IBZ WFK
+"t16.abi",  # aluminium: disentanglement from an IBZ WFK
+"t17.abi",  # GaAs: SOC Wannierization from an IBZ WFK
 ]

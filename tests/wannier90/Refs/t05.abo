@@ -809,33 +809,38 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    mlwfovlp :  mlwfovlp_setup done -
 -  see t05o_DS1_w90.wout for details.
 
-   Writing top of the overlap matrix: M_mn(ikb,ik)
-   m=n=1:3, ikb=1, ik=1
-
-;   (   0.537758  -0.040093 ,  -0.005237   0.011497 ,   0.074902  -0.000459 ,    )
-;   (  -0.000000  -0.000000 ,   0.589015  -0.000000 ,   0.000016  -0.012587 ,    )
-;   (  -0.005252  -0.039773 ,   0.029998  -0.000533 ,   0.039944   0.606263 ,    )
-
-   Writing bottom of the overlap matrix: M_mn(ikb,ik)
-   m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt
-
-;   (   0.010540  -0.028039 ,  -0.106927   0.124976 ,  -0.146507  -0.028127 ,    )
-;   (   0.017832   0.014499 ,  -0.246620  -0.028341 ,   0.151471   0.002899 ,    )
-;   (   0.011283  -0.023312 ,  -0.100826   0.147864 ,  -0.021767   0.092792 ,    )
-
-   Writing top of the initial projections matrix: A_mn(ik)
-   m=1:3, n=1:3, ik=1
-
-;   (   0.223789   0.000000 ,   0.127749  -0.000000 ,  -0.000000   0.003831 ,    )
-;   (   0.042610   0.000000 ,   0.048061  -0.000000 ,   0.000000  -0.008447 ,    )
-;   (   0.003268  -0.011487 ,   0.002878   0.064833 ,  -0.014130  -0.015646 ,    )
-
-   Writing bottom of the initial projections matrix: A_mn(ik)
-   m=num_bands-2:num_bands, n=nwan-2:nwan, ik=nkpt
-
-;   (  -0.026062   0.034119 ,   0.017551   0.000621 ,  -0.004468   0.010953 ,    )
-;   (   0.036486   0.002043 ,  -0.017994  -0.000484 ,   0.018222   0.001771 ,    )
-;   (  -0.034178   0.023894 ,  -0.003767  -0.018637 ,  -0.009275   0.005125 ,    )
+** mlwfovlp:   calling wannier90 library subroutine wannier_run 
+   Calculation is running         
+-  see t05o_DS1_w90.wout for details.
+   Spin channel: 1
+   Uniform k-mesh: 4 4 4
+   Number of k-points: 64
+   Number of input bands: 24
+   Number of Wannier functions: 18
+   Number of k-point neighbours: 12
+   Fermi energy [eV]:   9.27486602E+00
+   Eigenvalue range (min, max) [eV]:  -7.92196044E+01   3.33711073E+01
+   Wannier90 physical results:
+-   Spreads (Omega_total, Omega_I, Omega_tilde) [Ang^2]:   5.24526202E+01   4.98071899E+01   2.64543027E+00
+   Wannier function centres [Ang] and spreads [Ang^2]:
+-     WF 1: centre =    -0.02494638    -0.00550717    -0.04895931  spread =     2.85896082
+-     WF 2: centre =     0.04598683    -0.02406402    -0.00645074  spread =     2.84910718
+-     WF 3: centre =     0.01797437     0.00930246    -0.03900329  spread =     2.90938656
+-     WF 4: centre =     0.01045938     0.00564664     0.02440459  spread =     2.90326147
+-     WF 5: centre =    -0.03293955    -0.00418062     0.02997316  spread =     2.92281306
+-     WF 6: centre =    -0.01239762    -0.01384995     0.02019574  spread =     2.89329769
+-     WF 7: centre =     0.07128595     0.03645965    -0.01271574  spread =     2.93141768
+-     WF 8: centre =     0.04755113     0.02000839    -0.00439255  spread =     2.87203194
+-     WF 9: centre =    -0.01724338     0.03701568    -0.04807267  spread =     2.98279552
+-     WF 10: centre =    -0.02249587    -0.01008911     0.02237334  spread =     2.92288422
+-     WF 11: centre =    -0.01853113     0.04747109    -0.04752938  spread =     2.92296552
+-     WF 12: centre =    -0.04975034    -0.05309522    -0.02300904  spread =     2.93506684
+-     WF 13: centre =    -0.15546275    -0.03000472     0.02969515  spread =     2.97730452
+-     WF 14: centre =     0.13419111     0.06334566    -0.02502066  spread =     2.89455395
+-     WF 15: centre =    -0.01489727    -0.00106409     0.03973207  spread =     2.93081723
+-     WF 16: centre =     0.04568490     0.01786188    -0.05707325  spread =     2.90528401
+-     WF 17: centre =     0.00086778    -0.08965470     0.00870445  spread =     2.94491915
+-     WF 18: centre =    -0.02967335     0.00351146     0.13859884  spread =     2.89575283
 
    mlwfovlp :  mlwfovlp_run completed -
 -  see t05o_DS1_w90.wout for details.

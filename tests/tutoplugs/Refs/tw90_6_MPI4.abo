@@ -1593,6 +1593,16 @@ total_energy_dc_eV  : -8.89202280172887E+03
 ...
 
 
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 1, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -1.89255624510241E+04
+Total energy DC     : -1.89255624612446E+04
+Total energy (eV)   : -5.14990789777252E+05
+Total energy DC (eV): -5.14990790055364E+05
+...
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.86707107E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.86707107E-03  sigma(3 1)=  0.00000000E+00
@@ -1925,6 +1935,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 ...
 
 
+   mlwfovlp :  Creating temporary files with cg and cprj (PAW)
+
+
 ---------------------------------------------------------------
 
   Calculation of overlap and call to wannier90 library
@@ -1939,14 +1952,8 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 ---------------------------------------------------------------
 
-   mlwfovlp:  you should give k-point in the full brillouin zone
-   with explicit k-points (or kptopt=3) and istwfk 1
-
    mlwfovlp :  mlwfovlp_setup done -
 -  see tw90_6_MPI4o_DS3_w90.wout for details.
-
-   mlwfovlp :  Creating temporary files with cg and cprj (PAW)
-
 
    Writing top of the overlap matrix: M_mn(ikb,ik)
    m=n=1:3, ikb=1, ik=1
@@ -1962,9 +1969,6 @@ force_length_stats: {min: null, max: null, mean: null, }
 ;   (  -0.017745   0.000000 ,   0.984594   0.000000 ,   0.115415   0.000000 ,    )
 ;   (  -0.001979  -0.000001 ,   0.120426   0.000000 ,  -0.972876   0.000001 ,    )
 
-   mlwfovlp :  Removing temporary files with cg and cprj (PAW)
-
-
    Writing top of the initial projections matrix: A_mn(ik)
    m=1:3, n=1:3, ik=1
 
@@ -1979,8 +1983,27 @@ force_length_stats: {min: null, max: null, mean: null, }
 ;   (   0.000000   0.000000 ,    )
 ;   (  -0.437800   0.000000 ,    )
 
+** mlwfovlp:   calling wannier90 library subroutine wannier_run 
+   Calculation is running         
+-  see tw90_6_MPI4o_DS3_w90.wout for details.
+   Spin channel: 1
+   Uniform k-mesh: 8 8 8
+   Number of k-points: 512
+   Number of input bands: 5
+   Number of Wannier functions: 1
+   Number of k-point neighbours: 10
+   Fermi energy [eV]:   8.19325647E+00
+   Eigenvalue range (min, max) [eV]:  -1.05740552E+02   9.32974600E+00
+   Wannier90 physical results:
+-   Spreads (Omega_total, Omega_I, Omega_tilde) [Ang^2]:   5.00770041E+00   5.00770041E+00   2.88583960E-11
+   Wannier function centres [Ang] and spreads [Ang^2]:
+-     WF 1: centre =    -0.00000015     0.00000000     0.00000002  spread =     5.00770041
+
    mlwfovlp :  mlwfovlp_run completed -
 -  see tw90_6_MPI4o_DS3_w90.wout for details.
+
+
+   mlwfovlp :  Removing temporary files with cg and cprj (PAW)
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------

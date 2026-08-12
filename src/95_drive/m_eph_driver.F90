@@ -64,9 +64,10 @@ module m_eph_driver
  use m_sigmaph,         only : sigmaph
  use m_pspini,          only : pspini
  use m_ephtk,           only : ephtk_update_ebands
- use m_gstore,          only : gstore_t
  use m_migdal_eliashberg, only : migdal_eliashberg_iso !, migdal_eliashberg_aniso
+ use m_gstore,          only : gstore_t, gstore_symmetrize
  use m_gstore_sigmaph,   only : gstore_sigmaph
+ use m_gstore_converters, only : gstore_convert
  use m_berry_curvature, only : berry_curvature
  use m_cumulant,        only : cumulant_driver
  use m_frohlich,        only : frohlich_t, frohlichmodel_zpr, frohlichmodel_polaronmass
@@ -147,16 +148,17 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0, with_cplex1 = 1, with_cplex2 = 2
+ integer,parameter :: master = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0
+ integer,parameter :: with_cplex0 = 0, with_cplex1 = 1, with_cplex2 = 2
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
  integer :: omp_ncpus, work_size, nks_per_proc, lwsym, qptopt, ncid
  real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
- logical :: use_wfk, use_wfq, use_dvdb, use_sigeph, use_drhodb, use_gstore
+ logical :: use_wfk, use_wfq, use_dvdb, use_sigeph, use_drhodb, use_gstore, gstore_from_file
  character(len=500) :: msg
- character(len=fnlen) :: wfk0_path, wfq_path, ddb_filepath, dvdb_filepath, sigeph_filepath, path, drhodb_filepath, gstore_filepath, gstore_path
+ character(len=fnlen) :: wfk0_path, wfq_path, ddb_filepath, dvdb_filepath, sigeph_filepath, path, drhodb_filepath, gstore_path
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst, cryst_ddb
  type(ebands_t) :: ks_ebands, ks_ebands_kq, qp_ebands
@@ -233,7 +235,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    drhodb_filepath = dtfil%filddbsin; ii = len_trim(drhodb_filepath); drhodb_filepath(ii-2:ii+1) = "DRHODB"
  end if
 
- gstore_filepath = dtfil%filgstorein
  sigeph_filepath = dtfil%filsigephin
 
  use_wfk = all(dtset%eph_task /= [0, 5, -5, 6, +15, -15, -16, 16])
@@ -703,7 +704,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (24)
    ! Compute e-ph self-energy from GSTORE.nc file.
-   call gstore_sigmaph(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, ks_ebands, qp_ebands, dvdb, ifc, &
+   call gstore_sigmaph(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, ks_ebands, qp_ebands, wfk0_hdr, dvdb, ifc, &
                        pawfgr, pawtab, psps, mpi_enreg, comm)
 
  case (5, -5)
@@ -743,11 +744,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, qp_ebands, ifc, comm)
    end if
 
-   call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, qp_ebands, dvdb, &
+   call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, qp_ebands, ifc, dvdb, &
                        pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
    gstore_path = gstore%path
    call gstore%free()
+
+   if (len(trim(dtset%gstore_convert)) /= 0) call gstore_convert(gstore_path, dtset, dtfil, cryst, qp_ebands, ifc, comm)
 
    ! Wannierize the e-ph matrix elements if the ABIWAN.nc file is provided.
    if (dtfil%filabiwanin /= ABI_NOFILE) then
@@ -782,9 +785,16 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (12, -12)
    ! Migdal-Eliashberg equations (isotropic or anisotropic case).
-   ! Need|g(k,q)|^2 in the phonon representation but
-   call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, dtfil, cryst, qp_ebands, ifc, &
-                           "phonon", dtset%gstore_gname, .False., comm)
+   ! Read |g(k,q)|^2 from GSTORE when present. With Wannier input, prepare
+   ! the compact real-space vertex and interpolate it on demand in get_a2fw.
+   call gstore%init_or_from_ncpath(merge(with_cplex1, with_cplex0, dtfil%filgstorein /= ABI_NOFILE), &
+                                   dtset, dtfil, wfk0_hdr, cryst, qp_ebands, ifc, &
+                                   "phonon", dtset%gstore_gname, .False., comm, gstore_from_file)
+   if (gstore_from_file) then
+     call wrtout(units, " Gstore built by reading a pre-existent GSTORE.nc file")
+   else
+     call wrtout(units, " Gstore built on the fly via Wannier interpolation (ABIWAN.nc + GWAN.nc)")
+   end if
 
    if (dtset%eph_task == -12) call migdal_eliashberg_iso(gstore, dtset, dtfil)
    !if (dtset%eph_task == +12) call migdal_eliashberg_aniso(gstore, dtset, dtfil)
@@ -792,9 +802,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (13)
    ! Variational polaron equations.
-   call wrtout(units, sjoin(" Computing variational polaron equations from pre-existent GSTORE file:", gstore_filepath))
-   call gstore%from_ncpath(gstore_filepath, with_cplex2, dtset, dtfil, cryst, qp_ebands, ifc, &
-                           "phonon", dtset%gstore_gname, .False., comm)
+   call gstore%init_or_from_ncpath(with_cplex2, dtset, dtfil, wfk0_hdr, cryst, qp_ebands, ifc, &
+                                   "phonon", dtset%gstore_gname, .False., comm, gstore_from_file)
+   if (gstore_from_file) then
+     call wrtout(units, sjoin(" Computing variational polaron equations from pre-existent GSTORE file:", dtfil%filgstorein))
+   else
+     call wrtout(units, " Gstore built on the fly via Wannier interpolation (ABIWAN.nc + GWAN.nc)")
+   end if
    call varpeq_run(gstore, dtset, dtfil)
    call gstore%free()
 
@@ -804,9 +818,14 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (14)
    ! Molecular Berry Curvature.
-   call wrtout(units, sjoin(" Computing Berry curvature from pre-existent GSTORE file:", dtfil%filgstorein))
-   call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, dtfil, cryst, qp_ebands, ifc, &
-                           "atom", dtset%gstore_gname, .False., comm)
+   call gstore%init_or_from_ncpath(with_cplex2, dtset, dtfil, wfk0_hdr, cryst, qp_ebands, ifc, &
+                                   "atom", dtset%gstore_gname, .False., comm, gstore_from_file)
+   call wrtout(units, " Computing Berry curvature")
+   if (gstore_from_file) then
+     call wrtout(units, " Gstore built by reading a pre-existent GSTORE.nc file")
+   else
+     call wrtout(units, " Gstore built on the fly via Wannier interpolation (ABIWAN.nc + GWAN.nc)")
+   end if
 
    call berry_curvature(gstore, dtset, dtfil)
    call gstore%free()
@@ -842,13 +861,22 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call gwpt_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, qp_ebands, dvdb, drhodb, ifc, wfk0_hdr, &
                  pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
+    if (len(trim(dtset%gstore_convert)) /= 0) then
+      gstore_path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+      call gstore_convert(gstore_path, dtset, dtfil, cryst, qp_ebands, ifc, comm)
+    end if
+
  case (18)
    ! Compute e-ph matrix elements along path in the BZ.
    call eph_path_run(dtfil, dtset, cryst, ks_ebands, dvdb, ifc, pawfgr, pawang, pawrad, pawtab, psps, comm)
 
  case (19)
    ! Compute matrix elements of W_kk'.
+
    call wkk_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, qp_ebands, wfk0_hdr, pawtab, psps, mpi_enreg, comm)
+
+ case (20)
+   call gstore_convert(dtfil%filgstorein, dtset, dtfil, cryst, qp_ebands, ifc, comm)
 
  case default
    ABI_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
@@ -859,8 +887,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !=====================
  call cryst%free(); call dvdb%free(); call drhodb%free(); call ddb_hdr%free()
  call ddb%free(); call ifc%free(); call wfk0_hdr%free()
- call ks_ebands%free(); call ks_ebands_kq%free()
- call qp_ebands%free()
+ call ks_ebands%free(); call ks_ebands_kq%free(); call qp_ebands%free()
  call pawfgr_destroy(pawfgr); call destroy_mpi_enreg(mpi_enreg)
 
  if (allocated(efmasdeg)) call efmasdeg_free_array(efmasdeg)

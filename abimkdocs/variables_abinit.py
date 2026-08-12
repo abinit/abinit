@@ -3187,6 +3187,22 @@ See [[dmft_charge_prec]] for further tuning of the root-finding algorithm.
 ),
 
 Variable(
+    abivarname="dmft_full_chipsi",
+    varset="dmft",
+    vartype="integer",
+    topics=["DMFT_expert"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: compute full chi psi",
+    requires="[[usedmft]] == 1 and [[dmft_prtwan]] == 1",
+    added_in_version="before_v10.8",
+    text=r"""
+Required in order to build the full Wannier function outside the paw sphere. This is relevant
+only when using [[dmft_solv]] $\in$ [5,8,10].
+""",
+),
+
+Variable(
     abivarname="dmft_hybri_limit",
     varset="dmft",
     vartype="integer",
@@ -5617,6 +5633,30 @@ superconducting Tc using Mc-Millan's formula.
 ),
 
 Variable(
+    abivarname="eph_ngkpt_fine",
+    varset="eph",
+    vartype="integer",
+    topics=["ElPhonInt_useful"],
+    dimensions=[3],
+    defaultval=[0, 0, 0],
+    requires="[[optdriver]] == 7",
+    mnemonics="Electron-PHonon: Number of Grid K-PoinTs in FINE grid",
+    added_in_version="10.9.1",
+    text=r"""
+Defines the divisions of the dense homogeneous k-mesh used to interpolate
+electronic eigenvalues and electron-phonon matrix elements with Wannier
+functions in the EPH code.
+
+The shifts of the dense mesh are specified by [[eph_nshiftk_fine]] and
+[[eph_shiftk_fine]]. The default value, `[0, 0, 0]`, disables the dense
+Wannier k-mesh and preserves the k-mesh associated with the input WFK file.
+
+This variable is intended for calculations that read both `ABIWAN.nc` and
+`GWAN.nc`. It does not change the k-mesh stored in the input WFK file.
+""",
+),
+
+Variable(
     abivarname="eph_ngqpt_fine",
     varset="eph",
     vartype="integer",
@@ -5643,6 +5683,47 @@ DDB file i.e. [[ddb_ngqpt]] (default behavior).
     compatible with the one given in *eph_ngqpt_fine*.
     The code can interpolate DFPT potentials but is not able to interpolate KS wavefunctions,
     and will stop if ${\bf k + q}$ is not found in the WFK file.
+""",
+),
+
+Variable(
+    abivarname="eph_nshiftk_fine",
+    varset="eph",
+    vartype="integer",
+    topics=["ElPhonInt_useful"],
+    dimensions="scalar",
+    defaultval=1,
+    requires="[[optdriver]] == 7",
+    mnemonics="Electron-PHonon: Number of SHIFTs for the FINE K grid",
+    added_in_version="10.9.1",
+    text=r"""
+Gives the number of shifted grids used to construct the dense Wannier
+k-mesh defined by [[eph_ngkpt_fine]]. The shift vectors are specified by
+[[eph_shiftk_fine]].
+
+The allowed range is from 1 to `MAX_NSHIFTK`.
+""",
+),
+
+Variable(
+    abivarname="eph_shiftk_fine",
+    varset="eph",
+    vartype="real",
+    topics=["ElPhonInt_useful"],
+    dimensions=[3, "[[eph_nshiftk_fine]]"],
+    defaultval=[0.0, 0.0, 0.0],
+    requires="[[optdriver]] == 7",
+    mnemonics="Electron-PHonon: SHIFTs for the FINE K grid",
+    added_in_version="10.9.1",
+    text=r"""
+Defines the shifts of the dense homogeneous k-mesh used for Wannier
+interpolation in the EPH code. The number of vectors is given by
+[[eph_nshiftk_fine]], and the mesh divisions are specified by
+[[eph_ngkpt_fine]].
+
+The convention is the same as for [[shiftk]]: each vector is expressed in
+the reduced coordinates of the reciprocal-space sampling lattice. The
+default is a single unshifted grid.
 """,
 ),
 
@@ -5697,7 +5778,8 @@ The choice is among:
 * 17 --> Compute e-ph matrix elements with the GWPT formalism  Produce GSTORE.nc file.
          Requires netcdf library with MPI-IO support.
 * 18 --> Compute e-ph matrix g(k,q) along a high-symmetry path. See [[eph_fix_wavevec]] and other related variables.
-* 19 --> Compute matrix elements of the screened interaction W between two Cooper pairs.
+* 19 --> Compute matrix elements of the screened interaction W between two Cooper pairs (UNDER DEVELOPMENT).
+* 20 --> Convert GSTORE.nc file to other formats. Requires [[gstore_convert]].
 * 24 --> Compute electron self-energy (Fan-Migdal + Debye-Waller) and QP corrections, also possibly the spectral function.
          Similar to [[eph_task]] 4 but requires GSTORE file specified via [[getgstore_filepath]]
 
@@ -7454,6 +7536,25 @@ For further information about the naming of files in ABINIT, consult the [[help:
 """,
 ),
 
+
+Variable(
+    abivarname="getwfmq",
+    varset="files",
+    vartype="integer",
+    topics=["multidtset_useful"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GET the wavefunctions from _WFQ file at k-q",
+    added_in_version="10.4",
+    text=r"""
+Eventually used when [[ndtset]] > 0 (in the multi-dataset mode) and [[tim1rev]]=0, to indicate
+starting k-q wavefunctions, as an alternative to [[irdwfmq]].
+Note also that, starting Abinit v9, one can also use [[getwfmq_filepath]] to specify the path of the file directly.
+
+Similar to [[getwfk]] input variable, but will be used to initialize the wavefunctions at k-q.
+""",
+),
+
 Variable(
     abivarname="getwfq",
     varset="files",
@@ -7558,7 +7659,7 @@ Variable(
     mnemonics="GauGe TRansform CUToff",
     added_in_version="10.9.0",
     text=r"""
-Cutoff value to use in computing gauge change from parallel transport to diagonal. 
+Cutoff value to use in computing gauge change from parallel transport to diagonal.
 Expert use only, do not change unless you've studied the source code and know exactly
 what you are doing and expecting.
 """,
@@ -9765,18 +9866,18 @@ Variable(
     mnemonics="Integer for PReConditioning of ELectron response",
     added_in_version="before_v9",
     text=r"""
-Used when [[iscf]] > 0, to define the SCF preconditioning scheme. 
+Used when [[iscf]] > 0, to define the SCF preconditioning scheme.
 
 The preconditioner $P$ is used to compute the preconditioned density/potential residuals
 $$ r_n = P(x_n^\mathrm{in} - x_n^\mathrm{out}) $$
-that are then used in the mixing scheme. 
+that are then used in the mixing scheme.
 When potential mixing ($x=\rho$) is used, the preconditioner is an approximation of the inverse dielectric matrix $\varepsilon$.
 When density mixing ($x=V$) is used, the preconditioner is an approximation of the inverse adjoint dielectric matrix $\varepsilon^\dagger$.
 
 The possible values of [[iprcel]] are:
 
   * 0 --> Model dielectric function described by [[diemac]], [[dielng]] and [[diemix]].
-  
+
   * Between 21 and 169 --> Model dielectric matrix computed with the extrapolar approximation described in [[cite:Anglade2008]]. This approximation can be adjusted using the parameters [[diecut]], [[dielam]] and [[diegap]]. The accuracy of this model largely depends on the number of conduction bands included in the system. Having 2 to 10 empty bands in the calculation is usually enough (use [[nband]]).
     * Between 21 and 29 --> Use the same as [[iprcel]] = 0 for the first few steps, then compute  the RPA dielectric matrix, and use it as such.
     * Between 31 and 39 --> Use the same as [[iprcel]] = 0 for the first few steps, then compute  the RPA dielectric matrix, and use it with the mixing factor [[diemix]].
@@ -9784,7 +9885,7 @@ The possible values of [[iprcel]] are:
     * Between 51 and 59 --> Same as between 41 and 49, but compute the RPA dielectric matrix by another mean.
     * Between 61 and 69 --> Same as between 41 and 49, but compute the electronic dielectric matrix instead of the RPA one.
     * Between 141 and 169 --> Same as Between 41 and 69, but the dielectric matrix is also recomputed every mod([[iprcel]], 10) step.
- 
+
  > Notes :
  > * The step at which the dielectric matrix is computed or recomputed is determined by modulo([[iprcel]],10). The recomputation happens just once in the calculation for [[iprcel]] < 100.
  > * For non-homogeneous relatively large cells, [[iprcel]] = 45 will likely give a large improvement over [[iprcel]] = 0.
@@ -9795,7 +9896,7 @@ The possible values of [[iprcel]] are:
  > * The exchange term in the full dielectric matrix diverges for vanishing densities. Therefore the values of [[iprcel]] beyond 60 must not be used for cells containing vacuum, unless ones computes this matrix for every step ([[iprcel]] = 161).
 
   * Between 200 and 299 --> Model dielectric operator $\varepsilon^\mathrm{model}$ based of a model non-interacting susceptibility $\chi_0^\mathrm{model}$: $$ \varepsilon^\mathrm{model} = I - K \chi_0^\mathrm{model} $$ where $K$ is a potential kernel (the Coulomb kernel $K_H$ and/or the exchange-correlation kernel $K_\mathrm{XC}$).
-The preconditioner, $P = (\varepsilon^\mathrm{model})^{-1}$ for potential mixing or $P = ((\varepsilon^\mathrm{model})^\dagger)^{-1}$ for density mixing, is applied using an iterative linear solver (GMRES) to invert the model dielectric matrix or its adjoint.  
+The preconditioner, $P = (\varepsilon^\mathrm{model})^{-1}$ for potential mixing or $P = ((\varepsilon^\mathrm{model})^\dagger)^{-1}$ for density mixing, is applied using an iterative linear solver (GMRES) to invert the model dielectric matrix or its adjoint.
 Available models are :
     * 200 --> LDOS-preconditioner [[cite:Herbst2020]]: $$ \varepsilon^\mathrm{LDOS} = I - K_H \chi_0^\mathrm{LDOS} .$$ This preconditioner is well suited for metallic system in large homogeneous or inhomogeneous systems. It requires a smooth smearing function ([[occopt]] = 3 to 7) and we suggest using it as a **default** for such cases.
     * 201 --> DOS-preconditioner: $$\varepsilon^\mathrm{DOS} = I - DK_\mathrm{H}$$ with $D$ the (scalar) density of state at the Fermi-level. This is a parameter-free version of the Kerker preconditioner (suggested in [[cite:Herbst2020]]).
@@ -9803,7 +9904,7 @@ Available models are :
 
  > Notes :
  > * The mixing factor [[diemix]] is used and [[diemixmag]] is ignored.
- > * The preconditioner can be tuned with the parameters [[precon_ls_maxite]], [[precon_ls_rtol]], [[precon_verbose]], [[precon_tsmear]] and [[precon_in_memory]].  
+ > * The preconditioner can be tuned with the parameters [[precon_ls_maxite]], [[precon_ls_rtol]], [[precon_verbose]], [[precon_tsmear]] and [[precon_in_memory]].
  > * In PAW, this is only compatible with [[pawmixdg]] = 1.
 """,
 ),
@@ -10353,6 +10454,21 @@ For further information about the naming of files in ABINIT, consult the [[help:
 ),
 
 Variable(
+    abivarname="irdwfmq",
+    varset="files",
+    vartype="integer",
+    topics=["DFPT_useful"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Integer that governs the ReaDing of k-q _WFQ files",
+    added_in_version="10.4",
+    text=r"""
+See detailed description at [[irdwfk]].
+As alternative, one can use the input variable [[getwfmq]].
+""",
+),
+
+Variable(
     abivarname="irdwfq",
     varset="files",
     vartype="integer",
@@ -10362,7 +10478,7 @@ Variable(
     mnemonics="Integer that governs the ReaDing of _WFQ files",
     added_in_version="before_v9",
     text=r"""
-See detailed description at [[irdwfq]].
+See detailed description at [[irdwfk]].
 As alternative, one can use the
 input variable [[getwfq]].
 """,
@@ -17600,8 +17716,8 @@ Variable(
     text=r"""
 This variable defines the smearing temperature used in the $\chi_0^\mathrm{diag}$ of the Hybrid preconditioner.
 
-Increasing the smearing temperature in the preconditioner helps smooth out the preconditioner, 
-which can be more challenging to converge in k_points that other quantities. 
+Increasing the smearing temperature in the preconditioner helps smooth out the preconditioner,
+which can be more challenging to converge in k_points that other quantities.
 Adjusting this parameter can significantly improve convergence.
 
 This setting is only useful for $\chi_0$-based hybrid SCF preconditioning ([[iprcel]] = 202).
@@ -18434,6 +18550,30 @@ in real space grho(r), in units of Bohr^-(7/2).
 The name of the Laplacian of electron density file will be the root output name, followed by _LDEN.
 Like a _DEN file, it can be analyzed by cut3d.
 The file structure of this unformatted output file is described in [[help:abinit#denfile|this section]].
+""",
+),
+
+Variable(
+    abivarname="prt1mag",
+    varset="files",
+    vartype="integer",
+    topics=["DFPT_expert", "ConstrainedDFPT_expert"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PRinT the 1st-order MAGnetic moments",
+    added_in_version="10.4",
+    text=r"""
+
+When this flag is activated, integrals of the first-order particle and magnetization densities inside the atomic spheres are printed in the output file:
+
+  * **prt1mag** = 1 --> print the integrals of the densities for the last
+    iteration only.
+  * **prt1mag** = 2 --> print the integrals of the densities at each
+    iteration.
+
+In both cases, the total and local (i.e. integrated inside the atomic spheres) magnetic moments are also written to the DDB file, as second-order derivatives of the total energy with respect to a macroscopic or local
+Zeeman field and to another arbitrary perturbation.
+
 """,
 ),
 
@@ -20143,6 +20283,7 @@ This variable enables response-function calculations with respect to external Ze
   * 2 --> local magnetic-field perturbations (possibly at finite q) applied to the atoms specified by [[rfatpol]] and along the
           Cartesian directions specified by [[rfdir]]. The size and boundary shape of the atomic spheres wherein the field is applied
           are specified by [[ratsph]] and [[ratsm]].
+  * 3 --> Uniform non-magnetic scalar potential $e^{i {\bf q \cdot r}}$ perturbation applied along the direction of the wave-vector **q**.
 
 Note for constrained DFPT calculations:
 A set of local magnetic-field response calculations, combined with a geometrically equivalent magnetic penalty
@@ -24516,7 +24657,7 @@ due to nuclear magnetic dipoles (see [[nucdipmom]]).
 
 Negative values of [[zora]] are present only for debugging purposes. [[zora]] -1 permits only
 spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits spin-orbit
-coupling and the electron spin-nuclear dipole through space interaction, while [[zora]] -3 permits 
+coupling and the electron spin-nuclear dipole through space interaction, while [[zora]] -3 permits
 only spin-orbit coupling and the electron spin-nuclear dipole Fermi-contact-like interaction.
 """,
 ),
@@ -24861,57 +25002,57 @@ Variable(
 This variable defines the quantity that should be computed starting from a previously generated WFK file.
 Possible values are:
 
-  * "wfk_fullbz" --> Read input WFK file and produce new WFK file with $\kk$-points in the full BZ.
-     Wavefunctions with [[istwfk]] > 2 are automatically converted into the full G-sphere representation.
-     This option can be used to interface Abinit with external tools (e.g. lobster) requiring $\kk$-points in the full BZ.
-     Use [[iomode]] = 3 and [[prtkbff]] = 1 to produce a WFK file in netcdf format with Kleynmann-Bylander form factors.
+* "wfk_fullbz" --> Read input WFK file and produce new WFK file with $\kk$-points in the full BZ.
+   Wavefunctions with [[istwfk]] > 2 are automatically converted into the full G-sphere representation.
+   This option can be used to interface Abinit with external tools (e.g. lobster) requiring $\kk$-points in the full BZ.
+   Use [[iomode]] = 3 and [[prtkbff]] = 1 to produce a WFK file in netcdf format with Kleynmann-Bylander form factors.
 
-  * "wfk_einterp" --> Read energies from WFK file and interpolate the band structure with the modified SKW method [[cite:Pickett1988]],
-     using the parameters specified by [[einterp]].
+* "wfk_einterp" --> Read energies from WFK file and interpolate the band structure with the modified SKW method [[cite:Pickett1988]],
+   using the parameters specified by [[einterp]].
 
-  * "wfk_ddk" --> Compute velocity matrix elements for all bands and $\kk$-points found the input WFK file.
-     The code generates three `_EVK.nc` netcdf files with the matrix element of the $\frac{d}{d{\kk_i}}$
-     operator using the same list of $\kk$-points found in the input WFK file i.e. the same value of [[kptopt]].
-     These files can then be passed to optics via the `ddkfile_1, ddkfile_2, ddkfile_3` variables
-     without having to call the DFPT part that is much more expensive at the level of memory.
+* "wfk_ddk" --> Compute velocity matrix elements for all bands and $\kk$-points found the input WFK file.
+   The code generates three `_EVK.nc` netcdf files with the matrix element of the $\frac{d}{d{\kk_i}}$
+   operator using the same list of $\kk$-points found in the input WFK file i.e. the same value of [[kptopt]].
+   These files can then be passed to optics via the `ddkfile_1, ddkfile_2, ddkfile_3` variables
+   without having to call the DFPT part that is much more expensive at the level of memory.
 
-     Please note that, at present, the computation of non-linear optical properties in optic requires
-     [[kptopt]] = 3 i.e. $\kk$-points in the full BZ whereas the computation of linear optical properties
-     can take advantage of spatial and time-reversal symmetries.
-     If you use **wfk_ddk** to generate input files for optics, please make sure that your input WFK file
-     has the correct value of [[kptopt]] according to the physical properties you want to compute.
+   Please note that, at present, the computation of non-linear optical properties in optic requires
+   [[kptopt]] = 3 i.e. $\kk$-points in the full BZ whereas the computation of linear optical properties
+   can take advantage of spatial and time-reversal symmetries.
+   If you use **wfk_ddk** to generate input files for optics, please make sure that your input WFK file
+   has the correct value of [[kptopt]] according to the physical properties you want to compute.
 
-     In other words, don't use a WFK with [[kptopt]] != 3 if you plan to compute non-linear optical properties.
-     To work around the limitation of the non-linear part of optics, one can use "wfk_optics_fullbz"
-     to generate WKF and EVK files in the full BZ starting from a WFK defined in the IBZ.
+   In other words, do not use a WFK with [[kptopt]] != 3 if you plan to compute non-linear optical properties.
+   To work around the limitation of the non-linear part of optics, one can use "wfk_optics_fullbz"
+   to generate WKF and EVK files in the full BZ starting from a WFK defined in the IBZ.
 
-  * "wfk_optics_fullbz" --> Similar to "wfk_ddk" but accepts a WFK with wavefunctions in the IBZ
-     and generates a new WFK and three `_EVK.nc` files with $\kk$-points in the full BZ.
-     This procedure is equivalent to performing a NSCF + DDK calculation with [[kptopt]] = 3 as documented
-     in the tutorial [[tutorial:optic]] for non-linear optical properties but it is much faster and, most importantly,
-     less memory demanding.
+* "wfk_optics_fullbz" --> Similar to "wfk_ddk" but accepts a WFK with wavefunctions in the IBZ
+   and generates a new WFK and three `_EVK.nc` files with $\kk$-points in the full BZ.
+   This procedure is equivalent to performing a NSCF + DDK calculation with [[kptopt]] = 3 as documented
+   in the tutorial [[tutorial:optic]] for non-linear optical properties but it is much faster and, most importantly,
+   less memory demanding.
 
-  * "wfk_kpts_erange" --> Read WFK file, use star-function and [[einterp]] parameters to interpolate
-     electron energies onto fine k-mesh defined by [[sigma_ngkpt]] and [[sigma_shiftk]].
-     Find k-points inside (electron/hole) pockets according to the values specified by [[sigma_erange]].
-     Write KERANGE.nc file with all the tables required by the code to automate NSCF band structure calculations
-     inside the pocket(s) and electron lifetime computation in the EPH code when [[eph_task]] = -4.
+* "wfk_kpts_erange" --> Read WFK file, use star-function and [[einterp]] parameters to interpolate
+   electron energies onto fine k-mesh defined by [[sigma_ngkpt]] and [[sigma_shiftk]].
+   Find k-points inside (electron/hole) pockets according to the values specified by [[sigma_erange]].
+   Write KERANGE.nc file with all the tables required by the code to automate NSCF band structure calculations
+   inside the pocket(s) and electron lifetime computation in the EPH code when [[eph_task]] = -4.
 
-  * "wannier" --> Read WFK file and run Wannierization. It has the similar effect of
-      [[prtwant]] = 2, which uses the **ABINIT- Wannier90** interface. The difference is that with wfk_task "wannier",
-      the $\kk$-points in the full BZ is not necessary. Instead, the wavefunctions with the $\kk$-points not in
-      the IBZ will be reconstructed by symmetry. This functionality does not yet work with PAW when the wavefunction
-      is not already in full BZ.
+* "wannier" --> Read WFK file and run Wannierization. It has the similar effect of
+    [[prtwant]] = 2, which uses the **ABINIT- Wannier90** interface. The difference is that with wfk_task "wannier",
+    the $\kk$-points in the full BZ is not necessary. Instead, the wavefunctions with the $\kk$-points not in
+    the IBZ will be reconstructed by symmetry. This functionality does not yet work with PAW when the wavefunction
+    is not already in full BZ.
 
-      ABINIT will produce the input files required by Wannier90 and it will run
-      Wannier90 to produce the Maximally-locallized Wannier functions (see [
-      http://www.wannier.org ](http://www.wannier.org) ).
-      !!! Notes
+    ABINIT will produce the input files required by Wannier90 and it will run
+    Wannier90 to produce Maximally-locallized Wannier functions (see [http://www.wannier.org](http://www.wannier.org)).
 
-          * The files that are created can also be used by Wannier90 in stand-alone mode.
-          * In order to use Wannier90 as a post-processing program for ABINIT you might have to
-            compile it with the appropriate flags (see ABINIT makefile). You might use ./configure --enable-wannier90
-          * There are some other variables related to the interface of Wannier90 and ABINIT. See [[varset:w90]].
+    !!! Notes
+
+        * The files that are created can also be used by Wannier90 in stand-alone mode.
+        * In order to use Wannier90 as a post-processing program for ABINIT you might have to
+          compile it with the appropriate flags (see ABINIT makefile). You might use ./configure --enable-wannier90
+        * There are some other variables related to the interface of Wannier90 and ABINIT. See [[varset:w90]].
 """,
 ),
 
@@ -25493,6 +25634,23 @@ Alternative to [[getwfkfine]] and [[irdwfkfine]]. The string must be enclosed be
 """
 ),
 
+
+Variable(
+    abivarname="getwfmq_filepath",
+    varset="files",
+    vartype="string",
+    topics=["multidtset_useful"],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the k-q wavefunctions from WFQ PATH",
+    added_in_version="10.4",
+    text=r"""
+Eventually used when [[tim1rev]]=0 to specify the path of the k-q WFQ file using a string instead of the dataset index.
+Alternative to [[getwfmq]] and [[irdwfmq]]. The string must be enclosed between quotation marks:
+
+    getwfmq_filepath "../outdata/out_WFQ"
+"""
+),
 
 Variable(
     abivarname="getwfq_filepath",
@@ -26414,7 +26572,7 @@ Variable(
     defaultval=0,
     mnemonics=r"GSTORE write matrix elements of i[V1_ka, p] commutator",
     requires="[[optdriver]] == 7",
-    added_in_version="10.7.0",
+    added_in_version="10.9.0",
     text=r"""
 If set to 1, the EPH code computes and stores on file the matrix elements
 
@@ -26476,6 +26634,39 @@ By default, little group symmetries are not used.
 """,
 
 
+),
+
+Variable(
+    abivarname="gstore_sym",
+    varset="eph",
+    vartype="integer",
+    topics=["ElPhonInt_basic"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics=r"GSTORE use SYMmetries to reconstruct g(k,q)",
+    requires="[[optdriver]] == 7 and [[gstore_kzone]] == 'bz' and [[gstore_qzone]] == 'bz'",
+    added_in_version="10.9.1",
+    text=r"""
+Activates the reconstruction of the electron-phonon matrix elements g(k,q) by symmetry when
+[[gstore_kzone]] == "bz" and [[gstore_qzone]] == "bz". Only meaningful in that combination;
+setting it to a nonzero value otherwise is a fatal error.
+
+* 0 --> No reconstruction. g(k,q) is computed directly for every $\kk$ and $\qq$ in the full BZ.
+  This is the most expensive but always-safe option and the default.
+
+* 1 --> g(k,q) is computed directly only for $\kk$ in the IBZ (with $\qq$ still spanning the full
+  BZ) and then reconstructed by symmetry for $\kk$ outside the IBZ. Requires [[gstore_use_lgk]] == 0.
+
+* 2 --> Like 1, but $\qq$ is also restricted to IBZ_k (the irreducible zone defined by the little
+  group of $\kk$) at the direct-computation stage, and reconstructed by symmetry for both
+  $\kk$ outside the IBZ and $\qq$ outside IBZ_k. Requires [[gstore_use_lgk]] == 1.
+
+!!! important
+
+    [[gstore_sym]] != 0 is not yet supported for [[nspinor]] == 2 (spin-orbit coupling): the
+    reconstruction formula has a known, still-open bug for spinor wavefunctions. Use
+    [[gstore_sym]] 0 for spin-orbit calculations.
+""",
 ),
 
 Variable(
@@ -26577,6 +26768,34 @@ for comparison purposes.
 ),
 
 Variable(
+    abivarname="gstore_convert",
+    varset="eph",
+    vartype="string",
+    topics=["ElPhonInt_expert"],
+    dimensions="scalar",
+    defaultval="''",
+    mnemonics=r"GSTORE CONVERT",
+    requires="[[optdriver]] == 7",
+    added_in_version="10.8.2",
+    text=r"""
+This variable activates the conversion of a GSTORE file to an external format that
+can be used to interface ABINIT with other codes.
+
+If gstore_convert is not an empty string, ABINIT automatically invokes the conversion routine
+after the GSTORE.nc file has been generated with [[eph_task]] 11 or 17.
+
+A dedicated eph_task can also be used to convert an existing GSTORE.nc file by using
+[[eph_task]] 20 and [[getgstore_filepath]].
+
+Currently, the following formats are supported:
+
+- "epiq" to interface gstore with [EPIq](https://the-epiq-team.gitlab.io/epiq-site/)
+
+""",
+),
+
+
+Variable(
     abivarname="gstore_brange",
     varset="eph",
     vartype="integer",
@@ -26595,6 +26814,12 @@ two different spin channels when [[nsppol]] == 2.
 
 If not specified in input, ABINIT will use all the bands from 1 up to [[nband]]
 unless additional filters are activated, see also [[gstore_kfilter]] and [[gstore_erange]].
+
+When reading an existing GSTORE.nc file with [[getgstore_filepath]], this variable can be used
+to reduce the number of intermediate states at k+q kept in memory. In this case the requested
+range must be contained in the k+q band range stored in the file and `gstore_brange(2)` must be
+equal to [[nband]]. When [[eph_stern]] is enabled, `gstore_brange(1)` must be 1. The band range
+for the external states at k is not modified.
 """,
 ),
 
@@ -26628,7 +26853,7 @@ Variable(
     dimensions="scalar",
     defaultval="None",
     mnemonics="GET the QPDATA.nc from FILEPATH",
-    added_in_version="10.7.0",
+    added_in_version="10.9.0",
     text=r"""
 This variable defines the path of the QPDATA file with the quasi-particle energies.
 to be used to update the initial KS band structure.

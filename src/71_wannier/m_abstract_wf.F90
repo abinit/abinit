@@ -824,20 +824,24 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     subroutine dtset_expandk()
       integer :: nkpt
       self%dtset_bz = dtset%copy()
-      !ABI_FREE(self%dtset_bz%kpt)
+      ABI_FREE(self%dtset_bz%kpt)
       ABI_FREE(self%dtset_bz%kptns)
       ABI_FREE(self%dtset_bz%istwfk)
       ABI_FREE(self%dtset_bz%nband)
+      ABI_FREE(self%dtset_bz%wtk)
       nkpt=self%ebands_bz%nkpt
       self%dtset_bz%kptopt=3
       self%dtset_bz%nkpt = nkpt
-      !ABI_MALLOC(self%dtset_bz%kpt, (3,nkpt ))
+      ABI_MALLOC(self%dtset_bz%kpt, (3,nkpt))
       ABI_MALLOC(self%dtset_bz%kptns, (3,nkpt ))
       ABI_MALLOC(self%dtset_bz%istwfk, (nkpt ))
       ABI_MALLOC(self%dtset_bz%nband, (nkpt ))
+      ABI_MALLOC(self%dtset_bz%wtk, (nkpt))
+      self%dtset_bz%kpt(:,:) = self%ebands_bz%kptns(:,:)
       self%dtset_bz%kptns(:,:) = self%ebands_bz%kptns(:,:)
-      self%dtset_bz%istwfk(:) = 1.0_dp
+      self%dtset_bz%istwfk(:) = 1
       self%dtset_bz%nband(:) = self%hdr_bz%nband(:)
+      self%dtset_bz%wtk(:) = self%hdr_bz%wtk(:)
       self%dtset_bz%mkmem = self%kset%my_nkpt
     end subroutine dtset_expandk
 
@@ -904,9 +908,10 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
       complex(gwp), allocatable :: ug(:)
       integer ::  work_ngfft(18),gmax(3),indkk(6,1)
       real(dp),allocatable ::  work(:,:,:,:), cg_kbz(:, :, :)
-      integer ::mpw, mband, npw_kbz, size, ik_ibz
-      integer,allocatable :: kg_kbz(:,:)
+      integer ::mpw, mband, npw_kbz, npw_check, size, ik_ibz
+      integer,allocatable :: kg_kbz(:,:), kg_check(:,:)
       real(dp):: kk_bz(3), kk_ibz(3)
+      character(len=500) :: msg
 
       mband= dtset%mband
       ABI_MALLOC(istwfk, (self%ebands_bz%nkpt))
@@ -966,6 +971,17 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
             & work_ngfft=work_ngfft, work=work, istwf_kbz=istwfk(ik), &
             & npw_kbz=npw_kbz, kg_kbz=kg_kbz, cgs_kbz=cg_kbz, &
             & force_rotate=.True.)
+
+          ! The rotated coefficients are stored in the order defined by kg_kbz.
+          ! get_kgs regenerates this list later for mlwfovlp, so both the set and
+          ! its ordering must agree exactly.
+          call get_kg(kk_bz, 1, self%hdr_bz%ecut_eff, cryst%gmet, npw_check, kg_check)
+          write(msg, '(a,i0,a,i0,a,i0)') "Inconsistent plane-wave count at full-BZ k-point ", ik, &
+            ": sym_ug_kg gives ", npw_kbz, ", get_kg gives ", npw_check
+          ABI_CHECK(npw_check == npw_kbz, msg)
+          write(msg, '(a,i0)') "Inconsistent G-vector ordering at full-BZ k-point ", ik
+          ABI_CHECK(all(kg_check(:,1:npw_check) == kg_kbz(:,1:npw_kbz)), msg)
+          ABI_FREE(kg_check)
 
           self%hdr_bz%npwarr(ik)=npw_kbz
           self%ebands_bz%npwarr(ik)=npw_kbz

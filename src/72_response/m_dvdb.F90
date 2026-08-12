@@ -47,7 +47,7 @@ module m_dvdb
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
  use m_time,          only : cwtime, cwtime_report, sec2str, timab
  use m_io_tools,      only : open_file, file_exists, delete_file
- use m_numeric_tools, only : wrap2_pmhalf, vdiff_t, vdiff_eval, vdiff_print, l2int
+ use m_numeric_tools, only : wrap2_pmhalf, vdiff_t, l2int
  use m_matrix,        only : mati3inv, matr3inv
  use m_symtk,         only : littlegroup_q
  use m_geometry,      only : littlegroup_pert, irreducible_set_pert, mkradim, xcart2xred
@@ -440,6 +440,8 @@ module m_dvdb
  public :: dvdb_test_v1rsym        ! Check symmetries in real-space of the DFPT potentials.
  public :: dvdb_test_v1complete    ! Test the symmetrization of the DFPT potentials.
  public :: dvdb_test_ftinterp      ! Test the Fourier interpolation of DFPT potentials.
+ public :: dvdb_test_symcheck      ! Test cross-q-point symmetry consistency of the FT interpolation.
+ public :: dvdb_test_symcheck_native ! Same test but on two literal, non-interpolated q-points.
 
 !----------------------------------------------------------------------
 
@@ -2375,6 +2377,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qptopt, nqshift, qshift, nfft, ngfft, 
  real(dp),allocatable :: qibz(:,:), qbz(:,:), emiqr(:,:), all_rpt(:,:), all_wghatm(:,:,:)
  real(dp),allocatable :: v1r_qibz(:,:,:,:), v1r_qbz(:,:,:,:), v1r_lr(:,:,:)
  real(kind=sp), contiguous, pointer :: wsr_ptr(:,:,:,:,:)
+ logical,parameter :: DEBUG_WSR_IMAG = .False.
+ real(dp),allocatable :: wsi_diag(:,:,:,:)
 ! *************************************************************************
 
  ! Set communicator for R-point parallelism.
@@ -2451,6 +2455,11 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qptopt, nqshift, qshift, nfft, ngfft, 
  ABI_SFREE(db%wsr)
  ABI_MALLOC_OR_DIE(db%wsr, (1, db%my_nrpt, nfft, db%nspden, db%my_npert), ierr)
  db%wsr = zero
+
+ if (DEBUG_WSR_IMAG) then
+   ABI_MALLOC(wsi_diag, (db%my_nrpt, nfft, db%nspden, db%my_npert))
+   wsi_diag = zero
+ end if
 
  ! TODO: Parallelize this part over q-points using comm_rpt. For the time being only pert parallelism.
  iqst = 0
@@ -2547,9 +2556,11 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qptopt, nqshift, qshift, nfft, ngfft, 
                 + emiqr(1, :) * v1r_qbz(1, ifft, ispden, ipc) &
                 - emiqr(2, :) * v1r_qbz(2, ifft, ispden, ipc)
 
-             !db%wsr(2, :, ifft, ispden, imyp) = db%wsr(2, :, ifft, ispden, imyp) &
-             !   + emiqr(1, :) * v1r_qbz(2, ifft, ispden, ipc) &
-             !   + emiqr(2, :) * v1r_qbz(1, ifft, ispden, ipc)
+             if (DEBUG_WSR_IMAG) then
+               wsi_diag(:, ifft, ispden, imyp) = wsi_diag(:, ifft, ispden, imyp) &
+                  + emiqr(1, :) * v1r_qbz(2, ifft, ispden, ipc) &
+                  + emiqr(2, :) * v1r_qbz(1, ifft, ispden, ipc)
+             end if
            end do
 
            !call zgerc(db%my_nrpt, nfft, cone, emiqr, 1, v1r_qbz(:,:,ispden,ipc), 1, &
@@ -2581,6 +2592,19 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qptopt, nqshift, qshift, nfft, ngfft, 
 
  !call xmpi_sum(db%wsr, db%comm, ierr)
  db%wsr = db%wsr / nqbz
+
+ if (DEBUG_WSR_IMAG) then
+   wsi_diag = wsi_diag / nqbz
+   write(std_out, "(a)")" --- DEBUG_WSR_IMAG: discarded Im[W(R,r)] vs kept Re[W(R,r)], per perturbation (imyp) ---"
+   do imyp=1,db%my_npert
+     idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
+     write(std_out, "(a,i0,a,i0,a,i0,a,es12.4,a,es12.4)") &
+       " imyp=", imyp, " idir=", idir, " ipert=", ipert, &
+       "  max|Im[wsr]|=", maxval(abs(wsi_diag(:,:,:,imyp))), &
+       "  max|Re[wsr]|=", maxval(abs(real(db%wsr(1,:,:,:,imyp), kind=dp)))
+   end do
+   ABI_FREE(wsi_diag)
+ end if
 
  wsr_ptr => db%wsr
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -4620,8 +4644,6 @@ subroutine dvdb_test_v1rsym(db_path, symv1scf, comm)
  nfft = product(ngfft(1:3))
  call db%open_read(ngfft, comm)
 
- ABI_CHECK(db%nspinor==1, "nspinor == 2 not coded")
-
  cryst => db%cryst
  ABI_MALLOC(symafm1, (cryst%nsym))
  ABI_MALLOC(symrel1, (3,3,cryst%nsym))
@@ -4736,6 +4758,7 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
  type(dvdb_t),target :: dvdb
+ type(vdiff_t) :: vd
 !arrays
  integer :: ngfft(18), rfdir(3)
  integer,allocatable :: pflag(:,:), pertsy(:,:),rfpert(:),symq(:,:,:)
@@ -4859,7 +4882,7 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
        !        ", ipert: ", ipert, ", ispden: ", ispden, ", qpt: ", trim(ktoa(qpt)) ,", max_err: ", &
        !        maxval(abs(file_v1scf(:,:,ispden,pcase) - symm_v1scf(:,:,ispden,pcase)))
        !write(std_out,"(a,es10.3)")" max(abs(f1-f2))", maxval(abs(file_v1scf(:,:,ispden,pcase) - symm_v1scf(:,:,ispden,pcase)))
-       call vdiff_print(vdiff_eval(cplex,nfft,file_v1scf(:,:,ispden,pcase),symm_v1scf(:,:,ispden,pcase),cryst%ucvol))
+       call vd%eval(cplex,nfft,file_v1scf(:,:,ispden,pcase),symm_v1scf(:,:,ispden,pcase),cryst%ucvol, unit=std_out)
 
        ! Debug: write potentials to file.
        if (unt /= -1) then
@@ -5214,8 +5237,8 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
        !write(std_out,"(a,i0,a)")"  iq: ", iq, ","
        !write(std_out,"(2(a,i0))")"  idir: ", idir, ", ipert:", ipert
        !write(std_out,"(a,i0,a)")"  ispden: ", ispden, ","
-       !call vdiff_print(vdiff_eval(2, nfft, file_v1r(:,:,ispden,imyp), long_v1r(:,:,ispden,imyp), &
-       !                 dvdb%cryst%ucvol, vd_max=vd_max))
+       !call call vd%eval(2, nfft, file_v1r(:,:,ispden,imyp), long_v1r(:,:,ispden,imyp), &
+       !                 dvdb%cryst%ucvol, vd_max=vd_max, unit=std_out))
        !write(std_out,"(a)")"..."
 
        ! Debug: write potentials to file.
@@ -5316,10 +5339,10 @@ end subroutine dvdb_write_v1qavg
 !! SOURCE
 
 subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvdb_add_lr, dvdb_qdamp, &
-                              ddb_filepath, prtvol, coarse_ngqpt, comm)
+                              ddb_filepath, prtvol, coarse_ngqpt, dump_path, comm)
 
 !Arguments ------------------------------------
- character(len=*),intent(in) :: dvdb_filepath, ddb_filepath
+ character(len=*),intent(in) :: dvdb_filepath, ddb_filepath, dump_path
  integer,intent(in) :: comm, prtvol, dvdb_add_lr, rspace_cell, symv1
  real(dp),intent(in) :: dvdb_qdamp
  integer,intent(in) :: dvdb_ngqpt(3), coarse_ngqpt(3)
@@ -5328,9 +5351,10 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
 !scalars
  integer,parameter :: master = 0, chneut2 = 2, qptopt1 = 1, gpu_option0 = 0
  integer :: nfft, iq, cplex, mu, ispden, comm_rpt, iblock_dielt, iblock_dielt_zeff, my_rank,  ierr
+ integer :: ncid, ncerr
  logical :: autotest
  type(dvdb_t) :: dvdb, coarse_dvdb
- type(vdiff_t) :: vd_max
+ type(vdiff_t) :: vd_max, vd
  type(ddb_type) :: ddb
  character(len=fnlen) :: coarse_fname
 !arrays
@@ -5377,6 +5401,33 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
  ! Prepare FT interpolation.
  comm_rpt = xmpi_comm_self
 
+ ! Optionally dump ab-initio and interpolated V1(r) to a netcdf file for post-processing in python.
+ ncid = nctk_noid
+ if (len_trim(dump_path) /= 0 .and. my_rank == master) then
+   write(std_out,"(a)")sjoin(" Will write ab-initio and interpolated potentials to:", dump_path)
+   NCF_CHECK(nctk_open_create(ncid, dump_path, xmpi_comm_self))
+   NCF_CHECK(dvdb%cryst%ncwrite(ncid))
+   ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("two", 2), nctkdim_t("three", 3), nctkdim_t("nfft", nfft), nctkdim_t("nspden", dvdb%nspden), &
+     nctkdim_t("natom3", dvdb%natom3), nctkdim_t("nqpt", dvdb%nqpt)], defmode=.True.)
+   NCF_CHECK(ncerr)
+   NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("qpts", "dp", "three, nqpt")))
+   NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("ngfft", "int", "three")))
+   NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("self_v1r_abinitio", "dp", "two, nfft, nspden, natom3, nqpt")))
+   NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("self_v1r_interp", "dp", "two, nfft, nspden, natom3, nqpt")))
+   if (all(coarse_ngqpt /= 0)) then
+     NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("coarse_ngqpt", "int", "three")))
+     NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("coarse_v1r_abinitio", "dp", "two, nfft, nspden, natom3, nqpt")))
+     NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("coarse_v1r_interp", "dp", "two, nfft, nspden, natom3, nqpt")))
+   end if
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpts"), dvdb%qpts))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngfft"), ngfft(1:3)))
+   if (all(coarse_ngqpt /= 0)) then
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "coarse_ngqpt"), coarse_ngqpt))
+   end if
+ end if
+
  autotest = .True.
  if (autotest) then
    call dvdb%ftinterp_setup(dvdb_ngqpt, qptopt1, 1, [zero, zero, zero], nfft, ngfft, comm_rpt)
@@ -5406,8 +5457,8 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
          write(std_out,"(a,i0,a)")"  iqpt: ", iq, ","
          write(std_out,"(a,i0,a)")"  iatom3: ", mu, ","
          write(std_out,"(a,i0,a)")"  ispden: ", ispden, ","
-         call vdiff_print(vdiff_eval(2, nfft, file_v1r(:,:,ispden,mu), intp_v1r(:,:,ispden,mu), &
-                                    dvdb%cryst%ucvol, vd_max=vd_max))
+         call vd%eval(2, nfft, file_v1r(:,:,ispden,mu), intp_v1r(:,:,ispden,mu), &
+                      dvdb%cryst%ucvol, vd_max=vd_max, unit=std_out)
          write(std_out,"(a)")"..."
          !do ifft=1,nfft
          !  write(std_out,*)file_v1r(1,ifft,ispden,mu),intp_v1r(1,ifft,ispden,mu),&
@@ -5415,11 +5466,17 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
          !end do
        end do
      end do
+
+     if (ncid /= nctk_noid) then
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "self_v1r_abinitio"), file_v1r, start=[1,1,1,1,iq]))
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "self_v1r_interp"), intp_v1r, start=[1,1,1,1,iq]))
+     end if
+
      write(std_out,*)" "
    end do ! iq
 
    write(std_out, "(/, a)")" Max values over q-points and perturbations"
-   call vdiff_print(vd_max)
+   call vd_max%print()
    ABI_FREE(dvdb%wsr)
  end if
 
@@ -5427,13 +5484,6 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
  ! compare with ab-intio values in the initial dvdb.
  if (all(coarse_ngqpt /= 0)) then
    write(std_out, "(/, 2a)")" Downsampling Q-mesh using coarse_ngqpt:", trim(ltoa(coarse_ngqpt))
-
-!Flang compiler complains with empty constructors (this bug should be corrected in future versions)
-#if defined FC_LLVM || defined FC_ARM || defined FC_NVHPC
-   vd_max = vdiff_t(zero,zero,zero,zero,zero,zero)
-#else
-   vd_max = vdiff_t()
-#endif
 
    coarse_fname = strcat(dvdb_filepath, "_COARSE")
    call dvdb%qdownsample(coarse_fname, qptopt1, coarse_ngqpt, comm)
@@ -5482,8 +5532,8 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
          write(std_out,"(a,i0,a)")"  iqpt: ", iq, ","
          write(std_out,"(a,i0,a)")"  iatom3: ", mu, ","
          write(std_out,"(a,i0,a)")"  ispden: ", ispden, ","
-         call vdiff_print(vdiff_eval(2, nfft, file_v1r(:,:,ispden,mu), intp_v1r(:,:,ispden,mu), &
-                          dvdb%cryst%ucvol, vd_max=vd_max))
+         call vd%eval(2, nfft, file_v1r(:,:,ispden,mu), intp_v1r(:,:,ispden,mu), &
+                      dvdb%cryst%ucvol, vd_max=vd_max, unit=std_out)
          write(std_out,"(a)")"..."
          !do ifft=1,nfft
          !  write(std_out,*)file_v1r(1,ifft,ispden,mu),intp_v1r(1,ifft,ispden,mu),&
@@ -5491,11 +5541,17 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
          !end do
        end do
      end do
+
+     if (ncid /= nctk_noid) then
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "coarse_v1r_abinitio"), file_v1r, start=[1,1,1,1,iq]))
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "coarse_v1r_interp"), intp_v1r, start=[1,1,1,1,iq]))
+     end if
+
      write(std_out,*)" "
    end do ! iq
 
    write(std_out, "(/, a)")" COARSE DVDB: Max values over q-points and perturbations"
-   call vdiff_print(vd_max)
+   call vd_max%print()
    call coarse_dvdb%free()
    if (my_rank == master) call delete_file(coarse_fname, ierr)
  end if
@@ -5503,10 +5559,294 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
  ABI_FREE(intp_v1r)
  ABI_FREE(file_v1r)
 
+ if (ncid /= nctk_noid) then
+   NCF_CHECK(nf90_close(ncid))
+ end if
+
  call dvdb%free()
  call ddb%free()
 
 end subroutine dvdb_test_ftinterp
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_test_symcheck
+!! NAME
+!!  dvdb_test_symcheck
+!!
+!! FUNCTION
+!!  Debugging tool: checks whether Fourier-interpolating the DFPT potential independently
+!!  at q_source and at q_target = I(itimrev) S(isym) q_source (for every symmetry of the
+!!  crystal) gives results consistent with each other via the exact rotation formula
+!!  implemented in v1phq_rotate. This isolates the Fourier-interpolation machinery
+!!  (dvdb_ftinterp_qpt) from gstore_symmetrize: no e-ph coupling / m_gstore.F90 code is
+!!  involved at all. q_source need not be on the native ab-initio q-mesh.
+!!
+!! INPUTS
+!!  dvdb_filepath=Filename
+!!  dvdb_ngqpt(3)=Divisions of the Q-mesh reported in the DVDB file (usually equal to ddb_ngqpt)
+!!  dvdb_add_lr=0 to disable treatment of long-range part in Fourier interpolation.
+!!  qdamp=Defines exponential damping in LR potential
+!!  ddb_filepath=Path to DDB file. Used to treat LR part.
+!!  prtvol=Verbosity level.
+!!  qpt_source(3)=Source q-point (reduced coordinates, arbitrary, need not be on the ab-initio mesh).
+!!  comm=MPI communicator.
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! SOURCE
+
+subroutine dvdb_test_symcheck(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvdb_add_lr, dvdb_qdamp, &
+                               ddb_filepath, prtvol, qpt_source, dump_path, comm)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: dvdb_filepath, ddb_filepath, dump_path
+ integer,intent(in) :: comm, prtvol, dvdb_add_lr, rspace_cell, symv1
+ real(dp),intent(in) :: dvdb_qdamp
+ integer,intent(in) :: dvdb_ngqpt(3)
+ real(dp),intent(in) :: qpt_source(3)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master = 0, chneut2 = 2, qptopt1 = 1, gpu_option0 = 0, cplex2 = 2
+ integer :: nfft, isym, itimrev, tsign, mu, ispden, comm_rpt, iat, my_rank, ncid, ncerr
+ type(dvdb_t) :: dvdb
+ type(vdiff_t) :: vd_max, vd
+!arrays
+ integer :: ngfft(18), g0q(3)
+ real(dp) :: qpt_target(3)
+ real(dp),allocatable :: v1r_source(:,:,:,:), v1r_target(:,:,:,:), v1r_predicted(:,:,:,:)
+ type(vdiff_t),allocatable :: vd_max_atom(:)
+! *************************************************************************
+
+ my_rank = xmpi_comm_rank(comm)
+
+ write(std_out,"(2a)")" Testing cross-q-point symmetry consistency of the FT interpolation of V1(r)", ch10
+ write(std_out,"(a)")sjoin(" q_source: ", ktoa(qpt_source))
+
+ call dvdb%init(dvdb_filepath, gpu_option0, comm)
+ dvdb%debug = .False.
+ ABI_CHECK(any(symv1 == [0, 1, 2]), sjoin("invalid value of symv1:", itoa(symv1)))
+ dvdb%symv1 = symv1
+ dvdb%add_lr = dvdb_add_lr
+ dvdb%qdamp = dvdb_qdamp
+ dvdb%rspace_cell = rspace_cell
+
+ if (len_trim(ddb_filepath) > 0) then
+   call dvdb%load_ddb(prtvol, chneut2, comm, ddb_filepath=ddb_filepath)
+ else
+   dvdb%add_lr = 0
+   ABI_WARNING("ddb_filepath was not provided --> Setting dvdb_add_lr to zero")
+ end if
+
+ call dvdb%print([std_out], "", 0)
+
+ call ngfft_seq(ngfft, dvdb%ngfft3_v1(:,1))
+ nfft = product(ngfft(1:3))
+ call dvdb%open_read(ngfft, comm)
+
+ comm_rpt = xmpi_comm_self
+ call dvdb%ftinterp_setup(dvdb_ngqpt, qptopt1, 1, [zero, zero, zero], nfft, ngfft, comm_rpt)
+
+ ABI_MALLOC(v1r_source, (2, nfft, dvdb%nspden, dvdb%natom3))
+ ABI_MALLOC(v1r_target, (2, nfft, dvdb%nspden, dvdb%natom3))
+ ABI_MALLOC(v1r_predicted, (2, nfft, dvdb%nspden, dvdb%natom3))
+ ABI_MALLOC(vd_max_atom, (dvdb%cryst%natom))
+
+ ! Interpolate once at q_source (this itself is a genuine off-grid interpolation if q_source
+ ! is not on the coarse ab-initio mesh).
+ call dvdb%ftinterp_qpt(qpt_source, nfft, ngfft, v1r_source, dvdb%comm_rpt)
+
+ ! Optionally dump v1r_target (independent re-interpolation at q_target) and v1r_predicted
+ ! (rotated prediction from q_source) to a netcdf file for post-processing in python.
+ ncid = nctk_noid
+ if (len_trim(dump_path) /= 0 .and. my_rank == master) then
+   write(std_out,"(a)")sjoin(" Will write target and predicted potentials to:", dump_path)
+   NCF_CHECK(nctk_open_create(ncid, dump_path, xmpi_comm_self))
+   NCF_CHECK(dvdb%cryst%ncwrite(ncid))
+   ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("two", 2), nctkdim_t("three", 3), nctkdim_t("nfft", nfft), nctkdim_t("nspden", dvdb%nspden), &
+     nctkdim_t("natom3", dvdb%natom3), nctkdim_t("nsym", dvdb%cryst%nsym), nctkdim_t("ntimrev", 2)], &
+     defmode=.True.)
+   NCF_CHECK(ncerr)
+   NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("qpt_source", "dp", "three")))
+   NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("qpt_target", "dp", "three, ntimrev, nsym")))
+   NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("v1r_target", "dp", "two, nfft, nspden, natom3, ntimrev, nsym")))
+   NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("v1r_predicted", "dp", "two, nfft, nspden, natom3, ntimrev, nsym")))
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpt_source"), qpt_source))
+ end if
+
+ g0q = 0
+ do isym=1,dvdb%cryst%nsym
+   do itimrev=1,2
+     tsign = 3 - 2*itimrev
+     qpt_target = tsign * matmul(dvdb%cryst%symrec(:,:,isym), qpt_source)
+
+     ! Independent, direct interpolation at the target q (no symmetry involved at all).
+     call dvdb%ftinterp_qpt(qpt_target, nfft, ngfft, v1r_target, dvdb%comm_rpt)
+
+     ! Predicted potential at q_target obtained by ROTATING the q_source interpolation
+     ! with the exact same formula gstore_symmetrize/v1phq_rotate uses to expand IBZ->BZ.
+     call v1phq_rotate(dvdb%cryst, qpt_source, isym, itimrev, g0q, ngfft, cplex2, nfft, dvdb%nspden, &
+                        dvdb%mpi_enreg, v1r_source, v1r_predicted, xmpi_comm_self)
+
+     if (ncid /= nctk_noid) then
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpt_target"), qpt_target, start=[1,itimrev,isym]))
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1r_target"), v1r_target, start=[1,1,1,1,itimrev,isym]))
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1r_predicted"), v1r_predicted, start=[1,1,1,1,itimrev,isym]))
+     end if
+
+     do mu=1,dvdb%natom3
+       iat = (mu - 1) / 3 + 1
+       do ispden=1,dvdb%nspden
+         call vd%eval(cplex2, nfft, v1r_predicted(:,:,ispden,mu), v1r_target(:,:,ispden,mu), &
+                      dvdb%cryst%ucvol, vd_max=vd_max)
+         call vd%eval(cplex2, nfft, v1r_predicted(:,:,ispden,mu), v1r_target(:,:,ispden,mu), &
+                      dvdb%cryst%ucvol, vd_max=vd_max_atom(iat))
+       end do
+     end do
+
+     write(std_out,"(a)")"--- !DVDB_SYMCHECK"
+     write(std_out,"(a,i0,a)")"  isym: ", isym, ","
+     write(std_out,"(a,i0,a)")"  itimrev: ", itimrev, ","
+     write(std_out,"(3a)")"  qpt_target: ", trim(ktoa(qpt_target)), ","
+     call vd_max%print()
+     do iat=1,dvdb%cryst%natom
+       write(std_out,"(a,i0,a,es12.4)")"  atom_max_adiff[", iat, "]: ", vd_max_atom(iat)%max_adiff
+     end do
+     write(std_out,"(a)")"..."
+   end do ! itimrev
+ end do ! isym
+
+ ABI_FREE(v1r_source)
+ ABI_FREE(v1r_target)
+ ABI_FREE(v1r_predicted)
+ ABI_FREE(vd_max_atom)
+
+ if (ncid /= nctk_noid) then
+   NCF_CHECK(nf90_close(ncid))
+ end if
+
+ call dvdb%free()
+
+end subroutine dvdb_test_symcheck
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_test_symcheck_native
+!! NAME
+!!  dvdb_test_symcheck_native
+!!
+!! FUNCTION
+!!  Debugging tool: like dvdb_test_symcheck but operates on TWO LITERAL, independently
+!!  DFPT-computed q-points already present in the DVDB (no Fourier interpolation involved
+!!  at all -- no ftinterp_setup/ftinterp_qpt call anywhere). Reads q_source and q_target
+!!  directly via readsym_allv1, predicts q_target from q_source via v1phq_rotate, and
+!!  compares against q_target's own literal data. Isolates v1phq_rotate/rotate_fqg
+!!  completely from the W(R,r) real-space Fourier-interpolation machinery.
+!!
+!! INPUTS
+!!  dvdb_filepath=Filename (must contain BOTH q_source and q_target as literal,
+!!    fully-available (3*natom perturbations) q-points, e.g. produced with nsym 1).
+!!  sym_dvdb_filepath=Filename of a DIFFERENT DVDB (or any file crystal_from_file can read) that
+!!    carries the crystal's TRUE, full symmetry table (dvdb_filepath's own nsym is typically 1,
+!!    since that's what forces every requested perturbation/q to be explicitly, independently
+!!    computed in the first place -- so its own %cryst cannot be used to look up isym > 1).
+!!  qpt_source(3), qpt_target(3)=The two q-points (reduced coordinates), assumed related by
+!!    the given isym/itimrev/g0q.
+!!  isym, itimrev, g0q(3)=Symmetry indices such that qpt_target = I(itimrev) S(isym) qpt_source + g0q.
+!!  comm=MPI communicator.
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! SOURCE
+
+subroutine dvdb_test_symcheck_native(dvdb_filepath, sym_dvdb_filepath, qpt_source, qpt_target, &
+                                      isym, itimrev, g0q, comm)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: dvdb_filepath, sym_dvdb_filepath
+ integer,intent(in) :: comm, isym, itimrev
+ integer,intent(in) :: g0q(3)
+ real(dp),intent(in) :: qpt_source(3), qpt_target(3)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: gpu_option0 = 0, cplex2 = 2
+ integer :: nfft, mu, ispden, iq_source, iq_target, iat
+ type(dvdb_t) :: dvdb, sym_dvdb
+ type(vdiff_t) :: vd_max, vd
+!arrays
+ integer :: ngfft(18)
+ real(dp),allocatable :: v1r_source(:,:,:,:), v1r_target(:,:,:,:), v1r_predicted(:,:,:,:)
+ type(vdiff_t),allocatable :: vd_max_atom(:)
+! *************************************************************************
+
+ write(std_out,"(2a)")" Testing v1phq_rotate against TWO LITERAL, non-interpolated q-points", ch10
+ write(std_out,"(2a)")" q_source: ", trim(ktoa(qpt_source))
+ write(std_out,"(2a)")" q_target: ", trim(ktoa(qpt_target))
+
+ call dvdb%init(dvdb_filepath, gpu_option0, comm)
+ dvdb%debug = .False.
+ call dvdb%print([std_out], "", 0)
+
+ call ngfft_seq(ngfft, dvdb%ngfft3_v1(:,1))
+ nfft = product(ngfft(1:3))
+ call dvdb%open_read(ngfft, comm)
+
+ ! Load a SEPARATE dvdb just to get the crystal's true, full symmetry table (dvdb_filepath's
+ ! own %cryst normally has nsym=1, see docstring above).
+ call sym_dvdb%init(sym_dvdb_filepath, gpu_option0, comm)
+ write(std_out,"(a,i0,a,i0)")" sym_dvdb nsym: ", sym_dvdb%cryst%nsym, "  dvdb (literal) nsym: ", dvdb%cryst%nsym
+
+ iq_source = dvdb%findq(qpt_source)
+ iq_target = dvdb%findq(qpt_target)
+ ABI_CHECK(iq_source /= -1, "qpt_source not found in DVDB!")
+ ABI_CHECK(iq_target /= -1, "qpt_target not found in DVDB!")
+
+ call dvdb%readsym_allv1(iq_source, mu, nfft, ngfft, v1r_source, comm)  ! mu reused as cplex out-arg
+ ABI_CHECK_IEQ(mu, cplex2, "cplex != 2 for qpt_source")
+ call dvdb%readsym_allv1(iq_target, mu, nfft, ngfft, v1r_target, comm)
+ ABI_CHECK_IEQ(mu, cplex2, "cplex != 2 for qpt_target")
+
+ ABI_MALLOC(v1r_predicted, (2, nfft, dvdb%nspden, dvdb%natom3))
+ ABI_MALLOC(vd_max_atom, (dvdb%cryst%natom))
+
+ call v1phq_rotate(sym_dvdb%cryst, qpt_source, isym, itimrev, g0q, ngfft, cplex2, nfft, dvdb%nspden, &
+                    dvdb%mpi_enreg, v1r_source, v1r_predicted, xmpi_comm_self)
+
+ call sym_dvdb%free()
+
+ do mu=1,dvdb%natom3
+   iat = (mu - 1) / 3 + 1
+   do ispden=1,dvdb%nspden
+     call vd%eval(cplex2, nfft, v1r_predicted(:,:,ispden,mu), v1r_target(:,:,ispden,mu), &
+                  dvdb%cryst%ucvol, vd_max=vd_max)
+     call vd%eval(cplex2, nfft, v1r_predicted(:,:,ispden,mu), v1r_target(:,:,ispden,mu), &
+                  dvdb%cryst%ucvol, vd_max=vd_max_atom(iat))
+   end do
+ end do
+
+ write(std_out,"(a)")"--- !DVDB_SYMCHECK_NATIVE"
+ call vd_max%print()
+ do iat=1,dvdb%cryst%natom
+   write(std_out,"(a,i0,a,es12.4)")"  atom_max_adiff[", iat, "]: ", vd_max_atom(iat)%max_adiff
+ end do
+ write(std_out,"(a)")"..."
+
+ ABI_FREE(v1r_source)
+ ABI_FREE(v1r_target)
+ ABI_FREE(v1r_predicted)
+ ABI_FREE(vd_max_atom)
+
+ call dvdb%free()
+
+end subroutine dvdb_test_symcheck_native
 !!***
 
 !----------------------------------------------------------------------
@@ -5765,7 +6105,6 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
    ABI_CHECK(.not. present(ddb), "ddb argument cannot be present when ddb_filepath is used")
    call this_ddb%from_file(ddb_filepath, ddb_hdr, cryst_ddb, comm, prtvol=prtvol)
    call this_ddb%set_brav(dvdb%brav)
-   call ddb_hdr%free()
    call cryst_ddb%free()
    ddb_ptr => this_ddb
    free_ddb = .True.
@@ -5811,6 +6150,8 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
  ! Read the quadrupoles
  iblock_quadrupoles = ddb_ptr%get_quadrupoles(ddb_hdr%ddb_version,1,BLKTYP_d3E_xx,dvdb%qstar)
  if (iblock_quadrupoles /=0) dvdb%has_quadrupoles = .True.
+
+ if (present(ddb_filepath)) call ddb_hdr%free()
 
  ABI_FREE(zeff)
  ABI_FREE(zeff_raw)

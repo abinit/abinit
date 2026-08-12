@@ -1,56 +1,64 @@
-#
-ndtset  1
+# MgB2: generate a symmetry-reduced GSTORE and Wannierize the e-ph vertex.
 
-getkerange_filepath "teph4isotc_3o_DS1_KERANGE.nc"
+optdriver 7
+eph_task 11
 
-# Read DEN file to initialize the NSCF run.
-getden_filepath "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
-
-# Init GS wavefunctions from this file (optional).
-getwfk_filepath "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_WFK.nc"
-
-iscf  -2
-tolwfr 1e-18
-kptopt 0                        # Important!
-
-# These variables must be consistent with the values of
-# sigma_ngkpt, sigma_shiftk used in the previous step
-ngkpt   18 18 18
-#ngkpt    24 24 24
-#ngkpt    32 32 32
-nshiftk  1
-shiftk   0.0 0.0 0.0
-
-
-#COMMON INPUT DATA
-ecut 38
-nband   8
-occopt  4              # Marzari smearing
-tsmear 0.02
-
-# MgB2 structure
+getddb_filepath "MgB2_eph4isotc/flow_mgb2_phonons/w1/outdata/out_DDB"
+getwfk_filepath "teph4isotc_2o_DS1_WFK"
+getdvdb_filepath "teph4isotc_1_DVDB"
+getabiwan_filepath "teph4isotc_3o_ABIWAN.nc"
 structure "abifile:MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
+
+ddb_ngqpt 4 4 4
+eph_ngqpt_fine 6 6 4
+dipdip 0
+
+# Compute only symmetry-inequivalent (k,q) pairs and reconstruct the full BZ.
+gstore_kzone "bz"
+gstore_qzone "bz"
+gstore_kfilter "none"
+gstore_sym 2
+gstore_use_lgk 1
+gstore_with_vk 0
+eph_restart 0
+
+gstore_convert "epiq"  # Produce the files required by the EPIQ code.
+                       # IMPORTANT:
+                       # This generates many files; enable it only if you plan to use EPIQ.
+
+mixprec 1
+boxcutmin 1.1
+
+ngkpt 6 6 4
+nshiftk 1
+shiftk 0.0 0.0 0.0
+
+prtphbands 0
+prtphdos 0
+
+ecut 38.0
+nband 16
+occopt 4
+tsmear 0.02
 
 pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_04_pw_std_psp8/"
 pseudos "Mg-low.psp8, B.psp8"
 
-##############################################################
-# This section is used only for regression testing of ABINIT #
-###############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% need_cpp_vars = HAVE_WANNIER90
 #%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi, atlas_gnu_14.2_triqs
-#%% test_chain = teph4isotc_1.abi, teph4isotc_2.abi, teph4isotc_3.abi, teph4isotc_4.abi,
-#%%              teph4isotc_5.abi, teph4isotc_6.abi, teph4isotc_7.abi,
+#%% test_chain = teph4isotc_1.abi, teph4isotc_2.abi, teph4isotc_3.abi, teph4isotc_4.abi, teph4isotc_5.abi,
+#%%              teph4isotc_6.abi
 #%% [files]
 #%% use_git_submodule = MgB2_eph4isotc
 #%% files_to_test =
-#%%   teph4isotc_4.abo, tolnlines= 10, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%%   teph4isotc_4.abo, tolnlines= 40, tolabs= 3.0e-2, tolrel= 5.0e-2
 #%% [paral_info]
-#%% max_nprocs = 2
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = NC, DFPT, EPH
-#%% description = Computation of isotropic Migdal-Eliashberg Tc
+#%% keywords = NC, DFPT, EPH, GSTORE, WANNIER90
+#%% description = Test gstore_sym reconstruction and Wannierization of the MgB2 e-ph vertex
 #%%<END TEST_INFO>

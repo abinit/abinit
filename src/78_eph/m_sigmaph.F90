@@ -2487,9 +2487,9 @@ end if
        if (ignore_ibsum_kq /= 0) write(std_out, "(a, 1x, i0)")" Number of ignored (k+q, m) states:", ignore_ibsum_kq
      end if
 
-     ! Reduce E2 over perturbations and q-points only (E2 does not depend on bands)                                  
-     call xmpi_sum(sigma%E2, sigma%pert_comm%value, ierr)                                                            
-     call xmpi_sum(sigma%E2, sigma%qpt_comm%value, ierr)     
+     ! Reduce E2 over perturbations and q-points only (E2 does not depend on bands)
+     call xmpi_sum(sigma%E2, sigma%pert_comm%value, ierr)
+     call xmpi_sum(sigma%E2, sigma%qpt_comm%value, ierr)
      ! Collect results inside pqb_comm and write results for this (k-point, spin) to NETCDF file.
      call sigma%gather_and_write(dtset, ebands, ikcalc, spin, sigma%pqb_comm%value)
 
@@ -4210,7 +4210,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
      "(including time-reversal symmetry)"))
    call wrtout(std_out, sjoin(" Number of q-points in the IBZ(k):", itoa(lgk_ptr%nibz)))
 
-   if (dtset%prtvol > 0) call lgk_ptr%print(unit=std_out, prtvol=dtset%prtvol)
+   if (dtset%prtvol > 0) call lgk_ptr%print([std_out], prtvol=dtset%prtvol)
 
    ! TODO: Pointers instead of copies to save space?
    self%nqibz_k = lgk_ptr%nibz

@@ -1,0 +1,71 @@
+# ----------------------------------------
+# -          Input file for abinit       -
+# -                                      -
+# -         Cu                           -
+# ----------------------------------------
+
+# 2-Options for output:
+# ---------------------
+  prtvol 0
+  prtden 0
+  prtnabla 3
+
+# 3-Parameters governing the convergence:
+# ---------------------------------------
+  ecut 10.
+  pawecutdg 50.
+  nband 20
+  nstep 7
+  toldfe 1.d-5
+
+# 4-Options for the choice of calculation:
+# ----------------------------------------
+  occopt 3
+  tsmear 0.0036749
+  nspinor 2
+
+# 5-Definition of the unit cell:
+# ------------------------------
+  acell    3*6.7
+  rprim  0.0  0.5  0.5 
+         0.5  0.0  0.5
+         0.5  0.5  0.0
+  natom 1
+  ntypat 1
+  typat 1
+  znucl 29
+  xred    0.0000000000    0.0000000000    0.0000000000
+
+# 6-Definition of special K-points:
+# ---------------------------------
+  kptopt 0
+  nkpt 1
+  kpt 0. 0. 0.
+  wtk  1.0
+  istwfk 1
+  use_rcpaw 1
+
+  pp_dirpath "$ABI_PSPDIR"
+  pseudos "Cu.LDA_X+LDA_C_PW-paw.xml"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t130.abi, t131.abi
+#%% [files]
+#%% files_to_test =
+#%%   t130.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = J. Boust
+#%% keywords =
+#%% description =
+#%%   Test to prepare a SOC conductivity calculation in RCPAW
+#%%   Ground state calculation for Cu
+#%%   The number of bands is unrealistic. This test produces files that are inputs for test 131.
+#%%   It tests the following parts of the code:
+#%%     optic_paw_core, rcpaw
+#%%   Note that, in addition to the psp file, the spinor core wave functions file is needed.
+#%%<END TEST_INFO>
+

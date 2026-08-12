@@ -1,0 +1,11 @@
+num_wann = 8
+num_bands = 12
+exclude_bands = 9-12
+num_iter = 100
+guiding_centres = true
+spinors = true
+
+begin spinor_projections
+As: s, p (u)
+As: s, p (d)
+end spinor_projections

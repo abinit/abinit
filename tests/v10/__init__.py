@@ -76,6 +76,9 @@ inp_files = [
     "t120.abi",  # Test delta-encoded Pulay history with PAW
     "t121.abi",  # Test for hybrid function using fock_icutcoul, fock_rcut
     "t122.abi",  # Test meta-GGA NC pseudopotential reading: compare PSML vs UPF for bulk Si
+    "t130.abi",  # Test RCPAW+SOC, prepare for t131
+    "t131.abi",  # Test XANES SOC+RCPAW
+    "t132.abi",  # Test PAW l>=4
     "t150.abi",  # Test sequential slice execution in spectrum slicing diagonalization with 1 MPI
     "t161.abi",  # Test LDOS SCF preconditioner
     "t162.abi",  # Test Hybrid SCF preconditioner

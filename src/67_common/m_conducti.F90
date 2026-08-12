@@ -985,15 +985,15 @@ end subroutine conducti_paw
  type(hdr_type) :: hdr
  type(MPI_type) :: mpi_enreg
 !arrays
- integer :: nc_count(7),nc_start(7),nc_stride(7)
+ integer :: nc_count(6),nc_start(6),nc_stride(6)
  integer,allocatable :: nband(:),ncor(:,:),lcor(:,:),kappacor(:,:),typat(:),num_tasks(:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),dummy(0,0,0,0,0)
  real(dp),allocatable :: dom_var1(:,:),dhdk2_g(:)
  real(dp),allocatable :: eig0_k(:),eigen0(:),eig0nc(:,:,:)
- real(dp),allocatable :: energy_cor(:,:),edge(:),nphicor_arr(:),occ_cor(:,:)
+ real(dp),allocatable :: energy_cor(:,:),edge(:),nphicor_arr(:),occ_cor(:,:),maxocc_cor(:,:)
  real(dp),allocatable :: occ(:),occ_k(:),wtk(:)
  real(dp),allocatable :: oml_edge(:,:),oml_emis(:,:)
- real(dp),allocatable :: psinablapsi2(:,:,:,:,:)
+ real(dp),allocatable :: psinablapsi2(:,:,:,:)
  real(dp),allocatable :: sigx1(:,:,:,:),sigx1_av(:,:,:),sigx1_k(:,:,:)
  real(dp),allocatable :: sum_spin_sigx1(:,:,:),sum_spin_sigx1_av(:,:)
  real(dp),allocatable :: emisx(:,:,:,:),emisx_av(:,:,:),emisx_k(:,:,:)
@@ -1141,6 +1141,7 @@ end subroutine conducti_paw
 
  ABI_MALLOC(ncor,(nphicor_max,ntypat))
  ABI_MALLOC(occ_cor,(nphicor_max,ntypat))
+ ABI_MALLOC(maxocc_cor,(nphicor_max,ntypat))
  ABI_MALLOC(lcor,(nphicor_max,ntypat))
  ABI_MALLOC(kappacor,(nphicor_max,ntypat))
  ABI_MALLOC(energy_cor,(nphicor_max,ntypat))
@@ -1158,6 +1159,8 @@ end subroutine conducti_paw
      NCF_CHECK(nf90_get_var(ncid,varid,energy_cor))
      varid=nctk_idname(ncid,"occupation_core")
      NCF_CHECK(nf90_get_var(ncid,varid,occ_cor))
+     varid=nctk_idname(ncid,"max_occupation_core")
+     NCF_CHECK(nf90_get_var(ncid,varid,maxocc_cor))    
      varid=nctk_idname(ncid,"number_of_core_states")
      NCF_CHECK(nf90_get_var(ncid,varid,nphicor_arr))
 !Close here netcdf file here because the rest has to be read with collective I/O
@@ -1167,11 +1170,13 @@ end subroutine conducti_paw
        read(unit=opt2_unt) nphicor_arr(itypat)
        do icor=1,nphicor_max
          read(unit=opt2_unt,fmt='(a)') line
-         read(line,end=23,fmt=*) ncor(icor,itypat),lcor(icor,itypat),kappacor(icor,itypat),energy_cor(icor,itypat),occ_cor(icor,itypat)
+         read(line,end=23,fmt=*) ncor(icor,itypat),lcor(icor,itypat),kappacor(icor,itypat),occ_cor(icor,itypat),maxocc_cor(icor,itypat),&
+          energy_cor(icor,itypat)
          goto 24
 23       read(line,fmt=*) ncor(icor,itypat),lcor(icor,itypat),energy_cor(icor,itypat)
          kappacor(icor,itypat)=0
          occ_cor(icor,itypat)=one
+         maxocc_cor(icor,itypat)=one
 24       continue
        enddo
      end do
@@ -1184,7 +1189,9 @@ end subroutine conducti_paw
  call xmpi_bcast(kappacor,master,comm,mpierr)
  call xmpi_bcast(energy_cor,master,comm,mpierr)
  call xmpi_bcast(occ_cor,master,comm,mpierr)
+ call xmpi_bcast(maxocc_cor,master,comm,mpierr)
  call xmpi_bcast(nphicor,master,comm,mpierr)
+
  ABI_MALLOC(edge,(nphicor))
  edge(1:nphicor)=fermie-energy_cor(1:nphicor,itypat_atnbr)
 !---------------------------------------------------------------------------------
@@ -1328,10 +1335,10 @@ end subroutine conducti_paw
 
  if (iomode_estf_mpiio) then
    !If MPI-IO, store only elements for one band
-   ABI_MALLOC(psinablapsi2,(2,3,nphicor_max,natom,1))
+   ABI_MALLOC(psinablapsi2,(3,nphicor_max,natom,1))
  else
    !If not, store the elements for all bands
-   ABI_MALLOC(psinablapsi2,(2,3,nphicor_max,natom,mband))
+   ABI_MALLOC(psinablapsi2,(3,nphicor_max,natom,mband))
  end if
  pnp_size=size(psinablapsi2)
 !---------------------------------------------------------------------------------
@@ -1360,27 +1367,27 @@ end subroutine conducti_paw
 !      Master node reads and send to relevant processor
      if (.not.iomode_estf_mpiio.and.me==master) then
        if (iomode==IO_MODE_ETSF) then
-         nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
-         nc_count=[2,3,nphicor_max,natom,mband,1,1]
+         nc_start=[1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1]
+         nc_count=[3,nphicor_max,natom,mband,1,1]
          NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi2,start=nc_start,stride=nc_stride,count=nc_count))
        else
          psinablapsi2=zero
          if (fform2==612) then ! New OPT2 file format
-           read(opt2_unt) (((psinablapsi2(1:2,1,icor,iatom,iband),icor=1,nphicor_max),iatom=1,natom),iband=1,nband_k)
-           read(opt2_unt) (((psinablapsi2(1:2,2,icor,iatom,iband),icor=1,nphicor_max),iatom=1,natom),iband=1,nband_k)
-           read(opt2_unt) (((psinablapsi2(1:2,3,icor,iatom,iband),icor=1,nphicor_max),iatom=1,natom),iband=1,nband_k)
+           read(opt2_unt) (((psinablapsi2(1,icor,iatom,iband),icor=1,nphicor_max),iatom=1,natom),iband=1,nband_k)
+           read(opt2_unt) (((psinablapsi2(2,icor,iatom,iband),icor=1,nphicor_max),iatom=1,natom),iband=1,nband_k)
+           read(opt2_unt) (((psinablapsi2(3,icor,iatom,iband),icor=1,nphicor_max),iatom=1,natom),iband=1,nband_k)
          else if (fform2==613) then ! Large OPT2 file format
            do iband=1,nband_k
-             read(opt2_unt) ((psinablapsi2(1:2,1,icor,iatom,iband),icor=1,nphicor_max),iatom=1,natom)
-             read(opt2_unt) ((psinablapsi2(1:2,2,icor,iatom,iband),icor=1,nphicor_max),iatom=1,natom)
-             read(opt2_unt) ((psinablapsi2(1:2,3,icor,iatom,iband),icor=1,nphicor_max),iatom=1,natom)
+             read(opt2_unt) ((psinablapsi2(1,icor,iatom,iband),icor=1,nphicor_max),iatom=1,natom)
+             read(opt2_unt) ((psinablapsi2(2,icor,iatom,iband),icor=1,nphicor_max),iatom=1,natom)
+             read(opt2_unt) ((psinablapsi2(3,icor,iatom,iband),icor=1,nphicor_max),iatom=1,natom)
            end do
          else
            !The old writing was not efficient (indexes order is bad)
            do iatom=1,natom
-             read(opt2_unt) ((psinablapsi2(1:2,1,icor,iatom,iband),iband=1,nband_k),icor=1,nphicor_max)
-             read(opt2_unt) ((psinablapsi2(1:2,2,icor,iatom,iband),iband=1,nband_k),icor=1,nphicor_max)
-             read(opt2_unt) ((psinablapsi2(1:2,3,icor,iatom,iband),iband=1,nband_k),icor=1,nphicor_max)
+             read(opt2_unt) ((psinablapsi2(1,icor,iatom,iband),iband=1,nband_k),icor=1,nphicor_max)
+             read(opt2_unt) ((psinablapsi2(2,icor,iatom,iband),iband=1,nband_k),icor=1,nphicor_max)
+             read(opt2_unt) ((psinablapsi2(3,icor,iatom,iband),iband=1,nband_k),icor=1,nphicor_max)
            end do
          end if
        end if
@@ -1426,8 +1433,8 @@ end subroutine conducti_paw
 !          In case of MPI-IO, read core-valence dipoles for band n
            if (iomode_estf_mpiio) then
              itask=itask+1
-             nc_start=[1,1,1,1,iband,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
-             nc_count=[2,3,nphicor_max,natom,1,1,1]
+             nc_start=[1,1,1,iband,ikpt,isppol];nc_stride=[1,1,1,1,1,1]
+             nc_count=[3,nphicor_max,natom,1,1,1]
              NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi2,start=nc_start,stride=nc_stride,count=nc_count))
            end if
 
@@ -1439,14 +1446,13 @@ end subroutine conducti_paw
                dhdk2_g = zero
                do icor=1,nphicor
                  do l1=1,3
-                   dhdk2_g(icor)=dhdk2_g(icor) &
-&                   +(psinablapsi2(1,l1,icor,iatom,my_iband)*psinablapsi2(1,l1,icor,iatom,my_iband) &
-&                    +psinablapsi2(2,l1,icor,iatom,my_iband)*psinablapsi2(2,l1,icor,iatom,my_iband))*third
+                   dhdk2_g(icor)=dhdk2_g(icor)+psinablapsi2(l1,icor,iatom,my_iband)*third
                  end do
                end do
                do iom=1,mom
                  do icor=1,nphicor
-                   diff_occ = occ_cor(icor,itypat_atnbr)-occ_k(iband)
+                   diff_occ =occ_cor(icor,itypat_atnbr)/maxocc_cor(icor,itypat_atnbr)-occ_k(iband)/two*nsppol*nspinor
+                   diff_occ = diff_occ*two/nspinor/nsppol
                    diff_eig=eig0_k(iband)-energy_cor(icor,itypat_atnbr)
                    oml=oml_edge(icor,iom)
                    if(need_absorption) then
@@ -1500,8 +1506,8 @@ end subroutine conducti_paw
  if (iomode == IO_MODE_ETSF) then
    if(iomode_estf_mpiio.and.nproc>1) then
      do idum=num_tasks(me+1)+1,num_tasks_max
-       nc_start=[1,1,1,1,1,1,1];nc_stride=[1,1,1,1,1,1,1]
-       nc_count=[0,0,0,0,0,0,0]
+       nc_start=[1,1,1,1,1,1];nc_stride=[1,1,1,1,1,1]
+       nc_count=[0,0,0,0,0,0]
        NCF_CHECK(nf90_get_var(ncid,varid,dummy,start=nc_start,stride=nc_stride,count=nc_count))
      enddo
      ABI_FREE(num_tasks)
@@ -1830,6 +1836,8 @@ end subroutine conducti_paw
  ABI_FREE(eigen0)
  ABI_FREE(nband)
  ABI_FREE(occ)
+ ABI_FREE(occ_cor)
+ ABI_FREE(maxocc_cor)
  ABI_FREE(wtk)
  call hdr%free()
  call destroy_mpi_enreg(mpi_enreg)

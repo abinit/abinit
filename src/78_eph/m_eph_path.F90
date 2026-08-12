@@ -52,6 +52,7 @@ module m_eph_path
  use m_wfd,            only : u0_cache_t
  use m_ifc,            only : ifc_type
  use m_dvdb,           only : dvdb_t
+ use m_mlwfovlp,       only : wan_t
 
  implicit none
 
@@ -123,14 +124,16 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  integer :: natom, natom3, nsppol, nspden, nspinor, qptopt, comm_cart, me_cart
  integer :: nfft,nfftf,mgfft,mgfftf, my_npert, my_ip, idir, ipert, ipc, ncerr, ncid, my_nkpath, my_nqpath
  integer :: in_k, im_kq, my_is, my_ik, my_iq, nband, nb_in_g, ii, band_n, band_m, bstart, bstop, my_nspins, np, tot_nscf_ierr
+ integer :: my_pert_start_glob, nwan_glob, iglob
  real(dp) :: cpu_all,wall_all,gflops_all, eig0nk, eshift
- logical :: qq_is_gamma, need_ftinterp, gen_eigenpb, use_cg_k, use_cg_kq, use_cache
+ logical :: qq_is_gamma, need_ftinterp, gen_eigenpb, use_cg_k, use_cg_kq, use_cache, has_gwan
  type(gs_hamiltonian_type) :: gs_ham_k, gs_ham_kq
  type(rf_hamiltonian_type) :: rf_ham_kq
  type(nscf_t) :: nscf
  type(kpath_t) :: qpath, kpath
- type(xcomm_t) :: kpt_comm, qpt_comm, pert_comm
+ type(xcomm_t),target :: kpt_comm, qpt_comm, pert_comm
  type(u0_cache_t) :: ucache_kq, ucache_k
+ type(wan_t) :: wan
  character(len=fnlen) :: gpath_path
  character(len=5000) :: msg
  character(len=10) :: priority
@@ -141,7 +144,10 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  real(dp) :: kk(3), qq(3), kq(3), phfreqs(3*cryst%natom), phfreqs_ev(3*cryst%natom), fake_path(3,2)
  real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:)
  real(dp),allocatable :: cg_k(:,:,:), cg_kq(:,:,:), gsc_k(:,:,:), gsc_kq(:,:,:),eig_k(:), eig_kq(:)
+ real(dp),allocatable :: eig_k_wan(:), eig_kq_wan(:,:)
  real(dp),allocatable :: v1scf(:,:,:,:), vlocal1(:,:,:,:), vlocal(:,:,:,:), gkq_atm(:,:,:,:), gkq_nu(:,:,:,:), gkq2_nu(:,:,:)
+ real(dp),allocatable :: gkq_atm_wan(:,:,:,:), gkq_nu_wan(:,:,:,:), gkq2_nu_wan(:,:,:)
+ complex(dp),allocatable :: g_atm_wan_local(:,:,:,:)
  real(dp),allocatable :: gvnlx1(:,:), gs1c(:,:), h1_kets_kq(:,:,:), displ_cart(:,:,:,:),displ_red_qq(:,:,:,:)
  real(dp),allocatable :: kpg_k(:,:), ph3d_k(:,:,:), ffnl_k(:,:,:,:), vlocal_k(:,:,:,:)
  real(dp),allocatable :: kpg_kq(:,:), ph3d_kq(:,:,:), ffnl_kq(:,:,:,:), vlocal_kq(:,:,:,:), real_vec(:)
@@ -186,8 +192,35 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
  ! Define band range and nb_in_g from eph_path_brange.
  nband = dtset%mband; bstart = dtset%eph_path_brange(1); bstop = dtset%eph_path_brange(2)
- if (bstart <= 0) bstart = 1
- if (bstop <= 0) bstop = nband
+
+ ! Check whether e-ph matrix elements should also be computed via Wannier interpolation from
+ ! GWAN.nc, for comparison against the ab-initio results computed below.
+ has_gwan = (dtfil%filgwanin /= ABI_NOFILE)
+ nwan_glob = 0
+ if (has_gwan) then
+   ABI_CHECK(dtfil%filabiwanin /= ABI_NOFILE, "getgwan_filepath requires getabiwan_filepath to be given as well when eph_task=18.")
+   ABI_CHECK(dtset%nsppol == 1, "has_gwan with nsppol == 2 is not yet supported in eph_path_run.")
+
+   ! Cheap, non-collective read of ABIWAN.nc metadata, purely to validate/auto-set eph_path_brange
+   ! (mirrors gstore_init's has_abiwan branch, m_gstore.F90).
+   call wan%from_abiwan(dtfil%filabiwanin, 1, dtset%nsppol, .False., "", xmpi_comm_self)
+   if (bstart <= 0 .and. bstop <= 0) then
+     bstart = wan%bmin; bstop = wan%bmax
+     call wrtout(units, sjoin(" has_gwan: auto-setting eph_path_brange to Wannier band window:", ltoa([bstart,bstop])))
+   else
+     if (bstart <= 0) bstart = 1
+     if (bstop <= 0) bstop = nband
+     msg = sjoin("eph_path_brange:", ltoa([bstart,bstop]), "must equal [wan%bmin, wan%bmax]:", ltoa([wan%bmin, wan%bmax]), &
+                  "when getgwan_filepath is given (the gauge-invariant trace comparison needs the same electronic subspace).")
+     ABI_CHECK(bstart == wan%bmin .and. bstop == wan%bmax, msg)
+   end if
+   nwan_glob = wan%nwan
+   call wan%free()
+ else
+   if (bstart <= 0) bstart = 1
+   if (bstop <= 0) bstop = nband
+ end if
+
  nb_in_g = bstop - bstart + 1
 
  ! The values of eph_path_brange must be validated at this level!
@@ -260,6 +293,7 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  call xmpi_split_block(nk_path, kpt_comm%value, my_nkpath, my_ik_inds)
  call xmpi_split_block(nq_path, qpt_comm%value, my_nqpath, my_iq_inds)
  call xmpi_split_block(natom3, pert_comm%value, my_npert, my_iperts)
+ my_pert_start_glob = my_iperts(1)
  ABI_FREE(my_iperts)
 
  ! Idle processors are not supported (tested).
@@ -322,6 +356,14 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  ABI_MALLOC(gkq_nu, (2, nb_in_g, nb_in_g, natom3))
  ABI_MALLOC(gkq2_nu, (nb_in_g, nb_in_g, natom3))
 
+ if (has_gwan) then
+   ABI_MALLOC(gkq_atm_wan, (2, nwan_glob, nwan_glob, natom3))
+   ABI_MALLOC(gkq_nu_wan, (2, nwan_glob, nwan_glob, natom3))
+   ABI_MALLOC(gkq2_nu_wan, (nwan_glob, nwan_glob, natom3))
+   ABI_MALLOC(eig_k_wan, (nwan_glob))
+   ABI_MALLOC(eig_kq_wan, (nwan_glob, 1))
+ end if
+
  ! Master writes metadata to GPATH file.
  gpath_path = strcat(dtfil%filnam_ds(4), "_GPATH.nc")
 
@@ -367,6 +409,20 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
 
    NCF_CHECK(nf90_def_var_fill(ncid, vid("gkq2_nu"), NF90_FILL, -one))
    NCF_CHECK(nf90_def_var_fill(ncid, vid("phfreqs"), NF90_FILL, -one))
+
+   if (has_gwan) then
+     ncerr = nctk_def_dims(ncid, [nctkdim_t("nwan", nwan_glob)], defmode=.True.)
+     NCF_CHECK(ncerr)
+     ncerr = nctk_def_arrays(ncid, [ &
+       ! Use the same path convention as the ab-initio eigenvalues: k varies when q
+       ! is fixed, whereas k+q varies with q when k is fixed.
+       nctkarr_t("all_eigens_wan_k", "dp", "nwan, nk_path, nsppol"), &
+       nctkarr_t("all_eigens_wan_kq", "dp", "nwan, nq_path, nsppol"), &
+       nctkarr_t("gkq2_nu_wan", "dp", "nwan, nwan, natom3, nq_path, nk_path, nsppol") &
+     ])
+     NCF_CHECK(ncerr)
+     NCF_CHECK(nf90_def_var_fill(ncid, vid("gkq2_nu_wan"), NF90_FILL, -one))
+   end if
 
    ! Write data.
    NCF_CHECK(nctk_set_datamode(ncid))
@@ -415,6 +471,15 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  ! Loop over spins (MPI parallelized)
  do my_is=1,my_nspins
    spin = my_spins(my_is)
+
+   if (has_gwan) then
+     ! Build wan for this spin from the ABIWAN.nc file, set the perturbation distribution
+     ! from THIS routine's own pert_comm (same natom3 block-distribution used for the
+     ! ab-initio gkq_atm below), then load g(R_e, R_p) from GWAN.nc.
+     call wan%from_abiwan(dtfil%filabiwanin, spin, dtset%nsppol, .False., "", comm_my_is(my_is)%value)
+     wan%my_pert_start = my_pert_start_glob; wan%my_npert = my_npert; wan%pert_comm => pert_comm
+     call wan%load_gwan(dtfil%filgwanin, cryst, spin, dtset%nsppol, comm_my_is(my_is))
+   end if
 
    ! Loop over k-points in k-path (MPI parallelized).
    do my_ik=1,my_nkpath
@@ -493,8 +558,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        call ifc%fourq(cryst, qq, phfreqs, displ_cart, out_displ_red=displ_red_qq)
        phfreqs_eV = phfreqs * Ha_eV
 
-       !if (my_ik == 1 .and. pert_comm%me == master) then
-       if (my_ik == 1) then
+       ! Only the global first k-point contributes to q-path-only variables.
+       if (ik == 1) then
          NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_kq"), eig_kq, start=[1,iq,spin]))
          ! Write phonons for this qpt.
          if (spin == 1) then
@@ -583,6 +648,37 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
        NCF_CHECK(nf90_put_var(ncid, vid("gkq2_nu"), gkq2_nu, start=[1,1,1,iq,ik,spin]))
        !end if
 
+       if (has_gwan) then
+         ! Interpolate e-ph matrix elements from GWAN.nc at this same (k,q) for comparison.
+         ABI_MALLOC(g_atm_wan_local, (nwan_glob, nwan_glob, my_npert, 1))
+         ! The routine already diagonalizes H^W(k) and H^W(k+q) to rotate g to the
+         ! interpolated eigenstate basis, hence it also returns these eigenvalues.
+         call wan%interp_eph_manyq(cryst, 1, qq, kk, g_atm_wan_local, &
+                                   out_eigens_k=eig_k_wan, out_eigens_kq=eig_kq_wan)
+         if (iq == 1) then
+           NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_wan_k"), eig_k_wan, start=[1,ik,spin]))
+         end if
+         if (ik == 1) then
+           NCF_CHECK(nf90_put_var(ncid, vid("all_eigens_wan_kq"), eig_kq_wan(:,1), start=[1,iq,spin]))
+         end if
+
+         gkq_atm_wan = zero
+         do my_ip=1,my_npert
+           iglob = wan%my_pert_start + my_ip - 1
+           gkq_atm_wan(1,:,:,iglob) = real(g_atm_wan_local(:,:,my_ip,1), kind=dp)
+           gkq_atm_wan(2,:,:,iglob) = aimag(g_atm_wan_local(:,:,my_ip,1))
+         end do
+         if (pert_comm%nproc > 1) call xmpi_sum(gkq_atm_wan, pert_comm%value, ierr)
+
+         ! Reuses phfreqs/displ_red_qq already computed above (ifc%fourq) for this same q --
+         ! no new gauge issue, same literal-q call already used for the ab-initio side.
+         call ephtk_gkknu_from_atm(nwan_glob, nwan_glob, 1, natom, gkq_atm_wan, phfreqs, displ_red_qq, gkq_nu_wan)
+         gkq2_nu_wan = gkq_nu_wan(1,:,:,:)**2 + gkq_nu_wan(2,:,:,:)**2
+         NCF_CHECK(nf90_put_var(ncid, vid("gkq2_nu_wan"), gkq2_nu_wan, start=[1,1,1,iq,ik,spin]))
+
+         ABI_FREE(g_atm_wan_local)
+       end if
+
        ABI_FREE(gs1c)
        ABI_FREE(vlocal1)
        ABI_FREE(v1scf)
@@ -611,6 +707,8 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      ABI_FREE(gsc_k)
      call gs_ham_k%free()
    end do ! my_ik
+
+   if (has_gwan) call wan%free()
  end do ! my_is
 
  NCF_CHECK(nf90_close(ncid))
@@ -697,6 +795,28 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
      end do ! ik
    end do ! spin
 
+   if (has_gwan) then
+     call wrtout(units, &
+       " Writing sqrt(1/N^2 sum |g|^2): ab-initio vs Wannier-interpolated (gauge-invariant trace), meV.", pre_newlines=2)
+     write(msg, "(1x,4(a5,1x),2(a18,1x))") "nu","iq","ik","spin", "|g|_abinitio(meV)", "|g|_wannier(meV)"
+     call wrtout(units, msg)
+     do spin=1,nsppol
+       do ik=1, nk_path
+         if (all(ik /= [1, 2, nk_path-1, nk_path])) cycle
+         do iq=1, nq_path
+           if (all(iq /= [1, 2, nq_path-1, nq_path])) cycle
+           NCF_CHECK(nf90_get_var(ncid, vid("gkq2_nu"), gkq2_nu, start=[1,1,1,iq,ik,spin]))
+           NCF_CHECK(nf90_get_var(ncid, vid("gkq2_nu_wan"), gkq2_nu_wan, start=[1,1,1,iq,ik,spin]))
+           do nu=1,natom3
+             write(msg, "(1x,4(i5,1x),2(es18.6,1x))") nu, iq, ik, spin, &
+               sqrt(sum(gkq2_nu(:,:,nu)) / nb_in_g**2) * Ha_meV, sqrt(sum(gkq2_nu_wan(:,:,nu)) / nwan_glob**2) * Ha_meV
+             call wrtout(units, msg)
+           end do
+         end do ! iq
+       end do ! ik
+     end do ! spin
+   end if
+
    NCF_CHECK(nf90_close(ncid))
  end if ! master
 
@@ -709,6 +829,13 @@ subroutine eph_path_run(dtfil, dtset, cryst, wfk_ebands, dvdb, ifc, pawfgr, pawa
  ABI_FREE(gkq_atm)
  ABI_FREE(gkq_nu)
  ABI_FREE(gkq2_nu)
+ if (has_gwan) then
+   ABI_FREE(gkq_atm_wan)
+   ABI_FREE(gkq_nu_wan)
+   ABI_FREE(gkq2_nu_wan)
+   ABI_FREE(eig_k_wan)
+   ABI_FREE(eig_kq_wan)
+ end if
  ABI_FREE(displ_cart)
  ABI_FREE(displ_red_qq)
  ABI_FREE(my_spins)

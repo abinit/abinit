@@ -1,11 +1,11 @@
 # ----------------------------------------
 # -          Input file for abinit       -
 # -                                      -
-# -         Alu fcc                      -
+# -         Alu                      -
 # ----------------------------------------
 # 0 dtsets
   ndtset 2
-
+ 
 # 1- RCPAW
   use_rcpaw 1
 
@@ -20,7 +20,7 @@
   ecut 10.
   pawecutdg 50.
   nband 38
-  nstep 5
+  nstep 7
   toldfe 1.d-5
 
 # 4-Options for the choice of calculation:
@@ -30,22 +30,19 @@
   tsmear2 30000000.0 K
   useextfpmd2 1
   extfpmd_pawsph2 1
-  ionmov 0
-  optcell 0
 
 # 5-Definition of the unit cell:
 # ------------------------------
   acell 3*7.38796
-  rprim 1.0 0.0 0.0
-        0.0 1.0 0.0
-        0.0 0.0 1.0
+  rprim  0.0  1.0  1.0  
+         0.5  0.0  0.5
+         0.5  0.5  0.0
   natom 2
   ntypat 1
   typat 2*1
   znucl 13
   xred    0.0000000000    0.0000000000    0.0000000000
           0.4800000000    0.0000000000    0.0000000000
-  amu 26.98
 
 # 6-Definition of special K-points:
 # ---------------------------------
@@ -79,6 +76,6 @@
 #%%   Ground state calculation for 2 Al atoms
 #%%   The number of bands and k-points are unrealistic.
 #%%   It tests the following parts of the code:
-#%%     rcpaw_relax, atompaw_solve
+#%%     rcpaw
 #%%   Note that, in addition to the psp file, the core wave functions file is needed
 #%%<END TEST_INFO>

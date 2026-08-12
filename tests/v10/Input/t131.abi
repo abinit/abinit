@@ -1,0 +1,23 @@
+5
+t130o
+0.2 -0.1 10.0 1000 1 0
+1 0 0.0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = conducti
+#%% test_chain = t130.abi, t131.abi
+#%% [files]
+#%% files_to_test =
+#%%  t131_sigX_at1,  tolnlines =10, tolabs = 2.1e-10, tolrel = 1.0e-07, fld_options = -easy;
+#%% extra_inputs =
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = J. Boust
+#%% keywords =
+#%% description =
+#%%   Tests a PAW conductivity calculation.
+#%%   It tests the following parts of the code:
+#%%     conducti, conducti_paw_core
+#%%<END TEST_INFO>

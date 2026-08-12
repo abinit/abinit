@@ -39,7 +39,7 @@ module m_wfk_analyze
  use defs_datatypes,    only : pseudopotential_type
  use defs_abitypes,     only : mpi_type
  use m_time,            only : timab
- use m_fstrings,        only : strcat, sjoin, itoa, ftoa, ltoa
+ use m_fstrings,        only : strcat, sjoin, itoa, ftoa, ltoa, ktoa
  use m_fftcore,         only : print_ngfft
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq, init_mpi_enreg
  use m_esymm,           only : esymm_t, esymm_free
@@ -60,7 +60,8 @@ module m_wfk_analyze
  use m_paw_tools,       only : chkpawovlp
  use m_paw_correlations,only : pawpuxinit
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
- use m_classify_bands,  only : classify_bands
+ use m_classify_bands,  only : classify_bands, dmats_t
+ use m_kpts,            only : kpts_ibz_from_kptrlatt
  use m_pspini,          only : pspini
  use m_sigtk,           only : sigtk_kpts_in_erange
  use m_iowf,            only : prtkbff
@@ -147,7 +148,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  integer :: comm,nprocs,my_rank,mgfftf,nfftf !,nfftf_tot
  integer :: optcut,optgr0,optgr1,optgr2,optrad,psp_gencond,ii
  !integer :: option,option_test,option_dij,optrhoij
- integer :: band,ik_ibz,spin,first_band,last_band, nband_k, islice, ib, mpw, mcg, nb, npw_k
+ integer :: band,ik_ibz,spin,nband_k, islice, ib, mpw, mcg, nb, npw_k ! first_band,last_band,
  integer :: ierr,usexcnhat, sc_mode, nspinor, nsto
  integer :: cplex,cplex_dij,cplex_rhoij,ndij,nspden_rhoij,gnt_option
  real(dp),parameter :: spinmagntarget=-99.99_dp
@@ -156,7 +157,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  !real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,nelect,norm,oldefermi
  character(len=500) :: msg
  character(len=fnlen) :: wfk0_path, outwfk_path
- logical :: call_pawinit, use_paw_aeur
+ logical :: call_pawinit !, use_paw_aeur
  type(hdr_type) :: wfk0_hdr, hdr_bz, out_hdr
  type(crystal_t) :: cryst, cryst_dtset
  type(ebands_t) :: ebands, ebands_bz
@@ -166,10 +167,13 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  type(wfd_t) :: wfd
  type(ddkstore_t) :: ds
  type(wfk_t) :: in_wfk, out_wfk
+ type(dmats_t) :: dmats
  !type(dataset_type) :: my_dtset
 !arrays
- integer :: ngfftc(18),ngfftf(18), units(2), band_block(2), bstart
+ integer :: ngfftc(18),ngfftf(18), units(2), band_block(2), bstart, brange_spin(2, dtset%nsppol)
+ integer :: nkibz_full, nkbz_full, ikbz, nstar_fail
  integer,allocatable :: l_size_atm(:), kg_k(:,:)
+ real(dp),allocatable :: wtk_full(:), kibz_full(:,:), kbz_full(:,:)
  real(dp),parameter :: k0(3)=zero
  real(dp),pointer :: gs_eigen(:,:,:)
  real(dp),allocatable :: eig_k(:), occ_k(:), thetas(:) !, out_cg(:,:), work(:,:,:,:), allcg_k(:,:)
@@ -183,7 +187,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  type(pawfgrtab_type),allocatable :: pawfgrtab(:)
  !type(paw_ij_type),allocatable :: paw_ij(:)
  !type(paw_an_type),allocatable :: paw_an(:)
- type(esymm_t),allocatable :: esymm(:,:)
+ !type(esymm_t),allocatable :: esymm(:,:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
  type(psbands_t),allocatable :: psb_ks(:,:)
 !************************************************************************
@@ -382,6 +386,48 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
  case (WFK_TASK_CLASSIFY)
    ! Band classification.
+
+   ! New version
+   ! Compute the mixing matrices D^{k}(S) from the wavefunctions stored in wfd_t.
+   do spin=1,dtset%nsppol
+     brange_spin(:,spin) = [1, dtset%mband]
+   end do
+   call dmats%init(wfk0_path, dtset, cryst, brange_spin, ngfftf, pawtab, psps, comm)
+
+   if (my_rank == master) then
+     call dmats%check([std_out], dtset%prtvol)
+     call dmats%classify(dtset%prtvol)
+
+     ! Independently validate the group-conjugation D-matrix reconstruction (dmats%check_star)
+     ! by testing EVERY k-point in the full BZ mesh, not just the IBZ points dmats was built
+     ! from: each full-BZ k-point is the symmetry-star image of some IBZ k-point, so this
+     ! exercises dmats_get_star_dmats's multable/toinv composition logic (and, in particular,
+     ! its still-unverified two-step analytic phase formula) across the whole mesh.
+     call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ebands%kptopt, ebands%nshiftk, ebands%shiftk, &
+                                 nkibz_full, kibz_full, wtk_full, nkbz_full, kbz_full)
+
+     nstar_fail = 0
+     do spin=1,dtset%nsppol
+       do ikbz=1,nkbz_full
+         call dmats%check_star(spin, kbz_full(:,ikbz), [std_out], dtset%prtvol, ierr)
+         if (ierr /= 0) then
+           nstar_fail = nstar_fail + 1
+           call wrtout(units, sjoin("check_star FAILED for spin:", itoa(spin), &
+                       ", kbz:", ktoa(kbz_full(:,ikbz)), ", ierr:", itoa(ierr)))
+         end if
+       end do
+     end do
+     call wrtout(units, sjoin("check_star: tested", itoa(nkbz_full * dtset%nsppol), &
+                 "(k,spin) points in the full BZ, failures:", itoa(nstar_fail)))
+
+     ABI_FREE(kibz_full)
+     ABI_FREE(wtk_full)
+     ABI_FREE(kbz_full)
+   end if
+   call dmats%free()
+
+#if 0
+   ! old implementation
    call read_wfd()
 
    ABI_MALLOC(esymm,(wfd%nkibz,wfd%nsppol))
@@ -398,6 +444,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
    call esymm_free(esymm)
    ABI_FREE(esymm)
+#endif
 
  !case (WFK_TASK_UR)
  !  ! plot KSS wavefunctions. Change bks_mask to select particular states.

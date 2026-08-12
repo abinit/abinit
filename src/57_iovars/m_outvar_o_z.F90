@@ -798,6 +798,9 @@ contains
  intarr(1,:)=dtsets(:)%rcpaw_elin
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_elin','INT',0)
 
+ intarr(1,:)=dtsets(:)%rcpaw_prtpaw
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_prtpaw','INT',0)
+
  intarr(1,:)=dtsets(:)%rcpaw_tpaw
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_tpaw','INT',0)
 

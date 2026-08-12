@@ -2643,7 +2643,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
      end if
      write(std_out,'(A,F10.3,1x,A)') " Considered available memory             : ", real(free_mem)/(1024*1024), "MiB"
      write(std_out,'(A)')
-     write(std_out,'(A)') "|                 Buffers gouverned by blocking/slicing                |"
+     write(std_out,'(A)') "|                 Buffers governed by blocking/slicing                |"
      write(std_out,'(A)') "|:--------------------------|---------:|-------------:|---------------:|"
      write(std_out,'(A,I4,A,F10.2,1x,A)') "|  gemm_nonlop_projectors   | ", blocksize, " blk |  npw,*natom* | ",  real(nonlop_smem,dp)/(1024*1024), "MiB |"
      if(wfoptalg>=0) then
