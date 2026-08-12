@@ -507,7 +507,7 @@ subroutine orbmag_ncpp(cg,cg1,dtfil,dtset,crystal,ebands_k,kg,gsqcut,hdr,&
 
      ! ZTG23 Eq. 36 term 2 and Eq. 46 term 1
      call orbmag_cc_k_ncpp(dtset,eig_k,fermie,cg1_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm)
+       & mcgk,mpi_enreg,nband_k,npw_k,orbmag_mesh)
 
      ! accumulate terms
      do nn = 1, nband_k
@@ -1548,11 +1548,11 @@ end subroutine orbmag_nl_k
 !! SOURCE
 
 subroutine orbmag_cc_k_ncpp(dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-    & mcgk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm)
+    & mcgk,mpi_enreg,nband_k,npw_k,orbmag_mesh)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: ikpt,isppol,mcgk,mkmem_rbz,nband_k,npw_k
+  integer,intent(in) :: ikpt,isppol,mcgk,nband_k,npw_k
   real(dp),intent(in) :: fermie
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
@@ -1560,17 +1560,17 @@ subroutine orbmag_cc_k_ncpp(dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
   type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
 
   !arrays
-  real(dp),intent(in) :: eig_k(nband_k),trnrm(nband_k)
+  real(dp),intent(in) :: eig_k(nband_k)
   real(dp),intent(in),target :: gcg1_k(2,mcgk,3)
 
   !Local variables -------------------------
   !scalars
   integer :: adir,bdir,cpopt,gdir
-  integer :: ndat,n4,n5,n6,nn,npwsp,sij_opt,tim_getghc,type_calc
+  integer :: ndat,nn,npwsp,sij_opt,tim_getghc,type_calc
   real(dp) :: lams
-  complex(dp) :: ormesh_fac,prefac_b,prefac_m
+  complex(dp) :: prefac_b,prefac_m
   !arrays
-  real(dp) bdot(2),mdot(2),enk(2)
+  real(dp) bdot(2),mdot(2)
   real(dp),allocatable :: gec(:,:),gvnlxc(:,:)
   real(dp),allocatable,target :: ghc(:,:)
   real(dp),pointer :: du_dbeta(:,:),du_dgamma(:,:)

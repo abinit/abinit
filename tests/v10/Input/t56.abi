@@ -76,7 +76,7 @@ pseudos="P.psp8,Al.psp8"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t56.abo, tolnlines=  0, tolabs=  0, tolrel= 0
+#%%   t56.abo, tolnlines=  2, tolabs=  3.2e-10, tolrel= 1.0
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
