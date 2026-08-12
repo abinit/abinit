@@ -2311,7 +2311,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 & dtset%plowan_compute > 0 .or. &
 & dtset%userid .EQ. 1 )
 
- if(ANY(ABS(dtset%nucdipmom)>tol8)) recompute_cprj=.TRUE.
+ if( (psps%usepaw.EQ.1) .AND. ANY(ABS(dtset%nucdipmom)>tol8) ) recompute_cprj=.TRUE.
  if(dtset%berryopt == -2 .AND. dtset%orbmag /= 0) recompute_cprj=.TRUE.
 
  if (recompute_cprj) then
