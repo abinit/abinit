@@ -671,7 +671,7 @@ end subroutine pawmknhat
 !! OUTPUT
 !!  === if ider=0 or 2
 !!    nhat12(2,nfgd_max,nspinor**2,ndat2,ndat1,natom)=nhat on fine rectangular grid*exp(iqr),
-!!  === if ider=1 or 2 (not tested)
+!!  === if ider=1 or 2 (not implemented)
 !!    grnhat12(nfft,nspinor**2,3)=gradient of (nhat*exp(iqr)) on fine rectangular grid (derivative versus r)
 !!  === if ider=3
 !!    grnhat_12(2,nfgd_max,nspinor**2,3,natom*(ider/3),ndat2,ndat1)=derivatives of nhat on fine rectangular grid versus R*exp(iqr).
@@ -683,6 +683,9 @@ end subroutine pawmknhat
 !!  nhat12 and grnhat_12 are expected to be sized after each atom's PAW augmentation sphere (nfgd_max points)
 !!  and indexed by the local in-sphere point index.
 !!  (see pawfgrtab(iatom)%ifftsph for the mapping to the full FFT grid).
+!!
+!!  Only cases with ider in {0,3} are supported, grnhat12 isn't touched but kept for sticking with pawmknhat_psipsi prototype
+!!
 !!
 !! SOURCE
 
@@ -701,7 +704,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  integer,optional,intent(in) ::atindx(natom)
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),optional, intent(in) ::gprimd(3,3),qphon(3),xred(3,natom)
- real(dp),intent(out) :: grnhat12(2,nfft,nspinor**2,3*nhat12_grdim,ndat2,ndat1)
+ real(dp),intent(out) :: grnhat12(:,:,:,:,:,:)
  real(dp),optional,target,intent(out) :: grnhat_12(:,:,:,:,:,:,:)
  real(dp),target,intent(out) :: nhat12(:,:,:,:,:,:)
  type(pawfgrtab_type),intent(inout),target :: pawfgrtab(my_natom)
@@ -749,10 +752,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  end if
  gpu_option_=ABI_GPU_DISABLED; if (present(gpu_option)) gpu_option_=gpu_option
  if(gpu_option_/=ABI_GPU_OPENMP) gpu_option_=ABI_GPU_DISABLED ! Only OpenMP variant supported
- if (gpu_option_/=ABI_GPU_DISABLED) then
-   if(ider==1 .or. ider==2) then
-     ABI_BUG('ider=={1,2} not coded with GPU!')
-   end if
+ if(ider==1 .or. ider==2) then
+   ABI_BUG('ider=={1,2} not coded with GPU!')
  end if
  if (izero==1.and.(ider==0.or.ider==2.or.ider==3)) then
    ! nhat12 is stored compactly (nfgd_max-sized, per atom): the full-grid FFT/zerosym
@@ -791,10 +792,6 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    case default
      ABI_BUG("Unsupported GPU option")
    end select
- end if
-
- if (compute_grad) then
-!   ABI_BUG('compute_grad not tested!')
  end if
 
  ABI_MALLOC(gnt_scal,(size(pawang%gntselect,1),size(pawang%gntselect,2)))

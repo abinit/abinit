@@ -508,7 +508,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      end if
      ABI_MALLOC(grnhat_12,(2,nfgd_max,nspinor**2,3,natom*(ider/3),ndat_occ,ndat))
      ABI_MALLOC(gvnlxc,(2,npw*nspinor*ndat_tot))
-     ABI_MALLOC(grnhat12,(2,nfftf,nspinor**2,3*nhat12_grdim,ndat_occ,ndat))
+     ABI_MALLOC(grnhat12,(1,1,1,1,1,1))
      ABI_MALLOC(rho12,(2,nfgd_max,nspinor**2,ndat_occ,ndat,natom))
 
      ABI_MALLOC(atom_nfgd,    (natom))
