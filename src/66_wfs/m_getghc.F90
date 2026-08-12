@@ -995,6 +995,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE FROM(cwavef) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
+     write(std_out,'(a)')'JWZ debug calling getghc_nucdip'
      call getghc_nucdip(cwavef,ghc_vectornd,gbound_k1,istwf_k_,kg_k1,kpt_k1,&
        gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
        gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vectornd,gs_ham%vlocal,gs_ham%zora,gs_ham%gpu_option)
@@ -1542,6 +1543,7 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
 !scalars
  integer,parameter :: tim_fourwf=1
  integer :: idat,idir,ipw,iv1,iv2,nspinortot,shift
+ integer :: rank,ierr
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,usezora
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
  real(dp) :: weight=one
@@ -1552,6 +1554,7 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
  real(dp),allocatable :: work(:,:,:,:),zk(:,:,:,:)
 ! *********************************************************************
 
+ write(std_out,'(a,2i4)')'JWZ debug inside getghc_nucdip, rank, ndat = ',mpi_enreg%me,ndat
  ghc_vectornd(:,:)=zero
 
  !! JWZ debug initial code was only for nvloc==1 case
@@ -1626,6 +1629,7 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
 
  else ! nspinortot==2
 
+    write(std_out,'(a)')'JWZ debug malloc cwavef1 cwavef2'
     ABI_MALLOC(cwavef1,(2,npw_k*ndat))
     ABI_MALLOC(cwavef2,(2,npw_k*ndat))
     do idat=1,ndat
@@ -1634,6 +1638,7 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
        cwavef2(1:2,iv1:iv2) = &
          & cwavef(1:2,1+(idat-1)*my_nspinor*npw_k+shift:npw_k+(idat-1)*my_nspinor*npw_k+shift)
     end do
+    write(std_out,'(a)')'JWZ debug cwavef1 cwavef2 filled'
 
     ! compute k + G. Note these are in reduced coords
     ABI_MALLOC(kgkpk,(npw_k,3))
@@ -1737,6 +1742,7 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
    ABI_FREE(zk)
  end if
 
+ write(std_out,'(a)')'JWZ debug leaving getghc_nucdip'
 end subroutine getghc_nucdip
 !!***
 

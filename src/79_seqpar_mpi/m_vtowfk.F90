@@ -267,6 +267,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !============= INITIALIZATIONS AND ALLOCATIONS ===========================
 !=========================================================================
 
+
+ write(std_out,'(a)')'JWZ debug inside vtowfk'
+
  nkpt_max=50; if(xmpi_paral==1)nkpt_max=-1
 
  wfoptalg=mod(dtset%wfoptalg,100); wfopta10=mod(wfoptalg,10)
@@ -610,6 +613,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        end if
      end if
    end if
+ 
+   write(std_out,'(a)')'JWZ debug inside vtowfk line 615'
 
    !  =========================================================================
    !  ===================== FIND LARGEST RESIDUAL =============================
