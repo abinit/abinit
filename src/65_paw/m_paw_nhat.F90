@@ -629,14 +629,17 @@ end subroutine pawmknhat
 
 !----------------------------------------------------------------------
 
-!!****f* m_paw_nhat/pawmknhat_psipsi
+!!****f* m_paw_nhat/pawmknhat_psipsi_ndat
 !! NAME
-!! pawmknhat_psipsi
+!! pawmknhat_psipsi_ndat
 !!
 !! FUNCTION
 !! PAW only:
 !! Compute on the fine FFT grid the compensation charge density (and derivatives) associated
-!! to the product of two wavefunctions n_{12}(r) = \Psi_1* \Psi_2. Based on pawmknhat.
+!! to the product of two wavefunctions n_{12}(r) = \Psi_1* \Psi_2.
+!! Based on pawmknhat_psipsi, but:
+!!   - support batching
+!!   - execution on GPU
 !!
 !! INPUTS
 !!  cprj1(natom,nspinor), cprj2(natom,nspinor) <type(pawcprj_type)>=
@@ -663,11 +666,14 @@ end subroutine pawmknhat
 !!  pawang <type(pawang_type)>=paw angular mesh and related data
 !!  pawfgrtab(my_natom) <type(pawfgrtab_type)>=atomic data given on fine rectangular grid
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
+!!  ndat1=first batching size (from number of band)
+!!  ndat2=second batching size (from number of occupated states)
+!!  gpu_option=if equal to ABI_GPU_OPENMP, run on GPU
 !!
 !! OUTPUT
 !!  === if ider=0 or 2
-!!    nhat12(2,nfft,nspinor**2)=nhat on fine rectangular grid*exp(iqr)
-!!  === if ider=1 or 2
+!!    nhat12(2,nfft,nspinor**2,ndat1,dat2)=nhat on fine rectangular grid*exp(iqr)
+!!  === if ider=1 or 2 (not tested)
 !!    grnhat12(nfft,nspinor**2,3)=gradient of (nhat*exp(iqr)) on fine rectangular grid (derivative versus r)
 !!  === if ider=3
 !!    grnhat_12(2,nfgd_max,nspinor**2,3,natom*(ider/3),ndat1,ndat2)=derivatives of nhat on fine rectangular grid versus R*exp(iqr).
