@@ -948,7 +948,7 @@ end if
  if (compute_nhat) then
    ABI_MALLOC(atom_wgylm,(nfgd_max,lmn2_size,nattyp(itypat)))
  end if
- if(compute_phonon.and.(.not.qeq0).and.pawfgrtab(iatom)%expiqr_allocated/=0) then
+ if(compute_phonon.and.(.not.qeq0)) then
    ABI_MALLOC(atom_expiqr, (2,nfgd_max,nattyp(itypat)))
  end if
  if(compute_grad1) then
@@ -963,7 +963,7 @@ end if
    atom_nfgd(ia) = pawfgrtab(iatom)%nfgd
    atom_gylm(1:nfgd,1:lm_size,ia)      = pawfgrtab(iatom)%gylm(1:nfgd,1:lm_size)
    atom_ifftsph(1:nfgd,ia)             = pawfgrtab(iatom)%ifftsph(1:nfgd)
-   if(compute_phonon.and.(.not.qeq0).and.pawfgrtab(iatom)%expiqr_allocated/=0) then
+   if(compute_phonon.and.(.not.qeq0)) then
      atom_expiqr(1:2,1:nfgd,ia)          = pawfgrtab(iatom)%expiqr(1:2,1:nfgd)
    end if
    if(compute_grad1) then
@@ -1448,7 +1448,7 @@ end if
  if (compute_grad1) then
    ABI_FREE(atom_gylmgr)
  end if
- if (compute_phonon.and.(.not.qeq0).and.pawfgrtab(iatom)%expiqr_allocated/=0) then
+ if (compute_phonon.and.(.not.qeq0)) then
    ABI_FREE(atom_expiqr)
  end if
  ABI_FREE(atom_ifftsph)
