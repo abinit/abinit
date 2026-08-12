@@ -813,7 +813,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  gnt_scal=0
  do klm=1,size(pawang%gntselect,2)
    do ilslm=1,size(pawang%gntselect,1)
-     if(pawang%gntselect(ilslm,klm)>0) gnt_scal=1
+     if(pawang%gntselect(ilslm,klm)>0) gnt_scal(ilslm,klm)=1
    end do
  end do
 
