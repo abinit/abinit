@@ -715,11 +715,11 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  logical :: compute_grad,compute_grad1,compute_nhat,my_atmtab_allocated,paral_atom,qeq0,compute_phonon,order
  type(distribfft_type),pointer :: my_distribfft
  type(mpi_type) :: mpi_enreg_fft
- real(dp) :: sumr,sumi,sumr2,sumi2,sumr3,sumi3
- real(dp) :: wgt,wgt1,wgt2,wgt3,cr,ci
+ real(dp) :: wgt,wgt1,wgt2,wgt3
+ integer :: gemm_n
 #ifdef HAVE_OPENMP_OFFLOAD
  complex(dp) :: gemm_alpha,gemm_beta
- integer :: gemm_n,gemm_batch
+ integer :: gemm_batch
 #endif
 !arrays
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
@@ -924,21 +924,21 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    end if
  end do
 
- if (compute_nhat.and.gpu_option_==ABI_GPU_OPENMP) then
+ if (compute_nhat) then
    ! GEMM output buffers: C(ic,idat2,idat1) per atom, batched over ia.
    ABI_MALLOC(gemm_re,(nfgd_max,ndat2,ndat1,nattyp(itypat)))
    ABI_MALLOC(gemm_im,(nfgd_max,ndat2,ndat1,nattyp(itypat)))
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(alloc:gemm_re,gemm_im)
+   !$OMP TARGET ENTER DATA MAP(alloc:gemm_re,gemm_im) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif
  end if
-if (compute_grad1.and.gpu_option_==ABI_GPU_OPENMP) then
+if (compute_grad1) then
  ! GEMM output buffers for the gradient path: C(dir,ic,idat2,idat1) per
  ! atom, batched over ia.
  ABI_MALLOC(gemm_gr_re,(3,nfgd_max,ndat2,ndat1,nattyp(itypat)))
  ABI_MALLOC(gemm_gr_im,(3,nfgd_max,ndat2,ndat1,nattyp(itypat)))
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(alloc:gemm_gr_re,gemm_gr_im)
+ !$OMP TARGET ENTER DATA MAP(alloc:gemm_gr_re,gemm_gr_im) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif
 end if
 
@@ -1148,20 +1148,22 @@ end if
 
      if (compute_nhat) then
        if(gpu_option_==ABI_GPU_DISABLED) then
-         !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat1,idat2,ic,klmn,cr,ci)
+         gemm_n = ndat2*ndat1
+         do ia=1,nattyp(itypat)
+           call dgemm('n','n',nfgd_max,gemm_n,lmn2_size,one,&
+&            atom_wgylm(1,1,ia),nfgd_max,cpf_re(1,1,1,ia),lmn2_size,zero,&
+&            gemm_re(1,1,1,ia),nfgd_max)
+           call dgemm('n','n',nfgd_max,gemm_n,lmn2_size,one,&
+&            atom_wgylm(1,1,ia),nfgd_max,cpf_im(1,1,1,ia),lmn2_size,zero,&
+&            gemm_im(1,1,1,ia),nfgd_max)
+         end do
+         !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat1,idat2,ic)
          do ia=1,nattyp(itypat)
            do idat1=1,ndat1
              do idat2=1,ndat2
                do ic=1,atom_nfgd(ia)
-                 cr=zero; ci=zero
-                 do klmn=1,lmn2_size  ! Loop over ij channels of this atom type.
-                   cr=cr+cpf_re(klmn,idat2,idat1,ia)*atom_wgylm(ic,klmn,ia)
-                   ci=ci+cpf_im(klmn,idat2,idat1,ia)*atom_wgylm(ic,klmn,ia)
-                 end do
-                 ! nhat12_atm is indexed by the local sphere point ic (not the
-                 ! global FFT index jc): it is only nfgd_max points wide.
-                 nhat12_atm(1,ic,isploop,idat2,idat1,ia)=nhat12_atm(1,ic,isploop,idat2,idat1,ia)+cr
-                 nhat12_atm(2,ic,isploop,idat2,idat1,ia)=nhat12_atm(2,ic,isploop,idat2,idat1,ia)+ci
+                 nhat12_atm(1,ic,isploop,idat2,idat1,ia)=nhat12_atm(1,ic,isploop,idat2,idat1,ia)+gemm_re(ic,idat2,idat1,ia)
+                 nhat12_atm(2,ic,isploop,idat2,idat1,ia)=nhat12_atm(2,ic,isploop,idat2,idat1,ia)+gemm_im(ic,idat2,idat1,ia)
                end do
              end do
            end do
@@ -1203,27 +1205,27 @@ end if
 
      if (compute_grad1) then
        if(gpu_option_==ABI_GPU_DISABLED) then
-         !$OMP PARALLEL DO PRIVATE(iatom,idat1,idat2,ic,klmn,sumr,sumi,sumr2,sumi2,sumr3,sumi3)
+         gemm_n = ndat2*ndat1
          do ia=1,nattyp(itypat)
-           iatom=iatm+ia
+           call dgemm('n','n',3*nfgd_max,gemm_n,lmn2_size,one,&
+&            atom_wgylmgr(1,1,1,ia),3*nfgd_max,cpf_re(1,1,1,ia),lmn2_size,zero,&
+&            gemm_gr_re(1,1,1,1,ia),3*nfgd_max)
+           call dgemm('n','n',3*nfgd_max,gemm_n,lmn2_size,one,&
+&            atom_wgylmgr(1,1,1,ia),3*nfgd_max,cpf_im(1,1,1,ia),lmn2_size,zero,&
+&            gemm_gr_im(1,1,1,1,ia),3*nfgd_max)
+         end do
+         !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(iatom,idat1,idat2,ic)
+         do ia=1,nattyp(itypat)
            do idat1=1,ndat1
              do idat2=1,ndat2
+               iatom=iatm+ia
                do ic=1,atom_nfgd(ia)
-                 sumr=zero; sumi=zero; sumr2=zero; sumi2=zero; sumr3=zero; sumi3=zero
-                 do klmn=1,lmn2_size  ! Loop over ij channels of this atom type.
-                   sumr =sumr +cpf_re(klmn,idat2,idat1,ia)*atom_wgylmgr(1,ic,klmn,ia)
-                   sumr2=sumr2+cpf_re(klmn,idat2,idat1,ia)*atom_wgylmgr(2,ic,klmn,ia)
-                   sumr3=sumr3+cpf_re(klmn,idat2,idat1,ia)*atom_wgylmgr(3,ic,klmn,ia)
-                   sumi =sumi +cpf_im(klmn,idat2,idat1,ia)*atom_wgylmgr(1,ic,klmn,ia)
-                   sumi2=sumi2+cpf_im(klmn,idat2,idat1,ia)*atom_wgylmgr(2,ic,klmn,ia)
-                   sumi3=sumi3+cpf_im(klmn,idat2,idat1,ia)*atom_wgylmgr(3,ic,klmn,ia)
-                 end do
-                 grnhat_12(1,ic,isploop,1,iatom,idat2,idat1)=grnhat_12(1,ic,isploop,1,iatom,idat2,idat1)+sumr
-                 grnhat_12(1,ic,isploop,2,iatom,idat2,idat1)=grnhat_12(1,ic,isploop,2,iatom,idat2,idat1)+sumr2
-                 grnhat_12(1,ic,isploop,3,iatom,idat2,idat1)=grnhat_12(1,ic,isploop,3,iatom,idat2,idat1)+sumr3
-                 grnhat_12(2,ic,isploop,1,iatom,idat2,idat1)=grnhat_12(2,ic,isploop,1,iatom,idat2,idat1)+sumi
-                 grnhat_12(2,ic,isploop,2,iatom,idat2,idat1)=grnhat_12(2,ic,isploop,2,iatom,idat2,idat1)+sumi2
-                 grnhat_12(2,ic,isploop,3,iatom,idat2,idat1)=grnhat_12(2,ic,isploop,3,iatom,idat2,idat1)+sumi3
+                 grnhat_12(1,ic,isploop,1,iatom,idat2,idat1)=grnhat_12(1,ic,isploop,1,iatom,idat2,idat1)+gemm_gr_re(1,ic,idat2,idat1,ia)
+                 grnhat_12(1,ic,isploop,2,iatom,idat2,idat1)=grnhat_12(1,ic,isploop,2,iatom,idat2,idat1)+gemm_gr_re(2,ic,idat2,idat1,ia)
+                 grnhat_12(1,ic,isploop,3,iatom,idat2,idat1)=grnhat_12(1,ic,isploop,3,iatom,idat2,idat1)+gemm_gr_re(3,ic,idat2,idat1,ia)
+                 grnhat_12(2,ic,isploop,1,iatom,idat2,idat1)=grnhat_12(2,ic,isploop,1,iatom,idat2,idat1)+gemm_gr_im(1,ic,idat2,idat1,ia)
+                 grnhat_12(2,ic,isploop,2,iatom,idat2,idat1)=grnhat_12(2,ic,isploop,2,iatom,idat2,idat1)+gemm_gr_im(2,ic,idat2,idat1,ia)
+                 grnhat_12(2,ic,isploop,3,iatom,idat2,idat1)=grnhat_12(2,ic,isploop,3,iatom,idat2,idat1)+gemm_gr_im(3,ic,idat2,idat1,ia)
                end do
              end do
            end do
@@ -1466,11 +1468,11 @@ end if
 #endif
  ABI_FREE(cpf_re)
  ABI_FREE(cpf_im)
- if (compute_nhat.and.gpu_option_==ABI_GPU_OPENMP) then
+ if (compute_nhat) then
    ABI_FREE(gemm_re)
    ABI_FREE(gemm_im)
  end if
- if (compute_grad1.and.gpu_option_==ABI_GPU_OPENMP) then
+ if (compute_grad1) then
    ABI_FREE(gemm_gr_re)
    ABI_FREE(gemm_gr_im)
  end if
