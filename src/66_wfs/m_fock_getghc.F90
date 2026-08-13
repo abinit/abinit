@@ -573,7 +573,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 
 !*   occ = occupancy of jband at this k point
      occ(1:ndat_occ)=fockbz%occ_bz(jband+bdtot_jindex:jband+ndat_occ-1+bdtot_jindex,my_jsppol)
-     if(occ(1)<tol8) cycle
+     if(maxval(occ(1:ndat_occ))<tol8) cycle
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE TO(occ) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
