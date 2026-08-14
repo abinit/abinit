@@ -244,6 +244,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: wfraug(:,:,:,:)
 #endif
  real(dp),allocatable :: eig_save(:),enlout(:),evec(:,:),gsc(:,:),ghc_vectornd(:,:)
+ real(dp),allocatable :: identity_op(:)
  real(dp),allocatable :: subham(:),subovl(:),subvnlx(:),totvnlx(:,:)
  real(dp),pointer :: cg_k(:,:),cg_k_block(:,:),grnl_k_block(:,:),eig_k_block(:)
  real(dp),contiguous, pointer :: cwavef_iband(:,:), kinpw_ptr(:)
@@ -266,7 +267,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !=========================================================================
 !============= INITIALIZATIONS AND ALLOCATIONS ===========================
 !=========================================================================
-
+ 
  nkpt_max=50; if(xmpi_paral==1)nkpt_max=-1
 
  wfoptalg=mod(dtset%wfoptalg,100); wfopta10=mod(wfoptalg,10)
@@ -610,7 +611,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        end if
      end if
    end if
-
+ 
    !  =========================================================================
    !  ===================== FIND LARGEST RESIDUAL =============================
    !  =========================================================================
@@ -916,6 +917,24 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      call meanvalue_g_batch(ek_k(1+(iblock-1)*blocksize:iblock*blocksize), kinpw, &
      &    0, istwf_k, mpi_enreg, npw_k, my_nspinor, blocksize, &
      &    cwavef, cwavef, 0, gpu_option=gs_hamk%gpu_option)
+    
+     ! Compute nuclear dipole energies for all bands in this block (use_gbt==0).
+     if(ANY(ABS(dtset%nucdipmom)>tol8)) then
+       ABI_MALLOC(ghc_vectornd,(2,npw_k*my_nspinor*blocksize))
+       call getghc_nucdip(cwavef,ghc_vectornd,gs_hamk%gbound_k,gs_hamk%istwf_k,kg_k,gs_hamk%kpt_k,&
+         & gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,npw_k,gs_hamk%nvloc,&
+         & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,my_nspinor,gs_hamk%vectornd,gs_hamk%vlocal,&
+         & gs_hamk%zora,gs_hamk%gpu_option)
+       do iblocksize=1,blocksize
+         iband=(iblock-1)*blocksize+iblocksize
+         end_k(iband)=DOT_PRODUCT(cwavef(1,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),&
+                                & ghc_vectornd(1,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor))+ &
+                    & DOT_PRODUCT(cwavef(2,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),&
+                                & ghc_vectornd(2,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor))
+       end do
+       ABI_FREE(ghc_vectornd)
+     end if
+
    end if
 
    do iblocksize=1,blocksize
@@ -936,20 +955,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        &    gpu_thread_limit=dtset%gpu_thread_limit)
 
        ek_k(iband) = ar + ar2
-     end if
-
-     if(ANY(ABS(dtset%nucdipmom)>tol8)) then
-       ABI_MALLOC(ghc_vectornd,(2,npw_k*my_nspinor))
-       call getghc_nucdip(cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
-          ghc_vectornd,gs_hamk%gbound_k,gs_hamk%istwf_k,kg_k,gs_hamk%kpt_k,&
-          gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,gs_hamk%nvloc,&
-          gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,my_nspinor,gs_hamk%vectornd,gs_hamk%vlocal,&
-          gs_hamk%zora,gs_hamk%gpu_option)
-       end_k(iband)=DOT_PRODUCT(cg(1,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
-                               ghc_vectornd(1,1:npw_k*my_nspinor))+&
-                    DOT_PRODUCT(cg(2,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
-                               ghc_vectornd(2,1:npw_k*my_nspinor))
-       ABI_FREE(ghc_vectornd)
      end if
 
      if(paw_dmft%use_dmft==1) then
