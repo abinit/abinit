@@ -244,7 +244,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: wfraug(:,:,:,:)
 #endif
  real(dp),allocatable :: eig_save(:),enlout(:),evec(:,:),gsc(:,:),ghc_vectornd(:,:)
- real(dp),allocatable :: identity_op(:)
  real(dp),allocatable :: subham(:),subovl(:),subvnlx(:),totvnlx(:,:)
  real(dp),pointer :: cg_k(:,:),cg_k_block(:,:),grnl_k_block(:,:),eig_k_block(:)
  real(dp),contiguous, pointer :: cwavef_iband(:,:), kinpw_ptr(:)

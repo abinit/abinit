@@ -1542,7 +1542,6 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
 !scalars
  integer,parameter :: tim_fourwf=1
  integer :: idat,idir,ipw,iv1,iv2,nspinortot,shift
- integer :: rank,ierr
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,usezora
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
  real(dp) :: weight=one
