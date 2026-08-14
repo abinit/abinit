@@ -476,8 +476,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
  DBG_ENTER("COLL")
 
- write(std_out,'(a)') 'JWZ debug inside vtorho'
-
 !Keep track of total time spent in vtorho
  call timab(980,1,tsec)
  call timab(981,1,tsec)
@@ -848,8 +846,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ikpt = 0
      do while (ikpt_loc < nkpt1)
 
-       write(std_out,'(a)') 'JWZ debug enter kpt loop in vtorho'
-
        call timab(997,1,tsec)
 
        if ( .not.berryflag ) then
@@ -1182,8 +1178,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ! contributions to kinetic energy, nuclear dipole energy, nonlocal energy, forces,
        ! and update of rhor to this k-point and this spin polarization.
        
-       write(std_out,'(a)') 'JWZ debug calling vtowfk'
-
        call vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,&
          dtset,eig_k,ek_k,ek_k_nd,end_k,enlx_k,fixed_occ,grnl_k,gs_hamk,&
          ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
@@ -1191,7 +1185,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
          rhoaug,paw_dmft,dtset%wtk(ikpt),xg_nonlop,zshift, rmm_diis_status(:,ikpt,isppol))
        ABI_NVTX_END_RANGE()
-       write(std_out,'(a)') 'JWZ debug finished vtowfk'
 
 ! LB-01/03/2024: Very weird compiler error on eos-nvhpc23.1 if the second call of timab(985,...) is included...
 ! Drastic short-term solution : disable this timing for nvhpc... In fact this part is not important unless fock is activated

@@ -995,7 +995,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE FROM(cwavef) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
-     write(std_out,'(a)')'JWZ debug calling getghc_nucdip'
      call getghc_nucdip(cwavef,ghc_vectornd,gbound_k1,istwf_k_,kg_k1,kpt_k1,&
        gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
        gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vectornd,gs_ham%vlocal,gs_ham%zora,gs_ham%gpu_option)
@@ -1554,11 +1553,10 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
  real(dp),allocatable :: work(:,:,:,:),zk(:,:,:,:)
 ! *********************************************************************
 
- write(std_out,'(a,2i4)')'JWZ debug inside getghc_nucdip, rank, ndat = ',mpi_enreg%me,ndat
  ghc_vectornd(:,:)=zero
 
  !! JWZ debug initial code was only for nvloc==1 case
- !! if (nvloc/=1) return
+ if (nvloc/=1) return
 
  nspinortot=min(2,(1+mpi_enreg%paral_spinor)*my_nspinor)
  if (mpi_enreg%paral_spinor==0) then
@@ -1592,16 +1590,17 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
     ! compute k + G. Note these are in reduced coords
     ABI_MALLOC(kgkpk,(npw_k,3))
     do ipw = 1, npw_k
-       kgkpk(ipw,:) = kpt(:) + kg_k(:,ipw)
+      kgkpk(ipw,:) = kpt(:) + kg_k(:,ipw)
     end do
 
     ! make 2\pi(k+G)c(G)|G> by element-wise multiplication
     do idir = 1, 3
-       do idat = 1, ndat
-          iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
-          gcwavef(1,iv1:iv2,idir) = cwavef(1,iv1:iv2)*kgkpk(1:npw_k,idir)
-          gcwavef(2,iv1:iv2,idir) = cwavef(2,iv1:iv2)*kgkpk(1:npw_k,idir)
-       end do
+      do idat = 1, ndat
+        do ipw=1,npw_k
+          gcwavef(1,ipw+(idat-1)*npw_k,idir) = cwavef(1,ipw+(idat-1)*npw_k)*kgkpk(ipw,idir)
+          gcwavef(2,ipw+(idat-1)*npw_k,idir) = cwavef(2,ipw+(idat-1)*npw_k)*kgkpk(ipw,idir)
+        end do
+      end do
     end do
     ABI_FREE(kgkpk)
     gcwavef = gcwavef*two_pi
@@ -1617,11 +1616,13 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
       call fourwf(1,vectornd_dir,gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
            istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
            &     tim_fourwf,weight,weight,gpu_option=gpu_option)
-!      call fourwf(1,vectornd(:,:,:,:,idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
-!           istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-!           &     tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
-      ghc_vectornd=ghc_vectornd+ghc1
+      do idat=1,ndat
+        do ipw=1,npw_k
+          ghc_vectornd(:,ipw+(idat-1)*npw_k)=ghc_vectornd(:,ipw+(idat-1)*npw_k)+ghc1(:,ipw+(idat-1)*npw_k)
+        end do
+      end do
+      !ghc_vectornd=ghc_vectornd+ghc1
     end do ! idir
     ABI_FREE(vectornd_dir)
     ABI_FREE(gcwavef)
@@ -1629,7 +1630,6 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
 
  else ! nspinortot==2
 
-    write(std_out,'(a)')'JWZ debug malloc cwavef1 cwavef2'
     ABI_MALLOC(cwavef1,(2,npw_k*ndat))
     ABI_MALLOC(cwavef2,(2,npw_k*ndat))
     do idat=1,ndat
@@ -1638,7 +1638,6 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
        cwavef2(1:2,iv1:iv2) = &
          & cwavef(1:2,1+(idat-1)*my_nspinor*npw_k+shift:npw_k+(idat-1)*my_nspinor*npw_k+shift)
     end do
-    write(std_out,'(a)')'JWZ debug cwavef1 cwavef2 filled'
 
     ! compute k + G. Note these are in reduced coords
     ABI_MALLOC(kgkpk,(npw_k,3))
@@ -1742,7 +1741,6 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
    ABI_FREE(zk)
  end if
 
- write(std_out,'(a)')'JWZ debug leaving getghc_nucdip'
 end subroutine getghc_nucdip
 !!***
 
