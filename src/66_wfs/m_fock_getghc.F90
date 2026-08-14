@@ -447,7 +447,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 &        nfftf,ngfftf,n4f,n5f,n6f,natom,nspinor,lmn2_size,&
 &        fockcommon%usepaw,cwaveprj,fockcommon%ieigen,need_ghc,fockcommon%optfor,fockcommon%optstr,nfgd_max)
    else
-     ndat_occ=min(nband_k,4)
+     ndat_occ=min(nband_k,16)
      do ii=1,nband_k
        if(modulo(nband_k,ndat_occ)==0) exit
        ndat_occ=ndat_occ-1
