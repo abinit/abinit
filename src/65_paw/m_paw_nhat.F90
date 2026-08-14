@@ -721,7 +721,6 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  real(dp) :: wgt,wgt1,wgt2,wgt3
  integer :: gemm_n
 #ifdef HAVE_OPENMP_OFFLOAD
- complex(dp) :: gemm_alpha,gemm_beta
  integer :: gemm_batch
 #endif
 !arrays
@@ -1134,12 +1133,14 @@ end if
        if(gpu_option_==ABI_GPU_DISABLED) then
          gemm_n = ndat2*ndat1
          do ia=1,nattyp(itypat)
-           call dgemm('n','n',nfgd_max,gemm_n,lmn2_size,one,&
-&            atom_wgylm(1,1,ia),nfgd_max,cpf_re(1,1,1,ia),lmn2_size,zero,&
-&            gemm_re(1,1,1,ia),nfgd_max)
-           call dgemm('n','n',nfgd_max,gemm_n,lmn2_size,one,&
-&            atom_wgylm(1,1,ia),nfgd_max,cpf_im(1,1,1,ia),lmn2_size,zero,&
-&            gemm_im(1,1,1,ia),nfgd_max)
+           call abi_xgemm('n','n',nfgd_max,gemm_n,lmn2_size,cone,&
+&            atom_wgylm(:,:,ia),nfgd_max,&
+&            cpf_re(:,:,:,ia),lmn2_size,czero,&
+&            gemm_re(:,:,:,ia),nfgd_max,x_cplx=1)
+           call abi_xgemm('n','n',nfgd_max,gemm_n,lmn2_size,cone,&
+&            atom_wgylm(:,:,ia),nfgd_max,&
+&            cpf_im(:,:,:,ia),lmn2_size,czero,&
+&            gemm_im(:,:,:,ia),nfgd_max,x_cplx=1)
          end do
          !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat1,idat2,ic)
          do ia=1,nattyp(itypat)
@@ -1156,16 +1157,14 @@ end if
 #ifdef HAVE_OPENMP_OFFLOAD
          gemm_n = ndat2*ndat1
          gemm_batch = nattyp(itypat)
-         gemm_alpha = cone
-         gemm_beta  = czero
          !$OMP TARGET DATA USE_DEVICE_ADDR(atom_wgylm,cpf_re,cpf_im,gemm_re,gemm_im)
-         call abi_gpu_xgemm_strided(1,'n','n',nfgd_max,gemm_n,lmn2_size,gemm_alpha,&
+         call abi_gpu_xgemm_strided(1,'n','n',nfgd_max,gemm_n,lmn2_size,cone,&
 &          c_loc(atom_wgylm),nfgd_max,nfgd_max*lmn2_size,&
-&          c_loc(cpf_re),lmn2_size,lmn2_size*gemm_n,gemm_beta,&
+&          c_loc(cpf_re),lmn2_size,lmn2_size*gemm_n,czero,&
 &          c_loc(gemm_re),nfgd_max,nfgd_max*gemm_n,gemm_batch)
-         call abi_gpu_xgemm_strided(1,'n','n',nfgd_max,gemm_n,lmn2_size,gemm_alpha,&
+         call abi_gpu_xgemm_strided(1,'n','n',nfgd_max,gemm_n,lmn2_size,cone,&
 &          c_loc(atom_wgylm),nfgd_max,nfgd_max*lmn2_size,&
-&          c_loc(cpf_im),lmn2_size,lmn2_size*gemm_n,gemm_beta,&
+&          c_loc(cpf_im),lmn2_size,lmn2_size*gemm_n,czero,&
 &          c_loc(gemm_im),nfgd_max,nfgd_max*gemm_n,gemm_batch)
          !$OMP END TARGET DATA
 
@@ -1191,12 +1190,14 @@ end if
        if(gpu_option_==ABI_GPU_DISABLED) then
          gemm_n = ndat2*ndat1
          do ia=1,nattyp(itypat)
-           call dgemm('n','n',3*nfgd_max,gemm_n,lmn2_size,one,&
-&            atom_wgylmgr(1,1,1,ia),3*nfgd_max,cpf_re(1,1,1,ia),lmn2_size,zero,&
-&            gemm_gr_re(1,1,1,1,ia),3*nfgd_max)
-           call dgemm('n','n',3*nfgd_max,gemm_n,lmn2_size,one,&
-&            atom_wgylmgr(1,1,1,ia),3*nfgd_max,cpf_im(1,1,1,ia),lmn2_size,zero,&
-&            gemm_gr_im(1,1,1,1,ia),3*nfgd_max)
+           call abi_xgemm('n','n',3*nfgd_max,gemm_n,lmn2_size,cone,&
+&            atom_wgylmgr(:,:,:,ia),3*nfgd_max,&
+&            cpf_re(:,:,:,ia),lmn2_size,czero,&
+&            gemm_gr_re(:,:,:,:,ia),3*nfgd_max,x_cplx=1)
+           call abi_xgemm('n','n',3*nfgd_max,gemm_n,lmn2_size,cone,&
+&            atom_wgylmgr(:,:,:,ia),3*nfgd_max,&
+&            cpf_im(:,:,:,ia),lmn2_size,czero,&
+&            gemm_gr_im(:,:,:,:,ia),3*nfgd_max,x_cplx=1)
          end do
          !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(iatom,idat1,idat2,ic)
          do ia=1,nattyp(itypat)
@@ -1218,16 +1219,14 @@ end if
 #ifdef HAVE_OPENMP_OFFLOAD
          gemm_n = ndat2*ndat1
          gemm_batch = nattyp(itypat)
-         gemm_alpha = cone
-         gemm_beta  = czero
          !$OMP TARGET DATA USE_DEVICE_ADDR(atom_wgylmgr,cpf_re,cpf_im,gemm_gr_re,gemm_gr_im)
-         call abi_gpu_xgemm_strided(1,'n','n',3*nfgd_max,gemm_n,lmn2_size,gemm_alpha,&
+         call abi_gpu_xgemm_strided(1,'n','n',3*nfgd_max,gemm_n,lmn2_size,cone,&
 &          c_loc(atom_wgylmgr),3*nfgd_max,3*nfgd_max*lmn2_size,&
-&          c_loc(cpf_re),lmn2_size,lmn2_size*gemm_n,gemm_beta,&
+&          c_loc(cpf_re),lmn2_size,lmn2_size*gemm_n,czero,&
 &          c_loc(gemm_gr_re),3*nfgd_max,3*nfgd_max*gemm_n,gemm_batch)
-         call abi_gpu_xgemm_strided(1,'n','n',3*nfgd_max,gemm_n,lmn2_size,gemm_alpha,&
+         call abi_gpu_xgemm_strided(1,'n','n',3*nfgd_max,gemm_n,lmn2_size,cone,&
 &          c_loc(atom_wgylmgr),3*nfgd_max,3*nfgd_max*lmn2_size,&
-&          c_loc(cpf_im),lmn2_size,lmn2_size*gemm_n,gemm_beta,&
+&          c_loc(cpf_im),lmn2_size,lmn2_size*gemm_n,czero,&
 &          c_loc(gemm_gr_im),3*nfgd_max,3*nfgd_max*gemm_n,gemm_batch)
          !$OMP END TARGET DATA
          ! Scatter the dense (nfgd_max-wide) GEMM output back into
@@ -2236,7 +2235,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
  integer :: l_size_full,lm_size,lmn2_size,nfgd,nsploop,optgr0,gpu_option_
  logical :: has_qphase,qne0
  real(dp) :: vi,vr,scal_r
- complex(dp) :: gemm_alpha,gemm_beta
+ complex(dp) :: gemm_alpha
  character(len=500) :: msg
 !arrays
  real(dp) :: rdum1(1),rdum2(2)
@@ -2252,7 +2251,6 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
  qne0=(qphon(1)**2+qphon(2)**2+qphon(3)**2>=1.d-15)
  has_qphase=(qne0.and.qphase==2)
  scal_r=ucvol/dble(ngridtot)
- gemm_beta=czero
  gpu_option_=ABI_GPU_DISABLED; if (present(gpu_option)) gpu_option_=gpu_option
 
  ABI_MALLOC(gnt_scal,(size(pawang%gntselect,1),size(pawang%gntselect,2)))
@@ -2473,9 +2471,10 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
        if(gpu_option_==ABI_GPU_DISABLED) then
          do icpq=1,qphase
            do ia=1,nattyp
-             call dgemm('T','N',lm_size,ndat,nfgd_max,scal_r,&
-&              atom_gylm(1,1,ia),nfgd_max,atom_potg(1,1,ia,icpq),nfgd_max,zero,&
-&              prod(1,1,ia,icpq),lm_size)
+             call abi_xgemm('T','N',lm_size,ndat,nfgd_max,gemm_alpha,&
+&              atom_gylm(:,:,ia),nfgd_max,&
+&              atom_potg(:,:,ia,icpq),nfgd_max,czero,&
+&              prod(:,:,ia,icpq),lm_size,x_cplx=1)
            end do
          end do
        else if(gpu_option_==ABI_GPU_OPENMP) then
@@ -2484,7 +2483,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
          do icpq=1,qphase
            call abi_gpu_xgemm_strided(1,'T','N',lm_size,ndat,nfgd_max,gemm_alpha,&
 &            c_loc(atom_gylm),nfgd_max,nfgd_max*lm_size,&
-&            c_loc(atom_potg(1,1,1,icpq)),nfgd_max,nfgd_max*ndat,gemm_beta,&
+&            c_loc(atom_potg(1,1,1,icpq)),nfgd_max,nfgd_max*ndat,czero,&
 &            c_loc(prod(1,1,1,icpq)),lm_size,lm_size*ndat,nattyp)
          end do
          !$OMP END TARGET DATA
@@ -2500,19 +2499,11 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
 !      Gaunt selection rule forbids a given (ilslm,klmn) pair).
 !      ----------------------------------------------------------
        do icpq=1,qphase
-         if(gpu_option_==ABI_GPU_DISABLED) then
-           call dgemm('T','N',lmn2_size,ndat*nattyp,lm_size,one,&
-&            atom_qijl(1,1),l_size_full,prod(1,1,1,icpq),lm_size,zero,&
-&            dijhat_idij(1,1,1,icpq),lmn2_size)
-         else if(gpu_option_==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET DATA USE_DEVICE_ADDR(atom_qijl,prod,dijhat_idij)
-           call abi_gpu_xgemm(1,'T','N',lmn2_size,ndat*nattyp,lm_size,cone,&
-&            c_loc(atom_qijl),l_size_full,c_loc(prod(1,1,1,icpq)),lm_size,gemm_beta,&
-&            c_loc(dijhat_idij(1,1,1,icpq)),lmn2_size)
-           !$OMP END TARGET DATA
-#endif
-         end if
+         call abi_xgemm('T','N',lmn2_size,ndat*nattyp,lm_size,cone,&
+&          atom_qijl(:,:),l_size_full,&
+&          prod(:,:,:,icpq),lm_size,czero,&
+&          dijhat_idij(:,:,:,icpq),lmn2_size,&
+&          x_cplx=1,gpu_option=gpu_option_)
        end do
 
 !      ----------------------------------------------------------

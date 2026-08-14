@@ -406,6 +406,102 @@ end subroutine abi_zgemm_2r
 
 !----------------------------------------------------------------------
 
+!!****f* m_abi_linalg/abi_d2zgemm_222
+!! NAME
+!! abi_d2zgemm_333
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+!!
+subroutine abi_d2zgemm_222(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC,&
+                       x_cplx,gpu_option)
+
+!Arguments ------------------------------------
+ character(len=1), intent(in) :: transa
+ character(len=1), intent(in) :: transb
+ integer, intent(in) :: lda
+ integer, intent(in) :: ldb
+ integer, intent(in) :: ldc
+ integer, intent(in) :: m
+ integer, intent(in) :: n
+ integer, intent(in) :: k
+ complex(dp),intent(in) :: alpha
+ complex(dp),intent(in) :: beta
+ real(dp),target, intent(in)    :: a(:,:)
+ real(dp),target, intent(in)    :: b(:,:)
+ real(dp),target, intent(inout) :: c(:,:)
+ !Optionals -----------------------------------
+ integer, intent(in), optional :: x_cplx, gpu_option
+
+!Local variables-------------------------------
+ integer  :: cplx_,gpu_option_
+
+ cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
+ gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
+
+ call abi_d2zgemm(transa,transb,m,n,k,alpha,&
+ &    a,lda,&
+ &    b,ldb,&
+ &    beta,&
+ &    c,ldc,&
+ &    x_cplx=cplx_,gpu_option=gpu_option_)
+
+end subroutine abi_d2zgemm_222
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abi_linalg/abi_d2zgemm_233
+!! NAME
+!! abi_d2zgemm_333
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+!!
+subroutine abi_d2zgemm_233(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC,&
+                       x_cplx,gpu_option)
+
+!Arguments ------------------------------------
+ character(len=1), intent(in) :: transa
+ character(len=1), intent(in) :: transb
+ integer, intent(in) :: lda
+ integer, intent(in) :: ldb
+ integer, intent(in) :: ldc
+ integer, intent(in) :: m
+ integer, intent(in) :: n
+ integer, intent(in) :: k
+ complex(dp),intent(in) :: alpha
+ complex(dp),intent(in) :: beta
+ real(dp),target, intent(in)    :: a(:,:)
+ real(dp),target, intent(in)    :: b(:,:,:)
+ real(dp),target, intent(inout) :: c(:,:,:)
+ !Optionals -----------------------------------
+ integer, intent(in), optional :: x_cplx, gpu_option
+
+!Local variables-------------------------------
+ integer  :: cplx_,gpu_option_
+
+ cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
+ gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
+
+ call abi_d2zgemm(transa,transb,m,n,k,alpha,&
+ &    a,lda,&
+ &    b,ldb,&
+ &    beta,&
+ &    c,ldc,&
+ &    x_cplx=cplx_,gpu_option=gpu_option_)
+
+end subroutine abi_d2zgemm_233
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_abi_linalg/abi_d2zgemm_333
 !! NAME
 !! abi_d2zgemm_333
@@ -546,6 +642,54 @@ subroutine abi_d2zgemm_331(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC,&
  &    x_cplx=cplx_,gpu_option=gpu_option_)
 
 end subroutine abi_d2zgemm_331
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abi_linalg/abi_d2zgemm_331
+!! NAME
+!! abi_d2zgemm_331
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+!!
+subroutine abi_d2zgemm_334(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC,&
+                       x_cplx,gpu_option)
+
+!Arguments ------------------------------------
+ character(len=1), intent(in) :: transa
+ character(len=1), intent(in) :: transb
+ integer, intent(in) :: lda
+ integer, intent(in) :: ldb
+ integer, intent(in) :: ldc
+ integer, intent(in) :: m
+ integer, intent(in) :: n
+ integer, intent(in) :: k
+ complex(dp),intent(in) :: alpha
+ complex(dp),intent(in) :: beta
+ real(dp),target, intent(in)    :: a(:,:,:)    ! FIXME should be lda * x_cplx
+ real(dp),target, intent(in)    :: b(:,:,:)
+ real(dp),target, intent(inout) :: c(:,:,:,:)
+ !Optionals -----------------------------------
+ integer, intent(in), optional :: x_cplx, gpu_option
+
+!Local variables-------------------------------
+ integer  :: cplx_,gpu_option_
+
+ cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
+ gpu_option_=ABI_GPU_DISABLED ; if(PRESENT(gpu_option)) gpu_option_ = gpu_option
+
+ call abi_d2zgemm(transa,transb,m,n,k,alpha,&
+ &    a,lda,&
+ &    b,ldb,&
+ &    beta,&
+ &    c,ldc,&
+ &    x_cplx=cplx_,gpu_option=gpu_option_)
+
+end subroutine abi_d2zgemm_334
 !!***
 
 !----------------------------------------------------------------------

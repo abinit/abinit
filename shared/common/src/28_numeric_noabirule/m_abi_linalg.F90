@@ -153,9 +153,11 @@ module m_abi_linalg
     module procedure abi_zgemm_2dd
     module procedure abi_d2zgemm
     module procedure abi_d2zgemm_2d
+    module procedure abi_d2zgemm_233
     module procedure abi_d2zgemm_313
     module procedure abi_d2zgemm_331
     module procedure abi_d2zgemm_333
+    module procedure abi_d2zgemm_334
  end interface abi_xgemm
 
  interface abi_gpu_xgemm
