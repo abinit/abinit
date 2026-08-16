@@ -195,8 +195,10 @@ module m_orbmag
   ! Bound methods:
 
   public :: orbmag
+  public :: orbmag_ncpp
 
   private :: orbmag_cc_k
+  private :: orbmag_cc_k_ncpp
   private :: orbmag_vv_k
   private :: orbmag_nl_k
   private :: nonlop_orbmag_nl
@@ -225,6 +227,356 @@ module m_orbmag
 
 CONTAINS  !========================================================================================
 !!***
+
+!!****f* ABINIT/orbmag_ncpp
+!! NAME
+!! orbmag_ncpp
+!!
+!! FUNCTION
+!! This routine computes the orbital magnetization and Berry curvature based on input
+!! wavefunctions and DDK wavefuntions, specialized for NCPP
+!!
+!! INPUTS
+!!  cg(2,mcg)=all ground state wavefunctions
+!!  cg1(2,mcg1,3)=all DDK wavefunctions in all 3 directions
+!!  cprj(dtset%natom,mcprj)<type(pawcprj_type)>=all ground state cprj
+!!  crystal(crystal_t)=structured datatype holding details about unit cell
+!!  dtfil <type(datafiles_type)>=variables related to files
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  ebands_k(ebands_t)=structured datatype holding GS eigenvalues
+!!  gsqcut=large sphere cut-off
+!!  hdr(hdr_type)=structured dataype with header info for eventual output
+!!  kg(3,mpw*mkmem_rbz)=basis sphere of planewaves at k
+!!  mcg=dimension of cg
+!!  mcg1=dimension of cg1
+!!  mcprj=dimension of cprj
+!!  mkmem_rbz=kpts in memory
+!!  mpi_enreg<type(MPI_type)>=information about MPI parallelization
+!!  mpw=max number of planewaves at k
+!!  nfftf=(effective) number of FFT grid points (for this proc) for the "fine" grid (see NOTES in respfn.F90)
+!!  ngfftf(18)=FFT grid size information (from pawfgr%ngfft)
+!!  paw_ij(dtset%natom) <type(paw_ij_type)>=paw arrays given on (i,j) channels for the GS
+!!  pawfgr <type(pawfgr_type)>=fine grid parameters and related data
+!!  pawrad(dtset%ntypat) <type(pawrad_type)>=paw radial mesh and related data
+!!  pawtab(dtset%ntypat) <type(pawtab_type)>=paw tabulated starting data
+!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  rprimd(3,3)=real space translation vectors
+!!  usevxctau=1 if kinetic energy density contribution has to be included (mGGA)
+!!  vtrial(nfftf,dtset%nspden)=GS potential (Hartree)
+!!  vxctau(nfftf,nspden,4*usevxctau)=derivative of e_xc with respect to kinetic energy density, for mGGA
+!!  ylm(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm)=all ylm's
+!!  ylmgr(mpw*mkmem_rbz,3,psps%mpsang*psps%mpsang*psps%useylm)=gradients of ylm's
+!!
+!! OUTPUT
+!!  only printing in call to orbmag_output
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! See Zwanziger, Torrent, and Gonze Phys Rev B 107, 165157 (2023), "ZTG23"
+!! DDK wavefunctions are used for the derivatives.
+!!
+!! SOURCE
+
+subroutine orbmag_ncpp(cg,cg1,dtfil,dtset,crystal,ebands_k,kg,gsqcut,hdr,&
+    & mcg,mcg1,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,pawfgr,pawtab,psps,&
+    & usevxctau,vtrial,vxctau)
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: mcg,mcg1,mkmem_rbz,mpw,nfftf,usevxctau
+ real(dp),intent(in) :: gsqcut
+ type(crystal_t),intent(in) :: crystal
+ type(datafiles_type), intent(in) :: dtfil
+ type(dataset_type),intent(in) :: dtset
+ type(ebands_t),intent(in) :: ebands_k
+ type(hdr_type),intent(in) :: hdr
+ type(MPI_type), intent(inout) :: mpi_enreg
+ type(pawfgr_type),intent(in) :: pawfgr
+ type(pseudopotential_type), intent(in) :: psps
+
+ !arrays
+ integer,intent(in) :: kg(3,mpw*mkmem_rbz),ngfftf(18)
+ real(dp),intent(in) :: cg(2,mcg),cg1(2,mcg1,3)
+ real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
+ real(dp),intent(inout) :: vxctau(nfftf,dtset%nspden,4*usevxctau)
+ type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+
+ !Local
+ !scalars
+ character(len=fnlen) :: fname
+ integer :: bdtot_index,dimffnl,exchn2n3d,iatom,icg,ider,idir,ikg,ikg1,ikpt
+ integer :: indx,isppol,istwf_k,itypat
+ integer :: mcgk,me,my_nspinor,nband_k,nband_me,ncid
+ integer :: ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6
+ integer :: nkpg,nn,nproc,npw_k,npwsp,nucdip_dirs,spaceComm,usecprj_local=0
+ integer,parameter :: master=0
+ real(dp) :: ecut_eff,fermie
+ logical :: has_nucdip
+ type(gs_hamiltonian_type) :: gs_hamk
+ type(orbmag_mesh_type) :: orbmag_mesh
+
+ !arrays
+ integer,allocatable :: atindx(:),atindx1(:),kg_k(:,:),nattyp(:)
+ real(dp) :: kpoint(3),omlamb(3)
+ real(dp),allocatable :: cg1_k(:,:,:),eig_k(:)
+ real(dp),allocatable,target :: cg_k(:,:)
+ real(dp),allocatable :: ffnl_k(:,:,:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph1d(:,:),ph3d(:,:,:)
+ real(dp),allocatable :: trnrm(:),vlocal(:,:,:,:),vectornd(:,:,:),vectornd_pac(:,:,:,:,:)
+ real(dp),allocatable :: vxctaulocal(:,:,:,:,:),ylm_k(:,:),ylmgr_k(:,:,:)
+ type(paw_ij_type),allocatable :: ncpp_paw_ij(:)
+
+ !----------------------------------------------
+
+ ! set up basic FFT parameters
+ my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+ istwf_k = 1
+ spaceComm=mpi_enreg%comm_cell
+ nproc=xmpi_comm_size(spaceComm)
+ me = mpi_enreg%me_kpt
+ ngfft1=dtset%ngfft(1) ; ngfft2=dtset%ngfft(2) ; ngfft3=dtset%ngfft(3)
+ ngfft4=dtset%ngfft(4) ; ngfft5=dtset%ngfft(5) ; ngfft6=dtset%ngfft(6)
+ ecut_eff = dtset%ecut*(dtset%dilatmx)**2
+ exchn2n3d = 0; ikg1 = 0
+
+ ! Fermi energy
+ call local_fermie(dtset,ebands_k,fermie,mpi_enreg)
+
+ ! initialize orbmag_mesh datatype
+ call orbmag_mesh%init(dtset)
+ orbmag_mesh%nucdipmom=dtset%nucdipmom
+ ! if user input lambsig specifically in the input file, use it
+ if ( any ( abs(dtset%lambsig).GT.tol8 ) ) then
+   orbmag_mesh%lambsig=dtset%lambsig
+ ! else use the value read in to pawtab structure (which might well be zero)
+ else if (psps%usepaw .EQ. 1) then
+   orbmag_mesh%lambsig=pawtab(1:dtset%ntypat)%lamb_shielding
+ else
+   orbmag_mesh%lambsig=zero
+ end if
+
+
+ !Definition of atindx array
+ !Generate an index table of atoms, in order for them to be used type after type.
+ ABI_MALLOC(atindx,(dtset%natom))
+ ABI_MALLOC(atindx1,(dtset%natom))
+ ABI_MALLOC(nattyp,(psps%ntypat))
+ indx=1
+ do itypat=1,psps%ntypat
+   nattyp(itypat)=0
+   do iatom=1,dtset%natom
+     if(dtset%typat(iatom)==itypat)then
+       atindx(iatom)=indx
+       atindx1(indx)=iatom
+       indx=indx+1
+       nattyp(itypat)=nattyp(itypat)+1
+     end if
+   end do
+ end do
+
+ ABI_MALLOC(ncpp_paw_ij,(0))
+ ABI_MALLOC(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
+ call getph(atindx,dtset%natom,ngfft1,ngfft2,ngfft3,ph1d,crystal%xred)
+
+ !==== Initialize most of the Hamiltonian ====
+ !Allocate all arrays and initialize quantities that do not depend on k and spin.
+ !gs_hamk is the normal hamiltonian at k
+ call gs_hamk%init(psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,&
+      & dtset%typat,crystal%xred,dtset%nfft,dtset%mgfft,dtset%ngfft,crystal%rprimd,&
+      & dtset%nloalg,paw_ij=ncpp_paw_ij,ph1d=ph1d,usecprj=usecprj_local,&
+      & nucdipmom=dtset%nucdipmom)
+
+ ! iterate over spin channels
+ bdtot_index=0
+ icg = 0
+ do isppol = 1, dtset%nsppol
+
+   !========= construct local potential ==================
+   ABI_MALLOC(vlocal,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc))
+   call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+     & dtset%nspden, gs_hamk%nvloc, 1, pawfgr, mpi_enreg, vtrial, vlocal)
+   call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
+
+   !========  compute nuclear dipole vector potential (may be zero) ==========
+   has_nucdip = ANY( ABS(dtset%nucdipmom) .GT. tol8 )
+   if(has_nucdip) then
+     nucdip_dirs=3
+     ABI_MALLOC(vectornd,(nfftf,dtset%nspden,nucdip_dirs))
+     vectornd = zero
+     call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,&
+       & dtset%nspden,dtset%nucdipmom,crystal%rprimd,vectornd,crystal%xred)
+     ABI_MALLOC(vectornd_pac,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,nucdip_dirs))
+     call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+          & dtset%nspden, gs_hamk%nvloc, nucdip_dirs, pawfgr, mpi_enreg, vectornd,vectornd_pac)
+     ABI_FREE(vectornd)
+     call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
+   else
+     nucdip_dirs=0
+   end if
+
+ !  !========  compute vxctaulocal if vxctau present =====================
+
+   if (usevxctau==1) then
+     ABI_MALLOC(vxctaulocal,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,4))
+     call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+       & dtset%nspden, gs_hamk%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
+     call gs_hamk%load_spin(isppol, vxctaulocal=vxctaulocal)
+   end if
+
+   ikg = 0
+   !============= BIG FAT KPT LOOP :) ===========================
+   do ikpt = 1, dtset%nkpt
+
+     nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+     nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
+
+     ! if the current kpt is not on the current processor, cycle
+     if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
+       bdtot_index=bdtot_index+nband_k
+       cycle
+     end if
+
+     kpoint(:)=ebands_k%kptns(:,ikpt)
+     npw_k = ebands_k%npwarr(ikpt)
+     npwsp = npw_k*dtset%nspinor
+
+     ! retrieve kg_k at this k point
+     ABI_MALLOC(kg_k,(3,npw_k))
+     kg_k(1:3,1:npw_k) = kg(1:3,ikg+1:ikg+npw_k)
+
+     ! retrieve ylm at this k point
+     ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
+     ABI_MALLOC(ylmgr_k,(npw_k,3,psps%mpsang*psps%mpsang*psps%useylm))
+
+     ! retrieve occupation numbers at this k point
+     ABI_MALLOC(occ_k,(nband_k))
+     occ_k(:)=ebands_k%occ(1:nband_k,ikpt,isppol)
+
+     ! Compute kinetic energy at kpt
+     ABI_MALLOC(kinpw,(npw_k))
+     kinpw(:) = zero
+     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,crystal%gmet,&
+       & kg_k,kinpw,kpoint,npw_k,0,0)
+
+     ! Compute k+G at this k point (relevant only for useylm=1)
+     nkpg=3*dtset%optforces*dtset%nloalg(3)
+     ABI_MALLOC(kpg_k,(npw_k,nkpg))
+     call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+
+     ABI_MALLOC(ph3d,(2,npw_k,dtset%natom))
+
+ !   Compute nonlocal form factors ffnl at all (k+G):
+     ider=0;idir=0;dimffnl=1
+     ABI_MALLOC(ffnl_k,(npw_k,dimffnl,psps%lmnmax,dtset%ntypat))
+     call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl_k,psps%ffspl,&
+       & crystal%gmet,crystal%gprimd,ider,idir,psps%indlmn,&
+       & kg_k,kpg_k,kpoint,psps%lmnmax,&
+       & psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
+       & npw_k,dtset%ntypat,psps%pspso,psps%qgrid_ff,crystal%rmet,&
+       & psps%usepaw,psps%useylm,ylm_k,ylmgr_k,kinpw=kinpw)
+     !  - Load k-dependent quantities in the Hamiltonian
+     call gs_hamk%load_k(kpt_k=kpoint(:),istwf_k=istwf_k,npw_k=npw_k,&
+       & kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl_k,ph3d_k=ph3d,&
+       & compute_ph3d=.TRUE.,compute_gbound=(mpi_enreg%paral_kgb.NE.1))
+
+     ABI_SFREE(ylm_k)
+     ABI_SFREE(ylmgr_k)
+     
+     ! retrieve ground state wavefunctions at this k point and isppol
+     mcgk = npw_k*nband_k*dtset%nspinor
+     ABI_MALLOC(cg_k,(2,mcgk))
+     cg_k = cg(1:2,icg+1:icg+mcgk)
+
+     ! retrieve first order wavefunctions at this k point and isppol
+     ABI_MALLOC(cg1_k,(2,mcgk,3))
+     cg1_k = cg1(1:2,icg+1:icg+mcgk,1:3)
+
+     ! retrieve zeroth order eigenvalues at this k point and isppol
+     ABI_MALLOC(eig_k,(nband_k))
+     eig_k(:)=ebands_k%eig(1:nband_k,ikpt,isppol)
+
+     ! set up normalization factors at this k point
+     ABI_MALLOC(trnrm,(nband_k))
+     trnrm(1:nband_k) = ebands_k%occ(1:nband_k,ikpt,isppol)*dtset%wtk(ikpt)/crystal%ucvol
+
+     !--------------------------------------------------------------------------------
+     ! Finally ready to compute contributions to orbital magnetism and Berry curvature
+     !--------------------------------------------------------------------------------
+
+     ! ZTG23 Eq. 36 term 2 and Eq. 46 term 1
+     call orbmag_cc_k_ncpp(dtset,eig_k,fermie,cg1_k,gs_hamk,ikpt,isppol,&
+       & mcgk,mpi_enreg,nband_k,npw_k,orbmag_mesh)
+
+     ! accumulate terms
+     do nn = 1, nband_k
+       if(abs(trnrm(nn)).LT.tol8) cycle
+       orbmag_mesh%chern_terms(nn,isppol,1:3,ibcc:ibvv1) = orbmag_mesh%chern_terms(nn,isppol,1:3,ibcc:ibvv1) + &
+           & trnrm(nn)*orbmag_mesh%cmesh(nn,ikpt,isppol,1:3,ibcc:ibvv1)
+       orbmag_mesh%orbmag_terms(nn,isppol,1:3,incc:inbm) = orbmag_mesh%orbmag_terms(nn,isppol,1:3,incc:inbm) + &
+           & trnrm(nn)*orbmag_mesh%omesh(nn,ikpt,isppol,1:3,incc:inbm)
+     end do ! loop on bands
+
+     icg = icg + mcgk
+     ikg = ikg + npw_k
+     bdtot_index=bdtot_index+nband_k
+
+     ABI_SFREE(ffnl_k)
+     ABI_SFREE(ph3d)
+     ABI_SFREE(kpg_k)
+     ABI_SFREE(kg_k)
+     ABI_SFREE(kinpw)
+     ABI_SFREE(cg_k)
+     ABI_SFREE(cg1_k)
+     ABI_SFREE(eig_k)
+     ABI_SFREE(occ_k)
+     ABI_SFREE(trnrm)
+
+   end do ! end loop over kpts
+
+   ABI_SFREE(vlocal)
+   ABI_SFREE(vectornd_pac)
+   ABI_SFREE(vxctaulocal)
+
+ end do ! end loop over isppol
+
+ ! accumulate data over processors
+ call orbmag_mesh%mpisum(nproc,spaceComm)
+ 
+ ! prepare terms for output to abo file
+ call orbmag_mesh%term_scale(crystal,dtset)
+
+ ! get the Lamb term
+ call lamb_core(atindx,dtset,omlamb,pawtab,psps%usepaw)
+
+ ! output raw data to netcdf file for more detailed postprocessing
+ if (me == master) then
+   fname = trim(dtfil%filnam_ds(4))//'_ORBMAG.nc'
+   NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
+   call orbmag_ncwrite(crystal,dtset,ebands_k,hdr,ncid,orbmag_mesh)
+   NCF_CHECK(nf90_close(ncid))
+ end if
+
+ ! output summary to abo file
+ call orbmag_mesh%output(dtset,omlamb)
+
+!!---------------------------------------------------
+!! deallocate memory
+!!---------------------------------------------------
+
+ call gs_hamk%free()
+ call orbmag_mesh%free()
+ ABI_SFREE(ncpp_paw_ij)
+ ABI_SFREE(ph1d)
+ ABI_SFREE(atindx)
+ ABI_SFREE(atindx1)
+ ABI_SFREE(nattyp)
+
+
+end subroutine orbmag_ncpp
+!!***
+
 
 !!****f* ABINIT/orbmag
 !! NAME
@@ -369,7 +721,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
    end do
  end do
 
- ABI_MALLOC(ph1d,(2,dtset%natom*(2*(ngfft1+ngfft2+ngfft3)+3)))
+ ABI_MALLOC(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
  call getph(atindx,dtset%natom,ngfft1,ngfft2,ngfft3,ph1d,crystal%xred)
 
  ABI_MALLOC(kg_k,(3,mpw))
@@ -654,7 +1006,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  call orbmag_mesh%term_scale(crystal,dtset)
 
  ! get the Lamb term
- call lamb_core(atindx,dtset,omlamb,pawtab)
+ call lamb_core(atindx,dtset,omlamb,pawtab,psps%usepaw)
 
  ! output raw data to netcdf file for more detailed postprocessing
  if (me == master) then
@@ -1155,6 +1507,143 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,
 
 end subroutine orbmag_nl_k
 !!***
+
+!!****f* ABINIT/orbmag_cc_k_ncpp
+!! NAME
+!! orbmag_cc_k_ncpp
+!!
+!! FUNCTION
+!! computes <P_c du/dk|H + E*S|P_c du/dk> term in orbital magnetism, for NCPP
+!!
+!! INPUTS
+!!  atindx(natom)=index table for atoms (see gstate.f)
+!!  cprj1_k(dtset%natom,mcprjk)<type(pawcprj_type)>=cprj for Pc cg1_k
+!!  dimlmn(dtset%natom)=cprj lmn dimensions
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  eig_k(nband_k)=gs eigenvalues at this kpt
+!!  fermie=offset energy to use
+!!  gcg1_k(2,mcgk,3)=gauge adjusted cg1_k
+!!  gs_hamk<type(gs_hamiltonian_type)>=ground state Hamiltonian at this k
+!!  ikpt=current k pt
+!!  isppol=current spin polarization
+!!  mcgk=dimension of cg_k
+!!  mcprjk=dimension of cprj_k
+!!  mkmem_rbz=kpts in memory
+!!  mpi_enreg<type(MPI_type)>=information about MPI parallelization
+!!  nband_k=bands at this kpt
+!!  npw_k=number of planewaves at this kpt
+!!  occ_k=band occupations at this kpt
+!!  ucvol=unit cell volume
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!  orbmag_mesh%omesh, orbmag_mesh%cmesh
+!!
+!! TODO
+!!
+!! NOTES
+!! ZTG23 Eq. 36 term 2 and Eq. 46 term 1
+!!
+!! SOURCE
+
+subroutine orbmag_cc_k_ncpp(dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
+    & mcgk,mpi_enreg,nband_k,npw_k,orbmag_mesh)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: ikpt,isppol,mcgk,nband_k,npw_k
+  real(dp),intent(in) :: fermie
+  type(dataset_type),intent(in) :: dtset
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+  type(MPI_type), intent(inout) :: mpi_enreg
+  type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
+
+  !arrays
+  real(dp),intent(in) :: eig_k(nband_k)
+  real(dp),intent(in),target :: gcg1_k(2,mcgk,3)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,bdir,cpopt,gdir
+  integer :: ndat,nn,npwsp,sij_opt,tim_getghc,type_calc
+  real(dp) :: lams
+  complex(dp) :: prefac_b,prefac_m
+  !arrays
+  real(dp) bdot(2),mdot(2)
+  real(dp),allocatable :: gec(:,:),gvnlxc(:,:)
+  real(dp),allocatable,target :: ghc(:,:)
+  real(dp),pointer :: du_dbeta(:,:),du_dgamma(:,:)
+  complex(dp) :: m1(3),b1(3)
+  type(pawcprj_type),allocatable :: cwaveprj1(:,:)
+!--------------------------------------------------------------------
+
+ npwsp = npw_k*dtset%nspinor
+
+ ABI_MALLOC(ghc,(2,npwsp))
+ ABI_MALLOC(gec,(2,npwsp))
+ ABI_MALLOC(gvnlxc,(2,npwsp))
+ ABI_MALLOC(cwaveprj1,(dtset%natom,0))
+
+ tim_getghc = 0
+ lams = zero
+ ndat = 1
+ 
+ prefac_b = cbc*c2
+ prefac_m = com*c2
+ do nn = 1, nband_k
+   cpopt = -1; sij_opt = 0
+   type_calc = 0 ! apply local and non-local Hamiltonian
+
+   m1 = czero
+   b1 = czero
+
+   do adir = 1, 3
+
+     ! even permutation of adir,bdir,gdir
+     ! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
+     ! double the original even term
+     bdir=modulo(adir,3)+1
+     gdir=modulo(bdir,3)+1
+     
+     du_dgamma => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
+
+     ! compute H|Pc d_\gamma u>
+     ! [H+(E - 2\mu)]|ket> is needed for orbmag
+     ! -2|ket> needed for chern
+     call getghc(cpopt,du_dgamma,cwaveprj1,ghc,gec,gs_hamk,gvnlxc,lams,mpi_enreg,&
+       & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
+
+     gec(1:2,1:npwsp) = (eig_k(nn) - two*fermie)*du_dgamma(1:2,1:npwsp)
+     ghc(1:2,1:npwsp) = ghc(1:2,1:npwsp) + gec(1:2,1:npwsp)
+
+     du_dbeta => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
+     mdot = cg_zdotc(npwsp,du_dbeta,ghc); bdot = -two*cg_zdotc(npwsp,du_dbeta,du_dgamma)
+
+     ! cross product term adir,gdir,bdir leads to (-i/2)(Z-Z*) and 
+     ! double the original even term: this is the origin of the factor of two
+      orbmag_mesh%omesh(nn,ikpt,isppol,adir,incc) =  &
+       & orbmag_mesh%omesh(nn,ikpt,isppol,adir,incc) + &
+       & two*real(prefac_m*CMPLX(mdot(1),mdot(2)))
+      orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibcc) = &
+       & orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibcc) - &
+       & four*real(prefac_b*CMPLX(bdot(1),bdot(2)))
+
+   end do ! adir
+
+ end do !nn
+
+ if(ASSOCIATED(du_dbeta)) NULLIFY(du_dbeta)
+ if(ASSOCIATED(du_dgamma)) NULLIFY(du_dgamma)
+
+ ABI_SFREE(ghc)
+ ABI_SFREE(gec)
+ ABI_SFREE(gvnlxc)
+ ABI_SFREE(cwaveprj1)
+
+end subroutine orbmag_cc_k_ncpp
+!!***
+
 
 !!****f* ABINIT/orbmag_cc_k
 !! NAME
@@ -1927,10 +2416,11 @@ end subroutine make_pcg1
 !!
 !! SOURCE
 
-subroutine lamb_core(atindx,dtset,omlamb,pawtab)
+subroutine lamb_core(atindx,dtset,omlamb,pawtab,usepaw)
 
   !Arguments ------------------------------------
   !scalars
+  integer,intent(in) :: usepaw
   type(dataset_type),intent(in) :: dtset
 
   !arrays
@@ -1952,9 +2442,11 @@ subroutine lamb_core(atindx,dtset,omlamb,pawtab)
     ! if user input lambsig specifically in the input file, use it
     if (abs(dtset%lambsig(itypat)).GT.tol8) then
       lambsig=dtset%lambsig(itypat)
-    ! else use the value read in to pawtab structure (which might well be zero)
-    else
+    ! else if paw use the value read in to pawtab structure (which might well be zero)
+    else if (usepaw .EQ. 1) then
       lambsig=pawtab(itypat)%lamb_shielding
+    else 
+      lambsig = zero
     end if
     do adir = 1, 3
       omlamb(adir) = omlamb(adir) - lambsig*dtset%nucdipmom(adir,iat)

@@ -1555,7 +1555,7 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
  ghc_vectornd(:,:)=zero
 
  !! JWZ debug initial code was only for nvloc==1 case
- !! if (nvloc/=1) return
+ if (nvloc/=1) return
 
  nspinortot=min(2,(1+mpi_enreg%paral_spinor)*my_nspinor)
  if (mpi_enreg%paral_spinor==0) then
@@ -1589,16 +1589,17 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
     ! compute k + G. Note these are in reduced coords
     ABI_MALLOC(kgkpk,(npw_k,3))
     do ipw = 1, npw_k
-       kgkpk(ipw,:) = kpt(:) + kg_k(:,ipw)
+      kgkpk(ipw,:) = kpt(:) + kg_k(:,ipw)
     end do
 
     ! make 2\pi(k+G)c(G)|G> by element-wise multiplication
     do idir = 1, 3
-       do idat = 1, ndat
-          iv1=1+(idat-1)*npw_k; iv2=-1+iv1+npw_k
-          gcwavef(1,iv1:iv2,idir) = cwavef(1,iv1:iv2)*kgkpk(1:npw_k,idir)
-          gcwavef(2,iv1:iv2,idir) = cwavef(2,iv1:iv2)*kgkpk(1:npw_k,idir)
-       end do
+      do idat = 1, ndat
+        do ipw=1,npw_k
+          gcwavef(1,ipw+(idat-1)*npw_k,idir) = cwavef(1,ipw+(idat-1)*npw_k)*kgkpk(ipw,idir)
+          gcwavef(2,ipw+(idat-1)*npw_k,idir) = cwavef(2,ipw+(idat-1)*npw_k)*kgkpk(ipw,idir)
+        end do
+      end do
     end do
     ABI_FREE(kgkpk)
     gcwavef = gcwavef*two_pi
@@ -1614,11 +1615,13 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
       call fourwf(1,vectornd_dir,gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
            istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
            &     tim_fourwf,weight,weight,gpu_option=gpu_option)
-!      call fourwf(1,vectornd(:,:,:,:,idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
-!           istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-!           &     tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
-      ghc_vectornd=ghc_vectornd+ghc1
+      do idat=1,ndat
+        do ipw=1,npw_k
+          ghc_vectornd(:,ipw+(idat-1)*npw_k)=ghc_vectornd(:,ipw+(idat-1)*npw_k)+ghc1(:,ipw+(idat-1)*npw_k)
+        end do
+      end do
+      !ghc_vectornd=ghc_vectornd+ghc1
     end do ! idir
     ABI_FREE(vectornd_dir)
     ABI_FREE(gcwavef)

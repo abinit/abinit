@@ -61,7 +61,7 @@ module m_dfpt_loopert
  use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_iowf,       only : outwf, outresid
  use m_ioarr,      only : read_rhor
- use m_orbmag,     only : orbmag
+ use m_orbmag,     only : orbmag, orbmag_ncpp
  use m_pawang,     only : pawang_type, pawang_init, pawang_free
  use m_pawrad,     only : pawrad_type
  use m_pawtab,     only : pawtab_type
@@ -2290,16 +2290,18 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
      end if
      vtrial_local = vtrial
-     call orbmag(cg,cg1_3,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr0,kg,mcg,mcg1,mcprj,mkmem_rbz,&
-       & mpi_enreg,mpw,nfftf,ngfftf,paw_ij,pawfgr,pawrad,pawtab,psps,usevxctau,&
-       & vtrial_local,vxctau,ylm,ylmgr)
-     if( ALLOCATED(vtrial_local) ) then
-       ABI_FREE(vtrial_local)
+     if (psps%usepaw .EQ. 1) then
+       call orbmag(cg,cg1_3,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr0,kg,mcg,mcg1,&
+         & mcprj,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,paw_ij,pawfgr,pawrad,pawtab,psps,&
+         & usevxctau,vtrial_local,vxctau,ylm,ylmgr)
+     else
+       call orbmag_ncpp(cg,cg1_3,dtfil,dtset,crystal,ebands_k,kg,gsqcut,hdr0,&
+         & mcg,mcg1,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,pawfgr,pawtab,psps,&
+         & usevxctau,vtrial_local,vxctau)
      end if
-     if( ALLOCATED(cg1_3) ) then
-       ABI_FREE(cg1_3)
-       has_cg1_3(:) = .FALSE.
-     end if
+     ABI_SFREE(vtrial_local)
+     ABI_SFREE(cg1_3)
+     has_cg1_3(:) = .FALSE.
    end if ! end call orbmag
 
    if(mpi_enreg%paral_pert==1) then
