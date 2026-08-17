@@ -58,6 +58,7 @@ module m_orbmag
   use m_nctk
   use netcdf
   use m_nonlop,           only : nonlop
+  use m_nonlop_ylm,       only : nonlop_ylm
   use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free,pawcprj_getdim, pawcprj_get, pawcprj_put
   use m_pawdij,           only : pawv1
   use m_pawfgr,           only : pawfgr_type
@@ -211,8 +212,6 @@ module m_orbmag
   private :: dterm_LR
   private :: dterm_BM
   private :: local_fermie
-  private :: cmat
-  private :: lmat
 
   private :: lamb_core
   private :: make_pcg1
@@ -955,12 +954,12 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      ! ZTG23 text after Eq. 42
      ! <L_R> contribution
-     call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,inlr,isppol,&
+     call orbmag_nl1_k(atindx,atindx1,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,inlr,isppol,&
        & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm)
 
      ! ZTG23 Eq. 43
      ! A0.An contribution
-     call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,inbm,isppol,&
+     call orbmag_nl1_k(atindx,atindx1,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,inbm,isppol,&
        & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm)
 
      ! accumulate terms
@@ -1283,7 +1282,7 @@ end subroutine orbmag_term_scale
 !!
 !! SOURCE
 
-subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,&
+subroutine orbmag_nl1_k(atindx,atindx1,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,&
     & oterm,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm)
 
   !Arguments ------------------------------------
@@ -1296,22 +1295,22 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,&
   type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
 
   !arrays
-  integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
+  integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom),dimlmn(dtset%natom)
   real(dp),intent(in) :: trnrm(nband_k)
   real(dp),intent(in),target :: cg_k(2,mcgk)
   type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,mcprjk)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,choice,cpopt,dimekb1,dimekb2,dimekb3
-  integer :: n4,n5,n6,ndat,nn,nnlout,npwsp
+  integer :: adir,choice,cpopt,dimenl1,dimenl2,dimenl3,dimffnl_k
+  integer :: n4,n5,n6,ndat,nkpg,nn,nnlout,npwsp
   integer :: paw_opt,signs,tim_nonlop
+  real(dp) :: lambda
   complex(dp) :: prefac_m,ormesh_fac
   logical :: need_ormesh
-  type(gs_hamiltonian_type),target :: gs_hamk_local
   !arrays
-  real(dp) :: enlout(1),lambda(1),udotu(2)
-  real(dp),allocatable :: fofr(:,:,:,:),svectout(:,:)
+  real(dp) :: enlout(1),udotu(2)
+  real(dp),allocatable :: enl(:,:,:,:),fofr(:,:,:,:),svectout(:,:)
   real(dp),allocatable,target :: vectout(:,:)
   real(dp),pointer :: cwavef(:,:)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
@@ -1322,12 +1321,13 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,&
  ABI_MALLOC(vectout,(2,npwsp))
  ABI_MALLOC(svectout,(2,npwsp))
 
- ! make a deep copy of gs_hamk so we can sub in the LR and BM 
- ! Dij values without destroying gs_hamk
- call gs_hamk%copy(gs_hamk_local)
- dimekb1=size(gs_hamk_local%ekb_spin,1)
- dimekb2=size(gs_hamk_local%ekb_spin,2)
- dimekb3=size(gs_hamk_local%ekb_spin,3)
+ dimenl1=size(dterm%ekb_LR,1)
+ dimenl2=size(dterm%ekb_LR,2)
+ dimenl3=size(dterm%ekb_LR,3)
+ ABI_MALLOC(enl,(dimenl1,dimenl2,dimenl3,1))
+
+ dimffnl_k=size(gs_hamk%ffnl_k,2)
+ nkpg=size(gs_hamk%kpg_k,2)
 
  need_ormesh = (dtset%orbmag .EQ. 4)
  if (need_ormesh) then
@@ -1345,23 +1345,30 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,&
   
    do adir = 1, 3
      
-     gs_hamk_local%ekb_spin = zero
      select case (oterm)
      case ( inlr )
-       gs_hamk_local%ekb_spin(1:dimekb1,1:dimekb2,1:dimekb3,1,1) = &
-         & dterm%ekb_LR(1:dimekb1,1:dimekb2,1:dimekb3,adir)
+       enl(1:dimenl1,1:dimenl2,1:dimenl3,1)=dterm%ekb_LR(1:dimenl1,1:dimenl2,1:dimenl3,adir)
      case ( inbm )
-       gs_hamk_local%ekb_spin(1:dimekb1,1:dimekb2,1:dimekb3,1,1) = &
-         & dterm%ekb_BM(1:dimekb1,1:dimekb2,1:dimekb3,adir)
+       enl(1:dimenl1,1:dimenl2,1:dimenl3,1)=dterm%ekb_BM(1:dimenl1,1:dimenl2,1:dimenl3,adir)
      case default
-       gs_hamk_local%ekb_spin(1:dimekb1,1:dimekb2,1:dimekb3,1,1) = zero
+       enl(1:dimenl1,1:dimenl2,1:dimenl3,1)=zero
      end select
 
      ! use nonlop to construct vectout = \sum_ij |p_i>D_ij<p_j|unk>
      choice = 1; cpopt = 4; paw_opt = 1; signs = 2; nnlout = 1; ndat = 1
-     call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk_local,adir,lambda,mpi_enreg,ndat,nnlout,&
-       & paw_opt,signs,svectout,tim_nonlop,cwavef,vectout)
+
+     call nonlop_ylm(atindx1,choice,cpopt,cwaveprj,dimenl1,dimenl2,1,dimffnl_k,dimffnl_k,&
+       & enl,enlout,gs_hamk%ffnl_k,gs_hamk%ffnl_k,gs_hamk%gprimd,adir,gs_hamk%indlmn,gs_hamk%istwf_k,&
+       & gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,gs_hamk%kpt_k,lambda,&
+       & gs_hamk%lmnmax,gs_hamk%matblk,gs_hamk%mgfft,mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,&
+       & gs_hamk%ngfft,nkpg,nkpg,gs_hamk%nloalg,nnlout,npw_k,npw_k,dtset%nspinor,dtset%nspinor,&
+       & dtset%ntypat,paw_opt,gs_hamk%phkxred,gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ph3d_k,&
+       & signs,gs_hamk%sij,svectout,gs_hamk%ucvol,cwavef,vectout)
+     
+     !call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk_local,adir,lambda,mpi_enreg,ndat,nnlout,&
+     !  & paw_opt,signs,svectout,tim_nonlop,cwavef,vectout)
      udotu=cg_zdotc(npwsp,cwavef,vectout)
+     
      orbmag_mesh%omesh(nn,ikpt,isppol,adir,oterm) = udotu(1)
 
      if (need_ormesh) then
@@ -1378,11 +1385,10 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,&
  ABI_SFREE(cwaveprj)
  IF(ASSOCIATED(cwavef)) NULLIFY(cwavef)
  ABI_SFREE(fofr)
+ ABI_SFREE(enl)
  ABI_SFREE(vectout)
  ABI_SFREE(svectout)
  
- call gs_hamk_local%free()
-
 end subroutine orbmag_nl1_k
 !!***
 
@@ -2944,10 +2950,9 @@ subroutine dterm_LR(atindx,dterm,dtset,gprimd,pawrad,pawtab)
   !Local variables -------------------------
   !scalars
   integer :: adir,iat,iatom,ilmn,il,im,itypat,jlmn,jl,jm
-  integer :: mm,mp
   integer :: klmn,kln,mesh_size,pwave_size
   real(dp) :: intg
-  complex(dp) :: cmat1,cmat2,lmatt,orbl_me
+  complex(dp) :: orbl_me
   !arrays
   complex(dp) :: dij_cart(3),dij_red(3)
   real(dp),allocatable :: ff(:)
@@ -2982,16 +2987,7 @@ subroutine dterm_LR(atindx,dterm,dtset,gprimd,pawrad,pawtab)
 
       do adir = 1, 3
       ! compute <L_dir>/2
-        !call slxyzs(il,im,adir,jl,jm,orbl_me)
-        orbl_me = czero
-        do mp = -il,il
-          do mm=-il,il
-            call cmat(cmat1,im,mp)
-            call cmat(cmat2,jm,mm)
-            call lmat(lmatt,adir,il,mp,mm)
-            orbl_me = orbl_me + CONJG(cmat1)*lmatt*cmat2
-          end do
-        end do
+        call slxyzs(il,im,adir,jl,jm,orbl_me)
         dij_cart(adir) = -half*orbl_me*intg
       end do ! end loop over adir
 
@@ -3717,114 +3713,5 @@ contains
 
 end subroutine orbmag_ncwrite
 !!***
-
-!!****f* ABINIT/cmat
-!! NAME
-!! cmat
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine cmat(cmt,m,mu)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: m,mu
-  complex(dp),intent(out) :: cmt
-
-  !arrays
-
-  !Local variables -------------------------
-  !scalars
-  integer :: am
-
-  !arrays
-
-!--------------------------------------------------------------------
-
-  if (m .GT. 0) then
-    if (mu .EQ. m) then
-      cmt = (-1**m)*cone/sqrt(2.0)
-    else if (mu .EQ. -m) then
-      cmt = cone/sqrt(2.0)
-    else
-      cmt = czero
-    end if
-  else if (m .EQ. 0) then
-    if (mu .EQ. m) then
-      cmt = cone
-    else
-      cmt = czero
-    end if
-  else
-    am=abs(m)
-    if (mu .EQ. am) then
-      cmt = -j_dpc*(-1**am)/sqrt(2.0)
-    else if (mu .EQ. -am) then
-      cmt = j_dpc/sqrt(2.0)
-    else
-      cmt = czero
-    end if
-  end if
-
-end subroutine cmat
-!!***
-
-!!****f* ABINIT/lmat
-!! NAME
-!! lmat
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine lmat(lmt,idir,ll,mp,m)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: idir,ll,mp,m
-  complex(dp),intent(out) :: lmt
-
-  !arrays
-
-  !Local variables -------------------------
-  !scalars
-
-  !arrays
-
-!--------------------------------------------------------------------
-
-  lmt = czero
-
-  select case (idir)
-  case (3)
-    if (mp .EQ. m) lmt = m*cone
-  case (1)
-    if (mp .EQ. m+1) lmt=0.5*cone*sqrt(real(ll*(ll+1)-m*(m+1)))
-    if (mp .EQ. m-1) lmt=0.5*cone*sqrt(real(ll*(ll+1)-m*(m-1)))
-  case (2)
-    if (mp .EQ. m+1) lmt=-0.5*j_dpc*sqrt(real(ll*(ll+1)-m*(m+1)))
-    if (mp .EQ. m-1) lmt= 0.5*j_dpc*sqrt(real(ll*(ll+1)-m*(m-1)))
-  case default
-    lmt = czero
-  end select
-
-end subroutine lmat
-!!***
-
-
 
 end module m_orbmag
