@@ -1304,7 +1304,7 @@ subroutine orbmag_nl1_k(atindx,atindx1,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ik
   !scalars
   integer :: adir,choice,cpopt,dimenl1,dimenl2,dimenl3,dimffnl_k
   integer :: n4,n5,n6,ndat,nkpg,nn,nnlout,npwsp
-  integer :: paw_opt,signs,tim_nonlop
+  integer :: paw_opt,signs
   real(dp) :: lambda
   complex(dp) :: prefac_m,ormesh_fac
   logical :: need_ormesh
