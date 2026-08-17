@@ -3252,9 +3252,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
   call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,8,(/-3,-2,-1,0,1,2,3,4/),iout)
   if(dt%orbmag .NE. 0) then
     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
-  ! only kptopt 3 or 0 are allowed, because ddk cannot use spatial symmetries and
-  ! nucdipmom breaks time reversal symmetry
-    call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,2,(/0,3/),iout)
+  ! only kptopt 0, 3, 4 are allowed, because ddk cannot use spatial symmetries and
+  ! time reversal symmetry is typically broken
+    call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,3,(/0,3,4/),iout)
   ! only kpt parallelism is allowed at present
     call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_kgb',dt%paral_kgb,1,(/0/),iout)
     if (dt%usepaw.EQ.1) then
