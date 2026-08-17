@@ -211,6 +211,8 @@ module m_orbmag
   private :: dterm_LR
   private :: dterm_BM
   private :: local_fermie
+  private :: cmat
+  private :: lmat
 
   private :: lamb_core
   private :: make_pcg1
@@ -2942,9 +2944,10 @@ subroutine dterm_LR(atindx,dterm,dtset,gprimd,pawrad,pawtab)
   !Local variables -------------------------
   !scalars
   integer :: adir,iat,iatom,ilmn,il,im,itypat,jlmn,jl,jm
+  integer :: mm,mp
   integer :: klmn,kln,mesh_size,pwave_size
   real(dp) :: intg
-  complex(dp) :: orbl_me
+  complex(dp) :: cmat1,cmat2,lmatt,orbl_me
   !arrays
   complex(dp) :: dij_cart(3),dij_red(3)
   real(dp),allocatable :: ff(:)
@@ -2979,7 +2982,16 @@ subroutine dterm_LR(atindx,dterm,dtset,gprimd,pawrad,pawtab)
 
       do adir = 1, 3
       ! compute <L_dir>/2
-        call slxyzs(il,im,adir,jl,jm,orbl_me)
+        !call slxyzs(il,im,adir,jl,jm,orbl_me)
+        orbl_me = czero
+        do mp = -il,il
+          do mm=-il,il
+            call cmat(cmat1,im,mp)
+            call cmat(cmat2,jm,mm)
+            call lmat(lmatt,adir,il,mp,mm)
+            orbl_me = orbl_me + CONJG(cmat1)*lmatt*cmat2
+          end do
+        end do
         dij_cart(adir) = -half*orbl_me*intg
       end do ! end loop over adir
 
@@ -3705,5 +3717,114 @@ contains
 
 end subroutine orbmag_ncwrite
 !!***
+
+!!****f* ABINIT/cmat
+!! NAME
+!! cmat
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine cmat(cmt,m,mu)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: m,mu
+  complex(dp),intent(out) :: cmt
+
+  !arrays
+
+  !Local variables -------------------------
+  !scalars
+  integer :: am
+
+  !arrays
+
+!--------------------------------------------------------------------
+
+  if (m .GT. 0) then
+    if (mu .EQ. m) then
+      cmt = (-1**m)*cone/sqrt(2.0)
+    else if (mu .EQ. -m) then
+      cmt = cone/sqrt(2.0)
+    else
+      cmt = czero
+    end if
+  else if (m .EQ. 0) then
+    if (mu .EQ. m) then
+      cmt = cone
+    else
+      cmt = czero
+    end if
+  else
+    am=abs(m)
+    if (mu .EQ. am) then
+      cmt = -j_dpc*(-1**am)/sqrt(2.0)
+    else if (mu .EQ. -am) then
+      cmt = j_dpc/sqrt(2.0)
+    else
+      cmt = czero
+    end if
+  end if
+
+end subroutine cmat
+!!***
+
+!!****f* ABINIT/lmat
+!! NAME
+!! lmat
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine lmat(lmt,idir,ll,mp,m)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: idir,ll,mp,m
+  complex(dp),intent(out) :: lmt
+
+  !arrays
+
+  !Local variables -------------------------
+  !scalars
+
+  !arrays
+
+!--------------------------------------------------------------------
+
+  lmt = czero
+
+  select case (idir)
+  case (3)
+    if (mp .EQ. m) lmt = m*cone
+  case (1)
+    if (mp .EQ. m+1) lmt=0.5*cone*sqrt(real(ll*(ll+1)-m*(m+1)))
+    if (mp .EQ. m-1) lmt=0.5*cone*sqrt(real(ll*(ll+1)-m*(m-1)))
+  case (2)
+    if (mp .EQ. m+1) lmt=-0.5*j_dpc*sqrt(real(ll*(ll+1)-m*(m+1)))
+    if (mp .EQ. m-1) lmt= 0.5*j_dpc*sqrt(real(ll*(ll+1)-m*(m-1)))
+  case default
+    lmt = czero
+  end select
+
+end subroutine lmat
+!!***
+
+
 
 end module m_orbmag
