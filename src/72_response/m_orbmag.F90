@@ -54,7 +54,7 @@ module m_orbmag
   use m_hdr
   use m_kg,               only : getph,mkkin,mkkpg,ph1d3d
   use m_mkffnl,           only : mkffnl
-  use m_mpinfo,           only : proc_distrb_cycle,proc_distrb_nband
+  use m_mpinfo,           only : proc_distrb_cycle,proc_distrb_nband,proc_distrb_cycle_bands
   use m_nctk
   use netcdf
   use m_nonlop,           only : nonlop
@@ -664,9 +664,9 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  !scalars
  character(len=fnlen) :: fname
  integer :: adir,bdtot_index,choice,cpopt,dimffnl,exchn2n3d
- integer :: iat,iatom,icg,icprj,ider,idir
+ integer :: iat,iatom,iband,icg,icprj,ider,idir
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,itypat,lmn2max
- integer :: me,mcgk,mcprjk,my_nspinor,nband_k,nband_me,ncid,ngfft1,ngfft2,ngfft3,ngfft4
+ integer :: me,mcgk,mcprjk,my_nspinor,nband_k,nband_k_me,ncid,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,nn,nkpg,npw_k,npwsp,nproc,nucdip_dirs,spaceComm
  integer,parameter :: master=0
  real(dp) :: arg,ecut_eff,fermie
@@ -686,6 +686,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  real(dp),allocatable :: vectornd(:,:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: vxctaulocal(:,:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
+ logical,allocatable :: cycle_bands(:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj1_k(:,:,:),cwaveprj(:,:)
 
  !----------------------------------------------
@@ -803,13 +804,28 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
    do ikpt = 1, dtset%nkpt
 
      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-     nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
+     ABI_MALLOC(cycle_bands,(nband_k))
 
-     ! if the current kpt is not on the current processor, cycle
-     if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
-       bdtot_index=bdtot_index+nband_k
+     ! number of bands on current processor for this k point
+     nband_k_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
+
+     ! if current kpt has no bands to treat, cycle to the next one
+     if (nband_k_me .EQ. 0) then
+       bdtot_index = bdtot_index + nband_k
        cycle
+     else
+       ! return vector of logicals for each band being on present proc
+       ! note that False means band is present on me ("don't cycle") while True means
+       ! band is not present on me ("do cycle")
+       call proc_distrb_cycle_bands(cycle_bands,mpi_enreg%proc_distrb,ikpt,isppol,me)
      end if
+    
+     ! original code for npband = 1 case 
+     !! if the current kpt is not on the current processor, cycle
+     !if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
+     !  bdtot_index=bdtot_index+nband_k
+     !  cycle
+     !end if
 
      kpoint(:)=ebands_k%kptns(:,ikpt)
      npw_k = ebands_k%npwarr(ikpt)
@@ -881,7 +897,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      ABI_SFREE(ylmgr_k)
      
      ! retrieve ground state wavefunctions at this k point and isppol
-     mcgk = npw_k*nband_k*dtset%nspinor
+     mcgk = npw_k*nband_k_me*dtset%nspinor
      ABI_MALLOC(cg_k,(2,mcgk))
      cg_k = cg(1:2,icg+1:icg+mcgk)
 
@@ -991,6 +1007,8 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      end do
      ABI_SFREE(cprj1_k)
      ABI_SFREE(trnrm)
+
+     ABI_SFREE(cycle_bands)
 
    end do ! end loop over kpts
 
