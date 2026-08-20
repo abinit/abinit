@@ -664,7 +664,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  !scalars
  character(len=fnlen) :: fname
  integer :: adir,bdtot_index,choice,cpopt,dimffnl,exchn2n3d
- integer :: iat,iatom,iband,icg,icprj,ider,idir
+ integer :: iat,iatom,iband,iband_ctr,icg,icprj,ider,idir
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,itypat,lmn2max
  integer :: me,mcgk,mcprjk,my_nspinor,nband_k,nband_k_me,ncid,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,nn,nkpg,npw_k,npwsp,nproc,nucdip_dirs,spaceComm
@@ -676,7 +676,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  type(orbmag_mesh_type) :: orbmag_mesh
 
  !arrays
- integer,allocatable :: atindx(:),atindx1(:),dimlmn(:),kg_k(:,:),nattyp(:)
+ integer,allocatable :: atindx(:),atindx1(:),dimlmn(:),kg_k(:,:),kpt_band_procs(:),nattyp(:)
  real(dp) :: kpoint(3),omlamb(3)
  real(dp),allocatable :: cg1_k(:,:,:),cwavef(:,:),dkinpw(:,:),eig_k(:)
  real(dp),allocatable :: ffnl_k(:,:,:,:),kinpw(:),kpg_k(:,:),occ_k(:)
@@ -805,6 +805,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
      ABI_MALLOC(cycle_bands,(nband_k))
+     ABI_MALLOC(kpt_band_procs,(nband_k))
 
      ! number of bands on current processor for this k point
      nband_k_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
@@ -818,6 +819,11 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
        ! note that False means band is present on me ("don't cycle") while True means
        ! band is not present on me ("do cycle")
        call proc_distrb_cycle_bands(cycle_bands,mpi_enreg%proc_distrb,ikpt,isppol,me)
+       ! get processor index for band
+       kpt_band_procs=mpi_enreg%proc_distrb(ikpt,:,isppol)
+       do iband=1, nband_k
+         write(std_out,'(a,2i4)')'JWZ debug iband kpt_band_procs ',iband,kpt_band_procs(iband)
+       end do
      end if
     
      ! original code for npband = 1 case 
@@ -842,10 +848,25 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
        ylmgr_k(1:npw_k,1:3,ilm)=ylmgr(1+ikg:npw_k+ikg,1:3,ilm)
      end do
 
-     ! retrieve occupation numbers at this k point
-     ABI_MALLOC(occ_k,(nband_k))
+     ! retrieve occupation numbers and eigenvalues at this k point
+     ABI_MALLOC(occ_k,(nband_k_me))
+     ABI_MALLOC(eig_k,(nband_k_me))
      !occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
-     occ_k(:)=ebands_k%occ(1:nband_k,ikpt,isppol)
+     iband_ctr = 1
+     do iband = 1, nband_k
+       if (.NOT. cycle_bands(iband)) then
+         occ_k(iband_ctr) = ebands_k%occ(iband,ikpt,isppol)
+         eig_k(iband_ctr) = ebands_k%eig(iband,ikpt,isppol)
+         iband_ctr = iband_ctr + 1
+       else
+         cycle
+       end if
+     end do
+
+     ! occ_k(:)=ebands_k%occ(1:nband_k,ikpt,isppol)
+     ! retrieve zeroth order eigenvalues at this k point and isppol
+     ! eig_k(:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
+     ! eig_k(:)=ebands_k%eig(1:nband_k,ikpt,isppol)
 
      ! Compute kinetic energy at kpt
      kinpw(:) = zero
@@ -900,27 +921,23 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      mcgk = npw_k*nband_k_me*dtset%nspinor
      ABI_MALLOC(cg_k,(2,mcgk))
      cg_k = cg(1:2,icg+1:icg+mcgk)
-
+     
      ! retrieve first order wavefunctions at this k point and isppol
      ABI_MALLOC(cg1_k,(2,mcgk,3))
      cg1_k = cg1(1:2,icg+1:icg+mcgk,1:3)
-
-     ! retrieve zeroth order eigenvalues at this k point and isppol
-     ABI_MALLOC(eig_k,(nband_k))
-     !eig_k(:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
-     eig_k(:)=ebands_k%eig(1:nband_k,ikpt,isppol)
-
+   
      ! retrieve cprj_k at this k point and isppol
-     mcprjk = nband_k*dtset%nspinor
+     mcprjk = nband_k_me*dtset%nspinor
      ABI_MALLOC(cprj_k,(dtset%natom,mcprjk))
+     
      call pawcprj_alloc(cprj_k,cprj(1,1)%ncpgr,dimlmn)
      call pawcprj_get(atindx,cprj_k,cprj,dtset%natom,1,icprj,ikpt,0,isppol,dtset%mband,&
-       & mkmem_rbz,dtset%natom,nband_k,nband_k,dtset%nspinor,dtset%nsppol,0)
+       & mkmem_rbz,dtset%natom,nband_k_me,nband_k_me,dtset%nspinor,dtset%nsppol,0)
 
      ! gauge treatment of cg1_k
      ABI_MALLOC(gcg1_k,(2,mcgk,3))
      call gauge_treatment(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_k,gs_hamk,&
-         & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k,ngfft4,ngfft5,ngfft6,npw_k,&
+         & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k_me,ngfft4,ngfft5,ngfft6,npw_k,&
          & nucdip_dirs,occ_k,vectornd_pac)
      
      ! compute <p|gcg1> cprjs
@@ -932,7 +949,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      cpopt = 0
      idir = 0
      ABI_MALLOC(cwavef,(2,npwsp))
-     do nn = 1, nband_k
+     do nn = 1, nband_k_me
        do adir = 1, 3
          cwavef(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,adir)
          call getcprj(choice,cpopt,cwavef,cwaveprj,gs_hamk%ffnl_k,idir,&
@@ -1009,6 +1026,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      ABI_SFREE(trnrm)
 
      ABI_SFREE(cycle_bands)
+     ABI_SFREE(kpt_band_procs)
 
    end do ! end loop over kpts
 
