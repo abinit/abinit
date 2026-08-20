@@ -918,6 +918,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      &    cwavef, cwavef, 0, gpu_option=gs_hamk%gpu_option)
     
      ! Compute nuclear dipole energies for all bands in this block (use_gbt==0).
+     ! NOTE: this call is problematic in the npband /= 1 case. It does not crash
+     ! but doesn't return the correct band energies. However, the resulting end_k is
+     ! used only for printing. 
+     ! To be fixed eventually--jzwanzig 20 August 2026
      if(ANY(ABS(dtset%nucdipmom)>tol8)) then
        ABI_MALLOC(ghc_vectornd,(2,npw_k*my_nspinor*blocksize))
        call getghc_nucdip(cwavef,ghc_vectornd,gs_hamk%gbound_k,gs_hamk%istwf_k,kg_k,gs_hamk%kpt_k,&
