@@ -664,10 +664,10 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  !scalars
  character(len=fnlen) :: fname
  integer :: adir,bdtot_index,choice,cpopt,dimffnl,exchn2n3d
- integer :: iat,iatom,iband,iband_ctr,icg,icprj,ider,idir
- integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,itypat,lmn2max
+ integer :: iat,iatom,iband,iband_ctr,icg,icprj,ider,idir,ierr
+ integer :: ikg,ikg1,ikpt,ilm,indx,iproc,isppol,istwf_k,itypat,lmn2max
  integer :: me,mcgk,mcprjk,my_nspinor,nband_k,nband_k_me,ncid,ngfft1,ngfft2,ngfft3,ngfft4
- integer :: ngfft5,ngfft6,nn,nkpg,npw_k,npwsp,nproc,nucdip_dirs,spaceComm
+ integer :: ngfft5,ngfft6,nn,nkpg,npw_k,npwsp,nproc,nucdip_dirs,rank,spaceComm
  integer,parameter :: master=0
  real(dp) :: arg,ecut_eff,fermie
  logical :: has_nucdip
@@ -694,9 +694,9 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  ! set up basic FFT parameters
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
  istwf_k = 1
- spaceComm=mpi_enreg%comm_cell
+ spaceComm=mpi_enreg%comm_world
  nproc=xmpi_comm_size(spaceComm)
- me = mpi_enreg%me_kpt
+ me = mpi_enreg%me
  ngfft1=dtset%ngfft(1) ; ngfft2=dtset%ngfft(2) ; ngfft3=dtset%ngfft(3)
  ngfft4=dtset%ngfft(4) ; ngfft5=dtset%ngfft(5) ; ngfft6=dtset%ngfft(6)
  ecut_eff = dtset%ecut*(dtset%dilatmx)**2
@@ -704,6 +704,16 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
  ! Fermi energy
  call local_fermie(dtset,ebands_k,fermie,mpi_enreg)
+
+! if (me .EQ. 0) then
+!   write(std_out,'(a)')'JWZ debug hello from rank 0'
+!   do iproc=2,nproc
+!     call xmpi_recv(rank,iproc-1,0,spaceComm,ierr)
+!     write(std_out,'(a,i4)')'JWZ debug hello from rank ',rank
+!   end do
+! else
+!   call xmpi_send(me,0,0,spaceComm,ierr)
+! end if
 
  !Definition of atindx array
  !Generate an index table of atoms, in order for them to be used type after type.
@@ -804,8 +814,6 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
    do ikpt = 1, dtset%nkpt
 
      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-     ABI_MALLOC(cycle_bands,(nband_k))
-     ABI_MALLOC(kpt_band_procs,(nband_k))
 
      ! number of bands on current processor for this k point
      nband_k_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
@@ -815,15 +823,17 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
        bdtot_index = bdtot_index + nband_k
        cycle
      else
+       
        ! return vector of logicals for each band being on present proc
        ! note that False means band is present on me ("don't cycle") while True means
        ! band is not present on me ("do cycle")
+       ABI_MALLOC(cycle_bands,(nband_k))
        call proc_distrb_cycle_bands(cycle_bands,mpi_enreg%proc_distrb,ikpt,isppol,me)
+       
        ! get processor index for band
+       ABI_MALLOC(kpt_band_procs,(nband_k))
        kpt_band_procs=mpi_enreg%proc_distrb(ikpt,:,isppol)
-       do iband=1, nband_k
-         write(std_out,'(a,2i4)')'JWZ debug iband kpt_band_procs ',iband,kpt_band_procs(iband)
-       end do
+
      end if
     
      ! original code for npband = 1 case 
@@ -851,22 +861,16 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      ! retrieve occupation numbers and eigenvalues at this k point
      ABI_MALLOC(occ_k,(nband_k_me))
      ABI_MALLOC(eig_k,(nband_k_me))
-     !occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
+     ABI_MALLOC(trnrm,(nband_k_me))
      iband_ctr = 1
      do iband = 1, nband_k
-       if (.NOT. cycle_bands(iband)) then
-         occ_k(iband_ctr) = ebands_k%occ(iband,ikpt,isppol)
-         eig_k(iband_ctr) = ebands_k%eig(iband,ikpt,isppol)
-         iband_ctr = iband_ctr + 1
-       else
-         cycle
-       end if
+       if (cycle_bands(iband)) cycle
+       occ_k(iband_ctr) = ebands_k%occ(iband,ikpt,isppol)
+       eig_k(iband_ctr) = ebands_k%eig(iband,ikpt,isppol)
+       trnrm(iband_ctr) = &
+         & ebands_k%occ(iband,ikpt,isppol)*dtset%wtk(ikpt)/crystal%ucvol
+       iband_ctr = iband_ctr + 1
      end do
-
-     ! occ_k(:)=ebands_k%occ(1:nband_k,ikpt,isppol)
-     ! retrieve zeroth order eigenvalues at this k point and isppol
-     ! eig_k(:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
-     ! eig_k(:)=ebands_k%eig(1:nband_k,ikpt,isppol)
 
      ! Compute kinetic energy at kpt
      kinpw(:) = zero
@@ -937,7 +941,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      ! gauge treatment of cg1_k
      ABI_MALLOC(gcg1_k,(2,mcgk,3))
      call gauge_treatment(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_k,gs_hamk,&
-         & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k_me,ngfft4,ngfft5,ngfft6,npw_k,&
+         & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k,nband_k_me,ngfft4,ngfft5,ngfft6,npw_k,&
          & nucdip_dirs,occ_k,vectornd_pac)
      
      ! compute <p|gcg1> cprjs
@@ -965,38 +969,34 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      ABI_SFREE(cwavef)
      ABI_SFREE(phkxred)
 
-     ! set up normalization factors at this k point
-     ABI_MALLOC(trnrm,(nband_k))
-     trnrm(1:nband_k) = ebands_k%occ(1:nband_k,ikpt,isppol)*dtset%wtk(ikpt)/crystal%ucvol
-
      !--------------------------------------------------------------------------------
      ! Finally ready to compute contributions to orbital magnetism and Berry curvature
      !--------------------------------------------------------------------------------
 
      ! ZTG23 Eq. 36 term 2 and Eq. 46 term 1
      call orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k_me,npw_k,orbmag_mesh,trnrm)
 
-     ! ZTG23 Eq. 36 terms 3 and 4 and Eq. 46 term 2
-     call orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm)
+     !! ZTG23 Eq. 36 terms 3 and 4 and Eq. 46 term 2
+     !call orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
+     !  & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm)
 
-     ! ZTG23 Eq. 36 term 1
-     call orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,trnrm)
+     !! ZTG23 Eq. 36 term 1
+     !call orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,isppol,&
+     !  & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,trnrm)
 
-     ! ZTG23 text after Eq. 42
-     ! <L_R> contribution
-     call orbmag_nl1_k(atindx,atindx1,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,inlr,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm)
+     !! ZTG23 text after Eq. 42
+     !! <L_R> contribution
+     !call orbmag_nl1_k(atindx,atindx1,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,inlr,isppol,&
+     !  & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm)
 
-     ! ZTG23 Eq. 43
-     ! A0.An contribution
-     call orbmag_nl1_k(atindx,atindx1,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,inbm,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm)
+     !! ZTG23 Eq. 43
+     !! A0.An contribution
+     !call orbmag_nl1_k(atindx,atindx1,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,inbm,isppol,&
+     !  & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm)
 
      ! accumulate terms
-     do nn = 1, nband_k
+     do nn = 1, nband_k_me
        if(abs(trnrm(nn)).LT.tol8) cycle
        orbmag_mesh%chern_terms(nn,isppol,1:3,ibcc:ibvv1) = orbmag_mesh%chern_terms(nn,isppol,1:3,ibcc:ibvv1) + &
            & trnrm(nn)*orbmag_mesh%cmesh(nn,ikpt,isppol,1:3,ibcc:ibvv1)
@@ -2254,7 +2254,7 @@ end subroutine para_to_diag
 !!  mcprjk=dimension of cprj_k
 !!  mkmem_rbz=kpts in memory
 !!  mpi_enreg<type(MPI_type)>=information about MPI parallelization
-!!  nband_k=bands at this kpt
+!!  nband_k_me=bands at this kpt on current processor
 !!  npw_k=number of planewaves at this kpt
 !!  occ_k=band occupations at this kpt
 !!
@@ -2266,12 +2266,12 @@ end subroutine para_to_diag
 !! SOURCE
 
 subroutine gauge_treatment(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_k,gs_hamk,&
-    & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k,ngfft4,ngfft5,ngfft6,npw_k,&
+    & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k,nband_k_me,ngfft4,ngfft5,ngfft6,npw_k,&
     & nucdip_dirs,occ_k,vectornd_pac)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpw,nband_k,ngfft4,ngfft5,ngfft6
+  integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpw,nband_k,nband_k_me,ngfft4,ngfft5,ngfft6
   integer,intent(in) :: npw_k,nucdip_dirs
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
@@ -2279,7 +2279,7 @@ subroutine gauge_treatment(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gc
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3),eig_k(nband_k),dkinpw(mpw,3),occ_k(nband_k)
+  real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3),eig_k(nband_k_me),dkinpw(mpw,3),occ_k(nband_k_me)
   real(dp),intent(in) :: vectornd_pac(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,nucdip_dirs)
   real(dp),intent(out) :: gcg1_k(2,mcgk,3)
   type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,mcprjk)
@@ -2297,7 +2297,7 @@ subroutine gauge_treatment(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gc
   case ( -3 )
     ! Convert Berry DDK to diagonal gauge
     call para_to_diag(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_k,gs_hamk,&
-      & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k,ngfft4,ngfft5,ngfft6,npw_k,&
+      & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k_me,ngfft4,ngfft5,ngfft6,npw_k,&
       & nucdip_dirs,occ_k,vectornd_pac)
   case ( -2:-1 )
     ! Berry DDK already projected onto conduction space, leave in berry gauge
@@ -2305,13 +2305,13 @@ subroutine gauge_treatment(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gc
   case ( 3 ) 
     ! Convert PAW DDK to diagonal gauge
     call para_to_diag(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_k,gs_hamk,&
-      & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k,ngfft4,ngfft5,ngfft6,npw_k,&
+      & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k_me,ngfft4,ngfft5,ngfft6,npw_k,&
       & nucdip_dirs,occ_k,vectornd_pac)
   case default
     ! project cg1_k onto conduction space by removing ground PAW part; 
     ! stay in parallel transport gauge
     call make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
-      & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,gcg1_k)
+      & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,nband_k_me,npw_k,occ_k,gcg1_k)
   end select
 
 end subroutine gauge_treatment
@@ -2338,7 +2338,7 @@ end subroutine gauge_treatment
 !!  mcprjk=dimension of cprj_k
 !!  mkmem_rbz=kpts in memory
 !!  mpi_enreg<type(MPI_type)>=information about MPI parallelization
-!!  nband_k=bands at this kpt
+!!  nband_k_me=number of bands at this kpt on current processor
 !!  npw_k=number of planewaves at this kpt
 !!  occ_k=band occupations at this kpt
 !!
@@ -2351,26 +2351,28 @@ end subroutine gauge_treatment
 !! SOURCE
 
 subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
-    & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k)
+    & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,nband_k_me,npw_k,occ_k,pcg1_k)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,nband_k,npw_k
+  integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,nband_k,nband_k_me,npw_k
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   type(MPI_type), intent(inout) :: mpi_enreg
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3),occ_k(nband_k)
+  real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3),occ_k(nband_k_me)
   real(dp),intent(out) :: pcg1_k(2,mcgk,3)
   type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,mcprjk)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,choice,cpopt,iband,jband
+  integer :: adir,choice,cpopt,iband,iband_me,ierr,iproc,jband_me,me
   integer :: ndat,nnlout,npwsp,paw_opt,signs,tim_nonlop
   !arrays
+  integer :: idata(4)
+  integer,allocatable :: kpt_band_procs(:)
   real(dp) :: dotp(2),lambda(1)
   real(dp),allocatable :: cwavef(:,:),enlout(:),svectout(:,:)
   real(dp),allocatable :: vcg1(:,:),vectout(:,:)
@@ -2387,6 +2389,11 @@ subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
   nnlout = 0
   ndat = 1
 
+  ! get processor index for band
+  ABI_MALLOC(kpt_band_procs,(nband_k))
+  kpt_band_procs=mpi_enreg%proc_distrb(ikpt,:,isppol)
+  me = mpi_enreg%me
+
   npwsp = npw_k*dtset%nspinor
 
   ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
@@ -2400,34 +2407,50 @@ subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
 
   do adir = 1, 3
 
+    ! loop over all bands
+    iband_me = 0
     do iband = 1, nband_k
 
-      cwavef(1:2,1:npwsp)=cg_k(1:2,(iband-1)*npwsp+1:iband*npwsp)
+      if (me .EQ. kpt_band_procs(iband)) then
 
-      call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,iband,0,ikpt,0,isppol,dtset%mband,&
-        & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
+        iband_me = iband_me + 1
+        cwavef(1:2,1:npwsp)=cg_k(1:2,(iband_me-1)*npwsp+1:iband_me*npwsp)
 
-      ! compute S^1|u_i^0> where S^1 = \partial S/\partial k_adir, the k derivative of S in
-      ! direction adir
-      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,adir,lambda,mpi_enreg,ndat,&
-        & nnlout,paw_opt,signs,svectout,tim_nonlop,cwavef,vectout)
+        call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,iband_me,0,ikpt,0,isppol,dtset%mband,&
+          & mkmem_rbz,dtset%natom,1,nband_k_me,dtset%nspinor,dtset%nsppol,0)
+
+        ! compute S^1|u_i^0> where S^1 = \partial S/\partial k_adir, the k derivative of S in
+        ! direction adir
+        call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,adir,lambda,mpi_enreg,ndat,&
+          & nnlout,paw_opt,signs,svectout,tim_nonlop,cwavef,vectout)
+
+      end if
+
+      call xmpi_bcast(svectout,kpt_band_procs(iband),mpi_enreg%comm_band,ierr)
 
       !! form vcg1 = -1/2 \sum |u_j^0><u_j^0|S^1|u_i^0>, the valence band part of cg1
       vcg1 = zero
-      do jband = 1, nband_k
-        if(abs(occ_k(jband)).LT.tol8) cycle
-        cwavef(1:2,1:npwsp)=cg_k(1:2,(jband-1)*npwsp+1:jband*npwsp)
+      do jband_me = 1, nband_k_me
+        if(abs(occ_k(jband_me)).LT.tol8) cycle
+        cwavef(1:2,1:npwsp)=cg_k(1:2,(jband_me-1)*npwsp+1:jband_me*npwsp)
         dotp=cg_zdotc(npwsp,cwavef,svectout)
         vcg1(1,:) = vcg1(1,:) - half*( dotp(1)*cwavef(1,:) - dotp(2)*cwavef(2,:))
         vcg1(2,:) = vcg1(2,:) - half*( dotp(1)*cwavef(2,:) + dotp(2)*cwavef(1,:))
       end do
 
-      ! subtract vcg1 from cg1_k to obtain pcg1, the conduction band part of cg1
-      pcg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir) =cg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir)-&
-        &  vcg1(1:2,1:npwsp)
+      ! collect vcg1 from all processes
+      call xmpi_sum(vcg1,mpi_enreg%comm_band,ierr)
 
-    end do
-  end do
+      ! subtract vcg1 from cg1_k to obtain pcg1, the conduction band part of cg1
+      ! only if iband is on me
+      if (me .EQ. kpt_band_procs(iband)) then
+        pcg1_k(1:2,(iband_me-1)*npwsp+1:iband_me*npwsp,adir) =cg1_k(1:2,(iband_me-1)*npwsp+1:iband_me*npwsp,adir)-&
+          &  vcg1(1:2,1:npwsp)
+      end if
+
+    end do ! end loop over all bands
+
+  end do ! end loop over directions
 
   ABI_FREE(cwavef)
   ABI_FREE(vectout)
@@ -2435,6 +2458,7 @@ subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
   ABI_FREE(svectout)
   call pawcprj_free(cwaveprj)
   ABI_FREE(cwaveprj)
+  ABI_FREE(kpt_band_procs)
 
 end subroutine make_pcg1
 !!***
