@@ -705,16 +705,6 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  ! Fermi energy
  call local_fermie(dtset,ebands_k,fermie,mpi_enreg)
 
-! if (me .EQ. 0) then
-!   write(std_out,'(a)')'JWZ debug hello from rank 0'
-!   do iproc=2,nproc
-!     call xmpi_recv(rank,iproc-1,0,spaceComm,ierr)
-!     write(std_out,'(a,i4)')'JWZ debug hello from rank ',rank
-!   end do
-! else
-!   call xmpi_send(me,0,0,spaceComm,ierr)
-! end if
-
  !Definition of atindx array
  !Generate an index table of atoms, in order for them to be used type after type.
  ABI_MALLOC(atindx,(dtset%natom))
@@ -1909,8 +1899,9 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,choice,cpopt,dnl_dum,fourwf_cplex,fourwf_option,gdir,me
+  integer :: adir,bdir,choice,cpopt,dnl_dum,fourwf_cplex,fourwf_option,gdir,ierr,me
   integer :: n4,n5,n6,ndat,nn,nn_me,nnlout,np,npwsp,paw_opt,signs,tim_fourwf,tim_getghc
+  real(dp) :: eig_k_nn
   complex(dp) :: b1,bdotc,bpdotc,gdotc,gpdotc,m1,mv2b,ormesh_fac,prefac_b,prefac_m
   logical :: need_ormesh
   !arrays
@@ -1936,7 +1927,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
  call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
  call pawcprj_alloc(vv2_cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
 
- ! get processor index for band
+ ! get processor index for bands
  ABI_MALLOC(kpt_band_procs,(nband_k))
  kpt_band_procs=mpi_enreg%proc_distrb(ikpt,:,isppol)
  me = mpi_enreg%me
@@ -1975,7 +1966,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
      
        ! extract |u_nk>
        unk => cg_k(1:2,(nn_me-1)*npwsp+1:nn_me*npwsp)
-       call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
+       call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn_me,0,ikpt,0,isppol,dtset%mband,&
          & mkmem_rbz,dtset%natom,1,nband_k_me,dtset%nspinor,dtset%nsppol,0)
 
        ! compute dS/dk_b|u_nk>
@@ -1985,10 +1976,15 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
        ! compute dS/dk_g |u_nk>
        call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,gdir,lamv,mpi_enreg,ndat,nnlout,&
          & paw_opt,signs,svectoutg,tim_getghc,unk,vectout)
+       
+       ! need this in the vv2 part, if we are using npband /= 1
+       eig_k_nn = eig_k(nn_me)
 
      end if
 
-     ! call xmpi_bcast
+     call xmpi_bcast(svectoutb,kpt_band_procs(nn),mpi_enreg%comm_band,ierr)
+     call xmpi_bcast(svectoutg,kpt_band_procs(nn),mpi_enreg%comm_band,ierr)
+     call xmpi_bcast(eig_k_nn,kpt_band_procs(nn),mpi_enreg%comm_band,ierr)
 
      if (me .EQ. kpt_band_procs(nn)) then
        ! extract |Pc du/dk_b>
@@ -2001,7 +1997,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
 
        ! here is <Pc du/dk_b|dS/dk_g|u_nk>*E_nk
        b1    = -prefac_b*gdotc
-       m1    =  prefac_m*gdotc*(eig_k(nn) - fermie)
+       m1    =  prefac_m*gdotc*(eig_k(nn_me) - fermie)
 
        ! add CONJG(<Pc du/dk_b|dS/dk_g|u_nk>)*E_nk
        b1    = b1    - prefac_b*CONJG(bdotc)
@@ -2030,17 +2026,21 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
      end if
 
      mv2b = czero
-     do np = 1, nband_k
+     do np = 1, nband_k_me
        bra => cg_k(1:2,(np-1)*npwsp+1:np*npwsp)
        gpdot=cg_zdotc(npwsp,bra,svectoutg); gpdotc=CMPLX(gpdot(1),gpdot(2))
        bpdot=cg_zdotc(npwsp,bra,svectoutb); bpdotc=CMPLX(bpdot(1),bpdot(2))
        !mv2b = mv2b + prefac_m*CONJG(bpdotc)*gpdotc*(eig_k(nn) - eig_k(np))
-       mv2b = mv2b + prefac_m*CONJG(bpdotc)*gpdotc*(eig_k(nn) - fermie)
+       mv2b = mv2b + prefac_m*CONJG(bpdotc)*gpdotc*(eig_k_nn - fermie)
      end do ! np
-    
-     ! Note that term VV2 has a minus sign in contrast to VV1 (see ZTG Eq. 36)
-     orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv2) = &
-       & orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv2) - two*real(mv2b)
+
+     call xmpi_sum(mv2b,mpi_enreg%comm_band,ierr)
+   
+     if (me .EQ. kpt_band_procs(nn)) then 
+       ! Note that term VV2 has a minus sign in contrast to VV1 (see ZTG Eq. 36)
+       orbmag_mesh%omesh(nn_me,ikpt,isppol,adir,invv2) = &
+         & orbmag_mesh%omesh(nn_me,ikpt,isppol,adir,invv2) - two*real(mv2b)
+     end if
 
      if (need_ormesh) then
 
