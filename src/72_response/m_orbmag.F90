@@ -543,7 +543,7 @@ subroutine orbmag_ncpp(cg,cg1,dtfil,dtset,crystal,ebands_k,kg,gsqcut,hdr,&
  end do ! end loop over isppol
 
  ! accumulate data over processors
- call orbmag_mesh%mpisum(nproc,spaceComm)
+ call orbmag_mesh%mpisum(spaceComm)
  
  ! prepare terms for output to abo file
  call orbmag_mesh%term_scale(crystal,dtset)
@@ -793,6 +793,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
    !========  compute vxctaulocal if vxctau present =====================
 
    if (usevxctau==1) then
+
      ABI_MALLOC(vxctaulocal,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,4))
      call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
        & dtset%nspden, gs_hamk%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
@@ -826,13 +827,6 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      end if
     
-     ! original code for npband = 1 case 
-     !! if the current kpt is not on the current processor, cycle
-     !if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
-     !  bdtot_index=bdtot_index+nband_k
-     !  cycle
-     !end if
-
      kpoint(:)=ebands_k%kptns(:,ikpt)
      npw_k = ebands_k%npwarr(ikpt)
      npwsp = npw_k*dtset%nspinor
@@ -1027,7 +1021,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  end do ! end loop over isppol
 
  ! accumulate data over processors
- call orbmag_mesh%mpisum(nproc,spaceComm)
+ call orbmag_mesh%mpisum(spaceComm)
  
  ! prepare terms for output to abo file
  call orbmag_mesh%term_scale(crystal,dtset)
@@ -1084,82 +1078,28 @@ end subroutine orbmag
 !!
 !! SOURCE
 
-subroutine orbmag_mpisum(self,nproc,spaceComm)
+subroutine orbmag_mpisum(self,spaceComm)
   !Arguments
   class(orbmag_mesh_type),intent(inout),target :: self
-  integer,intent(in) :: nproc,spaceComm
+  integer,intent(in) :: spaceComm
 
   !Local variables
-  integer :: buff_size,ierr
-  real(dp),allocatable :: buffer1(:),buffer2(:)
+  integer :: ierr
 
-  if (nproc > 1) then
-    if (allocated(self%cmesh)) then
-      buff_size=size(self%cmesh)
-      ABI_MALLOC(buffer1,(buff_size))
-      ABI_MALLOC(buffer2,(buff_size))
-      buffer1=zero;buffer2=zero
-      buffer1(1:buff_size) = &
-        & reshape(self%cmesh,(/self%mband*self%nkpt*self%nsppol*3*chern_nterms/))
-      call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-      self%cmesh(1:self%mband,1:self%nkpt,1:self%nsppol,1:3,1:chern_nterms)=&
-        & reshape(buffer2,(/self%mband,self%nkpt,self%nsppol,3,chern_nterms/))
-      ABI_FREE(buffer1)
-      ABI_FREE(buffer2)
-    end if
-    if (allocated(self%chern_terms)) then
-      buff_size=size(self%chern_terms)
-      ABI_MALLOC(buffer1,(buff_size))
-      ABI_MALLOC(buffer2,(buff_size))
-      buffer1=zero;buffer2=zero
-      buffer1(1:buff_size) = &
-        & reshape(self%chern_terms,(/self%mband*self%nsppol*3*chern_nterms/))
-      call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-      self%chern_terms(1:self%mband,1:self%nsppol,1:3,1:chern_nterms)=&
-        & reshape(buffer2,(/self%mband,self%nsppol,3,chern_nterms/))
-      ABI_FREE(buffer1)
-      ABI_FREE(buffer2)
-    end if
-    if (allocated(self%omesh)) then
-      buff_size=size(self%omesh)
-      ABI_MALLOC(buffer1,(buff_size))
-      ABI_MALLOC(buffer2,(buff_size))
-      buffer1=zero;buffer2=zero
-      buffer1(1:buff_size) = &
-        & reshape(self%omesh,(/self%mband*self%nkpt*self%nsppol*3*orbmag_nterms/))
-      call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-      self%omesh(1:self%mband,1:self%nkpt,1:self%nsppol,1:3,1:orbmag_nterms)=&
-        & reshape(buffer2,(/self%mband,self%nkpt,self%nsppol,3,orbmag_nterms/))
-      ABI_FREE(buffer1)
-      ABI_FREE(buffer2)
-    end if
-    if (allocated(self%orbmag_terms)) then
-      buff_size=size(self%orbmag_terms)
-      ABI_MALLOC(buffer1,(buff_size))
-      ABI_MALLOC(buffer2,(buff_size))
-      buffer1=zero;buffer2=zero
-      buffer1(1:buff_size) = &
-        & reshape(self%orbmag_terms,(/self%mband*self%nsppol*3*orbmag_nterms/))
-      call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-      self%orbmag_terms(1:self%mband,1:self%nsppol,1:3,1:orbmag_nterms)=&
-        & reshape(buffer2,(/self%mband,self%nsppol,3,orbmag_nterms/))
-      ABI_FREE(buffer1)
-      ABI_FREE(buffer2)
-    end if
-    if (allocated(self%rmesh)) then
-      buff_size=size(self%rmesh)
-      ABI_MALLOC(buffer1,(buff_size))
-      ABI_MALLOC(buffer2,(buff_size))
-      buffer1=zero;buffer2=zero
-      buffer1(1:buff_size) = &
-        & reshape(self%rmesh,(/self%n4*self%n5*self%n6*3*orbmag_nterms/))
-      call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-      self%rmesh(1:self%n4,1:self%n5,1:self%n6,1:3,1:orbmag_nterms)=&
-        & reshape(buffer2,(/self%n4,self%n5,self%n6,3,orbmag_nterms/))
-      ABI_FREE(buffer1)
-      ABI_FREE(buffer2)
-    end if
- 
+  if (allocated(self%cmesh)) then
+    call xmpi_sum(self%cmesh,spaceComm,ierr)
+  end if
+  if (allocated(self%chern_terms)) then
+    call xmpi_sum(self%chern_terms,spaceComm,ierr)
+  end if
+  if (allocated(self%omesh)) then
+    call xmpi_sum(self%omesh,spaceComm,ierr)
+  end if
+  if (allocated(self%orbmag_terms)) then
+    call xmpi_sum(self%orbmag_terms,spaceComm,ierr)
+  end if
+  if (allocated(self%rmesh)) then
+    call xmpi_sum(self%rmesh,spaceComm,ierr)
   end if
 
 end subroutine orbmag_mpisum
@@ -3631,42 +3571,38 @@ subroutine local_fermie(dtset,ebands_k,fermie,mpi_enreg)
 
   !Local variables -------------------------
   !scalars
-  integer :: ierr,ikpt,isppol,me
-  integer :: nband_k,nn,nproc,spaceComm
-  real(dp) :: fermie_proc
+  integer :: iband,iband_ctr,ierr,ikpt,isppol,me
+  integer :: nband_k,nband_k_me,spaceComm
+  real(dp) :: eig,fermie_proc,occ
 
   !arrays
-  real(dp),allocatable :: eig_k(:),occ_k(:)
+  logical,allocatable :: cycle_bands(:)
 
 !--------------------------------------------------------------------
 
+  me=mpi_enreg%me
   spaceComm=mpi_enreg%comm_cell
-  nproc=xmpi_comm_size(spaceComm)
-  me = mpi_enreg%me_kpt
 
   fermie_proc = -1.0D99
   do isppol = 1, dtset%nsppol
     do ikpt = 1, dtset%nkpt
 
       nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+      nband_k_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
+      if (nband_k_me.EQ.0) cycle
+       
+      ABI_MALLOC(cycle_bands,(nband_k))
+      call proc_distrb_cycle_bands(cycle_bands,mpi_enreg%proc_distrb,ikpt,isppol,me)
 
-      ! if the current kpt is not on the current processor, cycle
-      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) cycle
-
-      ABI_MALLOC(occ_k,(nband_k))
-      occ_k(:)=ebands_k%occ(1:nband_k,ikpt,isppol)
-
-      ABI_MALLOC(eig_k,(nband_k))
-      eig_k(:)=ebands_k%eig(1:nband_k,ikpt,isppol)
-
-      do nn = 1, nband_k
-        if ( (abs(occ_k(nn)).GT.tol8) .AND. (eig_k(nn).GT.fermie_proc) ) then
-          fermie_proc = eig_k(nn)
-        end if
-      end do ! nn
-
-      ABI_FREE(occ_k)
-      ABI_FREE(eig_k)
+      iband_ctr = 1
+      do iband = 1, nband_k
+        if (cycle_bands(iband)) cycle
+        occ = ebands_k%occ(iband,ikpt,isppol)
+        eig = ebands_k%eig(iband,ikpt,isppol)
+        if ((abs(occ).GT.tol8).AND.(eig.GT.fermie_proc)) fermie_proc=eig
+        iband_ctr = iband_ctr + 1
+      end do
+      ABI_FREE(cycle_bands)
 
     end do ! end loop over kpts
   end do ! end loop over isppol
