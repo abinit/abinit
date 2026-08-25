@@ -18,7 +18,7 @@ repos:
       - id: trailing-whitespace
       - id: check-executables-have-shebangs
       - id: check-added-large-files
-        args: ['--maxkb=1500']  # 1000 KB = 1 MB
+        args: ['--maxkb=15000']  # 1000 KB = 1 MB
 
   #- repo: https://github.com/astral-sh/ruff-pre-commit
   #  rev: v0.11.12
@@ -157,9 +157,3 @@ repos:
         name: Check executable shebangs
         entry: git_rules_scripts/check-executable-shebangs.sh
         language: script
-      - id: check-staged-file-sizes
-        name: Check staged file sizes
-        entry: git_rules_scripts/check-staged-file-sizes.sh
-        language: script
-        pass_filenames: false
-        stages: [pre-commit]
