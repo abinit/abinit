@@ -781,7 +781,7 @@ class TestBot:
                 nexecuted += para_nexec
 
         table = self.summary.to_table()
-        pprint_table(table)
+        #pprint_table(table)
 
         self.summary.json_dump("testbot_summary.json")
 
@@ -797,6 +797,7 @@ class TestBot:
         if self.type == "ref":
             # Reference builder --> all the tests must pass.
             return nfailed + npassed
+
         return nfailed
 
 
