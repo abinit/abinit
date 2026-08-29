@@ -146,12 +146,6 @@ class TestBotContext:
     enable_openmp: bool | None = None
     """True if OpenMP is activated"""
 
-    poe: str = ""
-    """Deprecated"""
-
-    poe_args: str = ""
-    """Deprecated"""
-
     with_tdirs: list[str] = field(default_factory=list)
     """List of subsuites to include"""
 
@@ -160,9 +154,6 @@ class TestBotContext:
 
     timeout_time: float = 900.0
     """Timeout time in seconds"""
-
-    cygwin_dir: str = ""
-    """Deprecated"""
 
     runmode: str = "static"
     """'static': run all tests with 1 MPI proc; use np > 1 only for multiparallel tests"""
@@ -390,12 +381,9 @@ class TestBot:
       "omp_num_threads"  : (0,    int, "Number of OpenMP threads. 0 if OpenMP should not be used"),
       "enable_mpi"       : (None, _yesno2bool, "yes if MPI is activated else no."),
       "enable_openmp"    : (None, _yesno2bool, "yes if OpenMP is activated else no."),
-      "poe"              : ("", str, "This option is deprecated"),
-      "poe_args"         : ("", str, "This option is deprecated"),
       "with_tdirs"       : ("", _str2list, "List of subsuites to include."),
       "without_tdirs"    : ("", _str2list, "List of subsuites to exclude."),
       "timeout_time"     : (900, float, "Timeout time in seconds."),
-      "cygwin_dir"       : ("", str, "This option is deprecated"),
       "runmode"          : ("static", str, "'static to run all tests with 1 MPI proc and use np > 1 only for multiparallel tests'"),
       "keywords"         : ("", _str2list, "String with the keywords that should be selected/ignored."),
       "etsf_check"       : ("no", _yesno2bool, "yes to activate the validation of the netcdf files produced by Abinit."),
@@ -435,12 +423,9 @@ class TestBot:
             "mpi_prefix",
             "mpirun_np",
             "omp_num_threads",
-            "poe",
-            "poe_args",
             "with_tdirs",
             "without_tdirs",
             "timeout_time",
-            "cygwin_dir",
             "runmode",
             "keywords",
             "etsf_check",
@@ -614,7 +599,7 @@ class TestBot:
     @property
     def has_mpi(self) -> bool:
         """bool: True if an MPI runner is configured."""
-        return bool(self.mpirun_np) or bool(self.poe)
+        return bool(self.mpirun_np)
 
     @property
     def has_openmp(self) -> bool:
@@ -1147,4 +1132,3 @@ def old_main() -> int:
 if __name__ == "__main__":
     #sys.exit(new_main())
     sys.exit(old_main())
-

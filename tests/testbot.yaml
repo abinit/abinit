@@ -26,8 +26,6 @@
   omp_num_threads: 0
   timeout_time: 1200
   keywords: FAILS_IFMPI-
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: scope_gnu_10.2_s64
   slavename: scope
@@ -41,8 +39,6 @@
   omp_num_threads: 0
   timeout_time: 1200
   keywords: FAILS_IFMPI-
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: scope_gnu_12.2_mpich
   slavename: scope
@@ -56,8 +52,6 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: scope_gnu_12.2_abipy
   slavename: scope
@@ -71,8 +65,6 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: eos_nvhpc_23.9_elpa
   slavename: eos
@@ -86,8 +78,6 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: scope_gnu_13.2_dep
   slavename: scope
@@ -101,8 +91,6 @@
   omp_num_threads: 0
   timeout_time: 1200
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: eos_gnu_13.2_mpich
   slavename: eos
@@ -117,8 +105,6 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: eos_gnu_13.2_serial
   slavename: eos
@@ -133,8 +119,6 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: alps_gnu_9.5_sdebug
   slavename: alps
@@ -148,8 +132,6 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: alps_nag_7.2_openmpi
   slavename: alps
@@ -165,8 +147,6 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: eos_nvhpc_24.9_openmpi
   slavename: eos
@@ -180,8 +160,6 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: alps_nag_7.2_serial
   slavename: alps
@@ -195,8 +173,6 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: eos_intel_2023_cmake
   slavename: eos
@@ -210,8 +186,6 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: eos_gnu_13.2_nan
   slavename: eos
@@ -225,8 +199,6 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: alps_gnu_14.2_cov
   slavename: alps
@@ -240,8 +212,6 @@
   omp_num_threads: 0
   timeout_time: 2000
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: alps_intel_2025_elpa
   slavename: alps
@@ -255,8 +225,6 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: atlas_gnu_14.2_openmp
   slavename: atlas
@@ -270,8 +238,6 @@
   omp_num_threads: 2
   timeout_time: 900
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: bob_gnu_13.2_openmp
   slavename: bob
@@ -285,8 +251,6 @@
   omp_num_threads: 2
   timeout_time: 900
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: haicgu_gnu_14.1_hpc
   slavename: haicgu
@@ -300,8 +264,6 @@
   omp_num_threads: 0
   timeout_time: 1800
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
   mpi_args: --exclusive
   tmp_basedir: /tmp
@@ -318,8 +280,6 @@
   omp_num_threads: 1
   timeout_time: 900
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
 - name: manneback_gnu_14.2_hpc
   slavename: manneback
@@ -333,8 +293,6 @@
   omp_num_threads: 1
   timeout_time: 1800
   keywords: null
-  poe: null
-  poe_args: null
   etsf_check: 'no'
   mpi_args: --exclusive
   tmp_basedir: /tmp
