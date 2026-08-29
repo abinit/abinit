@@ -69,7 +69,8 @@ module defs_basis
 ! but it seems that increasing this value triggers bugs in the rest of code because people
 ! do not trim input strings and use character(len=500) :: msg
 
- integer, parameter :: fnlen=264     ! maximum length of file name variables
+ !integer, parameter :: fnlen=264     ! maximum length of file name variables
+ integer, parameter :: fnlen=300     ! maximum length of file name variables
  integer, parameter :: strlen=2000000 ! maximum length of input string
 
  ! The input file used to run the code, allocated and set by parsefile.
