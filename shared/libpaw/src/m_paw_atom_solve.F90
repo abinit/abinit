@@ -1002,7 +1002,7 @@ subroutine atompaw_init(pawtab,pawrad,atp,atm,sctol,elin_mode,vhtnzc_mode,tpaw_m
 !scalars
  CHARACTER(len=500) :: input_file
  character(len=500) :: msg
- character*(132) :: file_xml_core
+ character(len=fnlen) :: file_xml_core
  logical :: rcpaw_core_file,ex
  REAL(dp)    :: a1,a2,a3,hval,r0,zcore
  INTEGER :: ii,jj,icor,ir,io,fnln,ios

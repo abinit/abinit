@@ -2123,7 +2123,7 @@ subroutine effective_potential_writeAbiInput(eff_pot,filename,strain)
  end if
 
   write(msg,'(a,a,a,a)')ch10,&
- &   ' Generation of the input file in ',namefile,ch10
+ &   ' Generation of the input file in ',trim(namefile),ch10
   call wrtout(ab_out,msg,'COLL')
   call wrtout(std_out,msg,'COLL')
 
@@ -4038,7 +4038,7 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
    call isfile(namefile,'new')
 
    write(msg,'(a,a,a)')ch10,&
-&   ' Generation of the xml file for the reference structure in ',namefile
+&   ' Generation of the xml file for the reference structure in ',trim(namefile)
 
    call wrtout(ab_out,msg,'COLL')
    call wrtout(std_out,msg,'COLL')
