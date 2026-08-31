@@ -6,11 +6,13 @@ __author__ = "Matteo Giantomassi"
 
 import argparse
 import dataclasses
+import html
 import json
 import logging
 import os
 import platform
 import shutil
+import subprocess
 import sys
 import tempfile
 from collections.abc import Callable, Iterator
@@ -770,6 +772,21 @@ class TestBot:
 
         self.summary.json_dump("testbot_summary.json")
 
+        # Post-process the summary now, in-process. builder_scripts/analysis.sh
+        # still calls `./testbot.py analyze` independently afterwards as a
+        # fallback -- that path is what still produces a report if this
+        # process never reaches this point (e.g. killed by an external
+        # timeout wrapper mid-suite). analyze()'s own return code is
+        # deliberately not propagated here, matching analysis.sh's existing
+        # behavior of never letting post-processing override the real test
+        # result (self.type/nfailed/npassed below).
+        try:
+            analyze_rc = analyze("testbot_summary.json", tag=get_git_tag())
+            if analyze_rc != 0:
+                print(f"analyze() returned {analyze_rc}")
+        except Exception as exc:
+            print(f"analyze() raised an exception: {exc}")
+
         # Empty list of tests (usually due to the use of with, without options)
         # Create file to signal this condition and return 0.
         if nexecuted == 0:
@@ -786,70 +803,130 @@ class TestBot:
         return nfailed
 
 
-def analyze(fname: str) -> None:
+def get_git_tag() -> str:
+    """
+    Return the output of `git describe --tags --abbrev=0`, or "unknown" on failure.
+
+    Mirrors the fallback used in builder_scripts/analysis.sh
+    (`git describe --tags --abbrev=0 2>/dev/null || echo "unknown"`).
+    """
+    try:
+        result = subprocess.run(
+            ["git", "describe", "--tags", "--abbrev=0"],
+            capture_output=True, text=True, timeout=10,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+    except Exception:
+        pass
+    return "unknown"
+
+
+def analyze(fname: str, tag: str = "unknown") -> int:
     """
     Analyze and display the performance figures of the tests.
 
     Parses the summary JSON file and prints a table with execution times
-    (CPU and Wall) per test suite.
+    (CPU and Wall) per test suite. This is the in-process equivalent of the
+    post-processing previously embedded as a Python heredoc in
+    builder_scripts/analysis.sh (kept there as an independent fallback).
+
+    Also writes an HTML <table> fragment (no <html>/<head>/<body>) with the
+    same data to "testbot_analysis.html" in the current directory, for
+    embedding into the results index page (see upload_results.sh).
 
     Args:
         fname: Path to the JSON summary file.
+        tag: Git tag/revision to record in the summary JSON.
+
+    Returns:
+        int: 0 on success. Non-zero on failure (1 if the summary file is
+            missing or incomplete, 99 for any other post-processing error),
+            matching the historical analysis.sh exit codes.
     """
-    #fname = "testbot_summary.json"
-    with open(fname) as data_file:
-       d = json.load(data_file)
-
-    # FIXME What is this?
-    #d['tag'] = sys.argv[1]
-
-    with open(fname, "w") as data_file:
-       json.dump(d, data_file)
+    if not os.path.exists(fname):
+        print(f"Error: {fname} not found. Analysis failed.")
+        with open("ANALYSIS_SUMMARY_FAILED", "w") as f:
+            f.write(f"{fname} missing")
+        return 1
 
     try:
-        tests_status = dict(zip(d["summary_table"][0],d["summary_table"][1]))
+        with open(fname) as data_file:
+            d = json.load(data_file)
 
-        dashline = "=========================================================================="
-        print( dashline )
-        print(     "          Serie   #failed   #passed  #succes  #skip  |   #CPU      #WALL")
+        d["tag"] = tag
+        with open(fname, "w") as data_file:
+            json.dump(d, data_file)
+
+        if "summary_table" not in d:
+            print("Error: 'summary_table' missing in JSON.")
+            with open("ANALYSIS_SUMMARY_FAILED", "w") as f:
+                f.write("summary_table missing")
+            return 1
+
+        tests_status = dict(zip(d["summary_table"][0], d["summary_table"][1]))
+
+        dashline = "=" * 74
         print(dashline)
-        rtime = 0.0
-        ttime = 0.0
-        paral = ""
-        mpiio = ""
+        print("      Series   #failed   #passed  #success  #skip  |   #CPU      #WALL")
+        print(dashline)
+
+        paral, mpiio = "", ""
+        html_rows = []
         for t, s in sorted(tests_status.items()):
-            kt = False
-            for i in d[t].keys():
-               if  d[t][i]["status"] != "skipped":
-                  kt = True
-                  rtime += d[t][i]["run_etime"]
-                  ttime += d[t][i]["tot_etime"]
-            if kt:
-                 temp = "".join(["%5s   |" % l for l in  s.split("/") ])
-                 temp = "%15s | %10s %7.1f  | %7.1f" % (t,temp,rtime,ttime)
-                 if t == "mpiio":
-                    mpiio = temp
-                 elif t == "paral":
-                    paral = temp
-                 else:
-                    print(temp)
+            skip_series = True
             rtime = ttime = 0.0
 
+            if t in d and isinstance(d[t], dict):
+                for test_info in d[t].values():
+                    if test_info.get("status") != "skipped":
+                        skip_series = False
+                        rtime += test_info.get("run_etime", 0.0)
+                        ttime += test_info.get("tot_etime", 0.0)
+
+            if not skip_series:
+                counts = "".join("%5s   |" % v for v in s.split("/"))
+                row = "%12s | %s %7.1f  | %7.1f" % (t, counts, rtime, ttime)
+                if t == "mpiio":
+                    mpiio = row
+                elif t == "paral":
+                    paral = row
+                else:
+                    print(row)
+
+                nfailed_s = s.split("/")[0]
+                row_class = "suite-failed" if nfailed_s not in ("0", "") else "suite-ok"
+                cells = "".join(f"<td>{html.escape(v)}</td>" for v in s.split("/"))
+                html_rows.append(
+                    f'<tr class="{row_class}"><td>{html.escape(t)}</td>{cells}'
+                    f"<td>{rtime:.1f}</td><td>{ttime:.1f}</td></tr>"
+                )
+
         print(dashline)
-        putline = 0
-        if paral != "":
+        if paral:
             print(paral)
-            putline=1
-        if mpiio != "":
+        if mpiio:
             print(mpiio)
-            putline=1
-        if putline == 1:
+        if paral or mpiio:
             print(dashline)
-    except:
-        print("no results")
+
+        html_table = (
+            '<table class="testbot-summary" border="1" cellpadding="4" cellspacing="0">'
+            "<tr><th>Series</th><th>#failed</th><th>#passed</th><th>#success</th>"
+            "<th>#skip</th><th>#CPU (s)</th><th>#WALL (s)</th></tr>"
+            + "".join(html_rows)
+            + "</table>"
+        )
+        with open("testbot_analysis.html", "w") as f:
+            f.write(html_table)
+
+        return 0
+
+    except Exception as exc:
+        print(f"Post-processing failed: {exc}")
         with open("ANALYSIS_SUMMARY_FAILED", "w") as f:
-            f.write("")
-        sys.exit(99)
+            f.write(str(exc))
+        return 99
 
 
 class TestBotSummary:
@@ -1060,6 +1137,12 @@ def get_parser(with_epilog: bool = False) -> argparse.ArgumentParser:
     p_validate = subparsers.add_parser("validate", # parents=[copts_parser],
         help="Validate yaml file and convert to JSON.")
 
+    # Subparser for analyze
+    p_analyze = subparsers.add_parser("analyze",
+        help="Post-process testbot_summary.json and print/update the performance table.")
+    p_analyze.add_argument("tag", nargs="?", default="unknown",
+        help="Git tag/revision to record in the summary JSON.")
+
     return parser
 
 
@@ -1082,7 +1165,7 @@ def new_main() -> int:
         return 0
 
     if options.command == "analyze":
-        return analyze(fname="testbot_summary.json")
+        return analyze(fname="testbot_summary.json", tag=options.tag)
 
     if options.command == "run":
         testbot = TestBot(None, builder_name=options.builder_name)
@@ -1110,6 +1193,10 @@ def old_main() -> int:
 
     if len(sys.argv) > 1 and sys.argv[1] == "validate":
         return validate()
+
+    if len(sys.argv) > 1 and sys.argv[1] == "analyze":
+        tag = sys.argv[2] if len(sys.argv) > 2 else "unknown"
+        return analyze(fname="testbot_summary.json", tag=tag)
 
     # Configuration file (hardcoded or from command line)
     testbot_cfg = None
