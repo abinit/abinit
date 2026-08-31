@@ -70,8 +70,7 @@ module defs_basis
 ! do not trim input strings and use character(len=500) :: msg
 
  !integer, parameter :: fnlen=264     ! maximum length of file name variables
- !integer, parameter :: fnlen=364     ! maximum length of file name variables
- integer, parameter :: fnlen=512     ! maximum length of file name variables
+ integer, parameter :: fnlen=400     ! maximum length of file name variables
  integer, parameter :: strlen=2000000 ! maximum length of input string
 
  ! The input file used to run the code, allocated and set by parsefile.
