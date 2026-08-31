@@ -911,7 +911,7 @@ def analyze(fname: str, tag: str = "unknown") -> int:
             print(dashline)
 
         html_table = (
-            '<table class="testbot-summary" border="1" cellpadding="4" cellspacing="0">'
+            '<table id="testbot-summary" class="testbot-summary" border="1" cellpadding="4" cellspacing="0">'
             "<tr><th>Series</th><th>#failed</th><th>#passed</th><th>#success</th>"
             "<th>#skip</th><th>#CPU (s)</th><th>#WALL (s)</th></tr>"
             + "".join(html_rows)
