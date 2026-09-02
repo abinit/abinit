@@ -26,12 +26,9 @@ from warnings import warn
 
 logger = logging.getLogger(__name__)
 
-try:
-    from ConfigParser import NoOptionError, SafeConfigParser
-except ImportError:
-    # The ConfigParser module has been renamed to configparser in Python 3
-    from configparser import ConfigParser as SafeConfigParser
-    from configparser import NoOptionError
+# The ConfigParser module has been renamed to configparser in Python 3
+from configparser import ConfigParser as SafeConfigParser
+from configparser import NoOptionError
 
 
 # Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
