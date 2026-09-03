@@ -909,10 +909,11 @@ def analyze(fname: str, tag: str = "unknown") -> int:
 
         html_table = (
             '<table id="testbot-summary" class="testbot-summary" border="1" cellpadding="4" cellspacing="0">'
-            "<tr><th>Series</th><th>#failed</th><th>#passed</th><th>#success</th>"
-            "<th>#skip</th><th>#CPU (s)</th><th>#WALL (s)</th></tr>"
+            "<thead><tr><th>Series</th><th>#failed</th><th>#passed</th><th>#success</th>"
+            "<th>#skip</th><th>#CPU (s)</th><th>#WALL (s)</th></tr></thead>"
+            "<tbody>"
             + "".join(html_rows)
-            + "</table>"
+            + "</tbody></table>"
         )
         with open("testbot_analysis.html", "w") as f:
             f.write(html_table)
