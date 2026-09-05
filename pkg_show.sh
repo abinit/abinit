@@ -42,7 +42,7 @@ fi
 echo
 
 echo "=== Required Libraries ==="
-REQUIRED=("blas" "lapack" "hdf5" "netcdf-c" "netcdf-fortran")
+REQUIRED=("blas" "lapack" "hdf5" "netcdf" "netcdf-fortran")
 
 echo "Checking required library availability using pkg-config..."
 for LIB in "${REQUIRED[@]}"; do
