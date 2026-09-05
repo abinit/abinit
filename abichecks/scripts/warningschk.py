@@ -122,13 +122,21 @@ def main(warno, home_dir=""):
                              print(source + " = line: " + sourceline + ", var: " + warn_msg +" ["+source_dir[-2]+"]")
                           elif warno in [6,10]:
                              warn_msg=Buffer[4].split(":")[1].rstrip()
-                             warn_code=Buffer[2].rstrip()
+                             # Normalize quotes: gfortran versions differ in how they quote
+                             # string literals when reconstructing the source snippet in
+                             # diagnostics (single vs double), independently of how the
+                             # literal is actually quoted in the source file. Canonicalize
+                             # to single quotes so the comparison with Refs/*.out doesn't
+                             # spuriously fail depending on the compiler version used.
+                             warn_code=Buffer[2].rstrip().replace('"', "'")
                              warn_pos=Buffer[3].rstrip()
                              print("%s = line: %s, " % (source,sourceline),end="")
                              cprint("warn: %s" % (warn_msg),"red")
                              cprint("  ->%s\n  ->%s" % (warn_code,warn_pos),"red")
                           elif warno in [7]:
-                             warn_code=Buffer[2].rstrip().lstrip()
+                             # See the warno 6/10 comment above: canonicalize quotes to
+                             # make this robust across gfortran versions.
+                             warn_code=Buffer[2].rstrip().lstrip().replace('"', "'")
                              print("%s = line: %s, " % (source,sourceline),end="")
                              cprint("code: %s" % (warn_code),"red")
                           elif warno in [20]:
