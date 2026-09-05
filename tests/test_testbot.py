@@ -46,6 +46,13 @@ from tests.testbot import (
     read_builders,
 )
 
+# These are production classes from testbot.py, not test classes. Their names
+# happen to start with "Test", so mark them explicitly to stop pytest from
+# trying to collect them (they have __init__ constructors and warn otherwise).
+TestBot.__test__ = False
+TestBotContext.__test__ = False
+TestBotSummary.__test__ = False
+
 TESTBOT_CONTEXT_AVAILABLE = True
 
 
@@ -312,7 +319,7 @@ class TestAnalyzeFunction:
         result = analyze("nonexistent_file.json")
         assert result == 1
 
-    def test_analyze_valid_summary(self):
+    def test_analyze_valid_summary(self, monkeypatch):
         """Should return 0 for a valid summary file."""
         with tempfile.TemporaryDirectory() as tmpdir:
             summary_file = os.path.join(tmpdir, "testbot_summary.json")
@@ -329,18 +336,18 @@ class TestAnalyzeFunction:
             with open(summary_file, "w") as f:
                 json.dump(summary, f)
 
-            # Change to temp dir to avoid littering current directory
-            with patch("os.getcwd", return_value=tmpdir):
-                os.chdir(tmpdir)
-                result = analyze(summary_file)
-                assert result == 0
+            # Change to temp dir (monkeypatch restores the original cwd on
+            # teardown even if the test fails) to avoid littering it.
+            monkeypatch.chdir(tmpdir)
+            result = analyze(summary_file)
+            assert result == 0
 
-                # Check that tag was added to the file
-                with open(summary_file) as f:
-                    updated = json.load(f)
-                    assert "tag" in updated
+            # Check that tag was added to the file
+            with open(summary_file) as f:
+                updated = json.load(f)
+                assert "tag" in updated
 
-    def test_analyze_missing_summary_table(self):
+    def test_analyze_missing_summary_table(self, monkeypatch):
         """Should return 1 if summary_table is missing."""
         with tempfile.TemporaryDirectory() as tmpdir:
             summary_file = os.path.join(tmpdir, "testbot_summary.json")
@@ -351,12 +358,11 @@ class TestAnalyzeFunction:
             with open(summary_file, "w") as f:
                 json.dump(summary, f)
 
-            with patch("os.getcwd", return_value=tmpdir):
-                os.chdir(tmpdir)
-                result = analyze(summary_file)
-                assert result == 1
+            monkeypatch.chdir(tmpdir)
+            result = analyze(summary_file)
+            assert result == 1
 
-    def test_analyze_invalid_json(self):
+    def test_analyze_invalid_json(self, monkeypatch):
         """Should return 99 for invalid JSON."""
         with tempfile.TemporaryDirectory() as tmpdir:
             summary_file = os.path.join(tmpdir, "testbot_summary.json")
@@ -365,10 +371,9 @@ class TestAnalyzeFunction:
             with open(summary_file, "w") as f:
                 f.write("invalid json {")
 
-            with patch("os.getcwd", return_value=tmpdir):
-                os.chdir(tmpdir)
-                result = analyze(summary_file)
-                assert result == 99
+            monkeypatch.chdir(tmpdir)
+            result = analyze(summary_file)
+            assert result == 99
 
 
 @pytest.mark.skipif(
@@ -453,7 +458,7 @@ class TestTestBotSummary:
         assert table[0] == ["suite1", "suite2"]  # suite names
         assert len(table[1]) == 2  # rows with stats
 
-    def test_testbotsummary_json_dump(self):
+    def test_testbotsummary_json_dump(self, monkeypatch):
         """Should dump results to JSON file."""
         with tempfile.TemporaryDirectory() as tmpdir:
             res_table = {
@@ -466,7 +471,7 @@ class TestTestBotSummary:
             summary.passed = ["suite1/test1"]
 
             json_file = os.path.join(tmpdir, "summary.json")
-            os.chdir(tmpdir)
+            monkeypatch.chdir(tmpdir)
             summary.json_dump(json_file)
 
             assert os.path.exists(json_file)

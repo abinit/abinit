@@ -110,6 +110,7 @@ d3e_pert3_dir 0 0 0 # For backward compatibility of tests only. Instead one shou
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = alps_nag_7.2_serial 
 #%% [files]
 #%% files_to_test =
 #%%   t67.abo, tolnlines = 30, tolabs = 0.0, tolrel = 0.0

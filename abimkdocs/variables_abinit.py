@@ -21550,6 +21550,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="SYMmetrization of SIGMA matrix elements",
+    requires="[[optdriver]] in [4, 7]",
     commentdefault="The default value changed in Abinitv9 from 0 to 1",
     added_in_version="before_v9",
     text=r"""

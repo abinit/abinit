@@ -227,7 +227,7 @@ def load_mod(filepath: str) -> Any:
     """
     Dynamically load a Python module from a file path.
 
-    Supports both older `imp` and modern `importlib` mechanisms.
+    Supports both modern `importlib` and older `imp` mechanisms.
 
     Args:
         filepath: Absolute path to the .py file.
@@ -236,13 +236,21 @@ def load_mod(filepath: str) -> Any:
         ModuleType: The loaded module.
     """
     try:
-        import imp
+        import importlib.util
 
-        return imp.load_source(filepath, filepath)
-    except ModuleNotFoundError:
-        from importlib.machinery import SourceFileLoader
+        spec = importlib.util.spec_from_file_location(filepath, filepath)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+    except ImportError:
+        try:
+            import imp
 
-        return SourceFileLoader(filepath, filepath).load_module()
+            return imp.load_source(filepath, filepath)
+        except ModuleNotFoundError:
+            from importlib.machinery import SourceFileLoader
+
+            return SourceFileLoader(filepath, filepath).load_module()
 
 
 class Suite:
