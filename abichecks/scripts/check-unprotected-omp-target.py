@@ -2,6 +2,7 @@
 
 import os
 import re
+import shutil
 import sys
 from subprocess import run
 
@@ -19,6 +20,14 @@ black_list = {
 
 
 def main():
+    if shutil.which("gfortran") is None:
+        sys.stderr.write(
+            "check-unprotected-omp-target.py: 'gfortran' not found in PATH -- "
+            "it is used here only to preprocess Fortran sources (-E), not to compile. "
+            "Load a GNU toolchain module (or otherwise put gfortran on PATH) before running this check.\n"
+        )
+        return 1
+
     retval = 0
     out = "out.F90"
     for top in find_src_dirs():
