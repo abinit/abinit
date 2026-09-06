@@ -24,8 +24,10 @@ from tests.testbot import (
     _str2list,
     _yesno2bool,
     analyze,
+    build_parser,
     get_git_tag,
     get_mpi_prefix_from_env,
+    main,
 )
 
 # These are production classes from testbot.py, not test classes. Their names
@@ -342,7 +344,7 @@ class TestTestBotClass:
     def test_testbot_attributes(self):
         """TestBot._attrbs should have expected keys."""
         expected_keys = {
-            "slavename", "type", "ncpus", "max_gpus", "mpi_prefix",
+            "builder_name", "type", "max_cpus", "max_gpus", "mpi_prefix",
             "mpirun_np", "omp_num_threads", "enable_mpi", "enable_openmp",
             "with_tdirs", "without_tdirs", "timeout_time", "runmode",
             "keywords", "verbose", "tmp_basedir", "mpi_args",
@@ -363,6 +365,85 @@ class TestTestBotClass:
         tb = MagicMock(spec=TestBot)
         tb.omp_num_threads = 4
         assert bool(tb.omp_num_threads > 0)
+
+
+class TestBuildParser:
+    """Tests for the run/analyze/print argparse CLI."""
+
+    def test_run_defaults_and_explicit_cfg(self):
+        parser = build_parser()
+        ns = parser.parse_args(["run"])
+        assert ns.command == "run"
+        assert ns.testbot_cfg is None
+
+        ns = parser.parse_args(["run", "my.cfg"])
+        assert ns.testbot_cfg == "my.cfg"
+
+    def test_analyze_defaults_and_explicit_tag(self):
+        parser = build_parser()
+        ns = parser.parse_args(["analyze"])
+        assert ns.command == "analyze"
+        assert ns.tag == "unknown"
+
+        ns = parser.parse_args(["analyze", "v9.2.0"])
+        assert ns.tag == "v9.2.0"
+
+    def test_print_defaults_and_explicit_cfg(self):
+        parser = build_parser()
+        ns = parser.parse_args(["print"])
+        assert ns.command == "print"
+        assert ns.testbot_cfg is None
+
+        ns = parser.parse_args(["print", "my.cfg"])
+        assert ns.testbot_cfg == "my.cfg"
+
+    def test_missing_command_is_rejected(self):
+        parser = build_parser()
+        with pytest.raises(SystemExit):
+            parser.parse_args([])
+
+    def test_unknown_command_is_rejected(self):
+        parser = build_parser()
+        with pytest.raises(SystemExit):
+            parser.parse_args(["dry-run"])
+
+
+class TestMain:
+    """Characterization tests for main()'s dispatch to run/analyze/print."""
+
+    def test_main_dispatches_to_analyze(self, monkeypatch):
+        monkeypatch.setattr(sys, "argv", ["testbot.py", "analyze", "v1"])
+        with patch("tests.testbot.analyze", return_value=0) as mock_analyze:
+            assert main() == 0
+        mock_analyze.assert_called_once_with(fname="testbot_summary.json", tag="v1")
+
+    def test_main_dispatches_to_run(self, monkeypatch):
+        monkeypatch.setattr(sys, "argv", ["testbot.py", "run", "my.cfg"])
+        mock_instance = MagicMock()
+        mock_instance.run.return_value = 3
+        with patch("tests.testbot.TestBot", return_value=mock_instance) as mock_cls:
+            assert main() == 3
+        mock_cls.assert_called_once_with("my.cfg")
+        mock_instance.run.assert_called_once()
+
+    def test_main_dispatches_to_print_without_running(self, monkeypatch, capsys):
+        monkeypatch.setattr(sys, "argv", ["testbot.py", "print", "my.cfg"])
+        mock_instance = MagicMock()
+        mock_instance.__str__ = MagicMock(return_value="fake-config-dump")
+        with patch("tests.testbot.TestBot", return_value=mock_instance) as mock_cls:
+            assert main() == 0
+        mock_cls.assert_called_once_with("my.cfg")
+        mock_instance.run.assert_not_called()
+        assert "fake-config-dump" in capsys.readouterr().out
+
+    def test_main_run_with_no_cfg_uses_default(self, monkeypatch):
+        """A bare `testbot.py run` (the analysis.sh invocation) passes cfg=None."""
+        monkeypatch.setattr(sys, "argv", ["testbot.py", "run"])
+        mock_instance = MagicMock()
+        mock_instance.run.return_value = 0
+        with patch("tests.testbot.TestBot", return_value=mock_instance) as mock_cls:
+            assert main() == 0
+        mock_cls.assert_called_once_with(None)
 
 
 class TestUtilityFunctions:

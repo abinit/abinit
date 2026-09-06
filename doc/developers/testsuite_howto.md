@@ -336,7 +336,7 @@ and you want avoid to launch a full buildbot build just to check that your chang
 In this case, one can re-rerun the entire test suite (or part of it) by just executing the following two steps
 
     cd abinit/tests
-    testbot.py
+    testbot.py run
 
 The script `testbot.py` reads the configuration file `testbot.cfg` (already present in the working directory),
 runs the entire set of tests and produces the final report.

@@ -4,6 +4,7 @@ from __future__ import annotations
 __version__ = "1.0"
 __author__ = "Matteo Giantomassi"
 
+import argparse
 import html
 import json
 import os
@@ -133,10 +134,9 @@ class TestBot:
     _attrbs = {
       # name           --> (default, parser, info)
       # If default is None, the option must be specified.
-      "slavename"        : (None, str, "Name of buildbot builder"),
+      "builder_name"     : (None, str, "Name of buildbot builder"),
       "type"             : ("",   str, "'ref' if this builder is a reference builder where all tests should pass"),
-      # TODO: ncpus should be replaced by max_cpus for clarity reasons
-      "ncpus"            : (None, int, "Max number of CPUs that can be used by TestBot"),
+      "max_cpus"         : (None, int, "Max number of CPUs that can be used by TestBot"),
       "max_gpus"         : (0,    int, "Max number of GPUs that can be used by TestBot"),
       "mpi_prefix"       : ("",   str, "MPI runner"),
       "mpirun_np"        : ("",   str, "String used to execute `mpirun -n#NUM`"),
@@ -177,9 +177,10 @@ class TestBot:
             ValueError: If mandatory options are missing or invalid.
         """
         attrs2read = [
-            "slavename",
+            "builder_name",
             "type",
-            "ncpus",
+            "max_cpus",
+            "max_gpus",
             "mpi_prefix",
             "mpirun_np",
             "omp_num_threads",
@@ -226,33 +227,19 @@ class TestBot:
         if self.type not in ["", "ref"]:
             raise ValueError(f"type should be either 'ref' or empty string while it's: {self.type}")
 
-        # TODO: ncpus should be replaced by max_cpus for clarity reasons
-        self.max_cpus = self.ncpus
-
         system, node, release, version, machine, processor = platform.uname()
-        print("Running on %s -- builder %s -- system %s -- max_cpus %s -- Python %s -- %s" % (
-              gethostname(), self.slavename, system, self.max_cpus, platform.python_version(), _my_name))
-
-        # Read testfarm configuration file with builders.
-        build_examples = abenv.apath_of(pj("config", "specs", "testfarm.conf"))
-        parser = SafeConfigParser()
-        parser.read(build_examples)
-
-        if self.slavename not in parser.sections():
-            print("workers:", parser.sections())
-            raise ValueError("%s is not a valid buildbot builder." % self.slavename)
+        print("Running on %s -- builder %s (type: %s) -- system %s -- max_cpus %s -- Python %s -- %s" % (
+              gethostname(), self.builder_name, self.type or "regular", system, self.max_cpus,
+              platform.python_version(), _my_name))
 
         # 2) Initialize the job_runner.
         self.build_env = build_env = BuildEnvironment(os.curdir)
-        self.build_env.set_buildbot_builder(self.slavename)
+        self.build_env.set_buildbot_builder(self.builder_name)
 
-        # TODO: These parameters should be passed to testbot.cfg
-        from tests.pymods.devtools import number_of_gpus
-        #max_cpus = max(1, number_of_cpus())
+        # GPUs cannot be used unless the build itself was compiled with GPU
+        # support, regardless of what testbot.cfg requests.
         if "HAVE_GPU" not in self.build_env.defined_cppvars:
             self.max_gpus = 0
-        else:
-            self.max_gpus = max(0, number_of_gpus())
 
         if build_env.has_bin("timeout") and self.timeout_time > 0:
             # We can run executables under the control of timeout.c
@@ -758,7 +745,7 @@ class TestBotSummary:
         d["summary_table"] = self.to_table()
 
         for suite_name in self:
-            print("---", suite_name, self.res_table[suite_name])
+            #print("---", suite_name, self.res_table[suite_name])
             if suite_name in d:
                 #raise KeyError("Cannot overwrite key %s" % suite_name)
                 print("Warning: About to overwrite key %s" % suite_name)
@@ -768,34 +755,76 @@ class TestBotSummary:
             json.dump(d, fh)
 
 
-def old_main() -> int:
+def build_parser() -> argparse.ArgumentParser:
     """
-    Main entry point for TestBot using the legacy command-line interface.
+    Build the command-line argument parser for TestBot.
+
+    Returns:
+        argparse.ArgumentParser: The configured parser with `run`, `analyze`,
+        and `print` subcommands.
+    """
+    parser = argparse.ArgumentParser(
+        prog="testbot.py",
+        description="Driver for ABINIT automatic tests on Buildbot workers.",
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    run_parser = subparsers.add_parser(
+        "run", help="Run the test suite described by a testbot.cfg file."
+    )
+    run_parser.add_argument(
+        "testbot_cfg",
+        nargs="?",
+        default=None,
+        help="Path to the testbot.cfg INI file (default: testbot.cfg next to this script).",
+    )
+
+    analyze_parser = subparsers.add_parser(
+        "analyze", help="Analyze an existing testbot_summary.json and print a timing table."
+    )
+    analyze_parser.add_argument(
+        "tag",
+        nargs="?",
+        default="unknown",
+        help="Git tag/revision to record in the summary (default: unknown).",
+    )
+
+    print_parser = subparsers.add_parser(
+        "print",
+        help="Parse a testbot.cfg and print the resulting configuration without running any tests.",
+    )
+    print_parser.add_argument(
+        "testbot_cfg",
+        nargs="?",
+        default=None,
+        help="Path to the testbot.cfg INI file (default: testbot.cfg next to this script).",
+    )
+
+    return parser
+
+
+def main() -> int:
+    """
+    Main entry point for TestBot's command-line interface.
 
     Returns:
         int: The exit code of the execution.
     """
-    if "--help" in sys.argv or "-h" in sys.argv:
-        # Print help and exit.
-        TestBot.print_options()
-        return 0
+    args = build_parser().parse_args()
 
-    if len(sys.argv) > 1 and sys.argv[1] == "analyze":
-        tag = sys.argv[2] if len(sys.argv) > 2 else "unknown"
-        return analyze(fname="testbot_summary.json", tag=tag)
+    if args.command == "analyze":
+        return analyze(fname="testbot_summary.json", tag=args.tag)
 
-    # Configuration file (hardcoded or from command line)
-    testbot_cfg = None
-    if len(sys.argv) > 1:
-        testbot_cfg = sys.argv[1]
-        print("Reading testbot.cfg configuration file from: ", testbot_cfg)
+    # "run" and "print" both parse a testbot.cfg into a TestBot instance.
+    if args.testbot_cfg is not None:
+        print("Reading testbot.cfg configuration file from: ", args.testbot_cfg)
 
     # Disable colors
     termcolor.enable(False)
 
-    testbot = TestBot(testbot_cfg)
-    if "--dry-run" in sys.argv or "-d" in sys.argv:
-        print("Running in dry-run mode, will return immediately.")
+    testbot = TestBot(args.testbot_cfg)
+
+    if args.command == "print":
         print(testbot)
         return 0
 
@@ -803,4 +832,4 @@ def old_main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(old_main())
+    sys.exit(main())
