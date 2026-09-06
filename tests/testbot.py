@@ -145,7 +145,7 @@ class TestBot:
       "enable_openmp"    : (None, _yesno2bool, "yes if OpenMP is activated else no."),
       "with_tdirs"       : ("", _str2list, "List of subsuites to include."),
       "without_tdirs"    : ("", _str2list, "List of subsuites to exclude."),
-      "timeout_time"     : (900, float, "Timeout time in seconds."),
+      "timeout_time"     : (1200, float, "Timeout time in seconds."),
       "runmode"          : ("static", str, "'static to run all tests with 1 MPI proc and use np > 1 only for multiparallel tests'"),
       "keywords"         : ("", _str2list, "String with the keywords that should be selected/ignored."),
       "verbose"          : (0,    int, "Verbosity level"),
@@ -236,10 +236,26 @@ class TestBot:
         self.build_env = build_env = BuildEnvironment(os.curdir)
         self.build_env.set_buildbot_builder(self.builder_name)
 
-        # GPUs cannot be used unless the build itself was compiled with GPU
-        # support, regardless of what testbot.cfg requests.
+        # Consistency check between input parameters and build configuration.
         if "HAVE_GPU" not in self.build_env.defined_cppvars:
+            if self.max_gpus > 0:
+                warn(
+                    f"Builder {self.builder_name} requested max_gpus={self.max_gpus} but was "
+                    "not compiled with GPU support; forcing max_gpus=0"
+                )
             self.max_gpus = 0
+        elif self.max_gpus <= 0:
+            raise ValueError(
+                f"Builder {self.builder_name} was compiled with GPU support "
+                f"but max_gpus is {self.max_gpus}"
+            )
+
+        if "HAVE_OPENMP" not in self.build_env.defined_cppvars and self.omp_num_threads > 2:
+            warn(
+                f"Builder {self.builder_name} requested omp_num_threads={self.omp_num_threads} "
+                "but was not compiled with OpenMP support; clamping to 2"
+            )
+            self.omp_num_threads = 2
 
         if build_env.has_bin("timeout") and self.timeout_time > 0:
             # We can run executables under the control of timeout.c
@@ -366,7 +382,7 @@ class TestBot:
         self.summary.merge_results(test_suite)
 
         if self.tmp_basedir:
-            for fn in ["results.tar.gz", "suite_report.html"]:
+            for fn in ["results.tar.gz", "index.html"]:
                 try:
                     shutil.copy2(os.path.join(workdir, fn), workdir_name)
                 except Exception:
