@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-import dataclasses
 import json
 import os
 import sys
 import tempfile
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -19,41 +17,22 @@ sys.modules["pymods.jobrunner"] = MagicMock()
 sys.modules["pymods.testsuite"] = MagicMock()
 sys.modules["pymods.tools"] = MagicMock()
 
-# Monkey-patch dataclass to ignore kw_only parameter in Python < 3.10
-_original_dataclass = dataclasses.dataclass
-
-
-def _dataclass_compat(*args, **kwargs):
-    """Wrapper that removes kw_only parameter for Python < 3.10 compatibility."""
-    if sys.version_info < (3, 10) and "kw_only" in kwargs:
-        kwargs.pop("kw_only")
-    return _original_dataclass(*args, **kwargs)
-
-
-# Apply the monkey-patch
-dataclasses.dataclass = _dataclass_compat
-
 # Now we can import testbot
 from tests.testbot import (
     TestBot,
-    TestBotContext,
     TestBotSummary,
     _str2list,
     _yesno2bool,
     analyze,
     get_git_tag,
     get_mpi_prefix_from_env,
-    read_builders,
 )
 
 # These are production classes from testbot.py, not test classes. Their names
 # happen to start with "Test", so mark them explicitly to stop pytest from
 # trying to collect them (they have __init__ constructors and warn otherwise).
 TestBot.__test__ = False
-TestBotContext.__test__ = False
 TestBotSummary.__test__ = False
-
-TESTBOT_CONTEXT_AVAILABLE = True
 
 
 class TestYesno2Bool:
@@ -123,90 +102,6 @@ class TestStr2List:
         assert _str2list(("a", "b", "c")) == ("a", "b", "c")
 
 
-@pytest.mark.skipif(
-    not TESTBOT_CONTEXT_AVAILABLE,
-    reason="TestBotContext requires Python 3.10+ (kw_only parameter)"
-)
-class TestTestBotContext:
-    """Tests for the TestBotContext dataclass."""
-
-    def test_testbotcontext_creation(self):
-        """TestBotContext should be creatable with required fields."""
-        ctx = TestBotContext(slavename="test_worker", ncpus=8)
-        assert ctx.slavename == "test_worker"
-        assert ctx.ncpus == 8
-        assert ctx.type == ""
-        assert ctx.timeout_time == 900.0
-
-    def test_testbotcontext_missing_slavename(self):
-        """Missing slavename should raise ValueError."""
-        with pytest.raises(ValueError, match="Missing required configuration"):
-            TestBotContext(slavename="", ncpus=8)
-
-    def test_testbotcontext_missing_ncpus(self):
-        """Missing ncpus should raise ValueError."""
-        with pytest.raises(ValueError, match="Missing required configuration"):
-            TestBotContext(slavename="test_worker", ncpus=None)
-
-    def test_testbotcontext_negative_ncpus(self):
-        """Negative ncpus should raise ValueError."""
-        with pytest.raises(ValueError, match="ncpus is negative"):
-            TestBotContext(slavename="test_worker", ncpus=-1)
-
-    def test_testbotcontext_negative_max_gpus(self):
-        """Negative max_gpus should raise ValueError."""
-        with pytest.raises(ValueError, match="max_gpus is negative"):
-            TestBotContext(slavename="test_worker", ncpus=8, max_gpus=-1)
-
-    def test_testbotcontext_negative_omp_threads(self):
-        """Negative omp_num_threads should raise ValueError."""
-        with pytest.raises(ValueError, match="omp_num_threads is negative"):
-            TestBotContext(slavename="test_worker", ncpus=8, omp_num_threads=-1)
-
-    def test_testbotcontext_negative_timeout(self):
-        """Non-positive timeout_time should raise ValueError."""
-        with pytest.raises(ValueError, match="timeout_time is negative"):
-            TestBotContext(slavename="test_worker", ncpus=8, timeout_time=-1)
-        with pytest.raises(ValueError, match="timeout_time is negative"):
-            TestBotContext(slavename="test_worker", ncpus=8, timeout_time=0)
-
-    def test_testbotcontext_from_builders_valid(self):
-        """from_builders should extract configuration for a valid builder."""
-        builders = [
-            {"name": "builder1", "slavename": "worker1", "ncpus": 8},
-            {"name": "builder2", "slavename": "worker2", "ncpus": 16},
-        ]
-        ctx = TestBotContext.from_builders(builders, "builder1")
-        assert ctx.slavename == "worker1"
-        assert ctx.ncpus == 8
-
-    def test_testbotcontext_from_builders_missing(self):
-        """from_builders should raise ValueError for missing builder."""
-        builders = [{"name": "builder1", "slavename": "worker1", "ncpus": 8}]
-        with pytest.raises(ValueError, match="Cannot find"):
-            TestBotContext.from_builders(builders, "builder_missing")
-
-    def test_testbotcontext_with_tdirs_and_without_tdirs(self):
-        """Mutually exclusive with_tdirs and without_tdirs should fail at creation."""
-        # This is validated in TestBot.__init__, not in TestBotContext
-        # so let's just test that they can coexist in the dataclass
-        ctx = TestBotContext(
-            slavename="test",
-            ncpus=8,
-            with_tdirs=["dir1"],
-            without_tdirs=["dir2"]
-        )
-        assert ctx.with_tdirs == ["dir1"]
-        assert ctx.without_tdirs == ["dir2"]
-
-    def test_testbotcontext_type_field(self):
-        """Type field should accept 'ref' or empty string."""
-        ctx = TestBotContext(slavename="test", ncpus=8, type="ref")
-        assert ctx.type == "ref"
-        ctx2 = TestBotContext(slavename="test", ncpus=8, type="")
-        assert ctx2.type == ""
-
-
 class TestGetMpiPrefixFromEnv:
     """Tests for get_mpi_prefix_from_env() function."""
 
@@ -238,15 +133,6 @@ class TestGetMpiPrefixFromEnv:
         with patch.dict(os.environ, {}, clear=True):
             result = get_mpi_prefix_from_env()
             assert result is None
-
-
-class TestReadBuilders:
-    """Tests for read_builders() function."""
-
-    def test_read_builders_invalid_format(self):
-        """Should raise ValueError for invalid format."""
-        with pytest.raises(ValueError, match="Invalid"):
-            read_builders("xml")
 
 
 class TestGetGitTag:
@@ -339,10 +225,6 @@ class TestAnalyzeFunction:
             assert result == 99
 
 
-@pytest.mark.skipif(
-    not TESTBOT_CONTEXT_AVAILABLE,
-    reason="TestBotSummary requires Python 3.10+ (kw_only parameter)"
-)
 class TestTestBotSummary:
     """Tests for TestBotSummary class."""
 
@@ -445,10 +327,6 @@ class TestTestBotSummary:
                 assert "summary_table" in data
 
 
-@pytest.mark.skipif(
-    not TESTBOT_CONTEXT_AVAILABLE,
-    reason="TestBot requires Python 3.10+ (kw_only parameter)"
-)
 class TestTestBotClass:
     """Tests for the TestBot class."""
 
@@ -467,7 +345,7 @@ class TestTestBotClass:
             "slavename", "type", "ncpus", "max_gpus", "mpi_prefix",
             "mpirun_np", "omp_num_threads", "enable_mpi", "enable_openmp",
             "with_tdirs", "without_tdirs", "timeout_time", "runmode",
-            "keywords", "etsf_check", "verbose", "tmp_basedir", "mpi_args",
+            "keywords", "verbose", "tmp_basedir", "mpi_args",
             "force_mpi"
         }
         assert set(TestBot._attrbs.keys()) == expected_keys
@@ -485,28 +363,6 @@ class TestTestBotClass:
         tb = MagicMock(spec=TestBot)
         tb.omp_num_threads = 4
         assert bool(tb.omp_num_threads > 0)
-
-
-class TestGetParser:
-    """Tests for command-line parser."""
-
-    def test_parser_creation(self):
-        """Parser should be created without errors."""
-        from tests.testbot import get_parser
-        parser = get_parser()
-        assert parser is not None
-
-    def test_parser_subcommands(self):
-        """Parser should have expected subcommands."""
-        from tests.testbot import get_parser
-        parser = get_parser()
-        # Parse with minimal args to verify subcommands exist
-        try:
-            args = parser.parse_args(["run", "test_builder"])
-            assert args.command == "run"
-            assert args.builder_name == "test_builder"
-        except SystemExit:
-            pass
 
 
 class TestUtilityFunctions:

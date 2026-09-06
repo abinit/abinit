@@ -4,11 +4,8 @@ from __future__ import annotations
 __version__ = "1.0"
 __author__ = "Matteo Giantomassi"
 
-import argparse
-import dataclasses
 import html
 import json
-import logging
 import os
 import platform
 import shutil
@@ -16,15 +13,12 @@ import subprocess
 import sys
 import tempfile
 from collections.abc import Callable, Iterator
-from dataclasses import dataclass, field
 from os.path import abspath as absp
 from os.path import basename
 from os.path import join as pj
 from socket import gethostname
 from typing import Any
 from warnings import warn
-
-logger = logging.getLogger(__name__)
 
 # The ConfigParser module has been renamed to configparser in Python 3
 from configparser import ConfigParser as SafeConfigParser
@@ -49,11 +43,6 @@ from pymods import termcolor
 from pymods.jobrunner import JobRunner, OMPEnvironment, TimeBomb
 from pymods.testsuite import BuildEnvironment
 from pymods.tools import pprint_table
-
-ROOT, _ = os.path.split(absp(__file__))
-
-TESTBOT_YAML = pj(ROOT, "testbot.yaml")
-TESTBOT_JSON = pj(ROOT, "testbot.json")
 
 
 def lazy__str__(func: Callable) -> Callable:
@@ -107,132 +96,6 @@ def _str2list(string: str | list[str] | tuple[str, ...]) -> list[str]:
 
     return [s.strip() for s in string.split(",") if s]
 
-#from pydantic.dataclasses import dataclass as pydantic_dataclass
-#@pydantic_dataclass(kw_only=True)
-@dataclass(kw_only=True)
-class TestBotContext:
-    """
-    Configuration context for a TestBot builder.
-
-    This class encapsulates all settings required to run tests for a specific
-    Buildbot worker, including MPI/OpenMP configuration, timeouts, and suite selection.
-    """
-
-    slavename: str
-    """Name of buildbot builder"""
-
-    type: str = ""
-    """'ref' if this builder is the reference builder where all tests should pass"""
-
-    ncpus: int | None = None
-    """Max number of CPUs that can be used by TestBot"""
-
-    max_gpus: int | None = 0
-    """Max number of GPUs that can be used by TestBot"""
-
-    mpi_prefix: str = ""
-    """MPI runner"""
-
-    mpirun_np: str = ""
-    """String used to execute `mpirun -n#NUM`"""
-
-    omp_num_threads: int = 0
-    """Number of OpenMP threads. 0 if OpenMP should not be used"""
-
-    enable_mpi: bool | None = None
-    """True if MPI is activated"""
-
-    enable_openmp: bool | None = None
-    """True if OpenMP is activated"""
-
-    with_tdirs: list[str] = field(default_factory=list)
-    """List of subsuites to include"""
-
-    without_tdirs: list[str] = field(default_factory=list)
-    """List of subsuites to exclude"""
-
-    timeout_time: float = 900.0
-    """Timeout time in seconds"""
-
-    runmode: str = "static"
-    """'static': run all tests with 1 MPI proc; use np > 1 only for multiparallel tests"""
-
-    keywords: list[str] = field(default_factory=list)
-    """Keywords to select/ignore tests"""
-
-    etsf_check: bool = False
-    """Activate validation of NetCDF files produced by Abinit"""
-
-    verbose: int = 0
-    """Verbosity level"""
-
-    tmp_basedir: str = ""
-    """Temporary folder where tests are executed and copied back"""
-
-    mpi_args: str = ""
-    """Arguments passed to the MPI command"""
-
-    force_mpi: bool = False
-    """Force usage of mpirun_np prefix"""
-
-    @classmethod
-    def from_builders(cls, all_builders: list[dict[str, Any]], builder_name: str) -> TestBotContext:
-        """
-        Factory method to create a context from a list of builder configurations.
-
-        Args:
-            all_builders: List of builder dictionaries (e.g., from YAML/JSON).
-            builder_name: Name of the builder to extract.
-
-        Returns:
-            TestBotContext: An initialized context for the specified builder.
-
-        Raises:
-            ValueError: If the builder name is not found.
-        """
-        for builder in all_builders:
-            if builder["name"] == builder_name: break
-        else:
-            raise ValueError(f"Cannot find {builder_name=}")
-
-        kwargs = {k: builder[k] for k in [field.name for field in dataclasses.fields(cls)] if k in builder}
-        return cls(**kwargs)
-
-    def __post_init__(self) -> None:
-        """
-        Enforce required fields and basic consistency.
-        """
-        missing = []
-
-        if not self.slavename:
-            missing.append("slavename")
-
-        if self.ncpus is None:
-            missing.append("ncpus")
-
-        #if self.enable_mpi is None:
-        #    missing.append("enable_mpi")
-
-        #if self.enable_openmp is None:
-        #    missing.append("enable_openmp")
-
-        if missing:
-            raise ValueError("Missing required configuration field(s): " + ", ".join(missing))
-
-        # Optional sanity checks
-        if self.ncpus is not None and self.ncpus <= 0:
-            raise ValueError(f"ncpus is negative {self.ncpus}")
-
-        if self.max_gpus < 0:
-            raise ValueError(f"max_gpus is negative: {self.max_gpus}")
-
-        if self.omp_num_threads < 0:
-            raise ValueError(f"omp_num_threads is negative: {self.omp_num_threads}")
-
-        if self.timeout_time <= 0:
-            raise ValueError(f"timeout_time is negative: {self.timeout_time}")
-
-
 def get_mpi_prefix_from_env() -> str | None:
     """
     Try to detect the MPI installation directory from environment variables.
@@ -247,114 +110,14 @@ def get_mpi_prefix_from_env() -> str | None:
     # The problem is that this has precedence over mpi_prefix. Should ask why!!
     try:
        return os.environ["MPI_HOME"]
-    except:
+    except Exception:
        pass
     try:
        return os.environ["MPIHOME"]
-    except:
+    except Exception:
         pass
 
     return None
-
-
-def read_builders(fmt: str) -> list[dict[str, Any]]:
-    """
-    Read builder configurations from a file (YAML or JSON).
-
-    Args:
-        fmt: Format of the input file ("yaml" or "json").
-
-    Returns:
-        list[dict]: A list of dictionaries, each representing a builder.
-
-    Raises:
-        ValueError: If the format is invalid.
-    """
-    if fmt == "yaml":
-      from ruamel import yaml
-      with open(TESTBOT_YAML) as f:
-        all_builders = yaml.YAML(typ="safe", pure=True).load(f.read())
-    elif fmt == "json":
-      with open(TESTBOT_JSON) as f:
-        all_builders = json.load(f)
-    else:
-        raise ValueError(f"Invalid {fmt=}")
-
-    return all_builders
-
-
-def validate() -> int:
-    """
-    Validate the consistency of configuration files (YAML and testfarm.conf).
-
-    Returns:
-        int: Number of validation errors found.
-    """
-    # Read testfarm configuration file with builders.
-    build_examples = abenv.apath_of(pj("config", "specs", "testfarm.conf"))
-    parser = SafeConfigParser()
-    parser.read(build_examples)
-
-    all_builders = read_builders("yaml")
-    builder_names = [b["name"] for b in all_builders]
-
-    retcode = 0
-
-    if len(set(builder_names)) != len(builder_names):
-        retcode += 1
-        print("Builder names are not unique!")
-
-    allowed = set(TestBot._attrbs.keys())
-
-    for builder in all_builders:
-        b_keys = set(builder.keys())
-        #missing = allowed - b_keys
-        extra   = b_keys - allowed
-
-        if extra:
-            print("Unexpected:", extra)
-
-        #if missing:
-        #    print("Missing:", missing)
-
-    for builder_name in builder_names:
-        try:
-            ctx = TestBotContext.from_builders(all_builders, builder_name)
-            #print(ctx)
-        except Exception as exc:
-            print(exc)
-            retcode += 1
-
-    #print(ctx.type)
-    #for builder_name in parser.sections():
-    #convert()
-
-    for builder_name in builder_names:
-        testbot = TestBot(None, builder_name=builder_name)
-        #print("Running in dry-run mode, will return immediately.")
-        print(testbot)
-
-    if retcode == 0:
-        convert()
-    else:
-        print("Validation failed. JSON file won't be produced.")
-
-    return retcode
-
-
-def convert() -> int:
-    """
-    Convert the TestBot builder configuration from YAML to JSON.
-
-    Returns:
-        int: 0 on success.
-    """
-    all_builders = read_builders("yaml")
-
-    with open(TESTBOT_JSON, "w", encoding="utf-8") as f:
-      json.dump(all_builders, f, indent=2, sort_keys=True)
-
-    return 0
 
 
 class TestBot:
@@ -362,7 +125,7 @@ class TestBot:
     Driver for ABINIT automatic tests on Buildbot workers.
 
     The execution flow consists of:
-    1. Loading configuration from `testbot.cfg` (legacy) or `testbot.yaml`/`testbot.json`.
+    1. Loading configuration from `testbot.cfg` (INI, generated by abibuildbot).
     2. Initializing `JobRunner` instances for sequential and parallel execution.
     3. Selecting and running test suites based on selected keywords and tags.
     4. Aggregating results into a summary report.
@@ -385,7 +148,6 @@ class TestBot:
       "timeout_time"     : (900, float, "Timeout time in seconds."),
       "runmode"          : ("static", str, "'static to run all tests with 1 MPI proc and use np > 1 only for multiparallel tests'"),
       "keywords"         : ("", _str2list, "String with the keywords that should be selected/ignored."),
-      "etsf_check"       : ("no", _yesno2bool, "yes to activate the validation of the netcdf files produced by Abinit."),
       "verbose"          : (0,    int, "Verbosity level"),
       "tmp_basedir"      : ("", str, "Temporary folder where the tests will be executed and copied back"),
       "mpi_args"         : ("", str, "Args passed to the mpi command"),
@@ -404,13 +166,12 @@ class TestBot:
 
         print("# NB If default is None, the option must be specified.")
 
-    def __init__(self, testbot_cfg: str | None = None, builder_name: str | None = None) -> None:
+    def __init__(self, testbot_cfg: str | None = None) -> None:
         """
         Initialize the TestBot instance.
 
         Args:
-            testbot_cfg: Optional path to the legacy INI configuration file.
-            builder_name: Optional name for extraction from YAML/JSON config.
+            testbot_cfg: Optional path to the INI configuration file.
 
         Raises:
             ValueError: If mandatory options are missing or invalid.
@@ -427,82 +188,37 @@ class TestBot:
             "timeout_time",
             "runmode",
             "keywords",
-            "etsf_check",
             "verbose",
             "tmp_basedir",
             "mpi_args",
             "force_mpi",
         ]
 
-        if builder_name is None:
-            # Legacy mode based on INI file. Will be removed.
-            # Read the options specified in the testbot configuration file.
+        # Read the options specified in the testbot configuration file.
+        if testbot_cfg is None:
+            basedir, _ = os.path.split(absp(__file__))
+            testbot_cfg = pj(basedir, "testbot.cfg")
 
-            if testbot_cfg is None:
-                basedir, _ = os.path.split(absp(__file__))
-                testbot_cfg = pj(basedir, "testbot.cfg")
+        # Here we init the attributes either from the cfg file
+        parser = SafeConfigParser()
+        parser.read(testbot_cfg)
 
-            # Here we init the attributes either from the cfg file
-            parser = SafeConfigParser()
-            parser.read(testbot_cfg)
+        for attr in attrs2read:
+            default, parse, info = TestBot._attrbs[attr]
+            try:
+                value = parser.get("testbot", attr)
+            except NoOptionError:
+                value = default
 
-            for attr in attrs2read:
-                default, parse, info = TestBot._attrbs[attr]
-                try:
-                    value = parser.get("testbot", attr)
-                except NoOptionError:
-                    value = default
+            if value is None:
+                # Write out the cfg file and raise
+                for section in parser.sections():
+                    print("[" + section + "]")
+                    for opt in parser.options(section):
+                        print(opt + " = " + parser.get(section, opt))
+                raise ValueError("Mandatory option %s is not declared" % attr)
 
-                if value is None:
-                    # Write out the cfg file and raise
-                    for section in parser.sections():
-                        print("[" + section + "]")
-                        for opt in parser.options(section):
-                            print(opt + " = " + parser.get(section, opt))
-                    raise ValueError("Mandatory option %s is not declared" % attr)
-
-                self.__dict__[attr] = parse(value)
-
-        else:
-            #fmt = "yaml" # Use yaml file.
-            fmt = "json"
-            all_builders = read_builders(fmt)
-
-            for builder in all_builders:
-                if builder["name"] == builder_name: break
-            else:
-                all_names = [b["name"] for b in all_builders]
-                raise ValueError(f"Cannot find {builder_name=} in file {TESTBOT_YAML}\nChoose among: {all_names}")
-
-            print(builder)
-            ctx = TestBotContext.from_builders(all_builders, builder_name)
-            print(ctx)
-
-            for attr in attrs2read:
-                default, parse, info = TestBot._attrbs[attr]
-                value = builder.get(attr, default)
-
-                if value is None and default is None:
-                    # Write out the cfg file and raise
-                    print(builder)
-                    raise ValueError("Mandatory option %s is not declared" % attr)
-
-                if value is not None:
-                  value = parse(value)
-
-                self.__dict__[attr] = value
-
-            # Final fix.
-            self.slavename = builder["name"]
-
-            # This is what JMB does in buildbot_worker/testbot.py
-            mpi_prefix_from_env = get_mpi_prefix_from_env()
-            if mpi_prefix_from_env is not None:
-                if self.mpi_prefix:
-                    print("WARNING: About to overwrite mpi_prefix from yaml file with the one from $MPI_HOME")
-                    print(f"From Yaml     : {self.mpi_prefix}")
-                    print(f"From $MPI_HOME: {mpi_prefix_from_env}")
-                    self.mpi_prefix= mpi_prefix_from_env
+            self.__dict__[attr] = parse(value)
 
         if self.with_tdirs and self.without_tdirs:
             raise ValueError("with_tdirs and without_tdirs attribute are mutually exclusive")
@@ -516,16 +232,6 @@ class TestBot:
         system, node, release, version, machine, processor = platform.uname()
         print("Running on %s -- builder %s -- system %s -- max_cpus %s -- Python %s -- %s" % (
               gethostname(), self.slavename, system, self.max_cpus, platform.python_version(), _my_name))
-
-        # Set the logger level.
-        # loglevel is bound to the string value obtained from the command line argument.
-        # Convert to upper case to allow the user to specify --loglevel=DEBUG or --loglevel=debug
-        # numeric_level = getattr(logging, options.loglevel.upper(), None)
-        numeric_level = getattr(logging, "ERROR", None)
-
-        if not isinstance(numeric_level, int):
-            raise ValueError("Invalid log level: %s" % numeric_level)
-        logging.basicConfig(level=numeric_level)
 
         # Read testfarm configuration file with builders.
         build_examples = abenv.apath_of(pj("config", "specs", "testfarm.conf"))
@@ -572,7 +278,6 @@ class TestBot:
             if self.has_mpi:
                 self.mpi_runner.set_ompenv(omp_env)
 
-        self.targz_fnames = []
         print(self)
 
         # Initialize the table to store the final results.
@@ -664,10 +369,6 @@ class TestBot:
                                        verbose=self.verbose,
                                        make_html_diff=1)
 
-        # Cannot use this option on the test farm because hdf5 is not thread/process-safe.
-        # See https://www.hdfgroup.org/hdf5-quest.html#tsafe
-                                       # etsf_check=self.etsf_check)
-
         if results is None:
             print("Test suite is empty, returning 0 0 0 ")
             return 0, 0, 0
@@ -675,18 +376,13 @@ class TestBot:
         # Store the results in the summary table,
         # taking into account that an input file might be executed multiple times
         # with a different environment (MPI, OMP ...)
-        run_info = {}
-        # run_info = [self.build_env, workdir, runner, mpi_nprocs, py_nprocs]
-        self.summary.merge_results(test_suite, run_info)
-
-        # Push the location of the tarball file
-        self.targz_fnames.append(results.targz_fname)
+        self.summary.merge_results(test_suite)
 
         if self.tmp_basedir:
             for fn in ["results.tar.gz", "suite_report.html"]:
                 try:
                     shutil.copy2(os.path.join(workdir, fn), workdir_name)
-                except:
+                except Exception:
                     print("Could not copy back file ", fn)
 
         return results.nfailed, results.npassed, results.nexecuted
@@ -769,14 +465,10 @@ class TestBot:
 
         self.summary.json_dump("testbot_summary.json")
 
-        # Post-process the summary now, in-process. builder_scripts/analysis.sh
-        # still calls `./testbot.py analyze` independently afterwards as a
-        # fallback -- that path is what still produces a report if this
-        # process never reaches this point (e.g. killed by an external
-        # timeout wrapper mid-suite). analyze()'s own return code is
-        # deliberately not propagated here, matching analysis.sh's existing
-        # behavior of never letting post-processing override the real test
-        # result (self.type/nfailed/npassed below).
+        # Post-process the summary now, in-process (produces testbot_analysis.html
+        # and records the git tag). analyze()'s own return code is deliberately
+        # not propagated here -- post-processing must never override the real
+        # test result (self.type/nfailed/npassed below).
         try:
             analyze_rc = analyze("testbot_summary.json", tag=get_git_tag())
             if analyze_rc != 0:
@@ -974,7 +666,7 @@ class TestBotSummary:
 
         return table
 
-    def merge_results(self, test_suite: Any, run_info: dict[str, Any]) -> None:
+    def merge_results(self, test_suite: Any) -> None:
         """
         Merge results from a completed test suite into the global summary.
 
@@ -983,11 +675,8 @@ class TestBotSummary:
 
         Args:
             test_suite: The executed test suite object.
-            run_info: Dictionary containing execution metadata (currently unused).
         """
         # assert test_suite._executed
-        self.run_info = run_info
-
         for test in test_suite:
             d = self.res_table[test.suite_name][test.id]
 
@@ -1079,104 +768,6 @@ class TestBotSummary:
             json.dump(d, fh)
 
 
-def get_epilog() -> str:
-    """
-    Get the epilog string for the command-line help.
-
-    Returns:
-        str: The epilog usage examples.
-    """
-    s = """\
-======================================================================================================
-Usage example:
-
-    testbot.py run BUILDER_NAME  => Run tests for the given builder.
-    testbot.py print             => Print info on options.
-    testbot.py validate          => Validate yaml file and convert to json.
-
-======================================================================================================
-"""
-    return s
-
-
-def get_parser(with_epilog: bool = False) -> argparse.ArgumentParser:
-    """
-    Build and return the command-line parser.
-
-    Args:
-        with_epilog (bool, optional): Whether to include the epilog in help.
-
-    Returns:
-        argparse.ArgumentParser: The configured parser.
-    """
-    parser = argparse.ArgumentParser(epilog=get_epilog() if with_epilog else "",
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
-
-    parser.add_argument("--loglevel", default="ERROR", type=str,
-        help="Set the loglevel. Possible values: CRITICAL, ERROR (default), WARNING, INFO, DEBUG")
-    parser.add_argument("-V", "--version", action="version", version=__version__)
-
-    parser.add_argument("-v", "--verbose", default=0, action="count", # -vv --> verbose=2
-        help="verbose, can be supplied multiple times to increase verbosity")
-
-    # Create the parsers for the sub-commands
-    subparsers = parser.add_subparsers(dest="command", help="sub-command help",
-       description="Valid subcommands, use command --help for help")
-
-    # Subparser for run
-    p_run = subparsers.add_parser("run", # parents=[copts_parser],
-        help="Run tests.")
-    p_run.add_argument("builder_name", type=str, help="Name of the builder")
-    p_run.add_argument('-d', '--dry-run', default=False, action="store_true", help='Dry-run mode.')
-
-    p_info = subparsers.add_parser("info", help="Print info on options.")
-
-    # Subparser for validate
-    p_validate = subparsers.add_parser("validate", # parents=[copts_parser],
-        help="Validate yaml file and convert to JSON.")
-
-    # Subparser for analyze
-    p_analyze = subparsers.add_parser("analyze",
-        help="Post-process testbot_summary.json and print/update the performance table.")
-    p_analyze.add_argument("tag", nargs="?", default="unknown",
-        help="Git tag/revision to record in the summary JSON.")
-
-    return parser
-
-
-def new_main() -> int:
-    """
-    Main entry point for TestBot using the modern sub-command interface.
-
-    Returns:
-        int: The exit code of the executed command.
-    """
-    # Parse command line.
-    parser = get_parser(with_epilog=True)
-    options = parser.parse_args()
-
-    if options.command == "validate":
-        return validate()
-
-    if options.command == "info":
-        TestBot.print_options()
-        return 0
-
-    if options.command == "analyze":
-        return analyze(fname="testbot_summary.json", tag=options.tag)
-
-    if options.command == "run":
-        testbot = TestBot(None, builder_name=options.builder_name)
-        if options.dry_run:
-            print("Running in dry-run mode, will return immediately.")
-            print(testbot)
-            return 0
-
-        return testbot.run()
-
-    raise ValueError(f"Invalid command: {options.command}")
-
-
 def old_main() -> int:
     """
     Main entry point for TestBot using the legacy command-line interface.
@@ -1188,9 +779,6 @@ def old_main() -> int:
         # Print help and exit.
         TestBot.print_options()
         return 0
-
-    if len(sys.argv) > 1 and sys.argv[1] == "validate":
-        return validate()
 
     if len(sys.argv) > 1 and sys.argv[1] == "analyze":
         tag = sys.argv[2] if len(sys.argv) > 2 else "unknown"
@@ -1215,5 +803,4 @@ def old_main() -> int:
 
 
 if __name__ == "__main__":
-    #sys.exit(new_main())
     sys.exit(old_main())
