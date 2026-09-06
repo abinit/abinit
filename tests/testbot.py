@@ -387,9 +387,9 @@ class TestBot:
       "keywords"         : ("", _str2list, "String with the keywords that should be selected/ignored."),
       "etsf_check"       : ("no", _yesno2bool, "yes to activate the validation of the netcdf files produced by Abinit."),
       "verbose"          : (0,    int, "Verbosity level"),
-      "tmp_basedir"      : ("", str, "temporary folder where the tests will be executed and copied back"),
-      "mpi_args"         : ("", str, "args passed to the mpi command"),
-      "force_mpi"        : ("no", _yesno2bool, "force usage of mpirun_np prefix"),
+      "tmp_basedir"      : ("", str, "Temporary folder where the tests will be executed and copied back"),
+      "mpi_args"         : ("", str, "Args passed to the mpi command"),
+      "force_mpi"        : ("no", _yesno2bool, "Force usage of mpirun_np prefix"),
     }
 
     @classmethod

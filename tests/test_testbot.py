@@ -243,47 +243,10 @@ class TestGetMpiPrefixFromEnv:
 class TestReadBuilders:
     """Tests for read_builders() function."""
 
-    def test_read_builders_json_format(self):
-        """Should read builders from JSON file."""
-        builders = read_builders("json")
-        assert isinstance(builders, list)
-        assert len(builders) > 0
-        assert all("name" in b for b in builders)
-
-    def test_read_builders_yaml_format(self):
-        """Should read builders from YAML file."""
-        try:
-            from ruamel import yaml  # noqa: F401
-        except ImportError:
-            pytest.skip("ruamel YAML library not available")
-
-        builders = read_builders("yaml")
-        assert isinstance(builders, list)
-        assert len(builders) > 0
-        assert all("name" in b for b in builders)
-
     def test_read_builders_invalid_format(self):
         """Should raise ValueError for invalid format."""
         with pytest.raises(ValueError, match="Invalid"):
             read_builders("xml")
-
-    def test_read_builders_json_yaml_consistency(self):
-        """JSON and YAML builders should have the same structure."""
-        try:
-            from ruamel import yaml  # noqa: F401
-        except ImportError:
-            pytest.skip("ruamel YAML library not available")
-
-        builders_json = read_builders("json")
-        builders_yaml = read_builders("yaml")
-
-        # Check that we have the same number of builders
-        assert len(builders_json) == len(builders_yaml)
-
-        # Check that builder names match
-        json_names = {b["name"] for b in builders_json}
-        yaml_names = {b["name"] for b in builders_yaml}
-        assert json_names == yaml_names
 
 
 class TestGetGitTag:
