@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 """
 Tests for the yaml_tools package.
 """
+from typing import Any
+
 import pytest
 
 from .abinit_iterators import IterStateFilter
@@ -11,17 +15,17 @@ from .meta_conf_parser import ConfParser, ConfTree, Constraint, SpecKey
 
 
 class TestStateFilter:
-    def test_empty(self):
+    def test_empty(self) -> None:
         with pytest.raises(EmptySetError):
             IterStateFilter({"dtset": {"from": 5, "to": 2}})
 
-    def test_match_singleton(self):
+    def test_match_singleton(self) -> None:
         f1 = IterStateFilter({"dtset": 8})
         assert not f1.match({"dtset": 4})
         assert not f1.match({"dtset": 9})
         assert f1.match({"dtset": 8})
 
-    def test_match_finite(self):
+    def test_match_finite(self) -> None:
         f1 = IterStateFilter({"dtset": [1, 2, 3, 8]})
         assert not f1.match({"dtset": 4})
         assert not f1.match({"dtset": 9})
@@ -29,20 +33,20 @@ class TestStateFilter:
         assert f1.match({"dtset": 3})
         assert f1.match({"dtset": 8})
 
-    def test_match_bounded(self):
+    def test_match_bounded(self) -> None:
         f1 = IterStateFilter({"dtset": {"from": 1, "to": 5}})
         assert f1.match({"dtset": 1})
         assert f1.match({"dtset": 4, "image": 7})
         assert f1.match({"dtset": 5})
         assert not f1.match({"dtset": 6})
 
-    def test_match_half_bounded(self):
+    def test_match_half_bounded(self) -> None:
         f1 = IterStateFilter({"dtset": {"from": 5}})
         assert not f1.match({"dtset": 4})
         assert f1.match({"dtset": 5})
         assert f1.match({"dtset": 50000})
 
-    def test_include(self):
+    def test_include(self) -> None:
         f1 = IterStateFilter({
             "dtset": {"from": 5, "to": 8},
             "image": [1, 2, 3, 5],
@@ -67,7 +71,7 @@ class TestStateFilter:
         assert not f2.include(f3)
         assert not f3.include(f2)
 
-    def test_cmp(self):
+    def test_cmp(self) -> None:
         f1 = IterStateFilter({
             "dtset": {"from": 5, "to": 8},
             "image": [1, 2, 3, 5],
@@ -90,7 +94,7 @@ class TestStateFilter:
         with pytest.raises(NotOrderedOverlappingSetError):
             f2 < f3
 
-    def test_sort(self):
+    def test_sort(self) -> None:
         f1 = IterStateFilter({
             "dtset": {"from": 5, "to": 8},
             "image": [1, 2, 3, 5],
@@ -298,30 +302,30 @@ class TestMetaConfParser:
         },
     }
 
-    def test_make_tree_empty(self):
+    def test_make_tree_empty(self) -> None:
         cp = ConfParser()
         tree = ConfTree.make_tree({}, cp)
         assert tree == ConfTree({"spec": {}, "constraints": {},
                                              "parameters": {}})
 
-    def test_make_tree_specs(self):
+    def test_make_tree_specs(self) -> None:
         cp = ConfParser()
         tree = ConfTree.make_tree(self.src1, cp)
         assert tree == ConfTree(self.tree1)
 
-    def test_make_tree_constraints(self):
+    def test_make_tree_constraints(self) -> None:
         cp = ConfParser()
 
         @cp.constraint()
-        def tol_abs(tol, ref, test):
+        def tol_abs(tol: float, ref: Any, test: Any) -> None:
             pass
 
         @cp.constraint()
-        def tol_rel(tol, ref, test):
+        def tol_rel(tol: float, ref: Any, test: Any) -> None:
             pass
 
         @cp.constraint()
-        def ceil(tol, ref, test):
+        def ceil(tol: float, ref: Any, test: Any) -> None:
             pass
 
         tree = ConfTree.make_tree(self.src2, cp)
@@ -367,7 +371,7 @@ class TestMetaConfParser:
         })
         assert tree == ref
 
-    def test_make_tree_filters(self):
+    def test_make_tree_filters(self) -> None:
         cp = ConfParser()
 
         trees, filters = cp.make_trees(self.src4)
@@ -395,19 +399,19 @@ class TestMetaConfParser:
             })
         }
 
-    def test_update_tree(self):
+    def test_update_tree(self) -> None:
         cp = ConfParser()
 
         @cp.constraint()
-        def tol_abs(tol, ref, test):
+        def tol_abs(tol: float, ref: Any, test: Any) -> None:
             pass
 
         @cp.constraint()
-        def tol_rel(tol, ref, test):
+        def tol_rel(tol: float, ref: Any, test: Any) -> None:
             pass
 
         @cp.constraint()
-        def ceil(tol, ref, test):
+        def ceil(tol: float, ref: Any, test: Any) -> None:
             pass
 
         ref = ConfTree.make_tree(self.src23, cp)
@@ -416,19 +420,19 @@ class TestMetaConfParser:
 
         assert test == ref
 
-    def test_update_tree_hardreset(self):
+    def test_update_tree_hardreset(self) -> None:
         cp = ConfParser()
 
         @cp.constraint()
-        def tol_abs(tol, ref, test):
+        def tol_abs(tol: float, ref: Any, test: Any) -> None:
             pass
 
         @cp.constraint()
-        def tol_rel(tol, ref, test):
+        def tol_rel(tol: float, ref: Any, test: Any) -> None:
             pass
 
         @cp.constraint()
-        def ceil(tol, ref, test):
+        def ceil(tol: float, ref: Any, test: Any) -> None:
             pass
 
         ref = ConfTree.make_tree(self.src25, cp)
@@ -438,12 +442,12 @@ class TestMetaConfParser:
         assert test == ref
 
 
-def true(v, r, t):
+def true(v: Any, r: Any, t: Any) -> bool:
     return True
 
 
 class TestConstraint:
-    def test_apply_to_number(self):
+    def test_apply_to_number(self) -> None:
         cons = Constraint("c1", true, int, True, [], set(), "number", True)
 
         assert cons.apply_to(1.0)
@@ -451,7 +455,7 @@ class TestConstraint:
         assert cons.apply_to(1.0 + 1.0j)
         assert cons.apply_to(Undef())
 
-    def test_apply_to_real(self):
+    def test_apply_to_real(self) -> None:
         cons = Constraint("c1", true, int, True, [], set(), "real", True)
 
         assert cons.apply_to(1.0) is True
@@ -459,7 +463,7 @@ class TestConstraint:
         assert cons.apply_to(1.0 + 1.0j) is False
         assert cons.apply_to(Undef()) is True
 
-    def test_apply_to_integer(self):
+    def test_apply_to_integer(self) -> None:
         cons = Constraint("c1", true, int, True, [], set(), "integer", True)
 
         assert cons.apply_to(1.0) is False
@@ -467,7 +471,7 @@ class TestConstraint:
         assert cons.apply_to(1.0 + 1.0j) is False
         assert cons.apply_to(Undef()) is False
 
-    def test_apply_to_complex(self):
+    def test_apply_to_complex(self) -> None:
         cons = Constraint("c1", true, int, True, [], set(), "complex", True)
 
         assert cons.apply_to(1.0) is True
@@ -475,7 +479,7 @@ class TestConstraint:
         assert cons.apply_to(1.0 + 1.0j) is True
         assert cons.apply_to(Undef()) is True
 
-    def test_apply_to_Array(self):
+    def test_apply_to_Array(self) -> None:
         cons = Constraint("c1", true, int, True, [], set(), "Array", True)
 
         assert cons.apply_to(BaseArray((0,))) is True
@@ -486,7 +490,7 @@ class TestConstraint:
             pass
         assert cons.apply_to(MyArray.from_seq([1, 2, 3])) is True
 
-    def test_apply_to_class(self):
+    def test_apply_to_class(self) -> None:
         class BaseClass:
             pass
 
@@ -535,7 +539,7 @@ filters:
         image: 1
 """
 
-    def test_get_constraints(self):
+    def test_get_constraints(self) -> None:
         DriverTestConf.default_conf = "/dev/null"
         driver = DriverTestConf(src=self.src1)
 
@@ -598,7 +602,7 @@ filters:
         image: 1
 """
 
-    def test_get_constraints_hardreset(self):
+    def test_get_constraints_hardreset(self) -> None:
         DriverTestConf.default_conf = "/dev/null"
         driver = DriverTestConf(src=self.src2)
 
@@ -625,7 +629,7 @@ sp1:
         tol_vec: 1.0e-8
 """
 
-    def test_get_constraints_other_types(self):
+    def test_get_constraints_other_types(self) -> None:
         DriverTestConf.default_conf = "/dev/null"
 
         driver = DriverTestConf(src=self.src4)

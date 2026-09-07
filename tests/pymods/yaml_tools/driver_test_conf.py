@@ -1,8 +1,11 @@
 """
 Define the interface to the configuration of the test.
 """
+from __future__ import annotations
+
 import os
 from copy import copy
+from typing import Any
 
 from yaml import YAMLError
 
@@ -15,7 +18,7 @@ THIS_PATH = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_CONF_PATH = os.path.join(THIS_PATH, "default_test.yaml")
 
 
-def get_default_conf(filename):
+def get_default_conf(filename: str) -> dict[str, Any]:
     """
     Load and parse default test config file.
     """
@@ -36,7 +39,7 @@ class DriverTestConf:
     """
     default_conf = DEFAULT_CONF_PATH
 
-    def __init__(self, src=None, metadata={}):
+    def __init__(self, src: str | None = None, metadata: dict[str, Any] | None = None) -> None:
         """
         Initialize the DriverTestConf object.
 
@@ -44,6 +47,8 @@ class DriverTestConf:
             src (str, optional): YAML configuration source.
             metadata (dict, optional): Metadata for the configuration (e.g., file name).
         """
+        if metadata is None:
+            metadata = {}
         self.known_params = conf_parser.parameters.copy()
         self.param_stack = []
         self.constraints_stack = []
@@ -81,7 +86,7 @@ class DriverTestConf:
         self._tree_cache = {}
 
     @classmethod
-    def from_file(cls, filename):
+    def from_file(cls, filename: str) -> DriverTestConf:
         """
         Create a new instance of DriverTestConf from a configuration file.
 
@@ -94,7 +99,7 @@ class DriverTestConf:
         with open(filename) as f:
             return cls(f.read(), {"file name": filename})
 
-    def extra_info(self):
+    def extra_info(self) -> list[str]:
         """
         Return a list of info messages formatted for reporting.
 
@@ -103,7 +108,7 @@ class DriverTestConf:
         """
         return ["# " + inf for inf in self._infos]
 
-    def info(self, msg):
+    def info(self, msg: str) -> None:
         """
         Record an information message.
 
@@ -112,7 +117,7 @@ class DriverTestConf:
         """
         self._infos.append("[INFO] " + msg)
 
-    def warning(self, msg):
+    def warning(self, msg: str) -> None:
         """
         Record a warning message.
 
@@ -122,24 +127,24 @@ class DriverTestConf:
         self._infos.append("[WARNING] " + msg)
 
     @property
-    def path(self):
+    def path(self) -> tuple[str, ...]:
         return tuple(self.current_path)
 
-    def get_top_level_constraints(self):
+    def get_top_level_constraints(self) -> dict[str, Any]:
         """
         Return a list of the constraints defined at the tol level
         of configuration
         """
         return self.tree.get_new_constraints_at(())
 
-    def get_top_level_params(self):
+    def get_top_level_params(self) -> dict[str, Any]:
         """
         Return a dict of the parameters defined at the tol level
         of configuration
         """
         return self.tree.get_new_params_at(())
 
-    def get_constraints_for(self, obj):
+    def get_constraints_for(self, obj: Any) -> list[Any]:
         """
         Return constraints in the current scope that apply to an object.
 
@@ -178,7 +183,7 @@ class DriverTestConf:
 
         return constraints
 
-    def get_param(self, name):
+    def get_param(self, name: str) -> Any:
         """
         Return the value of the asked parameter as defined in
         the nearest scope or its default value (depending on
@@ -202,11 +207,11 @@ class DriverTestConf:
             return top_params[name]
         return default
 
-    def use_filter(self, state):
+    def use_filter(self, state: dict[str, Any]) -> DriverTestConf:
         """
         Start using filtered configurations if available.
         """
-        def state_hash(d):
+        def state_hash(d: dict[str, Any]) -> int:
             st = []
             for it in ITERATORS:
                 if it in d:
@@ -238,14 +243,14 @@ class DriverTestConf:
         self.will_enter = True
         return self
 
-    def clean_filter(self):
+    def clean_filter(self) -> None:
         """
         Restore default filter state
         """
         self.current_state = {}
         self.tree = self.trees["__default"].copy()
 
-    def rebuild_stacks(self):
+    def rebuild_stacks(self) -> None:
         """
         Rebuild parameters and constraints stacks.
         """
@@ -256,7 +261,7 @@ class DriverTestConf:
         for sp in path:
             self.go_down(sp)
 
-    def go_down(self, child):
+    def go_down(self, child: str) -> DriverTestConf:
         """
         Go deeper in the tree.
         """
@@ -272,7 +277,7 @@ class DriverTestConf:
         self.will_enter = True
         return self
 
-    def go_up(self):
+    def go_up(self) -> None:
         """
         Go back to a higher level of the tree.
         """
@@ -281,7 +286,7 @@ class DriverTestConf:
             self.param_stack.pop()
             self.constraints_stack.pop()
 
-    def __enter__(self):
+    def __enter__(self) -> DriverTestConf:
         """
         Act as a context manager.
         """
@@ -291,7 +296,7 @@ class DriverTestConf:
         self.will_enter = False
         return self
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, type: Any, value: Any, traceback: Any) -> None:
         """
         Automatically go back when leaving with block.
         """

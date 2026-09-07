@@ -21,6 +21,7 @@ import textwrap
 import time
 import warnings
 from base64 import b64encode
+from collections.abc import Callable, Iterable, Iterator, Sequence
 from configparser import ConfigParser
 from configparser import ParsingError as CPError
 from io import StringIO
@@ -30,6 +31,12 @@ from queue import Empty as EmptyQueueError
 from socket import gethostname
 from subprocess import PIPE, Popen
 from threading import Thread
+from typing import TYPE_CHECKING, Any, TextIO
+
+try:
+    from typing import Self
+except ImportError:
+    from typing_extensions import Self
 
 from .abo_file_analysis import AboFileAnalysis
 from .devtools import NoErrorFileLock, makeunique
@@ -56,7 +63,7 @@ _MY_NAME = os.path.basename(__file__)[:-3] + "-" + __version__
 
 
 # Helper functions and tools
-def my_getlogin():
+def my_getlogin() -> str:
     """
     Get the username of the user logged into the controlling terminal.
 
@@ -79,7 +86,7 @@ def my_getlogin():
 
 
 @makeunique
-def genid():
+def genid() -> str:
     """
     Generate a unique random ID (12 bytes, base64 encoded).
 
@@ -89,7 +96,7 @@ def genid():
     return b64encode(os.urandom(12)).decode("ascii")
 
 
-def html_colorize_text(string, code):
+def html_colorize_text(string: str, code: str) -> str:
     """
     Colorize text for HTML output.
 
@@ -112,7 +119,7 @@ _status2htmlcolor = {
 }
 
 
-def status2html(status):
+def status2html(status: str) -> str:
     """
     Convert a test status string into a colorized HTML string.
 
@@ -125,7 +132,7 @@ def status2html(status):
     return _status2htmlcolor[status](status)
 
 
-def sec2str(seconds):
+def sec2str(seconds: float) -> str:
     """
     Convert a duration in seconds to a string.
 
@@ -138,7 +145,7 @@ def sec2str(seconds):
     return "%.2f" % seconds
 
 
-def str2html(string, end="<br>"):
+def str2html(string: str, end: str = "<br>") -> str:
     """
     Convert a string with line breaks to HTML.
 
@@ -153,7 +160,7 @@ def str2html(string, end="<br>"):
     return "<br>".join(lines) + end
 
 
-def args2htmltr(*args):
+def args2htmltr(*args: object) -> str:
     """
     Convert a list of arguments to HTML table cells (TD).
 
@@ -169,7 +176,7 @@ def args2htmltr(*args):
     return string
 
 
-def html_link(string, href=None):
+def html_link(string: str, href: str | None = None) -> str:
     """
     Create an HTML hyperlink.
 
@@ -185,7 +192,7 @@ def html_link(string, href=None):
     return "<a href='%s'>%s</a>" % (string, string)
 
 
-def is_string(s):
+def is_string(s: object) -> bool:
     """
     Check if the input is string-like (duck typing).
 
@@ -202,7 +209,7 @@ def is_string(s):
         return False
 
 
-def has_exts(path, exts):
+def has_exts(path: str, exts: str | list[str]) -> bool:
     """
     Check if a path has one of the specified extensions.
 
@@ -219,7 +226,7 @@ def has_exts(path, exts):
     return ext in exts
 
 
-def lazy__str__(func):
+def lazy__str__(func: Callable[..., Any]) -> Callable[..., str]:
     """
     Lazy decorator for __str__ methods.
 
@@ -229,7 +236,7 @@ def lazy__str__(func):
     Returns:
         callable: Decorated function returning a string representation of attributes.
     """
-    def oncall(*args, **kwargs):
+    def oncall(*args: Any, **kwargs: Any) -> str:
         self = args[0]
         return "\n".join(str(k) + " : " + str(v) for (k, v) in self.__dict__.items())
     return oncall
@@ -237,7 +244,7 @@ def lazy__str__(func):
 
 # Helper functions for performing IO
 
-def lazy_read(fname):
+def lazy_read(fname: str) -> str:
     """
     Read the entire content of a file.
 
@@ -251,7 +258,7 @@ def lazy_read(fname):
         return fh.read()
 
 
-def lazy_readlines(fname):
+def lazy_readlines(fname: str) -> list[str]:
     """
     Read all lines from a file.
 
@@ -265,7 +272,7 @@ def lazy_readlines(fname):
         return fh.readlines()
 
 
-def rm_rf(top, exclude_paths=None):
+def rm_rf(top: str, exclude_paths: str | list[str] | None = None) -> list[str]:
     """
     Recursively remove all files and directories within `top`.
 
@@ -299,7 +306,7 @@ def rm_rf(top, exclude_paths=None):
     return removed
 
 
-def find_abortfile(workdir):
+def find_abortfile(workdir: str) -> str:
     """
     Find the absolute path of the MPI abort file produced by ABINIT.
 
@@ -316,7 +323,7 @@ def find_abortfile(workdir):
     return ""
 
 
-def read_yaml_errmsg(path):
+def read_yaml_errmsg(path: str) -> str:
     """
     Extract a YAML-formatted error message from a file.
 
@@ -341,7 +348,7 @@ def read_yaml_errmsg(path):
     return "".join(errlines)
 
 
-def extract_errinfo_from_files(workdir):
+def extract_errinfo_from_files(workdir: str) -> str:
     """
     Extract error information from debug files (.flun, .mocc) in a directory.
 
@@ -387,7 +394,7 @@ class FileToTest:
         ("verbose_report", "no", str),
     ]
 
-    def __init__(self, dic):
+    def __init__(self, dic: dict[str, Any]) -> None:
         """
         Initialize the FileToTest object.
 
@@ -425,10 +432,11 @@ class FileToTest:
         self.fld_msg = "Initialized in __init__"
 
     @lazy__str__
-    def __str__(self): pass
+    def __str__(self) -> None: pass
 
-    def compare(self, fldiff_path, ref_dir, workdir, yaml_test, timebomb=None,
-                outf=sys.stdout, simplified_yaml_test=False, forced_tolerance="default"):
+    def compare(self, fldiff_path: str, ref_dir: str, workdir: str, yaml_test: dict[str, Any],
+                timebomb: TimeBomb | None = None, outf: Any = sys.stdout, simplified_yaml_test: bool = False,
+                forced_tolerance: str = "default") -> tuple[bool, str, str]:
         """
         Compare the output file in `workdir` with the reference in `ref_dir`.
 
@@ -458,7 +466,7 @@ class FileToTest:
             yaml_section_start = "--- !"
             yaml_section_end = "..."
 
-            def make_simplified(file_in,file_out,start_string,end_string):
+            def make_simplified(file_in: str, file_out: str, start_string: str, end_string: str) -> None:
                 f_in=open(file_in)
                 f_out=open(file_out,"w")
                 inRecordingMode = False
@@ -531,7 +539,7 @@ class FileToTest:
 
         differ = FlDiffer(yaml_test=yaml_test, **opts)
 
-        def make_diff():
+        def make_diff() -> tuple[tuple[bool, str, str], bool]:
             result = differ.diff(ref_fname, out_fname)
             result.dump_details(outf)
 
@@ -565,7 +573,7 @@ class FileToTest:
 # Parsers used for the different TEST_INFO options
 
 
-def _str2filestotest(string):
+def _str2filestotest(string: str) -> Sequence[FileToTest]:
     """
     Parse a string containing file comparison metadata.
 
@@ -601,17 +609,17 @@ def _str2filestotest(string):
     return tuple(files_to_test)
 
 
-def _str2list(string):
+def _str2list(string: str) -> list[str]:
     """Convert comma-separated string to list."""
     return [s.strip() for s in string.split(",") if s]
-def _str2intlist(string):
+def _str2intlist(string: str) -> list[int]:
     """Convert comma-separated string to list of integers."""
     return [int(item) for item in _str2list(string)]
-def _str2set(string):     return {s.strip() for s in string.split(",") if s}
-def _str2cmds(string):    return [s.strip() for s in string.split(";") if s]
+def _str2set(string: str) -> set[str]:     return {s.strip() for s in string.split(",") if s}
+def _str2cmds(string: str) -> list[str]:    return [s.strip() for s in string.split(";") if s]
 
 
-def _str2bool(string):
+def _str2bool(string: str) -> bool:
     string = string.strip().lower()
     return string == "yes"
 
@@ -692,7 +700,7 @@ for key, tup in TESTCNF_KEYWORDS.items():
             "Please add the new section %s to TESTCNF_SECTIONS" % tup[2])
 
 
-def line_starts_with_section_or_option(string):
+def line_starts_with_section_or_option(string: str) -> int:
     """True if string starts with a TEST_INFO section or option."""
     from re import compile
     re_ncpu = compile(r"^NCPU_(\d+)$")
@@ -710,14 +718,14 @@ def line_starts_with_section_or_option(string):
     return 0
 
 
-def doc_testcnf_format(fh=sys.stdout):
+def doc_testcnf_format(fh: TextIO = sys.stdout) -> None:
     """
     Generate automatic documentation for the TEST_INFO sections and options.
 
     Args:
         fh: File-like object to write the documentation to.
     """
-    def written(string):
+    def written(string: str) -> None:
         fh.write(string + "\n")
 
     written("Automatic documentation of the TEST_INFO sections and options.")
@@ -742,7 +750,49 @@ def doc_testcnf_format(fh=sys.stdout):
 class AbinitTestInfo:
     """Container storing the options specified in the TEST_INFO section."""
 
-    def __init__(self, dct):
+    # Attributes are set dynamically in __init__ from a dict built by AbinitTestInfoParser,
+    # keyed according to TESTCNF_KEYWORDS. Declared here for static type checking.
+    executable: str
+    use_files_file: bool
+    exec_args: str
+    test_chain: list[str]
+    need_cpp_vars: set[str]
+    exclude_hosts: list[str]
+    exclude_builders: list[str]
+    input_prefix: str
+    output_prefix: str
+    expected_failure: bool
+    input_ddb: str
+    input_gkk: str
+    system_xml: str
+    coeff_xml: str
+    md_hist: str
+    test_set: str
+    no_check: bool
+    spin_pot: str
+    latt_pot: str
+    slc_pot: str
+    lwf_pot: str
+    files_to_test: Sequence[FileToTest]
+    psp_files: list[str]
+    extra_inputs: list[str]
+    use_git_submodule: str
+    pre_commands: list[str]
+    post_commands: list[str]
+    max_nprocs: int
+    nprocs_to_test: list[int]
+    exclude_nprocs: list[int]
+    authors: set[str]
+    keywords: set[str]
+    description: str
+    topics: list[str]
+    references: list[str]
+    file: str
+    yaml: str
+    inp_fname: str
+    _ismulti_paral: bool
+
+    def __init__(self, dct: dict[str, Any]) -> None:
         """
         Initialize the AbinitTestInfo object.
 
@@ -759,9 +809,9 @@ class AbinitTestInfo:
         self.add_keywords([self.executable])
 
     @lazy__str__
-    def __str__(self): pass
+    def __str__(self) -> None: pass
 
-    def add_cpp_vars(self, need_cpp_vars):
+    def add_cpp_vars(self, need_cpp_vars: Iterable[str] | None) -> None:
         """
         Add new set of CPP variables to the test requirements.
 
@@ -770,7 +820,7 @@ class AbinitTestInfo:
         """
         self.need_cpp_vars = self.need_cpp_vars.union(need_cpp_vars)
 
-    def add_keywords(self, keywords):
+    def add_keywords(self, keywords: Iterable[str] | None) -> None:
         """
         Add new set of keywords to the test metadata.
 
@@ -779,7 +829,7 @@ class AbinitTestInfo:
         """
         self.keywords = self.keywords.union(keywords)
 
-    def make_test_id(self):
+    def make_test_id(self) -> str:
         """
         Generate the string with the test identifier
         A special treatment is used for the multi-parallel tests.
@@ -806,7 +856,7 @@ class AbinitTestInfoParser:
     """Parser for the TEST_INFO section embedded in ABINIT input files."""
     Error = AbinitTestInfoParserError
 
-    def __init__(self, inp_fname, defaults=None):
+    def __init__(self, inp_fname: str, defaults: dict[str, Any] | None = None) -> None:
         """
         Initialize the AbinitTestInfoParser.
 
@@ -867,7 +917,7 @@ class AbinitTestInfoParser:
                     inp_fname, string)
                 raise self.Error(err_msg)
 
-    def generate_testinfo_nprocs(self, mpi_nprocs):
+    def generate_testinfo_nprocs(self, mpi_nprocs: int) -> AbinitTestInfo:
         """
         Generate a record with the variables needed to handle a job with mpi_nprocs.
 
@@ -877,7 +927,7 @@ class AbinitTestInfoParser:
         Returns:
             AbinitTestInfo: The test configuration object.
         """
-        d = {}
+        d: dict[str, Any] = {}
         d["yaml_test"] = self.yaml_test()
 
         # First read and parse the global options.
@@ -967,7 +1017,7 @@ class AbinitTestInfoParser:
         return AbinitTestInfo(d)
 
     @property
-    def nprocs_to_test(self):
+    def nprocs_to_test(self) -> list[int]:
         """List with the number of MPI processors to be tested."""
         key = "nprocs_to_test"
         opt_parser = TESTCNF_KEYWORDS[key][0]
@@ -982,13 +1032,13 @@ class AbinitTestInfoParser:
         return opt_parser(opt)
 
     @property
-    def is_testchain(self):
+    def is_testchain(self) -> bool:
         """True if this is a chain of tests"""
         opt = "test_chain"
         section = TESTCNF_KEYWORDS[opt][2]
         return self.parser.has_option(section, opt)
 
-    def chain_inputs(self):
+    def chain_inputs(self) -> list[str]:
         """
         Return a list of paths for the input files belonging to the test chain.
 
@@ -1005,7 +1055,7 @@ class AbinitTestInfoParser:
         fnames = [f.replace(".in", ".abi") for f in fnames]
         return [os.path.join(self.inp_dir, fname) for fname in fnames]
 
-    def yaml_test(self, ytest=None, sec_name="yaml_test"):
+    def yaml_test(self, ytest: dict[str, Any] | None = None, sec_name: str = "yaml_test") -> dict[str, Any]:
         """
         Parse YAML test configuration from the input file.
 
@@ -1031,7 +1081,7 @@ class AbinitTestInfoParser:
         return ytest
 
 
-def find_top_build_tree(start_path, with_abinit=True, ntrials=10):
+def find_top_build_tree(start_path: str, with_abinit: bool = True, ntrials: int = 10) -> str:
     """
     Returns the absolute path of the ABINIT build tree.
     Assume start_path is within the build tree.
@@ -1063,15 +1113,15 @@ class Compiler:
     Usually instantiated through the class method from_defined_cpp_vars.
     """
 
-    def __init__(self, name, version=None):
+    def __init__(self, name: str, version: str | None = None) -> None:
         self.name = name
         self.version = version
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "%s: %s %s" % (type(self).__name__, self.name, self.version)
 
     @classmethod
-    def from_defined_cpp_vars(cls, defined_cpp_vars):
+    def from_defined_cpp_vars(cls, defined_cpp_vars: Iterable[str]) -> Self:
         for var in defined_cpp_vars:
             # TODO: version may be useful but it's not reported in config.h
             if var in cls._KNOWN_CPP_VARS:
@@ -1117,7 +1167,8 @@ class CPreProcessor:
     """Pre-process source code with ANSI CPP."""
     Error = CPreProcessorError
 
-    def __init__(self, includes=None, opts=None, bin="cpp", verbose=0):
+    def __init__(self, includes: list[str] | None = None, opts: list[str] | None = None,
+                 bin: str = "cpp", verbose: int = 0) -> None:
         """
         Initialize the CPreProcessor.
 
@@ -1135,7 +1186,7 @@ class CPreProcessor:
             self.opts = opts
         self.bin, self.verbose = bin, verbose
 
-    def process_file(self, filepath, remove_lhash=True):
+    def process_file(self, filepath: str, remove_lhash: bool = True) -> str | bytes:
         """
         Read source from filepath and process it with CPP.
 
@@ -1179,18 +1230,18 @@ class CPreProcessor:
 
 
 class FortranBacktrace:
-    def __init__(self, text):
+    def __init__(self, text: list[str]) -> None:
         self.text = text
-        self.trace = []
+        self.trace: list[tuple[str, int]] = []
         self.parse()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.trace)
 
-    def parse(self):
+    def parse(self) -> None:
         raise NotImplementedError("parse method must be implemented by the subclass")
 
-    def locate_srcfile(self, base_name):
+    def locate_srcfile(self, base_name: str) -> str | None:
         """
         Locate a source file within the ABINIT source tree.
 
@@ -1210,7 +1261,7 @@ class FortranBacktrace:
         cprint("Cannot find file: %s" % base_name, color="red")
         return None
 
-    def edit_source(self, editor=None):
+    def edit_source(self, editor: Editor | None = None) -> int | None:
         if not self.trace:
             return None
 
@@ -1224,7 +1275,7 @@ class FortranBacktrace:
 
 class NagBacktrace(FortranBacktrace):
 
-    def parse(self):
+    def parse(self) -> None:
         # Example
         #
         # Runtime Error: opernl4a_cpp.f90, line 871: INTEGER(int32) overflow for 2146435072 * 3
@@ -1260,7 +1311,7 @@ class BuildEnvironment:
     current build (e.g., checking if a test requiring NetCDF can be executed).
     """
 
-    def __init__(self, build_dir, cygwin_instdir=None):
+    def __init__(self, build_dir: str, cygwin_instdir: str | None = None) -> None:
         """
         Args:
             build_dir: Path to the top level directory of the build.
@@ -1296,19 +1347,19 @@ class BuildEnvironment:
             raise ValueError("%s is not a valid ABINIT build tree." % self.build_dir)
 
         # Get the list of CPP variables defined in the build.
-        self.defined_cppvars = parse_configh_file(self.configh_path)
+        self.defined_cppvars: dict[str, str] = parse_configh_file(self.configh_path)
 
         # Get info on the compilers
         self.fortran_compiler = FortranCompiler.from_defined_cpp_vars(self.defined_cppvars)
         # print(self.fortran_compiler)
         # if not self.has_bin("timeout"): print("Cannot find timeout executable!")
 
-        self.buildbot_builder = None
+        self.buildbot_builder: str | None = None
 
     @lazy__str__
-    def __str__(self): pass
+    def __str__(self) -> None: pass
 
-    def issrctree(self):
+    def issrctree(self) -> bool:
         """
         Check if the current build directory is also a source tree.
 
@@ -1320,7 +1371,7 @@ class BuildEnvironment:
 
         return os.path.isfile(configac_path) and os.path.isfile(abinitF90_path)
 
-    def path_of_bin(self, bin_name, try_syspath=True):
+    def path_of_bin(self, bin_name: str, try_syspath: bool = True) -> str:
         """
         Get the absolute path of a binary.
 
@@ -1355,11 +1406,11 @@ class BuildEnvironment:
 
         return bin_path
 
-    def has_bin(self, bin_name, try_syspath=True):
+    def has_bin(self, bin_name: str, try_syspath: bool = True) -> bool:
         """True if binary bin_name is present in the build."""
         return os.path.isfile(self.path_of_bin(bin_name, try_syspath=try_syspath))
 
-    def set_buildbot_builder(self, builder):
+    def set_buildbot_builder(self, builder: str) -> None:
         """
         Set the name of the buildbot builder.
         Used to skip tests defining `exclude_builders` in the TEST_INFO_SECTION
@@ -1367,7 +1418,7 @@ class BuildEnvironment:
         self.buildbot_builder = builder
 
 
-def parse_configh_file(fname):
+def parse_configh_file(fname: str) -> dict[str, str]:
     """
     Parse the configuration file config.h,
     Returns a list with the CCP variables that are CPP defined.
@@ -1396,7 +1447,8 @@ def parse_configh_file(fname):
         return defined_cppvars
 
 
-def input_file_has_vars(fname, ivars, comment="#", mode="any"):
+def input_file_has_vars(fname: str, ivars: dict[str, int | None], comment: str = "#",
+                         mode: str = "any") -> tuple[bool, dict[str, list[str]]]:
     """
     Primitive parser that searches for the occurrence of input variables in the input file fname.
 
@@ -1458,7 +1510,8 @@ def input_file_has_vars(fname, ivars, comment="#", mode="any"):
     raise ValueError("Wrong mode %s" % mode)
 
 
-def make_abitest_from_input(inp_fname, abenv, keywords=None, need_cpp_vars=None, with_np=1):
+def make_abitest_from_input(inp_fname: str, abenv: BuildEnvironment, keywords: Iterable[str] | None = None,
+                             need_cpp_vars: set[str] | None = None, with_np: int = 1) -> BaseTest:
     """
     Factory function to generate a Test object from an input file.
 
@@ -1499,7 +1552,9 @@ def make_abitest_from_input(inp_fname, abenv, keywords=None, need_cpp_vars=None,
     return cls(test_info, abenv)
 
 
-def make_abitests_from_inputs(input_fnames, abenv, keywords=None, need_cpp_vars=None):
+def make_abitests_from_inputs(input_fnames: str | list[str], abenv: BuildEnvironment,
+                               keywords: Iterable[str] | None = None,
+                               need_cpp_vars: set[str] | None = None) -> list[BaseTest | ChainOfTests]:
     """
     Factory function. Return a list of tests generated from the TEST_INFO section reported
     in the input files inp_fnames.
@@ -1509,7 +1564,7 @@ def make_abitests_from_inputs(input_fnames, abenv, keywords=None, need_cpp_vars=
 
     inp_fnames = [os.path.abspath(p) for p in input_fnames]
 
-    out_tests = []
+    out_tests: list[BaseTest | ChainOfTests] = []
 
     while inp_fnames:
         inp_fname = inp_fnames.pop(0)
@@ -1569,10 +1624,10 @@ class NotALock:
     NOP context manager
     """
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         pass
 
-    def __exit__(self, *args):
+    def __exit__(self, *args: Any) -> None:
         pass
 
 

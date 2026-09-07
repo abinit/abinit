@@ -13,11 +13,7 @@ pyyaml
 pygments
 pybtex
 numpy
-pyyaml
 pandas
-
-#graphviz or python-graphviz if conda
-#py_w3c
 
 # Unit tests
 pytest

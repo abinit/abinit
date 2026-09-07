@@ -62,15 +62,18 @@ the '%',and '.' first-column special signs.
 """
 
 import re
+from collections.abc import Iterable, Iterator, Sequence
 from math import floor
 from threading import Thread
+from typing import Any, TextIO
 
 from .data_extractor import DataExtractor
-from .yaml_tools import is_available as has_yaml
+from .yaml_tools import Document, is_available as has_yaml
 
 if has_yaml:
     from .yaml_tools.driver_test_conf import DriverTestConf as YDriverConf
     from .yaml_tools.tester import Failure as YFailure
+    from .yaml_tools.tester import Issue as YIssue
     from .yaml_tools.tester import Tester as YTester
 
 # Match floats. Minimal float is .0 for historical reasons.
@@ -125,10 +128,10 @@ def relative_truncate(f: float, n: int) -> float:
 
 
 class NotDriverConf:
-    def __init__(self, has_yaml):
+    def __init__(self, has_yaml: bool) -> None:
         self.has_yaml = has_yaml
 
-    def extra_info(self):
+    def extra_info(self) -> tuple[str]:
         if self.has_yaml:
             return ("# YAML support is available, but is disabled for this test.",)
         return ("# YAML support is not available, YAML based tests will be ignored.",)
@@ -143,13 +146,13 @@ class LineDifference:
         content (tuple): Lines content (l1, l2).
     """
 
-    def __init__(self, p1, p2, l1, l2):
+    def __init__(self, p1: int, p2: int, l1: str, l2: str) -> None:
         self.lines = (p1 + 1, p2 + 1)
         if l1 == "" or l1[-1] not in "\n\r":
             l1 += "\n"
         self.content = (l1, l2)
 
-    def __eq__(self, other):
+    def __eq__(self, other: LineDifference) -> bool:
         """
         Check equality of two differences.
 
@@ -161,7 +164,7 @@ class LineDifference:
         """
         return self.lines == other.lines and self.content == other.content
 
-    def __ne__(self, other):
+    def __ne__(self, other: LineDifference) -> bool:
         """
         Check inequality of two differences.
 
@@ -173,7 +176,7 @@ class LineDifference:
         """
         return not (self == other)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Return a string representation of the difference.
 
@@ -190,7 +193,7 @@ class LineDifference:
 class LineCountDifference(LineDifference):
     """Represents a difference between line counts."""
 
-    def __init__(self, more, less, line_count=(0, 0)):
+    def __init__(self, more: str, less: str, line_count: tuple[int, int] = (0, 0)) -> None:
         """
         Args:
             more: the name of the file with more lines
@@ -201,7 +204,7 @@ class LineCountDifference(LineDifference):
         self.less = less
         self.line_count = line_count
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if self.line_count != (0, 0):
             return ("{} has more significant lines than {} ({} > {}).\n"
                     .format(self.more, self.less, *self.line_count))
@@ -211,18 +214,18 @@ class LineCountDifference(LineDifference):
 
 class MetaCharDifference(LineDifference):
     """Represent a difference between two lines with different meta characters."""
-    def __init__(self, p1, p2, m1, m2):
+    def __init__(self, p1: int, p2: int, m1: str, m2: str) -> None:
         LineDifference.__init__(self, p1, p2, "", "")
         self.metas = (m1, m2)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return ("At line {} (in file 1), line {} (in file 2), different"
                 " leading characters: `{}` and `{}`.\n").format(*(self.lines + self.metas))
 
 
 class FloatDifference(LineDifference):
     """Represent a difference between floating point values."""
-    def __init__(self, p1, p2, line1, line2, abs_err, rel_err):
+    def __init__(self, p1: int, p2: int, line1: str, line2: str, abs_err: float, rel_err: float) -> None:
         LineDifference.__init__(self, p1, p2, line1, line2)
         self.abs_err = abs_err
         self.rel_err = rel_err
@@ -230,7 +233,7 @@ class FloatDifference(LineDifference):
 
 class TextDifference(LineDifference):
     """Represent a difference between text parts of a lines."""
-    def __init__(self, p1, p2, line1, line2, silent=False):
+    def __init__(self, p1: int, p2: int, line1: str, line2: str, silent: bool = False) -> None:
         LineDifference.__init__(self, p1, p2, line1, line2)
         self.silent = silent
 
@@ -251,7 +254,8 @@ class Result:
         max_rel_err (float): Maximum relative error found.
     """
 
-    def __init__(self, fl_diff, yaml_diff, extra_info=[], label=None, verbose=False):
+    def __init__(self, fl_diff: list[LineDifference], yaml_diff: list[YIssue], extra_info: Sequence[str] = [],
+                 label: str | None = None, verbose: bool = False) -> None:
         """
         Initialize the Result object.
 
@@ -278,7 +282,7 @@ class Result:
 
         self.details = self._analyse()
 
-    def _analyse(self):
+    def _analyse(self) -> list[str] | str:
         """
         Analyze a difference list and extract summary information and details.
 
@@ -347,7 +351,7 @@ class Result:
 
         return details
 
-    def get_summary(self):
+    def get_summary(self) -> str:
         """
         Return a textual summary of the diff.
 
@@ -370,13 +374,13 @@ class Result:
 
         return summary
 
-    def dump_details(self, file=None):
+    def dump_details(self, file: TextIO | None = None) -> str | None:
         """
         Produce a detailed report of all detected differences.
 
         Args:
-            file (file-like, optional): If provided, the report is written to
-                this stream. Otherwise, it is returned as a string.
+            file: If provided, the report is written to this stream.
+                Otherwise, it is returned as a string.
 
         Returns:
             str or None: The report string if file is None, else None.
@@ -472,15 +476,14 @@ class Differ:
         options (dict): Dictionary of all configuration parameters.
     """
 
-    def __init__(self, yaml_test=None, **options):
+    def __init__(self, yaml_test: dict[str, Any] | None = None, **options: Any) -> None:
         """
         Init a differ with some parameters passed via options.
 
         Known parameters are:
             - ignore: bool (default True)
             - ignoreP: bool (default True)
-            - tolerance: float (tolerance for both relative and absolute
-              difference)
+            - tolerance: float (tolerance for both relative and absolute difference)
             - tolerance_abs: float (default 1.01e-10)
             - tolerance_rel: float (default 1.01e-10)
             - label: str (default None)
@@ -522,15 +525,15 @@ class Differ:
         else:
             self.yaml_conf = NotDriverConf(has_yaml)
 
-    def diff(self, file1, file2):
+    def diff(self, file1: str, file2: str) -> Result:
         """
         Compute the diff between two files.
 
         Combines legacy fldiff and YAML-based comparison if enabled.
 
         Args:
-            file1 (str): Path to the reference file.
-            file2 (str): Path to the output file.
+            file1: Path to the reference file.
+            file2: Path to the output file.
 
         Returns:
             Result: The analysis of found differences.
@@ -546,15 +549,15 @@ class Differ:
                       label=self.options["label"],
                       verbose=self.options["verbose"])
 
-    def _diff_lines(self, src1, src2):
+    def _diff_lines(self, src1: Iterable[str], src2: Iterable[str]) -> tuple[list[LineDifference], list[Any]]:
         """
         Perform a line-by-line comparison of two sources.
 
         Utilizes multiple threads for parallel extraction.
 
         Args:
-            src1 (iterable): Lines from the reference source.
-            src2 (iterable): Lines from the output source.
+            src1: Lines from the reference source.
+            src2: Lines from the output source.
 
         Returns:
             tuple: (line_differences, doc_differences)
@@ -607,26 +610,26 @@ class Differ:
 
         return lines_differences, doc_differences
 
-    def _test_doc(self, docs1, docs2):
+    def _test_doc(self, docs1: dict[str, Any], docs2: dict[str, Any]) -> list[Any]:
         """
         Compare two sets of YAML documents.
 
         Args:
-            docs1 (dict): Reference documents.
-            docs2 (dict): Output documents.
+            docs1: Reference documents.
+            docs2: Output documents.
 
         Returns:
             list: List of YAML failure objects.
         """
         return YTester(docs1, docs2, self.yaml_conf).run()
 
-    def _fldiff(self, lines1, lines2):
+    def _fldiff(self, lines1: list[tuple[int, str, str]], lines2: list[tuple[int, str, str]]) -> list[LineDifference]:
         """
         Compute the effective comparison between two sets of lines.
 
         Args:
-            lines1 (list): Significant lines from first file.
-            lines2 (list): Significant lines from second file.
+            lines1: Significant lines from first file.
+            lines2: Significant lines from second file.
 
         Returns:
             list: List of LineDifference subclasses.

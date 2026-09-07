@@ -4,10 +4,12 @@ It defines several decorators to easily create YAML compatible
 classes which are used both when parsing YAML formatted data
 and when writing YAML formatted data.
 """
+from __future__ import annotations
 
 import re
 import warnings
 from inspect import ismethod
+from typing import Any
 
 import yaml
 
@@ -18,7 +20,7 @@ from .errors import AlreadyRegisteredTagError, NotAvailableTagError
 known_tags = set()
 
 
-def reserve_tag(tag):
+def reserve_tag(tag: str) -> None:
     """
     Prevent multiple registration of the same tag.
 
@@ -33,7 +35,7 @@ def reserve_tag(tag):
     known_tags.add(tag)
 
 
-def yaml_map(cls):
+def yaml_map(cls: type) -> type:
     """
     Register a class as a YAML mapping (!Tag).
 
@@ -50,13 +52,13 @@ def yaml_map(cls):
 
     reserve_tag(tag)
 
-    def constructor(loader, node):
+    def constructor(loader: Any, node: Any) -> Any:
         map = dict(loader.construct_mapping(node, deep=True))
         if ismethod(cls.from_map):
             return cls.from_map(map)
         return cls().from_map(map)
 
-    def representer(dumper, data):
+    def representer(dumper: Any, data: Any) -> Any:
         return dumper.represent_mapping(tag, data.to_map())
 
     yaml.add_constructor(tag, constructor, Loader=Loader)
@@ -65,7 +67,7 @@ def yaml_map(cls):
     return cls
 
 
-def yaml_seq(cls):
+def yaml_seq(cls: type) -> type:
     """
     Register a class as a YAML sequence (!Tag).
 
@@ -82,13 +84,13 @@ def yaml_seq(cls):
 
     reserve_tag(tag)
 
-    def constructor(loader, node):
+    def constructor(loader: Any, node: Any) -> Any:
         seq = list(loader.construct_sequence(node, deep=True))
         if ismethod(cls.from_seq):
             return cls.from_seq(seq)
         return cls().from_seq(seq)
 
-    def representer(dumper, data):
+    def representer(dumper: Any, data: Any) -> Any:
         return dumper.represent_sequence(tag, data.to_seq())
 
     yaml.add_constructor(tag, constructor, Loader=Loader)
@@ -97,7 +99,7 @@ def yaml_seq(cls):
     return cls
 
 
-def yaml_scalar(cls):
+def yaml_scalar(cls: type) -> type:
     """
     Register a class as a YAML scalar (!Tag).
 
@@ -114,13 +116,13 @@ def yaml_scalar(cls):
 
     reserve_tag(tag)
 
-    def constructor(loader, node):
+    def constructor(loader: Any, node: Any) -> Any:
         scalar = loader.construct_scalar(node)
         if ismethod(cls.from_scalar):
             return cls.from_scalar(scalar)
         return cls().from_scalar(scalar)
 
-    def representer(dumper, data):
+    def representer(dumper: Any, data: Any) -> Any:
         return dumper.represent_scalar(tag, data.to_scalar())
 
     yaml.add_constructor(tag, constructor, Loader=Loader)
@@ -129,7 +131,7 @@ def yaml_scalar(cls):
     return cls
 
 
-def auto_map(Cls):
+def auto_map(Cls: type) -> type:
     """
     Automatically append `from_map`, `to_map`, and `__repr__` to a class.
 
@@ -160,20 +162,20 @@ def auto_map(Cls):
     """
     class AutoMap(Cls, BaseDictWrapper):
         @classmethod
-        def from_map(cls, d):
+        def from_map(cls: type, d: dict[str, Any]) -> Any:
             new = cls()
             for attr in d:
                 new[attr] = d[attr]
             return new
 
-        def to_map(self):
+        def to_map(self) -> dict[str, Any]:
             return self.__dict__
 
     AutoMap.__name__ = Cls.__name__
     return AutoMap
 
 
-def yaml_auto_map(cls):
+def yaml_auto_map(cls: type) -> type:
     """
     Register a class as a YAML mapping with auto-generated map methods.
 
@@ -186,7 +188,7 @@ def yaml_auto_map(cls):
     return yaml_map(auto_map(cls))
 
 
-def yaml_implicit_scalar(cls):
+def yaml_implicit_scalar(cls: type) -> type:
     """
     Register a class as a YAML scalar with an implicit pattern.
 
@@ -210,7 +212,7 @@ def yaml_implicit_scalar(cls):
     return cls
 
 
-def yaml_not_available_tag(tag, reason, fatal=False):
+def yaml_not_available_tag(tag: str, reason: str, fatal: bool = False) -> None:
     """
     Register tag with a given tag but trigger a warning if fatal == false
     or an error if fatal == True. Use `reason` as the message
@@ -221,7 +223,7 @@ def yaml_not_available_tag(tag, reason, fatal=False):
 
     reserve_tag("!" + tag)
 
-    def constructor(loader, node):
+    def constructor(loader: Any, node: Any) -> Any:
         if fatal:
             raise NotAvailableTagError(msg)
         warnings.warn(msg)

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 """Yet Another Python Templating Utility, Version 1.2. Taken from http://code.activestate.com/recipes/52305/"""
 
+import re
 import sys
-from typing import Any
-
-from .six import exec_
+from collections.abc import Callable
+from typing import Any, NoReturn
 
 
 # utility stuff to avoid tests in the mainline code
@@ -20,14 +20,14 @@ def identity(string: str, why: str) -> str:
     """A do-nothing-special-to-the-input, just-return-it function"""
     return string
 
-def nohandle(string):
+def nohandle(string: str) -> NoReturn:
     """A do-nothing handler that just re-raises the exception"""
     raise
 
 # and now the real thing
 class copier:
     """Smart-copier (YAPTU) class."""
-    def copyblock(self, i=0, last=None):
+    def copyblock(self, i: int = 0, last: int | None = None) -> None:
         """
         Main copy method: process lines [i, last) of block.
 
@@ -35,7 +35,7 @@ class copier:
             i (int): Start index.
             last (int, optional): End index. Defaults to end of block.
         """
-        def repl(match, self=self):
+        def repl(match: re.Match[str], self: copier = self) -> str:
             """Return the eval of a found expression, for replacement"""
             # uncomment for debug: print '!!! replacing',match.group(1)
             expr = self.preproc(match.group(1), "eval")
@@ -69,14 +69,16 @@ class copier:
                 stat = self.preproc(stat, "exec")
                 stat = "%s _cb(%s,%s)" % (stat,i+1,j)
                 # for debugging, uncomment...: print "-> Executing: {"+stat+"}"
-                exec_(stat, self.globals, self.locals)
+                exec(stat, self.globals, self.locals)
                 i=j+1
             else:       # normal line, just copy with substitution
                 self.ouf.write(self.regex.sub(repl,line))
                 i=i+1
-    def __init__(self, regex=_never, dict={},
-            restat=_never, restend=_never, recont=_never,
-            preproc=identity, handle=nohandle, ouf=sys.stdout):
+    def __init__(self, regex: re.Pattern[str] | _nevermatch = _never, dict: dict[str, Any] = {},
+            restat: re.Pattern[str] | _nevermatch = _never, restend: re.Pattern[str] | _nevermatch = _never,
+            recont: re.Pattern[str] | _nevermatch = _never,
+            preproc: Callable[[str, str], str] = identity, handle: Callable[[str], Any] = nohandle,
+            ouf: Any = sys.stdout) -> None:
         """
         Initialize the copier.
 
@@ -99,7 +101,7 @@ class copier:
         self.preproc = preproc
         self.handle  = handle
         self.ouf     = ouf
-    def copy(self, block=None, inf=sys.stdin):
+    def copy(self, block: list[str] | None = None, inf: Any = sys.stdin) -> None:
         """
         Entry point for copying with processing.
 

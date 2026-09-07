@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 This is the explore_test shell. This tool lets you inspect and explore YAML
 files defining Abinit tests. It also provides documentation about the
@@ -7,11 +9,16 @@ constraints and parameters available in the test config files.
 import cmd
 import glob
 import os
+from collections.abc import Iterable, Sequence
 from subprocess import call
+from typing import TYPE_CHECKING, Any
 
 from .conf_parser import conf_parser
 from .driver_test_conf import DEFAULT_CONF_PATH, DriverTestConf
 from .errors import ConfigError
+
+if TYPE_CHECKING:
+    from .meta_conf_parser import Constraint
 
 intro = """\
 Welcome to the explore_test shell.
@@ -33,7 +40,7 @@ except ImportError:
     pass
 
 
-def print_iter(it):
+def print_iter(it: Iterable[Any]) -> None:
     """
     Print elements of an iterator in rows of 8.
 
@@ -54,13 +61,13 @@ class ExtendedTestConf(DriverTestConf):
     """
     Test configuration driver with additional introspection and movements.
     """
-    def get_spec(self):
+    def get_spec(self) -> list[str] | dict[Any, Any]:
         """
         Return the list of specializations known at the current path.
         """
         return self.tree.get_spec_at(self.current_path)
 
-    def get_spec_at(self, path):
+    def get_spec_at(self, path: Sequence[str]) -> list[str] | dict[Any, Any]:
         """
         Return the list of specializations known at the given path.
 
@@ -81,7 +88,7 @@ class ExtendedTestConf(DriverTestConf):
                 new_path.append(sp)
         return self.tree.get_spec_at(new_path)
 
-    def go_root(self):
+    def go_root(self) -> None:
         """
         Go back to root, flushing all stacks and reset path.
         """
@@ -89,7 +96,7 @@ class ExtendedTestConf(DriverTestConf):
         self.param_stack = []
         self.constraints_stack = []
 
-    def get_all_constraints_here(self):
+    def get_all_constraints_here(self) -> dict[str, Constraint]:
         """
         Return a dict with the constraints in the current scope.
         """
@@ -97,17 +104,17 @@ class ExtendedTestConf(DriverTestConf):
         constraints = {cons.name: cons for cons in cons_list}
         return constraints
 
-    def get_all_parameters_here(self):
+    def get_all_parameters_here(self) -> dict[str, dict[str, Any]]:
         """
         Return a dict with the parameters in the current scope.
         """
-        parameters = {}
+        parameters: dict[str, dict[str, Any]] = {}
 
         cursor = 0
         top = len(self.param_stack) - 1  # top of the stack bottom of the tree
 
         # traverse from top to bottom to overwrite if needed
-        def look_in(param_dict, caller_lvl):
+        def look_in(param_dict: dict[str, Any], caller_lvl: bool) -> None:
             for name, value in param_dict.items():
                 if caller_lvl or self.known_params[name]["inherited"]:
                     # use known_params to get the dict structure
@@ -122,17 +129,17 @@ class ExtendedTestConf(DriverTestConf):
 
         return parameters
 
-    def get_known_constraints(self):
+    def get_known_constraints(self) -> dict[str, Constraint]:
         return conf_parser.constraints.copy()
 
-    def get_known_parameters(self):
+    def get_known_parameters(self) -> dict[str, dict[str, Any]]:
         return self.known_params.copy()
 
     @property
-    def path(self):
+    def path(self) -> tuple[str, ...]:
         return tuple(["TOP"] + self.current_path)
 
-    def dump_state(self):
+    def dump_state(self) -> dict[str, Any]:
         return {
             "cons": self.constraints_stack.copy(),
             "param": self.param_stack.copy(),
@@ -140,7 +147,7 @@ class ExtendedTestConf(DriverTestConf):
             "iter_state": self.current_state,
         }
 
-    def restore_state(self, state):
+    def restore_state(self, state: dict[str, Any]) -> None:
         self.constraints_stack = state["con"]
         self.param_stack = state["param"]
         self.current_path = state["path"]
@@ -151,20 +158,20 @@ class Explorer(cmd.Cmd):
     """
     Define the command line interface.
     """
-    intro = intro
+    intro: str = intro
 
-    debug = False
-    prompt = "() "
-    tree = None
-    filename = ""
-    full_path = ""
+    debug: bool = False
+    prompt: str = "() "
+    tree: ExtendedTestConf | None = None
+    filename: str = ""
+    full_path: str = ""
 
-    def update_prompt(self):
+    def update_prompt(self) -> None:
         template = "{filename}: {path}> "
         if self.tree is None:
             self.prompt = "[no file loaded]> "
         else:
-            def short_path(path):
+            def short_path(path: Sequence[str]) -> str:
                 if len(".".join(path)) > 50:
                     shpath = path[:2] + "..." + ".".join(path[-2:])
                 else:
@@ -177,17 +184,17 @@ class Explorer(cmd.Cmd):
             )
 
     # special hooks
-    def emptyline(self):
+    def emptyline(self) -> None:
         pass
 
-    def preloop(self):
+    def preloop(self) -> None:
         self.update_prompt()
 
-    def postcmd(self, stop, line):
+    def postcmd(self, stop: bool, line: str) -> bool:
         self.update_prompt()
         return stop
 
-    def precmd(self, line):
+    def precmd(self, line: str) -> str:
         # exit on CTRL_D
         if line == "EOF":
             line = "exit"
@@ -204,7 +211,7 @@ class Explorer(cmd.Cmd):
         return line
 
     # commands
-    def do_load(self, arg):
+    def do_load(self, arg: str) -> None:
         """
         Load a config file.
 
@@ -226,14 +233,14 @@ class Explorer(cmd.Cmd):
             self.full_path = filename
             print(arg, "successfully loaded.")
 
-    def do_up(self, arg):
+    def do_up(self, arg: str) -> None:
         """
         Usage: up
         Go up of one level.
         """
         self.tree.go_up()
 
-    def do_cd(self, arg):
+    def do_cd(self, arg: str) -> None:
         """
         Move to PATH relative to the current path the tree.
 
@@ -253,19 +260,19 @@ class Explorer(cmd.Cmd):
                 elif spec:
                     self.tree.go_down(spec)
 
-    def complete_file_path(self, text):
+    def complete_file_path(self, text: str) -> list[str]:
         """
         Autocompletion for file path arguments.
         """
         return glob.glob(os.path.expanduser(text) + "*")
 
-    def complete_load(self, text, line, begi, endi):
+    def complete_load(self, text: str, line: str, begi: int, endi: int) -> list[str]:
         return self.complete_file_path(text)
 
-    def complete_edit(self, text, line, begi, endi):
+    def complete_edit(self, text: str, line: str, begi: int, endi: int) -> list[str]:
         return self.complete_file_path(text)
 
-    def complete_rel_path(self, text):
+    def complete_rel_path(self, text: str) -> list[str]:
         """
         Autocompletion for path arguments.
         """
@@ -284,13 +291,13 @@ class Explorer(cmd.Cmd):
             partial = path[0]
             return [spec for spec in specs if spec.startswith(partial)]
 
-    def complete_ls(self, text, line, begi, endi):
+    def complete_ls(self, text: str, line: str, begi: int, endi: int) -> list[str]:
         return self.complete_rel_path(text)
 
-    def complete_cd(self, text, line, begi, endi):
+    def complete_cd(self, text: str, line: str, begi: int, endi: int) -> list[str]:
         return self.complete_rel_path(text)
 
-    def do_filter(self, arg):
+    def do_filter(self, arg: str) -> None:
         """
         Usage: filter [reset|(ITERATOR:VALUE)...]
         Set a virtual iterator state to access filtered trees.
@@ -309,7 +316,7 @@ class Explorer(cmd.Cmd):
             print_iter(f"{name}:{val}"
                        for name, val in self.tree.current_state.items())
 
-    def do_path(self, arg):
+    def do_path(self, arg: str) -> None:
         """
         Usage: path
         Print the current path.
@@ -320,7 +327,7 @@ class Explorer(cmd.Cmd):
         else:
             print("top level")
 
-    def do_ls(self, arg):
+    def do_ls(self, arg: str) -> None:
         """
         List nodes under the given PATH.
 
@@ -335,7 +342,7 @@ class Explorer(cmd.Cmd):
             path = arg.replace('"', "").replace("'", "").split(".")
             print_iter(spec for spec in self.tree.get_spec_at(path))
 
-    def do_show(self, arg):
+    def do_show(self, arg: str) -> None:
         """
         Usage: show [ARG | *]
         If no argument is given, list all parameters and constraints
@@ -343,7 +350,7 @@ class Explorer(cmd.Cmd):
         parameters and constraints known. If argument is ARG, show all
         informations about ARG.
         """
-        def show_cons(cons, used=False):
+        def show_cons(cons: Constraint, used: bool = False) -> None:
             print("Constraint", cons.name)
             print(" Value type:", cons.type)
             print(" Inherited:", "yes" if cons.inherited else "no")
@@ -363,7 +370,7 @@ class Explorer(cmd.Cmd):
             print(" Description:")
             print(cons.test.__doc__)
 
-        def show_param(name, dic, used=False):
+        def show_param(name: str, dic: dict[str, Any], used: bool = False) -> None:
             print("Parameter", name)
             print(" Value type:", dic["type"])
             print(" Inherited:", "yes" if dic["inherited"] else "no")
@@ -409,7 +416,7 @@ class Explorer(cmd.Cmd):
                 print(arg, "is neither a known parameter,"
                       " nor a known constraint")
 
-    def complete_show(self, text, line, begi, endi):
+    def complete_show(self, text: str, line: str, begi: int, endi: int) -> list[str]:
         return [
             name for name in self.tree.get_known_constraints()
             if name.startswith(text)
@@ -418,27 +425,27 @@ class Explorer(cmd.Cmd):
             if name.startswith(text)
         ]
 
-    def do_parameters(self, arg):
+    def do_parameters(self, arg: str) -> None:
         """
         Usage: parameters
         List constraints applying at the current level.
         """
         print_iter(self.tree.get_all_parameters_here())
 
-    def do_constraints(self, arg):
+    def do_constraints(self, arg: str) -> None:
         """
         Usage: constraints
         List constraints applying at the current level.
         """
         print_iter(self.tree.get_all_constraints_here())
 
-    def do_tree(self, arg):
+    def do_tree(self, arg: str) -> None:
         """
         Usage: tree
         Show the tree defined by the configuration starting at the current
         level
         """
-        def show_rec(specs, indent=[]):
+        def show_rec(specs: Sequence[str], indent: list[bool] = []) -> None:
             for i, sp in enumerate(specs):
                 print("".join("   " if last else "|  " for last in indent)
                       + ("`--" if i + 1 == len(specs) else "|--"), sp, sep="")
@@ -450,7 +457,7 @@ class Explorer(cmd.Cmd):
         print(".".join(self.tree.path))
         show_rec(toplvl, [])
 
-    def do_default(self, arg):
+    def do_default(self, arg: str) -> None:
         """
         Usage: default
         Print the default configuration file
@@ -458,7 +465,7 @@ class Explorer(cmd.Cmd):
         with open(DEFAULT_CONF_PATH) as f:
             print(f.read())
 
-    def do_shell(self, arg):
+    def do_shell(self, arg: str) -> None:
         """
         Usage: shell CMD ARG1 ARG2...
         Pass command to the system shell (environment variable SHELL)
@@ -471,7 +478,7 @@ class Explorer(cmd.Cmd):
                   "You may want to set your SHELL environment variable to",
                   "select a different command.")
 
-    def do_edit(self, arg):
+    def do_edit(self, arg: str) -> None:
         """
         Usage: edit [FILE]
         Open a file in an editor and load it once done. If no path is
@@ -503,7 +510,7 @@ class Explorer(cmd.Cmd):
             self.do_load(filepath)
             self.do_cd(path)
 
-    def do_cat(self, arg):
+    def do_cat(self, arg: str) -> None:
         """
         Usage: cat
         Print the current config file verbatim.
@@ -511,7 +518,7 @@ class Explorer(cmd.Cmd):
         with open(self.full_path) as f:
             print(f.read())
 
-    def do_exit(self, arg):
+    def do_exit(self, arg: str) -> bool:
         """
         Usage: exit
         Exit. CTRL-D is equivalent.
@@ -524,7 +531,7 @@ class DebugExplorer(Explorer):
     """
     Command line interface with an additional debug command
     """
-    def do_debug(self, arg):
+    def do_debug(self, arg: str) -> None:
         """
         Usage debug PYTHON_EXPR
         Print the result of any arbitrary python expression.

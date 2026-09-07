@@ -1,10 +1,13 @@
+from __future__ import annotations
 
 import os
 import shutil
 import sys
 import tempfile
 import warnings
+from collections.abc import Callable
 from subprocess import PIPE, Popen, call
+from typing import Any, TextIO
 
 __version__ = "0.1"
 __author__ = "Matteo Giantomassi"
@@ -18,7 +21,7 @@ __all__ = [
 # Helper functions
 
 
-def patch(fromfile, tofile):
+def patch(fromfile: str, tofile: str) -> int:
     """
     Use the Unix tools `diff` and `patch` to patch `tofile`.
 
@@ -62,7 +65,7 @@ def patch(fromfile, tofile):
     return retcode
 
 
-def unzip(gz_fname, dest=None):
+def unzip(gz_fname: str, dest: str | None = None) -> None:
     """
     Decompress a .gz file.
 
@@ -89,7 +92,7 @@ def unzip(gz_fname, dest=None):
         out_fh.close()
 
 
-def touch(fname, times=None):
+def touch(fname: str, times: tuple[float, float] | None = None) -> None:
     """
     Emulate the Unix `touch` command.
 
@@ -102,7 +105,7 @@ def touch(fname, times=None):
         os.utime(fname, times)
 
 
-def tail_file(fname, n, aslist=False):
+def tail_file(fname: str, n: int, aslist: bool = False) -> str | list[str]:
     """
     Emulate the Unix `tail` command. Assumes a Unix-like system.
 
@@ -131,7 +134,7 @@ def tail_file(fname, n, aslist=False):
     return p.stdout.read()
 
 
-def which(program):
+def which(program: str) -> str | None:
     """
     Locate an executable in the user's PATH.
 
@@ -141,7 +144,7 @@ def which(program):
     Returns:
         str: Absolute path to the executable, or None if not found.
     """
-    def is_exe(fpath):
+    def is_exe(fpath: str) -> bool:
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
     fpath, fname = os.path.split(program)
@@ -157,7 +160,7 @@ def which(program):
     return None
 
 
-def tonumber(s):
+def tonumber(s: str) -> float:
     """
     Convert a string to a number.
 
@@ -182,7 +185,7 @@ def tonumber(s):
         raise RuntimeError("Don't know how to handle string: " + s)
 
 
-def nums_and_text(line):
+def nums_and_text(line: str) -> tuple[list[float], str]:
     """
     Split a line into a list of numbers and a combined text string.
 
@@ -215,7 +218,7 @@ class RestrictedShell:
     to avoid executing arbitrary code passed through the TEST_INFO sections.
     It currently supports: cp, mv, and touch.
     """
-    _key2command = {
+    _key2command: dict[str, tuple[Callable[..., Any], int]] = {
         # key (function,   nargs)
         #"rm": (shutil.rmtree, 2),
         "cp": (shutil.copy,   2),
@@ -225,7 +228,7 @@ class RestrictedShell:
 
     Error = RShellError
 
-    def __init__(self, inp_dir, workdir, psps_dir):
+    def __init__(self, inp_dir: str, workdir: str, psps_dir: str) -> None:
         """
         Initialize the RestrictedShell with directory context.
 
@@ -234,7 +237,7 @@ class RestrictedShell:
             workdir (str): Working directory for the test.
             psps_dir (str): Directory for pseudopotential files.
         """
-        self.exceptions = []
+        self.exceptions: list[RShellError] = []
 
         self.prefix2dir = {
             "i": os.path.abspath(inp_dir),
@@ -242,10 +245,10 @@ class RestrictedShell:
             "p": os.path.abspath(psps_dir),
         }
 
-    def empty_exceptions(self):
+    def empty_exceptions(self) -> None:
         self.exceptions = []
 
-    def execute(self, string):
+    def execute(self, string: str) -> str | None:
         """
         Execute a basic command string.
 
@@ -323,7 +326,7 @@ class RestrictedShell:
             self.exceptions.append(self.Error(err_msg))
 
 
-def stream_has_colours(stream):
+def stream_has_colours(stream: TextIO) -> bool:
     """
     Check if a stream supports ANSI colors.
 
@@ -361,7 +364,7 @@ class StringColorizer:
         #"lred":    "\x1b[01;05;37;41m"
         }
 
-    def __init__(self, stream):
+    def __init__(self, stream: TextIO) -> None:
         """
         Initialize the StringColorizer.
 
@@ -370,7 +373,7 @@ class StringColorizer:
         """
         self.has_colours = stream_has_colours(stream)
 
-    def __call__(self, string, colour):
+    def __call__(self, string: str, colour: str) -> str:
         """
         Colorize a string if the stream supports it.
 
@@ -389,7 +392,7 @@ class StringColorizer:
         return string
 
 
-def prompt(question):
+def prompt(question: str) -> str:
     """
     Replacement for `input` / `raw_input` to support both Python 2 and 3.
 
@@ -408,7 +411,7 @@ def prompt(question):
     return my_input(question)
 
 
-def user_wants_to_exit():
+def user_wants_to_exit() -> bool:
     """Interactive problem, return False if user entered `n` or `no`."""
     try:
         answer = prompt("Do you want to continue [Y/n]")
@@ -420,7 +423,7 @@ def user_wants_to_exit():
 
 class Editor:
     """Python interface to system text editors."""
-    def __init__(self, editor=None):
+    def __init__(self, editor: str | None = None) -> None:
         """
         Initialize the Editor.
 
@@ -433,7 +436,7 @@ class Editor:
         else:
             self.editor = str(editor)
 
-    def edit_file(self, fname, lineno=None):
+    def edit_file(self, fname: str, lineno: int | None = None) -> int:
         """
         Open a file in the editor, optionally at a specific line.
 
@@ -456,7 +459,7 @@ class Editor:
 
         return retcode
 
-    def edit_files(self, fnames, ask_for_exit=True):
+    def edit_files(self, fnames: list[str], ask_for_exit: bool = True) -> int:
         """
         Edit a list of files, if assk_for_exit is True, we ask
         whether the user wants to exit from the cycle at each iteration.
@@ -490,7 +493,7 @@ class Patcher:
 
     known_patchers = interactive_patchers + auto_patchers
 
-    def __init__(self, patcher=None):
+    def __init__(self, patcher: str | None = None) -> None:
         """
         Args:
             patcher:
@@ -512,11 +515,11 @@ class Patcher:
             raise ValueError("Cannot find executable %s in $PATH" % self.patcher)
 
     @property
-    def is_interactive(self):
+    def is_interactive(self) -> bool:
         """True if this is an interactive patcher."""
         return self.patcher in Patcher.interactive_patchers
 
-    def patch(self, fromfile, tofile):
+    def patch(self, fromfile: str, tofile: str) -> int:
         """
         Apply a patch or launch an interactive patcher.
 
@@ -542,7 +545,7 @@ class Patcher:
             except Exception as exc:
                 raise self.Error("%s: trying to patch  %s %s:\n%s" % (self.patcher, fromfile, tofile, str(exc)))
 
-    def patch_files(self, fromfiles, tofiles):
+    def patch_files(self, fromfiles: list[str], tofiles: list[str]) -> int:
         """
         Patch a list of files.
 
@@ -588,7 +591,7 @@ class Patcher:
         return exit_status
 
 
-def pprint_table(table, out=sys.stdout, rstrip=False):
+def pprint_table(table: list[list[str]], out: TextIO = sys.stdout, rstrip: bool = False) -> None:
     """
     Prints out a table of data, padded for alignment
     Each row must have the same number of columns.
@@ -601,7 +604,7 @@ def pprint_table(table, out=sys.stdout, rstrip=False):
         rstrip:
             if true, trailing withespaces are removed from the entries.
     """
-    def max_width_col(table, col_idx):
+    def max_width_col(table: list[list[str]], col_idx: int) -> int:
         """Get the maximum width of the given column index"""
         return max([len(row[col_idx]) for row in table])
 
@@ -624,7 +627,7 @@ def pprint_table(table, out=sys.stdout, rstrip=False):
         out.write("\n")
 
 
-def ascii_wasp():
+def ascii_wasp() -> str:
     return \
 r"""
            | )/ )
@@ -656,7 +659,7 @@ r"""
 """
 
 
-def ascii_scream():
+def ascii_scream() -> str:
     return r"""
 ---;;;;;;;-----'''''''''``'  --- `'  .,,ccc$$hcccccc,.  `' ,;;!!!'``,;;!!'
 ;;;;,,.,;-------''''''' ,;;!!-    .zJ$$$$$$$$$$$$$$$$$$$c,. `' ,;;!!!!' ,;
@@ -703,7 +706,7 @@ cc                   `$$$c`?        ?$.`$$hc, cd$$F ,$'  $$$$$$     ;!!
 c,        ;,        `?$$$$P           !!>             .
 """
 
-def ascii_abinit():
+def ascii_abinit() -> str:
     return r"""
                         -////-                                                        .`
                        `:////:`                                                   :+ymd-
@@ -740,11 +743,11 @@ class lazy_property:
     are evaluated on first use.
     """
 
-    def __init__(self, func):
+    def __init__(self, func: Callable[..., Any]) -> None:
         self.__func = func
         wraps(self.__func)(self)
 
-    def __get__(self, inst, inst_cls):
+    def __get__(self, inst: Any, inst_cls: type) -> Any:
         if inst is None:
             return self
 
@@ -761,7 +764,7 @@ class lazy_property:
         return value
 
     @classmethod
-    def invalidate(cls, inst, name):
+    def invalidate(cls, inst: Any, name: str) -> None:
         """Invalidate a lazy attribute.
 
         This obviously violates the lazy contract. A subclass of lazy

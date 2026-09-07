@@ -16,9 +16,7 @@ import sys
 import tempfile
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
-from os.path import abspath as absp
 from os.path import basename
-from os.path import join as pj
 from socket import gethostname
 from typing import Any
 from warnings import warn
@@ -28,7 +26,7 @@ from warnings import warn
 os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Pspdir"))
 
 # Add the directory [...]/abinit/tests to $PYTHONPATH
-pack_dir, x = os.path.split(absp(__file__))
+pack_dir, x = os.path.split(os.path.abspath(__file__))
 pack_dir, x = os.path.split(pack_dir)
 sys.path.insert(0, pack_dir)
 import tests
@@ -177,15 +175,17 @@ class TestBot:
             ValueError: If a mandatory option is missing.
         """
         if testbot_json is None:
-            basedir, _ = os.path.split(absp(__file__))
-            testbot_json = pj(basedir, "testbot.json")
+            basedir, _ = os.path.split(os.path.abspath(__file__))
+            testbot_json = os.path.join(basedir, "testbot.json")
 
+        print(f"Reading TestBot options from: {os.path.abspath(testbot_json)}")
         with open(testbot_json) as fh:
             data = json.load(fh)
 
+        print(json.dumps(data, indent=2))
+
         for mandatory in ("builder_name", "max_cpus"):
             if mandatory not in data:
-                print(json.dumps(data, indent=2))
                 raise ValueError(f"Mandatory option {mandatory} is not declared in {testbot_json}")
 
         # Silently ignore unknown keys, mirroring the old INI reader's

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 The tokens recognised by the configuration parser are declared here.
 There are two kind of tokens:
@@ -8,6 +10,7 @@ description for the testconf_explorer. There is no point in defining
 value_type, inherited, apply_to or use_params in the docstring but you
 should explain when the test fails and when it succeeds.
 """
+from typing import Any
 
 from numpy import ndarray
 from numpy.linalg import norm
@@ -27,7 +30,7 @@ conf_parser.parameter("tol_eq", default=1e-8, inherited=True)
 # value_type=float, inherited=True, apply_to='number' use_params=[], exclude={}
 # handle_undef = True
 @conf_parser.constraint(exclude={"tol", "ceil", "ignore"})
-def tol_rel(tol, ref, tested):
+def tol_rel(tol: float, ref: Any, tested: Any) -> bool:
     """
     Valid if the relative difference between the values is below the given tolerance.
 
@@ -45,7 +48,7 @@ def tol_rel(tol, ref, tested):
 
 
 @conf_parser.constraint(exclude={"tol", "ceil", "ignore"})
-def tol_abs(tol, ref, tested):
+def tol_abs(tol: float, ref: Any, tested: Any) -> bool:
     """
     Valid if the absolute difference between the values is below the given tolerance.
 
@@ -61,7 +64,7 @@ def tol_abs(tol, ref, tested):
 
 
 @conf_parser.constraint(apply_to="Array", inherited=True)
-def tol_vec(tol, ref, tested):
+def tol_vec(tol: float, ref: Any, tested: Any) -> bool:
     """
     Valid if the cartesian norm of the vector (ref - tested) is below the given tolerance.
 
@@ -77,7 +80,7 @@ def tol_vec(tol, ref, tested):
 
 
 @conf_parser.constraint(exclude={"tol", "tol_abs", "tol_rel", "ignore"})
-def ceil(ceil_val, ref, tested):
+def ceil(ceil_val: float, ref: Any, tested: Any) -> bool:
     """
     Valid if the absolute value of the tested value is below the given ceiling.
 
@@ -94,7 +97,7 @@ def ceil(ceil_val, ref, tested):
 
 @conf_parser.constraint(value_type=bool, exclude={"ceil", "tol", "tol_rel",
                                                   "tol_abs"})
-def ignore(yes, ref, tested):
+def ignore(yes: bool, ref: Any, tested: Any) -> bool:
     """
     Override number tests and always return the same result.
 
@@ -111,7 +114,7 @@ def ignore(yes, ref, tested):
 
 @conf_parser.constraint(value_type=str, inherited=False, apply_to="this",
                         use_params=["tol_eq"])
-def equation(eq, ref, tested, tol_eq):
+def equation(eq: str, ref: Any, tested: Any, tol_eq: float) -> bool:
     """
     If the given expression returns a number, its absolute value is compared
     to the optional tol_eq parameter. If the expression returns a vector,
@@ -125,7 +128,7 @@ def equation(eq, ref, tested, tol_eq):
 
 @conf_parser.constraint(value_type=list, inherited=False, apply_to="this",
                         use_params=["tol_eq"])
-def equations(eqs, ref, tested, tol_eq):
+def equations(eqs: list[str], ref: Any, tested: Any, tol_eq: float) -> bool | None:
     """
     See equation. Same thing with a list of equations.
     """
@@ -139,7 +142,7 @@ def equations(eqs, ref, tested, tol_eq):
 
 
 @conf_parser.constraint(value_type=dict, apply_to="this")
-def callback(locs, ref, tested):
+def callback(locs: dict[str, Any], ref: Any, tested: Any) -> Any:
     """
     Call a method of the reference data with the tested data as first parameter
     and the other parameters as keyword arguments. Return the result of the call.
