@@ -338,10 +338,10 @@ In this case, one can re-rerun the entire test suite (or part of it) by just exe
     cd abinit/tests
     testbot.py run
 
-The script `testbot.py` reads the configuration file `testbot.cfg` (already present in the working directory),
+The script `testbot.py` reads the configuration file `testbot.json` (already present in the working directory),
 runs the entire set of tests and produces the final report.
 
-Note that one modify the configuration options defined in `testbot.cfg` in order to speed-up the execution of the tests.
+Note that one modify the configuration options defined in `testbot.json` in order to speed-up the execution of the tests.
 In particular one can use the options:
 
     # with_tdirs = list of directories to execute

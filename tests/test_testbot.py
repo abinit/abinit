@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import os
 import sys
@@ -21,8 +22,6 @@ sys.modules["pymods.tools"] = MagicMock()
 from tests.testbot import (
     TestBot,
     TestBotSummary,
-    _str2list,
-    _yesno2bool,
     analyze,
     build_parser,
     get_git_tag,
@@ -35,73 +34,6 @@ from tests.testbot import (
 # trying to collect them (they have __init__ constructors and warn otherwise).
 TestBot.__test__ = False
 TestBotSummary.__test__ = False
-
-
-class TestYesno2Bool:
-    """Tests for the _yesno2bool() utility function."""
-
-    def test_yesno2bool_yes(self):
-        """'yes' should convert to True."""
-        assert _yesno2bool("yes") is True
-        assert _yesno2bool("YES") is True
-        assert _yesno2bool("Yes") is True
-
-    def test_yesno2bool_no(self):
-        """'no' should convert to False."""
-        assert _yesno2bool("no") is False
-        assert _yesno2bool("NO") is False
-        assert _yesno2bool("No") is False
-
-    def test_yesno2bool_with_whitespace(self):
-        """Whitespace should be stripped."""
-        assert _yesno2bool("  yes  ") is True
-        assert _yesno2bool("  no  ") is False
-
-    def test_yesno2bool_with_quotes(self):
-        """Quotes should be removed."""
-        assert _yesno2bool('"yes"') is True
-        assert _yesno2bool("'no'") is False
-        assert _yesno2bool('"yes"') is True
-
-    def test_yesno2bool_invalid(self):
-        """Invalid strings should raise ValueError."""
-        with pytest.raises(ValueError, match="Cannot interpret string"):
-            _yesno2bool("maybe")
-        with pytest.raises(ValueError, match="Cannot interpret string"):
-            _yesno2bool("1")
-        with pytest.raises(ValueError, match="Cannot interpret string"):
-            _yesno2bool("")
-
-
-class TestStr2List:
-    """Tests for the _str2list() utility function."""
-
-    def test_str2list_comma_separated(self):
-        """Comma-separated strings should be split."""
-        assert _str2list("a,b,c") == ["a", "b", "c"]
-
-    def test_str2list_with_whitespace(self):
-        """Whitespace should be trimmed from each item."""
-        assert _str2list("a, b, c") == ["a", "b", "c"]
-        assert _str2list("  a  ,  b  ,  c  ") == ["a", "b", "c"]
-
-    def test_str2list_single_item(self):
-        """Single item should return a list with one element."""
-        assert _str2list("abc") == ["abc"]
-
-    def test_str2list_empty_string(self):
-        """Empty string should return empty list."""
-        assert _str2list("") == []
-
-    def test_str2list_with_empty_items(self):
-        """Empty items should be skipped."""
-        assert _str2list("a,,b") == ["a", "b"]
-        assert _str2list(",a,b,") == ["a", "b"]
-
-    def test_str2list_already_list(self):
-        """Lists and tuples should be returned as-is (converted to list if tuple)."""
-        assert _str2list(["a", "b", "c"]) == ["a", "b", "c"]
-        assert _str2list(("a", "b", "c")) == ("a", "b", "c")
 
 
 class TestGetMpiPrefixFromEnv:
@@ -342,15 +274,16 @@ class TestTestBotClass:
             pass
 
     def test_testbot_attributes(self):
-        """TestBot._attrbs should have expected keys."""
+        """TestBot's dataclass fields should have the expected config keys."""
         expected_keys = {
             "builder_name", "type", "max_cpus", "max_gpus", "mpi_prefix",
-            "mpirun_np", "omp_num_threads", "enable_mpi", "enable_openmp",
+            "mpirun_np", "omp_num_threads",
             "with_tdirs", "without_tdirs", "timeout_time", "runmode",
             "keywords", "verbose", "tmp_basedir", "mpi_args",
             "force_mpi"
         }
-        assert set(TestBot._attrbs.keys()) == expected_keys
+        config_fields = {f.name for f in dataclasses.fields(TestBot) if f.init}
+        assert config_fields == expected_keys
 
     def test_testbot_has_mpi_property(self):
         """has_mpi property should check for mpirun_np."""
@@ -367,17 +300,90 @@ class TestTestBotClass:
         assert bool(tb.omp_num_threads > 0)
 
 
+class TestTestBotFromJson:
+    """End-to-end characterization tests for TestBot.from_json()."""
+
+    def _mock_environment(self, monkeypatch, *, defined_cppvars=(), has_timeout=False):
+        """Mock the module-level names TestBot.__post_init__ relies on."""
+        import tests.testbot as tb_module
+
+        mock_database = MagicMock()
+        mock_database.init_result_table.return_value = {}
+        monkeypatch.setattr(tb_module.abitests, "get_database", lambda: mock_database)
+
+        mock_build_env = MagicMock()
+        mock_build_env.defined_cppvars = list(defined_cppvars)
+        mock_build_env.has_bin.return_value = has_timeout
+        mock_build_env.path_of_bin.return_value = "/usr/bin/timeout"
+        monkeypatch.setattr(tb_module, "BuildEnvironment", lambda *a, **kw: mock_build_env)
+
+        return mock_build_env
+
+    def test_from_json_builds_a_real_instance(self, tmp_path, monkeypatch):
+        """Feeding a real testbot.json through from_json() must produce a working TestBot."""
+        self._mock_environment(monkeypatch)
+        testbot_json = tmp_path / "testbot.json"
+        testbot_json.write_text(json.dumps({
+            "builder_name": "eos_gnu_13.2_serial",
+            "max_cpus": 4,
+            "with_tdirs": ["v1", "v2"],
+            "force_mpi": True,
+        }))
+
+        testbot = TestBot.from_json(str(testbot_json))
+
+        assert testbot.builder_name == "eos_gnu_13.2_serial"
+        assert testbot.max_cpus == 4
+        assert testbot.with_tdirs == ["v1", "v2"]
+        assert testbot.force_mpi is True
+        # Defaults for everything not in the JSON payload.
+        assert testbot.max_gpus == 0
+        assert testbot.without_tdirs == []
+
+    def test_from_json_missing_mandatory_key_raises(self, tmp_path):
+        """A testbot.json missing builder_name/max_cpus must raise a clear ValueError."""
+        testbot_json = tmp_path / "testbot.json"
+        testbot_json.write_text(json.dumps({"builder_name": "only_this"}))
+
+        with pytest.raises(ValueError, match="Mandatory option max_cpus is not declared"):
+            TestBot.from_json(str(testbot_json))
+
+    def test_from_json_ignores_unknown_keys(self, tmp_path, monkeypatch):
+        """Extra keys in the JSON payload must be silently ignored, not raise."""
+        self._mock_environment(monkeypatch)
+        testbot_json = tmp_path / "testbot.json"
+        testbot_json.write_text(json.dumps({
+            "builder_name": "b",
+            "max_cpus": 2,
+            "some_future_field": "unused",
+        }))
+
+        testbot = TestBot.from_json(str(testbot_json))
+        assert testbot.builder_name == "b"
+        assert not hasattr(testbot, "some_future_field")
+
+    def test_from_json_gpu_mismatch_raises(self, tmp_path, monkeypatch):
+        """max_gpus > 0 on a build without HAVE_GPU must clamp to 0 (with a warning)."""
+        self._mock_environment(monkeypatch, defined_cppvars=[])
+        testbot_json = tmp_path / "testbot.json"
+        testbot_json.write_text(json.dumps({"builder_name": "b", "max_cpus": 2, "max_gpus": 2}))
+
+        with pytest.warns(UserWarning, match="not compiled with GPU support"):
+            testbot = TestBot.from_json(str(testbot_json))
+        assert testbot.max_gpus == 0
+
+
 class TestBuildParser:
     """Tests for the run/analyze/print argparse CLI."""
 
-    def test_run_defaults_and_explicit_cfg(self):
+    def test_run_defaults_and_explicit_json(self):
         parser = build_parser()
         ns = parser.parse_args(["run"])
         assert ns.command == "run"
-        assert ns.testbot_cfg is None
+        assert ns.testbot_json is None
 
-        ns = parser.parse_args(["run", "my.cfg"])
-        assert ns.testbot_cfg == "my.cfg"
+        ns = parser.parse_args(["run", "my.json"])
+        assert ns.testbot_json == "my.json"
 
     def test_analyze_defaults_and_explicit_tag(self):
         parser = build_parser()
@@ -388,14 +394,14 @@ class TestBuildParser:
         ns = parser.parse_args(["analyze", "v9.2.0"])
         assert ns.tag == "v9.2.0"
 
-    def test_print_defaults_and_explicit_cfg(self):
+    def test_print_defaults_and_explicit_json(self):
         parser = build_parser()
         ns = parser.parse_args(["print"])
         assert ns.command == "print"
-        assert ns.testbot_cfg is None
+        assert ns.testbot_json is None
 
-        ns = parser.parse_args(["print", "my.cfg"])
-        assert ns.testbot_cfg == "my.cfg"
+        ns = parser.parse_args(["print", "my.json"])
+        assert ns.testbot_json == "my.json"
 
     def test_missing_command_is_rejected(self):
         parser = build_parser()
@@ -418,32 +424,32 @@ class TestMain:
         mock_analyze.assert_called_once_with(fname="testbot_summary.json", tag="v1")
 
     def test_main_dispatches_to_run(self, monkeypatch):
-        monkeypatch.setattr(sys, "argv", ["testbot.py", "run", "my.cfg"])
+        monkeypatch.setattr(sys, "argv", ["testbot.py", "run", "my.json"])
         mock_instance = MagicMock()
         mock_instance.run.return_value = 3
-        with patch("tests.testbot.TestBot", return_value=mock_instance) as mock_cls:
+        with patch("tests.testbot.TestBot.from_json", return_value=mock_instance) as mock_from_json:
             assert main() == 3
-        mock_cls.assert_called_once_with("my.cfg")
+        mock_from_json.assert_called_once_with("my.json")
         mock_instance.run.assert_called_once()
 
     def test_main_dispatches_to_print_without_running(self, monkeypatch, capsys):
-        monkeypatch.setattr(sys, "argv", ["testbot.py", "print", "my.cfg"])
+        monkeypatch.setattr(sys, "argv", ["testbot.py", "print", "my.json"])
         mock_instance = MagicMock()
         mock_instance.__str__ = MagicMock(return_value="fake-config-dump")
-        with patch("tests.testbot.TestBot", return_value=mock_instance) as mock_cls:
+        with patch("tests.testbot.TestBot.from_json", return_value=mock_instance) as mock_from_json:
             assert main() == 0
-        mock_cls.assert_called_once_with("my.cfg")
+        mock_from_json.assert_called_once_with("my.json")
         mock_instance.run.assert_not_called()
         assert "fake-config-dump" in capsys.readouterr().out
 
-    def test_main_run_with_no_cfg_uses_default(self, monkeypatch):
-        """A bare `testbot.py run` (the analysis.sh invocation) passes cfg=None."""
+    def test_main_run_with_no_json_uses_default(self, monkeypatch):
+        """A bare `testbot.py run` (the analysis.sh invocation) passes path=None."""
         monkeypatch.setattr(sys, "argv", ["testbot.py", "run"])
         mock_instance = MagicMock()
         mock_instance.run.return_value = 0
-        with patch("tests.testbot.TestBot", return_value=mock_instance) as mock_cls:
+        with patch("tests.testbot.TestBot.from_json", return_value=mock_instance) as mock_from_json:
             assert main() == 0
-        mock_cls.assert_called_once_with(None)
+        mock_from_json.assert_called_once_with(None)
 
 
 class TestUtilityFunctions:

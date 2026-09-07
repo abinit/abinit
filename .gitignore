@@ -301,7 +301,7 @@ tests/Analysis*
 tests/report.log
 tests/special.py
 tests/summary.log
-tests/testbot.cfg
+tests/testbot.json
 tests/testbot_summary.json
 tests/testbot_summary.shelve
 !.gitkeep
