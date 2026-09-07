@@ -5,4 +5,3 @@ program have_fc_async
   INTEGER, ASYNCHRONOUS :: int_array(10)
 
 end program have_fc_async
-x  
