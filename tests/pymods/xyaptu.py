@@ -17,7 +17,7 @@ __history__= {
 
 import re
 import sys
-from typing import IO, Any
+from typing import IO, Any, cast
 
 try:
     from cStringIO import StringIO
@@ -87,16 +87,24 @@ class xcopier(copier):
             ValueError: If input file cannot be opened.
         """
         # Read the input
-        inf = input
+        inf: IO[Any] | None = None
+        inputText = ""
         try:
+            if isinstance(input, str) or input is None:
+                raise AttributeError
+            inf = cast(IO[Any], input)
             inputText = inf.read()
-        except AttributeError:
-            inf = open(input)
-            if inf is None:
+        except (AttributeError, TypeError):
+            if isinstance(input, str):
+                inf = open(input)
+                if inf is None:
+                    raise ValueError("Can't open file (%s)" % input)
+                inputText = inf.read()
+            else:
                 raise ValueError("Can't open file (%s)" % input)
-            inputText = inf.read()
         try:
-            inf.close()
+            if inf is not None:
+                inf.close()
         except:
             pass
 
@@ -161,13 +169,17 @@ class xcopier(copier):
         # Call-back functions for re substitutions
         # These must be in sync with what is expected in self.__init__
         def rexpr(match: re.Match[str], self: xcopier = self) -> str:
-            return "_:@%s@:_" % match.group(match.lastindex)
+            idx = match.lastindex if match.lastindex is not None else 0
+            return "_:@%s@:_" % match.group(idx)
         def rline(match: re.Match[str], self: xcopier = self) -> str:
-            return "\n++yaptu %s #\n--yaptu \n" % match.group(match.lastindex)
+            idx = match.lastindex if match.lastindex is not None else 0
+            return "\n++yaptu %s #\n--yaptu \n" % match.group(idx)
         def ropen(match: re.Match[str], self: xcopier = self) -> str:
-            return "\n++yaptu %s \n" % match.group(match.lastindex)
+            idx = match.lastindex if match.lastindex is not None else 0
+            return "\n++yaptu %s \n" % match.group(idx)
         def rclause(match: re.Match[str], self: xcopier = self) -> str:
-            return "\n==yaptu %s \n" % match.group(match.lastindex)
+            idx = match.lastindex if match.lastindex is not None else 0
+            return "\n==yaptu %s \n" % match.group(idx)
         def rclose(match: re.Match[str], self: xcopier = self) -> str:
             return "\n--yaptu \n"
 
@@ -282,7 +294,7 @@ if __name__=="__main__":
     # and a function...
     def my_current_time() -> str:
         import time
-        return str(time.clock())
+        return str(time.time())
     DNS["my_current_time"] = my_current_time
 
     """

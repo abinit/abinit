@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from typing import cast
 from .data_extractor import DataExtractor
 from .fldiff import (
     Differ,
@@ -123,10 +124,10 @@ class TestDiffer:
 
         assert all(isinstance(d, TextDifference) for d in differences)
 
-        d4 = differences.pop(2)
+        d4 = cast(TextDifference, differences.pop(2))
         assert d4.silent
 
-        assert not any(d.silent for d in differences)
+        assert not any(cast(TextDifference, d).silent for d in differences)
 
     def test_diff_lines_number_not_significant(self) -> None:
         diff = Differ()
@@ -261,9 +262,9 @@ a list of strings:
 - "two strings"
 - "..."
 ..."""
-        lines = [line + "\n" for line in lines.split("\n")]
+        lines_list = [line + "\n" for line in lines.split("\n")]
         with pytest.raises(NoIteratorDefinedError):
-            _, documents, _ = dext.extract(lines)
+            _, documents, _ = dext.extract(lines_list)
             print(documents)
 
     def test_extract_require_label(self) -> None:
@@ -283,11 +284,11 @@ a list of strings:
 - "two strings"
 - "..."
 ..."""
-        lines = [line + "\n" for line in lines.split("\n")]
+        lines_list = [line + "\n" for line in lines.split("\n")]
         with pytest.raises(UntaggedDocumentError):
-            _, documents, _ = dext.extract(lines)
+            _, documents, _ = dext.extract(lines_list)
             assert len(documents) == 1
-            print(*(doc.obj for doc in documents))
+            print(*(doc.obj for doc in documents.values()))
 
     def test_extract_find_yaml_doc(self) -> None:
         """Test successful extraction of YAML documents."""
@@ -309,17 +310,18 @@ a list of strings:
 - "..."
 ..."""
 
-        lines = [line + "\n" for line in lines.split("\n")]
-        _, documents, _ = dext.extract(lines)
+        lines_list = [line + "\n" for line in lines.split("\n")]
+        _, documents, _ = dext.extract(lines_list)
 
         # IterStart documents should not be in the document list
         assert len(documents) == 1
         assert documents["dtset=1 GenericMap"].iterators == {"dtset": 1}
         assert documents["dtset=1 GenericMap"].start == 6
         assert documents["dtset=1 GenericMap"].end == 13
-        assert documents["dtset=1 GenericMap"].lines == lines[6:]
-        assert documents["dtset=1 GenericMap"].obj == GenericMap.from_map({
+        assert documents["dtset=1 GenericMap"].lines == lines_list[6:]
+        expected = cast(GenericMap, GenericMap.from_map({  # type: ignore[attr-defined]
             "a field": 58,
             "another": 78,
             "a list of strings": ["a string", "two strings", "..."]
-        })
+        }))
+        assert documents["dtset=1 GenericMap"].obj == expected

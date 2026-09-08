@@ -19,7 +19,7 @@ from collections.abc import Callable, Iterable, Iterator
 from io import StringIO
 from pprint import pprint
 from socket import gethostname
-from typing import Any
+from typing import Any, cast
 
 from tests.pymods.devtools import FileLock
 from tests.pymods.termcolor import cprint
@@ -173,7 +173,7 @@ abenv = AbinitEnvironment()
 database_path = os.path.join(abenv.tests_dir, "test_suite.cpkl")
 
 
-_tsuite_dirs = [
+_tsuite_dir_names = [
     "atompaw",
     "atdep",
     "bigdft",
@@ -217,10 +217,8 @@ _tsuite_dirs = [
     "wannier90",
 ]
 
-_tsuite_dirs.sort()
-_tsuite_dirs = tuple(
-    [os.path.join(abenv.tests_dir, dir_name) for dir_name in _tsuite_dirs]
-)
+_tsuite_dir_names.sort()
+_tsuite_dirs = tuple([os.path.join(abenv.tests_dir, dir_name) for dir_name in _tsuite_dir_names])
 
 
 def load_mod(filepath: str) -> Any:
@@ -239,7 +237,11 @@ def load_mod(filepath: str) -> Any:
         import importlib.util
 
         spec = importlib.util.spec_from_file_location(filepath, filepath)
+        if spec is None:
+            raise ImportError(f"Cannot load module from {filepath}")
         module = importlib.util.module_from_spec(spec)
+        if spec.loader is None:
+            raise ImportError(f"No loader for module from {filepath}")
         spec.loader.exec_module(module)
         return module
     except ImportError:
@@ -289,7 +291,7 @@ class Suite:
         if hasattr(module, "is_multi_parallel"):
             self.is_multi_parallel = module.is_multi_parallel
 
-        self.subsuites = {}
+        self.subsuites: dict[str, list[str]] = {}
         if hasattr(module, "subsuites"):
             subsuite_names = module.subsuites
             for k in subsuite_names:
@@ -436,7 +438,7 @@ class AbinitTestsDatabase(dict):
         Raises:
             ValueError: If duplicate test IDs are found within the same suite.
         """
-        res_table = {}
+        res_table: dict[str, dict[Any, dict[str, Any]]] = {}
         for suite_name in self.suite_names:
             res_table[suite_name] = {}
 
@@ -647,7 +649,7 @@ class AbinitTestsDatabase(dict):
 
             return d
 
-        lines = []
+        lines: list[str] = []
         app = lines.append
         for suite_name, suite in self.items():
             for test in suite:
@@ -763,7 +765,7 @@ class AbinitTests:
     @property
     def all_subsuite_names(self) -> list[str]:
         """List with the names of all the registered subsuites."""
-        all_subnames = []
+        all_subnames: list[str] = []
         for suite in self.suites:
             all_subnames.extend(suite.subsuites.keys())
 
@@ -946,6 +948,7 @@ class AbinitTests:
                         else:
                             raise ValueError("Wrong or unknown argument: %s" % arg)
 
+                tp: tuple[str, str | None]
                 if arg in self.suite_names:
                     tp = (arg, None)
                 elif arg in self.all_subsuite_names:
@@ -1010,7 +1013,8 @@ class AbinitTests:
 
         for t in tuples:
             suite_name, subsuite_name = t
-            for slice_obj in tests_todo[t]:
+            for slice_obj_iter in tests_todo[t]:
+                slice_obj: slice | None = slice_obj_iter
                 # print("Extracting suite_name: %s, subsuite_name: %s, slice_obj: %s" % (suite_name, subsuite_name, slice_obj))
 
                 # FIXME

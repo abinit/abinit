@@ -9,7 +9,7 @@ from __future__ import annotations
 import re
 import warnings
 from inspect import ismethod
-from typing import Any
+from typing import Any, cast
 
 import yaml
 
@@ -17,7 +17,7 @@ from . import Loader
 from .common import BaseDictWrapper, get_yaml_tag
 from .errors import AlreadyRegisteredTagError, NotAvailableTagError
 
-known_tags = set()
+known_tags: set[str] = set()
 
 
 def reserve_tag(tag: str) -> None:
@@ -54,8 +54,9 @@ def yaml_map(cls: type) -> type:
 
     def constructor(loader: Any, node: Any) -> Any:
         map = dict(loader.construct_mapping(node, deep=True))
-        if ismethod(cls.from_map):
-            return cls.from_map(map)
+        from_map = cast(Any, getattr(cls, "from_map", None))
+        if ismethod(from_map):
+            return from_map(map)
         return cls().from_map(map)
 
     def representer(dumper: Any, data: Any) -> Any:
@@ -86,8 +87,9 @@ def yaml_seq(cls: type) -> type:
 
     def constructor(loader: Any, node: Any) -> Any:
         seq = list(loader.construct_sequence(node, deep=True))
-        if ismethod(cls.from_seq):
-            return cls.from_seq(seq)
+        from_seq = cast(Any, getattr(cls, "from_seq", None))
+        if ismethod(from_seq):
+            return from_seq(seq)
         return cls().from_seq(seq)
 
     def representer(dumper: Any, data: Any) -> Any:
@@ -118,8 +120,9 @@ def yaml_scalar(cls: type) -> type:
 
     def constructor(loader: Any, node: Any) -> Any:
         scalar = loader.construct_scalar(node)
-        if ismethod(cls.from_scalar):
-            return cls.from_scalar(scalar)
+        from_scalar = cast(Any, getattr(cls, "from_scalar", None))
+        if ismethod(from_scalar):
+            return from_scalar(scalar)
         return cls().from_scalar(scalar)
 
     def representer(dumper: Any, data: Any) -> Any:
@@ -204,7 +207,7 @@ def yaml_implicit_scalar(cls: type) -> type:
     yaml_scalar(cls)  # register the constructor and the representer
     tag = "!" + get_yaml_tag(cls)
 
-    re_pattern = cls.yaml_pattern
+    re_pattern = cast(Any, getattr(cls, "yaml_pattern", None))
     if not hasattr(re_pattern, "match"):
         re_pattern = re.compile(re_pattern)
     # register the implicit pattern
@@ -225,7 +228,7 @@ def yaml_not_available_tag(tag: str, reason: str, fatal: bool = False) -> None:
 
     def constructor(loader: Any, node: Any) -> Any:
         if fatal:
-            raise NotAvailableTagError(msg)
+            raise NotAvailableTagError(tag, reason)
         warnings.warn(msg)
         return {"_not_available": True}
     yaml.add_constructor("!" + tag, constructor, Loader=Loader)

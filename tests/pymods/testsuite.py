@@ -31,7 +31,7 @@ from queue import Empty as EmptyQueueError
 from socket import gethostname
 from subprocess import PIPE, Popen
 from threading import Thread
-from typing import TYPE_CHECKING, Any, TextIO
+from typing import TYPE_CHECKING, Any, TextIO, cast
 
 try:
     from typing import Self
@@ -192,7 +192,7 @@ def html_link(string: str, href: str | None = None) -> str:
     return "<a href='%s'>%s</a>" % (string, string)
 
 
-def is_string(s: object) -> bool:
+def is_string(s: Any) -> bool:
     """
     Check if the input is string-like (duck typing).
 
@@ -203,7 +203,7 @@ def is_string(s: object) -> bool:
         bool: True if s behaves like a string, False otherwise.
     """
     try:
-        s + "hello"
+        s + "hello"  # type: ignore[operator]
         return True
     except TypeError:
         return False
@@ -283,12 +283,12 @@ def rm_rf(top: str, exclude_paths: str | list[str] | None = None) -> list[str]:
     Returns:
         list: Paths of files and directories that were removed.
     """
-    exc_paths = []
+    exc_paths: list[str] = []
     if exclude_paths is not None:
         if is_string(exclude_paths):
-            exc_paths = [exclude_paths]
+            exc_paths = [cast(str, exclude_paths)]
         else:
-            exc_paths = exclude_paths
+            exc_paths = cast(list[str], exclude_paths)
 
     removed = []
     for (root, dirs, files) in os.walk(top):
@@ -394,6 +394,22 @@ class FileToTest:
         ("verbose_report", "no", str),
     ]
 
+    name: str
+    tolnlines: int
+    tolabs: float
+    tolrel: float
+    fld_options: list[str]
+    fldiff_fname: str
+    hdiff_fname: str
+    diff_fname: str
+    use_yaml: str
+    verbose_report: str
+    has_line_count_error: bool
+    do_html_diff: bool
+    fld_isok: bool
+    fld_status: str
+    fld_msg: str
+
     def __init__(self, dic: dict[str, Any]) -> None:
         """
         Initialize the FileToTest object.
@@ -418,7 +434,8 @@ class FileToTest:
             self.__dict__[atr_name] = value
 
         # Postprocess fld_options
-        self.fld_options = self.fld_options.split()
+        fld_options_str = cast(str, self.fld_options)
+        self.fld_options = fld_options_str.split()
         for opt in self.fld_options:
             if not opt.startswith("-"):
                 raise ValueError("Wrong fldiff option: %s" % opt)
@@ -818,7 +835,8 @@ class AbinitTestInfo:
         Args:
             need_cpp_vars (set): Set of CPP variable names.
         """
-        self.need_cpp_vars = self.need_cpp_vars.union(need_cpp_vars)
+        if need_cpp_vars is not None:
+            self.need_cpp_vars = self.need_cpp_vars.union(need_cpp_vars)
 
     def add_keywords(self, keywords: Iterable[str] | None) -> None:
         """
@@ -827,7 +845,8 @@ class AbinitTestInfo:
         Args:
             keywords (set): Set of keyword strings.
         """
-        self.keywords = self.keywords.union(keywords)
+        if keywords is not None:
+            self.keywords = self.keywords.union(keywords)
 
     def make_test_id(self) -> str:
         """
@@ -906,7 +925,7 @@ class AbinitTestInfoParser:
         # Consistency check
         opt = "test_chain"
         section = TESTCNF_KEYWORDS[opt][2]
-        pars = TESTCNF_KEYWORDS[opt][0]
+        pars = cast(Callable[[str], Any], TESTCNF_KEYWORDS[opt][0])
 
         if self.parser.has_option(section, opt):
             string = self.parser.get(section, opt)
@@ -933,8 +952,8 @@ class AbinitTestInfoParser:
         # First read and parse the global options.
         for key in TESTCNF_KEYWORDS:
             tup = TESTCNF_KEYWORDS[key]
-            line_parser = tup[0]
-            section = tup[2]
+            line_parser = cast(Callable[[Any], Any], tup[0])
+            section = cast(str, tup[2])
 
             if section == "yaml_test":
                 # special case: handle this separately
@@ -996,7 +1015,7 @@ class AbinitTestInfoParser:
                     continue
                 opt = self.parser.get(ncpu_section, key)
                 tup = TESTCNF_KEYWORDS[key]
-                line_parser = tup[0]
+                line_parser = cast(Callable[[Any], Any], tup[0])
 
                 # Process the line and replace the global value.
                 try:
@@ -1020,9 +1039,9 @@ class AbinitTestInfoParser:
     def nprocs_to_test(self) -> list[int]:
         """List with the number of MPI processors to be tested."""
         key = "nprocs_to_test"
-        opt_parser = TESTCNF_KEYWORDS[key][0]
-        default = TESTCNF_KEYWORDS[key][1]
-        section = TESTCNF_KEYWORDS[key][2]
+        opt_parser = cast(Callable[[Any], list[int]], TESTCNF_KEYWORDS[key][0])
+        default = cast(str, TESTCNF_KEYWORDS[key][1])
+        section = cast(str, TESTCNF_KEYWORDS[key][2])
 
         if self.parser.has_option(section, key):
             opt = self.parser.get(section, key)
@@ -1047,8 +1066,8 @@ class AbinitTestInfoParser:
         """
         assert self.is_testchain
         opt = "test_chain"
-        section = TESTCNF_KEYWORDS[opt][2]
-        parse = TESTCNF_KEYWORDS[opt][0]
+        section = cast(str, TESTCNF_KEYWORDS[opt][2])
+        parse = cast(Callable[[str], list[str]], TESTCNF_KEYWORDS[opt][0])
 
         fnames = parse(self.parser.get(section, opt))
         # HACK
@@ -1112,6 +1131,7 @@ class Compiler:
     Base class for C, Fortran, C++ compilers.
     Usually instantiated through the class method from_defined_cpp_vars.
     """
+    _KNOWN_CPP_VARS: list[str] = []
 
     def __init__(self, name: str, version: str | None = None) -> None:
         self.name = name
@@ -1166,6 +1186,10 @@ class CPreProcessorError(Exception):
 class CPreProcessor:
     """Pre-process source code with ANSI CPP."""
     Error = CPreProcessorError
+    includes: list[str]
+    opts: list[str]
+    bin: str
+    verbose: int
 
     def __init__(self, includes: list[str] | None = None, opts: list[str] | None = None,
                  bin: str = "cpp", verbose: int = 0) -> None:
@@ -1178,12 +1202,8 @@ class CPreProcessor:
             bin (str): Path to the CPP binary.
             verbose (int): Verbosity level.
         """
-        self.includes = ["."]
-        if includes is not None:
-            self.includes = includes
-        self.opts = ["-DHAVE_CONFIG_H"]
-        if opts is not None:
-            self.opts = opts
+        self.includes = includes if includes is not None else ["."]
+        self.opts = opts if opts is not None else ["-DHAVE_CONFIG_H"]
         self.bin, self.verbose = bin, verbose
 
     def process_file(self, filepath: str, remove_lhash: bool = True) -> str | bytes:
@@ -1205,28 +1225,30 @@ class CPreProcessor:
             with open(filepath) as f:
                 return f.read()
 
-        cmd = [self.bin]
+        cmd_list = [self.bin]
         if self.opts:
-            cmd += self.opts
-        cmd += ["-ansi"]
+            cmd_list += self.opts
+        cmd_list += ["-ansi"]
         if self.includes:
-            cmd += ["-I" + inc for inc in self.includes]
-        cmd += [filepath]
-        cmd = " ".join(cmd)
+            cmd_list += ["-I" + inc for inc in self.includes]
+        cmd_list += [filepath]
+        cmd_str = " ".join(cmd_list)
         if self.verbose:
-            print(cmd)
+            print(cmd_str)
 
-        p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
+        p = Popen(cmd_str, shell=True, stdout=PIPE, stderr=PIPE)
         stdout, stderr = p.communicate()
+        stderr_str = stderr.decode() if isinstance(stderr, bytes) else stderr
+        stdout_str = stdout.decode() if isinstance(stdout, bytes) else stdout
 
         if p.returncode:
             raise self.Error(
-                "C-preprocessor returned %d\n stderr:\n%s" % (p.returncode, stderr))
+                "C-preprocessor returned %d\n stderr:\n%s" % (p.returncode, stderr_str))
 
         # Remove leading hash symbols added by CPP
         if not remove_lhash:
-            return stdout
-        return "\n".join(str(l) for l in stdout.splitlines() if not l.startswith("#"))
+            return stdout_str
+        return "\n".join(l for l in stdout_str.splitlines() if not l.startswith("#"))
 
 
 class FortranBacktrace:
@@ -1268,9 +1290,11 @@ class FortranBacktrace:
         if editor is None:
             editor = Editor()
         src_file, lineno = self.trace[0]
-        src_file = self.locate_srcfile(src_file)
+        src_file_located = self.locate_srcfile(src_file)
+        if src_file_located is None:
+            return None
 
-        return editor.edit_file(src_file, lineno=lineno)
+        return editor.edit_file(src_file_located, lineno=lineno)
 
 
 class NagBacktrace(FortranBacktrace):
@@ -1393,7 +1417,8 @@ class BuildEnvironment:
             if not try_syspath:
                 return ""
             # Search it in PATH.
-            paths = os.getenv("PATH").split(os.pathsep)
+            path_env = os.getenv("PATH") or ""
+            paths = path_env.split(os.pathsep)
             for p in paths:
                 bin_path = os.path.join(p, bin_name)
                 if os.path.isfile(bin_path):
@@ -1475,7 +1500,7 @@ def input_file_has_vars(fname: str, ivars: dict[str, int | None], comment: str =
                 line = line[:idx]
             lines.append(line)
 
-    matches = {}
+    matches: dict[str, list[str]] = {}
     for k in ivars:
         matches[k] = []
 
@@ -1493,9 +1518,9 @@ def input_file_has_vars(fname: str, ivars: dict[str, int | None], comment: str =
             if varvalue is None and varname in line:
                 nfound += 1
                 matches[varname].append(line)
-            elif re_match:
+            elif re_match and varvalue is not None:
                 num = int(re_match.group(1))
-                if num == int(varvalue):
+                if num == varvalue:
                     # print line
                     matches[varname].append(line)
                     nfound += 1
@@ -1560,7 +1585,9 @@ def make_abitests_from_inputs(input_fnames: str | list[str], abenv: BuildEnviron
     in the input files inp_fnames.
     """
     if is_string(input_fnames):
-        input_fnames = [input_fnames]
+        input_fnames = [cast(str, input_fnames)]
+    else:
+        input_fnames = cast(list[str], input_fnames)
 
     inp_fnames = [os.path.abspath(p) for p in input_fnames]
 

@@ -65,7 +65,7 @@ import re
 from collections.abc import Iterable, Iterator, Sequence
 from math import floor
 from threading import Thread
-from typing import Any, TextIO
+from typing import Any, TextIO, cast
 
 from .data_extractor import DataExtractor
 from .yaml_tools import Document, is_available as has_yaml
@@ -152,28 +152,32 @@ class LineDifference:
             l1 += "\n"
         self.content = (l1, l2)
 
-    def __eq__(self, other: LineDifference) -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Check equality of two differences.
 
         Args:
-            other (LineDifference): The other difference to compare.
+            other: The other difference to compare.
 
         Returns:
             bool: True if they are equal.
         """
+        if not isinstance(other, LineDifference):
+            return NotImplemented
         return self.lines == other.lines and self.content == other.content
 
-    def __ne__(self, other: LineDifference) -> bool:
+    def __ne__(self, other: object) -> bool:
         """
         Check inequality of two differences.
 
         Args:
-            other (LineDifference): The other difference to compare.
+            other: The other difference to compare.
 
         Returns:
             bool: True if they are not equal.
         """
+        if not isinstance(other, LineDifference):
+            return NotImplemented
         return not (self == other)
 
     def __repr__(self) -> str:
@@ -254,7 +258,7 @@ class Result:
         max_rel_err (float): Maximum relative error found.
     """
 
-    def __init__(self, fl_diff: list[LineDifference], yaml_diff: list[YIssue], extra_info: Sequence[str] = [],
+    def __init__(self, fl_diff: list[LineDifference], yaml_diff: list[Any], extra_info: Sequence[str] = [],
                  label: str | None = None, verbose: bool = False) -> None:
         """
         Initialize the Result object.
@@ -314,7 +318,7 @@ class Result:
                or isinstance(diff, MetaCharDifference):
                 self.fatal_error = True
                 self.success = False
-                details = str(diff)
+                details = [str(diff)]
 
             elif isinstance(diff, ForcedDifference):
                 pass  # Silent differences: not counted as different line
@@ -417,7 +421,7 @@ class Result:
             msg = f"yaml_test errors. First is:\n{first_fail}\n"
         elif self.fatal_error:
             status = "failed"
-            msg = "fldiff fatal error:\n" + self.details
+            msg = "fldiff fatal error:\n" + (self.details if isinstance(self.details, str) else "".join(self.details))
         elif self.success:
             status = "succeeded"
             msg = "succeeded"
@@ -493,7 +497,7 @@ class Differ:
         """
         self.xml_mode = False  # this is the first dirty fix.
 
-        self.options = {
+        self.options: dict[str, Any] = {
             "ignore": True,
             "ignoreP": True,
             "tolerance_abs": 1.01e-10,
@@ -511,17 +515,17 @@ class Differ:
             self.options["tolerance_abs"] = options["tolerance"]
             self.options["tolerance_rel"] = options["tolerance"]
 
-        self.use_fl = self.options["use_fl"]
-        self.use_yaml = has_yaml and self.options["use_yaml"]
+        self.use_fl = cast(bool, self.options["use_fl"])
+        self.use_yaml = has_yaml and cast(bool, self.options["use_yaml"])
 
         if self.use_yaml:
             if yaml_test and "file" in yaml_test and yaml_test["file"]:
-                self.yaml_conf = YDriverConf.from_file(yaml_test["file"])
+                self.yaml_conf: YDriverConf | NotDriverConf = YDriverConf.from_file(yaml_test["file"])
             elif yaml_test and "yaml" in yaml_test and yaml_test["yaml"]:
                 self.yaml_conf = YDriverConf(yaml_test["yaml"])
             else:
                 self.yaml_conf = YDriverConf()
-            self.yaml_conf.debug = self.options["debug"]
+            self.yaml_conf.debug = cast(bool, self.options["debug"])
         else:
             self.yaml_conf = NotDriverConf(has_yaml)
 
@@ -546,8 +550,8 @@ class Differ:
 
         return Result(line_diff, doc_diff,
                       extra_info=self.yaml_conf.extra_info(),
-                      label=self.options["label"],
-                      verbose=self.options["verbose"])
+                      label=cast(str | None, self.options["label"]),
+                      verbose=cast(bool, self.options["verbose"]))
 
     def _diff_lines(self, src1: Iterable[str], src2: Iterable[str]) -> tuple[list[LineDifference], list[Any]]:
         """
@@ -584,7 +588,10 @@ class Differ:
         t2.join()
 
         if self.use_fl:
-            lines_differences = self._fldiff(*lines)
+            lines_differences = self._fldiff(
+                cast(list[tuple[int, str, str]], lines[0]),
+                cast(list[tuple[int, str, str]], lines[1])
+            )
         else:
             lines_differences = []
 
@@ -606,7 +613,10 @@ class Differ:
             )]
 
         else:
-            doc_differences = self._test_doc(*documents)
+            doc_differences = self._test_doc(
+                cast(dict[str, Any], documents[0]),
+                cast(dict[str, Any], documents[1])
+            )
 
         return lines_differences, doc_differences
 
@@ -634,7 +644,7 @@ class Differ:
         Returns:
             list: List of LineDifference subclasses.
         """
-        differences = []
+        differences: list[LineDifference] = []
         if len(lines1) > len(lines2):
             return [LineCountDifference("file 1", "file 2", (len(lines1), len(lines2)))]
 
@@ -676,8 +686,8 @@ class Differ:
                         tol = 1.01e-2
                         tolrel = tol
                     else:
-                        tol = self.options["tolerance_abs"]
-                        tolrel = self.options["tolerance_rel"]
+                        tol = cast(float, self.options["tolerance_abs"])
+                        tolrel = cast(float, self.options["tolerance_rel"])
 
                     def to_float(f):
                         return float(f.lower().replace("d", "e").replace("f", "e"))

@@ -15,7 +15,7 @@ import time
 from collections.abc import Callable
 from configparser import NoOptionError
 from subprocess import Popen
-from typing import IO, Any
+from typing import IO, Any, cast
 
 from .subprocesswithtimeout import SubProcessWithTimeout
 
@@ -180,7 +180,7 @@ class JobRunner:
         Returns:
             JobRunner: A new instance configured from the file.
         """
-        d = mpicfg_parser(fname)
+        d: dict[str, Any] = mpicfg_parser(fname)
         d["ompenv"] = OMPEnvironment.from_file(fname, allow_empty=True)
         d["timebomb"] = timebomb
 
@@ -433,13 +433,16 @@ class JobRunner:
         stderr = " 2> %s " % stderr_fname if stderr_fname else ""
 
         if self.has_mpirun or self.has_srun:
-            args = [perf_cmd, self.mpirun_np, str(mpi_nprocs), " %s " % self.mpi_args,
+            mpirun_np = cast(str, getattr(self, "mpirun_np", ""))
+            args = [perf_cmd, mpirun_np, str(mpi_nprocs), " %s " % self.mpi_args,
                     valcmd, bin_path, bin_argstr, stdin, stdout, stderr]
 
         elif self.has_poe:
             # example ${poe} abinit ${poe_args} -procs 4
             # no support for valgrind, debugger, bin_argstr or perf here since poe uses a weird syntax for command line options.
-            args = [self.poe, bin_path, self.poe_args, " -procs "+ str(mpi_nprocs),
+            poe = cast(str, getattr(self, "poe", ""))
+            poe_args = cast(str, getattr(self, "poe_args", ""))
+            args = [poe, bin_path, poe_args, " -procs "+ str(mpi_nprocs),
                     stdin, stdout, stderr]
         else:
             assert mpi_nprocs == 1
@@ -458,7 +461,8 @@ class JobRunner:
                 fh.write("run %s %s" % (bin_argstr, stdin)) # Use dbg syntax
 
             if self.has_mpirun or self.has_srun:
-                args = [self.mpirun_np, str(mpi_nprocs), "xterm -e gdb", bin_path, "--command=%s" % dbg_filepath]
+                mpirun_np = cast(str, getattr(self, "mpirun_np", ""))
+                args = [mpirun_np, str(mpi_nprocs), "xterm -e gdb", bin_path, "--command=%s" % dbg_filepath]
             else:
                 args = ["gdb", bin_path, "--command=%s" % dbg_filepath]
 
@@ -620,9 +624,9 @@ class TimeBomb:
                 if self.timeout > 0.:
                     logger.debug("Using timeout function: " + self.exec_path)
                     if is_string(args):
-                        args = " ".join([self.exec_path, str(self.timeout), args])
+                        args = " ".join([self.exec_path, str(self.timeout), cast(str, args)])
                     else:
-                        args = [self.exec_path, str(self.timeout)] + args
+                        args = [self.exec_path, str(self.timeout)] + cast(list[str], args)
 
                 p = Popen(args,
                           bufsize=bufsize, executable=executable, stdin=stdin, stdout=stdout, stderr=stderr, preexec_fn=preexec_fn,
@@ -636,12 +640,13 @@ class TimeBomb:
             #
             elif self.timeout > 0.0:
                 logger.debug("Using SubprocesswithTimeout and timeout_time : "+str(self.timeout))
-                p = SubProcessWithTimeout(self.timeout, delay=self.delay)
+                timeout_proc = SubProcessWithTimeout(self.timeout, delay=self.delay)
 
-                p, ret_code = p.run(args,
+                p_temp, ret_code = timeout_proc.run(args,
                     bufsize=bufsize, executable=executable, stdin=stdin, stdout=stdout, stderr=stderr, preexec_fn=preexec_fn,
                     close_fds=close_fds, shell=shell, cwd=cwd, env=env, universal_newlines=universal_newlines, startupinfo=startupinfo,
                     creationflags=creationflags)
+                p = cast(Popen[Any], p_temp)
             else:
                 logger.debug("Using Popen (no timeout_time)")
                 p = Popen(args,

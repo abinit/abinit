@@ -35,14 +35,14 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
         """Extends the base class adding type conversion of arguments."""
         # write(logunt,'(a,t60,a,1x,2(i0,1x),2(a,1x),2(i0,1x))')&
         # trim(vname), trim(act), addr, isize, trim(abimem_basename(file)), line, memtot_abi%memory
-        return super(cls, Entry).__new__(cls,
-        	vname=args[0],
-        	action=args[1],
-        	ptr=int(args[2]),
-        	size=int(args[3]),
-        	file=args[4],
-                line=int(args[5]),
-                tot_memory=int(args[6]),
+        return super().__new__(cls,
+            args[0],  # vname
+            int(args[2]),  # ptr
+            args[1],  # action
+            int(args[3]),  # size
+            args[4],  # file
+            int(args[5]),  # line
+            int(args[6]),  # tot_memory
         )
 
     def __repr__(self) -> str:
@@ -88,7 +88,7 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
 
     def __hash__(self) -> int:
         """Standard hash implementation using locus and size."""
-        return hash(self.locus, self.size)
+        return hash((self.locus, self.size))
 
     def __eq__(self, other: Any) -> bool:
         """Check equality of two entries."""
@@ -175,7 +175,7 @@ class AbimemFile:
         Returns:
             str: Description of memory usage.
         """
-        lines = []
+        lines: list[str] = []
         app = lines.append
         df = self.get_intense_dataframe()
         app(df.to_string())
@@ -237,7 +237,7 @@ class AbimemFile:
         Args:
             as_dataframe: True to return a pandas dataframe instead of a deque.
         """
-        elist = []
+        elist: list[Entry] = []
         eapp = elist.append
         for e in self.all_entries:
             if e.size == 0: eapp(e)
@@ -251,7 +251,7 @@ class AbimemFile:
         Returns:
             list: List of weird Entry objects.
         """
-        elist = []
+        elist: list[Entry] = []
         eapp = elist.append
         for e in self.all_entries:
             if e.ptr <= 0: eapp(e)
@@ -266,7 +266,7 @@ class AbimemFile:
     @lazy_property
     def all_entries(self) -> list[Entry]:
         """Parse file and create list of Entries."""
-        all_entries = []
+        all_entries: list[Entry] = []
         app = all_entries.append
         with open(self.path) as fh:
             for lineno, line in enumerate(fh):
@@ -320,7 +320,7 @@ class AbimemFile:
         """
         # The deque is bounded to the specified maximum length. Once a bounded length deque is full,
         # when new items are added, a corresponding number of items are discarded from the opposite end.
-        peaks = deque(maxlen=maxlen)
+        peaks: deque[Entry] = deque(maxlen=maxlen)
 
         entries =  self.accumulated_entries if accumulated else self.all_entries
 
@@ -342,7 +342,7 @@ class AbimemFile:
                 peaks = deque(sorted(peaks, key=lambda x: x.size), maxlen=maxlen)
 
         peaks = deque(sorted(peaks, key=lambda x: x.size, reverse=True), maxlen=maxlen)
-        return entries_to_dataframe(peaks) if as_dataframe else peaks
+        return entries_to_dataframe(list(peaks)) if as_dataframe else peaks
 
     @lazy_property
     def dataframe(self) -> Any:
@@ -604,7 +604,7 @@ class Heap(dict):
             int: 1 if removed, 0 otherwise.
         """
         if not entry.isfree: return 0
-        elist = self.get[entry.ptr]
+        elist = self.get(entry.ptr)
         if elist is None: return 0
         for i, olde in elist:
             if entry.size + olde.size != 0:
@@ -639,7 +639,7 @@ class MplExpose: # pragma: no cover
             slide_timeout: Close figure after slide-timeout seconds Block if None.
             verbose: verbosity level
         """
-        self.figures = []
+        self.figures: list[Any] = []
         self.slide_mode = bool(slide_mode)
         self.timeout_ms = slide_timeout
         self.verbose = verbose

@@ -11,7 +11,7 @@ import glob
 import os
 from collections.abc import Iterable, Sequence
 from subprocess import call
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from .conf_parser import conf_parser
 from .driver_test_conf import DEFAULT_CONF_PATH, DriverTestConf
@@ -173,7 +173,8 @@ class Explorer(cmd.Cmd):
         else:
             def short_path(path: Sequence[str]) -> str:
                 if len(".".join(path)) > 50:
-                    shpath = path[:2] + "..." + ".".join(path[-2:])
+                    path_list = list(path)
+                    shpath = ".".join(path_list[:2]) + "..." + ".".join(path_list[-2:])
                 else:
                     shpath = ".".join(path)
                 return shpath
@@ -184,8 +185,8 @@ class Explorer(cmd.Cmd):
             )
 
     # special hooks
-    def emptyline(self) -> None:
-        pass
+    def emptyline(self) -> bool:
+        return False
 
     def preloop(self) -> None:
         self.update_prompt()
@@ -222,7 +223,7 @@ class Explorer(cmd.Cmd):
         """
         filename = os.path.realpath(os.path.expanduser(arg))
         try:
-            self.tree = ExtendedTestConf.from_file(filename)
+            self.tree = cast(ExtendedTestConf, ExtendedTestConf.from_file(filename))
         except OSError:
             print("File not found.")
         except ConfigError as e:
@@ -238,6 +239,8 @@ class Explorer(cmd.Cmd):
         Usage: up
         Go up of one level.
         """
+        if self.tree is None:
+            return
         self.tree.go_up()
 
     def do_cd(self, arg: str) -> None:
@@ -250,6 +253,8 @@ class Explorer(cmd.Cmd):
             arg (str): PATH of the form name1.name2... name can be a
                 specialization, "TOP" to go to root, or "UP" to go up one level.
         """
+        if self.tree is None:
+            return
         if not arg.isspace():
             path = arg.replace('"', "").replace("'", "").split(".")
             for spec in path:
@@ -276,6 +281,8 @@ class Explorer(cmd.Cmd):
         """
         Autocompletion for path arguments.
         """
+        if self.tree is None:
+            return []
         specs = ["TOP", "UP"] + list(self.tree.get_spec())
         path = text.replace('"', "").replace("'", "").split(".")
 
@@ -290,6 +297,7 @@ class Explorer(cmd.Cmd):
         if len(path) == 1:
             partial = path[0]
             return [spec for spec in specs if spec.startswith(partial)]
+        return []
 
     def complete_ls(self, text: str, line: str, begi: int, endi: int) -> list[str]:
         return self.complete_rel_path(text)
@@ -305,6 +313,8 @@ class Explorer(cmd.Cmd):
         Example:
             filter dtset:2 image:5
         """
+        if self.tree is None:
+            return
         state = {name: int(val) for name, val in [pair.split(":")
                                                   for pair in arg.split()]}
         if state == "reset":
@@ -321,6 +331,8 @@ class Explorer(cmd.Cmd):
         Usage: path
         Print the current path.
         """
+        if self.tree is None:
+            return
         spath = ".".join(self.tree.path)
         if spath:
             print(spath)
@@ -336,6 +348,8 @@ class Explorer(cmd.Cmd):
         Args:
             arg (str, optional): Path to list. If empty, list current level.
         """
+        if self.tree is None:
+            return
         if not arg:
             print_iter(spec for spec in self.tree.get_spec())
         else:
@@ -417,6 +431,8 @@ class Explorer(cmd.Cmd):
                       " nor a known constraint")
 
     def complete_show(self, text: str, line: str, begi: int, endi: int) -> list[str]:
+        if self.tree is None:
+            return []
         return [
             name for name in self.tree.get_known_constraints()
             if name.startswith(text)
@@ -430,6 +446,8 @@ class Explorer(cmd.Cmd):
         Usage: parameters
         List constraints applying at the current level.
         """
+        if self.tree is None:
+            return
         print_iter(self.tree.get_all_parameters_here())
 
     def do_constraints(self, arg: str) -> None:
@@ -437,6 +455,8 @@ class Explorer(cmd.Cmd):
         Usage: constraints
         List constraints applying at the current level.
         """
+        if self.tree is None:
+            return
         print_iter(self.tree.get_all_constraints_here())
 
     def do_tree(self, arg: str) -> None:
@@ -445,16 +465,24 @@ class Explorer(cmd.Cmd):
         Show the tree defined by the configuration starting at the current
         level
         """
-        def show_rec(specs: Sequence[str], indent: list[bool] = []) -> None:
+        if self.tree is None:
+            return
+
+        tree = self.tree  # Type narrowing for use in nested function
+        def show_rec(specs: list[str] | dict[Any, Any] | Any, indent: list[bool] = []) -> None:
+            if isinstance(specs, dict):
+                specs = list(specs.keys())
+            elif not isinstance(specs, list):
+                specs = list(specs) if specs else []
             for i, sp in enumerate(specs):
                 print("".join("   " if last else "|  " for last in indent)
                       + ("`--" if i + 1 == len(specs) else "|--"), sp, sep="")
-                with self.tree.go_down(sp):
-                    nspecs = self.tree.get_spec()
+                with tree.go_down(sp):
+                    nspecs = tree.get_spec()
                     show_rec(nspecs, indent + [i + 1 == len(specs)])
 
-        toplvl = self.tree.get_spec()
-        print(".".join(self.tree.path))
+        toplvl = tree.get_spec()
+        print(".".join(tree.path))
         show_rec(toplvl, [])
 
     def do_default(self, arg: str) -> None:
