@@ -83,6 +83,27 @@ def get_mpi_prefix_from_env() -> str | None:
 
 
 @dataclass
+class TestRunSummary:
+    """Summary of one ``run_tests_with_np`` invocation."""
+
+    mpi_nprocs: int
+    omp_nthreads: int
+    py_nprocs: int
+    runmode: str
+    workdir_name: str
+    nfailed: int
+    npassed: int
+    nsucceeded: int
+    nskipped: int
+    ndisabled: int
+    nexecuted: int
+
+    def as_dict(self) -> dict[str, int | str]:
+        """Return a JSON-serializable representation."""
+        return dataclasses.asdict(self)
+
+
+@dataclass
 class TestBot:
     """
     Driver for ABINIT automatic tests on Buildbot workers.
@@ -142,6 +163,7 @@ class TestBot:
     seq_runner: JobRunner = field(init=False, repr=False)
     mpi_runner: JobRunner | None = field(init=False, default=None, repr=False)
     summary: TestBotSummary = field(init=False, repr=False)
+    run_summaries: list[TestRunSummary] = field(init=False, default_factory=list, repr=False)
 
     @classmethod
     def print_options(cls) -> None:
@@ -285,6 +307,55 @@ class TestBot:
         """bool: True if tests should be executed with OpenMP."""
         return self.omp_num_threads > 0
 
+    def write_run_summaries(self) -> None:
+        """Write machine-readable and embeddable summaries of completed MPI runs."""
+        print(
+            "Writing testbot_runs.json: per-execution test counts and parallel configuration "
+            "for machine processing."
+        )
+        with open("testbot_runs.json", "w") as fh:
+            json.dump([run.as_dict() for run in self.run_summaries], fh, indent=2)
+
+        headings = [
+            "Configuration", "MPI", "OpenMP", "Python workers", "Executed",
+            "Failed", "Passed", "Succeeded", "Skipped", "Disabled", "Report",
+        ]
+        rows = []
+        for run in self.run_summaries:
+            safe_workdir = html.escape(run.workdir_name, quote=True)
+            report = (
+                f'<a class="run-report-link" href="{safe_workdir}/">View details</a>'
+                '<span class="run-report-unavailable">Not archived</span>'
+            )
+            values = [
+                safe_workdir,
+                str(run.mpi_nprocs),
+                str(run.omp_nthreads),
+                str(run.py_nprocs),
+                str(run.nexecuted),
+                str(run.nfailed),
+                str(run.npassed),
+                str(run.nsucceeded),
+                str(run.nskipped),
+                str(run.ndisabled),
+                report,
+            ]
+            cells = "".join(f"<td>{value}</td>" for value in values)
+            rows.append(f"<tr>{cells}</tr>")
+
+        header = "".join(f"<th>{html.escape(heading)}</th>" for heading in headings)
+        fragment = (
+            '<table id="testbot-runs" class="testbot-runs">'
+            f"<thead><tr>{header}</tr></thead>"
+            f"<tbody>{''.join(rows)}</tbody></table>"
+        )
+        print(
+            "Writing testbot_runs.html: per-execution test counts and links to detailed reports "
+            "for the results page."
+        )
+        with open("testbot_runs.html", "w") as fh:
+            fh.write(fragment)
+
     def run_tests_with_np(self, mpi_nprocs: int, suite_args: list[str] | str | None = None, runmode: str = "static") -> tuple[int, int, int]:
         """
         Run a subset of tests using a specified number of MPI processes.
@@ -347,6 +418,25 @@ class TestBot:
         if results is None:
             print("Test suite is empty, returning 0 0 0 ")
             return 0, 0, 0
+
+        self.run_summaries.append(
+            TestRunSummary(
+                mpi_nprocs=mpi_nprocs,
+                omp_nthreads=self.omp_num_threads,
+                py_nprocs=py_nprocs,
+                runmode=runmode,
+                workdir_name=workdir_name,
+                nfailed=results.nfailed,
+                npassed=results.npassed,
+                nsucceeded=len(results.succeeded_tests),
+                nskipped=len(results.skipped_tests),
+                ndisabled=len(results.disabled_tests),
+                nexecuted=results.nexecuted,
+            )
+        )
+        # Persist after every completed run so earlier configurations remain
+        # inspectable if a later MPI invocation crashes.
+        self.write_run_summaries()
 
         # Store the results in the summary table,
         # taking into account that an input file might be executed multiple times
@@ -519,6 +609,7 @@ def analyze(fname: str, tag: str = "unknown") -> int:
             d = json.load(data_file)
 
         d["tag"] = tag
+        print(f"Updating {fname}: adding the Git tag to the merged test results.")
         with open(fname, "w") as data_file:
             json.dump(d, data_file)
 
@@ -581,6 +672,10 @@ def analyze(fname: str, tag: str = "unknown") -> int:
             "<tbody>"
             + "".join(html_rows)
             + "</tbody></table>"
+        )
+        print(
+            "Writing testbot_analysis.html: suite-level status and timing totals "
+            "for the results page."
         )
         with open("testbot_analysis.html", "w") as f:
             f.write(html_table)
@@ -739,6 +834,10 @@ class TestBotSummary:
                 print("Warning: About to overwrite key %s" % suite_name)
             d[suite_name] = self.res_table[suite_name]
 
+        print(
+            f"Writing {fname}: merged test results across all MPI and OpenMP "
+            "execution configurations."
+        )
         with open(fname, "w") as fh:
             json.dump(d, fh)
 

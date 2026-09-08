@@ -21,6 +21,7 @@ sys.modules["pymods.tools"] = MagicMock()
 # Now we can import testbot
 from tests.testbot import (
     TestBot,
+    TestRunSummary,
     TestBotSummary,
     analyze,
     build_parser,
@@ -33,6 +34,7 @@ from tests.testbot import (
 # happen to start with "Test", so mark them explicitly to stop pytest from
 # trying to collect them (they have __init__ constructors and warn otherwise).
 TestBot.__test__ = False
+TestRunSummary.__test__ = False
 TestBotSummary.__test__ = False
 
 
@@ -102,7 +104,7 @@ class TestAnalyzeFunction:
         result = analyze("nonexistent_file.json")
         assert result == 1
 
-    def test_analyze_valid_summary(self, monkeypatch):
+    def test_analyze_valid_summary(self, monkeypatch, capsys):
         """Should return 0 for a valid summary file."""
         with tempfile.TemporaryDirectory() as tmpdir:
             summary_file = os.path.join(tmpdir, "testbot_summary.json")
@@ -124,6 +126,16 @@ class TestAnalyzeFunction:
             monkeypatch.chdir(tmpdir)
             result = analyze(summary_file)
             assert result == 0
+
+            output = capsys.readouterr().out
+            update_message = (
+                f"Updating {summary_file}: adding the Git tag to the merged test results."
+            )
+            assert update_message in output
+            assert (
+                "Writing testbot_analysis.html: suite-level status and timing totals "
+                "for the results page."
+            ) in output
 
             # Check that tag was added to the file
             with open(summary_file) as f:
@@ -237,7 +249,7 @@ class TestTestBotSummary:
         assert table[0] == ["suite1", "suite2"]  # suite names
         assert len(table[1]) == 2  # rows with stats
 
-    def test_testbotsummary_json_dump(self, monkeypatch):
+    def test_testbotsummary_json_dump(self, monkeypatch, capsys):
         """Should dump results to JSON file."""
         with tempfile.TemporaryDirectory() as tmpdir:
             res_table = {
@@ -252,6 +264,11 @@ class TestTestBotSummary:
             json_file = os.path.join(tmpdir, "summary.json")
             monkeypatch.chdir(tmpdir)
             summary.json_dump(json_file)
+
+            assert (
+                f"Writing {json_file}: merged test results across all MPI and OpenMP "
+                "execution configurations."
+            ) in capsys.readouterr().out
 
             assert os.path.exists(json_file)
             with open(json_file) as f:
@@ -298,6 +315,69 @@ class TestTestBotClass:
         tb = MagicMock(spec=TestBot)
         tb.omp_num_threads = 4
         assert bool(tb.omp_num_threads > 0)
+
+    def test_write_run_summaries_creates_json_and_html(self, tmp_path, monkeypatch, capsys):
+        """Per-run output should be machine-readable and link to detailed reports."""
+        monkeypatch.chdir(tmp_path)
+        testbot = TestBot.__new__(TestBot)
+        testbot.run_summaries = [
+            TestRunSummary(
+                mpi_nprocs=4,
+                omp_nthreads=2,
+                py_nprocs=3,
+                runmode="static",
+                workdir_name="TestBot_MPI4_OMP2",
+                nfailed=1,
+                npassed=2,
+                nsucceeded=7,
+                nskipped=4,
+                ndisabled=1,
+                nexecuted=10,
+            )
+        ]
+
+        testbot.write_run_summaries()
+
+        assert capsys.readouterr().out.splitlines() == [
+            "Writing testbot_runs.json: per-execution test counts and parallel configuration "
+            "for machine processing.",
+            "Writing testbot_runs.html: per-execution test counts and links to detailed reports "
+            "for the results page.",
+        ]
+
+        data = json.loads((tmp_path / "testbot_runs.json").read_text())
+        assert data == [testbot.run_summaries[0].as_dict()]
+        report = (tmp_path / "testbot_runs.html").read_text()
+        assert 'class="testbot-runs"' in report
+        assert "TestBot_MPI4_OMP2" in report
+        assert 'href="TestBot_MPI4_OMP2/"' in report
+        assert "<td>10</td><td>1</td><td>2</td><td>7</td>" in report
+
+    def test_write_run_summaries_escapes_workdir(self, tmp_path, monkeypatch):
+        """Generated report paths must not permit HTML injection."""
+        monkeypatch.chdir(tmp_path)
+        testbot = TestBot.__new__(TestBot)
+        testbot.run_summaries = [
+            TestRunSummary(
+                mpi_nprocs=1,
+                omp_nthreads=1,
+                py_nprocs=1,
+                runmode="static",
+                workdir_name='TestBot_<script>"',
+                nfailed=0,
+                npassed=0,
+                nsucceeded=1,
+                nskipped=0,
+                ndisabled=0,
+                nexecuted=1,
+            )
+        ]
+
+        testbot.write_run_summaries()
+
+        report = (tmp_path / "testbot_runs.html").read_text()
+        assert "<script>" not in report
+        assert "TestBot_&lt;script&gt;&quot;" in report
 
 
 class TestTestBotFromJson:
