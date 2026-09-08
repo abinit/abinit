@@ -1,0 +1,722 @@
+"""
+Unit tests for testsuite.py module.
+
+Tests cover configuration parsing, file comparison setup, and test info handling.
+Priority 1: High-impact, core infrastructure components.
+"""
+
+from __future__ import annotations
+
+import os
+import pytest
+import tempfile
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+from .testsuite import (
+    FileToTest,
+    AbinitTestInfo,
+    AbinitTestInfoParser,
+    AbinitTestInfoParserError,
+    _str2filestotest,
+    _str2list,
+    _str2intlist,
+    _str2set,
+    _str2cmds,
+    _str2bool,
+)
+
+
+# ============================================================================
+# FIXTURES
+# ============================================================================
+
+
+@pytest.fixture
+def temp_test_dir():
+    """Create a temporary directory for test files."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        yield tmpdir
+
+
+@pytest.fixture
+def sample_test_info_content():
+    """Sample TEST_INFO section content (valid)."""
+    return """\
+<BEGIN TEST_INFO>
+[setup]
+executable = abinit
+use_files_file = no
+exec_args =
+test_chain =
+need_cpp_vars =
+exclude_hosts =
+exclude_builders =
+input_prefix =
+output_prefix =
+expected_failure = no
+input_ddb =
+input_gkk =
+system_xml =
+coeff_xml =
+md_hist =
+test_set =
+no_check = no
+spin_pot =
+latt_pot =
+slc_pot =
+lwf_pot =
+
+[files]
+files_to_test = output.txt, tolnlines=0, tolabs=0.01, tolrel=1e-3
+psp_files =
+extra_inputs =
+
+[shell]
+pre_commands =
+post_commands =
+
+[paral_info]
+max_nprocs = 1
+nprocs_to_test =
+exclude_nprocs =
+
+[extra_info]
+authors = Unknown
+keywords =
+description = No description available
+topics =
+references =
+<END TEST_INFO>
+"""
+
+
+def _make_minimal_testinfo_data() -> dict:
+    """Create minimal valid AbinitTestInfo data for testing."""
+    return {
+        "executable": "abinit",
+        "use_files_file": False,
+        "exec_args": "",
+        "test_chain": [],
+        "need_cpp_vars": set(),
+        "exclude_hosts": [],
+        "exclude_builders": [],
+        "input_prefix": "",
+        "output_prefix": "",
+        "expected_failure": False,
+        "input_ddb": "",
+        "input_gkk": "",
+        "system_xml": "",
+        "coeff_xml": "",
+        "md_hist": "",
+        "test_set": "",
+        "no_check": False,
+        "spin_pot": "",
+        "latt_pot": "",
+        "slc_pot": "",
+        "lwf_pot": "",
+        "files_to_test": (),
+        "psp_files": [],
+        "extra_inputs": [],
+        "use_git_submodule": "",
+        "pre_commands": [],
+        "post_commands": [],
+        "max_nprocs": 1,
+        "nprocs_to_test": [],
+        "exclude_nprocs": [],
+        "authors": {"Unknown"},
+        "keywords": set(),
+        "description": "Test",
+        "topics": [],
+        "references": [],
+        "file": "",
+        "yaml": "",
+        "inp_fname": "/path/to/test.abi",
+        "_ismulti_paral": False,
+        "yaml_test": {},
+    }
+
+
+@pytest.fixture
+def input_file_with_test_info(temp_test_dir):
+    """Create a temporary input file with TEST_INFO section.
+
+    The format must match what the parser expects:
+    - Header: #%%<BEGIN TEST_INFO> (no space after #%%)
+    - Body lines: #%% followed by content (with space after #%%)
+    - Footer: #%%<END TEST_INFO> (no space after #%%)
+    - The #%% prefix is removed, then leading space is stripped
+    """
+    input_path = Path(temp_test_dir) / "test.abi"
+    content = """\
+# ABINIT test input file
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% use_files_file = no
+#%% exec_args =
+#%% [files]
+#%% files_to_test = output.txt, tolnlines=0, tolabs=0.01, tolrel=1e-3
+#%% [shell]
+#%% pre_commands =
+#%% post_commands =
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% nprocs_to_test =
+#%% exclude_nprocs =
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords =
+#%% description = No description available
+#%% topics =
+#%% references =
+#%%<END TEST_INFO>
+
+# Test data below
+npsp 1
+"""
+    input_path.write_text(content)
+    return str(input_path)
+
+
+# ============================================================================
+# TESTS FOR PARSER FUNCTIONS
+# ============================================================================
+
+
+class TestParserFunctions:
+    """Test string parsing functions for TEST_INFO options."""
+
+    def test_str2bool_yes(self):
+        """Test _str2bool with 'yes'."""
+        assert _str2bool("yes") is True
+
+    def test_str2bool_no(self):
+        """Test _str2bool with 'no'."""
+        assert _str2bool("no") is False
+
+    def test_str2bool_case_insensitive(self):
+        """Test _str2bool is case-insensitive."""
+        assert _str2bool("YES") is True
+        assert _str2bool("Yes") is True
+        assert _str2bool("NO") is False
+
+    def test_str2bool_with_whitespace(self):
+        """Test _str2bool handles leading/trailing whitespace."""
+        assert _str2bool("  yes  ") is True
+        assert _str2bool("\tno\t") is False
+
+    def test_str2list_single_item(self):
+        """Test _str2list with single item."""
+        result = _str2list("item1")
+        assert result == ["item1"]
+
+    def test_str2list_multiple_items(self):
+        """Test _str2list with multiple comma-separated items."""
+        result = _str2list("item1, item2, item3")
+        assert result == ["item1", "item2", "item3"]
+
+    def test_str2list_with_whitespace(self):
+        """Test _str2list strips whitespace."""
+        result = _str2list("  item1  ,  item2  ,  item3  ")
+        assert result == ["item1", "item2", "item3"]
+
+    def test_str2list_empty_string(self):
+        """Test _str2list with empty string."""
+        result = _str2list("")
+        assert result == []
+
+    def test_str2list_empty_items_with_spaces(self):
+        """Test _str2list behavior with whitespace-only items.
+
+        Note: items with only whitespace are stripped to empty strings
+        but still included because whitespace-only strings are truthy
+        in the original split."""
+        result = _str2list("item1,  , item2")
+        # Whitespace-only items become empty strings after strip()
+        assert result == ["item1", "", "item2"]
+
+    def test_str2intlist(self):
+        """Test _str2intlist converts to integers."""
+        result = _str2intlist("1, 2, 4, 8")
+        assert result == [1, 2, 4, 8]
+
+    def test_str2intlist_empty(self):
+        """Test _str2intlist with empty string."""
+        result = _str2intlist("")
+        assert result == []
+
+    def test_str2intlist_invalid_number(self):
+        """Test _str2intlist raises on non-integer."""
+        with pytest.raises(ValueError):
+            _str2intlist("1, two, 4")
+
+    def test_str2set(self):
+        """Test _str2set creates set from comma-separated string."""
+        result = _str2set("a, b, c")
+        assert result == {"a", "b", "c"}
+
+    def test_str2set_duplicates(self):
+        """Test _str2set removes duplicates."""
+        result = _str2set("a, b, a, c, b")
+        assert result == {"a", "b", "c"}
+
+    def test_str2set_empty(self):
+        """Test _str2set with empty string."""
+        result = _str2set("")
+        assert result == set()
+
+    def test_str2cmds_single(self):
+        """Test _str2cmds with single command."""
+        result = _str2cmds("echo hello")
+        assert result == ["echo hello"]
+
+    def test_str2cmds_multiple(self):
+        """Test _str2cmds with multiple semicolon-separated commands."""
+        result = _str2cmds("cmd1; cmd2; cmd3")
+        assert result == ["cmd1", "cmd2", "cmd3"]
+
+    def test_str2cmds_with_whitespace(self):
+        """Test _str2cmds strips whitespace."""
+        result = _str2cmds("  cmd1  ;  cmd2  ;  cmd3  ")
+        assert result == ["cmd1", "cmd2", "cmd3"]
+
+    def test_str2cmds_empty(self):
+        """Test _str2cmds with empty string."""
+        result = _str2cmds("")
+        assert result == []
+
+
+# ============================================================================
+# TESTS FOR FileToTest CLASS
+# ============================================================================
+
+
+class TestFileToTest:
+    """Test suite for FileToTest class."""
+
+    def test_init_minimal_config(self):
+        """Test FileToTest initialization with minimal config."""
+        config = {"name": "output.txt"}
+        ft = FileToTest(config)
+        assert ft.name == "output.txt"
+        assert ft.tolnlines == 0
+        assert ft.tolabs == 0.0
+        assert ft.tolrel == 0.0
+        assert ft.fld_options == []
+        assert ft.use_yaml == "no"
+        assert ft.verbose_report == "no"
+
+    def test_init_full_config(self):
+        """Test FileToTest with all attributes."""
+        config = {
+            "name": "output.txt",
+            "tolnlines": 2,
+            "tolabs": 0.01,
+            "tolrel": 1e-3,
+            "fld_options": "-medium -include",
+            "use_yaml": "yes",
+            "verbose_report": "yes",
+        }
+        ft = FileToTest(config)
+        assert ft.name == "output.txt"
+        assert ft.tolnlines == 2
+        assert ft.tolabs == 0.01
+        assert ft.tolrel == 1e-3
+        assert ft.fld_options == ["-medium", "-include"]
+        assert ft.use_yaml == "yes"
+        assert ft.verbose_report == "yes"
+
+    def test_init_missing_name_raises_error(self):
+        """Test FileToTest raises ValueError if 'name' is missing."""
+        config = {"tolnlines": 2}
+        with pytest.raises(ValueError, match="name must be defined"):
+            FileToTest(config)
+
+    def test_init_invalid_fld_option(self):
+        """Test FileToTest raises on invalid fldiff option (missing dash)."""
+        config = {
+            "name": "output.txt",
+            "fld_options": "-medium invalid_opt",
+        }
+        with pytest.raises(ValueError, match="Wrong fldiff option"):
+            FileToTest(config)
+
+    def test_init_strips_whitespace(self):
+        """Test FileToTest strips whitespace from string attributes."""
+        config = {
+            "name": "  output.txt  ",
+            "fld_options": "  -medium  ",
+        }
+        ft = FileToTest(config)
+        assert ft.name == "output.txt"
+        assert ft.fld_options == ["-medium"]
+
+    def test_fld_options_parsing(self):
+        """Test parsing of multiple fldiff options."""
+        config = {
+            "name": "output.txt",
+            "fld_options": "-medium -include -includeP -ridiculous",
+        }
+        ft = FileToTest(config)
+        assert ft.fld_options == ["-medium", "-include", "-includeP", "-ridiculous"]
+
+    def test_fld_options_empty(self):
+        """Test empty fld_options results in empty list."""
+        config = {"name": "output.txt", "fld_options": ""}
+        ft = FileToTest(config)
+        assert ft.fld_options == []
+
+    def test_use_yaml_valid_values(self):
+        """Test valid use_yaml values."""
+        for value in ["yes", "no", "only"]:
+            config = {"name": "output.txt", "use_yaml": value}
+            ft = FileToTest(config)
+            assert ft.use_yaml == value
+
+    def test_init_state_after_creation(self):
+        """Test FileToTest has correct initial state."""
+        config = {"name": "output.txt"}
+        ft = FileToTest(config)
+        assert ft.has_line_count_error is False
+        assert ft.do_html_diff is False
+        assert ft.fld_isok is False
+        assert ft.fld_status == "failed"
+        assert ft.fld_msg == "Initialized in __init__"
+
+
+# ============================================================================
+# TESTS FOR _str2filestotest FUNCTION
+# ============================================================================
+
+
+class TestStr2FilesToTest:
+    """Test suite for _str2filestotest parsing function."""
+
+    def test_empty_string(self):
+        """Test parsing empty string returns empty list."""
+        result = _str2filestotest("")
+        assert result == []
+
+    def test_single_file(self):
+        """Test parsing single file specification."""
+        spec = "output.txt, tolnlines=0, tolabs=0.01, tolrel=1e-3"
+        result = _str2filestotest(spec)
+        assert len(result) == 1
+        assert result[0].name == "output.txt"
+        assert result[0].tolnlines == 0
+        assert result[0].tolabs == 0.01
+        assert result[0].tolrel == 1e-3
+
+    def test_multiple_files_semicolon_separated(self):
+        """Test parsing multiple file specs separated by semicolons."""
+        spec = "out1.txt, tolnlines=1, tolabs=0.01; out2.txt, tolnlines=2, tolabs=0.02"
+        result = _str2filestotest(spec)
+        assert len(result) == 2
+        assert result[0].name == "out1.txt"
+        assert result[0].tolnlines == 1
+        assert result[1].name == "out2.txt"
+        assert result[1].tolnlines == 2
+
+    def test_file_with_fld_options(self):
+        """Test parsing file spec with fldiff options."""
+        spec = "output.txt, tolabs=0.01, fld_options=-medium -include"
+        result = _str2filestotest(spec)
+        assert len(result) == 1
+        assert result[0].fld_options == ["-medium", "-include"]
+
+    def test_duplicate_keyword_raises_error(self):
+        """Test that duplicate keywords in spec raise error."""
+        spec = "output.txt, tolabs=0.01, tolabs=0.02"
+        with pytest.raises(AbinitTestInfoParserError, match="multiple occurrences"):
+            _str2filestotest(spec)
+
+    def test_multiple_files_with_empty_specs(self):
+        """Test parsing skips empty specs."""
+        spec = "out1.txt, tolabs=0.01; ; out2.txt, tolabs=0.02"
+        result = _str2filestotest(spec)
+        assert len(result) == 2
+
+    def test_file_spec_with_all_attributes(self):
+        """Test parsing file spec with all possible attributes."""
+        spec = (
+            "output.txt, tolnlines=2, tolabs=0.01, tolrel=1e-3, "
+            "fld_options=-medium -include, use_yaml=yes, verbose_report=yes"
+        )
+        result = _str2filestotest(spec)
+        ft = result[0]
+        assert ft.name == "output.txt"
+        assert ft.tolnlines == 2
+        assert ft.tolabs == 0.01
+        assert ft.tolrel == 1e-3
+        assert ft.fld_options == ["-medium", "-include"]
+        assert ft.use_yaml == "yes"
+        assert ft.verbose_report == "yes"
+
+
+# ============================================================================
+# TESTS FOR AbinitTestInfoParser CLASS
+# ============================================================================
+
+
+class TestAbinitTestInfoParser:
+    """Test suite for AbinitTestInfoParser class."""
+
+    def test_parse_valid_test_info(self, input_file_with_test_info):
+        """Test parsing valid TEST_INFO section."""
+        parser = AbinitTestInfoParser(input_file_with_test_info)
+        assert parser.inp_fname == os.path.abspath(input_file_with_test_info)
+        assert parser.parser is not None
+
+    def test_parse_missing_test_info_raises_error(self, temp_test_dir):
+        """Test that missing TEST_INFO section raises error."""
+        input_path = Path(temp_test_dir) / "no_test_info.abi"
+        input_path.write_text("# Just a normal file\nwith no test info\n")
+
+        with pytest.raises(AbinitTestInfoParserError, match="does not contain any valid testcnf section"):
+            AbinitTestInfoParser(str(input_path))
+
+    def test_generate_testinfo_basic(self, input_file_with_test_info):
+        """Test generating AbinitTestInfo from parser."""
+        parser = AbinitTestInfoParser(input_file_with_test_info)
+        info = parser.generate_testinfo_nprocs(1)
+
+        assert isinstance(info, AbinitTestInfo)
+        assert info.executable == "abinit"
+        assert info.use_files_file is False
+        assert info.expected_failure is False
+        assert info.no_check is False
+
+    def test_nprocs_to_test_property(self, input_file_with_test_info):
+        """Test nprocs_to_test property."""
+        parser = AbinitTestInfoParser(input_file_with_test_info)
+        nprocs = parser.nprocs_to_test
+        assert isinstance(nprocs, list)
+
+    def test_is_testchain_property(self, input_file_with_test_info):
+        """Test is_testchain property."""
+        parser = AbinitTestInfoParser(input_file_with_test_info)
+        is_chain = parser.is_testchain
+        assert isinstance(is_chain, bool)
+
+    def test_yaml_test_method(self, input_file_with_test_info):
+        """Test yaml_test method returns dict."""
+        parser = AbinitTestInfoParser(input_file_with_test_info)
+        yaml_config = parser.yaml_test()
+        assert isinstance(yaml_config, dict)
+
+    def test_parser_with_parallel_test(self, temp_test_dir):
+        """Test parsing parallel test with nprocs_to_test."""
+        input_path = Path(temp_test_dir) / "parallel_test.abi"
+        content = """\
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% nprocs_to_test = 1, 2, 4
+#%% [files]
+#%% files_to_test = output.txt, tolabs=0.01
+#%% [shell]
+#%% [extra_info]
+#%%<END TEST_INFO>
+"""
+        input_path.write_text(content)
+
+        parser = AbinitTestInfoParser(str(input_path))
+        nprocs = parser.nprocs_to_test
+        assert nprocs == [1, 2, 4]
+
+    def test_parser_with_test_chain_detection(self, temp_test_dir):
+        """Test detection of test chain."""
+        input_path = Path(temp_test_dir) / "chain_test.abi"
+        content = """\
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = test1.abi, test2.abi, test3.abi
+#%% [files]
+#%% files_to_test = output.txt, tolabs=0.01
+#%% [shell]
+#%% [extra_info]
+#%%<END TEST_INFO>
+"""
+        input_path.write_text(content)
+
+        parser = AbinitTestInfoParser(str(input_path))
+        assert parser.is_testchain is True
+
+    def test_parser_default_values(self, input_file_with_test_info):
+        """Test that defaults are applied correctly."""
+        parser = AbinitTestInfoParser(input_file_with_test_info)
+        info = parser.generate_testinfo_nprocs(1)
+
+        # Check defaults are applied
+        assert info.max_nprocs == 1
+        assert info.exec_args == ""
+        assert info.expected_failure is False
+
+    def test_parser_with_multiple_files(self, temp_test_dir):
+        """Test parsing multiple files_to_test."""
+        input_path = Path(temp_test_dir) / "multi_file.abi"
+        content = """\
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = out1.txt, tolabs=0.01; out2.txt, tolabs=0.02; out3.txt, tolabs=0.03
+#%% [shell]
+#%% [extra_info]
+#%%<END TEST_INFO>
+"""
+        input_path.write_text(content)
+
+        parser = AbinitTestInfoParser(str(input_path))
+        info = parser.generate_testinfo_nprocs(1)
+        assert len(info.files_to_test) == 3
+        assert info.files_to_test[0].name == "out1.txt"
+        assert info.files_to_test[1].name == "out2.txt"
+        assert info.files_to_test[2].name == "out3.txt"
+
+    def test_parser_with_repeated_test_chain(self, temp_test_dir):
+        """Test that repeated tests in chain raise error."""
+        input_path = Path(temp_test_dir) / "bad_chain.abi"
+        content = """\
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = test1.abi, test2.abi, test1.abi
+#%% [files]
+#%% files_to_test = output.txt, tolabs=0.01
+#%% [shell]
+#%% [extra_info]
+#%%<END TEST_INFO>
+"""
+        input_path.write_text(content)
+
+        with pytest.raises(AbinitTestInfoParserError, match="repeated tests"):
+            AbinitTestInfoParser(str(input_path))
+
+
+# ============================================================================
+# TESTS FOR AbinitTestInfo CLASS
+# ============================================================================
+
+
+class TestAbinitTestInfo:
+    """Test suite for AbinitTestInfo class."""
+
+    def test_init_from_dict(self):
+        """Test AbinitTestInfo initialization from dictionary."""
+        data = _make_minimal_testinfo_data()
+        data.update({
+            "keywords": {"test", "basic"},
+        })
+        info = AbinitTestInfo(data)
+        assert info.executable == "abinit"
+        assert info.inp_fname == "/path/to/test.abi"
+        assert "test" in info.keywords
+        assert "basic" in info.keywords
+
+    def test_add_keywords(self):
+        """Test adding keywords to test info."""
+        data = _make_minimal_testinfo_data()
+        info = AbinitTestInfo(data)
+        # abinit is added automatically
+        assert "abinit" in info.keywords
+        info.add_keywords({"new_kw"})
+        assert "abinit" in info.keywords
+        assert "new_kw" in info.keywords
+
+    def test_add_cpp_vars(self):
+        """Test adding CPP variables to test info."""
+        data = _make_minimal_testinfo_data()
+        data["need_cpp_vars"] = {"HAVE_MPI"}
+        info = AbinitTestInfo(data)
+        info.add_cpp_vars({"HAVE_NETCDF"})
+        assert "HAVE_MPI" in info.need_cpp_vars
+        assert "HAVE_NETCDF" in info.need_cpp_vars
+
+    def test_make_test_id_basic(self):
+        """Test test_id generation."""
+        data = _make_minimal_testinfo_data()
+        data["inp_fname"] = "/path/to/suite/Input/test01.abi"
+        info = AbinitTestInfo(data)
+        test_id = info.make_test_id()
+        assert test_id == "test01"
+
+    def test_make_test_id_with_mpi(self):
+        """Test test_id generation for MPI tests."""
+        data = _make_minimal_testinfo_data()
+        data["inp_fname"] = "/path/to/suite/Input/test02.abi"
+        data["_ismulti_paral"] = True
+        data["max_nprocs"] = 4
+        info = AbinitTestInfo(data)
+        test_id = info.make_test_id()
+        assert test_id == "test02_MPI4"
+
+    def test_ismulti_parallel_property(self):
+        """Test ismulti_parallel property."""
+        data_serial = _make_minimal_testinfo_data()
+        data_serial["_ismulti_paral"] = False
+        info_serial = AbinitTestInfo(data_serial)
+        assert info_serial.ismulti_parallel is False
+
+        data_parallel = _make_minimal_testinfo_data()
+        data_parallel["_ismulti_paral"] = True
+        info_parallel = AbinitTestInfo(data_parallel)
+        assert info_parallel.ismulti_parallel is True
+
+
+# ============================================================================
+# INTEGRATION TESTS
+# ============================================================================
+
+
+class TestIntegration:
+    """Integration tests combining multiple components."""
+
+    def test_full_parsing_workflow(self, temp_test_dir):
+        """Test complete workflow: file creation -> parsing -> info generation."""
+        input_path = Path(temp_test_dir) / "integration_test.abi"
+        content = """\
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% expected_failure = no
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [files]
+#%% files_to_test = output.txt, tolnlines=1, tolabs=0.01, tolrel=1e-3, fld_options=-medium; energy.txt, tolabs=0.001
+#%% [shell]
+#%% pre_commands =
+#%% post_commands =
+#%% [extra_info]
+#%% authors = Test Author
+#%% keywords = test, integration
+#%% description = Integration test
+#%%<END TEST_INFO>
+"""
+        input_path.write_text(content)
+
+        # Parse the file
+        parser = AbinitTestInfoParser(str(input_path))
+
+        # Generate test info
+        info = parser.generate_testinfo_nprocs(1)
+        assert len(info.files_to_test) == 2
+        assert info.files_to_test[0].name == "output.txt"
+        assert info.files_to_test[0].tolabs == 0.01
+        assert info.files_to_test[1].name == "energy.txt"
+        assert info.files_to_test[1].tolabs == 0.001
+        assert info.expected_failure is False
+
+    def test_filetotest_created_from_parser(self, input_file_with_test_info):
+        """Test FileToTest objects are correctly created from parser."""
+        parser = AbinitTestInfoParser(input_file_with_test_info)
+        info = parser.generate_testinfo_nprocs(1)
+
+        # Check files_to_test contains FileToTest objects
+        assert isinstance(info.files_to_test, (tuple, list))
+        if info.files_to_test:
+            assert all(isinstance(ft, FileToTest) for ft in info.files_to_test)
