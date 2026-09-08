@@ -24,6 +24,7 @@ from base64 import b64encode
 from collections.abc import Callable, Iterable, Iterator, Sequence
 from configparser import ConfigParser
 from configparser import ParsingError as CPError
+from html import escape
 from io import StringIO
 from multiprocessing import Lock, Manager, Process, Queue, current_process
 from pprint import pprint
@@ -60,6 +61,78 @@ __all__ = [
 fldebug = "FLDIFF_DEBUG" in os.environ and os.environ["FLDIFF_DEBUG"]
 
 _MY_NAME = os.path.basename(__file__)[:-3] + "-" + __version__
+
+_HTML_REPORT_CSS = """
+:root {
+  color-scheme: light dark;
+  --bg: #f3f5f8;
+  --surface: #ffffff;
+  --surface-muted: #f8fafc;
+  --border: #d8dee8;
+  --text: #172033;
+  --muted: #5d687a;
+  --link: #175cd3;
+  --passed: #137333;
+  --passed-bg: #e8f5ec;
+  --failed: #b42318;
+  --failed-bg: #fef0ed;
+  --skipped: #6b4f00;
+  --skipped-bg: #fff4ce;
+  --code-bg: #101828;
+  --code-text: #e6edf7;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.5; }
+a { color: var(--link); text-underline-offset: 0.15em; }
+a:hover { text-decoration-thickness: 2px; }
+a:focus-visible, summary:focus-visible { outline: 3px solid #84adff; outline-offset: 2px; }
+.report { width: min(1180px, calc(100% - 2rem)); margin: 2rem auto; }
+.test-report { margin-bottom: 2rem; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 2px 8px rgba(16, 24, 40, 0.06); margin: 1rem 0; overflow: hidden; }
+.card-header { display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 1.1rem 1.25rem; border-bottom: 1px solid var(--border); }
+.card-body { padding: 1.25rem; }
+.report-title { margin: 0; font-size: clamp(1.35rem, 3vw, 2rem); overflow-wrap: anywhere; }
+.eyebrow { margin: 0 0 .25rem; color: var(--muted); font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.status { display: inline-flex; align-items: center; border-radius: 999px; padding: .25rem .65rem; font-size: .82rem; font-weight: 750; text-transform: capitalize; white-space: nowrap; }
+.status-succeeded, .status-passed { color: var(--passed); background: var(--passed-bg); }
+.status-failed { color: var(--failed); background: var(--failed-bg); }
+.status-skipped, .status-disabled { color: var(--skipped); background: var(--skipped-bg); }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: .75rem; margin: 0; }
+.metric { background: var(--surface-muted); border: 1px solid var(--border); border-radius: 8px; padding: .75rem; }
+.metric dt { color: var(--muted); font-size: .75rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.metric dd { margin: .2rem 0 0; font-size: 1.05rem; font-weight: 650; }
+.actions { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: 1rem; }
+.actions a { background: var(--surface-muted); border: 1px solid var(--border); border-radius: 7px; padding: .42rem .7rem; text-decoration: none; }
+.actions a:hover { background: var(--border); }
+.unavailable { color: var(--muted); font-style: italic; white-space: nowrap; }
+.unavailable::before { content: "— "; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: .7rem .8rem; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+th { background: var(--surface-muted); color: var(--muted); font-size: .75rem; letter-spacing: .035em; text-transform: uppercase; }
+tbody tr:last-child td { border-bottom: 0; }
+.message { border-left: 4px solid var(--skipped); padding: .8rem 1rem; background: var(--skipped-bg); border-radius: 6px; }
+details { border-top: 1px solid var(--border); }
+details:first-child { border-top: 0; }
+summary { cursor: pointer; font-weight: 700; padding: 1rem 1.25rem; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+.log { margin: 0; padding: 1rem 1.25rem; background: var(--code-bg); color: var(--code-text); font: .84rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 4; }
+.meta-list { display: grid; grid-template-columns: max-content 1fr; gap: .45rem 1rem; margin: 0; }
+.meta-list dt { color: var(--muted); font-weight: 650; }
+.meta-list dd { margin: 0; overflow-wrap: anywhere; }
+.report-footer { color: var(--muted); font-size: .82rem; padding: 1rem 0 2rem; text-align: center; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0b1220; --surface: #111a2b; --surface-muted: #182338; --border: #2b3850; --text: #e6edf7; --muted: #a8b3c5; --link: #84adff; --passed: #75d596; --passed-bg: #163b29; --failed: #ff9b8f; --failed-bg: #4a201d; --skipped: #f8d477; --skipped-bg: #493b16; --code-bg: #080d16; }
+}
+@media (max-width: 640px) {
+  .report { width: min(100% - 1rem, 1180px); margin-top: .5rem; }
+  .card { border-radius: 8px; }
+  .card-header, .card-body { padding: 1rem; }
+  .meta-list { grid-template-columns: 1fr; gap: .1rem; }
+  .meta-list dd { margin-bottom: .6rem; }
+}
+"""
 
 
 # Helper functions and tools
@@ -107,16 +180,10 @@ def html_colorize_text(string: str, code: str) -> str:
     Returns:
         str: HTML string with font color tags.
     """
-    return "<FONT COLOR='%s'>%s</FONT>" % (code, string)
+    return '<span style="color: %s">%s</span>' % (escape(code, quote=True), escape(str(string)))
 
 
-_status2htmlcolor = {
-    "succeeded": lambda string: html_colorize_text(string, "Green"),
-    "passed": lambda string: html_colorize_text(string, "DeepSkyBlue"),
-    "failed": lambda string: html_colorize_text(string, "Red"),
-    "disabled": lambda string: html_colorize_text(string, "Cyan"),
-    "skipped": lambda string: html_colorize_text(string, "Cyan"),
-}
+_status_symbols = {"succeeded": "✓", "passed": "✓", "failed": "✕", "disabled": "–", "skipped": "–"}
 
 
 def status2html(status: str) -> str:
@@ -129,7 +196,9 @@ def status2html(status: str) -> str:
     Returns:
         str: HTML string with font color tags.
     """
-    return _status2htmlcolor[status](status)
+    safe_status = escape(status, quote=True)
+    symbol = _status_symbols.get(status, "•")
+    return f'<span class="status status-{safe_status}">{symbol} {escape(status)}</span>'
 
 
 def sec2str(seconds: float) -> str:
@@ -156,7 +225,7 @@ def str2html(string: str, end: str = "<br>") -> str:
     Returns:
         str: HTML-formatted string.
     """
-    lines = string.splitlines()
+    lines = escape(str(string)).splitlines()
     return "<br>".join(lines) + end
 
 
@@ -187,9 +256,18 @@ def html_link(string: str, href: str | None = None) -> str:
     Returns:
         str: The HTML <a> tag.
     """
-    if href is not None:
-        return "<a href='%s'>%s</a>" % (href, string)
-    return "<a href='%s'>%s</a>" % (string, string)
+    target = string if href is None else href
+    return '<a href="%s">%s</a>' % (escape(str(target), quote=True), escape(str(string)))
+
+
+def html_file_link(path: str, label: str | None = None) -> str:
+    """Create a link to a generated artifact, or describe why it is unavailable."""
+    display_name = os.path.basename(path) if label is None else label
+    if not path or not os.path.isfile(path):
+        return '<span class="unavailable" title="File was not generated">Missing</span>'
+    if os.path.getsize(path) == 0:
+        return '<span class="unavailable" title="Generated file is empty">Empty</span>'
+    return html_link(display_name, os.path.basename(path))
 
 
 def is_string(s: Any) -> bool:
@@ -2872,7 +2950,7 @@ pp_dirpath $ABI_PSPDIR
         close_fh = False
         if fh is None:
             close_fh = True
-            html_report = os.path.join(self.workdir, "test_report.html")
+            html_report = os.path.join(self.workdir, "index.html")
             fh = open(html_report, "w")
 
         self.keep_files(fh.name)
@@ -2891,28 +2969,28 @@ pp_dirpath $ABI_PSPDIR
         # print("fld_isok:", self.fld_isok)
         if not self.fld_isok or self.status == "failed":
             try:
-                stderr_text = str2html(self.stderr_read())
-                stdout_text = str2html(tail_file(self.stdout_fname, nlast))
+                stderr_text = escape(self.stderr_read())
+                stdout_text = escape(tail_file(self.stdout_fname, nlast))
                 abiabort_text = "No __ABI_MPIABORTFILE__ found"
 
                 if abort_file:
                     with open(abort_file) as f:
-                        abiabort_text = (
+                        abiabort_text = escape(
                             12 * "=" + os.path.basename(abort_file) + 12 * "=" + 2 * "\n" + str(f.read())
                         )
 
             except Exception as exc:
                 s = "Exception while trying to get info from stderr, stdout and __ABI_MPIABORTFILE__\n" + \
                     str(exc)
-                stderr_text, stdout_text, abiabort_text = 3 * (s,)
+                stderr_text, stdout_text, abiabort_text = 3 * (escape(s),)
 
             # Look for extra info on the error in selected files produced by the code.
             try:
-                errinfo_text = str2html(
-                    extract_errinfo_from_files(self.workdir))
+                errinfo_text = escape(extract_errinfo_from_files(self.workdir))
             except Exception as exc:
-                errinfo_text = "Exception while trying to get error info from extra files\n" + \
-                    str(exc)
+                errinfo_text = escape(
+                    "Exception while trying to get error info from extra files\n" + str(exc)
+                )
 
         ##################################################
         # Document Name Space that serves as the substitution
@@ -2921,7 +2999,7 @@ pp_dirpath $ABI_PSPDIR
 
         DNS = {
             "self": self,
-            "page_title": "page_title",
+            "page_title": f"{self.full_id} · Abinit test report",
             "user_name": username,
             "hostname": gethostname(),
             "Headings": ["File_to_test", "Status", "fld_output", "fld_options", "txt_diff", "html_diff"],
@@ -2938,92 +3016,120 @@ pp_dirpath $ABI_PSPDIR
             "sec2str": sec2str,
             "args2htmltr": args2htmltr,
             "html_link": html_link,
-            "status2html": status2html
+            "html_file_link": html_file_link,
+            "status2html": status2html,
+            "html_escape": escape,
         }
 
-        header = """
-        <html>
-         <head><title>$page_title</title></head>
-         <body bgcolor="#FFFFFF" text="#000000">
+        header = """<!doctype html>
+        <html lang="en">
+         <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>$page_title</title>
+          <style>""" + _HTML_REPORT_CSS + """</style>
+         </head>
+         <body>
+          <main class="report">
         """
 
         if self.status in {"skipped", "disabled"}:
             if self.status == "skipped":
-                template = str2html(self.skip_msg)
+                message = str2html(self.skip_msg)
             else:
-                template = "This test has been disabled!"
+                message = "This test has been disabled."
+            DNS["message"] = message
+            template = """
+              <article class="test-report card">
+                <header class="card-header">
+                  <div><p class="eyebrow">Abinit test report</p><h1 class="report-title">${html_escape(self.full_id)}</h1></div>
+                  ${status2html(self.status)}
+                </header>
+                <div class="card-body"><div class="message">$message</div></div>
+              </article>
+            """
         else:
             template = """
-              <hr>
-              <h1>Results of test ${self.full_id}</h1>
-                 MPI nprocs =  ${self.mpi_nprocs},
-                 run_etime = ${sec2str(self.run_etime)} s,
-                 tot_etime = ${sec2str(self.tot_etime)} s
-               <br>
-               ${html_link("stdin",  basename(self.stdin_fname))},
-               ${html_link("stdout", basename(self.stdout_fname))},
-               ${html_link("stderr", basename(self.stderr_fname))}
-              <p>
-              <table width="100%" border="0" cellspacing="0" cellpadding="2">
-                <tr valign="top" align="left">
+              <article class="test-report">
+              <section class="card">
+               <header class="card-header">
+                <div><p class="eyebrow">Abinit test report</p><h1 class="report-title">${html_escape(self.full_id)}</h1></div>
+                ${status2html(self.status)}
+               </header>
+               <div class="card-body">
+                <dl class="metrics">
+                 <div class="metric"><dt>MPI processes</dt><dd>${self.mpi_nprocs}</dd></div>
+                 <div class="metric"><dt>Run time</dt><dd>${sec2str(self.run_etime)} s</dd></div>
+                 <div class="metric"><dt>Total time</dt><dd>${sec2str(self.tot_etime)} s</dd></div>
+                </dl>
+                <nav class="actions" aria-label="Test files">
+                 ${html_link("Input", basename(self.stdin_fname))}
+                 ${html_link("Standard output", basename(self.stdout_fname))}
+                 ${html_link("Standard error", basename(self.stderr_fname))}
+                </nav>
+               </div>
+              </section>
+              <section class="card">
+               <header class="card-header"><h2 class="report-title">Extra information</h2></header>
+               <div class="card-body"><dl class="meta-list">
+              <py-line code = "authors = ', '.join(a for a in self.authors)" />
+              <dt>Authors</dt><dd>${html_escape(authors)}</dd>
+              <py-line code = "keys = ', '.join(k for k in self.keywords)" />
+              <dt>Keywords</dt><dd>${html_escape(keys)}</dd>
+              <dt>Test definition</dt><dd>${self.listoftests(abslink=False)}</dd>
+               </dl></div>
+              </section>
+              <section class="card">
+               <header class="card-header"><h2 class="report-title">File comparisons</h2></header>
+               <div class="table-wrap">
+              <table>
+               <thead><tr>
                 <py-open code = "for h in Headings:"> </py-open>
                   <th>${h}</th>
                 <py-close/>
-                </tr>
+               </tr></thead><tbody>
                 <py-open>for idx, f in enumerate(self.files_to_test):</py-open>
-                 <tr valign="top" align="left">
-                  <py-line code = "out_link = html_link(basename(f.name))"/>
-                  <py-line code = "fld_link = html_link(basename(f.fldiff_fname))"/>
-                  <py-line code = "txt_diff_link = html_link(basename(f.diff_fname))"/>
-                  <py-line code = "html_diff_link = html_link(basename(f.hdiff_fname))"/>
+                 <tr>
+                  <py-line code = "out_link = html_file_link(pj(self.workdir, f.name), basename(f.name))"/>
+                  <py-line code = "fld_link = html_file_link(f.fldiff_fname)"/>
+                  <py-line code = "txt_diff_link = html_file_link(f.diff_fname)"/>
+                  <py-line code = "html_diff_link = html_file_link(f.hdiff_fname)"/>
                   <py-line code = "tab_row = args2htmltr(out_link, status2html(f.fld_status), fld_link, f.fld_options, txt_diff_link, html_diff_link)"/>
                   ${tab_row}
                  </tr>
                 <py-close/>
-              </table>
+               </tbody></table></div>
 
               <py-open>for idx, f in enumerate(self.files_to_test):</py-open>
                 <py-open code="if f.fld_status != 'succeeded':"/>
-                <p> ${f.name} ${f.fld_msg} </p>
+                <div class="card-body"><div class="message">${html_escape(f.name)}: ${html_escape(f.fld_msg)}</div></div>
               <py-close/>
+              <py-close/>
+              </section>
 
-              <py-open code="if self.status == "failed":"/>
+              <py-open code="if self.status == 'failed':"/>
+                <section class="card" aria-label="Failure diagnostics">
                 <py-open code="if self.exceptions:"/>
-                  <hr><p>
-                  <h1>Exceptions raised at run-time:</h1>
+                  <details open><summary>Exceptions raised at run time</summary><pre class="log">
                   <py-open code="for idx, e in enumerate(self.exceptions):"/>
-                    <p> $idx) ${str2html(str(e))}</p>
+                    $idx) ${str2html(str(e), end="")}
                   <py-close/>
-                  <br>
+                  </pre></details>
                 <py-close/>
-                <hr><p>
-                <h1>Standard Error of test ${self.id}:</h1>
-                  ${stderr_text}
-                <hr><p>
-                <h1>__MPIABORTFILE__ of test ${self.id}:</h1>
-                  ${abiabort_text}
-                <hr><p>
-                <h1>Info extracted from debug files produced by ${self.id}:</h1>
-                  ${errinfo_text}
-                <hr><p>
-                <h1>Standard output of test ${self.id} (last ${nlast} lines):</h1>
-                  ${stdout_text}
-                <br>
+                <details open><summary>Standard error</summary><pre class="log">${stderr_text}</pre></details>
+                <details><summary>MPI abort file</summary><pre class="log">${abiabort_text}</pre></details>
+                <details><summary>Debug information</summary><pre class="log">${errinfo_text}</pre></details>
+                <details><summary>Standard output (last ${nlast} lines)</summary><pre class="log">${stdout_text}</pre></details>
+                </section>
               <py-close/>
-              <p>
-              <h3>Extra Information</h3>
-              <py-line code = "authors = ', '.join(a for a in self.authors)" />
-              <p>Authors = ${authors}</p>
-              <py-line code = "keys = ', '.join(k for k in self.keywords)" />
-              <p>Keywords = ${keys}</p>
-              <p>${self.listoftests(abslink=False)}</p>
+              </article>
             """
 
         footer = """
-          <hr>
-          Automatically generated by %s on %s. Logged on as %s@%s
-          Python version: %s
-          <hr>
+          <footer class="report-footer">
+           Automatically generated by %s on %s · %s@%s · Python %s
+          </footer>
+          </main>
           </body>
           </html> """ % (_MY_NAME, time.asctime(), username, gethostname(), platform.python_version())
 
@@ -4023,7 +4129,7 @@ class ChainOfTests:
         raise ValueError("wrong mode %s" % mode)
 
     def write_html_report(self):
-        html_report = os.path.join(self.workdir, "test_report.html")
+        html_report = os.path.join(self.workdir, "index.html")
         with open(html_report, "w") as fh:
             for idx, test in enumerate(self):
                 oc = ""
@@ -4665,15 +4771,19 @@ class AbinitTestSuite:
                 "args2htmltr": args2htmltr,
                 "html_link": html_link,
                 "status2html": status2html,
+                "html_escape": escape,
             }
 
             fname = os.path.join(self.workdir, "index.html")
             fh = open(fname, "w")
 
-            header = """
-            <html>
+            header = """<!doctype html>
+            <html lang="en">
             <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
                 <title>Suite Summary</title>
+                <style>""" + _HTML_REPORT_CSS + """</style>
 
                 <!-- Include Jquery -->
                 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -4683,11 +4793,13 @@ class AbinitTestSuite:
                 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
 
             </head>
-            <body bgcolor="#FFFFFF" text="#000000">
-            <hr>
-            <h1>Suite Summary</h1>
-                <table width="100%" border="0" cellspacing="0" cellpadding="2">
-                <tr valign="top" align="left">
+            <body>
+            <main class="report">
+            <section class="card">
+            <header class="card-header"><div><p class="eyebrow">Abinit test suite</p><h1 class="report-title">Suite summary</h1></div></header>
+            <div class="table-wrap">
+                <table>
+                <tr>
                 <py-open code = "for h in suite_headings:"> </py-open>
                 <th>${status2html(h)}</th>
                 <py-close/>
@@ -4697,20 +4809,20 @@ class AbinitTestSuite:
                 <td> ${len(self._tests_with_status(h))} </td>
                 <py-close/>
                 </tr>
-                </table>
-                <p>
-                tot_etime = ${sec2str(self.tot_etime)} <br>
-                run_etime = ${sec2str(self.run_etime)} <br>
-                no_pyprocs = ${self.py_nprocs} <br>
-                no_MPI = ${self.mpi_nprocs} <br>
-                ${str2html(str(job_runner))}
-            <hr>
+                </table></div>
+                <div class="card-body"><dl class="metrics">
+                <div class="metric"><dt>Total time</dt><dd>${sec2str(self.tot_etime)} s</dd></div>
+                <div class="metric"><dt>Run time</dt><dd>${sec2str(self.run_etime)} s</dd></div>
+                <div class="metric"><dt>Python processes</dt><dd>${self.py_nprocs}</dd></div>
+                <div class="metric"><dt>MPI processes</dt><dd>${self.mpi_nprocs}</dd></div>
+                </dl><pre class="log">${str2html(str(job_runner), end="")}</pre></div>
+            </section>
             """
 
             table = """
-            <p>
-            <h1>Test Results</h1>
-            <table id="table_id" class="display" width="100%" border="0" cellspacing="0" cellpadding="2">
+            <section class="card">
+            <header class="card-header"><h2 class="report-title">Test results</h2></header>
+            <div class="table-wrap"><table id="table_id" class="display">
                 <thead>
                 <tr valign="top" align="left">
                     <py-open code = "for h in test_headings:"> </py-open>
@@ -4724,18 +4836,18 @@ class AbinitTestSuite:
             for status in BaseTest._possible_status:
                 table += self._pyhtml_table_section(status)
 
-            table += "</tbody> </table>"
+            table += "</tbody></table></div></section>"
 
             footer = """
-            <hr>
-            <h1>Suite Info</h1>
+            <section class="card">
+            <header class="card-header"><h2 class="report-title">Suite information</h2></header>
+            <div class="card-body"><dl class="meta-list">
                 <py-line code = "keys = ', '.join(self.keywords)" />
-                <p>Keywords = ${keys}</p>
+                <dt>Keywords</dt><dd>${html_escape(keys)}</dd>
                 <py-line code = "cpp_vars = ', '.join(self.need_cpp_vars)"/>
-                <p>Required CPP variables = ${cpp_vars}</p>
-            <hr>
-                Automatically generated by %s on %s. Logged on as %s@%s
-            <hr>
+                <dt>Required CPP variables</dt><dd>${html_escape(cpp_vars)}</dd>
+            </dl></div></section>
+            <footer class="report-footer">Automatically generated by %s on %s · %s@%s</footer>
 
             <script type="text/javascript">
             $(document).ready( function () {
@@ -4752,7 +4864,7 @@ class AbinitTestSuite:
             } );
             </script>
 
-            </body>
+            </main></body>
             </html> """ % (_MY_NAME, time.asctime(), username, gethostname())
 
             template = header + table + footer
@@ -4789,7 +4901,7 @@ class AbinitTestSuite:
         # ['ID', 'Status', 'run_etime', 'tot_etime'],
         string = """
            <py-open code="for test in self.%s_tests():"/>
-            <py-line code = "report_link = pj(basename(test.workdir),'test_report.html') " />
+            <py-line code = "report_link = pj(basename(test.workdir),'index.html') " />
             <tr valign="top" align="left">
              <td> ${html_link(test.full_id, report_link)}</td>
              <td> ${status2html(test.status)} </td>
