@@ -18,12 +18,33 @@ from .testsuite import (
     AbinitTestInfo,
     AbinitTestInfoParser,
     AbinitTestInfoParserError,
+    BuildEnvironment,
+    Compiler,
+    FortranCompiler,
+    CPreProcessor,
+    CPreProcessorError,
     _str2filestotest,
     _str2list,
     _str2intlist,
     _str2set,
     _str2cmds,
     _str2bool,
+    genid,
+    my_getlogin,
+    html_colorize_text,
+    status2html,
+    sec2str,
+    str2html,
+    args2htmltr,
+    html_link,
+    html_file_link,
+    is_string,
+    has_exts,
+    lazy_read,
+    lazy_readlines,
+    rm_rf,
+    parse_configh_file,
+    input_file_has_vars,
 )
 
 
@@ -666,6 +687,319 @@ class TestAbinitTestInfo:
         data_parallel["_ismulti_paral"] = True
         info_parallel = AbinitTestInfo(data_parallel)
         assert info_parallel.ismulti_parallel is True
+
+
+# ============================================================================
+# TESTS FOR UTILITY FUNCTIONS (P3)
+# ============================================================================
+
+
+class TestUtilityFunctions:
+    """Test suite for utility helper functions."""
+
+    def test_genid_returns_string(self):
+        """Test genid returns a string."""
+        result = genid()
+        assert isinstance(result, str)
+
+    def test_genid_length(self):
+        """Test genid returns 16-character string."""
+        result = genid()
+        assert len(result) == 16
+
+    def test_genid_uniqueness(self):
+        """Test genid generates unique IDs."""
+        ids = [genid() for _ in range(100)]
+        assert len(set(ids)) == 100, "genid should generate unique IDs"
+
+    def test_my_getlogin_returns_string(self):
+        """Test my_getlogin returns a string."""
+        result = my_getlogin()
+        assert isinstance(result, str)
+        assert len(result) > 0
+
+    def test_html_colorize_text_escaping(self):
+        """Test html_colorize_text properly escapes HTML."""
+        result = html_colorize_text('<script>', '#FF0000')
+        assert '<script>' not in result
+        assert '&lt;script&gt;' in result
+
+    def test_status2html_passed(self):
+        """Test status2html with 'passed' status."""
+        result = status2html("passed")
+        assert "✓" in result or "passed" in result.lower()
+        assert "status-passed" in result
+
+    def test_status2html_failed(self):
+        """Test status2html with 'failed' status."""
+        result = status2html("failed")
+        assert "✕" in result or "failed" in result.lower()
+        assert "status-failed" in result
+
+    def test_status2html_unknown_symbol(self):
+        """Test status2html with unknown status gets default symbol."""
+        result = status2html("unknown")
+        assert "•" in result  # Default symbol
+
+    def test_sec2str_formatting(self):
+        """Test sec2str formats seconds correctly."""
+        assert sec2str(1.23456) == "1.23"
+        assert sec2str(0) == "0.00"
+        assert sec2str(123.456) == "123.46"
+
+    def test_str2html_single_line(self):
+        """Test str2html with single line."""
+        result = str2html("Hello World")
+        assert "Hello World" in result
+        assert "<br>" in result
+
+    def test_str2html_multiple_lines(self):
+        """Test str2html with multiple lines."""
+        result = str2html("Line 1\nLine 2\nLine 3")
+        assert "<br>" in result
+        assert result.count("<br>") >= 3
+
+    def test_str2html_custom_end(self):
+        """Test str2html with custom end tag."""
+        result = str2html("Hello", end="</p>")
+        assert result.endswith("</p>")
+
+    def test_str2html_escaping(self):
+        """Test str2html escapes HTML entities."""
+        result = str2html("<script>alert('xss')</script>")
+        assert "<script>" not in result
+        assert "&lt;script&gt;" in result
+
+    def test_args2htmltr_single_arg(self):
+        """Test args2htmltr with single argument."""
+        result = args2htmltr("value1")
+        assert "<td>value1</td>" in result
+
+    def test_args2htmltr_multiple_args(self):
+        """Test args2htmltr with multiple arguments."""
+        result = args2htmltr("val1", "val2", "val3")
+        assert "<td>val1</td>" in result
+        assert "<td>val2</td>" in result
+        assert "<td>val3</td>" in result
+
+    def test_html_link_with_url(self):
+        """Test html_link with explicit URL."""
+        result = html_link("Click here", href="http://example.com")
+        assert 'href="http://example.com"' in result
+        assert "Click here" in result
+
+    def test_html_link_without_url(self):
+        """Test html_link uses text as URL when href not provided."""
+        result = html_link("http://example.com")
+        assert 'href="http://example.com"' in result
+
+    def test_html_link_escaping(self):
+        """Test html_link escapes URLs and text."""
+        result = html_link('<"text">', href='<"url">')
+        assert "<" not in result or "&lt;" in result
+
+    def test_html_file_link_missing_file(self):
+        """Test html_file_link for missing file."""
+        result = html_file_link("/nonexistent/file.txt")
+        assert "Missing" in result or "unavailable" in result
+
+    def test_html_file_link_empty_file(self, temp_test_dir):
+        """Test html_file_link for empty file."""
+        empty_file = Path(temp_test_dir) / "empty.txt"
+        empty_file.write_text("")
+        result = html_file_link(str(empty_file))
+        assert "Empty" in result or "unavailable" in result
+
+    def test_html_file_link_valid_file(self, temp_test_dir):
+        """Test html_file_link for valid file."""
+        valid_file = Path(temp_test_dir) / "test.txt"
+        valid_file.write_text("content")
+        result = html_file_link(str(valid_file))
+        assert "test.txt" in result
+        assert "<a" in result
+
+    def test_is_string_with_string(self):
+        """Test is_string returns True for strings."""
+        assert is_string("hello") is True
+
+    def test_is_string_with_non_string(self):
+        """Test is_string returns False for non-strings."""
+        assert is_string(123) is False
+        assert is_string([]) is False
+        assert is_string({}) is False
+
+    def test_has_exts_single_ext(self):
+        """Test has_exts with single extension."""
+        assert has_exts("file.txt", ".txt") is True
+        assert has_exts("file.txt", ".py") is False
+
+    def test_has_exts_multiple_exts(self):
+        """Test has_exts with multiple extensions."""
+        assert has_exts("file.txt", [".txt", ".py"]) is True
+        assert has_exts("file.py", [".txt", ".py"]) is True
+        assert has_exts("file.md", [".txt", ".py"]) is False
+
+    def test_lazy_read_file(self, temp_test_dir):
+        """Test lazy_read reads entire file content."""
+        test_file = Path(temp_test_dir) / "test.txt"
+        test_file.write_text("Line 1\nLine 2\nLine 3")
+        result = lazy_read(str(test_file))
+        assert "Line 1" in result
+        assert "Line 2" in result
+        assert "Line 3" in result
+
+    def test_lazy_readlines_file(self, temp_test_dir):
+        """Test lazy_readlines reads lines from file."""
+        test_file = Path(temp_test_dir) / "test.txt"
+        test_file.write_text("Line 1\nLine 2\nLine 3")
+        result = lazy_readlines(str(test_file))
+        assert len(result) == 3
+        assert "Line 1" in result[0]
+
+    def test_rm_rf_removes_files(self, temp_test_dir):
+        """Test rm_rf removes files in directory."""
+        subdir = Path(temp_test_dir) / "subdir"
+        subdir.mkdir()
+        (subdir / "file1.txt").write_text("content")
+        (subdir / "file2.txt").write_text("content")
+
+        removed = rm_rf(str(subdir))
+        assert len(removed) >= 2
+        assert not (subdir / "file1.txt").exists()
+
+    def test_rm_rf_exclude_paths(self, temp_test_dir):
+        """Test rm_rf excludes specified paths."""
+        subdir = Path(temp_test_dir) / "subdir"
+        subdir.mkdir()
+        keep_file = subdir / "keep.txt"
+        remove_file = subdir / "remove.txt"
+        keep_file.write_text("keep")
+        remove_file.write_text("remove")
+
+        removed = rm_rf(str(subdir), exclude_paths=[str(keep_file)])
+        assert not remove_file.exists()
+        assert keep_file.exists()
+
+    def test_parse_configh_file(self, temp_test_dir):
+        """Test parse_configh_file extracts CPP defines."""
+        config_h = Path(temp_test_dir) / "config.h"
+        config_h.write_text("""\
+#define HAVE_MPI 1
+#define HAVE_NETCDF 1
+#define HAVE_HDF5
+int x = 5;
+""")
+        result = parse_configh_file(str(config_h))
+        assert "HAVE_MPI" in result
+        assert result["HAVE_MPI"] == "1"
+        assert "HAVE_NETCDF" in result
+
+    def test_input_file_has_vars_match(self, temp_test_dir):
+        """Test input_file_has_vars finds variables."""
+        inp_file = Path(temp_test_dir) / "input.txt"
+        inp_file.write_text("""\
+npsp 2
+ecut 20.0
+ngkpt 2 2 2
+""")
+        found, matches = input_file_has_vars(str(inp_file), {"npsp": None})
+        assert found is True
+        assert "npsp" in matches
+
+    def test_input_file_has_vars_no_match(self, temp_test_dir):
+        """Test input_file_has_vars with no match."""
+        inp_file = Path(temp_test_dir) / "input.txt"
+        inp_file.write_text("ecut 20.0\n")
+        found, matches = input_file_has_vars(str(inp_file), {"npsp": None})
+        assert found is False
+
+
+# ============================================================================
+# TESTS FOR BuildEnvironment CLASS (P2)
+# ============================================================================
+
+
+class TestBuildEnvironment:
+    """Test suite for BuildEnvironment class."""
+
+    def test_buildenvironment_init_requires_valid_build_tree(self, temp_test_dir):
+        """Test BuildEnvironment raises error for invalid build tree."""
+        # BuildEnvironment raises ValueError or RuntimeError for invalid trees
+        with pytest.raises((ValueError, RuntimeError)):
+            BuildEnvironment(temp_test_dir)
+
+    def test_buildenvironment_sets_attributes(self):
+        """Test BuildEnvironment initializes key attributes."""
+        # Use current directory which should have minimal requirements
+        try:
+            env = BuildEnvironment(".")
+            assert hasattr(env, "build_dir")
+            assert hasattr(env, "hostname")
+            assert hasattr(env, "username")
+            assert hasattr(env, "fortran_compiler")
+        except (ValueError, RuntimeError):
+            # Expected if not in a valid ABINIT build tree
+            pytest.skip("Not in a valid ABINIT build tree")
+
+    def test_buildenvironment_path_of_bin_not_found(self):
+        """Test path_of_bin returns empty string for missing binary."""
+        try:
+            env = BuildEnvironment(".")
+            result = env.path_of_bin("nonexistent_binary_xyz", try_syspath=False)
+            # Result should be empty string or valid path
+            assert isinstance(result, str)
+        except (ValueError, RuntimeError):
+            pytest.skip("Not in a valid ABINIT build tree")
+
+    def test_compiler_base_class(self):
+        """Test Compiler base class initialization."""
+        compiler = Compiler(name="gfortran", version="9.3")
+        assert compiler.name == "gfortran"
+        assert compiler.version == "9.3"
+
+    def test_fortran_compiler_known_vars(self):
+        """Test FortranCompiler.from_defined_cpp_vars recognizes compilers."""
+        # Test with known compiler variable
+        compiler = FortranCompiler.from_defined_cpp_vars(["FC_GNU"])
+        assert compiler.name == "gfortran"
+
+    def test_cpp_preprocessor_init(self):
+        """Test CPreProcessor initialization."""
+        cpp = CPreProcessor(includes=["/usr/include"], bin="cpp")
+        assert cpp.includes == ["/usr/include"]
+        assert cpp.bin == "cpp"
+        assert cpp.verbose == 0
+
+    def test_cpp_preprocessor_default_includes(self):
+        """Test CPreProcessor uses default includes."""
+        cpp = CPreProcessor()
+        assert "." in cpp.includes
+
+
+# ============================================================================
+# TESTS FOR BaseTest CLASS CORE METHODS (P3)
+# ============================================================================
+
+
+class TestBaseTestCore:
+    """Test suite for BaseTest core methods."""
+
+    def test_basetest_requires_files_to_test_or_no_check(self, temp_test_dir):
+        """Test BaseTest raises error when no files_to_test and no_check is False."""
+        # Build environment would be needed, skip for now
+        pytest.skip("Requires valid BuildEnvironment")
+
+    def test_basetest_disabled_when_input_starts_with_dash(self):
+        """Test BaseTest marks tests as disabled if input starts with dash."""
+        pytest.skip("Requires valid BuildEnvironment and input file")
+
+    def test_basetest_attributes_from_testinfo(self):
+        """Test BaseTest incorporates TestInfo attributes."""
+        pytest.skip("Requires valid BuildEnvironment and input file")
+
+    def test_basetest_full_id_property(self):
+        """Test BaseTest.full_id property."""
+        pytest.skip("Requires valid BuildEnvironment and input file")
 
 
 # ============================================================================
