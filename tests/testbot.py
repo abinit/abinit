@@ -54,32 +54,8 @@ def lazy__str__(func: Callable) -> Callable:
     """
     def oncall(*args, **kwargs):
         self = args[0]
-        return "\n".join(str(k) + " : " + str(v) for (k, v) in self.__dict__.items())
+        return "\n".join(f"{k} : {v}" for (k, v) in self.__dict__.items())
     return oncall
-
-
-def get_mpi_prefix_from_env() -> str | None:
-    """
-    Try to detect the MPI installation directory from environment variables.
-
-    Checks MPI_HOME and MPIHOME. This is used for compatibility with certain
-    Buildbot worker configurations.
-
-    Returns:
-        str | None: The detected MPI path, or None if not found.
-    """
-    # This is what JMB does in buildbot_worker/testbot.py
-    # The problem is that this has precedence over mpi_prefix. Should ask why!!
-    try:
-       return os.environ["MPI_HOME"]
-    except Exception:
-       pass
-    try:
-       return os.environ["MPIHOME"]
-    except Exception:
-        pass
-
-    return None
 
 
 @dataclass
@@ -223,9 +199,7 @@ class TestBot:
             raise ValueError(f"type should be either 'ref' or empty string while it's: {self.type}")
 
         system, node, release, version, machine, processor = platform.uname()
-        print("Running on %s -- builder %s (type: %s) -- system %s -- max_cpus %s -- Python %s -- %s" % (
-              gethostname(), self.builder_name, self.type or "regular", system, self.max_cpus,
-              platform.python_version(), _my_name))
+        print(f"Running on {gethostname()} -- builder {self.builder_name} (type: {self.type or 'regular'}) -- system {system} -- max_cpus {self.max_cpus} -- Python {platform.python_version()} -- {_my_name}")
 
         # 2) Initialize the job_runner.
         self.build_env = build_env = BuildEnvironment(os.curdir)
@@ -257,7 +231,7 @@ class TestBot:
             timeout_path = build_env.path_of_bin("timeout")
             timebomb = TimeBomb(self.timeout_time, exec_path=timeout_path)
         else:
-            warn("Cannot find timeout executable at: %s" % build_env.path_of_bin("timeout"))
+            warn(f"Cannot find timeout executable at: {build_env.path_of_bin('timeout')}")
             timebomb = TimeBomb(self.timeout_time)
 
         print("Initalizing JobRunner for sequential runs.")
@@ -270,7 +244,7 @@ class TestBot:
             print(self.mpi_runner)
 
         if self.omp_num_threads > 0:
-            print("Initalizing OMP environment with omp_num_threads %d " % self.omp_num_threads)
+            print(f"Initalizing OMP environment with omp_num_threads {self.omp_num_threads}")
             omp_env = OMPEnvironment(OMP_NUM_THREADS=self.omp_num_threads)
             self.seq_runner.set_ompenv(omp_env)
             if self.has_mpi:
@@ -293,7 +267,7 @@ class TestBot:
         for f in dataclasses.fields(self):
             if not f.repr:
                 continue
-            lines.append("%s = %s" % (f.name, getattr(self, f.name)))
+            lines.append(f"{f.name} = {getattr(self, f.name)}")
 
         return "\n".join(lines)
 
@@ -374,17 +348,17 @@ class TestBot:
         # Compute number of python processes, note that self.omp_num_threads might be zero.
         py_nprocs = self.max_cpus // (mpi_nprocs * max(self.omp_num_threads, 1))
         if py_nprocs < 1:
-            raise RuntimeError("py_nprocs = %s" % py_nprocs)
+            raise RuntimeError(f"py_nprocs = {py_nprocs}")
 
         test_suite = abitests.select_tests(suite_args, keys=self.keywords, regenerate=False)
 
         # Create workdir.
-        workdir_name = "TestBot_MPI" + str(mpi_nprocs)
+        workdir_name = f"TestBot_MPI{mpi_nprocs}"
         if self.has_openmp:
-            workdir_name += "_OMP" + str(self.omp_num_threads)
+            workdir_name += f"_OMP{self.omp_num_threads}"
 
         if os.path.exists(workdir_name):
-            raise RuntimeError("%s already exists!" % workdir_name)
+            raise RuntimeError(f"{workdir_name} already exists!")
         os.mkdir(workdir_name)
 
         if self.tmp_basedir:
@@ -394,11 +368,9 @@ class TestBot:
 
         # Run the tests.
         if self.has_openmp:
-            msg = "Running ntests = %s, MPI_nprocs = %s, OMP_nthreads %s, Max GPUs: %s, py_nprocs = %s..." % (
-                  test_suite.full_length, mpi_nprocs, self.omp_num_threads, self.max_gpus, py_nprocs)
+            msg = f"Running ntests = {test_suite.full_length}, MPI_nprocs = {mpi_nprocs}, OMP_nthreads {self.omp_num_threads}, Max GPUs: {self.max_gpus}, py_nprocs = {py_nprocs}..."
         else:
-            msg = "Running ntests = %s, MPI_nprocs = %s, Max GPUs: %s py_nprocs = %s..." % (
-                  test_suite.full_length, mpi_nprocs, self.max_gpus, py_nprocs)
+            msg = f"Running ntests = {test_suite.full_length}, MPI_nprocs = {mpi_nprocs}, Max GPUs: {self.max_gpus} py_nprocs = {py_nprocs}..."
         print(msg)
 
         job_runner = self.seq_runner
@@ -448,7 +420,7 @@ class TestBot:
                 try:
                     shutil.copy2(os.path.join(workdir, fn), workdir_name)
                 except Exception:
-                    print("Could not copy back file ", fn)
+                    print(f"Could not copy back file {fn}")
 
         return results.nfailed, results.npassed, results.nexecuted
 
@@ -492,7 +464,6 @@ class TestBot:
             # Old mode: run all available tests with 1 MPI proc here,
             # then use MPI mode in mp_suites (paral/mpiio)
             np_list = [2, 4, 8, 10, 24, 64]
-            #nfailed, npassed, nexecuted = 0, 0 , 0
             nfailed, npassed, nexecuted = self.run_tests_with_np(1, suite_args=suite_args, runmode=self.runmode)
         else:
             # New mode: run all available tests with 2 MPI procs here,
@@ -514,10 +485,10 @@ class TestBot:
 
             for np in np_list:
                 if np > self.max_cpus or not suite_args:
-                    print("Skipping tests with np: %s as max_cpus: %s" % (np, self.max_cpus))
+                    print(f"Skipping tests with np: {np} as max_cpus: {self.max_cpus}")
                     continue
 
-                print("Running multi-parallel tests with %s MPI processors, suite_args %s" % (np, suite_args))
+                print(f"Running multi-parallel tests with {np} MPI processors, suite_args {suite_args}")
                 para_nfailed, para_npassed, para_nexec = self.run_tests_with_np(np, runmode="static", suite_args=suite_args)
 
                 # Accumulate the counters.
@@ -546,7 +517,7 @@ class TestBot:
         if nexecuted == 0:
             print("No file found")
             with open("__emptylist__", "w") as fh:
-                fh.write("nfailed = %d, npassed = %d, nexecuted = %d" % (nfailed, npassed, nexecuted))
+                fh.write(f"nfailed = {nfailed}, npassed = {npassed}, nexecuted = {nexecuted}")
                 return 0
 
         # The status error depends on the builder type.
@@ -640,8 +611,8 @@ def analyze(fname: str, tag: str = "unknown") -> int:
                         ttime += test_info.get("tot_etime", 0.0)
 
             if not skip_series:
-                counts = "".join("%5s   |" % v for v in s.split("/"))
-                row = "%12s | %s %7.1f  | %7.1f" % (t, counts, rtime, ttime)
+                counts = "".join(f"{v:>5s}   |" for v in s.split("/"))
+                row = f"{t:>12s} | {counts} {rtime:7.1f}  | {ttime:7.1f}"
                 if t == "mpiio":
                     mpiio = row
                 elif t == "paral":
@@ -807,7 +778,7 @@ class TestBotSummary:
             if not self.res_table[suite_name]:
                 suite_status = "succeeded"
             else:
-                raise RuntimeError("[%s] Wrong list of status values!" % suite_name)
+                raise RuntimeError(f"[{suite_name}] Wrong list of status values!")
 
         return suite_status, stats
 
@@ -830,8 +801,8 @@ class TestBotSummary:
         for suite_name in self:
             #print("---", suite_name, self.res_table[suite_name])
             if suite_name in d:
-                #raise KeyError("Cannot overwrite key %s" % suite_name)
-                print("Warning: About to overwrite key %s" % suite_name)
+                #raise KeyError(f"Cannot overwrite key {suite_name}")
+                print(f"Warning: About to overwrite key {suite_name}")
             d[suite_name] = self.res_table[suite_name]
 
         print(
@@ -842,17 +813,110 @@ class TestBotSummary:
             json.dump(d, fh)
 
 
+def print_schema() -> None:
+    """
+    Print the JSON schema for testbot.json with field descriptions.
+
+    This outputs a JSON structure documenting all available configuration options,
+    their types, default values, and descriptions.
+    """
+    schema = {
+        "description": "Configuration for TestBot automatic test execution",
+        "type": "object",
+        "properties": {},
+        "required": ["builder_name", "max_cpus"],
+    }
+
+    for f in dataclasses.fields(TestBot):
+        if not f.init:
+            continue
+
+        # Determine the type string
+        type_str = str(f.type).replace("typing.", "")
+
+        # Get default value
+        if f.default is not dataclasses.MISSING:
+            default = f.default
+        elif f.default_factory is not dataclasses.MISSING:  # type: ignore[misc]
+            default = f.default_factory()
+        else:
+            default = None
+
+        # Build property entry
+        prop_entry = {
+            "type": type_str,
+            "description": f.metadata.get("info", ""),
+        }
+        if default is not None:
+            prop_entry["default"] = default
+
+        schema["properties"][f.name] = prop_entry
+
+    print(json.dumps(schema, indent=2))
+
+
+def generate_template() -> None:
+    """
+    Generate a template testbot.json file with example values.
+
+    This creates a sample configuration with reasonable defaults that can be
+    customized for specific use cases.
+    """
+    template = {
+        "builder_name": "my_builder",
+        "max_cpus": 8,
+        "type": "ref",
+        "max_gpus": 0,
+        "mpi_prefix": "mpirun",
+        "mpirun_np": "-n",
+        "omp_num_threads": 2,
+        "with_tdirs": [],
+        "without_tdirs": [],
+        "timeout_time": 1200,
+        "runmode": "static",
+        "keywords": [],
+        "verbose": 0,
+        "tmp_basedir": "",
+        "mpi_args": "",
+        "force_mpi": False,
+    }
+
+    print("# TestBot configuration template")
+    print("# Save this to testbot.json and customize for your builder")
+    print(json.dumps(template, indent=2))
+
+
 def build_parser() -> argparse.ArgumentParser:
     """
     Build the command-line argument parser for TestBot.
 
     Returns:
         argparse.ArgumentParser: The configured parser with `run`, `analyze`,
-        and `print` subcommands.
+        `print`, `doc`, and `template` subcommands.
     """
+    examples = """
+Examples:
+  # Run tests using a configuration file
+  python testbot.py run testbot.json
+
+  # Generate a template configuration file
+  python testbot.py template > testbot.json
+
+  # Print the configuration schema with field descriptions
+  python testbot.py doc | less
+
+  # Print the parsed configuration without running tests
+  python testbot.py print testbot.json
+
+  # Analyze test results with a git tag
+  python testbot.py analyze v9.0.0
+"""
+
     parser = argparse.ArgumentParser(
         prog="testbot.py",
         description="Driver for ABINIT automatic tests on Buildbot workers.",
+        epilog=examples,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -864,6 +928,16 @@ def build_parser() -> argparse.ArgumentParser:
         nargs="?",
         default=None,
         help="Path to the testbot.json file (default: testbot.json next to this script).",
+    )
+
+    doc_parser = subparsers.add_parser(
+        "doc",
+        help="Print the JSON schema for testbot.json with field descriptions.",
+    )
+
+    template_parser = subparsers.add_parser(
+        "template",
+        help="Generate a template testbot.json file with example values.",
     )
 
     analyze_parser = subparsers.add_parser(
@@ -902,9 +976,17 @@ def main() -> int:
     if args.command == "analyze":
         return analyze(fname="testbot_summary.json", tag=args.tag)
 
+    if args.command == "doc":
+        print_schema()
+        return 0
+
+    if args.command == "template":
+        generate_template()
+        return 0
+
     # "run" and "print" both parse a testbot.json into a TestBot instance.
     if args.testbot_json is not None:
-        print("Reading testbot.json configuration file from: ", args.testbot_json)
+        print(f"Reading testbot.json configuration file from: {args.testbot_json}")
 
     # Disable colors
     termcolor.enable(False)
