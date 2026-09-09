@@ -70,6 +70,23 @@ class TestGetMpiPrefixFromEnv:
             result = get_mpi_prefix_from_env()
             assert result is None
 
+    def test_get_mpi_prefix_from_ebrootopenmpi(self):
+        """Should fall back to EBROOTOPENMPI, joined with 'bin', if MPI_HOME/MPIHOME unset."""
+        with patch.dict(os.environ, {"EBROOTOPENMPI": "/eb/OpenMPI/4.1.6"}, clear=True):
+            assert get_mpi_prefix_from_env() == "/eb/OpenMPI/4.1.6/bin"
+
+    def test_get_mpi_prefix_ebroot_precedence_order(self):
+        """EBROOTOPENMPI should win over EBROOTMPICH/EBROOTIMPI if multiple are set."""
+        env = {"EBROOTOPENMPI": "/eb/ompi", "EBROOTMPICH": "/eb/mpich", "EBROOTIMPI": "/eb/impi"}
+        with patch.dict(os.environ, env, clear=True):
+            assert get_mpi_prefix_from_env() == "/eb/ompi/bin"
+
+    def test_get_mpi_prefix_mpi_home_beats_ebroot(self):
+        """MPI_HOME/MPIHOME must take precedence over any EBROOT* variable."""
+        env = {"MPI_HOME": "/usr/local/mpi", "EBROOTMPICH": "/eb/mpich"}
+        with patch.dict(os.environ, env, clear=True):
+            assert get_mpi_prefix_from_env() == "/usr/local/mpi"
+
 
 class TestGetGitTag:
     """Tests for get_git_tag() function."""
@@ -293,22 +310,14 @@ class TestTestBotClass:
     def test_testbot_attributes(self):
         """TestBot's dataclass fields should have the expected config keys."""
         expected_keys = {
-            "builder_name", "type", "max_cpus", "max_gpus", "mpi_prefix",
-            "mpirun_np", "omp_num_threads",
+            "builder_name", "type", "max_cpus", "max_gpus",
+            "mpirun_np", "omp_num_threads", "has_mpi",
             "with_tdirs", "without_tdirs", "timeout_time", "runmode",
             "keywords", "verbose", "tmp_basedir", "mpi_args",
             "force_mpi"
         }
         config_fields = {f.name for f in dataclasses.fields(TestBot) if f.init}
         assert config_fields == expected_keys
-
-    def test_testbot_has_mpi_property(self):
-        """has_mpi property should check for mpirun_np."""
-        # Create a mock TestBot instance with minimal setup
-        tb = MagicMock(spec=TestBot)
-        # When mpirun_np is set, has_mpi should be True
-        tb.mpirun_np = "/usr/bin/mpirun"
-        assert bool(tb.mpirun_np)
 
     def test_testbot_has_openmp_property(self):
         """has_openmp property should check for omp_num_threads."""
@@ -401,13 +410,14 @@ class TestTestBotFromJson:
 
     def test_from_json_builds_a_real_instance(self, tmp_path, monkeypatch):
         """Feeding a real testbot.json through from_json() must produce a working TestBot."""
-        self._mock_environment(monkeypatch)
+        self._mock_environment(monkeypatch, defined_cppvars=[])
         testbot_json = tmp_path / "testbot.json"
         testbot_json.write_text(json.dumps({
             "builder_name": "eos_gnu_13.2_serial",
             "max_cpus": 4,
             "with_tdirs": ["v1", "v2"],
             "force_mpi": True,
+            "has_mpi": False,
         }))
 
         testbot = TestBot.from_json(str(testbot_json))
@@ -416,6 +426,7 @@ class TestTestBotFromJson:
         assert testbot.max_cpus == 4
         assert testbot.with_tdirs == ["v1", "v2"]
         assert testbot.force_mpi is True
+        assert testbot.has_mpi is False
         # Defaults for everything not in the JSON payload.
         assert testbot.max_gpus == 0
         assert testbot.without_tdirs == []
@@ -430,7 +441,7 @@ class TestTestBotFromJson:
 
     def test_from_json_ignores_unknown_keys(self, tmp_path, monkeypatch):
         """Extra keys in the JSON payload must be silently ignored, not raise."""
-        self._mock_environment(monkeypatch)
+        self._mock_environment(monkeypatch, defined_cppvars=["HAVE_MPI"])
         testbot_json = tmp_path / "testbot.json"
         testbot_json.write_text(json.dumps({
             "builder_name": "b",
@@ -446,11 +457,27 @@ class TestTestBotFromJson:
         """max_gpus > 0 on a build without HAVE_GPU must clamp to 0 (with a warning)."""
         self._mock_environment(monkeypatch, defined_cppvars=[])
         testbot_json = tmp_path / "testbot.json"
-        testbot_json.write_text(json.dumps({"builder_name": "b", "max_cpus": 2, "max_gpus": 2}))
+        testbot_json.write_text(json.dumps({"builder_name": "b", "max_cpus": 2, "max_gpus": 2, "has_mpi": False}))
 
         with pytest.warns(UserWarning, match="not compiled with GPU support"):
             testbot = TestBot.from_json(str(testbot_json))
         assert testbot.max_gpus == 0
+
+    def test_from_json_mpi_true_but_build_lacks_it_raises(self, tmp_path, monkeypatch):
+        """has_mpi=True (default) but build lacks HAVE_MPI must raise ValueError."""
+        self._mock_environment(monkeypatch, defined_cppvars=[])
+        testbot_json = tmp_path / "testbot.json"
+        testbot_json.write_text(json.dumps({"builder_name": "b", "max_cpus": 2}))
+        with pytest.raises(ValueError, match="declares has_mpi=True"):
+            TestBot.from_json(str(testbot_json))
+
+    def test_from_json_mpi_false_but_build_has_it_raises(self, tmp_path, monkeypatch):
+        """has_mpi=False but build has HAVE_MPI must raise ValueError."""
+        self._mock_environment(monkeypatch, defined_cppvars=["HAVE_MPI"])
+        testbot_json = tmp_path / "testbot.json"
+        testbot_json.write_text(json.dumps({"builder_name": "b", "max_cpus": 2, "has_mpi": False}))
+        with pytest.raises(ValueError, match="declares has_mpi=False"):
+            TestBot.from_json(str(testbot_json))
 
 
 class TestBuildParser:

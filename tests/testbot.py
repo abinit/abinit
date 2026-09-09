@@ -42,6 +42,22 @@ from pymods.testsuite import BuildEnvironment
 from pymods.tools import pprint_table
 
 
+def get_mpi_prefix_from_env() -> str | None:
+    """Detect the MPI installation prefix from the environment.
+
+    Checks, in order: MPI_HOME, MPIHOME, then the first defined of the
+    Easybuild-style EBROOTOPENMPI / EBROOTMPICH / EBROOTIMPI (joined with
+    "bin"). Returns None if none are set.
+    """
+    mpi_prefix = os.environ.get("MPI_HOME") or os.environ.get("MPIHOME")
+    if not mpi_prefix:
+        for vname in ["EBROOTOPENMPI", "EBROOTMPICH", "EBROOTIMPI"]:
+            mpi_home = os.environ.get(vname)
+            if mpi_home:
+                return os.path.join(mpi_home, "bin")
+    return mpi_prefix
+
+
 def lazy__str__(func: Callable) -> Callable:
     """
     Decorator that provides a default __str__ implementation based on object attributes.
@@ -103,7 +119,9 @@ class TestBot:
     max_gpus: int = field(
         default=0, metadata={"info": "Max number of GPUs that can be used by TestBot"}
     )
-    mpi_prefix: str = field(default="", metadata={"info": "MPI runner"})
+    has_mpi: bool = field(
+        default=True, metadata={"info": "Whether this builder's ABINIT binary was built with MPI support"}
+    )
     mpirun_np: str = field(default="", metadata={"info": "String used to execute `mpirun -n#NUM`"})
     omp_num_threads: int = field(
         default=0, metadata={"info": "Number of OpenMP threads. 0 if OpenMP should not be used"}
@@ -135,6 +153,10 @@ class TestBot:
 
     # Runtime-only, computed in __post_init__ -- not JSON/constructor inputs.
     # repr=False also marks them as "not a plain config value" for __str__.
+    mpi_prefix: str = field(
+        default="", init=False, repr=True,
+        metadata={"info": "Prefix path of the MPI installation, auto-detected at runtime (informational only, see __post_init__)"}
+    )
     build_env: BuildEnvironment = field(init=False, repr=False)
     seq_runner: JobRunner = field(init=False, repr=False)
     mpi_runner: JobRunner | None = field(init=False, default=None, repr=False)
@@ -219,6 +241,17 @@ class TestBot:
                 f"but max_gpus is {self.max_gpus}"
             )
 
+        if self.has_mpi and "HAVE_MPI" not in self.build_env.defined_cppvars:
+            raise ValueError(
+                f"Builder {self.builder_name} declares has_mpi=True but was not "
+                "compiled with MPI support (HAVE_MPI not in config.h)"
+            )
+        elif not self.has_mpi and "HAVE_MPI" in self.build_env.defined_cppvars:
+            raise ValueError(
+                f"Builder {self.builder_name} declares has_mpi=False but was "
+                "compiled with MPI support (HAVE_MPI in config.h)"
+            )
+
         if "HAVE_OPENMP" not in self.build_env.defined_cppvars and self.omp_num_threads > 2:
             warn(
                 f"Builder {self.builder_name} requested omp_num_threads={self.omp_num_threads} "
@@ -239,6 +272,13 @@ class TestBot:
         print(self.seq_runner)
 
         if self.has_mpi:
+            self.mpi_prefix = get_mpi_prefix_from_env() or ""
+            # NOTE: mpi_prefix is informational only today -- JobRunner.run() (pymods/jobrunner.py)
+            # builds its command line from mpirun_np/mpi_args/poe alone and never reads mpi_prefix,
+            # so this does not affect PATH or how mpirun_np resolves. Stored here only so it shows
+            # up in JobRunner.__str__/CFG_KEYWORDS diagnostics. A future refactor could prepend
+            # f"{self.mpi_prefix}/bin" to PATH so a bare mpirun_np command resolves against this
+            # specific MPI install -- not implemented here.
             print("Initalizing MPI JobRunner from self.__dict__")
             self.mpi_runner = JobRunner.fromdict(self.__dict__, timebomb=timebomb)
             print(self.mpi_runner)
@@ -270,11 +310,6 @@ class TestBot:
             lines.append(f"{f.name} = {getattr(self, f.name)}")
 
         return "\n".join(lines)
-
-    @property
-    def has_mpi(self) -> bool:
-        """bool: True if an MPI runner is configured."""
-        return bool(self.mpirun_np)
 
     @property
     def has_openmp(self) -> bool:
@@ -867,8 +902,8 @@ def generate_template() -> None:
         "max_cpus": 8,
         "type": "ref",
         "max_gpus": 0,
-        "mpi_prefix": "mpirun",
-        "mpirun_np": "-n",
+        "has_mpi": True,
+        "mpirun_np": "mpiexec -n",
         "omp_num_threads": 2,
         "with_tdirs": [],
         "without_tdirs": [],
