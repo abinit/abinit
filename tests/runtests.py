@@ -256,7 +256,7 @@ def reload_test_suite(status_list: list[str]) -> Any:
     Returns:
         AbinitTestSuite: A new test suite containing the filtered tests.
     """
-    cprint("Reading previous tests from pickle file", "yellow")
+    cprint("Reading previous tests from pickle file", color="yellow")
     with open(".prev_run.pickle", "rb") as fh:
         test_suite = pickle.load(fh)
 
@@ -731,7 +731,7 @@ def main() -> int:
     if not options.no_logo:
         nrows, ncols = get_terminal_size()
         if ncols > 100:
-            cprint(ascii_abinit(), "green")
+            cprint(ascii_abinit(), color="green")
 
     ncpus_detected = max(1, number_of_cpus())
     ngpus_detected = max(0, number_of_gpus())
@@ -854,7 +854,7 @@ def main() -> int:
 
     if runner.has_valgrind:
         cmd = "valgrind --tool=%s " % runner.valgrind_cmdline
-        cprint("Will invoke valgrind with cmd:\n %s" % cmd, "yellow")
+        cprint("Will invoke valgrind with cmd:\n %s" % cmd, color="yellow")
 
     # Debugging with GNU gdb
     if options.gdb:
@@ -907,7 +907,7 @@ def main() -> int:
             raise
 
     if not test_suite:
-        cprint("No test fulfills the requirements specified by the user!", "red")
+        cprint("No test fulfills the requirements specified by the user!", color="red")
         return 99
 
     if options.show_exclude_builders:
@@ -935,7 +935,7 @@ def main() -> int:
     if not os.path.exists(workdir):
         os.mkdir(workdir)
     else:
-        cprint("%s directory already exists. Files will be removed" % workdir, "yellow")
+        cprint("%s directory already exists. Files will be removed" % workdir, color="yellow")
 
     # Run the tests selected by the user.
     py_nprocs = options.py_nprocs
@@ -957,7 +957,7 @@ def main() -> int:
             "Running %s test(s) with MPI_nprocs: %s, OMP_nthreads: %s, py_nprocs: %s"
             % (test_suite.full_length, mpi_nprocs, omp_nthreads, py_nprocs)
         )
-    cprint(msg, "yellow")
+    cprint(msg, color="yellow")
 
     if ncpus_used < 0.3 * ncpus_detected:
         msg = (
@@ -966,14 +966,14 @@ def main() -> int:
             "Use `runtests -jNUM` to run with NUM processes"
             % (ncpus_used, ncpus_detected)
         )
-        cprint(msg, "blue")
+        cprint(msg, color="blue")
 
     elif ncpus_used > 1.5 * ncpus_detected:
         msg = (
             "[OVERLOAD] runtests.py is using %s CPUs but your architecture has only %s CPUs!!\n"
             % (ncpus_used, ncpus_detected)
         )
-        cprint(msg, "magenta")
+        cprint(msg, color="magenta")
 
     if options.list_info:
         with open("ListOfTests.html", "w") as fh:
@@ -1071,7 +1071,7 @@ def main() -> int:
         count, max_iterations = 0, 100
         cprint(
             "\n\nEntering looponfail loop with max_iterations %d" % max_iterations,
-            "yellow",
+            color="yellow",
         )
         abenv.start_watching_sources()
 
@@ -1079,16 +1079,16 @@ def main() -> int:
             count += 1
             test_list = [t for t in test_suite if t.status == "failed"]
             if not test_list:
-                cprint("All tests ok. Exiting looponfail", "green")
+                cprint("All tests ok. Exiting looponfail", color="green")
                 break
-            cprint("%d test(s) are still failing" % len(test_list), "red")
+            cprint("%d test(s) are still failing" % len(test_list), color="red")
             changed = abenv.changed_sources()
             if not changed:
                 sleep_time = 10
                 cprint(
                     "No change in source files detected. Will sleep for %s seconds..."
                     % sleep_time,
-                    "yellow",
+                    color="yellow",
                 )
                 time.sleep(sleep_time)
                 continue
@@ -1097,7 +1097,7 @@ def main() -> int:
                 print("[%d] %s" % (i, os.path.relpath(path)))
             rc = make_abinit(ncpus_detected, target=options.target)
             if rc != 0:
-                cprint("make_abinit returned %s, tests are postponed" % rc, "red")
+                cprint("make_abinit returned %s, tests are postponed" % rc, color="red")
                 continue
 
             test_suite = AbinitTestSuite(test_suite.abenv, test_list=test_list)
@@ -1126,7 +1126,7 @@ def main() -> int:
                 return 99
 
         if count == max_iterations:
-            cprint("Reached max_iterations", "red")
+            cprint("Reached max_iterations", color="red")
 
     # Edit input files.
     if options.edit:
@@ -1143,13 +1143,13 @@ def main() -> int:
     # Patch reference files.
     if options.patch:
         for status in parse_stats(options.patch):
-            cprint("Patching tests with status %s" % status, "yellow")
+            cprint("Patching tests with status %s" % status, color="yellow")
             results.patch_refs(status=status)
 
     if options.nag:
         for test in results.failed_tests:
             for trace in test.get_backtraces():
-                cprint(trace, "red")
+                cprint(trace, color="red")
                 trace.edit_source()
 
     # Save test_suite after execution so that we can reread it.
