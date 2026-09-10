@@ -60,21 +60,18 @@ class MyConfigParser(ConfigParser):
   def optionxform(self, option):
     return str(option)
 
-                    # ------------------------------------ #
 
 # Display section header
 def print_header(name, title):
 
   print("[%s] === %s ===" % (name, title))
 
-                    # ------------------------------------ #
 
 # Display message
 def print_message(name, title):
 
   print("[%s] %s" % (name, title))
 
-                    # ------------------------------------ #
 
 # Run external commands and check for errors
 def run_script(name, title, cmdline, stop_on_error=True,
