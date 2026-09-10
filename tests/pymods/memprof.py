@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import time
-from collections import OrderedDict, defaultdict, deque, namedtuple
+from collections import defaultdict, deque, namedtuple
 from itertools import groupby
 from pprint import pprint
 from typing import Any
@@ -130,16 +130,16 @@ def entries_to_dataframe(entries: list[Entry]) -> Any:
     import pandas as pd
     rows, index = [], []
     for e in entries:
-        rows.append(OrderedDict([
-            ("locus", e.locus),
-            ("vname", e.vname),
-            ("file", e.file),
-            ("line", e.line),
-            ("action", e.action),
-            ("size_mb", e.size_mb),
-            ("tot_memory_mb", e.tot_memory_mb),
-            ("ptr", e.ptr),
-        ]))
+        rows.append({
+            "locus": e.locus,
+            "vname": e.vname,
+            "file": e.file,
+            "line": e.line,
+            "action": e.action,
+            "size_mb": e.size_mb,
+            "tot_memory_mb": e.tot_memory_mb,
+            "ptr": e.ptr,
+        })
         index.append(e.locus)
 
     return pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
@@ -219,11 +219,11 @@ class AbimemFile:
             this_action = g.action.values[0]
             assert all(g.action.values == this_action)
             malloc_mb = g.size_mb.sum()
-            rows.append(OrderedDict([
-                ("ncalls", len(g)),
-                ("malloc_mb", malloc_mb),
-                ("mem_per_call_mb", malloc_mb / len(g)),
-            ]))
+            rows.append({
+                "ncalls": len(g),
+                "malloc_mb": malloc_mb,
+                "mem_per_call_mb": malloc_mb / len(g),
+            })
             index.append(locus)
 
         import pandas as pd
@@ -443,14 +443,14 @@ class AbimemFile:
             free_mb = g[g["action"] == "D"].size_mb.sum()
             nalloc = len(g["action"] == "A")
             nfree = len(g["action"] == "D")
-            rows.append(OrderedDict([
-                ("malloc_mb", malloc_mb),
-                ("free_mb", free_mb),
+            rows.append({
+                "malloc_mb": malloc_mb,
+                "free_mb": free_mb,
                 #("diff_mb", malloc_mb + free_mb),
-                ("nalloc", nalloc),
-                ("nfree", nfree),
+                "nalloc": nalloc,
+                "nfree": nfree,
                 #("npall", nalloc - nfree),
-            ]))
+            })
             index.append(filename)
 
         import pandas as pd

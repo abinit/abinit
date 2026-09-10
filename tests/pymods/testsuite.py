@@ -778,14 +778,14 @@ TESTCNF_KEYWORDS = {
 # TESTCNF_SECTIONS = set( [ TESTCNF_KEYWORDS[k][2] for k in TESTCNF_KEYWORDS ] )
 
 # This extra list is hardcoded in order to have a fixed order of the sections in doc_testcfn_format.
-# OrderedDict have been introduced in python2.7 sigh!
+# Keep the sections in their documented order with Python's insertion-ordered dictionaries.
 TESTCNF_SECTIONS = {
-    "setup",
-    "files",
-    "shell",
-    "paral_info",
-    "extra_info",
-    "yaml_test",
+    "setup": None,
+    "files": None,
+    "shell": None,
+    "paral_info": None,
+    "extra_info": None,
+    "yaml_test": None,
 }
 
 # consistency check.

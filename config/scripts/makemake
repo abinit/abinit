@@ -91,6 +91,27 @@ def run_script(name, title, cmdline, stop_on_error=True,
 
   return ret
 
+
+# Check whether Git has an executable pre-commit hook at its effective hook path.
+def has_precommit_hook():
+
+  (ret, hooks_path) = getstatusoutput("git config --path core.hooksPath")
+  if ( ret == 0 and hooks_path.strip() != "" ):
+    hooks_path = hooks_path.strip()
+    if ( not os.path.isabs(hooks_path) ):
+      hooks_path = os.path.abspath(hooks_path)
+    hook_path = os.path.join(hooks_path, "pre-commit")
+  else:
+    (ret, hook_path) = getstatusoutput(
+      "git rev-parse --git-path hooks/pre-commit")
+    if ( ret != 0 or hook_path.strip() == "" ):
+      return False
+    hook_path = hook_path.strip()
+    if ( not os.path.isabs(hook_path) ):
+      hook_path = os.path.abspath(hook_path)
+
+  return os.path.isfile(hook_path) and os.access(hook_path, os.X_OK)
+
                     # ------------------------------------ #
 
 def translate_version(name, version_string):
@@ -219,6 +240,9 @@ parser.add_option("-m", "--without-makefiles", action="store_false",
 parser.add_option("-n", "--no-split", action="store_false",
   dest="split_source", default=True,
   help="Behave as if the source tree were not split")
+parser.add_option("--no-precommit-hooks", action="store_false",
+  dest="check_precommit_hooks", default=True,
+  help="Run even if the Git pre-commit hooks are not installed")
 parser.add_option("-s", "--without-source", action="store_false",
   dest="run_source", default=True,
   help="Skip source tree update (will skip abisrc as well)")
@@ -229,6 +253,29 @@ parser.add_option("-x", "--without-subsystems", action="store_false",
   dest="run_subsystems", default=True,
   help="Skip subsystem synchronization")
 (opts, args) = parser.parse_args()
+
+# Promote repository checks before makemake updates generated files.
+if ( opts.check_precommit_hooks and not has_precommit_hook() ):
+  sys.stderr.write("[%s] No active Git pre-commit hook was found.\n" % my_name)
+  sys.stderr.write(
+    "[%s] Pre-commit hooks run many of the checks required before a contribution "
+    "can be merged into trunk.\n" % my_name)
+  sys.stderr.write(
+    "[%s] They also protect your work by catching problems early. For example, "
+    "committing oversized files can make a branch unsuitable for merging.\n" % my_name)
+  sys.stderr.write("[%s] Install and activate them with:\n" % my_name)
+  sys.stderr.write("\n")
+  sys.stderr.write("    python3 -m pip install pre-commit\n")
+  sys.stderr.write("    pre-commit install\n")
+  sys.stderr.write("\n")
+  sys.stderr.write(
+    "[%s] Run 'pre-commit install' from the repository's top-level directory, "
+    "where .pre-commit-config.yaml is located.\n" % my_name)
+  sys.stderr.write(
+    "[%s] To bypass this check intentionally, rerun makemake with "
+    "--no-precommit-hooks.\n" % my_name)
+  sys.stderr.write("[%s] Aborting now!\n" % my_name)
+  sys.exit(1)
 
 # What time is it?
 now = strftime("%Y/%m/%d %H:%M:%S +0000", gmtime())
