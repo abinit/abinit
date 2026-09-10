@@ -16,12 +16,11 @@ This script compares the generated build configuration examples in
 
 import os
 import sys
-from typing import Tuple, List
 
 from abirules_tools import find_abinit_toplevel_directory
 
 
-def getstatusoutput(cmd: str) -> Tuple[int, str]:
+def getstatusoutput(cmd: str) -> tuple[int, str]:
     """
     Return (status, output) of executing cmd in a shell.
 

@@ -62,18 +62,17 @@ the '%',and '.' first-column special signs.
 """
 
 import re
-from collections.abc import Iterable, Iterator, Sequence
+from collections.abc import Iterable, Sequence
 from math import floor
 from threading import Thread
 from typing import Any, TextIO, cast
 
 from .data_extractor import DataExtractor
-from .yaml_tools import Document, is_available as has_yaml
+from .yaml_tools import is_available as has_yaml
 
 if has_yaml:
     from .yaml_tools.driver_test_conf import DriverTestConf as YDriverConf
     from .yaml_tools.tester import Failure as YFailure
-    from .yaml_tools.tester import Issue as YIssue
     from .yaml_tools.tester import Tester as YTester
 
 # Match floats. Minimal float is .0 for historical reasons.
@@ -515,8 +514,8 @@ class Differ:
             self.options["tolerance_abs"] = options["tolerance"]
             self.options["tolerance_rel"] = options["tolerance"]
 
-        self.use_fl = cast(bool, self.options["use_fl"])
-        self.use_yaml = has_yaml and cast(bool, self.options["use_yaml"])
+        self.use_fl = cast("bool", self.options["use_fl"])
+        self.use_yaml = has_yaml and cast("bool", self.options["use_yaml"])
 
         if self.use_yaml:
             if yaml_test and "file" in yaml_test and yaml_test["file"]:
@@ -525,7 +524,7 @@ class Differ:
                 self.yaml_conf = YDriverConf(yaml_test["yaml"])
             else:
                 self.yaml_conf = YDriverConf()
-            self.yaml_conf.debug = cast(bool, self.options["debug"])
+            self.yaml_conf.debug = cast("bool", self.options["debug"])
         else:
             self.yaml_conf = NotDriverConf(has_yaml)
 
@@ -550,8 +549,8 @@ class Differ:
 
         return Result(line_diff, doc_diff,
                       extra_info=self.yaml_conf.extra_info(),
-                      label=cast(str | None, self.options["label"]),
-                      verbose=cast(bool, self.options["verbose"]))
+                      label=cast("str | None", self.options["label"]),
+                      verbose=cast("bool", self.options["verbose"]))
 
     def _diff_lines(self, src1: Iterable[str], src2: Iterable[str]) -> tuple[list[LineDifference], list[Any]]:
         """
@@ -589,8 +588,8 @@ class Differ:
 
         if self.use_fl:
             lines_differences = self._fldiff(
-                cast(list[tuple[int, str, str]], lines[0]),
-                cast(list[tuple[int, str, str]], lines[1])
+                cast("list[tuple[int, str, str]]", lines[0]),
+                cast("list[tuple[int, str, str]]", lines[1])
             )
         else:
             lines_differences = []
@@ -614,8 +613,8 @@ class Differ:
 
         else:
             doc_differences = self._test_doc(
-                cast(dict[str, Any], documents[0]),
-                cast(dict[str, Any], documents[1])
+                cast("dict[str, Any]", documents[0]),
+                cast("dict[str, Any]", documents[1])
             )
 
         return lines_differences, doc_differences
@@ -686,8 +685,8 @@ class Differ:
                         tol = 1.01e-2
                         tolrel = tol
                     else:
-                        tol = cast(float, self.options["tolerance_abs"])
-                        tolrel = cast(float, self.options["tolerance_rel"])
+                        tol = cast("float", self.options["tolerance_abs"])
+                        tolrel = cast("float", self.options["tolerance_rel"])
 
                     def to_float(f):
                         return float(f.lower().replace("d", "e").replace("f", "e"))

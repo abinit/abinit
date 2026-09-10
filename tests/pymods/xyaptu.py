@@ -92,7 +92,7 @@ class xcopier(copier):
         try:
             if isinstance(input, str) or input is None:
                 raise AttributeError
-            inf = cast(IO[Any], input)
+            inf = cast("IO[Any]", input)
             inputText = inf.read()
         except (AttributeError, TypeError):
             if isinstance(input, str):

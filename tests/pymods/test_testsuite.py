@@ -8,45 +8,43 @@ Priority 1: High-impact, core infrastructure components.
 from __future__ import annotations
 
 import os
-import pytest
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+
+import pytest
 
 from .testsuite import (
-    FileToTest,
     AbinitTestInfo,
     AbinitTestInfoParser,
     AbinitTestInfoParserError,
     BuildEnvironment,
     Compiler,
-    FortranCompiler,
     CPreProcessor,
-    CPreProcessorError,
-    _str2filestotest,
-    _str2list,
-    _str2intlist,
-    _str2set,
-    _str2cmds,
+    FileToTest,
+    FortranCompiler,
     _str2bool,
-    genid,
-    my_getlogin,
-    html_colorize_text,
-    status2html,
-    sec2str,
-    str2html,
+    _str2cmds,
+    _str2filestotest,
+    _str2intlist,
+    _str2list,
+    _str2set,
     args2htmltr,
-    html_link,
-    html_file_link,
-    is_string,
+    genid,
     has_exts,
+    html_colorize_text,
+    html_file_link,
+    html_link,
+    input_file_has_vars,
+    is_string,
     lazy_read,
     lazy_readlines,
-    rm_rf,
+    my_getlogin,
     parse_configh_file,
-    input_file_has_vars,
+    rm_rf,
+    sec2str,
+    status2html,
+    str2html,
 )
-
 
 # ============================================================================
 # FIXTURES
@@ -252,7 +250,8 @@ class TestParserFunctions:
 
         Note: items with only whitespace are stripped to empty strings
         but still included because whitespace-only strings are truthy
-        in the original split."""
+        in the original split.
+        """
         result = _str2list("item1,  , item2")
         # Whitespace-only items become empty strings after strip()
         assert result == ["item1", "", "item2"]
@@ -720,9 +719,9 @@ class TestUtilityFunctions:
 
     def test_html_colorize_text_escaping(self):
         """Test html_colorize_text properly escapes HTML."""
-        result = html_colorize_text('<script>', '#FF0000')
-        assert '<script>' not in result
-        assert '&lt;script&gt;' in result
+        result = html_colorize_text("<script>", "#FF0000")
+        assert "<script>" not in result
+        assert "&lt;script&gt;" in result
 
     def test_status2html_passed(self):
         """Test status2html with 'passed' status."""

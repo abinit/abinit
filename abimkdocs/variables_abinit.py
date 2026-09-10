@@ -3136,7 +3136,7 @@ Selects the double counting (DC) correction formula used in DFT+DMFT calculation
          Besides, we assume that the projection of the correlated orbital [[dmft_orbital]]
          on the energy window [ [[dmftbandi]],[[dmftbandf]] ] is equal to [[dmft_orbital]] itself
          (i.e. the closure relation is assumed). Please look at section 7 of the
-         [[tutorial:dmft_triqs|tutorial on DFT+DMFT with TRIQS/CT-HYB]] for detailed informations on how to use it.
+         [[tutorial:dmft_triqs|tutorial on DFT+DMFT with TRIQS/CT-HYB]] for detailed information on how to use it.
 
 Magnetic formulas ([[dmft_dc]] < 5 ) need to be used with magnetic DFT ([[usepawu]]=10).
 Non-magnetic formulas ([[dmft_dc]] >= 5 ) need to be used with non-magnetic DFT ([[usepawu]]=14).
@@ -3213,7 +3213,7 @@ Variable(
     requires="[[usedmft]] == 1 and [[dmft_solv]] == 10",
     added_in_version="before_v10.7",
     text=r"""
-Use of the asymptotic limit of the hybridization funtion to enforce that F(iw_n) -> -C_ij/iw_n
+Use of the asymptotic limit of the hybridization function to enforce that F(iw_n) -> -C_ij/iw_n
 """,
 ),
 
@@ -7653,7 +7653,7 @@ Variable(
     abivarname="ggtrcut",
     varset="dfpt",
     vartype="real",
-    topics=['printing_prngs', 'Output_useful'],
+    topics=["printing_prngs", "Output_useful"],
     dimensions="scalar",
     defaultval=0.001,
     mnemonics="GauGe TRansform CUToff",
@@ -12146,11 +12146,11 @@ Variable(
     abivarname="magpen",
     varset="dfpt",
     vartype="real",
-    topics=['DFPT_expert', 'ConstrainedDFPT_expert'],
+    topics=["DFPT_expert", "ConstrainedDFPT_expert"],
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="MAGnetic PENalty DFPT parameter",
-    characteristics=['[[DEVELOP]]'],
+    characteristics=["[[DEVELOP]]"],
     added_in_version="10.4",
     text=r"""
 This variable sets the amplitude of the penalty function applied to the first-order local magnetic moments in a constrained DFPT
@@ -12654,7 +12654,7 @@ Variable(
     abivarname="mpatpol",
     varset="dfpt",
     vartype="integer",
-    topics=['DFPT_expert', 'ConstrainedDFPT_expert'],
+    topics=["DFPT_expert", "ConstrainedDFPT_expert"],
     dimensions=[2],
     defaultval=MultipleValue(number=1, value="[[natom]]"),
     mnemonics="Magnetic Penalty: ATomic POLarisation",
@@ -21577,11 +21577,11 @@ Variable(
     abivarname="symsigma_de",
     varset="gw",
     vartype="real",
-    topics=['SelfEnergy_expert'],
+    topics=["SelfEnergy_expert"],
     dimensions="scalar",
     defaultval="1 meV",
     mnemonics="SYMmetrization of SIGMA matrix elements, Delta Energy",
-    characteristics=['[[ENERGY]]'],
+    characteristics=["[[ENERGY]]"],
     added_in_version="10.7.0",
     text=r"""
 
@@ -24607,7 +24607,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 
-OBSOLETE, superceded by [[hspinfield]].
+OBSOLETE, superseded by [[hspinfield]].
 
 Give the value of the magnetic field, $H$, acting on the spin/spinorial wavefunctions (so, not on the orbital part).
 As usual, the default is atomic units.
@@ -25352,7 +25352,7 @@ need to specify getsigeph or irdsigeph input variables.
 
 In the second case, the code will look for a **pre-existing** VPQ.nc file and continue the optimization
 process from the last iteration available in the netcdf file.
-In this case the default value of [[eph_restart]] is 0, so restart must be activated explictly in the input file
+In this case the default value of [[eph_restart]] is 0, so restart must be activated explicitly in the input file
 
 In the third case, the code will look for a **pre-existing** GSTORE.nc file and continue the computation of the missing elements.
 This feature is activated by default.
@@ -26568,7 +26568,7 @@ Variable(
     abivarname="gstore_iv1p_comm",
     varset="eph",
     vartype="integer",
-    topics=['ElPhonInt_basic'],
+    topics=["ElPhonInt_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics=r"GSTORE write matrix elements of i[V1_ka, p] commutator",
@@ -26850,7 +26850,7 @@ Variable(
     abivarname="getqpdata_filepath",
     varset="eph",
     vartype="string",
-    topics=['ElPhonInt_basic'],
+    topics=["ElPhonInt_basic"],
     dimensions="scalar",
     defaultval="None",
     mnemonics="GET the QPDATA.nc from FILEPATH",
@@ -27318,7 +27318,7 @@ Variable(
     abivarname="vpq_hop_from_filepath",
     varset="eph",
     vartype="string",
-    topics=['Polaron_basic'],
+    topics=["Polaron_basic"],
     dimensions="scalar",
     defaultval=None,
     mnemonics="VPQ.nc, HOPping FROM: FILEPATH",
@@ -27338,7 +27338,7 @@ Variable(
     abivarname="vpq_hop_to_filepath",
     varset="eph",
     vartype="string",
-    topics=['Polaron_expert'],
+    topics=["Polaron_expert"],
     dimensions="scalar",
     defaultval=None,
     mnemonics="VPQ.nc, HOPping TO: FILEPATH",
@@ -27486,7 +27486,7 @@ Variable(
     abivarname="vpq_atloc",
     varset="eph",
     vartype="integer",
-    topics=['Polaron_basic'],
+    topics=["Polaron_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Variational Polaron eQuations: ATom LOCalization site",
@@ -27522,7 +27522,7 @@ Variable(
     abivarname="vpq_mode",
     varset="eph",
     vartype="string",
-    topics=['Polaron_basic'],
+    topics=["Polaron_basic"],
     dimensions="scalar",
     defaultval="polaron",
     mnemonics="Variational Polaron eQuations: MODE",
@@ -27559,7 +27559,7 @@ Variable(
     abivarname="vpq_hop_from_ip",
     varset="eph",
     vartype="integer",
-    topics=['Polaron_expert'],
+    topics=["Polaron_expert"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="Variational Polaron eQuations: HOPping FROM Ith Polaron state",
@@ -27580,7 +27580,7 @@ Variable(
      abivarname="vpq_hop_to_ip",
      varset="eph",
      vartype="integer",
-     topics=['Polaron_expert'],
+     topics=["Polaron_expert"],
      dimensions="scalar",
      defaultval=1,
      mnemonics="Variational Polaron eQuations: HOPping TO Ith Polaron state",
@@ -27729,7 +27729,7 @@ Variable(
     abivarname="vpq_hop_nstep",
     varset="eph",
     vartype="integer",
-    topics=['Polaron_basic'],
+    topics=["Polaron_basic"],
     dimensions="scalar",
     defaultval=1,
     mnemonics="Variational Polaron eQuations, HOPping: Number of iteration STEPs",
@@ -27808,7 +27808,7 @@ Variable(
     abivarname="vpq_hop_tolgrs",
     varset="eph",
     vartype="real",
-    topics=['Polaron_basic'],
+    topics=["Polaron_basic"],
     dimensions="scalar",
     defaultval=1e-6,
     mnemonics="Variational Polaron eQuations, HOPping: TOLerance on the Gradient ReSidual",
@@ -27829,7 +27829,7 @@ Variable(
     abivarname="vpq_hop_ts",
     varset="eph",
     vartype="real",
-    topics=['Polaron_basic'],
+    topics=["Polaron_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Variational Polaron eQuations, HOPping: Time Step",
@@ -27854,9 +27854,9 @@ Variable(
     abivarname="vpq_efilter",
     varset="eph",
     vartype="real",
-    topics=['Polaron_expert'],
+    topics=["Polaron_expert"],
     dimensions="scalar",
-    characteristics=['[[ENERGY]]'],
+    characteristics=["[[ENERGY]]"],
     defaultval=0,
     mnemonics="Variational Polaron eQuations: Energy FILTER",
     requires="[[eph_task]] == 13",
@@ -27881,7 +27881,7 @@ Variable(
     abivarname="vpq_hop_from_site",
     varset="eph",
     vartype="integer",
-    topics=['Polaron_expert'],
+    topics=["Polaron_expert"],
     dimensions="(3)",
     defaultval=[0, 0, 0],
     mnemonics="Variational Polaron eQuations: HOPping FROM SITE",
@@ -27904,7 +27904,7 @@ Variable(
     abivarname="vpq_hop_to_site",
     varset="eph",
     vartype="integer",
-    topics=['Polaron_expert'],
+    topics=["Polaron_expert"],
     dimensions="(3)",
     defaultval=[0, 0, 0],
     mnemonics="Variational Polaron eQuations: HOPping TO SITE",
@@ -27928,7 +27928,7 @@ Variable(
     abivarname="vpq_hop_vec",
     varset="eph",
     vartype="real",
-    topics=['Polaron_basic'],
+    topics=["Polaron_basic"],
     dimensions="(3)",
     defaultval=[0, 0, 0],
     mnemonics="Variational Polaron eQuations: HOPping VECtor",

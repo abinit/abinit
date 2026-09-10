@@ -21,7 +21,7 @@ import textwrap
 import time
 import warnings
 from base64 import b64encode
-from collections.abc import Callable, Iterable, Iterator, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from configparser import ConfigParser
 from configparser import ParsingError as CPError
 from html import escape
@@ -32,7 +32,7 @@ from queue import Empty as EmptyQueueError
 from socket import gethostname
 from subprocess import PIPE, Popen
 from threading import Thread
-from typing import TYPE_CHECKING, Any, TextIO, cast
+from typing import Any, TextIO, cast
 
 try:
     from typing import Self
@@ -364,9 +364,9 @@ def rm_rf(top: str, exclude_paths: str | list[str] | None = None) -> list[str]:
     exc_paths: list[str] = []
     if exclude_paths is not None:
         if is_string(exclude_paths):
-            exc_paths = [cast(str, exclude_paths)]
+            exc_paths = [cast("str", exclude_paths)]
         else:
-            exc_paths = cast(list[str], exclude_paths)
+            exc_paths = cast("list[str]", exclude_paths)
 
     removed = []
     for (root, dirs, files) in os.walk(top):
@@ -512,7 +512,7 @@ class FileToTest:
             self.__dict__[atr_name] = value
 
         # Postprocess fld_options
-        fld_options_str = cast(str, self.fld_options)
+        fld_options_str = cast("str", self.fld_options)
         self.fld_options = fld_options_str.split()
         for opt in self.fld_options:
             if not opt.startswith("-"):
@@ -1003,7 +1003,7 @@ class AbinitTestInfoParser:
         # Consistency check
         opt = "test_chain"
         section = TESTCNF_KEYWORDS[opt][2]
-        pars = cast(Callable[[str], Any], TESTCNF_KEYWORDS[opt][0])
+        pars = cast("Callable[[str], Any]", TESTCNF_KEYWORDS[opt][0])
 
         if self.parser.has_option(section, opt):
             string = self.parser.get(section, opt)
@@ -1030,8 +1030,8 @@ class AbinitTestInfoParser:
         # First read and parse the global options.
         for key in TESTCNF_KEYWORDS:
             tup = TESTCNF_KEYWORDS[key]
-            line_parser = cast(Callable[[Any], Any], tup[0])
-            section = cast(str, tup[2])
+            line_parser = cast("Callable[[Any], Any]", tup[0])
+            section = cast("str", tup[2])
 
             if section == "yaml_test":
                 # special case: handle this separately
@@ -1093,7 +1093,7 @@ class AbinitTestInfoParser:
                     continue
                 opt = self.parser.get(ncpu_section, key)
                 tup = TESTCNF_KEYWORDS[key]
-                line_parser = cast(Callable[[Any], Any], tup[0])
+                line_parser = cast("Callable[[Any], Any]", tup[0])
 
                 # Process the line and replace the global value.
                 try:
@@ -1117,9 +1117,9 @@ class AbinitTestInfoParser:
     def nprocs_to_test(self) -> list[int]:
         """List with the number of MPI processors to be tested."""
         key = "nprocs_to_test"
-        opt_parser = cast(Callable[[Any], list[int]], TESTCNF_KEYWORDS[key][0])
-        default = cast(str, TESTCNF_KEYWORDS[key][1])
-        section = cast(str, TESTCNF_KEYWORDS[key][2])
+        opt_parser = cast("Callable[[Any], list[int]]", TESTCNF_KEYWORDS[key][0])
+        default = cast("str", TESTCNF_KEYWORDS[key][1])
+        section = cast("str", TESTCNF_KEYWORDS[key][2])
 
         if self.parser.has_option(section, key):
             opt = self.parser.get(section, key)
@@ -1144,8 +1144,8 @@ class AbinitTestInfoParser:
         """
         assert self.is_testchain
         opt = "test_chain"
-        section = cast(str, TESTCNF_KEYWORDS[opt][2])
-        parse = cast(Callable[[str], list[str]], TESTCNF_KEYWORDS[opt][0])
+        section = cast("str", TESTCNF_KEYWORDS[opt][2])
+        parse = cast("Callable[[str], list[str]]", TESTCNF_KEYWORDS[opt][0])
 
         fnames = parse(self.parser.get(section, opt))
         # HACK
@@ -1663,9 +1663,9 @@ def make_abitests_from_inputs(input_fnames: str | list[str], abenv: BuildEnviron
     in the input files inp_fnames.
     """
     if is_string(input_fnames):
-        input_fnames = [cast(str, input_fnames)]
+        input_fnames = [cast("str", input_fnames)]
     else:
-        input_fnames = cast(list[str], input_fnames)
+        input_fnames = cast("list[str]", input_fnames)
 
     inp_fnames = [os.path.abspath(p) for p in input_fnames]
 
@@ -1732,7 +1732,7 @@ class NotALock:
     def __enter__(self) -> None:
         pass
 
-    def __exit__(self, *args: Any) -> None:
+    def __exit__(self, *args: object) -> None:
         pass
 
 
@@ -3176,12 +3176,12 @@ def match_var_value(text, varname):
     varname : str
         Base variable name.
 
-    Returns
+    Returns:
     -------
     str or None
         The associated value if found, otherwise None.
     """
-    pattern = rf'\b{re.escape(varname)}(?:[:?+]|\d*)\s+(\S+)'
+    pattern = rf"\b{re.escape(varname)}(?:[:?+]|\d*)\s+(\S+)"
     m = re.search(pattern, text)
     return m.group(1) if m else None
 

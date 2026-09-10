@@ -21,7 +21,6 @@ from socket import gethostname
 from typing import Any
 from warnings import warn
 
-
 # Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
 os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Pspdir"))
 
@@ -39,7 +38,6 @@ abenv = tests.abenv
 from pymods import termcolor
 from pymods.jobrunner import JobRunner, OMPEnvironment, TimeBomb
 from pymods.testsuite import BuildEnvironment
-from pymods.tools import pprint_table
 
 
 def get_mpi_prefix_from_env() -> str | None:
@@ -285,7 +283,7 @@ class TestBot:
                 f"Builder {self.builder_name} declares has_mpi=True but was not "
                 "compiled with MPI support (HAVE_MPI not in config.h)"
             )
-        elif not self.has_mpi and "HAVE_MPI" in self.build_env.defined_cppvars:
+        if not self.has_mpi and "HAVE_MPI" in self.build_env.defined_cppvars:
             raise ValueError(
                 f"Builder {self.builder_name} declares has_mpi=False but was "
                 "compiled with MPI support (HAVE_MPI in config.h)"
@@ -306,7 +304,7 @@ class TestBot:
             warn(f"Cannot find timeout executable at: {build_env.path_of_bin('timeout')}")
             timebomb = TimeBomb(self.timeout_time)
 
-        print("Initalizing JobRunner for sequential runs.")
+        print("Initializing JobRunner for sequential runs.")
         self.seq_runner = JobRunner.sequential(timebomb=timebomb)
         print(self.seq_runner)
 
@@ -334,12 +332,12 @@ class TestBot:
                     "builders.yaml (testbot_args) to pin a specific launcher."
                 )
 
-            print("Initalizing MPI JobRunner from self.__dict__")
+            print("Initializing MPI JobRunner from self.__dict__")
             self.mpi_runner = JobRunner.fromdict(self.__dict__, timebomb=timebomb)
             print(self.mpi_runner)
 
         if self.omp_num_threads > 0:
-            print(f"Initalizing OMP environment with omp_num_threads {self.omp_num_threads}")
+            print(f"Initializing OMP environment with omp_num_threads {self.omp_num_threads}")
             omp_env = OMPEnvironment(OMP_NUM_THREADS=self.omp_num_threads)
             self.seq_runner.set_ompenv(omp_env)
             if self.has_mpi:
@@ -848,7 +846,7 @@ class TestBotSummary:
             suite_name: string with the name of the suite.
 
         return: (suite_status, stats) where
-            suite_status is one of the possile status in `_possible_status`
+            suite_status is one of the possible status in `_possible_status`
             stats is a dictionary : {failed:1, passed:2, succeeded:0, skipped:0}
         """
         # Initialize stats setting the keys to 0

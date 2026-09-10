@@ -25,9 +25,7 @@ except ImportError:
 
 import os
 import re
-import re
 import sys
-from typing import Dict, List, Tuple
 
 
 class MyConfigParser(ConfigParser):
@@ -50,7 +48,6 @@ def is_ignored(keyword: str) -> bool:
 
 def key_is_ok(mode: str, key: str) -> bool:
   """Determine if a configuration key is valid for a given build mode."""
-
   # Init keys to ignore
   cnf_ignore = dict() # type: Dict[str, Tuple[str, ...]]
   cnf_ignore["mpi"] = ("status","CC","CXX","FC")

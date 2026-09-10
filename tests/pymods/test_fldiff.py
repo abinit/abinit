@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from typing import cast
+
 import pytest
 
-from typing import cast
 from .data_extractor import DataExtractor
 from .fldiff import (
     Differ,
@@ -124,10 +125,10 @@ class TestDiffer:
 
         assert all(isinstance(d, TextDifference) for d in differences)
 
-        d4 = cast(TextDifference, differences.pop(2))
+        d4 = cast("TextDifference", differences.pop(2))
         assert d4.silent
 
-        assert not any(cast(TextDifference, d).silent for d in differences)
+        assert not any(cast("TextDifference", d).silent for d in differences)
 
     def test_diff_lines_number_not_significant(self) -> None:
         diff = Differ()
@@ -319,7 +320,7 @@ a list of strings:
         assert documents["dtset=1 GenericMap"].start == 6
         assert documents["dtset=1 GenericMap"].end == 13
         assert documents["dtset=1 GenericMap"].lines == lines_list[6:]
-        expected = cast(GenericMap, GenericMap.from_map({  # type: ignore[attr-defined]
+        expected = cast("GenericMap", GenericMap.from_map({  # type: ignore[attr-defined]
             "a field": 58,
             "another": 78,
             "a list of strings": ["a string", "two strings", "..."]

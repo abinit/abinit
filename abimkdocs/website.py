@@ -1481,10 +1481,9 @@ The full bibtex file is available [here](../abiref.bib).
                             url = "./index.md"
                         elif not has_ext and url != ".":
                             url += ".md"
-                    else:
-                        # For HTML, ensure directory-style URLs if no extension is present
-                        if not has_ext and url != "." and not url.endswith("/"):
-                            url += "/"
+                    # For HTML, ensure directory-style URLs if no extension is present
+                    elif not has_ext and url != "." and not url.endswith("/"):
+                        url += "/"
 
             if end: url = "%s#%s" % (url, end)
             #print("url", url)

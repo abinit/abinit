@@ -10,6 +10,7 @@ from collections.abc import ItemsView, Iterator, KeysView
 from typing import Any, TypeVar
 
 import numpy as np
+from typing_extensions import Self
 
 from .abinit_iterators import ITERATOR_RANKS
 
@@ -204,7 +205,7 @@ class BaseArray(np.ndarray):
     __yaml_tag = "Array"
 
     # by default we want to treat this as a coherent object and do not check
-    # values individualy
+    # values individually
     has_no_child = True
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -220,7 +221,7 @@ class BaseArray(np.ndarray):
         self._has_undef = False
 
     @classmethod
-    def from_seq(cls: type[_BaseArrayT], s: Any) -> _BaseArrayT:
+    def from_seq(cls, s: Any) -> Self:
         def check_undef(s: Any) -> bool:
             """
             Look for Undef in the original list because numpy convert it to nan

@@ -90,7 +90,7 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
         """Standard hash implementation using locus and size."""
         return hash((self.locus, self.size))
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Check equality of two entries."""
         return self.locus == other.locus and self.size == other.size
 

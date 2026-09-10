@@ -75,7 +75,7 @@ def main() -> int:
     if "autom4te.cache" in dirs: dirs.remove("autom4te.cache")
 
     # Ignore hidden directories
-    hidden_dirs = [d for d in dirs if d.startswith('.')]
+    hidden_dirs = [d for d in dirs if d.startswith(".")]
     for d in hidden_dirs: dirs.remove(d)
 
     # Ignore temporary dirs

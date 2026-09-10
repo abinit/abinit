@@ -1526,7 +1526,7 @@ def _extract_errors(logfile: str | Path, context_lines: int = 5) -> list[str]:
     errors = []
     for i, line in enumerate(lines):
         if regex.search(line):
-            # Ignore maches such as `sd_yakl_options='optional fail'
+            # Ignore matches such as `sd_yakl_options='optional fail'
             if line.startswith("sd_") and "fail" in line:
                 continue
             # Capture context
@@ -1626,5 +1626,5 @@ nsys stats profile_run.nsys-rep | tee prof.out
 #vimdiff run_gpu.abo ref_cpu.log
 """
 
-    with open(sh_path, "wt") as fh:
+    with open(sh_path, "w") as fh:
         fh.write(sh_template)

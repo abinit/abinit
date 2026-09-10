@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 """
-Define classes and contants to represent the state of iteration of a document
+Define classes and constants to represent the state of iteration of a document
 as well as the operations possible on this state. This is used in filter
 applications by the configuration handler.
 """
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from .errors import EmptySetError, NotOrderedOverlappingSetError
 

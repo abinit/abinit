@@ -54,7 +54,7 @@ def yaml_map(cls: type) -> type:
 
     def constructor(loader: Any, node: Any) -> Any:
         map = dict(loader.construct_mapping(node, deep=True))
-        from_map = cast(Any, getattr(cls, "from_map", None))
+        from_map = cast("Any", getattr(cls, "from_map", None))
         if ismethod(from_map):
             return from_map(map)
         return cls().from_map(map)
@@ -87,7 +87,7 @@ def yaml_seq(cls: type) -> type:
 
     def constructor(loader: Any, node: Any) -> Any:
         seq = list(loader.construct_sequence(node, deep=True))
-        from_seq = cast(Any, getattr(cls, "from_seq", None))
+        from_seq = cast("Any", getattr(cls, "from_seq", None))
         if ismethod(from_seq):
             return from_seq(seq)
         return cls().from_seq(seq)
@@ -120,7 +120,7 @@ def yaml_scalar(cls: type) -> type:
 
     def constructor(loader: Any, node: Any) -> Any:
         scalar = loader.construct_scalar(node)
-        from_scalar = cast(Any, getattr(cls, "from_scalar", None))
+        from_scalar = cast("Any", getattr(cls, "from_scalar", None))
         if ismethod(from_scalar):
             return from_scalar(scalar)
         return cls().from_scalar(scalar)
@@ -207,7 +207,7 @@ def yaml_implicit_scalar(cls: type) -> type:
     yaml_scalar(cls)  # register the constructor and the representer
     tag = "!" + get_yaml_tag(cls)
 
-    re_pattern = cast(Any, getattr(cls, "yaml_pattern", None))
+    re_pattern = cast("Any", getattr(cls, "yaml_pattern", None))
     if not hasattr(re_pattern, "match"):
         re_pattern = re.compile(re_pattern)
     # register the implicit pattern

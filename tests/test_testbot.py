@@ -22,8 +22,8 @@ sys.modules["pymods.tools"] = MagicMock()
 # Now we can import testbot
 from tests.testbot import (
     TestBot,
-    TestRunSummary,
     TestBotSummary,
+    TestRunSummary,
     analyze,
     build_parser,
     default_mpirun_np,

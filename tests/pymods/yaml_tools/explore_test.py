@@ -223,7 +223,7 @@ class Explorer(cmd.Cmd):
         """
         filename = os.path.realpath(os.path.expanduser(arg))
         try:
-            self.tree = cast(ExtendedTestConf, ExtendedTestConf.from_file(filename))
+            self.tree = cast("ExtendedTestConf", ExtendedTestConf.from_file(filename))
         except OSError:
             print("File not found.")
         except ConfigError as e:
@@ -362,7 +362,7 @@ class Explorer(cmd.Cmd):
         If no argument is given, list all parameters and constraints
         visible from the current level. If argument is *, list all
         parameters and constraints known. If argument is ARG, show all
-        informations about ARG.
+        information about ARG.
         """
         def show_cons(cons: Constraint, used: bool = False) -> None:
             print("Constraint", cons.name)
@@ -532,7 +532,7 @@ class Explorer(cmd.Cmd):
             call([ed, filepath])
         except OSError:
             print(f"The editor command {ed} cannot be found.",
-                  "You may want to set your EDITOR envrionment variable to",
+                  "You may want to set your EDITOR environment variable to",
                   "select a different command.")
         else:
             self.do_load(filepath)
