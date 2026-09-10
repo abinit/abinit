@@ -363,7 +363,13 @@ class JobRunner:
     @property
     def has_mpirun(self) -> bool:
         """True if we are running a MPI job with mpirun"""
-        return hasattr(self, "mpirun_np") and self.mpirun_np != "srun -n"
+        # Must test the *value*, not just the presence of the attribute: both
+        # mpicfg_parser and TestBot hand us every CFG_KEYWORDS key, so an
+        # unconfigured launcher arrives as mpirun_np="". Reporting True for that
+        # made run() emit [<empty>, nprocs, ..., bin_path, ...], i.e. a command
+        # line whose first token was the process count ("failed to run command
+        # '2'", retcode 127) instead of failing outright.
+        return bool(getattr(self, "mpirun_np", "")) and self.mpirun_np != "srun -n"
 
 
     @property
@@ -445,7 +451,13 @@ class JobRunner:
             args = [poe, bin_path, poe_args, " -procs "+ str(mpi_nprocs),
                     stdin, stdout, stderr]
         else:
-            assert mpi_nprocs == 1
+            if mpi_nprocs != 1:
+                raise ValueError(
+                    f"Cannot run with mpi_nprocs={mpi_nprocs}: this JobRunner has no MPI "
+                    "launcher configured (mpirun_np and poe are both empty). Set mpirun_np "
+                    "(e.g. 'mpiexec -n') in the builder configuration or the [mpi] section "
+                    "of the config file."
+                )
             args = [perf_cmd, valcmd, bin_path, bin_argstr, stdin, stdout, stderr]
 
         if self.has_debugger:

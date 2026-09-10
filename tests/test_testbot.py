@@ -7,6 +7,7 @@ import json
 import os
 import sys
 import tempfile
+import warnings
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -25,6 +26,7 @@ from tests.testbot import (
     TestBotSummary,
     analyze,
     build_parser,
+    default_mpirun_np,
     get_git_tag,
     get_mpi_prefix_from_env,
     main,
@@ -86,6 +88,58 @@ class TestGetMpiPrefixFromEnv:
         env = {"MPI_HOME": "/usr/local/mpi", "EBROOTMPICH": "/eb/mpich"}
         with patch.dict(os.environ, env, clear=True):
             assert get_mpi_prefix_from_env() == "/usr/local/mpi"
+
+
+class TestDefaultMpirunNp:
+    """Tests for default_mpirun_np(), the fallback when mpirun_np is unset."""
+
+    @staticmethod
+    def _make_launcher(directory, name="mpiexec"):
+        """Create an executable stub named `name` in `directory` and return its path."""
+        os.makedirs(directory, exist_ok=True)
+        path = os.path.join(directory, name)
+        with open(path, "w") as fh:
+            fh.write("#!/bin/sh\n")
+        os.chmod(path, 0o700)
+        return path
+
+    def test_prefers_launcher_under_mpi_home_prefix(self, tmp_path):
+        """MPI_HOME-style prefix: the launcher in <prefix>/bin must win over $PATH."""
+        exe = self._make_launcher(os.path.join(str(tmp_path), "bin"))
+        assert default_mpirun_np(str(tmp_path)) == f"{exe} -n"
+
+    def test_accepts_ebroot_style_prefix_already_ending_in_bin(self, tmp_path):
+        """get_mpi_prefix_from_env returns <root>/bin for EBROOT*; that must resolve too."""
+        exe = self._make_launcher(str(tmp_path))
+        assert default_mpirun_np(str(tmp_path)) == f"{exe} -n"
+
+    def test_ignores_a_non_executable_candidate(self, tmp_path):
+        """A non-executable file named mpiexec must not be picked as the launcher."""
+        bindir = tmp_path / "bin"
+        bindir.mkdir()
+        (bindir / "mpiexec").write_text("not executable\n")
+        assert default_mpirun_np(str(tmp_path)) == "mpiexec -n"
+
+    def test_falls_back_to_path_lookup_without_a_prefix(self, monkeypatch):
+        """With no usable prefix, fall back to whichever launcher $PATH provides."""
+        import tests.testbot as tb_module
+
+        monkeypatch.setattr(
+            tb_module.shutil, "which",
+            lambda name: None if name == "mpiexec" else "/usr/bin/mpirun",
+        )
+        assert default_mpirun_np("") == "mpirun -n"
+
+    def test_returns_standard_spelling_when_nothing_is_found(self, monkeypatch):
+        """No prefix and nothing in $PATH: still emit a real command name.
+
+        A bogus "mpiexec: command not found" is far easier to diagnose than the
+        mangled command line an empty mpirun_np used to produce.
+        """
+        import tests.testbot as tb_module
+
+        monkeypatch.setattr(tb_module.shutil, "which", lambda name: None)
+        assert default_mpirun_np(None) == "mpiexec -n"
 
 
 class TestGetGitTag:
@@ -470,6 +524,50 @@ class TestTestBotFromJson:
         testbot_json.write_text(json.dumps({"builder_name": "b", "max_cpus": 2}))
         with pytest.raises(ValueError, match="declares has_mpi=True"):
             TestBot.from_json(str(testbot_json))
+
+    def test_from_json_defaults_mpirun_np_when_builder_omits_it(self, tmp_path, monkeypatch):
+        """An MPI builder with no mpirun_np must get a working launcher, with a warning.
+
+        Regression test for alps_gnu_14.2_cov: mpirun_np is optional in
+        builders.yaml, and the empty value reached JobRunner, which still took
+        its MPI branch and built a command line starting with the process count
+        ("/bin/timeout: failed to run command '2'", retcode 127 on every np > 1
+        test).
+        """
+        self._mock_environment(monkeypatch, defined_cppvars=["HAVE_MPI"])
+        testbot_json = tmp_path / "testbot.json"
+        testbot_json.write_text(json.dumps({"builder_name": "alps_gnu_14.2_cov", "max_cpus": 8}))
+
+        with pytest.warns(UserWarning, match="no mpirun_np"):
+            testbot = TestBot.from_json(str(testbot_json))
+
+        assert testbot.mpirun_np
+        assert testbot.mpirun_np.endswith(" -n")
+
+    def test_from_json_keeps_an_explicit_mpirun_np(self, tmp_path, monkeypatch):
+        """A builder that pins mpirun_np must keep it verbatim, with no warning."""
+        self._mock_environment(monkeypatch, defined_cppvars=["HAVE_MPI"])
+        testbot_json = tmp_path / "testbot.json"
+        testbot_json.write_text(json.dumps({
+            "builder_name": "b", "max_cpus": 2, "mpirun_np": "/opt/mpich/bin/mpiexec -n",
+        }))
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            testbot = TestBot.from_json(str(testbot_json))
+
+        assert testbot.mpirun_np == "/opt/mpich/bin/mpiexec -n"
+        # Other warnings (e.g. a missing timeout binary) are unrelated and fine.
+        assert not [w for w in caught if "mpirun_np" in str(w.message)]
+
+    def test_from_json_leaves_mpirun_np_alone_for_serial_builders(self, tmp_path, monkeypatch):
+        """has_mpi=False builders never launch under MPI, so nothing is filled in."""
+        self._mock_environment(monkeypatch, defined_cppvars=[])
+        testbot_json = tmp_path / "testbot.json"
+        testbot_json.write_text(json.dumps({"builder_name": "b", "max_cpus": 2, "has_mpi": False}))
+
+        testbot = TestBot.from_json(str(testbot_json))
+        assert testbot.mpirun_np == ""
 
     def test_from_json_mpi_false_but_build_has_it_raises(self, tmp_path, monkeypatch):
         """has_mpi=False but build has HAVE_MPI must raise ValueError."""

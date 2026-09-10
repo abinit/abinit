@@ -58,6 +58,45 @@ def get_mpi_prefix_from_env() -> str | None:
     return mpi_prefix
 
 
+def default_mpirun_np(mpi_prefix: str | None = None) -> str:
+    """Return the launcher prefix to use when a builder leaves ``mpirun_np`` unset.
+
+    ``mpirun_np`` is optional in builders.yaml (e.g. alps_gnu_14.2_cov), but an
+    MPI-enabled builder still has to launch np > 1 tests somehow, so a sane
+    default is needed -- see TestBot.__post_init__ for what an empty value used
+    to do.
+
+    Prefers the launcher shipped by the MPI installation the binary was linked
+    against (``mpi_prefix``, from get_mpi_prefix_from_env) rather than whatever
+    turns up first in $PATH, which may well be a different implementation.
+    Falls back to a bare ``mpiexec``/``mpirun``; both MPICH and Open MPI accept
+    the ``-n`` spelling of the process-count flag.
+
+    Args:
+        mpi_prefix: MPI installation prefix, as returned by get_mpi_prefix_from_env().
+
+    Returns:
+        str: A prefix of the form ``"<launcher> -n"``, ready for JobRunner.
+    """
+    if mpi_prefix:
+        # get_mpi_prefix_from_env returns a prefix for MPI_HOME/MPIHOME but an
+        # already-".../bin" path for the Easybuild EBROOT* variables: try both.
+        for candidate in (
+            os.path.join(mpi_prefix, "bin", "mpiexec"),
+            os.path.join(mpi_prefix, "mpiexec"),
+        ):
+            if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+                return f"{candidate} -n"
+
+    for name in ("mpiexec", "mpirun"):
+        if shutil.which(name) is not None:
+            return f"{name} -n"
+
+    # Nothing found: return the standard spelling anyway so the failure is a
+    # plain "mpiexec: command not found" instead of a mangled command line.
+    return "mpiexec -n"
+
+
 def lazy__str__(func: Callable) -> Callable:
     """
     Decorator that provides a default __str__ implementation based on object attributes.
@@ -273,12 +312,28 @@ class TestBot:
 
         if self.has_mpi:
             self.mpi_prefix = get_mpi_prefix_from_env() or ""
-            # NOTE: mpi_prefix is informational only today -- JobRunner.run() (pymods/jobrunner.py)
-            # builds its command line from mpirun_np/mpi_args/poe alone and never reads mpi_prefix,
-            # so this does not affect PATH or how mpirun_np resolves. Stored here only so it shows
-            # up in JobRunner.__str__/CFG_KEYWORDS diagnostics. A future refactor could prepend
-            # f"{self.mpi_prefix}/bin" to PATH so a bare mpirun_np command resolves against this
-            # specific MPI install -- not implemented here.
+            # NOTE: JobRunner.run() (pymods/jobrunner.py) builds its command line from
+            # mpirun_np/mpi_args/poe alone and never reads mpi_prefix, so this does not
+            # affect PATH or how an explicitly configured mpirun_np resolves; it shows up
+            # in JobRunner.__str__/CFG_KEYWORDS diagnostics and is consulted below to
+            # locate a launcher when mpirun_np was left unset. A future refactor could
+            # prepend f"{self.mpi_prefix}/bin" to PATH so that a bare mpirun_np command
+            # also resolves against this specific MPI install -- not implemented here.
+
+            if not self.mpirun_np:
+                # An MPI builder that doesn't pin mpirun_np used to reach JobRunner with
+                # mpirun_np="". JobRunner.has_mpirun was still true (the attribute merely
+                # had to exist), so run() built its command line as
+                # [mpirun_np, nprocs, ..., bin_path, ...] and the process count ended up
+                # first: "/bin/timeout: failed to run command '2'", retcode 127 on every
+                # np > 1 test (observed on alps_gnu_14.2_cov).
+                self.mpirun_np = default_mpirun_np(self.mpi_prefix)
+                warn(
+                    f"Builder {self.builder_name} sets has_mpi=True but no mpirun_np; "
+                    f"defaulting to {self.mpirun_np!r}. Set mpirun_np explicitly in "
+                    "builders.yaml (testbot_args) to pin a specific launcher."
+                )
+
             print("Initalizing MPI JobRunner from self.__dict__")
             self.mpi_runner = JobRunner.fromdict(self.__dict__, timebomb=timebomb)
             print(self.mpi_runner)
