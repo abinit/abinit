@@ -1,6 +1,14 @@
 #!/bin/sh
 # This script generates the abinit documentation in ROBODOC format in the directory tmp-robodoc
 echo "Will generate ROBODOC documentation in tmp-robodoc (requires robodoc)"
+
+# Check the dependency before removing any previously generated documentation.
+if ! command -v robodoc >/dev/null 2>&1; then
+    echo "Error: robodoc is required but was not found in PATH." >&2
+    echo "Install ROBODoc or add its executable directory to PATH, then run this script again." >&2
+    exit 127
+fi
+
 #rm -rf tmp-robodoc robodoc-html && mkdir tmp-robodoc
 #cp -rf ./src/[0-9]* tmp-robodoc
 #cp ./config/robodoc/robodoc-html.rc tmp-robodoc/robodoc.rc
