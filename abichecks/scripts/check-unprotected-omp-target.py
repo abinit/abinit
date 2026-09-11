@@ -10,7 +10,8 @@ from abirules_tools import find_src_dirs
 
 # Init
 re_srcfile = re.compile(r"\.([Ff]|[Ff]90|finc)$")
-len_limit = 132
+re_omp_target = re.compile(r"!\$OMP TARGET")
+re_fortran_comment = re.compile(r"!!.*")
 
 black_list = {
 "m_build_info.F90",
@@ -29,7 +30,6 @@ def main():
         return 1
 
     retval = 0
-    out = "out.F90"
     for top in find_src_dirs():
         for root, dirs, files in os.walk(top):
             # Check line lengths in Fortran source files
@@ -37,17 +37,30 @@ def main():
                 if re_srcfile.search(item) and item not in black_list:
                     lineno = 1
                     path = os.path.join(root, item)
-                    cmd_list = ["gfortran", "-E", path]
+
+                    # Most source files cannot produce a finding. Avoid the
+                    # relatively expensive compiler startup for those files.
+                    with open(path, encoding="utf-8") as fh:
+                        if not any(re_omp_target.search(re_fortran_comment.sub("", line)) for line in fh):
+                            continue
+
+                    cmd_list = ["gfortran", "-cpp", "-E", path]
                     cmd_list.append(f"-I{root}")
                     cmd_list.append(f"-I{top}/incs")
                     cmd_list.append(f"-I{top}/../shared/common/src/incs")
                     cmd_list.append(f"-I{top}/../shared/libpaw/incs")
                     p = run(cmd_list, stdin=None, timeout=5, capture_output=True, encoding="utf-8", check=False)
-                    output = p.stdout.split("\n")
-                    for line in output:
-                        line = re.sub("!!.*", "", line)
-                        line = re.sub("\n", "", line)
-                        if re.search(r"!\$OMP TARGET", line):
+                    if p.returncode != 0:
+                        sys.stderr.write(
+                            "%s: gfortran preprocessing failed with exit status %d:\n%s\n"
+                            % (path, p.returncode, p.stderr)
+                        )
+                        retval = 1
+                        continue
+
+                    for line in p.stdout.splitlines():
+                        line = re_fortran_comment.sub("", line)
+                        if re_omp_target.search(line):
                             sys.stderr.write(
                                 "%s: line %d has an unprotected OMP TARGET directive:\n\n%s\n" % (path, lineno, line))
                             sys.stdout.write(
