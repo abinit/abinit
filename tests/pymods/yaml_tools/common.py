@@ -9,8 +9,12 @@ import sys
 from collections.abc import ItemsView, Iterator, KeysView
 from typing import Any, TypeVar
 
+try:
+    from typing import Self
+except ImportError:
+    from typing_extensions import Self
+
 import numpy as np
-from typing_extensions import Self
 
 from .abinit_iterators import ITERATOR_RANKS
 
