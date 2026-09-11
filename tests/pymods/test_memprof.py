@@ -99,61 +99,57 @@ class TestEntry:
         assert hash(e1) == hash(e2)
         assert not e1.__neq__(e2)
 
+    def test_site_excludes_action_unlike_locus(self):
+        alloc = Entry.from_line(make_line("v", "A", 1, 8, "f.F90", 10, 8))
+        free = Entry.from_line(make_line("v", "D", 1, -8, "f.F90", 10, 0))
+        assert alloc.locus != free.locus
+        assert alloc.site == free.site == "v@f.F90:10"
+
     def test_repr_and_to_repr(self):
         entry = Entry.from_line(make_line("v", "A", 255, 8, "f.F90", 1, 8))
         assert "0xff" in repr(entry)
         assert "addr=" in repr(entry)
         assert "addr=" not in entry.to_repr(with_addr=False)
 
-    def test_frees_onheap_never_matches_a_free_against_its_own_allocation(self):
-        # BUG (documented, not fixed here; also unused anywhere in the
-        # module -- find_memleaks() reimplements the same check inline
-        # instead of calling this method): the guard reads
-        # `if (not self.isfree) or other.isalloc: return False`, which
-        # returns False whenever `other` *is* an allocation -- i.e. for
-        # every real "does this free deallocate that alloc" call. The `or`
-        # is almost certainly missing a `not` on `other.isalloc`.
+    def test_frees_onheap_matches_a_free_against_its_own_allocation(self):
         alloc = Entry.from_line(make_line("v", "A", 1, 800, "f.F90", 1, 800))
         free = Entry.from_line(make_line("v", "D", 1, -800, "f.F90", 1, 0))
-        assert free.frees_onheap(alloc) is False
+        assert free.frees_onheap(alloc) is True
         assert alloc.frees_onheap(free) is False  # alloc is not a free
 
-    def test_frees_onheap_true_only_between_two_cancelling_frees(self):
-        # The only inputs that satisfy the (buggy) guard above: self is a
-        # free *and* other is also not an allocation.
+    def test_frees_onheap_size_mismatch(self):
+        alloc = Entry.from_line(make_line("v", "A", 1, 800, "f.F90", 1, 800))
+        free = Entry.from_line(make_line("v", "D", 1, -400, "f.F90", 1, 0))
+        assert free.frees_onheap(alloc) is False
+
+    def test_frees_onheap_other_not_an_alloc_returns_false(self):
         free1 = Entry.from_line(make_line("v", "D", 1, -800, "f.F90", 1, 0))
         free2 = Entry.from_line(make_line("v", "D", 2, 800, "f.F90", 1, 800))
-        assert free2.frees_onheap(free1) is True
-
-    def test_frees_onheap_size_mismatch(self):
-        free1 = Entry.from_line(make_line("v", "D", 1, -800, "f.F90", 1, 0))
-        free2 = Entry.from_line(make_line("v", "D", 2, 400, "f.F90", 1, 400))
         assert free2.frees_onheap(free1) is False
 
-    def test_frees_onstack_can_never_match_a_free_to_its_own_allocation(self):
-        # BUG (documented, not fixed here): locus embeds the entry's own
-        # action letter ("A:..." vs "D:..."), so a free's locus can never
-        # equal the locus of the allocation it deallocates -- even for the
-        # exact same vname/file/line. frees_onstack() (and transitively
-        # find_memleaks()'s stack-reconciliation branch) can therefore never
-        # actually match a free against its own allocation.
+    def test_frees_onstack_matches_a_free_to_its_own_allocation(self):
+        # Regression: site (vname/file/line, no action letter) is what this
+        # compares on, not locus (which embeds the action and so could never
+        # equal between an "A" and a "D" entry at the same source line).
         alloc = Entry.from_line(make_line("v", "A", 1, 800, "f.F90", 1, 800))
         free_same_line = Entry.from_line(make_line("v", "D", 1, -800, "f.F90", 1, 0))
         assert alloc.locus != free_same_line.locus
-        assert free_same_line.frees_onstack(alloc) is False
+        assert alloc.site == free_same_line.site
+        assert free_same_line.frees_onstack(alloc) is True
 
-    def test_frees_onstack_matches_two_free_entries_with_identical_locus(self):
-        # The only way frees_onstack() can return True in practice: two "D"
-        # entries sharing the exact same locus (so parked under the same
-        # stack[] key in find_memleaks()) whose sizes cancel.
+    def test_frees_onstack_requires_matching_line(self):
+        alloc = Entry.from_line(make_line("v", "A", 1, 800, "f.F90", 1, 800))
+        free_other_line = Entry.from_line(make_line("v", "D", 1, -800, "f.F90", 2, 0))
+        assert free_other_line.frees_onstack(alloc) is False
+
+    def test_frees_onstack_requires_size_cancellation(self):
+        alloc = Entry.from_line(make_line("v", "A", 1, 800, "f.F90", 1, 800))
+        free = Entry.from_line(make_line("v", "D", 1, -400, "f.F90", 1, 400))
+        assert free.frees_onstack(alloc) is False
+
+    def test_frees_onstack_other_not_an_alloc_returns_false(self):
         free1 = Entry.from_line(make_line("v", "D", 1, -800, "f.F90", 1, 0))
         free2 = Entry.from_line(make_line("v", "D", 2, 800, "f.F90", 1, 800))
-        assert free1.locus == free2.locus
-        assert free2.frees_onstack(free1) is True
-
-    def test_frees_onstack_still_requires_matching_line(self):
-        free1 = Entry.from_line(make_line("v", "D", 1, -800, "f.F90", 1, 0))
-        free2 = Entry.from_line(make_line("v", "D", 2, 800, "f.F90", 2, 800))
         assert free2.frees_onstack(free1) is False
 
 
@@ -308,24 +304,22 @@ class TestFindMemleaks:
         analysis = AbimemFile(str(_write(tmp_path, content)))
         assert analysis.find_memleaks() == 1
 
-    def test_ptr_reused_ends_up_parked_on_the_stack_unreconciled(self, tmp_path):
+    def test_ptr_reused_is_reconciled_via_the_stack(self, tmp_path):
         # Same ptr allocated twice in a row (simulating a compiler
         # reallocation): the second alloc can't cleanly pop the first from
-        # the heap, so it's parked on the stack under its own "A:..." locus
-        # key; a later free at that ptr that doesn't cancel the *original*
-        # heap entry either likewise gets parked, under a "D:..." key.
-        # Per frees_onstack()'s locus-includes-action quirk (see
-        # TestEntry.test_frees_onstack_can_never_match_a_free_to_its_own_allocation),
-        # these two parked entries can never reconcile with each other, so
-        # both linger: heap keeps the untouched original alloc (1), and the
-        # stack keeps both parked entries under 2 distinct locus keys (2).
+        # the heap, so it's parked on the stack under its site key
+        # ("v@f.F90:1"); a later free at that ptr that doesn't cancel the
+        # *original* heap entry is parked under the same site key and
+        # reconciles with the parked second allocation (site comparison,
+        # not the action-inclusive locus -- see Entry.site). Only the
+        # original, still-live heap allocation remains unaccounted for.
         content = (
             make_line("v", "A", 1, 800, "f.F90", 1, 800)
             + make_line("v", "A", 1, 400, "f.F90", 1, 1200)
             + make_line("v", "D", 1, -400, "f.F90", 1, 800)
         )
         analysis = AbimemFile(str(_write(tmp_path, content)))
-        assert analysis.find_memleaks() == 3
+        assert analysis.find_memleaks() == 1
 
     def test_verbose_mode_prints_diagnostics(self, tmp_path, capsys):
         content = (
@@ -371,19 +365,21 @@ class TestHeapAndStack:
         free = Entry.from_line(make_line("v", "D", 1, 8, "f.F90", 1, 0))
         assert Heap().pop_alloc(free) == 0
 
-    def test_heap_pop_alloc_raises_on_nonempty_match(self):
-        # BUG (documented, not fixed here; also unused anywhere in the
-        # module): `for i, olde in elist:` iterates the *Entry* namedtuples
-        # themselves (7 fields each), trying to unpack each one into just
-        # two names (i, olde) -- it should be `enumerate(elist)`, matching
-        # the equivalent loop in find_memleaks(). The one case this method
-        # exists for (a non-empty elist) always raises instead of matching.
+    def test_heap_pop_alloc_removes_matching_allocation(self):
         alloc = Entry.from_line(make_line("v", "A", 1, 800, "f.F90", 1, 800))
         free = Entry.from_line(make_line("v", "D", 1, -800, "f.F90", 1, 0))
         heap = Heap()
         heap[1] = [alloc]
-        with pytest.raises(ValueError, match="too many values to unpack"):
-            heap.pop_alloc(free)
+        assert heap.pop_alloc(free) == 1
+        assert heap[1] == []
+
+    def test_heap_pop_alloc_no_size_match_returns_zero(self):
+        alloc = Entry.from_line(make_line("v", "A", 1, 800, "f.F90", 1, 800))
+        free = Entry.from_line(make_line("v", "D", 1, -400, "f.F90", 1, 400))
+        heap = Heap()
+        heap[1] = [alloc]
+        assert heap.pop_alloc(free) == 0
+        assert heap[1] == [alloc]
 
     def test_stack_show_empty(self, capsys):
         Stack().show()

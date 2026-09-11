@@ -160,52 +160,6 @@ def which(program: str) -> str | None:
     return None
 
 
-def tonumber(s: str) -> float:
-    """
-    Convert a string to a number.
-
-    Args:
-        s: The string to convert.
-
-    Returns:
-        float: The converted number.
-
-    Raises:
-        ValueError: If the string cannot be converted to a float.
-        RuntimeError: If an unexpected error occurs during conversion.
-    """
-    # Duck test. Much more readable than the ugly strfltrem routine in fldiff.pl
-    try:
-        stnum = s.upper().replace("D","E")  # D-01 is not recognized by python: Replace it with E.
-        stnum = strip_punct(stnum)          # Remove punctuation chars.
-        return float(stnum)                 # Try to convert.
-    except ValueError:
-        raise
-    except:
-        raise RuntimeError("Don't know how to handle string: " + s)
-
-
-def nums_and_text(line: str) -> tuple[list[float], str]:
-    """
-    Split a line into a list of numbers and a combined text string.
-
-    Args:
-        line: The line to split.
-
-    Returns:
-        tuple: (list of floats, string of non-numeric tokens).
-    """
-    tokens = line.split()
-    text = ""
-    numbers = []
-    for tok in tokens:
-        try:
-            numbers.append( tonumber(tok) )
-        except ValueError:
-            text += " " + tok
-    return numbers, text
-
-
 class RShellError(Exception):
     """Exceptions raised by RestrictedShell"""
 

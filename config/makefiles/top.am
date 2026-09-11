@@ -20,7 +20,6 @@ EXTRA_DIST += \
 	abinit_theme \
 	abinit.pc.in \
 	abisrc.py \
-	abisrc_requirements.txt \
 	autogen.sh \
 	doc/tests \
 	doc/theory/aTDEP/aTDEP_Guide.pdf \
@@ -33,9 +32,9 @@ EXTRA_DIST += \
 	doc/topics/documents/noncol.pdf \
 	mkdocs.yml.in \
 	mksite.py \
+	pyproject.toml \
 	requirements.txt \
 	scripts \
-	setup.cfg \
 	tasks.py \
 	set_abienv.sh \
 	wipeout.sh \
@@ -181,7 +180,7 @@ dist-hook:
 	 test "x$(VERSION)" = "x$${GITGEN_VERSION}" || \
          ((echo "Stale version;"; echo $(VERSION); echo "$${GITGEN_VERSION}"; \
            echo "Please run:" ; \
-           echo "     (cd @top_srcdir@ && ./config/script/makemake)" ; \
+           echo "     (cd @top_srcdir@ && ./config/scripts/makemake)" ; \
            echo "before make dist") 1>&2 ; rm -r $(distdir) ; exit 1))
 
 dist-lite: distdir

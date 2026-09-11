@@ -29,13 +29,11 @@ from .tools import (
     ascii_scream,
     ascii_wasp,
     lazy_property,
-    nums_and_text,
     patch,
     pprint_table,
     prompt,
     stream_has_colours,
     tail_file,
-    tonumber,
     touch,
     unzip,
     user_wants_to_exit,
@@ -164,24 +162,6 @@ class TestWhich:
         script.chmod(0o644)
 
         assert which(str(script)) is None
-
-
-class TestBrokenNumericHelpers:
-    """tonumber()/nums_and_text() reference an undefined `strip_punct`
-    symbol: every call unconditionally raises. These tests pin down that
-    (broken) behavior rather than silently letting it regress further; see
-    the PR description for the corresponding bug report.
-    """
-
-    def test_tonumber_always_raises_runtimeerror(self):
-        with pytest.raises(RuntimeError, match="Don't know how to handle string"):
-            tonumber("3.14")
-
-    def test_nums_and_text_propagates_the_runtimeerror(self):
-        # nums_and_text() only catches ValueError around tonumber(), but
-        # tonumber()'s NameError-turned-RuntimeError is not a ValueError.
-        with pytest.raises(RuntimeError):
-            nums_and_text("1.0 2.0 foo")
 
 
 class TestRestrictedShell:

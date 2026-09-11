@@ -86,6 +86,16 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
         """Location of the entry. This is (hopefully) unique."""
         return "%s:%s@%s:%s" % (self.action, self.vname, self.file, self.line)
 
+    @lazy_property
+    def site(self) -> str:
+        """Source location of the entry, *not* including the action.
+
+        Unlike locus, this is shared between an allocation and the
+        deallocation that frees it (same vname/file/line, opposite action),
+        which is what frees_onstack()/find_memleaks() need to pair them up.
+        """
+        return "%s@%s:%s" % (self.vname, self.file, self.line)
+
     def __hash__(self) -> int:
         """Standard hash implementation using locus and size."""
         return hash((self.locus, self.size))
@@ -105,7 +115,7 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
         Returns:
             bool: True if it matches.
         """
-        if (not self.isfree) or other.isalloc: return False
+        if (not self.isfree) or (not other.isalloc): return False
         if self.size + other.size != 0: return False
         return True
 
@@ -116,9 +126,9 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
         Returns:
             bool: True if it matches.
         """
-        if (not self.isfree) or other.isalloc: return False
+        if (not self.isfree) or (not other.isalloc): return False
         if self.size + other.size != 0: return False
-        if self.locus != other.locus: return False
+        if self.site != other.site: return False
         return True
 
 
@@ -517,12 +527,15 @@ class AbimemFile:
                           " sizes: ", heap[p][0].size, newe.size)
                 #print("HEAP:", heap[newe.ptr])
 
-                locus = newe.locus
-                if locus not in stack:
-                    stack[locus] = [newe]
+                # Keyed by site (vname/file/line, *not* action) so that an
+                # orphaned allocation and the deallocation that later frees
+                # it land in the same bucket -- see Entry.site's docstring.
+                site = newe.site
+                if site not in stack:
+                    stack[site] = [newe]
                 else:
                     #if newe.ptr != 0: print(newe)
-                    stack_loc = stack[locus]
+                    stack_loc = stack[site]
                     ifind = -1
                     for i, olde in enumerate(stack_loc):
                         if newe.frees_onstack(olde):
@@ -531,6 +544,9 @@ class AbimemFile:
 
                     if ifind != -1:
                         stack_loc.pop(ifind)
+                        if not stack_loc:
+                            # Fully reconciled: no orphan left at this site.
+                            del stack[site]
                         #else:
                         #    print(newe)
 
@@ -606,8 +622,8 @@ class Heap(dict):
         if not entry.isfree: return 0
         elist = self.get(entry.ptr)
         if elist is None: return 0
-        for i, olde in elist:
-            if entry.size + olde.size != 0:
+        for i, olde in enumerate(elist):
+            if entry.size + olde.size == 0:
                 elist.pop(i)
                 return 1
         return 0

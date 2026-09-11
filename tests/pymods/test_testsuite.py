@@ -58,6 +58,37 @@ def temp_test_dir():
         yield tmpdir
 
 
+# By convention, a local out-of-tree build lives in `_build` at the top of
+# the repository (this is a project convention, not something ABINIT's
+# BuildEnvironment itself enforces or assumes).
+ABINIT_BUILD_DIR = Path(__file__).resolve().parents[2] / "_build"
+
+
+@pytest.fixture
+def build_environment():
+    """A real BuildEnvironment built from the repo's conventional `_build` dir.
+
+    `_build` may not exist at all, or may hold an incomplete/stale build
+    (e.g. `./configure` ran but `make` never finished, so `config.h` exists
+    but the `abinit` binary doesn't) -- BuildEnvironment's constructor raises
+    ValueError/RuntimeError in either case. Skip rather than fail when that
+    happens, since it reflects the state of this checkout, not a code bug --
+    but print the reason unconditionally (not just as a pytest skip reason,
+    which is easy to miss without -rs/-v) so it's obvious on the terminal
+    why these tests didn't run.
+    """
+    try:
+        return BuildEnvironment(str(ABINIT_BUILD_DIR))
+    except (ValueError, RuntimeError) as exc:
+        msg = (
+            f"Skipping: {ABINIT_BUILD_DIR} is not a valid/complete ABINIT "
+            f"build tree ({exc}). Run configure && make in _build to enable "
+            "this test."
+        )
+        print(msg)
+        pytest.skip(msg)
+
+
 @pytest.fixture
 def sample_test_info_content():
     """Sample TEST_INFO section content (valid)."""
@@ -927,28 +958,19 @@ class TestBuildEnvironment:
         with pytest.raises((ValueError, RuntimeError)):
             BuildEnvironment(temp_test_dir)
 
-    def test_buildenvironment_sets_attributes(self):
+    def test_buildenvironment_sets_attributes(self, build_environment):
         """Test BuildEnvironment initializes key attributes."""
-        # Use current directory which should have minimal requirements
-        try:
-            env = BuildEnvironment(".")
-            assert hasattr(env, "build_dir")
-            assert hasattr(env, "hostname")
-            assert hasattr(env, "username")
-            assert hasattr(env, "fortran_compiler")
-        except (ValueError, RuntimeError):
-            # Expected if not in a valid ABINIT build tree
-            pytest.skip("Not in a valid ABINIT build tree")
+        env = build_environment
+        assert hasattr(env, "build_dir")
+        assert hasattr(env, "hostname")
+        assert hasattr(env, "username")
+        assert hasattr(env, "fortran_compiler")
 
-    def test_buildenvironment_path_of_bin_not_found(self):
+    def test_buildenvironment_path_of_bin_not_found(self, build_environment):
         """Test path_of_bin returns empty string for missing binary."""
-        try:
-            env = BuildEnvironment(".")
-            result = env.path_of_bin("nonexistent_binary_xyz", try_syspath=False)
-            # Result should be empty string or valid path
-            assert isinstance(result, str)
-        except (ValueError, RuntimeError):
-            pytest.skip("Not in a valid ABINIT build tree")
+        result = build_environment.path_of_bin("nonexistent_binary_xyz", try_syspath=False)
+        # Result should be empty string or valid path
+        assert isinstance(result, str)
 
     def test_compiler_base_class(self):
         """Test Compiler base class initialization."""
