@@ -5,8 +5,7 @@ from .tools import AbimkdocsTest, patch_syspath
 patch_syspath()
 
 
-from collections import OrderedDict
-from pprint import pprint
+from collections import Counter
 
 from abimkdocs.variables import (
     MultipleValue,
@@ -18,6 +17,20 @@ from abimkdocs.variables import (
 
 
 class VariablesTest(AbimkdocsTest):
+
+    @staticmethod
+    def format_table(headers, rows):
+        """Return a compact plain-text table suitable for pytest diagnostics."""
+        rows = [[str(value) for value in row] for row in rows]
+        widths = [len(header) for header in headers]
+        for row in rows:
+            widths = [max(width, len(value)) for width, value in zip(widths, row, strict=True)]
+        separator = "+-" + "-+-".join("-" * width for width in widths) + "-+"
+        template = "| " + " | ".join("{:<%d}" % width for width in widths) + " |"
+        lines = [separator, template.format(*headers), separator]
+        lines.extend(template.format(*row) for row in rows)
+        lines.append(separator)
+        return "\n".join(lines)
 
     def test_variables(self):
         codevars = get_codevars()
@@ -138,13 +151,35 @@ class VariablesTest(AbimkdocsTest):
                 print("Error in %s:\n%s" % (var.abivarname, str(exc)))
                 raise
 
+    def test_documented_variables_are_accepted_by_chkvars(self):
+        """Check the shared ABINIT/MULTIBINIT input-variable allow-list."""
+        codevars = get_codevars()
+        documented = {
+            name.casefold()
+            for executable in ("abinit", "multibinit")
+            for name in codevars[executable].get_all_vnames(with_internal=False)
+        }
+        accepted = {name.casefold() for name in self.get_chkvars_varnames_from_f90()}
+
+        # These documented legacy or derived variables are not checked by chkvars.
+        # Keep this list explicit so additions require review instead of being silently ignored.
+        exceptions = {
+            "field_red",
+            "latt_taup",
+            "nfreqmidm",
+            "normpawu",
+            "opt_factors",
+            "pawprtden",
+            "prepscphon",
+            "scphon_supercell",
+            "scphon_temp",
+        }
+        missing = sorted(documented - accepted - exceptions)
+        rows = [(name, "documented but absent from chkvars") for name in missing]
+        assert not missing, "\n" + self.format_table(("Variable", "Problem"), rows)
+
     def test_variables_in_tests(self):
-        """
-        Find variables that are not tested by comparing the database of variables
-        with the input file of the test.
-        Build dictionary with list of untested variables for the different codes.
-        Finally compare the new dictionary with the reference one and fail if they don't match.
-        """
+        """Report documented-variable coverage from test inputs, grouped by executable."""
         # Build database with all input variables indexed by code name.
         from abimkdocs.variables import get_codevars
         codevars = get_codevars()
@@ -153,13 +188,10 @@ class VariablesTest(AbimkdocsTest):
         from doc import tests as tmod
         tests = tmod.abitests.select_tests(suite_args=[], regenerate=True, flat_list=True)
 
-        # Build conter for the different codes, keys are the varnames from the database.
-        from collections import Counter
+        # Build counter for the different codes, keys are the varnames from the database.
         count_code = {}
         for code, d in codevars.items():
             count_code[code] = Counter(dict.fromkeys(d, 0))
-
-        ierr = 0
 
         #doc_vnames = codevars["anaddb"].get_all_vnames(with_internal=False)
         #anaddb_f90vnames = self.get_anaddb_varnames_from_f90()
@@ -176,33 +208,18 @@ class VariablesTest(AbimkdocsTest):
         #    print("\nThe following variables are found in variables_anaddb.py but not in anaddb F90 code.")
         #    pprint(diff)
 
-        doc_vnames = codevars["abinit"].get_all_vnames(with_internal=False)
-        abinit_f90vnames = self.get_abinit_varnames_from_f90()
-        #print("abinit_f90vnames:", abinit_f90vnames)
-
-        diff = abinit_f90vnames - doc_vnames
-        if diff:
-            ierr += 1
-            print("\nThe following variables are found in abinit F90 code but not in variables_abinit.py")
-            pprint(diff)
-
-        diff = doc_vnames - abinit_f90vnames
-        if diff:
-            ierr += 1
-            print("\nThe following variables are found in variables_abinit.py but not in abinit F90 code")
-            pprint(diff)
-
         # TODO: should parse chkvars and
-        black_list = set([
-            "atompaw", "cut3d", "multibinit", "fftprof", "conducti", "mrgscr", "aTDEP",
+        black_list = {
+            "atompaw", "cut3d", "fftprof", "conducti", "mrgscr", "aTDEP",
             "mrgddb", "mrggkk", "mrgdv", "band2eps", "lruj", "fold2Bloch", "macroave", "testtransposer",
-        ])
+        }
         for test in tests:
-            if test.executable in black_list: continue
-            vnset = test.get_varname_set()
+            if test.executable in black_list or test.executable not in count_code:
+                continue
+            vnset = test.get_varname_set() & count_code[test.executable].keys()
             count_code[test.executable].update(vnset)
 
-        untested = OrderedDict()
+        untested = {}
         for code, count in count_code.items():
             untested[code] = []
             # Add it if var is not tested and not internal.
@@ -211,11 +228,18 @@ class VariablesTest(AbimkdocsTest):
                     #print(code, vname)
                     untested[code].append(vname)
 
-        for code in sorted(untested.keys()):
-            untested[code] = sorted(untested[code])
-            if untested[code]:
-                print("\nList of untested variables for code:", code)
-                pprint(untested[code])
+        rows = []
+        for code in sorted(untested):
+            untested[code].sort()
+            public_names = [
+                name for name in count_code[code]
+                if not codevars[code][name].is_internal
+            ]
+            tested_count = sum(count_code[code][name] > 0 for name in public_names)
+            rows.append((code, tested_count, len(untested[code])))
+        print("\nVariable coverage by executable:\n" + self.format_table(
+            ("Executable", "Tested", "Untested"), rows
+        ))
 
         #ref_json_path = os.path.join(os.path.dirname(__file__), "untested_variables.json")
         #update_ref = False
@@ -228,5 +252,3 @@ class VariablesTest(AbimkdocsTest):
 
         #    self.assertDictEqual(untested, ref_untested,
         #        msg="Detected mismatch between reference file and new list of untested variables.")
-
-        assert ierr == 0

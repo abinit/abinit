@@ -27,6 +27,19 @@ mksite = [
     "abimkdocs-plugin @ file:./abimkdocs_plugin",
 ]
 
+[tool.pytest.ini_options]
+# Don't search in these directories for tests.
+norecursedirs = [
+    "scripts/post_processing",
+    "_build*",
+    "doxygen_docs",
+    "tmp-robodoc",
+    ".ipynb_checkpoints",
+    "site",
+]
+# -f enables loop-on-fail mode.
+# looponfailroots (pathlist) specifies directories to check for changes.
+
 [tool.ruff]
 line-length = 100
 output-format = "concise"

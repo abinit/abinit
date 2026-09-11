@@ -337,13 +337,23 @@ class Website:
         self.ignored_paths = []
         self.warnings = []
 
-        # Read mkdocs configuration file.
-        # TODO: Should read Abinit version from a centralized file.
-        with open(os.path.join(self.root, "..", "mkdocs.yml"), encoding="utf-8") as fh:
+        # Read the version-controlled MkDocs template and substitute the ABINIT
+        # version from the centralized file in the top-level directory. This
+        # allows documentation tests to run without first generating mkdocs.yml.
+        top_level_dir = os.path.dirname(self.root)
+        version_path = os.path.join(top_level_dir, ".current_version")
+        with open(version_path, encoding="utf-8") as fh:
+            abinit_version = fh.read().strip()
+        if not abinit_version:
+            raise RuntimeError(f"Empty ABINIT version file: {version_path}")
+
+        mkdocs_path = os.path.join(top_level_dir, "mkdocs.yml.in")
+        with open(mkdocs_path, encoding="utf-8") as fh:
+            mkdocs_text = fh.read().replace("ABINIT_VERSION", abinit_version)
             if hasattr(yaml, "FullLoader"):
-                self.mkdocs_config = yaml.load(fh, Loader=yaml.FullLoader)
+                self.mkdocs_config = yaml.load(mkdocs_text, Loader=yaml.FullLoader)
             else:
-                self.mkdocs_config = yaml.load(fh)
+                self.mkdocs_config = yaml.load(mkdocs_text)
 
         # Build parser to convert Markdown to HTML.
         # The parser must support the same extensions as those used by mkdocs

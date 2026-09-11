@@ -3728,7 +3728,7 @@ Variable(
 ),
 
 Variable(
-    abivarname="dmft_triqs_chiloci_ins",
+    abivarname="dmft_triqs_chiloc_ins",
     varset="dmft",
     vartype="integer",
     topics=["DmftTriqsCthyb_expert"],

@@ -1,5 +1,6 @@
 
 import os
+import re
 import sys
 from unittest import TestCase
 
@@ -20,21 +21,23 @@ def patch_syspath():
 class AbimkdocsTest(TestCase):
 
     @staticmethod
-    def get_abinit_varnames_from_f90():
-        # construct list of input keywords that appear in chkvars.F90
+    def get_chkvars_varnames_from_f90():
+        # Construct the list of input keywords accepted by the shared chkvars routine.
         home_dir = os.path.join(os.path.dirname(__file__) , "..")
         path = os.path.join(home_dir, "src/44_abitypes_defs/m_dtset.F90")
 
         in_block = False
         words = []
+        re_assignment = re.compile(
+            r"^\s*(?:list_vars(?:_img)?|list_logicals|list_strings)\s*=.*?'([^']*)'"
+        )
         with open(path) as fh:
             for line in fh:
-                if line.find("admitted variable names") > 0: in_block = True
-                if line.find("Extra token") > 0: in_block = False
-                if in_block and line.find("list_var") > 0:
-                    line_words = (line.split("'")[1]).split()
-                    for i in range(len(line_words)):
-                        words.append(line_words[i])
+                if "<ABINIT_VARS>" in line: in_block = True
+                if "</ABINIT_VARS>" in line: in_block = False
+                match = re_assignment.match(line) if in_block else None
+                if match:
+                    words.extend(match.group(1).split())
 
         if not words:
             print("Found empty list of words in %s " % path)
@@ -43,6 +46,9 @@ class AbimkdocsTest(TestCase):
             raise RuntimeError("")
 
         return set(words)
+
+    # Backward-compatible name for external users of this test helper.
+    get_abinit_varnames_from_f90 = get_chkvars_varnames_from_f90
 
     @staticmethod
     def get_anaddb_varnames_from_f90():
