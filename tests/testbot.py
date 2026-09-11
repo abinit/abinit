@@ -252,7 +252,28 @@ class TestBot:
 
     def __post_init__(self) -> None:
         if self.with_tdirs and self.without_tdirs:
-            raise ValueError("with_tdirs and without_tdirs attribute are mutually exclusive")
+            # Not a hard error: this combination is reachable in practice
+            # (e.g. a Force build's own with_tdirs request landing on a
+            # builder whose static testbot_args already sets a without_tdirs
+            # default -- Buildbot only applies the builder default when the
+            # request left the property untouched, so both can be set at
+            # once). with_tdirs is the more specific ask, so keep it, but
+            # drop anything it shares with without_tdirs's exclusion list.
+            merged = [t for t in self.with_tdirs if t not in self.without_tdirs]
+            warn(
+                f"with_tdirs ({self.with_tdirs}) and without_tdirs "
+                f"({self.without_tdirs}) are supposed to be mutually exclusive "
+                f"but both were given. Merging by keeping with_tdirs entries "
+                f"not also listed in without_tdirs: {merged}"
+            )
+            self.with_tdirs = merged
+            self.without_tdirs = []
+            if not self.with_tdirs:
+                warn(
+                    "with_tdirs is empty after merging with without_tdirs "
+                    "(every requested directory was also excluded); falling back "
+                    "to running all test suites."
+                )
 
         if self.type not in ["", "ref"]:
             raise ValueError(f"type should be either 'ref' or empty string while it's: {self.type}")

@@ -485,6 +485,51 @@ class TestTestBotFromJson:
         assert testbot.max_gpus == 0
         assert testbot.without_tdirs == []
 
+    def test_from_json_with_and_without_tdirs_merges_with_warning(self, tmp_path, monkeypatch):
+        """Both filters set (e.g. a Force build's with_tdirs landing on a
+        builder whose static config already sets without_tdirs) must warn
+        and merge -- with_tdirs wins, minus anything without_tdirs excludes --
+        rather than raise.
+        """
+        self._mock_environment(monkeypatch, defined_cppvars=[])
+        testbot_json = tmp_path / "testbot.json"
+        testbot_json.write_text(json.dumps({
+            "builder_name": "b",
+            "max_cpus": 2,
+            "has_mpi": False,
+            "with_tdirs": ["v1", "v2"],
+            "without_tdirs": ["v2", "hpc_gpu_omp"],
+        }))
+
+        with pytest.warns(UserWarning, match="mutually exclusive"):
+            testbot = TestBot.from_json(str(testbot_json))
+
+        assert testbot.with_tdirs == ["v1"]
+        assert testbot.without_tdirs == []
+
+    def test_from_json_with_and_without_tdirs_fully_overlapping_runs_everything(self, tmp_path, monkeypatch):
+        """If without_tdirs excludes every entry in with_tdirs, the merged
+        with_tdirs is empty -- a second warning, and both fields end up
+        empty so run() falls back to its own "no filter" default (run all
+        suites) instead of a with_tdirs=[] that would (per the plain
+        `if self.with_tdirs:` check in run()) look identical to "not set".
+        """
+        self._mock_environment(monkeypatch, defined_cppvars=[])
+        testbot_json = tmp_path / "testbot.json"
+        testbot_json.write_text(json.dumps({
+            "builder_name": "b",
+            "max_cpus": 2,
+            "has_mpi": False,
+            "with_tdirs": ["v1", "v2"],
+            "without_tdirs": ["v1", "v2"],
+        }))
+
+        with pytest.warns(UserWarning, match="falling back to running all test suites"):
+            testbot = TestBot.from_json(str(testbot_json))
+
+        assert testbot.with_tdirs == []
+        assert testbot.without_tdirs == []
+
     def test_from_json_missing_mandatory_key_raises(self, tmp_path):
         """A testbot.json missing builder_name/max_cpus must raise a clear ValueError."""
         testbot_json = tmp_path / "testbot.json"
