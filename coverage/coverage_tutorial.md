@@ -19,7 +19,7 @@ Our first step will be to enable a special build.  Ultimately this just means ad
 
     bzr co lp:~allanlesage/coverage-tutorial
 
-Inspecting this archive you'll find 
+Inspecting this archive you'll find
 
 * __`gcov.m4`__: an `autoconf` macro which will check for relevant tools
 * __`Makefile.am.coverage`__, which includes our coverage-enabled `automake` targets
@@ -74,7 +74,7 @@ Now here's the step which requires knowledge both of your code and little bit of
     +++ configure.ac  2011-12-06 21:42:04 +0000
     @@ -45,6 +45,16 @@
      AM_GLIB_GNU_GETTEXT
-     
+
      ###########################
     +# gcov coverage reporting
     +###########################
@@ -95,7 +95,7 @@ And then having added these flags to the build process, we need to actually *act
     --- src/Makefile.am     2009-12-07 21:00:43 +0000
     +++ src/Makefile.am     2011-12-06 21:42:04 +0000
     @@ -3,6 +3,8 @@
-     
+
      dbus_test_runner_SOURCES = dbus-test-runner.c
      dbus_test_runner_CFLAGS  = $(DBUS_TEST_RUNNER_CFLAGS) \
     +                         $(COVERAGE_CFLAGS) \
@@ -161,7 +161,7 @@ For a small project these figures show that we have a good test-suite to build o
 At a glance our line coverage is 78.8%, and our "test-coverage progress bar" is yellow.  Be aware of the difference between the offered metrics:
 
 * __line coverage__: how many lines have our tests touched
-* __function coverage__: how many functions have our tests touched 
+* __function coverage__: how many functions have our tests touched
 * __branch coverage__: for the graph which describes all possible paths of control through this file--especially through conditionals, e.g.--what percentage has our tests touched
 
 In our opinion the killer feature of the `lcov` output is the source-file display, which shows which lines weren't touched by tests.  Drill into the source directory to see the results for a particular file.
