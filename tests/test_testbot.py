@@ -442,6 +442,34 @@ class TestTestBotClass:
         assert "<script>" not in report
         assert "TestBot_&lt;script&gt;&quot;" in report
 
+    def test_write_run_summaries_flags_failed_runs_for_highlighting(self, tmp_path, monkeypatch):
+        """A run with nfailed > 0 must get "suite-failed" on its <tr>, reusing
+        the same row_class convention to_table() already uses for
+        testbot_analysis.html -- so the results page's existing CSS for that
+        class (a light, readable red tint) highlights this table's failed
+        rows too, with no new styling needed.
+        """
+        monkeypatch.chdir(tmp_path)
+        testbot = TestBot.__new__(TestBot)
+        testbot.run_summaries = [
+            TestRunSummary(
+                mpi_nprocs=1, omp_nthreads=1, py_nprocs=1, runmode="static",
+                workdir_name="TestBot_failed", nfailed=3, npassed=0,
+                nsucceeded=0, nskipped=0, ndisabled=0, nexecuted=3,
+            ),
+            TestRunSummary(
+                mpi_nprocs=1, omp_nthreads=1, py_nprocs=1, runmode="static",
+                workdir_name="TestBot_ok", nfailed=0, npassed=3,
+                nsucceeded=0, nskipped=0, ndisabled=0, nexecuted=3,
+            ),
+        ]
+
+        testbot.write_run_summaries()
+
+        report = (tmp_path / "testbot_runs.html").read_text()
+        assert '<tr class="suite-failed"><td>TestBot_failed</td>' in report
+        assert '<tr class="suite-ok"><td>TestBot_ok</td>' in report
+
 
 class TestTestBotFromJson:
     """End-to-end characterization tests for TestBot.from_json()."""

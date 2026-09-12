@@ -424,7 +424,13 @@ class TestBot:
                 report,
             ]
             cells = "".join(f"<td>{value}</td>" for value in values)
-            rows.append(f"<tr>{cells}</tr>")
+            # Same row_class convention as to_table()'s testbot-summary table
+            # below ("suite-failed"/"suite-ok") -- reusing it here means the
+            # results page's existing CSS for those classes (a light,
+            # readable red/green tint) already covers this table too, no new
+            # style needed.
+            row_class = "suite-failed" if run.nfailed > 0 else "suite-ok"
+            rows.append(f'<tr class="{row_class}">{cells}</tr>')
 
         header = "".join(f"<th>{html.escape(heading)}</th>" for heading in headings)
         fragment = (
