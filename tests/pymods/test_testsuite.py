@@ -8,16 +8,23 @@ Priority 1: High-impact, core infrastructure components.
 from __future__ import annotations
 
 import os
+import shutil
 import tempfile
 from pathlib import Path
 
 import pytest
 
+from tests import abenv
+
+from .jobrunner import JobRunner
 from .testsuite import (
     AbinitTestInfo,
     AbinitTestInfoParser,
     AbinitTestInfoParserError,
+    AbinitTestSuite,
+    BaseTest,
     BuildEnvironment,
+    ChainOfTests,
     Compiler,
     CPreProcessor,
     FileToTest,
@@ -38,6 +45,8 @@ from .testsuite import (
     is_string,
     lazy_read,
     lazy_readlines,
+    make_abitest_from_input,
+    make_abitests_from_inputs,
     my_getlogin,
     parse_configh_file,
     rm_rf,
@@ -999,28 +1008,368 @@ class TestBuildEnvironment:
 
 # ============================================================================
 # TESTS FOR BaseTest CLASS CORE METHODS (P3)
+#
+# Built from real ABINIT test inputs rather than mocks: BaseTest.__init__
+# only needs the lightweight `AbinitEnvironment` (`tests.abenv`), not a
+# compiled `BuildEnvironment`, so no build tree is required to exercise it.
+# v1 is one of the oldest, most stable suites in the tree -- its Input files
+# rarely change, which keeps these tests from breaking on unrelated edits
+# elsewhere in the suite.
 # ============================================================================
+
+V1_T01_ABI = abenv.apath_of("tests", "v1", "Input", "t01.abi")
 
 
 class TestBaseTestCore:
     """Test suite for BaseTest core methods."""
 
     def test_basetest_requires_files_to_test_or_no_check(self, temp_test_dir):
-        """Test BaseTest raises error when no files_to_test and no_check is False."""
-        # Build environment would be needed, skip for now
-        pytest.skip("Requires valid BuildEnvironment")
+        """BaseTest must raise if files_to_test is empty and no_check is False.
 
-    def test_basetest_disabled_when_input_starts_with_dash(self):
-        """Test BaseTest marks tests as disabled if input starts with dash."""
-        pytest.skip("Requires valid BuildEnvironment and input file")
+        Necessarily a synthetic/malformed input: a real, already-passing
+        suite test can never trigger this by construction.
+        """
+        bad_input = Path(temp_test_dir) / "tbad.abi"
+        bad_input.write_text(
+            "#%%<BEGIN TEST_INFO>\n"
+            "#%% [setup]\n"
+            "#%% executable = abinit\n"
+            "#%% [paral_info]\n"
+            "#%% max_nprocs = 1\n"
+            "#%% [extra_info]\n"
+            "#%% authors = Unknown\n"
+            "#%%<END TEST_INFO>\n"
+        )
+        with pytest.raises(ValueError, match="no files_to_test attribute"):
+            make_abitest_from_input(str(bad_input), abenv)
+
+    def test_basetest_disabled_when_input_starts_with_dash(self, temp_test_dir):
+        """A leading '-' in the input's basename marks the test disabled.
+
+        Every currently-declared disabled entry in the real suite tree
+        (`Suite.disabled_inp_paths`, across every suite that has any) points
+        to a file that no longer exists on disk -- a real, separate data
+        problem in its own right (the kind `test_no_stale_or_lost_inputs`,
+        skipped elsewhere in this suite, is meant to catch) -- so there is no
+        live example to build this test on directly. Instead, symlink a
+        real, currently-active input (v1/t01.abi) under a dash-prefixed name
+        inside a suite_name/Input/ layout, so the parsed content is 100%
+        real; only the disabled-marker filename is synthesized.
+        """
+        input_dir = Path(temp_test_dir) / "v1" / "Input"
+        input_dir.mkdir(parents=True)
+        dashed = input_dir / "-t01.abi"
+        dashed.symlink_to(V1_T01_ABI)
+
+        test = make_abitest_from_input(str(dashed), abenv)
+        assert test.status == "disabled"
+        assert test.suite_name == "v1"
 
     def test_basetest_attributes_from_testinfo(self):
-        """Test BaseTest incorporates TestInfo attributes."""
-        pytest.skip("Requires valid BuildEnvironment and input file")
+        """TEST_INFO attributes (keywords, authors, description, executable,
+        ...) must be merged onto the real BaseTest instance.
+        """
+        test = make_abitest_from_input(V1_T01_ABI, abenv)
+
+        assert isinstance(test, BaseTest)
+        assert test.executable == "abinit"
+        assert test.authors == {"Unknown"}
+        assert "NC" in test.keywords
+        assert test.description.strip().startswith("Bulk Aluminium")
+        assert test.max_nprocs >= 1
+        assert len(test.files_to_test) >= 1
+        assert all(isinstance(ft, FileToTest) for ft in test.files_to_test)
 
     def test_basetest_full_id_property(self):
-        """Test BaseTest.full_id property."""
-        pytest.skip("Requires valid BuildEnvironment and input file")
+        """full_id must be '[suite_name][id][np=mpi_nprocs]'."""
+        test = make_abitest_from_input(V1_T01_ABI, abenv)
+
+        assert test.id == "t01"
+        assert test.suite_name == "v1"
+        assert test.mpi_nprocs == 1
+        assert test.full_id == "[v1][t01][np=1]"
+
+
+# ============================================================================
+# TESTS FOR ChainOfTests AND MULTI-PARALLEL SELECTION
+#
+# t51/t52/t53 form a `test_chain` in `paral`, one of the few suite
+# directories where chains and nprocs_to_test-driven multi-parallel tests
+# actually exist -- generic suites like v1-v3 never exercise this. Low
+# indices are used deliberately: these older chained tests are the least
+# likely to be edited or renumbered.
+# ============================================================================
+
+PARAL_CHAIN_INPUTS = [
+    abenv.apath_of("tests", "paral", "Input", name) for name in ("t51.abi", "t52.abi", "t53.abi")
+]
+
+
+class TestChainOfTestsMultiParallel:
+    """ChainOfTests and nprocs_to_test-driven multi-parallel selection,
+    built from a real `test_chain` in the `paral` suite.
+    """
+
+    @pytest.fixture(scope="class")
+    def chain_variants(self):
+        """One ChainOfTests per nprocs_to_test value declared on t51/t52/t53."""
+        return make_abitests_from_inputs(list(PARAL_CHAIN_INPUTS), abenv)
+
+    def test_chain_of_tests_is_generated_per_nprocs_value(self, chain_variants):
+        """One ChainOfTests per declared nprocs_to_test value (1, 2, 4, 10)."""
+        assert len(chain_variants) == 4
+        assert all(isinstance(c, ChainOfTests) for c in chain_variants)
+        assert all(c.is_chain for c in chain_variants)
+        assert [c.max_nprocs for c in chain_variants] == [1, 2, 4, 10]
+
+    def test_chain_keywords_are_the_union_of_its_members(self, chain_variants):
+        """ChainOfTests.keywords is the union of every member's own keywords."""
+        chain = chain_variants[0]
+        assert len(chain) == 3
+        assert [t.id for t in chain] == ["t51_MPI1", "t52_MPI1", "t53_MPI1"]
+        assert "NC" in chain.keywords
+
+    def test_chain_full_id_joins_member_ids_with_dashes(self, chain_variants):
+        """Chain id/full_id are built from the dash-joined member ids."""
+        chain = chain_variants[2]  # the MPI4 variant
+        assert chain.id == "t51_MPI4-t52_MPI4-t53_MPI4"
+        assert chain.full_id == "[paral][t51_MPI4-t52_MPI4-t53_MPI4]"
+
+    def test_compute_nprocs_accepts_its_own_nprocs_and_rejects_others(self, chain_variants):
+        """Each multi-parallel variant only runs at its own nprocs_to_test
+        value; BaseTest.compute_nprocs() must accept it and reject any other
+        real, declared alternative -- the same mechanism TestBot.run() relies
+        on when sweeping np_list across multiple runs (see mysteps.py /
+        testbot.py's run_tests_with_np()).
+        """
+        mpi4_chain = chain_variants[2]
+        t51_mpi4 = mpi4_chain.tests[0]
+        assert t51_mpi4.nprocs_to_test == [4]
+
+        real_nprocs, err = t51_mpi4.compute_nprocs(build_env=None, mpi_nprocs=4, runmode="static")
+        assert real_nprocs == 4
+        assert err == ""
+
+        real_nprocs, err = t51_mpi4.compute_nprocs(build_env=None, mpi_nprocs=2, runmode="static")
+        assert real_nprocs == 0
+        assert "nprocs_to_test" in err
+
+    def test_chain_has_keywords_any_and_all_modes(self, chain_variants):
+        """has_keywords() mirrors BaseTest: 'any' intersects, 'all' requires
+        every keyword, an unknown mode raises.
+        """
+        chain = chain_variants[0]
+        assert chain.keywords == {"DFPT", "NC", "abinit"}
+        assert chain.has_keywords(["NC"], mode="any")
+        assert chain.has_keywords(["DFPT", "NC"], mode="all")
+        assert not chain.has_keywords(["NOPE"], mode="any")
+
+        with pytest.raises(ValueError, match="wrong mode"):
+            chain.has_keywords(["NC"], mode="bogus")
+
+    def test_chain_authors_snames_and_has_authors(self, chain_variants):
+        """_authors_snames unions every member's parsed author second-name."""
+        chain = chain_variants[0]
+        assert chain._authors_snames == {"Unknown"}
+        assert chain.has_authors(["Unknown"], mode="all")
+
+        with pytest.raises(ValueError, match="wrong mode"):
+            chain.has_authors(["Unknown"], mode="bogus")
+
+    def test_chain_exclude_builders_merges_members(self, chain_variants):
+        """exclude_builders merges (and dedupes) every member's own list --
+        empty here since none of t51/t52/t53 declare any.
+        """
+        assert chain_variants[0].exclude_builders == []
+
+    def test_chain_status_defaults_to_failed_before_execution(self, chain_variants):
+        """A never-run chain must read as 'failed', not silently succeeded:
+        FileToTest.fld_status defaults to 'failed' until fldiff actually
+        runs, and both BaseTest.status and ChainOfTests.status propagate
+        that default rather than assuming success.
+        """
+        assert chain_variants[0].status == "failed"
+
+    def test_chain_keep_files_and_files_to_keep(self, chain_variants):
+        """keep_files()/files_to_keep track extra files across the whole
+        chain, on top of whatever each member already keeps.
+        """
+        chain = chain_variants[1]
+        before = list(chain.files_to_keep)
+        chain.keep_files("extra_report.html")
+        assert "extra_report.html" in chain.files_to_keep
+        assert chain.files_to_keep[: len(before)] == before
+
+    def test_chain_has_variables_checks_real_input_content(self, chain_variants):
+        """has_variables() greps the real input file content, no execution
+        needed: t51.abi genuinely sets natom 1 (see paral/Input/t51.abi).
+        """
+        chain = chain_variants[0]
+        assert chain.has_variables({"natom": 1})
+        assert chain.has_variables({"natom": 99}) == []
+
+
+# ============================================================================
+# TESTS FOR AbinitTestSuite
+#
+# v1 is reused again for the same reason as TestBaseTestCore: old, stable,
+# unlikely to change. t01/t02/t03/t08 are plain, non-chained tests (t04/t07
+# are a real test_chain pair and are deliberately excluded here so this
+# suite is just a flat list of independent tests).
+# ============================================================================
+
+V1_SIMPLE_INPUTS = [
+    abenv.apath_of("tests", "v1", "Input", name) for name in ("t01.abi", "t02.abi", "t03.abi")
+]
+V1_T08_ABI = abenv.apath_of("tests", "v1", "Input", "t08.abi")
+
+
+class TestAbinitTestSuite:
+    """AbinitTestSuite methods that don't require actually running abinit,
+    built from real, chain-free v1 inputs.
+    """
+
+    @pytest.fixture
+    def suite(self):
+        """A real AbinitTestSuite over three plain, chain-free v1 tests."""
+        return AbinitTestSuite(abenv, inp_files=list(V1_SIMPLE_INPUTS))
+
+    def test_suite_requires_exactly_one_of_inp_files_or_test_list(self, suite):
+        """Exactly one of inp_files/test_list must be given, never both/neither."""
+        with pytest.raises(ValueError, match="One and only one"):
+            AbinitTestSuite(abenv)
+        with pytest.raises(ValueError, match="One and only one"):
+            AbinitTestSuite(abenv, inp_files=list(V1_SIMPLE_INPUTS), test_list=[])
+
+    def test_suite_len_iter_and_ids(self, suite):
+        """len()/iteration expose one entry per input file, in order."""
+        assert len(suite) == 3
+        assert [t.id for t in suite] == ["t01", "t02", "t03"]
+
+    def test_suite_full_length_counts_chain_members(self):
+        """full_length must count each ChainOfTests by its own len(), not as 1 --
+        unlike len(suite), which counts one entry per (possibly chained) test.
+        """
+        chain_suite = AbinitTestSuite(abenv, inp_files=list(PARAL_CHAIN_INPUTS))
+        assert len(chain_suite) == 4  # 4 nprocs_to_test variants
+        assert chain_suite.full_length == 12  # each chain has 3 members
+
+    def test_suite_keywords_and_need_cpp_vars_are_unions(self, suite):
+        """keywords/need_cpp_vars/has_keywords() aggregate across all tests."""
+        assert suite.keywords == {"NC", "abinit"}
+        assert suite.need_cpp_vars == set()
+        assert suite.has_keywords(["NC"])
+        assert not suite.has_keywords(["NOPE"])
+
+    def test_suite_numeric_slice_selects_by_test_number(self, suite):
+        """AbinitTestSuite[start:stop] selects by the test's own numeric id
+        (via range(start, stop)), not by Python list position -- t01/t02
+        have numeric ids 1/2, so [1:3] keeps them and drops t03 (id 3).
+        """
+        sliced = suite[1:3]
+        assert isinstance(sliced, AbinitTestSuite)
+        assert [t.id for t in sliced] == ["t01", "t02"]
+
+    def test_suite_add_combines_two_suites(self, suite):
+        """__add__ concatenates the two suites' test lists."""
+        other = AbinitTestSuite(abenv, inp_files=[V1_T08_ABI])
+        combined = suite + other
+        assert [t.id for t in combined] == ["t01", "t02", "t03", "t08"]
+
+    def test_suite_on_refslave_toggle(self, suite):
+        """on_refslave() defaults to False until set_on_refslave() is called."""
+        assert suite.on_refslave() is False
+        suite.set_on_refslave(True)
+        assert suite.on_refslave() is True
+
+    def test_suite_run_etime_requires_executed(self, suite):
+        """run_etime asserts self._executed rather than returning a bogus 0."""
+        with pytest.raises(AssertionError):
+            suite.run_etime  # noqa: B018
+
+    def test_suite_status_filters_default_to_failed_before_execution(self, suite):
+        """Same invariant as ChainOfTests.status: nothing has actually run
+        yet, so every test reads as 'failed', never 'succeeded'.
+        """
+        assert suite.succeeded_tests() == []
+        assert [t.id for t in suite.failed_tests()] == ["t01", "t02", "t03"]
+
+
+# ============================================================================
+# TESTS FOR BaseTest.run() / AbinitTestSuite.run_tests() -- REAL EXECUTION
+#
+# These actually invoke the compiled `abinit` binary on v1/t01.abi (the same
+# real, stable input used throughout this file). They only run when a
+# complete build tree is available at <abinit_home>/_build (the
+# `build_environment` fixture above already skips with a clear message
+# otherwise), and are kept to the minimum needed to exercise each real code
+# path once: a single run can take a while, dominated by MPI startup/
+# teardown overhead rather than this tiny physics workload.
+#
+# Success is asserted via `status` (the fldiff-based correctness check: did
+# the computed output match the reference), not `isok` -- `isok` also folds
+# in the subprocess's raw exit code, which can be a false negative on setups
+# where MPI_Finalize itself errors out (observed locally, behind a VPN)
+# after a numerically correct run.
+#
+# Artifacts (the real abinit working directory) are written to an explicit
+# temp directory that is only removed if the test passes, so a failure
+# leaves the real output behind for inspection.
+#
+# Currently disabled outright (not just left to the build_environment skip):
+# a real run was observed to hang indefinitely, not just run slowly, tracked
+# to a local VPN interfering with the MPI runtime's OFI network layer (see
+# the MPI_Finalize/OFI errors noted above). Re-enable once that's resolved.
+# ============================================================================
+
+_VPN_MPI_SKIP_REASON = (
+    "Real abinit execution currently hangs/fails here -- a local VPN "
+    "appears to interfere with the MPI runtime's OFI network layer "
+    "(MPI_Finalize/OFI errors observed). Re-enable once resolved."
+)
+
+
+@pytest.mark.skip(reason=_VPN_MPI_SKIP_REASON)
+class TestBaseTestRunReal:
+    """BaseTest.run() against a real, compiled abinit binary."""
+
+    def test_run_produces_succeeded_status(self, build_environment, monkeypatch):
+        """A real sequential run of v1/t01.abi must report status='succeeded'."""
+        monkeypatch.setenv("ABI_PSPDIR", abenv.psps_dir)
+        test = make_abitest_from_input(V1_T01_ABI, abenv)
+        runner = JobRunner.sequential()
+        workdir = tempfile.mkdtemp(prefix="test_basetest_run_")
+        try:
+            test.run(build_environment, runner, workdir, mpi_nprocs=1)
+            assert test.status == "succeeded"
+            assert test.run_etime > 0
+            assert os.path.isfile(os.path.join(workdir, "t01.abo"))
+        except BaseException:
+            print(f"Test failed -- inspect real abinit output left in: {workdir}")
+            raise
+        else:
+            shutil.rmtree(workdir, ignore_errors=True)
+
+
+@pytest.mark.skip(reason=_VPN_MPI_SKIP_REASON)
+class TestAbinitTestSuiteRunReal:
+    """AbinitTestSuite.run_tests() (sequential mode) against a real build."""
+
+    def test_run_tests_sequential_produces_succeeded_status(self, build_environment, monkeypatch):
+        """run_tests() with py_nprocs=1 must drive the real test to 'succeeded'."""
+        monkeypatch.setenv("ABI_PSPDIR", abenv.psps_dir)
+        suite = AbinitTestSuite(abenv, inp_files=[V1_T01_ABI])
+        runner = JobRunner.sequential()
+        workdir = tempfile.mkdtemp(prefix="test_suite_run_tests_")
+        try:
+            suite.run_tests(build_environment, workdir, runner, mpi_nprocs=1, py_nprocs=1)
+            assert [t.status for t in suite] == ["succeeded"]
+            assert len(suite.succeeded_tests()) == 1
+        except BaseException:
+            print(f"Test failed -- inspect real abinit output left in: {workdir}")
+            raise
+        else:
+            shutil.rmtree(workdir, ignore_errors=True)
 
 
 # ============================================================================
