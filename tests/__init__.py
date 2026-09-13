@@ -179,7 +179,6 @@ _tsuite_dir_names = [
     "bigdft",
     "bigdft_paral",
     "built-in",
-    # "cpu",      This directory is disabled
     "etsf_io",
     "fast",
     "gwr_suite",
@@ -189,7 +188,7 @@ _tsuite_dir_names = [
     "libxc",
     "mpiio",
     "paral",
-    # "hpc",
+    #"hpc",    # This directory is disabled
     "hpc_gpu_omp",
     "gpu_omp",
     "gpu_kokkos",

@@ -11,8 +11,8 @@ dipdip  = 1       #(Default is 1)recompute the dipole-dipole interaction.
 dynamics = 25     # Molecular dynamic flag
 ncell = 6 6 6     # Size of the supercell for the simulation
 hmctt = 40        #Number of timesteps for hybrid monte carlo trial trajectory using the NPT mover (dynamics 13)
-ntime = 200       #Number of timesteps 
-nctime = 80       #Number of timesteps after which a timestipe is printed to the _HIST.nc file 
+ntime = 200       #Number of timesteps
+nctime = 80       #Number of timesteps after which a timestipe is printed to the _HIST.nc file
 temperature = 300 # Temperature of the simulation (default = 325K).
 dtion =  30       # Delta Time for IONs (default 100 , one atomic time unit is 2.42e-17 seconds)
 
@@ -32,9 +32,8 @@ dtion =  30       # Delta Time for IONs (default 100 , one atomic time unit is 2
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = L. BASTOGNE
-#%% keywords = Effective potential, multibinit
-#%% description = 
+#%% keywords = Effective_potential, multibinit
+#%% description =
 #%%   running a molecular dynamics using an effective lattice model
 #%% topics = LatticeModel
 #%%<END TEST_INFO>
-

@@ -3,15 +3,15 @@
 ##############################################################################
 
 #print options
-prt_model = 0 
-dipdip_prt = 0 
+prt_model = 0
+dipdip_prt = 0
 
 # Construction of harmonic lattice part
 ngqpt =  2 2 2
-dipdip  = 1 
+dipdip  = 1
 ncell = 2 2 2
 
-# Optimize a coefficient in th effective potential 
+# Optimize a coefficient in th effective potential
 opt_effpot = 1
 opt_ncoeff = 2
 opt_coeff  = 10 15
@@ -25,7 +25,7 @@ opt_coeff  = 10 15
 #%% need_cpp_vars = !HAVE_GPU  , !CC_INTEL_ONEAPI
 #%% exclude_builders = scope_gnu_12.2_mpich
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t99.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   before_opt_diff_energy.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   after_opt_diff_energy.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
@@ -33,8 +33,8 @@ opt_coeff  = 10 15
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = M. M. Schmitt
-#%% keywords = Effective potential, multibinit
-#%% description = 
+#%% keywords = Effective_potential, multibinit
+#%% description =
 #%%    Test the optimize effective potential option. Optimize the value of 2 coefficients with respect
 #%%    to a training set.
 #%% topics = LatticeModel,DynamicsMultibinit
