@@ -5,12 +5,7 @@ try:
     from abimkdocs.variables import MultipleValue, Range, ValueWithConditions, ValueWithUnit
 except ImportError:
     # This is needed for importing this module within Abipy
-    from abipy.abio.abivar_database.variables import (
-        MultipleValue,
-        Range,
-        ValueWithConditions,
-        ValueWithUnit,
-    )
+    from abipy.abio.abivar_database.variables import MultipleValue, Range, ValueWithConditions, ValueWithUnit
 
 Variable = dict
 

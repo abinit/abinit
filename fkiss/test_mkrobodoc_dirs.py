@@ -8,14 +8,7 @@ import sys
 
 import pytest
 
-from .mkrobodoc_dirs import (
-    WildCard,
-    is_string,
-    list_strings,
-    main,
-    mkrobodoc_files,
-    robodoc_dheader,
-)
+from .mkrobodoc_dirs import WildCard, is_string, list_strings, main, mkrobodoc_files, robodoc_dheader
 
 
 class TestIsString:

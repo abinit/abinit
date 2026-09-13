@@ -7,13 +7,7 @@ patch_syspath()
 
 from collections import Counter
 
-from abimkdocs.variables import (
-    MultipleValue,
-    Range,
-    ValueWithConditions,
-    ValueWithUnit,
-    get_codevars,
-)
+from abimkdocs.variables import MultipleValue, Range, ValueWithConditions, ValueWithUnit, get_codevars
 
 
 class VariablesTest(AbimkdocsTest):

@@ -12,16 +12,7 @@ import pandas as pd
 import pytest
 
 from . import tools
-from .tools import (
-    Editor,
-    NotebookWriter,
-    lazy_property,
-    pprint_table,
-    print_dataframe,
-    prompt,
-    user_wants_to_exit,
-    which,
-)
+from .tools import Editor, NotebookWriter, lazy_property, pprint_table, print_dataframe, prompt, user_wants_to_exit, which
 
 
 class TestLazyProperty:

@@ -635,9 +635,8 @@ sp1:
         driver = DriverTestConf(src=self.src4)
         from .common import BaseArray
 
-        with driver.use_filter({"dtset": 1}):
-            with driver.go_down("sp1").go_down("stress tensor"):
-                constraints = driver.get_constraints_for(BaseArray((0,)))
-                assert len(constraints) == 1
-                assert constraints[0].name == "tol_vec"
-                assert constraints[0].value == 1.0e-8
+        with driver.use_filter({"dtset": 1}), driver.go_down("sp1").go_down("stress tensor"):
+            constraints = driver.get_constraints_for(BaseArray((0,)))
+            assert len(constraints) == 1
+            assert constraints[0].name == "tol_vec"
+            assert constraints[0].value == 1.0e-8
