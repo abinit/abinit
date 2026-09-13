@@ -119,22 +119,3 @@ isort.split-on-trailing-comma = false
 
 [tool.ruff.format]
 docstring-code-format = true
-
-[tool.vulture]
-#exclude = ["*file*.py", "dir/"]
-ignore_decorators = ["@app.route", "@require_*"]
-#ignore_names = ["visit_*", "do_*"]
-make_whitelist = true
-min_confidence = 80
-#paths = ["myscript.py", "mydir", "whitelist.py"]
-sort_by_size = true
-verbose = true
-
-[tool.pyright]
-include = ["abibuildbot"]
-exclude = ["**/__pycache__", ".venv", "build", "dist"]
-pythonVersion = "3.14"
-typeCheckingMode = "basic"
-reportUnusedImport = true
-reportMissingTypeStubs = false
-reportGeneralTypeIssues = true
