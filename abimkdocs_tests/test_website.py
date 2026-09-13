@@ -6,7 +6,7 @@ from .tools import AbimkdocsTest, patch_syspath
 
 patch_syspath()
 
-from abimkdocs.website import Website
+from abimkdocs.website import Website, find_pdf_basename_collisions
 
 
 class WebsiteTest(AbimkdocsTest):
@@ -86,7 +86,65 @@ class WebsiteTest(AbimkdocsTest):
         # FIXME: buildsys refs are not needed anymore (YP)
         #e = element("ac:abiref_gnu_9.2_debug.ac")
         #assert e.get("href") == "../abichecks/buildsys/Refs/abiref_gnu_9.2_debug.ac"
+        # doc/topics/documents/howto_chebfi.pdf is now the only copy of this
+        # file (doc/theory/howto_chebfi.pdf, a stale duplicate, was removed:
+        # see find_pdf_basename_collisions()/Website.pdfs for why having two
+        # PDFs share a basename is a real, silently-machine-dependent bug,
+        # not just untidiness).
         e = element("pdf:howto_chebfi.pdf|chebfi")
         assert e.get("href") == "../topics/documents/howto_chebfi.pdf" and e.text == "chebfi"
         #e = element("[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]")
         assert not website.warnings
+
+
+class FindPdfBasenameCollisionsTest(AbimkdocsTest):
+    """Unit tests for find_pdf_basename_collisions(), isolated from the
+    (expensive) full Website.build() -- no need to construct a real site to
+    exercise this pure function.
+    """
+
+    def test_no_collision_when_every_basename_is_unique(self):
+        pairs = [("a.pdf", "/doc/x/a.pdf"), ("b.pdf", "/doc/y/b.pdf")]
+        assert find_pdf_basename_collisions(pairs) == []
+
+    def test_detects_a_collision_and_names_every_conflicting_path(self):
+        pairs = [
+            ("howto_chebfi.pdf", "/doc/theory/howto_chebfi.pdf"),
+            ("howto_chebfi.pdf", "/doc/topics/documents/howto_chebfi.pdf"),
+            ("unrelated.pdf", "/doc/x/unrelated.pdf"),
+        ]
+        messages = find_pdf_basename_collisions(pairs)
+
+        assert len(messages) == 1
+        msg = messages[0]
+        assert "howto_chebfi.pdf" in msg
+        assert "/doc/theory/howto_chebfi.pdf" in msg
+        assert "/doc/topics/documents/howto_chebfi.pdf" in msg
+        assert "unrelated.pdf" not in msg
+
+    def test_names_the_alphabetically_last_path_as_the_winner(self):
+        """The message must name whichever path OrderedDict(sorted(pairs))
+        actually keeps -- the alphabetically-last one -- not just list the
+        conflicting paths without saying which one wins.
+        """
+        pairs = [
+            ("dup.pdf", "/doc/theory/dup.pdf"),
+            ("dup.pdf", "/doc/topics/documents/dup.pdf"),
+        ]
+        messages = find_pdf_basename_collisions(pairs)
+
+        assert len(messages) == 1
+        assert "`/doc/topics/documents/dup.pdf`" in messages[0]
+
+    def test_handles_more_than_two_colliding_files(self):
+        pairs = [
+            ("dup.pdf", "/doc/a/dup.pdf"),
+            ("dup.pdf", "/doc/b/dup.pdf"),
+            ("dup.pdf", "/doc/c/dup.pdf"),
+        ]
+        messages = find_pdf_basename_collisions(pairs)
+
+        assert len(messages) == 1
+        assert "Found 3 PDF files" in messages[0]
+        for path in ("/doc/a/dup.pdf", "/doc/b/dup.pdf", "/doc/c/dup.pdf"):
+            assert path in messages[0]

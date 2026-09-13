@@ -824,13 +824,68 @@ class TestBotSummary:
 
     def merge_results(self, test_suite: Any) -> None:
         """
-        Merge results from a completed test suite into the global summary.
+        Merge one executed test_suite's results into `self.res_table`, in place.
 
-        Updates the status of each test (e.g., marking as failed if any run failed)
-        and accumulates execution times.
+        Call sites and how many times each test gets merged:
+            `TestBot.run_tests_with_np()` calls this once per invocation --
+            once for the single, suite-wide pass covering every "regular"
+            suite (at one fixed `mpi_nprocs`), and then once more per `np`
+            value in the multi-parallel sweep (`np_list`, filtered to
+            `np <= max_cpus`), but only for suites flagged
+            `is_multi_parallel = True` in their `__init__.py` (e.g. `paral`,
+            `mpiio`, `gpu`, ...). So a regular suite's tests are merged
+            exactly once; a multi-parallel suite's tests are merged once
+            per np actually attempted -- whether or not that particular
+            test's own `nprocs_to_test`/`exclude_nprocs` made it applicable
+            at that np. `BaseTest.compute_nprocs()` marks an inapplicable
+            pass "skipped" with `run_etime = 0.0`, but the test object is
+            still present in `test_suite` and still counted here.
+
+        What gets written, per test:
+            Each test (a `BaseTest`, or a `ChainOfTests` for a `test_chain`
+            group -- both expose the same `suite_name`/`id`/`status`/
+            `run_etime`/`tot_etime`/`full_id`) updates one entry of
+            `self.res_table[test.suite_name][test.id]`:
+
+            - First time this (suite_name, id) key is touched: the entry is
+              seeded with `status`, `number_of_runs = 1`, `run_etime`, and
+              `tot_etime` taken directly from this one pass.
+            - Every later time (only possible for multi-parallel suites,
+              where the same test recurs across np passes): `run_etime`/
+              `tot_etime` are SUMMED across every pass, `number_of_runs` is
+              incremented once per pass (skipped passes included), and
+              `status` becomes the *worst* of the two via `_min_status()`
+              (ordering `failed < passed < succeeded < skipped`, so one
+              genuine failure anywhere sticks, while a test that succeeded
+              in one pass and was merely inapplicable/skipped in others
+              still reports "succeeded" overall).
+
+            Consequence: for a multi-parallel suite, `run_etime`/`tot_etime`
+            in the final JSON are a *sum over however many np passes ran on
+            this worker* (which depends on `max_cpus`), not one run's
+            wall-clock time -- don't treat them as directly comparable to a
+            regular suite's single-pass values, or to the same suite's
+            values from a build on a worker with a different `max_cpus`.
+
+            A test never passed to this method at all (e.g. filtered out by
+            `keywords`/`with_tdirs`/`without_tdirs`, or genuinely disabled)
+            keeps the empty `{}` entry `database.init_result_table()`
+            seeded for it; `status_of_suite()` is what later defaults such
+            an entry to "skipped" for display purposes, not this method.
+
+        `self.failed`/`self.passed` (flat lists of `full_id` strings, e.g.
+        `"[suite][id][np=N]"`) are simply APPENDED to on every call, never
+        deduplicated -- since `full_id` embeds `np=`, the same logical test
+        recurring across np passes shows up as multiple distinct entries
+        here, one per np it actually passed/failed at.
+
+        `self.res_table` is exactly what `json_dump()` writes out under one
+        top-level key per suite name -- see that method's docstring for the
+        full JSON layout this method's output ends up in.
 
         Args:
-            test_suite: The executed test suite object.
+            test_suite: The just-executed `AbinitTestSuite` (an iterable of
+                `BaseTest`/`ChainOfTests`) to fold into the summary.
         """
         # assert test_suite._executed
         for test in test_suite:
@@ -899,10 +954,47 @@ class TestBotSummary:
 
     def json_dump(self, fname: str) -> None:
         """
-        Export the current summary to a JSON file.
+        Export the current summary to a JSON file (testbot_summary.json).
 
-        The exported data includes a list of failed tests, passed tests, and
-        the detailed result table for all suites.
+        Top-level layout::
+
+            {
+              "failed": ["[suite][id][np=N]", ...],
+              "passed": ["[suite][id][np=N]", ...],
+              "summary_table": [
+                  ["<suite_name_1>", "<suite_name_2>", ...],
+                  ["<nfail>/<npass>/<nsucc>/<nskip>", ...]
+              ],
+              "<suite_name_1>": {
+                  "<test_id>": {
+                      "status": "failed" | "passed" | "succeeded" | "skipped",
+                      "number_of_runs": <int>,
+                      "run_etime": <float>,
+                      "tot_etime": <float>
+                  },
+                  ...
+              },
+              "<suite_name_2>": { ... },
+              ...
+            }
+
+        Every key besides the three fixed ones above ("failed", "passed",
+        "summary_table") is a real ABINIT suite name (e.g. "v1", "paral"),
+        holding that suite's own slice of `self.res_table` verbatim -- see
+        `merge_results()` for exactly how each per-test entry is built and
+        what "run_etime"/"tot_etime"/"number_of_runs" mean for a
+        multi-parallel suite (they can be a sum across several np passes,
+        not one run's wall-clock time). A suite that happened to be named
+        "failed", "passed", or "summary_table" would collide with the fixed
+        keys above -- the "Warning: About to overwrite key" print below is
+        the only guard against that.
+
+        `summary_table`'s two rows are parallel lists matched by position
+        (index i of each row describes the same suite), not a list of
+        per-suite dicts.
+
+        `analyze()` (called right after this, in `TestBot.run()`) adds one
+        more top-level key, `"tag"`, once this file already exists on disk.
 
         Args:
             fname: Path to the output JSON file.

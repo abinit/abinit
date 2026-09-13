@@ -36,6 +36,20 @@ norecursedirs = [
     "tmp-robodoc",
     ".ipynb_checkpoints",
     "site",
+    # doc/tests is a symlink to ../tests (`doc/tests -> ../tests`): pytest
+    # follows symlinks by default, so without this every test under tests/
+    # gets collected AND RUN a second time under the doc/tests/ path,
+    # doubling the suite's runtime and reporting every failure twice.
+    "doc",
+    # Some builders (e.g. *_abipy) clone the abipy repo inside the abinit
+    # checkout, at the top level, for abipy's own test/doc steps to use.
+    # Its test modules (e.g. abipy/abipy/tools/tests/test_decorators.py)
+    # aren't importable from here -- pytest resolves them relative to this
+    # rootdir, not abipy's own, so "abipy.tools" doesn't exist on that
+    # path -- causing a collection ImportError instead of running abinit's
+    # own tests. abipy has its own test suite/CI; it doesn't need to be
+    # (and can't correctly be) collected from a pytest run rooted here.
+    "abipy",
 ]
 # -f enables loop-on-fail mode.
 # looponfailroots (pathlist) specifies directories to check for changes.

@@ -50,15 +50,19 @@ class TestGetMpiPrefixFromEnv:
             assert result == "/usr/local/mpi"
 
     def test_get_mpi_prefix_from_mpihome(self):
-        """Should return MPIHOME if MPI_HOME is not set."""
-        env = {"MPIHOME": "/opt/mpich"}
-        # Remove MPI_HOME if it exists
-        env_copy = os.environ.copy()
-        env_copy.pop("MPI_HOME", None)
-        env_copy.update(env)
-        with patch.dict(os.environ, env_copy, clear=False):
+        """Should return MPIHOME if MPI_HOME is not set.
+
+        Regression test: this used to build a *copy* of os.environ with
+        MPI_HOME popped out, then apply it via patch.dict(..., clear=False)
+        -- but clear=False only adds/overwrites keys, it never removes ones
+        merely absent from the given dict, so a real MPI_HOME already set on
+        the host (common on an HPC worker) leaked straight through and beat
+        the injected MPIHOME. clear=True (the pattern every other test in
+        this class already uses) makes the environment fully deterministic.
+        """
+        with patch.dict(os.environ, {"MPIHOME": "/opt/mpich"}, clear=True):
             result = get_mpi_prefix_from_env()
-            assert result == "/opt/mpich" or result is None
+            assert result == "/opt/mpich"
 
     def test_get_mpi_prefix_mpi_home_precedence(self):
         """MPI_HOME should take precedence over MPIHOME."""

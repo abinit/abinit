@@ -132,7 +132,8 @@ class TestKeywords:
     """Checks on the `keywords` TEST_INFO field across the whole suite."""
 
     @pytest.fixture(scope="class")
-    def unknown_and_wrong_keywords(self, full_database):
+    @classmethod
+    def unknown_and_wrong_keywords(cls, full_database):
         return full_database.find_unknown_wrong_keywords()
 
     def test_no_undocumented_keywords(self, unknown_and_wrong_keywords):

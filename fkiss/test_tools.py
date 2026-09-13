@@ -270,6 +270,10 @@ class TestPrintDataframe:
         assert isinstance(out, str)
 
     def test_display_html_returns_ipython_html_object(self):
+        # IPython is a soft/optional dependency (only display="html" needs
+        # it) -- skip rather than fail where it isn't installed, same
+        # convention as TestNotebookWriter's abipy/nbformat skips below.
+        pytest.importorskip("IPython.core.display", exc_type=ImportError)
         from IPython.core.display import HTML
 
         df = pd.DataFrame({"a": [1, 2]})
@@ -313,16 +317,22 @@ class TestNotebookWriter:
             os.remove(path)
 
     def test_get_nbformat_nbv(self):
+        # nbformat is a soft/optional dependency of fkiss (only the
+        # notebook-building helpers need it) -- skip rather than fail where
+        # it isn't installed, same convention as the abipy skips above.
+        pytest.importorskip("nbformat", exc_type=ImportError)
         obj = ConcreteNotebookWriter()
         nbformat, nbv = obj.get_nbformat_nbv()
         assert nbv.__name__.endswith("v4")
 
     def test_get_nbformat_nbv_nb_adds_title_cell(self):
+        pytest.importorskip("nbformat", exc_type=ImportError)
         obj = ConcreteNotebookWriter()
         nbformat, nbv, nb = obj.get_nbformat_nbv_nb(title="Hello")
         assert any("Hello" in cell.get("source", "") for cell in nb.cells)
 
     def test_write_notebook_creates_a_valid_ipynb_file(self, tmp_path):
+        pytest.importorskip("nbformat", exc_type=ImportError)
         obj = ConcreteNotebookWriter()
         nbpath = str(tmp_path / "test.ipynb")
         result = obj.write_notebook(nbpath=nbpath)
@@ -334,6 +344,7 @@ class TestNotebookWriter:
         assert any("Test notebook" in cell.get("source", "") for cell in nb.cells)
 
     def test_write_notebook_defaults_to_a_tempfile(self):
+        pytest.importorskip("nbformat", exc_type=ImportError)
         obj = ConcreteNotebookWriter()
         nbpath = obj.write_notebook()
         try:

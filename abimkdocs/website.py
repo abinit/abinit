@@ -133,6 +133,50 @@ def sort_and_groupby(items: Iterable[T], key: Callable[[T], Any], reverse: bool 
     return groupby(sorted(items, key=key, reverse=reverse), key=key)
 
 
+def find_pdf_basename_collisions(pdf_pairs: Iterable[tuple[str, str]]) -> list[str]:
+    """
+    Return one explanatory message per PDF basename shared by 2+ different files.
+
+    Two PDFs with the same basename but different full paths are a latent
+    bug: the `[[pdf:name.pdf]]` wikilink can only resolve to one of them
+    (see Website.pdfs), so any other copy is either a stale duplicate that
+    should be removed, or a genuine naming clash that should be resolved by
+    renaming one of the files. This happened for real: howto_chebfi.pdf
+    used to exist under both doc/theory/ and doc/topics/documents/, and
+    which copy `[[pdf:howto_chebfi.pdf]]` linked to silently depended on
+    the host machine's directory-scan order.
+
+    Args:
+        pdf_pairs: (basename, full_path) tuples, as produced by
+            Website.walk_filepath() filtered to *.pdf.
+
+    Returns:
+        One message per colliding basename, naming every conflicting path
+        and which one currently wins the collision (assuming pdf_pairs is
+        sorted by (basename, path) before being handed to
+        `OrderedDict(...)`, which keeps the *last* value for a repeated
+        key -- i.e. the alphabetically-last path). Empty if there are no
+        collisions.
+    """
+    paths_by_name: dict[str, list[str]] = defaultdict(list)
+    for name, path in pdf_pairs:
+        paths_by_name[name].append(path)
+
+    messages = []
+    for name, paths in paths_by_name.items():
+        if len(paths) > 1:
+            sorted_paths = sorted(paths)
+            messages.append(
+                "Found %d PDF files sharing the basename `%s`; any "
+                "[[pdf:%s]] wikilink resolves to just one of them "
+                "(`%s`, chosen by sorting the full paths and keeping the "
+                "last one -- not necessarily the one you expect). Rename "
+                "or remove all but one of:\n  %s"
+                % (len(paths), name, name, sorted_paths[-1], "\n  ".join(sorted_paths))
+            )
+    return messages
+
+
 class MyEntry(Entry):
     """
     Extends pybtex Entry with useful methods for generating HTML output.
@@ -453,9 +497,27 @@ class Website:
             var.tests_info["num_tests_in_tutorial"] = len([t for t in var.tests
                 if t.executable == var.executable and t.suite_name.startswith("tuto")])
 
-        # Find pdf files and sort them by basename.
-        self.pdfs = OrderedDict(sorted([t for t in self.walk_filepath() if t[0].endswith(".pdf")],
-                                key=lambda t: t[0]))
+        # Find pdf files and sort them by basename, breaking ties on the full
+        # path so this is deterministic across machines. os.walk()'s
+        # traversal order isn't guaranteed to be the same on every
+        # platform/filesystem -- sorting on the basename alone left the
+        # OrderedDict construction below (which keeps the *last* value for a
+        # repeated key) picking whichever same-named copy os.walk() happened
+        # to visit last, silently and differently depending on the machine
+        # (this actually happened: howto_chebfi.pdf used to exist under both
+        # doc/theory/ and doc/topics/documents/, since removed).
+        pdf_pairs = sorted([t for t in self.walk_filepath() if t[0].endswith(".pdf")],
+                            key=lambda t: (t[0], t[1]))
+
+        # Detect (rather than silently resolve) any basename that still
+        # collides across two or more different PDF files -- the sort above
+        # makes the outcome deterministic, but two files that happen to
+        # share a name almost certainly means one is a stale duplicate that
+        # should be renamed or removed, not quietly shadowed forever.
+        for msg in find_pdf_basename_collisions(pdf_pairs):
+            self.warn(msg)
+
+        self.pdfs = OrderedDict(pdf_pairs)
 
         cprint("Initial website generation completed in %.2f [s]" % (time.time() - start), "green")
 

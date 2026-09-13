@@ -1111,7 +1111,8 @@ class TestChainOfTestsMultiParallel:
     """
 
     @pytest.fixture(scope="class")
-    def chain_variants(self):
+    @classmethod
+    def chain_variants(cls):
         """One ChainOfTests per nprocs_to_test value declared on t51/t52/t53."""
         return make_abitests_from_inputs(list(PARAL_CHAIN_INPUTS), abenv)
 
