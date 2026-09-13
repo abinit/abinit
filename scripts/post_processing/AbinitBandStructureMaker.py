@@ -5,7 +5,7 @@ version = '1.3'
 # last modified : november 16 2010
 # written by Benjamin Tardif
 # benjamin.tardif@umontreal.ca
-# Modified by Paul Boulanger 
+# Modified by Paul Boulanger
 # 1.3 : Converted to numpy
 #     : corrected a bug related to termination of the segments (line 114)
 #     : defined a second angletol to distinguish between specialkpt detection and segment construction
@@ -45,7 +45,7 @@ default.emptyspacewidth = 10
 ctrl = VariableContainer()
 ctrl.arglist = sys.argv[1:]              # list of strings containing all the input arguments in the command line
 # list of valid keywords which can be used in the command line
-ctrl.validkeywords = ['-setautolaunch','-setenergyshift','-setlinecolor','-setlinewidth','-setspacewidth','-setup','-setdefault','-debug'] 
+ctrl.validkeywords = ['-setautolaunch','-setenergyshift','-setlinecolor','-setlinewidth','-setspacewidth','-setup','-setdefault','-debug']
 ctrl.debugmode = False                   # True if debug mode is activated (by adding keyword "-debug" in the command line)
 ctrl.launchcommand = str()            # string containing the xmgrace launch command
 ctrl.autolaunch = str()               # 'yes'or 'no', indicating if xmgrace will be automatically launched each time a .agr file is created
@@ -58,7 +58,7 @@ ctrl.separatorlinewidth = int()
 ctrl.emptyspacewidth = int()
 
 
-# dictionary maping color name with color number in xmgrace 
+# dictionary maping color name with color number in xmgrace
 ctrl.xmgracecolor = {
 'white'    : 0,
 'black'    : 1,
@@ -89,7 +89,7 @@ ctrl.angletol2 = 0.1
 ctrl.bandstructurescheme = str() # scheme of the type '{lA}-{lB}-{lC}' corresponding to the band structure to be plotted
                                  # each {} corresponds to the name given to a special k-point
                                  # {} 1st character : 'l' for 'letter' or 's' for 'symbol'
-                                 # {} 2nd character : a letter which combined with the 1st character will give a caption associated with this special k-point 
+                                 # {} 2nd character : a letter which combined with the 1st character will give a caption associated with this special k-point
                                  # '-' between {} indicates that a band structure must be plotted beteen the 2 corresponding k-points
                                  # ' ' (empty space) between {} indicates that an empty space must be inserted in the band structure
 ctrl.dicospecialkpt = dict()     # dictionary mapping , keys=[vectors], values={lx}
@@ -124,7 +124,7 @@ data.kpt = list() # list of array(3,Float)
 data.energy = list() # list of array(data.nband,Float)
 data.specialkpt = list() # list of array(3,Float)
 data.G = list() # list of array(3,Float) reciprocal vectors
-data.fermienergy = float() #fermi energy, in eV 
+data.fermienergy = float() #fermi energy, in eV
 data.typat = list() # list containing the type of each atom
 data.units = str() # 'eV' or 'hartree'
 
@@ -330,7 +330,7 @@ def setupfilecompatibility(oldsetupfile,newsetupfile):
         return True
     else:
         return False
-        
+
 def getsettings():
     # --> ctrl.launchcommand,ctrl.autolaunch,ctrl.energyshift,ctrl.valbandcolor,ctrl.conbandcolor,ctrl.bandlinewidth,ctrl.fermilinewidth,ctrl.emptyspacewidth
     reader = open(sys.path[0]+'/'+default.setupfilename,'r')
@@ -385,7 +385,7 @@ def feedbackbugged(jobtype='?'):
             #this is not the first time the method is being called
             filedata.pop(-1)
             writer.writelines(filedata)
-            writer.write('%s\t%s\t%s\t%s\t%s' %(feedback.ntimeused+1,time.ctime(),version,jobtype,'BUGGED'))            
+            writer.write('%s\t%s\t%s\t%s\t%s' %(feedback.ntimeused+1,time.ctime(),version,jobtype,'BUGGED'))
 
 def feedbackcrashed(jobtype,reason):
     reader = open(sys.path[0]+'/'+feedback.filename,'r')
@@ -435,7 +435,7 @@ else:
     reader.close()
     clean2(setupfile)
     checkversion = setupfile[1].split()[-1].split(')')[0]
-    #update the setup file if the checkversion is different from the version    
+    #update the setup file if the checkversion is different from the version
     if checkversion != version:
         print '\n- WARNING -\nnew version detected\n%s was upgraded from version %s to version %s' %(program,checkversion,version)
         writesetupfile(default.setupfilename+'2')
@@ -546,7 +546,7 @@ if setautolaunch+setenergyshift+setlinecolor+setlinewidth+setspacewidth+setup!=0
         #change launchcommand --> ctrl.launchcommand
         print '\ncurrent xmgrace launch command is :\n%s\n' %ctrl.launchcommand
         answer = str()
-        while answer not in ['yes','no']:    
+        while answer not in ['yes','no']:
             answer = raw_input('do you wish to change it (yes ; no) ? ')
         if answer == 'yes':
             ctrl.launchcommand = raw_input('\nenter the new xmgrace launch command :\n')
@@ -715,7 +715,7 @@ if ctrl.filetype == 'out':
 
             ctrl.useddataset = list()
             validanswer = True
-            
+
             #removes empty spaces from answer
             answersplit = answer.split()
             answer = str()
@@ -808,7 +808,7 @@ if ctrl.filetype == 'out':
 
     if data.fermienergy == float(0):
         data.fermienergy = 'automatic'
-        
+
     if ctrl.debugmode==True:print '\n--> fermi energy found\n    %s' %data.fermienergy
 
 #------------------------------
@@ -837,8 +837,8 @@ if ctrl.filetype == 'out':
         datasetkey.append(['natom:'])
         for i in range(len(starter)):
             if starter[i].split()[0] == 'natom%s' %n or starter[i].split()[0] == 'natom':
-                 value = float(re.search(parser_template.format('natom'), starter[i]).group(1)) 
-                 datasetkey[-1].append(value) 
+                 value = float(re.search(parser_template.format('natom'), starter[i]).group(1))
+                 datasetkey[-1].append(value)
         if len(datasetkey[-1]) == 1:
             datasetkey[-1].append(float(1)) #default
 
@@ -860,7 +860,7 @@ if ctrl.filetype == 'out':
         if len(datasetkey[-1]) == 1:
             datasetkey[-1].append(float(1)) #default
 
-        #set fermi energy to "automatic" if occopt is non metallic 
+        #set fermi energy to "automatic" if occopt is non metallic
         if datasetkey[-1][-1] in [0,1,2]:
             data.fermienergy = 'automatic'
 
@@ -958,7 +958,7 @@ if ctrl.filetype == 'out':
         for line in dataset:
             if line.split()[0] == 'Eigenvalues':
                 data.units = line.replace('(','').replace(')','').split()[1]
-        
+
         #get k-points --> data.kpt
         #get energy eigenvalues --> data.energy
         kptlist = list()
@@ -998,7 +998,7 @@ if ctrl.filetype == 'out':
             data.specialkpt.append(data.kpt[i])
         else:
             vector1 = data.kpt[i] - data.kpt[i-1]
-            
+
             if angle(vector1,vector2) < ctrl.angletol:
                 pass
             else:
@@ -1009,7 +1009,7 @@ if ctrl.filetype == 'out':
         for i in range(len(data.specialkpt)):
             print '    %s' %data.specialkpt[i]
 
-    #compute band structure scheme --> ctrl.bandstructurescheme 
+    #compute band structure scheme --> ctrl.bandstructurescheme
     L = 0
     dico = dict()
     for i in range(len(data.specialkpt)):
@@ -1113,7 +1113,7 @@ if ctrl.filetype == 'dbs':
             kf = kpt_red_to_cart(ctrl.dicospecialkpt[caption[1]],data.G)
             segmentcartlength.append(norm(kf-ki))
             totallen += segmentcartlength[-1]
-    
+
     if nvac != 0:
         spacelen = (float(ctrl.spacepercent)/100)*totallen/nvac/(1-float(ctrl.spacepercent)/100)
         for i in range(len(segmentcartlength)):
@@ -1136,8 +1136,8 @@ if ctrl.filetype == 'dbs':
         print '\n--> segment relative length computed\n    %s element(s)' %len(ctrl.segmentrellength)
         for i in range(len(ctrl.segmentrellength)):
             print '    %s' %ctrl.segmentrellength[i]
-    
-    #compute positions of xticks --> ctrl.xtick 
+
+    #compute positions of xticks --> ctrl.xtick
     xtick = list()
     for i in range(len(ctrl.segmentrellength)):
         xtick.append(sum(ctrl.segmentrellength[:i+1]))
@@ -1162,7 +1162,7 @@ if ctrl.filetype == 'dbs':
         print '\n--> captions of xticks computed\n    %s elements(s)' %len(ctrl.captiontick)
         for i in range(len(ctrl.captiontick)):
             print '    %s' %ctrl.captiontick[i]
-    
+
 
     #compute dictionary mapping x coordinate on graph with k-points --> ctrl.dicoxkpt {x,kpt} (type(x) = float, type(kpt)=array(3,Float))
     for i in range(len(ctrl.segmentcaptionlist)):
@@ -1191,7 +1191,7 @@ if ctrl.filetype == 'dbs':
 
     #compute abcissa array --> ctrl.X
     ctrl.X = sort(ctrl.dicoxkpt.keys())
-    
+
     #compute ordinate arrays --> ctrl.Y
     xsort = sort(ctrl.dicoxkpt.keys())
     for i in range(len(xsort)):
@@ -1276,7 +1276,7 @@ if ctrl.filetype == 'out':
 
 
 if ctrl.filetype == 'dbs':
-    
+
     #compute the .agr filename --> ctrl.agrfilename
     ctrl.agrfilename = '%s.agr' %ctrl.filename[:-4]
 
@@ -1331,7 +1331,7 @@ if ctrl.filetype == 'dbs':
     for array in ctrl.Y:
         minlist.append(min(array))
     graph.worldymin = min(minlist)
-    
+
     #compute plot.worldymax --> graph.worldymax
     maxlist = list()
     for array in ctrl.Y:
@@ -1396,13 +1396,13 @@ if ctrl.filetype == 'dbs':
     writer.write('# frame properties:\n')
     writer.write('@   frame linewidth %s\n' %ctrl.separatorlinewidth)
     writer.write('\n')
-    
+
     s = 0
 
     writer.write('# plot of energy bands:\n')
     for i in range(len(ctrl.Y[0])):
         if i+1 > ctrl.nvalenceband:
-            color = ctrl.xmgracecolor[ctrl.conbandcolor] 
+            color = ctrl.xmgracecolor[ctrl.conbandcolor]
         else:
             color = ctrl.xmgracecolor[ctrl.valbandcolor]
         writer.write('@   s%s line linewidth %s\n' %(s,ctrl.bandlinewidth))
@@ -1459,13 +1459,13 @@ if ctrl.filetype == 'dbs':
         writer.write('      %s \t %s\n' %(ctrl.xtick[i+1],graph.worldymax))
         writer.write('    &\n')
     writer.write('\n')
-        
+
     #close the writer
     writer.close()
 
     print '\n"%s" file created successfully\n' %ctrl.agrfilename
     if feedback.feedback==True:feedbackcompleted('DBS')
-    
+
 #=====================================================================================================================================================================
 
 

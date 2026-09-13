@@ -33,7 +33,7 @@
 						<DECISION description="All K points have the same number of bands and the same occupancies of bands">
 							<DIRECTENTRY variablename='occopt' variablevalue='0'/>
 							<KEYBOARDENTRY instruction='Specify the occupation of the bands' variablename='occ' textlen='1' />
-						</DECISION> 
+						</DECISION>
 						<DECISION description='k points may optionally have different numbers of bands and different occupancies'>
 							<DIRECTENTRY variablename='occopt' variablevalue='2'/>
 							<KEYBOARDENTRY instruction='Specify the occupation for EACH bands, for EACH k point and EACH spin' variablename='occ' textlen='1'/>
@@ -41,7 +41,7 @@
                                         </CHOICE>
 				</DECISION>
 				<DECISION description='By allowing the code to specify automatically the occupation for a semiconductor'>
-					<DIRECTENTRY variablename='occopt' variablevalue='1'/>  
+					<DIRECTENTRY variablename='occopt' variablevalue='1'/>
 				</DECISION>
 			</CHOICE>
 		</DECISION>
@@ -55,7 +55,7 @@
 			</MOUSEENTRY>
 			<KEYBOARDENTRY instruction='Specify the temperature of the smearing (give units: Ha, Ry, eV, K)' variablename='tsmear' textlen='1'/>
 		</DECISION>
-	</CHOICE>	
+	</CHOICE>
 
 	<KEYBOARDENTRY instruction='Preconditioning of the residual potential to be transferred in the SCF (Default 1.0)' variablename='diemix' textlen='1'/>
 	<KEYBOARDENTRY instruction='Give model for the Dielectric Macroscopic constant (speed up SCF procedure, Default 1d6)' variablename='diemac' textlen='1'/>
@@ -75,10 +75,10 @@
 		<OPTION description='12. Non-self-consistent calculation is to be done (see documentation)' variablename='iscf' variablevalue='-2'/>
 		<OPTION description='13. Like 12, but initialize occ and wtk (see documentation)' variablename='iscf' variablevalue='-3'/>
 		<OPTION description='14. Like 12, but followed by the determination of excited states within TDDFT' variablename='iscf' variablevalue='-1'/>
-	</MOUSEENTRY> 
+	</MOUSEENTRY>
 
 	<KEYBOARDENTRY instruction='Maximum number of SCF iterations' variablename='nstep' textlen='1'/>
-	
+
 	<CHOICE instruction='Choose the SCF cycle convergence criteria'>
 		<DECISION description='Converge on the difference on the energy'>
 		<KEYBOARDENTRY instruction='Minimum difference of energy (specify units: Ha, Ry, eV, K)' variablename='toldfe' textlen='1'/>

@@ -66,7 +66,7 @@ try:
 except ValueError:
   raise Exception('The value you enter is not an integer!')
 
-# Get the nb of random Q-points from user 
+# Get the nb of random Q-points from user
 user_input = raw_input('Enter the number of random Q-points you have\n')
 try:
   nbQ = int(user_input)
@@ -117,7 +117,7 @@ for ikpt in N.arange(DDB.nkpt):
         continue
     else:
       if N.allclose(eig0.EIG[0,ikpt,iband-1], eig0.EIG[0,ikpt,iband]):
-        degen[ikpt,iband] = count   
+        degen[ikpt,iband] = count
     if iband != 0:
       if N.allclose(eig0.EIG[0,ikpt,iband-1], eig0.EIG[0,ikpt,iband]):
         degen[ikpt,iband] = count
@@ -130,7 +130,7 @@ wtq = N.ones((nbQ))
 wtq = wtq*(1.0/nbQ)
 
 
-# Compute phonon freq. and eigenvector for each Q-point 
+# Compute phonon freq. and eigenvector for each Q-point
 # from each DDB (1 qpt per DDB file)
 fan_tot = N.zeros((len(freq)),dtype=complex)
 ddw_tot = N.zeros((),dtype=complex)
@@ -149,7 +149,7 @@ for ii in DDB_files:
   rprimd = DDB.rprim*DDB.acell
   gprimd = N.linalg.inv(N.matrix(rprimd))
 
-# Transform from 2nd-order matrix (non-cartesian coordinates, 
+# Transform from 2nd-order matrix (non-cartesian coordinates,
 # masses not included, asr not included ) from DDB to
 # dynamical matrix, in cartesian coordinates, asr not imposed.
   IFC_cart = N.zeros((3,DDB.natom,3,DDB.natom),dtype=complex)
@@ -183,7 +183,7 @@ for ii in DDB_files:
 # Solve the eigenvalue problem with linear algebra (Diagonalize the matrix)
   [eigval,eigvect]=N.linalg.eigh(Dyn_mat)
 
-# Orthonormality relation 
+# Orthonormality relation
   eigvect = (eigvect)*N.sqrt(5.4857990965007152E-4/float(DDB.amu[0]))
 
 # Phonon frequency (5.4857990946E-4 = 1 au of electron mass)
@@ -211,7 +211,7 @@ for ii in DDB_files:
   else:
     FANterm.__init__(directory='.',filename=user_input.split()[0])
 
-# Compute the displacement = eigenvectors of the DDB. 
+# Compute the displacement = eigenvectors of the DDB.
 # Due to metric problem in reduce coordinate we have to work in cartesian
 # but then go back to reduce because our EIGR2D matrix elements are in reduced coord.
   displ_FAN =  N.zeros((3,3),dtype=complex)
@@ -242,7 +242,7 @@ for ii in DDB_files:
           # Now compute the T=0 shift due to this q point
           for idir1 in N.arange(3):
             for idir2 in N.arange(3):
-              # DDW matrix only computed at Gamma  
+              # DDW matrix only computed at Gamma
               if N.allclose(EIGR2D.iqpt,[0.0,0.0,0.0]):
                 ddw_save[idir1,iatom1,idir2,iatom2] = EIGR2D.EIG2D[kpt,band-1,idir1,iatom1,idir2,iatom2]
                 ddw_corr += ddw_save[idir1,iatom1,idir2,iatom2]*\
@@ -287,18 +287,3 @@ with open(output,"w") as O:
 #plt.ylabel('Spectral function')
 #plt.xlabel('Energy [eV]')
 #plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

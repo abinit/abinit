@@ -5,7 +5,7 @@
 			<DIRECTENTRY  variablename='kptopt' variablevalue='0'/>
 			<KEYBOARDENTRY instruction='Number of points in the grid' variablename='nkpt' textlen='1'/>
 			<KEYBOARDENTRY instruction='Reduced coordinates in reciproqual space of the k points' variablename='kpt' textlen='getvalue nkpt'/>
-			<KEYBOARDENTRY instruction='Normalizing denominator for each k point' variablename='kptnrm' textlen='1'/> 			
+			<KEYBOARDENTRY instruction='Normalizing denominator for each k point' variablename='kptnrm' textlen='1'/>
 		</DECISION>
 
 		<DECISION description='Rely on the program to generate a Monkhorst-Pack grid'>

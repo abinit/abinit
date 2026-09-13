@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 #
 # Wrapper for the standard tests of abinit
 #

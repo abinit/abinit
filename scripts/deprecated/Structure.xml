@@ -1,5 +1,5 @@
 <SECTION sectiontitle='Structure'>
-  <CHOICE instruction='Use a CML file to define the structure ?'> 
+  <CHOICE instruction='Use a CML file to define the structure ?'>
     <DECISION description='yes'>
       <KEYBOARDENTRY instruction='Enter the name of the cml file' variablename='cmlfile' textlen='1'/>
     </DECISION>
@@ -79,7 +79,7 @@
         </DECISION>
       </CHOICE>
 
-      
+
     </DECISION>
   </CHOICE>
 </SECTION>

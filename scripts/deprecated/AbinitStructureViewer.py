@@ -51,7 +51,7 @@ ctrl.completed = bool()                # True if the calculation was completed i
 ctrl.askreplicate = str()              # 3 integers separated by spaces indicating the cell replication
 ctrl.replicatevalidator = bool()       # True if the format of askreplicate is valid
 ctrl.replicate = zeros(3,Int)          # integer array of size 1x3 containing the number of times the cell is replicated in each direction
-ctrl.natomreplicated = int()           # total number of atoms displayed, including the replicated ones 
+ctrl.natomreplicated = int()           # total number of atoms displayed, including the replicated ones
 ctrl.xyzfilename = str()               # name of the file created
 ctrl.flagacell = bool()                # True when acell is assigned
 ctrl_flagrprim = bool()                # True when rprim is assigned
@@ -89,7 +89,7 @@ data.xangst = list()                   # list of array((data.natom,3),Float) cor
 #=====================================================================================================================================================================
 #METHODS
 def detectfile(filename,directory): # type(filename) = type(directory) = string
-    # method detectfile returns True if the filename is found in the specified directory 
+    # method detectfile returns True if the filename is found in the specified directory
     if filename in os.listdir(directory):
         return True
     else:
@@ -183,7 +183,7 @@ if '-setup' in ctrl.arglist:
 
     # change launchcommand
     print '\ncurrent jmol launch command is :\n%s\n' %ctrl.launchcommand
-    while ctrl.changelaunchcommand not in ['yes','no']:    
+    while ctrl.changelaunchcommand not in ['yes','no']:
         ctrl.changelaunchcommand = raw_input('do you wish to change it (yes ; no) ? ')
 
     if ctrl.changelaunchcommand == 'yes':
@@ -207,13 +207,13 @@ if '-setup' in ctrl.arglist:
 
 #keyword -debug
 if '-debug' in ctrl.arglist:
-    # user activated the debug mode    
+    # user activated the debug mode
     ctrl.debugmode=True
     ctrl.arglist.pop(ctrl.arglist.index('-debug'))
 
 #keyword -ldebug
 if '-ldebug' in ctrl.arglist:
-    # user activated the ldebug mode    
+    # user activated the ldebug mode
     ctrl.debugmode=True
     ctrl.ldebugmode=True
     ctrl.arglist.pop(ctrl.arglist.index('-ldebug'))
@@ -339,7 +339,7 @@ if ctrl.relaxationtype == 0:
             if line.split()[0] == 'acell':
                 data.acell.append(ctrl.bohrtoangst*array([float(line.split()[1]),float(line.split()[2]),float(line.split()[3])],Float))
                 ctrl.flagacell=True
-    
+
     for i in range(len(ctrl.filedata)):
         if ctrl_flagrprim==False:
             if ctrl.filedata[i].split()[0] == 'rprim':
@@ -348,10 +348,10 @@ if ctrl.relaxationtype == 0:
                     [float(ctrl.filedata[i+1].split()[0]),float(ctrl.filedata[i+1].split()[1]),float(ctrl.filedata[i+1].split()[2])],\
                     [float(ctrl.filedata[i+2].split()[0]),float(ctrl.filedata[i+2].split()[1]),float(ctrl.filedata[i+2].split()[2])]],Float))
                 ctrl_flagrprim=True
-    
+
     if ctrl_flagrprim==False:
         data.rprim = [ array([[1.0 , 0.0, 0.0], [0.0 , 1.0, 0.0], [0.0 , 0.0, 1.0]]) ]*len(data.acell)
-	
+
     for k in range(len(ctrl.filedata)):
         if ctrl.flagxangst==False:
             if ctrl.filedata[k].split()[0] == 'xcart':
@@ -375,7 +375,7 @@ if ctrl.relaxationtype == 1:
             if line.split()[0] == 'acell':
                 data.acell.append(ctrl.bohrtoangst*array([float(line.split()[1]),float(line.split()[2]),float(line.split()[3])],Float))
                 ctrl.flagacell=True
-                
+
     for i in range(len(ctrl.filedata)):
         if ctrl_flagrprim==False:
             if ctrl.filedata[i].split()[0] == 'rprim':
@@ -384,11 +384,11 @@ if ctrl.relaxationtype == 1:
                     [float(ctrl.filedata[i+1].split()[0]),float(ctrl.filedata[i+1].split()[1]),float(ctrl.filedata[i+1].split()[2])],\
                     [float(ctrl.filedata[i+2].split()[0]),float(ctrl.filedata[i+2].split()[1]),float(ctrl.filedata[i+2].split()[2])]],Float))
                 ctrl_flagrprim=True
-		
+
     if ctrl_flagrprim==False:
         data.rprim = [ array([[1.0 , 0.0, 0.0], [0.0 , 1.0, 0.0], [0.0 , 0.0, 1.0]]) ]*len(data.acell)
-	
-			      
+
+
     for k in range(len(ctrl.filedata)):
         if ctrl.filedata[k] == ' Cartesian coordinates (bohr)':
             data.acell.append(data.acell[-1])
@@ -425,7 +425,7 @@ if ctrl.relaxationtype == 2:
 
     if ctrl_flagrprim==False:
         data.rprim = [ array([[1.0 , 0.0, 0.0], [0.0 , 1.0, 0.0], [0.0 , 0.0, 1.0]]) ]*len(data.acell)
-	
+
     for k in range(len(ctrl.filedata)):
         if ctrl.filedata[k] == ' Cartesian coordinates (bohr)':
             data.xangst.append(zeros((data.natom,3),Float))
@@ -488,7 +488,7 @@ for line in ctrl.filedata:
         ctrl.completed=True
 
 if ctrl.completed == False:
-    print '- WARNING : calculation not completed in the given file -' 
+    print '- WARNING : calculation not completed in the given file -'
 #=====================================================================================================================================================================
 
 

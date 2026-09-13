@@ -1,6 +1,6 @@
 <SECTION sectiontitle='Relaxation'>
   <CHOICE instruction='Which kind of relaxation do you wish to perform ?'>
-    
+
     <DECISION description='optimize the atomic positions only'>
       <MOUSEENTRY instruction='Choose the technique used to optimize the atomic positions (ionmov)'>
 	<OPTION description='molecular dynamics with optional viscous damping' variablename='ionmov' variablevalue='1'/>
@@ -10,10 +10,10 @@
 	<OPTION description='quenched molecular dynamics using the Verlet algorithm' variablename='ionmov' variablevalue='7'/>
 	<OPTION description='molecular dynamics with Nose-Hoover thermostat, using the Verlet algorithm' variablename='ionmov' variablevalue='8'/>
 	<OPTION description='Langevin molecular dynamics' variablename='ionmov' variablevalue='9'/>
-	<OPTION description='isokinetic ensemble molecular dynamics' variablename='ionmov' variablevalue='12'/>	
+	<OPTION description='isokinetic ensemble molecular dynamics' variablename='ionmov' variablevalue='12'/>
       </MOUSEENTRY>
     </DECISION>
-    
+
     <DECISION description='optimize the atomic positions as well as the cell geometry'>
       <MOUSEENTRY instruction='Choose the technique used to optimize the atmic positions (ionmov)'>
 	<OPTION description='structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS)' variablename='ionmov' variablevalue='2'/>

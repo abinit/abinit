@@ -74,8 +74,8 @@ class system:
     self.kpt = root.variables['reduced_coordinates_of_kpoints'][:,:]
     self.eigenvalues = root.variables['eigenvalues'][:,:,:] #number_of_spins, number_of_kpoints, max_number_of_states
     self.rprimd = root.variables['primitive_vectors'][:,:]
-    self.zpm = root.variables['zero_point_motion'][:,:,:,:,:] # nsppol, number_of_temperature, 
-                                                   # number_of_kpoints, max_number_of_states, cplex 
+    self.zpm = root.variables['zero_point_motion'][:,:,:,:,:] # nsppol, number_of_temperature,
+                                                   # number_of_kpoints, max_number_of_states, cplex
     root.close()
 
 # Read _EIG.nc file
@@ -83,7 +83,7 @@ class system:
     if not (os.path.isfile(filefullpath)):
       raise Exception('The file "%s" does not exists!' %filefullpath)
     root = nc.Dataset(filefullpath,'r')
-    self.EIG = root.variables['Eigenvalues'][:,:] 
+    self.EIG = root.variables['Eigenvalues'][:,:]
     self.Kptns = root.variables['Kptns'][:,:]
     NBandK = root.variables['NBandK'][:]
     self.nband =  N.int(NBandK[0,0])
@@ -99,7 +99,7 @@ class system:
     self.nband = len(root.dimensions['max_number_of_states'])
     self.nsppol = len(root.dimensions['number_of_spins'])
     self.occ = root.variables['occupations'][:,:,:] # number_of_spins, number_of_kpoints, max_number_of_states
-    GKKtmp = root.variables['second_derivative_eigenenergies_actif'][:,:,:,:,:] #product_mband_nsppol,number_of_atoms, 
+    GKKtmp = root.variables['second_derivative_eigenenergies_actif'][:,:,:,:,:] #product_mband_nsppol,number_of_atoms,
                                        # number_of_cartesian_directions, number_of_kpoints, product_mband_nsppol*2
     GKKtmp2 = zeros((self.nkpt,2*self.nband,3,self.natom,self.nband))
     GKKtmp2 = N.einsum('ijkno->nokji', GKKtmp)
@@ -107,7 +107,7 @@ class system:
     GKKtmp4 = GKKtmp2[:, 1::2, ...] # Slice the odd numbers
     self.GKK = 1j*GKKtmp4
     self.GKK += GKKtmp3
-    self.eigenvalues = root.variables['eigenvalues'][:,:,:] #number_of_spins, number_of_kpoints, max_number_of_states   
+    self.eigenvalues = root.variables['eigenvalues'][:,:,:] #number_of_spins, number_of_kpoints, max_number_of_states
     self.kpt = root.variables['reduced_coordinates_of_kpoints'][:,:]
     self.iqpt = root.variables['current_q_point'][:]
     self.wtq = root.variables['current_q_point_weight'][:]
@@ -124,14 +124,14 @@ class system:
     self.nband = len(root.dimensions['max_number_of_states'])
     self.nsppol = len(root.dimensions['number_of_spins'])
     self.occ = root.variables['occupations'][:,:,:] # number_of_spins, number_of_kpoints, max_number_of_states
-    EIG2Dtmp = root.variables['second_derivative_eigenenergies'][:,:,:,:,:,:,:] #number_of_atoms, 
+    EIG2Dtmp = root.variables['second_derivative_eigenenergies'][:,:,:,:,:,:,:] #number_of_atoms,
                                        # number_of_cartesian_directions, number_of_atoms, number_of_cartesian_directions,
                                        # number_of_kpoints, product_mband_nsppol, cplex
     EIG2Dtmp2 = zeros((self.nkpt,2*self.nband,3,self.natom,3,self.natom,2))
     EIG2Dtmp2 = N.einsum('ijklmno->mnlkjio', EIG2Dtmp)
     self.EIG2D = 1j*EIG2Dtmp2[...,1]
     self.EIG2D += EIG2Dtmp2[...,0]
-    self.eigenvalues = root.variables['eigenvalues'][:,:,:] #number_of_spins, number_of_kpoints, max_number_of_states   
+    self.eigenvalues = root.variables['eigenvalues'][:,:,:] #number_of_spins, number_of_kpoints, max_number_of_states
     self.kpt = root.variables['reduced_coordinates_of_kpoints'][:,:]
     self.iqpt = root.variables['current_q_point'][:]
     self.wtq = root.variables['current_q_point_weight'][:]
@@ -172,7 +172,7 @@ class system:
           if self.ntypat > 3:
             for ii in N.arange(3):
               self.amu[ii] = N.float(line.split()[ii+1])
-              Flag2 = True 
+              Flag2 = True
           else:
             for ii in N.arange(self.ntypat):
               self.amu[ii] = N.float(line.split()[ii+1])
@@ -185,7 +185,7 @@ class system:
         if ikpt < self.nkpt and ikpt > 0:
           line = line.replace('D','E')
           tmp = line.split()
-          self.kpt[ikpt,0:3] = [float(tmp[0]),float(tmp[1]),float(tmp[2])]  
+          self.kpt[ikpt,0:3] = [float(tmp[0]),float(tmp[1]),float(tmp[2])]
           ikpt += 1
           continue
         if Flag == 2:
@@ -205,9 +205,9 @@ class system:
           Flag = 1
         if Flag3:
           line = line.replace('D','E')
-          for ii in N.arange(12,self.natom): 
-            self.typat[ii] = N.float(line.split()[ii-12]) 
-          Flag3 = False 
+          for ii in N.arange(12,self.natom):
+            self.typat[ii] = N.float(line.split()[ii-12])
+          Flag3 = False
         if line.find(' typat') > -1:
           self.typat = zeros((self.natom))
           if self.natom > 12:
@@ -243,7 +243,7 @@ def compute_dynmat(DDB):
 # Calcul of gprimd from rprimd
   rprimd = DDB.rprim*DDB.acell
   gprimd = N.linalg.inv(N.matrix(rprimd))
-# Transform from 2nd-order matrix (non-cartesian coordinates, 
+# Transform from 2nd-order matrix (non-cartesian coordinates,
 # masses not included, asr not included ) from DDB to
 # dynamical matrix, in cartesian coordinates, asr not imposed.
   IFC_cart = zeros((3,DDB.natom,3,DDB.natom),dtype=complex)
@@ -276,7 +276,7 @@ def compute_dynmat(DDB):
 # Solve the eigenvalue problem with linear algebra (Diagonalize the matrix)
   [eigval,eigvect]=N.linalg.eigh(Dyn_mat)
 
-# Orthonormality relation 
+# Orthonormality relation
   ipert = 0
   for ii in N.arange(DDB.natom):
     for dir1 in N.arange(3):
@@ -295,7 +295,7 @@ def compute_dynmat(DDB):
 
 # The acoustic phonon at Gamma should NOT contribute because they should be zero.
 # Moreover with the translational invariance the ZPM will be 0 anyway for these
-# modes but the FAN and DDW will have a non physical value. We should therefore 
+# modes but the FAN and DDW will have a non physical value. We should therefore
 # neglect these values.
 #  if N.allclose(DDB.iqpt,[0.0,0.0,0.0]) == True:
 #    omega[0] = 0.0
@@ -408,7 +408,7 @@ def get_bose(natom,omega,temp_info):
 
 def gaussian(ifreq,omegatmp,gaussian_smearing):
   x = (ifreq - omegatmp)/gaussian_smearing
-  gaussian = 1.0/(N.sqrt(N.pi)) * (1.0/gaussian_smearing) * N.exp(-(x**2))  
+  gaussian = 1.0/(N.sqrt(N.pi)) * (1.0/gaussian_smearing) * N.exp(-(x**2))
   return gaussian
 
 
@@ -469,17 +469,17 @@ def dynamic_zpm(arguments,ddw_save,ddw_save2,type,smearing,eig0,degen,energy,gau
 # Now computa active space
 
 #  FAN = N.einsum('ijklm,ijnom->ijklnom',GKK,N.conjugate(GKK))
-#  fan_addQ = N.einsum('ijklmno,plnkm->ijop',FAN,displ_red_FAN2) 
-  
+#  fan_addQ = N.einsum('ijklmno,plnkm->ijop',FAN,displ_red_FAN2)
+
 
   temp = N.einsum('ijklm,nlokp->ijmnpo',GKK,displ_red_FAN2)
-  fan_addQ = N.einsum('ijklmn,ijmnk->ijkl',temp,N.conjugate(GKK)) 
+  fan_addQ = N.einsum('ijklmn,ijmnk->ijkl',temp,N.conjugate(GKK))
   temp = N.einsum('ijklm,nlokp->ijmnpo',ddw_save2,displ_red_DDW2)
   ddw_addQ = N.einsum('ijklmn,ijmnk->ijkl',temp,N.conjugate(ddw_save2))
 
   if type == 1:
     ddw_tmp = N.sum(ddw_addQ,axis=3)
-    occtmp = EIGR2D.occ[0,0,:]/2 # jband  
+    occtmp = EIGR2D.occ[0,0,:]/2 # jband
     delta_E = N.einsum('ij,k->ijk',eig0[0,:,:].real,N.ones(EIGR2D.nband)) - \
               N.einsum('ij,k->ikj',eigq.EIG[0,:,:].real,N.ones(EIGR2D.nband)) - \
               N.einsum('ij,k->ijk',N.ones((EIGR2D.nkpt,EIGR2D.nband)),(2*occtmp-1))*smearing*1j # ikpt,iband,jband
@@ -497,16 +497,16 @@ def dynamic_zpm(arguments,ddw_save,ddw_save2,type,smearing,eig0,degen,energy,gau
     div2 = N.einsum('i,jkil->lijk',occtmp,1.0/deno2) # (jband)/(ikpt,iband,jband,imode) ==> imode,jband,ikpt,iband
     fan_add = N.einsum('ijkl,lkij->ij',fan_addQ,div1+div2) # ikpt,iband,jband,imod
 
-    print "Now compute generalized g2F Eliashberg electron-phonon spectral function ..." 
- 
+    print "Now compute generalized g2F Eliashberg electron-phonon spectral function ..."
+
     fan_tmp = N.sum(fan_addQ,axis=2) # (ikpt, iband, imode)
     ddw_tmp = N.sum(ddw_addQ,axis=2) # (ikpt, iband, imode)
     g_kk = fan_tmp - ddw_tmp
-    
+
     # Generalized Eliashberg function with Gaussian broadening
     a2F =  zeros((len(energy),EIGR2D.nkpt,EIGR2D.nband),dtype=complex)
     PDOS = zeros((len(energy)),dtype=complex)
-    ii = 0 
+    ii = 0
     for ifreq in energy:
       for imode in N.arange(3*EIGR2D.natom):
         a2F[ii,:,:] += g_kk[:,:,imode]*gaussian(ifreq,omegatmp[imode],gaussian_smearing)
@@ -514,7 +514,7 @@ def dynamic_zpm(arguments,ddw_save,ddw_save2,type,smearing,eig0,degen,energy,gau
       ii += 1
 #    a2F_av = make_average(EIGR2D.nkpt,EIGR2D.nband,degen,a2F)
 
-# Correction from active space 
+# Correction from active space
   fan_corr += fan_add
   ddw_corr += ddw_add
   eigen_corr = (fan_corr[:,:] - ddw_corr[:,:])*wtq
@@ -525,7 +525,7 @@ def dynamic_zpm(arguments,ddw_save,ddw_save2,type,smearing,eig0,degen,energy,gau
 # Index 2 contains the DDW correction
   total_corr[2,:,:] = ddw_corr[:,:]*wtq
 # Index 3-energy contains the Eliashberg functions
-  total_corr[3:len(energy)+3,:,:] = a2F*wtq 
+  total_corr[3:len(energy)+3,:,:] = a2F*wtq
 
   total_corr = make_average(EIGR2D.nkpt,EIGR2D.nband,degen,total_corr)
 
@@ -567,7 +567,7 @@ def dynamic_zpm_temp(arguments,ddw_save,ddw_save2,type,temp_info,smearing,eig0,d
 # Find phonon freq and eigendisplacement from _DDB
   omega,eigvect,gprimd=compute_dynmat(DDB)
 
-# Compute the displacement = eigenvectors of the DDB. 
+# Compute the displacement = eigenvectors of the DDB.
 # Due to metric problem in reduce coordinate we have to work in cartesian
 # but then go back to reduce because our EIGR2D matrix elements are in reduced coord.
   fan_corr =  zeros((len(temp_info),EIGR2D.nkpt,EIGR2D.nband),dtype=complex)
@@ -594,7 +594,7 @@ def dynamic_zpm_temp(arguments,ddw_save,ddw_save2,type,temp_info,smearing,eig0,d
   temp = N.einsum('ijklm,nlokp->ijmnpo',ddw_save2,displ_red_DDW2)
   ddw_addQ = N.einsum('ijklmn,ijmnk->ijkl',temp,N.conjugate(ddw_save2))
 
-  if type == 1: 
+  if type == 1:
     occtmp = EIGR2D.occ[0,0,:]/2 # jband
     delta_E_ddw = N.einsum('ij,k->ijk',eig0[0,:,:].real,N.ones(EIGR2D.nband)) - \
               N.einsum('ij,k->ikj',eig0[0,:,:].real,N.ones(EIGR2D.nband)) - \
@@ -635,7 +635,7 @@ def dynamic_zpm_temp(arguments,ddw_save,ddw_save2,type,temp_info,smearing,eig0,d
       ii += 1
 
 
-# Correction from active space 
+# Correction from active space
   fan_corr += fan_add
   ddw_corr += ddw_add
   eigen_corr = (fan_corr[:,:,:] - ddw_corr[:,:,:])*wtq
@@ -693,4 +693,3 @@ class zpm:
 
     pool.close()
     pool.join()
-

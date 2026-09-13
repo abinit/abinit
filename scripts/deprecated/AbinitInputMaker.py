@@ -59,7 +59,7 @@ class MAIN_ContentHandler(ContentHandler):
                 output.container.append('#=================================================\n# %s\n' % Attribute.get('sectiontitle'))
                 output.pieceindex += 1
                 UpdateOutput()
-            
+
             if Element == 'CHOICE':
                 locator.element = 'CHOICE'
                 locator.instruction = Attribute.get('instruction')
@@ -90,11 +90,11 @@ class MAIN_ContentHandler(ContentHandler):
             if Element == 'DIRECTENTRY':
                 output.container.append('%s %s\n' % (Attribute.get('variablename'),Attribute.get('variablevalue')))
                 output.pieceindex += 1
-                UpdateOutput() 
-              
+                UpdateOutput()
+
     def characters(self,Content):
         pass
-        
+
     def endElement(self,Element):
         locator.currenttag = [locator.tagnumberlist[-1],'closing']
         locator.tagnumberlist.pop(-1)
@@ -103,13 +103,13 @@ class MAIN_ContentHandler(ContentHandler):
         if locator.currenttag == locator.wantedtag:
             locator.found=1
             if debug.prtlocatorfound:print 'locator found for currenttag',locator.currenttag # ---------- DEBUG
-        
+
         if locator.found:
 
             if (Element == 'DECISION') & (locator.readdecision==0):
                 locator.decisionindex -= 1
                 if debug.decisionindex:print 'locator.decisionindex ( end ) ',locator.decisionindex # ---------- DEBUG
-        
+
             if (Element == 'DECISION') & (locator.decisionindex==0):
                 locator.readdecision = 1
 
@@ -120,7 +120,7 @@ class MAIN_ContentHandler(ContentHandler):
                 SECTIONENDERwidget(frameQuestion.container)
                 frameQuestion.container.update()
                 frameQuestion.refresh()
-                
+
     def endDocument(self):
         pass
 
@@ -183,7 +183,7 @@ def enablebuttons():
 
 def endsection(section):
     sections.completedsectionlist.append(section)
-    output.permanent = textOutput.get(0.0,END) 
+    output.permanent = textOutput.get(0.0,END)
     enablebuttons()
     clear()
     UpdateOutput()
@@ -336,7 +336,7 @@ colors.option_active_fg = 'blue'
 #colors.option_selected_fg = 'red'
 colors.option_selected_bg = 'red'
 
-class CHOICEwidget(Frame):    
+class CHOICEwidget(Frame):
     def __init__(self,master=None,instruction='<default>',decisionlist=['<default1>','<default2>','<default3>']): # default values, not used
        Frame.__init__(self,master,bg=colors.widget_bg,relief=colors.widget_relief,bd=colors.widget_bd)
        if debug.current:print 'CHOICEwidget' # ---------- DEBUG
@@ -348,7 +348,7 @@ class CHOICEwidget(Frame):
 
        self.instructionlabel = Label(self,text=instruction,font=font,bg=colors.instruction_bg,fg=colors.instruction_fg,relief=colors.instruction_relief,bd=colors.instruction_bd,wraplen=colors.wraplen)
        self.instructionlabel.pack(side=TOP,padx=10,pady=10,ipadx=colors.instruction_ipadx,ipady=colors.instruction_ipady)
-       
+
        self.decisionframe = Frame(self,bg=colors.decisionframe,relief='solid',bd=1)
        self.decisionframe.pack(side=TOP,padx=10,pady=10)
 
@@ -403,7 +403,7 @@ class MOUSEENTRYwidget(Frame):
 
        self.instructionlabel = Label(self,text=instruction,font=font,bg=colors.instruction_bg,fg=colors.instruction_fg,relief=colors.instruction_relief,bd=colors.instruction_bd,wraplen=colors.wraplen)
        self.instructionlabel.pack(side=TOP,padx=10,pady=10,ipadx=colors.instruction_ipadx,ipady=colors.instruction_ipady)
-       
+
        self.optionframe = Frame(self,bg=colors.optionframe,relief='solid',bd=1)
        self.optionframe.pack(side=TOP,padx=10,pady=10)
 
@@ -482,7 +482,7 @@ class KEYBOARDENTRYwidget(Frame):
             frameQuestion.container.update()
             frameQuestion.refresh()
             W.index -= 1
-        
+
         while len(output.container) != frameQuestion.container.winfo_children()[self.button.index-1].outputpiecebefore:
             output.container.remove(output.container[-1]) # efface les outputpiece en dessous
             output.pieceindex -= 1
@@ -500,7 +500,7 @@ class KEYBOARDENTRYwidget(Frame):
         locator.wantedtag = [self.button.tag,'closing']
         MAINparser()
 
-class SECTIONENDERwidget(Frame):    
+class SECTIONENDERwidget(Frame):
     def __init__(self,master=None):
        Frame.__init__(self,master,bg=colors.widget_bg,relief=colors.widget_relief,bd=colors.widget_bd)
        if debug.current:print 'SECTIONENDERwidget' # ---------- DEBUG
@@ -522,14 +522,14 @@ def UpdateOutput():
         textOutput.insert(END,outputpiece)
     textOutput.configure(state=DISABLED)
     textOutput.yview('moveto',1)
-    
-    
+
+
 
 def UpdateReadDecisionList():
     locator.readdecisionlist = []
     for widget in frameQuestion.container.winfo_children():
         try:
-            locator.readdecisionlist.append(widget.readdecisionpiece) # parcourt les widgets et ajoute les elements a la readdecision liste pour les elements opportuns            
+            locator.readdecisionlist.append(widget.readdecisionpiece) # parcourt les widgets et ajoute les elements a la readdecision liste pour les elements opportuns
         except:
             pass
 
@@ -620,7 +620,7 @@ def clear():
         except:
             pass
         W.index -= 1
-        
+
     while len(output.container) != 0:
         output.container.remove(output.container[-1]) # efface les outputpiece en dessous
         output.pieceindex -= 1
@@ -629,7 +629,7 @@ def clear():
     locator.wantedtag = [1,'opening'] # wanted tag, on arrange le tout pour que ca devienne locator.found au premier element
     if output.permanent != '':
         writeInputFileButton['state']='normal'
-    
+
 #===============================================================================================================
 
 #writeinputfile=================================================================================================
