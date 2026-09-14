@@ -21,4 +21,4 @@ class LibraryBuilder(object):
             raise ValueError("Invalid entity description in {}".format(cfg_path))
 
 
-    def get_automake(self):
+    #def get_automake(self):
