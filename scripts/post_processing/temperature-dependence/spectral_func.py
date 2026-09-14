@@ -32,13 +32,13 @@ Ha2eV = 27.21138386
 kb_HaK = 3.1668154267112283e-06
 
 # Interaction with the user
-print '\n################################################'
-print '# Spectral function of the dynamical self-energy #'
-print '##################################################'
-print '\nThis script compute the zero-point motion and the temperature dependence \n\
+print( '\n################################################')
+print( '# Spectral function of the dynamical self-energy #')
+print( '##################################################')
+print( '\nThis script compute the zero-point motion and the temperature dependence \n\
 of eigenenergies due to electron-phonon interaction. This script can \n\
 only compute Q-points with the same weight. If you want symmetry you must hack the script.\n\
-WARNING: The first Q-point MUST be the Gamma point\n'
+WARNING: The first Q-point MUST be the Gamma point\n')
 
 # Define the output file name
 user_input = raw_input('Enter name of the output file\n')
@@ -86,9 +86,9 @@ if N.allclose(DDBtmp.iqpt,[0.0,0.0,0.0]) == False:
   raise Exception('The first Q-point is not Gamma!')
 
 # Choose a k-point in the list below:
-print 'Choose a k-point number in the list below for A_nk(omega,T)\n'
+print ('Choose a k-point number in the list below for A_nk(omega,T)\n')
 for ii in N.arange(DDBtmp.nkpt):
-  print '%s) %s' % (ii,DDBtmp.kpt[ii,:])
+  print ('%s) %s' % (ii,DDBtmp.kpt[ii,:]))
 user_input = raw_input('Enter the number of the k-point you want to analyse\n')
 try:
   kpt = N.int(user_input)
@@ -270,7 +270,7 @@ for ii in DDB_files:
   iiqpt +=1
 
 
-print 'eig0.EIG[0,kpt,band-1]',eig0.EIG[0,kpt,band-1]*Ha2eV
+print ('eig0.EIG[0,kpt,band-1]',eig0.EIG[0,kpt,band-1]*Ha2eV)
 # Computation of the self-energy and the spectral function at a given temperature.
 index = 0
 with open(output,"w") as O:
