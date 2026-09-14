@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright (C) 2009-2026 ABINIT Group (Yann Pouillon)
 #
@@ -6,35 +6,29 @@
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
-from __future__ import print_function, division, absolute_import #, unicode_literals
 
-try:
-    from ConfigParser import ConfigParser
-except ImportError:
-    from configparser import ConfigParser
-from time import gmtime,strftime
+from configparser import ConfigParser
+from time import gmtime, strftime
 
 import os
 import re
 import sys
 
+
 class MyConfigParser(ConfigParser):
-
-  def optionxform(self,option):
-    return str(option)
-
+    def optionxform(self, option):
+        return str(option)
 
 
 def key_is_ok(key):
 
-  # Init keys to ignore
-  cnf_ignore = ["status"]
+    # Init keys to ignore
+    cnf_ignore = ["status"]
 
-  if ( key in cnf_ignore ):
-    return False
-  else:
-    return True
-
+    if key in cnf_ignore:
+        return False
+    else:
+        return True
 
 
 # ---------------------------------------------------------------------------- #
@@ -44,95 +38,93 @@ def key_is_ok(key):
 #
 
 # Initial setup
-my_name     = "make-build-examples"
-my_configs  = ["config/specs/testfarm.conf"]
+my_name = "make-build-examples"
+my_configs = ["config/specs/testfarm.conf"]
 my_template = "doc/build/config-template.ac9"
-my_outdir   = "doc/build/config-examples"
-my_fbck     = "config/specs/fbversion.conf"
+my_outdir = "doc/build/config-examples"
+my_fbck = "config/specs/fbversion.conf"
 
 # Check if we are in the top of the ABINIT source tree
-if ( not os.path.exists("configure.ac") or
-     not os.path.exists("src/98_main/abinit.F90") ):
-  print("%s: You must be in the top of an ABINIT source tree." % my_name)
-  print("%s: Aborting now." % my_name)
-  sys.exit(1)
+if not os.path.exists("configure.ac") or not os.path.exists("src/98_main/abinit.F90"):
+    print("%s: You must be in the top of an ABINIT source tree." % my_name)
+    print("%s: Aborting now." % my_name)
+    sys.exit(1)
 
 # Check if we have a config file
 for my_config in my_configs:
-  if ( not os.path.exists(my_config) ):
-    print("%s: Could not find config file (%s)." % (my_name,my_config))
-    print("%s: Aborting now." % my_name)
-    sys.exit(2)
+    if not os.path.exists(my_config):
+        print("%s: Could not find config file (%s)." % (my_name, my_config))
+        print("%s: Aborting now." % my_name)
+        sys.exit(2)
 
 # Check if we have a template
-if ( os.path.exists(my_template) ):
-  inp_data = open(my_template,"rt").readlines()
+if os.path.exists(my_template):
+    inp_data = open(my_template).readlines()
 else:
-  print("%s: Could not find template file (%s)." % (my_name,my_template))
-  print("%s: Aborting now." % my_name)
-  sys.exit(3)
+    print("%s: Could not find template file (%s)." % (my_name, my_template))
+    print("%s: Aborting now." % my_name)
+    sys.exit(3)
 
 # Check if we have a fallback config file
-if ( os.path.exists(my_fbck) ):
-  fcnf = MyConfigParser()
-  fcnf.read(my_fbck)
-  if len(fcnf.sections()) != 0:
-     fbversion = '_'+fcnf.sections()[0]
-  else:
-     fbversion = ''
+if os.path.exists(my_fbck):
+    fcnf = MyConfigParser()
+    fcnf.read(my_fbck)
+    if len(fcnf.sections()) != 0:
+        fbversion = "_" + fcnf.sections()[0]
+    else:
+        fbversion = ""
 else:
-  print("%s: Could not find fbversion file (%s)." % (my_name,my_fbck))
-  print("%s: Aborting now." % my_name)
-  sys.exit(4)
+    print("%s: Could not find fbversion file (%s)." % (my_name, my_fbck))
+    print("%s: Aborting now." % my_name)
+    sys.exit(4)
 
 # What time is it?
-now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
+now = strftime("%Y/%m/%d %H:%M:%S +0000", gmtime())
 
 # Prepare the storage space
-if ( not os.path.exists(my_outdir) ):
-  os.makedirs(my_outdir)
+if not os.path.exists(my_outdir):
+    os.makedirs(my_outdir)
 for old_ex in os.listdir(my_outdir):
-  item = os.path.join(my_outdir, old_ex)
-  #print("Removing item:", item)
-  if os.path.isdir(item):
-    if os.listdir(item) != 0:
-        raise RuntimeError("Cannot remove non-empty directory:", item)
-    os.rmdir(item)
-  else:
-    os.remove(item)
+    item = os.path.join(my_outdir, old_ex)
+    # print("Removing item:", item)
+    if os.path.isdir(item):
+        if os.listdir(item) != 0:
+            raise RuntimeError("Cannot remove non-empty directory:", item)
+        os.rmdir(item)
+    else:
+        os.remove(item)
 
 # Process config files and write examples
 for my_config in my_configs:
-  cnf = MyConfigParser()
-  cnf.read(my_config)
+    cnf = MyConfigParser()
+    cnf.read(my_config)
 
-  for sec in cnf.sections():
-    cnf_vars = dict(cnf.items(sec))
-    cnf_keys = list(cnf_vars.keys())
-    cnf_keys.sort()
-    out_data = ""
+    for sec in cnf.sections():
+        cnf_vars = dict(cnf.items(sec))
+        cnf_keys = list(cnf_vars.keys())
+        cnf_keys.sort()
+        out_data = ""
 
-    # Uncomment variables in template data
-    for line in inp_data:
-      do_print = True
-      for key in cnf_keys:
-        if ( re.match("#%s=" % (key),line) or \
-          (re.match("#fcflags_opt_",line) and re.match("fcflags_opt_",key)) ):
-          if ( key_is_ok(key) ):
-            out_data += "%s=\"%s\"\n" % (key,cnf_vars[key])
-            do_print = False
-      if ( do_print ):
-        out_data += line
+        # Uncomment variables in template data
+        for line in inp_data:
+            do_print = True
+            for key in cnf_keys:
+                if re.match("#%s=" % (key), line) or (re.match("#fcflags_opt_", line) and re.match("fcflags_opt_", key)):
+                    if key_is_ok(key):
+                        out_data += '%s="%s"\n' % (key, cnf_vars[key])
+                        do_print = False
+            if do_print:
+                out_data += line
 
-    # Inject fbversion in out_data
-    out_data=out_data.replace("_FB_",fbversion)
+        # Inject fbversion in out_data
+        out_data = out_data.replace("_FB_", fbversion)
 
-    # Write data
-    out_path = os.path.join(my_outdir, sec+".ac9")
-    open(out_path, "wt").write(out_data)
+        # Write data
+        out_path = os.path.join(my_outdir, sec + ".ac9")
+        open(out_path, "w").write(out_data)
 
-    # FIXME: Create symbolic link until the test farm gets updated
-    old_path = os.path.join(my_outdir, sec+".ac")
-    if ( os.path.exists(old_path) or os.path.islink(old_path) ):
-      os.remove(old_path)
-    os.symlink(sec+".ac9", old_path)
+        # FIXME: Create symbolic link until the test farm gets updated
+        old_path = os.path.join(my_outdir, sec + ".ac")
+        if os.path.exists(old_path) or os.path.islink(old_path):
+            os.remove(old_path)
+        os.symlink(sec + ".ac9", old_path)
