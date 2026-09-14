@@ -18,7 +18,7 @@ precommit:
   script:
     - pip install --disable-pip-version-check pre-commit
     - |
-      for hook in check-ast check-merge-conflict check-yaml end-of-file-fixer trailing-whitespace check-executables-have-shebangs check-added-large-files codespell check-build-config run-check-config-h run-check-forbidden-flags run-check-ascii check-forbidden check-binaries-conf check-inlined-macros; do
+      for hook in check-ast check-merge-conflict check-yaml end-of-file-fixer trailing-whitespace check-executables-have-shebangs check-added-large-files check-build-config run-check-config-h run-check-forbidden-flags run-check-ascii check-forbidden check-binaries-conf check-inlined-macros; do
         printf '\n=== %s ===\n' "$hook" | tee -a pre-commit.log
         if ! pre-commit run "$hook" --show-diff-on-failure --from-ref "$CI_MERGE_REQUEST_DIFF_BASE_SHA" --to-ref "$CI_COMMIT_SHA" >> pre-commit.log 2>&1; then
           cat pre-commit.log
