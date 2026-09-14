@@ -7071,10 +7071,10 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_bra_glob, ur_ket_glob, sigm_pm, loc
      !ABI_CHECK_IEQ(nfftsp, rp_r%size_local(1), "First dimension should be local to each MPI proc!")
      !ABI_MALLOC(loc_cwork, (rp_r%size_local(2)))
      !loc_cwork(:) = matmul(transpose(rp_r%buffer_cplx), ur_glob)
-    
+
      nrows = rp_r%size_local(1); ncols = rp_r%size_local(2)
      call xgemv('T', nrows, ncols, cone_gw, rp_r%buffer_cplx, nrows, ur_ket_glob, 1, czero_gw, loc_cwork, 1)
-    
+
      ! Integrate over r. Note complex conjugate.
      do il_r1=1,rp_r%size_local(2)
        ir1 = rp_r%loc2gcol(il_r1)

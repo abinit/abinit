@@ -14,7 +14,7 @@ fi
 #cp ./config/robodoc/robodoc-html.rc tmp-robodoc/robodoc.rc
 #cd tmp-robodoc && rm -f */*.in && rm -f */interfaces* && robodoc > ../robodoc.log 2> ../robodoc.err
 #exit_status=`cat ../robodoc.err | wc -l`
-#if test $exit_status -ne 0 ; then 
+#if test $exit_status -ne 0 ; then
 #  cat ../doc/developers/robodoc.doc.txt >> robodoc.err
 #  cat ../robodoc.err
 #fi

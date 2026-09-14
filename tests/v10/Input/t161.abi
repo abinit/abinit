@@ -1,7 +1,7 @@
 # ABINIT - INPUT FILE
 # BCC IRON 1 ATOM
 
-# Model 
+# Model
 natom 1
 #Definition of the unit cell
 acell
@@ -22,7 +22,7 @@ xcart
 0.00000000000000 0.00000000000000 0.00000000000000
 chkexit 1 # abinit.exit file in the running directory terminates after the current SCF
 
-# Pseudopotentials 
+# Pseudopotentials
 pp_dirpath       "$ABI_PSPDIR/Psdj_nc_fr_04_pbe_std_psp8"   # pseudopotential directory
 pseudos          "Fe.psp8"                                  # pseudopotential filenames
 
@@ -39,18 +39,18 @@ spinat
 # Planewave basis
 ecut             10
 
-# k-point grid 
+# k-point grid
 ngkpt            2 2 2
 chksymbreak      0            # do not check for symmetry breaking
 
 # Diagonalization
 wfoptalg         114          # wavefunction optimization algorithm
-nline            6   
-nblock_lobpcg    1  
-        
+nline            6
+nblock_lobpcg    1
+
 fftalg           401
 
-# Occupations 
+# Occupations
 occopt           3            # smearing option
 tsmear           0.005        # smearing temperature [Ha]
 nband            16           # number of bands
