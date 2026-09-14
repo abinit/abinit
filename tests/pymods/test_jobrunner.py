@@ -283,6 +283,32 @@ class TestJobRunnerRun:
         assert runner.retcode == 0
         assert stdout_file.read_text() == "hello\n"
 
+    def test_paths_with_spaces_are_shell_quoted(self, tmp_path):
+        """A path containing a space must remain a single shell argument.
+
+        Regression test: bin_path/stdin_fname/stdout_fname/stderr_fname used
+        to be concatenated into the shell=True command line unquoted, so a
+        space in any of them silently split into multiple shell arguments
+        (e.g. "/tmp/has space/script.sh" ran as command "/tmp/has" with args
+        "space/script.sh").
+        """
+        workdir = tmp_path / "has space"
+        workdir.mkdir()
+        script = workdir / "my script.sh"
+        script.write_text("#!/bin/sh\ncat\n")
+        script.chmod(0o755)
+
+        runner = JobRunner.sequential()
+        stdin_file = workdir / "in file.txt"
+        stdin_file.write_text("hello\n")
+        stdout_file = workdir / "out file.txt"
+        stderr_file = workdir / "err file.txt"
+
+        runner.run(1, str(script), str(stdin_file), str(stdout_file), str(stderr_file))
+
+        assert runner.retcode == 0
+        assert stdout_file.read_text() == "hello\n"
+
     def test_valgrind_and_perf_prefix_the_command(self, tmp_path):
         # Neither valgrind nor perf need to be installed: we only check that
         # run() builds and executes a command line that *starts* with them

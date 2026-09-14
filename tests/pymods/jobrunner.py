@@ -9,6 +9,7 @@ perf, and managing environment variables.
 from __future__ import annotations
 
 import os
+import shlex
 import sys
 import time
 from collections.abc import Callable
@@ -56,6 +57,10 @@ def is_string(s: Any) -> bool:
     """
     Check if the input is a string-like object.
 
+    Uses duck typing (concatenation with a str succeeds) rather than
+    `isinstance(s, str)`, so any object supporting `+` with a string
+    (e.g. a str subclass) is accepted too.
+
     Args:
         s: The object to check.
 
@@ -79,8 +84,11 @@ def mpicfg_parser(fname: str, defaults: dict[str, str] | None = None) -> dict[st
 
     Returns:
         dict: A dictionary containing the parsed MPI options.
+
+    Raises:
+        ValueError: If a keyword's value cannot be converted by its declared parser type.
     """
-    logger.debug("Parsing [MPI] section in file : " + str(fname))
+    logger.debug(f"Parsing [MPI] section in file: {fname}")
 
     parser = SafeConfigParser(defaults)
     parser.read(fname)
@@ -104,18 +112,22 @@ def mpicfg_parser(fname: str, defaults: dict[str, str] | None = None) -> dict[st
         # Process the line
         try:
             d[key] = line_parser(d[key])
-        except:
-            raise ValueError("Wrong line: key = " + str(key) + " d[key] = " + str(d[key]) )
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"Wrong line: key = {key} d[key] = {d[key]}") from exc
 
     return d
 
-#NB: Pickle fail if JobRunnerError inherits from Exception
-# so we inherit from object. This should represents a serious problem
-# because we never catch JobRunner Exceptions. This object is mainly
-# used to store info about the exception in JobRunner exceptions (see run method)
 
 class JobRunnerError:
-    """Exception-like object to store information about job execution failures."""
+    """
+    Exception-like object to store information about job execution failures.
+
+    Inherits from `object`, not `Exception`, because pickling fails if
+    JobRunnerError inherits from Exception. This should not be a serious
+    problem in practice since JobRunner exceptions are never caught elsewhere
+    -- this object is mainly used to store info about the exception in
+    JobRunner.exceptions (see JobRunner.run()).
+    """
 
     def __init__(self, return_code: int, cmd: str, run_etime: float, prev_errmsg: str | None = None) -> None:
         """
@@ -131,9 +143,9 @@ class JobRunnerError:
         self.prev_errmsg = prev_errmsg
 
     def __str__(self) -> str:
-        string = "Command %s\n returned exit_code: %s\n" % (self.cmd, self.return_code)
+        string = f"Command {self.cmd}\n returned exit_code: {self.return_code}\n"
         if self.prev_errmsg:
-            string += "Previous exception: %s" % self.prev_errmsg
+            string += f"Previous exception: {self.prev_errmsg}"
 
         return string
 
@@ -257,7 +269,7 @@ class JobRunner:
             if k not in self.__dict__:
                 self.__dict__[k] = v
             else:
-                raise ValueError("key %s is already in self.__dict__, cannot overwrite" % k)
+                raise ValueError(f"key {k} is already in self.__dict__, cannot overwrite")
 
         if "mpi_args" not in dic:
             self.mpi_args = ""
@@ -275,7 +287,7 @@ class JobRunner:
         string = ""
         for key in CFG_KEYWORDS:
             attr = getattr(self, str(key), None)
-            if attr: string += "%s = %s\n" % (key, attr)
+            if attr: string += f"{key} = {attr}\n"
 
         if string:
             string = "[MPI setup]\n" + string
@@ -361,15 +373,17 @@ class JobRunner:
 
     @property
     def has_mpirun(self) -> bool:
-        """True if we are running a MPI job with mpirun"""
-        # Must test the *value*, not just the presence of the attribute: both
-        # mpicfg_parser and TestBot hand us every CFG_KEYWORDS key, so an
-        # unconfigured launcher arrives as mpirun_np="". Reporting True for that
-        # made run() emit [<empty>, nprocs, ..., bin_path, ...], i.e. a command
-        # line whose first token was the process count ("failed to run command
-        # '2'", retcode 127) instead of failing outright.
-        return bool(getattr(self, "mpirun_np", "")) and self.mpirun_np != "srun -n"
+        """
+        True if we are running a MPI job with mpirun.
 
+        Tests the attribute's *value*, not just its presence: both
+        mpicfg_parser and TestBot hand us every CFG_KEYWORDS key, so an
+        unconfigured launcher arrives as mpirun_np="". Reporting True for that
+        made run() emit [<empty>, nprocs, ..., bin_path, ...], i.e. a command
+        line whose first token was the process count ("failed to run command
+        '2'", retcode 127) instead of failing outright.
+        """
+        return bool(getattr(self, "mpirun_np", "")) and self.mpirun_np != "srun -n"
 
     @property
     def has_poe(self) -> bool:
@@ -419,6 +433,17 @@ class JobRunner:
 
         Returns:
             float: Elapsed time of the execution (in seconds).
+
+        Raises:
+            ValueError: If mpi_nprocs != 1 but no MPI launcher (mpirun_np/poe)
+                is configured on this runner.
+
+        Note:
+            Execution failures (non-zero return code, or an exception while
+            launching the subprocess) are not raised -- they are recorded as
+            JobRunnerError instances in self.exceptions, and self.retcode
+            carries the raw return code. Callers must inspect self.exceptions
+            (or self.retcode) after this returns to detect failure.
         """
         env = os.environ.copy()
         if self.has_ompenv: env.update(self.ompenv)
@@ -426,28 +451,33 @@ class JobRunner:
         # Build valgrind command line
         valcmd = ""
         if self.has_valgrind:
-            valcmd = "valgrind --tool=%s " % self.valgrind_cmdline
+            valcmd = f"valgrind --tool={self.valgrind_cmdline} "
 
         # Perf command
         perf_cmd = ""
         if self.has_perf:
-            perf_cmd = "perf %s " % self.perf_command
+            perf_cmd = f"perf {self.perf_command} "
 
-        stdin = " < %s " % stdin_fname if stdin_fname else ""
-        stdout = " > %s " % stdout_fname if stdout_fname else ""
-        stderr = " 2> %s " % stderr_fname if stderr_fname else ""
+        # Quoted because these are genuine single filesystem paths (unlike
+        # e.g. mpi_args/bin_argstr, which are meant to expand to multiple
+        # shell tokens) -- an unquoted path containing a space would
+        # otherwise silently split into multiple shell arguments.
+        bin_path_q = shlex.quote(bin_path)
+        stdin = f" < {shlex.quote(stdin_fname)} " if stdin_fname else ""
+        stdout = f" > {shlex.quote(stdout_fname)} " if stdout_fname else ""
+        stderr = f" 2> {shlex.quote(stderr_fname)} " if stderr_fname else ""
 
         if self.has_mpirun or self.has_srun:
             mpirun_np = cast("str", getattr(self, "mpirun_np", ""))
-            args = [perf_cmd, mpirun_np, str(mpi_nprocs), " %s " % self.mpi_args,
-                    valcmd, bin_path, bin_argstr, stdin, stdout, stderr]
+            args = [perf_cmd, mpirun_np, str(mpi_nprocs), f" {self.mpi_args} ",
+                    valcmd, bin_path_q, bin_argstr, stdin, stdout, stderr]
 
         elif self.has_poe:
             # example ${poe} abinit ${poe_args} -procs 4
             # no support for valgrind, debugger, bin_argstr or perf here since poe uses a weird syntax for command line options.
             poe = cast("str", getattr(self, "poe", ""))
             poe_args = cast("str", getattr(self, "poe_args", ""))
-            args = [poe, bin_path, poe_args, " -procs "+ str(mpi_nprocs),
+            args = [poe, bin_path_q, poe_args, " -procs "+ str(mpi_nprocs),
                     stdin, stdout, stderr]
         else:
             if mpi_nprocs != 1:
@@ -457,7 +487,7 @@ class JobRunner:
                     "(e.g. 'mpiexec -n') in the builder configuration or the [mpi] section "
                     "of the config file."
                 )
-            args = [perf_cmd, valcmd, bin_path, bin_argstr, stdin, stdout, stderr]
+            args = [perf_cmd, valcmd, bin_path_q, bin_argstr, stdin, stdout, stderr]
 
         if self.has_debugger:
             # Use completely different syntax if we are running under the control of gdb.
@@ -467,21 +497,22 @@ class JobRunner:
             workdir = os.path.dirname(stderr_fname)
 
             dbg_filepath = os.path.join(workdir, "dbg_commands")
+            dbg_filepath_q = shlex.quote(dbg_filepath)
 
             with open(dbg_filepath, "w") as fh:
-                fh.write("run %s %s" % (bin_argstr, stdin)) # Use dbg syntax
+                fh.write(f"run {bin_argstr} {stdin}") # Use dbg syntax
 
             if self.has_mpirun or self.has_srun:
                 mpirun_np = cast("str", getattr(self, "mpirun_np", ""))
-                args = [mpirun_np, str(mpi_nprocs), "xterm -e gdb", bin_path, "--command=%s" % dbg_filepath]
+                args = [mpirun_np, str(mpi_nprocs), "xterm -e gdb", bin_path_q, f"--command={dbg_filepath_q}"]
             else:
-                args = ["gdb", bin_path, "--command=%s" % dbg_filepath]
+                args = ["gdb", bin_path_q, f"--command={dbg_filepath_q}"]
 
         cmd = " ".join(args)
         #print(cmd)
 
-        #if self.has_valgrind: print("Invoking valgrind:\n %s" % cmd)
-        logger.debug("About to execute command:\n" + cmd)
+        #if self.has_valgrind: print(f"Invoking valgrind:\n {cmd}")
+        logger.debug(f"About to execute command:\n{cmd}")
 
         start_time = time.time()
         self.retcode = -1
@@ -559,41 +590,48 @@ class MemcheckParser(BaseValgrindParser):
         def fragile_parser(key: str, string: str) -> int:
             """
             Extract number from a line in the form: key number ignored_tokens
+
+            "Fragile" because this scrapes Valgrind's human-readable text
+            output by fixed key position rather than a structured format
+            (e.g. XML); any change to that output layout can silently break
+            this.
             """
             start = line.find(key)
-            if start == -1: raise ValueError("Cannot find key %s in string %s" % (key, string))
+            if start == -1: raise ValueError(f"Cannot find key {key} in string {string}")
             bytes_lost = int(string[start + len(key):].split(maxsplit=1)[0])
             return bytes_lost
 
         lost_bytes = 0
-        fh = open(filename)
 
-        for line in fh:
-            if "LEAK SUMMARY:" in line: break
-        else:
-            raise RuntimeError("Cannot find 'LEAK SUMMARY' section in valgrind stderr file")
+        # A `with` block (rather than a bare open()/close()) so the file is
+        # closed even when 'LEAK SUMMARY' is missing or fragile_parser()
+        # raises below -- both used to leak the handle, since the matching
+        # fh.close() at the end was only ever reached on the success path.
+        with open(filename) as fh:
+            for line in fh:
+                if "LEAK SUMMARY:" in line: break
+            else:
+                raise RuntimeError("Cannot find 'LEAK SUMMARY' section in valgrind stderr file")
 
-        keys = [
-            "definitely lost:",
-            "indirectly lost:",
-            "possibly lost:",
-        ]
+            keys = [
+                "definitely lost:",
+                "indirectly lost:",
+                "possibly lost:",
+            ]
 
-        # Inspect the next len(keys) line (memleak section)
-        errors = {}
-        for key, line in zip(keys, fh):
-            bytes = fragile_parser(key, line)
-            if bytes:
-                errors[key] = bytes
+            # Inspect the next len(keys) line (memleak section)
+            errors = {}
+            for key, line in zip(keys, fh):
+                bytes = fragile_parser(key, line)
+                if bytes:
+                    errors[key] = bytes
 
-        # Get total number of errors.
-        key = "ERROR SUMMARY:"
-        for line in fh:
-            if key in line:
-                num_errors = fragile_parser(key, line)
-                if num_errors: errors[key] = num_errors
-
-        fh.close()
+            # Get total number of errors.
+            key = "ERROR SUMMARY:"
+            for line in fh:
+                if key in line:
+                    num_errors = fragile_parser(key, line)
+                    if num_errors: errors[key] = num_errors
 
         self._error_report = ""
         if errors: self._error_report = str(errors)
@@ -621,56 +659,59 @@ class TimeBomb:
         """
         Execute a command with the configured timeout.
 
-        Supports the same interface as subprocess.Popen.
+        Supports the same interface as subprocess.Popen. Dispatches to one of
+        three execution paths depending on configuration:
+
+        1. `exec_path` is set and `timeout > 0`: wraps `args` with the
+           external timeout executable (e.g. `timeout <seconds> <args>`) and
+           runs it via a plain `Popen`.
+        2. `exec_path` is not set and `timeout > 0`: falls back to
+           `SubProcessWithTimeout`, which enforces the timeout itself (no
+           external timeout executable needed).
+        3. `timeout <= 0` (regardless of `exec_path`): no timeout is
+           enforced at all -- runs `args` via a plain `Popen`.
 
         Returns:
             tuple: (subprocess.Popen object, return_code)
         """
-        try:
 
-            if self.exec_path:
-                #
-                # timeout exec is available.
-                #
-                if self.timeout > 0.:
-                    logger.debug("Using timeout function: " + self.exec_path)
-                    if is_string(args):
-                        args = " ".join([self.exec_path, str(self.timeout), cast("str", args)])
-                    else:
-                        args = [self.exec_path, str(self.timeout)] + cast("list[str]", args)
+        if self.exec_path:
+            # timeout exec is available.
+            if self.timeout > 0.:
+                logger.debug(f"Using timeout function: {self.exec_path}")
+                if is_string(args):
+                    args = " ".join([self.exec_path, str(self.timeout), cast("str", args)])
+                else:
+                    args = [self.exec_path, str(self.timeout)] + cast("list[str]", args)
 
-                p = Popen(args,
-                          bufsize=bufsize, executable=executable, stdin=stdin, stdout=stdout, stderr=stderr, preexec_fn=preexec_fn,
-                          close_fds=close_fds, shell=shell, cwd=cwd, env=env, universal_newlines=universal_newlines, startupinfo=startupinfo,
-                          creationflags=creationflags)
+            p = Popen(args,
+                      bufsize=bufsize, executable=executable, stdin=stdin, stdout=stdout, stderr=stderr, preexec_fn=preexec_fn,
+                      close_fds=close_fds, shell=shell, cwd=cwd, env=env, universal_newlines=universal_newlines, startupinfo=startupinfo,
+                      creationflags=creationflags)
 
-                ret_code = p.wait()
+            ret_code = p.wait()
 
-            #
-            # timeout exec is NOT available.
-            #
-            elif self.timeout > 0.0:
-                logger.debug("Using SubprocesswithTimeout and timeout_time : "+str(self.timeout))
-                timeout_proc = SubProcessWithTimeout(self.timeout, delay=self.delay)
+        # timeout exec is NOT available.
+        elif self.timeout > 0.0:
+            logger.debug(f"Using SubprocesswithTimeout and timeout_time: {self.timeout}")
+            timeout_proc = SubProcessWithTimeout(self.timeout, delay=self.delay)
 
-                p_temp, ret_code = timeout_proc.run(args,
-                    bufsize=bufsize, executable=executable, stdin=stdin, stdout=stdout, stderr=stderr, preexec_fn=preexec_fn,
-                    close_fds=close_fds, shell=shell, cwd=cwd, env=env, universal_newlines=universal_newlines, startupinfo=startupinfo,
-                    creationflags=creationflags)
-                p = cast("Popen[Any]", p_temp)
-            else:
-                logger.debug("Using Popen (no timeout_time)")
-                p = Popen(args,
-                          bufsize=bufsize, executable=executable, stdin=stdin, stdout=stdout, stderr=stderr, preexec_fn=preexec_fn,
-                          close_fds=close_fds, shell=shell, cwd=cwd, env=env, universal_newlines=universal_newlines, startupinfo=startupinfo,
-                          creationflags=creationflags)
+            p_temp, ret_code = timeout_proc.run(args,
+                bufsize=bufsize, executable=executable, stdin=stdin, stdout=stdout, stderr=stderr, preexec_fn=preexec_fn,
+                close_fds=close_fds, shell=shell, cwd=cwd, env=env, universal_newlines=universal_newlines, startupinfo=startupinfo,
+                creationflags=creationflags)
+            p = cast("Popen[Any]", p_temp)
+        else:
+            logger.debug("Using Popen (no timeout_time)")
+            p = Popen(args,
+                      bufsize=bufsize, executable=executable, stdin=stdin, stdout=stdout, stderr=stderr, preexec_fn=preexec_fn,
+                      close_fds=close_fds, shell=shell, cwd=cwd, env=env, universal_newlines=universal_newlines, startupinfo=startupinfo,
+                      creationflags=creationflags)
 
-                ret_code = p.wait()
+            ret_code = p.wait()
 
-            return p, ret_code
+        return p, ret_code
 
-        except Exception:
-            raise
 
 
 class OMPEnvironment(dict):
@@ -689,8 +730,6 @@ class OMPEnvironment(dict):
        "OMP_WAIT_POLICY",
        "OMP_MAX_ACTIVE_LEVELS",
        "OMP_THREAD_LIMIT",
-       "OMP_STACKSIZE",
-       "OMP_PROC_BIND",
     ]
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -709,7 +748,7 @@ class OMPEnvironment(dict):
         for key, value in self.items():
             self[key] = str(value)
             if key not in OMPEnvironment._keys:
-                err_msg += "unknown option %s" % key
+                err_msg += f"unknown option {key}"
         if err_msg: raise ValueError(err_msg)
 
     @classmethod
@@ -724,13 +763,13 @@ class OMPEnvironment(dict):
         # we do not check whether the value is correct or not.
         if "openmp" not in parser.sections():
             if not allow_empty:
-                raise ValueError("%s does not contain any [openmp] section" % fname)
+                raise ValueError(f"{fname} does not contain any [openmp] section")
             return inst
 
         err_msg = ""
         for key in parser.options("openmp"):
             if key.upper() not in OMPEnvironment._keys:
-                err_msg += "unknown option %s, maybe a typo" % key
+                err_msg += f"unknown option {key}, maybe a typo"
         if err_msg:
             raise ValueError(err_msg)
 
