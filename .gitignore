@@ -313,6 +313,7 @@ tests/built-in/Input/fort.98
 tests/built-in/Input/testin_wannier90o_EBANDS.agr
 doxygen_docs
 doxygen.err
+abinit.tag
 venv
 
 # Pycharm

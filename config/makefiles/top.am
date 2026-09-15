@@ -6,6 +6,7 @@ $(top_srcdir)/.version:
 
 # Additional files to distribute
 EXTRA_DIST += \
+	.current_version \
 	KNOWN_PROBLEMS \
 	PACKAGING \
 	INSTALL_CentOS.md \
@@ -14,6 +15,7 @@ EXTRA_DIST += \
 	INSTALL_Ubuntu.md \
 	INSTALL_gpu.md \
 	RELNOTES \
+	Doxyfile \
 	abimkdocs \
 	abimkdocs_plugin \
 	abimkdocs_tests \
@@ -31,7 +33,9 @@ EXTRA_DIST += \
 	doc/topics/documents/hybrids-2017.pdf \
 	doc/topics/documents/noncol.pdf \
 	mkdocs.yml.in \
+	mkdoxygen.sh \
 	mksite.py \
+	config/doxygen \
 	pyproject.toml \
 	scripts \
 	tasks.py \

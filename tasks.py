@@ -17,6 +17,7 @@ Common workflows::
     invoke abinit --input-name=run.abi --run-make
     invoke config-log                    # Summarize the nearest config.log.
     invoke large-files --size-threshold-mb=10
+    invoke doxygen                       # Build the source-code reference.
 
 Git and release tasks can modify branches or remotes. Review their help and
 ensure the working tree is clean before using them. ``official-release`` is a
@@ -496,6 +497,31 @@ def robodoc(ctx: Context) -> bool | None:
         cprint("ROBODOC BUILD FAILED", color="red")
 
         return result.ok
+
+
+@task
+def doxygen(ctx: Context, open_browser: bool = True, warnings_as_errors: bool = False) -> bool:
+    """Build the Doxygen source-code reference.
+
+    Args:
+        ctx: Invoke context.
+        open_browser: Open the generated index after a successful build.
+        warnings_as_errors: Fail when Doxygen reports any warnings.
+    """
+    env = {"DOXYGEN_WARNINGS_AS_ERRORS": "1" if warnings_as_errors else "0"}
+    with cd(ABINIT_ROOTDIR):
+        result = ctx.run("./mkdoxygen.sh", env=env, pty=True, warn=True)
+
+    if not result.ok:
+        cprint("DOXYGEN BUILD FAILED", color="red")
+        return False
+
+    cprint("DOXYGEN BUILD OK", color="green")
+    if open_browser:
+        html_path = Path(ABINIT_ROOTDIR, "doxygen_docs", "html", "index.html")
+        print(f"Opening {html_path} in the browser ...")
+        webbrowser.open_new_tab(html_path.as_uri())
+    return True
 
 
 @task
