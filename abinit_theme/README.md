@@ -235,7 +235,7 @@ Use these guidelines when editing the templates:
 6. Check associated CSS and JavaScript whenever IDs, classes, or element structure change.
 7. Verify that the template still works with pages that have no optional metadata.
 
-The base theme is pinned in `pyproject.toml` and `requirements.txt`.
+The base theme is pinned in the `mksite` group of `pyproject.toml`.
 Review the Material release notes and upstream template changes before upgrading it, especially because the footer is a full partial override.
 
 ## Testing and previewing

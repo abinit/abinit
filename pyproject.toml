@@ -2,6 +2,7 @@
 # Install these groups from the repository's top-level directory with:
 #   python3 -m pip install --group abisrc
 #   python3 -m pip install --group mksite
+#   python3 -m pip install --group tasks
 [dependency-groups]
 abisrc = [
     "graphviz", # python-graphviz if conda
@@ -25,6 +26,12 @@ mksite = [
     # Unit tests
     "pytest",
     "abimkdocs-plugin @ file:./abimkdocs_plugin",
+]
+tasks = [
+    "invoke",
+    "psutil",
+    "tabulate",
+    "watchdog",
 ]
 
 [tool.pytest.ini_options]

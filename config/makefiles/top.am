@@ -33,7 +33,6 @@ EXTRA_DIST += \
 	mkdocs.yml.in \
 	mksite.py \
 	pyproject.toml \
-	requirements.txt \
 	scripts \
 	tasks.py \
 	set_abienv.sh \
