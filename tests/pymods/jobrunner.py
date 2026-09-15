@@ -15,7 +15,7 @@ import time
 from collections.abc import Callable
 from configparser import NoOptionError
 from subprocess import Popen
-from typing import Any, cast
+from typing import Any, Literal, cast
 
 from .subprocesswithtimeout import SubProcessWithTimeout
 
@@ -389,6 +389,26 @@ class JobRunner:
     def has_poe(self) -> bool:
         """True if are using IBM poe for MPI executions."""
         return hasattr(self, "poe") and bool(self.poe)
+
+    @property
+    def launcher(self) -> Literal["mpirun", "srun", "poe", "sequential"]:
+        """
+        The execution strategy this runner will use for job launching.
+
+        Derived from has_srun/has_mpirun/has_poe above, checked in the same
+        precedence run() itself uses -- read this (e.g. before calling run(),
+        or in a log line) to know how a job will actually execute without
+        tracing through run()'s branching by hand. Purely derived/read-only
+        for now: run() still branches on has_mpirun/has_srun/has_poe
+        directly, not on this property.
+        """
+        if self.has_srun:
+            return "srun"
+        if self.has_mpirun:
+            return "mpirun"
+        if self.has_poe:
+            return "poe"
+        return "sequential"
 
     @property
     def has_timebomb(self) -> bool:

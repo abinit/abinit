@@ -165,6 +165,41 @@ class TestJobRunnerProperties:
         assert JobRunner({"poe": ""}).has_poe is False
         assert JobRunner({}).has_poe is False
 
+    def test_launcher_reflects_configuration(self):
+        assert JobRunner({}).launcher == "sequential"
+        assert JobRunner({"mpirun_np": "mpirun -np"}).launcher == "mpirun"
+        assert JobRunner({"mpirun_np": "srun -n"}).launcher == "srun"
+        assert JobRunner({"poe": "poe"}).launcher == "poe"
+
+    def test_launcher_matches_the_branch_run_actually_takes(self, tmp_path):
+        """Regression guard: launcher must never disagree with run()'s own branching.
+
+        launcher is purely derived (see its docstring) and not yet wired
+        into run() -- this pins the two to the same answer so they can't
+        silently drift apart.
+        """
+        stdout, stderr = tmp_path / "out.log", tmp_path / "err.log"
+
+        runner = JobRunner.sequential()
+        assert runner.launcher == "sequential"
+        runner.run(1, "true", None, str(stdout), str(stderr))
+        assert runner.retcode == 0
+
+        runner = JobRunner.fromdict({"mpirun_np": "echo -n"})
+        assert runner.launcher == "mpirun"
+        runner.run(2, "true", None, str(stdout), str(stderr))
+        assert runner.retcode == 0
+
+        runner = JobRunner.srun(mpi_args="--fake")
+        # Real srun isn't necessarily installed on a dev machine; only the
+        # classification is under test here, not actual execution.
+        assert runner.launcher == "srun"
+
+        runner = JobRunner.fromdict({"poe": "echo", "poe_args": "-x"})
+        assert runner.launcher == "poe"
+        runner.run(4, "true", None, str(stdout), str(stderr))
+        assert runner.retcode == 0
+
     def test_has_timebomb(self):
         runner = JobRunner({})
         assert runner.has_timebomb is False

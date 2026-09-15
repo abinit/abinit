@@ -239,8 +239,6 @@ class TestBot:
         with open(testbot_json) as fh:
             data = json.load(fh)
 
-        print(json.dumps(data, indent=2))
-
         for mandatory in ("builder_name", "max_cpus"):
             if mandatory not in data:
                 raise ValueError(f"Mandatory option {mandatory} is not declared in {testbot_json}")
@@ -277,9 +275,6 @@ class TestBot:
 
         if self.type not in ["", "ref"]:
             raise ValueError(f"type should be either 'ref' or empty string while it's: {self.type}")
-
-        system, node, release, version, machine, processor = platform.uname()
-        print(f"Running on {gethostname()} -- builder {self.builder_name} (type: {self.type or 'regular'}) -- system {system} -- max_cpus {self.max_cpus} -- Python {platform.python_version()} -- {_my_name}")
 
         # 2) Initialize the job_runner.
         self.build_env = build_env = BuildEnvironment(os.curdir)
@@ -325,9 +320,7 @@ class TestBot:
             warn(f"Cannot find timeout executable at: {build_env.path_of_bin('timeout')}")
             timebomb = TimeBomb(self.timeout_time)
 
-        print("Initializing JobRunner for sequential runs.")
         self.seq_runner = JobRunner.sequential(timebomb=timebomb)
-        print(self.seq_runner)
 
         if self.has_mpi:
             self.mpi_prefix = get_mpi_prefix_from_env() or ""
@@ -353,18 +346,15 @@ class TestBot:
                     "builders.yaml (testbot_args) to pin a specific launcher."
                 )
 
-            print("Initializing MPI JobRunner from self.__dict__")
             self.mpi_runner = JobRunner.fromdict(self.__dict__, timebomb=timebomb)
-            print(self.mpi_runner)
 
         if self.omp_num_threads > 0:
-            print(f"Initializing OMP environment with omp_num_threads {self.omp_num_threads}")
             omp_env = OMPEnvironment(OMP_NUM_THREADS=self.omp_num_threads)
             self.seq_runner.set_ompenv(omp_env)
             if self.has_mpi:
                 self.mpi_runner.set_ompenv(omp_env)
 
-        print(self)
+        self._print_startup_report()
 
         # Initialize the table to store the final results.
         # The table include all the abinit tests (also those that will be skipped)
@@ -374,6 +364,92 @@ class TestBot:
         res_table = database.init_result_table()
         self.summary = TestBotSummary(res_table)
         #print(self.summary)
+
+    def _format_config_section(self) -> list[str]:
+        """
+        Return the "Configuration" section of the startup report as a list
+        of lines: every dataclass field with repr=True (same fields __str__
+        includes), paired two per row when short (an empty/short with_tdirs
+        list included), else given the row to itself so a long value (a
+        populated with_tdirs/keywords list, an absolute tmp_basedir path)
+        never gets truncated or misaligned. Field-agnostic by design: a
+        field added to/removed from the dataclass later needs no matching
+        update here.
+        """
+        label_w, col_w = 16, 38
+        lines: list[str] = []
+        pending: str | None = None
+
+        def flush() -> None:
+            nonlocal pending
+            if pending is not None:
+                lines.append(pending.rstrip())
+                pending = None
+
+        for f in dataclasses.fields(self):
+            if not f.repr:
+                continue
+            value = getattr(self, f.name)
+            cell = f"{f.name:<{label_w}} : {value}"
+            if len(cell) > col_w - 2:
+                flush()
+                lines.append(cell)
+            elif pending is None:
+                pending = cell.ljust(col_w)
+            else:
+                lines.append(pending + cell)
+                pending = None
+        flush()
+
+        return lines
+
+    def _print_startup_report(self) -> None:
+        """
+        Print one consolidated, human-readable report of the builder identity,
+        the effective configuration, and how JobRunner will actually execute
+        jobs (which launcher each runner resolved to -- see
+        JobRunner.launcher) -- replaces what used to be several small,
+        scattered prints spread across __post_init__ (raw JSON dump, a
+        single long system-info line, two near-empty JobRunner.__str__()
+        dumps, then the config fields with no grouping at all).
+        """
+        system, _node, release, _version, machine, _processor = platform.uname()
+        bar = "=" * 80
+
+        lines = [
+            bar,
+            f"  TestBot :: {self.builder_name} ({self.type or 'regular'} builder)",
+            bar,
+            f"  Host    : {gethostname()}",
+            f"  System  : {system} {release} {machine}",
+            f"  Python  : {platform.python_version()}",
+            f"  Script  : {_my_name}",
+            "",
+            "  -- Configuration --",
+        ]
+        lines += [f"  {line}" for line in self._format_config_section()]
+
+        lines += ["", "  -- Job execution (JobRunner) --"]
+        # str(...) before .ljust() rather than an f-string ":<10" spec --
+        # seq_runner/mpi_runner may be test doubles (e.g. the test suite
+        # mocks the whole pymods.jobrunner module) whose .launcher isn't a
+        # real str and doesn't support width-aligned __format__.
+        seq_timebomb = "yes" if self.seq_runner.has_timebomb else "no"
+        seq_launcher = str(self.seq_runner.launcher).ljust(10)
+        lines.append(f"  Sequential runner : launcher={seq_launcher} timebomb={seq_timebomb}")
+        if self.has_mpi:
+            mpi_timebomb = "yes" if self.mpi_runner.has_timebomb else "no"
+            mpi_launcher = str(self.mpi_runner.launcher).ljust(10)
+            mpi_args_part = f"   mpi_args={self.mpi_args!r}" if self.mpi_args else ""
+            lines.append(
+                f"  MPI runner        : launcher={mpi_launcher} timebomb={mpi_timebomb}{mpi_args_part}"
+            )
+        lines.append(
+            f"  OpenMP            : {'enabled (' + str(self.omp_num_threads) + ' threads)' if self.has_openmp else 'disabled'}"
+        )
+        lines.append(bar)
+
+        print("\n".join(lines))
 
     def __str__(self) -> str:
         """String representation (config fields only, excludes runtime objects)."""
