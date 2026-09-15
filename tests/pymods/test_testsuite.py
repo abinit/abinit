@@ -10,14 +10,18 @@ from __future__ import annotations
 import os
 import shutil
 import tempfile
+import threading
 from pathlib import Path
 
 import pytest
 
 from tests import abenv
 
+from . import testsuite as testsuite_module
 from .jobrunner import JobRunner
 from .testsuite import (
+    SLURM_ACCT_FORMAT,
+    SLURM_OOM_MAX_QUERIES,
     AbinitTestInfo,
     AbinitTestInfoParser,
     AbinitTestInfoParserError,
@@ -29,6 +33,8 @@ from .testsuite import (
     CPreProcessor,
     FileToTest,
     FortranCompiler,
+    _LocalCounter,
+    _oom_query_allowed,
     _str2bool,
     _str2cmds,
     _str2filestotest,
@@ -36,6 +42,7 @@ from .testsuite import (
     _str2list,
     _str2set,
     args2htmltr,
+    detect_slurm_oom_stepid,
     genid,
     has_exts,
     html_colorize_text,
@@ -49,6 +56,7 @@ from .testsuite import (
     make_abitests_from_inputs,
     my_getlogin,
     parse_configh_file,
+    query_slurm_step_accounting,
     rm_rf,
     sec2str,
     status2html,
@@ -951,6 +959,239 @@ ngkpt 2 2 2
         inp_file.write_text("ecut 20.0\n")
         found, matches = input_file_has_vars(str(inp_file), {"npsp": None})
         assert found is False
+
+
+# ============================================================================
+# TESTS FOR SLURM OOM-KILL DETECTION
+#
+# See detect_slurm_oom_stepid()/query_slurm_step_accounting()/
+# _oom_query_allowed() and BaseTest.report_slurm_oom_if_detected() in
+# testsuite.py. Real Slurm messages, observed live on manneback_gnu_14.2_hpc
+# (v9/t83): a memory-hungry test gets killed by srun with a distinctive
+# stderr, quite different from an ordinary non-zero-retcode failure.
+# ============================================================================
+
+REAL_OOM_STDERR = (
+    "[v9][t83][np=1] Test was not expected to fail but subprocesses returned retcode: 1\n"
+    "slurmstepd: error: Detected 1 oom_kill event in StepId=9787516.112. "
+    "Some of the step tasks have been OOM Killed.\n"
+    "srun: error: mb-mil009: task 0: Out Of Memory\n"
+    "srun: Terminating StepId=9787516.112\n"
+)
+
+
+class TestDetectSlurmOomStepid:
+    """Test suite for detect_slurm_oom_stepid()."""
+
+    def test_detects_real_oom_message_and_extracts_stepid(self):
+        """Regression fixture: the exact stderr text reported for a live OOM kill."""
+        assert detect_slurm_oom_stepid(REAL_OOM_STDERR) == "9787516.112"
+
+    def test_returns_none_for_ordinary_failure(self):
+        """A plain, non-Slurm failure must not be misidentified as an OOM kill."""
+        assert detect_slurm_oom_stepid("forrtl: severe (174): SIGSEGV\n") is None
+
+    def test_returns_none_for_empty_or_missing_stderr(self):
+        """Empty or None stderr must not raise."""
+        assert detect_slurm_oom_stepid("") is None
+        assert detect_slurm_oom_stepid(None) is None
+
+    def test_returns_none_when_oom_detected_but_no_stepid_present(self):
+        """A recognizable OOM message without a parseable StepId must not raise."""
+        assert detect_slurm_oom_stepid("srun: error: node1: task 0: Out Of Memory\n") is None
+
+    def test_matches_case_insensitively(self):
+        """The OOM signature match must not be case-sensitive."""
+        assert detect_slurm_oom_stepid("OUT OF MEMORY in StepId=1.0") == "1.0"
+
+
+class TestQuerySlurmStepAccounting:
+    """Test suite for query_slurm_step_accounting() -- Popen is mocked, no real Slurm needed."""
+
+    def test_returns_first_line_of_sacct_output(self, monkeypatch):
+        """A successful sacct call must return its first stripped output line."""
+        class FakeProc:
+            returncode = 0
+
+            def communicate(self, timeout=None):
+                return "9787516.112|COMPLETED|0:0|137|16|2Gc|1048576|00:12:34\n", ""
+
+        monkeypatch.setattr(testsuite_module, "Popen", lambda *a, **k: FakeProc())
+
+        result = query_slurm_step_accounting("9787516.112")
+        assert result == "9787516.112|COMPLETED|0:0|137|16|2Gc|1048576|00:12:34"
+
+    def test_returns_none_on_nonzero_returncode(self, monkeypatch):
+        """A failing sacct call (e.g. unknown job id) must return None, not raise."""
+        class FakeProc:
+            returncode = 1
+
+            def communicate(self, timeout=None):
+                return "", "slurm_load_jobs error: Invalid job id specified"
+
+        monkeypatch.setattr(testsuite_module, "Popen", lambda *a, **k: FakeProc())
+
+        assert query_slurm_step_accounting("999999.0") is None
+
+    def test_returns_none_on_empty_output(self, monkeypatch):
+        """A zero-exit-code sacct call with no matching record must return None."""
+        class FakeProc:
+            returncode = 0
+
+            def communicate(self, timeout=None):
+                return "", ""
+
+        monkeypatch.setattr(testsuite_module, "Popen", lambda *a, **k: FakeProc())
+
+        assert query_slurm_step_accounting("9787516.112") is None
+
+    def test_returns_none_when_sacct_binary_is_missing(self, monkeypatch):
+        """`sacct` not on PATH (e.g. a non-Slurm machine) must not raise."""
+
+        def raise_not_found(*a, **k):
+            raise FileNotFoundError("sacct not found")
+
+        monkeypatch.setattr(testsuite_module, "Popen", raise_not_found)
+
+        assert query_slurm_step_accounting("9787516.112") is None
+
+    def test_kills_process_and_returns_none_on_timeout(self, monkeypatch):
+        """A hung sacct call must be killed and return None, not block forever."""
+        from subprocess import TimeoutExpired
+
+        class FakeProc:
+            returncode = None
+
+            def __init__(self):
+                self.killed = False
+
+            def communicate(self, timeout=None):
+                if not self.killed:
+                    raise TimeoutExpired(cmd="sacct", timeout=timeout)
+                return "", ""
+
+            def kill(self):
+                self.killed = True
+
+        monkeypatch.setattr(testsuite_module, "Popen", lambda *a, **k: FakeProc())
+
+        assert query_slurm_step_accounting("9787516.112", timeout=1) is None
+
+
+class TestOomQueryAllowed:
+    """Test suite for _oom_query_allowed()'s shared-budget rate limiting."""
+
+    def test_allows_up_to_max_calls_then_denies(self):
+        """Exactly max_calls queries are allowed; every one after that is denied."""
+        counter = _LocalCounter()
+        lock = threading.Lock()
+        results = [_oom_query_allowed(counter, lock, max_calls=3) for _ in range(5)]
+        assert results == [True, True, True, False, False]
+
+    def test_denial_does_not_increment_the_counter_further(self):
+        """Denied calls must not keep incrementing the counter past max_calls."""
+        counter = _LocalCounter()
+        lock = threading.Lock()
+        for _ in range(10):
+            _oom_query_allowed(counter, lock, max_calls=2)
+        assert counter.value == 2
+
+
+class _FakeTestForOom:
+    """Minimal stand-in exposing exactly what report_slurm_oom_if_detected()
+    needs from a real BaseTest -- avoids constructing a full BaseTest (which
+    requires a real input file and build environment) just to test this
+    self-contained reporting method.
+    """
+
+    def __init__(self, max_calls=SLURM_OOM_MAX_QUERIES):
+        self._oom_query_counter = _LocalCounter()
+        self._oom_query_lock = threading.Lock()
+        self.oom_query_max_calls = max_calls
+        self.messages = []
+
+    def cprint(self, msg="", color=None):
+        self.messages.append((msg, color))
+
+    report_slurm_oom_if_detected = BaseTest.report_slurm_oom_if_detected
+
+
+class TestReportSlurmOomIfDetected:
+    """Test suite for BaseTest.report_slurm_oom_if_detected()."""
+
+    def test_prints_nothing_for_a_non_oom_failure(self):
+        """A non-OOM stderr must be a silent no-op."""
+        fake = _FakeTestForOom()
+        fake.report_slurm_oom_if_detected("forrtl: severe (174): SIGSEGV\n")
+        assert fake.messages == []
+
+    def test_reports_sacct_accounting_when_available(self, monkeypatch):
+        """A detected OOM kill with budget available must query and print sacct accounting."""
+        class FakeProc:
+            returncode = 0
+
+            def communicate(self, timeout=None):
+                return "9787516.112|COMPLETED|0:0|137|16|2Gc|1048576|00:12:34\n", ""
+
+        monkeypatch.setattr(testsuite_module, "Popen", lambda *a, **k: FakeProc())
+
+        fake = _FakeTestForOom()
+        fake.report_slurm_oom_if_detected(REAL_OOM_STDERR)
+
+        assert len(fake.messages) == 1
+        msg, color = fake.messages[0]
+        assert "9787516.112" in msg
+        assert SLURM_ACCT_FORMAT in msg
+        assert color == "red"
+
+    def test_reports_budget_exhausted_without_querying_sacct(self, monkeypatch):
+        """Once the shared budget is exhausted, sacct must not be invoked at all."""
+
+        def fail_if_called(*a, **k):
+            raise AssertionError("sacct must not be called once the budget is exhausted")
+
+        monkeypatch.setattr(testsuite_module, "Popen", fail_if_called)
+
+        fake = _FakeTestForOom(max_calls=1)
+        fake._oom_query_counter.value = 1  # budget already exhausted
+
+        fake.report_slurm_oom_if_detected(REAL_OOM_STDERR)  # must not raise, must not call Popen
+
+        assert len(fake.messages) == 1
+        msg, color = fake.messages[0]
+        assert "budget" in msg.lower()
+        assert color == "yellow"
+
+    def test_shares_budget_across_multiple_tests(self, monkeypatch):
+        """The counter/lock are meant to be shared across BaseTest instances
+        (e.g. multiple py_nprocs workers, see AbinitTestSuite.run_tests()) --
+        several tests passed the SAME counter/lock pair must together respect
+        ONE combined budget, not one budget each.
+        """
+        class FakeProc:
+            returncode = 0
+
+            def communicate(self, timeout=None):
+                return "9787516.112|COMPLETED|0:0|137|16|2Gc|1048576|00:12:34\n", ""
+
+        monkeypatch.setattr(testsuite_module, "Popen", lambda *a, **k: FakeProc())
+
+        shared_counter = _LocalCounter()
+        shared_lock = threading.Lock()
+        fakes = []
+        for _ in range(3):
+            fake = _FakeTestForOom(max_calls=2)
+            fake._oom_query_counter = shared_counter
+            fake._oom_query_lock = shared_lock
+            fakes.append(fake)
+
+        for fake in fakes:
+            fake.report_slurm_oom_if_detected(REAL_OOM_STDERR)
+
+        queried = [f for f in fakes if "sacct accounting" in f.messages[0][0]]
+        exhausted = [f for f in fakes if "budget" in f.messages[0][0].lower()]
+        assert len(queried) == 2
+        assert len(exhausted) == 1
 
 
 # ============================================================================

@@ -30,7 +30,7 @@ from multiprocessing import Lock, Manager, Process, Queue, current_process
 from pprint import pprint
 from queue import Empty as EmptyQueueError
 from socket import gethostname
-from subprocess import PIPE, Popen
+from subprocess import PIPE, Popen, TimeoutExpired
 from threading import Thread
 from typing import Any, TextIO, cast
 
@@ -61,6 +61,139 @@ __all__ = [
 fldebug = "FLDIFF_DEBUG" in os.environ and os.environ["FLDIFF_DEBUG"]
 
 _MY_NAME = os.path.basename(__file__)[:-3] + "-" + __version__
+
+# ----------------------------------------------------------------------------
+# Slurm OOM-kill detection (see BaseTest.run()'s failed-status handling below).
+#
+# When a test's executable is launched via `srun` on a Slurm-managed remote
+# builder and gets killed for exceeding its memory allocation, Slurm reports
+# this on stderr rather than through the process's own retcode/error message,
+# e.g.:
+#
+#   slurmstepd: error: Detected 1 oom_kill event in StepId=9787516.112. ...
+#   srun: error: mb-mil009: task 0: Out Of Memory
+#   srun: Terminating StepId=9787516.112
+#
+# In that case the test's own "subprocess returned retcode: 1" message is
+# misleading on its own -- the real cause is an out-of-memory kill, and
+# `sacct` (Slurm's accounting database) can report exactly how much memory
+# the killed step actually used (MaxRSS) versus what was requested (ReqMem).
+# Detection is pure best-effort text matching against these well-known
+# messages; it never raises, and simply does nothing on a stderr that
+# doesn't look like this (e.g. every non-Slurm/local test run).
+#
+# SLURM_OOM_MAX_QUERIES caps how many times `sacct` is actually invoked
+# across one whole test-suite run: if a memory-starved node starts OOM-
+# killing many tests in a row, we don't want to hammer slurmdbd once per
+# failure. Shared across the py_nprocs worker *processes* AbinitTestSuite may
+# spawn (see run_tests()'s Manager-backed oom_query_counter/oom_query_lock) --
+# a plain module-level int would not be shared across those.
+SLURM_OOM_MAX_QUERIES = 5
+
+# Same field list used by abibuildbot's own sacct-based accounting (see
+# abibuildbot/builder_scripts/run_queue.py's SACCT_FORMAT) -- kept in sync
+# deliberately so a build's Buildbot-side accounting and this test-level
+# accounting read the same way.
+SLURM_ACCT_FORMAT = "JobIDRaw,State,ExitCode,ElapsedRaw,AllocCPUS,ReqMem,MaxRSS,TotalCPU"
+
+_SLURM_OOM_RE = re.compile(r"oom[-_ ]kill|out of memory|oom killed", re.IGNORECASE)
+_SLURM_STEPID_RE = re.compile(r"StepId=(\d+\.\d+)")
+
+
+def detect_slurm_oom_stepid(stderr_text):
+    """Return the Slurm StepId ("<job_id>.<step_id>") if `stderr_text` looks
+    like a Slurm OOM kill, else None.
+
+    Best-effort text matching against the well-known slurmstepd/srun OOM
+    messages (see the module-level comment above); never raises.
+
+    Args:
+        stderr_text (str): Captured stderr of the test's subprocess.
+
+    Returns:
+        str or None: The matched StepId, or None if no OOM signature (or no
+            extractable StepId) was found.
+    """
+    if not stderr_text or not _SLURM_OOM_RE.search(stderr_text):
+        return None
+    m = _SLURM_STEPID_RE.search(stderr_text)
+    return m.group(1) if m else None
+
+
+def query_slurm_step_accounting(step_id, timeout=10):
+    """Best-effort `sacct` lookup for one Slurm step ("<job_id>.<step_id>").
+
+    Diagnostic-only: any failure (missing `sacct` binary, timeout, no
+    matching record, unreachable slurmdbd) is swallowed and reported as
+    None -- this must never raise or block test reporting.
+
+    Args:
+        step_id (str): Slurm step id, e.g. "9787516.112".
+        timeout (float): Seconds to wait for `sacct` before giving up.
+
+    Returns:
+        str or None: The raw pipe-delimited sacct line (fields in
+            SLURM_ACCT_FORMAT order), or None if unavailable.
+    """
+    cmd = ["sacct", "-j", step_id, "-n", "-P", "--format=" + SLURM_ACCT_FORMAT]
+    p = None
+    try:
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE, text=True)
+        stdout, _stderr = p.communicate(timeout=timeout)
+    except TimeoutExpired:
+        p.kill()
+        p.communicate()
+        return None
+    except Exception:
+        return None
+    if p.returncode != 0:
+        return None
+    stdout = stdout.strip()
+    return stdout.splitlines()[0] if stdout else None
+
+
+class _LocalCounter:
+    """Minimal `.value`-holding counter, mirroring the interface of a
+    multiprocessing.Manager().Value("i", 0) proxy just enough for
+    _oom_query_allowed() below.
+
+    Used as the fallback when BaseTest.run() isn't given a real,
+    cross-process-safe counter/lock by its caller (see
+    AbinitTestSuite.run_tests()) -- e.g. a direct/standalone .run() call.
+    Only correct within a single process; that's fine for this fallback's
+    purpose, since the real, Manager-backed pair is what run_tests() always
+    supplies for actual (possibly multi-process) test-suite runs.
+    """
+
+    def __init__(self):
+        self.value = 0
+
+
+# Process-local fallback pair (see _LocalCounter's docstring above).
+_fallback_oom_query_counter = _LocalCounter()
+_fallback_oom_query_lock = Lock()
+
+
+def _oom_query_allowed(counter, lock, max_calls):
+    """Atomically check-and-increment a shared OOM-query budget counter.
+
+    Args:
+        counter: Object with a `.value` int attribute (a Manager Value
+            proxy, or _LocalCounter).
+        lock: Context-manager lock guarding `counter` (a Manager Lock proxy,
+            or a plain multiprocessing/threading Lock).
+        max_calls (int): Maximum number of allowed queries for the whole run.
+
+    Returns:
+        bool: True (and increments counter) if the budget was not yet
+            exhausted, False (without incrementing) otherwise.
+    """
+    with lock:
+        if counter.value >= max_calls:
+            return False
+        counter.value += 1
+        return True
+
 
 _HTML_REPORT_CSS = """
 :root {
@@ -1916,6 +2049,40 @@ pp_dirpath $ABI_PSPDIR
     def has_empty_stderr(self):
         return not bool(self.stderr_read())
 
+    def report_slurm_oom_if_detected(self, errout):
+        """If `errout` looks like a Slurm OOM kill, print `sacct` accounting
+        for the killed step -- budget permitting (see SLURM_OOM_MAX_QUERIES,
+        oom_query_max_calls, and _oom_query_allowed()).
+
+        No-op (prints nothing) if `errout` doesn't match a known Slurm OOM
+        signature -- this makes the call a harmless no-op for every
+        non-Slurm/local test run. Never raises.
+
+        Args:
+            errout (str): Captured stderr of the test's subprocess.
+        """
+        step_id = detect_slurm_oom_stepid(errout)
+        if not step_id:
+            return
+
+        if _oom_query_allowed(self._oom_query_counter, self._oom_query_lock, self.oom_query_max_calls):
+            acct_line = query_slurm_step_accounting(step_id)
+            if acct_line:
+                self.cprint(
+                    msg="Slurm OOM kill detected (StepId=%s). sacct accounting (%s):\n%s"
+                    % (step_id, SLURM_ACCT_FORMAT, acct_line),
+                    color="red")
+            else:
+                self.cprint(
+                    msg="Slurm OOM kill detected (StepId=%s), but `sacct` returned no accounting data "
+                        "(unavailable, timed out, or no matching record)." % step_id,
+                    color="yellow")
+        else:
+            self.cprint(
+                msg="Slurm OOM kill detected (StepId=%s), but the sacct query budget for this run "
+                    "(%d) is already exhausted; skipping the lookup." % (step_id, self.oom_query_max_calls),
+                color="yellow")
+
     @property
     def full_id(self):
         """Full identifier of the test."""
@@ -2341,6 +2508,14 @@ pp_dirpath $ABI_PSPDIR
         abimem_level      Run executable with abimem_level.
         useylm            Change Abinit input file to use useylm e.g. useylm 1
         gpu_option        Change Abinit input file to use gpu_option e.g. gpu_option 2
+        oom_query_max_calls  Max number of `sacct` lookups for Slurm OOM-killed
+                           tests across the whole run. Default: SLURM_OOM_MAX_QUERIES.
+        oom_query_counter  Manager Value("i", 0) shared across py_nprocs workers,
+                           tracking how many sacct queries have been made so far
+                           (see AbinitTestSuite.run_tests()). Falls back to a
+                           process-local counter if not supplied.
+        oom_query_lock     Manager Lock guarding oom_query_counter. Same fallback
+                           behavior as oom_query_counter.
         ================  ====================================================================
 
         .. warning:
@@ -2373,6 +2548,9 @@ pp_dirpath $ABI_PSPDIR
         self.abimem_level = kwargs.get("abimem_level", 0)
         self.useylm = kwargs.get("useylm")
         self.gpu_option = kwargs.get("gpu_option")
+        self.oom_query_max_calls = kwargs.get("oom_query_max_calls", SLURM_OOM_MAX_QUERIES)
+        self._oom_query_counter = kwargs.get("oom_query_counter", _fallback_oom_query_counter)
+        self._oom_query_lock = kwargs.get("oom_query_lock", _fallback_oom_query_lock)
 
         timeout = self.sub_timeout
         if self.build_env.has_bin("timeout") and timeout > 0.0:
@@ -2662,6 +2840,16 @@ pp_dirpath $ABI_PSPDIR
                         else:
                             self.cprint(msg="No YAML Error found in: " + repr(self))
 
+                except Exception as exc:
+                    self.exceptions.append(exc)
+
+                # Detect a Slurm OOM kill and, budget permitting, enrich the
+                # report with sacct accounting for the killed step. Isolated
+                # in its own try/except (and its own stderr read, rather than
+                # reusing `errout` from above) so a problem here -- or in the
+                # block above -- can never interfere with the other.
+                try:
+                    self.report_slurm_oom_if_detected(self.stderr_read())
                 except Exception as exc:
                     self.exceptions.append(exc)
 
@@ -4630,6 +4818,13 @@ class AbinitTestSuite:
                 gpu_counter=manager.Value("i", 0),  # Shared counter for GPU usage.
                 condition=manager.Condition(),      # Condition variable for synchronization.
                 lock_counters=manager.Lock(),       # Lock to make cpu_counter and gpu_counter updates safe.
+                # Shared across all py_nprocs workers so the total number of
+                # sacct lookups for Slurm OOM kills stays bounded by
+                # SLURM_OOM_MAX_QUERIES (or the caller's oom_query_max_calls
+                # override) for the whole run, not per worker -- see
+                # BaseTest.report_slurm_oom_if_detected()/_oom_query_allowed().
+                oom_query_counter=manager.Value("i", 0),
+                oom_query_lock=manager.Lock(),
                 verbose=verbose,
             )
 
