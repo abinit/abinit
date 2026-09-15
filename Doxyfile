@@ -1170,14 +1170,17 @@ INPUT_FILTER           =
 # need to set EXTENSION_MAPPING for the extension otherwise the files are not
 # properly processed by Doxygen.
 
-FILTER_PATTERNS        =
+FILTER_PATTERNS        = *.F90="config/doxygen/robodoc_filter.py" \
+                         *.f90="config/doxygen/robodoc_filter.py" \
+                         *.f="config/doxygen/robodoc_filter.py" \
+                         *.finc="config/doxygen/robodoc_filter.py"
 
 # If the FILTER_SOURCE_FILES tag is set to YES, the input filter (if set using
 # INPUT_FILTER) will also be used to filter the input files that are used for
 # producing the source files to browse (i.e. when SOURCE_BROWSER is set to YES).
 # The default value is: NO.
 
-FILTER_SOURCE_FILES    = NO
+FILTER_SOURCE_FILES    = YES
 
 # The FILTER_SOURCE_PATTERNS tag can be used to specify source filters per file
 # pattern. A pattern will override the setting for FILTER_PATTERN (if any) and

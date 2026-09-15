@@ -37,7 +37,9 @@ echo "[mkdoxygen] Removing previous generated documentation files."
 rm -rf -- doxygen_docs
 rm -f -- doxygen.err abinit.tag
 
-if doxygen -q Doxyfile; then
+# Reading the configuration from standard input prevents newer Doxygen versions
+# from upgrading Doxyfile in place and creating a Doxyfile.bak file.
+if doxygen -q - < Doxyfile; then
     doxygen_status=0
 else
     doxygen_status=$?
