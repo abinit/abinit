@@ -639,7 +639,7 @@ class TestBot:
         suite_args = None
 
         # XG130410 Crude hack, to avoid paral and mpiio test directories
-        # in case of enable_mpi=no in config/specs/testfarm.conf
+        # in case of enable_mpi=no in the builder's config
         if not self.has_mpi:
             suite_args = "paral- mpiio-".split()
 

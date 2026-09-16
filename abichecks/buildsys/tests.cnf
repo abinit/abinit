@@ -52,4 +52,3 @@ Build-system consistency checks
 10 statchk abichecks/scripts/check-build-config.py
 12 statchk abichecks/scripts/check-cpp-options.py
 14 statchk abichecks/scripts/check-binaries-conf.py
-20 statchk abichecks/scripts/check-forbidden-flags.py

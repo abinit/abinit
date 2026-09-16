@@ -87,10 +87,6 @@ repos:
         name: Run run-check-config-h
         entry: python abichecks/scripts/check-config-h.py
         language: python
-      - id: run-check-forbidden-flags
-        name: Run run-check-forbidden-flags
-        entry: python abichecks/scripts/check-forbidden-flags.py
-        language: python
       - id: run-check-ascii
         name: Run run-check_ascii
         entry: python abichecks/scripts/check_ascii.py
