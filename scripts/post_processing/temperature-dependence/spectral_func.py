@@ -2,9 +2,8 @@
 # Date: 30/04/2013
 # Script to compute the spectral function
 
-import sys
-import os
 from rf_mods import system
+
 try:
   import numpy as N
 except ImportError:
@@ -32,78 +31,78 @@ Ha2eV = 27.21138386
 kb_HaK = 3.1668154267112283e-06
 
 # Interaction with the user
-print( '\n################################################')
-print( '# Spectral function of the dynamical self-energy #')
-print( '##################################################')
-print( '\nThis script compute the zero-point motion and the temperature dependence \n\
+print( "\n################################################")
+print( "# Spectral function of the dynamical self-energy #")
+print( "##################################################")
+print( "\nThis script compute the zero-point motion and the temperature dependence \n\
 of eigenenergies due to electron-phonon interaction. This script can \n\
 only compute Q-points with the same weight. If you want symmetry you must hack the script.\n\
-WARNING: The first Q-point MUST be the Gamma point\n')
+WARNING: The first Q-point MUST be the Gamma point\n")
 
 # Define the output file name
-user_input = raw_input('Enter name of the output file\n')
+user_input = raw_input("Enter name of the output file\n")
 output = user_input
 
 # Get the value of the smearing parameter (in eV)
-user_input = raw_input('Enter value of the smearing parameter (in eV)\n')
-smearing = N.float(user_input)
+user_input = raw_input("Enter value of the smearing parameter (in eV)\n")
+smearing = float(user_input)
 smearing = smearing/Ha2eV
 
 # Frequency range?
-user_input = raw_input('What is the range of frequencies you want to compute your spectral function upon (in eV)\n\
-  [start end steps]. e.g. -15 10 0.5 for an energy step every 0.5 eV between -15 eV and 10 eV. \n')
-freq = N.arange(N.float(user_input.split()[0]),N.float(user_input.split()[1]),N.float(user_input.split()[2]))
+user_input = raw_input("What is the range of frequencies you want to compute your spectral function upon (in eV)\n\
+  [start end steps]. e.g. -15 10 0.5 for an energy step every 0.5 eV between -15 eV and 10 eV. \n")
+freq = N.arange(float(user_input.split()[0]),float(user_input.split()[1]),float(user_input.split()[2]))
 freq = freq/Ha2eV # From eV to Ha
 
 # Temperature
-user_input = raw_input('Enter the temperature for the spectral function A_nk(omega,T) [in K]\n')
-temperature = N.float(user_input)
+user_input = raw_input("Enter the temperature for the spectral function A_nk(omega,T) [in K]\n")
+temperature = float(user_input)
 
 # Band index
-user_input = raw_input('Enter the band index for the spectral function A_nk(omega,T)\n')
+user_input = raw_input("Enter the band index for the spectral function A_nk(omega,T)\n")
 try:
-  band = N.int(user_input)
+  band = int(user_input)
 except ValueError:
-  raise Exception('The value you enter is not an integer!')
+  raise Exception("The value you enter is not an integer!")
 
 # Get the nb of random Q-points from user
-user_input = raw_input('Enter the number of random Q-points you have\n')
+user_input = raw_input("Enter the number of random Q-points you have\n")
 try:
   nbQ = int(user_input)
 except ValueError:
-  raise Exception('The value you enter is not an integer!')
+  raise Exception("The value you enter is not an integer!")
 
 # Get the path of the DDB files from user
-user_input = raw_input('Enter the name of the %s DDB files separated by a space\n' %nbQ)
+user_input = raw_input("Enter the name of the %s DDB files separated by a space\n" %nbQ)
 if len(user_input.split()) != nbQ:
   raise Exception("You sould provide %s DDB files" %nbQ)
 else:
   DDB_files = user_input.split()
 
 # Test if the first file is at the Gamma point
-DDBtmp = system(directory='.',filename=DDB_files[0])
+DDBtmp = system(directory=".",filename=DDB_files[0])
 if N.allclose(DDBtmp.iqpt,[0.0,0.0,0.0]) == False:
-  raise Exception('The first Q-point is not Gamma!')
+  raise Exception("The first Q-point is not Gamma!")
 
 # Choose a k-point in the list below:
-print ('Choose a k-point number in the list below for A_nk(omega,T)\n')
+print ("Choose a k-point number in the list below for A_nk(omega,T)\n")
 for ii in N.arange(DDBtmp.nkpt):
-  print ('%s) %s' % (ii,DDBtmp.kpt[ii,:]))
-user_input = raw_input('Enter the number of the k-point you want to analyse\n')
+  print ("%s) %s" % (ii,DDBtmp.kpt[ii,:]))
+user_input = raw_input("Enter the number of the k-point you want to analyse\n")
 try:
-  kpt = N.int(user_input)
+  kpt = int(user_input)
 except ValueError:
-  raise Exception('The value you enter is not an integer!')
+  raise Exception("The value you enter is not an integer!")
 
 # Take the EIG at Gamma
-user_input = raw_input('Enter the name of the unperturbed EIG.nc file at Gamma\n')
+user_input = raw_input("Enter the name of the unperturbed EIG.nc file at Gamma\n")
 if len(user_input.split()) != 1:
   raise Exception("You sould only provide 1 file")
 else:
-  eig0 = system(directory='.',filename=user_input)
+  eig0 = system(directory=".",filename=user_input)
 
 N.arange# Find the degenerate eigenstates
-DDB = system(directory='.',filename=DDB_files[0])
+DDB = system(directory=".",filename=DDB_files[0])
 degen =  N.zeros((DDB.nkpt,DDB.nband),dtype=int)
 for ikpt in N.arange(DDB.nkpt):
   count = 0
@@ -115,18 +114,16 @@ for ikpt in N.arange(DDB.nkpt):
         degen[ikpt,iband] = count
         count += 1
         continue
-    else:
-      if N.allclose(eig0.EIG[0,ikpt,iband-1], eig0.EIG[0,ikpt,iband]):
-        degen[ikpt,iband] = count
+    elif N.allclose(eig0.EIG[0,ikpt,iband-1], eig0.EIG[0,ikpt,iband]):
+      degen[ikpt,iband] = count
     if iband != 0:
       if N.allclose(eig0.EIG[0,ikpt,iband-1], eig0.EIG[0,ikpt,iband]):
         degen[ikpt,iband] = count
-    else:
-      if N.allclose(eig0.EIG[0,ikpt,iband+1], eig0.EIG[0,ikpt,iband]):
-        degen[ikpt,iband] = count
+    elif N.allclose(eig0.EIG[0,ikpt,iband+1], eig0.EIG[0,ikpt,iband]):
+      degen[ikpt,iband] = count
 
 # Create the random Q-integration (wtq=1/nqpt):
-wtq = N.ones((nbQ))
+wtq = N.ones(nbQ)
 wtq = wtq*(1.0/nbQ)
 
 
@@ -135,7 +132,7 @@ wtq = wtq*(1.0/nbQ)
 fan_tot = N.zeros((len(freq)),dtype=complex)
 ddw_tot = N.zeros((),dtype=complex)
 self_energy = N.zeros((len(freq)),dtype=complex)
-spectral = N.zeros((len(freq)))
+spectral = N.zeros(len(freq))
 iiqpt = 0
 DDB = system()
 FANterm = system()
@@ -143,7 +140,7 @@ EIGR2D = system()
 eigq = system()
 #Compute the spectral function
 for ii in DDB_files:
-  DDB.__init__(directory='.',filename=ii)
+  DDB.__init__(directory=".",filename=ii)
 
 # Calcul of gprimd from rprimd
   rprimd = DDB.rprim*DDB.acell
@@ -190,26 +187,26 @@ for ii in DDB_files:
   omega = N.sqrt((eigval*5.4857990965007152E-4)/float(DDB.amu[0]))
 
 # Now read the EIGq, EIGR2D and FAN
-  user_input = raw_input('Enter the name of the the _EIG.nc that contain\n\
- the %s Q-points. \n' %DDB.iqpt)
+  user_input = raw_input("Enter the name of the the _EIG.nc that contain\n\
+ the %s Q-points. \n" %DDB.iqpt)
   if len(user_input.split()) != 1:
     raise Exception("You sould provide only 1 ***_EIG.nc file" )
   else:
-    eigq.__init__(directory='.',filename=user_input.split()[0])
+    eigq.__init__(directory=".",filename=user_input.split()[0])
 
-  user_input = raw_input('Enter the name of the the EIGR2D that contain\n\
- the %s Q-points. \n' %DDB.iqpt)
+  user_input = raw_input("Enter the name of the the EIGR2D that contain\n\
+ the %s Q-points. \n" %DDB.iqpt)
   if len(user_input.split()) != 1:
     raise Exception("You sould provide only 1 ***_EIGR2D file" )
   else:
-    EIGR2D.__init__(directory='.',filename=user_input.split()[0])
+    EIGR2D.__init__(directory=".",filename=user_input.split()[0])
 
-  user_input = raw_input('Enter the name of the the _FAN that contain\n\
- the %s Q-points. \n' %DDB.iqpt)
+  user_input = raw_input("Enter the name of the the _FAN that contain\n\
+ the %s Q-points. \n" %DDB.iqpt)
   if len(user_input.split()) != 1:
     raise Exception("You sould provide only 1 ***_FAN file" )
   else:
-    FANterm.__init__(directory='.',filename=user_input.split()[0])
+    FANterm.__init__(directory=".",filename=user_input.split()[0])
 
 # Compute the displacement = eigenvectors of the DDB.
 # Due to metric problem in reduce coordinate we have to work in cartesian
@@ -270,16 +267,16 @@ for ii in DDB_files:
   iiqpt +=1
 
 
-print ('eig0.EIG[0,kpt,band-1]',eig0.EIG[0,kpt,band-1]*Ha2eV)
+print ("eig0.EIG[0,kpt,band-1]",eig0.EIG[0,kpt,band-1]*Ha2eV)
 # Computation of the self-energy and the spectral function at a given temperature.
 index = 0
 with open(output,"w") as O:
-  O.write('# Spectral function at T = '+str(temperature)+' for band = '+str(band)+' and kpt = '+str(DDBtmp.kpt[kpt,:])+'\n')
-  O.write('# Omega [eV]  Spectral function\n')
+  O.write("# Spectral function at T = "+str(temperature)+" for band = "+str(band)+" and kpt = "+str(DDBtmp.kpt[kpt,:])+"\n")
+  O.write("# Omega [eV]  Spectral function\n")
   for ifreq in freq:
     self_energy[index] = 1.0/(ifreq-eig0.EIG[0,kpt,band-1]-fan_tot[index]-ddw_tot)
     spectral[index]= (1.0/N.pi)*N.abs((self_energy[index]).imag)
-    O.write(str(ifreq*Ha2eV)+' '+str(spectral[index])+'\n')
+    O.write(str(ifreq*Ha2eV)+" "+str(spectral[index])+"\n")
     index +=1
 
 # Make a matplotlibplot

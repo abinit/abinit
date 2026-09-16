@@ -57,7 +57,7 @@ def parse_tests_cnf(path: Path) -> list[tuple[str, str, list[str]]]:
     lines = path.read_text().splitlines()
 
     idx = 0
-    for idx, line in enumerate(lines):  # noqa: B007 - idx used after the loop
+    for idx, line in enumerate(lines):
         if not line.startswith("#"):
             idx += 1  # consume the title line itself too
             break

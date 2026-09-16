@@ -413,7 +413,17 @@ class TestBot:
         single long system-info line, two near-empty JobRunner.__str__()
         dumps, then the config fields with no grouping at all).
         """
-        system, _node, release, _version, machine, _processor = platform.uname()
+        system, _node, release, _version, machine, processor = platform.uname()
+        logical_cpus = os.cpu_count()
+        process_cpu_count = getattr(os, "process_cpu_count", None)
+        available_cpus = process_cpu_count() if process_cpu_count is not None else logical_cpus
+        if available_cpus is None:
+            cpu_summary = "unknown"
+        elif logical_cpus is None or available_cpus == logical_cpus:
+            cpu_summary = str(available_cpus)
+        else:
+            cpu_summary = f"{available_cpus} available / {logical_cpus} logical"
+        python_bits = platform.architecture()[0]
         bar = "=" * 80
 
         lines = [
@@ -422,7 +432,11 @@ class TestBot:
             bar,
             f"  Host    : {gethostname()}",
             f"  System  : {system} {release} {machine}",
-            f"  Python  : {platform.python_version()}",
+            f"  CPU     : {processor or 'unknown'} ({cpu_summary})",
+            (
+                f"  Python  : {platform.python_implementation()} {platform.python_version()} "
+                f"({python_bits}, {sys.byteorder}-endian)"
+            ),
             f"  Script  : {_my_name}",
             "",
             "  -- Configuration --",

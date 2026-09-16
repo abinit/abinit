@@ -694,7 +694,6 @@ class TimeBomb:
         Returns:
             tuple: (subprocess.Popen object, return_code)
         """
-
         if self.exec_path:
             # timeout exec is available.
             if self.timeout > 0.:
