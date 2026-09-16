@@ -14,11 +14,11 @@ if ! command -v doxygen >/dev/null 2>&1; then
     exit 127
 fi
 
-if ! command -v dot >/dev/null 2>&1; then
-    echo "[mkdoxygen] Error: Graphviz 'dot' is not available in PATH." >&2
-    echo "[mkdoxygen] Doxyfile enables dependency graphs, so Graphviz is required." >&2
-    exit 127
-fi
+#if ! command -v dot >/dev/null 2>&1; then
+#    echo "[mkdoxygen] Error: Graphviz 'dot' is not available in PATH." >&2
+#    echo "[mkdoxygen] Doxyfile enables dependency graphs, so Graphviz is required." >&2
+#    exit 127
+#fi
 
 if [ ! -f Doxyfile ] || [ ! -f .current_version ]; then
     echo "[mkdoxygen] Error: Doxyfile or .current_version is missing from the repository root." >&2

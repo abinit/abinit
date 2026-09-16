@@ -67,10 +67,9 @@ make tests_buildsys
 ```
 
 `make distcheck` validates that the `abichecks` files are correctly distributed and that the standard check workflow succeeds.
-The explicit commands above execute the two maintenance-check series currently recognized by the legacy Perl runner.
+The explicit commands above execute the three maintenance-check series.
 
-The generated Makefile also provides `tests_libpaw`, but `run-standard-tests.pl` currently omits `libpaw` from its internal `@Series` list.
-Until that inconsistency is fixed, invoke `check-libpaw.py` directly or add `libpaw` to the runner before relying on `make tests_libpaw`.
+The generated Makefile also provides `tests_libpaw`, and `run_checks.py` (the Python runner) dispatches it the same way as the other two series.
 
 ## Directory organization
 
@@ -138,12 +137,7 @@ follows this path:
 tests_buildsys target in the configured Makefile
                         |
                         v
-       scripts/wrap-standard-tests.sh
-                        |
-                        +---- loads _build/abichecks/abichecks.env
-                        |
-                        v
-         scripts/run-standard-tests.pl
+        . ./abichecks.env && $(PYTHON) scripts/run_checks.py
                         |
                         +---- reads abichecks/buildsys/tests.cnf
                         |
@@ -155,7 +149,7 @@ tests_buildsys target in the configured Makefile
 ```
 
 `abichecks.env` is generated from `abichecks.env.in` by `configure`.
-It records the source directory, build directory, shell, Perl interpreter, and Python interpreter required by the wrapper.
+It records the source directory, build directory, shell, and Python interpreter required by the runner.
 This is why the Make targets should be run from the configured `abichecks` build directory rather than directly from the source directory.
 
 By default, result directories use the hostname.
@@ -222,16 +216,12 @@ Read the header of an existing `tests.cnf` before introducing a new command type
 
 | Script | Role |
 |---|---|
-| `wrap-standard-tests.sh` | Make-facing wrapper that loads `abichecks.env` and invokes the Perl runner. |
-| `run-standard-tests.pl` | Legacy dispatcher that reads `tests.cnf`, prepares temporary directories, executes checks, and records results. |
-| `fldiff.pl` | Compares reference and produced text while applying ABINIT-aware floating-point tolerances and line markers. |
-| `reportdiff.pl` | Compares generated summary records with the expected report. |
-| `Sort.sh` | Normalizes ordering in legacy report files before comparison. |
+| `run_checks.py` | Pure-Python dispatcher, invoked directly by the Makefile recipe. Reads `tests.cnf`, prepares the `tmp-<host>_<os>_<date>` working directory, runs each registered check, and writes the `report` file plus per-case logs. Reuses `tests/pymods/fldiff.py`'s `Differ`/`Result` (an existing, tested floating-point-aware comparison engine) for golden-file checks instead of a separate diff tool. |
 | `run-basic-tests.pl` | Legacy controller for built-in executable tests. |
 | `run-basic-dotest.pl` | Executes one built-in test on behalf of `run-basic-tests.pl`. |
 | `run-basic-tests.sh` | Shell implementation of the older built-in-test workflow. |
 
-The basic-test scripts are retained for compatibility with older Make workflows.
+The basic-test scripts are retained for compatibility with older Make workflows and are unrelated to `run_checks.py`/`tests.cnf` above.
 New numerical regression tests should normally use `tests/runtests.py` and the `TEST_INFO` format documented in `tests/README.md`.
 
 ### Source-rule checks
@@ -268,8 +258,7 @@ It must be registered explicitly in `buildsys/tests.cnf`.
 `check-libpaw.py` creates a standalone LibPAW archive, extracts it in a temporary location, builds it, and removes the temporary files.
 It is registered as check `01` in `libpaw/tests.cnf`.
 
-The generated `tests_libpaw` target is intended to execute it, but the current `run-standard-tests.pl` dispatcher recognizes only `abirules` and `buildsys` in its `@Series` list.
-This is a pre-existing limitation of the legacy runner.
+The `tests_libpaw` target executes it via `run_checks.py`, the same as `tests_abirules`/`tests_buildsys` -- unlike the legacy Perl runner, `run_checks.py` dispatches any series by name and does not hardcode which ones exist.
 
 ## Python test-suite registration
 

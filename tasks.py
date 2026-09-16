@@ -455,6 +455,12 @@ def abichecks(ctx: Context) -> int:
             "warningschk.py",
             "abirules_tools.py",
             "__init__.py",
+            # Not a standalone pass/fail checker like the others in this
+            # directory -- it's the dispatcher that runs them (the pure-Python
+            # replacement for the old Perl run-standard-tests.pl), and exits
+            # 16 with a usage message when run with no arguments, which this
+            # loop would otherwise count as a failed check.
+            "run_checks.py",
         ]
         for py_script in [f for f in os.listdir(script_dir) if f.endswith(".py")]:
             if py_script in exclude:
