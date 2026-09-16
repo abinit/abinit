@@ -372,7 +372,7 @@ class TestFileToTest:
         assert ft.tolabs == 0.0
         assert ft.tolrel == 0.0
         assert ft.fld_options == []
-        assert ft.use_yaml == "no"
+        assert ft.mode == ""
         assert ft.verbose_report == "no"
 
     def test_init_full_config(self):
@@ -383,7 +383,7 @@ class TestFileToTest:
             "tolabs": 0.01,
             "tolrel": 1e-3,
             "fld_options": "-medium -include",
-            "use_yaml": "yes",
+            "mode": "yaml",
             "verbose_report": "yes",
         }
         ft = FileToTest(config)
@@ -392,7 +392,7 @@ class TestFileToTest:
         assert ft.tolabs == 0.01
         assert ft.tolrel == 1e-3
         assert ft.fld_options == ["-medium", "-include"]
-        assert ft.use_yaml == "yes"
+        assert ft.mode == "yaml"
         assert ft.verbose_report == "yes"
 
     def test_init_missing_name_raises_error(self):
@@ -435,12 +435,18 @@ class TestFileToTest:
         ft = FileToTest(config)
         assert ft.fld_options == []
 
-    def test_use_yaml_valid_values(self):
-        """Test valid use_yaml values."""
-        for value in ["yes", "no", "only"]:
-            config = {"name": "output.txt", "use_yaml": value}
+    def test_mode_valid_values(self):
+        """Test valid mode values."""
+        for value in ["", "yaml", "yaml_docs"]:
+            config = {"name": "output.txt", "mode": value}
             ft = FileToTest(config)
-            assert ft.use_yaml == value
+            assert ft.mode == value
+
+    def test_mode_invalid_value_raises_error(self):
+        """Test FileToTest raises ValueError on invalid mode value."""
+        config = {"name": "output.txt", "mode": "bogus"}
+        with pytest.raises(ValueError, match="Invalid value for mode"):
+            FileToTest(config)
 
     def test_init_state_after_creation(self):
         """Test FileToTest has correct initial state."""
@@ -509,7 +515,7 @@ class TestStr2FilesToTest:
         """Test parsing file spec with all possible attributes."""
         spec = (
             "output.txt, tolnlines=2, tolabs=0.01, tolrel=1e-3, "
-            "fld_options=-medium -include, use_yaml=yes, verbose_report=yes"
+            "fld_options=-medium -include, mode=yaml, verbose_report=yes"
         )
         result = _str2filestotest(spec)
         ft = result[0]
@@ -518,7 +524,7 @@ class TestStr2FilesToTest:
         assert ft.tolabs == 0.01
         assert ft.tolrel == 1e-3
         assert ft.fld_options == ["-medium", "-include"]
-        assert ft.use_yaml == "yes"
+        assert ft.mode == "yaml"
         assert ft.verbose_report == "yes"
 
 
