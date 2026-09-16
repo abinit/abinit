@@ -651,47 +651,6 @@ Change the input yaml files or the python code
                 shutil.copy(src, dest)
                 self.ignored_paths.append(dest)
 
-    def generate_page_with_ac_examples(self) -> None:
-        """Generate markdown pages with all ac examples found in config-examples."""
-        dirpath = os.path.join(self.root, "build", "config-examples")
-        md_lines = []
-        app = md_lines.append
-        app("""
-# Autoconf examples
-
-This page gathers the autoconf files used by the buildbot testfarm. The different
-bots are described in Abinit web site [server matrix](https://github.com/abinit/abinit_web/blob/main/docs/servers.md)
-and [builder matrix](https://github.com/abinit/abinit_web/blob/main/docs/builder.md).
-
-""")
-        for f in os.listdir(dirpath):
-            path = os.path.join(dirpath, f)
-            if os.path.isdir(path) or path.endswith(".swp") or path.endswith(".ac"): continue
-            app("## %s  " %  f)
-            with open(path, encoding="utf-8") as fh:
-                # Remove all comments except for options that are specified.
-                #print(path)
-                ac_lines = []
-                inblock = False
-                for l in reversed(fh.readlines()):
-                    l = l.strip()
-                    if not l:
-                        inblock = False
-                        continue
-                    if l and l[0].isalpha():
-                        inblock = True
-                        ac_lines.append(l + "\n")
-                    elif inblock:
-                        ac_lines.append(l)
-
-                app("\n\n```shell")
-                md_lines.extend(reversed(ac_lines))
-                app("```\n")
-
-        # Write MD file.
-        with self.new_mdfile("developers", "autoconf_examples.md") as mdf:
-            mdf.write("\n".join(md_lines))
-
     def generate_markdown_files(self) -> None:
         """
         Main orchestration method to generate all dynamic markdown files for the site.
@@ -700,7 +659,6 @@ and [builder matrix](https://github.com/abinit/abinit_web/blob/main/docs/builder
         start = time.time()
 
         self.copy_install_files()
-        self.generate_page_with_ac_examples()
 
         # Write index.md with the description of the input variables.
         meta = {"description": "Complete list of Abinit input variables"}

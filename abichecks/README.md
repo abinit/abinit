@@ -245,9 +245,7 @@ These checks form the `abirules` series declared in `abirules/tests.cnf`.
 | `check-build-config.py` | Checks consistency among build configuration keywords, environment definitions, and options. |
 | `check-cpp-options.py` | Cross-checks C-preprocessor symbols used in source, headers, and Autoconf definitions. |
 | `check-binaries-conf.py` | Validates dependency and library ordering in `config/specs/binaries.conf`. |
-| `check-forbidden-flags.py` | Rejects debugging or optimization flags in configuration locations where they are forbidden. |
-| `check-build-examples.py` | Validates test-farm build examples against the supported environment and option specifications. |
-| `check-build-refs.py` | Compares generated build examples with stored reference files. |
+| `check-forbidden-flags.py` | Rejects debugging or optimization flags in configuration locations where they are forbidden. Reads `config/specs/testfarm.conf`, the one remaining reason that file is not yet removed -- planned to move to `abibuildbot` (reading `Bconfig.testfarm_flags` there instead) in a future session. |
 
 The commands currently registered in `buildsys/tests.cnf` are the ones invoked by `make tests_buildsys`.
 A script merely being present in `abichecks/scripts` does not make it part of that Make target.
