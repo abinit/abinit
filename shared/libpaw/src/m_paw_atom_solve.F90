@@ -464,6 +464,7 @@ END  TYPE splinesolvinfo
 
 
 !----------------------------------------------------------------------
+!!***
 !!****t* m_paw_atom_solve/atompaw_type
 !! NAME
 !! atompaw_type
@@ -9751,7 +9752,7 @@ END SUBROUTINE interpfunc
 !!        where h = x - tau(i). the function program *ppvalu* may be
 !!        used to evaluate f or its derivatives from tau,c, l = n-1,
 !!        and k=4.
-!!****** a tridiagonal linear system for the unknown slopes s(i) of
+!! A tridiagonal linear system for the unknown slopes s(i) of
 !!  f  at tau(i), i=1,...,n, is generated and then solved by gauss elim-
 !!  ination, with s(i) ending up in c(2,i), all i.
 !!     c(3,.) and c(4,.) are used initially for temporary storage.

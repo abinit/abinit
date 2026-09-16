@@ -23,7 +23,13 @@ fi
 #exit $exit_status
 
 rm -rf tmp-robodoc robodoc-html && mkdir tmp-robodoc
-cp -rf ./shared/common/src/[0-3]* tmp-robodoc
+# 39_libpaw is a symlink to shared/libpaw/src and is copied explicitly below.
+# Excluding the link here prevents every LibPAW header from being staged twice.
+for src_dir in ./shared/common/src/[0-3]*; do
+    if test "$(basename "$src_dir")" != "39_libpaw"; then
+        cp -rf "$src_dir" tmp-robodoc
+    fi
+done
 cp -rf ./shared/libpaw/src tmp-robodoc/39_libpaw
 cp -rf ./src/[4-9]* tmp-robodoc
 cp ./config/robodoc/robodoc-html.rc tmp-robodoc/robodoc.rc
