@@ -608,8 +608,6 @@ else:
 print_header(my_name, "Source tree update")
 
 if opts.run_source:
-    run_script(my_name, "Removing build examples", "./config/scripts/clean-build-examples")
-    run_script(my_name, "Generating build examples", "./config/scripts/make-build-examples")
     run_script(my_name, "Generating CPP option dumper", "./config/scripts/make-cppopts-dumper")
 
     # Create a symlink to the sources of LibPAW, so that the same naming
