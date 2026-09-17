@@ -1028,7 +1028,6 @@ subroutine xmpi_abort(comm, mpierr, msg, exit_status)
    close(ab_out)
  end if
 
-#ifdef HAVE_MPI
  ! exit_status=0 signals a deliberate, non-error termination (e.g. testkgrid
  ! stopping after dumping k-grids for prtkpt/=0), not a real abort. MPI_ABORT
  ! never returns, so it would discard exit_status: under some MPI/job-scheduler
@@ -1036,11 +1035,10 @@ subroutine xmpi_abort(comm, mpierr, msg, exit_status)
  ! SIGKILL (retcode 137) instead of exiting 0. This code path is reached
  ! identically by every rank, so exiting the calling process directly is safe.
  if (present(exit_status)) then
-   if (exit_status == 0) then
-     call sys_exit(0)
-   end if
+   if (exit_status == 0) call sys_exit(0)
  end if
 
+#ifdef HAVE_MPI
  my_errorcode=MPI_ERR_UNKNOWN; if (PRESENT(mpierr)) my_errorcode=mpierr
 
  call MPI_ERROR_STRING(my_errorcode, mpi_msg_error, ilen, ierr2)
