@@ -5,6 +5,8 @@ site_url: https://docs.abinit.org
 site_description: Abinit documentation
 site_author: The Abinit group
 docs_dir: doc
+exclude_docs: |
+  **/AGENTS.md
 
 repo_name: github-abinit
 repo_url: https://github.com/abinit/abinit/

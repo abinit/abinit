@@ -544,6 +544,7 @@ Change the input yaml files or the python code
             #print(root)
             for f in files:
                 if f.startswith("_"): continue
+                if f == "AGENTS.md": continue
                 #if f == "README.md": continue
                 yield f, os.path.join(root, f)
 
