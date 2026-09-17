@@ -187,6 +187,12 @@ class TestBot:
     )
     mpi_args: str = field(default="", metadata={"info": "Args passed to the mpi command"})
     force_mpi: bool = field(default=False, metadata={"info": "Force usage of mpirun_np prefix"})
+    with_parametrized: bool = field(
+        default=False,
+        metadata={
+            "info": "Enable parametrized tests (requires yaml and pydantic Python packages to be installed)"
+        },
+    )
 
     # Runtime-only, computed in __post_init__ -- not JSON/constructor inputs.
     # repr=False also marks them as "not a plain config value" for __str__.
@@ -275,6 +281,22 @@ class TestBot:
 
         if self.type not in ["", "ref"]:
             raise ValueError(f"type should be either 'ref' or empty string while it's: {self.type}")
+
+        if self.with_parametrized:
+            missing = []
+            try:
+                import yaml  # noqa: F401
+            except ImportError:
+                missing.append("yaml")
+            try:
+                import pydantic  # noqa: F401
+            except ImportError:
+                missing.append("pydantic")
+            if missing:
+                raise ImportError(
+                    f"with_parametrized=True but required packages are missing: {', '.join(missing)}. "
+                    "Install them with: pip install pyyaml pydantic"
+                )
 
         # 2) Initialize the job_runner.
         self.build_env = build_env = BuildEnvironment(os.curdir)

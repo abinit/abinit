@@ -708,6 +708,13 @@ def main() -> int:
         help="set the loglevel. Possible values: CRITICAL, ERROR (default), WARNING, INFO, DEBUG",
     )
 
+    parser.add_option(
+        "--with-parametrized",
+        action="store_true",
+        default=False,
+        help="Enable parametrized tests (requires yaml and pydantic Python packages to be installed)",
+    )
+
     # Parse command line.
     options, suite_args = parser.parse_args()
 
@@ -727,6 +734,25 @@ def main() -> int:
     if options.no_colors:
         # Disable colors
         termcolor.enable(False)
+
+    if options.with_parametrized:
+        missing = []
+        try:
+            import yaml  # noqa: F401
+        except ImportError:
+            missing.append("yaml")
+        try:
+            import pydantic  # noqa: F401
+        except ImportError:
+            missing.append("pydantic")
+        if missing:
+            cprint(
+                f"Fatal Error: --with-parametrized requested but required packages are missing: "
+                f"{', '.join(missing)}. Install them with: pip install pyyaml pydantic",
+                color="red",
+                attrs=["bold"],
+            )
+            return 1
 
     if not options.no_logo:
         nrows, ncols = get_terminal_size()
