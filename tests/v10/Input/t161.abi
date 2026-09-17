@@ -82,7 +82,6 @@ prteig           0            # do not print eigenvalues
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = C. Barat
-#%% keywords = GS
 #%% description =
 #%%   Test chi0-based preconditioning schemes - LDOS: iprcel = 200
 #%%<END TEST_INFO>

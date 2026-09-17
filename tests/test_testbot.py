@@ -372,7 +372,7 @@ class TestTestBotClass:
             "mpirun_np", "omp_num_threads", "has_mpi",
             "with_tdirs", "without_tdirs", "timeout_time", "runmode",
             "keywords", "verbose", "tmp_basedir", "mpi_args",
-            "force_mpi"
+            "force_mpi", "with_parametrized"
         }
         config_fields = {f.name for f in dataclasses.fields(TestBot) if f.init}
         assert config_fields == expected_keys
