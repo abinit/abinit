@@ -1265,6 +1265,7 @@ class TestBuildEnvironment:
 # ============================================================================
 
 V1_T01_ABI = abenv.apath_of("tests", "v1", "Input", "t01.abi")
+TUTORIAL_FOLD2BLOCH_ABI = abenv.apath_of("tests", "tutorial", "Input", "tfold2bloch_2.abi")
 
 
 class TestBaseTestCore:
@@ -1326,6 +1327,12 @@ class TestBaseTestCore:
         assert test.max_nprocs >= 1
         assert len(test.files_to_test) >= 1
         assert all(isinstance(ft, FileToTest) for ft in test.files_to_test)
+
+    def test_fold2bloch_executable_preserves_build_target_case(self):
+        """fold2Bloch metadata must match the case-sensitive executable name on Linux."""
+        test = make_abitest_from_input(TUTORIAL_FOLD2BLOCH_ABI, abenv)
+        assert test.executable == "fold2Bloch"
+        assert "fold2Bloch" in test.keywords
 
     def test_basetest_full_id_property(self):
         """full_id must be '[suite_name][id][np=mpi_nprocs]'."""

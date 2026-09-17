@@ -70,7 +70,7 @@
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = O. Rubel
-#%% keywords = fold2bloch, PAW
+#%% keywords = fold2Bloch, PAW
 #%% description =
 #%%   H6 Supercell
 #%%   Generates a 6 atom Hydrogen supercell with the multiplicity of 1:2:3 (x:y:z)

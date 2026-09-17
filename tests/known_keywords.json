@@ -19,7 +19,7 @@
     "atdep": "Tests for atdep code",
     "testtransposer": "Unit tests for transposer",
     "ujdet": "Computation of U (legacy code)",
-    "fold2bloch": "Tests related to fold2bloch code.",
+    "fold2Bloch": "Tests related to fold2Bloch code.",
     "multibinit": "Tests related to multibinit code",
     "NC": "Calculations with norm-conserving pseudos",
     "PAW": "PAW calculations",
