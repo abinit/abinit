@@ -1186,7 +1186,7 @@ class AbinitTestInfoParser:
                 d[key] = line_parser(d[key])
             except Exception as exc:
                 err_msg = (f"In file: {self.inp_fname}\nWrong line:\n key = {key}, d[key] = {d[key]}\n"
-                           f"{type(exc).__name__}: {str(exc)}")
+                           f"{type(exc).__name__}: {exc!s}")
                 raise self.Error(err_msg)
 
         # At this point info contains the parsed global values.
@@ -1236,7 +1236,7 @@ class AbinitTestInfoParser:
                     d[key] = line_parser(opt)
                 except Exception as exc:
                     err_msg = (f"In file: {self.inp_fname}\nWrong line:\n"
-                               f" key = {key}, d[key] = {d[key]}\n {type(exc).__name__}: {str(exc)}")
+                               f" key = {key}, d[key] = {d[key]}\n {type(exc).__name__}: {exc!s}")
                     raise self.Error(err_msg)
 
                 # print(self.inp_fname, d["max_nprocs"])
@@ -1364,7 +1364,7 @@ class Compiler:
                 if name == "pathscale":
                     name = "psc"
                 return cls(name=name, version=None)
-        err_msg = f"Cannot detect the name of the {cls.__name__}\n. Defined CPP vars: {str(defined_cpp_vars)} "
+        err_msg = f"Cannot detect the name of the {cls.__name__}\n. Defined CPP vars: {defined_cpp_vars!s} "
         raise RuntimeError(err_msg)
 
 
@@ -2380,7 +2380,7 @@ pp_dirpath $ABI_PSPDIR
                 var_list = [v.strip() for v in var.split(or_token)]
                 #print("in or_token with var_list:", var_list)
                 if not any(v in build_env.defined_cppvars for v in var_list):
-                    eapp(f"Build environment does not define any of the following CPP variables {str(var_list)}")
+                    eapp(f"Build environment does not define any of the following CPP variables {var_list!s}")
 
             elif not var.startswith("!") and var not in build_env.defined_cppvars:
                 # handle HAVE_FOO syntax
@@ -2750,13 +2750,13 @@ pp_dirpath $ABI_PSPDIR
                 # Print message for users running the test suite on their machine
                 # if the test failed and we have exclusion rules on the ABINIT testfarm.
                 if status == "failed" and (self.exclude_hosts or self.exclude_builders):
-                    cprint(f"\tTest `{self.full_id}` with keywords: `{str(self.keywords)}` failed.", color="yellow")
+                    cprint(f"\tTest `{self.full_id}` with keywords: `{self.keywords!s}` failed.", color="yellow")
                     cprint("\tNote, however, that this feature is not portable,", color="yellow")
                     cprint("\tand this test is partly disabled on the Abinit testfarm.", color="yellow")
                     if self.exclude_hosts:
-                        cprint(f"\t\texclude_hosts: {str(self.exclude_hosts)}", color="yellow")
+                        cprint(f"\t\texclude_hosts: {self.exclude_hosts!s}", color="yellow")
                     if self.exclude_builders:
-                        cprint(f"\t\texclude_builder: {str(self.exclude_builders)}", color="yellow")
+                        cprint(f"\t\texclude_builder: {self.exclude_builders!s}", color="yellow")
 
                 if status == "failed" and self.use_git_submodule:
                     cprint(f"\tTest {self.full_id} failed. Note, however, that this test requires external files in {self.use_git_submodule}", color="yellow")
@@ -3058,7 +3058,7 @@ pp_dirpath $ABI_PSPDIR
                 p, ret_code = self.timebomb.run(cmd, shell=True, cwd=self.workdir)
 
                 if ret_code != 0:
-                    err_msg = f"Timeout error ({self.timebomb.timeout} s) while executing {str(args)}, retcode = {ret_code}"
+                    err_msg = f"Timeout error ({self.timebomb.timeout} s) while executing {args!s}, retcode = {ret_code}"
                     self.exceptions.append(self.Error(err_msg))
                 else:
                     self.keep_files(hdiff_fname)
@@ -3112,7 +3112,7 @@ pp_dirpath $ABI_PSPDIR
                 (p, ret_code) = self.timebomb.run(cmd, shell=True, cwd=self.workdir)
 
                 if ret_code != 0:
-                    err_msg = f"Timeout error ({self.timebomb.timeout} s) while executing {str(args)}, retcode = {ret_code}"
+                    err_msg = f"Timeout error ({self.timebomb.timeout} s) while executing {args!s}, retcode = {ret_code}"
                     self.exceptions.append(self.Error(err_msg))
                 else:
                     self.keep_files(diff_fname)
@@ -4219,7 +4219,7 @@ class ChainOfTests:
                     self._status = "passed"
                 elif all_fldstats != {"succeeded"}:
                     print(self)
-                    print(f"WARNING, expecting {'succeeded'} but got\n{str(all_fldstats)}")
+                    print(f"WARNING, expecting {'succeeded'} but got\n{all_fldstats!s}")
                     self._status = "failed"
                 else:
                     self._status = "succeeded"
@@ -4639,7 +4639,7 @@ class AbinitTestSuite:
             self._targz_fname = ofname
 
         except Exception as exc:
-            warnings.warn(f"exception while creating tarball file: {str(exc)}")
+            warnings.warn(f"exception while creating tarball file: {exc!s}")
             self.exceptions.append(exc)
 
     def sanity_check(self):
@@ -4893,7 +4893,7 @@ class AbinitTestSuite:
                     stats_suite[test.suite_name]["tot_etime"] += test.tot_etime
                 except AttributeError:
                     #print(exc)
-                    print(f"Cannot access run_etime, tot_etime attributes of test:\n\t{str(test)}")
+                    print(f"Cannot access run_etime, tot_etime attributes of test:\n\t{test!s}")
                     print("Likely due to timeout error. Continuing anyway despite the error.")
                     stats_suite[test.suite_name]["run_etime"] += 0.0
                     stats_suite[test.suite_name]["tot_etime"] += 0.0
