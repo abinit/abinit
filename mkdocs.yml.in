@@ -5,6 +5,8 @@ site_url: https://docs.abinit.org
 site_description: Abinit documentation
 site_author: The Abinit group
 docs_dir: doc
+exclude_docs: |
+  **/AGENTS.md
 
 repo_name: github-abinit
 repo_url: https://github.com/abinit/abinit/
@@ -289,7 +291,6 @@ nav:
         - psp6: developers/psp6_info.md
         - psp8: developers/psp8_info.md
     - Code stats: developers/codestats.md
-    - Autoconf_examples: developers/autoconf_examples.md
     - Test Page for linkcheck: developers/testlink.md
     #- External Resources: developers/external_resources.md
 - About:
@@ -374,8 +375,6 @@ extra_javascript:
     #- https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 
 copyright: Copyright &copy; 2020-2026 The Abinit Group
-
-google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
     version: ABINIT_VERSION

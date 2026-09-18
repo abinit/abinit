@@ -1,11 +1,14 @@
+from __future__ import annotations
+
 """
 This file solves problems that can only be solved either by a trick or by
 a global refactoring such as python 2 compatibility (should be dropped
 soon) or problems related to the modified sys.path.
 """
+from typing import Any
 
 
-def cstm_isinstance(obj, cls):
+def cstm_isinstance(obj: Any, cls: type | tuple[type, ...]) -> bool:
     """
     Rely on the true isinstance when possible.
 
@@ -30,7 +33,7 @@ def cstm_isinstance(obj, cls):
     return False
 
 
-def cstm_issubclass(cls_test, cls_ref):
+def cstm_issubclass(cls_test: type, cls_ref: type | tuple[type, ...]) -> bool:
     """
     Rely on the true issubclass when possible.
 

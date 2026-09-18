@@ -18,5 +18,4 @@ pyscripts = [
 "check-binaries-conf.py",
 "check-build-config.py",
 "check-cpp-options.py",
-"check-forbidden-flags.py",
 ]

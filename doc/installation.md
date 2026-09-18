@@ -49,7 +49,7 @@ Examples of configuration files to compile Abinit on clusters are available
 in the |abiconfig| package on github
 (specifically the [directory for ABINITv9](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters)),
 while the configuration files
-used for our buildbot testfarm are available in the [autoconf_examples section](developers/autoconf_examples.md).
+used for our buildbot testfarm are available, searchable, on the [testfarm build examples page](http://dev-testfarm.abinit.org).
 The current documentation for the fallback procedure is available
 [here](https://github.com/abinit/abinit-fallbacks).
 
@@ -187,7 +187,7 @@ There is a template for such "hostname".ac9 file, located in ~abinit/doc/config.
 Its name is *config-template.ac9*.
 Examples of such files, that are used for testing the package on our testfarm,
 can be found in ~abinit/doc/build/config-examples,
-or equivalently in the [autoconf_examples section](developers/autoconf_examples.md).
+or, more conveniently, searchable on the [testfarm build examples page](http://dev-testfarm.abinit.org).
 Additional examples of configuration files for clusters are provided by the *abiconfig* project
 and are available [here](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters).
 

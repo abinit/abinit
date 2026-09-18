@@ -30,13 +30,13 @@
     kptopt1   1
     istwfk1   8*1     #Controls the form of the wavefunctions
 
-# Second: Wannier90
+# Second: wannier90
      iscf2 -2   #nscf run
     nstep2 0      #just read the old wave functions
    tolwfr2 1.e-10 #dummy here
    getwfk2 -1
    getden2 -1   # Usual file handling data
-  prtwant2 2   # Call to Wannier90
+  prtwant2 2   # Call to wannier90
     nband2 4
    istwfk2 8*1 #Controls the form of the wavefunctions
    kptopt2 3   # Option for the automatic generation of k points

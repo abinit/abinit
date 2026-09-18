@@ -1,8 +1,10 @@
 """
 This package gathers all tools used by the Abinit test suite for manipulating YAML formatted data.
 """
+from __future__ import annotations
 
 import warnings
+from typing import Any
 
 from .errors import NoYAMLSupportError, TagMismatchError, UntaggedDocumentError
 
@@ -37,7 +39,7 @@ if is_available:
 
     from .common import get_yaml_tag, string
 
-    def yaml_parse(content, *args, **kwargs):
+    def yaml_parse(content: str, *args: Any, **kwargs: Any) -> Any:
         from . import structures
         return yaml.load(content, *args, Loader=Loader, **kwargs)
 
@@ -48,7 +50,7 @@ class Document:
     """
     A document with all its metadata extracted from the original file.
     """
-    def __init__(self, iterators, start, lines, tag=None):
+    def __init__(self, iterators: dict[str, Any], start: int, lines: list[str], tag: str | None = None) -> None:
         """
         Initialize the Document object.
 
@@ -63,11 +65,11 @@ class Document:
         self.end = -1
         self.lines = lines
         self._tag = tag
-        self._obj = None
+        self._obj: Any = None
         self._corrupted = False
-        self._id = None
+        self._id: str | None = None
 
-    def _parse(self):
+    def _parse(self) -> None:
         """
         Parse lines, set `obj` property.
         Raise an error if the document is untagged.
@@ -99,7 +101,7 @@ class Document:
                                      " not available in this environment.")
 
     @property
-    def id(self):
+    def id(self) -> str:
         """
         Produce a string id that should be unique.
         """
@@ -113,7 +115,7 @@ class Document:
         return self._id
 
     @property
-    def obj(self):
+    def obj(self) -> Any:
         """
         The python object constructed by Pyyaml.
         """
@@ -121,7 +123,7 @@ class Document:
         return self._obj
 
     @property
-    def tag(self):
+    def tag(self) -> str | None:
         """
         The document tag.
         """
@@ -129,7 +131,7 @@ class Document:
         return self._tag
 
     @property
-    def corrupted(self):
+    def corrupted(self) -> bool:
         """
         True if Yaml document is corrupted.
         """

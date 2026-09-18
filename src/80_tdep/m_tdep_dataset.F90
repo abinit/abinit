@@ -13,6 +13,8 @@ module m_tdep_dataset
   use m_xmpi
   use m_abihist
   use m_parser
+  use netcdf
+  use m_nctk
   use m_fstrings, only : inupper,ljust,next_token
   use m_io_tools, only : file_exists
   use m_ddb,      only : ddb_type
@@ -134,11 +136,6 @@ contains
 !====================================================================================================
 
  subroutine tdep_read_input(input_path,Hist,Invar)
-
-#if defined HAVE_NETCDF
- use netcdf
- use m_nctk
-#endif
 
 ! Arguments-------------------------------
   character(len=*), intent(in):: input_path

@@ -26,7 +26,7 @@ randomseed=111111 # for testing only
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. He
-#%% keywords = Effective potential, multibinit, lattpot
+#%% keywords = Effective_potential, multibinit, lattpot
 #%% description =
 #%%   Read netcdf and run lattice dynamics using Velocity Verlet NVE (dynamics=101)
 #%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)

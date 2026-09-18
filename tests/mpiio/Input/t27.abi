@@ -115,7 +115,7 @@ natom 2
 #%%    t27_MPI4o_DS1_DOS_AT0001, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
 #%%    t27_MPI4o_DS2_DOS_AT0001, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
 #%% [extra_info]
-#%% keywords = NC, PSP8
+#%% keywords = NC, psp8
 #%% authors = M. Giantomassi
 #%% description =
 #%%   C-diamond, Bulk, 2 atoms, with NC pseudo generated with oncvps-3.2.3.

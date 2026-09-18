@@ -1,7 +1,16 @@
+from __future__ import annotations
+
 import time
+from collections.abc import Callable, Iterator
+from types import ModuleType, TracebackType
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from matplotlib.figure import Figure
 
 
-def get_ax_fig_plt(ax=None, **kwargs):
+def get_ax_fig_plt(ax: Axes | None = None, **kwargs: Any) -> tuple[Axes, Figure, ModuleType]:
     """
     Helper function used in plot functions supporting an optional Axes argument.
     If ax is None, we build the `matplotlib` figure and create the Axes else
@@ -26,7 +35,7 @@ def get_ax_fig_plt(ax=None, **kwargs):
     return ax, fig, plt
 
 
-def add_fig_kwargs(func):
+def add_fig_kwargs(func: Callable[..., Figure | None]) -> Callable[..., Figure | None]:
     """
     Decorator that adds keyword arguments for functions returning matplotlib figures.
 
@@ -41,7 +50,7 @@ def add_fig_kwargs(func):
     from functools import wraps
 
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Figure | None:
         # pop the kwds used by the decorator.
         title = kwargs.pop("title", None)
         size_kwargs = kwargs.pop("size_kwargs", None)
@@ -136,7 +145,7 @@ class MplExpose:  # pragma: no cover
             e(obj.plot2(show=False))
     """
 
-    def __init__(self, slide_mode=False, slide_timeout=None, verbose=1):
+    def __init__(self, slide_mode: bool = False, slide_timeout: float | None = None, verbose: int = 1) -> None:
         """
         Initialize the MplExpose helper.
 
@@ -163,7 +172,7 @@ class MplExpose:  # pragma: no cover
 
         self.start_time = time.time()
 
-    def __call__(self, obj):
+    def __call__(self, obj: Figure | list[Figure] | tuple[Figure, ...] | Iterator[Figure]) -> None:
         """
         Add an object to MplExpose.
 
@@ -178,7 +187,7 @@ class MplExpose:  # pragma: no cover
         else:
             self.add_fig(obj)
 
-    def add_fig(self, fig):
+    def add_fig(self, fig: Figure | None) -> None:
         """
         Add a matplotlib figure to the collection.
 
@@ -204,14 +213,15 @@ class MplExpose:  # pragma: no cover
             plt.show()
             fig.clear()
 
-    def __enter__(self):
+    def __enter__(self) -> MplExpose:
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None,
+                 exc_tb: TracebackType | None) -> None:
         """Activated at the end of the with statement."""
         self.expose()
 
-    def expose(self):
+    def expose(self) -> None:
         """Show all figures. Clear figures if needed."""
         if not self.slide_mode:
             print("All figures in memory, elapsed time: %.3f s" % (time.time() - self.start_time))

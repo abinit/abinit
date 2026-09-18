@@ -658,7 +658,7 @@ subroutine get_chkprdm(Wfd,Kmesh,Sigp,ebands,occs,nateigv,sigmak_todo,my_rank,gw
      end if
      write(msg,'(a1)')' '
      call wrtout(std_out,msg)
-     write(msg,'(a25,a)')' Reading checkpoint file ',gw1rdm_fname
+     write(msg,'(a25,a)')' Reading checkpoint file ',trim(gw1rdm_fname)
      call wrtout(std_out,msg)
      write(msg,'(a1)')' '
      call wrtout(std_out,msg)
@@ -787,7 +787,7 @@ subroutine print_chkprdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
    end if
    write(msg,'(a1)')' '
    call wrtout(std_out,msg)
-   write(msg,'(a25,a)')' Writing checkpoint file ',gw1rdm_fname
+   write(msg,'(a25,a)')' Writing checkpoint file ',trim(gw1rdm_fname)
    call wrtout(std_out,msg)
    write(msg,'(a1)')' '
    call wrtout(std_out,msg)

@@ -5,6 +5,8 @@ Can be used to count datasets, extract number of iterations...
 This module provides the AboFileAnalysis class which can be used to count datasets,
 extract iteration counts (SCF and MD), and compare different output files.
 """
+from __future__ import annotations
+
 from math import ceil, floor
 
 
@@ -23,7 +25,7 @@ class AboFileAnalysis:
         dtsets (list[AboDataset]): List of AboDataset objects containing the extracted information.
     """
 
-    def __init__(self, file_name, option):
+    def __init__(self, file_name: str, option: str) -> None:
         """
         Initialize the AboFileAnalysis object with a file and an extraction option.
 
@@ -39,7 +41,7 @@ class AboFileAnalysis:
         if option != "":
             self.dtsets = self.extract(option=option)
 
-    def extract(self, option):
+    def extract(self, option: str) -> list[AboDataset]:
         """
         Extract data from the abo file, dataset per dataset.
 
@@ -115,7 +117,7 @@ class AboFileAnalysis:
 
         return dataset_list
 
-    def compare_with(self,other_abo_file,option,percent_allowed_small=0,percent_allowed_large=0):
+    def compare_with(self, other_abo_file: AboFileAnalysis | None, option: str, percent_allowed_small: int = 0, percent_allowed_large: int = 0) -> tuple[str, str, str]:
         """
         Compare the current abo file with another one.
         Compare only specific parts specified by argument option.
@@ -199,7 +201,7 @@ class AboDataset:
         SCF_niter (list): List of SCF iteration counts.
     """
 
-    def __init__(self, number):
+    def __init__(self, number: int) -> None:
         """
         Initialize an AboDataset instance.
 
@@ -208,5 +210,5 @@ class AboDataset:
         """
         self.number = number
         self.optddriver = 0
-        self.MD_niter = None
-        self.SCF_niter = [] # This is a list because several SCF can occur in a dataset
+        self.MD_niter: int | None = None
+        self.SCF_niter: list[int] = [] # This is a list because several SCF can occur in a dataset

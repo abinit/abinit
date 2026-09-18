@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from typing import cast
 
 import pytest
 
@@ -85,7 +88,7 @@ class TestDiffer:
         "P P and , lines are handled according to parameters as + or - lines\n"
     ]
 
-    def test_default(self):
+    def test_default(self) -> None:
         """Test default Differ configuration options."""
         diff = Differ()
         assert diff.options["tolerance_abs"] == 1.01e-10
@@ -93,14 +96,14 @@ class TestDiffer:
         assert diff.options["ignore"]
         assert diff.options["ignoreP"]
 
-    def test_diff_lines_same(self):
+    def test_diff_lines_same(self) -> None:
         """Test that identical lines are flagged as ForcedDifference (due to '+')."""
         diff = Differ()
         differences = diff._diff_lines(self.lines1, self.lines1)[0]
         assert len(differences) == 1
         assert isinstance(differences[0], ForcedDifference)
 
-    def test_diff_lines_float(self):
+    def test_diff_lines_float(self) -> None:
         """Test detection of floating point differences."""
         diff = Differ()
         differences = diff._diff_lines(self.lines1, self.lines2)[0]
@@ -111,7 +114,7 @@ class TestDiffer:
         assert isinstance(d3, ForcedDifference)
         assert all(isinstance(d, FloatDifference) for d in differences)
 
-    def test_diff_lines_text(self):
+    def test_diff_lines_text(self) -> None:
         """Test detection of text differences."""
         diff = Differ()
         differences = diff._diff_lines(self.lines1, self.lines3)[0]
@@ -122,18 +125,18 @@ class TestDiffer:
 
         assert all(isinstance(d, TextDifference) for d in differences)
 
-        d4 = differences.pop(2)
+        d4 = cast("TextDifference", differences.pop(2))
         assert d4.silent
 
-        assert not any(d.silent for d in differences)
+        assert not any(cast("TextDifference", d).silent for d in differences)
 
-    def test_diff_lines_number_not_significant(self):
+    def test_diff_lines_number_not_significant(self) -> None:
         diff = Differ()
         differences = diff._diff_lines(self.lines1, self.lines4)[0]
         assert len(differences) == 1
         assert isinstance(differences[0], ForcedDifference)
 
-    def test_diff_lines_number_significant(self):
+    def test_diff_lines_number_significant(self) -> None:
         """Test detection of significant line count differences."""
         diff = Differ()
         diff = Differ()
@@ -142,7 +145,7 @@ class TestDiffer:
         assert isinstance(differences[0], LineCountDifference)
         assert differences[0].more == "file 2"
 
-    def test_diff_lines_float_format(self):
+    def test_diff_lines_float_format(self) -> None:
         """Test that different float formats (D/f notation) are handled correctly."""
         diff = Differ()
         differences = diff._diff_lines(
@@ -151,7 +154,7 @@ class TestDiffer:
         )[0]
         assert len(differences) == 0
 
-    def test_diff_ignore_blanks(self):
+    def test_diff_ignore_blanks(self) -> None:
         """Test that blank and messy whitespace lines can be ignored."""
         diff = Differ()
         differences = diff._diff_lines(
@@ -184,14 +187,14 @@ class TestResult:
 
 class TestDataExtractor:
     """Test suite for the DataExtractor class."""
-    def test_default(self):
+    def test_default(self) -> None:
         """Test default DataExtractor configuration."""
         dext = DataExtractor(True)
         assert dext.ignore
         assert dext.ignoreP
         assert not dext.xml_mode
 
-    def test_get_metachar(self):
+    def test_get_metachar(self) -> None:
         """Test metadata character extraction from lines."""
         dext = DataExtractor(True)
         assert dext._get_metachar("-truc") == "-"
@@ -212,7 +215,7 @@ class TestDataExtractor:
         dext = DataExtractor(True, ignoreP=False)
         assert dext._get_metachar("Ptruc") == "+"
 
-    def test_extract_ignore_minus_meta(self):
+    def test_extract_ignore_minus_meta(self) -> None:
         """Test that lines starting with '-' are ignored during extraction."""
         dext = DataExtractor(True)
         lines = [
@@ -226,7 +229,7 @@ class TestDataExtractor:
         assert linesres == []
         assert ignored == [(i, line) for i, line in enumerate(lines)]
 
-    def test_extract_keep_all_non_minus(self):
+    def test_extract_keep_all_non_minus(self) -> None:
         """Test that non-'-' meta characters are correctly preserved."""
         dext = DataExtractor(True, ignore=False, ignoreP=False)
         lines = [
@@ -247,7 +250,7 @@ class TestDataExtractor:
         ]
         assert ignored == []
 
-    def test_extract_require_iterstart(self):
+    def test_extract_require_iterstart(self) -> None:
         """Test that IterStart document is required for YAML extraction."""
         dext = DataExtractor(True)
         dext.iterators_state = {"dtset": 1}
@@ -260,12 +263,12 @@ a list of strings:
 - "two strings"
 - "..."
 ..."""
-        lines = [line + "\n" for line in lines.split("\n")]
+        lines_list = [line + "\n" for line in lines.split("\n")]
         with pytest.raises(NoIteratorDefinedError):
-            _, documents, _ = dext.extract(lines)
+            _, documents, _ = dext.extract(lines_list)
             print(documents)
 
-    def test_extract_require_label(self):
+    def test_extract_require_label(self) -> None:
         """Test that documents require tags/labels."""
         dext = DataExtractor(True)
         dext.iterators_state = {"dtset": 1}
@@ -282,13 +285,13 @@ a list of strings:
 - "two strings"
 - "..."
 ..."""
-        lines = [line + "\n" for line in lines.split("\n")]
+        lines_list = [line + "\n" for line in lines.split("\n")]
         with pytest.raises(UntaggedDocumentError):
-            _, documents, _ = dext.extract(lines)
+            _, documents, _ = dext.extract(lines_list)
             assert len(documents) == 1
-            print(*(doc.obj for doc in documents))
+            print(*(doc.obj for doc in documents.values()))
 
-    def test_extract_find_yaml_doc(self):
+    def test_extract_find_yaml_doc(self) -> None:
         """Test successful extraction of YAML documents."""
         dext = DataExtractor(True)
         dext.iterators_state = {"dtset": 1}
@@ -308,17 +311,18 @@ a list of strings:
 - "..."
 ..."""
 
-        lines = [line + "\n" for line in lines.split("\n")]
-        _, documents, _ = dext.extract(lines)
+        lines_list = [line + "\n" for line in lines.split("\n")]
+        _, documents, _ = dext.extract(lines_list)
 
         # IterStart documents should not be in the document list
         assert len(documents) == 1
         assert documents["dtset=1 GenericMap"].iterators == {"dtset": 1}
         assert documents["dtset=1 GenericMap"].start == 6
         assert documents["dtset=1 GenericMap"].end == 13
-        assert documents["dtset=1 GenericMap"].lines == lines[6:]
-        assert documents["dtset=1 GenericMap"].obj == GenericMap.from_map({
+        assert documents["dtset=1 GenericMap"].lines == lines_list[6:]
+        expected = cast("GenericMap", GenericMap.from_map({  # type: ignore[attr-defined]
             "a field": 58,
             "another": 78,
             "a list of strings": ["a string", "two strings", "..."]
-        })
+        }))
+        assert documents["dtset=1 GenericMap"].obj == expected

@@ -1,8 +1,10 @@
+from __future__ import annotations
 
 import time
-from collections import OrderedDict, defaultdict, deque, namedtuple
+from collections import defaultdict, deque, namedtuple
 from itertools import groupby
 from pprint import pprint
+from typing import Any
 
 from .plotting import add_fig_kwargs, get_ax_fig_plt
 from .tools import lazy_property
@@ -23,30 +25,30 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
     """
 
     @classmethod
-    def from_line(cls, line):
+    def from_line(cls, line: str) -> Entry:
         """Build entry from line."""
         vname = line[:59].strip().replace(" ", "")
         args = [vname] + line[59:].split()
         return cls(*args)
 
-    def __new__(cls, *args):
+    def __new__(cls, *args: Any) -> Entry:
         """Extends the base class adding type conversion of arguments."""
         # write(logunt,'(a,t60,a,1x,2(i0,1x),2(a,1x),2(i0,1x))')&
         # trim(vname), trim(act), addr, isize, trim(abimem_basename(file)), line, memtot_abi%memory
-        return super(cls, Entry).__new__(cls,
-        	vname=args[0],
-        	action=args[1],
-        	ptr=int(args[2]),
-        	size=int(args[3]),
-        	file=args[4],
-                line=int(args[5]),
-                tot_memory=int(args[6]),
+        return super().__new__(cls,
+            args[0],  # vname
+            int(args[2]),  # ptr
+            args[1],  # action
+            int(args[3]),  # size
+            args[4],  # file
+            int(args[5]),  # line
+            int(args[6]),  # tot_memory
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.to_repr(with_addr=True)
 
-    def to_repr(self, with_addr=True):
+    def to_repr(self, with_addr: bool = True) -> str:
         if with_addr:
             return "<var=%s, %s@%s:%s, addr=%s, size_mb=%.3f>" % (
               self.vname, self.action, self.file, self.line, hex(self.ptr), self.size_mb)
@@ -54,90 +56,100 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
           self.vname, self.action, self.file, self.line, self.size_mb)
 
     @lazy_property
-    def size_mb(self):
+    def size_mb(self) -> float:
         """Size in Megabytes."""
         sign = {"A": +1, "D": -1}[self.action]
         return sign * self.size / (8 * 1024 ** 2)
 
     @lazy_property
-    def tot_memory_mb(self):
+    def tot_memory_mb(self) -> float:
         """Total memory in Mb."""
         return self.tot_memory / (8 * 1024 ** 2)
 
     @lazy_property
-    def isalloc(self):
+    def isalloc(self) -> bool:
         """True if entry represents an allocation."""
         return self.action == "A"
 
     @lazy_property
-    def isfree(self):
+    def isfree(self) -> bool:
         """True if entry represents a deallocation."""
         return self.action == "D"
 
     @lazy_property
-    def iszerosized(self):
+    def iszerosized(self) -> bool:
         """True if this is a zero-sized alloc/free."""
         return self.size == 0
 
     @lazy_property
-    def locus(self):
+    def locus(self) -> str:
         """Location of the entry. This is (hopefully) unique."""
         return "%s:%s@%s:%s" % (self.action, self.vname, self.file, self.line)
 
-    def __hash__(self):
-        """Standard hash implementation using locus and size."""
-        return hash(self.locus, self.size)
+    @lazy_property
+    def site(self) -> str:
+        """Source location of the entry, *not* including the action.
 
-    def __eq__(self, other):
+        Unlike locus, this is shared between an allocation and the
+        deallocation that frees it (same vname/file/line, opposite action),
+        which is what frees_onstack()/find_memleaks() need to pair them up.
+        """
+        return "%s@%s:%s" % (self.vname, self.file, self.line)
+
+    def __hash__(self) -> int:
+        """Standard hash implementation using locus and size."""
+        return hash((self.locus, self.size))
+
+    def __eq__(self, other: object) -> bool:
         """Check equality of two entries."""
         return self.locus == other.locus and self.size == other.size
 
-    def __neq__(self, other):
+    def __neq__(self, other: Any) -> bool:
         """Check inequality of two entries."""
         return not (self == other)
 
-    def frees_onheap(self, other):
+    def frees_onheap(self, other: Entry) -> bool:
         """
         Check if this entry deallocates the object allocated by 'other' on the heap.
 
         Returns:
             bool: True if it matches.
         """
-        if (not self.isfree) or other.isalloc: return False
+        if (not self.isfree) or (not other.isalloc): return False
         if self.size + other.size != 0: return False
         return True
 
-    def frees_onstack(self, other):
+    def frees_onstack(self, other: Entry) -> bool:
         """
         Check if this entry deallocates the object allocated by 'other' on the stack.
 
         Returns:
             bool: True if it matches.
         """
-        if (not self.isfree) or other.isalloc: return False
+        if (not self.isfree) or (not other.isalloc): return False
         if self.size + other.size != 0: return False
-        if self.locus != other.locus: return False
+        if self.site != other.site: return False
         return True
 
 
 
-def entries_to_dataframe(entries):
+def entries_to_dataframe(entries: list[Entry]) -> Any:
     """
     Convert list of entries to pandas DataFrame.
     """
     import pandas as pd
     rows, index = [], []
     for e in entries:
-        rows.append(OrderedDict([
-            ("locus", e.locus),
-            ("vname", e.vname),
-            ("file", e.file),
-            ("line", e.line),
-            ("action", e.action),
-            ("size_mb", e.size_mb),
-            ("tot_memory_mb", e.tot_memory_mb),
-            ("ptr", e.ptr),
-        ]))
+        rows.append({
+            "locus": e.locus,
+            "vname": e.vname,
+            "file": e.file,
+            "line": e.line,
+            "action": e.action,
+            "size_mb": e.size_mb,
+            "tot_memory_mb": e.tot_memory_mb,
+            "ptr": e.ptr,
+        })
         index.append(e.locus)
 
     return pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
@@ -151,40 +163,40 @@ class AbimemFile:
         path (str): Path to the memory log file.
     """
 
-    def __init__(self, path):
+    def __init__(self, path: str) -> None:
         """
         Initialize the AbimemFile object.
 
         Args:
-            path (str): Path to the log file.
+            path: Path to the log file.
         """
         self.path = path
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.to_string()
 
-    def to_string(self, verbose=0):
+    def to_string(self, verbose: int = 0) -> str:
         """
         Return string representation of the memory usage.
 
         Args:
-            verbose (int): Verbosity level.
+            verbose: Verbosity level.
 
         Returns:
             str: Description of memory usage.
         """
-        lines = []
+        lines: list[str] = []
         app = lines.append
         df = self.get_intense_dataframe()
         app(df.to_string())
         return "\n".join(lines)
 
-    def find_small_allocs(self, nbits=160 * 8):
+    def find_small_allocs(self, nbits: int = 160 * 8) -> list[Entry]:
         """
         Find small allocations in the memory log.
 
         Args:
-            nbits (int): Threshold for 'small' allocation in bits.
+            nbits: Threshold for 'small' allocation in bits.
 
         Returns:
             list: List of small Entry objects.
@@ -197,7 +209,7 @@ class AbimemFile:
         pprint(smallest)
         return smallest
 
-    def find_large_allocs(self, nbits=10 *8*1024*1024):
+    def find_large_allocs(self, nbits: int = 10 * 8 * 1024 * 1024) -> list[Entry]:
         """Allocations below 10 Mbytes are not counted."""
         larges = []
         for e in self.all_entries:
@@ -207,7 +219,7 @@ class AbimemFile:
         pprint(larges)
         return larges
 
-    def get_intense_dataframe(self):
+    def get_intense_dataframe(self) -> Any:
         """
         Return DataFrame with intensive spots i.e. variables that are allocated/freed many times.
         """
@@ -217,39 +229,39 @@ class AbimemFile:
             this_action = g.action.values[0]
             assert all(g.action.values == this_action)
             malloc_mb = g.size_mb.sum()
-            rows.append(OrderedDict([
-                ("ncalls", len(g)),
-                ("malloc_mb", malloc_mb),
-                ("mem_per_call_mb", malloc_mb / len(g)),
-            ]))
+            rows.append({
+                "ncalls": len(g),
+                "malloc_mb": malloc_mb,
+                "mem_per_call_mb": malloc_mb / len(g),
+            })
             index.append(locus)
 
         import pandas as pd
         df = pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
         return df.sort_values(by="ncalls", ascending=False)
 
-    def find_zerosized(self, as_dataframe=False):
+    def find_zerosized(self, as_dataframe: bool = False) -> Any:
         """
         Find zero-sized allocations.
 
         Args:
             as_dataframe: True to return a pandas dataframe instead of a deque.
         """
-        elist = []
+        elist: list[Entry] = []
         eapp = elist.append
         for e in self.all_entries:
             if e.size == 0: eapp(e)
 
         return entries_to_dataframe(elist) if as_dataframe else elist
 
-    def find_weird_ptrs(self):
+    def find_weird_ptrs(self) -> list[Entry]:
         """
         Find and report negative or zero pointers in the memory log.
 
         Returns:
             list: List of weird Entry objects.
         """
-        elist = []
+        elist: list[Entry] = []
         eapp = elist.append
         for e in self.all_entries:
             if e.ptr <= 0: eapp(e)
@@ -262,9 +274,9 @@ class AbimemFile:
         return elist
 
     @lazy_property
-    def all_entries(self):
+    def all_entries(self) -> list[Entry]:
         """Parse file and create list of Entries."""
-        all_entries = []
+        all_entries: list[Entry] = []
         app = all_entries.append
         with open(self.path) as fh:
             for lineno, line in enumerate(fh):
@@ -281,7 +293,7 @@ class AbimemFile:
         return all_entries
 
     @lazy_property
-    def accumulated_entries(self):
+    def accumulated_entries(self) -> list[Entry]:
         """
         We may have "small" allocations/deallocations inside loops
         This function groups entries by locus and creates a new entry with the total size.
@@ -307,7 +319,7 @@ class AbimemFile:
 
         return new_entries
 
-    def get_peaks(self, accumulated=True, maxlen=30, as_dataframe=False):
+    def get_peaks(self, accumulated: bool = True, maxlen: int = 30, as_dataframe: bool = False) -> Any:
         """
         Find peaks in the allocation with the corresponding variable.
 
@@ -318,7 +330,7 @@ class AbimemFile:
         """
         # The deque is bounded to the specified maximum length. Once a bounded length deque is full,
         # when new items are added, a corresponding number of items are discarded from the opposite end.
-        peaks = deque(maxlen=maxlen)
+        peaks: deque[Entry] = deque(maxlen=maxlen)
 
         entries =  self.accumulated_entries if accumulated else self.all_entries
 
@@ -340,24 +352,24 @@ class AbimemFile:
                 peaks = deque(sorted(peaks, key=lambda x: x.size), maxlen=maxlen)
 
         peaks = deque(sorted(peaks, key=lambda x: x.size, reverse=True), maxlen=maxlen)
-        return entries_to_dataframe(peaks) if as_dataframe else peaks
+        return entries_to_dataframe(list(peaks)) if as_dataframe else peaks
 
     @lazy_property
-    def dataframe(self):
+    def dataframe(self) -> Any:
         """
         Return a |pandas-DataFrame| with **all** entries.
         """
         return entries_to_dataframe(self.all_entries)
 
     @lazy_property
-    def dataframe_accumulated(self):
+    def dataframe_accumulated(self) -> Any:
         """
         Return a |pandas-DataFrame| with accumulated entries.
         """
         return entries_to_dataframe(self.accumulated_entries)
 
     @add_fig_kwargs
-    def plot_memory_usage(self, accumulated=True, ax=None, **kwargs):
+    def plot_memory_usage(self, accumulated: bool = True, ax: Any = None, **kwargs: Any) -> Any:
         """
         Plot total allocated memory in Mb on axis `ax`.
 
@@ -375,7 +387,7 @@ class AbimemFile:
         return fig
 
     @add_fig_kwargs
-    def plot_peaks(self, accumulated=True, ax=None, maxlen=20, fontsize=4, rotation=25, **kwargs):
+    def plot_peaks(self, accumulated: bool = True, ax: Any = None, maxlen: int = 20, fontsize: int = 4, rotation: int = 25, **kwargs: Any) -> Any:
         """
         Plot memory peaks as vertical bars.
 
@@ -402,7 +414,7 @@ class AbimemFile:
         return fig
 
     @add_fig_kwargs
-    def plot_hist(self, accumulated=True, ax=None, **kwargs):
+    def plot_hist(self, accumulated: bool = True, ax: Any = None, **kwargs: Any) -> Any:
         """
         Plot histogram with the number of arrays allocated for a given size
 
@@ -423,12 +435,12 @@ class AbimemFile:
         ax.set_title("Accumulated: %s" % str(accumulated))
         return fig
 
-    def get_hotspots_dataframe(self, accumulated=True):
+    def get_hotspots_dataframe(self, accumulated: bool = True) -> Any:
         """
         Return a DataFrame with total memory allocated per Fortran file.
 
         Args:
-            accumulated (bool, optional): If True, use accumulated entries.
+            accumulated: If True, use accumulated entries.
 
         Returns:
             pd.DataFrame: Hotspots data.
@@ -441,21 +453,21 @@ class AbimemFile:
             free_mb = g[g["action"] == "D"].size_mb.sum()
             nalloc = len(g["action"] == "A")
             nfree = len(g["action"] == "D")
-            rows.append(OrderedDict([
-                ("malloc_mb", malloc_mb),
-                ("free_mb", free_mb),
+            rows.append({
+                "malloc_mb": malloc_mb,
+                "free_mb": free_mb,
                 #("diff_mb", malloc_mb + free_mb),
-                ("nalloc", nalloc),
-                ("nfree", nfree),
+                "nalloc": nalloc,
+                "nfree": nfree,
                 #("npall", nalloc - nfree),
-            ]))
+            })
             index.append(filename)
 
         import pandas as pd
         df = pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
         return df.sort_values(by="malloc_mb", ascending=False)
 
-    def expose(self, slide_mode=False, slide_timeout=None, **kwargs):
+    def expose(self, slide_mode: bool = False, slide_timeout: Any = None, **kwargs: Any) -> None:
         """
         Shows a predefined list of matplotlib figures with minimal input from the user.
         """
@@ -465,12 +477,12 @@ class AbimemFile:
             #e(self.plot_peaks(show=False))
             #e(self.plot_hist(show=False))
 
-    def find_memleaks(self, verbose=0):
+    def find_memleaks(self, verbose: int = 0) -> int:
         """
         Analyze memory log to identify potential memory leaks.
 
         Args:
-            verbose (int, optional): Verbosity level.
+            verbose: Verbosity level.
 
         Returns:
             int: Number of detected leaks.
@@ -515,12 +527,15 @@ class AbimemFile:
                           " sizes: ", heap[p][0].size, newe.size)
                 #print("HEAP:", heap[newe.ptr])
 
-                locus = newe.locus
-                if locus not in stack:
-                    stack[locus] = [newe]
+                # Keyed by site (vname/file/line, *not* action) so that an
+                # orphaned allocation and the deallocation that later frees
+                # it land in the same bucket -- see Entry.site's docstring.
+                site = newe.site
+                if site not in stack:
+                    stack[site] = [newe]
                 else:
                     #if newe.ptr != 0: print(newe)
-                    stack_loc = stack[locus]
+                    stack_loc = stack[site]
                     ifind = -1
                     for i, olde in enumerate(stack_loc):
                         if newe.frees_onstack(olde):
@@ -529,6 +544,9 @@ class AbimemFile:
 
                     if ifind != -1:
                         stack_loc.pop(ifind)
+                        if not stack_loc:
+                            # Fully reconciled: no orphan left at this site.
+                            del stack[site]
                         #else:
                         #    print(newe)
 
@@ -575,7 +593,7 @@ class AbimemFile:
 
         return len(heap) + len(stack) + len(reallocs)
 
-    def get_panel(self):
+    def get_panel(self) -> Any:
         """
         Build panel with widgets to interact with the memocc file either in a notebook or in panel app.
         """
@@ -586,7 +604,7 @@ class AbimemFile:
 class Heap(dict):
     """Container for heap memory allocations."""
 
-    def show(self):
+    def show(self) -> None:
         """Print the contents of the heap."""
         print("=== HEAP OF LEN %s ===" % len(self))
         if not self: return
@@ -594,7 +612,7 @@ class Heap(dict):
         pprint(self, indent=4)
         print()
 
-    def pop_alloc(self, entry):
+    def pop_alloc(self, entry: Entry) -> int:
         """
         Remove the allocation corresponding to the given deallocation entry.
 
@@ -602,10 +620,10 @@ class Heap(dict):
             int: 1 if removed, 0 otherwise.
         """
         if not entry.isfree: return 0
-        elist = self.get[entry.ptr]
+        elist = self.get(entry.ptr)
         if elist is None: return 0
-        for i, olde in elist:
-            if entry.size + olde.size != 0:
+        for i, olde in enumerate(elist):
+            if entry.size + olde.size == 0:
                 elist.pop(i)
                 return 1
         return 0
@@ -614,7 +632,7 @@ class Heap(dict):
 class Stack(dict):
     """Container for stack memory allocations."""
 
-    def show(self):
+    def show(self) -> None:
         """Print the contents of the stack."""
         print("=== STACK OF LEN %s ===" % len(self))
         if not self: return
@@ -630,14 +648,14 @@ class MplExpose: # pragma: no cover
             e(obj.plot1(show=False))
             e(obj.plot2(show=False))
     """
-    def __init__(self, slide_mode=False, slide_timeout=None, verbose=1):
+    def __init__(self, slide_mode: bool = False, slide_timeout: Any = None, verbose: int = 1) -> None:
         """
         Args:
             slide_mode: If true, iterate over figures. Default: Expose all figures at once.
             slide_timeout: Close figure after slide-timeout seconds Block if None.
             verbose: verbosity level
         """
-        self.figures = []
+        self.figures: list[Any] = []
         self.slide_mode = bool(slide_mode)
         self.timeout_ms = slide_timeout
         self.verbose = verbose
@@ -653,7 +671,7 @@ class MplExpose: # pragma: no cover
 
         self.start_time = time.time()
 
-    def __call__(self, obj):
+    def __call__(self, obj: Any) -> None:
         """
         Add an object to MplExpose.
 
@@ -667,7 +685,7 @@ class MplExpose: # pragma: no cover
         else:
             self.add_fig(obj)
 
-    def add_fig(self, fig):
+    def add_fig(self, fig: Any) -> None:
         """
         Add a single matplotlib figure.
 
@@ -691,14 +709,14 @@ class MplExpose: # pragma: no cover
             plt.show()
             fig.clear()
 
-    def __enter__(self):
+    def __enter__(self) -> MplExpose:
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Activated at the end of the with statement."""
         self.expose()
 
-    def expose(self):
+    def expose(self) -> None:
         """
         Show all loaded figures.
         """

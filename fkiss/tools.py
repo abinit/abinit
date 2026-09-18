@@ -363,8 +363,8 @@ class NotebookWriter: #metaclass=abc.ABCMeta):
         """
         Shows a predefined list of matplotlib figures with minimal input from the user.
         """
-        from abipy.tools.plotting import MplExpose
-        with MplExpose(slide_mode=slide_mode, slide_timeout=slide_mode, verbose=1) as e:
+        from abipy.tools.plotting import MplExposer
+        with MplExposer(slide_mode=slide_mode, slide_timeout=slide_timeout, verbose=1) as e:
             e(self.yield_figs(**kwargs))
 
 

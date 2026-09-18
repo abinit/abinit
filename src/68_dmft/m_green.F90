@@ -749,7 +749,7 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
              & trim(tag_at)//'_isppol'//tag_is//'_ispinor'//tag_is2
          end if ! optwt
          if (iall <= 4) then
-           write(message,'(3a)') ch10,"  == Print green function on file ",tmpfil
+           write(message,'(3a)') ch10,"  == Print green function on file ",trim(tmpfil)
            call wrtout(std_out,message,'COLL')
          else if (iall == 5) then
            write(message,'(3a)') ch10,"  == following values are printed in files"
@@ -813,7 +813,7 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
          tmpfil = trim(paw_dmft%filapp)//'Green-'//trim(char1)//'-tau_isppol'//tag_is//'_ikpt'//trim(adjustl(tag_ik))
        end if ! optwt
        if (iall <= 4) then
-         write(message,'(3a)') ch10,"  == Print green function on file ",tmpfil
+         write(message,'(3a)') ch10,"  == Print green function on file ",trim(tmpfil)
          call wrtout(std_out,message,'COLL')
        else if (iall == 5)  then
          write(message,'(3a)') ch10,"  == following values are printed in files"
@@ -4380,7 +4380,7 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
    do isppol=1,nsppol
      write(tag_is,'(i1)')isppol
      tmpfil = trim(paw_dmft%filapp)//'Gtau_locks_isppol'//tag_is
-     write(message,'(3a)') ch10," == Print green function on file ",tmpfil
+     write(message,'(3a)') ch10," == Print green function on file ",trim(tmpfil)
      call wrtout(std_out,message,'COLL')
      unitgreenlocks_arr(isppol)=500+isppol-1
      open (unit=unitgreenlocks_arr(isppol),file=trim(tmpfil),status='unknown',form='formatted')

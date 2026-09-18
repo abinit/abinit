@@ -10,7 +10,7 @@ in the main output file.
 The connection with the ABINIT test suite and the yaml syntax used to define
 tolerances, parameters and constraints is also discussed.
 
-The new infrastructure consists of a set of Fortran modules to output 
+The new infrastructure consists of a set of Fortran modules to output
 structured data in YAML format and Python code to parse the output files and analyze data.
 
 ## Motivations
@@ -45,7 +45,7 @@ Ideally, we would like to be able to
 * be able to replace the check on the absolute and relative difference with a **threshold check**
   (is this quantity smaller that the give threshold?)
 * have some sort of syntax to apply different rules depending on the **iteration state** e.g. the dataset index
-* execute python code (**callbacks**) that operates on the data to perform more advanced tests requiring 
+* execute python code (**callbacks**) that operates on the data to perform more advanced tests requiring
   some sort of post-processing
 * provide an easy-to-use **declarative interface** that allows developers to define the logic
   to compare selected quantities.
@@ -60,7 +60,7 @@ compare numerical results thanks to the fact that the new parser
 is aware of the context and of the meaning of the numerical values extracted from the output file.
 The new infrastructure consists of a set of Fortran modules to output
 structured data in YAML format as well as Python code to parse the output files and analyze data.
-One of the goals of this project is to implement a 
+One of the goals of this project is to implement a
 
 The new python-based infrastructure allows developers to implement more rigorous tests on the portability of
 important physical quantities while ignoring intermediate results.
@@ -71,9 +71,9 @@ satisfies fundamental physical and mathematical rules such as energy
 conservation, Newton's third law, symmetry properties, etc.
 
 That is not quite as simple as it sounds, especially because one of our goals is
-to minimize the amount of (coding) work required to express such logic. 
+to minimize the amount of (coding) work required to express such logic.
 There are therefore basic rules and design principles Abinit developers should be
-aware of in order to take fully advantage of the new infrastructure. 
+aware of in order to take fully advantage of the new infrastructure.
 In what follows, we briefly describe the philosophy employed to implement the YAML-based
 test suite, the syntax used to define tests and the modifications required to extend the framework.
 -->
@@ -93,15 +93,15 @@ test suite, the syntax used to define tests and the modifications required to ex
 ## Implementation details
 
 For reasons that will be clear later, implementing smart algorithms requires metadata and context.
-In other words, the python code needs to have some basic understanding of the meaning of the numerical values 
+In other words, the python code needs to have some basic understanding of the meaning of the numerical values
 extracted from the output file and must be able to locate a particular property by name or by its "position"
 inside the output file.
 For this reason, the most important physical results are now written in the main output file (*ab_out*)
 using machine-readable [YAML](https://en.wikipedia.org/wiki/YAML) documents.
 
 A YAML document starts with three hyphens (---) followed by an
-*optional* tag beginning with an exclamation mark (e.g. `!ETOT`). 
-Three periods (...) signals the end of the document. 
+*optional* tag beginning with an exclamation mark (e.g. `!ETOT`).
+Three periods (...) signals the end of the document.
 Following these rules, one can easily write a dictionary containing the different contributions
 to the total free energy using:
 
@@ -174,19 +174,19 @@ The integration of the new YAML-based tests with the pre-existent infrastructure
 is obtained via two modifications of the current specifications.
 More specifically:
 
-- the **files_to_test** section now accepts the optional argument **use_yaml**.
+- the **files_to_test** section now accepts the optional argument **mode**.
   The allowed values are:
 
-    * "yes" --> activate YAML mode
-    * "no" -->  do not use YAML mode (default)
-    * "only" --> use YAML mode, deactivate legacy fldiff algorithm
+    * not given --> do not use YAML mode, standard fldiff-based comparison (default)
+    * "yaml" --> activate YAML mode in addition to the legacy fldiff algorithm
+    * "yaml_docs" --> use YAML mode only, deactivate legacy fldiff algorithm
 
-- a new *optional* section **[yaml_test]** has been added. 
+- a new *optional* section **[yaml_test]** has been added.
   This section contains two mutually exclusive fields:
 
     * *file* --> path of the YAML configuration file.
       The path is relative to the input file. A natural choice
-      would be to use the same prefix as the input file e.g. "./t21.yaml" 
+      would be to use the same prefix as the input file e.g. "./t21.yaml"
       is the configuration file associated to the input file "t21.in".
 
     * *test* --> multi-line string with the YAML specifications. This option may
@@ -206,7 +206,7 @@ An example of `TEST_INFO` section that activates the YAML mode can be found in [
 #%% max_nprocs = 4
 #%% [NCPU_4]
 #%% files_to_test =
-#%%   t86_MPI4.out, use_yaml = yes, tolnlines = 4, tolabs = 2.0e-2, tolrel = 1.0, fld_options = -easy;
+#%%   t86_MPI4.out, mode = yaml, tolnlines = 4, tolabs = 2.0e-2, tolrel = 1.0, fld_options = -easy;
 #%% [extra_info]
 #%% authors = B. Amadon, T. Cavignac
 #%% keywords = DMFT, FAILS_IFMPI
@@ -222,7 +222,7 @@ with the associated YAML configuration file given by:
 {% dialog tests/paral/Input/t86.yaml %}
 
 
-### Our first example of YAML configuration file 
+### Our first example of YAML configuration file
 
 Let us start with a minimalistic example in which we compare the components of
 the total free energy in the `Etot` document with an absolute tolerance of 1.0e-7 Ha.
@@ -234,8 +234,8 @@ Etot:
 ```
 
 The `tol_abs` keyword defines the **constraint** that will applied to **all the children** of the `Etot` document.
-In other words, all the entries in the `Etot` dictionary will be compared with 
-an absolute tolerance of 1.0e-7 and the **default value** for the relative difference `tol_rel` as this 
+In other words, all the entries in the `Etot` dictionary will be compared with
+an absolute tolerance of 1.0e-7 and the **default value** for the relative difference `tol_rel` as this
 tolerance is not explicitly specified.
 
 <!--
@@ -252,7 +252,7 @@ To use a different absolute tolerance for this property, we **specialize** the r
 Since the unit is different, the absolute tolerance does not have the same impact on the precision.
 We want to achieve the same relative precision on this term but we cannot
 achieve the same absolute precision. Though we will **specialize** the rules
-and use the `tol_rel` constraint. 
+and use the `tol_rel` constraint.
 We could do something like this:
 
 ```yaml
@@ -281,7 +281,7 @@ Now we achieve the same relative precision and the test does not fail because
 of the looser absolute precision of the total energy in eV.
 -->
 
-To change the default value for the relative difference, it is sufficient to specify the 
+To change the default value for the relative difference, it is sufficient to specify the
 constraint outside of the document:
 
 ```yaml
@@ -368,8 +368,8 @@ natom     :        5
 nsppol    :        1
 cut       : {"ecut":   1.20000000000000000E+01, "pawecutdg":   2.00000000000000000E+01, }
 convergence: {
-    "deltae":   2.37409381043107715E-09, "res2":   1.41518780109792898E-08, 
-    "residm":   2.60254842131463755E-07, "diffor": 0.00000000000000000E+00, 
+    "deltae":   2.37409381043107715E-09, "res2":   1.41518780109792898E-08,
+    "residm":   2.60254842131463755E-07, "diffor": 0.00000000000000000E+00,
 }
 etotal    :  -1.51507711707660150E+02
 entropy   :   0.00000000000000000E+00
@@ -392,7 +392,7 @@ This YAML document is more complicated as it contains scalar fields, dictionarie
 **MG: Are integer values always compared without tolerance?**
 Still, the parsers will be able to locate the entire document via its tag/label and address all the entries by name.
 To specify the tolerance for the relative difference for all the scalar quantities in `ResultsGS`,
-we just add a new entry to the YAML configuration file similarly to what we did for `EnergyTerms`: 
+we just add a new entry to the YAML configuration file similarly to what we did for `EnergyTerms`:
 
 ```yaml
 EnergyTerms:
@@ -435,7 +435,7 @@ whereas the entries in the `convergence` dictionary will be tested against `ceil
     Within the explore shell `show ceil` will list
     the constraints that are disabled by the use of `ceil` in the _exclude_ field.
 
-Up to now we have been focusing on scalar quantities for which the concept of 
+Up to now we have been focusing on scalar quantities for which the concept of
 relative and absolute difference is unambiguously defined but how do we compare vectors and matrices?
 Fields with the `!TensorCart` tags are leafs of the tree. The tester routine
 won't try to compare each individual coefficient with `tol_rel`. However we
@@ -456,20 +456,20 @@ ResultsGS:
 
 ### How to use filters to select documents by iteration state
 
-Thanks to the syntax presented in the previous sections, one can customize tolerances for different 
+Thanks to the syntax presented in the previous sections, one can customize tolerances for different
 documents and different entries.
 Note however that these rules will be applied to all the documents found in the output file.
 This means that we are implicitly assuming that all the different steps of the calculation
 have similar numerical stability.
 There are however cases in which the results of particular datasets are less numerically stable than the others.
-An example will help clarify. 
+An example will help clarify.
 
 The test [[test:paral_86]] uses two datasets to perform two different computations.
 The first dataset computes the DFT density with LDA while
 the second dataset uses the LDA density to perform a DMFT computation.
-The entire calculation is supposed to take less than ~3-5 minutes hence the input parameters 
+The entire calculation is supposed to take less than ~3-5 minutes hence the input parameters
 are severely under converged and the numerical noise propagates quickly through the different steps.
-As a consequence, one cannot expect the DFMT results to have the same numerical stability as the LDA part. 
+As a consequence, one cannot expect the DFMT results to have the same numerical stability as the LDA part.
 Fortunately, one can use **filters** to specify different convergence criteria for the two datasets.
 
 A filter is a mechanism that allows one to associate a specific configuration to a set of **iteration states**.
@@ -580,8 +580,8 @@ For each iterator, a set of integers can be defined with three different methods
 - a single integer value e.g. `dtset: 1`
 - a YAML list of values e.g. `dtset: [1, 2, 5]`
 - a mapping with the optional members "from" and "to" specifying the boundaries (both
-  included) of the integer interval e.g. `dtset: {from: 1, to: 5}`. 
-  If "from" is omitted, the default is 1. If "to" is omitted the default is no upper boundary. 
+  included) of the integer interval e.g. `dtset: {from: 1, to: 5}`.
+  If "from" is omitted, the default is 1. If "to" is omitted the default is no upper boundary.
 
 !!! tip
 
@@ -591,7 +591,7 @@ For each iterator, a set of integers can be defined with three different methods
 
 ### Filter overlapping
 
-Several filters can apply to the same document even when they overlap. Note, however, 
+Several filters can apply to the same document even when they overlap. Note, however,
 that overlapping filters must have a trivial order of *specificity*.
 In other words, one filter must be a subset of the other one.
 The example below is OK because _f2_ is included in _f1_  i.e. is more specific:
@@ -723,7 +723,7 @@ EnergyTerms:
     equation: 'this["Etotal"] - this["Total energy(eV)"]/27.2114'
 ```
 
-**equations** works exactly the same but has a list of string as value. 
+**equations** works exactly the same but has a list of string as value.
 Each string is a different expression
 that will be tested independently from the others. In both case the tested
 object can be referred as `this` and the reference object can be referred as `ref`.
@@ -749,7 +749,7 @@ AtomSpeeds:
 
 ## Command line interface
 
-The `~abinit/tests/testtools.py` script provides a command line interface to facilitate 
+The `~abinit/tests/testtools.py` script provides a command line interface to facilitate
 the creation of new tests and the exploration of the YAML configuration file.
 The syntax is:
 
@@ -766,12 +766,12 @@ fldiff
 
 :   Interface to the *fldiff.py* module.
     This command can be used to compare output and reference files without executing ABINIT.
-    It is also possible to specify the YAML configuration file with the `--yaml-conf` option so 
+    It is also possible to specify the YAML configuration file with the `--yaml-conf` option so
     that one can employ the same parameters as those used by *runtests.py*
 
 explore
 
-:   This command allows the user to *explore* and *validate* a YAML configuration file. 
+:   This command allows the user to *explore* and *validate* a YAML configuration file.
     It provides a shell like interface in which the user can explore
-    the tree defined by the configuration file and print the constraints. 
+    the tree defined by the configuration file and print the constraints.
     It also provides documentation about constraints and parameters via the *show* command.

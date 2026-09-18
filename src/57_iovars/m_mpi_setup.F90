@@ -1131,7 +1131,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !This is not a very clean exit in case of paral_kgb<0
  if (iexit/=0)then
-   ABI_STOP("Stopping now!")
+   call wrtout(std_out, "Stopping now!")
+   call abi_abort('PERS', exit_status=0, print_config=.false.)
  end if
 
  DBG_EXIT("COLL")

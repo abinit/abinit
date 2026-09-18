@@ -1165,13 +1165,13 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
    else if (nrpt2 > nrpt1) then
      write(message, '(2a,I0,3a,I0,5a)' )ch10,&
 &   ' WARNING: the number of total IFC  (',nrpt2,') is not equal to the  ',ch10,&
-&   '          the number of short range IFC (',nrpt1,') in ',filename,ch10,&
+&   '          the number of short range IFC (',nrpt1,') in ',trim(filename),ch10,&
 &   '          the missing ifc will be set to zero',ch10
      call wrtout(std_out,message,'COLL')
    else if(nrpt1>nrpt2)then
      write(message, '(2a,I0,3a,I0,5a)' )ch10,&
 &   ' The number of total IFC  (',nrpt2,') is inferior to  ',ch10,&
-&   ' the number of short range IFC (',nrpt1,') in ',filename,ch10,&
+&   ' the number of short range IFC (',nrpt1,') in ',trim(filename),ch10,&
 &   ' This is not possible',ch10
      ABI_BUG(message)
    end if
@@ -1261,7 +1261,7 @@ end subroutine system_getDimFromXML
 ! *************************************************************************
 
  !Open the atomicdata XML file for reading
- write(message,'(a,a)')'-Opening the file ',filename
+ write(message,'(a,a)')'-Opening the file ',trim(filename)
 
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
@@ -1761,7 +1761,7 @@ end subroutine system_getDimFromXML
 
          if(voigt>6)then
            write(message, '(4a)' )ch10,&
-&               ' WARNING: the number of strain phonon coupling is superior to 6 in ',filename,ch10
+&               ' WARNING: the number of strain phonon coupling is superior to 6 in ',trim(filename),ch10
            call wrtout(std_out,message,'COLL')
            exit
          end if
@@ -1954,13 +1954,13 @@ end subroutine system_getDimFromXML
        end do
        if(irpt3 /= irpt1)then
          write(message, '(4a)' )ch10,&
-&         ' There is several similar short IFC in ',filename,ch10
+&         ' There is several similar short IFC in ',trim(filename),ch10
          ABI_BUG(message)
        end if
      else
        write(message, '(2a,I5,3a,I5,5a)' )ch10,&
 &     ' The number of total IFC  (',irpt2,') is inferior to  ',ch10,&
-&     ' the number of short range IFC (',irpt1,') in ',filename,ch10,&
+&     ' the number of short range IFC (',irpt1,') in ',trim(filename),ch10,&
 &     ' This is not possible',ch10
 
        ABI_BUG(message)
@@ -2864,7 +2864,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
  filename_tmp = trim(filename)
  !Open the atomicdata XML file for reading
- write(message,'(a,a)')'-Opening the file ',filename_tmp
+ write(message,'(a,a)')'-Opening the file ',trim(filename_tmp)
 
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')

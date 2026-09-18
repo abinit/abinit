@@ -49,14 +49,14 @@ istwfk 1
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t22.abo, tolnlines = 52, tolabs = 1.0e-4, tolrel = 7.6e-05
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = D. Caliste
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   H2O in isolated boundary conditions (plane waves, NC), try tu use Damiens Poisson cutoff.
 #%%   Water molecule with HGH pseudo-potentials. This checks that a negative
 #%%   value in rhor will not make the Poisson solver crashes on XC computation.

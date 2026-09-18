@@ -60,20 +60,23 @@ one can easily create an environment (let's call it mkdocs-3.12`) with:
 Then activate the new environment, and install the python packages required to build the website using:
 
 ```sh
-pip install -r requirements.txt
+pip install --group mksite
 ```
 
 if the packages are not already installed.
+This installs `abimkdocs_plugin` too -- it's declared as a local path dependency inside the `mksite`
+group in `pyproject.toml`, so no separate install step is needed.
+Note that `--group` requires pip >= 25.1; upgrade with `pip install --upgrade pip` if needed.
 
 If you already have a pre-existent installation and you need to upgrade to more recent versions
 add the *-upgrade* option (-U for short):
 
 ```sh
-pip install -r requirements.txt -U
+pip install --group mksite -U
 ```
 
 This step may be needed if the version of mkdocs and MkDocs are updated upstream in trunk/develop
-(check the version listed in requirements.txt).
+(check the versions pinned in the `mksite` group of `pyproject.toml`).
 
 !!! note
 

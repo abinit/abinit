@@ -6,7 +6,7 @@
 #
 # ----------------------------------------------------------------------------------
 ndtset 1
-jdtset 4 
+jdtset 4
 
 #==================================================================================
 ############ Parameters common to all DATASETS
@@ -17,7 +17,7 @@ nline     5          #Number of LINE minimisations
 nnsclo    2          #Number of Non-Self Consistent LOops
 ecut      4.0        # Maximal kinetic energy cut-off, in Hartree
 pawecutdg 5.0        #(60)PAW - Energy CUToff for the Double Grid ( need only when usepaw=1=)
-tolvrs   1.0d-10    
+tolvrs   1.0d-10
 mqgrid 1000
 mqgriddg 1000
 
@@ -83,7 +83,7 @@ plowan_natom 1 # Number of atoms
 plowan_iatom 1  # Index of atoms
 plowan_nbl 1  # Number of the orbitals
 plowan_lcalc 2  # Index of the orbitals (2 -> d)
-plowan_projcalc 7  # Projector for the orbitals 
+plowan_projcalc 7  # Projector for the orbitals
 
 # == DFT+U
 usepawu    1        # DFT+U is used.
@@ -104,7 +104,7 @@ jpawu      0.0000000000000000  0.0  0.0  eV
 # ppmfrq4   16.1 eV   # Imaginary frequency where to calculate the screening
  nfreqre4       1
  nfreqim4       0
- awtr4          1     
+ awtr4          1
  ucrpa_bands4  21 25  # crpa bands
  ucrpa4         1      # For the calcul of U
  inclvkb4       0
@@ -118,13 +118,13 @@ jpawu      0.0000000000000000  0.0  0.0  eV
 # getwfk5     3      # Obtain KSS file from dataset 1
  irdwfk5     1
 # getscr5     4      # Obtain SCR file from previous dataset
- irdscr5     1     
+ irdscr5     1
  ecutwfn5    2.0    # Planewaves to be used to represent the wavefunctions. It would be ore convenient to keep the default ecut value.
  ecutsigx5   2.0    # Dimension of the G sum in Sigma_x. It would be better to keep the default ecut value.
                     #(the dimension in Sigma_c is controlled by ecuteps)
  ppmodel  3         # in order to use only one frequency
  gwcalctyp5 2
- nkptgw5      0     # All k-points 
+ nkptgw5      0     # All k-points
  nfreqsp5 1
  freqspmax5 1 eV
  freqspmin5 0 eV
@@ -138,15 +138,15 @@ jpawu      0.0000000000000000  0.0  0.0  eV
 #%% test_chain = t23.abi, t24.abi, t25.abi
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT, !HAVE_NETCDF_DEFAULT
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t24.abo, tolnlines=   12,   tolabs=  2.0e-3,  tolrel= 3.0e-3, fld_options = -medium
-#%% [shell] 
-#%% post_commands = 
+#%% [shell]
+#%% post_commands =
 #%%   ww_mv t24o_DS4_SCR t25i_DS5_SCR
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
-#%% keywords = GW, DMFT, cRPA
+#%% keywords = GW, DMFT, CRPA
 #%% authors = T. Applencourt, B. Amadon, R. Outerovitch
 #%% description = Test the calculation of dielectric function in constrained RPA for SrVO3. Uses KSS file from test 23
 #%% topics = CalcUJ

@@ -4809,7 +4809,7 @@ subroutine gwr_build_tchi(gwr)
    if (.not. use_shmem_for_k) then
      ABI_MALLOC(gt_scbox, (sc_nfftsp, max_ndat, 2))
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET ENTER DATA MAP(alloc:gt_scbox) IF (gpu_option == ABI_GPU_OPENMP)
+     !$OMP TARGET ENTER DATA MAP(alloc:gt_scbox(1:sc_nfftsp,1:max_ndat,1:2)) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
    end if
 
@@ -4892,7 +4892,7 @@ subroutine gwr_build_tchi(gwr)
              ! Insert G_k(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir).
              call gwr%gk_to_scbox(sc_ngfft, select_my_kbz, desc_mykbz, green_scgvec, my_ir, ndat, gt_gpr(:,:,iab), gt_scbox)
 #ifdef HAVE_OPENMP_OFFLOAD
-             !$omp target update to(gt_scbox) if (gpu_option == ABI_GPU_OPENMP)
+             !$omp target update to(gt_scbox(1:sc_nfftsp,1:max_ndat,1:2)) if (gpu_option == ABI_GPU_OPENMP)
 #endif
 
              if (.not. use_mpi_for_k) then
@@ -4904,7 +4904,7 @@ subroutine gwr_build_tchi(gwr)
                ! Then back to tchi(G'=q+g',r) immediately with isign + 1.
                !gt_scbox(:,:,1) = gt_scbox(:,:,1) * conjg(gt_scbox(:,:,2))
 #ifdef HAVE_OPENMP_OFFLOAD
-              !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:gt_scbox) IF (gpu_option == ABI_GPU_OPENMP)
+              !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:gt_scbox(1:sc_nfftsp,1:max_ndat,1:2)) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
                do idat=1,max_ndat
                  do ifft=1,sc_nfftsp
@@ -4915,7 +4915,7 @@ subroutine gwr_build_tchi(gwr)
 
                call green_plan%execute(gt_scbox(:,1,1), +1, max_ndat*2)
 #ifdef HAVE_OPENMP_OFFLOAD
-               !$omp target update from(gt_scbox) if (gpu_option == ABI_GPU_OPENMP)
+               !$omp target update from(gt_scbox(1:sc_nfftsp,1:max_ndat,1:2)) if (gpu_option == ABI_GPU_OPENMP)
 #endif
 
              else
@@ -5037,7 +5037,7 @@ subroutine gwr_build_tchi(gwr)
      call xmpi_win_free(gt_scbox_win, ierr)
    else
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET EXIT DATA MAP(delete: gt_scbox) if (gpu_option == ABI_GPU_OPENMP)
+     !$OMP TARGET EXIT DATA MAP(delete: gt_scbox(1:sc_nfftsp,1:max_ndat,1:2)) if (gpu_option == ABI_GPU_OPENMP)
 #endif
      ABI_FREE(gt_scbox)
    end if
@@ -6109,7 +6109,7 @@ if (gwr%use_supercell_for_sigma) then
    ABI_CALLOC(gt_scbox, (sc_nfft, max_ndat, 2))
    ABI_CALLOC(wct_scbox, (sc_nfft, max_ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(to:gt_scbox, wct_scbox) IF (gpu_option == ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(to:gt_scbox(1:sc_nfft,1:max_ndat,1:2), wct_scbox(1:sc_nfft,1:max_ndat)) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
  end if
 
@@ -6180,7 +6180,7 @@ if (.not. use_shmem_for_k) then
        ! Insert Wc_q(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir)
        call gwr%wcq_to_scbox(sc_ngfft, select_my_qbz, desc_myqbz, wc_scgvec, my_ir, ndat, wc_gpr, wct_scbox)
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$omp target update to(wct_scbox) if (gpu_option == ABI_GPU_OPENMP)
+       !$omp target update to(wct_scbox(1:sc_nfft,1:max_ndat)) if (gpu_option == ABI_GPU_OPENMP)
 #endif
        if (gwr%kpt_comm%nproc > 1) call xmpi_isum_ip(wct_scbox, gwr%kpt_comm%value, wct_request, ierr)
 
@@ -6200,7 +6200,7 @@ if (.not. use_shmem_for_k) then
          ! Insert G_k(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir).
          call gwr%gk_to_scbox(sc_ngfft, select_my_kbz, desc_mykbz, green_scgvec, my_ir, ndat, gt_gpr(:,:,iab), gt_scbox)
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$omp target update to(gt_scbox) if (gpu_option == ABI_GPU_OPENMP)
+         !$omp target update to(gt_scbox(1:sc_nfft,1:max_ndat,1:2)) if (gpu_option == ABI_GPU_OPENMP)
 #endif
          if (gwr%kpt_comm%nproc > 1) call xmpi_isum_ip(gt_scbox, gwr%kpt_comm%value, gt_request, ierr)
 
@@ -6212,7 +6212,7 @@ if (.not. use_shmem_for_k) then
          !gt_scbox(:,:,1) = gt_scbox(:,:,1) * wct_scbox(:,:) * sigma_fact
          !gt_scbox(:,:,2) = gt_scbox(:,:,2) * wct_scbox(:,:) * sigma_fact
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) MAP(to:gt_scbox, wct_scbox) if (gpu_option == ABI_GPU_OPENMP)
+         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) MAP(to:gt_scbox(1:sc_nfft,1:max_ndat,1:2), wct_scbox(1:sc_nfft,1:max_ndat)) if (gpu_option == ABI_GPU_OPENMP)
 #endif
          do ipm=1,2
            do idat=1,max_ndat
@@ -6222,7 +6222,7 @@ if (.not. use_shmem_for_k) then
            end do
          end do
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$omp target update from(gt_scbox) if (gpu_option == ABI_GPU_OPENMP)
+         !$omp target update from(gt_scbox(1:sc_nfft,1:max_ndat,1:2)) if (gpu_option == ABI_GPU_OPENMP)
 #endif
          !print *, "Maxval abs imag G:", maxval(abs(aimag(gt_scbox)))
 
@@ -6302,7 +6302,7 @@ end if
  !call wrtout(std_out, sjoin(" Maxval abs imag W:", ftoa(max_abs_imag_wct)))
  if (.not. use_shmem_for_k) then
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete: gt_scbox, wct_scbox) if (gpu_option == ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(delete: gt_scbox(1:sc_nfft,1:max_ndat,1:2), wct_scbox(1:sc_nfft,1:max_ndat)) if (gpu_option == ABI_GPU_OPENMP)
 #endif
    ABI_FREE(gt_scbox)
    ABI_FREE(wct_scbox)
@@ -7071,10 +7071,10 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_bra_glob, ur_ket_glob, sigm_pm, loc
      !ABI_CHECK_IEQ(nfftsp, rp_r%size_local(1), "First dimension should be local to each MPI proc!")
      !ABI_MALLOC(loc_cwork, (rp_r%size_local(2)))
      !loc_cwork(:) = matmul(transpose(rp_r%buffer_cplx), ur_glob)
-    
+
      nrows = rp_r%size_local(1); ncols = rp_r%size_local(2)
      call xgemv('T', nrows, ncols, cone_gw, rp_r%buffer_cplx, nrows, ur_ket_glob, 1, czero_gw, loc_cwork, 1)
-    
+
      ! Integrate over r. Note complex conjugate.
      do il_r1=1,rp_r%size_local(2)
        ir1 = rp_r%loc2gcol(il_r1)

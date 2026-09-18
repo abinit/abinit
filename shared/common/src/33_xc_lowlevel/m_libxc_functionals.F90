@@ -1114,6 +1114,7 @@ logical function libxc_functionals_is_potential_only(xc_functionals) result(ans)
  end if
 
 end function libxc_functionals_is_potential_only
+!!***
 
 !----------------------------------------------------------------------
 

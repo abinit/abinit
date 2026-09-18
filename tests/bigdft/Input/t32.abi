@@ -1,5 +1,5 @@
 #H in a box.
-#Tests: 
+#Tests:
 #wvl_ngauss
 #
 
@@ -36,7 +36,7 @@ ixc 1
 icoulomb 1 #isolated system
 
 # H in a box
-acell   3*17.400000 
+acell   3*17.400000
 rprim      1.00   0.00   0.00
            0.00   1.00   0.00
            0.00   0.00   1.00
@@ -47,7 +47,7 @@ typat      1
 znucl     1.00
 
 #Minimal test: do not print WFK files etc..
-#optforces  0 
+#optforces  0
 optstress 0
 kptopt 0
 prtden 0
@@ -61,7 +61,7 @@ prteig 0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t32.abo, tolnlines = 33, tolabs = 5.8e-2, tolrel = 9.0e-3
 #%% [paral_info]
 #%% max_nprocs = 1

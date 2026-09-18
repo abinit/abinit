@@ -52,6 +52,6 @@
 #%% description =
 #%%  Gallium Arsenide, zinc-blende. 8 bands. prtwant=2
 #%%  Should still be completed by the call to wannier90, and subsequent fldiff use...
-#%%  example for post-processing mode of ABINIT-Wannier90 with wfk_task
+#%%  example for post-processing mode of ABINIT-wannier90 with wfk_task
 #%% topics = Wannier
 #%%<END TEST_INFO>

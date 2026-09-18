@@ -291,7 +291,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
      end do
    end do
    write(ab_out,'(a)')"..."
-   ABI_STOP("Stopping now!")
+   call wrtout(std_out, "Stopping now!")
+   call abi_abort('PERS', exit_status=0, print_config=.false.)
  end if
 
  cryst = dtset%get_crystal(img=1)

@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 """
 Define basic structures.
 """
+from typing import Any
+
 from ..register_tag import yaml_auto_map, yaml_implicit_scalar
 
 
@@ -20,11 +24,11 @@ class YAMLComplex(complex):
     # [2] + or - with optional blanks around
 
     @staticmethod
-    def __new__(*args, **kwargs):
+    def __new__(*args: Any, **kwargs: Any) -> YAMLComplex:
         return complex.__new__(*args, **kwargs)
 
     @classmethod
-    def from_scalar(cls, scal):
+    def from_scalar(cls, scal: str) -> YAMLComplex:
         """
         Convert a YAML complex number scalar to a Python complex object.
 
@@ -46,7 +50,7 @@ class YAMLComplex(complex):
                    .replace("+-", "-")
                    .replace("-+", "-"))
 
-    def to_scalar(self):
+    def to_scalar(self) -> str:
         return repr(self)[1:-1]  # remove parentheses
 
 

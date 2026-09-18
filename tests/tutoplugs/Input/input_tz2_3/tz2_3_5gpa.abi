@@ -30,6 +30,5 @@ getden_filepath "../tz2_2o_DS21_DEN"
 nband     40
 nbdbuf    2 # Buffer to speed up convergence
 enunit    2
-# Prepare Wannier90 calculation
+# Prepare wannier90 calculation
 prtwant 2
-

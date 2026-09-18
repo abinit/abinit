@@ -5,7 +5,6 @@ INSTALL_CentOS.md
 INSTALL_MacOS.md
 INSTALL_Ubuntu.md
 # The following md files have been automatically generated and should be `git ignored`
-developers/autoconf_examples.md
 variables/index.md
 variables/external_parameters.md
 variables/multibinit.md

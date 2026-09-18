@@ -99,11 +99,11 @@ use_yaml 1
 #%% max_nprocs = 10
 #%% [NCPU_4]
 #%% files_to_test =
-#%%   t92_MPI4.abo, use_yaml = no , tolnlines=  178, tolabs=  0.03, tolrel= 1.1, fld_options = -medium
+#%%   t92_MPI4.abo, tolnlines=  178, tolabs=  0.03, tolrel= 1.1, fld_options = -medium
 #%% file = ./t92_MPI4.yaml
 #%% [NCPU_10]
 #%% files_to_test =
-#%%   t92_MPI10.abo, use_yaml = yes, tolnlines=   178, tolabs=  0.06, tolrel= 0.05, fld_options = -medium
+#%%   t92_MPI10.abo, mode = yaml, tolnlines=   178, tolabs=  0.06, tolrel= 0.05, fld_options = -medium
 #%% file = ./t92_MPI10.yaml
 #%% [extra_info]
 #%% authors = J. Bieder, B. Amadon

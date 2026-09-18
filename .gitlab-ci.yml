@@ -1,0 +1,48 @@
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - when: never
+
+stages: [check]
+
+precommit:
+  stage: check
+  image: python:3.12
+  variables:
+    GIT_DEPTH: "0"
+    PRE_COMMIT_HOME: "$CI_PROJECT_DIR/.cache/pre-commit"
+  cache:
+    key:
+      files: [.pre-commit-config.yaml]
+    paths: [.cache/pre-commit]
+  script:
+    - pip install --disable-pip-version-check pre-commit
+    - |
+      for hook in check-ast check-merge-conflict check-yaml end-of-file-fixer trailing-whitespace check-executables-have-shebangs check-added-large-files check-build-config run-check-config-h run-check-ascii check-forbidden check-binaries-conf check-inlined-macros; do
+        printf '\n=== %s ===\n' "$hook" | tee -a pre-commit.log
+        if ! pre-commit run "$hook" --show-diff-on-failure --from-ref "$CI_MERGE_REQUEST_DIFF_BASE_SHA" --to-ref "$CI_COMMIT_SHA" >> pre-commit.log 2>&1; then
+          cat pre-commit.log
+          exit 1
+        fi
+      done
+      cat pre-commit.log
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  after_script:
+    - |
+      python - <<'PY'
+      import os
+      from xml.etree import ElementTree as ET
+
+      status = os.environ.get("CI_JOB_STATUS", "failed")
+      suite = ET.Element("testsuite", name="pre-commit", tests="1", failures="0" if status == "success" else "1")
+      case = ET.SubElement(suite, "testcase", classname="merge_request_checks", name="selected pre-commit checks")
+      if status != "success":
+          ET.SubElement(case, "failure", message="See pre-commit.log for the failing check.")
+      ET.ElementTree(suite).write("pre-commit-report.xml", encoding="utf-8", xml_declaration=True)
+      PY
+  artifacts:
+    when: always
+    reports:
+      junit: pre-commit-report.xml
+    paths: [pre-commit.log, pre-commit-report.xml]

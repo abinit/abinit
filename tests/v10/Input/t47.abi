@@ -8,7 +8,7 @@ outdata_prefix = "t47o"
 !Flags
  ifcflag   1     ! Interatomic force constant flag
  dipquad 1
- quadquad 1 
+ quadquad 1
 !Wavevector grid number 1 (coarse grid, from DDB)
   brav    1      ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
   ngqpt   2*16 1   ! Monkhorst-Pack indices
@@ -16,18 +16,18 @@ outdata_prefix = "t47o"
   q1shft  3*0.0
   symdynmat 0
 !Effective charges
-  asr  1     
+  asr  1
   sys_dim 4  ! 2D material with non-periodic axis along z
 !Interatomic force constant info
   dipdip 1      ! Desactivate the long-range electrostatics here
   dielt_env 1.00000   ! Dielectric constant of the embedding dielectric
   dielt_thick 10.05939 0 ! Consider a dielectric thickness of 10.05939 Bohr
-                         ! No outer dielectric 
+                         ! No outer dielectric
 !Phonon band structure output for band2eps - See note near end for
 ! dealing with gamma LO-TO splitting issue.
    eivec  4
 nph1l 33
-qph1l 
+qph1l
 0.0 0.5 0.0 1
 0.0 0.484375 0.0 1
 0.0 0.46875 0.0 1
@@ -84,4 +84,3 @@ qph1l
 #%%  description = Separate treatment of long-range electrostatics in 2D materials
 #%%  topics = Phonons
 #%%<END TEST_INFO>
-
