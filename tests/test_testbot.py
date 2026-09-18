@@ -21,10 +21,12 @@ sys.modules["pymods.tools"] = MagicMock()
 
 # Now we can import testbot
 from tests.testbot import (
+    BenchmarkResult,
     TestBot,
     TestBotSummary,
     TestRunSummary,
     analyze,
+    benchmark,
     build_parser,
     default_mpirun_np,
     get_git_tag,
@@ -36,6 +38,7 @@ from tests.testbot import (
 # happen to start with "Test", so mark them explicitly to stop pytest from
 # trying to collect them (they have __init__ constructors and warn otherwise).
 TestBot.__test__ = False
+BenchmarkResult.__test__ = False
 TestRunSummary.__test__ = False
 TestBotSummary.__test__ = False
 
@@ -676,6 +679,14 @@ class TestBuildParser:
         ns = parser.parse_args(["analyze", "v9.2.0"])
         assert ns.tag == "v9.2.0"
 
+    def test_benchmark_options(self):
+        parser = build_parser()
+        ns = parser.parse_args(["benchmark", "my.json", "--py-nprocs", "1", "4", "8", "--profile"])
+        assert ns.command == "benchmark"
+        assert ns.testbot_json == "my.json"
+        assert ns.py_nprocs == [1, 4, 8]
+        assert ns.profile is True
+
     def test_print_defaults_and_explicit_json(self):
         parser = build_parser()
         ns = parser.parse_args(["print"])
@@ -732,6 +743,64 @@ class TestMain:
         with patch("tests.testbot.TestBot.from_json", return_value=mock_instance) as mock_from_json:
             assert main() == 0
         mock_from_json.assert_called_once_with(None)
+
+    def test_main_dispatches_to_benchmark(self, monkeypatch):
+        monkeypatch.setattr(
+            sys, "argv", ["testbot.py", "benchmark", "my.json", "--py-nprocs", "1", "4"]
+        )
+        with patch("tests.testbot.benchmark", return_value=2) as mock_benchmark:
+            assert main() == 2
+        mock_benchmark.assert_called_once_with("my.json", [1, 4])
+
+    def test_main_rejects_invalid_benchmark_cpu_values(self, monkeypatch):
+        monkeypatch.setattr(
+            sys, "argv", ["testbot.py", "benchmark", "my.json", "--py-nprocs", "0"]
+        )
+        with pytest.raises(SystemExit, match="positive integers"):
+            main()
+
+
+def test_benchmark_writes_summary(tmp_path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    bots = []
+
+    def make_bot(_path):
+        bot = MagicMock()
+        bot.run.return_value = 0
+        bot.run_summaries = []
+        bots.append(bot)
+        return bot
+
+    monkeypatch.setattr("tests.testbot.TestBot.from_json", make_bot)
+    times = iter([10.0, 14.0, 20.0, 28.0])
+    monkeypatch.setattr("tests.testbot.time.perf_counter", lambda: next(times))
+
+    assert benchmark("testbot.json", [1, 4]) == 0
+
+    data = json.loads((tmp_path / "testbot_benchmark.json").read_text())
+    assert data == [
+        {
+            "py_nprocs": 1,
+            "wall_time": 4.0,
+            "speedup": 1.0,
+            "nexecuted": 0,
+            "tests_per_second": 0.0,
+            "returncode": 0,
+        },
+        {
+            "py_nprocs": 4,
+            "wall_time": 8.0,
+            "speedup": 0.5,
+            "nexecuted": 0,
+            "tests_per_second": 0.0,
+            "returncode": 0,
+        },
+    ]
+    assert bots[0].py_nprocs_override == 1
+    assert bots[1].py_nprocs_override == 4
+    assert bots[0].workdir_prefix == "Benchmark_PY1_"
+    assert bots[1].workdir_prefix == "Benchmark_PY4_"
+    assert "Benchmark summary" in capsys.readouterr().out
 
 
 class TestUtilityFunctions:

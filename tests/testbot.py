@@ -5,15 +5,18 @@ __version__ = "2.0"
 __author__ = "Matteo Giantomassi"
 
 import argparse
+import cProfile
 import dataclasses
 import html
 import json
 import os
 import platform
+import pstats
 import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 from os.path import basename
@@ -133,6 +136,22 @@ class TestRunSummary:
 
 
 @dataclass
+class BenchmarkResult:
+    """Wall-time result for one benchmark CPU configuration."""
+
+    py_nprocs: int
+    wall_time: float
+    speedup: float
+    nexecuted: int
+    tests_per_second: float
+    returncode: int
+
+    def as_dict(self) -> dict[str, float | int]:
+        """Return a JSON-serializable representation."""
+        return dataclasses.asdict(self)
+
+
+@dataclass
 class TestBot:
     """
     Driver for ABINIT automatic tests on Buildbot workers.
@@ -205,6 +224,8 @@ class TestBot:
     mpi_runner: JobRunner | None = field(init=False, default=None, repr=False)
     summary: TestBotSummary = field(init=False, repr=False)
     run_summaries: list[TestRunSummary] = field(init=False, default_factory=list, repr=False)
+    workdir_prefix: str = field(init=False, default="", repr=False)
+    py_nprocs_override: int | None = field(init=False, default=None, repr=False)
 
     @classmethod
     def print_options(cls) -> None:
@@ -574,13 +595,15 @@ class TestBot:
         """
         # Compute number of python processes, note that self.omp_num_threads might be zero.
         py_nprocs = self.max_cpus // (mpi_nprocs * max(self.omp_num_threads, 1))
+        if self.py_nprocs_override is not None:
+            py_nprocs = self.py_nprocs_override
         if py_nprocs < 1:
             raise RuntimeError(f"py_nprocs = {py_nprocs}")
 
         test_suite = abitests.select_tests(suite_args, keys=self.keywords, regenerate=False)
 
         # Create workdir.
-        workdir_name = f"TestBot_MPI{mpi_nprocs}"
+        workdir_name = f"{self.workdir_prefix}TestBot_MPI{mpi_nprocs}"
         if self.has_openmp:
             workdir_name += f"_OMP{self.omp_num_threads}"
 
@@ -753,6 +776,53 @@ class TestBot:
             return nfailed + npassed
 
         return nfailed
+
+
+def benchmark(testbot_json: str | None, py_nprocs_values: list[int]) -> int:
+    """Run TestBot repeatedly and compare total wall time for each Python worker count."""
+    results: list[BenchmarkResult] = []
+
+    for py_nprocs in py_nprocs_values:
+        print(f"\n{'=' * 80}\nBenchmarking py_nprocs={py_nprocs}\n{'=' * 80}")
+        testbot = TestBot.from_json(testbot_json)
+        testbot.py_nprocs_override = py_nprocs
+        testbot.workdir_prefix = f"Benchmark_PY{py_nprocs}_"
+
+        start = time.perf_counter()
+        returncode = testbot.run()
+        wall_time = time.perf_counter() - start
+        baseline = results[0].wall_time if results else wall_time
+        speedup = baseline / wall_time if wall_time else float("inf")
+        nexecuted = sum(run.nexecuted for run in testbot.run_summaries)
+        tests_per_second = nexecuted / wall_time if wall_time else float("inf")
+        results.append(
+            BenchmarkResult(py_nprocs, wall_time, speedup, nexecuted, tests_per_second, returncode)
+        )
+
+    headings = ("py_nprocs", "wall time (s)", "speedup", "executed", "tests/s", "return code")
+    rows = [
+        (
+            str(r.py_nprocs),
+            f"{r.wall_time:.3f}",
+            f"{r.speedup:.3f}x",
+            str(r.nexecuted),
+            f"{r.tests_per_second:.3f}",
+            str(r.returncode),
+        )
+        for r in results
+    ]
+    widths = [max(len(headings[i]), *(len(row[i]) for row in rows)) for i in range(len(headings))]
+    print("\nBenchmark summary")
+    print("  ".join(headings[i].ljust(widths[i]) for i in range(len(headings))))
+    print("  ".join("-" * width for width in widths))
+    for row in rows:
+        print("  ".join(row[i].ljust(widths[i]) for i in range(len(row))))
+
+    with open("testbot_benchmark.json", "w") as fh:
+        json.dump([result.as_dict() for result in results], fh, indent=2)
+    print("Writing testbot_benchmark.json: benchmark wall times and return codes.")
+
+    return max((result.returncode for result in results), default=0)
 
 
 def get_git_tag() -> str:
@@ -1210,13 +1280,16 @@ def build_parser() -> argparse.ArgumentParser:
     Build the command-line argument parser for TestBot.
 
     Returns:
-        argparse.ArgumentParser: The configured parser with `run`, `analyze`,
-        `print`, `doc`, and `template` subcommands.
+        argparse.ArgumentParser: The configured parser with `run`, `benchmark`,
+        `analyze`, `print`, `doc`, and `template` subcommands.
     """
     examples = """
 Examples:
   # Run tests using a configuration file
   python testbot.py run testbot.json
+
+  # Compare wall time with different CPU limits and profile Python orchestration
+  python testbot.py benchmark testbot.json --py-nprocs 1 2 4 8 --profile
 
   # Generate a template configuration file
   python testbot.py template > testbot.json
@@ -1247,6 +1320,29 @@ Examples:
         nargs="?",
         default=None,
         help="Path to the testbot.json file (default: testbot.json next to this script).",
+    )
+
+    benchmark_parser = subparsers.add_parser(
+        "benchmark", help="Run the test suite with several py_nprocs values and compare wall time."
+    )
+    benchmark_parser.add_argument(
+        "testbot_json",
+        nargs="?",
+        default=None,
+        help="Path to the testbot.json file (default: testbot.json next to this script).",
+    )
+    benchmark_parser.add_argument(
+        "--py-nprocs",
+        type=int,
+        nargs="+",
+        required=True,
+        metavar="N",
+        help="Positive Python worker counts to benchmark, in baseline-first order.",
+    )
+    benchmark_parser.add_argument(
+        "--profile",
+        action="store_true",
+        help="Profile Python orchestration and write testbot_benchmark.prof.",
     )
 
     doc_parser = subparsers.add_parser(
@@ -1302,6 +1398,22 @@ def main() -> int:
     if args.command == "template":
         generate_template()
         return 0
+
+    if args.command == "benchmark":
+        if any(value <= 0 for value in args.py_nprocs):
+            raise SystemExit("benchmark --py-nprocs values must be positive integers")
+        if len(set(args.py_nprocs)) != len(args.py_nprocs):
+            raise SystemExit("benchmark --py-nprocs values must be unique")
+
+        if args.profile:
+            profiler = cProfile.Profile()
+            returncode = profiler.runcall(benchmark, args.testbot_json, args.py_nprocs)
+            profiler.dump_stats("testbot_benchmark.prof")
+            print("Writing testbot_benchmark.prof: Python profiling data.")
+            pstats.Stats(profiler).strip_dirs().sort_stats("cumulative").print_stats(40)
+            return returncode
+
+        return benchmark(args.testbot_json, args.py_nprocs)
 
     # "run" and "print" both parse a testbot.json into a TestBot instance.
     if args.testbot_json is not None:
