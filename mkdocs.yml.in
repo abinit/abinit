@@ -376,8 +376,6 @@ extra_javascript:
 
 copyright: Copyright &copy; 2020-2026 The Abinit Group
 
-google_analytics: ['UA-116681470-1', 'docs.abinit.org']
-
 extra:
     version: ABINIT_VERSION
     previous_published_versions: [] #8.2.0
