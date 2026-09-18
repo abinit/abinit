@@ -585,7 +585,7 @@ subroutine pspheads_comm(npsp,pspheads,test_paw)
 #if defined HAVE_MPI
 !scalars
  integer,parameter :: master=0
- integer :: ierr,comm,ii,ipsp,il,list_size
+ integer :: ierr,comm,ii,ipsp,il,list_size,lmax_
 !arrays
  integer,allocatable :: list_int(:),lmax_(:)
  real(dp) :: tsec(2)
@@ -648,6 +648,7 @@ subroutine pspheads_comm(npsp,pspheads,test_paw)
    list_size=list_size+2*lmax_(ipsp)+1
  enddo
  ABI_MALLOC(list_int,(list_size))
+ list_int=0
  ii=0
  do ipsp=1,npsp
    do il=0,lmax_(ipsp)
