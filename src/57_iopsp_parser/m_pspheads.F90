@@ -587,7 +587,7 @@ subroutine pspheads_comm(npsp,pspheads,test_paw)
  integer,parameter :: master=0
  integer :: ierr,comm,ii,ipsp,il,list_size
 !arrays
- integer,allocatable :: list_int(:)
+ integer,allocatable :: list_int(:),lmax_(:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: list_dpr(:)
  character(len=fnlen),allocatable :: list_char(:)
@@ -636,25 +636,27 @@ subroutine pspheads_comm(npsp,pspheads,test_paw)
  ABI_FREE(list_int)
 
  list_size=0
+ ABI_MALLOC(lmax_,(npsp))
  do ipsp=1,npsp
+   lmax_(ipsp)=max(pspheads(ipsp)%lmax,0)
    if(.not.allocated(pspheads(ipsp)%nproj)) then
-     ABI_MALLOC(pspheads(ipsp)%nproj,(0:pspheads(ipsp)%lmax))
+     ABI_MALLOC(pspheads(ipsp)%nproj,(0:lmax_(ipsp)))
    endif
    if(.not.allocated(pspheads(ipsp)%nprojso)) then
-     ABI_MALLOC(pspheads(ipsp)%nprojso,(pspheads(ipsp)%lmax))
+     ABI_MALLOC(pspheads(ipsp)%nprojso,(lmax_(ipsp)))
    endif
-   list_size=list_size+2*pspheads(ipsp)%lmax+1
+   list_size=list_size+2*lmax_(ipsp)+1
  enddo
  ABI_MALLOC(list_int,(list_size))
  ii=0
  do ipsp=1,npsp
-   do il=0,pspheads(ipsp)%lmax
+   do il=0,lmax_(ipsp)
      ii=ii+1
      list_int(ii) = pspheads(ipsp)%nproj(il)
    enddo
  enddo
  do ipsp=1,npsp
-   do il=1,pspheads(ipsp)%lmax
+   do il=1,lmax_(ipsp)
      ii=ii+1
      list_int(ii) = pspheads(ipsp)%nprojso(il)
    enddo
@@ -664,18 +666,19 @@ subroutine pspheads_comm(npsp,pspheads,test_paw)
 
  ii=0
  do ipsp=1,npsp
-   do il=0,pspheads(ipsp)%lmax
+   do il=0,lmax_(ipsp)
      ii=ii+1
      pspheads(ipsp)%nproj(il) = list_int(ii)
    enddo
  enddo
  do ipsp=1,npsp
-   do il=1,pspheads(ipsp)%lmax
+   do il=1,lmax_(ipsp)
      ii=ii+1
      pspheads(ipsp)%nprojso(il) = list_int(ii)
    enddo
  enddo
  ABI_FREE(list_int)
+ ABI_FREE(lmax_)
 
  ! Unbeliveable, this cannot be sent with the others, for woopy
  ABI_MALLOC(list_int,(npsp))
