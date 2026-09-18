@@ -226,6 +226,7 @@ class TestBot:
     run_summaries: list[TestRunSummary] = field(init=False, default_factory=list, repr=False)
     workdir_prefix: str = field(init=False, default="", repr=False)
     py_nprocs_override: int | None = field(init=False, default=None, repr=False)
+    remove_existing_workdirs: bool = field(init=False, default=False, repr=False)
 
     @classmethod
     def print_options(cls) -> None:
@@ -578,6 +579,26 @@ class TestBot:
         with open("testbot_runs.html", "w") as fh:
             fh.write(fragment)
 
+    def _create_workdir(self, workdir_name: str) -> None:
+        """Create one work directory, optionally replacing explicitly requested stale output."""
+        try:
+            os.mkdir(workdir_name)
+        except FileExistsError:
+            if not self.remove_existing_workdirs:
+                raise RuntimeError(f"{workdir_name} already exists!") from None
+            if os.path.islink(workdir_name) or not os.path.isdir(workdir_name):
+                raise RuntimeError(
+                    f"Refusing to remove {workdir_name}: expected a real directory, not a symlink or file"
+                ) from None
+            print(f"Removing existing TestBot work directory: {workdir_name}")
+            shutil.rmtree(workdir_name)
+            try:
+                os.mkdir(workdir_name)
+            except FileExistsError:
+                raise RuntimeError(
+                    f"Cannot recreate {workdir_name}: another TestBot process created it concurrently"
+                ) from None
+
     def run_tests_with_np(self, mpi_nprocs: int, suite_args: list[str] | str | None = None, runmode: str = "static") -> tuple[int, int, int]:
         """
         Run a subset of tests using a specified number of MPI processes.
@@ -607,9 +628,7 @@ class TestBot:
         if self.has_openmp:
             workdir_name += f"_OMP{self.omp_num_threads}"
 
-        if os.path.exists(workdir_name):
-            raise RuntimeError(f"{workdir_name} already exists!")
-        os.mkdir(workdir_name)
+        self._create_workdir(workdir_name)
 
         if self.tmp_basedir:
             workdir = os.path.join(tempfile.mkdtemp(dir=self.tmp_basedir), workdir_name)
@@ -778,7 +797,11 @@ class TestBot:
         return nfailed
 
 
-def benchmark(testbot_json: str | None, py_nprocs_values: list[int]) -> int:
+def benchmark(
+    testbot_json: str | None,
+    py_nprocs_values: list[int],
+    remove_existing_workdirs: bool = False,
+) -> int:
     """Run TestBot repeatedly and compare total wall time for each Python worker count."""
     results: list[BenchmarkResult] = []
 
@@ -787,6 +810,7 @@ def benchmark(testbot_json: str | None, py_nprocs_values: list[int]) -> int:
         testbot = TestBot.from_json(testbot_json)
         testbot.py_nprocs_override = py_nprocs
         testbot.workdir_prefix = f"Benchmark_PY{py_nprocs}_"
+        testbot.remove_existing_workdirs = remove_existing_workdirs
 
         start = time.perf_counter()
         returncode = testbot.run()
@@ -1321,6 +1345,12 @@ Examples:
         default=None,
         help="Path to the testbot.json file (default: testbot.json next to this script).",
     )
+    run_parser.add_argument(
+        "-rf",
+        "--remove-existing-workdirs",
+        action="store_true",
+        help="Remove stale TestBot work directories before running. Unsafe for concurrent runs.",
+    )
 
     benchmark_parser = subparsers.add_parser(
         "benchmark", help="Run the test suite with several py_nprocs values and compare wall time."
@@ -1330,6 +1360,12 @@ Examples:
         nargs="?",
         default=None,
         help="Path to the testbot.json file (default: testbot.json next to this script).",
+    )
+    benchmark_parser.add_argument(
+        "-rf",
+        "--remove-existing-workdirs",
+        action="store_true",
+        help="Remove stale benchmark work directories. Unsafe for concurrent runs.",
     )
     benchmark_parser.add_argument(
         "--py-nprocs",
@@ -1407,13 +1443,15 @@ def main() -> int:
 
         if args.profile:
             profiler = cProfile.Profile()
-            returncode = profiler.runcall(benchmark, args.testbot_json, args.py_nprocs)
+            returncode = profiler.runcall(
+                benchmark, args.testbot_json, args.py_nprocs, args.remove_existing_workdirs
+            )
             profiler.dump_stats("testbot_benchmark.prof")
             print("Writing testbot_benchmark.prof: Python profiling data.")
             pstats.Stats(profiler).strip_dirs().sort_stats("cumulative").print_stats(40)
             return returncode
 
-        return benchmark(args.testbot_json, args.py_nprocs)
+        return benchmark(args.testbot_json, args.py_nprocs, args.remove_existing_workdirs)
 
     # "run" and "print" both parse a testbot.json into a TestBot instance.
     if args.testbot_json is not None:
@@ -1428,6 +1466,7 @@ def main() -> int:
         print(testbot)
         return 0
 
+    testbot.remove_existing_workdirs = args.remove_existing_workdirs
     return testbot.run()
 
 

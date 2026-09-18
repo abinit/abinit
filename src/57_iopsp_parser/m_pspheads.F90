@@ -585,7 +585,7 @@ subroutine pspheads_comm(npsp,pspheads,test_paw)
 #if defined HAVE_MPI
 !scalars
  integer,parameter :: master=0
- integer :: ierr,comm,ii,ipsp,il,list_size,lmax_
+ integer :: ierr,comm,ii,ipsp,il,list_size
 !arrays
  integer,allocatable :: list_int(:),lmax_(:)
  real(dp) :: tsec(2)

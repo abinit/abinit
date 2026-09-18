@@ -658,6 +658,48 @@ class TestTestBotFromJson:
             TestBot.from_json(str(testbot_json))
 
 
+class TestWorkdirReplacement:
+    """Tests for the opt-in stale work-directory removal behavior."""
+
+    @staticmethod
+    def make_bot(remove_existing: bool) -> TestBot:
+        bot = object.__new__(TestBot)
+        bot.remove_existing_workdirs = remove_existing
+        return bot
+
+    def test_default_still_refuses_existing_directory(self, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "TestBot_MPI1").mkdir()
+        with pytest.raises(RuntimeError, match="already exists"):
+            self.make_bot(False)._create_workdir("TestBot_MPI1")
+
+    def test_rf_removes_and_recreates_existing_directory(self, tmp_path, monkeypatch, capsys):
+        monkeypatch.chdir(tmp_path)
+        workdir = tmp_path / "TestBot_MPI1"
+        workdir.mkdir()
+        (workdir / "stale.txt").write_text("old")
+
+        self.make_bot(True)._create_workdir("TestBot_MPI1")
+
+        assert workdir.is_dir()
+        assert not (workdir / "stale.txt").exists()
+        assert "Removing existing TestBot work directory" in capsys.readouterr().out
+
+    @pytest.mark.parametrize("existing_kind", ["file", "symlink"])
+    def test_rf_refuses_files_and_symlinks(self, tmp_path, monkeypatch, existing_kind):
+        monkeypatch.chdir(tmp_path)
+        target = tmp_path / "TestBot_MPI1"
+        if existing_kind == "file":
+            target.write_text("not a directory")
+        else:
+            real_dir = tmp_path / "real"
+            real_dir.mkdir()
+            target.symlink_to(real_dir, target_is_directory=True)
+
+        with pytest.raises(RuntimeError, match="Refusing to remove"):
+            self.make_bot(True)._create_workdir("TestBot_MPI1")
+
+
 class TestBuildParser:
     """Tests for the run/analyze/print argparse CLI."""
 
@@ -669,6 +711,10 @@ class TestBuildParser:
 
         ns = parser.parse_args(["run", "my.json"])
         assert ns.testbot_json == "my.json"
+        assert ns.remove_existing_workdirs is False
+
+        ns = parser.parse_args(["run", "-rf", "my.json"])
+        assert ns.remove_existing_workdirs is True
 
     def test_analyze_defaults_and_explicit_tag(self):
         parser = build_parser()
@@ -686,6 +732,12 @@ class TestBuildParser:
         assert ns.testbot_json == "my.json"
         assert ns.py_nprocs == [1, 4, 8]
         assert ns.profile is True
+        assert ns.remove_existing_workdirs is False
+
+        ns = parser.parse_args(
+            ["benchmark", "my.json", "--py-nprocs", "1", "4", "-rf"]
+        )
+        assert ns.remove_existing_workdirs is True
 
     def test_print_defaults_and_explicit_json(self):
         parser = build_parser()
@@ -724,6 +776,15 @@ class TestMain:
             assert main() == 3
         mock_from_json.assert_called_once_with("my.json")
         mock_instance.run.assert_called_once()
+        assert mock_instance.remove_existing_workdirs is False
+
+    def test_main_propagates_remove_existing_workdirs(self, monkeypatch):
+        monkeypatch.setattr(sys, "argv", ["testbot.py", "run", "-rf", "my.json"])
+        mock_instance = MagicMock()
+        mock_instance.run.return_value = 0
+        with patch("tests.testbot.TestBot.from_json", return_value=mock_instance):
+            assert main() == 0
+        assert mock_instance.remove_existing_workdirs is True
 
     def test_main_dispatches_to_print_without_running(self, monkeypatch, capsys):
         monkeypatch.setattr(sys, "argv", ["testbot.py", "print", "my.json"])
@@ -750,7 +811,7 @@ class TestMain:
         )
         with patch("tests.testbot.benchmark", return_value=2) as mock_benchmark:
             assert main() == 2
-        mock_benchmark.assert_called_once_with("my.json", [1, 4])
+        mock_benchmark.assert_called_once_with("my.json", [1, 4], False)
 
     def test_main_rejects_invalid_benchmark_cpu_values(self, monkeypatch):
         monkeypatch.setattr(
