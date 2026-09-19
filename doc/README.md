@@ -10,19 +10,18 @@
 
 Install the python packages required to build the static website with:
 
-    pip install -r requirements.txt
+    pip install --group mksite
 
-then install the mkdocs plugin with:
+This also installs the `abimkdocs_plugin` (declared as a local path dependency inside the `mksite`
+group in `pyproject.toml`), so no separate install step is needed.
+Note that `--group` requires pip >= 25.1; upgrade first with `pip install --upgrade pip` if needed.
 
-    cd abimkdocs_plugin
-    python setup.py install
+If you use conda, you may want to create a new environment with:
 
-If you use conda, you may want to create a new environment based on python3.6 with:
-
-    conda create -n abinit-abimkdocs-2 python=3.6
+    conda create -n abinit-abimkdocs python=3.12
     source activate abinit-abimkdocs
 
-and then install the packages with pip (see above commands).
+and then install the packages with pip (see above command).
 
 MkDocs comes with a built-in dev-server that lets you preview your documentation as you work on it.
 Make sure you are in `~abinit`, and then start *our customized* server

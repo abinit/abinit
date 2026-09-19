@@ -38,7 +38,7 @@ randomseed=111111 # for testing purpose only
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. He
-#%% keywords = Effective potential, multibinit, spinpot
+#%% keywords = Effective_potential, multibinit, spinpot
 #%% description =
 #%%   This is to test the spin_init_state 3 option for spin dynamics in Multibinit.
 #%%   The initial spin state is set using three variables spin_init_*.

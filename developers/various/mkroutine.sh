@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 # Copyright (C) 1998-2026 ABINIT group (XG)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
@@ -120,4 +121,3 @@ end subroutine ${routine_name}
 EOF
 
 echo "done."
-

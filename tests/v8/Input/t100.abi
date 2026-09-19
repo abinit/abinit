@@ -3,18 +3,18 @@
 ##############################################################################
 
 #print options
-prt_model = 4 
-dipdip_prt = 0 
+prt_model = 4
+dipdip_prt = 0
 
 # Construction of harmonic lattice part
 ngqpt =  2 2 2
-dipdip  = 1 
+dipdip  = 1
 ncell = 2 2 2
 
-# Optimize a coefficient in th effective potential 
+# Optimize a coefficient in th effective potential
 bound_model = 3
-bound_rangePower = 6 6  
-bound_penalty = 1.001 
+bound_rangePower = 6 6
+bound_penalty = 1.001
 bound_factors = 0 1 1
 
 #%%<BEGIN TEST_INFO>
@@ -26,18 +26,18 @@ bound_factors = 0 1 1
 #%% exclude_builders = scope_gnu_12.2_mpich
 #%% need_cpp_vars = !HAVE_GPU  , !CC_INTEL_ONEAPI
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t100.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   t100_coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = M. M. Schmitt
-#%% keywords = Effective potential, multibinit
-#%% description = 
-#%%   Test the bound_model option 3: Create the equivalent high order terms for 
-#%%   diverging low order terms. 
-#%%   The test is excluded on scope_gnu_12.2_mpich, because there is memory leakage and the debug 
-#%%   is still not finished. FIXME: debug the memory leakage. 
+#%% keywords = Effective_potential, multibinit
+#%% description =
+#%%   Test the bound_model option 3: Create the equivalent high order terms for
+#%%   diverging low order terms.
+#%%   The test is excluded on scope_gnu_12.2_mpich, because there is memory leakage and the debug
+#%%   is still not finished. FIXME: debug the memory leakage.
 #%% topics = LatticeModel,DynamicsMultibinit
 #%%<END TEST_INFO>

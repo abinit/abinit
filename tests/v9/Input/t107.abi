@@ -1,5 +1,5 @@
 ###################################################################
-## Automatic test for ABINIT and LRUJ:                           ##
+## Automatic test for ABINIT and lruj:                           ##
 ##  Determine in situ Hund's J using ujdet; application of       ##
 ##  4 distinct potential perturbations                           ##
 ##  Fe BCC | ferromagnetic | PAW                        DJA 2010 ##
@@ -108,6 +108,6 @@
 #%% keywords = lruj,ujdet,DFTU,PAW
 #%% description = Compute the Hund's J in bcc Fe in 2 atom cell with ujdet
 #%%    intrinsic subroutine (using a two-point linear regression); generate
-#%%    input LRUJ.nc files for lruj post-processing utility
+#%%    input lruj.nc files for lruj post-processing utility
 #%% topics = DFT+U
 #%%<END TEST_INFO>

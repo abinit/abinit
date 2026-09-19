@@ -20,7 +20,7 @@ outdata_prefix = "t45o"
   asr   6     ! Activate translational + rotational invariance
   sys_dim 8       ! Treat the system as a molecule
 
- 
+
 !Interatomic force constant info
   dipdip  0      ! Dipole-dipole interaction treatment
 
@@ -42,14 +42,13 @@ nph1l 1
 #%% pre_commands =
 #%%   iw_cp t45.ddb.abo t45.ddb.abo
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%  t45.abo, tolnlines = 0,  tolabs=  1.2e-09, tolrel= 1.1
 #%% [paral_info]
 #%%  max_nprocs = 1
 #%% [extra_info]
 #%%  authors = B. Van Troeye
-#%%  keywords = Phonons, Acoustic Sum Rules
+#%%  keywords = Phonons, Acoustic_Sum_Rules
 #%%  description = Imposition of rotational invariance on IFCs of H2O molecule
 #%%  topics = Phonons
 #%%<END TEST_INFO>
-

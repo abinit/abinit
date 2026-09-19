@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import annotations
+
 """
 Command line interface to difflib.py providing diffs in four formats:
 
@@ -21,7 +23,7 @@ import sys
 import time
 
 
-def abinit_line_junk(line):
+def abinit_line_junk(line: str) -> bool:
     """
     Heuristic to determine if a line is 'junk' in Abinit output.
 
@@ -38,7 +40,7 @@ def abinit_line_junk(line):
     )
 
 
-def abinit_char_junk(c):
+def abinit_char_junk(c: str) -> bool:
     """
     Heuristic to determine if a character is 'junk'.
 
@@ -51,7 +53,7 @@ def abinit_char_junk(c):
     return c.isspace() or c.isdigit()
 
 
-def main():
+def main() -> None:
     """
     Main entry point for the command-line diff utility.
     Parses arguments and performs the selected diff operation.

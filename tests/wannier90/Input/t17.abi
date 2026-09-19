@@ -23,7 +23,7 @@ nbdbuf2 4
 prtebands2 1
 prtwf2 0
 
-# Dataset 3: expand dataset 1's IBZ WFK internally and call Wannier90.
+# Dataset 3: expand dataset 1's IBZ WFK internally and call wannier90.
 optdriver3 8
 wfk_task3 "wannier"
 getwfk3 1

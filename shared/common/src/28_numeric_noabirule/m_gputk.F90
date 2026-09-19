@@ -548,6 +548,7 @@ subroutine gpu_set_to_zero_sp(array, sizea)
 #endif
 
 end subroutine gpu_set_to_zero_sp
+!!***
 
 !------------------------------------------------------------------------------
 !!****f* m_gputk/gpu_set_to_zero_complex

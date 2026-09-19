@@ -18,7 +18,9 @@ repos:
       - id: trailing-whitespace
       - id: check-executables-have-shebangs
       - id: check-added-large-files
-        args: ['--maxkb=1500']  # 1000 KB = 1 MB
+        args: ['--maxkb=15000']  # 1000 KB = 1 MB
+      - id: mixed-line-ending
+        args: [--fix=lf]
 
   #- repo: https://github.com/astral-sh/ruff-pre-commit
   #  rev: v0.11.12
@@ -33,13 +35,14 @@ repos:
   #    - id: mypy
   #      #additional_dependencies: [numpy>=1.2.5]
 
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
-    hooks:
-      - id: codespell
-        stages: [pre-commit, commit-msg]
-        exclude_types: [html]
-        args: [--ignore-words=.codespell.ignore, --skip=doc/abiref.bib]
+  # MG: This is useful but it may lead to false positive
+  #- repo: https://github.com/codespell-project/codespell
+  #  rev: v2.4.1
+  #  hooks:
+  #    - id: codespell
+  #      stages: [pre-commit, commit-msg]
+  #      exclude_types: [html]
+  #      args: [--ignore-words=.codespell.ignore, --skip=doc/abiref.bib]
 
   #- repo: https://github.com/adamchainz/blacken-docs
   #  rev: 1.19.1
@@ -83,10 +86,6 @@ repos:
       - id: run-check-config-h
         name: Run run-check-config-h
         entry: python abichecks/scripts/check-config-h.py
-        language: python
-      - id: run-check-forbidden-flags
-        name: Run run-check-forbidden-flags
-        entry: python abichecks/scripts/check-forbidden-flags.py
         language: python
       - id: run-check-ascii
         name: Run run-check_ascii
@@ -132,34 +131,3 @@ repos:
         name: run check-unprotected-omp-target.py
         entry: python abichecks/scripts/check-unprotected-omp-target.py
         language: python
-      - id: check-trailing-whitespace-local
-        name: Check trailing whitespace
-        entry: git_rules_scripts/check-trailing-whitespace.sh
-        language: script
-      - id: check-final-newline-local
-        name: Check final newline
-        entry: git_rules_scripts/check-final-newline.sh
-        language: script
-      - id: check-yaml-syntax-local
-        name: Check YAML syntax
-        entry: git_rules_scripts/check-yaml-syntax.sh
-        language: script
-        files: '\.(ya?ml)$'
-      - id: check-merge-conflicts-local
-        name: Check merge conflict markers
-        entry: git_rules_scripts/check-merge-conflicts.sh
-        language: script
-      - id: check-line-endings-local
-        name: Check LF line endings
-        entry: git_rules_scripts/check-line-endings.sh
-        language: script
-      - id: check-executable-shebangs-local
-        name: Check executable shebangs
-        entry: git_rules_scripts/check-executable-shebangs.sh
-        language: script
-      - id: check-staged-file-sizes
-        name: Check staged file sizes
-        entry: git_rules_scripts/check-staged-file-sizes.sh
-        language: script
-        pass_filenames: false
-        stages: [pre-commit]

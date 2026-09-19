@@ -81,4 +81,3 @@ function(get_offload_flags)
     endif()
     set(${OMP_DO_RESULT} ${tmp2} PARENT_SCOPE)
 endfunction()
-

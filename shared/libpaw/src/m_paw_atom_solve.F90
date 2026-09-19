@@ -464,6 +464,7 @@ END  TYPE splinesolvinfo
 
 
 !----------------------------------------------------------------------
+!!***
 !!****t* m_paw_atom_solve/atompaw_type
 !! NAME
 !! atompaw_type
@@ -761,7 +762,7 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
    ! Update ehnzc
    call atompaw_ehnzc(coredens,radmesh,atm%ehnzc,atm%znucl)
 
-   ! update core kinetic energy 
+   ! update core kinetic energy
    atm%ekinc=zero
    atm%eeigc=zero
    icor=0
@@ -948,7 +949,7 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
  &    atp%PAW%otp,2,atp%input_string,"","",-1,atm%zcore_orig,atp)
      file_xml=TRIM(atp%pot%sym)//'-rcpaw.corewf.xml'
      call xmlprtcore(trim(file_xml),atp,atm%zcore_orig,mesh_data,atp%input_string)
-     call destroy_mesh_data(mesh_data) 
+     call destroy_mesh_data(mesh_data)
    endif
 
    ! update tcoretau : TODO : tau
@@ -1002,7 +1003,7 @@ subroutine atompaw_init(pawtab,pawrad,atp,atm,sctol,elin_mode,vhtnzc_mode,tpaw_m
 !scalars
  CHARACTER(len=500) :: input_file
  character(len=500) :: msg
- character*(132) :: file_xml_core
+ character(len=fnlen) :: file_xml_core
  logical :: rcpaw_core_file,ex
  REAL(dp)    :: a1,a2,a3,hval,r0,zcore
  INTEGER :: ii,jj,icor,ir,io,fnln,ios
@@ -1035,7 +1036,7 @@ subroutine atompaw_init(pawtab,pawrad,atp,atm,sctol,elin_mode,vhtnzc_mode,tpaw_m
    write(msg,'(3a)') 'This file does not exist: ',trim(input_file),'!'
    LIBPAW_ERROR(msg)
  end if
- 
+
 ! Initialize global constants
  machine_precision = zero
  a1 = 4._dp/3._dp
@@ -1167,7 +1168,7 @@ subroutine atompaw_init(pawtab,pawrad,atp,atm,sctol,elin_mode,vhtnzc_mode,tpaw_m
    call destroy_mesh_data(mesh_data)
  else
   file_xml_core=filename
- endif 
+ endif
  ! define atom
  call pawpsp_init_core(atm,psp_filename=trim(file_xml_core))
  call simp_gen(atp%pot_ref,atp%Pot%rv(1:pawtab%mesh_size)*pawrad%rad(1:pawtab%mesh_size)*pawtab%shapefunc(1:pawtab%mesh_size,1),pawrad)
@@ -9751,7 +9752,7 @@ END SUBROUTINE interpfunc
 !!        where h = x - tau(i). the function program *ppvalu* may be
 !!        used to evaluate f or its derivatives from tau,c, l = n-1,
 !!        and k=4.
-!!****** a tridiagonal linear system for the unknown slopes s(i) of
+!! A tridiagonal linear system for the unknown slopes s(i) of
 !!  f  at tau(i), i=1,...,n, is generated and then solved by gauss elim-
 !!  ination, with s(i) ending up in c(2,i), all i.
 !!     c(3,.) and c(4,.) are used initially for temporary storage.
@@ -11018,7 +11019,7 @@ END SUBROUTINE input_dataset_read
  WRITE(unit=char5a,fmt='(f5.2)') zcore
  WRITE(unit_xml_core,'(""" core=""",a,"""/>")')trim(ADJUSTL(char5a))
 
- 
+
 !!Write XC definition
 ! call get_xc_data(xc_type,xc_name)
 ! if (have_libxc.and.xc_type/="UNKNOWN") then
@@ -11043,7 +11044,7 @@ END SUBROUTINE input_dataset_read
  core_size=count(atp%Orbit%iscore(1:atp%Orbit%norbit))
 !WRITE(unit_xml_core,'("<orbitals norbs=""",i2,"""/>")') core_size
 
-!Read mesh size 
+!Read mesh size
  ii=0
  LIBPAW_ALLOCATE(irwf,(core_size))
  irwf(:)=mesh_data%meshsz(mesh_data%iwavmesh)
@@ -11098,7 +11099,7 @@ END SUBROUTINE input_dataset_read
     gridt(ii)="log"
     radstp0=mesh_data%radstp(ii)
     logstp0=mesh_data%logstp(ii)
-    dum(1:corewf_meshsz)=logstp0*(radstp0+atp%Grid%r(1:corewf_meshsz)) 
+    dum(1:corewf_meshsz)=logstp0*(radstp0+atp%Grid%r(1:corewf_meshsz))
    case default
     stop '  Bug (2) in xmlprtcore: mesh type not implemented in Atompaw!'
   end select
@@ -11231,27 +11232,27 @@ subroutine build_mesh_data(mesh_data,Grid,irc,ivion,ivale,coretailpoints,itau)
 
  if (PRESENT(irc).and.PRESENT(ivion).and.PRESENT(ivale).and.PRESENT(coretailpoints).and.PRESENT(itau)) then
     aeonly=.false.
- endif    
+ endif
 
 !Various mesh sizes
  if (Grid%type==loggrid) then
   mesh_data%wav_meshsz=Grid%n
   if (.not.aeonly) then
    mesh_data%sph_meshsz=min(1+nint(log(one+Grid%r(irc)/mesh_data%rad_step)/mesh_data%log_step),mesh_data%wav_meshsz)
-  else  
+  else
    mesh_data%sph_meshsz=Grid%n
-  endif        
+  endif
  else
-  if (.not.aeonly) then      
+  if (.not.aeonly) then
    mesh_data%wav_meshsz=irc+Grid%ishift
    mesh_data%sph_meshsz=min(1+nint(Grid%r(irc)/mesh_data%rad_step),mesh_data%wav_meshsz)
-  else 
+  else
    mesh_data%wav_meshsz=Grid%n
    mesh_data%sph_meshsz=Grid%n
-  endif 
+  endif
  endif
  mesh_data%prj_meshsz=mesh_data%sph_meshsz  ! To be modified by RSO
- 
+
  if (.not.aeonly) then
    mesh_data%core_meshsz=coretailpoints
    mesh_data%vale_meshsz=ivale
@@ -11428,7 +11429,7 @@ subroutine build_mesh_data(mesh_data,Grid,irc,ivion,ivale,coretailpoints,itau)
     if(mesh_data%vion_meshsz/=mesh_data%vlda12_meshsz) then
      if(mesh_data%vbare_meshsz/=mesh_data%vlda12_meshsz) then
       if(mesh_data%vale_meshsz/=mesh_data%vlda12_meshsz) then
-       if(mesh_data%tau_meshsz/=mesh_data%vlda12_meshsz) then 
+       if(mesh_data%tau_meshsz/=mesh_data%vlda12_meshsz) then
         mesh_data%nmesh=mesh_data%nmesh+1
         mesh_data%ivlda12mesh=mesh_data%nmesh
         mesh_data%meshtp(mesh_data%nmesh)=mesh_data%mesh_type
@@ -11468,16 +11469,16 @@ subroutine destroy_mesh_data(mesh_data)
 !---- Executable code
 !------------------------------------------------------------------
 
- if (allocated(mesh_data%meshtp)) then 
+ if (allocated(mesh_data%meshtp)) then
    LIBPAW_DEALLOCATE(mesh_data%meshtp)
  endif
- if (allocated(mesh_data%meshsz)) then 
+ if (allocated(mesh_data%meshsz)) then
    LIBPAW_DEALLOCATE(mesh_data%meshsz)
  endif
- if (allocated(mesh_data%radstp)) then 
+ if (allocated(mesh_data%radstp)) then
    LIBPAW_DEALLOCATE(mesh_data%radstp)
  endif
- if (allocated(mesh_data%logstp)) then 
+ if (allocated(mesh_data%logstp)) then
    LIBPAW_DEALLOCATE(mesh_data%logstp)
  endif
 
@@ -11949,7 +11950,7 @@ subroutine destroy_mesh_data(mesh_data)
 !
 !!Core-core exchange terms
 ! WRITE(unit_xml,'("<exact_exchange core-core=""", 1x,es23.16,"""/>")') &
-!&     PAW%XCORECORE/2 
+!&     PAW%XCORECORE/2
 !
 !!Lamb shielding
 ! WRITE(unit_xml,'("<lamb_shielding shielding=""", 1x,es23.16,"""/>")') &
@@ -11970,7 +11971,7 @@ subroutine destroy_mesh_data(mesh_data)
  LIBPAW_DEALLOCATE(rad_aux)
  LIBPAW_DEALLOCATE(dum_aux)
  LIBPAW_DEALLOCATE(dum)
- 
+
  CONTAINS
  !**************************************************
  ! If an interpolation on an auxiliary grid is
@@ -12037,7 +12038,7 @@ subroutine destroy_mesh_data(mesh_data)
     if (abs(func_out(jj))<tol_zero) func_out(jj)=0.d0
   end do
 
-  end subroutine interp_and_filter 
+  end subroutine interp_and_filter
 
 !***********************************************************************
 !* In case of interpolation on an auxiliary grid, a
@@ -12092,7 +12093,7 @@ subroutine destroy_mesh_data(mesh_data)
 !     enddo
 !     proj_aux=proj_aux1
 !     deallocate(proj_aux1)
-!  end subroutine vdborth 
+!  end subroutine vdborth
 
  END SUBROUTINE xmloutput
 

@@ -20,8 +20,8 @@ acell 3*5
 rprim  1.0  0.0  0.0
        0.0  1.0  0.0
        0.0  0.0  1.0
-      
-natom 1        
+
+natom 1
 nband 2
 
 #Hartree solver
@@ -30,15 +30,15 @@ nscforder  16    # Order of scaling used by kernel
 optforces 0       # Don't compute the forces inside the SCF loop
 
 
-#Definition of the k-point grid 
-ngkpt  1  1  1  
+#Definition of the k-point grid
+ngkpt  1  1  1
 nshiftk 1
 shiftk 0. 0. 0.
 
 #Definition of the atom types
 ntypat 1          # There is only one type of atom
 znucl 1           # The keyword "znucl" refers to the atomic number
-                         
+
 
 #Definition of the atoms
 typat 1  # All possible atoms are type 1.
@@ -51,8 +51,8 @@ ixc 1             # LDA Teter Pade parametrization
 #Definition of the planewave basis set
 ecut   50           # This cut-off is too low for real calculations
                     # but for the test, it is OK.
-                    
-                    
+
+
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "PseudosGTH_pwteter/01h.pspgth"

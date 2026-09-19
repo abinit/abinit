@@ -32,7 +32,7 @@ randomseed=111111 # for testing only
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. He
-#%% keywords = Effective potential, multibinit, LWF
+#%% keywords = Effective_potential, multibinit, LWF
 #%% description =
 #%%   read xml and run lattice wannier function dynamics
 #%%   The ncellmat  parameters are small.

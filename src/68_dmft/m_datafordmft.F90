@@ -712,6 +712,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
  CONTAINS
 
+!!***
 !!****f* m_datafordmft/chipsi_check
 !! NAME
 !!  chipsi_check

@@ -6,9 +6,9 @@ body {
 /* A better looking default horizontal rule */
 .md-typeset hr {
     border-bottom: .1rem solid rgba(0,0,0,.26);
-} 
+}
 
-/* Increase logo width because mkdocs material enforces 48 x 48 
+/* Increase logo width because mkdocs material enforces 48 x 48
     width: 48px;
 */
 .md-logo img {
@@ -19,7 +19,7 @@ body {
 
 
 /* Add vertical rhythm
- * Based on example 5 of https://tympanus.net/codrops/2012/11/02/heading-set-styling-with-css/ 
+ * Based on example 5 of https://tympanus.net/codrops/2012/11/02/heading-set-styling-with-css/
 .md-main {counter-reset: section-1, section-2, section-3, section-4;}
 */
 
@@ -92,10 +92,10 @@ a:focus, a:hover {
 
 a:active {
   color: red;
-} 
+}
 */
 
-/* https://codemyui.com/expand-on-hover-link-style/ 
+/* https://codemyui.com/expand-on-hover-link-style/
 a.wikilink {
   text-decoration: none;
   margin: 0 2px;
@@ -124,7 +124,7 @@ a.wikilink:hover:before {
 }
 */
 
-a.codevar-wikilink, 
+a.codevar-wikilink,
 a.abifile-wikilink {
     font-family: "Inconsolata", "Consolas", "Menlo", Monaco, "Lucida Console", "Liberation Mono", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace, serif;
 /*
@@ -148,7 +148,7 @@ font-family: 'Ubuntu Mono', monospace;
 
 /* Add fa icon to external links a la wikipedia.
  * See http://astronautweb.co/snippet/font-awesome/ */
-a[href^="http://"]:after, 
+a[href^="http://"]:after,
 a[href^="https://"]:after {
     content: "\f08e";  /* font-awesome fa-external-link */
     /* content: url(http://upload.wikimedia.org/wikipedia/commons/6/64/Icon_External_Link.png); */
@@ -162,7 +162,7 @@ a[href^="https://"]:after {
     position: absolute;
     display: inline-block;
     padding-left: 3px;
-    /*--adjust as necessary-- 
+    /*--adjust as necessary--
     padding-right: 0.5em;
     top: 10px;
     left: 0;
@@ -196,14 +196,14 @@ tr:hover {
 }
 
 /* Change color background of code examples and admonitions */
-.md-typeset .codehilite code, 
-.md-typeset .codehilite pre, 
-.md-typeset .highlight code, 
+.md-typeset .codehilite code,
+.md-typeset .codehilite pre,
+.md-typeset .highlight code,
 .md-typeset .highlight pre {
     background-color: #dfe2f1;
 }
 
-.md-typeset .admonition, 
+.md-typeset .admonition,
 .md-typeset details {
     background-color: #eee;
 }
@@ -213,7 +213,7 @@ tr:hover {
     background-color: rgba(144, 144, 144, 0.10);
 }
 
-/* This for bootstrap buttons with labels. See https://bootsnipp.com/snippets/featured/buttons-with-labels 
+/* This for bootstrap buttons with labels. See https://bootsnipp.com/snippets/featured/buttons-with-labels
 .btn-label {
     position: relative;
     left: -12px;
@@ -272,13 +272,13 @@ pre.small-text {
     z-index: 0;
 }
 
-/* Setting height is also important, otherwise editor wont showup 
+/* Setting height is also important, otherwise editor wont showup
 http://tech.deepumohan.com/2013/09/javascript-ace-editor-positioning-bootstrap.html */
-.editor { 
-    height: 480px; 
+.editor {
+    height: 480px;
     z-index: 0;
     /*
-    height: 520px; 
+    height: 520px;
     position: absolute;
     top: 0;
     right: 0;
@@ -296,7 +296,7 @@ http://tech.deepumohan.com/2013/09/javascript-ace-editor-positioning-bootstrap.h
     color: rgba(255, 255, 255, 0);
 }
 
-.fab-primary, 
+.fab-primary,
 .fab-secondary {
     transition: all 0.35s ease-in-out;
 }
@@ -318,7 +318,7 @@ http://tech.deepumohan.com/2013/09/javascript-ace-editor-positioning-bootstrap.h
 }
 
 #inbox .show-on-hover:hover > ul.dropdown-menu {
-    display: block;    
+    display: block;
 }
 
 #inbox .show-on-hover {
@@ -335,7 +335,7 @@ http://tech.deepumohan.com/2013/09/javascript-ace-editor-positioning-bootstrap.h
     background: #3C80F6;
 }
 
-#inbox .dropup .dropdown-menu, 
+#inbox .dropup .dropdown-menu,
 .navbar-fixed-bottom .dropdown .dropdown-menu {
     top: auto;
     bottom: 100%;
@@ -401,22 +401,22 @@ http://tech.deepumohan.com/2013/09/javascript-ace-editor-positioning-bootstrap.h
 
 #inbox .dropdown-menu > li:last-child>a {
     background: #D3A516;
-    color: #fff !important; 
+    color: #fff !important;
 }
 
 #inbox .dropdown-menu > li:nth-child(6)>a {
     background: magenta;
-    color: #fff !important; 
+    color: #fff !important;
 }
 
 #inbox .dropdown-menu > li:nth-child(5)>a {
     background: #3C80F6;
-    color: #fff !important; 
+    color: #fff !important;
 }
 
 #inbox .dropdown-menu > li:nth-child(4)>a {
     background: DARKTURQUOISE;
-    color: #fff !important; 
+    color: #fff !important;
 }
 
 #inbox .dropdown-menu > li:nth-child(3)>a {
@@ -472,7 +472,7 @@ div.TabsLetter a.active {
     padding: 6px 12px !important;
     /* border: 1px solid #ccc; */
     border-top: none !important;
-} 
+}
 
 ul#Letters, ul.TabContentLetter {
     list-style: none !important;
@@ -493,14 +493,14 @@ ul#Letters {
 
 a.small-grey-link {
     text-decoration: none; /* Remove default text underline */
-    font-size: 16px; 
-    color: #666 !important; 
+    font-size: 16px;
+    color: #666 !important;
     /* display: block; Make it into a block element to fill the whole list */
 }
 
 a.small-grey-link:hover {
     color: #111; /* Add a hover effect to all links, except for headers */
-    background-color: #ccc; 
+    background-color: #ccc;
 }
 
 li.HeaderLetter {

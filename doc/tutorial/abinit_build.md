@@ -1330,7 +1330,7 @@ You may now type "make" to build Abinit.
     Please take your time to read carefully the final summary and **make sure you are getting what you expect**.
     A lot of typos or configuration errors can be easily spotted at this level.
 
-    You might then find useful to have a look at other examples available [in this page](../developers/autoconf_examples.md).
+    You might then find useful to have a look at other examples available on the [testfarm build examples page](http://dev-testfarm.abinit.org).
     Additional configuration files for clusters can be found in the
     [abiconfig package](https://github.com/abinit/abiconfig).
 

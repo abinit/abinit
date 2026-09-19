@@ -28,9 +28,9 @@ def main() -> int:
   Returns:
       Number of files missing the `config.h` inclusion (0 if OK).
   """
+  retval = 0
   for top in find_src_dirs():
       assert os.path.exists(top)
-      retval = 0
       for root,dirs,files in os.walk(top):
         # Sort dirs
         dirs.sort()

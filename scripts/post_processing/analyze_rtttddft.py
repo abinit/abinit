@@ -9,8 +9,9 @@ Partially based on the script in the tutorials of the exciting code
 F. Brieuc
 """
 
-import sys
 import argparse
+import sys
+
 import numpy as np
 from scipy.fftpack import fft, fftfreq
 from scipy.integrate import trapz
@@ -56,7 +57,6 @@ def fourier_direct(time, signal, wcut, nfft):
     If wcut == -1 use a third order polynomial damping function as filter.
     From Yabana et al., Phys. Stat. Sol. (B) 243,1121 (2006)
     """
-
     ntime = len(time)
 
     if len(signal) != ntime:
@@ -121,9 +121,9 @@ def parse_output(file):
     with open(file) as f:
         lines = f.readlines()
 
-    tmp = search_keyword(lines,'nelect')
+    tmp = search_keyword(lines,"nelect")
     nele = float(tmp[:-1])
-    tmp = search_keyword(lines,'ucvol')
+    tmp = search_keyword(lines,"ucvol")
     vol = float(tmp)
 
     return nele, vol
@@ -133,53 +133,52 @@ def parse_command_line():
     """
     Parse command line arguments
     """
-
     parser = argparse.ArgumentParser()
 
     help_str = "Name of the TDCURRENT file"
-    parser.add_argument('-c', '--current', help=help_str, required=True)
+    parser.add_argument("-c", "--current", help=help_str, required=True)
 
     help_str = "Name of the TDEFIELD file or dirac if you used an impulse"
     help_str += " electric field (Dirac pulse) see also the ezero parameter"
     help_str += " in that case"
-    parser.add_argument('-e', '--efield', help=help_str, required=False)
+    parser.add_argument("-e", "--efield", help=help_str, required=False)
 
     help_str = "Amplitude of the electric field - Only used if -e dirac"
-    parser.add_argument('-ez', '--ezero',  help=help_str, required=False,
+    parser.add_argument("-ez", "--ezero",  help=help_str, required=False,
                         type=float, default=1.0)
 
     help_str = "Name of the Abinit output file (often *.abo)"
-    parser.add_argument('-o', '--outfile', help=help_str, required=False)
+    parser.add_argument("-o", "--outfile", help=help_str, required=False)
 
     help_str = "Direction (x, y or z) of electric field to consider"
-    parser.add_argument('-d', '--dir', help=help_str, required=False,
-                        default='x')
+    parser.add_argument("-d", "--dir", help=help_str, required=False,
+                        default="x")
 
     help_str = "Cutoff freq. of exponential window [exp(-wcut*t)] (in Ha)"
-    parser.add_argument('-wc', '--wcut', help=help_str, required=False,
+    parser.add_argument("-wc", "--wcut", help=help_str, required=False,
                         type=float, default=0.0)
 
     help_str = "Use a third order polynomial damping function"
     help_str += "[1-3(t/tmax)^2+2(t/tmax)^3]"
-    parser.add_argument('-damp', '--damp', help=help_str, required=False,
-                        action='store_true', default=False)
+    parser.add_argument("-damp", "--damp", help=help_str, required=False,
+                        action="store_true", default=False)
 
     help_str = "Remove the first tshift time of current density"
-    parser.add_argument('-ts', '--tshift', help=help_str, required=False,
+    parser.add_argument("-ts", "--tshift", help=help_str, required=False,
                         type=float, default=0.0)
 
     help_str = "Stride time step (Default: 1)"
-    parser.add_argument('-s', '--stride',  help=help_str,  required=False,
+    parser.add_argument("-s", "--stride",  help=help_str,  required=False,
                         type=int, default=1)
 
     help_str = "If p>1 then zero-padding is used.\n"
     help_str += "The signal is considered to be of length p*ntime (Default: 1)"
-    parser.add_argument('-p', '--padding', help=help_str, required=False,
+    parser.add_argument("-p", "--padding", help=help_str, required=False,
                         type=int, default=1)
 
     help_str = "More output mostly for testing"
-    parser.add_argument('-v', '--verbose', help=help_str, required=False,
-                        action='store_true', default=False)
+    parser.add_argument("-v", "--verbose", help=help_str, required=False,
+                        action="store_true", default=False)
 
     args = parser.parse_args()
 
@@ -190,7 +189,6 @@ def check_input_params(args):
     """
     Check input parameters values
     """
-
     if args.stride < 0:
         sys.exit("Wrong value of stride! It should be larger than zero!")
 
@@ -207,14 +205,14 @@ def check_input_params(args):
     if args.tshift < 0:
         sys.exit("Wrong value of tshift! It should be larger than zero!")
 
-    if args.dir != 'x' and args.dir != 'y' and args.dir != 'z':
+    if args.dir != "x" and args.dir != "y" and args.dir != "z":
         sys.exit("Wrong value of dir! Should be x, y or z!")
 
     if args.ezero < 0.0:
         sys.exit("Wrong value of ezero! It should be larger than zero!")
 
     # Print summary of parameters
-    print("")
+    print()
     print("# Summary of parameters")
     print("Current filename =", args.current)
     if args.efield.strip().lower() == "dirac":
@@ -241,10 +239,10 @@ def check_input_params(args):
     dirac_pulse = False
     if args.efield is None:
         calc_conducti = False
-        print("")
+        print()
         print("Conductivity and dielectric function will not be computed\
  since the electric field was not provided.")
-    elif args.efield.strip().lower() == 'dirac':
+    elif args.efield.strip().lower() == "dirac":
         dirac_pulse = True
 
     return calc_conducti, dirac_pulse
@@ -268,11 +266,11 @@ dt0 = time[1] - time[0]
 # Read electric field
 if calc_conducti and not dirac_pulse:
     data = np.loadtxt(args.efield.strip())
-    if args.dir == 'x':
+    if args.dir == "x":
         efield = data[:,2]
-    if args.dir == 'y':
+    if args.dir == "y":
         efield = data[:,3]
-    if args.dir == 'z':
+    if args.dir == "z":
         efield = data[:,4]
     if np.all(np.abs(efield) < 1e-10):
         sys.exit("It seems that the electric field is zero at all times!\n\
@@ -295,9 +293,9 @@ time = np.arange(0,n)*dt
 nfft = n*args.padding
 
 # Print summary
-print("")
+print()
 print("Remove timesteps before tshift and apply time striding if required.")
-print("")
+print()
 print("# Time-dependent current")
 print("Original number of steps n0 =", n0)
 print("Actual number of steps used n =", n)
@@ -307,7 +305,7 @@ print("Original length of trajectory tmax0 =",n0*dt0, "au",
       "=", n0*dt0*au2fs, "fs")
 print("Actual length of trajectory tmax =",n*dt, "au", "=", n*dt*au2fs, "fs")
 
-print("")
+print()
 print("# Fourier transform")
 print("Number of frequency point used for FFT nfft =", nfft)
 print("Minimum angular frequency wmin = dw =", 2*np.pi/(nfft*dt), "au",
@@ -383,7 +381,7 @@ zero imaginary part.")
     # f-sum rule test
     if args.outfile is not None:
         nele, vol = parse_output(args.outfile)
-        print('')
+        print()
         print("# f-sum rule (Thomas-Reiche-Kuhn) for conductivity:")
         wp2 = 4*np.pi*nele/vol
         pref = 8./wp2
@@ -409,7 +407,7 @@ zero imaginary part.")
             I_sigma = trapz(np.real(sigma_z)-np.real(sigma_z)[-1],x=w)
             print("With high freq. correction", I_sigma*pref)
     else:
-        print('')
+        print()
         msg = "Note that the f-sum rule (Thomas-Reiche-Kuhn) for conductivity"
         msg += "cannot be checked if you don't provide the abinit output file."
         print(msg)
@@ -439,11 +437,11 @@ zero imaginary part.")
     eps_x = 4.0*np.pi*1j*np.divide(sigma_x, w)
     eps_y = 4.0*np.pi*1j*np.divide(sigma_y, w)
     eps_z = 4.0*np.pi*1j*np.divide(sigma_z, w)
-    if args.dir == 'x':
+    if args.dir == "x":
         eps_x = 1.0 + eps_x
-    if args.dir == 'y':
+    if args.dir == "y":
         eps_y = 1.0 + eps_y
-    if args.dir == 'z':
+    if args.dir == "z":
         eps_z = 1.0 + eps_z
 
     # write out dielectric tensor

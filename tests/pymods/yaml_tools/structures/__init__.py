@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Import all available structures defined in this package.
 the possible operations on the extracted data.

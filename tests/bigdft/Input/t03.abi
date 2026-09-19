@@ -42,14 +42,14 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t03.abo, tolnlines = 10, tolabs = 2.0e-6, tolrel = 5.0e-8
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = D. Caliste
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   H2 molecule with default parameters. Forces are computed.
 #%% topics = Wavelets
 #%%<END TEST_INFO>

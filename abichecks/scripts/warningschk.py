@@ -38,7 +38,7 @@ def usage():
     print("\n Usage: warningschk test_number \n ")
 
 
-def main(warno, home_dir=""):
+def main(warno, home_dir="", build_dir=""):
   debug = 0
 
   if not home_dir:
@@ -53,6 +53,16 @@ def main(warno, home_dir=""):
   else:
     inp_dir = os.path.join(home_dir, "abichecks", "abirules", "Input")
 
+  # build_dir defaults to home_dir, preserving the historical in-tree-build
+  # assumption (make.log next to abichecks/) for every caller that doesn't
+  # pass it explicitly. Kept separate from home_dir because an out-of-tree
+  # build (e.g. ./configure run from a _build/ directory) produces make.log
+  # under the build tree while abichecks/abirules/Input only ever exists
+  # under the source tree -- a single shared directory can't be right for
+  # both when they differ.
+  if not build_dir:
+    build_dir = home_dir
+
   assert os.path.isdir(inp_dir)
   warno = int(warno)
   Warning      = gnu_warnings[warno][0]
@@ -64,11 +74,11 @@ def main(warno, home_dir=""):
   print( "Warning pattern : '"+Warning+"'")
   print( "**********************************************************************")
 
-  makelog = os.path.join(home_dir, "make.log")
+  makelog = os.path.join(build_dir, "make.log")
   if not os.path.exists(makelog):
-      makelog = os.path.join(home_dir, "make.stderr")
+      makelog = os.path.join(build_dir, "make.stderr")
       if not os.path.exists(makelog):
-          raise RuntimeError("Cannot find `make.log` or `make.stderr` file in `%s`.\nUse `make -O multi -j8 > make.log 2>&1`" % home_dir)
+          raise RuntimeError("Cannot find `make.log` or `make.stderr` file in `%s`.\nUse `make -O multi -j8 > make.log 2>&1`" % build_dir)
   # make.log contains utf-8 characters
   #import io
   #logfile = io.open(makelog, "r", encoding="utf-8")
@@ -122,13 +132,21 @@ def main(warno, home_dir=""):
                              print(source + " = line: " + sourceline + ", var: " + warn_msg +" ["+source_dir[-2]+"]")
                           elif warno in [6,10]:
                              warn_msg=Buffer[4].split(":")[1].rstrip()
-                             warn_code=Buffer[2].rstrip()
+                             # Normalize quotes: gfortran versions differ in how they quote
+                             # string literals when reconstructing the source snippet in
+                             # diagnostics (single vs double), independently of how the
+                             # literal is actually quoted in the source file. Canonicalize
+                             # to single quotes so the comparison with Refs/*.out doesn't
+                             # spuriously fail depending on the compiler version used.
+                             warn_code=Buffer[2].rstrip().replace('"', "'")
                              warn_pos=Buffer[3].rstrip()
                              print("%s = line: %s, " % (source,sourceline),end="")
                              cprint("warn: %s" % (warn_msg),"red")
                              cprint("  ->%s\n  ->%s" % (warn_code,warn_pos),"red")
                           elif warno in [7]:
-                             warn_code=Buffer[2].rstrip().lstrip()
+                             # See the warno 6/10 comment above: canonicalize quotes to
+                             # make this robust across gfortran versions.
+                             warn_code=Buffer[2].rstrip().lstrip().replace('"', "'")
                              print("%s = line: %s, " % (source,sourceline),end="")
                              cprint("code: %s" % (warn_code),"red")
                           elif warno in [20]:
@@ -170,8 +188,17 @@ if __name__ == "__main__":
 
   warno = sys.argv[1]
   try:
-    home_dir = os.path.abspath(sys.argv[2])
+    # An empty string here (rather than a missing argv[2]) must still mean
+    # "auto-derive home_dir" -- os.path.abspath("") resolves to the cwd,
+    # which would otherwise silently defeat the argv[0]-based derivation in
+    # main() above. This is what lets a caller supply build_dir (argv[3])
+    # without being forced to also compute and pass a real home_dir.
+    home_dir = os.path.abspath(sys.argv[2]) if sys.argv[2] else ""
   except IndexError:
     home_dir = ""
+  try:
+    build_dir = os.path.abspath(sys.argv[3]) if sys.argv[3] else ""
+  except IndexError:
+    build_dir = ""
 
-  sys.exit(main(warno, home_dir=home_dir))
+  sys.exit(main(warno, home_dir=home_dir, build_dir=build_dir))

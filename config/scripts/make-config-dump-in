@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright (C) 2014-2026 ABINIT Group (Yann Pouillon)
 #
@@ -6,23 +6,18 @@
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
-from __future__ import print_function, division, absolute_import #, unicode_literals
 
-try:
-    from ConfigParser import ConfigParser,NoOptionError
-except ImportError:
-    from configparser import ConfigParser,NoOptionError
-from time import gmtime,strftime
+from configparser import ConfigParser, NoOptionError
+from time import gmtime, strftime
 
 import os
 import re
 import sys
 
+
 class MyConfigParser(ConfigParser):
-
-  def optionxform(self,option):
-    return str(option)
-
+    def optionxform(self, option):
+        return str(option)
 
 
 # ---------------------------------------------------------------------------- #
@@ -32,26 +27,25 @@ class MyConfigParser(ConfigParser):
 #
 
 # Initial setup
-my_name    = "make-config-dump-in"
+my_name = "make-config-dump-in"
 my_configs = ["config/specs/dumpvars.conf"]
-my_output  = "config.dump.in"
+my_output = "config.dump.in"
 
 # Check if we are in the top of the ABINIT source tree
-if ( not os.path.exists("configure.ac") or
-     not os.path.exists("src/98_main/abinit.F90") ):
-  print("%s: You must be in the top of an ABINIT source tree." % my_name)
-  print("%s: Aborting now." % my_name)
-  sys.exit(1)
+if not os.path.exists("configure.ac") or not os.path.exists("src/98_main/abinit.F90"):
+    print("%s: You must be in the top of an ABINIT source tree." % my_name)
+    print("%s: Aborting now." % my_name)
+    sys.exit(1)
 
 # Read config file(s)
 for cnf_file in my_configs:
-  if ( not os.path.exists(cnf_file) ):
-    print("%s: Could not find config file (%s)." % (my_name,cnf_file))
-    print("%s: Aborting now." % my_name)
-    sys.exit(2)
+    if not os.path.exists(cnf_file):
+        print("%s: Could not find config file (%s)." % (my_name, cnf_file))
+        print("%s: Aborting now." % my_name)
+        sys.exit(2)
 
 # What time is it?
-now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
+now = strftime("%Y/%m/%d %H:%M:%S +0000", gmtime())
 
 # Init
 cnf = MyConfigParser()
@@ -60,8 +54,9 @@ abinit_int_vars = cnf.sections()
 abinit_int_vars.sort()
 
 # Write configuration dumper (for debugging)
-dumper = open("config.dump.in","wt")
-dumper.write("""\
+dumper = open("config.dump.in", "w")
+dumper.write(
+    """\
 #
 # Configuration dumper
 #
@@ -75,9 +70,11 @@ dumper.write("""\
 
 # Creation date: %s
 
-""" % (my_name, now))
+"""
+    % (my_name, now)
+)
 dumper.write("\n# Internal Abinit variables (script: %s)\n" % (my_name))
 for var in abinit_int_vars:
-  dumper.write("%s=\"@%s@\"\n" % (var,var))
+    dumper.write('%s="@%s@"\n' % (var, var))
 dumper.write("\n")
 dumper.close()

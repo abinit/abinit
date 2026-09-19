@@ -9,7 +9,10 @@ import os
 import shutil
 import subprocess
 import time
+from collections.abc import Callable
 from functools import wraps
+from typing import Any
+
 from .termcolor import cprint
 
 
@@ -23,13 +26,6 @@ def number_of_cpus() -> int:
     import os
     import re
     import subprocess
-
-    # Python 2.6+
-    #try:
-    #    import multiprocessing
-    #    return multiprocessing.cpu_count()
-    #except (ImportError, NotImplementedError):
-    #    pass
 
     # POSIX
     try:
@@ -184,7 +180,7 @@ class FileLock:
     # Create an alias for compatibility
     Error = FileLockException
 
-    def __init__(self, file_name, timeout=10, delay=.05):
+    def __init__(self, file_name: str, timeout: float = 10, delay: float = 0.05) -> None:
         """
         Initialize the file lock.
 
@@ -227,7 +223,7 @@ class FileLock:
         fake.release = nop
         return fake
 
-    def acquire(self):
+    def acquire(self) -> None:
         """
         Acquire the lock.
 
@@ -251,7 +247,7 @@ class FileLock:
 
         self.is_locked = True
 
-    def release(self):
+    def release(self) -> None:
         """
         Release the lock by deleting the lock file.
 
@@ -262,7 +258,7 @@ class FileLock:
             os.unlink(self.lockfile)
             self.is_locked = False
 
-    def __enter__(self):
+    def __enter__(self) -> FileLock:
         """
         Enter the runtime context related to this object.
 
@@ -274,7 +270,7 @@ class FileLock:
         if not self.is_locked: self.acquire()
         return self
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, type: Any, value: Any, traceback: Any) -> None:
         """
         Exit the runtime context related to this object.
 
@@ -287,7 +283,7 @@ class FileLock:
         """
         if self.is_locked: self.release()
 
-    def __del__(self):
+    def __del__(self) -> None:
         """
         Destructor to ensure the lock file is released when the instance is deleted.
         """
@@ -301,7 +297,7 @@ class NoErrorFileLock(FileLock):
     Returns True if the lock was acquired, False otherwise.
     """
 
-    def __enter__(self):
+    def __enter__(self) -> bool:
         """
         Enter the runtime context and attempt to acquire the lock.
 
@@ -316,7 +312,7 @@ class NoErrorFileLock(FileLock):
             return True
 
 
-def makeunique(gen):
+def makeunique(gen: Callable[..., Any]) -> Callable[..., Any]:
     """
     Decorator that ensures a generator produces unique outputs by caching them.
 
@@ -324,15 +320,15 @@ def makeunique(gen):
     name generators) when unique values are required.
 
     Args:
-        gen (callable): The generator function to wrap.
+        gen: The generator function to wrap.
 
     Returns:
         callable: A wrapped generator that filters out duplicate values.
     """
-    cache = set()
+    cache: set[Any] = set()
 
     @wraps(gen)
-    def generator(*args):
+    def generator(*args: Any) -> Any:
         s = gen(*args)
         while s in cache:
             s = gen(*args)
