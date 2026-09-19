@@ -182,11 +182,12 @@ for parent in abinit_parents:
     makefile += "\n# Help\n"
     makefile += f"help:\n\t@cat $(top_srcdir)/doc/help_make/help_make_{parent}.txt\n"
 
-    # Add a parents target
-    makefile += mf_sep
-    makefile += "\n# Creation of parent subroutines\n"
-    makefile += "parents:\n\t$(PERL) $(top_srcdir)/developers/maintainers/parents.pl -s\n"
-    makefile += "\trm -f *.old */*.old\n"
+    # A "parents" target used to be generated here, running
+    # developers/maintainers/parents.pl -- that script was deleted in 2022
+    # (commit 6624a3f36a, "git rm parents.pl") with no replacement, which
+    # left every generated Makefile.am with a target that always failed
+    # ("No such file or directory"). Not regenerating it removes that dead
+    # target instead of leaving it broken.
 
     # Add a local maintainer-clean target
     makefile += mf_sep

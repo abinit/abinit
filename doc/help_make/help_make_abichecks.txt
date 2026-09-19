@@ -1,6 +1,6 @@
 ==============================================================================
 Keywords to use with the make command to run quick tests,
-  possibly with -j NUM option:
+possibly with -j NUM option:
 
 >>> In build directory:
 
