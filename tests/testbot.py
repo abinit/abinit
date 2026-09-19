@@ -142,6 +142,7 @@ class BenchmarkResult:
     py_nprocs: int
     wall_time: float
     speedup: float
+    parallel_efficiency: float
     nexecuted: int
     tests_per_second: float
     returncode: int
@@ -804,6 +805,8 @@ def benchmark(
 ) -> int:
     """Run TestBot repeatedly and compare total wall time for each Python worker count."""
     results: list[BenchmarkResult] = []
+    baseline_wall_time: float | None = None
+    baseline_py_nprocs: int | None = None
 
     for py_nprocs in py_nprocs_values:
         print(f"\n{'=' * 80}\nBenchmarking py_nprocs={py_nprocs}\n{'=' * 80}")
@@ -815,20 +818,43 @@ def benchmark(
         start = time.perf_counter()
         returncode = testbot.run()
         wall_time = time.perf_counter() - start
-        baseline = results[0].wall_time if results else wall_time
-        speedup = baseline / wall_time if wall_time else float("inf")
+        if baseline_wall_time is None:
+            baseline_wall_time = wall_time
+            baseline_py_nprocs = py_nprocs
+
+        assert baseline_py_nprocs is not None
+        speedup = baseline_wall_time / wall_time if wall_time else float("inf")
+        worker_ratio = py_nprocs / baseline_py_nprocs
+        parallel_efficiency = speedup / worker_ratio
         nexecuted = sum(run.nexecuted for run in testbot.run_summaries)
         tests_per_second = nexecuted / wall_time if wall_time else float("inf")
         results.append(
-            BenchmarkResult(py_nprocs, wall_time, speedup, nexecuted, tests_per_second, returncode)
+            BenchmarkResult(
+                py_nprocs,
+                wall_time,
+                speedup,
+                parallel_efficiency,
+                nexecuted,
+                tests_per_second,
+                returncode,
+            )
         )
 
-    headings = ("py_nprocs", "wall time (s)", "speedup", "executed", "tests/s", "return code")
+    headings = (
+        "py_nprocs",
+        "wall time (s)",
+        "speedup",
+        "efficiency",
+        "executed",
+        "tests/s",
+        "return code",
+    )
     rows = [
         (
             str(r.py_nprocs),
             f"{r.wall_time:.3f}",
             f"{r.speedup:.3f}x",
+            f"{r.parallel_efficiency:.1%}",
             str(r.nexecuted),
             f"{r.tests_per_second:.3f}",
             str(r.returncode),

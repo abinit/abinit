@@ -1909,6 +1909,7 @@ class BaseTest:
         self.abenv = abenv
         self.id = test_info.make_test_id()  # The test identifier (takes into account the multi_parallel case)
         self.mpi_nprocs = 1  # Start with 1 MPI process.
+        self.omp_nthreads = 0  # Zero means that OpenMP is not enabled for this run.
 
         # FIXME Assumes inp_fname is in the form tests/suite_name/Input/name.in
         suite_name = os.path.dirname(self.inp_fname)
@@ -2039,6 +2040,20 @@ pp_dirpath $ABI_PSPDIR
                 cprint(msg, color=color)
             else:
                 print(msg)
+
+    def format_result_line(self, msg: str) -> str:
+        """Return the compact terminal summary for one output-file comparison."""
+        status_msg, separator, file_name = msg.rpartition(" [file=")
+        if separator:
+            file_tag = f"[file={file_name}"
+        else:
+            status_msg = msg
+            file_tag = "[file=unknown]"
+
+        return (
+            f"{self.full_id}[nt={self.omp_nthreads}]"
+            f"[run_etime: {sec2str(self.run_etime)} s]{file_tag}: {status_msg}"
+        )
 
     @property
     def has_empty_stderr(self):
@@ -2528,6 +2543,7 @@ pp_dirpath $ABI_PSPDIR
         self.workdir = workdir
 
         self.build_env = build_env
+        self.omp_nthreads = kwargs.get("omp_nthreads", 0)
 
         self.exceptions = []
         self.fld_isok = True  # False if at least one file comparison fails.
@@ -2731,8 +2747,10 @@ pp_dirpath $ABI_PSPDIR
                     if out_size_bites >= html_max_bites or ref_size_bites >= html_max_bites:
                         f.do_html_diff = False
 
-                self.cprint(msg=self.full_id + f"[run_etime: {sec2str(self.run_etime)} s]: " + msg,
-                            color=status2txtcolor[status])
+                self.cprint(
+                    msg=self.format_result_line(msg),
+                    color=status2txtcolor[status],
+                )
 
                 # In the case of a "simplified" test, lets check the number of iterations
                 if simplified_test and is_abo:
@@ -3963,7 +3981,11 @@ def run_and_check_test(test, rank, print_lock=None, **kwargs):
     build_env = kwargs.pop("build_env")
     job_runner = kwargs.pop("job_runner")
     mpi_nprocs = kwargs.pop("mpi_nprocs")
-    omp_nthreads = kwargs.pop("omp_nthreads") # 0 if OMP is not used.
+    omp_nthreads = kwargs.pop("omp_nthreads")
+    if "HAVE_OPENMP" not in build_env.defined_cppvars:
+        omp_nthreads = 0
+    elif omp_nthreads == 0 and job_runner.has_ompenv:
+        omp_nthreads = int(job_runner.ompenv.get("OMP_NUM_THREADS", 0))
     ncpus = mpi_nprocs * max(omp_nthreads, 1)
     runmode = kwargs.pop("runmode")
     verbose = kwargs.pop("verbose")
@@ -4014,11 +4036,19 @@ def run_and_check_test(test, rank, print_lock=None, **kwargs):
         # AMD GPUs, using ROCM ("ROCR" stands for ROCM Runtime)
         os.environ["ROCR_VISIBLE_DEVICES"] = ",".join(l)
 
-    # FIXME: run method should also receive omp_num_threads
     # Run the test in testdir
     #print("Calling test.run")
     testdir = os.path.abspath(os.path.join(workdir, test.suite_name + "_" + test.id))
-    test.run(build_env, job_runner, testdir, print_lock=print_lock, mpi_nprocs=mpi_nprocs, runmode=runmode, **kwargs)
+    test.run(
+        build_env,
+        job_runner,
+        testdir,
+        print_lock=print_lock,
+        mpi_nprocs=mpi_nprocs,
+        omp_nthreads=omp_nthreads,
+        runmode=runmode,
+        **kwargs,
+    )
 
     # Release resources safely using a lock
     with condition:

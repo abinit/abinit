@@ -1343,6 +1343,18 @@ class TestBaseTestCore:
         assert test.mpi_nprocs == 1
         assert test.full_id == "[v1][t01][np=1]"
 
+    def test_basetest_result_line_reports_threads_and_places_status_last(self):
+        """The terminal result line reports MPI/OpenMP parallelism before the status."""
+        test = make_abitest_from_input(V1_T01_ABI, abenv)
+        test.run_etime = 0.49
+
+        assert test.format_result_line("succeeded [file=t01.abo]") == (
+            "[v1][t01][np=1][nt=0][run_etime: 0.49 s][file=t01.abo]: succeeded"
+        )
+
+        test.omp_nthreads = 4
+        assert "[np=1][nt=4]" in test.format_result_line("passed [file=t01.abo]")
+
 
 # ============================================================================
 # TESTS FOR ChainOfTests AND MULTI-PARALLEL SELECTION

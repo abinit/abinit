@@ -844,6 +844,7 @@ def test_benchmark_writes_summary(tmp_path, monkeypatch, capsys):
             "py_nprocs": 1,
             "wall_time": 4.0,
             "speedup": 1.0,
+            "parallel_efficiency": 1.0,
             "nexecuted": 0,
             "tests_per_second": 0.0,
             "returncode": 0,
@@ -852,6 +853,7 @@ def test_benchmark_writes_summary(tmp_path, monkeypatch, capsys):
             "py_nprocs": 4,
             "wall_time": 8.0,
             "speedup": 0.5,
+            "parallel_efficiency": 0.125,
             "nexecuted": 0,
             "tests_per_second": 0.0,
             "returncode": 0,
@@ -861,7 +863,10 @@ def test_benchmark_writes_summary(tmp_path, monkeypatch, capsys):
     assert bots[1].py_nprocs_override == 4
     assert bots[0].workdir_prefix == "Benchmark_PY1_"
     assert bots[1].workdir_prefix == "Benchmark_PY4_"
-    assert "Benchmark summary" in capsys.readouterr().out
+    output = capsys.readouterr().out
+    assert "Benchmark summary" in output
+    assert "efficiency" in output
+    assert "12.5%" in output
 
 
 class TestUtilityFunctions:
