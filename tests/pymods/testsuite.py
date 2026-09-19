@@ -2785,13 +2785,23 @@ pp_dirpath $ABI_PSPDIR
             if runner.retcode == 124:
                 self._status = "failed"
                 self.had_timeout = True
-                msg = self.full_id + " Test has reached timeout and has been killed by SIGTERM"
+                msg = self.full_id + " Test has been killed by SIGTERM"
                 self.cprint(msg=msg, color=status2txtcolor["failed"])
 
-            elif runner.retcode == 137:
+            elif runner.retcode == 137 and not self.expected_failure:
+                # Unlike 124 (always the GNU `timeout` command's own exit code,
+                # so always a genuine hang), 137 is ambiguous: it's also what
+                # srun reports for a rank that called MPI_ABORT under some MPI
+                # launchers/process managers (e.g. --mpi=pmi2), not just an
+                # external SIGKILL from a real timeout/OOM. A test that
+                # declares expected_failure = yes specifically to exercise
+                # that abort path would otherwise always be marked failed here
+                # regardless of whether it aborted correctly -- let the
+                # fldiff-based comparison below decide instead, same as any
+                # other non-zero retcode under expected_failure.
                 self._status = "failed"
                 self.had_timeout = True
-                msg = self.full_id + " Test has reached timeout and has been killed by SIGKILL"
+                msg = self.full_id + " Test has been killed by SIGKILL"
                 self.cprint(msg=msg, color=status2txtcolor["failed"])
 
             elif runner.retcode != 0 and not self.expected_failure:

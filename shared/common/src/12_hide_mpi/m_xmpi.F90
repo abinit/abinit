@@ -826,8 +826,15 @@ subroutine xmpi_init()
 
    if (ierr /= 0) then
      write(std_out, "(a)")" WARNING: cannot increase stack size limit. "
-     !write(std_out, *)"rlim_cur, rlim_max, ierr", rlim_cur, rlim_max, ierr
    end if
+   ! rlim_cur/rlim_max are in bytes; -1 means RLIM_INFINITY (unlimited). Printed
+   ! unconditionally, not just when ierr /= 0: clib_ulimit_stack's fallback to
+   ! "soft = current hard limit" (see rlimit.c) can succeed (ierr == 0) at a
+   ! hard limit far below what a large automatic/local array actually needs,
+   ! which then only ever surfaces later as an unexplained OOM-kill rather
+   ! than this warning.
+   write(std_out, "(2(a,i0),a)") &
+     "- clib_ulimit_stack: rlim_cur= ", rlim_cur, " bytes, rlim_max= ", rlim_max, " bytes (-1 = RLIM_INFINITY)"
 
    ! Master Removes the ABI_MPIABORTFILE if present so that we start with a clean environment.
    inquire(file=ABI_MPIABORTFILE, exist=exists)

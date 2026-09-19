@@ -35,14 +35,6 @@ repos:
         name: Run run-check_ascii
         entry: python abichecks/scripts/check_ascii.py
         language: python
-      #- id: run-warningschk
-      #  name: Run run-warningschk
-      #  entry: python abichecks/scripts/warningschk.py
-      #  language: python
-      #- id: check-libpaw
-      #  name: Run check-libpaw
-      #  entry: python abichecks/scripts/check-libpaw.py
-      #  language: python
       - id: check-forbidden
         name: Run check-forbidden
         entry: python abichecks/scripts/check_forbidden.py

@@ -15,7 +15,7 @@ icoulomb     1    # Activate the free boundary conditions for the
                   # This is the value to choose for molecules in the wavelet formalism.
 
 iscf         2    # Activation of the simple mixing scheme for the density.
-                  
+
 nwfshist     6    # Activation of DIIS algoithm for the calculation of wavefunctions
                   #   (Direct minimization scheme)
                   #   with 6 wavefunctions stored in history
@@ -36,7 +36,7 @@ znucl 6 1         # Atomic number of the possible type(s) of atom. Here boron, h
 pp_dirpath "$ABI_PSPDIR"    # Path to the directory were
                             #   pseudopotentials for tests are stored
 pseudos "C-q4, H-q1"        # Name and location of the pseudopotentials
-                         
+
 #Definition of the atoms
 natom 65          # There are 65 atoms
 typat 21*1 44*2   # 21 are of type 1 (carbon), 44 are of type 2 (hydrogen)
@@ -118,8 +118,8 @@ kpt  3*0.         # - K-point coordinates in reciprocal space
 
 #Parameters for the SCF procedure
 nstep 20          # Maximal number of SCF cycles
-tolwfr 1.0d-4     # Will stop when, twice in a row, the difference 
-                  # between two consecutive evaluations of wavefunction residual 
+tolwfr 1.0d-4     # Will stop when, twice in a row, the difference
+                  # between two consecutive evaluations of wavefunction residual
                   # differ by less than tolwfr
                   # This convergence criterion is adapted to direct minimization
                   #   algorithm (iscf=0)
@@ -156,6 +156,6 @@ optstress 0       # Stress tensor computation is not relevant here
 #%%   Input for PARAL_GSWVL tutorial
 #%%   65-atom alkane chain of 65 atoms, parallel calculation
 #%%   WARNING : This test might not be functional anymore.
-#%%   It has not been tested since the final v10.3.0 of ABINIT due to unexplained failure 
+#%%   It has not been tested since the final v10.3.0 of ABINIT due to unexplained failure
 #%%   at the merge between v10.2.2 and previous commits in v10.3.0, both working.
 #%%<END TEST_INFO>
