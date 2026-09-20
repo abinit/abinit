@@ -200,7 +200,7 @@ _tsuite_dir_names = [
     "tutoplugs",
     "tutorespfn",
     "tutorial",
-    "unitary",
+    "unit_tests",
     "v1",
     "v2",
     "v3",
