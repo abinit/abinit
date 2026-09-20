@@ -12,6 +12,7 @@ import shutil
 import tempfile
 import threading
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -1251,6 +1252,56 @@ class TestBuildEnvironment:
         """Test CPreProcessor uses default includes."""
         cpp = CPreProcessor()
         assert "." in cpp.includes
+
+
+class TestSkipBuildbotBuilder:
+    """Test suite for BaseTest.skip_buildbot_builder().
+
+    Exercised through a bare namespace rather than a real BaseTest/BuildEnvironment
+    (which needs a compiled build tree): the method only ever reads
+    self.build_env.{buildbot_builder,dont_exclude_builders} and
+    self.exclude_builders, so any object providing those attributes works.
+    """
+
+    @staticmethod
+    def _fake_test(*, buildbot_builder, exclude_builders, dont_exclude_builders=False):
+        build_env = SimpleNamespace(
+            buildbot_builder=buildbot_builder, dont_exclude_builders=dont_exclude_builders
+        )
+        return SimpleNamespace(
+            build_env=build_env,
+            exclude_builders=exclude_builders,
+            skip_buildbot_builder=BaseTest.skip_buildbot_builder,
+        )
+
+    def test_no_builder_set_never_skips(self):
+        """No buildbot_builder configured (e.g. plain runtests.py run) -> never skip."""
+        fake = self._fake_test(buildbot_builder=None, exclude_builders=["alps_gnu_14.2"])
+        assert fake.skip_buildbot_builder(fake) is False
+
+    def test_exact_match_skips(self):
+        """The running builder is listed verbatim in exclude_builders -> skip."""
+        fake = self._fake_test(buildbot_builder="alps_gnu_14.2", exclude_builders=["alps_gnu_14.2"])
+        assert fake.skip_buildbot_builder(fake) is True
+
+    def test_no_match_does_not_skip(self):
+        """The running builder is not listed -> don't skip."""
+        fake = self._fake_test(buildbot_builder="alps_gnu_14.2", exclude_builders=["eos_gnu_13.2"])
+        assert fake.skip_buildbot_builder(fake) is False
+
+    def test_regex_pattern_skips(self):
+        """A glob/regex-like entry in exclude_builders matches by pattern."""
+        fake = self._fake_test(buildbot_builder="alps_gnu_14.2", exclude_builders=["alps_.*"])
+        assert fake.skip_buildbot_builder(fake) is True
+
+    def test_dont_exclude_builders_overrides_a_matching_exclusion(self):
+        """dont_exclude_builders=True must force execution even for a listed builder."""
+        fake = self._fake_test(
+            buildbot_builder="alps_gnu_14.2",
+            exclude_builders=["alps_gnu_14.2"],
+            dont_exclude_builders=True,
+        )
+        assert fake.skip_buildbot_builder(fake) is False
 
 
 # ============================================================================

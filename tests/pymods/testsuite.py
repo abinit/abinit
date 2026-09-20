@@ -258,6 +258,8 @@ details[open] summary { border-bottom: 1px solid var(--border); }
 .report-footer { color: var(--muted); font-size: .82rem; padding: 1rem 0 2rem; text-align: center; }
 .back-to-top { position: fixed; right: 1.25rem; bottom: 1.25rem; z-index: 50; display: inline-flex; align-items: center; gap: .35rem; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 999px; padding: .5rem .9rem; font-size: .82rem; font-weight: 650; text-decoration: none; box-shadow: 0 2px 10px rgba(16, 24, 40, 0.12); }
 .back-to-top:hover { background: var(--surface-muted); }
+.back-link { display: inline-flex; align-items: center; gap: .35rem; color: var(--muted); text-decoration: none; font-weight: 650; font-size: .82rem; margin-bottom: 1rem; }
+.back-link:hover { color: var(--link); }
 @media (prefers-color-scheme: dark) {
   :root { --bg: #0b1220; --surface: #111a2b; --surface-muted: #182338; --border: #2b3850; --text: #e6edf7; --muted: #a8b3c5; --link: #84adff; --passed: #75d596; --passed-bg: #163b29; --failed: #ff9b8f; --failed-bg: #4a201d; --skipped: #f8d477; --skipped-bg: #493b16; --code-bg: #080d16; }
 }
@@ -1590,6 +1592,7 @@ class BuildEnvironment:
         # if not self.has_bin("timeout"): print("Cannot find timeout executable!")
 
         self.buildbot_builder: str | None = None
+        self.dont_exclude_builders: bool = False
 
     @lazy__str__
     def __str__(self) -> None: pass
@@ -1651,6 +1654,13 @@ class BuildEnvironment:
         Used to skip tests defining `exclude_builders` in the TEST_INFO_SECTION
         """
         self.buildbot_builder = builder
+
+    def set_dont_exclude_builders(self, value: bool) -> None:
+        """
+        Set whether `exclude_builders` in the TEST_INFO_SECTION should be ignored.
+        Used to force execution of every test regardless of exclude_builders.
+        """
+        self.dont_exclude_builders = value
 
 
 def parse_configh_file(fname: str) -> dict[str, str]:
@@ -2470,6 +2480,9 @@ pp_dirpath $ABI_PSPDIR
         """
         Return True if the test should be skipped since we are running on a banned builder.
         """
+        if getattr(self.build_env, "dont_exclude_builders", False):
+            return False
+
         if getattr(self.build_env, "buildbot_builder", None) is None:
             return False
 
@@ -3239,6 +3252,7 @@ pp_dirpath $ABI_PSPDIR
          </head>
          <body>
           <main class="report">
+           <a class="back-link" href="../index.html">&#8592; Back</a>
         """
 
         if self.status in {"skipped", "disabled"}:
@@ -5021,6 +5035,7 @@ class AbinitTestSuite:
             </head>
             <body>
             <main class="report">
+            <a class="back-link" href="../index.html">&#8592; Back</a>
             <section class="card">
             <header class="card-header"><div><p class="eyebrow">Abinit test suite</p><h1 class="report-title">Suite summary</h1></div></header>
             <div class="table-wrap">

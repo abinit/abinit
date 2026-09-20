@@ -833,8 +833,8 @@ subroutine xmpi_init()
    ! hard limit far below what a large automatic/local array actually needs,
    ! which then only ever surfaces later as an unexplained OOM-kill rather
    ! than this warning.
-   write(std_out, "(2(a,i0),a)") &
-     "- clib_ulimit_stack: rlim_cur= ", rlim_cur, " bytes, rlim_max= ", rlim_max, " bytes (-1 = RLIM_INFINITY)"
+   !write(std_out, "(2(a,i0),a)") &
+   !  "- clib_ulimit_stack: rlim_cur= ", rlim_cur, " bytes, rlim_max= ", rlim_max, " bytes (-1 = RLIM_INFINITY)"
 
    ! Master Removes the ABI_MPIABORTFILE if present so that we start with a clean environment.
    inquire(file=ABI_MPIABORTFILE, exist=exists)

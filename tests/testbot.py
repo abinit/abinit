@@ -206,7 +206,11 @@ class TestBot:
         metadata={"info": "Temporary folder where the tests will be executed and copied back"},
     )
     mpi_args: str = field(default="", metadata={"info": "Args passed to the mpi command"})
-    force_mpi: bool = field(default=False, metadata={"info": "Force usage of mpirun_np prefix"})
+    force_mpi: bool = field(default=True, metadata={"info": "Use mpirun_np even for single-process (mpi_nprocs=1) test runs, not just once mpi_nprocs > 1"})
+    dont_exclude_builders: bool = field(
+        default=False,
+        metadata={"info": "Ignore exclude_builders in the TEST_INFO_SECTION and always execute tests"},
+    )
     with_parametrized: bool = field(
         default=False,
         metadata={
@@ -324,6 +328,7 @@ class TestBot:
         # 2) Initialize the job_runner.
         self.build_env = build_env = BuildEnvironment(os.curdir)
         self.build_env.set_buildbot_builder(self.builder_name)
+        self.build_env.set_dont_exclude_builders(self.dont_exclude_builders)
 
         # Consistency check between input parameters and build configuration.
         if "HAVE_GPU" not in self.build_env.defined_cppvars:
@@ -1317,7 +1322,8 @@ def generate_template() -> None:
         "verbose": 0,
         "tmp_basedir": "",
         "mpi_args": "",
-        "force_mpi": False,
+        "force_mpi": True,
+        "dont_exclude_builders": False,
     }
 
     print("# TestBot configuration template")

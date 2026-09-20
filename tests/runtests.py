@@ -410,6 +410,11 @@ def main() -> int:
     parser.add_option("--builder", dest="builder", type="str", default="",
                       help="Set buildbot builder name to skip test if name is in the exclude_builders TEST_INFO_SECTION.")
 
+    parser.add_option("--dont-exclude-builders", dest="dont_exclude_builders", default=False,
+                      action="store_true",
+                      help="Ignore exclude_builders in the TEST_INFO_SECTION and always execute tests, "
+                           "regardless of --builder.")
+
     parser.add_option(
         "-d",
         "--dry-run",
@@ -798,6 +803,9 @@ def main() -> int:
     # Set buildbot builder name to skip tests.
     if options.builder:
         build_env.set_buildbot_builder(options.builder)
+
+    if options.dont_exclude_builders:
+        build_env.set_dont_exclude_builders(True)
 
     timeout_time = options.timeout_time
 
