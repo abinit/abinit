@@ -206,7 +206,7 @@ class TestBot:
         metadata={"info": "Temporary folder where the tests will be executed and copied back"},
     )
     mpi_args: str = field(default="", metadata={"info": "Args passed to the mpi command"})
-    force_mpi: bool = field(default=True, metadata={"info": "Use mpirun_np even for single-process (mpi_nprocs=1) test runs, not just once mpi_nprocs > 1"})
+    force_mpi: bool = field(default=False, metadata={"info": "Use mpirun_np even for single-process (mpi_nprocs=1) test runs, not just once mpi_nprocs > 1"})
     dont_exclude_builders: bool = field(
         default=False,
         metadata={"info": "Ignore exclude_builders in the TEST_INFO_SECTION and always execute tests"},
@@ -1322,7 +1322,7 @@ def generate_template() -> None:
         "verbose": 0,
         "tmp_basedir": "",
         "mpi_args": "",
-        "force_mpi": True,
+        "force_mpi": False,
         "dont_exclude_builders": False,
     }
 
