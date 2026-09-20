@@ -35,6 +35,24 @@ cp -rf ./src/[4-9]* tmp-robodoc
 cp ./config/robodoc/robodoc-html.rc tmp-robodoc/robodoc.rc
 cd tmp-robodoc && rm -f */*.in && robodoc > ../robodoc.log 2> ../robodoc.err && cd ..
 exit_status=`cat robodoc.err | wc -l`
+
+# ROBODoc has no option to name its entry page "index.html" -- --multidoc
+# --index always names it masterindex.html, and --toc always names the
+# table-of-contents page toc_index.html (already the page abibuildbot's
+# AbiInfo.robodoc_url links to from the build page, see mysteps.py). Without
+# an index.html, a plain visit to the published site's root (e.g.
+# https://robodoc.abinit.org/) hits no file nginx recognizes as a default
+# index and falls back to a raw directory listing instead of any
+# ROBODoc-generated page. Copy toc_index.html to index.html so the root URL
+# lands on the same page the build-page link already uses, instead of
+# picking a third, inconsistent entry point.
+robodoc_doc_dir=tmp-robodoc/www/robodoc
+if test -f "$robodoc_doc_dir/toc_index.html" ; then
+    cp -f "$robodoc_doc_dir/toc_index.html" "$robodoc_doc_dir/index.html"
+else
+    echo "Error: $robodoc_doc_dir/toc_index.html was not generated -- cannot create index.html" >&2
+    exit 1
+fi
 #mv -f tmp-robodoc/www/robodoc robodoc-html
 #tardir=robodoc-html && tar --format=ustar -chf - "$tardir" | GZIP=--best gzip -c >robodoc-html-8.11.8.tar.gz
 #rm -rf robodoc-html tmp-robodoc
