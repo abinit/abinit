@@ -1,0 +1,131 @@
+  nCpuRows,nCpuCols           1           2
+  Complex all2all
+-Mean time:               0.39896
+ Difference:     0.00000000000000
+                        counter   calls         cpu_time        wall_time
+-xgTransposer_transpose@ColsRow      20           12.596            2.668
+- xgTransposer_transpose@Linalg      20           16.658            2.221
+-        xgTransposer_*@all2all      40            6.840            3.603
+-        xgTransposer_*@gatherv       0            0.000            0.000
+-      xgTransposer_@reorganize      40           21.468            1.242
+-     xgTransposer_*constructor       1            0.000            0.000
+-             xgTransposer_free       1            0.001            0.001
+-        xgTransposer_transpose      40           29.315            4.889
+-                         total     162           86.878           14.623
+  Complex gatherv
+-Mean time:               0.41964
+ Difference:     0.00000000000000
+                        counter   calls         cpu_time        wall_time
+-xgTransposer_transpose@ColsRow      20           12.456            3.004
+- xgTransposer_transpose@Linalg      20           16.801            2.146
+-        xgTransposer_*@all2all       0            0.000            0.000
+-        xgTransposer_*@gatherv      80            7.399            3.875
+-      xgTransposer_@reorganize      40           21.043            1.242
+-     xgTransposer_*constructor       1            0.000            0.000
+-             xgTransposer_free       1            0.001            0.001
+-        xgTransposer_transpose      40           29.265            5.151
+-                         total     202           86.965           15.419
+  Real all2all
+-Mean time:               0.38251
+ Difference:     0.00000000000000
+                        counter   calls         cpu_time        wall_time
+-xgTransposer_transpose@ColsRow      20           12.169            2.505
+- xgTransposer_transpose@Linalg      20           16.778            2.017
+-        xgTransposer_*@all2all      40            6.966            3.275
+-        xgTransposer_*@gatherv       0            0.000            0.000
+-      xgTransposer_@reorganize      40           21.037            1.202
+-     xgTransposer_*constructor       1            0.000            0.000
+-             xgTransposer_free       1            0.001            0.001
+-        xgTransposer_transpose      40           28.957            4.523
+-                         total     162           85.908           13.523
+  Real gatherv
+-Mean time:               0.44599
+ Difference:     0.00000000000000
+                        counter   calls         cpu_time        wall_time
+-xgTransposer_transpose@ColsRow      20           13.001            3.267
+- xgTransposer_transpose@Linalg      20           16.853            2.419
+-        xgTransposer_*@all2all       0            0.000            0.000
+-        xgTransposer_*@gatherv      80            7.370            4.346
+-      xgTransposer_@reorganize      40           21.325            1.293
+-     xgTransposer_*constructor       1            0.000            0.000
+-             xgTransposer_free       1            0.001            0.001
+-        xgTransposer_transpose      40           29.862            5.686
+-                         total     202           88.412           17.013
+  Complex all2all (nspinor=2)
+-Mean time:               0.37792
+ Difference:     0.00000000000000
+                        counter   calls         cpu_time        wall_time
+-xgTransposer_transpose@ColsRow      20           11.612            2.438
+- xgTransposer_transpose@Linalg      20           16.411            1.931
+-        xgTransposer_*@all2all      40            7.247            3.153
+-        xgTransposer_*@gatherv       0            0.000            0.000
+-      xgTransposer_@reorganize      40           20.040            1.187
+-     xgTransposer_*constructor       1            0.000            0.000
+-             xgTransposer_free       1            0.001            0.001
+-        xgTransposer_transpose      40           28.030            4.369
+-                         total     162           83.340           13.080
+  Complex gatherv (nspinor=2)
+-Mean time:               0.43373
+ Difference:     0.00000000000000
+                        counter   calls         cpu_time        wall_time
+-xgTransposer_transpose@ColsRow      20           12.857            3.174
+- xgTransposer_transpose@Linalg      20           16.874            2.352
+-        xgTransposer_*@all2all       0            0.000            0.000
+-        xgTransposer_*@gatherv      80            8.311            4.272
+-      xgTransposer_@reorganize      40           21.063            1.221
+-     xgTransposer_*constructor       1            0.000            0.000
+-             xgTransposer_free       1            0.001            0.001
+-        xgTransposer_transpose      40           29.740            5.526
+-                         total     202           88.846           16.546
+  Real all2all (nspinor=2)
+-Mean time:               0.40123
+ Difference:     0.00000000000000
+                        counter   calls         cpu_time        wall_time
+-xgTransposer_transpose@ColsRow      20           12.119            2.642
+- xgTransposer_transpose@Linalg      20           17.059            2.237
+-        xgTransposer_*@all2all      40            7.479            3.610
+-        xgTransposer_*@gatherv       0            0.000            0.000
+-      xgTransposer_@reorganize      40           20.639            1.215
+-     xgTransposer_*constructor       1            0.000            0.000
+-             xgTransposer_free       1            0.001            0.001
+-        xgTransposer_transpose      40           29.186            4.879
+-                         total     162           86.481           14.582
+  Real gatherv (nspinor=2)
+-Mean time:               0.43353
+ Difference:     0.00000000000000
+                        counter   calls         cpu_time        wall_time
+-xgTransposer_transpose@ColsRow      20           13.409            3.153
+- xgTransposer_transpose@Linalg      20           16.997            2.328
+-        xgTransposer_*@all2all       0            0.000            0.000
+-        xgTransposer_*@gatherv      80            8.488            4.217
+-      xgTransposer_@reorganize      40           21.268            1.235
+-     xgTransposer_*constructor       1            0.000            0.000
+-             xgTransposer_free       1            0.001            0.001
+-        xgTransposer_transpose      40           30.414            5.481
+-                         total     202           90.578           16.416
+ Allocation
+ Mapping
+ Transposer constructor : nspinor =           1
+ Init data
+ Linalg division
+ Linalg norm2
+ Transposer transpose
+ ColsRows divisions
+ Transposer transpose back
+ ColsRows norm2
+ Compare
+ Difference:               0.0000
+ Free everything
+ Allocation
+ Mapping
+ Transposer constructor : nspinor =           2
+ Init data
+ Linalg division
+ Linalg norm2
+ Transposer transpose
+ ColsRows divisions
+ Transposer transpose back
+ ColsRows norm2
+ Compare
+ Difference:               0.0000
+ Free everything
