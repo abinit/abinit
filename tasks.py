@@ -1470,12 +1470,15 @@ def _fsync_full(fh) -> None:
 
 
 @task
-def io_bench(ctx: Context, directories: str, size_gb: float = 1.0, chunk_mb: int = 4) -> None:
+def io_bench(ctx: Context, directories: str, size_gb: float = 1.0, chunk_mb: int = 4, iterations: int = 1) -> None:
     """Compare the I/O performance of one or more directories.
 
-    For each directory, writes a temporary file of `size_gb` gigabytes,
-    measures the write throughput, rereads it to measure the read
-    throughput, and removes the file afterwards.
+    For each directory, writes `iterations` temporary file(s) totalling
+    `size_gb` gigabytes, measures the write throughput, rereads them to
+    measure the read throughput, and removes them afterwards. Use
+    `iterations` > 1 to approximate a many-small-files access pattern
+    (each file gets its own open/close and fsync) instead of one large
+    sequential file.
 
     Note:
         The reread may be served (partly) from the OS page cache rather than
@@ -1485,12 +1488,15 @@ def io_bench(ctx: Context, directories: str, size_gb: float = 1.0, chunk_mb: int
     Examples:
         ``invoke io-bench --directories=/tmp``
         ``invoke io-bench --directories=/tmp,/scratch --size-gb=2``
+        ``invoke io-bench --directories=/tmp --size-gb=1 --iterations=1000``  # 1000 x ~1MB files
 
     Args:
         ctx: Invoke context.
         directories (str): Comma-separated list of directories to benchmark.
-        size_gb (float, optional): Size in GB of the temporary file. Defaults to 1.0.
-        chunk_mb (int, optional): Chunk size in MB used for writing/reading. Defaults to 4.
+        size_gb (float, optional): Total size in GB written per directory. Defaults to 1.0.
+        chunk_mb (int, optional): Chunk size in MB used for writing/reading each file. Defaults to 4.
+        iterations (int, optional): Number of separate files `size_gb` is split across.
+            Defaults to 1 (one big file).
     """
     import time
     import uuid
@@ -1500,6 +1506,8 @@ def io_bench(ctx: Context, directories: str, size_gb: float = 1.0, chunk_mb: int
     dirs = [d.strip() for d in directories.split(",") if d.strip()]
     if not dirs:
         raise ValueError("Expected at least one directory")
+    if iterations < 1:
+        raise ValueError(f"{iterations=} must be >= 1")
 
     size_bytes = int(size_gb * 1024**3)
     chunk_bytes = int(chunk_mb * 1024**2)
@@ -1508,7 +1516,15 @@ def io_bench(ctx: Context, directories: str, size_gb: float = 1.0, chunk_mb: int
     if chunk_bytes <= 0:
         raise ValueError(f"{chunk_mb=} must be > 0")
 
-    cprint(f"Benchmarking {len(dirs)} directory(ies) with a {size_gb} GB file ...", color="yellow")
+    file_size_bytes = size_bytes // iterations
+    if file_size_bytes <= 0:
+        raise ValueError(f"{size_gb=} split across {iterations=} gives a 0-byte file; lower iterations or raise size_gb")
+
+    cprint(
+        f"Benchmarking {len(dirs)} directory(ies) with {iterations} file(s) of "
+        f"{file_size_bytes / 1024**2:.2f} MB each ({size_gb} GB total) ...",
+        color="yellow",
+    )
 
     rows = []
     for directory in dirs:
@@ -1517,41 +1533,48 @@ def io_bench(ctx: Context, directories: str, size_gb: float = 1.0, chunk_mb: int
             cprint(f"Skipping {directory!r}: not a directory", color="red")
             continue
 
-        tmp_path = dir_path / f".io_bench_{uuid.uuid4().hex}.tmp"
-        chunk = os.urandom(chunk_bytes)
+        tmp_paths = [dir_path / f".io_bench_{uuid.uuid4().hex}.tmp" for _ in range(iterations)]
+        chunk = os.urandom(min(chunk_bytes, file_size_bytes))
         try:
             written = 0
             start = time.perf_counter()
-            with open(tmp_path, "wb") as fh:
-                while written < size_bytes:
-                    remaining = size_bytes - written
-                    fh.write(chunk if remaining >= chunk_bytes else chunk[:remaining])
-                    written += min(chunk_bytes, remaining)
-                _fsync_full(fh)
+            for tmp_path in tmp_paths:
+                remaining = file_size_bytes
+                with open(tmp_path, "wb") as fh:
+                    while remaining > 0:
+                        to_write = chunk if remaining >= len(chunk) else chunk[:remaining]
+                        fh.write(to_write)
+                        remaining -= len(to_write)
+                        written += len(to_write)
+                    _fsync_full(fh)
             write_time = time.perf_counter() - start
 
             read_bytes = 0
             start = time.perf_counter()
-            with open(tmp_path, "rb") as fh:
-                while True:
-                    data = fh.read(chunk_bytes)
-                    if not data:
-                        break
-                    read_bytes += len(data)
+            for tmp_path in tmp_paths:
+                with open(tmp_path, "rb") as fh:
+                    while True:
+                        data = fh.read(chunk_bytes)
+                        if not data:
+                            break
+                        read_bytes += len(data)
             read_time = time.perf_counter() - start
         finally:
-            tmp_path.unlink(missing_ok=True)
+            for tmp_path in tmp_paths:
+                tmp_path.unlink(missing_ok=True)
 
         write_mb_s = (written / 1024**2) / write_time if write_time > 0 else float("inf")
         read_mb_s = (read_bytes / 1024**2) / read_time if read_time > 0 else float("inf")
-        rows.append([directory, f"{write_mb_s:.1f} MB/s", f"{write_time:.2f} s", f"{read_mb_s:.1f} MB/s", f"{read_time:.2f} s"])
+        rows.append(
+            [directory, iterations, f"{write_mb_s:.1f} MB/s", f"{write_time:.2f} s", f"{read_mb_s:.1f} MB/s", f"{read_time:.2f} s"]
+        )
 
     if not rows:
         cprint("No valid directory to benchmark.", color="red")
         return
 
     print()
-    print(tabulate(rows, headers=["Directory", "Write speed", "Write time", "Read speed", "Read time"], tablefmt="grid"))
+    print(tabulate(rows, headers=["Directory", "Files", "Write speed", "Write time", "Read speed", "Read time"], tablefmt="grid"))
 
 
 @task
