@@ -540,8 +540,8 @@ class TestBot:
             json.dump([run.as_dict() for run in self.run_summaries], fh, indent=2)
 
         headings = [
-            "Configuration", "MPI", "OpenMP", "Python workers", "Executed",
-            "Failed", "Passed", "Succeeded", "Skipped", "Disabled", "Report",
+            "Configuration", "Report", "MPI", "OpenMP", "Python workers", "Executed",
+            "Failed", "Passed", "Succeeded", "Skipped", "Disabled",
         ]
         rows = []
         for run in self.run_summaries:
@@ -552,6 +552,7 @@ class TestBot:
             )
             values = [
                 safe_workdir,
+                report,
                 str(run.mpi_nprocs),
                 str(run.omp_nthreads),
                 str(run.py_nprocs),
@@ -561,7 +562,6 @@ class TestBot:
                 str(run.nsucceeded),
                 str(run.nskipped),
                 str(run.ndisabled),
-                report,
             ]
             cells = "".join(f"<td>{value}</td>" for value in values)
             # Same row_class convention as to_table()'s testbot-summary table

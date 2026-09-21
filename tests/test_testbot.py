@@ -423,6 +423,12 @@ class TestTestBotClass:
         assert 'href="TestBot_MPI4_OMP2/"' in report
         assert "<td>10</td><td>1</td><td>2</td><td>7</td>" in report
 
+        # Report must be the second column (right after Configuration), not
+        # trailing at the end -- readers scanning left to right want the link
+        # to the detailed report before wading through the pass/fail counts.
+        assert "<th>Configuration</th><th>Report</th><th>MPI</th>" in report
+        assert '<td>TestBot_MPI4_OMP2</td><td><a class="run-report-link"' in report
+
     def test_write_run_summaries_escapes_workdir(self, tmp_path, monkeypatch):
         """Generated report paths must not permit HTML injection."""
         monkeypatch.chdir(tmp_path)
