@@ -18,6 +18,7 @@ Common workflows::
     invoke config-log                    # Summarize the nearest config.log.
     invoke large-files --size-threshold-mb=10
     invoke doxygen                       # Build the source-code reference.
+    invoke io-bench --directories=/tmp,/scratch  # Compare directory I/O throughput.
 
 Git and release tasks can modify branches or remotes. Review their help and
 ensure the working tree is clean before using them. ``official-release`` is a
@@ -1053,6 +1054,52 @@ $ git merge --abort
 
 
 @task
+def prune_branches(ctx: Context, base: str = "develop", dry_run: bool = True) -> None:
+    """
+    List (and optionally delete) local branches already merged into `base`.
+
+    Never touches the currently checked-out branch or `develop`/`master`/`main`,
+    and only ever runs `git branch -d` (safe delete, refuses an unmerged branch),
+    never `-D`.
+
+    Examples:
+        ``invoke prune-branches`` lists merged branches without deleting them.
+        ``invoke prune-branches --no-dry-run`` deletes them.
+        ``invoke prune-branches --base=my_trunk-release-9.0`` checks against another branch.
+
+    Args:
+        ctx: Invoke context.
+        base (str, optional): Branch to check "merged into". Defaults to "develop".
+        dry_run (bool, optional): If True, only list candidates. Defaults to True.
+    """
+    protected = {"develop", "master", "main", get_current_branch()}
+
+    result = ctx.run(f'git branch --merged {base} --format="%(refname:short)"', hide=True, warn=True)
+    if not result.ok:
+        cprint(f"Could not list branches merged into {base!r}: {result.stderr.strip()}", color="red")
+        return
+
+    candidates = [b.strip() for b in result.stdout.splitlines() if b.strip() and b.strip() not in protected]
+
+    if not candidates:
+        cprint(f"No local branches to prune (already merged into {base!r}).", color="green")
+        return
+
+    cprint(f"Local branches already merged into {base!r}:", color="yellow")
+    for branch in candidates:
+        print(f"  {branch}")
+
+    if dry_run:
+        cprint("\nDry run: nothing deleted. Re-run with --no-dry-run to delete these branches.", color="yellow")
+        return
+
+    for branch in candidates:
+        cmd = f"git branch -d {branch}"
+        cprint(f"Executing: {cmd}", color="green")
+        ctx.run(cmd)
+
+
+@task
 def watchdog(ctx: Context, jobs: str | int = "auto", sleep_time: int = 5) -> None:
     """
     Monitor the source directory for changes and trigger recompilation automatically.
@@ -1357,6 +1404,215 @@ def large_files(ctx: Context, top_dir: str | Path | None = None, size_threshold_
 
     for size_mb, path in large_files:
         print(f"{size_mb:.2f} MB\t{path}")
+
+
+@task
+def disk_usage(ctx: Context, top_dir: str | Path | None = None, depth: int = 1, top_n: int = 20) -> None:
+    """
+    Summarize disk usage per subdirectory, similar to `du -d depth | sort -rh`.
+
+    Complements `large_files`, which only reports individual oversized files
+    and can miss a directory that's large because of many small files
+    (e.g. an accumulated pile of old build trees).
+
+    Args:
+        ctx: Invoke context.
+        top_dir: Root directory to scan. Defaults to the Abinit source root.
+        depth (int, optional): Number of path components below `top_dir` to
+            group by. Defaults to 1 (immediate subdirectories).
+        top_n (int, optional): Number of largest entries to display. Defaults to 20.
+    """
+    if top_dir is None:
+        top_dir = ABINIT_ROOTDIR
+    top_dir = Path(top_dir)
+    depth = max(1, depth)
+
+    exclude_dirs = {".git", "__pycache__", ".ruff_cache"}
+
+    sizes: dict[Path, int] = {}
+    for root, dirs, files in os.walk(top_dir):
+        dirs[:] = [d for d in dirs if d not in exclude_dirs]
+        root_path = Path(root)
+        rel_parts = root_path.relative_to(top_dir).parts
+        group_key = top_dir if len(rel_parts) < depth else top_dir.joinpath(*rel_parts[:depth])
+
+        total = 0
+        for name in files:
+            try:
+                total += (root_path / name).stat().st_size
+            except OSError:
+                continue
+        sizes[group_key] = sizes.get(group_key, 0) + total
+
+    ranked = sorted(sizes.items(), key=lambda kv: kv[1], reverse=True)[:top_n]
+
+    print(f"Disk usage under {top_dir} (grouped by {depth} path component(s)):\n")
+    for path, size in ranked:
+        print(f"{size / (1024**2):10.2f} MB\t{path}")
+
+
+def _fsync_full(fh) -> None:
+    """Flush a file to physical disk, bypassing any OS write-back cache.
+
+    Plain ``os.fsync`` does not guarantee data reaches the physical disk on
+    macOS (the kernel may just hand it to the drive's own volatile cache), so
+    write timings would otherwise mostly measure that cache instead of the
+    directory's real I/O performance. ``F_FULLFSYNC`` is Apple's documented
+    way to force a real flush; other platforms are fine with ``os.fsync``.
+    """
+    fh.flush()
+    if SYSTEM == "Darwin":
+        import fcntl
+
+        fcntl.fcntl(fh.fileno(), fcntl.F_FULLFSYNC)
+    else:
+        os.fsync(fh.fileno())
+
+
+@task
+def io_bench(ctx: Context, directories: str, size_gb: float = 1.0, chunk_mb: int = 4) -> None:
+    """Compare the I/O performance of one or more directories.
+
+    For each directory, writes a temporary file of `size_gb` gigabytes,
+    measures the write throughput, rereads it to measure the read
+    throughput, and removes the file afterwards.
+
+    Note:
+        The reread may be served (partly) from the OS page cache rather than
+        the physical disk, so read numbers can look better than a cold read
+        would be. There is no portable way to drop the cache without root.
+
+    Examples:
+        ``invoke io-bench --directories=/tmp``
+        ``invoke io-bench --directories=/tmp,/scratch --size-gb=2``
+
+    Args:
+        ctx: Invoke context.
+        directories (str): Comma-separated list of directories to benchmark.
+        size_gb (float, optional): Size in GB of the temporary file. Defaults to 1.0.
+        chunk_mb (int, optional): Chunk size in MB used for writing/reading. Defaults to 4.
+    """
+    import time
+    import uuid
+
+    from tabulate import tabulate
+
+    dirs = [d.strip() for d in directories.split(",") if d.strip()]
+    if not dirs:
+        raise ValueError("Expected at least one directory")
+
+    size_bytes = int(size_gb * 1024**3)
+    chunk_bytes = int(chunk_mb * 1024**2)
+    if size_bytes <= 0:
+        raise ValueError(f"{size_gb=} must be > 0")
+    if chunk_bytes <= 0:
+        raise ValueError(f"{chunk_mb=} must be > 0")
+
+    cprint(f"Benchmarking {len(dirs)} directory(ies) with a {size_gb} GB file ...", color="yellow")
+
+    rows = []
+    for directory in dirs:
+        dir_path = Path(directory)
+        if not dir_path.is_dir():
+            cprint(f"Skipping {directory!r}: not a directory", color="red")
+            continue
+
+        tmp_path = dir_path / f".io_bench_{uuid.uuid4().hex}.tmp"
+        chunk = os.urandom(chunk_bytes)
+        try:
+            written = 0
+            start = time.perf_counter()
+            with open(tmp_path, "wb") as fh:
+                while written < size_bytes:
+                    remaining = size_bytes - written
+                    fh.write(chunk if remaining >= chunk_bytes else chunk[:remaining])
+                    written += min(chunk_bytes, remaining)
+                _fsync_full(fh)
+            write_time = time.perf_counter() - start
+
+            read_bytes = 0
+            start = time.perf_counter()
+            with open(tmp_path, "rb") as fh:
+                while True:
+                    data = fh.read(chunk_bytes)
+                    if not data:
+                        break
+                    read_bytes += len(data)
+            read_time = time.perf_counter() - start
+        finally:
+            tmp_path.unlink(missing_ok=True)
+
+        write_mb_s = (written / 1024**2) / write_time if write_time > 0 else float("inf")
+        read_mb_s = (read_bytes / 1024**2) / read_time if read_time > 0 else float("inf")
+        rows.append([directory, f"{write_mb_s:.1f} MB/s", f"{write_time:.2f} s", f"{read_mb_s:.1f} MB/s", f"{read_time:.2f} s"])
+
+    if not rows:
+        cprint("No valid directory to benchmark.", color="red")
+        return
+
+    print()
+    print(tabulate(rows, headers=["Directory", "Write speed", "Write time", "Read speed", "Read time"], tablefmt="grid"))
+
+
+@task
+def doctor(ctx: Context) -> bool:
+    """
+    Check that common tools needed to build, test, and debug Abinit are on PATH.
+
+    Examples:
+        ``invoke doctor``
+
+    Args:
+        ctx: Invoke context.
+
+    Returns:
+        bool: True if every required tool was found, False otherwise.
+    """
+    from tabulate import tabulate
+
+    required = [
+        ("Make", ["make"]),
+        ("Git", ["git"]),
+        ("Fortran compiler", [os.environ.get("FC", ""), "gfortran", "ifort", "ifx"]),
+        ("MPI launcher", ["mpirun", "mpiexec", "srun"]),
+        ("Python 3", ["python3"]),
+    ]
+    optional = [
+        ("CMake", ["cmake"]),
+        ("Doxygen", ["doxygen"]),
+        ("Ctags", ["ctags"]),
+        ("GDB", ["gdb"]),
+        ("LLDB", ["lldb"]),
+        ("Vim-compatible editor", ["mvim", "nvim", "vim"]),
+    ]
+
+    def _first_found(names: list[str]) -> str | None:
+        """Return the path of the first name in `names` found on PATH, if any."""
+        for name in names:
+            if name and (path := which(name)):
+                return path
+        return None
+
+    rows = []
+    all_required_ok = True
+    for label, names in required:
+        path = _first_found(names)
+        if not path:
+            all_required_ok = False
+        rows.append([label, "required", path or "NOT FOUND"])
+
+    for label, names in optional:
+        path = _first_found(names)
+        rows.append([label, "optional", path or "not found"])
+
+    print(tabulate(rows, headers=["Tool", "Kind", "Location"], tablefmt="grid"))
+
+    if all_required_ok:
+        cprint("\nAll required tools found.", color="green")
+    else:
+        cprint("\nSome required tools are missing -- builds are likely to fail.", color="red")
+
+    return all_required_ok
 
 
 @task
