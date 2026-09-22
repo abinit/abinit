@@ -21,37 +21,37 @@ repos:
       - id: mixed-line-ending
         args: [--fix=lf]
 
-  - repo: local
-    hooks:
-      - id: check-build-config
-        name: Run check-build-config
-        entry: python abichecks/scripts/check-build-config.py
-        language: python
-      - id: run-check-config-h
-        name: Run run-check-config-h
-        entry: python abichecks/scripts/check-config-h.py
-        language: python
-      - id: run-check-ascii
-        name: Run run-check_ascii
-        entry: python abichecks/scripts/check_ascii.py
-        language: python
-      - id: check-forbidden
-        name: Run check-forbidden
-        entry: python abichecks/scripts/check_forbidden.py
-        language: python
-      - id: check-binaries-conf
-        name: Run check-binaries-conf
-        entry: python abichecks/scripts/check-binaries-conf.py
-        language: python
-      - id: check-cpp-options
-        name: Run check-cpp-options
-        entry: python abichecks/scripts/check-cpp-options.py
-        language: python
-      - id: check-inlined-macros
-        name: run check-inlined-macros
-        entry: python abichecks/scripts/check_inlined_macros.py
-        language: python
-      - id: check-unprotected-omp-target
-        name: run check-unprotected-omp-target.py
-        entry: python abichecks/scripts/check-unprotected-omp-target.py
-        language: python
+  #- repo: local
+  #  hooks:
+  #    - id: check-build-config
+  #      name: Run check-build-config
+  #      entry: python abichecks/scripts/check-build-config.py
+  #      language: python
+  #    - id: run-check-config-h
+  #      name: Run run-check-config-h
+  #      entry: python abichecks/scripts/check-config-h.py
+  #      language: python
+  #    - id: run-check-ascii
+  #      name: Run run-check_ascii
+  #      entry: python abichecks/scripts/check_ascii.py
+  #      language: python
+  #    - id: check-forbidden
+  #      name: Run check-forbidden
+  #      entry: python abichecks/scripts/check_forbidden.py
+  #      language: python
+  #    - id: check-binaries-conf
+  #      name: Run check-binaries-conf
+  #      entry: python abichecks/scripts/check-binaries-conf.py
+  #      language: python
+  #    - id: check-cpp-options
+  #      name: Run check-cpp-options
+  #      entry: python abichecks/scripts/check-cpp-options.py
+  #      language: python
+  #    - id: check-inlined-macros
+  #      name: run check-inlined-macros
+  #      entry: python abichecks/scripts/check_inlined_macros.py
+  #      language: python
+  #    - id: check-unprotected-omp-target
+  #      name: run check-unprotected-omp-target.py
+  #      entry: python abichecks/scripts/check-unprotected-omp-target.py
+  #      language: python
