@@ -718,9 +718,13 @@ class TestBuildParser:
         ns = parser.parse_args(["run", "my.json"])
         assert ns.testbot_json == "my.json"
         assert ns.remove_existing_workdirs is False
+        assert ns.profile is False
 
         ns = parser.parse_args(["run", "-rf", "my.json"])
         assert ns.remove_existing_workdirs is True
+
+        ns = parser.parse_args(["run", "--profile", "my.json"])
+        assert ns.profile is True
 
     def test_analyze_defaults_and_explicit_tag(self):
         parser = build_parser()
@@ -783,6 +787,7 @@ class TestMain:
         mock_from_json.assert_called_once_with("my.json")
         mock_instance.run.assert_called_once()
         assert mock_instance.remove_existing_workdirs is False
+        assert mock_instance.profile_workers is False
 
     def test_main_propagates_remove_existing_workdirs(self, monkeypatch):
         monkeypatch.setattr(sys, "argv", ["testbot.py", "run", "-rf", "my.json"])
@@ -791,6 +796,14 @@ class TestMain:
         with patch("tests.testbot.TestBot.from_json", return_value=mock_instance):
             assert main() == 0
         assert mock_instance.remove_existing_workdirs is True
+
+    def test_main_propagates_profile(self, monkeypatch):
+        monkeypatch.setattr(sys, "argv", ["testbot.py", "run", "--profile", "my.json"])
+        mock_instance = MagicMock()
+        mock_instance.run.return_value = 0
+        with patch("tests.testbot.TestBot.from_json", return_value=mock_instance):
+            assert main() == 0
+        assert mock_instance.profile_workers is True
 
     def test_main_dispatches_to_print_without_running(self, monkeypatch, capsys):
         monkeypatch.setattr(sys, "argv", ["testbot.py", "print", "my.json"])
@@ -817,7 +830,9 @@ class TestMain:
         )
         with patch("tests.testbot.benchmark", return_value=2) as mock_benchmark:
             assert main() == 2
-        mock_benchmark.assert_called_once_with("my.json", [1, 4], False)
+        mock_benchmark.assert_called_once_with(
+            "my.json", [1, 4], remove_existing_workdirs=False, profile_workers=False
+        )
 
     def test_main_rejects_invalid_benchmark_cpu_values(self, monkeypatch):
         monkeypatch.setattr(

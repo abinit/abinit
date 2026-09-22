@@ -5,13 +5,12 @@ __version__ = "2.0"
 __author__ = "Matteo Giantomassi"
 
 import argparse
-import cProfile
 import dataclasses
+import glob
 import html
 import json
 import os
 import platform
-import pstats
 import shutil
 import subprocess
 import sys
@@ -232,6 +231,7 @@ class TestBot:
     workdir_prefix: str = field(init=False, default="", repr=False)
     py_nprocs_override: int | None = field(init=False, default=None, repr=False)
     remove_existing_workdirs: bool = field(init=False, default=False, repr=False)
+    profile_workers: bool = field(init=False, default=False, repr=False)
 
     @classmethod
     def print_options(cls) -> None:
@@ -660,6 +660,7 @@ class TestBot:
                                        py_nprocs=py_nprocs,
                                        runmode=self.runmode,
                                        verbose=self.verbose,
+                                       profile_workers=self.profile_workers,
                                        make_html_diff=1)
 
         if results is None:
@@ -696,6 +697,16 @@ class TestBot:
                     shutil.copy2(os.path.join(workdir, fn), workdir_name)
                 except Exception:
                     print(f"Could not copy back file {fn}")
+
+            if self.profile_workers:
+                # workdir lives under tempfile.mkdtemp() and gets discarded --
+                # without this, the worker .prof files written there would be lost.
+                for fn in glob.glob(os.path.join(workdir, "testbot_worker_*.prof")) + \
+                          glob.glob(os.path.join(workdir, "testbot_workers_merged.prof")):
+                    try:
+                        shutil.copy2(fn, workdir_name)
+                    except Exception:
+                        print(f"Could not copy back file {fn}")
 
         return results.nfailed, results.npassed, results.nexecuted
 
@@ -807,6 +818,7 @@ def benchmark(
     testbot_json: str | None,
     py_nprocs_values: list[int],
     remove_existing_workdirs: bool = False,
+    profile_workers: bool = False,
 ) -> int:
     """Run TestBot repeatedly and compare total wall time for each Python worker count."""
     results: list[BenchmarkResult] = []
@@ -819,6 +831,7 @@ def benchmark(
         testbot.py_nprocs_override = py_nprocs
         testbot.workdir_prefix = f"Benchmark_PY{py_nprocs}_"
         testbot.remove_existing_workdirs = remove_existing_workdirs
+        testbot.profile_workers = profile_workers
 
         start = time.perf_counter()
         returncode = testbot.run()
@@ -1344,7 +1357,10 @@ Examples:
   # Run tests using a configuration file
   python testbot.py run testbot.json
 
-  # Compare wall time with different CPU limits and profile Python orchestration
+  # Same, profiling each worker's actual test execution (see testbot_workers_merged.prof)
+  python testbot.py run testbot.json --profile
+
+  # Compare wall time with different CPU limits, profiling worker execution too
   python testbot.py benchmark testbot.json --py-nprocs 1 2 4 8 --profile
 
   # Generate a template configuration file
@@ -1383,6 +1399,12 @@ Examples:
         action="store_true",
         help="Remove stale TestBot work directories before running. Unsafe for concurrent runs.",
     )
+    run_parser.add_argument(
+        "--profile",
+        action="store_true",
+        help="Profile each worker's actual test execution (cProfile, merged into "
+             "testbot_workers_merged.prof per workdir).",
+    )
 
     benchmark_parser = subparsers.add_parser(
         "benchmark", help="Run the test suite with several py_nprocs values and compare wall time."
@@ -1410,7 +1432,8 @@ Examples:
     benchmark_parser.add_argument(
         "--profile",
         action="store_true",
-        help="Profile Python orchestration and write testbot_benchmark.prof.",
+        help="Profile each worker's actual test execution (cProfile, merged into "
+             "testbot_workers_merged.prof per workdir), for every py_nprocs value.",
     )
 
     doc_parser = subparsers.add_parser(
@@ -1473,17 +1496,12 @@ def main() -> int:
         if len(set(args.py_nprocs)) != len(args.py_nprocs):
             raise SystemExit("benchmark --py-nprocs values must be unique")
 
-        if args.profile:
-            profiler = cProfile.Profile()
-            returncode = profiler.runcall(
-                benchmark, args.testbot_json, args.py_nprocs, args.remove_existing_workdirs
-            )
-            profiler.dump_stats("testbot_benchmark.prof")
-            print("Writing testbot_benchmark.prof: Python profiling data.")
-            pstats.Stats(profiler).strip_dirs().sort_stats("cumulative").print_stats(40)
-            return returncode
-
-        return benchmark(args.testbot_json, args.py_nprocs, args.remove_existing_workdirs)
+        return benchmark(
+            args.testbot_json,
+            args.py_nprocs,
+            remove_existing_workdirs=args.remove_existing_workdirs,
+            profile_workers=args.profile,
+        )
 
     # "run" and "print" both parse a testbot.json into a TestBot instance.
     if args.testbot_json is not None:
@@ -1499,6 +1517,7 @@ def main() -> int:
         return 0
 
     testbot.remove_existing_workdirs = args.remove_existing_workdirs
+    testbot.profile_workers = args.profile
     return testbot.run()
 
 

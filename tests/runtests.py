@@ -360,6 +360,17 @@ def main() -> int:
     )
 
     parser.add_option(
+        "--profile",
+        dest="profile",
+        default=False,
+        action="store_true",
+        help=(
+            "Profile each worker's actual test execution with cProfile, merging the "
+            "per-worker profiles into testbot_workers_merged.prof in workdir."
+        ),
+    )
+
+    parser.add_option(
         "--use-cache",
         default=False,
         action="store_true",
@@ -1086,6 +1097,7 @@ def main() -> int:
         py_nprocs=py_nprocs,
         runmode=runmode,
         verbose=options.verbose,
+        profile_workers=options.profile,
         erase_files=options.erase_files,
         make_html_diff=options.make_html_diff,
         sub_timeout=options.sub_timeout,
@@ -1146,6 +1158,7 @@ def main() -> int:
                 py_nprocs=py_nprocs,
                 runmode=runmode,
                 verbose=options.verbose,
+                profile_workers=options.profile,
                 erase_files=options.erase_files,
                 make_html_diff=options.make_html_diff,
                 sub_timeout=options.sub_timeout,

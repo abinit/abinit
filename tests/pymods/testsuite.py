@@ -9,10 +9,13 @@ and YAML formats.
 
 from __future__ import annotations
 
+import cProfile
+import glob
 import logging
 import os
 import pickle
 import platform
+import pstats
 import re
 import shutil
 import sys
@@ -3944,7 +3947,7 @@ def exec2class(exec_name):
     }.get(exec_name, BaseTest)
 
 
-def do_work(task_q, res_q, rank, run_func, run_func_kwargs, print_lock, kill_me, thread_mode=False):
+def do_work(task_q, res_q, rank, run_func, run_func_kwargs, print_lock, kill_me, thread_mode=False, profile=False):
     """
     Worker function for parallel test execution.
 
@@ -3957,6 +3960,9 @@ def do_work(task_q, res_q, rank, run_func, run_func_kwargs, print_lock, kill_me,
         print_lock (Lock): Thread/Process lock for printing.
         kill_me (bool): Signal to terminate worker.
         thread_mode (bool): If True, run as a thread instead of a process.
+        profile (bool): If True, profile every test this worker executes with cProfile
+            and dump the accumulated stats to "testbot_worker_{rank}.prof" in workdir
+            when the worker exits (see AbinitTestSuite._merge_worker_profiles()).
     """
     done = {"type": "proc_done"}
     all_done = False
@@ -3965,6 +3971,8 @@ def do_work(task_q, res_q, rank, run_func, run_func_kwargs, print_lock, kill_me,
     workdir = run_func_kwargs["workdir"]
     #print("func_kwargs", run_func_kwargs)
 
+    profiler = cProfile.Profile() if profile else None
+
     try:
         while not all_done and not (thread_mode and kill_me):
             test = task_q.get(block=True, timeout=2)
@@ -3972,6 +3980,9 @@ def do_work(task_q, res_q, rank, run_func, run_func_kwargs, print_lock, kill_me,
             if test is None:
                 # reached the end
                 all_done = True
+
+            elif profiler is not None:
+                res_q.put(profiler.runcall(run_func, test, rank, print_lock=print_lock, **run_func_kwargs))
 
             else:
                 res_q.put(run_func(test, rank, print_lock=print_lock, **run_func_kwargs))
@@ -3992,6 +4003,11 @@ def do_work(task_q, res_q, rank, run_func, run_func_kwargs, print_lock, kill_me,
             pass
 
     finally:
+        if profiler is not None:
+            try:
+                profiler.dump_stats(os.path.join(workdir, f"testbot_worker_{rank}.prof"))
+            except Exception as prof_exc:
+                warnings.warn(f"Could not dump worker profile for rank {rank}: {prof_exc}")
         res_q.put(done)
 
 
@@ -4696,6 +4712,44 @@ class AbinitTestSuite:
             warnings.warn(f"exception while creating tarball file: {exc!s}")
             self.exceptions.append(exc)
 
+    def _merge_worker_profiles(self):
+        """Merge every worker's cProfile dump in self.workdir into one report.
+
+        Called by run_tests() when profile_workers is True, after all workers have
+        finished. cProfile is deterministic (records every call rather than sampling),
+        so per-function call counts/cumulative times from different workers are
+        directly summable via pstats.Stats.add() -- this gives one aggregate "where
+        did total worker CPU time go" picture across the whole run, since any worker
+        can pull any test off the shared queue (they are interchangeable).
+        """
+        try:
+            prof_files = sorted(glob.glob(os.path.join(self.workdir, "testbot_worker_*.prof")))
+            if not prof_files:
+                warnings.warn("profile_workers was requested but no worker .prof files were found.")
+                return
+
+            stats = pstats.Stats(prof_files[0])
+            if len(prof_files) > 1:
+                stats.add(*prof_files[1:])
+
+            print(f"\n--- Worker profile summary ({len(prof_files)} worker(s)) ---")
+            stats.strip_dirs().sort_stats("cumulative").print_stats(40)
+
+            merged_fname = os.path.join(self.workdir, "testbot_workers_merged.prof")
+            stats.dump_stats(merged_fname)
+            print(f"Writing {merged_fname}: merged cProfile data from {len(prof_files)} worker(s).")
+            print(f"Inspect interactively with: snakeviz {merged_fname}")
+            print("  (pip install snakeviz if not already installed)")
+            print(f"Or a call-graph diagram with: gprof2dot -f pstats {merged_fname} | dot -Tpng -o profile.png")
+            print(
+                "Per-worker files (testbot_worker_<rank>.prof) are also kept in this "
+                "directory, useful for spotting one worker doing disproportionate work."
+            )
+
+        except Exception as exc:
+            warnings.warn(f"exception while merging worker profiles: {exc!s}")
+            self.exceptions.append(exc)
+
     def sanity_check(self):
         """
         Verify that all tests in the suite have unique identifiers.
@@ -4707,7 +4761,7 @@ class AbinitTestSuite:
         if len(all_full_ids) != len(set(all_full_ids)):
             raise ValueError("Cannot have more than two tests with the same full_id")
 
-    def start_workers(self, py_nprocs, run_func, run_func_kwargs):
+    def start_workers(self, py_nprocs, run_func, run_func_kwargs, profile=False):
         """
         Start py_nprocs new processes that will get tests from a queue and run
         them with run_func and put the result in an output queue.
@@ -4716,6 +4770,8 @@ class AbinitTestSuite:
             py_nprocs: Number of python sub-processes to be used.
             run_func: Function to be executed.
             run_func_kwargs: Kwargs passed to run_func.
+            profile: If True, each worker profiles its own test execution with
+                cProfile and dumps a "testbot_worker_{rank}.prof" file on exit.
 
         Return: the task/input queue (to be closed only) and the results/output queue.
         """
@@ -4738,13 +4794,21 @@ class AbinitTestSuite:
         # Create and start subprocesses
         for rank in range(py_nprocs - 1):
             # create and start subprocesses
-            p = Process(target=do_work, args=(task_q, res_q, rank, run_func, run_func_kwargs, print_lock, self._kill_me))
+            p = Process(
+                target=do_work,
+                args=(task_q, res_q, rank, run_func, run_func_kwargs, print_lock, self._kill_me),
+                kwargs={"profile": profile},
+            )
             self._processes.append(p)
             p.start()
 
         # Add the worker as a thread of the main process
         # make it daemon so it will die if the main process is interrupted early
-        t = Thread(target=do_work, args=(task_q, res_q, py_nprocs-1, run_func, run_func_kwargs, print_lock, self._kill_me, True))
+        t = Thread(
+            target=do_work,
+            args=(task_q, res_q, py_nprocs-1, run_func, run_func_kwargs, print_lock, self._kill_me, True),
+            kwargs={"profile": profile},
+        )
         t.daemon = True
         t.start()
 
@@ -4793,7 +4857,7 @@ class AbinitTestSuite:
 
     def run_tests(self, build_env, workdir, job_runner,
                   mpi_nprocs=1, omp_nthreads=0, max_cpus=0, max_gpus=0, py_nprocs=1,
-                  runmode="static", verbose=0, **kwargs):
+                  runmode="static", verbose=0, profile_workers=False, **kwargs):
         """
         Execute the list of tests (main entry point for client code)
 
@@ -4808,6 +4872,10 @@ class AbinitTestSuite:
             py_nprocs: number of python subprocesses.
             runmode: "static" or "dynamic"
             verbose: Verbosity level.
+            profile_workers: If True, profile the actual test-execution code running
+                inside each worker (process or thread) with cProfile, and merge the
+                per-worker profiles into "testbot_workers_merged.prof" in workdir once
+                all workers finish. See _merge_worker_profiles().
 
         return: Results instance.
         """
@@ -4882,14 +4950,27 @@ class AbinitTestSuite:
             if py_nprocs == 1:
                 logger.info("Sequential version")
 
+                profiler = cProfile.Profile() if profile_workers else None
+
                 # discard the return value because tests are directly modified
                 for test in self:
-                    run_and_check_test(test, rank=0, **run_func_kwargs)
+                    if profiler is not None:
+                        profiler.runcall(run_and_check_test, test, rank=0, **run_func_kwargs)
+                    else:
+                        run_and_check_test(test, rank=0, **run_func_kwargs)
+
+                if profiler is not None:
+                    try:
+                        profiler.dump_stats(os.path.join(self.workdir, "testbot_worker_0.prof"))
+                    except Exception as prof_exc:
+                        warnings.warn(f"Could not dump worker profile for rank 0: {prof_exc}")
 
             elif py_nprocs > 1:
                 logger.info(f"Parallel version with py_nprocs = {py_nprocs}")
 
-                task_q, res_q = self.start_workers(py_nprocs, run_and_check_test, run_func_kwargs)
+                task_q, res_q = self.start_workers(
+                    py_nprocs, run_and_check_test, run_func_kwargs, profile=profile_workers
+                )
 
                 timeout_1test = float(job_runner.timebomb.timeout)
                 if timeout_1test <= 0.1:
@@ -4923,6 +5004,9 @@ class AbinitTestSuite:
 
             # Collect HTML files in a tarball
             self.create_targz_results()
+
+            if profile_workers:
+                self._merge_worker_profiles()
 
             nsucc = len(self.succeeded_tests())
             npass = len(self.passed_tests())
