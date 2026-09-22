@@ -61,7 +61,7 @@ natom 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = atlas_gnu_14.2_triqs, haicgu_*, mann_gnu_13.3
+#%% exclude_builders = atlas_gnu_14.2_triqs, mann_gnu_13.3
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 4
