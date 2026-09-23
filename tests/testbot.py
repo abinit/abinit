@@ -128,8 +128,10 @@ class TestRunSummary:
     nskipped: int
     ndisabled: int
     nexecuted: int
+    # Wall-clock seconds spent in test_suite.run_tests() for this configuration.
+    wall_time: float
 
-    def as_dict(self) -> dict[str, int | str]:
+    def as_dict(self) -> dict[str, int | str | float]:
         """Return a JSON-serializable representation."""
         return dataclasses.asdict(self)
 
@@ -541,7 +543,7 @@ class TestBot:
 
         headings = [
             "Configuration", "Report", "MPI", "OpenMP", "Python workers", "Executed",
-            "Failed", "Passed", "Succeeded", "Skipped", "Disabled",
+            "Failed", "Passed", "Succeeded", "Skipped", "Disabled", "Wall time (s)",
         ]
         rows = []
         for run in self.run_summaries:
@@ -562,6 +564,7 @@ class TestBot:
                 str(run.nsucceeded),
                 str(run.nskipped),
                 str(run.ndisabled),
+                f"{run.wall_time:.1f}",
             ]
             cells = "".join(f"<td>{value}</td>" for value in values)
             # Same row_class convention as to_table()'s testbot-summary table
@@ -652,6 +655,7 @@ class TestBot:
         if mpi_nprocs > 1 or self.force_mpi:
             job_runner = self.mpi_runner
 
+        start = time.perf_counter()
         results = test_suite.run_tests(self.build_env, workdir, job_runner,
                                        mpi_nprocs=mpi_nprocs,
                                        omp_nthreads=self.omp_num_threads,
@@ -662,6 +666,7 @@ class TestBot:
                                        verbose=self.verbose,
                                        profile_workers=self.profile_workers,
                                        make_html_diff=1)
+        wall_time = time.perf_counter() - start
 
         if results is None:
             print("Test suite is empty, returning 0 0 0 ")
@@ -680,6 +685,7 @@ class TestBot:
                 nskipped=len(results.skipped_tests),
                 ndisabled=len(results.disabled_tests),
                 nexecuted=results.nexecuted,
+                wall_time=wall_time,
             )
         )
         # Persist after every completed run so earlier configurations remain

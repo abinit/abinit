@@ -403,6 +403,7 @@ class TestTestBotClass:
                 nskipped=4,
                 ndisabled=1,
                 nexecuted=10,
+                wall_time=123.456,
             )
         ]
 
@@ -422,6 +423,8 @@ class TestTestBotClass:
         assert "TestBot_MPI4_OMP2" in report
         assert 'href="TestBot_MPI4_OMP2/"' in report
         assert "<td>10</td><td>1</td><td>2</td><td>7</td>" in report
+        assert "<th>Disabled</th><th>Wall time (s)</th>" in report
+        assert "<td>1</td><td>123.5</td></tr>" in report
 
         # Report must be the second column (right after Configuration), not
         # trailing at the end -- readers scanning left to right want the link
@@ -446,6 +449,7 @@ class TestTestBotClass:
                 nskipped=0,
                 ndisabled=0,
                 nexecuted=1,
+                wall_time=1.0,
             )
         ]
 
@@ -468,12 +472,12 @@ class TestTestBotClass:
             TestRunSummary(
                 mpi_nprocs=1, omp_nthreads=1, py_nprocs=1, runmode="static",
                 workdir_name="TestBot_failed", nfailed=3, npassed=0,
-                nsucceeded=0, nskipped=0, ndisabled=0, nexecuted=3,
+                nsucceeded=0, nskipped=0, ndisabled=0, nexecuted=3, wall_time=1.0,
             ),
             TestRunSummary(
                 mpi_nprocs=1, omp_nthreads=1, py_nprocs=1, runmode="static",
                 workdir_name="TestBot_ok", nfailed=0, npassed=3,
-                nsucceeded=0, nskipped=0, ndisabled=0, nexecuted=3,
+                nsucceeded=0, nskipped=0, ndisabled=0, nexecuted=3, wall_time=1.0,
             ),
         ]
 
