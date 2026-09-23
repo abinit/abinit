@@ -36,16 +36,15 @@
 #%% [setup]
 #%% executable = anaddb
 #%% input_ddb = t18.ddb.in
-#%% test_chain = t18.abi, t19.abi, t20.abi, t21.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t19.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
-#%% keywords = 
+#%% keywords =
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%   Analyze a DDB for BaTiO3, same as test18, but IFCs are
 #%%   obtained from a 2x2x2 non-shifted grid (referred to as M1
 #%%   in the above-mentioned paper by Ghosez et al).

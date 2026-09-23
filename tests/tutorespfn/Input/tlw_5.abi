@@ -18,7 +18,6 @@ tlw_4o_DS5_DDB
 #%% [setup]
 #%% executable = mrgddb
 #%% exclude_builders = scope_gnu_10.2_paral, bob_gnu_13.2_openmp
-#%% test_chain =  tlw_4.abi, tlw_5.abi, tlw_6.abi, tlw_7.abi
 #%% [files]
 #%% files_to_test =
 #%%   tlw_5.ddb.out, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium

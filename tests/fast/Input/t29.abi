@@ -56,17 +56,16 @@
 #%% [setup]
 #%% executable = abinit
 #%% input_prefix = t27o
-#%% test_chain = t27.abi, t28.abi, t29.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t29.abo,       tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00;
 #%%   t29o_TIM8_GEO ,tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   move with natfix.
 #%%   Output also GEO files
 #%% topics = MolecularDynamics

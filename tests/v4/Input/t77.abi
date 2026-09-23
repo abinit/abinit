@@ -17,7 +17,6 @@ targetpol -1.4  -1.4  -1.4
 #%% [setup]
 #%% executable = anaddb
 #%% input_ddb = t76.ddb.out
-#%% test_chain = t75.abi, t76.abi, t77.abi
 #%% [files]
 #%% files_to_test =
 #%%   t77.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options =  -easy

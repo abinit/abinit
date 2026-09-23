@@ -866,7 +866,7 @@ TESTCNF_KEYWORDS = {
     "executable"     : (str       , None , "setup", "Name of the executable e.g. abinit"),
     "use_files_file" : (_str2bool , "no" , "setup", "Pass files file to executable (legacy mode)"),
     "exec_args"      : (str       , ""   , "setup", "Arguments passed to executable on the command line."),
-    "test_chain"     : (_str2list , ""   , "setup", "Defines a ChainOfTest i.e. a list of tests that are connected together."),
+    "test_chain"     : (_str2list , ""   , "setup", "Defines a ChainOfTest i.e. a list of tests that are connected together. Required only in the first input of the chain."),
     "need_cpp_vars"  : (_str2set  , ""   , "setup", "CPP variables that must be defined in config.h in order to enable the test."),
     "exclude_hosts"  : (_str2list , ""   , "setup", "The test is not executed if we are running on a slave that matches compiler@hostname"),
     "exclude_builders": (_str2list, ""   , "setup", "The test is not executed if we are using a builder whose name is in the list"),
@@ -1813,14 +1813,41 @@ def make_abitests_from_inputs(input_fnames: str | list[str], abenv: BuildEnviron
         input_fnames = cast("list[str]", input_fnames)
 
     inp_fnames = [os.path.abspath(p) for p in input_fnames]
+    parsers = {inp_fname: AbinitTestInfoParser(inp_fname) for inp_fname in inp_fnames}
+
+    # The test_chain option is only required in the first input of the chain (the head).
+    # The other members may omit it or repeat the same list (old convention).
+    # Map each member to the head of its chain so that it is not treated as an independent test.
+    member2head: dict[str, str] = {}
+    for inp_fname, parser in parsers.items():
+        if not parser.is_testchain:
+            continue
+        chain = parser.chain_inputs()
+        if chain[0] != inp_fname:
+            continue
+        for member in chain[1:]:
+            if member not in parsers:
+                raise RuntimeError(f"{member} belongs to the test_chain declared in {inp_fname} "
+                                   "but it is not in the list of inputs. Forgot to register the input in __init__.py ?")
+            if member in member2head:
+                raise RuntimeError(f"{member} belongs to two test chains: {member2head[member]} and {inp_fname}")
+            m_parser = parsers[member]
+            if m_parser.is_testchain and m_parser.chain_inputs() != chain:
+                raise RuntimeError(f"{member} declares a test_chain different from the one "
+                                   f"declared in the head of the chain {inp_fname}")
+            member2head[member] = inp_fname
 
     out_tests: list[BaseTest | ChainOfTests] = []
 
-    while inp_fnames:
-        inp_fname = inp_fnames.pop(0)
+    for inp_fname, parser in parsers.items():
+        if inp_fname in member2head:
+            # Already included in the ChainOfTests built from the head.
+            continue
 
-        #print("inp_fname", inp_fname)
-        parser = AbinitTestInfoParser(inp_fname)
+        if parser.is_testchain and parser.chain_inputs()[0] != inp_fname:
+            raise RuntimeError(f"{inp_fname} declares a test_chain whose head {parser.chain_inputs()[0]} "
+                               "is not in the list of inputs.")
+
         nprocs_to_test = parser.nprocs_to_test
 
         if len(nprocs_to_test) == 0:
@@ -1856,15 +1883,6 @@ def make_abitests_from_inputs(input_fnames: str | list[str], abenv: BuildEnviron
                         f"tchain_list is empty, inp_fname {inp_fname}")
 
                 out_tests.append(ChainOfTests(tchain_list))
-
-            # Remove the input files of the chain
-            for s in parser.chain_inputs()[1:]:
-                try:
-                    idx = inp_fnames.index(s)
-                except ValueError:
-                    raise RuntimeError(f"{inp_fnames} not found in inp_fnames. Forgot to register the input in __init__.py ?")
-
-                inp_fnames.pop(idx)
 
     return out_tests
 

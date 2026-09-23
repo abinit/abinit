@@ -79,7 +79,6 @@ prtebands 0       # Do not print ebands
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = trttddft_1.abi, trttddft_2.abi, trttddft_3.abi
 #%% expected_failure = yes
 #%% [files]
 #%% files_to_test =

@@ -22,7 +22,6 @@ bound_factors = 0 1 1
 #%% executable = multibinit
 #%% system_xml = t100_model.xml
 #%% md_hist = t98.nc
-#%% test_chain = t98.abi, t99.abi, t100.abi
 #%% exclude_builders = scope_gnu_12.2_mpich
 #%% need_cpp_vars = !HAVE_GPU  , !CC_INTEL_ONEAPI
 #%% [files]

@@ -6,7 +6,6 @@ t160o.ddb.nc
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% test_chain = t160.abi, t161.abi
 #%% [files]
 #%% files_to_test =
 #%%   t161o.ddb, tolnlines = 0, tolabs = 0.0, tolrel = 0.0

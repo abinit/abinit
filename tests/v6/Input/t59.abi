@@ -21,19 +21,18 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% test_chain = t58.abi, t59.abi
 #%% input_ddb = t58o_DS2_DDB
 #%% input_gkk = t58o_DS2_EIGR2D
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t59.abo, tolnlines = 8, tolabs = 4.0e-2, tolrel = 2.0e-4
-#%% psp_files = 
+#%% psp_files =
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   He BCC 8-atom supercell. Fake smooth pseudopotential.
 #%%   Follow-up of test 58. Analyse (anaddb) the DDB and EIGR2D files.
 #%%   Compute the electron-phonon modifications of the electronic structure.

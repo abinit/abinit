@@ -148,7 +148,6 @@ optdriver7    5 # for nonlinear calculation
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t85.abi, t86.abi
 #%% [files]
 #%% files_to_test =
 #%%    t86.abo, tolnlines = 0 , tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium;

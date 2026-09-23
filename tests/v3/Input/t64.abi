@@ -10,18 +10,17 @@ t64        # Root for the output name
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = cut3d
-#%% test_chain = t62.abi, t63.abi, t64.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t64_k2_b2, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%%##MG this was not tested by fldiff t64.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  
+#%%##MG this was not tested by fldiff t64.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =
 #%% [paral_info]
-#%% nprocs_to_test = 
+#%% nprocs_to_test =
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords =
-#%% description = 
+#%% description =
 #%%   Analysis of the output WF of the preceeding test
 #%%   by cut3d : output the wavefunction for (1/2 0 0), 2nd band
 #%%<END TEST_INFO>

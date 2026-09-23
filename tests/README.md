@@ -140,7 +140,8 @@ The tolerance fields have different meanings:
 
 Use existing tests for the same executable as examples because executables may require additional fields.
 Parallel tests can define processor-specific sections such as `[NCPU_4]` and declare suitable values for `nprocs_to_test` and `max_nprocs`.
-Chained tests must declare the same ordered `test_chain` in every member of the chain and usually use `pre_commands` or `post_commands` to transfer files between steps.
+Chained tests declare the ordered `test_chain` in the first input of the chain (the head) and usually use `pre_commands` or `post_commands` to transfer files between steps.
+The other members of the chain do not need to repeat `test_chain`; if they do, the list must be identical to the one given in the head.
 
 The complete automatically generated list of supported `TEST_INFO` sections and options is available with:
 
@@ -178,6 +179,22 @@ For a parallel test, specify the maximum number of MPI processes, for example:
 ```sh
 ./tests/runtests.py 'SUITE[NN]' -n 4
 ```
+
+Independent tests can be executed concurrently with `-j NUM` (`--jobs`), which starts `NUM` Python worker processes.
+The members of a chain are always executed sequentially inside the same worker.
+Use `-j 0` to let `runtests.py` choose the number of workers from the available CPUs.
+OpenMP threads are set with `-o NUM` (`--omp_num-threads`), which exports `OMP_NUM_THREADS` for each run.
+This option cannot be combined with `-c`: in this case, specify the OpenMP variables in the configuration file.
+The three options can be combined, for example:
+
+```sh
+./tests/runtests.py v9 -j 4             # 4 workers, sequential runs
+./tests/runtests.py paral -n 2 -j 2     # 2 workers, each test with 2 MPI processes
+./tests/runtests.py v9 -o 2 -j 4        # 4 workers, each run with 2 OpenMP threads
+```
+
+The total number of CPUs used is roughly `(MPI processes) × (OpenMP threads) × (workers)`.
+Keep this below the number of physical cores to avoid oversubscription; `runtests.py` prints a warning when the machine is overloaded.
 
 The results are written under `tests/Test_suite/` by default.
 Inspect the standard output, standard error, test report, and numerical differences rather than relying only on the final pass/fail status.

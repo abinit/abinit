@@ -75,16 +75,15 @@ t38o_DS2_WFK
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = cut3d
-#%% test_chain = t38.abi, t39.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t39.stdout, tolnlines = 4, tolabs = 1.100e-03, tolrel = 2.0e-02, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords =  
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   Analysis of the angular momentum content of the wavefunctions
 #%%   of the previous test (Silicon), at Gamma, X and L, using cut3d .
 #%%<END TEST_INFO>

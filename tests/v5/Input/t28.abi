@@ -37,21 +37,20 @@ qph1l  0.00000000E+00  0.00000000E+00  0.00000000E+00    1.0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% input_ddb = t26o 
-#%% input_gkk = t27.ddb.out 
-#%% input_prefix = 
-#%% output_prefix = 
-#%% test_chain = t26.abi, t27.abi, t28.abi
+#%% input_ddb = t26o
+#%% input_gkk = t27.ddb.out
+#%% input_prefix =
+#%% output_prefix =
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t28.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% extra_inputs =  t26o.gz
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = P. Boulanger
-#%% keywords =  
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   Crystalline Silicon
 #%%   Test the computation of the thermal eigenvalue corrections using anaddb and
 #%%   the merged second order eigenvalue file, from test 27.

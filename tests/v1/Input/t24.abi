@@ -44,9 +44,8 @@ xred 3*0
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
-#%% executable = abinit 
-#%% input_prefix = t23o 
-#%% test_chain = t21.abi, t22.abi, t23.abi, t24.abi
+#%% executable = abinit
+#%% input_prefix = t23o
 #%% [files]
 #%% files_to_test = t24.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
@@ -54,7 +53,7 @@ xred 3*0
 #%% [extra_info]
 #%% keywords = NC
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%   Isolated Hydrogen atom (see above)
 #%%   Treated with PBE GGA (ixc=11), with intxc=1.
 #%%   The total energy is -0.499588 Ha

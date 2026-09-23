@@ -49,15 +49,14 @@ xred 3*0 3*1/4
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t81.abi, t82.abi, t83.abi, t84.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t82.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = NC, DFPT, DDK
-#%% description = 
+#%% description =
 #%%   Compute silicon electric field perturbation, using WFK and DDK files produced in previous test.
 #%%<END TEST_INFO>

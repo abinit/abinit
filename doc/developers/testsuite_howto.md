@@ -202,8 +202,9 @@ execute the tests starting from the first item of the list.
 
 !!! note
 
-    All the input files belonging to a test chain must contain
-    the *test_chain* option (obviously with the same list of tests)
+    The *test_chain* option is only required in the first input file of the chain.
+    The other input files may omit it or repeat it (in this case, the list must be the same).
+    All the input files of the chain must be registered in the `__init__.py` file of the suite.
 
 During the execution of a test chain, one usually has to perform basic operations
 such as file renaming or file copying in order to connect the different steps

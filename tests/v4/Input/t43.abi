@@ -10,9 +10,8 @@ spline            # Type of interpolation
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = macroave
-#%% test_chain = t42.abi, t43.abi, t44.abi, t45.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t43_VHXC.MAV, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy;
 #%%   t43_VHXC.PAV, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
 #%% [shell]
@@ -22,10 +21,9 @@ spline            # Type of interpolation
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = NC
-#%% description = 
+#%% description =
 #%%   Si/Ge heterojunction, see test 42
 #%%   Analyze the Hartree and XC potential : one filter function,
 #%%   using the average width of a layer, and spline interpolation.
 #%% topics = Macroave
 #%%<END TEST_INFO>
-

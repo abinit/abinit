@@ -26,10 +26,9 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = optic
-#%% test_chain = toptic_1.abi, toptic_2.abi
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   toptic_2_0001_0001-linopt.out,        tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy;
 #%%   toptic_2_0001_0002_0003-ChiTotRe.out, tolnlines= 16, tolabs=  7.000e-04, tolrel=  7.000e-04, fld_options = -easy;
 #%%   toptic_2_0001_0002_0003-ChiTotIm.out, tolnlines= 16, tolabs=  4.000e-04, tolrel=  2.000e-04, fld_options = -easy
@@ -37,6 +36,6 @@
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = S. Sharma, X. Gonze
-#%% keywords = 
-#%% description = Input file for optic code. 
+#%% keywords =
+#%% description = Input file for optic code.
 #%%<END TEST_INFO>

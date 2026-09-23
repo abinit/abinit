@@ -7,9 +7,8 @@ t09o
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = conducti
-#%% test_chain = t09.abi, t10.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%  t10.out,   tolnlines =10, tolabs = 1.3e-04, tolrel = 2.0e-04, fld_options = -easy;
 #%%  t10_Kth,   tolnlines =50, tolabs = 1.3e-04, tolrel = 2.0e-04, fld_options = -easy;
 #%%  t10_abs,   tolnlines =50, tolabs = 4.0e+04, tolrel = 3.2e-05, fld_options = -ridiculous;
@@ -18,14 +17,14 @@ t09o
 #%%  t10_emisX_at1, tolnlines = 5, tolabs = 1.1e-07, tolrel = 1.9e-08, fld_options = -easy;
 #%%  t10_Lij, tolnlines = 50, tolabs = 1.1e-07, tolrel = 1.9e-08, fld_options = -ridiculous;
 #%%  t10_eps, tolnlines = 50, tolabs = 1.1e-07, tolrel = 1.9e-08, fld_options = -easy;
-#%% extra_inputs = 
-#%% psp_files = 
+#%% extra_inputs =
+#%% psp_files =
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = S. Mazevet, M. Torrent
 #%% keywords = PAW
-#%% description = 
+#%% description =
 #%%   Tests a PAW conductivity calculation.
 #%%   It tests the following parts of the code:
 #%%     conducti, conducti_paw, conducti_paw_core, emispec_paw

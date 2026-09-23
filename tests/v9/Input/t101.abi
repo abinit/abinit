@@ -6,7 +6,6 @@ t100o
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = conducti
-#%% test_chain = t100.abi, t101.abi
 #%% [files]
 #%% files_to_test =
 #%%  t101.out, tolnlines =10, tolabs = 6.5e-05, tolrel = 2.2e-05, fld_options = -easy;

@@ -75,7 +75,6 @@ nband 116    # Only the occupied states - will ease the convergence
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tdfpt_03.abi, tdfpt_04.abi
 #%% [files]
 #%% [paral_info]
 #%% max_nprocs = 24

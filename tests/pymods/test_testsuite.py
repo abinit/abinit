@@ -1527,6 +1527,98 @@ class TestChainOfTestsMultiParallel:
         assert chain.has_variables({"natom": 99}) == []
 
 
+def _write_chain_input(input_dir: Path, name: str, test_chain: str | None = None) -> str:
+    """Write a minimal input file with a TEST_INFO section, optionally declaring test_chain."""
+    chain_line = f"#%% test_chain = {test_chain}\n" if test_chain is not None else ""
+    path = input_dir / name
+    path.write_text(
+        "natom 1\n"
+        "#%%<BEGIN TEST_INFO>\n"
+        "#%% [setup]\n"
+        "#%% executable = abinit\n"
+        f"{chain_line}"
+        "#%% [files]\n"
+        f"#%% files_to_test = {name.replace('.abi', '.abo')}, tolnlines=0, tolabs=0.0, tolrel=0.0\n"
+        "#%% [paral_info]\n"
+        "#%% max_nprocs = 1\n"
+        "#%% [extra_info]\n"
+        "#%% authors = Unknown\n"
+        "#%%<END TEST_INFO>\n"
+    )
+    return str(path)
+
+
+class TestChainDeclaredInHeadOnly:
+    """test_chain must be declared in the head of the chain, the other members may omit it."""
+
+    @pytest.fixture
+    def input_dir(self, temp_test_dir):
+        path = Path(temp_test_dir) / "v1" / "Input"
+        path.mkdir(parents=True)
+        return path
+
+    def test_members_without_test_chain(self, input_dir):
+        chain = "t10.abi, t11.abi, t12.abi"
+        paths = [_write_chain_input(input_dir, "t10.abi", chain),
+                 _write_chain_input(input_dir, "t11.abi"),
+                 _write_chain_input(input_dir, "t12.abi"),
+                 _write_chain_input(input_dir, "t13.abi")]
+
+        tests = make_abitests_from_inputs(paths, abenv)
+        assert len(tests) == 2
+        assert isinstance(tests[0], ChainOfTests)
+        assert [t.id for t in tests[0]] == ["t10", "t11", "t12"]
+        assert tests[1].id == "t13"
+
+    def test_order_of_inputs_does_not_matter(self, input_dir):
+        chain = "t10.abi, t11.abi"
+        paths = [_write_chain_input(input_dir, "t11.abi"),
+                 _write_chain_input(input_dir, "t10.abi", chain)]
+
+        tests = make_abitests_from_inputs(paths, abenv)
+        assert len(tests) == 1
+        assert [t.id for t in tests[0]] == ["t10", "t11"]
+
+    def test_members_repeating_test_chain(self, input_dir):
+        chain = "t10.abi, t11.abi"
+        paths = [_write_chain_input(input_dir, "t10.abi", chain),
+                 _write_chain_input(input_dir, "t11.abi", chain)]
+
+        tests = make_abitests_from_inputs(paths, abenv)
+        assert len(tests) == 1
+        assert [t.id for t in tests[0]] == ["t10", "t11"]
+
+    def test_inconsistent_test_chain_raises(self, input_dir):
+        paths = [_write_chain_input(input_dir, "t10.abi", "t10.abi, t11.abi, t12.abi"),
+                 _write_chain_input(input_dir, "t11.abi", "t10.abi, t11.abi"),
+                 _write_chain_input(input_dir, "t12.abi")]
+
+        with pytest.raises(RuntimeError, match="different from the one"):
+            make_abitests_from_inputs(paths, abenv)
+
+    def test_unregistered_member_raises(self, input_dir):
+        paths = [_write_chain_input(input_dir, "t10.abi", "t10.abi, t11.abi")]
+        _write_chain_input(input_dir, "t11.abi")
+
+        with pytest.raises(RuntimeError, match="Forgot to register"):
+            make_abitests_from_inputs(paths, abenv)
+
+    def test_member_in_two_chains_raises(self, input_dir):
+        paths = [_write_chain_input(input_dir, "t10.abi", "t10.abi, t12.abi"),
+                 _write_chain_input(input_dir, "t11.abi", "t11.abi, t12.abi"),
+                 _write_chain_input(input_dir, "t12.abi")]
+
+        with pytest.raises(RuntimeError, match="two test chains"):
+            make_abitests_from_inputs(paths, abenv)
+
+    def test_missing_head_raises(self, input_dir):
+        _write_chain_input(input_dir, "t10.abi", "t10.abi, t11.abi")
+        paths = [_write_chain_input(input_dir, "t11.abi", "t10.abi, t11.abi")]
+
+        with pytest.raises(RuntimeError, match="whose head"):
+            make_abitests_from_inputs(paths, abenv)
+
+
 # ============================================================================
 # TESTS FOR AbinitTestSuite
 #

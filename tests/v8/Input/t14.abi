@@ -24,7 +24,6 @@ fit_imposecoeff = 4
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% test_chain = t13.abi,t14.abi,t15.abi
 #%% system_xml = t14_sys.xml
 #%% coeff_xml = t14_coeffs.xml
 #%% md_hist = t13_HIST

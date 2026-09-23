@@ -72,7 +72,6 @@ enunit      1
 #%% [setup]
 #%% executable = abinit
 #%% exclude_builders = bob_gnu_13.2_openmp, mann_gnu_13.3
-#%% test_chain = t23.abi, t24.abi
 #%% [files]
 #%% files_to_test =
 #%%   t24.abo, tolnlines = 4, tolabs = 1.0e-7, tolrel = 5.e-2, fld_options = -medium

@@ -72,16 +72,15 @@
 #%% [setup]
 #%% executable = anaddb
 #%% input_ddb = t53.ddb.out
-#%% test_chain = t52.abi, t53.abi, t54.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t54.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors =  M. Veithen
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   AlAs, zinc-blende structure. Code anaddb
 #%%   Analyse the DDB from test 53, for the generation of
 #%%   the electro-optic tensor, and Raman susceptibility coefficients.
