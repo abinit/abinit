@@ -18,8 +18,14 @@ precommit:
   script:
     - pip install --disable-pip-version-check pre-commit
     - |
+      # Hook ids declared (i.e. not commented out) in .pre-commit-config.yaml.
+      declared=$(python -c 'import yaml; print(" ".join(h["id"] for r in yaml.safe_load(open(".pre-commit-config.yaml"))["repos"] for h in r["hooks"]))')
       for hook in check-ast check-merge-conflict check-yaml end-of-file-fixer trailing-whitespace check-executables-have-shebangs check-added-large-files check-build-config run-check-config-h run-check-ascii check-forbidden check-binaries-conf check-inlined-macros; do
         printf '\n=== %s ===\n' "$hook" | tee -a pre-commit.log
+        case " $declared " in
+          *" $hook "*) ;;
+          *) echo "Skipped: $hook is not declared in .pre-commit-config.yaml" | tee -a pre-commit.log; continue ;;
+        esac
         if ! pre-commit run "$hook" --show-diff-on-failure --from-ref "$CI_MERGE_REQUEST_DIFF_BASE_SHA" --to-ref "$CI_COMMIT_SHA" >> pre-commit.log 2>&1; then
           cat pre-commit.log
           exit 1
