@@ -1,5 +1,5 @@
 #############################################################################
-# La2CuO4: Wannier90
+# La2CuO4: wannier90
 #############################################################################
 # Structural parameters
 #############################################################################
@@ -60,7 +60,7 @@ prtwf2           1
 ngkpt2           8 8 8
 
 #############################################################################
-# Third dataset: Call to the Wannier90 library
+# Third dataset: Call to the wannier90 library
 #############################################################################
 prtvol3          1
 iscf3           -2
@@ -68,7 +68,7 @@ nstep3           0
 tolwfr3          1e-9
 getwfk3          2
 getden3          2
-prtwant3         2     # ABINIT - Wannier90 interface
+prtwant3         2     # ABINIT - wannier90 interface
 istwfk3         *1
 kptopt3          3     # Do not use symmetries
 ngkpt3           8 8 8
@@ -76,7 +76,7 @@ w90prtunk3       0     # Do not prints the unk matrices
 w90iniprj3       2     # Use projection defined in the .win file
 
 #############################################################################
-# Fourth dataset: Band structure on the same path as Wannier90
+# Fourth dataset: Band structure on the same path as wannier90
 #############################################################################
 iscf4           -2
 getden4         -2
@@ -112,5 +112,5 @@ pseudos          "Psdj_paw_pw_std/La.xml, Psdj_paw_pw_std/Cu.xml, Psdj_paw_pw_st
 #%% [extra_info]
 #%% authors = O. Gingras
 #%% keywords = wannier90, PAW
-#%% description = Test interface with Wannier90 (PAW pseudopotentials)
+#%% description = Test interface with wannier90 (PAW pseudopotentials)
 #%%<END TEST_INFO>

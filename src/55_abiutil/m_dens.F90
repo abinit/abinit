@@ -2850,6 +2850,7 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
  end if
 
 end subroutine printmagvtk
+!!***
 
 !!****f* ABINIT/calmaxdifmag
 !! NAME

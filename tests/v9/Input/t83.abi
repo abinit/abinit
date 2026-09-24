@@ -5,7 +5,7 @@
 prt_model = 0
 
 dynamics = 102  #102    # Langevin NVT
-ncell = 4 4 4 
+ncell = 4 4 4
 temperature = 50
 ntime = 10
 nctime = 1
@@ -22,18 +22,18 @@ randomseed=111111 # for testing only
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% exclude_builders = alps_nag_7.2_serial, manneback_gnu_14.2_hpc
+#%% exclude_builders = alps_nag_7.2_serial, mann_gnu_13.3
 #%% latt_pot = t83.nc
 #%% exec_args = --F03
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t83.abo, tolnlines = 2, tolabs = 0.001, tolrel = 0.00001, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = X. He 
-#%% keywords = Effective potential, multibinit, spinpot
-#%% description = 
+#%% authors = X. He
+#%% keywords = Effective_potential, multibinit, spinpot
+#%% description =
 #%%   Read netcdf and run lattice dynamics using Langevin NVT (dynamics=102)
 #%%   need to run multibinit --F03 to use the new implementation.
 #%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)

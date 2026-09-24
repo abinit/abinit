@@ -37,9 +37,18 @@ AC_CONFIG_HEADERS([config.h])
 # Initial setup
 AC_CANONICAL_TARGET
 
-# Disable pax to initialize Automake because it causes 'make dist' to fail
+# tar-pax (not tar-ustar): changed together with the top-level configure.ac
+# for consistency. There, ustar's strict 100-char name/linkname header limit
+# broke `distcheck` for real (a symlink dereferenced into a same-content,
+# long-path duplicate during dist -- see that file's configure.ac for the
+# full incident writeup); pax/POSIX headers have no such limit. Switching
+# here doesn't reintroduce the problem the alias below guards against:
+# Automake's tar-pax option still tries plain tar first (`--format=posix`),
+# only *also* keeping the standalone `pax` utility as a later autodetection
+# fallback -- and that fallback is unconditionally disabled by the alias
+# regardless of which tar-* format is requested.
 alias pax='/bin/false'
-AM_INIT_AUTOMAKE([1.10 tar-ustar])
+AM_INIT_AUTOMAKE([1.10 tar-pax])
 unalias pax
 
 # Early ABINIT Common setup - the order is important!

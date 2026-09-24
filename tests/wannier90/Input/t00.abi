@@ -54,5 +54,5 @@ istwfk 8*1
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% keywords = MINIMAL
-#%% description = GaAs crystal with few bands. Very quick built-in test, to check that Wannier90 is installed.
+#%% description = GaAs crystal with few bands. Very quick built-in test, to check that wannier90 is installed.
 #%%<END TEST_INFO>

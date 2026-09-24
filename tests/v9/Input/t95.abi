@@ -38,7 +38,7 @@ nc_xccc_gspace 0 # calculates model core contribution in real space. Cleaner
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = bob_gnu_13.2_openmp, haicgu_gnu_14.1_hpc, manneback_gnu_14.2_hpc
+#%% exclude_builders = bob_gnu_13.2_openmp, mann_gnu_13.3
 #%% [files]
 #%% files_to_test =
 #%%   t95.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00 , fld_options= -ridiculous;

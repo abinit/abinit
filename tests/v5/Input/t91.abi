@@ -76,16 +76,15 @@ qph1l
 #%% executable = anaddb
 #%% input_ddb = t86.ddb.out
 #%% input_gkk = t87o
-#%% test_chain = t85.abi, t86.abi, t87.abi, t88.abi, t89.abi, t90.abi, t91.abi, t92.abi, t93.abi, t94.abi, t95.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t91.abo, tolnlines = 8, tolabs = 6.000e-04, tolrel = 4.000e-05, fld_options = -easy
-#%% psp_files = 
+#%% psp_files =
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
+#%% keywords =
 #%% description = anaddb electron-phonon run: output auxiliary files and change default smearings
 #%% topics = PhononWidth, ElPhonTransport
 #%%<END TEST_INFO>

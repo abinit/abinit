@@ -202,8 +202,9 @@ execute the tests starting from the first item of the list.
 
 !!! note
 
-    All the input files belonging to a test chain must contain
-    the *test_chain* option (obviously with the same list of tests)
+    The *test_chain* option is only required in the first input file of the chain.
+    The other input files may omit it or repeat it (in this case, the list must be the same).
+    All the input files of the chain must be registered in the `__init__.py` file of the suite.
 
 During the execution of a test chain, one usually has to perform basic operations
 such as file renaming or file copying in order to connect the different steps
@@ -336,12 +337,12 @@ and you want avoid to launch a full buildbot build just to check that your chang
 In this case, one can re-rerun the entire test suite (or part of it) by just executing the following two steps
 
     cd abinit/tests
-    testbot.py
+    testbot.py run
 
-The script `testbot.py` reads the configuration file `testbot.cfg` (already present in the working directory),
+The script `testbot.py` reads the configuration file `testbot.json` (already present in the working directory),
 runs the entire set of tests and produces the final report.
 
-Note that one modify the configuration options defined in `testbot.cfg` in order to speed-up the execution of the tests.
+Note that one modify the configuration options defined in `testbot.json` in order to speed-up the execution of the tests.
 In particular one can use the options:
 
     # with_tdirs = list of directories to execute

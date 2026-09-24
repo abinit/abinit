@@ -108,7 +108,7 @@ optstress 0       # Stress tensor computation is not relevant here
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = J. Wiktor
-#%% keywords = POSITRON,PAW
+#%% keywords = positron,PAW
 #%% description =
 #%%   Input for Positron tutorial
 #%%   Fourth step of the tutorial on electron-positron annihilation

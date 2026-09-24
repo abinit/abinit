@@ -9,7 +9,7 @@ outdata_prefix = "t46o"
  ifcflag   1     ! Interatomic force constant flag
  flexoflag 1
  dipquad 0
- quadquad 0 
+ quadquad 0
 !Wavevector grid number 1 (coarse grid, from DDB)
   brav    1      ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
   ngqpt   2*16 1   ! Monkhorst-Pack indices
@@ -212,8 +212,7 @@ qph1l 0.0 0.0 0.0 1
 #%%  max_nprocs = 1
 #%% [extra_info]
 #%%  authors = B. Van Troeye
-#%%  keywords = Phonons, Acoustic Sum Rules
+#%%  keywords = Phonons, Acoustic_Sum_Rules
 #%%  description = Imposition of rotational invariance on IFCs of phosphorene using IFCs derivatives from long-wavelength driver
 #%%  topics = Phonons
 #%%<END TEST_INFO>
-

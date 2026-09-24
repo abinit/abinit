@@ -60,7 +60,6 @@ rprim     -0.5  0.5  0.5
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t22.abi, t23.abi, t24.abi
 #%% [files]
 #%% files_to_test =
 #%%   t23.abo, tolnlines = 51, tolabs = 8.0e-2, tolrel = 2.0e-1, fld_options= -easy ;
@@ -77,4 +76,3 @@ rprim     -0.5  0.5  0.5
 #%%   The convergence seems OK though.
 #%% topics = PAW
 #%%<END TEST_INFO>
-

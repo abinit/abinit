@@ -1,42 +1,33 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-__version__ = "1.0"
+__version__ = "2.0"
 __author__ = "Matteo Giantomassi"
 
 import argparse
 import dataclasses
+import glob
+import html
 import json
-import logging
 import os
 import platform
 import shutil
+import subprocess
 import sys
 import tempfile
+import time
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
-from os.path import abspath as absp
 from os.path import basename
-from os.path import join as pj
 from socket import gethostname
 from typing import Any
 from warnings import warn
-
-logger = logging.getLogger(__name__)
-
-try:
-    from ConfigParser import NoOptionError, SafeConfigParser
-except ImportError:
-    # The ConfigParser module has been renamed to configparser in Python 3
-    from configparser import ConfigParser as SafeConfigParser
-    from configparser import NoOptionError
-
 
 # Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
 os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Pspdir"))
 
 # Add the directory [...]/abinit/tests to $PYTHONPATH
-pack_dir, x = os.path.split(absp(__file__))
+pack_dir, x = os.path.split(os.path.abspath(__file__))
 pack_dir, x = os.path.split(pack_dir)
 sys.path.insert(0, pack_dir)
 import tests
@@ -49,12 +40,61 @@ abenv = tests.abenv
 from pymods import termcolor
 from pymods.jobrunner import JobRunner, OMPEnvironment, TimeBomb
 from pymods.testsuite import BuildEnvironment
-from pymods.tools import pprint_table
 
-ROOT, _ = os.path.split(absp(__file__))
 
-TESTBOT_YAML = pj(ROOT, "testbot.yaml")
-TESTBOT_JSON = pj(ROOT, "testbot.json")
+def get_mpi_prefix_from_env() -> str | None:
+    """Detect the MPI installation prefix from the environment.
+
+    Checks, in order: MPI_HOME, MPIHOME, then the first defined of the
+    Easybuild-style EBROOTOPENMPI / EBROOTMPICH / EBROOTIMPI (joined with
+    "bin"). Returns None if none are set.
+    """
+    mpi_prefix = os.environ.get("MPI_HOME") or os.environ.get("MPIHOME")
+    if not mpi_prefix:
+        for vname in ["EBROOTOPENMPI", "EBROOTMPICH", "EBROOTIMPI"]:
+            mpi_home = os.environ.get(vname)
+            if mpi_home:
+                return os.path.join(mpi_home, "bin")
+    return mpi_prefix
+
+
+def default_mpirun_np(mpi_prefix: str | None = None) -> str:
+    """Return the launcher prefix to use when a builder leaves ``mpirun_np`` unset.
+
+    ``mpirun_np`` is optional in builders.yaml (e.g. alps_gnu_14.2_cov), but an
+    MPI-enabled builder still has to launch np > 1 tests somehow, so a sane
+    default is needed -- see TestBot.__post_init__ for what an empty value used
+    to do.
+
+    Prefers the launcher shipped by the MPI installation the binary was linked
+    against (``mpi_prefix``, from get_mpi_prefix_from_env) rather than whatever
+    turns up first in $PATH, which may well be a different implementation.
+    Falls back to a bare ``mpiexec``/``mpirun``; both MPICH and Open MPI accept
+    the ``-n`` spelling of the process-count flag.
+
+    Args:
+        mpi_prefix: MPI installation prefix, as returned by get_mpi_prefix_from_env().
+
+    Returns:
+        str: A prefix of the form ``"<launcher> -n"``, ready for JobRunner.
+    """
+    if mpi_prefix:
+        # get_mpi_prefix_from_env returns a prefix for MPI_HOME/MPIHOME but an
+        # already-".../bin" path for the Easybuild EBROOT* variables: try both.
+        for candidate in (
+            os.path.join(mpi_prefix, "bin", "mpiexec"),
+            os.path.join(mpi_prefix, "mpiexec"),
+        ):
+            if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+                return f"{candidate} -n"
+
+    for name in ("mpiexec", "mpirun"):
+        if shutil.which(name) is not None:
+            return f"{name} -n"
+
+    # Nothing found: return the standard spelling anyway so the failure is a
+    # plain "mpiexec: command not found" instead of a mangled command line.
+    return "mpiexec -n"
 
 
 def lazy__str__(func: Callable) -> Callable:
@@ -69,527 +109,304 @@ def lazy__str__(func: Callable) -> Callable:
     """
     def oncall(*args, **kwargs):
         self = args[0]
-        return "\n".join(str(k) + " : " + str(v) for (k, v) in self.__dict__.items())
+        return "\n".join(f"{k} : {v}" for (k, v) in self.__dict__.items())
     return oncall
 
 
-def _yesno2bool(string: str) -> bool:
-    """
-    Convert "yes"/"no" strings to boolean.
-
-    Args:
-        string: String to convert.
-
-    Returns:
-        bool: True if "yes", False if "no".
-
-    Raises:
-        ValueError: If the string cannot be interpreted.
-    """
-    string = string.lower().strip().replace('"', "").replace("'", "")
-    if string == "yes":
-        return True
-    if string == "no":
-        return False
-    raise ValueError("Cannot interpret string: %s" % string)
-
-def _str2list(string: str | list[str] | tuple[str, ...]) -> list[str]:
-    """
-    Parse a comma-separated string into a list of trimmed strings.
-
-    Args:
-        string: The string or list/tuple to process.
-
-    Returns:
-        list: A list of trimmed strings.
-    """
-    if isinstance(string, (list, tuple)):
-        return string
-
-    return [s.strip() for s in string.split(",") if s]
-
-#from pydantic.dataclasses import dataclass as pydantic_dataclass
-#@pydantic_dataclass(kw_only=True)
-@dataclass(kw_only=True)
-class TestBotContext:
-    """
-    Configuration context for a TestBot builder.
-
-    This class encapsulates all settings required to run tests for a specific
-    Buildbot worker, including MPI/OpenMP configuration, timeouts, and suite selection.
-    """
-
-    slavename: str
-    """Name of buildbot builder"""
-
-    type: str = ""
-    """'ref' if this builder is the reference builder where all tests should pass"""
-
-    ncpus: int | None = None
-    """Max number of CPUs that can be used by TestBot"""
-
-    max_gpus: int | None = 0
-    """Max number of GPUs that can be used by TestBot"""
-
-    mpi_prefix: str = ""
-    """MPI runner"""
-
-    mpirun_np: str = ""
-    """String used to execute `mpirun -n#NUM`"""
-
-    omp_num_threads: int = 0
-    """Number of OpenMP threads. 0 if OpenMP should not be used"""
-
-    enable_mpi: bool | None = None
-    """True if MPI is activated"""
-
-    enable_openmp: bool | None = None
-    """True if OpenMP is activated"""
-
-    poe: str = ""
-    """Deprecated"""
-
-    poe_args: str = ""
-    """Deprecated"""
-
-    with_tdirs: list[str] = field(default_factory=list)
-    """List of subsuites to include"""
-
-    without_tdirs: list[str] = field(default_factory=list)
-    """List of subsuites to exclude"""
-
-    timeout_time: float = 900.0
-    """Timeout time in seconds"""
-
-    cygwin_dir: str = ""
-    """Deprecated"""
-
-    runmode: str = "static"
-    """'static': run all tests with 1 MPI proc; use np > 1 only for multiparallel tests"""
-
-    keywords: list[str] = field(default_factory=list)
-    """Keywords to select/ignore tests"""
-
-    etsf_check: bool = False
-    """Activate validation of NetCDF files produced by Abinit"""
-
-    verbose: int = 0
-    """Verbosity level"""
-
-    tmp_basedir: str = ""
-    """Temporary folder where tests are executed and copied back"""
-
-    mpi_args: str = ""
-    """Arguments passed to the MPI command"""
-
-    force_mpi: bool = False
-    """Force usage of mpirun_np prefix"""
-
-    @classmethod
-    def from_builders(cls, all_builders: list[dict[str, Any]], builder_name: str) -> TestBotContext:
-        """
-        Factory method to create a context from a list of builder configurations.
-
-        Args:
-            all_builders: List of builder dictionaries (e.g., from YAML/JSON).
-            builder_name: Name of the builder to extract.
-
-        Returns:
-            TestBotContext: An initialized context for the specified builder.
-
-        Raises:
-            ValueError: If the builder name is not found.
-        """
-        for builder in all_builders:
-            if builder["name"] == builder_name: break
-        else:
-            raise ValueError(f"Cannot find {builder_name=}")
-
-        kwargs = {k: builder[k] for k in [field.name for field in dataclasses.fields(cls)] if k in builder}
-        return cls(**kwargs)
-
-    def __post_init__(self) -> None:
-        """
-        Enforce required fields and basic consistency.
-        """
-        missing = []
-
-        if not self.slavename:
-            missing.append("slavename")
-
-        if self.ncpus is None:
-            missing.append("ncpus")
-
-        #if self.enable_mpi is None:
-        #    missing.append("enable_mpi")
-
-        #if self.enable_openmp is None:
-        #    missing.append("enable_openmp")
-
-        if missing:
-            raise ValueError("Missing required configuration field(s): " + ", ".join(missing))
-
-        # Optional sanity checks
-        if self.ncpus is not None and self.ncpus <= 0:
-            raise ValueError(f"ncpus is negative {self.ncpus}")
-
-        if self.max_gpus < 0:
-            raise ValueError(f"max_gpus is negative: {self.max_gpus}")
-
-        if self.omp_num_threads < 0:
-            raise ValueError(f"omp_num_threads is negative: {self.omp_num_threads}")
-
-        if self.timeout_time <= 0:
-            raise ValueError(f"timeout_time is negative: {self.timeout_time}")
-
-
-def get_mpi_prefix_from_env() -> str | None:
-    """
-    Try to detect the MPI installation directory from environment variables.
-
-    Checks MPI_HOME and MPIHOME. This is used for compatibility with certain
-    Buildbot worker configurations.
-
-    Returns:
-        str | None: The detected MPI path, or None if not found.
-    """
-    # This is what JMB does in buildbot_worker/testbot.py
-    # The problem is that this has precedence over mpi_prefix. Should ask why!!
-    try:
-       return os.environ["MPI_HOME"]
-    except:
-       pass
-    try:
-       return os.environ["MPIHOME"]
-    except:
-        pass
-
-    return None
-
-
-def read_builders(fmt: str) -> list[dict[str, Any]]:
-    """
-    Read builder configurations from a file (YAML or JSON).
-
-    Args:
-        fmt: Format of the input file ("yaml" or "json").
-
-    Returns:
-        list[dict]: A list of dictionaries, each representing a builder.
-
-    Raises:
-        ValueError: If the format is invalid.
-    """
-    if fmt == "yaml":
-      from ruamel import yaml
-      with open(TESTBOT_YAML) as f:
-        all_builders = yaml.YAML(typ="safe", pure=True).load(f.read())
-    elif fmt == "json":
-      with open(TESTBOT_JSON) as f:
-        all_builders = json.load(f)
-    else:
-        raise ValueError(f"Invalid {fmt=}")
-
-    return all_builders
-
-
-def validate() -> int:
-    """
-    Validate the consistency of configuration files (YAML and testfarm.conf).
-
-    Returns:
-        int: Number of validation errors found.
-    """
-    # Read testfarm configuration file with builders.
-    build_examples = abenv.apath_of(pj("config", "specs", "testfarm.conf"))
-    parser = SafeConfigParser()
-    parser.read(build_examples)
-
-    all_builders = read_builders("yaml")
-    builder_names = [b["name"] for b in all_builders]
-
-    retcode = 0
-
-    if len(set(builder_names)) != len(builder_names):
-        retcode += 1
-        print("Builder names are not unique!")
-
-    allowed = set(TestBot._attrbs.keys())
-
-    for builder in all_builders:
-        b_keys = set(builder.keys())
-        #missing = allowed - b_keys
-        extra   = b_keys - allowed
-
-        if extra:
-            print("Unexpected:", extra)
-
-        #if missing:
-        #    print("Missing:", missing)
-
-    for builder_name in builder_names:
-        try:
-            ctx = TestBotContext.from_builders(all_builders, builder_name)
-            #print(ctx)
-        except Exception as exc:
-            print(exc)
-            retcode += 1
-
-    #print(ctx.type)
-    #for builder_name in parser.sections():
-    #convert()
-
-    for builder_name in builder_names:
-        testbot = TestBot(None, builder_name=builder_name)
-        #print("Running in dry-run mode, will return immediately.")
-        print(testbot)
-
-    if retcode == 0:
-        convert()
-    else:
-        print("Validation failed. JSON file won't be produced.")
-
-    return retcode
-
-
-def convert() -> int:
-    """
-    Convert the TestBot builder configuration from YAML to JSON.
-
-    Returns:
-        int: 0 on success.
-    """
-    all_builders = read_builders("yaml")
-
-    with open(TESTBOT_JSON, "w", encoding="utf-8") as f:
-      json.dump(all_builders, f, indent=2, sort_keys=True)
-
-    return 0
-
-
+@dataclass
+class TestRunSummary:
+    """Summary of one ``run_tests_with_np`` invocation."""
+
+    mpi_nprocs: int
+    omp_nthreads: int
+    py_nprocs: int
+    runmode: str
+    workdir_name: str
+    nfailed: int
+    npassed: int
+    nsucceeded: int
+    nskipped: int
+    ndisabled: int
+    nexecuted: int
+    # Wall-clock seconds spent in test_suite.run_tests() for this configuration.
+    wall_time: float
+
+    def as_dict(self) -> dict[str, int | str | float]:
+        """Return a JSON-serializable representation."""
+        return dataclasses.asdict(self)
+
+
+@dataclass
+class BenchmarkResult:
+    """Wall-time result for one benchmark CPU configuration."""
+
+    py_nprocs: int
+    wall_time: float
+    speedup: float
+    parallel_efficiency: float
+    nexecuted: int
+    tests_per_second: float
+    returncode: int
+
+    def as_dict(self) -> dict[str, float | int]:
+        """Return a JSON-serializable representation."""
+        return dataclasses.asdict(self)
+
+
+@dataclass
 class TestBot:
     """
     Driver for ABINIT automatic tests on Buildbot workers.
 
     The execution flow consists of:
-    1. Loading configuration from `testbot.cfg` (legacy) or `testbot.yaml`/`testbot.json`.
+    1. Loading configuration from `testbot.json` (generated by abibuildbot).
     2. Initializing `JobRunner` instances for sequential and parallel execution.
     3. Selecting and running test suites based on selected keywords and tags.
     4. Aggregating results into a summary report.
     """
-    _attrbs = {
-      # name           --> (default, parser, info)
-      # If default is None, the option must be specified.
-      "slavename"        : (None, str, "Name of buildbot builder"),
-      "type"             : ("",   str, "'ref' if this builder is a reference builder where all tests should pass"),
-      # TODO: ncpus should be replaced by max_cpus for clarity reasons
-      "ncpus"            : (None, int, "Max number of CPUs that can be used by TestBot"),
-      "max_gpus"         : (0,    int, "Max number of GPUs that can be used by TestBot"),
-      "mpi_prefix"       : ("",   str, "MPI runner"),
-      "mpirun_np"        : ("",   str, "String used to execute `mpirun -n#NUM`"),
-      "omp_num_threads"  : (0,    int, "Number of OpenMP threads. 0 if OpenMP should not be used"),
-      "enable_mpi"       : (None, _yesno2bool, "yes if MPI is activated else no."),
-      "enable_openmp"    : (None, _yesno2bool, "yes if OpenMP is activated else no."),
-      "poe"              : ("", str, "This option is deprecated"),
-      "poe_args"         : ("", str, "This option is deprecated"),
-      "with_tdirs"       : ("", _str2list, "List of subsuites to include."),
-      "without_tdirs"    : ("", _str2list, "List of subsuites to exclude."),
-      "timeout_time"     : (900, float, "Timeout time in seconds."),
-      "cygwin_dir"       : ("", str, "This option is deprecated"),
-      "runmode"          : ("static", str, "'static to run all tests with 1 MPI proc and use np > 1 only for multiparallel tests'"),
-      "keywords"         : ("", _str2list, "String with the keywords that should be selected/ignored."),
-      "etsf_check"       : ("no", _yesno2bool, "yes to activate the validation of the netcdf files produced by Abinit."),
-      "verbose"          : (0,    int, "Verbosity level"),
-      "tmp_basedir"      : ("", str, "temporary folder where the tests will be executed and copied back"),
-      "mpi_args"         : ("", str, "args passed to the mpi command"),
-      "force_mpi"        : ("no", _yesno2bool, "force usage of mpirun_np prefix"),
-    }
+    # Mandatory fields (no default) must come before defaulted ones.
+    builder_name: str = field(metadata={"info": "Name of buildbot builder"})
+    max_cpus: int = field(metadata={"info": "Max number of CPUs that can be used by TestBot"})
+
+    type: str = field(
+        default="",
+        metadata={
+            "info": "'ref' if this builder is a reference builder where all tests should pass"
+        },
+    )
+    max_gpus: int = field(
+        default=0, metadata={"info": "Max number of GPUs that can be used by TestBot"}
+    )
+    has_mpi: bool = field(
+        default=True, metadata={"info": "Whether this builder's ABINIT binary was built with MPI support"}
+    )
+    mpirun_np: str = field(default="", metadata={"info": "String used to execute `mpirun -n#NUM`"})
+    omp_num_threads: int = field(
+        default=0, metadata={"info": "Number of OpenMP threads. 0 if OpenMP should not be used"}
+    )
+    with_tdirs: list[str] = field(
+        default_factory=list, metadata={"info": "List of subsuites to include."}
+    )
+    without_tdirs: list[str] = field(
+        default_factory=list, metadata={"info": "List of subsuites to exclude."}
+    )
+    timeout_time: int = field(default=1200, metadata={"info": "Timeout time in seconds."})
+    runmode: str = field(
+        default="static",
+        metadata={
+            "info": "'static to run all tests with 1 MPI proc and use np > 1 "
+            "only for multiparallel tests'"
+        },
+    )
+    keywords: list[str] = field(
+        default_factory=list, metadata={"info": "List of keywords that should be selected/ignored."}
+    )
+    verbose: int = field(default=0, metadata={"info": "Verbosity level"})
+    tmp_basedir: str = field(
+        default="",
+        metadata={"info": "Temporary folder where the tests will be executed and copied back"},
+    )
+    mpi_args: str = field(default="", metadata={"info": "Args passed to the mpi command"})
+    force_mpi: bool = field(default=False, metadata={"info": "Use mpirun_np even for single-process (mpi_nprocs=1) test runs, not just once mpi_nprocs > 1"})
+    dont_exclude_builders: bool = field(
+        default=False,
+        metadata={"info": "Ignore exclude_builders in the TEST_INFO_SECTION and always execute tests"},
+    )
+    with_parametrized: bool = field(
+        default=False,
+        metadata={
+            "info": "Enable parametrized tests (requires yaml and pydantic Python packages to be installed)"
+        },
+    )
+
+    # Runtime-only, computed in __post_init__ -- not JSON/constructor inputs.
+    # repr=False also marks them as "not a plain config value" for __str__.
+    mpi_prefix: str = field(
+        default="", init=False, repr=True,
+        metadata={"info": "Prefix path of the MPI installation, auto-detected at runtime (informational only, see __post_init__)"}
+    )
+    build_env: BuildEnvironment = field(init=False, repr=False)
+    seq_runner: JobRunner = field(init=False, repr=False)
+    mpi_runner: JobRunner | None = field(init=False, default=None, repr=False)
+    summary: TestBotSummary = field(init=False, repr=False)
+    run_summaries: list[TestRunSummary] = field(init=False, default_factory=list, repr=False)
+    workdir_prefix: str = field(init=False, default="", repr=False)
+    py_nprocs_override: int | None = field(init=False, default=None, repr=False)
+    remove_existing_workdirs: bool = field(init=False, default=False, repr=False)
+    profile_workers: bool = field(init=False, default=False, repr=False)
 
     @classmethod
     def print_options(cls) -> None:
         """
         Print the available configuration options with descriptions and defaults.
         """
-        for opt_name, t in cls._attrbs.items():
-            default, parser, info = t
-            print("#", info)
-            print(opt_name, "=", default)
+        for f in dataclasses.fields(cls):
+            if not f.init:
+                continue
+            if f.default is not dataclasses.MISSING:
+                default = f.default
+            elif f.default_factory is not dataclasses.MISSING:  # type: ignore[misc]
+                default = f.default_factory()
+            else:
+                default = None
+            print("#", f.metadata.get("info", ""))
+            print(f.name, "=", default)
 
         print("# NB If default is None, the option must be specified.")
 
-    def __init__(self, testbot_cfg: str | None = None, builder_name: str | None = None) -> None:
+    @classmethod
+    def from_json(cls, testbot_json: str | None = None) -> TestBot:
         """
-        Initialize the TestBot instance.
+        Build a TestBot instance from a testbot.json file.
 
         Args:
-            testbot_cfg: Optional path to the legacy INI configuration file.
-            builder_name: Optional name for extraction from YAML/JSON config.
+            testbot_json: Optional path to the JSON configuration file
+                (default: testbot.json next to this script).
 
         Raises:
-            ValueError: If mandatory options are missing or invalid.
+            ValueError: If a mandatory option is missing.
         """
-        attrs2read = [
-            "slavename",
-            "type",
-            "ncpus",
-            "mpi_prefix",
-            "mpirun_np",
-            "omp_num_threads",
-            "poe",
-            "poe_args",
-            "with_tdirs",
-            "without_tdirs",
-            "timeout_time",
-            "cygwin_dir",
-            "runmode",
-            "keywords",
-            "etsf_check",
-            "verbose",
-            "tmp_basedir",
-            "mpi_args",
-            "force_mpi",
-        ]
+        if testbot_json is None:
+            basedir, _ = os.path.split(os.path.abspath(__file__))
+            testbot_json = os.path.join(basedir, "testbot.json")
 
-        if builder_name is None:
-            # Legacy mode based on INI file. Will be removed.
-            # Read the options specified in the testbot configuration file.
+        print(f"Reading TestBot options from: {os.path.abspath(testbot_json)}")
+        with open(testbot_json) as fh:
+            data = json.load(fh)
 
-            if testbot_cfg is None:
-                basedir, _ = os.path.split(absp(__file__))
-                testbot_cfg = pj(basedir, "testbot.cfg")
+        for mandatory in ("builder_name", "max_cpus"):
+            if mandatory not in data:
+                raise ValueError(f"Mandatory option {mandatory} is not declared in {testbot_json}")
 
-            # Here we init the attributes either from the cfg file
-            parser = SafeConfigParser()
-            parser.read(testbot_cfg)
+        # Silently ignore unknown keys, mirroring the old INI reader's
+        # behavior of only ever requesting the keys it knows about.
+        known = {f.name for f in dataclasses.fields(cls) if f.init}
+        return cls(**{k: v for k, v in data.items() if k in known})
 
-            for attr in attrs2read:
-                default, parse, info = TestBot._attrbs[attr]
-                try:
-                    value = parser.get("testbot", attr)
-                except NoOptionError:
-                    value = default
-
-                if value is None:
-                    # Write out the cfg file and raise
-                    for section in parser.sections():
-                        print("[" + section + "]")
-                        for opt in parser.options(section):
-                            print(opt + " = " + parser.get(section, opt))
-                    raise ValueError("Mandatory option %s is not declared" % attr)
-
-                self.__dict__[attr] = parse(value)
-
-        else:
-            #fmt = "yaml" # Use yaml file.
-            fmt = "json"
-            all_builders = read_builders(fmt)
-
-            for builder in all_builders:
-                if builder["name"] == builder_name: break
-            else:
-                all_names = [b["name"] for b in all_builders]
-                raise ValueError(f"Cannot find {builder_name=} in file {TESTBOT_YAML}\nChoose among: {all_names}")
-
-            print(builder)
-            ctx = TestBotContext.from_builders(all_builders, builder_name)
-            print(ctx)
-
-            for attr in attrs2read:
-                default, parse, info = TestBot._attrbs[attr]
-                value = builder.get(attr, default)
-
-                if value is None and default is None:
-                    # Write out the cfg file and raise
-                    print(builder)
-                    raise ValueError("Mandatory option %s is not declared" % attr)
-
-                if value is not None:
-                  value = parse(value)
-
-                self.__dict__[attr] = value
-
-            # Final fix.
-            self.slavename = builder["name"]
-
-            # This is what JMB does in buildbot_worker/testbot.py
-            mpi_prefix_from_env = get_mpi_prefix_from_env()
-            if mpi_prefix_from_env is not None:
-                if self.mpi_prefix:
-                    print("WARNING: About to overwrite mpi_prefix from yaml file with the one from $MPI_HOME")
-                    print(f"From Yaml     : {self.mpi_prefix}")
-                    print(f"From $MPI_HOME: {mpi_prefix_from_env}")
-                    self.mpi_prefix= mpi_prefix_from_env
-
+    def __post_init__(self) -> None:
         if self.with_tdirs and self.without_tdirs:
-            raise ValueError("with_tdirs and without_tdirs attribute are mutually exclusive")
+            # Not a hard error: this combination is reachable in practice
+            # (e.g. a Force build's own with_tdirs request landing on a
+            # builder whose static testbot_args already sets a without_tdirs
+            # default -- Buildbot only applies the builder default when the
+            # request left the property untouched, so both can be set at
+            # once). with_tdirs is the more specific ask, so keep it, but
+            # drop anything it shares with without_tdirs's exclusion list.
+            merged = [t for t in self.with_tdirs if t not in self.without_tdirs]
+            warn(
+                f"with_tdirs ({self.with_tdirs}) and without_tdirs "
+                f"({self.without_tdirs}) are supposed to be mutually exclusive "
+                f"but both were given. Merging by keeping with_tdirs entries "
+                f"not also listed in without_tdirs: {merged}"
+            )
+            self.with_tdirs = merged
+            self.without_tdirs = []
+            if not self.with_tdirs:
+                warn(
+                    "with_tdirs is empty after merging with without_tdirs "
+                    "(every requested directory was also excluded); falling back "
+                    "to running all test suites."
+                )
 
         if self.type not in ["", "ref"]:
             raise ValueError(f"type should be either 'ref' or empty string while it's: {self.type}")
 
-        # TODO: ncpus should be replaced by max_cpus for clarity reasons
-        self.max_cpus = self.ncpus
-
-        system, node, release, version, machine, processor = platform.uname()
-        print("Running on %s -- builder %s -- system %s -- max_cpus %s -- Python %s -- %s" % (
-              gethostname(), self.slavename, system, self.max_cpus, platform.python_version(), _my_name))
-
-        # Set the logger level.
-        # loglevel is bound to the string value obtained from the command line argument.
-        # Convert to upper case to allow the user to specify --loglevel=DEBUG or --loglevel=debug
-        # numeric_level = getattr(logging, options.loglevel.upper(), None)
-        numeric_level = getattr(logging, "ERROR", None)
-
-        if not isinstance(numeric_level, int):
-            raise ValueError("Invalid log level: %s" % numeric_level)
-        logging.basicConfig(level=numeric_level)
-
-        # Read testfarm configuration file with builders.
-        build_examples = abenv.apath_of(pj("config", "specs", "testfarm.conf"))
-        parser = SafeConfigParser()
-        parser.read(build_examples)
-
-        if self.slavename not in parser.sections():
-            print("workers:", parser.sections())
-            raise ValueError("%s is not a valid buildbot builder." % self.slavename)
+        if self.with_parametrized:
+            missing = []
+            try:
+                import yaml  # noqa: F401
+            except ImportError:
+                missing.append("yaml")
+            try:
+                import pydantic  # noqa: F401
+            except ImportError:
+                missing.append("pydantic")
+            if missing:
+                raise ImportError(
+                    f"with_parametrized=True but required packages are missing: {', '.join(missing)}. "
+                    "Install them with: pip install pyyaml pydantic"
+                )
 
         # 2) Initialize the job_runner.
         self.build_env = build_env = BuildEnvironment(os.curdir)
-        self.build_env.set_buildbot_builder(self.slavename)
+        self.build_env.set_buildbot_builder(self.builder_name)
+        self.build_env.set_dont_exclude_builders(self.dont_exclude_builders)
 
-        # TODO: These parameters should be passed to testbot.cfg
-        from tests.pymods.devtools import number_of_gpus
-        #max_cpus = max(1, number_of_cpus())
+        # Consistency check between input parameters and build configuration.
         if "HAVE_GPU" not in self.build_env.defined_cppvars:
+            if self.max_gpus > 0:
+                warn(
+                    f"Builder {self.builder_name} requested max_gpus={self.max_gpus} but was "
+                    "not compiled with GPU support; forcing max_gpus=0"
+                )
             self.max_gpus = 0
-        else:
-            self.max_gpus = max(0, number_of_gpus())
+        elif self.max_gpus <= 0:
+            raise ValueError(
+                f"Builder {self.builder_name} was compiled with GPU support "
+                f"but max_gpus is {self.max_gpus}"
+            )
+
+        if self.has_mpi and "HAVE_MPI" not in self.build_env.defined_cppvars:
+            raise ValueError(
+                f"Builder {self.builder_name} declares has_mpi=True but was not "
+                "compiled with MPI support (HAVE_MPI not in config.h)"
+            )
+        if not self.has_mpi and "HAVE_MPI" in self.build_env.defined_cppvars:
+            raise ValueError(
+                f"Builder {self.builder_name} declares has_mpi=False but was "
+                "compiled with MPI support (HAVE_MPI in config.h)"
+            )
+
+        if "HAVE_OPENMP" not in self.build_env.defined_cppvars and self.omp_num_threads > 2:
+            warn(
+                f"Builder {self.builder_name} requested omp_num_threads={self.omp_num_threads} "
+                "but was not compiled with OpenMP support; clamping to 2"
+            )
+            self.omp_num_threads = 2
 
         if build_env.has_bin("timeout") and self.timeout_time > 0:
             # We can run executables under the control of timeout.c
             timeout_path = build_env.path_of_bin("timeout")
             timebomb = TimeBomb(self.timeout_time, exec_path=timeout_path)
         else:
-            warn("Cannot find timeout executable at: %s" % build_env.path_of_bin("timeout"))
+            warn(f"Cannot find timeout executable at: {build_env.path_of_bin('timeout')}")
             timebomb = TimeBomb(self.timeout_time)
 
-        print("Initalizing JobRunner for sequential runs.")
         self.seq_runner = JobRunner.sequential(timebomb=timebomb)
-        print(self.seq_runner)
 
         if self.has_mpi:
-            print("Initalizing MPI JobRunner from self.__dict__")
+            self.mpi_prefix = get_mpi_prefix_from_env() or ""
+            # NOTE: JobRunner.run() (pymods/jobrunner.py) builds its command line from
+            # mpirun_np/mpi_args/poe alone and never reads mpi_prefix, so this does not
+            # affect PATH or how an explicitly configured mpirun_np resolves; it shows up
+            # in JobRunner.__str__/CFG_KEYWORDS diagnostics and is consulted below to
+            # locate a launcher when mpirun_np was left unset. A future refactor could
+            # prepend f"{self.mpi_prefix}/bin" to PATH so that a bare mpirun_np command
+            # also resolves against this specific MPI install -- not implemented here.
+
+            if not self.mpirun_np:
+                # An MPI builder that doesn't pin mpirun_np used to reach JobRunner with
+                # mpirun_np="". JobRunner.has_mpirun was still true (the attribute merely
+                # had to exist), so run() built its command line as
+                # [mpirun_np, nprocs, ..., bin_path, ...] and the process count ended up
+                # first: "/bin/timeout: failed to run command '2'", retcode 127 on every
+                # np > 1 test (observed on alps_gnu_14.2_cov).
+                self.mpirun_np = default_mpirun_np(self.mpi_prefix)
+                warn(
+                    f"Builder {self.builder_name} sets has_mpi=True but no mpirun_np; "
+                    f"defaulting to {self.mpirun_np!r}. Set mpirun_np explicitly in "
+                    "builders.yaml (testbot_args) to pin a specific launcher."
+                )
+
             self.mpi_runner = JobRunner.fromdict(self.__dict__, timebomb=timebomb)
-            print(self.mpi_runner)
 
         if self.omp_num_threads > 0:
-            print("Initalizing OMP environment with omp_num_threads %d " % self.omp_num_threads)
             omp_env = OMPEnvironment(OMP_NUM_THREADS=self.omp_num_threads)
             self.seq_runner.set_ompenv(omp_env)
             if self.has_mpi:
                 self.mpi_runner.set_ompenv(omp_env)
 
-        self.targz_fnames = []
-        print(self)
+        self._print_startup_report()
 
         # Initialize the table to store the final results.
         # The table include all the abinit tests (also those that will be skipped)
@@ -600,26 +417,196 @@ class TestBot:
         self.summary = TestBotSummary(res_table)
         #print(self.summary)
 
+    def _format_config_section(self) -> list[str]:
+        """
+        Return the "Configuration" section of the startup report as a list
+        of lines: every dataclass field with repr=True (same fields __str__
+        includes), paired two per row when short (an empty/short with_tdirs
+        list included), else given the row to itself so a long value (a
+        populated with_tdirs/keywords list, an absolute tmp_basedir path)
+        never gets truncated or misaligned. Field-agnostic by design: a
+        field added to/removed from the dataclass later needs no matching
+        update here.
+        """
+        label_w, col_w = 16, 38
+        lines: list[str] = []
+        pending: str | None = None
+
+        def flush() -> None:
+            nonlocal pending
+            if pending is not None:
+                lines.append(pending.rstrip())
+                pending = None
+
+        for f in dataclasses.fields(self):
+            if not f.repr:
+                continue
+            value = getattr(self, f.name)
+            cell = f"{f.name:<{label_w}} : {value}"
+            if len(cell) > col_w - 2:
+                flush()
+                lines.append(cell)
+            elif pending is None:
+                pending = cell.ljust(col_w)
+            else:
+                lines.append(pending + cell)
+                pending = None
+        flush()
+
+        return lines
+
+    def _print_startup_report(self) -> None:
+        """
+        Print one consolidated, human-readable report of the builder identity,
+        the effective configuration, and how JobRunner will actually execute
+        jobs (which launcher each runner resolved to -- see
+        JobRunner.launcher) -- replaces what used to be several small,
+        scattered prints spread across __post_init__ (raw JSON dump, a
+        single long system-info line, two near-empty JobRunner.__str__()
+        dumps, then the config fields with no grouping at all).
+        """
+        system, _node, release, _version, machine, processor = platform.uname()
+        logical_cpus = os.cpu_count()
+        process_cpu_count = getattr(os, "process_cpu_count", None)
+        available_cpus = process_cpu_count() if process_cpu_count is not None else logical_cpus
+        if available_cpus is None:
+            cpu_summary = "unknown"
+        elif logical_cpus is None or available_cpus == logical_cpus:
+            cpu_summary = str(available_cpus)
+        else:
+            cpu_summary = f"{available_cpus} available / {logical_cpus} logical"
+        python_bits = platform.architecture()[0]
+        bar = "=" * 80
+
+        lines = [
+            bar,
+            f"  TestBot :: {self.builder_name} ({self.type or 'regular'} builder)",
+            bar,
+            f"  Host    : {gethostname()}",
+            f"  System  : {system} {release} {machine}",
+            f"  CPU     : {processor or 'unknown'} ({cpu_summary})",
+            (
+                f"  Python  : {platform.python_implementation()} {platform.python_version()} "
+                f"({python_bits}, {sys.byteorder}-endian)"
+            ),
+            f"  Script  : {_my_name}",
+            "",
+            "  -- Configuration --",
+        ]
+        lines += [f"  {line}" for line in self._format_config_section()]
+
+        lines += ["", "  -- Job execution (JobRunner) --"]
+        # str(...) before .ljust() rather than an f-string ":<10" spec --
+        # seq_runner/mpi_runner may be test doubles (e.g. the test suite
+        # mocks the whole pymods.jobrunner module) whose .launcher isn't a
+        # real str and doesn't support width-aligned __format__.
+        seq_timebomb = "yes" if self.seq_runner.has_timebomb else "no"
+        seq_launcher = str(self.seq_runner.launcher).ljust(10)
+        lines.append(f"  Sequential runner : launcher={seq_launcher} timebomb={seq_timebomb}")
+        if self.has_mpi:
+            mpi_timebomb = "yes" if self.mpi_runner.has_timebomb else "no"
+            mpi_launcher = str(self.mpi_runner.launcher).ljust(10)
+            mpi_args_part = f"   mpi_args={self.mpi_args!r}" if self.mpi_args else ""
+            lines.append(
+                f"  MPI runner        : launcher={mpi_launcher} timebomb={mpi_timebomb}{mpi_args_part}"
+            )
+        lines.append(
+            f"  OpenMP            : {'enabled (' + str(self.omp_num_threads) + ' threads)' if self.has_openmp else 'disabled'}"
+        )
+        lines.append(bar)
+
+        print("\n".join(lines))
+
     def __str__(self) -> str:
-        """String representation."""
+        """String representation (config fields only, excludes runtime objects)."""
         lines = []
-        app = lines.append
-        for attr_name, t in self._attrbs.items():
-            default, parser, info = t
-            value = getattr(self, attr_name, "undefined")
-            app("%s = %s" % (attr_name, value))
+        for f in dataclasses.fields(self):
+            if not f.repr:
+                continue
+            lines.append(f"{f.name} = {getattr(self, f.name)}")
 
         return "\n".join(lines)
-
-    @property
-    def has_mpi(self) -> bool:
-        """bool: True if an MPI runner is configured."""
-        return bool(self.mpirun_np) or bool(self.poe)
 
     @property
     def has_openmp(self) -> bool:
         """bool: True if tests should be executed with OpenMP."""
         return self.omp_num_threads > 0
+
+    def write_run_summaries(self) -> None:
+        """Write machine-readable and embeddable summaries of completed MPI runs."""
+        print(
+            "Writing testbot_runs.json: per-execution test counts and parallel configuration "
+            "for machine processing."
+        )
+        with open("testbot_runs.json", "w") as fh:
+            json.dump([run.as_dict() for run in self.run_summaries], fh, indent=2)
+
+        headings = [
+            "Configuration", "Report", "MPI", "OpenMP", "Python workers", "Executed",
+            "Failed", "Passed", "Succeeded", "Skipped", "Disabled", "Wall time (s)",
+        ]
+        rows = []
+        for run in self.run_summaries:
+            safe_workdir = html.escape(run.workdir_name, quote=True)
+            report = (
+                f'<a class="run-report-link" href="{safe_workdir}/">View details</a>'
+                '<span class="run-report-unavailable">Not archived</span>'
+            )
+            values = [
+                safe_workdir,
+                report,
+                str(run.mpi_nprocs),
+                str(run.omp_nthreads),
+                str(run.py_nprocs),
+                str(run.nexecuted),
+                str(run.nfailed),
+                str(run.npassed),
+                str(run.nsucceeded),
+                str(run.nskipped),
+                str(run.ndisabled),
+                f"{run.wall_time:.1f}",
+            ]
+            cells = "".join(f"<td>{value}</td>" for value in values)
+            # Same row_class convention as to_table()'s testbot-summary table
+            # below ("suite-failed"/"suite-ok") -- reusing it here means the
+            # results page's existing CSS for those classes (a light,
+            # readable red/green tint) already covers this table too, no new
+            # style needed.
+            row_class = "suite-failed" if run.nfailed > 0 else "suite-ok"
+            rows.append(f'<tr class="{row_class}">{cells}</tr>')
+
+        header = "".join(f"<th>{html.escape(heading)}</th>" for heading in headings)
+        fragment = (
+            '<table id="testbot-runs" class="testbot-runs">'
+            f"<thead><tr>{header}</tr></thead>"
+            f"<tbody>{''.join(rows)}</tbody></table>"
+        )
+        print(
+            "Writing testbot_runs.html: per-execution test counts and links to detailed reports "
+            "for the results page."
+        )
+        with open("testbot_runs.html", "w") as fh:
+            fh.write(fragment)
+
+    def _create_workdir(self, workdir_name: str) -> None:
+        """Create one work directory, optionally replacing explicitly requested stale output."""
+        try:
+            os.mkdir(workdir_name)
+        except FileExistsError:
+            if not self.remove_existing_workdirs:
+                raise RuntimeError(f"{workdir_name} already exists!") from None
+            if os.path.islink(workdir_name) or not os.path.isdir(workdir_name):
+                raise RuntimeError(
+                    f"Refusing to remove {workdir_name}: expected a real directory, not a symlink or file"
+                ) from None
+            print(f"Removing existing TestBot work directory: {workdir_name}")
+            shutil.rmtree(workdir_name)
+            try:
+                os.mkdir(workdir_name)
+            except FileExistsError:
+                raise RuntimeError(
+                    f"Cannot recreate {workdir_name}: another TestBot process created it concurrently"
+                ) from None
 
     def run_tests_with_np(self, mpi_nprocs: int, suite_args: list[str] | str | None = None, runmode: str = "static") -> tuple[int, int, int]:
         """
@@ -638,19 +625,19 @@ class TestBot:
         """
         # Compute number of python processes, note that self.omp_num_threads might be zero.
         py_nprocs = self.max_cpus // (mpi_nprocs * max(self.omp_num_threads, 1))
+        if self.py_nprocs_override is not None:
+            py_nprocs = self.py_nprocs_override
         if py_nprocs < 1:
-            raise RuntimeError("py_nprocs = %s" % py_nprocs)
+            raise RuntimeError(f"py_nprocs = {py_nprocs}")
 
         test_suite = abitests.select_tests(suite_args, keys=self.keywords, regenerate=False)
 
         # Create workdir.
-        workdir_name = "TestBot_MPI" + str(mpi_nprocs)
+        workdir_name = f"{self.workdir_prefix}TestBot_MPI{mpi_nprocs}"
         if self.has_openmp:
-            workdir_name += "_OMP" + str(self.omp_num_threads)
+            workdir_name += f"_OMP{self.omp_num_threads}"
 
-        if os.path.exists(workdir_name):
-            raise RuntimeError("%s already exists!" % workdir_name)
-        os.mkdir(workdir_name)
+        self._create_workdir(workdir_name)
 
         if self.tmp_basedir:
             workdir = os.path.join(tempfile.mkdtemp(dir=self.tmp_basedir), workdir_name)
@@ -659,17 +646,16 @@ class TestBot:
 
         # Run the tests.
         if self.has_openmp:
-            msg = "Running ntests = %s, MPI_nprocs = %s, OMP_nthreads %s, Max GPUs: %s, py_nprocs = %s..." % (
-                  test_suite.full_length, mpi_nprocs, self.omp_num_threads, self.max_gpus, py_nprocs)
+            msg = f"Running ntests = {test_suite.full_length}, MPI_nprocs = {mpi_nprocs}, OMP_nthreads {self.omp_num_threads}, Max GPUs: {self.max_gpus}, py_nprocs = {py_nprocs}..."
         else:
-            msg = "Running ntests = %s, MPI_nprocs = %s, Max GPUs: %s py_nprocs = %s..." % (
-                  test_suite.full_length, mpi_nprocs, self.max_gpus, py_nprocs)
+            msg = f"Running ntests = {test_suite.full_length}, MPI_nprocs = {mpi_nprocs}, Max GPUs: {self.max_gpus} py_nprocs = {py_nprocs}..."
         print(msg)
 
         job_runner = self.seq_runner
         if mpi_nprocs > 1 or self.force_mpi:
             job_runner = self.mpi_runner
 
+        start = time.perf_counter()
         results = test_suite.run_tests(self.build_env, workdir, job_runner,
                                        mpi_nprocs=mpi_nprocs,
                                        omp_nthreads=self.omp_num_threads,
@@ -678,32 +664,55 @@ class TestBot:
                                        py_nprocs=py_nprocs,
                                        runmode=self.runmode,
                                        verbose=self.verbose,
+                                       profile_workers=self.profile_workers,
                                        make_html_diff=1)
-
-        # Cannot use this option on the test farm because hdf5 is not thread/process-safe.
-        # See https://www.hdfgroup.org/hdf5-quest.html#tsafe
-                                       # etsf_check=self.etsf_check)
+        wall_time = time.perf_counter() - start
 
         if results is None:
             print("Test suite is empty, returning 0 0 0 ")
             return 0, 0, 0
 
+        self.run_summaries.append(
+            TestRunSummary(
+                mpi_nprocs=mpi_nprocs,
+                omp_nthreads=self.omp_num_threads,
+                py_nprocs=py_nprocs,
+                runmode=runmode,
+                workdir_name=workdir_name,
+                nfailed=results.nfailed,
+                npassed=results.npassed,
+                nsucceeded=len(results.succeeded_tests),
+                nskipped=len(results.skipped_tests),
+                ndisabled=len(results.disabled_tests),
+                nexecuted=results.nexecuted,
+                wall_time=wall_time,
+            )
+        )
+        # Persist after every completed run so earlier configurations remain
+        # inspectable if a later MPI invocation crashes.
+        self.write_run_summaries()
+
         # Store the results in the summary table,
         # taking into account that an input file might be executed multiple times
         # with a different environment (MPI, OMP ...)
-        run_info = {}
-        # run_info = [self.build_env, workdir, runner, mpi_nprocs, py_nprocs]
-        self.summary.merge_results(test_suite, run_info)
-
-        # Push the location of the tarball file
-        self.targz_fnames.append(results.targz_fname)
+        self.summary.merge_results(test_suite)
 
         if self.tmp_basedir:
-            for fn in ["results.tar.gz", "suite_report.html"]:
+            for fn in ["results.tar.gz", "index.html"]:
                 try:
                     shutil.copy2(os.path.join(workdir, fn), workdir_name)
-                except:
-                    print("Could not copy back file ", fn)
+                except Exception:
+                    print(f"Could not copy back file {fn}")
+
+            if self.profile_workers:
+                # workdir lives under tempfile.mkdtemp() and gets discarded --
+                # without this, the worker .prof files written there would be lost.
+                for fn in glob.glob(os.path.join(workdir, "testbot_worker_*.prof")) + \
+                          glob.glob(os.path.join(workdir, "testbot_workers_merged.prof")):
+                    try:
+                        shutil.copy2(fn, workdir_name)
+                    except Exception:
+                        print(f"Could not copy back file {fn}")
 
         return results.nfailed, results.npassed, results.nexecuted
 
@@ -731,7 +740,7 @@ class TestBot:
         suite_args = None
 
         # XG130410 Crude hack, to avoid paral and mpiio test directories
-        # in case of enable_mpi=no in config/specs/testfarm.conf
+        # in case of enable_mpi=no in the builder's config
         if not self.has_mpi:
             suite_args = "paral- mpiio-".split()
 
@@ -747,7 +756,6 @@ class TestBot:
             # Old mode: run all available tests with 1 MPI proc here,
             # then use MPI mode in mp_suites (paral/mpiio)
             np_list = [2, 4, 8, 10, 24, 64]
-            #nfailed, npassed, nexecuted = 0, 0 , 0
             nfailed, npassed, nexecuted = self.run_tests_with_np(1, suite_args=suite_args, runmode=self.runmode)
         else:
             # New mode: run all available tests with 2 MPI procs here,
@@ -769,10 +777,10 @@ class TestBot:
 
             for np in np_list:
                 if np > self.max_cpus or not suite_args:
-                    print("Skipping tests with np: %s as max_cpus: %s" % (np, self.max_cpus))
+                    print(f"Skipping tests with np: {np} as max_cpus: {self.max_cpus}")
                     continue
 
-                print("Running multi-parallel tests with %s MPI processors, suite_args %s" % (np, suite_args))
+                print(f"Running multi-parallel tests with {np} MPI processors, suite_args {suite_args}")
                 para_nfailed, para_npassed, para_nexec = self.run_tests_with_np(np, runmode="static", suite_args=suite_args)
 
                 # Accumulate the counters.
@@ -781,89 +789,246 @@ class TestBot:
                 nexecuted += para_nexec
 
         table = self.summary.to_table()
-        pprint_table(table)
+        #pprint_table(table)
 
         self.summary.json_dump("testbot_summary.json")
+
+        # Post-process the summary now, in-process (produces testbot_analysis.html
+        # and records the git tag). analyze()'s own return code is deliberately
+        # not propagated here -- post-processing must never override the real
+        # test result (self.type/nfailed/npassed below).
+        try:
+            analyze_rc = analyze("testbot_summary.json", tag=get_git_tag())
+            if analyze_rc != 0:
+                print(f"analyze() returned {analyze_rc}")
+        except Exception as exc:
+            print(f"analyze() raised an exception: {exc}")
 
         # Empty list of tests (usually due to the use of with, without options)
         # Create file to signal this condition and return 0.
         if nexecuted == 0:
             print("No file found")
             with open("__emptylist__", "w") as fh:
-                fh.write("nfailed = %d, npassed = %d, nexecuted = %d" % (nfailed, npassed, nexecuted))
+                fh.write(f"nfailed = {nfailed}, npassed = {npassed}, nexecuted = {nexecuted}")
                 return 0
 
         # The status error depends on the builder type.
         if self.type == "ref":
             # Reference builder --> all the tests must pass.
             return nfailed + npassed
+
         return nfailed
 
 
-def analyze(fname: str) -> None:
+def benchmark(
+    testbot_json: str | None,
+    py_nprocs_values: list[int],
+    remove_existing_workdirs: bool = False,
+    profile_workers: bool = False,
+) -> int:
+    """Run TestBot repeatedly and compare total wall time for each Python worker count."""
+    results: list[BenchmarkResult] = []
+    baseline_wall_time: float | None = None
+    baseline_py_nprocs: int | None = None
+
+    for py_nprocs in py_nprocs_values:
+        print(f"\n{'=' * 80}\nBenchmarking py_nprocs={py_nprocs}\n{'=' * 80}")
+        testbot = TestBot.from_json(testbot_json)
+        testbot.py_nprocs_override = py_nprocs
+        testbot.workdir_prefix = f"Benchmark_PY{py_nprocs}_"
+        testbot.remove_existing_workdirs = remove_existing_workdirs
+        testbot.profile_workers = profile_workers
+
+        start = time.perf_counter()
+        returncode = testbot.run()
+        wall_time = time.perf_counter() - start
+        if baseline_wall_time is None:
+            baseline_wall_time = wall_time
+            baseline_py_nprocs = py_nprocs
+
+        assert baseline_py_nprocs is not None
+        speedup = baseline_wall_time / wall_time if wall_time else float("inf")
+        worker_ratio = py_nprocs / baseline_py_nprocs
+        parallel_efficiency = speedup / worker_ratio
+        nexecuted = sum(run.nexecuted for run in testbot.run_summaries)
+        tests_per_second = nexecuted / wall_time if wall_time else float("inf")
+        results.append(
+            BenchmarkResult(
+                py_nprocs,
+                wall_time,
+                speedup,
+                parallel_efficiency,
+                nexecuted,
+                tests_per_second,
+                returncode,
+            )
+        )
+
+    headings = (
+        "py_nprocs",
+        "wall time (s)",
+        "speedup",
+        "efficiency",
+        "executed",
+        "tests/s",
+        "return code",
+    )
+    rows = [
+        (
+            str(r.py_nprocs),
+            f"{r.wall_time:.3f}",
+            f"{r.speedup:.3f}x",
+            f"{r.parallel_efficiency:.1%}",
+            str(r.nexecuted),
+            f"{r.tests_per_second:.3f}",
+            str(r.returncode),
+        )
+        for r in results
+    ]
+    widths = [max(len(headings[i]), *(len(row[i]) for row in rows)) for i in range(len(headings))]
+    print("\nBenchmark summary")
+    print("  ".join(headings[i].ljust(widths[i]) for i in range(len(headings))))
+    print("  ".join("-" * width for width in widths))
+    for row in rows:
+        print("  ".join(row[i].ljust(widths[i]) for i in range(len(row))))
+
+    with open("testbot_benchmark.json", "w") as fh:
+        json.dump([result.as_dict() for result in results], fh, indent=2)
+    print("Writing testbot_benchmark.json: benchmark wall times and return codes.")
+
+    return max((result.returncode for result in results), default=0)
+
+
+def get_git_tag() -> str:
+    """
+    Return the output of `git describe --tags --abbrev=0`, or "unknown" on failure.
+
+    Mirrors the fallback used in builder_scripts/analysis.sh
+    (`git describe --tags --abbrev=0 2>/dev/null || echo "unknown"`).
+    """
+    try:
+        result = subprocess.run(
+            ["git", "describe", "--tags", "--abbrev=0"],
+            capture_output=True, text=True, timeout=10,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+    except Exception:
+        pass
+    return "unknown"
+
+
+def analyze(fname: str, tag: str = "unknown") -> int:
     """
     Analyze and display the performance figures of the tests.
 
     Parses the summary JSON file and prints a table with execution times
-    (CPU and Wall) per test suite.
+    (CPU and Wall) per test suite. This is the in-process equivalent of the
+    post-processing previously embedded as a Python heredoc in
+    builder_scripts/analysis.sh (kept there as an independent fallback).
+
+    Also writes an HTML <table> fragment (no <html>/<head>/<body>) with the
+    same data to "testbot_analysis.html" in the current directory, for
+    embedding into the results index page (see upload_results.sh).
 
     Args:
         fname: Path to the JSON summary file.
+        tag: Git tag/revision to record in the summary JSON.
+
+    Returns:
+        int: 0 on success. Non-zero on failure (1 if the summary file is
+            missing or incomplete, 99 for any other post-processing error),
+            matching the historical analysis.sh exit codes.
     """
-    #fname = "testbot_summary.json"
-    with open(fname) as data_file:
-       d = json.load(data_file)
-
-    # FIXME What is this?
-    #d['tag'] = sys.argv[1]
-
-    with open(fname, "w") as data_file:
-       json.dump(d, data_file)
+    if not os.path.exists(fname):
+        print(f"Error: {fname} not found. Analysis failed.")
+        with open("ANALYSIS_SUMMARY_FAILED", "w") as f:
+            f.write(f"{fname} missing")
+        return 1
 
     try:
-        tests_status = dict(zip(d["summary_table"][0],d["summary_table"][1]))
+        with open(fname) as data_file:
+            d = json.load(data_file)
 
-        dashline = "=========================================================================="
-        print( dashline )
-        print(     "          Serie   #failed   #passed  #succes  #skip  |   #CPU      #WALL")
+        d["tag"] = tag
+        print(f"Updating {fname}: adding the Git tag to the merged test results.")
+        with open(fname, "w") as data_file:
+            json.dump(d, data_file)
+
+        if "summary_table" not in d:
+            print("Error: 'summary_table' missing in JSON.")
+            with open("ANALYSIS_SUMMARY_FAILED", "w") as f:
+                f.write("summary_table missing")
+            return 1
+
+        tests_status = dict(zip(d["summary_table"][0], d["summary_table"][1]))
+
+        dashline = "=" * 74
         print(dashline)
-        rtime = 0.0
-        ttime = 0.0
-        paral = ""
-        mpiio = ""
+        print("      Series   #failed   #passed  #success  #skip  |   #CPU      #WALL")
+        print(dashline)
+
+        paral, mpiio = "", ""
+        html_rows = []
         for t, s in sorted(tests_status.items()):
-            kt = False
-            for i in d[t].keys():
-               if  d[t][i]["status"] != "skipped":
-                  kt = True
-                  rtime += d[t][i]["run_etime"]
-                  ttime += d[t][i]["tot_etime"]
-            if kt:
-                 temp = "".join(["%5s   |" % l for l in  s.split("/") ])
-                 temp = "%15s | %10s %7.1f  | %7.1f" % (t,temp,rtime,ttime)
-                 if t == "mpiio":
-                    mpiio = temp
-                 elif t == "paral":
-                    paral = temp
-                 else:
-                    print(temp)
+            skip_series = True
             rtime = ttime = 0.0
 
+            if t in d and isinstance(d[t], dict):
+                for test_info in d[t].values():
+                    if test_info.get("status") != "skipped":
+                        skip_series = False
+                        rtime += test_info.get("run_etime", 0.0)
+                        ttime += test_info.get("tot_etime", 0.0)
+
+            if not skip_series:
+                counts = "".join(f"{v:>5s}   |" for v in s.split("/"))
+                row = f"{t:>12s} | {counts} {rtime:7.1f}  | {ttime:7.1f}"
+                if t == "mpiio":
+                    mpiio = row
+                elif t == "paral":
+                    paral = row
+                else:
+                    print(row)
+
+                nfailed_s = s.split("/")[0]
+                row_class = "suite-failed" if nfailed_s not in ("0", "") else "suite-ok"
+                cells = "".join(f"<td>{html.escape(v)}</td>" for v in s.split("/"))
+                html_rows.append(
+                    f'<tr class="{row_class}"><td>{html.escape(t)}</td>{cells}'
+                    f"<td>{rtime:.1f}</td><td>{ttime:.1f}</td></tr>"
+                )
+
         print(dashline)
-        putline = 0
-        if paral != "":
+        if paral:
             print(paral)
-            putline=1
-        if mpiio != "":
+        if mpiio:
             print(mpiio)
-            putline=1
-        if putline == 1:
+        if paral or mpiio:
             print(dashline)
-    except:
-        print("no results")
+
+        html_table = (
+            '<table id="testbot-summary" class="testbot-summary" border="1" cellpadding="4" cellspacing="0">'
+            "<thead><tr><th>Series</th><th>#failed</th><th>#passed</th><th>#success</th>"
+            "<th>#skip</th><th>#CPU (s)</th><th>#WALL (s)</th></tr></thead>"
+            "<tbody>"
+            + "".join(html_rows)
+            + "</tbody></table>"
+        )
+        print(
+            "Writing testbot_analysis.html: suite-level status and timing totals "
+            "for the results page."
+        )
+        with open("testbot_analysis.html", "w") as f:
+            f.write(html_table)
+
+        return 0
+
+    except Exception as exc:
+        print(f"Post-processing failed: {exc}")
         with open("ANALYSIS_SUMMARY_FAILED", "w") as f:
-            f.write("")
-        sys.exit(99)
+            f.write(str(exc))
+        return 99
 
 
 class TestBotSummary:
@@ -913,20 +1078,72 @@ class TestBotSummary:
 
         return table
 
-    def merge_results(self, test_suite: Any, run_info: dict[str, Any]) -> None:
+    def merge_results(self, test_suite: Any) -> None:
         """
-        Merge results from a completed test suite into the global summary.
+        Merge one executed test_suite's results into `self.res_table`, in place.
 
-        Updates the status of each test (e.g., marking as failed if any run failed)
-        and accumulates execution times.
+        Call sites and how many times each test gets merged:
+            `TestBot.run_tests_with_np()` calls this once per invocation --
+            once for the single, suite-wide pass covering every "regular"
+            suite (at one fixed `mpi_nprocs`), and then once more per `np`
+            value in the multi-parallel sweep (`np_list`, filtered to
+            `np <= max_cpus`), but only for suites flagged
+            `is_multi_parallel = True` in their `__init__.py` (e.g. `paral`,
+            `mpiio`, `gpu`, ...). So a regular suite's tests are merged
+            exactly once; a multi-parallel suite's tests are merged once
+            per np actually attempted -- whether or not that particular
+            test's own `nprocs_to_test`/`exclude_nprocs` made it applicable
+            at that np. `BaseTest.compute_nprocs()` marks an inapplicable
+            pass "skipped" with `run_etime = 0.0`, but the test object is
+            still present in `test_suite` and still counted here.
+
+        What gets written, per test:
+            Each test (a `BaseTest`, or a `ChainOfTests` for a `test_chain`
+            group -- both expose the same `suite_name`/`id`/`status`/
+            `run_etime`/`tot_etime`/`full_id`) updates one entry of
+            `self.res_table[test.suite_name][test.id]`:
+
+            - First time this (suite_name, id) key is touched: the entry is
+              seeded with `status`, `number_of_runs = 1`, `run_etime`, and
+              `tot_etime` taken directly from this one pass.
+            - Every later time (only possible for multi-parallel suites,
+              where the same test recurs across np passes): `run_etime`/
+              `tot_etime` are SUMMED across every pass, `number_of_runs` is
+              incremented once per pass (skipped passes included), and
+              `status` becomes the *worst* of the two via `_min_status()`
+              (ordering `failed < passed < succeeded < skipped`, so one
+              genuine failure anywhere sticks, while a test that succeeded
+              in one pass and was merely inapplicable/skipped in others
+              still reports "succeeded" overall).
+
+            Consequence: for a multi-parallel suite, `run_etime`/`tot_etime`
+            in the final JSON are a *sum over however many np passes ran on
+            this worker* (which depends on `max_cpus`), not one run's
+            wall-clock time -- don't treat them as directly comparable to a
+            regular suite's single-pass values, or to the same suite's
+            values from a build on a worker with a different `max_cpus`.
+
+            A test never passed to this method at all (e.g. filtered out by
+            `keywords`/`with_tdirs`/`without_tdirs`, or genuinely disabled)
+            keeps the empty `{}` entry `database.init_result_table()`
+            seeded for it; `status_of_suite()` is what later defaults such
+            an entry to "skipped" for display purposes, not this method.
+
+        `self.failed`/`self.passed` (flat lists of `full_id` strings, e.g.
+        `"[suite][id][np=N]"`) are simply APPENDED to on every call, never
+        deduplicated -- since `full_id` embeds `np=`, the same logical test
+        recurring across np passes shows up as multiple distinct entries
+        here, one per np it actually passed/failed at.
+
+        `self.res_table` is exactly what `json_dump()` writes out under one
+        top-level key per suite name -- see that method's docstring for the
+        full JSON layout this method's output ends up in.
 
         Args:
-            test_suite: The executed test suite object.
-            run_info: Dictionary containing execution metadata (currently unused).
+            test_suite: The just-executed `AbinitTestSuite` (an iterable of
+                `BaseTest`/`ChainOfTests`) to fold into the summary.
         """
         # assert test_suite._executed
-        self.run_info = run_info
-
         for test in test_suite:
             d = self.res_table[test.suite_name][test.id]
 
@@ -967,7 +1184,7 @@ class TestBotSummary:
             suite_name: string with the name of the suite.
 
         return: (suite_status, stats) where
-            suite_status is one of the possile status in `_possible_status`
+            suite_status is one of the possible status in `_possible_status`
             stats is a dictionary : {failed:1, passed:2, succeeded:0, skipped:0}
         """
         # Initialize stats setting the keys to 0
@@ -987,16 +1204,53 @@ class TestBotSummary:
             if not self.res_table[suite_name]:
                 suite_status = "succeeded"
             else:
-                raise RuntimeError("[%s] Wrong list of status values!" % suite_name)
+                raise RuntimeError(f"[{suite_name}] Wrong list of status values!")
 
         return suite_status, stats
 
     def json_dump(self, fname: str) -> None:
         """
-        Export the current summary to a JSON file.
+        Export the current summary to a JSON file (testbot_summary.json).
 
-        The exported data includes a list of failed tests, passed tests, and
-        the detailed result table for all suites.
+        Top-level layout::
+
+            {
+              "failed": ["[suite][id][np=N]", ...],
+              "passed": ["[suite][id][np=N]", ...],
+              "summary_table": [
+                  ["<suite_name_1>", "<suite_name_2>", ...],
+                  ["<nfail>/<npass>/<nsucc>/<nskip>", ...]
+              ],
+              "<suite_name_1>": {
+                  "<test_id>": {
+                      "status": "failed" | "passed" | "succeeded" | "skipped",
+                      "number_of_runs": <int>,
+                      "run_etime": <float>,
+                      "tot_etime": <float>
+                  },
+                  ...
+              },
+              "<suite_name_2>": { ... },
+              ...
+            }
+
+        Every key besides the three fixed ones above ("failed", "passed",
+        "summary_table") is a real ABINIT suite name (e.g. "v1", "paral"),
+        holding that suite's own slice of `self.res_table` verbatim -- see
+        `merge_results()` for exactly how each per-test entry is built and
+        what "run_etime"/"tot_etime"/"number_of_runs" mean for a
+        multi-parallel suite (they can be a sum across several np passes,
+        not one run's wall-clock time). A suite that happened to be named
+        "failed", "passed", or "summary_table" would collide with the fixed
+        keys above -- the "Warning: About to overwrite key" print below is
+        the only guard against that.
+
+        `summary_table`'s two rows are parallel lists matched by position
+        (index i of each row describes the same suite), not a list of
+        per-suite dicts.
+
+        `analyze()` (called right after this, in `TestBot.run()`) adds one
+        more top-level key, `"tag"`, once this file already exists on disk.
 
         Args:
             fname: Path to the output JSON file.
@@ -1008,142 +1262,270 @@ class TestBotSummary:
         d["summary_table"] = self.to_table()
 
         for suite_name in self:
-            print("---", suite_name, self.res_table[suite_name])
+            #print("---", suite_name, self.res_table[suite_name])
             if suite_name in d:
-                #raise KeyError("Cannot overwrite key %s" % suite_name)
-                print("Warning: About to overwrite key %s" % suite_name)
+                #raise KeyError(f"Cannot overwrite key {suite_name}")
+                print(f"Warning: About to overwrite key {suite_name}")
             d[suite_name] = self.res_table[suite_name]
 
+        print(
+            f"Writing {fname}: merged test results across all MPI and OpenMP "
+            "execution configurations."
+        )
         with open(fname, "w") as fh:
             json.dump(d, fh)
 
 
-def get_epilog() -> str:
+def print_schema() -> None:
     """
-    Get the epilog string for the command-line help.
+    Print the JSON schema for testbot.json with field descriptions.
+
+    This outputs a JSON structure documenting all available configuration options,
+    their types, default values, and descriptions.
+    """
+    schema = {
+        "description": "Configuration for TestBot automatic test execution",
+        "type": "object",
+        "properties": {},
+        "required": ["builder_name", "max_cpus"],
+    }
+
+    for f in dataclasses.fields(TestBot):
+        if not f.init:
+            continue
+
+        # Determine the type string
+        type_str = str(f.type).replace("typing.", "")
+
+        # Get default value
+        if f.default is not dataclasses.MISSING:
+            default = f.default
+        elif f.default_factory is not dataclasses.MISSING:  # type: ignore[misc]
+            default = f.default_factory()
+        else:
+            default = None
+
+        # Build property entry
+        prop_entry = {
+            "type": type_str,
+            "description": f.metadata.get("info", ""),
+        }
+        if default is not None:
+            prop_entry["default"] = default
+
+        schema["properties"][f.name] = prop_entry
+
+    print(json.dumps(schema, indent=2))
+
+
+def generate_template() -> None:
+    """
+    Generate a template testbot.json file with example values.
+
+    This creates a sample configuration with reasonable defaults that can be
+    customized for specific use cases.
+    """
+    template = {
+        "builder_name": "my_builder",
+        "max_cpus": 8,
+        "type": "ref",
+        "max_gpus": 0,
+        "has_mpi": True,
+        "mpirun_np": "mpiexec -n",
+        "omp_num_threads": 2,
+        "with_tdirs": [],
+        "without_tdirs": [],
+        "timeout_time": 1200,
+        "runmode": "static",
+        "keywords": [],
+        "verbose": 0,
+        "tmp_basedir": "",
+        "mpi_args": "",
+        "force_mpi": False,
+        "dont_exclude_builders": False,
+    }
+
+    print("# TestBot configuration template")
+    print("# Save this to testbot.json and customize for your builder")
+    print(json.dumps(template, indent=2))
+
+
+def build_parser() -> argparse.ArgumentParser:
+    """
+    Build the command-line argument parser for TestBot.
 
     Returns:
-        str: The epilog usage examples.
+        argparse.ArgumentParser: The configured parser with `run`, `benchmark`,
+        `analyze`, `print`, `doc`, and `template` subcommands.
     """
-    s = """\
-======================================================================================================
-Usage example:
+    examples = """
+Examples:
+  # Run tests using a configuration file
+  python testbot.py run testbot.json
 
-    testbot.py run BUILDER_NAME  => Run tests for the given builder.
-    testbot.py print             => Print info on options.
-    testbot.py validate          => Validate yaml file and convert to json.
+  # Same, profiling each worker's actual test execution (see testbot_workers_merged.prof)
+  python testbot.py run testbot.json --profile
 
-======================================================================================================
+  # Compare wall time with different CPU limits, profiling worker execution too
+  python testbot.py benchmark testbot.json --py-nprocs 1 2 4 8 --profile
+
+  # Generate a template configuration file
+  python testbot.py template > testbot.json
+
+  # Print the configuration schema with field descriptions
+  python testbot.py doc | less
+
+  # Print the parsed configuration without running tests
+  python testbot.py print testbot.json
+
+  # Analyze test results with a git tag
+  python testbot.py analyze v9.0.0
 """
-    return s
 
+    parser = argparse.ArgumentParser(
+        prog="testbot.py",
+        description="Driver for ABINIT automatic tests on Buildbot workers.",
+        epilog=examples,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
-def get_parser(with_epilog: bool = False) -> argparse.ArgumentParser:
-    """
-    Build and return the command-line parser.
+    run_parser = subparsers.add_parser(
+        "run", help="Run the test suite described by a testbot.json file."
+    )
+    run_parser.add_argument(
+        "testbot_json",
+        nargs="?",
+        default=None,
+        help="Path to the testbot.json file (default: testbot.json next to this script).",
+    )
+    run_parser.add_argument(
+        "-rf",
+        "--remove-existing-workdirs",
+        action="store_true",
+        help="Remove stale TestBot work directories before running. Unsafe for concurrent runs.",
+    )
+    run_parser.add_argument(
+        "--profile",
+        action="store_true",
+        help="Profile each worker's actual test execution (cProfile, merged into "
+             "testbot_workers_merged.prof per workdir).",
+    )
 
-    Args:
-        with_epilog (bool, optional): Whether to include the epilog in help.
+    benchmark_parser = subparsers.add_parser(
+        "benchmark", help="Run the test suite with several py_nprocs values and compare wall time."
+    )
+    benchmark_parser.add_argument(
+        "testbot_json",
+        nargs="?",
+        default=None,
+        help="Path to the testbot.json file (default: testbot.json next to this script).",
+    )
+    benchmark_parser.add_argument(
+        "-rf",
+        "--remove-existing-workdirs",
+        action="store_true",
+        help="Remove stale benchmark work directories. Unsafe for concurrent runs.",
+    )
+    benchmark_parser.add_argument(
+        "--py-nprocs",
+        type=int,
+        nargs="+",
+        required=True,
+        metavar="N",
+        help="Positive Python worker counts to benchmark, in baseline-first order.",
+    )
+    benchmark_parser.add_argument(
+        "--profile",
+        action="store_true",
+        help="Profile each worker's actual test execution (cProfile, merged into "
+             "testbot_workers_merged.prof per workdir), for every py_nprocs value.",
+    )
 
-    Returns:
-        argparse.ArgumentParser: The configured parser.
-    """
-    parser = argparse.ArgumentParser(epilog=get_epilog() if with_epilog else "",
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    doc_parser = subparsers.add_parser(
+        "doc",
+        help="Print the JSON schema for testbot.json with field descriptions.",
+    )
 
-    parser.add_argument("--loglevel", default="ERROR", type=str,
-        help="Set the loglevel. Possible values: CRITICAL, ERROR (default), WARNING, INFO, DEBUG")
-    parser.add_argument("-V", "--version", action="version", version=__version__)
+    template_parser = subparsers.add_parser(
+        "template",
+        help="Generate a template testbot.json file with example values.",
+    )
 
-    parser.add_argument("-v", "--verbose", default=0, action="count", # -vv --> verbose=2
-        help="verbose, can be supplied multiple times to increase verbosity")
+    analyze_parser = subparsers.add_parser(
+        "analyze", help="Analyze an existing testbot_summary.json and print a timing table."
+    )
+    analyze_parser.add_argument(
+        "tag",
+        nargs="?",
+        default="unknown",
+        help="Git tag/revision to record in the summary (default: unknown).",
+    )
 
-    # Create the parsers for the sub-commands
-    subparsers = parser.add_subparsers(dest="command", help="sub-command help",
-       description="Valid subcommands, use command --help for help")
-
-    # Subparser for run
-    p_run = subparsers.add_parser("run", # parents=[copts_parser],
-        help="Run tests.")
-    p_run.add_argument("builder_name", type=str, help="Name of the builder")
-    p_run.add_argument('-d', '--dry-run', default=False, action="store_true", help='Dry-run mode.')
-
-    p_info = subparsers.add_parser("info", help="Print info on options.")
-
-    # Subparser for validate
-    p_validate = subparsers.add_parser("validate", # parents=[copts_parser],
-        help="Validate yaml file and convert to JSON.")
+    print_parser = subparsers.add_parser(
+        "print",
+        help="Parse a testbot.json and print the resulting configuration without running any tests.",
+    )
+    print_parser.add_argument(
+        "testbot_json",
+        nargs="?",
+        default=None,
+        help="Path to the testbot.json file (default: testbot.json next to this script).",
+    )
 
     return parser
 
 
-def new_main() -> int:
+def main() -> int:
     """
-    Main entry point for TestBot using the modern sub-command interface.
-
-    Returns:
-        int: The exit code of the executed command.
-    """
-    # Parse command line.
-    parser = get_parser(with_epilog=True)
-    options = parser.parse_args()
-
-    if options.command == "validate":
-        return validate()
-
-    if options.command == "info":
-        TestBot.print_options()
-        return 0
-
-    if options.command == "analyze":
-        return analyze(fname="testbot_summary.json")
-
-    if options.command == "run":
-        testbot = TestBot(None, builder_name=options.builder_name)
-        if options.dry_run:
-            print("Running in dry-run mode, will return immediately.")
-            print(testbot)
-            return 0
-
-        return testbot.run()
-
-    raise ValueError(f"Invalid command: {options.command}")
-
-
-def old_main() -> int:
-    """
-    Main entry point for TestBot using the legacy command-line interface.
+    Main entry point for TestBot's command-line interface.
 
     Returns:
         int: The exit code of the execution.
     """
-    if "--help" in sys.argv or "-h" in sys.argv:
-        # Print help and exit.
-        TestBot.print_options()
+    args = build_parser().parse_args()
+
+    if args.command == "analyze":
+        return analyze(fname="testbot_summary.json", tag=args.tag)
+
+    if args.command == "doc":
+        print_schema()
         return 0
 
-    if len(sys.argv) > 1 and sys.argv[1] == "validate":
-        return validate()
+    if args.command == "template":
+        generate_template()
+        return 0
 
-    # Configuration file (hardcoded or from command line)
-    testbot_cfg = None
-    if len(sys.argv) > 1:
-        testbot_cfg = sys.argv[1]
-        print("Reading testbot.cfg configuration file from: ", testbot_cfg)
+    if args.command == "benchmark":
+        if any(value <= 0 for value in args.py_nprocs):
+            raise SystemExit("benchmark --py-nprocs values must be positive integers")
+        if len(set(args.py_nprocs)) != len(args.py_nprocs):
+            raise SystemExit("benchmark --py-nprocs values must be unique")
+
+        return benchmark(
+            args.testbot_json,
+            args.py_nprocs,
+            remove_existing_workdirs=args.remove_existing_workdirs,
+            profile_workers=args.profile,
+        )
+
+    # "run" and "print" both parse a testbot.json into a TestBot instance.
+    if args.testbot_json is not None:
+        print(f"Reading testbot.json configuration file from: {args.testbot_json}")
 
     # Disable colors
     termcolor.enable(False)
 
-    testbot = TestBot(testbot_cfg)
-    if "--dry-run" in sys.argv or "-d" in sys.argv:
-        print("Running in dry-run mode, will return immediately.")
+    testbot = TestBot.from_json(args.testbot_json)
+
+    if args.command == "print":
         print(testbot)
         return 0
 
+    testbot.remove_existing_workdirs = args.remove_existing_workdirs
+    testbot.profile_workers = args.profile
     return testbot.run()
 
 
 if __name__ == "__main__":
-    #sys.exit(new_main())
-    sys.exit(old_main())
-
+    sys.exit(main())

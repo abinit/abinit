@@ -1,7 +1,7 @@
 #---------------------------------------------------------------
 #Print the model into XML file:
 #---------------------------------------------------------------
-prt_model = 4  #Print the model into a XML file 
+prt_model = 4  #Print the model into a XML file
 
 #---------------------------------------------------------------
 #Information about the DDB and the training set
@@ -42,9 +42,8 @@ sel_EFS = 0 1 1       # Select coefficient on the (E)nergy (F)orces and (S)tress
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = L. BASTOGNE
-#%% keywords = Effective potential, multibinit
-#%% description = 
+#%% keywords = Effective_potential, multibinit
+#%% description =
 #%%   read ddb and generate effective potential by fitting a training set
 #%% topics = LatticeModel
 #%%<END TEST_INFO>
-

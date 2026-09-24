@@ -157,7 +157,6 @@ pseudos "Psdj_nc_sr_04_pbe_std_psp8/Si.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = haicgu_*
 #%% need_cpp_vars = HAVE_LINALG_SCALAPACK
 #%% [NCPU_4]
 #%% files_to_test =

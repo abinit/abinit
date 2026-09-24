@@ -1,5 +1,5 @@
 ##############################################################################
-#Test for multibinit, spin dynamics 
+#Test for multibinit, spin dynamics
 ##############################################################################
 prt_model = 0
 
@@ -28,14 +28,14 @@ spin_dt=1e-16 s
 #%% spin_pot = t16.xml
 #%% exec_args = --F03
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t16.abo, tolnlines = 1, tolabs = 3e2, tolrel = 0.3, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = X. He 
-#%% keywords = Effective potential, multibinit
-#%% description = 
+#%% authors = X. He
+#%% keywords = Effective_potential, multibinit
+#%% description =
 #%%   read xml and run spin dynamics
 #%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)
 #%%   is detected, which is needed by the random number generator.

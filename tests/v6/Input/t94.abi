@@ -32,7 +32,7 @@ qpath
 mustar 0.01
 
 # Minimalistic qpoint grid
-ngqpt 2 2 2 
+ngqpt 2 2 2
 
 # Use standard set of temperatures (default for ntemper, tempermin, temperinc)
 
@@ -77,18 +77,17 @@ iatprj_bs 1 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% input_gkk = t92o 
+#%% input_gkk = t92o
 #%% input_ddb = t91.ddb.out
-#%% test_chain = t90.abi, t91.abi, t92.abi, t93.abi, t94.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t94.abo, tolnlines = 20, tolabs = 1.1e-2, tolrel = 2.0e-1, fld_options =  -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = B. Xu
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   anaddb test electron phonon coupling with extra number of electons of hcp Ti
 #%% topics = PhononWidth, ElPhonTransport
 #%%<END TEST_INFO>

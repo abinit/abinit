@@ -5,6 +5,8 @@ import os
 import signal
 import subprocess
 import time
+from collections.abc import Callable
+from typing import IO, Any
 
 
 class TimeoutError(Exception):
@@ -17,7 +19,7 @@ class SubProcessWithTimeout:
     """
     Error = TimeoutError
 
-    def __init__(self, timeout: float, delay: float = .05):
+    def __init__(self, timeout: float, delay: float = .05) -> None:
         """
         Initialize the SubProcessWithTimeout object.
 
@@ -34,9 +36,13 @@ class SubProcessWithTimeout:
         if self.delay > self.timeout or self.delay <= 0 or self.timeout <= 0:
             raise ValueError("delay and timeout must be positive with delay <= timeout")
 
-    def run(self, args,
-            bufsize=0, executable=None, stdin=None, stdout=None, stderr=None, preexec_fn=None,
-            close_fds=False, shell=False, cwd=None, env=None, universal_newlines=False, startupinfo=None, creationflags=0):
+    def run(self, args: str | list[str],
+            bufsize: int = 0, executable: str | None = None,
+            stdin: int | IO[Any] | None = None, stdout: int | IO[Any] | None = None, stderr: int | IO[Any] | None = None,
+            preexec_fn: Callable[[], Any] | None = None,
+            close_fds: bool = False, shell: bool = False, cwd: str | os.PathLike[str] | None = None,
+            env: dict[str, str] | None = None, universal_newlines: bool = False, startupinfo: Any = None,
+            creationflags: int = 0) -> tuple[subprocess.Popen[Any], int]:
         """
         Run a subprocess with a timeout.
 
@@ -52,7 +58,7 @@ class SubProcessWithTimeout:
         return_code = self._wait_testcomplete()
         return self.proc, return_code
 
-    def _wait_testcomplete(self):
+    def _wait_testcomplete(self) -> int:
         """
         Wait for the subprocess to complete or for the timeout to trigger.
 
@@ -93,7 +99,7 @@ import unittest
 
 
 class TestSubProcessWithTimeout(unittest.TestCase):
-    def test_with_sleep(self):
+    def test_with_sleep(self) -> None:
         """"Testing if sleep 5 raises TimeoutError"""
         proc, retcode = SubProcessWithTimeout(1).run(["sleep", "5"])
         self.assertEqual(retcode, 124)

@@ -17,9 +17,8 @@ t78o_DS2_WFK
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = conducti
-#%% test_chain = t78.abi, t79.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t79.out, tolnlines=  1, tolabs=  4.000e-08, tolrel=  7.000e-06, fld_options=-medium;
 #%%   t79_Kth, tolnlines=  50, tolabs=  4.000e-08, tolrel=  7.000e-06, fld_options=-easy;
 #%%   t79_Lij, tolnlines=  50, tolabs=  4.000e-08, tolrel=  7.000e-06, fld_options=-easy;
@@ -31,7 +30,7 @@ t78o_DS2_WFK
 #%% [extra_info]
 #%% keywords = NC
 #%% authors = V. Recoules
-#%% description = 
+#%% description =
 #%%   Aluminum FCC : test the conductivity.
 #%%   Only for testing purposes : no physical meaning !!
 #%%<END TEST_INFO>

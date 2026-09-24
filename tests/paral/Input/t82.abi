@@ -11,12 +11,12 @@ dipdip_prt = 1
 #---------------------------------------------------------------
 fit_coeff = 1
 fit_ncoeff = 2
-fit_nfixcoeff  = 2 
-fit_fixcoeff  = 1 2 
-fit_rangePower = 3 3 
+fit_nfixcoeff  = 2
+fit_fixcoeff  = 1 2
+fit_rangePower = 3 3
 fit_SPCoupling = 1
-fit_cutoff = 3.8 
-fit_iatom = -1 
+fit_cutoff = 3.8
+fit_iatom = -1
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -31,34 +31,34 @@ fit_iatom = -1
 #%% system_xml = t82_sys.xml
 #%% coeff_xml = t82_coeffs.xml
 #%% md_hist = t81_HIST
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t82_MPI1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t82_MPI1_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [NCPU_2]
 #%% system_xml = t82_sys.xml
 #%% coeff_xml = t82_coeffs.xml
 #%% md_hist = t81_HIST
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t82_MPI2.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t82_MPI2_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [NCPU_4]
 #%% system_xml = t82_sys.xml
 #%% coeff_xml = t82_coeffs.xml
 #%% md_hist = t81_HIST
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t82_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t82_MPI4_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [NCPU_10]
 #%% system_xml = t82_sys.xml
 #%% coeff_xml = t82_coeffs.xml
 #%% md_hist = t81_HIST
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t82_MPI10.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t82_MPI10_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [extra_info]
 #%% authors = A. MARTIN, M.M. Schmitt
-#%% keywords = Effective potential, multibinit
-#%% description = 
-#%%   read ddb and HIST, fit the anharmonic part and generate effective potential 
+#%% keywords = Effective_potential, multibinit
+#%% description =
+#%%   read ddb and HIST, fit the anharmonic part and generate effective potential
 #%% topics = LatticeModel,FitProcess
 #%%<END TEST_INFO>

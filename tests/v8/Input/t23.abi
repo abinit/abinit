@@ -29,14 +29,14 @@ spin_write_traj = 0
 #%% spin_pot = t23.xml
 #%% exec_args = --F03
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t23.abo, tolnlines = 1, tolabs = 2e3, tolrel = 1, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = X. He 
-#%% keywords = Effective potential, multibinit
-#%% description = 
+#%% authors = X. He
+#%% keywords = Effective_potential, multibinit
+#%% description =
 #%%   read xml and run spin dynamics.
 #%%   This is to test spin_dynamics=2 (Depondt-Mertens method of spin rotation.)
 #%%   The ncell, spin_ntime_pre, spin_ntime parameters are small.
@@ -44,5 +44,5 @@ spin_write_traj = 0
 #%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)
 #%%   is detected, which is needed by the random number generator.
 #%%   The random number generator in in 28_numeric_noabirule/m_random_xoroshiro128plus.F90
-#%%   
+#%%
 #%%<END TEST_INFO>

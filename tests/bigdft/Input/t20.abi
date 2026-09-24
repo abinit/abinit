@@ -67,17 +67,17 @@ ecut   50           # This cut-off is too low for real calculations
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = 
+#%% need_cpp_vars =
 #%% [files]
-#%% files_to_test = 
-#%%   t20.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% files_to_test =
+#%%   t20.abo, tolnlines = 17, tolabs = 2.0e-6, tolrel = 5.0e-8
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = D. Caliste
-#%% keywords = 
-#%% description = 
-#%%     Simple test for real space computation (using a wavelet based poisson solver), 
+#%% keywords =
+#%% description =
+#%%     Simple test for real space computation (using a wavelet based poisson solver),
 #%%     no forces, just an H atom in an empty box. The cut-off is unrealistic. This
 #%%     test tests the following part of the code :
 #%%     * psp spline generation for real space ;

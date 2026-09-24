@@ -21,7 +21,7 @@
  occopt 2
  rprim 1 0 0  0 1 0  0 0 1
  tolwfr 1.0d-12
- typat  2*1 
+ typat  2*1
  wtk  1
  xcart -2.122 0 0 2.122 0 0
  znucl  14.0
@@ -32,17 +32,16 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% input_prefix = t17o 
-#%% test_chain = t17.abi, t19.abi, t20.abi, t21.abi, t23.abi
+#%% input_prefix = t17o
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t19.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   Re-run 17 but in slightly larger box, same ecut, larger ng.
 #%%   (Box is still too small for proper model of Si2.)
 #%%<END TEST_INFO>

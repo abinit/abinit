@@ -32,9 +32,53 @@ I usually use the [conda](https://docs.conda.io/en/latest/) package manager and:
     Remember to run *makemake* every time you add/remove a Fortran file or a new directory or you
     change parts the buildsystem *i.e.* the files in *~abinit/config*.
 
+Before regenerating any file, *makemake* checks that the Git **pre-commit hook** is installed and active.
+If it isn't, *makemake* prints instructions and aborts:
+
+    ./config/scripts/makemake
+    [makemake] No active Git pre-commit hook was found.
+    ...
+    [makemake] To bypass this check intentionally, rerun makemake with --no-precommit-hooks.
+
+See [How to install and use pre-commit hooks](#how-to-install-and-use-pre-commit-hooks) below to
+set it up. If you deliberately want to run *makemake* without it pass `--no-precommit-hooks`:
+
+    ./config/scripts/makemake --no-precommit-hooks
+
+## How to install and use pre-commit hooks
+
+[pre-commit](https://pre-commit.com/) runs a set of fast, automated checks (defined in
+`~abinit/.pre-commit-config.yaml`) right before each `git commit`, catching problems early instead
+of at review/CI time. The current hooks check for syntactically valid Python (`check-ast`),
+unresolved merge-conflict markers, valid YAML, missing end-of-file newlines, trailing whitespace,
+executable-but-shebang-less scripts, **oversized files** (>15 MB), and inconsistent line endings.
+
+We **strongly suggest installing it** inside a virtual environment rather than system-wide:
+
+    python3 -m venv ~/venvs/abinit-dev
+    source ~/venvs/abinit-dev/bin/activate
+    python3 -m pip install pre-commit
+
+Then, from the repository's top-level directory (where `.pre-commit-config.yaml` lives), register
+the hook once:
+
+    pre-commit install
+
+From now on, `git commit` automatically runs the checks on the files you staged, blocking the
+commit if any of them fail. You can also run every hook against the whole tree at any time, e.g.
+before opening a merge request:
+
+    pre-commit run --all-files
+
+!!! tip
+
+    A hook that only *reformats* files (e.g. `end-of-file-fixer`, `trailing-whitespace`,
+    `mixed-line-ending`) fails the first time simply because it just modified your files -- `git add`
+    the changes it made and commit again; the second run will pass.
+
 ## How to build Abinit
 
-Developers are invited to build the executables inside a **build** directory *i.e.* a directory that is **separated**
+Developers are **strongly** invited to build the executables inside a **build** directory *i.e.* a directory that is **separated**
 from the source tree in order to keep the source directory as clean as possible and allow for multiple builds.
 I usually use the naming scheme: `_build_[compiler_name]` for the build directory and an external file
 (e.g. *gcc.ac*) storing the configuration options that can be passed to *configure* via the **--with-config-file** option:
@@ -83,6 +127,43 @@ A more detailed discussion is given in [this page](../developers/testsuite_howto
     in order to spot possible regressions or incompatibilities.
     Trust me, you can save a lot of time if you run *runtests.py* systematically!
 
+## How to install and use invoke for common developer tasks
+
+[invoke](https://www.pyinvoke.org/) is a Python task runner. `~abinit/tasks.py` wraps many of the
+recurring developer operations covered in this guide (building, testing, debugging, ctags, git
+housekeeping, ...) into a single, discoverable `invoke <task>` command, so you don't have to
+remember the exact `make`/`gdb`/`ctags` invocation each time.
+
+Install it (again, a virtual environment is recommended -- reuse the one from the pre-commit
+section above if you already created it):
+
+    python3 -m pip install --group tasks
+
+This installs `invoke` itself plus `psutil`, `tabulate`, and `watchdog`, used by a few of the
+tasks below. Note that `--group` requires pip >= 25.1; upgrade with `python3 -m pip install
+--upgrade pip` if the command fails.
+
+`invoke` discovers `tasks.py` automatically when run from `~abinit` or any of its subdirectories.
+List every available task, or get help for a specific one, with:
+
+    invoke --list
+    invoke --help make
+
+A few tasks that map directly onto sections of this guide:
+
+    invoke makemake              # equivalent to ./config/scripts/makemake
+    invoke make --jobs=8         # build with 8 parallel jobs
+    invoke makedeep              # makemake + clean + build in one step
+    invoke runemall              # build (if needed) and run the full test suite
+    invoke runemall --no-make    # run the test suite against an existing build
+    invoke ctags                          # regenerate the ctags file (see "How to browse the source files")
+    invoke gdb --input-name=run.abi       # launch gdb on the abinit binary
+    invoke doctor                         # check that make/git/compiler/MPI/python are all on PATH
+
+Run `invoke --list` for the full catalog -- it also includes tasks for git housekeeping
+(`pull`, `push`, `branchoff`, `prune-branches`), disk/large-file audits (`large-files`,
+`disk-usage`), and building the Robodoc/Doxygen documentation (`robodoc`, `doxygen`).
+
 ## How to browse the source files
 
 The HTML documentation generated by Robodoc is available at
@@ -96,6 +177,9 @@ To generate a **tags** file containing the list of procedures, modules, datatype
     cd ~abinit/src
     ctags -R
 
+or, equivalently, `invoke ctags` from anywhere inside `~abinit` (see
+[How to install and use invoke](#how-to-install-and-use-invoke-for-common-developer-tasks) above).
+
 Now it is possible to open the file containing the declaration of the *dataset_type* Fortran datatype
 directly from the terminal with:
 
@@ -108,16 +192,15 @@ Inside the editor, you can go directly to a tag definition by entering the follo
 More tips for vim users are available [here](https://andrew.stwrt.ca/posts/vim-ctags/).
 For `emacs` see [this page](https://www.emacswiki.org/emacs/EmacsTags).
 
-Finally, one can use the *abisrc.py* script in the `~abinit` directory.
-
-TODO
-
 
 ## How to debug with gdb
 
 Load the executable in the GNU debugger using the syntax:
 
     gdb path_to_abinit_executable
+
+or use `invoke gdb --input-name=run.abi` (add `--run-make` to build first) -- see
+[How to install and use invoke](#how-to-install-and-use-invoke-for-common-developer-tasks) above.
 
 Run the code with the gdb *run* command and redirect the standard input with:
 
@@ -274,10 +357,9 @@ We aim that the test suite covers all the functionalities of ABINIT.
 How to trigger a coverage report?
 
 There is one slave dedicated to *on-demand* execution of branches by the developers
-that produces a code coverage report, at present, **higgs_gnu_7.5_cov**.
+that produces a code coverage report, at present, **alps_gnu_14.2_cov**.
 It can be launched by the general [on-demand interface](https://bbportal.abinit.org)
-(contact Jean-Michel or Xavier if you do not yet have access to it).
-Code coverage reports from recent runs of the tests are available [here](http://coverage.abinit.org).
+Code coverage reports from recent runs of the tests are available [here](https://coverage.abinit.org).
 If you see parts of the code which are not well tested, please contribute to improving coverage by writing new tests!
 
 
@@ -297,9 +379,5 @@ If you see parts of the code which are not well tested, please contribute to imp
 
 
 {% include doc/developers/robodoc.doc.txt %}
-
-{% include doc/developers/debug_make_parents %}
-
-{% include doc/developers/debug_make_abiauty %}
 
 {% include doc/developers/profile_devtools.md %}

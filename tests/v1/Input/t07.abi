@@ -72,7 +72,6 @@
 #%% [setup]
 #%% executable = abinit
 #%% input_prefix = t04o
-#%% test_chain = t04.abi, t07.abi
 #%% no_check = yes
 #%% [files]
 # MG: this file is not tested ###%% t07.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
@@ -82,7 +81,7 @@
 #%% [extra_info]
 #%% keywords = NC
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%   Bulk Aluminium, FCC, with 10 special points, occopt=7 and tsmear=0.05 .
 #%%   Start from the wavefunctions of case 4, reformatted by case 6.
 #%%   Ask to compute the DOS. See the WARNING described in case 6.

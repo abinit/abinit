@@ -74,7 +74,6 @@ pseudos "H.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = haicgu_*
 #%% [files]
 #%% files_to_test =
 #%%   t10.abo, tolnlines=  15, tolabs=  2.2e-09, tolrel= 1.0

@@ -20,7 +20,7 @@ outdata_prefix = "t48o"
  ! (dielectric constant 1) and an outer one with thickness = 9.63 - 2.2 Bohr
  ! with dielectric constant estimated based on response function calculations
  ! Internal to the code
- dielt_env 3.5456 ! Dielectric constant of environment 
+ dielt_env 3.5456 ! Dielectric constant of environment
 ! Interatomic force constant info
  dipdip 1       ! Dipole-dipole interaction treatment
 

@@ -1,24 +1,28 @@
-"""
-Pyinvoke file for automating build and configuration tasks within the Abinit repository.
+"""Developer tasks for building, testing, and maintaining ABINIT.
 
-This file can be executed from any location within the Abinit directory structure,
-including build directories. It requires the `invoke` package.
+Install the task dependencies from the repository root with::
 
-Task Categories:
-    * Build & Clean: `make`, `makemake`, `makedeep`, `clean`
-    * Testing: `runemall`, `abichecks`
-    * Git & Release: `pull`, `push`, `pull_trunk`, `branchoff`, `official_release`, `git_info`, `submodules`
-    * Debugging: `gdb`, `lldb`, `config_log`
-    * Execution: `abinit`, `anaddb`, `mpi_check`, `omp_check`
-    * Utilities: `links`, `ctags`, `fgrep`, `cgrep`, `tgrep`, `watchdog`, `diff2`, `diff3`
-    * System Info: `system`, `pid`, `env`
+    python3 -m pip install --group tasks
 
-General usage:
-    To list available commands:
-        invoke --list
+Invoke discovers this file when run from the source tree or one of its
+subdirectories. Use ``invoke --list`` for the task catalog and
+``invoke --help TASK`` for task-specific options.
 
-    To run specific tasks (e.g., abichecks):
-        invoke abichecks
+Common workflows::
+
+    invoke make --jobs=8                 # Build with eight parallel jobs.
+    invoke make --clean --binary=abinit  # Clean and rebuild only ABINIT.
+    invoke runemall --no-make            # Test an existing build.
+    invoke runemall --keywords=fast      # Build and run matching tests.
+    invoke abinit --input-name=run.abi --run-make
+    invoke config-log                    # Summarize the nearest config.log.
+    invoke large-files --size-threshold-mb=10
+    invoke doxygen                       # Build the source-code reference.
+    invoke io-bench --directories=/tmp,/scratch  # Compare directory I/O throughput.
+
+Git and release tasks can modify branches or remotes. Review their help and
+ensure the working tree is clean before using them. ``official-release`` is a
+simulation unless explicitly called with ``--no-dry-run``.
 """
 
 from __future__ import annotations
@@ -28,18 +32,19 @@ import platform
 import subprocess
 import sys
 import webbrowser
-from collections.abc import Iterable
 from contextlib import contextmanager
 from glob import glob
 from pathlib import Path
 from shutil import which
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 try:
     from invoke import Context, task
 except ImportError:
-    raise ImportError(
-        "Cannot import invoke package. Use `pip install invoke` (or `pip install fabric` which includes invoke)"
-    )
+    raise ImportError("Cannot import invoke package. Use `pip install invoke` (or `pip install fabric` which includes invoke)")
 
 
 from tests.pymods.devtools import number_of_cpus
@@ -125,28 +130,28 @@ def change_output_file(input_file: str | Path, output_file: str) -> None:
         input_file (str or Path): Path to the input file to modify.
         output_file (str): New output file name to insert.
     """
-    with open(input_file) as fh:
-        remove_iline = None
-        lines = [l.lstrip() for l in fh]
-        for i, l in enumerate(lines):
-            if l.lstrip().startswith("output_file"):
-                remove_iline = i
-                break
+    input_path = Path(input_file)
+    lines = input_path.read_text(encoding="utf-8").splitlines()
+    assignment = f'output_file = "{output_file}"'
 
-    if remove_iline is not None:
-        lines.pop(remove_iline)
+    for index, line in enumerate(lines):
+        if line.lstrip().startswith("output_file"):
+            lines[index] = assignment
+            break
+    else:
+        lines.insert(0, assignment)
 
-    lines.insert(0, f'output_file = "{output_file}"')
-    with open(input_file, "w") as fh:
-        fh.write("\n".join(lines))
+    input_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 @contextmanager
-def cd(path: str | Path) -> Iterable[None]:
+def cd(path: str | Path) -> Iterator[None]:
     """
     A Fabric-inspired cd context that temporarily changes directory for
     performing some tasks, and returns to the original working directory
-    afterwards. E.g.,
+    afterwards.
+
+    Example::
 
         with cd("/my/path/"):
             do_something()
@@ -163,20 +168,50 @@ def cd(path: str | Path) -> Iterable[None]:
         os.chdir(cwd)
 
 
-def list_from_string(string, type=int) -> list[str]:
+def list_from_string(string: str, converter=int) -> list:
     """
     Convert a comma or space-separated string into a list of typed values.
 
     Args:
         string (str): The input string to parse.
-        type (type, optional): The type to convert elements to. Defaults to int.
+        converter: Callable used to convert each value. Defaults to ``int``.
 
     Returns:
         list: List of converted values.
     """
-    if "," in string:
-        return [type(s) for s in string.split(",")]
-    return [type(s) for s in string.split(" ")]
+    values = string.replace(",", " ").split()
+    if not values:
+        raise ValueError("Expected at least one value")
+    return [converter(value) for value in values]
+
+
+def _run_make(
+    ctx: Context,
+    jobs: str | int = "auto",
+    touch: bool = False,
+    clean: bool = False,
+    binary: str = "",
+) -> None:
+    """Implement the :func:`make` task."""
+    if touch:
+        with cd(ABINIT_ROOTDIR):
+            cmd = "./abisrc.py touch"
+            cprint(f"Executing: {cmd}", color="yellow")
+            ctx.run(cmd, pty=True)
+
+    top = find_top_build_tree(".", with_abinit=False)
+    job_count = max(1, number_of_cpus() // 2) if jobs == "auto" else int(jobs)
+
+    with cd(top):
+        if clean:
+            ctx.run("make -C src clean", pty=True)
+            ctx.run("make -C shared clean", pty=True)
+
+        command = f"make -j{job_count}"
+        if binary:
+            command += f" {binary}"
+        cprint(f"Executing: {command}", color="yellow")
+        ctx.run(command, pty=True)
 
 
 @task
@@ -187,8 +222,12 @@ def make(
     clean: bool = False,
     binary: str = "",
 ) -> None:
-    """
-    Recompile the Abinit source code.
+    """Recompile the ABINIT source code.
+
+    Examples:
+        ``invoke make`` uses half of the available CPUs.
+        ``invoke make --jobs=8 --binary=abinit`` builds only ``abinit``.
+        ``invoke make --clean`` cleans the build tree first.
 
     Args:
         ctx: Invoke context.
@@ -201,39 +240,16 @@ def make(
         binary (str, optional): Specific binary to recompile (e.g., "abinit").
             Defaults to all binaries.
     """
-    if touch:
-        with cd(ABINIT_ROOTDIR):
-            cmd = "./abisrc.py touch"
-            cprint(f"Executing: {cmd}", color="yellow")
-            result = ctx.run(cmd, pty=True)
-            if not result.ok:
-                cprint(f"{cmd=} failed. Aborting now!", color="red")
-                return 1
+    _run_make(ctx, jobs=jobs, touch=touch, clean=clean, binary=binary)
 
-    top = find_top_build_tree(".", with_abinit=False)
-    jobs = max(1, number_of_cpus() // 2) if jobs == "auto" else int(jobs)
+    # TODO Check for errors in make.stderr
+    # cprint("Exit code: %s" % retcode, "green" if retcode == 0 else "red")
 
-    with cd(top):
-        if clean:
-            ctx.run("cd src && make clean && cd ..", pty=True)
-            ctx.run("cd shared && make clean && cd ..", pty=True)
-
-        # cmd = f"make -j{jobs} {binary} | tee make.log 2> make.stderr"
-        cmd = f"make -j{jobs} {binary}"
-        cprint(f"Executing: {cmd}", color="yellow")
-        result = ctx.run(cmd, pty=True)
-        if not result.ok:
-            cprint(f"{cmd=} failed. Aborting now!", color="red")
-            sys.exit(1)
-
-        # TODO Check for errors in make.stderr
-        # cprint("Exit code: %s" % retcode, "green" if retcode == 0 else "red")
-
-        # if SYSTEM == "Darwin":
-        #    for binary in ALL_BINARIES:
-        #        cmd = f"codesign -v --force --deep src/98_main/{binary}"
-        #        cprint("Executing: %s" % cmd, "yellow")
-        #        ctx.run(cmd, pty=True)
+    # if SYSTEM == "Darwin":
+    #    for binary in ALL_BINARIES:
+    #        cmd = f"codesign -v --force --deep src/98_main/{binary}"
+    #        cprint("Executing: %s" % cmd, "yellow")
+    #        ctx.run(cmd, pty=True)
 
 
 @task
@@ -262,11 +278,14 @@ def runemall(
     clean: bool = False,
     keywords: str | None = None,
 ) -> None:
-    """
-    Run all sequential and parallel tests.
+    """Run the sequential and parallel test suites.
 
     The task first ensures the code is compiled, and then executes the
     test suite. It exits immediately if any critical error occurs.
+
+    Examples:
+        ``invoke runemall --no-make`` tests the current binaries.
+        ``invoke runemall --jobs=8 --keywords=fast`` selects fast tests.
 
     Args:
         ctx: Invoke context.
@@ -279,14 +298,15 @@ def runemall(
         keywords (str, optional): Keyword filter for selecting specific tests.
             Defaults to None.
     """
-    make(ctx, jobs=jobs, touch=touch, clean=clean)
+    if make:
+        _run_make(ctx, jobs=jobs, touch=touch, clean=clean)
 
     top = find_top_build_tree(".", with_abinit=True)
     jobs = max(1, number_of_cpus() // 2) if jobs == "auto" else int(jobs)
-    kws = "" if keywords is None else "-k %s" % keywords
+    kws = "" if keywords is None else f"-k {keywords}"
 
     with cd(os.path.join(top, "tests")):
-        cmd = "./runtests.py -j%d %s" % (jobs, kws)
+        cmd = f"./runtests.py -j{jobs} {kws}"
         cprint(f"Executing: {cmd}", color="yellow")
         ctx.run(cmd, pty=True)
         # Now run the parallel tests.
@@ -294,7 +314,7 @@ def runemall(
             j = jobs // n
             if j == 0:
                 continue
-            cmd = "./runtests.py paral mpiio -j%d -n%d %s" % (j, n, kws)
+            cmd = f"./runtests.py paral mpiio -j{j} -n{n} {kws}"
             cprint(f"Executing: {cmd}", color="yellow")
             ctx.run(cmd, pty=True)
 
@@ -338,7 +358,7 @@ def bisect(ctx: Context, start: str, end: str, runtests_args: str) -> None:
                 mid = (low + high) // 2
                 current_commit = commits[mid]
 
-                msg = f"\n--- Checking commit {mid+1}/{len(commits)}: {current_commit} ---"
+                msg = f"\n--- Checking commit {mid + 1}/{len(commits)}: {current_commit} ---"
                 cprint(msg, color="cyan")
                 log.write(msg + "\n")
 
@@ -436,6 +456,12 @@ def abichecks(ctx: Context) -> int:
             "warningschk.py",
             "abirules_tools.py",
             "__init__.py",
+            # Not a standalone pass/fail checker like the others in this
+            # directory -- it's the dispatcher that runs them (the pure-Python
+            # replacement for the old Perl run-standard-tests.pl), and exits
+            # 16 with a usage message when run with no arguments, which this
+            # loop would otherwise count as a failed check.
+            "run_checks.py",
         ]
         for py_script in [f for f in os.listdir(script_dir) if f.endswith(".py")]:
             if py_script in exclude:
@@ -446,12 +472,12 @@ def abichecks(ctx: Context) -> int:
             result = ctx.run(py_script, warn=True, pty=True)
             # print(result.ok)
             msg, color = ("[OK]", "green") if result.ok else ("[FAILED]", "red")
-            cprint("%s (%.2f s)" % (msg, time.time() - start), color=color)
+            cprint(f"{msg} ({time.time() - start:.2f} s)", color=color)
             if not result.ok:
                 retcode += 1
 
     if retcode != 0:
-        cprint("%d FAILED TESTS" % retcode, color="red")
+        cprint(f"{retcode} FAILED TESTS", color="red")
     else:
         cprint("ALL TESTS OK", color="green")
 
@@ -472,14 +498,37 @@ def robodoc(ctx: Context) -> bool | None:
         if result.ok:
             cprint("ROBODOC BUILD OK", color="green")
             # https://stackoverflow.com/questions/44447469/cannot-open-an-html-file-from-python-in-a-web-browser-notepad-opens-instead
-            html_path = os.path.join(
-                ABINIT_ROOTDIR, "./tmp-robodoc/www/robodoc/masterindex.html"
-            )
-            print("Trying to open %s in browser ..." % html_path)
+            html_path = os.path.join(ABINIT_ROOTDIR, "./tmp-robodoc/www/robodoc/masterindex.html")
+            print(f"Trying to open {html_path} in browser ...")
             return webbrowser.open_new_tab(html_path)
         cprint("ROBODOC BUILD FAILED", color="red")
 
         return result.ok
+
+
+@task
+def doxygen(ctx: Context, open_browser: bool = True, warnings_as_errors: bool = False) -> bool:
+    """Build the Doxygen source-code reference.
+
+    Args:
+        ctx: Invoke context.
+        open_browser: Open the generated index after a successful build.
+        warnings_as_errors: Fail when Doxygen reports any warnings.
+    """
+    env = {"DOXYGEN_WARNINGS_AS_ERRORS": "1" if warnings_as_errors else "0"}
+    with cd(ABINIT_ROOTDIR):
+        result = ctx.run("./mkdoxygen.sh", env=env, pty=True, warn=True)
+
+    if not result.ok:
+        cprint("DOXYGEN BUILD FAILED", color="red")
+        return False
+
+    cprint("DOXYGEN BUILD OK", color="green")
+    if open_browser:
+        html_path = Path(ABINIT_ROOTDIR, "doxygen_docs", "html", "index.html")
+        print(f"Opening {html_path} in the browser ...")
+        webbrowser.open_new_tab(html_path.as_uri())
+    return True
 
 
 @task
@@ -512,7 +561,7 @@ def links(ctx: Context) -> None:
         if os.path.isfile(source):
             os.symlink(source, dest)
         else:
-            cprint("Cannot find `%s` in dir `%s" % (source, main98), color="yellow")
+            cprint(f"Cannot find `{source}` in dir `{main98}", color="yellow")
 
 
 @task
@@ -544,10 +593,7 @@ def fgrep(ctx: Context, pattern: str) -> None:
     #    -i - case-insensitive search
     #    --include=\*.${file_extension} - search files that match the extension(s) or file pattern only
     with cd(ABINIT_ROOTDIR):
-        cmd = (
-            'grep -r -i --color --include "*[.F90,.f90,.finc,.c,.cu,.cpp,.h]" "%s" src shared'
-            % pattern
-        )
+        cmd = f'grep -r -i --color --include "*[.F90,.f90,.finc,.c,.cu,.cpp,.h]" "{pattern}" src shared'
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
@@ -562,7 +608,7 @@ def cgrep(ctx: Context, pattern: str) -> None:
         pattern (str): The pattern to search for.
     """
     with cd(ABINIT_ROOTDIR):
-        cmd = 'grep -r -i --color --include "*.c" "%s" src shared' % pattern
+        cmd = f'grep -r -i --color --include "*.c" "{pattern}" src shared'
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
@@ -577,7 +623,7 @@ def tgrep(ctx: Context, pattern: str) -> None:
         pattern (str): The pattern to search for.
     """
     with cd(ABINIT_ROOTDIR):
-        cmd = 'grep -r -i --color "%s" tests/*/Input/*' % pattern
+        cmd = f'grep -r -i --color "{pattern}" tests/*/Input/*'
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
@@ -608,9 +654,7 @@ def env(ctx: Context) -> None:
     Args:
         ctx: Invoke context.
     """
-    cprint(
-        "\nExecute the following lines in the shell to set the env:\n", color="green"
-    )
+    cprint("\nExecute the following lines in the shell to set the env:\n", color="green")
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main")
     print(f"export ABI_PSPDIR={ABINIT_ROOTDIR}/tests/Pspdir")
@@ -650,10 +694,7 @@ def diff3(ctx: Context, filename: str = "run.abo") -> None:
     if not files:
         return
 
-    if len(files) > 2:
-        cmd = "%s %s %s %s" % (differ, filename, files[-2], files[-1])
-    else:
-        cmd = "%s %s %s" % (differ, filename, files[-1])
+    cmd = f"{differ} {filename} {files[-2]} {files[-1]}" if len(files) > 2 else f"{differ} {filename} {files[-1]}"
     print("Executing:", cmd)
     ctx.run(cmd, pty=True)
 
@@ -666,7 +707,7 @@ def add_trunk(ctx: Context) -> None:
     Args:
         ctx: Invoke context.
     """
-    cmd = "git remote add trunk git@gitlab.abinit.org:trunk/abinit.git"
+    cmd = "git remote add trunk https://gitlab.uliege.be/abinit/developers/trunk/abinit.git"
     print("Executing:", cmd)
     ctx.run(cmd, pty=True)
     cmd = "git fetch trunk"
@@ -683,7 +724,7 @@ def remote_add(ctx: Context, remote: str) -> None:
         ctx: Invoke context.
         remote (str): GitLab username of the developer.
     """
-    cmd = f"git remote add {remote} git@gitlab.abinit.org:{remote}/abinit.git"
+    cmd = f"git remote add {remote} https://gitlab.uliege.be/abinit/developers/{remote}/abinit.git"
     print("Executing:", cmd)
     ctx.run(cmd, pty=True)
     cmd = f"git fetch {remote}"
@@ -692,9 +733,7 @@ def remote_add(ctx: Context, remote: str) -> None:
 
 
 @task
-def gdb(
-    ctx: Context, input_name: str, exec_name: str = "abinit", run_make: bool = False
-) -> None:
+def gdb(ctx: Context, input_name: str, exec_name: str = "abinit", run_make: bool = False) -> None:
     """
     Launch the GDB debugger for a specific executable and input file.
 
@@ -710,7 +749,7 @@ def gdb(
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main", exec_name)
     cprint(f"Using binpath: {binpath}", "green")
-    cmd = f"gdb {binpath} --one-line 'settings set target.run-args {input_name}'"
+    cmd = f"gdb {binpath} --eval-command 'set args {input_name}'"
     cprint(f"Executing gdb command: {cmd}", color="green")
     # mpirun -np 2 xterm -e gdb fftprof --command=dbg_file
     # cprint("Type run to start lldb debugger", color="green")
@@ -719,9 +758,7 @@ def gdb(
 
 
 @task
-def lldb(
-    ctx: Context, input_name: str, exec_name: str = "abinit", run_make: bool = False
-) -> None:
+def lldb(ctx: Context, input_name: str, exec_name: str = "abinit", run_make: bool = False) -> None:
     """
     Launch the LLDB debugger for a specific executable and input file.
 
@@ -765,9 +802,7 @@ def mpi_check(
     if run_make:
         make(ctx)
 
-    cprint(
-        f"Will run {abinit_input_file=} with MPI nprocs in {np_list=}", color="yellow"
-    )
+    cprint(f"Will run {abinit_input_file=} with MPI nprocs in {np_list=}", color="yellow")
 
     differ = which_differ()
     np_list = list_from_string(np_list)
@@ -815,21 +850,21 @@ def omp_check(
     omp_threads = list_from_string(omp_threads)
 
     cprint(
-        "Will run {abinit_input_file=} with OMP threads={omp_threads=} and MPI nprocs={np}",
+        f"Will run {abinit_input_file=} with OMP threads={omp_threads!r} and MPI nprocs={np}",
         color="yellow",
     )
     for nth in omp_threads:
         change_output_file(abinit_input_file, f"run_omp{nth}_mpi{np}.abo")
-        cmd = f"{mpi_runner} -n {np} abinit -o {nth} {abinit_input_file} | tee run_omp{nth}_mpi{np}.log"
+        cmd = f"OMP_NUM_THREADS={nth} {mpi_runner} -n {np} abinit {abinit_input_file} | tee run_omp{nth}_mpi{np}.log"
         cprint(f"About to execute {cmd=}", color="yellow")
         ctx.run(cmd)
 
     omp_ref = omp_threads[0]
     for nth in omp_threads[1:]:
-        cmd = f"{differ} run_omp{omp_ref}.abo run_omp{nth}_mpi{np}.abo"
+        cmd = f"{differ} run_omp{omp_ref}_mpi{np}.abo run_omp{nth}_mpi{np}.abo"
         cprint(f"About to execute {cmd=}", color="yellow")
         ctx.run(cmd, pty=True)
-        cmd = f"{differ} run_omp{omp_ref}.log run_omp{nth}_mpi{np}.log"
+        cmd = f"{differ} run_omp{omp_ref}_mpi{np}.log run_omp{nth}_mpi{np}.log"
         cprint(f"About to execute {cmd=}", color="yellow")
         ctx.run(cmd, pty=True)
 
@@ -848,7 +883,7 @@ def pyenv_clean(ctx: Context) -> None:
         ctx.run(cmd)
 
     cmd = "pip cache purge"
-    cprint("About to execute {cmd=}")
+    cprint(f"About to execute {cmd=}")
     ctx.run(cmd)
 
 
@@ -969,10 +1004,12 @@ def branchoff(ctx: Context, start_point: str) -> None:
         ctx: Invoke context.
         start_point (str): The remote branch to start from (e.g., "trunk/release-9.0").
     """
-    try:
-        remote, branch = start_point.split("/")
-    except:
+    if "/" in start_point:
+        remote, _branch = start_point.split("/", maxsplit=1)
+        remote_ref = start_point
+    else:
         remote = "trunk"
+        remote_ref = f"{remote}/{start_point}"
 
     def run(cmd: str):
         """Execute a shell command via context."""
@@ -982,11 +1019,10 @@ def branchoff(ctx: Context, start_point: str) -> None:
     run(f"git fetch {remote}")
     # Create new branch `test_v9.0` using trunk/release-9.0 as start_point:
     # git checkout [-q] [-f] [-m] [[-b|-B|--orphan] <new_branch>] [<start_point>]
-    my_branch = "my_" + start_point.replace("/", "-")
-    run(f"git checkout -b {my_branch} {start_point}")
-    # Change default upstream. If you forget this step, you will be pushing to trunk
-    run("git branch --set-upstream-to origin")
-    run("git push origin HEAD")
+    my_branch = "my_" + remote_ref.replace("/", "-")
+    run(f"git checkout -b {my_branch} {remote_ref}")
+    # Change default upstream. If you forget this step, you may push to trunk.
+    run("git push --set-upstream origin HEAD")
 
 
 @task
@@ -1018,6 +1054,52 @@ $ git merge --abort
 
 
 @task
+def prune_branches(ctx: Context, base: str = "develop", dry_run: bool = True) -> None:
+    """
+    List (and optionally delete) local branches already merged into `base`.
+
+    Never touches the currently checked-out branch or `develop`/`master`/`main`,
+    and only ever runs `git branch -d` (safe delete, refuses an unmerged branch),
+    never `-D`.
+
+    Examples:
+        ``invoke prune-branches`` lists merged branches without deleting them.
+        ``invoke prune-branches --no-dry-run`` deletes them.
+        ``invoke prune-branches --base=my_trunk-release-9.0`` checks against another branch.
+
+    Args:
+        ctx: Invoke context.
+        base (str, optional): Branch to check "merged into". Defaults to "develop".
+        dry_run (bool, optional): If True, only list candidates. Defaults to True.
+    """
+    protected = {"develop", "master", "main", get_current_branch()}
+
+    result = ctx.run(f'git branch --merged {base} --format="%(refname:short)"', hide=True, warn=True)
+    if not result.ok:
+        cprint(f"Could not list branches merged into {base!r}: {result.stderr.strip()}", color="red")
+        return
+
+    candidates = [b.strip() for b in result.stdout.splitlines() if b.strip() and b.strip() not in protected]
+
+    if not candidates:
+        cprint(f"No local branches to prune (already merged into {base!r}).", color="green")
+        return
+
+    cprint(f"Local branches already merged into {base!r}:", color="yellow")
+    for branch in candidates:
+        print(f"  {branch}")
+
+    if dry_run:
+        cprint("\nDry run: nothing deleted. Re-run with --no-dry-run to delete these branches.", color="yellow")
+        return
+
+    for branch in candidates:
+        cmd = f"git branch -d {branch}"
+        cprint(f"Executing: {cmd}", color="green")
+        ctx.run(cmd)
+
+
+@task
 def watchdog(ctx: Context, jobs: str | int = "auto", sleep_time: int = 5) -> None:
     """
     Monitor the source directory for changes and trigger recompilation automatically.
@@ -1033,9 +1115,7 @@ def watchdog(ctx: Context, jobs: str | int = "auto", sleep_time: int = 5) -> Non
     )
     cprint("Enter <CTRL + C> in the terminal to kill the service.", color="green")
 
-    cprint(
-        f"Start watching F90 files with sleep_time {sleep_time} s ....", color="green"
-    )
+    cprint(f"Start watching F90 files with sleep_time {sleep_time} s ....", color="green")
     top = find_top_build_tree(".", with_abinit=True)
     jobs = max(1, number_of_cpus() // 2) if jobs == "auto" else int(jobs)
 
@@ -1059,13 +1139,13 @@ def watchdog(ctx: Context, jobs: str | int = "auto", sleep_time: int = 5) -> Non
 
     def on_deleted(event):
         """Handle file deletion events."""
-        print(f"what the f**k! Someone deleted {event.src_path}!")
+        print(f"File deleted: {event.src_path}")
 
     def on_modified(event):
         """Trigger parallel make when a watched file is modified."""
         print(f"hey buddy, {event.src_path} has been modified")
-        cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
-        cprint("Executing: %s" % cmd, color="yellow")
+        cmd = f"make -j{jobs} > >(tee -a make.log) 2> >(tee -a make.stderr >&2)"
+        cprint(f"Executing: {cmd}", color="yellow")
         with cd(top):
             try:
                 result = ctx.run(cmd, pty=True)
@@ -1112,13 +1192,9 @@ def get_current_branch() -> str:
         RuntimeError: If not in a git repository or git command fails.
     """
     try:
-        return (
-            subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
-            .strip()
-            .decode("utf-8")
-        )
-    except subprocess.CalledProcessError:
-        raise RuntimeError("Not inside a git repository or an error occurred")
+        return subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], text=True).strip()
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError("Not inside a Git repository or git command failed") from exc
 
 
 def get_git_tags() -> list[str]:
@@ -1132,11 +1208,9 @@ def get_git_tags() -> list[str]:
         RuntimeError: If not in a git repository or git command fails.
     """
     try:
-        tags = subprocess.check_output(["git", "tag"]).decode("utf-8").split("\n")
-        # Remove empty strings from the list
-        return [tag for tag in tags if tag]
-    except subprocess.CalledProcessError:
-        raise RuntimeError("Not inside a git repository or an error occurred")
+        return subprocess.check_output(["git", "tag"], text=True).splitlines()
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError("Not inside a Git repository or git command failed") from exc
 
 
 @task
@@ -1146,6 +1220,10 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
 
     This involves merging develop into master, tagging, and pushing to
     remote repositories.
+
+    Examples:
+        ``invoke official-release --new-version=10.0.0`` prints the plan.
+        Add ``--no-dry-run`` to perform the release.
 
     Args:
         ctx: Invoke context.
@@ -1160,7 +1238,10 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
     _run_kwargs = dict(pty=True, echo=True)
 
     def _run(command: str):
-        """Helper to run commands with predefined kwargs."""
+        """Run a release command, or display it when simulating."""
+        if dry_run:
+            cprint(f"Would execute: {command}", color="yellow")
+            return None
         return ctx.run(command, **_run_kwargs)
 
     current_branch = get_current_branch()
@@ -1168,7 +1249,7 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
         raise RuntimeError(f"You are on the '{current_branch}' branch, not 'develop'.")
 
     old_tags = get_git_tags()
-    if new_version in old_tags and not dry_run:
+    if new_version in old_tags:
         raise RuntimeError(f"{new_version=} is already in {old_tags=}")
 
     # List of files that should be added to master and then removed in develop
@@ -1200,17 +1281,13 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
         for path in configure_paths:
             _run(f"git add -f {path}")
 
-        if not dry_run:
-            _run(f"git commit -a -m 'v{version}'")
-            _run(f"git tag -a {version} -m 'v{version}'")
-            _run("git push origin master")
+        _run(f"git commit -a -m 'v{new_version}'")
+        _run(f"git tag -a {new_version} -m 'v{new_version}'")
+        _run("git push origin master")
 
         # Step 2: Push to GitHub
-        _run(
-            f"git remote add abinit {github_url} || echo 'Remote already exists but this is not critical'"
-        )
-        if not dry_run:
-            _run("git push -u abinit master --tags")
+        _run(f"git remote add abinit {github_url} || echo 'Remote already exists but this is not critical'")
+        _run("git push -u abinit master --tags")
 
         _run("git checkout develop")
         _run("git merge master")
@@ -1279,29 +1356,24 @@ def git_info(ctx: Context, top_n: int = 20) -> None:
     sizes = get_blob_sizes(hashes)
 
     sorted_blobs = sorted(
-        (
-            (size, paths[_hash], _hash)
-            for _hash, size in sizes.items()
-            if _hash in paths
-        ),
+        ((size, paths[_hash], _hash) for _hash, size in sizes.items() if _hash in paths),
         reverse=True,
     )
 
     print(f"\nTop {top_n} largest files ever committed:")
-    for size, path, obj_hash in sorted_blobs[:top_n]:
-        print(f"{size / (1024*1024):7.2f} MB\t{path}")
+    for size, path, _obj_hash in sorted_blobs[:top_n]:
+        print(f"{size / (1024 * 1024):7.2f} MB\t{path}")
 
     ctx.run("git count-objects -vH", pty=True)
 
 
 @task
-def large_files(
-    ctx: Context, top_dir: str | Path | None = None, size_threshold_mb: int = 5
-) -> None:
+def large_files(ctx: Context, top_dir: str | Path | None = None, size_threshold_mb: int = 5) -> None:
     """
     Find and list files larger than `size_threshold_mb` megabytes under `top_dir`.
 
     Args:
+        ctx: Invoke context.
         top_dir: Root directory to start searching from.
         size_threshold_mb: Minimum file size in MB to report.
     """
@@ -1335,6 +1407,238 @@ def large_files(
 
 
 @task
+def disk_usage(ctx: Context, top_dir: str | Path | None = None, depth: int = 1, top_n: int = 20) -> None:
+    """
+    Summarize disk usage per subdirectory, similar to `du -d depth | sort -rh`.
+
+    Complements `large_files`, which only reports individual oversized files
+    and can miss a directory that's large because of many small files
+    (e.g. an accumulated pile of old build trees).
+
+    Args:
+        ctx: Invoke context.
+        top_dir: Root directory to scan. Defaults to the Abinit source root.
+        depth (int, optional): Number of path components below `top_dir` to
+            group by. Defaults to 1 (immediate subdirectories).
+        top_n (int, optional): Number of largest entries to display. Defaults to 20.
+    """
+    if top_dir is None:
+        top_dir = ABINIT_ROOTDIR
+    top_dir = Path(top_dir)
+    depth = max(1, depth)
+
+    exclude_dirs = {".git", "__pycache__", ".ruff_cache"}
+
+    sizes: dict[Path, int] = {}
+    for root, dirs, files in os.walk(top_dir):
+        dirs[:] = [d for d in dirs if d not in exclude_dirs]
+        root_path = Path(root)
+        rel_parts = root_path.relative_to(top_dir).parts
+        group_key = top_dir if len(rel_parts) < depth else top_dir.joinpath(*rel_parts[:depth])
+
+        total = 0
+        for name in files:
+            try:
+                total += (root_path / name).stat().st_size
+            except OSError:
+                continue
+        sizes[group_key] = sizes.get(group_key, 0) + total
+
+    ranked = sorted(sizes.items(), key=lambda kv: kv[1], reverse=True)[:top_n]
+
+    print(f"Disk usage under {top_dir} (grouped by {depth} path component(s)):\n")
+    for path, size in ranked:
+        print(f"{size / (1024**2):10.2f} MB\t{path}")
+
+
+def _fsync_full(fh) -> None:
+    """Flush a file to physical disk, bypassing any OS write-back cache.
+
+    Plain ``os.fsync`` does not guarantee data reaches the physical disk on
+    macOS (the kernel may just hand it to the drive's own volatile cache), so
+    write timings would otherwise mostly measure that cache instead of the
+    directory's real I/O performance. ``F_FULLFSYNC`` is Apple's documented
+    way to force a real flush; other platforms are fine with ``os.fsync``.
+    """
+    fh.flush()
+    if SYSTEM == "Darwin":
+        import fcntl
+
+        fcntl.fcntl(fh.fileno(), fcntl.F_FULLFSYNC)
+    else:
+        os.fsync(fh.fileno())
+
+
+@task
+def io_bench(ctx: Context, directories: str, size_gb: float = 1.0, chunk_mb: int = 4, iterations: int = 1) -> None:
+    """Compare the I/O performance of one or more directories.
+
+    For each directory, writes `iterations` temporary file(s) totalling
+    `size_gb` gigabytes, measures the write throughput, rereads them to
+    measure the read throughput, and removes them afterwards. Use
+    `iterations` > 1 to approximate a many-small-files access pattern
+    (each file gets its own open/close and fsync) instead of one large
+    sequential file.
+
+    Note:
+        The reread may be served (partly) from the OS page cache rather than
+        the physical disk, so read numbers can look better than a cold read
+        would be. There is no portable way to drop the cache without root.
+
+    Examples:
+        ``invoke io-bench --directories=/tmp``
+        ``invoke io-bench --directories=/tmp,/scratch --size-gb=2``
+        ``invoke io-bench --directories=/tmp --size-gb=1 --iterations=1000``  # 1000 x ~1MB files
+
+    Args:
+        ctx: Invoke context.
+        directories (str): Comma-separated list of directories to benchmark.
+        size_gb (float, optional): Total size in GB written per directory. Defaults to 1.0.
+        chunk_mb (int, optional): Chunk size in MB used for writing/reading each file. Defaults to 4.
+        iterations (int, optional): Number of separate files `size_gb` is split across.
+            Defaults to 1 (one big file).
+    """
+    import time
+    import uuid
+
+    from tabulate import tabulate
+
+    dirs = [d.strip() for d in directories.split(",") if d.strip()]
+    if not dirs:
+        raise ValueError("Expected at least one directory")
+    if iterations < 1:
+        raise ValueError(f"{iterations=} must be >= 1")
+
+    size_bytes = int(size_gb * 1024**3)
+    chunk_bytes = int(chunk_mb * 1024**2)
+    if size_bytes <= 0:
+        raise ValueError(f"{size_gb=} must be > 0")
+    if chunk_bytes <= 0:
+        raise ValueError(f"{chunk_mb=} must be > 0")
+
+    file_size_bytes = size_bytes // iterations
+    if file_size_bytes <= 0:
+        raise ValueError(f"{size_gb=} split across {iterations=} gives a 0-byte file; lower iterations or raise size_gb")
+
+    cprint(
+        f"Benchmarking {len(dirs)} directory(ies) with {iterations} file(s) of "
+        f"{file_size_bytes / 1024**2:.2f} MB each ({size_gb} GB total) ...",
+        color="yellow",
+    )
+
+    rows = []
+    for directory in dirs:
+        dir_path = Path(directory)
+        if not dir_path.is_dir():
+            cprint(f"Skipping {directory!r}: not a directory", color="red")
+            continue
+
+        tmp_paths = [dir_path / f".io_bench_{uuid.uuid4().hex}.tmp" for _ in range(iterations)]
+        chunk = os.urandom(min(chunk_bytes, file_size_bytes))
+        try:
+            written = 0
+            start = time.perf_counter()
+            for tmp_path in tmp_paths:
+                remaining = file_size_bytes
+                with open(tmp_path, "wb") as fh:
+                    while remaining > 0:
+                        to_write = chunk if remaining >= len(chunk) else chunk[:remaining]
+                        fh.write(to_write)
+                        remaining -= len(to_write)
+                        written += len(to_write)
+                    _fsync_full(fh)
+            write_time = time.perf_counter() - start
+
+            read_bytes = 0
+            start = time.perf_counter()
+            for tmp_path in tmp_paths:
+                with open(tmp_path, "rb") as fh:
+                    while True:
+                        data = fh.read(chunk_bytes)
+                        if not data:
+                            break
+                        read_bytes += len(data)
+            read_time = time.perf_counter() - start
+        finally:
+            for tmp_path in tmp_paths:
+                tmp_path.unlink(missing_ok=True)
+
+        write_mb_s = (written / 1024**2) / write_time if write_time > 0 else float("inf")
+        read_mb_s = (read_bytes / 1024**2) / read_time if read_time > 0 else float("inf")
+        rows.append(
+            [directory, iterations, f"{write_mb_s:.1f} MB/s", f"{write_time:.2f} s", f"{read_mb_s:.1f} MB/s", f"{read_time:.2f} s"]
+        )
+
+    if not rows:
+        cprint("No valid directory to benchmark.", color="red")
+        return
+
+    print()
+    print(tabulate(rows, headers=["Directory", "Files", "Write speed", "Write time", "Read speed", "Read time"], tablefmt="grid"))
+
+
+@task
+def doctor(ctx: Context) -> bool:
+    """
+    Check that common tools needed to build, test, and debug Abinit are on PATH.
+
+    Examples:
+        ``invoke doctor``
+
+    Args:
+        ctx: Invoke context.
+
+    Returns:
+        bool: True if every required tool was found, False otherwise.
+    """
+    from tabulate import tabulate
+
+    required = [
+        ("Make", ["make"]),
+        ("Git", ["git"]),
+        ("Fortran compiler", [os.environ.get("FC", ""), "gfortran", "ifort", "ifx"]),
+        ("MPI launcher", ["mpirun", "mpiexec", "srun"]),
+        ("Python 3", ["python3"]),
+    ]
+    optional = [
+        ("CMake", ["cmake"]),
+        ("Doxygen", ["doxygen"]),
+        ("Ctags", ["ctags"]),
+        ("GDB", ["gdb"]),
+        ("LLDB", ["lldb"]),
+        ("Vim-compatible editor", ["mvim", "nvim", "vim"]),
+    ]
+
+    def _first_found(names: list[str]) -> str | None:
+        """Return the path of the first name in `names` found on PATH, if any."""
+        for name in names:
+            if name and (path := which(name)):
+                return path
+        return None
+
+    rows = []
+    all_required_ok = True
+    for label, names in required:
+        path = _first_found(names)
+        if not path:
+            all_required_ok = False
+        rows.append([label, "required", path or "NOT FOUND"])
+
+    for label, names in optional:
+        path = _first_found(names)
+        rows.append([label, "optional", path or "not found"])
+
+    print(tabulate(rows, headers=["Tool", "Kind", "Location"], tablefmt="grid"))
+
+    if all_required_ok:
+        cprint("\nAll required tools found.", color="green")
+    else:
+        cprint("\nSome required tools are missing -- builds are likely to fail.", color="red")
+
+    return all_required_ok
+
+
+@task
 def system(ctx: Context) -> None:
     """
     Display comprehensive system information as a formatted table.
@@ -1357,9 +1661,7 @@ def system(ctx: Context) -> None:
     info.append(["Processor", platform.processor()])
     info.append(["CPU Cores (Physical)", psutil.cpu_count(logical=False)])
     info.append(["CPU Cores (Logical)", psutil.cpu_count()])
-    info.append(
-        ["Memory (Total)", f"{psutil.virtual_memory().total / (1024 ** 3):.2f} GB"]
-    )
+    info.append(["Memory (Total)", f"{psutil.virtual_memory().total / (1024**3):.2f} GB"])
     for level, size in get_cache_info().items():
         info.append([level, size])
 
@@ -1390,7 +1692,7 @@ def pid(ctx: Context, pid: int | str) -> None:
         info.append(["User", p.username()])
         info.append(["CPU %", f"{p.cpu_percent(interval=0.1):.1f} %"])
         info.append(["Memory %", f"{p.memory_percent():.2f} %"])
-        info.append(["Memory RSS", f"{p.memory_info().rss / (1024 ** 2):.2f} MB"])
+        info.append(["Memory RSS", f"{p.memory_info().rss / (1024**2):.2f} MB"])
         info.append(["Threads", p.num_threads()])
         info.append(["CWD", p.cwd()])
         info.append(["Parent PID", p.ppid()])
@@ -1477,9 +1779,7 @@ def get_cache_info_windows() -> dict[str, str]:
     """
     caches = {}
     try:
-        out = subprocess.check_output(
-            ["wmic", "cpu", "get", "L2CacheSize,L3CacheSize"], stderr=subprocess.DEVNULL
-        ).decode()
+        out = subprocess.check_output(["wmic", "cpu", "get", "L2CacheSize,L3CacheSize"], stderr=subprocess.DEVNULL).decode()
         lines = out.strip().split("\n")
         if len(lines) >= 2:
             _, l2, l3 = lines[1].split()
@@ -1526,7 +1826,7 @@ def _extract_errors(logfile: str | Path, context_lines: int = 5) -> list[str]:
     errors = []
     for i, line in enumerate(lines):
         if regex.search(line):
-            # Ignore maches such as `sd_yakl_options='optional fail'
+            # Ignore matches such as `sd_yakl_options='optional fail'
             if line.startswith("sd_") and "fail" in line:
                 continue
             # Capture context
@@ -1553,7 +1853,7 @@ def find_filename(filename: str, start_dir: Path | None = None) -> Path:
     Raises:
         FileNotFoundError: If the file is not found before reaching the root.
     """
-    current = start_dir.resolve()
+    current = Path.cwd() if start_dir is None else start_dir.resolve()
     while True:
         candidate = current / filename
         if candidate.exists():
@@ -1626,5 +1926,5 @@ nsys stats profile_run.nsys-rep | tee prof.out
 #vimdiff run_gpu.abo ref_cpu.log
 """
 
-    with open(sh_path, "wt") as fh:
+    with open(sh_path, "w") as fh:
         fh.write(sh_template)

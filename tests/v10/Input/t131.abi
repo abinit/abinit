@@ -6,7 +6,6 @@ t130o
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = conducti
-#%% test_chain = t130.abi, t131.abi
 #%% [files]
 #%% files_to_test =
 #%%  t131_sigX_at1,  tolnlines =10, tolabs = 2.1e-10, tolrel = 1.0e-07, fld_options = -easy;

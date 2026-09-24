@@ -16,7 +16,7 @@ randomseed=111111 # for testing only
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% exclude_builders = alps_nag_7.2_serial, manneback_gnu_14.2_hpc
+#%% exclude_builders = alps_nag_7.2_serial, mann_gnu_13.3
 #%% latt_pot = t83.nc
 #%% exec_args = --F03
 #%% [files]
@@ -26,7 +26,7 @@ randomseed=111111 # for testing only
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. He
-#%% keywords = Effective potential, multibinit, lattpot
+#%% keywords = Effective_potential, multibinit, lattpot
 #%% description =
 #%%   Read netcdf and run lattice dynamics using Velocity Verlet NVE (dynamics=101)
 #%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)

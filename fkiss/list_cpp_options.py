@@ -46,5 +46,5 @@ if __name__ == "__main__":
   else:
     top = sys.argv[1]
 
-  exit_status = main(top)
+  exit_status = list_cpp_options(top)
   sys.exit(exit_status)

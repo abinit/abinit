@@ -27,17 +27,16 @@
 #%% [setup]
 #%% executable = anaddb
 #%% input_ddb = t16.ddb.in
-#%% test_chain = t16.abi, t17.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t17.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% extra_inputs = 
+#%% extra_inputs =
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
-#%% keywords = 
+#%% keywords =
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%   Analyze a DDB for Silicon. Lattice parameter = 10.18 Angstrom.
 #%%   IFCs are computed as in test 16, but by limiting artificially
 #%%   the number of allowed interacting shells to 2. The total number

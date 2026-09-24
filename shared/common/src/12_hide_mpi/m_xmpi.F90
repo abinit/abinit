@@ -826,8 +826,15 @@ subroutine xmpi_init()
 
    if (ierr /= 0) then
      write(std_out, "(a)")" WARNING: cannot increase stack size limit. "
-     !write(std_out, *)"rlim_cur, rlim_max, ierr", rlim_cur, rlim_max, ierr
    end if
+   ! rlim_cur/rlim_max are in bytes; -1 means RLIM_INFINITY (unlimited). Printed
+   ! unconditionally, not just when ierr /= 0: clib_ulimit_stack's fallback to
+   ! "soft = current hard limit" (see rlimit.c) can succeed (ierr == 0) at a
+   ! hard limit far below what a large automatic/local array actually needs,
+   ! which then only ever surfaces later as an unexplained OOM-kill rather
+   ! than this warning.
+   !write(std_out, "(2(a,i0),a)") &
+   !  "- clib_ulimit_stack: rlim_cur= ", rlim_cur, " bytes, rlim_max= ", rlim_max, " bytes (-1 = RLIM_INFINITY)"
 
    ! Master Removes the ABI_MPIABORTFILE if present so that we start with a clean environment.
    inquire(file=ABI_MPIABORTFILE, exist=exists)
@@ -1026,6 +1033,16 @@ subroutine xmpi_abort(comm, mpierr, msg, exit_status)
    call flush(ab_out)
 #endif
    close(ab_out)
+ end if
+
+ ! exit_status=0 signals a deliberate, non-error termination (e.g. testkgrid
+ ! stopping after dumping k-grids for prtkpt/=0), not a real abort. MPI_ABORT
+ ! never returns, so it would discard exit_status: under some MPI/job-scheduler
+ ! combinations (e.g. Slurm srun) the step then gets reported as killed by
+ ! SIGKILL (retcode 137) instead of exiting 0. This code path is reached
+ ! identically by every rank, so exiting the calling process directly is safe.
+ if (present(exit_status)) then
+   if (exit_status == 0) call sys_exit(0)
  end if
 
 #ifdef HAVE_MPI

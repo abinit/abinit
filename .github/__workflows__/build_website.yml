@@ -9,7 +9,7 @@ on:
     #  - .github/workflows/your_site_publish_file.yml # Change name to what your workflow file is
     #  - docs/**
     #  - mkdocs.yml
-    #  - requirements.txt
+    #  - pyproject.toml
 
 permissions:
   contents: read
@@ -41,8 +41,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install -U pip setuptools
-          python -m pip install -r requirements.txt # Define your dependencies in this file.
+          python -m pip install -U pip setuptools # -U pip ensures --group support (needs pip >= 25.1)
+          python -m pip install --group mksite # Dependencies are defined in pyproject.toml's mksite group.
 
       - name: Install autoconf, automake, and m4
         run: |

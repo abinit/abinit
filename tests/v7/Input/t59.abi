@@ -28,13 +28,13 @@
 # getwfk3  1
 # getddk3  2
 # rfphon3  1
-# rfelfd3  3   # Electric-field perturbation response only 
+# rfelfd3  3   # Electric-field perturbation response only
 # tolwfr3  1.0e-16
-# kptopt3  2 
+# kptopt3  2
 # nqpt3    1
 # qpt3     0.0 0.0 0.0
 
-# Non self-consistent calculation with an abritrary q point 
+# Non self-consistent calculation with an abritrary q point
 # getden4   1
 # getwfk4   1
 # iscf4    -2
@@ -48,7 +48,7 @@
 # nqpt5     1
 #  qpt5     1/150 0.0 0.0
 # ieig2rf5  4            # Static eigenvalues corrections using DFPT (Sternheimer)
-# smdelta5  1            # Flag required to produce the _EIGI2D used to 
+# smdelta5  1            # Flag required to produce the _EIGI2D used to
 #                        # compute the lifetime of electronic levels.
 #                        # smdelta = 1 ==> Fermi-Dirac smearing.
 # rfphon5   1            # Do phonon response
@@ -61,7 +61,7 @@
 # nqpt6     1
 #  qpt6     1/150 0.0 0.0
 # ieig2rf6  4            # Static eigenvalues corrections using DFPT (Sternheimer)
-# smdelta6  1            # Flag required to produce the _EIGI2D used to 
+# smdelta6  1            # Flag required to produce the _EIGI2D used to
 #                        # compute the lifetime of electronic levels.
 #                        # smdelta = 1 ==> Fermi-Dirac smearing.
 # rfphon6   1            # Do phonon response
@@ -74,7 +74,7 @@
  nqpt7     1
   qpt7     1/150 0.0 0.0
  ieig2rf7  4            # Static eigenvalues corrections using DFPT (Sternheimer)
- smdelta7  1            # Flag required to produce the _EIGI2D used to 
+ smdelta7  1            # Flag required to produce the _EIGI2D used to
                         # compute the lifetime of electronic levels.
                         # smdelta = 1 ==> Fermi-Dirac smearing.
  rfphon7   1            # Do phonon response
@@ -104,20 +104,19 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t58.abi, t59.abi
-#%% [shell] 
-#%% post_commands = 
+#%% [shell]
+#%% post_commands =
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t59.abo, tolnlines = 10, tolabs = 1.1e-3, tolrel = 8.0e-4, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = S. Ponc\'e
 #%% keywords = NC, DFPT, EPH_OLD
-#%% description = 
+#%% description =
 #%%  Diamond. Test the getddb variable that cancels the divergence in el-ph for small q-points
 #%%  Such divergence is induced by a residual electric field.
-#%%  Note: DATASET 7 test the irdddb that should behave exactly as getddb. 
+#%%  Note: DATASET 7 test the irdddb that should behave exactly as getddb.
 #%% topics = TDepES
 #%%<END TEST_INFO>

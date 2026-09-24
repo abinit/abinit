@@ -43,7 +43,6 @@ xred 3*0
 #%% [setup]
 #%% executable = abinit
 #%% input_prefix = t21o
-#%% test_chain = t21.abi, t22.abi, t23.abi, t24.abi
 #%% [files]
 #%% files_to_test = t23.abo ,tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
@@ -51,12 +50,12 @@ xred 3*0
 #%% [extra_info]
 #%% keywords = NC
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%   Isolated Hydrogen atom (see above)
 #%%   Treated with PBE GGA (ixc=11).
 #%%   The one dimensional treatment
-#%%   of H in the PW91 GGA-II gives the total energy of -13.63 eV, 
-#%%   that is -0.501 Ha see J.P. Perdew et al , Phys. Rev. B 46, 6671 (1992)  
+#%%   of H in the PW91 GGA-II gives the total energy of -13.63 eV,
+#%%   that is -0.501 Ha see J.P. Perdew et al , Phys. Rev. B 46, 6671 (1992)
 #%%   (maybe not very accurate!)
 #%%   Here, the answer is -0.499583 Ha.
 #%%   Going to 100 Ha cut-off gives -0.5001 Ha.

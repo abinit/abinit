@@ -75,8 +75,6 @@ rm -f \
   theory/vanderbilt-anaddb-notes.pdf \
   theory/wavefunction.out \
   theory/wavefunction.pdf \
-  guide/AbinitBandStructureMaker_manual.out \
-  guide/AbinitBandStructureMaker_manual.pdf \
   guide/aimhelp.out \
   guide/aimhelp.pdf \
   guide/conducti_manual.out \

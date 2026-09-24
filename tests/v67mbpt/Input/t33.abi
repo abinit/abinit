@@ -69,7 +69,6 @@ bs_interp_kmult   2 2 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t31.abi, t32.abi, t33.abi, t34.abi, t35.abi
 #%% [files]
 #%% files_to_test =
 #%%  t33.abo,               tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;

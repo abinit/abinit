@@ -1895,7 +1895,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  real(dp) :: pnorm,pr,rate,rate_ipm,ratec,ratec_ipm,rate_paw,rate_paw_ipm
  real(dp) :: scale_,units_,weight,weight_pos,wf_fact,wtk_k,wtk_k_pos,vec
  character(len=fnlen) :: filename_dop
- character(len=500) :: msg
+ character(len=1000) :: msg
  type(bandfft_kpt_type),pointer :: bandfft_kpt_el,bandfft_kpt_pos
  type(MPI_type) :: mpi_enreg_seq
  type(wffile_type) :: wff

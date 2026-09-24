@@ -14,7 +14,6 @@ t96o_DS10_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% test_chain = t96.abi, t97.abi, t98.abi, t99.abi
 #%% [files]
 #%% files_to_test =
 #%%   t97.ddb.out, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy
