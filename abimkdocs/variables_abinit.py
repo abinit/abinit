@@ -17690,11 +17690,11 @@ Variable(
     topics=["SCFAlgorithms_expert"],
     dimensions="scalar",
     defaultval=1.0e-6,
-    mnemonics="PRECONnditioner Linear Solver MAXimumm number of ITErations",
+    mnemonics="PRECONnditioner Linear Solver Relative TOLerance",
     requires="[[iprcel]] in [200, 202]",
     added_in_version="v10",
     text=r"""
-This variable defines the maximum number of GMRES iterations in the application of the $\chi0$-based SCF preconditioner ([[iprcel]] = 2**).
+This variable defines the relative tolerance for the GMRES iterations in the application of the $\chi0$-based SCF preconditioner ([[iprcel]] = 2**).
 """,
 ),
 
