@@ -592,6 +592,54 @@ def extract_errinfo_from_files(workdir: str) -> str:
     return "\n".join(errinfo)
 
 
+# Possible values of the `schedule` option of AbinitTestSuite.run_tests():
+#   "ref-walltime": put the tests in the queue in descending order of the wall-time
+#                   reported in the reference files (longest first).
+#   "fifo": use the order of the test suite.
+SCHEDULES = ("ref-walltime", "fifo")
+
+# Regular expressions used to extract the wall-time from the end of the reference files.
+_REF_WALLTIME_REGEXES = [
+    # abinit
+    re.compile(rb"\+Overall time at end \(sec\) : cpu=\s*\S+\s+wall=\s*([0-9.]+)"),
+    # anaddb, multibinit, aim
+    re.compile(rb"\+Total cpu time\s+\S+\s+and wall time\s+([0-9.]+)\s+sec"),
+    # mrgscr, mrgddb, cut3d ...
+    re.compile(rb"- Proc\.\s+0 individual time \(sec\): cpu=\s*\S+\s+wall=\s*([0-9.]+)"),
+]
+
+
+def read_ref_walltime(ref_dir: str, fnames: Iterable[str], nbytes: int = 16384) -> float | None:
+    """
+    Return the wall-time (in seconds) reported at the end of the reference files
+    or None if no reference file reports it.
+
+    Only the last `nbytes` of each file are read. The files are inspected in order
+    and the first match is returned.
+    """
+    for fname in fnames:
+        path = os.path.join(ref_dir, fname)
+        # Same stdout-out ambiguity as in FileToTest.compare
+        if not os.path.exists(path) and path.endswith(".stdout"):
+            path = path[:-7] + ".out"
+        try:
+            with open(path, "rb") as fh:
+                fh.seek(max(0, os.path.getsize(path) - nbytes))
+                tail = fh.read()
+        except OSError:
+            continue
+
+        for regex in _REF_WALLTIME_REGEXES:
+            matches = regex.findall(tail)
+            if matches:
+                try:
+                    return float(matches[-1])
+                except ValueError:
+                    break
+
+    return None
+
+
 class FileToTest:
     """
     Metadata and comparison logic for a single output file.
@@ -2392,6 +2440,14 @@ pp_dirpath $ABI_PSPDIR
     def files_to_keep(self):
         """List with the files that should not be erased once the test completed"""
         return self._files_to_keep
+
+    @property
+    def ref_walltime(self):
+        """
+        Wall-time (in seconds) reported at the end of the reference files.
+        None if not available. Used to order the tests in the queue.
+        """
+        return read_ref_walltime(self.ref_dir, [f.name for f in self.files_to_test])
 
     def keep_files(self, files):
         """Add files to the list of paths that should not be erased"""
@@ -4269,6 +4325,15 @@ class ChainOfTests:
         return self._run_etime
 
     @property
+    def ref_walltime(self):
+        """
+        Sum of the wall-times reported in the reference files of the tests in the chain.
+        Tests without this info are ignored. None if no test in the chain reports it.
+        """
+        walltimes = [t for t in (test.ref_walltime for test in self) if t is not None]
+        return sum(walltimes) if walltimes else None
+
+    @property
     def tot_etime(self):
         if self._tot_etime is None:
             self._tot_etime = sum(test.tot_etime for test in self)
@@ -4446,10 +4511,16 @@ class ChainOfTests:
             self._priv_executed = d["executed"]
             self._isok = d["isok"]
             self.workdir = d["workdir"]
+            # Propagate the results to the members of the chain, otherwise the
+            # tests in the parent process are never marked as executed.
+            children = d["children"]
         except KeyError as exc:
             #print("in load_results with:", type(self))
             #print(d)
             raise exc
+
+        for test, child_d in zip(self, children, strict=True):
+            test.load_results(child_d)
 
     def get_results(self):
         """
@@ -4463,7 +4534,8 @@ class ChainOfTests:
             "run_etime": self.run_etime,
             "executed": self._executed,
             "isok": self.isok,
-            "workdir": self.workdir
+            "workdir": self.workdir,
+            "children": [test.get_results() for test in self],
         }
 
     def clean_workdir(self, other_test_files=None):
@@ -4779,7 +4851,55 @@ class AbinitTestSuite:
         if len(all_full_ids) != len(set(all_full_ids)):
             raise ValueError("Cannot have more than two tests with the same full_id")
 
-    def start_workers(self, py_nprocs, run_func, run_func_kwargs, profile=False):
+    def slowest_tests(self, num=10):
+        """
+        Return the `num` executed tests with the largest wall-time (tot_etime), slowest first.
+        A chain of tests is treated as a single test.
+        """
+        executed = [t for t in self if t.status not in ("skipped", "disabled")]
+        return sorted(executed, key=lambda t: getattr(t, "tot_etime", None) or 0.0, reverse=True)[:num]
+
+    def print_slowest_tests(self, num=10, out=sys.stdout):
+        """
+        Print a table with the `num` executed tests with the largest wall-time.
+        The wall-time reported in the reference files is printed as well for comparison.
+        """
+        tests = self.slowest_tests(num=num)
+        if not tests:
+            return
+
+        table = [["Test", "tot_etime [s]", "run_etime [s]", "ref_walltime [s]", "status"]]
+        for test in tests:
+            ref_walltime = test.ref_walltime
+            table.append([
+                test.full_id,
+                f"{getattr(test, 'tot_etime', None) or 0.0:.2f}",
+                f"{getattr(test, 'run_etime', None) or 0.0:.2f}",
+                f"{ref_walltime:.2f}" if ref_walltime is not None else "-",
+                test.status,
+            ])
+
+        print(f"The {len(tests)} tests with the largest wall-time:", file=out)
+        pprint_table(table, out=out)
+
+    def queue_order(self, schedule):
+        """
+        Return the list of tests in the order they should be put in the queue.
+
+        Args:
+            schedule: "ref-walltime" to sort the tests by the wall-time reported in the
+                reference files (longest first) so that the longest tests do not end up
+                at the end of the queue. Tests without this info are executed last.
+                "fifo" to use the order of the test suite.
+        """
+        if schedule == "fifo":
+            return list(self)
+        if schedule == "ref-walltime":
+            # sorted is stable: tests with the same wall-time keep the order of the suite.
+            return sorted(self, key=lambda test: test.ref_walltime or 0.0, reverse=True)
+        raise ValueError(f"Invalid schedule: {schedule}. Possible values: {SCHEDULES}")
+
+    def start_workers(self, py_nprocs, run_func, run_func_kwargs, profile=False, schedule="ref-walltime"):
         """
         Start py_nprocs new processes that will get tests from a queue and run
         them with run_func and put the result in an output queue.
@@ -4790,6 +4910,7 @@ class AbinitTestSuite:
             run_func_kwargs: Kwargs passed to run_func.
             profile: If True, each worker profiles its own test execution with
                 cProfile and dumps a "testbot_worker_{rank}.prof" file on exit.
+            schedule: Order of the tests in the queue. See queue_order().
 
         Return: the task/input queue (to be closed only) and the results/output queue.
         """
@@ -4797,7 +4918,7 @@ class AbinitTestSuite:
         task_q, res_q = Queue(), Queue()
 
         # Fill the queue
-        for test in self:
+        for test in self.queue_order(schedule):
             task_q.put(test)
 
         for _ in range(py_nprocs):
@@ -4875,7 +4996,7 @@ class AbinitTestSuite:
 
     def run_tests(self, build_env, workdir, job_runner,
                   mpi_nprocs=1, omp_nthreads=0, max_cpus=0, max_gpus=0, py_nprocs=1,
-                  runmode="static", verbose=0, profile_workers=False, **kwargs):
+                  runmode="static", verbose=0, profile_workers=False, schedule="ref-walltime", **kwargs):
         """
         Execute the list of tests (main entry point for client code)
 
@@ -4894,9 +5015,14 @@ class AbinitTestSuite:
                 inside each worker (process or thread) with cProfile, and merge the
                 per-worker profiles into "testbot_workers_merged.prof" in workdir once
                 all workers finish. See _merge_worker_profiles().
+            schedule: Order of the tests in the queue when py_nprocs > 1.
+                "ref-walltime" (longest first according to the reference files) or "fifo".
+                The sequential version always uses the order of the test suite.
 
         return: Results instance.
         """
+        if schedule not in SCHEDULES:
+            raise ValueError(f"Invalid schedule: {schedule}. Possible values: {SCHEDULES}")
         self.sanity_check()
 
         if len(self) == 0:
@@ -4930,6 +5056,8 @@ class AbinitTestSuite:
             self.mpi_nprocs = mpi_nprocs
             self.max_gpus = max_gpus
             self.py_nprocs = py_nprocs
+            # The sequential version always executes the tests in the order of the suite.
+            self.schedule = schedule if py_nprocs > 1 else "fifo"
             #print(f"{mpi_nprocs=}")
 
             manager = Manager()
@@ -4987,7 +5115,7 @@ class AbinitTestSuite:
                 logger.info(f"Parallel version with py_nprocs = {py_nprocs}")
 
                 task_q, res_q = self.start_workers(
-                    py_nprocs, run_and_check_test, run_func_kwargs, profile=profile_workers
+                    py_nprocs, run_and_check_test, run_func_kwargs, profile=profile_workers, schedule=schedule,
                 )
 
                 timeout_1test = float(job_runner.timebomb.timeout)
@@ -5085,14 +5213,14 @@ class AbinitTestSuite:
                 else:
                     cprint(msg, color="green")
 
-                # Print outliers
-                if False and dev_etime > 0.0:
-                    for test in self:
-                        if abs(test.run_etime) > 0.0 and abs(test.run_etime - mean_etime) > 2 * dev_etime:
-                            print(f"{test.full_id} has run_etime {test.run_etime:.2f} s")
+                # Print the tests with the largest wall-time.
+                print()
+                self.print_slowest_tests()
 
             with open(os.path.join(self.workdir, "results.txt"), "w") as fh:
                 pprint_table(table, out=fh)
+                fh.write("\n")
+                self.print_slowest_tests(out=fh)
 
             username = my_getlogin()
 
@@ -5157,6 +5285,7 @@ class AbinitTestSuite:
                 <div class="metric"><dt>Total time</dt><dd>${sec2str(self.tot_etime)} s</dd></div>
                 <div class="metric"><dt>Run time</dt><dd>${sec2str(self.run_etime)} s</dd></div>
                 <div class="metric"><dt>Python processes</dt><dd>${self.py_nprocs}</dd></div>
+                <div class="metric"><dt>Schedule</dt><dd>${self.schedule}</dd></div>
                 <div class="metric"><dt>MPI processes</dt><dd>${self.mpi_nprocs}</dd></div>
                 </dl><pre class="log">${str2html(str(job_runner), end="")}</pre></div>
             </section>

@@ -930,9 +930,9 @@ real(dp), allocatable ::  dptmp(:)
    ABI_ERROR(message)
  end if
 
-if (multibinit_dtset%efield_type/=6 .and. multibinit_dtset%efield_type/=0)then
-  multibinit_dtset%nefield=1
-else if (multibinit_dtset%efield_type==6)then
+! The F03 manager calls invars10 without multibinit_dtset_init: set this default here.
+multibinit_dtset%nefield=1
+if (multibinit_dtset%efield_type==6)then
   multibinit_dtset%nefield=2
   call read_int_var( multibinit_dtset%nefield, 'nefield')
   if (multibinit_dtset%nefield/=2)then
@@ -2482,7 +2482,7 @@ multibinit_dtset%lwf_temperature_start=0.0
    'sys_dim is ',multibinit_dtset%sys_dim,', but the only allowed values',ch10,&
    'are 1, 2, 3, 4, 5, 6, 7 or 8.',ch10,'Action: correct sys_dim in your input file.'
    ABI_ERROR(message)
- end if 
+ end if
 
  multibinit_dtset%strfact=100.0d0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'strfact',tread,'DPR')

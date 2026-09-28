@@ -18,6 +18,8 @@ sys.modules["pymods.termcolor"] = MagicMock()
 sys.modules["pymods.jobrunner"] = MagicMock()
 sys.modules["pymods.testsuite"] = MagicMock()
 sys.modules["pymods.tools"] = MagicMock()
+# testbot.py validates the schedule option against this tuple.
+sys.modules["pymods.testsuite"].SCHEDULES = ("ref-walltime", "fifo")
 
 # Now we can import testbot
 from tests.testbot import (
@@ -32,6 +34,7 @@ from tests.testbot import (
     get_git_tag,
     get_mpi_prefix_from_env,
     main,
+    slurm_cpus_on_node,
 )
 
 # These are production classes from testbot.py, not test classes. Their names
@@ -95,6 +98,20 @@ class TestGetMpiPrefixFromEnv:
         env = {"MPI_HOME": "/usr/local/mpi", "EBROOTMPICH": "/eb/mpich"}
         with patch.dict(os.environ, env, clear=True):
             assert get_mpi_prefix_from_env() == "/usr/local/mpi"
+
+
+class TestSlurmCpusOnNode:
+    """Tests for slurm_cpus_on_node()."""
+
+    @pytest.mark.parametrize(("value", "expected"), [
+        (None, None), ("64", 64), (" 32 ", 32), ("", None), ("0", None), ("64(x2)", None),
+    ])
+    def test_slurm_cpus_on_node(self, monkeypatch, value, expected):
+        """Only a positive integer is a valid number of CPUs, otherwise None."""
+        monkeypatch.delenv("SLURM_CPUS_ON_NODE", raising=False)
+        if value is not None:
+            monkeypatch.setenv("SLURM_CPUS_ON_NODE", value)
+        assert slurm_cpus_on_node() == expected
 
 
 class TestDefaultMpirunNp:
@@ -375,7 +392,7 @@ class TestTestBotClass:
             "mpirun_np", "omp_num_threads", "has_mpi",
             "with_tdirs", "without_tdirs", "timeout_time", "runmode",
             "keywords", "verbose", "tmp_basedir", "mpi_args",
-            "force_mpi", "dont_exclude_builders", "with_parametrized"
+            "force_mpi", "dont_exclude_builders", "with_parametrized", "schedule",
         }
         config_fields = {f.name for f in dataclasses.fields(TestBot) if f.init}
         assert config_fields == expected_keys
@@ -488,12 +505,91 @@ class TestTestBotClass:
         assert '<tr class="suite-ok"><td>TestBot_ok</td>' in report
 
 
+class TestRunTestsWithNpTmpBasedir:
+    """run_tests_with_np() must never leave its tempfile.mkdtemp() directory behind.
+
+    Every run used to leak a full test tree under tmp_basedir (/tmp on Manneback)
+    until the node ran out of space (mann_gnu_13.3 build #11).
+    """
+
+    def _make_testbot(self, tmp_path, monkeypatch, run_tests):
+        import tests.testbot as tb_module
+
+        workdir_parent = tmp_path / "build"
+        workdir_parent.mkdir()
+        monkeypatch.chdir(workdir_parent)
+        tmp_basedir = tmp_path / "scratch"
+        tmp_basedir.mkdir()
+
+        test_suite = MagicMock()
+        test_suite.full_length = 1
+        test_suite.run_tests.side_effect = run_tests
+        monkeypatch.setattr(tb_module.abitests, "select_tests", lambda *a, **kw: test_suite)
+
+        testbot = TestBot.__new__(TestBot)
+        testbot.max_cpus = 1
+        testbot.omp_num_threads = 0
+        testbot.py_nprocs_override = None
+        testbot.keywords = []
+        testbot.workdir_prefix = ""
+        testbot.remove_existing_workdirs = False
+        testbot.tmp_basedir = str(tmp_basedir)
+        testbot.seq_runner = MagicMock()
+        testbot.mpi_runner = MagicMock()
+        testbot.force_mpi = False
+        testbot.max_gpus = 0
+        testbot.build_env = MagicMock()
+        testbot.runmode = "static"
+        testbot.verbose = 0
+        testbot.profile_workers = False
+        testbot.schedule = "fifo"
+        testbot.run_summaries = []
+        testbot.summary = MagicMock()
+        return testbot, workdir_parent, tmp_basedir
+
+    def test_tmp_dir_removed_after_reports_are_copied_back(self, tmp_path, monkeypatch):
+        def run_tests(build_env, workdir, *args, **kwargs):
+            os.makedirs(workdir)
+            for fn in ("results.tar.gz", "index.html", "big_output.nc"):
+                with open(os.path.join(workdir, fn), "w") as fh:
+                    fh.write(fn)
+            return MagicMock(nfailed=0, npassed=1, nexecuted=1, succeeded_tests=[], skipped_tests=[], disabled_tests=[])
+
+        testbot, workdir_parent, tmp_basedir = self._make_testbot(tmp_path, monkeypatch, run_tests)
+
+        assert testbot.run_tests_with_np(1) == (0, 1, 1)
+
+        assert list(tmp_basedir.iterdir()) == []
+        copied = sorted(p.name for p in (workdir_parent / "TestBot_MPI1").iterdir())
+        assert copied == ["index.html", "results.tar.gz"]
+
+    def test_tmp_dir_removed_for_an_empty_suite(self, tmp_path, monkeypatch):
+        testbot, _, tmp_basedir = self._make_testbot(tmp_path, monkeypatch, lambda *a, **kw: None)
+
+        assert testbot.run_tests_with_np(1) == (0, 0, 0)
+        assert list(tmp_basedir.iterdir()) == []
+
+    def test_tmp_dir_removed_when_the_run_raises(self, tmp_path, monkeypatch):
+        def run_tests(build_env, workdir, *args, **kwargs):
+            os.makedirs(workdir)
+            raise RuntimeError("worker crashed")
+
+        testbot, _, tmp_basedir = self._make_testbot(tmp_path, monkeypatch, run_tests)
+
+        with pytest.raises(RuntimeError, match="worker crashed"):
+            testbot.run_tests_with_np(1)
+        assert list(tmp_basedir.iterdir()) == []
+
+
 class TestTestBotFromJson:
     """End-to-end characterization tests for TestBot.from_json()."""
 
     def _mock_environment(self, monkeypatch, *, defined_cppvars=(), has_timeout=False):
         """Mock the module-level names TestBot.__post_init__ relies on."""
         import tests.testbot as tb_module
+
+        # Results must not depend on the Slurm allocation the tests are executed in.
+        monkeypatch.delenv("SLURM_CPUS_ON_NODE", raising=False)
 
         mock_database = MagicMock()
         mock_database.init_result_table.return_value = {}
@@ -529,6 +625,43 @@ class TestTestBotFromJson:
         # Defaults for everything not in the JSON payload.
         assert testbot.max_gpus == 0
         assert testbot.without_tdirs == []
+        # pre_testbot.py (abibuildbot) does not write the schedule option.
+        assert testbot.schedule == "ref-walltime"
+
+    @pytest.mark.parametrize(("slurm_cpus", "expected"), [(None, 128), ("64", 64), ("128", 128), ("256", 128)])
+    def test_from_json_caps_max_cpus_to_slurm_allocation(self, tmp_path, monkeypatch, capsys, slurm_cpus, expected):
+        """Inside a Slurm job, max_cpus cannot exceed SLURM_CPUS_ON_NODE: cap it with a big warning."""
+        self._mock_environment(monkeypatch, defined_cppvars=[])
+        if slurm_cpus is not None:
+            monkeypatch.setenv("SLURM_CPUS_ON_NODE", slurm_cpus)
+        testbot_json = tmp_path / "testbot.json"
+        testbot_json.write_text(json.dumps({"builder_name": "b", "max_cpus": 128, "has_mpi": False}))
+
+        capped = expected < 128
+        with warnings.catch_warnings(record=True) as record:
+            warnings.simplefilter("always")
+            testbot = TestBot.from_json(str(testbot_json))
+
+        assert testbot.max_cpus == expected
+        slurm_warnings = [w for w in record if "SLURM_CPUS_ON_NODE" in str(w.message)]
+        assert len(slurm_warnings) == int(capped)
+        out = capsys.readouterr().out
+        assert ("!" * 80 in out) == capped
+        if capped:
+            assert "max_cpus has been reduced to 64" in out
+
+    def test_from_json_schedule(self, tmp_path, monkeypatch):
+        """The schedule option can be set in testbot.json and is validated."""
+        self._mock_environment(monkeypatch, defined_cppvars=[])
+        testbot_json = tmp_path / "testbot.json"
+        config = {"builder_name": "b", "max_cpus": 2, "has_mpi": False, "schedule": "fifo"}
+        testbot_json.write_text(json.dumps(config))
+        assert TestBot.from_json(str(testbot_json)).schedule == "fifo"
+
+        config["schedule"] = "random"
+        testbot_json.write_text(json.dumps(config))
+        with pytest.raises(ValueError, match="schedule should be in"):
+            TestBot.from_json(str(testbot_json))
 
     def test_from_json_with_and_without_tdirs_merges_with_warning(self, tmp_path, monkeypatch):
         """Both filters set (e.g. a Force build's with_tdirs landing on a
@@ -668,6 +801,51 @@ class TestTestBotFromJson:
             TestBot.from_json(str(testbot_json))
 
 
+class TestRunMultiParallelSkipMessages:
+    """TestBot.run() must report the actual reason why multi-parallel runs are skipped."""
+
+    @staticmethod
+    def run_bot(monkeypatch, with_tdirs, max_cpus):
+        bot = object.__new__(TestBot)
+        bot.has_mpi = True
+        bot.with_tdirs = with_tdirs
+        bot.without_tdirs = []
+        bot.runmode = "static"
+        bot.max_cpus = max_cpus
+        bot.type = ""
+        bot.summary = MagicMock()
+
+        calls = []
+
+        def fake_run_tests_with_np(mpi_nprocs, suite_args=None, runmode="static"):
+            calls.append((mpi_nprocs, suite_args))
+            return 0, 0, 1
+
+        bot.run_tests_with_np = fake_run_tests_with_np
+        suites = [MagicMock(), MagicMock()]
+        suites[0].name, suites[1].name = "paral", "mpiio"
+        monkeypatch.setattr("tests.testbot.abitests.multi_parallel_suites", lambda: suites)
+        monkeypatch.setattr("tests.testbot.analyze", lambda *args, **kwargs: 0)
+        monkeypatch.setattr("tests.testbot.get_git_tag", lambda: "tag")
+        bot.run()
+        return calls
+
+    def test_no_multi_parallel_suite_selected(self, monkeypatch, capsys):
+        calls = self.run_bot(monkeypatch, with_tdirs=["v1", "v2"], max_cpus=128)
+        out = capsys.readouterr().out
+        assert calls == [(1, ["v1", "v2"])]
+        assert "no multi-parallel suite has been selected" in out
+        assert "max_cpus" not in out
+
+    def test_np_larger_than_max_cpus(self, monkeypatch, capsys):
+        calls = self.run_bot(monkeypatch, with_tdirs=["v1", "paral"], max_cpus=8)
+        out = capsys.readouterr().out
+        assert [np for np, _ in calls] == [1, 2, 4, 8]
+        assert all(suite_args == ["paral"] for np, suite_args in calls[1:])
+        assert "Skipping tests with np: 10 > max_cpus: 8" in out
+        assert "no multi-parallel suite has been selected" not in out
+
+
 class TestWorkdirReplacement:
     """Tests for the opt-in stale work-directory removal behavior."""
 
@@ -801,6 +979,26 @@ class TestMain:
             assert main() == 0
         assert mock_instance.remove_existing_workdirs is True
 
+    def test_main_run_schedule_overrides_json(self, monkeypatch):
+        """The run --schedule option overrides the value read from testbot.json."""
+        monkeypatch.setattr(sys, "argv", ["testbot.py", "run", "--schedule", "fifo", "my.json"])
+        mock_instance = MagicMock()
+        mock_instance.schedule = "ref-walltime"
+        mock_instance.run.return_value = 0
+        with patch("tests.testbot.TestBot.from_json", return_value=mock_instance):
+            assert main() == 0
+        assert mock_instance.schedule == "fifo"
+
+    def test_main_run_without_schedule_keeps_json_value(self, monkeypatch):
+        """Without --schedule the value read from testbot.json is used."""
+        monkeypatch.setattr(sys, "argv", ["testbot.py", "run", "my.json"])
+        mock_instance = MagicMock()
+        mock_instance.schedule = "fifo"
+        mock_instance.run.return_value = 0
+        with patch("tests.testbot.TestBot.from_json", return_value=mock_instance):
+            assert main() == 0
+        assert mock_instance.schedule == "fifo"
+
     def test_main_propagates_profile(self, monkeypatch):
         monkeypatch.setattr(sys, "argv", ["testbot.py", "run", "--profile", "my.json"])
         mock_instance = MagicMock()
@@ -835,8 +1033,26 @@ class TestMain:
         with patch("tests.testbot.benchmark", return_value=2) as mock_benchmark:
             assert main() == 2
         mock_benchmark.assert_called_once_with(
-            "my.json", [1, 4], remove_existing_workdirs=False, profile_workers=False
+            "my.json", [1, 4], remove_existing_workdirs=False, profile_workers=False, schedules=None
         )
+
+    def test_main_propagates_benchmark_schedules(self, monkeypatch):
+        """The benchmark --schedule option accepts several values."""
+        monkeypatch.setattr(
+            sys, "argv",
+            ["testbot.py", "benchmark", "my.json", "--py-nprocs", "16", "32", "--schedule", "fifo", "ref-walltime"],
+        )
+        with patch("tests.testbot.benchmark", return_value=0) as mock_benchmark:
+            assert main() == 0
+        assert mock_benchmark.call_args.kwargs["schedules"] == ["fifo", "ref-walltime"]
+
+    def test_main_rejects_duplicated_benchmark_schedules(self, monkeypatch):
+        """The same schedule cannot be benchmarked twice."""
+        monkeypatch.setattr(
+            sys, "argv", ["testbot.py", "benchmark", "my.json", "--py-nprocs", "1", "--schedule", "fifo", "fifo"]
+        )
+        with pytest.raises(SystemExit, match="must be unique"):
+            main()
 
     def test_main_rejects_invalid_benchmark_cpu_values(self, monkeypatch):
         monkeypatch.setattr(
@@ -854,6 +1070,7 @@ def test_benchmark_writes_summary(tmp_path, monkeypatch, capsys):
         bot = MagicMock()
         bot.run.return_value = 0
         bot.run_summaries = []
+        bot.schedule = "ref-walltime"
         bots.append(bot)
         return bot
 
@@ -873,6 +1090,7 @@ def test_benchmark_writes_summary(tmp_path, monkeypatch, capsys):
             "nexecuted": 0,
             "tests_per_second": 0.0,
             "returncode": 0,
+            "schedule": "ref-walltime",
         },
         {
             "py_nprocs": 4,
@@ -882,6 +1100,7 @@ def test_benchmark_writes_summary(tmp_path, monkeypatch, capsys):
             "nexecuted": 0,
             "tests_per_second": 0.0,
             "returncode": 0,
+            "schedule": "ref-walltime",
         },
     ]
     assert bots[0].py_nprocs_override == 1
@@ -892,6 +1111,36 @@ def test_benchmark_writes_summary(tmp_path, monkeypatch, capsys):
     assert "Benchmark summary" in output
     assert "efficiency" in output
     assert "12.5%" in output
+
+
+def test_benchmark_runs_every_schedule_combination(tmp_path, monkeypatch):
+    """Every (schedule, py_nprocs) combination is benchmarked, baseline first."""
+    monkeypatch.chdir(tmp_path)
+    bots = []
+
+    def make_bot(_path):
+        bot = MagicMock()
+        bot.run.return_value = 0
+        bot.run_summaries = []
+        bot.schedule = "ref-walltime"
+        bots.append(bot)
+        return bot
+
+    monkeypatch.setattr("tests.testbot.TestBot.from_json", make_bot)
+    times = iter(float(t) for t in range(8))
+    monkeypatch.setattr("tests.testbot.time.perf_counter", lambda: next(times))
+
+    assert benchmark("testbot.json", [16, 32], schedules=["fifo", "ref-walltime"]) == 0
+
+    assert [(b.schedule, b.py_nprocs_override) for b in bots] == [
+        ("fifo", 16), ("fifo", 32), ("ref-walltime", 16), ("ref-walltime", 32),
+    ]
+    assert [b.workdir_prefix for b in bots] == [
+        "Benchmark_PY16_fifo_", "Benchmark_PY32_fifo_",
+        "Benchmark_PY16_ref-walltime_", "Benchmark_PY32_ref-walltime_",
+    ]
+    data = json.loads((tmp_path / "testbot_benchmark.json").read_text())
+    assert [d["schedule"] for d in data] == ["fifo", "fifo", "ref-walltime", "ref-walltime"]
 
 
 class TestUtilityFunctions:
