@@ -18,84 +18,18 @@ from .termcolor import cprint
 
 def number_of_cpus() -> int:
     """
-    Detect the number of physical or virtual CPUs on the system.
+    Return the number of logical CPUs available to this process, using the standard library only.
+
+    Logical CPUs include SMT (hyper-threading) siblings and, on hybrid architectures
+    such as Apple Silicon, both performance and efficiency cores.
 
     Returns:
-        int: Number of CPUs detected, or -1 if detection fails.
+        int: Number of logical CPUs, or -1 if detection fails.
     """
-    import os
-    import re
-    import subprocess
-
-    # POSIX
-    try:
-        res = int(os.sysconf("SC_NPROCESSORS_ONLN"))
-        if res > 0: return res
-    except (AttributeError, ValueError):
-        pass
-
-    # Windows
-    try:
-        res = int(os.environ["NUMBER_OF_PROCESSORS"])
-        if res > 0: return res
-    except (KeyError, ValueError):
-        pass
-
-    # jython
-    try:
-        from java.lang import Runtime
-        runtime = Runtime.getRuntime()
-        res = runtime.availableProcessors()
-        if res > 0: return res
-    except ImportError:
-        pass
-
-    # BSD
-    try:
-        sysctl = subprocess.Popen(["sysctl", "-n", "hw.ncpu"], stdout=subprocess.PIPE)
-        scStdout = sysctl.communicate()[0]
-        res = int(scStdout)
-        if res > 0: return res
-    except (OSError, ValueError):
-        pass
-
-    # Linux
-    try:
-        res = open("/proc/cpuinfo").read().count("processor\t:")
-        if res > 0: return res
-    except OSError:
-        pass
-
-    # Solaris
-    try:
-        pseudoDevices = os.listdir("/devices/pseudo/")
-        expr = re.compile("^cpuid@[0-9]+$")
-        res = 0
-        for pd in pseudoDevices:
-            if expr.match(pd) is not None:
-                res += 1
-        if res > 0: return res
-    except OSError:
-        pass
-
-    # Other UNIXes (heuristic)
-    try:
-        try:
-            dmesg = open("/var/run/dmesg.boot").read()
-        except OSError:
-            dmesgProcess = subprocess.Popen(["dmesg"], stdout=subprocess.PIPE)
-            dmesg = dmesgProcess.communicate()[0]
-
-        res = 0
-        while "\ncpu" + str(res) + ":" in dmesg:
-            res += 1
-
-        if res > 0: return res
-    except OSError:
-        pass
-
-    return -1
-    #raise Exception('Cannot determine number of CPUs on this system')
+    # os.process_cpu_count (py >= 3.13) takes into account the CPU affinity of the process.
+    count_func = getattr(os, "process_cpu_count", os.cpu_count)
+    res = count_func()
+    return res if res else -1
 
 def number_of_gpus() -> int:
     """

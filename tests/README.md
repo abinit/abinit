@@ -146,17 +146,21 @@ The other members of the chain do not need to repeat `test_chain`; if they do, t
 The complete automatically generated list of supported `TEST_INFO` sections and options is available with:
 
 ```sh
-python3 -m tests.pymods.testsuite
+./tests/runtests.py --doc
 ```
 
 Run this command from the top-level ABINIT directory.
+`python3 -m tests.pymods.testsuite` prints the same information.
 
 Further documentation is available in:
 
 - [`doc/developers/testsuite_howto.md`](../doc/developers/testsuite_howto.md), for suite organization, registration, tolerances, parallel tests, and chained tests.
 - [`doc/developers/new_testsuite.md`](../doc/developers/new_testsuite.md), for YAML-based output validation and the `[yaml_test]` section.
 
-YAML validation is activated for an output by adding `use_yaml = yes` or `use_yaml = only` to its `files_to_test` entry.
+YAML validation is activated for an output by adding `mode = yaml` (line-based fldiff plus YAML documents)
+or `mode = yaml_docs` (YAML documents only) to its `files_to_test` entry, e.g.
+`t86.abo, tolnlines = 5, tolabs = 2.0e-2, tolrel = 1.0, mode = yaml`.
+Unknown keys in `files_to_test` are silently ignored, so a misspelled option disables the YAML check without any error.
 The optional `[yaml_test]` section then specifies either an external YAML file, relative to the input file, or a short inline YAML test definition.
 
 ## Running and checking a new test
