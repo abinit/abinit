@@ -221,3 +221,17 @@ Before committing a new test, check that:
 - The description explains what capability or regression is covered.
 - Keywords and authors are valid and useful for test selection.
 - The test passes in the intended sequential or parallel configurations.
+
+## Parametrized tests (optional)
+
+The `tests/parametrized` suite contains templates (`Input/tNN.tmpl.abi`) that are expanded on the fly into several tests.
+Each test runs the same calculation with settings that must not change the results, e.g. `useylm 0/1`, different
+eigensolvers or MPI layouts, and all instances are compared with the same reference `Refs/tNN.abo`.
+The suite is optional: it requires the `pyyaml` and `pydantic` packages and is enabled only on request:
+
+```sh
+./tests/runtests.py parametrized --with-parametrized -j4
+```
+
+In testbot, set `with_parametrized` in `testbot.json`.
+How to run, write and debug parametrized tests is described in [`parametrized/README.md`](parametrized/README.md).

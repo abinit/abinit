@@ -1,0 +1,29 @@
+%YAML
+test_info:
+  setup: {executable: abinit}
+  files:
+    files_to_test:
+      # DatasetInfo and BeginCycle.solver are ignored by default.
+      # paral_kgb 1 switches the eigensolver (CG -> LOBPCG): with tolvrs 1e-10 fermie and the energy terms
+      # differ by up to ~5e-7 (7 lines), and the solver residuals are not comparable.
+      - {name: "{id}.abo", mode: yaml_docs, tolnlines: 8, tolabs: 1.0e-6, tolrel: 1.0e-6, fld_options: -medium,
+         overrides: {ResultsGS.convergence: ignore}}
+  extra_info: {keywords: [NC], authors: [M. Giantomassi],
+               description: "3C-SiC, GS on 1 process: results must not depend on useylm or paral_kgb"}
+
+axes:
+  - {type: grid, parameters: {useylm: [0, 1], paral_kgb: [0, 1]}}
+%ENDYAML
+
+# 3C-SiC (zinc blende) at the ideal positions, LDA norm-conserving pseudos (PseudoDojo)
+acell 3*8.24
+rprim  0.0 0.5 0.5   0.5 0.0 0.5   0.5 0.5 0.0
+ntypat 2  znucl 14 6  natom 2  typat 1 2
+xred  0.0 0.0 0.0   0.25 0.25 0.25
+ecut 16.0
+nband 8
+kptopt 1  ngkpt 4 4 4  nshiftk 1  shiftk 0.0 0.0 0.0
+nstep 50  tolvrs 1.0d-10
+diemac 6.0
+pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_04_pw_std_psp8"
+pseudos "Si.psp8, C.psp8"

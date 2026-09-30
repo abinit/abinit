@@ -20,6 +20,10 @@ sys.modules["pymods.testsuite"] = MagicMock()
 sys.modules["pymods.tools"] = MagicMock()
 # testbot.py validates the schedule option against this tuple.
 sys.modules["pymods.testsuite"].SCHEDULES = ("ref-walltime", "fifo")
+# testbot.py takes the process counts of the multi-parallel loop from this dict.
+from tests.pymods.testsuite import TESTBOT_NP_LISTS  # noqa: E402
+
+sys.modules["pymods.testsuite"].TESTBOT_NP_LISTS = TESTBOT_NP_LISTS
 
 # Now we can import testbot
 from tests.testbot import (
@@ -31,6 +35,7 @@ from tests.testbot import (
     benchmark,
     build_parser,
     default_mpirun_np,
+    expand_tmp_basedir,
     get_git_tag,
     get_mpi_prefix_from_env,
     main,
@@ -505,6 +510,44 @@ class TestTestBotClass:
         assert '<tr class="suite-ok"><td>TestBot_ok</td>' in report
 
 
+class TestExpandTmpBasedir:
+    """expand_tmp_basedir(): environment variables in tmp_basedir, e.g. ${LOCALSCRATCH} on Manneback."""
+
+    def test_empty_means_no_tmp_basedir(self):
+        assert expand_tmp_basedir("") == ""
+
+    def test_plain_path_is_unchanged(self, tmp_path):
+        assert expand_tmp_basedir(str(tmp_path)) == str(tmp_path)
+
+    @pytest.mark.parametrize("template", ["${SCRATCH_ROOT}", "$SCRATCH_ROOT", "${SCRATCH_ROOT}/sub", "$SCRATCH_ROOT/sub"])
+    def test_variables_are_expanded(self, tmp_path, monkeypatch, template):
+        (tmp_path / "sub").mkdir()
+        monkeypatch.setenv("SCRATCH_ROOT", str(tmp_path))
+        expected = str(tmp_path / "sub") if template.endswith("/sub") else str(tmp_path)
+        assert expand_tmp_basedir(template) == expected
+
+    def test_home_is_expanded(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("HOME", str(tmp_path))
+        assert expand_tmp_basedir("~") == str(tmp_path)
+
+    @pytest.mark.parametrize("template", ["${LOCALSCRATCH}", "$LOCALSCRATCH", "/tmp/${LOCALSCRATCH}/x"])
+    def test_undefined_variable_raises(self, monkeypatch, template):
+        monkeypatch.delenv("LOCALSCRATCH", raising=False)
+        with pytest.raises(ValueError, match="undefined environment variable.*LOCALSCRATCH"):
+            expand_tmp_basedir(template)
+
+    def test_undefined_variables_are_all_listed(self, monkeypatch):
+        monkeypatch.delenv("UNDEF_A", raising=False)
+        monkeypatch.delenv("UNDEF_B", raising=False)
+        with pytest.raises(ValueError, match="UNDEF_A, UNDEF_B"):
+            expand_tmp_basedir("${UNDEF_A}/$UNDEF_B")
+
+    def test_missing_directory_raises(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("SCRATCH_ROOT", str(tmp_path / "missing"))
+        with pytest.raises(ValueError, match="not an existing directory"):
+            expand_tmp_basedir("${SCRATCH_ROOT}")
+
+
 class TestRunTestsWithNpTmpBasedir:
     """run_tests_with_np() must never leave its tempfile.mkdtemp() directory behind.
 
@@ -661,6 +704,19 @@ class TestTestBotFromJson:
         config["schedule"] = "random"
         testbot_json.write_text(json.dumps(config))
         with pytest.raises(ValueError, match="schedule should be in"):
+            TestBot.from_json(str(testbot_json))
+
+    def test_from_json_expands_tmp_basedir(self, tmp_path, monkeypatch):
+        """tmp_basedir: ${LOCALSCRATCH} in builders.yaml reaches testbot.json as is, expanded when testbot.py starts."""
+        self._mock_environment(monkeypatch, defined_cppvars=[])
+        monkeypatch.setenv("LOCALSCRATCH", str(tmp_path))
+        testbot_json = tmp_path / "testbot.json"
+        config = {"builder_name": "b", "max_cpus": 2, "has_mpi": False, "tmp_basedir": "${LOCALSCRATCH}"}
+        testbot_json.write_text(json.dumps(config))
+        assert TestBot.from_json(str(testbot_json)).tmp_basedir == str(tmp_path)
+
+        monkeypatch.delenv("LOCALSCRATCH")
+        with pytest.raises(ValueError, match="undefined environment variable.*LOCALSCRATCH"):
             TestBot.from_json(str(testbot_json))
 
     def test_from_json_with_and_without_tdirs_merges_with_warning(self, tmp_path, monkeypatch):

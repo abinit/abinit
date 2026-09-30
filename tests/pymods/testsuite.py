@@ -263,6 +263,18 @@ details[open] summary { border-bottom: 1px solid var(--border); }
 .back-to-top:hover { background: var(--surface-muted); }
 .back-link { display: inline-flex; align-items: center; gap: .35rem; color: var(--muted); text-decoration: none; font-weight: 650; font-size: .82rem; margin-bottom: 1rem; }
 .back-link:hover { color: var(--link); }
+/* Parametrized tests (parametrized/htmlreport.py) */
+.pill { display: inline-block; margin: 0 .3rem .25rem 0; padding: .05rem .45rem; border: 1px solid var(--border);
+        border-radius: 6px; background: var(--surface-muted); font: .8rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.pill-ref { color: var(--link); font-weight: 700; }
+.mono { font: .84rem/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.muted { color: var(--muted); }
+.bad { color: var(--failed); font-weight: 700; }
+.filters { display: flex; flex-wrap: wrap; gap: .5rem; padding: 1rem 1.25rem 0; }
+.filters button { cursor: pointer; border: 1px solid var(--border); border-radius: 999px; background: var(--surface);
+                  color: var(--text); font: inherit; font-size: .82rem; padding: .2rem .7rem; }
+.filters button.active { outline: 2px solid var(--link); }
+td.num { text-align: right; white-space: nowrap; }
 @media (prefers-color-scheme: dark) {
   :root { --bg: #0b1220; --surface: #111a2b; --surface-muted: #182338; --border: #2b3850; --text: #e6edf7; --muted: #a8b3c5; --link: #84adff; --passed: #75d596; --passed-bg: #163b29; --failed: #ff9b8f; --failed-bg: #4a201d; --skipped: #f8d477; --skipped-bg: #493b16; --code-bg: #080d16; }
 }
@@ -591,6 +603,14 @@ def extract_errinfo_from_files(workdir: str) -> str:
 
     return "\n".join(errinfo)
 
+
+# Number of MPI processes used by testbot.py in the multi-parallel loop, for each runmode.
+# The main pass uses 1 (static) or 2 (dynamic) processes. Shared with the parametrized tests,
+# whose nproc values must be reachable by testbot.
+TESTBOT_NP_LISTS = {
+    "static": (2, 4, 8, 10, 24, 64),
+    "dynamic": (4, 8, 10, 24, 64),
+}
 
 # Possible values of the `schedule` option of AbinitTestSuite.run_tests():
 #   "ref-walltime": put the tests in the queue in descending order of the wall-time
@@ -1861,6 +1881,17 @@ def make_abitests_from_inputs(input_fnames: str | list[str], abenv: BuildEnviron
         input_fnames = cast("list[str]", input_fnames)
 
     inp_fnames = [os.path.abspath(p) for p in input_fnames]
+
+    # Parametrized templates (*.tmpl.abi) have no INI TEST_INFO block: they are expanded into tests
+    # by the optional tests.pymods.parametrized package, imported here and only if needed.
+    template_fnames = [p for p in inp_fnames if p.endswith(".tmpl.abi")]
+    template_tests: list[BaseTest | ChainOfTests] = []
+    if template_fnames:
+        inp_fnames = [p for p in inp_fnames if not p.endswith(".tmpl.abi")]
+        from .parametrized.expand import expand_template
+        for path in template_fnames:
+            template_tests.extend(expand_template(path, abenv, keywords=keywords, need_cpp_vars=need_cpp_vars))
+
     parsers = {inp_fname: AbinitTestInfoParser(inp_fname) for inp_fname in inp_fnames}
 
     # The test_chain option is only required in the first input of the chain (the head).
@@ -1932,7 +1963,7 @@ def make_abitests_from_inputs(input_fnames: str | list[str], abenv: BuildEnviron
 
                 out_tests.append(ChainOfTests(tchain_list))
 
-    return out_tests
+    return out_tests + template_tests
 
 
 class NotALock:
@@ -3047,6 +3078,9 @@ pp_dirpath $ABI_PSPDIR
             self._isok = d["isok"]
             self.exec_error = d["exec_error"]
             self.workdir = d["workdir"]
+            # Set in the worker by run(): without them the parent process reports the defaults (np=1).
+            self.mpi_nprocs = d.get("mpi_nprocs", self.mpi_nprocs)
+            self.omp_nthreads = d.get("omp_nthreads", getattr(self, "omp_nthreads", 0))
         except KeyError as exc:
             #print("in load_results with:", type(self))
             #print(d)
@@ -3073,6 +3107,8 @@ pp_dirpath $ABI_PSPDIR
             "exec_error": self.exec_error,
             "isok": self.isok,
             "workdir": self.workdir,
+            "mpi_nprocs": self.mpi_nprocs,
+            "omp_nthreads": getattr(self, "omp_nthreads", 0),
         }
 
     @property
@@ -3130,6 +3166,31 @@ pp_dirpath $ABI_PSPDIR
             raise NotImplementedError("patcher should be tested")
             Patcher(patcher).patch(out_fname, ref_fname)
 
+    def diff_sources(self, f: FileToTest) -> tuple[str, str]:
+        """
+        Return (output, reference) of the file to test `f`, the files compared by the text and HTML diffs.
+        Subclasses may return other files, e.g. the part of the output that is actually compared.
+        """
+        ref_fname = os.path.abspath(os.path.join(self.ref_dir, f.name))
+        if not os.path.isfile(ref_fname) and ref_fname.endswith(".stdout"):
+            ref_fname = ref_fname[:-7] + ".out"  # FIXME Hack due to the stdout-out ambiguity
+        return os.path.abspath(os.path.join(self.workdir, f.name)), ref_fname
+
+    def html_diff_allowed(self, f: FileToTest) -> bool:
+        """True if the HTML diff of `f` can be produced (only for these files: it can be slow)."""
+        return os.path.splitext(f.name)[1] in {".out", ".abo", ".stdout"}
+
+    def _run_diffpy(self, out_opt: str, out_fname: str, ref_fname: str, diff_fname: str) -> None:
+        """Write to diff_fname the diff of out_fname and ref_fname produced by diff.py with option out_opt."""
+        diffpy = self.abenv.apath_of("tests", "pymods", "diff.py")
+        args = [diffpy, out_opt, "-j", "-f " + diff_fname, out_fname, ref_fname]
+        p, ret_code = self.timebomb.run(" ".join(args), shell=True, cwd=self.workdir)
+        if ret_code != 0:
+            err_msg = f"Timeout error ({self.timebomb.timeout} s) while executing {args!s}, retcode = {ret_code}"
+            self.exceptions.append(self.Error(err_msg))
+        else:
+            self.keep_files(diff_fname)
+
     def make_html_diff_files(self):
         """
         Generate and write diff files in HTML format for failed tests.
@@ -3140,46 +3201,16 @@ pp_dirpath $ABI_PSPDIR
         if self.make_html_diff == 0 or self._status in {"disabled", "skipped"}:
             return
 
-        diffpy = self.abenv.apath_of("tests", "pymods", "diff.py")
-
         for f in self.files_to_test:
             if not f.do_html_diff and self.make_html_diff == 1:
                 continue
 
-            ref_fname = os.path.abspath(os.path.join(self.ref_dir, f.name))
+            out_fname, ref_fname = self.diff_sources(f)
+            f.hdiff_fname = os.path.abspath(os.path.join(self.workdir, f.name + ".diff.html"))
 
-            if not os.path.isfile(ref_fname) and ref_fname.endswith(".stdout"):
-                ref_fname = ref_fname[:-7] + ".out"  # FIXME Hack due to the stdout-out ambiguity
-                #ref_fname = ref_fname[:-7] + ".abo"  # FIXME Hack due to the stdout-out ambiguity
-
-            out_fname = os.path.abspath(os.path.join(self.workdir, f.name))
-
-            # Check whether output and ref file exist.
-            out_exists = os.path.isfile(out_fname)
-            ref_exists = os.path.isfile(ref_fname)
-
-            hdiff_fname = os.path.abspath(os.path.join(self.workdir, f.name + ".diff.html"))
-
-            f.hdiff_fname = hdiff_fname
-
-            x, ext = os.path.splitext(f.name)
-            safe_hdiff = ext in {".out", ".abo", ".stdout"}  # Create HTML diff file only for these files
-
-            if ref_exists and out_exists and safe_hdiff:
-                out_opt = "-m"
-                # out_opt = "-t"   # For simple HTML table. (can get stuck)
-                # args = ["python", diffpy, out_opt, "-f " + hdiff_fname, out_fname, ref_fname ]
-                args = [diffpy, out_opt, "-j",  "-f " + hdiff_fname, out_fname, ref_fname]
-                cmd = " ".join(args)
-                # print("Diff", cmd)
-
-                p, ret_code = self.timebomb.run(cmd, shell=True, cwd=self.workdir)
-
-                if ret_code != 0:
-                    err_msg = f"Timeout error ({self.timebomb.timeout} s) while executing {args!s}, retcode = {ret_code}"
-                    self.exceptions.append(self.Error(err_msg))
-                else:
-                    self.keep_files(hdiff_fname)
+            if os.path.isfile(ref_fname) and os.path.isfile(out_fname) and self.html_diff_allowed(f):
+                # "-t" for a simple HTML table (can get stuck).
+                self._run_diffpy("-m", out_fname, ref_fname, f.hdiff_fname)
 
     def make_txt_diff_files(self):
         """
@@ -3191,49 +3222,24 @@ pp_dirpath $ABI_PSPDIR
         if self._status in {"disabled", "skipped"}:
             return
 
-        # print(self._status)
-        # if self._status not in {"failed", "passed"}: return
-        diffpy = self.abenv.apath_of("tests", "pymods", "diff.py")
-
         for f in self.files_to_test:
-            # print(f, f.fld_isok)
             if f.fld_isok:
                 continue
 
-            ref_fname = os.path.abspath(os.path.join(self.ref_dir, f.name))
+            out_fname, ref_fname = self.diff_sources(f)
+            f.diff_fname = os.path.abspath(os.path.join(self.workdir, f.name + ".diff"))
 
-            if not os.path.isfile(ref_fname) and ref_fname.endswith(".stdout"):
-                ref_fname = ref_fname[:-7] + ".out"  # FIXME Hack due to the stdout-out ambiguity
-                #ref_fname = ref_fname[:-7] + ".abo"  # FIXME Hack due to the stdout-out ambiguity
-
-            out_fname = os.path.abspath(os.path.join(self.workdir, f.name))
-
-            # Check whether output and ref file exist.
-            out_exists = os.path.isfile(out_fname)
-            ref_exists = os.path.isfile(ref_fname)
-
-            diff_fname = os.path.abspath(os.path.join(self.workdir, f.name + ".diff"))
-
-            f.diff_fname = diff_fname
-
-            x, ext = os.path.splitext(f.name)
-
-            if ref_exists and out_exists:
+            if os.path.isfile(ref_fname) and os.path.isfile(out_fname):
                 # n is for ndiff format, c for context, u for unified
-                # for out_opt in ["-n", "-c"]:
-                # out_opt = "-n"
-                # out_opt = "-c"
-                out_opt = "-u"
-                args = [diffpy, out_opt, "-j", "-f " + diff_fname, out_fname, ref_fname]
-                cmd = " ".join(args)
+                self._run_diffpy("-u", out_fname, ref_fname, f.diff_fname)
 
-                (p, ret_code) = self.timebomb.run(cmd, shell=True, cwd=self.workdir)
+    def html_extra_sections(self) -> str:
+        """HTML sections added to the report of the test after "Extra information". Subclasses may override."""
+        return ""
 
-                if ret_code != 0:
-                    err_msg = f"Timeout error ({self.timebomb.timeout} s) while executing {args!s}, retcode = {ret_code}"
-                    self.exceptions.append(self.Error(err_msg))
-                else:
-                    self.keep_files(diff_fname)
+    def html_file_options(self, f: FileToTest) -> str:
+        """The comparison options of the file to test `f` shown in the report."""
+        return " ".join(f.fld_options)
 
     def write_html_report(self, fh=None, oc="oc"):
         """
@@ -3300,12 +3306,16 @@ pp_dirpath $ABI_PSPDIR
             "page_title": f"{self.full_id} · Abinit test report",
             "user_name": username,
             "hostname": gethostname(),
-            "Headings": ["File_to_test", "Status", "fld_output", "fld_options", "txt_diff", "html_diff"],
+            "Headings": ["File_to_test", "Status", "fld_output", "Options", "txt_diff", "html_diff"],
             "nlast": nlast,
             "stderr_text": stderr_text,
             "stdout_text": stdout_text,
             "abiabort_text": abiabort_text,
             "errinfo_text": errinfo_text,
+            # stdin exists only in the legacy files-file mode, otherwise the input is passed on the command line.
+            "input_name": os.path.basename(self.stdin_fname if os.path.isfile(getattr(self, "stdin_fname", ""))
+                                           else self.inp_fname),
+            "extra_sections": self.html_extra_sections(),
             # Functions and modules available in the template.
             "time": time,
             "pj": os.path.join,
@@ -3362,7 +3372,7 @@ pp_dirpath $ABI_PSPDIR
                  <div class="metric"><dt>Total time</dt><dd>${sec2str(self.tot_etime)} s</dd></div>
                 </dl>
                 <nav class="actions" aria-label="Test files">
-                 ${html_link("Input", basename(self.stdin_fname))}
+                 ${html_link("Input", input_name)}
                  ${html_link("Standard output", basename(self.stdout_fname))}
                  ${html_link("Standard error", basename(self.stderr_fname))}
                 </nav>
@@ -3378,6 +3388,7 @@ pp_dirpath $ABI_PSPDIR
               <dt>Test definition</dt><dd>${self.listoftests(abslink=False)}</dd>
                </dl></div>
               </section>
+              ${extra_sections}
               <section class="card">
                <header class="card-header"><h2 class="report-title">File comparisons</h2></header>
                <div class="table-wrap">
@@ -3393,7 +3404,7 @@ pp_dirpath $ABI_PSPDIR
                   <py-line code = "fld_link = html_file_link(f.fldiff_fname)"/>
                   <py-line code = "txt_diff_link = html_file_link(f.diff_fname)"/>
                   <py-line code = "html_diff_link = html_file_link(f.hdiff_fname)"/>
-                  <py-line code = "tab_row = args2htmltr(out_link, status2html(f.fld_status), fld_link, f.fld_options, txt_diff_link, html_diff_link)"/>
+                  <py-line code = "tab_row = args2htmltr(out_link, status2html(f.fld_status), fld_link, html_escape(self.html_file_options(f)), txt_diff_link, html_diff_link)"/>
                   ${tab_row}
                  </tr>
                 <py-close/>
@@ -4188,6 +4199,12 @@ def run_and_check_test(test, rank, print_lock=None, **kwargs):
     return d
 
 
+def _is_parametrized(test) -> bool:
+    """True if `test`, or a member of the chain `test`, is an instance of a parametrized template."""
+    members = test if isinstance(test, ChainOfTests) else [test]
+    return any(getattr(t, "template_path", None) or type(t).__name__ == "BrokenTemplateTest" for t in members)
+
+
 class ChainOfTests:
     """
     A list of tests that should be executed together due to inter-dependencies.
@@ -4778,20 +4795,10 @@ class AbinitTestSuite:
                         # print "Removing", test.stdout_fname
                         save_files.discard(test.stdout_fname)
 
-                for p in save_files:
-                    # if not os.path.exists(os.path.join(self.workdir, p)): continue
-                    # /foo/bar/suite_workdir/test_workdir/file --> test_workdir/t01/file
-                    rpath = os.path.relpath(p, start=self.workdir)
-                    # arcname = str(rpath.encode("ascii", "ignore"))
-                    arcname = str(rpath)
-                    try:
-                        # print("targz.add: adding:", p," with arcname ", arcname)
-                        # print(type(p), type(arcname))
-                        targz.add(p, arcname=arcname)
-                    except Exception as exc:
-                        # Handle the case in which the output file has not been produced.
-                        warnings.warn(f"exception while adding {p} to tarball:\n{exc}")
-                        self.exceptions.append(exc)
+                self._add_to_targz(targz, save_files)
+
+            # Files of the suite, e.g. the pages of the parametrized templates.
+            self._add_to_targz(targz, getattr(self, "_suite_files_to_keep", []))
 
             targz.close()
 
@@ -4801,6 +4808,18 @@ class AbinitTestSuite:
         except Exception as exc:
             warnings.warn(f"exception while creating tarball file: {exc!s}")
             self.exceptions.append(exc)
+
+    def _add_to_targz(self, targz, paths) -> None:
+        """Add the files `paths` to the tarball `targz`, with paths relative to the workdir of the suite."""
+        for p in paths:
+            # /foo/bar/suite_workdir/test_workdir/file --> test_workdir/t01/file
+            arcname = str(os.path.relpath(p, start=self.workdir))
+            try:
+                targz.add(p, arcname=arcname)
+            except Exception as exc:
+                # Handle the case in which the output file has not been produced.
+                warnings.warn(f"exception while adding {p} to tarball:\n{exc}")
+                self.exceptions.append(exc)
 
     def _merge_worker_profiles(self):
         """Merge every worker's cProfile dump in self.workdir into one report.
@@ -4996,7 +5015,8 @@ class AbinitTestSuite:
 
     def run_tests(self, build_env, workdir, job_runner,
                   mpi_nprocs=1, omp_nthreads=0, max_cpus=0, max_gpus=0, py_nprocs=1,
-                  runmode="static", verbose=0, profile_workers=False, schedule="ref-walltime", **kwargs):
+                  runmode="static", verbose=0, profile_workers=False, schedule="ref-walltime",
+                  fixture_runner=None, **kwargs):
         """
         Execute the list of tests (main entry point for client code)
 
@@ -5018,6 +5038,8 @@ class AbinitTestSuite:
             schedule: Order of the tests in the queue when py_nprocs > 1.
                 "ref-walltime" (longest first according to the reference files) or "fifo".
                 The sequential version always uses the order of the test suite.
+            fixture_runner: `JobRunner` able to launch MPI jobs, used to build the fixtures of parametrized
+                tests (they may use several MPI processes even when the tests run on 1). Default: job_runner.
 
         return: Results instance.
         """
@@ -5088,6 +5110,13 @@ class AbinitTestSuite:
             # Add input kwargs
             run_func_kwargs.update(kwargs)
 
+            # Fixtures of parametrized tests (tests/plans/parametrized_tests_plan.md, 8.4): built here, before the
+            # workers start, because they may use several MPI processes that a worker has not reserved.
+            if any(getattr(test, "fixtures", None) for test in self):
+                from .parametrized.prebuild import prebuild_for_suite
+                prebuild_for_suite(self, build_env, fixture_runner or job_runner, self.workdir, self.mpi_nprocs,
+                                   runmode, max_cpus)
+
             ##############################
             # And now let's run the tests
             ##############################
@@ -5147,6 +5176,12 @@ class AbinitTestSuite:
 
             # Run completed.
             self._executed = True
+
+            # One page per parametrized template, linked from the index (see parametrized/html.py).
+            self._suite_files_to_keep, param_section = [], ""
+            if any(_is_parametrized(test) for test in self):
+                from .parametrized.htmlreport import write_suite_pages
+                self._suite_files_to_keep, param_section = write_suite_pages(self, self.workdir)
 
             # Collect HTML files in a tarball
             self.create_targz_results()
@@ -5232,6 +5267,7 @@ class AbinitTestSuite:
                 "hostname": gethostname(),
                 "test_headings": ["ID", "Status", "run_etime (s)", "tot_etime (s)"],
                 "suite_headings": ["failed", "passed", "succeeded", "skipped", "disabled"],
+                "param_section": param_section,
                 # Functions and modules available in the template.
                 "time": time,
                 "pj": os.path.join,
@@ -5291,7 +5327,8 @@ class AbinitTestSuite:
             </section>
             """
 
-            table = """
+            # The parametrized templates (if any) come first: their pages group the instances.
+            table = "${param_section}" + """
             <section class="card">
             <header class="card-header"><h2 class="report-title">Test results</h2></header>
             <div class="table-wrap"><table id="table_id" class="display">

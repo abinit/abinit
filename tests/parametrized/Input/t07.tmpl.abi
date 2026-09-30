@@ -1,0 +1,54 @@
+%YAML
+test_info:
+  setup: {executable: abinit}
+  files:
+    use_git_submodule: MgO_eph_zpr
+    files_to_test:
+      # EPH writes no YAML results yet (P4): standard fldiff on the main output. The self-energy table has
+      # 3 decimals (eV): the tolerances accept a flip of the last digit on at most 2 lines (e.g. another compiler).
+      # All 8 distributions reproduce the reference exactly on the development machine.
+      - {name: "{id}.abo", tolnlines: 2, tolabs: 1.1e-3, tolrel: 1.0}
+  extra_info: {keywords: [NC, DFPT, EPH], authors: [M. Giantomassi],
+               description: "MgO, ZPR at Gamma: results must not depend on the MPI distribution (eph_np_pqbks)"}
+
+# Built once per workdir root, on 1 process, and shared with the other templates that use them.
+fixtures: [mgo_ddb_444q, mgo_dvdb_444q, mgo_wfk_444k_70b]
+
+axes:
+  # eph_np_pqbks = procs for perturbations, q-points, bands, k-points, spins. The product must be nproc.
+  # natom 2 --> 6 perturbations, 8 q-points in the IBZ, nband 30, 1 k-point, 1 spin.
+  - type: explicit
+    values:
+      - {nproc: 1, eph_np_pqbks: [1, 1, 1, 1, 1]}
+      - {nproc: 2, eph_np_pqbks: [2, 1, 1, 1, 1]}
+      - {nproc: 2, eph_np_pqbks: [1, 2, 1, 1, 1]}
+      - {nproc: 2, eph_np_pqbks: [1, 1, 2, 1, 1]}
+      - {nproc: 4, eph_np_pqbks: [2, 2, 1, 1, 1]}
+      - {nproc: 4, eph_np_pqbks: [1, 2, 2, 1, 1]}
+      - {nproc: 4, eph_np_pqbks: [2, 1, 2, 1, 1]}
+      - {nproc: 8, eph_np_pqbks: [2, 2, 2, 1, 1]}
+%ENDYAML
+# ZPR computation at the Gamma point for MgO (tutorespfn/teph4zpr_4 without phonon bands and DOS)
+nband 30
+ecut 35.0
+ngkpt 4 4 4  nshiftk 1  shiftk 0 0 0
+
+optdriver 7              # EPH driver
+eph_task 4               # e-ph self-energy (real + imaginary part)
+eph_frohl_ntheta 0       # No spherical integration of the Frohlich term around Gamma
+tmesh 0 100 4            # [start, step, num_T] in K
+prtphdos 0               # No phonon DOS
+
+getddb_filepath  "MgO_444q_DDB"    # fixture mgo_ddb_444q
+ddb_ngqpt 4 4 4
+getdvdb_filepath "MgO_444q_DVDB"   # fixture mgo_dvdb_444q
+getwfk_filepath  "MgO_444k_70b_WFK" # fixture mgo_wfk_444k_70b (NSCF, 70 bands)
+
+nkptgw 1
+kptgw 0.0 0.0 0.0
+bdgw 8 9
+zcut 0.01 eV
+
+structure "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
+pp_dirpath "$ABI_PSPDIR"
+pseudos "O.psp8, Mg-sp-gw.psp8"
