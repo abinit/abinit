@@ -615,7 +615,7 @@ def main() -> int:
             "Diff tool can be specified via $PATCHER e.g. export PATCHER=kdiff3. default: vimdiff."
             "Examples: `-p failed` to patch the reference files of the failed tests. "
             "`-p all` to patch all files."
-            "`-p failed+passed` to patch both failed and passed tests or, equivalently, `-p not_succeed`"
+            "`-p failed+passed` to patch both failed and passed tests or, equivalently, `-p not_succeeded`"
         ),
     )
 
@@ -794,6 +794,7 @@ def main() -> int:
                 attrs=["bold"],
             )
             return 1
+        abitests.enable_parametrized()
 
     if not options.no_logo:
         nrows, ncols = get_terminal_size()
@@ -911,6 +912,13 @@ def main() -> int:
         if omp_nthreads > 0:
             omp_env = OMPEnvironment(OMP_NUM_THREADS=omp_nthreads)
             runner.set_ompenv(omp_env)
+
+    # Runner for the MPI fixtures of the parametrized tests: they may use several processes even with -n 1.
+    fixture_runner = runner
+    if not (runner.has_mpirun or runner.has_srun or runner.has_poe) and "HAVE_MPI" in build_env.defined_cppvars:
+        if which("mpirun") is not None or which("mpiexec") is not None:
+            fixture_runner = JobRunner.generic_mpi(use_mpiexec=which("mpirun") is None, timebomb=timebomb,
+                                                   mpi_args=options.mpi_args)
 
     # Valgrind support.
     if options.valgrind_cmdline:
@@ -1123,6 +1131,7 @@ def main() -> int:
         verbose=options.verbose,
         profile_workers=options.profile,
         schedule=options.schedule,
+        fixture_runner=fixture_runner,
         erase_files=options.erase_files,
         make_html_diff=options.make_html_diff,
         sub_timeout=options.sub_timeout,
@@ -1185,6 +1194,7 @@ def main() -> int:
                 verbose=options.verbose,
                 profile_workers=options.profile,
                 schedule=options.schedule,
+                fixture_runner=fixture_runner,
                 erase_files=options.erase_files,
                 make_html_diff=options.make_html_diff,
                 sub_timeout=options.sub_timeout,

@@ -11,6 +11,7 @@ import html
 import json
 import os
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -39,7 +40,7 @@ abenv = tests.abenv
 
 from pymods import termcolor
 from pymods.jobrunner import JobRunner, OMPEnvironment, TimeBomb
-from pymods.testsuite import SCHEDULES, BuildEnvironment
+from pymods.testsuite import SCHEDULES, TESTBOT_NP_LISTS, BuildEnvironment
 
 
 def get_mpi_prefix_from_env() -> str | None:
@@ -56,6 +57,29 @@ def get_mpi_prefix_from_env() -> str | None:
             if mpi_home:
                 return os.path.join(mpi_home, "bin")
     return mpi_prefix
+
+
+_ENV_VAR_RE = re.compile(r"\$(?:\{(\w+)\}|(\w+))")
+
+
+def expand_tmp_basedir(tmp_basedir: str) -> str:
+    """
+    Expand the environment variables ($VAR or ${VAR}) and ~ in tmp_basedir, e.g. ``${LOCALSCRATCH}``
+    whose value is known only in the job that runs testbot.py (testbot.json stores the string as is).
+
+    Raises:
+        ValueError: If a variable is not defined, or the result is not an existing directory.
+    """
+    if not tmp_basedir:
+        return tmp_basedir
+    undefined = [a or b for a, b in _ENV_VAR_RE.findall(tmp_basedir) if (a or b) not in os.environ]
+    if undefined:
+        raise ValueError(f"tmp_basedir {tmp_basedir!r} uses undefined environment variable(s): "
+                         f"{', '.join(undefined)}")
+    path = os.path.expanduser(os.path.expandvars(tmp_basedir))
+    if not os.path.isdir(path):
+        raise ValueError(f"tmp_basedir {tmp_basedir!r} (expanded to {path!r}) is not an existing directory")
+    return path
 
 
 def slurm_cpus_on_node() -> int | None:
@@ -228,7 +252,9 @@ class TestBot:
     verbose: int = field(default=0, metadata={"info": "Verbosity level"})
     tmp_basedir: str = field(
         default="",
-        metadata={"info": "Temporary folder where the tests will be executed and copied back"},
+        metadata={"info": "Temporary folder where the tests will be executed and copied back. "
+                          "Environment variables ($VAR, ${VAR}) and ~ are expanded when testbot.py starts, "
+                          "e.g. ${LOCALSCRATCH}: an undefined variable is an error"},
     )
     mpi_args: str = field(default="", metadata={"info": "Args passed to the mpi command"})
     force_mpi: bool = field(default=False, metadata={"info": "Use mpirun_np even for single-process (mpi_nprocs=1) test runs, not just once mpi_nprocs > 1"})
@@ -338,6 +364,9 @@ class TestBot:
         if self.schedule not in SCHEDULES:
             raise ValueError(f"schedule should be in {SCHEDULES} while it's: {self.schedule}")
 
+        # Fail now, not when the first pass creates its temporary directory.
+        self.tmp_basedir = expand_tmp_basedir(self.tmp_basedir)
+
         # Inside a Slurm allocation, we cannot use more CPUs than those allocated to the job.
         # The tests are executed with srun so the steps in excess wait for free CPUs inside srun:
         # the wall-time does not decrease and the waiting time is counted as run_etime.
@@ -369,6 +398,7 @@ class TestBot:
                     f"with_parametrized=True but required packages are missing: {', '.join(missing)}. "
                     "Install them with: pip install pyyaml pydantic"
                 )
+            abitests.enable_parametrized()
 
         # 2) Initialize the job_runner.
         self.build_env = build_env = BuildEnvironment(os.curdir)
@@ -736,6 +766,8 @@ class TestBot:
                                        verbose=self.verbose,
                                        profile_workers=self.profile_workers,
                                        schedule=self.schedule,
+                                       # MPI fixtures of parametrized tests, also in the passes with 1 process.
+                                       fixture_runner=getattr(self, "mpi_runner", None),
                                        make_html_diff=1)
         wall_time = time.perf_counter() - start
 
@@ -827,12 +859,12 @@ class TestBot:
         if self.runmode == "static":
             # Old mode: run all available tests with 1 MPI proc here,
             # then use MPI mode in mp_suites (paral/mpiio)
-            np_list = [2, 4, 8, 10, 24, 64]
+            np_list = list(TESTBOT_NP_LISTS["static"])
             nfailed, npassed, nexecuted = self.run_tests_with_np(1, suite_args=suite_args, runmode=self.runmode)
         else:
             # New mode: run all available tests with 2 MPI procs here,
             # then enter the mp_suites with np_list CPUs
-            np_list = [4, 8, 10, 24, 64]
+            np_list = list(TESTBOT_NP_LISTS["dynamic"])
             nfailed, npassed, nexecuted = self.run_tests_with_np(2, suite_args=suite_args, runmode=self.runmode)
 
         if self.has_mpi:

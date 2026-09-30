@@ -14,6 +14,7 @@ Common workflows::
     invoke make --clean --binary=abinit  # Clean and rebuild only ABINIT.
     invoke runemall --no-make            # Test an existing build.
     invoke runemall --keywords=fast      # Build and run matching tests.
+    invoke pytest                        # Run the Python unit tests (pytest -v).
     invoke abinit --input-name=run.abi --run-make
     invoke config-log                    # Summarize the nearest config.log.
     invoke large-files --size-threshold-mb=10
@@ -317,6 +318,25 @@ def runemall(
             cmd = f"./runtests.py paral mpiio -j{j} -n{n} {kws}"
             cprint(f"Executing: {cmd}", color="yellow")
             ctx.run(cmd, pty=True)
+
+
+@task
+def pytest(ctx: Context, args: str = "") -> None:
+    """Run the Python unit tests with ``pytest -v`` from the top-level directory.
+
+    Examples:
+        ``invoke pytest`` runs all the unit tests.
+        ``invoke pytest --args="-k parametrized -x"`` passes extra options to pytest.
+
+    Args:
+        ctx: Invoke context.
+        args (str, optional): Extra command-line arguments for pytest. Defaults to "".
+    """
+    with cd(ABINIT_ROOTDIR):
+        # Use the interpreter running invoke, so that pytest sees the same environment.
+        cmd = f"{sys.executable} -m pytest -v {args}".rstrip()
+        cprint(f"Executing: {cmd}", color="yellow")
+        ctx.run(cmd, pty=True)
 
 
 @task
