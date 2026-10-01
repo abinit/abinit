@@ -131,7 +131,7 @@ pseudos "Psdj_nc_sr_04_pbe_std_psp8/Si.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = haicgu_*
+#%% exclude_builders = eos_nvhpc_24.9_openmpi
 #%% need_cpp_vars = HAVE_GPU, HAVE_OPENMP_OFFLOAD
 #%% [files]
 #%% files_to_test =

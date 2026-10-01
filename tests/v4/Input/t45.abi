@@ -10,9 +10,8 @@ linear            # Type of interpolation
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = macroave
-#%% test_chain = t42.abi, t43.abi, t44.abi, t45.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t45_DEN.MAV, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy;
 #%%   t45_DEN.PAV, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
 #%% [shell]
@@ -22,7 +21,7 @@ linear            # Type of interpolation
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = NC
-#%% description = 
+#%% description =
 #%%  Si/Ge heterojunction, see test 42
 #%%  Analyze the charge density : one filter function,
 #%%  using the average width of a layer, and linear interpolation.

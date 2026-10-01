@@ -14,7 +14,7 @@ pawprtvol 3
 ############ Parameters common to all DATASETS
 #==================================================================================
 ##### CONVERGENCE PARAMETERS
-nstep    15 
+nstep    15
 nline     5          #Number of LINE minimisations
 nnsclo    2          #Number of Non-Self Consistent LOops
 tolvrs   1.0d-15
@@ -85,7 +85,7 @@ plowan_natom 1 # Number of atoms
 plowan_iatom 1  # Index of atoms
 plowan_nbl 1  # Number of the orbitals
 plowan_lcalc 2  # Index of the orbitals (2 -> d)
-plowan_projcalc 7  # Projector for the orbitals 
+plowan_projcalc 7  # Projector for the orbitals
 
 # -- DFTU: 1st dataset and definition of correlated angular momentum
 usepawu    1        # DFT+U is used just for printing usefull quantities.
@@ -164,8 +164,8 @@ plowan_compute3 1 # Activate the computation of Wannier functions
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
-#%% keywords = GW, cRPA, DMFT
+#%% keywords = GW, CRPA, DMFT
 #%% authors =  B. Amadon
-#%% description = For SrVO3, compute cRPA screened interaction U in the d-dp(b) model
+#%% description = For SrVO3, compute CRPA screened interaction U in the d-dp(b) model
 #%% topics = CalcUJ
 #%%<END TEST_INFO>

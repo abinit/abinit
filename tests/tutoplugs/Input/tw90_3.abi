@@ -17,7 +17,7 @@ ndtset 2
 
 
 #########################################################
-# Second: Wannier90
+# Second: wannier90
 #########################################################
      iscf2 -2      #non self-consistent field calculation
     nstep2 0       # zero steps, it will just read the previous wave function
@@ -95,5 +95,5 @@ ecut  8       # Maximal kinetic energy cut-off, in Hartree
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = NC, wannier90
-#%% description = Silane SiH4. Generation of Wannier functions via Wannier90 code.
+#%% description = Silane SiH4. Generation of Wannier functions via wannier90 code.
 #%%<END TEST_INFO>

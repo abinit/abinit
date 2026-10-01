@@ -28,8 +28,8 @@ dipdip  = 0
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = A. MARTIN
-#%% keywords = Effective potential, multibinit
-#%% description = 
+#%% keywords = Effective_potential, multibinit
+#%% description =
 #%%   read ddb and generate effective potential
 #%% topics = LatticeModel
 #%%<END TEST_INFO>

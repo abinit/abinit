@@ -1030,7 +1030,7 @@ function cheb_poly1(xx,nn,aa,bb) result(yy)
 end function cheb_poly1
 !!***
 
-!!****f* m_chebfi2/chebfi_set_ndeg_from_residu
+!!****f* m_chebfi2_cprj/chebfi_set_ndeg_from_residu
 !! NAME
 !! chebfi_set_ndeg_from_residu
 !!

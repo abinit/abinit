@@ -32,7 +32,7 @@ cp TestBot_MPI1/tutomultibinit_t*/*out TestBot_MPI1/tutomultibinit_t*/*xml tutom
 cp TestBot_MPI1/tutoplugs_t*/*out      tutoplugs/Refs
 cp TestBot_MPI1/tutorespfn_t*/*out TestBot_MPI1/tutorespfn_t*/*MRTA* TestBot_MPI1/tutorespfn_t*/*SERTA*    tutorespfn/Refs
 cp TestBot_MPI1/tutorial_t*/*out  TestBot_MPI1/tutorial_t*/*f2b  TestBot_MPI1/tutorial_t*/*abo  tutorial/Refs
-cp TestBot_MPI1/unitary_t*/*out        unitary/Refs
+cp TestBot_MPI1/unit_tests_t*/*out     unit_tests/Refs
 cp TestBot_MPI1/vdwxc_t*/*out          vdwxc/Refs
 cp TestBot_MPI1/wannier90_t*/*out      wannier90/Refs
 
@@ -41,7 +41,7 @@ cp TestBot_MPI*/bigdft_paral_t*/*out   bigdft_paral/Refs
 cp TestBot_MPI*/mpiio_t*/*out TestBot_MPI*/mpiio_t*/*DOS*        mpiio/Refs
 cp TestBot_MPI*/paral_t*/*out TestBot_MPI*/paral_t*/*MDF   TestBot_MPI*/paral_t*/*xml    TestBot_MPI*/paral_t*/*dat  TestBot_MPI*/paral_t*/*DDB paral/Refs
 cp TestBot_MPI*/tutoparal_t*/*out      tutoparal/Refs
-cp TestBot_MPI*/unitary_t*/*out        unitary/Refs
+cp TestBot_MPI*/unit_tests_t*/*out     unit_tests/Refs
 
 # For the serial reference machine
 #p TestBot_MPI1/seq_t*/*out      seq/Refs
@@ -74,7 +74,7 @@ rm TestBot_MPI1/tutomultibinit_t*/*out.fldiff TestBot_MPI1/tutomultibinit_t*/*xm
 rm TestBot_MPI1/tutoplugs_t*/*out.fldiff
 rm TestBot_MPI1/tutorespfn_t*/*out.fldiff TestBot_MPI1/tutorespfn_t*/*MRTA*.fldiff TestBot_MPI1/tutorespfn_t*/*SERTA*.fldiff
 rm TestBot_MPI1/tutorial_t*/*out.fldiff  TestBot_MPI1/tutorial_t*/*f2b.fldiff TestBot_MPI1/tutorial_t*/*abo.fldiff
-rm TestBot_MPI1/unitary_t*/*out.fldiff
+rm TestBot_MPI1/unit_tests_t*/*out.fldiff
 rm TestBot_MPI1/vdwxc_t*/*out.fldiff
 rm TestBot_MPI1/wannier90_t*/*out.fldiff
 
@@ -83,11 +83,10 @@ rm TestBot_MPI*/bigdft_paral_t*/*out.fldiff
 rm TestBot_MPI*/mpiio_t*/*out.fldiff TestBot_MPI*/mpiio_t*/*DOS*.fldiff
 rm TestBot_MPI*/paral_t*/*out.fldiff TestBot_MPI*/paral_t*/*MDF.fldiff   TestBot_MPI*/paral_t*/*xml.fldiff    TestBot_MPI*/paral_t*/*dat.fldiff  TestBot_MPI*/paral_t*/*DDB.fldiff
 rm TestBot_MPI*/tutoparal_t*/*out.fldiff
-rm TestBot_MPI*/unitary_t*/*out.fldiff
+rm TestBot_MPI*/unit_tests_t*/*out.fldiff
 
 # For the serial reference machine
 #rm TestBot_MPI1/seq_t*/*out.fldiff
 
 # For the gpu reference machine
 #rm TestBot_MPI*/gpu_t*/*out.fldiff
-

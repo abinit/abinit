@@ -48,7 +48,6 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tdfpt_01.abi, tdfpt_02.abi
 #%% [files]
 #%% [paral_info]
 #%% max_nprocs = 4
@@ -60,4 +59,3 @@
 #%% keywords =
 #%% description = FCC Al linear response with k point parallelism
 #%%<END TEST_INFO>
-

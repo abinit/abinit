@@ -3262,7 +3262,7 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,msym,nshiftk,nsym,prtkpt,rpri
    call wrtout(std_out,msg, do_flush=.True.)
    call wrtout(iout,msg, do_flush=.True.)
 
-   call abi_abort('PERS',exit_status=0,print_config=.false.)
+   call abi_abort('PERS', exit_status=0, print_config=.false.)
  end if
 
 end subroutine testkgrid

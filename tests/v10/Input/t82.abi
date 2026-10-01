@@ -3,7 +3,7 @@
 #   Al 4 atoms, PAW, short MD restarting using     #
 #   restartxf -1 to test restart from HIST file    #
 ####################################################
- 
+
 # MD
 ionmov 12
 dtion  50
@@ -45,22 +45,21 @@ nstep 100
 tolvrs 1e-4
 # Printing parameters
 prtwf 0
-prtden 0     
-prteig 0    
-prtebands 0  
-prtdos 0     
-pawprtdos 0  
-pawprtvol 0 
-prtgsr 0     
+prtden 0
+prteig 0
+prtebands 0
+prtdos 0
+pawprtdos 0
+pawprtvol 0
+prtgsr 0
 ##############################################################
 # This section is used only for regression testing of ABINIT #
 ##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%%  executable = abinit
-#%%  test_chain = t81.abi, t82.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%  t82.abo, tolnlines = 0, tolabs = 0.0, tolrel= 0.0, fld_options= -ridiculous;
 #%% [paral_info]
 #%%  max_nprocs = 4

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright (C) 2010-2026 ABINIT Group (Yann Pouillon)
 #
@@ -6,9 +6,8 @@
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
-from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from time import gmtime,strftime
+from time import gmtime, strftime
 
 import os
 import re
@@ -21,23 +20,21 @@ import sys
 #
 
 # Initial setup
-my_name   = "update-version-number"
+my_name = "update-version-number"
 
 # Check if we are in the top of the ABINIT source tree
-if ( not os.path.exists("configure.ac") or
-     not os.path.exists("src/98_main/abinit.F90") ):
-  sys.stderr.write("%s: You must be at the top of an ABINIT source tree.\n" % \
-    (my_name))
-  sys.stderr.write("%s: Aborting now.\n" % (my_name))
-  sys.exit(1)
+if not os.path.exists("configure.ac") or not os.path.exists("src/98_main/abinit.F90"):
+    sys.stderr.write("%s: You must be at the top of an ABINIT source tree.\n" % (my_name))
+    sys.stderr.write("%s: Aborting now.\n" % (my_name))
+    sys.exit(1)
 
 # Check that we have a version number to put
-if ( len(sys.argv) < 2 ):
-  sys.stderr.write("%s: You must provide a version number.\n" % (my_name))
-  sys.exit(2)
+if len(sys.argv) < 2:
+    sys.stderr.write("%s: You must provide a version number.\n" % (my_name))
+    sys.exit(2)
 
 # What time is it?
-now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
+now = strftime("%Y/%m/%d %H:%M:%S +0000", gmtime())
 
 # Init
 tgt_version = sys.argv[1]
@@ -46,16 +43,16 @@ tgt_version = sys.argv[1]
 ac_init = re.compile(r"^(AC_INIT\([^, ]*,)[^, ]*(.*)$", re.MULTILINE)
 
 # Change the version number in configure.ac
-ac_data = open("configure.ac", "rt").read()
+ac_data = open("configure.ac").read()
 ac_data = re.sub(ac_init, "\\1[%s]\\2" % (tgt_version), ac_data)
-open("configure.ac", "wt").write(ac_data)
+open("configure.ac", "w").write(ac_data)
 
 # Change the version number in doc/configure.ac
-ac_data = open("doc/configure.ac", "rt").read()
+ac_data = open("doc/configure.ac").read()
 ac_data = re.sub(ac_init, "\\1[%s]\\2" % (tgt_version), ac_data)
-open("doc/configure.ac", "wt").write(ac_data)
+open("doc/configure.ac", "w").write(ac_data)
 
 # Change the version number in tests/configure.ac
-ac_data = open("tests/configure.ac", "rt").read()
+ac_data = open("tests/configure.ac").read()
 ac_data = re.sub(ac_init, "\\1[%s]\\2" % (tgt_version), ac_data)
-open("tests/configure.ac", "wt").write(ac_data)
+open("tests/configure.ac", "w").write(ac_data)

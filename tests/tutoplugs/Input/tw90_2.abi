@@ -36,13 +36,13 @@ pawecutdg 16.0
     kptopt1    1
     istwfk1    3*1     #Controls the form of the wavefunctions
 
-# Second: Wannier90
+# Second: wannier90
      iscf2 -2   #nscf run
     nstep2 0      #just read the old wave functions
    tolwfr2 1.e-10 #dummy here
    getwfk2 1
    getden2 1   # Usual file handling data
-  prtwant2 2   # Call to Wannier90
+  prtwant2 2   # Call to wannier90
     nband2 4
    istwfk2 8*1 #Controls the form of the wavefunctions
    kptopt2 3   # Option for the automatic generation of k points
@@ -68,5 +68,5 @@ w90prtunk2 1   #Prints UNK files (for plotting the Wannier functions)
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = PAW, wannier90
-#%% description = Test interface with Wannier90 (PAW calculation)
+#%% description = Test interface with wannier90 (PAW calculation)
 #%%<END TEST_INFO>

@@ -31,6 +31,10 @@
 !   write_buffer: Writes a string to the socket.
 !   read_buffer: Reads data from the socket.
 
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 MODULE m_fsockets
 
   use, intrinsic :: iso_c_binding

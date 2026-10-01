@@ -26,7 +26,6 @@
 #%% [setup]
 #%% executable = anaddb
 #%% input_ddb = tcdfpt_6.ddb.in
-#%% test_chain =  tcdfpt_1.abi, tcdfpt_2.abi, tcdfpt_3.abi, tcdfpt_4.abi, tcdfpt_5.abi, tcdfpt_6.abi, tcdfpt_7.abi
 #%% [files]
 #%% extra_inputs = tcdfpt_6.ddb.in
 #%% files_to_test =
@@ -38,4 +37,3 @@
 #%% keywords = CDFPT
 #%% description = anaddb input file for switching between constrained magnetic functionals and frequency interpolation
 #%%<END TEST_INFO>
-

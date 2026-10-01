@@ -8,7 +8,6 @@ t75o_DS3_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% test_chain = t75.abi, t76.abi, t77.abi
 #%% [files]
 #%% files_to_test =
 #%%    t76.ddb.out, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options =  -medium

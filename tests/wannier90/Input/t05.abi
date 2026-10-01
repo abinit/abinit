@@ -96,10 +96,9 @@ shiftk
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = MJV and X. He
-#%% keywords = PAW, Wannier90
+#%% keywords = PAW, wannier90
 #%% description =
 #%%   Wannier function for bcc Fe.
 #%%   To check whether wannier90 interface works properly with nspinor=2  and nspden=4
 #%%   Small accuracy parameters, small k-mesh and large test tolerance are used.
 #%%<END TEST_INFO>
-

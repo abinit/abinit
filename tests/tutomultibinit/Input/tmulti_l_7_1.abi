@@ -16,7 +16,7 @@ ncell = 2 2 2     # Number of cells in the DDB regarding to the RS (default 1 1 
 
 bound_model = 3        # Flag to activate the bound process (default 0)
 bound_rangePower = 6 8 # Range of the power for the additional terms in the bound process (defaut 6 6)
-bound_EFS = 0 1 1      # Bound regarding to (E)nergy (F)orces and (S)tress 
+bound_EFS = 0 1 1      # Bound regarding to (E)nergy (F)orces and (S)tress
 bound_penalty = 1.001  # Penalty on the Goal Function (GF_new/GF_init) can't be bigger than this value
 bound_option = 2       # Option for the bound process (default 1)
 
@@ -40,12 +40,12 @@ bound_option = 2       # Option for the bound process (default 1)
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = L. BASTOGNE
-#%% keywords = Effective potential, multibinit, effpot
-#%% description = 
+#%% keywords = Effective_potential, multibinit, effpot
+#%% description =
 #%%   Bounding an existing model
-#%%   TODO: Test disabled on FC_INTEL_ONEAPI, FC_NVHPC : the m_fit_polynomial_coeff_fit has several incompatibility issues with ifx/nvhpc, 
+#%%   TODO: Test disabled on FC_INTEL_ONEAPI, FC_NVHPC : the m_fit_polynomial_coeff_fit has several incompatibility issues with ifx/nvhpc,
 #%%   It may require a full rework of the code as some Fortran features (blocks, subsubroutines, assiciations) are extensively used. Not sure
-#%%   why as the compiler gives unuseful/misleading error messages. This part of the code is disabled on these compilers and the related tests 
+#%%   why as the compiler gives unuseful/misleading error messages. This part of the code is disabled on these compilers and the related tests
 #%%   are disabled too.
 #%% topics = LatticeModel
 #%%<END TEST_INFO>

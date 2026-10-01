@@ -1,9 +1,10 @@
+#!/usr/bin/env python
+from __future__ import annotations
 
 import os
-from typing import Optional, List
 
 
-def find_abinit_src_directory(start_path: Optional[str] = None, ntrials: int = 10) -> str:
+def find_abinit_src_directory(start_path: str | None = None, ntrials: int = 10) -> str:
     """
     Find the main 'src' directory of the ABINIT codebase.
 
@@ -18,7 +19,7 @@ def find_abinit_src_directory(start_path: Optional[str] = None, ntrials: int = 1
     return os.path.join(top, "src")
 
 
-def find_src_dirs(start_path: Optional[str] = None, ntrials: int = 10) -> List[str]:
+def find_src_dirs(start_path: str | None = None, ntrials: int = 10) -> list[str]:
     """
     Return list of directories containing source files
     taking into account the new division in shared and ~abinit/src.
@@ -42,7 +43,7 @@ def find_src_dirs(start_path: Optional[str] = None, ntrials: int = 10) -> List[s
     return dlist
 
 
-def find_abinit_toplevel_directory(start_path: Optional[str] = None, ntrials: int = 10) -> str:
+def find_abinit_toplevel_directory(start_path: str | None = None, ntrials: int = 10) -> str:
     """
     Returns the absolute path of the ABINIT top level directory.
     Use current working directory is start_path is None

@@ -90,5 +90,5 @@ pseudos          "Psdj_paw_pw_std/La.xml, Psdj_paw_pw_std/Cu.xml, Psdj_paw_pw_st
 #%% [extra_info]
 #%% authors = O. Gingras
 #%% keywords = PAW, wannier90
-#%% description = Test interface with Wannier90 (PAW pseudopotentials)
+#%% description = Test interface with wannier90 (PAW pseudopotentials)
 #%%<END TEST_INFO>

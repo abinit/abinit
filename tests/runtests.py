@@ -50,7 +50,7 @@ from tests.pymods import termcolor
 from tests.pymods.devtools import number_of_cpus, number_of_gpus
 from tests.pymods.jobrunner import JobRunner, OMPEnvironment, TimeBomb
 from tests.pymods.termcolor import cprint, get_terminal_size
-from tests.pymods.testsuite import AbinitTestSuite, BuildEnvironment, find_top_build_tree
+from tests.pymods.testsuite import SCHEDULES, AbinitTestSuite, BuildEnvironment, doc_testcnf_format, find_top_build_tree
 from tests.pymods.tools import ascii_abinit, which
 
 __version__ = "0.7.0"
@@ -256,7 +256,7 @@ def reload_test_suite(status_list: list[str]) -> Any:
     Returns:
         AbinitTestSuite: A new test suite containing the filtered tests.
     """
-    cprint("Reading previous tests from pickle file", "yellow")
+    cprint("Reading previous tests from pickle file", color="yellow")
     with open(".prev_run.pickle", "rb") as fh:
         test_suite = pickle.load(fh)
 
@@ -360,6 +360,29 @@ def main() -> int:
     )
 
     parser.add_option(
+        "--schedule",
+        type="choice",
+        choices=list(SCHEDULES),
+        default="ref-walltime",
+        help=(
+            "Order in which the tests are distributed to the python processes (used only if -j > 1). "
+            "'ref-walltime': longest first, according to the wall-time reported in the reference files. "
+            "'fifo': order of the test suite. Default: ref-walltime"
+        ),
+    )
+
+    parser.add_option(
+        "--profile",
+        dest="profile",
+        default=False,
+        action="store_true",
+        help=(
+            "Profile each worker's actual test execution with cProfile, merging the "
+            "per-worker profiles into testbot_workers_merged.prof in workdir."
+        ),
+    )
+
+    parser.add_option(
         "--use-cache",
         default=False,
         action="store_true",
@@ -409,6 +432,11 @@ def main() -> int:
 
     parser.add_option("--builder", dest="builder", type="str", default="",
                       help="Set buildbot builder name to skip test if name is in the exclude_builders TEST_INFO_SECTION.")
+
+    parser.add_option("--dont-exclude-builders", dest="dont_exclude_builders", default=False,
+                      action="store_true",
+                      help="Ignore exclude_builders in the TEST_INFO_SECTION and always execute tests, "
+                           "regardless of --builder.")
 
     parser.add_option(
         "-d",
@@ -525,6 +553,14 @@ def main() -> int:
     )
 
     parser.add_option(
+        "--doc",
+        dest="doc_testcnf",
+        default=False,
+        action="store_true",
+        help="Print the documentation of the TEST_INFO sections and options and exit.",
+    )
+
+    parser.add_option(
         "-l",
         "--list-tests-info",
         dest="list_info",
@@ -579,7 +615,7 @@ def main() -> int:
             "Diff tool can be specified via $PATCHER e.g. export PATCHER=kdiff3. default: vimdiff."
             "Examples: `-p failed` to patch the reference files of the failed tests. "
             "`-p all` to patch all files."
-            "`-p failed+passed` to patch both failed and passed tests or, equivalently, `-p not_succeed`"
+            "`-p failed+passed` to patch both failed and passed tests or, equivalently, `-p not_succeeded`"
         ),
     )
 
@@ -708,8 +744,20 @@ def main() -> int:
         help="set the loglevel. Possible values: CRITICAL, ERROR (default), WARNING, INFO, DEBUG",
     )
 
+    parser.add_option(
+        "--with-parametrized",
+        action="store_true",
+        default=False,
+        help="Enable parametrized tests (requires yaml and pydantic Python packages to be installed)",
+    )
+
     # Parse command line.
     options, suite_args = parser.parse_args()
+
+    if options.doc_testcnf:
+        # Automatic documentation of the TEST_INFO options.
+        doc_testcnf_format()
+        return 0
 
     if options.show_info:
         abitests.show_info(verbose=options.verbose)
@@ -728,10 +776,30 @@ def main() -> int:
         # Disable colors
         termcolor.enable(False)
 
+    if options.with_parametrized:
+        missing = []
+        try:
+            import yaml  # noqa: F401
+        except ImportError:
+            missing.append("yaml")
+        try:
+            import pydantic  # noqa: F401
+        except ImportError:
+            missing.append("pydantic")
+        if missing:
+            cprint(
+                f"Fatal Error: --with-parametrized requested but required packages are missing: "
+                f"{', '.join(missing)}. Install them with: pip install pyyaml pydantic",
+                color="red",
+                attrs=["bold"],
+            )
+            return 1
+        abitests.enable_parametrized()
+
     if not options.no_logo:
         nrows, ncols = get_terminal_size()
         if ncols > 100:
-            cprint(ascii_abinit(), "green")
+            cprint(ascii_abinit(), color="green")
 
     ncpus_detected = max(1, number_of_cpus())
     ngpus_detected = max(0, number_of_gpus())
@@ -741,7 +809,7 @@ def main() -> int:
     omp_nthreads = options.omp_nthreads
 
     cprint(
-        "Running on %s -- system %s -- ncpus %s -- ngpus %s -- Python %s -- %s"
+        "Running on %s -- system %s -- logical CPUs %s -- ngpus %s -- Python %s -- %s"
         % (
             gethostname(),
             system,
@@ -772,6 +840,9 @@ def main() -> int:
     # Set buildbot builder name to skip tests.
     if options.builder:
         build_env.set_buildbot_builder(options.builder)
+
+    if options.dont_exclude_builders:
+        build_env.set_dont_exclude_builders(True)
 
     timeout_time = options.timeout_time
 
@@ -842,6 +913,13 @@ def main() -> int:
             omp_env = OMPEnvironment(OMP_NUM_THREADS=omp_nthreads)
             runner.set_ompenv(omp_env)
 
+    # Runner for the MPI fixtures of the parametrized tests: they may use several processes even with -n 1.
+    fixture_runner = runner
+    if not (runner.has_mpirun or runner.has_srun or runner.has_poe) and "HAVE_MPI" in build_env.defined_cppvars:
+        if which("mpirun") is not None or which("mpiexec") is not None:
+            fixture_runner = JobRunner.generic_mpi(use_mpiexec=which("mpirun") is None, timebomb=timebomb,
+                                                   mpi_args=options.mpi_args)
+
     # Valgrind support.
     if options.valgrind_cmdline:
         runner.set_valgrind_cmdline(options.valgrind_cmdline)
@@ -854,7 +932,7 @@ def main() -> int:
 
     if runner.has_valgrind:
         cmd = "valgrind --tool=%s " % runner.valgrind_cmdline
-        cprint("Will invoke valgrind with cmd:\n %s" % cmd, "yellow")
+        cprint("Will invoke valgrind with cmd:\n %s" % cmd, color="yellow")
 
     # Debugging with GNU gdb
     if options.gdb:
@@ -907,7 +985,7 @@ def main() -> int:
             raise
 
     if not test_suite:
-        cprint("No test fulfills the requirements specified by the user!", "red")
+        cprint("No test fulfills the requirements specified by the user!", color="red")
         return 99
 
     if options.show_exclude_builders:
@@ -935,13 +1013,12 @@ def main() -> int:
     if not os.path.exists(workdir):
         os.mkdir(workdir)
     else:
-        cprint("%s directory already exists. Files will be removed" % workdir, "yellow")
+        cprint("%s directory already exists. Files will be removed" % workdir, color="yellow")
 
     # Run the tests selected by the user.
     py_nprocs = options.py_nprocs
     if py_nprocs <= 0:
-        py_nprocs = ncpus_detected // (mpi_nprocs * max(omp_nthreads, 1))
-        py_nprocs = max(py_nprocs // 2, 1)
+        py_nprocs = max(ncpus_detected // (mpi_nprocs * max(omp_nthreads, 1)), 1)
         print("py_nprocs has been computed automatically. py_nprocs=", py_nprocs)
 
     if omp_nthreads == 0:
@@ -957,23 +1034,23 @@ def main() -> int:
             "Running %s test(s) with MPI_nprocs: %s, OMP_nthreads: %s, py_nprocs: %s"
             % (test_suite.full_length, mpi_nprocs, omp_nthreads, py_nprocs)
         )
-    cprint(msg, "yellow")
+    cprint(msg, color="yellow")
 
-    if ncpus_used < 0.3 * ncpus_detected:
+    if ncpus_used < 0.5 * ncpus_detected:
         msg = (
-            "[TIP] runtests.py is using %s CPUs but your architecture has %s CPUs (assuming x2 Hyper-Threading)\n"
+            "[TIP] runtests.py is using %s CPUs but your architecture has %s logical CPUs\n"
             "You may want to use python processes to speed up the execution\n"
             "Use `runtests -jNUM` to run with NUM processes"
             % (ncpus_used, ncpus_detected)
         )
-        cprint(msg, "blue")
+        cprint(msg, color="blue")
 
-    elif ncpus_used > 1.5 * ncpus_detected:
+    elif ncpus_used > ncpus_detected:
         msg = (
-            "[OVERLOAD] runtests.py is using %s CPUs but your architecture has only %s CPUs!!\n"
+            "[OVERLOAD] runtests.py is using %s CPUs but your architecture has only %s logical CPUs!!\n"
             % (ncpus_used, ncpus_detected)
         )
-        cprint(msg, "magenta")
+        cprint(msg, color="magenta")
 
     if options.list_info:
         with open("ListOfTests.html", "w") as fh:
@@ -1052,6 +1129,9 @@ def main() -> int:
         py_nprocs=py_nprocs,
         runmode=runmode,
         verbose=options.verbose,
+        profile_workers=options.profile,
+        schedule=options.schedule,
+        fixture_runner=fixture_runner,
         erase_files=options.erase_files,
         make_html_diff=options.make_html_diff,
         sub_timeout=options.sub_timeout,
@@ -1071,7 +1151,7 @@ def main() -> int:
         count, max_iterations = 0, 100
         cprint(
             "\n\nEntering looponfail loop with max_iterations %d" % max_iterations,
-            "yellow",
+            color="yellow",
         )
         abenv.start_watching_sources()
 
@@ -1079,16 +1159,16 @@ def main() -> int:
             count += 1
             test_list = [t for t in test_suite if t.status == "failed"]
             if not test_list:
-                cprint("All tests ok. Exiting looponfail", "green")
+                cprint("All tests ok. Exiting looponfail", color="green")
                 break
-            cprint("%d test(s) are still failing" % len(test_list), "red")
+            cprint("%d test(s) are still failing" % len(test_list), color="red")
             changed = abenv.changed_sources()
             if not changed:
                 sleep_time = 10
                 cprint(
                     "No change in source files detected. Will sleep for %s seconds..."
                     % sleep_time,
-                    "yellow",
+                    color="yellow",
                 )
                 time.sleep(sleep_time)
                 continue
@@ -1097,7 +1177,7 @@ def main() -> int:
                 print("[%d] %s" % (i, os.path.relpath(path)))
             rc = make_abinit(ncpus_detected, target=options.target)
             if rc != 0:
-                cprint("make_abinit returned %s, tests are postponed" % rc, "red")
+                cprint("make_abinit returned %s, tests are postponed" % rc, color="red")
                 continue
 
             test_suite = AbinitTestSuite(test_suite.abenv, test_list=test_list)
@@ -1112,6 +1192,9 @@ def main() -> int:
                 py_nprocs=py_nprocs,
                 runmode=runmode,
                 verbose=options.verbose,
+                profile_workers=options.profile,
+                schedule=options.schedule,
+                fixture_runner=fixture_runner,
                 erase_files=options.erase_files,
                 make_html_diff=options.make_html_diff,
                 sub_timeout=options.sub_timeout,
@@ -1126,7 +1209,7 @@ def main() -> int:
                 return 99
 
         if count == max_iterations:
-            cprint("Reached max_iterations", "red")
+            cprint("Reached max_iterations", color="red")
 
     # Edit input files.
     if options.edit:
@@ -1143,13 +1226,13 @@ def main() -> int:
     # Patch reference files.
     if options.patch:
         for status in parse_stats(options.patch):
-            cprint("Patching tests with status %s" % status, "yellow")
+            cprint("Patching tests with status %s" % status, color="yellow")
             results.patch_refs(status=status)
 
     if options.nag:
         for test in results.failed_tests:
             for trace in test.get_backtraces():
-                cprint(trace, "red")
+                cprint(trace, color="red")
                 trace.edit_source()
 
     # Save test_suite after execution so that we can reread it.
@@ -1160,7 +1243,7 @@ def main() -> int:
     print("Execution completed.")
     print(
         "Results in HTML format are available in %s"
-        % (os.path.join(workdir, "suite_report.html"))
+        % (os.path.join(workdir, "index.html"))
     )
 
     try:

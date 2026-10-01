@@ -2,10 +2,14 @@
 Main home of the test engine. Define the class used to traverse the data tree
 while checking constraints as well as a few utility classes linked to that process.
 """
+from __future__ import annotations
+
+from typing import Any
+
 from .common import BaseDictWrapper, basestring, string
 
 
-def short_repr(thing):
+def short_repr(thing: Any) -> str:
     """
     Shorten representation of things when the default one is too long.
     """
@@ -21,7 +25,7 @@ class Issue:
     """
     Represent the result of a test.
     """
-    def __init__(self, conf, msg):
+    def __init__(self, conf: Any, msg: str) -> None:
         """
         Initialize the Issue object.
 
@@ -33,12 +37,12 @@ class Issue:
         self.state = conf.current_state
         self.message = msg
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         spath = ".".join(self.path)
         sstate = ", ".join("{}={}".format(*it) for it in self.state.items())
         return f"At {spath}({sstate}): {self.message}"
 
-    def is_fail(self):
+    def is_fail(self) -> bool:
         return False
 
 
@@ -46,7 +50,7 @@ class Failure(Issue):
     """
     Represent the fail of a test.
     """
-    def __init__(self, conf, msg, ref=None, tested=None):
+    def __init__(self, conf: Any, msg: str, ref: Any = None, tested: Any = None) -> None:
         """
         Initialize the Failure object.
 
@@ -60,12 +64,12 @@ class Failure(Issue):
         self.tested = tested
         Issue.__init__(self, conf, msg)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if self.ref is not None:
             return Issue.__repr__(self) + f"\nref: {short_repr(self.ref)}\ntested: {short_repr(self.tested)}"
         return Issue.__repr__(self)
 
-    def is_fail(self):
+    def is_fail(self) -> bool:
         return True
 
 
@@ -73,7 +77,7 @@ class DetailedFailure(Failure):
     """
     Represent the fail of a test when more info are available.
     """
-    def __init__(self, conf, msg, details):
+    def __init__(self, conf: Any, msg: str, details: Any) -> None:
         """
         Initialize the DetailedFailure object.
 
@@ -85,7 +89,7 @@ class DetailedFailure(Failure):
         self.details = details
         Issue.__init__(self, conf, msg)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return Issue.__repr__(self) + f"\n{self.details}"
 
 
@@ -97,7 +101,7 @@ class Tester:
     """
     Drive the testing process.
     """
-    def __init__(self, reference_docs, tested_docs, config):
+    def __init__(self, reference_docs: dict[str, Any], tested_docs: dict[str, Any], config: Any) -> None:
         """
         Initialize the Tester object.
 
@@ -109,9 +113,9 @@ class Tester:
         self.ref = reference_docs
         self.tested = tested_docs
         self.conf = config
-        self.issues = []
+        self.issues: list[Issue] = []
 
-    def check_this(self, name, ref, tested):
+    def check_this(self, name: str, ref: Any, tested: Any) -> None:
         """
         Check constraints applying to the 'tested' node of name 'name'
         against 'ref' and recursively apply on children.
@@ -126,7 +130,7 @@ class Tester:
                 #print("Got None None for name:", name)
                 return
 
-        def analyze(success, cons):
+        def analyze(success: Any, cons: Any) -> None:
             """Analyse the result of a constraint check."""
             if success:
                 msg = f"{cons.name} ok"
@@ -202,7 +206,7 @@ class Tester:
                 for index, (vref, vtest) in enumerate(zip(ref, tested)):
                     self.check_this(string(index), vref, vtest)
 
-    def run(self):
+    def run(self) -> list[Issue]:
         """
         Main entry point for testing.
         """

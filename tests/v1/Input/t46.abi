@@ -40,7 +40,6 @@
 #%% [setup]
 #%% executable = abinit
 #%% input_prefix = t45o
-#%% test_chain = t45.abi, t46.abi, t47.abi
 #%% [files]
 #%% files_to_test = t46.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
@@ -48,7 +47,7 @@
 #%% [extra_info]
 #%% keywords = NC
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%   Si2 molecule, spin-polarized. Take the wavefunctions from test 45,
 #%%   and converge them further for initialisation of test 47.
 #%%   Cannot be executed in parallel:
@@ -56,7 +55,7 @@
 #%%         message: |
 #%%         the number of bands in the spin up case must be equal to
 #%%         the number of bands in the spin down case.
-#%%         This is not the case for the k point number : 1 
+#%%         This is not the case for the k point number : 1
 #%%         The number of bands spin up and down are : 5 3 Action : change nband, or use the sequential
 #%%         version of ABINIT.
 #%%         src_file: chkinp.F90

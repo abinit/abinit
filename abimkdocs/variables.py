@@ -1263,13 +1263,20 @@ class InputVariables(OrderedDict):
             InputVariables: Loaded instance.
         """
         try:
-            import imp
+            import importlib.util
 
-            module = imp.load_source(filepath, filepath)
-        except ModuleNotFoundError:
-            from importlib.machinery import SourceFileLoader
+            spec = importlib.util.spec_from_file_location(filepath, filepath)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+        except ImportError:
+            try:
+                import imp
 
-            module = SourceFileLoader(filepath, filepath).load_module()
+                module = imp.load_source(filepath, filepath)
+            except ModuleNotFoundError:
+                from importlib.machinery import SourceFileLoader
+
+                module = SourceFileLoader(filepath, filepath).load_module()
         vlist = [Variable(**d) for d in module.variables]
         new = cls()
         new.executable = module.executable

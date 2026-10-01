@@ -1,8 +1,8 @@
 
 .Version 10.3.4.5 of ANADDB. v10.8.1 released May 2026.
-.(sequential version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(sequential version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2026 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Thu 11 Jun 2026.
 - ( at 13h01 )
-  
+
 
 ================================================================================
 
@@ -118,11 +118,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -138,7 +138,7 @@
        3               2        0.000000        0.000000
        3               3       -0.000001        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -162,7 +162,7 @@ Converted dielectric tensor  1.38602438E+01  -0.00000000E+00    0.00000000E+00  
 
 ================================================================================
 
- Calculation of the interatomic forces 
+ Calculation of the interatomic forces
 
 
  Ewald treatment of 2D long-range electrostatics interatomic force constants
@@ -197,7 +197,7 @@ Converted dielectric tensor  1.38602438E+01  -0.00000000E+00    0.00000000E+00  
 
 ================================================================================
 
- Treat the first list of vectors 
+ Treat the first list of vectors
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.50000  0.00000

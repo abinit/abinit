@@ -73,7 +73,6 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t105.abi, t106.abi, t107.abi, t108.abi, t109.abi
 #%% [files]
 #%% files_to_test =
 #%%   t108.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -ridiculous;

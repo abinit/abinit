@@ -60,5 +60,3 @@ for ii in np.arange(natom):
   at = ii
   dirc = 2
   print("  %3i   %3i    %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f"%(at+1, dirc+1, quad[at,dirc,0,0], quad[at,dirc,1,1], quad[at,dirc,2,2], quad[at,dirc,1,2], quad[at,dirc,0,2], quad[at,dirc,0,1],))
-
-

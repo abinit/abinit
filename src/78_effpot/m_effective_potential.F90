@@ -2123,7 +2123,7 @@ subroutine effective_potential_writeAbiInput(eff_pot,filename,strain)
  end if
 
   write(msg,'(a,a,a,a)')ch10,&
- &   ' Generation of the input file in ',namefile,ch10
+ &   ' Generation of the input file in ',trim(namefile),ch10
   call wrtout(ab_out,msg,'COLL')
   call wrtout(std_out,msg,'COLL')
 
@@ -2293,12 +2293,12 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,r
 !array
   type(strain_type) :: strain_t
   integer :: sc_size(3)
-  real(dp) :: disp_tmp(3,natom)
-  real(dp) :: du_delta_tmp(6,3,natom)
-  real(dp) :: fcart_part(3,natom)
   real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
   real(dp) :: strain_tmp(6),strten_part(6)
-  real(dp) :: energy_coeff_part(eff_pot%anharmonics_terms%ncoeff)
+  real(dp),allocatable :: disp_tmp(:,:)
+  real(dp),allocatable :: du_delta_tmp(:,:,:)
+  real(dp),allocatable :: fcart_part(:,:)
+  real(dp),allocatable :: energy_coeff_part(:)
   real(dp),allocatable :: xcart(:,:)
   !real(dp) :: ext_field(3),ext_field2(3),temp_pol(3)
   character(len=500) :: msg
@@ -2407,6 +2407,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,r
   end if
 ! Get displacement and the variation of the displacmeent wr to strain
   ABI_MALLOC(xcart,(3,natom))
+  ABI_MALLOC(disp_tmp,(3,natom))
+  ABI_MALLOC(du_delta_tmp,(6,3,natom))
+  ABI_MALLOC(fcart_part,(3,natom))
+  ABI_MALLOC(energy_coeff_part,(eff_pot%anharmonics_terms%ncoeff))
   disp_tmp(:,:) = zero
   du_delta_tmp(:,:,:) = zero
   if((.not.present(displacement).or..not.present(du_delta)).and.present(xred))then
@@ -2799,6 +2803,10 @@ endif
 
 
   ABI_FREE(xcart)
+  ABI_FREE(disp_tmp)
+  ABI_FREE(du_delta_tmp)
+  ABI_FREE(fcart_part)
+  ABI_FREE(energy_coeff_part)
 
 end subroutine effective_potential_evaluate
 
@@ -3139,8 +3147,8 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   integer,parameter :: alpha(9)=(/1,2,3,3,3,2,2,1,1/),beta(9)=(/1,2,3,2,1,1,3,3,2/)
   integer,allocatable :: my_atoms(:)
   type(strain_type) :: strain
-  real(dp) :: xcart_hist_tmp(3,natom),xcart_ref_tmp(3,natom)
-  real(dp) :: xred_ref_tmp(3,natom),strain_inv(3,3),strain_inv_u(3),strain_tmp(3,3)
+  real(dp),allocatable :: xcart_hist_tmp(:,:),xcart_ref_tmp(:,:),xred_ref_tmp(:,:)
+  real(dp) :: strain_inv(3,3),strain_inv_u(3),strain_tmp(3,3)
 ! *************************************************************************
 
   if (.not.(present(xred_ref).or.present(xcart_ref))) then
@@ -3160,6 +3168,10 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   if(present(compute_duDelta)) need_duDelta = compute_duDelta
   if(present(compute_displacement)) need_displacement = compute_displacement
   if(.not.need_duDelta .and. .not.need_displacement) return
+
+  ABI_MALLOC(xcart_hist_tmp,(3,natom))
+  ABI_MALLOC(xcart_ref_tmp,(3,natom))
+  ABI_MALLOC(xred_ref_tmp,(3,natom))
 
 !--------------------------------------------
 ! 0 - Set the MPI
@@ -3266,6 +3278,9 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   call xmpi_sum(du_delta , comm, ierr)
 
   ABI_FREE(my_atoms)
+  ABI_FREE(xcart_hist_tmp)
+  ABI_FREE(xcart_ref_tmp)
+  ABI_FREE(xred_ref_tmp)
 
 end subroutine effective_potential_getDisp
 !!***
@@ -3823,10 +3838,10 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
  real(dp):: energy,delt,delta,ucvol
  !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),mat_def(3,3),identity(3,3)
- real(dp):: fcart(3,natom),gred(3,natom),strten(6),rprimd(3,3)
+ real(dp):: strten(6),rprimd(3,3)
  real(dp):: rprimd_def(3,3),rprimd_ref(3,3),deltalist(5)
- real(dp):: disp(3,natom),disp_red(3,natom),strain(6),du_delta(6,3,natom),diff(5)
- real(dp),allocatable :: xred(:,:)
+ real(dp):: strain(6),diff(5)
+ real(dp),allocatable :: xred(:,:),fcart(:,:),gred(:,:),disp(:,:),disp_red(:,:),du_delta(:,:,:)
  integer,parameter :: alpha(9)=(/1,2,3,3,3,2,2,1,1/),beta(9)=(/1,2,3,2,1,1,3,3,2/)
  character(len=500) :: msg
 
@@ -3845,6 +3860,11 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 
 
  ABI_MALLOC(xred,(3,natom))
+ ABI_MALLOC(fcart,(3,natom))
+ ABI_MALLOC(gred,(3,natom))
+ ABI_MALLOC(disp,(3,natom))
+ ABI_MALLOC(disp_red,(3,natom))
+ ABI_MALLOC(du_delta,(6,3,natom))
  xred = zero
 
 !option 1 => set the reference for the test
@@ -3975,6 +3995,13 @@ forall(ii=1:3)identity(ii,ii)=1
 
 end do
 
+ ABI_FREE(xred)
+ ABI_FREE(fcart)
+ ABI_FREE(gred)
+ ABI_FREE(disp)
+ ABI_FREE(disp_red)
+ ABI_FREE(du_delta)
+
 end subroutine effective_potential_checkDEV
 !!***
 
@@ -4038,7 +4065,7 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
    call isfile(namefile,'new')
 
    write(msg,'(a,a,a)')ch10,&
-&   ' Generation of the xml file for the reference structure in ',namefile
+&   ' Generation of the xml file for the reference structure in ',trim(namefile)
 
    call wrtout(ab_out,msg,'COLL')
    call wrtout(std_out,msg,'COLL')

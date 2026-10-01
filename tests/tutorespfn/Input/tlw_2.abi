@@ -12,7 +12,6 @@ tlw_1o_DS5_DDB
 #%% [setup]
 #%% executable = mrgddb
 #%% exclude_builders = scope_gnu_10.2_paral
-#%% test_chain =  tlw_1.abi, tlw_2.abi, tlw_3.abi
 #%% [files]
 #%% files_to_test =
 #%%   tlw_2.ddb.out, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium
@@ -26,4 +25,3 @@ tlw_1o_DS5_DDB
 #%%   Apparently, there is a (minor, erratic) problem with openmp (2 procs), for the echo of pseudopotential data in the tlw_2.ddb.out file
 #%% topics = longwave
 #%%<END TEST_INFO>
-

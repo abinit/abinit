@@ -14,28 +14,28 @@
 
  ecut 10
 
- enunit 2  
+ enunit 2
 
  kptopt 3
  localrdwf 1
  nkpt 256
- ngkpt 4 4 4   
+ ngkpt 4 4 4
  nshiftk 4
  shiftk 0.5 0.5 0.5
         0.5 0.0 0.0
         0.0 0.5 0.0
-        0.0 0.0 0.5 
+        0.0 0.0 0.5
 
  natom  1 nband 5  nbdbuf 0
  nstep 20
  ntypat  1
- occopt  4 
+ occopt  4
  paral_kgb 0
  prteig 1
  rprim   0 .5 .5  .5 0 .5  .5 .5 0
  timopt 2
  tolwfr 1.0d-18
- typat  1  
+ typat  1
  xred  0.0 0.0 0.0
  znucl 13.0
 
@@ -46,7 +46,6 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t51.abi, t52.abi, t53.abi
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4, 10

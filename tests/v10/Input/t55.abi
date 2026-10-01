@@ -62,7 +62,7 @@ pseudos="Ne.GGA_PBE-JTH.xml"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = bob_gnu_13.2_openmp, haicgu_gnu_14.1_hpc, manneback_gnu_14.2_hpc
+#%% exclude_builders = bob_gnu_13.2_openmp, mann_gnu_13.3
 #%% [files]
 #%% files_to_test =
 #%%   t55.abo, tolnlines=  4, tolabs=  3e-8, tolrel= 2e-4
@@ -74,4 +74,3 @@ pseudos="Ne.GGA_PBE-JTH.xml"
 #%% description = Calculate chemical shielding in neon atom and output on real space mesh
 #%% topics = NMR, MagField
 #%%<END TEST_INFO>
-

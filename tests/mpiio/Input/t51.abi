@@ -61,7 +61,7 @@ natom 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = atlas_gnu_14.2_triqs, haicgu_*, manneback_gnu_14.2_hpc
+#%% exclude_builders = atlas_gnu_14.2_triqs, mann_gnu_13.3
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 4
@@ -77,5 +77,5 @@ natom 2
 #%%   Use paral_kgb==1 in the GS part in band-fft mode.
 #%%   Read the WFK part to perform phonon calculations at Gamma.
 #%%   Output the 1st order wavefunction file in parallel and read it in the last dataset
-#%%  Exclude manneback_gnu_14.2_hpc because of completely wrong results with MPI 4  ... To be debugged ... See also test paral#60 MPI4.
+#%%  Exclude mann_gnu_13.3 because of completely wrong results with MPI 4  ... To be debugged ... See also test paral#60 MPI4.
 #%%<END TEST_INFO>

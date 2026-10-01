@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 import os
 import re
+from collections.abc import Sequence
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -49,13 +50,15 @@ class EtsfObject:
     Subclasses must implement a `validate` method that takes a NetCDF dataset instance
     as input and returns a list of strings describing any validation failures.
     """
-    def __str__(self):
+    name: str
+
+    def __str__(self) -> str:
         return "<%s: %s>" % (self.__class__.__name__, self.name)
 
 
 class EtsfDimension(EtsfObject):
     """A dimension has a name, a type and, optionally, a list of allowed values."""
-    def __init__(self, name, xtype, allowed=None):
+    def __init__(self, name: str, xtype: str, allowed: list[int] | None = None) -> None:
         """
         Initialize an EtsfDimension instance.
 
@@ -68,7 +71,7 @@ class EtsfDimension(EtsfObject):
         self.xtype = xtype
         self.allowed = allowed
 
-    def validate(self, ncdata):
+    def validate(self, ncdata: netCDF4.Dataset) -> list[str]:
         """
         Validate the dimension in the NC dataset.
 
@@ -78,7 +81,7 @@ class EtsfDimension(EtsfObject):
         Returns:
             list: List of error strings.
         """
-        errors = []
+        errors: list[str] = []
         eapp = errors.append
 
         # Dimension should be present.
@@ -97,7 +100,7 @@ class EtsfDimension(EtsfObject):
 
 class EtsfAttribute(EtsfObject):
     """A dimension has a name, a type and, optionally, a shape and list of allowed values."""
-    def __init__(self, name, xtype, shape=None, allowed=None):
+    def __init__(self, name: str, xtype: str, shape: list[int] | None = None, allowed: list[str] | None = None) -> None:
         """
         Initialize an EtsfAttribute instance.
 
@@ -109,7 +112,7 @@ class EtsfAttribute(EtsfObject):
         """
         self.name = name
 
-    def validate(self, ncdata):
+    def validate(self, ncdata: netCDF4.Dataset) -> list[str]:
         """
         Validate the attribute in the NC dataset.
 
@@ -119,7 +122,7 @@ class EtsfAttribute(EtsfObject):
         Returns:
             list: List of error strings.
         """
-        errors = []
+        errors: list[str] = []
         eapp = errors.append
         nc_attrs = ncdata.ncattrs()
 
@@ -153,9 +156,10 @@ class EtsfVariable(EtsfObject):
         reqattrs (list[EtsfAttribute], optional): Attributes that the variable must possess.
     """
     # Stores all the instances we are gonna create.
-    all_variables = []
+    all_variables: list[EtsfVariable] = []
 
-    def __init__(self, name, xtype, dimensions, allowed=None, reqattrs=None):
+    def __init__(self, name: str, xtype: str, dimensions: list[EtsfDimension],
+                 allowed: Sequence[Any] | None = None, reqattrs: list[EtsfAttribute] | None = None) -> None:
         self.name = name
         self.xtype = xtype
         #if xtype == "char": assert shape
@@ -170,7 +174,7 @@ class EtsfVariable(EtsfObject):
         # Store the instance in cls.all_variables
         self.__class__.all_variables.append(self)
 
-    def validate(self, ncdata):
+    def validate(self, ncdata: netCDF4.Dataset) -> list[str]:
         """
         Validate the variable in the NC dataset.
 
@@ -180,7 +184,7 @@ class EtsfVariable(EtsfObject):
         Returns:
             list: List of error strings.
         """
-        errors = []
+        errors: list[str] = []
         eapp = errors.append
 
         # Variable should be present.
@@ -233,14 +237,15 @@ class EtsfVariable(EtsfObject):
 
 class VariableWithUnits(EtsfVariable):
     """A Variable that requires the specification of units."""
-    def __init__(self, name, xtype, dimensions, allowed=None, reqattrs=None):
+    def __init__(self, name: str, xtype: str, dimensions: list[EtsfDimension],
+                 allowed: Sequence[Any] | None = None, reqattrs: list[EtsfAttribute] | None = None) -> None:
         if reqattrs is None: reqattrs = []
         reqattrs = reqattrs[:]
         reqattrs.append(units)
 
         super().__init__(name, xtype, dimensions, allowed=allowed, reqattrs=reqattrs)
 
-    def validate(self, ncdata):
+    def validate(self, ncdata: netCDF4.Dataset) -> list[str]:
         """
         Validate the variable (with units) in the NC dataset.
 
@@ -435,14 +440,14 @@ class EtsfGroup:
     satisfying specific parts of the ETSF core specification (e.g., Crystallographic
     data, K-points, etc.).
     """
-    attributes = []
-    dimensions = []
-    variables = []
-    at_least_one_variable_in = []
-    subgroups = []
+    attributes: list[EtsfAttribute] = []
+    dimensions: list[EtsfDimension] = []
+    variables: list[EtsfVariable] = []
+    at_least_one_variable_in: list[EtsfVariable] = []
+    subgroups: list[type[EtsfGroup]] = []
 
     @classmethod
-    def validate_file(cls, path):
+    def validate_file(cls, path: str) -> list[str]:
         """
         Validate the NetCDF file at path.
 
@@ -458,7 +463,7 @@ class EtsfGroup:
         return errors
 
     @classmethod
-    def validate(cls, ncdata):
+    def validate(cls, ncdata: netCDF4.Dataset) -> list[str]:
         """
         Validate the NetCDF data.
 
@@ -468,7 +473,7 @@ class EtsfGroup:
         Returns:
             list: List of error strings.
         """
-        errors = []
+        errors: list[str] = []
 
         # Test attributes.
         for attr in cls.attributes:
@@ -777,7 +782,7 @@ class PotentialGroup(DenPotGroup):
     pass
 
 
-def validate_vars(path: str) -> list[str]:
+def validate_vars(path: str) -> list[list[str]]:
     """
     Validate the ETSF variables declared in file `path`.
 
@@ -788,7 +793,8 @@ def validate_vars(path: str) -> list[str]:
         list: List of error strings.
     """
     ncdata = netCDF4.Dataset(path, mode="r")
-    evars, all_errors = [] , []
+    evars: list[EtsfVariable] = []
+    all_errors: list[list[str]] = []
     d = {}
     for var in EtsfVariable.all_variables:
        if var.name in ncdata.variables:
@@ -821,7 +827,7 @@ def validate_vars(path: str) -> list[str]:
     return all_errors
 
 
-def find_groups(path):
+def find_groups(path: str) -> list[type[EtsfGroup]]:
     """
     Find the ETSF groups present in path and validate them.
 
@@ -832,7 +838,7 @@ def find_groups(path):
         list: List of groups present and validated.
     """
     ncdata = netCDF4.Dataset(path, mode="r")
-    groups = []
+    groups: list[type[EtsfGroup]] = []
     for g in all_subclasses(EtsfGroup):
         if g.validate(ncdata):
             groups.append(g)
@@ -843,7 +849,7 @@ def find_groups(path):
     return groups
 
 
-def validate_groups(path, groups):
+def validate_groups(path: str, groups: list[type[EtsfGroup]]) -> list[list[str] | str]:
     """
     Validate the presence and consistency of a list of groups.
 
@@ -861,7 +867,8 @@ def validate_groups(path, groups):
     #if ncdata.data_model != "NETCDF4":
     #    wrong_datamodel = "Found data_model %s while it should be NETCDF4" % ncdata.data_model
 
-    egroups, errors = [], []
+    egroups: list[type[EtsfGroup]] = []
+    errors: list[list[str] | str] = []
     for group in groups:
         elist = group.validate(ncdata)
         if elist:
@@ -895,7 +902,7 @@ def validate_groups(path, groups):
     return errors
 
 
-def validate_ncfile(path):
+def validate_ncfile(path: str) -> list[list[str] | str]:
     """
     Validate the NetCDF files produced by ABINIT.
 
@@ -911,7 +918,7 @@ def validate_ncfile(path):
     # New netcdf files introduced in Abinit should try to use the etsfio specs as much
     # as possible and extend the format to treat new cases.
     # Remember that gmatteo is watching you so don't try to hack this code.
-    ext2groups = {
+    ext2groups: dict[str, list[type[EtsfGroup]] | None] = {
         # GS files.
         "GSR.nc": [CrystalGroup, KpointsGroup, StatesGroup],
         "DEN.nc": [DensityGroup],
@@ -960,7 +967,7 @@ def validate_ncfile(path):
         "MDF.nc": [CrystalGroup, KpointsGroup, StatesGroup],
     }
 
-    groups = None
+    groups: list[type[EtsfGroup]] | None = None
     fname = os.path.basename(path)
 
     # DFPT files require regular expressions e.g.

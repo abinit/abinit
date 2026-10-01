@@ -320,6 +320,7 @@ end subroutine tdep_sampling_rotate
 
 !=====================================================================================================
 
+!!***
 !!****f* ABINIT/m_tdep_sampling/tdep_MatchIdeal2Average
 !! NAME
 !!  tdep_MatchIdeal2Average

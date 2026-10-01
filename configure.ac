@@ -59,9 +59,34 @@ ABI_MSG_SECTION([Basic initialization])
 # Initial setup
 AC_CANONICAL_TARGET
 
-# Disable pax to initialise Automake because it causes 'make dist' to fail
+# tar-pax (not tar-ustar): the strict POSIX 1988 ustar format caps the tar
+# header's name/linkname fields at 100 characters. doc/tests is a symlink to
+# ../tests, and `make dist`'s tar invocation dereferences symlinks (-h), so
+# doc/tests/<subdir>/<file> and tests/<subdir>/<file> end up as the same
+# on-disk file; tar then archives the second occurrence as a hard link back
+# to the first, storing that first path as the linkname. For long reference
+# filenames (e.g. doc/tests/paral/Refs/t108_MPI8o_DS2_CTQMC_HISTOGRAM_
+# iatom0001_ilam03.dat, 102 chars once prefixed with the versioned dist
+# directory name) that exceeds the 100-char limit, so ustar silently drops
+# the entry ("link name is too long; not dumped") and the resulting tarball
+# fails to extract. `distcheck` on alps_gnu_9.5_sdebug hit exactly this
+# (build #29, https://dev-buildbot.abinit.org/#/builders/alps_gnu_9.5_sdebug).
+# pax/POSIX headers have no such limit (arbitrarily long names/linknames via
+# extended header records), which is the standard fix for this class of
+# "tar: ... name is too long" dist failure.
+#
+# This does NOT reintroduce the problem the alias below guards against:
+# Automake's tar-pax option still tries plain tar first, with
+# `--format=posix` (verified: `am__tar = tar --format=posix -chf - ...` in
+# the generated Makefile) -- it only *also* keeps the standalone `pax`
+# utility as one of its later autodetection fallbacks if that tar attempt
+# were to fail, and `alias pax='/bin/false'` already unconditionally
+# disables that fallback regardless of which tar-* format is requested here.
+# Confirmed end-to-end: `make dist` on the full tree now succeeds and the
+# offending file round-trips correctly (see PR/commit discussion for the
+# verification transcript).
 alias pax='/bin/false'
-AM_INIT_AUTOMAKE([1.10 tar-ustar])
+AM_INIT_AUTOMAKE([1.10 tar-pax])
 unalias pax
 
 # Early Abinit setup - the order is important!

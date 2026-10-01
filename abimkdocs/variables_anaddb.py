@@ -66,7 +66,7 @@ Note that there is a similar input variable [[asr]] for ABINIT.
   * 1 or 2 --> the ASR for interatomic force constants is imposed by modifying
   the on-site interatomic force constants, in a symmetric way ( **asr** =2),
   or in the more general case, unconstrained way ( **asr** =1).
-  * 6 --> impose ASR and rotational invariance on the interatomic force constants. 
+  * 6 --> impose ASR and rotational invariance on the interatomic force constants.
   This requires the knowledge of the IFCS derivatives, estimated based on real-space
   IFCs moments (requires [[anaddb:ifcflag]]=1) or reading them from flexoddb
   (requires [[anaddb:flexoflag]]=1). Right now, scaling is not optimum with
@@ -82,7 +82,7 @@ slightly breaks the translational invariance. Well, in some pathological
 cases, the breaking can be rather important. Meanwhile, rotational invariance,
 i.e. the total energy should be invariant under rotation and leaves no torque
 on the atoms. Its imposition has different impacts depending on the dimensionality
-of the problem, see [[anaddb:sys_dim]]. 
+of the problem, see [[anaddb:sys_dim]].
 
 Two quantities are affected: the interatomic forces (or dynamical matrices),
 and the effective charges. The ASR for the effective charges is called the
@@ -126,12 +126,12 @@ should use a diagonalisation routine for non-hermitian matrices.
 
 For rotational infariance [[anaddb:asr]]==6, invariance is imposed on the zone-center
 IFCs and/or their derivatives thanks to a Moore-Penrose pseudo-inverse,
-correcting on-site and first-neigbhors interactions. In principle, rotational 
+correcting on-site and first-neigbhors interactions. In principle, rotational
 invariance also propagates to the second derivatives of the IFCs, but this requires a
 rotational-invariant long-range electrostatics treatments of the IFCs, which is now
-missing both in 3D or in low-dimmensional materials. It is therefore desactivated. 
+missing both in 3D or in low-dimmensional materials. It is therefore deactivated.
 As an extension, be very prudent when IFCs moments are used in combination to the
-long-range electrostatic treatments of IFCs ([[anaddb:dipdip]]): they have been 
+long-range electrostatic treatments of IFCs ([[anaddb:dipdip]]): they have been
 tested on a limited amount of systems.
 
 """,
@@ -286,7 +286,7 @@ Frequency-dependent dielectric tensor flag.
         abivarname="dielt_env@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['PhononBands_basic'],
+        topics=["PhononBands_basic"],
         dimensions="scalar",
         defaultval=1,
         mnemonics="DIELecTric constant ENVironment",
@@ -306,23 +306,23 @@ Frequency-dependent dielectric tensor flag.
         abivarname="dielt_thick@anaddb",
         varset="anaddb",
         vartype="real",
-        topics=['PhononBands_basic'],
+        topics=["PhononBands_basic"],
         dimensions="scalar",
         defaultval=2,
         mnemonics="dielectric thickness of 2D materials",
         added_in_version="v10",
         text=r"""
-  In low-dimensional materials, the electronic density doesn't extend infinitively in space, and it is 
+  In low-dimensional materials, the electronic density doesn't extend infinitively in space, and it is
   necessary to define a dielectric thickness when considering electrostatics in such a system (simple)
   or several ones (more advanced electrostatic model) to add the potential variation along the z direction.
-  The embedding dielectric constant is controlled by [[anaddb:dielt_env]]. Right now two cases are possible: 
+  The embedding dielectric constant is controlled by [[anaddb:dielt_env]]. Right now two cases are possible:
 
   * If only the first value of [[anaddb:dielt_thick]] is non-zero, consider one dielectric constant for
-  the whole 2D (dielectric slab). Both in-plane and out-of-plane dipole responses are estimated using this 
-  thickness. The dielectric constants of the 2D are then computed based on DFPT dielectric tensors with 
+  the whole 2D (dielectric slab). Both in-plane and out-of-plane dipole responses are estimated using this
+  thickness. The dielectric constants of the 2D are then computed based on DFPT dielectric tensors with
   vacuum considering capacitors in parallel or in series, respectively.
 
-  * If two values are input, the first one corresponds to the total (outer) dielectric thickness 
+  * If two values are input, the first one corresponds to the total (outer) dielectric thickness
   (beyond that value, the dielectric constant is fixed by [[anaddb:dielt_env]]), while the second gives
    the inner dielectric thickness with the dielectric constant fixed to 1. The outer dielectric constant
    is then computed based on DFPT dielectric tensors.
@@ -2421,13 +2421,13 @@ some slight symmetry breaking effects. The latter can be bypassed by this additi
         abivarname="sys_dim@anaddb",
         varset="anaddb",
         vartype="integer",
-        topics=['PhononBands_basic'],
+        topics=["PhononBands_basic"],
         dimensions="scalar",
         defaultval=1,
         mnemonics="SYStem DIMensionality",
         added_in_version="v10",
         text=r"""
-  Control the dimensionaility of the problem when rotational invariance is imposed on the interatomic force constants
+  Control the dimensionality of the problem when rotational invariance is imposed on the interatomic force constants
   [[anaddb:asr]]==6 AND/OR when long-range electrostatics IFCs of 2D materials are considered (in this case,
   only available with [[anaddb:sys_dim]]<5, but both for [[anaddb:dipdip]] and [[anaddb:quadquad]]). Currently, only
   possible to consider [[anaddb:dipquad]] and [[anaddb:quadquad]] interactions at the same time.

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 import os
@@ -8,16 +8,15 @@ from collections import OrderedDict
 
 # Get optimizations
 opt_data = OrderedDict()
-with open("config.optim", "r") as opt_file:
-    opt_specs = [line for line in opt_file.read().split("\n") \
-        if ( len(line) > 0)]
+with open("config.optim") as opt_file:
+    opt_specs = [line for line in opt_file.read().split("\n") if (len(line) > 0)]
     for line in opt_specs:
         line_specs = line.split("=")
         key = line_specs[0]
         val = "=".join(line_specs[1:])[1:-1]
-        if ( key == "optim_dumper_template" ):
+        if key == "optim_dumper_template":
             optim_dumper_template = val
-        elif ( key == "optim_dumper_output" ):
+        elif key == "optim_dumper_output":
             optim_dumper_output = val
         else:
             opt_data[key] = val
@@ -25,24 +24,23 @@ with open("config.optim", "r") as opt_file:
 # Fix empty default flags
 # (writing an empty string crashes the program when compiling with ifort
 # or xlf)
-if ( opt_data["fcflags_opt_default"] == "" ):
+if opt_data["fcflags_opt_default"] == "":
     opt_data["fcflags_opt_default"] = "--- None ---"
 
 # Build source code
 config_optim = ""
 for srcdir in opt_data["fcflags_opt_dirlist"].split():
-    key = "fcflags_opt_{}".format(srcdir)
-    if ( key in opt_data ):
-        config_optim += """
+    key = f"fcflags_opt_{srcdir}"
+    if key in opt_data:
+        config_optim += f"""
 
   write(my_unit,"(1x,a,a,3x,a,a,a)") "Optimizations for {srcdir}:",ch10, &
-&   "{optim}",ch10,ch10""".format(srcdir=srcdir, optim=opt_data[key])
+&   "{opt_data[key]}",ch10,ch10"""
 
 # Get template and substitute text
-with open(optim_dumper_template, "r") as template_file:
+with open(optim_dumper_template) as template_file:
     dump_source = template_file.read()
-    dump_source = re.sub("@fcflags_opt_default@",
-        opt_data["fcflags_opt_default"], dump_source)
+    dump_source = re.sub("@fcflags_opt_default@", opt_data["fcflags_opt_default"], dump_source)
     dump_source = re.sub("@config.optim@", config_optim, dump_source)
 
 # Write down source file

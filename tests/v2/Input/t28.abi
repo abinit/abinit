@@ -44,18 +44,17 @@
 #%% [setup]
 #%% executable = anaddb
 #%% input_ddb = t27.ddb.out
-#%% test_chain = t26.abi, t27.abi, t28.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t28.abo, tolnlines = 10, tolabs = 2.000e-04, tolrel = 5.000e-08
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
-#%% keywords = 
+#%% keywords =
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%   Phonon band structure of Al, from DDB of test 27.
-#%%   The parameters were really too low in test 26, so that some 
+#%%   The parameters were really too low in test 26, so that some
 #%%   phonon unstabilities are present close to Gamma. These
 #%%   do not appear anymore in test 29.
 #%% topics = PhononBands

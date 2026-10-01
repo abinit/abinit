@@ -23,18 +23,17 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = optic
-#%% test_chain = t05.abi, t06.abi
 #%% [files]
-#%% files_to_test = 
-#%%   t06_0001_0001-linopt.out          , tolnlines = 17,   tolabs = 1.1e-04, tolrel = 4.0e-07; 
-#%%   t06_0002_0003-linopt.out          , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00; 
+#%% files_to_test =
+#%%   t06_0001_0001-linopt.out          , tolnlines = 17,   tolabs = 1.1e-04, tolrel = 4.0e-07;
+#%%   t06_0002_0003-linopt.out          , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00;
 #%%
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = 
-#%% description = 
-#%%  GaAs, zinc-blende structure. GGA-PBE. nsppol=1. Code optic. Use DDK files in netcdf format. 
+#%% keywords =
+#%% description =
+#%%  GaAs, zinc-blende structure. GGA-PBE. nsppol=1. Code optic. Use DDK files in netcdf format.
 #%% topics = Optic
 #%%<END TEST_INFO>

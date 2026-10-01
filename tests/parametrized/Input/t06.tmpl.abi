@@ -1,0 +1,40 @@
+%YAML
+test_info:
+  setup: {executable: abinit}
+  files:
+    files_to_test:
+      # DatasetInfo (mpw is per process) is ignored by default
+      - {name: "{id}.abo", mode: yaml_docs, tolnlines: 0, tolabs: 1.1e-8, tolrel: 1.0e-8, fld_options: -medium}
+  extra_info: {keywords: [PAW], authors: [M. Giantomassi],
+               description: "3C-SiC, PAW GS with paral_kgb 1 (PAW version of t02): results must not depend on the k-point/band/FFT distribution"}
+
+axes:
+  # nproc must be npkpt * npband * npfft, and a process count reachable by testbot (1, 2, 4, 8, ...)
+  - type: explicit
+    values:
+      - {nproc: 1, npkpt: 1, npband: 1, npfft: 1}
+      - {nproc: 2, npkpt: 1, npband: 2, npfft: 1}
+      - {nproc: 4, npkpt: 2, npband: 2, npfft: 1}
+      - {nproc: 4, npkpt: 1, npband: 4, npfft: 1}
+      - {nproc: 4, npkpt: 1, npband: 2, npfft: 2}
+      - {nproc: 8, npkpt: 2, npband: 2, npfft: 2}
+%ENDYAML
+
+# 3C-SiC (zinc blende) at the ideal positions, LDA PAW datasets (JTH-based PseudoDojo)
+acell 3*8.24
+rprim  0.0 0.5 0.5   0.5 0.0 0.5   0.5 0.5 0.0
+ntypat 2  znucl 14 6  natom 2  typat 1 2
+xred  0.0 0.0 0.0   0.25 0.25 0.25
+ecut 12.0
+pawecutdg 24.0
+# Fixed FFT grids: with npfft > 1 the grids must be divisible by npfft, so the automatic choice
+# would depend on the distribution (fine grid 27^3 for npfft 1, 30^3 for npfft 2).
+ngfft   3*20
+ngfftdg 3*30
+nband 8
+kptopt 1  ngkpt 4 4 4  nshiftk 1  shiftk 0.0 0.0 0.0
+nstep 50  tolvrs 1.0d-10
+diemac 6.0
+paral_kgb 1
+pp_dirpath "$ABI_PSPDIR/Psdj_paw_pw_std"
+pseudos "Si.xml, C.xml"

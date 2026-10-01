@@ -1,12 +1,16 @@
+from __future__ import annotations
+
 """
-Define classes and contants to represent the state of iteration of a document
+Define classes and constants to represent the state of iteration of a document
 as well as the operations possible on this state. This is used in filter
 applications by the configuration handler.
 """
+from collections.abc import Callable
+from typing import Any
 
 from .errors import EmptySetError, NotOrderedOverlappingSetError
 
-ITERATORS = [  # order matters
+ITERATORS: list[str] = [  # order matters
     "dtset",
     "timimage",
     "image",
@@ -15,14 +19,14 @@ ITERATORS = [  # order matters
 ]
 
 # associate an iterator with its deepness in the global computation
-ITERATOR_RANKS = {key: i for i, key in enumerate(ITERATORS)}
+ITERATOR_RANKS: dict[str, int] = {key: i for i, key in enumerate(ITERATORS)}
 
 
 class IntSet:
     """
     Represent a subset of the natural integers.
     """
-    def __init__(self, obj):
+    def __init__(self, obj: int | list[int] | dict[str, int] | str) -> None:
         """
         Initialize the IntSet.
 
@@ -39,7 +43,7 @@ class IntSet:
             self._type = "singleton"
             self.value = obj
 
-            def test(v):
+            def test(v: Any) -> bool:
                 if isinstance(v, IntSet):
                     if v._type == "singleton":
                         return v.value == self.value
@@ -49,7 +53,7 @@ class IntSet:
             self._type = "finite"
             self.values = frozenset(obj)
 
-            def test(v):
+            def test(v: Any) -> bool:
                 if isinstance(v, IntSet):
                     if v._type == "singleton":
                         return v.value in self
@@ -70,7 +74,7 @@ class IntSet:
                 self._type = "half-bounded"
                 self.min = fr
 
-                def test(v):
+                def test(v: Any) -> bool:
                     if isinstance(v, IntSet):
                         if v._type == "singleton":
                             return v.value in self
@@ -90,7 +94,7 @@ class IntSet:
                 self.min = fr
                 self.max = to
 
-                def test(v):
+                def test(v: Any) -> bool:
                     if isinstance(v, IntSet):
                         if v._type == "singleton":
                             return v.value in self
@@ -107,24 +111,24 @@ class IntSet:
         elif obj == "all":
             self._type = "natural"
 
-            def test(v):
+            def test(v: Any) -> bool:
                 return True
 
         else:
             raise TypeError(f"Unknown input for IntSet: {obj}")
 
-        self._test = test
+        self._test: Callable[[Any], bool] = test
 
-    def __contains__(self, v):
+    def __contains__(self, v: Any) -> bool:
         return self._test(v)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, IntSet) and self in other and other in self
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
         return not (self == other)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if self._type == "singleton":
             return f"IntSet({self.value})"
         if self._type == "finite":
@@ -147,19 +151,19 @@ class IterStateFilter:
     For example IterStateFilter({'dtset': 4, 'image': {1, 5}}) is
     {4} x N* x {1, 2, 3, 4, 5} x N* x N*
     """
-    def __init__(self, d):
+    def __init__(self, d: dict[str, int | list[int] | dict[str, int] | str]) -> None:
         """
         Initialize the IterStateFilter.
 
         Args:
             d (dict): Dictionary mapping iterator names to their allowed values.
         """
-        self.filters = {}
+        self.filters: dict[str, IntSet] = {}
         for it in ITERATORS:
             if it in d:
                 self.filters[it] = IntSet(d[it])
 
-    def match(self, state):
+    def match(self, state: dict[str, int]) -> bool:
         """
         Check if a given state matches the filter.
 
@@ -174,7 +178,7 @@ class IterStateFilter:
                 return False
         return True
 
-    def include(self, filt):
+    def include(self, filt: IterStateFilter) -> bool:
         """
         Return True if filt is included (see the set interpretation
         in class docstring) in self, False otherwise.
@@ -189,13 +193,13 @@ class IterStateFilter:
                 return False
         return True
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return ("IterStateFilter({"
                 + ", ".join(f'"{n}": {s}'
                             for n, s in self.filters.items())
                 + "})")
 
-    def cmp(self, other):
+    def cmp(self, other: IterStateFilter) -> int:
         """
         Return 1 or -1 if their is a relation of order between the two
         members else raise an error.
@@ -211,7 +215,7 @@ class IterStateFilter:
             return 1
         raise NotOrderedOverlappingSetError(self, other)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, IterStateFilter):
             return False
         for it in ITERATORS:
@@ -226,17 +230,17 @@ class IterStateFilter:
 
         return True
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
         return not (self == other)
 
-    def __lt__(self, other):
+    def __lt__(self, other: IterStateFilter) -> bool:
         return self.cmp(other) == 1
 
-    def __le__(self, other):
+    def __le__(self, other: IterStateFilter) -> bool:
         return self.cmp(other) >= 0
 
-    def __gt__(self, other):
+    def __gt__(self, other: IterStateFilter) -> bool:
         return self.cmp(other) == -1
 
-    def __ge__(self, other):
+    def __ge__(self, other: IterStateFilter) -> bool:
         return self.cmp(other) <= 0

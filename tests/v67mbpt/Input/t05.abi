@@ -82,16 +82,15 @@ ecut 8.0          # Maximal kinetic energy cut-off, in Hartree
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t04.abi, t05.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t05.abo, tolnlines = 10, tolabs = 1.1e-3, tolrel = 4.0e-2, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords =  GW, NC
-#%% description = 
+#%% description =
 #%%  Carbon in diamond structure. Chained GW calculation: The first run produces the KSS, the SCR, the SUSC
 #%%  and the QPS file. These file are subsequently read and used in t537 using irdwfk, irdscr, irdsuscep and irdqps
 #%%  In the second dataset of t85, the screened interaction W is approximated using the test-electron

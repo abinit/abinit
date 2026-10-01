@@ -240,6 +240,7 @@ public :: irrep_free
    contains
    procedure :: free => groupk_free
  end type group_k_t
+!!***
 
 contains
 

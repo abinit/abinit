@@ -1,4 +1,8 @@
 """Panel dashboard to analyze the data stored in the mocc files (memory allocation info)."""
+from __future__ import annotations
+
+from typing import Any
+
 from fkiss.termcolor import cprint
 
 try:
@@ -9,7 +13,7 @@ except ImportError as exc:
     raise exc
 
 
-def _df(df):
+def _df(df: Any) -> Any:
     """
     Create a Panel DataFrame widget.
 
@@ -31,7 +35,7 @@ class MoccViewer(param.Parameterized):
     #engine = pn.widgets.Select(value="dot",
     #    options=['dot', 'neato', 'twopi', 'circo', 'fdp', 'sfdp', 'patchwork', 'osage'])
 
-    def __init__(self, mocc, **params):
+    def __init__(self, mocc: Any, **params: Any) -> None:
         """
         Initialize the MoccViewer.
 
@@ -42,7 +46,7 @@ class MoccViewer(param.Parameterized):
         super().__init__(**params)
         self.mocc = mocc
 
-    def get_panel(self):
+    def get_panel(self) -> Any:
         """
         Build the Panel dashboard.
 

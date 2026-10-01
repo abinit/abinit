@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 """
 Define basic structures without particular requirements.
 """
+from typing import Any
 
 from ..common import FailDetail
 from ..register_tag import yaml_auto_map, yaml_not_available_tag, yaml_scalar
@@ -18,7 +21,7 @@ class EnergyTerms:
         "total_energy_eV",
     }
 
-    def __init__(self, comment="no comment"):
+    def __init__(self, comment: str = "no comment") -> None:
         """
         Initialize EnergyTerms.
 
@@ -28,7 +31,7 @@ class EnergyTerms:
         self.comment = comment
 
     @classmethod
-    def from_map(cls, map):
+    def from_map(cls, map: dict[str, Any]) -> EnergyTerms:
         """
         Create an EnergyTerms instance from a YAML mapping.
 

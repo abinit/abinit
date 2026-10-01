@@ -801,9 +801,9 @@ end subroutine sigma_pade_init
 !!***
 !----------------------------------------------------------------------
 
-!!****f* m_dyson_solver/sigma_pade_init
+!!****f* m_dyson_solver/sigma_pade_init_spinor
 !! NAME
-!!  sigma_pade_init
+!!  sigma_pade_init_spinor
 !!
 !! FUNCTION
 !!  Initialize the Pade' from the `npts` values of Sigma_c(iw) given on the mesh `zmesh`.

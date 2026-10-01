@@ -17,12 +17,12 @@ fit_ncoeff_per_iatom = 2
 fit_rangePower = 3 3
 fit_cutoff = 5.4
 fit_ncoeff = 6
-fit_dispterms = 1 
+fit_dispterms = 1
 fit_SPCoupling = 1
 fit_SPC_maxS = 2
-fit_anhaStrain = 1 
-fit_iatom = 0 
-fit_EFS = 1 1 1 
+fit_anhaStrain = 1
+fit_iatom = 0
+fit_EFS = 1 1 1
 sel_EFS = 1 1 1
 fit_factors = 1 1 1
 prt_GF_csv = 1
@@ -34,7 +34,7 @@ prt_GF_csv = 1
 #%% input_ddb = t103_ddb.in
 #%% md_hist = t103_HIST
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t103.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   t103_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   t103_coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
@@ -47,8 +47,8 @@ prt_GF_csv = 1
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = A. Martin, M.M. Schmitt
-#%% keywords = Effective potential, multibinit
-#%% description = 
+#%% keywords = Effective_potential, multibinit
+#%% description =
 #%%   Read ddb and HIST, fit the anharmonic part on energies and generate effective potential
 #%%   Disabled checking of GF_values_iatom2_proc000_iter002.csv, as there name of the coefficient is not determinant and can have multiple correct value. In the future, the priority of the coefficient name should be included so that we choose the name according to a rule rather than using the first in the list of terms.
 #%% topics = FitProcess,LatticeModel

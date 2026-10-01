@@ -53,17 +53,16 @@ qrefine 2 2 2
 #%% [setup]
 #%% executable = anaddb
 #%% input_ddb = t79.ddb.out
-#%% test_chain = t78.abi, t79.abi, t80.abi, t81.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t81.abo, tolnlines = 14, tolabs = 2.e-4, tolrel = 1.e-6
-#%% psp_files = 
+#%% psp_files =
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Verstraete
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   Use output from t78 to test qrefine: trivially start with 1x1x1 q-point grid and add the 2x2x2
 #%%   q-points after the method of Gaal Nagy. Not working yet.
 #%%<END TEST_INFO>

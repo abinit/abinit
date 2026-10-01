@@ -35,7 +35,7 @@ randomseed=111111 # for testing only
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. He
-#%% keywords = Effective potential, multibinit, spinpot
+#%% keywords = Effective_potential, multibinit, spinpot
 #%% description =
 #%%   read xml and run spin dynamics. This is to test the spin_damping option.
 #%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)

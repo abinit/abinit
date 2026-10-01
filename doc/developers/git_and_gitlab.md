@@ -10,8 +10,7 @@ If you are not familiar with *git*, we would strongly advise to watch this tutor
 
 <iframe width="1384" height="629" src="https://www.youtube.com/embed/HVsySz-h9r4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-For further information about *git*, please consult
-the [official documentation](https://git-scm.com/).
+For further information about *git*, please consult the [official documentation](https://git-scm.com/).
 
 !!! tip
 
@@ -104,17 +103,7 @@ To be sure the key is proposed each time git calls ssh, you can use ssh-agent:
 
 Every developer has his/her specific gitlab **user_id** e.g. *gonze*.
 An additional *virtual* developer, called **trunk**, is also defined.
-<!--
-===== Standard names (projects, ID, branches) =====
-On the ABINIT gitlab server, an ABINIT project can be defined, specifically for you,
-with address <color blue>git@gitlab.abinit.org</color>:<color red>user_id</color><color blue>/abinit.git</color>.
-In order to do this, log on https://gitlab.abinit.org, go to "Explore projects", find "Trunk / Abinit" (+perhaps select "All"),
-then click on the "Fork" button. You need to contact Jean-Michel Beuken to have access to the ABINIT gitlab.
-In order to start to work locally (not on the ABINIT gitlab server, but on your own machine),
-you should setup the SSH environment for gitlab, as described
-In particular on some machines you need to have an ssh agent running with your rsa key already available,
-so that git finds it when it runs ssh.
--->
+
 You have by default a **master** branch and a **develop** branch in your repo,
 but it is also possible to create and work in other branches.
 
@@ -283,39 +272,3 @@ If, on the contrary, a new branch (e.g. a release branch, let's says 10.2.3 to f
     git push -u origin release-10.2
 
 That's it! You can now make modifications in your release-8.8, then issue a merge request to the trunk/release-8.8.
-
-<!--
-### Additional info: Setup of the SSH environment
-## How to clone your repository with git and track `trunk`
-
-To clone your repository on your `localhost`:
-
-    git clone
-
-To track `trunk`:
-
-    git remote add trunk
-
-To show the list of remote branches:
-
-    git remote -v
-
-To merge the `develop` branch of `trunk` in your branch:
-
-    git checkout develop
-    git pull trunk develop
-
-To push to the gilab server:
-
-    git push origin develop
-
-
-!!! tip
-
-    To access the online help use: `git COMMAND --help`
-
-
-!!! important
-
-    gitflow: You should always send pull requests to trunk/develop
--->

@@ -1,0 +1,64 @@
+%YAML
+test_info:
+  setup: {executable: abinit}
+  files:
+    files_to_test:
+      # GS energies, forces and stresses (YAML documents). DFPT writes no YAML results yet (P4): the phonons,
+      # the Born effective charges and the dielectric tensor are compared through the text DDB of dataset 3.
+      - {name: "{id}.abo", mode: yaml_docs, tolnlines: 0, tolabs: 1.1e-8, tolrel: 1.0e-8, fld_options: -medium}
+      - {name: "{id}o_DS3_DDB", tolnlines: 1, tolabs: 1.1e-8, tolrel: 1.0e-8}
+  extra_info: {keywords: [NC, DFPT, SOC], authors: [M. Torrent, M. Giantomassi],
+               description: "AlAs NC+SOC (HGH), GS forces/stress, Gamma phonons, Born charges and dielectric tensor: results must not depend on useylm (v9/t133)"}
+
+dataset: all
+axes:
+  # useylm 0: plane-wave KB projectors; useylm 1: real-Ylm projectors (nonlop_ylm pathway)
+  - {type: grid, parameters: {useylm: [0, 1]}}
+%ENDYAML
+# AlAs zinc-blende: NC+SOC ground state (forces + stress), Gamma-point phonons, Born effective charges
+# and dielectric tensor (from v9/t133, with the DDK and the electric-field perturbation added).
+# As is slightly displaced from the ideal (0.25,0.25,0.25) to produce non-zero forces.
+
+ndtset 3
+#--- Dataset 1: GS
+kptopt1  1   tolvrs1  1.0d-14   prtwf1  1
+#--- Dataset 2: DDK (derivative of the wavefunctions with respect to k), non self-consistent
+getwfk2  1   kptopt2  2   rfelfd2 2   rfdir2 1 1 1   iscf2 -3   tolwfr2 1.0d-22   prtwf2  1
+nqpt2    1   qpt2     0.0  0.0  0.0
+#--- Dataset 3: Gamma-point phonons + electric field: dynamical matrix, Born effective charges, dielectric tensor
+getwfk3  1   getddk3  2   kptopt3  2   rfphon3 1   rfatpol3 1 2   rfelfd3 3   rfdir3 1 1 1
+nqpt3    1   qpt3     0.0  0.0  0.0   tolvrs3  1.0d-10   prtwf3  0
+
+# NC+SOC: 2-component spinors
+nspinor  2
+
+# AlAs zinc-blende (experimental a = 5.66 AA = 10.70 bohr, LDA)
+acell    3*10.70
+rprim    0.0  0.5  0.5
+         0.5  0.0  0.5
+         0.5  0.5  0.0
+natom    2
+ntypat   2
+znucl    13  33
+typat    1   2
+xred     0.00  0.00  0.00
+         0.26  0.25  0.25   # As slightly displaced along a1 to produce non-zero forces
+
+# 8 bands: 3 (Al) + 5 (As) valence electrons; occ=1 each with nspinor=2
+nband    8
+
+# Minimal cut-off and k-grid for speed
+ecut     3.0
+ngkpt    2  2  2
+nshiftk  1
+shiftk   0.5  0.5  0.5
+
+# SCF
+nstep   30
+diemac  9.0
+prtden  0
+prteig  0
+chksymbreak 0
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "PseudosHGH_pwteter/13al.3.hgh, PseudosHGH_pwteter/33as.5.hgh"

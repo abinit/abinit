@@ -5709,7 +5709,7 @@ end subroutine frohl_integrator_find_mesh
 !!  call xmpi_sum(z0_nk, comm, ierr)
 !!
 !! end subroutine frohl_integrator_eval
-!! !!***
+!!***
 
 !!****f* m_epthk/frohl_integrator_free
 !! NAME

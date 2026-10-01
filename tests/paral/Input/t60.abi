@@ -75,10 +75,10 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = manneback_gnu_14.2_hpc
+#%% exclude_builders = mann_gnu_13.3
 #%% need_cpp_vars = HAVE_NETCDF_MPI
-#%% [shell] 
-#%% post_commands = 
+#%% [shell]
+#%% post_commands =
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4
@@ -90,11 +90,11 @@
 #%% [NCPU_4]
 #%% files_to_test = t60_MPI4.abo, tolnlines= 6, tolabs=  2.0e-5, tolrel= 3.0e-4
 #%% [extra_info]
-#%% authors = S. Ponc\'e 
+#%% authors = S. Ponc\'e
 #%% keywords = NC, DFPT, EPH_OLD
-#%% description = 
+#%% description =
 #%%  Diamond.
-#%%  Diamond dynamical temperature-dependent of the electronic structure. 
+#%%  Diamond dynamical temperature-dependent of the electronic structure.
 #%%  Three q-points are computed. Test of the parallelization. Must be compared with v7/Refs/t55.abo
-#%%  Exclude manneback_gnu_14.2_hpc because of completely wrong results with MPI 4  OK with NCPU 2 or 1 ... To be debugged ... See also test mpiio#51 MPI4.
+#%%  Exclude mann_gnu_13.3 because of completely wrong results with MPI 4  OK with NCPU 2 or 1 ... To be debugged ... See also test mpiio#51 MPI4.
 #%%<END TEST_INFO>

@@ -35,6 +35,7 @@ module m_tdep_model
 
 !----------------------------------------------------------------------
 
+!!***
 !!****t* m_tdep_model/Phi2_type
 !! NAME
 !! Phi2_type
@@ -64,6 +65,7 @@ module m_tdep_model
 
 !----------------------------------------------------------------------
 
+!!***
 !!****t* m_tdep_model/tdep_Model_type
 !! NAME
 !! tdep_Model_type

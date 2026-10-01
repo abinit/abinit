@@ -2,14 +2,14 @@
 #   Only 3 q-points
  ndtset 1
 
- getwfk      99  
+ getwfk      99
  irdwfq      1
  irdwfkfine  1
  nqpt        1
  iqpt        3
  ieig2rf     1
  smdelta     1
- rfphon      1 
+ rfphon      1
 
 #Size-dependent parameters
  acell 3*6.70346805
@@ -48,16 +48,15 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t50.abi, t51.abi, t52.abi, t53.abi, t54.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t51.abo, tolnlines = 22, tolabs = 1.1e-3, tolrel = 2.0e-4, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = S. Ponc\'e
 #%% keywords = NC, DFPT, EPH_OLD
-#%% description = 
+#%% description =
 #%%   This tests make use of the irdwfkfine variable instead of the getwfkfine variable used in the
 #%%   previous test. The third q-point is computed here.
 #%% topics = TDepES

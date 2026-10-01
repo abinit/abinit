@@ -1,0 +1,40 @@
+%YAML
+test_info:
+  setup: {executable: abinit}
+  files:
+    files_to_test:
+      # main output: GS results of dataset 1 (DFPT writes no YAML results yet)
+      - {name: "{id}.abo", mode: yaml_docs, tolnlines: 0, tolabs: 1.1e-8, tolrel: 1.0e-8, fld_options: -medium}
+      # text DDB files of the phonon datasets, standard fldiff (default mode).
+      # Only the header line with lmnmax depends on useylm. With tolvrs 1e-16 the dynamical matrices agree
+      # to the printed digits (with tolvrs 1e-10 they differ by up to 2.4e-7 at q = X).
+      - {name: "{id}o_DS2_DDB", tolnlines: 1, tolabs: 1.1e-8, tolrel: 1.0e-8}
+      - {name: "{id}o_DS4_DDB", tolnlines: 1, tolabs: 1.1e-8, tolrel: 1.0e-8}
+  extra_info: {keywords: [NC, DFPT], authors: [M. Giantomassi],
+               description: "Si diamond, GS + phonons at Gamma and q = (1/2, 0, 0): results must not depend on useylm"}
+
+dataset: all
+axes:
+  - {type: grid, parameters: {useylm: [0, 1]}}
+%ENDYAML
+
+ndtset 4
+tolvrs1 1.0d-18   prtwf1 1                                       # GS
+getwfk2 1  kptopt2 2  rfphon2 1  rfatpol2 1 2  rfdir2 1 1 1      # Gamma phonons
+nqpt2 1   qpt2 0.0 0.0 0.0   tolvrs2 1.0d-16   prtwf2 0
+iscf3 -2  getden3 1  getwfk3 1  kptopt3 3  nqpt3 1  qpt3 0.5 0.0 0.0  tolwfr3 1.0d-22  prtwf3 1   # WFQ: NSCF on k+q
+getwfk4 1  getwfq4 3  kptopt4 3  rfphon4 1  rfatpol4 1 2  rfdir4 1 1 1   # phonons at q = (1/2, 0, 0)
+nqpt4 1   qpt4 0.5 0.0 0.0   tolvrs4 1.0d-16   prtwf4 0
+
+# Diamond Si at the ideal positions
+acell 3*10.18
+rprim  0.0 0.5 0.5   0.5 0.0 0.5   0.5 0.5 0.0
+ntypat 1  znucl 14  natom 2  typat 1 1
+xred  0.0 0.0 0.0   0.25 0.25 0.25
+ecut 8.0
+nband 4
+kptopt 1  ngkpt 4 4 4  nshiftk 1  shiftk 0.0 0.0 0.0
+nstep 50
+diemac 12.0
+pp_dirpath "$ABI_PSPDIR"
+pseudos "PseudosTM_pwteter/14si.pspnc"

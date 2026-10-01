@@ -52,17 +52,16 @@ qph1l
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% test_chain = t96.abi, t97.abi, t98.abi, t99.abi
 #%% input_ddb =  t97.ddb.out
 #%% input_gkk =  t98o
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t99.abo, tolnlines = 4, tolabs = 4.000e+03, tolrel = 1.500e-02, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
+#%% keywords =
 #%% description = anaddb run for Ni, from t96 t97 t98. Calculate e-p coupling
 #%% topics = PhononWidth, ElPhonTransport
 #%%<END TEST_INFO>

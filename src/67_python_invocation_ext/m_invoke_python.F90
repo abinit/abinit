@@ -1,4 +1,4 @@
-!!****m* ABINIT/invocation_python_interface
+!!****m* ABINIT/m_invoke_python
 !! NAME
 !!  invocation_python_interface
 !!
@@ -154,4 +154,4 @@ module m_invoke_python
    end subroutine invoke_python_run_script
 
 end module m_invoke_python
-
+!!***

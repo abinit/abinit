@@ -116,7 +116,6 @@ znucl  13
 #%% [setup]
 #%% executable = abinit
 #%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
-#%% test_chain = t85.abi, t86.abi, t87.abi, t88.abi
 #%% [files]
 #%% files_to_test =
 #%%   t88.abo, tolnlines= 100, tolabs=5.000e-02, tolrel=5.0e-02, fld_options= -easy;

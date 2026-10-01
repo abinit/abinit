@@ -5449,9 +5449,9 @@ subroutine enfact1_kdt16(iflag,s2x,Fx,dFxds2x)
 end subroutine enfact1_kdt16
 !!***
 
-!!****f* ABINIT/enfact1_kdt16
+!!****f* ABINIT/enfact2_kdt16
 !! NAME
-!! enfact1_kdt16
+!! enfact2_kdt16
 !!
 !! FUNCTION
 !!  Returns Finite-T GGA KDT16 enhancement factor and its derivative

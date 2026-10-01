@@ -6,7 +6,6 @@ t102o
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = conducti
-#%% test_chain = t102.abi, t103.abi
 #%% [files]
 #%% files_to_test =
 #%%  t103_sigX_at1,  tolnlines =10, tolabs = 2.1e-10, tolrel = 1.0e-07, fld_options = -easy;

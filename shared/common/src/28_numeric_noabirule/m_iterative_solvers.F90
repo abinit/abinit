@@ -17,7 +17,7 @@
 #include "abi_common.h"
 
 module m_iterative_solvers
-    
+
     use m_errors
     use defs_basis
     use m_xmpi
@@ -27,7 +27,7 @@ module m_iterative_solvers
     implicit none
     private
     public :: cg_linear_solver, gmres_linear_solver, cg_eigen_solver_treshold
- 
+
     contains
 
 !-------------------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ module m_iterative_solvers
     !!
     !! FUNCTION
     !!  Compute the smallest eigenvalues and corresponding eigenvectors of a matrix using
-    !!  the Conjugate Gradient method to minimize the Rayleigh quotient. 
+    !!  the Conjugate Gradient method to minimize the Rayleigh quotient.
     !!  The stopping criterion is : at least one of the computed eigenvalues is above 'treshold'.
     !!
     !! INPUTS
@@ -59,7 +59,7 @@ module m_iterative_solvers
     !!
     !! SOURCE
     subroutine cg_eigen_solver_treshold(n, matvec, x0, tol, max_iter, max_neig, eigenvalue_threshold, eigenvalues, eigenvectors, n_eig)
-        
+
         ! Input parameters
         integer, intent(in) :: n, max_iter, max_neig
         real(dp), intent(in) :: tol, eigenvalue_threshold
@@ -82,9 +82,9 @@ module m_iterative_solvers
         integer :: i, j, iter
         logical :: do_exit
         integer :: ierr
-        
+
         ! *************************************************************************
-        
+
         ! Initialize variables
         x = x0
         call matvec(n, x, Ax)                                   ! Compute initial matrix-vector product
@@ -150,8 +150,8 @@ module m_iterative_solvers
     !!  cg_update
     !!
     !! FUNCTION
-    !!  Perform a single Conjugate Gradient update step to minimize the Rayleigh quotient 
-    !!  of a self-adjoint operator given by matvec. This method is used to approximate 
+    !!  Perform a single Conjugate Gradient update step to minimize the Rayleigh quotient
+    !!  of a self-adjoint operator given by matvec. This method is used to approximate
     !!  the eigenvalue and eigenvector of the operator.
     !!
     !! INPUTS
@@ -170,7 +170,7 @@ module m_iterative_solvers
     !!  residual_norm     = Norm of the residual.
     !!
     !! NOTES
-    !!  - The input vectors (x, r, p, Ap) must be properly initialized before calling 
+    !!  - The input vectors (x, r, p, Ap) must be properly initialized before calling
     !!    this subroutine.
     !!  - The subroutine assumes that the operator is self-adjoint (Hermitian).
     !!
@@ -222,7 +222,7 @@ module m_iterative_solvers
         ! Update solution vector
         x = x + alpha * p
         Ax = Ax + alpha * Ap
-        
+
         ! Update the Rayleigh-quotient
         rayleigh_quotient = dot_product(x, Ax)/dot_product(x, x)
 
@@ -270,7 +270,7 @@ module m_iterative_solvers
 !-------------------------------------------------------------------------------------------
 
     subroutine cg_linear_solver(n, matvec, rhs, est, cg_maxiter, cg_rtol, verbose)
-        
+
         !Arguments ------------------------------------
         integer, intent(in) :: n, cg_maxiter
         real(dp), intent(in) :: cg_rtol
@@ -307,7 +307,7 @@ module m_iterative_solvers
             est = est + alpha * p
             r = r - alpha * Ap
             rsnew = dot_product(r, r)
-            
+
             ! Check for convergence
             do_exit = (sqrt(rsnew) < cg_rtol)
             call xmpi_bcast(do_exit, 0, xmpi_world, ierr)   ! MPI aware: avoid desynchronization.
@@ -403,7 +403,7 @@ module m_iterative_solvers
     !!  gmres_linear_solver
     !!
     !! FUNCTION
-    !!  Solve a linear system using GMRES. Depending on the availability of MKL, 
+    !!  Solve a linear system using GMRES. Depending on the availability of MKL,
     !!  it either calls the MKL FGMRES routine or the gmresm routine.
     !!
     !! INPUTS
@@ -430,11 +430,11 @@ module m_iterative_solvers
                 double precision, intent(inout), target :: x(n_), y(n_)
             end subroutine matvec
         end interface
-      
+
         ! *************************************************************************
-        
+
         call call_gmresm(n, matvec, est, rhs, gmres_maxiter, gmres_rtol, verbose)
-      
+
     end subroutine gmres_linear_solver
 
 !-------------------------------------------------------------------------------------------
@@ -445,7 +445,7 @@ module m_iterative_solvers
 ! https://doi.org/10.1016/j.softx.2017.05.003 (open access)
 !                                      Thanks in advance! Ashley 2019.
 !----------------------------------------------------------------------
-! solve A x = b for x ;  
+! solve A x = b for x ;
 ! minimise |Ax-b| subject to constraint |x| < delta .
 ! requires lapack routines dgelsy, dgesvd.
 !----------------------------------------------------------------------
@@ -459,11 +459,11 @@ module m_iterative_solvers
 ! dotprd  dot product, d = dotprd(n,a,b)
 ! h       Hessian matrix,  size (m+1)*m
 ! v       Krylov subspace, size n*(m+1)
-! res	  on input: |Ax-b|/|b|<res; 
+! res	  on input: |Ax-b|/|b|<res;
 !         on exit:  residual reached
 ! del     on input: if(del>0) then the x returned is the hookstep
 !         on exit:  norm of next b predicted by hook
-! its	  on input: max num its; 
+! its	  on input: max num its;
 !         on exit:  number of its taken
 ! info	  on input: if(info==1) print* residuals
 !                   if(info==2) recalc hookstep with new del
@@ -505,7 +505,7 @@ module m_iterative_solvers
    real(dp), save :: beta
    integer, save :: j
    logical :: done
-   integer :: ierr  
+   integer :: ierr
    character(len=500) :: msg
 
    if(info==2) then
@@ -525,18 +525,18 @@ module m_iterative_solvers
  1 continue
    res_ = 1d99
    stgn = 1d0 - 1d-14
- 
-   beta = dsqrt(dotprd(n,x,x)) 
+
+   beta = dsqrt(dotprd(n,x,x))
    if(beta==0d0)  w = 0d0
    if(beta/=0d0)  call matvec(n,x, w)
    w = b - w
-   beta = dsqrt(dotprd(n,w,w)) 
+   beta = dsqrt(dotprd(n,w,w))
    v(:,1) = w / beta
-     
+
    h = 0d0
    do j = 1, m
       its = its + 1
-      z = v(:,j)      
+      z = v(:,j)
       call psolve(n, z)
       call matvec(n, z, w)
       do i = 1, j
@@ -545,7 +545,7 @@ module m_iterative_solvers
       end do
       h(j+1,j) = dsqrt(dotprd(n,w,w))
       v(:,j+1) = w / h(j+1,j)
-          
+
       p(1) = beta
       p(2:j+1) = 0d0
       h_(1:j+1,1:j) = h(1:j+1,1:j)
@@ -579,11 +579,11 @@ module m_iterative_solvers
       end if
       res_ = res*stgn
 
-   end do   
+   end do
 
  end subroutine gmresm
- 
- 
+
+
 !-----------------------------------------------------------------
 ! replace y with a vector that generates a hookstep
 ! c.f. Viswanath (2008) arXiv:0809.1498
@@ -597,13 +597,13 @@ module m_iterative_solvers
    real(dp) :: a(j+1,j), s(j), u(j+1,j+1), vt(j,j), work(5*(j+1))
    real(dp) :: p(j+1), q(j), mu, qn
    integer :: info
-   
+
    a = h(1:j+1,1:j)
-   
+
    call dgesvd('A','A',j+1,j,a,j+1,s,u,j+1,vt,j,work,5*(j+1),info)
    if(info/=0) stop 'hookstep: dgesvd'
-   
-   p(1:j) = beta * u(1,1:j)   
+
+   p(1:j) = beta * u(1,1:j)
 
    mu = max(s(j)*s(j)*1d-6,1d-99)
    qn = 1d99
@@ -618,7 +618,8 @@ module m_iterative_solvers
    p = - matmul(h(1:j+1,1:j),y(1:j))
    p(1) = p(1) + beta
    del = dsqrt(dot_product(p,p))
- 
+
  end subroutine hookstep
 
 end module m_iterative_solvers
+!!***

@@ -2717,7 +2717,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
  integer :: INFO
  !integer :: ITER ! Only needed if DSGESV is used
  real(dp):: RCOND
- real(dp):: fcart_coeffs_tmp(3,natom,ntime)
+ real(dp),allocatable:: fcart_coeffs_tmp(:,:,:)
  real(dp),allocatable:: AF(:,:),BERR(:),FERR(:),WORK(:),C(:),R(:)
  integer,allocatable :: IPIV(:),IWORK(:),SWORK(:)
 !arrays
@@ -2747,6 +2747,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
  ABI_MALLOC(WORK,(4*N))
  ABI_MALLOC(IWORK,(N))
  ABI_MALLOC(SWORK,(N*(N+NRHS)))
+ ABI_MALLOC(fcart_coeffs_tmp,(3,natom,ntime))
  A=zero; B=zero;
  AF = zero; IPIV = 1;
  R = one; C = one;
@@ -2890,6 +2891,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
  ABI_FREE(SWORK)
  ABI_FREE(A)
  ABI_FREE(B)
+ ABI_FREE(fcart_coeffs_tmp)
 
 end subroutine fit_polynomial_coeff_solve
 !!***
@@ -3435,7 +3437,8 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
  logical :: need_anharmonic,need_print,need_elec_eval,iam_master
  logical :: need_prt_ph
  !arrays
- real(dp):: fcart(3,natom),gred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
+ real(dp):: strten(6),rprimd(3,3)
+ real(dp),allocatable :: fcart(:,:),gred(:,:),xred(:,:)
 !Strings/Characters
  character(len=fnlen) :: file_energy, file_stress, file_anh, name_file
  character(len=500) :: msg
@@ -3443,10 +3446,15 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
  type(abihist) :: hist_out
  character(len=200) :: filename_hist
 
- real(dp) :: weights_tmp(ntime)
+ real(dp),allocatable :: weights_tmp(:)
 ! *************************************************************************
  !MS Hide SCALE-UP variables
  ABI_UNUSED(itime)
+
+ ABI_MALLOC(fcart,(3,natom))
+ ABI_MALLOC(gred,(3,natom))
+ ABI_MALLOC(xred,(3,natom))
+ ABI_MALLOC(weights_tmp,(ntime))
 
  !MPI
  master = 0
@@ -3599,6 +3607,11 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
 
  !MS uncommented for PHONOPY TEST
  call abihist_free(hist_out)
+
+ ABI_FREE(fcart)
+ ABI_FREE(gred)
+ ABI_FREE(xred)
+ ABI_FREE(weights_tmp)
 
 end subroutine fit_polynomial_coeff_computeMSD
 

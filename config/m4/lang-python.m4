@@ -57,7 +57,15 @@ AC_DEFUN([ABI_PY_FEATURES],
   abi_python_ok="no"
 
   # Preserve environment
+  # ABI_ENV_BACKUP only saves the ABINIT-declared variables listed in
+  # config/specs/environment.conf (CC_LIBS, FC_LIBS, CC_LDFLAGS, ...); it
+  # never populates abi_env_LIBS/abi_env_LDFLAGS since bare LIBS/LDFLAGS
+  # are not sections in that file. Restoring from those below would silently
+  # reset LIBS/LDFLAGS to empty, wiping out anything an ac9 file (or
+  # buildbot.ac) seeded them with -- save them ourselves instead.
   ABI_ENV_BACKUP
+  abi_py_saved_LDFLAGS="${LDFLAGS}"
+  abi_py_saved_LIBS="${LIBS}"
 
   # Get Python CPPFLAGS
   if test "${PYTHON}" != "" -a "${PYTHON_CONFIG}" != ""; then
@@ -124,8 +132,8 @@ AC_DEFUN([ABI_PY_FEATURES],
   # Restore environment
   CPPFLAGS="${abi_env_CPPFLAGS}"
   CFLAGS="${abi_env_CFLAGS}"
-  LDFLAGS="${abi_env_LDFLAGS}"
-  LIBS="${abi_env_LIBS}"
+  LDFLAGS="${abi_py_saved_LDFLAGS}"
+  LIBS="${abi_py_saved_LIBS}"
 ]) # ABI_PY_FEATURES
 
 

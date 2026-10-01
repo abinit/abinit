@@ -8,7 +8,6 @@ chneut 0
 #%% [setup]
 #%% executable = anaddb
 #%% input_ddb = t82.ddb.out
-#%% test_chain = t81.abi, t82.abi, t83.abi
 #%% [files]
 #%% files_to_test =
 #%%   t83.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
@@ -16,8 +15,8 @@ chneut 0
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = X. Wu
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   Highly Strained Si (diamond) structure.
 #%%   Using the DDB file merged by test2, this test computed the elastic
 #%%   constant (relaxed ion) considering the correction from remaining

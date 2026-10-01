@@ -12,7 +12,6 @@ tcdfpt_2o_DS6_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% test_chain =  tcdfpt_1.abi, tcdfpt_2.abi, tcdfpt_3.abi, tcdfpt_4.abi, tcdfpt_5.abi, tcdfpt_6.abi, tcdfpt_7.abi
 #%% [files]
 #%% files_to_test =
 #%%   tcdfpt_4.ddb.out, tolnlines=  10, tolabs=  2.000e-08, tolrel=  4.000e-07, fld_options = -easy
@@ -23,4 +22,3 @@ tcdfpt_2o_DS6_DDB
 #%% keywords = CDFPT
 #%% description =  Input file for mrgddb of 2nd derivatives of ETOT at different frequencies
 #%%<END TEST_INFO>
-

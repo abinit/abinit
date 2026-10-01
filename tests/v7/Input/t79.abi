@@ -14,7 +14,7 @@ pawprtvol 3
 ############ Parameters common to all DATASETS
 #==================================================================================
 ##### CONVERGENCE PARAMETERS
-nstep    15 
+nstep    15
 nline     5          #Number of LINE minimisations
 nnsclo    2          #Number of Non-Self Consistent LOops
 tolvrs   1.0d-15
@@ -76,7 +76,7 @@ gwpara5 2        # necessary for dataset 5 DO NOT CHANGE IT if nsppol=2
 
 # -- Ucrpa: screening
 ucrpa 1              # The screening will use the Wannier weights to suppress transitions.
-ucrpa_window  -5.0 5.0 eV  # Exclude a large window of energy 
+ucrpa_window  -5.0 5.0 eV  # Exclude a large window of energy
                            #  (just because it is more stable as the convergence parameters chosen for this automatic test are low)
 
 # -- Ucrpa: Wannier functions
@@ -86,7 +86,7 @@ plowan_natom 1 # Number of atoms
 plowan_iatom 1  # Index of atoms
 plowan_nbl 1  # Number of the orbitals
 plowan_lcalc 2  # Index of the orbitals (2 -> d)
-plowan_projcalc 7  # Projector for the orbitals 
+plowan_projcalc 7  # Projector for the orbitals
 
 # -- DFTU: 1st dataset and definition of correlated angular momentum
 usepawu    1        # DFT+U is used just for printing usefull quantities.
@@ -130,7 +130,7 @@ plowan_compute3 1 # Activate the computation of Wannier functionsplowan_compute3
 #==================================================================================
  optdriver4     3     # Screening calculation
  getwfk4       -1     # Obtain KSS file from previous dataset
- plowan_compute4 10   # Read Wannier functions 
+ plowan_compute4 10   # Read Wannier functions
  nfreqim4       0
  gwcalctyp4 2
  upawu4 0 0 0         # necessary if upawu/=0 in the first three datasets as usepawu=1 everywhere
@@ -143,7 +143,7 @@ plowan_compute3 1 # Activate the computation of Wannier functionsplowan_compute3
  upawu5 0 0 0       # necessary if upawu/=0 in the first three datasets
  optdriver5  4      # Self-Energy calculation
  getwfk5     3      # Obtain KSS file from dataset 1
- plowan_compute5 10   # Read Wannier functions	   
+ plowan_compute5 10   # Read Wannier functions
  getscr5     4      # Obtain SCR file from previous dataset
  ppmodel  2         # in order to use only one frequency
  nkptgw5      0     # number of k-point where to calculate the GW correction: all BZ
@@ -163,8 +163,8 @@ plowan_compute3 1 # Activate the computation of Wannier functionsplowan_compute3
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
-#%% keywords = GW, cRPA, DMFT
+#%% keywords = GW, CRPA, DMFT
 #%% authors =  B. Amadon
-#%% description = For SrVO3, compute cRPA screened interaction U by excluding an energy window to compute epsilon
+#%% description = For SrVO3, compute CRPA screened interaction U by excluding an energy window to compute epsilon
 #%% topics = CalcUJ
 #%%<END TEST_INFO>

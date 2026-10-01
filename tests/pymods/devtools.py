@@ -9,97 +9,27 @@ import os
 import shutil
 import subprocess
 import time
+from collections.abc import Callable
 from functools import wraps
+from typing import Any
+
 from .termcolor import cprint
 
 
 def number_of_cpus() -> int:
     """
-    Detect the number of physical or virtual CPUs on the system.
+    Return the number of logical CPUs available to this process, using the standard library only.
+
+    Logical CPUs include SMT (hyper-threading) siblings and, on hybrid architectures
+    such as Apple Silicon, both performance and efficiency cores.
 
     Returns:
-        int: Number of CPUs detected, or -1 if detection fails.
+        int: Number of logical CPUs, or -1 if detection fails.
     """
-    import os
-    import re
-    import subprocess
-
-    # Python 2.6+
-    #try:
-    #    import multiprocessing
-    #    return multiprocessing.cpu_count()
-    #except (ImportError, NotImplementedError):
-    #    pass
-
-    # POSIX
-    try:
-        res = int(os.sysconf("SC_NPROCESSORS_ONLN"))
-        if res > 0: return res
-    except (AttributeError, ValueError):
-        pass
-
-    # Windows
-    try:
-        res = int(os.environ["NUMBER_OF_PROCESSORS"])
-        if res > 0: return res
-    except (KeyError, ValueError):
-        pass
-
-    # jython
-    try:
-        from java.lang import Runtime
-        runtime = Runtime.getRuntime()
-        res = runtime.availableProcessors()
-        if res > 0: return res
-    except ImportError:
-        pass
-
-    # BSD
-    try:
-        sysctl = subprocess.Popen(["sysctl", "-n", "hw.ncpu"], stdout=subprocess.PIPE)
-        scStdout = sysctl.communicate()[0]
-        res = int(scStdout)
-        if res > 0: return res
-    except (OSError, ValueError):
-        pass
-
-    # Linux
-    try:
-        res = open("/proc/cpuinfo").read().count("processor\t:")
-        if res > 0: return res
-    except OSError:
-        pass
-
-    # Solaris
-    try:
-        pseudoDevices = os.listdir("/devices/pseudo/")
-        expr = re.compile("^cpuid@[0-9]+$")
-        res = 0
-        for pd in pseudoDevices:
-            if expr.match(pd) is not None:
-                res += 1
-        if res > 0: return res
-    except OSError:
-        pass
-
-    # Other UNIXes (heuristic)
-    try:
-        try:
-            dmesg = open("/var/run/dmesg.boot").read()
-        except OSError:
-            dmesgProcess = subprocess.Popen(["dmesg"], stdout=subprocess.PIPE)
-            dmesg = dmesgProcess.communicate()[0]
-
-        res = 0
-        while "\ncpu" + str(res) + ":" in dmesg:
-            res += 1
-
-        if res > 0: return res
-    except OSError:
-        pass
-
-    return -1
-    #raise Exception('Cannot determine number of CPUs on this system')
+    # os.process_cpu_count (py >= 3.13) takes into account the CPU affinity of the process.
+    count_func = getattr(os, "process_cpu_count", os.cpu_count)
+    res = count_func()
+    return res if res else -1
 
 def number_of_gpus() -> int:
     """
@@ -184,7 +114,7 @@ class FileLock:
     # Create an alias for compatibility
     Error = FileLockException
 
-    def __init__(self, file_name, timeout=10, delay=.05):
+    def __init__(self, file_name: str, timeout: float = 10, delay: float = 0.05) -> None:
         """
         Initialize the file lock.
 
@@ -227,7 +157,7 @@ class FileLock:
         fake.release = nop
         return fake
 
-    def acquire(self):
+    def acquire(self) -> None:
         """
         Acquire the lock.
 
@@ -251,7 +181,7 @@ class FileLock:
 
         self.is_locked = True
 
-    def release(self):
+    def release(self) -> None:
         """
         Release the lock by deleting the lock file.
 
@@ -262,7 +192,7 @@ class FileLock:
             os.unlink(self.lockfile)
             self.is_locked = False
 
-    def __enter__(self):
+    def __enter__(self) -> FileLock:
         """
         Enter the runtime context related to this object.
 
@@ -274,7 +204,7 @@ class FileLock:
         if not self.is_locked: self.acquire()
         return self
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, type: Any, value: Any, traceback: Any) -> None:
         """
         Exit the runtime context related to this object.
 
@@ -287,7 +217,7 @@ class FileLock:
         """
         if self.is_locked: self.release()
 
-    def __del__(self):
+    def __del__(self) -> None:
         """
         Destructor to ensure the lock file is released when the instance is deleted.
         """
@@ -301,7 +231,7 @@ class NoErrorFileLock(FileLock):
     Returns True if the lock was acquired, False otherwise.
     """
 
-    def __enter__(self):
+    def __enter__(self) -> bool:
         """
         Enter the runtime context and attempt to acquire the lock.
 
@@ -316,7 +246,7 @@ class NoErrorFileLock(FileLock):
             return True
 
 
-def makeunique(gen):
+def makeunique(gen: Callable[..., Any]) -> Callable[..., Any]:
     """
     Decorator that ensures a generator produces unique outputs by caching them.
 
@@ -324,15 +254,15 @@ def makeunique(gen):
     name generators) when unique values are required.
 
     Args:
-        gen (callable): The generator function to wrap.
+        gen: The generator function to wrap.
 
     Returns:
         callable: A wrapped generator that filters out duplicate values.
     """
-    cache = set()
+    cache: set[Any] = set()
 
     @wraps(gen)
-    def generator(*args):
+    def generator(*args: Any) -> Any:
         s = gen(*args)
         while s in cache:
             s = gen(*args)

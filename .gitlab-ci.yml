@@ -1,0 +1,127 @@
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - when: never
+
+stages: [check]
+
+# Fail if the MR source branch is behind its target branch (i.e. the target tip is not
+# an ancestor of the source head) or if it has no new commits with respect to the target.
+up-to-date:
+  stage: check
+  image: python:3.12
+  variables:
+    GIT_DEPTH: "0"
+  script:
+    - |
+      set -e
+      target_branch="$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+      # The pipeline usually runs in the fork (source project), so fetch the target
+      # branch from the target project explicitly.
+      target_url="${CI_SERVER_PROTOCOL}://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_MERGE_REQUEST_PROJECT_PATH}.git"
+      git fetch --no-tags --quiet "$target_url" "+refs/heads/${target_branch}:refs/remotes/mr-target/${target_branch}"
+      target_sha=$(git rev-parse "refs/remotes/mr-target/${target_branch}")
+      # In merged-results pipelines CI_COMMIT_SHA is the merge commit, use the source head.
+      source_sha="${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA:-$CI_COMMIT_SHA}"
+      behind=$(git rev-list --count "${source_sha}..${target_sha}")
+      ahead=$(git rev-list --count "${target_sha}..${source_sha}")
+      echo "Source ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME} (${source_sha})"
+      echo "Target ${CI_MERGE_REQUEST_PROJECT_PATH}:${target_branch} (${target_sha})"
+      echo "Source is ${ahead} commit(s) ahead and ${behind} commit(s) behind the target."
+      target_http="${CI_MERGE_REQUEST_PROJECT_URL}.git"
+      src="${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
+      if [ "$behind" -ne 0 ]; then
+        cat <<EOF
+
+      ERROR: your branch '${src}' is NOT up to date with '${target_branch}'.
+
+      ${target_branch} contains ${behind} commit(s) that are not in '${src}',
+      so this MR has not been tested against the current state of ${target_branch}.
+      Please integrate the latest ${target_branch} into your branch and push again.
+
+      How to fix it (from your local clone):
+
+        # 1) Add the target repository as a remote (only needed once)
+        git remote add trunk ${target_http}
+
+        # 2) Get the latest version of ${target_branch}
+        git fetch trunk
+
+        # 3) Merge it into your branch and push
+        git checkout ${src}
+        git merge trunk/${target_branch}
+        git push origin ${src}
+
+      Solve any conflicts, rebuild and rerun the tests before pushing.
+      The pipeline will restart automatically after the push.
+      EOF
+        exit 1
+      fi
+      if [ "$ahead" -eq 0 ]; then
+        cat <<EOF
+
+      ERROR: your branch '${src}' has no new commits with respect to '${target_branch}'.
+
+      There is nothing to merge: all the commits of '${src}' are already in ${target_branch}.
+      Possible reasons:
+        - you forgot to commit/push your changes to '${src}';
+        - the MR was opened from the wrong source branch;
+        - your changes have already been merged in ${target_branch}.
+
+      How to fix it:
+        - commit and push your changes:  git push origin ${src}
+        - or edit the MR and select the correct source branch;
+        - or close the MR if the changes are already in ${target_branch}.
+      EOF
+        exit 1
+      fi
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+precommit:
+  stage: check
+  image: python:3.12
+  variables:
+    GIT_DEPTH: "0"
+    PRE_COMMIT_HOME: "$CI_PROJECT_DIR/.cache/pre-commit"
+  cache:
+    key:
+      files: [.pre-commit-config.yaml]
+    paths: [.cache/pre-commit]
+  script:
+    - pip install --disable-pip-version-check pre-commit
+    - |
+      # Hook ids declared (i.e. not commented out) in .pre-commit-config.yaml.
+      declared=$(python -c 'import yaml; print(" ".join(h["id"] for r in yaml.safe_load(open(".pre-commit-config.yaml"))["repos"] for h in r["hooks"]))')
+      for hook in check-ast check-merge-conflict check-yaml end-of-file-fixer trailing-whitespace check-executables-have-shebangs check-added-large-files mixed-line-ending check-build-config run-check-config-h run-check-ascii check-forbidden check-binaries-conf check-inlined-macros; do
+        printf '\n=== %s ===\n' "$hook" | tee -a pre-commit.log
+        case " $declared " in
+          *" $hook "*) ;;
+          *) echo "Skipped: $hook is not declared in .pre-commit-config.yaml" | tee -a pre-commit.log; continue ;;
+        esac
+        if ! pre-commit run "$hook" --show-diff-on-failure --from-ref "$CI_MERGE_REQUEST_DIFF_BASE_SHA" --to-ref "$CI_COMMIT_SHA" >> pre-commit.log 2>&1; then
+          cat pre-commit.log
+          exit 1
+        fi
+      done
+      cat pre-commit.log
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  after_script:
+    - |
+      python - <<'PY'
+      import os
+      from xml.etree import ElementTree as ET
+
+      status = os.environ.get("CI_JOB_STATUS", "failed")
+      suite = ET.Element("testsuite", name="pre-commit", tests="1", failures="0" if status == "success" else "1")
+      case = ET.SubElement(suite, "testcase", classname="merge_request_checks", name="selected pre-commit checks")
+      if status != "success":
+          ET.SubElement(case, "failure", message="See pre-commit.log for the failing check.")
+      ET.ElementTree(suite).write("pre-commit-report.xml", encoding="utf-8", xml_declaration=True)
+      PY
+  artifacts:
+    when: always
+    reports:
+      junit: pre-commit-report.xml
+    paths: [pre-commit.log, pre-commit-report.xml]

@@ -225,7 +225,7 @@ MODULE m_ifc
      ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q).
 
       procedure :: get_dcdq => ifc_get_dcdq
-    !  Compute first derivative of reciprocal-space IFCs based on IFCs.  
+    !  Compute first derivative of reciprocal-space IFCs based on IFCs.
 
     procedure :: get_dwdq => ifc_get_dwdq
     !  Compute phonon group velocities at an arbitrary q-point.
@@ -500,9 +500,9 @@ subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    else
      ! 2D materials are embedded in a dielectric environment (typically vacuum in DFT calculations)
      ! which leads to a different long-range electrostatics than in 2D. The next routine allows
-     ! to estimate it. 
-     call ewald9_2D(natom,ddb%acell,Crystal%xred,rprim,dielt,dyew,qpt,zeff,qdrp_cart,dielt_env,dielt_thick,sys_dim)     
-   end if        
+     ! to estimate it.
+     call ewald9_2D(natom,ddb%acell,Crystal%xred,rprim,dielt,dyew,qpt,zeff,qdrp_cart,dielt_env,dielt_thick,sys_dim)
+   end if
    call q0dy3_calc(natom,dyewq0,dyew,Ifc%asr)
    ABI_FREE(dyew)
  end if
@@ -614,7 +614,7 @@ subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      qpt(:)=qbz(:,iqpt)
      sumg0=0
      if (sys_dim==1) then
-             ! 3D case     
+             ! 3D case
        if (Ifc%dipquad==1.or.Ifc%quadquad==1) then
          call ewald9(Ifc%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                      Crystal%xred,zeff,qdrp_cart, ifc%eta, &
@@ -623,11 +623,11 @@ subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
          call ewald9(Ifc%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                      Crystal%xred,zeff,qdrp_cart, ifc%eta, &
                      option=ifc%ewald_option)
-       end if 
-     else 
+       end if
+     else
        ! 2D case
-       call ewald9_2D(natom,ddb%acell,Crystal%xred,rprim,dielt,dyew,qpt,zeff,qdrp_cart,one,dielt_thick,sys_dim)      
-     end if        
+       call ewald9_2D(natom,ddb%acell,Crystal%xred,rprim,dielt,dyew,qpt,zeff,qdrp_cart,one,dielt_thick,sys_dim)
+     end if
      call q0dy3_apply(natom,dyewq0,dyew)
      plus=0
      ! Implement Eq.(76) of Gonze&Lee PRB 55, 10355 (1997) [[cite:Gonze1997a]], possibly generalized for quadrupoles
@@ -1163,7 +1163,7 @@ subroutine ifc_get_dcdq(ifc, cryst, dcdq, dcdqdq, comm)
           !qtmp(:) = zero
           !qtmp(kk)=jj*0.01_dp
           !call ewald9_2D(cryst%natom,ifc%acell,cryst%xred,ifc%rprim,ifc%dielt,dyew_tmp,&
-          !        qtmp,ifc%zeff,ifc%qdrp_cart,ifc%dielt_env,ifc%dielt_thick,ifc%sys_dim)      
+          !        qtmp,ifc%zeff,ifc%qdrp_cart,ifc%dielt_env,ifc%dielt_thick,ifc%sys_dim)
           !dcdqred(2,:,:,:,:,kk) = dcdqred(2,:,:,:,:,kk)+half*dyew_tmp(2,:,:,:,:)/qtmp(kk)
  !       end do
  !     end if
@@ -1177,6 +1177,7 @@ subroutine ifc_get_dcdq(ifc, cryst, dcdq, dcdqdq, comm)
  end do
 
  end subroutine ifc_get_dcdq
+!!***
 
 !!****f* m_ifc/ifc_get_dwdq
 !! NAME

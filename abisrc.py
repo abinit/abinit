@@ -68,10 +68,7 @@ Requires graphviz and python graphviz: https://graphviz.readthedocs.io/en/stable
 
 NB: graph and panel commands require external libraries. Use:
 
-    pip install -r abisrc_requirements.txt
-or
-
-    conda install --file abisrc_requirements.txt
+    pip install --group abisrc
 """
   #./abisrc.py robodoc            ==> Generate robodoc files.
 

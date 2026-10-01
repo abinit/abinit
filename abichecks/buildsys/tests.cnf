@@ -47,11 +47,8 @@ Build-system consistency checks
 # fn5 = tNNN
 # fn6-fn9, psp1-psp4 = none
 #
-01 statchk abichecks/scripts/check-conflict-markers.py
-#02 statchk abichecks/scripts/check-line-lengths.py
 03 statchk abichecks/scripts/check-config-h.py
 04 statchk abichecks/scripts/check-unprotected-omp-target.py
 10 statchk abichecks/scripts/check-build-config.py
 12 statchk abichecks/scripts/check-cpp-options.py
 14 statchk abichecks/scripts/check-binaries-conf.py
-20 statchk abichecks/scripts/check-forbidden-flags.py

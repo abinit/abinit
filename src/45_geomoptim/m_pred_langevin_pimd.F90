@@ -35,6 +35,7 @@ module m_pred_langevin_pimd
 
 contains
 
+  !!***
   !!****f* ABINIT/pred_langevin_pimd
   !! NAME
   !! pred_langevin_pimd

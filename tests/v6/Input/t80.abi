@@ -44,16 +44,15 @@
 #%% [setup]
 #%% executable = anaddb
 #%% input_ddb = t79.ddb.out
-#%% test_chain = t78.abi, t79.abi, t80.abi, t81.abi
 #%% [files]
-#%% files_to_test = 
-#%%   t80.abo, tolnlines = 10, tolabs = 2.e-4, tolrel = 1.e-6, fld_options =  
+#%% files_to_test =
+#%%   t80.abo, tolnlines = 10, tolabs = 2.e-4, tolrel = 1.e-6, fld_options =
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   Phonon band structure of Al, from DDB of test 78.
 #%%   The parameters were really too low in test 78, so that some
 #%%   phonon unstabilities are present close to Gamma.

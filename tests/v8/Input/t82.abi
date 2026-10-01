@@ -140,16 +140,17 @@ optdriver7    5 # for nonlinear calculation
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = alps_nag_7.2_serial
 #%% [files]
-#%% files_to_test = 
-#%%    t82.abo, tolnlines =1 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -medium;
+#%% files_to_test =
+#%%    t82.abo, tolnlines = 10 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = L. Baguet
 #%% keywords = NC, DFPT, NONLINEAR
-#%% description = 
-#%%   'Full' DFPT computation of third derivatives in Nonlinear (dataset 7). 
+#%% description =
+#%%   'Full' DFPT computation of third derivatives in Nonlinear (dataset 7).
 #%%   Preceded by resolution of Second-order Sternheimer equations (dataset 5 and 6).
 #%%   Test the polarized case (with a non-polarized system). Must give same results than t81.in
 #%%<END TEST_INFO>

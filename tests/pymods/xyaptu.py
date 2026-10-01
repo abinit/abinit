@@ -17,6 +17,7 @@ __history__= {
 
 import re
 import sys
+from typing import IO, Any, cast
 
 try:
     from cStringIO import StringIO
@@ -35,8 +36,10 @@ class xcopier(copier):
     template tags to YAPTU format.
     """
 
-    def __init__(self, dns, rExpr=None, rOpen=None, rClose=None, rClause=None,
-                 ouf=sys.stdout, dbg=0, dbgOuf=sys.stdout):
+    def __init__(self, dns: dict[str, Any], rExpr: re.Pattern[str] | None = None,
+                 rOpen: re.Pattern[str] | None = None, rClose: re.Pattern[str] | None = None,
+                 rClause: re.Pattern[str] | None = None,
+                 ouf: Any = sys.stdout, dbg: int = 0, dbgOuf: Any = sys.stdout) -> None:
         """
         Initialize the xcopier.
 
@@ -73,7 +76,7 @@ class xcopier(copier):
                         preproc=_preproc, handle=self._handleBadExps, ouf=ouf)
 
 
-    def xcopy(self, input=None):
+    def xcopy(self, input: str | IO[Any] | None = None) -> None:
         """
         Convert xyaptu format to yaptu format and invoke copying.
 
@@ -84,16 +87,24 @@ class xcopier(copier):
             ValueError: If input file cannot be opened.
         """
         # Read the input
-        inf = input
+        inf: IO[Any] | None = None
+        inputText = ""
         try:
+            if isinstance(input, str) or input is None:
+                raise AttributeError
+            inf = cast("IO[Any]", input)
             inputText = inf.read()
-        except AttributeError:
-            inf = open(input)
-            if inf is None:
+        except (AttributeError, TypeError):
+            if isinstance(input, str):
+                inf = open(input)
+                if inf is None:
+                    raise ValueError("Can't open file (%s)" % input)
+                inputText = inf.read()
+            else:
                 raise ValueError("Can't open file (%s)" % input)
-            inputText = inf.read()
         try:
-            inf.close()
+            if inf is not None:
+                inf.close()
         except:
             pass
 
@@ -103,7 +114,7 @@ class xcopier(copier):
         self.copy(inf=yinf)
         yinf.close()
 
-    def _x2y_translate(self, xStr):
+    def _x2y_translate(self, xStr: str) -> str:
         """
         Convert xyaptu markup in input string to yaptu delimiters.
 
@@ -157,15 +168,19 @@ class xcopier(copier):
 
         # Call-back functions for re substitutions
         # These must be in sync with what is expected in self.__init__
-        def rexpr(match,self=self):
-            return "_:@%s@:_" % match.group(match.lastindex)
-        def rline(match,self=self):
-            return "\n++yaptu %s #\n--yaptu \n" % match.group(match.lastindex)
-        def ropen(match,self=self):
-            return "\n++yaptu %s \n" % match.group(match.lastindex)
-        def rclause(match,self=self):
-            return "\n==yaptu %s \n" % match.group(match.lastindex)
-        def rclose(match,self=self):
+        def rexpr(match: re.Match[str], self: xcopier = self) -> str:
+            idx = match.lastindex if match.lastindex is not None else 0
+            return "_:@%s@:_" % match.group(idx)
+        def rline(match: re.Match[str], self: xcopier = self) -> str:
+            idx = match.lastindex if match.lastindex is not None else 0
+            return "\n++yaptu %s #\n--yaptu \n" % match.group(idx)
+        def ropen(match: re.Match[str], self: xcopier = self) -> str:
+            idx = match.lastindex if match.lastindex is not None else 0
+            return "\n++yaptu %s \n" % match.group(idx)
+        def rclause(match: re.Match[str], self: xcopier = self) -> str:
+            idx = match.lastindex if match.lastindex is not None else 0
+            return "\n==yaptu %s \n" % match.group(idx)
+        def rclose(match: re.Match[str], self: xcopier = self) -> str:
             return "\n--yaptu \n"
 
         # Substitutions
@@ -183,7 +198,7 @@ class xcopier(copier):
         return xStr
 
     # Handle expressions that do not evaluate
-    def _handleBadExps(self, s):
+    def _handleBadExps(self, s: str) -> str:
         """
         Handle expressions that do not evaluate.
 
@@ -198,7 +213,7 @@ class xcopier(copier):
         return "***! %s !***" % s
 
     # Preprocess code
-    def _preProcess(self, s, why):
+    def _preProcess(self, s: str, why: str) -> str:
         """
         Preprocess embedded python statements and expressions.
 
@@ -210,7 +225,7 @@ class xcopier(copier):
             str: Decoded code string.
         """
         return self._xmlDecode(s)
-    def _preProcessDbg(self, s, why):
+    def _preProcessDbg(self, s: str, why: str) -> str:
         """
         Preprocess embedded python statements and expressions with debug logging.
 
@@ -231,7 +246,7 @@ class xcopier(copier):
       ["<", "&lt;"],
       ["&", "&amp;"],
     ]
-    def _xmlDecode(self, s):
+    def _xmlDecode(self, s: str) -> str:
         """
         Return the ASCII decoded version of the given HTML string.
 
@@ -277,9 +292,9 @@ if __name__=="__main__":
     }
 
     # and a function...
-    def my_current_time():
+    def my_current_time() -> str:
         import time
-        return str(time.clock())
+        return str(time.time())
     DNS["my_current_time"] = my_current_time
 
     """

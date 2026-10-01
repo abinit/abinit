@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 # Copyright (C) 2010-2026 ABINIT group (Yann Pouillon)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
@@ -135,4 +136,3 @@ end module ${module_name}
 EOF
 
 echo "done."
-

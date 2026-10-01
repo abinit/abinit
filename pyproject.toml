@@ -1,6 +1,68 @@
 
+# Install these groups from the repository's top-level directory with:
+#   python3 -m pip install --group abisrc
+#   python3 -m pip install --group mksite
+#   python3 -m pip install --group tasks
+[dependency-groups]
+abisrc = [
+    "graphviz", # python-graphviz if conda
+    "pygments",
+    "pandas",
+    "panel",
+]
+mksite = [
+    "html2text",
+    # Pinned versions for website deployment; tested with Python 3.12.
+    "mkdocs==1.6.1",
+    "mkdocs-material==9.5.43",
+    "jinja2==3.1.4",
+    "pymdown-extensions==10.12",
+    "python-markdown-math==0.8",
+    "pyyaml",
+    "pygments",
+    "pybtex",
+    "numpy",
+    "pandas",
+    # Unit tests
+    "pytest",
+    "abimkdocs-plugin @ file:./abimkdocs_plugin",
+]
+tasks = [
+    "invoke",
+    "psutil",
+    "tabulate",
+    "watchdog",
+]
+
+[tool.pytest.ini_options]
+# Don't search in these directories for tests.
+norecursedirs = [
+    "scripts/post_processing",
+    "_build*",
+    "doxygen_docs",
+    "tmp-robodoc",
+    ".ipynb_checkpoints",
+    "site",
+    # doc/tests is a symlink to ../tests (`doc/tests -> ../tests`): pytest
+    # follows symlinks by default, so without this every test under tests/
+    # gets collected AND RUN a second time under the doc/tests/ path,
+    # doubling the suite's runtime and reporting every failure twice.
+    "doc",
+    # Some builders (e.g. *_abipy) clone the abipy repo inside the abinit
+    # checkout, at the top level, for abipy's own test/doc steps to use.
+    # Its test modules (e.g. abipy/abipy/tools/tests/test_decorators.py)
+    # aren't importable from here -- pytest resolves them relative to this
+    # rootdir, not abipy's own, so "abipy.tools" doesn't exist on that
+    # path -- causing a collection ImportError instead of running abinit's
+    # own tests. abipy has its own test suite/CI; it doesn't need to be
+    # (and can't correctly be) collected from a pytest run rooted here.
+    "abipy",
+]
+# -f enables loop-on-fail mode.
+# looponfailroots (pathlist) specifies directories to check for changes.
+
 [tool.ruff]
-line-length = 100
+line-length = 127
 output-format = "concise"
 
 [tool.ruff.lint]
@@ -64,22 +126,3 @@ isort.split-on-trailing-comma = false
 
 [tool.ruff.format]
 docstring-code-format = true
-
-[tool.vulture]
-#exclude = ["*file*.py", "dir/"]
-ignore_decorators = ["@app.route", "@require_*"]
-#ignore_names = ["visit_*", "do_*"]
-make_whitelist = true
-min_confidence = 80
-#paths = ["myscript.py", "mydir", "whitelist.py"]
-sort_by_size = true
-verbose = true
-
-[tool.pyright]
-include = ["abibuildbot"]
-exclude = ["**/__pycache__", ".venv", "build", "dist"]
-pythonVersion = "3.14"
-typeCheckingMode = "basic"
-reportUnusedImport = true
-reportMissingTypeStubs = false
-reportGeneralTypeIssues = true

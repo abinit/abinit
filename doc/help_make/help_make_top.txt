@@ -12,10 +12,10 @@ Specific keywords to be used with the ABINIT `make` in the top directory:
 
 mj4                       same as `make`, but launches 4 processes
 multi multi_nprocs=XX     same as `make`, but launches XX processes
-test_fast                 performs the first basic test 
+test_fast                 performs the first basic test
                           (similarly, test_X with X=v1,v5,bigdft,etsf_io,libxc,
                           wannier90 will execute the corresponding internal test)
-tests_in                  Launch several small tests (3 mandatory ones, for basic 
+tests_in                  Launch several small tests (3 mandatory ones, for basic
                           capabilities of ABINIT, and 4 optional, to test
                           bigdft, etsf_io, libxc, wannier90, if they are installed)
 check                     Run fast tests with runtests.py.
@@ -27,8 +27,8 @@ help_dev (or dev)         prints additional keywords for developers
 ------------------------------------------------------------------------------
 
 For the (re)compilation of selected main codes, change the directory to
-src/main and type:  
-    
+src/main and type:
+
     $ make `name_of_main`
 
 where `name_of_main` is your main code.
@@ -40,7 +40,7 @@ a specific subdirectory of src or lib, and type `make`.
 For additional automatic tests (beyond the 5 basic ones), change the directory
 to `tests`, and use the `runtests.py` script. Use:
 
-     `runtests.py --help` 
+     `runtests.py --help`
 
 to obtain the list of available options.
 ==============================================================================

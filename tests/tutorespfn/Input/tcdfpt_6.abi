@@ -14,7 +14,6 @@ tcdfpt_2o_DS10_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% test_chain =  tcdfpt_1.abi, tcdfpt_2.abi, tcdfpt_3.abi, tcdfpt_4.abi, tcdfpt_5.abi, tcdfpt_6.abi, tcdfpt_7.abi
 #%% [files]
 #%% files_to_test =
 #%%   tcdfpt_6.ddb.out, tolnlines=  0, tolabs=  1.143e-09, tolrel=  3.000e-09, fld_options = -easy
@@ -25,4 +24,3 @@ tcdfpt_2o_DS10_DDB
 #%% keywords = CDFPT
 #%% description =  Input file for mrgddb of 2nd and 3rd (Berry Curvs.) derivatives of ETOT
 #%%<END TEST_INFO>
-

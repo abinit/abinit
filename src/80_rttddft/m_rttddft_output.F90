@@ -737,19 +737,19 @@ subroutine prt_restart(dtfil, dtset, istep, mpi_enreg, tdks)
  if (mpi_enreg%me == 0) rewind(tdks%tdrestart_unit)
  write(msg,'(a)') step_nb
  call wrtout(tdks%tdrestart_unit,msg)
- write(msg,'(a)') tdks%fname_wfk0
+ write(msg,'(a)') trim(tdks%fname_wfk0)
  call wrtout(tdks%tdrestart_unit,msg)
  fname = trim(dtfil%filnam_ds(4))//'_'//trim(adjustl(step_nb))//'_WFK'
- write(msg,'(a)') fname
+ write(msg,'(a)') trim(fname)
  call wrtout(tdks%tdrestart_unit,msg)
- write(msg,'(a)') tdks%fname_tdener
+ write(msg,'(a)') trim(tdks%fname_tdener)
  call wrtout(tdks%tdrestart_unit,msg)
  if (dtset%td_ef_type /= 0) then
-    write(msg,'(a)') tdks%fname_tdef
+    write(msg,'(a)') trim(tdks%fname_tdef)
     call wrtout(tdks%tdrestart_unit,msg)
  end if
  if (dtset%prtcurrent /= 0) then
-    write(msg,'(a)') tdks%fname_current
+    write(msg,'(a)') trim(tdks%fname_current)
     call wrtout(tdks%tdrestart_unit,msg)
  end if
  if (dtset%td_ef_induced_vecpot /= 0) then

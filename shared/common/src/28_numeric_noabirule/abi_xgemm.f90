@@ -646,9 +646,9 @@ end subroutine abi_d2zgemm_331
 
 !----------------------------------------------------------------------
 
-!!****f* m_abi_linalg/abi_d2zgemm_331
+!!****f* m_abi_linalg/abi_d2zgemm_334
 !! NAME
-!! abi_d2zgemm_331
+!! abi_d2zgemm_334
 !!
 !! FUNCTION
 !!
@@ -739,4 +739,3 @@ subroutine abi_d2zgemm_2d(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC,&
 
 end subroutine abi_d2zgemm_2d
 !!***
-

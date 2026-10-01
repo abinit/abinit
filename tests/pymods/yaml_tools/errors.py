@@ -1,7 +1,14 @@
+from __future__ import annotations
+
 """
 Define all error types used in yaml_tools.
 All errors must inherit from YAMLTestError.
 """
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from . import Document
+    from .abinit_iterators import IterStateFilter
 
 
 class YAMLTestError(Exception):
@@ -9,7 +16,7 @@ class YAMLTestError(Exception):
 
 
 class ConfigContextError(YAMLTestError):
-    def __init__(self, path):
+    def __init__(self, path: list[str]) -> None:
         """
         Initialize ConfigContextError.
 
@@ -32,7 +39,7 @@ class ConfigParserError(YAMLTestError):
 
 
 class UnknownParamError(ConfigParserError):
-    def __init__(self, cons, param):
+    def __init__(self, cons: str, param: str) -> None:
         """
         Initialize UnknownParamError.
 
@@ -46,7 +53,7 @@ class UnknownParamError(ConfigParserError):
 
 
 class AlreadyRegisteredTagError(ConfigParserError):
-    def __init__(self, tag):
+    def __init__(self, tag: str) -> None:
         """
         Initialize AlreadyRegisteredTagError.
 
@@ -63,7 +70,7 @@ class ConfigError(YAMLTestError):
 
 
 class ValueTypeError(TypeError, ConfigError):
-    def __init__(self, name, exp, found):
+    def __init__(self, name: str, exp: type, found: Any) -> None:
         """
         Initialize ValueTypeError.
 
@@ -78,7 +85,7 @@ class ValueTypeError(TypeError, ConfigError):
 
 
 class InvalidNodeError(ConfigError):
-    def __init__(self, name, value):
+    def __init__(self, name: str, value: Any) -> None:
         """
         Initialize InvalidNodeError.
 
@@ -92,7 +99,7 @@ class InvalidNodeError(ConfigError):
 
 
 class EmptySetError(ConfigError):
-    def __init__(self, obj):
+    def __init__(self, obj: Any) -> None:
         """
         Initialize EmptySetError.
 
@@ -104,60 +111,60 @@ class EmptySetError(ConfigError):
 
 
 class NotOrderedOverlappingSetError(ConfigError):
-    def __init__(self, set1, set2):
+    def __init__(self, set1: IterStateFilter, set2: IterStateFilter) -> None:
         msg = "{} and {} are overlapping but cannot be ordered."
         super().__init__(msg.format(set1,
                                                                        set2))
 
 
 class IllegalFilterNameError(ConfigError):
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         msg = "{} is a reserved name, you cannot use it as a filter name."
         super().__init__(msg.format(name))
 
 
 class MissingCallbackError(ConfigError):
-    def __init__(self, obj, method):
+    def __init__(self, obj: Any, method: str) -> None:
         msg = f"{obj} does not expose a {method} method."
         super().__init__(msg)
 
 
 ###############################################################################
 class InputFileError(YAMLTestError):
-    def __init__(self, line, msg):
+    def __init__(self, line: int, msg: str) -> None:
         msg = f"In input file at line {line}:\n{msg}"
         super().__init__(self, msg)
 
 
 class NoIteratorDefinedError(InputFileError):
-    def __init__(self, doc):
+    def __init__(self, doc: Document) -> None:
         msg = (f"No iterator have been found before the first document {doc.obj}."
                )
         super().__init__(doc.start + 1, msg)
 
 
 class NotAvailableTagError(InputFileError):
-    def __init__(self, tag, msg):
+    def __init__(self, tag: str, msg: str) -> None:
         msg = (f"Tag {tag} is not available in this installation : {msg}"
                )
         YAMLTestError.__init__(msg)
 
 
 class UntaggedDocumentError(InputFileError):
-    def __init__(self, line):
+    def __init__(self, line: int) -> None:
         msg = ("This document does not have a tag. It cannot be identified.")
         super().__init__(line, msg)
 
 
 class TagMismatchError(InputFileError):
-    def __init__(self, line, expected, found):
+    def __init__(self, line: int, expected: str, found: str) -> None:
         msg = (f"This was supposed to be tagged {expected} but it was {found}."
                )
         super().__init__(line, msg)
 
 
 class DuplicateDocumentError(InputFileError):
-    def __init__(self, line, id):
+    def __init__(self, line: int, id: str) -> None:
         msg = ("There are two document with the same tag and iteration"
                f" state ({id}). Please change the tag of one of them to make it"
                " unique.")

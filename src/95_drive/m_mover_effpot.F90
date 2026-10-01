@@ -323,7 +323,7 @@ ABI_FREE(xcart)
       if(inp%restartxf < 0)then
          md_hist_name=trim(filnam(2))//'_HIST.nc'
          write(message,'(3a)')&
-&         ' Restart from external structure stored in file: ',md_hist_name,ch10
+&         ' Restart from external structure stored in file: ',trim(md_hist_name),ch10
          call wrtout(std_out,message,"COLL")
          call wrtout(ab_out,message,"COLL")
          isVused  = .true.

@@ -26,7 +26,7 @@
        ecut  8                    # Energy cutoff
   pawecutdg  40                   # pawecutdg > 2*ecut
       nband  25                   # Fe_2 minband=17
-     nbdbuf  2                    # This is to improve the portability (the residual of degenerate states with indices nband 
+     nbdbuf  2                    # This is to improve the portability (the residual of degenerate states with indices nband
                                   # and nband+1 is not portable).
 
 #Definition of the k-point grid
@@ -91,15 +91,14 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t105.abi, t106.abi, t107.abi, t108.abi, t109.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t106.abo, tolnlines = 15, tolabs = 2.0e-04, tolrel = 1.0e+00, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
 #%% authors = M. Torrent, D.J. Adams, L. MacEnulty
-#%% keywords = PAW,lruj,ujdet 
+#%% keywords = PAW,lruj,ujdet
 #%% description = Compute U in bcc Fe in 2 atomic supercell with the ujdet
 #%%    intrinsic subroutine (using a two-point linear regression).
 #%% topics = DFT+U

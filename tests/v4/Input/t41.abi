@@ -10,9 +10,8 @@ spline            # Type of interpolation
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = macroave
-#%% test_chain = t40.abi, t41.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t41_DEN.MAV, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00;
 #%%   t41_DEN.PAV, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
 #%% [shell]
@@ -22,7 +21,7 @@ spline            # Type of interpolation
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = NC
-#%% description = 
+#%% description =
 #%%  Test of macroave, on the basis of the density of the previous run.
 #%% topics = Macroave
 #%%<END TEST_INFO>

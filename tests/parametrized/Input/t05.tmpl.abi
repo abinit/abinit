@@ -1,0 +1,73 @@
+%YAML
+test_info:
+  setup: {executable: abinit}
+  files:
+    files_to_test:
+      # GS energies, forces and stress (YAML documents), compared with the CG instance (0000).
+      - {name: "{id}.abo", mode: yaml_docs, tolnlines: 0, tolabs: 1.1e-8, tolrel: 1.0e-8, fld_options: -medium}
+  extra_info:
+    keywords: [NC, SOC]
+    authors: [M. Giantomassi]
+    description: >-
+      AlAs NC+SOC (HGH, nspinor 2): GS energies, forces and stress with the LOBPCG and ChebFI eigensolvers
+      must reproduce the CG solver. Motivation: the NC + spinor path of LOBPCG is not covered by the sequential
+      CPU tests (only paral/t32 with MPI and one GPU test), and LOBPCG with use_gemm_nonlop and NC spinors
+      is not covered by any test. Swept: LOBPCG (wfoptalg 114) with one or two blocks, with useylm 1,
+      with use_gemm_nonlop 1, with RMM-DIIS, and ChebFI (wfoptalg 111, with cprj_in_memory 0).
+
+axes:
+  - type: explicit
+    values:
+      - {wfoptalg: 0}                        # CG: the reference (instance 0000)
+      - {wfoptalg: 114}                      # LOBPCG, one block
+      - {wfoptalg: 114, nblock_lobpcg: 2}    # LOBPCG, two blocks of 6 bands (nband 12)
+      - {wfoptalg: 114, useylm: 1}           # LOBPCG with real-Ylm projectors
+      - {wfoptalg: 114, use_gemm_nonlop: 1}  # LOBPCG, non-local operator as a matrix product (implies useylm 1)
+      - {wfoptalg: 114, rmm_diis: 1}         # LOBPCG, then RMM-DIIS
+      # ChebFI (needs the extra bands and nbdbuf). With ChebFI cprj_in_memory defaults to a non-zero value,
+      # which m_chkinp rejects for NC + nspinor 2: "set cprj_in_memory to 0".
+      - {wfoptalg: 111, cprj_in_memory: 0}
+%ENDYAML
+# AlAs zinc-blende, NC+SOC ground state (forces + stress), as in t04 (from v9/t133): eigensolver sweep.
+# Coverage survey (2026-09-27): among the tests of the sequential CPU suites, none runs LOBPCG with norm-conserving
+# pseudopotentials and nspinor 2, and no test at all runs LOBPCG with use_gemm_nonlop 1 and NC spinors.
+# All the bands, including 4 empty ones, are converged with tolwfr, so that the solvers can be compared
+# with tight tolerances (with tolvrs, the empty bands converge differently and fermie changes at 1e-8).
+# ChebFI struggles with the last bands: nbdbuf 2 excludes them from the convergence check (for all solvers).
+
+# NC+SOC: 2-component spinors
+nspinor  2
+
+# AlAs zinc-blende (experimental a = 5.66 AA = 10.70 bohr, LDA)
+acell    3*10.70
+rprim    0.0  0.5  0.5
+         0.5  0.0  0.5
+         0.5  0.5  0.0
+natom    2
+ntypat   2
+znucl    13  33
+typat    1   2
+xred     0.00  0.00  0.00
+         0.26  0.25  0.25   # As slightly displaced along a1 to produce non-zero forces
+
+# 8 occupied bands (3 + 5 valence electrons, occ = 1 with nspinor 2) + 4 empty bands
+nband    12
+nbdbuf   2
+
+# Minimal cut-off and k-grid for speed
+ecut     3.0
+ngkpt    2  2  2
+nshiftk  1
+shiftk   0.5  0.5  0.5
+
+# SCF: every band converged
+nstep   60
+tolwfr  1.0d-20
+diemac  9.0
+prtwf   0
+prtden  0
+prteig  0
+chksymbreak 0
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "PseudosHGH_pwteter/13al.3.hgh, PseudosHGH_pwteter/33as.5.hgh"

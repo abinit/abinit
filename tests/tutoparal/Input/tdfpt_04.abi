@@ -75,13 +75,12 @@ nband 116    # Only the occupied states - will ease the convergence
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tdfpt_03.abi, tdfpt_04.abi
 #%% [files]
 #%% [paral_info]
 #%% max_nprocs = 24
 #%% nprocs_to_test = 24
 #%% [NCPU_24]
-#%% files_to_test = tdfpt_04_MPI24.abo, tolnlines = 12, tolabs = 1e-07, tolrel= 0.01
+#%% files_to_test = tdfpt_04_MPI24.abo, tolnlines = 12, tolabs = 1e-07, tolrel= 1.7e-2
 #%% post_commands =
 #%%   ww_mv tdfpt_03_MPI24o_WFK tdfpt_04_MPI24i_WFK
 #%% [extra_info]

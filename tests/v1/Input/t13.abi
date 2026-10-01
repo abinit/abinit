@@ -39,8 +39,7 @@ xred 3*0
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
-#%% executable = abinit 
-#%% test_chain = t11.abi, t12.abi, t13.abi, t14.abi, t15.abi, t16.abi, t17.abi, t18.abi, t19.abi, t20.abi
+#%% executable = abinit
 #%% input_prefix = t11o
 #%% [files]
 #%% files_to_test = t13.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
@@ -49,7 +48,7 @@ xred 3*0
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords =  NC
-#%% description = 
+#%% description =
 #%%   Isolated Helium atom. Treated with LDA, old Teter rational polynomial parametrization (4/91) (ixc=3).
 #%%   The total energy is -2.8279 Ha. For speed-up, it begins with the wavefunctions from test 11.
 #%% topics = xc

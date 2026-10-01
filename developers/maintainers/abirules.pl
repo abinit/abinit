@@ -1,3 +1,4 @@
+#!/usr/bin/env perl
 # This script enforces some coding rules on a single Fortran module or a collection of modules from a
 # specific subdirectory or, from current directory and all src/* subdirectories.
 

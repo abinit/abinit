@@ -133,6 +133,50 @@ def sort_and_groupby(items: Iterable[T], key: Callable[[T], Any], reverse: bool 
     return groupby(sorted(items, key=key, reverse=reverse), key=key)
 
 
+def find_pdf_basename_collisions(pdf_pairs: Iterable[tuple[str, str]]) -> list[str]:
+    """
+    Return one explanatory message per PDF basename shared by 2+ different files.
+
+    Two PDFs with the same basename but different full paths are a latent
+    bug: the `[[pdf:name.pdf]]` wikilink can only resolve to one of them
+    (see Website.pdfs), so any other copy is either a stale duplicate that
+    should be removed, or a genuine naming clash that should be resolved by
+    renaming one of the files. This happened for real: howto_chebfi.pdf
+    used to exist under both doc/theory/ and doc/topics/documents/, and
+    which copy `[[pdf:howto_chebfi.pdf]]` linked to silently depended on
+    the host machine's directory-scan order.
+
+    Args:
+        pdf_pairs: (basename, full_path) tuples, as produced by
+            Website.walk_filepath() filtered to *.pdf.
+
+    Returns:
+        One message per colliding basename, naming every conflicting path
+        and which one currently wins the collision (assuming pdf_pairs is
+        sorted by (basename, path) before being handed to
+        `OrderedDict(...)`, which keeps the *last* value for a repeated
+        key -- i.e. the alphabetically-last path). Empty if there are no
+        collisions.
+    """
+    paths_by_name: dict[str, list[str]] = defaultdict(list)
+    for name, path in pdf_pairs:
+        paths_by_name[name].append(path)
+
+    messages = []
+    for name, paths in paths_by_name.items():
+        if len(paths) > 1:
+            sorted_paths = sorted(paths)
+            messages.append(
+                "Found %d PDF files sharing the basename `%s`; any "
+                "[[pdf:%s]] wikilink resolves to just one of them "
+                "(`%s`, chosen by sorting the full paths and keeping the "
+                "last one -- not necessarily the one you expect). Rename "
+                "or remove all but one of:\n  %s"
+                % (len(paths), name, name, sorted_paths[-1], "\n  ".join(sorted_paths))
+            )
+    return messages
+
+
 class MyEntry(Entry):
     """
     Extends pybtex Entry with useful methods for generating HTML output.
@@ -337,13 +381,23 @@ class Website:
         self.ignored_paths = []
         self.warnings = []
 
-        # Read mkdocs configuration file.
-        # TODO: Should read Abinit version from a centralized file.
-        with open(os.path.join(self.root, "..", "mkdocs.yml"), encoding="utf-8") as fh:
+        # Read the version-controlled MkDocs template and substitute the ABINIT
+        # version from the centralized file in the top-level directory. This
+        # allows documentation tests to run without first generating mkdocs.yml.
+        top_level_dir = os.path.dirname(self.root)
+        version_path = os.path.join(top_level_dir, ".current_version")
+        with open(version_path, encoding="utf-8") as fh:
+            abinit_version = fh.read().strip()
+        if not abinit_version:
+            raise RuntimeError(f"Empty ABINIT version file: {version_path}")
+
+        mkdocs_path = os.path.join(top_level_dir, "mkdocs.yml.in")
+        with open(mkdocs_path, encoding="utf-8") as fh:
+            mkdocs_text = fh.read().replace("ABINIT_VERSION", abinit_version)
             if hasattr(yaml, "FullLoader"):
-                self.mkdocs_config = yaml.load(fh, Loader=yaml.FullLoader)
+                self.mkdocs_config = yaml.load(mkdocs_text, Loader=yaml.FullLoader)
             else:
-                self.mkdocs_config = yaml.load(fh)
+                self.mkdocs_config = yaml.load(mkdocs_text)
 
         # Build parser to convert Markdown to HTML.
         # The parser must support the same extensions as those used by mkdocs
@@ -443,9 +497,27 @@ class Website:
             var.tests_info["num_tests_in_tutorial"] = len([t for t in var.tests
                 if t.executable == var.executable and t.suite_name.startswith("tuto")])
 
-        # Find pdf files and sort them by basename.
-        self.pdfs = OrderedDict(sorted([t for t in self.walk_filepath() if t[0].endswith(".pdf")],
-                                key=lambda t: t[0]))
+        # Find pdf files and sort them by basename, breaking ties on the full
+        # path so this is deterministic across machines. os.walk()'s
+        # traversal order isn't guaranteed to be the same on every
+        # platform/filesystem -- sorting on the basename alone left the
+        # OrderedDict construction below (which keeps the *last* value for a
+        # repeated key) picking whichever same-named copy os.walk() happened
+        # to visit last, silently and differently depending on the machine
+        # (this actually happened: howto_chebfi.pdf used to exist under both
+        # doc/theory/ and doc/topics/documents/, since removed).
+        pdf_pairs = sorted([t for t in self.walk_filepath() if t[0].endswith(".pdf")],
+                            key=lambda t: (t[0], t[1]))
+
+        # Detect (rather than silently resolve) any basename that still
+        # collides across two or more different PDF files -- the sort above
+        # makes the outcome deterministic, but two files that happen to
+        # share a name almost certainly means one is a stale duplicate that
+        # should be renamed or removed, not quietly shadowed forever.
+        for msg in find_pdf_basename_collisions(pdf_pairs):
+            self.warn(msg)
+
+        self.pdfs = OrderedDict(pdf_pairs)
 
         cprint("Initial website generation completed in %.2f [s]" % (time.time() - start), "green")
 
@@ -472,6 +544,7 @@ Change the input yaml files or the python code
             #print(root)
             for f in files:
                 if f.startswith("_"): continue
+                if f == "AGENTS.md": continue
                 #if f == "README.md": continue
                 yield f, os.path.join(root, f)
 
@@ -579,47 +652,6 @@ Change the input yaml files or the python code
                 shutil.copy(src, dest)
                 self.ignored_paths.append(dest)
 
-    def generate_page_with_ac_examples(self) -> None:
-        """Generate markdown pages with all ac examples found in config-examples."""
-        dirpath = os.path.join(self.root, "build", "config-examples")
-        md_lines = []
-        app = md_lines.append
-        app("""
-# Autoconf examples
-
-This page gathers the autoconf files used by the buildbot testfarm. The different
-bots are described in Abinit web site [server matrix](https://github.com/abinit/abinit_web/blob/main/docs/servers.md)
-and [builder matrix](https://github.com/abinit/abinit_web/blob/main/docs/builder.md).
-
-""")
-        for f in os.listdir(dirpath):
-            path = os.path.join(dirpath, f)
-            if os.path.isdir(path) or path.endswith(".swp") or path.endswith(".ac"): continue
-            app("## %s  " %  f)
-            with open(path, encoding="utf-8") as fh:
-                # Remove all comments except for options that are specified.
-                #print(path)
-                ac_lines = []
-                inblock = False
-                for l in reversed(fh.readlines()):
-                    l = l.strip()
-                    if not l:
-                        inblock = False
-                        continue
-                    if l and l[0].isalpha():
-                        inblock = True
-                        ac_lines.append(l + "\n")
-                    elif inblock:
-                        ac_lines.append(l)
-
-                app("\n\n```shell")
-                md_lines.extend(reversed(ac_lines))
-                app("```\n")
-
-        # Write MD file.
-        with self.new_mdfile("developers", "autoconf_examples.md") as mdf:
-            mdf.write("\n".join(md_lines))
-
     def generate_markdown_files(self) -> None:
         """
         Main orchestration method to generate all dynamic markdown files for the site.
@@ -628,7 +660,6 @@ and [builder matrix](https://github.com/abinit/abinit_web/blob/main/docs/builder
         start = time.time()
 
         self.copy_install_files()
-        self.generate_page_with_ac_examples()
 
         # Write index.md with the description of the input variables.
         meta = {"description": "Complete list of Abinit input variables"}
@@ -1481,10 +1512,9 @@ The full bibtex file is available [here](../abiref.bib).
                             url = "./index.md"
                         elif not has_ext and url != ".":
                             url += ".md"
-                    else:
-                        # For HTML, ensure directory-style URLs if no extension is present
-                        if not has_ext and url != "." and not url.endswith("/"):
-                            url += "/"
+                    # For HTML, ensure directory-style URLs if no extension is present
+                    elif not has_ext and url != "." and not url.endswith("/"):
+                        url += "/"
 
             if end: url = "%s#%s" % (url, end)
             #print("url", url)

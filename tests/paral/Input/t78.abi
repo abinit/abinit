@@ -45,7 +45,7 @@ prtvol3 1            # Write additional stuff to abo file for  testing purposes.
 getden3 1
 getwfk3 2
 gwr_ntau3   6         # Number of imaginary-time points
-gwr_sigma_algo3  1    # Use supercell for Sigma 
+gwr_sigma_algo3  1    # Use supercell for Sigma
 #gwr_sigma_algo3  2   # Use convolutions for Sigma
                       # (this is faster but there are small diffs wrt supercell version to be investigated)
 gwr_np_kgts 1 2 2 1   # k/G/tau/spin parallelism
@@ -114,7 +114,6 @@ pseudos "Si-GGA.psp8, O-GGA.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = haicgu_*
 #%% need_cpp_vars = HAVE_LINALG_SCALAPACK
 #%% [paral_info]
 #%% nprocs_to_test = 4

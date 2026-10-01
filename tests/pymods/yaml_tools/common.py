@@ -1,15 +1,26 @@
+from __future__ import annotations
+
 """
 Define classes used in several places and structures required by other modules.
 """
 
 import re
 import sys
+from collections.abc import ItemsView, Iterator, KeysView
+from typing import Any, TypeVar
+
+try:
+    from typing import Self
+except ImportError:
+    from typing_extensions import Self
 
 import numpy as np
 
 from .abinit_iterators import ITERATOR_RANKS
 
 re_word = re.compile(r"[a-zA-Z0-9_]+")
+
+_BaseArrayT = TypeVar("_BaseArrayT", bound="BaseArray")
 
 
 PY3 = sys.version_info[0] >= 3
@@ -22,11 +33,11 @@ else:
     basestring = basestring
 
 
-def get_yaml_tag(cls):
+def get_yaml_tag(cls: type) -> str:
     return getattr(cls, "_" + cls.__name__.lstrip("_") + "__yaml_tag", cls.__name__)
 
 
-def normalize_attr(string):
+def normalize_attr(string: str) -> str:
     return "_".join(re_word.findall(string))  # .lower()
 
 
@@ -38,7 +49,7 @@ class BaseDictWrapper:
     """
     is_dict_like = True
 
-    def __init__(self, d={}, **kwargs):
+    def __init__(self, d: dict[str, Any] = {}, **kwargs: Any) -> None:
         """
         Initialize the BaseDictWrapper.
 
@@ -52,7 +63,7 @@ class BaseDictWrapper:
         for attr in kwargs:
             self[attr] = kwargs[attr]
 
-    def get(self, key, default=None):
+    def get(self, key: Any, default: Any = None) -> Any:
         if isinstance(key, basestring):
             key = normalize_attr(key)
         if key in self.__dict__:
@@ -63,12 +74,12 @@ class BaseDictWrapper:
             return BaseDictWrapper(elem)
         return elem
 
-    def __contains__(self, key):
+    def __contains__(self, key: Any) -> bool:
         if isinstance(key, basestring):
             key = normalize_attr(key)
         return key in self.__dict__
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: Any) -> Any:
         if isinstance(key, basestring):
             nkey = normalize_attr(key)
         else:
@@ -80,33 +91,33 @@ class BaseDictWrapper:
             return BaseDictWrapper(elem)
         return elem
 
-    def __setitem__(self, key, val):
+    def __setitem__(self, key: Any, val: Any) -> None:
         if isinstance(key, basestring):
             key = normalize_attr(key)
         if type(val) is dict:
             val = BaseDictWrapper(val)
         self.__dict__[key] = val
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: Any) -> None:
         nkey = normalize_attr(key)
         if nkey not in self.__dict__:
             raise KeyError(key)
         del self.__dict__[nkey]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         r = type(self).__name__ + "("
         for attr, val in self.__dict__.items():
             r += f"{attr}={val}, "
         return r[:-2] + ")"
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         for key in self.__dict__:
             yield key
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.__dict__)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         try:
             if len(self) != len(other):
                 return False
@@ -122,13 +133,13 @@ class BaseDictWrapper:
         except Exception:
             return False
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
         return not self == other
 
-    def keys(self):
+    def keys(self) -> KeysView[str]:
         return self.__dict__.keys()
 
-    def items(self):
+    def items(self) -> ItemsView[str, Any]:
         return self.__dict__.items()
 
 
@@ -142,24 +153,24 @@ class Undef(float):
     yaml_pattern = re.compile("undef")
 
     @staticmethod
-    def is_undef(obj):
+    def is_undef(obj: Any) -> bool:
         return getattr(obj, "_is_undef", False)
 
     @staticmethod
-    def __new__(cls):
+    def __new__(cls) -> Undef:
         return super().__new__(cls, "nan")
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         return getattr(other, "_is_undef", False)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "undef"
 
     @classmethod
-    def from_scalar(cls, scal):
+    def from_scalar(cls, scal: str) -> Undef:
         return cls()
 
-    def to_scalar(self):
+    def to_scalar(self) -> str:
         return "undef"
 
 
@@ -167,7 +178,7 @@ class FailDetail:
     """
     Result of a failed test with additional information.
     """
-    def __init__(self, details):
+    def __init__(self, details: Any) -> None:
         """
         Initialize the FailDetail.
 
@@ -176,7 +187,7 @@ class FailDetail:
         """
         self.details = details
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         """
         As a fail it is always Falsy
         """
@@ -198,10 +209,10 @@ class BaseArray(np.ndarray):
     __yaml_tag = "Array"
 
     # by default we want to treat this as a coherent object and do not check
-    # values individualy
+    # values individually
     has_no_child = True
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """
         Initialize the BaseArray.
 
@@ -214,8 +225,8 @@ class BaseArray(np.ndarray):
         self._has_undef = False
 
     @classmethod
-    def from_seq(cls, s):
-        def check_undef(s):
+    def from_seq(cls, s: Any) -> Self:
+        def check_undef(s: Any) -> bool:
             """
             Look for Undef in the original list because numpy convert it to nan
             """
@@ -230,9 +241,9 @@ class BaseArray(np.ndarray):
         new._has_undef = check_undef(s)
         return new
 
-    def to_seq(self):
+    def to_seq(self) -> list[Any]:
         # conversion have to be explicit because numpy float are not recognised as float by yaml
-        def to_list(arr):
+        def to_list(arr: np.ndarray) -> list[Any]:
             if len(arr.shape) > 1:
                 return [to_list(line) for line in arr]
             return [float(f) for f in arr]
@@ -246,7 +257,7 @@ class IterStart:
     # Don't do this at home, trick to workaround the custom sys.path
     _is_iter_start = True
 
-    def __init__(self, iterator, iteration):
+    def __init__(self, iterator: str, iteration: int) -> None:
         """
         Initialize the IterStart object.
 
@@ -258,13 +269,13 @@ class IterStart:
         self.iteration = iteration
 
     @classmethod
-    def from_map(cls, d):
+    def from_map(cls, d: dict[str, int]) -> IterStart:
         iterator = max(d.keys(), key=lambda x: ITERATOR_RANKS[x])
         iteration = d[iterator]
         return cls(iterator, iteration)
 
-    def to_map(self):
+    def to_map(self) -> dict[str, int]:
         return {self.iterator: self.iteration}
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"IterStart({self.iterator}={self.iteration})"

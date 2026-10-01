@@ -75,15 +75,14 @@ t65o_DS3_WFK
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = cut3d
-#%% test_chain = t65.abi, t66.abi, t67.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t67.stdout, tolnlines = 3, tolabs = 1.10e-06, tolrel = 6.000e-07
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   Analysis of the output WFs of the test#66 by cut3d : angular analysis. istwfk/=1
 #%%<END TEST_INFO>

@@ -24,7 +24,10 @@ Copyright (C) 2008-2011 Volvox Development Team.
 ANSII Color formatting for output in terminal.
 """
 
+from __future__ import annotations
+
 import os
+from typing import Any
 
 __all__ = ["colored", "cprint"]
 
@@ -81,7 +84,7 @@ RESET = "\033[0m"
 __ISON = True
 
 
-def enable(true_false):
+def enable(true_false: bool) -> None:
     """
     Enable or disable ANSI color formatting.
 
@@ -92,7 +95,7 @@ def enable(true_false):
     __ISON = true_false
 
 
-def ison():
+def ison() -> bool:
     """
     Check if ANSI color formatting is activated.
 
@@ -102,7 +105,7 @@ def ison():
     return __ISON
 
 
-def stream_has_colours(stream):
+def stream_has_colours(stream: Any) -> bool:
     """
     Check if the given stream supports colors.
 
@@ -126,7 +129,7 @@ def stream_has_colours(stream):
         return False  # guess false in case of error
 
 
-def colored(text, color=None, on_color=None, attrs=None):
+def colored(text: str, color: str | None = None, on_color: str | None = None, attrs: list[str] | None = None) -> str:
     """
     Colorize text for terminal output.
 
@@ -168,7 +171,7 @@ def colored(text, color=None, on_color=None, attrs=None):
     return text
 
 
-def cprint(text, color=None, on_color=None, attrs=None, **kwargs):
+def cprint(text: str, color: str | None = None, on_color: str | None = None, attrs: list[str] | None = None, **kwargs: Any) -> None:
     """
     Print colorized text.
 
@@ -187,7 +190,7 @@ def cprint(text, color=None, on_color=None, attrs=None, **kwargs):
         print((colored(text, color, on_color, attrs)), **kwargs)
 
 
-def colored_map(text, cmap):
+def colored_map(text: str, cmap: dict[str, Any]) -> str:
     """
     Return colorized text based on a mapping of tokens to colors.
 
@@ -212,7 +215,7 @@ def colored_map(text, cmap):
     return text
 
 
-def cprint_map(text, cmap, **kwargs):
+def cprint_map(text: str, cmap: dict[str, Any], **kwargs: Any) -> None:
     """
     Print colorized text based on a mapping of tokens to colors.
 
@@ -232,7 +235,7 @@ def cprint_map(text, cmap, **kwargs):
         print(colored_map(text, cmap), **kwargs)
 
 
-def get_terminal_size():
+def get_terminal_size() -> tuple[int, int]:
     """
     Return the size of the terminal.
 
@@ -250,7 +253,7 @@ def get_terminal_size():
 
     env = os.environ
 
-    def ioctl_GWINSZ(fd):
+    def ioctl_GWINSZ(fd: int) -> tuple[int, int] | None:
         try:
             import fcntl
             import struct

@@ -20,7 +20,7 @@
  rprim 1 0 0  0 1 0  0 0 1
  timopt  -1
  tolwfr 1.0d-10
- typat  2*1 
+ typat  2*1
  xcart -2.122 0 0 2.122 0 0
  znucl  14.0
 
@@ -30,18 +30,17 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t17.abi, t19.abi, t20.abi, t21.abi, t23.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t23.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   23. Compute a few unoccupied state eigenvalues for case 17, at two
-#%%   k points. 
+#%%   k points.
 #%%   Also checks reading of a density file (t17o_DEN) which was created with
 #%%   a different number of k points (perfectly ok).
 #%%   (Shows inadequacy of this box for Si2 molecule--note enormous

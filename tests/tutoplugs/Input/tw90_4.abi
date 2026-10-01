@@ -47,7 +47,7 @@ shiftk1      0.00   0.00   0.00  # default shift
 nshiftk2 1
  shiftk2 0.0 0.0 0.0
 
-# Third: Wannier90
+# Third: wannier90
    prtvol3 1
      iscf3 -2
     nband3 14
@@ -84,5 +84,5 @@ w90iniprj3 2
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = NC, wannier90
-#%% description = Test Wannier90 interface with NC pseudopotentials
+#%% description = Test wannier90 interface with NC pseudopotentials
 #%%<END TEST_INFO>

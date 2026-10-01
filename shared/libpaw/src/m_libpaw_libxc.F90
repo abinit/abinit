@@ -1101,6 +1101,7 @@ logical function libpaw_libxc_is_potential_only(xc_functionals) result(ans)
  end if
 
 end function libpaw_libxc_is_potential_only
+!!***
 
 !----------------------------------------------------------------------
 

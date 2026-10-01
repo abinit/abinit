@@ -23,10 +23,10 @@
     prtmbm  1
 
 # Wavevector list number 1
-**************************                                                      
+**************************
      nph1l  1
-     qph1l  0.0 0.0 0.0 1.0 
-                                                                                
+     qph1l  0.0 0.0 0.0 1.0
+
 # Wave vector list no. 2
 #***********************
      nph2l  1
@@ -39,14 +39,13 @@
 #%% [setup]
 #%% executable = anaddb
 #%% input_ddb = tnlo_3.ddb.out
-#%% test_chain = tnlo_2.abi, tnlo_3.abi, tnlo_4.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tnlo_4.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = J. Zwanziger, M. Veithen, P. Ghosez
-#%% keywords = 
+#%% keywords =
 #%% description = anaddb input file.
 #%%<END TEST_INFO>

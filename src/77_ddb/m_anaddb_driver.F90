@@ -179,6 +179,7 @@ module m_anaddb_driver
    ! Extract low-dimmensional dielectric response from periodic calculations
 
  end type anaddb_driver_type
+!!***
 
 contains
 
@@ -1479,7 +1480,7 @@ end subroutine anaddb_driver_lattice_wannier
 !! anaddb_driver_convertdim_dielt
 !!
 !! FUNCTION
-!! Supposing a reduced dimensionality of the problem, convert DDB dielectric tensor 
+!! Supposing a reduced dimensionality of the problem, convert DDB dielectric tensor
 !! to the low-dimensionality dielectric tensor of the isolated material. Indeed,
 !! first-principles calculations requires vacuum buffer(s) to isolate the low-dimensional
 !! materials, that spuriously contributes to the dielectric response of the whole slab
@@ -1505,7 +1506,7 @@ subroutine anaddb_driver_convertdim_dielt(driver, rprimd, sys_dim, dielt_thick)
 ! ************************************************************************
  epsinf_conv=zero
  thick = dielt_thick(1)-dielt_thick(2)
- bool_isolated(:) = 0 
+ bool_isolated(:) = 0
  ! When periodic, additional variable spaces coming from dynamical matrices derivatives
  if (sys_dim == 1) then ! 3D
     bool_isolated = 0
@@ -1542,17 +1543,17 @@ subroutine anaddb_driver_convertdim_dielt(driver, rprimd, sys_dim, dielt_thick)
      do idir=1,3
        do jdir=1,3
          if (bool_isolated(idir)==0 .and. bool_isolated(jdir)==0) then
-           ! Capacitors in parallel for periodic directions between 2D and vacuum  
-           if (idir==jdir) then 
+           ! Capacitors in parallel for periodic directions between 2D and vacuum
+           if (idir==jdir) then
              epsinf_conv(idir,jdir)=one-acell(kdir)/dielt_thick(1)*(one-driver%epsinf(idir,jdir))
            else
              epsinf_conv(idir,jdir)=acell(kdir)/dielt_thick(1)*driver%epsinf(idir,jdir)
            end if
          elseif (bool_isolated(idir)==1 .and. bool_isolated(jdir)==1) then
            ! Capacitors in series for confined direction between 2D and vacuum
-           epsinf_conv(idir,jdir)= one/(one-acell(kdir)/thick*(one-one/driver%epsinf(idir,jdir))) 
+           epsinf_conv(idir,jdir)= one/(one-acell(kdir)/thick*(one-one/driver%epsinf(idir,jdir)))
          end if
-       end do  
+       end do
      end do
    end if
  end do

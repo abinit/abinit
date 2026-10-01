@@ -104,10 +104,10 @@ module m_dynmat
  public :: ftgam
  public :: ftgam_init
 
- public :: msria_calc          ! Calculate the correction for the Acoustic sum rule 
+ public :: msria_calc          ! Calculate the correction for the Acoustic sum rule
                                ! + rotational invariance on the IFCs in reciprocal space
- public :: msria_apply         ! Apply the correction for the Acoustic sum rule + rotational invariance 
-                               ! If IFCs derivatives calculated both from LW driver and Fourier, correct the interpolation 
+ public :: msria_apply         ! Apply the correction for the Acoustic sum rule + rotational invariance
+                               ! If IFCs derivatives calculated both from LW driver and Fourier, correct the interpolation
 
 ! *************************************************************************
 
@@ -5025,8 +5025,8 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
      call ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff,&
         qdrp_cart,eta,option=ewald_option,dipquad=dipquad_,quadquad=quadquad_)
    elseif (sys_dim<5) then
-     call ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qpt,zeff,qdrp_cart,dielt_env,dielt_thick,sys_dim)      
-   end if       
+     call ewald9_2D(natom,acell,xred,rprim,dielt,dyew,qpt,zeff,qdrp_cart,dielt_env,dielt_thick,sys_dim)
+   end if
 
    call q0dy3_apply(natom,dyewq0,dyew)
    call nanal9(dyew,dq,iqpt1,natom,nqpt1,plus1)
@@ -5995,7 +5995,7 @@ end subroutine ftgam_init
 !! Calculate the corrections on the zone-center IFCs and their derivatives with respect to the phonon
 !! wavevector q to achieve both translational (acoustic sum rule) and rotational invariances,
 !! i.e. there is not remanent forces on the atoms if they are moved or rotated globablly.
-!! This function needs the dimensionality of the system (0D, 1D, 2D, ...) to work properly, as well 
+!! This function needs the dimensionality of the system (0D, 1D, 2D, ...) to work properly, as well
 !! as the moment of the IFCs, i.e. Phi^(1). It can be obtained by a long wave calculation
 !! or with the Fourier transform. Be careful for the second option that the non-analytical part
 !! is not (yet) treated for the 1D and 2D cases; ideally this routine should only impacts the
@@ -6005,7 +6005,7 @@ end subroutine ftgam_init
 !!  asr=(6 Impose accoustic sum rules + rotational invariance)
 !!  crystal<type(crystal_t)>=Crystal structure parameters
 !!  d2cart(2,3,natom,3,natom)= Dynamical matrices coming from the Derivative Data Base at Gamma
-!!  d2dq (3,natom,3,natom,3): moment of IFCs (Phi^(1)) in cartesian coordinates 
+!!  d2dq (3,natom,3,natom,3): moment of IFCs (Phi^(1)) in cartesian coordinates
 !!  sys_dim=System dimensionality (0D, 1D, ...) used for rotational invariance
 !!  mpert =maximum number of ipert
 !!  natom=number of atom
@@ -6029,8 +6029,8 @@ subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,sys
  real(dp),intent(in) :: d2dq(3,natom,3,natom,3)
  real(dp),intent(in) :: d2dqdq(3,natom,3,3,3)
  real(dp),intent(out) :: d2asr(2,3,natom,3,natom)
- real(dp),intent(out) :: d2dqmsr(3,natom,3,natom,3)        
- real(dp),intent(out) :: d2dqdqmsr(3,natom,3,natom,3,3)        
+ real(dp),intent(out) :: d2dqmsr(3,natom,3,natom,3)
+ real(dp),intent(out) :: d2dqdqmsr(3,natom,3,natom,3,3)
 !Local variables-------------------------------
 !scalars
  integer :: idir1,idir2,idir3,idir4,idir5,info,ipert1,ipert2,col,ncol,nrow,row
@@ -6118,7 +6118,7 @@ subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,sys
  Levi_Civita(3,2,1)=-1 ; Levi_Civita(1,3,2)=-1 ; Levi_Civita(2,1,3)=-1
 
  ! We only have access to \sum d^2 Phi(kappa alpha, kappa' beta)/dqdq through the
- ! long-wavelength driver, we need to construct the full tensor. Here we split 
+ ! long-wavelength driver, we need to construct the full tensor. Here we split
  ! an equal contribution on all atoms
  d2dqdqcart(:,:,:,:,:,:)=zero
  do ipert1=1,natom
@@ -6144,7 +6144,7 @@ subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,sys
          d2dqdqred(:,:,:,:,idir2,idir4)=d2dqdqred(:,:,:,:,idir2,idir4)+&
          d2dqdqcart(:,:,:,:,idir1,idir3)*crystal%gprimd(idir1,idir2)*crystal%gprimd(idir3,idir4)
        end do
-     end do  
+     end do
    end do
  end do
  ! Now building the condition matrix
@@ -6162,15 +6162,15 @@ subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,sys
           if ( bool_kdir(idir3) == 1) then ! confined direction
             do idir4 = 1,3
                 col= ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
-                row = 9*natom+idir4+3*(ipert1-1)+3*natom*(idir1-1) 
+                row = 9*natom+idir4+3*(ipert1-1)+3*natom*(idir1-1)
                 rcond(row,col) = rcond(row,col)+ & ! first moment of IFCs
                 (crystal%xcart(idir3,ipert2)-crystal%xcart(idir3,ipert1))*Levi_Civita(idir2,idir3,idir4)
             end do
             ! Conditions on the second moments of IFCs
             ! In molecules, already fulfilled with rotational invariance
             ! For 1D systems, should only consider pair of direction when 1 is
-            ! periodic, the other is not. Currently desactivated 
-            if (idir1 == idir2 .and. bool_ldir(idir1) ==1) then !  
+            ! periodic, the other is not. Currently desactivated
+            if (idir1 == idir2 .and. bool_ldir(idir1) ==1) then !
               col= ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
               row = 2*9*natom+idir2 ! second moment of IFCs
               ! Currently desactivated because long-range electrostatics, only need to uncomment
@@ -6181,12 +6181,12 @@ subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,sys
             end if
           end if
           if ( bool_ldir(idir3) == 1 ) then ! periodic direction
-            ! Initialize the IFCs derivatives      
+            ! Initialize the IFCs derivatives
             col= (3*natom)**2*idir3+ipert2+natom*(idir2-1)+3*natom*(ipert1-1)+3*natom**2*(idir1-1)
             d2cart_vec(col) = d2dqred(idir1,ipert1,idir2,ipert2,idir3)
             do idir5 = 1,3
               do idir4 = 1,3
-                row = 9*natom+idir4+3*(ipert1-1)+3*natom*(idir1-1) 
+                row = 9*natom+idir4+3*(ipert1-1)+3*natom*(idir1-1)
                 rcond(row,col) = rcond(row,col)+ Levi_Civita(idir2,idir5,idir4)*crystal%rprimd(idir5,idir3)!/two_pi
               end do
             end do
@@ -6226,7 +6226,7 @@ subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,sys
        end do
      end do
    end do
- end do          
+ end do
 
 
 ! Use LAPACK singular value decomposition
@@ -6313,9 +6313,9 @@ subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,sys
      do idir2=1,3
        do ipert2=1, natom
          do idir3=1,3
-           if ( bool_kdir(idir3) == 1) then ! Contribution from zone-center 
+           if ( bool_kdir(idir3) == 1) then ! Contribution from zone-center
              tmp = d2cart(1,idir1,ipert1,idir2,ipert2)
-             tmp2 = tmp-d2asr(1,idir1,ipert1,idir2,ipert2)      
+             tmp2 = tmp-d2asr(1,idir1,ipert1,idir2,ipert2)
              do idir4 = 1,3
                msr_init(idir1,ipert1,idir4)=msr_init(idir1,ipert1,idir4)+&
                tmp*(crystal%xcart(idir3,ipert2)-crystal%xcart(idir3,ipert1))*Levi_Civita(idir2,idir3,idir4)
@@ -6323,8 +6323,8 @@ subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,sys
                tmp2*(crystal%xcart(idir3,ipert2)-crystal%xcart(idir3,ipert1))*Levi_Civita(idir2,idir3,idir4)
              end do
            end if
-           if ( bool_ldir(idir3) == 1 ) then ! Contribution from dC/dq 
-             tmp =d2dqred(idir1,ipert1,idir2,ipert2,idir3) 
+           if ( bool_ldir(idir3) == 1 ) then ! Contribution from dC/dq
+             tmp =d2dqred(idir1,ipert1,idir2,ipert2,idir3)
              tmp2=tmp-d2dqmsr(idir1,ipert1,idir2,ipert2,idir3)
              do idir4 = 1,3
               do idir5 = 1,3
@@ -6353,7 +6353,7 @@ subroutine msria_calc(asr,crystal,d2asr,d2cart,d2dq,d2dqdq,d2dqmsr,d2dqdqmsr,sys
      end do
    end do
  end do
- 
+
  ABI_FREE(msr)
  ABI_FREE(msr_init)
  ABI_FREE(d2cart_vec)
@@ -6408,7 +6408,7 @@ subroutine msria_apply(asr,d2asr,d2dqmsr,d2cart,mpert,natom,qphon,crystal)
 !scalars
  integer :: idir1,idir2,ipert1,ipert2,idir3,ii,jj
  integer :: tiat,tjat,isym,indij(natom,natom),indij2(natom,natom,3)
- integer :: isgn, itirev,acc,acc2 
+ integer :: isgn, itirev,acc,acc2
  real(dp) :: qsym(3), qsym2(3), symcart(3,3,crystal%nsym),arg1,arg2
  real(dp) :: re,im,re2,im2,sumr,sumi,valr,vali,carttmp
  real(dp), allocatable :: pert(:,:,:,:,:,:), pert2(:,:,:,:,:,:,:)
@@ -6507,7 +6507,7 @@ subroutine msria_apply(asr,d2asr,d2dqmsr,d2cart,mpert,natom,qphon,crystal)
        end do !ipert2
      end do !ipert1
    end do !itirev
- end do !isym  
+ end do !isym
  do ipert1=1,natom
    do idir1 =1,3
      do idir2=1,3
@@ -6538,4 +6538,5 @@ subroutine msria_apply(asr,d2asr,d2dqmsr,d2cart,mpert,natom,qphon,crystal)
  ABI_FREE(pert)
  ABI_FREE(pert2)
 end subroutine msria_apply
+!!***
 end module m_dynmat

@@ -2751,6 +2751,7 @@ subroutine fourwf_optmem(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
 
 end subroutine fourwf_optmem
+!!***
 
 !!****f* ABINIT/fourwf
 !! NAME

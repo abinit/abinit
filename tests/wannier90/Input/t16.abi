@@ -29,7 +29,7 @@ getden3 1
 tolwfr3 1.0d-12
 nbdbuf3 4
 
-# Dataset 4: expand dataset 3's WFK and call Wannier90.
+# Dataset 4: expand dataset 3's WFK and call wannier90.
 optdriver4 8
 wfk_task4 "wannier"
 getwfk4 -1

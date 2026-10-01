@@ -122,4 +122,3 @@ pseudos "B.psp8, N.psp8"
 #%% keywords = DFPT
 #%% description = Linear response to phonons and electric field with the 2D short-range Coulomb kernel
 #%%<END TEST_INFO>
-

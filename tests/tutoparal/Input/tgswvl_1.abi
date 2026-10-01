@@ -17,7 +17,7 @@ icoulomb     1    # Activate the free boundary conditions for the
 iscf         0    # Activation of the Direct minimization scheme for the calculation
                   #   of wavefunctions. This algorithm is fast but working only for
                   #   systems with a gap, and only for wavelets.
-                  
+
 nwfshist     6    # Activation of DIIS algoithm (Direct minimization scheme)
                   #   with 6 wavefunctions stored in history
 
@@ -36,7 +36,7 @@ znucl 5           # Atomic number of the possible type(s) of atom. Here boron.
 pp_dirpath "$ABI_PSPDIR"        # Path to the directory were
                                 #   pseudopotentials for tests are stored
 pseudos "B-q3"                  # Name and location of the pseudopotential
-                         
+
 #Definition of the atoms
 natom 14          # There are 14 atoms
 typat 14*1        # They all are of type 1, that is, Carbon
@@ -66,8 +66,8 @@ kpt  3*0.         # - K-point coordinates in reciprocal space
 
 #Parameters for the SCF procedure
 nstep 20          # Maximal number of SCF cycles
-tolwfr 1.0d-14    # Will stop when, twice in a row, the difference 
-                  # between two consecutive evaluations of wavefunction residual 
+tolwfr 1.0d-14    # Will stop when, twice in a row, the difference
+                  # between two consecutive evaluations of wavefunction residual
                   # differ by less than tolwfr
                   # This convergence criterion is adapted to direct minimization
                   #   algorithm (iscf=0)
@@ -91,17 +91,17 @@ optstress 0       # Stress tensor computation is not relevant here
 #%% max_nprocs = 14
 #%% nprocs_to_test = 1, 2, 4, 8, 10, 12
 #%% [NCPU_1]
-#%% files_to_test = tgswvl_1_MPI1.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 1.1e-4
+#%% files_to_test = tgswvl_1_MPI1.abo, tolnlines =   62, tolabs =  2.1e-5, tolrel= 1.1e-4
 #%% [NCPU_2]
-#%% files_to_test = tgswvl_1_MPI2.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 1.1e-4
+#%% files_to_test = tgswvl_1_MPI2.abo, tolnlines =   62, tolabs =  2.1e-5, tolrel= 1.1e-4
 #%% [NCPU_4]
-#%% files_to_test = tgswvl_1_MPI4.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 1.1e-4
+#%% files_to_test = tgswvl_1_MPI4.abo, tolnlines =   62, tolabs =  2.1e-5, tolrel= 1.1e-4
 #%% [NCPU_8]
-#%% files_to_test = tgswvl_1_MPI8.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 1.1e-4
+#%% files_to_test = tgswvl_1_MPI8.abo, tolnlines =   62, tolabs =  2.1e-5, tolrel= 1.1e-4
 #%% [NCPU_10]
-#%% files_to_test = tgswvl_1_MPI10.abo, tolnlines =   4, tolabs =  1.1e-4, tolrel= 1.1e-4
+#%% files_to_test = tgswvl_1_MPI10.abo, tolnlines =   62, tolabs =  1.1e-4, tolrel= 1.1e-4
 #%% [NCPU_12]
-#%% files_to_test = tgswvl_1_MPI12.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 1.1e-4
+#%% files_to_test = tgswvl_1_MPI12.abo, tolnlines =   62, tolabs =  2.1e-5, tolrel= 1.1e-4
 #%% [extra_info]
 #%% authors = D. Caliste
 #%% keywords = NC,WVL

@@ -32,7 +32,7 @@ optcell = 2
 #%% coeff_xml = t06_coeff.xml
 #%% need_cpp_vars = !HAVE_GPU  , !CC_INTEL_ONEAPI
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t06.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t06_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t06_coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
@@ -40,8 +40,8 @@ optcell = 2
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = A. MARTIN
-#%% keywords = Effective potential, multibinit
-#%% description = 
+#%% keywords = Effective_potential, multibinit
+#%% description =
 #%%   read xml and generate effective potential and run NPT simulation
 #%% topics = LatticeModel,DynamicsMultibinit
 #%%<END TEST_INFO>

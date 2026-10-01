@@ -1,4 +1,4 @@
-# Test Fe XML pseudopotential with and without sppol - PSP8 reference
+# Test Fe XML pseudopotential with and without sppol - psp8 reference
 
 ndtset 2
 nsppol1 1

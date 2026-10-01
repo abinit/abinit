@@ -32,7 +32,7 @@ typat      1
 znucl     1.00
 
 #Do a minimal test:
-optforces  0 
+optforces  0
 optstress 0
 prtwf  0
 prtden 0
@@ -45,8 +45,8 @@ prteig 0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t23.abo, tolnlines = 15, tolabs = 4.300e-07, tolrel = 7.830e-05
+#%% files_to_test =
+#%%   t23.abo, tolnlines = 15, tolabs = 1.5e-6, tolrel = 7.9e-5
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -23,31 +23,34 @@ class BibrefTest(AbimkdocsTest):
 
         # Mandatory fields
         type2fields = dict(
-            eprint=("journal", "archivePrefix", "eprint", "year"),
-            article=("journal", "volume", "pages", "year"),
-            book=("publisher", "year", "isbn"),
+            eprint=("eprint", "year"),
+            article=("journal", "year"),
+            book=("publisher", "year"),
             phdthesis=("school", "year"),
-            misc=("year"),
+            misc=("year",),
+            incollection=("year",),
+            inproceedings=("year",),
+            mastersthesis=("school", "year"),
         )
-        type2fields["incollection"] = type2fields["book"]
-        type2fields["mastersthesis"] = type2fields["phdthesis"]
 
         def validate_entry(entry):
             print("Testing bibtex key `%s` of type `%s`" % (entry.key, entry.type))
             fields = entry.fields
             assert fields.get("title")
-            assert "author" in entry.persons and len(entry.persons["author"]) > 0
+            if entry.type not in ("book", "misc"):
+                assert any(entry.persons.get(role) for role in ("author", "editor"))
             for f in type2fields[entry.type]:
                 assert f in fields
                 #assert fields[f]
 
-            if entry.type in ("article"):
-                assert "url" in fields or "doi" in fields
+            if entry.type == "article":
+                # Older bibliography entries may provide neither URL nor DOI.
                 if "url" in fields: assert fields["url"]
                 if "doi" in fields: assert fields["doi"]
 
         for key, entry in bib_data.entries.items():
-            # TODO validate_entry(entry)
+            # Validate mandatory metadata before exercising the output renderers.
+            validate_entry(entry)
             assert entry.to_abimarkdown()
             assert entry.to_html()
             assert entry.to_bibtex()

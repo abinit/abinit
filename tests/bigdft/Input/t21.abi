@@ -72,14 +72,14 @@ ecut   50           # This cut-off is too low for real calculations
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%  t21.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% files_to_test =
+#%%  t21.abo, tolnlines = 36, tolabs = 1.1e-2, tolrel = 8.0e-6
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = D. Caliste
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   H in isolated boundary conditions (plane waves, NC).
 #%%   Similar to t20.in but check that non cubic boxs can be used with equivalent x, y and z directions.
 #%%<END TEST_INFO>

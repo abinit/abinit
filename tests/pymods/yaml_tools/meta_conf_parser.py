@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 """
 Define the internals of parsing the configuration file.
 Also define the evaluation of a constraint.
 """
+from collections.abc import Callable
 from copy import deepcopy
 from inspect import isclass
+from typing import TYPE_CHECKING, Any
 from warnings import warn
 
 from .abinit_iterators import IterStateFilter
@@ -11,43 +15,46 @@ from .common import BaseArray, FailDetail, Undef, normalize_attr, string
 from .errors import IllegalFilterNameError, InvalidNodeError, UnknownParamError, ValueTypeError
 from .tricks import cstm_isinstance
 
+if TYPE_CHECKING:
+    from .driver_test_conf import DriverTestConf
 
-def make_apply_to(type_):
+
+def make_apply_to(type_: str | type) -> Callable[[Constraint, Any], bool]:
     """
     Return a function that takes in argument the constraint and
     an object from the data tree and returns True it the constraints
     apply to the object.
     """
     if type_ == "number":
-        def apply_to(self, obj):
+        def apply_to(self: Constraint, obj: Any) -> bool:
             return isinstance(obj, (int, float, complex))
 
     elif type_ == "real":
-        def apply_to(self, obj):
+        def apply_to(self: Constraint, obj: Any) -> bool:
             return isinstance(obj, float)
 
     elif type_ == "integer":
-        def apply_to(self, obj):
+        def apply_to(self: Constraint, obj: Any) -> bool:
             return isinstance(obj, int)
 
     elif type_ == "complex":
-        def apply_to(self, obj):
+        def apply_to(self: Constraint, obj: Any) -> bool:
             return isinstance(obj, (float, complex))
 
     elif type_ == "Array":
-        def apply_to(self, obj):
+        def apply_to(self: Constraint, obj: Any) -> bool:
             return getattr(obj, "_is_base_array", False)
 
     elif type_ == "this":
-        def apply_to(self, obj):
+        def apply_to(self: Constraint, obj: Any) -> bool:
             return True
 
     elif isclass(type_):
-        def apply_to(self, obj):
+        def apply_to(self: Constraint, obj: Any) -> bool:
             return cstm_isinstance(obj, type_)
 
     else:  # dummy
-        def apply_to(self, obj):
+        def apply_to(self: Constraint, obj: Any) -> bool:
             return False
 
     return apply_to
@@ -57,8 +64,10 @@ class Constraint:
     """
     Represent a constraint to be applied to some piece of data.
     """
-    def __init__(self, name, test, val_type, inherited, use_params, exclude,
-                 apply_to, handle_undef, value=None, metadata={}):
+    def __init__(self, name: str, test: Callable[..., Any], val_type: type,
+                 inherited: bool, use_params: list[str], exclude: set[str],
+                 apply_to: str | type, handle_undef: bool, value: Any = None,
+                 metadata: dict[str, Any] = {}) -> None:
         """
         Initialize the Constraint object.
 
@@ -87,7 +96,7 @@ class Constraint:
         self._apply_to_type = apply_to
         self._apply_to = make_apply_to(apply_to)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Constraint({})".format(", ".join((
             str(self.name),
             str(self.test),
@@ -99,7 +108,7 @@ class Constraint:
             str(self.metadata),
         )))
 
-    def check(self, ref, tested, conf):
+    def check(self, ref: Any, tested: Any, conf: DriverTestConf) -> bool | FailDetail:
         """
         Check if the constraint is verified for given data.
 
@@ -135,13 +144,13 @@ class Constraint:
         params = [conf.get_param(p) for p in self.use_params]
         return self.test(self.value, ref, tested, *params)
 
-    def apply_to(self, obj):
+    def apply_to(self, obj: Any) -> bool:
         """
         _apply_to is not a method so we have to pass self explicitly
         """
         return self._apply_to(self, obj)
 
-    def copy(self):
+    def copy(self) -> Constraint:
         """
         Create a copy of self.
         """
@@ -151,7 +160,7 @@ class Constraint:
         cp._apply_to = self._apply_to
         return cp
 
-    def with_value(self, val, metadata={}):
+    def with_value(self, val: Any, metadata: dict[str, Any] = {}) -> Constraint:
         """
         Create a copy of self with the value attribute set.
         """
@@ -162,7 +171,7 @@ class Constraint:
         cp.metadata = metadata
         return cp
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, Constraint)
             and self.name == other.name
@@ -174,7 +183,7 @@ class Constraint:
             and self.handle_undef == other.handle_undef
         )
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
         return not (self == other)
 
 
@@ -183,12 +192,12 @@ class SpecKey:
     This object encapsulate the manipulation of field labels, interpreting
     the eventual ! at the end and normalizing the name.
     """
-    def __init__(self, name, hardreset=False):
+    def __init__(self, name: str, hardreset: bool = False) -> None:
         self.name = normalize_attr(name)
         self.hardreset = hardreset
 
     @classmethod
-    def parse(cls, name):
+    def parse(cls, name: str | int) -> SpecKey:
         hardr = False
         if isinstance(name, int):
             name = string(name)
@@ -198,16 +207,16 @@ class SpecKey:
 
         return cls(name, hardreset=hardr)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.name)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, SpecKey) and self.name == other.name
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
         return not isinstance(other, SpecKey) or self.name != other.name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '"' + self.name + ("!" if self.hardreset else "") + '"'
 
 
@@ -217,11 +226,11 @@ class ConfTree:
     defined in the nodes.
     Internally used by DriverTestConf to manipulate individual trees.
     """
-    def __init__(self, dict_tree):
+    def __init__(self, dict_tree: dict[str, Any]) -> None:
         self.dict = dict_tree
 
     @staticmethod
-    def _empty_tree():
+    def _empty_tree() -> dict[str, Any]:
         return {
             "spec": {},
             "constraints": {},
@@ -229,7 +238,7 @@ class ConfTree:
         }
 
     @classmethod
-    def make_tree(cls, src, parser):
+    def make_tree(cls, src: dict[str, Any], parser: ConfParser) -> ConfTree:
         """
         Recursively build a configuration tree from source data.
 
@@ -242,7 +251,7 @@ class ConfTree:
         """
         params, cons, ctx = parser.parameters, parser.constraints, parser.ctx()
 
-        def mk(src):
+        def mk(src: dict[str, Any]) -> dict[str, Any]:
             """
             Recursively build the configuration tree
             """
@@ -267,14 +276,14 @@ class ConfTree:
 
         return cls(mk(src))
 
-    def copy(self):
+    def copy(self) -> ConfTree:
         return ConfTree(deepcopy(self.dict))
 
-    def update(self, tree):
+    def update(self, tree: ConfTree) -> None:
         """
         Update self with values found in tree.
         """
-        def up(old_d, new_d):
+        def up(old_d: dict[str, Any], new_d: dict[str, Any]) -> None:
             """
             Recursively update the content of old_d with new_d.
             """
@@ -294,7 +303,7 @@ class ConfTree:
 
         up(self.dict, tree.dict)
 
-    def get_spec_at(self, path):
+    def get_spec_at(self, path: list[str]) -> list[str] | dict[Any, Any]:
         """
         Get specializations defined at a given node in the tree.
         Return an empty dictionary if the path does not exist.
@@ -308,7 +317,7 @@ class ConfTree:
                 return {}
         return [repr(sp) for sp in d["spec"]]
 
-    def get_new_params_at(self, path):
+    def get_new_params_at(self, path: tuple[str, ...] | list[str]) -> dict[str, Any]:
         """
         Get params defined at a given node in the tree.
         Return an empty dictionary if the path does not exist.
@@ -322,7 +331,7 @@ class ConfTree:
                 return {}
         return d["parameters"]
 
-    def get_new_constraints_at(self, path):
+    def get_new_constraints_at(self, path: tuple[str, ...] | list[str]) -> dict[str, Constraint]:
         """
         Get constraints defined at a given node in the tree.
         Return an empty dictionary if the path does not exist.
@@ -336,13 +345,13 @@ class ConfTree:
                 return {}
         return d["constraints"]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"ConfTree({self.dict})"
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, ConfTree) and self.dict == other.dict
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
         return not (self == other)
 
 
@@ -351,18 +360,18 @@ class ConfParser:
     Test configuration loader and parser. It takes output from yaml parser
     and build the actual configuration trees.
     """
-    def __init__(self):
-        self.parameters = {
+    def __init__(self) -> None:
+        self.parameters: dict[str, dict[str, Any]] = {
             "allow_undef": {
                 "type": bool,
                 "inherited": True,
                 "default": True
             }
         }
-        self.constraints = {}
-        self.metadata = {}
+        self.constraints: dict[str, Constraint] = {}
+        self.metadata: dict[str, Any] = {}
 
-    def import_parser(self, conf_parser):
+    def import_parser(self, conf_parser: ConfParser) -> None:
         """
         Import constraints and parameters from another conf_parser.
         In case of name conflict the local values are overridden by the new
@@ -371,7 +380,8 @@ class ConfParser:
         self.parameters.update(conf_parser.parameters)
         self.constraints.update(conf_parser.constraints)
 
-    def parameter(self, token, default=None, value_type=float, inherited=True):
+    def parameter(self, token: str, default: Any = None,
+                  value_type: type = float, inherited: bool = True) -> None:
         """
         Register a parameter to be recognised while parsing config.
         """
@@ -381,14 +391,15 @@ class ConfParser:
             "default": default,
         }
 
-    def constraint(self, name=None, value_type=float, inherited=True,
-                   apply_to="number", use_params=[], exclude=set(),
-                   handle_undef=True):
+    def constraint(self, name: str | None = None, value_type: type = float,
+                   inherited: bool = True, apply_to: str | type = "number",
+                   use_params: list[str] = [], exclude: set[str] = set(),
+                   handle_undef: bool = True) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         """
         Register a constraints to be recognised while parsing config.
         Decorator for the constraint body function.
         """
-        def register(fun):
+        def register(fun: Callable[..., Any]) -> Callable[..., Any]:
             if name is None:
                 name_ = fun.__name__
             else:
@@ -410,10 +421,11 @@ class ConfParser:
             return fun
         return register
 
-    def ctx(self):
+    def ctx(self) -> dict[str, Any]:
         return self.metadata.copy()
 
-    def make_trees(self, parsed_src, metadata={}):
+    def make_trees(self, parsed_src: dict[str, Any],
+                    metadata: dict[str, Any] = {}) -> tuple[dict[str, ConfTree], dict[str, IterStateFilter]]:
         """
         Convert parsed YAML output into configuration trees and filters.
 
@@ -427,8 +439,8 @@ class ConfParser:
         assert isinstance(parsed_src, dict), ("parsed_src have to be derivated"
                                               " from a dictionary but it is"
                                               f" a {type(parsed_src)}")
-        filters = {}
-        trees = {}
+        filters: dict[str, IterStateFilter] = {}
+        trees: dict[str, ConfTree] = {}
         self.metadata = metadata.copy()
 
         if "filters" in parsed_src:

@@ -30,18 +30,17 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% test_chain = t50.abi, t51.abi, t52.abi, t53.abi
 #%% input_ddb = t51.ddb.out
 #%% input_gkk = t52.ddb.out
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t53.abo, tolnlines = 1, tolabs = 4.0e-5, tolrel = 2.0e-7
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   He BCC primitive cell. Fake smooth pseudopotential.
 #%%   Follow-up of test 50. Analyse (anaddb) the DDB and EIGR2D files.
 #%%   Compute the electron-phonon modifications of the electronic structure.

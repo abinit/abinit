@@ -11,7 +11,8 @@ import os
 import subprocess
 import sys
 import warnings
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import mkdocs
 import mkdocs.__main__
