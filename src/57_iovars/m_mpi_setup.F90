@@ -178,14 +178,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    endif
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npspinor',tread(5),'INT')
-   ! oriringal code
-   !if(tread(5)==1) dtsets(idtset)%npspinor=intarr(1)
-   ! JWZ debug adjustment
-   if(tread(5)==1.and.optdriver/=RUNL_GSTATE) then
-     dtsets(idtset)%npspinor=intarr(1)
-   else
-     dtsets(idtset)%npspinor=1
-   end if
+   ! original code
+   if(tread(5)==1) dtsets(idtset)%npspinor=intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npfft',tread(6),'INT')
    if(tread(6)==1) dtsets(idtset)%npfft=intarr(1)
