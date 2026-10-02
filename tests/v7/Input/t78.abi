@@ -143,6 +143,7 @@ plowan_compute3 1 # Activate the computation of Wannier functions
 #==================================================================================
  upawu5 0 0 0       # necessary if upawu/=0 in the first three datasets
  optdriver5  4      # Self-Energy calculation
+ gw_sigxcore    0   # Core contribution is approximated with vxc instead of on-site Fock operator
  getwfk5     3      # Obtain WFK file from dataset 1
  getscr5     4      # Obtain SCR file from previous dataset
  plowan_compute5 10 # Read Wannier functions

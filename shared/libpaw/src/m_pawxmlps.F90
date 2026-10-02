@@ -2731,12 +2731,12 @@ end subroutine paw_setup_copy
 !!
 !! SOURCE
 
- subroutine rdpawpsxml_core(atm,filename,rcut,pawrad)
+ subroutine rdpawpsxml_core(Atm,filename,rcut,pawrad)
 
 !Arguments ---------------------------------------------
  character (len=*),intent(in) :: filename
  real(dp), intent(in) :: rcut
- type(atomorb_type), intent(inout) :: atm
+ type(atomorb_type), intent(inout) :: Atm
  type(pawrad_type),intent(in),optional :: pawrad
 
 !Local variables ---------------------------------------
@@ -2965,7 +2965,7 @@ end subroutine paw_setup_copy
  Atm%fname = filename
  Atm%l_max=0
  Atm%ixc=0
- Atm%method=0
+ Atm%method=1
  Atm%l_size=0
  Atm%ln2_size=0
  Atm%lmn_size=0
@@ -3072,9 +3072,9 @@ end subroutine paw_setup_copy
 !  End of reading loop
  end do
 
- atm%zcore_conv=.false.
- atm%nc_conv=.false.
- atm%nresid_c=one
+ Atm%zcore_conv=.false.
+ Atm%nc_conv=.false.
+ Atm%nresid_c=one
 
  if(Atm%ln_size==0)then
    LIBPAW_ALLOCATE(Atm%mode,(1,1,2))
@@ -3098,7 +3098,7 @@ end subroutine paw_setup_copy
          if(present(pawrad)) then
            Atm%mesh_size = pawrad%mesh_size
            Atm%rcore=pawrad%rad(pawrad%mesh_size)
-           call pawrad_copy(pawrad,atm%radmesh)
+           call pawrad_copy(pawrad,Atm%radmesh)
          elseif(rcut>tol16) then
            msz_cut =min(pawrad_ifromr(radmesh(imeshae),rcut)+6,radmesh(imeshae)%mesh_size) ! add six more points six more points
            Atm%mesh_size = msz_cut

@@ -8229,7 +8229,7 @@ Variable(
     vartype="integer",
     topics=["SelfEnergy_expert"],
     dimensions="scalar",
-    defaultval=0,
+    defaultval=1,
     mnemonics="GW, SIGma (self-energy) for the CORE contribution",
     requires="[[optdriver]] == 4 and [[usepaw]] == 1",
     added_in_version="before_v9",
@@ -8253,8 +8253,10 @@ that the core wave functions are strictly localized inside the PAW spheres.
 
 [[gw_sigxcore]] defines the approximation used to evaluate the core contribution to sigma.
 
-  * 0, standard approach, the core contribution is approximated with vxc.
-  * 1, the core term is approximated with the Fock operator inside the PAW spheres.
+  * 0, the core contribution is approximated with vxc.
+  * 1, the core term is approximated with the Fock operator inside the PAW spheres. This is the default approach, but requires that the core wave function files are provided.
+
+Note that before version 10.9 the default value was 0.
 """,
 ),
 
