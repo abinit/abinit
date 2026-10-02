@@ -58,6 +58,7 @@ module m_pawpsp
  public:: pawpsp_nl              !make paw projector form factors f_l(q)
  public:: pawpsp_read            !read psp from file
  public:: pawpsp_read_header     !read header of psp file
+ public:: pawpsp_check_corefile  !check if core wave func file exists
  public:: pawpsp_init_core       !guess the name of the core wf file and initialize a paw_atomorb type for the core
  public:: pawpsp_read_corewf     !read core wavefunction
  public:: pawpsp_read_header_2   !reads pspversion, basis_size and lmn_size
@@ -1332,46 +1333,39 @@ end subroutine pawpsp_read
 
 !----------------------------------------------------------------------
 
-!!****f* m_pawpsp/pawpsp_init_core
+!!****f* m_pawpsp/pawpsp_check_corefile
 !! NAME
-!!  pawpsp_init_core
+!!  pawpsp_check_corefile
 !!
 !! FUNCTION
-!!  Initialize a structure of type atomorb_type from a core file.
+!!  Checks the existance of a core file.
 !!
 !! INPUTS
 !!  psp_filename= (optional) Name of the file containing core electrons
-!!  rcut_in= (optional) Radius cut-off for radial mesh quantities
-!!  radmesh= (optional) Radial mesh
 !!
 !! OUTPUT
-!!  Atm<paw_atomorb_type>=Structure defining the set of core orbitals.
+!!  filename_wf= core wave function file, if found
+!!  ex= true if found
 !!
 !! SOURCE
 
-subroutine pawpsp_init_core(Atm,psp_filename,rcut_in,radmesh)
+subroutine pawpsp_check_corefile(filename_wf, ex ,psp_filename)
 !Arguments ------------------------------------
 !scalars
  character(len=*), intent(in),optional :: psp_filename
- real(dp), intent(in), optional :: rcut_in
- type(atomorb_type),intent(inout) :: Atm
- type(pawrad_type), intent(in),optional :: radmesh
+ character(len=*), intent(out) :: filename_wf
+ logical, intent(out) :: ex
 
 !Local variables-------------------------------
 !scalars
- integer :: unt,ios,fnln,ic
- logical :: ex,fmt_xml,old_fmt,def_name,fmt_abinit
- character(len=80) :: fline
+ integer :: ios,fnln,ic
+ logical :: fmt_xml,def_name,fmt_abinit
  character(len=500) :: msg
  character(len=fnlen) :: filename_,string
- real(dp) :: rcut
 
-! ************************************************************************
+! *************************************************************************
 
- rcut=zero
- if(present(rcut_in)) rcut=rcut_in
  fmt_xml=.false.
- old_fmt=.false.
  def_name=.false.
 
  if (present(psp_filename)) then
@@ -1395,8 +1389,6 @@ subroutine pawpsp_init_core(Atm,psp_filename,rcut_in,radmesh)
      LIBPAW_ERROR(msg)
    end if
    if (.not.ex) then
-     write(msg,'(3a)') 'This file does not exist: ',trim(filename_),'!'
-     LIBPAW_WARNING(msg)
      string=trim(psp_filename)
      filename_="CORE_"//trim(libpaw_basename(string))
      ic = index (trim(string), "/" , back=.true.)
@@ -1427,33 +1419,73 @@ subroutine pawpsp_init_core(Atm,psp_filename,rcut_in,radmesh)
        LIBPAW_ERROR(msg)
      end if
      fmt_xml=ex
-     if (.not.ex) then
-       write(msg, '(3a)' )'Please provide an up-to-date corewf file'
-       LIBPAW_ERROR(msg)
-!!      Core WF file: old format
-!       filename_='corewf.dat';ex=.false.
-!       inquire(file=trim(filename_),iostat=ios,exist=ex)
-!       if (ios/=0) then
-!         write(msg,'(3a)') 'INQUIRE returns an error for file ',trim(filename_),'!'
-!         LIBPAW_ERROR(msg)
-!       end if
-!       old_fmt=ex
-!       if (.not.ex) then
-!!        No core WF file found
-!         write(msg, '(3a)' )&
-!&         'Checks for existence of files corewf.abinit[.xml] or corewf.dat',ch10,&
-!&         'but INQUIRE finds file does not exist!'
-!         LIBPAW_ERROR(msg)
-!       end if
-     end if
-   end if
-   write(msg, '(3a)' )&
-     'Reading corewf file', trim(filename_),' : the calculation will NOT be &
-&    correct for several atomic types !'
-   LIBPAW_WARNING(msg)
+   endif
+   if (ex) then
+       write(msg, '(3a)' )&
+       'Reading corewf file', trim(filename_),' : the calculation will NOT be &
+&      correct for several atomic types !'
+       LIBPAW_WARNING(msg)
+   endif
  endif
 
+ if (ex) filename_wf = filename_
 
+end subroutine pawpsp_check_corefile
+!!***
+
+!-------------------------------------------------------------------------
+
+!!****f* m_pawpsp/pawpsp_init_core
+!! NAME
+!!  pawpsp_init_core
+!!
+!! FUNCTION
+!!  Initialize a structure of type atomorb_type from a core file.
+!!
+!! INPUTS
+!!  psp_filename= (optional) Name of the file containing core electrons
+!!  rcut_in= (optional) Radius cut-off for radial mesh quantities
+!!  radmesh= (optional) Radial mesh
+!!
+!! OUTPUT
+!!  Atm<paw_atomorb_type>=Structure defining the set of core orbitals.
+!!
+!! SOURCE
+
+subroutine pawpsp_init_core(Atm,psp_filename,rcut_in,radmesh)
+!Arguments ------------------------------------
+!scalars
+ character(len=*), intent(in),optional :: psp_filename
+ real(dp), intent(in), optional :: rcut_in
+ type(atomorb_type),intent(inout) :: Atm
+ type(pawrad_type), intent(in),optional :: radmesh
+
+!Local variables-------------------------------
+!scalars
+ integer :: unt
+ logical :: ex,fmt_xml
+ character(len=80) :: fline
+ character(len=500) :: msg
+ character(len=fnlen) :: filename_
+ real(dp) :: rcut
+
+! ************************************************************************
+
+ rcut=zero
+ if(present(rcut_in)) rcut=rcut_in
+ if(present(psp_filename)) then
+   call pawpsp_check_corefile(filename_, ex ,psp_filename)
+ else
+   call pawpsp_check_corefile(filename_, ex)
+ endif
+
+ if (ex) then
+   write(msg,'(2a)') 'Read core wave function file: ', filename_
+   call wrtout(std_out,msg)
+ else
+   write(msg,'(3a)') 'No core wave function file found!'
+   LIBPAW_ERROR(msg)
+ endif
 
  unt = libpaw_get_free_unit()
  open(unit=unt,file=trim(filename_),form='formatted',status='old',action="read")
@@ -1495,7 +1527,7 @@ end subroutine pawpsp_init_core
 !!  filename_= core WF file name
 !!  oldformat= old format for the file or not
 !!  rcut= radius cut-off for radial mesh quantities
-!!  ramesh_in= (optional) radial mesh
+!!  radmesh_in= (optional) radial mesh
 !!
 !! OUTPUT
 !!  Atm<paw_atomorb_type>= Structure defining the set of core orbitals.
@@ -1627,7 +1659,7 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
            if(present(radmesh_in)) then
              Atm%mesh_size = radmesh_in%mesh_size
              Atm%rcore=radmesh_in%rad(radmesh_in%mesh_size)
-             call pawrad_copy(radmesh_in,atm%radmesh)
+             call pawrad_copy(radmesh_in,Atm%radmesh)
            elseif(rcut>tol16) then
              call pawrad_init(tmpmesh,meshsz(ii),meshtp(ii),radstp(ii),logstp(ii),-one)
              msz_cut =min(pawrad_ifromr(tmpmesh,rcut)+6,tmpmesh%mesh_size) ! addsix more points

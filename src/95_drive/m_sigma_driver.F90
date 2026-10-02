@@ -90,6 +90,7 @@ module m_sigma_driver
  use m_paw_tools,     only : chkpawovlp, pawprt
  use m_paw_denpot,    only : pawdenpot
  use m_paw_init,      only : pawinit, paw_gencond
+ use m_pawpsp,        only : pawpsp_check_corefile
  use m_classify_bands,only : classify_bands
  use m_wfk,           only : wfk_read_eigenvalues
  use m_io_kss,        only : make_gvec_kss
@@ -1575,6 +1576,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! Matrix elements of V_U are zero unless we are using DFT+U as starting point
  do ib=b1gw,b2gw
    Sr%vxcme(ib,:,:)=KS_me%vxcval(ib,ib,:,:)
+   if (Sigp%use_sigxcore == 1) Sr%vxcme(ib,:,:)= KS_me%vxc(ib,ib,:,:) -KS_me%sxcore(ib,ib,:,:) !SF: This needs to be updated, otherwise Vxc will be reported incorrectly in the output. However, vxcme is not used by solve_dyson
    if (Dtset%usepawu/=0) Sr%vUme (ib,:,:)=KS_me%vu(ib,ib,:,:)
  end do
 
@@ -2947,12 +2949,12 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  integer :: bantot,enforce_sym,gwcalctyp,ib,ibtot,icutcoul_eff,ii,ikcalc,ikibz,io,isppol,itypat,jj,method
  integer :: mod10,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng, nsppol
  integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev,usefock_ixc
- integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange,ivcoul_init,nvcoul_init,xclevel_ixc
+ integer :: iqbz,isym,iq_ibz,itim,pinv,ig1,ng_sigx,spin,gw_qprange,ivcoul_init,nvcoul_init,xclevel_ixc
  real(dp),parameter :: OMEGASIMIN=0.01d0
  real(dp) :: domegas,domegasi,ucvol,rcut, drude_plasmon_freq, wmax
- logical :: ltest,remove_inv,changed,found
+ logical :: ltest,remove_inv,changed,found,ex
  character(len=500) :: msg, iw_mesh_type
- character(len=fnlen) :: fname,fcore,string
+ character(len=fnlen) :: fname,fcore
  type(wvl_internal_type) :: wvl
  type(gaps_t) :: ks_gaps
 !arrays
@@ -3698,17 +3700,12 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  if (Dtset%usepaw==1.and.Dtset%gw_sigxcore==1) then
    ii = 0
    do itypat=1,Cryst%ntypat
-     string = Psps%filpsp(itypat)
-     fcore = "CORE_"//TRIM(basename(string))
-     ic = INDEX (TRIM(string), "/" , back=.TRUE.)
-     if (ic>0 .and. ic<LEN_TRIM(string)) then
-       ! string defines a path, prepend path to fcore
-       fcore = Psps%filpsp(itypat)(1:ic)//TRIM(fcore)
-     end if
-     if (file_exists(fcore)) then
+     call pawpsp_check_corefile(fcore,ex,Psps%filpsp(itypat))
+     if (ex) then
        ii = ii+1
      else
-       ABI_WARNING(sjoin("HF decoupling is required but cannot find file:", fcore))
+       write(msg,'(a,i2)') "HF decoupling is required but cannot find file for itypat:", itypat
+       ABI_WARNING(msg)
      end if
    end do
 

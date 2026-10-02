@@ -876,7 +876,7 @@ subroutine simp_gen(intg,func,radmesh,r_for_intg)
 
  else
    if (radmesh%int_meshsz>size(func)) then
-     write(msg,'(2(a,i4))')"int_meshsz= ",int_meshsz," > size(func)=",size(func)
+     write(msg,'(2(a,i4))')"int_meshsz= ",radmesh%int_meshsz," > size(func)=",size(func)
      LIBPAW_BUG(msg)
    end if
    nn=radmesh%int_meshsz

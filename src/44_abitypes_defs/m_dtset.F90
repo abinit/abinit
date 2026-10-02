@@ -346,7 +346,7 @@ type, public :: dataset_type
  integer :: gw_invalid_freq
  integer :: gw_nqlwl
  integer :: gw_qprange = 0
- integer :: gw_sigxcore = 0
+ integer :: gw_sigxcore = 1
 
  integer :: gwr_nstep = 50
  integer :: gwr_ntau = 12
