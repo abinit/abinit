@@ -765,6 +765,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  bdtot_index=0
  icg = 0
  icprj = 0
+
  do isppol = 1, dtset%nsppol
 
    !========= construct local potential ==================
@@ -818,7 +819,6 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
        ! return vector of logicals for each band being on present proc
        ! note that False means band is present on me ("don't cycle") while True means
        ! band is not present on me ("do cycle")
-       ABI_MALLOC(cycle_bands,(nband_k))
        call proc_distrb_cycle_bands(cycle_bands,mpi_enreg%proc_distrb,ikpt,isppol,me)
 
        ! get processor index for band
@@ -1054,10 +1054,6 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  ABI_SFREE(dkinpw)
  ABI_SFREE(ph1d)
 
- ABI_SFREE(atindx)
- ABI_SFREE(atindx1)
- ABI_SFREE(nattyp)
-
  ABI_FREE(dimlmn)
  call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
@@ -1065,7 +1061,11 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  call dterm%free()
  call orbmag_mesh%free()
 
-end subroutine orbmag
+ ABI_SFREE(atindx)
+ ABI_SFREE(atindx1)
+ ABI_SFREE(nattyp)
+
+ end subroutine orbmag
 !!***
 
 !!****f*m_orbmag/orbmag_mpisum
@@ -3580,7 +3580,7 @@ subroutine local_fermie(dtset,ebands_k,fermie,mpi_enreg)
   !scalars
   real(dp),intent(out) :: fermie
   type(dataset_type),intent(in) :: dtset
-  type(ebands_t) :: ebands_k
+  type(ebands_t),intent(in) :: ebands_k
   type(MPI_type), intent(inout) :: mpi_enreg
 
   !arrays
@@ -3595,7 +3595,6 @@ subroutine local_fermie(dtset,ebands_k,fermie,mpi_enreg)
   logical,allocatable :: cycle_bands(:)
 
 !--------------------------------------------------------------------
-
   me=mpi_enreg%me
   spaceComm=mpi_enreg%comm_cell
 
@@ -3607,7 +3606,6 @@ subroutine local_fermie(dtset,ebands_k,fermie,mpi_enreg)
       nband_k_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
       if (nband_k_me.EQ.0) cycle
 
-      ABI_MALLOC(cycle_bands,(nband_k))
       call proc_distrb_cycle_bands(cycle_bands,mpi_enreg%proc_distrb,ikpt,isppol,me)
 
       iband_ctr = 1
@@ -3618,7 +3616,8 @@ subroutine local_fermie(dtset,ebands_k,fermie,mpi_enreg)
         if ((abs(occ).GT.tol8).AND.(eig.GT.fermie_proc)) fermie_proc=eig
         iband_ctr = iband_ctr + 1
       end do
-      ABI_FREE(cycle_bands)
+
+      ABI_SFREE(cycle_bands)
 
     end do ! end loop over kpts
   end do ! end loop over isppol
