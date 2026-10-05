@@ -39,6 +39,7 @@ module m_chkinp
  use m_fftcore,        only : fftalg_has_mpi
  use m_exit,           only : get_timelimit
  use m_parser,         only : chkdpr, chkint, chkint_eq, chkint_ge, chkint_le, chkint_ne
+ use m_pawpsp,         only : pawpsp_check_corefile
  use m_mep
 
  implicit none
@@ -101,6 +102,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
  real(dp) :: dotval,dz,norm_spinat,norm_spinaxis,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom,zval
  character(len=1000) :: msg
  type(dataset_type) :: dt
+ character(len=fnlen) :: corewf_str
+ logical :: corewf_exist
 !arrays
  integer :: cond_values(4)!,nprojmax(0:3)
  integer :: gpu_devices(12)=(/-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2/)
@@ -1655,6 +1658,19 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
    ! gw_sigxcore
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_sigxcore',dt%gw_sigxcore,2,[0,1],iout)
+
+   if (dt%gw_sigxcore==1.and.dt%usepaw==1.and.optdriver==RUNL_SIGMA) then !SF check if core wf file is present
+     do ipsp=1,npsp
+       call pawpsp_check_corefile(corewf_str,corewf_exist,pspheads(ipsp)%filpsp)
+       if (.not. corewf_exist) then
+         write(msg,'(7a)') 'gw_sigxcore=1, but the core wave function file corresponding to ', ch10,&
+         trim(pspheads(ipsp)%filpsp), ch10,&
+         'cannot be found.', ch10,&
+         'Action: Provide a core wave function file for each atom type OR set gw_sigxcore=0'
+         ABI_ERROR_NOSTOP(msg, ierr)
+       endif
+     enddo
+   endif
 
    ! gwcomp
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gwcomp',dt%gwcomp,3,[0,1,2],iout)

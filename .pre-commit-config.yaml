@@ -13,13 +13,26 @@ repos:
       - id: check-ast
       - id: check-merge-conflict
       - id: check-yaml
+      # Style, newline and spell checks run only on source code files.
+      # Data files (pseudopotentials, test inputs and reference outputs) are never touched.
       - id: end-of-file-fixer
+        files: &source_files '\.(F90|f90|f|finc|h|c|cpp|hpp|py|sh|bash|mk|m4|ac|am|cmake)$|(^|/)CMakeLists\.txt$'
       - id: trailing-whitespace
-      - id: check-executables-have-shebangs
-      - id: check-added-large-files
-        args: ['--maxkb=15000']  # 1000 KB = 1 MB
+        files: *source_files
       - id: mixed-line-ending
         args: [--fix=lf]
+        files: *source_files
+      - id: check-executables-have-shebangs
+      - id: check-added-large-files
+        args: ['--maxkb=15000']  # 15 MB cap
+
+  #- repo: https://github.com/codespell-project/codespell
+  #  rev: v2.4.1
+  #  hooks:
+  #    - id: codespell
+  #      stages: [pre-commit, commit-msg]
+  #      files: *source_files
+  #      args: [--ignore-words=.codespell.ignore]
 
   #- repo: local
   #  hooks:

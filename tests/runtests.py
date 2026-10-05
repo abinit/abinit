@@ -50,7 +50,7 @@ from tests.pymods import termcolor
 from tests.pymods.devtools import number_of_cpus, number_of_gpus
 from tests.pymods.jobrunner import JobRunner, OMPEnvironment, TimeBomb
 from tests.pymods.termcolor import cprint, get_terminal_size
-from tests.pymods.testsuite import AbinitTestSuite, BuildEnvironment, find_top_build_tree
+from tests.pymods.testsuite import SCHEDULES, AbinitTestSuite, BuildEnvironment, doc_testcnf_format, find_top_build_tree
 from tests.pymods.tools import ascii_abinit, which
 
 __version__ = "0.7.0"
@@ -360,6 +360,18 @@ def main() -> int:
     )
 
     parser.add_option(
+        "--schedule",
+        type="choice",
+        choices=list(SCHEDULES),
+        default="ref-walltime",
+        help=(
+            "Order in which the tests are distributed to the python processes (used only if -j > 1). "
+            "'ref-walltime': longest first, according to the wall-time reported in the reference files. "
+            "'fifo': order of the test suite. Default: ref-walltime"
+        ),
+    )
+
+    parser.add_option(
         "--profile",
         dest="profile",
         default=False,
@@ -541,6 +553,14 @@ def main() -> int:
     )
 
     parser.add_option(
+        "--doc",
+        dest="doc_testcnf",
+        default=False,
+        action="store_true",
+        help="Print the documentation of the TEST_INFO sections and options and exit.",
+    )
+
+    parser.add_option(
         "-l",
         "--list-tests-info",
         dest="list_info",
@@ -595,7 +615,7 @@ def main() -> int:
             "Diff tool can be specified via $PATCHER e.g. export PATCHER=kdiff3. default: vimdiff."
             "Examples: `-p failed` to patch the reference files of the failed tests. "
             "`-p all` to patch all files."
-            "`-p failed+passed` to patch both failed and passed tests or, equivalently, `-p not_succeed`"
+            "`-p failed+passed` to patch both failed and passed tests or, equivalently, `-p not_succeeded`"
         ),
     )
 
@@ -734,6 +754,11 @@ def main() -> int:
     # Parse command line.
     options, suite_args = parser.parse_args()
 
+    if options.doc_testcnf:
+        # Automatic documentation of the TEST_INFO options.
+        doc_testcnf_format()
+        return 0
+
     if options.show_info:
         abitests.show_info(verbose=options.verbose)
         return 0
@@ -769,6 +794,7 @@ def main() -> int:
                 attrs=["bold"],
             )
             return 1
+        abitests.enable_parametrized()
 
     if not options.no_logo:
         nrows, ncols = get_terminal_size()
@@ -783,7 +809,7 @@ def main() -> int:
     omp_nthreads = options.omp_nthreads
 
     cprint(
-        "Running on %s -- system %s -- ncpus %s -- ngpus %s -- Python %s -- %s"
+        "Running on %s -- system %s -- logical CPUs %s -- ngpus %s -- Python %s -- %s"
         % (
             gethostname(),
             system,
@@ -887,6 +913,13 @@ def main() -> int:
             omp_env = OMPEnvironment(OMP_NUM_THREADS=omp_nthreads)
             runner.set_ompenv(omp_env)
 
+    # Runner for the MPI fixtures of the parametrized tests: they may use several processes even with -n 1.
+    fixture_runner = runner
+    if not (runner.has_mpirun or runner.has_srun or runner.has_poe) and "HAVE_MPI" in build_env.defined_cppvars:
+        if which("mpirun") is not None or which("mpiexec") is not None:
+            fixture_runner = JobRunner.generic_mpi(use_mpiexec=which("mpirun") is None, timebomb=timebomb,
+                                                   mpi_args=options.mpi_args)
+
     # Valgrind support.
     if options.valgrind_cmdline:
         runner.set_valgrind_cmdline(options.valgrind_cmdline)
@@ -985,8 +1018,7 @@ def main() -> int:
     # Run the tests selected by the user.
     py_nprocs = options.py_nprocs
     if py_nprocs <= 0:
-        py_nprocs = ncpus_detected // (mpi_nprocs * max(omp_nthreads, 1))
-        py_nprocs = max(py_nprocs // 2, 1)
+        py_nprocs = max(ncpus_detected // (mpi_nprocs * max(omp_nthreads, 1)), 1)
         print("py_nprocs has been computed automatically. py_nprocs=", py_nprocs)
 
     if omp_nthreads == 0:
@@ -1004,18 +1036,18 @@ def main() -> int:
         )
     cprint(msg, color="yellow")
 
-    if ncpus_used < 0.3 * ncpus_detected:
+    if ncpus_used < 0.5 * ncpus_detected:
         msg = (
-            "[TIP] runtests.py is using %s CPUs but your architecture has %s CPUs (assuming x2 Hyper-Threading)\n"
+            "[TIP] runtests.py is using %s CPUs but your architecture has %s logical CPUs\n"
             "You may want to use python processes to speed up the execution\n"
             "Use `runtests -jNUM` to run with NUM processes"
             % (ncpus_used, ncpus_detected)
         )
         cprint(msg, color="blue")
 
-    elif ncpus_used > 1.5 * ncpus_detected:
+    elif ncpus_used > ncpus_detected:
         msg = (
-            "[OVERLOAD] runtests.py is using %s CPUs but your architecture has only %s CPUs!!\n"
+            "[OVERLOAD] runtests.py is using %s CPUs but your architecture has only %s logical CPUs!!\n"
             % (ncpus_used, ncpus_detected)
         )
         cprint(msg, color="magenta")
@@ -1098,6 +1130,8 @@ def main() -> int:
         runmode=runmode,
         verbose=options.verbose,
         profile_workers=options.profile,
+        schedule=options.schedule,
+        fixture_runner=fixture_runner,
         erase_files=options.erase_files,
         make_html_diff=options.make_html_diff,
         sub_timeout=options.sub_timeout,
@@ -1159,6 +1193,8 @@ def main() -> int:
                 runmode=runmode,
                 verbose=options.verbose,
                 profile_workers=options.profile,
+                schedule=options.schedule,
+                fixture_runner=fixture_runner,
                 erase_files=options.erase_files,
                 make_html_diff=options.make_html_diff,
                 sub_timeout=options.sub_timeout,

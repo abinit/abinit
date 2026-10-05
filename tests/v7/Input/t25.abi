@@ -114,6 +114,7 @@ jpawu      0.0000000000000000  0.0  0.0  eV
 ############ FIFTH DATASET: Calculation of the Self-Energy matrix elements (GW corrections)
 #==================================================================================
  optdriver5  4      # Self-Energy calculation
+ gw_sigxcore    0   # Core contribution is approximated with vxc instead of on-site Fock operator
  ucrpa5      1      # For the calcul of U
 # getwfk5     3      # Obtain KSS file from dataset 1
  irdwfk5     1

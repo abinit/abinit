@@ -22,6 +22,7 @@
     "fold2Bloch": "Tests related to fold2Bloch code.",
     "multibinit": "Tests related to multibinit code",
     "NC": "Calculations with norm-conserving pseudos",
+    "PARAMETRIZED": "Parametrized tests expanded on the fly from templates (tests/parametrized)",
     "PAW": "PAW calculations",
     "GW": "GW calculations",
     "GWGamma": "GW calculations with vertex corrections",

@@ -217,6 +217,9 @@ _tsuite_dir_names = [
 ]
 
 _tsuite_dir_names.sort()
+
+#: Name of the optional suite with the parametrized tests. Not in _tsuite_dir_names: see AbinitTests.enable_parametrized.
+PARAMETRIZED_SUITE = "parametrized"
 _tsuite_dirs = tuple([os.path.join(abenv.tests_dir, dir_name) for dir_name in _tsuite_dir_names])
 
 
@@ -699,11 +702,29 @@ class AbinitTests:
         for suite_name, suite_path in self.walk_suites():
             self._suites[suite_name] = Suite(suite_path)
 
+        # The optional parametrized suite is registered only on request (see enable_parametrized).
+        self.parametrized_enabled = False
+
         # Check suite_names and subsuite_names
         all_subsuite_names = self.all_subsuite_names
         for suite_name, suite_path in self.walk_suites():
             if suite_name in all_subsuite_names:
                 print("Found suite and subsuite with the same name: %s" % suite_name)
+
+    def enable_parametrized(self) -> None:
+        """
+        Register the optional `parametrized` suite (runtests.py --with-parametrized, testbot with_parametrized).
+
+        Its templates are expanded by tests.pymods.parametrized, which requires pyyaml and pydantic:
+        the caller is responsible for checking that these packages are available.
+        """
+        if self.parametrized_enabled:
+            return
+        path = os.path.join(abenv.tests_dir, PARAMETRIZED_SUITE)
+        self.suite_names = self.suite_names + (PARAMETRIZED_SUITE,)
+        self.suite_paths = self.suite_paths + (path,)
+        self._suites[PARAMETRIZED_SUITE] = Suite(path)
+        self.parametrized_enabled = True
 
     def walk_suites(self) -> Iterator[tuple[str, str]]:
         """
@@ -871,6 +892,13 @@ class AbinitTests:
             # Use file locking mechanism to prevent IO from other processes.
             with FileLock(database_path), open(database_path, "rb") as fh:
                 database = pickle.load(fh)
+
+            # The cached database may have been built with a different choice for the optional parametrized suite.
+            if self.parametrized_enabled and PARAMETRIZED_SUITE not in database:
+                cprint("Cached database has no parametrized tests. Regenerating database...", "yellow")
+                database = self.build_database()
+            elif not self.parametrized_enabled and PARAMETRIZED_SUITE in database:
+                del database[PARAMETRIZED_SUITE]
 
         return database
 

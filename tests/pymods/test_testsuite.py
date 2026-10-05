@@ -11,6 +11,7 @@ import os
 import shutil
 import tempfile
 import threading
+from io import StringIO
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -21,6 +22,7 @@ from tests import abenv
 from . import testsuite as testsuite_module
 from .jobrunner import JobRunner
 from .testsuite import (
+    SCHEDULES,
     SLURM_ACCT_FORMAT,
     SLURM_OOM_MAX_QUERIES,
     AbinitTestInfo,
@@ -58,6 +60,7 @@ from .testsuite import (
     my_getlogin,
     parse_configh_file,
     query_slurm_step_accounting,
+    read_ref_walltime,
     rm_rf,
     sec2str,
     status2html,
@@ -1526,6 +1529,45 @@ class TestChainOfTestsMultiParallel:
         assert chain.has_variables({"natom": 1})
         assert chain.has_variables({"natom": 99}) == []
 
+    def test_chain_results_propagate_to_members(self):
+        """get_results()/load_results() must carry the results of the members of the chain.
+
+        In parallel mode the chain runs in a worker and only the dict returned by
+        get_results() reaches the parent process. The members in the parent must be
+        marked as executed, otherwise Results.nexecuted undercounts them.
+        """
+        # Fresh instances: the class-scoped fixture must not be modified.
+        worker_chain = make_abitests_from_inputs(list(PARAL_CHAIN_INPUTS), abenv)[0]
+        parent_chain = make_abitests_from_inputs(list(PARAL_CHAIN_INPUTS), abenv)[0]
+
+        # Simulate the state of the chain after its execution in the worker.
+        worker_chain.workdir = "/tmp/chain_workdir"
+        for i, test in enumerate(worker_chain):
+            test._status = "passed" if i == 1 else "succeeded"
+            test._executed = True
+            test._isok = True
+            test.exec_error = False
+            test.tot_etime, test.run_etime = 2.0 + i, 1.0 + i
+            test.workdir = worker_chain.workdir
+            test.stdout_fname = f"{test.workdir}/{test.id}.stdout"
+            for f in test.files_to_test:
+                f.fld_status = test._status
+
+        assert not any(t.executed for t in parent_chain)
+        parent_chain.load_results(worker_chain.get_results())
+
+        assert all(t.executed for t in parent_chain)
+        assert [t.status for t in parent_chain] == ["succeeded", "passed", "succeeded"]
+        assert [t.run_etime for t in parent_chain] == [1.0, 2.0, 3.0]
+        assert parent_chain.status == "passed"
+        assert parent_chain.run_etime == 6.0
+
+        # A result with the wrong number of members must not be silently accepted.
+        d = worker_chain.get_results()
+        d["children"] = d["children"][:-1]
+        with pytest.raises(ValueError):
+            make_abitests_from_inputs(list(PARAL_CHAIN_INPUTS), abenv)[0].load_results(d)
+
 
 def _write_chain_input(input_dir: Path, name: str, test_chain: str | None = None) -> str:
     """Write a minimal input file with a TEST_INFO section, optionally declaring test_chain."""
@@ -1632,6 +1674,113 @@ V1_SIMPLE_INPUTS = [
     abenv.apath_of("tests", "v1", "Input", name) for name in ("t01.abi", "t02.abi", "t03.abi")
 ]
 V1_T08_ABI = abenv.apath_of("tests", "v1", "Input", "t08.abi")
+
+
+class TestRefWalltime:
+    """Wall-time read from the reference files, used to order the tests in the queue."""
+
+    @pytest.mark.parametrize(("line", "expected"), [
+        # abinit
+        ("+Overall time at end (sec) : cpu=         67.8  wall=         67.9", 67.9),
+        # anaddb, multibinit, aim
+        ("+Total cpu time      1.469  and wall time      1.470 sec", 1.470),
+        # mrgscr, mrgddb, cut3d
+        ("- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.2", 0.2),
+    ])
+    def test_read_ref_walltime_formats(self, tmp_path, line, expected):
+        """Each wall-time format written by the executables is recognized."""
+        (tmp_path / "t01.abo").write_text("header\n" + line + "\n completed\n")
+        assert read_ref_walltime(str(tmp_path), ["t01.abo"]) == pytest.approx(expected)
+
+    def test_read_ref_walltime_missing_info(self, tmp_path):
+        """None if the file has no timing info or does not exist."""
+        (tmp_path / "t01.abo").write_text("no timing info\n")
+        assert read_ref_walltime(str(tmp_path), ["t01.abo"]) is None
+        assert read_ref_walltime(str(tmp_path), ["does_not_exist.abo"]) is None
+
+    def test_read_ref_walltime_first_file_with_info_wins(self, tmp_path):
+        """Files are inspected in order; data files without timing info are skipped."""
+        (tmp_path / "t01_DOS").write_text("1.0 2.0\n")
+        (tmp_path / "t01.abo").write_text("+Overall time at end (sec) : cpu= 3.0  wall= 3.5\n")
+        assert read_ref_walltime(str(tmp_path), ["t01_DOS", "t01.abo"]) == 3.5
+
+    def test_read_ref_walltime_stdout_out_fallback(self, tmp_path):
+        """.stdout reference files may be stored with the .out extension."""
+        (tmp_path / "t01.out").write_text("+Total cpu time 1.0 and wall time 2.0 sec\n")
+        assert read_ref_walltime(str(tmp_path), ["t01.stdout"]) == 2.0
+
+    def test_read_ref_walltime_reads_the_last_occurrence_in_the_tail(self, tmp_path):
+        """The last occurrence in the tail of the file is used."""
+        (tmp_path / "t01.abo").write_text(
+            "+Overall time at end (sec) : cpu= 1.0  wall= 1.0\n" + "x" * 100 +
+            "\n+Overall time at end (sec) : cpu= 2.0  wall= 2.0\n")
+        assert read_ref_walltime(str(tmp_path), ["t01.abo"]) == 2.0
+        # Only the tail is read: the first occurrence is outside a 60-byte window.
+        assert read_ref_walltime(str(tmp_path), ["t01.abo"], nbytes=60) == 2.0
+
+    def test_real_test_and_chain(self):
+        """v3/t98 reports 67.8 s; the wall-time of a chain is the sum of its members."""
+        test = make_abitest_from_input(abenv.apath_of("tests", "v3", "Input", "t98.abi"), abenv)
+        assert test.ref_walltime == pytest.approx(67.8)
+
+        chain_inputs = [abenv.apath_of("tests", "v1", "Input", f"t{i}.abi") for i in range(11, 21)]
+        chain = make_abitests_from_inputs(chain_inputs, abenv)[0]
+        assert isinstance(chain, ChainOfTests)
+        members = [t.ref_walltime for t in chain]
+        assert all(w is not None for w in members)
+        assert chain.ref_walltime == pytest.approx(sum(members))
+
+    def test_chain_ignores_members_without_info(self):
+        """Members without timing info do not contribute to the wall-time of the chain."""
+        chain = object.__new__(ChainOfTests)
+        chain.tests = (SimpleNamespace(ref_walltime=None), SimpleNamespace(ref_walltime=2.0))
+        assert chain.ref_walltime == 2.0
+        chain.tests = (SimpleNamespace(ref_walltime=None),)
+        assert chain.ref_walltime is None
+
+    def test_queue_order(self):
+        """The fifo schedule keeps the order of the suite, ref-walltime puts the longest tests first."""
+        tests = [SimpleNamespace(name=name, ref_walltime=w)
+                 for name, w in [("a", 1.0), ("b", None), ("c", 10.0), ("d", 1.0), ("e", 5.0)]]
+        suite = AbinitTestSuite(abenv, test_list=tests)
+        assert [t.name for t in suite.queue_order("fifo")] == ["a", "b", "c", "d", "e"]
+        # Longest first, ties keep the order of the suite, tests without info go last.
+        assert [t.name for t in suite.queue_order("ref-walltime")] == ["c", "e", "a", "d", "b"]
+        assert SCHEDULES == ("ref-walltime", "fifo")
+        with pytest.raises(ValueError, match="Invalid schedule"):
+            suite.queue_order("random")
+
+    def test_slowest_tests(self):
+        """Executed tests sorted by tot_etime; skipped/disabled tests and missing times are handled."""
+        tests = [
+            SimpleNamespace(full_id="a", status="succeeded", tot_etime=1.0, run_etime=0.9, ref_walltime=1.5),
+            SimpleNamespace(full_id="b", status="skipped", tot_etime=100.0, run_etime=0.0, ref_walltime=None),
+            SimpleNamespace(full_id="c", status="failed", tot_etime=5.0, run_etime=4.0, ref_walltime=None),
+            # Results never received from a worker (e.g. timeout in wait_workers): no tot_etime.
+            SimpleNamespace(full_id="d", status="failed", ref_walltime=2.0),
+            SimpleNamespace(full_id="e", status="passed", tot_etime=3.0, run_etime=2.5, ref_walltime=2.0),
+        ]
+        suite = AbinitTestSuite(abenv, test_list=tests)
+        assert [t.full_id for t in suite.slowest_tests()] == ["c", "e", "a", "d"]
+        assert [t.full_id for t in suite.slowest_tests(num=2)] == ["c", "e"]
+
+        out = StringIO()
+        suite.print_slowest_tests(num=2, out=out)
+        lines = out.getvalue().splitlines()
+        assert lines[0] == "The 2 tests with the largest wall-time:"
+        assert lines[2].split() == ["c", "5.00", "4.00", "-", "failed"]
+        assert lines[3].split() == ["e", "3.00", "2.50", "2.00", "passed"]
+
+        # Nothing is printed if no test has been executed.
+        out = StringIO()
+        AbinitTestSuite(abenv, test_list=[tests[1]]).print_slowest_tests(out=out)
+        assert out.getvalue() == ""
+
+    def test_run_tests_rejects_invalid_schedule(self):
+        """run_tests validates the schedule before doing anything else."""
+        suite = AbinitTestSuite(abenv, test_list=[SimpleNamespace(ref_walltime=1.0)])
+        with pytest.raises(ValueError, match="Invalid schedule"):
+            suite.run_tests(None, "workdir", None, schedule="random")
 
 
 class TestAbinitTestSuite:

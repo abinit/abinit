@@ -1,0 +1,21 @@
+%YAML
+# Fixture: NSCF WFK file with 70 bands on the 4x4x4 k-mesh (dataset 1 of tutorespfn/teph4zpr_3).
+test_info:
+  setup: {executable: abinit, output_prefix: MgO_444k_70b}
+  files: {use_git_submodule: MgO_eph_zpr}
+  extra_info: {keywords: [NC, DFPT, EPH], authors: [M. Giantomassi],
+               description: "NSCF computation of the WFK file of MgO with 70 bands on the 4x4x4 k-mesh"}
+fixture: {outputs: [MgO_444k_70b_WFK], nproc: 4}   # 8 k-points, distributed automatically
+%ENDYAML
+nband 70  nbdbuf -10     # A negative value means 10% of nband
+ngkpt 4 4 4  nshiftk 1  shiftk 0 0 0
+ecut 35.0
+nstep 150
+iscf -2                  # NSCF run
+tolwfr 1e-14
+
+getden_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
+structure "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "O.psp8, Mg-sp-gw.psp8"

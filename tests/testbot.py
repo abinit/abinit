@@ -11,6 +11,7 @@ import html
 import json
 import os
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -39,7 +40,7 @@ abenv = tests.abenv
 
 from pymods import termcolor
 from pymods.jobrunner import JobRunner, OMPEnvironment, TimeBomb
-from pymods.testsuite import BuildEnvironment
+from pymods.testsuite import SCHEDULES, TESTBOT_NP_LISTS, BuildEnvironment
 
 
 def get_mpi_prefix_from_env() -> str | None:
@@ -56,6 +57,42 @@ def get_mpi_prefix_from_env() -> str | None:
             if mpi_home:
                 return os.path.join(mpi_home, "bin")
     return mpi_prefix
+
+
+_ENV_VAR_RE = re.compile(r"\$(?:\{(\w+)\}|(\w+))")
+
+
+def expand_tmp_basedir(tmp_basedir: str) -> str:
+    """
+    Expand the environment variables ($VAR or ${VAR}) and ~ in tmp_basedir, e.g. ``${LOCALSCRATCH}``
+    whose value is known only in the job that runs testbot.py (testbot.json stores the string as is).
+
+    Raises:
+        ValueError: If a variable is not defined, or the result is not an existing directory.
+    """
+    if not tmp_basedir:
+        return tmp_basedir
+    undefined = [a or b for a, b in _ENV_VAR_RE.findall(tmp_basedir) if (a or b) not in os.environ]
+    if undefined:
+        raise ValueError(f"tmp_basedir {tmp_basedir!r} uses undefined environment variable(s): "
+                         f"{', '.join(undefined)}")
+    path = os.path.expanduser(os.path.expandvars(tmp_basedir))
+    if not os.path.isdir(path):
+        raise ValueError(f"tmp_basedir {tmp_basedir!r} (expanded to {path!r}) is not an existing directory")
+    return path
+
+
+def slurm_cpus_on_node() -> int | None:
+    """
+    Return the number of CPUs allocated to the Slurm job on this node
+    (SLURM_CPUS_ON_NODE) or None if we are not running inside a Slurm allocation.
+    """
+    value = os.environ.get("SLURM_CPUS_ON_NODE", "").strip()
+    try:
+        ncpus = int(value)
+    except ValueError:
+        return None
+    return ncpus if ncpus > 0 else None
 
 
 def default_mpirun_np(mpi_prefix: str | None = None) -> str:
@@ -130,6 +167,8 @@ class TestRunSummary:
     nexecuted: int
     # Wall-clock seconds spent in test_suite.run_tests() for this configuration.
     wall_time: float
+    # Order of the tests in the queue (see AbinitTestSuite.queue_order).
+    schedule: str = "ref-walltime"
 
     def as_dict(self) -> dict[str, int | str | float]:
         """Return a JSON-serializable representation."""
@@ -147,6 +186,7 @@ class BenchmarkResult:
     nexecuted: int
     tests_per_second: float
     returncode: int
+    schedule: str = "ref-walltime"
 
     def as_dict(self) -> dict[str, float | int]:
         """Return a JSON-serializable representation."""
@@ -201,10 +241,20 @@ class TestBot:
     keywords: list[str] = field(
         default_factory=list, metadata={"info": "List of keywords that should be selected/ignored."}
     )
+    schedule: str = field(
+        default="ref-walltime",
+        metadata={
+            "info": "Order in which the tests are distributed to the python processes. "
+            "'ref-walltime': longest first, according to the wall-time reported in the reference files. "
+            "'fifo': order of the test suite. Used if the option is not present in testbot.json"
+        },
+    )
     verbose: int = field(default=0, metadata={"info": "Verbosity level"})
     tmp_basedir: str = field(
         default="",
-        metadata={"info": "Temporary folder where the tests will be executed and copied back"},
+        metadata={"info": "Temporary folder where the tests will be executed and copied back. "
+                          "Environment variables ($VAR, ${VAR}) and ~ are expanded when testbot.py starts, "
+                          "e.g. ${LOCALSCRATCH}: an undefined variable is an error"},
     )
     mpi_args: str = field(default="", metadata={"info": "Args passed to the mpi command"})
     force_mpi: bool = field(default=False, metadata={"info": "Use mpirun_np even for single-process (mpi_nprocs=1) test runs, not just once mpi_nprocs > 1"})
@@ -311,6 +361,28 @@ class TestBot:
         if self.type not in ["", "ref"]:
             raise ValueError(f"type should be either 'ref' or empty string while it's: {self.type}")
 
+        if self.schedule not in SCHEDULES:
+            raise ValueError(f"schedule should be in {SCHEDULES} while it's: {self.schedule}")
+
+        # Fail now, not when the first pass creates its temporary directory.
+        self.tmp_basedir = expand_tmp_basedir(self.tmp_basedir)
+
+        # Inside a Slurm allocation, we cannot use more CPUs than those allocated to the job.
+        # The tests are executed with srun so the steps in excess wait for free CPUs inside srun:
+        # the wall-time does not decrease and the waiting time is counted as run_etime.
+        slurm_cpus = slurm_cpus_on_node()
+        if slurm_cpus is not None and self.max_cpus > slurm_cpus:
+            msg = (
+                f"max_cpus = {self.max_cpus} in testbot.json but the Slurm job has only "
+                f"SLURM_CPUS_ON_NODE = {slurm_cpus} CPUs on this node.\n"
+                f"max_cpus has been reduced to {slurm_cpus}.\n"
+                "Fix max_cpus in testbot.json or request more CPUs for the Slurm job."
+            )
+            banner = "!" * 80
+            print(f"\n{banner}\n{banner}\nWARNING: {msg}\n{banner}\n{banner}\n", flush=True)
+            warn(msg, stacklevel=2)
+            self.max_cpus = slurm_cpus
+
         if self.with_parametrized:
             missing = []
             try:
@@ -326,6 +398,7 @@ class TestBot:
                     f"with_parametrized=True but required packages are missing: {', '.join(missing)}. "
                     "Install them with: pip install pyyaml pydantic"
                 )
+            abitests.enable_parametrized()
 
         # 2) Initialize the job_runner.
         self.build_env = build_env = BuildEnvironment(os.curdir)
@@ -542,7 +615,7 @@ class TestBot:
             json.dump([run.as_dict() for run in self.run_summaries], fh, indent=2)
 
         headings = [
-            "Configuration", "Report", "MPI", "OpenMP", "Python workers", "Executed",
+            "Configuration", "Report", "MPI", "OpenMP", "Python workers", "Schedule", "Executed",
             "Failed", "Passed", "Succeeded", "Skipped", "Disabled", "Wall time (s)",
         ]
         rows = []
@@ -558,6 +631,7 @@ class TestBot:
                 str(run.mpi_nprocs),
                 str(run.omp_nthreads),
                 str(run.py_nprocs),
+                html.escape(run.schedule),
                 str(run.nexecuted),
                 str(run.nfailed),
                 str(run.npassed),
@@ -639,10 +713,36 @@ class TestBot:
 
         self._create_workdir(workdir_name)
 
+        # With tmp_basedir the tests run in a private tempfile.mkdtemp() directory;
+        # only results.tar.gz/index.html (and profiles) are copied back below.
+        # tmp_root is removed in the finally clause whatever happens (empty
+        # suite, exception, normal return): nothing else ever deletes it, and
+        # every run leaked a full test tree into the node's /tmp until it filled
+        # up ("No space left on device" on Manneback, mann_gnu_13.3 build #11).
+        tmp_root = None
         if self.tmp_basedir:
-            workdir = os.path.join(tempfile.mkdtemp(dir=self.tmp_basedir), workdir_name)
+            tmp_root = tempfile.mkdtemp(dir=self.tmp_basedir)
+            workdir = os.path.join(tmp_root, workdir_name)
         else:
             workdir = workdir_name
+
+        try:
+            return self._run_tests_in_workdir(test_suite, workdir, workdir_name, mpi_nprocs, py_nprocs, runmode)
+        finally:
+            if tmp_root is not None:
+                shutil.rmtree(tmp_root, ignore_errors=True)
+
+    def _run_tests_in_workdir(
+        self, test_suite, workdir: str, workdir_name: str, mpi_nprocs: int, py_nprocs: int, runmode: str
+    ) -> tuple[int, int, int]:
+        """Run ``test_suite`` in ``workdir`` and copy the reports back to ``workdir_name`` when tmp_basedir is set.
+
+        Split out of ``run_tests_with_np`` so the caller can remove the temporary
+        directory in a ``finally`` clause. See ``run_tests_with_np`` for the arguments.
+
+        Returns:
+            tuple: (nfailed, npassed, nexecuted)
+        """
 
         # Run the tests.
         if self.has_openmp:
@@ -665,6 +765,9 @@ class TestBot:
                                        runmode=self.runmode,
                                        verbose=self.verbose,
                                        profile_workers=self.profile_workers,
+                                       schedule=self.schedule,
+                                       # MPI fixtures of parametrized tests, also in the passes with 1 process.
+                                       fixture_runner=getattr(self, "mpi_runner", None),
                                        make_html_diff=1)
         wall_time = time.perf_counter() - start
 
@@ -686,6 +789,7 @@ class TestBot:
                 ndisabled=len(results.disabled_tests),
                 nexecuted=results.nexecuted,
                 wall_time=wall_time,
+                schedule=self.schedule,
             )
         )
         # Persist after every completed run so earlier configurations remain
@@ -705,7 +809,7 @@ class TestBot:
                     print(f"Could not copy back file {fn}")
 
             if self.profile_workers:
-                # workdir lives under tempfile.mkdtemp() and gets discarded --
+                # workdir lives under tempfile.mkdtemp(), which run_tests_with_np removes --
                 # without this, the worker .prof files written there would be lost.
                 for fn in glob.glob(os.path.join(workdir, "testbot_worker_*.prof")) + \
                           glob.glob(os.path.join(workdir, "testbot_workers_merged.prof")):
@@ -755,12 +859,12 @@ class TestBot:
         if self.runmode == "static":
             # Old mode: run all available tests with 1 MPI proc here,
             # then use MPI mode in mp_suites (paral/mpiio)
-            np_list = [2, 4, 8, 10, 24, 64]
+            np_list = list(TESTBOT_NP_LISTS["static"])
             nfailed, npassed, nexecuted = self.run_tests_with_np(1, suite_args=suite_args, runmode=self.runmode)
         else:
             # New mode: run all available tests with 2 MPI procs here,
             # then enter the mp_suites with np_list CPUs
-            np_list = [4, 8, 10, 24, 64]
+            np_list = list(TESTBOT_NP_LISTS["dynamic"])
             nfailed, npassed, nexecuted = self.run_tests_with_np(2, suite_args=suite_args, runmode=self.runmode)
 
         if self.has_mpi:
@@ -775,9 +879,13 @@ class TestBot:
             elif self.without_tdirs:
                 suite_args = [s for s in suite_args if s not in self.without_tdirs]
 
+            if not suite_args:
+                print("Skipping multi-parallel tests as no multi-parallel suite has been selected.")
+                np_list = []
+
             for np in np_list:
-                if np > self.max_cpus or not suite_args:
-                    print(f"Skipping tests with np: {np} as max_cpus: {self.max_cpus}")
+                if np > self.max_cpus:
+                    print(f"Skipping tests with np: {np} > max_cpus: {self.max_cpus}")
                     continue
 
                 print(f"Running multi-parallel tests with {np} MPI processors, suite_args {suite_args}")
@@ -825,17 +933,31 @@ def benchmark(
     py_nprocs_values: list[int],
     remove_existing_workdirs: bool = False,
     profile_workers: bool = False,
+    schedules: list[str] | None = None,
 ) -> int:
-    """Run TestBot repeatedly and compare total wall time for each Python worker count."""
+    """
+    Run TestBot repeatedly and compare total wall time for each Python worker count.
+
+    If `schedules` is given, run every (schedule, py_nprocs) combination, overriding
+    the schedule read from testbot.json. The first combination is the baseline.
+    """
     results: list[BenchmarkResult] = []
     baseline_wall_time: float | None = None
     baseline_py_nprocs: int | None = None
 
-    for py_nprocs in py_nprocs_values:
-        print(f"\n{'=' * 80}\nBenchmarking py_nprocs={py_nprocs}\n{'=' * 80}")
+    # None means: use the schedule declared in testbot.json.
+    combinations = [(schedule, py_nprocs) for schedule in (schedules or [None]) for py_nprocs in py_nprocs_values]
+
+    for schedule, py_nprocs in combinations:
+        label = f"py_nprocs={py_nprocs}" if schedule is None else f"py_nprocs={py_nprocs}, schedule={schedule}"
+        print(f"\n{'=' * 80}\nBenchmarking {label}\n{'=' * 80}")
         testbot = TestBot.from_json(testbot_json)
         testbot.py_nprocs_override = py_nprocs
-        testbot.workdir_prefix = f"Benchmark_PY{py_nprocs}_"
+        if schedule is None:
+            testbot.workdir_prefix = f"Benchmark_PY{py_nprocs}_"
+        else:
+            testbot.schedule = schedule
+            testbot.workdir_prefix = f"Benchmark_PY{py_nprocs}_{schedule}_"
         testbot.remove_existing_workdirs = remove_existing_workdirs
         testbot.profile_workers = profile_workers
 
@@ -861,11 +983,13 @@ def benchmark(
                 nexecuted,
                 tests_per_second,
                 returncode,
+                schedule=testbot.schedule,
             )
         )
 
     headings = (
         "py_nprocs",
+        "schedule",
         "wall time (s)",
         "speedup",
         "efficiency",
@@ -876,6 +1000,7 @@ def benchmark(
     rows = [
         (
             str(r.py_nprocs),
+            r.schedule,
             f"{r.wall_time:.3f}",
             f"{r.speedup:.3f}x",
             f"{r.parallel_efficiency:.1%}",
@@ -1337,6 +1462,7 @@ def generate_template() -> None:
         "without_tdirs": [],
         "timeout_time": 1200,
         "runmode": "static",
+        "schedule": "ref-walltime",
         "keywords": [],
         "verbose": 0,
         "tmp_basedir": "",
@@ -1368,6 +1494,9 @@ Examples:
 
   # Compare wall time with different CPU limits, profiling worker execution too
   python testbot.py benchmark testbot.json --py-nprocs 1 2 4 8 --profile
+
+  # Compare the two orders of the tests in the queue with 16 and 32 workers
+  python testbot.py benchmark testbot.json --py-nprocs 16 32 --schedule fifo ref-walltime
 
   # Generate a template configuration file
   python testbot.py template > testbot.json
@@ -1411,6 +1540,13 @@ Examples:
         help="Profile each worker's actual test execution (cProfile, merged into "
              "testbot_workers_merged.prof per workdir).",
     )
+    run_parser.add_argument(
+        "--schedule",
+        choices=SCHEDULES,
+        default=None,
+        help="Order of the tests in the queue. Overrides the schedule option in testbot.json "
+             "(default: value in testbot.json, ref-walltime if not present).",
+    )
 
     benchmark_parser = subparsers.add_parser(
         "benchmark", help="Run the test suite with several py_nprocs values and compare wall time."
@@ -1440,6 +1576,14 @@ Examples:
         action="store_true",
         help="Profile each worker's actual test execution (cProfile, merged into "
              "testbot_workers_merged.prof per workdir), for every py_nprocs value.",
+    )
+    benchmark_parser.add_argument(
+        "--schedule",
+        choices=SCHEDULES,
+        nargs="+",
+        default=None,
+        help="Order(s) of the tests in the queue. Every (schedule, py_nprocs) combination is "
+             "benchmarked (default: value in testbot.json, ref-walltime if not present).",
     )
 
     doc_parser = subparsers.add_parser(
@@ -1501,12 +1645,15 @@ def main() -> int:
             raise SystemExit("benchmark --py-nprocs values must be positive integers")
         if len(set(args.py_nprocs)) != len(args.py_nprocs):
             raise SystemExit("benchmark --py-nprocs values must be unique")
+        if args.schedule is not None and len(set(args.schedule)) != len(args.schedule):
+            raise SystemExit("benchmark --schedule values must be unique")
 
         return benchmark(
             args.testbot_json,
             args.py_nprocs,
             remove_existing_workdirs=args.remove_existing_workdirs,
             profile_workers=args.profile,
+            schedules=args.schedule,
         )
 
     # "run" and "print" both parse a testbot.json into a TestBot instance.
@@ -1524,6 +1671,8 @@ def main() -> int:
 
     testbot.remove_existing_workdirs = args.remove_existing_workdirs
     testbot.profile_workers = args.profile
+    if args.schedule is not None:
+        testbot.schedule = args.schedule
     return testbot.run()
 
 
