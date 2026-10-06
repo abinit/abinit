@@ -25,22 +25,22 @@
 #  kinetic energy density files.
 #
 #  The preparatory Abinit calculation must include output of the DEN and KDEN files,
-#  that is, density and kinetic energy density. Therefore you must include the 
+#  that is, density and kinetic energy density. Therefore you must include the
 #  keywords "prtden 1" or "prtden 2", "prtkden 1", and "usekden 1". Also, the output
 #  must be in netcdf form ("iomode 3"). Note that "prtden 1" generates the DEN.nc file,
-#  while "prtden 2" generates both DEN.nc and PAWDEN.nc. The program can use either 
-#  one, and this is selected by input option -d. 
+#  while "prtden 2" generates both DEN.nc and PAWDEN.nc. The program can use either
+#  one, and this is selected by input option -d.
 #
 #  The program will also read the PAW data files used, in order to extract the core
 #  density and kinetic energy density. It will determine where to find them based on
 #  the content of the DEN.nc or PAWDEN.nc files. Therefore it is probably safest to
 #  run this program in the same directory where you generated the DEN files; if you
-#  move these files to some other computer the program probably won't be able to 
+#  move these files to some other computer the program probably won't be able to
 #  find the PAW files.
 #
 #  The output will be a new netcdf file, named DEN_ELF.nc or PAWDEN_ELF.nc, which will
 #  include both the original DEN information as well as the new ELF information.
- 
+
 import xml.etree.ElementTree as ET
 import argparse
 import textwrap
@@ -620,7 +620,7 @@ def get_core_densities_from_atompaw_file(pawfile):
     # ae_core from paw xml file contains sqrt(4*Pi)*n_rad(r)/(4*Pi*r^2)
     # tau from paw xml file contains 1/2 * sqrt(4*Pi)*coretau(r)/(4*Pi*r^2) = sqrt(4*pi)*tau
     sphharm=math.sqrt(4.0*math.pi)
-    
+
     try:
         tree = ET.parse(pawfile)
     except ET.ParseError as e:
@@ -630,7 +630,7 @@ def get_core_densities_from_atompaw_file(pawfile):
 
     grid = root.find('radial_grid').find('values').text
     grid_data = np.fromstring(grid,sep=' ')
-    
+
     ae_core = root.find('ae_core_density').text
     ae_core_data = np.fromstring(ae_core,sep=' ')/sphharm
 
@@ -655,7 +655,7 @@ def get_atom_positions(xred,rprimd):
     xcart=np.zeros(xred.shape)
     for iatom,atom in enumerate(xred):
         xcart[iatom]=atom[0]*rprimd[0]+atom[1]*rprimd[1]+atom[2]*rprimd[2]
-       
+
     return xcart
 
 def get_pseudos_from_nc(input_string,pawdenfile,md5_pseudos):
@@ -676,7 +676,7 @@ def get_pseudos_from_nc(input_string,pawdenfile,md5_pseudos):
     return pseudo_list
 
 def get_elf(rho_ae,grad_rho_ae,tau_ae):
-    
+
     # Becke and Edgecombe JCP 92, 5397 (1990)
     # Uniform electron gas at n(r), Eq. 13
     #UniformEG=(3.0/5.0)*(6.0*math.pi**2)**(2.0/3.0)*rho_ae**(5.0/3.0)
@@ -687,7 +687,7 @@ def get_elf(rho_ae,grad_rho_ae,tau_ae):
     # Savin et al. using total densities
     UniformEG=(3.0/10.0)*(3.0*math.pi**2)**(2.0/3.0)*rho_ae**(5.0/3.0)
     ELOC=tau_ae - (1.0/8.0)*grad_rho_ae**2/rho_ae
-    
+
     return 1.0/(1.0+(ELOC/UniformEG)**2)
 
 def get_ncfiles(filepath,dentype):
@@ -730,17 +730,17 @@ long_instructions=textwrap.dedent('''
   kinetic energy density files.
 
   The preparatory Abinit calculation must include output of the DEN and KDEN files,
-  that is, density and kinetic energy density. Therefore you must include the 
+  that is, density and kinetic energy density. Therefore you must include the
   keywords "prtden 1" or "prtden 2", "prtkden 1", and "usekden 1". Also, the output
   must be in netcdf form ("iomode 3"). Note that "prtden 1" generates the DEN.nc file,
-  while "prtden 2" generates both DEN.nc and PAWDEN.nc. The program can use either 
-  one, and this is selected by input option -d. 
+  while "prtden 2" generates both DEN.nc and PAWDEN.nc. The program can use either
+  one, and this is selected by input option -d.
 
   The program will also read the PAW data files used, in order to extract the core
   density and kinetic energy density. It will determine where to find them based on
   the content of the DEN.nc or PAWDEN.nc files. Therefore it is probably safest to
   run this program in the same directory where you generated the DEN files; if you
-  move these files to some other computer the program probably won't be able to 
+  move these files to some other computer the program probably won't be able to
   find the PAW files.
 
   The output will be a new netcdf file, named DEN_ELF.nc or PAWDEN_ELF.nc, which will
@@ -807,4 +807,3 @@ write_elf_like_pawrhor(
     elf,
     paw_density_variable=file_dict['density']['denfield']
 )
-
