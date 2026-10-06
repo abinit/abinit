@@ -462,7 +462,7 @@ AC_DEFUN([_SD_MPI_INIT_CXX], [
       if test "${sd_mpi_cxx}" != ""; then
         sd_mpi_cxx_set="yes"
       else
-        AC_CHECK_PROGS([sd_mpi_cxx], [mpiicpc mpic++ mpicxx])
+        AC_CHECK_PROGS([sd_mpi_cxx], [mpiicpx mpiicpc mpic++ mpicxx])
         if test "${sd_mpi_cxx}" != ""; then
           AC_MSG_NOTICE([setting CXX to '${sd_mpi_cxx}'])
           CXX="${sd_mpi_cxx}"
