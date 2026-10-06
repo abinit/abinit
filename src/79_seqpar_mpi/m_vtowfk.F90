@@ -266,7 +266,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !=========================================================================
 !============= INITIALIZATIONS AND ALLOCATIONS ===========================
 !=========================================================================
- 
+
  nkpt_max=50; if(xmpi_paral==1)nkpt_max=-1
 
  wfoptalg=mod(dtset%wfoptalg,100); wfopta10=mod(wfoptalg,10)
@@ -610,7 +610,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        end if
      end if
    end if
- 
+
    !  =========================================================================
    !  ===================== FIND LARGEST RESIDUAL =============================
    !  =========================================================================
@@ -916,11 +916,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      call meanvalue_g_batch(ek_k(1+(iblock-1)*blocksize:iblock*blocksize), kinpw, &
      &    0, istwf_k, mpi_enreg, npw_k, my_nspinor, blocksize, &
      &    cwavef, cwavef, 0, gpu_option=gs_hamk%gpu_option)
-    
+
      ! Compute nuclear dipole energies for all bands in this block (use_gbt==0).
      ! NOTE: this call is problematic in the npband /= 1 case. It does not crash
      ! but doesn't return the correct band energies. However, the resulting end_k is
-     ! used only for printing. 
+     ! used only for printing.
      ! To be fixed eventually--jzwanzig 20 August 2026
      if(ANY(ABS(dtset%nucdipmom)>tol8)) then
        ABI_MALLOC(ghc_vectornd,(2,npw_k*my_nspinor*blocksize))
