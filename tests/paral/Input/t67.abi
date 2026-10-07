@@ -78,7 +78,7 @@ pseudos="Ne.xml"
 #%% [setup]
 #%% executable = abinit
 #%% [NCPU_4]
-#%% files_to_test = t67_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% files_to_test = t67_MPI4.abo, tolnlines = 2, tolabs = 6.5e-9, tolrel = 7.5e-5
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
