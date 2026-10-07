@@ -509,7 +509,7 @@ AC_DEFUN([_SD_LINALG_CHECK_FLAVOR], [
 		sd_linalg_chk_serial="${sd_linalg_chk_serial} openblas_pkg"
 	fi
         ;;
-      intel*)
+      intel)
         sd_linalg_chk_serial="mkl atlas ${sd_linalg_chk_serial}"
         sd_linalg_chk_mpi="mkl netlib"
 	AC_CHECK_PROG([PKG_CONFIG], [pkg-config], [pkg-config], [no])

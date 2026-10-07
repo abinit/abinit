@@ -137,7 +137,7 @@ AC_DEFUN([_ABI_CC_CHECK_IBM],[
 # Checks whether the specified C compiler is an Intel C compiler
 # (either the classic "icc" or the LLVM-based "icx"/oneAPI compiler).
 # If yes, tries to determine its version number and sets the abi_cc_vendor,
-# abi_cc_version and abi_cc_flavor variables accordingly.
+# abi_cc_version and abi_cc_intel_flavor variables accordingly.
 #
 AC_DEFUN([_ABI_CC_CHECK_INTEL],[
   # Do some sanity checking of the arguments
@@ -171,7 +171,7 @@ AC_DEFUN([_ABI_CC_CHECK_INTEL],[
     cc_info_string=""
     abi_cc_vendor="unknown"
     abi_cc_version="unknown"
-    abi_cc_flavor="unknown"
+    abi_cc_intel_flavor=""
   else
     cc_info_string="${version_line}"
     AC_DEFINE([CC_INTEL],1,[Define to 1 if you are using an Intel C compiler.])
@@ -188,15 +188,14 @@ AC_DEFUN([_ABI_CC_CHECK_INTEL],[
     #   "Intel(R) oneAPI DPC++/C++ Compiler for applications running on ..."
     classic_check=`echo "${version_line}" | grep '^Intel(R) C Intel(R) 64 Compiler'`
     if test "${classic_check}" != ""; then
-      abi_cc_flavor="classic"
+      abi_cc_intel_flavor="classic"
     else
-      abi_cc_flavor="oneapi"
+      abi_cc_intel_flavor="oneapi"
       AC_DEFINE([CC_INTEL_ONEAPI], 1,
         [Define to 1 if you are using the LLVM-based Intel C compiler (icx).])
     fi
 
-    abi_cc_vendor="${abi_cc_vendor} ${abi_cc_flavor}"
-    abi_result="yes (${abi_cc_flavor})"
+    abi_result="yes (${abi_cc_intel_flavor})"
   fi
   dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CC_CHECK_INTEL
@@ -474,6 +473,7 @@ AC_DEFUN([ABI_PROG_CC],[
   if test "${abi_cc_vendor}" = ""; then
     abi_cc_vendor="unknown"
   fi
+  abi_cc_intel_flavor=""
 
   # Preserve environment
   ABI_ENV_BACKUP
@@ -549,7 +549,11 @@ AC_DEFUN([ABI_PROG_CC],[
   abi_cc_version=`echo ${abi_cc_version} | cut -d. -f1-2`
 
   # Display final result
-  AC_MSG_RESULT([${abi_cc_vendor} ${abi_cc_version}])
+  if test "${abi_cc_intel_flavor}" = ""; then
+    AC_MSG_RESULT([${abi_cc_vendor} ${abi_cc_version}])
+  else
+    AC_MSG_RESULT([${abi_cc_vendor} ${abi_cc_version} (${abi_cc_intel_flavor})])
+  fi
 
   # Restore back CPPFLAGS and CFLAGS
   CPPFLAGS="${abi_env_CPPFLAGS}"
