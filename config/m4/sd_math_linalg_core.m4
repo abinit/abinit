@@ -701,7 +701,7 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
             sd_linalg_vendor_blas_libs="-L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_scalapack_lp64 -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -lmkl_blacs_intelmpi_lp64 -lpthread -lm -ldl"
           fi
           ;;
-        intel)
+        intel*)
           sd_linalg_vendor_cppflags="-I${MKLROOT}/include"
           sd_linalg_vendor_fcflags="-I${MKLROOT}/include"
           if test "${sd_mpi_enable}" = "yes"; then

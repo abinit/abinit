@@ -126,7 +126,7 @@ AC_DEFUN([ABI_LINALG_INIT],[
         gnu)
           abi_linalg_chk_serial="atlas netlib"
           ;;
-        intel)
+        intel*)
           abi_linalg_chk_serial="mkl atlas netlib"
           ;;
         *)

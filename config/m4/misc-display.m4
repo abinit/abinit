@@ -124,7 +124,7 @@ AC_DEFUN([ABI_MSG_FC_BUGGY],[
       ABI_MSG_NOTICE([fc-ibm],[About the IBM XL Fortran compiler])
       ;;
 
-    intel)
+    intel*)
       ABI_MSG_NOTICE([fc-intel],[About the Intel Fortran compiler])
       ;;
 
