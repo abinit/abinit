@@ -161,7 +161,7 @@ AC_DEFUN([_ABI_FC_CHECK_IBM],[
 # Checks whether the specified Fortran compiler is an Intel Fortran compiler
 # (either the classic "ifort" or the LLVM-based "ifx"/oneAPI compiler).
 # If yes, tries to determine its version number and sets the abi_fc_vendor,
-# abi_fc_version and abi_fc_flavor variables accordingly.
+# abi_fc_version and abi_fc_intel_flavor variables accordingly.
 #
 AC_DEFUN([_ABI_FC_CHECK_INTEL], [
   # Do some sanity checking of the arguments
@@ -192,7 +192,7 @@ AC_DEFUN([_ABI_FC_CHECK_INTEL], [
     fc_output=""
     abi_fc_vendor="unknown"
     abi_fc_version="unknown"
-    abi_fc_flavor="unknown"
+    abi_fc_intel_flavor=""
   else
     AC_DEFINE([FC_INTEL], 1,
       [Define to 1 if you are using an Intel Fortran compiler.])
@@ -209,15 +209,14 @@ AC_DEFUN([_ABI_FC_CHECK_INTEL], [
     #   "Intel(R) Fortran Compiler for applications running on Intel(R) 64, ..."
     classic_check=`echo "${version_line}" | grep '^Intel(R) Fortran Intel(R) 64 Compiler'`
     if test "${classic_check}" != ""; then
-      abi_fc_flavor="classic"
+      abi_fc_intel_flavor="classic"
     else
-      abi_fc_flavor="oneapi"
+      abi_fc_intel_flavor="oneapi"
       AC_DEFINE([FC_INTEL_ONEAPI], 1,
         [Define to 1 if you are using the LLVM-based Intel Fortran compiler (ifx).])
     fi
 
-    abi_fc_vendor="${abi_fc_vendor} ${abi_fc_flavor}"
-    abi_result="yes (${abi_fc_flavor})"
+    abi_result="yes (${abi_fc_intel_flavor})"
   fi
   dnl AC_MSG_RESULT([${abi_result}])
 ]) # _ABI_FC_CHECK_INTEL
@@ -1617,6 +1616,7 @@ AC_DEFUN([ABI_PROG_FC],[
     abi_fc_version="unknown"
   fi
   abi_fc_wrap="no"
+  abi_fc_intel_flavor=""
 
   # Preserve environment
   ABI_ENV_BACKUP
@@ -1730,7 +1730,11 @@ AC_DEFUN([ABI_PROG_FC],[
   fi
 
   # Display final result
-  AC_MSG_RESULT([${abi_fc_vendor} ${abi_fc_version}])
+  if test "${abi_fc_intel_flavor}" = ""; then
+    AC_MSG_RESULT([${abi_fc_vendor} ${abi_fc_version}])
+  else
+    AC_MSG_RESULT([${abi_fc_vendor} ${abi_fc_version} (${abi_fc_intel_flavor})])
+  fi
 
   # Restore back FCFLAGS
   FCFLAGS="${abi_env_FCFLAGS}"
