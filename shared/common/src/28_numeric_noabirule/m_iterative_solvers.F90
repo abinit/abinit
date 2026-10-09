@@ -499,6 +499,7 @@ module m_iterative_solvers
    integer,          intent(inout) :: its
    integer,          intent(inout) :: info
    real(dp) :: tol,res_,stgn
+   real(dp) :: rcond
    real(dp), target :: w(n), z(n)
    real(dp) :: h_(m+1,m), y(m+1), p(m+1), work(4*m+1)
    integer :: imx, piv(m), rank, i
@@ -521,6 +522,8 @@ module m_iterative_solvers
    imx = its
    its = 0
    v   = 0d0
+   piv = 0
+   rcond = 1.0d-14
 
  1 continue
    res_ = 1d99
@@ -550,7 +553,7 @@ module m_iterative_solvers
       p(2:j+1) = 0d0
       h_(1:j+1,1:j) = h(1:j+1,1:j)
       !call dgelsy(j+1,j,1,h_(1:m+1, 1:j),m+1,p,m+1,piv,m,rank,work,4*m+1,i)
-      call dgelsy(j+1,j,1,h_,m+1,p,m+1,piv,m,rank,work,4*m+1,i)
+      call dgelsy(j+1,j,1,h_,m+1,p,m+1,piv,rcond,rank,work,4*m+1,i)
       if(i/=0) stop 'gmresm: dgelsy'
       y = p
 

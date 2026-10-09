@@ -9867,42 +9867,46 @@ Used when [[iscf]] > 0, to define the SCF preconditioning scheme.
 
 The preconditioner $P$ is used to compute the preconditioned density/potential residuals
 $$ r_n = P(x_n^\mathrm{in} - x_n^\mathrm{out}) $$
-that are then used in the mixing scheme.
-When potential mixing ($x=\rho$) is used, the preconditioner is an approximation of the inverse dielectric matrix $\varepsilon$.
-When density mixing ($x=V$) is used, the preconditioner is an approximation of the inverse adjoint dielectric matrix $\varepsilon^\dagger$.
+that are then used in the mixing scheme (see [[iscf]]).
+When potential mixing ($x=V$) is used, the preconditioner is an approximation of the inverse dielectric matrix $\varepsilon$.
+When density mixing ($x=\rho$) is used, the preconditioner is an approximation of the inverse adjoint dielectric matrix $\varepsilon^\dagger$.
 
 The possible values of [[iprcel]] are:
 
-  * 0 --> Model dielectric function described by [[diemac]], [[dielng]] and [[diemix]].
+* 0 --> Model dielectric function described by [[diemac]], [[dielng]] and [[diemix]].
 
-  * Between 21 and 169 --> Model dielectric matrix computed with the extrapolar approximation described in [[cite:Anglade2008]]. This approximation can be adjusted using the parameters [[diecut]], [[dielam]] and [[diegap]]. The accuracy of this model largely depends on the number of conduction bands included in the system. Having 2 to 10 empty bands in the calculation is usually enough (use [[nband]]).
-    * Between 21 and 29 --> Use the same as [[iprcel]] = 0 for the first few steps, then compute  the RPA dielectric matrix, and use it as such.
-    * Between 31 and 39 --> Use the same as [[iprcel]] = 0 for the first few steps, then compute  the RPA dielectric matrix, and use it with the mixing factor [[diemix]].
+* Between 21 and 169 --> Model dielectric matrix computed with the extrapolar approximation described in [[cite:Anglade2008]]. This approximation can be adjusted using the parameters [[diecut]], [[dielam]] and [[diegap]]. The accuracy of this model largely depends on the number of conduction bands included in the system. Having 2 to 10 empty bands in the calculation is usually enough (use [[nband]]).
+
+    * Between 21 and 29 --> Use the same as [[iprcel]] = 0 for the first few steps, then compute the RPA dielectric matrix, and use it as such.
+    * Between 31 and 39 --> Use the same as [[iprcel]] = 0 for the first few steps, then compute the RPA dielectric matrix, and use it with the mixing factor [[diemix]].
     * Between 41 and 49 --> Compute the RPA dielectric matrix at the first step, and recompute it at a later step, taking into account the mixing factor [[diemix]].
     * Between 51 and 59 --> Same as between 41 and 49, but compute the RPA dielectric matrix by another mean.
     * Between 61 and 69 --> Same as between 41 and 49, but compute the electronic dielectric matrix instead of the RPA one.
     * Between 141 and 169 --> Same as Between 41 and 69, but the dielectric matrix is also recomputed every mod([[iprcel]], 10) step.
 
- > Notes :
- > * The step at which the dielectric matrix is computed or recomputed is determined by modulo([[iprcel]],10). The recomputation happens just once in the calculation for [[iprcel]] < 100.
- > * For non-homogeneous relatively large cells, [[iprcel]] = 45 will likely give a large improvement over [[iprcel]] = 0.
- > * In case of PAW and [[iprcel]] > 0, see [[pawsushat]] input variable. By default, an approximation (which can be suppressed) is done for the computation of the susceptibility matrix.
- > * For extremely large inhomogeneous cells where computation of the full dielectric matrix takes too many weeks, 70 < [[iprcel]] < 80 is advised.
- > * For [[nsppol]] = 2 or [[nspinor]] = 2 with metallic [[occopt]], only mod([[iprcel]],10) < 50 is allowed.
- > * No meaning for RF calculations yet.
- > * The exchange term in the full dielectric matrix diverges for vanishing densities. Therefore the values of [[iprcel]] beyond 60 must not be used for cells containing vacuum, unless ones computes this matrix for every step ([[iprcel]] = 161).
+    !!! note "Notes"
 
-  * Between 200 and 299 --> Model dielectric operator $\varepsilon^\mathrm{model}$ based of a model non-interacting susceptibility $\chi_0^\mathrm{model}$: $$ \varepsilon^\mathrm{model} = I - K \chi_0^\mathrm{model} $$ where $K$ is a potential kernel (the Coulomb kernel $K_H$ and/or the exchange-correlation kernel $K_\mathrm{XC}$).
-The preconditioner, $P = (\varepsilon^\mathrm{model})^{-1}$ for potential mixing or $P = ((\varepsilon^\mathrm{model})^\dagger)^{-1}$ for density mixing, is applied using an iterative linear solver (GMRES) to invert the model dielectric matrix or its adjoint.
-Available models are :
+        * The step at which the dielectric matrix is computed or recomputed is determined by modulo([[iprcel]],10). The recomputation happens just once in the calculation for [[iprcel]] < 100.
+        * For non-homogeneous relatively large cells, [[iprcel]] = 45 will likely give a large improvement over [[iprcel]] = 0.
+        * In case of PAW and [[iprcel]] > 0, see [[pawsushat]] input variable. By default, an approximation (which can be suppressed) is done for the computation of the susceptibility matrix.
+        * For extremely large inhomogeneous cells where computation of the full dielectric matrix takes too many weeks, 70 < [[iprcel]] < 80 is advised.
+        * For [[nsppol]] = 2 or [[nspinor]] = 2 with metallic [[occopt]], only mod([[iprcel]],10) < 50 is allowed.
+        * No meaning for RF calculations yet.
+        * The exchange term in the full dielectric matrix diverges for vanishing densities. Therefore the values of [[iprcel]] beyond 60 must not be used for cells containing vacuum, unless one computes this matrix for every step ([[iprcel]] = 161).
+
+* Between 200 and 299 --> Model dielectric operator $\varepsilon^\mathrm{model}$ based on a model non-interacting susceptibility $\chi_0^\mathrm{model}$: $$ \varepsilon^\mathrm{model} = I - K \chi_0^\mathrm{model} $$ where $K$ is a potential kernel (the Coulomb kernel $K_H$ and/or the exchange-correlation kernel $K_\mathrm{XC}$).
+    The preconditioner, $P = (\varepsilon^\mathrm{model})^{-1}$ for potential mixing or $P = ((\varepsilon^\mathrm{model})^\dagger)^{-1}$ for density mixing, is applied using an iterative linear solver (GMRES) to invert the model dielectric matrix or its adjoint.
+    Available models are:
+
     * 200 --> LDOS-preconditioner [[cite:Herbst2020]]: $$ \varepsilon^\mathrm{LDOS} = I - K_H \chi_0^\mathrm{LDOS} .$$ This preconditioner is well suited for metallic system in large homogeneous or inhomogeneous systems. It requires a smooth smearing function ([[occopt]] = 3 to 7) and we suggest using it as a **default** for such cases.
-    * 201 --> DOS-preconditioner: $$\varepsilon^\mathrm{DOS} = I - DK_\mathrm{H}$$ with $D$ the (scalar) density of state at the Fermi-level. This is a parameter-free version of the Kerker preconditioner (suggested in [[cite:Herbst2020]]).
-    * 202 --> Hybrid preconditioner for ferromagnetism: $$\varepsilon^\mathrm{hybrid} = I - K_H \chi_0^\mathrm{LDOS} - K_\mathrm{XC}\chi_0^\mathrm{diag} .$$ This preconditioner is designed for ferromagnetic systems and we suggest trying it in ferromagnetic systems with convergence issues. The parameter [[precon_tsmear]] may need to be adjusted for this preconditioner to work properly.
+    * 201 --> DOS-preconditioner: $$ \varepsilon^\mathrm{DOS} = I - K_\mathrm{H} D $$ with $D$ the (scalar) density of state at the Fermi-level. This is a parameter-free version of the Kerker preconditioner (suggested in [[cite:Herbst2020]]).
+    * 202 --> Hybrid preconditioner for ferromagnetism: $$ \varepsilon^\mathrm{hybrid} = I - K_H \chi_0^\mathrm{LDOS} - K_\mathrm{XC}\chi_0^\mathrm{diag} .$$ This preconditioner is designed for ferromagnetic systems and we suggest trying it in ferromagnetic systems with convergence issues. The parameter [[precon_tsmear]] may need to be adjusted for this preconditioner to work properly.
 
- > Notes :
- > * The mixing factor [[diemix]] is used and [[diemixmag]] is ignored.
- > * The preconditioner can be tuned with the parameters [[precon_ls_maxite]], [[precon_ls_rtol]], [[precon_verbose]], [[precon_tsmear]] and [[precon_in_memory]].
- > * In PAW, this is only compatible with [[pawmixdg]] = 1.
+    !!! note "Notes"
+
+        * The mixing factor [[diemix]] is used and [[diemixmag]] is ignored.
+        * The preconditioner can be tuned with the parameters [[precon_ls_maxite]], [[precon_ls_rtol]], [[precon_verbose]], [[precon_tsmear]] and [[precon_in_memory]].
+        * In PAW, this is only compatible with [[pawmixdg]] = 1.
 """,
 ),
 
@@ -17692,11 +17696,11 @@ Variable(
     topics=["SCFAlgorithms_expert"],
     dimensions="scalar",
     defaultval=1.0e-6,
-    mnemonics="PRECONnditioner Linear Solver MAXimumm number of ITErations",
+    mnemonics="PRECONnditioner Linear Solver Relative TOLerance",
     requires="[[iprcel]] in [200, 202]",
     added_in_version="v10",
     text=r"""
-This variable defines the maximum number of GMRES iterations in the application of the $\chi0$-based SCF preconditioner ([[iprcel]] = 2**).
+This variable defines the relative tolerance for the GMRES iterations in the application of the $\chi0$-based SCF preconditioner ([[iprcel]] = 2**).
 """,
 ),
 
