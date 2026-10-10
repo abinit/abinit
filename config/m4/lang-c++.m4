@@ -133,7 +133,7 @@ AC_DEFUN([_ABI_CXX_CHECK_IBM],[
 # Checks whether the specified C++ compiler is an Intel C++ compiler
 # (either the classic "icpc" or the LLVM-based "icpx"/oneAPI compiler).
 # If yes, tries to determine its version number and sets the abi_cxx_vendor,
-# abi_cxx_version and abi_cxx_flavor variables accordingly.
+# abi_cxx_version and abi_cxx_intel_flavor variables accordingly.
 #
 AC_DEFUN([_ABI_CXX_CHECK_INTEL],[
   # Do some sanity checking of the arguments
@@ -167,7 +167,7 @@ AC_DEFUN([_ABI_CXX_CHECK_INTEL],[
     cxx_info_string=""
     abi_cxx_vendor="unknown"
     abi_cxx_version="unknown"
-    abi_cxx_flavor="unknown"
+    abi_cxx_intel_flavor=""
   else
     cxx_info_string="${version_line}"
     AC_DEFINE([CXX_INTEL],1,[Define to 1 if you are using an Intel C++ compiler.])
@@ -187,15 +187,14 @@ AC_DEFUN([_ABI_CXX_CHECK_INTEL],[
     #   "Intel(R) oneAPI DPC++/C++ Compiler for applications running on ..."
     classic_check=`echo "${version_line}" | grep '^Intel(R) C++ Intel(R) 64 Compiler'`
     if test "${classic_check}" != ""; then
-      abi_cxx_flavor="classic"
+      abi_cxx_intel_flavor="classic"
     else
-      abi_cxx_flavor="oneapi"
+      abi_cxx_intel_flavor="oneapi"
       AC_DEFINE([CXX_INTEL_ONEAPI], 1,
         [Define to 1 if you are using the LLVM-based Intel C++ compiler (icpx).])
     fi
 
-    abi_cxx_vendor="${abi_cxx_vendor} ${abi_cxx_flavor}"
-    abi_result="yes (${abi_cxx_flavor})"
+    abi_result="yes (${abi_cxx_intel_flavor})"
   fi
   dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CXX_CHECK_INTEL
@@ -341,6 +340,7 @@ AC_DEFUN([ABI_PROG_CXX],[
   if test "${abi_cxx_vendor}" = ""; then
     abi_cxx_vendor="unknown"
   fi
+  abi_cxx_intel_flavor=""
 
   # Preserve environment
   ABI_ENV_BACKUP
@@ -403,7 +403,11 @@ AC_DEFUN([ABI_PROG_CXX],[
   abi_cxx_version=`echo ${abi_cxx_version} | cut -d. -f1-2`
 
   # Display final result
-  AC_MSG_RESULT([${abi_cxx_vendor} ${abi_cxx_version}])
+  if test "${abi_cxx_intel_flavor}" = ""; then
+    AC_MSG_RESULT([${abi_cxx_vendor} ${abi_cxx_version}])
+  else
+    AC_MSG_RESULT([${abi_cxx_vendor} ${abi_cxx_version} (${abi_cxx_intel_flavor})])
+  fi
 
   # Restore back CXXFLAGS
   CXXFLAGS="${abi_env_CXXFLAGS}"

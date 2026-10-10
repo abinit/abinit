@@ -674,15 +674,40 @@ AC_DEFUN([_SD_HDF5_CHECK_COMPILERS], [
     fi
     unset tmp_hdf5_hl
 
-    #These extralibs are useless and sometimes not found
-    #AC_MSG_CHECKING([for HDF5 extra dependencies])
-    #sd_hdf5_libs_extra=`${sd_hdf5_h5cc} -showconfig | grep 'Extra libraries: ' | sed -e 's/.*Extra libraries: //g' -e 's/m\;dl\;//g' -e 's/m\;dl//g' -e 's/Threads::Threads/-lpthread/g' -e 's/;/ /g'`
-    # Proposed change to be more general : sd_hdf5_libs_extra=`${sd_hdf5_h5cc} -showconfig | egrep 'LDFLAGS: |Extra libraries: ' | sed -e 's/.*Extra libraries: //;s/.*LDFLAGS: //:'`
-    #if test "${sd_hdf5_libs_extra}" = ""; then
-    #  AC_MSG_RESULT([none])
-    #else
-    #  AC_MSG_RESULT([${sd_hdf5_libs_extra}])
-    #fi
+    # Extra dependencies (e.g. -lz) are only needed with a static HDF5,
+    # since shared libraries record their own dependencies. CMake-style
+    # entries (targets, missing files) are filtered out, as they cannot
+    # be passed to the linker.
+    AC_MSG_CHECKING([for HDF5 extra dependencies])
+    tmp_hdf5_shared=`${sd_hdf5_h5cc} -showconfig | grep 'Shared C Library:' | awk '{print [$]NF}' | tr 'A-Z' 'a-z'`
+    if test "${tmp_hdf5_shared}" = "yes" -o "${tmp_hdf5_shared}" = "on"; then
+      AC_MSG_RESULT([none needed (shared library)])
+    else
+      tmp_hdf5_extra=`${sd_hdf5_h5cc} -showconfig | grep 'Extra libraries: ' | sed -e 's/.*Extra libraries: //' -e 's/Threads::Threads/-lpthread/g' -e 's/;/ /g'`
+      for arg in ${tmp_hdf5_extra}; do
+        case ${arg} in
+          -l*|-L*|-pthread)
+            sd_hdf5_libs_extra="${sd_hdf5_libs_extra} ${arg}"
+            ;;
+          *::*)
+            ;;
+          /*)
+            test -e "${arg}" && sd_hdf5_libs_extra="${sd_hdf5_libs_extra} ${arg}"
+            ;;
+          *)
+            sd_hdf5_libs_extra="${sd_hdf5_libs_extra} -l${arg}"
+            ;;
+        esac
+      done
+      unset arg
+      if test "${sd_hdf5_libs_extra}" = ""; then
+        AC_MSG_RESULT([none])
+      else
+        AC_MSG_RESULT([${sd_hdf5_libs_extra}])
+      fi
+    fi
+    unset tmp_hdf5_extra
+    unset tmp_hdf5_shared
 
     if test "${sd_mpi_ok}" = "yes"; then
       AC_MSG_CHECKING([whether HDF5 supports MPI])
