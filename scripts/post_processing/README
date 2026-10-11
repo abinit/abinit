@@ -61,3 +61,7 @@ post-processing tools
     Script to analyze the output of a real-time TDDFT run.
     Computes the conductivity tensor and associated dielectric function from the
     time-dependent current density.
+
+- pawelf.py
+    Generate netcdf file containing the electron localization function ELF, from
+    PAW density (DEN.nc or PAWDEN.nc) and kinetic energy density (KDEN.nc) files.

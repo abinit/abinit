@@ -1709,7 +1709,11 @@ subroutine prtene(dtset,energies,iout,usepaw)
        !!!  call wrtout(iout,msg)
        !!!endif
      end if
-     if (ANY(ABS(dtset%nucdipmom)>tol8)) then
+     ! Suppress output of e_nucdip in the npband case, due to problematic direct
+     ! call to getghc_nucdip in m_vtowfk in this case. SCF cycle, which depends
+     ! on getghc itself, is ok (parallel bands are distributed properly there
+     ! before getghc_nucdip is called
+     if (ANY(ABS(dtset%nucdipmom)>tol8) .AND. (dtset%npband .EQ. 1) ) then
        call edoc%add_real('nucl. magn. dipoles',energies%e_nucdip)
      end if
      if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
